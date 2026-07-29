@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Aplica el tema guardado antes del primer paint (evita flash).
+      try {
+        if (localStorage.getItem('scrolllab-theme') === 'dark') {
+          document.documentElement.classList.add('dark')
+        }
+      } catch (e) {}
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f2efe9" />
+
+    <title>SCROLLLAB — Templates de scrollytelling listos para descargar</title>
+    <meta
+      name="description"
+      content="Templates de scrollytelling con animaciones de scroll cinematográficas. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable y listo para publicar."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://scrolllab.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SCROLLLAB" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:url" content="https://scrolllab.com/" />
+    <meta
+      property="og:title"
+      content="SCROLLLAB — Templates de scrollytelling listos para descargar"
+    />
+    <meta
+      property="og:description"
+      content="Templates de scrollytelling con animaciones de scroll cinematográficas. Elegí un modelo o armá el tuyo en el builder y descargá el código fuente completo."
+    />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="SCROLLLAB — Templates de scrollytelling listos para descargar"
+    />
+    <meta
+      name="twitter:description"
+      content="Templates de scrollytelling con animaciones de scroll cinematográficas. Descargá el código fuente completo, editable y listo para publicar."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300..700&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "SCROLLLAB",
+        "url": "https://scrolllab.com/",
+        "description": "Templates de scrollytelling listos para descargar: código fuente completo con animaciones de scroll, o armá tu propia página en el builder.",
+        "inLanguage": "es-AR"
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
