@@ -12,6 +12,12 @@ const MonolithPage = lazy(() => import('./pages/MonolithPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LicensePage = lazy(() => import('./pages/LicensePage'))
+const PrivacyPage = lazy(() =>
+  import('./pages/LegalDocumentPage').then((m) => ({ default: m.PrivacyPage })),
+)
+const TermsPage = lazy(() =>
+  import('./pages/LegalDocumentPage').then((m) => ({ default: m.TermsPage })),
+)
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
@@ -60,6 +66,8 @@ export default function App() {
               <Route path="/builder" element={<BuilderPage />} />
               <Route path="/preview" element={<PreviewPage />} />
               <Route path="/legal/license" element={<LicensePage />} />
+              <Route path="/legal/privacy" element={<PrivacyPage />} />
+              <Route path="/legal/terms" element={<TermsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/cart" element={<CartPage />} />

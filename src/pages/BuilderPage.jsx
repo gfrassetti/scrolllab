@@ -19,6 +19,11 @@ const kindLabelKeys = {
 
 const DND_MIME = 'text/plain'
 
+/** Clave i18n de name/blurb a partir del id `model/Component`. */
+function sectionCopyKey(sectionId, field) {
+  return `builder.sections.${sectionId.replace('/', '.')}.${field}`
+}
+
 /**
  * BuilderPage — armá una página propia eligiendo secciones de
  * cualquier modelo: arrastrá desde la paleta al lienzo (o usá
@@ -270,18 +275,22 @@ export default function BuilderPage() {
                         </span>
                         <div className="min-w-0">
                           <p className="flex items-baseline gap-2 text-sm font-medium">
-                            {section.name}
+                            {t(sectionCopyKey(section.id, 'name'))}
                             <span className="text-[9px] tracking-[0.2em] text-ink/40">
                               {t(kindLabelKeys[section.kind])}
                             </span>
                           </p>
-                          <p className="truncate text-xs text-ink/50">{section.blurb}</p>
+                          <p className="truncate text-xs text-ink/50">
+                            {t(sectionCopyKey(section.id, 'blurb'))}
+                          </p>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => addSection(section.id)}
-                        aria-label={`Agregar ${section.name}`}
+                        aria-label={t('builder.addAria', {
+                          name: t(sectionCopyKey(section.id, 'name')),
+                        })}
                         className="shrink-0 border border-ink/30 px-3 py-1.5 text-xs transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-bone"
                       >
                         {t('builder.add')}
@@ -353,7 +362,7 @@ export default function BuilderPage() {
 
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-base font-medium md:text-lg">
-                          {section.name}
+                          {t(sectionCopyKey(section.id, 'name'))}
                         </p>
                         <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40">
                           {section.model.name} · {t(kindLabelKeys[section.kind])}
@@ -365,7 +374,7 @@ export default function BuilderPage() {
                           type="button"
                           onClick={() => moveItem(item.uid, -1)}
                           disabled={i === 0}
-                          aria-label="Subir"
+                          aria-label={t('builder.moveUp')}
                           className="border border-ink/30 px-2.5 py-1.5 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
                         >
                           ↑
@@ -374,7 +383,7 @@ export default function BuilderPage() {
                           type="button"
                           onClick={() => moveItem(item.uid, 1)}
                           disabled={i === items.length - 1}
-                          aria-label="Bajar"
+                          aria-label={t('builder.moveDown')}
                           className="border border-ink/30 px-2.5 py-1.5 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
                         >
                           ↓
@@ -382,7 +391,7 @@ export default function BuilderPage() {
                         <button
                           type="button"
                           onClick={() => removeItem(item.uid)}
-                          aria-label="Quitar"
+                          aria-label={t('builder.remove')}
                           className="border border-ink/30 px-2.5 py-1.5 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-bone"
                         >
                           ✕

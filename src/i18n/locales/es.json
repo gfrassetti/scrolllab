@@ -69,6 +69,8 @@
     "footerContact": "Contacto",
     "footerBuildPage": "Armar mi página",
     "footerLicense": "Licencia",
+    "footerPrivacy": "Privacidad",
+    "footerTerms": "Términos",
     "footerHow": "Cómo funciona",
     "footerAccount": "Mis compras",
     "backTop": "Volver arriba"
@@ -114,7 +116,123 @@
       "section": "SECCIÓN",
       "footer": "FOOTER"
     },
-    "compositionTitle": "Composición del builder"
+    "compositionTitle": "Composición del builder",
+    "addAria": "Agregar {{name}}",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "remove": "Quitar",
+    "sections": {
+      "chapters": {
+        "NavMinimal": {
+          "name": "Nav minimal",
+          "blurb": "Header fijo que se invierte sobre cualquier fondo"
+        },
+        "HeroKinetic": {
+          "name": "Hero cinético",
+          "blurb": "Tipografía oversized que emerge de máscaras"
+        },
+        "VelocityMarquee": {
+          "name": "Marquee de velocidad",
+          "blurb": "Cinta que acelera con el scroll"
+        },
+        "ManifestoReveal": {
+          "name": "Manifiesto revelado",
+          "blurb": "Párrafo gigante que se escribe palabra a palabra"
+        },
+        "StickyImageStory": {
+          "name": "Historia sticky",
+          "blurb": "Imagen fijada, la narración fluye al lado"
+        },
+        "HorizontalPanels": {
+          "name": "Paneles horizontales",
+          "blurb": "El scroll vertical mueve un paneo horizontal"
+        },
+        "ParallaxEditorial": {
+          "name": "Parallax editorial",
+          "blurb": "Imágenes dispersas que derivan a distintas velocidades"
+        },
+        "StackingCards": {
+          "name": "Cards apiladas",
+          "blurb": "Cards sticky que se apilan una sobre otra"
+        },
+        "BigNumbers": {
+          "name": "Números grandes",
+          "blurb": "Contadores de stats enormes que cuentan hacia arriba"
+        },
+        "QuoteBreak": {
+          "name": "Corte de cita",
+          "blurb": "Interludio serif a pantalla completa invertida"
+        },
+        "FooterCTA": {
+          "name": "Footer CTA",
+          "blurb": "Palabra CTA gigante que cierra la página"
+        }
+      },
+      "nocturne": {
+        "NavNocturne": {
+          "name": "Nav nocturne",
+          "blurb": "Header oscuro fijo con marcador de reel"
+        },
+        "HeroCinematic": {
+          "name": "Hero cinematográfico",
+          "blurb": "Foto a sangre con zoom lento y tipografía de créditos"
+        },
+        "ZoomPortal": {
+          "name": "Portal con zoom",
+          "blurb": "Una ventanita crece hasta tragar el viewport"
+        },
+        "DiagonalMarquee": {
+          "name": "Marquee diagonal",
+          "blurb": "Dos cintas inclinadas en direcciones opuestas"
+        },
+        "SplitReveals": {
+          "name": "Revelados partidos",
+          "blurb": "Filas alternadas con wipes de clip-path"
+        },
+        "WorkIndex": {
+          "name": "Índice de trabajos",
+          "blurb": "Lista con hover y preview que sigue al cursor"
+        },
+        "StickyWordCycle": {
+          "name": "Ciclo de palabras",
+          "blurb": "Palabras fijadas que se disuelven entre sí"
+        },
+        "OutroCTA": {
+          "name": "Outro CTA",
+          "blurb": "Créditos de cierre con palabra CTA gigante"
+        }
+      },
+      "monolith": {
+        "NavBrutal": {
+          "name": "Nav brutal",
+          "blurb": "Header bloque sólido con bordes duros"
+        },
+        "HeroThree": {
+          "name": "Hero 3D",
+          "blurb": "Monolito wireframe 3D detrás de tipografía gigante"
+        },
+        "SkewScroller": {
+          "name": "Skew scroller",
+          "blurb": "Palabras gigantes que se sesgan con la velocidad del scroll"
+        },
+        "SpecSheet": {
+          "name": "Ficha técnica",
+          "blurb": "Tabla de datos brutalista; las filas se invierten al hover"
+        },
+        "ExhibitGrid": {
+          "name": "Grilla de exhibición",
+          "blurb": "Grilla de bordes duros, en gris hasta el hover"
+        },
+        "TypeAccordion": {
+          "name": "Acordeón tipográfico",
+          "blurb": "Títulos condensados que se abren en cajones"
+        },
+        "FooterBrutal": {
+          "name": "Footer brutal",
+          "blurb": "Bloque de cierre azul Klein con links mono"
+        }
+      }
+    }
   },
   "cart": {
     "eyebrow": "Carrito",
@@ -178,6 +296,93 @@
     "ownerTitle": "Propiedad",
     "ownerBody": "{{site}} (y sus licenciantes) retienen todos los derechos de propiedad intelectual sobre el Ítem. Solo se otorgan los derechos descritos acá. Cada ZIP incluye un archivo LICENSE.txt con el número de orden y el email del comprador; esa marca identifica la licencia otorgada.",
     "contact": "Consultas:"
+  },
+  "privacy": {
+    "eyebrow": "Legal",
+    "title": "Política de Privacidad",
+    "effectiveDate": "Vigente desde el 29 de julio de 2026",
+    "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra o descargás un producto.",
+    "sections": [
+      {
+        "title": "Datos que recopilamos",
+        "items": [
+          "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
+          "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago y cantidad de descargas.",
+          "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión."
+        ]
+      },
+      {
+        "title": "Cómo usamos tus datos",
+        "items": [
+          "Crear y administrar tu cuenta y mantener tu sesión iniciada.",
+          "Procesar pagos, confirmar órdenes y habilitar descargas.",
+          "Enviar comprobantes y comunicaciones operativas relacionadas con tus compras.",
+          "Prevenir fraude, abuso y accesos no autorizados, y cumplir obligaciones legales."
+        ]
+      },
+      {
+        "title": "Servicios de terceros",
+        "body": "Usamos Google para autenticación y Mercado Pago para procesar pagos. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+      },
+      {
+        "title": "Cookies y almacenamiento local",
+        "body": "Usamos una cookie de sesión para mantener tu cuenta autenticada. También podemos guardar en tu navegador preferencias como idioma, tema, carrito y composiciones del builder. Podés borrar estos datos desde la configuración de tu navegador, aunque algunas funciones pueden dejar de operar correctamente."
+      },
+      {
+        "title": "Conservación y seguridad",
+        "body": "Conservamos los datos mientras sean necesarios para prestar el servicio, mantener el historial de compras, prevenir fraude y cumplir obligaciones legales o contables. Aplicamos medidas razonables de seguridad, pero ningún sistema puede garantizar protección absoluta."
+      },
+      {
+        "title": "Tus derechos",
+        "body": "Podés solicitar acceso, corrección o eliminación de tus datos personales, y revocar el acceso de Google desde tu cuenta de Google. Algunas órdenes pueden conservarse cuando exista una obligación legal. Para ejercer tus derechos, escribinos al email indicado abajo."
+      },
+      {
+        "title": "Cambios a esta política",
+        "body": "Podemos actualizar esta política para reflejar cambios del servicio o requisitos legales. La versión vigente y su fecha siempre estarán publicadas en esta página."
+      }
+    ],
+    "contact": "Consultas sobre privacidad:"
+  },
+  "terms": {
+    "eyebrow": "Legal",
+    "title": "Términos del Servicio",
+    "effectiveDate": "Vigentes desde el 29 de julio de 2026",
+    "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
+    "sections": [
+      {
+        "title": "Cuenta y acceso",
+        "body": "Sos responsable de mantener la seguridad de tu cuenta y de la actividad realizada desde ella. Debés proporcionar información verdadera y no compartir tus credenciales ni links de descarga."
+      },
+      {
+        "title": "Productos y licencia",
+        "body": "Los productos son descargas digitales de código fuente. La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso establecidos en la Licencia Regular publicada en el sitio."
+      },
+      {
+        "title": "Precios y pagos",
+        "body": "Los precios y la moneda se muestran antes de confirmar la compra. Los pagos son procesados por Mercado Pago y quedan sujetos a su aprobación. Una orden se considera pagada solo cuando el servicio recibe la confirmación correspondiente."
+      },
+      {
+        "title": "Entrega y descargas",
+        "body": "Después de acreditado el pago, el producto queda disponible en Mis compras mediante un link temporal. Es tu responsabilidad descargar y respaldar los archivos. Podemos limitar o bloquear descargas ante indicios de fraude, abuso o incumplimiento."
+      },
+      {
+        "title": "Reembolsos",
+        "body": "Por tratarse de productos digitales de acceso inmediato, las compras acreditadas no son reembolsables salvo que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario. Contactanos para evaluar el caso."
+      },
+      {
+        "title": "Uso permitido",
+        "body": "No podés usar el servicio para infringir derechos de terceros, vulnerar sistemas, automatizar descargas abusivas, revender archivos fuente ni realizar actividades ilegales. Podemos suspender el acceso si detectamos un incumplimiento."
+      },
+      {
+        "title": "Disponibilidad y responsabilidad",
+        "body": "Procuramos mantener el servicio disponible y los productos funcionales, pero no garantizamos funcionamiento ininterrumpido ni compatibilidad con todos los entornos. En la medida permitida por la ley, no respondemos por daños indirectos o pérdidas derivadas del uso o imposibilidad de uso."
+      },
+      {
+        "title": "Cambios",
+        "body": "Podemos actualizar el servicio y estos Términos. La versión vigente y su fecha estarán publicadas en esta página. El uso posterior a una actualización implica la aceptación de los nuevos Términos."
+      }
+    ],
+    "contact": "Consultas sobre estos términos:"
   },
   "theme": {
     "toLight": "Cambiar a tema claro",

@@ -78,7 +78,7 @@ export const models = [
     wrapperClass: 'bg-concrete text-carbon',
     sections: [
       { id: 'monolith/NavBrutal', name: 'Nav Brutal', kind: 'nav', component: NavBrutal, blurb: 'Solid blocky header with hard borders' },
-      { id: 'monolith/HeroThree', name: 'Hero Three', kind: 'hero', component: HeroThree, blurb: 'Three.js wireframe monolith behind giant type' },
+      { id: 'monolith/HeroThree', name: 'Hero Three', kind: 'hero', component: HeroThree, blurb: 'Wireframe 3D monolith behind giant type' },
       { id: 'monolith/SkewScroller', name: 'Skew Scroller', kind: 'section', component: SkewScroller, blurb: 'Giant words shearing with scroll velocity' },
       { id: 'monolith/SpecSheet', name: 'Spec Sheet', kind: 'section', component: SpecSheet, blurb: 'Brutalist data table, rows invert on hover' },
       { id: 'monolith/ExhibitGrid', name: 'Exhibit Grid', kind: 'section', component: ExhibitGrid, blurb: 'Hard-bordered grid, grayscale until hovered' },

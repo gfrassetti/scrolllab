@@ -69,6 +69,8 @@
     "footerContact": "Contact",
     "footerBuildPage": "Build my page",
     "footerLicense": "License",
+    "footerPrivacy": "Privacy",
+    "footerTerms": "Terms",
     "footerHow": "How it works",
     "footerAccount": "My purchases",
     "backTop": "Back to top"
@@ -114,7 +116,123 @@
       "section": "SECTION",
       "footer": "FOOTER"
     },
-    "compositionTitle": "Builder composition"
+    "compositionTitle": "Builder composition",
+    "addAria": "Add {{name}}",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove",
+    "sections": {
+      "chapters": {
+        "NavMinimal": {
+          "name": "Nav Minimal",
+          "blurb": "Fixed header that inverts over any background"
+        },
+        "HeroKinetic": {
+          "name": "Hero Kinetic",
+          "blurb": "Oversized type rising out of masks"
+        },
+        "VelocityMarquee": {
+          "name": "Velocity Marquee",
+          "blurb": "Ribbon that speeds up with scroll"
+        },
+        "ManifestoReveal": {
+          "name": "Manifesto Reveal",
+          "blurb": "Giant paragraph inking in word by word"
+        },
+        "StickyImageStory": {
+          "name": "Sticky Image Story",
+          "blurb": "Pinned image, narrative flows beside it"
+        },
+        "HorizontalPanels": {
+          "name": "Horizontal Panels",
+          "blurb": "Vertical scroll drives a horizontal pan"
+        },
+        "ParallaxEditorial": {
+          "name": "Parallax Editorial",
+          "blurb": "Scattered images drifting at different speeds"
+        },
+        "StackingCards": {
+          "name": "Stacking Cards",
+          "blurb": "Sticky cards piling onto each other"
+        },
+        "BigNumbers": {
+          "name": "Big Numbers",
+          "blurb": "Huge stat counters that count up"
+        },
+        "QuoteBreak": {
+          "name": "Quote Break",
+          "blurb": "Inverted full-screen serif interlude"
+        },
+        "FooterCTA": {
+          "name": "Footer CTA",
+          "blurb": "Giant call-to-action word closing the page"
+        }
+      },
+      "nocturne": {
+        "NavNocturne": {
+          "name": "Nav Nocturne",
+          "blurb": "Fixed dark header with reel marker"
+        },
+        "HeroCinematic": {
+          "name": "Hero Cinematic",
+          "blurb": "Full-bleed photo with slow zoom, credit type"
+        },
+        "ZoomPortal": {
+          "name": "Zoom Portal",
+          "blurb": "Small window grows to swallow the viewport"
+        },
+        "DiagonalMarquee": {
+          "name": "Diagonal Marquee",
+          "blurb": "Two tilted ribbons crossing directions"
+        },
+        "SplitReveals": {
+          "name": "Split Reveals",
+          "blurb": "Alternating rows with clip-path wipes"
+        },
+        "WorkIndex": {
+          "name": "Work Index",
+          "blurb": "Hover list with cursor-trailing preview"
+        },
+        "StickyWordCycle": {
+          "name": "Sticky Word Cycle",
+          "blurb": "Pinned words dissolving into each other"
+        },
+        "OutroCTA": {
+          "name": "Outro CTA",
+          "blurb": "Closing credits with giant CTA word"
+        }
+      },
+      "monolith": {
+        "NavBrutal": {
+          "name": "Nav Brutal",
+          "blurb": "Solid blocky header with hard borders"
+        },
+        "HeroThree": {
+          "name": "Hero 3D",
+          "blurb": "Wireframe 3D monolith behind giant type"
+        },
+        "SkewScroller": {
+          "name": "Skew Scroller",
+          "blurb": "Giant words shearing with scroll velocity"
+        },
+        "SpecSheet": {
+          "name": "Spec Sheet",
+          "blurb": "Brutalist data table, rows invert on hover"
+        },
+        "ExhibitGrid": {
+          "name": "Exhibit Grid",
+          "blurb": "Hard-bordered grid, grayscale until hovered"
+        },
+        "TypeAccordion": {
+          "name": "Type Accordion",
+          "blurb": "Condensed titles expanding into drawers"
+        },
+        "FooterBrutal": {
+          "name": "Footer Brutal",
+          "blurb": "Klein-blue closing block with mono links"
+        }
+      }
+    }
   },
   "cart": {
     "eyebrow": "Cart",
@@ -178,6 +296,93 @@
     "ownerTitle": "Ownership",
     "ownerBody": "{{site}} (and its licensors) retain all intellectual property rights to the Item. Only the rights described here are granted. Each ZIP includes a LICENSE.txt with the order number and buyer email; that mark identifies the license granted.",
     "contact": "Questions:"
+  },
+  "privacy": {
+    "eyebrow": "Legal",
+    "title": "Privacy Policy",
+    "effectiveDate": "Effective July 29, 2026",
+    "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, or download a product.",
+    "sections": [
+      {
+        "title": "Data we collect",
+        "items": [
+          "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
+          "Purchase and order data: products, amount, currency, payment status, Mercado Pago identifiers, and download count.",
+          "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies."
+        ]
+      },
+      {
+        "title": "How we use your data",
+        "items": [
+          "Create and manage your account and keep you signed in.",
+          "Process payments, confirm orders, and enable downloads.",
+          "Send receipts and operational messages related to your purchases.",
+          "Prevent fraud, abuse, and unauthorized access, and comply with legal obligations."
+        ]
+      },
+      {
+        "title": "Third-party services",
+        "body": "We use Google for authentication and Mercado Pago to process payments. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+      },
+      {
+        "title": "Cookies and local storage",
+        "body": "We use a session cookie to keep your account authenticated. We may also store preferences such as language, theme, cart, and builder compositions in your browser. You can delete this data through your browser settings, although some features may stop working correctly."
+      },
+      {
+        "title": "Retention and security",
+        "body": "We retain data for as long as needed to provide the service, maintain purchase history, prevent fraud, and meet legal or accounting obligations. We apply reasonable security measures, but no system can guarantee absolute protection."
+      },
+      {
+        "title": "Your rights",
+        "body": "You may request access, correction, or deletion of your personal data, and revoke Google access from your Google account. Some order information may be retained where legally required. To exercise your rights, email us at the address below."
+      },
+      {
+        "title": "Changes to this policy",
+        "body": "We may update this policy to reflect service changes or legal requirements. The current version and effective date will always be posted on this page."
+      }
+    ],
+    "contact": "Privacy questions:"
+  },
+  "terms": {
+    "eyebrow": "Legal",
+    "title": "Terms of Service",
+    "effectiveDate": "Effective July 29, 2026",
+    "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
+    "sections": [
+      {
+        "title": "Account and access",
+        "body": "You are responsible for maintaining the security of your account and for activity performed through it. You must provide accurate information and must not share your credentials or download links."
+      },
+      {
+        "title": "Products and license",
+        "body": "Products are digital source-code downloads. A purchase does not transfer intellectual property ownership; it only grants the usage rights established in the Regular License published on the site."
+      },
+      {
+        "title": "Prices and payments",
+        "body": "Prices and currency are displayed before purchase confirmation. Payments are processed by Mercado Pago and are subject to its approval. An order is considered paid only after the service receives the corresponding confirmation."
+      },
+      {
+        "title": "Delivery and downloads",
+        "body": "After payment is confirmed, the product becomes available under My purchases through a temporary link. You are responsible for downloading and backing up the files. We may limit or block downloads where fraud, abuse, or a breach is suspected."
+      },
+      {
+        "title": "Refunds",
+        "body": "Because products are digital and available immediately, confirmed purchases are non-refundable unless the file cannot be delivered, has a substantial technical defect, or applicable law requires otherwise. Contact us so we can review the case."
+      },
+      {
+        "title": "Permitted use",
+        "body": "You may not use the service to infringe third-party rights, compromise systems, automate abusive downloads, resell source files, or conduct illegal activity. We may suspend access if we detect a breach."
+      },
+      {
+        "title": "Availability and liability",
+        "body": "We aim to keep the service available and products functional, but do not guarantee uninterrupted operation or compatibility with every environment. To the extent permitted by law, we are not liable for indirect damages or losses arising from use or inability to use the service."
+      },
+      {
+        "title": "Changes",
+        "body": "We may update the service and these Terms. The current version and effective date will be posted on this page. Continued use after an update means you accept the revised Terms."
+      }
+    ],
+    "contact": "Questions about these terms:"
   },
   "theme": {
     "toLight": "Switch to light theme",

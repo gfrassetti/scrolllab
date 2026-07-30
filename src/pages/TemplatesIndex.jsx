@@ -371,6 +371,22 @@ export default function TemplatesIndex() {
                 </Link>
               </li>
               <li>
+                <Link
+                  to="/legal/privacy"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerPrivacy')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/legal/terms"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerTerms')}
+                </Link>
+              </li>
+              <li>
                 <a
                   href="#como-funciona"
                   className="transition-colors duration-300 hover:text-accent"
