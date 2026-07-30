@@ -50,11 +50,9 @@ export function loadConfig() {
   const authDev = bool('AUTH_DEV_ENABLED', !isProd)
   const mpAccessToken = process.env.MP_ACCESS_TOKEN || ''
   let mpMock = bool('MP_MOCK_ENABLED', !mpAccessToken)
-  // Token TEST-* → checkout sandbox (acepta @testuser.com). Override con MP_SANDBOX.
-  const mpSandbox = bool(
-    'MP_SANDBOX',
-    Boolean(mpAccessToken && mpAccessToken.startsWith('TEST-')),
-  )
+  // Credenciales de "Prueba" también pueden ser APP_USR-*. No detectar por prefijo:
+  // forzá sandbox con MP_SANDBOX=true mientras uses la pestaña Prueba.
+  const mpSandbox = bool('MP_SANDBOX', false)
 
   if (isProd) {
     if (authDev) throw new Error('AUTH_DEV_ENABLED no puede estar activo en producción')
