@@ -72,7 +72,7 @@ export default function AccountPage() {
         </p>
 
         {error && (
-          <p className="mt-6 border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+          <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
             {error}
           </p>
         )}

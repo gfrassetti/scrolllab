@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useCart } from '../lib/cart'
 import { useI18n } from '../i18n'
+import ProductThumbnail from './ProductThumbnail'
 
 /**
  * Botón "Carrito (n)" del header con popup desplegable.
@@ -99,9 +100,14 @@ export default function CartPopover() {
                   return (
                     <li
                       key={item.sku}
-                      className="flex items-start justify-between gap-3 border-b border-ink/10 px-4 py-3"
+                      className="flex items-center gap-3 border-b border-ink/10 px-4 py-3"
                     >
-                      <div className="min-w-0">
+                      <ProductThumbnail
+                        sku={item.sku}
+                        title={item.title}
+                        className="h-12 w-14"
+                      />
+                      <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">
                           {item.title}
                         </p>

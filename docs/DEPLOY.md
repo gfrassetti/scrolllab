@@ -38,6 +38,20 @@ COOKIE_SAME_SITE=none       # si front y API son orígenes distintos
 
 El boot **falla** si faltan secretos, si Mongo no conecta, o si mock/dev quedan activos.
 
+## Google OAuth (equivalente a “app registration”)
+
+Creá **dos** OAuth clients en Google Cloud Console (APIs y servicios → Credenciales), tipo **Aplicación web**:
+
+1. **Local** — redirect: `http://localhost:8787/api/auth/google/callback`  
+   Orígenes JS: `http://localhost:5173`
+2. **Producción** — redirect **exacto** (sin barra final):  
+   `https://TU-API/api/auth/google/callback`  
+   Orígenes JS: `https://TU-FRONT` (Vercel)
+
+En Railway, `GOOGLE_CALLBACK_URL` debe coincidir **carácter por carácter** con el redirect de prod y con `API_PUBLIC_URL` + `/api/auth/google/callback`. El boot corta si no.
+
+No mezcles localhost y prod en el mismo client. Rotá `GOOGLE_CLIENT_SECRET` si se filtró. Nunca lo subas al repo.
+
 ## Healthchecks
 
 - Liveness: `GET /api/health`

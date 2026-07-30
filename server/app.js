@@ -260,7 +260,12 @@ export async function createApp(config) {
       if (logoutErr) return next(logoutErr)
       req.session.destroy((destroyErr) => {
         if (destroyErr) return next(destroyErr)
-        res.clearCookie(config.cookie.name)
+        res.clearCookie(config.cookie.name, {
+          path: '/',
+          sameSite: config.cookie.sameSite,
+          secure: config.cookie.secure,
+          httpOnly: config.cookie.httpOnly,
+        })
         res.json({ ok: true })
       })
     })

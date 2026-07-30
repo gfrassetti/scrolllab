@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP, SplitText } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
@@ -38,6 +38,7 @@ export default function TemplatesIndex() {
   const root = useRef(null)
   const addItem = useCart((s) => s.addItem)
   const { hash } = useLocation()
+  const navigate = useNavigate()
   const { t, locale } = useI18n()
 
   const templates = useMemo(
@@ -111,20 +112,24 @@ export default function TemplatesIndex() {
             {t('meta.tagline')}
           </p>
 
-          <h1 className="select-none leading-[0.85] font-medium tracking-[-0.03em]">
-            <span data-hero-line className="block text-[13vw] uppercase">
-              {t('home.heroLine1')}
-            </span>
-            <span
+          <div>
+            <h1
               data-hero-line
-              className="block pl-[10vw] font-display text-[13vw] font-normal italic tracking-normal text-accent"
+              className="select-none font-brico text-[clamp(3.5rem,14vw,11rem)] leading-[0.88] font-semibold tracking-[-0.04em] uppercase"
             >
-              {t('home.heroLine2')}
-            </span>
-            <span data-hero-line className="block text-[13vw] uppercase">
-              {t('home.heroLine3')}
-            </span>
-          </h1>
+              {SITE_NAME}
+            </h1>
+            <p className="mt-6 max-w-[22ch] text-[clamp(1.4rem,3.5vw,2.6rem)] leading-[1.05] font-medium tracking-[-0.02em] text-ink/80 md:mt-8">
+              <span data-hero-line>{t('home.heroLine1')} </span>
+              <em
+                data-hero-line
+                className="font-display font-normal italic text-accent"
+              >
+                {t('home.heroLine2')}
+              </em>
+              <span data-hero-line> {t('home.heroLine3')}</span>
+            </p>
+          </div>
 
           <div className="border-t border-ink/15 pt-4">
             <p
@@ -199,19 +204,30 @@ export default function TemplatesIndex() {
                     onClick={() =>
                       addItem({
                         sku: template.sku,
-                        title: `${template.name} — template`,
+                        title: t('common.cartItemTitle', {
+                          name: template.name,
+                        }),
                       })
                     }
                     className="border border-ink/30 px-3 py-1.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
                   >
                     {t('common.addToCart')}
                   </button>
-                  <Link
-                    to="/cart"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addItem({
+                        sku: template.sku,
+                        title: t('common.cartItemTitle', {
+                          name: template.name,
+                        }),
+                      })
+                      navigate('/cart')
+                    }}
                     className="text-ink transition-colors hover:text-accent"
                   >
                     {t('common.buy')}
-                  </Link>
+                  </button>
                 </p>
               </li>
             ))}
@@ -416,14 +432,6 @@ export default function TemplatesIndex() {
                   className="transition-colors duration-300 hover:text-accent"
                 >
                   {SUPPORT_EMAIL}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="transition-colors duration-300 hover:text-accent"
-                >
-                  Instagram
                 </a>
               </li>
             </ul>

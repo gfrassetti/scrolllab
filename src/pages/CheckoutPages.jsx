@@ -3,10 +3,19 @@ import { useEffect, useState } from 'react'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { useCart } from '../lib/cart'
 import { useT } from '../i18n'
 
 export default function CheckoutSuccessPage() {
   const t = useT()
+  const clearCart = useCart((s) => s.clear)
+
+  // El carrito se vacía recién acá: si el usuario abandona el checkout
+  // y vuelve atrás, sus items siguen intactos.
+  useEffect(() => {
+    clearCart()
+  }, [clearCart])
+
   return (
     <div className="min-h-svh bg-bone text-ink">
       <SiteHeader />
@@ -60,6 +69,7 @@ export function CheckoutMockPage() {
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const t = useT()
+  const clearCart = useCart((s) => s.clear)
 
   useEffect(() => {
     if (!user || !orderId) return undefined
@@ -67,7 +77,10 @@ export function CheckoutMockPage() {
     ;(async () => {
       try {
         await api.mockPay(orderId)
-        if (!cancelled) setDone(true)
+        if (!cancelled) {
+          setDone(true)
+          clearCart()
+        }
       } catch (err) {
         if (!cancelled) setError(err.message)
       }
@@ -75,7 +88,7 @@ export function CheckoutMockPage() {
     return () => {
       cancelled = true
     }
-  }, [user, orderId])
+  }, [user, orderId, clearCart])
 
   if (loading) {
     return (
@@ -104,7 +117,7 @@ export function CheckoutMockPage() {
         <h1 className="mt-3 text-3xl font-medium">
           {done ? t('checkout.mockDone') : t('checkout.mockBusy')}
         </h1>
-        {error && <p className="mt-4 text-sm text-accent">{error}</p>}
+        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
         {done && (
           <Link
             to="/account"

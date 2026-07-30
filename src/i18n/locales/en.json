@@ -22,10 +22,14 @@
     "howItWorksLink": "How it works →",
     "licenseLink": "View regular license →",
     "remove": "Remove",
+    "close": "Close",
     "estimatedTotal": "Estimated total",
     "goToCart": "Go to cart →",
     "cartEmpty": "Your cart is empty.",
     "addToCart": "+ Add to cart",
+    "addedToCart": "Added to cart",
+    "alreadyInCart": "Already in cart",
+    "cartItemTitle": "{{name}} — template",
     "buy": "Buy →"
   },
   "home": {

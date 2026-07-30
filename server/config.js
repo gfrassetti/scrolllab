@@ -10,7 +10,11 @@ const WEAK_SECRETS = new Set([
   'dev-secret',
   'download-secret',
   'change-me-in-production-scrolllab',
+  'change-me-in-production-scrolllab-min24',
   'change-me-download-secret',
+  'change-me-download-secret-min24chars',
+  'dev-scrollypages-session',
+  'dev-download-secret',
 ])
 
 function bool(name, fallback = false) {
@@ -58,6 +62,7 @@ export function loadConfig() {
     requireEnv('MP_WEBHOOK_SECRET')
     requireEnv('GOOGLE_CLIENT_ID')
     requireEnv('GOOGLE_CLIENT_SECRET')
+    requireEnv('GOOGLE_CALLBACK_URL')
     requireEnv('CLIENT_URL')
     requireEnv('API_PUBLIC_URL')
     requireEnv('STORAGE_DIR')
@@ -66,8 +71,18 @@ export function loadConfig() {
 
     const clientUrl = process.env.CLIENT_URL
     const apiUrl = process.env.API_PUBLIC_URL
+    const googleCallback = process.env.GOOGLE_CALLBACK_URL
     if (!clientUrl.startsWith('https://') || !apiUrl.startsWith('https://')) {
       throw new Error('CLIENT_URL y API_PUBLIC_URL deben ser HTTPS en producción')
+    }
+    if (!googleCallback.startsWith('https://')) {
+      throw new Error('GOOGLE_CALLBACK_URL debe ser HTTPS en producción')
+    }
+    const expectedCallback = `${apiUrl.replace(/\/$/, '')}/api/auth/google/callback`
+    if (googleCallback.replace(/\/$/, '') !== expectedCallback) {
+      throw new Error(
+        `GOOGLE_CALLBACK_URL debe ser exactamente ${expectedCallback}`,
+      )
     }
   }
 

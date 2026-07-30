@@ -63,7 +63,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <p className="border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+          <p className="border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
             {error === 'google_not_configured'
               ? import.meta.env.DEV
                 ? t('login.errorNotConfiguredDev')

@@ -26,6 +26,8 @@ html.dark {
 @theme {
   /* ——— Model 01 "CHAPTERS": kinetic editorial ——— */
   --color-accent: #ff4b00;
+  /* Errores / estados destructivos: no reusar accent de marca */
+  --color-danger: #b42318;
 
   /* ——— Model 02 "NOCTURNE": cinematic noir ——— */
   --color-noir: #0e0e11;
@@ -68,6 +70,11 @@ body {
   summary,
   label[for] {
     cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
   }
 }
 

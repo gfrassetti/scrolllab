@@ -4,6 +4,7 @@ import TemplatesIndex from './pages/TemplatesIndex'
 import { AuthProvider } from './lib/auth'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
+import CartToast from './components/CartToast'
 import './lib/theme'
 
 const ChaptersPage = lazy(() => import('./pages/ChaptersPage'))
@@ -57,6 +58,7 @@ export default function App() {
         <CustomCursor />
         <BrowserRouter>
           <ScrollToTop />
+          <CartToast />
           <Suspense fallback={<Loader />}>
             <Routes>
               <Route path="/" element={<TemplatesIndex />} />

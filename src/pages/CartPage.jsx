@@ -5,12 +5,12 @@ import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { useI18n } from '../i18n'
+import ProductThumbnail from '../components/ProductThumbnail'
 
 export default function CartPage() {
   const { user } = useAuth()
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
-  const clear = useCart((s) => s.clear)
   const [catalog, setCatalog] = useState({})
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -57,7 +57,6 @@ export default function CartPage() {
         recipe: i.recipe,
       }))
       const data = await api.checkout(payload)
-      clear()
       window.location.href = data.init_point
     } catch (err) {
       setError(err.message)
@@ -77,7 +76,7 @@ export default function CartPage() {
         </h1>
 
         {error && (
-          <p className="mt-6 border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+          <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
             {error}
           </p>
         )}
@@ -100,17 +99,24 @@ export default function CartPage() {
                   key={line.sku}
                   className="flex items-center justify-between gap-4 border-b border-ink/15 py-5"
                 >
-                  <div>
-                    <p className="font-medium">{line.title}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                      {line.sku}
-                    </p>
-                    {line.unit_price != null && (
-                      <p className="mt-1 text-sm text-ink/70">
-                        {line.unit_price.toLocaleString(numberLocale)}{' '}
-                        {line.currency_id}
+                  <div className="flex min-w-0 items-center gap-4">
+                    <ProductThumbnail
+                      sku={line.sku}
+                      title={line.title}
+                      className="h-20 w-24"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{line.title}</p>
+                      <p className="truncate text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                        {line.sku}
                       </p>
-                    )}
+                      {line.unit_price != null && (
+                        <p className="mt-1 text-sm text-ink/70">
+                          {line.unit_price.toLocaleString(numberLocale)}{' '}
+                          {line.currency_id}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <button
                     type="button"
