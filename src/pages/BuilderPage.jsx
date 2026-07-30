@@ -28,8 +28,7 @@ function sectionCopyKey(sectionId, field) {
  * BuilderPage — armá una página propia eligiendo secciones de
  * cualquier modelo: arrastrá desde la paleta al lienzo (o usá
  * "+ Agregar" en touch), reordená arrastrando o con flechas y
- * previsualizá la página real acá o en una pestaña nueva.
- * Persiste en localStorage.
+ * previsualizá la página real. Persiste en localStorage.
  */
 export default function BuilderPage() {
   const [items, setItems] = useState(loadComposition)
@@ -45,14 +44,20 @@ export default function BuilderPage() {
     saveComposition(items)
   }, [items])
 
+  const compositionCartItem = () => ({
+    sku: `custom:${items.map((item) => item.sectionId).join('+').slice(0, 80)}`,
+    title: t('builder.compositionTitle'),
+    recipe: items.map((item) => item.sectionId),
+  })
+
+  const addCompositionToCart = () => {
+    if (items.length === 0) return
+    addToCart(compositionCartItem())
+  }
+
   const buyComposition = () => {
     if (items.length === 0) return
-    const recipe = items.map((item) => item.sectionId)
-    addToCart({
-      sku: `custom:${recipe.join('+').slice(0, 80)}`,
-      title: t('builder.compositionTitle'),
-      recipe,
-    })
+    addToCart(compositionCartItem())
     navigate(user ? '/cart' : '/login')
   }
 
@@ -185,20 +190,6 @@ export default function BuilderPage() {
           >
             {t('builder.clear')}
           </button>
-          {items.length > 0 ? (
-            <a
-              href="/preview"
-              target="_blank"
-              rel="noreferrer"
-              className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 hover:border-ink md:text-xs"
-            >
-              {t('builder.newTab')}
-            </a>
-          ) : (
-            <span className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] opacity-30 md:text-xs">
-              {t('builder.newTab')}
-            </span>
-          )}
           <button
             type="button"
             onClick={openPreview}
@@ -206,6 +197,14 @@ export default function BuilderPage() {
             className="border-2 border-ink bg-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors duration-300 not-disabled:hover:bg-accent not-disabled:hover:border-accent disabled:opacity-30 md:text-xs"
           >
             {t('builder.preview')}
+          </button>
+          <button
+            type="button"
+            onClick={addCompositionToCart}
+            disabled={items.length === 0}
+            className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-30 md:text-xs"
+          >
+            {t('common.addToCart')}
           </button>
           <button
             type="button"
