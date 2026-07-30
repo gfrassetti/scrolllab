@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { getSection } from '../lib/sectionRegistry'
 import { loadComposition } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import { useT } from '../i18n'
 
 /**
  * PreviewPage — renderiza en una pestaña propia la página que el
@@ -11,6 +12,7 @@ import SmoothScrollProvider from '../components/SmoothScrollProvider'
  */
 export default function PreviewPage() {
   const [items] = useState(loadComposition)
+  const t = useT()
 
   if (items.length === 0) {
     return (
@@ -26,7 +28,7 @@ export default function PreviewPage() {
           to="/builder"
           className="border-2 border-ink px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors duration-300 hover:bg-ink hover:text-bone"
         >
-          Ir al builder →
+          {t('builder.backToBuilder')}
         </Link>
       </div>
     )
@@ -48,9 +50,9 @@ export default function PreviewPage() {
 
       <Link
         to="/builder"
-        className="fixed bottom-5 left-1/2 z-100 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
+        className="fixed bottom-5 left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
       >
-        Editar en el builder ({items.length})
+        {t('builder.backToBuilder')} ({items.length})
       </Link>
     </SmoothScrollProvider>
   )

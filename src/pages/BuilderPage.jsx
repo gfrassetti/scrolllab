@@ -27,14 +27,13 @@ function sectionCopyKey(sectionId, field) {
 /**
  * BuilderPage — armá una página propia eligiendo secciones de
  * cualquier modelo: arrastrá desde la paleta al lienzo (o usá
- * "+ Agregar" en touch), reordená arrastrando o con flechas,
- * previsualizá la página real acá o en una pestaña nueva y copiá
- * la receta JSON de lo que armaste. Persiste en localStorage.
+ * "+ Agregar" en touch), reordená arrastrando o con flechas y
+ * previsualizá la página real acá o en una pestaña nueva.
+ * Persiste en localStorage.
  */
 export default function BuilderPage() {
   const [items, setItems] = useState(loadComposition)
   const [preview, setPreview] = useState(false)
-  const [copied, setCopied] = useState(false)
   // null | index de inserción | 'end'
   const [dragOver, setDragOver] = useState(null)
   const addToCart = useCart((s) => s.addItem)
@@ -124,17 +123,6 @@ export default function BuilderPage() {
     setDragOver(index)
   }
 
-  const copyRecipe = async () => {
-    const recipe = {
-      name: 'Composición propia',
-      createdAt: new Date().toISOString(),
-      sections: items.map((item) => item.sectionId),
-    }
-    await navigator.clipboard.writeText(JSON.stringify(recipe, null, 2))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1800)
-  }
-
   const openPreview = () => {
     window.scrollTo(0, 0)
     setPreview(true)
@@ -164,7 +152,7 @@ export default function BuilderPage() {
         <button
           type="button"
           onClick={closePreview}
-          className="fixed bottom-5 left-1/2 z-100 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
+          className="fixed bottom-5 left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
         >
           {t('builder.exitPreview')} ({items.length})
         </button>
@@ -196,14 +184,6 @@ export default function BuilderPage() {
             className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 not-disabled:hover:border-ink disabled:opacity-30 md:text-xs"
           >
             {t('builder.clear')}
-          </button>
-          <button
-            type="button"
-            onClick={copyRecipe}
-            disabled={items.length === 0}
-            className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 not-disabled:hover:border-ink disabled:opacity-30 md:text-xs"
-          >
-            {copied ? t('builder.copied') : t('builder.copyRecipe')}
           </button>
           {items.length > 0 ? (
             <a
@@ -307,7 +287,9 @@ export default function BuilderPage() {
         <div className="lg:col-span-7">
           <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
             {t('builder.canvasTitle')} ({items.length}{' '}
-            {items.length === 1 ? t('builder.section') : t('builder.sections')})
+            {items.length === 1
+              ? t('builder.sectionCountOne')
+              : t('builder.sectionCountMany')})
           </p>
 
           {items.length === 0 ? (
