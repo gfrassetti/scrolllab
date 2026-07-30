@@ -2,21 +2,45 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 
+/** Presets curados — sin upload de GLB. */
+export const HERO_THREE_SHAPES = [
+  'icosahedron',
+  'box',
+  'octahedron',
+  'torus',
+  'sphere',
+]
+
+function createShapeGeometry(shape) {
+  switch (shape) {
+    case 'box':
+      return new THREE.BoxGeometry(4.2, 4.2, 4.2)
+    case 'octahedron':
+      return new THREE.OctahedronGeometry(3.4, 0)
+    case 'torus':
+      return new THREE.TorusGeometry(2.4, 0.85, 16, 48)
+    case 'sphere':
+      return new THREE.SphereGeometry(3.2, 24, 18)
+    case 'icosahedron':
+    default:
+      return new THREE.IcosahedronGeometry(3.4, 1)
+  }
+}
+
 /**
- * HeroThree — brutalist hero with a Three.js wireframe monolith
- * (icosahedron + klein-blue point cloud) spinning behind giant
- * condensed type. The object tilts toward the pointer and keeps
- * rotating with scroll. Renders a single static frame under
- * reduced motion.
+ * HeroThree — brutalist hero with a Three.js wireframe object
+ * spinning behind giant condensed type. Shape is a curated preset.
  */
 export default function HeroThree({
   title = 'MONOLITH',
   subtitle = 'A brutalist storytelling template — placeholder object, real motion',
   meta = 'System v1.0 — ©2026',
   hint = 'Scroll',
+  shape = 'icosahedron',
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
+  const resolvedShape = HERO_THREE_SHAPES.includes(shape) ? shape : 'icosahedron'
 
   useGSAP(
     () => {
@@ -37,7 +61,7 @@ export default function HeroThree({
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
       camera.position.z = 9
 
-      const geometry = new THREE.IcosahedronGeometry(3.4, 1)
+      const geometry = createShapeGeometry(resolvedShape)
       const wireframe = new THREE.Mesh(
         geometry,
         new THREE.MeshBasicMaterial({ wireframe: true, color: 0x101010 }),
@@ -126,7 +150,7 @@ export default function HeroThree({
         renderer.dispose()
       }
     },
-    { scope: root },
+    { scope: root, dependencies: [resolvedShape], revertOnUpdate: true },
   )
 
   return (

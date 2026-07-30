@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
+import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useI18n } from '../i18n'
@@ -22,8 +23,12 @@ export default function AccountPage() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(null)
   const [page, setPage] = useState(0)
+  const [successOrder, setSuccessOrder] = useState(null)
   const { t, locale } = useI18n()
   const dateLocale = locale === 'en' ? 'en-US' : 'es-AR'
+  const [params] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!user) return
@@ -32,6 +37,43 @@ export default function AccountPage() {
       .then((data) => setOrders(data.orders || []))
       .catch((err) => setError(err.message))
   }, [user])
+
+  // Modal post-compra: ?purchase=1&orderId=… (state opcional desde confirm)
+  useEffect(() => {
+    if (!user || params.get('purchase') !== '1') return undefined
+    const orderId = params.get('orderId')
+    const fromState = location.state?.purchaseOrder
+    if (fromState?.id) {
+      setSuccessOrder(fromState)
+    }
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const data = await api.orders()
+        if (cancelled) return
+        const list = data.orders || []
+        setOrders(list)
+        if (orderId) {
+          const found = list.find((o) => o.id === orderId)
+          if (found) setSuccessOrder(found)
+        } else if (list[0]?.status === 'paid') {
+          setSuccessOrder(list[0])
+        }
+      } catch {
+        /* ignore */
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [user, params, location.state])
+
+  const closeSuccessModal = () => {
+    setSuccessOrder(null)
+    navigate('/account', { replace: true, state: {} })
+  }
 
   if (loading) {
     return (
@@ -80,6 +122,14 @@ export default function AccountPage() {
   return (
     <div className="min-h-svh bg-bone text-ink">
       <SiteHeader />
+      {successOrder && (
+        <PurchaseSuccessModal
+          order={successOrder}
+          onClose={closeSuccessModal}
+          onDownload={download}
+          downloading={busy === successOrder?.id}
+        />
+      )}
       <main className="px-5 py-12 md:px-10">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
           {t('account.eyebrow')}
@@ -157,6 +207,11 @@ export default function AccountPage() {
                           {formatTtl(order.downloadTtlSeconds || 900, t)}
                         </p>
                       )}
+                      {order.status === 'pending' && (
+                        <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
+                          {t('account.pendingHint')}
+                        </p>
+                      )}
                     </div>
                     {order.status === 'paid' ? (
                       <button
@@ -172,7 +227,7 @@ export default function AccountPage() {
                             : t('account.download')}
                       </button>
                     ) : (
-                      <span className="text-[11px] uppercase tracking-[0.25em] text-ink/40">
+                      <span className="text-[11px] uppercase tracking-[0.25em] text-accent">
                         {t('account.waiting')}
                       </span>
                     )}

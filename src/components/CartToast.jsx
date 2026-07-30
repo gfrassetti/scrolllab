@@ -43,7 +43,9 @@ export default function CartToast() {
           <p className="text-[10px] uppercase tracking-[0.22em] text-ink/50">
             {notice.already
               ? t('common.alreadyInCart')
-              : t('common.addedToCart')}
+              : notice.updated
+                ? t('common.updatedInCart')
+                : t('common.addedToCart')}
           </p>
           <p className="mt-1 truncate text-sm font-medium">{notice.title}</p>
         </div>

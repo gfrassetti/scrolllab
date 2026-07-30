@@ -137,6 +137,9 @@ export default function CartPage() {
                 <span className="mt-1 block text-[11px] uppercase tracking-[0.2em] text-ink/40">
                   {t('cart.priceNote')}
                 </span>
+                <span className="mt-2 block text-xs text-ink/55">
+                  {t('cart.trustNote')}
+                </span>
               </p>
               <button
                 type="button"

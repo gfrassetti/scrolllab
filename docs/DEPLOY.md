@@ -67,15 +67,26 @@ Validamos `x-signature` con `MP_WEBHOOK_SECRET` (SDK oficial).
 
 ## Email de confirmación (Resend)
 
-1. Creá una cuenta y API key en Resend.
-2. Verificá el dominio remitente agregando sus registros DNS.
-3. Configurá `EMAIL_FROM` con una dirección del dominio verificado.
-4. Activá `EMAIL_ENABLED=true`.
+El mail **solo se envía cuando la orden pasa a `paid`**. Si quedó `pending`
+(pago de prueba sin webhook / sin confirm), no hay correo.
+
+En Railway:
+
+1. Creá cuenta en [resend.com](https://resend.com) y una API key.
+2. Verificá tu dominio (DNS) o, en modo prueba de Resend, solo podés enviar
+   al email con el que te registraste.
+3. Variables:
+   ```
+   EMAIL_ENABLED=true
+   RESEND_API_KEY=re_...
+   EMAIL_FROM=SCROLLLAB <compras@tu-dominio-verificado.com>
+   EMAIL_REPLY_TO=hola@tu-dominio.com
+   ```
+4. Redeploy del API.
 
 Después de confirmar el pago y generar el ZIP, el backend envía un detalle
 de orden con CTA a `/account`. La orden guarda el estado del envío y Resend
-recibe una `Idempotency-Key`, por lo que los reintentos del webhook no
-duplican el correo.
+recibe una `Idempotency-Key`, por lo que los reintentos no duplican el correo.
 
 El email es un comprobante/detalle de compra, no una factura fiscal de ARCA.
 

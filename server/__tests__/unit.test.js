@@ -12,13 +12,24 @@ import {
 } from '../packaging.js'
 import { assertPaymentMatchesOrder } from '../services/mercadoPago.js'
 import { verifyMpWebhookSignature } from '../services/mercadoPago.js'
-import { PRODUCTS } from '../catalog.js'
+import { PRODUCTS, COMMERCE_PACK_SURCHARGE } from '../catalog.js'
 import { buildOrderReceipt } from '../services/email.js'
 
 describe('validateRecipe', () => {
-  it('acepta secciones de la allowlist', () => {
+  it('acepta secciones de la allowlist (legacy string[])', () => {
     const recipe = validateRecipe(['chapters/HeroKinetic', 'nocturne/OutroCTA'])
     assert.equal(recipe.length, 2)
+    assert.deepEqual(recipe[0], { id: 'chapters/HeroKinetic' })
+  })
+
+  it('acepta recipe con props allowlisted', () => {
+    const recipe = validateRecipe([
+      { id: 'chapters/HeroKinetic', props: { lineOne: 'HELLO', evil: 'nope' } },
+    ])
+    assert.deepEqual(recipe[0], {
+      id: 'chapters/HeroKinetic',
+      props: { lineOne: 'HELLO' },
+    })
   })
 
   it('rechaza path traversal / secciones inventadas', () => {
@@ -67,9 +78,28 @@ describe('validateCheckoutItems', () => {
     assert.equal(lines[0].title, PRODUCTS.custom.title)
     assert.equal(lines[0].unit_price, PRODUCTS.custom.unit_price)
     assert.deepEqual(lines[0].recipe, [
-      'chapters/VelocityMarquee',
-      'monolith/SkewScroller',
+      { id: 'chapters/VelocityMarquee' },
+      { id: 'monolith/SkewScroller' },
     ])
+  })
+
+  it('suma recargo commerce al custom', () => {
+    const lines = validateCheckoutItems(
+      [
+        {
+          sku: 'custom:x',
+          recipe: [
+            'chapters/HeroKinetic',
+            'commerce/ProductGrid',
+          ],
+        },
+      ],
+      opts,
+    )
+    assert.equal(
+      lines[0].unit_price,
+      PRODUCTS.custom.unit_price + COMMERCE_PACK_SURCHARGE,
+    )
   })
 })
 
@@ -103,7 +133,7 @@ describe('download tokens', () => {
 describe('assertPaymentMatchesOrder', () => {
   const order = {
     id: 'ord1',
-    total: 49000,
+    total: 200000,
     currency_id: 'ARS',
   }
 
@@ -112,7 +142,7 @@ describe('assertPaymentMatchesOrder', () => {
       assertPaymentMatchesOrder(
         {
           status: 'approved',
-          transaction_amount: 49000,
+          transaction_amount: 200000,
           currency_id: 'ARS',
           external_reference: 'ord1',
         },
@@ -140,7 +170,7 @@ describe('assertPaymentMatchesOrder', () => {
         assertPaymentMatchesOrder(
           {
             status: 'approved',
-            transaction_amount: 49000,
+            transaction_amount: 200000,
             currency_id: 'USD',
             external_reference: 'ord1',
           },
@@ -197,11 +227,11 @@ describe('order receipt email', () => {
           {
             sku: 'chapters',
             title: 'CHAPTERS <script>alert(1)</script>',
-            unit_price: 49000,
+            unit_price: 200000,
             currency_id: 'ARS',
           },
         ],
-        total: 49000,
+        total: 200000,
         currency_id: 'ARS',
       },
       user: {

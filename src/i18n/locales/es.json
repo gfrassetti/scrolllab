@@ -29,6 +29,7 @@
     "addToCart": "+ Al carrito",
     "addedToCart": "Agregado al carrito",
     "alreadyInCart": "Ya está en el carrito",
+    "updatedInCart": "Composición actualizada",
     "cartItemTitle": "{{name}} — modelo",
     "buy": "Comprar →"
   },
@@ -71,6 +72,7 @@
     "builderTitleBefore": "Abrir el",
     "builderTitleEm": "builder",
     "builderBody": "Mezclá secciones de todos los modelos, reordenalas, previsualizá la página en vivo y exportá la receta de lo que armaste.",
+    "builderPrices": "Desde {{base}} · Builder + Commerce = {{withCommerce}}",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
     "footerContact": "Contacto",
@@ -112,7 +114,18 @@
     "canvasTitle": "02 — Tu página",
     "sectionCountOne": "sección",
     "sectionCountMany": "secciones",
-    "emptyCanvas": "Lienzo vacío. Arrastrá secciones desde la paleta — con un Nav, un Hero, algunas secciones narrativas y un Footer ya tenés una página completa.",
+    "emptyCanvas": "Lienzo vacío. Arrastrá secciones desde la paleta en este orden:",
+    "emptyStepNav": "Nav",
+    "emptyStepHero": "Hero",
+    "emptyStepSections": "Secciones narrativas",
+    "emptyStepFooter": "Footer",
+    "structureHint": "Una página = un Nav, un Hero y un Footer. Las secciones narrativas (SECCIÓN) sí se pueden repetir o mezclar entre modelos.",
+    "duplicateChromeWarn": "Hay más de un Nav, Hero o Footer. Sacá los duplicados para una página limpia.",
+    "cleanedChrome": "Sacamos Nav/Hero/Footer duplicados de una composición anterior.",
+    "previewBeforeBuy": "Preview antes de comprar →",
+    "priceLadder": "Builder {{base}} · + Commerce {{surcharge}} = {{total}}",
+    "uniqueKindLimit": "Ya tenés un {{kind}} en la página. Sacalo si querés usar otro.",
+    "uniqueKindShort": "Ya hay un {{kind}} en el lienzo",
     "add": "+ Agregar",
     "recipeLabel": "Receta — lo que armaste",
     "kind": {
@@ -126,6 +139,14 @@
     "moveUp": "Subir",
     "moveDown": "Bajar",
     "remove": "Quitar",
+    "editTexts": "Editar textos",
+    "editing": "Editando",
+    "editPanel": "Textos de la sección",
+    "noEditableFields": "Esta sección no tiene campos de texto editables todavía.",
+    "commerceHint": "Agregá la grilla al story. En el ZIP van PDP (/product/:id), cart (drawer) y checkout (/checkout) como rutas. Suma {{price}}.",
+    "estimatedPrice": "Total estimado",
+    "priceNote": "El precio final lo confirma el servidor al pagar",
+    "commerceIncluded": "Incluye kit Commerce (+{{price}})",
     "sections": {
       "chapters": {
         "NavMinimal": {
@@ -236,6 +257,12 @@
           "name": "Footer brutal",
           "blurb": "Bloque de cierre azul Klein con links mono"
         }
+      },
+      "commerce": {
+        "ProductGrid": {
+          "name": "Grilla de productos",
+          "blurb": "Catálogo en el scroll; PDP, cart y checkout van como rutas"
+        }
       }
     }
   },
@@ -243,6 +270,7 @@
     "eyebrow": "Carrito",
     "title": "Tu pedido",
     "priceNote": "El precio final lo confirma el servidor al pagar",
+    "trustNote": "Pago con Mercado Pago · licencia en el ZIP",
     "payLoggedIn": "Pagar →",
     "payLoggedOut": "Entrá para pagar →",
     "redirecting": "Redirigiendo…"
@@ -264,11 +292,12 @@
     "empty": "Todavía no compraste nada.",
     "order": "Orden",
     "paid": "Paga",
-    "pending": "Pendiente",
+    "pending": "Confirmando pago…",
     "failed": "Fallida",
     "download": "Descargar ZIP",
     "preparing": "Preparando…",
-    "waiting": "Esperando pago",
+    "waiting": "Confirmando pago…",
+    "pendingHint": "Si acabás de pagar, puede tardar unos segundos. Refrescá la página si sigue así.",
     "downloadsLeft": "{{used}}/{{max}} descargas · quedan {{left}}",
     "limitReached": "Límite alcanzado",
     "linkTtlMinutes": "el link dura {{minutes}} min",
@@ -276,6 +305,13 @@
     "prevPage": "← Anterior",
     "nextPage": "Siguiente →",
     "pageOf": "{{page}} / {{total}}"
+  },
+  "purchaseModal": {
+    "eyebrow": "Compra",
+    "title": "Compra realizada con éxito",
+    "body": "Tu pago fue confirmado. Ya podés descargar el ZIP.",
+    "download": "Descargar ZIP",
+    "cta": "Seguir en Mis compras"
   },
   "checkout": {
     "eyebrow": "Checkout",
@@ -360,7 +396,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 29 de julio de 2026",
+    "effectiveDate": "Vigentes desde el 30 de julio de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
       {
@@ -369,15 +405,15 @@
       },
       {
         "title": "Productos y licencia",
-        "body": "Los productos son descargas digitales de código fuente. La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso establecidos en la Licencia Regular publicada en el sitio."
+        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, NOCTURNE, MONOLITH), composiciones armadas en el builder y, si la receta lo incluye, el kit Commerce (grilla en el scroll más rutas PDP, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye LICENSE.txt con tu email y número de orden."
       },
       {
         "title": "Precios y pagos",
-        "body": "Los precios y la moneda se muestran antes de confirmar la compra. Los pagos son procesados por Mercado Pago y quedan sujetos a su aprobación. Una orden se considera pagada solo cuando el servicio recibe la confirmación correspondiente."
+        "body": "Los precios vigentes se muestran en el catálogo y el builder (modelos desde 200.000 ARS; MONOLITH 250.000 ARS; composición del builder 350.000 ARS; kit Commerce +150.000 ARS). El total final lo confirma el servidor al pagar. Los pagos son procesados por Mercado Pago y quedan sujetos a su aprobación. Una orden se considera pagada solo cuando el servicio recibe la confirmación correspondiente."
       },
       {
         "title": "Entrega y descargas",
-        "body": "Después de acreditado el pago, el producto queda disponible en Mis compras mediante un link temporal. Es tu responsabilidad descargar y respaldar los archivos. Podemos limitar o bloquear descargas ante indicios de fraude, abuso o incumplimiento."
+        "body": "Después de acreditado el pago, el producto queda disponible en Mis compras mediante un link temporal firmado. Es tu responsabilidad descargar y respaldar los archivos. Podemos limitar o bloquear descargas ante indicios de fraude, abuso o incumplimiento."
       },
       {
         "title": "Reembolsos",

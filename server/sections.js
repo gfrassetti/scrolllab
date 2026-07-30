@@ -29,6 +29,7 @@ export const ALLOWED_SECTIONS = Object.freeze([
   'monolith/ExhibitGrid',
   'monolith/TypeAccordion',
   'monolith/FooterBrutal',
+  'commerce/ProductGrid',
 ])
 
 export const ALLOWED_SECTION_SET = new Set(ALLOWED_SECTIONS)

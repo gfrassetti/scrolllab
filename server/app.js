@@ -38,7 +38,7 @@ import {
   verifyDownloadToken,
   storageRoot,
 } from './packaging.js'
-import { PRODUCTS } from './catalog.js'
+import { PRODUCTS, COMMERCE_PACK_SURCHARGE } from './catalog.js'
 
 function publicUser(user) {
   if (!user) return null
@@ -204,7 +204,10 @@ export async function createApp(config) {
   )
 
   app.get('/api/catalog', (_req, res) => {
-    res.json({ products: Object.values(PRODUCTS) })
+    res.json({
+      products: Object.values(PRODUCTS),
+      commercePackSurcharge: COMMERCE_PACK_SURCHARGE,
+    })
   })
 
   app.get('/api/auth/me', (req, res) => {
@@ -324,6 +327,15 @@ export async function createApp(config) {
         ok: true,
         orderId,
         status: order?.status || 'paid',
+        order: order
+          ? {
+              id: orderId,
+              status: order.status,
+              items: order.items,
+              total: order.total,
+              currency_id: order.currency_id,
+            }
+          : null,
       })
     }),
   )

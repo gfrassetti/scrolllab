@@ -29,6 +29,7 @@
     "addToCart": "+ Add to cart",
     "addedToCart": "Added to cart",
     "alreadyInCart": "Already in cart",
+    "updatedInCart": "Composition updated",
     "cartItemTitle": "{{name}} — template",
     "buy": "Buy →"
   },
@@ -71,6 +72,7 @@
     "builderTitleBefore": "Open the",
     "builderTitleEm": "builder",
     "builderBody": "Mix sections from every model, reorder them, preview the live page, and export the recipe you assembled.",
+    "builderPrices": "From {{base}} · Builder + Commerce = {{withCommerce}}",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
     "footerContact": "Contact",
@@ -112,7 +114,18 @@
     "canvasTitle": "02 — Your page",
     "sectionCountOne": "section",
     "sectionCountMany": "sections",
-    "emptyCanvas": "Empty canvas. Drag sections from the palette — with a Nav, a Hero, a few narrative sections, and a Footer you already have a full page.",
+    "emptyCanvas": "Empty canvas. Drag sections from the palette in this order:",
+    "emptyStepNav": "Nav",
+    "emptyStepHero": "Hero",
+    "emptyStepSections": "Narrative sections",
+    "emptyStepFooter": "Footer",
+    "structureHint": "One page = one Nav, one Hero, and one Footer. Narrative sections (SECTION) can be repeated or mixed across models.",
+    "duplicateChromeWarn": "There's more than one Nav, Hero, or Footer. Remove the duplicates for a clean page.",
+    "cleanedChrome": "We removed duplicate Nav/Hero/Footer from a previous composition.",
+    "previewBeforeBuy": "Preview before buying →",
+    "priceLadder": "Builder {{base}} · + Commerce {{surcharge}} = {{total}}",
+    "uniqueKindLimit": "You already have a {{kind}} on the page. Remove it if you want another.",
+    "uniqueKindShort": "A {{kind}} is already on the canvas",
     "add": "+ Add",
     "recipeLabel": "Recipe — what you built",
     "kind": {
@@ -126,6 +139,14 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "remove": "Remove",
+    "editTexts": "Edit texts",
+    "editing": "Editing",
+    "editPanel": "Section texts",
+    "noEditableFields": "This section has no editable text fields yet.",
+    "commerceHint": "Add the grid to the story. The ZIP ships PDP (/product/:id), cart (drawer) and checkout (/checkout) as routes. Adds {{price}}.",
+    "estimatedPrice": "Estimated total",
+    "priceNote": "Final price is confirmed by the server at checkout",
+    "commerceIncluded": "Includes Commerce kit (+{{price}})",
     "sections": {
       "chapters": {
         "NavMinimal": {
@@ -236,6 +257,12 @@
           "name": "Footer Brutal",
           "blurb": "Klein-blue closing block with mono links"
         }
+      },
+      "commerce": {
+        "ProductGrid": {
+          "name": "Product Grid",
+          "blurb": "Catalog in the scroll; PDP, cart and checkout ship as routes"
+        }
       }
     }
   },
@@ -243,6 +270,7 @@
     "eyebrow": "Cart",
     "title": "Your order",
     "priceNote": "Final price is confirmed by the server at checkout",
+    "trustNote": "Paid via Mercado Pago · license in the ZIP",
     "payLoggedIn": "Pay →",
     "payLoggedOut": "Log in to pay →",
     "redirecting": "Redirecting…"
@@ -264,11 +292,12 @@
     "empty": "You haven't bought anything yet.",
     "order": "Order",
     "paid": "Paid",
-    "pending": "Pending",
+    "pending": "Confirming payment…",
     "failed": "Failed",
     "download": "Download ZIP",
     "preparing": "Preparing…",
-    "waiting": "Awaiting payment",
+    "waiting": "Confirming payment…",
+    "pendingHint": "If you just paid, this can take a few seconds. Refresh if it stays like this.",
     "downloadsLeft": "{{used}}/{{max}} downloads · {{left}} left",
     "limitReached": "Limit reached",
     "linkTtlMinutes": "link lasts {{minutes}} min",
@@ -276,6 +305,13 @@
     "prevPage": "← Previous",
     "nextPage": "Next →",
     "pageOf": "{{page}} / {{total}}"
+  },
+  "purchaseModal": {
+    "eyebrow": "Purchase",
+    "title": "Purchase successful",
+    "body": "Your payment was confirmed. You can download the ZIP now.",
+    "download": "Download ZIP",
+    "cta": "Continue in My purchases"
   },
   "checkout": {
     "eyebrow": "Checkout",
@@ -360,7 +396,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective July 29, 2026",
+    "effectiveDate": "Effective July 30, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -369,15 +405,15 @@
       },
       {
         "title": "Products and license",
-        "body": "Products are digital source-code downloads. A purchase does not transfer intellectual property ownership; it only grants the usage rights established in the Regular License published on the site."
+        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, NOCTURNE, MONOLITH), builder compositions, and—if the recipe includes it—the Commerce kit (scroll grid plus PDP, cart, and checkout routes). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes LICENSE.txt with your email and order number."
       },
       {
         "title": "Prices and payments",
-        "body": "Prices and currency are displayed before purchase confirmation. Payments are processed by Mercado Pago and are subject to its approval. An order is considered paid only after the service receives the corresponding confirmation."
+        "body": "Current prices are shown in the catalog and builder (models from ARS 200,000; MONOLITH ARS 250,000; builder composition ARS 350,000; Commerce kit +ARS 150,000). The server confirms the final total at checkout. Payments are processed by Mercado Pago and are subject to its approval. An order is considered paid only after the service receives the corresponding confirmation."
       },
       {
         "title": "Delivery and downloads",
-        "body": "After payment is confirmed, the product becomes available under My purchases through a temporary link. You are responsible for downloading and backing up the files. We may limit or block downloads where fraud, abuse, or a breach is suspected."
+        "body": "After payment is confirmed, the product becomes available under My purchases through a temporary signed link. You are responsible for downloading and backing up the files. We may limit or block downloads where fraud, abuse, or a breach is suspected."
       },
       {
         "title": "Refunds",

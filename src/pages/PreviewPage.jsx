@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSection } from '../lib/sectionRegistry'
-import { loadComposition } from '../lib/composition'
+import { loadComposition, recipeHasCommerce } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import CompositionShopShell from '../components/CompositionShopShell'
 import { useT } from '../i18n'
 
 /**
@@ -13,6 +14,7 @@ import { useT } from '../i18n'
 export default function PreviewPage() {
   const [items] = useState(loadComposition)
   const t = useT()
+  const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
 
   if (items.length === 0) {
     return (
@@ -34,7 +36,7 @@ export default function PreviewPage() {
     )
   }
 
-  return (
+  const home = (
     <SmoothScrollProvider>
       <div id="top">
         {items.map((item) => {
@@ -42,11 +44,17 @@ export default function PreviewPage() {
           const Component = section.component
           return (
             <div key={item.uid} className={section.model.wrapperClass}>
-              <Component />
+              <Component {...(item.props || {})} />
             </div>
           )
         })}
       </div>
+    </SmoothScrollProvider>
+  )
+
+  return (
+    <>
+      {hasCommerce ? <CompositionShopShell home={home} /> : home}
 
       <Link
         to="/builder"
@@ -54,6 +62,6 @@ export default function PreviewPage() {
       >
         {t('builder.backToBuilder')} ({items.length})
       </Link>
-    </SmoothScrollProvider>
+    </>
   )
 }

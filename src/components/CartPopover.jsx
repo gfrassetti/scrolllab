@@ -41,18 +41,25 @@ export default function CartPopover() {
     }
   }, [open])
 
-  // Precios del servidor, solo la primera vez que se abre.
+  // Precios del servidor cada vez que se abre (evita cachear montos viejos).
   useEffect(() => {
-    if (!open || catalog) return
+    if (!open) return
+    let cancelled = false
     api
       .catalog()
       .then((data) => {
+        if (cancelled) return
         const map = {}
         for (const p of data.products || []) map[p.sku] = p
         setCatalog(map)
       })
-      .catch(() => setCatalog({}))
-  }, [open, catalog])
+      .catch(() => {
+        if (!cancelled) setCatalog({})
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open])
 
   const priceFor = (item) => {
     if (!catalog) return null

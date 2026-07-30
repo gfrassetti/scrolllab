@@ -1,5 +1,11 @@
-import { PRODUCTS, resolveLineItem } from './catalog.js'
+import {
+  PRODUCTS,
+  resolveLineItem,
+  priceCustomRecipe,
+  recipeSectionId,
+} from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
+import { sanitizeSectionProps } from './sectionFields.js'
 
 export class HttpError extends Error {
   constructor(status, message) {
@@ -42,9 +48,10 @@ export function validateCheckoutItems(rawItems, { maxCartItems, maxRecipeSection
     if (line.sku === 'custom' || String(line.sku).startsWith('custom:')) {
       const recipe = validateRecipe(raw.recipe, maxRecipeSections)
       line.recipe = recipe
-      // No aceptar título del cliente
       line.title = PRODUCTS.custom.title
-      line.sku = `custom:${recipe.join('+').slice(0, 80)}`
+      const ids = recipe.map(recipeSectionId).join('+')
+      line.sku = `custom:${ids.slice(0, 80)}`
+      line.unit_price = priceCustomRecipe(recipe)
     } else {
       line.recipe = undefined
     }
@@ -61,6 +68,10 @@ export function validateCheckoutItems(rawItems, { maxCartItems, maxRecipeSection
   return resolved
 }
 
+/**
+ * Accepts legacy string[] or [{ id, props? }, ...].
+ * Returns normalized [{ id, props? }, ...].
+ */
 export function validateRecipe(recipe, maxRecipeSections = 30) {
   if (!Array.isArray(recipe) || recipe.length === 0) {
     throw new HttpError(400, 'La composición custom necesita una receta')
@@ -69,11 +80,16 @@ export function validateRecipe(recipe, maxRecipeSections = 30) {
     throw new HttpError(400, `Máximo ${maxRecipeSections} secciones en la receta`)
   }
   const cleaned = []
-  for (const id of recipe) {
+  for (const entry of recipe) {
+    const id = recipeSectionId(entry)
     if (!isAllowedSectionId(id)) {
       throw new HttpError(400, `Sección no permitida: ${String(id)}`)
     }
-    cleaned.push(id)
+    const props =
+      entry && typeof entry === 'object' && !Array.isArray(entry)
+        ? sanitizeSectionProps(id, entry.props)
+        : undefined
+    cleaned.push(props ? { id, props } : { id })
   }
   return cleaned
 }

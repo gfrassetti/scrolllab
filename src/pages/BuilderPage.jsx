@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { models, getSection } from '../lib/sectionRegistry'
-import { loadComposition, saveComposition } from '../lib/composition'
+import {
+  loadComposition,
+  saveComposition,
+  compositionToRecipe,
+  recipeHasCommerce,
+  dedupeUniqueKinds,
+} from '../lib/composition'
+import {
+  estimateCustomPrice,
+  formatArs,
+  COMMERCE_PACK_SURCHARGE,
+  CUSTOM_BASE_PRICE,
+} from '../lib/pricing'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import BuilderPreview from '../components/BuilderPreview'
 import CartPopover from '../components/CartPopover'
 import ThemeToggle from '../components/ThemeToggle'
 import LanguageSelector from '../components/LanguageSelector'
@@ -17,6 +30,9 @@ const kindLabelKeys = {
   footer: 'builder.kind.footer',
 }
 
+/** Una sola nav / hero / footer por página. Las secciones narrativas sí se pueden repetir. */
+const UNIQUE_KINDS = new Set(['nav', 'hero', 'footer'])
+
 const DND_MIME = 'text/plain'
 
 /** Clave i18n de name/blurb a partir del id `model/Component`. */
@@ -30,11 +46,19 @@ function sectionCopyKey(sectionId, field) {
  * "+ Agregar" en touch), reordená arrastrando o con flechas y
  * previsualizá la página real. Persiste en localStorage.
  */
+function bootstrapComposition() {
+  const loaded = loadComposition()
+  const items = dedupeUniqueKinds(loaded)
+  return { items, cleaned: items.length < loaded.length }
+}
+
 export default function BuilderPage() {
-  const [items, setItems] = useState(loadComposition)
+  const [boot] = useState(bootstrapComposition)
+  const [items, setItems] = useState(boot.items)
   const [preview, setPreview] = useState(false)
   // null | index de inserción | 'end'
   const [dragOver, setDragOver] = useState(null)
+  const [limitNotice, setLimitNotice] = useState('')
   const addToCart = useCart((s) => s.addItem)
   const { user, loading: authLoading, hadSession } = useAuth()
   const looksLoggedIn = user ? true : authLoading ? hadSession : false
@@ -45,10 +69,47 @@ export default function BuilderPage() {
     saveComposition(items)
   }, [items])
 
+  useEffect(() => {
+    if (boot.cleaned) setLimitNotice(t('builder.cleanedChrome'))
+  }, [boot.cleaned, t])
+
+  useEffect(() => {
+    if (!limitNotice) return undefined
+    const id = window.setTimeout(() => setLimitNotice(''), 3200)
+    return () => window.clearTimeout(id)
+  }, [limitNotice])
+
+  const recipe = useMemo(() => compositionToRecipe(items), [items])
+  const hasCommerce = useMemo(() => recipeHasCommerce(recipe), [recipe])
+  const estimatedPrice = estimateCustomPrice(hasCommerce)
+
+  const takenKinds = useMemo(() => {
+    const taken = new Set()
+    for (const item of items) {
+      const kind = getSection(item.sectionId)?.kind
+      if (kind && UNIQUE_KINDS.has(kind)) taken.add(kind)
+    }
+    return taken
+  }, [items])
+
+  const hasDuplicateChrome = useMemo(() => {
+    const counts = { nav: 0, hero: 0, footer: 0 }
+    for (const item of items) {
+      const kind = getSection(item.sectionId)?.kind
+      if (kind && kind in counts) counts[kind] += 1
+    }
+    return Object.values(counts).some((n) => n > 1)
+  }, [items])
+
+  const kindBlocked = (sectionId) => {
+    const kind = getSection(sectionId)?.kind
+    return Boolean(kind && UNIQUE_KINDS.has(kind) && takenKinds.has(kind))
+  }
+
   const compositionCartItem = () => ({
-    sku: `custom:${items.map((item) => item.sectionId).join('+').slice(0, 80)}`,
+    sku: 'custom',
     title: t('builder.compositionTitle'),
-    recipe: items.map((item) => item.sectionId),
+    recipe,
   })
 
   const addCompositionToCart = () => {
@@ -63,11 +124,35 @@ export default function BuilderPage() {
   }
 
   const addSection = (sectionId, index = items.length) => {
+    const section = getSection(sectionId)
+    if (!section) return
+    if (
+      UNIQUE_KINDS.has(section.kind) &&
+      items.some((item) => getSection(item.sectionId)?.kind === section.kind)
+    ) {
+      setLimitNotice(
+        t('builder.uniqueKindLimit', {
+          kind: t(kindLabelKeys[section.kind]),
+        }),
+      )
+      return
+    }
     setItems((prev) => {
       const next = [...prev]
-      next.splice(index, 0, { uid: crypto.randomUUID(), sectionId })
+      next.splice(index, 0, { uid: crypto.randomUUID(), sectionId, props: {} })
       return next
     })
+  }
+
+  const updateItemProps = (uid, props) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.uid !== uid) return item
+        const next = { uid: item.uid, sectionId: item.sectionId }
+        if (props && Object.keys(props).length) next.props = props
+        return next
+      }),
+    )
   }
 
   const removeItem = (uid) => {
@@ -139,29 +224,15 @@ export default function BuilderPage() {
     setPreview(false)
   }
 
-  /* ——— Preview en vivo: la página real, animaciones incluidas ——— */
+  /* ——— Preview en vivo + edición de textos ——— */
   if (preview) {
     return (
       <SmoothScrollProvider>
-        <div id="top">
-          {items.map((item) => {
-            const section = getSection(item.sectionId)
-            const Component = section.component
-            return (
-              <div key={item.uid} className={section.model.wrapperClass}>
-                <Component />
-              </div>
-            )
-          })}
-        </div>
-
-        <button
-          type="button"
-          onClick={closePreview}
-          className="fixed bottom-5 left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
-        >
-          {t('builder.exitPreview')} ({items.length})
-        </button>
+        <BuilderPreview
+          items={items}
+          onChangeProps={updateItemProps}
+          onExit={closePreview}
+        />
       </SmoothScrollProvider>
     )
   }
@@ -199,24 +270,6 @@ export default function BuilderPage() {
           >
             {t('builder.preview')}
           </button>
-          <button
-            type="button"
-            onClick={addCompositionToCart}
-            disabled={items.length === 0}
-            className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-30 md:text-xs"
-          >
-            {t('common.addToCart')}
-          </button>
-          <button
-            type="button"
-            onClick={buyComposition}
-            disabled={items.length === 0}
-            className="border-2 border-accent bg-accent px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-ink transition-opacity duration-300 not-disabled:hover:opacity-80 disabled:opacity-30 md:text-xs"
-          >
-            {looksLoggedIn
-              ? t('builder.buyLoggedIn')
-              : t('builder.buyLoggedOut')}
-          </button>
           <CartPopover />
           <LanguageSelector />
           <ThemeToggle />
@@ -233,7 +286,7 @@ export default function BuilderPage() {
           <div className="space-y-10">
             {models.map((model) => (
               <div key={model.id}>
-                <div className="mb-2 flex items-center gap-3 border-b border-ink/15 pb-2">
+                <div className="mb-2 flex flex-wrap items-center gap-3 border-b border-ink/15 pb-2">
                   <span
                     aria-hidden="true"
                     className="inline-block size-3 rounded-full"
@@ -241,44 +294,72 @@ export default function BuilderPage() {
                   />
                   <p className="text-sm font-medium tracking-[0.15em]">{model.name}</p>
                 </div>
+                {model.id === 'commerce' && (
+                  <p className="mb-3 text-xs leading-relaxed text-ink/50">
+                    {t('builder.commerceHint', {
+                      price: formatArs(COMMERCE_PACK_SURCHARGE),
+                    })}
+                  </p>
+                )}
 
                 <ul>
-                  {model.sections.map((section) => (
-                    <li
-                      key={section.id}
-                      draggable
-                      onDragStart={(e) => startPaletteDrag(e, section.id)}
-                      onDragEnd={() => setDragOver(null)}
-                      className="flex cursor-grab items-center justify-between gap-4 border-b border-ink/10 py-2.5 active:cursor-grabbing"
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span aria-hidden="true" className="shrink-0 text-ink/30">
-                          ⠿
-                        </span>
-                        <div className="min-w-0">
-                          <p className="flex items-baseline gap-2 text-sm font-medium">
-                            {t(sectionCopyKey(section.id, 'name'))}
-                            <span className="text-[9px] tracking-[0.2em] text-ink/40">
-                              {t(kindLabelKeys[section.kind])}
-                            </span>
-                          </p>
-                          <p className="truncate text-xs text-ink/50">
-                            {t(sectionCopyKey(section.id, 'blurb'))}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => addSection(section.id)}
-                        aria-label={t('builder.addAria', {
-                          name: t(sectionCopyKey(section.id, 'name')),
-                        })}
-                        className="shrink-0 border border-ink/30 px-3 py-1.5 text-xs transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-bone"
+                  {model.sections.map((section) => {
+                    const blocked = kindBlocked(section.id)
+                    return (
+                      <li
+                        key={section.id}
+                        draggable={!blocked}
+                        onDragStart={(e) => {
+                          if (blocked) {
+                            e.preventDefault()
+                            return
+                          }
+                          startPaletteDrag(e, section.id)
+                        }}
+                        onDragEnd={() => setDragOver(null)}
+                        className={`flex items-center justify-between gap-4 border-b border-ink/10 py-2.5 ${
+                          blocked
+                            ? 'cursor-not-allowed opacity-40'
+                            : 'cursor-grab active:cursor-grabbing'
+                        }`}
                       >
-                        {t('builder.add')}
-                      </button>
-                    </li>
-                  ))}
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            aria-hidden="true"
+                            className="shrink-0 text-ink/30"
+                          >
+                            ⠿
+                          </span>
+                          <div className="min-w-0">
+                            <p className="flex items-baseline gap-2 text-sm font-medium">
+                              {t(sectionCopyKey(section.id, 'name'))}
+                              <span className="text-[9px] tracking-[0.2em] text-ink/40">
+                                {t(kindLabelKeys[section.kind])}
+                              </span>
+                            </p>
+                            <p className="truncate text-xs text-ink/50">
+                              {blocked
+                                ? t('builder.uniqueKindShort', {
+                                    kind: t(kindLabelKeys[section.kind]),
+                                  })
+                                : t(sectionCopyKey(section.id, 'blurb'))}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => addSection(section.id)}
+                          disabled={blocked}
+                          aria-label={t('builder.addAria', {
+                            name: t(sectionCopyKey(section.id, 'name')),
+                          })}
+                          className="shrink-0 border border-ink/30 px-3 py-1.5 text-xs transition-colors duration-200 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-40"
+                        >
+                          {t('builder.add')}
+                        </button>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             ))}
@@ -299,13 +380,25 @@ export default function BuilderPage() {
               onDragOver={allowDropAt('end')}
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => handleDrop(e, 0)}
-              className={`flex min-h-60 items-center justify-center border-2 border-dashed p-10 text-center transition-colors duration-200 ${
+              className={`flex min-h-60 flex-col items-center justify-center gap-6 border-2 border-dashed p-10 text-center transition-colors duration-200 ${
                 dragOver === 'end' ? 'border-accent bg-accent/5' : 'border-ink/20'
               }`}
             >
               <p className="max-w-[36ch] text-sm text-ink/50">
                 {t('builder.emptyCanvas')}
               </p>
+              <ol className="w-full max-w-[28ch] space-y-2 text-left text-xs uppercase tracking-[0.2em] text-ink/45">
+                <li className="border-b border-ink/10 pb-2">
+                  01 — {t('builder.emptyStepNav')}
+                </li>
+                <li className="border-b border-ink/10 pb-2">
+                  02 — {t('builder.emptyStepHero')}
+                </li>
+                <li className="border-b border-ink/10 pb-2">
+                  03 — {t('builder.emptyStepSections')}
+                </li>
+                <li>04 — {t('builder.emptyStepFooter')}</li>
+              </ol>
             </div>
           ) : (
             <div
@@ -395,14 +488,85 @@ export default function BuilderPage() {
             </div>
           )}
 
+          {limitNotice && (
+            <p className="mt-6 border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+              {limitNotice}
+            </p>
+          )}
+
           {items.length > 0 && (
-            <div className="mt-8 border border-ink/15 bg-ink/2 p-5">
-              <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                {t('builder.recipeLabel')}
+            <div className="mt-8 space-y-5 border border-ink/15 p-5 md:p-6">
+              <div>
+                <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                  {t('builder.recipeLabel')}
+                </p>
+                <code className="block text-xs leading-relaxed break-all text-ink/70">
+                  {JSON.stringify(recipe)}
+                </code>
+              </div>
+
+              <p className="text-xs leading-relaxed text-ink/55">
+                {t('builder.structureHint')}
               </p>
-              <code className="block text-xs leading-relaxed break-all text-ink/70">
-                [{items.map((item) => `"${item.sectionId}"`).join(', ')}]
-              </code>
+              {hasDuplicateChrome && (
+                <p className="text-xs leading-relaxed text-accent">
+                  {t('builder.duplicateChromeWarn')}
+                </p>
+              )}
+
+              <div className="border-t border-ink/15 pt-5">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                  {t('builder.estimatedPrice')}
+                </p>
+                <p className="mt-2 text-[clamp(1.5rem,3vw,2rem)] font-medium tracking-[-0.02em]">
+                  {formatArs(estimatedPrice)}
+                </p>
+                {hasCommerce ? (
+                  <p className="mt-1 text-xs text-ink/55">
+                    {t('builder.commerceIncluded', {
+                      price: formatArs(COMMERCE_PACK_SURCHARGE),
+                    })}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-ink/55">
+                    {t('builder.priceLadder', {
+                      base: formatArs(CUSTOM_BASE_PRICE),
+                      surcharge: formatArs(COMMERCE_PACK_SURCHARGE),
+                      total: formatArs(estimateCustomPrice(true)),
+                    })}
+                  </p>
+                )}
+                <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                  {t('builder.priceNote')}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={openPreview}
+                className="w-full border-2 border-ink bg-ink px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
+              >
+                {t('builder.previewBeforeBuy')}
+              </button>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={addCompositionToCart}
+                  className="border-2 border-ink px-5 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone sm:flex-1"
+                >
+                  {t('common.addToCart')}
+                </button>
+                <button
+                  type="button"
+                  onClick={buyComposition}
+                  className="border-2 border-accent bg-accent px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink transition-opacity hover:opacity-80 sm:flex-1"
+                >
+                  {looksLoggedIn
+                    ? t('builder.buyLoggedIn')
+                    : t('builder.buyLoggedOut')}
+                </button>
+              </div>
             </div>
           )}
         </div>

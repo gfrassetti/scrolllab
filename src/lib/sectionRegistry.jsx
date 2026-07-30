@@ -27,10 +27,11 @@ import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
 
+import ProductGrid from '../components/sections/commerce/ProductGrid'
+
 /**
  * Central catalog of every section across all template models.
- * The builder (and later the market) reads from here. Each section
- * renders with zero props, so composing is just stacking components.
+ * Builder preview can pass text props; defaults live on each component.
  *
  * `wrapperClass` gives every section instance its model's canvas
  * (background + text color) when mixed with sections of other models.
@@ -84,6 +85,21 @@ export const models = [
       { id: 'monolith/ExhibitGrid', name: 'Exhibit Grid', kind: 'section', component: ExhibitGrid, blurb: 'Hard-bordered grid, grayscale until hovered' },
       { id: 'monolith/TypeAccordion', name: 'Type Accordion', kind: 'section', component: TypeAccordion, blurb: 'Condensed titles expanding into drawers' },
       { id: 'monolith/FooterBrutal', name: 'Footer Brutal', kind: 'footer', component: FooterBrutal, blurb: 'Klein-blue closing block with mono links' },
+    ],
+  },
+  {
+    id: 'commerce',
+    name: 'COMMERCE',
+    accent: '#161412',
+    wrapperClass: 'bg-bone text-ink',
+    sections: [
+      {
+        id: 'commerce/ProductGrid',
+        name: 'Product Grid',
+        kind: 'section',
+        component: ProductGrid,
+        blurb: 'Catalog in the story; PDP, cart drawer and checkout ship as routes',
+      },
     ],
   },
 ]

@@ -4,6 +4,12 @@ import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import { useCart } from '../lib/cart'
+import {
+  CUSTOM_BASE_PRICE,
+  estimateCustomPrice,
+  formatArs,
+  templatePrice,
+} from '../lib/pricing'
 import { useI18n } from '../i18n'
 
 const TEMPLATE_META = [
@@ -167,8 +173,11 @@ export default function TemplatesIndex() {
         stagger: 0.12,
         delay: 0.9,
       })
+
+      // El revert del contexto no deshace el DOM que crea SplitText.
+      return () => split.revert()
     },
-    { scope: root, dependencies: [locale] },
+    { scope: root, dependencies: [locale], revertOnUpdate: true },
   )
 
   useGSAP(
@@ -250,7 +259,7 @@ export default function TemplatesIndex() {
 
       return () => mm.revert()
     },
-    { scope: root, dependencies: [locale] },
+    { scope: root, dependencies: [locale], revertOnUpdate: true },
   )
 
   const steps = [
@@ -388,6 +397,12 @@ export default function TemplatesIndex() {
                       ? template.tags.join(' · ')
                       : template.tags}
                   </p>
+
+                  {templatePrice(template.sku) != null && (
+                    <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+                      {formatArs(templatePrice(template.sku))}
+                    </p>
+                  )}
 
                   <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
                     <button
@@ -578,6 +593,12 @@ export default function TemplatesIndex() {
           </p>
           <p className="mt-3 max-w-[52ch] text-sm leading-relaxed opacity-70">
             {t('home.builderBody')}
+          </p>
+          <p className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60">
+            {t('home.builderPrices', {
+              base: formatArs(CUSTOM_BASE_PRICE),
+              withCommerce: formatArs(estimateCustomPrice(true)),
+            })}
           </p>
         </Link>
       </main>

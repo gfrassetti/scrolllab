@@ -16,7 +16,8 @@ const orderItemSchema = new mongoose.Schema(
     title: String,
     unit_price: Number,
     currency_id: { type: String, default: "ARS" },
-    recipe: { type: [String], default: undefined },
+    // string[] legacy or [{ id, props? }, ...]
+    recipe: { type: [mongoose.Schema.Types.Mixed], default: undefined },
   },
   { _id: false },
 );

@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
@@ -8,6 +8,7 @@ import { useT } from '../i18n'
 
 export default function CheckoutSuccessPage() {
   const t = useT()
+  const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
   const { user, loading: authLoading } = useAuth()
   const [params] = useSearchParams()
@@ -22,17 +23,18 @@ export default function CheckoutSuccessPage() {
     params.get('status') || params.get('collection_status') || ''
   const orderId = params.get('external_reference') || ''
 
-  // El carrito se vacía recién acá: si el usuario abandona el checkout
-  // y vuelve atrás, sus items siguen intactos.
   useEffect(() => {
     clearCart()
   }, [clearCart])
 
-  // MP no manda webhooks con credenciales de prueba: confirmamos al volver.
+  // MP no manda webhooks con credenciales de prueba: confirmamos al volver
+  // y redirigimos a Mis compras con el modal de éxito.
   useEffect(() => {
-    if (authLoading || !user) return undefined
+    if (authLoading) return undefined
+    if (!user) return undefined
+
     if (!paymentId || paymentId === 'null') {
-      setConfirmState('skipped')
+      navigate('/account', { replace: true })
       return undefined
     }
     if (status && status !== 'approved') {
@@ -44,8 +46,19 @@ export default function CheckoutSuccessPage() {
     setConfirmState('busy')
     ;(async () => {
       try {
-        await api.confirmCheckout({ paymentId, orderId: orderId || undefined })
-        if (!cancelled) setConfirmState('done')
+        const data = await api.confirmCheckout({
+          paymentId,
+          orderId: orderId || undefined,
+        })
+        if (cancelled) return
+        const confirmedId = data.orderId || orderId
+        navigate(
+          `/account?purchase=1&orderId=${encodeURIComponent(confirmedId)}`,
+          {
+            replace: true,
+            state: { purchaseOrder: data.order || null },
+          },
+        )
       } catch (err) {
         if (!cancelled) {
           setConfirmState('error')
@@ -57,47 +70,47 @@ export default function CheckoutSuccessPage() {
     return () => {
       cancelled = true
     }
-  }, [authLoading, user, paymentId, status, orderId])
+  }, [authLoading, user, paymentId, status, orderId, navigate])
 
-  const confirming = confirmState === 'busy' || confirmState === 'idle'
+  if (confirmState === 'not-approved' || confirmState === 'error') {
+    return (
+      <div className="min-h-svh bg-bone text-ink">
+        <SiteHeader />
+        <main className="mx-auto max-w-lg px-5 py-16 md:px-10">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+            {t('checkout.eyebrow')}
+          </p>
+          <h1 className="mt-3 text-[clamp(2rem,5vw,3rem)] font-medium tracking-[-0.02em]">
+            {confirmState === 'not-approved'
+              ? t('checkout.failTitle')
+              : t('checkout.successTitle')}
+          </h1>
+          <p className="mt-4 text-sm leading-relaxed text-ink/70">
+            {confirmState === 'not-approved'
+              ? t('checkout.failBody')
+              : t('checkout.confirmError')}
+          </p>
+          {confirmError && (
+            <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+              {confirmError}
+            </p>
+          )}
+          <Link
+            to={confirmState === 'not-approved' ? '/cart' : '/account'}
+            className="mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone"
+          >
+            {confirmState === 'not-approved'
+              ? t('checkout.backCart')
+              : t('checkout.goAccount')}
+          </Link>
+        </main>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-svh bg-bone text-ink">
-      <SiteHeader />
-      <main className="mx-auto max-w-lg px-5 py-16 md:px-10">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-          {t('checkout.eyebrow')}
-        </p>
-        <h1 className="mt-3 text-[clamp(2rem,5vw,3rem)] font-medium tracking-[-0.02em]">
-          {confirmState === 'not-approved'
-            ? t('checkout.failTitle')
-            : t('checkout.successTitle')}
-        </h1>
-        <p className="mt-4 text-sm leading-relaxed text-ink/70">
-          {confirmState === 'busy' || (confirmState === 'idle' && paymentId)
-            ? t('checkout.confirming')
-            : confirmState === 'error'
-              ? t('checkout.confirmError')
-              : confirmState === 'not-approved'
-                ? t('checkout.failBody')
-                : t('checkout.successBody')}
-        </p>
-        {confirmError && (
-          <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
-            {confirmError}
-          </p>
-        )}
-        <Link
-          to={confirmState === 'not-approved' ? '/cart' : '/account'}
-          className={`mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone ${
-            confirming ? 'pointer-events-none opacity-40' : ''
-          }`}
-        >
-          {confirmState === 'not-approved'
-            ? t('checkout.backCart')
-            : t('checkout.goAccount')}
-        </Link>
-      </main>
+    <div className="flex min-h-svh items-center justify-center bg-bone text-[11px] uppercase tracking-[0.25em] text-ink/50">
+      {t('checkout.confirming')}
     </div>
   )
 }
@@ -131,6 +144,7 @@ export function CheckoutMockPage() {
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const t = useT()
+  const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
 
   useEffect(() => {
@@ -142,6 +156,10 @@ export function CheckoutMockPage() {
         if (!cancelled) {
           setDone(true)
           clearCart()
+          navigate(
+            `/account?purchase=1&orderId=${encodeURIComponent(orderId)}`,
+            { replace: true },
+          )
         }
       } catch (err) {
         if (!cancelled) setError(err.message)
@@ -150,7 +168,7 @@ export function CheckoutMockPage() {
     return () => {
       cancelled = true
     }
-  }, [user, orderId, clearCart])
+  }, [user, orderId, clearCart, navigate])
 
   if (loading) {
     return (
@@ -180,14 +198,6 @@ export function CheckoutMockPage() {
           {done ? t('checkout.mockDone') : t('checkout.mockBusy')}
         </h1>
         {error && <p className="mt-4 text-sm text-danger">{error}</p>}
-        {done && (
-          <Link
-            to="/account"
-            className="mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone"
-          >
-            {t('checkout.mockDownload')}
-          </Link>
-        )}
       </main>
     </div>
   )

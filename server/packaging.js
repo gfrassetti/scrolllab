@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import archiver from 'archiver'
 import { buildLicenseText } from './license.js'
 import { isAllowedSectionId } from './sections.js'
+import { recipeSectionId } from './catalog.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -78,9 +79,44 @@ function read(rel) {
 }
 
 function rewriteImportsInSections(content) {
-  return content.replaceAll("from '../../../lib/gsap'", "from '../../lib/gsap'")
+  return content
+    .replaceAll("from '../../../lib/gsap'", "from '../../lib/gsap'")
     .replaceAll("from '../../../hooks/useReducedMotion'", "from '../../hooks/useReducedMotion'")
+    .replaceAll("from '../../../lib/shop/", "from '../../lib/shop/")
 }
+
+/** Serialize props as JSX attributes (strings only). */
+function propsToJsx(props) {
+  if (!props || typeof props !== 'object') return ''
+  return Object.entries(props)
+    .filter(([, v]) => typeof v === 'string')
+    .map(([k, v]) => {
+      const escaped = JSON.stringify(v)
+      return ` ${k}={${escaped}}`
+    })
+    .join('')
+}
+
+function modelWrapperClass(model) {
+  if (model === 'chapters') return 'bg-bone text-ink'
+  if (model === 'nocturne') return 'bg-noir text-salt'
+  if (model === 'monolith') return 'bg-concrete text-carbon'
+  return 'bg-bone text-ink'
+}
+
+const SHOP_FILES = [
+  'src/lib/shop/products.js',
+  'src/lib/shop/cartStore.js',
+  'src/lib/shop/checkoutAdapter.js',
+]
+
+/** Commerce UI shipped as routes (not scroll sections), when recipe has ProductGrid. */
+const SHOP_ROUTE_COMPONENTS = [
+  'src/components/sections/commerce/ProductDetail.jsx',
+  'src/components/sections/commerce/CartDrawer.jsx',
+  'src/components/sections/commerce/Checkout.jsx',
+  'src/components/sections/commerce/ShopChrome.jsx',
+]
 
 function rewritePageToApp(content, model) {
   // ChaptersPage etc. import from '../components/...' — in packaged App they live under ./components
@@ -162,7 +198,8 @@ export async function packFixedTemplate({ model, destPath, licenseMeta }) {
 }
 
 /**
- * Pack a custom builder recipe (array of section ids like "chapters/HeroKinetic").
+ * Pack a custom builder recipe.
+ * recipe: string[] (legacy) or [{ id, props? }, ...]
  */
 export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
   ensureDir(path.dirname(destPath))
@@ -189,15 +226,35 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
     archive.append(body, { name: rel })
   }
 
+  const entries = (recipe || []).map((entry) => ({
+    id: recipeSectionId(entry),
+    props:
+      entry && typeof entry === 'object' && !Array.isArray(entry)
+        ? entry.props
+        : undefined,
+  }))
+
+  const needsShop = entries.some((e) => String(e.id || '').startsWith('commerce/'))
+  if (needsShop) {
+    for (const rel of [...SHOP_FILES, ...SHOP_ROUTE_COMPONENTS]) {
+      const abs = path.join(ROOT, rel)
+      if (!fs.existsSync(abs)) continue
+      const body = rel.endsWith('.jsx')
+        ? rewriteImportsInSections(fs.readFileSync(abs, 'utf8'))
+        : fs.readFileSync(abs)
+      archive.append(body, { name: rel })
+    }
+  }
+
   const imports = []
   const renderLines = []
   const seen = new Set()
 
-  recipe.forEach((sectionId, i) => {
+  entries.forEach((entry, i) => {
+    const sectionId = entry.id
     if (!isAllowedSectionId(sectionId)) return
     const [model, component] = sectionId.split('/')
     if (!model || !component) return
-    // Paths are constrained by allowlist + alphanumeric component names.
     const fileRel = path.posix.join(
       'src/components/sections',
       model,
@@ -217,19 +274,64 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
       )
     }
 
-    const wrapper =
-      model === 'chapters'
-        ? 'bg-bone text-ink'
-        : model === 'nocturne'
-          ? 'bg-noir text-salt'
-          : 'bg-concrete text-carbon'
+    const wrapper = modelWrapperClass(model)
     const Comp = `${component}_${model}`
+    const attrs = propsToJsx(entry.props)
     renderLines.push(
-      `        <div key="${i}" className="${wrapper}"><${Comp} /></div>`,
+      `        <div key="${i}" className="${wrapper}"><${Comp}${attrs} /></div>`,
     )
   })
 
-  const appSrc = `import SmoothScrollProvider from './components/SmoothScrollProvider'
+  let appSrc
+  if (needsShop) {
+    appSrc = `import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import SmoothScrollProvider from './components/SmoothScrollProvider'
+import ProductDetail from './components/sections/commerce/ProductDetail'
+import Checkout from './components/sections/commerce/Checkout'
+import ShopChrome from './components/sections/commerce/ShopChrome'
+${imports.join('\n')}
+
+function Home() {
+  return (
+    <SmoothScrollProvider>
+      <div id="top">
+${renderLines.join('\n')}
+      </div>
+      <ShopChrome />
+    </SmoothScrollProvider>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/product/:productId"
+          element={
+            <div className="min-h-svh bg-bone text-ink">
+              <ProductDetail />
+              <ShopChrome />
+            </div>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <div className="min-h-svh bg-bone text-ink">
+              <Checkout />
+              <ShopChrome />
+            </div>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+`
+  } else {
+    appSrc = `import SmoothScrollProvider from './components/SmoothScrollProvider'
 ${imports.join('\n')}
 
 export default function App() {
@@ -242,22 +344,26 @@ ${renderLines.join('\n')}
   )
 }
 `
+  }
   archive.append(appSrc, { name: 'src/App.jsx' })
+
+  const idList = entries.map((e) => e.id).filter(Boolean)
+  let readme = `# Composición custom — SCROLLLAB\n\nReceta:\n${idList.map((r) => `- ${r}`).join('\n')}\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n`
+  if (needsShop) {
+    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — summary + mock pay\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
+  }
 
   archive.append(
     buildLicenseText({
       siteName: 'SCROLLLAB',
       orderId: licenseMeta.orderId,
       email: licenseMeta.email,
-      sku: `custom:${recipe.join(',')}`,
+      sku: `custom:${idList.join(',')}`,
       date: licenseMeta.date,
     }),
     { name: 'LICENSE.txt' },
   )
-  archive.append(
-    `# Composición custom — SCROLLLAB\n\nReceta:\n${recipe.map((r) => `- ${r}`).join('\n')}\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n`,
-    { name: 'README.md' },
-  )
+  archive.append(readme, { name: 'README.md' })
 
   await archive.finalize()
   await done
