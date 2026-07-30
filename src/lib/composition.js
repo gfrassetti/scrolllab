@@ -21,12 +21,8 @@ export function normalizeCompositionItem(raw) {
   }
 }
 
-/**
- * Load the saved builder composition from localStorage, dropping any
- * entries whose section no longer exists in the registry. Shared by
- * the builder and the /preview route (new-tab preview).
- */
-export function loadComposition() {
+/** Carga cruda (sin dedupe de nav/hero/footer). */
+export function readCompositionItems() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
@@ -38,11 +34,20 @@ export function loadComposition() {
   }
 }
 
+/**
+ * Load the saved builder composition from localStorage, dropping any
+ * entries whose section no longer exists, and enforcing one nav/hero/footer.
+ */
+export function loadComposition() {
+  return dedupeUniqueKinds(readCompositionItems())
+}
+
 export function saveComposition(items) {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(items.map(normalizeCompositionItem).filter(Boolean)),
+  const normalized = dedupeUniqueKinds(
+    (items || []).map(normalizeCompositionItem).filter(Boolean),
   )
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
+  return normalized
 }
 
 /** Recipe payload for checkout: [{ id, props? }, ...] */

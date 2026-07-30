@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { models, getSection } from '../lib/sectionRegistry'
 import {
-  loadComposition,
+  readCompositionItems,
   saveComposition,
   compositionToRecipe,
   recipeHasCommerce,
@@ -47,7 +47,7 @@ function sectionCopyKey(sectionId, field) {
  * previsualizá la página real. Persiste en localStorage.
  */
 function bootstrapComposition() {
-  const loaded = loadComposition()
+  const loaded = readCompositionItems()
   const items = dedupeUniqueKinds(loaded)
   return { items, cleaned: items.length < loaded.length }
 }
@@ -101,6 +101,16 @@ export default function BuilderPage() {
     return Object.values(counts).some((n) => n > 1)
   }, [items])
 
+  // Autocuración: si llega una composición con chrome duplicado, la limpia.
+  useEffect(() => {
+    if (!hasDuplicateChrome) return
+    setItems((prev) => {
+      const cleaned = dedupeUniqueKinds(prev)
+      return cleaned.length === prev.length ? prev : cleaned
+    })
+    setLimitNotice(t('builder.cleanedChrome'))
+  }, [hasDuplicateChrome, t])
+
   const kindBlocked = (sectionId) => {
     const kind = getSection(sectionId)?.kind
     return Boolean(kind && UNIQUE_KINDS.has(kind) && takenKinds.has(kind))
@@ -123,25 +133,36 @@ export default function BuilderPage() {
     navigate(user ? '/cart' : '/login')
   }
 
-  const addSection = (sectionId, index = items.length) => {
+  const addSection = (sectionId, atIndex) => {
     const section = getSection(sectionId)
     if (!section) return
-    if (
-      UNIQUE_KINDS.has(section.kind) &&
-      items.some((item) => getSection(item.sectionId)?.kind === section.kind)
-    ) {
+
+    let blocked = false
+    setItems((prev) => {
+      if (
+        UNIQUE_KINDS.has(section.kind) &&
+        prev.some((item) => getSection(item.sectionId)?.kind === section.kind)
+      ) {
+        blocked = true
+        return prev
+      }
+      const index = atIndex == null ? prev.length : atIndex
+      const next = [...prev]
+      next.splice(index, 0, {
+        uid: crypto.randomUUID(),
+        sectionId,
+        props: {},
+      })
+      return next
+    })
+
+    if (blocked) {
       setLimitNotice(
         t('builder.uniqueKindLimit', {
           kind: t(kindLabelKeys[section.kind]),
         }),
       )
-      return
     }
-    setItems((prev) => {
-      const next = [...prev]
-      next.splice(index, 0, { uid: crypto.randomUUID(), sectionId, props: {} })
-      return next
-    })
   }
 
   const updateItemProps = (uid, props) => {
