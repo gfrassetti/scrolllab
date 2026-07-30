@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
-import { useAuth } from '../lib/auth'
+import { markSessionIntent, useAuth } from '../lib/auth'
 import { SITE_NAME } from '../lib/site'
 import { useT } from '../i18n'
 
@@ -74,6 +74,7 @@ export default function LoginPage() {
 
         <a
           href={api.googleUrl()}
+          onClick={() => markSessionIntent()}
           className="flex items-center justify-center gap-3 border-2 border-ink bg-ink px-6 py-4 text-center text-xs font-medium uppercase tracking-[0.25em] text-bone transition-colors hover:bg-accent hover:border-accent"
         >
           <span className="grid size-6 shrink-0 place-items-center rounded-full bg-bone">

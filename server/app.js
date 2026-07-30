@@ -337,9 +337,14 @@ export async function createApp(config) {
       order.mpPreferenceId = result.id
       await order.save()
 
+      const checkoutUrl = config.mpSandbox
+        ? result.sandbox_init_point || result.init_point
+        : result.init_point || result.sandbox_init_point
+
       res.json({
-        init_point: result.init_point || result.sandbox_init_point,
+        init_point: checkoutUrl,
         orderId,
+        sandbox: Boolean(config.mpSandbox),
       })
     }),
   )

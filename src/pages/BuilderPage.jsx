@@ -36,7 +36,8 @@ export default function BuilderPage() {
   // null | index de inserción | 'end'
   const [dragOver, setDragOver] = useState(null)
   const addToCart = useCart((s) => s.addItem)
-  const { user } = useAuth()
+  const { user, loading: authLoading, hadSession } = useAuth()
+  const looksLoggedIn = user ? true : authLoading ? hadSession : false
   const navigate = useNavigate()
   const t = useT()
 
@@ -212,7 +213,9 @@ export default function BuilderPage() {
             disabled={items.length === 0}
             className="border-2 border-accent bg-accent px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-ink transition-opacity duration-300 not-disabled:hover:opacity-80 disabled:opacity-30 md:text-xs"
           >
-            {user ? t('builder.buyLoggedIn') : t('builder.buyLoggedOut')}
+            {looksLoggedIn
+              ? t('builder.buyLoggedIn')
+              : t('builder.buyLoggedOut')}
           </button>
           <CartPopover />
           <LanguageSelector />

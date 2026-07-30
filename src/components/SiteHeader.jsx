@@ -11,8 +11,12 @@ import LanguageSelector from './LanguageSelector'
  * Chrome compartido del market (home, cart, account, login…).
  */
 export default function SiteHeader({ solid = true }) {
-  const { user, logout } = useAuth()
+  const { user, loading, hadSession, logout } = useAuth()
   const t = useT()
+
+  // Durante la carga usamos la pista de sesión previa para no invertir
+  // el menú a mitad de camino.
+  const showAccount = user ? true : loading ? hadSession : false
 
   return (
     <header
@@ -48,7 +52,7 @@ export default function SiteHeader({ solid = true }) {
             {t('nav.builder')}
           </Link>
           <CartPopover />
-          {user ? (
+          {showAccount ? (
             <>
               <Link
                 to="/account"
@@ -59,7 +63,8 @@ export default function SiteHeader({ solid = true }) {
               <button
                 type="button"
                 onClick={() => logout()}
-                className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors hover:text-accent md:text-xs"
+                disabled={loading && !user}
+                className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors hover:text-accent disabled:opacity-50 md:text-xs"
               >
                 {t('nav.logout')}
               </button>

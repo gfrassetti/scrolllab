@@ -8,7 +8,8 @@ import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
 
 export default function CartPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading, hadSession } = useAuth()
+  const looksLoggedIn = user ? true : authLoading ? hadSession : false
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
   const [catalog, setCatalog] = useState({})
@@ -139,11 +140,11 @@ export default function CartPage() {
               </p>
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || authLoading}
                 onClick={checkout}
                 className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
               >
-                {user
+                {looksLoggedIn
                   ? busy
                     ? t('cart.redirecting')
                     : t('cart.payLoggedIn')
