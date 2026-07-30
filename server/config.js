@@ -50,9 +50,6 @@ export function loadConfig() {
   const authDev = bool('AUTH_DEV_ENABLED', !isProd)
   const mpAccessToken = process.env.MP_ACCESS_TOKEN || ''
   let mpMock = bool('MP_MOCK_ENABLED', !mpAccessToken)
-  // Credenciales de "Prueba" también pueden ser APP_USR-*. No detectar por prefijo:
-  // forzá sandbox con MP_SANDBOX=true mientras uses la pestaña Prueba.
-  const mpSandbox = bool('MP_SANDBOX', false)
 
   if (isProd) {
     if (authDev) throw new Error('AUTH_DEV_ENABLED no puede estar activo en producción')
@@ -129,7 +126,6 @@ export function loadConfig() {
     authDev: isProd ? false : authDev,
     mpMock: isProd ? false : mpMock,
     mpAccessToken,
-    mpSandbox,
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET || '',
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || '',

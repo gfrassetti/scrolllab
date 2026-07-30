@@ -337,14 +337,11 @@ export async function createApp(config) {
       order.mpPreferenceId = result.id
       await order.save()
 
-      const checkoutUrl = config.mpSandbox
-        ? result.sandbox_init_point || result.init_point
-        : result.init_point || result.sandbox_init_point
-
+      // sandbox_init_point está deprecado por MP: con credenciales de Prueba,
+      // init_point ya abre el entorno de test.
       res.json({
-        init_point: checkoutUrl,
+        init_point: result.init_point,
         orderId,
-        sandbox: Boolean(config.mpSandbox),
       })
     }),
   )
