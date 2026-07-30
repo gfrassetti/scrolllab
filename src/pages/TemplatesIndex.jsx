@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { gsap, useGSAP, SplitText } from '../lib/gsap'
+import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import { useCart } from '../lib/cart'
@@ -29,6 +29,85 @@ const TEMPLATE_META = [
     palette: ['#cdcbc4', '#101010', '#2b3cff'],
   },
 ]
+
+function TemplatePoster({ template, index }) {
+  const baseClass =
+    'absolute inset-0 overflow-hidden border border-ink/15 transition-opacity'
+
+  if (template.sku === 'chapters') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-[#f2efe9] text-[#161412]`}
+        style={{ opacity: index === 0 ? 1 : 0 }}
+      >
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
+          EDITORIAL / 01
+        </span>
+        <span className="absolute top-[22%] left-[-3%] text-[clamp(4rem,10vw,9rem)] leading-[0.75] font-semibold tracking-[-0.08em]">
+          CHA
+          <br />
+          PTERS
+        </span>
+        <span className="absolute right-0 bottom-[18%] h-[13%] w-[72%] bg-accent" />
+        <span className="absolute right-5 bottom-5 font-display text-3xl italic">
+          kinetic stories
+        </span>
+      </div>
+    )
+  }
+
+  if (template.sku === 'nocturne') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-noir text-salt`}
+        style={{ opacity: 0 }}
+      >
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-acid">
+          CINEMA / 02
+        </span>
+        <span className="absolute top-[14%] right-[8%] aspect-square w-[56%] rounded-full border border-acid/70" />
+        <span className="absolute top-[26%] right-[20%] aspect-square w-[32%] rounded-full bg-acid" />
+        <span className="absolute bottom-[14%] left-5 text-[clamp(2.8rem,7vw,6.5rem)] leading-[0.8] font-light tracking-[-0.07em]">
+          NOC
+          <br />
+          TURNE
+        </span>
+        <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.25em]">
+          AFTER DARK
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      data-template-art
+      className={`${baseClass} bg-concrete text-carbon`}
+      style={{ opacity: 0 }}
+    >
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 opacity-25"
+        style={{
+          backgroundImage:
+            'linear-gradient(#101010 1px, transparent 1px), linear-gradient(90deg, #101010 1px, transparent 1px)',
+          backgroundSize: '34px 34px',
+        }}
+      />
+      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
+        SYSTEM / 03
+      </span>
+      <span className="absolute top-[18%] left-[18%] h-[56%] w-[54%] rotate-6 bg-klein shadow-[18px_18px_0_#101010]" />
+      <span className="absolute right-5 bottom-[12%] text-right font-anton text-[clamp(3.2rem,8vw,7rem)] leading-[0.75] tracking-[-0.04em]">
+        MONO
+        <br />
+        LITH
+      </span>
+    </div>
+  )
+}
 
 /**
  * Home del catálogo. Header fijo, hero editorial, lista de modelos,
@@ -92,6 +171,88 @@ export default function TemplatesIndex() {
     { scope: root, dependencies: [locale] },
   )
 
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+
+      mm.add(
+        '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
+        () => {
+          const artworks = gsap.utils.toArray('[data-template-art]')
+          const templateSteps = gsap.utils.toArray('[data-template-step]')
+
+          const activateTemplate = (activeIndex) => {
+            artworks.forEach((artwork, index) => {
+              gsap.to(artwork, {
+                autoAlpha: index === activeIndex ? 1 : 0,
+                scale: index === activeIndex ? 1 : 1.035,
+                duration: 0.65,
+                ease: 'power2.out',
+                overwrite: true,
+              })
+            })
+          }
+
+          templateSteps.forEach((step, index) => {
+            ScrollTrigger.create({
+              trigger: step,
+              start: 'top 58%',
+              end: 'bottom 58%',
+              onEnter: () => activateTemplate(index),
+              onEnterBack: () => activateTemplate(index),
+            })
+          })
+        },
+      )
+
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.from('[data-how-heading]', {
+          opacity: 0,
+          y: 40,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '[data-how-heading]',
+            start: 'top 82%',
+          },
+        })
+
+        gsap.utils.toArray('[data-how-step]').forEach((step) => {
+          gsap.from(step, {
+            opacity: 0.2,
+            y: 56,
+            duration: 0.85,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: step,
+              start: 'top 82%',
+              end: 'top 52%',
+              scrub: 0.7,
+            },
+          })
+        })
+
+        gsap.fromTo(
+          '[data-how-progress]',
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '[data-how-steps]',
+              start: 'top 65%',
+              end: 'bottom 65%',
+              scrub: true,
+            },
+          },
+        )
+      })
+
+      return () => mm.revert()
+    },
+    { scope: root, dependencies: [locale] },
+  )
+
   const steps = [
     { n: '01', title: t('home.step1Title'), body: t('home.step1Body') },
     { n: '02', title: t('home.step2Title'), body: t('home.step2Body') },
@@ -147,133 +308,218 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
-        <section id="templates" className="scroll-mt-20">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
-            {t('home.modelsLabel')}
-          </p>
+        <section id="templates" className="scroll-mt-20 border-t border-ink/15">
+          <div className="flex items-baseline justify-between pt-4">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+              {t('home.modelsLabel')}
+            </p>
+            <p className="hidden text-[11px] uppercase tracking-[0.25em] text-ink/40 md:block md:text-xs">
+              {t('home.modelsScrollHint')}
+            </p>
+          </div>
 
-          <ul className="mt-4 border-t border-ink/15">
-            {templates.map((template) => (
-              <li key={template.id} className="border-b border-ink/15">
-                <Link
-                  to={template.path}
-                  className="group grid gap-4 py-8 transition-colors duration-300 md:grid-cols-12 md:items-baseline md:gap-6 md:py-10"
+          <div className="mt-8 grid gap-10 md:grid-cols-12 md:gap-12 lg:gap-20">
+            <div className="hidden md:col-span-5 md:block">
+              <div className="sticky top-0 flex h-svh items-center py-16">
+                <div className="relative aspect-4/5 w-full overflow-hidden">
+                  {templates.map((template, index) => (
+                    <TemplatePoster
+                      key={template.sku}
+                      template={template}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-7">
+              {templates.map((template) => (
+                <article
+                  key={template.id}
+                  data-template-step
+                  className="flex min-h-[82svh] flex-col justify-center border-b border-ink/15 py-14 first:border-t md:min-h-svh md:py-20"
                 >
-                  <span className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:col-span-1 md:text-xs">
-                    {template.id}
-                  </span>
+                  <div className="relative mb-8 aspect-4/3 overflow-hidden md:hidden">
+                    <TemplatePoster template={template} index={0} />
+                  </div>
 
-                  <span className="text-[clamp(2rem,5vw,4.5rem)] leading-none font-medium tracking-[-0.02em] transition-colors duration-300 group-hover:text-accent md:col-span-4">
-                    {template.name}
-                  </span>
-
-                  <span className="flex items-center gap-2 md:col-span-2">
-                    {template.palette.map((color) => (
-                      <span
-                        key={color}
-                        aria-hidden="true"
-                        className="inline-block size-4 rounded-full border border-ink/20"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </span>
-
-                  <span className="max-w-[44ch] text-sm leading-relaxed text-ink/70 md:col-span-4">
-                    <span className="mb-1 block text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                      {template.vibe}
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
+                      {template.id} / 03
+                    </p>
+                    <span className="flex items-center gap-2">
+                      {template.palette.map((color) => (
+                        <span
+                          key={color}
+                          aria-hidden="true"
+                          className="inline-block size-3 rounded-full border border-ink/20"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
                     </span>
-                    {template.description}
-                  </span>
+                  </div>
 
-                  <span
-                    aria-hidden="true"
-                    className="text-2xl transition-transform duration-300 group-hover:translate-x-2 md:col-span-1 md:justify-self-end"
+                  <Link
+                    to={template.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group mt-5 flex items-end justify-between gap-5"
                   >
-                    →
-                  </span>
-                </Link>
+                    <h2 className="text-[clamp(2.6rem,7vw,6.5rem)] leading-[0.86] font-medium tracking-[-0.055em] transition-colors group-hover:text-accent">
+                      {template.name}
+                    </h2>
+                    <span
+                      aria-hidden="true"
+                      className="pb-1 text-3xl transition-transform group-hover:translate-x-2"
+                    >
+                      →
+                    </span>
+                  </Link>
 
-                <p className="flex flex-wrap items-center gap-4 pb-6 text-[11px] uppercase tracking-[0.25em] text-ink/40 md:-mt-4">
-                  <span>
+                  <p className="mt-5 text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                    {template.vibe}
+                  </p>
+                  <p className="mt-3 max-w-[46ch] text-sm leading-relaxed text-ink/70 md:text-base">
+                    {template.description}
+                  </p>
+                  <p className="mt-5 max-w-[56ch] text-[10px] leading-relaxed tracking-[0.16em] text-ink/40 uppercase">
                     {Array.isArray(template.tags)
                       ? template.tags.join(' · ')
                       : template.tags}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      addItem({
-                        sku: template.sku,
-                        title: t('common.cartItemTitle', {
-                          name: template.name,
-                        }),
-                      })
-                    }
-                    className="border border-ink/30 px-3 py-1.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
-                  >
-                    {t('common.addToCart')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addItem({
-                        sku: template.sku,
-                        title: t('common.cartItemTitle', {
-                          name: template.name,
-                        }),
-                      })
-                      navigate('/cart')
-                    }}
-                    className="text-ink transition-colors hover:text-accent"
-                  >
-                    {t('common.buy')}
-                  </button>
-                </p>
-              </li>
-            ))}
-          </ul>
+                  </p>
+
+                  <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        addItem({
+                          sku: template.sku,
+                          title: t('common.cartItemTitle', {
+                            name: template.name,
+                          }),
+                        })
+                      }
+                      className="border border-ink/30 px-4 py-2 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
+                    >
+                      {t('common.addToCart')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addItem({
+                          sku: template.sku,
+                          title: t('common.cartItemTitle', {
+                            name: template.name,
+                          }),
+                        })
+                        navigate('/cart')
+                      }}
+                      className="text-ink transition-colors hover:text-accent"
+                    >
+                      {t('common.buy')}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section
           id="como-funciona"
           className="mt-20 scroll-mt-20 border-t border-ink/15 pt-14 md:mt-28 md:pt-20"
         >
-          <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
-            {t('nav.howItWorks')}
-          </p>
-          <h2 className="mt-3 max-w-[18ch] text-[clamp(1.8rem,4.5vw,3.5rem)] leading-[1.05] font-medium tracking-[-0.02em]">
-            {t('home.howTitleBefore')}{' '}
-            <em className="font-display font-normal italic text-accent">
-              {t('home.howTitleZip')}
-            </em>
-            {t('home.howTitleAfter')}
-          </h2>
-          <p className="mt-5 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base">
-            {t('home.howBodyBefore')}{' '}
-            <strong className="font-medium text-ink">
-              {t('home.howBodyStrong')}
-            </strong>{' '}
-            {t('home.howBodyAfter')}
-          </p>
+          <div className="grid gap-10 md:grid-cols-12 md:gap-12 lg:gap-20">
+            <div
+              data-how-heading
+              className="md:sticky md:top-24 md:col-span-5 md:self-start"
+            >
+              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+                {t('nav.howItWorks')}
+              </p>
+              <h2 className="mt-3 max-w-[18ch] text-[clamp(2rem,4.5vw,4.2rem)] leading-[0.98] font-medium tracking-[-0.035em]">
+                {t('home.howTitleBefore')}{' '}
+                <em className="font-display font-normal italic text-accent">
+                  {t('home.howTitleZip')}
+                </em>
+                {t('home.howTitleAfter')}
+              </h2>
+              <p className="mt-5 max-w-[44ch] text-sm leading-relaxed text-ink/70 md:text-base">
+                {t('home.howBodyBefore')}{' '}
+                <strong className="font-medium text-ink">
+                  {t('home.howBodyStrong')}
+                </strong>{' '}
+                {t('home.howBodyAfter')}
+              </p>
+            </div>
 
-          <ol className="mt-12 grid gap-8 border-t border-ink/15 md:grid-cols-2 lg:grid-cols-4 lg:gap-0">
-            {steps.map((step) => (
-              <li
-                key={step.n}
-                className="border-ink/15 lg:border-r lg:px-6 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0"
+            <div
+              data-how-steps
+              className="relative border-l border-ink/15 pl-6 md:col-span-7 md:pl-10"
+            >
+              <span
+                data-how-progress
+                aria-hidden="true"
+                className="absolute top-0 bottom-0 -left-px w-px origin-top bg-accent"
+              />
+              <ol>
+                {steps.map((step, index) => (
+                  <li
+                    key={step.n}
+                    data-how-step
+                    className="flex min-h-[42svh] flex-col justify-center border-b border-ink/15 py-12 first:border-t md:min-h-[50svh]"
+                  >
+                    <div className="flex items-baseline justify-between gap-5">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
+                        {step.n}
+                      </p>
+                      <p className="font-display text-4xl leading-none italic text-ink/15 md:text-6xl">
+                        {String(index + 1).padStart(2, '0')}
+                      </p>
+                    </div>
+                    <h3 className="mt-5 text-[clamp(1.5rem,3.5vw,2.8rem)] leading-[1.02] font-medium tracking-tight">
+                      {step.title}
+                    </h3>
+                    <p className="mt-3 max-w-[42ch] text-sm leading-relaxed text-ink/60 md:text-base">
+                      {step.body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+
+          <div className="mt-12 flex flex-col items-center justify-center gap-6 border-y border-ink/15 py-6 text-center md:flex-row md:gap-10">
+            <div className="max-w-[42ch]">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                {t('home.paymentsTitle')}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-ink/60">
+                {t('home.paymentsBody')}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a
+                href="https://www.mercadopago.com.ar/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-16 items-center rounded-sm border border-ink/15 bg-bone px-4 transition-colors hover:border-ink/40"
+                aria-label="Mercado Pago"
               >
-                <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
-                  {step.n}
-                </p>
-                <p className="mt-3 text-base font-medium tracking-[-0.01em] md:text-lg">
-                  {step.title}
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-ink/60">
-                  {step.body}
-                </p>
-              </li>
-            ))}
-          </ol>
+                <img
+                  src="/payment/mercado-pago.svg"
+                  alt="Mercado Pago"
+                  className="h-12 w-32 object-contain dark:hidden"
+                />
+                <img
+                  src="/payment/mercado-pago-white.svg"
+                  alt="Mercado Pago"
+                  className="hidden h-12 w-32 object-contain dark:block"
+                />
+              </a>
+            </div>
+          </div>
 
           <div className="mt-12 grid gap-6 border border-ink/15 p-6 md:grid-cols-2 md:p-8">
             <div>
@@ -356,6 +602,8 @@ export default function TemplatesIndex() {
                 <li key={template.id}>
                   <Link
                     to={template.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="transition-colors duration-300 hover:text-accent"
                   >
                     {template.name}

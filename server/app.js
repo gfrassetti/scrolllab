@@ -24,13 +24,13 @@ import {
   createCheckoutPreference,
   verifyMpWebhookSignature,
   fetchPayment,
-  assertPaymentMatchesOrder,
 } from './services/mercadoPago.js'
 import {
   ensureOrderZip,
   markOrderPaid,
   consumeDownload,
   assertPathInsideStorage,
+  fulfillApprovedPayment,
 } from './services/orders.js'
 import { sendOrderReceiptOnce } from './services/email.js'
 import {
@@ -284,8 +284,46 @@ export async function createApp(config) {
           total: o.total,
           currency_id: o.currency_id,
           createdAt: o.createdAt,
-          downloadCount: o.downloadCount,
+          downloadCount: o.downloadCount || 0,
+          maxDownloads: config.maxDownloads,
+          downloadTtlSeconds: config.downloadTtl,
         })),
+      })
+    }),
+  )
+
+  /**
+   * Confirma un pago al volver de Checkout Pro. Obligatorio en test:
+   * MP no envía webhooks con credenciales de prueba.
+   */
+  app.post(
+    '/api/checkout/confirm',
+    requireAuth,
+    requireSameOrigin,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (config.mpMock || !config.mpAccessToken) {
+        throw new HttpError(400, 'Confirmación MP no disponible en modo mock')
+      }
+
+      const paymentId = String(
+        req.body?.paymentId || req.body?.collection_id || '',
+      ).trim()
+      if (!paymentId || paymentId === 'null') {
+        throw new HttpError(400, 'paymentId requerido')
+      }
+
+      const payment = await fetchPayment(config.mpAccessToken, paymentId)
+      const { order, orderId } = await fulfillApprovedPayment({
+        payment,
+        config,
+        expectedUserId: db.uid(req.user),
+      })
+
+      res.json({
+        ok: true,
+        orderId,
+        status: order?.status || 'paid',
       })
     }),
   )
@@ -393,44 +431,16 @@ export async function createApp(config) {
       })
 
       const payment = await fetchPayment(config.mpAccessToken, dataId)
-      if (payment.status !== 'approved') {
-        return res.sendStatus(200)
-      }
-
-      const orderId = payment.external_reference || payment.metadata?.orderId
-      if (!orderId) return res.sendStatus(200)
-
-      const order = await db.findOrderById(orderId)
-      if (!order) return res.sendStatus(200)
-
       try {
-        assertPaymentMatchesOrder(payment, {
-          ...(typeof order.toObject === 'function' ? order.toObject() : order),
-          id: db.uid(order) || order.id,
-        })
+        await fulfillApprovedPayment({ payment, config })
       } catch (err) {
-        console.error('MP payment mismatch', err.message, {
-          orderId,
-          paymentId: payment.id,
-        })
-        return res.sendStatus(200)
-      }
-
-      const { order: paid } = await markOrderPaid({
-        orderId: db.uid(order) || order.id,
-        mpPaymentId: payment.id,
-      })
-
-      if (paid) {
-        const user = await db.findUserById(paid.userId)
-        if (user) {
-          try {
-            await ensureOrderZip(paid, user, config)
-            await sendReceiptSafely(paid, user)
-          } catch (packErr) {
-            console.error('ZIP pack failed after payment', packErr)
-          }
+        if (err instanceof HttpError && err.status < 500) {
+          console.error('MP webhook fulfill skipped', err.message, {
+            paymentId: dataId,
+          })
+          return res.sendStatus(200)
         }
+        throw err
       }
 
       res.sendStatus(200)

@@ -63,6 +63,8 @@ No mezcles localhost y prod en el mismo client. Rotá `GOOGLE_CLIENT_SECRET` si 
 
 Validamos `x-signature` con `MP_WEBHOOK_SECRET` (SDK oficial).
 
+**Importante (doc oficial):** los pagos creados con **credenciales de prueba no envían webhooks**. Por eso el front, al volver a `/checkout/success`, llama a `POST /api/checkout/confirm` con el `payment_id` de la query y marca la orden como paga. En producción el webhook sigue siendo la fuente principal; el confirm actúa de respaldo.
+
 ## Email de confirmación (Resend)
 
 1. Creá una cuenta y API key en Resend.

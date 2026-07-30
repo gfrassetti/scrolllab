@@ -32,5 +32,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ orderId }),
     }),
+  confirmCheckout: ({ paymentId, orderId }) =>
+    request('/api/checkout/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ paymentId, orderId }),
+    }),
   downloadLink: (orderId) => request(`/api/orders/${orderId}/download`),
 }

@@ -9,12 +9,57 @@ import { useT } from '../i18n'
 export default function CheckoutSuccessPage() {
   const t = useT()
   const clearCart = useCart((s) => s.clear)
+  const { user, loading: authLoading } = useAuth()
+  const [params] = useSearchParams()
+  const [confirmState, setConfirmState] = useState('idle')
+  const [confirmError, setConfirmError] = useState('')
+
+  const paymentId =
+    params.get('payment_id') ||
+    params.get('collection_id') ||
+    params.get('paymentId')
+  const status =
+    params.get('status') || params.get('collection_status') || ''
+  const orderId = params.get('external_reference') || ''
 
   // El carrito se vacía recién acá: si el usuario abandona el checkout
   // y vuelve atrás, sus items siguen intactos.
   useEffect(() => {
     clearCart()
   }, [clearCart])
+
+  // MP no manda webhooks con credenciales de prueba: confirmamos al volver.
+  useEffect(() => {
+    if (authLoading || !user) return undefined
+    if (!paymentId || paymentId === 'null') {
+      setConfirmState('skipped')
+      return undefined
+    }
+    if (status && status !== 'approved') {
+      setConfirmState('not-approved')
+      return undefined
+    }
+
+    let cancelled = false
+    setConfirmState('busy')
+    ;(async () => {
+      try {
+        await api.confirmCheckout({ paymentId, orderId: orderId || undefined })
+        if (!cancelled) setConfirmState('done')
+      } catch (err) {
+        if (!cancelled) {
+          setConfirmState('error')
+          setConfirmError(err.message)
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [authLoading, user, paymentId, status, orderId])
+
+  const confirming = confirmState === 'busy' || confirmState === 'idle'
 
   return (
     <div className="min-h-svh bg-bone text-ink">
@@ -24,16 +69,33 @@ export default function CheckoutSuccessPage() {
           {t('checkout.eyebrow')}
         </p>
         <h1 className="mt-3 text-[clamp(2rem,5vw,3rem)] font-medium tracking-[-0.02em]">
-          {t('checkout.successTitle')}
+          {confirmState === 'not-approved'
+            ? t('checkout.failTitle')
+            : t('checkout.successTitle')}
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-ink/70">
-          {t('checkout.successBody')}
+          {confirmState === 'busy' || (confirmState === 'idle' && paymentId)
+            ? t('checkout.confirming')
+            : confirmState === 'error'
+              ? t('checkout.confirmError')
+              : confirmState === 'not-approved'
+                ? t('checkout.failBody')
+                : t('checkout.successBody')}
         </p>
+        {confirmError && (
+          <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+            {confirmError}
+          </p>
+        )}
         <Link
-          to="/account"
-          className="mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone"
+          to={confirmState === 'not-approved' ? '/cart' : '/account'}
+          className={`mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone ${
+            confirming ? 'pointer-events-none opacity-40' : ''
+          }`}
         >
-          {t('checkout.goAccount')}
+          {confirmState === 'not-approved'
+            ? t('checkout.backCart')
+            : t('checkout.goAccount')}
         </Link>
       </main>
     </div>

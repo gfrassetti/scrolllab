@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* El variant `dark:` sigue el tema elegido en la app, no el del sistema. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * Paleta clara/oscura del market. Los tokens bone/ink/mist se resuelven
  * vía variables que flipean con html.dark (persistido en localStorage).

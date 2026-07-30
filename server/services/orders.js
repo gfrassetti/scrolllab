@@ -6,6 +6,8 @@ import {
 } from '../packaging.js'
 import { HttpError } from '../validation.js'
 import { db } from '../db.js'
+import { assertPaymentMatchesOrder } from './mercadoPago.js'
+import { sendOrderReceiptOnce } from './email.js'
 
 const packingLocks = new Map()
 
@@ -90,6 +92,67 @@ export async function ensureOrderZip(order, user, config) {
  */
 export async function markOrderPaid({ orderId, mpPaymentId }) {
   return db.markOrderPaidAtomic({ orderId, mpPaymentId })
+}
+
+/**
+ * Valida un pago aprobado de MP, marca la orden y empaqueta el ZIP.
+ * Usado por webhook y por el return del checkout (necesario en test:
+ * MP no envía webhooks con credenciales de prueba).
+ */
+export async function fulfillApprovedPayment({
+  payment,
+  config,
+  expectedUserId = null,
+}) {
+  if (payment.status !== 'approved') {
+    throw new HttpError(400, 'Pago no aprobado')
+  }
+
+  const orderId = payment.external_reference || payment.metadata?.orderId
+  if (!orderId) {
+    throw new HttpError(400, 'Pago sin referencia de orden')
+  }
+
+  const order = await db.findOrderById(orderId)
+  if (!order) {
+    throw new HttpError(404, 'Orden no encontrada')
+  }
+
+  const orderUserId = String(order.userId)
+  if (expectedUserId && orderUserId !== String(expectedUserId)) {
+    throw new HttpError(403, 'La orden no pertenece a este usuario')
+  }
+
+  assertPaymentMatchesOrder(payment, {
+    ...(typeof order.toObject === 'function' ? order.toObject() : order),
+    id: db.uid(order) || order.id,
+  })
+
+  const { order: paid } = await markOrderPaid({
+    orderId: db.uid(order) || order.id,
+    mpPaymentId: payment.id,
+  })
+
+  if (paid) {
+    const user = await db.findUserById(paid.userId)
+    if (user) {
+      try {
+        await ensureOrderZip(paid, user, config)
+      } catch (packErr) {
+        console.error('ZIP pack failed after payment', packErr)
+      }
+      try {
+        const result = await sendOrderReceiptOnce({ order: paid, user, config })
+        if (result.sent) {
+          console.log(`Order receipt sent order=${db.uid(paid) || paid.id}`)
+        }
+      } catch (emailErr) {
+        console.error('Order receipt email failed', emailErr)
+      }
+    }
+  }
+
+  return { order: paid, orderId: db.uid(paid) || orderId }
 }
 
 /**
