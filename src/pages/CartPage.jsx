@@ -98,13 +98,13 @@ export default function CartPage() {
               {lines.map((line) => (
                 <li
                   key={line.sku}
-                  className="flex items-center justify-between gap-4 border-b border-ink/15 py-5"
+                  className="flex flex-col gap-3 border-b border-ink/15 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
                   <div className="flex min-w-0 items-center gap-4">
                     <ProductThumbnail
                       sku={line.sku}
                       title={line.title}
-                      className="h-20 w-24"
+                      className="h-16 w-20 sm:h-20 sm:w-24"
                     />
                     <div className="min-w-0">
                       <p className="truncate font-medium">{line.title}</p>
@@ -122,7 +122,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeItem(line.sku)}
-                    className="border border-ink/30 px-3 py-1.5 text-xs hover:border-accent hover:bg-accent hover:text-bone"
+                    className="min-h-10 self-start border border-ink/30 px-4 py-2 text-xs hover:border-accent hover:bg-accent hover:text-bone sm:self-auto"
                   >
                     {t('common.remove')}
                   </button>

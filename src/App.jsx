@@ -1,10 +1,13 @@
 import { lazy, Suspense, useLayoutEffect } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import TemplatesIndex from './pages/TemplatesIndex'
+import LicensePage from './pages/LicensePage'
+import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
 import { AuthProvider } from './lib/auth'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
+import ChunkErrorBoundary from './components/ChunkErrorBoundary'
 import './lib/theme'
 
 const ChaptersPage = lazy(() => import('./pages/ChaptersPage'))
@@ -12,13 +15,6 @@ const NocturnePage = lazy(() => import('./pages/NocturnePage'))
 const MonolithPage = lazy(() => import('./pages/MonolithPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
-const LicensePage = lazy(() => import('./pages/LicensePage'))
-const PrivacyPage = lazy(() =>
-  import('./pages/LegalDocumentPage').then((m) => ({ default: m.PrivacyPage })),
-)
-const TermsPage = lazy(() =>
-  import('./pages/LegalDocumentPage').then((m) => ({ default: m.TermsPage })),
-)
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
@@ -59,25 +55,31 @@ export default function App() {
         <BrowserRouter>
           <ScrollToTop />
           <CartToast />
-          <Suspense fallback={<Loader />}>
-            <Routes>
-              <Route path="/" element={<TemplatesIndex />} />
-              <Route path="/templates/chapters" element={<ChaptersPage />} />
-              <Route path="/templates/nocturne" element={<NocturnePage />} />
-              <Route path="/templates/monolith" element={<MonolithPage />} />
-              <Route path="/builder" element={<BuilderPage />} />
-              <Route path="/preview" element={<PreviewPage />} />
-              <Route path="/legal/license" element={<LicensePage />} />
-              <Route path="/legal/privacy" element={<PrivacyPage />} />
-              <Route path="/legal/terms" element={<TermsPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-              <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
-              <Route path="/checkout/mock" element={<CheckoutMockPage />} />
-            </Routes>
-          </Suspense>
+          <ChunkErrorBoundary>
+            <Suspense fallback={<Loader />}>
+              <Routes>
+                <Route path="/" element={<TemplatesIndex />} />
+                <Route path="/templates/chapters" element={<ChaptersPage />} />
+                <Route path="/templates/nocturne" element={<NocturnePage />} />
+                <Route path="/templates/monolith" element={<MonolithPage />} />
+                <Route path="/builder" element={<BuilderPage />} />
+                <Route path="/preview" element={<PreviewPage />} />
+                <Route path="/legal/license" element={<LicensePage />} />
+                <Route path="/legal/privacy" element={<PrivacyPage />} />
+                <Route path="/legal/terms" element={<TermsPage />} />
+                <Route
+                  path="/license"
+                  element={<Navigate to="/legal/license" replace />}
+                />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/account" element={<AccountPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+                <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
+                <Route path="/checkout/mock" element={<CheckoutMockPage />} />
+              </Routes>
+            </Suspense>
+          </ChunkErrorBoundary>
         </BrowserRouter>
       </AuthProvider>
     </I18nProvider>

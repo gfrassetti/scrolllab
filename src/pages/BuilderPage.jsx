@@ -374,7 +374,7 @@ export default function BuilderPage() {
                           aria-label={t('builder.addAria', {
                             name: t(sectionCopyKey(section.id, 'name')),
                           })}
-                          className="shrink-0 border border-ink/30 px-3 py-1.5 text-xs transition-colors duration-200 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-40"
+                          className="min-h-10 shrink-0 border border-ink/30 px-3 py-2 text-xs transition-colors duration-200 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-40"
                         >
                           {t('builder.add')}
                         </button>
@@ -467,13 +467,13 @@ export default function BuilderPage() {
                         </p>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-1">
+                      <div className="flex shrink-0 items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => moveItem(item.uid, -1)}
                           disabled={i === 0}
                           aria-label={t('builder.moveUp')}
-                          className="border border-ink/30 px-2.5 py-1.5 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
+                          className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
                         >
                           ↑
                         </button>
@@ -482,7 +482,7 @@ export default function BuilderPage() {
                           onClick={() => moveItem(item.uid, 1)}
                           disabled={i === items.length - 1}
                           aria-label={t('builder.moveDown')}
-                          className="border border-ink/30 px-2.5 py-1.5 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
+                          className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
                         >
                           ↓
                         </button>
@@ -490,7 +490,7 @@ export default function BuilderPage() {
                           type="button"
                           onClick={() => removeItem(item.uid)}
                           aria-label={t('builder.remove')}
-                          className="border border-ink/30 px-2.5 py-1.5 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-bone"
+                          className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-bone"
                         >
                           ✕
                         </button>
@@ -516,7 +516,7 @@ export default function BuilderPage() {
           )}
 
           {items.length > 0 && (
-            <div className="mt-8 space-y-5 border border-ink/15 p-5 md:p-6">
+            <div className="mt-8 space-y-5 border border-ink/15 p-5 md:p-6 lg:sticky lg:top-6">
               <div>
                 <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50">
                   {t('builder.recipeLabel')}

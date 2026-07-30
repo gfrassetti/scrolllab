@@ -18,7 +18,7 @@ export default function LanguageSelector() {
           type="button"
           onClick={() => setLocale(code)}
           aria-pressed={locale === code}
-          className={`px-1.5 py-0.5 transition-colors ${
+          className={`min-h-11 min-w-9 px-1.5 transition-colors ${
             locale === code
               ? 'text-accent'
               : 'text-ink/40 hover:text-accent'

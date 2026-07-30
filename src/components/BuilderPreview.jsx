@@ -33,7 +33,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
               onClick={() =>
                 setEditingUid((uid) => (uid === item.uid ? null : item.uid))
               }
-              className={`absolute top-3 right-3 z-20 border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
+              className={`absolute top-3 right-3 z-[60] min-h-9 border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
                 active
                   ? 'border-accent bg-accent text-bone'
                   : 'border-ink/30 bg-bone/90 text-ink hover:border-ink'
@@ -72,7 +72,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
             <button
               type="button"
               onClick={() => setEditingUid(null)}
-              className="text-[11px] uppercase tracking-[0.2em] text-ink/50 hover:text-ink"
+              className="min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/50 hover:text-ink"
             >
               {t('common.close')}
             </button>
@@ -148,7 +148,9 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
       <button
         type="button"
         onClick={onExit}
-        className="fixed bottom-5 left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
+        className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
+          hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
+        }`}
       >
         {t('builder.exitPreview')} ({items.length})
       </button>

@@ -58,7 +58,9 @@ export default function PreviewPage() {
 
       <Link
         to="/builder"
-        className="fixed bottom-5 left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone"
+        className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
+          hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
+        }`}
       >
         {t('builder.backToBuilder')} ({items.length})
       </Link>

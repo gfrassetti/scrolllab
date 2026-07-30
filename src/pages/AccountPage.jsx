@@ -134,7 +134,7 @@ export default function AccountPage() {
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
           {t('account.eyebrow')}
         </p>
-        <h1 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.02em]">
+        <h1 className="mt-2 break-words text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.02em]">
           {t('account.hello', { name: user.name || user.email })}
         </h1>
         <p className="mt-2 text-sm text-ink/60">{user.email}</p>
@@ -242,7 +242,7 @@ export default function AccountPage() {
                   type="button"
                   disabled={safePage === 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  className="text-[11px] uppercase tracking-[0.25em] text-ink/60 transition-colors hover:text-accent disabled:opacity-30"
+                  className="min-h-11 px-2 text-[11px] uppercase tracking-[0.25em] text-ink/60 transition-colors hover:text-accent disabled:opacity-30"
                 >
                   {t('account.prevPage')}
                 </button>
@@ -258,7 +258,7 @@ export default function AccountPage() {
                   onClick={() =>
                     setPage((p) => Math.min(totalPages - 1, p + 1))
                   }
-                  className="text-[11px] uppercase tracking-[0.25em] text-ink/60 transition-colors hover:text-accent disabled:opacity-30"
+                  className="min-h-11 px-2 text-[11px] uppercase tracking-[0.25em] text-ink/60 transition-colors hover:text-accent disabled:opacity-30"
                 >
                   {t('account.nextPage')}
                 </button>

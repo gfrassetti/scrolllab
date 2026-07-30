@@ -20,14 +20,14 @@ export default function PurchaseSuccessModal({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-ink/50 p-5 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-ink/50 p-5 backdrop-blur-[2px] sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="purchase-success-title"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md border-2 border-ink bg-bone p-6 text-ink shadow-xl md:p-8"
+        className="max-h-[calc(100svh-2.5rem)] w-full max-w-md overflow-y-auto border-2 border-ink bg-bone p-6 text-ink shadow-xl md:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">

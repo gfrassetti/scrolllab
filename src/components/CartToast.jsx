@@ -29,7 +29,7 @@ export default function CartToast() {
   return (
     <aside
       aria-live="polite"
-      className={`fixed bottom-5 right-5 z-9999 w-[min(22rem,calc(100vw-2.5rem))] border border-ink/20 bg-bone p-3 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition duration-300 ease-out ${
+      className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-5 right-5 z-[70] w-auto border border-ink/20 bg-bone p-3 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition duration-300 ease-out sm:left-auto sm:w-[min(22rem,calc(100vw-2.5rem))] ${
         visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
     >
@@ -56,7 +56,7 @@ export default function CartToast() {
             window.setTimeout(clear, 300)
           }}
           aria-label={t('common.close')}
-          className="self-start px-1 text-lg leading-none text-ink/40 transition-colors hover:text-ink"
+          className="-mr-1 -mt-1 grid size-10 shrink-0 place-items-center self-start text-lg leading-none text-ink/40 transition-colors hover:text-ink"
         >
           ×
         </button>

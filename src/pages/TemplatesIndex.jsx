@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
+import Logo from '../components/Logo'
 import { useCart } from '../lib/cart'
 import {
   CUSTOM_BASE_PRICE,
@@ -152,6 +153,35 @@ export default function TemplatesIndex() {
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
+      // Logo del hero: barras caen de arriba y se apilan (alusión al scroll).
+      const heroLogo = root.current?.querySelector('[data-hero-logo]')
+      const bars = heroLogo
+        ? gsap.utils.toArray(heroLogo.querySelectorAll('[data-logo-bar]'))
+        : []
+      const accent = heroLogo?.querySelector('[data-logo-accent]')
+      if (bars.length) {
+        gsap.set(bars, { transformOrigin: '50% 50%' })
+        gsap.from(bars, {
+          y: -28,
+          opacity: 0,
+          duration: 0.6,
+          ease: 'power3.out',
+          stagger: 0.12,
+          delay: 0.05,
+        })
+      }
+      if (accent) {
+        gsap.from(accent, {
+          scale: 0,
+          opacity: 0,
+          duration: 0.4,
+          ease: 'back.out(2.2)',
+          transformOrigin: '50% 50%',
+          delay: 0.45,
+        })
+      }
+
+      // Title + tagline: revelado por caracteres (como está).
       const split = new SplitText('[data-hero-line]', {
         type: 'chars',
         mask: 'chars',
@@ -283,12 +313,17 @@ export default function TemplatesIndex() {
           </p>
 
           <div>
-            <h1
-              data-hero-line
-              className="select-none font-brico text-[clamp(3.5rem,14vw,11rem)] leading-[0.88] font-semibold tracking-[-0.04em] uppercase"
-            >
-              {SITE_NAME}
-            </h1>
+            <div className="flex items-center gap-3 md:gap-5">
+              <span data-hero-logo className="shrink-0 self-center">
+                <Logo className="size-[clamp(2.25rem,8vw,6.5rem)]" />
+              </span>
+              <h1
+                data-hero-line
+                className="min-w-0 select-none font-brico text-[clamp(2.75rem,14vw,11rem)] leading-[0.88] font-semibold tracking-[-0.04em] uppercase"
+              >
+                {SITE_NAME}
+              </h1>
+            </div>
             <p className="mt-6 max-w-[22ch] text-[clamp(1.4rem,3.5vw,2.6rem)] leading-[1.05] font-medium tracking-[-0.02em] text-ink/80 md:mt-8">
               <span data-hero-line>{t('home.heroLine1')} </span>
               <em
@@ -308,7 +343,7 @@ export default function TemplatesIndex() {
             >
               {t('home.heroBody')}
             </p>
-            <div className="mt-6 flex items-end justify-between gap-4 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
+            <div className="mt-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 md:text-xs md:tracking-[0.25em]">
               <p data-hero-meta>©2026 — {SITE_NAME}</p>
               <p data-hero-meta className="text-ink">
                 {t('home.scrollDown')} <span aria-hidden="true">↓</span>
@@ -373,14 +408,14 @@ export default function TemplatesIndex() {
                     to={template.path}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group mt-5 flex items-end justify-between gap-5"
+                    className="group mt-5 flex items-end justify-between gap-2 md:gap-5"
                   >
-                    <h2 className="text-[clamp(2.6rem,7vw,6.5rem)] leading-[0.86] font-medium tracking-[-0.055em] transition-colors group-hover:text-accent">
+                    <h2 className="min-w-0 text-[clamp(2.2rem,10vw,6.5rem)] leading-[0.86] font-medium tracking-[-0.055em] transition-colors group-hover:text-accent md:text-[clamp(2.6rem,7vw,6.5rem)]">
                       {template.name}
                     </h2>
                     <span
                       aria-hidden="true"
-                      className="pb-1 text-3xl transition-transform group-hover:translate-x-2"
+                      className="shrink-0 pb-1 text-3xl transition-transform group-hover:translate-x-2"
                     >
                       →
                     </span>
@@ -415,7 +450,7 @@ export default function TemplatesIndex() {
                           }),
                         })
                       }
-                      className="border border-ink/30 px-4 py-2 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
+                      className="min-h-11 border border-ink/30 px-5 py-2.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
                     >
                       {t('common.addToCart')}
                     </button>
@@ -430,7 +465,7 @@ export default function TemplatesIndex() {
                         })
                         navigate('/cart')
                       }}
-                      className="text-ink transition-colors hover:text-accent"
+                      className="min-h-11 px-1 text-ink transition-colors hover:text-accent"
                     >
                       {t('common.buy')}
                     </button>

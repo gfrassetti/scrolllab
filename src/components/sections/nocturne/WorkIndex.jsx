@@ -109,14 +109,14 @@ export default function WorkIndex({
                 {work.index}
               </span>
 
-              <span className="flex items-center gap-4">
+              <span className="flex min-w-0 items-center gap-4">
                 <img
                   src={work.img}
                   alt=""
                   loading="lazy"
                   className="h-14 w-11 shrink-0 object-cover md:hidden"
                 />
-                <span className="font-brico text-[clamp(1.6rem,4.5vw,3.8rem)] leading-none font-extrabold tracking-[-0.02em] uppercase transition-all duration-300 group-hover:translate-x-2 group-hover:text-acid">
+                <span className="min-w-0 break-words font-brico text-[clamp(1.6rem,4.5vw,3.8rem)] leading-none font-extrabold tracking-[-0.02em] uppercase transition-all duration-300 group-hover:translate-x-2 group-hover:text-acid">
                   {work.title}
                 </span>
               </span>

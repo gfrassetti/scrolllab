@@ -1,6 +1,6 @@
 {
   "meta": {
-    "tagline": "Templates para descargar."
+    "tagline": "Solo scrolleá."
   },
   "nav": {
     "templates": "Templates",
@@ -10,14 +10,15 @@
     "account": "Mis compras",
     "login": "Entrar",
     "logout": "Salir",
+    "menu": "Menú",
     "langEs": "ES",
     "langEn": "EN",
     "langLabel": "Idioma"
   },
   "common": {
     "loading": "Cargando…",
-    "siteName": "SCROLLLAB",
-    "backHome": "← SCROLLLAB",
+    "siteName": "SCROLL LAB",
+    "backHome": "← SCROLL LAB",
     "seeTemplates": "Ver templates →",
     "howItWorksLink": "Cómo funciona →",
     "licenseLink": "Ver licencia regular →",
@@ -56,7 +57,7 @@
     "step4Title": "Descargá el .zip",
     "step4Body": "Link firmado (vence en 24 h; hasta 10 descargas). Regenerás el link estando logueado.",
     "paymentsTitle": "Pago simple y protegido",
-    "paymentsBody": "El checkout se realiza fuera de SCROLLLAB. No almacenamos los datos de tu tarjeta.",
+    "paymentsBody": "El checkout se realiza fuera de SCROLL LAB. No almacenamos los datos de tu tarjeta.",
     "zipTitle": "Qué viene en el ZIP",
     "zip1": "El proyecto completo (código fuente editable)",
     "zip2": "Secciones del modelo o de tu receta del builder",

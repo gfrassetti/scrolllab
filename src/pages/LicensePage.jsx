@@ -10,7 +10,7 @@ export default function LicensePage() {
 
   return (
     <div className="min-h-svh bg-bone px-5 py-10 text-ink md:px-10">
-      <header className="mb-12 flex items-baseline justify-between border-b border-ink/15 pb-4">
+      <header className="mb-12 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-ink/15 pb-4">
         <Link
           to="/"
           className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors hover:text-accent md:text-xs"

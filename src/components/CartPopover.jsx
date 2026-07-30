@@ -79,7 +79,7 @@ export default function CartPopover() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="true"
-        className={`text-[11px] uppercase tracking-[0.25em] transition-colors hover:text-accent md:text-xs ${
+        className={`min-h-11 px-2 text-[11px] uppercase tracking-[0.25em] transition-colors hover:text-accent md:px-0 md:text-xs ${
           open ? 'text-accent' : ''
         }`}
       >
@@ -88,7 +88,7 @@ export default function CartPopover() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-3 w-[min(20rem,calc(100vw-2.5rem))] border border-ink/15 bg-bone shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+        <div className="fixed inset-x-5 top-16 z-50 border border-ink/15 bg-bone shadow-[0_16px_40px_rgba(0,0,0,0.12)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[min(20rem,calc(100vw-2.5rem))]">
           {items.length === 0 ? (
             <div className="p-6 text-center">
               <p className="text-sm text-ink/50">{t('common.cartEmpty')}</p>
@@ -128,7 +128,7 @@ export default function CartPopover() {
                         type="button"
                         onClick={() => removeItem(item.sku)}
                         aria-label={`${t('common.remove')} ${item.title}`}
-                        className="shrink-0 text-xs text-ink/40 transition-colors hover:text-accent"
+                        className="min-h-11 shrink-0 px-2 text-xs text-ink/40 transition-colors hover:text-accent"
                       >
                         {t('common.remove')}
                       </button>
