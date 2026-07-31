@@ -1,9 +1,10 @@
-import { useRef, useEffect, useMemo } from 'react'
+import { useRef, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
+import BrandSplash from '../components/BrandSplash'
 import { useCart } from '../lib/cart'
 import {
   CUSTOM_BASE_PRICE,
@@ -232,6 +233,7 @@ export default function TemplatesIndex() {
   const { hash } = useLocation()
   const navigate = useNavigate()
   const { t, locale } = useI18n()
+  const [introReady, setIntroReady] = useState(false)
 
   const templates = useMemo(
     () =>
@@ -245,7 +247,18 @@ export default function TemplatesIndex() {
   )
 
   useEffect(() => {
-    if (!hash) return
+    if (!introReady) {
+      const prev = document.documentElement.style.overflow
+      document.documentElement.style.overflow = 'hidden'
+      return () => {
+        document.documentElement.style.overflow = prev
+      }
+    }
+    return undefined
+  }, [introReady])
+
+  useEffect(() => {
+    if (!hash || !introReady) return
     const id = hash.replace('#', '')
     const el = document.getElementById(id)
     if (el) {
@@ -253,10 +266,11 @@ export default function TemplatesIndex() {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     }
-  }, [hash])
+  }, [hash, introReady])
 
   useGSAP(
     () => {
+      if (!introReady) return
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
       // Logo del hero: barras caen de arriba y se apilan (alusión al scroll).
@@ -313,7 +327,7 @@ export default function TemplatesIndex() {
       // El revert del contexto no deshace el DOM que crea SplitText.
       return () => split.revert()
     },
-    { scope: root, dependencies: [locale], revertOnUpdate: true },
+    { scope: root, dependencies: [locale, introReady], revertOnUpdate: true },
   )
 
   useGSAP(
@@ -407,6 +421,7 @@ export default function TemplatesIndex() {
 
   return (
     <div ref={root} id="top" className="min-h-svh bg-bone text-ink">
+      <BrandSplash onDone={() => setIntroReady(true)} />
       <SiteHeader />
 
       <main className="px-5 md:px-10">
