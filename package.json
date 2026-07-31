@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "pack:templates": "node scripts/pack-templates.mjs",
+    "gen:brand": "node scripts/gen-brand-assets.mjs",
     "server": "node server/index.js",
     "start": "node server/index.js",
     "test": "node --test server/__tests__/unit.test.js server/__tests__/api.test.js src/lib/__tests__/authReturn.test.js src/lib/__tests__/cart.test.js"

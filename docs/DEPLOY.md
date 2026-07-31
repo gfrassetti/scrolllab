@@ -65,24 +65,57 @@ Validamos `x-signature` con `MP_WEBHOOK_SECRET` (SDK oficial).
 
 **Importante (doc oficial):** los pagos creados con **credenciales de prueba no envían webhooks**. Por eso el front, al volver a `/checkout/success`, llama a `POST /api/checkout/confirm` con el `payment_id` de la query y marca la orden como paga. En producción el webhook sigue siendo la fuente principal; el confirm actúa de respaldo.
 
-## Email de confirmación (Resend)
+## Mercado Pago — pasar a producción
+
+En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
+
+1. Abrí tu aplicación → pestaña **Producción** (no Prueba).
+2. Copiá el **Access Token** de producción → `MP_ACCESS_TOKEN` en Railway.
+3. Webhooks → agregá URL:  
+   `https://TU-API/api/webhooks/mercadopago`  
+   (eventos de **pagos** / `payment`).
+4. Copiá el **secret** de firma del webhook → `MP_WEBHOOK_SECRET`.
+5. En Railway / prod:
+   ```
+   MP_MOCK_ENABLED=false
+   AUTH_DEV_ENABLED=false
+   NODE_ENV=production
+   CLIENT_URL=https://www.scrolllab.com.ar
+   API_PUBLIC_URL=https://TU-API   # HTTPS obligatorio
+   ```
+
+   `CLIENT_URL` tiene que ser **exactamente** el host que sirve el sitio
+   (hoy `www`, porque el apex hace 308 a `www` en Vercel). El CORS y la
+   defensa CSRF comparan el `Origin` exacto: si acá va el apex, todos los
+   POST desde `www` responden 403 «Origen no permitido».
+6. Redeploy API. Probá un pago real chico o el flujo de sandbox **solo** con credenciales de prueba; prod usa plata real.
+
+Sin `MP_WEBHOOK_SECRET` + token de prod, el boot en producción **falla** a propósito.
+
+## Email de confirmación (Resend) — scrolllab.com.ar
 
 El mail **solo se envía cuando la orden pasa a `paid`**. Si quedó `pending`
 (pago de prueba sin webhook / sin confirm), no hay correo.
 
-En Railway:
-
-1. Creá cuenta en [resend.com](https://resend.com) y una API key.
-2. Verificá tu dominio (DNS) o, en modo prueba de Resend, solo podés enviar
-   al email con el que te registraste.
-3. Variables:
+1. Cuenta en [resend.com](https://resend.com) → API key → `RESEND_API_KEY`.
+2. **Domains → Add** → `scrolllab.com.ar`.
+3. Resend te da registros DNS (TXT/MX/CNAME). Como el DNS está en **Vercel**
+   (`ns1/ns2.vercel-dns.com`):
+   - Vercel → Project o cuenta → **Domains** → DNS del dominio (o
+     [vercel.com/domains](https://vercel.com/domains)) → **Add record** por cada
+     uno que pida Resend.
+   - Si más adelante pasás DNS a Cloudflare, mové esos mismos records ahí.
+4. Esperá que Resend marque el dominio **Verified**.
+5. Variables en Railway:
    ```
    EMAIL_ENABLED=true
    RESEND_API_KEY=re_...
-   EMAIL_FROM=SCROLLLAB <compras@tu-dominio-verificado.com>
-   EMAIL_REPLY_TO=hola@tu-dominio.com
+   EMAIL_FROM=SCROLLLAB <compras@scrolllab.com.ar>
+   EMAIL_REPLY_TO=hola@scrolllab.com.ar
+   EMAIL_LOGO_URL=https://www.scrolllab.com.ar/logo.svg
    ```
-4. Redeploy del API.
+6. Redeploy del API. Comprá un ítem de prueba (o mock en staging) y verificá
+   que llegue el mail a Mis compras / inbox.
 
 Después de confirmar el pago y generar el ZIP, el backend envía un detalle
 de orden con CTA a `/account`. La orden guarda el estado del envío y Resend

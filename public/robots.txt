@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Rutas privadas o de sesión: no aportan a la búsqueda.
+Disallow: /account
+Disallow: /cart
+Disallow: /login
+Disallow: /preview
+Disallow: /checkout
+Disallow: /api/
+
+Sitemap: https://www.scrolllab.com.ar/sitemap.xml

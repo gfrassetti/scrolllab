@@ -21,7 +21,7 @@ PROHIBIDO
 - Redistribuir el Ítem como template competidor (aunque lo redesigneés).
 
 La propiedad intelectual permanece en ${siteName}.
-Consultas: hola@scrolllab.com
+Consultas: hola@scrolllab.com.ar
 
 Este archivo identifica la licencia otorgada a ${email} (orden ${orderId}).
 `
