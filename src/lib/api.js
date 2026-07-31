@@ -23,7 +23,12 @@ export const api = {
   logout: () => request('/api/auth/logout', { method: 'POST' }),
   devLogin: (body) =>
     request('/api/auth/dev-login', { method: 'POST', body: JSON.stringify(body || {}) }),
-  googleUrl: () => `${API_BASE}/api/auth/google`,
+  googleUrl: (next) => {
+    const url = `${API_BASE}/api/auth/google`
+    if (!next) return url
+    const q = new URLSearchParams({ next: String(next) })
+    return `${url}?${q}`
+  },
   orders: () => request('/api/orders'),
   checkout: (items) =>
     request('/api/checkout', { method: 'POST', body: JSON.stringify({ items }) }),

@@ -14,6 +14,7 @@ import { assertPaymentMatchesOrder } from '../services/mercadoPago.js'
 import { verifyMpWebhookSignature } from '../services/mercadoPago.js'
 import { PRODUCTS, COMMERCE_PACK_SURCHARGE } from '../catalog.js'
 import { buildOrderReceipt } from '../services/email.js'
+import { sanitizeAuthReturn } from '../authReturn.js'
 
 describe('validateRecipe', () => {
   it('acepta secciones de la allowlist (legacy string[])', () => {
@@ -287,5 +288,20 @@ describe('order receipt email', () => {
     assert.doesNotMatch(message.html, /<script>/)
     assert.doesNotMatch(message.html, /<b>Buyer<\/b>/)
     assert.match(message.text, /CHAPTERS/)
+  })
+})
+
+describe('sanitizeAuthReturn', () => {
+  it('acepta rutas internas allowlisteadas', () => {
+    assert.equal(sanitizeAuthReturn('/builder'), '/builder')
+    assert.equal(sanitizeAuthReturn('/cart'), '/cart')
+    assert.equal(sanitizeAuthReturn('/account'), '/account')
+  })
+
+  it('rechaza open redirects', () => {
+    assert.equal(sanitizeAuthReturn('https://evil.com'), null)
+    assert.equal(sanitizeAuthReturn('//evil.com'), null)
+    assert.equal(sanitizeAuthReturn('/login'), null)
+    assert.equal(sanitizeAuthReturn('/templates/fizz'), null)
   })
 })

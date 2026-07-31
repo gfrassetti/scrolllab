@@ -116,6 +116,46 @@ describe('API HTTP (file store)', () => {
     assert.equal(bad.status, 400)
   })
 
+  it('checkout custom válido crea orden pending (precio de servidor)', async () => {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email: 'custom-ok@test.com' })
+
+    const checkout = await agent
+      .post('/api/checkout')
+      .set('Origin', config.clientUrl)
+      .send({
+        items: [
+          {
+            sku: 'custom',
+            title: 'Cliente inventa título',
+            unit_price: 1,
+            recipe: [
+              { id: 'chapters/HeroKinetic' },
+              { id: 'nocturne/StickyWordCycle' },
+              { id: 'commerce/ProductGrid' },
+            ],
+          },
+        ],
+      })
+    assert.equal(checkout.status, 200)
+    assert.ok(checkout.body.orderId)
+    assert.equal(checkout.body.mock, true)
+
+    const orders = await agent
+      .get('/api/orders')
+      .set('Origin', config.clientUrl)
+    assert.equal(orders.status, 200)
+    const order = (orders.body.orders || []).find(
+      (o) => o.id === checkout.body.orderId,
+    )
+    assert.ok(order)
+    assert.equal(order.status, 'pending')
+    assert.ok(order.total > 1, 'no usa unit_price del cliente')
+  })
+
   it('webhook sin firma válida → 401 cuando no es mock', async () => {
     // Rebuild a non-mock app config for this assertion would be heavy;
     // signature unit tests cover the validator. Aquí confirmamos 200 en mock.

@@ -46,7 +46,7 @@ export default function CartPage() {
 
   const checkout = async () => {
     if (!user) {
-      navigate('/login')
+      navigate('/login?next=/cart')
       return
     }
     setBusy(true)

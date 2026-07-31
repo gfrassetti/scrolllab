@@ -74,7 +74,7 @@ export default function AccountPage() {
     )
   }
 
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/login?next=/account" replace />
 
   const download = async (orderId) => {
     setBusy(orderId)

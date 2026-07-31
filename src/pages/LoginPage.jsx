@@ -3,6 +3,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { markSessionIntent, useAuth } from '../lib/auth'
+import {
+  sanitizeAuthReturn,
+  stashAuthReturn,
+  takeAuthReturn,
+} from '../lib/authReturn'
 import { SITE_NAME } from '../lib/site'
 import { useT } from '../i18n'
 
@@ -34,17 +39,24 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const error = params.get('error')
+  const next = sanitizeAuthReturn(params.get('next')) || '/account'
   const t = useT()
 
   useEffect(() => {
-    if (user) navigate('/account', { replace: true })
-  }, [user, navigate])
+    stashAuthReturn(next)
+  }, [next])
+
+  useEffect(() => {
+    if (user) navigate(takeAuthReturn(next), { replace: true })
+  }, [user, navigate, next])
 
   const devLogin = async () => {
     await api.devLogin({ email: 'dev@scrolllab.com', name: 'Dev Buyer' })
     await refresh()
-    navigate('/account')
+    navigate(takeAuthReturn(next), { replace: true })
   }
+
+  const googleHref = api.googleUrl(next)
 
   return (
     <div className="min-h-svh bg-bone text-ink">
@@ -73,8 +85,11 @@ export default function LoginPage() {
         )}
 
         <a
-          href={api.googleUrl()}
-          onClick={() => markSessionIntent()}
+          href={googleHref}
+          onClick={() => {
+            stashAuthReturn(next)
+            markSessionIntent()
+          }}
           className="flex items-center justify-center gap-3 border-2 border-ink bg-ink px-6 py-4 text-center text-xs font-medium uppercase tracking-[0.25em] text-bone transition-colors hover:bg-accent hover:border-accent"
         >
           <span className="grid size-6 shrink-0 place-items-center rounded-full bg-bone">

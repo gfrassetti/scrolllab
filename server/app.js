@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
+import { sanitizeAuthReturn } from './authReturn.js'
 import fs from 'node:fs'
 import { connectDb, db, storeMode } from './db.js'
 import { assertWritableDir } from './config.js'
@@ -216,12 +217,22 @@ export async function createApp(config) {
 
   app.get('/api/auth/google', limits.auth, (req, res, next) => {
     if (!config.google.clientId) {
-      return res.redirect(`${config.clientUrl}/login?error=google_not_configured`)
+      const nextQ = sanitizeAuthReturn(req.query.next)
+      const q = new URLSearchParams({ error: 'google_not_configured' })
+      if (nextQ) q.set('next', nextQ)
+      return res.redirect(`${config.clientUrl}/login?${q}`)
     }
-    passport.authenticate('google', {
-      scope: ['profile', 'email'],
-      state: true,
-    })(req, res, next)
+    const nextPath = sanitizeAuthReturn(req.query.next)
+    if (nextPath) req.session.authNext = nextPath
+    else delete req.session.authNext
+
+    req.session.save((err) => {
+      if (err) return next(err)
+      passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        state: true,
+      })(req, res, next)
+    })
   })
 
   app.get(
@@ -230,8 +241,10 @@ export async function createApp(config) {
     passport.authenticate('google', {
       failureRedirect: `${config.clientUrl}/login?error=google_failed`,
     }),
-    (_req, res) => {
-      res.redirect(`${config.clientUrl}/account`)
+    (req, res) => {
+      const nextPath = sanitizeAuthReturn(req.session.authNext) || '/account'
+      delete req.session.authNext
+      res.redirect(`${config.clientUrl}${nextPath}`)
     },
   )
 

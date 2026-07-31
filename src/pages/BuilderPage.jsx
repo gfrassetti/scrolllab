@@ -107,8 +107,13 @@ export default function BuilderPage() {
 
   const buyComposition = () => {
     if (items.length === 0) return
+    if (!user) {
+      // Solo login: no tocar el carrito. Al volver, el user elige carrito o comprar.
+      navigate('/login?next=/builder')
+      return
+    }
     addToCart(compositionCartItem())
-    navigate(user ? '/cart' : '/login')
+    navigate('/cart')
   }
 
   const handleAddSection = (sectionId, atIndex) => {
