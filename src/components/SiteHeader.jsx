@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { SITE_NAME } from '../lib/site'
 import { useAuth } from '../lib/auth'
+import { useCompositionCount } from '../hooks/useCompositionCount'
 import { useT } from '../i18n'
+import { resetBrandSplash } from './BrandSplash'
 import CartPopover from './CartPopover'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
@@ -15,12 +17,17 @@ import LanguageSelector from './LanguageSelector'
 export default function SiteHeader({ solid = true }) {
   const { user, loading, hadSession, logout } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [logoutFailed, setLogoutFailed] = useState(false)
   const location = useLocation()
   const t = useT()
+  const builderCount = useCompositionCount()
 
   // Durante la carga usamos la pista de sesión previa para no invertir
-  // el menú a mitad de camino.
-  const showAccount = user ? true : loading ? hadSession : false
+  // el menú a mitad de camino. Al salir lo mantenemos hasta que la recarga
+  // reemplace el documento: si no, el botón "Saliendo…" se convierte en
+  // "Entrar" antes de irse y vuelve el parpadeo que queremos evitar.
+  const showAccount = loggingOut || (user ? true : loading ? hadSession : false)
 
   useEffect(() => {
     setMenuOpen(false)
@@ -37,6 +44,34 @@ export default function SiteHeader({ solid = true }) {
 
   const linkClass =
     'text-[11px] uppercase tracking-[0.25em] transition-colors hover:text-accent md:text-xs'
+
+  // Recarga dura al home: `navigate('/')` desde la home no remonta la página,
+  // así que el splash no se vería, y el reload deja el estado en memoria limpio.
+  const handleLogout = async () => {
+    if (loggingOut) return
+    setLoggingOut(true)
+    setLogoutFailed(false)
+    try {
+      await logout()
+    } catch {
+      setLoggingOut(false)
+      setLogoutFailed(true)
+      setMenuOpen(false)
+      return
+    }
+    resetBrandSplash()
+    window.location.assign('/')
+  }
+
+  const logoutBusy = loggingOut || (loading && !user)
+  const logoutLabel = loggingOut ? t('nav.loggingOut') : t('nav.logout')
+
+  const builderBadge = builderCount > 0 && (
+    <span className="ml-1.5 text-accent tabular-nums">({builderCount})</span>
+  )
+  const builderLabel = builderCount > 0
+    ? t('nav.builderWithCount', { count: builderCount })
+    : undefined
 
   return (
     <header
@@ -61,8 +96,9 @@ export default function SiteHeader({ solid = true }) {
           <Link to="/#como-funciona" className={linkClass}>
             {t('nav.howItWorks')}
           </Link>
-          <Link to="/builder" className={linkClass}>
+          <Link to="/builder" className={linkClass} aria-label={builderLabel}>
             {t('nav.builder')}
+            {builderBadge}
           </Link>
           <CartPopover />
           {showAccount ? (
@@ -72,11 +108,12 @@ export default function SiteHeader({ solid = true }) {
               </Link>
               <button
                 type="button"
-                onClick={() => logout()}
-                disabled={loading && !user}
+                onClick={handleLogout}
+                disabled={logoutBusy}
+                aria-busy={loggingOut}
                 className={`${linkClass} text-ink/50 disabled:opacity-50`}
               >
-                {t('nav.logout')}
+                {logoutLabel}
               </button>
             </>
           ) : (
@@ -117,6 +154,15 @@ export default function SiteHeader({ solid = true }) {
         </div>
       </nav>
 
+      {logoutFailed && (
+        <p
+          role="alert"
+          className="border-t border-ink/15 px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-danger md:px-10"
+        >
+          {t('nav.logoutError')}
+        </p>
+      )}
+
       {menuOpen && (
         <div className="border-t border-ink/15 bg-bone px-5 pb-6 pt-2 md:hidden">
           <ul className="divide-y divide-ink/10 text-[12px] uppercase tracking-[0.22em]">
@@ -134,8 +180,13 @@ export default function SiteHeader({ solid = true }) {
               </Link>
             </li>
             <li>
-              <Link to="/builder" className="block py-3.5 hover:text-accent">
+              <Link
+                to="/builder"
+                className="block py-3.5 hover:text-accent"
+                aria-label={builderLabel}
+              >
                 {t('nav.builder')}
+                {builderBadge}
               </Link>
             </li>
             {showAccount ? (
@@ -148,14 +199,12 @@ export default function SiteHeader({ solid = true }) {
                 <li>
                   <button
                     type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      logout()
-                    }}
-                    disabled={loading && !user}
+                    onClick={handleLogout}
+                    disabled={logoutBusy}
+                    aria-busy={loggingOut}
                     className="block w-full py-3.5 text-left text-ink/50 hover:text-accent disabled:opacity-50"
                   >
-                    {t('nav.logout')}
+                    {logoutLabel}
                   </button>
                 </li>
               </>

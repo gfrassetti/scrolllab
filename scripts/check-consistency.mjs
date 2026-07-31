@@ -22,6 +22,7 @@ import {
 } from '../src/lib/pricing.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
+import { SECTION_KINDS } from '../src/lib/sectionKinds.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
@@ -67,6 +68,17 @@ for (const id of diff(registryIds, [...ALLOWED_SECTIONS])) {
 }
 for (const id of diff([...ALLOWED_SECTIONS], registryIds)) {
   fail('secciones', `'${id}' está en server/sections.js pero no en sectionRegistry`)
+}
+
+// 2b. sectionKinds.js es el mapa plano que usa composition.js (y sus tests).
+// Tiene que coincidir con el registry: si no, el builder deja agregar algo
+// que el preview no sabe renderizar, o al revés.
+const kindIds = Object.keys(SECTION_KINDS)
+for (const id of diff(registryIds, kindIds)) {
+  fail('secciones', `'${id}' está en el registry pero no en sectionKinds.js — corré node scripts/gen-section-kinds.mjs`)
+}
+for (const id of diff(kindIds, registryIds)) {
+  fail('secciones', `'${id}' está en sectionKinds.js pero no en el registry`)
 }
 
 // 3. Editable props: builder fields vs server allowlist.

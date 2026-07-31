@@ -12,9 +12,30 @@ export function requestId(req, res, next) {
   next()
 }
 
+/**
+ * Orígenes aceptados: CLIENT_URL más la variante apex/www del mismo host.
+ * Mercado Pago puede devolver al apex aunque el canónico sea www, y ahí el
+ * POST de confirmación moría en 403 «Origen no permitido».
+ */
+export function allowedOrigins(config) {
+  const base = new URL(config.clientUrl)
+  const origins = new Set([base.origin])
+  const host = base.hostname
+  const isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
+  if (!isIp && host.includes('.')) {
+    const sibling = host.startsWith('www.') ? host.slice(4) : `www.${host}`
+    if (sibling.includes('.')) {
+      const url = new URL(base.origin)
+      url.hostname = sibling
+      origins.add(url.origin)
+    }
+  }
+  return [...origins]
+}
+
 export function createCors(config) {
   return cors({
-    origin: config.clientUrl,
+    origin: allowedOrigins(config),
     credentials: true,
   })
 }
@@ -40,20 +61,19 @@ export function requireAuth(req, res, next) {
 
 /**
  * Defensa CSRF para mutaciones con cookie de sesión.
- * Exige Origin o Referer igual a CLIENT_URL (misma política que CORS).
+ * Exige Origin o Referer dentro de allowedOrigins (misma política que CORS).
  */
 export function requireSameOrigin(config) {
+  const allowed = new Set(allowedOrigins(config))
   return (req, res, next) => {
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next()
     // Webhook de MP no usa cookie de sesión
     if (req.path.startsWith('/api/webhooks/')) return next()
 
-    const allowed = new URL(config.clientUrl)
     const origin = req.headers.origin
     if (origin) {
       try {
-        const o = new URL(origin)
-        if (o.origin === allowed.origin) return next()
+        if (allowed.has(new URL(origin).origin)) return next()
       } catch {
         /* fallthrough */
       }
@@ -63,8 +83,7 @@ export function requireSameOrigin(config) {
     const referer = req.headers.referer
     if (referer) {
       try {
-        const r = new URL(referer)
-        if (r.origin === allowed.origin) return next()
+        if (allowed.has(new URL(referer).origin)) return next()
       } catch {
         /* fallthrough */
       }

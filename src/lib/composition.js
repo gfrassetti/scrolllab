@@ -1,7 +1,18 @@
-import { getSection } from './sectionRegistry'
-import { sanitizeProps, isEphemeralAssetUrl } from './sectionFields'
+import { sanitizeProps, isEphemeralAssetUrl } from './sectionFields.js'
+import { sectionKindOf, isKnownSection } from './sectionKinds.js'
 
 export const STORAGE_KEY = 'builder-composition-v1'
+
+/**
+ * El `storage` event solo llega a las *otras* pestañas, así que el header no se
+ * enteraría de lo que el usuario acaba de armar en esta. Se emite a mano.
+ */
+export const COMPOSITION_EVENT = 'scrolllab:composition'
+
+function emitCompositionChange() {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new Event(COMPOSITION_EVENT))
+}
 
 /** Only scroll-section id for the commerce kit (PDP/cart/checkout are routes). */
 export const COMMERCE_SCROLL_SECTION = 'commerce/ProductGrid'
@@ -10,7 +21,7 @@ export const COMMERCE_SCROLL_SECTION = 'commerce/ProductGrid'
 export const UNIQUE_CHROME_KINDS = new Set(['nav', 'footer'])
 
 export function sectionKind(sectionId) {
-  return getSection(sectionId)?.kind
+  return sectionKindOf(sectionId)
 }
 
 export function isUniqueKind(kind) {
@@ -24,7 +35,7 @@ export function isUniqueKind(kind) {
 export function normalizeCompositionItem(raw) {
   if (!raw || typeof raw !== 'object') return null
   const sectionId = raw.sectionId
-  if (!getSection(sectionId)) return null
+  if (!isKnownSection(sectionId)) return null
   const props = sanitizeProps(sectionId, raw.props)
   return {
     uid: typeof raw.uid === 'string' ? raw.uid : crypto.randomUUID(),
@@ -73,11 +84,42 @@ export function saveComposition(items) {
     (items || []).map(normalizeCompositionItem).filter(Boolean),
   )
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
+  emitCompositionChange()
   return normalized
 }
 
 export function clearComposition() {
   localStorage.removeItem(STORAGE_KEY)
+  emitCompositionChange()
+}
+
+/**
+ * Cuántas secciones tiene la composición guardada.
+ *
+ * Cuenta lo mismo que muestra el builder (descarta desconocidas y nav/footer
+ * repetidos) pero sin sanitizar props: es un número para el header, y
+ * useSyncExternalStore lo pide en cada render. El resultado se cachea contra
+ * el string crudo del storage.
+ */
+let countCacheKey = null
+let countCacheValue = 0
+
+export function readCompositionCount() {
+  if (typeof localStorage === 'undefined') return 0
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (raw === countCacheKey) return countCacheValue
+
+  countCacheKey = raw
+  try {
+    const parsed = JSON.parse(raw || '[]')
+    countCacheValue = Array.isArray(parsed)
+      ? dedupeUniqueKinds(parsed.filter((item) => isKnownSection(item?.sectionId)))
+          .length
+      : 0
+  } catch {
+    countCacheValue = 0
+  }
+  return countCacheValue
 }
 
 /** Recipe payload for checkout: [{ id, props? }, ...] — never ships blob:/data:. */
@@ -127,18 +169,18 @@ export function kindIsBlocked(sectionId, items) {
 }
 
 export function createCompositionItem(sectionId) {
-  if (!getSection(sectionId)) return null
+  if (!isKnownSection(sectionId)) return null
   return { uid: crypto.randomUUID(), sectionId }
 }
 
 export function addSectionToComposition(items, sectionId, atIndex) {
-  const section = getSection(sectionId)
-  if (!section) return { items, blocked: false }
+  if (!isKnownSection(sectionId)) return { items, blocked: false }
+  const kind = sectionKind(sectionId)
   if (
-    isUniqueKind(section.kind) &&
-    (items || []).some((item) => sectionKind(item.sectionId) === section.kind)
+    isUniqueKind(kind) &&
+    (items || []).some((item) => sectionKind(item.sectionId) === kind)
   ) {
-    return { items, blocked: true, kind: section.kind }
+    return { items, blocked: true, kind }
   }
   const nextItem = createCompositionItem(sectionId)
   const index = atIndex == null ? items.length : atIndex

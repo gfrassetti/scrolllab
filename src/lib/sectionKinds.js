@@ -1,0 +1,67 @@
+/**
+ * Mapa plano id → kind. Vive aparte del registry (que importa React) para que
+ * composition.js y sus tests puedan correr en Node sin transformar JSX.
+ *
+ * Mantener en sync con src/lib/sectionRegistry.jsx:
+ *   node scripts/gen-section-kinds.mjs
+ * `npm run check` también lo verifica.
+ */
+export const SECTION_KINDS = {
+  'chapters/NavMinimal': 'nav',
+  'chapters/HeroKinetic': 'hero',
+  'chapters/VelocityMarquee': 'section',
+  'chapters/ManifestoReveal': 'section',
+  'chapters/StickyImageStory': 'section',
+  'chapters/HorizontalPanels': 'section',
+  'chapters/ParallaxEditorial': 'section',
+  'chapters/StackingCards': 'section',
+  'chapters/BigNumbers': 'section',
+  'chapters/QuoteBreak': 'section',
+  'chapters/FooterCTA': 'footer',
+  'nocturne/NavNocturne': 'nav',
+  'nocturne/HeroCinematic': 'hero',
+  'nocturne/ZoomPortal': 'section',
+  'nocturne/DiagonalMarquee': 'section',
+  'nocturne/SplitReveals': 'section',
+  'nocturne/WorkIndex': 'section',
+  'nocturne/StickyWordCycle': 'section',
+  'nocturne/OutroCTA': 'footer',
+  'monolith/NavBrutal': 'nav',
+  'monolith/HeroThree': 'hero',
+  'monolith/SkewScroller': 'section',
+  'monolith/SpecSheet': 'section',
+  'monolith/ExhibitGrid': 'section',
+  'monolith/TypeAccordion': 'section',
+  'monolith/FooterBrutal': 'footer',
+  'fizz/NavFizz': 'nav',
+  'fizz/HeroBubbles': 'hero',
+  'fizz/FlavorWorlds': 'section',
+  'fizz/BubbleBenefits': 'section',
+  'fizz/CanCarousel': 'section',
+  'fizz/PopManifesto': 'section',
+  'fizz/FooterSplash': 'footer',
+  'velocity/NavVelocity': 'nav',
+  'velocity/HeroStrike': 'hero',
+  'velocity/TrackMerge': 'section',
+  'velocity/HelmetGrid': 'section',
+  'velocity/ParallaxRise': 'section',
+  'velocity/FooterVelocity': 'footer',
+  'atelier/NavAtelier': 'nav',
+  'atelier/HeroMeaning': 'hero',
+  'atelier/AboutClarity': 'section',
+  'atelier/ServicesStone': 'section',
+  'atelier/VisionShutter': 'section',
+  'atelier/SelectedWork': 'section',
+  'atelier/KeyFacts': 'section',
+  'atelier/FooterAtelier': 'footer',
+  'contact/ContactForm': 'section',
+  'commerce/ProductGrid': 'section',
+}
+
+export function sectionKindOf(sectionId) {
+  return SECTION_KINDS[sectionId]
+}
+
+export function isKnownSection(sectionId) {
+  return Object.prototype.hasOwnProperty.call(SECTION_KINDS, sectionId)
+}

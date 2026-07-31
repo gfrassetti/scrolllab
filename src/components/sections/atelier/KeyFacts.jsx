@@ -48,8 +48,8 @@ export default function KeyFacts({
           {title}
         </h2>
         <ul className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {FACTS.map((fact) => (
-            <li key={fact.label} data-fact>
+          {FACTS.map((fact, i) => (
+            <li key={i} data-fact>
               <p className="font-brico text-[clamp(2.8rem,6vw,4.5rem)] leading-none tracking-[-0.04em]">
                 {fact.value}
               </p>

@@ -99,7 +99,11 @@ export default function WorkIndex({
 
       <ul onMouseMove={handleMove} onMouseLeave={hidePreview}>
         {works.map((work) => (
-          <li key={work.index} className="border-b border-salt/15 first:border-t">
+          <li
+            key={work.index}
+            data-work-row
+            className="border-b border-salt/15 first:border-t"
+          >
             <a
               href="#"
               onMouseEnter={() => showPreview(work.img)}

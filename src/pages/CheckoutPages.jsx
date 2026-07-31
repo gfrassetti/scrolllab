@@ -6,6 +6,39 @@ import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { useT } from '../i18n'
 
+const CONFIRM_TIMEOUT_MS = 15000
+
+/**
+ * El webhook de MP ya marcó la orden como paga server-to-server, así que
+ * ningún fallo del confirm puede dejar al comprador sin salida.
+ */
+const RESOLVED_PANELS = {
+  'not-approved': {
+    title: 'checkout.failTitle',
+    body: 'checkout.failBody',
+    to: '/cart',
+    cta: 'checkout.backCart',
+  },
+  error: {
+    title: 'checkout.successTitle',
+    body: 'checkout.confirmError',
+    to: '/account',
+    cta: 'checkout.goAccount',
+  },
+  received: {
+    title: 'checkout.successTitle',
+    body: 'checkout.confirmSlow',
+    to: '/account',
+    cta: 'checkout.goAccount',
+  },
+  'needs-login': {
+    title: 'checkout.successTitle',
+    body: 'checkout.needsLogin',
+    to: '/login?next=/account',
+    cta: 'checkout.needsLoginCta',
+  },
+}
+
 export default function CheckoutSuccessPage() {
   const t = useT()
   const navigate = useNavigate()
@@ -27,11 +60,28 @@ export default function CheckoutSuccessPage() {
     clearCart()
   }, [clearCart])
 
+  // Nunca girar para siempre: si /api/auth/me o el confirm se cuelgan, la orden
+  // ya quedó paga por el webhook y el comprador tiene que poder llegar a
+  // Mis compras igual.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setConfirmState((prev) =>
+        prev === 'idle' || prev === 'busy' ? 'received' : prev,
+      )
+    }, CONFIRM_TIMEOUT_MS)
+    return () => clearTimeout(timer)
+  }, [])
+
   // MP no manda webhooks con credenciales de prueba: confirmamos al volver
   // y redirigimos a Mis compras con el modal de éxito.
   useEffect(() => {
     if (authLoading) return undefined
-    if (!user) return undefined
+    // Front y API viven en dominios distintos: la cookie de sesión es
+    // third-party y al volver de MP puede no viajar. El pago ya está hecho.
+    if (!user) {
+      setConfirmState('needs-login')
+      return undefined
+    }
 
     if (!paymentId || paymentId === 'null') {
       navigate('/account', { replace: true })
@@ -43,7 +93,7 @@ export default function CheckoutSuccessPage() {
     }
 
     let cancelled = false
-    setConfirmState('busy')
+    setConfirmState((prev) => (prev === 'received' ? prev : 'busy'))
     ;(async () => {
       try {
         const data = await api.confirmCheckout({
@@ -60,10 +110,9 @@ export default function CheckoutSuccessPage() {
           },
         )
       } catch (err) {
-        if (!cancelled) {
-          setConfirmState('error')
-          setConfirmError(err.message)
-        }
+        if (cancelled) return
+        setConfirmError(err.message)
+        setConfirmState((prev) => (prev === 'busy' ? 'error' : prev))
       }
     })()
 
@@ -72,7 +121,8 @@ export default function CheckoutSuccessPage() {
     }
   }, [authLoading, user, paymentId, status, orderId, navigate])
 
-  if (confirmState === 'not-approved' || confirmState === 'error') {
+  const panel = RESOLVED_PANELS[confirmState]
+  if (panel) {
     return (
       <div className="min-h-svh bg-bone text-ink">
         <SiteHeader />
@@ -81,27 +131,21 @@ export default function CheckoutSuccessPage() {
             {t('checkout.eyebrow')}
           </p>
           <h1 className="mt-3 text-[clamp(2rem,5vw,3rem)] font-medium tracking-[-0.02em]">
-            {confirmState === 'not-approved'
-              ? t('checkout.failTitle')
-              : t('checkout.successTitle')}
+            {t(panel.title)}
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-ink/70">
-            {confirmState === 'not-approved'
-              ? t('checkout.failBody')
-              : t('checkout.confirmError')}
+            {t(panel.body)}
           </p>
-          {confirmError && (
+          {confirmState === 'error' && confirmError && (
             <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
               {confirmError}
             </p>
           )}
           <Link
-            to={confirmState === 'not-approved' ? '/cart' : '/account'}
+            to={panel.to}
             className="mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone"
           >
-            {confirmState === 'not-approved'
-              ? t('checkout.backCart')
-              : t('checkout.goAccount')}
+            {t(panel.cta)}
           </Link>
         </main>
       </div>

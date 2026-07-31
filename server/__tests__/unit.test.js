@@ -26,6 +26,7 @@ import {
 } from '../fx.js'
 import { buildOrderReceipt } from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
+import { allowedOrigins, requireSameOrigin } from '../middleware.js'
 
 describe('validateRecipe', () => {
   it('acepta secciones de la allowlist (legacy string[])', () => {
@@ -421,5 +422,81 @@ describe('sanitizeAuthReturn', () => {
     assert.equal(sanitizeAuthReturn('//evil.com'), null)
     assert.equal(sanitizeAuthReturn('/login'), null)
     assert.equal(sanitizeAuthReturn('/templates/fizz'), null)
+  })
+})
+
+describe('allowedOrigins', () => {
+  it('agrega el apex cuando CLIENT_URL es www', () => {
+    assert.deepEqual(allowedOrigins({ clientUrl: 'https://www.scrolllab.com.ar' }), [
+      'https://www.scrolllab.com.ar',
+      'https://scrolllab.com.ar',
+    ])
+  })
+
+  it('agrega el www cuando CLIENT_URL es apex', () => {
+    assert.deepEqual(allowedOrigins({ clientUrl: 'https://scrolllab.com.ar' }), [
+      'https://scrolllab.com.ar',
+      'https://www.scrolllab.com.ar',
+    ])
+  })
+
+  it('no inventa variantes para localhost ni IPs', () => {
+    assert.deepEqual(allowedOrigins({ clientUrl: 'http://localhost:5173' }), [
+      'http://localhost:5173',
+    ])
+    assert.deepEqual(allowedOrigins({ clientUrl: 'http://127.0.0.1:5173' }), [
+      'http://127.0.0.1:5173',
+    ])
+  })
+})
+
+describe('requireSameOrigin', () => {
+  const config = { clientUrl: 'https://www.scrolllab.com.ar', isProd: true }
+
+  function run(headers, { method = 'POST', path = '/api/checkout/confirm' } = {}) {
+    const result = { status: null, body: null, nexted: false }
+    const res = {
+      status(code) {
+        result.status = code
+        return res
+      },
+      json(body) {
+        result.body = body
+        return res
+      },
+    }
+    requireSameOrigin(config)({ method, path, headers }, res, () => {
+      result.nexted = true
+    })
+    return result
+  }
+
+  it('acepta el origin canónico', () => {
+    assert.equal(run({ origin: 'https://www.scrolllab.com.ar' }).nexted, true)
+  })
+
+  it('acepta el apex del mismo dominio (retorno de Mercado Pago)', () => {
+    assert.equal(run({ origin: 'https://scrolllab.com.ar' }).nexted, true)
+    assert.equal(run({ referer: 'https://scrolllab.com.ar/checkout/success' }).nexted, true)
+  })
+
+  it('rechaza otros dominios y subdominios ajenos', () => {
+    assert.equal(run({ origin: 'https://evil.example' }).status, 403)
+    assert.equal(run({ origin: 'https://scrolllab.com.ar.evil.example' }).status, 403)
+    assert.equal(run({ origin: 'http://www.scrolllab.com.ar' }).status, 403)
+    assert.equal(run({ referer: 'https://evil.example/x' }).status, 403)
+  })
+
+  it('rechaza mutaciones sin Origin ni Referer en producción', () => {
+    assert.equal(run({}).status, 403)
+  })
+
+  it('deja pasar GET y el webhook de MP', () => {
+    assert.equal(run({ origin: 'https://evil.example' }, { method: 'GET' }).nexted, true)
+    assert.equal(
+      run({ origin: 'https://api.mercadopago.com' }, { path: '/api/webhooks/mercadopago' })
+        .nexted,
+      true,
+    )
   })
 })

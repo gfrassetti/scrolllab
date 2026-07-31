@@ -84,10 +84,12 @@ En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
    API_PUBLIC_URL=https://TU-API   # HTTPS obligatorio
    ```
 
-   `CLIENT_URL` tiene que ser **exactamente** el host que sirve el sitio
-   (hoy `www`, porque el apex hace 308 a `www` en Vercel). El CORS y la
-   defensa CSRF comparan el `Origin` exacto: si acá va el apex, todos los
-   POST desde `www` responden 403 «Origen no permitido».
+   `CLIENT_URL` tiene que ser el host canónico que sirve el sitio (hoy `www`,
+   porque el apex hace 308 a `www` en Vercel). El CORS y la defensa CSRF
+   aceptan ese origin **más la variante apex/www del mismo dominio**, porque
+   Mercado Pago puede devolver al apex y el POST de confirmación moría en 403
+   «Origen no permitido». Cualquier otro host (otro dominio, otro subdominio,
+   otro esquema) sigue rechazado: no hay wildcards.
 6. Redeploy API. Probá un pago real chico o el flujo de sandbox **solo** con credenciales de prueba; prod usa plata real.
 
 Sin `MP_WEBHOOK_SECRET` + token de prod, el boot en producción **falla** a propósito.

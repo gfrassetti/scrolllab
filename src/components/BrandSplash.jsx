@@ -6,6 +6,18 @@ import { useT } from '../i18n'
 const SESSION_KEY = 'scrolllab-splash-seen'
 
 /**
+ * El splash se muestra una vez por pestaña: sin limpiar el flag, volver al home
+ * (logout) no lo vuelve a mostrar. Única fuente de verdad de la key.
+ */
+export function resetBrandSplash() {
+  try {
+    sessionStorage.removeItem(SESSION_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
  * Splash mínimo: solo el logo centrado, barras que se apilan, fade out.
  * Una vez por sesión de pestaña; respeta prefers-reduced-motion.
  */

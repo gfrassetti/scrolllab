@@ -21,6 +21,7 @@ npm test               # API unit + HTTP tests
 npm run check          # invariantes cruzadas (precios, secciones, props, i18n, rutas)
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
+npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 ```
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
@@ -30,6 +31,12 @@ roto. Dos redes lo cubren:
   modelo, lo abre y verifica imports, archivos de arranque y dependencias.
 - `npm run check:visual` hace lo que haría el comprador: `npm install`, `vite
   build` y Chromium, con capturas en `storage/visual-check/`.
+
+El editor del builder tiene su propia red: `check:builder`. Varias secciones
+animan el texto con SplitText, que reemplaza el DOM del nodo; a partir de ahí
+React no puede actualizar ese texto. El preview remonta la sección cuando las
+props se estabilizan (`CompositionCanvas`). Si tocás esa lógica, corré
+`npm run check:builder`.
 
 Reglas que salen de bugs reales: las secciones se copian **verbatim** (nunca
 reescribas rutas de import al empaquetar) y el `package.json` del template se
