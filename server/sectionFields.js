@@ -77,7 +77,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'fizz/PopManifesto': ['eyebrow', 'text'],
   'fizz/FooterSplash': ['ctaWord', 'email', 'legal'],
   'velocity/NavVelocity': ['brand', 'cta', 'linksText'],
-  'velocity/HeroStrike': ['brand', 'lineLeft', 'lineRight', 'caption'],
+  'velocity/HeroStrike': ['lineLeft', 'lineRight', 'caption'],
   'velocity/HelmetGrid': ['eyebrow', 'title', 'body'],
   'velocity/ParallaxRise': ['eyebrow', 'title', 'body', 'cta'],
   'velocity/FooterVelocity': ['line', 'legal'],

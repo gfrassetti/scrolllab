@@ -172,7 +172,6 @@ export const SECTION_FIELDS = {
     },
   ],
   'velocity/HeroStrike': [
-    { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'lineLeft', label: 'Line left', type: 'text' },
     { key: 'lineRight', label: 'Line right', type: 'text' },
     { key: 'caption', label: 'Caption', type: 'text' },

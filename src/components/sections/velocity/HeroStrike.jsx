@@ -7,7 +7,6 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  * Inspired by athlete-site exit choreography; placeholder media only.
  */
 export default function HeroStrike({
-  brand = 'BRAND',
   lineLeft = 'TITLE 1',
   lineRight = 'TITLE 2',
   lineLeft2 = 'TITLE 3',
@@ -147,9 +146,6 @@ export default function HeroStrike({
             </svg>
           </div>
 
-          <p className="absolute top-6 left-5 text-[11px] font-medium tracking-[0.28em] uppercase md:left-10 md:text-xs">
-            {brand}
-          </p>
           <p
             data-strike-caption
             className="absolute right-5 bottom-6 text-[11px] tracking-[0.25em] text-white/55 uppercase md:right-10 md:text-xs"
