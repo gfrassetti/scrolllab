@@ -1,6 +1,6 @@
 export default function FooterVelocity({
-  line = 'YOUR CLOSING LINE.',
-  legal = '©2026 Placeholder Brand — Template, not a promise',
+  line = 'Closing line.',
+  legal = '©2026 Brand — Lorem ipsum dolor sit amet.',
 }) {
   return (
     <footer className="border-t border-[#ece9e2]/10 bg-[#07140e] px-5 py-16 text-[#ece9e2] md:px-10 md:py-20">

@@ -5,6 +5,7 @@ import TrackMerge from '../components/sections/velocity/TrackMerge'
 import HelmetGrid from '../components/sections/velocity/HelmetGrid'
 import ParallaxRise from '../components/sections/velocity/ParallaxRise'
 import FooterVelocity from '../components/sections/velocity/FooterVelocity'
+import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 04 — "VELOCITY"
@@ -20,6 +21,7 @@ export default function VelocityPage() {
           <TrackMerge />
           <HelmetGrid />
           <ParallaxRise />
+          <ContactForm theme="velocity" />
         </main>
         <FooterVelocity />
       </div>

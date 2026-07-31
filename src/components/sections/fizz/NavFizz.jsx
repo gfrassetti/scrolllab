@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { useMobileMenu } from '../../../hooks/useMobileMenu'
 
 function parseItems(value, fallback) {
   if (Array.isArray(value)) {
@@ -114,7 +115,12 @@ export default function NavFizz({
   const shop = parseItems(shopItems, ['All flavors', 'Bundles', 'Merch'])
   const learn = parseItems(learnItems, ['Our story', 'Ingredients', 'FAQ'])
   const [openMenu, setOpenMenu] = useState(null)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const {
+    open: mobileOpen,
+    close: closeMobile,
+    panelProps,
+    triggerProps,
+  } = useMobileMenu()
 
   return (
     <header className="fixed inset-x-0 top-4 z-50 px-4 md:top-6 md:px-8">
@@ -156,18 +162,20 @@ export default function NavFizz({
         </div>
 
         <button
-          type="button"
-          className="grid size-10 place-items-center rounded-full border border-foam/20 text-foam md:hidden"
-          aria-expanded={mobileOpen}
+          {...triggerProps}
           aria-label="Menu"
-          onClick={() => setMobileOpen((v) => !v)}
+          className="grid size-10 place-items-center rounded-full border border-foam/20 text-foam md:hidden"
         >
           <span className="font-brico text-sm font-bold">{mobileOpen ? '×' : '≡'}</span>
         </button>
       </nav>
 
       {mobileOpen && (
-        <div className="mx-auto mt-2 max-w-5xl rounded-3xl border border-foam/15 bg-grape/95 p-4 backdrop-blur-md md:hidden">
+        <div
+          {...panelProps}
+          aria-label="Menu"
+          className="mx-auto mt-2 max-w-5xl rounded-3xl border border-foam/15 bg-grape/95 p-4 backdrop-blur-md md:hidden"
+        >
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-foam/45">
             {shopLabel}
           </p>
@@ -177,7 +185,7 @@ export default function NavFizz({
                 <a
                   href="#"
                   className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-foam/85"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobile}
                 >
                   {item}
                 </a>
@@ -193,7 +201,7 @@ export default function NavFizz({
                 <a
                   href="#"
                   className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-foam/85"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobile}
                 >
                   {item}
                 </a>
@@ -203,14 +211,14 @@ export default function NavFizz({
           <a
             href="#"
             className="mt-4 block rounded-full border border-foam/20 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-foam"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobile}
           >
             {linkLabel}
           </a>
           <a
             href="#"
             className="mt-2 block rounded-full bg-fizz px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-grape"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobile}
           >
             {cta}
           </a>

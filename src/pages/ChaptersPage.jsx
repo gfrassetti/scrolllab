@@ -10,6 +10,7 @@ import StackingCards from '../components/sections/chapters/StackingCards'
 import BigNumbers from '../components/sections/chapters/BigNumbers'
 import QuoteBreak from '../components/sections/chapters/QuoteBreak'
 import FooterCTA from '../components/sections/chapters/FooterCTA'
+import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 01 — "CHAPTERS"
@@ -32,6 +33,7 @@ export default function ChaptersPage() {
           <StackingCards chapter="05" />
           <BigNumbers />
           <QuoteBreak chapter="06" />
+          <ContactForm theme="chapters" />
         </main>
 
         <FooterCTA />

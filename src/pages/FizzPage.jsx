@@ -6,6 +6,7 @@ import BubbleBenefits from '../components/sections/fizz/BubbleBenefits'
 import CanCarousel from '../components/sections/fizz/CanCarousel'
 import PopManifesto from '../components/sections/fizz/PopManifesto'
 import FooterSplash from '../components/sections/fizz/FooterSplash'
+import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 04 — "FIZZ"
@@ -24,6 +25,7 @@ export default function FizzPage() {
           <BubbleBenefits />
           <CanCarousel />
           <PopManifesto />
+          <ContactForm theme="fizz" />
         </main>
 
         <FooterSplash />

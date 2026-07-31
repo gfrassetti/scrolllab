@@ -92,6 +92,33 @@ En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
 
 Sin `MP_WEBHOOK_SECRET` + token de prod, el boot en producción **falla** a propósito.
 
+## Precios en USD, cobro en pesos
+
+Mercado Pago Argentina **siempre procesa en moneda local**. Mandar
+`currency_id: "USD"` no sirve: la propia doc de MP aclara que convierte el
+monto a pesos al crear la preferencia, con una cotización que no controlamos.
+Por eso la conversión es nuestra.
+
+- Los precios de lista están en dólares: `server/catalog.js` (`unit_price_usd`)
+  y `src/lib/pricing.js`. **Los dos archivos tienen que coincidir.**
+- `server/fx.js` trae el dólar blue (venta) de `dolarapi.com`, lo cachea
+  15 minutos, le aplica `FX_SPREAD_PCT` y cae a `FX_FALLBACK_RATE` si la API
+  falla: una caída de la API externa no puede tumbar el checkout.
+- El pesos final se redondea al millar de arriba y se calcula **al crear la
+  orden**. Cada orden guarda `totalUsd` y `fxRate`, así el cobro queda auditable
+  aunque la cotización se mueva después.
+- El front muestra pesos usando la cotización que expone `GET /api/catalog`,
+  pero el precio que se cobra lo fija el servidor.
+
+Variables: `FX_RATE_URL`, `FX_SPREAD_PCT`, `FX_FALLBACK_RATE`,
+`FX_CACHE_TTL_SECONDS`, `FX_OFFLINE`. Ninguna es obligatoria; sin nada
+configurado usa blue de dolarapi con spread 0. Actualizá `FX_FALLBACK_RATE`
+cada tanto para que el respaldo no quede viejo.
+
+Para cobrar de verdad en dólares (comprador del exterior, tarjeta
+internacional) hace falta un merchant of record aparte — Lemon Squeezy o
+Paddle, ~5% + USD 0,50. No está integrado.
+
 ## Email de confirmación (Resend) — scrolllab.com.ar
 
 El mail **solo se envía cuando la orden pasa a `paid`**. Si quedó `pending`

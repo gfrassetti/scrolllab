@@ -8,11 +8,11 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  */
 export default function HeroStrike({
   brand = 'BRAND',
-  lineLeft = 'LINE LEFT',
-  lineRight = 'LINE RIGHT',
-  lineLeft2 = 'LINE LEFT 2',
-  lineRight2 = 'LINE RIGHT 2',
-  caption = 'Scroll — placeholder caption',
+  lineLeft = 'TITLE 1',
+  lineRight = 'TITLE 2',
+  lineLeft2 = 'TITLE 3',
+  lineRight2 = 'TITLE 4',
+  caption = 'Lorem ipsum — scroll',
   img = 'https://picsum.photos/seed/velocity-hero/900/1200',
 }) {
   const root = useRef(null)

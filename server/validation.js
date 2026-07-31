@@ -1,8 +1,9 @@
 import {
   PRODUCTS,
   resolveLineItem,
-  priceCustomRecipe,
+  priceCustomRecipeUsd,
   recipeSectionId,
+  arsFromUsd,
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
@@ -23,9 +24,16 @@ export function assertObjectIdLike(id) {
 }
 
 /**
- * Valida el carrito del cliente. Precios y títulos siempre salen del catálogo.
+ * Valida el carrito del cliente. Precios y títulos siempre salen del catálogo:
+ * el precio de lista está en USD y `rate` lo lleva a pesos para esta orden.
  */
-export function validateCheckoutItems(rawItems, { maxCartItems, maxRecipeSections }) {
+export function validateCheckoutItems(
+  rawItems,
+  { maxCartItems, maxRecipeSections, rate },
+) {
+  if (!Number.isFinite(rate) || rate <= 0) {
+    throw new HttpError(500, 'Cotización USD→ARS no disponible')
+  }
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
     throw new HttpError(400, 'El carrito está vacío')
   }
@@ -51,7 +59,7 @@ export function validateCheckoutItems(rawItems, { maxCartItems, maxRecipeSection
       line.title = PRODUCTS.custom.title
       const ids = recipe.map(recipeSectionId).join('+')
       line.sku = `custom:${ids.slice(0, 80)}`
-      line.unit_price = priceCustomRecipe(recipe)
+      line.unit_price_usd = priceCustomRecipeUsd(recipe)
     } else {
       line.recipe = undefined
     }
@@ -59,7 +67,8 @@ export function validateCheckoutItems(rawItems, { maxCartItems, maxRecipeSection
     resolved.push({
       sku: line.sku,
       title: line.title,
-      unit_price: line.unit_price,
+      unit_price: arsFromUsd(line.unit_price_usd, rate),
+      unit_price_usd: line.unit_price_usd,
       currency_id: line.currency_id,
       recipe: line.recipe,
     })

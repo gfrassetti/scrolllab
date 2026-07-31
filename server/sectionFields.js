@@ -3,7 +3,7 @@
  * Debe coincidir con src/lib/sectionFields.js.
  */
 export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
-  'chapters/NavMinimal': ['brand'],
+  'chapters/NavMinimal': ['brand', 'linksText'],
   'chapters/HeroKinetic': [
     'lineOne',
     'lineTwo',
@@ -21,7 +21,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'attribution',
   ],
   'chapters/FooterCTA': ['ctaWord', 'email', 'legal'],
-  'nocturne/NavNocturne': ['brand', 'marker'],
+  'nocturne/NavNocturne': ['brand', 'marker', 'linksText'],
   'nocturne/HeroCinematic': [
     'titleTop',
     'titleBottom',
@@ -30,7 +30,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'hint',
   ],
   'nocturne/OutroCTA': ['ctaWord', 'email', 'legal'],
-  'monolith/NavBrutal': ['brand'],
+  'monolith/NavBrutal': ['brand', 'linksText'],
   'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
   'monolith/FooterBrutal': ['ctaWord', 'email', 'legal'],
   'fizz/NavFizz': [
@@ -76,12 +76,12 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
   'fizz/PopManifesto': ['eyebrow', 'text'],
   'fizz/FooterSplash': ['ctaWord', 'email', 'legal'],
-  'velocity/NavVelocity': ['brand', 'cta'],
+  'velocity/NavVelocity': ['brand', 'cta', 'linksText'],
   'velocity/HeroStrike': ['brand', 'lineLeft', 'lineRight', 'caption'],
   'velocity/HelmetGrid': ['eyebrow', 'title', 'body'],
   'velocity/ParallaxRise': ['eyebrow', 'title', 'body', 'cta'],
   'velocity/FooterVelocity': ['line', 'legal'],
-  'atelier/NavAtelier': ['brand', 'cta'],
+  'atelier/NavAtelier': ['brand', 'cta', 'label', 'linksText'],
   'atelier/HeroMeaning': ['line1', 'line2', 'meta', 'hint'],
   'atelier/AboutClarity': ['eyebrow', 'title', 'body'],
   'atelier/ServicesStone': [
@@ -100,6 +100,21 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'atelier/SelectedWork': ['title', 'cta'],
   'atelier/KeyFacts': ['eyebrow', 'title'],
   'atelier/FooterAtelier': ['line', 'legal'],
+  'contact/ContactForm': [
+    'theme',
+    'eyebrow',
+    'title',
+    'body',
+    'nameLabel',
+    'emailLabel',
+    'messageLabel',
+    'submitLabel',
+    'sendingLabel',
+    'successMessage',
+    'errorMessage',
+    'note',
+    'endpoint',
+  ],
   'commerce/ProductGrid': ['eyebrow', 'title', 'body'],
 })
 
@@ -112,6 +127,16 @@ const SHAPE_PRESETS = new Set([
 ])
 
 const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
+
+const THEME_PRESETS = new Set([
+  'auto',
+  'chapters',
+  'nocturne',
+  'monolith',
+  'velocity',
+  'fizz',
+  'atelier',
+])
 
 /**
  * Asset URLs baked into the sold ZIP must be a real path/URL:
@@ -142,7 +167,9 @@ export function sanitizeSectionProps(sectionId, props) {
     if (!trimmed) continue
     if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
+    if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
+    if (key === 'endpoint' && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed
   }
   return Object.keys(cleaned).length ? cleaned : undefined

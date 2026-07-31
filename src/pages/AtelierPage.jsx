@@ -7,6 +7,7 @@ import VisionShutter from '../components/sections/atelier/VisionShutter'
 import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
+import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 06 — "ATELIER"
@@ -26,6 +27,7 @@ export default function AtelierPage() {
           <VisionShutter />
           <SelectedWork />
           <KeyFacts />
+          <ContactForm theme="atelier" />
         </main>
         <FooterAtelier />
       </div>

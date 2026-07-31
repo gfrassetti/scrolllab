@@ -3,22 +3,23 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 
 const ROW_A = [
   {
-    label: 'Battersea, 2024',
+    label: 'Title 1',
     img: 'https://picsum.photos/seed/vel-a1/640/860',
     w: 'w-[42vw] md:w-[18vw]',
   },
   {
     label: 'Quote',
-    quote: 'It doesn’t matter where you start — it’s how you progress from there.',
+    quote:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.',
     w: 'w-[70vw] md:w-[28vw]',
   },
   {
-    label: 'Monaco, 2023',
+    label: 'Title 2',
     img: 'https://picsum.photos/seed/vel-a2/520/700',
     w: 'w-[36vw] md:w-[14vw]',
   },
   {
-    label: 'High Performance, 2024',
+    label: 'Title 3',
     img: 'https://picsum.photos/seed/vel-a3/700/700',
     w: 'w-[48vw] md:w-[20vw]',
   },
@@ -26,22 +27,22 @@ const ROW_A = [
 
 const ROW_B = [
   {
-    label: 'FIA Prize Giving, 2024',
+    label: 'Title 4',
     img: 'https://picsum.photos/seed/vel-b1/700/700',
     w: 'w-[44vw] md:w-[17vw]',
   },
   {
-    label: 'Miami GP, 2024',
+    label: 'Title 5',
     img: 'https://picsum.photos/seed/vel-b2/900/900',
     w: 'w-[56vw] md:w-[24vw]',
   },
   {
-    label: 'Britain, 2025',
+    label: 'Title 6',
     img: 'https://picsum.photos/seed/vel-b3/700/700',
     w: 'w-[44vw] md:w-[17vw]',
   },
   {
-    label: 'Barcelona, 2024',
+    label: 'Title 7',
     img: 'https://picsum.photos/seed/vel-b4/640/800',
     w: 'w-[40vw] md:w-[16vw]',
   },
@@ -50,7 +51,7 @@ const ROW_B = [
 /**
  * TrackMerge — vertical scroll drives:
  * 1) horizontal photo gallery
- * 2) ON TRACK / OFF TRACK panels converging
+ * 2) two panels converging
  * 3) release into the next section below
  */
 export default function TrackMerge() {
@@ -81,7 +82,6 @@ export default function TrackMerge() {
             },
           })
 
-          // 1 — gallery pans horizontally (two rows, different speeds)
           tl.fromTo(
             '[data-tm-row-a]',
             { xPercent: 8 },
@@ -95,14 +95,12 @@ export default function TrackMerge() {
             0,
           )
 
-          // gallery exits
           tl.to(
             '[data-tm-gallery]',
             { opacity: 0, scale: 0.96, ease: 'power1.in' },
             0.42,
           )
 
-          // 2 — merge scene in
           tl.fromTo(
             '[data-tm-merge]',
             { opacity: 0 },
@@ -116,7 +114,6 @@ export default function TrackMerge() {
             0.4,
           )
 
-          // panels start apart and join
           tl.fromTo(
             '[data-tm-on]',
             { yPercent: -55, xPercent: -12, opacity: 0.4 },
@@ -136,7 +133,6 @@ export default function TrackMerge() {
             0.58,
           )
 
-          // brief hold on the joined frame, then soft exit
           tl.to('[data-tm-merge]', { opacity: 1, duration: 0.12 }, 0.78)
           tl.to(
             '[data-tm-merge]',
@@ -146,7 +142,6 @@ export default function TrackMerge() {
         },
       )
 
-      // Mobile: simpler horizontal scrub without pin merge complexity
       mm.add(
         '(max-width: 767px) and (prefers-reduced-motion: no-preference)',
         () => {
@@ -214,7 +209,6 @@ export default function TrackMerge() {
           className="absolute inset-0 bg-[#0a1a12] transition-colors"
         />
 
-        {/* ——— 1. Horizontal gallery ——— */}
         <div
           data-tm-gallery
           className="absolute inset-0 z-10 flex flex-col justify-center gap-[4vh] overflow-hidden"
@@ -242,7 +236,7 @@ export default function TrackMerge() {
                     {item.quote}
                   </blockquote>
                   <p className="mt-4 text-[10px] tracking-[0.25em] text-acid uppercase">
-                    — signature
+                    — Caption
                   </p>
                 </figure>
               ) : (
@@ -285,16 +279,12 @@ export default function TrackMerge() {
           </div>
         </div>
 
-        {/* ——— 2. ON / OFF converge ——— */}
         <div
           data-tm-merge
           className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0"
         >
           <div className="relative grid w-full max-w-6xl grid-cols-2 items-center gap-3 px-4 md:gap-8 md:px-10">
-            <div
-              data-tm-on
-              className="will-change-transform"
-            >
+            <div data-tm-on className="will-change-transform">
               <div className="mx-auto aspect-square w-[78%] overflow-hidden md:w-[70%]">
                 <img
                   src="https://picsum.photos/seed/vel-on-track/900/900"
@@ -303,13 +293,10 @@ export default function TrackMerge() {
                 />
               </div>
               <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
-                On track
+                Panel 1
               </p>
             </div>
-            <div
-              data-tm-off
-              className="will-change-transform"
-            >
+            <div data-tm-off className="will-change-transform">
               <div className="mx-auto aspect-3/4 w-[70%] overflow-hidden md:w-[58%]">
                 <img
                   src="https://picsum.photos/seed/vel-off-track/800/1100"
@@ -318,7 +305,7 @@ export default function TrackMerge() {
                 />
               </div>
               <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
-                Off track
+                Panel 2
               </p>
             </div>
           </div>
@@ -329,11 +316,11 @@ export default function TrackMerge() {
           >
             <span className="relative inline-block">
               <span className="absolute -top-2 left-0 font-display text-[0.55em] font-normal normal-case italic text-acid md:-top-3">
-                on
+                A
               </span>
-              TRACK
+              TITLE
             </span>{' '}
-            <span className="text-[#161412]/35">OFF</span> TRACK
+            <span className="text-[#161412]/35">B</span> TITLE
           </h2>
         </div>
       </div>

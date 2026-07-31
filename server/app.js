@@ -39,7 +39,12 @@ import {
   verifyDownloadToken,
   storageRoot,
 } from './packaging.js'
-import { PRODUCTS, COMMERCE_PACK_SURCHARGE } from './catalog.js'
+import {
+  catalogWithArs,
+  arsFromUsd,
+  COMMERCE_PACK_SURCHARGE_USD,
+} from './catalog.js'
+import { getUsdArsRate } from './fx.js'
 
 function publicUser(user) {
   if (!user) return null
@@ -204,12 +209,23 @@ export async function createApp(config) {
     }),
   )
 
-  app.get('/api/catalog', (_req, res) => {
-    res.json({
-      products: Object.values(PRODUCTS),
-      commercePackSurcharge: COMMERCE_PACK_SURCHARGE,
-    })
-  })
+  app.get(
+    '/api/catalog',
+    asyncHandler(async (_req, res) => {
+      const fx = await getUsdArsRate()
+      res.json({
+        products: catalogWithArs(fx.rate),
+        commercePackSurchargeUsd: COMMERCE_PACK_SURCHARGE_USD,
+        commercePackSurcharge: arsFromUsd(COMMERCE_PACK_SURCHARGE_USD, fx.rate),
+        fx: {
+          rate: fx.rate,
+          spreadPct: fx.spreadPct,
+          updatedAt: fx.updatedAt,
+          stale: fx.stale,
+        },
+      })
+    }),
+  )
 
   app.get('/api/auth/me', (req, res) => {
     res.json({ user: publicUser(req.user) })
@@ -298,6 +314,8 @@ export async function createApp(config) {
           status: o.status,
           items: o.items,
           total: o.total,
+          totalUsd: o.totalUsd,
+          fxRate: o.fxRate,
           currency_id: o.currency_id,
           createdAt: o.createdAt,
           downloadCount: o.downloadCount || 0,
@@ -358,9 +376,11 @@ export async function createApp(config) {
     requireAuth,
     limits.checkout,
     asyncHandler(async (req, res) => {
+      const fx = await getUsdArsRate()
       const resolved = validateCheckoutItems(req.body?.items, {
         maxCartItems: config.maxCartItems,
         maxRecipeSections: config.maxRecipeSections,
+        rate: fx.rate,
       })
 
       const total = resolved.reduce((sum, i) => sum + i.unit_price, 0)
@@ -371,10 +391,13 @@ export async function createApp(config) {
           sku: i.sku,
           title: i.title,
           unit_price: i.unit_price,
+          unit_price_usd: i.unit_price_usd,
           currency_id: i.currency_id,
           recipe: i.recipe || undefined,
         })),
         total,
+        totalUsd: resolved.reduce((sum, i) => sum + i.unit_price_usd, 0),
+        fxRate: fx.rate,
         currency_id: 'ARS',
       })
 

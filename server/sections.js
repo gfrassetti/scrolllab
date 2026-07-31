@@ -50,6 +50,7 @@ export const ALLOWED_SECTIONS = Object.freeze([
   'atelier/SelectedWork',
   'atelier/KeyFacts',
   'atelier/FooterAtelier',
+  'contact/ContactForm',
   'commerce/ProductGrid',
 ])
 

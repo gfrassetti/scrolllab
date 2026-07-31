@@ -2,6 +2,16 @@ import { useEffect } from 'react'
 import Lenis from 'lenis'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 
+let instance = null
+
+/**
+ * The running Lenis instance, or null when smooth scroll is off
+ * (reduced motion). Overlays use it to freeze the page behind them.
+ */
+export function getLenis() {
+  return instance
+}
+
 /**
  * Boots Lenis smooth scrolling and keeps it in sync with GSAP:
  * Lenis drives the scroll, ScrollTrigger listens to it, and both
@@ -17,6 +27,7 @@ export function useLenis() {
       lerp: 0.1,
       smoothWheel: true,
     })
+    instance = lenis
 
     lenis.on('scroll', ScrollTrigger.update)
 
@@ -30,6 +41,7 @@ export function useLenis() {
     return () => {
       gsap.ticker.remove(onTick)
       lenis.destroy()
+      if (instance === lenis) instance = null
     }
   }, [])
 }

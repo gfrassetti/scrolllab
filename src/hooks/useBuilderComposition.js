@@ -13,7 +13,7 @@ import {
   moveCompositionItem,
   reorderCompositionItem,
 } from '../lib/composition'
-import { estimateCustomPrice } from '../lib/pricing'
+import { estimateCustomPriceUsd } from '../lib/pricing'
 
 /**
  * Estado + mutaciones del builder. La UI (BuilderPage) solo renderiza.
@@ -49,7 +49,7 @@ export function useBuilderComposition() {
 
   const recipe = useMemo(() => compositionToRecipe(items), [items])
   const hasCommerce = useMemo(() => recipeHasCommerce(recipe), [recipe])
-  const estimatedPrice = estimateCustomPrice(hasCommerce)
+  const estimatedPriceUsd = estimateCustomPriceUsd(hasCommerce)
 
   const notify = useCallback((message) => {
     if (message) setLimitNotice(message)
@@ -112,7 +112,7 @@ export function useBuilderComposition() {
     bootCleaned: boot.cleaned,
     recipe,
     hasCommerce,
-    estimatedPrice,
+    estimatedPriceUsd,
     hasDuplicateChrome: duplicateChrome,
     addSection,
     updateItemProps,

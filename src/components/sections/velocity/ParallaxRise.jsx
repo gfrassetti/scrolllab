@@ -6,10 +6,10 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  * as you scroll (slower than the page).
  */
 export default function ParallaxRise({
-  eyebrow = 'Partners',
-  title = 'Built for speed.',
-  body = 'A generic content band. Swap the copy, image and CTA for your campaign or story beat.',
-  cta = 'See more',
+  eyebrow = 'Eyebrow',
+  title = 'Title 1',
+  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.',
+  cta = 'CTA label',
   img = 'https://picsum.photos/seed/vel-parallax/1920/1400',
 }) {
   const root = useRef(null)

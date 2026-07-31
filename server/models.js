@@ -14,7 +14,9 @@ const orderItemSchema = new mongoose.Schema(
   {
     sku: { type: String, required: true },
     title: String,
+    // unit_price es el cobrado (ARS); unit_price_usd es el precio de lista.
     unit_price: Number,
+    unit_price_usd: Number,
     currency_id: { type: String, default: "ARS" },
     // string[] legacy or [{ id, props? }, ...]
     recipe: { type: [mongoose.Schema.Types.Mixed], default: undefined },
@@ -38,6 +40,9 @@ const orderSchema = new mongoose.Schema(
     },
     items: [orderItemSchema],
     total: Number,
+    // Precio de lista en USD y cotización aplicada al cobrar, para auditar.
+    totalUsd: Number,
+    fxRate: Number,
     currency_id: { type: String, default: "ARS" },
     mpPreferenceId: String,
     mpPaymentId: { type: String, sparse: true, unique: true },

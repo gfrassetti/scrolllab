@@ -7,11 +7,16 @@ import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
 import { useCart } from '../lib/cart'
 import {
-  CUSTOM_BASE_PRICE,
-  estimateCustomPrice,
+  BUNDLE_PRICE_USD,
+  CUSTOM_BASE_PRICE_USD,
+  arsFromUsd,
+  bundleDiscountPct,
+  bundleListPriceUsd,
+  estimateCustomPriceUsd,
   formatArs,
-  templatePrice,
+  templatePriceUsd,
 } from '../lib/pricing'
+import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
 
 const TEMPLATE_META = [
@@ -233,6 +238,7 @@ export default function TemplatesIndex() {
   const { hash } = useLocation()
   const navigate = useNavigate()
   const { t, locale } = useI18n()
+  const { rate } = useFxRate()
   const [introReady, setIntroReady] = useState(false)
 
   const templates = useMemo(
@@ -554,9 +560,9 @@ export default function TemplatesIndex() {
                       : template.tags}
                   </p>
 
-                  {templatePrice(template.sku) != null && (
+                  {templatePriceUsd(template.sku) != null && (
                     <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
-                      {formatArs(templatePrice(template.sku))}
+                      {formatArs(arsFromUsd(templatePriceUsd(template.sku), rate))}
                     </p>
                   )}
 
@@ -597,6 +603,53 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
+        <section className="mt-16 border-2 border-ink p-6 md:mt-24 md:p-10">
+          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
+            {t('home.bundleEyebrow')}
+          </p>
+          <div className="flex flex-wrap items-baseline justify-between gap-4">
+            <p className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]">
+              {t('home.bundleTitleBefore')}{' '}
+              <em className="font-display font-normal italic text-accent">
+                {t('home.bundleTitleEm')}
+              </em>
+            </p>
+            <p className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+              {formatArs(arsFromUsd(BUNDLE_PRICE_USD, rate))}
+            </p>
+          </div>
+          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base">
+            {t('home.bundleBody')}
+          </p>
+          <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+            {t('home.bundleSaving', {
+              list: formatArs(arsFromUsd(bundleListPriceUsd(), rate)),
+              off: String(bundleDiscountPct()),
+            })}
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
+            <button
+              type="button"
+              onClick={() =>
+                addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
+              }
+              className="min-h-11 border border-ink/30 px-5 py-2.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
+            >
+              {t('common.addToCart')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
+                navigate('/cart')
+              }}
+              className="min-h-11 px-1 text-ink transition-colors hover:text-accent"
+            >
+              {t('common.buy')}
+            </button>
+          </div>
+        </section>
+
         <Link
           to="/builder"
           className="group mt-16 block border-2 border-ink p-6 transition-colors duration-300 hover:bg-ink hover:text-bone md:mt-24 md:p-10"
@@ -623,8 +676,10 @@ export default function TemplatesIndex() {
           </p>
           <p className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60">
             {t('home.builderPrices', {
-              base: formatArs(CUSTOM_BASE_PRICE),
-              withCommerce: formatArs(estimateCustomPrice(true)),
+              base: formatArs(arsFromUsd(CUSTOM_BASE_PRICE_USD, rate)),
+              withCommerce: formatArs(
+                arsFromUsd(estimateCustomPriceUsd(true), rate),
+              ),
             })}
           </p>
         </Link>

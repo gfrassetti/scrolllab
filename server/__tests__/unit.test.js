@@ -12,7 +12,18 @@ import {
 } from '../packaging.js'
 import { assertPaymentMatchesOrder } from '../services/mercadoPago.js'
 import { verifyMpWebhookSignature } from '../services/mercadoPago.js'
-import { PRODUCTS, COMMERCE_PACK_SURCHARGE } from '../catalog.js'
+import {
+  PRODUCTS,
+  COMMERCE_PACK_SURCHARGE_USD,
+  BUNDLE_MODELS,
+  arsFromUsd,
+} from '../catalog.js'
+import {
+  extractRate,
+  getUsdArsRate,
+  clearFxCache,
+  setFxCacheForTests,
+} from '../fx.js'
 import { buildOrderReceipt } from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
 
@@ -82,18 +93,63 @@ describe('validateRecipe', () => {
     assert.equal(recipe[0].props.line1, 'Hello')
     assert.equal(recipe[1].props.brand, 'BRAND')
   })
+
+  it('contact form: valida theme y endpoint', () => {
+    const recipe = validateRecipe([
+      {
+        id: 'contact/ContactForm',
+        props: {
+          theme: 'nocturne',
+          title: 'Say hello',
+          endpoint: 'https://api.example.com/contact',
+        },
+      },
+      {
+        id: 'contact/ContactForm',
+        props: { theme: 'hacker', endpoint: 'javascript:alert(1)' },
+      },
+    ])
+    assert.deepEqual(recipe[0].props, {
+      theme: 'nocturne',
+      title: 'Say hello',
+      endpoint: 'https://api.example.com/contact',
+    })
+    assert.equal(recipe[1].props, undefined)
+  })
 })
 
 describe('validateCheckoutItems', () => {
-  const opts = { maxCartItems: 5, maxRecipeSections: 30 }
+  const RATE = 1560
+  const opts = { maxCartItems: 5, maxRecipeSections: 30, rate: RATE }
 
   it('usa precio del servidor, no del cliente', () => {
     const lines = validateCheckoutItems(
       [{ sku: 'chapters', unit_price: 1, title: 'Hacked' }],
       opts,
     )
-    assert.equal(lines[0].unit_price, PRODUCTS.chapters.unit_price)
+    assert.equal(lines[0].unit_price_usd, PRODUCTS.chapters.unit_price_usd)
+    assert.equal(
+      lines[0].unit_price,
+      arsFromUsd(PRODUCTS.chapters.unit_price_usd, RATE),
+    )
     assert.equal(lines[0].title, PRODUCTS.chapters.title)
+  })
+
+  it('falla sin cotización válida', () => {
+    assert.throws(
+      () =>
+        validateCheckoutItems([{ sku: 'chapters' }], {
+          ...opts,
+          rate: 0,
+        }),
+      HttpError,
+    )
+  })
+
+  it('convierte a pesos redondeando al millar de arriba', () => {
+    // 129 USD * 1560 = 201.240 → 202.000
+    assert.equal(arsFromUsd(129, RATE), 202000)
+    assert.equal(arsFromUsd(1, 1000), 1000)
   })
 
   it('rechaza carrito vacío y SKU inválido', () => {
@@ -116,7 +172,7 @@ describe('validateCheckoutItems', () => {
       opts,
     )
     assert.equal(lines[0].title, PRODUCTS.custom.title)
-    assert.equal(lines[0].unit_price, PRODUCTS.custom.unit_price)
+    assert.equal(lines[0].unit_price_usd, PRODUCTS.custom.unit_price_usd)
     assert.deepEqual(lines[0].recipe, [
       { id: 'chapters/VelocityMarquee' },
       { id: 'monolith/SkewScroller' },
@@ -137,9 +193,71 @@ describe('validateCheckoutItems', () => {
       opts,
     )
     assert.equal(
-      lines[0].unit_price,
-      PRODUCTS.custom.unit_price + COMMERCE_PACK_SURCHARGE,
+      lines[0].unit_price_usd,
+      PRODUCTS.custom.unit_price_usd + COMMERCE_PACK_SURCHARGE_USD,
     )
+  })
+
+  it('resuelve el bundle con precio de servidor', () => {
+    const lines = validateCheckoutItems(
+      [{ sku: 'bundle', unit_price: 1, title: 'Cliente miente' }],
+      opts,
+    )
+    assert.equal(lines[0].sku, 'bundle')
+    assert.equal(lines[0].unit_price_usd, PRODUCTS.bundle.unit_price_usd)
+    assert.equal(lines[0].title, PRODUCTS.bundle.title)
+    assert.equal(lines[0].recipe, undefined)
+  })
+
+  it('el bundle cuesta menos que los 6 modelos por separado', () => {
+    const singles = BUNDLE_MODELS.reduce(
+      (sum, model) => sum + PRODUCTS[model].unit_price_usd,
+      0,
+    )
+    assert.ok(PRODUCTS.bundle.unit_price_usd < singles)
+  })
+})
+
+describe('cotización USD→ARS', () => {
+  it('lee el shape de dolarapi y de bluelytics', () => {
+    assert.equal(extractRate({ venta: 1565, compra: 1545 }), 1565)
+    assert.equal(extractRate({ blue: { value_sell: 1560 } }), 1560)
+    assert.equal(extractRate({ nada: 1 }), null)
+    assert.equal(extractRate({ venta: 0 }), null)
+  })
+
+  it('usa el fallback cuando no hay red y aplica el spread', async () => {
+    clearFxCache()
+    const prev = { ...process.env }
+    process.env.FX_OFFLINE = 'true'
+    process.env.FX_FALLBACK_RATE = '2000'
+    process.env.FX_SPREAD_PCT = '5'
+    try {
+      const fx = await getUsdArsRate()
+      assert.equal(fx.base, 2000)
+      assert.equal(fx.rate, 2100)
+      assert.equal(fx.source, 'fallback')
+      assert.equal(fx.stale, true)
+    } finally {
+      process.env = prev
+      clearFxCache()
+    }
+  })
+
+  it('prefiere la cotización cacheada', async () => {
+    clearFxCache()
+    const prev = { ...process.env }
+    process.env.FX_OFFLINE = 'true'
+    process.env.FX_SPREAD_PCT = '0'
+    try {
+      setFxCacheForTests(1700)
+      const fx = await getUsdArsRate()
+      assert.equal(fx.rate, 1700)
+      assert.equal(fx.source, 'test')
+    } finally {
+      process.env = prev
+      clearFxCache()
+    }
   })
 })
 

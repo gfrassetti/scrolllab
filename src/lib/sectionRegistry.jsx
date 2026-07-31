@@ -51,6 +51,8 @@ import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
 
+import ContactForm from '../components/sections/contact/ContactForm'
+
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 
 /**
@@ -67,7 +69,7 @@ export const models = [
     accent: '#ff4b00',
     wrapperClass: 'bg-bone text-ink',
     sections: [
-      { id: 'chapters/NavMinimal', name: 'Nav Minimal', kind: 'nav', component: NavMinimal, blurb: 'Fixed header that inverts over any background' },
+      { id: 'chapters/NavMinimal', name: 'Nav Minimal', kind: 'nav', component: NavMinimal, blurb: 'Fixed header that inverts over any background · full-screen mobile menu' },
       { id: 'chapters/HeroKinetic', name: 'Hero Kinetic', kind: 'hero', component: HeroKinetic, blurb: 'Oversized type rising out of masks' },
       { id: 'chapters/VelocityMarquee', name: 'Velocity Marquee', kind: 'section', component: VelocityMarquee, blurb: 'Ribbon that speeds up with scroll' },
       { id: 'chapters/ManifestoReveal', name: 'Manifesto Reveal', kind: 'section', component: ManifestoReveal, blurb: 'Giant paragraph inking in word by word' },
@@ -86,7 +88,7 @@ export const models = [
     accent: '#d9ff3f',
     wrapperClass: 'bg-noir text-salt',
     sections: [
-      { id: 'nocturne/NavNocturne', name: 'Nav Nocturne', kind: 'nav', component: NavNocturne, blurb: 'Fixed dark header with reel marker' },
+      { id: 'nocturne/NavNocturne', name: 'Nav Nocturne', kind: 'nav', component: NavNocturne, blurb: 'Fixed dark header with reel marker · numbered mobile menu' },
       { id: 'nocturne/HeroCinematic', name: 'Hero Cinematic', kind: 'hero', component: HeroCinematic, blurb: 'Full-bleed photo with slow zoom, credit type' },
       { id: 'nocturne/ZoomPortal', name: 'Zoom Portal', kind: 'section', component: ZoomPortal, blurb: 'Small window grows to swallow the viewport' },
       { id: 'nocturne/DiagonalMarquee', name: 'Diagonal Marquee', kind: 'section', component: DiagonalMarquee, blurb: 'Two tilted ribbons crossing directions' },
@@ -102,7 +104,7 @@ export const models = [
     accent: '#2b3cff',
     wrapperClass: 'bg-concrete text-carbon',
     sections: [
-      { id: 'monolith/NavBrutal', name: 'Nav Brutal', kind: 'nav', component: NavBrutal, blurb: 'Solid blocky header with hard borders' },
+      { id: 'monolith/NavBrutal', name: 'Nav Brutal', kind: 'nav', component: NavBrutal, blurb: 'Solid blocky header with hard borders · slab mobile menu' },
       { id: 'monolith/HeroThree', name: 'Hero Three', kind: 'hero', component: HeroThree, blurb: 'Wireframe 3D monolith behind giant type' },
       { id: 'monolith/SkewScroller', name: 'Skew Scroller', kind: 'section', component: SkewScroller, blurb: 'Giant words shearing with scroll velocity' },
       { id: 'monolith/SpecSheet', name: 'Spec Sheet', kind: 'section', component: SpecSheet, blurb: 'Brutalist data table, rows invert on hover' },
@@ -132,7 +134,7 @@ export const models = [
     accent: '#d9ff3f',
     wrapperClass: 'bg-[#0a1a12] text-[#ece9e2]',
     sections: [
-      { id: 'velocity/NavVelocity', name: 'Nav Velocity', kind: 'nav', component: NavVelocity, blurb: 'Fixed athlete header with lime CTA' },
+      { id: 'velocity/NavVelocity', name: 'Nav Velocity', kind: 'nav', component: NavVelocity, blurb: 'Fixed athlete header with lime CTA · full-screen mobile menu' },
       { id: 'velocity/HeroStrike', name: 'Hero Strike', kind: 'hero', component: HeroStrike, blurb: 'Portrait hero that blurs and gets struck on scroll' },
       { id: 'velocity/TrackMerge', name: 'Track Merge', kind: 'section', component: TrackMerge, blurb: 'Horizontal gallery / On-Off tracks merging' },
       { id: 'velocity/HelmetGrid', name: 'Helmet Grid', kind: 'section', component: HelmetGrid, blurb: 'Hall of fame product grid with focus' },
@@ -146,7 +148,7 @@ export const models = [
     accent: '#c8d0dc',
     wrapperClass: 'bg-[#0b0c10] text-white',
     sections: [
-      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Fixed header that flips over light sections' },
+      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Fixed header that flips over light sections · full-screen mobile menu' },
       { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Blur-in type with a scroll-scrubbed WebGL emblem' },
       { id: 'atelier/AboutClarity', name: 'About Clarity', kind: 'section', component: AboutClarity, blurb: 'Word-masked about statement over scroll fog' },
       { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Pinned services with a scrubbed 3D stone' },
@@ -154,6 +156,22 @@ export const models = [
       { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Light sticky-title project column' },
       { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Big numbers with fog atmosphere' },
       { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Closing statement and legal line' },
+    ],
+  },
+  {
+    id: 'contact',
+    name: 'CONTACT',
+    accent: '#7c5cff',
+    // Empty on purpose: the section paints its own theme (or inherits with `auto`).
+    wrapperClass: '',
+    sections: [
+      {
+        id: 'contact/ContactForm',
+        name: 'Contact Form',
+        kind: 'section',
+        component: ContactForm,
+        blurb: "Validated contact form that picks up the adjacent section's palette",
+      },
     ],
   },
   {

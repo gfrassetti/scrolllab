@@ -7,6 +7,7 @@ import SplitReveals from '../components/sections/nocturne/SplitReveals'
 import WorkIndex from '../components/sections/nocturne/WorkIndex'
 import StickyWordCycle from '../components/sections/nocturne/StickyWordCycle'
 import OutroCTA from '../components/sections/nocturne/OutroCTA'
+import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 02 — "NOCTURNE"
@@ -26,6 +27,7 @@ export default function NocturnePage() {
           <SplitReveals seq="03" />
           <WorkIndex seq="04" />
           <StickyWordCycle seq="05" />
+          <ContactForm theme="nocturne" />
         </main>
 
         <OutroCTA />

@@ -18,8 +18,23 @@ npm run dev:api        # only Express
 npm run build
 npm run start          # API production
 npm test               # API unit + HTTP tests
+npm run check          # invariantes cruzadas (precios, secciones, props, i18n, rutas)
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
+npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
 ```
+
+Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
+roto. Dos redes lo cubren:
+
+- `server/__tests__/packaging.test.js` (dentro de `npm test`) empaqueta cada
+  modelo, lo abre y verifica imports, archivos de arranque y dependencias.
+- `npm run check:visual` hace lo que haría el comprador: `npm install`, `vite
+  build` y Chromium, con capturas en `storage/visual-check/`.
+
+Reglas que salen de bugs reales: las secciones se copian **verbatim** (nunca
+reescribas rutas de import al empaquetar) y el `package.json` del template se
+**genera** a partir de los imports del código — copiar el del marketplace le
+mandaba al comprador un `npm run dev` que arrancaba `nodemon server/index.js`.
 
 Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pay. Without Google creds, use “Login de desarrollo”. Deploy notes: `docs/DEPLOY.md`.
 

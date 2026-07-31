@@ -69,6 +69,12 @@
     "req2License": "see license",
     "req3": "No reselling or redistributing the ZIP / code as a template",
     "req4": "Does not include hosting, domain, or deploy support",
+    "bundleEyebrow": "All 6 models together",
+    "bundleTitleBefore": "Get the",
+    "bundleTitleEm": "full catalog",
+    "bundleBody": "All six models in a single ZIP, each in its own folder, ready to npm install. One license covers them all.",
+    "bundleSaving": "Separately {{list}} · You save {{off}}%",
+    "bundleCartTitle": "BUNDLE — all 6 models",
     "builderEyebrow": "Or build your own",
     "builderTitleBefore": "Open the",
     "builderTitleEm": "builder",
@@ -373,6 +379,12 @@
         "FooterAtelier": {
           "name": "Footer Atelier",
           "blurb": "Closing statement and legal line"
+        }
+      },
+      "contact": {
+        "ContactForm": {
+          "name": "Contact Form",
+          "blurb": "Validated contact form that picks up the adjacent section's palette"
         }
       },
       "commerce": {

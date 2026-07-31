@@ -6,6 +6,7 @@ import SpecSheet from '../components/sections/monolith/SpecSheet'
 import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
+import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 03 — "MONOLITH"
@@ -24,6 +25,7 @@ export default function MonolithPage() {
           <SpecSheet unit="02" />
           <ExhibitGrid unit="03" />
           <TypeAccordion unit="04" />
+          <ContactForm theme="monolith" />
         </main>
 
         <FooterBrutal />

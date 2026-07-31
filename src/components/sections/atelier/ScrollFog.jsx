@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { gsap, ScrollTrigger } from '../../../lib/gsap'
+import { ScrollTrigger } from '../../../lib/gsap'
 
 /**
  * Full-bleed canvas fog/smoke that shifts with scroll progress.

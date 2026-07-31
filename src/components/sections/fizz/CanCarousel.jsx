@@ -11,6 +11,14 @@ const defaultCans = [
 
 /** Illustrated can, pure SVG — no image assets in the template. */
 function CanIllustration({ color, label }) {
+  // Label must stay inside the can body (88 wide) whatever the font that loads,
+  // so size it by length and pin the run length with textLength.
+  const text = String(label || '')
+  const maxWidth = 70
+  const chars = Math.max(text.length, 1)
+  const fontSize = Math.max(9, Math.min(24, Math.round(maxWidth / (chars * 0.62))))
+  const runLength = Math.min(fontSize * 0.62 * chars, maxWidth)
+
   return (
     <svg viewBox="0 0 120 200" className="h-44 w-auto md:h-52" aria-hidden="true">
       <ellipse cx="60" cy="14" rx="44" ry="10" fill="#d9d4cf" />
@@ -22,14 +30,17 @@ function CanIllustration({ color, label }) {
       />
       <text
         x="60"
-        y="72"
+        y="70"
         textAnchor="middle"
+        dominantBaseline="middle"
         fontFamily="Bricolage Grotesque, sans-serif"
         fontWeight="800"
-        fontSize={Math.min(26, Math.round(140 / Math.max(label.length, 1)))}
+        fontSize={fontSize}
+        textLength={runLength}
+        lengthAdjust="spacingAndGlyphs"
         fill="#241352"
       >
-        {label}
+        {text}
       </text>
       <ellipse cx="60" cy="186" rx="44" ry="10" fill={color} opacity="0.55" />
       <rect x="50" y="6" width="20" height="6" rx="3" fill="#8f8a85" />

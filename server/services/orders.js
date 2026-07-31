@@ -3,7 +3,9 @@ import path from 'node:path'
 import {
   packFixedTemplate,
   packCustomTemplate,
+  packBundleTemplate,
 } from '../packaging.js'
+import { BUNDLE_MODELS } from '../catalog.js'
 import { HttpError } from '../validation.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
@@ -62,6 +64,12 @@ export async function ensureOrderZip(order, user, config) {
     ) {
       await packCustomTemplate({
         recipe: item.recipe || [],
+        destPath: dest,
+        licenseMeta,
+      })
+    } else if (item.sku === 'bundle') {
+      await packBundleTemplate({
+        models: BUNDLE_MODELS,
         destPath: dest,
         licenseMeta,
       })

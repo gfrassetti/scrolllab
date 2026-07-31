@@ -3,45 +3,45 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 
 const ITEMS = [
   {
-    id: 'season',
-    name: 'Season',
-    year: '2025',
-    img: 'https://picsum.photos/seed/helm-season/800/800',
+    id: 'item-1',
+    name: 'Title 1',
+    year: '01',
+    img: 'https://picsum.photos/seed/helm-1/800/800',
     offset: 'md:mt-0',
   },
   {
-    id: 'discoball',
-    name: 'Discoball',
-    year: '2024',
-    img: 'https://picsum.photos/seed/helm-disco/800/800',
+    id: 'item-2',
+    name: 'Title 2',
+    year: '02',
+    img: 'https://picsum.photos/seed/helm-2/800/800',
     offset: 'md:mt-16',
   },
   {
-    id: 'dark',
-    name: 'Dark Glitter',
-    year: '2024',
-    img: 'https://picsum.photos/seed/helm-dark/800/800',
+    id: 'item-3',
+    name: 'Title 3',
+    year: '03',
+    img: 'https://picsum.photos/seed/helm-3/800/800',
     offset: 'md:mt-8',
   },
   {
-    id: 'porcelain',
-    name: 'Porcelain',
-    year: '2024',
-    img: 'https://picsum.photos/seed/helm-porc/800/800',
+    id: 'item-4',
+    name: 'Title 4',
+    year: '04',
+    img: 'https://picsum.photos/seed/helm-4/800/800',
     offset: 'md:mt-20',
   },
   {
-    id: 'japan',
-    name: 'Japan',
-    year: '2024',
-    img: 'https://picsum.photos/seed/helm-japan/800/800',
+    id: 'item-5',
+    name: 'Title 5',
+    year: '05',
+    img: 'https://picsum.photos/seed/helm-5/800/800',
     offset: 'md:mt-4',
   },
   {
-    id: 'chrome',
-    name: 'Chrome',
-    year: '2023',
-    img: 'https://picsum.photos/seed/helm-chrome/800/800',
+    id: 'item-6',
+    name: 'Title 6',
+    year: '06',
+    img: 'https://picsum.photos/seed/helm-6/800/800',
     offset: 'md:mt-14',
   },
 ]
@@ -94,9 +94,9 @@ function NotchFrame({ active }) {
  * staggered layout, lime hover, stroke draw-in on scroll.
  */
 export default function HelmetGrid({
-  eyebrow = 'Hall of Fame',
-  title = 'Helmets',
-  body = 'From seasonal liveries to one-off designs. Placeholder products — swap freely.',
+  eyebrow = 'Section label',
+  title = 'Title grid',
+  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
 }) {
   const root = useRef(null)
   const [active, setActive] = useState(ITEMS[0].id)

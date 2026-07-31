@@ -5,6 +5,11 @@
 export const SECTION_FIELDS = {
   'chapters/NavMinimal': [
     { key: 'brand', label: 'Brand', type: 'text' },
+    {
+      key: 'linksText',
+      label: 'Links (uno por línea, "Texto | #ancla")',
+      type: 'textarea',
+    },
   ],
   'chapters/HeroKinetic': [
     { key: 'lineOne', label: 'Linea 1', type: 'text' },
@@ -34,6 +39,11 @@ export const SECTION_FIELDS = {
   'nocturne/NavNocturne': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'marker', label: 'Marker', type: 'text' },
+    {
+      key: 'linksText',
+      label: 'Links (uno por línea, "Texto | #ancla")',
+      type: 'textarea',
+    },
   ],
   'nocturne/HeroCinematic': [
     { key: 'titleTop', label: 'Title top', type: 'text' },
@@ -49,6 +59,11 @@ export const SECTION_FIELDS = {
   ],
   'monolith/NavBrutal': [
     { key: 'brand', label: 'Brand', type: 'text' },
+    {
+      key: 'linksText',
+      label: 'Links (uno por línea, "Texto | #ancla")',
+      type: 'textarea',
+    },
   ],
   'monolith/HeroThree': [
     { key: 'title', label: 'Title', type: 'text' },
@@ -150,6 +165,11 @@ export const SECTION_FIELDS = {
   'velocity/NavVelocity': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
+    {
+      key: 'linksText',
+      label: 'Links (uno por línea, "Texto | #ancla")',
+      type: 'textarea',
+    },
   ],
   'velocity/HeroStrike': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -175,6 +195,12 @@ export const SECTION_FIELDS = {
   'atelier/NavAtelier': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'linksText',
+      label: 'Links (uno por línea, "Texto | #ancla")',
+      type: 'textarea',
+    },
   ],
   'atelier/HeroMeaning': [
     { key: 'line1', label: 'Line 1', type: 'text' },
@@ -217,6 +243,38 @@ export const SECTION_FIELDS = {
   'atelier/FooterAtelier': [
     { key: 'line', label: 'Line', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
+  ],
+  'contact/ContactForm': [
+    {
+      key: 'theme',
+      label: 'Theme',
+      type: 'select',
+      options: [
+        { value: 'auto', label: 'Auto (sección de al lado)' },
+        { value: 'chapters', label: 'Chapters' },
+        { value: 'nocturne', label: 'Nocturne' },
+        { value: 'monolith', label: 'Monolith' },
+        { value: 'velocity', label: 'Velocity' },
+        { value: 'fizz', label: 'Fizz' },
+        { value: 'atelier', label: 'Atelier' },
+      ],
+    },
+    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'nameLabel', label: 'Name — label', type: 'text' },
+    { key: 'emailLabel', label: 'Email — label', type: 'text' },
+    { key: 'messageLabel', label: 'Message — label', type: 'text' },
+    { key: 'submitLabel', label: 'Submit — label', type: 'text' },
+    { key: 'sendingLabel', label: 'Sending — label', type: 'text' },
+    { key: 'successMessage', label: 'Success message', type: 'textarea' },
+    { key: 'errorMessage', label: 'Error message', type: 'textarea' },
+    { key: 'note', label: 'Note', type: 'textarea' },
+    {
+      key: 'endpoint',
+      label: 'Endpoint — https:// or /path (empty = demo)',
+      type: 'text',
+    },
   ],
   'commerce/ProductGrid': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },

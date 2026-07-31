@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { models, getSection } from '../lib/sectionRegistry'
 import {
   formatArs,
-  COMMERCE_PACK_SURCHARGE,
+  arsFromUsd,
+  COMMERCE_PACK_SURCHARGE_USD,
 } from '../lib/pricing'
+import { useFxRate } from '../lib/fx'
 import { useBuilderComposition } from '../hooks/useBuilderComposition'
 import { sectionKind } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
@@ -50,7 +52,7 @@ export default function BuilderPage() {
     bootCleaned,
     recipe,
     hasCommerce,
-    estimatedPrice,
+    estimatedPriceUsd,
     hasDuplicateChrome,
     addSection,
     updateItemProps,
@@ -62,6 +64,11 @@ export default function BuilderPage() {
     openPreview,
     closePreview,
   } = useBuilderComposition()
+
+  const { rate } = useFxRate()
+  const commerceSurchargeArs = formatArs(
+    arsFromUsd(COMMERCE_PACK_SURCHARGE_USD, rate),
+  )
 
   useEffect(() => {
     if (bootCleaned) setLimitNotice(t('builder.cleanedChrome'))
@@ -232,7 +239,7 @@ export default function BuilderPage() {
                 {model.id === 'commerce' && (
                   <p className="mb-3 text-xs leading-relaxed text-ink/50">
                     {t('builder.commerceHint', {
-                      price: formatArs(COMMERCE_PACK_SURCHARGE),
+                      price: commerceSurchargeArs,
                     })}
                   </p>
                 )}
@@ -419,7 +426,7 @@ export default function BuilderPage() {
                           {section.model.id === 'commerce' && (
                             <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
                               {t('builder.commerceBadge', {
-                                price: formatArs(COMMERCE_PACK_SURCHARGE),
+                                price: commerceSurchargeArs,
                               })}
                             </span>
                           )}
@@ -490,12 +497,12 @@ export default function BuilderPage() {
                   {t('builder.estimatedPrice')}
                 </p>
                 <p className="mt-2 text-[clamp(1.5rem,3vw,2rem)] font-medium tracking-[-0.02em]">
-                  {formatArs(estimatedPrice)}
+                  {formatArs(arsFromUsd(estimatedPriceUsd, rate))}
                 </p>
                 {hasCommerce && (
                   <p className="mt-1 text-xs text-ink/55">
                     {t('builder.commerceIncluded', {
-                      price: formatArs(COMMERCE_PACK_SURCHARGE),
+                      price: commerceSurchargeArs,
                     })}
                   </p>
                 )}
