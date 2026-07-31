@@ -164,7 +164,7 @@
     "editing": "Editando",
     "editPanel": "Editar sección",
     "noEditableFields": "Esta sección no tiene campos de texto editables todavía.",
-    "commerceHint": "Sumá una tienda a tu página: catálogo, ficha de producto, carrito y checkout. +{{price}}.",
+    "commerceHint": "Sumá una tienda a tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). El pago viene en modo demo: conectás tu Mercado Pago o Stripe en checkoutAdapter.js. +{{price}}.",
     "estimatedPrice": "Total",
     "commerceIncluded": "Incluye kit Commerce (+{{price}})",
     "commerceBadge": "Kit Commerce +{{price}}",
@@ -378,7 +378,7 @@
       "commerce": {
         "ProductGrid": {
           "name": "Grilla de productos",
-          "blurb": "Catálogo en la página; producto, carrito y pago aparte"
+          "blurb": "Catálogo en la página; producto, carrito y pago aparte (pago en modo demo)"
         }
       }
     }

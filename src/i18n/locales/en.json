@@ -164,7 +164,7 @@
     "editing": "Editing",
     "editPanel": "Edit section",
     "noEditableFields": "This section has no editable text fields yet.",
-    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. +{{price}}.",
+    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). Payment ships in demo mode: wire your Mercado Pago or Stripe in checkoutAdapter.js. +{{price}}.",
     "estimatedPrice": "Total",
     "commerceIncluded": "Includes Commerce kit (+{{price}})",
     "commerceBadge": "Commerce kit +{{price}}",
@@ -378,7 +378,7 @@
       "commerce": {
         "ProductGrid": {
           "name": "Product Grid",
-          "blurb": "Catalog on the page; product, cart and checkout separately"
+          "blurb": "Catalog on the page; product, cart and checkout separately (demo payment)"
         }
       }
     }

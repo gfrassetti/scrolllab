@@ -597,6 +597,38 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
+        <Link
+          to="/builder"
+          className="group mt-16 block border-2 border-ink p-6 transition-colors duration-300 hover:bg-ink hover:text-bone md:mt-24 md:p-10"
+        >
+          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs">
+            {t('home.builderEyebrow')}
+          </p>
+          <p className="flex items-baseline justify-between gap-4">
+            <span className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]">
+              {t('home.builderTitleBefore')}{' '}
+              <em className="font-display font-normal italic text-accent">
+                {t('home.builderTitleEm')}
+              </em>
+            </span>
+            <span
+              aria-hidden="true"
+              className="text-2xl transition-transform duration-300 group-hover:translate-x-2"
+            >
+              →
+            </span>
+          </p>
+          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed opacity-70">
+            {t('home.builderBody')}
+          </p>
+          <p className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60">
+            {t('home.builderPrices', {
+              base: formatArs(CUSTOM_BASE_PRICE),
+              withCommerce: formatArs(estimateCustomPrice(true)),
+            })}
+          </p>
+        </Link>
+
         <section
           id="como-funciona"
           className="mt-20 scroll-mt-20 border-t border-ink/15 pt-14 md:mt-28 md:pt-20"
@@ -725,38 +757,6 @@ export default function TemplatesIndex() {
             </div>
           </div>
         </section>
-
-        <Link
-          to="/builder"
-          className="group mt-16 block border-2 border-ink p-6 transition-colors duration-300 hover:bg-ink hover:text-bone md:mt-24 md:p-10"
-        >
-          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs">
-            {t('home.builderEyebrow')}
-          </p>
-          <p className="flex items-baseline justify-between gap-4">
-            <span className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]">
-              {t('home.builderTitleBefore')}{' '}
-              <em className="font-display font-normal italic text-accent">
-                {t('home.builderTitleEm')}
-              </em>
-            </span>
-            <span
-              aria-hidden="true"
-              className="text-2xl transition-transform duration-300 group-hover:translate-x-2"
-            >
-              →
-            </span>
-          </p>
-          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed opacity-70">
-            {t('home.builderBody')}
-          </p>
-          <p className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60">
-            {t('home.builderPrices', {
-              base: formatArs(CUSTOM_BASE_PRICE),
-              withCommerce: formatArs(estimateCustomPrice(true)),
-            })}
-          </p>
-        </Link>
       </main>
 
       <footer className="mt-20 border-t border-ink/15 px-5 pt-10 pb-8 md:mt-32 md:px-10 md:pt-14">

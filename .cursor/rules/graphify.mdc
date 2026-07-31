@@ -1,0 +1,40 @@
+---
+description: graphify + Obsidian second-brain context for SCROLLLAB
+alwaysApply: true
+---
+
+# Graphify + Obsidian (always)
+
+This project has a graphify knowledge graph at `graphify-out/` and a linked Obsidian vault (second brain).
+
+## Before exploring code
+
+**MANDATORY:** Before using Read, Grep, Glob, or Bash to explore the codebase, run graphify first:
+
+- `graphify query "<question>"` — scoped subgraph for architecture / “where is X”
+- `graphify path "<A>" "<B>"` — dependency path between two symbols
+- `graphify explain "<concept>"` — neighbors of a concept
+
+This applies to you and every subagent. Include this rule in every subagent prompt that explores code. Do not skip graphify because files are “already known”.
+
+Only use Read/Grep/Glob directly when:
+
+1. graphify already oriented you and you need specific lines to edit, or
+2. `graphify-out/graph.json` does not exist yet
+
+Also:
+
+- If `graphify-out/wiki/index.md` exists, prefer it over raw dumps
+- Use `graphify-out/GRAPH_REPORT.md` only for broad architecture review
+- After structural code changes: `graphify update .` (AST-only, no API cost)
+
+## Obsidian vault (complement, not replacement)
+
+Canonical vault: `C:\Users\Guido\Documents\Obsidian\ScrollLab`
+
+- Open `graph.canvas` or Graph view for humans; for the agent, **read** relevant `.md` notes under that path when decisions, product intent, or annotated architecture are needed
+- Prefer ScrollLab over duplicate vaults named `graphify` / `obsidian`
+- Re-sync when asked:  
+  `graphify export obsidian --graph graphify-out/graph.json --dir "C:\Users\Guido\Documents\Obsidian\ScrollLab"`
+
+Flow: **graphify CLI → (optional) Obsidian notes → edit files**. Obsidian does not replace `graphify-out/`.

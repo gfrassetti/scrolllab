@@ -63,3 +63,30 @@ In production: Mongo required (no silent file fallback), mock/dev auth off, MP w
 (Same as before: self-contained sections, `lib/gsap.js`, reduced motion, matchMedia for heavy scroll.)
 
 Register new sellable SKUs in `server/catalog.js` and pack logic in `server/packaging.js`. Keep `server/sections.js` in sync with `src/lib/sectionRegistry.jsx`.
+
+## Second brain — graphify + Obsidian
+
+Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
+
+| Capa | Rol | Dónde |
+|---|---|---|
+| **graphify** (máquina) | Orientación del agente antes de explorar código | `graphify-out/` + CLI |
+| **Obsidian** (humano + notas) | Segundo cerebro visual: Graph view, canvas, anotaciones | bóveda **ScrollLab** |
+| **Cursor** | Implementa; se apoya en graphify primero y en notas Obsidian si aportan decisión/contexto | este repo |
+
+### Flow obligatorio para el agente
+
+1. Pregunta de arquitectura / “dónde está X” / dependencias → `graphify query`, `path` o `explain` (ver `.cursor/rules/graphify.mdc`).
+2. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
+3. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
+4. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
+5. Si el usuario pide re-sync del vault →  
+   `graphify export obsidian --graph graphify-out/graph.json --dir "C:\Users\Guido\Documents\Obsidian\ScrollLab"`
+
+### Bóveda canónica (usar solo esta)
+
+- **ScrollLab** → `C:\Users\Guido\Documents\Obsidian\ScrollLab`
+- Entrada visual: `graph.canvas` o Graph view (`Ctrl+G`)
+- Ignorar bóvedas duplicadas `graphify` / `obsidian` salvo que el usuario diga lo contrario
+
+Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre” Obsidian UI: lee los `.md` del vault cuando aportan contexto.
