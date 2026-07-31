@@ -4,7 +4,9 @@ import './index.css'
 import App from './App.jsx'
 
 // Tabs abiertas tras un deploy: un chunk con hash viejo falla → reload una vez.
+// En dev no interferimos: Vite ya recarga solo y así no se tapan errores.
 window.addEventListener('vite:preloadError', (event) => {
+  if (import.meta.env.DEV) return
   event.preventDefault()
   const key = 'scrolllab-chunk-reload'
   try {

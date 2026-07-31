@@ -28,6 +28,27 @@ export const PRODUCTS = {
     unit_price: 250000,
     currency_id: 'ARS',
   },
+  velocity: {
+    sku: 'velocity',
+    title: 'VELOCITY — template',
+    description: 'Modelo de energía athlete / scroll cinematográfico (código fuente).',
+    unit_price: 250000,
+    currency_id: 'ARS',
+  },
+  fizz: {
+    sku: 'fizz',
+    title: 'FIZZ — template',
+    description: 'Modelo pop carbonatado con lata 3D y mundos de color (código fuente).',
+    unit_price: 250000,
+    currency_id: 'ARS',
+  },
+  atelier: {
+    sku: 'atelier',
+    title: 'ATELIER — template',
+    description: 'Modelo studio con WebGL + fondos reactivos al scroll (código fuente).',
+    unit_price: 280000,
+    currency_id: 'ARS',
+  },
   custom: {
     sku: 'custom',
     title: 'Composición del builder',

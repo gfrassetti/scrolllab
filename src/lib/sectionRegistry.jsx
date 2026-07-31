@@ -27,6 +27,30 @@ import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
 
+import NavFizz from '../components/sections/fizz/NavFizz'
+import HeroBubbles from '../components/sections/fizz/HeroBubbles'
+import FlavorWorlds from '../components/sections/fizz/FlavorWorlds'
+import BubbleBenefits from '../components/sections/fizz/BubbleBenefits'
+import CanCarousel from '../components/sections/fizz/CanCarousel'
+import PopManifesto from '../components/sections/fizz/PopManifesto'
+import FooterSplash from '../components/sections/fizz/FooterSplash'
+
+import NavVelocity from '../components/sections/velocity/NavVelocity'
+import HeroStrike from '../components/sections/velocity/HeroStrike'
+import TrackMerge from '../components/sections/velocity/TrackMerge'
+import HelmetGrid from '../components/sections/velocity/HelmetGrid'
+import ParallaxRise from '../components/sections/velocity/ParallaxRise'
+import FooterVelocity from '../components/sections/velocity/FooterVelocity'
+
+import NavAtelier from '../components/sections/atelier/NavAtelier'
+import HeroMeaning from '../components/sections/atelier/HeroMeaning'
+import AboutClarity from '../components/sections/atelier/AboutClarity'
+import ServicesStone from '../components/sections/atelier/ServicesStone'
+import VisionShutter from '../components/sections/atelier/VisionShutter'
+import SelectedWork from '../components/sections/atelier/SelectedWork'
+import KeyFacts from '../components/sections/atelier/KeyFacts'
+import FooterAtelier from '../components/sections/atelier/FooterAtelier'
+
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 
 /**
@@ -88,9 +112,54 @@ export const models = [
     ],
   },
   {
+    id: 'fizz',
+    name: 'FIZZ',
+    accent: '#ff3ea5',
+    wrapperClass: 'bg-grape text-foam',
+    sections: [
+      { id: 'fizz/NavFizz', name: 'Nav Fizz', kind: 'nav', component: NavFizz, blurb: 'Floating pill header with candy CTA' },
+      { id: 'fizz/HeroBubbles', name: 'Hero Bubbles', kind: 'hero', component: HeroBubbles, blurb: '3D soda can spinning over rising bubbles' },
+      { id: 'fizz/FlavorWorlds', name: 'Flavor Worlds', kind: 'section', component: FlavorWorlds, blurb: 'Full-screen worlds repainting the page per flavor' },
+      { id: 'fizz/BubbleBenefits', name: 'Bubble Benefits', kind: 'section', component: BubbleBenefits, blurb: 'Springy benefit cards with drifting bubbles' },
+      { id: 'fizz/CanCarousel', name: 'Can Carousel', kind: 'section', component: CanCarousel, blurb: 'Snap shelf of illustrated cans, tilt on hover' },
+      { id: 'fizz/PopManifesto', name: 'Pop Manifesto', kind: 'section', component: PopManifesto, blurb: 'Giant paragraph inking in with flavor colors' },
+      { id: 'fizz/FooterSplash', name: 'Footer Splash', kind: 'footer', component: FooterSplash, blurb: 'Candy CTA word with bubbles rising behind' },
+    ],
+  },
+  {
+    id: 'velocity',
+    name: 'VELOCITY',
+    accent: '#d9ff3f',
+    wrapperClass: 'bg-[#0a1a12] text-[#ece9e2]',
+    sections: [
+      { id: 'velocity/NavVelocity', name: 'Nav Velocity', kind: 'nav', component: NavVelocity, blurb: 'Fixed athlete header with lime CTA' },
+      { id: 'velocity/HeroStrike', name: 'Hero Strike', kind: 'hero', component: HeroStrike, blurb: 'Portrait hero that blurs and gets struck on scroll' },
+      { id: 'velocity/TrackMerge', name: 'Track Merge', kind: 'section', component: TrackMerge, blurb: 'Horizontal gallery / On-Off tracks merging' },
+      { id: 'velocity/HelmetGrid', name: 'Helmet Grid', kind: 'section', component: HelmetGrid, blurb: 'Hall of fame product grid with focus' },
+      { id: 'velocity/ParallaxRise', name: 'Parallax Rise', kind: 'section', component: ParallaxRise, blurb: 'Content band with rising parallax media' },
+      { id: 'velocity/FooterVelocity', name: 'Footer Velocity', kind: 'footer', component: FooterVelocity, blurb: 'Closing line with lime accent' },
+    ],
+  },
+  {
+    id: 'atelier',
+    name: 'ATELIER',
+    accent: '#c8d0dc',
+    wrapperClass: 'bg-[#0b0c10] text-white',
+    sections: [
+      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Fixed header that flips over light sections' },
+      { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Blur-in type with a scroll-scrubbed WebGL emblem' },
+      { id: 'atelier/AboutClarity', name: 'About Clarity', kind: 'section', component: AboutClarity, blurb: 'Word-masked about statement over scroll fog' },
+      { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Pinned services with a scrubbed 3D stone' },
+      { id: 'atelier/VisionShutter', name: 'Vision Shutter', kind: 'section', component: VisionShutter, blurb: 'Shutter bands and oversized scrubbing words' },
+      { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Light sticky-title project column' },
+      { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Big numbers with fog atmosphere' },
+      { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Closing statement and legal line' },
+    ],
+  },
+  {
     id: 'commerce',
     name: 'COMMERCE',
-    accent: '#161412',
+    accent: '#00c08b',
     wrapperClass: 'bg-bone text-ink',
     sections: [
       {
@@ -98,7 +167,7 @@ export const models = [
         name: 'Product Grid',
         kind: 'section',
         component: ProductGrid,
-        blurb: 'Catalog in the story; PDP, cart drawer and checkout ship as routes',
+        blurb: 'Catalog on the page; product, cart and checkout as separate screens',
       },
     ],
   },

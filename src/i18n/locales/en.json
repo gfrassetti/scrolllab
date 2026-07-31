@@ -24,7 +24,7 @@
     "licenseLink": "View regular license →",
     "remove": "Remove",
     "close": "Close",
-    "estimatedTotal": "Estimated total",
+    "estimatedTotal": "Total",
     "goToCart": "Go to cart →",
     "cartEmpty": "Your cart is empty.",
     "addToCart": "+ Add to cart",
@@ -40,7 +40,7 @@
     "heroLine3": "stories",
     "heroBody": "Modern, minimalist pages that break the mold. Build yours any way you want in the builder, or download one of our pre-built templates, ready to customize.",
     "scrollDown": "Scroll to explore",
-    "modelsLabel": "The models — 03",
+    "modelsLabel": "The models — 06",
     "modelsScrollHint": "Scroll to explore",
     "howTitleBefore": "You buy. You download a",
     "howTitleZip": "ZIP",
@@ -49,20 +49,20 @@
     "howBodyStrong": "source code",
     "howBodyAfter": "of your page, complete and editable, ready to customize and publish wherever you want.",
     "step1Title": "Sign in",
-    "step1Body": "Google login (required to buy and download).",
+    "step1Body": "Sign in with Google to buy and download.",
     "step2Title": "Pick or build",
-    "step2Body": "Buy a model (CHAPTERS, NOCTURNE, MONOLITH) or a custom builder composition.",
+    "step2Body": "A ready-made model (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER) or a page you build yourself.",
     "step3Title": "Pay",
-    "step3Body": "Once payment is confirmed, the order shows up under My purchases.",
-    "step4Title": "Download the .zip",
-    "step4Body": "Signed link (expires in 24 h; up to 10 downloads). Regenerate the link while logged in.",
+    "step3Body": "Pay with Mercado Pago. Your order shows up under My purchases.",
+    "step4Title": "Download the ZIP",
+    "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
     "paymentsTitle": "Simple, protected payments",
-    "paymentsBody": "Checkout takes place outside SCROLL LAB. We don't store your card details.",
+    "paymentsBody": "You pay with Mercado Pago. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
-    "zip1": "The full project (editable source code)",
-    "zip2": "Sections from the model or your builder recipe",
-    "zip3": "LICENSE.txt with your email and order number",
-    "zip4": "README.md with npm install / npm run dev",
+    "zip1": "The full editable project",
+    "zip2": "Sections from the model or what you built",
+    "zip3": "Your license with email and order number",
+    "zip4": "Setup instructions for your machine",
     "reqTitle": "Requirements and limits",
     "req1": "Node.js installed on your machine (npm included)",
     "req2Before": "Use in your own or client projects —",
@@ -72,7 +72,7 @@
     "builderEyebrow": "Or build your own",
     "builderTitleBefore": "Open the",
     "builderTitleEm": "builder",
-    "builderBody": "Mix sections from every model, reorder them, preview the live page, and export the recipe you assembled.",
+    "builderBody": "Mix sections from every model, reorder them, and preview the live page before you buy.",
     "builderPrices": "From {{base}} · Builder + Commerce = {{withCommerce}}",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
@@ -100,6 +100,21 @@
       "vibe": "Brutalist system",
       "tags": ["Three.js hero", "Velocity skew", "Spec sheet", "Type accordion"],
       "description": "Concrete grey, hard 2px borders, condensed type, and a wireframe 3D monolith spinning behind the hero."
+    },
+    "velocity": {
+      "vibe": "Athlete energy",
+      "tags": ["Strike-exit hero", "Horizontal gallery", "Helmet hall", "Parallax band"],
+      "description": "Deep green, lime accent, cinematic scroll: strike-exit hero, On/Off merge, helmet product grid and upward parallax — no 3D."
+    },
+    "fizz": {
+      "vibe": "Carbonated pop",
+      "tags": ["3D can with bubbles", "Page-repainting worlds", "Candy type", "Can shelf"],
+      "description": "Grape violet, candy colors and a 3D can spinning through bubbles. Every flavor is a full screen that repaints the page as you scroll."
+    },
+    "atelier": {
+      "vibe": "WebGL studio",
+      "tags": ["Scroll-reactive fog", "3D emblem", "Scrubbed stone", "Asymmetric services"],
+      "description": "Atmospheric dark canvas, scroll-tied fog, and Three.js pieces that rotate or shatter as you scroll. Digital studio aesthetic."
     }
   },
   "builder": {
@@ -115,20 +130,22 @@
     "canvasTitle": "02 — Your page",
     "sectionCountOne": "section",
     "sectionCountMany": "sections",
-    "emptyCanvas": "Empty canvas. Drag sections from the palette in this order:",
+    "emptyCanvas": "Empty canvas. Drag or tap + in the palette to start.",
+    "emptyPreview": "Nothing built yet. Compose your page in the builder and open preview again.",
     "emptyStepNav": "Nav",
     "emptyStepHero": "Hero",
     "emptyStepSections": "Narrative sections",
     "emptyStepFooter": "Footer",
-    "structureHint": "One page = one Nav, one Hero, and one Footer. Narrative sections (SECTION) can be repeated or mixed across models.",
-    "duplicateChromeWarn": "There's more than one Nav, Hero, or Footer. Remove the duplicates for a clean page.",
-    "cleanedChrome": "We removed duplicate Nav/Hero/Footer from a previous composition.",
+    "structureHint": "One page = one Nav and one Footer. You can add more than one Hero (e.g. to open another block). Narrative sections mix across models.",
+    "duplicateChromeWarn": "There's more than one Nav or Footer. Remove the duplicates for a clean page.",
+    "cleanedChrome": "We removed duplicate Nav/Footer from a previous composition.",
     "previewBeforeBuy": "Preview before buying →",
     "priceLadder": "Builder {{base}} · + Commerce {{surcharge}} = {{total}}",
     "uniqueKindLimit": "You already have a {{kind}} on the page. Remove it if you want another.",
     "uniqueKindShort": "A {{kind}} is already on the canvas",
     "add": "+ Add",
-    "recipeLabel": "Recipe — what you built",
+    "addedCount": "×{{count}}",
+    "addedAria": "{{name}} already added {{count}} times",
     "kind": {
       "nav": "NAV",
       "hero": "HERO",
@@ -140,14 +157,23 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "remove": "Remove",
-    "editTexts": "Edit texts",
+    "editNav": "Edit nav",
+    "editHero": "Edit hero",
+    "editFooter": "Edit footer",
+    "editSection": "Edit section",
     "editing": "Editing",
-    "editPanel": "Section texts",
+    "editPanel": "Edit section",
     "noEditableFields": "This section has no editable text fields yet.",
-    "commerceHint": "Add the grid to the story. The ZIP ships PDP (/product/:id), cart (drawer) and checkout (/checkout) as routes. Adds {{price}}.",
-    "estimatedPrice": "Estimated total",
-    "priceNote": "Final price is confirmed by the server at checkout",
+    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. +{{price}}.",
+    "estimatedPrice": "Total",
     "commerceIncluded": "Includes Commerce kit (+{{price}})",
+    "commerceBadge": "Commerce kit +{{price}}",
+    "modelUpload": "Try a local .glb",
+    "modelClear": "Remove model",
+    "modelHelp": "GLB/GLTF format (recommended: .glb, single file). A local file only works in this preview. To ship it in your ZIP: enter a public https URL, or leave the field empty and, in the downloaded project, save your model as public/my-model.glb and pass modelUrl=\"/my-model.glb\" (explained in the ZIP's README). Without a model, the placeholder object renders.",
+    "imageUpload": "Try a local image / SVG",
+    "imageClear": "Remove image",
+    "imageHelp": "PNG, SVG, WebP or JPG. A local file only works in this preview (it replaces the placeholder SVG). To ship it in your ZIP: enter a public https URL, or in the downloaded project save the file under public/ (e.g. public/can-1.svg) and pass can1Image=\"/can-1.svg\". Without an image, the template SVG can renders.",
     "sections": {
       "chapters": {
         "NavMinimal": {
@@ -259,10 +285,100 @@
           "blurb": "Klein-blue closing block with mono links"
         }
       },
+      "fizz": {
+        "NavFizz": {
+          "name": "Nav Fizz",
+          "blurb": "Floating pill header with candy CTA"
+        },
+        "HeroBubbles": {
+          "name": "Hero Bubbles",
+          "blurb": "3D soda can spinning over rising bubbles"
+        },
+        "FlavorWorlds": {
+          "name": "Flavor Worlds",
+          "blurb": "Full-screen worlds repainting the page per flavor"
+        },
+        "BubbleBenefits": {
+          "name": "Bubble Benefits",
+          "blurb": "Springy benefit cards with drifting bubbles"
+        },
+        "CanCarousel": {
+          "name": "Can Carousel",
+          "blurb": "Snap shelf of illustrated cans, tilt on hover"
+        },
+        "PopManifesto": {
+          "name": "Pop Manifesto",
+          "blurb": "Giant paragraph inking in with flavor colors"
+        },
+        "FooterSplash": {
+          "name": "Footer Splash",
+          "blurb": "Candy CTA word with bubbles rising behind"
+        }
+      },
+      "velocity": {
+        "NavVelocity": {
+          "name": "Nav Velocity",
+          "blurb": "Fixed athlete header with lime CTA"
+        },
+        "HeroStrike": {
+          "name": "Hero Strike",
+          "blurb": "Portrait hero that blurs and gets struck on scroll"
+        },
+        "TrackMerge": {
+          "name": "Track Merge",
+          "blurb": "Horizontal gallery / On-Off tracks merging"
+        },
+        "HelmetGrid": {
+          "name": "Helmet Grid",
+          "blurb": "Hall of fame product grid with focus"
+        },
+        "ParallaxRise": {
+          "name": "Parallax Rise",
+          "blurb": "Content band with rising parallax media"
+        },
+        "FooterVelocity": {
+          "name": "Footer Velocity",
+          "blurb": "Closing line with lime accent"
+        }
+      },
+      "atelier": {
+        "NavAtelier": {
+          "name": "Nav Atelier",
+          "blurb": "Fixed header that flips over light sections"
+        },
+        "HeroMeaning": {
+          "name": "Hero Meaning",
+          "blurb": "Blur-in type with a scroll-scrubbed WebGL emblem"
+        },
+        "AboutClarity": {
+          "name": "About Clarity",
+          "blurb": "Word-masked about statement over scroll fog"
+        },
+        "ServicesStone": {
+          "name": "Services Stone",
+          "blurb": "Pinned services with a scrubbed 3D stone"
+        },
+        "VisionShutter": {
+          "name": "Vision Shutter",
+          "blurb": "Shutter bands and oversized scrubbing words"
+        },
+        "SelectedWork": {
+          "name": "Selected Work",
+          "blurb": "Light sticky-title project column"
+        },
+        "KeyFacts": {
+          "name": "Key Facts",
+          "blurb": "Big numbers with fog atmosphere"
+        },
+        "FooterAtelier": {
+          "name": "Footer Atelier",
+          "blurb": "Closing statement and legal line"
+        }
+      },
       "commerce": {
         "ProductGrid": {
           "name": "Product Grid",
-          "blurb": "Catalog in the scroll; PDP, cart and checkout ship as routes"
+          "blurb": "Catalog on the page; product, cart and checkout separately"
         }
       }
     }
@@ -270,26 +386,25 @@
   "cart": {
     "eyebrow": "Cart",
     "title": "Your order",
-    "priceNote": "Final price is confirmed by the server at checkout",
-    "trustNote": "Paid via Mercado Pago · license in the ZIP",
+    "trustNote": "Paid with Mercado Pago · license included",
     "payLoggedIn": "Pay →",
     "payLoggedOut": "Log in to pay →",
-    "redirecting": "Redirecting…"
+    "redirecting": "One moment…"
   },
   "login": {
     "eyebrow": "Account",
     "title": "Log in to buy and download",
-    "body": "On {{site}}, ZIP downloads (source code + license) are only available with an account and a paid order.",
+    "body": "To buy and download your page you need an account. Sign in with Google and you’re set.",
     "google": "Continue with Google",
-    "devLogin": "Dev login (no Google)",
+    "devLogin": "Sign in without Google (dev only)",
     "errorGoogle": "Could not sign in with Google.",
-    "errorNotConfiguredDev": "Google OAuth is not configured. Use the dev login or set GOOGLE_CLIENT_ID on the server.",
+    "errorNotConfiguredDev": "Google isn’t set up. Use the dev login or ask the site admin to enable it.",
     "errorNotConfiguredProd": "Sign-in is unavailable right now. Try again later."
   },
   "account": {
     "eyebrow": "My purchases",
     "hello": "Hi, {{name}}",
-    "body": "Each download is a .zip with your page source. Generate the link here ({{ttl}}; max {{max}} downloads per order).",
+    "body": "Your purchases live here, always. Each one is a ZIP ready to open on your machine — hit Download whenever you need it.",
     "empty": "You haven't bought anything yet.",
     "order": "Order",
     "paid": "Paid",
@@ -299,10 +414,7 @@
     "preparing": "Preparing…",
     "waiting": "Confirming payment…",
     "pendingHint": "If you just paid, this can take a few seconds. Refresh if it stays like this.",
-    "downloadsLeft": "{{used}}/{{max}} downloads · {{left}} left",
-    "limitReached": "Limit reached",
-    "linkTtlMinutes": "link lasts {{minutes}} min",
-    "linkTtlHours": "link lasts {{hours}} h",
+    "limitReached": "Download limit reached",
     "prevPage": "← Previous",
     "nextPage": "Next →",
     "pageOf": "{{page}} / {{total}}"
@@ -317,7 +429,7 @@
   "checkout": {
     "eyebrow": "Checkout",
     "successTitle": "Payment received",
-    "successBody": "Your ZIP is ready under My purchases. Tap Download ZIP to get the signed link.",
+    "successBody": "Your ZIP is ready under My purchases. Tap Download whenever you need it.",
     "confirming": "Confirming payment with Mercado Pago…",
     "confirmError": "Payment was received, but we couldn't confirm it here. If My purchases still shows pending, wait a minute or contact us.",
     "goAccount": "Go to My purchases →",
@@ -406,15 +518,15 @@
       },
       {
         "title": "Products and license",
-        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, NOCTURNE, MONOLITH), builder compositions, and—if the recipe includes it—the Commerce kit (scroll grid plus PDP, cart, and checkout routes). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes LICENSE.txt with your email and order number."
+        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER), builder compositions, and—if you add it—the Commerce kit (catalog, product page, cart, and checkout). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes your license with email and order number."
       },
       {
         "title": "Prices and payments",
-        "body": "Current prices are shown in the catalog and builder (models from ARS 200,000; MONOLITH ARS 250,000; builder composition ARS 350,000; Commerce kit +ARS 150,000). The server confirms the final total at checkout. Payments are processed by Mercado Pago and are subject to its approval. An order is considered paid only after the service receives the corresponding confirmation."
+        "body": "Current prices are shown in the catalog and builder. The purchase total is the one shown when you pay with Mercado Pago, subject to their approval. An order is considered paid when Mercado Pago confirms the payment."
       },
       {
         "title": "Delivery and downloads",
-        "body": "After payment is confirmed, the product becomes available under My purchases through a temporary signed link. You are responsible for downloading and backing up the files. We may limit or block downloads where fraud, abuse, or a breach is suspected."
+        "body": "After payment is confirmed, the product becomes available under My purchases so you can download it whenever you want. You are responsible for backing up the files. We may limit or block downloads where fraud, abuse, or a breach is suspected."
       },
       {
         "title": "Refunds",

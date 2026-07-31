@@ -106,7 +106,8 @@ export function loadConfig() {
     throw new Error("COOKIE_SAME_SITE inválido (lax|strict|none)");
   }
 
-  const downloadTtlDefault = isProd ? 900 : 86400;
+  // Link firmado (anti-filtración). La compra sigue en Mis compras para siempre.
+  const downloadTtlDefault = 30 * 24 * 60 * 60; // 30 días
   const emailEnabled = bool(
     "EMAIL_ENABLED",
     Boolean(process.env.RESEND_API_KEY),
@@ -126,7 +127,7 @@ export function loadConfig() {
     sessionSecret,
     downloadSecret,
     downloadTtl: Number(process.env.DOWNLOAD_TTL_SECONDS || downloadTtlDefault),
-    maxDownloads: Number(process.env.MAX_DOWNLOADS || 10),
+    maxDownloads: Number(process.env.MAX_DOWNLOADS || 50),
     storageDir: path.resolve(
       process.env.STORAGE_DIR || path.join(ROOT, "storage", "orders"),
     ),

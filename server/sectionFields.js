@@ -31,8 +31,67 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
   'nocturne/OutroCTA': ['ctaWord', 'email', 'legal'],
   'monolith/NavBrutal': ['brand'],
-  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape'],
+  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
   'monolith/FooterBrutal': ['ctaWord', 'email', 'legal'],
+  'fizz/NavFizz': ['brand', 'cta'],
+  'fizz/HeroBubbles': [
+    'title',
+    'tagline',
+    'meta',
+    'hint',
+    'flavor',
+    'canLabel',
+    'modelUrl',
+  ],
+  'fizz/FlavorWorlds': ['eyebrow'],
+  'fizz/BubbleBenefits': ['eyebrow', 'title'],
+  'fizz/CanCarousel': [
+    'eyebrow',
+    'title',
+    'cta',
+    'canLabel',
+    'can1Name',
+    'can1Note',
+    'can1Image',
+    'can2Name',
+    'can2Note',
+    'can2Image',
+    'can3Name',
+    'can3Note',
+    'can3Image',
+    'can4Name',
+    'can4Note',
+    'can4Image',
+    'can5Name',
+    'can5Note',
+    'can5Image',
+  ],
+  'fizz/PopManifesto': ['eyebrow', 'text'],
+  'fizz/FooterSplash': ['ctaWord', 'email', 'legal'],
+  'velocity/NavVelocity': ['brand', 'cta'],
+  'velocity/HeroStrike': ['brand', 'lineLeft', 'lineRight', 'caption'],
+  'velocity/HelmetGrid': ['eyebrow', 'title', 'body'],
+  'velocity/ParallaxRise': ['eyebrow', 'title', 'body', 'cta'],
+  'velocity/FooterVelocity': ['line', 'legal'],
+  'atelier/NavAtelier': ['brand', 'cta'],
+  'atelier/HeroMeaning': ['line1', 'line2', 'meta', 'hint'],
+  'atelier/AboutClarity': ['eyebrow', 'title', 'body'],
+  'atelier/ServicesStone': [
+    'eyebrow',
+    'title',
+    'service1Title',
+    'service1Body',
+    'service2Title',
+    'service2Body',
+    'service3Title',
+    'service3Body',
+    'service4Title',
+    'service4Body',
+  ],
+  'atelier/VisionShutter': ['line1', 'line2', 'word1', 'word2', 'word3'],
+  'atelier/SelectedWork': ['title', 'cta'],
+  'atelier/KeyFacts': ['eyebrow', 'title'],
+  'atelier/FooterAtelier': ['line', 'legal'],
   'commerce/ProductGrid': ['eyebrow', 'title', 'body'],
 })
 
@@ -42,6 +101,24 @@ const SHAPE_PRESETS = new Set([
   'octahedron',
   'torus',
   'sphere',
+])
+
+const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
+
+/**
+ * Asset URLs baked into the sold ZIP must be a real path/URL:
+ * https:// or a site-relative path like /my-can.png.
+ * blob:/data: (builder-preview uploads) never survive the session.
+ */
+const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
+
+const ASSET_URL_KEYS = new Set([
+  'modelUrl',
+  'can1Image',
+  'can2Image',
+  'can3Image',
+  'can4Image',
+  'can5Image',
 ])
 
 export function sanitizeSectionProps(sectionId, props) {
@@ -56,6 +133,8 @@ export function sanitizeSectionProps(sectionId, props) {
     const trimmed = value.slice(0, 2000)
     if (!trimmed) continue
     if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
+    if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
+    if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed
   }
   return Object.keys(cleaned).length ? cleaned : undefined

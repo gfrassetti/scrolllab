@@ -14,17 +14,18 @@ function isChunkLoadError(error) {
 
 /**
  * Tras un deploy, tabs abiertas pueden pedir chunks con hash viejo.
- * Un reload limpia el HTML/cache y recupera la app.
+ * Solo ese caso se recupera con un reload; cualquier otro error se propaga
+ * para no enmascarar bugs reales con un cartel de "versión nueva".
  */
 export default class ChunkErrorBoundary extends Component {
-  state = { crashed: false }
+  state = { error: null }
 
-  static getDerivedStateFromError() {
-    return { crashed: true }
+  static getDerivedStateFromError(error) {
+    return { error }
   }
 
   componentDidCatch(error) {
-    if (!isChunkLoadError(error)) return
+    if (!isChunkLoadError(error) || import.meta.env.DEV) return
     try {
       if (sessionStorage.getItem(RELOAD_KEY) === '1') {
         sessionStorage.removeItem(RELOAD_KEY)
@@ -46,11 +47,17 @@ export default class ChunkErrorBoundary extends Component {
   }
 
   render() {
-    if (this.state.crashed) {
+    const { error } = this.state
+
+    if (error && (import.meta.env.DEV || !isChunkLoadError(error))) {
+      throw error
+    }
+
+    if (error) {
       return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-4 bg-bone px-5 text-ink">
           <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-            SCROLL LAB
+            SCROLLLAB
           </p>
           <p className="max-w-[36ch] text-center text-sm text-ink/70">
             Hay una versión nueva del sitio. Recargá la página.
@@ -65,6 +72,7 @@ export default class ChunkErrorBoundary extends Component {
         </div>
       )
     }
+
     return this.props.children
   }
 }

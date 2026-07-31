@@ -13,6 +13,9 @@ import './lib/theme'
 const ChaptersPage = lazy(() => import('./pages/ChaptersPage'))
 const NocturnePage = lazy(() => import('./pages/NocturnePage'))
 const MonolithPage = lazy(() => import('./pages/MonolithPage'))
+const FizzPage = lazy(() => import('./pages/FizzPage'))
+const VelocityPage = lazy(() => import('./pages/VelocityPage'))
+const AtelierPage = lazy(() => import('./pages/AtelierPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -62,6 +65,9 @@ export default function App() {
                 <Route path="/templates/chapters" element={<ChaptersPage />} />
                 <Route path="/templates/nocturne" element={<NocturnePage />} />
                 <Route path="/templates/monolith" element={<MonolithPage />} />
+                <Route path="/templates/fizz" element={<FizzPage />} />
+                <Route path="/templates/velocity" element={<VelocityPage />} />
+                <Route path="/templates/atelier" element={<AtelierPage />} />
                 <Route path="/builder" element={<BuilderPage />} />
                 <Route path="/preview" element={<PreviewPage />} />
                 <Route path="/legal/license" element={<LicensePage />} />

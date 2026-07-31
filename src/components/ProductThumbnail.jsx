@@ -17,6 +17,24 @@ const styles = {
     accent: '#2b3cff',
     code: 'MO',
   },
+  velocity: {
+    background: '#0a1a12',
+    color: '#ece9e2',
+    accent: '#d9ff3f',
+    code: 'VE',
+  },
+  fizz: {
+    background: '#241352',
+    color: '#fff3e2',
+    accent: '#ff3ea5',
+    code: 'FZ',
+  },
+  atelier: {
+    background: '#0b0c10',
+    color: '#f2f2f2',
+    accent: '#c8d0dc',
+    code: 'AT',
+  },
   custom: {
     background: '#181715',
     color: '#f2efe8',

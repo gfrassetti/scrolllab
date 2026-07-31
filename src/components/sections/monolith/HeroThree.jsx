@@ -28,8 +28,39 @@ function createShapeGeometry(shape) {
 }
 
 /**
+ * Fit a loaded model into the same footprint as the presets so the
+ * scroll/pointer animations keep working regardless of source scale.
+ */
+function fitObjectToScene(obj, targetSize = 5.2) {
+  const box = new THREE.Box3().setFromObject(obj)
+  const size = box.getSize(new THREE.Vector3())
+  const maxAxis = Math.max(size.x, size.y, size.z) || 1
+  obj.scale.setScalar(targetSize / maxAxis)
+  box.setFromObject(obj)
+  const center = box.getCenter(new THREE.Vector3())
+  obj.position.sub(center)
+}
+
+function disposeObject(obj) {
+  obj.traverse((node) => {
+    node.geometry?.dispose?.()
+    const mats = Array.isArray(node.material) ? node.material : [node.material]
+    mats.forEach((m) => {
+      if (!m) return
+      Object.values(m).forEach((v) => v?.isTexture && v.dispose())
+      m.dispose?.()
+    })
+  })
+}
+
+/**
  * HeroThree — brutalist hero with a Three.js wireframe object
  * spinning behind giant condensed type. Shape is a curated preset.
+ *
+ * `modelUrl` (optional): URL or path to a GLB/GLTF file. When set, the
+ * preset shape is replaced by the custom model, re-materialized as a
+ * carbon wireframe to keep the brutalist look. Buyers drop their file
+ * in `public/` and point to it, e.g. modelUrl="/my-object.glb".
  */
 export default function HeroThree({
   title = 'MONOLITH',
@@ -37,6 +68,7 @@ export default function HeroThree({
   meta = 'System v1.0 — ©2026',
   hint = 'Scroll',
   shape = 'icosahedron',
+  modelUrl = '',
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
@@ -74,6 +106,43 @@ export default function HeroThree({
       group.add(wireframe, points)
       group.rotation.set(0.4, 0.6, 0)
       scene.add(group)
+
+      // —— Optional custom model (GLB/GLTF), re-skinned as wireframe ——
+      let customModel = null
+      let cancelled = false
+      if (modelUrl && typeof modelUrl === 'string') {
+        import('three/examples/jsm/loaders/GLTFLoader.js')
+          .then(({ GLTFLoader }) => {
+            if (cancelled) return
+            new GLTFLoader().load(
+              modelUrl,
+              (gltf) => {
+                if (cancelled) {
+                  disposeObject(gltf.scene)
+                  return
+                }
+                customModel = gltf.scene
+                customModel.traverse((node) => {
+                  if (node.isMesh) {
+                    node.material = new THREE.MeshBasicMaterial({
+                      wireframe: true,
+                      color: 0x101010,
+                    })
+                  }
+                })
+                fitObjectToScene(customModel)
+                group.remove(wireframe, points)
+                group.add(customModel)
+                render()
+              },
+              undefined,
+              () => {
+                console.warn(`HeroThree: could not load model "${modelUrl}"`)
+              },
+            )
+          })
+          .catch(() => {})
+      }
 
       const pointer = { x: 0, y: 0 }
 
@@ -141,16 +210,18 @@ export default function HeroThree({
       }
 
       return () => {
+        cancelled = true
         window.removeEventListener('resize', resize)
         window.removeEventListener('pointermove', onPointerMove)
         gsap.ticker.remove(tick)
         geometry.dispose()
         wireframe.material.dispose()
         points.material.dispose()
+        if (customModel) disposeObject(customModel)
         renderer.dispose()
       }
     },
-    { scope: root, dependencies: [resolvedShape], revertOnUpdate: true },
+    { scope: root, dependencies: [resolvedShape, modelUrl], revertOnUpdate: true },
   )
 
   return (

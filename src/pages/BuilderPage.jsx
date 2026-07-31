@@ -1,19 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { models, getSection } from '../lib/sectionRegistry'
 import {
-  readCompositionItems,
-  saveComposition,
-  compositionToRecipe,
-  recipeHasCommerce,
-  dedupeUniqueKinds,
-} from '../lib/composition'
-import {
-  estimateCustomPrice,
   formatArs,
   COMMERCE_PACK_SURCHARGE,
-  CUSTOM_BASE_PRICE,
 } from '../lib/pricing'
+import { useBuilderComposition } from '../hooks/useBuilderComposition'
+import { sectionKind } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import BuilderPreview from '../components/BuilderPreview'
 import CartPopover from '../components/CartPopover'
@@ -30,91 +23,76 @@ const kindLabelKeys = {
   footer: 'builder.kind.footer',
 }
 
-/** Una sola nav / hero / footer por página. Las secciones narrativas sí se pueden repetir. */
-const UNIQUE_KINDS = new Set(['nav', 'hero', 'footer'])
-
 const DND_MIME = 'text/plain'
 
-/** Clave i18n de name/blurb a partir del id `model/Component`. */
 function sectionCopyKey(sectionId, field) {
   return `builder.sections.${sectionId.replace('/', '.')}.${field}`
 }
 
 /**
- * BuilderPage — armá una página propia eligiendo secciones de
- * cualquier modelo: arrastrá desde la paleta al lienzo (o usá
- * "+ Agregar" en touch), reordená arrastrando o con flechas y
- * previsualizá la página real. Persiste en localStorage.
+ * BuilderPage — UI del builder. La lógica vive en useBuilderComposition
+ * + src/lib/composition.js (persistencia, receta, chrome único).
  */
-function bootstrapComposition() {
-  const loaded = readCompositionItems()
-  const items = dedupeUniqueKinds(loaded)
-  return { items, cleaned: items.length < loaded.length }
-}
-
 export default function BuilderPage() {
-  const [boot] = useState(bootstrapComposition)
-  const [items, setItems] = useState(boot.items)
-  const [preview, setPreview] = useState(false)
-  // null | index de inserción | 'end'
-  const [dragOver, setDragOver] = useState(null)
-  const [limitNotice, setLimitNotice] = useState('')
+  const t = useT()
   const addToCart = useCart((s) => s.addItem)
   const { user, loading: authLoading, hadSession } = useAuth()
   const looksLoggedIn = user ? true : authLoading ? hadSession : false
   const navigate = useNavigate()
-  const t = useT()
+
+  const {
+    items,
+    preview,
+    dragOver,
+    setDragOver,
+    limitNotice,
+    setLimitNotice,
+    bootCleaned,
+    recipe,
+    hasCommerce,
+    estimatedPrice,
+    hasDuplicateChrome,
+    addSection,
+    updateItemProps,
+    removeItem,
+    moveItem,
+    reorderItem,
+    clearItems,
+    isKindBlocked,
+    openPreview,
+    closePreview,
+  } = useBuilderComposition()
 
   useEffect(() => {
-    saveComposition(items)
-  }, [items])
+    if (bootCleaned) setLimitNotice(t('builder.cleanedChrome'))
+  }, [bootCleaned, setLimitNotice, t])
 
   useEffect(() => {
-    if (boot.cleaned) setLimitNotice(t('builder.cleanedChrome'))
-  }, [boot.cleaned, t])
+    if (hasDuplicateChrome) setLimitNotice(t('builder.cleanedChrome'))
+  }, [hasDuplicateChrome, setLimitNotice, t])
 
-  useEffect(() => {
-    if (!limitNotice) return undefined
-    const id = window.setTimeout(() => setLimitNotice(''), 3200)
-    return () => window.clearTimeout(id)
-  }, [limitNotice])
-
-  const recipe = useMemo(() => compositionToRecipe(items), [items])
-  const hasCommerce = useMemo(() => recipeHasCommerce(recipe), [recipe])
-  const estimatedPrice = estimateCustomPrice(hasCommerce)
-
-  const takenKinds = useMemo(() => {
-    const taken = new Set()
+  const sectionCounts = useMemo(() => {
+    const counts = new Map()
     for (const item of items) {
-      const kind = getSection(item.sectionId)?.kind
-      if (kind && UNIQUE_KINDS.has(kind)) taken.add(kind)
+      counts.set(item.sectionId, (counts.get(item.sectionId) || 0) + 1)
     }
-    return taken
+    return counts
   }, [items])
 
-  const hasDuplicateChrome = useMemo(() => {
-    const counts = { nav: 0, hero: 0, footer: 0 }
+  const structure = useMemo(() => {
+    let nav = 0
+    let hero = 0
+    let section = 0
+    let footer = 0
     for (const item of items) {
-      const kind = getSection(item.sectionId)?.kind
-      if (kind && kind in counts) counts[kind] += 1
+      const kind = sectionKind(item.sectionId)
+      if (kind === 'nav') nav += 1
+      else if (kind === 'hero') hero += 1
+      else if (kind === 'footer') footer += 1
+      else if (kind === 'section') section += 1
     }
-    return Object.values(counts).some((n) => n > 1)
+    return { nav, hero, section, footer }
   }, [items])
-
-  // Autocuración: si llega una composición con chrome duplicado, la limpia.
-  useEffect(() => {
-    if (!hasDuplicateChrome) return
-    setItems((prev) => {
-      const cleaned = dedupeUniqueKinds(prev)
-      return cleaned.length === prev.length ? prev : cleaned
-    })
-    setLimitNotice(t('builder.cleanedChrome'))
-  }, [hasDuplicateChrome, t])
-
-  const kindBlocked = (sectionId) => {
-    const kind = getSection(sectionId)?.kind
-    return Boolean(kind && UNIQUE_KINDS.has(kind) && takenKinds.has(kind))
-  }
 
   const compositionCartItem = () => ({
     sku: 'custom',
@@ -133,65 +111,16 @@ export default function BuilderPage() {
     navigate(user ? '/cart' : '/login')
   }
 
-  const addSection = (sectionId, atIndex) => {
-    const section = getSection(sectionId)
-    if (!section) return
-
-    let blocked = false
-    setItems((prev) => {
-      if (
-        UNIQUE_KINDS.has(section.kind) &&
-        prev.some((item) => getSection(item.sectionId)?.kind === section.kind)
-      ) {
-        blocked = true
-        return prev
-      }
-      const index = atIndex == null ? prev.length : atIndex
-      const next = [...prev]
-      next.splice(index, 0, {
-        uid: crypto.randomUUID(),
-        sectionId,
-        props: {},
-      })
-      return next
-    })
-
-    if (blocked) {
+  const handleAddSection = (sectionId, atIndex) => {
+    const blockedKind = addSection(sectionId, atIndex)
+    if (blockedKind) {
       setLimitNotice(
         t('builder.uniqueKindLimit', {
-          kind: t(kindLabelKeys[section.kind]),
+          kind: t(kindLabelKeys[blockedKind]),
         }),
       )
     }
   }
-
-  const updateItemProps = (uid, props) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.uid !== uid) return item
-        const next = { uid: item.uid, sectionId: item.sectionId }
-        if (props && Object.keys(props).length) next.props = props
-        return next
-      }),
-    )
-  }
-
-  const removeItem = (uid) => {
-    setItems((prev) => prev.filter((item) => item.uid !== uid))
-  }
-
-  const moveItem = (uid, delta) => {
-    setItems((prev) => {
-      const from = prev.findIndex((item) => item.uid === uid)
-      const to = from + delta
-      if (to < 0 || to >= prev.length) return prev
-      const next = [...prev]
-      next.splice(to, 0, next.splice(from, 1)[0])
-      return next
-    })
-  }
-
-  /* ——— Drag & drop nativo ——— */
 
   const startPaletteDrag = (e, sectionId) => {
     e.dataTransfer.setData(DND_MIME, JSON.stringify({ type: 'add', sectionId }))
@@ -216,16 +145,9 @@ export default function BuilderPage() {
     }
 
     if (payload?.type === 'add' && getSection(payload.sectionId)) {
-      addSection(payload.sectionId, index)
+      handleAddSection(payload.sectionId, index)
     } else if (payload?.type === 'move') {
-      setItems((prev) => {
-        const from = prev.findIndex((item) => item.uid === payload.uid)
-        if (from === -1) return prev
-        const next = [...prev]
-        const [moved] = next.splice(from, 1)
-        next.splice(from < index ? index - 1 : index, 0, moved)
-        return next
-      })
+      reorderItem(payload.uid, index)
     }
   }
 
@@ -235,17 +157,6 @@ export default function BuilderPage() {
     setDragOver(index)
   }
 
-  const openPreview = () => {
-    window.scrollTo(0, 0)
-    setPreview(true)
-  }
-
-  const closePreview = () => {
-    window.scrollTo(0, 0)
-    setPreview(false)
-  }
-
-  /* ——— Preview en vivo + edición de textos ——— */
   if (preview) {
     return (
       <SmoothScrollProvider>
@@ -258,10 +169,9 @@ export default function BuilderPage() {
     )
   }
 
-  /* ——— UI del builder ——— */
   return (
-    <div className="min-h-svh bg-bone px-5 py-10 text-ink md:px-10">
-      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 pb-4">
+    <div className="min-h-svh bg-bone px-5 pb-10 text-ink md:px-10">
+      <header className="sticky top-0 z-30 -mx-5 mb-10 flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 bg-bone/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
         <div className="flex items-baseline gap-6">
           <Link
             to="/"
@@ -277,7 +187,7 @@ export default function BuilderPage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={() => setItems([])}
+            onClick={clearItems}
             disabled={items.length === 0}
             className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 not-disabled:hover:border-ink disabled:opacity-30 md:text-xs"
           >
@@ -297,8 +207,7 @@ export default function BuilderPage() {
         </div>
       </header>
 
-      <div className="mt-10 grid gap-12 lg:grid-cols-12">
-        {/* ——— Paleta ——— */}
+      <div className="grid items-start gap-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
             {t('builder.paletteTitle')}
@@ -325,7 +234,10 @@ export default function BuilderPage() {
 
                 <ul>
                   {model.sections.map((section) => {
-                    const blocked = kindBlocked(section.id)
+                    const blocked = isKindBlocked(section.id)
+                    const count = sectionCounts.get(section.id) || 0
+                    const added = count > 0
+                    const name = t(sectionCopyKey(section.id, 'name'))
                     return (
                       <li
                         key={section.id}
@@ -342,21 +254,30 @@ export default function BuilderPage() {
                           blocked
                             ? 'cursor-not-allowed opacity-40'
                             : 'cursor-grab active:cursor-grabbing'
-                        }`}
+                        } ${added ? 'bg-ink/[0.03]' : ''}`}
                       >
                         <div className="flex min-w-0 items-center gap-3">
                           <span
                             aria-hidden="true"
-                            className="shrink-0 text-ink/30"
+                            className={`grid size-5 shrink-0 place-items-center text-[11px] ${
+                              added
+                                ? 'border border-accent/50 text-accent'
+                                : 'text-ink/30'
+                            }`}
                           >
-                            ⠿
+                            {added ? '✓' : '⠿'}
                           </span>
                           <div className="min-w-0">
-                            <p className="flex items-baseline gap-2 text-sm font-medium">
-                              {t(sectionCopyKey(section.id, 'name'))}
+                            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm font-medium">
+                              {name}
                               <span className="text-[9px] tracking-[0.2em] text-ink/40">
                                 {t(kindLabelKeys[section.kind])}
                               </span>
+                              {added && (
+                                <span className="text-[10px] tracking-[0.16em] text-accent">
+                                  {t('builder.addedCount', { count })}
+                                </span>
+                              )}
                             </p>
                             <p className="truncate text-xs text-ink/50">
                               {blocked
@@ -369,14 +290,20 @@ export default function BuilderPage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => addSection(section.id)}
+                          onClick={() => handleAddSection(section.id)}
                           disabled={blocked}
-                          aria-label={t('builder.addAria', {
-                            name: t(sectionCopyKey(section.id, 'name')),
-                          })}
-                          className="min-h-10 shrink-0 border border-ink/30 px-3 py-2 text-xs transition-colors duration-200 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-40"
+                          aria-label={
+                            added
+                              ? t('builder.addedAria', { name, count })
+                              : t('builder.addAria', { name })
+                          }
+                          className={`min-h-10 shrink-0 border px-3 py-2 text-xs transition-colors duration-200 disabled:opacity-40 ${
+                            added
+                              ? 'border-accent/60 text-accent not-disabled:hover:border-accent not-disabled:hover:bg-accent not-disabled:hover:text-ink'
+                              : 'border-ink/30 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone'
+                          }`}
                         >
-                          {t('builder.add')}
+                          {added ? `✓ ${count}` : t('builder.add')}
                         </button>
                       </li>
                     )
@@ -387,39 +314,56 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* ——— Lienzo / composición ——— */}
-        <div className="lg:col-span-7">
-          <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+        <div className="lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:max-h-[calc(100svh-5.5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain">
+          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
             {t('builder.canvasTitle')} ({items.length}{' '}
             {items.length === 1
               ? t('builder.sectionCountOne')
               : t('builder.sectionCountMany')})
           </p>
 
+          <ol className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase tracking-[0.18em] text-ink/40 md:text-[11px]">
+            {[
+              { key: 'nav', label: t('builder.emptyStepNav'), count: structure.nav },
+              { key: 'hero', label: t('builder.emptyStepHero'), count: structure.hero },
+              {
+                key: 'section',
+                label: t('builder.emptyStepSections'),
+                count: structure.section,
+              },
+              {
+                key: 'footer',
+                label: t('builder.emptyStepFooter'),
+                count: structure.footer,
+              },
+            ].map((step) => (
+              <li
+                key={step.key}
+                className={`flex items-center gap-1.5 ${
+                  step.count > 0 ? 'text-accent' : ''
+                }`}
+              >
+                <span aria-hidden="true">{step.count > 0 ? '✓' : '○'}</span>
+                <span>
+                  {step.label}
+                  {step.count > 0 ? ` · ${step.count}` : ''}
+                </span>
+              </li>
+            ))}
+          </ol>
+
           {items.length === 0 ? (
             <div
               onDragOver={allowDropAt('end')}
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => handleDrop(e, 0)}
-              className={`flex min-h-60 flex-col items-center justify-center gap-6 border-2 border-dashed p-10 text-center transition-colors duration-200 ${
+              className={`flex min-h-60 flex-col items-center justify-center gap-4 border-2 border-dashed p-10 text-center transition-colors duration-200 ${
                 dragOver === 'end' ? 'border-accent bg-accent/5' : 'border-ink/20'
               }`}
             >
               <p className="max-w-[36ch] text-sm text-ink/50">
                 {t('builder.emptyCanvas')}
               </p>
-              <ol className="w-full max-w-[28ch] space-y-2 text-left text-xs uppercase tracking-[0.2em] text-ink/45">
-                <li className="border-b border-ink/10 pb-2">
-                  01 — {t('builder.emptyStepNav')}
-                </li>
-                <li className="border-b border-ink/10 pb-2">
-                  02 — {t('builder.emptyStepHero')}
-                </li>
-                <li className="border-b border-ink/10 pb-2">
-                  03 — {t('builder.emptyStepSections')}
-                </li>
-                <li>04 — {t('builder.emptyStepFooter')}</li>
-              </ol>
             </div>
           ) : (
             <div
@@ -462,8 +406,18 @@ export default function BuilderPage() {
                         <p className="truncate text-base font-medium md:text-lg">
                           {t(sectionCopyKey(section.id, 'name'))}
                         </p>
-                        <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                          {section.model.name} · {t(kindLabelKeys[section.kind])}
+                        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                          <span>
+                            {section.model.name} ·{' '}
+                            {t(kindLabelKeys[section.kind])}
+                          </span>
+                          {section.model.id === 'commerce' && (
+                            <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
+                              {t('builder.commerceBadge', {
+                                price: formatArs(COMMERCE_PACK_SURCHARGE),
+                              })}
+                            </span>
+                          )}
                         </p>
                       </div>
 
@@ -516,16 +470,7 @@ export default function BuilderPage() {
           )}
 
           {items.length > 0 && (
-            <div className="mt-8 space-y-5 border border-ink/15 p-5 md:p-6 lg:sticky lg:top-6">
-              <div>
-                <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                  {t('builder.recipeLabel')}
-                </p>
-                <code className="block text-xs leading-relaxed break-all text-ink/70">
-                  {JSON.stringify(recipe)}
-                </code>
-              </div>
-
+            <div className="mt-8 space-y-5 border border-ink/15 bg-bone p-5 md:p-6">
               <p className="text-xs leading-relaxed text-ink/55">
                 {t('builder.structureHint')}
               </p>
@@ -542,24 +487,13 @@ export default function BuilderPage() {
                 <p className="mt-2 text-[clamp(1.5rem,3vw,2rem)] font-medium tracking-[-0.02em]">
                   {formatArs(estimatedPrice)}
                 </p>
-                {hasCommerce ? (
+                {hasCommerce && (
                   <p className="mt-1 text-xs text-ink/55">
                     {t('builder.commerceIncluded', {
                       price: formatArs(COMMERCE_PACK_SURCHARGE),
                     })}
                   </p>
-                ) : (
-                  <p className="mt-1 text-xs text-ink/55">
-                    {t('builder.priceLadder', {
-                      base: formatArs(CUSTOM_BASE_PRICE),
-                      surcharge: formatArs(COMMERCE_PACK_SURCHARGE),
-                      total: formatArs(estimateCustomPrice(true)),
-                    })}
-                  </p>
                 )}
-                <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                  {t('builder.priceNote')}
-                </p>
               </div>
 
               <button

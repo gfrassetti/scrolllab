@@ -8,7 +8,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const outDir = path.join(__dirname, '..', 'storage', 'catalog')
 
-const models = ['chapters', 'nocturne', 'monolith']
+const models = ['chapters', 'nocturne', 'monolith', 'velocity', 'fizz', 'atelier']
 
 for (const model of models) {
   const dest = path.join(outDir, `${model}.zip`)

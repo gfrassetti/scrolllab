@@ -29,6 +29,24 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/monolith',
   },
+  velocity: {
+    page: 'src/pages/VelocityPage.jsx',
+    sectionsDir: 'src/components/sections/velocity',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/velocity',
+  },
+  fizz: {
+    page: 'src/pages/FizzPage.jsx',
+    sectionsDir: 'src/components/sections/fizz',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/fizz',
+  },
+  atelier: {
+    page: 'src/pages/AtelierPage.jsx',
+    sectionsDir: 'src/components/sections/atelier',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/atelier',
+  },
 }
 
 const SHARED = [
@@ -101,6 +119,10 @@ function modelWrapperClass(model) {
   if (model === 'chapters') return 'bg-bone text-ink'
   if (model === 'nocturne') return 'bg-noir text-salt'
   if (model === 'monolith') return 'bg-concrete text-carbon'
+  if (model === 'velocity') return 'bg-[#0a1a12] text-[#ece9e2]'
+  if (model === 'fizz') return 'bg-grape text-foam'
+  if (model === 'atelier') return 'bg-[#0b0c10] text-white'
+  if (model === 'commerce') return 'bg-bone text-ink'
   return 'bg-bone text-ink'
 }
 
@@ -117,6 +139,40 @@ const SHOP_ROUTE_COMPONENTS = [
   'src/components/sections/commerce/Checkout.jsx',
   'src/components/sections/commerce/ShopChrome.jsx',
 ]
+
+/** READMEs: how to swap the hero's 3D object for a custom GLB. */
+const MODEL_3D_NOTES = {
+  fizz: `## Custom 3D model (hero)
+
+The hero's soda can is generated in code (no assets). To use your own model:
+
+1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
+2. Drop it in \`public/\`, e.g. \`public/my-can.glb\`.
+3. In \`src/App.jsx\`, pass it to the hero: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
+
+The model is auto-centered and auto-scaled; it keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works. Without \`modelUrl\`, the placeholder can renders (label color via \`flavor\`: berry / citrus / tropical / mint).
+
+## Custom can images (carousel)
+
+The lineup cans are inline SVG placeholders. To replace each one:
+
+1. Export your art as **SVG**, PNG, WebP or JPG.
+2. Drop files in \`public/\`, e.g. \`public/can-1.svg\`.
+3. Pass them to the carousel: \`<CanCarousel can1Image="/can-1.svg" can2Image="/can-2.png" … />\`.
+
+A hosted \`https://\` URL also works. Without \`canNImage\`, the SVG placeholder renders (\`canLabel\` prints on it).
+`,
+  monolith: `## Custom 3D model (hero)
+
+The hero's wireframe object is a preset (\`shape\`). To use your own model:
+
+1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
+2. Drop it in \`public/\`, e.g. \`public/my-object.glb\`.
+3. In \`src/App.jsx\`, pass it to the hero: \`<HeroThree modelUrl="/my-object.glb" />\`.
+
+The model is auto-centered, auto-scaled and re-materialized as a carbon wireframe to keep the brutalist look. A hosted \`https://\` URL also works.
+`,
+}
 
 function rewritePageToApp(content, model) {
   // ChaptersPage etc. import from '../components/...' — in packaged App they live under ./components
@@ -188,7 +244,9 @@ export async function packFixedTemplate({ model, destPath, licenseMeta }) {
   )
 
   archive.append(
-    `# ${model.toUpperCase()} — SCROLLLAB\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n\nSee LICENSE.txt for usage terms.\n`,
+    `# ${model.toUpperCase()} — SCROLLLAB\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n\nSee LICENSE.txt for usage terms.\n${
+      MODEL_3D_NOTES[model] ? `\n${MODEL_3D_NOTES[model]}` : ''
+    }`,
     { name: 'README.md' },
   )
 
@@ -249,6 +307,7 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
   const imports = []
   const renderLines = []
   const seen = new Set()
+  const packedModels = new Set()
 
   entries.forEach((entry, i) => {
     const sectionId = entry.id
@@ -265,10 +324,22 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
     if (!abs.startsWith(sectionsRoot)) return
     if (!fs.existsSync(abs)) return
 
+    // Pack every .jsx in the model folder once (helpers like ScrollFog).
+    if (!packedModels.has(model)) {
+      packedModels.add(model)
+      const modelDir = path.join(ROOT, 'src', 'components', 'sections', model)
+      if (fs.existsSync(modelDir)) {
+        for (const file of fs.readdirSync(modelDir)) {
+          if (!file.endsWith('.jsx')) continue
+          const rel = path.posix.join('src/components/sections', model, file)
+          const raw = fs.readFileSync(path.join(modelDir, file), 'utf8')
+          archive.append(rewriteImportsInSections(raw), { name: rel })
+        }
+      }
+    }
+
     if (!seen.has(sectionId)) {
       seen.add(sectionId)
-      const raw = fs.readFileSync(abs, 'utf8')
-      archive.append(rewriteImportsInSections(raw), { name: fileRel })
       imports.push(
         `import ${component}_${model} from './components/sections/${model}/${component}'`,
       )
@@ -349,6 +420,13 @@ ${renderLines.join('\n')}
 
   const idList = entries.map((e) => e.id).filter(Boolean)
   let readme = `# Composición custom — SCROLLLAB\n\nReceta:\n${idList.map((r) => `- ${r}`).join('\n')}\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n`
+  if (
+    idList.includes('fizz/HeroBubbles') ||
+    idList.includes('fizz/CanCarousel')
+  ) {
+    readme += `\n${MODEL_3D_NOTES.fizz}`
+  }
+  if (idList.includes('monolith/HeroThree')) readme += `\n${MODEL_3D_NOTES.monolith}`
   if (needsShop) {
     readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — summary + mock pay\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
   }

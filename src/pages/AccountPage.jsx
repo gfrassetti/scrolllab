@@ -8,15 +8,6 @@ import { useI18n } from '../i18n'
 
 const PAGE_SIZE = 20
 
-function formatTtl(seconds, t) {
-  if (seconds >= 86400) {
-    const hours = Math.round(seconds / 3600)
-    return t('account.linkTtlHours', { hours })
-  }
-  const minutes = Math.max(1, Math.round(seconds / 60))
-  return t('account.linkTtlMinutes', { minutes })
-}
-
 export default function AccountPage() {
   const { user, loading } = useAuth()
   const [orders, setOrders] = useState([])
@@ -117,8 +108,6 @@ export default function AccountPage() {
     safePage * PAGE_SIZE,
     safePage * PAGE_SIZE + PAGE_SIZE,
   )
-  const meta = orders[0]
-
   return (
     <div className="min-h-svh bg-bone text-ink">
       <SiteHeader />
@@ -139,10 +128,7 @@ export default function AccountPage() {
         </h1>
         <p className="mt-2 text-sm text-ink/60">{user.email}</p>
         <p className="mt-4 max-w-[52ch] text-sm leading-relaxed text-ink/70">
-          {t('account.body', {
-            ttl: formatTtl(meta?.downloadTtlSeconds || 900, t),
-            max: meta?.maxDownloads || 10,
-          })}{' '}
+          {t('account.body')}{' '}
           <Link
             to="/#como-funciona"
             className="underline decoration-ink/30 underline-offset-2 hover:text-accent"
@@ -172,7 +158,7 @@ export default function AccountPage() {
             <ul className="mt-10 border-t border-ink/15">
               {pageOrders.map((order) => {
                 const used = order.downloadCount || 0
-                const max = order.maxDownloads || 10
+                const max = order.maxDownloads || 50
                 const left = Math.max(0, max - used)
                 return (
                   <li
@@ -200,13 +186,6 @@ export default function AccountPage() {
                           {statusLabel(order.status)}
                         </span>
                       </p>
-                      {order.status === 'paid' && (
-                        <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                          {t('account.downloadsLeft', { used, max, left })}
-                          {' · '}
-                          {formatTtl(order.downloadTtlSeconds || 900, t)}
-                        </p>
-                      )}
                       {order.status === 'pending' && (
                         <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
                           {t('account.pendingHint')}

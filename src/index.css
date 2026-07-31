@@ -42,6 +42,11 @@ html.dark {
   --color-carbon: #101010;
   --color-klein: #2b3cff;
 
+  /* ——— Model 04 "FIZZ": carbonated pop worlds ——— */
+  --color-grape: #241352;
+  --color-foam: #fff3e2;
+  --color-fizz: #ff3ea5;
+
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-brico: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
@@ -85,6 +90,26 @@ body {
 html.has-custom-cursor,
 html.has-custom-cursor * {
   cursor: none !important;
+}
+
+/* Paneles de UI del market (builder edit, etc.): cursor nativo encima. */
+html.has-custom-cursor [data-native-cursor],
+html.has-custom-cursor [data-native-cursor] * {
+  cursor: auto !important;
+}
+
+html.has-custom-cursor [data-native-cursor] button:not(:disabled),
+html.has-custom-cursor [data-native-cursor] [role="button"]:not(:disabled),
+html.has-custom-cursor [data-native-cursor] a,
+html.has-custom-cursor [data-native-cursor] select,
+html.has-custom-cursor [data-native-cursor] summary,
+html.has-custom-cursor [data-native-cursor] label[for] {
+  cursor: pointer !important;
+}
+
+html.has-custom-cursor [data-native-cursor] input,
+html.has-custom-cursor [data-native-cursor] textarea {
+  cursor: text !important;
 }
 
 /* ——— Lenis recommended styles ——— */

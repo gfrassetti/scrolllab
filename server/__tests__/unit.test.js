@@ -42,6 +42,45 @@ describe('validateRecipe', () => {
       (err) => err instanceof HttpError && err.status === 400,
     )
   })
+
+  it('persiste textos fizz y descarta blob: de assets', () => {
+    const recipe = validateRecipe([
+      {
+        id: 'fizz/HeroBubbles',
+        props: {
+          title: 'MY TITLE',
+          modelUrl: 'blob:http://localhost/abc',
+          flavor: 'mint',
+        },
+      },
+      {
+        id: 'fizz/CanCarousel',
+        props: {
+          can1Name: 'Custom',
+          can1Image: '/can-1.svg',
+          can2Image: 'blob:http://localhost/x',
+        },
+      },
+    ])
+    assert.deepEqual(recipe[0].props, {
+      title: 'MY TITLE',
+      flavor: 'mint',
+    })
+    assert.deepEqual(recipe[1].props, {
+      can1Name: 'Custom',
+      can1Image: '/can-1.svg',
+    })
+  })
+
+  it('acepta secciones atelier y velocity', () => {
+    const recipe = validateRecipe([
+      { id: 'atelier/HeroMeaning', props: { line1: 'Hello' } },
+      { id: 'velocity/NavVelocity', props: { brand: 'BRAND' } },
+    ])
+    assert.equal(recipe.length, 2)
+    assert.equal(recipe[0].props.line1, 'Hello')
+    assert.equal(recipe[1].props.brand, 'BRAND')
+  })
 })
 
 describe('validateCheckoutItems', () => {

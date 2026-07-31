@@ -35,6 +35,27 @@ const TEMPLATE_META = [
     path: '/templates/monolith',
     palette: ['#cdcbc4', '#101010', '#2b3cff'],
   },
+  {
+    id: '04',
+    sku: 'velocity',
+    name: 'VELOCITY',
+    path: '/templates/velocity',
+    palette: ['#0a1a12', '#ece9e2', '#d9ff3f'],
+  },
+  {
+    id: '05',
+    sku: 'fizz',
+    name: 'FIZZ',
+    path: '/templates/fizz',
+    palette: ['#241352', '#fff3e2', '#ff3ea5'],
+  },
+  {
+    id: '06',
+    sku: 'atelier',
+    name: 'ATELIER',
+    path: '/templates/atelier',
+    palette: ['#0b0c10', '#f2f2f2', '#c8d0dc'],
+  },
 ]
 
 function TemplatePoster({ template, index }) {
@@ -88,29 +109,114 @@ function TemplatePoster({ template, index }) {
     )
   }
 
+  if (template.sku === 'monolith') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-concrete text-carbon`}
+        style={{ opacity: 0 }}
+      >
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage:
+              'linear-gradient(#101010 1px, transparent 1px), linear-gradient(90deg, #101010 1px, transparent 1px)',
+            backgroundSize: '34px 34px',
+          }}
+        />
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
+          SYSTEM / 03
+        </span>
+        <span className="absolute top-[18%] left-[18%] h-[56%] w-[54%] rotate-6 bg-klein shadow-[18px_18px_0_#101010]" />
+        <span className="absolute right-5 bottom-[12%] text-right font-anton text-[clamp(3.2rem,8vw,7rem)] leading-[0.75] tracking-[-0.04em]">
+          MONO
+          <br />
+          LITH
+        </span>
+      </div>
+    )
+  }
+
+  if (template.sku === 'velocity') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-[#0a1a12] text-[#ece9e2]`}
+        style={{ opacity: 0 }}
+      >
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `repeating-radial-gradient(circle at 40% 40%, transparent 0 16px, rgba(236,233,226,0.08) 16px 17px)`,
+          }}
+        />
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-acid">
+          ATHLETE / 04
+        </span>
+        <span className="absolute top-[28%] left-5 h-1 w-[42%] -rotate-12 bg-acid" />
+        <span className="absolute bottom-[16%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-semibold tracking-[-0.05em]">
+          VELO
+          <br />
+          CITY
+        </span>
+        <span className="absolute right-5 bottom-5 font-display text-2xl italic text-acid">
+          full send
+        </span>
+      </div>
+    )
+  }
+
+  if (template.sku === 'fizz') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-grape text-foam`}
+        style={{ opacity: 0 }}
+      >
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-fizz">
+          POP / 05
+        </span>
+        <span className="absolute top-[12%] right-[10%] aspect-square w-[26%] rounded-full bg-[#ffb02e]" />
+        <span className="absolute top-[38%] right-[28%] aspect-square w-[14%] rounded-full bg-[#3ddc97]" />
+        <span className="absolute top-[24%] right-[38%] aspect-square w-[8%] rounded-full bg-fizz" />
+        <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-extrabold tracking-[-0.04em]">
+          FIZZ
+          <span className="text-fizz">*</span>
+        </span>
+        <span className="absolute right-5 bottom-5 font-display text-2xl italic text-[#ffb02e]">
+          drink the spark
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div
       data-template-art
-      className={`${baseClass} bg-concrete text-carbon`}
+      className={`${baseClass} bg-[#0b0c10] text-[#f2f2f2]`}
       style={{ opacity: 0 }}
     >
       <span
         aria-hidden="true"
-        className="absolute inset-0 opacity-25"
+        className="absolute inset-0 opacity-40"
         style={{
           backgroundImage:
-            'linear-gradient(#101010 1px, transparent 1px), linear-gradient(90deg, #101010 1px, transparent 1px)',
-          backgroundSize: '34px 34px',
+            'radial-gradient(ellipse at 50% 40%, rgba(200,208,220,0.18), transparent 55%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06), transparent 40%)',
         }}
       />
-      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
-        SYSTEM / 03
+      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-white/50">
+        STUDIO / 06
       </span>
-      <span className="absolute top-[18%] left-[18%] h-[56%] w-[54%] rotate-6 bg-klein shadow-[18px_18px_0_#101010]" />
-      <span className="absolute right-5 bottom-[12%] text-right font-anton text-[clamp(3.2rem,8vw,7rem)] leading-[0.75] tracking-[-0.04em]">
-        MONO
+      <span className="absolute top-1/2 left-1/2 h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 border border-white/25 bg-white/[0.04] shadow-[0_0_60px_rgba(200,208,220,0.12)]" />
+      <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-semibold tracking-[-0.05em]">
+        ATE
         <br />
-        LITH
+        LIER
+      </span>
+      <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.28em] text-white/45 uppercase">
+        scroll the fog
       </span>
     </div>
   )
@@ -390,7 +496,7 @@ export default function TemplatesIndex() {
 
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
-                      {template.id} / 03
+                      {template.id} / {String(templates.length).padStart(2, '0')}
                     </p>
                     <span className="flex items-center gap-2">
                       {template.palette.map((color) => (

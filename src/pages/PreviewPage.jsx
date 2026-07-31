@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getSection } from '../lib/sectionRegistry'
 import { loadComposition, recipeHasCommerce } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import CompositionCanvas from '../components/CompositionCanvas'
 import CompositionShopShell from '../components/CompositionShopShell'
 import { useT } from '../i18n'
 
 /**
  * PreviewPage — renderiza en una pestaña propia la página que el
  * usuario armó en el builder (leída de localStorage), con las
- * animaciones reales. Pensada para abrirse con "Pestaña nueva ↗".
+ * animaciones reales.
  */
 export default function PreviewPage() {
   const [items] = useState(loadComposition)
@@ -23,8 +23,7 @@ export default function PreviewPage() {
           Preview
         </p>
         <p className="max-w-[36ch] text-lg text-ink/70">
-          Todavía no hay nada armado. Componé tu página en el builder y volvé
-          a abrir el preview.
+          {t('builder.emptyPreview')}
         </p>
         <Link
           to="/builder"
@@ -38,17 +37,7 @@ export default function PreviewPage() {
 
   const home = (
     <SmoothScrollProvider>
-      <div id="top">
-        {items.map((item) => {
-          const section = getSection(item.sectionId)
-          const Component = section.component
-          return (
-            <div key={item.uid} className={section.model.wrapperClass}>
-              <Component {...(item.props || {})} />
-            </div>
-          )
-        })}
-      </div>
+      <CompositionCanvas items={items} />
     </SmoothScrollProvider>
   )
 
@@ -58,6 +47,7 @@ export default function PreviewPage() {
 
       <Link
         to="/builder"
+        data-native-cursor
         className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
           hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
         }`}
