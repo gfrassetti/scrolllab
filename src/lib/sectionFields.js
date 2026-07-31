@@ -76,6 +76,19 @@ export const SECTION_FIELDS = {
   ],
   'fizz/NavFizz': [
     { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'shopLabel', label: 'Dropdown 1 — label', type: 'text' },
+    {
+      key: 'shopItems',
+      label: 'Dropdown 1 — ítems (uno por línea)',
+      type: 'textarea',
+    },
+    { key: 'learnLabel', label: 'Dropdown 2 — label', type: 'text' },
+    {
+      key: 'learnItems',
+      label: 'Dropdown 2 — ítems (uno por línea)',
+      type: 'textarea',
+    },
+    { key: 'linkLabel', label: 'Link simple', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
   ],
   'fizz/HeroBubbles': [

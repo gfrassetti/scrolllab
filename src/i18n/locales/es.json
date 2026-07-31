@@ -288,11 +288,11 @@
       "fizz": {
         "NavFizz": {
           "name": "Nav fizz",
-          "blurb": "Header píldora flotante con CTA candy"
+          "blurb": "Header píldora flotante con menús que se despliegan"
         },
         "HeroBubbles": {
           "name": "Hero burbujas",
-          "blurb": "Lata 3D girando sobre burbujas que suben"
+          "blurb": "Lata PBR con reflejos y fondo que gira con el scroll"
         },
         "FlavorWorlds": {
           "name": "Mundos de sabor",
@@ -304,7 +304,7 @@
         },
         "CanCarousel": {
           "name": "Carrusel de latas",
-          "blurb": "Estante con snap de latas ilustradas, tilt al hover"
+          "blurb": "Estante con snap; el color del sabor aparece suave al hover"
         },
         "PopManifesto": {
           "name": "Manifesto pop",

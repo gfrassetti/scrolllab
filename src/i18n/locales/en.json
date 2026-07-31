@@ -288,11 +288,11 @@
       "fizz": {
         "NavFizz": {
           "name": "Nav Fizz",
-          "blurb": "Floating pill header with candy CTA"
+          "blurb": "Floating pill header with dropdown menus"
         },
         "HeroBubbles": {
           "name": "Hero Bubbles",
-          "blurb": "3D soda can spinning over rising bubbles"
+          "blurb": "PBR soda can with reflections and scroll-driven backdrop"
         },
         "FlavorWorlds": {
           "name": "Flavor Worlds",
@@ -304,7 +304,7 @@
         },
         "CanCarousel": {
           "name": "Can Carousel",
-          "blurb": "Snap shelf of illustrated cans, tilt on hover"
+          "blurb": "Snap shelf of cans; flavor color fades in on hover"
         },
         "PopManifesto": {
           "name": "Pop Manifesto",

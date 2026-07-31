@@ -33,7 +33,15 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'monolith/NavBrutal': ['brand'],
   'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
   'monolith/FooterBrutal': ['ctaWord', 'email', 'legal'],
-  'fizz/NavFizz': ['brand', 'cta'],
+  'fizz/NavFizz': [
+    'brand',
+    'shopLabel',
+    'shopItems',
+    'learnLabel',
+    'learnItems',
+    'linkLabel',
+    'cta',
+  ],
   'fizz/HeroBubbles': [
     'title',
     'tagline',

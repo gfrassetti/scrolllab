@@ -38,8 +38,9 @@ function CanIllustration({ color, label }) {
 }
 
 /**
- * CanCarousel — snap-scrolling shelf of illustrated cans. Cards tilt
- * on hover and pop in with a stagger as the shelf enters the viewport.
+ * CanCarousel — snap-scrolling shelf of illustrated cans.
+ * On hover the flavor color softly fills the card (and a soft outer glow),
+ * like the MANA product shelf.
  *
  * Per-can name/note/image are editable from the builder. With `canNImage`
  * set (URL or path), the placeholder SVG is replaced by that asset
@@ -115,29 +116,43 @@ export default function CanCarousel({
           <li
             key={i}
             data-can-card
-            className="group flex w-64 shrink-0 snap-start flex-col items-center rounded-3xl border border-foam/20 px-6 pt-10 pb-7 text-center transition-transform duration-300 hover:-rotate-2 md:w-72"
+            className="group relative flex w-64 shrink-0 snap-start flex-col items-center overflow-hidden rounded-3xl border border-foam/25 px-6 pt-10 pb-7 text-center md:w-72"
           >
-            <div className="flex h-52 items-center justify-center transition-transform duration-300 group-hover:-translate-y-2 group-hover:rotate-3">
+            {/* Soft outer wash */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-3 rounded-[2rem] opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-45"
+              style={{
+                background: `radial-gradient(circle at 50% 40%, ${can.color}, transparent 70%)`,
+              }}
+            />
+            {/* Solid fill that fades in */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+              style={{ backgroundColor: can.color }}
+            />
+
+            <div className="relative z-10 flex h-52 items-center justify-center transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:rotate-3">
               {can.image ? (
                 <img
                   src={can.image}
                   alt=""
-                  className="max-h-52 w-auto max-w-[7.5rem] object-contain"
+                  className="max-h-52 w-auto max-w-[7.5rem] object-contain drop-shadow-md"
                 />
               ) : (
                 <CanIllustration color={can.color} label={canLabel} />
               )}
             </div>
-            <h3 className="mt-7 font-brico text-lg font-extrabold uppercase tracking-tight">
+            <h3 className="relative z-10 mt-7 font-brico text-lg font-extrabold uppercase tracking-tight text-foam transition-colors duration-500 group-hover:text-grape">
               {can.name}
             </h3>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-foam/60">
+            <p className="relative z-10 mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-foam/60 transition-colors duration-500 group-hover:text-grape/70">
               {can.note}
             </p>
             <a
               href="#"
-              className="mt-6 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-grape transition-transform duration-200 group-hover:scale-105"
-              style={{ backgroundColor: can.color }}
+              className="relative z-10 mt-6 rounded-full border border-transparent bg-foam/15 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-foam transition-[transform,background-color,color,border-color] duration-300 group-hover:scale-105 group-hover:border-grape/20 group-hover:bg-grape group-hover:text-foam"
             >
               {cta}
             </a>

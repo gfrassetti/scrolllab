@@ -2,12 +2,12 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 
-/** Curated flavor presets — label color + bubble tint. */
+/** Curated flavor presets — label color + bubble / backdrop tint. */
 export const FIZZ_FLAVORS = {
-  berry: { base: '#ff3ea5', dark: '#b81f74', bubbles: 0xffd1ec },
-  citrus: { base: '#ffb02e', dark: '#e08a00', bubbles: 0xffe9c0 },
-  tropical: { base: '#ff6b35', dark: '#d14a17', bubbles: 0xffd6c4 },
-  mint: { base: '#3ddc97', dark: '#1fa96d', bubbles: 0xd2ffe9 },
+  berry: { base: '#ff3ea5', dark: '#b81f74', bubbles: 0xffd1ec, back: '#5b1a8a' },
+  citrus: { base: '#ffb02e', dark: '#e08a00', bubbles: 0xffe9c0, back: '#8a4a10' },
+  tropical: { base: '#ff6b35', dark: '#d14a17', bubbles: 0xffd6c4, back: '#7a2a40' },
+  mint: { base: '#3ddc97', dark: '#1fa96d', bubbles: 0xd2ffe9, back: '#1a5a48' },
 }
 
 const CHAR_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
@@ -15,7 +15,7 @@ const CHAR_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
 /** Flat, illustrated can label drawn to a canvas (no external assets). */
 function buildLabelTexture(flavorKey, label) {
   const flavor = FIZZ_FLAVORS[flavorKey] || FIZZ_FLAVORS.berry
-  const size = 512
+  const size = 1024
   const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
@@ -24,33 +24,82 @@ function buildLabelTexture(flavorKey, label) {
   ctx.fillStyle = flavor.base
   ctx.fillRect(0, 0, size, size)
 
-  // Wavy stripe across the middle
+  // Soft highlight strip (reads as aluminum glare under PBR)
+  const shine = ctx.createLinearGradient(0, 0, size * 0.35, 0)
+  shine.addColorStop(0, 'rgba(255,255,255,0)')
+  shine.addColorStop(0.45, 'rgba(255,255,255,0.22)')
+  shine.addColorStop(1, 'rgba(255,255,255,0)')
+  ctx.fillStyle = shine
+  ctx.fillRect(0, 0, size * 0.35, size)
+
   ctx.fillStyle = '#fff3e2'
   ctx.beginPath()
   ctx.moveTo(0, size * 0.62)
-  for (let x = 0; x <= size; x += 16) {
-    ctx.lineTo(x, size * 0.62 + Math.sin((x / size) * Math.PI * 4) * 14)
+  for (let x = 0; x <= size; x += 12) {
+    ctx.lineTo(x, size * 0.62 + Math.sin((x / size) * Math.PI * 4) * 22)
   }
   ctx.lineTo(size, size)
   ctx.lineTo(0, size)
   ctx.closePath()
   ctx.fill()
 
-  // Brand mark repeated around the can
   ctx.fillStyle = '#241352'
-  ctx.font = '800 96px "Bricolage Grotesque", sans-serif'
+  ctx.font = '800 170px "Bricolage Grotesque", sans-serif'
   ctx.textBaseline = 'middle'
   ctx.fillText(label, size * 0.06, size * 0.3)
   ctx.fillText(label, size * 0.56, size * 0.3)
 
   ctx.fillStyle = flavor.dark || '#241352'
-  ctx.font = '700 44px "Bricolage Grotesque", sans-serif'
+  ctx.font = '700 56px "Bricolage Grotesque", sans-serif'
   ctx.fillText('placeholder flavor', size * 0.06, size * 0.82)
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
+  texture.anisotropy = 8
   texture.wrapS = THREE.RepeatWrapping
   return texture
+}
+
+/** Cheap studio env map so metal rims pick up reflections without HDR files. */
+function buildStudioEnv(renderer) {
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  pmrem.compileEquirectangularShader()
+
+  const envScene = new THREE.Scene()
+  envScene.background = new THREE.Color(0x1a1028)
+
+  const hemi = new THREE.HemisphereLight(0xfff0e0, 0x2a1840, 1.2)
+  envScene.add(hemi)
+
+  const key = new THREE.Mesh(
+    new THREE.SphereGeometry(1.2, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0xffffff }),
+  )
+  key.position.set(4, 6, 3)
+  envScene.add(key)
+
+  const fill = new THREE.Mesh(
+    new THREE.SphereGeometry(0.8, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0xaaccff }),
+  )
+  fill.position.set(-5, 2, -2)
+  envScene.add(fill)
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.MeshBasicMaterial({ color: 0x3a2048 }),
+  )
+  ground.rotation.x = -Math.PI / 2
+  ground.position.y = -3
+  envScene.add(ground)
+
+  const envMap = pmrem.fromScene(envScene, 0.04).texture
+  envScene.traverse((n) => {
+    n.geometry?.dispose?.()
+    n.material?.dispose?.()
+  })
+  pmrem.dispose()
+  return envMap
 }
 
 /**
@@ -67,6 +116,26 @@ function fitObjectToScene(obj, targetSize = 4.6) {
   obj.position.sub(center)
 }
 
+function boostPbrMaterials(root) {
+  root.traverse((node) => {
+    if (!node.isMesh || !node.material) return
+    const mats = Array.isArray(node.material) ? node.material : [node.material]
+    mats.forEach((m) => {
+      if (!m) return
+      if ('envMapIntensity' in m) m.envMapIntensity = 1.35
+      if ('metalness' in m && m.metalness < 0.05) {
+        // Keep painted labels matte; bump bare metal-looking greys a bit.
+        const c = m.color
+        if (c && c.r > 0.7 && c.g > 0.7 && c.b > 0.7) {
+          m.metalness = 0.85
+          m.roughness = Math.min(m.roughness ?? 0.4, 0.35)
+        }
+      }
+      m.needsUpdate = true
+    })
+  })
+}
+
 function disposeObject(obj) {
   obj.traverse((node) => {
     node.geometry?.dispose?.()
@@ -80,8 +149,70 @@ function disposeObject(obj) {
 }
 
 /**
- * HeroBubbles — a flat-shaded 3D soda can spinning over a field of
- * rising bubbles, behind candy-colored kinetic type. Flavor is a preset.
+ * Decorative backdrop that rotates with scroll — soft discs + petal shapes
+ * behind the can (MANA-like motion without external illustration assets).
+ */
+function buildScrollBackdrop(flavor) {
+  const group = new THREE.Group()
+  group.position.z = -2.4
+
+  const disc = new THREE.Mesh(
+    new THREE.CircleGeometry(7.2, 64),
+    new THREE.MeshBasicMaterial({
+      color: new THREE.Color(flavor.back || '#5b1a8a'),
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    }),
+  )
+  group.add(disc)
+
+  const petalMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(flavor.base),
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  })
+  const accentMat = new THREE.MeshBasicMaterial({
+    color: 0xfff3e2,
+    transparent: true,
+    opacity: 0.35,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  })
+
+  for (let i = 0; i < 8; i += 1) {
+    const angle = (i / 8) * Math.PI * 2
+    const petal = new THREE.Mesh(
+      new THREE.CircleGeometry(1.1 + (i % 3) * 0.25, 28),
+      i % 2 === 0 ? petalMat : accentMat,
+    )
+    petal.position.set(Math.cos(angle) * 4.1, Math.sin(angle) * 3.4, -0.2)
+    petal.rotation.z = angle
+    petal.scale.set(1, 1.55, 1)
+    group.add(petal)
+  }
+
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(5.2, 5.55, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    }),
+  )
+  ring.position.z = -0.4
+  group.add(ring)
+
+  return group
+}
+
+/**
+ * HeroBubbles — PBR soda can with studio reflections over a scroll-driven
+ * illustrated backdrop and rising bubbles. Flavor is a preset.
  *
  * `modelUrl` (optional): URL or path to a GLB/GLTF file. When set, the
  * placeholder can is replaced by the custom model (auto-centered and
@@ -106,39 +237,73 @@ export default function HeroBubbles({
       const reduced = window.matchMedia(
         '(prefers-reduced-motion: reduce)',
       ).matches
+      const flavorCfg = FIZZ_FLAVORS[resolvedFlavor] || FIZZ_FLAVORS.berry
 
-      // —— Three.js: can + bubbles ——
       const renderer = new THREE.WebGLRenderer({
         canvas: canvasRef.current,
         antialias: true,
         alpha: true,
+        powerPreference: 'high-performance',
       })
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 1.15
 
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100)
-      camera.position.z = 10
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100)
+      camera.position.set(0, 0.15, 10)
+
+      const envMap = buildStudioEnv(renderer)
+      scene.environment = envMap
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.55))
+      const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.6)
+      keyLight.position.set(4.5, 6, 7)
+      scene.add(keyLight)
+      const rimLight = new THREE.DirectionalLight(0xc9b6ff, 1.1)
+      rimLight.position.set(-5, 2, -4)
+      scene.add(rimLight)
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.55)
+      fillLight.position.set(-2, -3, 5)
+      scene.add(fillLight)
+
+      const backdrop = buildScrollBackdrop(flavorCfg)
+      scene.add(backdrop)
 
       const labelTexture = buildLabelTexture(resolvedFlavor, canLabel)
-      const bodyGeo = new THREE.CylinderGeometry(1.45, 1.45, 3.9, 48, 1, false)
-      const body = new THREE.Mesh(
-        bodyGeo,
-        new THREE.MeshBasicMaterial({ map: labelTexture }),
-      )
-      const lidGeo = new THREE.CylinderGeometry(1.34, 1.45, 0.22, 48)
-      const lidMat = new THREE.MeshBasicMaterial({ color: 0xd9d4cf })
-      const lidTop = new THREE.Mesh(lidGeo, lidMat)
+      const bodyGeo = new THREE.CylinderGeometry(1.45, 1.45, 3.9, 64, 1, false)
+      const bodyMat = new THREE.MeshStandardMaterial({
+        map: labelTexture,
+        roughness: 0.38,
+        metalness: 0.22,
+        envMapIntensity: 1.1,
+      })
+      const body = new THREE.Mesh(bodyGeo, bodyMat)
+
+      const metalMat = new THREE.MeshStandardMaterial({
+        color: 0xd6d2cd,
+        metalness: 0.92,
+        roughness: 0.22,
+        envMapIntensity: 1.5,
+      })
+      const lidGeo = new THREE.CylinderGeometry(1.34, 1.45, 0.22, 64)
+      const lidTop = new THREE.Mesh(lidGeo, metalMat)
       lidTop.position.y = 2.05
-      const lidBottom = new THREE.Mesh(lidGeo, lidMat)
+      const lidBottom = new THREE.Mesh(lidGeo, metalMat)
       lidBottom.rotation.x = Math.PI
       lidBottom.position.y = -2.05
 
+      const rimGeo = new THREE.TorusGeometry(1.4, 0.045, 12, 64)
+      const rimTop = new THREE.Mesh(rimGeo, metalMat)
+      rimTop.rotation.x = Math.PI / 2
+      rimTop.position.y = 1.96
+
       const can = new THREE.Group()
-      can.add(body, lidTop, lidBottom)
-      can.rotation.set(0.18, -0.6, -0.12)
+      can.add(body, lidTop, lidBottom, rimTop)
+      can.rotation.set(0.18, -0.55, -0.1)
       scene.add(can)
 
-      // —— Optional custom model (GLB/GLTF) replacing the placeholder can ——
       let customModel = null
       let cancelled = false
       if (modelUrl && typeof modelUrl === 'string') {
@@ -154,17 +319,13 @@ export default function HeroBubbles({
                 }
                 customModel = gltf.scene
                 fitObjectToScene(customModel)
-                // GLB materials are usually lit — the placeholder can is not.
-                const keyLight = new THREE.DirectionalLight(0xffffff, 2.2)
-                keyLight.position.set(3, 5, 6)
-                scene.add(new THREE.AmbientLight(0xffffff, 1.4), keyLight)
-                can.remove(body, lidTop, lidBottom)
+                boostPbrMaterials(customModel)
+                can.remove(body, lidTop, lidBottom, rimTop)
                 can.add(customModel)
                 render()
               },
               undefined,
               () => {
-                // Bad URL / expired blob — keep the placeholder can.
                 console.warn(`HeroBubbles: could not load model "${modelUrl}"`)
               },
             )
@@ -172,12 +333,12 @@ export default function HeroBubbles({
           .catch(() => {})
       }
 
-      const bubbleCount = 110
+      const bubbleCount = 90
       const positions = new Float32Array(bubbleCount * 3)
       for (let i = 0; i < bubbleCount; i += 1) {
         positions[i * 3] = (Math.random() - 0.5) * 16
         positions[i * 3 + 1] = (Math.random() - 0.5) * 12
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 6 - 2
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1.5
       }
       const bubbleGeo = new THREE.BufferGeometry()
       bubbleGeo.setAttribute(
@@ -185,10 +346,11 @@ export default function HeroBubbles({
         new THREE.BufferAttribute(positions, 3),
       )
       const bubbleMat = new THREE.PointsMaterial({
-        size: 0.12,
-        color: (FIZZ_FLAVORS[resolvedFlavor] || FIZZ_FLAVORS.berry).bubbles,
+        size: 0.11,
+        color: flavorCfg.bubbles,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.75,
+        depthWrite: false,
       })
       const bubbles = new THREE.Points(bubbleGeo, bubbleMat)
       scene.add(bubbles)
@@ -196,9 +358,11 @@ export default function HeroBubbles({
       const pointer = { x: 0, y: 0 }
 
       const resize = () => {
-        const { clientWidth: w, clientHeight: h } = root.current
+        const host = canvasRef.current?.parentElement || root.current
+        if (!host) return
+        const { clientWidth: w, clientHeight: h } = host
         renderer.setSize(w, h, false)
-        camera.aspect = w / h
+        camera.aspect = w / Math.max(h, 1)
         camera.updateProjectionMatrix()
       }
       resize()
@@ -211,14 +375,14 @@ export default function HeroBubbles({
       }
 
       const tick = () => {
-        can.rotation.y += 0.006
-        can.position.y = Math.sin(gsap.ticker.time * 1.1) * 0.18
-        can.rotation.z += (pointer.x * 0.12 - 0.12 - can.rotation.z) * 0.05
-        can.rotation.x += (pointer.y * 0.15 + 0.18 - can.rotation.x) * 0.05
+        can.rotation.y += 0.004
+        can.position.y = Math.sin(gsap.ticker.time * 1.1) * 0.14
+        can.rotation.z += (pointer.x * 0.1 - 0.1 - can.rotation.z) * 0.05
+        can.rotation.x += (pointer.y * 0.12 + 0.18 - can.rotation.x) * 0.05
 
         const pos = bubbleGeo.attributes.position
         for (let i = 0; i < bubbleCount; i += 1) {
-          let y = pos.getY(i) + 0.012 + (i % 5) * 0.0035
+          let y = pos.getY(i) + 0.01 + (i % 5) * 0.003
           if (y > 6) y = -6
           pos.setY(i, y)
         }
@@ -234,8 +398,31 @@ export default function HeroBubbles({
         window.addEventListener('pointermove', onPointerMove)
         gsap.ticker.add(tick)
 
+        // Can + backdrop share the scroll scrub so the world turns with the product.
         gsap.to(can.rotation, {
-          y: '+=2.4',
+          y: '+=3.2',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        })
+        gsap.to(backdrop.rotation, {
+          z: Math.PI * 1.15,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        })
+        gsap.to(backdrop.scale, {
+          x: 1.18,
+          y: 1.18,
+          z: 1.18,
           ease: 'none',
           scrollTrigger: {
             trigger: root.current,
@@ -245,9 +432,9 @@ export default function HeroBubbles({
           },
         })
         gsap.to(can.scale, {
-          x: 1.35,
-          y: 1.35,
-          z: 1.35,
+          x: 1.28,
+          y: 1.28,
+          z: 1.28,
           ease: 'none',
           scrollTrigger: {
             trigger: root.current,
@@ -257,7 +444,6 @@ export default function HeroBubbles({
           },
         })
 
-        // —— Candy type: each glyph pops in with its own color ——
         const split = new SplitText('[data-fizz-title]', {
           type: 'chars',
           mask: 'chars',
@@ -289,11 +475,14 @@ export default function HeroBubbles({
         gsap.ticker.remove(tick)
         bodyGeo.dispose()
         lidGeo.dispose()
+        rimGeo.dispose()
         bubbleGeo.dispose()
         labelTexture.dispose()
-        body.material.dispose()
-        lidMat.dispose()
+        bodyMat.dispose()
+        metalMat.dispose()
         bubbleMat.dispose()
+        envMap.dispose()
+        disposeObject(backdrop)
         if (customModel) disposeObject(customModel)
         renderer.dispose()
       }
@@ -306,39 +495,38 @@ export default function HeroBubbles({
   )
 
   return (
-    <section
-      ref={root}
-      className="relative flex h-svh flex-col justify-between overflow-hidden px-5 pt-28 pb-6 md:px-10"
-    >
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="absolute inset-0 h-full w-full"
-      />
+    <section ref={root} className="relative h-[155svh]">
+      <div className="sticky top-0 h-svh overflow-hidden px-5 pt-28 pb-6 md:px-10">
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full"
+        />
 
-      <div className="pointer-events-none relative flex h-full flex-col justify-between">
-        <p
-          data-fizz-fade
-          className="max-w-[34ch] text-xs font-semibold uppercase tracking-[0.22em] text-foam/70 md:text-sm"
-        >
-          {tagline}
-        </p>
-
-        <h1
-          data-fizz-title
-          className="font-brico text-[clamp(3rem,15vw,12rem)] leading-[0.92] font-extrabold tracking-[-0.03em] uppercase select-none"
-        >
-          {title}
-        </h1>
-
-        <div className="flex items-end justify-between gap-4 border-t border-foam/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-foam/60 md:text-xs">
-          <p data-fizz-fade>{meta}</p>
+        <div className="pointer-events-none relative flex h-full flex-col justify-between">
           <p
             data-fizz-fade
-            className="rounded-full bg-foam px-3 py-1.5 text-grape"
+            className="max-w-[34ch] text-xs font-semibold uppercase tracking-[0.22em] text-foam/70 md:text-sm"
           >
-            {hint} <span aria-hidden="true">↓</span>
+            {tagline}
           </p>
+
+          <h1
+            data-fizz-title
+            className="font-brico text-[clamp(3rem,15vw,12rem)] leading-[0.92] font-extrabold tracking-[-0.03em] uppercase select-none"
+          >
+            {title}
+          </h1>
+
+          <div className="flex items-end justify-between gap-4 border-t border-foam/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-foam/60 md:text-xs">
+            <p data-fizz-fade>{meta}</p>
+            <p
+              data-fizz-fade
+              className="rounded-full bg-foam px-3 py-1.5 text-grape"
+            >
+              {hint} <span aria-hidden="true">↓</span>
+            </p>
+          </div>
         </div>
       </div>
     </section>
