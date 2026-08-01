@@ -115,7 +115,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'note',
     'endpoint',
   ],
-  'commerce/ProductGrid': ['eyebrow', 'title', 'body'],
+  'commerce/ProductGrid': ['theme', 'eyebrow', 'title', 'body'],
 })
 
 const SHAPE_PRESETS = new Set([

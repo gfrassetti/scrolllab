@@ -122,7 +122,7 @@ export default function CanCarousel({
         </h2>
       </div>
 
-      <ul className="mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-6 md:px-10 [scrollbar-width:thin]">
+      <ul className="mt-12 flex snap-x snap-mandatory justify-safe-center gap-5 overflow-x-auto px-5 pb-6 md:px-10 [scrollbar-width:thin]">
         {shelf.map((can, i) => (
           <li
             key={i}

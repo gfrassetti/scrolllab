@@ -1,10 +1,23 @@
-import { TEMPLATE_PRICES_USD } from './pricing'
+import { TEMPLATE_PRICES_USD } from './pricing.js'
 
 const FIXED_TEMPLATE_SKUS = new Set(Object.keys(TEMPLATE_PRICES_USD))
 
 export function isCustomSku(sku) {
   const value = String(sku || '')
   return value === 'custom' || value.startsWith('custom:')
+}
+
+/**
+ * Preview de un ítem del carrito (todavía no hay orden). Los templates fijos
+ * van a su demo; la composición del builder, a /preview?cart=1.
+ */
+export function cartItemPreviewHref(item) {
+  const sku = String(item?.sku || '')
+  if (FIXED_TEMPLATE_SKUS.has(sku)) return `/templates/${sku}`
+  if (sku === 'bundle') return '/#templates'
+  if (!isCustomSku(sku)) return null
+  if (!Array.isArray(item?.recipe) || item.recipe.length === 0) return null
+  return '/preview?cart=1'
 }
 
 /**

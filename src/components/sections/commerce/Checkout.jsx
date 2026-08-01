@@ -36,30 +36,30 @@ export default function Checkout({
   }
 
   return (
-    <section className="px-5 py-16 md:px-10 md:py-24">
+    <section className="bg-[color:var(--shop-bg)] px-5 py-16 text-[color:var(--shop-fg)] md:px-10 md:py-24">
       <Link
         to="/"
-        className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors hover:text-ink"
+        className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--shop-muted)] transition-colors hover:text-[color:var(--shop-fg)]"
       >
         ← Back
       </Link>
-      <p className="mt-10 text-[11px] uppercase tracking-[0.25em] text-ink/50">
+      <p className="mt-10 text-[11px] uppercase tracking-[0.25em] text-[color:var(--shop-muted)]">
         {eyebrow}
       </p>
       <h1 className="mt-3 max-w-[16ch] text-[clamp(2rem,5vw,3.5rem)] leading-[0.95] font-medium tracking-[-0.03em]">
         {title}
       </h1>
-      <p className="mt-4 max-w-[48ch] text-sm leading-relaxed text-ink/65 md:text-base">
+      <p className="mt-4 max-w-[48ch] text-sm leading-relaxed text-[color:var(--shop-muted)] md:text-base">
         {body}
       </p>
 
-      <div className="mt-10 max-w-md border border-ink/15 p-6">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+      <div className="mt-10 max-w-md border border-[color:var(--shop-border)] p-6">
+        <p className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--shop-muted)]">
           Order summary
         </p>
         <ul className="mt-4 space-y-2 text-sm">
           {lines.length === 0 ? (
-            <li className="text-ink/50">No items</li>
+            <li className="text-[color:var(--shop-muted)]">No items</li>
           ) : (
             lines.map((line) => (
               <li key={line.productId} className="flex justify-between gap-4">
@@ -71,7 +71,7 @@ export default function Checkout({
             ))
           )}
         </ul>
-        <p className="mt-6 flex justify-between border-t border-ink/15 pt-4 text-base font-medium">
+        <p className="mt-6 flex justify-between border-t border-[color:var(--shop-border)] pt-4 text-base font-medium">
           <span>Total</span>
           <span>{formatShopPrice(total)}</span>
         </p>
@@ -79,7 +79,8 @@ export default function Checkout({
           type="button"
           disabled={busy || lines.length === 0}
           onClick={pay}
-          className="mt-6 w-full border-2 border-ink px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-40"
+          className="mt-6 w-full border-2 border-[color:var(--shop-fg)] px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors not-disabled:hover:border-[color:var(--shop-accent)] not-disabled:hover:bg-[color:var(--shop-accent)] not-disabled:hover:text-[color:var(--shop-accent-fg)] disabled:opacity-40"
+          style={{ borderRadius: 'var(--shop-radius)' }}
         >
           {busy ? '…' : payLabel}
         </button>
@@ -89,7 +90,7 @@ export default function Checkout({
           </p>
         )}
         {result?.ok && (
-          <p className="mt-3 text-sm text-ink/70" role="status">
+          <p className="mt-3 text-sm text-[color:var(--shop-muted)]" role="status">
             {result.message} ({result.orderId})
           </p>
         )}

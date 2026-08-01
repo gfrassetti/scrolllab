@@ -276,6 +276,20 @@ export const SECTION_FIELDS = {
     },
   ],
   'commerce/ProductGrid': [
+    {
+      key: 'theme',
+      label: 'Color',
+      type: 'select',
+      options: [
+        { value: 'auto', label: 'Auto (sección de al lado)' },
+        { value: 'chapters', label: 'Chapters · #ff4b00' },
+        { value: 'nocturne', label: 'Nocturne · #d9ff3f' },
+        { value: 'monolith', label: 'Monolith · #2b3cff' },
+        { value: 'velocity', label: 'Velocity · #d9ff3f' },
+        { value: 'fizz', label: 'Fizz · #ff3ea5' },
+        { value: 'atelier', label: 'Atelier · #c8d0dc' },
+      ],
+    },
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },

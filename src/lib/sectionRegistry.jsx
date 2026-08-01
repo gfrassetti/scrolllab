@@ -178,7 +178,8 @@ export const models = [
     id: 'commerce',
     name: 'COMMERCE',
     accent: '#00c08b',
-    wrapperClass: 'bg-bone text-ink',
+    // Empty: ProductGrid (+ ShopThemeProvider) paint the palette from `theme`.
+    wrapperClass: '',
     sections: [
       {
         id: 'commerce/ProductGrid',

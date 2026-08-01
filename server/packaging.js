@@ -9,6 +9,7 @@ import { recipeSectionId } from './catalog.js'
 // Shared with the builder preview on purpose: if the two resolved `auto`
 // differently, the ZIP would not match what the user approved on screen.
 import { resolveSectionTheme } from '../src/lib/sectionTheme.js'
+import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -203,9 +204,9 @@ function modelWrapperClass(model) {
   if (model === 'velocity') return 'bg-[#0a1a12] text-[#ece9e2]'
   if (model === 'fizz') return 'bg-grape text-foam'
   if (model === 'atelier') return 'bg-[#0b0c10] text-white'
-  // contact paints its own theme (or inherits) — no wrapper canvas.
+  // contact / commerce paint their own theme — no wrapper canvas.
   if (model === 'contact') return ''
-  if (model === 'commerce') return 'bg-bone text-ink'
+  if (model === 'commerce') return ''
   return 'bg-bone text-ink'
 }
 
@@ -213,6 +214,8 @@ const SHOP_FILES = [
   'src/lib/shop/products.js',
   'src/lib/shop/cartStore.js',
   'src/lib/shop/checkoutAdapter.js',
+  'src/lib/shop/theme.js',
+  'src/lib/shop/ShopTheme.jsx',
 ]
 
 /** Commerce UI shipped as routes (not scroll sections), when recipe has ProductGrid. */
@@ -517,6 +520,16 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
     )
   })
 
+  const shopTheme = needsShop
+    ? commerceThemeFromItems(
+        entries.map((entry) => ({
+          id: entry.id,
+          props: entry.props,
+        })),
+        resolveSectionTheme,
+      )
+    : 'auto'
+
   let appSrc
   if (needsShop) {
     appSrc = `import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -524,6 +537,7 @@ import SmoothScrollProvider from './components/SmoothScrollProvider'
 import ProductDetail from './components/sections/commerce/ProductDetail'
 import Checkout from './components/sections/commerce/Checkout'
 import ShopChrome from './components/sections/commerce/ShopChrome'
+import { ShopThemeProvider } from './lib/shop/ShopTheme'
 ${imports.join('\n')}
 
 function Home() {
@@ -540,27 +554,32 @@ ${renderLines.join('\n')}
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/product/:productId"
-          element={
-            <div className="min-h-svh bg-bone text-ink">
-              <ProductDetail />
-              <ShopChrome />
-            </div>
-          }
-        />
-        <Route
-          path="/checkout"
-          element={
-            <div className="min-h-svh bg-bone text-ink">
-              <Checkout />
-              <ShopChrome />
-            </div>
-          }
-        />
-      </Routes>
+      <ShopThemeProvider
+        theme="${shopTheme}"
+        className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]"
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/product/:productId"
+            element={
+              <>
+                <ProductDetail />
+                <ShopChrome />
+              </>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <>
+                <Checkout />
+                <ShopChrome />
+              </>
+            }
+          />
+        </Routes>
+      </ShopThemeProvider>
     </BrowserRouter>
   )
 }

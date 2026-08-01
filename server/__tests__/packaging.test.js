@@ -221,12 +221,22 @@ describe('ZIP del builder', () => {
   it('incluye el kit de commerce cuando la receta lo pide', async () => {
     const files = await pack('custom-shop', (destPath) =>
       packCustomTemplate({
-        recipe: ['chapters/HeroKinetic', 'commerce/ProductGrid'],
+        recipe: [
+          'nocturne/HeroCinematic',
+          { id: 'commerce/ProductGrid', props: { theme: 'auto' } },
+        ],
         destPath,
         licenseMeta: LICENSE,
       }),
     )
     assert.ok(files.has('src/components/sections/commerce/ProductGrid.jsx'))
+    assert.ok(files.has('src/lib/shop/ShopTheme.jsx'))
+    const app = files.get('src/App.jsx').toString('utf8')
+    assert.match(
+      app,
+      /theme="nocturne"/,
+      'el shop del ZIP debe heredar el color del vecino',
+    )
     assert.deepEqual(brokenImports(files), [])
     assertDepsCoverImports(files)
 

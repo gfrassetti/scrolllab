@@ -15,14 +15,16 @@ export default function ShopChrome() {
       <div className="fixed right-5 bottom-5 z-40 flex items-center gap-2">
         <Link
           to="/checkout"
-          className="border-2 border-ink bg-bone px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-ink shadow-sm transition-colors hover:bg-ink hover:text-bone"
+          className="border-2 border-[color:var(--shop-fg)] bg-[color:var(--shop-bg)] px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[color:var(--shop-fg)] shadow-sm transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
+          style={{ borderRadius: 'var(--shop-radius)' }}
         >
           Checkout
         </Link>
         <button
           type="button"
           onClick={openDrawer}
-          className="border-2 border-ink bg-ink px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-bone shadow-sm"
+          className="border-2 border-[color:var(--shop-accent)] bg-[color:var(--shop-accent)] px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[color:var(--shop-accent-fg)] shadow-sm"
+          style={{ borderRadius: 'var(--shop-radius)' }}
         >
           Cart{count > 0 ? ` (${count})` : ''}
         </button>

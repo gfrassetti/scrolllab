@@ -1,0 +1,122 @@
+/**
+ * Paletas del kit commerce, alineadas a cada template.
+ *
+ * El builder mezcla modelos, así que el color no se puede inferir solo del
+ * ProductGrid: el usuario elige (o deja `auto` y toma el vecino). Las rutas
+ * del shop (PDP, drawer, checkout) leen las mismas CSS vars.
+ */
+
+export const SHOP_THEME_IDS = [
+  'auto',
+  'chapters',
+  'nocturne',
+  'monolith',
+  'velocity',
+  'fizz',
+  'atelier',
+]
+
+/** Acento de cada modelo — mismo hex que `models[].accent` en el registry. */
+export const TEMPLATE_ACCENTS = {
+  chapters: '#ff4b00',
+  nocturne: '#d9ff3f',
+  monolith: '#2b3cff',
+  velocity: '#d9ff3f',
+  fizz: '#ff3ea5',
+  atelier: '#c8d0dc',
+}
+
+const THEMES = {
+  auto: {
+    '--shop-bg': 'var(--color-bone)',
+    '--shop-fg': 'var(--color-ink)',
+    '--shop-muted': 'color-mix(in oklab, var(--color-ink) 55%, transparent)',
+    '--shop-border': 'color-mix(in oklab, var(--color-ink) 15%, transparent)',
+    '--shop-accent': 'var(--color-accent)',
+    '--shop-accent-fg': 'var(--color-bone)',
+    '--shop-radius': '0px',
+  },
+  chapters: {
+    '--shop-bg': '#f2efe9',
+    '--shop-fg': '#1a1a1a',
+    '--shop-muted': 'rgba(26, 26, 26, 0.55)',
+    '--shop-border': 'rgba(26, 26, 26, 0.15)',
+    '--shop-accent': TEMPLATE_ACCENTS.chapters,
+    '--shop-accent-fg': '#f2efe9',
+    '--shop-radius': '0px',
+  },
+  nocturne: {
+    '--shop-bg': '#0e0e11',
+    '--shop-fg': '#ece9e2',
+    '--shop-muted': 'rgba(236, 233, 226, 0.55)',
+    '--shop-border': 'rgba(236, 233, 226, 0.15)',
+    '--shop-accent': TEMPLATE_ACCENTS.nocturne,
+    '--shop-accent-fg': '#0e0e11',
+    '--shop-radius': '0px',
+  },
+  monolith: {
+    '--shop-bg': '#cdcbc4',
+    '--shop-fg': '#101010',
+    '--shop-muted': 'rgba(16, 16, 16, 0.55)',
+    '--shop-border': 'rgba(16, 16, 16, 0.2)',
+    '--shop-accent': TEMPLATE_ACCENTS.monolith,
+    '--shop-accent-fg': '#ffffff',
+    '--shop-radius': '0px',
+  },
+  velocity: {
+    '--shop-bg': '#0a1a12',
+    '--shop-fg': '#ece9e2',
+    '--shop-muted': 'rgba(236, 233, 226, 0.55)',
+    '--shop-border': 'rgba(236, 233, 226, 0.15)',
+    '--shop-accent': TEMPLATE_ACCENTS.velocity,
+    '--shop-accent-fg': '#0a1a12',
+    '--shop-radius': '9999px',
+  },
+  fizz: {
+    '--shop-bg': '#241352',
+    '--shop-fg': '#fff3e2',
+    '--shop-muted': 'rgba(255, 243, 226, 0.55)',
+    '--shop-border': 'rgba(255, 243, 226, 0.2)',
+    '--shop-accent': TEMPLATE_ACCENTS.fizz,
+    '--shop-accent-fg': '#241352',
+    '--shop-radius': '9999px',
+  },
+  atelier: {
+    '--shop-bg': '#0b0c10',
+    '--shop-fg': '#ffffff',
+    '--shop-muted': 'rgba(255, 255, 255, 0.5)',
+    '--shop-border': 'rgba(255, 255, 255, 0.15)',
+    '--shop-accent': TEMPLATE_ACCENTS.atelier,
+    '--shop-accent-fg': '#0b0c10',
+    '--shop-radius': '0px',
+  },
+}
+
+export function shopThemeVars(theme) {
+  return THEMES[theme] || THEMES.auto
+}
+
+export function isShopThemeId(value) {
+  return SHOP_THEME_IDS.includes(value)
+}
+
+/**
+ * Tema del commerce en una composición del builder / receta del ZIP.
+ * Lee el ProductGrid y resuelve `auto` contra los vecinos.
+ */
+export function commerceThemeFromItems(items, resolveTheme) {
+  const list = items || []
+  const index = list.findIndex(
+    (item) =>
+      (item.sectionId || item.id) === 'commerce/ProductGrid',
+  )
+  if (index < 0) return 'auto'
+  const entry = list[index]
+  const sectionId = entry.sectionId || entry.id
+  const modelIds = list.map((item) =>
+    String(item.sectionId || item.id || '').split('/')[0],
+  )
+  return (
+    resolveTheme(sectionId, entry.props, modelIds, index) || 'auto'
+  )
+}

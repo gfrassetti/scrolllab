@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { getSection } from '../lib/sectionRegistry'
 import { getSectionFields, sanitizeProps } from '../lib/sectionFields'
 import { recipeHasCommerce } from '../lib/composition'
+import { resolveSectionTheme } from '../lib/sectionTheme'
+import { commerceThemeFromItems } from '../lib/shop/theme'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import { useT } from '../i18n'
@@ -17,6 +19,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
   const editingSection = editing ? getSection(editing.sectionId) : null
   const fields = editing ? getSectionFields(editing.sectionId) : []
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
+  const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
 
   const editLabelFor = (section) => {
     if (section.kind === 'nav') return t('builder.editNav')
@@ -59,7 +62,11 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
 
   return (
     <div className="relative">
-      {hasCommerce ? <CompositionShopShell home={home} /> : home}
+      {hasCommerce ? (
+        <CompositionShopShell home={home} theme={shopTheme} />
+      ) : (
+        home
+      )}
 
       {editing && editingSection && fields.length > 0 && (
         <aside

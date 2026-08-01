@@ -399,7 +399,7 @@
       "commerce": {
         "ProductGrid": {
           "name": "Product Grid",
-          "blurb": "Catalog on the page; product, cart and checkout separately (demo payment)"
+          "blurb": "Catalog + shop; pick a kit color so it matches the rest of the page"
         }
       }
     }
@@ -410,7 +410,8 @@
     "trustNote": "Paid with Mercado Pago · license included",
     "payLoggedIn": "Pay →",
     "payLoggedOut": "Log in to pay →",
-    "redirecting": "One moment…"
+    "redirecting": "One moment…",
+    "preview": "View preview"
   },
   "login": {
     "eyebrow": "Account",
@@ -445,9 +446,11 @@
   },
   "preview": {
     "backToAccount": "← Back to My purchases",
+    "backToCart": "← Back to cart",
     "needsLogin": "Sign in to see the preview of this purchase.",
     "loginCta": "Sign in →",
-    "notFound": "We couldn't find this composition in your purchases."
+    "notFound": "We couldn't find this composition in your purchases.",
+    "cartEmpty": "There's no composition in the cart to preview."
   },
   "purchaseModal": {
     "eyebrow": "Purchase",

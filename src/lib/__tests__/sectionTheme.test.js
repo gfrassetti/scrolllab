@@ -68,8 +68,35 @@ describe('resolveSectionTheme', () => {
 })
 
 describe('isThemeAdaptive', () => {
-  it('reconoce el formulario de contacto', () => {
+  it('reconoce las secciones neutras con select de color', () => {
     assert.ok(isThemeAdaptive('contact/ContactForm'))
+    assert.ok(isThemeAdaptive('commerce/ProductGrid'))
     assert.ok(!isThemeAdaptive('chapters/HeroKinetic'))
+  })
+})
+
+describe('commerce theme', () => {
+  it('resuelve auto contra el vecino, como el contact form', () => {
+    assert.equal(
+      resolveSectionTheme(
+        'commerce/ProductGrid',
+        { theme: 'auto' },
+        ['nocturne', 'commerce'],
+        1,
+      ),
+      'nocturne',
+    )
+  })
+
+  it('deja elegir un color explícito', () => {
+    assert.equal(
+      resolveSectionTheme(
+        'commerce/ProductGrid',
+        { theme: 'fizz' },
+        ['nocturne', 'commerce'],
+        1,
+      ),
+      'fizz',
+    )
   })
 })

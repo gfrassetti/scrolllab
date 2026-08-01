@@ -399,7 +399,7 @@
       "commerce": {
         "ProductGrid": {
           "name": "Grilla de productos",
-          "blurb": "Catálogo en la página; producto, carrito y pago aparte (pago en modo demo)"
+          "blurb": "Catálogo + shop; elegí el color del kit para que combine con el resto"
         }
       }
     }
@@ -410,7 +410,8 @@
     "trustNote": "Pago con Mercado Pago · licencia incluida",
     "payLoggedIn": "Pagar →",
     "payLoggedOut": "Entrá para pagar →",
-    "redirecting": "Un momento…"
+    "redirecting": "Un momento…",
+    "preview": "Ver preview"
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -445,9 +446,11 @@
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",
+    "backToCart": "← Volver al carrito",
     "needsLogin": "Entrá con tu cuenta para ver el preview de esta compra.",
     "loginCta": "Entrar →",
-    "notFound": "No encontramos esta composición en tus compras."
+    "notFound": "No encontramos esta composición en tus compras.",
+    "cartEmpty": "No hay una composición en el carrito para previsualizar."
   },
   "purchaseModal": {
     "eyebrow": "Compra",

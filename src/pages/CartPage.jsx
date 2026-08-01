@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { cartLinePriceArs, useCart } from '../lib/cart'
+import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
@@ -91,39 +92,50 @@ export default function CartPage() {
         ) : (
           <>
             <ul className="mt-10 border-t border-ink/15">
-              {lines.map((line) => (
-                <li
-                  key={line.sku}
-                  className="flex flex-col gap-3 border-b border-ink/15 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                >
-                  <div className="flex min-w-0 items-center gap-4">
-                    <ProductThumbnail
-                      sku={line.sku}
-                      title={line.title}
-                      className="h-16 w-20 sm:h-20 sm:w-24"
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{line.title}</p>
-                      <p className="truncate text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                        {line.sku}
-                      </p>
-                      {line.unit_price != null && (
-                        <p className="mt-1 text-sm text-ink/70">
-                          {line.unit_price.toLocaleString(numberLocale)}{' '}
-                          {line.currency_id}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(line.sku)}
-                    className="min-h-10 self-start border border-ink/30 px-4 py-2 text-xs hover:border-accent hover:bg-accent hover:text-bone sm:self-auto"
+              {lines.map((line) => {
+                const previewHref = cartItemPreviewHref(line)
+                return (
+                  <li
+                    key={line.sku}
+                    className="flex flex-col gap-3 border-b border-ink/15 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
-                    {t('common.remove')}
-                  </button>
-                </li>
-              ))}
+                    <div className="flex min-w-0 items-center gap-4">
+                      <ProductThumbnail
+                        sku={line.sku}
+                        title={line.title}
+                        className="h-16 w-20 sm:h-20 sm:w-24"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{line.title}</p>
+                        <p className="truncate text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                          {line.sku}
+                        </p>
+                        {line.unit_price != null && (
+                          <p className="mt-1 text-sm text-ink/70">
+                            {line.unit_price.toLocaleString(numberLocale)}{' '}
+                            {line.currency_id}
+                          </p>
+                        )}
+                        {previewHref && (
+                          <Link
+                            to={previewHref}
+                            className="mt-1 inline-block text-[11px] uppercase tracking-[0.2em] text-accent-ink underline-offset-4 hover:underline"
+                          >
+                            {t('cart.preview')} ↗
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(line.sku)}
+                      className="min-h-10 self-start border border-ink/30 px-4 py-2 text-xs hover:border-accent hover:bg-accent hover:text-bone sm:self-auto"
+                    >
+                      {t('common.remove')}
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
 
             <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">

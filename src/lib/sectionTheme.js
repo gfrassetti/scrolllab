@@ -28,7 +28,10 @@ export const THEMED_MODELS = [
 ]
 
 /** Secciones neutras cuyo prop `theme` se resuelve según el contexto. */
-export const THEME_ADAPTIVE_SECTIONS = ['contact/ContactForm']
+export const THEME_ADAPTIVE_SECTIONS = [
+  'contact/ContactForm',
+  'commerce/ProductGrid',
+]
 
 const THEMED = new Set(THEMED_MODELS)
 

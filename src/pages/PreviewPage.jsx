@@ -5,6 +5,9 @@ import {
   recipeHasCommerce,
   recipeToComposition,
 } from '../lib/composition'
+import { resolveSectionTheme } from '../lib/sectionTheme'
+import { commerceThemeFromItems } from '../lib/shop/theme'
+import { useCart } from '../lib/cart'
 import { api } from '../lib/api'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import CompositionCanvas from '../components/CompositionCanvas'
@@ -75,24 +78,44 @@ function PreviewNotice({ message, to, cta }) {
 
 /**
  * PreviewPage — renderiza en una pestaña propia una página armada con el
- * builder, con las animaciones reales. Sin `?order=` lee la composición en
- * curso (localStorage); con `?order=<id>&item=<n>` reconstruye una compra.
+ * builder, con las animaciones reales.
+ *
+ * - sin query: composición en curso (localStorage)
+ * - `?order=<id>&item=<n>`: compra en Mis compras
+ * - `?cart=1`: composición que está en el carrito
  */
 export default function PreviewPage() {
   const [params] = useSearchParams()
   const orderId = params.get('order')
+  const fromCart = params.get('cart') === '1'
   const itemIndex = Number.parseInt(params.get('item') || '0', 10) || 0
   const t = useT()
+  const cartItems = useCart((s) => s.items)
 
   const order = useOrderComposition(orderId, itemIndex)
-  const [localItems] = useState(() => (orderId ? [] : loadComposition()))
+  const [localItems] = useState(() =>
+    orderId || fromCart ? [] : loadComposition(),
+  )
+
+  const cartComposition = fromCart
+    ? recipeToComposition(
+        cartItems.find((item) => item.sku === 'custom' || String(item.sku).startsWith('custom:'))
+          ?.recipe,
+      )
+    : []
 
   const fromOrder = Boolean(orderId)
-  const items = fromOrder ? order.items : localItems
-  const backTo = fromOrder ? '/account' : '/builder'
+  const items = fromOrder
+    ? order.items
+    : fromCart
+      ? cartComposition
+      : localItems
+  const backTo = fromOrder ? '/account' : fromCart ? '/cart' : '/builder'
   const backLabel = fromOrder
     ? t('preview.backToAccount')
-    : t('builder.backToBuilder')
+    : fromCart
+      ? t('preview.backToCart')
+      : t('builder.backToBuilder')
 
   if (fromOrder && order.status === 'loading') {
     return (
@@ -115,7 +138,13 @@ export default function PreviewPage() {
   if (items.length === 0) {
     return (
       <PreviewNotice
-        message={fromOrder ? t('preview.notFound') : t('builder.emptyPreview')}
+        message={
+          fromOrder
+            ? t('preview.notFound')
+            : fromCart
+              ? t('preview.cartEmpty')
+              : t('builder.emptyPreview')
+        }
         to={backTo}
         cta={backLabel}
       />
@@ -123,6 +152,7 @@ export default function PreviewPage() {
   }
 
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
+  const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
 
   const home = (
     <SmoothScrollProvider>
@@ -132,7 +162,11 @@ export default function PreviewPage() {
 
   return (
     <>
-      {hasCommerce ? <CompositionShopShell home={home} /> : home}
+      {hasCommerce ? (
+        <CompositionShopShell home={home} theme={shopTheme} />
+      ) : (
+        home
+      )}
 
       <Link
         to={backTo}

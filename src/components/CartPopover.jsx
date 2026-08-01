@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
 import { cartLinePriceArs, useCart } from '../lib/cart'
+import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
 import ProductThumbnail from './ProductThumbnail'
@@ -102,6 +103,7 @@ export default function CartPopover() {
               <ul className="max-h-72 overflow-y-auto">
                 {items.map((item) => {
                   const price = priceFor(item)
+                  const previewHref = cartItemPreviewHref(item)
                   return (
                     <li
                       key={item.sku}
@@ -121,6 +123,14 @@ export default function CartPopover() {
                             ? `${price.toLocaleString(numberLocale)} ARS`
                             : '—'}
                         </p>
+                        {previewHref && (
+                          <Link
+                            to={previewHref}
+                            className="mt-0.5 inline-block text-[10px] uppercase tracking-[0.18em] text-accent-ink underline-offset-4 hover:underline"
+                          >
+                            {t('cart.preview')} ↗
+                          </Link>
+                        )}
                       </div>
                       <button
                         type="button"
