@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
+import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { orderPreviews, previewName } from '../lib/orderPreview'
 import { useI18n } from '../i18n'
 
 const PAGE_SIZE = 20
@@ -96,12 +98,6 @@ export default function AccountPage() {
     }
   }
 
-  const statusLabel = (status) => {
-    if (status === 'paid') return t('account.paid')
-    if (status === 'pending') return t('account.pending')
-    return t('account.failed')
-  }
-
   const totalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
   const pageOrders = orders.slice(
@@ -160,6 +156,7 @@ export default function AccountPage() {
                 const used = order.downloadCount || 0
                 const max = order.maxDownloads || 50
                 const left = Math.max(0, max - used)
+                const previews = orderPreviews(order)
                 return (
                   <li
                     key={order.id}
@@ -167,7 +164,10 @@ export default function AccountPage() {
                   >
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                        {t('account.order')} {order.id.slice(-8)} ·{' '}
+                        <span className="text-accent-ink">
+                          {t('account.order')} {order.id.slice(-8)}
+                        </span>{' '}
+                        ·{' '}
                         {new Date(order.createdAt).toLocaleDateString(
                           dateLocale,
                         )}
@@ -177,14 +177,7 @@ export default function AccountPage() {
                       </p>
                       <p className="mt-1 text-sm text-ink/60">
                         {order.total?.toLocaleString(dateLocale)}{' '}
-                        {order.currency_id} ·{' '}
-                        <span
-                          className={
-                            order.status === 'paid' ? 'text-ink' : 'text-accent'
-                          }
-                        >
-                          {statusLabel(order.status)}
-                        </span>
+                        {order.currency_id} · <OrderStatus status={order.status} />
                       </p>
                       {order.status === 'pending' && (
                         <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
@@ -192,24 +185,42 @@ export default function AccountPage() {
                         </p>
                       )}
                     </div>
-                    {order.status === 'paid' ? (
-                      <button
-                        type="button"
-                        disabled={busy === order.id || left === 0}
-                        onClick={() => download(order.id)}
-                        className="border-2 border-ink px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone disabled:opacity-40"
-                      >
-                        {busy === order.id
-                          ? t('account.preparing')
-                          : left === 0
-                            ? t('account.limitReached')
-                            : t('account.download')}
-                      </button>
-                    ) : (
-                      <span className="text-[11px] uppercase tracking-[0.25em] text-accent">
-                        {t('account.waiting')}
-                      </span>
-                    )}
+                    <div className="flex flex-wrap items-center gap-3">
+                      {previews.map(({ item, index, href }) => (
+                        <a
+                          key={`${item.sku}-${index}`}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="border-2 border-ink/30 px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:border-ink hover:text-accent-ink"
+                        >
+                          {previews.length === 1
+                            ? t('account.preview')
+                            : t('account.previewOf', {
+                                name:
+                                  previewName(item) || t('account.previewCustom'),
+                              })}
+                        </a>
+                      ))}
+                      {order.status === 'paid' ? (
+                        <button
+                          type="button"
+                          disabled={busy === order.id || left === 0}
+                          onClick={() => download(order.id)}
+                          className="border-2 border-ink px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone disabled:opacity-40"
+                        >
+                          {busy === order.id
+                            ? t('account.preparing')
+                            : left === 0
+                              ? t('account.limitReached')
+                              : t('account.download')}
+                        </button>
+                      ) : (
+                        <span className="text-[11px] uppercase tracking-[0.25em] text-warning">
+                          {t('account.waiting')}
+                        </span>
+                      )}
+                    </div>
                   </li>
                 )
               })}

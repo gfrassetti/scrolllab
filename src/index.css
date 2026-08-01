@@ -12,25 +12,42 @@
   --market-bone: #f2efe9;
   --market-ink: #161412;
   --market-mist: #c7c1b6;
+  --market-accent-ink: #c23a00;
+  --market-success: #157347;
+  --market-warning: #8a5a00;
+  --market-danger: #b42318;
 }
 
 html.dark {
   --market-bone: #131313;
   --market-ink: #e8e5df;
   --market-mist: #45423d;
+  --market-accent-ink: #ff5c1f;
+  --market-success: #3fd07f;
+  --market-warning: #e8b13c;
+  --market-danger: #ef6a5e;
 }
 
 @theme inline {
   --color-bone: var(--market-bone);
   --color-ink: var(--market-ink);
   --color-mist: var(--market-mist);
+
+  /*
+   * Colores de estado. Flipean con el tema porque como *texto* chico tienen
+   * que llegar a 4.5:1 contra bone, y un mismo hex no lo logra en claro y
+   * oscuro a la vez. accent-ink es el naranja de marca hecho legible: usar
+   * `accent` para fondos/hovers y `accent-ink` cuando el naranja es texto.
+   */
+  --color-accent-ink: var(--market-accent-ink);
+  --color-success: var(--market-success);
+  --color-warning: var(--market-warning);
+  --color-danger: var(--market-danger);
 }
 
 @theme {
   /* ——— Model 01 "CHAPTERS": kinetic editorial ——— */
   --color-accent: #ff4b00;
-  /* Errores / estados destructivos: no reusar accent de marca */
-  --color-danger: #b42318;
 
   /* ——— Model 02 "NOCTURNE": cinematic noir ——— */
   --color-noir: #0e0e11;

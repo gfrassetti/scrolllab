@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
+import { outcomeForStatus, shouldClearCart } from '../lib/checkoutOutcome'
 import { useT } from '../i18n'
 
 const CONFIRM_TIMEOUT_MS = 15000
@@ -18,6 +19,12 @@ const RESOLVED_PANELS = {
     body: 'checkout.failBody',
     to: '/cart',
     cta: 'checkout.backCart',
+  },
+  processing: {
+    title: 'checkout.processingTitle',
+    body: 'checkout.processingBody',
+    to: '/account',
+    cta: 'checkout.goAccount',
   },
   error: {
     title: 'checkout.successTitle',
@@ -57,9 +64,11 @@ export default function CheckoutSuccessPage() {
     params.get('status') || params.get('collection_status') || ''
   const orderId = params.get('external_reference') || ''
 
+  // Vaciarlo al llegar acá dejaba al comprador rechazado volviendo a un carrito
+  // vacío, con todo para rearmar.
   useEffect(() => {
-    clearCart()
-  }, [clearCart])
+    if (shouldClearCart(confirmState)) clearCart()
+  }, [confirmState, clearCart])
 
   // Nunca girar para siempre: si /api/auth/me o el confirm se cuelgan, la orden
   // ya quedó paga por el webhook y el comprador tiene que poder llegar a
@@ -88,8 +97,9 @@ export default function CheckoutSuccessPage() {
       navigate('/account', { replace: true })
       return undefined
     }
-    if (status && status !== 'approved') {
-      setConfirmState('not-approved')
+    const outcome = outcomeForStatus(status)
+    if (outcome !== 'approved') {
+      setConfirmState(outcome)
       return undefined
     }
 
@@ -103,6 +113,7 @@ export default function CheckoutSuccessPage() {
         })
         if (cancelled) return
         const confirmedId = data.orderId || orderId
+        clearCart()
         navigate(
           `/account?purchase=1&orderId=${encodeURIComponent(confirmedId)}`,
           {
@@ -121,7 +132,7 @@ export default function CheckoutSuccessPage() {
     return () => {
       cancelled = true
     }
-  }, [authLoading, user, paymentId, status, orderId, navigate])
+  }, [authLoading, user, paymentId, status, orderId, navigate, clearCart])
 
   const panel = RESOLVED_PANELS[confirmState]
   if (panel) {

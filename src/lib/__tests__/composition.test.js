@@ -3,6 +3,7 @@ import { after, before, beforeEach, describe, it } from 'node:test'
 
 import {
   compositionToRecipe,
+  recipeToComposition,
   createCompositionItem,
   updateCompositionItemProps,
   addSectionToComposition,
@@ -82,6 +83,42 @@ describe('compositionToRecipe', () => {
       },
     ])
     assert.deepEqual(recipe, [{ id: 'fizz/CanCarousel', props: { title: 'ok' } }])
+  })
+})
+
+/**
+ * El preview de una compra se arma con esto: si no devuelve la misma lista de
+ * secciones y props que empaqueta el ZIP, el comprador ve algo que no compró.
+ */
+describe('recipeToComposition', () => {
+  it('reconstruye la composición guardada en la orden', () => {
+    const items = recipeToComposition([
+      { id: 'chapters/HeroKinetic', props: { lineOne: 'Hola' } },
+      { id: 'atelier/HeroMeaning' },
+    ])
+    assert.equal(items.length, 2)
+    assert.equal(items[0].sectionId, 'chapters/HeroKinetic')
+    assert.deepEqual(items[0].props, { lineOne: 'Hola' })
+    assert.equal(items[1].props, undefined)
+    assert.ok(items[0].uid && items[1].uid)
+  })
+
+  it('acepta recetas legacy de strings', () => {
+    const items = recipeToComposition(['chapters/HeroKinetic'])
+    assert.equal(items[0].sectionId, 'chapters/HeroKinetic')
+  })
+
+  it('el ida y vuelta no altera la receta', () => {
+    const recipe = [
+      { id: 'chapters/NavMinimal' },
+      { id: 'nocturne/NavNocturne' },
+      { id: 'atelier/HeroMeaning', props: { line1: 'uno' } },
+    ]
+    assert.deepEqual(compositionToRecipe(recipeToComposition(recipe)), recipe)
+  })
+
+  it('descarta secciones que ya no existen', () => {
+    assert.deepEqual(recipeToComposition([{ id: 'nope/Nope' }, null]), [])
   })
 })
 

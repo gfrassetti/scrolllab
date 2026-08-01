@@ -1,39 +1,128 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { loadComposition, recipeHasCommerce } from '../lib/composition'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  loadComposition,
+  recipeHasCommerce,
+  recipeToComposition,
+} from '../lib/composition'
+import { api } from '../lib/api'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import CompositionCanvas from '../components/CompositionCanvas'
 import CompositionShopShell from '../components/CompositionShopShell'
 import { useT } from '../i18n'
 
 /**
- * PreviewPage — renderiza en una pestaña propia la página que el
- * usuario armó en el builder (leída de localStorage), con las
- * animaciones reales.
+ * Reconstruye la composición de una compra desde la receta que quedó guardada
+ * en la orden. Es la misma lista de secciones (y props) con la que se arma el
+ * ZIP, así que el preview muestra exactamente lo vendido.
+ */
+function useOrderComposition(orderId, itemIndex) {
+  const [state, setState] = useState({
+    status: orderId ? 'loading' : 'idle',
+    items: [],
+  })
+
+  useEffect(() => {
+    if (!orderId) {
+      setState({ status: 'idle', items: [] })
+      return undefined
+    }
+    let cancelled = false
+    setState({ status: 'loading', items: [] })
+    api
+      .orders()
+      .then((data) => {
+        if (cancelled) return
+        const order = (data.orders || []).find((o) => o.id === orderId)
+        const items = recipeToComposition(order?.items?.[itemIndex]?.recipe)
+        setState(
+          items.length
+            ? { status: 'ready', items }
+            : { status: 'missing', items: [] },
+        )
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setState({
+          status: err?.status === 401 ? 'unauthorized' : 'missing',
+          items: [],
+        })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [orderId, itemIndex])
+
+  return state
+}
+
+function PreviewNotice({ message, to, cta }) {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-bone px-5 text-center text-ink">
+      <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+        Preview
+      </p>
+      <p className="max-w-[36ch] text-lg text-ink/70">{message}</p>
+      <Link
+        to={to}
+        className="border-2 border-ink px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors duration-300 hover:bg-ink hover:text-bone"
+      >
+        {cta}
+      </Link>
+    </div>
+  )
+}
+
+/**
+ * PreviewPage — renderiza en una pestaña propia una página armada con el
+ * builder, con las animaciones reales. Sin `?order=` lee la composición en
+ * curso (localStorage); con `?order=<id>&item=<n>` reconstruye una compra.
  */
 export default function PreviewPage() {
-  const [items] = useState(loadComposition)
+  const [params] = useSearchParams()
+  const orderId = params.get('order')
+  const itemIndex = Number.parseInt(params.get('item') || '0', 10) || 0
   const t = useT()
-  const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
 
-  if (items.length === 0) {
+  const order = useOrderComposition(orderId, itemIndex)
+  const [localItems] = useState(() => (orderId ? [] : loadComposition()))
+
+  const fromOrder = Boolean(orderId)
+  const items = fromOrder ? order.items : localItems
+  const backTo = fromOrder ? '/account' : '/builder'
+  const backLabel = fromOrder
+    ? t('preview.backToAccount')
+    : t('builder.backToBuilder')
+
+  if (fromOrder && order.status === 'loading') {
     return (
-      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-bone px-5 text-center text-ink">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
-          Preview
-        </p>
-        <p className="max-w-[36ch] text-lg text-ink/70">
-          {t('builder.emptyPreview')}
-        </p>
-        <Link
-          to="/builder"
-          className="border-2 border-ink px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors duration-300 hover:bg-ink hover:text-bone"
-        >
-          {t('builder.backToBuilder')}
-        </Link>
+      <div className="flex min-h-svh items-center justify-center bg-bone text-[11px] uppercase tracking-[0.25em] text-ink/50">
+        {t('common.loading')}
       </div>
     )
   }
+
+  if (fromOrder && order.status === 'unauthorized') {
+    return (
+      <PreviewNotice
+        message={t('preview.needsLogin')}
+        to={`/login?next=${encodeURIComponent(`/preview?order=${orderId}&item=${itemIndex}`)}`}
+        cta={t('preview.loginCta')}
+      />
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <PreviewNotice
+        message={fromOrder ? t('preview.notFound') : t('builder.emptyPreview')}
+        to={backTo}
+        cta={backLabel}
+      />
+    )
+  }
+
+  const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
 
   const home = (
     <SmoothScrollProvider>
@@ -46,13 +135,13 @@ export default function PreviewPage() {
       {hasCommerce ? <CompositionShopShell home={home} /> : home}
 
       <Link
-        to="/builder"
+        to={backTo}
         data-native-cursor
         className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
           hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
         }`}
       >
-        {t('builder.backToBuilder')} ({items.length})
+        {backLabel} ({items.length})
       </Link>
     </>
   )

@@ -138,6 +138,24 @@ export function compositionToRecipe(items) {
   })
 }
 
+/**
+ * Inversa de compositionToRecipe: receta guardada en una orden → items
+ * renderizables. No dedupea nav/footer a propósito — el ZIP se arma con la
+ * receta tal cual, y el preview tiene que mostrar eso y no una versión
+ * "arreglada".
+ */
+export function recipeToComposition(recipe) {
+  return (recipe || [])
+    .map((entry) =>
+      normalizeCompositionItem(
+        typeof entry === 'string'
+          ? { sectionId: entry }
+          : { sectionId: entry?.id, props: entry?.props },
+      ),
+    )
+    .filter(Boolean)
+}
+
 export function recipeHasCommerce(recipe) {
   const ids = (recipe || []).map((entry) =>
     typeof entry === 'string' ? entry : entry?.id,

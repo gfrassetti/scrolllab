@@ -426,6 +426,9 @@
     "pending": "Confirming payment…",
     "failed": "Failed",
     "download": "Download ZIP",
+    "preview": "See preview",
+    "previewOf": "Preview · {{name}}",
+    "previewCustom": "Your composition",
     "preparing": "Preparing…",
     "waiting": "Confirming payment…",
     "pendingHint": "If you just paid, this can take a few seconds. Refresh if it stays like this.",
@@ -433,6 +436,12 @@
     "prevPage": "← Previous",
     "nextPage": "Next →",
     "pageOf": "{{page}} / {{total}}"
+  },
+  "preview": {
+    "backToAccount": "← Back to My purchases",
+    "needsLogin": "Sign in to see the preview of this purchase.",
+    "loginCta": "Sign in →",
+    "notFound": "We couldn't find this composition in your purchases."
   },
   "purchaseModal": {
     "eyebrow": "Purchase",
@@ -453,7 +462,9 @@
     "needsLoginCta": "Sign in and see my purchase →",
     "goAccount": "Go to My purchases →",
     "failTitle": "Payment was not completed",
-    "failBody": "You can return to the cart and try again.",
+    "failBody": "Mercado Pago declined the payment, so you were not charged. Your cart is untouched: go back and try again, with that card or another one.",
+    "processingTitle": "Payment in progress",
+    "processingBody": "Mercado Pago is still processing the payment. Cash payments can take a few days: as soon as it clears, your ZIP shows up in My purchases and we email you.",
     "backCart": "Back to cart →",
     "mockEyebrow": "Payment (mock)",
     "mockDone": "Mock payment OK",

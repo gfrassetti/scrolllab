@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
 import ProductThumbnail from './ProductThumbnail'
+import OrderStatus from './OrderStatus'
+import { itemPreviewHref } from '../lib/orderPreview'
 import { useI18n } from '../i18n'
 
 /**
@@ -12,6 +15,15 @@ export default function PurchaseSuccessModal({
 }) {
   const { t, locale } = useI18n()
   const numberLocale = locale === 'en' ? 'en-US' : 'es-AR'
+
+  useEffect(() => {
+    if (!order) return undefined
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') onClose?.()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [order, onClose])
 
   if (!order) return null
 
@@ -27,10 +39,21 @@ export default function PurchaseSuccessModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[calc(100svh-2.5rem)] w-full max-w-md overflow-y-auto border-2 border-ink bg-bone p-6 text-ink shadow-xl md:p-8"
+        className="relative max-h-[calc(100svh-2.5rem)] w-full max-w-md overflow-y-auto border-2 border-ink bg-bone p-6 text-ink shadow-xl md:p-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t('common.close')}
+          className="absolute right-2 top-2 grid size-11 place-items-center text-ink/50 transition-colors hover:text-accent"
+        >
+          <svg viewBox="0 0 20 20" className="size-4" aria-hidden="true">
+            <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.6" />
+          </svg>
+        </button>
+
+        <p className="pr-10 text-[11px] uppercase tracking-[0.25em] text-ink/50">
           {t('purchaseModal.eyebrow')}
         </p>
         <h2
@@ -43,32 +66,49 @@ export default function PurchaseSuccessModal({
           {t('purchaseModal.body')}
         </p>
 
-        <p className="mt-6 text-[11px] uppercase tracking-[0.2em] text-ink/40">
-          {t('account.order')} {String(order.id).slice(-8)}
+        <p className="mt-6 text-[11px] uppercase tracking-[0.2em]">
+          <span className="text-accent-ink">
+            {t('account.order')} {String(order.id).slice(-8)}
+          </span>{' '}
+          <span className="text-ink/40">·</span>{' '}
+          <OrderStatus status={order.status} />
         </p>
 
         <ul className="mt-3 border-t border-ink/15">
-          {items.map((item) => (
-            <li
-              key={item.sku}
-              className="flex items-center gap-4 border-b border-ink/15 py-4"
-            >
-              <ProductThumbnail
-                sku={item.sku}
-                title={item.title}
-                className="h-16 w-20"
-              />
-              <div className="min-w-0">
-                <p className="truncate font-medium">{item.title}</p>
-                {item.unit_price != null && (
-                  <p className="mt-1 text-sm text-ink/60">
-                    {Number(item.unit_price).toLocaleString(numberLocale)}{' '}
-                    {item.currency_id || order.currency_id || 'ARS'}
-                  </p>
-                )}
-              </div>
-            </li>
-          ))}
+          {items.map((item, index) => {
+            const previewHref = itemPreviewHref(order, item, index)
+            return (
+              <li
+                key={item.sku}
+                className="flex items-center gap-4 border-b border-ink/15 py-4"
+              >
+                <ProductThumbnail
+                  sku={item.sku}
+                  title={item.title}
+                  className="h-16 w-20"
+                />
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{item.title}</p>
+                  {item.unit_price != null && (
+                    <p className="mt-1 text-sm text-ink/60">
+                      {Number(item.unit_price).toLocaleString(numberLocale)}{' '}
+                      {item.currency_id || order.currency_id || 'ARS'}
+                    </p>
+                  )}
+                  {previewHref && (
+                    <a
+                      href={previewHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block text-[11px] uppercase tracking-[0.2em] text-accent-ink underline-offset-4 hover:underline"
+                    >
+                      {t('account.preview')} ↗
+                    </a>
+                  )}
+                </div>
+              </li>
+            )
+          })}
         </ul>
 
         {order.total != null && (

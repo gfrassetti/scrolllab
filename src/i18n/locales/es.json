@@ -426,6 +426,9 @@
     "pending": "Confirmando pago…",
     "failed": "Fallida",
     "download": "Descargar ZIP",
+    "preview": "Ver preview",
+    "previewOf": "Preview · {{name}}",
+    "previewCustom": "Tu composición",
     "preparing": "Preparando…",
     "waiting": "Confirmando pago…",
     "pendingHint": "Si acabás de pagar, puede tardar unos segundos. Refrescá la página si sigue así.",
@@ -433,6 +436,12 @@
     "prevPage": "← Anterior",
     "nextPage": "Siguiente →",
     "pageOf": "{{page}} / {{total}}"
+  },
+  "preview": {
+    "backToAccount": "← Volver a Mis compras",
+    "needsLogin": "Entrá con tu cuenta para ver el preview de esta compra.",
+    "loginCta": "Entrar →",
+    "notFound": "No encontramos esta composición en tus compras."
   },
   "purchaseModal": {
     "eyebrow": "Compra",
@@ -453,7 +462,9 @@
     "needsLoginCta": "Entrar y ver mi compra →",
     "goAccount": "Ir a Mis compras →",
     "failTitle": "El pago no se completó",
-    "failBody": "Podés volver al carrito e intentarlo de nuevo.",
+    "failBody": "Mercado Pago rechazó el pago, así que no te cobramos nada. Dejamos el carrito como estaba: volvé e intentá de nuevo, con esa tarjeta u otra.",
+    "processingTitle": "Pago en proceso",
+    "processingBody": "Mercado Pago todavía está procesando el pago. Si elegiste efectivo puede tardar hasta unos días: cuando se acredite, tu ZIP aparece en Mis compras y te lo avisamos por mail.",
     "backCart": "Volver al carrito →",
     "mockEyebrow": "Pago (mock)",
     "mockDone": "Pago simulado OK",
