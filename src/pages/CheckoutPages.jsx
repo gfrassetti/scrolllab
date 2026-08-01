@@ -47,6 +47,7 @@ export default function CheckoutSuccessPage() {
   const [params] = useSearchParams()
   const [confirmState, setConfirmState] = useState('idle')
   const [confirmError, setConfirmError] = useState('')
+  const [confirmRef, setConfirmRef] = useState('')
 
   const paymentId =
     params.get('payment_id') ||
@@ -112,6 +113,7 @@ export default function CheckoutSuccessPage() {
       } catch (err) {
         if (cancelled) return
         setConfirmError(err.message)
+        setConfirmRef(err.requestId || '')
         setConfirmState((prev) => (prev === 'busy' ? 'error' : prev))
       }
     })()
@@ -137,9 +139,17 @@ export default function CheckoutSuccessPage() {
             {t(panel.body)}
           </p>
           {confirmState === 'error' && confirmError && (
-            <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
-              {confirmError}
-            </p>
+            <div className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+              <p>{confirmError}</p>
+              {confirmRef && (
+                <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                  {t('checkout.errorRef')}{' '}
+                  <code className="select-all font-mono normal-case tracking-normal text-ink/70">
+                    {confirmRef}
+                  </code>
+                </p>
+              )}
+            </div>
           )}
           <Link
             to={panel.to}

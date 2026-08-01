@@ -47,6 +47,9 @@ const orderSchema = new mongoose.Schema(
     mpPreferenceId: String,
     mpPaymentId: { type: String, sparse: true, unique: true },
     downloadCount: { type: Number, default: 0 },
+    // Solo en las pendientes: índice TTL para que Mongo limpie los checkouts
+    // abandonados. Se borra al pagar (ver db.markOrderPaidAtomic).
+    expiresAt: { type: Date, index: { expires: 0 } },
     zipPath: String,
     receiptEmailSendingAt: Date,
     receiptEmailSentAt: Date,

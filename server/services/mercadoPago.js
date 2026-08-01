@@ -67,10 +67,53 @@ export function verifyMpWebhookSignature({
   }
 }
 
+/**
+ * El SDK de MP tira el body JSON del error, no un Error: sin traducir, un 404
+ * (token de otro entorno) o un timeout salían como 500 «Error interno».
+ * Solo 400/404 son definitivos; el resto se marca 5xx para que el webhook
+ * reintente, con `expose` para que el comprador vea algo útil igual.
+ */
+export function mpPaymentError(err, paymentId) {
+  const status = Number(err?.status || err?.statusCode) || 0
+  const detail = String(err?.error || err?.message || err || '').slice(0, 300)
+  console.error(
+    `MP payment fetch failed payment=${paymentId} status=${status || '-'} detail=${detail}`,
+  )
+
+  if (status === 404) {
+    return new HttpError(
+      404,
+      'Mercado Pago no reconoce ese pago con las credenciales configuradas',
+    )
+  }
+  if (status === 401 || status === 403) {
+    return new HttpError(
+      502,
+      'No pudimos validar el pago con Mercado Pago (credenciales rechazadas)',
+      { expose: true },
+    )
+  }
+  if (status === 429 || status >= 500) {
+    return new HttpError(503, 'Mercado Pago no está respondiendo, probá en un momento', {
+      expose: true,
+    })
+  }
+  if (status >= 400) {
+    return new HttpError(400, 'Mercado Pago rechazó la consulta de ese pago')
+  }
+  return new HttpError(504, 'No pudimos comunicarnos con Mercado Pago', {
+    expose: true,
+  })
+}
+
 export async function fetchPayment(accessToken, paymentId) {
   const client = createMpClient(accessToken)
   const paymentApi = new Payment(client)
-  return paymentApi.get({ id: paymentId })
+  try {
+    return await paymentApi.get({ id: paymentId })
+  } catch (err) {
+    throw mpPaymentError(err, paymentId)
+  }
 }
 
 /**

@@ -63,7 +63,34 @@ No mezcles localhost y prod en el mismo client. Rotá `GOOGLE_CLIENT_SECRET` si 
 
 Validamos `x-signature` con `MP_WEBHOOK_SECRET` (SDK oficial).
 
+**Trampa del panel:** la config de webhooks tiene dos pestañas, **Modo de prueba**
+y **Modo productivo**, y **cada una guarda su propia URL**. Un pago productivo
+notifica solo a la URL de Modo productivo: si esa pestaña está vacía no llega
+ningún webhook y la orden queda `pending` para siempre, aunque la de prueba esté
+bien cargada. La clave secreta, en cambio, es de la aplicación y se comparte entre
+ambos modos, así que `MP_WEBHOOK_SECRET` es uno solo.
+
+El evento a tildar es **Pagos (legacy)**, que manda `type=payment`: es lo que
+filtra el handler. «Order (Mercado Pago)» tiene otro payload y se ignora.
+
 **Importante (doc oficial):** los pagos creados con **credenciales de prueba no envían webhooks**. Por eso el front, al volver a `/checkout/success`, llama a `POST /api/checkout/confirm` con el `payment_id` de la query y marca la orden como paga. En producción el webhook sigue siendo la fuente principal; el confirm actúa de respaldo.
+
+## Diagnóstico: «Error interno» en /checkout/success
+
+En producción `errorHandler` enmascara todo 5xx como «Error interno», así que ese
+recuadro rojo siempre significa que `POST /api/checkout/confirm` devolvió 500 —
+nunca un problema de Mercado Pago. La pantalla muestra abajo un **código de
+referencia**: es el `requestId` del pedido, y el log de Railway trae el stack con
+ese mismo id entre corchetes.
+
+```
+[<requestId>] TypeError: ...
+```
+
+Los errores esperados ya no son 500: pago en proceso (409), pago rechazado (400),
+orden inexistente (404), pago de otra cuenta (403), MP caído o token de otro
+entorno (502/503/504 con mensaje propio). Confirmar un pago que el webhook ya
+cumplió devuelve 200 con la orden.
 
 ## Mercado Pago — pasar a producción
 
@@ -71,10 +98,11 @@ En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
 
 1. Abrí tu aplicación → pestaña **Producción** (no Prueba).
 2. Copiá el **Access Token** de producción → `MP_ACCESS_TOKEN` en Railway.
-3. Webhooks → agregá URL:  
+3. Webhooks → pestaña **Modo productivo** (no alcanza con Modo de prueba) → URL:  
    `https://TU-API/api/webhooks/mercadopago`  
-   (eventos de **pagos** / `payment`).
-4. Copiá el **secret** de firma del webhook → `MP_WEBHOOK_SECRET`.
+   con el evento **Pagos (legacy)** tildado.
+4. Copiá la **clave secreta** de firma del webhook → `MP_WEBHOOK_SECRET`
+   (es la misma para los dos modos).
 5. En Railway / prod:
    ```
    MP_MOCK_ENABLED=false

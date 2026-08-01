@@ -101,6 +101,7 @@ export const db = {
       }
       order.status = "paid";
       order.mpPaymentId = String(mpPaymentId);
+      delete order.expiresAt;
       await order.save();
       return { order, created: true };
     }
@@ -120,6 +121,8 @@ export const db = {
           status: "paid",
           mpPaymentId: String(mpPaymentId),
         },
+        // Una orden paga no caduca: sacarle el TTL es parte de cobrarla.
+        $unset: { expiresAt: 1 },
       },
       { new: true },
     );

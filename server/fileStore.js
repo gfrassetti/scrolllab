@@ -4,7 +4,11 @@ import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const DATA_DIR = path.resolve(__dirname, '..', 'storage', 'db')
+// Sin escritura atómica, dos procesos sobre el mismo JSON se pisan: cada suite
+// de tests que use STORE=file necesita su propio directorio.
+const DATA_DIR = path.resolve(
+  process.env.FILE_DB_DIR || path.join(__dirname, '..', 'storage', 'db'),
+)
 
 function ensure() {
   fs.mkdirSync(DATA_DIR, { recursive: true })

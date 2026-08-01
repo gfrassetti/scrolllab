@@ -10,7 +10,10 @@ import {
   signDownloadToken,
   verifyDownloadToken,
 } from '../packaging.js'
-import { assertPaymentMatchesOrder } from '../services/mercadoPago.js'
+import {
+  assertPaymentMatchesOrder,
+  mpPaymentError,
+} from '../services/mercadoPago.js'
 import { verifyMpWebhookSignature } from '../services/mercadoPago.js'
 import {
   PRODUCTS,
@@ -26,7 +29,14 @@ import {
 } from '../fx.js'
 import { buildOrderReceipt } from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
-import { allowedOrigins, requireSameOrigin } from '../middleware.js'
+import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
+import {
+  PENDING_RETENTION_MS,
+  PENDING_VISIBLE_MS,
+  isStalePending,
+  pendingExpiresAt,
+  visibleOrders,
+} from '../orderRetention.js'
 
 describe('validateRecipe', () => {
   it('acepta secciones de la allowlist (legacy string[])', () => {
@@ -450,6 +460,80 @@ describe('allowedOrigins', () => {
   })
 })
 
+describe('errorHandler', () => {
+  function send(err, { isProd = true } = {}) {
+    const out = {}
+    const res = {
+      status(code) {
+        out.status = code
+        return res
+      },
+      json(body) {
+        out.body = body
+        return res
+      },
+    }
+    const silence = console.error
+    console.error = () => {}
+    try {
+      errorHandler({ isProd })(err, { requestId: 'rid-1' }, res, () => {})
+    } finally {
+      console.error = silence
+    }
+    return out
+  }
+
+  it('enmascara el 5xx crudo pero devuelve el requestId para reportarlo', () => {
+    const out = send(new TypeError('Invalid URL'))
+    assert.equal(out.status, 500)
+    assert.equal(out.body.error, 'Error interno')
+    assert.equal(out.body.requestId, 'rid-1')
+  })
+
+  it('deja pasar el mensaje de un 5xx marcado expose', () => {
+    const out = send(new HttpError(503, 'Mercado Pago no responde', { expose: true }))
+    assert.equal(out.status, 503)
+    assert.equal(out.body.error, 'Mercado Pago no responde')
+  })
+
+  it('los 4xx muestran su mensaje', () => {
+    const out = send(new HttpError(409, 'Todavía se está procesando'))
+    assert.equal(out.status, 409)
+    assert.equal(out.body.error, 'Todavía se está procesando')
+    assert.equal(out.body.requestId, 'rid-1')
+  })
+})
+
+describe('mpPaymentError', () => {
+  // El SDK de MP tira el body JSON del error, sin ser un Error.
+  const mapped = (raw) => mpPaymentError(raw, '123')
+
+  it('traduce 404 (pago de otro entorno) a 404 y no a 500', () => {
+    const err = mapped({ message: 'Payment not found', error: 'not_found', status: 404 })
+    assert.ok(err instanceof HttpError)
+    assert.equal(err.status, 404)
+    assert.equal(err.expose, true)
+  })
+
+  it('credenciales rechazadas → 502 con mensaje visible', () => {
+    const err = mapped({ message: 'invalid access token', status: 401 })
+    assert.equal(err.status, 502)
+    assert.equal(err.expose, true)
+    assert.doesNotMatch(err.message, /access token/i, 'no filtra el detalle de MP')
+  })
+
+  it('rate limit y 5xx de MP → 503 reintentable', () => {
+    assert.equal(mapped({ status: 429 }).status, 503)
+    assert.equal(mapped({ status: 503 }).status, 503)
+  })
+
+  it('un fallo de red sin status → 504', () => {
+    const err = mapped(new TypeError('fetch failed'))
+    assert.equal(err.status, 504)
+    assert.equal(err.expose, true)
+  })
+})
+
 describe('requireSameOrigin', () => {
   const config = { clientUrl: 'https://www.scrolllab.com.ar', isProd: true }
 
@@ -497,6 +581,59 @@ describe('requireSameOrigin', () => {
       run({ origin: 'https://api.mercadopago.com' }, { path: '/api/webhooks/mercadopago' })
         .nexted,
       true,
+    )
+  })
+})
+
+/**
+ * Un checkout abandonado no puede quedarse para siempre en Mis compras, pero
+ * tampoco se puede tirar una compra: el efectivo se acredita días después.
+ */
+describe('retención de órdenes pendientes', () => {
+  const NOW = Date.parse('2026-07-31T20:00:00Z')
+  const agedHours = (h) => ({
+    status: 'pending',
+    createdAt: new Date(NOW - h * 3600_000).toISOString(),
+  })
+
+  it('muestra la pendiente recién creada', () => {
+    assert.equal(isStalePending(agedHours(0), NOW), false)
+    assert.equal(isStalePending(agedHours(1), NOW), false)
+  })
+
+  it('esconde la pendiente vencida', () => {
+    assert.equal(isStalePending(agedHours(3), NOW), true)
+    assert.equal(isStalePending(agedHours(72), NOW), true)
+  })
+
+  it('nunca esconde una compra paga, por vieja que sea', () => {
+    const paid = { ...agedHours(24 * 365), status: 'paid' }
+    assert.equal(isStalePending(paid, NOW), false)
+  })
+
+  it('ante una fecha ilegible prefiere mostrar', () => {
+    assert.equal(isStalePending({ status: 'pending' }, NOW), false)
+    assert.equal(isStalePending({ status: 'pending', createdAt: 'ayer' }, NOW), false)
+  })
+
+  it('filtra la lista dejando pagas y pendientes recientes', () => {
+    const orders = [
+      { id: 'a', ...agedHours(0) },
+      { id: 'b', ...agedHours(48) },
+      { id: 'c', ...agedHours(48), status: 'paid' },
+    ]
+    assert.deepEqual(
+      visibleOrders(orders, NOW).map((o) => o.id),
+      ['a', 'c'],
+    )
+  })
+
+  it('el TTL sobrevive a los pagos en efectivo, que tardan días', () => {
+    assert.ok(PENDING_RETENTION_MS > PENDING_VISIBLE_MS)
+    assert.ok(PENDING_RETENTION_MS >= 3 * 24 * 3600_000)
+    assert.equal(
+      pendingExpiresAt(NOW).getTime(),
+      NOW + PENDING_RETENTION_MS,
     )
   })
 })

@@ -21,6 +21,7 @@ import {
   HttpError,
 } from './middleware.js'
 import { validateCheckoutItems, assertObjectIdLike } from './validation.js'
+import { pendingExpiresAt, visibleOrders } from './orderRetention.js'
 import {
   createCheckoutPreference,
   verifyMpWebhookSignature,
@@ -307,9 +308,9 @@ export async function createApp(config) {
     '/api/orders',
     requireAuth,
     asyncHandler(async (req, res) => {
-      const orders = await db.findOrdersByUser(db.uid(req.user))
+      const all = await db.findOrdersByUser(db.uid(req.user))
       res.json({
-        orders: orders.map((o) => ({
+        orders: visibleOrders(all).map((o) => ({
           id: db.uid(o) || o.id,
           status: o.status,
           items: o.items,
@@ -333,7 +334,6 @@ export async function createApp(config) {
   app.post(
     '/api/checkout/confirm',
     requireAuth,
-    requireSameOrigin,
     limits.checkout,
     asyncHandler(async (req, res) => {
       if (config.mpMock || !config.mpAccessToken) {
@@ -348,7 +348,7 @@ export async function createApp(config) {
       }
 
       const payment = await fetchPayment(config.mpAccessToken, paymentId)
-      const { order, orderId } = await fulfillApprovedPayment({
+      const { order, orderId, alreadyFulfilled } = await fulfillApprovedPayment({
         payment,
         config,
         expectedUserId: db.uid(req.user),
@@ -357,6 +357,7 @@ export async function createApp(config) {
       res.json({
         ok: true,
         orderId,
+        alreadyFulfilled,
         status: order?.status || 'paid',
         order: order
           ? {
@@ -399,6 +400,7 @@ export async function createApp(config) {
         totalUsd: resolved.reduce((sum, i) => sum + i.unit_price_usd, 0),
         fxRate: fx.rate,
         currency_id: 'ARS',
+        expiresAt: pendingExpiresAt(),
       })
 
       const orderId = db.uid(order) || order.id
@@ -478,8 +480,10 @@ export async function createApp(config) {
         dataId,
       })
 
-      const payment = await fetchPayment(config.mpAccessToken, dataId)
+      // Un 4xx no se arregla reintentando: cortamos con 200 para que MP no
+      // repita el evento. Los 5xx (MP caído, Mongo) sí tienen que reintentarse.
       try {
+        const payment = await fetchPayment(config.mpAccessToken, dataId)
         await fulfillApprovedPayment({ payment, config })
       } catch (err) {
         if (err instanceof HttpError && err.status < 500) {

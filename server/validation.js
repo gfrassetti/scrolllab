@@ -9,10 +9,15 @@ import { isAllowedSectionId } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
 
 export class HttpError extends Error {
-  constructor(status, message) {
+  /**
+   * `expose` habilita que el mensaje viaje al cliente aunque sea 5xx: los 5xx
+   * crudos se enmascaran porque pueden traer detalles internos.
+   */
+  constructor(status, message, { expose } = {}) {
     super(message)
     this.status = status
     this.name = 'HttpError'
+    this.expose = expose ?? status < 500
   }
 }
 

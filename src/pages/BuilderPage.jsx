@@ -213,6 +213,14 @@ export default function BuilderPage() {
           >
             {t('builder.preview')}
           </button>
+          {looksLoggedIn && (
+            <Link
+              to="/account"
+              className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors duration-300 hover:text-accent md:text-xs"
+            >
+              {t('nav.account')}
+            </Link>
+          )}
           <CartPopover />
           <LanguageSelector />
           <ThemeToggle />
@@ -326,7 +334,9 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:max-h-[calc(100svh-5.5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain">
+        {/* Sin scroll propio: la página scrollea entera. Un contenedor con
+            altura tope acá recortaba el precio y los botones de compra. */}
+        <div className="lg:col-span-7">
           <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
             {t('builder.canvasTitle')} ({items.length}{' '}
             {items.length === 1

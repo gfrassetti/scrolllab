@@ -113,7 +113,15 @@ export async function fulfillApprovedPayment({
   expectedUserId = null,
 }) {
   if (payment.status !== 'approved') {
-    throw new HttpError(400, 'Pago no aprobado')
+    const processing = ['pending', 'in_process', 'authorized'].includes(
+      payment.status,
+    )
+    throw new HttpError(
+      processing ? 409 : 400,
+      processing
+        ? 'Mercado Pago todavía está procesando el pago'
+        : 'El pago no fue aprobado',
+    )
   }
 
   const orderId = payment.external_reference || payment.metadata?.orderId
@@ -121,14 +129,27 @@ export async function fulfillApprovedPayment({
     throw new HttpError(400, 'Pago sin referencia de orden')
   }
 
-  const order = await db.findOrderById(orderId)
+  // Un external_reference que no es ObjectId hace que Mongo tire CastError:
+  // eso es una orden que no existe, no un error del servidor.
+  let order
+  try {
+    order = await db.findOrderById(orderId)
+  } catch (err) {
+    if (err?.name === 'CastError') {
+      throw new HttpError(404, 'No encontramos la orden de ese pago')
+    }
+    throw err
+  }
   if (!order) {
-    throw new HttpError(404, 'Orden no encontrada')
+    throw new HttpError(404, 'No encontramos la orden de ese pago')
   }
 
   const orderUserId = String(order.userId)
   if (expectedUserId && orderUserId !== String(expectedUserId)) {
-    throw new HttpError(403, 'La orden no pertenece a este usuario')
+    throw new HttpError(
+      403,
+      'Ese pago pertenece a otra cuenta. Entrá con la cuenta que usaste para comprar.',
+    )
   }
 
   assertPaymentMatchesOrder(payment, {
@@ -136,31 +157,44 @@ export async function fulfillApprovedPayment({
     id: db.uid(order) || order.id,
   })
 
-  const { order: paid } = await markOrderPaid({
+  const { order: updated, created } = await markOrderPaid({
     orderId: db.uid(order) || order.id,
     mpPaymentId: payment.id,
   })
 
-  if (paid) {
-    const user = await db.findUserById(paid.userId)
-    if (user) {
-      try {
-        await ensureOrderZip(paid, user, config)
-      } catch (packErr) {
-        console.error('ZIP pack failed after payment', packErr)
+  // El webhook puede haber cumplido la orden antes del confirm: confirmar de
+  // nuevo tiene que devolver éxito, no un error.
+  const paid = updated || order
+
+  let user = null
+  if (paid.status === 'paid') {
+    try {
+      user = await db.findUserById(paid.userId)
+    } catch (userErr) {
+      console.error('Order user lookup failed', userErr)
+    }
+  }
+  if (user) {
+    try {
+      await ensureOrderZip(paid, user, config)
+    } catch (packErr) {
+      console.error('ZIP pack failed after payment', packErr)
+    }
+    try {
+      const result = await sendOrderReceiptOnce({ order: paid, user, config })
+      if (result.sent) {
+        console.log(`Order receipt sent order=${db.uid(paid) || paid.id}`)
       }
-      try {
-        const result = await sendOrderReceiptOnce({ order: paid, user, config })
-        if (result.sent) {
-          console.log(`Order receipt sent order=${db.uid(paid) || paid.id}`)
-        }
-      } catch (emailErr) {
-        console.error('Order receipt email failed', emailErr)
-      }
+    } catch (emailErr) {
+      console.error('Order receipt email failed', emailErr)
     }
   }
 
-  return { order: paid, orderId: db.uid(paid) || orderId }
+  return {
+    order: paid,
+    orderId: db.uid(paid) || paid.id || orderId,
+    alreadyFulfilled: !created,
+  }
 }
 
 /**

@@ -448,6 +448,7 @@
     "confirming": "Confirming payment with Mercado Pago…",
     "confirmError": "Payment was received and your order is already registered. We couldn't confirm it from here, but it's under My purchases: if it still shows pending, wait a minute and reload, or contact us.",
     "confirmSlow": "Payment received. Confirmation is taking longer than usual, but your purchase is already registered: open My purchases to download the ZIP.",
+    "errorRef": "Reference code:",
     "needsLogin": "Payment received and your purchase is already registered. Sign in to see it and download the ZIP.",
     "needsLoginCta": "Sign in and see my purchase →",
     "goAccount": "Go to My purchases →",

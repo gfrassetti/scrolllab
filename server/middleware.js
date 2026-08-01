@@ -37,6 +37,9 @@ export function createCors(config) {
   return cors({
     origin: allowedOrigins(config),
     credentials: true,
+    // El front muestra el requestId para reportar un error; sin exponerlo,
+    // fetch cross-origin no puede leer el header.
+    exposedHeaders: ['x-request-id'],
   })
 }
 
@@ -138,14 +141,15 @@ export function notFound(_req, res) {
 export function errorHandler(config) {
   return (err, req, res, _next) => {
     const status = err.status || err.statusCode || 500
+    const requestId = req.requestId || null
     if (status >= 500) {
-      console.error(`[${req.requestId || '-'}]`, err)
+      console.error(`[${requestId || '-'}]`, err)
     }
-    const message =
-      status >= 500 && config.isProd
-        ? 'Error interno'
-        : err.message || 'Error interno'
-    res.status(status).json({ error: message })
+    const masked = status >= 500 && config.isProd && err.expose !== true
+    const message = masked ? 'Error interno' : err.message || 'Error interno'
+    // El requestId viaja siempre: es lo único que ata la pantalla del comprador
+    // al log del servidor cuando el mensaje va enmascarado.
+    res.status(status).json({ error: message, requestId })
   }
 }
 

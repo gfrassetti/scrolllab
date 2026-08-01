@@ -34,6 +34,7 @@ describe('API HTTP (file store)', () => {
     process.env.FX_SPREAD_PCT = '0'
     storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-orders-'))
     process.env.STORAGE_DIR = storageDir
+    process.env.FILE_DB_DIR = path.join(storageDir, 'db')
 
     // Reset modules that cache config-ish state
     const { loadConfig } = await import('../config.js')
@@ -188,6 +189,58 @@ describe('API HTTP (file store)', () => {
     )
   })
 
+  /**
+   * El checkout crea la orden al abrirse, así que cada intento abandonado
+   * ensuciaba Mis compras para siempre.
+   */
+  it('esconde de Mis compras el checkout abandonado, pero no la compra paga', async () => {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email: 'stale@test.com' })
+
+    const checkout = await agent
+      .post('/api/checkout')
+      .set('Origin', config.clientUrl)
+      .send({ items: [{ sku: 'chapters', unit_price: 1 }] })
+    const orderId = checkout.body.orderId
+
+    const listed = async () => {
+      const res = await agent.get('/api/orders').set('Origin', config.clientUrl)
+      return (res.body.orders || []).map((o) => o.id)
+    }
+    assert.ok((await listed()).includes(orderId), 'la orden recién creada no aparece')
+
+    // Envejecerla a mano es la única forma de simular el abandono sin esperar.
+    const ordersPath = path.join(storageDir, 'db', 'orders.json')
+    const age = (hours) => {
+      const rows = JSON.parse(fs.readFileSync(ordersPath, 'utf8'))
+      const row = rows.find((o) => o.id === orderId)
+      row.createdAt = new Date(Date.now() - hours * 3600_000).toISOString()
+      fs.writeFileSync(ordersPath, JSON.stringify(rows, null, 2))
+    }
+
+    age(48)
+    assert.ok(
+      !(await listed()).includes(orderId),
+      'la orden abandonada sigue apareciendo',
+    )
+
+    // Los pagos en efectivo se acreditan días después: al cobrarse tiene que
+    // volver a la lista, vieja y todo.
+    const pay = await agent
+      .post('/api/checkout/mock-pay')
+      .set('Origin', config.clientUrl)
+      .send({ orderId })
+    assert.equal(pay.status, 200)
+    age(48)
+    assert.ok(
+      (await listed()).includes(orderId),
+      'la compra paga desapareció de Mis compras',
+    )
+  })
+
   it('el catálogo devuelve pesos convertidos y la cotización usada', async () => {
     const res = await request(app).get('/api/catalog')
     assert.equal(res.status, 200)
@@ -196,6 +249,22 @@ describe('API HTTP (file store)', () => {
     assert.ok(bundle)
     assert.ok(bundle.unit_price_usd > 0)
     assert.equal(bundle.unit_price, Math.ceil((bundle.unit_price_usd * 1560) / 1000) * 1000)
+  })
+
+  it('confirm llega al handler y responde 4xx con requestId', async () => {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email: 'confirm@test.com' })
+
+    const res = await agent
+      .post('/api/checkout/confirm')
+      .set('Origin', config.clientUrl)
+      .send({ paymentId: '123456' })
+
+    assert.equal(res.status, 400, `esperaba 400 y vino ${res.status}: ${res.text}`)
+    assert.ok(res.body.requestId, 'el error no trae requestId para reportar')
   })
 
   it('webhook sin firma válida → 401 cuando no es mock', async () => {

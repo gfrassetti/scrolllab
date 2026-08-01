@@ -11,7 +11,11 @@ async function request(path, options = {}) {
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    throw new Error(data.error || `Error ${res.status}`)
+    const error = new Error(data.error || `Error ${res.status}`)
+    error.status = res.status
+    // El requestId es lo único que ata este error al log del servidor.
+    error.requestId = data.requestId || res.headers.get('x-request-id') || ''
+    throw error
   }
   return data
 }
