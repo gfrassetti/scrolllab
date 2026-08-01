@@ -320,8 +320,6 @@ export async function createApp(config) {
           currency_id: o.currency_id,
           createdAt: o.createdAt,
           downloadCount: o.downloadCount || 0,
-          maxDownloads: config.maxDownloads,
-          downloadTtlSeconds: config.downloadTtl,
         })),
       })
     }),
@@ -502,7 +500,7 @@ export async function createApp(config) {
   app.get(
     '/api/orders/:id/download',
     requireAuth,
-    limits.download,
+    limits.downloadToken,
     asyncHandler(async (req, res) => {
       assertObjectIdLike(req.params.id)
       const order = await db.findOrderById(req.params.id)
@@ -512,7 +510,10 @@ export async function createApp(config) {
       if (order.status !== 'paid') {
         throw new HttpError(403, 'La orden todavía no está paga')
       }
-      if ((order.downloadCount || 0) >= config.maxDownloads) {
+      if (
+        config.maxDownloads > 0 &&
+        (order.downloadCount || 0) >= config.maxDownloads
+      ) {
         throw new HttpError(429, 'Límite de descargas alcanzado')
       }
 
@@ -539,7 +540,18 @@ export async function createApp(config) {
       } catch {
         throw new HttpError(400, 'Token inválido')
       }
-      if (!data) throw new HttpError(401, 'Link expirado o inválido')
+      if (!data) {
+        // El link vencido llega por navegación del browser: un JSON crudo no le
+        // dice nada al comprador, así que lo devolvemos a Mis compras avisado.
+        if (String(req.headers.accept || '').includes('text/html')) {
+          const base = config.clientUrl.replace(/\/$/, '')
+          return res.redirect(302, `${base}/account?download=expired`)
+        }
+        throw new HttpError(
+          410,
+          'El link de descarga venció. Entrá a Mis compras y tocá Descargar de nuevo.',
+        )
+      }
 
       const existing = await db.findOrderById(data.orderId)
       if (!existing || existing.status !== 'paid') {

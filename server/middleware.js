@@ -124,9 +124,18 @@ export function rateLimits() {
       legacyHeaders: false,
       message: { error: 'Rate limit' },
     }),
+    // Emitir el link es lo que conviene frenar (un script pidiendo tokens para
+    // repartir); bajar el ZIP es generoso porque el browser reintenta y resume.
+    downloadToken: rateLimit({
+      windowMs: 60 * 1000,
+      max: 20,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Demasiados pedidos de descarga' },
+    }),
     download: rateLimit({
       windowMs: 60 * 1000,
-      max: 30,
+      max: 60,
       standardHeaders: true,
       legacyHeaders: false,
       message: { error: 'Demasiadas descargas' },

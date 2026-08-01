@@ -8,6 +8,15 @@
  */
 export const COMMERCE_PACK_SURCHARGE_USD = 39
 
+/**
+ * Composición del builder: `PRODUCTS.custom.unit_price_usd` es la base e
+ * incluye CUSTOM_BASE_SECTIONS secciones; cada sección extra suma
+ * CUSTOM_EXTRA_SECTION_USD. Cuenta cada entrada de la receta, porque cada una
+ * es un componente renderizado en el App.jsx del ZIP.
+ */
+export const CUSTOM_BASE_SECTIONS = 8
+export const CUSTOM_EXTRA_SECTION_USD = 15
+
 /** Redondeo del monto en pesos: al millar de arriba, para no perder en el cambio. */
 export const ARS_ROUNDING = 1000
 
@@ -75,7 +84,7 @@ export const PRODUCTS = {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 229,
+    unit_price_usd: 199,
     currency_id: 'ARS',
   },
 }
@@ -97,9 +106,18 @@ export function recipeHasCommerce(recipe) {
   )
 }
 
+export function customExtraSections(sectionCount) {
+  const count = Number.isFinite(sectionCount) ? Math.floor(sectionCount) : 0
+  return Math.max(0, count - CUSTOM_BASE_SECTIONS)
+}
+
 export function priceCustomRecipeUsd(recipe) {
-  const base = PRODUCTS.custom.unit_price_usd
-  return base + (recipeHasCommerce(recipe) ? COMMERCE_PACK_SURCHARGE_USD : 0)
+  const sections = Array.isArray(recipe) ? recipe.length : 0
+  return (
+    PRODUCTS.custom.unit_price_usd +
+    customExtraSections(sections) * CUSTOM_EXTRA_SECTION_USD +
+    (recipeHasCommerce(recipe) ? COMMERCE_PACK_SURCHARGE_USD : 0)
+  )
 }
 
 export function resolveLineItem(item) {

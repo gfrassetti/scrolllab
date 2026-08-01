@@ -4,7 +4,8 @@ import { installBrowserStorageMocks } from './storageMock.js'
 
 installBrowserStorageMocks()
 
-const { useCart, useCartNotice } = await import('../cart.js')
+const { useCart, useCartNotice, cartLinePriceArs } = await import('../cart.js')
+const { estimateCustomPriceUsd, arsFromUsd } = await import('../pricing.js')
 
 describe('useCart', () => {
   beforeEach(() => {
@@ -83,5 +84,39 @@ describe('useCart', () => {
     }
     assert.equal('unit_price' in checkoutPayload, false)
     assert.equal(checkoutPayload.sku, 'custom')
+  })
+})
+
+describe('cartLinePriceArs', () => {
+  const RATE = 1560
+  const catalog = { chapters: { unit_price: 202000 } }
+  const recipeOf = (n, extra = []) => [
+    ...Array.from({ length: n }, () => ({ id: 'chapters/HeroKinetic' })),
+    ...extra,
+  ]
+
+  it('los templates salen del catálogo del servidor', () => {
+    assert.equal(cartLinePriceArs({ sku: 'chapters' }, catalog, RATE), 202000)
+  })
+
+  /**
+   * El carrito viejo de localStorage guarda la receta, nunca el monto: al
+   * recalcular con la fórmula vigente muestra lo mismo que cobra el checkout.
+   */
+  it('recalcula la composición según las secciones guardadas', () => {
+    for (const count of [1, 8, 9, 30]) {
+      assert.equal(
+        cartLinePriceArs({ sku: 'custom', recipe: recipeOf(count) }, catalog, RATE),
+        arsFromUsd(estimateCustomPriceUsd(count, false), RATE),
+      )
+    }
+  })
+
+  it('detecta el kit de commerce en la receta guardada', () => {
+    const recipe = recipeOf(2, [{ id: 'commerce/ProductGrid' }])
+    assert.equal(
+      cartLinePriceArs({ sku: 'custom:algo', recipe }, catalog, RATE),
+      arsFromUsd(estimateCustomPriceUsd(3, true), RATE),
+    )
   })
 })

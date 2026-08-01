@@ -198,7 +198,8 @@ export async function fulfillApprovedPayment({
 }
 
 /**
- * Consume un slot de descarga de forma atómica.
+ * Cuenta la descarga de forma atómica. Con maxDownloads 0 nunca frena:
+ * el contador queda solo como señal de abuso para soporte.
  */
 export async function consumeDownload(orderId, maxDownloads) {
   const order = await db.consumeDownloadAtomic(orderId, maxDownloads)

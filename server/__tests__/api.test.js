@@ -6,6 +6,7 @@ import os from 'node:os'
 import request from 'supertest'
 
 import { brokenImports, readZip } from './helpers/zip.js'
+import { signDownloadToken } from '../packaging.js'
 
 /** supertest devuelve texto por defecto y eso corrompe los bytes del ZIP. */
 function binaryParser(res, callback) {
@@ -123,6 +124,93 @@ describe('API HTTP (file store)', () => {
       files.get('LICENSE.txt').toString('utf8'),
       /buyer@test\.com/,
       'la licencia descargada no lleva el watermark del comprador',
+    )
+  })
+
+  /** dev-login + checkout mock + mock-pay: deja una orden paga lista para bajar. */
+  async function seedPaidOrder(email) {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email, name: 'Buyer' })
+    const checkout = await agent
+      .post('/api/checkout')
+      .set('Origin', config.clientUrl)
+      .send({ items: [{ sku: 'chapters', unit_price: 1 }] })
+    const orderId = checkout.body.orderId
+    await agent
+      .post('/api/checkout/mock-pay')
+      .set('Origin', config.clientUrl)
+      .send({ orderId })
+    return { agent, orderId }
+  }
+
+  it('el link vencido se rechaza y devuelve al comprador a Mis compras', async () => {
+    const { orderId } = await seedPaidOrder('expired@test.com')
+    const stale = signDownloadToken({
+      orderId,
+      userId: 'anyone',
+      secret: config.downloadSecret,
+      ttlSeconds: -10,
+    })
+
+    const asJson = await request(app).get(`/api/download/${stale}`)
+    assert.equal(asJson.status, 410)
+    assert.match(asJson.body.error, /venció/)
+
+    // Es una navegación del browser: un JSON crudo no le dice nada al comprador.
+    const asBrowser = await request(app)
+      .get(`/api/download/${stale}`)
+      .set('Accept', 'text/html,application/xhtml+xml')
+    assert.equal(asBrowser.status, 302)
+    assert.equal(
+      asBrowser.headers.location,
+      `${config.clientUrl}/account?download=expired`,
+    )
+  })
+
+  it('permite re-descargar el ZIP sin tope', async () => {
+    const { agent, orderId } = await seedPaidOrder('repeat@test.com')
+
+    for (let attempt = 1; attempt <= 4; attempt += 1) {
+      const link = await agent
+        .get(`/api/orders/${orderId}/download`)
+        .set('Origin', config.clientUrl)
+      assert.equal(link.status, 200, `el pedido ${attempt} no emitió link`)
+
+      const dl = await agent.get(link.body.url).buffer().parse(binaryParser)
+      assert.equal(dl.status, 200, `la descarga ${attempt} falló`)
+      assert.ok(readZip(dl.body).has('package.json'))
+    }
+  })
+
+  /**
+   * El tope viejo (50) dejaba colgado al comprador que formateó la máquina:
+   * el contador sigue subiendo pero no puede volver a bloquear la descarga.
+   */
+  it('una orden con downloadCount alto sigue pudiendo descargar', async () => {
+    const { agent, orderId } = await seedPaidOrder('heavy@test.com')
+
+    const ordersPath = path.join(storageDir, 'db', 'orders.json')
+    const rows = JSON.parse(fs.readFileSync(ordersPath, 'utf8'))
+    rows.find((o) => o.id === orderId).downloadCount = 9999
+    fs.writeFileSync(ordersPath, JSON.stringify(rows, null, 2))
+
+    const link = await agent
+      .get(`/api/orders/${orderId}/download`)
+      .set('Origin', config.clientUrl)
+    assert.equal(link.status, 200)
+    const dl = await agent.get(link.body.url).buffer().parse(binaryParser)
+    assert.equal(dl.status, 200)
+
+    const listed = await agent.get('/api/orders').set('Origin', config.clientUrl)
+    const order = (listed.body.orders || []).find((o) => o.id === orderId)
+    assert.ok(order.downloadCount > 9999, 'dejó de contar las descargas')
+    assert.equal(
+      order.maxDownloads,
+      undefined,
+      'la API sigue anunciando un tope que ya no existe',
     )
   })
 

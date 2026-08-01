@@ -106,8 +106,27 @@ export function loadConfig() {
     throw new Error("COOKIE_SAME_SITE inválido (lax|strict|none)");
   }
 
-  // Link firmado (anti-filtración). La compra sigue en Mis compras para siempre.
-  const downloadTtlDefault = 30 * 24 * 60 * 60; // 30 días
+  // Link firmado efímero (anti-filtración): se regenera en cada click y la
+  // compra sigue en Mis compras para siempre, sin tope de re-descargas.
+  const downloadTtlDefault = 15 * 60; // 15 minutos
+  // 0 / vacío = sin tope. Queda como palanca por si aparece abuso concreto.
+  const maxDownloadsRaw = Number(process.env.MAX_DOWNLOADS || 0);
+  const maxDownloads =
+    Number.isFinite(maxDownloadsRaw) && maxDownloadsRaw > 0
+      ? Math.floor(maxDownloadsRaw)
+      : 0;
+  const downloadTtlRaw = Number(process.env.DOWNLOAD_TTL_SECONDS || 0);
+  const downloadTtl =
+    Number.isFinite(downloadTtlRaw) && downloadTtlRaw > 0
+      ? Math.floor(downloadTtlRaw)
+      : downloadTtlDefault;
+  // Un TTL largo convierte el link en algo compartible: avisar, no pisar el env.
+  if (downloadTtl > 60 * 60) {
+    console.warn(
+      `DOWNLOAD_TTL_SECONDS=${downloadTtl} deja el link de descarga vivo más de una hora (recomendado: ${downloadTtlDefault})`,
+    );
+  }
+
   const emailEnabled = bool(
     "EMAIL_ENABLED",
     Boolean(process.env.RESEND_API_KEY),
@@ -126,8 +145,8 @@ export function loadConfig() {
       `http://localhost:${Number(process.env.PORT || 8787)}`,
     sessionSecret,
     downloadSecret,
-    downloadTtl: Number(process.env.DOWNLOAD_TTL_SECONDS || downloadTtlDefault),
-    maxDownloads: Number(process.env.MAX_DOWNLOADS || 50),
+    downloadTtl,
+    maxDownloads,
     storageDir: path.resolve(
       process.env.STORAGE_DIR || path.join(ROOT, "storage", "orders"),
     ),

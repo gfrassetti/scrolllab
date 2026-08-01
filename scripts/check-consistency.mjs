@@ -11,12 +11,17 @@ import {
   PRODUCTS,
   BUNDLE_MODELS,
   COMMERCE_PACK_SURCHARGE_USD as SERVER_SURCHARGE,
+  CUSTOM_BASE_SECTIONS as SERVER_BASE_SECTIONS,
+  CUSTOM_EXTRA_SECTION_USD as SERVER_EXTRA_SECTION,
 } from '../server/catalog.js'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
 import { ALLOWED_PROPS_BY_SECTION } from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
   CUSTOM_BASE_PRICE_USD,
+  CUSTOM_BASE_SECTIONS as CLIENT_BASE_SECTIONS,
+  CUSTOM_EXTRA_SECTION_USD as CLIENT_EXTRA_SECTION,
+  MAX_CUSTOM_SECTIONS,
   COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
   BUNDLE_PRICE_USD,
 } from '../src/lib/pricing.js'
@@ -60,6 +65,34 @@ if (PRODUCTS.bundle.unit_price_usd !== BUNDLE_PRICE_USD) {
 }
 if (SERVER_SURCHARGE !== CLIENT_SURCHARGE) {
   fail('precios', `recargo commerce: cliente ${CLIENT_SURCHARGE} vs servidor ${SERVER_SURCHARGE}`)
+}
+if (SERVER_BASE_SECTIONS !== CLIENT_BASE_SECTIONS) {
+  fail('precios', `secciones incluidas: cliente ${CLIENT_BASE_SECTIONS} vs servidor ${SERVER_BASE_SECTIONS}`)
+}
+if (SERVER_EXTRA_SECTION !== CLIENT_EXTRA_SECTION) {
+  fail('precios', `sección extra: cliente USD ${CLIENT_EXTRA_SECTION} vs servidor USD ${SERVER_EXTRA_SECTION}`)
+}
+
+// 1b. El tope que muestra el builder tiene que ser el que aplica el checkout.
+const configSrc = read('server/config.js')
+const maxRecipeSections = Number(
+  (configSrc.match(/maxRecipeSections:\s*(\d+)/) || [])[1],
+)
+if (maxRecipeSections !== MAX_CUSTOM_SECTIONS) {
+  fail(
+    'precios',
+    `tope de secciones: pricing.js ${MAX_CUSTOM_SECTIONS} vs config.js ${maxRecipeSections}`,
+  )
+}
+
+// 1c. El piso del builder tiene que quedar arriba del template más caro: si no,
+// armar una composición sale menos que comprar un modelo entero.
+const priciestTemplate = Math.max(...Object.values(TEMPLATE_PRICES_USD))
+if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
+  fail(
+    'precios',
+    `la base del builder (USD ${CUSTOM_BASE_PRICE_USD}) no supera al template más caro (USD ${priciestTemplate})`,
+  )
 }
 
 // 2. Sellable sections: registry (client) vs allowlist (server).

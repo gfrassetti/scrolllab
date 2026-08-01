@@ -9,11 +9,12 @@ import { useCart } from '../lib/cart'
 import {
   BUNDLE_PRICE_USD,
   CUSTOM_BASE_PRICE_USD,
+  CUSTOM_BASE_SECTIONS,
   arsFromUsd,
   bundleDiscountPct,
   bundleListPriceUsd,
-  estimateCustomPriceUsd,
   formatArs,
+  nextSectionArs,
   templatePriceUsd,
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
@@ -677,8 +678,9 @@ export default function TemplatesIndex() {
           <p className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60">
             {t('home.builderPrices', {
               base: formatArs(arsFromUsd(CUSTOM_BASE_PRICE_USD, rate)),
-              withCommerce: formatArs(
-                arsFromUsd(estimateCustomPriceUsd(true), rate),
+              included: CUSTOM_BASE_SECTIONS,
+              extra: formatArs(
+                nextSectionArs(CUSTOM_BASE_SECTIONS, false, rate),
               ),
             })}
           </p>

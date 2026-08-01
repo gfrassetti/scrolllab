@@ -131,11 +131,13 @@ export const db = {
     const current = await MongoOrder.findById(orderId);
     return { order: current, created: false };
   },
+  // maxDownloads 0 = sin tope: el contador se sigue llevando, pero no frena.
   async consumeDownloadAtomic(orderId, maxDownloads) {
+    const capped = Number(maxDownloads) > 0;
     if (mode === "file") {
       const order = await fileDb.findOrderById(orderId);
       if (!order || order.status !== "paid") return null;
-      if ((order.downloadCount || 0) >= maxDownloads) return null;
+      if (capped && (order.downloadCount || 0) >= maxDownloads) return null;
       order.downloadCount = (order.downloadCount || 0) + 1;
       await order.save();
       return order;
@@ -144,7 +146,7 @@ export const db = {
       {
         _id: orderId,
         status: "paid",
-        downloadCount: { $lt: maxDownloads },
+        ...(capped ? { downloadCount: { $lt: maxDownloads } } : {}),
       },
       { $inc: { downloadCount: 1 } },
       { new: true },

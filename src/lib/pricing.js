@@ -12,7 +12,16 @@ export const TEMPLATE_PRICES_USD = {
   atelier: 179,
 }
 
-export const CUSTOM_BASE_PRICE_USD = 229
+/**
+ * Composición del builder: base por tramo + adicional por sección extra.
+ * Una composición del tamaño de un template (10 secciones) queda en 229 USD.
+ */
+export const CUSTOM_BASE_PRICE_USD = 199
+export const CUSTOM_BASE_SECTIONS = 8
+export const CUSTOM_EXTRA_SECTION_USD = 15
+/** Tope de secciones de una receta — espejo de `maxRecipeSections`. */
+export const MAX_CUSTOM_SECTIONS = 30
+
 export const COMMERCE_PACK_SURCHARGE_USD = 39
 export const BUNDLE_PRICE_USD = 389
 
@@ -25,8 +34,30 @@ export function templatePriceUsd(sku) {
   return TEMPLATE_PRICES_USD[sku] ?? null
 }
 
-export function estimateCustomPriceUsd(hasCommerce) {
-  return CUSTOM_BASE_PRICE_USD + (hasCommerce ? COMMERCE_PACK_SURCHARGE_USD : 0)
+/** Secciones por encima de las que trae la base. Cuenta cada instancia. */
+export function customExtraSections(sectionCount) {
+  const count = Number.isFinite(sectionCount) ? Math.floor(sectionCount) : 0
+  return Math.max(0, count - CUSTOM_BASE_SECTIONS)
+}
+
+export function estimateCustomPriceUsd(sectionCount, hasCommerce) {
+  return (
+    CUSTOM_BASE_PRICE_USD +
+    customExtraSections(sectionCount) * CUSTOM_EXTRA_SECTION_USD +
+    (hasCommerce ? COMMERCE_PACK_SURCHARGE_USD : 0)
+  )
+}
+
+/**
+ * Lo que suma la próxima sección, en pesos. Sale de la resta de dos totales
+ * ya redondeados: el redondeo al millar hace que el salto real alterne, y
+ * mostrar el adicional de lista suelto no coincidiría con el total.
+ */
+export function nextSectionArs(sectionCount, hasCommerce, rate) {
+  const current = arsFromUsd(estimateCustomPriceUsd(sectionCount, hasCommerce), rate)
+  const next = arsFromUsd(estimateCustomPriceUsd(sectionCount + 1, hasCommerce), rate)
+  if (current == null || next == null) return null
+  return next - current
 }
 
 /** Lo que costaría comprar los 6 modelos por separado. */

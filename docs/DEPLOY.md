@@ -30,13 +30,37 @@ GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 GOOGLE_CALLBACK_URL=https://tu-api/api/auth/google/callback
 STORAGE_DIR=/data/orders
-DOWNLOAD_TTL_SECONDS=2592000
+DOWNLOAD_TTL_SECONDS=900
 AUTH_DEV_ENABLED=false
 MP_MOCK_ENABLED=false
 COOKIE_SAME_SITE=none       # si front y API son orígenes distintos
 ```
 
 El boot **falla** si faltan secretos, si Mongo no conecta, o si mock/dev quedan activos.
+
+## Descargas: link efímero, re-descargas libres
+
+El vector de abuso es que el comprador **comparta el link**, no que se baje el
+ZIP muchas veces. Por eso los dos límites están invertidos respecto de la
+versión vieja (link de 30 días + tope de 50 bajadas), que castigaba al comprador
+legítimo y dejaba un link repartible durante un mes:
+
+- `DOWNLOAD_TTL_SECONDS=900` — el link firmado vive **15 minutos** y se emite
+  recién cuando el comprador toca Descargar. Alcanza de sobra para arrancar,
+  pausar y reanudar un ZIP en una conexión lenta: el TTL se chequea al abrir el
+  request, no mientras el archivo baja.
+- `MAX_DOWNLOADS=0` (o sin setear) — **sin tope**. Es la norma del mercado
+  (Envato, Creative Market, Gumroad): re-descargás desde tu cuenta para siempre,
+  mientras tengas sesión y seas dueño de la orden.
+
+`downloadCount` **se sigue contando** en cada orden: sirve para detectar abuso y
+para soporte, pero ya no bloquea nada. Si alguna vez hace falta frenar a alguien
+puntual, poné `MAX_DOWNLOADS` en un número > 0 y vuelve el tope duro.
+
+Si `DOWNLOAD_TTL_SECONDS` quedó viejo (largo), el boot lo avisa por log pero
+**no lo pisa**: el valor del entorno manda. Un link vencido no muestra un JSON
+crudo: el API redirige a `/account?download=expired` y Mis compras explica que
+hay que tocar Descargar otra vez.
 
 ## Google OAuth (equivalente a “app registration”)
 
@@ -139,6 +163,30 @@ Por eso la conversión es nuestra.
   aunque la cotización se mueva después.
 - El front muestra pesos usando la cotización que expone `GET /api/catalog`,
   pero el precio que se cobra lo fija el servidor.
+
+### Composición del builder: precio por tramos
+
+No es un precio plano. `priceCustomRecipeUsd()` (servidor) y
+`estimateCustomPriceUsd()` (cliente) calculan lo mismo:
+
+```
+base (USD 199, incluye 8 secciones)
++ USD 15 × secciones por encima de 8
++ USD 39 si la receta trae alguna sección commerce/
+```
+
+- Constantes: `CUSTOM_BASE_PRICE_USD` / `CUSTOM_BASE_SECTIONS` /
+  `CUSTOM_EXTRA_SECTION_USD` en `src/lib/pricing.js`, espejadas en
+  `server/catalog.js`. `npm run check` falla si se despegan.
+- **Cuenta cada entrada de la receta**, incluidas nav, footer y repeticiones:
+  cada una es un componente renderizado en el `App.jsx` del ZIP. El tope son
+  30 (`maxRecipeSections` en `server/config.js`, espejado en
+  `MAX_CUSTOM_SECTIONS`).
+- Anclajes: 8 secciones = el piso, 10 = USD 229 (lo que salía antes el precio
+  plano), 30 = USD 529. El piso queda arriba del template más caro (USD 179).
+- El carrito **no guarda el monto**: lo recalcula desde la receta con la misma
+  fórmula, así una composición vieja en `localStorage` no muestra un precio que
+  el checkout ya no cobra.
 
 Variables: `FX_RATE_URL`, `FX_SPREAD_PCT`, `FX_FALLBACK_RATE`,
 `FX_CACHE_TTL_SECONDS`, `FX_OFFLINE`. Ninguna es obligatoria; sin nada

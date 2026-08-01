@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
-import { useCart } from '../lib/cart'
+import { cartLinePriceArs, useCart } from '../lib/cart'
+import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
 import ProductThumbnail from './ProductThumbnail'
 
@@ -13,6 +14,7 @@ export default function CartPopover() {
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
   const { t, locale } = useI18n()
+  const { rate } = useFxRate()
   const numberLocale = locale === 'en' ? 'en-US' : 'es-AR'
   const [open, setOpen] = useState(false)
   const [catalog, setCatalog] = useState(null)
@@ -63,11 +65,7 @@ export default function CartPopover() {
 
   const priceFor = (item) => {
     if (!catalog) return null
-    const base =
-      item.sku === 'custom' || String(item.sku).startsWith('custom:')
-        ? catalog.custom
-        : catalog[item.sku]
-    return base?.unit_price ?? null
+    return cartLinePriceArs(item, catalog, rate)
   }
 
   const total = items.reduce((sum, item) => sum + (priceFor(item) || 0), 0)

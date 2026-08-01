@@ -1,8 +1,26 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { arsFromUsd, estimateCustomPriceUsd } from './pricing.js'
+import { recipeHasCommerce } from './composition.js'
 
-function isCustomSku(sku) {
+export function isCustomSku(sku) {
   return sku === 'custom' || String(sku).startsWith('custom:')
+}
+
+/**
+ * Precio en pesos de una línea del carrito. La composición no guarda monto:
+ * se recalcula desde la receta con la misma fórmula que aplica el checkout,
+ * así un carrito viejo en localStorage nunca muestra el precio de ayer.
+ */
+export function cartLinePriceArs(item, catalog, rate) {
+  if (isCustomSku(item?.sku)) {
+    const recipe = item?.recipe || []
+    return arsFromUsd(
+      estimateCustomPriceUsd(recipe.length, recipeHasCommerce(recipe)),
+      rate,
+    )
+  }
+  return catalog?.[item?.sku]?.unit_price ?? null
 }
 
 export const useCartNotice = create((set) => ({

@@ -4,11 +4,14 @@ import { models, getSection } from '../lib/sectionRegistry'
 import {
   formatArs,
   arsFromUsd,
+  nextSectionArs,
   COMMERCE_PACK_SURCHARGE_USD,
+  CUSTOM_BASE_SECTIONS,
+  MAX_CUSTOM_SECTIONS,
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
 import { useBuilderComposition } from '../hooks/useBuilderComposition'
-import { sectionKind } from '../lib/composition'
+import { sectionKind, recipeHasCommerce } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import BuilderPreview from '../components/BuilderPreview'
 import CartPopover from '../components/CartPopover'
@@ -52,6 +55,8 @@ export default function BuilderPage() {
     bootCleaned,
     recipe,
     hasCommerce,
+    sectionCount,
+    atMaxSections,
     estimatedPriceUsd,
     hasDuplicateChrome,
     addSection,
@@ -69,6 +74,22 @@ export default function BuilderPage() {
   const commerceSurchargeArs = formatArs(
     arsFromUsd(COMMERCE_PACK_SURCHARGE_USD, rate),
   )
+  // Por qué el total es ese: qué incluye la base, cuánto llevás, cuánto suma
+  // la próxima. En el tope se explica el límite en vez de ofrecer un precio.
+  const priceHint = (() => {
+    const next = formatArs(nextSectionArs(sectionCount, hasCommerce, rate))
+    const included = CUSTOM_BASE_SECTIONS
+    if (atMaxSections) {
+      return t('builder.priceMax', { max: MAX_CUSTOM_SECTIONS })
+    }
+    if (sectionCount < included) {
+      return t('builder.priceRoom', { included, left: included - sectionCount })
+    }
+    if (sectionCount === included) {
+      return t('builder.priceNext', { included, next })
+    }
+    return t('builder.priceExtras', { included, count: sectionCount, next })
+  })()
 
   useEffect(() => {
     if (bootCleaned) setLimitNotice(t('builder.cleanedChrome'))
@@ -124,12 +145,26 @@ export default function BuilderPage() {
   }
 
   const handleAddSection = (sectionId, atIndex) => {
-    const blockedKind = addSection(sectionId, atIndex)
-    if (blockedKind) {
+    const firstCommerce = !hasCommerce && recipeHasCommerce([sectionId])
+    const blocked = addSection(sectionId, atIndex)
+    if (blocked) {
+      if (blocked.reason === 'max') {
+        setLimitNotice(
+          t('builder.maxSectionsLimit', { max: MAX_CUSTOM_SECTIONS }),
+        )
+        return
+      }
       setLimitNotice(
         t('builder.uniqueKindLimit', {
-          kind: t(kindLabelKeys[blockedKind]),
+          kind: t(kindLabelKeys[blocked.kind]),
         }),
+      )
+      return
+    }
+    // El salto del total no es la grilla: es el kit (ficha, carrito, checkout).
+    if (firstCommerce) {
+      setLimitNotice(
+        t('builder.commerceAdded', { price: commerceSurchargeArs }),
       )
     }
   }
@@ -254,7 +289,8 @@ export default function BuilderPage() {
 
                 <ul>
                   {model.sections.map((section) => {
-                    const blocked = isKindBlocked(section.id)
+                    const kindBlocked = isKindBlocked(section.id)
+                    const blocked = kindBlocked || atMaxSections
                     const count = sectionCounts.get(section.id) || 0
                     const added = count > 0
                     const name = t(sectionCopyKey(section.id, 'name'))
@@ -300,11 +336,15 @@ export default function BuilderPage() {
                               )}
                             </p>
                             <p className="truncate text-xs text-ink/50">
-                              {blocked
+                              {kindBlocked
                                 ? t('builder.uniqueKindShort', {
                                     kind: t(kindLabelKeys[section.kind]),
                                   })
-                                : t(sectionCopyKey(section.id, 'blurb'))}
+                                : atMaxSections
+                                  ? t('builder.maxSectionsShort', {
+                                      max: MAX_CUSTOM_SECTIONS,
+                                    })
+                                  : t(sectionCopyKey(section.id, 'blurb'))}
                             </p>
                           </div>
                         </div>
@@ -334,210 +374,220 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* Sin scroll propio: la página scrollea entera. Un contenedor con
-            altura tope acá recortaba el precio y los botones de compra. */}
-        <div className="lg:col-span-7">
-          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
-            {t('builder.canvasTitle')} ({items.length}{' '}
-            {items.length === 1
-              ? t('builder.sectionCountOne')
-              : t('builder.sectionCountMany')})
-          </p>
+        {/* Sticky en desktop: acompaña el scroll de la paleta. Solo la lista
+            scrollea; el precio y los botones quedan siempre a la vista.
+            El max-h deja aire bajo el header sticky y sobre el borde inferior. */}
+        <div className="lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
+          <div className="shrink-0">
+            <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+              {t('builder.canvasTitle')} ({items.length}{' '}
+              {items.length === 1
+                ? t('builder.sectionCountOne')
+                : t('builder.sectionCountMany')})
+            </p>
 
-          <ol className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase tracking-[0.18em] text-ink/40 md:text-[11px]">
-            {[
-              { key: 'nav', label: t('builder.emptyStepNav'), count: structure.nav },
-              { key: 'hero', label: t('builder.emptyStepHero'), count: structure.hero },
-              {
-                key: 'section',
-                label: t('builder.emptyStepSections'),
-                count: structure.section,
-              },
-              {
-                key: 'footer',
-                label: t('builder.emptyStepFooter'),
-                count: structure.footer,
-              },
-            ].map((step) => (
-              <li
-                key={step.key}
-                className={`flex items-center gap-1.5 ${
-                  step.count > 0 ? 'text-accent' : ''
+            <ol className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase tracking-[0.18em] text-ink/40 md:text-[11px]">
+              {[
+                { key: 'nav', label: t('builder.emptyStepNav'), count: structure.nav },
+                { key: 'hero', label: t('builder.emptyStepHero'), count: structure.hero },
+                {
+                  key: 'section',
+                  label: t('builder.emptyStepSections'),
+                  count: structure.section,
+                },
+                {
+                  key: 'footer',
+                  label: t('builder.emptyStepFooter'),
+                  count: structure.footer,
+                },
+              ].map((step) => (
+                <li
+                  key={step.key}
+                  className={`flex items-center gap-1.5 ${
+                    step.count > 0 ? 'text-accent' : ''
+                  }`}
+                >
+                  <span aria-hidden="true">{step.count > 0 ? '✓' : '○'}</span>
+                  <span>
+                    {step.label}
+                    {step.count > 0 ? ` · ${step.count}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+            {items.length === 0 ? (
+              <div
+                onDragOver={allowDropAt('end')}
+                onDragLeave={() => setDragOver(null)}
+                onDrop={(e) => handleDrop(e, 0)}
+                className={`flex min-h-60 flex-col items-center justify-center gap-4 border-2 border-dashed p-10 text-center transition-colors duration-200 ${
+                  dragOver === 'end' ? 'border-accent bg-accent/5' : 'border-ink/20'
                 }`}
               >
-                <span aria-hidden="true">{step.count > 0 ? '✓' : '○'}</span>
-                <span>
-                  {step.label}
-                  {step.count > 0 ? ` · ${step.count}` : ''}
-                </span>
-              </li>
-            ))}
-          </ol>
-
-          {items.length === 0 ? (
-            <div
-              onDragOver={allowDropAt('end')}
-              onDragLeave={() => setDragOver(null)}
-              onDrop={(e) => handleDrop(e, 0)}
-              className={`flex min-h-60 flex-col items-center justify-center gap-4 border-2 border-dashed p-10 text-center transition-colors duration-200 ${
-                dragOver === 'end' ? 'border-accent bg-accent/5' : 'border-ink/20'
-              }`}
-            >
-              <p className="max-w-[36ch] text-sm text-ink/50">
-                {t('builder.emptyCanvas')}
-              </p>
-            </div>
-          ) : (
-            <div
-              onDragOver={allowDropAt('end')}
-              onDragLeave={() => setDragOver(null)}
-              onDrop={(e) => handleDrop(e, items.length)}
-            >
-              <ol className="border-t border-ink/15">
-                {items.map((item, i) => {
-                  const section = getSection(item.sectionId)
-                  return (
-                    <li
-                      key={item.uid}
-                      draggable
-                      onDragStart={(e) => startReorderDrag(e, item.uid)}
-                      onDragEnd={() => setDragOver(null)}
-                      onDragOver={allowDropAt(i)}
-                      onDrop={(e) => handleDrop(e, i)}
-                      className={`flex cursor-grab items-center gap-4 border-b border-ink/15 py-4 active:cursor-grabbing ${
-                        dragOver === i
-                          ? 'shadow-[inset_0_2px_0_0_var(--color-accent)]'
-                          : ''
-                      }`}
-                    >
-                      <span aria-hidden="true" className="text-ink/30">
-                        ⠿
-                      </span>
-
-                      <span className="w-8 text-[11px] tracking-[0.2em] text-ink/40">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-
-                      <span
-                        aria-hidden="true"
-                        className="inline-block size-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: section.model.accent }}
-                      />
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-base font-medium md:text-lg">
-                          {t(sectionCopyKey(section.id, 'name'))}
-                        </p>
-                        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                          <span>
-                            {section.model.name} ·{' '}
-                            {t(kindLabelKeys[section.kind])}
-                          </span>
-                          {section.model.id === 'commerce' && (
-                            <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
-                              {t('builder.commerceBadge', {
-                                price: commerceSurchargeArs,
-                              })}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => moveItem(item.uid, -1)}
-                          disabled={i === 0}
-                          aria-label={t('builder.moveUp')}
-                          className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveItem(item.uid, 1)}
-                          disabled={i === items.length - 1}
-                          aria-label={t('builder.moveDown')}
-                          className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
-                        >
-                          ↓
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.uid)}
-                          aria-label={t('builder.remove')}
-                          className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-bone"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ol>
-
+                <p className="max-w-[36ch] text-sm text-ink/50">
+                  {t('builder.emptyCanvas')}
+                </p>
+              </div>
+            ) : (
               <div
-                aria-hidden="true"
-                className={`h-1 transition-colors duration-200 ${
-                  dragOver === 'end' ? 'bg-accent' : 'bg-transparent'
-                }`}
-              />
-            </div>
-          )}
+                onDragOver={allowDropAt('end')}
+                onDragLeave={() => setDragOver(null)}
+                onDrop={(e) => handleDrop(e, items.length)}
+              >
+                <ol className="border-t border-ink/15">
+                  {items.map((item, i) => {
+                    const section = getSection(item.sectionId)
+                    return (
+                      <li
+                        key={item.uid}
+                        draggable
+                        onDragStart={(e) => startReorderDrag(e, item.uid)}
+                        onDragEnd={() => setDragOver(null)}
+                        onDragOver={allowDropAt(i)}
+                        onDrop={(e) => handleDrop(e, i)}
+                        className={`flex cursor-grab items-center gap-4 border-b border-ink/15 py-4 active:cursor-grabbing ${
+                          dragOver === i
+                            ? 'shadow-[inset_0_2px_0_0_var(--color-accent)]'
+                            : ''
+                        }`}
+                      >
+                        <span aria-hidden="true" className="text-ink/30">
+                          ⠿
+                        </span>
 
-          {limitNotice && (
-            <p className="mt-6 border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
-              {limitNotice}
-            </p>
-          )}
+                        <span className="w-8 text-[11px] tracking-[0.2em] text-ink/40">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+
+                        <span
+                          aria-hidden="true"
+                          className="inline-block size-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: section.model.accent }}
+                        />
+
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-base font-medium md:text-lg">
+                            {t(sectionCopyKey(section.id, 'name'))}
+                          </p>
+                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                            <span>
+                              {section.model.name} ·{' '}
+                              {t(kindLabelKeys[section.kind])}
+                            </span>
+                            {section.model.id === 'commerce' && (
+                              <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
+                                {t('builder.commerceBadge', {
+                                  price: commerceSurchargeArs,
+                                })}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => moveItem(item.uid, -1)}
+                            disabled={i === 0}
+                            aria-label={t('builder.moveUp')}
+                            className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveItem(item.uid, 1)}
+                            disabled={i === items.length - 1}
+                            aria-label={t('builder.moveDown')}
+                            className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 not-disabled:hover:bg-ink not-disabled:hover:text-bone disabled:opacity-25"
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.uid)}
+                            aria-label={t('builder.remove')}
+                            className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-bone"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ol>
+
+                <div
+                  aria-hidden="true"
+                  className={`h-1 transition-colors duration-200 ${
+                    dragOver === 'end' ? 'bg-accent' : 'bg-transparent'
+                  }`}
+                />
+              </div>
+            )}
+
+            {limitNotice && (
+              <p className="mt-4 border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+                {limitNotice}
+              </p>
+            )}
+          </div>
 
           {items.length > 0 && (
-            <div className="mt-8 space-y-5 border border-ink/15 bg-bone p-5 md:p-6">
-              <p className="text-xs leading-relaxed text-ink/55">
-                {t('builder.structureHint')}
-              </p>
+            <div className="mt-3 shrink-0 space-y-3 border border-ink/15 bg-bone p-4 md:p-5">
               {hasDuplicateChrome && (
                 <p className="text-xs leading-relaxed text-accent">
                   {t('builder.duplicateChromeWarn')}
                 </p>
               )}
 
-              <div className="border-t border-ink/15 pt-5">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                  {t('builder.estimatedPrice')}
-                </p>
-                <p className="mt-2 text-[clamp(1.5rem,3vw,2rem)] font-medium tracking-[-0.02em]">
-                  {formatArs(arsFromUsd(estimatedPriceUsd, rate))}
-                </p>
-                {hasCommerce && (
-                  <p className="mt-1 text-xs text-ink/55">
-                    {t('builder.commerceIncluded', {
-                      price: commerceSurchargeArs,
-                    })}
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                    {t('builder.estimatedPrice')}
                   </p>
-                )}
+                  <p className="mt-1 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+                    {formatArs(arsFromUsd(estimatedPriceUsd, rate))}
+                  </p>
+                  <p
+                    className={`mt-1 max-w-[46ch] text-xs leading-relaxed ${
+                      atMaxSections ? 'text-accent' : 'text-ink/55'
+                    }`}
+                  >
+                    {priceHint}
+                  </p>
+                  {hasCommerce && (
+                    <p className="mt-0.5 text-xs text-ink/55">
+                      {t('builder.commerceIncluded', {
+                        price: commerceSurchargeArs,
+                      })}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={openPreview}
+                  className="border-2 border-ink bg-ink px-4 py-2.5 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
+                >
+                  {t('builder.previewBeforeBuy')}
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={openPreview}
-                className="w-full border-2 border-ink bg-ink px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
-              >
-                {t('builder.previewBeforeBuy')}
-              </button>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={addCompositionToCart}
-                  className="border-2 border-ink px-5 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone sm:flex-1"
+                  className="border-2 border-ink px-4 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone sm:flex-1"
                 >
                   {t('common.addToCart')}
                 </button>
                 <button
                   type="button"
                   onClick={buyComposition}
-                  className="border-2 border-accent bg-accent px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink transition-opacity hover:opacity-80 sm:flex-1"
+                  className="border-2 border-accent bg-accent px-4 py-2.5 text-[11px] uppercase tracking-[0.25em] text-ink transition-opacity hover:opacity-80 sm:flex-1"
                 >
                   {looksLoggedIn
                     ? t('builder.buyLoggedIn')

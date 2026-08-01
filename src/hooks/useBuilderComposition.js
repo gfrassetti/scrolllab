@@ -13,7 +13,7 @@ import {
   moveCompositionItem,
   reorderCompositionItem,
 } from '../lib/composition'
-import { estimateCustomPriceUsd } from '../lib/pricing'
+import { estimateCustomPriceUsd, MAX_CUSTOM_SECTIONS } from '../lib/pricing'
 
 /**
  * Estado + mutaciones del builder. La UI (BuilderPage) solo renderiza.
@@ -49,23 +49,30 @@ export function useBuilderComposition() {
 
   const recipe = useMemo(() => compositionToRecipe(items), [items])
   const hasCommerce = useMemo(() => recipeHasCommerce(recipe), [recipe])
-  const estimatedPriceUsd = estimateCustomPriceUsd(hasCommerce)
+  const sectionCount = recipe.length
+  const atMaxSections = sectionCount >= MAX_CUSTOM_SECTIONS
+  const estimatedPriceUsd = estimateCustomPriceUsd(sectionCount, hasCommerce)
 
   const notify = useCallback((message) => {
     if (message) setLimitNotice(message)
   }, [])
 
+  /** Devuelve null si entró, o el motivo por el que no: { reason, kind? }. */
   const addSection = useCallback((sectionId, atIndex) => {
-    let blockedKind = null
+    let blocked = null
     setItems((prev) => {
+      if (prev.length >= MAX_CUSTOM_SECTIONS) {
+        blocked = { reason: 'max' }
+        return prev
+      }
       const result = addSectionToComposition(prev, sectionId, atIndex)
       if (result.blocked) {
-        blockedKind = result.kind
+        blocked = { reason: 'kind', kind: result.kind }
         return prev
       }
       return result.items
     })
-    return blockedKind
+    return blocked
   }, [])
 
   const updateItemProps = useCallback((uid, props) => {
@@ -112,6 +119,8 @@ export function useBuilderComposition() {
     bootCleaned: boot.cleaned,
     recipe,
     hasCommerce,
+    sectionCount,
+    atMaxSections,
     estimatedPriceUsd,
     hasDuplicateChrome: duplicateChrome,
     addSection,

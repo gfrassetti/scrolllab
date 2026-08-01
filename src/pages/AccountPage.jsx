@@ -14,6 +14,7 @@ export default function AccountPage() {
   const { user, loading } = useAuth()
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(null)
   const [page, setPage] = useState(0)
   const [successOrder, setSuccessOrder] = useState(null)
@@ -63,6 +64,13 @@ export default function AccountPage() {
     }
   }, [user, params, location.state])
 
+  // El API manda acá al comprador cuando el link firmado ya venció.
+  useEffect(() => {
+    if (params.get('download') !== 'expired') return
+    setNotice(t('account.linkExpired'))
+    navigate('/account', { replace: true })
+  }, [params, navigate, t])
+
   const closeSuccessModal = () => {
     setSuccessOrder(null)
     navigate('/account', { replace: true, state: {} })
@@ -78,19 +86,14 @@ export default function AccountPage() {
 
   if (!user) return <Navigate to="/login?next=/account" replace />
 
+  // El link dura minutos: se pide recién acá, nunca al montar la lista.
   const download = async (orderId) => {
     setBusy(orderId)
     setError('')
+    setNotice('')
     try {
       const { url } = await api.downloadLink(orderId)
       window.location.href = `${api.base}${url}`
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId
-            ? { ...o, downloadCount: (o.downloadCount || 0) + 1 }
-            : o,
-        ),
-      )
     } catch (err) {
       setError(err.message)
     } finally {
@@ -139,6 +142,12 @@ export default function AccountPage() {
           </p>
         )}
 
+        {notice && (
+          <p className="mt-6 border border-warning/50 bg-warning/10 px-4 py-3 text-sm">
+            {notice}
+          </p>
+        )}
+
         {orders.length === 0 ? (
           <div className="mt-12 border-2 border-dashed border-ink/20 p-10 text-center">
             <p className="text-sm text-ink/50">{t('account.empty')}</p>
@@ -153,9 +162,6 @@ export default function AccountPage() {
           <>
             <ul className="mt-10 border-t border-ink/15">
               {pageOrders.map((order) => {
-                const used = order.downloadCount || 0
-                const max = order.maxDownloads || 50
-                const left = Math.max(0, max - used)
                 const previews = orderPreviews(order)
                 return (
                   <li
@@ -205,15 +211,13 @@ export default function AccountPage() {
                       {order.status === 'paid' ? (
                         <button
                           type="button"
-                          disabled={busy === order.id || left === 0}
+                          disabled={busy === order.id}
                           onClick={() => download(order.id)}
                           className="border-2 border-ink px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone disabled:opacity-40"
                         >
                           {busy === order.id
                             ? t('account.preparing')
-                            : left === 0
-                              ? t('account.limitReached')
-                              : t('account.download')}
+                            : t('account.download')}
                         </button>
                       ) : (
                         <span className="text-[11px] uppercase tracking-[0.25em] text-warning">

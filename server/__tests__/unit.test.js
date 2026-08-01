@@ -18,8 +18,11 @@ import { verifyMpWebhookSignature } from '../services/mercadoPago.js'
 import {
   PRODUCTS,
   COMMERCE_PACK_SURCHARGE_USD,
+  CUSTOM_BASE_SECTIONS,
+  CUSTOM_EXTRA_SECTION_USD,
   BUNDLE_MODELS,
   arsFromUsd,
+  priceCustomRecipeUsd,
 } from '../catalog.js'
 import {
   extractRate,
@@ -229,6 +232,87 @@ describe('validateCheckoutItems', () => {
   })
 })
 
+/**
+ * El precio de una composición sale de la receta, no del cliente: base con
+ * secciones incluidas + adicional por cada sección extra.
+ */
+describe('precio por tramos de la composición', () => {
+  const BASE = PRODUCTS.custom.unit_price_usd
+  const recipeOf = (n, extra = []) => [
+    ...Array.from({ length: n }, () => 'chapters/HeroKinetic'),
+    ...extra,
+  ]
+
+  it('la base cubre hasta las secciones incluidas', () => {
+    assert.equal(priceCustomRecipeUsd([]), BASE)
+    assert.equal(priceCustomRecipeUsd(recipeOf(1)), BASE)
+    assert.equal(priceCustomRecipeUsd(recipeOf(CUSTOM_BASE_SECTIONS)), BASE)
+  })
+
+  it('cada sección extra suma el adicional', () => {
+    assert.equal(
+      priceCustomRecipeUsd(recipeOf(CUSTOM_BASE_SECTIONS + 1)),
+      BASE + CUSTOM_EXTRA_SECTION_USD,
+    )
+    assert.equal(
+      priceCustomRecipeUsd(recipeOf(30)),
+      BASE + (30 - CUSTOM_BASE_SECTIONS) * CUSTOM_EXTRA_SECTION_USD,
+    )
+  })
+
+  it('el recargo de commerce sigue siendo aditivo', () => {
+    const recipe = recipeOf(9, ['commerce/ProductGrid'])
+    assert.equal(
+      priceCustomRecipeUsd(recipe),
+      BASE + 2 * CUSTOM_EXTRA_SECTION_USD + COMMERCE_PACK_SURCHARGE_USD,
+    )
+  })
+
+  it('el checkout cobra por la receta real, no por lo que manda el cliente', () => {
+    const opts = { maxCartItems: 5, maxRecipeSections: 30, rate: 1560 }
+    const lines = validateCheckoutItems(
+      [
+        {
+          sku: 'custom:mentira',
+          unit_price: 1,
+          unit_price_usd: 1,
+          recipe: recipeOf(12),
+        },
+      ],
+      opts,
+    )
+    const expectedUsd = BASE + 4 * CUSTOM_EXTRA_SECTION_USD
+    assert.equal(lines[0].unit_price_usd, expectedUsd)
+    assert.equal(lines[0].unit_price, arsFromUsd(expectedUsd, 1560))
+    assert.equal(lines[0].recipe.length, 12)
+  })
+
+  it('una composición grande cuesta más que una chica', () => {
+    const opts = { maxCartItems: 5, maxRecipeSections: 30, rate: 1560 }
+    const small = validateCheckoutItems(
+      [{ sku: 'custom', recipe: recipeOf(3) }],
+      opts,
+    )
+    const big = validateCheckoutItems(
+      [{ sku: 'custom', recipe: recipeOf(30) }],
+      opts,
+    )
+    assert.ok(big[0].unit_price_usd > small[0].unit_price_usd)
+  })
+
+  it('pasarse del tope se rechaza antes de cobrar', () => {
+    assert.throws(
+      () =>
+        validateCheckoutItems([{ sku: 'custom', recipe: recipeOf(31) }], {
+          maxCartItems: 5,
+          maxRecipeSections: 30,
+          rate: 1560,
+        }),
+      HttpError,
+    )
+  })
+})
+
 describe('cotización USD→ARS', () => {
   it('lee el shape de dolarapi y de bluelytics', () => {
     assert.equal(extractRate({ venta: 1565, compra: 1545 }), 1565)
@@ -296,6 +380,35 @@ describe('download tokens', () => {
     })
     assert.equal(verifyDownloadToken(token, secret), null)
     assert.equal(verifyDownloadToken('nope.bad', secret), null)
+  })
+})
+
+describe('config de descargas', () => {
+  async function withEnv(patch, fn) {
+    const prev = process.env
+    process.env = { ...prev, NODE_ENV: 'development', ...patch }
+    try {
+      const { loadConfig } = await import('../config.js')
+      return fn(loadConfig())
+    } finally {
+      process.env = prev
+    }
+  }
+
+  it('por default: link de 15 minutos y sin tope de descargas', async () => {
+    await withEnv(
+      { DOWNLOAD_TTL_SECONDS: '', MAX_DOWNLOADS: '' },
+      (config) => {
+        assert.equal(config.downloadTtl, 900)
+        assert.equal(config.maxDownloads, 0)
+      },
+    )
+  })
+
+  it('MAX_DOWNLOADS > 0 reactiva el tope duro', async () => {
+    await withEnv({ MAX_DOWNLOADS: '3' }, (config) => {
+      assert.equal(config.maxDownloads, 3)
+    })
   })
 })
 

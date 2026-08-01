@@ -77,6 +77,13 @@ src/lib/
 └── cart.js
 ```
 
+Los templates fijos tienen precio de lista; la composición del builder va **por
+tramos**: base de USD 199 con 8 secciones incluidas, USD 15 por cada sección
+extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
+receta (nav, footer y repeticiones incluidas). Las constantes viven en
+`src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check` valida
+la paridad. Detalle en `docs/DEPLOY.md`.
+
 Never trust client prices. Never obfuscate sold JSX — license + account + signed links + watermark.
 In production: Mongo required (no silent file fallback), mock/dev auth off, MP webhook signature required, persistent `STORAGE_DIR`.
 

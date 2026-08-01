@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { useCart } from '../lib/cart'
+import { cartLinePriceArs, useCart } from '../lib/cart'
+import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
 
@@ -16,6 +17,7 @@ export default function CartPage() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const navigate = useNavigate()
+  const { rate } = useFxRate()
   const { t, locale } = useI18n()
   const numberLocale = locale === 'en' ? 'en-US' : 'es-AR'
 
@@ -30,17 +32,11 @@ export default function CartPage() {
       .catch(() => {})
   }, [])
 
-  const lines = items.map((item) => {
-    const base =
-      item.sku === 'custom' || String(item.sku).startsWith('custom:')
-        ? catalog.custom
-        : catalog[item.sku]
-    return {
-      ...item,
-      unit_price: base?.unit_price,
-      currency_id: base?.currency_id || 'ARS',
-    }
-  })
+  const lines = items.map((item) => ({
+    ...item,
+    unit_price: cartLinePriceArs(item, catalog, rate),
+    currency_id: catalog[item.sku]?.currency_id || 'ARS',
+  }))
 
   const total = lines.reduce((s, l) => s + (l.unit_price || 0), 0)
 
