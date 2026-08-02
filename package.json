@@ -15,6 +15,7 @@
     "check": "node scripts/check-consistency.mjs",
     "check:visual": "node scripts/check-visual.mjs",
     "check:builder": "node scripts/check-builder.mjs",
+    "analyze:ref": "node scripts/analyze-reference.mjs",
     "gen:brand": "node scripts/gen-brand-assets.mjs",
     "server": "node server/index.js",
     "start": "node server/index.js",

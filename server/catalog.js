@@ -28,6 +28,8 @@ export const BUNDLE_MODELS = [
   'velocity',
   'fizz',
   'atelier',
+  'comic',
+  'unity',
 ]
 
 export const PRODUCTS = {
@@ -74,11 +76,25 @@ export const PRODUCTS = {
     unit_price_usd: 179,
     currency_id: 'ARS',
   },
+  comic: {
+    sku: 'comic',
+    title: 'COMIC — template',
+    description: 'Modelo historieta scrollytelling con paneles y escena en capas (código fuente).',
+    unit_price_usd: 179,
+    currency_id: 'ARS',
+  },
+  unity: {
+    sku: 'unity',
+    title: 'UNITY — template',
+    description: 'Modelo editorial deportivo con mosaico→slider y footer de trofeo (código fuente).',
+    unit_price_usd: 179,
+    currency_id: 'ARS',
+  },
   bundle: {
     sku: 'bundle',
-    title: 'BUNDLE — los 6 modelos',
-    description: 'Los seis modelos completos en un solo ZIP (código fuente).',
-    unit_price_usd: 389,
+    title: 'BUNDLE — los 8 modelos',
+    description: 'Los ocho modelos completos en un solo ZIP (código fuente).',
+    unit_price_usd: 499,
     currency_id: 'ARS',
   },
   custom: {

@@ -35,6 +35,18 @@ const styles = {
     accent: '#c8d0dc',
     code: 'AT',
   },
+  comic: {
+    background: '#d8d4cc',
+    color: '#2a2622',
+    accent: '#e85a24',
+    code: 'CM',
+  },
+  unity: {
+    background: '#f3efe6',
+    color: '#0a0a0a',
+    accent: '#f4c518',
+    code: 'UN',
+  },
   custom: {
     background: '#181715',
     color: '#f2efe8',

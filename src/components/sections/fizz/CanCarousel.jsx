@@ -100,11 +100,14 @@ export default function CanCarousel({
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
       gsap.from('[data-can-card]', {
-        x: 90,
+        x: 70,
+        y: 28,
         opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.1,
+        rotate: 4,
+        scale: 0.92,
+        duration: 0.85,
+        ease: 'back.out(1.5)',
+        stagger: 0.09,
         scrollTrigger: { trigger: root.current, start: 'top 65%', once: true },
       })
     },

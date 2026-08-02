@@ -63,6 +63,20 @@ const TEMPLATE_META = [
     path: '/templates/atelier',
     palette: ['#0b0c10', '#f2f2f2', '#c8d0dc'],
   },
+  {
+    id: '07',
+    sku: 'comic',
+    name: 'COMIC',
+    path: '/templates/comic',
+    palette: ['#d8d4cc', '#2a2622', '#e85a24'],
+  },
+  {
+    id: '08',
+    sku: 'unity',
+    name: 'UNITY',
+    path: '/templates/unity',
+    palette: ['#f3efe6', '#0a0a0a', '#f4c518'],
+  },
 ]
 
 function TemplatePoster({ template, index }) {
@@ -199,31 +213,84 @@ function TemplatePoster({ template, index }) {
     )
   }
 
+  if (template.sku === 'atelier') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-[#0b0c10] text-[#f2f2f2]`}
+        style={{ opacity: 0 }}
+      >
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse at 50% 40%, rgba(200,208,220,0.18), transparent 55%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06), transparent 40%)',
+          }}
+        />
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-white/50">
+          STUDIO / 06
+        </span>
+        <span className="absolute top-1/2 left-1/2 h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 border border-white/25 bg-white/[0.04] shadow-[0_0_60px_rgba(200,208,220,0.12)]" />
+        <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-semibold tracking-[-0.05em]">
+          ATE
+          <br />
+          LIER
+        </span>
+        <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.28em] text-white/45 uppercase">
+          scroll the fog
+        </span>
+      </div>
+    )
+  }
+
+  if (template.sku === 'comic') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-comic-paper text-[#2a2622]`}
+        style={{ opacity: 0 }}
+      >
+        <span
+          aria-hidden="true"
+          className="absolute inset-[10%] bg-gradient-to-br from-[#7eb8b0] via-[#f0a35a] to-[#e85a24]"
+          style={{
+            clipPath:
+              'polygon(2% 1%, 98% 0%, 100% 4%, 99% 96%, 96% 100%, 3% 99%, 0% 95%, 1% 5%)',
+          }}
+        />
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-comic-flare">
+          SCRAPBOOK / 07
+        </span>
+        <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-extrabold tracking-[-0.04em]">
+          CO
+          <br />
+          MIC
+        </span>
+        <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.28em] uppercase">
+          torn panels
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div
       data-template-art
-      className={`${baseClass} bg-[#0b0c10] text-[#f2f2f2]`}
+      className={`${baseClass} bg-[#f3efe6] text-[#0a0a0a]`}
       style={{ opacity: 0 }}
     >
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 opacity-40"
-        style={{
-          backgroundImage:
-            'radial-gradient(ellipse at 50% 40%, rgba(200,208,220,0.18), transparent 55%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06), transparent 40%)',
-        }}
-      />
-      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-white/50">
-        STUDIO / 06
+      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
+        EDITORIAL / 08
       </span>
-      <span className="absolute top-1/2 left-1/2 h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 border border-white/25 bg-white/[0.04] shadow-[0_0_60px_rgba(200,208,220,0.12)]" />
-      <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-semibold tracking-[-0.05em]">
-        ATE
+      <span className="absolute top-[28%] left-5 font-oswald text-[clamp(3.2rem,9vw,7.5rem)] leading-[0.82] font-semibold tracking-[-0.03em] uppercase">
+        UNI
         <br />
-        LIER
+        TY
       </span>
-      <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.28em] text-white/45 uppercase">
-        scroll the fog
+      <span className="absolute right-0 bottom-[22%] h-[10%] w-[58%] bg-[#f4c518]" />
+      <span className="absolute right-5 bottom-5 font-display text-2xl italic text-[#0a0a0a]/55">
+        one game
       </span>
     </div>
   )

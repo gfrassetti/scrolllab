@@ -25,8 +25,7 @@ const defaultBenefits = [
 ]
 
 /**
- * BubbleBenefits — 2×2 benefit cards that pop in with a springy
- * stagger, while decorative bubbles drift up behind them.
+ * BubbleBenefits — springy stagger pop-in + denser drifting bubbles.
  */
 export default function BubbleBenefits({
   eyebrow = 'Section eyebrow',
@@ -39,21 +38,51 @@ export default function BubbleBenefits({
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-      gsap.from('[data-benefit-card]', {
-        y: 60,
+      gsap.from('[data-benefit-head]', {
+        y: 36,
         opacity: 0,
-        rotate: (i) => (i % 2 === 0 ? -4 : 4),
-        duration: 0.8,
-        ease: 'back.out(1.4)',
-        stagger: 0.12,
-        scrollTrigger: { trigger: root.current, start: 'top 65%', once: true },
+        duration: 0.75,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: root.current, start: 'top 72%', once: true },
+      })
+
+      gsap.from('[data-benefit-card]', {
+        y: 80,
+        opacity: 0,
+        scale: 0.82,
+        rotate: (i) => (i % 2 === 0 ? -7 : 7),
+        duration: 0.95,
+        ease: 'back.out(1.85)',
+        stagger: { each: 0.11, from: 'start' },
+        scrollTrigger: { trigger: root.current, start: 'top 62%', once: true },
+      })
+
+      gsap.from('[data-benefit-dot]', {
+        scale: 0,
+        duration: 0.55,
+        ease: 'back.out(2.4)',
+        stagger: 0.1,
+        delay: 0.15,
+        scrollTrigger: { trigger: root.current, start: 'top 62%', once: true },
       })
 
       gsap.utils.toArray('[data-float-bubble]', root.current).forEach((el, i) => {
+        gsap.fromTo(
+          el,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            delay: 0.05 * i,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
+          },
+        )
         gsap.to(el, {
-          y: -30 - (i % 3) * 14,
-          x: i % 2 === 0 ? 12 : -12,
-          duration: 3 + (i % 4) * 0.8,
+          y: -36 - (i % 4) * 16,
+          x: i % 2 === 0 ? 16 : -14,
+          duration: 2.6 + (i % 5) * 0.7,
           ease: 'sine.inOut',
           yoyo: true,
           repeat: -1,
@@ -68,27 +97,30 @@ export default function BubbleBenefits({
       ref={root}
       className="relative overflow-hidden px-5 py-24 md:px-10 md:py-36"
     >
-      {[...Array(7)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <span
           key={i}
           data-float-bubble
           aria-hidden="true"
           className="absolute rounded-full border border-foam/25"
           style={{
-            width: `${18 + (i % 4) * 14}px`,
-            height: `${18 + (i % 4) * 14}px`,
-            left: `${8 + i * 13}%`,
-            top: `${12 + ((i * 29) % 70)}%`,
+            width: `${14 + (i % 5) * 12}px`,
+            height: `${14 + (i % 5) * 12}px`,
+            left: `${4 + ((i * 8) % 90)}%`,
+            top: `${8 + ((i * 17) % 78)}%`,
+            opacity: 0.35 + (i % 3) * 0.15,
           }}
         />
       ))}
 
-      <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 max-w-[16ch] font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
-        {title}
-      </h2>
+      <div data-benefit-head>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
+          {eyebrow}
+        </p>
+        <h2 className="mt-4 max-w-[16ch] font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
+          {title}
+        </h2>
+      </div>
 
       <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {benefits.map((benefit) => (
@@ -98,6 +130,7 @@ export default function BubbleBenefits({
             className="group rounded-3xl border border-foam/20 p-6 transition-transform duration-300 hover:-rotate-2 hover:scale-[1.02] md:p-7"
           >
             <span
+              data-benefit-dot
               aria-hidden="true"
               className="block h-10 w-10 rounded-full transition-transform duration-300 group-hover:scale-125"
               style={{ backgroundColor: benefit.color }}

@@ -25,7 +25,7 @@ export function cartItemPreviewHref(item) {
  * muestre exactamente eso. Preferimos no ofrecer preview antes que mandar al
  * comprador a algo distinto de lo que compró.
  *
- * El bundle son los 6 modelos en un ZIP: no hay una demo única, así que va al
+ * El bundle son los modelos del catálogo en un ZIP: no hay una demo única, así que va al
  * índice de templates, donde están las seis.
  */
 export function itemPreviewHref(order, item, index) {

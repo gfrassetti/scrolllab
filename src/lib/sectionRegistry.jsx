@@ -49,7 +49,18 @@ import ServicesStone from '../components/sections/atelier/ServicesStone'
 import VisionShutter from '../components/sections/atelier/VisionShutter'
 import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
+import WordStripe from '../components/sections/atelier/WordStripe'
+import StudioCards from '../components/sections/atelier/StudioCards'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
+
+import NavUnity from '../components/sections/unity/NavUnity'
+import HeroTwin from '../components/sections/unity/HeroTwin'
+import MosaicSlider from '../components/sections/unity/MosaicSlider'
+import UniversalLang from '../components/sections/unity/UniversalLang'
+import LanguageBlock from '../components/sections/unity/LanguageBlock'
+import LastPortrait from '../components/sections/unity/LastPortrait'
+import StageLines from '../components/sections/unity/StageLines'
+import FooterTrophy from '../components/sections/unity/FooterTrophy'
 
 import ContactForm from '../components/sections/contact/ContactForm'
 
@@ -135,7 +146,7 @@ export const models = [
     wrapperClass: 'bg-[#0a1a12] text-[#ece9e2]',
     sections: [
       { id: 'velocity/NavVelocity', name: 'Nav Velocity', kind: 'nav', component: NavVelocity, blurb: 'Fixed athlete header with lime CTA · full-screen mobile menu' },
-      { id: 'velocity/HeroStrike', name: 'Hero Strike', kind: 'hero', component: HeroStrike, blurb: 'Portrait hero that blurs and gets struck on scroll' },
+      { id: 'velocity/HeroStrike', name: 'Hero Strike', kind: 'hero', component: HeroStrike, blurb: 'Full-bleed multi-layer parallax — titles peel, layers blur out' },
       { id: 'velocity/TrackMerge', name: 'Track Merge', kind: 'section', component: TrackMerge, blurb: 'Horizontal gallery / On-Off tracks merging' },
       { id: 'velocity/HelmetGrid', name: 'Helmet Grid', kind: 'section', component: HelmetGrid, blurb: 'Hall of fame product grid with focus' },
       { id: 'velocity/ParallaxRise', name: 'Parallax Rise', kind: 'section', component: ParallaxRise, blurb: 'Content band with rising parallax media' },
@@ -148,14 +159,32 @@ export const models = [
     accent: '#c8d0dc',
     wrapperClass: 'bg-[#0b0c10] text-white',
     sections: [
-      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Fixed header that flips over light sections · full-screen mobile menu' },
+      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Floating MENU pill + CTA · full-screen overlay' },
       { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Blur-in type with a scroll-scrubbed WebGL emblem' },
       { id: 'atelier/AboutClarity', name: 'About Clarity', kind: 'section', component: AboutClarity, blurb: 'Word-masked about statement over scroll fog' },
       { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Pinned services with a scrubbed 3D stone' },
       { id: 'atelier/VisionShutter', name: 'Vision Shutter', kind: 'section', component: VisionShutter, blurb: 'Shutter bands and oversized scrubbing words' },
-      { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Light sticky-title project column' },
+      { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Horizontal work slider — cards rise in with fade' },
       { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Big numbers with fog atmosphere' },
-      { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Closing statement and legal line' },
+      { id: 'atelier/WordStripe', name: 'Word Stripe', kind: 'section', component: WordStripe, blurb: 'Pinned shutter transition — same mechanic as Vision Shutter' },
+      { id: 'atelier/StudioCards', name: 'Studio Cards', kind: 'section', component: StudioCards, blurb: 'Light 2×3 card grid that staggers in after the shutter wash' },
+      { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Dark studio closer with lined brand mark + collaboration CTA' },
+    ],
+  },
+  {
+    id: 'unity',
+    name: 'UNITY',
+    accent: '#f4c518',
+    wrapperClass: 'bg-[#f3efe6] text-[#0a0a0a]',
+    sections: [
+      { id: 'unity/NavUnity', name: 'Nav Unity', kind: 'nav', component: NavUnity, blurb: 'Phrase left · logo center · 3 links right' },
+      { id: 'unity/HeroTwin', name: 'Hero Twin', kind: 'hero', component: HeroTwin, blurb: 'Two headlines peeling apart on scroll parallax' },
+      { id: 'unity/MosaicSlider', name: 'Mosaic Slider', kind: 'section', component: MosaicSlider, blurb: 'Scattered polaroids that unfold into a full-bleed slider' },
+      { id: 'unity/UniversalLang', name: 'Universal Lang', kind: 'section', component: UniversalLang, blurb: 'Pinned giant number with barcode stats' },
+      { id: 'unity/LanguageBlock', name: 'Language Block', kind: 'section', component: LanguageBlock, blurb: 'Oversized type interleaved with fixed-feel photo windows' },
+      { id: 'unity/LastPortrait', name: 'Last Portrait', kind: 'section', component: LastPortrait, blurb: 'Dark portrait closer with stats row' },
+      { id: 'unity/StageLines', name: 'Stage Lines', kind: 'section', component: StageLines, blurb: 'Two typographic stage beats over drifting media' },
+      { id: 'unity/FooterTrophy', name: 'Footer Trophy', kind: 'footer', component: FooterTrophy, blurb: 'Sky closer with giant type and a rising transparent PNG' },
     ],
   },
   {

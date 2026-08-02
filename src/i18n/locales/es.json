@@ -72,12 +72,12 @@
     "req2License": "ver licencia",
     "req3": "Prohibido revender o redistribuir el ZIP / el código como template",
     "req4": "No incluye hosting, dominio ni soporte de deploy",
-    "bundleEyebrow": "Los 6 modelos juntos",
+    "bundleEyebrow": "Los 7 modelos juntos",
     "bundleTitleBefore": "Llevate el",
     "bundleTitleEm": "catálogo completo",
-    "bundleBody": "Los seis modelos en un solo ZIP, cada uno en su carpeta y listo para npm install. Una sola licencia cubre todos.",
+    "bundleBody": "Los siete modelos en un solo ZIP, cada uno en su carpeta y listo para npm install. Una sola licencia cubre todos.",
     "bundleSaving": "Por separado {{list}} · Ahorrás {{off}}%",
-    "bundleCartTitle": "BUNDLE — los 6 modelos",
+    "bundleCartTitle": "BUNDLE — los 7 modelos",
     "builderEyebrow": "O armá la tuya",
     "builderTitleBefore": "Abrir el",
     "builderTitleEm": "builder",
@@ -124,6 +124,16 @@
       "vibe": "Studio WebGL",
       "tags": ["Niebla reactiva al scroll", "Emblema 3D", "Piedra scrubeada", "Servicios asimétricos"],
       "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas Three.js que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
+    },
+    "comic": {
+      "vibe": "Historieta scrollytelling",
+      "tags": ["Paneles rasgados", "Camión en capas", "Rail de capítulos", "Hotspots"],
+      "description": "Página-papel con paneles de historieta, una escena sticky del camión en capas SVG y un rail de capítulos. Ideal para campañas narrativas, ONG, editoriales o marcas que quieren contar un cuento largo con scroll."
+    },
+    "unity": {
+      "vibe": "Editorial deportivo",
+      "tags": ["Hero twin parallax", "Mosaico → slider", "Language bands", "Orbe rising"],
+      "description": "Canvas crema, tipografía Instrument + Oswald, mosaico de fotos que se despliega en un slider full-bleed y un footer con orbe geométrico que sube al scroll. Ideal para campañas deportivas, eventos, o marcas que quieren un scrollytelling editorial de alto impacto."
     }
   },
   "builder": {
@@ -385,9 +395,51 @@
           "name": "Key facts",
           "blurb": "Números grandes con niebla"
         },
+        "WordStripe": {
+          "name": "Word stripe",
+          "blurb": "Transición pineada con persianas — misma mecánica que Vision Shutter"
+        },
+        "StudioCards": {
+          "name": "Studio cards",
+          "blurb": "Grilla 2×3 clara que entra en stagger después del wash"
+        },
         "FooterAtelier": {
           "name": "Footer atelier",
           "blurb": "Cierre y línea legal"
+        }
+      },
+      "unity": {
+        "NavUnity": {
+          "name": "Nav unity",
+          "blurb": "Frase a la izquierda · logo al centro · 3 links a la derecha"
+        },
+        "HeroTwin": {
+          "name": "Hero twin",
+          "blurb": "Dos headlines en parallax opuesto"
+        },
+        "MosaicSlider": {
+          "name": "Mosaic slider",
+          "blurb": "Polaroids que se despliegan en un slider full-bleed"
+        },
+        "UniversalLang": {
+          "name": "Universal lang",
+          "blurb": "Número gigante pineado con stats barcode"
+        },
+        "LanguageBlock": {
+          "name": "Language block",
+          "blurb": "Tipo oversized con ventanas de foto fijas al scroll"
+        },
+        "LastPortrait": {
+          "name": "Last portrait",
+          "blurb": "Cierre oscuro con retrato y stats"
+        },
+        "StageLines": {
+          "name": "Stage lines",
+          "blurb": "Dos beats tipográficos sobre media en drift"
+        },
+        "FooterTrophy": {
+          "name": "Footer trophy",
+          "blurb": "Cierre cielo con orbe fotográfico que sube al scroll"
         }
       },
       "contact": {

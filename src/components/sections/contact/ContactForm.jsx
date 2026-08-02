@@ -87,6 +87,30 @@ const THEMES = {
     note: 'text-white/35',
     radius: '',
   },
+  comic: {
+    surface: 'bg-comic-paper text-[#2a2622]',
+    eyebrow: 'text-comic-flare',
+    title: 'font-brico font-bold tracking-[-0.03em]',
+    body: 'text-[#2a2622]/70',
+    field:
+      'border-[#2a2622]/25 focus:border-comic-flare placeholder:text-[#2a2622]/35',
+    button:
+      'rounded-md border border-comic-flare bg-comic-flare text-white hover:bg-transparent hover:text-comic-flare disabled:opacity-40',
+    note: 'text-[#2a2622]/45',
+    radius: 'rounded-md',
+  },
+  unity: {
+    surface: 'bg-[#f3efe6] text-[#0a0a0a]',
+    eyebrow: 'text-[#0a0a0a]/45',
+    title: 'font-oswald font-semibold uppercase tracking-[-0.02em]',
+    body: 'text-[#0a0a0a]/70',
+    field:
+      'border-[#0a0a0a]/20 focus:border-[#f4c518] placeholder:text-[#0a0a0a]/35',
+    button:
+      'border border-[#0a0a0a] bg-[#f4c518] text-[#0a0a0a] hover:bg-transparent disabled:opacity-40',
+    note: 'text-[#0a0a0a]/45',
+    radius: '',
+  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

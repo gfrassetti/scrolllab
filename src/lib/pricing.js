@@ -12,6 +12,8 @@ export const TEMPLATE_PRICES_USD = {
   velocity: 0.3,
   fizz: 159,
   atelier: 179,
+  comic: 179,
+  unity: 179,
 }
 
 /**
@@ -25,7 +27,7 @@ export const CUSTOM_EXTRA_SECTION_USD = 15
 export const MAX_CUSTOM_SECTIONS = 30
 
 export const COMMERCE_PACK_SURCHARGE_USD = 39
-export const BUNDLE_PRICE_USD = 389
+export const BUNDLE_PRICE_USD = 499
 
 /** Respaldo para el primer render, antes de que llegue la cotización real. */
 export const FALLBACK_USD_ARS = 1560
@@ -62,7 +64,7 @@ export function nextSectionArs(sectionCount, hasCommerce, rate) {
   return next - current
 }
 
-/** Lo que costaría comprar los 6 modelos por separado. */
+/** Lo que costaría comprar los modelos del bundle por separado. */
 export function bundleListPriceUsd() {
   return Object.values(TEMPLATE_PRICES_USD).reduce((sum, usd) => sum + usd, 0)
 }

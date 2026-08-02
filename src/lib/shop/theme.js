@@ -14,6 +14,8 @@ export const SHOP_THEME_IDS = [
   'velocity',
   'fizz',
   'atelier',
+  'comic',
+  'unity',
 ]
 
 /** Acento de cada modelo — mismo hex que `models[].accent` en el registry. */
@@ -24,6 +26,8 @@ export const TEMPLATE_ACCENTS = {
   velocity: '#d9ff3f',
   fizz: '#ff3ea5',
   atelier: '#c8d0dc',
+  comic: '#e85a24',
+  unity: '#f4c518',
 }
 
 const THEMES = {
@@ -88,6 +92,24 @@ const THEMES = {
     '--shop-border': 'rgba(255, 255, 255, 0.15)',
     '--shop-accent': TEMPLATE_ACCENTS.atelier,
     '--shop-accent-fg': '#0b0c10',
+    '--shop-radius': '0px',
+  },
+  comic: {
+    '--shop-bg': '#d8d4cc',
+    '--shop-fg': '#2a2622',
+    '--shop-muted': 'rgba(42, 38, 34, 0.55)',
+    '--shop-border': 'rgba(42, 38, 34, 0.15)',
+    '--shop-accent': TEMPLATE_ACCENTS.comic,
+    '--shop-accent-fg': '#ffffff',
+    '--shop-radius': '6px',
+  },
+  unity: {
+    '--shop-bg': '#f3efe6',
+    '--shop-fg': '#0a0a0a',
+    '--shop-muted': 'rgba(10, 10, 10, 0.55)',
+    '--shop-border': 'rgba(10, 10, 10, 0.15)',
+    '--shop-accent': TEMPLATE_ACCENTS.unity,
+    '--shop-accent-fg': '#0a0a0a',
     '--shop-radius': '0px',
   },
 }

@@ -51,6 +51,18 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/atelier',
   },
+  comic: {
+    page: 'src/pages/ComicPage.jsx',
+    sectionsDir: 'src/components/sections/comic',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/comic',
+  },
+  unity: {
+    page: 'src/pages/UnityPage.jsx',
+    sectionsDir: 'src/components/sections/unity',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/unity',
+  },
 }
 
 const SHARED = [
@@ -168,7 +180,7 @@ function buildTemplateIndexHtml(title) {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300..700&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300..700&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=Boldonse&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
     <title>${title}</title>
@@ -204,6 +216,8 @@ function modelWrapperClass(model) {
   if (model === 'velocity') return 'bg-[#0a1a12] text-[#ece9e2]'
   if (model === 'fizz') return 'bg-grape text-foam'
   if (model === 'atelier') return 'bg-[#0b0c10] text-white'
+  if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
+  if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
   // contact / commerce paint their own theme — no wrapper canvas.
   if (model === 'contact') return ''
   if (model === 'commerce') return ''
@@ -274,7 +288,7 @@ and resets, but nothing is sent anywhere. To receive real messages:
 3. Any backend works — your own API, a serverless function, or a form service.
 
 Styling follows the \`theme\` prop (\`auto\`, \`chapters\`, \`nocturne\`, \`monolith\`,
-\`velocity\`, \`fizz\`, \`atelier\`). With \`auto\` it inherits the surrounding
+\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`). With \`auto\` it inherits the surrounding
 background and text color. A hidden honeypot field filters basic bots.
 `
 
@@ -339,14 +353,26 @@ function appendModelProject(archive, model, prefix = '') {
   for (const dir of sectionDirs) {
     const sectionsAbs = path.join(ROOT, 'src', 'components', 'sections', dir)
     if (!fs.existsSync(sectionsAbs)) continue
-    for (const file of fs.readdirSync(sectionsAbs)) {
-      if (!file.endsWith('.jsx')) continue
-      const body = fs.readFileSync(path.join(sectionsAbs, file))
-      sources.push(body.toString('utf8'))
-      archive.append(body, {
-        name: `${prefix}src/components/sections/${dir}/${file}`,
-      })
+
+    const walk = (absDir, relBase) => {
+      for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
+        const abs = path.join(absDir, entry.name)
+        const rel = path.posix.join(relBase, entry.name)
+        if (entry.isDirectory()) {
+          walk(abs, rel)
+          continue
+        }
+        const body = fs.readFileSync(abs)
+        if (entry.name.endsWith('.jsx') || entry.name.endsWith('.js')) {
+          sources.push(body.toString('utf8'))
+        }
+        archive.append(body, {
+          name: `${prefix}src/components/sections/${rel}`,
+        })
+      }
     }
+
+    walk(sectionsAbs, dir)
   }
 
   archive.append(buildTemplatePackageJson(`scrolllab-${model}`, sources), {

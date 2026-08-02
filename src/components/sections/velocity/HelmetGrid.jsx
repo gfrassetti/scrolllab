@@ -1,53 +1,83 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 
+/** Varied notch / irregular masks — storytelling “hall of fame” feel. */
+const MASKS = [
+  'polygon(0 0, 100% 0, 100% 70%, 62% 70%, 62% 100%, 0 100%)',
+  'polygon(0 0, 100% 0, 100% 100%, 38% 100%, 38% 72%, 0 72%)',
+  'polygon(0 8%, 100% 0, 100% 100%, 0 100%)',
+  'polygon(0 0, 100% 0, 92% 100%, 0 88%)',
+  'polygon(6% 0, 100% 0, 100% 100%, 0 100%, 0 22%)',
+  'polygon(0 0, 100% 12%, 100% 100%, 0 100%)',
+]
+
+const STROKE_PATHS = [
+  'M 3 3 H 97 V 70 H 62 V 97 H 3 Z',
+  'M 3 3 H 97 V 97 H 38 V 72 H 3 Z',
+  'M 3 10 H 97 V 97 H 3 Z',
+  'M 3 3 H 97 V 97 L 3 88 Z',
+  'M 8 3 H 97 V 97 H 3 V 24 Z',
+  'M 3 3 H 97 L 97 97 H 3 Z',
+]
+
 const ITEMS = [
   {
     id: 'item-1',
     name: 'Title 1',
     year: '01',
     img: 'https://picsum.photos/seed/helm-1/800/800',
+    hover: 'https://picsum.photos/seed/helm-1b/800/800',
     offset: 'md:mt-0',
+    mask: 0,
   },
   {
     id: 'item-2',
     name: 'Title 2',
     year: '02',
     img: 'https://picsum.photos/seed/helm-2/800/800',
+    hover: 'https://picsum.photos/seed/helm-2b/800/800',
     offset: 'md:mt-16',
+    mask: 1,
   },
   {
     id: 'item-3',
     name: 'Title 3',
     year: '03',
     img: 'https://picsum.photos/seed/helm-3/800/800',
+    hover: 'https://picsum.photos/seed/helm-3b/800/800',
     offset: 'md:mt-8',
+    mask: 2,
   },
   {
     id: 'item-4',
     name: 'Title 4',
     year: '04',
     img: 'https://picsum.photos/seed/helm-4/800/800',
+    hover: 'https://picsum.photos/seed/helm-4b/800/800',
     offset: 'md:mt-20',
+    mask: 3,
   },
   {
     id: 'item-5',
     name: 'Title 5',
     year: '05',
     img: 'https://picsum.photos/seed/helm-5/800/800',
+    hover: 'https://picsum.photos/seed/helm-5b/800/800',
     offset: 'md:mt-4',
+    mask: 4,
   },
   {
     id: 'item-6',
     name: 'Title 6',
     year: '06',
     img: 'https://picsum.photos/seed/helm-6/800/800',
+    hover: 'https://picsum.photos/seed/helm-6b/800/800',
     offset: 'md:mt-14',
+    mask: 5,
   },
 ]
 
-/** Notched frame path (viewBox 0 0 100 100). Label lives in the cut corner. */
-function NotchFrame({ active }) {
+function NotchStroke({ active, maskIndex }) {
   const pathRef = useRef(null)
 
   useGSAP(
@@ -58,15 +88,12 @@ function NotchFrame({ active }) {
       gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
       gsap.to(path, {
         strokeDashoffset: 0,
-        duration: 1.1,
+        duration: 1.15,
         ease: 'power2.out',
-        scrollTrigger: {
-          trigger: path,
-          start: 'top 88%',
-        },
+        scrollTrigger: { trigger: path, start: 'top 88%' },
       })
     },
-    { dependencies: [] },
+    { dependencies: [maskIndex] },
   )
 
   return (
@@ -79,7 +106,7 @@ function NotchFrame({ active }) {
     >
       <path
         ref={pathRef}
-        d="M 3 3 H 97 V 68 H 58 V 97 H 3 Z"
+        d={STROKE_PATHS[maskIndex] || STROKE_PATHS[0]}
         stroke={active ? 'var(--color-acid)' : 'rgba(236,233,226,0.28)'}
         strokeWidth="0.9"
         vectorEffect="non-scaling-stroke"
@@ -89,14 +116,75 @@ function NotchFrame({ active }) {
   )
 }
 
+function HelmCard({ item, isActive, onActivate }) {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <li data-helm-card className={item.offset}>
+      <button
+        type="button"
+        onMouseEnter={() => {
+          onActivate()
+          setHovered(true)
+        }}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => {
+          onActivate()
+          setHovered(true)
+        }}
+        onBlur={() => setHovered(false)}
+        className="group relative w-full text-left"
+      >
+        <div className="relative aspect-square bg-black">
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{ clipPath: MASKS[item.mask] }}
+          >
+            <img
+              src={item.img}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                clipPath: hovered
+                  ? 'ellipse(78% 78% at 50% 50%)'
+                  : 'ellipse(0% 0% at 50% 50%)',
+                opacity: hovered ? 1 : 0,
+                transition: 'clip-path 0.55s ease, opacity 0.35s ease',
+              }}
+            >
+              <img
+                src={item.hover}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+          <NotchStroke active={isActive} maskIndex={item.mask} />
+          <p
+            className={`absolute right-0 bottom-[2%] w-[42%] pl-2 text-[10px] leading-tight tracking-[0.18em] uppercase md:text-[11px] ${
+              isActive ? 'text-[#ece9e2]' : 'text-white/55'
+            }`}
+          >
+            {item.name} <span className="text-acid">{item.year}</span>
+          </p>
+        </div>
+      </button>
+    </li>
+  )
+}
+
 /**
- * HelmetGrid — product hall like the cascos: notched frames,
- * staggered layout, lime hover, stroke draw-in on scroll.
+ * HelmetGrid — irregular clip masks + hover photo reveal (ellipse wipe).
  */
 export default function HelmetGrid({
   eyebrow = 'Section label',
   title = 'Title grid',
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
+  body = 'Body 1 — replace with hall copy.',
 }) {
   const root = useRef(null)
   const [active, setActive] = useState(ITEMS[0].id)
@@ -106,13 +194,14 @@ export default function HelmetGrid({
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       gsap.from('[data-helm-card]', {
         opacity: 0,
-        y: 40,
-        duration: 0.85,
-        stagger: 0.08,
+        y: 48,
+        rotate: 1.5,
+        duration: 0.9,
+        stagger: { each: 0.07, from: 'start' },
         ease: 'power3.out',
         scrollTrigger: {
           trigger: root.current,
-          start: 'top 70%',
+          start: 'top 72%',
         },
       })
     },
@@ -136,49 +225,14 @@ export default function HelmetGrid({
       </p>
 
       <ul className="mt-14 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-8 md:gap-y-6">
-        {ITEMS.map((item) => {
-          const isActive = active === item.id
-          return (
-            <li
-              key={item.id}
-              data-helm-card
-              className={item.offset}
-            >
-              <button
-                type="button"
-                onMouseEnter={() => setActive(item.id)}
-                onFocus={() => setActive(item.id)}
-                className="group relative w-full text-left"
-              >
-                <div className="relative aspect-square bg-black">
-                  <div
-                    className="absolute inset-0 overflow-hidden"
-                    style={{
-                      clipPath:
-                        'polygon(0 0, 100% 0, 100% 68%, 58% 68%, 58% 100%, 0 100%)',
-                    }}
-                  >
-                    <img
-                      src={item.img}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                    />
-                  </div>
-                  <NotchFrame active={isActive} />
-                  <p
-                    className={`absolute right-0 bottom-[2%] w-[40%] pl-2 text-[10px] leading-tight tracking-[0.18em] uppercase md:text-[11px] ${
-                      isActive ? 'text-[#ece9e2]' : 'text-white/55'
-                    }`}
-                  >
-                    {item.name}{' '}
-                    <span className="text-acid">{item.year}</span>
-                  </p>
-                </div>
-              </button>
-            </li>
-          )
-        })}
+        {ITEMS.map((item) => (
+          <HelmCard
+            key={item.id}
+            item={item}
+            isActive={active === item.id}
+            onActivate={() => setActive(item.id)}
+          />
+        ))}
       </ul>
     </section>
   )

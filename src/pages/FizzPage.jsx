@@ -6,12 +6,12 @@ import BubbleBenefits from '../components/sections/fizz/BubbleBenefits'
 import CanCarousel from '../components/sections/fizz/CanCarousel'
 import PopManifesto from '../components/sections/fizz/PopManifesto'
 import FooterSplash from '../components/sections/fizz/FooterSplash'
-import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
- * Template model 04 — "FIZZ"
- * Carbonated pop world: deep grape canvas, candy flavor colors,
- * a 3D soda can hero and full-screen color-morphing flavor worlds.
+ * Template model — "FIZZ"
+ * Carbonated pop: 3D can hero + flavor worlds that repaint the page.
+ * Family refs: Fizzi / La Revoltosa (confirm exact URL). Generic copy only.
+ * See Obsidian: "Fizz — mapa de referencia".
  */
 export default function FizzPage() {
   return (
@@ -25,7 +25,6 @@ export default function FizzPage() {
           <BubbleBenefits />
           <CanCarousel />
           <PopManifesto />
-          <ContactForm theme="fizz" />
         </main>
 
         <FooterSplash />

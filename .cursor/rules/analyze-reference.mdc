@@ -1,0 +1,31 @@
+---
+description: Al clonar un template desde una URL de referencia, correr el analizador solo (sin que el usuario lo pida).
+alwaysApply: true
+---
+
+# Analizador de páginas modelo (automático)
+
+Cuando el usuario pida **un template nuevo / recrear / imitar** una página y dé una **URL de referencia** (Framer, Webflow, custom, etc.):
+
+## Obligatorio — correr solo
+
+1. **Antes** de implementar secciones, ejecutar:
+
+```bash
+$env:PLAYWRIGHT_BROWSERS_PATH = "$env:USERPROFILE\AppData\Local\ms-playwright"
+npm run analyze:ref -- <url> --sku <sku> --name "<Name>"
+```
+
+(En bash: `PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"` o la ruta local de Playwright.)
+
+2. Si falta Chromium: `npx playwright install chromium` y reintentar.
+3. Leer la nota generada en Obsidian (`<Name> - analisis de referencia.md`) y/o `docs/reference-analysis/<sku>.md`.
+4. Recién después: graphify → mapa Obsidian del SKU → código.
+
+No esperar a que el usuario diga “corré el analizador”. Es parte del flujo de todo template desde URL.
+
+## Salidas
+
+- Vault: `C:\Users\Guido\Documents\Obsidian\ScrollLab\<Name> - analisis de referencia.md`
+- Repo: `docs/reference-analysis/<sku>.md`
+- Workflow: nota Obsidian `Analizar paginas modelo.md`

@@ -3,6 +3,10 @@ import { useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
 
+/**
+ * NavAtelier — studio header. On scroll, brand fades; CTA + MENU pill
+ * stay floating top-right (Trionn-style chrome, generic copy).
+ */
 export default function NavAtelier({
   brand = 'BRAND',
   cta = 'Your CTA',
@@ -17,8 +21,6 @@ export default function NavAtelier({
 }) {
   const root = useRef(null)
   const items = parseNavLinks(links, linksText)
-  // No inline links at any width: the corner trigger is the only way in, so
-  // the overlay stays available on desktop too.
   const { open, close, panelProps, triggerProps } = useMobileMenu({
     breakpoint: null,
   })
@@ -29,12 +31,13 @@ export default function NavAtelier({
       if (!header) return
 
       const section = document.querySelector(lightSection)
-      if (!section) return
 
-      // The band the header occupies, measured live on every update: a
-      // start/end trigger gets its bounds from a first pass that runs before
-      // images settle, and then stays stuck in light mode over a dark hero.
       const sync = () => {
+        const scrolled = window.scrollY > 48
+        if (scrolled) header.setAttribute('data-scrolled', 'true')
+        else header.removeAttribute('data-scrolled')
+
+        if (!section) return
         const { top, bottom } = section.getBoundingClientRect()
         const overlapping = top <= bandHeight && bottom > 0
         if (overlapping) header.setAttribute('data-on-light', 'true')
@@ -53,8 +56,6 @@ export default function NavAtelier({
     { scope: root },
   )
 
-  // The open panel is always dark, so the light-section treatment has to be
-  // dropped while it covers the page or the bar turns black on black.
   const onLight = (classes) => (open ? '' : classes)
 
   return (
@@ -64,37 +65,42 @@ export default function NavAtelier({
     >
       <a
         href="#top"
-        className={`relative z-10 text-sm font-medium tracking-[0.2em] text-white uppercase ${onLight('group-data-on-light:text-[#111214]')}`}
+        className={`relative z-10 text-sm font-medium tracking-[0.2em] text-white uppercase transition-opacity duration-300 ${onLight('group-data-on-light:text-[#111214]')} group-data-scrolled:opacity-0 group-data-scrolled:pointer-events-none md:group-data-scrolled:opacity-100 md:group-data-scrolled:pointer-events-auto`}
       >
         {brand}
       </a>
-      <p className="hidden text-[10px] tracking-[0.25em] text-white/40 uppercase md:block group-data-on-light:text-black/40">
+      <p
+        className={`hidden text-[10px] tracking-[0.25em] text-white/40 uppercase transition-opacity duration-300 md:block ${onLight('group-data-on-light:text-black/40')} group-data-scrolled:opacity-0`}
+      >
         {label}
       </p>
-      <div className="relative z-10 flex items-center gap-2">
+
+      {/* Floating cluster — always above the overlay */}
+      <div className="relative z-50 ml-auto flex items-center gap-2">
         <a
           href={ctaHref}
-          className={`rounded-full bg-white px-4 py-2 text-[10px] font-medium tracking-[0.18em] text-black uppercase ${onLight('group-data-on-light:bg-[#111214] group-data-on-light:text-white')}`}
+          className={`rounded-full bg-white px-4 py-2.5 text-[10px] font-medium tracking-[0.18em] text-black uppercase shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-transform duration-300 group-data-scrolled:scale-[1.02] ${onLight('group-data-on-light:bg-[#111214] group-data-on-light:text-white')}`}
         >
           {cta}
         </a>
         <button
           {...triggerProps}
           aria-label={menuLabel}
-          className={`relative grid size-9 place-items-center rounded-full border border-white/40 text-white ${onLight('group-data-on-light:border-black/30 group-data-on-light:text-[#111214]')}`}
+          className={`relative inline-flex items-center gap-2.5 rounded-full border border-white/55 bg-black/25 px-4 py-2.5 text-[10px] font-medium tracking-[0.2em] text-white uppercase backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-[background-color,border-color,color] duration-300 ${onLight('group-data-on-light:border-black/35 group-data-on-light:bg-white/70 group-data-on-light:text-[#111214]')}`}
         >
-          <span
-            aria-hidden="true"
-            className={`absolute h-px w-3.5 bg-current transition-transform duration-200 motion-reduce:transition-none ${
-              open ? 'rotate-45' : '-translate-y-1'
-            }`}
-          />
-          <span
-            aria-hidden="true"
-            className={`absolute h-px w-3.5 bg-current transition-transform duration-200 motion-reduce:transition-none ${
-              open ? '-rotate-45' : 'translate-y-1'
-            }`}
-          />
+          <span>{menuLabel}</span>
+          <span aria-hidden="true" className="relative grid h-2.5 w-3.5 place-items-center">
+            <span
+              className={`absolute h-px w-full bg-current transition-transform duration-200 motion-reduce:transition-none ${
+                open ? 'rotate-45' : '-translate-y-[3px]'
+              }`}
+            />
+            <span
+              className={`absolute h-px w-full bg-current transition-transform duration-200 motion-reduce:transition-none ${
+                open ? '-rotate-45' : 'translate-y-[3px]'
+              }`}
+            />
+          </span>
         </button>
       </div>
 
@@ -102,7 +108,7 @@ export default function NavAtelier({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
-        className={`fixed inset-0 bg-[#0b0c10] text-white transition-opacity duration-300 motion-reduce:transition-none ${
+        className={`fixed inset-0 z-40 bg-[#0b0c10] text-white transition-opacity duration-300 motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >

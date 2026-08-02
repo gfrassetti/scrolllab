@@ -72,12 +72,12 @@
     "req2License": "see license",
     "req3": "No reselling or redistributing the ZIP / code as a template",
     "req4": "Does not include hosting, domain, or deploy support",
-    "bundleEyebrow": "All 6 models together",
+    "bundleEyebrow": "All 7 models together",
     "bundleTitleBefore": "Get the",
     "bundleTitleEm": "full catalog",
-    "bundleBody": "All six models in a single ZIP, each in its own folder, ready to npm install. One license covers them all.",
+    "bundleBody": "All seven models in a single ZIP, each in its own folder, ready to npm install. One license covers them all.",
     "bundleSaving": "Separately {{list}} · You save {{off}}%",
-    "bundleCartTitle": "BUNDLE — all 6 models",
+    "bundleCartTitle": "BUNDLE — all 7 models",
     "builderEyebrow": "Or build your own",
     "builderTitleBefore": "Open the",
     "builderTitleEm": "builder",
@@ -124,6 +124,16 @@
       "vibe": "WebGL studio",
       "tags": ["Scroll-reactive fog", "3D emblem", "Scrubbed stone", "Asymmetric services"],
       "description": "Atmospheric dark canvas, scroll-tied fog, and Three.js pieces that rotate or shatter as you scroll. Digital studio aesthetic. Ideal for agencies, creative studios, or architecture practices selling premium services with a prestige site."
+    },
+    "comic": {
+      "vibe": "Comic scrollytelling",
+      "tags": ["Torn panels", "Layered truck scene", "Chapter rail", "Hotspots"],
+      "description": "Paper-page comic panels, a sticky layered SVG truck scene, and a chapter rail. Ideal for narrative campaigns, NGOs, editorials, or brands that want a long scroll-told story."
+    },
+    "unity": {
+      "vibe": "Sports editorial",
+      "tags": ["Twin-type hero", "Mosaic → slider", "Language bands", "Rising orb"],
+      "description": "Cream canvas, Instrument + Oswald type, a photo mosaic that unfolds into a full-bleed slider, and a sky-blue footer with a rising geometric orb. Ideal for sports campaigns, events, or brands that want high-impact editorial scrollytelling."
     }
   },
   "builder": {
@@ -385,9 +395,51 @@
           "name": "Key Facts",
           "blurb": "Big numbers with fog atmosphere"
         },
+        "WordStripe": {
+          "name": "Word Stripe",
+          "blurb": "Pinned shutter transition — same mechanic as Vision Shutter"
+        },
+        "StudioCards": {
+          "name": "Studio Cards",
+          "blurb": "Light 2×3 card grid that staggers in after the shutter wash"
+        },
         "FooterAtelier": {
           "name": "Footer Atelier",
           "blurb": "Closing statement and legal line"
+        }
+      },
+      "unity": {
+        "NavUnity": {
+          "name": "Nav Unity",
+          "blurb": "Phrase left · logo center · 3 links right"
+        },
+        "HeroTwin": {
+          "name": "Hero Twin",
+          "blurb": "Two headlines peeling apart on scroll parallax"
+        },
+        "MosaicSlider": {
+          "name": "Mosaic Slider",
+          "blurb": "Scattered polaroids that unfold into a full-bleed slider"
+        },
+        "UniversalLang": {
+          "name": "Universal Lang",
+          "blurb": "Pinned giant number with barcode stats"
+        },
+        "LanguageBlock": {
+          "name": "Language Block",
+          "blurb": "Oversized type interleaved with fixed-feel photo windows"
+        },
+        "LastPortrait": {
+          "name": "Last Portrait",
+          "blurb": "Dark portrait closer with stats row"
+        },
+        "StageLines": {
+          "name": "Stage Lines",
+          "blurb": "Two typographic stage beats over drifting media"
+        },
+        "FooterTrophy": {
+          "name": "Footer Trophy",
+          "blurb": "Sky-blue closer with a rising photo orb"
         }
       },
       "contact": {

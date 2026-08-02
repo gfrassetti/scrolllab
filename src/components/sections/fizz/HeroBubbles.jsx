@@ -302,6 +302,7 @@ export default function HeroBubbles({
       const can = new THREE.Group()
       can.add(body, lidTop, lidBottom, rimTop)
       can.rotation.set(0.18, -0.55, -0.1)
+      can.userData.liftY = 0
       scene.add(can)
 
       let customModel = null
@@ -333,12 +334,14 @@ export default function HeroBubbles({
           .catch(() => {})
       }
 
-      const bubbleCount = 90
+      const bubbleCount = 120
       const positions = new Float32Array(bubbleCount * 3)
+      const speeds = new Float32Array(bubbleCount)
       for (let i = 0; i < bubbleCount; i += 1) {
         positions[i * 3] = (Math.random() - 0.5) * 16
         positions[i * 3 + 1] = (Math.random() - 0.5) * 12
         positions[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1.5
+        speeds[i] = 0.008 + (i % 7) * 0.004
       }
       const bubbleGeo = new THREE.BufferGeometry()
       bubbleGeo.setAttribute(
@@ -346,14 +349,18 @@ export default function HeroBubbles({
         new THREE.BufferAttribute(positions, 3),
       )
       const bubbleMat = new THREE.PointsMaterial({
-        size: 0.11,
+        size: 0.09,
         color: flavorCfg.bubbles,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.45,
         depthWrite: false,
+        sizeAttenuation: true,
       })
       const bubbles = new THREE.Points(bubbleGeo, bubbleMat)
       scene.add(bubbles)
+
+      // Scroll-driven density proxy (sparse → dense mid → lift away)
+      const fizzState = { density: 0.35, rise: 1 }
 
       const pointer = { x: 0, y: 0 }
 
@@ -375,14 +382,18 @@ export default function HeroBubbles({
       }
 
       const tick = () => {
-        can.rotation.y += 0.004
-        can.position.y = Math.sin(gsap.ticker.time * 1.1) * 0.14
+        // Idle bob — scroll scrub owns the big moves
+        can.position.y =
+          Math.sin(gsap.ticker.time * 1.1) * 0.1 + (can.userData.liftY || 0)
         can.rotation.z += (pointer.x * 0.1 - 0.1 - can.rotation.z) * 0.05
-        can.rotation.x += (pointer.y * 0.12 + 0.18 - can.rotation.x) * 0.05
+        can.rotation.x += (pointer.y * 0.1 + 0.12 - can.rotation.x) * 0.05
+
+        bubbleMat.opacity = 0.25 + fizzState.density * 0.7
+        bubbleMat.size = 0.07 + fizzState.density * 0.12
 
         const pos = bubbleGeo.attributes.position
         for (let i = 0; i < bubbleCount; i += 1) {
-          let y = pos.getY(i) + 0.01 + (i % 5) * 0.003
+          let y = pos.getY(i) + speeds[i] * fizzState.rise
           if (y > 6) y = -6
           pos.setY(i, y)
         }
@@ -393,56 +404,82 @@ export default function HeroBubbles({
       window.addEventListener('resize', resize)
 
       if (reduced) {
+        camera.position.set(0, 0.2, 8.5)
+        can.scale.setScalar(1.1)
         render()
       } else {
         window.addEventListener('pointermove', onPointerMove)
         gsap.ticker.add(tick)
 
-        // Can + backdrop share the scroll scrub so the world turns with the product.
-        gsap.to(can.rotation, {
-          y: '+=3.2',
-          ease: 'none',
+        // Longer scrub: approach → orbit → lift (camera + can + bubbles)
+        const camTl = gsap.timeline({
+          defaults: { ease: 'none' },
           scrollTrigger: {
             trigger: root.current,
             start: 'top top',
             end: 'bottom top',
-            scrub: 0.6,
+            scrub: 0.55,
           },
         })
-        gsap.to(backdrop.rotation, {
-          z: Math.PI * 1.15,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: root.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0.6,
-          },
-        })
-        gsap.to(backdrop.scale, {
-          x: 1.18,
-          y: 1.18,
-          z: 1.18,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: root.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        })
-        gsap.to(can.scale, {
-          x: 1.28,
-          y: 1.28,
-          z: 1.28,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: root.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        })
+
+        // Act 1 — approach (pull in)
+        camTl.fromTo(
+          camera.position,
+          { x: 0.35, y: 0.4, z: 12.2 },
+          { x: 0, y: 0.1, z: 8.2, duration: 1 },
+          0,
+        )
+        camTl.fromTo(
+          can.scale,
+          { x: 0.92, y: 0.92, z: 0.92 },
+          { x: 1.12, y: 1.12, z: 1.12, duration: 1 },
+          0,
+        )
+        camTl.fromTo(fizzState, { density: 0.25, rise: 0.7 }, { density: 0.55, rise: 1.1, duration: 1 }, 0)
+
+        // Act 2 — orbit (world turns with product)
+        camTl.to(can.rotation, { y: '+=2.8', duration: 1.4 }, 0.85)
+        camTl.to(
+          camera.position,
+          { x: -1.1, y: 0.35, z: 7.4, duration: 1.4 },
+          0.85,
+        )
+        camTl.to(backdrop.rotation, { z: Math.PI * 1.25, duration: 1.4 }, 0.85)
+        camTl.to(
+          backdrop.scale,
+          { x: 1.22, y: 1.22, z: 1.22, duration: 1.4 },
+          0.85,
+        )
+        camTl.to(fizzState, { density: 1, rise: 1.85, duration: 1.2 }, 0.9)
+
+        // Act 3 — lift + tight close-up, bubbles rush past
+        camTl.to(
+          camera.position,
+          { x: 0.2, y: 1.15, z: 5.6, duration: 1.1 },
+          2.1,
+        )
+        camTl.to(
+          can.scale,
+          { x: 1.38, y: 1.38, z: 1.38, duration: 1.1 },
+          2.1,
+        )
+        camTl.to(
+          can.userData,
+          { liftY: 0.55, duration: 1.1 },
+          2.1,
+        )
+        camTl.to(can.rotation, { y: '+=1.4', duration: 1.1 }, 2.1)
+        camTl.to(fizzState, { density: 0.4, rise: 2.6, duration: 1 }, 2.2)
+        camTl.to(
+          '[data-fizz-title]',
+          { opacity: 0.15, y: -40, duration: 0.9 },
+          2.3,
+        )
+        camTl.to(
+          '[data-fizz-fade]',
+          { opacity: 0, y: -18, stagger: 0.05, duration: 0.7 },
+          2.35,
+        )
 
         const split = new SplitText('[data-fizz-title]', {
           type: 'chars',
@@ -495,7 +532,7 @@ export default function HeroBubbles({
   )
 
   return (
-    <section ref={root} className="relative h-[155svh]">
+    <section ref={root} className="relative h-[240svh] md:h-[280svh]">
       <div className="sticky top-0 h-svh overflow-hidden px-5 pt-28 pb-6 md:px-10">
         <canvas
           ref={canvasRef}

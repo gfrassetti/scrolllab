@@ -223,7 +223,7 @@ describe('validateCheckoutItems', () => {
     assert.equal(lines[0].recipe, undefined)
   })
 
-  it('el bundle cuesta menos que los 6 modelos por separado', () => {
+  it('el bundle cuesta menos que los modelos por separado', () => {
     const singles = BUNDLE_MODELS.reduce(
       (sum, model) => sum + PRODUCTS[model].unit_price_usd,
       0,

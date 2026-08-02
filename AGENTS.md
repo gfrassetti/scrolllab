@@ -106,10 +106,13 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 ### Flow obligatorio para el agente
 
 1. Pregunta de arquitectura / “dónde está X” / dependencias → `graphify query`, `path` o `explain` (ver `.cursor/rules/graphify.mdc`).
-2. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
-3. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
-4. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
-5. Si el usuario pide re-sync del vault →  
+2. **Template nuevo desde URL de referencia** → correr solo  
+   `npm run analyze:ref -- <url> --sku <sku> --name "<Name>"`  
+   (ver `.cursor/rules/analyze-reference.mdc`). Escribe libs + scroll sample a Obsidian y `docs/reference-analysis/`. No esperar a que el usuario lo pida.
+3. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
+4. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
+5. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
+6. Si el usuario pide re-sync del vault →  
    `graphify export obsidian --graph graphify-out/graph.json --dir "C:\Users\Guido\Documents\Obsidian\ScrollLab"`
 
 ### Bóveda canónica (usar solo esta)

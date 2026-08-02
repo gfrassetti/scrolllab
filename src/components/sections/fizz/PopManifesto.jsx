@@ -29,16 +29,16 @@ export default function PopManifesto({
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
-          start: 'top 70%',
-          end: 'bottom 65%',
-          scrub: 0.4,
+          start: 'top 75%',
+          end: 'bottom 55%',
+          scrub: 0.35,
         },
       })
 
       tl.fromTo(
         split.words,
-        { opacity: 0.14 },
-        { opacity: 1, stagger: 0.6, ease: 'none' },
+        { opacity: 0.1, y: 12 },
+        { opacity: 1, y: 0, stagger: 0.55, ease: 'none' },
       )
       split.words.forEach((word, i) => {
         if (!word.dataset.popColor) return

@@ -5,11 +5,12 @@ import TrackMerge from '../components/sections/velocity/TrackMerge'
 import HelmetGrid from '../components/sections/velocity/HelmetGrid'
 import ParallaxRise from '../components/sections/velocity/ParallaxRise'
 import FooterVelocity from '../components/sections/velocity/FooterVelocity'
-import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
- * Template model 04 — "VELOCITY"
- * Strike hero → horizontal gallery / track merge → helmet grid → parallax band.
+ * Template model — "VELOCITY"
+ * Athlete / motorsport scroll: hero strike → horizontal track merge →
+ * helmet grid → parallax. Inspired by landonorris.com patterns (generic copy).
+ * See Obsidian: "Velocity — mapa de referencia".
  */
 export default function VelocityPage() {
   return (
@@ -21,7 +22,6 @@ export default function VelocityPage() {
           <TrackMerge />
           <HelmetGrid />
           <ParallaxRise />
-          <ContactForm theme="velocity" />
         </main>
         <FooterVelocity />
       </div>

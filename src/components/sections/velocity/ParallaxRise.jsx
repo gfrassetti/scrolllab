@@ -23,9 +23,25 @@ export default function ParallaxRise({
 
       gsap.fromTo(
         '[data-rise-bg]',
-        { yPercent: 18 },
+        { yPercent: 22, scale: 1.1 },
         {
-          yPercent: -22,
+          yPercent: -28,
+          scale: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        },
+      )
+
+      gsap.fromTo(
+        '[data-rise-veil]',
+        { opacity: 0.4 },
+        {
+          opacity: 0.78,
           ease: 'none',
           scrollTrigger: {
             trigger: root.current,
@@ -38,12 +54,12 @@ export default function ParallaxRise({
 
       gsap.from('[data-rise-copy]', {
         opacity: 0,
-        y: 28,
-        duration: 0.9,
+        y: 40,
+        duration: 1,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: root.current,
-          start: 'top 70%',
+          start: 'top 68%',
         },
       })
     },
@@ -53,21 +69,24 @@ export default function ParallaxRise({
   return (
     <section
       ref={root}
-      className="relative min-h-[85svh] overflow-hidden border-t border-white/10 bg-black text-[#ece9e2]"
+      className="relative min-h-[95svh] overflow-hidden border-t border-white/10 bg-black text-[#ece9e2]"
     >
       <div className="absolute inset-0 overflow-hidden">
         <img
           data-rise-bg
           src={img}
           alt=""
-          className="absolute inset-x-0 -top-[18%] h-[136%] w-full object-cover will-change-transform"
+          className="absolute inset-x-0 -top-[18%] h-[145%] w-full origin-center object-cover will-change-transform"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/25" />
+        <div
+          data-rise-veil
+          className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/25"
+        />
       </div>
 
       <div
         data-rise-copy
-        className="relative z-10 flex min-h-[85svh] flex-col justify-end px-5 py-16 md:px-10 md:py-24"
+        className="relative z-10 flex min-h-[95svh] flex-col justify-end px-5 py-16 md:px-10 md:py-24"
       >
         <p className="text-[11px] tracking-[0.25em] text-acid uppercase">
           {eyebrow}

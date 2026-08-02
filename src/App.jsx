@@ -16,6 +16,8 @@ const MonolithPage = lazy(() => import('./pages/MonolithPage'))
 const FizzPage = lazy(() => import('./pages/FizzPage'))
 const VelocityPage = lazy(() => import('./pages/VelocityPage'))
 const AtelierPage = lazy(() => import('./pages/AtelierPage'))
+const ComicPage = lazy(() => import('./pages/ComicPage'))
+const UnityPage = lazy(() => import('./pages/UnityPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -68,6 +70,8 @@ export default function App() {
                 <Route path="/templates/fizz" element={<FizzPage />} />
                 <Route path="/templates/velocity" element={<VelocityPage />} />
                 <Route path="/templates/atelier" element={<AtelierPage />} />
+                <Route path="/templates/comic" element={<ComicPage />} />
+                <Route path="/templates/unity" element={<UnityPage />} />
                 <Route path="/builder" element={<BuilderPage />} />
                 <Route path="/preview" element={<PreviewPage />} />
                 <Route path="/legal/license" element={<LicensePage />} />

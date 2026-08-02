@@ -23,6 +23,11 @@ const ROW_A = [
     img: 'https://picsum.photos/seed/vel-a3/700/700',
     w: 'w-[48vw] md:w-[20vw]',
   },
+  {
+    label: 'Title 8',
+    img: 'https://picsum.photos/seed/vel-a4/560/760',
+    w: 'w-[40vw] md:w-[16vw]',
+  },
 ]
 
 const ROW_B = [
@@ -46,15 +51,24 @@ const ROW_B = [
     img: 'https://picsum.photos/seed/vel-b4/640/800',
     w: 'w-[40vw] md:w-[16vw]',
   },
+  {
+    label: 'Title 9',
+    img: 'https://picsum.photos/seed/vel-b5/680/820',
+    w: 'w-[46vw] md:w-[19vw]',
+  },
 ]
 
 /**
- * TrackMerge — vertical scroll drives:
- * 1) horizontal photo gallery
- * 2) two panels converging
- * 3) release into the next section below
+ * TrackMerge — dual-row gallery with aggressive speed differential, then
+ * PATH 1 / PATH 2 panels converge and hold before release.
  */
-export default function TrackMerge() {
+export default function TrackMerge({
+  pathLabelA = 'Path 1',
+  pathLabelB = 'Path 2',
+  mergeTitleA = 'TITLE',
+  mergeTitleB = 'TITLE',
+  mergeAccent = 'A',
+}) {
   const root = useRef(null)
 
   useGSAP(
@@ -75,69 +89,116 @@ export default function TrackMerge() {
             scrollTrigger: {
               trigger: root.current,
               start: 'top top',
-              end: '+=420%',
+              end: '+=520%',
               pin: true,
-              scrub: 0.8,
+              scrub: 0.65,
               anticipatePin: 1,
             },
           })
 
+          // Act 1 — opposing rows: top races left, bottom crawls opposite
           tl.fromTo(
             '[data-tm-row-a]',
-            { xPercent: 8 },
-            { xPercent: -55, ease: 'none' },
+            { xPercent: 18 },
+            { xPercent: -72, ease: 'none' },
             0,
           )
           tl.fromTo(
             '[data-tm-row-b]',
-            { xPercent: -6 },
-            { xPercent: -62, ease: 'none' },
+            { xPercent: -22 },
+            { xPercent: 8, ease: 'none' },
             0,
           )
+          tl.fromTo(
+            '[data-tm-path-tag]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.15 },
+            0.05,
+          )
 
+          // Continuous bg wash: forest → cream (merge) → black (HelmetGrid)
+          tl.fromTo(
+            '[data-tm-bg]',
+            { backgroundColor: '#0a1a12' },
+            { backgroundColor: '#12261c', ease: 'none', duration: 0.2 },
+            0,
+          )
+          tl.to(
+            '[data-tm-bg]',
+            { backgroundColor: '#1a3328', ease: 'none', duration: 0.18 },
+            0.2,
+          )
+
+          // Act 2 — gallery exits; merge stage fades in
           tl.to(
             '[data-tm-gallery]',
-            { opacity: 0, scale: 0.96, ease: 'power1.in' },
-            0.42,
+            { opacity: 0, scale: 0.94, ease: 'power1.in' },
+            0.38,
           )
+          tl.to('[data-tm-path-tag]', { opacity: 0, duration: 0.08 }, 0.36)
 
           tl.fromTo(
             '[data-tm-merge]',
             { opacity: 0 },
-            { opacity: 1, duration: 0.12, ease: 'none' },
-            0.4,
+            { opacity: 1, duration: 0.1, ease: 'none' },
+            0.36,
           )
-          tl.fromTo(
+          tl.to(
             '[data-tm-bg]',
-            { backgroundColor: '#0a1a12' },
-            { backgroundColor: '#e6e4dc', ease: 'none', duration: 0.18 },
-            0.4,
+            { backgroundColor: '#e6e4dc', ease: 'none', duration: 0.22 },
+            0.34,
           )
 
+          // Act 3 — panels slam together from opposite corners
           tl.fromTo(
             '[data-tm-on]',
-            { yPercent: -55, xPercent: -12, opacity: 0.4 },
-            { yPercent: 0, xPercent: 0, opacity: 1, ease: 'power2.out' },
-            0.45,
+            { yPercent: -70, xPercent: -18, opacity: 0.25, rotate: -4 },
+            {
+              yPercent: 0,
+              xPercent: 0,
+              opacity: 1,
+              rotate: 0,
+              ease: 'power3.out',
+            },
+            0.4,
           )
           tl.fromTo(
             '[data-tm-off]',
-            { yPercent: 55, xPercent: 12, opacity: 0.4 },
-            { yPercent: 0, xPercent: 0, opacity: 1, ease: 'power2.out' },
-            0.45,
+            { yPercent: 70, xPercent: 18, opacity: 0.25, rotate: 4 },
+            {
+              yPercent: 0,
+              xPercent: 0,
+              opacity: 1,
+              rotate: 0,
+              ease: 'power3.out',
+            },
+            0.4,
           )
           tl.fromTo(
             '[data-tm-title]',
-            { opacity: 0, scale: 1.08 },
-            { opacity: 1, scale: 1, ease: 'power2.out' },
-            0.58,
+            { opacity: 0, scale: 1.14, letterSpacing: '0.12em' },
+            {
+              opacity: 1,
+              scale: 1,
+              letterSpacing: '-0.04em',
+              ease: 'power2.out',
+            },
+            0.52,
           )
 
-          tl.to('[data-tm-merge]', { opacity: 1, duration: 0.12 }, 0.78)
+          // Act 4 — long hold on the merge beat (storytelling pause)
+          tl.to('[data-tm-merge]', { opacity: 1, duration: 0.22 }, 0.62)
+
+          // Act 5 — release: wash to black to match HelmetGrid below
+          tl.to(
+            '[data-tm-bg]',
+            { backgroundColor: '#000000', ease: 'none', duration: 0.2 },
+            0.78,
+          )
           tl.to(
             '[data-tm-merge]',
-            { opacity: 0, y: -24, ease: 'power1.in' },
-            0.9,
+            { opacity: 0, y: -36, scale: 0.97, ease: 'power1.in' },
+            0.84,
           )
         },
       )
@@ -149,49 +210,66 @@ export default function TrackMerge() {
             scrollTrigger: {
               trigger: root.current,
               start: 'top top',
-              end: '+=280%',
+              end: '+=360%',
               pin: true,
-              scrub: 0.75,
+              scrub: 0.7,
             },
           })
           tl.fromTo(
             '[data-tm-row-a]',
-            { xPercent: 4 },
-            { xPercent: -70, ease: 'none' },
+            { xPercent: 10 },
+            { xPercent: -78, ease: 'none' },
             0,
           )
           tl.fromTo(
             '[data-tm-row-b]',
-            { xPercent: -4 },
-            { xPercent: -75, ease: 'none' },
+            { xPercent: -12 },
+            { xPercent: 6, ease: 'none' },
             0,
           )
-          tl.to('[data-tm-gallery]', { opacity: 0 }, 0.5)
+          tl.to('[data-tm-gallery]', { opacity: 0, scale: 0.96 }, 0.42)
           tl.fromTo(
             '[data-tm-merge]',
             { opacity: 0 },
             { opacity: 1 },
-            0.48,
+            0.4,
+          )
+          tl.fromTo(
+            '[data-tm-bg]',
+            { backgroundColor: '#0a1a12' },
+            { backgroundColor: '#1a3328', ease: 'none', duration: 0.35 },
+            0,
+          )
+          tl.to(
+            '[data-tm-bg]',
+            { backgroundColor: '#e6e4dc', ease: 'none', duration: 0.2 },
+            0.38,
           )
           tl.fromTo(
             '[data-tm-on]',
-            { yPercent: -40 },
-            { yPercent: 0, ease: 'power2.out' },
-            0.52,
+            { yPercent: -48, opacity: 0.3 },
+            { yPercent: 0, opacity: 1, ease: 'power2.out' },
+            0.44,
           )
           tl.fromTo(
             '[data-tm-off]',
-            { yPercent: 40 },
-            { yPercent: 0, ease: 'power2.out' },
-            0.52,
+            { yPercent: 48, opacity: 0.3 },
+            { yPercent: 0, opacity: 1, ease: 'power2.out' },
+            0.44,
           )
           tl.fromTo(
             '[data-tm-title]',
             { opacity: 0 },
             { opacity: 1 },
-            0.62,
+            0.55,
           )
-          tl.to('[data-tm-merge]', { opacity: 0 }, 0.9)
+          tl.to('[data-tm-merge]', { opacity: 1, duration: 0.18 }, 0.62)
+          tl.to(
+            '[data-tm-bg]',
+            { backgroundColor: '#000000', ease: 'none', duration: 0.18 },
+            0.78,
+          )
+          tl.to('[data-tm-merge]', { opacity: 0, y: -20 }, 0.84)
         },
       )
     },
@@ -199,10 +277,7 @@ export default function TrackMerge() {
   )
 
   return (
-    <section
-      ref={root}
-      className="relative bg-[#0a1a12] text-[#ece9e2]"
-    >
+    <section ref={root} className="relative bg-[#0a1a12] text-[#ece9e2]">
       <div className="relative h-svh overflow-hidden">
         <div
           data-tm-bg
@@ -221,6 +296,13 @@ export default function TrackMerge() {
                 'repeating-radial-gradient(circle at 40% 40%, transparent 0 16px, rgba(236,233,226,0.08) 16px 17px)',
             }}
           />
+
+          <p
+            data-tm-path-tag
+            className="pointer-events-none absolute top-[12%] left-5 z-20 text-[10px] tracking-[0.3em] text-acid uppercase opacity-0 md:left-10"
+          >
+            Dual track
+          </p>
 
           <div
             data-tm-row-a
@@ -293,7 +375,7 @@ export default function TrackMerge() {
                 />
               </div>
               <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
-                Panel 1
+                {pathLabelA}
               </p>
             </div>
             <div data-tm-off className="will-change-transform">
@@ -305,7 +387,7 @@ export default function TrackMerge() {
                 />
               </div>
               <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
-                Panel 2
+                {pathLabelB}
               </p>
             </div>
           </div>
@@ -316,11 +398,11 @@ export default function TrackMerge() {
           >
             <span className="relative inline-block">
               <span className="absolute -top-2 left-0 font-display text-[0.55em] font-normal normal-case italic text-acid md:-top-3">
-                A
+                {mergeAccent}
               </span>
-              TITLE
+              {mergeTitleA}
             </span>{' '}
-            <span className="text-[#161412]/35">B</span> TITLE
+            <span className="text-[#161412]/35">/</span> {mergeTitleB}
           </h2>
         </div>
       </div>
