@@ -181,10 +181,17 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
                     <select
                       value={value}
                       onChange={(e) => onFieldChange(e.target.value)}
-                      className={fieldClass}
+                      // Native <select> on Windows: popup blanco + text-ink claro = ilegible.
+                      // Esquema claro fijo en el control (cerrado y abierto).
+                      className="mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink"
+                      style={{ colorScheme: 'light' }}
                     >
                       {(field.options || []).map((opt) => (
-                        <option key={opt.value} value={opt.value}>
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          style={{ backgroundColor: '#f2efe9', color: '#1a1a1a' }}
+                        >
                           {opt.label}
                         </option>
                       ))}
