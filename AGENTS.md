@@ -91,6 +91,8 @@ In production: Mongo required (no silent file fallback), mock/dev auth off, MP w
 
 (Same as before: self-contained sections, `lib/gsap.js`, reduced motion, matchMedia for heavy scroll.)
 
+Image pieces for new models: generate realistic local assets under `sections/<sku>/assets/` (see `.cursor/rules/template-image-assets.mdc`). Do not ship sellable defaults on picsum.
+
 Register new sellable SKUs in `server/catalog.js` and pack logic in `server/packaging.js`. Keep `server/sections.js` in sync with `src/lib/sectionRegistry.jsx`.
 
 ## Second brain — graphify + Obsidian
@@ -109,10 +111,11 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 2. **Template nuevo desde URL de referencia** → correr solo  
    `npm run analyze:ref -- <url> --sku <sku> --name "<Name>"`  
    (ver `.cursor/rules/analyze-reference.mdc`). Escribe libs + scroll sample a Obsidian y `docs/reference-analysis/`. No esperar a que el usuario lo pida.
-3. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
-4. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
-5. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
-6. Si el usuario pide re-sync del vault →  
+3. **Piezas de imagen del template** → el agente actúa como diseñador/generador: inventariar cada foto/cutout que la ref anima, generar assets realistas locales en `src/components/sections/<sku>/assets/`, **sin picsum**. Regla `.cursor/rules/template-image-assets.mdc` + skill `.cursor/skills/template-image-designer/`.
+4. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
+5. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
+6. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
+7. Si el usuario pide re-sync del vault →  
    `graphify export obsidian --graph graphify-out/graph.json --dir "C:\Users\Guido\Documents\Obsidian\ScrollLab"`
 
 ### Bóveda canónica (usar solo esta)

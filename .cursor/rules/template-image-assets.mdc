@@ -1,0 +1,28 @@
+---
+description: Al crear templates, generar piezas de imagen realistas (no picsum) y animarlas como en la referencia.
+alwaysApply: true
+---
+
+# Piezas de imagen en templates (obligatorio)
+
+Las demos scrollytelling venden **movimiento sobre fotografía / cutouts reales**. No son layouts con placeholders.
+
+## Cuando aplica
+
+Al crear o portar un **template nuevo** (o una sección visual pesada): el agente actúa como **diseñador / generador de imágenes** — no solo como coder.
+
+## Obligatorio
+
+1. Tras `analyze:ref` (o al inventariar la ref), listar **cada pieza** que se anima o se recorta: hero, mosaico, ventanas, retrato, objeto foreground (PNG transparente), texturas, etc.
+2. **Generar** esas piezas (tool `GenerateImage` o pipeline del skill `template-image-designer`). Estilo **fotográfico / realista**, coherente con el mundo del template.
+3. Guardar en `src/components/sections/<sku>/assets/` (o `…/<Section>/assets/`). Import local en el JSX — **nunca** `picsum`, Unsplash random ni SVG flat como sustituto de foto/objeto hero.
+4. Objetos que cruzan tipografía o suben al scroll → **PNG con alpha real** (verificar esquina transparente).
+5. Packaging ya hace walk recursivo: los assets van al ZIP del comprador.
+
+## Anti-patrones
+
+- Terminar un template con `https://picsum.photos/...` en defaults vendibles
+- Un solo gradient / mesh como “imagen” del beat visual principal
+- Reciclar el mismo seed de stock en todas las ventanas del mosaico
+
+Leer el skill del repo: `.cursor/skills/template-image-designer/SKILL.md`.

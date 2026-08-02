@@ -18,9 +18,45 @@ export default function FooterTrophy({
 
   useGSAP(
     () => {
+      const type = () => root.current?.querySelector('[data-trophy-type]')
+
+      const fitType = () => {
+        const el = type()
+        if (!el) return
+        el.style.fontSize = ''
+        // Force layout with base clamp size before measuring natural width.
+        void el.offsetWidth
+        const pad = 24
+        const avail = Math.max(120, (root.current?.clientWidth || window.innerWidth) - pad)
+        let natural = 0
+        el.querySelectorAll(':scope > span').forEach((line) => {
+          natural = Math.max(natural, line.scrollWidth)
+        })
+        if (!natural) natural = el.scrollWidth
+        if (natural <= avail) return
+        const current = parseFloat(getComputedStyle(el).fontSize) || 16
+        el.style.fontSize = `${Math.max(32, current * (avail / natural))}px`
+      }
+
+      const scheduleFit = () => {
+        fitType()
+        requestAnimationFrame(fitType)
+        window.setTimeout(fitType, 60)
+        window.setTimeout(fitType, 200)
+        document.fonts?.ready?.then(() => fitType())
+      }
+      scheduleFit()
+
+      const ro = new ResizeObserver(scheduleFit)
+      if (root.current) ro.observe(root.current)
+      window.addEventListener('resize', scheduleFit)
+
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         gsap.set('[data-trophy]', { yPercent: 0 })
-        return
+        return () => {
+          ro.disconnect()
+          window.removeEventListener('resize', scheduleFit)
+        }
       }
 
       gsap.fromTo(
@@ -50,9 +86,15 @@ export default function FooterTrophy({
             start: 'top 80%',
             end: 'top 40%',
             scrub: 0.4,
+            onRefresh: fitType,
           },
         },
       )
+
+      return () => {
+        ro.disconnect()
+        window.removeEventListener('resize', scheduleFit)
+      }
     },
     { scope: root },
   )
@@ -66,14 +108,14 @@ export default function FooterTrophy({
     const accent = String(accentWord)
     if (!accent) {
       return (
-        <span key={key} className="block whitespace-nowrap">
+        <span key={key} className="inline-block whitespace-nowrap">
           {line}
         </span>
       )
     }
     const parts = line.split(new RegExp(`(${accent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'i'))
     return (
-      <span key={key} className="block whitespace-nowrap">
+      <span key={key} className="inline-block whitespace-nowrap">
         {parts.map((part, i) =>
           part.toLowerCase() === accent.toLowerCase() ? (
             <span key={i} className="text-[#f4c518]">
@@ -104,7 +146,7 @@ export default function FooterTrophy({
       <div className="relative mx-auto mt-4 flex min-h-[78svh] max-w-[100vw] flex-col items-center justify-center md:mt-6 md:min-h-[82svh]">
         <h2
           data-trophy-type
-          className="relative z-0 w-full max-w-[98vw] text-center font-oswald text-[clamp(4.6rem,18.5vw,13.5rem)] leading-[0.82] font-bold tracking-[-0.04em] uppercase"
+          className="relative z-0 flex w-max max-w-none flex-col items-center text-center font-oswald text-[clamp(5.5rem,22vw,16rem)] leading-[0.8] font-bold tracking-[-0.045em] uppercase"
         >
           {lines.map((line, i) => paintLine(line, i))}
         </h2>
