@@ -72,7 +72,7 @@ const ogHtml = `<!doctype html>
 </style>
 </head>
 <body>
-  <p class="eyebrow">Plantillas web</p>
+  <p class="eyebrow">Plantillas web · Storytelling templates</p>
 
   <div>
     <div class="lockup">
