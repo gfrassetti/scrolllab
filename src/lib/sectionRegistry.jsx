@@ -131,10 +131,10 @@ export const models = [
     wrapperClass: 'bg-grape text-foam',
     sections: [
       { id: 'fizz/NavFizz', name: 'Nav Fizz', kind: 'nav', component: NavFizz, blurb: 'Floating pill header with dropdown menus' },
-      { id: 'fizz/HeroBubbles', name: 'Hero Bubbles', kind: 'hero', component: HeroBubbles, blurb: 'PBR soda can with reflections and scroll-driven backdrop' },
+      { id: 'fizz/HeroBubbles', name: 'Hero Bubbles', kind: 'hero', component: HeroBubbles, blurb: 'Photoreal can PNG over scroll bubbles; optional GLB override' },
       { id: 'fizz/FlavorWorlds', name: 'Flavor Worlds', kind: 'section', component: FlavorWorlds, blurb: 'Full-screen worlds repainting the page per flavor' },
       { id: 'fizz/BubbleBenefits', name: 'Bubble Benefits', kind: 'section', component: BubbleBenefits, blurb: 'Springy benefit cards with drifting bubbles' },
-      { id: 'fizz/CanCarousel', name: 'Can Carousel', kind: 'section', component: CanCarousel, blurb: 'Snap shelf of cans; flavor color fades in on hover' },
+      { id: 'fizz/CanCarousel', name: 'Can Carousel', kind: 'section', component: CanCarousel, blurb: 'Snap shelf of photorealistic can PNGs; flavor glow on hover' },
       { id: 'fizz/PopManifesto', name: 'Pop Manifesto', kind: 'section', component: PopManifesto, blurb: 'Giant paragraph inking in with flavor colors' },
       { id: 'fizz/FooterSplash', name: 'Footer Splash', kind: 'footer', component: FooterSplash, blurb: 'Candy CTA word with bubbles rising behind' },
     ],

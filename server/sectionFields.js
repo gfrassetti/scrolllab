@@ -48,6 +48,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'meta',
     'hint',
     'flavor',
+    'canImage',
     'canLabel',
     'modelUrl',
   ],

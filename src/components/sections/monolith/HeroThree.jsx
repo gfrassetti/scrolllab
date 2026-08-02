@@ -20,7 +20,7 @@ function createShapeGeometry(shape) {
     case 'torus':
       return new THREE.TorusGeometry(2.4, 0.85, 16, 48)
     case 'sphere':
-      return new THREE.SphereGeometry(3.2, 24, 18)
+      return new THREE.SphereGeometry(3.6, 32, 24)
     case 'icosahedron':
     default:
       return new THREE.IcosahedronGeometry(3.4, 1)
@@ -90,21 +90,36 @@ export default function HeroThree({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
-      camera.position.z = 9
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
+      // Ligero offset Y: el título vive bajo el nav, no en el centro geométrico.
+      camera.position.set(0, -0.15, 9.2)
+      camera.lookAt(0, -0.35, 0)
 
       const geometry = createShapeGeometry(resolvedShape)
       const wireframe = new THREE.Mesh(
         geometry,
-        new THREE.MeshBasicMaterial({ wireframe: true, color: 0x101010 }),
+        new THREE.MeshBasicMaterial({
+          wireframe: true,
+          color: 0x101010,
+          transparent: true,
+          opacity: 0.95,
+        }),
       )
       const points = new THREE.Points(
         geometry,
-        new THREE.PointsMaterial({ size: 0.09, color: 0x2b3cff }),
+        new THREE.PointsMaterial({
+          size: 0.14,
+          color: 0x2b3cff,
+          transparent: true,
+          opacity: 0.98,
+          depthWrite: false,
+        }),
       )
       const group = new THREE.Group()
       group.add(wireframe, points)
-      group.rotation.set(0.4, 0.6, 0)
+      group.rotation.set(0.28, 0.4, 0)
+      group.position.set(0, -0.35, 0)
+      group.scale.setScalar(1.05)
       scene.add(group)
 
       // —— Optional custom model (GLB/GLTF), re-skinned as wireframe ——
@@ -147,9 +162,11 @@ export default function HeroThree({
       const pointer = { x: 0, y: 0 }
 
       const resize = () => {
-        const { clientWidth: w, clientHeight: h } = root.current
+        const host = canvasRef.current?.parentElement || root.current
+        if (!host) return
+        const { clientWidth: w, clientHeight: h } = host
         renderer.setSize(w, h, false)
-        camera.aspect = w / h
+        camera.aspect = w / Math.max(h, 1)
         camera.updateProjectionMatrix()
       }
       resize()
@@ -232,10 +249,10 @@ export default function HeroThree({
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full"
       />
 
-      <div className="pointer-events-none relative flex h-full flex-col justify-between">
+      <div className="pointer-events-none relative z-10 flex h-full flex-col justify-between">
         <p
           data-mono-fade
           className="max-w-70 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs"
@@ -245,12 +262,12 @@ export default function HeroThree({
 
         <h1
           data-mono-title
-          className="font-anton text-[19vw] leading-[0.85] tracking-[0.01em] uppercase select-none"
+          className="relative z-10 mx-auto w-full text-center font-anton text-[clamp(4.5rem,16vw,12rem)] leading-[0.85] tracking-[0.01em] uppercase select-none mix-blend-multiply"
         >
           {title}
         </h1>
 
-        <div className="flex items-end justify-between border-t-2 border-carbon pt-3 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
+        <div className="relative z-10 flex items-end justify-between border-t-2 border-carbon pt-3 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
           <p data-mono-fade>{meta}</p>
           <p data-mono-fade className="bg-carbon px-2 py-1 text-concrete">
             {hint} <span aria-hidden="true">↓</span>

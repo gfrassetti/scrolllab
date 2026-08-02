@@ -2,65 +2,48 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 
-/** Curated flavor presets — label color + bubble / backdrop tint. */
+const gltfLoaderMod = () =>
+  import('three/examples/jsm/loaders/GLTFLoader.js')
+import canCitrus from './assets/soda-can-01.png'
+import canBerry from './assets/soda-can-02.png'
+import canMint from './assets/soda-can-03.png'
+import canTropical from './assets/soda-can-04.png'
+import canPurple from './assets/soda-can-05.png'
+
+/** Curated flavor presets — PNG cutout + bubble / backdrop tint. */
 export const FIZZ_FLAVORS = {
-  berry: { base: '#ff3ea5', dark: '#b81f74', bubbles: 0xffd1ec, back: '#5b1a8a' },
-  citrus: { base: '#ffb02e', dark: '#e08a00', bubbles: 0xffe9c0, back: '#8a4a10' },
-  tropical: { base: '#ff6b35', dark: '#d14a17', bubbles: 0xffd6c4, back: '#7a2a40' },
-  mint: { base: '#3ddc97', dark: '#1fa96d', bubbles: 0xd2ffe9, back: '#1a5a48' },
+  berry: {
+    base: '#ff3ea5',
+    dark: '#b81f74',
+    bubbles: 0xffd1ec,
+    back: '#5b1a8a',
+    can: canBerry,
+  },
+  citrus: {
+    base: '#ffb02e',
+    dark: '#e08a00',
+    bubbles: 0xffe9c0,
+    back: '#8a4a10',
+    can: canCitrus,
+  },
+  tropical: {
+    base: '#ff6b35',
+    dark: '#d14a17',
+    bubbles: 0xffd6c4,
+    back: '#7a2a40',
+    can: canTropical,
+  },
+  mint: {
+    base: '#3ddc97',
+    dark: '#1fa96d',
+    bubbles: 0xd2ffe9,
+    back: '#1a5a48',
+    can: canMint,
+  },
 }
 
 const CHAR_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
 
-/** Flat, illustrated can label drawn to a canvas (no external assets). */
-function buildLabelTexture(flavorKey, label) {
-  const flavor = FIZZ_FLAVORS[flavorKey] || FIZZ_FLAVORS.berry
-  const size = 1024
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
-  const ctx = canvas.getContext('2d')
-
-  ctx.fillStyle = flavor.base
-  ctx.fillRect(0, 0, size, size)
-
-  // Soft highlight strip (reads as aluminum glare under PBR)
-  const shine = ctx.createLinearGradient(0, 0, size * 0.35, 0)
-  shine.addColorStop(0, 'rgba(255,255,255,0)')
-  shine.addColorStop(0.45, 'rgba(255,255,255,0.22)')
-  shine.addColorStop(1, 'rgba(255,255,255,0)')
-  ctx.fillStyle = shine
-  ctx.fillRect(0, 0, size * 0.35, size)
-
-  ctx.fillStyle = '#fff3e2'
-  ctx.beginPath()
-  ctx.moveTo(0, size * 0.62)
-  for (let x = 0; x <= size; x += 12) {
-    ctx.lineTo(x, size * 0.62 + Math.sin((x / size) * Math.PI * 4) * 22)
-  }
-  ctx.lineTo(size, size)
-  ctx.lineTo(0, size)
-  ctx.closePath()
-  ctx.fill()
-
-  ctx.fillStyle = '#241352'
-  ctx.font = '800 170px "Bricolage Grotesque", sans-serif'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(label, size * 0.06, size * 0.3)
-  ctx.fillText(label, size * 0.56, size * 0.3)
-
-  ctx.fillStyle = flavor.dark || '#241352'
-  ctx.font = '700 56px "Bricolage Grotesque", sans-serif'
-  ctx.fillText('placeholder flavor', size * 0.06, size * 0.82)
-
-  const texture = new THREE.CanvasTexture(canvas)
-  texture.colorSpace = THREE.SRGBColorSpace
-  texture.anisotropy = 8
-  texture.wrapS = THREE.RepeatWrapping
-  return texture
-}
-
-/** Cheap studio env map so metal rims pick up reflections without HDR files. */
 function buildStudioEnv(renderer) {
   const pmrem = new THREE.PMREMGenerator(renderer)
   pmrem.compileEquirectangularShader()
@@ -102,10 +85,6 @@ function buildStudioEnv(renderer) {
   return envMap
 }
 
-/**
- * Fit any loaded model into the same visual footprint as the can,
- * so scroll/pointer animations keep working regardless of source scale.
- */
 function fitObjectToScene(obj, targetSize = 4.6) {
   const box = new THREE.Box3().setFromObject(obj)
   const size = box.getSize(new THREE.Vector3())
@@ -118,39 +97,38 @@ function fitObjectToScene(obj, targetSize = 4.6) {
 
 function boostPbrMaterials(root) {
   root.traverse((node) => {
-    if (!node.isMesh || !node.material) return
+    if (!node.isMesh) return
+    // Avoid alpha-blend ghosting from Meshy textures (looks like a second can).
+    node.castShadow = false
+    node.receiveShadow = false
     const mats = Array.isArray(node.material) ? node.material : [node.material]
     mats.forEach((m) => {
       if (!m) return
+      m.transparent = false
+      m.opacity = 1
+      m.depthWrite = true
+      m.depthTest = true
+      m.side = THREE.FrontSide
+      m.alphaTest = 0
       if ('envMapIntensity' in m) m.envMapIntensity = 1.35
-      if ('metalness' in m && m.metalness < 0.05) {
-        // Keep painted labels matte; bump bare metal-looking greys a bit.
-        const c = m.color
-        if (c && c.r > 0.7 && c.g > 0.7 && c.b > 0.7) {
-          m.metalness = 0.85
-          m.roughness = Math.min(m.roughness ?? 0.4, 0.35)
-        }
-      }
+      if ('roughness' in m) m.roughness = Math.min(m.roughness ?? 0.45, 0.55)
+      if ('metalness' in m) m.metalness = Math.max(m.metalness ?? 0.2, 0.15)
       m.needsUpdate = true
     })
   })
 }
 
-function disposeObject(obj) {
-  obj.traverse((node) => {
-    node.geometry?.dispose?.()
-    const mats = Array.isArray(node.material) ? node.material : [node.material]
-    mats.forEach((m) => {
-      if (!m) return
-      Object.values(m).forEach((v) => v?.isTexture && v.dispose())
-      m.dispose?.()
-    })
+function disposeObject(root) {
+  root.traverse((n) => {
+    n.geometry?.dispose?.()
+    if (Array.isArray(n.material)) n.material.forEach((m) => m.dispose?.())
+    else n.material?.dispose?.()
   })
 }
 
 /**
  * Decorative backdrop that rotates with scroll — soft discs + petal shapes
- * behind the can (MANA-like motion without external illustration assets).
+ * behind the can (MANA-like motion).
  */
 function buildScrollBackdrop(flavor) {
   const group = new THREE.Group()
@@ -211,13 +189,10 @@ function buildScrollBackdrop(flavor) {
 }
 
 /**
- * HeroBubbles — PBR soda can with studio reflections over a scroll-driven
- * illustrated backdrop and rising bubbles. Flavor is a preset.
+ * HeroBubbles — photorealistic can PNG (alpha cutout) over a scroll-driven
+ * Three.js backdrop + bubbles. Optional `modelUrl` swaps in a custom GLB.
  *
- * `modelUrl` (optional): URL or path to a GLB/GLTF file. When set, the
- * placeholder can is replaced by the custom model (auto-centered and
- * auto-scaled). Buyers drop their file in `public/` and point to it,
- * e.g. modelUrl="/my-can.glb".
+ * `canImage` overrides the flavor default PNG.
  */
 export default function HeroBubbles({
   title = 'YOUR BIG TITLE',
@@ -225,19 +200,25 @@ export default function HeroBubbles({
   meta = 'Placeholder meta — ©2026',
   hint = 'Scroll',
   flavor = 'berry',
-  canLabel = 'BRAND*',
+  canLabel: _canLabel = 'BRAND*', // builder field; PNG/GLB no longer use canvas label
+  canImage = '',
   modelUrl = '',
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
+  const canImgRef = useRef(null)
   const resolvedFlavor = flavor in FIZZ_FLAVORS ? flavor : 'berry'
+  const flavorCfg = FIZZ_FLAVORS[resolvedFlavor]
+  const useGlb = Boolean(modelUrl && typeof modelUrl === 'string')
+  const heroCanSrc = canImage || flavorCfg.can || canPurple
+  // Never bridge with PNG when a GLB is set — different pose = ghost can.
+  const showPngCan = !useGlb
 
   useGSAP(
     () => {
       const reduced = window.matchMedia(
         '(prefers-reduced-motion: reduce)',
       ).matches
-      const flavorCfg = FIZZ_FLAVORS[resolvedFlavor] || FIZZ_FLAVORS.berry
 
       const renderer = new THREE.WebGLRenderer({
         canvas: canvasRef.current,
@@ -249,66 +230,43 @@ export default function HeroBubbles({
       renderer.outputColorSpace = THREE.SRGBColorSpace
       renderer.toneMapping = THREE.ACESFilmicToneMapping
       renderer.toneMappingExposure = 1.15
+      renderer.setClearColor(0x000000, 0)
 
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100)
       camera.position.set(0, 0.15, 10)
 
-      const envMap = buildStudioEnv(renderer)
-      scene.environment = envMap
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.55))
-      const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.6)
-      keyLight.position.set(4.5, 6, 7)
-      scene.add(keyLight)
-      const rimLight = new THREE.DirectionalLight(0xc9b6ff, 1.1)
-      rimLight.position.set(-5, 2, -4)
-      scene.add(rimLight)
-      const fillLight = new THREE.DirectionalLight(0xffffff, 0.55)
-      fillLight.position.set(-2, -3, 5)
-      scene.add(fillLight)
-
       const backdrop = buildScrollBackdrop(flavorCfg)
       scene.add(backdrop)
 
-      const labelTexture = buildLabelTexture(resolvedFlavor, canLabel)
-      const bodyGeo = new THREE.CylinderGeometry(1.45, 1.45, 3.9, 64, 1, false)
-      const bodyMat = new THREE.MeshStandardMaterial({
-        map: labelTexture,
-        roughness: 0.38,
-        metalness: 0.22,
-        envMapIntensity: 1.1,
-      })
-      const body = new THREE.Mesh(bodyGeo, bodyMat)
-
-      const metalMat = new THREE.MeshStandardMaterial({
-        color: 0xd6d2cd,
-        metalness: 0.92,
-        roughness: 0.22,
-        envMapIntensity: 1.5,
-      })
-      const lidGeo = new THREE.CylinderGeometry(1.34, 1.45, 0.22, 64)
-      const lidTop = new THREE.Mesh(lidGeo, metalMat)
-      lidTop.position.y = 2.05
-      const lidBottom = new THREE.Mesh(lidGeo, metalMat)
-      lidBottom.rotation.x = Math.PI
-      lidBottom.position.y = -2.05
-
-      const rimGeo = new THREE.TorusGeometry(1.4, 0.045, 12, 64)
-      const rimTop = new THREE.Mesh(rimGeo, metalMat)
-      rimTop.rotation.x = Math.PI / 2
-      rimTop.position.y = 1.96
-
-      const can = new THREE.Group()
-      can.add(body, lidTop, lidBottom, rimTop)
-      can.rotation.set(0.18, -0.55, -0.1)
-      can.userData.liftY = 0
-      scene.add(can)
-
+      // GLB path: no PNG stand-in — only show the can once the model is ready.
+      let can = null
+      let envMap
       let customModel = null
       let cancelled = false
-      if (modelUrl && typeof modelUrl === 'string') {
-        import('three/examples/jsm/loaders/GLTFLoader.js')
+      let modelLoaded = false
+
+      if (useGlb) {
+        envMap = buildStudioEnv(renderer)
+        scene.environment = envMap
+        scene.add(new THREE.AmbientLight(0xffffff, 0.55))
+        const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.6)
+        keyLight.position.set(4.5, 6, 7)
+        scene.add(keyLight)
+        const rimLight = new THREE.DirectionalLight(0xc9b6ff, 1.1)
+        rimLight.position.set(-5, 2, -4)
+        scene.add(rimLight)
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.55)
+        fillLight.position.set(-2, -3, 5)
+        scene.add(fillLight)
+
+        can = new THREE.Group()
+        can.visible = false
+        can.rotation.set(0.18, -0.55, -0.1)
+        can.userData.liftY = 0
+        scene.add(can)
+
+        gltfLoaderMod()
           .then(({ GLTFLoader }) => {
             if (cancelled) return
             new GLTFLoader().load(
@@ -318,11 +276,28 @@ export default function HeroBubbles({
                   disposeObject(gltf.scene)
                   return
                 }
+                // Drop any prior child (Strict Mode / HMR remount) before attach.
+                while (can.children.length) {
+                  const child = can.children[0]
+                  can.remove(child)
+                  disposeObject(child)
+                }
                 customModel = gltf.scene
                 fitObjectToScene(customModel)
                 boostPbrMaterials(customModel)
-                can.remove(body, lidTop, lidBottom, rimTop)
                 can.add(customModel)
+                can.visible = true
+                modelLoaded = true
+                if (!reduced) {
+                  can.scale.setScalar(0.94)
+                  gsap.to(can.scale, {
+                    x: 1,
+                    y: 1,
+                    z: 1,
+                    duration: 0.4,
+                    ease: 'power2.out',
+                  })
+                }
                 render()
               },
               undefined,
@@ -359,10 +334,10 @@ export default function HeroBubbles({
       const bubbles = new THREE.Points(bubbleGeo, bubbleMat)
       scene.add(bubbles)
 
-      // Scroll-driven density proxy (sparse → dense mid → lift away)
       const fizzState = { density: 0.35, rise: 1 }
-
       const pointer = { x: 0, y: 0 }
+      // Start small/low — ticker owns transform; CSS only hides opacity to avoid FOUC.
+      const canDom = { liftY: 40, rotX: 8, rotY: -12, rotZ: -4, scale: 0.85 }
 
       const resize = () => {
         const host = canvasRef.current?.parentElement || root.current
@@ -381,12 +356,24 @@ export default function HeroBubbles({
         pointer.y = (e.clientY / window.innerHeight) * 2 - 1
       }
 
+      const applyCanDom = () => {
+        const el = canImgRef.current
+        if (!el) return
+        const bob = Math.sin(gsap.ticker.time * 1.1) * 6
+        const px = pointer.x * 8
+        const py = pointer.y * 6
+        el.style.transform = `translate3d(${px}px, ${canDom.liftY + bob + py}px, 0) rotateX(${canDom.rotX + pointer.y * 4}deg) rotateY(${canDom.rotY + pointer.x * 10}deg) rotateZ(${canDom.rotZ}deg) scale(${canDom.scale})`
+      }
+
       const tick = () => {
-        // Idle bob — scroll scrub owns the big moves
-        can.position.y =
-          Math.sin(gsap.ticker.time * 1.1) * 0.1 + (can.userData.liftY || 0)
-        can.rotation.z += (pointer.x * 0.1 - 0.1 - can.rotation.z) * 0.05
-        can.rotation.x += (pointer.y * 0.1 + 0.12 - can.rotation.x) * 0.05
+        if (can && modelLoaded) {
+          can.position.y =
+            Math.sin(gsap.ticker.time * 1.1) * 0.1 + (can.userData.liftY || 0)
+          can.rotation.z += (pointer.x * 0.1 - 0.1 - can.rotation.z) * 0.05
+          can.rotation.x += (pointer.y * 0.1 + 0.12 - can.rotation.x) * 0.05
+        } else {
+          applyCanDom()
+        }
 
         bubbleMat.opacity = 0.25 + fizzState.density * 0.7
         bubbleMat.size = 0.07 + fizzState.density * 0.12
@@ -405,13 +392,17 @@ export default function HeroBubbles({
 
       if (reduced) {
         camera.position.set(0, 0.2, 8.5)
-        can.scale.setScalar(1.1)
+        if (can) can.scale.setScalar(1.1)
+        else {
+          canDom.scale = 1.08
+          applyCanDom()
+        }
+        gsap.set('[data-fizz-can]', { opacity: 1, scale: 1, y: 0 })
         render()
       } else {
         window.addEventListener('pointermove', onPointerMove)
         gsap.ticker.add(tick)
 
-        // Longer scrub: approach → orbit → lift (camera + can + bubbles)
         const camTl = gsap.timeline({
           defaults: { ease: 'none' },
           scrollTrigger: {
@@ -422,7 +413,6 @@ export default function HeroBubbles({
           },
         })
 
-        // Act 1 — approach (pull in)
         camTl.fromTo(
           camera.position,
           { x: 0.35, y: 0.4, z: 12.2 },
@@ -430,20 +420,53 @@ export default function HeroBubbles({
           0,
         )
         camTl.fromTo(
-          can.scale,
-          { x: 0.92, y: 0.92, z: 0.92 },
-          { x: 1.12, y: 1.12, z: 1.12, duration: 1 },
+          fizzState,
+          { density: 0.25, rise: 0.7 },
+          { density: 0.55, rise: 1.1, duration: 1 },
           0,
         )
-        camTl.fromTo(fizzState, { density: 0.25, rise: 0.7 }, { density: 0.55, rise: 1.1, duration: 1 }, 0)
 
-        // Act 2 — orbit (world turns with product)
-        camTl.to(can.rotation, { y: '+=2.8', duration: 1.4 }, 0.85)
-        camTl.to(
-          camera.position,
-          { x: -1.1, y: 0.35, z: 7.4, duration: 1.4 },
-          0.85,
-        )
+        if (can) {
+          camTl.fromTo(
+            can.scale,
+            { x: 0.92, y: 0.92, z: 0.92 },
+            { x: 1.12, y: 1.12, z: 1.12, duration: 1 },
+            0,
+          )
+          camTl.to(can.rotation, { y: '+=2.8', duration: 1.4 }, 0.85)
+          camTl.to(
+            camera.position,
+            { x: -1.1, y: 0.35, z: 7.4, duration: 1.4 },
+            0.85,
+          )
+          camTl.to(
+            can.scale,
+            { x: 1.38, y: 1.38, z: 1.38, duration: 1.1 },
+            2.1,
+          )
+          camTl.to(can.userData, { liftY: 0.55, duration: 1.1 }, 2.1)
+          camTl.to(can.rotation, { y: '+=1.4', duration: 1.1 }, 2.1)
+        }
+
+        if (!useGlb) {
+          camTl.fromTo(canDom, { scale: 0.88 }, { scale: 1.06, duration: 1 }, 0)
+          camTl.to(
+            canDom,
+            { rotY: 18, rotZ: 2, rotX: 4, duration: 1.4 },
+            0.85,
+          )
+          camTl.to(
+            camera.position,
+            { x: -0.6, y: 0.25, z: 7.6, duration: 1.4 },
+            0.85,
+          )
+          camTl.to(
+            canDom,
+            { scale: 1.28, liftY: -28, rotY: -8, duration: 1.1 },
+            2.1,
+          )
+        }
+
         camTl.to(backdrop.rotation, { z: Math.PI * 1.25, duration: 1.4 }, 0.85)
         camTl.to(
           backdrop.scale,
@@ -451,24 +474,11 @@ export default function HeroBubbles({
           0.85,
         )
         camTl.to(fizzState, { density: 1, rise: 1.85, duration: 1.2 }, 0.9)
-
-        // Act 3 — lift + tight close-up, bubbles rush past
         camTl.to(
           camera.position,
           { x: 0.2, y: 1.15, z: 5.6, duration: 1.1 },
           2.1,
         )
-        camTl.to(
-          can.scale,
-          { x: 1.38, y: 1.38, z: 1.38, duration: 1.1 },
-          2.1,
-        )
-        camTl.to(
-          can.userData,
-          { liftY: 0.55, duration: 1.1 },
-          2.1,
-        )
-        camTl.to(can.rotation, { y: '+=1.4', duration: 1.1 }, 2.1)
         camTl.to(fizzState, { density: 0.4, rise: 2.6, duration: 1 }, 2.2)
         camTl.to(
           '[data-fizz-title]',
@@ -503,6 +513,22 @@ export default function HeroBubbles({
           stagger: 0.12,
           delay: 0.9,
         })
+        if (!useGlb) {
+          // CSS opacity-0 + canDom seed — never gsap.from (that flashes a painted frame).
+          gsap.to('[data-fizz-can]', {
+            opacity: 1,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 0.15,
+          })
+          gsap.to(canDom, {
+            scale: 1,
+            liftY: 0,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 0.15,
+          })
+        }
       }
 
       return () => {
@@ -510,23 +536,17 @@ export default function HeroBubbles({
         window.removeEventListener('resize', resize)
         window.removeEventListener('pointermove', onPointerMove)
         gsap.ticker.remove(tick)
-        bodyGeo.dispose()
-        lidGeo.dispose()
-        rimGeo.dispose()
         bubbleGeo.dispose()
-        labelTexture.dispose()
-        bodyMat.dispose()
-        metalMat.dispose()
         bubbleMat.dispose()
-        envMap.dispose()
         disposeObject(backdrop)
+        if (envMap) envMap.dispose()
         if (customModel) disposeObject(customModel)
         renderer.dispose()
       }
     },
     {
       scope: root,
-      dependencies: [resolvedFlavor, modelUrl, canLabel],
+      dependencies: [resolvedFlavor, modelUrl, canImage, useGlb],
       revertOnUpdate: true,
     },
   )
@@ -540,7 +560,21 @@ export default function HeroBubbles({
           className="absolute inset-0 h-full w-full"
         />
 
-        <div className="pointer-events-none relative flex h-full flex-col justify-between">
+        {/* Photoreal cutout — only when there is no GLB (never as a load bridge) */}
+        {showPngCan && (
+          <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center perspective-[1200px]">
+            <img
+              ref={canImgRef}
+              data-fizz-can
+              src={heroCanSrc}
+              alt=""
+              draggable={false}
+              className="h-[min(78svh,720px)] w-auto max-w-[min(58vw,340px)] origin-center opacity-0 select-none object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.65)] will-change-transform md:max-w-[380px]"
+            />
+          </div>
+        )}
+
+        <div className="pointer-events-none relative z-[2] flex h-full flex-col justify-between">
           <p
             data-fizz-fade
             className="max-w-[34ch] text-xs font-semibold uppercase tracking-[0.22em] text-foam/70 md:text-sm"

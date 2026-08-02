@@ -32,6 +32,7 @@ const MODEL_FILES = {
     sectionsDir: 'src/components/sections/monolith',
     pageName: 'App.jsx',
     importPrefix: './components/sections/monolith',
+    publicAssets: ['public/monolith/monolith-form.glb'],
   },
   velocity: {
     page: 'src/pages/VelocityPage.jsx',
@@ -44,6 +45,7 @@ const MODEL_FILES = {
     sectionsDir: 'src/components/sections/fizz',
     pageName: 'App.jsx',
     importPrefix: './components/sections/fizz',
+    publicAssets: ['public/fizz/soda-can.glb'],
   },
   atelier: {
     page: 'src/pages/AtelierPage.jsx',
@@ -244,17 +246,18 @@ const SHOP_ROUTE_COMPONENTS = [
 const MODEL_3D_NOTES = {
   fizz: `## Custom 3D model (hero)
 
-The hero's soda can is generated in code (no assets). To use your own model:
+The demo ships with \`public/fizz/soda-can.glb\` as \`modelUrl\` on \`HeroBubbles\`.
+The PNG cutout is only used when \`modelUrl\` is omitted. To use your own model:
 
 1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
 2. Drop it in \`public/\`, e.g. \`public/my-can.glb\`.
 3. In \`src/App.jsx\`, pass it to the hero: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
 
-The model is auto-centered and auto-scaled; it keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works. Without \`modelUrl\`, the placeholder can renders (label color via \`flavor\`: berry / citrus / tropical / mint).
+The model is auto-centered and auto-scaled; it keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works. Without \`modelUrl\`, a photoreal PNG cutout renders (flavor via \`flavor\`: berry / citrus / tropical / mint).
 
 ## Custom can images (carousel)
 
-The lineup cans are inline SVG placeholders. To replace each one:
+The lineup ships photoreal PNG cutouts. To replace each one:
 
 1. Export your art as **SVG**, PNG, WebP or JPG.
 2. Drop files in \`public/\`, e.g. \`public/can-1.svg\`.
@@ -264,7 +267,7 @@ A hosted \`https://\` URL also works. Without \`canNImage\`, the SVG placeholder
 `,
   monolith: `## Custom 3D model (hero)
 
-The hero's wireframe object is a preset (\`shape\`). To use your own model:
+The demo ships with \`public/monolith/monolith-form.glb\` as \`modelUrl\` on \`HeroThree\` (carbon wireframe). To use your own model:
 
 1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
 2. Drop it in \`public/\`, e.g. \`public/my-object.glb\`.
@@ -373,6 +376,14 @@ function appendModelProject(archive, model, prefix = '') {
     }
 
     walk(sectionsAbs, dir)
+  }
+
+  for (const rel of cfg.publicAssets || []) {
+    const abs = path.join(ROOT, rel)
+    if (!fs.existsSync(abs)) continue
+    archive.append(fs.readFileSync(abs), {
+      name: `${prefix}${rel.replace(/\\/g, '/')}`,
+    })
   }
 
   archive.append(buildTemplatePackageJson(`scrolllab-${model}`, sources), {

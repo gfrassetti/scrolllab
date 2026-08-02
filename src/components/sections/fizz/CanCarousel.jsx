@@ -1,15 +1,20 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import can01 from './assets/soda-can-01.png'
+import can02 from './assets/soda-can-02.png'
+import can03 from './assets/soda-can-03.png'
+import can04 from './assets/soda-can-04.png'
+import can05 from './assets/soda-can-05.png'
 
 const defaultCans = [
-  { name: 'FLAVOR 01', note: 'Ingredient + ingredient', color: '#ffb02e' },
-  { name: 'FLAVOR 02', note: 'Ingredient + ingredient', color: '#ff3ea5' },
-  { name: 'FLAVOR 03', note: 'Ingredient + ingredient', color: '#3ddc97' },
-  { name: 'FLAVOR 04', note: 'Ingredient + ingredient', color: '#ff6b35' },
-  { name: 'FLAVOR 05', note: 'Ingredient + ingredient', color: '#5b3df0' },
+  { name: 'FLAVOR 01', note: 'Ingredient + ingredient', color: '#ffb02e', image: can01 },
+  { name: 'FLAVOR 02', note: 'Ingredient + ingredient', color: '#ff3ea5', image: can02 },
+  { name: 'FLAVOR 03', note: 'Ingredient + ingredient', color: '#3ddc97', image: can03 },
+  { name: 'FLAVOR 04', note: 'Ingredient + ingredient', color: '#ff6b35', image: can04 },
+  { name: 'FLAVOR 05', note: 'Ingredient + ingredient', color: '#5b3df0', image: can05 },
 ]
 
-/** Illustrated can, pure SVG — no image assets in the template. */
+/** Fallback SVG if a can has no image override and no default asset. */
 function CanIllustration({ color, label }) {
   // Label must stay inside the can body (88 wide) whatever the font that loads,
   // so size it by length and pin the run length with textLength.
@@ -49,13 +54,12 @@ function CanIllustration({ color, label }) {
 }
 
 /**
- * CanCarousel — snap-scrolling shelf of illustrated cans.
+ * CanCarousel — photorealistic can shelf (PNG cutouts) in a wrapping grid.
  * On hover the flavor color softly fills the card (and a soft outer glow),
  * like the MANA product shelf.
  *
- * Per-can name/note/image are editable from the builder. With `canNImage`
- * set (URL or path), the placeholder SVG is replaced by that asset
- * (PNG / SVG / WebP / JPG). Drop files in `public/` after download.
+ * Defaults ship with local `assets/soda-can-0N.png`. Builder `canNImage`
+ * overrides any slot (PNG / SVG / WebP / JPG).
  */
 export default function CanCarousel({
   eyebrow = 'Section eyebrow',
@@ -92,7 +96,7 @@ export default function CanCarousel({
     ...can,
     name: overrides[i]?.name || can.name,
     note: overrides[i]?.note || can.note,
-    image: overrides[i]?.image || '',
+    image: overrides[i]?.image || can.image || '',
   }))
 
   useGSAP(
@@ -100,14 +104,12 @@ export default function CanCarousel({
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
       gsap.from('[data-can-card]', {
-        x: 70,
-        y: 28,
+        y: 36,
         opacity: 0,
-        rotate: 4,
-        scale: 0.92,
+        scale: 0.94,
         duration: 0.85,
         ease: 'back.out(1.5)',
-        stagger: 0.09,
+        stagger: 0.08,
         scrollTrigger: { trigger: root.current, start: 'top 65%', once: true },
       })
     },
@@ -115,64 +117,65 @@ export default function CanCarousel({
   )
 
   return (
-    <section ref={root} className="overflow-hidden py-24 md:py-36">
-      <div className="px-5 md:px-10">
+    <section ref={root} className="py-24 md:py-36">
+      <div className="mx-auto max-w-7xl px-5 text-center md:px-10">
         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
           {eyebrow}
         </p>
         <h2 className="mt-4 font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
           {title}
         </h2>
-      </div>
 
-      <ul className="mt-12 flex snap-x snap-mandatory justify-safe-center gap-5 overflow-x-auto px-5 pb-6 md:px-10 [scrollbar-width:thin]">
-        {shelf.map((can, i) => (
-          <li
-            key={i}
-            data-can-card
-            className="group relative flex w-64 shrink-0 snap-start flex-col items-center overflow-hidden rounded-3xl border border-foam/25 px-6 pt-10 pb-7 text-center md:w-72"
-          >
-            {/* Soft outer wash */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-3 rounded-[2rem] opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-45"
-              style={{
-                background: `radial-gradient(circle at 50% 40%, ${can.color}, transparent 70%)`,
-              }}
-            />
-            {/* Solid fill that fades in */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
-              style={{ backgroundColor: can.color }}
-            />
-
-            <div className="relative z-10 flex h-52 items-center justify-center transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:rotate-3">
-              {can.image ? (
-                <img
-                  src={can.image}
-                  alt=""
-                  className="max-h-52 w-auto max-w-[7.5rem] object-contain drop-shadow-md"
-                />
-              ) : (
-                <CanIllustration color={can.color} label={canLabel} />
-              )}
-            </div>
-            <h3 className="relative z-10 mt-7 font-brico text-lg font-extrabold uppercase tracking-tight text-foam transition-colors duration-500 group-hover:text-grape">
-              {can.name}
-            </h3>
-            <p className="relative z-10 mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-foam/60 transition-colors duration-500 group-hover:text-grape/70">
-              {can.note}
-            </p>
-            <a
-              href="#"
-              className="relative z-10 mt-6 rounded-full border border-transparent bg-foam/15 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-foam transition-[transform,background-color,color,border-color] duration-300 group-hover:scale-105 group-hover:border-grape/20 group-hover:bg-grape group-hover:text-foam"
+        <ul className="mt-12 grid grid-cols-1 justify-items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          {shelf.map((can, i) => (
+            <li
+              key={i}
+              data-can-card
+              className="group relative flex w-full flex-col items-center overflow-hidden rounded-3xl border border-foam/25 px-5 pt-10 pb-7 text-center sm:px-6"
             >
-              {cta}
-            </a>
-          </li>
-        ))}
-      </ul>
+              {/* Soft outer wash */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-3 rounded-[2rem] opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-45"
+                style={{
+                  background: `radial-gradient(circle at 50% 40%, ${can.color}, transparent 70%)`,
+                }}
+              />
+              {/* Solid fill that fades in */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                style={{ backgroundColor: can.color }}
+              />
+
+              <div className="relative z-10 flex h-52 items-center justify-center transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:rotate-3">
+                {can.image ? (
+                  <img
+                    src={can.image}
+                    alt=""
+                    draggable={false}
+                    className="max-h-52 w-auto max-w-[8.5rem] select-none object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]"
+                  />
+                ) : (
+                  <CanIllustration color={can.color} label={canLabel} />
+                )}
+              </div>
+              <h3 className="relative z-10 mt-7 font-brico text-lg font-extrabold uppercase tracking-tight text-foam transition-colors duration-500 group-hover:text-grape">
+                {can.name}
+              </h3>
+              <p className="relative z-10 mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-foam/60 transition-colors duration-500 group-hover:text-grape/70">
+                {can.note}
+              </p>
+              <a
+                href="#"
+                className="relative z-10 mt-6 rounded-full border border-transparent bg-foam/15 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-foam transition-[transform,background-color,color,border-color] duration-300 group-hover:scale-105 group-hover:border-grape/20 group-hover:bg-grape group-hover:text-foam"
+              >
+                {cta}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }

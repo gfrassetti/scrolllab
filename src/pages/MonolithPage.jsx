@@ -20,7 +20,7 @@ export default function MonolithPage() {
         <NavBrutal />
 
         <main>
-          <HeroThree />
+          <HeroThree shape="sphere" />
           <SkewScroller unit="01" />
           <SpecSheet unit="02" />
           <ExhibitGrid unit="03" />

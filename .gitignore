@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env
 storage/
+.cursor/mcp.json
+meshy_output/
 
 # graphify — regenerated locally (graph.json, html, obsidian export, caches)
 graphify-out/

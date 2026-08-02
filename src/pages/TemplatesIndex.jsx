@@ -5,6 +5,7 @@ import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
+import HomeContact from '../components/HomeContact'
 import { useCart } from '../lib/cart'
 import {
   BUNDLE_PRICE_USD,
@@ -479,6 +480,69 @@ export default function TemplatesIndex() {
             },
           },
         )
+
+        // Bundle + builder CTAs: scrubbed card rise + staggered copy reveal.
+        gsap.utils.toArray('[data-cta-card]').forEach((card) => {
+          gsap.from(card, {
+            opacity: 0.15,
+            y: 72,
+            duration: 1,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 88%',
+              end: 'top 55%',
+              scrub: 0.65,
+            },
+          })
+
+          const bits = gsap.utils.toArray('[data-cta-bit]', card)
+          if (bits.length) {
+            gsap.from(bits, {
+              opacity: 0,
+              y: 28,
+              duration: 0.7,
+              stagger: 0.07,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 78%',
+                once: true,
+              },
+            })
+          }
+
+          const accent = card.querySelector('[data-cta-accent]')
+          if (accent) {
+            gsap.from(accent, {
+              opacity: 0,
+              yPercent: 40,
+              duration: 0.85,
+              ease: 'power4.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 78%',
+                once: true,
+              },
+            })
+          }
+
+          const arrow = card.querySelector('[data-cta-arrow]')
+          if (arrow) {
+            gsap.from(arrow, {
+              opacity: 0,
+              x: -18,
+              duration: 0.65,
+              ease: 'power3.out',
+              delay: 0.15,
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 78%',
+                once: true,
+              },
+            })
+          }
+        })
       })
 
       return () => mm.revert()
@@ -671,31 +735,55 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
-        <section className="mt-16 border-2 border-ink p-6 md:mt-24 md:p-10">
-          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
+        <section
+          data-cta-card
+          className="mt-16 border-2 border-ink p-6 md:mt-24 md:p-10"
+        >
+          <p
+            data-cta-bit
+            className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
+          >
             {t('home.bundleEyebrow')}
           </p>
           <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <p className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]">
+            <p
+              data-cta-bit
+              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
+            >
               {t('home.bundleTitleBefore')}{' '}
-              <em className="font-display font-normal italic text-accent">
+              <em
+                data-cta-accent
+                className="inline-block font-display font-normal italic text-accent"
+              >
                 {t('home.bundleTitleEm')}
               </em>
             </p>
-            <p className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+            <p
+              data-cta-bit
+              className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]"
+            >
               {formatArs(arsFromUsd(BUNDLE_PRICE_USD, rate))}
             </p>
           </div>
-          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base">
+          <p
+            data-cta-bit
+            className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
+          >
             {t('home.bundleBody')}
           </p>
-          <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+          <p
+            data-cta-bit
+            className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
+          >
             {t('home.bundleSaving', {
               list: formatArs(arsFromUsd(bundleListPriceUsd(), rate)),
               off: String(bundleDiscountPct()),
             })}
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
+          <div
+            data-cta-bit
+            className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]"
+          >
             <button
               type="button"
               onClick={() =>
@@ -720,29 +808,46 @@ export default function TemplatesIndex() {
 
         <Link
           to="/builder"
+          data-cta-card
           className="group mt-16 block border-2 border-ink p-6 transition-colors duration-300 hover:bg-ink hover:text-bone md:mt-24 md:p-10"
         >
-          <p className="mb-3 text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs">
+          <p
+            data-cta-bit
+            className="mb-3 text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs"
+          >
             {t('home.builderEyebrow')}
           </p>
           <p className="flex items-baseline justify-between gap-4">
-            <span className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]">
+            <span
+              data-cta-bit
+              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
+            >
               {t('home.builderTitleBefore')}{' '}
-              <em className="font-display font-normal italic text-accent">
+              <em
+                data-cta-accent
+                className="inline-block font-display font-normal italic text-accent"
+              >
                 {t('home.builderTitleEm')}
               </em>
             </span>
             <span
+              data-cta-arrow
               aria-hidden="true"
               className="text-2xl transition-transform duration-300 group-hover:translate-x-2"
             >
               →
             </span>
           </p>
-          <p className="mt-3 max-w-[52ch] text-sm leading-relaxed opacity-70">
+          <p
+            data-cta-bit
+            className="mt-3 max-w-[52ch] text-sm leading-relaxed opacity-70"
+          >
             {t('home.builderBody')}
           </p>
-          <p className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60">
+          <p
+            data-cta-bit
+            className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60"
+          >
             {t('home.builderPrices', {
               base: formatArs(arsFromUsd(CUSTOM_BASE_PRICE_USD, rate)),
               included: CUSTOM_BASE_SECTIONS,
@@ -883,7 +988,9 @@ export default function TemplatesIndex() {
         </section>
       </main>
 
-      <footer className="mt-20 border-t border-ink/15 px-5 pt-10 pb-8 md:mt-32 md:px-10 md:pt-14">
+      <HomeContact />
+
+      <footer className="border-t border-ink/15 px-5 pt-10 pb-8 md:px-10 md:pt-14">
         <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-6">
             <p className="text-[clamp(2rem,6vw,4.5rem)] leading-none font-medium tracking-[-0.02em]">
@@ -975,6 +1082,14 @@ export default function TemplatesIndex() {
               {t('home.footerContact')}
             </p>
             <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <a
+                  href="#contacto"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerContactForm')}
+                </a>
+              </li>
               <li>
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
