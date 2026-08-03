@@ -149,7 +149,7 @@ describe('ZIP de cada template', () => {
 
   it('incluye el formulario de contacto que la página importa', async () => {
     const files = await pack('contact', (destPath) =>
-      packFixedTemplate({ model: 'chapters', destPath, licenseMeta: LICENSE }),
+      packFixedTemplate({ model: 'monolith', destPath, licenseMeta: LICENSE }),
     )
     assert.ok(files.has('src/components/sections/contact/ContactForm.jsx'))
   })

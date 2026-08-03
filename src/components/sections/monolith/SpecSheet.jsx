@@ -2,11 +2,11 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 
 const defaultSpecs = [
-  { key: 'Format', value: 'One-page scrollytelling' },
-  { key: 'Stack', value: 'React / Tailwind / GSAP / Lenis / Three.js' },
-  { key: 'Units', value: '07 modular sections' },
-  { key: 'Type', value: 'Anton condensed + JetBrains Mono' },
-  { key: 'License', value: 'Commercial — placeholder terms' },
+  { key: 'Form', value: 'Vertical scroll monument' },
+  { key: 'System', value: 'Wireframe · pin scrub · hard edge' },
+  { key: 'Modules', value: '07 locked units' },
+  { key: 'Face', value: 'Anton condensed · JetBrains Mono' },
+  { key: 'Signal', value: 'Klein blue on concrete grey' },
 ]
 
 /**

@@ -275,26 +275,30 @@ function TemplatePoster({ template, index }) {
     )
   }
 
-  return (
-    <div
-      data-template-art
-      className={`${baseClass} bg-[#f3efe6] text-[#0a0a0a]`}
-      style={{ opacity: 0 }}
-    >
-      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
-        EDITORIAL / 08
-      </span>
-      <span className="absolute top-[28%] left-5 font-oswald text-[clamp(3.2rem,9vw,7.5rem)] leading-[0.82] font-semibold tracking-[-0.03em] uppercase">
-        UNI
-        <br />
-        TY
-      </span>
-      <span className="absolute right-0 bottom-[22%] h-[10%] w-[58%] bg-[#f4c518]" />
-      <span className="absolute right-5 bottom-5 font-display text-2xl italic text-[#0a0a0a]/55">
-        one game
-      </span>
-    </div>
-  )
+  if (template.sku === 'unity') {
+    return (
+      <div
+        data-template-art
+        className={`${baseClass} bg-[#f3efe6] text-[#0a0a0a]`}
+        style={{ opacity: 0 }}
+      >
+        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
+          EDITORIAL / 08
+        </span>
+        <span className="absolute top-[28%] left-5 font-oswald text-[clamp(3.2rem,9vw,7.5rem)] leading-[0.82] font-semibold tracking-[-0.03em] uppercase">
+          UNI
+          <br />
+          TY
+        </span>
+        <span className="absolute right-0 bottom-[22%] h-[10%] w-[58%] bg-[#f4c518]" />
+        <span className="absolute right-5 bottom-5 font-display text-2xl italic text-[#0a0a0a]/55">
+          one game
+        </span>
+      </div>
+    )
+  }
+
+  return null
 }
 
 /**

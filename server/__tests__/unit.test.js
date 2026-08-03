@@ -13,6 +13,10 @@ import {
 import {
   assertPaymentMatchesOrder,
   mpPaymentError,
+  buildPreferenceBody,
+  absoluteClientAsset,
+  MP_STATEMENT_DESCRIPTOR,
+  MP_DEFAULT_ITEM_PICTURE,
 } from '../services/mercadoPago.js'
 import { verifyMpWebhookSignature } from '../services/mercadoPago.js'
 import {
@@ -614,6 +618,66 @@ describe('errorHandler', () => {
     assert.equal(out.status, 409)
     assert.equal(out.body.error, 'Todavía se está procesando')
     assert.equal(out.body.requestId, 'rid-1')
+  })
+})
+
+describe('buildPreferenceBody', () => {
+  const base = {
+    orderId: 'ord-1',
+    userId: 'user-1',
+    clientUrl: 'https://www.scrolllab.com.ar/',
+    apiPublicUrl: 'https://api.example.com',
+  }
+
+  it('manda picture_url absoluto y statement_descriptor SCROLLLAB', () => {
+    const body = buildPreferenceBody({
+      ...base,
+      items: [
+        {
+          sku: 'velocity',
+          title: 'VELOCITY — template',
+          unit_price: 1000,
+          currency_id: 'ARS',
+        },
+      ],
+    })
+    assert.equal(body.statement_descriptor, MP_STATEMENT_DESCRIPTOR)
+    assert.ok(body.statement_descriptor.length <= 13)
+    assert.equal(
+      body.items[0].picture_url,
+      `https://www.scrolllab.com.ar${MP_DEFAULT_ITEM_PICTURE}`,
+    )
+    assert.equal(body.items[0].title, 'VELOCITY — template')
+    assert.equal(
+      body.notification_url,
+      'https://api.example.com/api/webhooks/mercadopago',
+    )
+  })
+
+  it('respeta picture override del ítem', () => {
+    const body = buildPreferenceBody({
+      ...base,
+      items: [
+        {
+          sku: 'custom:abc',
+          title: 'Composición',
+          unit_price: 311000,
+          currency_id: 'ARS',
+          picture: '/og.png',
+        },
+      ],
+    })
+    assert.equal(
+      body.items[0].picture_url,
+      'https://www.scrolllab.com.ar/og.png',
+    )
+  })
+
+  it('absoluteClientAsset normaliza barra final y path relativo', () => {
+    assert.equal(
+      absoluteClientAsset('https://www.scrolllab.com.ar/', 'icon-512.png'),
+      'https://www.scrolllab.com.ar/icon-512.png',
+    )
   })
 })
 

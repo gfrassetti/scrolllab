@@ -114,42 +114,82 @@
   "templates": {
     "chapters": {
       "vibe": "Kinetic editorial",
-      "tags": ["Giant type", "Sticky story", "Horizontal pan", "Parallax"],
+      "tags": [
+        "Giant type",
+        "Sticky story",
+        "Horizontal pan",
+        "Parallax"
+      ],
       "description": "Near-white raw canvas, ink type at 17vw, and a single burnt-orange accent. Restraint over spectacle. Ideal for digital magazines, writer portfolios, or editorial brands that want a long-form story page."
     },
     "nocturne": {
       "vibe": "Cinematic noir",
-      "tags": ["Full-bleed images", "Zoom portal", "Hover index", "Word cycle"],
+      "tags": [
+        "Full-bleed images",
+        "Zoom portal",
+        "Hover index",
+        "Word cycle"
+      ],
       "description": "Near-black screen, full-bleed photography, and an acid accent. The page behaves like a film, not a document. Ideal for photographers, filmmakers, fashion lookbooks, or galleries built around full-bleed imagery."
     },
     "monolith": {
       "vibe": "Brutalist system",
-      "tags": ["Three.js hero", "Velocity skew", "Spec sheet", "Type accordion"],
+      "tags": [
+        "Three.js hero",
+        "Velocity skew",
+        "Spec sheet",
+        "Type accordion"
+      ],
       "description": "Concrete grey, hard 2px borders, condensed type, and a wireframe 3D monolith spinning behind the hero. Ideal for architecture studios, industrial design, or tech products that need a spec sheet and brutalist presence."
     },
     "velocity": {
       "vibe": "Athlete energy",
-      "tags": ["Strike-exit hero", "Horizontal gallery", "Helmet hall", "Parallax band"],
+      "tags": [
+        "Strike-exit hero",
+        "Horizontal gallery",
+        "Helmet hall",
+        "Parallax band"
+      ],
       "description": "Deep green, lime accent, cinematic scroll: strike-exit hero, On/Off merge, helmet product grid and upward parallax — no 3D. Ideal for sports brands, outdoor gear, performance apparel, or an athlete-product ecommerce."
     },
     "fizz": {
       "vibe": "Carbonated pop",
-      "tags": ["3D can with bubbles", "Page-repainting worlds", "Candy type", "Can shelf"],
+      "tags": [
+        "3D can with bubbles",
+        "Page-repainting worlds",
+        "Candy type",
+        "Can shelf"
+      ],
       "description": "Grape violet, candy colors and a 3D can spinning through bubbles. Every flavor is a full screen that repaints the page as you scroll. Ideal for drinks, snacks, candy, or any edible product with flavors or variants to showcase."
     },
     "atelier": {
       "vibe": "WebGL studio",
-      "tags": ["Scroll-reactive fog", "3D emblem", "Scrubbed stone", "Asymmetric services"],
+      "tags": [
+        "Scroll-reactive fog",
+        "3D emblem",
+        "Scrubbed stone",
+        "Asymmetric services"
+      ],
       "description": "Atmospheric dark canvas, scroll-tied fog, and Three.js pieces that rotate or shatter as you scroll. Digital studio aesthetic. Ideal for agencies, creative studios, or architecture practices selling premium services with a prestige site."
     },
     "comic": {
       "vibe": "Comic scrollytelling",
-      "tags": ["Torn panels", "Layered truck scene", "Chapter rail", "Hotspots"],
+      "tags": [
+        "Torn panels",
+        "Layered truck scene",
+        "Chapter rail",
+        "Hotspots"
+      ],
       "description": "Paper-page comic panels, a sticky layered SVG truck scene, and a chapter rail. Ideal for narrative campaigns, NGOs, editorials, or brands that want a long scroll-told story."
     },
     "unity": {
       "vibe": "Sports editorial",
-      "tags": ["Twin-type hero", "Mosaic → slider", "Language bands", "Rising orb"],
+      "tags": [
+        "Twin-type hero",
+        "Mosaic → slider",
+        "Language bands",
+        "Rising orb"
+      ],
       "description": "Cream canvas, Instrument + Oswald type, a photo mosaic that unfolds into a full-bleed slider, and a sky-blue footer with a rising geometric orb. Ideal for sports campaigns, events, or brands that want high-impact editorial scrollytelling."
     }
   },

@@ -73,6 +73,7 @@ html.dark {
   --color-unity-gold: #f4c518;
   --color-unity-sky: #4aa3e8;
 
+
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-brico: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
@@ -80,6 +81,8 @@ html.dark {
   --font-boldonse: "Boldonse", ui-sans-serif, system-ui, sans-serif;
   --font-oswald: "Oswald", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+
 }
 
 html {

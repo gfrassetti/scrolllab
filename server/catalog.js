@@ -33,6 +33,8 @@ export const BUNDLE_MODELS = [
 ]
 
 export const PRODUCTS = {
+  // Opcional por SKU: `picture: '/ruta.png'` (público bajo CLIENT_URL).
+  // Si falta, Checkout Pro usa /icon-512.png.
   chapters: {
     sku: 'chapters',
     title: 'CHAPTERS — template',

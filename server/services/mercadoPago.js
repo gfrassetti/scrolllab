@@ -5,10 +5,62 @@ import {
   WebhookSignatureValidator,
   InvalidWebhookSignatureError,
 } from 'mercadopago'
+import { PRODUCTS } from '../catalog.js'
 import { HttpError } from '../validation.js'
+
+/** Máx. 13 caracteres: sale en el resumen de la tarjeta del comprador. */
+export const MP_STATEMENT_DESCRIPTOR = 'SCROLLLAB'
+
+/** Imagen del ítem en Checkout Pro (PNG/JPG públicos; no el logo del comercio). */
+export const MP_DEFAULT_ITEM_PICTURE = '/icon-512.png'
 
 export function createMpClient(accessToken) {
   return new MercadoPagoConfig({ accessToken })
+}
+
+export function absoluteClientAsset(clientUrl, path) {
+  const base = String(clientUrl || '').replace(/\/$/, '')
+  const rel = String(path || MP_DEFAULT_ITEM_PICTURE)
+  const normalized = rel.startsWith('/') ? rel : `/${rel}`
+  return `${base}${normalized}`
+}
+
+function picturePathForSku(sku) {
+  const key = String(sku || '').startsWith('custom') ? 'custom' : String(sku || '')
+  return PRODUCTS[key]?.picture || MP_DEFAULT_ITEM_PICTURE
+}
+
+/** Body de la preference — puro, testeable sin pegarle a MP. */
+export function buildPreferenceBody({
+  items,
+  orderId,
+  userId,
+  clientUrl,
+  apiPublicUrl,
+}) {
+  return {
+    items: items.map((i) => ({
+      id: i.sku,
+      title: i.title,
+      quantity: 1,
+      unit_price: i.unit_price,
+      currency_id: i.currency_id,
+      picture_url: absoluteClientAsset(
+        clientUrl,
+        i.picture || picturePathForSku(i.sku),
+      ),
+    })),
+    external_reference: orderId,
+    metadata: { orderId, userId },
+    back_urls: {
+      success: `${clientUrl}/checkout/success`,
+      failure: `${clientUrl}/checkout/failure`,
+      pending: `${clientUrl}/checkout/success`,
+    },
+    auto_return: 'approved',
+    notification_url: `${apiPublicUrl}/api/webhooks/mercadopago`,
+    statement_descriptor: MP_STATEMENT_DESCRIPTOR,
+  }
 }
 
 export async function createCheckoutPreference({
@@ -22,24 +74,13 @@ export async function createCheckoutPreference({
   const client = createMpClient(accessToken)
   const preference = new Preference(client)
   return preference.create({
-    body: {
-      items: items.map((i) => ({
-        id: i.sku,
-        title: i.title,
-        quantity: 1,
-        unit_price: i.unit_price,
-        currency_id: i.currency_id,
-      })),
-      external_reference: orderId,
-      metadata: { orderId, userId },
-      back_urls: {
-        success: `${clientUrl}/checkout/success`,
-        failure: `${clientUrl}/checkout/failure`,
-        pending: `${clientUrl}/checkout/success`,
-      },
-      auto_return: 'approved',
-      notification_url: `${apiPublicUrl}/api/webhooks/mercadopago`,
-    },
+    body: buildPreferenceBody({
+      items,
+      orderId,
+      userId,
+      clientUrl,
+      apiPublicUrl,
+    }),
   })
 }
 

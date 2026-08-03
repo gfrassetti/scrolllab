@@ -114,42 +114,82 @@
   "templates": {
     "chapters": {
       "vibe": "Editorial cinética",
-      "tags": ["Tipografía gigante", "Historia sticky", "Paneo horizontal", "Parallax"],
+      "tags": [
+        "Tipografía gigante",
+        "Historia sticky",
+        "Paneo horizontal",
+        "Parallax"
+      ],
       "description": "Lienzo crudo casi blanco, tipografía tinta a 17vw y un único acento naranja quemado. Contención antes que espectáculo. Ideal para revistas digitales, portfolios de escritores o marcas editoriales que quieren contar una historia largo-formato."
     },
     "nocturne": {
       "vibe": "Noir cinematográfico",
-      "tags": ["Imágenes full-bleed", "Portal con zoom", "Índice con hover", "Ciclo de palabras"],
+      "tags": [
+        "Imágenes full-bleed",
+        "Portal con zoom",
+        "Índice con hover",
+        "Ciclo de palabras"
+      ],
       "description": "Pantalla casi negra, fotografía a sangre y un acento ácido. La página se comporta como una película, no como un documento. Ideal para fotógrafos, cineastas, lookbooks de moda o galerías que viven de la imagen full-bleed."
     },
     "monolith": {
       "vibe": "Sistema brutalista",
-      "tags": ["Hero en Three.js", "Skew por velocidad", "Ficha técnica", "Acordeón tipográfico"],
+      "tags": [
+        "Hero en Three.js",
+        "Skew por velocidad",
+        "Ficha técnica",
+        "Acordeón tipográfico"
+      ],
       "description": "Gris hormigón, bordes duros de 2px, tipografía condensada y un monolito 3D wireframe girando detrás del hero. Ideal para estudios de arquitectura, diseño industrial o productos tech que necesitan ficha técnica y presencia brutalista."
     },
     "velocity": {
       "vibe": "Energía athlete",
-      "tags": ["Hero que se tacha", "Galería horizontal", "Cascos / hall", "Parallax"],
+      "tags": [
+        "Hero que se tacha",
+        "Galería horizontal",
+        "Cascos / hall",
+        "Parallax"
+      ],
       "description": "Verde oscuro, acento lima y scroll cinematográfico: hero que se tacha, galería On/Off, grilla de cascos y banda parallax — sin 3D. Ideal para marcas deportivas, outdoor, indumentaria performance o un ecomm de producto athlete."
     },
     "fizz": {
       "vibe": "Pop carbonatado",
-      "tags": ["Lata 3D con burbujas", "Mundos que repintan la página", "Tipografía candy", "Estante de latas"],
+      "tags": [
+        "Lata 3D con burbujas",
+        "Mundos que repintan la página",
+        "Tipografía candy",
+        "Estante de latas"
+      ],
       "description": "Violeta uva, colores golosina y una lata 3D girando entre burbujas. Cada sabor es una pantalla completa que tiñe la página al scrollear. Ideal para bebidas, snacks, golosinas u otro producto comestible con sabores o variantes para mostrar."
     },
     "atelier": {
       "vibe": "Studio WebGL",
-      "tags": ["Niebla reactiva al scroll", "Emblema 3D", "Piedra scrubeada", "Servicios asimétricos"],
+      "tags": [
+        "Niebla reactiva al scroll",
+        "Emblema 3D",
+        "Piedra scrubeada",
+        "Servicios asimétricos"
+      ],
       "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas Three.js que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
     },
     "comic": {
       "vibe": "Historieta scrollytelling",
-      "tags": ["Paneles rasgados", "Camión en capas", "Rail de capítulos", "Hotspots"],
+      "tags": [
+        "Paneles rasgados",
+        "Camión en capas",
+        "Rail de capítulos",
+        "Hotspots"
+      ],
       "description": "Página-papel con paneles de historieta, una escena sticky del camión en capas SVG y un rail de capítulos. Ideal para campañas narrativas, ONG, editoriales o marcas que quieren contar un cuento largo con scroll."
     },
     "unity": {
       "vibe": "Editorial deportivo",
-      "tags": ["Hero twin parallax", "Mosaico → slider", "Language bands", "Orbe rising"],
+      "tags": [
+        "Hero twin parallax",
+        "Mosaico → slider",
+        "Language bands",
+        "Orbe rising"
+      ],
       "description": "Canvas crema, tipografía Instrument + Oswald, mosaico de fotos que se despliega en un slider full-bleed y un footer con orbe geométrico que sube al scroll. Ideal para campañas deportivas, eventos, o marcas que quieren un scrollytelling editorial de alto impacto."
     }
   },

@@ -95,6 +95,37 @@ Image pieces for new models: generate realistic local assets under `sections/<sk
 
 Register new sellable SKUs in `server/catalog.js` and pack logic in `server/packaging.js`. Keep `server/sections.js` in sync with `src/lib/sectionRegistry.jsx`.
 
+## Storytelling motion (HTML + CSS + JS — no magia)
+
+El scrollytelling **no es imposible**: son capas DOM + CSS + GSAP/Lenis. Antes de inventar un efecto, **leer y reutilizar** el cookbook:
+
+| Dónde | Qué |
+|---|---|
+| Repo | [`docs/motion-cookbook.md`](docs/motion-cookbook.md) |
+| Obsidian (canónico) | `Storytelling motion cookbook.md` en ScrollLab |
+| Wiring | `src/lib/gsap.js` + `SmoothScrollProvider` / `useLenis` |
+
+### Primitivos (P1–P14) — lib y método
+
+| ID | Efecto | Lib | Método |
+|---|---|---|---|
+| P1 | Pin + scrub | GSAP ScrollTrigger | `timeline({ scrollTrigger: { pin, scrub, end: '+=N%' } })` |
+| P2 | Zoom/parallax, UI fija | GSAP | animar solo media (`scale`/`yPercent`) |
+| P3 | Crossfade A→B | GSAP | capas `opacity`/`scale` (nunca `src` en scrub) |
+| P4 | Disco / zoom-through | GSAP + CSS | `rounded-full` `scale 0→1`; bg = sección siguiente |
+| P5 | Horizontal en pin | GSAP | `to(track, { x: -distance, pin, scrub })` |
+| P6 | Cutouts parallax | GSAP | PNG alpha + scrub `yPercent`/`rotate` |
+| P7 | Lista índice activa | GSAP tl | item `scale↑`; resto atenuado + P3 |
+| P8 | Type reveal | SplitText | `chars/words` + `yPercent: 110` stagger |
+| P9 | Carousel timer | React + CSS | `setInterval` + keyframes `scaleX` + P8 |
+| P10 | Hotspots | React | `%` + hover; fade del grupo en tl |
+| P11 | Rail `00→N` | GSAP | proxy `{ n }` + `onUpdate` |
+| P12 | Crest spin | CSS | `animate-spin` + SVG `textPath` |
+| P13 | Overlap sin hard cut | composición | mismo bg / media opacity↓ al unpin |
+| P14 | Day/Night | React | swap `src`; no en deps del pin `useGSAP` |
+
+Al portar una ref (Loom / live): anotar cada beat como `beat → P# → archivo`.
+
 ## Second brain — graphify + Obsidian
 
 Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
@@ -113,9 +144,10 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
    (ver `.cursor/rules/analyze-reference.mdc`). Escribe libs + scroll sample a Obsidian y `docs/reference-analysis/`. No esperar a que el usuario lo pida.
 3. **Piezas de imagen del template** → el agente actúa como diseñador/generador: inventariar cada foto/cutout que la ref anima, generar assets realistas locales en `src/components/sections/<sku>/assets/`, **sin picsum**. Regla `.cursor/rules/template-image-assets.mdc` + skill `.cursor/skills/template-image-designer/`.
 4. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
-5. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
-6. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
-7. Si el usuario pide re-sync del vault →  
+5. **Motion / transitions de un template** → leer `Storytelling motion cookbook.md` (Obsidian) + `docs/motion-cookbook.md`; implementar con primitivos P1–P14, no aproximaciones vagas.
+6. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
+7. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
+8. Si el usuario pide re-sync del vault →  
    `graphify export obsidian --graph graphify-out/graph.json --dir "C:\Users\Guido\Documents\Obsidian\ScrollLab"`
 
 ### Bóveda canónica (usar solo esta)

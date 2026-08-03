@@ -200,10 +200,11 @@ export default function HeroBubbles({
   meta = 'Placeholder meta — ©2026',
   hint = 'Scroll',
   flavor = 'berry',
-  canLabel: _canLabel = 'BRAND*', // builder field; PNG/GLB no longer use canvas label
+  canLabel = 'BRAND*',
   canImage = '',
   modelUrl = '',
 }) {
+  void canLabel
   const root = useRef(null)
   const canvasRef = useRef(null)
   const canImgRef = useRef(null)
