@@ -547,6 +547,97 @@ export default function TemplatesIndex() {
             })
           }
         })
+
+        // Footer: columnas + logo apilado + wordmark por caracteres (estilo Chapters).
+        const footer = root.current?.querySelector('[data-footer]')
+        if (footer) {
+          const footerSplits = []
+          gsap.from(gsap.utils.toArray('[data-footer-bit]', footer), {
+            opacity: 0,
+            y: 28,
+            duration: 0.75,
+            stagger: 0.08,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: footer,
+              start: 'top 82%',
+              once: true,
+            },
+          })
+
+          const footerLogo = footer.querySelector('[data-footer-logo]')
+          const footerBars = footerLogo
+            ? gsap.utils.toArray(footerLogo.querySelectorAll('[data-logo-bar]'))
+            : []
+          const footerAccent = footerLogo?.querySelector('[data-logo-accent]')
+          if (footerBars.length) {
+            gsap.set(footerBars, { transformOrigin: '50% 50%' })
+            gsap.from(footerBars, {
+              y: -24,
+              opacity: 0,
+              duration: 0.55,
+              ease: 'power3.out',
+              stagger: 0.1,
+              scrollTrigger: {
+                trigger: '[data-footer-brand]',
+                start: 'top 85%',
+                once: true,
+              },
+            })
+          }
+          if (footerAccent) {
+            gsap.from(footerAccent, {
+              scale: 0,
+              opacity: 0,
+              duration: 0.4,
+              ease: 'back.out(2.2)',
+              transformOrigin: '50% 50%',
+              delay: 0.28,
+              scrollTrigger: {
+                trigger: '[data-footer-brand]',
+                start: 'top 85%',
+                once: true,
+              },
+            })
+          }
+
+          const footerWord = footer.querySelector('[data-footer-word]')
+          if (footerWord) {
+            const split = new SplitText(footerWord, {
+              type: 'chars',
+              mask: 'chars',
+            })
+            footerSplits.push(split)
+            gsap.from(split.chars, {
+              yPercent: 115,
+              stagger: 0.035,
+              ease: 'power4.out',
+              duration: 1,
+              scrollTrigger: {
+                trigger: '[data-footer-brand]',
+                start: 'top 85%',
+                once: true,
+              },
+            })
+          }
+
+          gsap.from('[data-footer-legal]', {
+            opacity: 0,
+            y: 12,
+            duration: 0.6,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: '[data-footer-legal]',
+              start: 'top 95%',
+              once: true,
+            },
+          })
+
+          // SplitText deja nodos en el DOM; hay que revertirlos a mano.
+          return () => {
+            footerSplits.forEach((s) => s.revert())
+          }
+        }
       })
 
       return () => mm.revert()
@@ -994,13 +1085,23 @@ export default function TemplatesIndex() {
 
       <HomeContact />
 
-      <footer className="border-t border-ink/15 px-5 pt-24 pb-6 md:px-10 md:pt-36">
+      <footer
+        data-footer
+        className="border-t border-ink/15 px-5 pt-24 pb-6 md:px-10 md:pt-36"
+      >
         <div className="mb-20 grid gap-12 md:mb-28 md:grid-cols-12">
-          <p className="max-w-[40ch] text-sm leading-relaxed text-ink/70 md:col-span-4 md:text-base">
+          <p
+            data-footer-bit
+            className="max-w-[40ch] text-sm leading-relaxed text-ink/70 md:col-span-4 md:text-base"
+          >
             {t('meta.tagline')}
           </p>
 
-          <nav className="md:col-span-2" aria-label={t('home.footerTemplates')}>
+          <nav
+            data-footer-bit
+            className="md:col-span-2"
+            aria-label={t('home.footerTemplates')}
+          >
             <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerTemplates')}
             </p>
@@ -1020,7 +1121,11 @@ export default function TemplatesIndex() {
             </ul>
           </nav>
 
-          <nav className="md:col-span-3" aria-label={t('home.footerBuilder')}>
+          <nav
+            data-footer-bit
+            className="md:col-span-3"
+            aria-label={t('home.footerBuilder')}
+          >
             <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerBuilder')}
             </p>
@@ -1076,7 +1181,11 @@ export default function TemplatesIndex() {
             </ul>
           </nav>
 
-          <nav className="md:col-span-3" aria-label={t('home.footerContact')}>
+          <nav
+            data-footer-bit
+            className="md:col-span-3"
+            aria-label={t('home.footerContact')}
+          >
             <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerContact')}
             </p>
@@ -1102,17 +1211,26 @@ export default function TemplatesIndex() {
         </div>
 
         <a
+          data-footer-brand
           href="#top"
           className="group flex items-end gap-[2.5vw] text-ink transition-colors duration-500 hover:text-accent"
           aria-label={`${SITE_NAME} — ${t('home.backTop')}`}
         >
-          <Logo className="mb-[0.08em] size-[clamp(2.75rem,9.5vw,8.5rem)] shrink-0" />
-          <span className="min-w-0 select-none font-brico text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] font-semibold tracking-[-0.04em] uppercase">
+          <span data-footer-logo className="mb-[0.08em] shrink-0">
+            <Logo className="size-[clamp(2.75rem,9.5vw,8.5rem)]" />
+          </span>
+          <span
+            data-footer-word
+            className="min-w-0 select-none font-brico text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] font-semibold tracking-[-0.04em] uppercase"
+          >
             {SITE_NAME}
           </span>
         </a>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs">
+        <div
+          data-footer-legal
+          className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs"
+        >
           <p>©2026 {SITE_NAME}</p>
           <a
             href="#top"
