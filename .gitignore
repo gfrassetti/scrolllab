@@ -16,6 +16,21 @@ storage/
 .cursor/mcp.json
 meshy_output/
 
+# Cursor skills generadas por CLIs (impeccable / uipro) — instalar local, no versionar
+# Se mantiene en repo solo: .cursor/skills/template-image-designer/
+.cursor/skills/banner-design/
+.cursor/skills/brand/
+.cursor/skills/design/
+.cursor/skills/design-system/
+.cursor/skills/impeccable/
+.cursor/skills/slides/
+.cursor/skills/ui-styling/
+.cursor/skills/ui-ux-pro-max/
+
+# Refs temporales de Loom / scrapes (no producto)
+docs/reference-analysis/loom*
+docs/reference-analysis/loom-frames/
+
 # impeccable — efímero / por-dev (mantener config.json, design.json, critique/*.md)
 # impeccable-ignore-start
 .impeccable/config.local.json

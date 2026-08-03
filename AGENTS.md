@@ -15,37 +15,37 @@ Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, qu
 
 El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento.
 
-## Design craft — Impeccable + UI/UX Pro Max (siempre)
+## Design craft — Impeccable + UI/UX Pro Max (local)
 
-Para **cualquier** tarea de UI/UX (armar, rediseñar, criticar, pulir, animar, tipografía, color, layout, anti-slop), usar estas skills del proyecto **antes** de inventar un look genérico. Complementan el posicionamiento Awwwards de arriba; no lo reemplazan.
+Para UI/UX award-level, usar estas tools **instaladas en la máquina** (no van versionadas en git; ver `.gitignore`). Complementan el posicionamiento Awwwards; no lo reemplazan.
 
-### Impeccable (`.cursor/skills/impeccable/`)
+### Impeccable (local: `.cursor/skills/impeccable/`)
 
 - Instalar / actualizar: `npx impeccable install --providers=cursor --scope=project` · `npx impeccable update`
-- Setup de contexto (una vez por proyecto / cuando cambie la marca): `/impeccable init` → escribe `PRODUCT.md` (verdad de producto). El sistema visual se documenta después con `/impeccable document` → `DESIGN.md`
-- Uso típico: `/impeccable critique`, `audit`, `polish`, `animate`, `typeset`, `layout`, `craft`, `document`, `live`, etc.
-- Hook en `.cursor/hooks.json`: bloquea writes de UI con anti-patrones de “AI slop” antes de que aterrizen
-- Detector CLI: `npx impeccable detect src/` (sin API key)
-- Docs: [impeccable.style](https://impeccable.style) · repo [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
-- Requiere **Node ≥ 22.12** para el CLI completo; el runtime del agente en esta máquina puede ser 20.x (aviso EBADENGINE): conviene subir Node localmente
+- Setup: `/impeccable init` → `PRODUCT.md`; `/impeccable document` → `DESIGN.md`
+- Uso: `/impeccable critique`, `audit`, `polish`, `animate`, `typeset`, `layout`, `craft`, `document`, `live`, etc.
+- Hook en `.cursor/hooks.json` (no-op si el skill no está instalado)
+- Docs: [impeccable.style](https://impeccable.style)
 
-### UI/UX Pro Max / `uipro` (`.cursor/skills/ui-ux-pro-max/` + related)
+### UI/UX Pro Max / `uipro` (local)
 
-- Paquete npm: **`ui-ux-pro-max-cli`** (comando `uipro`). No usar el paquete viejo `uipro-cli`.
-- Instalar skill en Cursor: `uipro init --ai cursor` (o `uipro init --ai cursor --force` para regenerar)
-- Actualizar CLI: `uipro update` / `npm install -g ui-ux-pro-max-cli@latest`
-- Flujo: pedís UI → genera / razona design system → recomienda estilos, color, tipografía → implementá con el stack del repo (**React + Vite + Tailwind**; también cubre Three.js) → chequeos pre-entrega contra anti-patrones
-- Skills instaladas junto al pack: `ui-ux-pro-max`, `design`, `design-system`, `brand`, `slides`, `banner-design`, `ui-styling`
+- CLI: **`ui-ux-pro-max-cli`** → `uipro init --ai cursor`
+- Skills que genera (gitignored): `ui-ux-pro-max`, `design`, `design-system`, `brand`, `slides`, `banner-design`, `ui-styling`
+
+### Skill de producto (sí versionada)
+
+- `.cursor/skills/template-image-designer/` — piezas de imagen realistas para templates SCROLLLAB
 
 ### Cuándo usar qué
 
 | Situación | Herramienta |
 |---|---|
-| Nuevo surface / look award-level, live en browser, detector de slop | **Impeccable** |
-| Sistema de diseño, stacks, recomendaciones de estilo/color/tipo, checklist UX | **UI/UX Pro Max** |
-| Scroll / GSAP / Lenis / WebGL del producto | Cookbook + skills GSAP + reglas de “Qué vendemos” |
+| Nuevo surface / look award-level, live, anti-slop | **Impeccable** (local) |
+| Sistema de diseño / estilo / color / checklist UX | **UI/UX Pro Max** (local) |
+| Fotos / cutouts de un template | **template-image-designer** (repo) |
+| Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
 
-Nota en Obsidian (segundo cerebro): `Impeccable + UI UX Pro Max.md` en la bóveda ScrollLab.
+Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 
 ## Stack & commands
 
