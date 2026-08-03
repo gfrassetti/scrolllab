@@ -61,10 +61,7 @@ import LanguageBlock from '../components/sections/unity/LanguageBlock'
 import LastPortrait from '../components/sections/unity/LastPortrait'
 import StageLines from '../components/sections/unity/StageLines'
 import FooterTrophy from '../components/sections/unity/FooterTrophy'
-
-
 import ContactForm from '../components/sections/contact/ContactForm'
-
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 
 /**

@@ -602,7 +602,13 @@ export default function TemplatesIndex() {
           <div className="border-t border-ink/15 pt-4">
             <p
               data-hero-meta
-              className="max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
+              className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs"
+            >
+              {t('home.heroAudience')}
+            </p>
+            <p
+              data-hero-meta
+              className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
             >
               {t('home.heroBody')}
             </p>
@@ -974,6 +980,7 @@ export default function TemplatesIndex() {
                 {t('home.reqTitle')}
               </p>
               <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
+                <li className="font-medium text-ink">{t('home.reqAudience')}</li>
                 <li>{t('home.req1')}</li>
                 <li>
                   {t('home.req2Before')}{' '}

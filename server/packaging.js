@@ -220,6 +220,7 @@ function modelWrapperClass(model) {
   if (model === 'atelier') return 'bg-[#0b0c10] text-white'
   if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
   if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
+
   // contact / commerce paint their own theme — no wrapper canvas.
   if (model === 'contact') return ''
   if (model === 'commerce') return ''

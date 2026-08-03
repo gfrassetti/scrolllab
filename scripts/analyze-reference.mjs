@@ -279,7 +279,9 @@ async function main() {
   console.log(`Analizando ${args.url}…`)
   const browser = await chromium.launch({ headless: true })
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-  await page.goto(args.url, { waitUntil: 'networkidle', timeout: 90000 })
+  // Heavy scrolly sites never reach networkidle (video sequences, lazy media).
+  await page.goto(args.url, { waitUntil: 'domcontentloaded', timeout: 90000 })
+  await page.waitForTimeout(4000)
   await page.waitForTimeout(1200)
 
   const libs = await detectLibraries(page)

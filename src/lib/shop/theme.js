@@ -112,7 +112,6 @@ const THEMES = {
     '--shop-accent-fg': '#0a0a0a',
     '--shop-radius': '0px',
   },
-
 }
 
 export function shopThemeVars(theme) {
