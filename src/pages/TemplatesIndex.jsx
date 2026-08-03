@@ -602,13 +602,7 @@ export default function TemplatesIndex() {
           <div className="border-t border-ink/15 pt-4">
             <p
               data-hero-meta
-              className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs"
-            >
-              {t('home.heroAudience')}
-            </p>
-            <p
-              data-hero-meta
-              className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
+              className="max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
             >
               {t('home.heroBody')}
             </p>
@@ -979,8 +973,7 @@ export default function TemplatesIndex() {
               <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
                 {t('home.reqTitle')}
               </p>
-              <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
-                <li className="font-medium text-ink">{t('home.reqAudience')}</li>
+                <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
                 <li>{t('home.req1')}</li>
                 <li>
                   {t('home.req2Before')}{' '}
@@ -1001,22 +994,17 @@ export default function TemplatesIndex() {
 
       <HomeContact />
 
-      <footer className="border-t border-ink/15 px-5 pt-10 pb-8 md:px-10 md:pt-14">
-        <div className="grid gap-10 md:grid-cols-12">
-          <div className="md:col-span-6">
-            <p className="text-[clamp(2rem,6vw,4.5rem)] leading-none font-medium tracking-[-0.02em]">
-              {SITE_NAME}
-            </p>
-            <p className="mt-4 max-w-[40ch] text-sm leading-relaxed text-ink/70">
-              {t('meta.tagline')}
-            </p>
-          </div>
+      <footer className="border-t border-ink/15 px-5 pt-24 pb-6 md:px-10 md:pt-36">
+        <div className="mb-20 grid gap-12 md:mb-28 md:grid-cols-12">
+          <p className="max-w-[40ch] text-sm leading-relaxed text-ink/70 md:col-span-4 md:text-base">
+            {t('meta.tagline')}
+          </p>
 
           <nav className="md:col-span-2" aria-label={t('home.footerTemplates')}>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+            <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerTemplates')}
             </p>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="space-y-2 text-sm">
               {templates.map((template) => (
                 <li key={template.id}>
                   <Link
@@ -1032,11 +1020,11 @@ export default function TemplatesIndex() {
             </ul>
           </nav>
 
-          <nav className="md:col-span-2" aria-label={t('home.footerBuilder')}>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+          <nav className="md:col-span-3" aria-label={t('home.footerBuilder')}>
+            <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerBuilder')}
             </p>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   to="/builder"
@@ -1088,11 +1076,11 @@ export default function TemplatesIndex() {
             </ul>
           </nav>
 
-          <nav className="md:col-span-2" aria-label={t('home.footerContact')}>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+          <nav className="md:col-span-3" aria-label={t('home.footerContact')}>
+            <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerContact')}
             </p>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="space-y-2 text-sm">
               <li>
                 <a
                   href="#contacto"
@@ -1113,7 +1101,18 @@ export default function TemplatesIndex() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs">
+        <a
+          href="#top"
+          className="group flex items-end gap-[2.5vw] text-ink transition-colors duration-500 hover:text-accent"
+          aria-label={`${SITE_NAME} — ${t('home.backTop')}`}
+        >
+          <Logo className="mb-[0.08em] size-[clamp(2.75rem,9.5vw,8.5rem)] shrink-0" />
+          <span className="min-w-0 select-none font-brico text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] font-semibold tracking-[-0.04em] uppercase">
+            {SITE_NAME}
+          </span>
+        </a>
+
+        <div className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs">
           <p>©2026 {SITE_NAME}</p>
           <a
             href="#top"

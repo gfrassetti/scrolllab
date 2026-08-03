@@ -72,14 +72,14 @@ const ogHtml = `<!doctype html>
 </style>
 </head>
 <body>
-  <p class="eyebrow">Plantillas web · Storytelling templates · Nivel Awwwards</p>
+  <p class="eyebrow">Plantillas web · Storytelling templates</p>
 
   <div>
     <div class="lockup">
       ${logoMarkSvg}
       <span class="wordmark">Scroll Lab</span>
     </div>
-    <p class="claim">Elegí un modelo completo o <em>armá el tuyo</em><br />y descargá el código fuente. Canvas / WebGL cuando hace falta. No es no-code.</p>
+    <p class="claim">Elegí un modelo completo o <em>armá el tuyo</em><br />y descargá el código fuente.</p>
   </div>
 
   <div class="foot">

@@ -4,17 +4,6 @@ Marketplace de templates scrollytelling. Cada modelo es una demo completa; el bu
 
 **Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. Brand: `src/lib/site.js` → `SCROLLLAB`.
 
-## Qué vendemos (posicionamiento)
-
-Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, que no se ven en el promedio de marketplaces de templates. No es un tema Bootstrap ni un layout genérico con animaciones leves.
-
-- El listón es **sitio de referencia / portfolio award-level**: tipografía con intención, scroll coreografiado (GSAP + Lenis), atmósfera y una idea visual propia por modelo.
-- Cuando el efecto lo pide, usamos **Canvas 2D y/o WebGL** (Three.js u otras APIs): 3D, shaders, fondos reactivos, objetos con presencia real. Si el promedio se resuelve con CSS, nosotros no bajamos el listón: usamos la API que haga falta.
-- El comprador es un **desarrollador**: baja código fuente React/Vite, no un constructor no-code. Una persona sin experiencia técnica no puede “usarlo” como un Wix.
-- Al diseñar o mejorar un template, preguntate: *¿esto podría estar en Awwwards / en un site of the day, o es interchangeable con ThemeForest?* Si es lo segundo, no entra.
-
-El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento.
-
 ## Stack & commands
 
 - Vite + React 19 + Tailwind CSS v4
