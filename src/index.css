@@ -74,7 +74,8 @@ html.dark {
   --color-unity-sky: #4aa3e8;
 
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
   --font-brico: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-anton: "Anton", ui-sans-serif, system-ui, sans-serif;
   --font-boldonse: "Boldonse", ui-sans-serif, system-ui, sans-serif;
@@ -90,6 +91,13 @@ html {
 body {
   @apply bg-bone font-grotesk text-ink antialiased;
   overflow-x: clip;
+}
+
+/* Playfair italic: contraste alto vs Bricolage/Grotesk (recomendación Pro Max). */
+.font-display.italic {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 ::selection {

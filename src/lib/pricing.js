@@ -7,9 +7,7 @@ export const TEMPLATE_PRICES_USD = {
   chapters: 129,
   nocturne: 129,
   monolith: 159,
-  // TEMP test pago real: ~$1.000 ARS (mínimo por redondeo al millar).
-  // Revertir a 129 cuando termines de probar.
-  velocity: 0.3,
+  velocity: 129,
   fizz: 159,
   atelier: 179,
   comic: 179,

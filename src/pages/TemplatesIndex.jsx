@@ -6,6 +6,7 @@ import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
 import HomeContact from '../components/HomeContact'
+import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
 import { useCart } from '../lib/cart'
 import {
   BUNDLE_PRICE_USD,
@@ -325,6 +326,32 @@ export default function TemplatesIndex() {
     [t],
   )
 
+  const howPanels = useMemo(
+    () => [
+      {
+        index: '01',
+        title: t('home.step1Title'),
+        caption: t('home.step1Body'),
+      },
+      {
+        index: '02',
+        title: t('home.step2Title'),
+        caption: t('home.step2Body'),
+      },
+      {
+        index: '03',
+        title: t('home.step3Title'),
+        caption: t('home.step3Body'),
+      },
+      {
+        index: '04',
+        title: t('home.step4Title'),
+        caption: t('home.step4Body'),
+      },
+    ],
+    [t],
+  )
+
   useEffect(() => {
     if (!introReady) {
       const prev = document.documentElement.style.overflow
@@ -444,46 +471,20 @@ export default function TemplatesIndex() {
       )
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('[data-how-heading]', {
-          opacity: 0,
-          y: 40,
-          duration: 0.9,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '[data-how-heading]',
-            start: 'top 82%',
-          },
-        })
-
-        gsap.utils.toArray('[data-how-step]').forEach((step) => {
-          gsap.from(step, {
-            opacity: 0.2,
-            y: 56,
-            duration: 0.85,
-            ease: 'power3.out',
+        gsap.utils.toArray('[data-soft-fade]').forEach((el) => {
+          gsap.from(el, {
+            opacity: 0,
+            y: 28,
+            duration: 1.05,
+            ease: 'power2.out',
             scrollTrigger: {
-              trigger: step,
-              start: 'top 82%',
-              end: 'top 52%',
-              scrub: 0.7,
+              trigger: el,
+              start: 'top 88%',
+              end: 'top 62%',
+              scrub: 0.8,
             },
           })
         })
-
-        gsap.fromTo(
-          '[data-how-progress]',
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: '[data-how-steps]',
-              start: 'top 65%',
-              end: 'bottom 65%',
-              scrub: true,
-            },
-          },
-        )
 
         // Bundle + builder CTAs: scrubbed card rise + staggered copy reveal.
         gsap.utils.toArray('[data-cta-card]').forEach((card) => {
@@ -644,13 +645,6 @@ export default function TemplatesIndex() {
     },
     { scope: root, dependencies: [locale], revertOnUpdate: true },
   )
-
-  const steps = [
-    { n: '01', title: t('home.step1Title'), body: t('home.step1Body') },
-    { n: '02', title: t('home.step2Title'), body: t('home.step2Body') },
-    { n: '03', title: t('home.step3Title'), body: t('home.step3Body') },
-    { n: '04', title: t('home.step4Title'), body: t('home.step4Body') },
-  ]
 
   return (
     <div ref={root} id="top" className="min-h-svh bg-bone text-ink">
@@ -831,193 +825,24 @@ export default function TemplatesIndex() {
         </section>
 
         <section
-          data-cta-card
-          className="mt-16 border-2 border-ink p-6 md:mt-24 md:p-10"
-        >
-          <p
-            data-cta-bit
-            className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
-          >
-            {t('home.bundleEyebrow')}
-          </p>
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <p
-              data-cta-bit
-              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
-            >
-              {t('home.bundleTitleBefore')}{' '}
-              <em
-                data-cta-accent
-                className="inline-block font-display font-normal italic text-accent"
-              >
-                {t('home.bundleTitleEm')}
-              </em>
-            </p>
-            <p
-              data-cta-bit
-              className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]"
-            >
-              {formatArs(arsFromUsd(BUNDLE_PRICE_USD, rate))}
-            </p>
-          </div>
-          <p
-            data-cta-bit
-            className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
-          >
-            {t('home.bundleBody')}
-          </p>
-          <p
-            data-cta-bit
-            className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
-          >
-            {t('home.bundleSaving', {
-              list: formatArs(arsFromUsd(bundleListPriceUsd(), rate)),
-              off: String(bundleDiscountPct()),
-            })}
-          </p>
-          <div
-            data-cta-bit
-            className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]"
-          >
-            <button
-              type="button"
-              onClick={() =>
-                addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
-              }
-              className="min-h-11 border border-ink/30 px-5 py-2.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
-            >
-              {t('common.addToCart')}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
-                navigate('/cart')
-              }}
-              className="min-h-11 px-1 text-ink transition-colors hover:text-accent"
-            >
-              {t('common.buy')}
-            </button>
-          </div>
-        </section>
-
-        <Link
-          to="/builder"
-          data-cta-card
-          className="group mt-16 block border-2 border-ink p-6 transition-colors duration-300 hover:bg-ink hover:text-bone md:mt-24 md:p-10"
-        >
-          <p
-            data-cta-bit
-            className="mb-3 text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs"
-          >
-            {t('home.builderEyebrow')}
-          </p>
-          <p className="flex items-baseline justify-between gap-4">
-            <span
-              data-cta-bit
-              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
-            >
-              {t('home.builderTitleBefore')}{' '}
-              <em
-                data-cta-accent
-                className="inline-block font-display font-normal italic text-accent"
-              >
-                {t('home.builderTitleEm')}
-              </em>
-            </span>
-            <span
-              data-cta-arrow
-              aria-hidden="true"
-              className="text-2xl transition-transform duration-300 group-hover:translate-x-2"
-            >
-              →
-            </span>
-          </p>
-          <p
-            data-cta-bit
-            className="mt-3 max-w-[52ch] text-sm leading-relaxed opacity-70"
-          >
-            {t('home.builderBody')}
-          </p>
-          <p
-            data-cta-bit
-            className="mt-4 text-[11px] uppercase tracking-[0.2em] opacity-60"
-          >
-            {t('home.builderPrices', {
-              base: formatArs(arsFromUsd(CUSTOM_BASE_PRICE_USD, rate)),
-              included: CUSTOM_BASE_SECTIONS,
-              extra: formatArs(
-                nextSectionArs(CUSTOM_BASE_SECTIONS, false, rate),
-              ),
-            })}
-          </p>
-        </Link>
-
-        <section
           id="como-funciona"
-          className="mt-20 scroll-mt-20 border-t border-ink/15 pt-14 md:mt-28 md:pt-20"
+          className="mt-16 scroll-mt-20 -mx-5 md:mt-24 md:-mx-10"
         >
-          <div className="grid gap-10 md:grid-cols-12 md:gap-12 lg:gap-20">
-            <div
-              data-how-heading
-              className="md:sticky md:top-24 md:col-span-5 md:self-start"
-            >
-              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
-                {t('nav.howItWorks')}
-              </p>
-              <h2 className="mt-3 max-w-[18ch] text-[clamp(2rem,4.5vw,4.2rem)] leading-[0.98] font-medium tracking-[-0.035em]">
-                {t('home.howTitleBefore')}{' '}
-                <em className="font-display font-normal italic text-accent">
-                  {t('home.howTitleZip')}
-                </em>
-                {t('home.howTitleAfter')}
-              </h2>
-              <p className="mt-5 max-w-[44ch] text-sm leading-relaxed text-ink/70 md:text-base">
-                {t('home.howBodyBefore')}{' '}
-                <strong className="font-medium text-ink">
-                  {t('home.howBodyStrong')}
-                </strong>{' '}
-                {t('home.howBodyAfter')}
-              </p>
-            </div>
+          <HorizontalPanels
+            chapter="01"
+            total="04"
+            label={t('nav.howItWorks')}
+            headingBefore={t('home.howTitleBefore')}
+            headingEm={t('home.howTitleZip')}
+            headingAfter={t('home.howTitleAfter')}
+            panels={howPanels}
+            variant="type"
+          />
 
-            <div
-              data-how-steps
-              className="relative border-l border-ink/15 pl-6 md:col-span-7 md:pl-10"
-            >
-              <span
-                data-how-progress
-                aria-hidden="true"
-                className="absolute top-0 bottom-0 -left-px w-px origin-top bg-accent"
-              />
-              <ol>
-                {steps.map((step, index) => (
-                  <li
-                    key={step.n}
-                    data-how-step
-                    className="flex min-h-[42svh] flex-col justify-center border-b border-ink/15 py-12 first:border-t md:min-h-[50svh]"
-                  >
-                    <div className="flex items-baseline justify-between gap-5">
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
-                        {step.n}
-                      </p>
-                      <p className="font-display text-4xl leading-none italic text-ink/15 md:text-6xl">
-                        {String(index + 1).padStart(2, '0')}
-                      </p>
-                    </div>
-                    <h3 className="mt-5 text-[clamp(1.5rem,3.5vw,2.8rem)] leading-[1.02] font-medium tracking-tight">
-                      {step.title}
-                    </h3>
-                    <p className="mt-3 max-w-[42ch] text-sm leading-relaxed text-ink/60 md:text-base">
-                      {step.body}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-
-          <div className="mt-12 flex flex-col items-center justify-center gap-6 border-y border-ink/15 py-6 text-center md:flex-row md:gap-10">
+          <div
+            data-soft-fade
+            className="mt-12 flex flex-col items-center justify-center gap-6 border-y border-ink/15 px-5 py-6 text-center md:flex-row md:gap-10 md:px-10"
+          >
             <div className="max-w-[42ch]">
               <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
                 {t('home.paymentsTitle')}
@@ -1048,7 +873,10 @@ export default function TemplatesIndex() {
             </div>
           </div>
 
-          <div className="mt-12 grid gap-6 border border-ink/15 p-6 md:grid-cols-2 md:p-8">
+          <div
+            data-soft-fade
+            className="mt-12 mx-5 grid gap-6 border border-ink/15 p-6 md:mx-10 md:grid-cols-2 md:p-8"
+          >
             <div>
               <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
                 {t('home.zipTitle')}
@@ -1064,7 +892,7 @@ export default function TemplatesIndex() {
               <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
                 {t('home.reqTitle')}
               </p>
-                <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
+              <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
                 <li>{t('home.req1')}</li>
                 <li>
                   {t('home.req2Before')}{' '}
@@ -1081,6 +909,132 @@ export default function TemplatesIndex() {
             </div>
           </div>
         </section>
+
+        {/* Bundle: card comercial con precio. */}
+        <section
+          data-cta-card
+          className="mt-16 border-2 border-ink p-6 md:mt-24 md:grid md:grid-cols-12 md:gap-10 md:p-10"
+        >
+          <div className="md:col-span-8">
+            <p
+              data-cta-bit
+              className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
+            >
+              {t('home.bundleEyebrow')}
+            </p>
+            <p
+              data-cta-bit
+              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
+            >
+              {t('home.bundleTitleBefore')}{' '}
+              <em
+                data-cta-accent
+                className="inline-block font-display font-normal italic text-accent"
+              >
+                {t('home.bundleTitleEm')}
+              </em>
+            </p>
+            <p
+              data-cta-bit
+              className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
+            >
+              {t('home.bundleBody')}
+            </p>
+            <p
+              data-cta-bit
+              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
+            >
+              {t('home.bundleSaving', {
+                list: formatArs(arsFromUsd(bundleListPriceUsd(), rate)),
+                off: String(bundleDiscountPct()),
+              })}
+            </p>
+            <div
+              data-cta-bit
+              className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
+                }
+                className="min-h-11 border border-ink/30 px-5 py-2.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
+              >
+                {t('common.addToCart')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
+                  navigate('/cart')
+                }}
+                className="min-h-11 px-1 text-ink transition-colors hover:text-accent"
+              >
+                {t('common.buy')}
+              </button>
+            </div>
+          </div>
+          <p
+            data-cta-bit
+            className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
+          >
+            {formatArs(arsFromUsd(BUNDLE_PRICE_USD, rate))}
+          </p>
+        </section>
+
+        {/* Builder: franja editorial invertida, no gemela del card. */}
+        <Link
+          to="/builder"
+          data-cta-card
+          className="group mt-10 -mx-5 block border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-14 md:-mx-10 md:px-10 md:py-20"
+        >
+          <p
+            data-cta-bit
+            className="mb-4 text-[11px] uppercase tracking-[0.25em] text-bone/55 md:text-xs"
+          >
+            {t('home.builderEyebrow')}
+          </p>
+          <p className="flex items-end justify-between gap-6">
+            <span
+              data-cta-bit
+              className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
+            >
+              {t('home.builderTitleBefore')}{' '}
+              <em
+                data-cta-accent
+                className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
+              >
+                {t('home.builderTitleEm')}
+              </em>
+            </span>
+            <span
+              data-cta-arrow
+              aria-hidden="true"
+              className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
+            >
+              →
+            </span>
+          </p>
+          <p
+            data-cta-bit
+            className="mt-5 max-w-[48ch] text-sm leading-relaxed text-bone/65 md:text-base"
+          >
+            {t('home.builderBody')}
+          </p>
+          <p
+            data-cta-bit
+            className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
+          >
+            {t('home.builderPrices', {
+              base: formatArs(arsFromUsd(CUSTOM_BASE_PRICE_USD, rate)),
+              included: CUSTOM_BASE_SECTIONS,
+              extra: formatArs(
+                nextSectionArs(CUSTOM_BASE_SECTIONS, false, rate),
+              ),
+            })}
+          </p>
+        </Link>
+
       </main>
 
       <HomeContact />

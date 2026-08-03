@@ -6,18 +6,28 @@ const defaultWords = ['CRAFT', 'MOTION', 'SILENCE', 'IMPACT']
 
 /**
  * StickyWordCycle — the viewport pins while scroll steps through a
- * cycle of giant words, each dissolving into the next. A thin acid
+ * cycle of giant words, each dissolving into the next. A thin
  * progress bar tracks the sequence. Static word list under reduced
- * motion.
+ * motion. `accentClass` defaults to Nocturne acid; home can pass
+ * marketplace orange (`text-accent` / `bg-accent`).
  */
 export default function StickyWordCycle({
   seq = '05',
   total = '06',
   label = 'The mantra',
   words = defaultWords,
+  accentClass = 'text-acid',
+  barClass = 'bg-acid',
+  phrase = false,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
+  const wordType = phrase
+    ? 'absolute max-w-[min(92vw,18ch)] px-4 text-center font-brico text-[clamp(1.75rem,7.5vw,5.5rem)] leading-[0.95] font-extrabold tracking-[-0.03em] uppercase select-none'
+    : 'absolute font-brico text-[16vw] leading-none font-extrabold tracking-[-0.02em] uppercase select-none'
+  const reducedType = phrase
+    ? 'font-brico text-[clamp(1.5rem,6vw,3.5rem)] leading-[0.95] font-extrabold tracking-[-0.03em] uppercase'
+    : 'font-brico text-[13vw] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase'
 
   useGSAP(
     () => {
@@ -79,11 +89,11 @@ export default function StickyWordCycle({
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>
         {words.map((word) => (
-          <p
-            key={word}
-            className="font-brico text-[13vw] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase"
-          >
+          <p key={word} className={reducedType}>
             {word}
+            <span aria-hidden="true" className={accentClass}>
+              .
+            </span>
           </p>
         ))}
       </section>
@@ -108,11 +118,11 @@ export default function StickyWordCycle({
           <p
             key={word}
             data-cycle-word
-            className="absolute font-brico text-[16vw] leading-none font-extrabold tracking-[-0.02em] uppercase select-none"
+            className={wordType}
             style={{ opacity: i === 0 ? 1 : 0 }}
           >
             {word}
-            <span aria-hidden="true" className="text-acid">
+            <span aria-hidden="true" className={accentClass}>
               .
             </span>
           </p>
@@ -121,7 +131,7 @@ export default function StickyWordCycle({
         <div className="absolute bottom-10 inset-x-0 mx-5 h-px bg-salt/20 md:mx-10">
           <div
             data-cycle-bar
-            className="h-full w-full origin-left scale-x-0 bg-acid"
+            className={`h-full w-full origin-left scale-x-0 ${barClass}`}
           />
         </div>
       </div>

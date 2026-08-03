@@ -37,6 +37,16 @@
     "cartItemTitle": "{{name}} — modelo",
     "buy": "Comprar →"
   },
+  "notFound": {
+    "eyebrow": "Error · ruta sin destino",
+    "reel": "Reel / scroll track",
+    "missingFrame": "sin frame",
+    "title": "Esta ruta se quedó sin frames",
+    "body": "Scrolleaste hasta el final del mapa y no había nada. Volvé al catálogo o armá una página en el builder.",
+    "home": "← Inicio",
+    "templates": "Ver templates",
+    "builder": "Abrir builder →"
+  },
   "home": {
     "heroLine1": "Páginas que",
     "heroLine2": "cuentan",
@@ -45,6 +55,9 @@
     "scrollDown": "Bajá para ver",
     "modelsLabel": "Los modelos — 06",
     "modelsScrollHint": "Scrolleá para recorrer",
+    "cycleLabel": "El listón",
+    "cycleWords": ["CÓDIGO", "QUE", "IMPACTA"],
+    "panelsHeading": "Te llevás el código",
     "howTitleBefore": "Comprás. Descargás un",
     "howTitleZip": "ZIP",
     "howTitleAfter": ". Lo abrís en tu máquina.",

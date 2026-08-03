@@ -32,6 +32,7 @@ const CheckoutFailurePage = lazy(() =>
 const CheckoutMockPage = lazy(() =>
   import('./pages/CheckoutPages').then((m) => ({ default: m.CheckoutMockPage })),
 )
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -87,6 +88,7 @@ export default function App() {
                 <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
                 <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
                 <Route path="/checkout/mock" element={<CheckoutMockPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
           </ChunkErrorBoundary>

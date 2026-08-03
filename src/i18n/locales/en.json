@@ -37,6 +37,16 @@
     "cartItemTitle": "{{name}} — template",
     "buy": "Buy →"
   },
+  "notFound": {
+    "eyebrow": "Error · dead-end route",
+    "reel": "Reel / scroll track",
+    "missingFrame": "no frame",
+    "title": "This route ran out of frames",
+    "body": "You scrolled past the end of the map and there was nothing there. Head back to the catalog or build a page in the builder.",
+    "home": "← Home",
+    "templates": "Browse templates",
+    "builder": "Open builder →"
+  },
   "home": {
     "heroLine1": "Pages that",
     "heroLine2": "tell",
@@ -45,6 +55,9 @@
     "scrollDown": "Scroll to explore",
     "modelsLabel": "The models — 06",
     "modelsScrollHint": "Scroll to explore",
+    "cycleLabel": "The bar",
+    "cycleWords": ["CODE", "THAT", "HITS"],
+    "panelsHeading": "You get the source",
     "howTitleBefore": "You buy. You download a",
     "howTitleZip": "ZIP",
     "howTitleAfter": ". You open it on your machine.",

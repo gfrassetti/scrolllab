@@ -60,8 +60,7 @@ export const PRODUCTS = {
     sku: 'velocity',
     title: 'VELOCITY — template',
     description: 'Modelo de energía athlete / scroll cinematográfico (código fuente).',
-    // TEMP test pago real: ~$1.000 ARS. Revertir a 129 cuando termines de probar.
-    unit_price_usd: 0.3,
+    unit_price_usd: 129,
     currency_id: 'ARS',
   },
   fizz: {
