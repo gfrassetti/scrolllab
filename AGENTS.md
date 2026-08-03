@@ -4,6 +4,49 @@ Marketplace de templates scrollytelling. Cada modelo es una demo completa; el bu
 
 **Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. Brand: `src/lib/site.js` → `SCROLLLAB`.
 
+## Qué vendemos (posicionamiento)
+
+Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, que no se ven en el promedio de marketplaces de templates. No es un tema Bootstrap ni un layout genérico con animaciones leves.
+
+- El listón es **sitio de referencia / portfolio award-level**: tipografía con intención, scroll coreografiado (GSAP + Lenis), atmósfera y una idea visual propia por modelo.
+- Cuando el efecto lo pide, usamos **Canvas 2D y/o WebGL** (Three.js u otras APIs): 3D, shaders, fondos reactivos, objetos con presencia real. Si el promedio se resuelve con CSS, nosotros no bajamos el listón: usamos la API que haga falta.
+- El comprador es un **desarrollador**: baja código fuente React/Vite, no un constructor no-code. Una persona sin experiencia técnica no puede “usarlo” como un Wix.
+- Al diseñar o mejorar un template, preguntate: *¿esto podría estar en Awwwards / en un site of the day, o es interchangeable con ThemeForest?* Si es lo segundo, no entra.
+
+El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento.
+
+## Design craft — Impeccable + UI/UX Pro Max (siempre)
+
+Para **cualquier** tarea de UI/UX (armar, rediseñar, criticar, pulir, animar, tipografía, color, layout, anti-slop), usar estas skills del proyecto **antes** de inventar un look genérico. Complementan el posicionamiento Awwwards de arriba; no lo reemplazan.
+
+### Impeccable (`.cursor/skills/impeccable/`)
+
+- Instalar / actualizar: `npx impeccable install --providers=cursor --scope=project` · `npx impeccable update`
+- Setup de contexto (una vez por proyecto / cuando cambie la marca): `/impeccable init` → escribe `PRODUCT.md` (verdad de producto). El sistema visual se documenta después con `/impeccable document` → `DESIGN.md`
+- Uso típico: `/impeccable critique`, `audit`, `polish`, `animate`, `typeset`, `layout`, `craft`, `document`, `live`, etc.
+- Hook en `.cursor/hooks.json`: bloquea writes de UI con anti-patrones de “AI slop” antes de que aterrizen
+- Detector CLI: `npx impeccable detect src/` (sin API key)
+- Docs: [impeccable.style](https://impeccable.style) · repo [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
+- Requiere **Node ≥ 22.12** para el CLI completo; el runtime del agente en esta máquina puede ser 20.x (aviso EBADENGINE): conviene subir Node localmente
+
+### UI/UX Pro Max / `uipro` (`.cursor/skills/ui-ux-pro-max/` + related)
+
+- Paquete npm: **`ui-ux-pro-max-cli`** (comando `uipro`). No usar el paquete viejo `uipro-cli`.
+- Instalar skill en Cursor: `uipro init --ai cursor` (o `uipro init --ai cursor --force` para regenerar)
+- Actualizar CLI: `uipro update` / `npm install -g ui-ux-pro-max-cli@latest`
+- Flujo: pedís UI → genera / razona design system → recomienda estilos, color, tipografía → implementá con el stack del repo (**React + Vite + Tailwind**; también cubre Three.js) → chequeos pre-entrega contra anti-patrones
+- Skills instaladas junto al pack: `ui-ux-pro-max`, `design`, `design-system`, `brand`, `slides`, `banner-design`, `ui-styling`
+
+### Cuándo usar qué
+
+| Situación | Herramienta |
+|---|---|
+| Nuevo surface / look award-level, live en browser, detector de slop | **Impeccable** |
+| Sistema de diseño, stacks, recomendaciones de estilo/color/tipo, checklist UX | **UI/UX Pro Max** |
+| Scroll / GSAP / Lenis / WebGL del producto | Cookbook + skills GSAP + reglas de “Qué vendemos” |
+
+Nota en Obsidian (segundo cerebro): `Impeccable + UI UX Pro Max.md` en la bóveda ScrollLab.
+
 ## Stack & commands
 
 - Vite + React 19 + Tailwind CSS v4

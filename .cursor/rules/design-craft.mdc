@@ -1,0 +1,14 @@
+---
+description: Usar Impeccable + UI/UX Pro Max en toda tarea de UI
+alwaysApply: true
+---
+
+# Design craft (Impeccable + UI/UX Pro Max)
+
+En **cualquier** pedido de UI/UX (crear, rediseñar, criticar, pulir, animar, tipografía, color, layout):
+
+1. Leer la sección **Design craft** de `AGENTS.md` y el posicionamiento Awwwards (**Qué vendemos**).
+2. Preferir la skill **impeccable** (`.cursor/skills/impeccable/`) para critique/audit/polish/animate/live y anti-slop.
+3. Preferir **ui-ux-pro-max** (y skills hermanas `design`, `design-system`, `brand`) para sistemas, paletas y stack React + Tailwind.
+4. No inventar un look genérico de marketplace si el brief pide award-level / Canvas / WebGL.
+5. Contexto Obsidian: nota `Impeccable + UI UX Pro Max.md` en la bóveda ScrollLab.
