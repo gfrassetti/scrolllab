@@ -16,6 +16,14 @@
   --market-success: #157347;
   --market-warning: #8a5a00;
   --market-danger: #b42318;
+
+  /* Emil Kowalski / animations.dev — UI motion (never ease-in on UI) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-press: 140ms;
+  --duration-popover: 200ms;
+  --duration-toast: 280ms;
 }
 
 html.dark {
@@ -119,6 +127,55 @@ body {
   :focus-visible {
     outline: 2px solid var(--color-ink);
     outline-offset: 3px;
+  }
+}
+
+/* ——— UI motion utilities (Emil Kowalski) ——— */
+@layer utilities {
+  .ease-out-strong {
+    transition-timing-function: var(--ease-out);
+  }
+
+  .ease-drawer {
+    transition-timing-function: var(--ease-drawer);
+  }
+
+  .ui-press {
+    transition:
+      transform var(--duration-press) var(--ease-out),
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .ui-press:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .ui-enter {
+    transform-origin: top right;
+    transition:
+      opacity var(--duration-popover) var(--ease-drawer),
+      transform var(--duration-popover) var(--ease-drawer);
+  }
+
+  .ui-enter-from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+
+  .ui-enter-to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-press,
+    .ui-enter,
+    .ui-press:active:not(:disabled) {
+      transition: none;
+      transform: none;
+    }
   }
 }
 

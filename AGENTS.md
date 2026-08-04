@@ -15,16 +15,66 @@ Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, qu
 
 El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento.
 
-## Design craft — Impeccable + UI/UX Pro Max (local)
+## Design craft — obligatorio (siempre)
 
-Para UI/UX award-level, usar estas tools **instaladas en la máquina** (no van versionadas en git; ver `.gitignore`). Complementan el posicionamiento Awwwards; no lo reemplazan.
+En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, polish, animación):
+
+| # | Herramienta | Rol | Dónde |
+|---|---|---|---|
+| 1 | **Impeccable** | Critique / audit / **polish** / animate / anti-slop — **siempre** antes de dar por cerrada una UI | `.cursor/skills/impeccable/` · [impeccable.style](https://impeccable.style) · repo [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
+| 2 | **Emil Kowalski / emil-design-eng** | Easing, duración, press feedback, drawers/toasts, “should this animate?” | `.cursor/skills/emil-design-eng/` · [animations.dev](https://animations.dev/) |
+| 3 | **taste-skill** (`design-taste-frontend`) | Anti-slop: no repetir look genérico LLM; brief inference antes de diseñar | `.cursor/skills/taste-skill/` · [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| 4 | **UI/UX Pro Max** | Sistemas, paletas, tipografía, checklist UX | `.cursor/skills/ui-ux-pro-max/` |
+| 5 | **template-image-designer** | Fotos / cutouts reales de templates | `.cursor/skills/template-image-designer/` (versionada) |
+
+### Reglas de uso (no negociables)
+
+1. **Impeccable siempre**: al crear o tocar UI, correr el flujo relevante (`critique` / `audit` / **`polish`**). No shippear chrome “a ojo” sin pasar por Impeccable.
+2. **Emil en motion de UI**: chrome del market + microinteracciones de templates (nav, botones, popovers, toasts). Tokens en `src/index.css` (`--ease-out`, `--ease-in-out`, `--ease-drawer`). Nunca `ease-in` en UI. Scroll storytelling sigue en GSAP + cookbook.
+3. **taste-skill antes de inventar look**: declarar un “Design Read” de una línea; evitar defaults LLM (purple mesh, Inter+slate, cards genéricas).
+4. El scrollytelling cinematográfico (pin/scrub/WebGL) **no** se reemplaza por micro-UI: Emil/Impeccable pulen el chrome y los detalles; el cookbook manda el scroll.
+
+### Instalar / actualizar (local, gitignored)
+
+```bash
+npx impeccable install --providers=cursor --scope=project
+npx impeccable update
+# link opcional si tenés skills compiladas en .impeccable:
+# npx impeccable link --source=.impeccable --providers=cursor
+
+# taste-skill (si `npx skills` falla por Node < 22.20, clonar/copiar SKILL.md a .cursor/skills/taste-skill/)
+npx skills add Leonxlnx/taste-skill
+
+# Emil design eng
+# clonar https://github.com/emilkowalski/skills → .cursor/skills/emil-design-eng/
+```
+
+Requiere **Node ≥ 22.12** para el CLI de Impeccable / skills; con Node 20 el skill ya instalado en `.cursor/skills/` sigue usable.
+
+Hook: `.cursor/hooks.json` (detector Impeccable).
+
+Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
+
+### Cuándo usar qué (atajo)
+
+| Situación | Herramienta |
+|---|---|
+| Pulir / limpiar UI existente | **Impeccable `polish`** (obligatorio) |
+| Microinteracción / easing / toast / drawer | **emil-design-eng** |
+| Landing / homepage / evitar look repetido | **taste-skill** + Impeccable |
+| Sistema de color / tipografía / checklist | **UI/UX Pro Max** |
+| Fotos / cutouts de un template | **template-image-designer** |
+| Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
+
+## Design craft — Impeccable + UI/UX Pro Max (detalle)
+
+Para UI/UX award-level, estas tools viven **instaladas en la máquina** (gitignored salvo `template-image-designer`). Complementan el posicionamiento Awwwards; no lo reemplazan.
 
 ### Impeccable (local: `.cursor/skills/impeccable/`)
 
-- Instalar / actualizar: `npx impeccable install --providers=cursor --scope=project` · `npx impeccable update`
+- Instalar / actualizar: ver bloque obligatorio arriba
 - Setup: `/impeccable init` → `PRODUCT.md`; `/impeccable document` → `DESIGN.md`
-- Uso: `/impeccable critique`, `audit`, `polish`, `animate`, `typeset`, `layout`, `craft`, `document`, `live`, etc.
-- Hook en `.cursor/hooks.json` (no-op si el skill no está instalado)
+- Uso frecuente: `/impeccable critique`, `audit`, **`polish`**, `animate`, `typeset`, `layout`, `live`
 - Docs: [impeccable.style](https://impeccable.style)
 
 ### UI/UX Pro Max / `uipro` (local)
@@ -35,17 +85,6 @@ Para UI/UX award-level, usar estas tools **instaladas en la máquina** (no van v
 ### Skill de producto (sí versionada)
 
 - `.cursor/skills/template-image-designer/` — piezas de imagen realistas para templates SCROLLLAB
-
-### Cuándo usar qué
-
-| Situación | Herramienta |
-|---|---|
-| Nuevo surface / look award-level, live, anti-slop | **Impeccable** (local) |
-| Sistema de diseño / estilo / color / checklist UX | **UI/UX Pro Max** (local) |
-| Fotos / cutouts de un template | **template-image-designer** (repo) |
-| Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
-
-Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 
 ## Stack & commands
 

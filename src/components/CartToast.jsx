@@ -29,9 +29,15 @@ export default function CartToast() {
   return (
     <aside
       aria-live="polite"
-      className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-5 right-5 z-[70] w-auto border border-ink/20 bg-bone p-3 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition duration-300 ease-out sm:left-auto sm:w-[min(22rem,calc(100vw-2.5rem))] ${
-        visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+      className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-5 right-5 z-[70] w-auto border border-ink/20 bg-bone p-3 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-[opacity,transform] sm:left-auto sm:w-[min(22rem,calc(100vw-2.5rem))] ${
+        visible
+          ? 'translate-y-0 scale-100 opacity-100'
+          : 'translate-y-3 scale-[0.98] opacity-0'
       }`}
+      style={{
+        transitionDuration: 'var(--duration-toast)',
+        transitionTimingFunction: 'var(--ease-out)',
+      }}
     >
       <div className="flex items-center gap-3">
         <ProductThumbnail
@@ -64,7 +70,7 @@ export default function CartToast() {
       <Link
         to="/cart"
         onClick={clear}
-        className="mt-3 block border border-ink bg-ink px-3 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-bone transition-colors hover:border-accent hover:bg-accent"
+        className="mt-3 block border border-ink bg-ink px-3 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-bone ui-press hover:border-accent hover:bg-accent"
       >
         {t('common.goToCart')}
       </Link>

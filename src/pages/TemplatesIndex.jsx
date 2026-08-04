@@ -28,6 +28,8 @@ const TEMPLATE_META = [
     sku: 'chapters',
     name: 'CHAPTERS',
     path: '/templates/chapters',
+    category: 'EDITORIAL',
+    tagline: 'kinetic stories',
     palette: ['#f2efe9', '#161412', '#ff4b00'],
   },
   {
@@ -35,6 +37,8 @@ const TEMPLATE_META = [
     sku: 'nocturne',
     name: 'NOCTURNE',
     path: '/templates/nocturne',
+    category: 'CINEMA',
+    tagline: 'AFTER DARK',
     palette: ['#0e0e11', '#ece9e2', '#d9ff3f'],
   },
   {
@@ -42,6 +46,8 @@ const TEMPLATE_META = [
     sku: 'monolith',
     name: 'MONOLITH',
     path: '/templates/monolith',
+    category: 'SYSTEM',
+    tagline: 'brutal form',
     palette: ['#cdcbc4', '#101010', '#2b3cff'],
   },
   {
@@ -49,6 +55,8 @@ const TEMPLATE_META = [
     sku: 'velocity',
     name: 'VELOCITY',
     path: '/templates/velocity',
+    category: 'ATHLETE',
+    tagline: 'full send',
     palette: ['#0a1a12', '#ece9e2', '#d9ff3f'],
   },
   {
@@ -56,6 +64,8 @@ const TEMPLATE_META = [
     sku: 'fizz',
     name: 'FIZZ',
     path: '/templates/fizz',
+    category: 'POP',
+    tagline: 'drink the spark',
     palette: ['#241352', '#fff3e2', '#ff3ea5'],
   },
   {
@@ -63,6 +73,8 @@ const TEMPLATE_META = [
     sku: 'atelier',
     name: 'ATELIER',
     path: '/templates/atelier',
+    category: 'STUDIO',
+    tagline: 'scroll the fog',
     palette: ['#0b0c10', '#f2f2f2', '#c8d0dc'],
   },
   {
@@ -70,6 +82,8 @@ const TEMPLATE_META = [
     sku: 'comic',
     name: 'COMIC',
     path: '/templates/comic',
+    category: 'SCRAPBOOK',
+    tagline: 'torn panels',
     palette: ['#d8d4cc', '#2a2622', '#e85a24'],
   },
   {
@@ -77,234 +91,49 @@ const TEMPLATE_META = [
     sku: 'unity',
     name: 'UNITY',
     path: '/templates/unity',
+    category: 'EDITORIAL',
+    tagline: 'one game',
     palette: ['#f3efe6', '#0a0a0a', '#f4c518'],
   },
 ]
 
-function TemplatePoster({ template, index }) {
-  const baseClass =
-    'absolute inset-0 overflow-hidden border border-ink/15 transition-opacity'
+function catalogCoverSrc(sku) {
+  return `/catalog/${sku}.jpg`
+}
 
-  if (template.sku === 'chapters') {
-    return (
+function TemplatePoster({ template, index = 0 }) {
+  return (
+    <div
+      data-template-art
+      className="absolute inset-0 overflow-hidden border border-ink/15 bg-ink"
+      style={{ opacity: index === 0 ? 1 : 0 }}
+    >
+      <img
+        src={catalogCoverSrc(template.sku)}
+        alt=""
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover object-top"
+      />
       <div
-        data-template-art
-        className={`${baseClass} bg-[#f2efe9] text-[#161412]`}
-        style={{ opacity: index === 0 ? 1 : 0 }}
-      >
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
-          EDITORIAL / 01
-        </span>
-        <span className="absolute top-[22%] left-[-3%] text-[clamp(4rem,10vw,9rem)] leading-[0.75] font-semibold tracking-[-0.08em]">
-          CHA
-          <br />
-          PTERS
-        </span>
-        <span className="absolute right-0 bottom-[18%] h-[13%] w-[72%] bg-accent" />
-        <span className="absolute right-5 bottom-5 font-display text-3xl italic">
-          kinetic stories
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'nocturne') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-noir text-salt`}
-        style={{ opacity: 0 }}
-      >
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-acid">
-          CINEMA / 02
-        </span>
-        <span className="absolute top-[14%] right-[8%] aspect-square w-[56%] rounded-full border border-acid/70" />
-        <span className="absolute top-[26%] right-[20%] aspect-square w-[32%] rounded-full bg-acid" />
-        <span className="absolute bottom-[14%] left-5 text-[clamp(2.8rem,7vw,6.5rem)] leading-[0.8] font-light tracking-[-0.07em]">
-          NOC
-          <br />
-          TURNE
-        </span>
-        <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.25em]">
-          AFTER DARK
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'monolith') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-concrete text-carbon`}
-        style={{ opacity: 0 }}
-      >
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 opacity-25"
-          style={{
-            backgroundImage:
-              'linear-gradient(#101010 1px, transparent 1px), linear-gradient(90deg, #101010 1px, transparent 1px)',
-            backgroundSize: '34px 34px',
-          }}
-        />
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
-          SYSTEM / 03
-        </span>
-        <span className="absolute top-[18%] left-[18%] h-[56%] w-[54%] rotate-6 bg-klein shadow-[18px_18px_0_#101010]" />
-        <span className="absolute right-5 bottom-[12%] text-right font-anton text-[clamp(3.2rem,8vw,7rem)] leading-[0.75] tracking-[-0.04em]">
-          MONO
-          <br />
-          LITH
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'velocity') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-[#0a1a12] text-[#ece9e2]`}
-        style={{ opacity: 0 }}
-      >
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `repeating-radial-gradient(circle at 40% 40%, transparent 0 16px, rgba(236,233,226,0.08) 16px 17px)`,
-          }}
-        />
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-acid">
-          ATHLETE / 04
-        </span>
-        <span className="absolute top-[28%] left-5 h-1 w-[42%] -rotate-12 bg-acid" />
-        <span className="absolute bottom-[16%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-semibold tracking-[-0.05em]">
-          VELO
-          <br />
-          CITY
-        </span>
-        <span className="absolute right-5 bottom-5 font-display text-2xl italic text-acid">
-          full send
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'fizz') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-grape text-foam`}
-        style={{ opacity: 0 }}
-      >
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-fizz">
-          POP / 05
-        </span>
-        <span className="absolute top-[12%] right-[10%] aspect-square w-[26%] rounded-full bg-[#ffb02e]" />
-        <span className="absolute top-[38%] right-[28%] aspect-square w-[14%] rounded-full bg-[#3ddc97]" />
-        <span className="absolute top-[24%] right-[38%] aspect-square w-[8%] rounded-full bg-fizz" />
-        <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-extrabold tracking-[-0.04em]">
-          FIZZ
-          <span className="text-fizz">*</span>
-        </span>
-        <span className="absolute right-5 bottom-5 font-display text-2xl italic text-[#ffb02e]">
-          drink the spark
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'atelier') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-[#0b0c10] text-[#f2f2f2]`}
-        style={{ opacity: 0 }}
-      >
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse at 50% 40%, rgba(200,208,220,0.18), transparent 55%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06), transparent 40%)',
-          }}
-        />
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-white/50">
-          STUDIO / 06
-        </span>
-        <span className="absolute top-1/2 left-1/2 h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 border border-white/25 bg-white/[0.04] shadow-[0_0_60px_rgba(200,208,220,0.12)]" />
-        <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-semibold tracking-[-0.05em]">
-          ATE
-          <br />
-          LIER
-        </span>
-        <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.28em] text-white/45 uppercase">
-          scroll the fog
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'comic') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-comic-paper text-[#2a2622]`}
-        style={{ opacity: 0 }}
-      >
-        <span
-          aria-hidden="true"
-          className="absolute inset-[10%] bg-gradient-to-br from-[#7eb8b0] via-[#f0a35a] to-[#e85a24]"
-          style={{
-            clipPath:
-              'polygon(2% 1%, 98% 0%, 100% 4%, 99% 96%, 96% 100%, 3% 99%, 0% 95%, 1% 5%)',
-          }}
-        />
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-comic-flare">
-          SCRAPBOOK / 07
-        </span>
-        <span className="absolute bottom-[14%] left-5 font-brico text-[clamp(3rem,8vw,7rem)] leading-[0.8] font-extrabold tracking-[-0.04em]">
-          CO
-          <br />
-          MIC
-        </span>
-        <span className="absolute right-5 bottom-5 text-[10px] tracking-[0.28em] uppercase">
-          torn panels
-        </span>
-      </div>
-    )
-  }
-
-  if (template.sku === 'unity') {
-    return (
-      <div
-        data-template-art
-        className={`${baseClass} bg-[#f3efe6] text-[#0a0a0a]`}
-        style={{ opacity: 0 }}
-      >
-        <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em]">
-          EDITORIAL / 08
-        </span>
-        <span className="absolute top-[28%] left-5 font-oswald text-[clamp(3.2rem,9vw,7.5rem)] leading-[0.82] font-semibold tracking-[-0.03em] uppercase">
-          UNI
-          <br />
-          TY
-        </span>
-        <span className="absolute right-0 bottom-[22%] h-[10%] w-[58%] bg-[#f4c518]" />
-        <span className="absolute right-5 bottom-5 font-display text-2xl italic text-[#0a0a0a]/55">
-          one game
-        </span>
-      </div>
-    )
-  }
-
-  return null
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/30"
+      />
+      <span className="absolute top-5 left-5 text-[10px] tracking-[0.3em] text-white/90 uppercase drop-shadow-sm">
+        {template.category} / {template.id}
+      </span>
+      <span className="absolute right-5 bottom-14 max-w-[85%] text-right font-brico text-[clamp(2.4rem,6vw,4.5rem)] leading-[0.85] font-semibold tracking-[-0.05em] text-white drop-shadow-md">
+        {template.name}
+      </span>
+      <span className="absolute right-5 bottom-5 font-display text-xl italic text-white/80 md:text-2xl">
+        {template.tagline}
+      </span>
+    </div>
+  )
 }
 
 /**
- * Home del catálogo. Header fijo, hero editorial, lista de modelos,
- * cómo funciona y footer.
+ * Home del catálogo.
+ * Flujo: hero → manifiesto → modelos (editorial) → Bundle/Builder → cómo funciona → contacto.
  */
 export default function TemplatesIndex() {
   const root = useRef(null)
@@ -456,7 +285,10 @@ export default function TemplatesIndex() {
       mm.add(
         '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
         () => {
-          const artworks = gsap.utils.toArray('[data-template-art]')
+          const stage = root.current?.querySelector('[data-template-stage]')
+          const artworks = stage
+            ? gsap.utils.toArray('[data-template-art]', stage)
+            : []
           const templateSteps = gsap.utils.toArray('[data-template-step]')
 
           const activateTemplate = (activeIndex) => {
@@ -695,6 +527,31 @@ export default function TemplatesIndex() {
               </em>
               <span data-hero-line> {t('home.heroLine3')}</span>
             </p>
+            <div
+              data-hero-meta
+              className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 sm:mt-10 md:mt-12"
+            >
+              <a
+                href="#templates"
+                className="ui-press inline-flex min-h-11 items-center border border-ink bg-ink px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-bone hover:bg-accent hover:border-accent"
+              >
+                {t('home.heroCtaModels')}
+              </a>
+              <Link
+                to="/templates/chapters"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center text-[11px] uppercase tracking-[0.2em] text-ink/70 transition-colors hover:text-accent"
+              >
+                {t('home.heroCtaDemo')} →
+              </Link>
+              <Link
+                to="/builder"
+                className="inline-flex min-h-11 items-center text-[11px] uppercase tracking-[0.2em] text-ink/70 transition-colors hover:text-accent"
+              >
+                {t('home.heroCtaBuilder')} →
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -728,7 +585,10 @@ export default function TemplatesIndex() {
           <div className="mt-8 grid gap-10 md:grid-cols-12 md:gap-12 lg:gap-20">
             <div className="hidden md:col-span-5 md:block">
               <div className="sticky top-0 flex h-svh items-center py-16">
-                <div className="relative aspect-4/5 w-full overflow-hidden">
+                <div
+                  data-template-stage
+                  className="relative aspect-4/5 w-full overflow-hidden"
+                >
                   {templates.map((template, index) => (
                     <TemplatePoster
                       key={template.sku}
@@ -753,7 +613,8 @@ export default function TemplatesIndex() {
 
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
-                      {template.id} / {String(templates.length).padStart(2, '0')}
+                      {template.id} /{' '}
+                      {String(templates.length).padStart(2, '0')}
                     </p>
                     <span className="flex items-center gap-2">
                       {template.palette.map((color) => (
@@ -798,11 +659,23 @@ export default function TemplatesIndex() {
 
                   {templatePriceUsd(template.sku) != null && (
                     <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
-                      {formatPriceFromUsd(templatePriceUsd(template.sku), locale, rate)}
+                      {formatPriceFromUsd(
+                        templatePriceUsd(template.sku),
+                        locale,
+                        rate,
+                      )}
                     </p>
                   )}
 
                   <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
+                    <Link
+                      to={template.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ui-press min-h-11 border border-ink bg-ink px-5 py-2.5 text-bone hover:border-accent hover:bg-accent"
+                    >
+                      {t('home.openDemo')} →
+                    </Link>
                     <button
                       type="button"
                       onClick={() =>
@@ -813,7 +686,7 @@ export default function TemplatesIndex() {
                           }),
                         })
                       }
-                      className="min-h-11 border border-ink/30 px-5 py-2.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
+                      className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
                     >
                       {t('common.addToCart')}
                     </button>
@@ -828,7 +701,7 @@ export default function TemplatesIndex() {
                         })
                         navigate('/cart')
                       }}
-                      className="min-h-11 px-1 text-ink transition-colors hover:text-accent"
+                      className="ui-press min-h-11 px-1 text-ink hover:text-accent"
                     >
                       {t('common.buy')}
                     </button>
@@ -839,6 +712,135 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
+        {/* Ofertas justo después del deseo (Bundle → Builder). */}
+        <section
+          id="ofertas"
+          data-cta-card
+          className="mt-16 scroll-mt-20 border-2 border-ink p-6 md:mt-20 md:grid md:grid-cols-12 md:gap-10 md:p-10"
+        >
+          <div className="md:col-span-8">
+            <p
+              data-cta-bit
+              className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
+            >
+              {t('home.bundleEyebrow')}
+            </p>
+            <p
+              data-cta-bit
+              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
+            >
+              {t('home.bundleTitleBefore')}{' '}
+              <em
+                data-cta-accent
+                className="inline-block font-display font-normal italic text-accent"
+              >
+                {t('home.bundleTitleEm')}
+              </em>
+            </p>
+            <p
+              data-cta-bit
+              className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
+            >
+              {t('home.bundleBody')}
+            </p>
+            <p
+              data-cta-bit
+              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
+            >
+              {t('home.bundleSaving', {
+                list: formatPriceFromUsd(bundleListPriceUsd(), locale, rate),
+                off: String(bundleDiscountPct()),
+              })}
+            </p>
+            <div
+              data-cta-bit
+              className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
+                }
+                className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
+              >
+                {t('common.addToCart')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
+                  navigate('/cart')
+                }}
+                className="ui-press min-h-11 px-1 text-ink hover:text-accent"
+              >
+                {t('common.buy')}
+              </button>
+            </div>
+          </div>
+          <p
+            data-cta-bit
+            className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
+          >
+            {formatPriceFromUsd(BUNDLE_PRICE_USD, locale, rate)}
+          </p>
+        </section>
+
+        <Link
+          to="/builder"
+          data-cta-card
+          className="group mt-10 -mx-5 block border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-12 md:-mx-10 md:px-10 md:py-20"
+        >
+          <p
+            data-cta-bit
+            className="mb-4 text-[11px] uppercase tracking-[0.25em] text-bone/55 md:text-xs"
+          >
+            {t('home.builderEyebrow')}
+          </p>
+          <p className="flex items-end justify-between gap-6">
+            <span
+              data-cta-bit
+              className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
+            >
+              {t('home.builderTitleBefore')}{' '}
+              <em
+                data-cta-accent
+                className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
+              >
+                {t('home.builderTitleEm')}
+              </em>
+            </span>
+            <span
+              data-cta-arrow
+              aria-hidden="true"
+              className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
+            >
+              →
+            </span>
+          </p>
+          <p
+            data-cta-bit
+            className="mt-5 max-w-[48ch] text-sm leading-relaxed text-bone/65 md:text-base"
+          >
+            {t('home.builderBody')}
+          </p>
+          <p
+            data-cta-bit
+            className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
+          >
+            {t('home.builderPrices', {
+              base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
+              included: CUSTOM_BASE_SECTIONS,
+              extra: formatNextSectionPrice(
+                CUSTOM_BASE_SECTIONS,
+                false,
+                locale,
+                rate,
+              ),
+            })}
+          </p>
+        </Link>
+
+        {/* Confianza / proceso: después de las ofertas. */}
         <section
           id="como-funciona"
           className="mt-16 scroll-mt-20 -mx-5 md:mt-24 md:-mx-10"
@@ -852,6 +854,7 @@ export default function TemplatesIndex() {
             headingAfter={t('home.howTitleAfter')}
             panels={howPanels}
             variant="type"
+            idleOpacity={0.48}
           />
 
           <div
@@ -924,134 +927,6 @@ export default function TemplatesIndex() {
             </div>
           </div>
         </section>
-
-        {/* Bundle: card comercial con precio. */}
-        <section
-          data-cta-card
-          className="mt-16 border-2 border-ink p-6 md:mt-24 md:grid md:grid-cols-12 md:gap-10 md:p-10"
-        >
-          <div className="md:col-span-8">
-            <p
-              data-cta-bit
-              className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
-            >
-              {t('home.bundleEyebrow')}
-            </p>
-            <p
-              data-cta-bit
-              className="text-[clamp(1.8rem,4.5vw,4rem)] leading-none font-medium tracking-[-0.02em]"
-            >
-              {t('home.bundleTitleBefore')}{' '}
-              <em
-                data-cta-accent
-                className="inline-block font-display font-normal italic text-accent"
-              >
-                {t('home.bundleTitleEm')}
-              </em>
-            </p>
-            <p
-              data-cta-bit
-              className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
-            >
-              {t('home.bundleBody')}
-            </p>
-            <p
-              data-cta-bit
-              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
-            >
-              {t('home.bundleSaving', {
-                list: formatPriceFromUsd(bundleListPriceUsd(), locale, rate),
-                off: String(bundleDiscountPct()),
-              })}
-            </p>
-            <div
-              data-cta-bit
-              className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]"
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
-                }
-                className="min-h-11 border border-ink/30 px-5 py-2.5 text-ink transition-colors hover:border-ink hover:bg-ink hover:text-bone"
-              >
-                {t('common.addToCart')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
-                  navigate('/cart')
-                }}
-                className="min-h-11 px-1 text-ink transition-colors hover:text-accent"
-              >
-                {t('common.buy')}
-              </button>
-            </div>
-          </div>
-          <p
-            data-cta-bit
-            className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
-          >
-            {formatPriceFromUsd(BUNDLE_PRICE_USD, locale, rate)}
-          </p>
-        </section>
-
-        {/* Builder: franja editorial invertida, no gemela del card. */}
-        <Link
-          to="/builder"
-          data-cta-card
-          className="group mt-10 -mx-5 block border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-14 md:-mx-10 md:px-10 md:py-20"
-        >
-          <p
-            data-cta-bit
-            className="mb-4 text-[11px] uppercase tracking-[0.25em] text-bone/55 md:text-xs"
-          >
-            {t('home.builderEyebrow')}
-          </p>
-          <p className="flex items-end justify-between gap-6">
-            <span
-              data-cta-bit
-              className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
-            >
-              {t('home.builderTitleBefore')}{' '}
-              <em
-                data-cta-accent
-                className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
-              >
-                {t('home.builderTitleEm')}
-              </em>
-            </span>
-            <span
-              data-cta-arrow
-              aria-hidden="true"
-              className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
-            >
-              →
-            </span>
-          </p>
-          <p
-            data-cta-bit
-            className="mt-5 max-w-[48ch] text-sm leading-relaxed text-bone/65 md:text-base"
-          >
-            {t('home.builderBody')}
-          </p>
-          <p
-            data-cta-bit
-            className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
-          >
-            {t('home.builderPrices', {
-              base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
-              included: CUSTOM_BASE_SECTIONS,
-              extra: formatNextSectionPrice(
-                CUSTOM_BASE_SECTIONS,
-                false,
-                locale,
-                rate,
-              ),
-            })}
-          </p>
-        </Link>
 
       </main>
 

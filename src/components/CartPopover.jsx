@@ -19,6 +19,7 @@ export default function CartPopover() {
   const { rate } = useFxRate()
   const showUsd = locale === 'en'
   const [open, setOpen] = useState(false)
+  const [panelIn, setPanelIn] = useState(false)
   const [catalog, setCatalog] = useState(null)
   const rootRef = useRef(null)
   const location = useLocation()
@@ -27,6 +28,16 @@ export default function CartPopover() {
   useEffect(() => {
     setOpen(false)
   }, [location.pathname])
+
+  // Enter animation (Emil: popover scale from trigger, ease-drawer ~200ms).
+  useEffect(() => {
+    if (!open) {
+      setPanelIn(false)
+      return undefined
+    }
+    const id = requestAnimationFrame(() => setPanelIn(true))
+    return () => cancelAnimationFrame(id)
+  }, [open])
 
   // Cierra con click afuera o Escape.
   useEffect(() => {
@@ -86,7 +97,7 @@ export default function CartPopover() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="true"
-        className={`min-h-11 px-2 text-[11px] uppercase tracking-[0.25em] transition-colors hover:text-accent md:px-0 md:text-xs ${
+        className={`ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.25em] hover:text-accent md:px-0 md:text-xs ${
           open ? 'text-accent' : ''
         }`}
       >
@@ -95,8 +106,11 @@ export default function CartPopover() {
       </button>
 
       {open && (
-        <div className="fixed inset-x-5 top-16 z-50 border border-ink/15 bg-bone shadow-[0_16px_40px_rgba(0,0,0,0.12)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[min(20rem,calc(100vw-2.5rem))]">
-          {items.length === 0 ? (
+        <div
+          className={`fixed inset-x-5 top-16 z-50 border border-ink/15 bg-bone shadow-[0_16px_40px_rgba(0,0,0,0.12)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[min(20rem,calc(100vw-2.5rem))] ui-enter ${
+            panelIn ? 'ui-enter-to' : 'ui-enter-from'
+          }`}
+        >          {items.length === 0 ? (
             <div className="p-6 text-center">
               <p className="text-sm text-ink/50">{t('common.cartEmpty')}</p>
               <Link
@@ -157,7 +171,7 @@ export default function CartPopover() {
               <div className="p-3 pt-0">
                 <Link
                   to="/cart"
-                  className="block border-2 border-ink bg-ink px-4 py-3 text-center text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
+                  className="block border-2 border-ink bg-ink px-4 py-3 text-center text-[11px] uppercase tracking-[0.25em] text-bone ui-press hover:border-accent hover:bg-accent"
                 >
                   {t('common.goToCart')}
                 </Link>

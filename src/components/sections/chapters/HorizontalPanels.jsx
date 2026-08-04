@@ -47,6 +47,8 @@ export default function HorizontalPanels({
   headingAfter,
   panels = defaultPanels,
   variant = 'media',
+  /** Idle word opacity for type reveals (home needs readable steps). */
+  idleOpacity = 0.12,
 }) {
   const root = useRef(null)
   const track = useRef(null)
@@ -115,7 +117,7 @@ export default function HorizontalPanels({
             const introEl = root.current.querySelector('[data-panels-intro]')
             gsap.fromTo(
               introSplit.words,
-              { opacity: 0.12 },
+              { opacity: idleOpacity },
               {
                 opacity: 1,
                 stagger: 0.06,
@@ -135,7 +137,7 @@ export default function HorizontalPanels({
             if (titleSplit) {
               gsap.fromTo(
                 titleSplit.words,
-                { opacity: 0.12 },
+                { opacity: idleOpacity },
                 {
                   opacity: 1,
                   stagger: 0.06,
@@ -153,7 +155,7 @@ export default function HorizontalPanels({
             if (captionSplit) {
               gsap.fromTo(
                 captionSplit.words,
-                { opacity: 0.12 },
+                { opacity: idleOpacity },
                 {
                   opacity: 1,
                   stagger: 0.05,
@@ -172,7 +174,7 @@ export default function HorizontalPanels({
             if (indexEl) {
               gsap.fromTo(
                 indexEl,
-                { opacity: 0.2 },
+                { opacity: Math.min(1, idleOpacity + 0.15) },
                 {
                   opacity: 1,
                   ease: 'none',
@@ -196,7 +198,7 @@ export default function HorizontalPanels({
           if (introSplit) {
             gsap.fromTo(
               introSplit.words,
-              { opacity: 0.12 },
+              { opacity: idleOpacity },
               {
                 opacity: 1,
                 stagger: 0.06,
@@ -215,7 +217,7 @@ export default function HorizontalPanels({
             if (titleSplit) {
               gsap.fromTo(
                 titleSplit.words,
-                { opacity: 0.12 },
+                { opacity: idleOpacity },
                 {
                   opacity: 1,
                   stagger: 0.06,
@@ -232,7 +234,7 @@ export default function HorizontalPanels({
             if (captionSplit) {
               gsap.fromTo(
                 captionSplit.words,
-                { opacity: 0.12 },
+                { opacity: idleOpacity },
                 {
                   opacity: 1,
                   stagger: 0.05,
@@ -255,7 +257,7 @@ export default function HorizontalPanels({
         mm.revert()
       }
     },
-    { scope: root, dependencies: [variant, panels.length] },
+    { scope: root, dependencies: [variant, panels.length, idleOpacity] },
   )
 
   return (

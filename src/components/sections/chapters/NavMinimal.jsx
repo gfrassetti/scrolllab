@@ -34,7 +34,8 @@ export default function NavMinimal({
               <li key={item.label}>
                 <a
                   href={item.href}
-                  className="text-xs uppercase tracking-[0.25em] transition-opacity duration-300 hover:opacity-50"
+                  className="text-xs uppercase tracking-[0.25em] transition-opacity ease-out-strong hover:opacity-50"
+                  style={{ transitionDuration: '180ms' }}
                 >
                   {item.label}
                 </a>
@@ -44,7 +45,7 @@ export default function NavMinimal({
 
           <button
             {...triggerProps}
-            className="text-xs uppercase tracking-[0.25em] md:hidden"
+            className="ui-press text-xs uppercase tracking-[0.25em] md:hidden"
           >
             {open ? closeLabel : menuLabel}
           </button>

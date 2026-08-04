@@ -43,7 +43,7 @@ export default function SiteHeader({ solid = true }) {
   }, [menuOpen])
 
   const linkClass =
-    'text-[11px] uppercase tracking-[0.25em] transition-colors hover:text-accent md:text-xs'
+    'text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs'
 
   // Recarga dura al home: `navigate('/')` desde la home no remonta la página,
   // así que el splash no se vería, y el reload deja el estado en memoria limpio.
@@ -133,7 +133,7 @@ export default function SiteHeader({ solid = true }) {
             onClick={() => setMenuOpen((v) => !v)}
             aria-expanded={menuOpen}
             aria-label={t('nav.menu')}
-            className="grid size-11 place-items-center text-ink transition-colors hover:text-accent"
+            className="ui-press grid size-11 place-items-center text-ink hover:text-accent"
           >
             <svg viewBox="0 0 20 20" className="size-5" aria-hidden="true">
               {menuOpen ? (
