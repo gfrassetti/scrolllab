@@ -2,9 +2,8 @@ import { useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { models, getSection } from '../lib/sectionRegistry'
 import {
-  formatArs,
-  arsFromUsd,
-  nextSectionArs,
+  formatPriceFromUsd,
+  formatNextSectionPrice,
   COMMERCE_PACK_SURCHARGE_USD,
   CUSTOM_BASE_SECTIONS,
   MAX_CUSTOM_SECTIONS,
@@ -19,7 +18,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import LanguageSelector from '../components/LanguageSelector'
 import { useCart } from '../lib/cart'
 import { useAuth } from '../lib/auth'
-import { useT } from '../i18n'
+import { useI18n } from '../i18n'
 
 const kindLabelKeys = {
   nav: 'builder.kind.nav',
@@ -39,7 +38,7 @@ function sectionCopyKey(sectionId, field) {
  * + src/lib/composition.js (persistencia, receta, chrome único).
  */
 export default function BuilderPage() {
-  const t = useT()
+  const { t, locale } = useI18n()
   const addToCart = useCart((s) => s.addItem)
   const { user, loading: authLoading, hadSession } = useAuth()
   const looksLoggedIn = user ? true : authLoading ? hadSession : false
@@ -71,13 +70,20 @@ export default function BuilderPage() {
   } = useBuilderComposition()
 
   const { rate } = useFxRate()
-  const commerceSurchargeArs = formatArs(
-    arsFromUsd(COMMERCE_PACK_SURCHARGE_USD, rate),
+  const commerceSurcharge = formatPriceFromUsd(
+    COMMERCE_PACK_SURCHARGE_USD,
+    locale,
+    rate,
   )
   // Por qué el total es ese: qué incluye la base, cuánto llevás, cuánto suma
   // la próxima. En el tope se explica el límite en vez de ofrecer un precio.
   const priceHint = (() => {
-    const next = formatArs(nextSectionArs(sectionCount, hasCommerce, rate))
+    const next = formatNextSectionPrice(
+      sectionCount,
+      hasCommerce,
+      locale,
+      rate,
+    )
     const included = CUSTOM_BASE_SECTIONS
     if (atMaxSections) {
       return t('builder.priceMax', { max: MAX_CUSTOM_SECTIONS })
@@ -164,7 +170,7 @@ export default function BuilderPage() {
     // El salto del total no es la grilla: es el kit (ficha, carrito, checkout).
     if (firstCommerce) {
       setLimitNotice(
-        t('builder.commerceAdded', { price: commerceSurchargeArs }),
+        t('builder.commerceAdded', { price: commerceSurcharge }),
       )
     }
   }
@@ -282,7 +288,7 @@ export default function BuilderPage() {
                 {model.id === 'commerce' && (
                   <p className="mb-3 text-xs leading-relaxed text-ink/50">
                     {t('builder.commerceHint', {
-                      price: commerceSurchargeArs,
+                      price: commerceSurcharge,
                     })}
                   </p>
                 )}
@@ -480,7 +486,7 @@ export default function BuilderPage() {
                             {section.model.id === 'commerce' && (
                               <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
                                 {t('builder.commerceBadge', {
-                                  price: commerceSurchargeArs,
+                                  price: commerceSurcharge,
                                 })}
                               </span>
                             )}
@@ -550,7 +556,7 @@ export default function BuilderPage() {
                     {t('builder.estimatedPrice')}
                   </p>
                   <p className="mt-1 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
-                    {formatArs(arsFromUsd(estimatedPriceUsd, rate))}
+                    {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
                   </p>
                   <p
                     className={`mt-1 max-w-[46ch] text-xs leading-relaxed ${
@@ -562,7 +568,7 @@ export default function BuilderPage() {
                   {hasCommerce && (
                     <p className="mt-0.5 text-xs text-ink/55">
                       {t('builder.commerceIncluded', {
-                        price: commerceSurchargeArs,
+                        price: commerceSurcharge,
                       })}
                     </p>
                   )}

@@ -84,3 +84,37 @@ export function formatArs(amount) {
     maximumFractionDigits: 0,
   }).format(amount)
 }
+
+export function formatUsd(amount) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+/**
+ * Precio de lista para UI: EN muestra USD; ES convierte a ARS con la
+ * cotización del catálogo. El checkout sigue cobrando en pesos.
+ */
+export function formatPriceFromUsd(usd, locale, rate) {
+  if (!Number.isFinite(usd)) return null
+  if (locale === 'en') return formatUsd(usd)
+  const ars = arsFromUsd(usd, rate)
+  return ars == null ? null : formatArs(ars)
+}
+
+/** Delta de la próxima sección en USD (sin redondeo ARS). */
+export function nextSectionUsd(sectionCount, hasCommerce) {
+  return (
+    estimateCustomPriceUsd(sectionCount + 1, hasCommerce) -
+    estimateCustomPriceUsd(sectionCount, hasCommerce)
+  )
+}
+
+/** Próxima sección formateada: USD en EN, delta ARS redondeado en ES. */
+export function formatNextSectionPrice(sectionCount, hasCommerce, locale, rate) {
+  if (locale === 'en') return formatUsd(nextSectionUsd(sectionCount, hasCommerce))
+  const ars = nextSectionArs(sectionCount, hasCommerce, rate)
+  return ars == null ? null : formatArs(ars)
+}

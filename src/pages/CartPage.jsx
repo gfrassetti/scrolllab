@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { cartLinePriceArs, useCart } from '../lib/cart'
+import { cartLinePriceArs, cartLinePriceUsd, useCart } from '../lib/cart'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
+import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
 
@@ -20,7 +21,7 @@ export default function CartPage() {
   const navigate = useNavigate()
   const { rate } = useFxRate()
   const { t, locale } = useI18n()
-  const numberLocale = locale === 'en' ? 'en-US' : 'es-AR'
+  const showUsd = locale === 'en'
 
   useEffect(() => {
     api
@@ -35,11 +36,17 @@ export default function CartPage() {
 
   const lines = items.map((item) => ({
     ...item,
-    unit_price: cartLinePriceArs(item, catalog, rate),
-    currency_id: catalog[item.sku]?.currency_id || 'ARS',
+    unit_price: showUsd
+      ? cartLinePriceUsd(item, catalog)
+      : cartLinePriceArs(item, catalog, rate),
+    currency_id: showUsd ? 'USD' : 'ARS',
   }))
 
   const total = lines.reduce((s, l) => s + (l.unit_price || 0), 0)
+  const formatLine = (amount) => {
+    if (amount == null) return '—'
+    return showUsd ? formatUsd(amount) : formatArs(amount)
+  }
 
   const checkout = async () => {
     if (!user) {
@@ -112,8 +119,7 @@ export default function CartPage() {
                         </p>
                         {line.unit_price != null && (
                           <p className="mt-1 text-sm text-ink/70">
-                            {line.unit_price.toLocaleString(numberLocale)}{' '}
-                            {line.currency_id}
+                            {formatLine(line.unit_price)}
                           </p>
                         )}
                         {previewHref && (
@@ -141,7 +147,7 @@ export default function CartPage() {
             <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
               <p className="text-sm">
                 {t('common.estimatedTotal')}:{' '}
-                <strong>{total.toLocaleString(numberLocale)} ARS</strong>
+                <strong>{formatLine(total)}</strong>
                 <span className="mt-2 block text-xs text-ink/55">
                   {t('cart.trustNote')}
                 </span>

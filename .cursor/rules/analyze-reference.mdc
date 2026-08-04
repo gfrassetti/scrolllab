@@ -19,13 +19,14 @@ npm run analyze:ref -- <url> --sku <sku> --name "<Name>"
 (En bash: `PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"` o la ruta local de Playwright.)
 
 2. Si falta Chromium: `npx playwright install chromium` y reintentar.
-3. Leer la nota generada en Obsidian (`<Name> - analisis de referencia.md`) y/o `docs/reference-analysis/<sku>.md`.
+3. Leer la nota generada en Obsidian (`<Name> - analisis de referencia.md`) y/o `docs/reference-analysis/<sku>.md` (+ `beats.json` / capturas en `<sku>/beats/`).
 4. Recién después: graphify → mapa Obsidian del SKU → código.
 
-No esperar a que el usuario diga “corré el analizador”. Es parte del flujo de todo template desde URL.
+El lector es **adaptativo**: no frame-a-frame (caro/ruidoso); guarda un beat cuando cambian fondo, sticky, transforms o texto visible. Gemini es opcional (`GEMINI_API_KEY`) y anota en una sola pasada — sin key alcanza la captura mecánica para portar.
 
 ## Salidas
 
 - Vault: `C:\Users\Guido\Documents\Obsidian\ScrollLab\<Name> - analisis de referencia.md`
 - Repo: `docs/reference-analysis/<sku>.md`
+- Beats: `docs/reference-analysis/<sku>/beats.json` + JPEG en `…/beats/`
 - Workflow: nota Obsidian `Analizar paginas modelo.md`

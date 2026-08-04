@@ -4,7 +4,7 @@ import { installBrowserStorageMocks } from './storageMock.js'
 
 installBrowserStorageMocks()
 
-const { useCart, useCartNotice, cartLinePriceArs } = await import('../cart.js')
+const { useCart, useCartNotice, cartLinePriceArs, cartLinePriceUsd } = await import('../cart.js')
 const { estimateCustomPriceUsd, arsFromUsd } = await import('../pricing.js')
 
 describe('useCart', () => {
@@ -117,6 +117,24 @@ describe('cartLinePriceArs', () => {
     assert.equal(
       cartLinePriceArs({ sku: 'custom:algo', recipe }, catalog, RATE),
       arsFromUsd(estimateCustomPriceUsd(3, true), RATE),
+    )
+  })
+})
+
+describe('cartLinePriceUsd', () => {
+  const catalog = { chapters: { unit_price: 202000, unit_price_usd: 129 } }
+
+  it('usa unit_price_usd del catálogo', () => {
+    assert.equal(cartLinePriceUsd({ sku: 'chapters' }, catalog), 129)
+  })
+
+  it('recalcula custom en USD de lista', () => {
+    const recipe = Array.from({ length: 10 }, () => ({
+      id: 'chapters/HeroKinetic',
+    }))
+    assert.equal(
+      cartLinePriceUsd({ sku: 'custom', recipe }, catalog),
+      estimateCustomPriceUsd(10, false),
     )
   })
 })

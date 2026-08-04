@@ -184,7 +184,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 1. Pregunta de arquitectura / “dónde está X” / dependencias → `graphify query`, `path` o `explain` (ver `.cursor/rules/graphify.mdc`).
 2. **Template nuevo desde URL de referencia** → correr solo  
    `npm run analyze:ref -- <url> --sku <sku> --name "<Name>"`  
-   (ver `.cursor/rules/analyze-reference.mdc`). Escribe libs + scroll sample a Obsidian y `docs/reference-analysis/`. No esperar a que el usuario lo pida.
+   (ver `.cursor/rules/analyze-reference.mdc`). Playwright muestrea el scroll y **solo guarda beats donde cambia la firma** (fondo / sticky / transforms / texto) + JPEG livianos en `docs/reference-analysis/<sku>/beats/`. Si hay `GEMINI_API_KEY` o `GOOGLE_API_KEY` en `.env`, una pasada de Gemini anota fondo/figura/texto. Salida: Obsidian + `docs/reference-analysis/<sku>.md` + `beats.json`. No esperar a que el usuario lo pida.
 3. **Piezas de imagen del template** → el agente actúa como diseñador/generador: inventariar cada foto/cutout que la ref anima, generar assets realistas locales en `src/components/sections/<sku>/assets/`, **sin picsum**. Regla `.cursor/rules/template-image-assets.mdc` + skill `.cursor/skills/template-image-designer/`.
 4. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
 5. **Motion / transitions de un template** → leer `Storytelling motion cookbook.md` (Obsidian) + `docs/motion-cookbook.md`; implementar con primitivos P1–P14, no aproximaciones vagas.

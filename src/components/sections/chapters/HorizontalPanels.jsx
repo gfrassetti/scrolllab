@@ -269,7 +269,11 @@ export default function HorizontalPanels({
 
       <div
         ref={track}
-        className="flex flex-col md:h-full md:w-max md:flex-row md:items-stretch"
+        className={
+          typeOnly
+            ? 'flex flex-col md:h-full md:w-max md:flex-row md:items-stretch md:gap-20 lg:gap-28'
+            : 'flex flex-col md:h-full md:w-max md:flex-row md:items-stretch'
+        }
       >
         <div
           className={
@@ -312,7 +316,7 @@ export default function HorizontalPanels({
             <article
               key={panel.index}
               data-type-panel
-              className="flex flex-col justify-center gap-5 px-5 pb-20 md:h-full md:w-[42vw] md:shrink-0 md:px-8 md:py-24 lg:w-[34vw]"
+              className="flex flex-col justify-center gap-5 px-5 pb-20 md:h-full md:w-[48vw] md:shrink-0 md:px-12 md:py-24 lg:w-[40vw] lg:px-16"
             >
               <p
                 data-panel-index

@@ -11,6 +11,7 @@ export default function ManifestoReveal({
   chapter = '01',
   total = '06',
   label = 'Manifesto',
+  className = '',
   children,
 }) {
   const root = useRef(null)
@@ -37,7 +38,10 @@ export default function ManifestoReveal({
   )
 
   return (
-    <section ref={root} className="px-5 py-28 md:px-10 md:py-44">
+    <section
+      ref={root}
+      className={`px-5 py-28 md:px-10 md:py-44${className ? ` ${className}` : ''}`}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t border-ink/15 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
           Chapter {chapter} / {total}

@@ -10,7 +10,11 @@ import {
   arsFromUsd,
   customExtraSections,
   estimateCustomPriceUsd,
+  formatPriceFromUsd,
+  formatUsd,
+  formatArs,
   nextSectionArs,
+  nextSectionUsd,
 } from '../pricing.js'
 
 const RATE = 1560
@@ -81,5 +85,24 @@ describe('nextSectionArs', () => {
           arsFromUsd(estimateCustomPriceUsd(count, false), RATE),
       )
     }
+  })
+})
+
+describe('formatPriceFromUsd', () => {
+  it('en EN muestra USD', () => {
+    assert.equal(formatPriceFromUsd(159, 'en', RATE), formatUsd(159))
+    assert.match(formatPriceFromUsd(159, 'en', RATE), /\$159/)
+  })
+
+  it('en ES muestra ARS convertidos', () => {
+    assert.equal(
+      formatPriceFromUsd(159, 'es', RATE),
+      formatArs(arsFromUsd(159, RATE)),
+    )
+  })
+
+  it('nextSectionUsd es el salto de lista', () => {
+    assert.equal(nextSectionUsd(8, false), CUSTOM_EXTRA_SECTION_USD)
+    assert.equal(nextSectionUsd(3, false), 0)
   })
 })

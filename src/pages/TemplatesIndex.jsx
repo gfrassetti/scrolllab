@@ -7,16 +7,16 @@ import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
 import HomeContact from '../components/HomeContact'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
+import ManifestoReveal from '../components/sections/chapters/ManifestoReveal'
 import { useCart } from '../lib/cart'
 import {
   BUNDLE_PRICE_USD,
   CUSTOM_BASE_PRICE_USD,
   CUSTOM_BASE_SECTIONS,
-  arsFromUsd,
   bundleDiscountPct,
   bundleListPriceUsd,
-  formatArs,
-  nextSectionArs,
+  formatPriceFromUsd,
+  formatNextSectionPrice,
   templatePriceUsd,
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
@@ -379,32 +379,45 @@ export default function TemplatesIndex() {
       if (!introReady) return
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-      // Logo del hero: barras caen de arriba y se apilan (alusión al scroll).
+      // Logo del hero: mismo ensamble que el contact (barras + accent).
       const heroLogo = root.current?.querySelector('[data-hero-logo]')
       const bars = heroLogo
         ? gsap.utils.toArray(heroLogo.querySelectorAll('[data-logo-bar]'))
         : []
       const accent = heroLogo?.querySelector('[data-logo-accent]')
-      if (bars.length) {
-        gsap.set(bars, { transformOrigin: '50% 50%' })
-        gsap.from(bars, {
-          y: -28,
-          opacity: 0,
-          duration: 0.6,
-          ease: 'power3.out',
-          stagger: 0.12,
+      if (bars.length || accent) {
+        const narrow = window.matchMedia('(max-width: 639px)').matches
+        const dx = narrow ? 28 : 48
+        const dy = narrow ? 24 : 40
+        if (bars[0]) gsap.set(bars[0], { x: -dx, opacity: 0 })
+        if (bars[1]) gsap.set(bars[1], { x: dx + 8, opacity: 0 })
+        if (bars[2]) gsap.set(bars[2], { y: dy, opacity: 0 })
+        if (accent) {
+          gsap.set(accent, {
+            y: narrow ? -20 : -36,
+            x: narrow ? 16 : 28,
+            scale: 0.5,
+            opacity: 0,
+            transformOrigin: '50% 50%',
+          })
+        }
+
+        const logoTl = gsap.timeline({
           delay: 0.05,
+          defaults: { ease: 'power3.out' },
         })
-      }
-      if (accent) {
-        gsap.from(accent, {
-          scale: 0,
-          opacity: 0,
-          duration: 0.4,
-          ease: 'back.out(2.2)',
-          transformOrigin: '50% 50%',
-          delay: 0.45,
-        })
+        if (bars[0]) logoTl.to(bars[0], { x: 0, opacity: 1, duration: 0.7 }, 0)
+        if (bars[1])
+          logoTl.to(bars[1], { x: 0, opacity: 1, duration: 0.7 }, 0.08)
+        if (bars[2])
+          logoTl.to(bars[2], { y: 0, opacity: 1, duration: 0.7 }, 0.16)
+        if (accent) {
+          logoTl.to(
+            accent,
+            { y: 0, x: 0, scale: 1, opacity: 1, duration: 0.55 },
+            0.22,
+          )
+        }
       }
 
       // Title + tagline: revelado por caracteres (como está).
@@ -652,27 +665,27 @@ export default function TemplatesIndex() {
       <SiteHeader />
 
       <main className="px-5 md:px-10">
-        <section className="flex min-h-[90svh] flex-col justify-between overflow-hidden pt-16 pb-6 md:pt-24 md:pb-10">
+        <section className="flex min-h-[85svh] flex-col overflow-x-clip pt-20 pb-8 sm:min-h-[90svh] md:pt-24 md:pb-14">
           <p
             data-hero-meta
-            className="max-w-[36ch] text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
+            className="max-w-[36ch] text-[11px] uppercase tracking-[0.2em] text-ink/60 sm:tracking-[0.25em] md:text-xs"
           >
             {t('meta.tagline')}
           </p>
 
-          <div>
-            <div className="flex items-center gap-3 md:gap-5">
+          <div className="flex flex-1 flex-col justify-center py-6 sm:py-8">
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-4 md:gap-6 lg:gap-8">
               <span data-hero-logo className="shrink-0 self-center">
-                <Logo className="size-[clamp(2.25rem,8vw,6.5rem)]" />
+                <Logo className="size-[clamp(2rem,1.25rem+6vw,3.25rem)] md:size-[clamp(3.5rem,5vw+1.5rem,6.5rem)] xl:size-[clamp(5.5rem,6vw,8.5rem)]" />
               </span>
               <h1
                 data-hero-line
-                className="min-w-0 select-none font-brico text-[clamp(2.75rem,14vw,11rem)] leading-[0.88] font-semibold tracking-[-0.04em] uppercase"
+                className="min-w-0 select-none font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
               >
                 {SITE_NAME}
               </h1>
             </div>
-            <p className="mt-6 max-w-[22ch] text-[clamp(1.4rem,3.5vw,2.6rem)] leading-[1.05] font-medium tracking-[-0.02em] text-ink/80 md:mt-8">
+            <p className="mt-5 max-w-[20ch] text-[clamp(1.25rem,1rem+2vw,1.75rem)] leading-[1.1] font-medium tracking-[-0.02em] text-ink/80 sm:mt-6 sm:max-w-[22ch] sm:text-[clamp(1.4rem,1rem+2.2vw,2.2rem)] md:mt-10 md:text-[clamp(1.6rem,1rem+2vw,2.6rem)]">
               <span data-hero-line>{t('home.heroLine1')} </span>
               <em
                 data-hero-line
@@ -683,22 +696,24 @@ export default function TemplatesIndex() {
               <span data-hero-line> {t('home.heroLine3')}</span>
             </p>
           </div>
-
-          <div className="border-t border-ink/15 pt-4">
-            <p
-              data-hero-meta
-              className="max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
-            >
-              {t('home.heroBody')}
-            </p>
-            <div className="mt-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 md:text-xs md:tracking-[0.25em]">
-              <p data-hero-meta>©2026 — {SITE_NAME}</p>
-              <p data-hero-meta className="text-ink">
-                {t('home.scrollDown')} <span aria-hidden="true">↓</span>
-              </p>
-            </div>
-          </div>
         </section>
+
+        <div className="-mx-5 md:-mx-10">
+          <ManifestoReveal
+            chapter="00"
+            total="00"
+            label={SITE_NAME}
+            className="!flex !min-h-0 !flex-col !justify-center !py-16 sm:!min-h-[55svh] sm:!py-24 md:!min-h-[70svh] md:!py-36 [&_[data-manifesto]]:mx-auto [&_[data-manifesto]]:max-w-[min(100%,16ch)] [&_[data-manifesto]]:text-left sm:[&_[data-manifesto]]:max-w-[18ch] sm:[&_[data-manifesto]]:text-center md:[&_[data-manifesto]]:text-[clamp(2.4rem,5vw,5.5rem)]"
+          >
+            <>
+              {t('home.manifestoLead')}{' '}
+              <em>{t('home.manifestoEm1')}</em>
+              {t('home.manifestoMid')}{' '}
+              <em>{t('home.manifestoEm2')}</em>
+              {t('home.manifestoTail')}
+            </>
+          </ManifestoReveal>
+        </div>
 
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
           <div className="flex items-baseline justify-between pt-4">
@@ -783,7 +798,7 @@ export default function TemplatesIndex() {
 
                   {templatePriceUsd(template.sku) != null && (
                     <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
-                      {formatArs(arsFromUsd(templatePriceUsd(template.sku), rate))}
+                      {formatPriceFromUsd(templatePriceUsd(template.sku), locale, rate)}
                     </p>
                   )}
 
@@ -945,7 +960,7 @@ export default function TemplatesIndex() {
               className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
             >
               {t('home.bundleSaving', {
-                list: formatArs(arsFromUsd(bundleListPriceUsd(), rate)),
+                list: formatPriceFromUsd(bundleListPriceUsd(), locale, rate),
                 off: String(bundleDiscountPct()),
               })}
             </p>
@@ -978,7 +993,7 @@ export default function TemplatesIndex() {
             data-cta-bit
             className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
           >
-            {formatArs(arsFromUsd(BUNDLE_PRICE_USD, rate))}
+            {formatPriceFromUsd(BUNDLE_PRICE_USD, locale, rate)}
           </p>
         </section>
 
@@ -1026,10 +1041,13 @@ export default function TemplatesIndex() {
             className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
           >
             {t('home.builderPrices', {
-              base: formatArs(arsFromUsd(CUSTOM_BASE_PRICE_USD, rate)),
+              base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
               included: CUSTOM_BASE_SECTIONS,
-              extra: formatArs(
-                nextSectionArs(CUSTOM_BASE_SECTIONS, false, rate),
+              extra: formatNextSectionPrice(
+                CUSTOM_BASE_SECTIONS,
+                false,
+                locale,
+                rate,
               ),
             })}
           </p>

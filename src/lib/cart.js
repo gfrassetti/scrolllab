@@ -1,6 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { arsFromUsd, estimateCustomPriceUsd } from './pricing.js'
+import {
+  arsFromUsd,
+  estimateCustomPriceUsd,
+  templatePriceUsd,
+} from './pricing.js'
 import { recipeHasCommerce } from './composition.js'
 
 export function isCustomSku(sku) {
@@ -21,6 +25,17 @@ export function cartLinePriceArs(item, catalog, rate) {
     )
   }
   return catalog?.[item?.sku]?.unit_price ?? null
+}
+
+/** Precio de lista en USD para mostrar cuando el UI está en inglés. */
+export function cartLinePriceUsd(item, catalog) {
+  if (isCustomSku(item?.sku)) {
+    const recipe = item?.recipe || []
+    return estimateCustomPriceUsd(recipe.length, recipeHasCommerce(recipe))
+  }
+  return (
+    catalog?.[item?.sku]?.unit_price_usd ?? templatePriceUsd(item?.sku) ?? null
+  )
 }
 
 export const useCartNotice = create((set) => ({

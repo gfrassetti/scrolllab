@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
-import { cartLinePriceArs, useCart } from '../lib/cart'
+import { cartLinePriceArs, cartLinePriceUsd, useCart } from '../lib/cart'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
+import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import ProductThumbnail from './ProductThumbnail'
 
@@ -16,7 +17,7 @@ export default function CartPopover() {
   const removeItem = useCart((s) => s.removeItem)
   const { t, locale } = useI18n()
   const { rate } = useFxRate()
-  const numberLocale = locale === 'en' ? 'en-US' : 'es-AR'
+  const showUsd = locale === 'en'
   const [open, setOpen] = useState(false)
   const [catalog, setCatalog] = useState(null)
   const rootRef = useRef(null)
@@ -66,7 +67,14 @@ export default function CartPopover() {
 
   const priceFor = (item) => {
     if (!catalog) return null
-    return cartLinePriceArs(item, catalog, rate)
+    return showUsd
+      ? cartLinePriceUsd(item, catalog)
+      : cartLinePriceArs(item, catalog, rate)
+  }
+
+  const formatLine = (amount) => {
+    if (amount == null) return '—'
+    return showUsd ? formatUsd(amount) : formatArs(amount)
   }
 
   const total = items.reduce((sum, item) => sum + (priceFor(item) || 0), 0)
@@ -119,9 +127,7 @@ export default function CartPopover() {
                           {item.title}
                         </p>
                         <p className="mt-0.5 text-xs text-ink/60">
-                          {price != null
-                            ? `${price.toLocaleString(numberLocale)} ARS`
-                            : '—'}
+                          {formatLine(price)}
                         </p>
                         {previewHref && (
                           <Link
@@ -146,7 +152,7 @@ export default function CartPopover() {
               </ul>
               <div className="flex items-center justify-between px-4 py-3 text-sm">
                 <span className="text-ink/60">{t('common.estimatedTotal')}</span>
-                <strong>{total.toLocaleString(numberLocale)} ARS</strong>
+                <strong>{formatLine(total)}</strong>
               </div>
               <div className="p-3 pt-0">
                 <Link
