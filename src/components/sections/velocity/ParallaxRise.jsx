@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import parallaxImg from './assets/parallax.png'
 
 /**
  * ParallaxRise — generic band with a background that drifts upward
@@ -10,7 +11,7 @@ export default function ParallaxRise({
   title = 'Title 1',
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.',
   cta = 'CTA label',
-  img = 'https://picsum.photos/seed/vel-parallax/1920/1400',
+  img = parallaxImg,
 }) {
   const root = useRef(null)
 

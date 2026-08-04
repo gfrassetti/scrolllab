@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import portrait from './assets/portrait.png'
 
 /**
  * LastPortrait — dark portrait closer ("Last Dance" beat).
@@ -11,7 +12,7 @@ export default function LastPortrait({
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Integer aliquet, augue eget aliquam.',
   question = 'HEADLINE 7?',
   caption = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae justo.',
-  img = 'https://picsum.photos/seed/unity-portrait/1400/1800',
+  img = portrait,
   stat1Label = 'STAT 1',
   stat1Value = '00',
   stat2Label = 'STAT 2',

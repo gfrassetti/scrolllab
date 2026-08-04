@@ -1,6 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import PaperFrame from './PaperFrame'
+import driveSunset from './assets/drive-sunset.png'
+import closedYards from './assets/closed-yards.png'
 
 /**
  * ChapterFork — pinned split: two futures tear apart on scroll.
@@ -102,13 +104,13 @@ export default function ChapterFork({
             <div data-path-left className="will-change-transform">
               <PaperFrame>
                 <div className="relative min-h-72 overflow-hidden md:min-h-85">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#1f5c55] via-[#0f3531] to-[#072422]" />
-                  <div className="absolute inset-0 opacity-40"
-                    style={{
-                      backgroundImage:
-                        'radial-gradient(circle at 30% 70%, rgba(240,160,64,0.45), transparent 40%)',
-                    }}
+                  <img
+                    src={driveSunset}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                    draggable={false}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                   <div className="relative z-10 flex h-full min-h-72 flex-col justify-end p-7 md:min-h-85 md:p-9">
                     <p className="mb-3 text-[10px] tracking-[0.25em] text-white/55 uppercase">
                       Path 1
@@ -127,13 +129,13 @@ export default function ChapterFork({
             <div data-path-right className="will-change-transform">
               <PaperFrame>
                 <div className="relative min-h-72 overflow-hidden md:min-h-85">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#e86a2f] via-[#a83218] to-[#4a1408]" />
-                  <div className="absolute inset-0 opacity-35"
-                    style={{
-                      backgroundImage:
-                        'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.25), transparent 45%)',
-                    }}
+                  <img
+                    src={closedYards}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                    draggable={false}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                   <div className="relative z-10 flex h-full min-h-72 flex-col justify-end p-7 md:min-h-85 md:p-9">
                     <p className="mb-3 text-[10px] tracking-[0.25em] text-white/55 uppercase">
                       Path 2

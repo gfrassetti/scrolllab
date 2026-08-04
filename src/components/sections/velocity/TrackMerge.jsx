@@ -1,10 +1,21 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import trackA1 from './assets/track-a1.png'
+import trackA2 from './assets/track-a2.png'
+import trackA3 from './assets/track-a3.png'
+import trackA4 from './assets/track-a4.png'
+import trackB1 from './assets/track-b1.png'
+import trackB2 from './assets/track-b2.png'
+import trackB3 from './assets/track-b3.png'
+import trackB4 from './assets/track-b4.png'
+import trackB5 from './assets/track-b5.png'
+import onTrack from './assets/on-track.png'
+import offTrack from './assets/off-track.png'
 
 const ROW_A = [
   {
     label: 'Title 1',
-    img: 'https://picsum.photos/seed/vel-a1/640/860',
+    img: trackA1,
     w: 'w-[42vw] md:w-[18vw]',
   },
   {
@@ -15,17 +26,17 @@ const ROW_A = [
   },
   {
     label: 'Title 2',
-    img: 'https://picsum.photos/seed/vel-a2/520/700',
+    img: trackA2,
     w: 'w-[36vw] md:w-[14vw]',
   },
   {
     label: 'Title 3',
-    img: 'https://picsum.photos/seed/vel-a3/700/700',
+    img: trackA3,
     w: 'w-[48vw] md:w-[20vw]',
   },
   {
     label: 'Title 8',
-    img: 'https://picsum.photos/seed/vel-a4/560/760',
+    img: trackA4,
     w: 'w-[40vw] md:w-[16vw]',
   },
 ]
@@ -33,27 +44,27 @@ const ROW_A = [
 const ROW_B = [
   {
     label: 'Title 4',
-    img: 'https://picsum.photos/seed/vel-b1/700/700',
+    img: trackB1,
     w: 'w-[44vw] md:w-[17vw]',
   },
   {
     label: 'Title 5',
-    img: 'https://picsum.photos/seed/vel-b2/900/900',
+    img: trackB2,
     w: 'w-[56vw] md:w-[24vw]',
   },
   {
     label: 'Title 6',
-    img: 'https://picsum.photos/seed/vel-b3/700/700',
+    img: trackB3,
     w: 'w-[44vw] md:w-[17vw]',
   },
   {
     label: 'Title 7',
-    img: 'https://picsum.photos/seed/vel-b4/640/800',
+    img: trackB4,
     w: 'w-[40vw] md:w-[16vw]',
   },
   {
     label: 'Title 9',
-    img: 'https://picsum.photos/seed/vel-b5/680/820',
+    img: trackB5,
     w: 'w-[46vw] md:w-[19vw]',
   },
 ]
@@ -369,7 +380,7 @@ export default function TrackMerge({
             <div data-tm-on className="will-change-transform">
               <div className="mx-auto aspect-square w-[78%] overflow-hidden md:w-[70%]">
                 <img
-                  src="https://picsum.photos/seed/vel-on-track/900/900"
+                  src={onTrack}
                   alt=""
                   className="h-full w-full object-cover"
                 />
@@ -381,7 +392,7 @@ export default function TrackMerge({
             <div data-tm-off className="will-change-transform">
               <div className="mx-auto aspect-3/4 w-[70%] overflow-hidden md:w-[58%]">
                 <img
-                  src="https://picsum.photos/seed/vel-off-track/800/1100"
+                  src={offTrack}
                   alt=""
                   className="h-full w-full object-cover"
                 />

@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import stageA from './assets/stage-a.png'
+import stageB from './assets/stage-b.png'
 
 /**
  * StageLines — two typographic beats (group → finals).
@@ -8,10 +10,10 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 export default function StageLines({
   eyebrow1 = 'EYEBROW 7',
   line1 = 'HEADLINE 8 LOREM IPSUM',
-  img1 = 'https://picsum.photos/seed/unity-stage-a/1600/1000',
+  img1 = stageA,
   eyebrow2 = 'EYEBROW 8',
   line2 = 'HEADLINE 9 LOREM IPSUM',
-  img2 = 'https://picsum.photos/seed/unity-stage-b/1600/1000',
+  img2 = stageB,
 }) {
   const root = useRef(null)
 

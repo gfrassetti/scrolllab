@@ -1,11 +1,15 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import ex01 from './assets/ex-01.png'
+import ex02 from './assets/ex-02.png'
+import ex03 from './assets/ex-03.png'
+import ex04 from './assets/ex-04.png'
 
 const defaultExhibits = [
-  { code: 'EX-01', caption: 'Placeholder exhibit', img: 'https://picsum.photos/seed/mono-a/900/900' },
-  { code: 'EX-02', caption: 'Generic artifact', img: 'https://picsum.photos/seed/mono-b/900/900' },
-  { code: 'EX-03', caption: 'Untitled block', img: 'https://picsum.photos/seed/mono-c/900/900' },
-  { code: 'EX-04', caption: 'Working sample', img: 'https://picsum.photos/seed/mono-d/900/900' },
+  { code: 'EX-01', caption: 'Placeholder exhibit', img: ex01 },
+  { code: 'EX-02', caption: 'Generic artifact', img: ex02 },
+  { code: 'EX-03', caption: 'Untitled block', img: ex03 },
+  { code: 'EX-04', caption: 'Working sample', img: ex04 },
 ]
 
 /**

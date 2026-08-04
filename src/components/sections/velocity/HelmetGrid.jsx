@@ -1,5 +1,11 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import helm1 from './assets/helm-1.png'
+import helm2 from './assets/helm-2.png'
+import helm3 from './assets/helm-3.png'
+import helm4 from './assets/helm-4.png'
+import helm5 from './assets/helm-5.png'
+import helm6 from './assets/helm-6.png'
 
 /** Varied notch / irregular masks — storytelling “hall of fame” feel. */
 const MASKS = [
@@ -25,8 +31,8 @@ const ITEMS = [
     id: 'item-1',
     name: 'Title 1',
     year: '01',
-    img: 'https://picsum.photos/seed/helm-1/800/800',
-    hover: 'https://picsum.photos/seed/helm-1b/800/800',
+    img: helm1,
+    hover: helm1,
     offset: 'md:mt-0',
     mask: 0,
   },
@@ -34,8 +40,8 @@ const ITEMS = [
     id: 'item-2',
     name: 'Title 2',
     year: '02',
-    img: 'https://picsum.photos/seed/helm-2/800/800',
-    hover: 'https://picsum.photos/seed/helm-2b/800/800',
+    img: helm2,
+    hover: helm2,
     offset: 'md:mt-16',
     mask: 1,
   },
@@ -43,8 +49,8 @@ const ITEMS = [
     id: 'item-3',
     name: 'Title 3',
     year: '03',
-    img: 'https://picsum.photos/seed/helm-3/800/800',
-    hover: 'https://picsum.photos/seed/helm-3b/800/800',
+    img: helm3,
+    hover: helm3,
     offset: 'md:mt-8',
     mask: 2,
   },
@@ -52,8 +58,8 @@ const ITEMS = [
     id: 'item-4',
     name: 'Title 4',
     year: '04',
-    img: 'https://picsum.photos/seed/helm-4/800/800',
-    hover: 'https://picsum.photos/seed/helm-4b/800/800',
+    img: helm4,
+    hover: helm4,
     offset: 'md:mt-20',
     mask: 3,
   },
@@ -61,8 +67,8 @@ const ITEMS = [
     id: 'item-5',
     name: 'Title 5',
     year: '05',
-    img: 'https://picsum.photos/seed/helm-5/800/800',
-    hover: 'https://picsum.photos/seed/helm-5b/800/800',
+    img: helm5,
+    hover: helm5,
     offset: 'md:mt-4',
     mask: 4,
   },
@@ -70,8 +76,8 @@ const ITEMS = [
     id: 'item-6',
     name: 'Title 6',
     year: '06',
-    img: 'https://picsum.photos/seed/helm-6/800/800',
-    hover: 'https://picsum.photos/seed/helm-6b/800/800',
+    img: helm6,
+    hover: helm6,
     offset: 'md:mt-14',
     mask: 5,
   },

@@ -1,42 +1,48 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import card1 from './assets/card-1.png'
+import card2 from './assets/card-2.png'
+import card3 from './assets/card-3.png'
+import card4 from './assets/card-4.png'
+import card5 from './assets/card-5.png'
+import card6 from './assets/card-6.png'
 
 const defaultCards = [
   {
     title: 'Card 01',
     label: 'Label one',
     tone: 'from-[#f4f0ea] via-[#e8d5c4] to-[#c45a1a]',
-    img: 'https://picsum.photos/seed/atelier-c1/900/700',
+    img: card1,
   },
   {
     title: 'Card 02',
     label: 'Label two',
     tone: 'from-[#d8d0c4] via-[#b8a898] to-[#6a5a4a]',
-    img: 'https://picsum.photos/seed/atelier-c2/900/700',
+    img: card2,
   },
   {
     title: 'Card 03',
     label: 'Label three',
     tone: 'from-[#1a1410] via-[#3a2a22] to-[#0c0a08]',
-    img: 'https://picsum.photos/seed/atelier-c3/900/700',
+    img: card3,
   },
   {
     title: 'Card 04',
     label: 'Label four',
     tone: 'from-[#2a2a2a] via-[#4a4540] to-[#1a1816]',
-    img: 'https://picsum.photos/seed/atelier-c4/900/700',
+    img: card4,
   },
   {
     title: 'Card 05',
     label: 'Label five',
     tone: 'from-[#ece8e0] via-[#ddd6cc] to-[#b8b0a4]',
-    img: 'https://picsum.photos/seed/atelier-c5/900/700',
+    img: card5,
   },
   {
     title: 'Card 06',
     label: 'Label six',
     tone: 'from-[#e8d4d8] via-[#c8a0a8] to-[#8a6070]',
-    img: 'https://picsum.photos/seed/atelier-c6/900/700',
+    img: card6,
   },
 ]
 

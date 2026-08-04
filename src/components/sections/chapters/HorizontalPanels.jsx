@@ -1,30 +1,34 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import panelA from './assets/panel-a.png'
+import panelB from './assets/panel-b.png'
+import panelC from './assets/panel-c.png'
+import panelD from './assets/panel-d.png'
 
 const defaultPanels = [
   {
     index: '3.1',
     title: 'Placeholder panel',
     caption: 'Generic caption — swap freely',
-    img: 'https://picsum.photos/seed/panel-a/1000/1250',
+    img: panelA,
   },
   {
     index: '3.2',
     title: 'Another placeholder',
     caption: 'Each panel is one narrative beat',
-    img: 'https://picsum.photos/seed/panel-b/1000/1250',
+    img: panelB,
   },
   {
     index: '3.3',
     title: 'Keeps on going',
     caption: 'The scroll is vertical, the motion horizontal',
-    img: 'https://picsum.photos/seed/panel-c/1000/1250',
+    img: panelC,
   },
   {
     index: '3.4',
     title: 'Last frame',
     caption: 'On mobile the panels stack vertically',
-    img: 'https://picsum.photos/seed/panel-d/1000/1250',
+    img: panelD,
   },
 ]
 

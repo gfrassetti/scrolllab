@@ -1,15 +1,23 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import mosaic1 from './assets/mosaic-1.png'
+import mosaic2 from './assets/mosaic-2.png'
+import mosaic3 from './assets/mosaic-3.png'
+import mosaic4 from './assets/mosaic-4.png'
+import mosaic5 from './assets/mosaic-5.png'
+import mosaic6 from './assets/mosaic-6.png'
+import mosaic7 from './assets/mosaic-7.png'
+import mosaic8 from './assets/mosaic-8.png'
 
 const DEFAULT_SLIDES = [
-  'https://picsum.photos/seed/unity-m1/1400/1800',
-  'https://picsum.photos/seed/unity-m2/1400/1800',
-  'https://picsum.photos/seed/unity-m3/1400/1800',
-  'https://picsum.photos/seed/unity-m4/1400/1800',
-  'https://picsum.photos/seed/unity-m5/1400/1800',
-  'https://picsum.photos/seed/unity-m6/1400/1800',
-  'https://picsum.photos/seed/unity-m7/1400/1800',
-  'https://picsum.photos/seed/unity-m8/1400/1800',
+  mosaic1,
+  mosaic2,
+  mosaic3,
+  mosaic4,
+  mosaic5,
+  mosaic6,
+  mosaic7,
+  mosaic8,
 ]
 
 /** Mosaic offsets as % of viewport; index 0 = center plate. */

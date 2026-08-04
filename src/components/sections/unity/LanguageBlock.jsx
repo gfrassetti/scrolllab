@@ -1,5 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import joyA from './assets/joy-a.png'
+import joyB from './assets/joy-b.png'
+import joyC from './assets/joy-c.png'
 
 /**
  * LanguageBlock — solid type/image block (Framer language-of-*).
@@ -14,9 +17,9 @@ export default function LanguageBlock({
   note = 'NOTE 1',
   bg = '#ffd84d',
   fg = '#0a0a0a',
-  img1 = 'https://picsum.photos/seed/unity-lang-a/1200/800',
-  img2 = 'https://picsum.photos/seed/unity-lang-b/1200/800',
-  img3 = 'https://picsum.photos/seed/unity-lang-c/1200/800',
+  img1 = joyA,
+  img2 = joyB,
+  img3 = joyC,
   anchor = 'lang-a',
 }) {
   const root = useRef(null)

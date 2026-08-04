@@ -1,5 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import heroBack from './assets/hero-back.png'
+import heroMid from './assets/hero-mid.png'
+import heroFront from './assets/hero-front.png'
 
 /**
  * HeroStrike — full-bleed multi-layer parallax hero.
@@ -12,14 +15,14 @@ export default function HeroStrike({
   lineLeft2 = 'TITLE 3',
   lineRight2 = 'TITLE 4',
   caption = 'Caption 1 — scroll',
-  imgBack = 'https://picsum.photos/seed/vel-hero-back/1920/1200',
-  imgMid = 'https://picsum.photos/seed/vel-hero-mid/1600/1000',
-  imgFront = 'https://picsum.photos/seed/vel-hero-front/1400/900',
+  imgBack = heroBack,
+  imgMid = heroMid,
+  imgFront = heroFront,
   /** @deprecated kept for builder compat — maps to mid layer */
   img,
 }) {
   const root = useRef(null)
-  const midSrc = imgMid || img || 'https://picsum.photos/seed/vel-hero-mid/1600/1000'
+  const midSrc = imgMid || img || heroMid
 
   useGSAP(
     () => {

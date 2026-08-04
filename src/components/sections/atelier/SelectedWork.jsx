@@ -1,5 +1,9 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import work1 from './assets/work-1.png'
+import work2 from './assets/work-2.png'
+import work3 from './assets/work-3.png'
+import work4 from './assets/work-4.png'
 
 const PROJECTS = [
   {
@@ -8,6 +12,7 @@ const PROJECTS = [
     tag: 'Placeholder tag',
     overlay: 'Overlay text.',
     tone: 'from-[#1a2330] via-[#3d5168] to-[#c5b8a5]',
+    img: work1,
   },
   {
     title: 'Project 02',
@@ -15,6 +20,7 @@ const PROJECTS = [
     tag: 'Placeholder tag',
     overlay: 'Overlay text.',
     tone: 'from-[#2a2118] via-[#6b5344] to-[#e8d5c4]',
+    img: work2,
   },
   {
     title: 'Project 03',
@@ -22,6 +28,7 @@ const PROJECTS = [
     tag: 'Placeholder tag',
     overlay: 'Overlay text.',
     tone: 'from-[#121816] via-[#2f4a3c] to-[#b8d4c4]',
+    img: work3,
   },
   {
     title: 'Project 04',
@@ -29,6 +36,7 @@ const PROJECTS = [
     tag: 'Placeholder tag',
     overlay: 'Overlay text.',
     tone: 'from-[#1c1524] via-[#4a3a5c] to-[#d4c8e0]',
+    img: work4,
   },
 ]
 
@@ -157,20 +165,18 @@ export default function SelectedWork({
                 <div
                   className={`relative aspect-[16/11] overflow-hidden rounded-2xl bg-gradient-to-br ${project.tone}`}
                 >
-                  <p className="absolute top-5 left-5 max-w-[28ch] text-[10px] tracking-[0.18em] text-white/80 uppercase md:text-[11px]">
+                  <img
+                    src={project.img}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <p className="absolute top-5 left-5 z-10 max-w-[28ch] text-[10px] tracking-[0.18em] text-white/80 uppercase md:text-[11px]">
                     {project.tag}
                   </p>
-                  <p className="absolute bottom-6 left-5 font-brico text-[clamp(1.6rem,3.2vw,2.6rem)] leading-none font-semibold tracking-[-0.03em] text-white">
+                  <p className="absolute bottom-6 left-5 z-10 font-brico text-[clamp(1.6rem,3.2vw,2.6rem)] leading-none font-semibold tracking-[-0.03em] text-white">
                     {project.overlay}
                   </p>
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 opacity-30 transition-opacity duration-500 group-hover:opacity-45"
-                    style={{
-                      backgroundImage:
-                        'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.35), transparent 45%)',
-                    }}
-                  />
                 </div>
                 <div className="mt-4 flex items-start justify-between gap-4">
                   <div>

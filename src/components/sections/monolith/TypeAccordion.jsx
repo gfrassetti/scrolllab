@@ -1,21 +1,24 @@
 import { useRef, useState } from 'react'
 import { ScrollTrigger } from '../../../lib/gsap'
+import accA from './assets/acc-a.png'
+import accB from './assets/acc-b.png'
+import accC from './assets/acc-c.png'
 
 const defaultItems = [
   {
     title: 'First unit',
     body: 'Placeholder answer. Click rows to expand them — the grid-rows trick animates height with pure CSS.',
-    img: 'https://picsum.photos/seed/acc-a/800/500',
+    img: accA,
   },
   {
     title: 'Second unit',
     body: 'Generic copy for the second drawer. Swap freely, the accordion keeps the rhythm.',
-    img: 'https://picsum.photos/seed/acc-b/800/500',
+    img: accB,
   },
   {
     title: 'Third unit',
     body: 'One idea per drawer. Close it and the page snaps back to pure typography.',
-    img: 'https://picsum.photos/seed/acc-c/800/500',
+    img: accC,
   },
 ]
 

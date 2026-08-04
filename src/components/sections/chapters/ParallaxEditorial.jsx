@@ -1,28 +1,32 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import editA from './assets/edit-a.png'
+import editB from './assets/edit-b.png'
+import editC from './assets/edit-c.png'
+import editD from './assets/edit-d.png'
 
 const defaultFigures = [
   {
     caption: 'Fig. 01 — Placeholder',
-    img: 'https://picsum.photos/seed/edit-a/800/1000',
+    img: editA,
     speed: 0.85,
     className: 'col-span-7 md:col-span-4 md:col-start-1',
   },
   {
     caption: 'Fig. 02 — Placeholder',
-    img: 'https://picsum.photos/seed/edit-b/800/600',
+    img: editB,
     speed: 1.2,
     className: 'col-span-5 col-start-8 mt-24 md:col-span-3 md:col-start-6 md:mt-48',
   },
   {
     caption: 'Fig. 03 — Placeholder',
-    img: 'https://picsum.photos/seed/edit-c/800/1100',
+    img: editC,
     speed: 0.7,
     className: 'col-span-6 col-start-4 mt-16 md:col-span-4 md:col-start-9 md:-mt-16',
   },
   {
     caption: 'Fig. 04 — Placeholder',
-    img: 'https://picsum.photos/seed/edit-d/900/700',
+    img: editD,
     speed: 1.1,
     className: 'col-span-8 col-start-2 mt-20 md:col-span-4 md:col-start-3 md:mt-40',
   },

@@ -1,3 +1,7 @@
+import tee from './assets/tee.png'
+import cap from './assets/cap.png'
+import tote from './assets/tote.png'
+
 /** Demo catalog shipped with the commerce kit. Replace freely. */
 export const DEMO_PRODUCTS = [
   {
@@ -6,7 +10,7 @@ export const DEMO_PRODUCTS = [
     price: 18000,
     currency: 'ARS',
     blurb: 'Heavyweight cotton, one accent stitch.',
-    img: 'https://picsum.photos/seed/scrolllab-p1/900/1100',
+    img: tee,
   },
   {
     id: 'p-02',
@@ -14,7 +18,7 @@ export const DEMO_PRODUCTS = [
     price: 12000,
     currency: 'ARS',
     blurb: 'Unstructured six-panel, tonal mark.',
-    img: 'https://picsum.photos/seed/scrolllab-p2/900/1100',
+    img: cap,
   },
   {
     id: 'p-03',
@@ -22,7 +26,7 @@ export const DEMO_PRODUCTS = [
     price: 24000,
     currency: 'ARS',
     blurb: 'Canvas body, reinforced handles.',
-    img: 'https://picsum.photos/seed/scrolllab-p3/900/1100',
+    img: tote,
   },
 ]
 

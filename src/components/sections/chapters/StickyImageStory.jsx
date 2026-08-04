@@ -1,24 +1,27 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import sceneA from './assets/scene-a.png'
+import sceneB from './assets/scene-b.png'
+import sceneC from './assets/scene-c.png'
 
 const defaultScenes = [
   {
     kicker: 'Scene A',
     title: 'Placeholder scene one',
     body: 'Generic supporting copy. Each block of text swaps the pinned image beside it as it scrolls into view.',
-    img: 'https://picsum.photos/seed/chapters-a/900/1200',
+    img: sceneA,
   },
   {
     kicker: 'Scene B',
     title: 'Placeholder scene two',
     body: 'Swap this text for your own narrative beat. The image column stays fixed while the story flows past it.',
-    img: 'https://picsum.photos/seed/chapters-b/900/1200',
+    img: sceneB,
   },
   {
     kicker: 'Scene C',
     title: 'Placeholder scene three',
     body: 'The final beat of this chapter. On small screens each scene simply carries its own inline image.',
-    img: 'https://picsum.photos/seed/chapters-c/900/1200',
+    img: sceneC,
   },
 ]
 

@@ -7,6 +7,15 @@ import LanguageBlock from '../components/sections/unity/LanguageBlock'
 import LastPortrait from '../components/sections/unity/LastPortrait'
 import StageLines from '../components/sections/unity/StageLines'
 import FooterTrophy from '../components/sections/unity/FooterTrophy'
+import joyA from '../components/sections/unity/assets/joy-a.png'
+import joyB from '../components/sections/unity/assets/joy-b.png'
+import joyC from '../components/sections/unity/assets/joy-c.png'
+import hopeA from '../components/sections/unity/assets/hope-a.png'
+import hopeB from '../components/sections/unity/assets/hope-b.png'
+import hopeC from '../components/sections/unity/assets/hope-c.png'
+import heatA from '../components/sections/unity/assets/heat-a.png'
+import heatB from '../components/sections/unity/assets/heat-b.png'
+import heatC from '../components/sections/unity/assets/heat-c.png'
 
 /**
  * Template model — "UNITY"
@@ -34,9 +43,9 @@ export default function UnityPage() {
             note="NOTE 1"
             bg="#ffd84d"
             fg="#0a0a0a"
-            img1="https://picsum.photos/seed/unity-joy-a/1200/800"
-            img2="https://picsum.photos/seed/unity-joy-b/1200/800"
-            img3="https://picsum.photos/seed/unity-joy-c/1200/800"
+            img1={joyA}
+            img2={joyB}
+            img3={joyC}
             anchor="lang-a"
           />
           <LanguageBlock
@@ -47,9 +56,9 @@ export default function UnityPage() {
             note="NOTE 2"
             bg="#7ec8ff"
             fg="#0a0a0a"
-            img1="https://picsum.photos/seed/unity-hope-a/1200/800"
-            img2="https://picsum.photos/seed/unity-hope-b/1200/800"
-            img3="https://picsum.photos/seed/unity-hope-c/1200/800"
+            img1={hopeA}
+            img2={hopeB}
+            img3={hopeC}
             anchor="lang-b"
           />
           <LanguageBlock
@@ -60,9 +69,9 @@ export default function UnityPage() {
             note="NOTE 3"
             bg="#ff4d33"
             fg="#0a0a0a"
-            img1="https://picsum.photos/seed/unity-heat-a/1200/800"
-            img2="https://picsum.photos/seed/unity-heat-b/1200/800"
-            img3="https://picsum.photos/seed/unity-heat-c/1200/800"
+            img1={heatA}
+            img2={heatB}
+            img3={heatC}
             anchor="lang-c"
           />
           <LastPortrait />
