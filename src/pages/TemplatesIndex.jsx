@@ -7,7 +7,6 @@ import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
 import HomeContact from '../components/HomeContact'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
-import ManifestoReveal from '../components/sections/chapters/ManifestoReveal'
 import { useCart } from '../lib/cart'
 import {
   BUNDLE_PRICE_USD,
@@ -555,22 +554,16 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
-        <div className="-mx-5 md:-mx-10">
-          <ManifestoReveal
-            chapter="00"
-            total="00"
-            label={SITE_NAME}
-            className="!flex !min-h-0 !flex-col !justify-center !py-16 sm:!min-h-[55svh] sm:!py-24 md:!min-h-[70svh] md:!py-36 [&_[data-manifesto]]:mx-auto [&_[data-manifesto]]:max-w-[min(100%,16ch)] [&_[data-manifesto]]:text-left sm:[&_[data-manifesto]]:max-w-[18ch] sm:[&_[data-manifesto]]:text-center md:[&_[data-manifesto]]:text-[clamp(2.4rem,5vw,5.5rem)]"
-          >
-            <>
-              {t('home.manifestoLead')}{' '}
-              <em>{t('home.manifestoEm1')}</em>
-              {t('home.manifestoMid')}{' '}
-              <em>{t('home.manifestoEm2')}</em>
-              {t('home.manifestoTail')}
-            </>
-          </ManifestoReveal>
-        </div>
+        <p
+          data-soft-fade
+          className="mx-auto max-w-[22ch] py-16 text-center text-[clamp(1.75rem,4.5vw,3.25rem)] leading-[1.05] font-medium tracking-[-0.03em] sm:py-20 md:py-28"
+        >
+          {t('home.manifestoLineBefore')}{' '}
+          <em className="font-display font-normal italic text-accent">
+            {t('home.manifestoLineEm')}
+          </em>
+          {t('home.manifestoLineAfter')}
+        </p>
 
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
           <div className="flex items-baseline justify-between pt-4">
