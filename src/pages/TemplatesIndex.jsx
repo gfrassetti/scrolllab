@@ -526,6 +526,12 @@ export default function TemplatesIndex() {
               </em>
               <span data-hero-line> {t('home.heroLine3')}</span>
             </p>
+            <p
+              data-hero-meta
+              className="mt-5 max-w-[52ch] text-sm leading-relaxed text-ink/70 sm:mt-6 md:mt-8 md:text-base"
+            >
+              {t('home.heroBody')}
+            </p>
             <div
               data-hero-meta
               className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 sm:mt-10 md:mt-12"
@@ -553,17 +559,6 @@ export default function TemplatesIndex() {
             </div>
           </div>
         </section>
-
-        <p
-          data-soft-fade
-          className="mx-auto max-w-[22ch] py-16 text-center text-[clamp(1.75rem,4.5vw,3.25rem)] leading-[1.05] font-medium tracking-[-0.03em] sm:py-20 md:py-28"
-        >
-          {t('home.manifestoLineBefore')}{' '}
-          <em className="font-display font-normal italic text-accent">
-            {t('home.manifestoLineEm')}
-          </em>
-          {t('home.manifestoLineAfter')}
-        </p>
 
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
           <div className="flex items-baseline justify-between pt-4">
