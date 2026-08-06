@@ -28,6 +28,7 @@ import {
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
 import { SECTION_KINDS } from '../src/lib/sectionKinds.js'
+import { checkoutPropsFrom } from '../src/lib/shop/checkoutProps.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
@@ -202,6 +203,11 @@ function componentProps(file) {
   )
 }
 
+const COMMERCE_GRID_ID = 'commerce/ProductGrid'
+const checkoutProps = componentProps(
+  path.join(ROOT, 'src/components/sections/commerce/Checkout.jsx'),
+)
+
 for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   const [model, component] = id.split('/')
   const file = path.join(ROOT, 'src/components/sections', model, `${component}.jsx`)
@@ -212,6 +218,16 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   const props = componentProps(file)
   if (!props) continue
   for (const field of fields) {
+    // El checkout es una ruta, no una sección: sus textos se editan desde el
+    // ProductGrid con prefijo `checkout` y se reenvían a Checkout.jsx.
+    if (id === COMMERCE_GRID_ID && field.key.startsWith('checkout')) {
+      const forwarded = checkoutPropsFrom({ [field.key]: 'x' })
+      const [target] = Object.keys(forwarded)
+      if (!target || !checkoutProps?.has(target)) {
+        fail('props', `'${id}.${field.key}' es editable pero Checkout no recibe '${target}'`)
+      }
+      continue
+    }
     if (!props.has(field.key)) {
       fail('props', `'${id}.${field.key}' es editable pero ${component} no recibe esa prop`)
     }

@@ -4,7 +4,14 @@ import { installBrowserStorageMocks } from './storageMock.js'
 
 installBrowserStorageMocks()
 
-const { useCart, useCartNotice, cartLinePriceArs, cartLinePriceUsd } = await import('../cart.js')
+const {
+  useCart,
+  useCartNotice,
+  cartLinePriceArs,
+  cartLinePriceUsd,
+  markCheckoutIntent,
+  takeCheckoutIntent,
+} = await import('../cart.js')
 const { estimateCustomPriceUsd, arsFromUsd } = await import('../pricing.js')
 
 describe('useCart', () => {
@@ -136,5 +143,31 @@ describe('cartLinePriceUsd', () => {
       cartLinePriceUsd({ sku: 'custom', recipe }, catalog),
       estimateCustomPriceUsd(10, false),
     )
+  })
+})
+
+/**
+ * Apretar Pagar sin sesión manda al login: al volver, el carrito tiene que
+ * retomar el pago solo, y una sola vez.
+ */
+describe('intención de checkout', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  it('sin marca no retoma nada', () => {
+    assert.equal(takeCheckoutIntent(), false)
+  })
+
+  it('retoma una sola vez', () => {
+    markCheckoutIntent()
+    assert.equal(takeCheckoutIntent(), true)
+    assert.equal(takeCheckoutIntent(), false)
+  })
+
+  it('descarta una intención vieja', () => {
+    const now = Date.now()
+    markCheckoutIntent(now - 31 * 60 * 1000)
+    assert.equal(takeCheckoutIntent(now), false)
   })
 })

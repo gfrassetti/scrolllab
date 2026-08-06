@@ -847,7 +847,7 @@ export default function TemplatesIndex() {
 
           <div
             data-soft-fade
-            className="mt-12 flex flex-col items-center justify-center gap-6 border-y border-ink/15 px-5 py-6 text-center md:flex-row md:gap-10 md:px-10"
+            className="mt-12 flex flex-col items-center justify-center gap-8 border-y border-ink/15 px-5 py-14 text-center md:flex-row md:gap-16 md:px-10 md:py-20"
           >
             <div className="max-w-[42ch]">
               <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">

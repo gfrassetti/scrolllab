@@ -255,8 +255,11 @@ export async function createApp(config) {
   app.get(
     '/api/auth/google/callback',
     limits.auth,
+    // `logIn` regenera la sesión (anti session fixation) y se llevaría
+    // `authNext`: sin keepSessionInfo el comprador siempre cae en /account.
     passport.authenticate('google', {
       failureRedirect: `${config.clientUrl}/login?error=google_failed`,
+      keepSessionInfo: true,
     }),
     (req, res) => {
       const nextPath = sanitizeAuthReturn(req.session.authNext) || '/account'

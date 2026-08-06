@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { cartLinePriceArs, cartLinePriceUsd, useCart } from '../lib/cart'
+import {
+  cartLinePriceArs,
+  cartLinePriceUsd,
+  markCheckoutIntent,
+  takeCheckoutIntent,
+  useCart,
+} from '../lib/cart'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
@@ -48,8 +54,9 @@ export default function CartPage() {
     return showUsd ? formatUsd(amount) : formatArs(amount)
   }
 
-  const checkout = async () => {
+  const checkout = useCallback(async () => {
     if (!user) {
+      markCheckoutIntent()
       navigate('/login?next=/cart')
       return
     }
@@ -67,7 +74,16 @@ export default function CartPage() {
       setError(err.message)
       setBusy(false)
     }
-  }
+  }, [items, navigate, user])
+
+  // Volvió del login con el pago ya pedido: sigue derecho a Mercado Pago.
+  const resumed = useRef(false)
+  useEffect(() => {
+    if (resumed.current || !user || items.length === 0) return
+    if (!takeCheckoutIntent()) return
+    resumed.current = true
+    checkout()
+  }, [user, items.length, checkout])
 
   return (
     <div className="min-h-svh bg-bone text-ink">

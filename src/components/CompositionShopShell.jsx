@@ -35,7 +35,11 @@ function IsolatedRouterBoundary({ children }) {
  * Nested shop routes for builder /preview when the composition includes
  * commerce/ProductGrid. Packaged ZIPs use BrowserRouter instead (see packaging).
  */
-export default function CompositionShopShell({ home, theme = 'auto' }) {
+export default function CompositionShopShell({
+  home,
+  theme = 'auto',
+  checkoutProps,
+}) {
   return (
     <IsolatedRouterBoundary>
       <ShopThemeProvider theme={theme} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
@@ -63,7 +67,7 @@ export default function CompositionShopShell({ home, theme = 'auto' }) {
               path="/checkout"
               element={
                 <>
-                  <Checkout />
+                  <Checkout {...(checkoutProps || {})} />
                   <ShopChrome />
                 </>
               }

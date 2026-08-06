@@ -214,7 +214,7 @@ export const models = [
         kind: 'section',
         component: ProductGrid,
         blurb:
-          'Catalog on the page; product, cart and checkout as separate screens (demo payment)',
+          'Catalog on the page; PDP, cart and a full checkout (shipping, discount code, thumbnail summary) as separate screens',
       },
     ],
   },

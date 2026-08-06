@@ -10,6 +10,7 @@ import { recipeSectionId } from './catalog.js'
 // differently, the ZIP would not match what the user approved on screen.
 import { resolveSectionTheme } from '../src/lib/sectionTheme.js'
 import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
+import { checkoutPropsFromItems } from '../src/lib/shop/checkoutProps.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -209,6 +210,17 @@ function propsToJsx(props) {
       return ` ${k}={${escaped}}`
     })
     .join('')
+}
+
+/** Los `checkout*` del ProductGrid son para la ruta /checkout, no para la grilla. */
+function stripCheckoutProps(props) {
+  if (!props || typeof props !== 'object') return props
+  const out = {}
+  for (const [key, value] of Object.entries(props)) {
+    if (key.startsWith('checkout')) continue
+    out[key] = value
+  }
+  return out
 }
 
 function modelWrapperClass(model) {
@@ -502,6 +514,15 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
       sources.push(body.toString('utf8'))
       archive.append(body, { name: rel })
     }
+    // Fotos del catálogo demo importadas por products.js.
+    const shopAssets = path.join(ROOT, 'src', 'lib', 'shop', 'assets')
+    if (fs.existsSync(shopAssets)) {
+      for (const file of fs.readdirSync(shopAssets)) {
+        archive.append(fs.readFileSync(path.join(shopAssets, file)), {
+          name: `src/lib/shop/assets/${file}`,
+        })
+      }
+    }
   }
 
   const imports = []
@@ -532,13 +553,24 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
       packedModels.add(model)
       const modelDir = path.join(ROOT, 'src', 'components', 'sections', model)
       if (fs.existsSync(modelDir)) {
-        for (const file of fs.readdirSync(modelDir)) {
-          if (!file.endsWith('.jsx')) continue
-          const rel = path.posix.join('src/components/sections', model, file)
-          const body = fs.readFileSync(path.join(modelDir, file))
-          sources.push(body.toString('utf8'))
-          archive.append(body, { name: rel })
+        // Recursivo: las secciones importan sus fotos desde `assets/`, y sin
+        // ellas el ZIP del comprador ni siquiera compila.
+        const walk = (absDir, relBase) => {
+          for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
+            const abs = path.join(absDir, entry.name)
+            const rel = path.posix.join(relBase, entry.name)
+            if (entry.isDirectory()) {
+              walk(abs, rel)
+              continue
+            }
+            const body = fs.readFileSync(abs)
+            if (entry.name.endsWith('.jsx') || entry.name.endsWith('.js')) {
+              sources.push(body.toString('utf8'))
+            }
+            archive.append(body, { name: rel })
+          }
         }
+        walk(modelDir, path.posix.join('src/components/sections', model))
       }
     }
 
@@ -552,7 +584,11 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
     const wrapper = modelWrapperClass(model)
     const Comp = `${component}_${model}`
     const theme = resolveSectionTheme(sectionId, entry.props, modelIds, i)
-    const attrs = propsToJsx(theme ? { ...entry.props, theme } : entry.props)
+    const ownProps =
+      sectionId === 'commerce/ProductGrid'
+        ? stripCheckoutProps(entry.props)
+        : entry.props
+    const attrs = propsToJsx(theme ? { ...ownProps, theme } : ownProps)
     renderLines.push(
       `        <div key="${i}" className="${wrapper}"><${Comp}${attrs} /></div>`,
     )
@@ -567,6 +603,8 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
         resolveSectionTheme,
       )
     : 'auto'
+
+  const checkoutAttrs = needsShop ? propsToJsx(checkoutPropsFromItems(entries)) : ''
 
   let appSrc
   if (needsShop) {
@@ -611,7 +649,7 @@ export default function App() {
             path="/checkout"
             element={
               <>
-                <Checkout />
+                <Checkout${checkoutAttrs} />
                 <ShopChrome />
               </>
             }
@@ -654,7 +692,7 @@ ${renderLines.join('\n')}
   if (idList.includes('monolith/HeroThree')) readme += `\n${MODEL_3D_NOTES.monolith}`
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
   if (needsShop) {
-    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — summary + mock pay\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
+    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
   }
 
   archive.append(

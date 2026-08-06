@@ -38,6 +38,35 @@ export function cartLinePriceUsd(item, catalog) {
   )
 }
 
+const CHECKOUT_INTENT_KEY = 'scrolllab-checkout-intent'
+/** Ventana para retomar el pago: más viejo que esto ya no es el mismo intento. */
+const CHECKOUT_INTENT_TTL_MS = 30 * 60 * 1000
+
+/**
+ * El comprador ya apretó Pagar pero le faltaba sesión. Al volver del login
+ * el carrito retoma solo el checkout en vez de pedirle otro click.
+ */
+export function markCheckoutIntent(now = Date.now()) {
+  try {
+    sessionStorage.setItem(CHECKOUT_INTENT_KEY, String(now))
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Devuelve si había intención vigente y la consume (no se repite). */
+export function takeCheckoutIntent(now = Date.now()) {
+  try {
+    const raw = sessionStorage.getItem(CHECKOUT_INTENT_KEY)
+    sessionStorage.removeItem(CHECKOUT_INTENT_KEY)
+    const at = Number(raw)
+    if (!Number.isFinite(at) || at <= 0) return false
+    return now - at <= CHECKOUT_INTENT_TTL_MS
+  } catch {
+    return false
+  }
+}
+
 export const useCartNotice = create((set) => ({
   notice: null,
   show: (item, { already = false, updated = false } = {}) =>

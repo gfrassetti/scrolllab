@@ -7,6 +7,7 @@ import {
 } from '../lib/composition'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
+import { checkoutPropsFromItems } from '../lib/shop/checkoutProps'
 import { useCart } from '../lib/cart'
 import { api } from '../lib/api'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
@@ -153,6 +154,7 @@ export default function PreviewPage() {
 
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
+  const checkoutProps = checkoutPropsFromItems(items)
 
   const home = (
     <SmoothScrollProvider>
@@ -163,7 +165,11 @@ export default function PreviewPage() {
   return (
     <>
       {hasCommerce ? (
-        <CompositionShopShell home={home} theme={shopTheme} />
+        <CompositionShopShell
+          home={home}
+          theme={shopTheme}
+          checkoutProps={checkoutProps}
+        />
       ) : (
         home
       )}
