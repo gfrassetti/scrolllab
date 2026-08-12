@@ -1,7 +1,7 @@
 {
   "name": "SCROLL LAB",
   "short_name": "SCROLL LAB",
-  "description": "Plantillas web / Storytelling templates, con el código fuente incluido.",
+  "description": "Plantillas web minimalistas / web templates con código fuente React.",
   "lang": "es-AR",
   "start_url": "/",
   "scope": "/",

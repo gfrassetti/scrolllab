@@ -14,11 +14,21 @@
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2efe9" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131313" />
 
-    <title>SCROLL LAB — Plantillas web · Storytelling templates</title>
+    <!--
+      SEO: categoría = plantillas web / web templates (mismo radar que Envato, etc.).
+      Diferencial = minimalistas + storytelling + código fuente React.
+    -->
+    <title>SCROLL LAB — Plantillas web | Web templates</title>
     <meta
       name="description"
-      content="Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable y listo para publicar."
+      content="Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar."
     />
+    <meta
+      name="keywords"
+      content="plantillas web, web templates, website templates, plantillas para sitios web, react templates, plantillas minimalistas, storytelling templates, landing page templates, plantillas HTML, código fuente"
+    />
+    <meta name="author" content="SCROLL LAB" />
+    <meta name="application-name" content="SCROLL LAB" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://www.scrolllab.com.ar/" />
 
@@ -26,14 +36,15 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SCROLL LAB" />
     <meta property="og:locale" content="es_AR" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:url" content="https://www.scrolllab.com.ar/" />
     <meta
       property="og:title"
-      content="SCROLL LAB — Plantillas web · Storytelling templates"
+      content="SCROLL LAB — Plantillas web | Web templates"
     />
     <meta
       property="og:description"
-      content="Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable y listo para publicar."
+      content="Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar."
     />
     <meta property="og:image" content="https://www.scrolllab.com.ar/og.png" />
     <meta property="og:image:type" content="image/png" />
@@ -41,23 +52,23 @@
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="SCROLL LAB — plantillas web / storytelling templates, código fuente y licencia"
+      content="SCROLL LAB — plantillas web minimalistas / web templates con código fuente"
     />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="SCROLL LAB — Plantillas web · Storytelling templates"
+      content="SCROLL LAB — Plantillas web | Web templates"
     />
     <meta
       name="twitter:description"
-      content="Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable y listo para publicar."
+      content="Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar."
     />
     <meta name="twitter:image" content="https://www.scrolllab.com.ar/og.png" />
     <meta
       name="twitter:image:alt"
-      content="SCROLL LAB — plantillas web / storytelling templates, código fuente y licencia"
+      content="SCROLL LAB — plantillas web minimalistas / web templates con código fuente"
     />
 
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
@@ -74,11 +85,81 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "SCROLL LAB",
-        "url": "https://www.scrolllab.com.ar/",
-        "description": "Plantillas web / Storytelling templates: elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable y listo para publicar.",
-        "inLanguage": "es-AR"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.scrolllab.com.ar/#organization",
+            "name": "SCROLL LAB",
+            "url": "https://www.scrolllab.com.ar/",
+            "email": "hola@scrolllab.com.ar",
+            "logo": "https://www.scrolllab.com.ar/logo.svg",
+            "description": "Marketplace de plantillas web minimalistas con storytelling. Web templates con código fuente React para desarrolladores."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.scrolllab.com.ar/#website",
+            "name": "SCROLL LAB",
+            "url": "https://www.scrolllab.com.ar/",
+            "description": "Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar.",
+            "inLanguage": ["es-AR", "en"],
+            "publisher": { "@id": "https://www.scrolllab.com.ar/#organization" }
+          },
+          {
+            "@type": "ItemList",
+            "@id": "https://www.scrolllab.com.ar/#templates",
+            "name": "Plantillas web / web templates",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "CHAPTERS — plantilla web editorial",
+                "url": "https://www.scrolllab.com.ar/templates/chapters"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "NOCTURNE — plantilla web cinematográfica",
+                "url": "https://www.scrolllab.com.ar/templates/nocturne"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "MONOLITH — plantilla web brutalista",
+                "url": "https://www.scrolllab.com.ar/templates/monolith"
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "VELOCITY — plantilla web athlete",
+                "url": "https://www.scrolllab.com.ar/templates/velocity"
+              },
+              {
+                "@type": "ListItem",
+                "position": 5,
+                "name": "FIZZ — plantilla web product pop",
+                "url": "https://www.scrolllab.com.ar/templates/fizz"
+              },
+              {
+                "@type": "ListItem",
+                "position": 6,
+                "name": "ATELIER — plantilla web studio WebGL",
+                "url": "https://www.scrolllab.com.ar/templates/atelier"
+              },
+              {
+                "@type": "ListItem",
+                "position": 7,
+                "name": "COMIC — plantilla web narrativa",
+                "url": "https://www.scrolllab.com.ar/templates/comic"
+              },
+              {
+                "@type": "ListItem",
+                "position": 8,
+                "name": "UNITY — plantilla web editorial deportiva",
+                "url": "https://www.scrolllab.com.ar/templates/unity"
+              }
+            ]
+          }
+        ]
       }
     </script>
   </head>
