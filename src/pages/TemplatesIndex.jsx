@@ -8,6 +8,8 @@ import BrandSplash from '../components/BrandSplash'
 import HomeContact from '../components/HomeContact'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
 import { useCart } from '../lib/cart'
+import { startCheckout } from '../lib/startCheckout'
+import { useAuth } from '../lib/auth'
 import {
   BUNDLE_PRICE_USD,
   CUSTOM_BASE_PRICE_USD,
@@ -137,11 +139,31 @@ function TemplatePoster({ template, index = 0 }) {
 export default function TemplatesIndex() {
   const root = useRef(null)
   const addItem = useCart((s) => s.addItem)
+  const { user, loading: authLoading } = useAuth()
   const { hash } = useLocation()
   const navigate = useNavigate()
   const { t, locale } = useI18n()
   const { rate } = useFxRate()
   const [introReady, setIntroReady] = useState(false)
+  const [buyingSku, setBuyingSku] = useState(null)
+
+  /** Comprar → Mercado Pago (login si hace falta). Al carrito sigue aparte. */
+  const buyNow = async (cartItem) => {
+    if (buyingSku || authLoading) return
+    addItem(cartItem)
+    setBuyingSku(cartItem.sku)
+    try {
+      const result = await startCheckout({
+        items: useCart.getState().items,
+        user,
+        navigate,
+      })
+      if (result !== 'redirect') setBuyingSku(null)
+    } catch {
+      navigate('/cart')
+      setBuyingSku(null)
+    }
+  }
 
   const templates = useMemo(
     () =>
@@ -680,18 +702,20 @@ export default function TemplatesIndex() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        addItem({
+                      disabled={Boolean(buyingSku) || authLoading}
+                      onClick={() =>
+                        buyNow({
                           sku: template.sku,
                           title: t('common.cartItemTitle', {
                             name: template.name,
                           }),
                         })
-                        navigate('/cart')
-                      }}
-                      className="ui-press min-h-11 px-1 text-ink hover:text-accent"
+                      }
+                      className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
                     >
-                      {t('common.buy')}
+                      {buyingSku === template.sku
+                        ? t('cart.redirecting')
+                        : t('common.buy')}
                     </button>
                   </div>
                 </article>
@@ -755,13 +779,18 @@ export default function TemplatesIndex() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
-                  navigate('/cart')
-                }}
-                className="ui-press min-h-11 px-1 text-ink hover:text-accent"
+                disabled={Boolean(buyingSku) || authLoading}
+                onClick={() =>
+                  buyNow({
+                    sku: 'bundle',
+                    title: t('home.bundleCartTitle'),
+                  })
+                }
+                className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
               >
-                {t('common.buy')}
+                {buyingSku === 'bundle'
+                  ? t('cart.redirecting')
+                  : t('common.buy')}
               </button>
             </div>
           </div>

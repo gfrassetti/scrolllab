@@ -17,6 +17,7 @@ import CartPopover from '../components/CartPopover'
 import ThemeToggle from '../components/ThemeToggle'
 import LanguageSelector from '../components/LanguageSelector'
 import { useCart } from '../lib/cart'
+import { startCheckout } from '../lib/startCheckout'
 import { useAuth } from '../lib/auth'
 import { useI18n } from '../i18n'
 
@@ -139,15 +140,20 @@ export default function BuilderPage() {
     addToCart(compositionCartItem())
   }
 
-  const buyComposition = () => {
+  const buyComposition = async () => {
     if (items.length === 0) return
-    if (!user) {
-      // Solo login: no tocar el carrito. Al volver, el user elige carrito o comprar.
-      navigate('/login?next=/builder')
-      return
+    const cartItem = compositionCartItem()
+    addToCart(cartItem)
+    try {
+      await startCheckout({
+        items: useCart.getState().items,
+        user,
+        navigate,
+      })
+    } catch {
+      // Si falla el redirect, el carrito ya tiene la composición para reintentar.
+      navigate('/cart')
     }
-    addToCart(compositionCartItem())
-    navigate('/cart')
   }
 
   const handleAddSection = (sectionId, atIndex) => {

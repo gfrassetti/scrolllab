@@ -6,10 +6,10 @@ import { useAuth } from '../lib/auth'
 import {
   cartLinePriceArs,
   cartLinePriceUsd,
-  markCheckoutIntent,
   takeCheckoutIntent,
   useCart,
 } from '../lib/cart'
+import { startCheckout } from '../lib/startCheckout'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
@@ -55,21 +55,12 @@ export default function CartPage() {
   }
 
   const checkout = useCallback(async () => {
-    if (!user) {
-      markCheckoutIntent()
-      navigate('/login?next=/cart')
-      return
-    }
     setBusy(true)
     setError('')
     try {
-      const payload = items.map((i) => ({
-        sku: i.sku,
-        title: i.title,
-        recipe: i.recipe,
-      }))
-      const data = await api.checkout(payload)
-      window.location.href = data.init_point
+      const result = await startCheckout({ items, user, navigate })
+      // redirect a MP: dejamos busy. login: liberamos por si vuelve con atrás.
+      if (result !== 'redirect') setBusy(false)
     } catch (err) {
       setError(err.message)
       setBusy(false)
