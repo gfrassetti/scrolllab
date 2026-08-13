@@ -239,3 +239,12 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 - Ignorar bóvedas duplicadas `graphify` / `obsidian` salvo que el usuario diga lo contrario
 
 Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre” Obsidian UI: lee los `.md` del vault cuando aportan contexto.
+
+## Cursor Cloud specific instructions
+
+### MCP: Meshy (generación de assets 3D)
+
+- Config del servidor MCP en `.cursor/mcp.json` (server `meshy` → `npx -y @meshy-ai/meshy-mcp-server`). **Ese archivo está gitignored**, así que no viaja con el repo: si no existe, recrealo con esa entrada.
+- La API key va **solo** como secret `MESHY_API_KEY` (empieza con `msy_`), referenciada en `mcp.json` como `"MESHY_API_KEY": "${env:MESHY_API_KEY}"`. Nunca hardcodear ni commitear la key (los docs de Meshy lo advierten; consume créditos de la cuenta).
+- El server **valida la key contra `https://api.meshy.ai` al arrancar**: sin una key válida no levanta (`Invalid MESHY_API_KEY`) y las tools no aparecen. Tras setear el secret, activá el server en el panel MCP de Cursor.
+- Encaja con el uso de Three.js/WebGL del catálogo; `meshy_output/` ya está gitignored para las salidas.
