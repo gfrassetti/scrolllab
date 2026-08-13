@@ -560,7 +560,6 @@ export default function TemplatesIndex() {
                     text: t('home.heroLine2'),
                     className: 'font-display font-normal italic text-accent',
                   },
-                  t('home.heroLine3'),
                 ]}
                 aria-label={t('playableHeadline.aria')}
               />
