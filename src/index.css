@@ -144,8 +144,15 @@ body {
   background: color-mix(in srgb, var(--market-ink) 12%, transparent);
   color: inherit;
 }
+/* Tamaños H2/H3 claramente distintos del H1 del hero */
+.playable-headline[data-block='h2'] {
+  font-size: clamp(1.15rem, 0.7rem + 1.8vw, 1.95rem) !important;
+}
+.playable-headline[data-block='h3'] {
+  font-size: clamp(0.95rem, 0.6rem + 1.2vw, 1.35rem) !important;
+}
 
-/* Toolbar: cero scrollbars (ni X ni Y). Los menús viven fuera del pill. */
+/* Toolbar: cero scrollbars. Menús fuera del pill. */
 .playable-toolbar {
   overflow: visible !important;
   overflow-x: visible !important;
@@ -159,6 +166,13 @@ body {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* Menú Turn into: siempre opaco (dark mode / stacking no lo vuelven vidrio) */
+.playable-block-menu {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  isolation: isolate;
 }
 
 /* ——— UI motion utilities (Emil Kowalski) ——— */
