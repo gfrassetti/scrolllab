@@ -163,3 +163,102 @@ describe('fulfillApprovedPayment (file store)', () => {
     )
   })
 })
+
+describe('sendOrderReceiptOnce (file store)', () => {
+  let db
+  let sendOrderReceiptOnce
+  let storageDir
+
+  before(async () => {
+    process.env.NODE_ENV = 'development'
+    process.env.STORE = 'file'
+    storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-email-'))
+    process.env.STORAGE_DIR = storageDir
+    process.env.FILE_DB_DIR = path.join(storageDir, 'db')
+
+    ;({ db } = await import('../db.js'))
+    ;({ sendOrderReceiptOnce } = await import('../services/email.js'))
+  })
+
+  after(() => {
+    try {
+      fs.rmSync(storageDir, { recursive: true, force: true })
+    } catch {
+      /* ignore */
+    }
+  })
+
+  async function seedPaidOrder() {
+    const tag = `email-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const user = await db.createUser({
+      email: `${tag}@test.com`,
+      name: 'Buyer',
+      googleId: `dev-${tag}`,
+    })
+    const created = await db.createOrder({
+      userId: db.uid(user),
+      status: 'pending',
+      items: [
+        {
+          sku: 'chapters',
+          title: 'CHAPTERS',
+          unit_price: 12000,
+          currency_id: 'ARS',
+        },
+      ],
+      total: 12000,
+      currency_id: 'ARS',
+    })
+    const { order } = await db.markOrderPaidAtomic({
+      orderId: created.id,
+      mpPaymentId: `mp-${tag}`,
+    })
+    return { user, order }
+  }
+
+  it('sin email enabled hace skip', async () => {
+    const { user, order } = await seedPaidOrder()
+    const result = await sendOrderReceiptOnce({
+      order,
+      user,
+      config: {
+        clientUrl: 'http://localhost:5173',
+        email: { enabled: false },
+      },
+      client: { emails: { send: async () => assert.fail('no debía llamar Resend') } },
+    })
+    assert.equal(result.skipped, 'disabled')
+  })
+
+  it('envía una sola vez con client mock (idempotente)', async () => {
+    const { user, order } = await seedPaidOrder()
+    const calls = []
+    const client = {
+      emails: {
+        send: async (body, opts) => {
+          calls.push({ body, opts })
+          return { data: { id: 're_test_123' }, error: null }
+        },
+      },
+    }
+    const config = {
+      clientUrl: 'http://localhost:5173',
+      email: {
+        enabled: true,
+        apiKey: 're_test',
+        from: 'SCROLLLAB <compras@scrolllab.com.ar>',
+        replyTo: 'hola@scrolllab.com.ar',
+      },
+    }
+
+    const first = await sendOrderReceiptOnce({ order, user, config, client })
+    assert.equal(first.sent, true)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].body.to[0], user.email)
+    assert.equal(calls[0].opts.idempotencyKey, `scrolllab-order-${order.id}`)
+
+    const second = await sendOrderReceiptOnce({ order, user, config, client })
+    assert.equal(second.skipped, 'already-sent-or-in-progress')
+    assert.equal(calls.length, 1)
+  })
+})

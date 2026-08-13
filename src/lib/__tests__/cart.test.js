@@ -92,6 +92,14 @@ describe('useCart', () => {
     assert.equal('unit_price' in checkoutPayload, false)
     assert.equal(checkoutPayload.sku, 'custom')
   })
+
+  it('vacía todos los ítems de una', () => {
+    useCart.getState().addItem({ sku: 'chapters', title: 'CHAPTERS' })
+    useCart.getState().addItem({ sku: 'fizz', title: 'FIZZ' })
+    assert.equal(useCart.getState().items.length, 2)
+    useCart.getState().clear()
+    assert.equal(useCart.getState().items.length, 0)
+  })
 })
 
 describe('cartLinePriceArs', () => {
