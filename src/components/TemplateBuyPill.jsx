@@ -19,10 +19,10 @@ const POSTERS = {
 }
 
 /**
- * Pill flotante estilo demos Framer (Orionix): thumb + precio → hover “Get Template”.
- * Solo marketplace (páginas /templates/*); no va en los ZIP vendidos.
+ * Pill flotante estilo Orionix: thumb + precio → hover “Get Template”.
+ * Solo homepage del marketplace; no va en los ZIP vendidos.
  */
-export default function TemplateBuyPill({ sku, name }) {
+export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
   const { t, locale } = useI18n()
   const { rate } = useFxRate()
   const { user, loading: authLoading } = useAuth()
@@ -52,8 +52,15 @@ export default function TemplateBuyPill({ sku, name }) {
     }
   }
 
+  const place =
+    placement === 'center'
+      ? 'inset-x-0 justify-center px-4'
+      : 'right-4 justify-end sm:right-6 md:right-10'
+
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-5 z-[60] flex justify-center px-4 md:bottom-7">
+    <div
+      className={`pointer-events-none fixed bottom-5 z-[60] flex md:bottom-7 ${place}`}
+    >
       <button
         type="button"
         disabled={busy || authLoading}

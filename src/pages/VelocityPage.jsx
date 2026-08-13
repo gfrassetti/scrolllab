@@ -1,5 +1,4 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
-import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavVelocity from '../components/sections/velocity/NavVelocity'
 import HeroStrike from '../components/sections/velocity/HeroStrike'
 import TrackMerge from '../components/sections/velocity/TrackMerge'
@@ -25,7 +24,6 @@ export default function VelocityPage() {
           <ParallaxRise />
         </main>
         <FooterVelocity />
-        <TemplateBuyPill sku="velocity" name="VELOCITY" />
       </div>
     </SmoothScrollProvider>
   )

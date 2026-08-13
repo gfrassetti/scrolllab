@@ -6,6 +6,7 @@ import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
 import PlayableHeadline from '../components/PlayableHeadline'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import HomeContact from '../components/HomeContact'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
 import { useCart } from '../lib/cart'
@@ -271,8 +272,8 @@ export default function TemplatesIndex() {
         }
       }
 
-      // Title + tagline: revelado por caracteres (como está).
-      const split = new SplitText('[data-hero-line]', {
+      // Brand wordmark: revelado por caracteres. El H1 jugable no usa SplitText.
+      const split = new SplitText('[data-hero-brand]', {
         type: 'chars',
         mask: 'chars',
       })
@@ -283,6 +284,14 @@ export default function TemplatesIndex() {
         ease: 'power4.out',
         stagger: { each: 0.025 },
         delay: 0.15,
+      })
+
+      gsap.from('[data-hero-playable]', {
+        opacity: 0,
+        y: 18,
+        duration: 0.9,
+        ease: 'power3.out',
+        delay: 0.45,
       })
 
       gsap.from('[data-hero-meta]', {
@@ -532,30 +541,37 @@ export default function TemplatesIndex() {
               <span data-hero-logo className="shrink-0 self-center">
                 <Logo className="size-[clamp(2rem,1.25rem+6vw,3.25rem)] md:size-[clamp(3.5rem,5vw+1.5rem,6.5rem)] xl:size-[clamp(5.5rem,6vw,8.5rem)]" />
               </span>
-              <div className="min-w-0 flex-1">
-                <PlayableHeadline
-                  className="min-w-0 font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
-                  lines={[SITE_NAME]}
-                  aria-label={t('playableHeadline.aria')}
-                />
-                <p
-                  data-hero-meta
-                  className="mt-2 text-[10px] uppercase tracking-[0.22em] text-ink/40 md:text-[11px]"
-                >
-                  {t('playableHeadline.hint')}
-                </p>
-              </div>
-            </div>
-            <p className="mt-5 max-w-[20ch] text-[clamp(1.25rem,1rem+2vw,1.75rem)] leading-[1.1] font-medium tracking-[-0.02em] text-ink/80 sm:mt-6 sm:max-w-[22ch] sm:text-[clamp(1.4rem,1rem+2.2vw,2.2rem)] md:mt-10 md:text-[clamp(1.6rem,1rem+2vw,2.6rem)]">
-              <span data-hero-line>{t('home.heroLine1')} </span>
-              <em
-                data-hero-line
-                className="font-display font-normal italic text-accent"
+              <p
+                data-hero-brand
+                className="min-w-0 select-none font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
               >
-                {t('home.heroLine2')}
-              </em>
-              <span data-hero-line> {t('home.heroLine3')}</span>
-            </p>
+                {SITE_NAME}
+              </p>
+            </div>
+
+            {/* H1 jugable estilo Orionix: tocá → toolbar (no persiste) */}
+            <div data-hero-playable className="mt-5 sm:mt-6 md:mt-10">
+              <PlayableHeadline
+                key={locale}
+                className="max-w-[16ch] text-[clamp(1.75rem,1rem+3.5vw,3.25rem)] leading-[1.05] font-medium tracking-[-0.03em] sm:max-w-[18ch] md:text-[clamp(2.25rem,1.2rem+3vw,3.75rem)]"
+                lines={[
+                  t('home.heroLine1'),
+                  {
+                    text: t('home.heroLine2'),
+                    className: 'font-display font-normal italic text-accent',
+                  },
+                  t('home.heroLine3'),
+                ]}
+                aria-label={t('playableHeadline.aria')}
+              />
+              <p
+                data-hero-meta
+                className="mt-3 text-[10px] uppercase tracking-[0.22em] text-ink/40 md:text-[11px]"
+              >
+                {t('playableHeadline.hint')}
+              </p>
+            </div>
+
             <p
               data-hero-meta
               className="mt-5 max-w-[52ch] text-sm leading-relaxed text-ink/70 sm:mt-6 md:mt-8 md:text-base"
@@ -1112,6 +1128,8 @@ export default function TemplatesIndex() {
           </a>
         </div>
       </footer>
+
+      <TemplateBuyPill sku="atelier" name="ATELIER" placement="end" />
     </div>
   )
 }
