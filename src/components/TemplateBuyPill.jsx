@@ -19,9 +19,8 @@ const POSTERS = {
 }
 
 /**
- * Pill flotante estilo Orionix: thumb + precio → hover “Get Template”.
- * Solo homepage del marketplace; no va en los ZIP vendidos.
- * Idle = tamaño normal; solo crece en hover (scale 1.02).
+ * Pill flotante compacto estilo Orionix.
+ * Idle chico; solo crece un poco en hover.
  */
 export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
   const { t, locale } = useI18n()
@@ -67,10 +66,9 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
         disabled={busy || authLoading}
         onClick={buy}
         aria-label={t('demoBuy.aria', { name })}
-        className="group pointer-events-auto relative flex max-w-full origin-bottom-right scale-100 items-center gap-3 rounded-full border border-white/10 bg-[#0a0a0a] py-2 pr-5 pl-2 text-left text-white shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.02] hover:shadow-[0_16px_48px_rgba(0,0,0,0.45)] active:scale-[0.98] disabled:opacity-60"
+        className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98] disabled:opacity-60"
       >
-        {/* Borde blanco solo en la miniatura (1px, sin agrandar el pill) */}
-        <span className="relative h-11 w-16 shrink-0 overflow-hidden rounded-full border border-white bg-white/10 sm:h-12 sm:w-[4.5rem]">
+        <span className="relative h-8 w-11 shrink-0 overflow-hidden rounded-[10px] border border-white bg-white/10 sm:h-9 sm:w-12">
           {poster ? (
             <img
               src={poster}
@@ -81,18 +79,18 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
           ) : null}
         </span>
 
-        <span className="relative min-h-10 min-w-[7.5rem] overflow-hidden pr-1 sm:min-w-[8.5rem]">
-          <span className="flex h-full flex-col justify-center leading-tight transition-all duration-300 ease-[var(--ease-drawer)] group-hover:-translate-y-1.5 group-hover:opacity-0 group-focus-visible:-translate-y-1.5 group-focus-visible:opacity-0">
-            <span className="truncate text-[13px] font-semibold tracking-tight">
+        <span className="relative min-h-8 min-w-[5.75rem] overflow-hidden pr-0.5 sm:min-w-[6.25rem]">
+          <span className="flex h-full flex-col justify-center leading-tight transition-all duration-300 ease-[var(--ease-drawer)] group-hover:-translate-y-1 group-hover:opacity-0 group-focus-visible:-translate-y-1 group-focus-visible:opacity-0">
+            <span className="truncate text-[11px] font-semibold tracking-tight">
               {name}
             </span>
-            <span className="truncate text-[12px] text-white/55">
+            <span className="truncate text-[10px] text-white/55">
               {t('demoBuy.only')}{' '}
               <span className="text-white">{priceLabel || '—'}</span>
             </span>
           </span>
 
-          <span className="pointer-events-none absolute inset-0 flex items-center gap-1.5 text-[13px] font-semibold tracking-tight opacity-0 transition-all duration-300 ease-[var(--ease-drawer)] translate-y-1.5 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+          <span className="pointer-events-none absolute inset-0 flex items-center gap-1 text-[11px] font-semibold tracking-tight opacity-0 transition-all duration-300 ease-[var(--ease-drawer)] translate-y-1 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
             {busy ? t('cart.redirecting') : t('demoBuy.getTemplate')}
             {!busy && <span aria-hidden="true">→</span>}
           </span>

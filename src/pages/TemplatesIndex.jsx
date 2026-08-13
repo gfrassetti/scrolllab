@@ -286,7 +286,7 @@ export default function TemplatesIndex() {
         delay: 0.15,
       })
 
-      gsap.from('[data-hero-playable]', {
+      gsap.from('.playable-headline', {
         opacity: 0,
         y: 18,
         duration: 0.9,

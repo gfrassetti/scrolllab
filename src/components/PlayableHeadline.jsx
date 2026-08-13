@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const BLOCKS = [
   { value: 'h1', label: 'Heading 1', short: 'H1' },
@@ -33,8 +34,8 @@ function selectEditorContents(el) {
 }
 
 /**
- * Título jugable estilo Orionix: toolbar siempre visible, sin caret de input.
- * Turn into → H1 / H2 / H3 con tamaño real distinto. No persiste.
+ * Título jugable estilo Orionix.
+ * Menús en portal (body) → opacos de verdad, sin heredar opacity del hero GSAP.
  */
 export default function PlayableHeadline({
   as: Tag = 'h1',
@@ -45,18 +46,52 @@ export default function PlayableHeadline({
 }) {
   const editorRef = useRef(null)
   const rootRef = useRef(null)
+  const blockBtnRef = useRef(null)
+  const colorBtnRef = useRef(null)
+  const blockMenuRef = useRef(null)
+  const colorMenuRef = useRef(null)
   const toolbarId = useId()
   const [block, setBlock] = useState('h1')
   const [blockOpen, setBlockOpen] = useState(false)
   const [colorOpen, setColorOpen] = useState(false)
+  const [blockPos, setBlockPos] = useState({ top: 0, left: 0 })
+  const [colorPos, setColorPos] = useState({ top: 0, left: 0 })
+
+  const syncMenuPositions = () => {
+    if (blockOpen && blockBtnRef.current) {
+      const r = blockBtnRef.current.getBoundingClientRect()
+      setBlockPos({ top: r.bottom + 8, left: r.left })
+    }
+    if (colorOpen && colorBtnRef.current) {
+      const r = colorBtnRef.current.getBoundingClientRect()
+      setColorPos({ top: r.bottom + 8, left: r.right })
+    }
+  }
+
+  useLayoutEffect(() => {
+    syncMenuPositions()
+  }, [blockOpen, colorOpen])
+
+  useEffect(() => {
+    if (!blockOpen && !colorOpen) return undefined
+    const onScrollOrResize = () => syncMenuPositions()
+    window.addEventListener('resize', onScrollOrResize)
+    window.addEventListener('scroll', onScrollOrResize, true)
+    return () => {
+      window.removeEventListener('resize', onScrollOrResize)
+      window.removeEventListener('scroll', onScrollOrResize, true)
+    }
+  }, [blockOpen, colorOpen])
 
   useEffect(() => {
     if (!blockOpen && !colorOpen) return undefined
     const onPointerDown = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) {
-        setBlockOpen(false)
-        setColorOpen(false)
-      }
+      const t = e.target
+      if (rootRef.current?.contains(t)) return
+      if (blockMenuRef.current?.contains(t)) return
+      if (colorMenuRef.current?.contains(t)) return
+      setBlockOpen(false)
+      setColorOpen(false)
     }
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -104,6 +139,101 @@ export default function PlayableHeadline({
   }
 
   const current = BLOCKS.find((b) => b.value === block) || BLOCKS[0]
+  const canPortal = typeof document !== 'undefined'
+
+  const blockMenu =
+    blockOpen && canPortal
+      ? createPortal(
+          <div
+            ref={blockMenuRef}
+            role="menu"
+            aria-label="Turn into"
+            className="playable-block-menu fixed z-[200] min-w-[12rem] rounded-2xl border border-black/10 py-1.5 text-[#161412] shadow-[0_16px_40px_rgba(0,0,0,0.22)]"
+            style={{
+              top: blockPos.top,
+              left: blockPos.left,
+              backgroundColor: '#ffffff',
+              opacity: 1,
+            }}
+          >
+            <p className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-black/40">
+              Turn into
+            </p>
+            {BLOCKS.map((b) => (
+              <button
+                key={b.value}
+                type="button"
+                role="menuitem"
+                onPointerDown={(e) => {
+                  // pointerdown: aplica antes de que un outside-close cancele el click
+                  e.preventDefault()
+                  e.stopPropagation()
+                  applyBlock(b.value)
+                }}
+                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left whitespace-nowrap transition-colors hover:bg-black/5 ${
+                  block === b.value ? 'bg-black/[0.04]' : ''
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-black/10 bg-white font-semibold text-black/55"
+                  style={{
+                    fontSize:
+                      b.value === 'h1' ? 12 : b.value === 'h2' ? 10 : 9,
+                  }}
+                >
+                  {b.short}
+                </span>
+                <span
+                  className="font-medium text-[#161412]"
+                  style={{
+                    fontSize:
+                      b.value === 'h1' ? 16 : b.value === 'h2' ? 14 : 12,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {b.label}
+                </span>
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )
+      : null
+
+  const colorMenu =
+    colorOpen && canPortal
+      ? createPortal(
+          <div
+            ref={colorMenuRef}
+            className="fixed z-[200] flex gap-1.5 rounded-full border border-black/10 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
+            style={{
+              top: colorPos.top,
+              left: colorPos.left,
+              transform: 'translateX(-100%)',
+              backgroundColor: '#ffffff',
+              opacity: 1,
+            }}
+          >
+            {COLORS.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                title={c.label}
+                aria-label={c.label}
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  paint(c.value)
+                }}
+                className="h-6 w-6 rounded-full border border-black/15 ui-press"
+                style={{ background: c.value }}
+              />
+            ))}
+          </div>,
+          document.body,
+        )
+      : null
 
   return (
     <div ref={rootRef} className="relative">
@@ -146,12 +276,12 @@ export default function PlayableHeadline({
           aria-label="Text formatting"
           className="playable-toolbar inline-flex items-center gap-0.5 rounded-full border border-black/10 bg-white px-2 py-1.5 text-[#161412] shadow-[0_10px_32px_rgba(0,0,0,0.12)]"
           onMouseDown={(e) => {
-            // Evita que el contentEditable robe el foco; no cancelar clicks de botones.
             if (e.target.closest('button')) return
             e.preventDefault()
           }}
         >
           <button
+            ref={blockBtnRef}
             type="button"
             title="Turn into"
             aria-label="Turn into"
@@ -193,6 +323,7 @@ export default function PlayableHeadline({
           <span aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-black/10" />
 
           <ToolbarBtn
+            ref={colorBtnRef}
             label="Text color"
             onClick={() => {
               setColorOpen((v) => !v)
@@ -208,77 +339,18 @@ export default function PlayableHeadline({
             </span>
           </ToolbarBtn>
         </div>
-
-        {blockOpen && (
-          <div
-            role="menu"
-            aria-label="Turn into"
-            className="playable-block-menu absolute top-full left-0 z-[80] mt-2 min-w-[12rem] rounded-2xl border border-black/10 py-1.5 text-[#161412] shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
-            style={{ backgroundColor: '#ffffff', opacity: 1 }}
-          >
-            <p className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-black/40">
-              Turn into
-            </p>
-            {BLOCKS.map((b) => (
-              <button
-                key={b.value}
-                type="button"
-                role="menuitem"
-                onClick={() => applyBlock(b.value)}
-                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] whitespace-nowrap transition-colors hover:bg-black/5 ${
-                  block === b.value ? 'bg-black/[0.04]' : ''
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-black/10 bg-white text-[10px] font-semibold text-black/55"
-                  style={{
-                    fontSize:
-                      b.value === 'h1' ? 11 : b.value === 'h2' ? 10 : 9,
-                  }}
-                >
-                  {b.short}
-                </span>
-                <span
-                  className="font-medium text-[#161412]"
-                  style={{
-                    fontSize:
-                      b.value === 'h1' ? 15 : b.value === 'h2' ? 13 : 12,
-                  }}
-                >
-                  {b.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {colorOpen && (
-          <div
-            className="absolute top-full right-0 z-[80] mt-2 flex gap-1.5 rounded-full border border-black/10 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.16)]"
-            style={{ backgroundColor: '#ffffff', opacity: 1 }}
-          >
-            {COLORS.map((c) => (
-              <button
-                key={c.value}
-                type="button"
-                title={c.label}
-                aria-label={c.label}
-                onClick={() => paint(c.value)}
-                className="h-6 w-6 rounded-full border border-black/15 ui-press"
-                style={{ background: c.value }}
-              />
-            ))}
-          </div>
-        )}
       </div>
+
+      {blockMenu}
+      {colorMenu}
     </div>
   )
 }
 
-function ToolbarBtn({ label, onClick, children }) {
+function ToolbarBtn({ label, onClick, children, ref }) {
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={label}
       title={label}
