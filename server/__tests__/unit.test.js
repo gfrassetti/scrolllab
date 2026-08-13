@@ -414,6 +414,12 @@ describe('config de descargas', () => {
       assert.equal(config.maxDownloads, 3)
     })
   })
+
+  it('en development sin STORE usa file', async () => {
+    await withEnv({ STORE: '', NODE_ENV: 'development' }, (config) => {
+      assert.equal(config.store, 'file')
+    })
+  })
 })
 
 describe('assertPaymentMatchesOrder', () => {

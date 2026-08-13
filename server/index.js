@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import './loadEnv.js'
 import { loadConfig, assertWritableDir } from './config.js'
 import { createApp } from './app.js'
 import { db } from './db.js'
@@ -13,6 +13,16 @@ async function boot() {
     console.log(
       `SCROLLLAB API http://localhost:${config.port} store=${config.store} mpMock=${config.mpMock} env=${config.isProd ? 'production' : 'dev'}`,
     )
+  })
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(
+        `Puerto ${config.port} ocupado. Cerrá el otro npm run dev y volvé a intentar.`,
+      )
+    } else {
+      console.error(err)
+    }
+    process.exit(1)
   })
 
   const shutdown = async (signal) => {

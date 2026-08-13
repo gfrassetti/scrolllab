@@ -42,12 +42,14 @@ function assertStrongSecret(name, value) {
  * En producción falla el boot si faltan secretos, Mongo o flags inseguros.
  */
 export function loadConfig() {
-  const storeExplicit = process.env.STORE;
-  let store = storeExplicit === "file" ? "file" : "mongo";
+  const storeExplicit = String(process.env.STORE || "").toLowerCase();
+  let store;
+  if (storeExplicit === "file") store = "file";
+  else if (storeExplicit === "mongo") store = "mongo";
+  else store = isProd ? "mongo" : "file";
   if (isProd && store === "file") {
     throw new Error("STORE=file no está permitido en producción");
   }
-  if (isProd && !storeExplicit) store = "mongo";
 
   const authDev = bool("AUTH_DEV_ENABLED", !isProd);
   const mpAccessToken = process.env.MP_ACCESS_TOKEN || "";

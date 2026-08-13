@@ -2,7 +2,14 @@ import mongoose from "mongoose";
 import { User as MongoUser, Order as MongoOrder } from "./models.js";
 import { fileDb } from "./fileStore.js";
 
-let mode = process.env.STORE === "file" ? "file" : "mongo";
+let mode =
+  process.env.STORE === "file"
+    ? "file"
+    : process.env.STORE === "mongo"
+      ? "mongo"
+      : process.env.NODE_ENV === "production"
+        ? "mongo"
+        : "file";
 
 /**
  * Conecta a Mongo o usa file store.
@@ -32,11 +39,11 @@ export async function connectDb(config) {
     if (config?.isProd || process.env.NODE_ENV === "production") {
       throw new Error(`MongoDB requerido en producción: ${err.message}`);
     }
-    // Solo fallback silencioso si el caller eligió mongo local y falló:
-    // ahora NO hacemos fallback — hay que poner STORE=file explícito.
-    throw new Error(
-      `MongoDB no disponible (${err.message}). Usá STORE=file para desarrollo local sin Mongo.`,
+    console.warn(
+      `MongoDB no disponible (${err.message}). Usando STORE=file para desarrollo local.`,
     );
+    mode = "file";
+    return mode;
   }
 }
 
