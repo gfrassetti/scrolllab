@@ -5,6 +5,7 @@ import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
 import BrandSplash from '../components/BrandSplash'
+import PlayableHeadline from '../components/PlayableHeadline'
 import HomeContact from '../components/HomeContact'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
 import { useCart } from '../lib/cart'
@@ -531,12 +532,19 @@ export default function TemplatesIndex() {
               <span data-hero-logo className="shrink-0 self-center">
                 <Logo className="size-[clamp(2rem,1.25rem+6vw,3.25rem)] md:size-[clamp(3.5rem,5vw+1.5rem,6.5rem)] xl:size-[clamp(5.5rem,6vw,8.5rem)]" />
               </span>
-              <h1
-                data-hero-line
-                className="min-w-0 select-none font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
-              >
-                {SITE_NAME}
-              </h1>
+              <div className="min-w-0 flex-1">
+                <PlayableHeadline
+                  className="min-w-0 font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
+                  lines={[SITE_NAME]}
+                  aria-label={t('playableHeadline.aria')}
+                />
+                <p
+                  data-hero-meta
+                  className="mt-2 text-[10px] uppercase tracking-[0.22em] text-ink/40 md:text-[11px]"
+                >
+                  {t('playableHeadline.hint')}
+                </p>
+              </div>
             </div>
             <p className="mt-5 max-w-[20ch] text-[clamp(1.25rem,1rem+2vw,1.75rem)] leading-[1.1] font-medium tracking-[-0.02em] text-ink/80 sm:mt-6 sm:max-w-[22ch] sm:text-[clamp(1.4rem,1rem+2.2vw,2.2rem)] md:mt-10 md:text-[clamp(1.6rem,1rem+2vw,2.6rem)]">
               <span data-hero-line>{t('home.heroLine1')} </span>

@@ -42,6 +42,10 @@
     "getTemplate": "Get Template",
     "aria": "Comprar {{name}}"
   },
+  "playableHeadline": {
+    "aria": "Título editable — jugá con el texto",
+    "hint": "Tocá el título"
+  },
   "notFound": {
     "eyebrow": "Error · ruta sin destino",
     "reel": "Reel / scroll track",

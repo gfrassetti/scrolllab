@@ -72,9 +72,9 @@ export default function TemplateBuyPill({ sku, name }) {
           ) : null}
         </span>
 
-        <span className="relative min-w-0 overflow-hidden pr-1">
+        <span className="relative min-h-10 min-w-[7.5rem] overflow-hidden pr-1 sm:min-w-[8.5rem]">
           {/* Idle: nombre + precio */}
-          <span className="flex flex-col leading-tight transition-all duration-300 ease-[var(--ease-drawer)] group-hover:-translate-y-2 group-hover:opacity-0 group-focus-visible:-translate-y-2 group-focus-visible:opacity-0">
+          <span className="flex h-full flex-col justify-center leading-tight transition-all duration-300 ease-[var(--ease-drawer)] group-hover:-translate-y-1.5 group-hover:opacity-0 group-focus-visible:-translate-y-1.5 group-focus-visible:opacity-0">
             <span className="truncate text-[13px] font-semibold tracking-tight">
               {name}
             </span>
@@ -85,7 +85,7 @@ export default function TemplateBuyPill({ sku, name }) {
           </span>
 
           {/* Hover / focus: CTA */}
-          <span className="pointer-events-none absolute inset-0 flex items-center gap-1.5 text-[13px] font-semibold tracking-tight opacity-0 transition-all duration-300 ease-[var(--ease-drawer)] translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+          <span className="pointer-events-none absolute inset-0 flex items-center gap-1.5 text-[13px] font-semibold tracking-tight opacity-0 transition-all duration-300 ease-[var(--ease-drawer)] translate-y-1.5 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
             {busy ? t('cart.redirecting') : t('demoBuy.getTemplate')}
             {!busy && <span aria-hidden="true">→</span>}
           </span>

@@ -42,6 +42,10 @@
     "getTemplate": "Get Template",
     "aria": "Buy {{name}}"
   },
+  "playableHeadline": {
+    "aria": "Editable title — play with the text",
+    "hint": "Tap the title"
+  },
   "notFound": {
     "eyebrow": "Error · dead-end route",
     "reel": "Reel / scroll track",
