@@ -134,7 +134,6 @@ body {
 .playable-headline {
   caret-color: transparent;
   cursor: default;
-  -webkit-user-modify: read-write-plaintext-only;
 }
 .playable-headline:focus {
   outline: none;
