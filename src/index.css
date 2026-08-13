@@ -145,6 +145,18 @@ body {
   color: inherit;
 }
 
+/* Toolbar: nunca scrollbar nativo (Windows pintaba overflow-x-auto) */
+.playable-toolbar {
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.playable-toolbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* ——— UI motion utilities (Emil Kowalski) ——— */
 @layer utilities {
   .ease-out-strong {

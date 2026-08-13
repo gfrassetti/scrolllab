@@ -66,9 +66,9 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
         disabled={busy || authLoading}
         onClick={buy}
         aria-label={t('demoBuy.aria', { name })}
-        className="group pointer-events-auto relative flex max-w-full items-center gap-3 rounded-full border-2 border-white bg-[#0a0a0a] py-2 pr-5 pl-2 text-left text-white shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/10 transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.02] hover:shadow-[0_16px_48px_rgba(0,0,0,0.4)] active:scale-[0.98] disabled:opacity-60"
+        className="group pointer-events-auto relative flex max-w-full items-center gap-3 rounded-full border border-white/10 bg-[#0a0a0a] py-2 pr-5 pl-2 text-left text-white shadow-[0_12px_40px_rgba(0,0,0,0.28)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.02] hover:shadow-[0_16px_48px_rgba(0,0,0,0.4)] active:scale-[0.98] disabled:opacity-60"
       >
-        <span className="relative h-11 w-16 shrink-0 overflow-hidden rounded-full border border-white bg-white/10 sm:h-12 sm:w-[4.5rem]">
+        <span className="relative h-11 w-16 shrink-0 overflow-hidden rounded-full border-2 border-white bg-white/10 sm:h-12 sm:w-[4.5rem]">
           {poster ? (
             <img
               src={poster}
