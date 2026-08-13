@@ -1,9 +1,9 @@
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 const BLOCKS = [
-  { value: 'h1', label: 'Heading 1' },
-  { value: 'h2', label: 'Heading 2' },
-  { value: 'p', label: 'Paragraph' },
+  { value: 'h1', label: 'Heading 1', short: 'H1' },
+  { value: 'h2', label: 'Heading 2', short: 'H2' },
+  { value: 'h3', label: 'Heading 3', short: 'H3' },
 ]
 
 const COLORS = [
@@ -34,7 +34,7 @@ function selectEditorContents(el) {
 
 /**
  * Título jugable estilo Orionix: toolbar siempre visible, sin caret de input.
- * El texto se puede formatear; no persiste.
+ * Turn into → H1 / H2 / H3. No persiste.
  */
 export default function PlayableHeadline({
   as: Tag = 'h1',
@@ -44,9 +44,33 @@ export default function PlayableHeadline({
   'aria-label': ariaLabel = 'Editable headline',
 }) {
   const editorRef = useRef(null)
+  const rootRef = useRef(null)
   const toolbarId = useId()
   const [block, setBlock] = useState('h1')
+  const [blockOpen, setBlockOpen] = useState(false)
   const [colorOpen, setColorOpen] = useState(false)
+
+  useEffect(() => {
+    if (!blockOpen && !colorOpen) return undefined
+    const onPointerDown = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) {
+        setBlockOpen(false)
+        setColorOpen(false)
+      }
+    }
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setBlockOpen(false)
+        setColorOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [blockOpen, colorOpen])
 
   const withSelection = (fn) => {
     const el = editorRef.current
@@ -60,7 +84,6 @@ export default function PlayableHeadline({
     if (!inside) selectEditorContents(el)
     el.focus({ preventScroll: true })
     fn()
-    // Sin caret visible: soltamos el foco tras aplicar (como Orionix).
     window.requestAnimationFrame(() => {
       el.blur()
       window.getSelection()?.removeAllRanges()
@@ -69,7 +92,8 @@ export default function PlayableHeadline({
 
   const applyBlock = (value) => {
     setBlock(value)
-    withSelection(() => run('formatBlock', value === 'p' ? 'p' : value))
+    setBlockOpen(false)
+    withSelection(() => run('formatBlock', value))
   }
 
   const paint = (hex) => {
@@ -77,8 +101,10 @@ export default function PlayableHeadline({
     setColorOpen(false)
   }
 
+  const current = BLOCKS.find((b) => b.value === block) || BLOCKS[0]
+
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <Tag
         ref={editorRef}
         contentEditable
@@ -94,9 +120,6 @@ export default function PlayableHeadline({
         aria-label={ariaLabel}
         aria-controls={toolbarId}
         className={`playable-headline outline-none ${className}`}
-        onMouseUp={() => {
-          /* selección para formatear; el caret queda oculto por CSS */
-        }}
       >
         {lines.map((line, i) => {
           const text = typeof line === 'string' ? line : line?.text
@@ -117,29 +140,62 @@ export default function PlayableHeadline({
         id={toolbarId}
         role="toolbar"
         aria-label="Text formatting"
-        className="mt-4 inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-black/10 bg-white px-2 py-1.5 text-[#161412] shadow-[0_10px_32px_rgba(0,0,0,0.12)]"
-        onPointerDown={(e) => e.preventDefault()}
+        className="mt-4 inline-flex max-w-full items-center gap-0.5 overflow-visible rounded-full border border-black/10 bg-white px-2 py-1.5 text-[#161412] shadow-[0_10px_32px_rgba(0,0,0,0.12)]"
+        onPointerDown={(e) => {
+          // Evita robar el foco del contentEditable, pero no bloquea botones.
+          if (e.target.closest('button, [role="menu"]')) return
+          e.preventDefault()
+        }}
       >
-        <label className="relative flex items-center">
-          <span className="sr-only">Block type</span>
-          <select
-            value={block}
-            onChange={(e) => applyBlock(e.target.value)}
-            className="cursor-pointer appearance-none rounded-full bg-transparent py-1.5 pr-6 pl-3 text-[12px] font-medium outline-none hover:bg-black/5"
+        <div className="relative">
+          <button
+            type="button"
+            title="Turn into"
+            aria-label="Turn into"
+            aria-haspopup="menu"
+            aria-expanded={blockOpen}
+            onClick={() => {
+              setBlockOpen((v) => !v)
+              setColorOpen(false)
+            }}
+            className="inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-[12px] font-medium transition-colors duration-[var(--duration-press)] ease-[var(--ease-out)] hover:bg-black/5"
           >
-            {BLOCKS.map((b) => (
-              <option key={b.value} value={b.value}>
-                {b.label}
-              </option>
-            ))}
-          </select>
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute right-2 text-[10px] opacity-50"
-          >
-            ▾
-          </span>
-        </label>
+            {current.label}
+            <span aria-hidden="true" className="text-[9px] opacity-50">
+              ▾
+            </span>
+          </button>
+          {blockOpen && (
+            <div
+              role="menu"
+              aria-label="Turn into"
+              className="absolute top-full left-0 z-[80] mt-2 min-w-[11rem] overflow-hidden rounded-2xl border border-black/10 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.16)]"
+            >
+              <p className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-black/40">
+                Turn into
+              </p>
+              {BLOCKS.map((b) => (
+                <button
+                  key={b.value}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => applyBlock(b.value)}
+                  className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] transition-colors hover:bg-black/5 ${
+                    block === b.value ? 'bg-black/[0.04]' : ''
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-black/10 text-[10px] font-semibold text-black/55"
+                  >
+                    {b.short}
+                  </span>
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <span aria-hidden="true" className="mx-1 h-4 w-px bg-black/10" />
 
@@ -164,7 +220,10 @@ export default function PlayableHeadline({
         <div className="relative">
           <ToolbarBtn
             label="Text color"
-            onClick={() => setColorOpen((v) => !v)}
+            onClick={() => {
+              setColorOpen((v) => !v)
+              setBlockOpen(false)
+            }}
           >
             <span className="flex flex-col items-center leading-none">
               <span className="text-[13px] font-semibold">A</span>
@@ -175,7 +234,7 @@ export default function PlayableHeadline({
             </span>
           </ToolbarBtn>
           {colorOpen && (
-            <div className="absolute top-full left-1/2 z-[70] mt-2 flex -translate-x-1/2 gap-1.5 rounded-full border border-black/10 bg-white p-2 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
+            <div className="absolute top-full left-1/2 z-[80] mt-2 flex -translate-x-1/2 gap-1.5 rounded-full border border-black/10 bg-white p-2 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
               {COLORS.map((c) => (
                 <button
                   key={c.value}
