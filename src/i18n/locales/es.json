@@ -37,6 +37,11 @@
     "cartItemTitle": "{{name}} — modelo",
     "buy": "Comprar →"
   },
+  "demoBuy": {
+    "only": "solo",
+    "getTemplate": "Get Template",
+    "aria": "Comprar {{name}}"
+  },
   "notFound": {
     "eyebrow": "Error · ruta sin destino",
     "reel": "Reel / scroll track",

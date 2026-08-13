@@ -37,6 +37,11 @@
     "cartItemTitle": "{{name}} — template",
     "buy": "Buy →"
   },
+  "demoBuy": {
+    "only": "only",
+    "getTemplate": "Get Template",
+    "aria": "Buy {{name}}"
+  },
   "notFound": {
     "eyebrow": "Error · dead-end route",
     "reel": "Reel / scroll track",

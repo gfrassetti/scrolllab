@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavBrutal from '../components/sections/monolith/NavBrutal'
 import HeroThree from '../components/sections/monolith/HeroThree'
 import SkewScroller from '../components/sections/monolith/SkewScroller'
@@ -29,6 +30,7 @@ export default function MonolithPage() {
         </main>
 
         <FooterBrutal />
+        <TemplateBuyPill sku="monolith" name="MONOLITH" />
       </div>
     </SmoothScrollProvider>
   )

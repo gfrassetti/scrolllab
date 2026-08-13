@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavUnity from '../components/sections/unity/NavUnity'
 import HeroTwin from '../components/sections/unity/HeroTwin'
 import MosaicSlider from '../components/sections/unity/MosaicSlider'
@@ -79,6 +80,7 @@ export default function UnityPage() {
         </main>
 
         <FooterTrophy />
+        <TemplateBuyPill sku="unity" name="UNITY" />
       </div>
     </SmoothScrollProvider>
   )

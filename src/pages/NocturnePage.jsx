@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavNocturne from '../components/sections/nocturne/NavNocturne'
 import HeroCinematic from '../components/sections/nocturne/HeroCinematic'
 import ZoomPortal from '../components/sections/nocturne/ZoomPortal'
@@ -29,6 +30,7 @@ export default function NocturnePage() {
         </main>
 
         <OutroCTA />
+        <TemplateBuyPill sku="nocturne" name="NOCTURNE" />
       </div>
     </SmoothScrollProvider>
   )

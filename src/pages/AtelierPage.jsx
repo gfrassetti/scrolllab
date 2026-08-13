@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavAtelier from '../components/sections/atelier/NavAtelier'
 import HeroMeaning from '../components/sections/atelier/HeroMeaning'
 import AboutClarity from '../components/sections/atelier/AboutClarity'
@@ -34,6 +35,7 @@ export default function AtelierPage() {
           <ContactForm theme="atelier" />
         </main>
         <FooterAtelier />
+        <TemplateBuyPill sku="atelier" name="ATELIER" />
       </div>
     </SmoothScrollProvider>
   )

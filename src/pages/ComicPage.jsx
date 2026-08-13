@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavComic from '../components/sections/comic/NavComic'
 import ChapterRail from '../components/sections/comic/ChapterRail'
 import ChapterDusty from '../components/sections/comic/ChapterDusty'
@@ -27,6 +28,7 @@ export default function ComicPage() {
         </main>
 
         <FooterComic />
+        <TemplateBuyPill sku="comic" name="COMIC" />
       </div>
     </SmoothScrollProvider>
   )

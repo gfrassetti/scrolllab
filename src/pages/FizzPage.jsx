@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavFizz from '../components/sections/fizz/NavFizz'
 import HeroBubbles from '../components/sections/fizz/HeroBubbles'
 import FlavorWorlds from '../components/sections/fizz/FlavorWorlds'
@@ -44,6 +45,7 @@ export default function FizzPage() {
         </main>
 
         <FooterSplash />
+        <TemplateBuyPill sku="fizz" name="FIZZ" />
       </div>
     </SmoothScrollProvider>
   )

@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import NavMinimal from '../components/sections/chapters/NavMinimal'
 import HeroKinetic from '../components/sections/chapters/HeroKinetic'
 import VelocityMarquee from '../components/sections/chapters/VelocityMarquee'
@@ -35,6 +36,7 @@ export default function ChaptersPage() {
         </main>
 
         <FooterCTA />
+        <TemplateBuyPill sku="chapters" name="CHAPTERS" />
       </div>
     </SmoothScrollProvider>
   )
