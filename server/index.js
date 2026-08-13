@@ -1,7 +1,7 @@
 import './loadEnv.js'
 import { loadConfig, assertWritableDir } from './config.js'
 import { createApp } from './app.js'
-import { db } from './db.js'
+import { db, storeMode } from './db.js'
 
 const config = loadConfig()
 
@@ -11,7 +11,7 @@ async function boot() {
 
   const server = app.listen(config.port, () => {
     console.log(
-      `SCROLLLAB API http://localhost:${config.port} store=${config.store} mpMock=${config.mpMock} env=${config.isProd ? 'production' : 'dev'}`,
+      `SCROLLLAB API http://localhost:${config.port} store=${storeMode()} mpMock=${config.mpMock} env=${config.isProd ? 'production' : 'dev'}`,
     )
   })
   server.on('error', (err) => {

@@ -40,9 +40,12 @@ export async function connectDb(config) {
       throw new Error(`MongoDB requerido en producción: ${err.message}`);
     }
     console.warn(
-      `MongoDB no disponible (${err.message}). Usando STORE=file para desarrollo local.`,
+      `MongoDB no disponible (${err.message}). Usando STORE=file para desarrollo local.` +
+        " (Poné STORE=file en .env para silenciar este aviso.)",
     );
     mode = "file";
+    // Mantener config alineada con el store efectivo (session, logs, health).
+    if (config && typeof config === "object") config.store = "file";
     return mode;
   }
 }
