@@ -8,6 +8,7 @@ import BrandSplash from '../components/BrandSplash'
 import PlayableHeadline from '../components/PlayableHeadline'
 import TemplateBuyPill from '../components/TemplateBuyPill'
 import HomeContact from '../components/HomeContact'
+import HowItWorksThread from '../components/HowItWorksThread'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
 import { useCart } from '../lib/cart'
 import { startCheckout } from '../lib/startCheckout'
@@ -361,6 +362,25 @@ export default function TemplatesIndex() {
             },
           })
         })
+
+        // Hilo verde de "cómo funciona": se dibuja hacia adelante al bajar y
+        // se repliega al subir (stroke-dashoffset scrubbeado al scroll).
+        const thread = root.current?.querySelector('[data-how-thread-path]')
+        if (thread) {
+          const len = thread.getTotalLength()
+          gsap.set(thread, { strokeDasharray: len, strokeDashoffset: len })
+          gsap.to(thread, {
+            strokeDashoffset: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '#como-funciona',
+              start: 'top 82%',
+              end: 'bottom bottom',
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          })
+        }
 
         // Bundle + builder CTAs: scrubbed card rise + staggered copy reveal.
         gsap.utils.toArray('[data-cta-card]').forEach((card) => {
@@ -877,8 +897,11 @@ export default function TemplatesIndex() {
         {/* Confianza / proceso: después de las ofertas. */}
         <section
           id="como-funciona"
-          className="mt-16 scroll-mt-20 -mx-5 md:mt-24 md:-mx-10"
+          className="relative isolate mt-16 scroll-mt-20 -mx-5 md:mt-24 md:-mx-10"
         >
+          <HowItWorksThread />
+
+          <div className="relative z-10">
           <HorizontalPanels
             chapter="01"
             total="04"
@@ -959,6 +982,7 @@ export default function TemplatesIndex() {
                 <li>{t('home.req4')}</li>
               </ul>
             </div>
+          </div>
           </div>
         </section>
 
