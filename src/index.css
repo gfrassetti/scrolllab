@@ -145,16 +145,20 @@ body {
   color: inherit;
 }
 
-/* Toolbar: nunca scrollbar nativo (Windows pintaba overflow-x-auto) */
+/* Toolbar: cero scrollbars (ni X ni Y). Los menús viven fuera del pill. */
 .playable-toolbar {
-  overflow: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  max-height: none;
+  max-width: none;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 .playable-toolbar::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* ——— UI motion utilities (Emil Kowalski) ——— */

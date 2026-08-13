@@ -64,9 +64,13 @@ export default function PlayableHeadline({
         setColorOpen(false)
       }
     }
-    document.addEventListener('pointerdown', onPointerDown)
+    // Después del pointerdown actual, para no cerrar al abrir.
+    const timer = window.setTimeout(() => {
+      document.addEventListener('pointerdown', onPointerDown)
+    }, 0)
     document.addEventListener('keydown', onKeyDown)
     return () => {
+      window.clearTimeout(timer)
       document.removeEventListener('pointerdown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
@@ -93,7 +97,6 @@ export default function PlayableHeadline({
   const applyBlock = (value) => {
     setBlock(value)
     setBlockOpen(false)
-    // Chrome acepta "h2" o "<h2>"; probamos ambos formatos vía scale visual + formatBlock.
     withSelection(() => {
       run('formatBlock', value)
       run('formatBlock', `<${value}>`)
@@ -142,21 +145,21 @@ export default function PlayableHeadline({
         })}
       </Tag>
 
-      <div
-        id={toolbarId}
-        role="toolbar"
-        aria-label="Text formatting"
-        className="playable-toolbar mt-4 inline-flex w-max max-w-full shrink-0 items-center gap-0.5 overflow-hidden rounded-full border border-black/10 bg-white px-2 py-1.5 text-[#161412] shadow-[0_10px_32px_rgba(0,0,0,0.12)]"
-        onPointerDown={(e) => {
-          // Evita robar el foco del contentEditable; los botones manejan su propio pointerdown.
-          if (e.target.closest('button, [role="menu"]')) {
-            e.stopPropagation()
-            return
-          }
-          e.preventDefault()
-        }}
-      >
-        <div className="relative shrink-0">
+      {/* Wrapper: los menús viven AFUERA del pill para que nunca genere scrollbars */}
+      <div className="relative mt-4 w-max max-w-full">
+        <div
+          id={toolbarId}
+          role="toolbar"
+          aria-label="Text formatting"
+          className="playable-toolbar inline-flex items-center gap-0.5 rounded-full border border-black/10 bg-white px-2 py-1.5 text-[#161412] shadow-[0_10px_32px_rgba(0,0,0,0.12)]"
+          onPointerDown={(e) => {
+            if (e.target.closest('button')) {
+              e.stopPropagation()
+              return
+            }
+            e.preventDefault()
+          }}
+        >
           <button
             type="button"
             title="Turn into"
@@ -164,91 +167,54 @@ export default function PlayableHeadline({
             aria-haspopup="menu"
             aria-expanded={blockOpen}
             onPointerDown={(e) => {
-              // pointerdown (no click): más fiable en toolbars con preventDefault
               e.preventDefault()
               e.stopPropagation()
               setBlockOpen((v) => !v)
               setColorOpen(false)
             }}
-            className="inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-[12px] font-medium whitespace-nowrap transition-colors duration-[var(--duration-press)] ease-[var(--ease-out)] hover:bg-black/5"
+            className="inline-flex h-9 items-center gap-1 rounded-full px-3 text-[12px] font-medium whitespace-nowrap transition-colors duration-[var(--duration-press)] ease-[var(--ease-out)] hover:bg-black/5"
           >
             {current.label}
             <span aria-hidden="true" className="text-[9px] opacity-50">
               ▾
             </span>
           </button>
-          {blockOpen && (
-            <div
-              role="menu"
-              aria-label="Turn into"
-              className="absolute top-full left-0 z-[80] mt-2 min-w-[12rem] overflow-hidden rounded-2xl border border-black/10 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.16)]"
-            >
-              <p className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-black/40">
-                Turn into
-              </p>
-              {BLOCKS.map((b) => (
-                <button
-                  key={b.value}
-                  type="button"
-                  role="menuitem"
-                  onPointerDown={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    applyBlock(b.value)
-                  }}
-                  className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] whitespace-nowrap transition-colors hover:bg-black/5 ${
-                    block === b.value ? 'bg-black/[0.04]' : ''
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-black/10 text-[10px] font-semibold text-black/55"
-                  >
-                    {b.short}
-                  </span>
-                  {b.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
-        <span aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-black/10" />
+          <span aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-black/10" />
 
-        <ToolbarBtn
-          label="Bold"
-          onPointerDown={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            withSelection(() => run('bold'))
-          }}
-        >
-          <span className="font-bold">B</span>
-        </ToolbarBtn>
-        <ToolbarBtn
-          label="Italic"
-          onPointerDown={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            withSelection(() => run('italic'))
-          }}
-        >
-          <span className="italic">I</span>
-        </ToolbarBtn>
-        <ToolbarBtn
-          label="Underline"
-          onPointerDown={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            withSelection(() => run('underline'))
-          }}
-        >
-          <span className="underline">U</span>
-        </ToolbarBtn>
+          <ToolbarBtn
+            label="Bold"
+            onPointerDown={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              withSelection(() => run('bold'))
+            }}
+          >
+            <span className="font-bold">B</span>
+          </ToolbarBtn>
+          <ToolbarBtn
+            label="Italic"
+            onPointerDown={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              withSelection(() => run('italic'))
+            }}
+          >
+            <span className="italic">I</span>
+          </ToolbarBtn>
+          <ToolbarBtn
+            label="Underline"
+            onPointerDown={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              withSelection(() => run('underline'))
+            }}
+          >
+            <span className="underline">U</span>
+          </ToolbarBtn>
 
-        <span aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-black/10" />
+          <span aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-black/10" />
 
-        <div className="relative shrink-0">
           <ToolbarBtn
             label="Text color"
             onPointerDown={(e) => {
@@ -266,26 +232,62 @@ export default function PlayableHeadline({
               ▾
             </span>
           </ToolbarBtn>
-          {colorOpen && (
-            <div className="absolute top-full left-1/2 z-[80] mt-2 flex -translate-x-1/2 gap-1.5 rounded-full border border-black/10 bg-white p-2 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
-              {COLORS.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  title={c.label}
-                  aria-label={c.label}
-                  onPointerDown={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    paint(c.value)
-                  }}
-                  className="h-6 w-6 rounded-full border border-black/15 ui-press"
-                  style={{ background: c.value }}
-                />
-              ))}
-            </div>
-          )}
         </div>
+
+        {blockOpen && (
+          <div
+            role="menu"
+            aria-label="Turn into"
+            className="absolute top-full left-0 z-[80] mt-2 min-w-[12rem] rounded-2xl border border-black/10 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.16)]"
+          >
+            <p className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-black/40">
+              Turn into
+            </p>
+            {BLOCKS.map((b) => (
+              <button
+                key={b.value}
+                type="button"
+                role="menuitem"
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  applyBlock(b.value)
+                }}
+                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] whitespace-nowrap transition-colors hover:bg-black/5 ${
+                  block === b.value ? 'bg-black/[0.04]' : ''
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-black/10 text-[10px] font-semibold text-black/55"
+                >
+                  {b.short}
+                </span>
+                {b.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {colorOpen && (
+          <div className="absolute top-full right-0 z-[80] mt-2 flex gap-1.5 rounded-full border border-black/10 bg-white p-2 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
+            {COLORS.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                title={c.label}
+                aria-label={c.label}
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  paint(c.value)
+                }}
+                className="h-6 w-6 rounded-full border border-black/15 ui-press"
+                style={{ background: c.value }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -298,7 +300,7 @@ function ToolbarBtn({ label, onPointerDown, children }) {
       aria-label={label}
       title={label}
       onPointerDown={onPointerDown}
-      className="inline-flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-full px-2 text-[13px] transition-colors duration-[var(--duration-press)] ease-[var(--ease-out)] hover:bg-black/5 active:scale-95"
+      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] transition-colors duration-[var(--duration-press)] ease-[var(--ease-out)] hover:bg-black/5 active:scale-95"
     >
       {children}
     </button>
