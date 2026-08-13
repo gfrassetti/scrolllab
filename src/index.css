@@ -130,6 +130,19 @@ body {
   }
 }
 
+/* Título jugable (homepage): selección tipo Framer */
+.playable-headline {
+  caret-color: var(--market-accent-ink, #ff4b00);
+  cursor: text;
+}
+.playable-headline:focus {
+  outline: none;
+}
+.playable-headline::selection,
+.playable-headline *::selection {
+  background: color-mix(in srgb, var(--market-ink) 14%, transparent);
+}
+
 /* ——— UI motion utilities (Emil Kowalski) ——— */
 @layer utilities {
   .ease-out-strong {
