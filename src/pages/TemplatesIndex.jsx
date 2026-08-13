@@ -564,12 +564,6 @@ export default function TemplatesIndex() {
                 ]}
                 aria-label={t('playableHeadline.aria')}
               />
-              <p
-                data-hero-meta
-                className="mt-3 text-[10px] uppercase tracking-[0.22em] text-ink/40 md:text-[11px]"
-              >
-                {t('playableHeadline.hint')}
-              </p>
             </div>
 
             <p

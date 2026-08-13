@@ -130,17 +130,20 @@ body {
   }
 }
 
-/* Título jugable (homepage): selección tipo Framer */
+/* Título jugable (homepage): sin caret de input; se formatea con la toolbar */
 .playable-headline {
-  caret-color: var(--market-accent-ink, #ff4b00);
-  cursor: text;
+  caret-color: transparent;
+  cursor: default;
+  -webkit-user-modify: read-write-plaintext-only;
 }
 .playable-headline:focus {
   outline: none;
+  box-shadow: none;
 }
 .playable-headline::selection,
 .playable-headline *::selection {
-  background: color-mix(in srgb, var(--market-ink) 14%, transparent);
+  background: color-mix(in srgb, var(--market-ink) 12%, transparent);
+  color: inherit;
 }
 
 /* ——— UI motion utilities (Emil Kowalski) ——— */

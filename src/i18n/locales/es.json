@@ -43,8 +43,7 @@
     "aria": "Comprar {{name}}"
   },
   "playableHeadline": {
-    "aria": "Título editable — jugá con el texto",
-    "hint": "Tocá el título"
+    "aria": "Título editable — jugá con el texto"
   },
   "notFound": {
     "eyebrow": "Error · ruta sin destino",

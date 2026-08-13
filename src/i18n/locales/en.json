@@ -43,8 +43,7 @@
     "aria": "Buy {{name}}"
   },
   "playableHeadline": {
-    "aria": "Editable title — play with the text",
-    "hint": "Tap the title"
+    "aria": "Editable title — play with the text"
   },
   "notFound": {
     "eyebrow": "Error · dead-end route",
