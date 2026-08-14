@@ -26,6 +26,7 @@
     "howItWorksLink": "How it works →",
     "licenseLink": "View regular license →",
     "remove": "Remove",
+    "clearCart": "Clear cart",
     "close": "Close",
     "estimatedTotal": "Total",
     "goToCart": "Go to cart →",
@@ -546,7 +547,8 @@
     "payLoggedIn": "Pay →",
     "payLoggedOut": "Log in to pay →",
     "redirecting": "One moment…",
-    "preview": "View preview"
+    "preview": "View preview",
+    "clearAll": "Clear all"
   },
   "login": {
     "eyebrow": "Account",

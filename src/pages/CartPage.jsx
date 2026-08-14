@@ -21,6 +21,7 @@ export default function CartPage() {
   const looksLoggedIn = user ? true : authLoading ? hadSession : false
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
+  const clearCart = useCart((s) => s.clear)
   const [catalog, setCatalog] = useState({})
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -159,18 +160,28 @@ export default function CartPage() {
                   {t('cart.trustNote')}
                 </span>
               </p>
-              <button
-                type="button"
-                disabled={busy || authLoading}
-                onClick={checkout}
-                className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
-              >
-                {looksLoggedIn
-                  ? busy
-                    ? t('cart.redirecting')
-                    : t('cart.payLoggedIn')
-                  : t('cart.payLoggedOut')}
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => clearCart()}
+                  className="min-h-11 border border-ink/30 px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink/70 transition-colors hover:border-ink hover:text-ink disabled:opacity-40"
+                >
+                  {t('cart.clearAll')}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || authLoading}
+                  onClick={checkout}
+                  className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
+                >
+                  {looksLoggedIn
+                    ? busy
+                      ? t('cart.redirecting')
+                      : t('cart.payLoggedIn')
+                    : t('cart.payLoggedOut')}
+                </button>
+              </div>
             </div>
           </>
         )}
