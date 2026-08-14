@@ -15,6 +15,7 @@ import ProductThumbnail from './ProductThumbnail'
 export default function CartPopover() {
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
+  const clearCart = useCart((s) => s.clear)
   const { t, locale } = useI18n()
   const { rate } = useFxRate()
   const showUsd = locale === 'en'
@@ -168,13 +169,20 @@ export default function CartPopover() {
                 <span className="text-ink/60">{t('common.estimatedTotal')}</span>
                 <strong>{formatLine(total)}</strong>
               </div>
-              <div className="p-3 pt-0">
+              <div className="flex flex-col gap-2 p-3 pt-0">
                 <Link
                   to="/cart"
                   className="block border-2 border-ink bg-ink px-4 py-3 text-center text-[11px] uppercase tracking-[0.25em] text-bone ui-press hover:border-accent hover:bg-accent"
                 >
                   {t('common.goToCart')}
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => clearCart()}
+                  className="min-h-11 px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] text-ink/55 transition-colors hover:text-ink"
+                >
+                  {t('common.clearCart')}
+                </button>
               </div>
             </>
           )}
