@@ -16,8 +16,6 @@
   --market-success: #157347;
   --market-warning: #8a5a00;
   --market-danger: #b42318;
-  /* Hilo "cómo funciona": verde vivo que se dibuja con el scroll */
-  --market-spring: #12a566;
 
   /* Emil Kowalski / animations.dev — UI motion (never ease-in on UI) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -36,7 +34,6 @@ html.dark {
   --market-success: #3fd07f;
   --market-warning: #e8b13c;
   --market-danger: #ef6a5e;
-  --market-spring: #35d68a;
 }
 
 @theme inline {
@@ -54,7 +51,6 @@ html.dark {
   --color-success: var(--market-success);
   --color-warning: var(--market-warning);
   --color-danger: var(--market-danger);
-  --color-spring: var(--market-spring);
 }
 
 @theme {
