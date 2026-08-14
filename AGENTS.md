@@ -104,7 +104,21 @@ npm run check          # invariantes cruzadas (precios, secciones, props, i18n, 
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
+npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 ```
+
+### Responsive — 3 tiers (mobile / tablet / desktop)
+
+Modelo acordado, mapeado a Tailwind v4 (breakpoints default):
+
+- **Mobile**: base sin prefijo, `< 640`. Referencias 390 y 480.
+- **Tablet**: `sm:` (≥640) hasta 1023. Referencias 768 y 834. `md:` (768) es refinamiento *dentro* de tablet (los navs colapsan a hamburguesa en `md`; excepción intencional: `NavAtelier` siempre overlay vía `useMobileMenu({ breakpoint: null })`).
+- **Desktop**: `lg:` (≥1024). Referencias 1280/1440.
+
+Reglas:
+- Navs de template + market colapsan en `md:` (consistente; no mezclar `lg:` como hacía comic).
+- Grid/flex items que puedan quedar más anchos que su track necesitan `min-w-0` (el default `min-width:auto` los expande a min-content y desborda; fue el bug del builder en mobile).
+- `body { overflow-x: clip }` enmascara leaks horizontales pero **no** arregla layout; usar `npm run check:responsive` para detectar elementos que se salen del viewport. Ojo: secciones con scroll horizontal/marquee/pin (HorizontalPanels, TrackMerge, SelectedWork, ChapterRail, marquees) son anchas *a propósito* y van clippeadas — no son overflow real.
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
 roto. Dos redes lo cubren:
