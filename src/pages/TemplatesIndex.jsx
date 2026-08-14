@@ -1122,7 +1122,7 @@ export default function TemplatesIndex() {
         </div>
       </footer>
 
-      <TemplateBuyPill sku="atelier" name="ATELIER" placement="end" />
+      <TemplateBuyPill sku="chapters" name="CHAPTERS" placement="end" />
     </div>
   )
 }
