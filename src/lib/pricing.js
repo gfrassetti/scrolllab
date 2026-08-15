@@ -12,20 +12,29 @@ export const TEMPLATE_PRICES_USD = {
   atelier: 179,
   comic: 179,
   unity: 179,
+  ratio: 199,
+  vanta: 199,
+}
+
+/** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
+export const COMING_SOON_SKUS = ['ratio', 'vanta']
+
+export function isComingSoonSku(sku) {
+  return COMING_SOON_SKUS.includes(sku)
 }
 
 /**
  * Composición del builder: base por tramo + adicional por sección extra.
- * Una composición del tamaño de un template (10 secciones) queda en 229 USD.
+ * Una composición del tamaño de un template (10 secciones) queda en 249 USD.
  */
-export const CUSTOM_BASE_PRICE_USD = 199
+export const CUSTOM_BASE_PRICE_USD = 219
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 15
 /** Tope de secciones de una receta — espejo de `maxRecipeSections`. */
 export const MAX_CUSTOM_SECTIONS = 30
 
 export const COMMERCE_PACK_SURCHARGE_USD = 39
-export const BUNDLE_PRICE_USD = 499
+export const BUNDLE_PRICE_USD = 649
 
 /** Respaldo para el primer render, antes de que llegue la cotización real. */
 export const FALLBACK_USD_ARS = 1560
@@ -64,7 +73,10 @@ export function nextSectionArs(sectionCount, hasCommerce, rate) {
 
 /** Lo que costaría comprar los modelos del bundle por separado. */
 export function bundleListPriceUsd() {
-  return Object.values(TEMPLATE_PRICES_USD).reduce((sum, usd) => sum + usd, 0)
+  return Object.entries(TEMPLATE_PRICES_USD).reduce((sum, [sku, usd]) => {
+    if (isComingSoonSku(sku)) return sum
+    return sum + usd
+  }, 0)
 }
 
 export function bundleDiscountPct() {

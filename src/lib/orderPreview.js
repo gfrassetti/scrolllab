@@ -1,4 +1,4 @@
-import { TEMPLATE_PRICES_USD } from './pricing.js'
+import { isComingSoonSku, TEMPLATE_PRICES_USD } from './pricing.js'
 
 const FIXED_TEMPLATE_SKUS = new Set(Object.keys(TEMPLATE_PRICES_USD))
 
@@ -13,6 +13,7 @@ export function isCustomSku(sku) {
  */
 export function cartItemPreviewHref(item) {
   const sku = String(item?.sku || '')
+  if (isComingSoonSku(sku)) return null
   if (FIXED_TEMPLATE_SKUS.has(sku)) return `/templates/${sku}`
   if (sku === 'bundle') return '/#templates'
   if (!isCustomSku(sku)) return null
@@ -26,10 +27,11 @@ export function cartItemPreviewHref(item) {
  * comprador a algo distinto de lo que compró.
  *
  * El bundle son los modelos del catálogo en un ZIP: no hay una demo única, así que va al
- * índice de templates, donde están las seis.
+ * índice de templates, donde están las demos en venta.
  */
 export function itemPreviewHref(order, item, index) {
   const sku = String(item?.sku || '')
+  if (isComingSoonSku(sku)) return null
   if (FIXED_TEMPLATE_SKUS.has(sku)) return `/templates/${sku}`
   if (sku === 'bundle') return '/#templates'
   if (!isCustomSku(sku)) return null

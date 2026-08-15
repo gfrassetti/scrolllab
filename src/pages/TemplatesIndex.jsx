@@ -20,6 +20,7 @@ import {
   bundleListPriceUsd,
   formatPriceFromUsd,
   formatNextSectionPrice,
+  isComingSoonSku,
   templatePriceUsd,
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
@@ -98,13 +99,33 @@ const TEMPLATE_META = [
     tagline: 'one game',
     palette: ['#f3efe6', '#0a0a0a', '#f4c518'],
   },
+  {
+    id: '09',
+    sku: 'ratio',
+    name: 'RATIO',
+    path: '/templates/ratio',
+    category: 'SYSTEM',
+    tagline: 'bend the measure',
+    palette: ['#ebe6dc', '#111111', '#e23c24'],
+    comingSoon: true,
+  },
+  {
+    id: '10',
+    sku: 'vanta',
+    name: 'VANTA',
+    path: '/templates/vanta',
+    category: 'GAME',
+    tagline: 'hold to scan',
+    palette: ['#f4f1ea', '#111114', '#5b4cff'],
+    comingSoon: true,
+  },
 ]
 
 function catalogCoverSrc(sku) {
   return `/catalog/${sku}.jpg`
 }
 
-function TemplatePoster({ template, index = 0 }) {
+function TemplatePoster({ template, index = 0, soonLabel = 'Coming soon' }) {
   return (
     <div
       data-template-art
@@ -115,7 +136,9 @@ function TemplatePoster({ template, index = 0 }) {
         src={catalogCoverSrc(template.sku)}
         alt=""
         draggable={false}
-        className="absolute inset-0 h-full w-full object-cover object-top"
+        className={`absolute inset-0 h-full w-full object-cover object-top ${
+          template.comingSoon ? 'grayscale' : ''
+        }`}
       />
       <div
         aria-hidden="true"
@@ -128,8 +151,15 @@ function TemplatePoster({ template, index = 0 }) {
         {template.name}
       </span>
       <span className="absolute right-5 bottom-5 font-display text-xl italic text-white/80 md:text-2xl">
-        {template.tagline}
+        {template.comingSoon ? '' : template.tagline}
       </span>
+      {template.comingSoon ? (
+        <span className="absolute inset-0 z-10 flex items-center justify-center bg-black/35">
+          <span className="border border-white/35 bg-black/50 px-4 py-2 text-[11px] tracking-[0.22em] text-white/85 uppercase">
+          {soonLabel}
+          </span>
+        </span>
+      ) : null}
     </div>
   )
 }
@@ -621,6 +651,7 @@ export default function TemplatesIndex() {
                       key={template.sku}
                       template={template}
                       index={index}
+                      soonLabel={t('home.comingSoon')}
                     />
                   ))}
                 </div>
@@ -628,17 +659,43 @@ export default function TemplatesIndex() {
             </div>
 
             <div className="md:col-span-7">
-              {templates.map((template) => (
+              {templates.map((template) => {
+                const soon = Boolean(
+                  template.comingSoon || isComingSoonSku(template.sku),
+                )
+                return (
                 <article
                   key={template.id}
                   data-template-step
-                  className="flex min-h-[82svh] flex-col justify-center border-b border-ink/15 py-14 first:border-t md:min-h-svh md:py-20"
+                  aria-disabled={soon || undefined}
+                  className={`flex min-h-[82svh] flex-col justify-center border-b border-ink/15 py-14 first:border-t md:min-h-svh md:py-20 ${
+                    soon ? 'select-none' : ''
+                  }`}
                 >
-                  <div className="relative mb-8 aspect-4/3 overflow-hidden md:hidden">
-                    <TemplatePoster template={template} index={0} />
+                  <div
+                    className={`relative mb-8 aspect-4/3 overflow-hidden md:hidden ${
+                      soon ? 'opacity-45 grayscale' : ''
+                    }`}
+                  >
+                    <TemplatePoster
+                      template={template}
+                      index={0}
+                      soonLabel={t('home.comingSoon')}
+                    />
+                    {soon ? (
+                      <span className="absolute inset-0 z-10 flex items-center justify-center bg-bone/50">
+                        <span className="border border-ink/20 bg-bone px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-ink/50">
+                          {t('home.comingSoon')}
+                        </span>
+                      </span>
+                    ) : null}
                   </div>
 
-                  <div className="flex items-center justify-between gap-4">
+                  <div
+                    className={`flex items-center justify-between gap-4 ${
+                      soon ? 'opacity-40' : ''
+                    }`}
+                  >
                     <p className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
                       {template.id} /{' '}
                       {String(templates.length).padStart(2, '0')}
@@ -655,88 +712,117 @@ export default function TemplatesIndex() {
                     </span>
                   </div>
 
-                  <Link
-                    to={template.path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group mt-5 flex items-end justify-between gap-2 md:gap-5"
-                  >
-                    <h2 className="min-w-0 text-[clamp(2.2rem,10vw,6.5rem)] leading-[0.86] font-medium tracking-[-0.055em] transition-colors group-hover:text-accent md:text-[clamp(2.6rem,7vw,6.5rem)]">
-                      {template.name}
-                    </h2>
-                    <span
-                      aria-hidden="true"
-                      className="shrink-0 pb-1 text-3xl transition-transform group-hover:translate-x-2"
+                  {soon ? (
+                    <div className="mt-5 flex items-end justify-between gap-2 opacity-40 md:gap-5">
+                      <h2 className="min-w-0 text-[clamp(2.2rem,10vw,6.5rem)] leading-[0.86] font-medium tracking-[-0.055em] md:text-[clamp(2.6rem,7vw,6.5rem)]">
+                        {template.name}
+                      </h2>
+                    </div>
+                  ) : (
+                    <Link
+                      to={template.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group mt-5 flex items-end justify-between gap-2 md:gap-5"
                     >
-                      →
-                    </span>
-                  </Link>
+                      <h2 className="min-w-0 text-[clamp(2.2rem,10vw,6.5rem)] leading-[0.86] font-medium tracking-[-0.055em] transition-colors group-hover:text-accent md:text-[clamp(2.6rem,7vw,6.5rem)]">
+                        {template.name}
+                      </h2>
+                      <span
+                        aria-hidden="true"
+                        className="shrink-0 pb-1 text-3xl transition-transform group-hover:translate-x-2"
+                      >
+                        →
+                      </span>
+                    </Link>
+                  )}
 
-                  <p className="mt-5 text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                    {template.vibe}
+                  <p
+                    className={`mt-5 text-[11px] uppercase tracking-[0.25em] ${
+                      soon ? 'text-ink/30' : 'text-ink/50'
+                    }`}
+                  >
+                    {soon ? t('home.comingSoon') : template.vibe}
                   </p>
-                  <p className="mt-3 max-w-[46ch] text-sm leading-relaxed text-ink/70 md:text-base">
+                  <p
+                    className={`mt-3 max-w-[46ch] text-sm leading-relaxed md:text-base ${
+                      soon ? 'text-ink/35' : 'text-ink/70'
+                    }`}
+                  >
                     {template.description}
                   </p>
-                  <p className="mt-5 max-w-[56ch] text-[10px] leading-relaxed tracking-[0.16em] text-ink/40 uppercase">
+                  <p
+                    className={`mt-5 max-w-[56ch] text-[10px] leading-relaxed tracking-[0.16em] uppercase ${
+                      soon ? 'text-ink/25' : 'text-ink/40'
+                    }`}
+                  >
                     {Array.isArray(template.tags)
                       ? template.tags.join(' · ')
                       : template.tags}
                   </p>
 
-                  {templatePriceUsd(template.sku) != null && (
-                    <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
-                      {formatPriceFromUsd(
-                        templatePriceUsd(template.sku),
-                        locale,
-                        rate,
-                      )}
+                  {soon ? (
+                    <p className="mt-8 text-[11px] uppercase tracking-[0.22em] text-ink/40">
+                      {t('home.comingSoon')}
                     </p>
-                  )}
+                  ) : (
+                    <>
+                      {templatePriceUsd(template.sku) != null && (
+                        <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+                          {formatPriceFromUsd(
+                            templatePriceUsd(template.sku),
+                            locale,
+                            rate,
+                          )}
+                        </p>
+                      )}
 
-                  <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
-                    <Link
-                      to={template.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ui-press min-h-11 border border-ink bg-ink px-5 py-2.5 text-bone hover:border-accent hover:bg-accent"
-                    >
-                      {t('home.openDemo')} →
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        addItem({
-                          sku: template.sku,
-                          title: t('common.cartItemTitle', {
-                            name: template.name,
-                          }),
-                        })
-                      }
-                      className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
-                    >
-                      {t('common.addToCart')}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={Boolean(buyingSku) || authLoading}
-                      onClick={() =>
-                        buyNow({
-                          sku: template.sku,
-                          title: t('common.cartItemTitle', {
-                            name: template.name,
-                          }),
-                        })
-                      }
-                      className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
-                    >
-                      {buyingSku === template.sku
-                        ? t('cart.redirecting')
-                        : t('common.buy')}
-                    </button>
-                  </div>
+                      <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
+                        <Link
+                          to={template.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ui-press min-h-11 border border-ink bg-ink px-5 py-2.5 text-bone hover:border-accent hover:bg-accent"
+                        >
+                          {t('home.openDemo')} →
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addItem({
+                              sku: template.sku,
+                              title: t('common.cartItemTitle', {
+                                name: template.name,
+                              }),
+                            })
+                          }
+                          className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
+                        >
+                          {t('common.addToCart')}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={Boolean(buyingSku) || authLoading}
+                          onClick={() =>
+                            buyNow({
+                              sku: template.sku,
+                              title: t('common.cartItemTitle', {
+                                name: template.name,
+                              }),
+                            })
+                          }
+                          className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
+                        >
+                          {buyingSku === template.sku
+                            ? t('cart.redirecting')
+                            : t('common.buy')}
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </article>
-              ))}
+                )
+              })}
             </div>
           </div>
         </section>
@@ -987,18 +1073,29 @@ export default function TemplatesIndex() {
               {t('home.footerTemplates')}
             </p>
             <ul className="space-y-2 text-sm">
-              {templates.map((template) => (
-                <li key={template.id}>
-                  <Link
-                    to={template.path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors duration-300 hover:text-accent"
-                  >
-                    {template.name}
-                  </Link>
-                </li>
-              ))}
+              {templates.map((template) => {
+                const soon = Boolean(
+                  template.comingSoon || isComingSoonSku(template.sku),
+                )
+                return (
+                  <li key={template.id}>
+                    {soon ? (
+                      <span className="cursor-not-allowed text-ink/30">
+                        {template.name}
+                      </span>
+                    ) : (
+                      <Link
+                        to={template.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transition-colors duration-300 hover:text-accent"
+                      >
+                        {template.name}
+                      </Link>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           </nav>
 

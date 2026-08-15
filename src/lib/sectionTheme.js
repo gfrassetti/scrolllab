@@ -27,6 +27,8 @@ export const THEMED_MODELS = [
   'atelier',
   'comic',
   'unity',
+  'ratio',
+  'vanta',
 ]
 
 /** Secciones neutras cuyo prop `theme` se resuelve según el contexto. */

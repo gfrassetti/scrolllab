@@ -32,6 +32,13 @@ export const BUNDLE_MODELS = [
   'unity',
 ]
 
+/** Listados en home como “próximamente”; no se venden ni van en el bundle. */
+export const COMING_SOON_SKUS = ['ratio', 'vanta']
+
+export function isComingSoonSku(sku) {
+  return COMING_SOON_SKUS.includes(sku)
+}
+
 export const PRODUCTS = {
   // Opcional por SKU: `picture: '/ruta.png'` (público bajo CLIENT_URL).
   // Si falta, Checkout Pro usa /icon-512.png.
@@ -91,18 +98,32 @@ export const PRODUCTS = {
     unit_price_usd: 179,
     currency_id: 'ARS',
   },
+  ratio: {
+    sku: 'ratio',
+    title: 'RATIO — template',
+    description: 'Modelo de sistemas que se rompen: pin, zoom-through y crazy mode (código fuente).',
+    unit_price_usd: 199,
+    currency_id: 'ARS',
+  },
+  vanta: {
+    sku: 'vanta',
+    title: 'VANTA — template',
+    description: 'Modelo de universo de videojuego: HUD, hold-to-scan y Three.js (código fuente).',
+    unit_price_usd: 199,
+    currency_id: 'ARS',
+  },
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',
     description: 'Los ocho modelos completos en un solo ZIP (código fuente).',
-    unit_price_usd: 499,
+    unit_price_usd: 649,
     currency_id: 'ARS',
   },
   custom: {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 199,
+    unit_price_usd: 219,
     currency_id: 'ARS',
   },
 }
@@ -149,13 +170,16 @@ export function resolveLineItem(item) {
   }
   const product = PRODUCTS[item.sku]
   if (!product) return null
+  if (isComingSoonSku(item.sku)) return null
   return { ...product, recipe: null }
 }
 
 /** Catálogo público con el precio ya convertido a pesos. */
 export function catalogWithArs(rate) {
-  return Object.values(PRODUCTS).map((product) => ({
-    ...product,
-    unit_price: arsFromUsd(product.unit_price_usd, rate),
-  }))
+  return Object.values(PRODUCTS)
+    .filter((product) => !isComingSoonSku(product.sku))
+    .map((product) => ({
+      ...product,
+      unit_price: arsFromUsd(product.unit_price_usd, rate),
+    }))
 }

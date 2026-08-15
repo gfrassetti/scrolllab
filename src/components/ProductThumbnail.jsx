@@ -47,6 +47,18 @@ const styles = {
     accent: '#f4c518',
     code: 'UN',
   },
+  ratio: {
+    background: '#ebe6dc',
+    color: '#111111',
+    accent: '#e23c24',
+    code: 'RA',
+  },
+  vanta: {
+    background: '#0e0b14',
+    color: '#f4f1ea',
+    accent: '#5b4cff',
+    code: 'VA',
+  },
   custom: {
     background: '#181715',
     color: '#f2efe8',

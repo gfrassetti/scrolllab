@@ -61,8 +61,25 @@ import LanguageBlock from '../components/sections/unity/LanguageBlock'
 import LastPortrait from '../components/sections/unity/LastPortrait'
 import StageLines from '../components/sections/unity/StageLines'
 import FooterTrophy from '../components/sections/unity/FooterTrophy'
+import NavRatio from '../components/sections/ratio/NavRatio'
+import HeroTools from '../components/sections/ratio/HeroTools'
+import FourPlates from '../components/sections/ratio/FourPlates'
+import PlateStudy from '../components/sections/ratio/PlateStudy'
+import BreakRules from '../components/sections/ratio/BreakRules'
+import FooterLedger from '../components/sections/ratio/FooterLedger'
+import NavVanta from '../components/sections/vanta/NavVanta'
+import BootVanta from '../components/sections/vanta/BootVanta'
+import HeroOperators from '../components/sections/vanta/HeroOperators'
+import KeeperVista from '../components/sections/vanta/KeeperVista'
+import CollectionDesk from '../components/sections/vanta/CollectionDesk'
+import OperatorFan from '../components/sections/vanta/OperatorFan'
+import CitadelStage from '../components/sections/vanta/CitadelStage'
+import FactionHold from '../components/sections/vanta/FactionHold'
+import WorldVista from '../components/sections/vanta/WorldVista'
+import FooterDrop from '../components/sections/vanta/FooterDrop'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
+import { COMING_SOON_SKUS } from './pricing.js'
 
 /**
  * Central catalog of every section across all template models.
@@ -71,7 +88,7 @@ import ProductGrid from '../components/sections/commerce/ProductGrid'
  * `wrapperClass` gives every section instance its model's canvas
  * (background + text color) when mixed with sections of other models.
  */
-export const models = [
+const allModels = [
   {
     id: 'chapters',
     name: 'CHAPTERS',
@@ -186,6 +203,38 @@ export const models = [
     ],
   },
   {
+    id: 'ratio',
+    name: 'RATIO',
+    accent: '#e23c24',
+    wrapperClass: 'bg-[#ebe6dc] text-[#111]',
+    sections: [
+      { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, blurb: 'Hairline bar with a Rupture switch — crazy mode for the whole page' },
+      { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, blurb: 'Cube knocks FORM → POWER on scrub; full-bleed close' },
+      { id: 'ratio/FourPlates', name: 'Four Plates', kind: 'section', component: FourPlates, blurb: 'Four stacked construction cards that zoom through the viewport' },
+      { id: 'ratio/PlateStudy', name: 'Plate Study', kind: 'section', component: PlateStudy, blurb: 'Pinned drawing, case that scales in, two steps and a note' },
+      { id: 'ratio/BreakRules', name: 'Break Rules', kind: 'section', component: BreakRules, blurb: 'Black field, grey modules, three lines peeling on scrub' },
+      { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Outlined display word, parallax spines, hairline credits' },
+    ],
+  },
+  {
+    id: 'vanta',
+    name: 'VANTA',
+    accent: '#5b4cff',
+    wrapperClass: 'bg-[#f4f1ea] text-[#111114]',
+    sections: [
+      { id: 'vanta/NavVanta', name: 'Nav Vanta', kind: 'nav', component: NavVanta, blurb: 'HUD bar and a black drawer menu that slides from the left' },
+      { id: 'vanta/BootVanta', name: 'Boot Vanta', kind: 'section', component: BootVanta, blurb: 'White loading overlay, click-to-sound, then the giant mark' },
+      { id: 'vanta/HeroOperators', name: 'Hero Operators', kind: 'hero', component: HeroOperators, blurb: 'Full-bleed operator with 3D cursor tilt; scroll shrinks it into a folder card' },
+      { id: 'vanta/KeeperVista', name: 'Keeper Vista', kind: 'section', component: KeeperVista, blurb: 'The folder card flips into a parallax tableau, then closes as a rotating plate' },
+      { id: 'vanta/CollectionDesk', name: 'Collection Desk', kind: 'section', component: CollectionDesk, blurb: '10K ledger, 3D hover plate, spinning crystal and Windows to the Soul' },
+      { id: 'vanta/OperatorFan', name: 'Operator Fan', kind: 'section', component: OperatorFan, blurb: 'Lilac deck that splits into two branches and expands on scrub' },
+      { id: 'vanta/CitadelStage', name: 'Citadel Stage', kind: 'section', component: CitadelStage, blurb: 'Pinned fortress zoom; click-and-hold opens a live feed overlay' },
+      { id: 'vanta/FactionHold', name: 'Faction Hold', kind: 'section', component: FactionHold, blurb: 'Two houses, 3D hover, center hold reveals intel' },
+      { id: 'vanta/WorldVista', name: 'World Vista', kind: 'section', component: WorldVista, blurb: 'Aerial world zoom with drifting collage shards' },
+      { id: 'vanta/FooterDrop', name: 'Footer Drop', kind: 'footer', component: FooterDrop, blurb: 'Outlined mark, 3D slivers, rising operator, three close columns' },
+    ],
+  },
+  {
     id: 'contact',
     name: 'CONTACT',
     accent: '#7c5cff',
@@ -220,8 +269,11 @@ export const models = [
   },
 ]
 
+/** Paleta del builder: sin modelos en “próximamente”. */
+export const models = allModels.filter((model) => !COMING_SOON_SKUS.includes(model.id))
+
 const index = new Map()
-models.forEach((model) => {
+allModels.forEach((model) => {
   model.sections.forEach((section) => {
     index.set(section.id, { ...section, model })
   })

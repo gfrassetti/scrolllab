@@ -65,6 +65,7 @@
     "heroCtaDemo": "Abrir una demo",
     "heroCtaBuilder": "Probar el builder",
     "openDemo": "Ver demo",
+    "comingSoon": "Próximamente",
     "scrollDown": "Bajá para ver",
     "modelsLabel": "Los modelos — 08",
     "modelsScrollHint": "Scrolleá para recorrer",
@@ -218,6 +219,26 @@
         "Orbe rising"
       ],
       "description": "Canvas crema, tipografía Instrument + Oswald, mosaico de fotos que se despliega en un slider full-bleed y un footer con orbe geométrico que sube al scroll. Ideal para campañas deportivas, eventos, o marcas que quieren un scrollytelling editorial de alto impacto."
+    },
+    "ratio": {
+      "vibe": "Sistemas que se rompen",
+      "tags": [
+        "Loader que gira",
+        "Zoom-through de placas",
+        "Rupture (crazy mode)",
+        "Estudios pineados"
+      ],
+      "description": "Un scrollytelling de sistemas de medida: cuadrados que giran, tipo gigante, cuatro placas que atraviesan el viewport y un interruptor que tira todo de lado. Para estudios, agencias y portfolios que necesitan coreografía de scroll, no un layout quieto."
+    },
+    "vanta": {
+      "vibe": "Universo de juego",
+      "tags": [
+        "Boot de carga",
+        "Click-and-hold",
+        "Placas carpeta",
+        "Abanico de operators"
+      ],
+      "description": "Landing cinematográfica de un universo de videojuego: HUD de consola, arte de operators, secuencia de boot y capas de intel al mantener click. Para estudios que publican un mundo, un raid o un drop — no una grilla de producto genérica."
     }
   },
   "builder": {
@@ -524,6 +545,74 @@
         "FooterTrophy": {
           "name": "Footer trophy",
           "blurb": "Cierre cielo con orbe fotográfico que sube al scroll"
+        }
+      },
+      "ratio": {
+        "NavRatio": {
+          "name": "Nav ratio",
+          "blurb": "Barra hairline con interruptor Rupture — crazy mode de la página"
+        },
+        "HeroTools": {
+          "name": "Hero tools",
+          "blurb": "Dos bandas, cubo negro que pega contra el tipo, scrub reversible"
+        },
+        "FourPlates": {
+          "name": "Four plates",
+          "blurb": "Cuatro placas apiladas que atraviesan el viewport"
+        },
+        "PlateStudy": {
+          "name": "Plate study",
+          "blurb": "Dibujo pineado, caso que escala, dos pasos y una nota"
+        },
+        "BreakRules": {
+          "name": "Break rules",
+          "blurb": "Campo negro, módulos grises, tres líneas que se pelan al scroll"
+        },
+        "FooterLedger": {
+          "name": "Footer ledger",
+          "blurb": "Palabra outline, lomos en parallax, créditos en hairline"
+        }
+      },
+      "vanta": {
+        "NavVanta": {
+          "name": "Nav vanta",
+          "blurb": "HUD y un cajón negro que entra desde la izquierda"
+        },
+        "BootVanta": {
+          "name": "Boot vanta",
+          "blurb": "Overlay blanco de carga, click para sonido, después la marca gigante"
+        },
+        "HeroOperators": {
+          "name": "Hero operators",
+          "blurb": "Operator a full-bleed con tilt 3D al cursor; el scroll lo encoge a una carta carpeta"
+        },
+        "KeeperVista": {
+          "name": "Keeper vista",
+          "blurb": "La carta se da vuelta a un tableau con parallax y se cierra girando"
+        },
+        "CollectionDesk": {
+          "name": "Collection desk",
+          "blurb": "Ledger 10K, placa 3D, cristal que gira y Windows to the Soul"
+        },
+        "OperatorFan": {
+          "name": "Operator fan",
+          "blurb": "Mazo lila que se abre en dos ramas y se expande al scroll"
+        },
+        "CitadelStage": {
+          "name": "Citadel stage",
+          "blurb": "Zoom pineado de la fortaleza; mantener click abre un feed encima"
+        },
+        "FactionHold": {
+          "name": "Faction hold",
+          "blurb": "Dos casas, hover 3D, hold al centro revela intel"
+        },
+        "WorldVista": {
+          "name": "World vista",
+          "blurb": "Zoom aéreo del mundo con fragmentos de collage"
+        },
+        "FooterDrop": {
+          "name": "Footer drop",
+          "blurb": "Marca outline, slivers 3D, operator que sube, tres columnas de cierre"
         }
       },
       "contact": {

@@ -66,6 +66,18 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/unity',
   },
+  ratio: {
+    page: 'src/pages/RatioPage.jsx',
+    sectionsDir: 'src/components/sections/ratio',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/ratio',
+  },
+  vanta: {
+    page: 'src/pages/VantaPage.jsx',
+    sectionsDir: 'src/components/sections/vanta',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/vanta',
+  },
 }
 
 const SHARED = [
@@ -232,6 +244,8 @@ function modelWrapperClass(model) {
   if (model === 'atelier') return 'bg-[#0b0c10] text-white'
   if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
   if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
+  if (model === 'ratio') return 'bg-[#ebe6dc] text-[#111]'
+  if (model === 'vanta') return 'bg-[#f4f1ea] text-[#111114]'
 
   // contact / commerce paint their own theme — no wrapper canvas.
   if (model === 'contact') return ''
@@ -304,7 +318,7 @@ and resets, but nothing is sent anywhere. To receive real messages:
 3. Any backend works — your own API, a serverless function, or a form service.
 
 Styling follows the \`theme\` prop (\`auto\`, \`chapters\`, \`nocturne\`, \`monolith\`,
-\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`). With \`auto\` it inherits the surrounding
+\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`, \`unity\`, \`ratio\`, \`vanta\`). With \`auto\` it inherits the surrounding
 background and text color. A hidden honeypot field filters basic bots.
 `
 

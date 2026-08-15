@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 import {
   PRODUCTS,
   BUNDLE_MODELS,
+  COMING_SOON_SKUS as SERVER_COMING_SOON,
   COMMERCE_PACK_SURCHARGE_USD as SERVER_SURCHARGE,
   CUSTOM_BASE_SECTIONS as SERVER_BASE_SECTIONS,
   CUSTOM_EXTRA_SECTION_USD as SERVER_EXTRA_SECTION,
@@ -24,6 +25,7 @@ import {
   MAX_CUSTOM_SECTIONS,
   COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
   BUNDLE_PRICE_USD,
+  COMING_SOON_SKUS as CLIENT_COMING_SOON,
 } from '../src/lib/pricing.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
@@ -234,11 +236,28 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   }
 }
 
+const sameSkuList = (a, b) =>
+  JSON.stringify([...a].sort()) === JSON.stringify([...b].sort())
+
+if (!sameSkuList(CLIENT_COMING_SOON, SERVER_COMING_SOON)) {
+  fail(
+    'catálogo',
+    `COMING_SOON_SKUS no coincide: cliente [${CLIENT_COMING_SOON}] vs servidor [${SERVER_COMING_SOON}]`,
+  )
+}
+for (const sku of SERVER_COMING_SOON) {
+  if (BUNDLE_MODELS.includes(sku)) {
+    fail('catálogo', `'${sku}' está en COMING_SOON_SKUS y también en BUNDLE_MODELS`)
+  }
+}
+
 // 3d. `auto` can only resolve to a model the form actually knows how to paint.
-for (const model of diff(THEMED_MODELS, BUNDLE_MODELS)) {
+// Paletas = modelos en venta + los que se listan como “próximamente”.
+const themedExpected = [...BUNDLE_MODELS, ...SERVER_COMING_SOON]
+for (const model of diff(THEMED_MODELS, themedExpected)) {
   fail('temas', `THEMED_MODELS incluye '${model}' pero no es un modelo del catálogo`)
 }
-for (const model of diff(BUNDLE_MODELS, THEMED_MODELS)) {
+for (const model of diff(themedExpected, THEMED_MODELS)) {
   fail('temas', `'${model}' es un modelo del catálogo pero no tiene paleta en THEMED_MODELS`)
 }
 for (const id of THEME_ADAPTIVE_SECTIONS) {
@@ -284,10 +303,30 @@ const metaBlock = indexSrc.slice(
   indexSrc.indexOf('function TemplatePoster'),
 )
 const listed = [...metaBlock.matchAll(/sku:\s*'([a-z]+)'/g)].map((m) => m[1])
+for (const sku of SERVER_COMING_SOON) {
+  if (!listed.includes(sku)) {
+    fail('catálogo', `'${sku}' es próximamente pero no se lista en la home`)
+  }
+}
 for (const sku of listed) {
   if (!PRODUCTS[sku]) fail('catálogo', `'${sku}' se lista en la home pero no existe en catalog.js`)
   if (!appSrc.includes(`/templates/${sku}`)) {
     fail('catálogo', `'${sku}' se lista en la home pero no tiene ruta en App.jsx`)
+  }
+  const comingSoon = SERVER_COMING_SOON.includes(sku)
+  if (comingSoon && !new RegExp(`sku:\\s*'${sku}'[\\s\\S]*?comingSoon:\\s*true`).test(metaBlock)) {
+    fail('catálogo', `'${sku}' es próximamente pero la home no lo marca comingSoon`)
+  }
+  if (
+    comingSoon &&
+    !new RegExp(
+      `path="/templates/${sku}"[\\s\\S]{0,280}import\\.meta\\.env\\.DEV[\\s\\S]{0,160}Navigate to="/"`,
+    ).test(appSrc)
+  ) {
+    fail(
+      'catálogo',
+      `'${sku}' es próximamente: en local debe renderizar la demo y en prod redirigir a /`,
+    )
   }
   for (const [name, keys] of [['es', esKeys], ['en', enKeys]]) {
     if (!keys.includes(`templates.${sku}.description`)) {

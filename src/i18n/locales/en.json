@@ -65,6 +65,7 @@
     "heroCtaDemo": "Open a demo",
     "heroCtaBuilder": "Try the builder",
     "openDemo": "View demo",
+    "comingSoon": "Coming soon",
     "scrollDown": "Scroll to explore",
     "modelsLabel": "The models — 08",
     "modelsScrollHint": "Scroll to explore",
@@ -218,6 +219,26 @@
         "Rising orb"
       ],
       "description": "Cream canvas, Instrument + Oswald type, a photo mosaic that unfolds into a full-bleed slider, and a sky-blue footer with a rising geometric orb. Ideal for sports campaigns, events, or brands that want high-impact editorial scrollytelling."
+    },
+    "ratio": {
+      "vibe": "Systems that rupture",
+      "tags": [
+        "Spinning loader",
+        "Zoom-through plates",
+        "Rupture (crazy mode)",
+        "Pinned studies"
+      ],
+      "description": "A scrollytelling of measuring systems: spinning squares, giant type, four plates that punch through the viewport, and a switch that knocks the page off-true. For studios, agencies and portfolios that need scroll choreography, not a quiet layout."
+    },
+    "vanta": {
+      "vibe": "Game universe",
+      "tags": [
+        "Loading boot",
+        "Click-and-hold feed",
+        "Folder plates",
+        "Operator fan"
+      ],
+      "description": "A cinematic game-universe landing: HUD chrome, painterly operator art, a boot sequence, and click-and-hold intel overlays. For studios shipping a world, a raid, or a live-service drop — not a generic product grid."
     }
   },
   "builder": {
@@ -524,6 +545,74 @@
         "FooterTrophy": {
           "name": "Footer Trophy",
           "blurb": "Sky-blue closer with a rising photo orb"
+        }
+      },
+      "ratio": {
+        "NavRatio": {
+          "name": "Nav ratio",
+          "blurb": "Hairline bar with a Rupture switch — crazy mode for the page"
+        },
+        "HeroTools": {
+          "name": "Hero tools",
+          "blurb": "Two bands, a black cube that hits the type, reversible scrub"
+        },
+        "FourPlates": {
+          "name": "Four plates",
+          "blurb": "Four stacked construction cards that zoom through the viewport"
+        },
+        "PlateStudy": {
+          "name": "Plate study",
+          "blurb": "Pinned drawing, case that scales in, two steps and a note"
+        },
+        "BreakRules": {
+          "name": "Break rules",
+          "blurb": "Black field, grey modules, three lines peeling on scrub"
+        },
+        "FooterLedger": {
+          "name": "Footer ledger",
+          "blurb": "Outlined display word, parallax spines, hairline credits"
+        }
+      },
+      "vanta": {
+        "NavVanta": {
+          "name": "Nav vanta",
+          "blurb": "HUD bar and a black drawer menu that slides from the left"
+        },
+        "BootVanta": {
+          "name": "Boot vanta",
+          "blurb": "White loading overlay, click-to-sound, then the giant mark"
+        },
+        "HeroOperators": {
+          "name": "Hero operators",
+          "blurb": "Full-bleed operator with 3D cursor tilt; scroll shrinks it into a folder card"
+        },
+        "KeeperVista": {
+          "name": "Keeper vista",
+          "blurb": "The folder card flips into a parallax tableau, then closes as a rotating plate"
+        },
+        "CollectionDesk": {
+          "name": "Collection desk",
+          "blurb": "10K ledger, 3D hover plate, spinning crystal and Windows to the Soul"
+        },
+        "OperatorFan": {
+          "name": "Operator fan",
+          "blurb": "Lilac deck that splits into two branches and expands on scrub"
+        },
+        "CitadelStage": {
+          "name": "Citadel stage",
+          "blurb": "Pinned fortress zoom; click-and-hold opens a live feed overlay"
+        },
+        "FactionHold": {
+          "name": "Faction hold",
+          "blurb": "Two houses, 3D hover, center hold reveals intel"
+        },
+        "WorldVista": {
+          "name": "World vista",
+          "blurb": "Aerial world zoom with drifting collage shards"
+        },
+        "FooterDrop": {
+          "name": "Footer drop",
+          "blurb": "Outlined mark, 3D slivers, rising operator, three close columns"
         }
       },
       "contact": {

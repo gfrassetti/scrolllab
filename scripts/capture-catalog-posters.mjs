@@ -24,6 +24,8 @@ const SCROLL_AT = {
   atelier: 0.05,
   comic: 0.06,
   unity: 0.04,
+  ratio: 0.08,
+  vanta: 0.04,
 }
 
 async function main() {

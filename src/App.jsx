@@ -18,6 +18,8 @@ const VelocityPage = lazy(() => import('./pages/VelocityPage'))
 const AtelierPage = lazy(() => import('./pages/AtelierPage'))
 const ComicPage = lazy(() => import('./pages/ComicPage'))
 const UnityPage = lazy(() => import('./pages/UnityPage'))
+const RatioPage = lazy(() => import('./pages/RatioPage'))
+const VantaPage = lazy(() => import('./pages/VantaPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -42,6 +44,12 @@ function ScrollToTop() {
   return null
 }
 
+function HomeCursor() {
+  const { pathname } = useLocation()
+  if (pathname !== '/') return null
+  return <CustomCursor />
+}
+
 function Loader() {
   const t = useT()
   return (
@@ -57,8 +65,8 @@ export default function App() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <CustomCursor />
         <BrowserRouter>
+          <HomeCursor />
           <ScrollToTop />
           <CartToast />
           <ChunkErrorBoundary>
@@ -73,6 +81,26 @@ export default function App() {
                 <Route path="/templates/atelier" element={<AtelierPage />} />
                 <Route path="/templates/comic" element={<ComicPage />} />
                 <Route path="/templates/unity" element={<UnityPage />} />
+                <Route
+                  path="/templates/ratio"
+                  element={
+                    import.meta.env.DEV ? (
+                      <RatioPage />
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="/templates/vanta"
+                  element={
+                    import.meta.env.DEV ? (
+                      <VantaPage />
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  }
+                />
                 <Route path="/builder" element={<BuilderPage />} />
                 <Route path="/preview" element={<PreviewPage />} />
                 <Route path="/legal/license" element={<LicensePage />} />

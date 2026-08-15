@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import {
   arsFromUsd,
   estimateCustomPriceUsd,
+  isComingSoonSku,
   templatePriceUsd,
 } from './pricing.js'
 import { recipeHasCommerce } from './composition.js'
@@ -92,6 +93,7 @@ export const useCart = create(
     (set, get) => ({
       items: [],
       addItem: (item) => {
+        if (isComingSoonSku(item?.sku)) return false
         const items = get().items
 
         if (isCustomSku(item.sku)) {
@@ -121,6 +123,14 @@ export const useCart = create(
       count: () => get().items.length,
     }),
     // v2: una sola composición custom (antes se apilaban custom:…)
-    { name: 'scrolllab-cart-v2' },
+    {
+      name: 'scrolllab-cart-v2',
+      merge: (persisted, current) => {
+        const items = Array.isArray(persisted?.items)
+          ? persisted.items.filter((item) => !isComingSoonSku(item?.sku))
+          : current.items
+        return { ...current, ...persisted, items }
+      },
+    },
   ),
 )

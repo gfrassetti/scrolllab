@@ -54,8 +54,8 @@ describe('estimateCustomPriceUsd', () => {
   })
 
   /** El anclaje del esquema: una composición del tamaño de un template. */
-  it('una composición de 10 secciones vale 229 USD', () => {
-    assert.equal(estimateCustomPriceUsd(10, false), 229)
+  it('una composición de 10 secciones vale 249 USD', () => {
+    assert.equal(estimateCustomPriceUsd(10, false), 249)
   })
 
   it('la base queda arriba del template más caro', () => {

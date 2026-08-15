@@ -178,6 +178,17 @@ describe('validateCheckoutItems', () => {
     )
   })
 
+  it('rechaza SKUs en próximamente', () => {
+    assert.throws(
+      () => validateCheckoutItems([{ sku: 'ratio' }], opts),
+      HttpError,
+    )
+    assert.throws(
+      () => validateCheckoutItems([{ sku: 'vanta' }], opts),
+      HttpError,
+    )
+  })
+
   it('valida receta custom', () => {
     const lines = validateCheckoutItems(
       [
