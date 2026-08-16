@@ -20,7 +20,7 @@
     "capture:catalog": "node scripts/capture-catalog-posters.mjs",
     "server": "node server/index.js",
     "start": "node server/index.js",
-    "test": "node --test server/__tests__/unit.test.js server/__tests__/api.test.js server/__tests__/fulfill.test.js server/__tests__/packaging.test.js src/lib/__tests__/authReturn.test.js src/lib/__tests__/pricing.test.js src/lib/__tests__/cart.test.js src/lib/__tests__/startCheckout.test.js src/lib/__tests__/sectionTheme.test.js src/lib/__tests__/sectionFields.test.js src/lib/__tests__/composition.test.js src/lib/__tests__/checkoutOutcome.test.js src/lib/__tests__/orderPreview.test.js src/lib/__tests__/contactForm.test.js"
+    "test": "node --test server/__tests__/unit.test.js server/__tests__/api.test.js server/__tests__/fulfill.test.js server/__tests__/packaging.test.js src/lib/__tests__/authReturn.test.js src/lib/__tests__/pricing.test.js src/lib/__tests__/cart.test.js src/lib/__tests__/startCheckout.test.js src/lib/__tests__/sectionTheme.test.js src/lib/__tests__/sectionFields.test.js src/lib/__tests__/composition.test.js src/lib/__tests__/checkoutOutcome.test.js src/lib/__tests__/orderPreview.test.js src/lib/__tests__/contactForm.test.js src/lib/__tests__/beatLayout.test.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

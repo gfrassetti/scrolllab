@@ -26,6 +26,7 @@ import {
   COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
   BUNDLE_PRICE_USD,
   COMING_SOON_SKUS as CLIENT_COMING_SOON,
+  BUILDER_HIDDEN_SKUS,
 } from '../src/lib/pricing.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
@@ -248,6 +249,14 @@ if (!sameSkuList(CLIENT_COMING_SOON, SERVER_COMING_SOON)) {
 for (const sku of SERVER_COMING_SOON) {
   if (BUNDLE_MODELS.includes(sku)) {
     fail('catálogo', `'${sku}' está en COMING_SOON_SKUS y también en BUNDLE_MODELS`)
+  }
+}
+for (const sku of BUILDER_HIDDEN_SKUS) {
+  if (!CLIENT_COMING_SOON.includes(sku)) {
+    fail(
+      'catálogo',
+      `'${sku}' está en BUILDER_HIDDEN_SKUS pero no en COMING_SOON_SKUS — no ocultes un modelo en venta`,
+    )
   }
 }
 

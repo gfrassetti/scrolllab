@@ -22,6 +22,8 @@ npm run analyze:ref -- <url> --sku <sku> --name "<Name>"
 3. Leer la nota generada en Obsidian (`<Name> - analisis de referencia.md`) y/o `docs/reference-analysis/<sku>.md` (+ `beats.json` / capturas en `<sku>/beats/`).
 4. Recién después: graphify → mapa Obsidian del SKU → código.
 
+Si la ref es **Readymag** (`window.RM`, scripts `rmcdn`, `.animation-container`): no alcanza `analyze:ref` ni el dump CSS/HTML. Seguir [`docs/readymag-motion.md`](../../docs/readymag-motion.md) — extraer `widget.animation[]` y alimentar **Beat** (`src/lib/beat`, [`docs/scrolllab-beat.md`](../../docs/scrolllab-beat.md)). El viewer no se copia al ZIP.
+
 El lector es **adaptativo**: no frame-a-frame (caro/ruidoso); guarda un beat cuando cambian fondo, sticky, transforms o texto visible. Gemini es opcional (`GEMINI_API_KEY`) y anota en una sola pasada — sin key alcanza la captura mecánica para portar.
 
 ## Salidas

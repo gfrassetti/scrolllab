@@ -223,12 +223,12 @@
     "ratio": {
       "vibe": "Sistemas que se rompen",
       "tags": [
+        "Beat (riel + seek)",
         "Loader que gira",
         "Zoom-through de placas",
-        "Rupture (crazy mode)",
-        "Estudios pineados"
+        "Rupture (crazy mode)"
       ],
-      "description": "Un scrollytelling de sistemas de medida: cuadrados que giran, tipo gigante, cuatro placas que atraviesan el viewport y un interruptor que tira todo de lado. Para estudios, agencias y portfolios que necesitan coreografía de scroll, no un layout quieto."
+      "description": "Un scrollytelling de sistemas de medida con Beat: cubo y tipo en un riel, cuadrados que giran, cuatro placas que atraviesan el viewport y un interruptor que tira todo de lado. Para estudios, agencias y portfolios que necesitan coreografía de scroll, no un layout quieto."
     },
     "vanta": {
       "vibe": "Universo de juego",
@@ -298,6 +298,9 @@
     "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. La grilla cuenta como una sección más.",
     "commerceIncluded": "+{{price}} del kit Commerce (ficha, carrito y checkout), aparte de la sección",
     "commerceBadge": "Kit +{{price}}",
+    "beatBadge": "Beat",
+    "beatHint": "Estas piezas llevan Beat: el riel se mueve solo en el preview y viaja en el ZIP. El panel edita copy; las recetas no se tocan acá.",
+    "beatEditHint": "Beat: el cubo y las letras se mueven solas. Acá cambiás las palabras; el riel queda en el código.",
     "modelUpload": "Probar un .glb local",
     "modelClear": "Quitar modelo",
     "modelHelp": "Formato GLB/GLTF (recomendado: .glb, un solo archivo). El archivo local sirve solo para esta vista previa. Para que viaje en tu ZIP: escribí una URL https pública, o dejá el campo vacío y en el proyecto descargado guardá tu modelo como public/mi-modelo.glb y pasá modelUrl=\"/mi-modelo.glb\" (viene explicado en el README del ZIP). Sin modelo, queda el objeto placeholder.",
@@ -554,7 +557,7 @@
         },
         "HeroTools": {
           "name": "Hero tools",
-          "blurb": "Dos bandas, cubo negro que pega contra el tipo, scrub reversible"
+          "blurb": "Dos bandas, cubo y tipo en un riel Beat, scrub reversible"
         },
         "FourPlates": {
           "name": "Four plates",
@@ -588,11 +591,11 @@
         },
         "KeeperVista": {
           "name": "Keeper vista",
-          "blurb": "La carta se da vuelta a un tableau con parallax y se cierra girando"
+          "blurb": "Tres placas carpeta sobre papel crema que se abren a una pintura, después la jaula"
         },
         "CollectionDesk": {
           "name": "Collection desk",
-          "blurb": "Ledger 10K, placa 3D, cristal que gira y Windows to the Soul"
+          "blurb": "Dossier blanco: 10K vertical, una carpeta, cristal y ojo"
         },
         "OperatorFan": {
           "name": "Operator fan",

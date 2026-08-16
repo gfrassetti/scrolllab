@@ -16,7 +16,7 @@ const DEFAULT_PLATES = [
  * to full-bleed, then through the lens (scale ~9) into the next chapter.
  */
 export default function FourPlates({
-  eyebrow = '4 systems of measure',
+  eyebrow = 'A working measure',
   platesText,
   plate1Title = 'COLUMNS',
   plate2Title = 'CANON',

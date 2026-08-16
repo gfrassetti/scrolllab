@@ -13,7 +13,7 @@ Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, qu
 - El comprador es un **desarrollador**: baja código fuente React/Vite, no un constructor no-code. Una persona sin experiencia técnica no puede “usarlo” como un Wix.
 - Al diseñar o mejorar un template, preguntate: *¿esto podría estar en Awwwards / en un site of the day, o es interchangeable con ThemeForest?* Si es lo segundo, no entra.
 
-El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento.
+El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento. La plusvalía junto al builder es **Beat** (`docs/scrolllab-beat.md`, `src/lib/beat/`): riel + seek en nuestras secciones, no un fade genérico. Si la URL de referencia es un proyecto **Readymag**, extraer recetas y alimentar Beat — no interpolar a ojo con GSAP ni copiar el viewer (`docs/readymag-motion.md`).
 
 ## Design craft — obligatorio (siempre)
 
@@ -65,6 +65,8 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | Sistema de color / tipografía / checklist | **UI/UX Pro Max** |
 | Fotos / cutouts de un template | **template-image-designer** |
 | Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
+| Motion de piezas en una sección (riel / cubo / letras) | **Beat** — [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) + `src/lib/beat/` |
+| Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
 
@@ -160,11 +162,12 @@ src/lib/
 ```
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 199 con 8 secciones incluidas, USD 15 por cada sección
+tramos**: base de USD 249 con 8 secciones incluidas, USD 15 por cada sección
 extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
-receta (nav, footer y repeticiones incluidas). Las constantes viven en
-`src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check` valida
-la paridad. Detalle en `docs/DEPLOY.md`.
+receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 229; la
+base del builder tiene que quedar **arriba** del template más caro. Las constantes
+viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
+valida la paridad. Detalle en `docs/DEPLOY.md`.
 
 Never trust client prices. Never obfuscate sold JSX — license + account + signed links + watermark.
 In production: Mongo required (no silent file fallback), mock/dev auth off, MP webhook signature required, persistent `STORAGE_DIR`.
@@ -174,6 +177,8 @@ In production: Mongo required (no silent file fallback), mock/dev auth off, MP w
 (Same as before: self-contained sections, `lib/gsap.js`, reduced motion, matchMedia for heavy scroll.)
 
 Image pieces for new models: generate realistic local assets under `sections/<sku>/assets/` (see `.cursor/rules/template-image-assets.mdc`). Do not ship sellable defaults on picsum.
+
+Riel / cubo / letras que siguen un path: **Beat** (`src/lib/beat`, [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md)). `<BeatStage>` + `<Beat>`. No copies el motor a `sections/<sku>/`.
 
 Register new sellable SKUs in `server/catalog.js` and pack logic in `server/packaging.js`. Keep `server/sections.js` in sync with `src/lib/sectionRegistry.jsx`.
 
@@ -186,6 +191,7 @@ El scrollytelling **no es imposible**: son capas DOM + CSS + GSAP/Lenis. Antes d
 | Repo | [`docs/motion-cookbook.md`](docs/motion-cookbook.md) |
 | Obsidian (canónico) | `Storytelling motion cookbook.md` en ScrollLab |
 | Wiring | `src/lib/gsap.js` + `SmoothScrollProvider` / `useLenis` |
+| Beat (producto) | [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) · `src/lib/beat/` |
 
 ### Primitivos (P1–P14) — lib y método
 
@@ -206,7 +212,44 @@ El scrollytelling **no es imposible**: son capas DOM + CSS + GSAP/Lenis. Antes d
 | P13 | Overlap sin hard cut | composición | mismo bg / media opacity↓ al unpin |
 | P14 | Day/Night | React | swap `src`; no en deps del pin `useGSAP` |
 
-Al portar una ref (Loom / live): anotar cada beat como `beat → P# → archivo`.
+Al portar una ref (Loom / live): anotar cada beat como `beat → P# → archivo` **o** `beat → Beat recipe → archivo`.
+
+### Beat — motor propio (secciones + builder)
+
+Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatStage>` + `<Beat mag recipe>` — cada pieza es un riel (`offset-path`) y el escenario hace `seek` al scroll. GSAP solo pincha. Equivalente a mano: `data-beat` + `useBeatStage`. El ZIP siempre incluye `src/lib/beat/*` (`SHARED` en `packaging.js`). No hay compilador aparte: el riel se arma en runtime.
+
+#### Cómo se usa en un template propio nuevo (obligatorio)
+
+1. Inventar el **mundo** del template (fotos reales, tipo, copy placeholder en inglés).
+2. Elegir **una escena firma** (casi siempre el hero; a veces un objeto que cruza el tipo).
+3. Piezas = widgets Beat: `<BeatStage>` + `<Beat mag recipe>` (o `data-beat` + `useBeatStage`). Receta propia — no copiar el cubo de RATIO. En el registry: `beat: true`.
+4. El resto de la página puede ser primitivos P1–P14 (pin, zoom, WebGL). Beat no reemplaza todo.
+5. Esa sección **entra al builder**. El panel edita copy; el motion viaja en el JSX/ZIP. Quien arma una composición se lleva Beat sin tocar código.
+
+#### Builder (v1)
+
+- **Sí:** secciones `beat: true` en la paleta (badge Beat) cuando el modelo ya no está en obra. RATIO y VANTA siguen en `BUILDER_HIDDEN_SKUS` + `COMING_SOON_SKUS` hasta estar terminados.
+- **No:** editor de recetas JSON / `dx`/`dy` en el panel. `sectionFields.js` sigue en strings.
+- Después (cuando haya 2–3 escenas Beat): un tipo de campo `beat` en `SECTION_FIELDS`.
+
+#### Precio
+
+- RATIO y VANTA listan **USD 229**. Catálogo en venta: entry 149 / mid 189 / top 229.
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 249) tiene que superar al template más caro. Si subís un SKU, subí la base o `npm run check` falla.
+
+### Readymag (cuando la ref lo usa) — cómo se aprendió
+
+RATIO (`HeroTools`) clavó el hero de https://grids.obys.agency/ **porque se portó el motor**, no porque se aproximó el look. Ese motor ahora vive en `src/lib/beat/engine.js`.
+
+La modelo no trae GSAP. Trae el viewer de Readymag: CSS `offset-path` / `offset-distance`, wrappers `.animation-container`, y `timeline.seek(scrollTop)` con easing cuadrático. El JSON de cada widget vive en `RM.viewerRouter.mag.currentPage.widgets` (`dx`/`dy` absolutos, canvas 1024).
+
+| Dónde | Qué |
+|---|---|
+| Producto (usar esto) | [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) · `src/lib/beat/` |
+| Método de port | [`docs/readymag-motion.md`](docs/readymag-motion.md) |
+| Ejemplo ya clavado | `src/components/sections/ratio/HeroTools.jsx` |
+
+**No** meter `viewer.js` de Readymag en el ZIP vendible (propietario). Si un template nuevo sale de Readymag, extraer `animation[]` y alimentar Beat (`attachScroll` / `playLoadPath`). Detalle y anti-patrones en el doc de port.
 
 ## Second brain — graphify + Obsidian
 
@@ -226,7 +269,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
    (ver `.cursor/rules/analyze-reference.mdc`). Playwright muestrea el scroll y **solo guarda beats donde cambia la firma** (fondo / sticky / transforms / texto) + JPEG livianos en `docs/reference-analysis/<sku>/beats/`. Si hay `GEMINI_API_KEY` o `GOOGLE_API_KEY` en `.env`, una pasada de Gemini anota fondo/figura/texto. Salida: Obsidian + `docs/reference-analysis/<sku>.md` + `beats.json`. No esperar a que el usuario lo pida.
 3. **Piezas de imagen del template** → el agente actúa como diseñador/generador: inventariar cada foto/cutout que la ref anima, generar assets realistas locales en `src/components/sections/<sku>/assets/`, **sin picsum**. Regla `.cursor/rules/template-image-assets.mdc` + skill `.cursor/skills/template-image-designer/`.
 4. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
-5. **Motion / transitions de un template** → leer `Storytelling motion cookbook.md` (Obsidian) + `docs/motion-cookbook.md`; implementar con primitivos P1–P14, no aproximaciones vagas.
+5. **Motion / transitions de un template** → leer `Storytelling motion cookbook.md` (Obsidian) + `docs/motion-cookbook.md`. Piezas que recorren un riel → **Beat** (`docs/scrolllab-beat.md`, `useBeatStage`). Si la ref es Readymag → extraer recetas ([`docs/readymag-motion.md`](docs/readymag-motion.md)) y alimentar Beat, no tweens `x/y` “parecidos”.
 6. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
 7. Tras cambiar código estructuralmente → `graphify update .` (AST, sin API key).
 8. Si el usuario pide re-sync del vault →  

@@ -1,0 +1,16 @@
+---
+description: Si la URL de referencia es Readymag, portar seek/offset-path — no aproximar con GSAP x/y.
+globs: docs/reference-analysis/**,src/components/sections/**/*
+---
+
+# Readymag motion (port, no aproximación)
+
+Cuando un template nuevo imita un sitio Readymag (`window.RM`, `rmcdn`, `.animation-container`):
+
+1. Leer `docs/readymag-motion.md`, `docs/scrolllab-beat.md` y `AGENTS.md` (Beat).
+2. Reusar `src/lib/beat` (`useBeatStage`, o `attachScroll` / `playLoadPath`).
+3. Extraer `RM.viewerRouter.mag.currentPage.widgets` → `animation[]` (`dx`/`dy` absolutos, mag 1024).
+4. GSAP ScrollTrigger solo pincha; el motion es `seek(scrollPx)` + CSS `offset-path`.
+5. **No** copiar `viewer.js` al ZIP. **No** tweenear `x/y/autoAlpha` “parecido”.
+
+Referencia que ya funciona: RATIO `HeroTools.jsx`.

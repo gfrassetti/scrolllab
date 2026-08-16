@@ -278,7 +278,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'pageLabel',
     'year',
   ],
-  'vanta/BootVanta': ['brand', 'loadingLabel', 'soundLabel', 'readyLabel'],
+  'vanta/BootVanta': ['brand', 'loadingLabel', 'soundLabel', 'readyLabel', 'playLabel'],
   'vanta/HeroOperators': [
     'line',
     'word1',
@@ -292,7 +292,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'img',
     'img2',
   ],
-  'vanta/KeeperVista': ['line', 'power', 'index', 'img', 'img2', 'img3'],
+  'vanta/KeeperVista': ['worldLine', 'line', 'power', 'index', 'img', 'img2', 'img3', 'img4'],
   'vanta/CollectionDesk': [
     'kicker',
     'mark',
@@ -300,6 +300,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'crystalLabel',
     'eyeLabel',
     'img',
+    'img2',
     'img3',
   ],
   'vanta/OperatorFan': [

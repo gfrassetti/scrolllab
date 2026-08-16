@@ -223,12 +223,12 @@
     "ratio": {
       "vibe": "Systems that rupture",
       "tags": [
+        "Beat (rail + seek)",
         "Spinning loader",
         "Zoom-through plates",
-        "Rupture (crazy mode)",
-        "Pinned studies"
+        "Rupture (crazy mode)"
       ],
-      "description": "A scrollytelling of measuring systems: spinning squares, giant type, four plates that punch through the viewport, and a switch that knocks the page off-true. For studios, agencies and portfolios that need scroll choreography, not a quiet layout."
+      "description": "A scrollytelling of measuring systems with Beat: cube and type on a rail, spinning squares, four plates that punch through the viewport, and a switch that knocks the page off-true. For studios, agencies and portfolios that need scroll choreography, not a quiet layout."
     },
     "vanta": {
       "vibe": "Game universe",
@@ -298,6 +298,9 @@
     "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. The grid still counts as one section.",
     "commerceIncluded": "+{{price}} Commerce kit (product page, cart and checkout), on top of the section",
     "commerceBadge": "Kit +{{price}}",
+    "beatBadge": "Beat",
+    "beatHint": "These pieces ship with Beat: the rail plays in preview and in the ZIP. The panel edits copy; recipes stay in code.",
+    "beatEditHint": "Beat: the cube and type move on their own. Change the words here; the rail stays in code.",
     "modelUpload": "Try a local .glb",
     "modelClear": "Remove model",
     "modelHelp": "GLB/GLTF format (recommended: .glb, single file). A local file only works in this preview. To ship it in your ZIP: enter a public https URL, or leave the field empty and, in the downloaded project, save your model as public/my-model.glb and pass modelUrl=\"/my-model.glb\" (explained in the ZIP's README). Without a model, the placeholder object renders.",
@@ -554,7 +557,7 @@
         },
         "HeroTools": {
           "name": "Hero tools",
-          "blurb": "Two bands, a black cube that hits the type, reversible scrub"
+          "blurb": "Two bands, cube and type on a Beat rail, reversible scrub"
         },
         "FourPlates": {
           "name": "Four plates",
@@ -588,11 +591,11 @@
         },
         "KeeperVista": {
           "name": "Keeper vista",
-          "blurb": "The folder card flips into a parallax tableau, then closes as a rotating plate"
+          "blurb": "Three folder plates on cream paper that open into a painterly vista, then a mesh cage"
         },
         "CollectionDesk": {
           "name": "Collection desk",
-          "blurb": "10K ledger, 3D hover plate, spinning crystal and Windows to the Soul"
+          "blurb": "White dossier: vertical 10K, one folder specimen, crystal and eye"
         },
         "OperatorFan": {
           "name": "Operator fan",

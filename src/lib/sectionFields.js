@@ -1,6 +1,8 @@
 /**
  * Campos de texto editables por sección (builder preview).
  * Solo strings simples en v1; arrays complejos quedan fuera.
+ * Recetas Beat (pasos dx/dy) aún no son un campo: el motion vive en JSX/presets.
+ * Ver docs/scrolllab-beat.md.
  */
 export const SECTION_FIELDS = {
   'chapters/NavMinimal': [
@@ -450,6 +452,7 @@ export const SECTION_FIELDS = {
     { key: 'loadingLabel', label: 'Loading label', type: 'text' },
     { key: 'soundLabel', label: 'Sound label', type: 'text' },
     { key: 'readyLabel', label: 'Ready label', type: 'text' },
+    { key: 'playLabel', label: 'Play label', type: 'text' },
   ],
   'vanta/HeroOperators': [
     { key: 'line', label: 'Manifesto', type: 'textarea' },
@@ -465,12 +468,14 @@ export const SECTION_FIELDS = {
     { key: 'img2', label: 'Card behind', type: 'image' },
   ],
   'vanta/KeeperVista': [
+    { key: 'worldLine', label: 'World line', type: 'text' },
     { key: 'line', label: 'Line', type: 'text' },
     { key: 'power', label: 'Power line', type: 'textarea' },
     { key: 'index', label: 'Index', type: 'text' },
-    { key: 'img', label: 'Incoming card', type: 'image' },
-    { key: 'img2', label: 'Operators (PNG)', type: 'image' },
-    { key: 'img3', label: 'Parallax sky', type: 'image' },
+    { key: 'img', label: 'Plate wide', type: 'image' },
+    { key: 'img2', label: 'Plate portrait', type: 'image' },
+    { key: 'img3', label: 'Plate tall', type: 'image' },
+    { key: 'img4', label: 'Vista painting', type: 'image' },
   ],
   'vanta/CollectionDesk': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
@@ -479,6 +484,7 @@ export const SECTION_FIELDS = {
     { key: 'crystalLabel', label: 'Crystal label', type: 'text' },
     { key: 'eyeLabel', label: 'Eye label', type: 'text' },
     { key: 'img', label: 'Plate', type: 'image' },
+    { key: 'img2', label: 'Crystal', type: 'image' },
     { key: 'img3', label: 'Eye', type: 'image' },
   ],
   'vanta/OperatorFan': [

@@ -36,16 +36,40 @@ export default function HeroOperators({
       const copy = root.current.querySelector('[data-hero-copy]')
 
       const split = new SplitText(words, { type: 'chars', mask: 'chars' })
-      if (!reduced) {
-        gsap.from(split.chars, {
-          yPercent: 110,
-          duration: 1.05,
+      const stage = root.current.querySelector('[data-hero-space]')
+      let played = false
+      const playIntro = () => {
+        if (played || reduced) return
+        played = true
+        gsap.to(split.chars, {
+          yPercent: 0,
+          duration: 1.2,
+          delay: 0.32,
           ease: 'power4.out',
           stagger: 0.028,
-          delay: 0.2,
         })
-        gsap.from(copy, { autoAlpha: 0, y: 12, duration: 0.8, delay: 0.45, ease: 'power3.out' })
+        gsap.to(copy, { autoAlpha: 1, y: 0, duration: 1, delay: 0.5, ease: 'power3.out' })
+        if (stage) {
+          gsap.fromTo(
+            stage,
+            { scale: 1.04 },
+            { scale: 1, duration: 1.35, ease: 'power3.out' },
+          )
+        }
       }
+
+      if (!reduced) {
+        gsap.set(split.chars, { yPercent: 110 })
+        gsap.set(copy, { autoAlpha: 0, y: 14 })
+      }
+
+      const bootLive = document.querySelector('[data-vanta-boot]')
+      const onBootOut = () => {
+        playIntro()
+        window.removeEventListener('vanta:boot-out', onBootOut)
+      }
+      if (reduced || !bootLive) playIntro()
+      else window.addEventListener('vanta:boot-out', onBootOut)
 
       const mouse = { x: 0, y: 0 }
       let damp = reduced ? 0 : 1
@@ -113,6 +137,7 @@ export default function HeroOperators({
         gsap.set(shot, { borderRadius: 28 })
         gsap.set([paper, world, tab, cardB], { autoAlpha: 1, x: 0, y: 0, rotateY: -18 })
         return () => {
+          window.removeEventListener('vanta:boot-out', onBootOut)
           window.removeEventListener('pointermove', onMove)
           window.removeEventListener('pointerleave', onLeave)
         }
@@ -165,6 +190,7 @@ export default function HeroOperators({
       window.addEventListener('resize', onResize)
 
       return () => {
+        window.removeEventListener('vanta:boot-out', onBootOut)
         window.removeEventListener('pointermove', onMove)
         window.removeEventListener('pointerleave', onLeave)
         window.removeEventListener('resize', onResize)
@@ -187,7 +213,7 @@ export default function HeroOperators({
 
         <div
           data-hero-space
-          className="absolute inset-0 z-20"
+          className="absolute inset-0 z-20 origin-center"
           style={{ perspective: '1400px' }}
         >
           <div data-hero-tilt className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>

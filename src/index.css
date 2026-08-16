@@ -353,13 +353,25 @@ html[data-ratio-rupture='on'] [data-rupture-prop] {
   top: 0;
 }
 
-.ratio-animation-container {
+.ratio-animation-container,
+.ratio-ac,
+.beat-ac {
   position: absolute;
-  left: 0;
-  top: 0;
   pointer-events: none;
   offset-rotate: 0deg;
+  offset-anchor: 50% 50%;
   will-change: offset-distance, transform;
+}
+
+.ratio-glyph {
+  display: block;
+  width: max-content;
+  overflow: visible;
+  font-weight: 400;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #111;
+  line-height: 1;
 }
 
 [data-hero-rule] {
@@ -466,4 +478,21 @@ html[data-ratio-rupture='on'] [data-rupture-prop] {
   .vanta-feed {
     animation: none;
   }
+}
+
+.vanta-stage {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    78% 100%,
+    74% 96.5%,
+    26% 96.5%,
+    22% 100%,
+    0 100%
+  );
+}
+
+.vanta-stage-tr {
+  border-radius: 0 2.8rem 0 0;
 }

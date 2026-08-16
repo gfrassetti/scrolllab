@@ -8,10 +8,10 @@ import { tilt } from './rupture'
  * leans them (crazy mode). Used twice: after canon, after field.
  */
 export default function BreakRules({
-  line1 = "DON'T BE AFRAID",
-  line2 = 'TO BEND',
-  line3 = 'THE MEASURE',
-  aside = '(IF THE WORK ASKS)',
+  line1 = 'LEAVE THE GRID',
+  line2 = 'IF THE SHEET',
+  line3 = 'ASKS YOU TO',
+  aside = '(THEN COME BACK)',
   invert = true,
   anchor = 'break',
 }) {

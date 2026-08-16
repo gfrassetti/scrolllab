@@ -82,6 +82,14 @@ const MODEL_FILES = {
 
 const SHARED = [
   'src/lib/gsap.js',
+  // Beat motor: every ZIP (fixed model + builder recipe) ships the library.
+  'src/lib/beat/index.js',
+  'src/lib/beat/engine.js',
+  'src/lib/beat/motionPath.js',
+  'src/lib/beat/presets.js',
+  'src/lib/beat/useBeatStage.js',
+  'src/lib/beat/widgets.jsx',
+  'src/lib/beat/layout.js',
   'src/lib/navLinks.js',
   'src/hooks/useLenis.js',
   'src/hooks/useMobileMenu.js',

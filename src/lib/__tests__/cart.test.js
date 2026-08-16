@@ -137,10 +137,10 @@ describe('cartLinePriceArs', () => {
 })
 
 describe('cartLinePriceUsd', () => {
-  const catalog = { chapters: { unit_price: 202000, unit_price_usd: 129 } }
+  const catalog = { chapters: { unit_price: 233000, unit_price_usd: 149 } }
 
   it('usa unit_price_usd del catálogo', () => {
-    assert.equal(cartLinePriceUsd({ sku: 'chapters' }, catalog), 129)
+    assert.equal(cartLinePriceUsd({ sku: 'chapters' }, catalog), 149)
   })
 
   it('recalcula custom en USD de lista', () => {

@@ -78,10 +78,10 @@ export default function RatioPage() {
           />
 
           <BreakRules
-            line1="DON'T BE AFRAID"
-            line2="TO BEND"
-            line3="THE MEASURE"
-            aside="(IF THE WORK ASKS)"
+            line1="LEAVE THE GRID"
+            line2="IF THE SHEET"
+            line3="ASKS YOU TO"
+            aside="(THEN COME BACK)"
             invert
             anchor="break"
           />
@@ -137,10 +137,10 @@ export default function RatioPage() {
           />
 
           <BreakRules
-            line1="DON'T"
-            line2="TAKE IT"
-            line3="TOO SERIOUSLY"
-            aside="(IT'S JUST A GUIDE)"
+            line1="THE DRAWING"
+            line2="IS NOT"
+            line3="THE BUILDING"
+            aside="(KEEP THE PENCIL)"
             invert
             anchor="guide"
           />

@@ -298,6 +298,11 @@ export default function BuilderPage() {
                     })}
                   </p>
                 )}
+                {model.sections.some((s) => s.beat) && (
+                  <p className="mb-3 text-xs leading-relaxed text-ink/50">
+                    {t('builder.beatHint')}
+                  </p>
+                )}
 
                 <ul>
                   {model.sections.map((section) => {
@@ -341,6 +346,11 @@ export default function BuilderPage() {
                               <span className="text-[9px] tracking-[0.2em] text-ink/40">
                                 {t(kindLabelKeys[section.kind])}
                               </span>
+                              {section.beat && (
+                                <span className="border border-accent/50 px-1.5 py-0.5 text-[9px] tracking-[0.16em] text-accent">
+                                  {t('builder.beatBadge')}
+                                </span>
+                              )}
                               {added && (
                                 <span className="text-[10px] tracking-[0.16em] text-accent">
                                   {t('builder.addedCount', { count })}
@@ -494,6 +504,11 @@ export default function BuilderPage() {
                                 {t('builder.commerceBadge', {
                                   price: commerceSurcharge,
                                 })}
+                              </span>
+                            )}
+                            {section.beat && (
+                              <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
+                                {t('builder.beatBadge')}
                               </span>
                             )}
                           </p>

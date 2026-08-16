@@ -1,0 +1,20 @@
+---
+description: Motion de piezas en secciones nuevas va por Beat (BeatStage / Beat), no tweens x/y.
+globs: src/components/sections/**/*,src/lib/beat/**/*,src/lib/sectionFields.js,src/lib/sectionRegistry.jsx
+---
+
+# SCROLLLAB Beat
+
+Producto: `docs/scrolllab-beat.md`. Código: `src/lib/beat/`. Spec de agente: `AGENTS.md` (Beat).
+
+Cuando armes o portes una **sección nueva** con piezas que recorren un riel (letras, cubo, objeto):
+
+1. Inventar el mundo (fotos reales, tipo, copy en inglés).
+2. Elegir una escena firma (casi siempre el hero).
+3. `<BeatStage>` + `<Beat mag recipe>` (o `data-beat` + `useBeatStage`). No copiar el cubo de RATIO. En el registry: `beat: true`.
+4. El resto de la página puede ser P1–P14. GSAP solo pincha el riel.
+5. La sección entra al builder. El panel edita copy; no hay campo JSON de pasos en v1.
+
+**No** `gsap.to({ x, y })` sobre el mismo nodo. **No** copiar `viewer.js` de Readymag. **No** meter el engine en `sections/<sku>/`.
+
+HeroTools (RATIO) ya está clavado: no lo reescribas “para unificar”. Si la ref es Readymag, extraer recetas con `docs/readymag-motion.md` y alimentar Beat.

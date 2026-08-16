@@ -13,6 +13,7 @@
 | Scroll scenes | ScrollTrigger (`pin`, `scrub`) | idem |
 | Type split | SplitText | idem |
 | React setup | `useGSAP` | `@gsap/react` vía `lib/gsap.js` |
+| **Beat** (riel + seek) | `src/lib/beat` | [`docs/scrolllab-beat.md`](scrolllab-beat.md) |
 
 Reglas: importar GSAP solo desde `lib/gsap.js`; página dentro de `SmoothScrollProvider`; respetar `prefers-reduced-motion`.
 
@@ -35,8 +36,18 @@ Reglas: importar GSAP solo desde `lib/gsap.js`; página dentro de `SmoothScrollP
 | **P13** | Overlap sin hard cut | composición | mismo bg en handoff; media opacity↓ al final del pin |
 | **P14** | Day/Night | React state | swap `src`; **no** meter mode en deps del `useGSAP` del pin |
 
+### Beat (producto SCROLLLAB — no es P15)
+
+Motor propio: widgets `<BeatStage>` + `<Beat>` (riel CSS `offset-path` + `seek`). Spec: [`docs/scrolllab-beat.md`](scrolllab-beat.md). Código: `src/lib/beat/`. Secciones nuevas: esos componentes. GSAP solo pincha.
+
+Si la URL de referencia es un proyecto Readymag, **no** interpolar con tweens GSAP `x/y`. Extraer recetas y alimentar Beat. Método de port: [`docs/readymag-motion.md`](readymag-motion.md). HeroTools (RATIO) es el primer consumidor; no reescribirlo si ya está clavado.
+
 
 ## Receta para un beat nuevo
+
+Si las piezas **siguen un riel** (cubo, letras que se van): no esta lista — [`scrolllab-beat.md`](scrolllab-beat.md) + `<BeatStage>` / `<Beat>`.
+
+Si es pin / zoom / crossfade GSAP:
 
 1. HTML: pin `h-svh` + capas absolute + chrome fijo aparte.
 2. Elegir 1–2 primitivos (no apilar de más).
@@ -47,6 +58,7 @@ Reglas: importar GSAP solo desde `lib/gsap.js`; página dentro de `SmoothScrollP
 
 ## Anti-patrones
 
+- Tween `x`/`y` en un nodo Beat → receta + `seek`.
 - Fade de sección entera → usar P2/P13.
 - `img.src` en scrub → P3 capas.
 - Animar chrome con la foto → chrome fuera del transform.

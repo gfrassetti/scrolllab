@@ -1,12 +1,15 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import FolderFrame from './FolderFrame'
-import collectCard from './assets/op-lyra.jpg'
+import TiltPlate from './TiltPlate'
+import { VantaGrid, VantaCrosshair } from './VantaChrome'
+import dossier from './assets/dossier-portrait.jpg'
+import crystal from './assets/vanta-crystal.png'
 import eye from './assets/eye-detail.jpg'
 
 /**
- * CollectionDesk — white ledger: 10K type, 3D hover plate on Z, spinning
- * crystal, Windows to the Soul. Hands off into the lilac fan.
+ * CollectionDesk — white dossier, not a product row: giant vertical mark,
+ * one folder specimen, crystal on a ruler, windows to the soul.
  */
 export default function CollectionDesk({
   kicker = 'Initial collection',
@@ -14,120 +17,97 @@ export default function CollectionDesk({
   title = '10,000 unique digital collectibles.',
   crystalLabel = 'Pulse crystal',
   eyeLabel = 'Windows to the soul',
-  img = collectCard,
+  img = dossier,
+  img2 = crystal,
   img3 = eye,
 }) {
   const root = useRef(null)
 
   useGSAP(
     () => {
-      const card = root.current.querySelector('[data-desk-card]')
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      if (!card) return
-
-      gsap.set(card, { transformPerspective: 1200, transformOrigin: '50% 50%', z: 36 })
-
-      if (reduced) return undefined
-      if (window.matchMedia('(pointer: coarse)').matches) return undefined
-
-      const mouse = { x: 0, y: 0 }
-      const apply = () => {
-        gsap.set(card, {
-          rotateY: mouse.x * 14,
-          rotateX: mouse.y * -10,
-          z: 36 + Math.abs(mouse.x) * 28,
-        })
-      }
-      const onMove = (event) => {
-        const box = card.getBoundingClientRect()
-        mouse.x = ((event.clientX - box.left) / box.width - 0.5) * 2
-        mouse.y = ((event.clientY - box.top) / box.height - 0.5) * 2
-        apply()
-      }
-      const onLeave = () => {
-        gsap.to(mouse, {
-          x: 0,
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      gsap.fromTo(
+        '[data-desk-card]',
+        { y: 48 },
+        {
           y: 0,
-          duration: 0.55,
-          ease: 'power3.out',
-          onUpdate: apply,
-        })
-      }
-      card.addEventListener('pointermove', onMove)
-      card.addEventListener('pointerleave', onLeave)
-      return () => {
-        card.removeEventListener('pointermove', onMove)
-        card.removeEventListener('pointerleave', onLeave)
-      }
+          ease: 'none',
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top 82%',
+            end: 'top 38%',
+            scrub: 0.5,
+          },
+        },
+      )
     },
     { scope: root },
   )
 
   return (
     <section id="collection" ref={root} className="relative bg-[#f4f1ea] text-[#111114]">
-      <div className="mx-auto grid min-h-svh max-w-[1400px] items-center gap-8 px-5 py-24 md:grid-cols-[0.7fr_1fr_0.85fr] md:px-10">
-        <div>
-          <div className="flex items-start gap-3">
-            <p className="font-anton text-[clamp(4.5rem,14vw,9rem)] leading-[0.75] tracking-[-0.05em]">
+      <div className="relative min-h-svh overflow-hidden">
+        <VantaGrid />
+        <VantaCrosshair className="text-[#111114]" />
+
+        <div className="relative z-10 grid min-h-svh items-stretch md:grid-cols-[7.5rem_minmax(0,1fr)_minmax(16rem,22rem)]">
+          <div className="hidden items-end border-r border-[#111114]/10 px-3 py-16 md:flex">
+            <p
+              data-desk-in
+              className="font-anton origin-bottom-left text-[clamp(4.5rem,9vw,8rem)] leading-[0.78] tracking-[-0.06em]"
+              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            >
               {mark}
             </p>
-            <p className="mt-3 font-mono text-[10px] tracking-[0.2em] uppercase opacity-55">
-              ▶▶ {kicker}
-            </p>
           </div>
-          <h2 className="font-anton mt-6 max-w-[12ch] text-[clamp(1.4rem,3vw,2.2rem)] leading-[0.9] uppercase opacity-80">
-            {title}
-          </h2>
-        </div>
 
-        <div className="flex justify-center" style={{ perspective: '1200px' }}>
-          <div
-            data-desk-card
-            className="h-[min(72vh,640px)] w-[min(78%,380px)] will-change-transform"
-            style={{ transformStyle: 'preserve-3d' }}
-          >
-            <FolderFrame tab="left" className="h-full w-full shadow-[0_28px_80px_rgb(17_17_20_/0.28)]">
-              <img src={img} alt="" className="h-full w-full object-cover" />
-            </FolderFrame>
+          <div className="flex flex-col justify-between px-5 py-20 md:px-10 md:py-16">
+            <div data-desk-in>
+              <p className="font-mono text-[10px] tracking-[0.22em] uppercase opacity-50">
+                ▶▶ {kicker}
+              </p>
+              <h2 className="font-anton mt-4 max-w-[12ch] text-[clamp(1.8rem,3.4vw,3rem)] leading-[0.9] uppercase md:hidden">
+                {title}
+              </h2>
+            </div>
+
+            <div data-desk-card className="mx-auto w-full max-w-[420px] py-8" style={{ perspective: '1200px' }}>
+              <TiltPlate className="h-[min(68vh,620px)] w-full">
+                <FolderFrame tab="top" className="h-full w-full shadow-[0_32px_80px_rgb(17_17_20_/0.22)]">
+                  <img src={img} alt="" className="h-full w-full object-cover object-[center_18%]" />
+                </FolderFrame>
+              </TiltPlate>
+            </div>
           </div>
-        </div>
 
-        <div className="grid gap-6">
-          <figure className="relative overflow-hidden rounded-[1.25rem] bg-[#ece8e0] px-6 py-8">
-            <p className="mb-4 font-mono text-[10px] tracking-[0.2em] uppercase opacity-55">
-              ● {crystalLabel}
-            </p>
-            <div className="grid place-items-center py-4" style={{ perspective: '800px' }}>
-              <div
-                className="vanta-crystal relative h-40 w-24 md:h-52 md:w-28"
-                aria-hidden="true"
-              >
-                <span
-                  className="absolute inset-0 bg-gradient-to-br from-[#f3e8ff] via-[#7c3aed] to-[#1e1b4b]"
-                  style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
-                />
-                <span
-                  className="absolute inset-[12%] bg-gradient-to-l from-white/50 to-transparent"
-                  style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+          <div className="grid content-center gap-0 border-t border-[#111114]/10 md:border-t-0 md:border-l">
+            <figure data-desk-in className="relative px-6 py-8 md:px-7">
+              <p className="mb-5 font-mono text-[10px] tracking-[0.2em] uppercase opacity-50">
+                ■ {crystalLabel}
+              </p>
+              <div className="grid place-items-center py-6" style={{ perspective: 800 }}>
+                <img
+                  src={img2}
+                  alt=""
+                  className="vanta-crystal h-44 w-auto object-contain mix-blend-multiply md:h-52"
                 />
               </div>
-            </div>
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-10 right-4 w-10 opacity-30"
-              style={{
-                backgroundImage:
-                  'repeating-linear-gradient(to bottom, #111 0 1px, transparent 1px 8px)',
-              }}
-            />
-          </figure>
-
-          <figure className="relative overflow-hidden rounded-[1.25rem]">
-            <img src={img3} alt="" className="aspect-[16/10] w-full object-cover" />
-            <p className="absolute bottom-3 left-3 font-mono text-[10px] tracking-[0.2em] text-white uppercase">
-              ● {eyeLabel}
-            </p>
-          </figure>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-10 right-5 w-9 opacity-25"
+                style={{
+                  backgroundImage:
+                    'repeating-linear-gradient(to bottom, #111 0 1px, transparent 1px 7px)',
+                }}
+              />
+            </figure>
+            <figure data-desk-in className="relative overflow-hidden border-t border-[#111114]/10">
+              <img src={img3} alt="" className="aspect-[16/11] w-full object-cover" />
+              <p className="absolute bottom-3 left-3 font-mono text-[10px] tracking-[0.2em] text-white uppercase">
+                ■ {eyeLabel}
+              </p>
+            </figure>
+          </div>
         </div>
       </div>
     </section>

@@ -87,6 +87,11 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
               <p className="mt-1 text-sm font-medium">
                 {editingSection.name}
               </p>
+              {editingSection.beat && (
+                <p className="mt-2 max-w-[36ch] text-xs leading-relaxed text-ink/50">
+                  {t('builder.beatEditHint')}
+                </p>
+              )}
             </div>
             <button
               type="button"

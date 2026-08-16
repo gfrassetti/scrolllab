@@ -79,7 +79,7 @@ import WorldVista from '../components/sections/vanta/WorldVista'
 import FooterDrop from '../components/sections/vanta/FooterDrop'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
-import { COMING_SOON_SKUS } from './pricing.js'
+import { BUILDER_HIDDEN_SKUS } from './pricing.js'
 
 /**
  * Central catalog of every section across all template models.
@@ -209,7 +209,7 @@ const allModels = [
     wrapperClass: 'bg-[#ebe6dc] text-[#111]',
     sections: [
       { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, blurb: 'Hairline bar with a Rupture switch — crazy mode for the whole page' },
-      { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, blurb: 'Cube knocks FORM → POWER on scrub; full-bleed close' },
+      { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, beat: true, blurb: 'Sticky drawing, tumbling cube, overlapping type on a Beat motion path' },
       { id: 'ratio/FourPlates', name: 'Four Plates', kind: 'section', component: FourPlates, blurb: 'Four stacked construction cards that zoom through the viewport' },
       { id: 'ratio/PlateStudy', name: 'Plate Study', kind: 'section', component: PlateStudy, blurb: 'Pinned drawing, case that scales in, two steps and a note' },
       { id: 'ratio/BreakRules', name: 'Break Rules', kind: 'section', component: BreakRules, blurb: 'Black field, grey modules, three lines peeling on scrub' },
@@ -225,8 +225,8 @@ const allModels = [
       { id: 'vanta/NavVanta', name: 'Nav Vanta', kind: 'nav', component: NavVanta, blurb: 'HUD bar and a black drawer menu that slides from the left' },
       { id: 'vanta/BootVanta', name: 'Boot Vanta', kind: 'section', component: BootVanta, blurb: 'White loading overlay, click-to-sound, then the giant mark' },
       { id: 'vanta/HeroOperators', name: 'Hero Operators', kind: 'hero', component: HeroOperators, blurb: 'Full-bleed operator with 3D cursor tilt; scroll shrinks it into a folder card' },
-      { id: 'vanta/KeeperVista', name: 'Keeper Vista', kind: 'section', component: KeeperVista, blurb: 'The folder card flips into a parallax tableau, then closes as a rotating plate' },
-      { id: 'vanta/CollectionDesk', name: 'Collection Desk', kind: 'section', component: CollectionDesk, blurb: '10K ledger, 3D hover plate, spinning crystal and Windows to the Soul' },
+      { id: 'vanta/KeeperVista', name: 'Keeper Vista', kind: 'section', component: KeeperVista, blurb: 'Three folder plates on cream paper that open into a painterly vista, then a mesh cage' },
+      { id: 'vanta/CollectionDesk', name: 'Collection Desk', kind: 'section', component: CollectionDesk, blurb: 'White dossier: vertical 10K, one folder specimen, crystal and eye' },
       { id: 'vanta/OperatorFan', name: 'Operator Fan', kind: 'section', component: OperatorFan, blurb: 'Lilac deck that splits into two branches and expands on scrub' },
       { id: 'vanta/CitadelStage', name: 'Citadel Stage', kind: 'section', component: CitadelStage, blurb: 'Pinned fortress zoom; click-and-hold opens a live feed overlay' },
       { id: 'vanta/FactionHold', name: 'Faction Hold', kind: 'section', component: FactionHold, blurb: 'Two houses, 3D hover, center hold reveals intel' },
@@ -269,8 +269,8 @@ const allModels = [
   },
 ]
 
-/** Paleta del builder: sin modelos en “próximamente”. */
-export const models = allModels.filter((model) => !COMING_SOON_SKUS.includes(model.id))
+/** Paleta del builder: sin modelos todavía en obra. */
+export const models = allModels.filter((model) => !BUILDER_HIDDEN_SKUS.includes(model.id))
 
 const index = new Map()
 allModels.forEach((model) => {
