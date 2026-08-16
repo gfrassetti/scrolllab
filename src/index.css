@@ -82,9 +82,9 @@ html.dark {
   --color-unity-sky: #4aa3e8;
 
   /* ——— Model 09 "RATIO": construction drawings that rupture ——— */
-  --color-ratio-putty: #ebe6dc;
+  --color-ratio-putty: #ffffff;
   --color-ratio-ink: #111111;
-  --color-ratio-mark: #e23c24;
+  --color-ratio-mark: #111111;
 
   /* ——— Model 10 "VANTA": game universe HUD ——— */
   --color-vanta-paper: #f4f1ea;
@@ -93,6 +93,7 @@ html.dark {
   --color-vanta-live: #3dffc5;
 
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-bedfort: "Mr Bedfort", cursive;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
   --font-brico: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
@@ -284,69 +285,156 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* ——— RATIO: loader spin + rupture (crazy mode) ——— */
-@keyframes ratio-spin {
-  to {
-    transform: rotateY(360deg);
-  }
-}
-
-[data-ratio-block] {
-  transition:
-    rotate 700ms var(--ease-out),
-    translate 700ms var(--ease-out);
-}
-
-html[data-ratio-rupture='on'] [data-ratio-block] {
-  rotate: var(--ratio-tilt, 0deg);
-  translate: var(--ratio-shift-x, 0) 0;
-}
-
+/* ——— RATIO: rupture (crazy mode) — tint + stickers, page layout unchanged ——— */
 [data-rupture-wash] {
-  opacity: 0;
-  background: #f3e03b;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background-color: rgb(255 229 0 / 0);
   mix-blend-mode: multiply;
-  transition: opacity 560ms var(--ease-out);
+  transition: background-color 560ms var(--ease-out);
 }
 
 html[data-ratio-rupture='on'] [data-rupture-wash] {
-  opacity: 1;
+  background-color: #5fd4ea;
 }
 
-[data-rupture-prop] {
+[data-rupture-extras] {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 61;
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  animation: ratio-prop-spin var(--ratio-prop-spin, 18s) linear infinite;
   transition:
     opacity 560ms var(--ease-out),
     visibility 560ms var(--ease-out);
 }
 
-[data-rupture-prop][data-hold] {
-  animation: none;
-}
-
-html[data-ratio-rupture='on'] [data-rupture-prop] {
+html[data-ratio-rupture='on'] [data-rupture-extras] {
   opacity: 1;
   visibility: visible;
 }
 
-@keyframes ratio-prop-spin {
-  from {
-    transform: rotate(0deg);
+[data-rupture-on] {
+  visibility: hidden;
+}
+
+html[data-ratio-rupture='on'] [data-rupture-on] {
+  visibility: visible;
+}
+
+html[data-ratio-rupture='on'] [data-rupture-off] {
+  visibility: hidden;
+}
+
+/* Script overlay (Mr Bedfort). Hidden until On — grotesk stays underneath. */
+[data-rupture-script] {
+  visibility: hidden;
+}
+
+html[data-ratio-rupture='on'] [data-rupture-script] {
+  visibility: visible;
+}
+
+.ratio-script {
+  font-family: var(--font-bedfort);
+  font-weight: 400;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  color: #5fd4ea;
+  -webkit-text-stroke: 1px #111;
+  paint-order: stroke fill;
+  pointer-events: none;
+  line-height: 0.85;
+  font-size: 1.08em;
+}
+
+[data-rupture-fly] {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 308.76px;
+  height: 190.974px;
+  margin-left: 929.71px;
+  margin-top: 138.37px;
+  offset-path: path(
+    'M 154.38 95.4868 C 154.38 95.4868 -1865.14 -630.67 -1865.14 -630.67 M -1865.14 -630.67 C -1865.14 -630.67 -1865.14 395.098 -1865.14 395.098 M -1865.14 395.098 C -1865.14 395.098 85.7666 -694.709 85.7666 -694.709'
+  );
+  offset-rotate: 0deg;
+  offset-distance: 0px;
+}
+
+[data-rupture-fly] > svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 176px;
+  height: 194px;
+  margin-left: -88px;
+  margin-top: -97px;
+  overflow: visible;
+}
+
+html[data-ratio-rupture='on'] [data-rupture-fly] {
+  animation: ratio-rupture-fly 18s linear infinite alternate;
+}
+
+html[data-ratio-rupture='on'] [data-rupture-fly-b] {
+  width: 160px;
+  height: 160px;
+  margin-left: -720px;
+  margin-top: -280px;
+  animation: ratio-rupture-fly 22s linear infinite alternate-reverse;
+}
+
+[data-rupture-fly-b] > svg {
+  width: 168px;
+  height: 185px;
+  margin-left: -84px;
+  margin-top: -92px;
+}
+
+html[data-ratio-rupture='on'] [data-rupture-fly-c] {
+  width: 240px;
+  height: 88px;
+  margin-left: 180px;
+  margin-top: -420px;
+  animation: ratio-rupture-fly 26s linear infinite alternate;
+}
+
+[data-rupture-fly-c] > svg {
+  width: 220px;
+  height: 72px;
+  margin-left: -110px;
+  margin-top: -36px;
+}
+
+@keyframes ratio-rupture-fly {
+  0%,
+  38.88888888888889% {
+    transform: rotate(0deg) scale(1);
+    offset-distance: 0px;
   }
-  to {
-    transform: rotate(360deg);
+  55.55555555555556% {
+    transform: rotate(360deg) scale(1);
+    offset-distance: 2146.10241275779px;
+  }
+  72.22222222222221%,
+  83.33333333333333% {
+    transform: rotate(720deg) scale(1);
+    offset-distance: 3171.87096744529px;
+  }
+  100% {
+    transform: rotate(1080deg) scale(1);
+    offset-distance: 5406.531616860595px;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [data-rupture-prop] {
-    animation: none;
-  }
-}
-
-/* Readymag viewer: polyfill-sticky + animation-container */
+/* Readymag / Beat motion-path wrappers */
 .ratio-polyfill-sticky {
   position: -webkit-sticky;
   position: sticky;
@@ -365,13 +453,12 @@ html[data-ratio-rupture='on'] [data-rupture-prop] {
 
 .ratio-glyph {
   display: block;
-  width: max-content;
   overflow: visible;
   font-weight: 400;
+  font-style: normal;
   text-transform: uppercase;
   white-space: nowrap;
   color: #111;
-  line-height: 1;
 }
 
 [data-hero-rule] {
@@ -384,6 +471,12 @@ html[data-ratio-rupture='on'] [data-rupture-prop] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html[data-ratio-rupture='on'] [data-rupture-fly] {
+    animation: none;
+    margin-left: -154px;
+    margin-top: -95px;
+  }
+
   [data-hero-rule] {
     transition: none;
   }

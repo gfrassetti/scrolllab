@@ -55,8 +55,9 @@ export default function KeeperVista({
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
-          end: '+=280%',
+          end: '+=100%',
           pin: '[data-keep-pin]',
+          pinSpacing: false,
           scrub: 0.65,
         },
       })

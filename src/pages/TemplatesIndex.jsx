@@ -105,9 +105,9 @@ const TEMPLATE_META = [
     name: 'RATIO',
     path: '/templates/ratio',
     category: 'SYSTEM',
-    tagline: 'bend the measure',
-    palette: ['#ebe6dc', '#111111', '#e23c24'],
-    comingSoon: true,
+    tagline: 'rail + seek',
+    palette: ['#ffffff', '#111111'],
+    desktopOnly: true,
   },
   {
     id: '10',
@@ -744,6 +744,11 @@ export default function TemplatesIndex() {
                   >
                     {soon ? t('home.comingSoon') : template.vibe}
                   </p>
+                  {template.desktopOnly && !soon ? (
+                    <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-ink/45">
+                      {t('home.desktopOnly')}
+                    </p>
+                  ) : null}
                   <p
                     className={`mt-3 max-w-[46ch] text-sm leading-relaxed md:text-base ${
                       soon ? 'text-ink/35' : 'text-ink/70'

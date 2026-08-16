@@ -48,9 +48,9 @@ const styles = {
     code: 'UN',
   },
   ratio: {
-    background: '#ebe6dc',
+    background: '#ffffff',
     color: '#111111',
-    accent: '#e23c24',
+    accent: '#111111',
     code: 'RA',
   },
   vanta: {

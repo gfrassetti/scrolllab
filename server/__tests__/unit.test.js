@@ -180,13 +180,15 @@ describe('validateCheckoutItems', () => {
 
   it('rechaza SKUs en próximamente', () => {
     assert.throws(
-      () => validateCheckoutItems([{ sku: 'ratio' }], opts),
-      HttpError,
-    )
-    assert.throws(
       () => validateCheckoutItems([{ sku: 'vanta' }], opts),
       HttpError,
     )
+  })
+
+  it('acepta RATIO en venta', () => {
+    const lines = validateCheckoutItems([{ sku: 'ratio' }], opts)
+    assert.equal(lines[0].sku, 'ratio')
+    assert.equal(lines[0].unit_price_usd, PRODUCTS.ratio.unit_price_usd)
   })
 
   it('valida receta custom', () => {

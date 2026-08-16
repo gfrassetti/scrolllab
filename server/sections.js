@@ -63,6 +63,8 @@ export const ALLOWED_SECTIONS = Object.freeze([
   'ratio/NavRatio',
   'ratio/HeroTools',
   'ratio/FourPlates',
+  'ratio/SplitStudy',
+  'ratio/FitStack',
   'ratio/PlateStudy',
   'ratio/BreakRules',
   'ratio/FooterLedger',

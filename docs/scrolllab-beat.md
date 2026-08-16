@@ -93,6 +93,8 @@ Lienzo: ancho **1024**. En pantalla se multiplica por `viewport / 1024`.
 
 Presets reutilizables: `BEAT_PRESETS` en `src/lib/beat/presets.js`. Coreografía de una sola escena: objeto local al lado del JSX.
 
+**RATIO hero (guardar para otro template):** `RATIO_HERO_BEAT` en el mismo archivo. Cubo `tumble-cube` + losa que crece en `width` (no `scaleX`) hacia PLATE y SCALE, tope a 24px de la palabra. Ref clavada: `HeroTools.jsx`.
+
 ## ¿Hay que “compilar” un bundle aparte?
 
 No. No hay plugin de webpack ni un `.beat` que se compile a JS.
@@ -111,11 +113,11 @@ El builder **ya vende Beat**: arrastrás `ratio/HeroTools` (badge Beat) a la com
 
 El panel edita **copy** (`word1`, etc.). **No** hay un campo de recetas JSON en v1.
 
-1. **Ahora** — `beat: true` en el registry, badge en la paleta, hint en el editor. RATIO sigue oculto (`BUILDER_HIDDEN_SKUS`) hasta estar terminado.
+1. **Ahora** — `beat: true` en el registry, badge en la paleta, hint en el editor. RATIO está en venta; VANTA sigue oculto (`BUILDER_HIDDEN_SKUS`) hasta estar terminado.
 2. **Después** — un tipo de campo `beat` en `SECTION_FIELDS`.
 3. **No** en v1 — arrays complejos en el editor.
 
-Precio: RATIO lista USD 229. La base del builder (USD 249) tiene que quedar arriba de ese techo.
+Precio: RATIO lista USD 269. La base del builder (USD 279) tiene que quedar arriba de ese techo.
 
 No pongas Beat en el chrome del marketplace (nav, carrito): eso es Emil / Impeccable.
 

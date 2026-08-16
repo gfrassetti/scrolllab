@@ -19,4 +19,6 @@ No se copia KPR / Keepers / Kai. El gesto es el mismo: HUD de consola, marcos ti
 | 27–33 — The World aerial, shards 3D | P1 + P2 zoom + tilt | `WorldVista` |
 | 34–40 — slivers 3D + closer negro | P6 cutout + P8 | `FooterDrop` |
 
-Firma: **CLICK & HOLD** (pointer hold, reversible al soltar) abre un feed encima. Scroll atrás = timeline atrás (pin+scrub). Three.js = campo de partículas en el hero.
+Firma: **CLICK & HOLD** (pointer hold, reversible al soltar) abre un feed encima. Scroll atrás = timeline atrás (pin+scrub). Three.js en la ref = canvas fijo + cámara `damp`; en VANTA el hero usa la misma mate sobre foto.
+
+Motor real de la ref (GSAP + Three + damp, **sin físicas**): [`kpr-engine.md`](kpr-engine.md).

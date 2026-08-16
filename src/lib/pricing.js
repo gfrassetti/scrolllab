@@ -12,19 +12,18 @@ export const TEMPLATE_PRICES_USD = {
   atelier: 229,
   comic: 229,
   unity: 229,
-  ratio: 229,
+  ratio: 269,
   vanta: 229,
 }
 
 /** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
-export const COMING_SOON_SKUS = ['ratio', 'vanta']
+export const COMING_SOON_SKUS = ['vanta']
 
 /**
  * Modelos que no entran a la paleta del builder.
- * Mientras un SKU esté en obra, va acá y en COMING_SOON_SKUS.
- * Cuando RATIO esté terminado: sacarlo de las dos listas.
+ * VANTA sigue en obra: va acá y en COMING_SOON_SKUS.
  */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'vanta']
+export const BUILDER_HIDDEN_SKUS = ['vanta']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -32,10 +31,10 @@ export function isComingSoonSku(sku) {
 
 /**
  * Composición del builder: base por tramo + adicional por sección extra.
- * Una composición del tamaño de un template (10 secciones) queda en 279 USD.
- * El piso tiene que superar al template más caro (RATIO / Beat).
+ * Una composición del tamaño de un template (10 secciones) queda en 309 USD.
+ * El piso tiene que superar al template más caro (RATIO / Beat, USD 269).
  */
-export const CUSTOM_BASE_PRICE_USD = 249
+export const CUSTOM_BASE_PRICE_USD = 279
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 15
 /** Tope de secciones de una receta — espejo de `maxRecipeSections`. */

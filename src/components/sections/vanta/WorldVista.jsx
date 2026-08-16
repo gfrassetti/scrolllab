@@ -28,9 +28,8 @@ export default function WorldVista({
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
-          start: 'top top',
-          end: '+=240%',
-          pin: '[data-world-pin]',
+          start: 'top 80%',
+          end: 'bottom top',
           scrub: 0.55,
         },
       })
@@ -47,9 +46,9 @@ export default function WorldVista({
   )
 
   return (
-    <section id="world" ref={root} className="relative bg-[#f4f1ea] text-white">
-      <div data-world-pin className="relative h-svh overflow-hidden px-3 py-3 md:px-4 md:py-4">
-        <VantaStage className="absolute inset-3 md:inset-4">
+    <section id="world" ref={root} className="relative bg-[#111114] text-white">
+      <div className="relative h-svh overflow-hidden">
+        <VantaStage className="absolute inset-0">
           <img
             data-world-bg
             src={img}

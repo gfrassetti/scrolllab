@@ -5,12 +5,11 @@ import RuptureLayer from './RuptureLayer'
 
 /**
  * NavRatio — hairline bar. Brand · links · Rupture switch.
- * Rupture is the page-wide crazy mode: objects spin harder, blocks lean.
- * No construction-grid overlay — the drawings live inside the chapters.
+ * Rupture tints the whole page and brings in stickers + a flying mark.
  */
 export default function NavRatio({
   brand = 'RATIO',
-  links = ['Intro', 'Systems', 'Notes'],
+  links = ['Intro', 'Study', 'Notes'],
   linksText,
   ruptureLabel = 'Rupture',
   onLabel = 'On',
@@ -26,7 +25,7 @@ export default function NavRatio({
     <>
     <header
       data-ratio-nav
-      className="fixed inset-x-0 top-0 z-50 border-b border-[#111] bg-[#f3f1eb] text-[#111]"
+      className="fixed inset-x-0 top-0 z-50 border-b border-[#111] bg-white text-[#111]"
     >
       <div className="flex h-11 items-center justify-between gap-3 px-3 text-[10px] tracking-[0.18em] uppercase md:h-12 md:px-5 md:text-[11px]">
         <a href="#top" className="flex shrink-0 items-center gap-2 font-medium">
@@ -55,7 +54,7 @@ export default function NavRatio({
                 aria-pressed={ruptured}
                 onClick={() => setRupture(true)}
                 className={`ui-press rounded-full px-2 py-0.5 ${
-                  ruptured ? 'bg-[#111] text-[#ebe6dc]' : 'hover:opacity-55'
+                  ruptured ? 'bg-[#111] text-white' : 'hover:opacity-55'
                 }`}
               >
                 {onLabel}
@@ -65,7 +64,7 @@ export default function NavRatio({
                 aria-pressed={!ruptured}
                 onClick={() => setRupture(false)}
                 className={`ui-press rounded-full px-2 py-0.5 ${
-                  !ruptured ? 'bg-[#111] text-[#ebe6dc]' : 'hover:opacity-55'
+                  !ruptured ? 'bg-[#111] text-white' : 'hover:opacity-55'
                 }`}
               >
                 {offLabel}
@@ -100,7 +99,7 @@ export default function NavRatio({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
-        className={`fixed inset-0 bg-[#f3f1eb] text-[#111] transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
+        className={`fixed inset-0 bg-white text-[#111] transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >

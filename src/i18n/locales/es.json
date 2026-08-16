@@ -66,8 +66,9 @@
     "heroCtaBuilder": "Probar el builder",
     "openDemo": "Ver demo",
     "comingSoon": "Próximamente",
+    "desktopOnly": "Solo desktop",
     "scrollDown": "Bajá para ver",
-    "modelsLabel": "Los modelos — 08",
+    "modelsLabel": "Los modelos — 09",
     "modelsScrollHint": "Scrolleá para recorrer",
     "modelsBrowseHint": "Pasá el cursor · abrí la demo",
     "cycleLabel": "El listón",
@@ -82,7 +83,7 @@
     "step1Title": "Entrá con tu cuenta",
     "step1Body": "Entrá con Google para comprar y descargar.",
     "step2Title": "Elegí o armá",
-    "step2Body": "Un modelo listo (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER, COMIC, UNITY) o tu página armada en el builder.",
+    "step2Body": "Un modelo listo (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER, COMIC, UNITY, RATIO) o tu página armada en el builder.",
     "step3Title": "Pagá",
     "step3Body": "Pagás con Mercado Pago. La compra aparece en Mis compras.",
     "step4Title": "Descargá el ZIP",
@@ -100,12 +101,12 @@
     "req2License": "ver licencia",
     "req3": "Prohibido revender o redistribuir el ZIP / el código como template",
     "req4": "No incluye hosting, dominio ni soporte de deploy",
-    "bundleEyebrow": "Los 8 modelos juntos",
+    "bundleEyebrow": "Los 9 modelos juntos",
     "bundleTitleBefore": "Llevate el",
     "bundleTitleEm": "catálogo completo",
-    "bundleBody": "Los ocho modelos en un solo ZIP, cada uno en su carpeta y listo para npm install. Una sola licencia cubre todos.",
+    "bundleBody": "Los nueve modelos en un solo ZIP, cada uno en su carpeta y listo para npm install. Una sola licencia cubre todos.",
     "bundleSaving": "Por separado {{list}} · Ahorrás {{off}}%",
-    "bundleCartTitle": "BUNDLE — los 8 modelos",
+    "bundleCartTitle": "BUNDLE — los 9 modelos",
     "builderEyebrow": "O armá la tuya",
     "builderTitleBefore": "Abrir el",
     "builderTitleEm": "builder",
@@ -221,14 +222,14 @@
       "description": "Canvas crema, tipografía Instrument + Oswald, mosaico de fotos que se despliega en un slider full-bleed y un footer con orbe geométrico que sube al scroll. Ideal para campañas deportivas, eventos, o marcas que quieren un scrollytelling editorial de alto impacto."
     },
     "ratio": {
-      "vibe": "Sistemas que se rompen",
+      "vibe": "Coreografía Beat",
       "tags": [
+        "Solo desktop",
         "Beat (riel + seek)",
-        "Loader que gira",
-        "Zoom-through de placas",
-        "Rupture (crazy mode)"
+        "Cubo y tipo",
+        "Placas al scroll"
       ],
-      "description": "Un scrollytelling de sistemas de medida con Beat: cubo y tipo en un riel, cuadrados que giran, cuatro placas que atraviesan el viewport y un interruptor que tira todo de lado. Para estudios, agencias y portfolios que necesitan coreografía de scroll, no un layout quieto."
+      "description": "Template Beat para desktop: cubo y tipo en un riel, placas que atraviesan el viewport y un cierre horizontal. Copy de placeholder genérico, listo para reemplazar. No está pensado para móvil."
     },
     "vanta": {
       "vibe": "Universo de juego",
@@ -553,7 +554,7 @@
       "ratio": {
         "NavRatio": {
           "name": "Nav ratio",
-          "blurb": "Barra hairline con interruptor Rupture — crazy mode de la página"
+          "blurb": "Barra hairline con interruptor Rupture: tiñe la página y suelta stickers"
         },
         "HeroTools": {
           "name": "Hero tools",
@@ -561,7 +562,15 @@
         },
         "FourPlates": {
           "name": "Four plates",
-          "blurb": "Cuatro placas apiladas que atraviesan el viewport"
+          "blurb": "Cajón negro; cuatro cuadrados que tumban como el cubo y uno crece al capítulo siguiente"
+        },
+        "SplitStudy": {
+          "name": "Split study",
+          "blurb": "Ledger de specs fijo a la izquierda, dos paneles de caso a la derecha"
+        },
+        "FitStack": {
+          "name": "Fit stack",
+          "blurb": "El campo blanco tumba en cubo y encastra; títulos genéricos sobre el campo negro"
         },
         "PlateStudy": {
           "name": "Plate study",
@@ -573,7 +582,7 @@
         },
         "FooterLedger": {
           "name": "Footer ledger",
-          "blurb": "Palabra outline, lomos en parallax, créditos en hairline"
+          "blurb": "Cajón bajo la tapa negra; índice horizontal con letras outline entre marcos"
         }
       },
       "vanta": {

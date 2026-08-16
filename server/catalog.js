@@ -30,10 +30,11 @@ export const BUNDLE_MODELS = [
   'atelier',
   'comic',
   'unity',
+  'ratio',
 ]
 
 /** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['ratio', 'vanta']
+export const COMING_SOON_SKUS = ['vanta']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -101,8 +102,8 @@ export const PRODUCTS = {
   ratio: {
     sku: 'ratio',
     title: 'RATIO — template',
-    description: 'Modelo de sistemas que se rompen: Beat (riel + seek), pin, zoom-through y crazy mode (código fuente).',
-    unit_price_usd: 229,
+    description: 'Modelo Beat (riel + seek): cubo, tipo y placas coreografiados. Solo desktop (código fuente).',
+    unit_price_usd: 269,
     currency_id: 'ARS',
   },
   vanta: {
@@ -114,8 +115,8 @@ export const PRODUCTS = {
   },
   bundle: {
     sku: 'bundle',
-    title: 'BUNDLE — los 8 modelos',
-    description: 'Los ocho modelos completos en un solo ZIP (código fuente).',
+    title: 'BUNDLE — los 9 modelos',
+    description: 'Los nueve modelos completos en un solo ZIP (código fuente).',
     unit_price_usd: 649,
     currency_id: 'ARS',
   },
@@ -123,7 +124,7 @@ export const PRODUCTS = {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 249,
+    unit_price_usd: 279,
     currency_id: 'ARS',
   },
 }

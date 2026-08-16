@@ -17,7 +17,7 @@ export {
 
 export { useBeatStage } from './useBeatStage.js'
 export { BeatStage, Beat } from './widgets.jsx'
-export { BEAT_PRESETS } from './presets.js'
+export { BEAT_PRESETS, RATIO_HERO_BEAT } from './presets.js'
 export {
   glyphsOf,
   packLine,

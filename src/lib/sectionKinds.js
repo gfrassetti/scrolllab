@@ -67,6 +67,8 @@ export const SECTION_KINDS = {
   'ratio/NavRatio': 'nav',
   'ratio/HeroTools': 'hero',
   'ratio/FourPlates': 'section',
+  'ratio/SplitStudy': 'section',
+  'ratio/FitStack': 'section',
   'ratio/PlateStudy': 'section',
   'ratio/BreakRules': 'section',
   'ratio/FooterLedger': 'footer',

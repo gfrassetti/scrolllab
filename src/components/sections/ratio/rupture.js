@@ -1,16 +1,15 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * RUPTURE — the page-wide switch that throws the grid out of true.
+ * RUPTURE — page-wide crazy mode.
  *
  * It lives in a module store instead of a React context because the sections
  * that read it are sold one by one: dropped into a builder composition there
  * is no shared ancestor to hold a provider, and a nav cannot wrap its
  * siblings. A store keeps every mounted section in sync with no provider.
  *
- * The state is also mirrored on `<html data-ratio-rupture>` so the CSS in
- * index.css can tilt blocks and open the width axis without React re-rendering
- * anything mid-scroll.
+ * Mirrored on `<html data-ratio-rupture>` so CSS can tint the page and
+ * reveal stickers without React re-rendering anything mid-scroll.
  */
 const listeners = new Set()
 let ruptured = false

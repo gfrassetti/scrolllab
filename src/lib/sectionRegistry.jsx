@@ -64,6 +64,8 @@ import FooterTrophy from '../components/sections/unity/FooterTrophy'
 import NavRatio from '../components/sections/ratio/NavRatio'
 import HeroTools from '../components/sections/ratio/HeroTools'
 import FourPlates from '../components/sections/ratio/FourPlates'
+import SplitStudy from '../components/sections/ratio/SplitStudy'
+import FitStack from '../components/sections/ratio/FitStack'
 import PlateStudy from '../components/sections/ratio/PlateStudy'
 import BreakRules from '../components/sections/ratio/BreakRules'
 import FooterLedger from '../components/sections/ratio/FooterLedger'
@@ -205,15 +207,17 @@ const allModels = [
   {
     id: 'ratio',
     name: 'RATIO',
-    accent: '#e23c24',
-    wrapperClass: 'bg-[#ebe6dc] text-[#111]',
+    accent: '#111111',
+    wrapperClass: 'bg-white text-[#111]',
     sections: [
-      { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, blurb: 'Hairline bar with a Rupture switch — crazy mode for the whole page' },
+      { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, blurb: 'Hairline bar with a Rupture switch — tints the page and drops stickers' },
       { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, beat: true, blurb: 'Sticky drawing, tumbling cube, overlapping type on a Beat motion path' },
-      { id: 'ratio/FourPlates', name: 'Four Plates', kind: 'section', component: FourPlates, blurb: 'Four stacked construction cards that zoom through the viewport' },
+      { id: 'ratio/FourPlates', name: 'Four Plates', kind: 'section', component: FourPlates, beat: true, blurb: 'Black drawer over the hero; four squares tumble like the cube and one grows into the next chapter' },
+      { id: 'ratio/SplitStudy', name: 'Split Study', kind: 'section', component: SplitStudy, blurb: 'Sticky spec ledger on the left, two full-height case panels on the right' },
+      { id: 'ratio/FitStack', name: 'Fit Stack', kind: 'section', component: FitStack, beat: true, blurb: 'White field tumbles into a cube and slots with others; generic type on the black field' },
       { id: 'ratio/PlateStudy', name: 'Plate Study', kind: 'section', component: PlateStudy, blurb: 'Pinned drawing, case that scales in, two steps and a note' },
       { id: 'ratio/BreakRules', name: 'Break Rules', kind: 'section', component: BreakRules, blurb: 'Black field, grey modules, three lines peeling on scrub' },
-      { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Outlined display word, parallax spines, hairline credits' },
+      { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Drawer under the last black lid; horizontal index with outlined letters between frames' },
     ],
   },
   {
@@ -228,7 +232,7 @@ const allModels = [
       { id: 'vanta/KeeperVista', name: 'Keeper Vista', kind: 'section', component: KeeperVista, blurb: 'Three folder plates on cream paper that open into a painterly vista, then a mesh cage' },
       { id: 'vanta/CollectionDesk', name: 'Collection Desk', kind: 'section', component: CollectionDesk, blurb: 'White dossier: vertical 10K, one folder specimen, crystal and eye' },
       { id: 'vanta/OperatorFan', name: 'Operator Fan', kind: 'section', component: OperatorFan, blurb: 'Lilac deck that splits into two branches and expands on scrub' },
-      { id: 'vanta/CitadelStage', name: 'Citadel Stage', kind: 'section', component: CitadelStage, blurb: 'Pinned fortress zoom; click-and-hold opens a live feed overlay' },
+      { id: 'vanta/CitadelStage', name: 'Citadel Stage', kind: 'section', component: CitadelStage, blurb: 'Fortress viewport with hold-to-scan feed; console bar like the Keep loader' },
       { id: 'vanta/FactionHold', name: 'Faction Hold', kind: 'section', component: FactionHold, blurb: 'Two houses, 3D hover, center hold reveals intel' },
       { id: 'vanta/WorldVista', name: 'World Vista', kind: 'section', component: WorldVista, blurb: 'Aerial world zoom with drifting collage shards' },
       { id: 'vanta/FooterDrop', name: 'Footer Drop', kind: 'footer', component: FooterDrop, blurb: 'Outlined mark, 3D slivers, rising operator, three close columns' },

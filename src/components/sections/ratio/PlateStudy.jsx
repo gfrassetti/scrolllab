@@ -12,31 +12,31 @@ import editorial from './assets/case-editorial.jpg'
  */
 export default function PlateStudy({
   index = '01',
-  title = 'COLUMNS',
+  title = 'TITLE',
   variant = 'column',
-  specLabel = 'System',
-  specValue = 'Columns',
-  spec2Label = 'Gutters',
+  specLabel = 'Label',
+  specValue = 'Value',
+  spec2Label = 'Label two',
   spec2Value = '1.6',
-  spec3Label = 'Margins',
+  spec3Label = 'Label three',
   spec3Value = '3',
-  spec4Label = 'Baseline',
+  spec4Label = 'Label four',
   spec4Value = 'Used',
   caseTitle = 'CASE 01',
   caseMeta = 'Studio — 2024',
   img = identity,
   img2 = editorial,
-  step1Label = 'Set margins',
-  step1Body = 'Find the outer measure first.',
-  step2Label = 'Set gutters',
-  step2Body = 'Leave air so the type can breathe.',
-  notes = '(1) Combine this system with a typographic grid based on line-height. (2) A smaller module if the page is quiet; a larger one if it is loud.',
+  step1Label = 'Step one',
+  step1Body = 'Lorem ipsum dolor sit amet.',
+  step2Label = 'Step two',
+  step2Body = 'Consectetur adipiscing elit, sed do eiusmod.',
+  notes = '(1) Lorem ipsum dolor sit amet, consectetur adipiscing elit. (2) Sed do eiusmod tempor incididunt ut labore.',
   invert = false,
   anchor = 'plate-01',
 }) {
   const root = useRef(null)
-  const bg = invert ? '#111' : '#ebe6dc'
-  const fg = invert ? '#ebe6dc' : '#111'
+  const bg = invert ? '#111' : '#ffffff'
+  const fg = invert ? '#ffffff' : '#111'
 
   useGSAP(
     () => {

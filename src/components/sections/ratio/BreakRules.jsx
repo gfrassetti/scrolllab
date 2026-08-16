@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { tilt } from './rupture'
+import { RuptureOn } from './RuptureOn'
 
 /**
  * BreakRules — P1 pin + P8 type + grey/white modules.
@@ -8,25 +9,25 @@ import { tilt } from './rupture'
  * leans them (crazy mode). Used twice: after canon, after field.
  */
 export default function BreakRules({
-  line1 = 'LEAVE THE GRID',
-  line2 = 'IF THE SHEET',
-  line3 = 'ASKS YOU TO',
-  aside = '(THEN COME BACK)',
+  line1 = 'TITLE LINE ONE',
+  line2 = 'TITLE LINE TWO',
+  line3 = 'TITLE LINE THREE',
+  aside = '(A PLACEHOLDER)',
   invert = true,
   anchor = 'break',
 }) {
   const root = useRef(null)
-  const bg = invert ? '#111' : '#ebe6dc'
-  const fg = invert ? '#ebe6dc' : '#111'
+  const bg = invert ? '#111' : '#ffffff'
+  const fg = invert ? '#ffffff' : '#111'
   const tiles = [
-    '#f4f1ea',
-    '#f4f1ea',
-    '#f4f1ea',
+    '#ffffff',
+    '#ffffff',
+    '#ffffff',
     null,
-    '#9a958c',
-    '#9a958c',
-    '#9a958c',
-    '#cfc8bc',
+    '#9a9a9a',
+    '#9a9a9a',
+    '#9a9a9a',
+    '#c4c4c4',
   ]
 
   useGSAP(
@@ -93,12 +94,20 @@ export default function BreakRules({
             <div
               key={i}
               data-ratio-block
-              className="min-h-0"
-              style={{
-                backgroundColor: color || 'transparent',
-                ...tilt(i + 6, 1.6),
-              }}
-            />
+              className="relative min-h-0"
+              style={tilt(i + 6, 1.6)}
+            >
+              {color ? (
+                <>
+                  <span
+                    data-rupture-off
+                    className="absolute inset-0"
+                    style={{ backgroundColor: color }}
+                  />
+                  <RuptureOn index={i} />
+                </>
+              ) : null}
+            </div>
           ))}
         </div>
 

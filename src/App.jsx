@@ -81,16 +81,7 @@ export default function App() {
                 <Route path="/templates/atelier" element={<AtelierPage />} />
                 <Route path="/templates/comic" element={<ComicPage />} />
                 <Route path="/templates/unity" element={<UnityPage />} />
-                <Route
-                  path="/templates/ratio"
-                  element={
-                    import.meta.env.DEV ? (
-                      <RatioPage />
-                    ) : (
-                      <Navigate to="/" replace />
-                    )
-                  }
-                />
+                <Route path="/templates/ratio" element={<RatioPage />} />
                 <Route
                   path="/templates/vanta"
                   element={

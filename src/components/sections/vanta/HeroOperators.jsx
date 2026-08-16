@@ -4,8 +4,7 @@ import heroFace from './assets/hero-face.jpg'
 import rex from './assets/op-rex.jpg'
 
 /**
- * HeroOperators — full-bleed operator, pointer 3D tilt, then P1 pin+scrub
- * shrinks the same image into a folder card (reversible).
+ * HeroOperators — one photo. Full-bleed, then the same node shrinks into a card.
  */
 export default function HeroOperators({
   line = 'VANTA is a living raid — a world waiting to be played, protected, or rewritten.',
@@ -34,33 +33,27 @@ export default function HeroOperators({
       const words = gsap.utils.toArray('[data-hero-word]', root.current)
       const world = root.current.querySelector('[data-hero-world]')
       const copy = root.current.querySelector('[data-hero-copy]')
-
       const split = new SplitText(words, { type: 'chars', mask: 'chars' })
-      const stage = root.current.querySelector('[data-hero-space]')
       let played = false
+      const type = gsap.utils.toArray('[data-hero-type]', root.current)
       const playIntro = () => {
         if (played || reduced) return
         played = true
         gsap.to(split.chars, {
           yPercent: 0,
-          duration: 1.2,
-          delay: 0.32,
+          duration: 1.15,
+          delay: 0.08,
           ease: 'power4.out',
           stagger: 0.028,
         })
-        gsap.to(copy, { autoAlpha: 1, y: 0, duration: 1, delay: 0.5, ease: 'power3.out' })
-        if (stage) {
-          gsap.fromTo(
-            stage,
-            { scale: 1.04 },
-            { scale: 1, duration: 1.35, ease: 'power3.out' },
-          )
-        }
+        gsap.to(copy, { autoAlpha: 1, y: 0, duration: 0.9, delay: 0.18, ease: 'power3.out' })
+        gsap.to(type, { autoAlpha: 1, duration: 0.85, delay: 0.12, ease: 'power3.out' })
       }
 
       if (!reduced) {
         gsap.set(split.chars, { yPercent: 110 })
         gsap.set(copy, { autoAlpha: 0, y: 14 })
+        gsap.set(type, { autoAlpha: 0 })
       }
 
       const bootLive = document.querySelector('[data-vanta-boot]')
@@ -72,30 +65,38 @@ export default function HeroOperators({
       else window.addEventListener('vanta:boot-out', onBootOut)
 
       const mouse = { x: 0, y: 0 }
-      let damp = reduced ? 0 : 1
+      const look = { x: 0, y: 0 }
+      let dampAmt = reduced ? 0 : 1
+      let tiltRaf = 0
+      const damp = (current, target, lambda, dt) =>
+        current + (target - current) * (1 - Math.exp(-lambda * dt))
       const applyTilt = () => {
         if (!tiltEl) return
         gsap.set(tiltEl, {
-          rotateY: mouse.x * 15 * damp,
-          rotateX: mouse.y * -8 * damp,
+          rotateY: look.x * 10 * dampAmt,
+          rotateX: look.y * -10 * dampAmt,
         })
       }
+      let last = performance.now()
+      const tiltLoop = (now) => {
+        const dt = Math.min(0.05, (now - last) / 1000)
+        last = now
+        look.x = damp(look.x, mouse.x, 3, dt)
+        look.y = damp(look.y, mouse.y, 3, dt)
+        applyTilt()
+        tiltRaf = requestAnimationFrame(tiltLoop)
+      }
+      if (!reduced) tiltRaf = requestAnimationFrame(tiltLoop)
 
       const onMove = (event) => {
         if (reduced) return
         if (window.matchMedia('(pointer: coarse)').matches) return
         mouse.x = (event.clientX / window.innerWidth - 0.5) * 2
         mouse.y = (event.clientY / window.innerHeight - 0.5) * 2
-        applyTilt()
       }
       const onLeave = () => {
-        gsap.to(mouse, {
-          x: 0,
-          y: 0,
-          duration: 0.7,
-          ease: 'power3.out',
-          onUpdate: applyTilt,
-        })
+        mouse.x = 0
+        mouse.y = 0
       }
       window.addEventListener('pointermove', onMove)
       window.addEventListener('pointerleave', onLeave)
@@ -137,6 +138,7 @@ export default function HeroOperators({
         gsap.set(shot, { borderRadius: 28 })
         gsap.set([paper, world, tab, cardB], { autoAlpha: 1, x: 0, y: 0, rotateY: -18 })
         return () => {
+          cancelAnimationFrame(tiltRaf)
           window.removeEventListener('vanta:boot-out', onBootOut)
           window.removeEventListener('pointermove', onMove)
           window.removeEventListener('pointerleave', onLeave)
@@ -152,8 +154,7 @@ export default function HeroOperators({
           scrub: 0.55,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            damp = 1 - Math.min(1, self.progress * 1.7)
-            applyTilt()
+            dampAmt = 1 - Math.min(1, self.progress * 1.7)
           },
         },
       })
@@ -167,14 +168,15 @@ export default function HeroOperators({
           width: () => sizeCard().w,
           height: () => sizeCard().h,
           borderRadius: 28,
-          duration: 0.72,
+          duration: 0.85,
           ease: 'none',
         },
-        0.12,
+        0,
       )
-      tl.to(shot, { borderRadius: 28, duration: 0.72, ease: 'none' }, 0.12)
-      tl.to(paper, { autoAlpha: 1, duration: 0.35, ease: 'none' }, 0.18)
-      tl.to(words, { autoAlpha: 0, y: -30, stagger: 0.04, duration: 0.22, ease: 'none' }, 0.2)
+      tl.to(shot, { borderRadius: 28, duration: 0.85, ease: 'none' }, 0)
+      tl.to(paper, { autoAlpha: 1, duration: 0.4, ease: 'none' }, 0.12)
+      tl.to(words, { autoAlpha: 0, y: -30, stagger: 0.04, duration: 0.22, ease: 'none' }, 0.16)
+      tl.to('[data-hero-hud]', { autoAlpha: 0, duration: 0.2, ease: 'none' }, 0.12)
       tl.to(copy, { color: '#111114', duration: 0.2, ease: 'none' }, 0.22)
       tl.to(tab, { autoAlpha: 1, x: 0, duration: 0.18, ease: 'none' }, 0.38)
       tl.to(
@@ -190,6 +192,7 @@ export default function HeroOperators({
       window.addEventListener('resize', onResize)
 
       return () => {
+        cancelAnimationFrame(tiltRaf)
         window.removeEventListener('vanta:boot-out', onBootOut)
         window.removeEventListener('pointermove', onMove)
         window.removeEventListener('pointerleave', onLeave)
@@ -213,7 +216,7 @@ export default function HeroOperators({
 
         <div
           data-hero-space
-          className="absolute inset-0 z-20 origin-center"
+          className="absolute inset-0 z-20"
           style={{ perspective: '1400px' }}
         >
           <div data-hero-tilt className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
@@ -251,7 +254,7 @@ export default function HeroOperators({
           {line}
         </p>
 
-        <div className="pointer-events-none absolute right-6 top-[28%] z-30 hidden text-right md:block">
+        <div className="pointer-events-none absolute right-6 top-[28%] z-30 hidden text-right md:block" data-hero-type="">
           <p className="mb-1 font-mono text-[9px] tracking-[0.22em] uppercase opacity-70">{tag1}</p>
           <p data-hero-word className="font-anton text-[clamp(2.4rem,5.5vw,4.8rem)] leading-[0.86] tracking-[-0.03em] uppercase">
             {word1}
@@ -261,7 +264,7 @@ export default function HeroOperators({
             {word2}
           </p>
         </div>
-        <div className="pointer-events-none absolute bottom-[10%] left-4 z-30 md:left-8">
+        <div className="pointer-events-none absolute bottom-[10%] left-4 z-30 md:left-8" data-hero-type="">
           <p className="mb-1 font-mono text-[9px] tracking-[0.22em] uppercase opacity-70">{tag3}</p>
           <p
             data-hero-word
@@ -271,12 +274,14 @@ export default function HeroOperators({
           </p>
         </div>
 
-        <p className="pointer-events-none absolute right-6 bottom-6 z-30 font-mono text-[10px] tracking-[0.28em] uppercase opacity-70">
+        <p className="pointer-events-none absolute right-6 bottom-6 z-30 font-mono text-[10px] tracking-[0.28em] uppercase opacity-70" data-hero-type="">
           {hint}
           <span aria-hidden="true" className="ml-2 inline-block">↓</span>
         </p>
 
         <div
+          data-hero-type=""
+          data-hero-hud=""
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-[25] opacity-[0.12]"
           style={{
@@ -287,6 +292,8 @@ export default function HeroOperators({
         />
 
         <div
+          data-hero-type=""
+          data-hero-hud=""
           aria-hidden="true"
           className="pointer-events-none absolute inset-3 z-40 rounded-[1.25rem] border border-white/25 md:inset-4"
         />

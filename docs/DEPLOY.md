@@ -170,7 +170,7 @@ No es un precio plano. `priceCustomRecipeUsd()` (servidor) y
 `estimateCustomPriceUsd()` (cliente) calculan lo mismo:
 
 ```
-base (USD 249, incluye 8 secciones)
+base (USD 279, incluye 8 secciones)
 + USD 15 × secciones por encima de 8
 + USD 39 si la receta trae alguna sección commerce/
 ```
@@ -182,8 +182,8 @@ base (USD 249, incluye 8 secciones)
   cada una es un componente renderizado en el `App.jsx` del ZIP. El tope son
   30 (`maxRecipeSections` en `server/config.js`, espejado en
   `MAX_CUSTOM_SECTIONS`).
-- Anclajes: 8 secciones = el piso, 10 = USD 279, 30 = USD 579. El piso queda
-  arriba del template más caro (RATIO / Beat, USD 229).
+- Anclajes: 8 secciones = el piso, 10 = USD 309, 30 = USD 609. El piso queda
+  arriba del template más caro (RATIO / Beat, USD 269).
 - El carrito **no guarda el monto**: lo recalcula desde la receta con la misma
   fórmula, así una composición vieja en `localStorage` no muestra un precio que
   el checkout ya no cobra.

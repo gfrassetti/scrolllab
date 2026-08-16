@@ -198,7 +198,7 @@ export default function NavVanta({
   })
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
+    <header data-vanta-nav="" className="pointer-events-none fixed inset-x-0 top-0 z-50">
       <div className="pointer-events-auto relative z-50 flex h-12 items-center justify-between gap-3 px-3 mix-blend-difference text-white md:h-14 md:px-5">
         <div className="flex items-center gap-3 md:gap-5">
           <button

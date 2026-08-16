@@ -162,9 +162,9 @@ src/lib/
 ```
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 249 con 8 secciones incluidas, USD 15 por cada sección
+tramos**: base de USD 279 con 8 secciones incluidas, USD 15 por cada sección
 extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
-receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 229; la
+receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269; la
 base del builder tiene que quedar **arriba** del template más caro. Las constantes
 viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
 valida la paridad. Detalle en `docs/DEPLOY.md`.
@@ -228,14 +228,14 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 #### Builder (v1)
 
-- **Sí:** secciones `beat: true` en la paleta (badge Beat) cuando el modelo ya no está en obra. RATIO y VANTA siguen en `BUILDER_HIDDEN_SKUS` + `COMING_SOON_SKUS` hasta estar terminados.
+- **Sí:** secciones `beat: true` en la paleta (badge Beat) cuando el modelo ya no está en obra. VANTA sigue en `BUILDER_HIDDEN_SKUS` + `COMING_SOON_SKUS` hasta estar terminado.
 - **No:** editor de recetas JSON / `dx`/`dy` en el panel. `sectionFields.js` sigue en strings.
 - Después (cuando haya 2–3 escenas Beat): un tipo de campo `beat` en `SECTION_FIELDS`.
 
 #### Precio
 
-- RATIO y VANTA listan **USD 229**. Catálogo en venta: entry 149 / mid 189 / top 229.
-- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 249) tiene que superar al template más caro. Si subís un SKU, subí la base o `npm run check` falla.
+- RATIO lista **USD 269** (Beat, el más caro). VANTA lista USD 229 (próximamente). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 279) tiene que superar al template más caro. Si subís un SKU, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
 
