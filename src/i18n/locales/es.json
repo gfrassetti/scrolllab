@@ -229,7 +229,7 @@
         "Cubo y tipo",
         "Placas al scroll"
       ],
-      "description": "Template Beat para desktop: cubo y tipo en un riel, placas que atraviesan el viewport y un cierre horizontal. Copy de placeholder genérico, listo para reemplazar. No está pensado para móvil."
+      "description": "Template Beat para desktop: cubo y tipo en un riel, placas que atraviesan el viewport y un cierre horizontal. Mundo de estudio de impresión — grid, fold, ratio. No está pensado para móvil."
     },
     "vanta": {
       "vibe": "Universo de juego",
@@ -570,7 +570,7 @@
         },
         "FitStack": {
           "name": "Fit stack",
-          "blurb": "El campo blanco tumba en cubo y encastra; títulos genéricos sobre el campo negro"
+          "blurb": "El campo blanco tumba en cubo y encastra; grid / fold / ratio sobre el campo negro"
         },
         "PlateStudy": {
           "name": "Plate study",

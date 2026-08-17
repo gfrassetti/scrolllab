@@ -9,10 +9,10 @@ import { RuptureOn } from './RuptureOn'
  * leans them (crazy mode). Used twice: after canon, after field.
  */
 export default function BreakRules({
-  line1 = 'TITLE LINE ONE',
-  line2 = 'TITLE LINE TWO',
-  line3 = 'TITLE LINE THREE',
-  aside = '(A PLACEHOLDER)',
+  line1 = 'HOLD THE GRID',
+  line2 = 'KEEP THE FOLD',
+  line3 = 'LOCK THE RATIO',
+  aside = '(A BASELINE)',
   invert = true,
   anchor = 'break',
 }) {

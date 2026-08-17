@@ -105,7 +105,7 @@ const TEMPLATE_META = [
     name: 'RATIO',
     path: '/templates/ratio',
     category: 'SYSTEM',
-    tagline: 'rail + seek',
+    tagline: 'hold the fold',
     palette: ['#ffffff', '#111111'],
     desktopOnly: true,
   },

@@ -4,10 +4,10 @@ import { attachScroll, magScale } from '../../../lib/beat'
 import { RuptureOn, RuptureScript } from './RuptureOn'
 
 const DEFAULT_PLATES = [
-  { index: '01', title: 'Title one', tone: '#ffffff' },
-  { index: '02', title: 'Title two', tone: '#9a9a9a' },
-  { index: '03', title: 'Title three', tone: '#555555' },
-  { index: '04', title: 'Title four', tone: '#222222' },
+  { index: '01', title: 'Grid', tone: '#ffffff' },
+  { index: '02', title: 'Fold', tone: '#9a9a9a' },
+  { index: '03', title: 'Ratio', tone: '#555555' },
+  { index: '04', title: 'Baseline', tone: '#222222' },
 ]
 
 function tumbleSteps(i, hop) {
@@ -26,12 +26,12 @@ function tumbleSteps(i, hop) {
  * hero cube (Beat hops + 90° rot), overlap, then one grows into the next chapter.
  */
 export default function FourPlates({
-  eyebrow = 'TITLE',
+  eyebrow = 'PLATES',
   platesText,
-  plate1Title = 'Title one',
-  plate2Title = 'Title two',
-  plate3Title = 'Title three',
-  plate4Title = 'Title four',
+  plate1Title = 'Grid',
+  plate2Title = 'Fold',
+  plate3Title = 'Ratio',
+  plate4Title = 'Baseline',
 }) {
   const root = useRef(null)
   const plates = platesText
@@ -115,11 +115,16 @@ export default function FourPlates({
         })
         if (cards[0]) tl.to(cards[0], { borderColor: 'transparent', duration: 0.2 }, 3.45)
         if (keepFill) {
-          const twins = keepFill.querySelectorAll('[data-rupture-on], [data-rupture-off]')
-          tl.set(twins, { autoAlpha: 0 }, 3.5)
           tl.to(
             keepFill,
-            { scale: 22, backgroundColor: '#ffffff', duration: 0.95 },
+            {
+              scale: 22,
+              backgroundColor: '#ffffff',
+              duration: 0.95,
+              onUpdate() {
+                keepFill.classList.toggle('is-zoom', this.progress() > 0.02)
+              },
+            },
             3.55,
           )
         }

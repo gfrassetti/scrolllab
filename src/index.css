@@ -318,25 +318,27 @@ html[data-ratio-rupture='on'] [data-rupture-extras] {
   visibility: visible;
 }
 
-[data-rupture-on] {
+[data-rupture-on],
+[data-rupture-script] {
   visibility: hidden;
+  opacity: 0;
 }
 
-html[data-ratio-rupture='on'] [data-rupture-on] {
+html[data-ratio-rupture='on'] [data-rupture-on],
+html[data-ratio-rupture='on'] [data-rupture-script] {
   visibility: visible;
+  opacity: 1;
 }
 
 html[data-ratio-rupture='on'] [data-rupture-off] {
   visibility: hidden;
+  opacity: 0;
 }
 
-/* Script overlay (Mr Bedfort). Hidden until On — grotesk stays underneath. */
-[data-rupture-script] {
+/* FourPlates zoom: hide twins via class, never GSAP autoAlpha (inline visibility leaks into Off). */
+[data-swatch-fill].is-zoom > * {
   visibility: hidden;
-}
-
-html[data-ratio-rupture='on'] [data-rupture-script] {
-  visibility: visible;
+  opacity: 0;
 }
 
 .ratio-script {

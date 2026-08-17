@@ -214,7 +214,7 @@ const allModels = [
       { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, beat: true, blurb: 'Sticky drawing, tumbling cube, overlapping type on a Beat motion path' },
       { id: 'ratio/FourPlates', name: 'Four Plates', kind: 'section', component: FourPlates, beat: true, blurb: 'Black drawer over the hero; four squares tumble like the cube and one grows into the next chapter' },
       { id: 'ratio/SplitStudy', name: 'Split Study', kind: 'section', component: SplitStudy, blurb: 'Sticky spec ledger on the left, two full-height case panels on the right' },
-      { id: 'ratio/FitStack', name: 'Fit Stack', kind: 'section', component: FitStack, beat: true, blurb: 'White field tumbles into a cube and slots with others; generic type on the black field' },
+      { id: 'ratio/FitStack', name: 'Fit Stack', kind: 'section', component: FitStack, beat: true, blurb: 'White field tumbles into a cube and slots with others; grid / fold / ratio on the black field' },
       { id: 'ratio/PlateStudy', name: 'Plate Study', kind: 'section', component: PlateStudy, blurb: 'Pinned drawing, case that scales in, two steps and a note' },
       { id: 'ratio/BreakRules', name: 'Break Rules', kind: 'section', component: BreakRules, blurb: 'Black field, grey modules, three lines peeling on scrub' },
       { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Drawer under the last black lid; horizontal index with outlined letters between frames' },

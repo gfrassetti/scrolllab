@@ -229,7 +229,7 @@
         "Cube and type",
         "Scroll plates"
       ],
-      "description": "A Beat template for desktop: cube and type on a rail, plates that punch through the viewport, and a horizontal closer. Generic placeholder copy, ready to replace. Not built for mobile."
+      "description": "A Beat template for desktop: cube and type on a rail, plates that punch through the viewport, and a horizontal closer. A print-studio world — grid, fold, ratio. Not built for mobile."
     },
     "vanta": {
       "vibe": "Game universe",
@@ -570,7 +570,7 @@
         },
         "FitStack": {
           "name": "Fit stack",
-          "blurb": "White field tumbles into a cube and slots with others; generic type on the black field"
+          "blurb": "White field tumbles into a cube and slots with others; grid / fold / ratio on the black field"
         },
         "PlateStudy": {
           "name": "Plate study",

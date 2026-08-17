@@ -27,13 +27,18 @@ export default function RatioPage() {
           <FourPlates />
           <SplitStudy />
           <SplitStudy
-            kicker="Lorem ipsum"
+            kicker="Motion plates"
             index="02"
-            spec2Value="consectetur"
-            spec3Value="adipiscing"
-            quote="Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-            quoteBy="B. Sample"
-            quoteRole="Editor of the placeholder"
+            spec2Label="path"
+            spec2Value="rail"
+            spec3Label="engine"
+            spec3Value="seek"
+            spec4Label="stage"
+            spec4Value="cube / type"
+            quote="A cube on a rail. Plates punch the viewport. The baseline holds."
+            quoteBy="R. Chen"
+            quoteRole="Motion lead"
+            panel2Label="Board"
             img={packaging}
             img2={motion}
             anchor="study-two"

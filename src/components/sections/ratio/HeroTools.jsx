@@ -196,13 +196,13 @@ function Actor({ kind, i, text, fill, children }) {
 }
 
 export default function HeroTools({
-  word1 = 'LORE',
-  word2 = 'IPS',
+  word1 = 'GRID',
+  word2 = 'THE',
   word3 = 'FOLD',
-  word4 = 'IPSUM',
-  word5 = 'LOREMIPSUM',
-  note = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  aside = '... lorem\nipsum\ndolor.',
+  word4 = 'RATIO',
+  word5 = 'BASELINE',
+  note = 'Type on the floor. A cube holds the fold and the ratio between them.',
+  aside = '... grid\nfold\nratio.',
 }) {
   const root = useRef(null)
   const form = glyphsOf(word1)
