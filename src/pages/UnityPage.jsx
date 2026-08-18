@@ -20,15 +20,13 @@ import heatC from '../components/sections/unity/assets/heat-c.png'
 /**
  * Template model — "UNITY"
  * Sports-editorial scrollytelling: twin-type hero, mosaic→slider,
- * sticky universal number, language bands, rising trophy footer.
- * Family ref: https://united-in-football.framer.website/
+ * sticky number, language bands, rising closer.
  * Generic placeholder copy only.
- * See Obsidian: "Unity — mapa de referencia".
  */
 export default function UnityPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-[#f3efe6] text-[#0a0a0a]">
+      <div id="top" className="bg-[#e7e4dc] text-[#0a0a0a]">
         <NavUnity />
 
         <main>
@@ -41,7 +39,7 @@ export default function UnityPage() {
             line2="LINE 2"
             line3="LINE 3"
             note="NOTE 1"
-            bg="#ffd84d"
+            bg="#c9b896"
             fg="#0a0a0a"
             img1={joyA}
             img2={joyB}
@@ -54,8 +52,8 @@ export default function UnityPage() {
             line2="LINE 5"
             line3="LINE 6"
             note="NOTE 2"
-            bg="#7ec8ff"
-            fg="#0a0a0a"
+            bg="#3d5c54"
+            fg="#e7e4dc"
             img1={hopeA}
             img2={hopeB}
             img3={hopeC}
@@ -67,8 +65,8 @@ export default function UnityPage() {
             line2="LINE 8"
             line3="LINE 9"
             note="NOTE 3"
-            bg="#ff4d33"
-            fg="#0a0a0a"
+            bg="#a34b32"
+            fg="#e7e4dc"
             img1={heatA}
             img2={heatB}
             img3={heatC}

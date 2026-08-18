@@ -35,7 +35,6 @@ const MOSAIC = [
 /**
  * MosaicSlider — continuous scrub (no mid-timeline gsap.set).
  * Same left-origin coords from mosaic → unfold → pan.
- * Framer: Immersive Zoom / Pinned Stage / Panel Track.
  */
 export default function MosaicSlider({
   eyebrow = 'EYEBROW 1',
@@ -250,7 +249,7 @@ export default function MosaicSlider({
           data-sticky-text
           className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center px-5 text-center will-change-transform"
         >
-          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-[#f4c518] uppercase md:text-xs">
+          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-[#2c4a42] uppercase md:text-xs">
             {eyebrow}
           </p>
           <h2 className="font-display text-[clamp(2.4rem,7vw,6rem)] leading-[0.95] tracking-[-0.02em] uppercase">

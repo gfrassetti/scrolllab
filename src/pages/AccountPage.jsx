@@ -6,6 +6,7 @@ import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { orderPreviews, previewName } from '../lib/orderPreview'
+import { trackPurchase } from '../lib/gtm'
 import { useI18n } from '../i18n'
 
 const PAGE_SIZE = 20
@@ -63,6 +64,10 @@ export default function AccountPage() {
       cancelled = true
     }
   }, [user, params, location.state])
+
+  useEffect(() => {
+    if (successOrder?.status === 'paid') trackPurchase(successOrder)
+  }, [successOrder])
 
   // El API manda acá al comprador cuando el link firmado ya venció.
   useEffect(() => {

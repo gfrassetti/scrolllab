@@ -4,7 +4,7 @@ import RisingOrb from './RisingOrb'
 
 /**
  * FooterTrophy — sky closer. Super-size type behind a rising
- * transparent PNG cutout (Framer “lift” beat).
+ * transparent PNG cutout.
  */
 export default function FooterTrophy({
   eyebrow = 'EYEBROW 6',
@@ -118,7 +118,7 @@ export default function FooterTrophy({
       <span key={key} className="inline-block whitespace-nowrap">
         {parts.map((part, i) =>
           part.toLowerCase() === accent.toLowerCase() ? (
-            <span key={i} className="text-[#f4c518]">
+            <span key={i} className="text-[#2c4a42]">
               {part}
             </span>
           ) : (
@@ -135,7 +135,7 @@ export default function FooterTrophy({
       id="winner"
       className="relative overflow-hidden px-3 pt-14 pb-5 text-[#f7f2e8] md:px-6 md:pt-16 md:pb-6"
       style={{
-        background: 'linear-gradient(180deg, #2f8f9a 0%, #4aa8c8 42%, #7ec8e0 100%)',
+        background: 'linear-gradient(180deg, #1c2a28 0%, #2c4a42 48%, #4a675c 100%)',
       }}
     >
       <p className="relative z-30 text-center text-[10px] tracking-[0.32em] uppercase md:text-[11px]">
@@ -151,7 +151,7 @@ export default function FooterTrophy({
           {lines.map((line, i) => paintLine(line, i))}
         </h2>
 
-        {/* Transparent PNG above type — rises on scrub (Framer “lift”) */}
+        {/* Transparent PNG above type — rises on scrub */}
         <div
           data-trophy
           className="pointer-events-none absolute bottom-[-8%] left-1/2 z-20 w-[min(78vw,520px)] -translate-x-1/2 will-change-transform md:bottom-[-10%] md:w-[min(52vw,580px)]"

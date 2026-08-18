@@ -77,14 +77,16 @@ html.dark {
   --color-comic-flare: #e85a24;
 
   /* ——— Model 08 "UNITY": sports editorial ——— */
-  --color-unity-cream: #f3efe6;
-  --color-unity-gold: #f4c518;
-  --color-unity-sky: #4aa3e8;
+  --color-unity-cream: #e7e4dc;
+  --color-unity-gold: #2c4a42;
+  --color-unity-sky: #3d6b8a;
 
-  /* ——— Model 09 "RATIO": construction drawings that rupture ——— */
-  --color-ratio-putty: #ffffff;
-  --color-ratio-ink: #111111;
-  --color-ratio-mark: #111111;
+  /* ——— Model 09 "RATIO": inverted stock — light cube on dark paper ——— */
+  --color-ratio-paper: #16110e;
+  --color-ratio-putty: #16110e;
+  --color-ratio-ink: #ebe6dc;
+  --color-ratio-field: #ebe6dc;
+  --color-ratio-mark: #e23c24;
 
   /* ——— Model 10 "VANTA": game universe HUD ——— */
   --color-vanta-paper: #f4f1ea;
@@ -93,9 +95,10 @@ html.dark {
   --color-vanta-live: #3dffc5;
 
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-bedfort: "Mr Bedfort", cursive;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  /* Rupture On — calligraphic overlay (Google: Mr Bedfort). */
+  --font-rupture: "Mr Bedfort", cursive;
   --font-brico: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-anton: "Anton", ui-sans-serif, system-ui, sans-serif;
   --font-boldonse: "Boldonse", ui-sans-serif, system-ui, sans-serif;
@@ -292,7 +295,7 @@ html.lenis body {
   inset: 0;
   z-index: 60;
   background-color: rgb(255 229 0 / 0);
-  mix-blend-mode: multiply;
+  mix-blend-mode: screen;
   transition: background-color 560ms var(--ease-out);
 }
 
@@ -330,6 +333,11 @@ html[data-ratio-rupture='on'] [data-rupture-script] {
   opacity: 1;
 }
 
+/* Slab goes ink on the cyan wash so the tag can sit on it. */
+html[data-ratio-rupture='on'] .ratio-glyph {
+  color: #16110e !important;
+}
+
 html[data-ratio-rupture='on'] [data-rupture-off] {
   visibility: hidden;
   opacity: 0;
@@ -343,17 +351,17 @@ html[data-ratio-rupture='on'] [data-rupture-off] {
 }
 
 .ratio-script {
-  font-family: var(--font-bedfort);
+  font-family: var(--font-rupture);
   font-weight: 400;
   font-style: normal;
-  text-transform: uppercase;
-  letter-spacing: -0.05em;
+  text-transform: none;
+  letter-spacing: 0;
   color: #5fd4ea;
-  -webkit-text-stroke: 1px #111;
+  -webkit-text-stroke: 0.028em #16110e;
   paint-order: stroke fill;
   pointer-events: none;
   line-height: 0.85;
-  font-size: 1.08em;
+  font-size: 1.12em;
 }
 
 [data-rupture-fly] {
@@ -437,7 +445,7 @@ html[data-ratio-rupture='on'] [data-rupture-fly-c] {
   }
 }
 
-/* Readymag / Beat motion-path wrappers */
+/* Beat motion-path wrappers */
 .ratio-polyfill-sticky {
   position: -webkit-sticky;
   position: sticky;
@@ -461,7 +469,20 @@ html[data-ratio-rupture='on'] [data-rupture-fly-c] {
   font-style: normal;
   text-transform: uppercase;
   white-space: nowrap;
-  color: #111;
+  color: #ebe6dc;
+}
+
+.ratio-cube-face {
+  background-color: var(--color-ratio-field);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ratio-ink) 28%, transparent);
+}
+.ratio-cube-face.is-chase {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 8px var(--color-ratio-mark);
+}
+.ratio-guide-face {
+  background-color: var(--color-ratio-ink);
+  opacity: 0.38;
 }
 
 [data-hero-rule] {

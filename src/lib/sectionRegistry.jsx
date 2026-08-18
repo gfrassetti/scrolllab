@@ -191,8 +191,8 @@ const allModels = [
   {
     id: 'unity',
     name: 'UNITY',
-    accent: '#f4c518',
-    wrapperClass: 'bg-[#f3efe6] text-[#0a0a0a]',
+    accent: '#2c4a42',
+    wrapperClass: 'bg-[#e7e4dc] text-[#0a0a0a]',
     sections: [
       { id: 'unity/NavUnity', name: 'Nav Unity', kind: 'nav', component: NavUnity, blurb: 'Phrase left · logo center · 3 links right' },
       { id: 'unity/HeroTwin', name: 'Hero Twin', kind: 'hero', component: HeroTwin, blurb: 'Two headlines peeling apart on scroll parallax' },
@@ -207,17 +207,17 @@ const allModels = [
   {
     id: 'ratio',
     name: 'RATIO',
-    accent: '#111111',
-    wrapperClass: 'bg-white text-[#111]',
+    accent: '#e23c24',
+    wrapperClass: 'bg-ratio-paper text-ratio-ink',
     sections: [
-      { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, blurb: 'Hairline bar with a Rupture switch — tints the page and drops stickers' },
+      { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, beat: true, blurb: 'Hairline bar; index rides Beat into the header, one link at a time' },
       { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, beat: true, blurb: 'Sticky drawing, tumbling cube, overlapping type on a Beat motion path' },
       { id: 'ratio/FourPlates', name: 'Four Plates', kind: 'section', component: FourPlates, beat: true, blurb: 'Black drawer over the hero; four squares tumble like the cube and one grows into the next chapter' },
       { id: 'ratio/SplitStudy', name: 'Split Study', kind: 'section', component: SplitStudy, blurb: 'Sticky spec ledger on the left, two full-height case panels on the right' },
-      { id: 'ratio/FitStack', name: 'Fit Stack', kind: 'section', component: FitStack, beat: true, blurb: 'White field tumbles into a cube and slots with others; grid / fold / ratio on the black field' },
+      { id: 'ratio/FitStack', name: 'Fit Stack', kind: 'section', component: FitStack, beat: true, blurb: 'A cube drops into a four-cell well on scrub; titles sit on the dark field' },
       { id: 'ratio/PlateStudy', name: 'Plate Study', kind: 'section', component: PlateStudy, blurb: 'Pinned drawing, case that scales in, two steps and a note' },
       { id: 'ratio/BreakRules', name: 'Break Rules', kind: 'section', component: BreakRules, blurb: 'Black field, grey modules, three lines peeling on scrub' },
-      { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Drawer under the last black lid; horizontal index with outlined letters between frames' },
+      { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Horizontal closer: outlined brand letters between plate frames' },
     ],
   },
   {

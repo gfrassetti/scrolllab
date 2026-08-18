@@ -11,14 +11,13 @@ import motion from '../components/sections/ratio/assets/case-motion.jpg'
 
 /**
  * Template model — "RATIO"
- * Construction-drawing scrollytelling: split hero (cube vs type),
- * zoom-through plates, case split, cube stack, rupture switch (crazy mode).
- * Motion family: grids.obys.agency — original copy, type and world.
+ * Print-shop scrollytelling: cube and type on a Beat rail,
+ * zoom-through plates, stacked squares. Rupture is an easter egg on the cube.
  */
 export default function RatioPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-white text-[#111] max-lg:h-svh max-lg:overflow-hidden">
+      <div id="top" className="bg-ratio-paper text-ratio-ink max-lg:h-svh max-lg:overflow-hidden">
         <DeskNotice />
         <NavRatio />
 
@@ -36,8 +35,8 @@ export default function RatioPage() {
             spec4Label="stage"
             spec4Value="cube / type"
             quote="A cube on a rail. Plates punch the viewport. The baseline holds."
-            quoteBy="R. Chen"
-            quoteRole="Motion lead"
+            quoteBy="Press room"
+            quoteRole="Shop floor"
             panel2Label="Board"
             img={packaging}
             img2={motion}

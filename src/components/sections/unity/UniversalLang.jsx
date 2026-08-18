@@ -10,7 +10,7 @@ const DEFAULT_STATS = [
 
 /**
  * UniversalLang — intro scrolls away; giant number stays sticky/centered
- * while barcode + stats scrub past (Framer "Hero Number" sticky).
+ * while barcode + stats scrub past.
  */
 export default function UniversalLang({
   eyebrow = 'EYEBROW 2',
@@ -67,7 +67,7 @@ export default function UniversalLang({
     <section
       ref={root}
       id="languages"
-      className="relative bg-[#f3efe6] text-[#0a0a0a]"
+      className="relative bg-[#e7e4dc] text-[#0a0a0a]"
     >
       <div className="mx-auto max-w-5xl px-5 pt-24 md:px-10 md:pt-32">
         <p className="mb-4 text-[11px] tracking-[0.28em] uppercase opacity-55">

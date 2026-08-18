@@ -217,9 +217,9 @@
         "Hero twin parallax",
         "Mosaico → slider",
         "Language bands",
-        "Orbe rising"
+        "Cutout rising"
       ],
-      "description": "Canvas crema, tipografía Instrument + Oswald, mosaico de fotos que se despliega en un slider full-bleed y un footer con orbe geométrico que sube al scroll. Ideal para campañas deportivas, eventos, o marcas que quieren un scrollytelling editorial de alto impacto."
+      "description": "Canvas piedra, cuerpo Playfair y display Anton, un mosaico de fotos que se despliega en un slider full-bleed y un cierre con cutout que sube al scroll. Para campañas, eventos o marcas que quieren scrollytelling editorial de alto impacto."
     },
     "ratio": {
       "vibe": "Coreografía Beat",
@@ -229,7 +229,7 @@
         "Cubo y tipo",
         "Placas al scroll"
       ],
-      "description": "Template Beat para desktop: cubo y tipo en un riel, placas que atraviesan el viewport y un cierre horizontal. Mundo de estudio de impresión — grid, fold, ratio. No está pensado para móvil."
+      "description": "Template Beat de scrollytelling para desktop: cubo y tipo en un riel, placas que atraviesan el viewport, un pozo que encastra y un cierre horizontal. Papel de taller y registro vermillion. No está pensado para móvil."
     },
     "vanta": {
       "vibe": "Universo de juego",
@@ -554,7 +554,7 @@
       "ratio": {
         "NavRatio": {
           "name": "Nav ratio",
-          "blurb": "Barra hairline con interruptor Rupture: tiñe la página y suelta stickers"
+          "blurb": "Barra hairline; el índice entra al header en Beat, un link por vez"
         },
         "HeroTools": {
           "name": "Hero tools",
@@ -570,7 +570,7 @@
         },
         "FitStack": {
           "name": "Fit stack",
-          "blurb": "El campo blanco tumba en cubo y encastra; grid / fold / ratio sobre el campo negro"
+          "blurb": "Un cubo cae en un pozo de cuatro celdas al scroll; los títulos van sobre el campo oscuro"
         },
         "PlateStudy": {
           "name": "Plate study",
@@ -582,7 +582,7 @@
         },
         "FooterLedger": {
           "name": "Footer ledger",
-          "blurb": "Cajón bajo la tapa negra; índice horizontal con letras outline entre marcos"
+          "blurb": "Cierre horizontal: letras outline de la marca entre marcos de placa"
         }
       },
       "vanta": {

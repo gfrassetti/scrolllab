@@ -5,7 +5,7 @@ import joyB from './assets/joy-b.png'
 import joyC from './assets/joy-c.png'
 
 /**
- * LanguageBlock — solid type/image block (Framer language-of-*).
+ * LanguageBlock — solid type/image block.
  * Each row is one continuous line: image window + type, no mid-row voids.
  * Image windows are slightly taller than the type.
  */
@@ -15,7 +15,7 @@ export default function LanguageBlock({
   line2 = 'LINE 2',
   line3 = 'LINE 3',
   note = 'NOTE 1',
-  bg = '#ffd84d',
+  bg = '#c9b896',
   fg = '#0a0a0a',
   img1 = joyA,
   img2 = joyB,

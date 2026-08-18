@@ -4,8 +4,7 @@ import stageA from './assets/stage-a.png'
 import stageB from './assets/stage-b.png'
 
 /**
- * StageLines — two typographic beats (group → finals).
- * Same language as the Framer "Group Stage / Finals" bands.
+ * StageLines — two typographic beats over drifting media.
  */
 export default function StageLines({
   eyebrow1 = 'EYEBROW 7',

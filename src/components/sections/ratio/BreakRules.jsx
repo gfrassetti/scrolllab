@@ -9,7 +9,7 @@ import { RuptureOn } from './RuptureOn'
  * leans them (crazy mode). Used twice: after canon, after field.
  */
 export default function BreakRules({
-  line1 = 'HOLD THE GRID',
+  line1 = 'HOLD THE RULE',
   line2 = 'KEEP THE FOLD',
   line3 = 'LOCK THE RATIO',
   aside = '(A BASELINE)',
@@ -17,12 +17,12 @@ export default function BreakRules({
   anchor = 'break',
 }) {
   const root = useRef(null)
-  const bg = invert ? '#111' : '#ffffff'
-  const fg = invert ? '#ffffff' : '#111'
+  const bg = invert ? '#ebe6dc' : '#16110e'
+  const fg = invert ? '#16110e' : '#ebe6dc'
   const tiles = [
-    '#ffffff',
-    '#ffffff',
-    '#ffffff',
+    '#16110e',
+    '#16110e',
+    '#16110e',
     null,
     '#9a9a9a',
     '#9a9a9a',

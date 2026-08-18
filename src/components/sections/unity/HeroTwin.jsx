@@ -3,7 +3,6 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 
 /**
  * HeroTwin — two stacked headlines with opposing scroll parallax.
- * Framer ref: cream hero, Instrument Serif body + Boldonse display.
  */
 export default function HeroTwin({
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
@@ -40,7 +39,7 @@ export default function HeroTwin({
     <section
       ref={root}
       id="start"
-      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#f3efe6] px-5 pt-24 pb-20 text-[#0a0a0a] md:px-10"
+      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#e7e4dc] px-5 pt-24 pb-20 text-[#0a0a0a] md:px-10"
     >
       <div className="relative mx-auto w-full max-w-5xl text-center">
         <p
@@ -52,7 +51,7 @@ export default function HeroTwin({
 
         <h1
           data-twin-head
-          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 font-boldonse text-[clamp(2.4rem,8.5vw,6rem)] leading-[1.05] font-normal tracking-[-0.02em] text-[#f4c518] uppercase will-change-transform"
+          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 font-anton text-[clamp(2.6rem,9vw,6.5rem)] leading-[0.9] font-normal tracking-[-0.03em] text-[#2c4a42] uppercase will-change-transform"
         >
           {lines.map((line) => (
             <span key={line} className="block">

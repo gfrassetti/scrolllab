@@ -1,5 +1,5 @@
 export const RUPTURE_FILL = '#5fd4ea'
-export const RUPTURE_INK = '#111'
+export const RUPTURE_INK = '#ebe6dc'
 
 function Eyes() {
   return (
@@ -103,7 +103,7 @@ export function RuptureOn({ index = 0, className = '' }) {
   )
 }
 
-/** Mr Bedfort overlay — fill matches the wash so it knocks out the grotesk. */
+/** Rupture overlay — Mr Bedfort over the slab. Same string as the word. */
 export function RuptureScript({ children, className = '' }) {
   return (
     <span data-rupture-script className={`ratio-script ${className}`} aria-hidden="true">

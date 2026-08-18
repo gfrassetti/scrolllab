@@ -2,6 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { bootGtm } from './lib/gtm.js'
+
+bootGtm()
 
 // Tabs abiertas tras un deploy: un chunk con hash viejo falla → reload una vez.
 // En dev no interferimos: Vite ya recarga solo y así no se tapan errores.

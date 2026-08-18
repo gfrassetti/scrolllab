@@ -1,13 +1,9 @@
 /**
  * SCROLLLAB Beat engine — seek + CSS offset-path.
  *
- * Learned from Readymag’s viewer (not shipped): the live ref does NOT use
- * GSAP / MotionPathPlugin / anime.js. It uses:
- *   1. CSS Motion Path — offset-path + offset-distance + offset-rotate: 0deg
- *   2. Quadratic ease-in / ease-out inside timeline.seek() (not GSAP power2)
- *   3. bezier-easing only for custom cubic arrays
- *
- * Public API: src/lib/beat/index.js · docs: docs/scrolllab-beat.md
+ * Pieces ride offset-path; the stage seeks that path to scroll.
+ * Quadratic ease inside seek(); optional cubic bezier arrays.
+ * GSAP only pins. Public API: src/lib/beat/index.js
  */
 import { pathLength, supportsOffsetPath } from './motionPath.js'
 

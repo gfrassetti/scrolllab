@@ -11,10 +11,7 @@ function svgPath(d) {
   return p
 }
 
-/**
- * Readymag-style polyline: degenerate cubics so DevTools shows
- * `offset-path: path("M … C …")` like the reference.
- */
+/** Polyline as degenerate cubics so offset-path paints as `path("M … C …")`. */
 export function polyPath(points) {
   const fmt = (n) => Number(n.toFixed(3))
   const [s, ...rest] = points
@@ -27,7 +24,7 @@ export function polyPath(points) {
   return d
 }
 
-/** Path in the container’s own box, starting at the centre (Readymag). */
+/** Path in the container’s own box, starting at the centre. */
 export function boxPath(boxW, boxH, deltas) {
   const cx = boxW / 2
   const cy = boxH / 2
@@ -48,10 +45,7 @@ export function supportsOffsetPath() {
   return typeof CSS !== 'undefined' && CSS.supports?.('offset-path', 'path("M0 0")')
 }
 
-/**
- * Paint a Readymag `.animation-container`:
- * offset-path, offset-rotate: 0deg, offset-distance, transform: rotate() scale(1), opacity: 1.
- */
+/** Paint offset-path + offset-distance + rotate/scale on a Beat actor. */
 export function applyOffset(el, d, distance, rotate = 0) {
   const dist = Math.max(0, distance)
   el.style.offsetPath = `path("${d}")`

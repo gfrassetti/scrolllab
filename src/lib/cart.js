@@ -7,6 +7,7 @@ import {
   templatePriceUsd,
 } from './pricing.js'
 import { recipeHasCommerce } from './composition.js'
+import { trackAddToCart } from './gtm.js'
 
 export function isCustomSku(sku) {
   return sku === 'custom' || String(sku).startsWith('custom:')
@@ -103,6 +104,7 @@ export const useCart = create(
           const rest = items.filter((i) => !isCustomSku(i.sku))
           set({ items: [...rest, nextItem] })
           useCartNotice.getState().show(nextItem, { updated: hadCustom })
+          trackAddToCart(nextItem)
           return true
         }
 
@@ -113,6 +115,7 @@ export const useCart = create(
         }
         set({ items: [...items, { ...item, qty: 1 }] })
         useCartNotice.getState().show(item)
+        trackAddToCart(item)
         return true
       },
       removeItem: (sku) => {

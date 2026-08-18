@@ -1,13 +1,13 @@
 import { useId, useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { attachScroll, magScale } from '../../../lib/beat'
-import { RuptureOn, RuptureScript } from './RuptureOn'
+import { RuptureScript } from './RuptureOn'
 
 const DEFAULT_PLATES = [
-  { index: '01', title: 'Grid', tone: '#ffffff' },
-  { index: '02', title: 'Fold', tone: '#9a9a9a' },
-  { index: '03', title: 'Ratio', tone: '#555555' },
-  { index: '04', title: 'Baseline', tone: '#222222' },
+  { index: '01', title: 'Rule', tone: '#16110e' },
+  { index: '02', title: 'Fold', tone: '#656565' },
+  { index: '03', title: 'Ratio', tone: '#a3a3a3' },
+  { index: '04', title: 'Baseline', tone: '#d4cfc6' },
 ]
 
 const NEXT_RULES = [
@@ -67,7 +67,7 @@ function punchHole(pin, fill, hole) {
 export default function FourPlates({
   eyebrow = 'PLATES',
   platesText,
-  plate1Title = 'Grid',
+  plate1Title = 'Rule',
   plate2Title = 'Fold',
   plate3Title = 'Ratio',
   plate4Title = 'Baseline',
@@ -201,23 +201,23 @@ export default function FourPlates({
     <section
       id="systems"
       ref={root}
-      className="relative z-[45] -mt-[100svh] text-white"
+      className="relative z-[45] -mt-[100svh] text-ratio-paper"
     >
       <div data-plates-pin className="relative h-svh overflow-hidden">
-        <div data-plates-next className="invisible absolute inset-0 z-0 bg-white" aria-hidden="true">
+        <div data-plates-next className="invisible absolute inset-0 z-0 bg-ratio-paper" aria-hidden="true">
           {nextImg ? (
             <img src={nextImg} alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
           ) : null}
-          <span className="absolute inset-x-0 top-[58%] h-px bg-[#111]" />
+          <span className="absolute inset-x-0 top-[58%] h-px bg-ratio-ink" />
           {NEXT_RULES.map((rule) => (
             <span
               key={rule.left}
-              className="absolute w-px bg-[#111]"
+              className="absolute w-px bg-ratio-ink"
               style={{ left: rule.left, top: `calc(58% - ${rule.height})`, height: rule.height }}
             />
           ))}
-          <span className="absolute top-[46%] left-[16%] aspect-square w-[10%] bg-[#111]" />
-          <span className="absolute top-[46%] left-[28%] aspect-square w-[10%] border border-[#111] bg-white" />
+          <span className="absolute top-[46%] left-[16%] aspect-square w-[10%] bg-ratio-mark" />
+          <span className="absolute top-[46%] left-[28%] aspect-square w-[10%] border border-ratio-ink bg-ratio-paper" />
         </div>
 
         <svg
@@ -231,13 +231,13 @@ export default function FourPlates({
               <polygon data-plates-hole fill="#000" />
             </mask>
           </defs>
-          <rect width="100%" height="100%" fill="#111" mask={`url(#${holeMaskId})`} />
+          <rect width="100%" height="100%" fill="#ebe6dc" mask={`url(#${holeMaskId})`} />
         </svg>
 
-        <div data-drawer className="absolute inset-0 z-10 flex flex-col bg-[#111] will-change-transform">
+        <div data-drawer className="absolute inset-0 z-10 flex flex-col bg-ratio-field will-change-transform">
           <h2
             data-plates-title
-            className="relative shrink-0 px-5 pt-16 font-grotesk text-[clamp(2.1rem,6.4vw,5.8rem)] font-medium leading-[0.86] tracking-[-0.045em] uppercase md:px-8 md:pt-20"
+            className="relative shrink-0 px-5 pt-16 font-brico text-[clamp(2.1rem,6.4vw,5.8rem)] font-medium leading-[0.86] tracking-[-0.04em] uppercase md:px-8 md:pt-20"
           >
             <span className="relative inline-block">
               {eyebrow}
@@ -283,14 +283,11 @@ export default function FourPlates({
                     zIndex: 4 - i,
                   }}
                 >
-                  <span data-swatch-fill className="absolute inset-0">
-                    <span
-                      data-rupture-off
-                      className="absolute inset-0"
-                      style={{ backgroundColor: plate.tone }}
-                    />
-                    <RuptureOn index={i} />
-                  </span>
+                  <span
+                    data-swatch-fill
+                    className="absolute inset-0"
+                    style={{ backgroundColor: plate.tone }}
+                  />
                 </span>
               ))}
             </div>

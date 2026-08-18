@@ -352,9 +352,6 @@ export const SECTION_FIELDS = {
   'ratio/NavRatio': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'linksText', label: 'Links (uno por línea)', type: 'textarea' },
-    { key: 'ruptureLabel', label: 'Rupture label', type: 'text' },
-    { key: 'onLabel', label: 'On', type: 'text' },
-    { key: 'offLabel', label: 'Off', type: 'text' },
     { key: 'credit', label: 'Credit', type: 'text' },
     { key: 'menuLabel', label: 'Menu label', type: 'text' },
   ],
@@ -445,7 +442,7 @@ export const SECTION_FIELDS = {
   ],
   'ratio/FooterLedger': [
     { key: 'title', label: 'Title', type: 'text' },
-    { key: 'ghost', label: 'Ghost word', type: 'text' },
+    { key: 'ghost', label: 'Brand word (outlined)', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'studio', label: 'Studio', type: 'text' },

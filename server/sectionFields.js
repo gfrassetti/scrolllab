@@ -189,9 +189,6 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'ratio/NavRatio': [
     'brand',
     'linksText',
-    'ruptureLabel',
-    'onLabel',
-    'offLabel',
     'credit',
     'menuLabel',
   ],

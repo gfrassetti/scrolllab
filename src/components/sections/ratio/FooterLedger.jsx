@@ -16,20 +16,20 @@ const FRAME_SHAPE = [
  * GSAP pin + scrub so scroll-up rewinds. No extra runway (that was empty white).
  */
 export default function FooterLedger({
-  title = 'INDEX &\nNOTES',
-  ghost = 'INDEX',
+  title = 'YOUR TITLE',
+  ghost = 'BRAND',
   hint = 'Scroll down ¬',
-  brand = 'SCROLLLAB',
-  studio = 'Guido — 2026',
+  brand = 'Brand',
+  studio = '',
   row1Label = 'Made by',
-  row1Value = 'Guido',
+  row1Value = 'Studio',
   row2Label = 'Say hi',
   row2Value = 'hello@studio.test',
   row3Label = 'Prev. 01',
   row3Value = 'PRINT SYSTEM',
   row4Label = 'Prev. 02',
   row4Value = 'MOTION PLATES',
-  spine1Title = 'Grid',
+  spine1Title = 'Rule',
   spine2Title = 'Fold',
   spine3Title = 'Ratio',
   spine4Title = 'Rules',
@@ -108,19 +108,21 @@ export default function FooterLedger({
   )
 
   return (
-    <footer ref={root} id={anchor} className="relative z-0 bg-white text-[#111]">
+    <footer ref={root} id={anchor} className="relative z-0 bg-ratio-paper text-ratio-ink">
       <div data-ledger-pin className="relative h-svh overflow-hidden">
         <header className="pointer-events-none absolute inset-x-0 top-12 z-20 flex items-start justify-between gap-6 px-5 pt-5 md:px-8 md:pt-6">
           <div>
-            <h2 className="max-w-[12ch] font-grotesk text-[clamp(3.2rem,9vw,8rem)] font-medium leading-[0.8] tracking-[-0.055em] whitespace-pre-line uppercase">
+            <h2 className="font-brico text-[clamp(3.2rem,9vw,8rem)] font-medium leading-[0.8] tracking-[-0.05em] whitespace-nowrap uppercase">
               {title}
             </h2>
             <p className="mt-6">
               <span className="flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase">
-                <span aria-hidden="true" className="size-2 bg-[#111]" />
+                <span aria-hidden="true" className="size-2 bg-ratio-mark" />
                 {brand}
               </span>
-              <span className="mt-1 block text-[11px] tracking-[0.18em] uppercase opacity-50">{studio}</span>
+              {studio ? (
+                <span className="mt-1 block text-[11px] tracking-[0.18em] uppercase opacity-50">{studio}</span>
+              ) : null}
             </p>
           </div>
           <p className="shrink-0 pt-1 text-[11px] tracking-[0.16em] uppercase">{hint}</p>
@@ -136,7 +138,7 @@ export default function FooterLedger({
                 <span
                   key={`ch-${item.i}-${item.ch}`}
                   aria-hidden="true"
-                  className="mb-[-0.08em] shrink-0 font-grotesk text-[clamp(7.5rem,42vh,22rem)] leading-none font-medium text-transparent uppercase [-webkit-text-stroke:2px_#111]"
+                  className="mb-[-0.08em] shrink-0 font-brico text-[clamp(7.5rem,42vh,22rem)] leading-none font-medium text-transparent uppercase [-webkit-text-stroke:2px_#ebe6dc]"
                 >
                   {item.ch}
                 </span>
@@ -148,7 +150,7 @@ export default function FooterLedger({
               <article
                 key={`fr-${item.i}`}
                 data-ratio-block
-                className="flex shrink-0 flex-col border border-[#111] bg-white px-2 py-2.5"
+                className="flex shrink-0 flex-col border border-ratio-ink bg-ratio-paper px-2 py-2.5"
                 style={{
                   width: shape.width,
                   height: shape.height,
@@ -165,7 +167,7 @@ export default function FooterLedger({
             {rows.map(([k, v]) => (
               <div
                 key={k}
-                className="flex items-baseline justify-between gap-4 border-b border-[#111]/30 py-2 text-[11px] tracking-[0.14em] uppercase"
+                className="flex items-baseline justify-between gap-4 border-b border-ratio-ink/30 py-2 text-[11px] tracking-[0.14em] uppercase"
               >
                 <dt className="opacity-50">{k}</dt>
                 <dd>{v}</dd>

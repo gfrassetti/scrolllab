@@ -1,132 +1,203 @@
+import { useRef } from 'react'
 import { parseNavLinks } from '../../../lib/navLinks'
-import { useMobileMenu } from '../../../hooks/useMobileMenu'
-import { useRupture, setRupture } from './rupture'
+import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { attachScroll, magScale } from '../../../lib/beat'
 import RuptureLayer from './RuptureLayer'
 
+const LINK_CLASS =
+  'px-1.5 py-0.5 text-[10px] tracking-[0.2em] uppercase md:text-[11px]'
+
 /**
- * NavRatio — hairline bar. Brand · links · Rupture switch.
- * Rupture tints the whole page and brings in stickers + a flying mark.
+ * NavRatio — hairline bar (brand). Index sits as a bottom dock, then
+ * each link rides a Beat rail into the header (Plates → Notes → Press).
  */
 export default function NavRatio({
   brand = 'RATIO',
-  links = ['Intro', 'Study', 'Notes'],
+  links = ['Plates | #intro', 'Notes | #notes', 'Press | #index'],
   linksText,
-  ruptureLabel = 'Rupture',
-  onLabel = 'On',
-  offLabel = 'Off',
-  credit = 'SCROLLLAB',
+  credit = '',
   menuLabel = 'MENU',
 }) {
+  const root = useRef(null)
   const items = parseNavLinks(links, linksText).slice(0, 3)
-  const ruptured = useRupture()
-  const { open, close, panelProps, triggerProps } = useMobileMenu()
+
+  useGSAP(
+    () => {
+      const wrap = root.current
+      const shell = wrap.querySelector('[data-nav-shell]')
+      const pieceEls = gsap.utils.toArray('[data-nav-item]', wrap)
+      const phs = gsap.utils.toArray('[data-nav-ph]', wrap)
+      const slashes = gsap.utils.toArray('[data-nav-slash]', wrap)
+      if (!shell || pieceEls.length !== phs.length || !pieceEls.length) return undefined
+
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const floorGap = () => (window.matchMedia('(min-width: 768px)').matches ? 24 : 20)
+
+      const layout = () => {
+        const gapX = 8
+        const padX = 18
+        const padY = 10
+        const widths = pieceEls.map((el) => el.offsetWidth)
+        const h = Math.max(...pieceEls.map((el) => el.offsetHeight), 16)
+        const row = widths.reduce((n, w) => n + w, 0) + gapX * (pieceEls.length - 1)
+        const top = window.innerHeight - h - padY * 2 - floorGap()
+        let x = (window.innerWidth - row) / 2
+        const from = pieceEls.map((_, i) => {
+          const pos = { top, left: x }
+          x += widths[i] + gapX
+          return pos
+        })
+        const to = phs.map((ph) => {
+          const r = ph.getBoundingClientRect()
+          return { top: r.top, left: r.left }
+        })
+        return {
+          from,
+          to,
+          shell: {
+            top: top - padY,
+            left: from[0].left - padX,
+            width: row + padX * 2,
+            height: h + padY * 2,
+          },
+        }
+      }
+
+      let players = []
+      let st
+
+      const mountRails = () => {
+        players = []
+        const s = magScale(window.innerWidth)
+        const { from, to, shell: box } = layout()
+        gsap.set(shell, box)
+        pieceEls.forEach((el, i) => {
+          el.style.removeProperty('offset-path')
+          el.style.removeProperty('offset-distance')
+          el.style.removeProperty('offset-rotate')
+          el.style.transform = ''
+          gsap.set(el, {
+            position: 'fixed',
+            top: from[i].top,
+            left: from[i].left,
+            x: 0,
+            y: 0,
+            autoAlpha: 1,
+          })
+          players[i] = attachScroll(
+            el,
+            [
+              {
+                delay_px: i * 280,
+                dx: (to[i].left - from[i].left) / s,
+                dy: (to[i].top - from[i].top) / s,
+                acc: 'ease-out',
+                speed: 0.48,
+              },
+            ],
+            s,
+          )
+        })
+      }
+
+      const seekAll = (progress) => {
+        const max = Math.max(...players.map((p) => p.duration), 1)
+        const px = progress * max
+        players.forEach((p) => p.seek(px))
+        const fade = reduced ? (progress > 0.2 ? 0 : 1) : 1 - Math.min(1, progress / 0.28)
+        gsap.set(shell, { autoAlpha: fade })
+        slashes.forEach((el) => {
+          gsap.set(el, { opacity: progress > 0.62 ? 0.35 : 0 })
+        })
+      }
+
+      const bind = () => {
+        st?.kill()
+        mountRails()
+        const drawer = document.querySelector('[data-drawer]')
+        if (!drawer) {
+          seekAll(0)
+          return
+        }
+        const trigger = drawer.closest('[data-plates-pin]') || drawer
+        st = ScrollTrigger.create({
+          trigger,
+          start: 'top 94%',
+          end: 'top -18%',
+          scrub: reduced ? true : 0.6,
+          invalidateOnRefresh: true,
+          onRefresh(self) {
+            mountRails()
+            seekAll(self.progress)
+          },
+          onUpdate(self) {
+            seekAll(self.progress)
+          },
+        })
+        seekAll(st.progress)
+      }
+
+      const later = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bind()
+          ScrollTrigger.refresh()
+        })
+      })
+
+      return () => {
+        cancelAnimationFrame(later)
+        st?.kill()
+      }
+    },
+    { scope: root, dependencies: [links, linksText] },
+  )
 
   return (
-    <>
-    <header
-      data-ratio-nav
-      className="fixed inset-x-0 top-0 z-50 border-b border-[#111] bg-white text-[#111]"
-    >
-      <div className="flex h-11 items-center justify-between gap-3 px-3 text-[10px] tracking-[0.18em] uppercase md:h-12 md:px-5 md:text-[11px]">
-        <a href="#top" className="flex shrink-0 items-center gap-2 font-medium">
-          <span aria-hidden="true" className="size-2 bg-[#111]" />
-          {brand}
-        </a>
-
-        <ul className="hidden items-center gap-1 md:flex">
-          {items.map((item, i) => (
-            <li key={item.label} className="flex items-center gap-1">
-              {i > 0 ? <span className="opacity-35">/</span> : null}
-              <a href={item.href} className="transition-opacity hover:opacity-50">
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center gap-3 md:gap-5">
-          <fieldset className="flex items-center gap-1.5 border-0 p-0">
-            <legend className="sr-only">{ruptureLabel}</legend>
-            <span className="hidden opacity-55 sm:inline">{ruptureLabel}:</span>
-            <span className="inline-flex items-center gap-0.5">
-              <button
-                type="button"
-                aria-pressed={ruptured}
-                onClick={() => setRupture(true)}
-                className={`ui-press rounded-full px-2 py-0.5 ${
-                  ruptured ? 'bg-[#111] text-white' : 'hover:opacity-55'
-                }`}
-              >
-                {onLabel}
-              </button>
-              <button
-                type="button"
-                aria-pressed={!ruptured}
-                onClick={() => setRupture(false)}
-                className={`ui-press rounded-full px-2 py-0.5 ${
-                  !ruptured ? 'bg-[#111] text-white' : 'hover:opacity-55'
-                }`}
-              >
-                {offLabel}
-              </button>
-            </span>
-          </fieldset>
-
-          <span className="hidden opacity-45 lg:inline">{credit}</span>
-
-          <button
-            {...triggerProps}
-            aria-label={menuLabel}
-            className="relative grid size-8 place-items-center md:hidden"
-          >
-            <span
-              aria-hidden="true"
-              className={`absolute h-px w-4 bg-current transition-transform duration-200 motion-reduce:transition-none ${
-                open ? 'rotate-45' : '-translate-y-1'
-              }`}
-            />
-            <span
-              aria-hidden="true"
-              className={`absolute h-px w-4 bg-current transition-transform duration-200 motion-reduce:transition-none ${
-                open ? '-rotate-45' : 'translate-y-1'
-              }`}
-            />
-          </button>
-        </div>
-      </div>
-
-      <div
-        {...panelProps}
-        aria-label={menuLabel}
-        inert={!open}
-        className={`fixed inset-0 bg-white text-[#111] transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
+    <div ref={root}>
+      <header
+        data-ratio-nav
+        className="fixed inset-x-0 top-0 z-50 border-b border-ratio-ink bg-ratio-paper text-ratio-ink"
       >
-        <ul className="flex h-full flex-col justify-center gap-1 px-5">
-          {items.map((item, i) => (
-            <li key={item.label}>
-              <a
-                href={item.href}
-                onClick={close}
-                className={`flex items-center gap-4 py-3 transition-all duration-300 motion-reduce:transition-none ${
-                  open ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                }`}
-                style={{ transitionDelay: open ? `${80 + i * 60}ms` : '0ms' }}
-              >
-                <span className="text-[10px] tracking-[0.3em] opacity-40">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span className="font-anton text-[clamp(2.5rem,12vw,4.5rem)] leading-[0.85] uppercase">
+        <div className="flex h-11 items-center gap-3 px-3 text-[10px] tracking-[0.18em] uppercase md:h-12 md:px-5 md:text-[11px]">
+          <a href="#top" className="shrink-0 font-medium">
+            {brand}
+          </a>
+          <div data-nav-slot className="flex min-h-0 min-w-0 flex-1 items-center justify-center">
+            {items.map((item, i) => (
+              <span key={item.label} className="flex items-center">
+                {i > 0 ? (
+                  <span data-nav-slash className="px-1 opacity-0">
+                    /
+                  </span>
+                ) : null}
+                <span data-nav-ph className={`invisible ${LINK_CLASS}`}>
                   {item.label}
                 </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </header>
-    <RuptureLayer />
-    </>
+              </span>
+            ))}
+          </div>
+          {credit ? <span className="shrink-0 opacity-45">{credit}</span> : null}
+        </div>
+      </header>
+
+      <nav aria-label="Index">
+        <div
+          data-nav-shell
+          aria-hidden="true"
+          className="pointer-events-none fixed z-50 border border-ratio-ink bg-ratio-paper"
+        />
+        {items.map((item) => (
+          <a
+            key={item.label}
+            data-nav-item
+            href={item.href}
+            className={`pointer-events-auto fixed z-50 text-ratio-ink opacity-80 transition-opacity duration-200 ease-[var(--ease-out)] hover:opacity-100 active:opacity-50 ${LINK_CLASS}`}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+      <RuptureLayer />
+    </div>
   )
 }

@@ -1,5 +1,6 @@
 import { api } from './api.js'
 import { markCheckoutIntent } from './cart.js'
+import { trackBeginCheckout } from './gtm.js'
 
 /**
  * Arma el payload que acepta POST /api/checkout (sin precios del cliente).
@@ -35,6 +36,8 @@ export async function startCheckout({
   if (payload.length === 0) {
     throw new Error('Carrito vacío')
   }
+
+  trackBeginCheckout(items)
 
   if (!user) {
     markCheckoutIntent()

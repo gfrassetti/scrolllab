@@ -100,27 +100,27 @@ const THEMES = {
     radius: 'rounded-md',
   },
   unity: {
-    surface: 'bg-[#f3efe6] text-[#0a0a0a]',
+    surface: 'bg-[#e7e4dc] text-[#0a0a0a]',
     eyebrow: 'text-[#0a0a0a]/45',
     title: 'font-oswald font-semibold uppercase tracking-[-0.02em]',
     body: 'text-[#0a0a0a]/70',
     field:
-      'border-[#0a0a0a]/20 focus:border-[#f4c518] placeholder:text-[#0a0a0a]/35',
+      'border-[#0a0a0a]/20 focus:border-[#2c4a42] placeholder:text-[#0a0a0a]/35',
     button:
-      'border border-[#0a0a0a] bg-[#f4c518] text-[#0a0a0a] hover:bg-transparent disabled:opacity-40',
+      'border border-[#0a0a0a] bg-[#2c4a42] text-[#e7e4dc] hover:bg-transparent hover:text-[#0a0a0a] disabled:opacity-40',
     note: 'text-[#0a0a0a]/45',
     radius: '',
   },
   ratio: {
-    surface: 'bg-[#ebe6dc] text-[#111]',
-    eyebrow: 'text-[#111]/45',
+    surface: 'bg-[#16110e] text-[#ebe6dc]',
+    eyebrow: 'text-[#ebe6dc]/45',
     title: 'font-anton uppercase tracking-[-0.02em]',
-    body: 'text-[#111]/70',
+    body: 'text-[#ebe6dc]/70',
     field:
-      'border-[#111]/20 focus:border-[#e23c24] placeholder:text-[#111]/35',
+      'border-[#ebe6dc]/20 focus:border-[#e23c24] placeholder:text-[#ebe6dc]/35',
     button:
-      'border border-[#111] bg-[#e23c24] text-[#ebe6dc] hover:bg-transparent hover:text-[#111] disabled:opacity-40',
-    note: 'text-[#111]/45',
+      'border border-[#ebe6dc] bg-[#e23c24] text-[#16110e] hover:bg-transparent hover:text-[#ebe6dc] disabled:opacity-40',
+    note: 'text-[#ebe6dc]/45',
     radius: '',
   },
   vanta: {

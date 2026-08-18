@@ -1,5 +1,5 @@
 /**
- * Rising mark — transparent PNG cutout (same technique as the Framer ref).
+ * Rising mark — transparent PNG cutout.
  * Override with `src` / builder `orbSrc` for a custom asset.
  */
 import defaultMark from './assets/rising-mark.png'

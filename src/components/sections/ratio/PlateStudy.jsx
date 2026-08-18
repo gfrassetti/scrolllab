@@ -35,8 +35,8 @@ export default function PlateStudy({
   anchor = 'plate-01',
 }) {
   const root = useRef(null)
-  const bg = invert ? '#111' : '#ffffff'
-  const fg = invert ? '#ffffff' : '#111'
+  const bg = invert ? '#ebe6dc' : '#16110e'
+  const fg = invert ? '#16110e' : '#ebe6dc'
 
   useGSAP(
     () => {

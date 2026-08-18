@@ -96,8 +96,8 @@ const TEMPLATE_META = [
     name: 'UNITY',
     path: '/templates/unity',
     category: 'EDITORIAL',
-    tagline: 'one game',
-    palette: ['#f3efe6', '#0a0a0a', '#f4c518'],
+    tagline: 'shared field',
+    palette: ['#e7e4dc', '#0a0a0a', '#2c4a42'],
   },
   {
     id: '09',
@@ -106,7 +106,7 @@ const TEMPLATE_META = [
     path: '/templates/ratio',
     category: 'SYSTEM',
     tagline: 'hold the fold',
-    palette: ['#ffffff', '#111111'],
+    palette: ['#16110e', '#ebe6dc', '#e23c24'],
     desktopOnly: true,
   },
   {

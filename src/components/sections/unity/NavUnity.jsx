@@ -2,7 +2,7 @@ import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
 
 /**
- * NavUnity — ref layout: phrase left · logo center · 3 links right.
+ * NavUnity — phrase left · mark center · 3 links right.
  * Mobile: phrase + burger; links in full-screen overlay.
  */
 export default function NavUnity({
@@ -83,7 +83,7 @@ export default function NavUnity({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
-        className={`fixed inset-0 bg-[#f3efe6] text-[#0a0a0a] mix-blend-normal transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
+        className={`fixed inset-0 bg-[#e7e4dc] text-[#0a0a0a] mix-blend-normal transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >

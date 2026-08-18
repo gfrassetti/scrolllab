@@ -117,12 +117,12 @@ const THEMES = {
     '--shop-radius': '0px',
   },
   ratio: {
-    '--shop-bg': '#ebe6dc',
-    '--shop-fg': '#111111',
-    '--shop-muted': 'rgba(17, 17, 17, 0.55)',
-    '--shop-border': 'rgba(17, 17, 17, 0.18)',
+    '--shop-bg': '#16110e',
+    '--shop-fg': '#ebe6dc',
+    '--shop-muted': 'rgba(235, 230, 220, 0.55)',
+    '--shop-border': 'rgba(235, 230, 220, 0.18)',
     '--shop-accent': TEMPLATE_ACCENTS.ratio,
-    '--shop-accent-fg': '#ebe6dc',
+    '--shop-accent-fg': '#16110e',
     '--shop-radius': '0px',
   },
   vanta: {

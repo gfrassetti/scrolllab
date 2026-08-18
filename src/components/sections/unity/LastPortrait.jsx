@@ -62,7 +62,7 @@ export default function LastPortrait({
     <section
       ref={root}
       id="last"
-      className="relative overflow-hidden bg-[#0a0a0a] px-5 py-24 text-[#f3efe6] md:px-10 md:py-32"
+      className="relative overflow-hidden bg-[#0a0a0a] px-5 py-24 text-[#e7e4dc] md:px-10 md:py-32"
     >
       <h2
         data-last-rise
@@ -90,7 +90,7 @@ export default function LastPortrait({
           </p>
           <p
             data-last-rise
-            className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-[#f3efe6]/75 md:text-base"
+            className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-[#e7e4dc]/75 md:text-base"
           >
             {body}
           </p>
@@ -101,7 +101,7 @@ export default function LastPortrait({
           >
             {question}
           </h3>
-          <p data-last-rise className="mt-3 max-w-[36ch] text-sm text-[#f3efe6]/60">
+          <p data-last-rise className="mt-3 max-w-[36ch] text-sm text-[#e7e4dc]/60">
             {caption}
           </p>
 

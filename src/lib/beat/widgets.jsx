@@ -5,8 +5,7 @@ import { useBeatStage } from './useBeatStage.js'
 const BeatBag = createContext(null)
 
 /**
- * Our widget canvas. Readymag had a page of widgets + seek(scrollTop).
- * This is the same idea: one pin, one clock, many Beats on a mag 1024 rail.
+ * Widget canvas: one pin, one clock, many Beats on a mag 1024 rail.
  *
  * GSAP only pins. Each <Beat> owns offset-path + its recipe.
  */
@@ -53,8 +52,8 @@ export function BeatStage({
 }
 
 /**
- * One widget on the stage. mag is rest pose on the 1024 canvas
- * (same units as Readymag dx/dy). recipe.scroll is the rail.
+ * One widget on the stage. mag is rest pose on the 1024 canvas.
+ * recipe.scroll is the rail (dx/dy in mag pixels).
  */
 export function Beat({
   id,
