@@ -32,6 +32,7 @@ import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
 import { SECTION_KINDS } from '../src/lib/sectionKinds.js'
 import { checkoutPropsFrom } from '../src/lib/shop/checkoutProps.js'
+import { BUILDER_SEO, SITE_SEO } from '../src/lib/site.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
@@ -375,6 +376,28 @@ for (const model of BUNDLE_MODELS) {
       fail('packaging', `${pageRel} importa 'sections/${dir}' y el ZIP de '${model}' no lo incluye`)
     }
   }
+}
+
+const indexHtml = read('index.html')
+if (!indexHtml.includes(SITE_SEO.title)) {
+  fail('seo', 'el <title> de index.html no coincide con SITE_SEO.title')
+}
+if (!indexHtml.includes(SITE_SEO.description)) {
+  fail('seo', 'la meta description de index.html no coincide con SITE_SEO.description')
+}
+if (!indexHtml.includes(BUILDER_SEO.title) || !indexHtml.includes(BUILDER_SEO.description)) {
+  fail('seo', 'el boot de index.html no espeja BUILDER_SEO')
+}
+if (!indexHtml.includes("noindex, follow")) {
+  fail('seo', 'index.html debe marcar noindex en /templates/')
+}
+
+const sitemapSrc = read('public/sitemap.xml')
+if (sitemapSrc.includes('/templates/')) {
+  fail('seo', 'sitemap.xml no debe listar demos /templates/ (son noindex)')
+}
+if (!sitemapSrc.includes('https://www.scrolllab.com.ar/builder')) {
+  fail('seo', 'sitemap.xml debe incluir /builder')
 }
 
 if (problems.length) {

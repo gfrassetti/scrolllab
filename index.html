@@ -21,7 +21,7 @@
     <title>SCROLL LAB — Plantillas web | Web templates</title>
     <meta
       name="description"
-      content="Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar."
+      content="Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable."
     />
     <meta
       name="keywords"
@@ -44,7 +44,7 @@
     />
     <meta
       property="og:description"
-      content="Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar."
+      content="Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable."
     />
     <meta property="og:image" content="https://www.scrolllab.com.ar/og.png" />
     <meta property="og:image:type" content="image/png" />
@@ -63,13 +63,54 @@
     />
     <meta
       name="twitter:description"
-      content="Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar."
+      content="Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable."
     />
     <meta name="twitter:image" content="https://www.scrolllab.com.ar/og.png" />
     <meta
       name="twitter:image:alt"
       content="SCROLL LAB — plantillas web minimalistas / web templates con código fuente"
     />
+
+    <script>
+      // Primer paint / crawler: las demos no se indexan; el builder tiene meta propia.
+      // Espejo de BUILDER_SEO / seoForPath en src/lib/site.js.
+      (function () {
+        var path = location.pathname
+        if (path.length > 1 && path.charAt(path.length - 1) === '/') {
+          path = path.slice(0, -1)
+        }
+        var desc = document.querySelector('meta[name="description"]')
+        var robots = document.querySelector('meta[name="robots"]')
+        var canonical = document.querySelector('link[rel="canonical"]')
+        var ogTitle = document.querySelector('meta[property="og:title"]')
+        var ogDesc = document.querySelector('meta[property="og:description"]')
+        var ogUrl = document.querySelector('meta[property="og:url"]')
+        var twTitle = document.querySelector('meta[name="twitter:title"]')
+        var twDesc = document.querySelector('meta[name="twitter:description"]')
+        function set(el, attr, value) {
+          if (el) el.setAttribute(attr, value)
+        }
+        if (path.indexOf('/templates/') === 0) {
+          if (robots) robots.setAttribute('content', 'noindex, follow')
+          if (canonical) canonical.setAttribute('href', 'https://www.scrolllab.com.ar/')
+          set(ogUrl, 'content', 'https://www.scrolllab.com.ar/')
+          return
+        }
+        if (path === '/builder') {
+          var title = 'SCROLL LAB — Builder | Armá tu plantilla web'
+          var body =
+            'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente React, editable.'
+          document.title = title
+          set(desc, 'content', body)
+          set(ogTitle, 'content', title)
+          set(ogDesc, 'content', body)
+          set(ogUrl, 'content', 'https://www.scrolllab.com.ar/builder')
+          set(twTitle, 'content', title)
+          set(twDesc, 'content', body)
+          if (canonical) canonical.setAttribute('href', 'https://www.scrolllab.com.ar/builder')
+        }
+      })()
+    </script>
 
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="icon" sizes="32x32" href="/favicon.ico" />
@@ -100,7 +141,7 @@
             "@id": "https://www.scrolllab.com.ar/#website",
             "name": "SCROLL LAB",
             "url": "https://www.scrolllab.com.ar/",
-            "description": "Plantillas web minimalistas con storytelling. Elegí un modelo o armá el tuyo — código React editable. Web templates listos para publicar.",
+            "description": "Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable.",
             "inLanguage": ["es-AR", "en"],
             "publisher": { "@id": "https://www.scrolllab.com.ar/#organization" }
           },

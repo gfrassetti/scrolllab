@@ -7,6 +7,7 @@ import { AuthProvider } from './lib/auth'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
+import DocumentHead from './components/DocumentHead'
 import ChunkErrorBoundary from './components/ChunkErrorBoundary'
 import './lib/theme'
 
@@ -67,6 +68,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <HomeCursor />
+          <DocumentHead />
           <ScrollToTop />
           <CartToast />
           <ChunkErrorBoundary>
