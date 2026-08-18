@@ -19,10 +19,10 @@ export default function FooterLedger({
   title = 'INDEX &\nNOTES',
   ghost = 'INDEX',
   hint = 'Scroll down ¬',
-  brand = 'RATIO',
-  studio = 'SCROLLLAB — 2026',
-  row1Label = 'Built as',
-  row1Value = 'A SCROLLLAB template',
+  brand = 'SCROLLLAB',
+  studio = 'Guido — 2026',
+  row1Label = 'Made by',
+  row1Value = 'Guido',
   row2Label = 'Say hi',
   row2Value = 'hello@studio.test',
   row3Label = 'Prev. 01',
@@ -30,25 +30,19 @@ export default function FooterLedger({
   row4Label = 'Prev. 02',
   row4Value = 'MOTION PLATES',
   spine1Title = 'Grid',
-  spine1Author = 'M. Hale',
   spine2Title = 'Fold',
-  spine2Author = 'R. Chen',
   spine3Title = 'Ratio',
-  spine3Author = 'A. Voss',
   spine4Title = 'Rules',
-  spine4Author = 'L. Park',
   spine5Title = 'Baseline',
-  spine5Author = 'S. Okada',
   anchor = 'index',
 }) {
   const root = useRef(null)
   const spines = [
-    { title: spine1Title, author: spine1Author },
-    { title: spine2Title, author: spine2Author },
-    { title: spine3Title, author: spine3Author },
-    { title: spine4Title, author: spine4Author },
-    { title: spine5Title, author: spine5Author },
-    { title: 'Title six', author: 'Name six' },
+    { title: spine1Title },
+    { title: spine2Title },
+    { title: spine3Title },
+    { title: spine4Title },
+    { title: spine5Title },
   ]
   const letters = Array.from(String(ghost).replace(/\s/g, '').toUpperCase())
   const items = []
@@ -105,15 +99,10 @@ export default function FooterLedger({
         ghost,
         hint,
         spine1Title,
-        spine1Author,
         spine2Title,
-        spine2Author,
         spine3Title,
-        spine3Author,
         spine4Title,
-        spine4Author,
         spine5Title,
-        spine5Author,
       ],
     },
   )
@@ -122,9 +111,18 @@ export default function FooterLedger({
     <footer ref={root} id={anchor} className="relative z-0 bg-white text-[#111]">
       <div data-ledger-pin className="relative h-svh overflow-hidden">
         <header className="pointer-events-none absolute inset-x-0 top-12 z-20 flex items-start justify-between gap-6 px-5 pt-5 md:px-8 md:pt-6">
-          <h2 className="max-w-[12ch] font-grotesk text-[clamp(3.2rem,9vw,8rem)] font-medium leading-[0.8] tracking-[-0.055em] whitespace-pre-line uppercase">
-            {title}
-          </h2>
+          <div>
+            <h2 className="max-w-[12ch] font-grotesk text-[clamp(3.2rem,9vw,8rem)] font-medium leading-[0.8] tracking-[-0.055em] whitespace-pre-line uppercase">
+              {title}
+            </h2>
+            <p className="mt-6">
+              <span className="flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase">
+                <span aria-hidden="true" className="size-2 bg-[#111]" />
+                {brand}
+              </span>
+              <span className="mt-1 block text-[11px] tracking-[0.18em] uppercase opacity-50">{studio}</span>
+            </p>
+          </div>
           <p className="shrink-0 pt-1 text-[11px] tracking-[0.16em] uppercase">{hint}</p>
         </header>
 
@@ -150,7 +148,7 @@ export default function FooterLedger({
               <article
                 key={`fr-${item.i}`}
                 data-ratio-block
-                className="flex shrink-0 flex-col justify-between border border-[#111] bg-white px-2 py-2.5"
+                className="flex shrink-0 flex-col border border-[#111] bg-white px-2 py-2.5"
                 style={{
                   width: shape.width,
                   height: shape.height,
@@ -159,9 +157,6 @@ export default function FooterLedger({
                 }}
               >
                 <p className="text-[10px] leading-tight tracking-[0.12em] uppercase">{item.title}</p>
-                <p className="text-[10px] leading-tight tracking-[0.12em] uppercase opacity-55">
-                  {item.author}
-                </p>
               </article>
             )
           })}

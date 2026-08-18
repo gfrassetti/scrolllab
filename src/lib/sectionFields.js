@@ -373,6 +373,7 @@ export const SECTION_FIELDS = {
     { key: 'plate2Title', label: 'Plate 2', type: 'text' },
     { key: 'plate3Title', label: 'Plate 3', type: 'text' },
     { key: 'plate4Title', label: 'Plate 4', type: 'text' },
+    { key: 'nextImg', label: 'Next chapter image', type: 'image' },
   ],
   'ratio/SplitStudy': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
@@ -398,6 +399,7 @@ export const SECTION_FIELDS = {
   'ratio/FitStack': [
     { key: 'noteLabel', label: 'Notes label', type: 'text' },
     { key: 'note1', label: 'Note 1', type: 'text' },
+    { key: 'note1Mark', label: 'Note 1 underline', type: 'text' },
     { key: 'note2', label: 'Note 2', type: 'text' },
     { key: 'note2Mark', label: 'Note 2 underline', type: 'text' },
     { key: 'note3', label: 'Note 3', type: 'text' },
@@ -456,15 +458,10 @@ export const SECTION_FIELDS = {
     { key: 'row4Label', label: 'Row 4 label', type: 'text' },
     { key: 'row4Value', label: 'Row 4 value', type: 'text' },
     { key: 'spine1Title', label: 'Spine 1 title', type: 'text' },
-    { key: 'spine1Author', label: 'Spine 1 author', type: 'text' },
     { key: 'spine2Title', label: 'Spine 2 title', type: 'text' },
-    { key: 'spine2Author', label: 'Spine 2 author', type: 'text' },
     { key: 'spine3Title', label: 'Spine 3 title', type: 'text' },
-    { key: 'spine3Author', label: 'Spine 3 author', type: 'text' },
     { key: 'spine4Title', label: 'Spine 4 title', type: 'text' },
-    { key: 'spine4Author', label: 'Spine 4 author', type: 'text' },
     { key: 'spine5Title', label: 'Spine 5 title', type: 'text' },
-    { key: 'spine5Author', label: 'Spine 5 author', type: 'text' },
   ],
   'vanta/NavVanta': [
     { key: 'brand', label: 'Brand', type: 'text' },

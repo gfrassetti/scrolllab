@@ -210,6 +210,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'plate2Title',
     'plate3Title',
     'plate4Title',
+    'nextImg',
   ],
   'ratio/SplitStudy': [
     'kicker',
@@ -235,6 +236,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'ratio/FitStack': [
     'noteLabel',
     'note1',
+    'note1Mark',
     'note2',
     'note2Mark',
     'note3',
@@ -287,15 +289,10 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'row4Label',
     'row4Value',
     'spine1Title',
-    'spine1Author',
     'spine2Title',
-    'spine2Author',
     'spine3Title',
-    'spine3Author',
     'spine4Title',
-    'spine4Author',
     'spine5Title',
-    'spine5Author',
   ],
   'vanta/NavVanta': [
     'brand',

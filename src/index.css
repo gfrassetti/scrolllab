@@ -336,7 +336,8 @@ html[data-ratio-rupture='on'] [data-rupture-off] {
 }
 
 /* FourPlates zoom: hide twins via class, never GSAP autoAlpha (inline visibility leaks into Off). */
-[data-swatch-fill].is-zoom > * {
+[data-swatch-fill].is-zoom > [data-rupture-on],
+[data-swatch-fill].is-zoom > [data-rupture-off] {
   visibility: hidden;
   opacity: 0;
 }

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useId, useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { attachScroll, magScale } from '../../../lib/beat'
 import { RuptureOn, RuptureScript } from './RuptureOn'
@@ -8,6 +8,14 @@ const DEFAULT_PLATES = [
   { index: '02', title: 'Fold', tone: '#9a9a9a' },
   { index: '03', title: 'Ratio', tone: '#555555' },
   { index: '04', title: 'Baseline', tone: '#222222' },
+]
+
+const NEXT_RULES = [
+  { left: '22%', height: '28%' },
+  { left: '38%', height: '52%' },
+  { left: '54%', height: '36%' },
+  { left: '71%', height: '64%' },
+  { left: '84%', height: '22%' },
 ]
 
 function tumbleSteps(i, hop) {
@@ -21,9 +29,40 @@ function tumbleSteps(i, hop) {
   ]
 }
 
+function coverScale(pin, fill) {
+  const side = fill.offsetWidth || 1
+  return (Math.hypot(pin.offsetWidth, pin.offsetHeight) / side) * 1.18
+}
+
+/** Rotated square of the growing cube, in pin-local px — for the veil hole. */
+function cubePoints(pin, fill) {
+  const pinR = pin.getBoundingClientRect()
+  const box = fill.getBoundingClientRect()
+  const rot = ((Number(gsap.getProperty(fill, 'rotation')) || 0) * Math.PI) / 180
+  const k = Math.abs(Math.cos(rot)) + Math.abs(Math.sin(rot))
+  const side = k > 0.05 ? box.width / k : box.width
+  const hw = side / 2
+  const cx = box.left + box.width / 2 - pinR.left
+  const cy = box.top + box.height / 2 - pinR.top
+  const c = Math.cos(rot)
+  const s = Math.sin(rot)
+  return [
+    [-hw, -hw],
+    [hw, -hw],
+    [hw, hw],
+    [-hw, hw],
+  ].map(([x, y]) => `${x * c - y * s + cx},${x * s + y * c + cy}`)
+}
+
+function punchHole(pin, fill, hole) {
+  if (!pin || !fill || !hole) return
+  hole.setAttribute('points', cubePoints(pin, fill).join(' '))
+}
+
 /**
- * FourPlates — drawer over the hero. The four squares tumble like the
- * hero cube (Beat hops + 90° rot), overlap, then one grows into the next chapter.
+ * FourPlates — drawer over the hero. Cubes tumble, then the keeper
+ * spins and grows. The next chapter is a sibling layer (never scaled);
+ * a vector hole in the black veil reveals it (P4 + P13).
  */
 export default function FourPlates({
   eyebrow = 'PLATES',
@@ -32,8 +71,10 @@ export default function FourPlates({
   plate2Title = 'Fold',
   plate3Title = 'Ratio',
   plate4Title = 'Baseline',
+  nextImg,
 }) {
   const root = useRef(null)
+  const holeMaskId = `ratio-plate-hole-${useId().replace(/:/g, '')}`
   const plates = platesText
     ? platesText.split('\n').filter(Boolean).slice(0, 4).map((line, i) => {
         const [title] = line.split('|').map((p) => p.trim())
@@ -59,10 +100,15 @@ export default function FourPlates({
       const swatches = gsap.utils.toArray('[data-plate-swatch]', pin)
       const fills = gsap.utils.toArray('[data-swatch-fill]', pin)
       const keepFill = fills[0]
+      const veil = pin.querySelector('[data-plates-veil]')
+      const hole = pin.querySelector('[data-plates-hole]')
+      const next = pin.querySelector('[data-plates-next]')
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
       gsap.set(drawer, { yPercent: reduced ? 0 : 100 })
-      gsap.set(fills, { transformOrigin: '50% 50%', scale: 1, autoAlpha: 1 })
+      gsap.set(fills, { transformOrigin: '50% 50%', scale: 1, rotation: 0, autoAlpha: 1 })
+      if (veil) gsap.set(veil, { autoAlpha: 0 })
+      if (next) gsap.set(next, { autoAlpha: 0 })
       cards.forEach((card, i) => {
         gsap.set(card, { left: `${i * 25}%`, width: '25%', autoAlpha: 1 })
       })
@@ -115,18 +161,28 @@ export default function FourPlates({
         })
         if (cards[0]) tl.to(cards[0], { borderColor: 'transparent', duration: 0.2 }, 3.45)
         if (keepFill) {
+          const grow = coverScale(pin, keepFill)
+          tl.add(() => {
+            punchHole(pin, keepFill, hole)
+          }, 3.48)
+          if (next) tl.set(next, { autoAlpha: 1 }, 3.48)
+          if (veil) tl.set(veil, { autoAlpha: 1 }, 3.48)
+          tl.to(drawer, { autoAlpha: 0, duration: 0.16 }, 3.48)
           tl.to(
             keepFill,
             {
-              scale: 22,
-              backgroundColor: '#ffffff',
-              duration: 0.95,
+              scale: grow,
+              rotation: 90,
+              autoAlpha: 0,
+              duration: 1.35,
               onUpdate() {
-                keepFill.classList.toggle('is-zoom', this.progress() > 0.02)
+                keepFill.classList.toggle('is-zoom', this.progress() > 0.01)
+                punchHole(pin, keepFill, hole)
               },
             },
-            3.55,
+            3.52,
           )
+          tl.to({}, { duration: 0.28 }, 4.87)
         }
       })
 
@@ -138,7 +194,7 @@ export default function FourPlates({
 
       return () => mm.revert()
     },
-    { scope: root, dependencies: [eyebrow, plate1Title, plate2Title, plate3Title, plate4Title, platesText] },
+    { scope: root, dependencies: [eyebrow, plate1Title, plate2Title, plate3Title, plate4Title, platesText, nextImg] },
   )
 
   return (
@@ -148,7 +204,37 @@ export default function FourPlates({
       className="relative z-[45] -mt-[100svh] text-white"
     >
       <div data-plates-pin className="relative h-svh overflow-hidden">
-        <div data-drawer className="absolute inset-0 flex flex-col bg-[#111] will-change-transform">
+        <div data-plates-next className="invisible absolute inset-0 z-0 bg-white" aria-hidden="true">
+          {nextImg ? (
+            <img src={nextImg} alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
+          ) : null}
+          <span className="absolute inset-x-0 top-[58%] h-px bg-[#111]" />
+          {NEXT_RULES.map((rule) => (
+            <span
+              key={rule.left}
+              className="absolute w-px bg-[#111]"
+              style={{ left: rule.left, top: `calc(58% - ${rule.height})`, height: rule.height }}
+            />
+          ))}
+          <span className="absolute top-[46%] left-[16%] aspect-square w-[10%] bg-[#111]" />
+          <span className="absolute top-[46%] left-[28%] aspect-square w-[10%] border border-[#111] bg-white" />
+        </div>
+
+        <svg
+          data-plates-veil
+          className="pointer-events-none absolute inset-0 z-[15] h-full w-full"
+          aria-hidden="true"
+        >
+          <defs>
+            <mask id={holeMaskId} maskUnits="userSpaceOnUse">
+              <rect width="100%" height="100%" fill="#fff" />
+              <polygon data-plates-hole fill="#000" />
+            </mask>
+          </defs>
+          <rect width="100%" height="100%" fill="#111" mask={`url(#${holeMaskId})`} />
+        </svg>
+
+        <div data-drawer className="absolute inset-0 z-10 flex flex-col bg-[#111] will-change-transform">
           <h2
             data-plates-title
             className="relative shrink-0 px-5 pt-16 font-grotesk text-[clamp(2.1rem,6.4vw,5.8rem)] font-medium leading-[0.86] tracking-[-0.045em] uppercase md:px-8 md:pt-20"
@@ -197,10 +283,7 @@ export default function FourPlates({
                     zIndex: 4 - i,
                   }}
                 >
-                  <span
-                    data-swatch-fill
-                    className="absolute inset-0"
-                  >
+                  <span data-swatch-fill className="absolute inset-0">
                     <span
                       data-rupture-off
                       className="absolute inset-0"

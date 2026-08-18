@@ -83,16 +83,18 @@ function powerSlot(i) {
 
 const CUBE = { x: -385, y: 20, w: 197, h: 197, z: CUBE_Z }
 
-const CUBE_STEPS = [
-  { delay_px: 1174, dx: 70, dy: -241, rot: 90, from: 0, acc: 'ease-out', speed: 1 },
-  { dx: 202, dy: -241, rot: 90, speed: 1 },
-      { dx: 255, dy: 0, rot: 180, acc: 'ease-in', speed: 1 },
-  { dx: 0, dy: 0, rot: 360, speed: 1 },
-  { delay_px: 1730, dx: 50, dy: -241, rot: 270, acc: 'ease-out', speed: 1 },
-  { dx: 332, dy: -241, rot: 270, speed: 1 },
-  { dx: 502, dy: 0, rot: 360, acc: 'ease-in', speed: 1 },
-  { dx: 0, dy: 0, rot: 360, speed: 1 },
-]
+function cubeSteps(hop) {
+  return [
+    { delay_px: 1174, dx: 70, dy: hop, rot: 90, from: 0, acc: 'ease-out', speed: 1 },
+    { dx: 202, dy: hop, rot: 90, speed: 1 },
+    { dx: 255, dy: 0, rot: 180, acc: 'ease-in', speed: 1 },
+    { dx: 0, dy: 0, rot: 360, speed: 1 },
+    { delay_px: 1730, dx: 50, dy: hop, rot: 270, acc: 'ease-out', speed: 1 },
+    { dx: 332, dy: hop, rot: 270, speed: 1 },
+    { dx: 502, dy: 0, rot: 360, acc: 'ease-in', speed: 1 },
+    { dx: 0, dy: 0, rot: 360, speed: 1 },
+  ]
+}
 
 function glyphsOf(word) {
   return Array.from(word || '').filter((ch) => ch !== ' ')
@@ -220,7 +222,7 @@ export default function HeroTools({
 
       const s = magScale(pin.offsetWidth)
       const bottomEl = pin.querySelector('[data-bottom]')
-      // Cream gap under the top band — cube stays in the lower half.
+      const frame = pin.querySelector('[data-top-frame]')
       const floorGap = Math.max(28, Math.round(bottomEl.offsetHeight * 0.08))
       const topGap = Math.max(20, Math.round(bottomEl.offsetHeight * 0.08))
       const cubeSide = Math.min(
@@ -239,6 +241,15 @@ export default function HeroTools({
 
       const cube = stage.querySelector('[data-kind="cube"]')
       placeActor(cube, { ...CUBE, w: cubeMag, h: cubeMag })
+
+      // Rest stays with the type. Hop lands on the top plate's bottom edge.
+      let hopDy = -241
+      if (frame) {
+        const stageR = stage.getBoundingClientRect()
+        const frameR = frame.getBoundingClientRect()
+        const border = parseFloat(getComputedStyle(frame).borderBottomWidth) || 1
+        hopDy = -Math.round((stageR.bottom - floorGap - (frameR.bottom - border)) / s)
+      }
 
       {
         const px = FONT * s
@@ -352,7 +363,7 @@ export default function HeroTools({
           { dx: slot.dx2, dy: slot.dy2, rot: 360, acc: 'ease-out', speed: slot.speed2 },
         ])
       })
-      add(cube, CUBE_STEPS)
+      add(cube, cubeSteps(hopDy))
       add(stage.querySelector('[data-kind="tools"]'), [{ dx: -5000, dy: 0, speed: 1 }])
       if (noteEl) {
         const exit = Math.ceil((noteEl.offsetWidth + 48) / s) + 40
@@ -458,7 +469,7 @@ export default function HeroTools({
               className="absolute left-3 right-0 top-2 bottom-0 will-change-transform md:left-4"
               style={tilt(0, 1)}
             >
-              <div className="relative h-full overflow-hidden border border-[#111] bg-white">
+              <div data-top-frame className="relative h-full overflow-hidden border border-[#111] bg-white">
                 <p
                   data-note
                   className="absolute bottom-4 left-4 z-10 max-w-[36ch] text-[11px] leading-[1.45] tracking-[0.04em] uppercase will-change-transform md:bottom-5 md:left-5"

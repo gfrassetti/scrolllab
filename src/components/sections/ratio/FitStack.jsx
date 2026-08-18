@@ -30,17 +30,18 @@ function Marked({ text, mark }) {
 export default function FitStack({
   noteLabel = '(Notes)',
   note1 = 'Type sits on the floor. Do not hang letters below the fold.',
+  note1Mark = 'the fold',
   note2 = 'The cube keeps a square ratio while the slab grows with the last word.',
   note2Mark = 'square ratio',
   note3 = 'On the black field, four plates wait. One of them is the next chapter.',
-  note3Mark = '',
+  note3Mark = 'four plates',
   phrase = 'GRID',
   breakLine = 'THE FOLD',
   rulesLine = 'THE RATIO',
   worthLine = '(BASELINE)',
   closer = '(HOLD THE LINE)',
-  brand = 'RATIO',
-  studio = 'SCROLLLAB — 2026',
+  brand = 'SCROLLLAB',
+  studio = 'Guido — 2026',
   anchor = 'notes',
 }) {
   const root = useRef(null)
@@ -79,17 +80,12 @@ export default function FitStack({
 
   return (
     <section ref={root} id={anchor} className="relative z-20 bg-[#111] text-white">
-      <div className="min-h-svh bg-white px-5 pt-20 text-[#111] md:px-10 md:pt-24">
-        <p className="font-grotesk text-[13px] tracking-[0.04em] opacity-55">{noteLabel}</p>
-        <ol className="mt-6 max-w-[46ch] space-y-3 font-grotesk text-[15px] leading-[1.45] tracking-[0.01em] md:text-[17px]">
-          <li>(1) {note1}</li>
-          <li>
-            (2) <Marked text={note2} mark={note2Mark} />
-          </li>
-          <li>
-            (3) <Marked text={note3} mark={note3Mark} />
-          </li>
-        </ol>
+      <div className="min-h-svh bg-white px-5 pt-16 text-[#111] md:px-10 md:pt-20 lg:px-14">
+        <p className="font-grotesk text-[13px] tracking-[0.02em] text-[#111]/45">{noteLabel}</p>
+        <p className="mt-5 max-w-[38rem] font-grotesk text-[1.625rem] font-normal leading-[1.32] tracking-[-0.02em] md:max-w-[42rem] md:text-[2rem] md:leading-[1.3]">
+          (1) <Marked text={note1} mark={note1Mark} /> (2) <Marked text={note2} mark={note2Mark} />{' '}
+          (3) <Marked text={note3} mark={note3Mark} />
+        </p>
       </div>
 
       {BANDS.map((band) => (
@@ -149,7 +145,7 @@ export default function FitStack({
 
       <div
         data-fit-lid
-        className="relative z-10 flex min-h-svh flex-col justify-between bg-[#111] px-5 pb-6 pt-[22vh] md:px-10 md:pb-8"
+        className="relative z-10 bg-[#111] px-5 pb-8 pt-[clamp(3.4rem,9vw,7.5rem)] md:px-10 md:pb-10"
       >
         <h2 className="relative max-w-[18ch] font-grotesk text-[clamp(2.6rem,8.5vw,7.5rem)] font-medium leading-[0.84] tracking-[-0.045em] uppercase text-[#3a3a3a]">
           <span className="relative inline-block">
@@ -159,7 +155,7 @@ export default function FitStack({
             </RuptureScript>
           </span>
         </h2>
-        <p>
+        <p className="mt-[clamp(2.6rem,7vw,5.5rem)]">
           <span className="flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase">
             <span aria-hidden="true" className="size-2 bg-white" />
             {brand}
