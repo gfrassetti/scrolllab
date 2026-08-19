@@ -112,6 +112,11 @@ describe('validateRecipe', () => {
     assert.equal(recipe[1].props.brand, 'BRAND')
   })
 
+  it('rechaza secciones de modelos ocultos en el builder', () => {
+    assert.throws(() => validateRecipe(['ratio/HeroTools']), HttpError)
+    assert.throws(() => validateRecipe(['vanta/NavVanta']), HttpError)
+  })
+
   it('contact form: valida theme y endpoint', () => {
     const recipe = validateRecipe([
       {
@@ -183,12 +188,10 @@ describe('validateCheckoutItems', () => {
       () => validateCheckoutItems([{ sku: 'vanta' }], opts),
       HttpError,
     )
-  })
-
-  it('acepta RATIO en venta', () => {
-    const lines = validateCheckoutItems([{ sku: 'ratio' }], opts)
-    assert.equal(lines[0].sku, 'ratio')
-    assert.equal(lines[0].unit_price_usd, PRODUCTS.ratio.unit_price_usd)
+    assert.throws(
+      () => validateCheckoutItems([{ sku: 'ratio' }], opts),
+      HttpError,
+    )
   })
 
   it('valida receta custom', () => {

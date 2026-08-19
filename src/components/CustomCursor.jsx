@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { gsap } from '../lib/gsap'
 
 const INTERACTIVE =
-  'a, button, [role="button"], [draggable="true"], input, textarea, select, summary, label[for]'
+  'a, button, [role="button"], [data-rupture-hit], [draggable="true"], input, textarea, select, summary, label[for]'
 
 /**
  * Cursor custom del sitio: un punto sólido + un anillo que lo sigue
@@ -57,14 +57,17 @@ export default function CustomCursor() {
     }
 
     const onOver = (e) => {
-      const interactive = e.target.closest?.(INTERACTIVE)
+      const egg = e.target.closest?.('[data-rupture-hit]')
+      const interactive = egg || e.target.closest?.(INTERACTIVE)
+      document.documentElement.classList.toggle('cursor-egg', Boolean(egg))
+      gsap.to([dot, ring], { opacity: visible ? 1 : 0, duration: 0.12 })
       gsap.to(ring, {
-        scale: interactive ? 1.9 : 1,
-        opacity: interactive ? 0.55 : 1,
+        scale: egg ? 1.25 : interactive ? 1.9 : 1,
+        rotation: egg ? 45 : 0,
         duration: 0.25,
         ease: 'power2.out',
       })
-      gsap.to(dot, { scale: interactive ? 0.5 : 1, duration: 0.25 })
+      gsap.to(dot, { scale: egg ? 1.4 : interactive ? 0.5 : 1, duration: 0.25 })
     }
 
     const onLeave = () => {
@@ -72,8 +75,14 @@ export default function CustomCursor() {
       gsap.to([dot, ring], { opacity: 0, duration: 0.2 })
     }
 
-    const onDown = () => gsap.to(ring, { scale: 0.8, duration: 0.15 })
-    const onUp = () => gsap.to(ring, { scale: 1, duration: 0.25 })
+    const onDown = () => {
+      const egg = document.documentElement.classList.contains('cursor-egg')
+      gsap.to(ring, { scale: egg ? 1.05 : 0.8, duration: 0.15 })
+    }
+    const onUp = () => {
+      const egg = document.documentElement.classList.contains('cursor-egg')
+      gsap.to(ring, { scale: egg ? 1.25 : 1, duration: 0.25 })
+    }
 
     window.addEventListener('mousemove', onMove, { passive: true })
     window.addEventListener('mouseover', onOver, { passive: true })
@@ -83,6 +92,7 @@ export default function CustomCursor() {
 
     return () => {
       document.documentElement.classList.remove('has-custom-cursor')
+      document.documentElement.classList.remove('cursor-egg')
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseover', onOver)
       window.removeEventListener('mousedown', onDown)

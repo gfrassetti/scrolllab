@@ -1,5 +1,8 @@
+import { useEffect } from 'react'
+import { bindRuptureCursor, toggleRupture } from './rupture'
+
 export const RUPTURE_FILL = '#5fd4ea'
-export const RUPTURE_INK = '#ebe6dc'
+export const RUPTURE_INK = '#111'
 
 function Eyes() {
   return (
@@ -103,7 +106,21 @@ export function RuptureOn({ index = 0, className = '' }) {
   )
 }
 
-/** Rupture overlay — Mr Bedfort over the slab. Same string as the word. */
+/** Clickable cream chip on dark paper. Hover paints a diamond, not a hand. */
+export function RuptureHit({ className = '' }) {
+  useEffect(() => bindRuptureCursor(), [])
+  return (
+    <button
+      type="button"
+      data-rupture-hit
+      aria-label="Rupture"
+      onClick={toggleRupture}
+      className={`pointer-events-auto size-10 shrink-0 bg-[#ebe6dc] shadow-[inset_0_0_0_1px_#16110e] transition-transform duration-200 ease-[var(--ease-out)] hover:scale-110 active:scale-95 ${className}`}
+    />
+  )
+}
+
+/** Mr Bedfort overlay — fill matches the wash so it knocks out the grotesk. */
 export function RuptureScript({ children, className = '' }) {
   return (
     <span data-rupture-script className={`ratio-script ${className}`} aria-hidden="true">

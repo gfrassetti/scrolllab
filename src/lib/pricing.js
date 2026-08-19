@@ -17,22 +17,31 @@ export const TEMPLATE_PRICES_USD = {
 }
 
 /** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
-export const COMING_SOON_SKUS = ['vanta']
+export const COMING_SOON_SKUS = ['vanta', 'ratio']
+
+/**
+ * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
+ */
+export const LOCAL_ONLY_SKUS = ['ratio']
 
 /**
  * Modelos que no entran a la paleta del builder.
- * VANTA sigue en obra: va acá y en COMING_SOON_SKUS.
+ * VANTA / RATIO siguen en obra: van acá y en COMING_SOON_SKUS.
  */
-export const BUILDER_HIDDEN_SKUS = ['vanta']
+export const BUILDER_HIDDEN_SKUS = ['vanta', 'ratio']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
 }
 
+export function isLocalOnlySku(sku) {
+  return LOCAL_ONLY_SKUS.includes(sku)
+}
+
 /**
  * Composición del builder: base por tramo + adicional por sección extra.
  * Una composición del tamaño de un template (10 secciones) queda en 309 USD.
- * El piso tiene que superar al template más caro (RATIO / Beat, USD 269).
+ * El piso tiene que superar al template más caro en venta.
  */
 export const CUSTOM_BASE_PRICE_USD = 279
 export const CUSTOM_BASE_SECTIONS = 8

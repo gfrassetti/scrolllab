@@ -11,6 +11,8 @@ import {
   PRODUCTS,
   BUNDLE_MODELS,
   COMING_SOON_SKUS as SERVER_COMING_SOON,
+  LOCAL_ONLY_SKUS as SERVER_LOCAL_ONLY,
+  BUILDER_HIDDEN_SKUS as SERVER_BUILDER_HIDDEN,
   COMMERCE_PACK_SURCHARGE_USD as SERVER_SURCHARGE,
   CUSTOM_BASE_SECTIONS as SERVER_BASE_SECTIONS,
   CUSTOM_EXTRA_SECTION_USD as SERVER_EXTRA_SECTION,
@@ -26,6 +28,7 @@ import {
   COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
   BUNDLE_PRICE_USD,
   COMING_SOON_SKUS as CLIENT_COMING_SOON,
+  LOCAL_ONLY_SKUS as CLIENT_LOCAL_ONLY,
   BUILDER_HIDDEN_SKUS,
 } from '../src/lib/pricing.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
@@ -247,6 +250,18 @@ if (!sameSkuList(CLIENT_COMING_SOON, SERVER_COMING_SOON)) {
     `COMING_SOON_SKUS no coincide: cliente [${CLIENT_COMING_SOON}] vs servidor [${SERVER_COMING_SOON}]`,
   )
 }
+if (!sameSkuList(CLIENT_LOCAL_ONLY, SERVER_LOCAL_ONLY)) {
+  fail(
+    'catálogo',
+    `LOCAL_ONLY_SKUS no coincide: cliente [${CLIENT_LOCAL_ONLY}] vs servidor [${SERVER_LOCAL_ONLY}]`,
+  )
+}
+if (!sameSkuList(BUILDER_HIDDEN_SKUS, SERVER_BUILDER_HIDDEN)) {
+  fail(
+    'catálogo',
+    `BUILDER_HIDDEN_SKUS no coincide: cliente [${BUILDER_HIDDEN_SKUS}] vs servidor [${SERVER_BUILDER_HIDDEN}]`,
+  )
+}
 for (const sku of SERVER_COMING_SOON) {
   if (BUNDLE_MODELS.includes(sku)) {
     fail('catálogo', `'${sku}' está en COMING_SOON_SKUS y también en BUNDLE_MODELS`)
@@ -258,6 +273,14 @@ for (const sku of BUILDER_HIDDEN_SKUS) {
       'catálogo',
       `'${sku}' está en BUILDER_HIDDEN_SKUS pero no en COMING_SOON_SKUS — no ocultes un modelo en venta`,
     )
+  }
+}
+for (const sku of SERVER_LOCAL_ONLY) {
+  if (!SERVER_COMING_SOON.includes(sku)) {
+    fail('catálogo', `'${sku}' es local-only pero no está en COMING_SOON_SKUS`)
+  }
+  if (!BUILDER_HIDDEN_SKUS.includes(sku)) {
+    fail('catálogo', `'${sku}' es local-only pero sigue en la paleta del builder`)
   }
 }
 
@@ -313,9 +336,30 @@ const metaBlock = indexSrc.slice(
   indexSrc.indexOf('function TemplatePoster'),
 )
 const listed = [...metaBlock.matchAll(/sku:\s*'([a-z]+)'/g)].map((m) => m[1])
+for (const sku of SERVER_LOCAL_ONLY) {
+  if (listed.includes(sku)) {
+    fail('catálogo', `'${sku}' es local-only pero se lista en la home`)
+  }
+}
 for (const sku of SERVER_COMING_SOON) {
+  if (SERVER_LOCAL_ONLY.includes(sku)) continue
   if (!listed.includes(sku)) {
     fail('catálogo', `'${sku}' es próximamente pero no se lista en la home`)
+  }
+}
+for (const sku of SERVER_COMING_SOON) {
+  if (!appSrc.includes(`/templates/${sku}`)) {
+    fail('catálogo', `'${sku}' no tiene ruta en App.jsx`)
+  }
+  if (
+    !new RegExp(
+      `path="/templates/${sku}"[\\s\\S]{0,280}import\\.meta\\.env\\.DEV[\\s\\S]{0,160}Navigate to="/"`,
+    ).test(appSrc)
+  ) {
+    fail(
+      'catálogo',
+      `'${sku}' es próximamente / local: en local debe renderizar la demo y en prod redirigir a /`,
+    )
   }
 }
 for (const sku of listed) {
@@ -326,17 +370,6 @@ for (const sku of listed) {
   const comingSoon = SERVER_COMING_SOON.includes(sku)
   if (comingSoon && !new RegExp(`sku:\\s*'${sku}'[\\s\\S]*?comingSoon:\\s*true`).test(metaBlock)) {
     fail('catálogo', `'${sku}' es próximamente pero la home no lo marca comingSoon`)
-  }
-  if (
-    comingSoon &&
-    !new RegExp(
-      `path="/templates/${sku}"[\\s\\S]{0,280}import\\.meta\\.env\\.DEV[\\s\\S]{0,160}Navigate to="/"`,
-    ).test(appSrc)
-  ) {
-    fail(
-      'catálogo',
-      `'${sku}' es próximamente: en local debe renderizar la demo y en prod redirigir a /`,
-    )
   }
   for (const [name, keys] of [['es', esKeys], ['en', enKeys]]) {
     if (!keys.includes(`templates.${sku}.description`)) {

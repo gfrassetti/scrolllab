@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { tilt } from './rupture'
-import { RuptureScript } from './RuptureOn'
+import { RuptureOn, RuptureHit } from './RuptureOn'
 
 const BANDS = [
   { id: 'white', titleKey: 'phrase', color: '#16110e', gap: 1, seed: 2 },
@@ -96,7 +96,8 @@ export default function FitStack({
 
   return (
     <section ref={root} id={anchor} className="relative z-20 bg-ratio-field text-ratio-paper">
-      <div className="min-h-svh bg-ratio-paper px-5 pt-16 text-ratio-ink md:px-10 md:pt-20 lg:px-14">
+      <div className="relative min-h-svh bg-ratio-paper px-5 pt-16 text-ratio-ink md:px-10 md:pt-20 lg:px-14">
+        <RuptureHit className="absolute top-16 right-5 md:top-20 md:right-10 lg:right-14" />
         <p className="font-brico text-[13px] tracking-[0.02em] text-ratio-ink/45">{noteLabel}</p>
         <p className="mt-5 max-w-[38rem] font-brico text-[1.625rem] font-normal leading-[1.32] tracking-[-0.02em] md:max-w-[42rem] md:text-[2rem] md:leading-[1.3]">
           (1) <Marked text={note1} mark={note1Mark} /> (2) <Marked text={note2} mark={note2Mark} />{' '}
@@ -111,12 +112,7 @@ export default function FitStack({
           className="relative min-h-svh overflow-hidden bg-ratio-field"
         >
           <h2 className="pointer-events-none absolute top-[18%] left-0 z-10 max-w-[16ch] px-5 font-brico text-[clamp(2.2rem,7vw,6.2rem)] font-medium leading-[0.84] tracking-[-0.04em] uppercase md:px-10">
-            <span className="relative inline-block">
-              {titles[band.titleKey]}
-              <RuptureScript className="absolute top-0 left-0 origin-left">
-                {titles[band.titleKey]}
-              </RuptureScript>
-            </span>
+            {titles[band.titleKey]}
           </h2>
 
           <div data-fit-grid className="absolute inset-x-0 bottom-0 grid grid-cols-4 gap-px px-px">
@@ -131,15 +127,17 @@ export default function FitStack({
                     <span
                       data-fit-fall
                       data-ratio-block
-                      className="absolute inset-0"
-                      style={{ ...tilt(band.seed + col, 1.1), backgroundColor: band.color }}
-                    />
+                      className="absolute inset-0 overflow-visible"
+                      style={tilt(band.seed + col, 1.1)}
+                    >
+                      <span data-rupture-off className="absolute inset-0" style={{ backgroundColor: band.color }} />
+                      <RuptureOn index={band.seed + col} />
+                    </span>
                   ) : (
-                    <span
-                      data-ratio-block
-                      className="absolute inset-0"
-                      style={{ ...tilt(band.seed + col, 1.1), backgroundColor: band.color }}
-                    />
+                    <span data-ratio-block className="absolute inset-0 overflow-visible" style={tilt(band.seed + col, 1.1)}>
+                      <span data-rupture-off className="absolute inset-0" style={{ backgroundColor: band.color }} />
+                      <RuptureOn index={band.seed + col} />
+                    </span>
                   )}
                 </div>
               )
@@ -153,12 +151,7 @@ export default function FitStack({
         className="relative z-10 bg-ratio-field px-5 pb-8 pt-[clamp(3.4rem,9vw,7.5rem)] md:px-10 md:pb-10"
       >
         <h2 className="relative max-w-[18ch] font-brico text-[clamp(2.6rem,8.5vw,7.5rem)] font-medium leading-[0.84] tracking-[-0.04em] uppercase text-ratio-paper/30">
-          <span className="relative inline-block">
-            {closer}
-            <RuptureScript className="absolute top-0 left-0 origin-left">
-              {closer}
-            </RuptureScript>
-          </span>
+          {closer}
         </h2>
         <p className="mt-[clamp(2.6rem,7vw,5.5rem)]">
           <span className="flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase">

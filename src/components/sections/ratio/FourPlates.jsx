@@ -1,7 +1,7 @@
 import { useId, useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { attachScroll, magScale } from '../../../lib/beat'
-import { RuptureScript } from './RuptureOn'
+import { RuptureOn, RuptureHit } from './RuptureOn'
 
 const DEFAULT_PLATES = [
   { index: '01', title: 'Rule', tone: '#16110e' },
@@ -201,9 +201,9 @@ export default function FourPlates({
     <section
       id="systems"
       ref={root}
-      className="relative z-[45] -mt-[100svh] text-ratio-paper"
+      className="pointer-events-none relative z-[45] -mt-[100svh] text-ratio-paper"
     >
-      <div data-plates-pin className="relative h-svh overflow-hidden">
+      <div data-plates-pin className="pointer-events-none relative h-svh overflow-hidden">
         <div data-plates-next className="invisible absolute inset-0 z-0 bg-ratio-paper" aria-hidden="true">
           {nextImg ? (
             <img src={nextImg} alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
@@ -216,7 +216,7 @@ export default function FourPlates({
               style={{ left: rule.left, top: `calc(58% - ${rule.height})`, height: rule.height }}
             />
           ))}
-          <span className="absolute top-[46%] left-[16%] aspect-square w-[10%] bg-ratio-mark" />
+          <RuptureHit className="absolute top-[46%] left-[16%] z-10 aspect-square !h-auto !w-[10%]" />
           <span className="absolute top-[46%] left-[28%] aspect-square w-[10%] border border-ratio-ink bg-ratio-paper" />
         </div>
 
@@ -234,17 +234,13 @@ export default function FourPlates({
           <rect width="100%" height="100%" fill="#ebe6dc" mask={`url(#${holeMaskId})`} />
         </svg>
 
-        <div data-drawer className="absolute inset-0 z-10 flex flex-col bg-ratio-field will-change-transform">
+        <div data-drawer className="pointer-events-auto absolute inset-0 z-10 flex flex-col bg-ratio-field will-change-transform">
           <h2
             data-plates-title
             className="relative shrink-0 px-5 pt-16 font-brico text-[clamp(2.1rem,6.4vw,5.8rem)] font-medium leading-[0.86] tracking-[-0.04em] uppercase md:px-8 md:pt-20"
           >
-            <span className="relative inline-block">
-              {eyebrow}
-              <RuptureScript className="absolute top-0 left-0 origin-left whitespace-nowrap">
-                {eyebrow}
-              </RuptureScript>
-            </span>
+            {eyebrow}
+            <RuptureHit className="absolute top-16 right-5 md:top-20 md:right-8" />
           </h2>
 
           <div className="relative mt-6 min-h-0 flex-1 overflow-visible">
@@ -283,11 +279,14 @@ export default function FourPlates({
                     zIndex: 4 - i,
                   }}
                 >
-                  <span
-                    data-swatch-fill
-                    className="absolute inset-0"
-                    style={{ backgroundColor: plate.tone }}
-                  />
+                  <span data-swatch-fill className="absolute inset-0 overflow-visible">
+                    <span
+                      data-rupture-off
+                      className="absolute inset-0"
+                      style={{ backgroundColor: plate.tone }}
+                    />
+                    <RuptureOn index={i} />
+                  </span>
                 </span>
               ))}
             </div>

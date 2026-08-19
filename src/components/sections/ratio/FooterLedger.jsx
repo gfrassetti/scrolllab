@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { tilt } from './rupture'
+import { RuptureHit } from './RuptureOn'
 
 const FRAME_SHAPE = [
   { width: '9.5vw', height: '52vh' },
@@ -117,7 +118,7 @@ export default function FooterLedger({
             </h2>
             <p className="mt-6">
               <span className="flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase">
-                <span aria-hidden="true" className="size-2 bg-ratio-mark" />
+                <span aria-hidden="true" className="size-2 bg-[#111]" />
                 {brand}
               </span>
               {studio ? (
@@ -126,6 +127,7 @@ export default function FooterLedger({
             </p>
           </div>
           <p className="shrink-0 pt-1 text-[11px] tracking-[0.16em] uppercase">{hint}</p>
+          <RuptureHit className="mt-1" />
         </header>
 
         <div

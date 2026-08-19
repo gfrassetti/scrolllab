@@ -48,6 +48,74 @@ export function toggleRupture() {
   setRupture(!ruptured)
 }
 
+/**
+ * Native cursor over the egg. FourPlates pins a layer on top of the hero,
+ * so CSS cursor on the button never wins — we hit-test the chip rects and
+ * paint a diamond on <html> instead. Not a hand: a registration mark.
+ */
+let cursorBinds = 0
+let cursorStyle = null
+let cursorOn = false
+
+function diamondCursorUrl() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 32
+  canvas.height = 32
+  const ctx = canvas.getContext('2d')
+  ctx.translate(16, 16)
+  ctx.rotate(Math.PI / 4)
+  ctx.fillStyle = '#16110e'
+  ctx.fillRect(-8, -8, 16, 16)
+  ctx.fillStyle = '#ebe6dc'
+  ctx.fillRect(-5.5, -5.5, 11, 11)
+  return canvas.toDataURL('image/png')
+}
+
+function eggUnderPoint(x, y) {
+  for (const el of document.querySelectorAll('[data-rupture-hit]')) {
+    const r = el.getBoundingClientRect()
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true
+  }
+  return false
+}
+
+function onCursorMove(e) {
+  const next = eggUnderPoint(e.clientX, e.clientY)
+  if (next === cursorOn) return
+  cursorOn = next
+  document.documentElement.classList.toggle('cursor-egg', next)
+}
+
+export function bindRuptureCursor() {
+  if (typeof window === 'undefined') return () => {}
+  if (cursorBinds === 0) {
+    const url = diamondCursorUrl()
+    cursorStyle = document.createElement('style')
+    cursorStyle.setAttribute('data-rupture-cursor', '')
+    cursorStyle.textContent = `
+      [data-rupture-hit] {
+        cursor: url("${url}") 16 16, crosshair !important;
+      }
+      html.cursor-egg,
+      html.cursor-egg * {
+        cursor: url("${url}") 16 16, crosshair !important;
+      }
+    `
+    document.head.appendChild(cursorStyle)
+    window.addEventListener('pointermove', onCursorMove, { passive: true })
+  }
+  cursorBinds += 1
+  return () => {
+    cursorBinds -= 1
+    if (cursorBinds > 0) return
+    window.removeEventListener('pointermove', onCursorMove)
+    cursorStyle?.remove()
+    cursorStyle = null
+    cursorOn = false
+    document.documentElement.classList.remove('cursor-egg')
+  }
+}
+
 export function useRupture() {
   return useSyncExternalStore(subscribe, isRuptured, () => false)
 }

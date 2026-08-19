@@ -87,6 +87,7 @@ html.dark {
   --color-ratio-ink: #ebe6dc;
   --color-ratio-field: #ebe6dc;
   --color-ratio-mark: #e23c24;
+  --color-ratio-rupture: #5fd4ea;
 
   /* ——— Model 10 "VANTA": game universe HUD ——— */
   --color-vanta-paper: #f4f1ea;
@@ -288,26 +289,35 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* ——— RATIO: rupture (crazy mode) — tint + stickers, page layout unchanged ——— */
+/* ——— RATIO rupture: Obys On — celeste field, black grotesk, script knocks out ——— */
+html[data-ratio-rupture='on'] {
+  --color-ratio-paper: #5fd4ea;
+  --color-ratio-putty: #5fd4ea;
+  --color-ratio-field: #5fd4ea;
+  --color-ratio-ink: #111;
+  background-color: #5fd4ea;
+}
+
 [data-rupture-wash] {
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 60;
-  background-color: rgb(255 229 0 / 0);
-  mix-blend-mode: screen;
-  transition: background-color 560ms var(--ease-out);
+  background-color: #5fd4ea;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: opacity 560ms var(--ease-out);
 }
 
 html[data-ratio-rupture='on'] [data-rupture-wash] {
-  background-color: #5fd4ea;
+  opacity: 1;
 }
 
 [data-rupture-extras] {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  z-index: 61;
+  z-index: 80;
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
@@ -333,9 +343,12 @@ html[data-ratio-rupture='on'] [data-rupture-script] {
   opacity: 1;
 }
 
-/* Slab goes ink on the cyan wash so the tag can sit on it. */
-html[data-ratio-rupture='on'] .ratio-glyph {
-  color: #16110e !important;
+html[data-ratio-rupture='on'] .ratio-glyph,
+html[data-ratio-rupture='on'] [data-plates-title],
+html[data-ratio-rupture='on'] [data-fit-band] h2,
+html[data-ratio-rupture='on'] [data-fit-lid] h2,
+html[data-ratio-rupture='on'] #systems {
+  color: #111 !important;
 }
 
 html[data-ratio-rupture='on'] [data-rupture-off] {
@@ -344,6 +357,10 @@ html[data-ratio-rupture='on'] [data-rupture-off] {
 }
 
 /* FourPlates zoom: hide twins via class, never GSAP autoAlpha (inline visibility leaks into Off). */
+[data-swatch-fill].is-zoom {
+  background-color: #5fd4ea;
+}
+
 [data-swatch-fill].is-zoom > [data-rupture-on],
 [data-swatch-fill].is-zoom > [data-rupture-off] {
   visibility: hidden;
@@ -354,14 +371,14 @@ html[data-ratio-rupture='on'] [data-rupture-off] {
   font-family: var(--font-rupture);
   font-weight: 400;
   font-style: normal;
-  text-transform: none;
-  letter-spacing: 0;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
   color: #5fd4ea;
-  -webkit-text-stroke: 0.028em #16110e;
+  -webkit-text-stroke: 1px #111;
   paint-order: stroke fill;
   pointer-events: none;
   line-height: 0.85;
-  font-size: 1.12em;
+  font-size: 1.08em;
 }
 
 [data-rupture-fly] {
@@ -462,6 +479,25 @@ html[data-ratio-rupture='on'] [data-rupture-fly-c] {
   will-change: offset-distance, transform;
 }
 
+[data-rupture-hit] {
+  cursor: crosshair !important;
+}
+
+html.cursor-egg,
+html.cursor-egg * {
+  cursor: crosshair !important;
+}
+
+html.cursor-egg #cursor-ring {
+  border-radius: 0;
+}
+
+html.cursor-egg #cursor-dot {
+  border-radius: 0;
+  width: 6px;
+  height: 6px;
+}
+
 .ratio-glyph {
   display: block;
   overflow: visible;
@@ -478,7 +514,7 @@ html[data-ratio-rupture='on'] [data-rupture-fly-c] {
 }
 .ratio-cube-face.is-chase {
   background-color: transparent;
-  box-shadow: inset 0 0 0 8px var(--color-ratio-mark);
+  box-shadow: inset 0 0 0 8px var(--color-ratio-rupture);
 }
 .ratio-guide-face {
   background-color: var(--color-ratio-ink);

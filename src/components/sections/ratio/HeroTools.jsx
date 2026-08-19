@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import { tilt, toggleRupture } from './rupture'
+import { tilt } from './rupture'
+import { RuptureOn, RuptureHit } from './RuptureOn'
 import {
   MAG_SCROLL,
   magScale,
@@ -210,15 +211,15 @@ function paintGlyph(el, s) {
   })
 }
 
-/** Rupture overlay: Mr Bedfort over whole-word pieces only. */
+/** Obys On overlay: Mr Bedfort, 197px mag, −10 tracking, 1px ink stroke. */
 function paintScript(el, s) {
   if (!el) return
-  const px = 288 * s
+  const px = 197 * s
   Object.assign(el.style, {
     position: 'absolute',
     left: '0px',
     top: 'auto',
-    bottom: `${Math.round(-0.06 * px)}px`,
+    bottom: `${Math.round(-0.08 * px)}px`,
     display: 'block',
     width: 'max-content',
     height: `${0.9 * px}px`,
@@ -226,12 +227,12 @@ function paintScript(el, s) {
     fontSize: `${px}px`,
     fontWeight: '400',
     fontStyle: 'normal',
-    lineHeight: '0.85',
-    letterSpacing: '0px',
+    lineHeight: '0.9',
+    letterSpacing: `${TRACK * s}px`,
     color: '#5fd4ea',
-    WebkitTextStroke: `${Math.max(1.2, 0.02 * px)}px #16110e`,
+    WebkitTextStroke: '1px #111',
     paintOrder: 'stroke fill',
-    textTransform: 'none',
+    textTransform: 'uppercase',
     overflow: 'visible',
     zIndex: '2',
     pointerEvents: 'none',
@@ -268,16 +269,20 @@ function Actor({ kind, i, text, fill, tone, guide, onActivate, children }) {
         style={fill && !guide ? tilt(kind === 'cube' ? 3 : i + 4, 1) : undefined}
       >
         {fill ? (
-          <span
-            className={
-              kind === 'cube'
-                ? 'ratio-cube-face absolute inset-0'
-                : guide
-                  ? 'ratio-guide-face absolute inset-0'
-                  : 'ratio-slug-face absolute inset-0'
-            }
-            style={kind === 'cube' || guide ? undefined : { backgroundColor: tone }}
-          />
+          <>
+            <span
+              data-rupture-off={kind === 'cube' ? '' : undefined}
+              className={
+                kind === 'cube'
+                  ? 'ratio-cube-face absolute inset-0'
+                  : guide
+                    ? 'ratio-guide-face absolute inset-0'
+                    : 'ratio-slug-face absolute inset-0'
+              }
+              style={kind === 'cube' || guide ? undefined : { backgroundColor: tone }}
+            />
+            {kind === 'cube' ? <RuptureOn index={0} /> : null}
+          </>
         ) : (
           children ?? (
             <>
@@ -291,7 +296,7 @@ function Actor({ kind, i, text, fill, tone, guide, onActivate, children }) {
                   text
                 )}
               </span>
-              {kind === 'are' || kind === 'tools' ? (
+              {kind === 'are' && text ? (
                 <span data-rupture-script className="ratio-script select-none" aria-hidden="true">
                   {text}
                 </span>
@@ -423,7 +428,6 @@ export default function HeroTools({
         const glyph = el.querySelector('.ratio-glyph')
         paintGlyph(glyph, s)
         if (glyph) glyph.style.letterSpacing = `${TRACK * s}px`
-        paintScript(el.querySelector('[data-rupture-script]'), s)
       }
 
       power.forEach((_, i) => {
@@ -681,11 +685,13 @@ export default function HeroTools({
                 >
                   {note}
                 </p>
+                <RuptureHit className="absolute top-4 right-4 z-30 !size-12 md:top-5 md:right-5" />
               </div>
             </div>
           </div>
 
           <div data-bottom className="relative z-30 min-h-0 flex-[1.15] overflow-visible border-t border-ratio-ink">
+            <RuptureHit className="absolute top-3 left-5 z-40 md:left-6" />
             <p
               data-aside
               className="pointer-events-none absolute top-3 right-6 z-20 whitespace-pre text-left text-[11px] leading-[1.35] tracking-[0.04em]"
@@ -693,7 +699,7 @@ export default function HeroTools({
               {aside}
             </p>
             <div data-stage className="pointer-events-none absolute inset-0 z-10 overflow-visible opacity-0">
-              <Actor kind="cube" fill onActivate={toggleRupture} />
+              <Actor kind="cube" fill />
               {FURNITURE.map((item, i) => (
                 <Actor
                   key={`s-${i}`}

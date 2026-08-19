@@ -101,16 +101,6 @@ const TEMPLATE_META = [
   },
   {
     id: '09',
-    sku: 'ratio',
-    name: 'RATIO',
-    path: '/templates/ratio',
-    category: 'SYSTEM',
-    tagline: 'hold the fold',
-    palette: ['#16110e', '#ebe6dc', '#e23c24'],
-    desktopOnly: true,
-  },
-  {
-    id: '10',
     sku: 'vanta',
     name: 'VANTA',
     path: '/templates/vanta',

@@ -30,14 +30,25 @@ export const BUNDLE_MODELS = [
   'atelier',
   'comic',
   'unity',
-  'ratio',
 ]
 
 /** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['vanta']
+export const COMING_SOON_SKUS = ['vanta', 'ratio']
+
+/**
+ * En el repo, no en el marketplace: sin card en home, ruta solo en local.
+ */
+export const LOCAL_ONLY_SKUS = ['ratio']
+
+/** Espejo de src/lib/pricing.js — no se venden por sección en el builder. */
+export const BUILDER_HIDDEN_SKUS = ['vanta', 'ratio']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
+}
+
+export function isLocalOnlySku(sku) {
+  return LOCAL_ONLY_SKUS.includes(sku)
 }
 
 export const PRODUCTS = {
@@ -115,8 +126,8 @@ export const PRODUCTS = {
   },
   bundle: {
     sku: 'bundle',
-    title: 'BUNDLE — los 9 modelos',
-    description: 'Los nueve modelos completos en un solo ZIP (código fuente).',
+    title: 'BUNDLE — los 8 modelos',
+    description: 'Los ocho modelos completos en un solo ZIP (código fuente).',
     unit_price_usd: 649,
     currency_id: 'ARS',
   },

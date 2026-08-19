@@ -4,6 +4,7 @@ import {
   priceCustomRecipeUsd,
   recipeSectionId,
   arsFromUsd,
+  BUILDER_HIDDEN_SKUS,
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
@@ -97,6 +98,10 @@ export function validateRecipe(recipe, maxRecipeSections = 30) {
   for (const entry of recipe) {
     const id = recipeSectionId(entry)
     if (!isAllowedSectionId(id)) {
+      throw new HttpError(400, `Sección no permitida: ${String(id)}`)
+    }
+    const model = String(id).split('/')[0]
+    if (BUILDER_HIDDEN_SKUS.includes(model)) {
       throw new HttpError(400, `Sección no permitida: ${String(id)}`)
     }
     const props =
