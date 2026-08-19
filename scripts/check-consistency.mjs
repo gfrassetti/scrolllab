@@ -71,6 +71,7 @@ if (PRODUCTS.custom.unit_price_usd !== CUSTOM_BASE_PRICE_USD) {
 if (PRODUCTS.bundle.unit_price_usd !== BUNDLE_PRICE_USD) {
   fail('precios', `bundle: cliente ${BUNDLE_PRICE_USD} vs servidor ${PRODUCTS.bundle.unit_price_usd}`)
 }
+
 if (SERVER_SURCHARGE !== CLIENT_SURCHARGE) {
   fail('precios', `recargo commerce: cliente ${CLIENT_SURCHARGE} vs servidor ${SERVER_SURCHARGE}`)
 }

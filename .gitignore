@@ -66,3 +66,6 @@ raw/
 *.njsproj
 *.sln
 *.sw?
+
+# Ads (solo para Google Ads, no van al repo)
+public/ads/

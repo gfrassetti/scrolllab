@@ -61,6 +61,7 @@ export function templatePriceUsd(sku) {
   return TEMPLATE_PRICES_USD[sku] ?? null
 }
 
+
 /** Secciones por encima de las que trae la base. Cuenta cada instancia. */
 export function customExtraSections(sectionCount) {
   const count = Number.isFinite(sectionCount) ? Math.floor(sectionCount) : 0

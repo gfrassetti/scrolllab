@@ -109,3 +109,4 @@ describe('formatPriceFromUsd', () => {
     assert.equal(nextSectionUsd(3, false), 0)
   })
 })
+

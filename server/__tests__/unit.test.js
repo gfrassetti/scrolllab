@@ -175,6 +175,7 @@ describe('validateCheckoutItems', () => {
     assert.equal(arsFromUsd(1, 1000), 1000)
   })
 
+
   it('rechaza carrito vacío y SKU inválido', () => {
     assert.throws(() => validateCheckoutItems([], opts), HttpError)
     assert.throws(
