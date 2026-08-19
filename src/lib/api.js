@@ -1,8 +1,21 @@
-const API_BASE = (import.meta.env && import.meta.env.VITE_API_URL) || ''
+function resolveApiBase() {
+  const envBase = (import.meta.env && import.meta.env.VITE_API_URL) || ''
+  if (import.meta.env?.PROD && typeof window !== 'undefined') {
+    const host = window.location.hostname
+    // Prod front on Vercel: /api is rewritten to Railway — same-origin cookies.
+    if (host === 'scrolllab.com.ar' || host === 'www.scrolllab.com.ar') {
+      return ''
+    }
+  }
+  return envBase
+}
+
+const API_BASE = resolveApiBase()
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {}),

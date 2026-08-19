@@ -37,6 +37,52 @@ function assertStrongSecret(name, value) {
   }
 }
 
+function hostOf(url) {
+  return new URL(url).hostname;
+}
+
+/** Diagnóstico público para /api/ready y logs de boot. */
+export function authDiagnostics(config) {
+  const clientHost = hostOf(config.clientUrl);
+  const apiHost = hostOf(config.apiPublicUrl);
+  const callbackHost = hostOf(config.google.callbackUrl);
+  const sameOrigin = clientHost === apiHost && callbackHost === clientHost;
+  let hint = "";
+  if (sameOrigin) {
+    hint =
+      "Front proxy /api en Vercel. Login OK si GCP redirect usa el mismo host.";
+  } else if (callbackHost.includes("railway.app")) {
+    hint =
+      "Callback en Railway + front en otro dominio: la cookie no llega al browser. " +
+      "Usá GOOGLE_CALLBACK_URL con www.scrolllab.com.ar y proxy /api en Vercel.";
+  } else {
+    hint = "Hosts distintos: hace falta cookie SameSite=None y VITE_API_URL apuntando al API.";
+  }
+  return {
+    clientHost,
+    apiHost,
+    callbackHost,
+    mode: sameOrigin ? "same-origin" : "cross-origin",
+    loginLikelyOk: sameOrigin,
+    hint,
+  };
+}
+
+function assertProdAuthHosts(clientUrl, apiPublicUrl, googleCallback) {
+  const clientHost = hostOf(clientUrl);
+  const apiHost = hostOf(apiPublicUrl);
+  const callbackHost = hostOf(googleCallback);
+
+  // Vercel proxy: client === api public, pero callback en Railway = login roto.
+  if (clientHost === apiHost && callbackHost !== clientHost) {
+    const expected = `${apiPublicUrl.replace(/\/$/, "")}/api/auth/google/callback`;
+    throw new Error(
+      `GOOGLE_CALLBACK_URL apunta a ${callbackHost} pero CLIENT_URL/API_PUBLIC_URL usan ${clientHost}. ` +
+        `Para login con proxy Vercel, poné GOOGLE_CALLBACK_URL=${expected}`,
+    );
+  }
+}
+
 /**
  * Parseo y validación central de env.
  * En producción falla el boot si faltan secretos, Mongo o flags inseguros.
@@ -91,6 +137,7 @@ export function loadConfig() {
         `GOOGLE_CALLBACK_URL debe ser exactamente ${expectedCallback}`,
       );
     }
+    assertProdAuthHosts(clientUrl, apiUrl, googleCallback);
   }
 
   const sessionSecret =

@@ -1,9 +1,10 @@
 import './loadEnv.js'
-import { loadConfig, assertWritableDir } from './config.js'
+import { loadConfig, assertWritableDir, authDiagnostics } from './config.js'
 import { createApp } from './app.js'
 import { db, storeMode } from './db.js'
 
 const config = loadConfig()
+const auth = authDiagnostics(config)
 
 async function boot() {
   assertWritableDir(config.storageDir)
@@ -13,6 +14,10 @@ async function boot() {
     console.log(
       `SCROLLLAB API http://localhost:${config.port} store=${storeMode()} mpMock=${config.mpMock} env=${config.isProd ? 'production' : 'dev'}`,
     )
+    console.log(
+      `Auth ${auth.mode} client=${auth.clientHost} api=${auth.apiHost} callback=${auth.callbackHost} loginOk=${auth.loginLikelyOk}`,
+    )
+    if (!auth.loginLikelyOk) console.warn(`Auth hint: ${auth.hint}`)
   })
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {

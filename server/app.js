@@ -6,7 +6,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { sanitizeAuthReturn } from './authReturn.js'
 import fs from 'node:fs'
 import { connectDb, db, storeMode } from './db.js'
-import { assertWritableDir } from './config.js'
+import { assertWritableDir, authDiagnostics } from './config.js'
 import {
   createCors,
   createHelmet,
@@ -66,7 +66,8 @@ export async function createApp(config) {
   assertWritableDir(config.storageDir)
 
   const app = express()
-  app.set('trust proxy', 1)
+  // Railway / Vercel proxy: trust X-Forwarded-* so secure session cookies stick.
+  app.set('trust proxy', config.isProd ? true : 1)
   app.disable('x-powered-by')
 
   app.use(requestId)
@@ -206,6 +207,7 @@ export async function createApp(config) {
         mongo: mongoOk,
         storage: storageOk,
         mpMock: config.mpMock,
+        auth: authDiagnostics(config),
       })
     }),
   )
@@ -229,6 +231,7 @@ export async function createApp(config) {
   )
 
   app.get('/api/auth/me', (req, res) => {
+    res.set('Cache-Control', 'no-store')
     res.json({ user: publicUser(req.user) })
   })
 
@@ -261,10 +264,13 @@ export async function createApp(config) {
       failureRedirect: `${config.clientUrl}/login?error=google_failed`,
       keepSessionInfo: true,
     }),
-    (req, res) => {
+    (req, res, next) => {
       const nextPath = sanitizeAuthReturn(req.session.authNext) || '/account'
       delete req.session.authNext
-      res.redirect(`${config.clientUrl}${nextPath}`)
+      req.session.save((err) => {
+        if (err) return next(err)
+        res.redirect(`${config.clientUrl}${nextPath}`)
+      })
     },
   )
 
