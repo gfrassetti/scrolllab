@@ -18,6 +18,16 @@ function formatMoney(value, currency = 'ARS') {
   }).format(Number(value || 0))
 }
 
+function formatDateTime(value) {
+  const date = value ? new Date(value) : new Date()
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
+}
+
 export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
   const orderId = String(db.uid(order) || order.id)
   const buyerName = user.name || user.email
@@ -132,6 +142,106 @@ Este correo es el detalle de tu compra y no reemplaza una factura fiscal.`
   }
 }
 
+export function buildOrderAdminNotify({ order, user }) {
+  const orderId = String(db.uid(order) || order.id)
+  const userId = String(db.uid(user) || user.id || '')
+  const buyerName = user.name || user.email
+  const buyerEmail = user.email
+  const paidAt = order.updatedAt || order.createdAt || new Date()
+  const createdAt = order.createdAt || paidAt
+  const paidLabel = formatDateTime(paidAt)
+  const createdLabel = formatDateTime(createdAt)
+  const itemLines = (order.items || [])
+    .map(
+      (item) =>
+        `- ${item.title || item.sku} (${item.sku}) · ${formatMoney(
+          item.unit_price,
+          item.currency_id || order.currency_id,
+        )}`,
+    )
+    .join('\n')
+
+  const htmlItems = (order.items || [])
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#161412;font-size:14px;">
+            ${escapeHtml(item.title || item.sku)}
+            <span style="color:#77716a;font-size:12px;"> · ${escapeHtml(item.sku)}</span>
+          </td>
+          <td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#161412;font-size:14px;text-align:right;white-space:nowrap;">
+            ${escapeHtml(formatMoney(item.unit_price, item.currency_id || order.currency_id))}
+          </td>
+        </tr>`,
+    )
+    .join('')
+
+  const html = `<!doctype html>
+<html lang="es">
+  <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#fff;border:1px solid #d6d1c8;">
+            <tr>
+              <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
+                <p style="margin:0;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">Nueva venta</p>
+                <h1 style="margin:12px 0 0;font-size:28px;line-height:1.1;font-weight:600;">Compra confirmada</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px;">
+                <p style="margin:0 0 8px;color:#77716a;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Comprador</p>
+                <p style="margin:0 0 4px;font-size:16px;font-weight:600;">${escapeHtml(buyerName)}</p>
+                <p style="margin:0 0 4px;font-size:14px;color:#5b5650;">${escapeHtml(buyerEmail)}</p>
+                <p style="margin:0 0 20px;font-size:12px;color:#77716a;font-family:monospace;">User ID: ${escapeHtml(userId)}</p>
+                <p style="margin:0 0 8px;color:#77716a;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Fecha y hora</p>
+                <p style="margin:0 0 4px;font-size:14px;color:#161412;">Pago confirmado: <strong>${escapeHtml(paidLabel)}</strong></p>
+                <p style="margin:0 0 20px;font-size:13px;color:#77716a;">Checkout iniciado: ${escapeHtml(createdLabel)}</p>
+                <p style="margin:0 0 8px;color:#77716a;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Orden</p>
+                <p style="margin:0 0 20px;font-family:monospace;font-size:14px;">${escapeHtml(orderId)}</p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  ${htmlItems}
+                  <tr>
+                    <td style="padding:16px 0 0;font-size:15px;font-weight:700;">Total</td>
+                    <td style="padding:16px 0 0;font-size:15px;font-weight:700;text-align:right;">
+                      ${escapeHtml(formatMoney(order.total, order.currency_id))}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+
+  const text = `SCROLLLAB — nueva venta
+
+Comprador: ${buyerName} <${buyerEmail}>
+User ID: ${userId}
+Pago confirmado: ${paidLabel}
+Checkout iniciado: ${createdLabel}
+Orden: ${orderId}
+
+Qué compró:
+${itemLines}
+Total: ${formatMoney(order.total, order.currency_id)}`
+
+  const itemSummary = (order.items || [])
+    .map((item) => item.title || item.sku)
+    .slice(0, 2)
+    .join(', ')
+
+  return {
+    subject: `[SCROLLLAB] Venta · ${itemSummary || 'orden'} · ${buyerEmail}`,
+    html,
+    text,
+  }
+}
+
 /**
  * Envía una sola confirmación por orden. Resend también recibe una
  * Idempotency-Key estable para cubrir reintentos tras cortes de proceso.
@@ -179,4 +289,37 @@ export async function sendOrderReceiptOnce({ order, user, config, client }) {
     await db.releaseReceiptEmail(orderId, err.message)
     throw err
   }
+}
+
+/**
+ * Aviso interno al dueño del marketplace. Idempotente vía Resend (webhook + confirm).
+ */
+export async function sendOrderAdminNotifyOnce({ order, user, config, client }) {
+  if (!config.email.enabled) return { skipped: 'disabled' }
+
+  const notifyTo = config.email.notifyTo
+  if (!notifyTo) return { skipped: 'no-notify-to' }
+
+  const orderId = String(db.uid(order) || order.id)
+  const message = buildOrderAdminNotify({ order, user })
+  const resend = client || new Resend(config.email.apiKey)
+
+  const response = await resend.emails.send(
+    {
+      from: config.email.from,
+      to: [notifyTo],
+      replyTo: user.email,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      tags: [{ name: 'type', value: 'order_admin' }],
+    },
+    { idempotencyKey: `scrolllab-order-admin-${orderId}` },
+  )
+
+  if (response.error) {
+    throw new Error(response.error.message || 'Resend rechazó el aviso interno')
+  }
+
+  return { sent: true, id: response.data?.id || null }
 }

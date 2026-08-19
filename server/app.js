@@ -34,7 +34,7 @@ import {
   assertPathInsideStorage,
   fulfillApprovedPayment,
 } from './services/orders.js'
-import { sendOrderReceiptOnce } from './services/email.js'
+import { sendOrderReceiptOnce, sendOrderAdminNotifyOnce } from './services/email.js'
 import {
   signDownloadToken,
   verifyDownloadToken,
@@ -169,8 +169,15 @@ export async function createApp(config) {
         console.log(`Order receipt sent order=${db.uid(order) || order.id}`)
       }
     } catch (emailErr) {
-      // El correo es secundario: nunca debe revertir un pago ni bloquear descarga.
       console.error('Order receipt email failed', emailErr)
+    }
+    try {
+      const result = await sendOrderAdminNotifyOnce({ order, user, config })
+      if (result.sent) {
+        console.log(`Order admin notify sent order=${db.uid(order) || order.id}`)
+      }
+    } catch (emailErr) {
+      console.error('Order admin notify failed', emailErr)
     }
   }
 

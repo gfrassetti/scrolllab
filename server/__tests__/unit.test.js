@@ -34,7 +34,7 @@ import {
   clearFxCache,
   setFxCacheForTests,
 } from '../fx.js'
-import { buildOrderReceipt } from '../services/email.js'
+import { buildOrderReceipt, buildOrderAdminNotify } from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
 import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
 import {
@@ -557,6 +557,36 @@ describe('order receipt email', () => {
     assert.doesNotMatch(message.html, /<script>/)
     assert.doesNotMatch(message.html, /<b>Buyer<\/b>/)
     assert.match(message.text, /CHAPTERS/)
+  })
+
+  it('aviso admin incluye comprador, sku y total escapados', () => {
+    const message = buildOrderAdminNotify({
+      order: {
+        id: 'abc123abc123abc123abc123',
+        items: [
+          {
+            sku: 'custom:chapters',
+            title: 'Builder <script>',
+            unit_price: 350000,
+            currency_id: 'ARS',
+          },
+        ],
+        total: 350000,
+        currency_id: 'ARS',
+      },
+      user: {
+        email: 'buyer@example.com',
+        name: 'Buyer',
+      },
+    })
+
+    assert.match(message.subject, /\[SCROLLLAB\] Venta/)
+    assert.match(message.subject, /buyer@example.com/)
+    assert.match(message.text, /custom:chapters/)
+    assert.match(message.text, /User ID:/)
+    assert.match(message.text, /Pago confirmado:/)
+    assert.match(message.text, /Qué compró:/)
+    assert.doesNotMatch(message.html, /<script>/)
   })
 })
 

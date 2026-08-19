@@ -9,7 +9,7 @@ import { BUNDLE_MODELS } from '../catalog.js'
 import { HttpError } from '../validation.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
-import { sendOrderReceiptOnce } from './email.js'
+import { sendOrderReceiptOnce, sendOrderAdminNotifyOnce } from './email.js'
 
 const packingLocks = new Map()
 
@@ -187,6 +187,14 @@ export async function fulfillApprovedPayment({
       }
     } catch (emailErr) {
       console.error('Order receipt email failed', emailErr)
+    }
+    try {
+      const result = await sendOrderAdminNotifyOnce({ order: paid, user, config })
+      if (result.sent) {
+        console.log(`Order admin notify sent order=${db.uid(paid) || paid.id}`)
+      }
+    } catch (emailErr) {
+      console.error('Order admin notify failed', emailErr)
     }
   }
 

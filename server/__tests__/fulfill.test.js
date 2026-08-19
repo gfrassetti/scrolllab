@@ -262,3 +262,48 @@ describe('sendOrderReceiptOnce (file store)', () => {
     assert.equal(calls.length, 1)
   })
 })
+
+describe('sendOrderAdminNotifyOnce (file store)', () => {
+  let sendOrderAdminNotifyOnce
+
+  before(async () => {
+    ;({ sendOrderAdminNotifyOnce } = await import('../services/email.js'))
+  })
+
+  it('envía aviso interno con idempotency key propia', async () => {
+    const calls = []
+    const client = {
+      emails: {
+        send: async (body, opts) => {
+          calls.push({ body, opts })
+          return { data: { id: 'admin-msg-1' }, error: null }
+        },
+      },
+    }
+
+    const result = await sendOrderAdminNotifyOnce({
+      order: {
+        id: 'order123order123order123',
+        items: [{ sku: 'chapters', title: 'CHAPTERS', unit_price: 12000, currency_id: 'ARS' }],
+        total: 12000,
+        currency_id: 'ARS',
+      },
+      user: { email: 'buyer@test.com', name: 'Buyer' },
+      config: {
+        email: {
+          enabled: true,
+          apiKey: 're_test',
+          from: 'SCROLLLAB <compras@scrolllab.com.ar>',
+          notifyTo: 'owner@test.com',
+        },
+      },
+      client,
+    })
+
+    assert.equal(result.sent, true)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].body.to[0], 'owner@test.com')
+    assert.equal(calls[0].body.replyTo, 'buyer@test.com')
+    assert.equal(calls[0].opts.idempotencyKey, 'scrolllab-order-admin-order123order123order123')
+  })
+})

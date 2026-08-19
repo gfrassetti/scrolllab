@@ -217,6 +217,7 @@ export function loadConfig() {
       apiKey: process.env.RESEND_API_KEY || "",
       from: process.env.EMAIL_FROM || "SCROLLLAB <onboarding@resend.dev>",
       replyTo: process.env.EMAIL_REPLY_TO || "",
+      notifyTo: process.env.EMAIL_NOTIFY_TO || "",
       logoUrl: process.env.EMAIL_LOGO_URL || "",
     },
     cookie: {
