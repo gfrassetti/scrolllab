@@ -107,7 +107,7 @@ export const PRODUCTS = {
     sku: 'unity',
     title: 'UNITY — template',
     description: 'Modelo editorial deportivo con mosaico→slider y footer de trofeo (código fuente).',
-    unit_price_usd: 229,
+    unit_price_usd: 189,
     currency_id: 'ARS',
   },
   ratio: {

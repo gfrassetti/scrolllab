@@ -11,7 +11,7 @@ export const TEMPLATE_PRICES_USD = {
   fizz: 189,
   atelier: 229,
   comic: 229,
-  unity: 229,
+  unity: 189,
   ratio: 269,
   vanta: 229,
 }
