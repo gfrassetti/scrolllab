@@ -14,10 +14,14 @@ export const TEMPLATE_PRICES_USD = {
   unity: 189,
   ratio: 269,
   vanta: 229,
+  'chapters-2': 1,
 }
 
 /** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
 export const COMING_SOON_SKUS = ['vanta', 'ratio']
+
+/** SKUs ocultos: comprables por URL directa pero no aparecen en home/catálogo. */
+export const HIDDEN_SKUS = ['chapters-2']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
@@ -92,6 +96,7 @@ export function nextSectionArs(sectionCount, hasCommerce, rate) {
 export function bundleListPriceUsd() {
   return Object.entries(TEMPLATE_PRICES_USD).reduce((sum, [sku, usd]) => {
     if (isComingSoonSku(sku)) return sum
+    if (HIDDEN_SKUS.includes(sku)) return sum
     return sum + usd
   }, 0)
 }

@@ -61,6 +61,7 @@ for (const [sku, usd] of Object.entries(TEMPLATE_PRICES_USD)) {
 }
 for (const sku of Object.keys(PRODUCTS)) {
   if (['bundle', 'custom'].includes(sku)) continue
+  if (PRODUCTS[sku].unit_price_ars_override != null) continue
   if (!(sku in TEMPLATE_PRICES_USD)) {
     fail('precios', `'${sku}' está en catalog.js pero no en pricing.js`)
   }
@@ -96,7 +97,11 @@ if (maxRecipeSections !== MAX_CUSTOM_SECTIONS) {
 
 // 1c. El piso del builder tiene que quedar arriba del template más caro: si no,
 // armar una composición sale menos que comprar un modelo entero.
-const priciestTemplate = Math.max(...Object.values(TEMPLATE_PRICES_USD))
+const priciestTemplate = Math.max(
+  ...Object.entries(TEMPLATE_PRICES_USD)
+    .filter(([sku]) => !CLIENT_COMING_SOON.includes(sku) && !(PRODUCTS[sku]?.unit_price_ars_override != null))
+    .map(([, usd]) => usd),
+)
 if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
   fail(
     'precios',
@@ -392,6 +397,7 @@ for (const model of BUNDLE_MODELS) {
 }
 for (const sku of Object.keys(PRODUCTS)) {
   if (['bundle', 'custom'].includes(sku)) continue
+  if (PRODUCTS[sku].unit_price_ars_override != null) continue
   if (!new RegExp(`\\b${sku}:\\s*\\{`).test(modelFiles)) {
     fail('packaging', `el SKU '${sku}' no tiene entrada en MODEL_FILES`)
   }

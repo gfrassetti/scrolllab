@@ -5,6 +5,7 @@ import {
   recipeSectionId,
   arsFromUsd,
   BUILDER_HIDDEN_SKUS,
+  HIDDEN_SKUS,
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
@@ -70,10 +71,16 @@ export function validateCheckoutItems(
       line.recipe = undefined
     }
 
+    const product = PRODUCTS[line.sku] || line
+    const unitPriceArs =
+      Number.isFinite(product.unit_price_ars_override) && product.unit_price_ars_override > 0
+        ? Math.round(product.unit_price_ars_override)
+        : arsFromUsd(line.unit_price_usd, rate)
+
     resolved.push({
       sku: line.sku,
       title: line.title,
-      unit_price: arsFromUsd(line.unit_price_usd, rate),
+      unit_price: unitPriceArs,
       unit_price_usd: line.unit_price_usd,
       currency_id: line.currency_id,
       recipe: line.recipe,

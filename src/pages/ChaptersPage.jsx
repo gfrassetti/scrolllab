@@ -1,3 +1,4 @@
+import TemplateBuyPill from '../components/TemplateBuyPill'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import NavMinimal from '../components/sections/chapters/NavMinimal'
 import HeroKinetic from '../components/sections/chapters/HeroKinetic'
@@ -16,11 +17,14 @@ import FooterCTA from '../components/sections/chapters/FooterCTA'
  * Kinetic editorial: raw near-white background, huge type,
  * chapter numbering, restraint over spectacle.
  */
-export default function ChaptersPage() {
+export default function ChaptersPage({ sku = 'chapters' }) {
   return (
     <SmoothScrollProvider>
       <div id="top" className="bg-bone text-ink">
         <NavMinimal />
+        {sku !== 'chapters' && (
+          <TemplateBuyPill sku={sku} name="CHAPTERS (test)" placement="end" />
+        )}
 
         <main>
           <HeroKinetic />

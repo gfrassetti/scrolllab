@@ -61,6 +61,14 @@ export const PRODUCTS = {
     unit_price_usd: 149,
     currency_id: 'ARS',
   },
+  'chapters-2': {
+    sku: 'chapters-2',
+    title: 'CHAPTERS — test',
+    description: 'Copia de prueba (código fuente).',
+    unit_price_usd: 1,
+    unit_price_ars_override: 200,
+    currency_id: 'ARS',
+  },
   nocturne: {
     sku: 'nocturne',
     title: 'NOCTURNE — template',
@@ -186,12 +194,22 @@ export function resolveLineItem(item) {
   return { ...product, recipe: null }
 }
 
+/** SKUs ocultos del catálogo público (solo accesibles por URL directa). */
+export const HIDDEN_SKUS = ['chapters-2']
+
+function productArs(product, rate) {
+  if (Number.isFinite(product.unit_price_ars_override) && product.unit_price_ars_override > 0) {
+    return Math.round(product.unit_price_ars_override)
+  }
+  return arsFromUsd(product.unit_price_usd, rate)
+}
+
 /** Catálogo público con el precio ya convertido a pesos. */
 export function catalogWithArs(rate) {
   return Object.values(PRODUCTS)
-    .filter((product) => !isComingSoonSku(product.sku))
+    .filter((product) => !isComingSoonSku(product.sku) && !HIDDEN_SKUS.includes(product.sku))
     .map((product) => ({
       ...product,
-      unit_price: arsFromUsd(product.unit_price_usd, rate),
+      unit_price: productArs(product, rate),
     }))
 }

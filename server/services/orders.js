@@ -6,6 +6,10 @@ import {
   packBundleTemplate,
 } from '../packaging.js'
 import { BUNDLE_MODELS } from '../catalog.js'
+
+const SKU_TO_MODEL = {
+  'chapters-2': 'chapters',
+}
 import { HttpError } from '../validation.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
@@ -74,8 +78,9 @@ export async function ensureOrderZip(order, user, config) {
         licenseMeta,
       })
     } else {
+      const model = SKU_TO_MODEL[item.sku] || item.sku
       await packFixedTemplate({
-        model: item.sku,
+        model,
         destPath: dest,
         licenseMeta,
       })

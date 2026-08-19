@@ -76,6 +76,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<TemplatesIndex />} />
                 <Route path="/templates/chapters" element={<ChaptersPage />} />
+                <Route path="/templates/chapters-2" element={<ChaptersPage sku="chapters-2" />} />
                 <Route path="/templates/nocturne" element={<NocturnePage />} />
                 <Route path="/templates/monolith" element={<MonolithPage />} />
                 <Route path="/templates/fizz" element={<FizzPage />} />
