@@ -72,24 +72,18 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/ratio',
   },
-  vanta: {
-    page: 'src/pages/VantaPage.jsx',
-    sectionsDir: 'src/components/sections/vanta',
-    pageName: 'App.jsx',
-    importPrefix: './components/sections/vanta',
-  },
 }
 
 const SHARED = [
   'src/lib/gsap.js',
-  // Beat motor: every ZIP (fixed model + builder recipe) ships the library.
-  'src/lib/beat/index.js',
-  'src/lib/beat/engine.js',
-  'src/lib/beat/motionPath.js',
-  'src/lib/beat/presets.js',
-  'src/lib/beat/useBeatStage.js',
-  'src/lib/beat/widgets.jsx',
-  'src/lib/beat/layout.js',
+  // Beat (src/lib/beat/*) NO va en el ZIP — plusvalía marketplace. Ver docs/scrolllab-beat.md.
+  // Si una sección importa lib/beat, el pack fallará hasta portar a GSAP.
+  'src/lib/webgl/index.js',
+  'src/lib/webgl/stage.js',
+  'src/lib/webgl/orbit.js',
+  'src/lib/webgl/damp.js',
+  'src/lib/webgl/coverPlane.js',
+  'src/lib/webgl/gltf.js',
   'src/lib/navLinks.js',
   'src/hooks/useLenis.js',
   'src/hooks/useMobileMenu.js',
@@ -253,7 +247,6 @@ function modelWrapperClass(model) {
   if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
   if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
   if (model === 'ratio') return 'bg-white text-[#111]'
-  if (model === 'vanta') return 'bg-[#f4f1ea] text-[#111114]'
 
   // contact / commerce paint their own theme — no wrapper canvas.
   if (model === 'contact') return ''
@@ -326,7 +319,7 @@ and resets, but nothing is sent anywhere. To receive real messages:
 3. Any backend works — your own API, a serverless function, or a form service.
 
 Styling follows the \`theme\` prop (\`auto\`, \`chapters\`, \`nocturne\`, \`monolith\`,
-\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`, \`unity\`, \`ratio\`, \`vanta\`). With \`auto\` it inherits the surrounding
+\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`, \`unity\`, \`ratio\`). With \`auto\` it inherits the surrounding
 background and text color. A hidden honeypot field filters basic bots.
 `
 

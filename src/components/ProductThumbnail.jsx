@@ -53,12 +53,6 @@ const styles = {
     accent: '#111111',
     code: 'RA',
   },
-  vanta: {
-    background: '#0e0b14',
-    color: '#f4f1ea',
-    accent: '#5b4cff',
-    code: 'VA',
-  },
   custom: {
     background: '#181715',
     color: '#f2efe8',

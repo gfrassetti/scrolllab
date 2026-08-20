@@ -113,7 +113,7 @@ El builder **ya vende Beat**: arrastrás `ratio/HeroTools` (badge Beat) a la com
 
 El panel edita **copy** (`word1`, etc.). **No** hay un campo de recetas JSON en v1.
 
-1. **Ahora** — `beat: true` en el registry, badge en la paleta, hint en el editor. RATIO está en venta; VANTA sigue oculto (`BUILDER_HIDDEN_SKUS`) hasta estar terminado.
+1. **Ahora** — `beat: true` en el registry, badge en la paleta, hint en el editor. RATIO está en venta; modelos en obra siguen en `BUILDER_HIDDEN_SKUS` + `COMING_SOON_SKUS`.
 2. **Después** — un tipo de campo `beat` en `SECTION_FIELDS`.
 3. **No** en v1 — arrays complejos en el editor.
 
@@ -127,7 +127,7 @@ No pongas Beat en el chrome del marketplace (nav, carrito): eso es Emil / Impecc
 2. `<BeatStage>` + un `<Beat>` por pieza, cada uno con `mag` propio y receta propia (no copiar el cubo de RATIO).
 3. ¿El riel se reusa? → `BEAT_PRESETS`. ¿Es de esta escena? → receta local.
 4. Probar ida y vuelta y `prefers-reduced-motion`.
-5. `beat: true` en el registry. El ZIP ya incluye `lib/beat` vía SHARED.
+5. `beat: true` en el registry. El motor **no** viaja en el ZIP vendido (solo marketplace).
 
 ## Qué no hacer
 
@@ -136,6 +136,7 @@ No pongas Beat en el chrome del marketplace (nav, carrito): eso es Emil / Impecc
 - Esperar que una class CSS de Tailwind anime el riel.
 - Meter el motor otra vez adentro de `sections/<sku>/` — vive en `src/lib/beat/`.
 - Refactorizar un hero que ya está clavado solo para cambiar el import.
+- **Empaquetar** `src/lib/beat/*` al comprador — es plusvalía del builder/demo; ver `server/packaging.js`.
 
 ## Archivos
 
@@ -149,6 +150,6 @@ No pongas Beat en el chrome del marketplace (nav, carrito): eso es Emil / Impecc
 | `src/lib/beat/motionPath.js` | polyfill `offset-path` |
 | `src/lib/beat/presets.js` | biblioteca de recetas |
 | `src/lib/beat/layout.js` | pack de letras + `dx` desde reposo (palabras editables) |
-| `server/packaging.js` → `SHARED` | el ZIP siempre lleva `lib/beat` |
+| `server/packaging.js` → `SHARED` | **no** incluye `lib/beat` en ZIPs vendidos |
 | `src/components/sections/ratio/HeroTools.jsx` | primer consumidor (referencia; no unificar) |
 | `src/components/sections/ratio/readymag.js` | reexport (compat. HeroTools) |

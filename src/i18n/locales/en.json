@@ -230,16 +230,6 @@
         "Scroll plates"
       ],
       "description": "A Beat scrollytelling template for desktop: cube and type on a rail, plates that punch through the viewport, a stacking well, and a horizontal closer. Print-shop stock and vermillion register. Not built for mobile."
-    },
-    "vanta": {
-      "vibe": "Game universe",
-      "tags": [
-        "Loading boot",
-        "Click-and-hold feed",
-        "Folder plates",
-        "Operator fan"
-      ],
-      "description": "A cinematic game-universe landing: HUD chrome, painterly operator art, a boot sequence, and click-and-hold intel overlays. For studios shipping a world, a raid, or a live-service drop — not a generic product grid."
     }
   },
   "builder": {
@@ -583,48 +573,6 @@
         "FooterLedger": {
           "name": "Footer ledger",
           "blurb": "Horizontal closer: outlined brand letters between plate frames"
-        }
-      },
-      "vanta": {
-        "NavVanta": {
-          "name": "Nav vanta",
-          "blurb": "HUD bar and a black drawer menu that slides from the left"
-        },
-        "BootVanta": {
-          "name": "Boot vanta",
-          "blurb": "White loading overlay, click-to-sound, then the giant mark"
-        },
-        "HeroOperators": {
-          "name": "Hero operators",
-          "blurb": "Full-bleed operator with 3D cursor tilt; scroll shrinks it into a folder card"
-        },
-        "KeeperVista": {
-          "name": "Keeper vista",
-          "blurb": "Three folder plates on cream paper that open into a painterly vista, then a mesh cage"
-        },
-        "CollectionDesk": {
-          "name": "Collection desk",
-          "blurb": "White dossier: vertical 10K, one folder specimen, crystal and eye"
-        },
-        "OperatorFan": {
-          "name": "Operator fan",
-          "blurb": "Lilac deck that splits into two branches and expands on scrub"
-        },
-        "CitadelStage": {
-          "name": "Citadel stage",
-          "blurb": "Pinned fortress zoom; click-and-hold opens a live feed overlay"
-        },
-        "FactionHold": {
-          "name": "Faction hold",
-          "blurb": "Two houses, 3D hover, center hold reveals intel"
-        },
-        "WorldVista": {
-          "name": "World vista",
-          "blurb": "Aerial world zoom with drifting collage shards"
-        },
-        "FooterDrop": {
-          "name": "Footer drop",
-          "blurb": "Outlined mark, 3D slivers, rising operator, three close columns"
         }
       },
       "contact": {

@@ -129,6 +129,13 @@ describe('ZIP de cada template', () => {
       )
       assert.deepEqual(brokenImports(files), [])
 
+      for (const name of files.keys()) {
+        assert.ok(
+          !name.includes('src/lib/beat/'),
+          `${model} no debe empaquetar el motor Beat: ${name}`,
+        )
+      }
+
       const app = files.get('src/App.jsx').toString('utf8')
       assert.match(app, /export default function App/)
     })
@@ -145,6 +152,10 @@ describe('ZIP de cada template', () => {
     }
     assert.ok(files.has('LICENSE.txt'), 'el bundle no trae licencia en la raíz')
     assert.deepEqual(brokenImports(files), [])
+
+    for (const name of files.keys()) {
+      assert.ok(!name.includes('src/lib/beat/'), `bundle regala Beat: ${name}`)
+    }
   })
 
   it('incluye el formulario de contacto que la página importa', async () => {

@@ -14,6 +14,7 @@
 | Type split | SplitText | idem |
 | React setup | `useGSAP` | `@gsap/react` vía `lib/gsap.js` |
 | **Beat** (riel + seek) | `src/lib/beat` | [`docs/scrolllab-beat.md`](scrolllab-beat.md) |
+| Canvas 3D / secuencia de frames | Three.js o canvas 2D + WebP | [`docs/scroll-media.md`](scroll-media.md) |
 
 Reglas: importar GSAP solo desde `lib/gsap.js`; página dentro de `SmoothScrollProvider`; respetar `prefers-reduced-motion`.
 
@@ -46,6 +47,8 @@ Si la URL de referencia es un proyecto Readymag, **no** interpolar con tweens GS
 ## Receta para un beat nuevo
 
 Si las piezas **siguen un riel** (cubo, letras que se van): no esta lista — [`scrolllab-beat.md`](scrolllab-beat.md) + `<BeatStage>` / `<Beat>`.
+
+Si el beat **parece 3D** (giro de producto, morph cinematográfico): [`scroll-media.md`](scroll-media.md). WebGL interpola cámara/mesh; pear.no / Apple pintan un **fotograma WebP** según el mismo `progress`.
 
 Si es pin / zoom / crossfade GSAP:
 

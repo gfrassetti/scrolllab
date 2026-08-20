@@ -20,6 +20,7 @@ import {
   bundleListPriceUsd,
   formatPriceFromUsd,
   formatNextSectionPrice,
+  isCatalogComingSoon,
   isComingSoonSku,
   templatePriceUsd,
 } from '../lib/pricing'
@@ -99,16 +100,6 @@ const TEMPLATE_META = [
     tagline: 'shared field',
     palette: ['#e7e4dc', '#0a0a0a', '#2c4a42'],
   },
-  {
-    id: '09',
-    sku: 'vanta',
-    name: 'VANTA',
-    path: '/templates/vanta',
-    category: 'GAME',
-    tagline: 'hold to scan',
-    palette: ['#f4f1ea', '#111114', '#5b4cff'],
-    comingSoon: true,
-  },
 ]
 
 function catalogCoverSrc(sku) {
@@ -127,7 +118,7 @@ function TemplatePoster({ template, index = 0, soonLabel = 'Coming soon' }) {
         alt=""
         draggable={false}
         className={`absolute inset-0 h-full w-full object-cover object-top ${
-          template.comingSoon ? 'grayscale' : ''
+          template.comingSoon || isCatalogComingSoon(template.sku) ? 'grayscale' : ''
         }`}
       />
       <div
@@ -651,8 +642,9 @@ export default function TemplatesIndex() {
             <div className="md:col-span-7">
               {templates.map((template) => {
                 const soon = Boolean(
-                  template.comingSoon || isComingSoonSku(template.sku),
+                  template.comingSoon || isCatalogComingSoon(template.sku),
                 )
+                const sellable = !isComingSoonSku(template.sku)
                 return (
                 <article
                   key={template.id}
@@ -762,7 +754,7 @@ export default function TemplatesIndex() {
                     </p>
                   ) : (
                     <>
-                      {templatePriceUsd(template.sku) != null && (
+                      {sellable && templatePriceUsd(template.sku) != null && (
                         <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
                           {formatPriceFromUsd(
                             templatePriceUsd(template.sku),
@@ -781,37 +773,41 @@ export default function TemplatesIndex() {
                         >
                           {t('home.openDemo')} →
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            addItem({
-                              sku: template.sku,
-                              title: t('common.cartItemTitle', {
-                                name: template.name,
-                              }),
-                            })
-                          }
-                          className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
-                        >
-                          {t('common.addToCart')}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={Boolean(buyingSku) || authLoading}
-                          onClick={() =>
-                            buyNow({
-                              sku: template.sku,
-                              title: t('common.cartItemTitle', {
-                                name: template.name,
-                              }),
-                            })
-                          }
-                          className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
-                        >
-                          {buyingSku === template.sku
-                            ? t('cart.redirecting')
-                            : t('common.buy')}
-                        </button>
+                        {sellable ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                addItem({
+                                  sku: template.sku,
+                                  title: t('common.cartItemTitle', {
+                                    name: template.name,
+                                  }),
+                                })
+                              }
+                              className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
+                            >
+                              {t('common.addToCart')}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={Boolean(buyingSku) || authLoading}
+                              onClick={() =>
+                                buyNow({
+                                  sku: template.sku,
+                                  title: t('common.cartItemTitle', {
+                                    name: template.name,
+                                  }),
+                                })
+                              }
+                              className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
+                            >
+                              {buyingSku === template.sku
+                                ? t('cart.redirecting')
+                                : t('common.buy')}
+                            </button>
+                          </>
+                        ) : null}
                       </div>
                     </>
                   )}
@@ -1070,7 +1066,7 @@ export default function TemplatesIndex() {
             <ul className="space-y-2 text-sm">
               {templates.map((template) => {
                 const soon = Boolean(
-                  template.comingSoon || isComingSoonSku(template.sku),
+                  template.comingSoon || isCatalogComingSoon(template.sku),
                 )
                 return (
                   <li key={template.id}>

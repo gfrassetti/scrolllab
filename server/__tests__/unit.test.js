@@ -114,7 +114,6 @@ describe('validateRecipe', () => {
 
   it('rechaza secciones de modelos ocultos en el builder', () => {
     assert.throws(() => validateRecipe(['ratio/HeroTools']), HttpError)
-    assert.throws(() => validateRecipe(['vanta/NavVanta']), HttpError)
   })
 
   it('contact form: valida theme y endpoint', () => {
@@ -185,10 +184,6 @@ describe('validateCheckoutItems', () => {
   })
 
   it('rechaza SKUs en próximamente', () => {
-    assert.throws(
-      () => validateCheckoutItems([{ sku: 'vanta' }], opts),
-      HttpError,
-    )
     assert.throws(
       () => validateCheckoutItems([{ sku: 'ratio' }], opts),
       HttpError,

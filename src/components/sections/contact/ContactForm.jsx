@@ -123,18 +123,6 @@ const THEMES = {
     note: 'text-[#ebe6dc]/45',
     radius: '',
   },
-  vanta: {
-    surface: 'bg-[#0e0b14] text-[#f4f1ea]',
-    eyebrow: 'text-[#f4f1ea]/45',
-    title: 'font-anton uppercase tracking-[-0.02em]',
-    body: 'text-[#f4f1ea]/70',
-    field:
-      'border-[#f4f1ea]/20 focus:border-[#5b4cff] placeholder:text-[#f4f1ea]/35',
-    button:
-      'border border-[#f4f1ea] bg-[#5b4cff] text-[#f4f1ea] hover:bg-transparent disabled:opacity-40',
-    note: 'text-[#f4f1ea]/45',
-    radius: 'rounded-full',
-  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

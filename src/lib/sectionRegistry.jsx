@@ -69,19 +69,9 @@ import FitStack from '../components/sections/ratio/FitStack'
 import PlateStudy from '../components/sections/ratio/PlateStudy'
 import BreakRules from '../components/sections/ratio/BreakRules'
 import FooterLedger from '../components/sections/ratio/FooterLedger'
-import NavVanta from '../components/sections/vanta/NavVanta'
-import BootVanta from '../components/sections/vanta/BootVanta'
-import HeroOperators from '../components/sections/vanta/HeroOperators'
-import KeeperVista from '../components/sections/vanta/KeeperVista'
-import CollectionDesk from '../components/sections/vanta/CollectionDesk'
-import OperatorFan from '../components/sections/vanta/OperatorFan'
-import CitadelStage from '../components/sections/vanta/CitadelStage'
-import FactionHold from '../components/sections/vanta/FactionHold'
-import WorldVista from '../components/sections/vanta/WorldVista'
-import FooterDrop from '../components/sections/vanta/FooterDrop'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
-import { BUILDER_HIDDEN_SKUS } from './pricing.js'
+import { isBuilderHiddenSku } from './pricing.js'
 
 /**
  * Central catalog of every section across all template models.
@@ -221,24 +211,6 @@ const allModels = [
     ],
   },
   {
-    id: 'vanta',
-    name: 'VANTA',
-    accent: '#5b4cff',
-    wrapperClass: 'bg-[#f4f1ea] text-[#111114]',
-    sections: [
-      { id: 'vanta/NavVanta', name: 'Nav Vanta', kind: 'nav', component: NavVanta, blurb: 'HUD bar and a black drawer menu that slides from the left' },
-      { id: 'vanta/BootVanta', name: 'Boot Vanta', kind: 'section', component: BootVanta, blurb: 'White loading overlay, click-to-sound, then the giant mark' },
-      { id: 'vanta/HeroOperators', name: 'Hero Operators', kind: 'hero', component: HeroOperators, blurb: 'Full-bleed operator with 3D cursor tilt; scroll shrinks it into a folder card' },
-      { id: 'vanta/KeeperVista', name: 'Keeper Vista', kind: 'section', component: KeeperVista, blurb: 'Three folder plates on cream paper that open into a painterly vista, then a mesh cage' },
-      { id: 'vanta/CollectionDesk', name: 'Collection Desk', kind: 'section', component: CollectionDesk, blurb: 'White dossier: vertical 10K, one folder specimen, crystal and eye' },
-      { id: 'vanta/OperatorFan', name: 'Operator Fan', kind: 'section', component: OperatorFan, blurb: 'Lilac deck that splits into two branches and expands on scrub' },
-      { id: 'vanta/CitadelStage', name: 'Citadel Stage', kind: 'section', component: CitadelStage, blurb: 'Fortress viewport with hold-to-scan feed; console bar like the Keep loader' },
-      { id: 'vanta/FactionHold', name: 'Faction Hold', kind: 'section', component: FactionHold, blurb: 'Two houses, 3D hover, center hold reveals intel' },
-      { id: 'vanta/WorldVista', name: 'World Vista', kind: 'section', component: WorldVista, blurb: 'Aerial world zoom with drifting collage shards' },
-      { id: 'vanta/FooterDrop', name: 'Footer Drop', kind: 'footer', component: FooterDrop, blurb: 'Outlined mark, 3D slivers, rising operator, three close columns' },
-    ],
-  },
-  {
     id: 'contact',
     name: 'CONTACT',
     accent: '#7c5cff',
@@ -274,7 +246,7 @@ const allModels = [
 ]
 
 /** Paleta del builder: sin modelos todavía en obra. */
-export const models = allModels.filter((model) => !BUILDER_HIDDEN_SKUS.includes(model.id))
+export const models = allModels.filter((model) => !isBuilderHiddenSku(model.id))
 
 const index = new Map()
 allModels.forEach((model) => {

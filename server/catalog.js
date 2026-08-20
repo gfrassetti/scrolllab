@@ -33,7 +33,7 @@ export const BUNDLE_MODELS = [
 ]
 
 /** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['vanta', 'ratio']
+export const COMING_SOON_SKUS = ['ratio']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en local.
@@ -41,7 +41,7 @@ export const COMING_SOON_SKUS = ['vanta', 'ratio']
 export const LOCAL_ONLY_SKUS = ['ratio']
 
 /** Espejo de src/lib/pricing.js — no se venden por sección en el builder. */
-export const BUILDER_HIDDEN_SKUS = ['vanta', 'ratio']
+export const BUILDER_HIDDEN_SKUS = ['ratio']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -115,13 +115,6 @@ export const PRODUCTS = {
     title: 'RATIO — template',
     description: 'Modelo Beat (riel + seek): cubo, tipo y placas coreografiados. Solo desktop (código fuente).',
     unit_price_usd: 269,
-    currency_id: 'ARS',
-  },
-  vanta: {
-    sku: 'vanta',
-    title: 'VANTA — template',
-    description: 'Modelo de universo de videojuego: HUD, hold-to-scan y Three.js (código fuente).',
-    unit_price_usd: 229,
     currency_id: 'ARS',
   },
   bundle: {

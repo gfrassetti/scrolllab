@@ -66,6 +66,8 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | Fotos / cutouts de un template | **template-image-designer** |
 | Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
 | Motion de piezas en una sección (riel / cubo / letras) | **Beat** — [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) + `src/lib/beat/` |
+| Card hero / tableau / emblem Three.js | **WebGL mini motor** — [`docs/scrolllab-webgl.md`](docs/scrolllab-webgl.md) + `src/lib/webgl/` |
+| “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
@@ -216,7 +218,7 @@ Al portar una ref (Loom / live): anotar cada beat como `beat → P# → archivo`
 
 ### Beat — motor propio (secciones + builder)
 
-Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatStage>` + `<Beat mag recipe>` — cada pieza es un riel (`offset-path`) y el escenario hace `seek` al scroll. GSAP solo pincha. Equivalente a mano: `data-beat` + `useBeatStage`. El ZIP siempre incluye `src/lib/beat/*` (`SHARED` en `packaging.js`). No hay compilador aparte: el riel se arma en runtime.
+Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatStage>` + `<Beat mag recipe>` — cada pieza es un riel (`offset-path`) y el escenario hace `seek` al scroll. GSAP solo pincha. Equivalente a mano: `data-beat` + `useBeatStage`. El motor **no** va en el ZIP vendido (`SHARED` en `packaging.js` lo excluye). No hay compilador aparte: el riel se arma en runtime.
 
 #### Cómo se usa en un template propio nuevo (obligatorio)
 
@@ -228,13 +230,13 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 #### Builder (v1)
 
-- **Sí:** secciones `beat: true` en la paleta (badge Beat) cuando el modelo ya no está en obra. VANTA sigue en `BUILDER_HIDDEN_SKUS` + `COMING_SOON_SKUS` hasta estar terminado.
+- **Sí:** secciones `beat: true` en la paleta (badge Beat) cuando el modelo ya no está en obra. RATIO sigue en `BUILDER_HIDDEN_SKUS` + `COMING_SOON_SKUS` hasta estar terminado.
 - **No:** editor de recetas JSON / `dx`/`dy` en el panel. `sectionFields.js` sigue en strings.
 - Después (cuando haya 2–3 escenas Beat): un tipo de campo `beat` en `SECTION_FIELDS`.
 
 #### Precio
 
-- RATIO lista **USD 269** (Beat, el más caro). VANTA lista USD 229 (próximamente). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
+- RATIO lista **USD 269** (Beat, el más caro). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
 - La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 279) tiene que superar al template más caro. Si subís un SKU, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
@@ -250,6 +252,16 @@ La modelo no trae GSAP. Trae el viewer de Readymag: CSS `offset-path` / `offset-
 | Ejemplo ya clavado | `src/components/sections/ratio/HeroTools.jsx` |
 
 **No** meter `viewer.js` de Readymag en el ZIP vendible (propietario). Si un template nuevo sale de Readymag, extraer `animation[]` y alimentar Beat (`attachScroll` / `playLoadPath`). Detalle y anti-patrones en el doc de port.
+
+### WebGL mini motor (card / tableau)
+
+Producto: [`docs/scrolllab-webgl.md`](docs/scrolllab-webgl.md). API: `src/lib/webgl/` (`createWebGLStage`, `attachPointerOrbit`, `createCoverPlane`). **Sí** va en el ZIP (`SHARED` en `packaging.js`). Three.js ya está en `package.json` raíz.
+
+**Patrón KPR (obligatorio en heroes WebGL):** `#canvas-container` fijo + `<canvas>` Three.js + DOM encima (`pointer-events-none`). No retrato hero en `<img>`. Referencias en el catálogo: `monolith/HeroThree.jsx`, `fizz/HeroBubbles.jsx`, `atelier/*`.
+
+No confundir con Beat: WebGL mueve cámara/meshes; Beat mueve DOM en riel. Un third path (secuencia de WebP en canvas 2D, estilo pear.no) está en [`docs/scroll-media.md`](docs/scroll-media.md).
+
+**Nuxt:** KPR usa Nuxt (Vue). SCROLLLAB usa React/Vite — **mismo Three.js**, no hace falta cambiar de framework.
 
 ## Second brain — graphify + Obsidian
 
