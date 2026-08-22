@@ -275,7 +275,7 @@ export default function BuilderPage() {
       </header>
 
       <div className="grid items-start gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+        <div className="min-w-0 lg:col-span-5">
           <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
             {t('builder.paletteTitle')}
           </p>
@@ -399,7 +399,7 @@ export default function BuilderPage() {
         {/* Sticky en desktop: acompaña el scroll de la paleta. Solo la lista
             scrollea; el precio y los botones quedan siempre a la vista.
             El max-h deja aire bajo el header sticky y sobre el borde inferior. */}
-        <div className="lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
           <div className="shrink-0">
             <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('builder.canvasTitle')} ({items.length}{' '}
