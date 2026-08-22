@@ -10,14 +10,14 @@ export const SITE_URL = 'https://www.scrolllab.com.ar'
 /**
  * Meta SEO del marketplace.
  * Categoría: plantillas web / web templates (radar Envato-like).
- * Diferencial: minimalistas + storytelling + fuente React.
+ * Diferencial: storytelling + fuente React.
  */
 export const SITE_SEO = {
   title: 'SCROLL LAB — Plantillas web | Web templates',
   description:
     'Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable.',
   keywords:
-    'plantillas web, web templates, website templates, plantillas para sitios web, react templates, plantillas minimalistas, storytelling templates, landing page templates',
+    'plantillas web, web templates, website templates, plantillas para sitios web, react templates, storytelling templates, landing page templates',
 }
 
 /** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
