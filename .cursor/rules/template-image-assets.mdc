@@ -14,7 +14,7 @@ Al crear o portar un **template nuevo** (o una sección visual pesada): el agent
 ## Obligatorio
 
 1. Tras `analyze:ref` (o al inventariar la ref), listar **cada pieza** que se anima o se recorta: hero, mosaico, ventanas, retrato, objeto foreground (PNG transparente), texturas, etc.
-2. **Generar** esas piezas (tool `GenerateImage` o pipeline del skill `template-image-designer`). Estilo **fotográfico / realista**, coherente con el mundo del template.
+2. **Generar** esas piezas con el plugin **Higgsfield** (`generate_image`; cutouts con `remove_background`). Fallback: tool `GenerateImage` de Cursor o el pipeline del skill `template-image-designer`. Estilo **fotográfico / realista**, coherente con el mundo del template.
 3. Guardar en `src/components/sections/<sku>/assets/` (o `…/<Section>/assets/`). Import local en el JSX — **nunca** `picsum`, Unsplash random ni SVG flat como sustituto de foto/objeto hero.
 4. Objetos que cruzan tipografía o suben al scroll → **PNG con alpha real** (verificar esquina transparente).
 5. Packaging ya hace walk recursivo: los assets van al ZIP del comprador.

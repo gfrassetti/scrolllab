@@ -1,0 +1,203 @@
+- generic [ref=e3]:
+  - link "Skip to work" [ref=e4] [cursor=pointer]:
+    - /url: "#work"
+  - banner [ref=e5]:
+    - navigation [ref=e6]:
+      - link "Architectural Bureau" [ref=e7] [cursor=pointer]:
+        - /url: "#top"
+        - generic [ref=e8]: Architectural
+        - generic [ref=e9]: Bureau
+      - list [ref=e10]:
+        - listitem [ref=e11]:
+          - link "Work" [ref=e12] [cursor=pointer]:
+            - /url: "#work"
+        - listitem [ref=e13]:
+          - link "Practice" [ref=e14] [cursor=pointer]:
+            - /url: "#practice"
+        - listitem [ref=e15]:
+          - link "Bureau" [ref=e16] [cursor=pointer]:
+            - /url: "#bureau"
+        - listitem [ref=e17]:
+          - link "Contact" [ref=e18] [cursor=pointer]:
+            - /url: "#contact"
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e25]:
+        - generic [ref=e26]: Atrium
+        - generic [ref=e27]: Architectural Bureau
+      - generic [ref=e28]:
+        - heading [level=1] [ref=e29]:
+          - generic "Measured clarity" [ref=e30]:
+            - generic [ref=e31]: M
+            - generic [ref=e33]: e
+            - generic [ref=e35]: a
+            - generic [ref=e37]: s
+            - generic [ref=e39]: u
+            - generic [ref=e41]: r
+            - generic [ref=e43]: e
+            - generic [ref=e45]: d
+            - generic [ref=e47]: c
+            - generic [ref=e49]: l
+            - generic [ref=e51]: a
+            - generic [ref=e53]: r
+            - generic [ref=e55]: i
+            - generic [ref=e57]: t
+            - generic [ref=e59]: "y"
+          - generic "and invention." [ref=e61]:
+            - generic [ref=e62]: a
+            - generic [ref=e64]: "n"
+            - generic [ref=e66]: d
+            - generic [ref=e68]: i
+            - generic [ref=e70]: "n"
+            - generic [ref=e72]: v
+            - generic [ref=e74]: e
+            - generic [ref=e76]: "n"
+            - generic [ref=e78]: t
+            - generic [ref=e80]: i
+            - generic [ref=e82]: o
+            - generic [ref=e84]: "n"
+            - generic [ref=e86]: .
+        - generic [ref=e88]:
+          - paragraph [ref=e89]: Site strategy, material economy, passive systems, energy studies, lifecycle notes.
+          - paragraph [ref=e90]: Concept, envelope, sketch set, working drawings, and stills for the room.
+    - heading "Architectural concept, facade and planning solutions, sketch project, working documentation, visualizations." [level=2] [ref=e92]:
+      - generic [ref=e93]: Architectural concept,
+      - generic [ref=e95]: facade and planning
+      - generic [ref=e97]: solutions, sketch project,
+      - generic [ref=e99]: working documentation,
+      - generic [ref=e101]: visualizations.
+    - generic [ref=e104]:
+      - generic [ref=e105]:
+        - heading "Mass." [level=2] [ref=e106]:
+          - generic [ref=e107]: M
+          - generic [ref=e109]: a
+          - generic [ref=e111]: s
+          - generic [ref=e113]: s
+          - generic [ref=e115]: .
+        - paragraph [ref=e117]: "We begin with volume: how a building sits in weather, how it holds a street, how it lets light travel through a room."
+      - generic [ref=e118]:
+        - heading "and measure." [level=2] [ref=e119]:
+          - generic [ref=e120]: a
+          - generic [ref=e122]: "n"
+          - generic [ref=e124]: d
+          - generic [ref=e126]: m
+          - generic [ref=e128]: e
+          - generic [ref=e130]: a
+          - generic [ref=e132]: s
+          - generic [ref=e134]: u
+          - generic [ref=e136]: r
+          - generic [ref=e138]: e
+          - generic [ref=e140]: .
+        - paragraph [ref=e142]: Then we measure. Structure, envelope, and sequence are drawn until the idea can be built without losing its quiet.
+    - generic [ref=e145]:
+      - generic [ref=e146]:
+        - paragraph [ref=e147]: Drawing
+        - heading "Plan before mass" [level=2] [ref=e148]
+        - paragraph [ref=e149]: Lines first. A courtyard holds the centre; rooms gather around light. Swap this drawing for your own plan. The motion stays.
+      - figure "Courtyard house, 1:200" [ref=e150]
+    - generic [ref=e161]:
+      - generic [ref=e162]:
+        - paragraph [ref=e163]: Selected work
+        - heading "Projects" [level=2] [ref=e164]
+      - list [ref=e165]:
+        - listitem [ref=e166]:
+          - link "01 North Civic Hall 1,240 m²" [ref=e167] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e168]: "01"
+            - generic [ref=e169]: North Civic Hall
+            - generic [ref=e171]: 1,240 m²
+        - listitem [ref=e172]:
+          - link "02 Harbour Court 8,400 m²" [ref=e173] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e174]: "02"
+            - generic [ref=e175]: Harbour Court
+            - generic [ref=e177]: 8,400 m²
+        - listitem [ref=e178]:
+          - link "03 Olive House 420 m²" [ref=e179] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e180]: "03"
+            - generic [ref=e181]: Olive House
+            - generic [ref=e183]: 420 m²
+        - listitem [ref=e184]:
+          - link "04 Daylight Gallery 2,100 m²" [ref=e185] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e186]: "04"
+            - generic [ref=e187]: Daylight Gallery
+            - generic [ref=e189]: 2,100 m²
+        - listitem [ref=e190]:
+          - link "05 Ridge Residence 610 m²" [ref=e191] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e192]: "05"
+            - generic [ref=e193]: Ridge Residence
+            - generic [ref=e195]: 610 m²
+        - listitem [ref=e196]:
+          - link "06 Field Pavilion 3,800 m²" [ref=e197] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e198]: "06"
+            - generic [ref=e199]: Field Pavilion
+            - generic [ref=e201]: 3,800 m²
+    - generic [ref=e202]:
+      - paragraph [ref=e203]: Approach
+      - generic [ref=e209]:
+        - article [ref=e210]:
+          - paragraph [ref=e211]: Sketch
+          - heading "From paper to mass" [level=3] [ref=e212]
+          - paragraph [ref=e213]: Early volumes are tested as models. Circulation, light, and the first structural rhythm get decided here, before a facade is named.
+        - article [ref=e214]:
+          - paragraph [ref=e215]: Envelope
+          - heading "Material as climate" [level=3] [ref=e216]
+          - paragraph [ref=e217]: Stone, timber, and metal are chosen for how they weather, not how they photograph. The joint is the drawing.
+        - article [ref=e218]:
+          - paragraph [ref=e219]: Light
+          - heading "Rooms that hold still" [level=3] [ref=e220]
+          - paragraph [ref=e221]: "The last pass is quiet: openings, thresholds, and the pause between them. A gallery, a house, a hall: same discipline."
+    - generic [ref=e223]:
+      - generic [ref=e224]:
+        - paragraph [ref=e225]: Studio
+        - heading "A brief, a site, a first drawing." [level=2] [ref=e226]
+        - paragraph [ref=e227]: Tell us about the plot, the program, and the quiet you want the building to keep.
+        - paragraph [ref=e228]: Replies leave the studio within a few days.
+      - generic [ref=e229]:
+        - generic [ref=e230]:
+          - text: Name
+          - textbox "Name" [ref=e231]
+        - generic [ref=e232]:
+          - text: Email
+          - textbox "Email" [ref=e233]
+        - generic [ref=e234]:
+          - text: Message
+          - textbox "Message" [ref=e235]
+        - button "Send the brief" [ref=e236] [cursor=pointer]
+        - paragraph
+    - generic [ref=e237]:
+      - paragraph [ref=e238]: People & Process
+      - heading "A studio shaped by clarity, trust, and a collective pursuit of thoughtful design." [level=2] [ref=e239]:
+        - generic [ref=e240]: A studio shaped by clarity,
+        - generic [ref=e242]: trust, and a collective
+        - generic [ref=e246]:
+          - emphasis [ref=e247]: pursuit
+          - text: of thoughtful
+        - generic [ref=e248]: design.
+      - generic:
+        - figure
+        - figure
+        - figure
+        - figure
+        - figure
+        - figure
+    - generic [ref=e254]:
+      - heading "2014 Year of practice" [level=2] [ref=e256]:
+        - generic [ref=e257]: 2014 Year
+        - generic [ref=e258]: of practice
+      - generic [ref=e259]:
+        - paragraph [ref=e260]: Design approach grounded in passive strategies, material logic, and environmental responsibility.
+        - paragraph [ref=e261]: Lifecycle-focused architecture with efficient systems, sustainable choices, and long-term value.
+  - contentinfo [ref=e262]:
+    - paragraph [ref=e263]: ATRIUM
+    - generic [ref=e264]:
+      - paragraph [ref=e265]: All rights reserved
+      - paragraph [ref=e266]: License Number AA-00-00000 BB-00-00000
+      - paragraph [ref=e267]: Visual Design Placeholder
+      - paragraph [ref=e268]: Development Placeholder
+      - paragraph [ref=e269]: Legal documents
+      - paragraph [ref=e270]: © 2026

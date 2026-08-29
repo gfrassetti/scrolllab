@@ -1,0 +1,182 @@
+- generic [ref=e3]:
+  - link "Skip to work" [ref=e4] [cursor=pointer]:
+    - /url: "#work"
+  - banner [ref=e5]:
+    - navigation [ref=e6]:
+      - link "ATRIUM" [ref=e7] [cursor=pointer]:
+        - /url: "#top"
+      - list [ref=e8]:
+        - listitem [ref=e9]:
+          - link "Work" [ref=e10] [cursor=pointer]:
+            - /url: "#work"
+        - listitem [ref=e11]:
+          - link "Approach" [ref=e12] [cursor=pointer]:
+            - /url: "#approach"
+        - listitem [ref=e13]:
+          - link "Bureau" [ref=e14] [cursor=pointer]:
+            - /url: "#bureau"
+        - listitem [ref=e15]:
+          - link "Contact" [ref=e16] [cursor=pointer]:
+            - /url: "#contact"
+  - main [ref=e17]:
+    - heading [level=1] [ref=e23]:
+      - generic "Atrium" [ref=e24]:
+        - generic [ref=e25]: A
+        - generic [ref=e27]: t
+        - generic [ref=e29]: r
+        - generic [ref=e31]: i
+        - generic [ref=e33]: u
+        - generic [ref=e35]: m
+      - generic "Architectural Bureau" [ref=e37]:
+        - generic [ref=e38]: A
+        - generic [ref=e40]: r
+        - generic [ref=e42]: c
+        - generic [ref=e44]: h
+        - generic [ref=e46]: i
+        - generic [ref=e48]: t
+        - generic [ref=e50]: e
+        - generic [ref=e52]: c
+        - generic [ref=e54]: t
+        - generic [ref=e56]: u
+        - generic [ref=e58]: r
+        - generic [ref=e60]: a
+        - generic [ref=e62]: l
+        - generic [ref=e64]: B
+        - generic [ref=e66]: u
+        - generic [ref=e68]: r
+        - generic [ref=e70]: e
+        - generic [ref=e72]: a
+        - generic [ref=e74]: u
+    - generic [ref=e76]:
+      - paragraph [ref=e77]: Bureau
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - heading "Mass." [level=2] [ref=e80]:
+            - generic [ref=e81]: M
+            - generic [ref=e83]: a
+            - generic [ref=e85]: s
+            - generic [ref=e87]: s
+            - generic [ref=e89]: .
+          - paragraph [ref=e91]: "We begin with volume: how a building sits in weather, how it holds a street, how it lets light travel through a room."
+        - generic [ref=e92]:
+          - heading "and measure." [level=2] [ref=e93]:
+            - generic [ref=e94]: a
+            - generic [ref=e96]: "n"
+            - generic [ref=e98]: d
+            - generic [ref=e100]: m
+            - generic [ref=e102]: e
+            - generic [ref=e104]: a
+            - generic [ref=e106]: s
+            - generic [ref=e108]: u
+            - generic [ref=e110]: r
+            - generic [ref=e112]: e
+            - generic [ref=e114]: .
+          - paragraph [ref=e116]: Then we measure. Structure, envelope, and sequence are drawn until the idea can be built without losing its quiet.
+    - generic [ref=e119]:
+      - generic [ref=e120]:
+        - paragraph [ref=e121]: Drawing
+        - heading "Plan before mass" [level=2] [ref=e122]
+        - paragraph [ref=e123]: Lines first. A courtyard holds the centre; rooms gather around light. Swap this drawing for your own plan. The motion stays.
+      - figure "Courtyard house, 1:200" [ref=e124]
+    - generic [ref=e135]:
+      - generic [ref=e136]:
+        - paragraph [ref=e137]: Selected work
+        - heading "Projects" [level=2] [ref=e138]
+      - list [ref=e139]:
+        - listitem [ref=e140]:
+          - link "01 North Civic Hall 1,240 m²" [ref=e141] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e142]: "01"
+            - generic [ref=e143]: North Civic Hall
+            - generic [ref=e145]: 1,240 m²
+        - listitem [ref=e146]:
+          - link "02 Harbour Court 8,400 m²" [ref=e147] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e148]: "02"
+            - generic [ref=e149]: Harbour Court
+            - generic [ref=e151]: 8,400 m²
+        - listitem [ref=e152]:
+          - link "03 Olive House 420 m²" [ref=e153] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e154]: "03"
+            - generic [ref=e155]: Olive House
+            - generic [ref=e157]: 420 m²
+        - listitem [ref=e158]:
+          - link "04 Daylight Gallery 2,100 m²" [ref=e159] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e160]: "04"
+            - generic [ref=e161]: Daylight Gallery
+            - generic [ref=e163]: 2,100 m²
+        - listitem [ref=e164]:
+          - link "05 Ridge Residence 610 m²" [ref=e165] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e166]: "05"
+            - generic [ref=e167]: Ridge Residence
+            - generic [ref=e169]: 610 m²
+        - listitem [ref=e170]:
+          - link "06 Field Pavilion 3,800 m²" [ref=e171] [cursor=pointer]:
+            - /url: "#work"
+            - generic [ref=e172]: "06"
+            - generic [ref=e173]: Field Pavilion
+            - generic [ref=e175]: 3,800 m²
+    - generic [ref=e176]:
+      - paragraph [ref=e177]: Approach
+      - generic [ref=e182]:
+        - article [ref=e183]:
+          - paragraph [ref=e184]: Sketch
+          - heading "From paper to mass" [level=3] [ref=e185]
+          - paragraph [ref=e186]: Early volumes are tested as models. Circulation, light, and the first structural rhythm get decided here, before a facade is named.
+        - article [ref=e187]:
+          - paragraph [ref=e188]: Envelope
+          - heading "Material as climate" [level=3] [ref=e189]
+          - paragraph [ref=e190]: Stone, timber, and metal are chosen for how they weather, not how they photograph. The joint is the drawing.
+        - article [ref=e191]:
+          - paragraph [ref=e192]: Light
+          - heading "Rooms that hold still" [level=3] [ref=e193]
+          - paragraph [ref=e194]: "The last pass is quiet: openings, thresholds, and the pause between them. A gallery, a house, a hall: same discipline."
+    - generic [ref=e195]:
+      - paragraph [ref=e196]: Practice
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - paragraph [ref=e199]: 14+
+          - paragraph [ref=e200]: Years in practice
+        - generic [ref=e201]:
+          - paragraph [ref=e202]: "86"
+          - paragraph [ref=e203]: Projects completed
+        - generic [ref=e204]:
+          - paragraph [ref=e205]: "22"
+          - paragraph [ref=e206]: People in the studio
+        - generic [ref=e207]:
+          - paragraph [ref=e208]: 40k
+          - paragraph [ref=e209]: Square metres built
+    - generic [ref=e211]:
+      - generic [ref=e212]:
+        - paragraph [ref=e213]: Studio
+        - heading "A brief, a site, a first drawing." [level=2] [ref=e214]
+        - paragraph [ref=e215]: Tell us about the plot, the program, and the quiet you want the building to keep.
+        - paragraph [ref=e216]: Placeholder note — replace with your reply time or privacy line.
+      - generic [ref=e217]:
+        - generic [ref=e218]:
+          - text: Name
+          - textbox "Name" [ref=e219]
+        - generic [ref=e220]:
+          - text: Email
+          - textbox "Email" [ref=e221]
+        - generic [ref=e222]:
+          - text: Message
+          - textbox "Message" [ref=e223]
+        - button "Send the brief" [ref=e224] [cursor=pointer]
+        - paragraph
+  - contentinfo [ref=e225]:
+    - link "Begin a conversation" [ref=e226] [cursor=pointer]:
+      - /url: mailto:studio@atrium.bureau
+    - generic [ref=e227]:
+      - paragraph [ref=e228]: Atrium
+      - generic [ref=e229]:
+        - paragraph [ref=e230]: Offices
+        - paragraph [ref=e231]: Via Giacomo Leopardi 14, Milano
+        - paragraph [ref=e232]: Keizersgracht 421, Amsterdam
+      - generic [ref=e233]:
+        - link "studio@atrium.bureau" [ref=e234] [cursor=pointer]:
+          - /url: mailto:studio@atrium.bureau
+        - paragraph [ref=e235]: ©2026 Atrium Bureau. Placeholder copy.

@@ -91,16 +91,26 @@ const TEMPLATE_META = [
     tagline: 'torn panels',
     palette: ['#d8d4cc', '#2a2622', '#e85a24'],
   },
-  {
-    id: '08',
-    sku: 'unity',
-    name: 'UNITY',
-    path: '/templates/unity',
-    category: 'EDITORIAL',
-    tagline: 'shared field',
-    palette: ['#e7e4dc', '#0a0a0a', '#2c4a42'],
-  },
-]
+    {
+      id: '08',
+      sku: 'unity',
+      name: 'UNITY',
+      path: '/templates/unity',
+      category: 'EDITORIAL',
+      tagline: 'shared field',
+      palette: ['#e7e4dc', '#0a0a0a', '#2c4a42'],
+    },
+    {
+      id: '09',
+      sku: 'atrium',
+      name: 'ATRIUM',
+      path: '/templates/atrium',
+      category: 'ARCHITECTURE',
+      tagline: 'mass and measure',
+      palette: ['#f4f1ea', '#111111', '#111111'],
+      comingSoon: true,
+    },
+  ]
 
 function catalogCoverSrc(sku) {
   return `/catalog/${sku}.jpg`

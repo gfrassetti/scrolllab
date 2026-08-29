@@ -230,6 +230,16 @@
         "Placas al scroll"
       ],
       "description": "Template Beat de scrollytelling para desktop: cubo y tipo en un riel, placas que atraviesan el viewport, un pozo que encastra y un cierre horizontal. Papel de taller y registro vermillion. No está pensado para móvil."
+    },
+    "atrium": {
+      "vibe": "Estudio de arquitectura",
+      "tags": [
+        "Hero de massing pineado",
+        "Manifiesto tipográfico",
+        "Anillo de estudio",
+        "Wordmark gigante"
+      ],
+      "description": "Papel hueso, serif editorial y fotografías de edificios genéricos. El hero pineado cruza tres tomas de massing; un plano de patio se dibuja; un anillo negro de fotos de estudio cicla las cifras. Para estudios de arquitectura: las fotos se cambian, el motion queda."
     }
   },
   "builder": {
@@ -573,6 +583,56 @@
         "FooterLedger": {
           "name": "Footer ledger",
           "blurb": "Cierre horizontal: letras outline de la marca entre marcos de placa"
+        }
+      },
+      "atrium": {
+        "NavAtrium": {
+          "name": "Nav atrium",
+          "blurb": "Header mix-blend · marca compacta · índice mobile"
+        },
+        "HeroMassing": {
+          "name": "Hero massing",
+          "blurb": "Fotos full-bleed pineadas que se cruzan al scroll"
+        },
+        "ManifestoType": {
+          "name": "Manifiesto tipo",
+          "blurb": "Titular grotesk oversized con dos columnas de oficio"
+        },
+        "ScopeSerif": {
+          "name": "Alcance serif",
+          "blurb": "Un solo párrafo editorial con el alcance de la práctica"
+        },
+        "ClarityPair": {
+          "name": "Clarity pair",
+          "blurb": "Dos declaraciones oversized con tipo en máscara"
+        },
+        "BlueprintDraw": {
+          "name": "Blueprint draw",
+          "blurb": "Un plano de patio que se traza al scroll"
+        },
+        "ProjectRail": {
+          "name": "Project rail",
+          "blurb": "Índice de obra con foto que sigue el cursor"
+        },
+        "ProcessPin": {
+          "name": "Process pin",
+          "blurb": "Fotos de proceso sticky, copy al lado"
+        },
+        "PeopleScatter": {
+          "name": "People scatter",
+          "blurb": "Campo negro, línea serif, fotos inclinadas con paralaje"
+        },
+        "OrbitRing": {
+          "name": "Orbit ring",
+          "blurb": "Pin negro, fotos de estudio que rotan, cifras que ciclan"
+        },
+        "StatField": {
+          "name": "Stat field",
+          "blurb": "Contadores del estudio que cuentan al entrar"
+        },
+        "FooterAtrium": {
+          "name": "Footer atrium",
+          "blurb": "Wordmark gigante y fila legal"
         }
       },
       "contact": {

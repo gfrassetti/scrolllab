@@ -17,6 +17,7 @@ const POSTERS = {
   comic: '/catalog/comic.jpg',
   unity: '/catalog/unity.jpg',
   ratio: '/catalog/ratio.jpg',
+  atrium: '/catalog/atrium.jpg',
 }
 
 /**

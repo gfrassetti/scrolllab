@@ -47,6 +47,12 @@ const styles = {
     accent: '#f4c518',
     code: 'UN',
   },
+  atrium: {
+    background: '#f4f1ea',
+    color: '#111111',
+    accent: '#111111',
+    code: 'AU',
+  },
   ratio: {
     background: '#ffffff',
     color: '#111111',

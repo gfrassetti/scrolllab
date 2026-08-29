@@ -123,6 +123,18 @@ const THEMES = {
     note: 'text-[#ebe6dc]/45',
     radius: '',
   },
+  atrium: {
+    surface: 'bg-atrium-paper text-atrium-ink',
+    eyebrow: 'text-atrium-ink/45',
+    title: 'font-display tracking-[-0.03em]',
+    body: 'text-atrium-ink/70',
+    field:
+      'border-atrium-ink/20 focus:border-atrium-ink placeholder:text-atrium-ink/35',
+    button:
+      'ui-press border border-atrium-ink bg-atrium-ink text-atrium-paper hover:bg-transparent hover:text-atrium-ink disabled:opacity-40',
+    note: 'text-atrium-ink/45',
+    radius: '',
+  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -146,7 +158,7 @@ export default function ContactForm({
   sendingLabel = 'Sending…',
   successMessage = 'Message sent.',
   errorMessage = 'Something went wrong. Please try again.',
-  note = 'Placeholder note — replace with your reply time or privacy line.',
+  note = 'Replace with your reply time or privacy line.',
   endpoint = '',
 }) {
   const root = useRef(null)

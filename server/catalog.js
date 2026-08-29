@@ -33,7 +33,7 @@ export const BUNDLE_MODELS = [
 ]
 
 /** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['ratio']
+export const COMING_SOON_SKUS = ['ratio', 'atrium']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en local.
@@ -41,7 +41,7 @@ export const COMING_SOON_SKUS = ['ratio']
 export const LOCAL_ONLY_SKUS = ['ratio']
 
 /** Espejo de src/lib/pricing.js — no se venden por sección en el builder. */
-export const BUILDER_HIDDEN_SKUS = ['ratio']
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'atrium']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -115,6 +115,13 @@ export const PRODUCTS = {
     title: 'RATIO — template',
     description: 'Modelo Beat (riel + seek): cubo, tipo y placas coreografiados. Solo desktop (código fuente).',
     unit_price_usd: 269,
+    currency_id: 'ARS',
+  },
+  atrium: {
+    sku: 'atrium',
+    title: 'ATRIUM — template',
+    description: 'Modelo de estudio de arquitectura: massing, manifiesto, anillo de fotos y wordmark (código fuente).',
+    unit_price_usd: 189,
     currency_id: 'ARS',
   },
   bundle: {

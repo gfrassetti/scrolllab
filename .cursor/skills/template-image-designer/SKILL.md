@@ -30,11 +30,13 @@ Rol: **art director + generador de imágenes** para un modelo vendible. El códi
 
 2. **Brief visual del SKU** (1 párrafo): sujeto, luz, paleta, época, qué NO (logos de marcas reales, caras de celebridades, trofeos FIFA™, etc.). Preferir genérico creíble.
 
-3. **Generar** cada pieza con `GenerateImage`:
-   - Prompt: sujeto concreto + lente/luz + fondo (o “isolated on transparent” si cutout) + “photorealistic, no text, no watermark, no logo”
-   - Cutouts: pedir fondo transparente / subject isolated; si el archivo sale sin alpha, post-procesar (Pillow chroma / rembg) y **verificar** esquina `A=0`
+3. **Generar** cada pieza con **Higgsfield** (plugin MCP `plugin-higgsfield-higgsfield`), no picsum:
+   - Fotos: `generate_image` (si el modelo no está claro, `models_explore`). Prompt: sujeto concreto + lente/luz + fondo + “photorealistic, no text, no watermark, no logo”.
+   - Cutouts: generar y luego `remove_background`; **verificar** esquina `A=0`.
+   - Fallback si el plugin no está: tool `GenerateImage` de Cursor; si sale sin alpha, post-procesar (Pillow / rembg).
    - Variedad: mosaicos = tomas distintas del mismo mundo, no el mismo crop 8 veces
    - Aspecto cercano al uso (portrait 3:4, landscape 16:9, square)
+   - Video / GLB: `get_cost:true` y confirmar créditos con el usuario antes de `generate_video` / `generate_3d`
 
 4. **Colocar** en `src/components/sections/<sku>/assets/<nombre>.{png,jpg,webp}` e **import** en el componente (default props). No URLs externas frágiles.
 

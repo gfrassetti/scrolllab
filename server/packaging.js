@@ -72,6 +72,12 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/ratio',
   },
+  atrium: {
+    page: 'src/pages/AtriumPage.jsx',
+    sectionsDir: 'src/components/sections/atrium',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/atrium',
+  },
 }
 
 const SHARED = [
@@ -247,6 +253,7 @@ function modelWrapperClass(model) {
   if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
   if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
   if (model === 'ratio') return 'bg-white text-[#111]'
+  if (model === 'atrium') return 'bg-[#f4f1ea] text-[#111111]'
 
   // contact / commerce paint their own theme — no wrapper canvas.
   if (model === 'contact') return ''
@@ -319,7 +326,7 @@ and resets, but nothing is sent anywhere. To receive real messages:
 3. Any backend works — your own API, a serverless function, or a form service.
 
 Styling follows the \`theme\` prop (\`auto\`, \`chapters\`, \`nocturne\`, \`monolith\`,
-\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`, \`unity\`, \`ratio\`). With \`auto\` it inherits the surrounding
+\`velocity\`, \`fizz\`, \`atelier\`, \`comic\`, \`unity\`, \`ratio\`, \`atrium\`). With \`auto\` it inherits the surrounding
 background and text color. A hidden honeypot field filters basic bots.
 `
 

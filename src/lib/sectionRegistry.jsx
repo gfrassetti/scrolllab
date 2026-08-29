@@ -69,6 +69,18 @@ import FitStack from '../components/sections/ratio/FitStack'
 import PlateStudy from '../components/sections/ratio/PlateStudy'
 import BreakRules from '../components/sections/ratio/BreakRules'
 import FooterLedger from '../components/sections/ratio/FooterLedger'
+import NavAtrium from '../components/sections/atrium/NavAtrium'
+import HeroMassing from '../components/sections/atrium/HeroMassing'
+import ManifestoType from '../components/sections/atrium/ManifestoType'
+import ScopeSerif from '../components/sections/atrium/ScopeSerif'
+import ClarityPair from '../components/sections/atrium/ClarityPair'
+import BlueprintDraw from '../components/sections/atrium/BlueprintDraw'
+import ProjectRail from '../components/sections/atrium/ProjectRail'
+import ProcessPin from '../components/sections/atrium/ProcessPin'
+import PeopleScatter from '../components/sections/atrium/PeopleScatter'
+import OrbitRing from '../components/sections/atrium/OrbitRing'
+import StatField from '../components/sections/atrium/StatField'
+import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 import { isBuilderHiddenSku } from './pricing.js'
@@ -208,6 +220,26 @@ const allModels = [
       { id: 'ratio/PlateStudy', name: 'Plate Study', kind: 'section', component: PlateStudy, blurb: 'Pinned drawing, case that scales in, two steps and a note' },
       { id: 'ratio/BreakRules', name: 'Break Rules', kind: 'section', component: BreakRules, blurb: 'Black field, grey modules, three lines peeling on scrub' },
       { id: 'ratio/FooterLedger', name: 'Footer Ledger', kind: 'footer', component: FooterLedger, blurb: 'Horizontal closer: outlined brand letters between plate frames' },
+    ],
+  },
+  {
+    id: 'atrium',
+    name: 'ATRIUM',
+    accent: '#111111',
+    wrapperClass: 'bg-[#f4f1ea] text-[#111111]',
+    sections: [
+      { id: 'atrium/NavAtrium', name: 'Nav Atrium', kind: 'nav', component: NavAtrium, blurb: 'Stacked bureau mark, mix-blend links' },
+      { id: 'atrium/HeroMassing', name: 'Hero Massing', kind: 'hero', component: HeroMassing, blurb: 'Pinned full-bleed photos that crossfade on scrub' },
+      { id: 'atrium/ManifestoType', name: 'Manifesto Type', kind: 'section', component: ManifestoType, blurb: 'Oversized grotesk headline with two service columns' },
+      { id: 'atrium/ScopeSerif', name: 'Scope Serif', kind: 'section', component: ScopeSerif, blurb: 'A single large editorial paragraph of practice scope' },
+      { id: 'atrium/ClarityPair', name: 'Clarity Pair', kind: 'section', component: ClarityPair, blurb: 'Two oversized statements with masked type' },
+      { id: 'atrium/BlueprintDraw', name: 'Blueprint Draw', kind: 'section', component: BlueprintDraw, blurb: 'A courtyard plan that traces itself on scroll' },
+      { id: 'atrium/ProjectRail', name: 'Project Rail', kind: 'section', component: ProjectRail, blurb: 'Work index with a cursor-trailing photograph' },
+      { id: 'atrium/ProcessPin', name: 'Process Pin', kind: 'section', component: ProcessPin, blurb: 'Sticky process photos, copy flowing beside them' },
+      { id: 'atrium/PeopleScatter', name: 'People Scatter', kind: 'section', component: PeopleScatter, blurb: 'Black field, serif studio line, tilted photos with parallax' },
+      { id: 'atrium/OrbitRing', name: 'Orbit Ring', kind: 'section', component: OrbitRing, blurb: 'Black pin, rotating studio photographs, cycling stats' },
+      { id: 'atrium/StatField', name: 'Stat Field', kind: 'section', component: StatField, blurb: 'Practice counters that count up on enter' },
+      { id: 'atrium/FooterAtrium', name: 'Footer Atrium', kind: 'footer', component: FooterAtrium, blurb: 'Giant wordmark closer and a legal row' },
     ],
   },
   {

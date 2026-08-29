@@ -1,0 +1,4064 @@
+{
+  "url": "https://kononenkogroup.com/",
+  "sku": "atrium",
+  "name": "Atrium",
+  "maxScroll": 19034,
+  "libs": [
+    "lenis",
+    "three",
+    "react"
+  ],
+  "beats": [
+    {
+      "index": 0,
+      "progress": 0,
+      "y": 0,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "72"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)",
+          "area": 1568160,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1568160,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 1568160,
+          "src": "https://images.prismic.io/kononenko/ajJbI41P9HI4UmtO_hero_hd.jpg?auto=format,compress&w=1536&fm=webp&q=95"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 78.78)",
+          "area": 21855.84375,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "72",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Kononenko  Architectural Bureau",
+          "text": "Kononenko Architectural Bureau",
+          "size": "60px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "beat inicial"
+      ],
+      "shot": "beat-00.jpg"
+    },
+    {
+      "index": 1,
+      "progress": 0.031,
+      "y": 595,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "79"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)",
+          "area": 1568160,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 119)",
+          "area": 1568160,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 1568160,
+          "src": "https://images.prismic.io/kononenko/ajJbI41P9HI4UmtO_hero_hd.jpg?auto=format,compress&w=1536&fm=webp&q=95"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": "matrix(1.0444, 0, 0, 1.0444, 0, -135.467)",
+          "area": 1130911.6153348088,
+          "src": "https://images.prismic.io/kononenko/afYFYcBOoF08xjTN_intro.jpg?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 77.3607)",
+          "area": 92425.4296875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 159.075)",
+          "area": 77622.890625,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 118.672)",
+          "area": 52299.84375,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 78.78)",
+          "area": 23839.96875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 78.78)",
+          "area": 21855.84375,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 78.78)",
+          "area": 14573.8125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 159.075)",
+          "area": 11866.640625,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "79",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Kononenko  Architectural Bureau",
+          "text": "Kononenko Architectural Bureau",
+          "size": "60px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "SystematicClarity & Creativity",
+          "text": "SystematicClarity & Creativity",
+          "size": "131.25px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1.1, 0, 0, 1.1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 119)",
+        "figura mueve: img opacity 1→1 t=matrix(1.0444, 0, 0, 1.0444, 0, -135.467",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 77.3607)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 159.075)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 118.672)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 159.075)",
+        "texto aparece: “79”",
+        "texto aparece: “SystematicClarity & Creativity”",
+        "texto sale: “72”"
+      ],
+      "shot": "beat-01.jpg"
+    },
+    {
+      "index": 2,
+      "progress": 0.063,
+      "y": 1190,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "84"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": "matrix(1.0444, 0, 0, 1.0444, 0, -29.6892)",
+          "area": 1130911.7989207506,
+          "src": "https://images.prismic.io/kononenko/afYFYcBOoF08xjTN_intro.jpg?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 77.3607)",
+          "area": 77622.890625,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 32.9323)",
+          "area": 52299.84375,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 50.6772)",
+          "area": 11866.640625,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "84",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "SystematicClarity & Creativity",
+          "text": "SystematicClarity & Creativity",
+          "size": "131.25px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: img opacity 1→1 t=matrix(1.0444, 0, 0, 1.0444, 0, -29.6892",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 77.3607)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 32.9323)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 50.6772)",
+        "texto aparece: “84”",
+        "texto sale: “79”",
+        "texto sale: “Kononenko Architectural Bureau”"
+      ],
+      "shot": "beat-02.jpg"
+    },
+    {
+      "index": 3,
+      "progress": 0.094,
+      "y": 1784,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "88"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": "matrix(1.0444, 0, 0, 1.0444, 0, 75.911)",
+          "area": 1130911.7071277797,
+          "src": "https://images.prismic.io/kononenko/afYFYcBOoF08xjTN_intro.jpg?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 23.6744)",
+          "area": 39960.02540588379,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 30.822)",
+          "area": 39960,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 40.3106)",
+          "area": 39960,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 39960,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 39960,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "88",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: img opacity 1→1 t=matrix(1.0444, 0, 0, 1.0444, 0, 75.911)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 23.6744)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 30.822)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 40.3106)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 48.48)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 48.48)",
+        "texto aparece: “88”",
+        "texto sale: “84”",
+        "texto sale: “SystematicClarity & Creativity”"
+      ],
+      "shot": "beat-03.jpg"
+    },
+    {
+      "index": 4,
+      "progress": 0.125,
+      "y": 2379,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "92"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 87.8245)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 57.372)",
+          "area": 161212.67578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 18.9278)",
+          "area": 39960.00317573547,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 14.5535)",
+          "area": 39960,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "92",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Architectural concept, facade and planning solutions, sketch project, working documentation, visualizations.",
+          "text": "Architectural concept, facade and planning solutions, sketch project, working do",
+          "size": "88.5px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 87.8245)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 57.372)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 18.9278)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 14.5535)",
+        "texto aparece: “92”",
+        "texto aparece: “Architectural concept, facade and planning solutio”",
+        "texto sale: “88”"
+      ],
+      "shot": "beat-04.jpg"
+    },
+    {
+      "index": 5,
+      "progress": 0.156,
+      "y": 2974,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "95"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 30.4366)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 46.6331)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 71.2191)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 19.5489)",
+          "area": 161212.67578125,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 16.251)",
+          "area": 22756.191497802734,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 19.249)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 22.8232)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 27.129)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 32.3044)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.7445)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.7445)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.7445)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.7445)",
+          "area": 22756.171875,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "95",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Architectural concept, facade and planning solutions, sketch project, working documentation, visualizations.",
+          "text": "Architectural concept, facade and planning solutions, sketch project, working do",
+          "size": "88.5px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 30.4366)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 46.6331)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 71.2191)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 19.5489)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "texto aparece: “95”",
+        "texto sale: “92”"
+      ],
+      "shot": "beat-05.jpg"
+    },
+    {
+      "index": 6,
+      "progress": 0.188,
+      "y": 3569,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "98"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 55.0493)",
+          "area": 26325.020599365234,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.9688)",
+          "area": 26325,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 10.5955)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 12.5588)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 14.8727)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 17.6063)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 20.8662)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 24.7625)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.1349)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 35.7445)",
+          "area": 22756.171875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 29.4669)",
+          "area": 22756.162063598633,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "98",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "From Sketch to Strategy",
+          "text": "From Sketch to Strategy",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 55.0493)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 35.9688)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 10.5955)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 12.5588)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 14.8727)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 17.6063)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 20.8662)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 24.7625)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 35.1349)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 29.4669)",
+        "texto aparece: “98”",
+        "texto aparece: “From Sketch to Strategy”",
+        "texto sale: “95”",
+        "texto sale: “Architectural concept, facade and planning solutio”"
+      ],
+      "shot": "beat-06.jpg"
+    },
+    {
+      "index": 7,
+      "progress": 0.219,
+      "y": 4164,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "100"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "100",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “100”",
+        "texto sale: “98”",
+        "texto sale: “From Sketch to Strategy”"
+      ],
+      "shot": "beat-07.jpg"
+    },
+    {
+      "index": 8,
+      "progress": 0.25,
+      "y": 4759,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0.7123",
+          "transform": null,
+          "text": "100"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 94.9696)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 125.13)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 61.8992)",
+          "area": 161677.265625,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 23.9821)",
+          "area": 35376.044982910156,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 31.2254)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 40.85)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 35376,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "100",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Early-stage ideas are distilled into precise frameworks, balancing intuition, analysis, and clarity.",
+          "text": "Early-stage ideas are distilled into precise frameworks, balancing intuition, an",
+          "size": "88.5px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: span (span)",
+        "figura entra: span (span)",
+        "figura entra: span (span)",
+        "figura entra: span (span)",
+        "figura entra: span (span)",
+        "figura entra: span (span)",
+        "figura entra: span (span)",
+        "texto aparece: “Early-stage ideas are distilled into precise frame”"
+      ],
+      "shot": "beat-08.jpg"
+    },
+    {
+      "index": 9,
+      "progress": 0.281,
+      "y": 5353,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0.0345",
+          "transform": null,
+          "text": "100"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 42.676)",
+          "area": 172827.421875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 6.87883)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 9.10733)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 15.578)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 20.2576)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 26.3321)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 34.3268)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 44.9968)",
+          "area": 35376,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 11.9482)",
+          "area": 35375.98875427246,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 35375.97750854492,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "p",
+          "text": "100",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Early-stage ideas are distilled into precise frameworks, balancing intuition, analysis, and clarity.",
+          "text": "Early-stage ideas are distilled into precise frameworks, balancing intuition, an",
+          "size": "88.5px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "h"
+        },
+        {
+          "name": "Precision in Development",
+          "text": "Precision in Development",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 42.676)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 6.87883)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 9.10733)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 15.578)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 20.2576)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 26.3321)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 34.3268)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 44.9968)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 11.9482)",
+        "texto aparece: “Precision in Development”"
+      ],
+      "shot": "beat-09.jpg"
+    },
+    {
+      "index": 10,
+      "progress": 0.313,
+      "y": 5948,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 38.8038)",
+          "area": 26325,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 59.5365)",
+          "area": 26325,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Precision in Development",
+          "text": "Precision in Development",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 38.8038)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 59.5365)",
+        "texto sale: “100”",
+        "texto sale: “Early-stage ideas are distilled into precise frame”"
+      ],
+      "shot": "beat-10.jpg"
+    },
+    {
+      "index": 11,
+      "progress": 0.344,
+      "y": 6543,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 30.693)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 40.1381)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 23.5766)",
+          "area": 22032,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 30.693)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 40.1381)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 48.48)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 48.48)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 23.5766)",
+        "texto sale: “Precision in Development”"
+      ],
+      "shot": "beat-11.jpg"
+    },
+    {
+      "index": 12,
+      "progress": 0.375,
+      "y": 7138,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 101.768)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/ajGEQI1P9HI4UlWI_pokrovskoe-private-house-3-3.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 51.6558)",
+          "area": 31347.65625,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 37.0406)",
+          "area": 29249.977111816406,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 28.3007)",
+          "area": 26352.008377075195,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 9.81686)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 12.853)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 16.7447)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 21.7607)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 36.9531)",
+          "area": 26352,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 48.48)",
+          "area": 26351.98324584961,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 7.4376)",
+          "area": 22032,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Selected Projects (8+)",
+          "text": "Selected Projects (8+)",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: a (a)",
+        "figura entra: img (img)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 51.6558)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 37.0406)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 28.3007)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 9.81686)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 12.853)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 16.7447)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 21.7607)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 36.9531)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 48.48)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 7.4376)",
+        "texto aparece: “Selected Projects (8+)”"
+      ],
+      "shot": "beat-12.jpg"
+    },
+    {
+      "index": 13,
+      "progress": 0.406,
+      "y": 7733,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 32.0105)",
+          "area": 278348.65225219727,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 32.0105)",
+          "area": 278348.65225219727,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260414.98037719727,
+          "src": "https://images.prismic.io/kononenko/ajGEQI1P9HI4UlWI_pokrovskoe-private-house-3-3.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260414.98037719727,
+          "src": "https://images.prismic.io/kononenko/ajFvlY1P9HI4UlLH_millenium-park-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 16.5078)",
+          "area": 31347.65625,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Selected Projects (8+)",
+          "text": "Selected Projects (8+)",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 32.0105)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 32.0105)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 16.5078)"
+      ],
+      "shot": "beat-13.jpg"
+    },
+    {
+      "index": 14,
+      "progress": 0.438,
+      "y": 8327,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 7.87168)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/ajFvlY1P9HI4UlLH_millenium-park-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 32.0105)",
+          "area": 237656.953125,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 222345,
+          "src": "https://images.prismic.io/kononenko/ajEFXI1P9HI4Ujbv_kns-stolbovo-boiler-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 124.618)",
+          "area": 199593.4935913086,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 189524.9779663086,
+          "src": "https://images.prismic.io/kononenko/ajD8wY1P9HI4UjWj_bolshevik-residential-complex-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 7.87168)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 124.618)",
+        "texto sale: “Selected Projects (8+)”"
+      ],
+      "shot": "beat-14.jpg"
+    },
+    {
+      "index": 15,
+      "progress": 0.469,
+      "y": 8922,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 26.1964)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/aip70alQnVZVEM1X_kotelnaya-kinetics-3.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 6.30245)",
+          "area": 237656.98663330078,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 222345.03350830078,
+          "src": "https://images.prismic.io/kononenko/ajEFXI1P9HI4Ujbv_kns-stolbovo-boiler-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 33.4582)",
+          "area": 199593.5376586914,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 189525.0220336914,
+          "src": "https://images.prismic.io/kononenko/ajD8wY1P9HI4UjWj_bolshevik-residential-complex-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 26.1964)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 6.30245)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 33.4582)"
+      ],
+      "shot": "beat-15.jpg"
+    },
+    {
+      "index": 16,
+      "progress": 0.5,
+      "y": 9517,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 6.60937)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 42.6058)",
+          "area": 199593.515625,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 189525,
+          "src": "https://images.prismic.io/kononenko/aip0ZqlQnVZVEMsw_vision-mansion-private-2.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 6.60937)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 42.6058)"
+      ],
+      "shot": "beat-16.jpg"
+    },
+    {
+      "index": 17,
+      "progress": 0.531,
+      "y": 10112,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 105.698)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 34.5763)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/aiptnKlQnVZVEMlW_almaty-hotelornament-stone-4.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/aikwFAeQX7-eXIgS_eli-house-corner-plot-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 11.5211)",
+          "area": 199593.4715576172,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 189524.9559326172,
+          "src": "https://images.prismic.io/kononenko/aip0ZqlQnVZVEMsw_vision-mansion-private-2.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 105.698)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 34.5763)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 11.5211)"
+      ],
+      "shot": "beat-17.jpg"
+    },
+    {
+      "index": 18,
+      "progress": 0.563,
+      "y": 10707,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Refined & Bold EssentialSimplicity & Clarity of "
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 33.8153)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "a",
+          "tag": "a",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 8.85824)",
+          "area": 278348.671875,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/aiptnKlQnVZVEMlW_almaty-hotelornament-stone-4.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 260415,
+          "src": "https://images.prismic.io/kononenko/aikwFAeQX7-eXIgS_eli-house-corner-plot-1.jpg?auto=format,compress&w=768&fm=webp&q=95"
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 37125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 33.8153)",
+        "figura mueve: a opacity 1→1 t=matrix(1, 0, 0, 1, 0, 8.85824)",
+        "figura entra: span (span)"
+      ],
+      "shot": "beat-18.jpg"
+    },
+    {
+      "index": 19,
+      "progress": 0.594,
+      "y": 11301,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Refined & Bold EssentialSimplicity & Clarity of "
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 37125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 83.325)",
+          "area": 37125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Refined & Bold Essential",
+          "text": "Refined & Bold Essential",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Simplicity & Clarity of Approach",
+          "text": "Simplicity & Clarity of Approach",
+          "size": "60px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 83.325)",
+        "texto aparece: “Refined & Bold Essential”",
+        "texto aparece: “Simplicity & Clarity of Approach”"
+      ],
+      "shot": "beat-19.jpg"
+    },
+    {
+      "index": 20,
+      "progress": 0.625,
+      "y": 11896,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Refined & Bold EssentialSimplicity & Clarity of "
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -1.77639)",
+          "area": 37125.013732910156,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -42.8027)",
+          "area": 37125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 83.325)",
+          "area": 37125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Refined & Bold Essential",
+          "text": "Refined & Bold Essential",
+          "size": "60px",
+          "color": "rgb(233, 233, 233)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Simplicity & Clarity of Approach",
+          "text": "Simplicity & Clarity of Approach",
+          "size": "60px",
+          "color": "rgb(233, 233, 233)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, -1.77639)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, -42.8027)"
+      ],
+      "shot": "beat-20.jpg"
+    },
+    {
+      "index": 21,
+      "progress": 0.656,
+      "y": 12491,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Refined & Bold EssentialSimplicity & Clarity of "
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 125.13)",
+          "area": 104997.3046875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 91.6889)",
+          "area": 76705.83984375,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -61.4222)",
+          "area": 37125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 43.825)",
+          "area": 37125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Refined & Bold Essential",
+          "text": "Refined & Bold Essential",
+          "size": "60px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Simplicity & Clarity of Approach",
+          "text": "Simplicity & Clarity of Approach",
+          "size": "60px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "A studio shaped by clarity, trust, and a collective pursuit of thoughtful design.",
+          "text": "A studio shaped by clarity, trust, and a collective pursuit of thoughtful design",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 125.13)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 91.6889)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, -61.4222)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 43.825)",
+        "texto aparece: “A studio shaped by clarity, trust, and a collectiv”"
+      ],
+      "shot": "beat-21.jpg"
+    },
+    {
+      "index": 22,
+      "progress": 0.688,
+      "y": 13086,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 45.084)",
+          "area": 104997.3046875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 68.8347)",
+          "area": 104997.3046875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 105.904)",
+          "area": 104997.3046875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 24.1499)",
+          "area": 76705.84559440613,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "A studio shaped by clarity, trust, and a collective pursuit of thoughtful design.",
+          "text": "A studio shaped by clarity, trust, and a collective pursuit of thoughtful design",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 45.084)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 68.8347)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 105.904)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 24.1499)",
+        "texto sale: “Refined & Bold Essential”",
+        "texto sale: “Simplicity & Clarity of Approach”"
+      ],
+      "shot": "beat-22.jpg"
+    },
+    {
+      "index": 23,
+      "progress": 0.719,
+      "y": 13681,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 73.2022)",
+          "area": 131561.71875,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "2011 Year of Foundation",
+          "text": "2011 Year of Foundation",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 73.2022)",
+        "texto aparece: “2011 Year of Foundation”",
+        "texto sale: “A studio shaped by clarity, trust, and a collectiv”"
+      ],
+      "shot": "beat-23.jpg"
+    },
+    {
+      "index": 24,
+      "progress": 0.75,
+      "y": 14276,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 6.46788)",
+          "area": 131561.74140930176,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 11.5842)",
+          "area": 131561.71875,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "2011 Year of Foundation",
+          "text": "2011 Year of Foundation",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 6.46788)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 11.5842)"
+      ],
+      "shot": "beat-24.jpg"
+    },
+    {
+      "index": 25,
+      "progress": 0.781,
+      "y": 14870,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 65.9063)",
+          "area": 101233.125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "15+",
+          "text": "15+",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Years of experience",
+          "text": "Years of experience",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 65.9063)",
+        "texto aparece: “15+”",
+        "texto aparece: “Years of experience”",
+        "texto sale: “2011 Year of Foundation”"
+      ],
+      "shot": "beat-25.jpg"
+    },
+    {
+      "index": 26,
+      "progress": 0.813,
+      "y": 15465,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 7.87327)",
+          "area": 101233.125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 61.33)",
+          "area": 101233.125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 17.2675)",
+          "area": 79630.69921875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 113.574)",
+          "area": 79630.69921875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 10.639)",
+          "area": 67551.36328125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 73.6812)",
+          "area": 67551.36328125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "15+",
+          "text": "15+",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Years of experience",
+          "text": "Years of experience",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        },
+        {
+          "name": "490+",
+          "text": "490+",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Completed projects",
+          "text": "Completed projects",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 7.87327)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 61.33)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 17.2675)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 113.574)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 10.639)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 73.6812)",
+        "texto aparece: “490+”",
+        "texto aparece: “Completed projects”"
+      ],
+      "shot": "beat-26.jpg"
+    },
+    {
+      "index": 27,
+      "progress": 0.844,
+      "y": 16060,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 9.43677)",
+          "area": 101233.125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 63.4445)",
+          "area": 101233.125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 63.4445)",
+          "area": 101233.125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 19.9889)",
+          "area": 79630.70412254333,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 117.704)",
+          "area": 79630.69921875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 12.4842)",
+          "area": 67551.36328125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 76.2238)",
+          "area": 67551.36328125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 76.2238)",
+          "area": 67551.36328125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Completed projects",
+          "text": "Completed projects",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        },
+        {
+          "name": "45+",
+          "text": "45+",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Professionals on the team",
+          "text": "Professionals on the team",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        },
+        {
+          "name": "40K",
+          "text": "40K",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Total area covered",
+          "text": "Total area covered",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 9.43677)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 63.4445)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 63.4445)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 19.9889)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 117.704)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 12.4842)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 76.2238)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 76.2238)",
+        "texto aparece: “45+”",
+        "texto aparece: “Professionals on the team”",
+        "texto aparece: “40K”",
+        "texto aparece: “Total area covered”",
+        "texto sale: “15+”",
+        "texto sale: “Years of experience”",
+        "texto sale: “490+”"
+      ],
+      "shot": "beat-27.jpg"
+    },
+    {
+      "index": 28,
+      "progress": 0.875,
+      "y": 16655,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 75.4332)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 115.34)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 11.8894)",
+          "area": 101233.125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 24.2489)",
+          "area": 79630.69921875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 15.3605)",
+          "area": 67551.37160110474,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 11928.788681089878,
+          "src": "https://images.prismic.io/kononenko/ahQcZbK9tuLqEHTJ_parnter-9.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.0870406,
+          "transform": "matrix(0.793171, 0, 0, 0.793171, 416.006, -278.591)",
+          "area": 10227.129748478532,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 10227.129748478532,
+          "src": "https://images.prismic.io/kononenko/ahQcZrK9tuLqEHTK_parnter-10.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 9319.292697641999,
+          "src": "https://images.prismic.io/kononenko/ahQcbLK9tuLqEHTQ_parnter-16.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.0912703,
+          "transform": "matrix(0.744537, 0, 0, 0.744537, 273.634, -362.836)",
+          "area": 9011.419602379203,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 9011.419602379203,
+          "src": "https://images.prismic.io/kononenko/ahQcZ7K9tuLqEHTL_parnter-11.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 8463.124046102166,
+          "src": "https://images.prismic.io/kononenko/ahQca7K9tuLqEHTP_parnter-15.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 8294.930230848491,
+          "src": "https://images.prismic.io/kononenko/ahQcaLK9tuLqEHTM_parnter-12.png?auto=format,compress&w=1400&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "40K",
+          "text": "40K",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "Total area covered",
+          "text": "Total area covered",
+          "size": "88.5px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        },
+        {
+          "name": "The  World’s Most Ambitious Brands Choose to Work With Us",
+          "text": "The World’s Most Ambitious Brands Choose to Work With Us",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 75.4332)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 115.34)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 11.8894)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 24.2489)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 15.3605)",
+        "figura entra: img (img)",
+        "figura entra: div (div)",
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "figura entra: div (div)",
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "texto aparece: “The World’s Most Ambitious Brands Choose to Work W”",
+        "texto sale: “Completed projects”",
+        "texto sale: “45+”",
+        "texto sale: “Professionals on the team”"
+      ],
+      "shot": "beat-28.jpg"
+    },
+    {
+      "index": 29,
+      "progress": 0.906,
+      "y": 17250,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 33.377)",
+          "area": 143477.59079360962,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 12.8422)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 21.1244)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 51.518)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 78.6807)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 120.405)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 16197.704479191452,
+          "src": "https://images.prismic.io/kononenko/ahQcX7K9tuLqEHTC_parnter-3.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 16188.477461043745,
+          "src": "https://images.prismic.io/kononenko/ahQcYLK9tuLqEHTD_parnter-4.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 15698.63391071558,
+          "src": "https://images.prismic.io/kononenko/ahQcXrK9tuLqEHTB_parnter-2.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 15670.557756990194,
+          "src": "https://images.prismic.io/kononenko/ahQcYbK9tuLqEHTE_parnter-5.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 14675.453992271796,
+          "src": "https://images.prismic.io/kononenko/ahQcXbK9tuLqEHTA_parnter-1.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 14627.967928133905,
+          "src": "https://images.prismic.io/kononenko/ahQcYrK9tuLqEHTF_parnter-6.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 13141.353386878967,
+          "src": "https://images.prismic.io/kononenko/ahQcbbK9tuLqEHTS_parnter-17.png?auto=format,compress&w=1400&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "The  World’s Most Ambitious Brands Choose to Work With Us",
+          "text": "The World’s Most Ambitious Brands Choose to Work With Us",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 33.377)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 12.8422)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 21.1244)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 51.518)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 78.6807)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 120.405)",
+        "texto sale: “40K”",
+        "texto sale: “Total area covered”"
+      ],
+      "shot": "beat-29.jpg"
+    },
+    {
+      "index": 30,
+      "progress": 0.938,
+      "y": 17844,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 16.8238)",
+          "area": 143477.578125,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.103988,
+          "transform": "matrix(0.999973, 0, 0, 0.999973, 121.025, 358.164)",
+          "area": 16255.37842965126,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 16255.37842965126,
+          "src": "https://images.prismic.io/kononenko/ahQcXrK9tuLqEHTB_parnter-2.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.534026,
+          "transform": "matrix(0.993084, 0, 0, 0.993084, -42.089, 390.449)",
+          "area": 16032.174926880747,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 16032.174926880747,
+          "src": "https://images.prismic.io/kononenko/ahQcXbK9tuLqEHTA_parnter-1.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.293592,
+          "transform": "matrix(0.991238, 0, 0, 0.991238, 271.966, 288.43)",
+          "area": 15972.615295410156,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 15972.615295410156,
+          "src": "https://images.prismic.io/kononenko/ahQcX7K9tuLqEHTC_parnter-3.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.833849,
+          "transform": "matrix(0.969966, 0, 0, 0.969966, -207.955, 380.777)",
+          "area": 15294.44583073631,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 15294.44583073631,
+          "src": "https://images.prismic.io/kononenko/ahQcbbK9tuLqEHTS_parnter-17.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.675011,
+          "transform": "matrix(0.966117, 0, 0, 0.966117, 399.987, 182.566)",
+          "area": 15173.303077295423,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 15173.303077295423,
+          "src": "https://images.prismic.io/kononenko/ahQcYLK9tuLqEHTD_parnter-4.png?auto=format,compress&w=1400&fm=webp&q=95"
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 0.716482,
+          "transform": "matrix(0.928954, 0, 0, 0.928954, -362.291, 320.336)",
+          "area": 14028.42454725504,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 14028.42454725504,
+          "src": "https://images.prismic.io/kononenko/ahQcbLK9tuLqEHTQ_parnter-16.png?auto=format,compress&w=1400&fm=webp&q=95"
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "The  World’s Most Ambitious Brands Choose to Work With Us",
+          "text": "The World’s Most Ambitious Brands Choose to Work With Us",
+          "size": "131.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "h"
+        },
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 16.8238)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)",
+        "figura entra: div (div)"
+      ],
+      "shot": "beat-30.jpg"
+    },
+    {
+      "index": 31,
+      "progress": 0.969,
+      "y": 18134,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 466.732)",
+          "area": 127662.24668129161,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 274.489)",
+          "area": 127661.91201515496,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 357.18)",
+          "area": 123251.99508747086,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: path (path)",
+        "figura entra: path (path)",
+        "figura entra: path (path)",
+        "texto sale: “The World’s Most Ambitious Brands Choose to Work W”"
+      ],
+      "shot": "beat-31.jpg"
+    },
+    {
+      "index": 32,
+      "progress": 1,
+      "y": 18134,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "header",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "KononenkoArchitecturalBureauIndex,Work,About,Con"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 126.293)",
+          "area": 160384.1787855327,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 95.8739)",
+          "area": 127662.20743235573,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 53.2679)",
+          "area": 127661.89239073545,
+          "src": null
+        },
+        {
+          "name": "path",
+          "tag": "path",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 72.0011)",
+          "area": 123251.9856142113,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        },
+        {
+          "name": "KononenkoArchitecturalBureau",
+          "text": "KononenkoArchitecturalBureau",
+          "size": "14.25px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "400",
+          "font": "n"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: path opacity 1→1 t=matrix(1, 0, 0, 1, 0, 126.293)",
+        "figura mueve: path opacity 1→1 t=matrix(1, 0, 0, 1, 0, 95.8739)",
+        "figura mueve: path opacity 1→1 t=matrix(1, 0, 0, 1, 0, 53.2679)",
+        "figura mueve: path opacity 1→1 t=matrix(1, 0, 0, 1, 0, 72.0011)"
+      ],
+      "shot": "beat-32.jpg"
+    }
+  ]
+}

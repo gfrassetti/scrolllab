@@ -13,10 +13,11 @@ export const TEMPLATE_PRICES_USD = {
   comic: 229,
   unity: 189,
   ratio: 269,
+  atrium: 189,
 }
 
 /** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
-export const COMING_SOON_SKUS = ['ratio']
+export const COMING_SOON_SKUS = ['ratio', 'atrium']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
@@ -24,13 +25,13 @@ export const COMING_SOON_SKUS = ['ratio']
 export const LOCAL_ONLY_SKUS = ['ratio']
 
 /** Preview en dev: card + demo (+ builder) aunque sigan en COMING_SOON_SKUS. */
-export const DEV_PREVIEW_SKUS = []
+export const DEV_PREVIEW_SKUS = ['atrium']
 
 /**
  * Modelos que no entran a la paleta del builder.
  * RATIO sigue en obra: va acá y en COMING_SOON_SKUS.
  */
-export const BUILDER_HIDDEN_SKUS = ['ratio']
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'atrium']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)

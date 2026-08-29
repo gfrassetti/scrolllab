@@ -16,8 +16,10 @@ storage/
 .cursor/mcp.json
 meshy_output/
 
-# Cursor skills generadas por CLIs (impeccable / uipro) — instalar local, no versionar
-# Se mantiene en repo solo: .cursor/skills/template-image-designer/
+# Cursor / agents skills generadas por CLIs — instalar local, no versionar
+# Se versiona: .cursor/skills/template-image-designer/ + skills-lock.json
+.agents/skills/
+.img2threejs/
 .cursor/skills/banner-design/
 .cursor/skills/brand/
 .cursor/skills/design/
@@ -28,6 +30,8 @@ meshy_output/
 .cursor/skills/ui-ux-pro-max/
 .cursor/skills/emil-design-eng/
 .cursor/skills/taste-skill/
+.cursor/skills/playwright-cli/
+.cursor/skills/img2threejs/
 
 # Refs temporales de Loom / scrapes (no producto)
 docs/reference-analysis/loom*

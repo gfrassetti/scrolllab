@@ -21,20 +21,28 @@ En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, pol
 
 | # | Herramienta | Rol | Dónde |
 |---|---|---|---|
-| 1 | **Impeccable** | Critique / audit / **polish** / animate / anti-slop — **siempre** antes de dar por cerrada una UI | `.cursor/skills/impeccable/` · [impeccable.style](https://impeccable.style) · repo [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
+| 1 | **Impeccable** | Critique / audit / **polish** / animate / anti-slop — **siempre** antes de dar por cerrada una UI. Leer `SKILL.md` al tocar UI | `.cursor/skills/impeccable/` · [impeccable.style](https://impeccable.style) · repo [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
 | 2 | **Emil Kowalski / emil-design-eng** | Easing, duración, press feedback, drawers/toasts, “should this animate?” | `.cursor/skills/emil-design-eng/` · [animations.dev](https://animations.dev/) |
-| 3 | **taste-skill** (`design-taste-frontend`) | Anti-slop: no repetir look genérico LLM; brief inference antes de diseñar | `.cursor/skills/taste-skill/` · [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| 3 | **taste-skill** (`design-taste-frontend`) | Anti-slop: no repetir look genérico LLM; brief inference antes de diseñar | `.agents/skills/design-taste-frontend/` (junction `.cursor/skills/taste-skill/`) · [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
 | 4 | **UI/UX Pro Max** | Sistemas, paletas, tipografía, checklist UX | `.cursor/skills/ui-ux-pro-max/` |
-| 5 | **template-image-designer** | Fotos / cutouts reales de templates | `.cursor/skills/template-image-designer/` (versionada) |
+| 5 | **template-image-designer** | Inventario + brief de piezas de un SKU | `.cursor/skills/template-image-designer/` (versionada) |
+| 6 | **Higgsfield** (plugin MCP) | Generar fotos, cutouts PNG, video, GLB — **preferido** para assets de templates | namespace `plugin-higgsfield-higgsfield` · [higgsfield.ai](https://higgsfield.ai) · plugin [Cursor Marketplace](https://cursor.com/marketplace/higgsfield) |
+| 7 | **playwright-cli** | Verificar demos/UI en el browser (open / snapshot / click / screenshot). Token-efficient | `.agents/skills/playwright-cli/` · [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) · [docs](https://playwright.dev/docs/getting-started-cli) |
+| 8 | **img2threejs** | Reconstruir un objeto de una foto como Three.js **procedural** (código, no GLB) | `.agents/skills/img2threejs/` · [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs) |
 
 ### Reglas de uso (no negociables)
 
-1. **Impeccable siempre**: al crear o tocar UI, correr el flujo relevante (`critique` / `audit` / **`polish`**). No shippear chrome “a ojo” sin pasar por Impeccable.
+1. **Impeccable siempre**: al crear o tocar UI, **leer** `.cursor/skills/impeccable/SKILL.md` y correr el flujo relevante (`critique` / `audit` / **`polish`**). No shippear chrome “a ojo” sin pasar por Impeccable.
 2. **Emil en motion de UI**: chrome del market + microinteracciones de templates (nav, botones, popovers, toasts). Tokens en `src/index.css` (`--ease-out`, `--ease-in-out`, `--ease-drawer`). Nunca `ease-in` en UI. Scroll storytelling sigue en GSAP + cookbook.
-3. **taste-skill antes de inventar look**: declarar un “Design Read” de una línea; evitar defaults LLM (purple mesh, Inter+slate, cards genéricas).
+3. **taste-skill antes de inventar look**: declarar un “Design Read” de una línea; evitar defaults LLM (purple mesh, Inter+slate, cards genéricas). Skill canónico: `design-taste-frontend`.
 4. El scrollytelling cinematográfico (pin/scrub/WebGL) **no** se reemplaza por micro-UI: Emil/Impeccable pulen el chrome y los detalles; el cookbook manda el scroll.
+5. **Higgsfield para piezas de imagen** de templates (fotos, cutouts, upscale). No picsum. `GenerateImage` nativo de Cursor es fallback si el plugin no está. Video / GLB: preflight `get_cost` y confirmar créditos con el usuario.
+6. **playwright-cli para verificar** templates y chrome en el browser (`npx playwright-cli …`). Leer el skill antes de automatizar. No sustituye `check:visual` / `check:builder`.
+7. **img2threejs** cuando hay que esculpir un objeto **genérico y reemplazable** desde una foto a código Three.js. No para caras/artistas/productos únicos (mismo filtro que Tabasco). GLB texturizado: Higgsfield `generate_3d` o Meshy.
 
 ### Instalar / actualizar (local, gitignored)
+
+Los skills de CLI viven en `.agents/skills/` (`skills-lock.json` sí se versiona). Restore: `npx skills experimental_install -y`.
 
 ```bash
 npx impeccable install --providers=cursor --scope=project
@@ -42,8 +50,17 @@ npx impeccable update
 # link opcional si tenés skills compiladas en .impeccable:
 # npx impeccable link --source=.impeccable --providers=cursor
 
-# taste-skill (si `npx skills` falla por Node < 22.20, clonar/copiar SKILL.md a .cursor/skills/taste-skill/)
-npx skills add Leonxlnx/taste-skill
+# taste-skill (pack: design-taste-frontend + siblings)
+npx skills add Leonxlnx/taste-skill -a cursor -y
+
+# Playwright CLI (skill + bin local)
+npx skills add https://github.com/microsoft/playwright-cli --skill playwright-cli -a cursor -y
+npm install -D @playwright/cli@latest
+npx playwright-cli --help
+npx playwright-cli install-browser chromium
+
+# img2threejs (checkout completo: SKILL + forge/ + grimoire/)
+npx skills add img2threejs/img2threejs -a cursor -y --full-depth
 
 # Emil design eng
 # clonar https://github.com/emilkowalski/skills → .cursor/skills/emil-design-eng/
@@ -59,11 +76,15 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 
 | Situación | Herramienta |
 |---|---|
-| Pulir / limpiar UI existente | **Impeccable `polish`** (obligatorio) |
+| Pulir / limpiar UI existente | **Impeccable `polish`** (obligatorio; leer el skill) |
 | Microinteracción / easing / toast / drawer | **emil-design-eng** |
 | Landing / homepage / evitar look repetido | **taste-skill** + Impeccable |
 | Sistema de color / tipografía / checklist | **UI/UX Pro Max** |
-| Fotos / cutouts de un template | **template-image-designer** |
+| Fotos / cutouts de un template | **Higgsfield** `generate_image` + `remove_background` (brief: template-image-designer) |
+| Video / still animado de un beat | **Higgsfield** `generate_video` (confirmar créditos) |
+| Verificar demo / flujo en el browser | **playwright-cli** (`npx playwright-cli open …`) |
+| Objeto 3D procedural desde una foto (código Three.js) | **img2threejs** — solo si es genérico/vendible |
+| Mesh GLB texturizado | **Higgsfield** `generate_3d` o **Meshy MCP** |
 | Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
 | Motion de piezas en una sección (riel / cubo / letras) | **Beat** — [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) + `src/lib/beat/` |
 | Card hero / tableau / emblem Three.js | **WebGL mini motor** — [`docs/scrolllab-webgl.md`](docs/scrolllab-webgl.md) + `src/lib/webgl/` |
@@ -72,7 +93,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
 
-Para UI/UX award-level, estas tools viven **instaladas en la máquina** (gitignored salvo `template-image-designer`). Complementan el posicionamiento Awwwards; no lo reemplazan.
+Para UI/UX award-level, estas tools viven **instaladas en la máquina** (gitignored salvo `template-image-designer` y `skills-lock.json`). Complementan el posicionamiento Awwwards; no lo reemplazan.
 
 ### Impeccable (local: `.cursor/skills/impeccable/`)
 
@@ -88,7 +109,60 @@ Para UI/UX award-level, estas tools viven **instaladas en la máquina** (gitigno
 
 ### Skill de producto (sí versionada)
 
-- `.cursor/skills/template-image-designer/` — piezas de imagen realistas para templates SCROLLLAB
+- `.cursor/skills/template-image-designer/` — inventario + brief de piezas; la generación la hace Higgsfield
+
+### Higgsfield (plugin Cursor — ya vinculado)
+
+Plugin MCP `plugin-higgsfield-higgsfield` ([Marketplace](https://cursor.com/marketplace/higgsfield), [higgsfield.ai](https://higgsfield.ai)). No hay CLI que instalar: si el namespace no aparece, reactivar el plugin y autenticar en Customize → MCPs.
+
+**Default para assets de templates** (fotos fotográficas, no picsum):
+
+| Necesidad | Tool |
+|---|---|
+| Foto / still | `generate_image` (`models_explore` si el modelo no está claro) |
+| Cutout PNG alpha | `remove_background` sobre el job/media |
+| Upscale / reframe / expandir | `upscale_image` / `reframe` / `outpaint_image` |
+| Video de un beat | `generate_video` — `get_cost:true` y confirmar créditos |
+| GLB desde foto | `generate_3d` — mismo filtro genérico/vendible; o Meshy |
+
+Bajar el archivo a `src/components/sections/<sku>/assets/` e importarlo en el JSX. Fallback si el plugin no está: tool `GenerateImage` de Cursor.
+
+Video, 3D y batches caros: no gastar créditos a ciegas. Entrada `/higgs` para pedidos sueltos de media.
+
+### Playwright CLI (verificar UI)
+
+Bin local: `npx playwright-cli` (`devDependency` `@playwright/cli`). Skill: `.agents/skills/playwright-cli/SKILL.md`.
+
+Al verificar un template o chrome (no en lugar de `npm run check:visual`):
+
+```bash
+npx playwright-cli open http://localhost:5173/templates/atrium --headed
+npx playwright-cli snapshot
+npx playwright-cli screenshot
+npx playwright-cli close
+```
+
+Patrón de sesión (docs oficiales):
+
+```bash
+npx playwright-cli open https://demo.playwright.dev/todomvc --headed
+npx playwright-cli type "Buy groceries"
+npx playwright-cli press Enter
+npx playwright-cli type "Water flowers"
+npx playwright-cli press Enter
+npx playwright-cli check e21
+npx playwright-cli screenshot
+```
+
+Si `playwright-cli` no está en PATH, usar `npx playwright-cli` (este repo) o `npx playwright cli`.
+
+### img2threejs (foto → Three.js procedural)
+
+Skill + `forge/` + `grimoire/`: `.agents/skills/img2threejs/`. Estado local: `.img2threejs/` (gitignored).
+
+Usar cuando el brief pide reconstruir **el objeto de una imagen** como modelo Three.js en código (primitivas, shaders, geometría generada) — no photogrammetry ni un GLB de Higgsfield/Meshy. Seguir el `SKILL.md`: `python forge/next.py` como gate, pases blockout → material, verificar contra la ref.
+
+**Filtro SCROLLLAB:** el objeto tiene que ser reemplazable por el comprador (latas geométricas, hardware genérico, massing abstracto). Una cara, un artista o un producto único no entra.
 
 ## Stack & commands
 
@@ -279,7 +353,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 2. **Template nuevo desde URL de referencia** → correr solo  
    `npm run analyze:ref -- <url> --sku <sku> --name "<Name>"`  
    (ver `.cursor/rules/analyze-reference.mdc`). Playwright muestrea el scroll y **solo guarda beats donde cambia la firma** (fondo / sticky / transforms / texto) + JPEG livianos en `docs/reference-analysis/<sku>/beats/`. Si hay `GEMINI_API_KEY` o `GOOGLE_API_KEY` en `.env`, una pasada de Gemini anota fondo/figura/texto. Salida: Obsidian + `docs/reference-analysis/<sku>.md` + `beats.json`. No esperar a que el usuario lo pida.
-3. **Piezas de imagen del template** → el agente actúa como diseñador/generador: inventariar cada foto/cutout que la ref anima, generar assets realistas locales en `src/components/sections/<sku>/assets/`, **sin picsum**. Regla `.cursor/rules/template-image-assets.mdc` + skill `.cursor/skills/template-image-designer/`.
+3. **Piezas de imagen del template** → inventariar cada foto/cutout que la ref anima (skill `template-image-designer`), generarlas con **Higgsfield** (`generate_image`, cutout con `remove_background`), guardar en `src/components/sections/<sku>/assets/`, **sin picsum**. Si el beat pide un objeto 3D **procedural genérico** → **img2threejs**. Si pide un GLB texturizado → Higgsfield `generate_3d` o Meshy.
 4. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
 5. **Motion / transitions de un template** → leer `Storytelling motion cookbook.md` (Obsidian) + `docs/motion-cookbook.md`. Piezas que recorren un riel → **Beat** (`docs/scrolllab-beat.md`, `useBeatStage`). Si la ref es Readymag → extraer recetas ([`docs/readymag-motion.md`](docs/readymag-motion.md)) y alimentar Beat, no tweens `x/y` “parecidos”.
 6. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
@@ -297,9 +371,16 @@ Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre�
 
 ## Cursor Cloud specific instructions
 
+### Plugin: Higgsfield (imágenes, video, 3D)
+
+- Ya vinculado: namespace MCP `plugin-higgsfield-higgsfield`. Si no aparece, Customize → Plugins / MCPs y reautenticar.
+- Default para fotos y cutouts de templates (`generate_image`, `remove_background`). Guardar en `sections/<sku>/assets/`.
+- Video y `generate_3d`: `get_cost:true` y confirmar créditos. Mismo filtro de plantilla genérica que el resto del catálogo.
+
 ### MCP: Meshy (generación de assets 3D)
 
 - Config del servidor MCP en `.cursor/mcp.json` (server `meshy` → `npx -y @meshy-ai/meshy-mcp-server`). **Ese archivo está gitignored**, así que no viaja con el repo: si no existe, recrealo con esa entrada.
 - La API key va **solo** como secret `MESHY_API_KEY` (empieza con `msy_`), referenciada en `mcp.json` como `"MESHY_API_KEY": "${env:MESHY_API_KEY}"`. Nunca hardcodear ni commitear la key (los docs de Meshy lo advierten; consume créditos de la cuenta).
 - El server **valida la key contra `https://api.meshy.ai` al arrancar**: sin una key válida no levanta (`Invalid MESHY_API_KEY`) y las tools no aparecen. Tras setear el secret, activá el server en el panel MCP de Cursor.
 - Encaja con el uso de Three.js/WebGL del catálogo; `meshy_output/` ya está gitignored para las salidas.
+- No confundir con **img2threejs**: Meshy (y Higgsfield `generate_3d`) entregan mesh/GLB; img2threejs escribe Three.js procedural. Para **fotos de templates** el default es Higgsfield, no Meshy.

@@ -89,6 +89,10 @@ html.dark {
   --color-ratio-mark: #e23c24;
   --color-ratio-rupture: #5fd4ea;
 
+  /* ——— Model 10 "ATRIUM": swiss architectural journal ——— */
+  --color-atrium-paper: #f4f1ea;
+  --color-atrium-ink: #111111;
+
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
@@ -121,6 +125,20 @@ body {
 ::selection {
   background: var(--color-accent);
   color: var(--color-bone);
+}
+
+.atrium-world {
+  --atrium-paper: #f4f1ea;
+  --atrium-ink: #111111;
+}
+
+.atrium-world ::selection {
+  background: var(--atrium-ink);
+  color: var(--atrium-paper);
+}
+
+.atrium-world :focus-visible {
+  outline-color: var(--atrium-ink);
 }
 
 /* Preflight de Tailwind v4 deja los botones con cursor default. */

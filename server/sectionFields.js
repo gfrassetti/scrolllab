@@ -291,6 +291,26 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'spine4Title',
     'spine5Title',
   ],
+  'atrium/NavAtrium': ['lineOne', 'lineTwo', 'linksText', 'menuLabel'],
+  'atrium/HeroMassing': ['lineOne', 'lineTwo', 'hint'],
+  'atrium/ManifestoType': ['lineOne', 'lineTwo', 'left', 'right'],
+  'atrium/ScopeSerif': ['body'],
+  'atrium/ClarityPair': ['kicker', 'left', 'right', 'bodyLeft', 'bodyRight'],
+  'atrium/BlueprintDraw': ['index', 'title', 'body', 'caption'],
+  'atrium/ProjectRail': ['kicker', 'title'],
+  'atrium/ProcessPin': ['label'],
+  'atrium/PeopleScatter': ['label', 'title'],
+  'atrium/OrbitRing': [],
+  'atrium/StatField': ['kicker'],
+  'atrium/FooterAtrium': [
+    'mark',
+    'reserved',
+    'license',
+    'design',
+    'development',
+    'legal',
+    'year',
+  ],
   'contact/ContactForm': [
     'theme',
     'eyebrow',
@@ -364,6 +384,7 @@ const THEME_PRESETS = new Set([
   'comic',
   'unity',
   'ratio',
+  'atrium',
 ])
 
 /**

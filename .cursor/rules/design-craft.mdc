@@ -8,11 +8,12 @@ alwaysApply: true
 En **cualquier** pedido de UI/UX (crear, rediseñar, criticar, pulir, animar, tipografía, color, layout, homepage, templates):
 
 1. Leer **Design craft — obligatorio** en `AGENTS.md` y el posicionamiento Awwwards (**Qué vendemos**).
-2. **Impeccable siempre** (`.cursor/skills/impeccable/`): `critique` / `audit` / **`polish`** antes de dar la UI por cerrada. Docs: [impeccable.style](https://impeccable.style).
+2. **Impeccable siempre**: leer `.cursor/skills/impeccable/SKILL.md` y correr `critique` / `audit` / **`polish`** antes de dar la UI por cerrada. Docs: [impeccable.style](https://impeccable.style).
 3. **Emil Kowalski** (`.cursor/skills/emil-design-eng/`): easing custom, press feedback, drawers/toasts; tokens `--ease-out` / `--ease-drawer` en `src/index.css`. No `ease-in` en UI.
-4. **taste-skill** (`.cursor/skills/taste-skill/`): anti-slop — Design Read de una línea; no repetir look LLM genérico.
+4. **taste-skill** (`design-taste-frontend`, junction `.cursor/skills/taste-skill/`): anti-slop — Design Read de una línea; no repetir look LLM genérico.
 5. **UI/UX Pro Max** (+ `design` / `design-system` / `brand`) para sistemas, paletas y stack React + Tailwind.
 6. No inventar un look genérico de marketplace si el brief pide award-level / Canvas / WebGL.
 7. Scroll storytelling = cookbook GSAP; Emil/Impeccable pulen el chrome, no reemplazan el scrollytelling.
+8. Verificar demos con **playwright-cli** (`npx playwright-cli`). Fotos/cutouts de templates → **Higgsfield**. Objeto 3D procedural desde foto → **img2threejs** (solo genérico/vendible); GLB → Higgsfield `generate_3d` o Meshy.
 
 Contexto Obsidian: `Impeccable + UI UX Pro Max.md` en la bóveda ScrollLab.

@@ -230,6 +230,16 @@
         "Scroll plates"
       ],
       "description": "A Beat scrollytelling template for desktop: cube and type on a rail, plates that punch through the viewport, a stacking well, and a horizontal closer. Print-shop stock and vermillion register. Not built for mobile."
+    },
+    "atrium": {
+      "vibe": "Architecture bureau",
+        "tags": [
+        "Pinned massing hero",
+        "Manifesto type",
+        "Studio orbit",
+        "Giant wordmark"
+      ],
+      "description": "Bone paper, editorial serif, and generic building photography. A pinned hero crossfades three massing shots; a courtyard plan draws itself; a black ring of studio photos cycles the practice stats. For architecture studios: swap the photos, keep the motion."
     }
   },
   "builder": {
@@ -573,6 +583,56 @@
         "FooterLedger": {
           "name": "Footer ledger",
           "blurb": "Horizontal closer: outlined brand letters between plate frames"
+        }
+      },
+      "atrium": {
+        "NavAtrium": {
+          "name": "Nav atrium",
+          "blurb": "Mix-blend header · compact brand · mobile index"
+        },
+        "HeroMassing": {
+          "name": "Hero massing",
+          "blurb": "Pinned full-bleed photos that crossfade on scrub"
+        },
+        "ManifestoType": {
+          "name": "Manifesto type",
+          "blurb": "Oversized grotesk headline with two service columns"
+        },
+        "ScopeSerif": {
+          "name": "Scope serif",
+          "blurb": "A single large editorial paragraph of practice scope"
+        },
+        "ClarityPair": {
+          "name": "Clarity pair",
+          "blurb": "Two oversized statements with masked type"
+        },
+        "BlueprintDraw": {
+          "name": "Blueprint draw",
+          "blurb": "A courtyard plan that traces itself on scroll"
+        },
+        "ProjectRail": {
+          "name": "Project rail",
+          "blurb": "Work index with a cursor-trailing photograph"
+        },
+        "ProcessPin": {
+          "name": "Process pin",
+          "blurb": "Sticky process photos, copy flowing beside them"
+        },
+        "PeopleScatter": {
+          "name": "People scatter",
+          "blurb": "Black field, serif studio line, tilted photos with parallax"
+        },
+        "OrbitRing": {
+          "name": "Orbit ring",
+          "blurb": "Black pin, rotating studio photographs, cycling stats"
+        },
+        "StatField": {
+          "name": "Stat field",
+          "blurb": "Practice counters that count up on enter"
+        },
+        "FooterAtrium": {
+          "name": "Footer atrium",
+          "blurb": "Giant wordmark closer and a legal row"
         }
       },
       "contact": {
