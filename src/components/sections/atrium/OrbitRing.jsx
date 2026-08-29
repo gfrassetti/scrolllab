@@ -1,169 +1,136 @@
 import { useRef } from 'react'
-import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
-import orbitDesk from './assets/orbit-desk.jpg'
-import orbitModel from './assets/orbit-model.jpg'
-import orbitHands from './assets/orbit-hands.jpg'
-import orbitScreens from './assets/orbit-screens.jpg'
-import orbitMaterials from './assets/orbit-materials.jpg'
-import orbitMeeting from './assets/orbit-meeting.jpg'
-import orbitSite from './assets/orbit-site.jpg'
-import orbitBoard from './assets/orbit-board.jpg'
-import orbitFacade from './assets/orbit-facade.jpg'
+import { gsap, useGSAP } from '../../../lib/gsap'
 import orbitCivic from './assets/orbit-civic.jpg'
+import orbitFacade from './assets/orbit-facade.jpg'
+import orbitMaterials from './assets/orbit-materials.jpg'
+import civic from './assets/civic.jpg'
+import tower from './assets/tower.jpg'
+import courtyard from './assets/courtyard.jpg'
 import gallery from './assets/gallery.jpg'
-import model from './assets/model.jpg'
+import heroHouse from './assets/hero-house.jpg'
+import interior from './assets/interior.jpg'
 
+// `model.jpg` / `material.jpg` / `orbit-site.jpg` quedan solo para ProcessPin
+// y las seis de PeopleScatter (orbit-board/meeting/screens/hands/desk/model)
+// no entran aca: el anillo no puede repetir ninguna foto dentro de si mismo,
+// y con solo 19 assets en el pool no alcanza para que ademas no se toque con
+// ProjectRail. Nueve tiles, todas distintas entre si, es el mejor balance
+// hasta que haya piezas nuevas (Higgsfield / template-image-designer) — ese
+// paso no corrio en esta sesion por falta de la herramienta de generacion.
 const defaultTiles = [
-  orbitDesk,
-  orbitModel,
-  orbitHands,
-  orbitScreens,
-  orbitMaterials,
-  orbitMeeting,
-  orbitSite,
-  orbitBoard,
-  orbitFacade,
   orbitCivic,
+  civic,
+  orbitMaterials,
+  courtyard,
+  orbitFacade,
+  tower,
   gallery,
-  model,
-]
-
-const defaultScenes = [
-  {
-    lineOne: '2014 Year',
-    lineTwo: 'of practice',
-    left: 'Design approach grounded in passive strategies, material logic, and environmental responsibility.',
-    right: 'Lifecycle-focused architecture with efficient systems, sustainable choices, and long-term value.',
-  },
-  {
-    lineOne: '36+ People',
-    lineTwo: 'in the studio',
-    left: 'Architects, model makers, and site leads share one drawing set from the first massing.',
-    right: 'The team stays small enough that every room still has an author.',
-  },
-  {
-    lineOne: '82 Works',
-    lineTwo: 'on the ledger',
-    left: 'Houses, halls, and civic rooms. Placeholder counts for the buyer to replace.',
-    right: 'Each job keeps the same discipline: volume first, then the joint.',
-  },
-  {
-    lineOne: '40k Metres',
-    lineTwo: 'drawn to date',
-    left: 'Sample figure. Swap it for the metres your practice has actually built.',
-    right: 'The number is a measure, not a promise.',
-  },
+  interior,
+  heroHouse,
 ]
 
 /**
- * OrbitRing — photographs sit on a circular rail, each rotated to the
- * tangent. The ring turns on scrub (P1); centre copy and foot columns cycle.
+ * OrbitRing — the photographs sit on one circular rail, each rotated to the
+ * tangent, and the whole rail turns as a rigid body on scrub (P1). The
+ * rotation lives on the ring wrapper, never on a tile: every tile already
+ * carries its own `rotate + translateY` and the two would fight. The centre
+ * holds a single scene — the founding year — so the pin reads as one idea,
+ * not a carousel. The figures for the stats come after, in StatField.
  */
 export default function OrbitRing({
   tiles = defaultTiles,
-  scenes = defaultScenes,
+  lineOne = '0000',
+  lineTwo = 'Placeholder year',
+  left = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+  right = 'Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam.',
+  turn = 290,
 }) {
   const root = useRef(null)
 
   useGSAP(
     () => {
-      const ring = root.current.querySelector('[data-orbit-ring]')
-      const sceneEls = gsap.utils.toArray('[data-orbit-scene]')
-      const n = sceneEls.length
-
-      const show = (index) => {
-        sceneEls.forEach((el, i) => {
-          const on = i === index
-          gsap.to(el, {
-            autoAlpha: on ? 1 : 0,
-            duration: 0.45,
-            ease: 'power2.out',
-            overwrite: true,
-          })
-        })
-      }
-
-      gsap.set(sceneEls, { autoAlpha: 0 })
-      gsap.set(sceneEls[0], { autoAlpha: 1 })
-
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-      ScrollTrigger.create({
-        trigger: root.current,
-        start: 'top top',
-        end: 'bottom bottom',
-        pin: '[data-orbit-pin]',
-        scrub: 0.35,
-        anticipatePin: 1,
-        onUpdate: (self) => {
-          if (!ring) return
-          gsap.set(ring, { rotate: self.progress * 360 })
-          const index = Math.min(n - 1, Math.floor(self.progress * n + 0.001))
-          if (ring.dataset.active !== String(index)) {
-            ring.dataset.active = String(index)
-            show(index)
-          }
+      gsap.set('[data-orbit-scene]', { autoAlpha: 0, y: 34 })
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.35,
         },
       })
+
+      // Rotate y un crecimiento leve viven en el wrapper del anillo, nunca en
+      // el tile — ese ya tiene su propio rotate + translateY, y un scale
+      // grande ahi dispersaria el aro y dejaria el centro vacio.
+      tl.fromTo(
+        '[data-orbit-ring]',
+        { rotate: -turn * 0.16, scale: 0.96 },
+        { rotate: turn * 0.84, scale: 1.03, ease: 'none', duration: 1 },
+        0,
+      )
+      tl.fromTo(
+        '[data-orbit-media]',
+        { yPercent: -7 },
+        { yPercent: 7, ease: 'none', duration: 1 },
+        0,
+      )
+
+      tl.to('[data-orbit-scene]', { autoAlpha: 1, y: 0, ease: 'none', duration: 0.1 }, 0.04)
+      tl.to('[data-orbit-scene]', { autoAlpha: 0, y: -28, ease: 'none', duration: 0.06 }, 0.94)
     },
     { scope: root },
   )
 
   return (
-    <section
-      ref={root}
-      id="practice"
-      className="relative h-[420svh] bg-atrium-ink text-atrium-paper"
-    >
-      <div
-        data-orbit-pin
-        className="relative h-svh overflow-hidden"
-      >
+    <section ref={root} id="foundation" className="relative h-[340svh] bg-atrium-ink text-atrium-paper">
+      <div data-orbit-pin className="sticky top-0 h-svh overflow-hidden">
         <div
           data-orbit-ring
-          data-active="0"
-          className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-0 w-0 will-change-transform"
+          className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-0 w-0 [--orbit-r:min(34vw,40vh)] will-change-transform md:[--orbit-r:min(30vw,46vh)]"
         >
-          {tiles.map((src, i) => {
-            const angle = (360 / tiles.length) * i
-            return (
-              <div
-                key={`${src}-${i}`}
-                className="absolute top-0 left-0 h-[5.6rem] w-[8rem] md:h-[7.8rem] md:w-[11.2rem] lg:h-[9.2rem] lg:w-[13.2rem]"
-                style={{
-                  transform: `rotate(${angle}deg) translateY(-41vmin) translateX(-50%)`,
-                }}
-              >
-                <img
-                  src={src}
-                  alt=""
-                  className="h-full w-full max-w-none object-cover"
-                />
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="relative z-10 flex h-full flex-col">
-          {scenes.map((scene, i) => (
+          {tiles.map((src, i) => (
             <div
-              key={scene.lineOne}
-              data-orbit-scene
-              className="absolute inset-0 flex flex-col"
-              style={{ opacity: i === 0 ? 1 : 0 }}
+              key={`${src}-${i}`}
+              data-orbit-tile
+              className="absolute top-0 left-0 h-[clamp(4.6rem,23vw,22rem)] w-[clamp(4rem,20vw,19rem)] overflow-hidden md:h-[clamp(8rem,23vw,22rem)] md:w-[clamp(7rem,20vw,19rem)]"
+              style={{
+                transform: `rotate(${(360 / tiles.length) * i}deg) translateY(calc(-1 * var(--orbit-r))) translate(-50%, -50%)`,
+              }}
             >
-              <div className="flex flex-1 items-center justify-center px-5 text-center">
-                <h2 className="font-grotesk text-[clamp(2.6rem,8.4vw,6.8rem)] font-medium leading-[0.9] tracking-[-0.055em]">
-                  <span className="block">{scene.lineOne}</span>
-                  <span className="block">{scene.lineTwo}</span>
-                </h2>
-              </div>
-              <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-6 px-5 pb-10 text-[12px] leading-relaxed text-atrium-paper/50 md:grid-cols-2 md:gap-16 md:px-10 md:pb-14 md:text-[13px]">
-                <p className="md:max-w-[28ch]">{scene.left}</p>
-                <p className="md:max-w-[28ch] md:justify-self-end md:text-right">{scene.right}</p>
-              </div>
+              <img
+                data-orbit-media
+                src={src}
+                alt=""
+                loading={i > 3 ? 'lazy' : undefined}
+                className="h-[116%] w-full max-w-none -translate-y-[7%] object-cover will-change-transform"
+              />
             </div>
           ))}
+        </div>
+
+        {/* Scrim: a algunas rotaciones una foto clara queda justo detras del
+            texto — sin esto se vuelve ilegible, sobre todo en mobile donde
+            el anillo tiene menos aire alrededor del centro. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(closest-side,rgba(17,17,17,0.7),transparent_72%)]"
+        />
+
+        <div
+          data-orbit-scene
+          className="relative z-10 flex h-full flex-col items-center justify-center px-5 pb-[6svh] text-center"
+        >
+          <h2 className="atrium-display">
+            <span className="block">{lineOne}</span>
+            <span className="block">{lineTwo}</span>
+          </h2>
+          <div className="atrium-note mt-[5svh] grid w-full max-w-xl gap-6 text-left text-atrium-paper/65 md:grid-cols-2 md:gap-14">
+            <p>{left}</p>
+            <p>{right}</p>
+          </div>
         </div>
       </div>
     </section>

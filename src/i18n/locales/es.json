@@ -239,7 +239,7 @@
         "Anillo de estudio",
         "Wordmark gigante"
       ],
-      "description": "Papel hueso, serif editorial y fotografías de edificios genéricos. El hero pineado cruza tres tomas de massing; un plano de patio se dibuja; un anillo negro de fotos de estudio cicla las cifras. Para estudios de arquitectura: las fotos se cambian, el motion queda."
+      "description": "Papel hueso, serif editorial y fotografías de edificios genéricos. Una sola toma de massing sostiene el hero pineado bajo el manifiesto; un índice de obras y el proceso en pin preceden un anillo negro de fotos de estudio con el año de fundación al centro y las cifras de la práctica después. Para estudios de arquitectura: las fotos se cambian, el motion queda."
     }
   },
   "builder": {
@@ -588,11 +588,11 @@
       "atrium": {
         "NavAtrium": {
           "name": "Nav atrium",
-          "blurb": "Header mix-blend · marca compacta · índice mobile"
+          "blurb": "Header oscuro con blur · marca compacta · índice mobile"
         },
         "HeroMassing": {
           "name": "Hero massing",
-          "blurb": "Fotos full-bleed pineadas que se cruzan al scroll"
+          "blurb": "Foto de massing full-bleed pineada, con drift en parallax"
         },
         "ManifestoType": {
           "name": "Manifiesto tipo",
@@ -604,7 +604,7 @@
         },
         "ClarityPair": {
           "name": "Clarity pair",
-          "blurb": "Dos declaraciones oversized con tipo en máscara"
+          "blurb": "Bisagra papel-tinta: un diagrama radial se dibuja y el campo se invierte"
         },
         "BlueprintDraw": {
           "name": "Blueprint draw",
@@ -612,7 +612,7 @@
         },
         "ProjectRail": {
           "name": "Project rail",
-          "blurb": "Índice de obra con foto que sigue el cursor"
+          "blurb": "Índice de obra con bandas de fotos a su propia escala y paralaje"
         },
         "ProcessPin": {
           "name": "Process pin",
@@ -624,11 +624,11 @@
         },
         "OrbitRing": {
           "name": "Orbit ring",
-          "blurb": "Pin negro, fotos de estudio que rotan, cifras que ciclan"
+          "blurb": "Pin negro, un anillo de fotos de estudio rotando alrededor del año de fundación"
         },
         "StatField": {
           "name": "Stat field",
-          "blurb": "Contadores del estudio que cuentan al entrar"
+          "blurb": "Contadores del estudio que cuentan al entrar y cierran en una frase tipográfica"
         },
         "FooterAtrium": {
           "name": "Footer atrium",

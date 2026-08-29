@@ -2,14 +2,15 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 
 /**
- * ManifestoType — the page H1 on bone paper. Slides over the sticky hero.
- * Two service columns sit lower in the same field.
+ * ManifestoType — the page H1 on paper. The paper slides over the pinned
+ * hero while the type is still low in the frame, so the photograph is
+ * visible behind the first line. Service columns sit far below it.
  */
 export default function ManifestoType({
-  lineOne = 'Measured clarity',
-  lineTwo = 'and invention.',
-  left = 'Site strategy, material economy, passive systems, energy studies, lifecycle notes.',
-  right = 'Concept, envelope, sketch set, working drawings, and stills for the room.',
+  lineOne = 'Your headline',
+  lineTwo = 'goes right here',
+  left = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
+  right = 'Ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
 }) {
   const root = useRef(null)
 
@@ -26,16 +27,16 @@ export default function ManifestoType({
         duration: 1.1,
         ease: 'power4.out',
         stagger: 0.014,
-        scrollTrigger: { trigger: root.current, start: 'top 80%', once: true },
+        scrollTrigger: { trigger: '[data-manifesto-head]', start: 'top 92%', once: true },
       })
 
       gsap.from('[data-manifesto-col]', {
-        yPercent: 18,
+        yPercent: 24,
         opacity: 0,
         duration: 0.9,
         ease: 'power3.out',
         stagger: 0.1,
-        scrollTrigger: { trigger: root.current, start: 'top 40%', once: true },
+        scrollTrigger: { trigger: '[data-manifesto-cols]', start: 'top 88%', once: true },
       })
     },
     { scope: root },
@@ -45,9 +46,12 @@ export default function ManifestoType({
     <section
       ref={root}
       id="bureau"
-      className="relative z-10 bg-atrium-paper px-5 pt-[22svh] pb-28 text-atrium-ink md:px-10 md:pt-[26svh] md:pb-36"
+      className="relative z-10 bg-atrium-paper px-5 pt-[30svh] pb-[26svh] text-atrium-ink md:px-10 md:pt-[34svh] md:pb-[30svh]"
     >
-      <h1 className="mx-auto max-w-[16ch] text-center font-grotesk text-[clamp(2.8rem,8.6vw,8.25rem)] font-medium leading-[0.9] tracking-[-0.05em]">
+      <h1
+        data-manifesto-head
+        className="atrium-display mx-auto max-w-[13ch] text-center text-balance"
+      >
         <span data-manifesto-line className="block">
           {lineOne}
         </span>
@@ -55,9 +59,17 @@ export default function ManifestoType({
           {lineTwo}
         </span>
       </h1>
-      <div className="mx-auto mt-24 grid w-full max-w-3xl gap-8 text-center text-[13px] leading-relaxed text-atrium-ink/55 md:mt-32 md:grid-cols-2 md:gap-16 md:text-left md:text-[15px]">
-        <p data-manifesto-col>{left}</p>
-        <p data-manifesto-col>{right}</p>
+
+      <div
+        data-manifesto-cols
+        className="atrium-note mx-auto mt-[26svh] grid w-full max-w-4xl gap-10 text-atrium-ink/65 md:mt-[34svh] md:grid-cols-2 md:gap-24"
+      >
+        <p data-manifesto-col className="md:max-w-[34ch]">
+          {left}
+        </p>
+        <p data-manifesto-col className="md:max-w-[34ch] md:justify-self-end">
+          {right}
+        </p>
       </div>
     </section>
   )

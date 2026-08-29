@@ -17,21 +17,18 @@ export const TEMPLATE_PRICES_USD = {
 }
 
 /** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
-export const COMING_SOON_SKUS = ['ratio', 'atrium']
+export const COMING_SOON_SKUS = ['ratio']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
  */
 export const LOCAL_ONLY_SKUS = ['ratio']
 
-/** Preview en dev: card + demo (+ builder) aunque sigan en COMING_SOON_SKUS. */
-export const DEV_PREVIEW_SKUS = ['atrium']
-
 /**
  * Modelos que no entran a la paleta del builder.
  * RATIO sigue en obra: va acá y en COMING_SOON_SKUS.
  */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'atrium']
+export const BUILDER_HIDDEN_SKUS = ['ratio']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -41,19 +38,11 @@ export function isLocalOnlySku(sku) {
   return LOCAL_ONLY_SKUS.includes(sku)
 }
 
-/** Catálogo home: en dev, SKUs en DEV_PREVIEW_SKUS se ven sin badge próximamente. */
 export function isCatalogComingSoon(sku) {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV && DEV_PREVIEW_SKUS.includes(sku)) {
-    return false
-  }
   return isComingSoonSku(sku)
 }
 
-/** Builder: en dev, SKUs en DEV_PREVIEW_SKUS entran a la paleta. */
 export function isBuilderHiddenSku(sku) {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV && DEV_PREVIEW_SKUS.includes(sku)) {
-    return false
-  }
   return BUILDER_HIDDEN_SKUS.includes(sku)
 }
 

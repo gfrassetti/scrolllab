@@ -3,19 +3,21 @@ import NavAtrium from '../components/sections/atrium/NavAtrium'
 import HeroMassing from '../components/sections/atrium/HeroMassing'
 import ManifestoType from '../components/sections/atrium/ManifestoType'
 import ScopeSerif from '../components/sections/atrium/ScopeSerif'
-import ClarityPair from '../components/sections/atrium/ClarityPair'
-import BlueprintDraw from '../components/sections/atrium/BlueprintDraw'
 import ProjectRail from '../components/sections/atrium/ProjectRail'
 import ProcessPin from '../components/sections/atrium/ProcessPin'
+import ClarityPair from '../components/sections/atrium/ClarityPair'
 import PeopleScatter from '../components/sections/atrium/PeopleScatter'
 import OrbitRing from '../components/sections/atrium/OrbitRing'
+import StatField from '../components/sections/atrium/StatField'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model — "ATRIUM"
- * Architecture bureau: pinned massing, manifesto type, a rotating
- * studio ring, and a giant wordmark closer. Generic English copy.
+ * Architecture bureau. One arc: paper (hero, manifesto, scope, work,
+ * process) → the ClarityPair hinge inverts the field → ink (people, the
+ * ring, the figures) → paper again for the brief → the wordmark closes.
+ * Contact sits after the black act, never inside it. Generic English copy.
  */
 export default function AtriumPage() {
   return (
@@ -34,22 +36,13 @@ export default function AtriumPage() {
             <ManifestoType />
           </div>
           <ScopeSerif />
-          <ClarityPair />
-          <BlueprintDraw />
           <ProjectRail />
           <ProcessPin />
-          <ContactForm
-            theme="atrium"
-            eyebrow="Studio"
-            title="A brief, a site, a first drawing."
-            body="Tell us about the plot, the program, and the quiet you want the building to keep."
-            submitLabel="Send the brief"
-            sendingLabel="Sending"
-            successMessage="Received. We will write back from the studio."
-            note="Replies leave the studio within a few days."
-          />
+          <ClarityPair />
           <PeopleScatter />
           <OrbitRing />
+          <StatField />
+          <ContactForm theme="atrium" />
         </main>
         <FooterAtrium />
       </div>

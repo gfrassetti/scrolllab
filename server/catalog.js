@@ -33,7 +33,7 @@ export const BUNDLE_MODELS = [
 ]
 
 /** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['ratio', 'atrium']
+export const COMING_SOON_SKUS = ['ratio']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en local.
@@ -41,7 +41,7 @@ export const COMING_SOON_SKUS = ['ratio', 'atrium']
 export const LOCAL_ONLY_SKUS = ['ratio']
 
 /** Espejo de src/lib/pricing.js — no se venden por sección en el builder. */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'atrium']
+export const BUILDER_HIDDEN_SKUS = ['ratio']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)

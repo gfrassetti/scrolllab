@@ -301,7 +301,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'atrium/ProcessPin': ['label'],
   'atrium/PeopleScatter': ['label', 'title'],
   'atrium/OrbitRing': [],
-  'atrium/StatField': ['kicker'],
+  'atrium/StatField': ['kicker', 'closer'],
   'atrium/FooterAtrium': [
     'mark',
     'reserved',

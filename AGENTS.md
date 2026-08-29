@@ -90,6 +90,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | Card hero / tableau / emblem Three.js | **WebGL mini motor** — [`docs/scrolllab-webgl.md`](docs/scrolllab-webgl.md) + `src/lib/webgl/` |
 | “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
+| Template existente "no está al nivel de la ref" (handoff / review) | [`docs/rebuild-against-reference.md`](docs/rebuild-against-reference.md) — reconstruir contra beats, no contra el JSX actual |
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
 
@@ -111,11 +112,15 @@ Para UI/UX award-level, estas tools viven **instaladas en la máquina** (gitigno
 
 - `.cursor/skills/template-image-designer/` — inventario + brief de piezas; la generación la hace Higgsfield
 
-### Higgsfield (plugin Cursor — ya vinculado)
+### Higgsfield (dos rutas según el cliente)
 
-Plugin MCP `plugin-higgsfield-higgsfield` ([Marketplace](https://cursor.com/marketplace/higgsfield), [higgsfield.ai](https://higgsfield.ai)). No hay CLI que instalar: si el namespace no aparece, reactivar el plugin y autenticar en Customize → MCPs.
+**En Cursor** — plugin MCP `plugin-higgsfield-higgsfield` ([Marketplace](https://cursor.com/marketplace/higgsfield), [higgsfield.ai](https://higgsfield.ai)). No hay CLI que instalar: si el namespace no aparece, reactivar el plugin y autenticar en Customize → MCPs.
 
-**Default para assets de templates** (fotos fotográficas, no picsum):
+**En Claude Code** — el plugin del Marketplace no existe. Server local `scripts/higgsfield-mcp.mjs` (cero dependencias) que habla directo con `https://api.higgsfield.ai`. Credenciales en `.env`: `HIGGSFIELD_API_KEY_ID` + `HIGGSFIELD_API_KEY_SECRET` ([cloud.higgsfield.ai/api-keys](https://cloud.higgsfield.ai/api-keys)); auth `Authorization: Key <id>:<secret>`. Tools: `higgsfield_list_models`, `higgsfield_generate`, `higgsfield_status`, `higgsfield_cancel`, `higgsfield_download`.
+
+Es la misma cuenta pero **no las mismas tools**: la API pública expone los 48 endpoints de generación (Soul, Sora 2, Veo 3.1, Kling, Hailuo, Seedance, WAN, Nano Banana, Reve, Flux Kontext, DoP) y no trae `remove_background` ni `generate_3d`. En Claude Code: cutouts → editar con `/nano-banana` o `/reve/edit` por prompt; GLB → **Meshy**. Empezar siempre por `higgsfield_list_models` para el esquema exacto del endpoint. El índice de modelos vive en `scripts/higgsfield-models.json` (derivado de `docs.higgsfield.ai/docs/openapi.json`; regenerarlo si Higgsfield suma modelos).
+
+**Default para assets de templates** (fotos fotográficas, no picsum) — nombres de tool del plugin de Cursor:
 
 | Necesidad | Tool |
 |---|---|
@@ -379,7 +384,8 @@ Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre�
 
 ### MCP: Meshy (generación de assets 3D)
 
-- Config del servidor MCP en `.cursor/mcp.json` (server `meshy` → `npx -y @meshy-ai/meshy-mcp-server`). **Ese archivo está gitignored**, así que no viaja con el repo: si no existe, recrealo con esa entrada.
+- Config del servidor MCP en `.cursor/mcp.json` (servers `meshy` → `npx -y @meshy-ai/meshy-mcp-server` y `higgsfield` → `node ${workspaceFolder}/scripts/higgsfield-mcp.mjs`, ambos con `"envFile": "${workspaceFolder}/.env"`). **Ese archivo está gitignored**, así que no viaja con el repo: si no existe, recrealo con esas dos entradas.
+- En Claude Code los dos están registrados en scope `local` (`~/.claude.json`, no commiteado). Para recrearlos: `claude mcp add meshy --scope local --env MESHY_API_KEY=… -- npx -y @meshy-ai/meshy-mcp-server`.
 - La API key va **solo** como secret `MESHY_API_KEY` (empieza con `msy_`), referenciada en `mcp.json` como `"MESHY_API_KEY": "${env:MESHY_API_KEY}"`. Nunca hardcodear ni commitear la key (los docs de Meshy lo advierten; consume créditos de la cuenta).
 - El server **valida la key contra `https://api.meshy.ai` al arrancar**: sin una key válida no levanta (`Invalid MESHY_API_KEY`) y las tools no aparecen. Tras setear el secret, activá el server en el panel MCP de Cursor.
 - Encaja con el uso de Three.js/WebGL del catálogo; `meshy_output/` ya está gitignored para las salidas.

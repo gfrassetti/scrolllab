@@ -505,7 +505,10 @@ export const SECTION_FIELDS = {
     { key: 'title', label: 'Title', type: 'textarea' },
   ],
   'atrium/OrbitRing': [],
-  'atrium/StatField': [{ key: 'kicker', label: 'Kicker', type: 'text' }],
+  'atrium/StatField': [
+    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'closer', label: 'Closing statement', type: 'textarea' },
+  ],
   'atrium/FooterAtrium': [
     { key: 'mark', label: 'Mark', type: 'text' },
     { key: 'reserved', label: 'Reserved', type: 'text' },

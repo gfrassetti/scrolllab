@@ -20,6 +20,7 @@ const AtelierPage = lazy(() => import('./pages/AtelierPage'))
 const ComicPage = lazy(() => import('./pages/ComicPage'))
 const UnityPage = lazy(() => import('./pages/UnityPage'))
 const RatioPage = lazy(() => import('./pages/RatioPage'))
+const VantaPage = lazy(() => import('./pages/VantaPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
@@ -94,15 +95,16 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/templates/atrium"
+                  path="/templates/vanta"
                   element={
                     import.meta.env.DEV ? (
-                      <AtriumPage />
+                      <VantaPage />
                     ) : (
                       <Navigate to="/" replace />
                     )
                   }
                 />
+                <Route path="/templates/atrium" element={<AtriumPage />} />
                 <Route path="/builder" element={<BuilderPage />} />
                 <Route path="/preview" element={<PreviewPage />} />
                 <Route path="/legal/license" element={<LicensePage />} />

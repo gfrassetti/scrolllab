@@ -1,26 +1,58 @@
 import { useRef } from 'react'
-import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
 
 const defaultStats = [
-  { value: 14, suffix: '+', label: 'Years in practice' },
-  { value: 86, suffix: '', label: 'Projects completed' },
-  { value: 22, suffix: '', label: 'People in the studio' },
-  { value: 40, suffix: 'k', label: 'Square metres built' },
+  { value: 10, suffix: '+', label: 'Placeholder metric' },
+  { value: 100, suffix: '+', label: 'Placeholder metric' },
+  { value: 25, suffix: '+', label: 'Placeholder metric' },
+  { value: 50, suffix: 'K', label: 'Placeholder metric' },
 ]
 
 /**
- * StatField — counters that count up on enter. Final values render first
- * so reduced motion still reads the real numbers.
+ * StatField — the figures, on ink, at reference scale: a grotesk numeral
+ * over a serif label, one pair per band, alternating sides so the eye has to
+ * travel. Counters run on enter; the final value renders first so reduced
+ * motion still reads the real number. The page closes on the typographic
+ * statement underneath.
  */
 export default function StatField({
   kicker = 'Practice',
   stats = defaultStats,
+  closer = 'Placeholder statement — swap this line for your own closing sentence.',
 }) {
   const root = useRef(null)
 
   useGSAP(
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+      gsap.utils.toArray('[data-stat]').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { autoAlpha: 0.12, y: 60 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 92%',
+              end: 'top 48%',
+              scrub: 0.5,
+            },
+          },
+        )
+        gsap.to(el, {
+          autoAlpha: 0.14,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el,
+            start: 'bottom 52%',
+            end: 'bottom 8%',
+            scrub: 0.5,
+          },
+        })
+      })
 
       gsap.utils.toArray('[data-atrium-counter]').forEach((el) => {
         const target = parseFloat(el.dataset.atriumCounter)
@@ -41,26 +73,60 @@ export default function StatField({
           },
         })
       })
+
+      const split = new SplitText('[data-closer]', { type: 'lines', mask: 'lines' })
+      gsap.from(split.lines, {
+        yPercent: 110,
+        duration: 1.2,
+        ease: 'power4.out',
+        stagger: 0.09,
+        scrollTrigger: { trigger: '[data-closer]', start: 'top 82%', once: true },
+      })
     },
     { scope: root },
   )
 
   return (
-    <section ref={root} className="border-t border-[#111]/12 px-5 py-20 md:px-10 md:py-32">
-      <p className="mb-14 text-[11px] tracking-[0.28em] text-[#111]/45 uppercase">{kicker}</p>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="space-y-3">
-            <p className="font-display text-[clamp(3rem,8vw,6.5rem)] leading-none tracking-[-0.04em]">
+    <section
+      ref={root}
+      className="bg-atrium-ink px-5 pt-[14svh] pb-[16svh] text-atrium-paper md:px-10"
+    >
+      {kicker ? (
+        <p className="atrium-note font-display text-atrium-paper/65">{kicker}</p>
+      ) : null}
+
+      <div className="mt-[10svh]">
+        {stats.map((stat, i) => (
+          <div
+            key={`${stat.label}-${i}`}
+            data-stat
+            className={`flex min-h-[46svh] flex-col justify-center will-change-transform md:min-h-[54svh] ${
+              i % 2 ? 'md:items-end md:text-right' : 'md:items-start'
+            }`}
+          >
+            <p className="atrium-display">
               <span data-atrium-counter={stat.value}>{stat.value}</span>
               <span>{stat.suffix}</span>
             </p>
-            <p className="border-t border-[#111]/12 pt-3 text-[11px] tracking-[0.22em] text-[#111]/50 uppercase">
+            <p
+              className={`atrium-lead max-w-[11ch] text-atrium-paper/70 ${
+                i % 2 ? 'md:pr-[0.55em]' : 'md:pl-[0.55em]'
+              }`}
+            >
               {stat.label}
             </p>
           </div>
         ))}
       </div>
+
+      {closer ? (
+        <h2
+          data-closer
+          className="mx-auto mt-[16svh] max-w-[17ch] text-center font-display text-[length:var(--atrium-display)] leading-[0.98] tracking-[-0.02em] text-balance"
+        >
+          {closer}
+        </h2>
+      ) : null}
     </section>
   )
 }

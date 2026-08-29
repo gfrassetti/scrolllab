@@ -2,16 +2,22 @@ import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
 
 /**
- * NavAtrium — stacked bureau mark, mix-blend so the same ink reads
- * on photos, paper, and the black orbit. Overlay is a sibling.
+ * NavAtrium — stacked bureau mark, reference-style links (Index / Work /
+ * About / Contact). A dark scrim + blur sits behind the bar instead of
+ * `mix-blend-difference`: the blend mode read fine over a flat photo or a
+ * flat colour field, but the moment a large headline (the manifesto H1, the
+ * ring's centre copy) scrolled directly under it, the pixel-difference math
+ * doubled-exposed the two sets of letterforms into an unreadable smear.
+ * A fixed scrim behind fixed-colour type has no such failure mode — it reads
+ * the same over a photo, paper, or ink, always.
  */
 export default function NavAtrium({
   lineOne = 'Architectural',
   lineTwo = 'Bureau',
   links = [
+    'Index | #top',
     'Work | #work',
-    'Practice | #practice',
-    'Bureau | #bureau',
+    'About | #bureau',
     'Contact | #contact',
   ],
   linksText,
@@ -23,7 +29,7 @@ export default function NavAtrium({
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-[90] text-bone mix-blend-difference">
+      <header className="fixed inset-x-0 top-0 z-[90] bg-atrium-ink/70 text-atrium-paper backdrop-blur-md">
         <nav className="flex items-start justify-between px-5 py-5 md:px-10 md:py-6">
           <a href="#top" className="text-[11px] leading-[1.25] tracking-[0.08em] md:text-xs">
             <span className="block">{lineOne}</span>

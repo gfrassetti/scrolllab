@@ -233,13 +233,13 @@
     },
     "atrium": {
       "vibe": "Architecture bureau",
-        "tags": [
+      "tags": [
         "Pinned massing hero",
         "Manifesto type",
         "Studio orbit",
         "Giant wordmark"
       ],
-      "description": "Bone paper, editorial serif, and generic building photography. A pinned hero crossfades three massing shots; a courtyard plan draws itself; a black ring of studio photos cycles the practice stats. For architecture studios: swap the photos, keep the motion."
+      "description": "Bone paper, editorial serif, and generic building photography. A single massing shot holds the pinned hero under the manifesto; a project index and a pinned process precede a black ring of studio photos with the founding year at its centre and the practice figures after it. For architecture studios: swap the photos, keep the motion."
     }
   },
   "builder": {
@@ -588,11 +588,11 @@
       "atrium": {
         "NavAtrium": {
           "name": "Nav atrium",
-          "blurb": "Mix-blend header · compact brand · mobile index"
+          "blurb": "Blurred dark header bar · compact brand · mobile index"
         },
         "HeroMassing": {
           "name": "Hero massing",
-          "blurb": "Pinned full-bleed photos that crossfade on scrub"
+          "blurb": "Pinned full-bleed massing photo with a drifting parallax"
         },
         "ManifestoType": {
           "name": "Manifesto type",
@@ -604,7 +604,7 @@
         },
         "ClarityPair": {
           "name": "Clarity pair",
-          "blurb": "Two oversized statements with masked type"
+          "blurb": "Paper-to-ink hinge: a radial diagram draws itself, then the field inverts"
         },
         "BlueprintDraw": {
           "name": "Blueprint draw",
@@ -612,7 +612,7 @@
         },
         "ProjectRail": {
           "name": "Project rail",
-          "blurb": "Work index with a cursor-trailing photograph"
+          "blurb": "Work index with bands of photos at their own scale and parallax"
         },
         "ProcessPin": {
           "name": "Process pin",
@@ -624,11 +624,11 @@
         },
         "OrbitRing": {
           "name": "Orbit ring",
-          "blurb": "Black pin, rotating studio photographs, cycling stats"
+          "blurb": "Black pin, a rotating ring of studio photographs around the founding year"
         },
         "StatField": {
           "name": "Stat field",
-          "blurb": "Practice counters that count up on enter"
+          "blurb": "Practice counters that count up on enter, closing on a typographic statement"
         },
         "FooterAtrium": {
           "name": "Footer atrium",

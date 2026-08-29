@@ -1018,3 +1018,15 @@ _Sin `GEMINI_API_KEY` / `GOOGLE_API_KEY` — solo captura mecánica._
 - [ ] Hero
 - [ ] Sección firma (la más difícil)
 - [ ] Footer
+
+## Handoff rebuild (ago 2026)
+
+Reconstrucción completa contra este análisis + capturas del usuario (People &
+Process, anillo). Método generalizado en
+[`docs/rebuild-against-reference.md`](../rebuild-against-reference.md) — escala
+tipográfica en tokens (131/88.5/60/12px medidos arriba), hero de una sola foto,
+hinge ClarityPair papel→tinta en un pin, PeopleScatter con rotate/drift en nodos
+separados, OrbitRing con radio acotado al viewport. Pendiente: reciclaje de fotos
+entre `ProjectRail` y `OrbitRing` por pool finito de assets — ver sección 6 del
+playbook; no ameritó gasto de crédito Higgsfield porque el SKU sigue en
+`COMING_SOON_SKUS`.

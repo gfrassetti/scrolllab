@@ -286,8 +286,9 @@ for (const sku of SERVER_LOCAL_ONLY) {
 }
 
 // 3d. `auto` can only resolve to a model the form actually knows how to paint.
-// Paletas = modelos en venta + los que se listan como “próximamente”.
-const themedExpected = [...BUNDLE_MODELS, ...SERVER_COMING_SOON]
+// Paletas = todo SKU vendible individualmente (bundle/custom no tienen tema propio),
+// esté o no en el bundle de 8, esté o no todavía en COMING_SOON_SKUS.
+const themedExpected = Object.keys(PRODUCTS).filter((sku) => !['bundle', 'custom'].includes(sku))
 for (const model of diff(THEMED_MODELS, themedExpected)) {
   fail('temas', `THEMED_MODELS incluye '${model}' pero no es un modelo del catálogo`)
 }

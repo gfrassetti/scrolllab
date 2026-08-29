@@ -130,6 +130,47 @@ body {
 .atrium-world {
   --atrium-paper: #f4f1ea;
   --atrium-ink: #111111;
+
+  /* Escala tipografica medida sobre la referencia a 1440px:
+     131.25 / 88.5 / 60 / 12. El piso de craft (display max 6rem) no aplica
+     en ATRIUM: la firma del modelo es el tipo a tamano de diario. */
+  --atrium-display: clamp(3rem, 9.1vw, 9.5rem);
+  --atrium-lead: clamp(2rem, 6.15vw, 6.6rem);
+  --atrium-mid: clamp(1.7rem, 4.17vw, 4.6rem);
+  --atrium-note: clamp(11px, 0.9vw, 13px);
+}
+
+/* Grotesk 131px: manifiesto, centro del anillo, cifras. */
+.atrium-display {
+  font-family: var(--font-grotesk);
+  font-size: var(--atrium-display);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+/* Serif 88.5px: parrafos de alcance, People & Process, labels de cifra. */
+.atrium-lead {
+  font-family: var(--font-display);
+  font-size: var(--atrium-lead);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+/* Grotesk 60px: titulos de seccion y marca del hero. */
+.atrium-mid {
+  font-size: var(--atrium-mid);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+/* 12-13px: labels, pies de foto, columnas de servicio. */
+.atrium-note {
+  font-size: var(--atrium-note);
+  line-height: 1.45;
+  letter-spacing: 0;
 }
 
 .atrium-world ::selection {

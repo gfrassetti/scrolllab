@@ -16,6 +16,8 @@ scrollY  →  progress 0…1  →  “tiempo” de la escena
 | **A. Tiempo real 3D** | Un canvas WebGL (Three.js) + meshes / cámara / shaders | Cada frame interpolás cámara, rotación, morph, etc. según `progress` | kprverse, MONOLITH, FIZZ (`docs/scrolllab-webgl.md`) |
 | **B. Película en fotogramas** | Un canvas **2D** (o a veces un `<img>`) + **cientos de WebP** | `progress` elige el **índice de frame** y lo pintás | [pear.no](https://pear.no/), product pages de Apple |
 
+> **Las familias se mezclan.** Un sitio puede usar las dos más un tercer sistema. kprverse corre A (Three.js + texturas KTX2) **y** B en variante atlas (101 frames del wordmark en un solo sprite sheet TexturePacker, no 101 requests) **y** un export de After Effects a JSON que anima capas de recortes con alpha. Medido sobre network real en [`docs/vanta-kpr-mechanics.md`](vanta-kpr-mechanics.md) — leerlo antes de asumir que una referencia es "de una sola familia".
+
 No confundir con **Beat** (`docs/scrolllab-beat.md`): Beat mueve **DOM** en un riel. WebGL mueve meshes. La secuencia mueve un **fotograma pre-renderizado**.
 
 ---

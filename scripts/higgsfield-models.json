@@ -1,0 +1,2112 @@
+{
+  "/higgsfield-ai/dop/turbo": {
+    "summary": "Create higgsfield-ai dop turbo",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "maximum": 1000000,
+        "minimum": 1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "motions": {
+        "type": "array",
+        "items": {
+          "title": "Motion",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Motion preset ID."
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "multipleOf": 0.01,
+              "description": "Strength of the selected motion preset."
+            }
+          },
+          "required": [
+            "id",
+            "strength"
+          ]
+        },
+        "title": "Motions",
+        "default": null,
+        "maxItems": 2,
+        "minItems": 0
+      },
+      "image_url": {
+        "type": "string",
+        "title": "First frame image",
+        "format": "uri"
+      },
+      "end_image_url": {
+        "type": "string",
+        "title": "Last frame image",
+        "format": "uri"
+      },
+      "enhance_prompt": {
+        "type": "boolean",
+        "title": "Enhance Prompt",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/higgsfield-ai/dop/lite": {
+    "summary": "Create higgsfield-ai dop lite",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "maximum": 1000000,
+        "minimum": 1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "motions": {
+        "type": "array",
+        "items": {
+          "title": "Motion",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Motion preset ID."
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "multipleOf": 0.01,
+              "description": "Strength of the selected motion preset."
+            }
+          },
+          "required": [
+            "id",
+            "strength"
+          ]
+        },
+        "title": "Motions",
+        "default": null,
+        "maxItems": 2,
+        "minItems": 0
+      },
+      "image_url": {
+        "type": "string",
+        "title": "First frame image",
+        "format": "uri"
+      },
+      "end_image_url": {
+        "type": "string",
+        "title": "Last frame image",
+        "format": "uri"
+      },
+      "enhance_prompt": {
+        "type": "boolean",
+        "title": "Enhance Prompt",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/higgsfield-ai/dop/standard": {
+    "summary": "Create higgsfield-ai dop standard",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "maximum": 1000000,
+        "minimum": 1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "motions": {
+        "type": "array",
+        "items": {
+          "title": "Motion",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Motion preset ID."
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "multipleOf": 0.01,
+              "description": "Strength of the selected motion preset."
+            }
+          },
+          "required": [
+            "id",
+            "strength"
+          ]
+        },
+        "title": "Motions",
+        "default": null,
+        "maxItems": 2,
+        "minItems": 0
+      },
+      "image_url": {
+        "type": "string",
+        "title": "First frame image",
+        "format": "uri"
+      },
+      "end_image_url": {
+        "type": "string",
+        "title": "Last frame image",
+        "format": "uri"
+      },
+      "enhance_prompt": {
+        "type": "boolean",
+        "title": "Enhance Prompt",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/higgsfield-ai/popcorn/auto": {
+    "summary": "Create higgsfield-ai popcorn auto",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "maximum": 1000000,
+        "minimum": 1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_urls": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "title": "Reference image",
+          "format": "uri"
+        },
+        "title": "Image references",
+        "maxItems": 8,
+        "minItems": 0
+      },
+      "num_images": {
+        "type": "integer",
+        "title": "Output images count",
+        "default": 1,
+        "maximum": 8,
+        "minimum": 1
+      },
+      "resolution": {
+        "enum": [
+          "720p",
+          "1600p"
+        ],
+        "type": "string",
+        "title": "Quality",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "1:1",
+          "4:3",
+          "3:4",
+          "3:2",
+          "2:3",
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/higgsfield-ai/soul/character": {
+    "summary": "Create higgsfield-ai soul character",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "maximum": 1000000,
+        "minimum": 1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "style_id": {
+        "type": "string",
+        "title": "Soul Style",
+        "format": "uuid",
+        "default": null
+      },
+      "batch_size": {
+        "enum": [
+          1,
+          4
+        ],
+        "type": "integer",
+        "title": "Result images",
+        "default": 1
+      },
+      "resolution": {
+        "enum": [
+          "720p",
+          "1080p"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "9:16",
+          "16:9",
+          "4:3",
+          "3:4",
+          "1:1",
+          "2:3",
+          "3:2"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      },
+      "enhance_prompt": {
+        "type": "boolean",
+        "title": "Enhance Prompt",
+        "default": true
+      },
+      "style_strength": {
+        "type": "number",
+        "title": "Style strength",
+        "format": "float",
+        "default": 1,
+        "maximum": 1,
+        "minimum": 0
+      },
+      "custom_reference_id": {
+        "type": "string",
+        "title": "Character ID",
+        "format": "uuid"
+      },
+      "image_reference_url": {
+        "type": "string",
+        "title": "Image reference url",
+        "format": "uri"
+      },
+      "custom_reference_strength": {
+        "type": "number",
+        "title": "Character strength",
+        "format": "float",
+        "default": 1,
+        "maximum": 1,
+        "minimum": 0
+      }
+    },
+    "required": [
+      "prompt",
+      "custom_reference_id",
+      "custom_reference_strength"
+    ]
+  },
+  "/higgsfield-ai/soul/reference": {
+    "summary": "Create higgsfield-ai soul reference",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "maximum": 1000000,
+        "minimum": 1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "style_id": {
+        "type": "string",
+        "title": "Soul Style",
+        "format": "uuid",
+        "default": null
+      },
+      "batch_size": {
+        "enum": [
+          1,
+          4
+        ],
+        "type": "integer",
+        "title": "Result images",
+        "default": 1
+      },
+      "resolution": {
+        "enum": [
+          "720p",
+          "1080p"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "9:16",
+          "16:9",
+          "4:3",
+          "3:4",
+          "1:1",
+          "2:3",
+          "3:2"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      },
+      "enhance_prompt": {
+        "type": "boolean",
+        "title": "Enhance Prompt",
+        "default": true
+      },
+      "style_strength": {
+        "type": "number",
+        "title": "Style strength",
+        "format": "float",
+        "default": 1,
+        "maximum": 1,
+        "minimum": 0
+      },
+      "image_reference_url": {
+        "type": "string",
+        "title": "Image reference url",
+        "format": "uri"
+      }
+    },
+    "required": [
+      "prompt",
+      "image_reference_url"
+    ]
+  },
+  "/higgsfield-ai/soul/standard": {
+    "summary": "Create higgsfield-ai soul standard",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      },
+      "resolution": {
+        "enum": [
+          "2K",
+          "4K"
+        ],
+        "default": "2K"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "1:1",
+          "4:3",
+          "3:4",
+          "3:2",
+          "2:3",
+          "5:4",
+          "4:5",
+          "16:9",
+          "9:16",
+          "21:9"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/veo3.1": {
+    "summary": "Create veo3.1",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "aspect_ratio",
+      "resolution",
+      "generate_audio"
+    ]
+  },
+  "/veo3.1/image-to-video": {
+    "summary": "Create veo3.1 image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "minLength": 3
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/veo3.1/first-last-frame-to-video": {
+    "summary": "Create veo3.1 first-last-frame-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      },
+      "last_frame_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "minLength": 3
+      },
+      "first_frame_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "minLength": 3
+      }
+    },
+    "required": [
+      "prompt",
+      "first_frame_url",
+      "last_frame_url"
+    ]
+  },
+  "/veo3.1/fast/image-to-video": {
+    "summary": "Create veo3.1 fast image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "minLength": 3
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/veo3.1/fast": {
+    "summary": "Create veo3.1 fast",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "aspect_ratio",
+      "resolution",
+      "generate_audio"
+    ]
+  },
+  "/veo3.1/fast/first-last-frame-to-video": {
+    "summary": "Create veo3.1 fast first-last-frame-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      },
+      "last_frame_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "minLength": 3
+      },
+      "first_frame_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "minLength": 3
+      }
+    },
+    "required": [
+      "prompt",
+      "first_frame_url",
+      "last_frame_url"
+    ]
+  },
+  "/veo3.1/reference-to-video": {
+    "summary": "Create veo3.1 reference-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          "4",
+          "6",
+          "8"
+        ],
+        "type": "string",
+        "title": "Duration",
+        "default": "6"
+      },
+      "image_urls": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "title": "Image",
+          "format": "uri",
+          "minLength": 3
+        },
+        "maxItems": 3,
+        "minItems": 1
+      },
+      "resolution": {
+        "enum": [
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "16:9"
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate audio",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "image_urls"
+    ]
+  },
+  "/bytedance/seedance/v1/lite/image-to-video": {
+    "summary": "Create bytedance seedance v1 lite image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 12,
+        "minimum": 2
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "480",
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "1080"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:4",
+          "1:1",
+          "21:9"
+        ],
+        "type": "string",
+        "default": "16:9"
+      },
+      "camera_fixed": {
+        "type": "boolean",
+        "title": "Camera fixed",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/bytedance/seedance/v1/lite/text-to-video": {
+    "summary": "Create bytedance seedance v1 lite text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 12,
+        "minimum": 2
+      },
+      "resolution": {
+        "enum": [
+          "480",
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:4",
+          "1:1",
+          "21:9"
+        ],
+        "type": "string",
+        "default": "16:9"
+      },
+      "camera_fixed": {
+        "type": "boolean",
+        "title": "Camera fixed",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/bytedance/seedance/v1/pro/fast/image-to-video": {
+    "summary": "Create bytedance seedance v1 pro fast image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 12,
+        "minimum": 2
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "480",
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "1080"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:4",
+          "1:1",
+          "21:9"
+        ],
+        "type": "string",
+        "default": "16:9"
+      },
+      "camera_fixed": {
+        "type": "boolean",
+        "title": "Camera fixed",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/bytedance/seedance/v1/pro/fast/text-to-video": {
+    "summary": "Create bytedance seedance v1 pro fast text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 12,
+        "minimum": 2
+      },
+      "resolution": {
+        "enum": [
+          "480",
+          "720",
+          "1080"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "1080"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:4",
+          "1:1",
+          "21:9"
+        ],
+        "type": "string",
+        "default": "16:9"
+      },
+      "camera_fixed": {
+        "type": "boolean",
+        "title": "Camera fixed",
+        "default": false
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/flux-pro/kontext/max/text-to-image": {
+    "summary": "Create flux-pro kontext max text-to-image",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "maximum": 1000000,
+        "minimum": 1,
+        "description": "Random seed for reproducibility"
+      },
+      "prompt": {
+        "type": "string",
+        "description": "Text prompt for image generation"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "4:3",
+          "1:1",
+          "3:4",
+          "9:16",
+          "2:3",
+          "1:2",
+          "2:1",
+          "4:5",
+          "3:2"
+        ],
+        "type": "string",
+        "title": "Aspect ratio",
+        "default": "16:9"
+      },
+      "safety_tolerance": {
+        "type": "integer",
+        "default": 6,
+        "maximum": 6,
+        "minimum": 0,
+        "description": "Safety tolerance level (0-6)"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/kling-video/v2.1/master/image-to-video": {
+    "summary": "Create kling-video v2.1 master image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/kling-video/v2.1/master/text-to-video": {
+    "summary": "Create kling-video v2.1 master text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt",
+        "maxLength": 2500
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "aspect_ratio": {
+        "enum": [
+          "1:1",
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "1:1"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/kling-video/v2.1/pro/image-to-video": {
+    "summary": "Create kling-video v2.1 pro image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/kling-video/v2.1/standard/image-to-video": {
+    "summary": "Create kling-video v2.1 standard image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/kling-video/v2.5-turbo/pro/image-to-video": {
+    "summary": "Create kling-video v2.5-turbo pro image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/kling-video/v2.5-turbo/pro/text-to-video": {
+    "summary": "Create kling-video v2.5-turbo pro text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/kling-video/v2.5-turbo/standard/image-to-video": {
+    "summary": "Create kling-video v2.5-turbo standard image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "cfg_scale": {
+        "type": "number",
+        "title": "CFG Scale",
+        "default": 0.5,
+        "maximum": 1,
+        "minimum": 0,
+        "multipleOf": 0.01
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-02/pro/image-to-video": {
+    "summary": "Create minimax hailuo-02 pro image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "First frame image",
+        "format": "uri"
+      },
+      "end_image_url": {
+        "type": "string",
+        "title": "Last frame image",
+        "format": "uri"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-02/pro/text-to-video": {
+    "summary": "Create minimax hailuo-02 pro text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/minimax/hailuo-02/standard/image-to-video": {
+    "summary": "Create minimax hailuo-02 standard image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          6,
+          10
+        ],
+        "default": 6
+      },
+      "image_url": {
+        "type": "string",
+        "title": "First frame image",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "512P",
+          "768P"
+        ],
+        "type": "string",
+        "default": "768P"
+      },
+      "end_image_url": {
+        "type": "string",
+        "title": "Last frame image",
+        "format": "uri"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-02/standard/text-to-video": {
+    "summary": "Create minimax hailuo-02 standard text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          6,
+          10
+        ],
+        "default": 6
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/minimax/hailuo-2.3-fast/pro/image-to-video": {
+    "summary": "Create minimax hailuo-2.3-fast pro image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-2.3-fast/standard/image-to-video": {
+    "summary": "Create minimax hailuo-2.3-fast standard image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          6,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 6
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-2.3/pro/image-to-video": {
+    "summary": "Create minimax hailuo-2.3 pro image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-2.3/pro/text-to-video": {
+    "summary": "Create minimax hailuo-2.3 pro text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/minimax/hailuo-2.3/standard/image-to-video": {
+    "summary": "Create minimax hailuo-2.3 standard image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          6,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 6
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/minimax/hailuo-2.3/standard/text-to-video": {
+    "summary": "Create minimax hailuo-2.3 standard text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          6,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 6
+      },
+      "prompt_optimizer": {
+        "type": "boolean",
+        "title": "Prompt optimizer",
+        "default": true
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/nano-banana": {
+    "summary": "Create nano-banana",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      },
+      "aspect_ratio": {
+        "enum": [
+          "auto",
+          "1:1",
+          "4:3",
+          "3:4",
+          "3:2",
+          "2:3",
+          "5:4",
+          "4:5",
+          "16:9",
+          "9:16",
+          "21:9"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      },
+      "input_images": {
+        "type": "array",
+        "items": {
+          "title": "Image URL input",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "image_url"
+            },
+            "image_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "type",
+            "image_url"
+          ]
+        },
+        "title": "Input Images",
+        "maxItems": 8,
+        "minItems": 0
+      },
+      "output_format": {
+        "enum": [
+          "jpeg",
+          "png"
+        ],
+        "type": "string",
+        "default": "jpeg"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/reve/edit": {
+    "summary": "Create reve edit",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/reve/fast/edit": {
+    "summary": "Create reve fast edit",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/reve/fast/remix": {
+    "summary": "Create reve fast remix",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_urls": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": "Image URLs",
+        "maxItems": 4,
+        "minItems": 2
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      },
+      "aspect_ratio": {
+        "enum": [
+          "1:1",
+          "4:3",
+          "3:4",
+          "3:2",
+          "2:3",
+          "5:4",
+          "4:5",
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      }
+    },
+    "required": [
+      "prompt",
+      "image_urls"
+    ]
+  },
+  "/reve/remix": {
+    "summary": "Create reve remix",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "image_urls": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": "Image URLs",
+        "maxItems": 4,
+        "minItems": 2
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      },
+      "aspect_ratio": {
+        "enum": [
+          "1:1",
+          "4:3",
+          "3:4",
+          "3:2",
+          "2:3",
+          "5:4",
+          "4:5",
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect Ratio",
+        "default": "4:3"
+      }
+    },
+    "required": [
+      "prompt",
+      "image_urls"
+    ]
+  },
+  "/reve/text-to-image": {
+    "summary": "Create reve text-to-image",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "num_images": {
+        "type": "integer",
+        "default": 1,
+        "maximum": 4,
+        "minimum": 1
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/sora-2/image-to-video": {
+    "summary": "Create sora-2 image-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          4,
+          8,
+          12
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 4
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "720p"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect ratio",
+        "default": "16:9"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/sora-2/image-to-video/pro": {
+    "summary": "Create sora-2 image-to-video pro",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          4,
+          8,
+          12
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 4
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "720p",
+          "1080p"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect ratio",
+        "default": "16:9"
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/sora-2/text-to-video": {
+    "summary": "Create sora-2 text-to-video",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          4,
+          8,
+          12
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 4
+      },
+      "resolution": {
+        "enum": [
+          "720p"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect ratio",
+        "default": "16:9"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/sora-2/text-to-video/pro": {
+    "summary": "Create sora-2 text-to-video pro",
+    "params": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          4,
+          8,
+          12
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 4
+      },
+      "resolution": {
+        "enum": [
+          "720p",
+          "1080p"
+        ],
+        "type": "string",
+        "title": "Resolution",
+        "default": "720p"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "16:9",
+          "9:16"
+        ],
+        "type": "string",
+        "title": "Aspect ratio",
+        "default": "16:9"
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  },
+  "/wan-25-preview/image-to-video": {
+    "summary": "Create wan-25-preview image-to-video",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": -1,
+        "maximum": 1000000,
+        "minimum": -1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "audio_url": {
+        "type": "string",
+        "title": "Audio URL",
+        "format": "uri"
+      },
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "480p",
+          "720p",
+          "1080p"
+        ],
+        "type": "string",
+        "default": "720p"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt",
+      "image_url"
+    ]
+  },
+  "/wan-25-preview/text-to-video": {
+    "summary": "Create wan-25-preview text-to-video",
+    "params": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": -1,
+        "maximum": 1000000,
+        "minimum": -1
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt"
+      },
+      "duration": {
+        "enum": [
+          5,
+          10
+        ],
+        "type": "integer",
+        "title": "Duration",
+        "default": 5
+      },
+      "audio_url": {
+        "type": "string",
+        "title": "Audio URL",
+        "format": "uri"
+      },
+      "resolution": {
+        "enum": [
+          "480p",
+          "720p",
+          "1080p"
+        ],
+        "type": "string",
+        "default": "720p"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative prompt",
+        "default": ""
+      }
+    },
+    "required": [
+      "prompt"
+    ]
+  }
+}

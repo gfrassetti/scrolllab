@@ -1,133 +1,126 @@
 import { useRef } from 'react'
-import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { gsap, useGSAP } from '../../../lib/gsap'
 import civic from './assets/civic.jpg'
 import tower from './assets/tower.jpg'
 import courtyard from './assets/courtyard.jpg'
 import gallery from './assets/gallery.jpg'
 import heroHouse from './assets/hero-house.jpg'
-import heroField from './assets/hero-field.jpg'
+import interior from './assets/interior.jpg'
 
+/**
+ * Cada obra ocupa un ancho y una banda distintos: la pagina se lee como un
+ * indice suelto, no como una grilla. `x` / `w` van en % del contenedor,
+ * `gap` en svh, y `speed` gradua el parallax de cada foto.
+ */
 const defaultWorks = [
-  { index: '01', title: 'North Civic Hall', meta: '1,240 m²', img: civic },
-  { index: '02', title: 'Harbour Court', meta: '8,400 m²', img: tower },
-  { index: '03', title: 'Olive House', meta: '420 m²', img: courtyard },
-  { index: '04', title: 'Daylight Gallery', meta: '2,100 m²', img: gallery },
-  { index: '05', title: 'Ridge Residence', meta: '610 m²', img: heroHouse },
-  { index: '06', title: 'Field Pavilion', meta: '3,800 m²', img: heroField },
+  { title: 'Placeholder Project 01', meta: '000 m²', img: civic, x: 54, w: 46, ratio: '16 / 7', gap: 0, speed: 1 },
+  { title: 'Placeholder Project 02', meta: '000 m²', img: tower, x: 34, w: 38, ratio: '4 / 3', gap: 6, speed: 1.35 },
+  { title: 'Placeholder Project 03', meta: '000 m²', img: courtyard, x: 0, w: 25, ratio: '3 / 4', gap: -14, speed: 0.75 },
+  { title: 'Placeholder Project 04', meta: '000 m²', img: gallery, x: 46, w: 54, ratio: '16 / 9', gap: 4, speed: 1.15 },
+  { title: 'Placeholder Project 05', meta: '000 m²', img: heroHouse, x: 8, w: 32, ratio: '5 / 4', gap: -10, speed: 0.9 },
+  { title: 'Placeholder Project 06', meta: '000 m²', img: interior, x: 52, w: 44, ratio: '4 / 3', gap: 2, speed: 1.3 },
 ]
 
 /**
- * ProjectRail — work index. Desktop: a photograph trails the cursor.
- * Mobile: each row carries its own thumbnail.
+ * ProjectRail — work index. Photographs of different widths land on their
+ * own bands; each one drifts inside its crop (P2) and carries a caption
+ * row: name on the left, area on the right.
  */
 export default function ProjectRail({
-  kicker = 'Selected work',
-  title = 'Projects',
+  kicker = '(6)',
+  title = 'Selected Projects',
   works = defaultWorks,
 }) {
   const root = useRef(null)
-  const floatImg = useRef(null)
-  const quick = useRef({ x: null, y: null })
 
   useGSAP(
     () => {
-      gsap.set(floatImg.current, {
-        autoAlpha: 0,
-        scale: 0.92,
-        xPercent: -50,
-        yPercent: -50,
-      })
-
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-      gsap.from('[data-work-row]', {
-        y: 36,
+      gsap.from('[data-work-head]', {
+        yPercent: 40,
         opacity: 0,
-        duration: 0.85,
+        duration: 1,
         ease: 'power3.out',
-        stagger: 0.07,
-        scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
+        scrollTrigger: { trigger: root.current, start: 'top 80%', once: true },
       })
 
-      quick.current.x = gsap.quickTo(floatImg.current, 'x', {
-        duration: 0.45,
-        ease: 'power3',
-      })
-      quick.current.y = gsap.quickTo(floatImg.current, 'y', {
-        duration: 0.45,
-        ease: 'power3',
-      })
+      gsap.utils.toArray('[data-work-item]').forEach((item) => {
+        const media = item.querySelector('[data-work-media]')
+        const speed = Number(item.dataset.speed) || 1
 
-      ScrollTrigger.create({
-        trigger: root.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        onLeave: () => hidePreview(),
-        onLeaveBack: () => hidePreview(),
+        gsap.fromTo(
+          media,
+          { yPercent: -9 * speed },
+          {
+            yPercent: 9 * speed,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: item,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 0.5,
+            },
+          },
+        )
+
+        gsap.from(item, {
+          opacity: 0,
+          y: 40,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: item, start: 'top 88%', once: true },
+        })
       })
     },
     { scope: root },
   )
 
-  const handleMove = (e) => {
-    quick.current.x?.(e.clientX)
-    quick.current.y?.(e.clientY)
-  }
-
-  const showPreview = (img, e) => {
-    if (!floatImg.current) return
-    floatImg.current.src = img
-    if (e) gsap.set(floatImg.current, { x: e.clientX, y: e.clientY })
-    gsap.to(floatImg.current, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power3.out' })
-  }
-
-  const hidePreview = () => {
-    if (!floatImg.current) return
-    gsap.to(floatImg.current, { autoAlpha: 0, scale: 0.92, duration: 0.28, ease: 'power2.out' })
-  }
-
   return (
-    <section ref={root} id="work" className="px-5 py-24 md:px-10 md:py-36">
-      <div className="mb-12 flex items-end justify-between gap-6 border-t border-[#111]/12 pt-5">
-        <p className="text-[11px] tracking-[0.28em] text-[#111]/45 uppercase">{kicker}</p>
-        <h2 className="font-display text-[clamp(2rem,5vw,3.4rem)] leading-none">{title}</h2>
-      </div>
+    <section
+      ref={root}
+      id="work"
+      className="bg-atrium-paper px-5 pt-[8svh] pb-[24svh] text-atrium-ink md:px-10 md:pb-[30svh]"
+    >
+      <h2 data-work-head className="atrium-mid mb-[14svh] flex items-start gap-3">
+        <span>{title}</span>
+        {kicker ? (
+          <span className="atrium-note font-display text-atrium-ink/65">{kicker}</span>
+        ) : null}
+      </h2>
 
-      <ul onMouseMove={handleMove} onMouseLeave={hidePreview}>
+      <div>
         {works.map((work) => (
-          <li key={work.index} data-work-row className="border-b border-[#111]/12 first:border-t">
-            <a
-              href="#work"
-              onMouseEnter={(e) => showPreview(work.img, e)}
-              className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 py-6 md:grid-cols-[4.5rem_1fr_auto] md:gap-8 md:py-8"
+          <figure
+            key={work.title}
+            data-work-item
+            data-speed={work.speed}
+            style={{
+              '--work-x': `${work.x}%`,
+              '--work-w': `${work.w}%`,
+              '--work-gap': `${work.gap}svh`,
+            }}
+            className="mt-[8svh] ml-0 w-full first:mt-0 md:mt-[calc(9svh+var(--work-gap))] md:ml-[var(--work-x)] md:w-[var(--work-w)]"
+          >
+            <div
+              className="relative overflow-hidden"
+              style={{ aspectRatio: work.ratio }}
             >
-              <span className="text-[11px] tracking-[0.22em] text-[#111]/40">{work.index}</span>
-              <span className="flex min-w-0 items-center gap-4">
-                <img
-                  src={work.img}
-                  alt=""
-                  loading="lazy"
-                  className="h-14 w-16 shrink-0 object-cover md:hidden"
-                />
-                <span className="min-w-0 font-display text-[clamp(1.45rem,3.6vw,2.8rem)] leading-[0.95] tracking-[-0.03em] transition-transform duration-300 ease-out-strong group-hover:translate-x-2">
-                  {work.title}
-                </span>
-              </span>
-              <span className="justify-self-end text-[11px] tracking-[0.18em] text-[#111]/40 uppercase">
-                {work.meta}
-              </span>
-            </a>
-          </li>
+              <img
+                data-work-media
+                src={work.img}
+                alt=""
+                loading="lazy"
+                className="absolute top-1/2 left-0 h-[122%] w-full max-w-none -translate-y-1/2 object-cover will-change-transform"
+              />
+            </div>
+            <figcaption className="atrium-note mt-3 flex items-baseline justify-between gap-6">
+              <span>{work.title}</span>
+              <span className="font-display text-atrium-ink/65">{work.meta}</span>
+            </figcaption>
+          </figure>
         ))}
-      </ul>
-
-      <img
-        ref={floatImg}
-        src={works[0]?.img}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-40 hidden h-36 w-56 object-cover md:block lg:h-48 lg:w-72"
-      />
+      </div>
     </section>
   )
 }
