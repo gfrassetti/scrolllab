@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { VantaCrosshair } from './VantaChrome'
 import HeroCanvas from './HeroCanvas'
 import heroFace from './assets/hero-face.jpg'
 import rex from './assets/op-rex.jpg'
@@ -12,14 +13,18 @@ import rex from './assets/op-rex.jpg'
  * es lo que hace que un hero KPR-like se note falso.
  */
 export default function HeroOperators({
-  line = 'VANTA is a living raid — a world waiting to be played, protected, or rewritten.',
-  word1 = 'VANGUARD.',
-  word2 = 'PROTECT.',
-  word3 = 'REWRITE.',
-  tag1 = '01V',
-  tag2 = '02P',
-  tag3 = '03R',
-  worldLine = 'A familiar world… set on a different path.',
+  // Copy genérico a propósito (título 1 / headline / lorem corto): en esta
+  // pasada estamos clavando motor y layout contra la ref, no lore de VANTA.
+  // El comprador reemplaza esto por su propio copy — no hace falta inventar
+  // facciones/operators todavía.
+  line = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.',
+  word1 = 'HEADLINE.',
+  word2 = 'TITLE TWO.',
+  word3 = 'TITLE 1.',
+  tag1 = '01',
+  tag2 = '02',
+  tag3 = '03',
+  worldLine = 'Subheadline placeholder text goes here.',
   hint = 'Scroll',
   img = heroFace,
   img2 = rex,
@@ -38,12 +43,27 @@ export default function HeroOperators({
       const words = gsap.utils.toArray('[data-hero-word]', root.current)
       const world = root.current.querySelector('[data-hero-world]')
       const copy = root.current.querySelector('[data-hero-copy]')
-      const split = new SplitText(words, { type: 'chars', mask: 'chars' })
-      let played = false
       const type = gsap.utils.toArray('[data-hero-type]', root.current)
+
+      // Anton carga con display=swap (index.html) sin ningún gate: SplitText
+      // puede correr ANTES de que la fuente real esté lista, cortar cada
+      // carácter en un span de tamaño fijo medido contra el fallback, y romper
+      // (recorte + flicker) cuando Anton entra y cambia el ancho del glifo.
+      // Palabras huge + fluid (clamp/vw) como estas son justo donde más se
+      // nota. Se tapan hasta que la fuente real esté confirmada.
+      let split = null
+      let played = false
+      let cancelled = false
+      gsap.set(words, { autoAlpha: reduced ? 1 : 0 })
+
       const playIntro = () => {
-        if (played || reduced) return
+        if (played || reduced || cancelled) return
         played = true
+        split = new SplitText(words, { type: 'chars', mask: 'chars' })
+        gsap.set(split.chars, { yPercent: 110 })
+        gsap.set(words, { autoAlpha: 1 })
+        gsap.set(copy, { autoAlpha: 0, y: 14 })
+        gsap.set(type, { autoAlpha: 0 })
         gsap.to(split.chars, {
           yPercent: 0,
           duration: 1.15,
@@ -55,19 +75,23 @@ export default function HeroOperators({
         gsap.to(type, { autoAlpha: 1, duration: 0.85, delay: 0.12, ease: 'power3.out' })
       }
 
-      if (!reduced) {
-        gsap.set(split.chars, { yPercent: 110 })
-        gsap.set(copy, { autoAlpha: 0, y: 14 })
-        gsap.set(type, { autoAlpha: 0 })
-      }
-
       const bootLive = document.querySelector('[data-vanta-boot]')
       const onBootOut = () => {
         playIntro()
         window.removeEventListener('vanta:boot-out', onBootOut)
       }
-      if (reduced || !bootLive) playIntro()
-      else window.addEventListener('vanta:boot-out', onBootOut)
+      const armIntro = () => {
+        if (reduced || !bootLive) {
+          // Un frame de diferencia: StrictMode monta/desmonta/remonta este
+          // efecto en el mismo tick al arrancar. Si playIntro() corriera ya,
+          // el montaje fantasma también crearía su SplitText antes de que
+          // `cancelled` se ponga en true — doble split, doble flicker. Con
+          // rAF, para cuando esto corre, el fantasma ya se limpió.
+          requestAnimationFrame(() => !cancelled && playIntro())
+        } else window.addEventListener('vanta:boot-out', onBootOut)
+      }
+      if (reduced || document.fonts.status === 'loaded') armIntro()
+      else document.fonts.ready.then(() => !cancelled && armIntro())
 
       // Sin tilt loop: la respuesta al puntero la da la órbita de cámara en
       // HeroCanvas. Un rotate CSS acá encima sería doble parallax sobre la
@@ -110,6 +134,7 @@ export default function HeroOperators({
         gsap.set(shot, { borderRadius: 28 })
         gsap.set([paper, world, tab, cardB], { autoAlpha: 1, x: 0, y: 0, rotateY: -18 })
         return () => {
+          cancelled = true
           window.removeEventListener('vanta:boot-out', onBootOut)
         }
       }
@@ -158,6 +183,8 @@ export default function HeroOperators({
       window.addEventListener('resize', onResize)
 
       return () => {
+        cancelled = true
+        split?.revert()
         window.removeEventListener('vanta:boot-out', onBootOut)
         window.removeEventListener('resize', onResize)
       }
@@ -218,24 +245,27 @@ export default function HeroOperators({
           {line}
         </p>
 
-        <div className="pointer-events-none absolute right-6 top-[28%] z-30 hidden text-right md:block" data-hero-type="">
-          <p className="mb-1 font-mono text-[9px] tracking-[0.22em] uppercase opacity-70">{tag1}</p>
-          <p data-hero-word className="font-anton text-[clamp(2.4rem,5.5vw,4.8rem)] leading-[0.86] tracking-[-0.03em] uppercase">
-            {word1}
-          </p>
-          <p className="mt-3 mb-1 font-mono text-[9px] tracking-[0.22em] uppercase opacity-70">{tag2}</p>
-          <p data-hero-word className="font-anton text-[clamp(2.4rem,5.5vw,4.8rem)] leading-[0.86] tracking-[-0.03em] uppercase">
-            {word2}
-          </p>
-        </div>
-        <div className="pointer-events-none absolute bottom-[10%] left-4 z-30 md:left-8" data-hero-type="">
-          <p className="mb-1 font-mono text-[9px] tracking-[0.22em] uppercase opacity-70">{tag3}</p>
-          <p
-            data-hero-word
-            className="font-anton text-[clamp(2.8rem,11vw,8.5rem)] leading-[0.8] tracking-[-0.04em] uppercase"
-          >
-            {word3}
-          </p>
+        {/* Las tres palabras van APILADAS, gigantes, alineadas a la izquierda,
+            directo arriba del retrato — no una columna chica a un costado. Así
+            está en la ref (beat-05): cada línea corre casi el ancho completo. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[8%] z-30 px-4 md:px-8" data-hero-type="">
+          {[
+            [tag1, word1],
+            [tag2, word2],
+            [tag3, word3],
+          ].map(([tag, word]) => (
+            <div key={tag} className="flex items-baseline gap-3">
+              <span className="w-8 shrink-0 font-mono text-[9px] tracking-[0.22em] uppercase opacity-70 md:w-10">
+                {tag}
+              </span>
+              <p
+                data-hero-word
+                className="font-anton text-[clamp(2.6rem,9.2vw,7.6rem)] leading-[0.86] tracking-[-0.035em] uppercase"
+              >
+                {word}
+              </p>
+            </div>
+          ))}
         </div>
 
         <p className="pointer-events-none absolute right-6 bottom-6 z-30 font-mono text-[10px] tracking-[0.28em] uppercase opacity-70" data-hero-type="">
@@ -261,6 +291,11 @@ export default function HeroOperators({
           aria-hidden="true"
           className="pointer-events-none absolute inset-3 z-40 rounded-[1.25rem] border border-white/25 md:inset-4"
         />
+        {/* data-hero-hud: se apaga con el resto del HUD al achicarse la card
+            (mismo selector que anima la timeline de scrub más arriba). */}
+        <span data-hero-hud>
+          <VantaCrosshair />
+        </span>
       </div>
     </section>
   )

@@ -15,8 +15,16 @@ import heroFace from './assets/hero-face.jpg'
  * cámara con damp λ≈3. El puntero mueve la CÁMARA; nunca un `rotate` CSS sobre
  * la foto — eso es lo que delata un hero falso.
  *
- * Todo el lifecycle sale de `src/lib/webgl/`: no reimplementar acá la
- * matemática de cover ni el damp (era la falla de la iteración anterior).
+ * Un solo plano por ahora, a propósito. Se probó una versión con dos planos a
+ * distinta profundidad (fondo oscurecido detrás del pivote) para dar paralaje
+ * real — ver git history de este archivo — pero mostró un render negro
+ * intermitente en pruebas repetidas que no se pudo aislar con certeza en el
+ * tiempo disponible (candidatos: StrictMode remontando el efecto dos veces
+ * sobre el mismo canvas/contexto WebGL, o una condición de carrera con el
+ * ResizeObserver del stage). Un solo plano estable > paralaje inestable.
+ * La profundidad real del hero necesita de todos modos un recorte con alpha
+ * del personaje sobre un fondo separado (Higgsfield/Meshy) — retomar ahí,
+ * no reintentar dos planos de la misma foto sin resolver antes esa causa raíz.
  */
 export default function HeroCanvas({
   img = heroFace,

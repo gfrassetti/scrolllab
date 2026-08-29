@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom'
-import { DEMO_PRODUCTS, formatShopPrice } from '../../../lib/shop/products'
+import {
+  DEMO_PRODUCTS,
+  defaultVariant,
+  formatShopPrice,
+} from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
 import { shopThemeVars } from '../../../lib/shop/theme'
 
@@ -60,14 +64,23 @@ export default function ProductGrid({
                 {product.blurb}
               </p>
             </Link>
-            <button
-              type="button"
-              onClick={() => addItem(product.id)}
-              className="mt-4 border border-[color:var(--shop-border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-fg)] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
-              style={{ borderRadius: 'var(--shop-radius)' }}
-            >
-              Add
-            </button>
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => addItem(product.id, 1, defaultVariant(product))}
+                className="border border-[color:var(--shop-border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-fg)] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
+                style={{ borderRadius: 'var(--shop-radius)' }}
+              >
+                Add
+              </button>
+              {/* Quick-add takes the first option; the full picker lives on
+                  the product page (not every product has one — see PDP). */}
+              {product.variants ? (
+                <span className="text-[11px] text-[color:var(--shop-muted)]">
+                  {defaultVariant(product)} · pick {product.variants.label.toLowerCase()} on the page
+                </span>
+              ) : null}
+            </div>
           </li>
         ))}
       </ul>

@@ -82,14 +82,12 @@ const MODEL_FILES = {
 
 const SHARED = [
   'src/lib/gsap.js',
+  'src/lib/gtm.js',
   // Beat (src/lib/beat/*) NO va en el ZIP — plusvalía marketplace. Ver docs/scrolllab-beat.md.
   // Si una sección importa lib/beat, el pack fallará hasta portar a GSAP.
-  'src/lib/webgl/index.js',
-  'src/lib/webgl/stage.js',
-  'src/lib/webgl/orbit.js',
-  'src/lib/webgl/damp.js',
-  'src/lib/webgl/coverPlane.js',
-  'src/lib/webgl/gltf.js',
+  // webgl (src/lib/webgl/*) tampoco es incondicional: solo lo usa vanta/HeroCanvas
+  // hoy. Meterlo siempre arrastraba `three` como dependencia hasta en un ZIP
+  // 100% 2D (chapters, nocturne...). Ver WEBGL_FILES + needsWebgl más abajo.
   'src/lib/navLinks.js',
   'src/hooks/useLenis.js',
   'src/hooks/useMobileMenu.js',
@@ -261,6 +259,32 @@ function modelWrapperClass(model) {
   return 'bg-bone text-ink'
 }
 
+/** Solo entra si alguna fuente empaquetada de verdad importa `lib/webgl` (ver needsWebgl). */
+const WEBGL_FILES = [
+  'src/lib/webgl/index.js',
+  'src/lib/webgl/stage.js',
+  'src/lib/webgl/orbit.js',
+  'src/lib/webgl/damp.js',
+  'src/lib/webgl/coverPlane.js',
+  'src/lib/webgl/gltf.js',
+]
+
+/** El sufijo `lib/webgl` sobrevive a cualquier reescritura de `../` relativo. */
+function needsWebgl(sources) {
+  return sources.some((s) => /['"][^'"]*\blib\/webgl(?:\/[^'"]*)?['"]/.test(s))
+}
+
+function appendWebglIfNeeded(archive, sources, prefix = '') {
+  if (!needsWebgl(sources)) return
+  for (const rel of WEBGL_FILES) {
+    const abs = path.join(ROOT, rel)
+    if (!fs.existsSync(abs)) continue
+    const body = fs.readFileSync(abs)
+    sources.push(body.toString('utf8'))
+    archive.append(body, { name: `${prefix}${rel}` })
+  }
+}
+
 const SHOP_FILES = [
   'src/lib/shop/products.js',
   'src/lib/shop/cartStore.js',
@@ -420,6 +444,8 @@ function appendModelProject(archive, model, prefix = '') {
       name: `${prefix}${rel.replace(/\\/g, '/')}`,
     })
   }
+
+  appendWebglIfNeeded(archive, sources, prefix)
 
   archive.append(buildTemplatePackageJson(`scrolllab-${model}`, sources), {
     name: `${prefix}package.json`,
@@ -699,6 +725,7 @@ ${renderLines.join('\n')}
   }
   sources.push(appSrc)
   archive.append(appSrc, { name: 'src/App.jsx' })
+  appendWebglIfNeeded(archive, sources)
   archive.append(buildTemplatePackageJson('scrolllab-custom', sources), {
     name: 'package.json',
   })

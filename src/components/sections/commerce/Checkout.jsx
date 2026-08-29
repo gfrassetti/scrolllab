@@ -465,7 +465,7 @@ export default function Checkout({
                 ) : (
                   <ul className="mt-5 divide-y divide-[color:var(--shop-border)] border-y border-[color:var(--shop-border)]">
                     {lines.map((line) => (
-                      <li key={line.productId} className="flex gap-4 py-4">
+                      <li key={line.id} className="flex gap-4 py-4">
                         <img
                           src={line.img}
                           alt=""
@@ -477,6 +477,12 @@ export default function Checkout({
                           <div className="flex items-baseline justify-between gap-3">
                             <p className="truncate text-sm font-medium">
                               {line.name}
+                              {line.variant ? (
+                                <span className="text-[color:var(--shop-muted)]">
+                                  {' '}
+                                  — {line.variant}
+                                </span>
+                              ) : null}
                             </p>
                             <p className="shrink-0 text-sm">
                               {money(line.price * line.qty)}
@@ -490,7 +496,7 @@ export default function Checkout({
                               <button
                                 type="button"
                                 aria-label={`${qtyLabel} −`}
-                                onClick={() => setQty(line.productId, line.qty - 1)}
+                                onClick={() => setQty(line.id, line.qty - 1)}
                                 className="ui-press px-2.5 py-1 text-sm hover:text-[color:var(--shop-accent)]"
                               >
                                 −
@@ -501,7 +507,7 @@ export default function Checkout({
                               <button
                                 type="button"
                                 aria-label={`${qtyLabel} +`}
-                                onClick={() => setQty(line.productId, line.qty + 1)}
+                                onClick={() => setQty(line.id, line.qty + 1)}
                                 className="ui-press px-2.5 py-1 text-sm hover:text-[color:var(--shop-accent)]"
                               >
                                 +
@@ -509,7 +515,7 @@ export default function Checkout({
                             </div>
                             <button
                               type="button"
-                              onClick={() => removeItem(line.productId)}
+                              onClick={() => removeItem(line.id)}
                               className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--shop-muted)] hover:text-[color:var(--shop-accent)]"
                             >
                               {removeLabel}

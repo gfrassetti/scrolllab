@@ -49,7 +49,7 @@ export default function CartDrawer({
             <ul className="divide-y divide-[color:var(--shop-border)] border-y border-[color:var(--shop-border)]">
               {lines.map((line) => (
                 <li
-                  key={line.productId}
+                  key={line.id}
                   className="flex flex-wrap items-center gap-4 py-5"
                 >
                   <img
@@ -58,7 +58,16 @@ export default function CartDrawer({
                     className="size-16 border border-[color:var(--shop-border)] object-cover"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium">{line.name}</p>
+                    <p className="font-medium">
+                      {line.name}
+                      {line.variant ? (
+                        <span className="text-[color:var(--shop-muted)]">
+                          {' '}
+                          — {line.variantLabel ? `${line.variantLabel} ` : ''}
+                          {line.variant}
+                        </span>
+                      ) : null}
+                    </p>
                     <p className="text-sm text-[color:var(--shop-muted)]">
                       {formatShopPrice(line.price, line.currency)}
                     </p>
@@ -69,13 +78,13 @@ export default function CartDrawer({
                       type="number"
                       min={1}
                       value={line.qty}
-                      onChange={(e) => setQty(line.productId, e.target.value)}
+                      onChange={(e) => setQty(line.id, e.target.value)}
                       className="w-14 border border-[color:var(--shop-border)] bg-transparent px-2 py-1 text-sm text-[color:var(--shop-fg)]"
                     />
                   </label>
                   <button
                     type="button"
-                    onClick={() => removeItem(line.productId)}
+                    onClick={() => removeItem(line.id)}
                     className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-muted)] hover:text-[color:var(--shop-accent)]"
                   >
                     Remove

@@ -59,6 +59,12 @@ docs/reference-analysis/loom-frames/
 # graphify — regenerated locally (graph.json, html, obsidian export, caches)
 graphify-out/
 raw/
+# graphify's "export obsidian" walks a code graph into one .md note per symbol —
+# thousands of files, all regenerable. Never export it into docs/reference-analysis/_vault/
+# (or any tracked path) again: `graphify export obsidian` with no --dir goes to
+# graphify-out/obsidian/, already ignored above. This ignores it if it recurs anyway.
+docs/reference-analysis/_vault/*
+!docs/reference-analysis/_vault/*analisis de referencia.md
 
 # Editor directories and files
 .vscode/*
