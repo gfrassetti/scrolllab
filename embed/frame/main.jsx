@@ -5,7 +5,9 @@ import { ScrollTrigger } from '../src/gsap'
 
 const params = new URLSearchParams(location.hash.slice(1))
 const key = params.get('key')
-const api = (params.get('api') || 'https://cdn.scrolllab.com.ar').replace(/\/$/, '')
+// El loader la pasa desde el snippet (`data-api`). Sin eso no sabemos dónde
+// está la API — abortamos en vez de adivinar un dominio.
+const api = (params.get('api') || '').replace(/\/$/, '')
 
 const root = document.getElementById('root')
 
@@ -79,6 +81,10 @@ function onMessage(e) {
 async function main() {
   if (!key) {
     console.error('[scrolllab] frame sin key')
+    return
+  }
+  if (!api) {
+    console.error('[scrolllab] frame sin api (falta data-api en el <script>)')
     return
   }
 

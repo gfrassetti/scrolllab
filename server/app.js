@@ -723,6 +723,9 @@ export async function createApp(config) {
     loaderInfoCache = {
       version,
       url: `${config.embedCdnUrl}/${version}/loader.js`,
+      // El frame (estático) no sabe dónde está la API — se la pasamos en el
+      // snippet como `data-api`.
+      api: config.apiPublicUrl || '',
       // Solo mandamos el hash si SRI está habilitado (el host tiene CORS).
       integrity: config.embedSri ? integrity : null,
     }
@@ -856,10 +859,16 @@ export async function createApp(config) {
     limits.hosted,
     asyncHandler(async (req, res) => {
       const inst = await loadOwnedHosted(req)
+      // `draftProps` / `publishedProps` son Mixed en Mongo: reasignarlos no
+      // siempre queda marcado como modificado y `save()` no los persiste.
+      const touch = (p) => {
+        if (typeof inst.markModified === 'function') inst.markModified(p)
+      }
 
       if (req.body?.draftProps !== undefined) {
         inst.draftProps =
           sanitizeSectionProps(inst.sectionId, req.body.draftProps) || {}
+        touch('draftProps')
       }
       if (req.body?.domains !== undefined) {
         inst.domains = cleanDomains(req.body.domains)
@@ -883,6 +892,7 @@ export async function createApp(config) {
           })
         }
         inst.publishedProps = inst.draftProps || {}
+        touch('publishedProps')
         inst.status = 'published'
         inst.publishedAt = new Date()
       } else if (req.body?.unpublish === true && inst.status === 'published') {
