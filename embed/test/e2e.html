@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed — E2E contra la API real</title>
+    <style>
+      * { box-sizing: border-box; }
+      html { font-size: 21px; }
+      body { margin: 0; font-family: Georgia, serif; background: #fff; color: #1a1a1a; }
+      .host-block { padding: 5rem 3rem; }
+      .host-block.alt { background: #0e0e12; color: #f0f0f0; }
+      h1 { font-size: 2.2rem; margin: 0 0 1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="host-block">
+      <h1>Página anfitriona — config traída de la API real</h1>
+      <p>
+        El <code>&lt;script&gt;</code> pide
+        <code>http://localhost:8787/api/embed/&lt;key&gt;/config</code> (cross-origin,
+        sin auth) y monta la sección publicada.
+      </p>
+    </div>
+
+    <!-- data-key se reemplaza por el de la instancia publicada en cada corrida de E2E -->
+    <script
+      src="../../embed-dist/scrolllab-embed.js"
+      data-scrolllab
+      data-key="__E2E_KEY__"
+      data-api="http://localhost:8787"
+      async
+    ></script>
+
+    <div class="host-block alt"><p>Bloque del host debajo del embed.</p></div>
+  </body>
+</html>

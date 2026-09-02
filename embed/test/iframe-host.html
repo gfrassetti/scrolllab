@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed iframe — página anfitriona</title>
+    <style>
+      * { box-sizing: border-box; }
+      html { font-size: 21px; }
+      body { margin: 0; font-family: Georgia, serif; background: #fff; color: #1a1a1a; }
+      .host-block { padding: 5rem 3rem; }
+      .host-block.alt { background: #0e0e12; color: #f0f0f0; }
+      h1 { font-size: 2.2rem; margin: 0 0 1rem; }
+      /* dato "sensible" del host: el iframe NO debería poder leer esto */
+      #secret { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="secret" data-token="HOST-SECRET-DO-NOT-LEAK">x</div>
+
+    <div class="host-block">
+      <h1>Página anfitriona</h1>
+      <p>El <code>&lt;script&gt;</code> del loader (1.7 KB) crea un iframe cross-origin. La sección corre adentro, en otro origen.</p>
+    </div>
+
+    <!-- lo que pega el cliente. data-frame/data-api solo para test local. -->
+    <script
+      src="http://localhost:4178/embed-dist/v1/loader.js"
+      data-scrolllab
+      data-key="__E2E_KEY__"
+      data-frame="http://localhost:4179/embed-dist/v1"
+      data-api="http://localhost:8787"
+      async
+    ></script>
+
+    <div class="host-block alt"><p>Bloque del host debajo del embed.</p></div>
+  </body>
+</html>

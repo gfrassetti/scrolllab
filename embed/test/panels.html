@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed — sección con pin + scrub</title>
+    <style>
+      * { box-sizing: border-box; }
+      html { font-size: 20px; }
+      body { margin: 0; font-family: Georgia, serif; background: #fff; color: #1a1a1a; }
+      .host-block { padding: 6rem 3rem; }
+      .host-block.alt { background: #0e0e12; color: #f0f0f0; }
+      h1 { font-size: 2.2rem; margin: 0 0 1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="host-block">
+      <h1>Página anfitriona — arriba del embed</h1>
+      <p>La sección de abajo se pinea y el scroll vertical la recorre en horizontal. Ojo cuánto scroll del host se "come".</p>
+    </div>
+
+    <script
+      src="../../embed-dist/scrolllab-embed.js"
+      data-scrolllab
+      data-key="panels-demo"
+      data-config-url="./config-panels.json"
+      async
+    ></script>
+
+    <div class="host-block alt">
+      <h1>Página anfitriona — abajo del embed</h1>
+      <p>Este bloque debería quedar accesible después de recorrer los paneles, sin que el layout se rompa.</p>
+    </div>
+  </body>
+</html>

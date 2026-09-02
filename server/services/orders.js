@@ -209,8 +209,8 @@ export async function fulfillApprovedPayment({
  * Cuenta la descarga de forma atómica. Con maxDownloads 0 nunca frena:
  * el contador queda solo como señal de abuso para soporte.
  */
-export async function consumeDownload(orderId, maxDownloads) {
-  const order = await db.consumeDownloadAtomic(orderId, maxDownloads)
+export async function consumeDownload(orderId, maxDownloads, meta = {}) {
+  const order = await db.consumeDownloadAtomic(orderId, maxDownloads, meta)
   if (!order) {
     throw new HttpError(429, 'Límite de descargas alcanzado o orden no disponible')
   }

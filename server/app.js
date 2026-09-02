@@ -5,6 +5,8 @@ import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { sanitizeAuthReturn } from './authReturn.js'
 import fs from 'node:fs'
+import path from 'node:path'
+import crypto from 'node:crypto'
 import { connectDb, db, storeMode } from './db.js'
 import { assertWritableDir, authDiagnostics } from './config.js'
 import {
@@ -21,12 +23,30 @@ import {
   HttpError,
 } from './middleware.js'
 import { validateCheckoutItems, assertObjectIdLike } from './validation.js'
+import { isHostableSectionId, HOSTABLE_SECTIONS } from './sections.js'
+import { sanitizeSectionProps } from './sectionFields.js'
+import {
+  newHostedKey,
+  isHostedKey,
+  requestHost,
+  cleanDomains,
+  domainAllowed,
+} from './hostedKey.js'
 import { pendingExpiresAt, visibleOrders } from './orderRetention.js'
 import {
   createCheckoutPreference,
   verifyMpWebhookSignature,
   fetchPayment,
+  createPreapproval,
+  cancelPreapproval,
 } from './services/mercadoPago.js'
+import {
+  resolveEntitlement,
+  assertCanPublish,
+  handlePreapprovalEvent,
+  handleAuthorizedPaymentEvent,
+  syncSubscriptionForUser,
+} from './services/subscriptions.js'
 import {
   ensureOrderZip,
   markOrderPaid,
@@ -44,6 +64,8 @@ import {
   catalogWithArs,
   arsFromUsd,
   COMMERCE_PACK_SURCHARGE_USD,
+  HOSTED_PLANS,
+  isHostedPlanId,
 } from './catalog.js'
 import { getUsdArsRate } from './fx.js'
 
@@ -77,6 +99,29 @@ export async function createApp(config) {
   app.use(cookieParser())
   app.use(express.json({ limit: '64kb' }))
   app.use(requireSameOrigin(config))
+
+  // Servir el embed (loader + frame) desde la propia API, si `embed-dist/` está
+  // presente en el deploy. Es la opción sin infra: `EMBED_CDN_URL` apunta a la
+  // API y listo. Si el embed vive en un CDN aparte, esta carpeta no existe acá
+  // y el mount es un no-op. Assets versionados e inmutables → cache duro.
+  const embedDir = path.join(process.cwd(), 'embed-dist')
+  if (fs.existsSync(embedDir)) {
+    app.use(
+      '/embed',
+      express.static(embedDir, {
+        immutable: true,
+        maxAge: '365d',
+        setHeaders(res) {
+          res.set('Access-Control-Allow-Origin', '*')
+          res.set('Cross-Origin-Resource-Policy', 'cross-origin')
+          // El frame se carga como <iframe> desde sitios de terceros: helmet
+          // pone X-Frame-Options: SAMEORIGIN globalmente y eso lo bloquearía.
+          res.removeHeader('X-Frame-Options')
+        },
+      }),
+    )
+    console.log('embed self-host: sirviendo embed-dist/ en /embed')
+  }
 
   let sessionStore
   if (storeMode() === 'mongo') {
@@ -477,13 +522,48 @@ export async function createApp(config) {
     '/api/webhooks/mercadopago',
     limits.webhook,
     asyncHandler(async (req, res) => {
-      if (config.mpMock || !config.mpAccessToken) {
+      const type = req.query.type || req.body?.type
+      const dataId = req.query['data.id'] || req.body?.data?.id
+      if (!dataId) return res.sendStatus(200)
+
+      // ——— Suscripciones (LAB) — misma URL, otro `type` ———
+      if (
+        type === 'subscription_preapproval' ||
+        type === 'subscription_authorized_payment'
+      ) {
+        if (!config.mpSubs.accessToken) return res.sendStatus(200)
+        verifyMpWebhookSignature({
+          secret: config.mpSubs.webhookSecret,
+          xSignature: req.headers['x-signature'],
+          xRequestId: req.headers['x-request-id'],
+          dataId,
+        })
+        try {
+          if (type === 'subscription_preapproval') {
+            await handlePreapprovalEvent({ preapprovalId: dataId, config })
+          } else {
+            // authorized_payment: se cobró una cuota. Extiende el período —
+            // sin esto la renovación no lo mueve y el usuario cae a free
+            // aunque le sigan cobrando.
+            await handleAuthorizedPaymentEvent(
+              { authorizedPaymentId: dataId, config },
+            )
+          }
+        } catch (err) {
+          if (err instanceof HttpError && err.status < 500) {
+            console.error('MP subs webhook skipped', err.message, { id: dataId })
+            return res.sendStatus(200)
+          }
+          throw err
+        }
         return res.sendStatus(200)
       }
 
-      const type = req.query.type || req.body?.type
-      const dataId = req.query['data.id'] || req.body?.data?.id
-      if (type !== 'payment' || !dataId) {
+      // ——— Pago único (Checkout Pro) ———
+      if (config.mpMock || !config.mpAccessToken) {
+        return res.sendStatus(200)
+      }
+      if (type !== 'payment') {
         return res.sendStatus(200)
       }
 
@@ -584,8 +664,447 @@ export async function createApp(config) {
         throw new HttpError(404, 'ZIP no encontrado')
       }
 
-      await consumeDownload(data.orderId, config.maxDownloads)
+      await consumeDownload(data.orderId, config.maxDownloads, { ip: req.ip })
       res.download(safePath, `scrolllab-${data.orderId}.zip`)
+    }),
+  )
+
+  // ——————————————————————————————————————————————————————————————
+  // Hosted Component (docs/hosted-component-plan.md, Fase 3)
+  // ——————————————————————————————————————————————————————————————
+
+  function publicHosted(inst) {
+    return {
+      id: db.uid(inst) || inst.id,
+      key: inst.key,
+      sectionId: inst.sectionId,
+      status: inst.status,
+      domains: inst.domains || [],
+      draftProps: inst.draftProps || {},
+      publishedProps: inst.publishedProps || null,
+      publishedAt: inst.publishedAt || null,
+      views: inst.views || 0,
+      createdAt: inst.createdAt,
+      updatedAt: inst.updatedAt,
+    }
+  }
+
+  function safeEqual(a, b) {
+    const ba = Buffer.from(String(a))
+    const bb = Buffer.from(String(b))
+    return ba.length === bb.length && crypto.timingSafeEqual(ba, bb)
+  }
+
+  function requireAdmin(req) {
+    const token = req.get('x-admin-token') || ''
+    if (!config.adminToken || !safeEqual(token, config.adminToken)) {
+      throw new HttpError(403, 'Forbidden')
+    }
+  }
+
+  // Info del loader para armar el snippet con SRI. El hash lo escribe
+  // embed/build-loader.mjs en embed-dist/v1/manifest.json.
+  let loaderInfoCache = null
+  function loaderInfo() {
+    if (loaderInfoCache) return loaderInfoCache
+    let integrity = null
+    let version = 'v1'
+    try {
+      const raw = fs.readFileSync(
+        path.join(process.cwd(), 'embed-dist', 'v1', 'manifest.json'),
+        'utf8',
+      )
+      const m = JSON.parse(raw)
+      integrity = m.integrity || null
+      version = m.version || version
+    } catch {
+      /* build todavía no corrió */
+    }
+    loaderInfoCache = {
+      version,
+      url: `${config.embedCdnUrl}/embed/${version}/loader.js`,
+      integrity,
+    }
+    return loaderInfoCache
+  }
+
+  async function loadOwnedHosted(req) {
+    assertObjectIdLike(req.params.id)
+    const inst = await db.findHostedInstanceById(req.params.id)
+    if (!inst || String(inst.userId) !== String(db.uid(req.user))) {
+      throw new HttpError(404, 'Instancia no encontrada')
+    }
+    return inst
+  }
+
+  // Público: lo consume el `<script>` del embed desde sitios de terceros.
+  app.get(
+    '/api/embed/:key/config',
+    limits.embedConfig,
+    asyncHandler(async (req, res) => {
+      // Endpoint público: cualquier origen, sin credenciales (el embed usa
+      // credentials:'omit'). ACAO:* con ACAC:true es combo inválido → se saca.
+      res.set('Access-Control-Allow-Origin', '*')
+      res.removeHeader('Access-Control-Allow-Credentials')
+      res.set('Vary', 'Origin')
+
+      const key = String(req.params.key || '')
+      if (!isHostedKey(key)) throw new HttpError(404, 'No encontrado')
+
+      const inst = await db.findHostedInstanceByKey(key)
+      if (!inst) throw new HttpError(404, 'No encontrado')
+      if (inst.status === 'suspended') {
+        throw new HttpError(402, 'Instancia suspendida')
+      }
+      if (inst.status !== 'published' || !inst.publishedProps) {
+        throw new HttpError(409, 'La instancia todavía no se publicó')
+      }
+      if (!domainAllowed(inst.domains, requestHost(req))) {
+        throw new HttpError(403, 'Dominio no autorizado')
+      }
+
+      // Suscripción caída o bajada de plan: las publicadas por encima del tope
+      // dejan de servir. Chequeo perezoso, sin tocar `inst.status` — si el
+      // dueño vuelve a suscribirse, reviven solas. Orden estable por
+      // `createdAt`: quedan cubiertas las más viejas. `persist:false` para NO
+      // escribir la fila de suscripción desde este path anónimo/caliente — el
+      // barrido de vencimiento lo hace `/api/subscriptions/me` o el publish.
+      const ent = await resolveEntitlement(inst.userId, config, {
+        persist: false,
+      })
+      if (Number.isFinite(ent.quota)) {
+        const olderPublished = await db.countPublishedHostedCreatedBefore(
+          inst.userId,
+          inst.createdAt,
+          db.uid(inst) || inst.id,
+        )
+        if (olderPublished >= ent.quota) {
+          throw new HttpError(402, 'Sección por encima del límite del plan')
+        }
+      }
+
+      // Señal de uso, best-effort: no bloquea la respuesta.
+      db.incHostedViews(key).catch(() => {})
+
+      // max-age=0 + must-revalidate: al republicar, el cambio se ve en la
+      // próxima carga (el ETag débil de Express hace que lo igual devuelva 304
+      // barato). `s-maxage` deja un margen para un cache compartido/CDN futuro.
+      res.set('Cache-Control', 'public, max-age=0, s-maxage=5, must-revalidate')
+      res.json({ sectionId: inst.sectionId, props: inst.publishedProps || {} })
+    }),
+  )
+
+  // Snippet + hash SRI para la página LAB.
+  app.get('/api/embed/loader', (_req, res) => {
+    res.set('Cache-Control', 'public, max-age=300')
+    res.json(loaderInfo())
+  })
+
+  app.get(
+    '/api/hosted/sections',
+    requireAuth,
+    asyncHandler(async (_req, res) => {
+      res.json({ sections: HOSTABLE_SECTIONS })
+    }),
+  )
+
+  app.get(
+    '/api/hosted',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const rows = await db.findHostedInstancesByUser(db.uid(req.user))
+      res.json({ instances: rows.map(publicHosted) })
+    }),
+  )
+
+  app.post(
+    '/api/hosted',
+    requireAuth,
+    limits.hosted,
+    asyncHandler(async (req, res) => {
+      const sectionId = String(req.body?.sectionId || '')
+      if (!isHostableSectionId(sectionId)) {
+        throw new HttpError(400, 'Sección no hosteable')
+      }
+      const draftProps =
+        sanitizeSectionProps(sectionId, req.body?.draftProps) || {}
+      const inst = await db.createHostedInstance({
+        userId: db.uid(req.user),
+        key: newHostedKey(),
+        sectionId,
+        status: 'draft',
+        domains: [],
+        draftProps,
+      })
+      res.status(201).json({ instance: publicHosted(inst) })
+    }),
+  )
+
+  app.get(
+    '/api/hosted/:id',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const inst = await loadOwnedHosted(req)
+      res.json({ instance: publicHosted(inst) })
+    }),
+  )
+
+  app.put(
+    '/api/hosted/:id',
+    requireAuth,
+    limits.hosted,
+    asyncHandler(async (req, res) => {
+      const inst = await loadOwnedHosted(req)
+
+      if (req.body?.draftProps !== undefined) {
+        inst.draftProps =
+          sanitizeSectionProps(inst.sectionId, req.body.draftProps) || {}
+      }
+      if (req.body?.domains !== undefined) {
+        inst.domains = cleanDomains(req.body.domains)
+      }
+      if (req.body?.publish === true) {
+        // Cuota: publicar de nuevo una ya publicada no cuenta (se excluye).
+        if (inst.status !== 'published') {
+          await assertCanPublish({
+            userId: db.uid(req.user),
+            instanceId: db.uid(inst) || inst.id,
+            config,
+          })
+        }
+        inst.publishedProps = inst.draftProps || {}
+        inst.status = 'published'
+        inst.publishedAt = new Date()
+      } else if (req.body?.unpublish === true && inst.status === 'published') {
+        inst.status = 'draft'
+      }
+
+      await inst.save()
+      res.json({ instance: publicHosted(inst) })
+    }),
+  )
+
+  app.delete(
+    '/api/hosted/:id',
+    requireAuth,
+    limits.hosted,
+    asyncHandler(async (req, res) => {
+      const inst = await loadOwnedHosted(req)
+      await db.deleteHostedInstance(db.uid(inst) || inst.id)
+      res.json({ ok: true })
+    }),
+  )
+
+  // ——————————————————————————————————————————————————————————————
+  // Suscripciones (LAB, Fase 4) — MercadoPago PreApproval
+  // ——————————————————————————————————————————————————————————————
+
+  const subsMock = () => config.mpMock || !config.mpSubs.accessToken
+
+  // `instanceQuota` puede ser `Infinity` (plan sin tope) — JSON no tiene forma
+  // de representar eso, y `JSON.stringify` lo pisa por `null` en silencio.
+  // Lo hacemos explícito acá: el cliente lee `null`/no-finito como "ilimitado".
+  const quotaForWire = (n) => (Number.isFinite(n) ? n : null)
+
+  function publicPlans() {
+    return Object.values(HOSTED_PLANS).map((p) => ({
+      id: p.id,
+      tier: p.tier,
+      priceMonthly: p.priceMonthly,
+      priceYearly: p.priceYearly,
+      instanceQuota: quotaForWire(p.instanceQuota),
+      currency_id: p.currency_id,
+    }))
+  }
+
+  app.get('/api/subscriptions/plans', (_req, res) => {
+    res.set('Cache-Control', 'public, max-age=300')
+    res.json({ plans: publicPlans(), mock: subsMock() })
+  })
+
+  app.get(
+    '/api/subscriptions/me',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const userId = db.uid(req.user)
+      const ent = await resolveEntitlement(userId, config)
+      const used = await db.countPublishedHosted(userId, null)
+      res.json({
+        ...ent,
+        quota: quotaForWire(ent.quota),
+        used,
+        canPublish: used < ent.quota,
+      })
+    }),
+  )
+
+  app.post(
+    '/api/subscriptions',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      const plan = String(req.body?.plan || '')
+      const cycle = req.body?.cycle === 'yearly' ? 'yearly' : 'monthly'
+      if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
+
+      const userId = db.uid(req.user)
+
+      // Dedup: una sola suscripción activa, y no acumular altas a medio hacer.
+      // Si ya la canceló (sigue con acceso hasta fin de período) o si el período
+      // ya venció (el barrido perezoso todavía no la marcó), sí puede volver a
+      // suscribirse — la nueva reemplaza.
+      const current = await db.findActiveSubscriptionByUser(userId)
+      const currentExpired =
+        current?.currentPeriodEnd &&
+        new Date(current.currentPeriodEnd).getTime() <= Date.now()
+      if (current && !current.canceledAt && !currentExpired) {
+        throw new HttpError(409, 'Ya tenés una suscripción activa', {
+          expose: true,
+        })
+      }
+      if (current && (current.canceledAt || currentExpired)) {
+        current.status = 'cancelled'
+        await current.save()
+      }
+      const STALE_MS = 30 * 60 * 1000
+      const now = Date.now()
+      for (const s of await db.findSubscriptionsByUser(userId)) {
+        if (s.status !== 'pending') continue
+        if (now - new Date(s.createdAt).getTime() > STALE_MS) {
+          await db.deleteSubscription(db.uid(s) || s.id)
+        } else {
+          throw new HttpError(
+            409,
+            'Tenés un alta en curso. Completala o esperá unos minutos.',
+            { expose: true },
+          )
+        }
+      }
+
+      const sub = await db.createSubscription({
+        userId,
+        plan,
+        cycle,
+        status: 'pending',
+      })
+      const subId = db.uid(sub) || sub.id
+
+      if (subsMock()) {
+        return res.json({
+          mock: true,
+          subscriptionId: subId,
+          activateUrl: `/api/subscriptions/${subId}/mock-activate`,
+        })
+      }
+
+      const plof = HOSTED_PLANS[plan]
+      const pre = await createPreapproval({
+        accessToken: config.mpSubs.accessToken,
+        reason: `ScrollLab LAB — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
+        amount: cycle === 'yearly' ? plof.priceYearly : plof.priceMonthly,
+        currencyId: plof.currency_id,
+        frequency: 1,
+        frequencyType: cycle === 'yearly' ? 'years' : 'months',
+        payerEmail: req.user.email,
+        externalReference: subId,
+        backUrl: `${config.clientUrl}/lab`,
+      })
+      sub.mpPreapprovalId = String(pre.id)
+      await sub.save()
+      res.json({ init_point: pre.init_point, subscriptionId: subId })
+    }),
+  )
+
+  app.post(
+    '/api/subscriptions/:id/mock-activate',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      if (!subsMock()) throw new HttpError(403, 'Mock deshabilitado')
+      assertObjectIdLike(req.params.id)
+      const sub = await db.findSubscriptionById(req.params.id)
+      if (!sub || String(sub.userId) !== String(db.uid(req.user))) {
+        throw new HttpError(404, 'Suscripción no encontrada')
+      }
+      sub.status = 'authorized'
+      const end = new Date()
+      end.setDate(end.getDate() + (sub.cycle === 'yearly' ? 365 : 31))
+      sub.currentPeriodEnd = end
+      await sub.save()
+      res.json({ ok: true, status: sub.status })
+    }),
+  )
+
+  // Sync manual con MercadoPago: el usuario vuelve del checkout y pide bajar el
+  // estado real de su preapproval sin esperar al webhook. Hace exactamente lo
+  // mismo que el webhook `subscription_preapproval`, pero disparado a mano —
+  // así se puede probar el flujo real de MP en local sin túnel.
+  app.post(
+    '/api/subscriptions/sync',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (subsMock()) throw new HttpError(403, 'Mock activo: usá activar directo')
+      const out = await syncSubscriptionForUser({
+        userId: db.uid(req.user),
+        config,
+      })
+      res.json({ ok: true, ...out })
+    }),
+  )
+
+  app.post(
+    '/api/subscriptions/cancel',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const sub = await db.findActiveSubscriptionByUser(db.uid(req.user))
+      if (!sub || sub.canceledAt) {
+        throw new HttpError(404, 'No tenés una suscripción activa')
+      }
+      if (!subsMock() && sub.mpPreapprovalId) {
+        try {
+          await cancelPreapproval(config.mpSubs.accessToken, sub.mpPreapprovalId)
+        } catch (err) {
+          console.error('cancelPreapproval falló', err?.message)
+        }
+      }
+      // No la matamos ya: sigue con acceso hasta `currentPeriodEnd`. MP no
+      // renueva. Si no hay fecha (edge), la cerramos en el acto.
+      sub.canceledAt = new Date()
+      if (!sub.currentPeriodEnd) sub.status = 'cancelled'
+      await sub.save()
+      res.json({
+        ok: true,
+        endsAt: sub.currentPeriodEnd || null,
+        status: sub.status,
+      })
+    }),
+  )
+
+  // Revocación de key: solo con ADMIN_TOKEN (header x-admin-token). Sin UI.
+  // Suspender → el config público responde 402 y el embed deja de renderizar.
+  app.post(
+    '/api/hosted/:id/suspend',
+    asyncHandler(async (req, res) => {
+      requireAdmin(req)
+      assertObjectIdLike(req.params.id)
+      const inst = await db.findHostedInstanceById(req.params.id)
+      if (!inst) throw new HttpError(404, 'Instancia no encontrada')
+      inst.status = 'suspended'
+      await inst.save()
+      res.json({ instance: publicHosted(inst) })
+    }),
+  )
+
+  app.post(
+    '/api/hosted/:id/unsuspend',
+    asyncHandler(async (req, res) => {
+      requireAdmin(req)
+      assertObjectIdLike(req.params.id)
+      const inst = await db.findHostedInstanceById(req.params.id)
+      if (!inst) throw new HttpError(404, 'Instancia no encontrada')
+      inst.status = inst.publishedProps ? 'published' : 'draft'
+      await inst.save()
+      res.json({ instance: publicHosted(inst) })
     }),
   )
 

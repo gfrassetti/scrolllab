@@ -14,6 +14,7 @@ import {
   assertPaymentMatchesOrder,
   mpPaymentError,
   buildPreferenceBody,
+  buildPreapprovalBody,
   absoluteClientAsset,
   MP_STATEMENT_DESCRIPTOR,
   MP_DEFAULT_ITEM_PICTURE,
@@ -726,6 +727,51 @@ describe('buildPreferenceBody', () => {
       absoluteClientAsset('https://www.scrolllab.com.ar/', 'icon-512.png'),
       'https://www.scrolllab.com.ar/icon-512.png',
     )
+  })
+})
+
+describe('buildPreapprovalBody', () => {
+  const args = {
+    reason: 'ScrollLab LAB — pro (mensual)',
+    amount: 19900,
+    currencyId: 'ARS',
+    frequency: 1,
+    frequencyType: 'months',
+    payerEmail: 'user@test.com',
+    externalReference: 'sub-1',
+    backUrl: 'https://www.scrolllab.com.ar/lab',
+  }
+
+  it('arma el auto_recurring con monto inline y status pending', () => {
+    const body = buildPreapprovalBody(args)
+    assert.deepEqual(body.auto_recurring, {
+      frequency: 1,
+      frequency_type: 'months',
+      transaction_amount: 19900,
+      currency_id: 'ARS',
+    })
+    assert.equal(body.status, 'pending')
+    assert.equal(body.external_reference, 'sub-1')
+    assert.equal(body.payer_email, 'user@test.com')
+    assert.equal(body.back_url, 'https://www.scrolllab.com.ar/lab')
+    assert.equal(body.reason, args.reason)
+  })
+
+  it('currency_id default ARS y frequency_type years para el anual', () => {
+    const body = buildPreapprovalBody({
+      ...args,
+      currencyId: undefined,
+      frequencyType: 'years',
+      amount: 199000,
+    })
+    assert.equal(body.auto_recurring.currency_id, 'ARS')
+    assert.equal(body.auto_recurring.frequency_type, 'years')
+    assert.equal(body.auto_recurring.transaction_amount, 199000)
+  })
+
+  it('no cuela un preapproval_plan_id (el monto va inline)', () => {
+    const body = buildPreapprovalBody(args)
+    assert.equal('preapproval_plan_id' in body, false)
   })
 })
 

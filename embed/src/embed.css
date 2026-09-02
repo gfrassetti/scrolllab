@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/*
+ * Subconjunto de tokens de src/index.css que las secciones hosteables usan.
+ * Sin variante `.dark` (el shadow root no ve la clase del host); v1 es light.
+ * Tailwind v4 emite sus tokens en :root; entry.jsx los reapunta a :host en
+ * runtime porque dentro de un shadow root la regla :root no aplica.
+ */
+:root {
+  --market-bone: #f2efe9;
+  --market-ink: #161412;
+  --market-mist: #c7c1b6;
+  --market-accent-ink: #c23a00;
+}
+
+@theme inline {
+  --color-bone: var(--market-bone);
+  --color-ink: var(--market-ink);
+  --color-mist: var(--market-mist);
+  --color-accent-ink: var(--market-accent-ink);
+}
+
+@theme {
+  --color-accent: #ff4b00;
+  --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+}
+
+:host {
+  all: initial;
+  display: block;
+  font-size: 16px;
+  font-family: var(--font-grotesk);
+  color: var(--color-ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.scrolllab-root {
+  font-family: var(--font-grotesk);
+  color: var(--color-ink);
+}
+
+/* Playfair italic — mismo detalle que el sitio. */
+.font-display.italic {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}

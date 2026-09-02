@@ -4,6 +4,14 @@
  */
 export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'chapters/NavMinimal': ['brand', 'linksText'],
+  // Hosteable: los `panels` (array) aún no son editables; sí los textos sueltos.
+  'chapters/HorizontalPanels': [
+    'variant',
+    'chapter',
+    'total',
+    'label',
+    'heading',
+  ],
   'chapters/HeroKinetic': [
     'lineOne',
     'lineTwo',
@@ -372,6 +380,7 @@ const SHAPE_PRESETS = new Set([
 ])
 
 const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
+const VARIANT_PRESETS = new Set(['media', 'type'])
 
 const THEME_PRESETS = new Set([
   'auto',
@@ -428,6 +437,7 @@ export function sanitizeSectionProps(sectionId, props) {
     if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
+    if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
     if (key === 'endpoint' && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed

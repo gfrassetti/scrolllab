@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed — sin data-frame (base derivada del src)</title>
+    <style>
+      * { box-sizing: border-box; }
+      html { font-size: 21px; }
+      body { margin: 0; font-family: Georgia, serif; background: #fff; color: #1a1a1a; }
+      .host-block { padding: 5rem 3rem; }
+      #secret { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="secret" data-token="HOST-SECRET-DO-NOT-LEAK">x</div>
+
+    <div class="host-block">
+      <h1>Página anfitriona</h1>
+      <p>Acá el <code>&lt;script&gt;</code> NO trae <code>data-frame</code>: el loader
+        deriva la base del frame de su propio <code>src</code> (:4179), que es otro
+        origen que esta página (:4178).</p>
+    </div>
+
+    <!-- loader servido desde :4179; sin data-frame. Solo data-api para test local. -->
+    <script
+      src="http://localhost:4179/embed-dist/v1/loader.js"
+      data-scrolllab
+      data-key="__E2E_KEY__"
+      data-api="http://localhost:8787"
+      async
+    ></script>
+  </body>
+</html>

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { SITE_NAME } from '../lib/site'
 import { useAuth } from '../lib/auth'
+import { usePlan } from '../lib/plan'
 import { useCompositionCount } from '../hooks/useCompositionCount'
 import { useT } from '../i18n'
 import { resetBrandSplash } from './BrandSplash'
 import CartPopover from './CartPopover'
+import UserMenu from './UserMenu'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
@@ -16,6 +18,7 @@ import LanguageSelector from './LanguageSelector'
  */
 export default function SiteHeader({ solid = true }) {
   const { user, loading, hadSession, logout } = useAuth()
+  const { plan, used, quota, loading: planLoading } = usePlan()
   const [menuOpen, setMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutFailed, setLogoutFailed] = useState(false)
@@ -73,6 +76,19 @@ export default function SiteHeader({ solid = true }) {
     ? t('nav.builderWithCount', { count: builderCount })
     : undefined
 
+  // Estado del plan de LAB — visible acá porque es la única señal de "cuánto
+  // me queda" que el usuario ve fuera de /lab. Viene del contexto compartido
+  // (src/lib/plan.jsx), no de un fetch propio: mismo dato que HostedPlans.
+  const showPlanBadge = user && !planLoading
+  const planTierKey = plan === 'free' ? 'free' : plan.replace('hosted_', '')
+  const planLabel = t(`lab.tier.${planTierKey}`)
+  // El server manda `null` para "sin tope" (Infinity no es JSON válido).
+  const planQuotaLabel = Number.isFinite(quota) ? quota : '∞'
+  const planTitle =
+    plan === 'free'
+      ? t('lab.planFreeState', { used, quota: planQuotaLabel })
+      : t('lab.planActiveState', { plan: planLabel, used, quota: planQuotaLabel })
+
   return (
     <header
       className={`sticky top-0 z-50 border-b border-ink/15 ${
@@ -100,22 +116,37 @@ export default function SiteHeader({ solid = true }) {
             {t('nav.builder')}
             {builderBadge}
           </Link>
+          <Link
+            to="/lab"
+            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-accent transition-colors ease-out-strong hover:text-ink md:text-xs"
+          >
+            {t('nav.lab')}
+            {showPlanBadge && (
+              <span
+                title={planTitle}
+                className={`rounded-sm border px-1.5 py-0.5 text-[9px] tracking-[0.14em] ${
+                  plan !== 'free'
+                    ? 'border-accent text-accent'
+                    : 'border-ink/25 text-ink/45'
+                }`}
+              >
+                {planLabel}
+              </span>
+            )}
+          </Link>
           <CartPopover />
           {showAccount ? (
-            <>
-              <Link to="/account" className={linkClass}>
-                {t('nav.account')}
-              </Link>
-              <button
-                type="button"
-                onClick={handleLogout}
-                disabled={logoutBusy}
-                aria-busy={loggingOut}
-                className={`${linkClass} text-ink/50 disabled:opacity-50`}
-              >
+            user ? (
+              <UserMenu
+                user={user}
+                onLogout={handleLogout}
+                loggingOut={loggingOut}
+              />
+            ) : (
+              <span className={`${linkClass} text-ink/50`} aria-busy="true">
                 {logoutLabel}
-              </button>
-            </>
+              </span>
+            )
           ) : (
             <Link to="/login" className={linkClass}>
               {t('nav.login')}
@@ -189,11 +220,40 @@ export default function SiteHeader({ solid = true }) {
                 {builderBadge}
               </Link>
             </li>
+            <li>
+              <Link
+                to="/lab"
+                className="flex items-center justify-between py-3.5 text-accent hover:text-ink"
+              >
+                {t('nav.lab')}
+                {showPlanBadge && (
+                  <span
+                    className={`rounded-sm border px-1.5 py-0.5 text-[10px] tracking-[0.14em] normal-case ${
+                      plan !== 'free'
+                        ? 'border-accent text-accent'
+                        : 'border-ink/25 text-ink/45'
+                    }`}
+                  >
+                    {planLabel}
+                    {' · '}
+                    {used}/{planQuotaLabel}
+                  </span>
+                )}
+              </Link>
+            </li>
             {showAccount ? (
               <>
                 <li>
                   <Link to="/account" className="block py-3.5 hover:text-accent">
                     {t('nav.account')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/account#suscripcion"
+                    className="block py-3.5 hover:text-accent"
+                  >
+                    {t('nav.plan')}
                   </Link>
                 </li>
                 <li>

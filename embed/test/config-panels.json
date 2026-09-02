@@ -1,0 +1,15 @@
+{
+  "sectionId": "chapters/HorizontalPanels",
+  "props": {
+    "variant": "type",
+    "chapter": "01",
+    "total": "03",
+    "label": "Deriva lateral",
+    "heading": "de costado también se avanza",
+    "panels": [
+      { "index": "1.1", "title": "Primer beat", "caption": "El scroll es vertical, el movimiento horizontal." },
+      { "index": "1.2", "title": "Segundo beat", "caption": "Cada panel es un momento del relato." },
+      { "index": "1.3", "title": "Último beat", "caption": "En mobile los paneles se apilan." }
+    ]
+  }
+}

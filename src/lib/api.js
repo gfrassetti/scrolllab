@@ -60,4 +60,35 @@ export const api = {
       body: JSON.stringify({ paymentId, orderId }),
     }),
   downloadLink: (orderId) => request(`/api/orders/${orderId}/download`),
+
+  // Hosted Components (LAB) — docs/hosted-component-plan.md
+  embedLoader: () => request('/api/embed/loader'),
+  hostedSections: () => request('/api/hosted/sections'),
+  hostedList: () => request('/api/hosted'),
+  hostedGet: (id) => request(`/api/hosted/${id}`),
+  hostedCreate: (sectionId) =>
+    request('/api/hosted', {
+      method: 'POST',
+      body: JSON.stringify({ sectionId }),
+    }),
+  hostedUpdate: (id, body) =>
+    request(`/api/hosted/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(body || {}),
+    }),
+  hostedDelete: (id) =>
+    request(`/api/hosted/${id}`, { method: 'DELETE' }),
+
+  subscriptionPlans: () => request('/api/subscriptions/plans'),
+  subscriptionMe: () => request('/api/subscriptions/me'),
+  subscribe: (plan, cycle) =>
+    request('/api/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify({ plan, cycle }),
+    }),
+  subscriptionMockActivate: (url) => request(url, { method: 'POST' }),
+  subscriptionSync: () =>
+    request('/api/subscriptions/sync', { method: 'POST' }),
+  subscriptionCancel: () =>
+    request('/api/subscriptions/cancel', { method: 'POST' }),
 }

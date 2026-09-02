@@ -4,6 +4,7 @@ import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
+import LabMark from '../components/LabMark'
 import BrandSplash from '../components/BrandSplash'
 import PlayableHeadline from '../components/PlayableHeadline'
 import TemplateBuyPill from '../components/TemplateBuyPill'
@@ -445,6 +446,84 @@ export default function TemplatesIndex() {
           }
         })
 
+        // Capa "demo": cada camino se arma solo al entrar, con la metáfora del
+        // producto. Builder → las "secciones" del mark encastran desde los
+        // lados. LAB → el <script> se dibuja en una sola pasada y el <LAB> de
+        // fondo deriva. Scrub sobre la entrada, sin pin: el presupuesto de pin
+        // de la home ya se gasta en HorizontalPanels ("cómo funciona").
+        const builderBand = root.current?.querySelector('[data-cta-demo="builder"]')
+        if (builderBand) {
+          const wmBars = gsap.utils.toArray(
+            builderBand.querySelectorAll('[data-logo-bar]'),
+          )
+          const wmAccent = builderBand.querySelector('[data-logo-accent]')
+          if (wmBars.length) {
+            gsap.set([...wmBars, wmAccent].filter(Boolean), {
+              transformOrigin: '50% 50%',
+            })
+            gsap.from(wmBars, {
+              xPercent: (i) => (i % 2 ? 70 : -70),
+              opacity: 0,
+              ease: 'power2.out',
+              stagger: 0.12,
+              scrollTrigger: {
+                trigger: builderBand,
+                start: 'top 82%',
+                end: 'top 44%',
+                scrub: 0.8,
+              },
+            })
+            if (wmAccent) {
+              gsap.from(wmAccent, {
+                scale: 0,
+                opacity: 0,
+                ease: 'back.out(2)',
+                scrollTrigger: {
+                  trigger: builderBand,
+                  start: 'top 66%',
+                  end: 'top 44%',
+                  scrub: 0.8,
+                },
+              })
+            }
+          }
+        }
+
+        const labBand = root.current?.querySelector('[data-cta-demo="lab"]')
+        if (labBand) {
+          const code = labBand.querySelector('[data-cta-code]')
+          if (code) {
+            gsap.fromTo(
+              code,
+              { clipPath: 'inset(0 100% 0 0)' },
+              {
+                clipPath: 'inset(0 0% 0 0)',
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: labBand,
+                  start: 'top 80%',
+                  end: 'top 46%',
+                  scrub: 0.6,
+                },
+              },
+            )
+          }
+          const labMark = labBand.querySelector('[data-cta-labmark]')
+          if (labMark) {
+            gsap.from(labMark, {
+              xPercent: 18,
+              opacity: 0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: labBand,
+                start: 'top 88%',
+                end: 'top 46%',
+                scrub: 1,
+              },
+            })
+          }
+        }
+
         // Footer: columnas + logo apilado + wordmark por caracteres (estilo Chapters).
         const footer = root.current?.querySelector('[data-footer]')
         if (footer) {
@@ -524,8 +603,11 @@ export default function TemplatesIndex() {
             duration: 0.6,
             ease: 'power2.out',
             scrollTrigger: {
+              // Es lo último de la página (24px de padding abajo): con `top 95%`
+              // el trigger caía por debajo del scroll máximo y el ©️ quedaba en
+              // opacity 0 para siempre. `top bottom` dispara apenas asoma.
               trigger: '[data-footer-legal]',
-              start: 'top 95%',
+              start: 'top bottom',
               once: true,
             },
           })
@@ -692,9 +774,9 @@ export default function TemplatesIndex() {
                       {String(templates.length).padStart(2, '0')}
                     </p>
                     <span className="flex items-center gap-2">
-                      {template.palette.map((color) => (
+                      {template.palette.map((color, i) => (
                         <span
-                          key={color}
+                          key={`${color}-${i}`}
                           aria-hidden="true"
                           className="inline-block size-3 rounded-full border border-ink/20"
                           style={{ backgroundColor: color }}
@@ -908,56 +990,136 @@ export default function TemplatesIndex() {
         <Link
           to="/builder"
           data-cta-card
-          className="group mt-10 -mx-5 block border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-12 md:-mx-10 md:px-10 md:py-20"
+          data-cta-demo="builder"
+          className="group relative mt-10 -mx-5 block overflow-hidden border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-12 md:-mx-10 md:px-10 md:py-20"
         >
-          <p
-            data-cta-bit
-            className="mb-4 text-[11px] uppercase tracking-[0.25em] text-bone/55 md:text-xs"
+          {/* Identidad de fondo: el logo de la marca es literalmente
+              "secciones apiladas" — la misma metáfora que arma el builder.
+              Opacity real en el wrapper (no un modificador de color), igual
+              que el watermark de HomeContact — si no, el bloque accent del
+              logo (fill fijo, no currentColor) queda naranja pleno.
+              Solo desktop: en mobile el precio ya envuelve a 2 líneas y
+              choca contra la marca — el título ya identifica la card ahí. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-6 bottom-6 hidden text-bone opacity-25 md:block"
+            style={{ ['--color-accent']: 'currentColor' }}
           >
-            {t('home.builderEyebrow')}
-          </p>
-          <p className="flex items-end justify-between gap-6">
-            <span
+            <Logo className="h-40 w-40" />
+          </div>
+          <div className="relative z-10">
+            <p
               data-cta-bit
-              className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
+              className="mb-4 text-[11px] uppercase tracking-[0.25em] text-bone/55 md:text-xs"
             >
-              {t('home.builderTitleBefore')}{' '}
-              <em
-                data-cta-accent
-                className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
+              {t('home.builderEyebrow')}
+            </p>
+            <p className="flex items-end justify-between gap-6">
+              <span
+                data-cta-bit
+                className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
               >
-                {t('home.builderTitleEm')}
-              </em>
-            </span>
-            <span
-              data-cta-arrow
-              aria-hidden="true"
-              className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
+                {t('home.builderTitleBefore')}{' '}
+                <em
+                  data-cta-accent
+                  className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
+                >
+                  {t('home.builderTitleEm')}
+                </em>
+              </span>
+              <span
+                data-cta-arrow
+                aria-hidden="true"
+                className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
+              >
+                →
+              </span>
+            </p>
+            <p
+              data-cta-bit
+              className="mt-5 max-w-[48ch] text-sm leading-relaxed text-bone/65 md:text-base"
             >
-              →
-            </span>
-          </p>
-          <p
-            data-cta-bit
-            className="mt-5 max-w-[48ch] text-sm leading-relaxed text-bone/65 md:text-base"
+              {t('home.builderBody')}
+            </p>
+            <p
+              data-cta-bit
+              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
+            >
+              {t('home.builderPrices', {
+                base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
+                included: CUSTOM_BASE_SECTIONS,
+                extra: formatNextSectionPrice(
+                  CUSTOM_BASE_SECTIONS,
+                  false,
+                  locale,
+                  rate,
+                ),
+              })}
+            </p>
+          </div>
+        </Link>
+
+        {/* LAB: el otro camino — no lo bajás, lo enchufás. */}
+        <Link
+          to="/lab"
+          data-cta-card
+          data-cta-demo="lab"
+          className="group relative mt-4 -mx-5 block overflow-hidden border-b border-ink/20 px-5 py-14 transition-colors duration-300 hover:bg-ink hover:text-bone md:-mx-10 md:px-10 md:py-20"
+        >
+          {/* Identidad de fondo: el mark de LAB, mismo que el splash al
+              entrar — sin esto la card no se distingue del builder. Solo
+              desktop: en mobile choca con el snippet de código de abajo. */}
+          <div
+            data-cta-labmark
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-4 -bottom-12 hidden text-ink opacity-[0.14] group-hover:text-bone md:block"
           >
-            {t('home.builderBody')}
-          </p>
-          <p
-            data-cta-bit
-            className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
-          >
-            {t('home.builderPrices', {
-              base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
-              included: CUSTOM_BASE_SECTIONS,
-              extra: formatNextSectionPrice(
-                CUSTOM_BASE_SECTIONS,
-                false,
-                locale,
-                rate,
-              ),
-            })}
-          </p>
+            <LabMark className="h-[17rem] w-auto" />
+          </div>
+          <div className="relative z-10">
+            <p
+              data-cta-bit
+              className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 group-hover:text-bone/55 md:text-xs"
+            >
+              {t('home.labEyebrow')}
+            </p>
+            <p className="flex items-end justify-between gap-6">
+              <span
+                data-cta-bit
+                className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
+              >
+                {t('home.labTitleBefore')}{' '}
+                <em
+                  data-cta-accent
+                  className="inline-block font-display font-normal italic text-accent"
+                >
+                  {t('home.labTitleEm')}
+                </em>
+              </span>
+              <span
+                data-cta-arrow
+                aria-hidden="true"
+                className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
+              >
+                →
+              </span>
+            </p>
+            <p
+              data-cta-bit
+              className="mt-5 max-w-[52ch] text-sm leading-relaxed text-ink/60 group-hover:text-bone/65 md:text-base"
+            >
+              {t('home.labBodyBefore')}
+              <span className="text-accent">{t('home.labBodyLink')}</span>
+              {t('home.labBodyAfter')}
+            </p>
+            <code
+              data-cta-code
+              className="mt-5 block overflow-x-auto whitespace-nowrap font-mono text-[11px] text-ink/35 group-hover:text-bone/40 md:text-xs"
+            >
+              &lt;script src=&quot;.../embed/v1/loader.js&quot; data-key=&quot;pub_…&quot;
+              async&gt;&lt;/script&gt;
+            </code>
+          </div>
         </Link>
 
         {/* Confianza / proceso: después de las ofertas. */}
@@ -976,6 +1138,21 @@ export default function TemplatesIndex() {
             variant="type"
             idleOpacity={0.48}
           />
+
+          {/* Bifurcación, no un 5º paso: el hosted es otro producto (una
+              sección suelta, suscripción). Solo un puntero a LAB. */}
+          <p
+            data-soft-fade
+            className="mt-8 px-5 text-sm leading-relaxed text-ink/55 md:px-10 md:text-base"
+          >
+            {t('home.howHostedNote')}{' '}
+            <Link
+              to="/lab"
+              className="text-accent underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
+            >
+              {t('home.howHostedLink')}
+            </Link>
+          </p>
 
           <div
             data-soft-fade
@@ -1046,6 +1223,7 @@ export default function TemplatesIndex() {
               </ul>
             </div>
           </div>
+
         </section>
 
       </main>
@@ -1209,7 +1387,7 @@ export default function TemplatesIndex() {
           data-footer-legal
           className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs"
         >
-          <p>©2026 {SITE_NAME}</p>
+          <p>©{new Date().getFullYear()} {SITE_NAME}</p>
           <a
             href="#top"
             className="transition-colors duration-300 hover:text-accent"

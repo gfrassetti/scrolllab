@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed iframe — sección pineada</title>
+    <style>
+      * { box-sizing: border-box; }
+      html { font-size: 20px; }
+      body { margin: 0; font-family: Georgia, serif; background: #fff; color: #1a1a1a; }
+      .host-block { padding: 6rem 3rem; }
+      .host-block.alt { background: #0e0e12; color: #f0f0f0; }
+      h1 { font-size: 2.2rem; margin: 0 0 1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="host-block">
+      <h1>Página anfitriona — arriba</h1>
+      <p>La sección de abajo se pinea mientras el host scrollea, y el pan horizontal sigue ese scroll. El loader hace el sticky sobre un spacer y le manda progreso 0→1 al iframe.</p>
+    </div>
+
+    <script
+      src="http://localhost:4178/embed-dist/v1/loader.js"
+      data-scrolllab
+      data-key="__E2E_KEY__"
+      data-frame="http://localhost:4179/embed-dist/v1"
+      data-api="http://localhost:8787"
+      async
+    ></script>
+
+    <div class="host-block alt">
+      <h1>Página anfitriona — abajo</h1>
+      <p>Este bloque queda accesible después de recorrer la sección pineada.</p>
+    </div>
+  </body>
+</html>

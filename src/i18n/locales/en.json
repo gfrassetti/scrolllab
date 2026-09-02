@@ -7,6 +7,7 @@
     "howItWorks": "How it works",
     "builder": "Builder",
     "builderWithCount": "Builder, {{count}} sections added",
+    "lab": "LAB",
     "cart": "Cart",
     "account": "My purchases",
     "login": "Log in",
@@ -16,7 +17,107 @@
     "menu": "Menu",
     "langEs": "ES",
     "langEn": "EN",
-    "langLabel": "Language"
+    "langLabel": "Language",
+    "plan": "Plan"
+  },
+  "lab": {
+    "eyebrow": "Hosted components",
+    "body": "Configure a section and serve it on any site with one line of <script>. The code never leaves our side: you edit here, it updates there.",
+    "yours": "Your sections",
+    "new": "＋ New",
+    "pickSection": "Pick a section",
+    "empty": "You don't have any yet. Create one to get started.",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "suspended": "Suspended"
+    },
+    "edit": "Edit",
+    "delete": "Delete",
+    "snippet": "Paste this into the site",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "draftHint": "Draft — open the editor to configure and publish it.",
+    "footnote": "Want a whole page instead of a single section? That goes through the",
+    "back": "← Back to LAB",
+    "fields": "Content",
+    "noFields": "This section has no editable fields.",
+    "domains": "Allowed domains (one per line)",
+    "domainsHint": "Leave it empty and the section shows on any domain. Add domains and it's limited to those.",
+    "preview": "Preview",
+    "saveDraft": "Save draft",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "saved": "Saved",
+    "published": "Published",
+    "publishFirst": "The snippet only works once you publish.",
+    "guideTitle": "How to install",
+    "guide1": "Configure the section in the editor and hit Publish.",
+    "guide2": "Copy the <script> shown on the card.",
+    "guide3": "Paste it into your site's HTML, before </body>. The section appears where you put the script.",
+    "faqTitle": "FAQ",
+    "faq": [
+      {
+        "q": "What is a hosted component?",
+        "a": "A section you configure here and show on any page with one line of code. Unlike downloading the ZIP, the code never leaves our side: you edit it from LAB and it updates on its own wherever you pasted it."
+      },
+      {
+        "q": "Can I change the content later?",
+        "a": "Yes. Edit the text in LAB, hit Publish, and the change shows on your site on the next refresh. No need to touch the code again."
+      },
+      {
+        "q": "Can it read data from my page?",
+        "a": "No. The section runs inside an iframe on our domain. The browser isolates it: it can't reach your cookies, forms, or the rest of your page."
+      },
+      {
+        "q": "Does it work on Webflow, WordPress, etc.?",
+        "a": "Yes, on any site where you can paste a <script> tag into the HTML."
+      },
+      {
+        "q": "What happens if I unpublish or cancel the plan?",
+        "a": "The embed stops rendering: nothing shows where the script was. Publishing again brings it back."
+      },
+      {
+        "q": "What are allowed domains for?",
+        "a": "Leave the list empty and the section shows on any domain. Add domains and it only works there — so nobody else can reuse your instance."
+      },
+      {
+        "q": "How is this different from the Builder?",
+        "a": "The Builder assembles a whole page and gives you the source code to download: one-time payment, it's yours. LAB serves a single section, hosted by us: it updates on its own."
+      }
+    ],
+    "views": "{{n}} views",
+    "loginPrompt": "Sign in to create and manage your hosted sections.",
+    "plansTitle": "Plans",
+    "cycle": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "tier": {
+      "free": "Free",
+      "starter": "Starter",
+      "pro": "Pro",
+      "studio": "Studio"
+    },
+    "perMonth": "/ mo",
+    "perYear": "/ yr",
+    "save": "Save {{pct}}%",
+    "planQuota": "{{n}} published sections",
+    "planFeaturesTitle": "All plans include",
+    "planFeatures": [
+      "Edit and republish anytime",
+      "Runs isolated in an iframe",
+      "Allowed domains (allowlist)",
+      "View counter",
+      "Email support"
+    ],
+    "planFreeState": "Free plan — {{used}} / {{quota}} published",
+    "planActiveState": "{{plan}} — {{used}} / {{quota}} published",
+    "planCancel": "Cancel subscription",
+    "planCanceledUntil": "canceled · access until {{date}}",
+    "planCurrent": "Your plan",
+    "planSubscribe": "Subscribe",
+    "planRecommended": "Most popular"
   },
   "common": {
     "loading": "Loading…",
@@ -72,7 +173,11 @@
     "modelsScrollHint": "Scroll to explore",
     "modelsBrowseHint": "Hover · open a demo",
     "cycleLabel": "The bar",
-    "cycleWords": ["CODE", "THAT", "HITS"],
+    "cycleWords": [
+      "CODE",
+      "THAT",
+      "HITS"
+    ],
     "panelsHeading": "You get the source",
     "howTitleBefore": "You buy. You download a",
     "howTitleZip": "ZIP",
@@ -83,11 +188,13 @@
     "step1Title": "Sign in",
     "step1Body": "Sign in with Google to buy and download.",
     "step2Title": "Pick or build",
-    "step2Body": "A ready-made model (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER, COMIC, UNITY, RATIO) or a page you build yourself.",
+    "step2Body": "A ready-made model or a page you build yourself.",
     "step3Title": "Pay",
     "step3Body": "Pay with Mercado Pago. Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
+    "howHostedNote": "Just need a single section, not a whole page? Some are served hosted with a <script>: edit them online, on a subscription.",
+    "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
     "paymentsBody": "You pay with Mercado Pago. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
@@ -138,7 +245,13 @@
     "contactErrMessage": "Message is too short.",
     "contactErrGeneric": "Couldn’t send. Please try again.",
     "contactErrNetwork": "No connection. Check your network and try again.",
-    "contactErrConfig": "The form isn’t configured yet. Email us instead."
+    "contactErrConfig": "The form isn’t configured yet. Email us instead.",
+    "labBodyBefore": "Configure a section in LAB and show it on any site with a script tag — no download, no touching your code. Edit it from the ",
+    "labBodyLink": "Lab",
+    "labBodyAfter": ".",
+    "labEyebrow": "No download",
+    "labTitleBefore": "Your component in one",
+    "labTitleEm": "line"
   },
   "templates": {
     "chapters": {
@@ -688,7 +801,24 @@
     "linkExpired": "That download link expired: for security it only lasts a few minutes. Just hit Download again.",
     "prevPage": "← Previous",
     "nextPage": "Next →",
-    "pageOf": "{{page}} / {{total}}"
+    "pageOf": "{{page}} / {{total}}",
+    "subTitle": "Subscription",
+    "subNone": "You don’t have an active subscription.",
+    "subSeePlans": "See plans →",
+    "subActive": "Active · next charge on {{date}}",
+    "subCanceled": "Canceled · you keep access until {{date}}",
+    "subPaused": "Paused — check your payment method in Mercado Pago",
+    "subSince": "Since",
+    "subUsage": "Published",
+    "subUnlimited": "unlimited",
+    "subChange": "Change plan",
+    "subCancel": "Cancel subscription",
+    "subCancelConfirm": "Cancel?",
+    "subCancelYes": "Yes, cancel",
+    "subCancelDone": "Subscription canceled",
+    "subSync": "Sync with Mercado Pago",
+    "subSyncHint": "Subscribed just now and it's not showing?",
+    "subSyncDone": "Status updated"
   },
   "preview": {
     "backToAccount": "← Back to My purchases",
@@ -787,6 +917,14 @@
       {
         "title": "Changes to this policy",
         "body": "We may update this policy to reflect service changes or legal requirements. The current version and effective date will always be posted on this page."
+      },
+      {
+        "title": "Hosted components (LAB)",
+        "items": [
+          "When you publish an instance we store its configuration (text and allowed domains) tied to your account. It is deleted when you delete the instance or your account.",
+          "The <script> you add to your site loads content from our domain. In doing so, our server and CDN log technical request data (IP, user-agent, referer) to operate the service, prevent abuse, and measure usage in aggregate.",
+          "The embed runs isolated in an iframe: it does not read cookies, forms, or content of the page it is embedded in, and we do not share your visitors data with third parties."
+        ]
       }
     ],
     "contact": "Privacy questions:"
@@ -828,6 +966,19 @@
       {
         "title": "Changes",
         "body": "We may update the service and these Terms. The current version and effective date will be posted on this page. Continued use after an update means you accept the revised Terms."
+      },
+      {
+        "title": "Hosted components (LAB)",
+        "items": [
+          "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
+          "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
+          "The subscription is billed in advance (monthly or yearly) through Mercado Pago and renews automatically at the end of each period until you cancel.",
+          "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Amounts already charged are non-refundable unless applicable law requires otherwise.",
+          "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
+          "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
+          "We make reasonable efforts to keep the service available, but we do not guarantee uninterrupted availability and are not liable for losses from downtime, latency, or changes to the service.",
+          "Acceptable use: you may not use the embed for illegal or deceptive content, content that infringes third-party rights, or to load the service abusively. We may suspend or revoke a non-compliant instance."
+        ]
       }
     ],
     "contact": "Questions about these terms:"

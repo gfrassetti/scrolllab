@@ -2,6 +2,7 @@ import {
   MercadoPagoConfig,
   Preference,
   Payment,
+  PreApproval,
   WebhookSignatureValidator,
   InvalidWebhookSignatureError,
 } from 'mercadopago'
@@ -145,6 +146,72 @@ export function mpPaymentError(err, paymentId) {
   return new HttpError(504, 'No pudimos comunicarnos con Mercado Pago', {
     expose: true,
   })
+}
+
+// ————————————————————————————————————————————————————————————————
+// Suscripciones (PreApproval) — LAB, Fase 4. Misma app de MP, token aparte.
+// Sin plan pre-creado: el monto va inline en cada alta. Solo hace falta
+// MP_SUBS_ACCESS_TOKEN — nada de seed ni plan IDs.
+// ————————————————————————————————————————————————————————————————
+
+/** Body del preapproval — puro, testeable sin pegarle a MP. */
+export function buildPreapprovalBody({
+  reason,
+  amount,
+  currencyId = 'ARS',
+  frequency,
+  frequencyType,
+  payerEmail,
+  externalReference,
+  backUrl,
+}) {
+  return {
+    reason,
+    external_reference: externalReference,
+    payer_email: payerEmail,
+    back_url: backUrl,
+    auto_recurring: {
+      frequency,
+      frequency_type: frequencyType,
+      transaction_amount: amount,
+      currency_id: currencyId,
+    },
+    status: 'pending',
+  }
+}
+
+/** Alta de una suscripción con monto inline. Devuelve `init_point`. */
+export async function createPreapproval({ accessToken, ...rest }) {
+  const pa = new PreApproval(createMpClient(accessToken))
+  return pa.create({ body: buildPreapprovalBody(rest) })
+}
+
+export async function fetchPreapproval(accessToken, id) {
+  const pa = new PreApproval(createMpClient(accessToken))
+  try {
+    return await pa.get({ id })
+  } catch (err) {
+    throw mpPaymentError(err, id)
+  }
+}
+
+/**
+ * Trae un authorized_payment (una cuota cobrada de una suscripción). El SDK no
+ * lo expone, así que va por REST. Devuelve, entre otros, `preapproval_id` y
+ * `status` (`processed` = cobrado) + `payment.status`.
+ */
+export async function fetchAuthorizedPayment(accessToken, id) {
+  const res = await fetch(
+    `https://api.mercadopago.com/authorized_payments/${encodeURIComponent(id)}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+  if (!res.ok) throw mpPaymentError({ status: res.status }, id)
+  return res.json()
+}
+
+export async function cancelPreapproval(accessToken, id) {
+  const pa = new PreApproval(createMpClient(accessToken))
+  return pa.update({ id, body: { status: 'cancelled' } })
 }
 
 export async function fetchPayment(accessToken, paymentId) {

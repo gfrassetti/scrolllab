@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+embed-dist
 *.local
 .env
 storage/
@@ -32,6 +33,9 @@ meshy_output/
 .cursor/skills/taste-skill/
 .cursor/skills/playwright-cli/
 .cursor/skills/img2threejs/
+
+# Claude skills instaladas por CLIs (higgsfield, etc.) — local, no versionar
+.claude/skills/
 
 # Refs temporales de Loom / scrapes (no producto)
 docs/reference-analysis/loom*

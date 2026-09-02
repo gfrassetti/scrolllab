@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
+import SubscriptionCard from '../components/SubscriptionCard'
 import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
@@ -140,6 +141,8 @@ export default function AccountPage() {
             {t('common.howItWorksLink')}
           </Link>
         </p>
+
+        <SubscriptionCard />
 
         {error && (
           <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">

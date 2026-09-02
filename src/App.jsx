@@ -4,6 +4,7 @@ import TemplatesIndex from './pages/TemplatesIndex'
 import LicensePage from './pages/LicensePage'
 import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
 import { AuthProvider } from './lib/auth'
+import { PlanProvider } from './lib/plan'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
@@ -20,9 +21,10 @@ const AtelierPage = lazy(() => import('./pages/AtelierPage'))
 const ComicPage = lazy(() => import('./pages/ComicPage'))
 const UnityPage = lazy(() => import('./pages/UnityPage'))
 const RatioPage = lazy(() => import('./pages/RatioPage'))
-const VantaPage = lazy(() => import('./pages/VantaPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
+const LabPage = lazy(() => import('./pages/LabPage'))
+const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
@@ -67,64 +69,58 @@ export default function App() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <HomeCursor />
-          <DocumentHead />
-          <ScrollToTop />
-          <CartToast />
-          <ChunkErrorBoundary>
-            <Suspense fallback={<Loader />}>
-              <Routes>
-                <Route path="/" element={<TemplatesIndex />} />
-                <Route path="/templates/chapters" element={<ChaptersPage />} />
-                <Route path="/templates/nocturne" element={<NocturnePage />} />
-                <Route path="/templates/monolith" element={<MonolithPage />} />
-                <Route path="/templates/fizz" element={<FizzPage />} />
-                <Route path="/templates/velocity" element={<VelocityPage />} />
-                <Route path="/templates/atelier" element={<AtelierPage />} />
-                <Route path="/templates/comic" element={<ComicPage />} />
-                <Route path="/templates/unity" element={<UnityPage />} />
-                <Route
-                  path="/templates/ratio"
-                  element={
-                    import.meta.env.DEV ? (
-                      <RatioPage />
-                    ) : (
-                      <Navigate to="/" replace />
-                    )
-                  }
-                />
-                <Route
-                  path="/templates/vanta"
-                  element={
-                    import.meta.env.DEV ? (
-                      <VantaPage />
-                    ) : (
-                      <Navigate to="/" replace />
-                    )
-                  }
-                />
-                <Route path="/templates/atrium" element={<AtriumPage />} />
-                <Route path="/builder" element={<BuilderPage />} />
-                <Route path="/preview" element={<PreviewPage />} />
-                <Route path="/legal/license" element={<LicensePage />} />
-                <Route path="/legal/privacy" element={<PrivacyPage />} />
-                <Route path="/legal/terms" element={<TermsPage />} />
-                <Route
-                  path="/license"
-                  element={<Navigate to="/legal/license" replace />}
-                />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/account" element={<AccountPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-                <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
-                <Route path="/checkout/mock" element={<CheckoutMockPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </Suspense>
-          </ChunkErrorBoundary>
-        </BrowserRouter>
+        <PlanProvider>
+          <BrowserRouter>
+            <HomeCursor />
+            <DocumentHead />
+            <ScrollToTop />
+            <CartToast />
+            <ChunkErrorBoundary>
+              <Suspense fallback={<Loader />}>
+                <Routes>
+                  <Route path="/" element={<TemplatesIndex />} />
+                  <Route path="/templates/chapters" element={<ChaptersPage />} />
+                  <Route path="/templates/nocturne" element={<NocturnePage />} />
+                  <Route path="/templates/monolith" element={<MonolithPage />} />
+                  <Route path="/templates/fizz" element={<FizzPage />} />
+                  <Route path="/templates/velocity" element={<VelocityPage />} />
+                  <Route path="/templates/atelier" element={<AtelierPage />} />
+                  <Route path="/templates/comic" element={<ComicPage />} />
+                  <Route path="/templates/unity" element={<UnityPage />} />
+                  <Route
+                    path="/templates/ratio"
+                    element={
+                      import.meta.env.DEV ? (
+                        <RatioPage />
+                      ) : (
+                        <Navigate to="/" replace />
+                      )
+                    }
+                  />
+                  <Route path="/templates/atrium" element={<AtriumPage />} />
+                  <Route path="/builder" element={<BuilderPage />} />
+                  <Route path="/lab" element={<LabPage />} />
+                  <Route path="/lab/:id" element={<LabEditorPage />} />
+                  <Route path="/preview" element={<PreviewPage />} />
+                  <Route path="/legal/license" element={<LicensePage />} />
+                  <Route path="/legal/privacy" element={<PrivacyPage />} />
+                  <Route path="/legal/terms" element={<TermsPage />} />
+                  <Route
+                    path="/license"
+                    element={<Navigate to="/legal/license" replace />}
+                  />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/account" element={<AccountPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+                  <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
+                  <Route path="/checkout/mock" element={<CheckoutMockPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </Suspense>
+            </ChunkErrorBoundary>
+          </BrowserRouter>
+        </PlanProvider>
       </AuthProvider>
     </I18nProvider>
   )

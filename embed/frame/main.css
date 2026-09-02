@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/*
+ * El build corre con root=embed/frame, así que Tailwind no ve las secciones.
+ * Sin esto, clases como text-[13.5vw] o md:grid-cols-12 no se generan.
+ */
+@source "../src";
+@source "../../src/components/sections";
+
+/*
+ * El frame corre en NUESTRO origen: no hay CSS del host que aislar, así que
+ * cero hacks de shadow root. Solo los tokens del sitio que usan las secciones.
+ * Sin variante `.dark` — v1 light.
+ */
+:root {
+  --market-bone: #f2efe9;
+  --market-ink: #161412;
+  --market-mist: #c7c1b6;
+  --market-accent-ink: #c23a00;
+}
+
+@theme inline {
+  --color-bone: var(--market-bone);
+  --color-ink: var(--market-ink);
+  --color-mist: var(--market-mist);
+  --color-accent-ink: var(--market-accent-ink);
+}
+
+@theme {
+  --color-accent: #ff4b00;
+  --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  /* transparente: el iframe se funde con la página del host */
+  background: transparent;
+}
+
+body {
+  font-family: var(--font-grotesk);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display.italic {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* La sección arranca oculta y aparece cuando el host avisa que entró en pantalla. */
+#root {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#root[data-inview] {
+  opacity: 1;
+}

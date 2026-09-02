@@ -1,0 +1,8 @@
+{
+  "sectionId": "chapters/FooterCTA",
+  "props": {
+    "ctaWord": "HABLEMOS",
+    "email": "hola@estudio-demo.com",
+    "legal": "©2026 Estudio Demo — sección hosteada con ScrollLab"
+  }
+}

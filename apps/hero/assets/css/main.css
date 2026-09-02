@@ -1,0 +1,38 @@
+:root {
+  --void: #08080c;
+  --ink: #eef1f6;
+  --cyan: #37e6f0;
+  --grey: #55555f;
+  --font-display: 'Anton', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --glow: 0 0 0.02em rgba(55, 230, 240, 0.85), 0 0 0.55em rgba(55, 230, 240, 0.35);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--void);
+}
+body {
+  background: var(--void);
+  color: var(--ink);
+  overflow-x: clip;
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.82vw, 12px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.7;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}

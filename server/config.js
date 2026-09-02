@@ -229,6 +229,30 @@ export function loadConfig() {
     },
     maxCartItems: 5,
     maxRecipeSections: 30,
+    // Hosted Component (LAB): origen del CDN que sirve loader/frame y token
+    // para suspender/reactivar una instancia (revocación de key).
+    embedCdnUrl: (
+      process.env.EMBED_CDN_URL || "https://embed.scrolllab.com.ar"
+    ).replace(/\/$/, ""),
+    adminToken: process.env.ADMIN_TOKEN || "",
+    // Cuántas instancias hosteadas se pueden publicar SIN suscripción.
+    // 1 = "una sección gratis" para probar; 0 = hay que suscribirse siempre.
+    hostedFreeQuota: (() => {
+      const n = Number(process.env.HOSTED_FREE_QUOTA);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 1;
+    })(),
+    // Suscripciones (LAB) — MercadoPago PreApproval con monto inline (sin plan
+    // pre-creado). Es la misma app de MP que Checkout Pro: si no seteás las env
+    // `MP_SUBS_*`, reusa las de Checkout Pro. `MP_SUBS_*` solo si querés una app
+    // o un webhook aparte.
+    mpSubs: {
+      accessToken:
+        process.env.MP_SUBS_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN || "",
+      webhookSecret:
+        process.env.MP_SUBS_WEBHOOK_SECRET ||
+        process.env.MP_WEBHOOK_SECRET ||
+        "",
+    },
   };
 }
 

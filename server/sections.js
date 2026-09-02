@@ -91,3 +91,22 @@ const SECTION_RE = /^[a-z]+\/[A-Za-z0-9]+$/
 export function isAllowedSectionId(id) {
   return typeof id === 'string' && SECTION_RE.test(id) && ALLOWED_SECTION_SET.has(id)
 }
+
+/**
+ * Secciones que se pueden servir como Hosted Component (ver
+ * docs/hosted-component-plan.md). Requisito para entrar acá: tener un embed
+ * verificado (embed/src/registry.js) y un schema de props en
+ * ALLOWED_PROPS_BY_SECTION. Se amplía a medida que cada sección lo cumple.
+ */
+export const HOSTABLE_SECTIONS = Object.freeze([
+  'chapters/FooterCTA',
+  // `variant: "type"` — sección pineada, paneles de texto. Los paneles todavía
+  // no son editables (array), pero el resto de los textos sí.
+  'chapters/HorizontalPanels',
+])
+
+export const HOSTABLE_SECTION_SET = new Set(HOSTABLE_SECTIONS)
+
+export function isHostableSectionId(id) {
+  return isAllowedSectionId(id) && HOSTABLE_SECTION_SET.has(id)
+}

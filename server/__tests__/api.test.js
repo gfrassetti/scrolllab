@@ -183,6 +183,18 @@ describe('API HTTP (file store)', () => {
       assert.equal(dl.status, 200, `la descarga ${attempt} falló`)
       assert.ok(readZip(dl.body).has('package.json'))
     }
+
+    // Log de descargas (ip-protection-brief §3.5): una fila por descarga, con
+    // fecha, para que soporte pueda ver quién bajó qué y cuándo.
+    const ordersPath = path.join(storageDir, 'db', 'orders.json')
+    const row = JSON.parse(fs.readFileSync(ordersPath, 'utf8')).find(
+      (o) => o.id === orderId,
+    )
+    assert.equal(row.downloads.length, 4, 'no se registró cada descarga')
+    assert.ok(
+      row.downloads.every((d) => !Number.isNaN(Date.parse(d.at))),
+      'una fila del log no tiene fecha válida',
+    )
   })
 
   /**

@@ -85,9 +85,9 @@ const SHARED = [
   'src/lib/gtm.js',
   // Beat (src/lib/beat/*) NO va en el ZIP — plusvalía marketplace. Ver docs/scrolllab-beat.md.
   // Si una sección importa lib/beat, el pack fallará hasta portar a GSAP.
-  // webgl (src/lib/webgl/*) tampoco es incondicional: solo lo usa vanta/HeroCanvas
-  // hoy. Meterlo siempre arrastraba `three` como dependencia hasta en un ZIP
-  // 100% 2D (chapters, nocturne...). Ver WEBGL_FILES + needsWebgl más abajo.
+  // webgl (src/lib/webgl/*) tampoco es incondicional: meterlo siempre arrastraba
+  // `three` como dependencia hasta en un ZIP 100% 2D (chapters, nocturne...).
+  // Ver WEBGL_FILES + needsWebgl más abajo.
   'src/lib/navLinks.js',
   'src/hooks/useLenis.js',
   'src/hooks/useMobileMenu.js',
@@ -362,6 +362,27 @@ function rewritePageToApp(content, model) {
     .replace(/export default function \w+Page/, 'export default function App')
 }
 
+/**
+ * Marca de agua embebida en el `src/App.jsx` del ZIP: si una copia se filtra
+ * sin el `LICENSE.txt`, este encabezado sigue atando el código al comprador
+ * (docs/ip-protection-brief.md §3.5). El token `SCROLLLAB-LICENSE` es estable
+ * a propósito — así un search en GitHub/marketplaces encuentra las filtraciones.
+ */
+function fingerprintComment({ orderId, email, date } = {}) {
+  return `/**
+ * SCROLLLAB-LICENSE ${orderId || 'unknown'}
+ * Licencia regular emitida a ${email || 'unknown'}${date ? ` el ${date}` : ''}.
+ * Uso permitido según LICENSE.txt (incluido en este ZIP). Redistribuir,
+ * revender o republicar el código fuente está prohibido. Este encabezado
+ * identifica al comprador original; quitarlo no cambia los términos.
+ */
+`
+}
+
+function stampApp(appSrc, licenseMeta) {
+  return licenseMeta ? `${fingerprintComment(licenseMeta)}\n${appSrc}` : appSrc
+}
+
 function createZip(destPath) {
   ensureDir(path.dirname(destPath))
   const output = fs.createWriteStream(destPath)
@@ -379,7 +400,7 @@ function createZip(destPath) {
  * under `prefix`. With an empty prefix it fills the root of a single-template
  * ZIP; the bundle calls it once per model with `<model>/`.
  */
-function appendModelProject(archive, model, prefix = '') {
+function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
   const cfg = MODEL_FILES[model]
   if (!cfg) throw new Error(`Unknown model: ${model}`)
 
@@ -403,7 +424,7 @@ function appendModelProject(archive, model, prefix = '') {
 
   // main.jsx already imports App — we write App.jsx from the model page
   const pageSrc = read(cfg.page)
-  const appSrc = rewritePageToApp(pageSrc, model)
+  const appSrc = stampApp(rewritePageToApp(pageSrc, model), licenseMeta)
   sources.push(appSrc)
   archive.append(appSrc, { name: `${prefix}src/App.jsx` })
 
@@ -468,7 +489,7 @@ function appendModelProject(archive, model, prefix = '') {
 export async function packFixedTemplate({ model, destPath, licenseMeta }) {
   const { archive, done } = createZip(destPath)
 
-  appendModelProject(archive, model)
+  appendModelProject(archive, model, '', licenseMeta)
 
   archive.append(
     buildLicenseText({
@@ -497,7 +518,7 @@ export async function packBundleTemplate({ models, destPath, licenseMeta }) {
   const { archive, done } = createZip(destPath)
 
   for (const model of list) {
-    appendModelProject(archive, model, `${model}/`)
+    appendModelProject(archive, model, `${model}/`, licenseMeta)
   }
 
   archive.append(
@@ -723,6 +744,7 @@ ${renderLines.join('\n')}
 }
 `
   }
+  appSrc = stampApp(appSrc, licenseMeta)
   sources.push(appSrc)
   archive.append(appSrc, { name: 'src/App.jsx' })
   appendWebglIfNeeded(archive, sources)

@@ -1,0 +1,12 @@
+{
+  // Solo sirve el embed (loader + frame) como assets estáticos desde el CDN de
+  // Cloudflare. No hay Worker: sin `main`, `wrangler deploy` sube `embed-dist/`
+  // tal cual. El build lo hace `npm run build:embed` (deja `_headers` y
+  // `_redirects` en la raíz de esa carpeta). Ver embed/README.md#deploy.
+  // El sitio principal y la API NO viven acá (Vercel / Railway).
+  "name": "scrolllab-embed",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./embed-dist"
+  }
+}

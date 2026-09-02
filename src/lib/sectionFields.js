@@ -38,6 +38,21 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
   ],
+  'chapters/HorizontalPanels': [
+    {
+      key: 'variant',
+      label: 'Variante',
+      type: 'select',
+      options: [
+        { value: 'media', label: 'Media (imágenes)' },
+        { value: 'type', label: 'Type (títulos grandes)' },
+      ],
+    },
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'heading', label: 'Heading', type: 'text' },
+  ],
   'nocturne/NavNocturne': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'marker', label: 'Marker', type: 'text' },

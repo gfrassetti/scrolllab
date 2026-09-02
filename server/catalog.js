@@ -140,6 +140,59 @@ export const PRODUCTS = {
   },
 }
 
+/**
+ * Planes de suscripción de Hosted Component (LAB). A diferencia de los
+ * one-time, el precio es ARS fijo (no pasa por fx). PRECIOS: placeholder,
+ * los ajusta otro agente — no tocar acá. `instanceQuota` sí es definitivo
+ * (pedido directo del usuario: 5 / 15 / sin tope).
+ * `yearly` va por debajo de 12× `monthly` (ese descuento es el "ahorro").
+ */
+export const HOSTED_PLANS = Object.freeze({
+  hosted_starter: {
+    id: 'hosted_starter',
+    tier: 'starter',
+    priceMonthly: 9900,
+    priceYearly: 99000,
+    instanceQuota: 5,
+    currency_id: 'ARS',
+  },
+  hosted_pro: {
+    id: 'hosted_pro',
+    tier: 'pro',
+    priceMonthly: 19900,
+    priceYearly: 199000,
+    instanceQuota: 15,
+    currency_id: 'ARS',
+  },
+  hosted_studio: {
+    id: 'hosted_studio',
+    tier: 'studio',
+    priceMonthly: 49900,
+    priceYearly: 499000,
+    // Sin tope: Infinity vive acá adentro (las comparaciones `used >= quota`
+    // dan siempre false). Se serializa a `null` en el borde HTTP — ver
+    // `quotaForWire` en app.js — y el cliente lo lee como "ilimitado".
+    instanceQuota: Infinity,
+    currency_id: 'ARS',
+  },
+})
+
+export const HOSTED_PLAN_IDS = Object.freeze(Object.keys(HOSTED_PLANS))
+
+export function isHostedPlanId(id) {
+  return Object.prototype.hasOwnProperty.call(HOSTED_PLANS, id)
+}
+
+export function hostedPlanPrice(planId, cycle) {
+  const plan = HOSTED_PLANS[planId]
+  if (!plan) return null
+  return cycle === 'yearly' ? plan.priceYearly : plan.priceMonthly
+}
+
+export function hostedPlanQuota(planId) {
+  return HOSTED_PLANS[planId]?.instanceQuota ?? 0
+}
+
 export function arsFromUsd(usd, rate) {
   if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) {
     throw new Error('Conversión USD→ARS inválida')

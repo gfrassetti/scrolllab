@@ -138,6 +138,9 @@ describe('ZIP de cada template', () => {
 
       const app = files.get('src/App.jsx').toString('utf8')
       assert.match(app, /export default function App/)
+      // Fingerprint embebido: una copia sin LICENSE.txt sigue siendo trazable.
+      assert.match(app, /SCROLLLAB-LICENSE test-order/, 'App.jsx sin marca de licencia')
+      assert.match(app, /buyer@test\.com/, 'App.jsx sin el comprador embebido')
     })
   }
 
@@ -149,6 +152,11 @@ describe('ZIP de cada template', () => {
     for (const model of BUNDLE_MODELS) {
       assertRunnableProject(files, `${model}/`)
       assertDepsCoverImports(files, `${model}/`)
+      assert.match(
+        files.get(`${model}/src/App.jsx`).toString('utf8'),
+        /SCROLLLAB-LICENSE test-order/,
+        `${model}/src/App.jsx sin marca de licencia`,
+      )
     }
     assert.ok(files.has('LICENSE.txt'), 'el bundle no trae licencia en la raíz')
     assert.deepEqual(brokenImports(files), [])
@@ -187,6 +195,8 @@ describe('ZIP del builder', () => {
     for (const id of ['HeroKinetic', 'SplitReveals', 'ContactForm', 'FooterAtelier']) {
       assert.match(app, new RegExp(id), `App.jsx no renderiza ${id}`)
     }
+    assert.match(app, /SCROLLLAB-LICENSE test-order/, 'App.jsx custom sin marca de licencia')
+    assert.match(app, /buyer@test\.com/, 'App.jsx custom sin el comprador embebido')
   })
 
   it('resuelve el tema del contact form al de la sección de arriba', async () => {

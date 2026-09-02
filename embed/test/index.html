@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed — prueba en página ajena</title>
+    <style>
+      /* CSS agresivo de la "página anfitriona" — no debería filtrarse al embed */
+      * { box-sizing: border-box; }
+      html { font-size: 22px; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #ffffff;
+        color: #1a1a1a;
+      }
+      .host-block { padding: 5rem 3rem; }
+      .host-block.alt { background: #101010; color: #f0f0f0; }
+      h1 { font-size: 2.4rem; margin: 0 0 1rem; }
+      a { color: crimson; }
+    </style>
+  </head>
+  <body>
+    <div class="host-block">
+      <h1>Página anfitriona (Webflow / WordPress / lo que sea)</h1>
+      <p>
+        Reset propio, <code>html { font-size: 22px }</code>, serif, links
+        carmesí. Scrolleá: el embed aparece después de este bloque y su
+        animación de entrada dispara al entrar en viewport.
+      </p>
+    </div>
+
+    <!-- así se instala en el sitio del cliente -->
+    <script
+      src="../../embed-dist/scrolllab-embed.js"
+      data-scrolllab
+      data-key="demo"
+      data-config-url="./config-demo.json"
+      async
+    ></script>
+
+    <div class="host-block alt">
+      <p>Contenido de la página anfitriona debajo del embed.</p>
+    </div>
+  </body>
+</html>

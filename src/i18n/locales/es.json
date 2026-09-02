@@ -7,6 +7,7 @@
     "howItWorks": "Cómo funciona",
     "builder": "Builder",
     "builderWithCount": "Builder, {{count}} secciones armadas",
+    "lab": "LAB",
     "cart": "Carrito",
     "account": "Mis compras",
     "login": "Entrar",
@@ -16,7 +17,107 @@
     "menu": "Menú",
     "langEs": "ES",
     "langEn": "EN",
-    "langLabel": "Idioma"
+    "langLabel": "Idioma",
+    "plan": "Plan"
+  },
+  "lab": {
+    "eyebrow": "Componentes hosteados",
+    "body": "Configurá una sección y mostrala en cualquier sitio con una línea de <script>. El código nunca sale de nuestro lado: editás acá, se actualiza allá.",
+    "yours": "Tus secciones",
+    "new": "＋ Nueva",
+    "pickSection": "Elegí una sección",
+    "empty": "Todavía no tenés ninguna. Creá una para empezar.",
+    "status": {
+      "draft": "Borrador",
+      "published": "Publicada",
+      "suspended": "Suspendida"
+    },
+    "edit": "Editar",
+    "delete": "Borrar",
+    "snippet": "Pegá esto en el sitio",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "draftHint": "Borrador — abrí el editor para configurarla y publicarla.",
+    "footnote": "¿Querés una página entera en vez de una sección suelta? Eso va por el",
+    "back": "← Volver a LAB",
+    "fields": "Contenido",
+    "noFields": "Esta sección no tiene campos editables.",
+    "domains": "Dominios permitidos (uno por línea)",
+    "domainsHint": "Si dejás la lista vacía, la sección se muestra en cualquier dominio. Si ponés dominios, solo ahí.",
+    "preview": "Vista previa",
+    "saveDraft": "Guardar borrador",
+    "publish": "Publicar",
+    "unpublish": "Despublicar",
+    "saved": "Guardado",
+    "published": "Publicado",
+    "publishFirst": "El snippet funciona recién cuando publicás.",
+    "guideTitle": "Cómo se instala",
+    "guide1": "Configurá la sección en el editor y tocá Publicar.",
+    "guide2": "Copiá el <script> que aparece en la card.",
+    "guide3": "Pegalo en el HTML de tu sitio, antes de </body>. La sección aparece donde pusiste el script.",
+    "faqTitle": "Preguntas",
+    "faq": [
+      {
+        "q": "¿Qué es un componente hosteado?",
+        "a": "Una sección del sitio que configurás acá y se muestra en cualquier página con una línea de código. A diferencia de bajar el ZIP, el código no sale de nuestro lado: lo editás desde LAB y se actualiza solo donde lo pegaste."
+      },
+      {
+        "q": "¿Puedo cambiar el contenido después?",
+        "a": "Sí. Editás los textos en LAB, tocás Publicar, y el cambio aparece en tu sitio en el próximo refresco. No hay que volver a tocar el código."
+      },
+      {
+        "q": "¿Puede leer datos de mi página?",
+        "a": "No. La sección corre dentro de un iframe en nuestro dominio. El navegador lo aísla: no accede a tus cookies, formularios ni al resto de tu página."
+      },
+      {
+        "q": "¿Funciona en Webflow, WordPress, etc.?",
+        "a": "Sí, en cualquier sitio donde puedas pegar una etiqueta <script> en el HTML."
+      },
+      {
+        "q": "¿Qué pasa si lo despublico o doy de baja el plan?",
+        "a": "El embed deja de renderizar: donde estaba el script no se muestra nada. Volver a publicar lo reactiva."
+      },
+      {
+        "q": "¿Para qué sirven los dominios permitidos?",
+        "a": "Si dejás la lista vacía, la sección se muestra en cualquier dominio. Si ponés dominios, solo funciona ahí — sirve para que nadie más reuse tu instancia."
+      },
+      {
+        "q": "¿En qué se diferencia del Builder?",
+        "a": "El Builder arma una página entera y te da el código fuente para descargar: pago único, es tuyo. LAB sirve una sección suelta, hosteada por nosotros: se actualiza sola."
+      }
+    ],
+    "views": "{{n}} vistas",
+    "loginPrompt": "Entrá para crear y gestionar tus secciones hosteadas.",
+    "plansTitle": "Planes",
+    "cycle": {
+      "monthly": "Mensual",
+      "yearly": "Anual"
+    },
+    "tier": {
+      "free": "Free",
+      "starter": "Starter",
+      "pro": "Pro",
+      "studio": "Studio"
+    },
+    "perMonth": "/ mes",
+    "perYear": "/ año",
+    "save": "Ahorrás {{pct}}%",
+    "planQuota": "{{n}} secciones publicadas",
+    "planFeaturesTitle": "Todos los planes incluyen",
+    "planFeatures": [
+      "Editás y republicás cuando quieras",
+      "Corre aislada en un iframe",
+      "Dominios permitidos (allowlist)",
+      "Contador de vistas",
+      "Soporte por email"
+    ],
+    "planFreeState": "Plan gratis — {{used}} / {{quota}} publicadas",
+    "planActiveState": "{{plan}} — {{used}} / {{quota}} publicadas",
+    "planCancel": "Cancelar suscripción",
+    "planCanceledUntil": "cancelada · acceso hasta {{date}}",
+    "planCurrent": "Tu plan",
+    "planSubscribe": "Suscribirme",
+    "planRecommended": "Más elegido"
   },
   "common": {
     "loading": "Cargando…",
@@ -72,7 +173,11 @@
     "modelsScrollHint": "Scrolleá para recorrer",
     "modelsBrowseHint": "Pasá el cursor · abrí la demo",
     "cycleLabel": "El listón",
-    "cycleWords": ["CÓDIGO", "QUE", "IMPACTA"],
+    "cycleWords": [
+      "CÓDIGO",
+      "QUE",
+      "IMPACTA"
+    ],
     "panelsHeading": "Te llevás el código",
     "howTitleBefore": "Comprás. Descargás un",
     "howTitleZip": "ZIP",
@@ -83,11 +188,13 @@
     "step1Title": "Entrá con tu cuenta",
     "step1Body": "Entrá con Google para comprar y descargar.",
     "step2Title": "Elegí o armá",
-    "step2Body": "Un modelo listo (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER, COMIC, UNITY, RATIO) o tu página armada en el builder.",
+    "step2Body": "Un modelo listo o tu página armada en el builder.",
     "step3Title": "Pagá",
     "step3Body": "Pagás con Mercado Pago. La compra aparece en Mis compras.",
     "step4Title": "Descargá el ZIP",
     "step4Body": "Tu compra queda en Mis compras. Descargá el ZIP cuando quieras.",
+    "howHostedNote": "¿Solo necesitás una sección suelta, no una página entera? Algunas se sirven hosteadas con un <script>: las editás online, por suscripción.",
+    "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
     "paymentsBody": "Pagás con Mercado Pago. No vemos ni guardamos los datos de tu tarjeta.",
     "zipTitle": "Qué viene en el ZIP",
@@ -138,7 +245,13 @@
     "contactErrMessage": "El mensaje es muy corto.",
     "contactErrGeneric": "No se pudo enviar. Probá de nuevo.",
     "contactErrNetwork": "Sin conexión. Revisá tu red e intentá otra vez.",
-    "contactErrConfig": "El formulario aún no está configurado. Escribinos por email."
+    "contactErrConfig": "El formulario aún no está configurado. Escribinos por email.",
+    "labBodyBefore": "Configurás una sección en LAB y la mostrás en cualquier sitio con una etiqueta script — sin bajar nada, sin tocar tu código. La editás desde el ",
+    "labBodyLink": "Lab",
+    "labBodyAfter": ".",
+    "labEyebrow": "Sin descargar nada",
+    "labTitleBefore": "Tu componente en una",
+    "labTitleEm": "línea"
   },
   "templates": {
     "chapters": {
@@ -688,7 +801,24 @@
     "linkExpired": "El link de descarga venció: por seguridad dura solo unos minutos. Tocá Descargar de nuevo y listo.",
     "prevPage": "← Anterior",
     "nextPage": "Siguiente →",
-    "pageOf": "{{page}} / {{total}}"
+    "pageOf": "{{page}} / {{total}}",
+    "subTitle": "Suscripción",
+    "subNone": "No tenés una suscripción activa.",
+    "subSeePlans": "Ver planes →",
+    "subActive": "Activa · próximo cobro el {{date}}",
+    "subCanceled": "Cancelada · seguís con acceso hasta el {{date}}",
+    "subPaused": "En pausa — revisá tu medio de pago en Mercado Pago",
+    "subSince": "Desde",
+    "subUsage": "Publicadas",
+    "subUnlimited": "ilimitadas",
+    "subChange": "Cambiar de plan",
+    "subCancel": "Cancelar suscripción",
+    "subCancelConfirm": "¿Cancelar?",
+    "subCancelYes": "Sí, cancelar",
+    "subCancelDone": "Suscripción cancelada",
+    "subSync": "Sincronizar con Mercado Pago",
+    "subSyncHint": "¿Te suscribiste recién y no se refleja?",
+    "subSyncDone": "Estado actualizado"
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",
@@ -787,6 +917,14 @@
       {
         "title": "Cambios a esta política",
         "body": "Podemos actualizar esta política para reflejar cambios del servicio o requisitos legales. La versión vigente y su fecha siempre estarán publicadas en esta página."
+      },
+      {
+        "title": "Componentes hosteados (LAB)",
+        "items": [
+          "Al publicar una instancia guardamos su configuración (textos y dominios permitidos) asociada a tu cuenta. Se elimina cuando borrás la instancia o tu cuenta.",
+          "El <script> que insertás en tu sitio carga contenido desde nuestro dominio. Al hacerlo, nuestro servidor y CDN registran datos técnicos de la request (IP, user-agent, referer) para operar el servicio, prevenir abuso y medir uso de forma agregada.",
+          "El embed corre aislado en un iframe: no lee cookies, formularios ni contenido de la página donde lo insertás, y no compartimos datos de tus visitantes con terceros."
+        ]
       }
     ],
     "contact": "Consultas sobre privacidad:"
@@ -828,6 +966,19 @@
       {
         "title": "Cambios",
         "body": "Podemos actualizar el servicio y estos Términos. La versión vigente y su fecha estarán publicadas en esta página. El uso posterior a una actualización implica la aceptación de los nuevos Términos."
+      },
+      {
+        "title": "Componentes hosteados (LAB)",
+        "items": [
+          "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
+          "El código del componente permanece hosteado por nosotros: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
+          "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago y se renueva automáticamente al final de cada período hasta que la des de baja.",
+          "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
+          "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
+          "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
+          "Hacemos esfuerzos razonables por mantener el servicio disponible, pero no garantizamos disponibilidad ininterrumpida y no respondemos por pérdidas derivadas de caídas, latencia o cambios en el servicio.",
+          "Uso aceptable: no podés usar el embed para contenido ilegal, engañoso o que infrinja derechos de terceros, ni cargar el servicio de forma abusiva. Podemos suspender o revocar una instancia que incumpla."
+        ]
       }
     ],
     "contact": "Consultas sobre estos términos:"

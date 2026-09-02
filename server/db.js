@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
-import { User as MongoUser, Order as MongoOrder } from "./models.js";
+import {
+  User as MongoUser,
+  Order as MongoOrder,
+  HostedInstance as MongoHostedInstance,
+  Subscription as MongoSubscription,
+} from "./models.js";
 import { fileDb } from "./fileStore.js";
 
 let mode =
@@ -142,13 +147,19 @@ export const db = {
     return { order: current, created: false };
   },
   // maxDownloads 0 = sin tope: el contador se sigue llevando, pero no frena.
-  async consumeDownloadAtomic(orderId, maxDownloads) {
+  // `meta` ({ ip }) alimenta el log de descargas (ip-protection-brief §3.5).
+  async consumeDownloadAtomic(orderId, maxDownloads, meta = {}) {
     const capped = Number(maxDownloads) > 0;
+    const entry = { at: new Date(), ip: meta.ip ? String(meta.ip) : undefined };
     if (mode === "file") {
       const order = await fileDb.findOrderById(orderId);
       if (!order || order.status !== "paid") return null;
       if (capped && (order.downloadCount || 0) >= maxDownloads) return null;
       order.downloadCount = (order.downloadCount || 0) + 1;
+      order.downloads = [
+        ...(order.downloads || []),
+        { at: entry.at.toISOString(), ip: entry.ip },
+      ].slice(-50);
       await order.save();
       return order;
     }
@@ -158,7 +169,10 @@ export const db = {
         status: "paid",
         ...(capped ? { downloadCount: { $lt: maxDownloads } } : {}),
       },
-      { $inc: { downloadCount: 1 } },
+      {
+        $inc: { downloadCount: 1 },
+        $push: { downloads: { $each: [entry], $slice: -50 } },
+      },
       { new: true },
     );
   },
@@ -246,6 +260,101 @@ export const db = {
       { new: true },
     );
   },
+  // ——— Hosted Component (docs/hosted-component-plan.md, Fase 3) ———
+  async createHostedInstance(data) {
+    if (mode === "file") return fileDb.createHostedInstance(data);
+    return MongoHostedInstance.create(data);
+  },
+  async findHostedInstanceById(id) {
+    if (mode === "file") return fileDb.findHostedInstanceById(id);
+    return MongoHostedInstance.findById(id);
+  },
+  async findHostedInstanceByKey(key) {
+    if (mode === "file") return fileDb.findHostedInstanceByKey(key);
+    return MongoHostedInstance.findOne({ key: String(key) });
+  },
+  async findHostedInstancesByUser(userId) {
+    if (mode === "file") return fileDb.findHostedInstancesByUser(userId);
+    return MongoHostedInstance.find({ userId }).sort({ createdAt: -1 });
+  },
+  async deleteHostedInstance(id) {
+    if (mode === "file") return fileDb.deleteHostedInstance(id);
+    const res = await MongoHostedInstance.deleteOne({ _id: id });
+    return res.deletedCount > 0;
+  },
+  async incHostedViews(key) {
+    if (mode === "file") {
+      const inst = await fileDb.findHostedInstanceByKey(key);
+      if (!inst) return;
+      inst.views = (inst.views || 0) + 1;
+      await inst.save();
+      return;
+    }
+    await MongoHostedInstance.updateOne(
+      { key: String(key) },
+      { $inc: { views: 1 } },
+    );
+  },
+  async countPublishedHosted(userId, exceptId) {
+    if (mode === "file") return fileDb.countPublishedHosted(userId, exceptId);
+    return MongoHostedInstance.countDocuments({
+      userId,
+      status: "published",
+      ...(exceptId ? { _id: { $ne: exceptId } } : {}),
+    });
+  },
+  // Publicadas del usuario creadas ANTES que `createdAt` (orden estable para
+  // decidir cuáles quedan cubiertas por la cuota cuando el plan cae).
+  // Desempate por `_id` cuando el `createdAt` coincide → orden total.
+  async countPublishedHostedCreatedBefore(userId, createdAt, exceptId) {
+    if (mode === "file")
+      return fileDb.countPublishedHostedCreatedBefore(
+        userId,
+        createdAt,
+        exceptId,
+      );
+    const d = new Date(createdAt);
+    return MongoHostedInstance.countDocuments({
+      userId,
+      status: "published",
+      ...(exceptId ? { _id: { $ne: exceptId } } : {}),
+      $or: [
+        { createdAt: { $lt: d } },
+        ...(exceptId ? [{ createdAt: d, _id: { $lt: exceptId } }] : []),
+      ],
+    });
+  },
+
+  // ——— Suscripciones (LAB, Fase 4) ———
+  async createSubscription(data) {
+    if (mode === "file") return fileDb.createSubscription(data);
+    return MongoSubscription.create(data);
+  },
+  async findSubscriptionById(id) {
+    if (mode === "file") return fileDb.findSubscriptionById(id);
+    return MongoSubscription.findById(id);
+  },
+  async findSubscriptionByPreapproval(preapprovalId) {
+    if (mode === "file")
+      return fileDb.findSubscriptionByPreapproval(preapprovalId);
+    return MongoSubscription.findOne({ mpPreapprovalId: String(preapprovalId) });
+  },
+  async findActiveSubscriptionByUser(userId) {
+    if (mode === "file") return fileDb.findActiveSubscriptionByUser(userId);
+    return MongoSubscription.findOne({ userId, status: "authorized" }).sort({
+      createdAt: -1,
+    });
+  },
+  async findSubscriptionsByUser(userId) {
+    if (mode === "file") return fileDb.findSubscriptionsByUser(userId);
+    return MongoSubscription.find({ userId }).sort({ createdAt: -1 });
+  },
+  async deleteSubscription(id) {
+    if (mode === "file") return fileDb.deleteSubscription(id);
+    const res = await MongoSubscription.deleteOne({ _id: id });
+    return res.deletedCount > 0;
+  },
+
   async isReady() {
     if (mode === "file") return true;
     return mongoose.connection.readyState === 1;

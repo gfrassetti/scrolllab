@@ -72,6 +72,8 @@ export function requireSameOrigin(config) {
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next()
     // Webhook de MP no usa cookie de sesión
     if (req.path.startsWith('/api/webhooks/')) return next()
+    // Rutas admin: protegidas por x-admin-token, no por cookie → sin CSRF
+    if (/^\/api\/hosted\/[^/]+\/(un)?suspend$/.test(req.path)) return next()
 
     const origin = req.headers.origin
     if (origin) {
@@ -139,6 +141,24 @@ export function rateLimits() {
       standardHeaders: true,
       legacyHeaders: false,
       message: { error: 'Demasiadas descargas' },
+    }),
+    // Config del embed: público y cacheable (CDN + max-age), así que el origin
+    // recibe pocos hits. Generoso porque muchos visitantes pueden compartir IP.
+    embedConfig: rateLimit({
+      windowMs: 60 * 1000,
+      max: 240,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Rate limit' },
+    }),
+    // Mutaciones de LAB (crear/editar/borrar instancias hosteadas). Holgado
+    // para editar de verdad, corta el scripteo de creación masiva de keys.
+    hosted: rateLimit({
+      windowMs: 60 * 1000,
+      max: 40,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Demasiadas operaciones, probá en un momento' },
     }),
   }
 }

@@ -1,0 +1,278 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { api } from '../lib/api'
+import { useAuth } from '../lib/auth'
+import { usePlan } from '../lib/plan'
+import { useI18n } from '../i18n'
+import { gsap, useGSAP } from '../lib/gsap'
+
+const TIER_ORDER = ['starter', 'pro', 'studio']
+
+function fmtArs(n, locale) {
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  }).format(n)
+}
+
+// El server manda `null` para "sin tope" (Infinity no es JSON) — ver
+// `quotaForWire` en server/app.js.
+const displayQuota = (n) => (Number.isFinite(n) ? n : '∞')
+
+export default function HostedPlans() {
+  const { user } = useAuth()
+  const {
+    plan,
+    quota,
+    used,
+    canceledAt,
+    currentPeriodEnd,
+    refresh: refreshPlan,
+  } = usePlan()
+  const { t, locale } = useI18n()
+  const root = useRef(null)
+
+  const [plans, setPlans] = useState([])
+  const [cycle, setCycle] = useState('monthly')
+  const [busy, setBusy] = useState('')
+  const [error, setError] = useState('')
+
+  const refresh = useCallback(async () => {
+    try {
+      const p = await api.subscriptionPlans()
+      setPlans(
+        [...(p.plans || [])].sort(
+          (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
+        ),
+      )
+    } catch (err) {
+      setError(err.message)
+    }
+  }, [])
+
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  const subscribe = async (planId) => {
+    if (busy) return
+    setBusy(planId)
+    setError('')
+    try {
+      const res = await api.subscribe(planId, cycle)
+      if (res.init_point) {
+        window.location.href = res.init_point
+        return
+      }
+      if (res.mock && res.activateUrl) {
+        await api.subscriptionMockActivate(res.activateUrl)
+        await refreshPlan()
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const cancel = async () => {
+    if (busy) return
+    setBusy('cancel')
+    try {
+      await api.subscriptionCancel()
+      await refreshPlan()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const features = t('lab.planFeatures')
+  const activePlan = user && plan !== 'free' ? plan : null
+
+  useGSAP(
+    () => {
+      if (!plans.length) return
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      gsap.from('[data-plan-card]', {
+        y: 24,
+        opacity: 0,
+        duration: 0.55,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top 80%',
+          once: true,
+        },
+      })
+    },
+    { scope: root, dependencies: [plans.length] },
+  )
+
+  return (
+    <section ref={root} className="mt-14 border-t border-ink/15 pt-10">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+          {t('lab.plansTitle')}
+        </h2>
+        <div className="inline-flex border border-ink/20 text-[11px] uppercase tracking-[0.2em]">
+          {['monthly', 'yearly'].map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setCycle(c)}
+              className={`px-3 py-1.5 transition-colors ${
+                cycle === c
+                  ? 'bg-accent text-ink'
+                  : 'text-ink/60 hover:text-ink'
+              }`}
+            >
+              {t(`lab.cycle.${c}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {user && (
+        <p className="mt-4 text-xs text-ink/55">
+          {plan === 'free'
+            ? t('lab.planFreeState', { used, quota: displayQuota(quota) })
+            : t('lab.planActiveState', {
+                plan: t(`lab.tier.${plan.replace('hosted_', '')}`),
+                used,
+                quota: displayQuota(quota),
+              })}
+          {activePlan && canceledAt && (
+            <span className="text-ink/45">
+              {' · '}
+              {t('lab.planCanceledUntil', {
+                date: currentPeriodEnd
+                  ? new Date(currentPeriodEnd).toLocaleDateString(
+                      locale === 'en' ? 'en-US' : 'es-AR',
+                    )
+                  : '',
+              })}
+            </span>
+          )}
+          {activePlan && !canceledAt && (
+            <>
+              {' · '}
+              <button
+                type="button"
+                onClick={cancel}
+                disabled={busy === 'cancel'}
+                className="underline decoration-ink/30 underline-offset-2 hover:text-danger disabled:opacity-40"
+              >
+                {t('lab.planCancel')}
+              </button>
+            </>
+          )}
+        </p>
+      )}
+
+      {error && (
+        <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+          {error}
+        </p>
+      )}
+
+      {/* Compartidas por los 3 planes — una sola vez, no repetidas card por
+          card. Ninguna se gatea por tier del lado del backend, así que
+          listarlas 3 veces solo se veía como relleno, no como diferenciador. */}
+      <div className="mt-6 border border-ink/10 bg-ink/[0.02] p-4">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/45">
+          {t('lab.planFeaturesTitle')}
+        </p>
+        <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-ink/65">
+          {(Array.isArray(features) ? features : []).map((f, i) => (
+            <li key={i} className="flex items-center gap-1.5">
+              <span className="text-accent">✓</span>
+              {f}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        {plans.map((p) => {
+          const price = cycle === 'yearly' ? p.priceYearly : p.priceMonthly
+          const saving = Math.round(
+            100 - (p.priceYearly / (p.priceMonthly * 12)) * 100,
+          )
+          const isCurrent = activePlan === p.id
+          const featured = p.tier === 'pro'
+          return (
+            <div
+              key={p.id}
+              data-plan-card
+              className={`relative flex flex-col border p-5 ${
+                featured
+                  ? 'border-accent bg-accent/[0.04] md:shadow-[0_20px_45px_-16px_rgba(255,75,0,0.4)]'
+                  : 'border-ink/15'
+              }`}
+            >
+              {featured && (
+                <span className="absolute -top-3 left-5 border border-accent bg-bone px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-accent">
+                  {t('lab.planRecommended')}
+                </span>
+              )}
+              <p
+                className={`text-[11px] uppercase tracking-[0.25em] ${
+                  featured ? 'text-accent' : 'text-ink/50'
+                }`}
+              >
+                {t(`lab.tier.${p.tier}`)}
+              </p>
+              <p className="mt-3 text-2xl font-medium tracking-[-0.02em]">
+                {fmtArs(price, locale)}
+                <span className="ml-1 text-xs font-normal text-ink/45">
+                  {t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
+                </span>
+              </p>
+              {cycle === 'yearly' && saving > 0 && (
+                <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-success">
+                  {t('lab.save', { pct: saving })}
+                </p>
+              )}
+              <p className="mt-4 flex-1 text-sm text-ink/70">
+                {t('lab.planQuota', { n: displayQuota(p.instanceQuota) })}
+              </p>
+              {!user ? (
+                <Link
+                  to="/login?next=/lab"
+                  className={`ui-press mt-5 block px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] ${
+                    featured
+                      ? 'border border-accent bg-accent text-ink hover:opacity-85'
+                      : 'border border-ink hover:bg-ink hover:text-bone'
+                  }`}
+                >
+                  {t('nav.login')}
+                </Link>
+              ) : isCurrent ? (
+                <span className="mt-5 block border border-ink/20 px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] text-ink/40">
+                  {t('lab.planCurrent')}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => subscribe(p.id)}
+                  disabled={!!busy}
+                  className={`ui-press mt-5 px-4 py-2 text-[11px] uppercase tracking-[0.25em] disabled:opacity-40 ${
+                    featured
+                      ? 'border border-accent bg-accent text-ink hover:opacity-85'
+                      : 'border border-ink bg-ink text-bone hover:opacity-90'
+                  }`}
+                >
+                  {busy === p.id ? '…' : t('lab.planSubscribe')}
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
