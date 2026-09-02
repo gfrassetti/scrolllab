@@ -130,6 +130,12 @@ const subscriptionSchema = new mongoose.Schema(
     // `currentPeriodEnd`; no renueva. `resolveEntitlement` la cierra al vencer.
     canceledAt: Date,
     mpPreapprovalId: { type: String, sparse: true },
+    // Mail de bienvenida (una vez, al pasar a `authorized`). Mismo patrón
+    // claim/complete/release que el recibo de orden.
+    welcomeEmailSendingAt: Date,
+    welcomeEmailSentAt: Date,
+    welcomeEmailId: String,
+    welcomeEmailError: String,
   },
   { timestamps: true },
 );

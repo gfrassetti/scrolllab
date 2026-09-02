@@ -119,6 +119,8 @@
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
     "planSubscribe": "Suscribirme",
+    "planViaResub": "Disponible al re-suscribirte",
+    "planChangeHint": "Para cambiar de plan, cancelás la actual y te suscribís de nuevo al terminar el período.",
     "planRecommended": "Más elegido"
   },
   "common": {
@@ -813,7 +815,6 @@
     "subSince": "Desde",
     "subUsage": "Publicadas",
     "subUnlimited": "ilimitadas",
-    "subChange": "Cambiar de plan",
     "subCancel": "Cancelar suscripción",
     "subCancelConfirm": "¿Cancelar?",
     "subCancelYes": "Sí, cancelar",

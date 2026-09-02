@@ -61,6 +61,41 @@ export default function HostedPlans() {
     refresh()
   }, [refresh])
 
+  // Llegar con /lab#planes (desde /account o "Ver planes") es intención
+  // explícita de comparar: abre la grilla. El scroll orgánico de /lab no
+  // trae hash, así que con plan pago la card sigue colapsada ahí.
+  const [hashIntent, setHashIntent] = useState(
+    () => typeof window !== 'undefined' && window.location.hash === '#planes',
+  )
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const sync = () => {
+      if (window.location.hash === '#planes') {
+        setShowComparison(true)
+        setHashIntent(true)
+      }
+    }
+    sync()
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+
+  // El scroll espera a que la grilla exista: /lab monta detrás de un splash
+  // y del gate de auth, así que en mount la sección todavía no tiene alto.
+  // `ScrollToTop` (useLayoutEffect en App) ya corrió para entonces.
+  useEffect(() => {
+    if (!hashIntent || !plans.length || !root.current) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const id = requestAnimationFrame(() => {
+      root.current?.scrollIntoView({
+        behavior: reduce ? 'auto' : 'smooth',
+        block: 'start',
+      })
+      setHashIntent(false)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [hashIntent, plans.length])
+
   const subscribe = async (planId) => {
     if (busy) return
     setBusy(planId)
@@ -123,7 +158,11 @@ export default function HostedPlans() {
   )
 
   return (
-    <section ref={root} className="mt-14 border-t border-ink/15 pt-10">
+    <section
+      ref={root}
+      id="planes"
+      className="mt-14 scroll-mt-24 border-t border-ink/15 pt-10"
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
           {t('lab.plansTitle')}
@@ -224,6 +263,11 @@ export default function HostedPlans() {
 
       {comparisonVisible && (
         <>
+          {activePlan && (
+            <p className="mt-6 text-sm text-ink/55">
+              {t('lab.planChangeHint')}
+            </p>
+          )}
           {/* Compartidas por los 3 planes — una sola vez, no repetidas card
               por card. Ninguna se gatea por tier del lado del backend, así
               que listarlas 3 veces solo se veía como relleno. */}
@@ -299,6 +343,10 @@ export default function HostedPlans() {
                   ) : isCurrent ? (
                     <span className="mt-5 block border border-ink/20 px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] text-ink/40">
                       {t('lab.planCurrent')}
+                    </span>
+                  ) : activePlan ? (
+                    <span className="mt-5 block border border-ink/15 px-4 py-2 text-center text-[11px] uppercase tracking-[0.2em] text-ink/35">
+                      {t('lab.planViaResub')}
                     </span>
                   ) : (
                     <button

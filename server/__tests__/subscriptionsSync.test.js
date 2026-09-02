@@ -171,4 +171,73 @@ describe('syncSubscriptionForUser (file store, MP inyectado)', () => {
     )
     assert.ok(out.skipped)
   })
+
+  it('mail de bienvenida: se manda una sola vez y solo si authorized', async () => {
+    const { sendSubscriptionWelcomeOnce } = await import('../services/email.js')
+    const user = await db.createUser({ email: 'welcome@test.com', name: 'W' })
+    const emailCfg = {
+      clientUrl: 'https://www.scrolllab.com.ar',
+      email: { enabled: true, apiKey: 'x', from: 'x', replyTo: '', logoUrl: '' },
+    }
+    let calls = 0
+    const client = {
+      emails: {
+        send: async () => {
+          calls++
+          return { data: { id: `em-${calls}` } }
+        },
+      },
+    }
+
+    const sub = await db.createSubscription({
+      userId: user.id,
+      plan: 'hosted_starter',
+      cycle: 'monthly',
+      status: 'pending',
+    })
+
+    // pending → no manda
+    let r = await sendSubscriptionWelcomeOnce({
+      subscription: sub,
+      config: emailCfg,
+      client,
+    })
+    assert.ok(r.skipped)
+    assert.equal(calls, 0)
+
+    sub.status = 'authorized'
+    await sub.save()
+
+    r = await sendSubscriptionWelcomeOnce({
+      subscription: sub,
+      config: emailCfg,
+      client,
+    })
+    assert.equal(r.sent, true)
+    assert.equal(calls, 1)
+
+    // segundo intento → dedup
+    r = await sendSubscriptionWelcomeOnce({
+      subscription: sub,
+      config: emailCfg,
+      client,
+    })
+    assert.ok(r.skipped)
+    assert.equal(calls, 1)
+  })
+
+  it('mail de bienvenida: no-op si email deshabilitado', async () => {
+    const { sendSubscriptionWelcomeOnce } = await import('../services/email.js')
+    const sub = await db.createSubscription({
+      userId: 'noemail',
+      plan: 'hosted_pro',
+      cycle: 'monthly',
+      status: 'authorized',
+    })
+    const r = await sendSubscriptionWelcomeOnce({
+      subscription: sub,
+      config: { clientUrl: 'https://x', email: { enabled: false } },
+    })
+    assert.equal(r.skipped, 'disabled')
+  })
 })

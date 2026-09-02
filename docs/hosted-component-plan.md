@@ -302,9 +302,76 @@ Hecho después:
   Chequeo perezoso en el endpoint de config, sin tocar `status`: al
   re-suscribirse reviven solas. `db.countPublishedHostedCreatedBefore`.
 
-Pendiente: dominio real + DNS (`embed.scrolllab.com.ar`), purge activo de un
-CDN al publicar (hoy alcanza con la revalidación), badge "congelada por el
-plan" en la lista de LAB.
+Pendiente: purge activo de un CDN al publicar (hoy alcanza con la
+revalidación), badge "congelada por el plan" en la lista de LAB.
+
+---
+
+## Fase 6 — LANZADO (2026-09) — embed en producción
+
+**El Servicio 2 está vivo end-to-end.** Verificado: LAB publica → snippet
+`<script>` → loader crea iframe cross-origin → frame trae la config de Railway
+(vía proxy de Vercel) → FooterCTA renderiza en una página ajena.
+
+### Topología
+
+| pieza | dónde |
+|---|---|
+| SPA (`/lab`, `/account`, catálogo) | Vercel, proyecto `scrolllab`, `https://www.scrolllab.com.ar` |
+| API | Railway, `https://scrolllab-production.up.railway.app` (`API_PUBLIC_URL`) |
+| **Embed** (loader + frame) | Vercel, proyecto `scrolllab-embed`, `https://embed.scrolllab.com.ar` (output `embed-dist/`, build `npm run build:embed`) |
+| DNS de `scrolllab.com.ar` | Vercel (nameservers) |
+| `vercel.json` (raíz) | proxya `/api/*` → Railway; el fallback SPA excluye `/v1/` |
+
+### URL scheme
+
+- Snippet: `<script src="https://embed.scrolllab.com.ar/v1/loader.js" data-scrolllab data-key="pub_…" data-api="https://www.scrolllab.com.ar" async>`. **Sin prefijo `/embed/`** (el archivo directo, sin depender de rewrites).
+- `EMBED_CDN_URL` (Railway): opcional, default `https://embed.scrolllab.com.ar`.
+- `data-api`: lo mete `loaderInfo()` desde `API_PUBLIC_URL`; el frame es
+  estático y no sabe dónde está la API si no. El fetch de config va a
+  `https://www.scrolllab.com.ar/api/embed/:key/config` → `vercel.json` lo
+  proxya a Railway (mismo-origin del SPA → sin CORS del lado del browser).
+- `EMBED_SRI` (Railway): `true` → el snippet suma `integrity`+`crossorigin`
+  (requiere el host del embed con `Access-Control-Allow-Origin: *`). Default
+  off para que ande sin configurar headers.
+
+### Cuota gratis
+
+`HOSTED_FREE_QUOTA` (Railway, default **1**): secciones **publicadas** que se
+permiten sin suscripción.
+- `1` → una sección gratis (para probar).
+- `0` → hace falta suscripción para publicar cualquier cosa. El borrador se
+  puede crear/editar, pero **Publicar** tira 402. Las secciones publicadas
+  cuando la cuota era 1 dejan de servir (freeze).
+
+### Suscripción MP — flujo real confirmado
+
+`createPreapproval` con `auto_recurring` inline (monto por alta, sin plan
+pre-creado) **funciona** contra MP real. Notas:
+- MP para suscripciones **no tiene `auto_return`** → tras autorizar muestra
+  "Volver al sitio del vendedor" (va a `${CLIENT_URL}/lab`). No redirige solo.
+- La suscripción arranca `pending` local hasta el webhook
+  `subscription_preapproval` **o** el botón "Sincronizar" en `/account`.
+- Renovación: el webhook `subscription_authorized_payment` extiende
+  `currentPeriodEnd` (`handleAuthorizedPaymentEvent`, trae el authorized_payment
+  por REST para mapear al preapproval).
+
+### Fixes del deploy (2026-09)
+
+- `loaderInfo()` arma `${EMBED_CDN_URL}/v1/loader.js` (sin `/embed/`).
+- `data-api` en el snippet (`src/lib/embed.js` + `loaderInfo()`); el frame
+  aborta con error claro si falta.
+- `markModified('publishedProps'/'draftProps')` en el PUT de publish — Mongoose
+  no persistía los campos Mixed al reasignarlos.
+- El config endpoint sirve la instancia publicada aunque `publishedProps` esté
+  vacío (antes: 409). Guard = solo `status === 'published'`.
+- FLOW/PIN se decide por `.pin-spacer` real (ScrollTrigger), no por
+  `scrollHeight > viewport` — FooterCTA (footer alto, sin pin) caía en PIN y se
+  veía cortada.
+- Sección **inline** en el bundle del frame (no más `import()` lazy → no más
+  404 del chunk si el CDN/rewrite falla).
+- El frame se auto-revela si se abre fuera de un iframe (URL directa = preview).
+- `embed-dist/` salió de `dist/` (`vite build` del SPA lo vaciaba).
 
 ### (histórico) Endurecimiento — plan original
 

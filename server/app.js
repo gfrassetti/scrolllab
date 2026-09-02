@@ -54,7 +54,11 @@ import {
   assertPathInsideStorage,
   fulfillApprovedPayment,
 } from './services/orders.js'
-import { sendOrderReceiptOnce, sendOrderAdminNotifyOnce } from './services/email.js'
+import {
+  sendOrderReceiptOnce,
+  sendOrderAdminNotifyOnce,
+  sendSubscriptionWelcomeOnce,
+} from './services/email.js'
 import {
   signDownloadToken,
   verifyDownloadToken,
@@ -1050,6 +1054,9 @@ export async function createApp(config) {
       end.setDate(end.getDate() + (sub.cycle === 'yearly' ? 365 : 31))
       sub.currentPeriodEnd = end
       await sub.save()
+      sendSubscriptionWelcomeOnce({ subscription: sub, config }).catch((err) =>
+        console.error('subs welcome email', err?.message),
+      )
       res.json({ ok: true, status: sub.status })
     }),
   )

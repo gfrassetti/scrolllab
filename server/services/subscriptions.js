@@ -2,6 +2,15 @@ import { db } from '../db.js'
 import { HttpError } from '../validation.js'
 import { HOSTED_PLANS, hostedPlanQuota } from '../catalog.js'
 import { fetchPreapproval, fetchAuthorizedPayment } from './mercadoPago.js'
+import { sendSubscriptionWelcomeOnce } from './email.js'
+
+/** Mail de bienvenida al activarse — fire-and-forget, idempotente por el claim. */
+function fireWelcome(sub, config) {
+  if (sub?.status !== 'authorized') return
+  sendSubscriptionWelcomeOnce({ subscription: sub, config }).catch((err) =>
+    console.error('subs welcome email', err?.message),
+  )
+}
 
 const FREE = (config, extra = {}) => ({
   plan: 'free',
@@ -103,6 +112,7 @@ async function applyPreapprovalState(sub, config, deps = {}) {
     if (end) sub.currentPeriodEnd = new Date(end)
     await sub.save()
   }
+  fireWelcome(sub, config)
   return { status: sub.status, currentPeriodEnd: sub.currentPeriodEnd || null }
 }
 
@@ -163,5 +173,6 @@ export async function handleAuthorizedPaymentEvent(
     if (sub.status !== 'authorized') sub.status = 'authorized'
     await sub.save()
   }
+  fireWelcome(sub, config)
   return { status: sub.status, currentPeriodEnd: sub.currentPeriodEnd || null }
 }

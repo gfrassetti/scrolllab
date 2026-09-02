@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { db } from '../db.js'
+import { HOSTED_PLANS, hostedPlanPrice } from '../catalog.js'
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -287,6 +288,176 @@ export async function sendOrderReceiptOnce({ order, user, config, client }) {
     return { sent: true, id: response.data?.id || null }
   } catch (err) {
     await db.releaseReceiptEmail(orderId, err.message)
+    throw err
+  }
+}
+
+// ————————————————————————————————————————————————————————————————
+// Suscripción de Hosted Component (LAB) — mail de bienvenida al activarse.
+// ————————————————————————————————————————————————————————————————
+
+const TIER_LABEL = { starter: 'Starter', pro: 'Pro', studio: 'Studio' }
+
+function formatDateOnly(value) {
+  const date = value ? new Date(value) : null
+  if (!date || Number.isNaN(date.getTime())) return null
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    dateStyle: 'long',
+  }).format(date)
+}
+
+/** Contenido del mail — puro, testeable. */
+export function buildSubscriptionWelcome({
+  subscription,
+  user,
+  accountUrl,
+  logoUrl,
+}) {
+  const plan = HOSTED_PLANS[subscription.plan] || {}
+  const tier = TIER_LABEL[plan.tier] || subscription.plan
+  const cycle = subscription.cycle === 'yearly' ? 'anual' : 'mensual'
+  const price = hostedPlanPrice(subscription.plan, subscription.cycle)
+  const priceLabel = price != null ? formatMoney(price, 'ARS') : null
+  const quota = Number.isFinite(plan.instanceQuota)
+    ? `${plan.instanceQuota} secciones publicadas`
+    : 'secciones publicadas sin tope'
+  const nextPayment = formatDateOnly(subscription.currentPeriodEnd)
+  const name = user.name || user.email
+
+  const html = `<!doctype html>
+<html lang="es">
+  <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
+    <div style="display:none;max-height:0;overflow:hidden;">
+      Tu suscripción a ScrollLab LAB está activa.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#f2efe9;border:1px solid #d6d1c8;">
+            <tr>
+              <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:40px 32px 20px;">
+                <p style="margin:0 0 12px;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">Suscripción activa</p>
+                <h1 style="margin:0 0 18px;font-size:32px;line-height:1.1;font-weight:600;">Ya estás en LAB, ${escapeHtml(name)}.</h1>
+                <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">
+                  Tu plan <strong>${escapeHtml(tier)}</strong> (${escapeHtml(cycle)}) está activo. Ya podés publicar y editar tus secciones hosteadas.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 24px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+                  <tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Plan</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(tier)} · ${escapeHtml(cycle)}</td></tr>
+                  ${priceLabel ? `<tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Importe</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(priceLabel)} / ${escapeHtml(cycle === 'anual' ? 'año' : 'mes')}</td></tr>` : ''}
+                  <tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Incluye</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(quota)}</td></tr>
+                  ${nextPayment ? `<tr><td style="padding:10px 0;color:#77716a;">Próximo pago</td><td style="padding:10px 0;text-align:right;">${escapeHtml(nextPayment)}</td></tr>` : ''}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 32px 40px;">
+                <a href="${escapeHtml(accountUrl)}" style="display:inline-block;background:#161412;color:#f2efe9;text-decoration:none;padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+                  Ir a LAB →
+                </a>
+                <p style="margin:20px 0 0;color:#77716a;font-size:13px;line-height:1.5;">
+                  Se renueva automáticamente. Podés cancelar cuando quieras desde “Mi cuenta”: seguís con acceso hasta el fin del período pagado.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
+                Este correo confirma la activación de tu suscripción y no reemplaza una factura fiscal.
+                Si necesitás ayuda, respondé a este email.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+
+  const text = `SCROLLLAB — Suscripción activa
+
+Ya estás en LAB, ${name}.
+
+Plan: ${tier} · ${cycle}${priceLabel ? `\nImporte: ${priceLabel} / ${cycle === 'anual' ? 'año' : 'mes'}` : ''}
+Incluye: ${quota}${nextPayment ? `\nPróximo pago: ${nextPayment}` : ''}
+
+Ir a LAB:
+${accountUrl}
+
+Se renueva automáticamente. Podés cancelar cuando quieras desde "Mi cuenta";
+seguís con acceso hasta el fin del período pagado.
+
+Este correo confirma la activación y no reemplaza una factura fiscal.`
+
+  return {
+    subject: `Tu suscripción a ScrollLab LAB está activa · ${tier}`,
+    html,
+    text,
+  }
+}
+
+/**
+ * Un solo mail de bienvenida por suscripción, al pasar a `authorized`.
+ * Idempotente por el claim en DB + Idempotency-Key de Resend. Fire-and-forget
+ * desde los paths que activan (webhook / sync / mock-activate).
+ */
+export async function sendSubscriptionWelcomeOnce({ subscription, config, client }) {
+  if (!config.email.enabled) return { skipped: 'disabled' }
+
+  const subId = String(db.uid(subscription) || subscription.id)
+  const claimed = await db.claimSubscriptionWelcome(subId)
+  if (!claimed) return { skipped: 'already-sent-or-not-authorized' }
+
+  const user = await db.findUserById(String(claimed.userId))
+  if (!user?.email) {
+    await db.releaseSubscriptionWelcome(subId, 'usuario sin email')
+    return { skipped: 'no-user-email' }
+  }
+
+  const accountUrl = new URL('/lab', config.clientUrl).toString()
+  const logoUrl =
+    config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
+  const message = buildSubscriptionWelcome({
+    subscription: claimed,
+    user,
+    accountUrl,
+    logoUrl,
+  })
+
+  const resend = client || new Resend(config.email.apiKey)
+  try {
+    const response = await resend.emails.send(
+      {
+        from: config.email.from,
+        to: [user.email],
+        replyTo: config.email.replyTo || undefined,
+        subject: message.subject,
+        html: message.html,
+        text: message.text,
+        tags: [{ name: 'type', value: 'subscription_welcome' }],
+      },
+      { idempotencyKey: `scrolllab-sub-welcome-${subId}` },
+    )
+    if (response.error) {
+      throw new Error(response.error.message || 'Resend rechazó el correo')
+    }
+    await db.completeSubscriptionWelcome(subId, response.data?.id || null)
+    return { sent: true, id: response.data?.id || null }
+  } catch (err) {
+    await db.releaseSubscriptionWelcome(subId, err.message)
     throw err
   }
 }

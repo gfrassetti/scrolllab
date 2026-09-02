@@ -183,9 +183,9 @@ export default function SubscriptionCard() {
           <div className="mt-5 flex flex-wrap items-center gap-4">
             <Link
               to="/lab#planes"
-              className="ui-press border border-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone"
+              className="text-[11px] uppercase tracking-[0.2em] text-ink/45 hover:text-accent"
             >
-              {t('account.subChange')}
+              {t('account.subSeePlans')}
             </Link>
 
             <SyncButton />

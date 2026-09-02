@@ -35,7 +35,11 @@ import {
   clearFxCache,
   setFxCacheForTests,
 } from '../fx.js'
-import { buildOrderReceipt, buildOrderAdminNotify } from '../services/email.js'
+import {
+  buildOrderReceipt,
+  buildOrderAdminNotify,
+  buildSubscriptionWelcome,
+} from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
 import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
 import {
@@ -583,6 +587,38 @@ describe('order receipt email', () => {
     assert.match(message.text, /Pago confirmado:/)
     assert.match(message.text, /Qué compró:/)
     assert.doesNotMatch(message.html, /<script>/)
+  })
+
+  it('bienvenida de suscripción: tier, ciclo, precio, próximo pago', () => {
+    const message = buildSubscriptionWelcome({
+      subscription: {
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        currentPeriodEnd: '2026-10-02T00:00:00.000Z',
+      },
+      user: { email: 'sub@example.com', name: 'Sub' },
+      accountUrl: 'https://www.scrolllab.com.ar/lab',
+      logoUrl: 'https://www.scrolllab.com.ar/logo.svg',
+    })
+    assert.match(message.subject, /suscripción a ScrollLab LAB/)
+    assert.match(message.subject, /Pro/)
+    assert.match(message.text, /Pro · mensual/)
+    assert.match(message.text, /15 secciones publicadas/)
+    assert.match(message.text, /Próximo pago: /)
+    assert.match(message.html, /Ir a LAB/)
+    assert.match(message.html, /www\.scrolllab\.com\.ar\/lab/)
+  })
+
+  it('bienvenida studio: sin tope, sin romper si falta currentPeriodEnd', () => {
+    const message = buildSubscriptionWelcome({
+      subscription: { plan: 'hosted_studio', cycle: 'yearly' },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.text, /Studio · anual/)
+    assert.match(message.text, /sin tope/)
+    assert.doesNotMatch(message.text, /Próximo pago/)
   })
 })
 

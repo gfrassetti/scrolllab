@@ -60,12 +60,30 @@ pricing; las cuotas (5 / 15 / sin tope) son fijas.
 
 Cambialos y redeploy. No hace falta tocar nada en MP (el monto viaja en el alta).
 
+### Cuota gratis (`HOSTED_FREE_QUOTA`)
+
+Env en Railway, **default `1`**: secciones publicadas permitidas **sin**
+suscripción.
+- `1` → una sección gratis para probar.
+- `0` → **sin plan no se publica nada**. El borrador se crea/edita igual, pero
+  **Publicar** tira `402` ("Suscribite para publicar"). Las secciones que se
+  publicaron cuando la cuota era 1 dejan de servir (freeze).
+
 ---
 
-## 4. Probar un alta real
+## 4. Probar un alta real — ✅ confirmado (2026-09)
 
-Requisito: `MP_SUBS_ACCESS_TOKEN` seteado (apaga el mock). Podés probar contra
-**localhost** sin túnel — ver el paso 4.
+`createPreapproval` con `auto_recurring` inline (monto por alta, sin plan
+pre-creado en MP) **funciona** contra MP real.
+
+Requisito: `MP_ACCESS_TOKEN` en prod (apaga el mock; `MP_SUBS_ACCESS_TOKEN`
+solo si querés app separada). Se puede probar contra **localhost** sin túnel
+usando el sync manual (paso 4).
+
+> **MP para suscripciones NO tiene `auto_return`.** Tras autorizar, muestra la
+> pantalla de éxito con el botón **"Volver al sitio del vendedor"** (va a
+> `${CLIENT_URL}/lab`). No redirige solo — es el comportamiento normal de
+> PreApproval, no un bug.
 
 1. `/lab` logueado → **Planes** → **Suscribirme**.
 2. Redirige al `init_point` de MP → autorizás con una

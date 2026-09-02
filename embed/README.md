@@ -58,42 +58,52 @@ pública es el archivo directo — sin rewrites.
 ```
 embed-dist/
 ├─ v1/loader.js   · el <script> del cliente (+ manifest.json con el hash)
-├─ v1/frame/…     · la página del iframe (index.html + assets)
-└─ _headers       · CORS abierto (lo leen Cloudflare / Netlify; inofensivo si no)
+├─ v1/frame/…     · index.html + assets/index-*.{js,css} (la sección va inline,
+│                   NO hay chunk lazy — evita 404 si el CDN/rewrite falla)
+└─ _headers       · CORS (lo leen Cloudflare / Netlify; Vercel usa vercel.json)
 ```
 
-`EMBED_CDN_URL` es la base a la que se le pega `/v1/loader.js`.
+`EMBED_CDN_URL` es la base a la que el server le pega `/v1/loader.js` para armar
+el snippet (`loaderInfo()` en `server/app.js`). Default:
+`https://embed.scrolllab.com.ar`.
 
-### A · Cloudflare Worker (static assets)
+### Producción actual — Vercel (`embed.scrolllab.com.ar`)
 
-El repo trae `wrangler.jsonc` con `assets.directory: ./embed-dist` (deploy de
-solo estáticos, sin Worker).
+Segundo proyecto de Vercel sobre el mismo repo:
 
-1. **Cloudflare → Compute → Workers & Pages → Create → Workers → Import a
-   repository** → repo `scrolllab`.
-2. Build command: `npm run build:embed` · Deploy command: `npx wrangler deploy`.
-3. **Deploy**. En **Domains** del proyecto, activá la URL de producción
-   `*.workers.dev`. Probá `https://<worker>.workers.dev/v1/loader.js` → 200.
-4. **Railway**: `EMBED_CDN_URL=https://<worker>.workers.dev` → redeploy. (O el
-   dominio custom, ver abajo.)
+| campo | valor |
+|---|---|
+| Project name | `scrolllab-embed` |
+| Framework preset | **Other** |
+| Build command | `npm run build:embed` |
+| Output directory | `embed-dist` |
+| Root directory | `./` |
 
-**Dominio custom** (`embed.scrolllab.com.ar`): el Worker exige la zona DNS en
-Cloudflare. Si el DNS está afuera (Vercel), o movés la zona a Cloudflare
-("Onboard domain", cambio de nameservers — poné los A del sitio principal en
-"DNS only"), o hosteás el embed en el mismo proveedor del DNS (ver B).
+Custom domain `embed.scrolllab.com.ar` desde el proyecto (el DNS ya está en
+Vercel → un click, SSL automático por el wildcard `*.scrolllab.com.ar`).
 
-### B · Vercel / Netlify (estático)
+**`vercel.json`** (raíz del repo, lo leen los DOS proyectos):
+- `rewrites`: `/api/:path*` → Railway (así el frame en `embed.scrolllab.com.ar`
+  puede pedir la config a `https://www.scrolllab.com.ar/api/...`); el fallback
+  SPA `/((?!assets/|v1/).*) → /index.html` **excluye `/v1/`** para no pisar los
+  assets del embed.
+- `headers`: `/v1/*` con `Access-Control-Allow-Origin: *`, `index.html` con
+  `must-revalidate`, `assets/*` con `immutable`.
 
-Proyecto nuevo, mismo repo, build `npm run build:embed`, output `embed-dist`.
-Si el DNS ya está ahí, `embed.scrolllab.com.ar` es un click. `EMBED_CDN_URL`
-apunta a ese dominio.
+`EMBED_CDN_URL` en Railway: **no hace falta** (el default ya es
+`https://embed.scrolllab.com.ar`). Se setea solo si el embed vive en otro lado.
 
-### C · Desde la propia API (sin infra aparte)
+> `wrangler.jsonc` quedó en el repo de un intento con Cloudflare Workers
+> (abandonado: el dominio custom del Worker exige la zona DNS en Cloudflare y
+> está en Vercel). Es inofensivo.
 
-Si el build de la API corre `npm run build:embed` y `embed-dist/` viaja en el
-deploy, `server/app.js` la sirve en la raíz (`/v1/loader.js`, `/v1/frame/…`;
-CORS `*`, sin `X-Frame-Options`). `EMBED_CDN_URL=https://TU-API`. Mismo origen
-que la API: simple para arrancar, se migra cambiando solo `EMBED_CDN_URL`.
+### Alternativas
+
+- **Netlify**: proyecto nuevo, build `npm run build:embed`, publish
+  `embed-dist`. Lee `_headers`.
+- **Desde la propia API**: si `embed-dist/` viaja en el deploy de la API,
+  `server/app.js` la sirve en la raíz (`/v1/loader.js`, `/v1/frame/…`; CORS
+  `*`, sin `X-Frame-Options`). `EMBED_CDN_URL=https://TU-API`.
 
 ## Peso
 
@@ -102,7 +112,7 @@ que la API: simple para arrancar, se migra cambiando solo `EMBED_CDN_URL`.
 | `loader.js` (lo baja el host) | **1.7 KB** sin comprimir |
 | frame core (Preact + GSAP + framework) | 57.5 KB gz — nuestro origen, cache compartida entre sitios |
 | frame CSS (Tailwind) | 16.9 KB gz — escanea TODAS las secciones (pendiente: scopear a `HOSTABLE_SECTIONS`) |
-| por sección (`FooterCTA`) | ~1.1 KB gz, chunk aparte |
+| secciones | inline en el bundle del frame (~1 KB gz cada una) |
 
 ## Build
 

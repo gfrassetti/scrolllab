@@ -355,6 +355,84 @@ export const db = {
     return res.deletedCount > 0;
   },
 
+  // Mails de suscripción (bienvenida al activarse / confirmación al cancelar).
+  // claim/complete/release igual que el recibo de orden — se manda una vez.
+  // `kind`: 'welcome' (gate: status authorized) | 'canceled' (gate: canceledAt).
+  async claimSubscriptionEmail(subId, kind) {
+    const p = `${kind === "canceled" ? "canceled" : "welcome"}Email`;
+    const now = new Date();
+    const staleBefore = new Date(now.getTime() - 10 * 60 * 1000);
+    if (mode === "file") {
+      const sub = await fileDb.findSubscriptionById(subId);
+      if (!sub || sub[`${p}SentAt`]) return null;
+      if (kind === "canceled" ? !sub.canceledAt : sub.status !== "authorized") {
+        return null;
+      }
+      if (sub[`${p}SendingAt`] && new Date(sub[`${p}SendingAt`]) >= staleBefore) {
+        return null;
+      }
+      sub[`${p}SendingAt`] = now.toISOString();
+      delete sub[`${p}Error`];
+      await sub.save();
+      return sub;
+    }
+    const gate =
+      kind === "canceled"
+        ? { canceledAt: { $ne: null } }
+        : { status: "authorized" };
+    return MongoSubscription.findOneAndUpdate(
+      {
+        _id: subId,
+        ...gate,
+        [`${p}SentAt`]: null,
+        $or: [
+          { [`${p}SendingAt`]: null },
+          { [`${p}SendingAt`]: { $lt: staleBefore } },
+        ],
+      },
+      { $set: { [`${p}SendingAt`]: now }, $unset: { [`${p}Error`]: 1 } },
+      { new: true },
+    );
+  },
+  async completeSubscriptionEmail(subId, kind, emailId) {
+    const p = `${kind === "canceled" ? "canceled" : "welcome"}Email`;
+    if (mode === "file") {
+      const sub = await fileDb.findSubscriptionById(subId);
+      if (!sub) return null;
+      sub[`${p}SentAt`] = new Date().toISOString();
+      sub[`${p}Id`] = emailId;
+      delete sub[`${p}SendingAt`];
+      delete sub[`${p}Error`];
+      await sub.save();
+      return sub;
+    }
+    return MongoSubscription.findByIdAndUpdate(
+      subId,
+      {
+        $set: { [`${p}SentAt`]: new Date(), [`${p}Id`]: emailId },
+        $unset: { [`${p}SendingAt`]: 1, [`${p}Error`]: 1 },
+      },
+      { new: true },
+    );
+  },
+  async releaseSubscriptionEmail(subId, kind, message) {
+    const p = `${kind === "canceled" ? "canceled" : "welcome"}Email`;
+    const safe = String(message || "Error de email").slice(0, 500);
+    if (mode === "file") {
+      const sub = await fileDb.findSubscriptionById(subId);
+      if (!sub) return null;
+      sub[`${p}Error`] = safe;
+      delete sub[`${p}SendingAt`];
+      await sub.save();
+      return sub;
+    }
+    return MongoSubscription.findByIdAndUpdate(
+      subId,
+      { $set: { [`${p}Error`]: safe }, $unset: { [`${p}SendingAt`]: 1 } },
+      { new: true },
+    );
+  },
+
   async isReady() {
     if (mode === "file") return true;
     return mongoose.connection.readyState === 1;
