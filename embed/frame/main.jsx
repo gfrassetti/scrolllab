@@ -114,6 +114,19 @@ async function main() {
 
   render(h(Section, config.props || {}), root)
 
+  // Abierto directo (sin loader / fuera de un iframe): no va a llegar
+  // `scrolllab:viewport`, así que nos revelamos solos para que la URL del
+  // frame sirva de preview. Dentro del embed real `parent !== window`.
+  if (window.parent === window) {
+    hostVh = window.innerHeight
+    reveal()
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh()
+      decide()
+    })
+    return
+  }
+
   window.addEventListener('message', onMessage)
   // Handshake: el loader manda `viewport` en load/scroll/resize; si el load ya
   // pasó cuando montamos, se perdió. Pedímoslo.
