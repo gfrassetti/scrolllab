@@ -45,11 +45,17 @@ function reveal() {
 
 function decide() {
   if (!hostVh) return
-  scrollMax = Math.max(0, document.documentElement.scrollHeight - hostVh)
-  const next = scrollMax > 8 ? 'pin' : 'flow'
+  // PIN solo si la sección REALMENTE se pinea: ScrollTrigger inserta un
+  // `<div class="pin-spacer">` cuando hace `pin: true`. Una sección estática
+  // alta (FooterCTA, un hero largo) NO tiene pin-spacer → va en FLOW y el
+  // iframe crece a su alto. (Antes: `scrollHeight > viewport` → cualquier
+  // sección alta caía en PIN por error y se veía cortada.)
+  const pinned = !!document.querySelector('.pin-spacer')
+  const next = pinned ? 'pin' : 'flow'
   if (next !== mode) mode = next
 
   if (mode === 'pin') {
+    scrollMax = Math.max(0, document.documentElement.scrollHeight - hostVh)
     reveal() // en PIN el "estar en pantalla" lo maneja el sticky del loader
     post({ type: 'scrolllab:pinlength', px: scrollMax })
   } else {
