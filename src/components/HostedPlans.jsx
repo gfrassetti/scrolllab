@@ -28,6 +28,7 @@ export default function HostedPlans() {
     used,
     canceledAt,
     currentPeriodEnd,
+    cycle: billingCycle,
     refresh: refreshPlan,
   } = usePlan()
   const { t, locale } = useI18n()
@@ -37,6 +38,11 @@ export default function HostedPlans() {
   const [cycle, setCycle] = useState('monthly')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
+  // Con un plan pago activo, la grilla de 3 arranca colapsada: cambiar de
+  // tier hoy exige cancelar y esperar (el server rechaza una 2da alta
+  // activa, ver /api/subscriptions), así que la comparación completa no es
+  // la acción principal — "ver mi plan" sí. Queda a un click de distancia.
+  const [showComparison, setShowComparison] = useState(false)
 
   const refresh = useCallback(async () => {
     try {
@@ -91,6 +97,10 @@ export default function HostedPlans() {
 
   const features = t('lab.planFeatures')
   const activePlan = user && plan !== 'free' ? plan : null
+  // Free/sin plan: siempre se ve la comparación completa, es la única acción
+  // posible. Con plan pago: colapsada por default, el toggle la despliega.
+  const comparisonVisible = !activePlan || showComparison
+  const currentPlanMeta = plans.find((p) => p.id === activePlan)
 
   useGSAP(
     () => {
@@ -118,60 +128,25 @@ export default function HostedPlans() {
         <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
           {t('lab.plansTitle')}
         </h2>
-        <div className="inline-flex border border-ink/20 text-[11px] uppercase tracking-[0.2em]">
-          {['monthly', 'yearly'].map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCycle(c)}
-              className={`px-3 py-1.5 transition-colors ${
-                cycle === c
-                  ? 'bg-accent text-ink'
-                  : 'text-ink/60 hover:text-ink'
-              }`}
-            >
-              {t(`lab.cycle.${c}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {user && (
-        <p className="mt-4 text-xs text-ink/55">
-          {plan === 'free'
-            ? t('lab.planFreeState', { used, quota: displayQuota(quota) })
-            : t('lab.planActiveState', {
-                plan: t(`lab.tier.${plan.replace('hosted_', '')}`),
-                used,
-                quota: displayQuota(quota),
-              })}
-          {activePlan && canceledAt && (
-            <span className="text-ink/45">
-              {' · '}
-              {t('lab.planCanceledUntil', {
-                date: currentPeriodEnd
-                  ? new Date(currentPeriodEnd).toLocaleDateString(
-                      locale === 'en' ? 'en-US' : 'es-AR',
-                    )
-                  : '',
-              })}
-            </span>
-          )}
-          {activePlan && !canceledAt && (
-            <>
-              {' · '}
+        {comparisonVisible && (
+          <div className="inline-flex border border-ink/20 text-[11px] uppercase tracking-[0.2em]">
+            {['monthly', 'yearly'].map((c) => (
               <button
+                key={c}
                 type="button"
-                onClick={cancel}
-                disabled={busy === 'cancel'}
-                className="underline decoration-ink/30 underline-offset-2 hover:text-danger disabled:opacity-40"
+                onClick={() => setCycle(c)}
+                className={`px-3 py-1.5 transition-colors ${
+                  cycle === c
+                    ? 'bg-accent text-ink'
+                    : 'text-ink/60 hover:text-ink'
+                }`}
               >
-                {t('lab.planCancel')}
+                {t(`lab.cycle.${c}`)}
               </button>
-            </>
-          )}
-        </p>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
       {error && (
         <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
@@ -179,100 +154,172 @@ export default function HostedPlans() {
         </p>
       )}
 
-      {/* Compartidas por los 3 planes — una sola vez, no repetidas card por
-          card. Ninguna se gatea por tier del lado del backend, así que
-          listarlas 3 veces solo se veía como relleno, no como diferenciador. */}
-      <div className="mt-6 border border-ink/10 bg-ink/[0.02] p-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/45">
-          {t('lab.planFeaturesTitle')}
-        </p>
-        <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-ink/65">
-          {(Array.isArray(features) ? features : []).map((f, i) => (
-            <li key={i} className="flex items-center gap-1.5">
-              <span className="text-accent">✓</span>
-              {f}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {plans.map((p) => {
-          const price = cycle === 'yearly' ? p.priceYearly : p.priceMonthly
-          const saving = Math.round(
-            100 - (p.priceYearly / (p.priceMonthly * 12)) * 100,
-          )
-          const isCurrent = activePlan === p.id
-          const featured = p.tier === 'pro'
-          return (
-            <div
-              key={p.id}
-              data-plan-card
-              className={`relative flex flex-col border p-5 ${
-                featured
-                  ? 'border-accent bg-accent/[0.04] md:shadow-[0_20px_45px_-16px_rgba(255,75,0,0.4)]'
-                  : 'border-ink/15'
-              }`}
-            >
-              {featured && (
-                <span className="absolute -top-3 left-5 border border-accent bg-bone px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-accent">
-                  {t('lab.planRecommended')}
-                </span>
+      {/* Con plan pago activo, cambiar de tier hoy exige cancelar y esperar
+          (el server rechaza una 2da alta activa) — así que lo que el
+          suscriptor necesita ver por default es SU plan, no una grilla de
+          3 planes con 2 botones que van a tirar error. La comparación queda
+          a un click ("Ver otros planes"), no escondida del todo. */}
+      {activePlan ? (
+        <div className="mt-4 flex flex-col gap-4 border border-ink/15 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
+              {t(`lab.tier.${plan.replace('hosted_', '')}`)}
+            </p>
+            <p className="mt-2 text-sm text-ink/70">
+              {t('lab.planActiveState', {
+                plan: t(`lab.tier.${plan.replace('hosted_', '')}`),
+                used,
+                quota: displayQuota(quota),
+              })}
+              {currentPlanMeta && (
+                <>
+                  {' · '}
+                  {fmtArs(
+                    billingCycle === 'yearly'
+                      ? currentPlanMeta.priceYearly
+                      : currentPlanMeta.priceMonthly,
+                    locale,
+                  )}
+                  {' '}
+                  {t(billingCycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
+                </>
               )}
-              <p
-                className={`text-[11px] uppercase tracking-[0.25em] ${
-                  featured ? 'text-accent' : 'text-ink/50'
-                }`}
+            </p>
+            {canceledAt ? (
+              <p className="mt-1 text-xs text-ink/45">
+                {t('lab.planCanceledUntil', {
+                  date: currentPeriodEnd
+                    ? new Date(currentPeriodEnd).toLocaleDateString(
+                        locale === 'en' ? 'en-US' : 'es-AR',
+                      )
+                    : '',
+                })}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={cancel}
+                disabled={busy === 'cancel'}
+                className="mt-1 text-xs text-ink/50 underline decoration-ink/30 underline-offset-2 hover:text-danger disabled:opacity-40"
               >
-                {t(`lab.tier.${p.tier}`)}
-              </p>
-              <p className="mt-3 text-2xl font-medium tracking-[-0.02em]">
-                {fmtArs(price, locale)}
-                <span className="ml-1 text-xs font-normal text-ink/45">
-                  {t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
-                </span>
-              </p>
-              {cycle === 'yearly' && saving > 0 && (
-                <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-success">
-                  {t('lab.save', { pct: saving })}
-                </p>
-              )}
-              <p className="mt-4 flex-1 text-sm text-ink/70">
-                {t('lab.planQuota', { n: displayQuota(p.instanceQuota) })}
-              </p>
-              {!user ? (
-                <Link
-                  to="/login?next=/lab"
-                  className={`ui-press mt-5 block px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] ${
+                {t('lab.planCancel')}
+              </button>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowComparison((v) => !v)}
+            className="ui-press shrink-0 border border-ink/20 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:border-ink hover:text-ink"
+          >
+            {showComparison ? t('lab.hideOtherPlans') : t('lab.viewOtherPlans')}
+          </button>
+        </div>
+      ) : (
+        user && (
+          <p className="mt-4 text-xs text-ink/55">
+            {t('lab.planFreeState', { used, quota: displayQuota(quota) })}
+          </p>
+        )
+      )}
+
+      {comparisonVisible && (
+        <>
+          {/* Compartidas por los 3 planes — una sola vez, no repetidas card
+              por card. Ninguna se gatea por tier del lado del backend, así
+              que listarlas 3 veces solo se veía como relleno. */}
+          <div className="mt-6 border border-ink/10 bg-ink/[0.02] p-4">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/45">
+              {t('lab.planFeaturesTitle')}
+            </p>
+            <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-ink/65">
+              {(Array.isArray(features) ? features : []).map((f, i) => (
+                <li key={i} className="flex items-center gap-1.5">
+                  <span className="text-accent">✓</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {plans.map((p) => {
+              const price = cycle === 'yearly' ? p.priceYearly : p.priceMonthly
+              const saving = Math.round(
+                100 - (p.priceYearly / (p.priceMonthly * 12)) * 100,
+              )
+              const isCurrent = activePlan === p.id
+              const featured = p.tier === 'pro'
+              return (
+                <div
+                  key={p.id}
+                  data-plan-card
+                  className={`relative flex flex-col border p-5 ${
                     featured
-                      ? 'border border-accent bg-accent text-ink hover:opacity-85'
-                      : 'border border-ink hover:bg-ink hover:text-bone'
+                      ? 'border-accent bg-accent/[0.04] md:shadow-[0_20px_45px_-16px_rgba(255,75,0,0.4)]'
+                      : 'border-ink/15'
                   }`}
                 >
-                  {t('nav.login')}
-                </Link>
-              ) : isCurrent ? (
-                <span className="mt-5 block border border-ink/20 px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] text-ink/40">
-                  {t('lab.planCurrent')}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => subscribe(p.id)}
-                  disabled={!!busy}
-                  className={`ui-press mt-5 px-4 py-2 text-[11px] uppercase tracking-[0.25em] disabled:opacity-40 ${
-                    featured
-                      ? 'border border-accent bg-accent text-ink hover:opacity-85'
-                      : 'border border-ink bg-ink text-bone hover:opacity-90'
-                  }`}
-                >
-                  {busy === p.id ? '…' : t('lab.planSubscribe')}
-                </button>
-              )}
-            </div>
-          )
-        })}
-      </div>
+                  {featured && (
+                    <span className="absolute -top-3 left-5 border border-accent bg-bone px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-accent">
+                      {t('lab.planRecommended')}
+                    </span>
+                  )}
+                  <p
+                    className={`text-[11px] uppercase tracking-[0.25em] ${
+                      featured ? 'text-accent' : 'text-ink/50'
+                    }`}
+                  >
+                    {t(`lab.tier.${p.tier}`)}
+                  </p>
+                  <p className="mt-3 text-2xl font-medium tracking-[-0.02em]">
+                    {fmtArs(price, locale)}
+                    <span className="ml-1 text-xs font-normal text-ink/45">
+                      {t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
+                    </span>
+                  </p>
+                  {cycle === 'yearly' && saving > 0 && (
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-success">
+                      {t('lab.save', { pct: saving })}
+                    </p>
+                  )}
+                  <p className="mt-4 flex-1 text-sm text-ink/70">
+                    {t('lab.planQuota', { n: displayQuota(p.instanceQuota) })}
+                  </p>
+                  {!user ? (
+                    <Link
+                      to="/login?next=/lab"
+                      className={`ui-press mt-5 block px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] ${
+                        featured
+                          ? 'border border-accent bg-accent text-ink hover:opacity-85'
+                          : 'border border-ink hover:bg-ink hover:text-bone'
+                      }`}
+                    >
+                      {t('nav.login')}
+                    </Link>
+                  ) : isCurrent ? (
+                    <span className="mt-5 block border border-ink/20 px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] text-ink/40">
+                      {t('lab.planCurrent')}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => subscribe(p.id)}
+                      disabled={!!busy}
+                      className={`ui-press mt-5 px-4 py-2 text-[11px] uppercase tracking-[0.25em] disabled:opacity-40 ${
+                        featured
+                          ? 'border border-accent bg-accent text-ink hover:opacity-85'
+                          : 'border border-ink bg-ink text-bone hover:opacity-90'
+                      }`}
+                    >
+                      {busy === p.id ? '…' : t('lab.planSubscribe')}
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </section>
   )
 }

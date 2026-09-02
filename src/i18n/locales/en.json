@@ -115,6 +115,8 @@
     "planActiveState": "{{plan}} — {{used}} / {{quota}} published",
     "planCancel": "Cancel subscription",
     "planCanceledUntil": "canceled · access until {{date}}",
+    "viewOtherPlans": "View other plans →",
+    "hideOtherPlans": "Hide other plans",
     "planCurrent": "Your plan",
     "planSubscribe": "Subscribe",
     "planRecommended": "Most popular"

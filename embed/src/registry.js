@@ -1,17 +1,16 @@
 /**
- * Secciones hosteables. Fase 1: solo el piloto.
- * `inlineDynamicImports` del build mete todo en un archivo igual — el import()
- * es para mantener el registro declarativo, no para code-splitting real todavía.
+ * Secciones hosteables. Import ESTÁTICO a propósito: con una sola sección el
+ * code-splitting no gana nada y agrega un chunk lazy que puede fallar (404 si
+ * el CDN/rewrite no lo sirve bien). Todo va en el bundle del frame.
+ * `chapters/HorizontalPanels` NO va: scrolljack pineada, se rompe dentro del
+ * iframe acotado. Ver HOSTABLE_SECTIONS en server/sections.js.
  */
+import FooterCTA from '../../src/components/sections/chapters/FooterCTA.jsx'
+
+const SECTIONS = {
+  'chapters/FooterCTA': FooterCTA,
+}
+
 export async function loadSection(sectionId) {
-  switch (sectionId) {
-    case 'chapters/FooterCTA':
-      return (
-        await import('../../src/components/sections/chapters/FooterCTA.jsx')
-      ).default
-    // `chapters/HorizontalPanels` NO va: scrolljack pineada, se rompe dentro
-    // del iframe acotado del embed. Ver HOSTABLE_SECTIONS en server/sections.js.
-    default:
-      return null
-  }
+  return SECTIONS[sectionId] || null
 }
