@@ -14,8 +14,7 @@
  *    loader mete el iframe en un contenedor alto y lo hace `position:sticky`,
  *    y en cada frame le manda `progress` 0→1 según cuánto scrolleó el host.
  *
- * <script src="https://embed.scrolllab.com.ar/embed/v1/loader.js"
- *         integrity="sha384-…" crossorigin="anonymous"
+ * <script src="https://embed.scrolllab.com.ar/v1/loader.js"
  *         data-scrolllab data-key="pub_xxxxx" async></script>
  */
 import { clamp, resolveFrameBase } from './lib.js'
@@ -25,7 +24,7 @@ import { clamp, resolveFrameBase } from './lib.js'
 
   // Último recurso: si no se puede leer el `src` del propio <script> (inline,
   // navegador raro), el frame se sirve desde acá.
-  var FRAME_BASE_FALLBACK = 'https://embed.scrolllab.com.ar/embed/v1'
+  var FRAME_BASE_FALLBACK = 'https://embed.scrolllab.com.ar/v1'
 
   var nodes = document.querySelectorAll(
     'script[data-scrolllab][data-key]:not([data-scrolllab-done])',

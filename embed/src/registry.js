@@ -9,12 +9,8 @@ export async function loadSection(sectionId) {
       return (
         await import('../../src/components/sections/chapters/FooterCTA.jsx')
       ).default
-    case 'chapters/HorizontalPanels':
-      return (
-        await import(
-          '../../src/components/sections/chapters/HorizontalPanels.jsx'
-        )
-      ).default
+    // `chapters/HorizontalPanels` NO va: scrolljack pineada, se rompe dentro
+    // del iframe acotado del embed. Ver HOSTABLE_SECTIONS en server/sections.js.
     default:
       return null
   }

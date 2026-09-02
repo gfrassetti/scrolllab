@@ -184,7 +184,9 @@ describe('Hosted Component API (file store)', () => {
     const res = await request(app).get('/api/embed/loader')
     assert.equal(res.status, 200)
     assert.equal(res.body.version, 'v1')
-    assert.match(res.body.url, /\/embed\/v1\/loader\.js$/)
+    assert.match(res.body.url, /\/v1\/loader\.js$/)
+    // SRI off por defecto (sin EMBED_SRI) → sin integrity en el snippet.
+    assert.equal(res.body.integrity, null)
   })
 
   it('listar y borrar', async () => {

@@ -34,73 +34,66 @@ corre con `root: embed/frame` y si no Tailwind no ve las clases de las secciones
 ## Instalación (lo que pega el cliente)
 
 ```html
-<script src="https://embed.scrolllab.com.ar/embed/v1/loader.js"
-        integrity="sha384-…" crossorigin="anonymous"
+<script src="https://embed.scrolllab.com.ar/v1/loader.js"
         data-scrolllab data-key="pub_xxxxx" async></script>
 ```
 
-La página LAB arma este snippet con el `integrity` real (de
-`GET /api/embed/loader`, que lo lee de `embed-dist/v1/manifest.json`).
-`data-frame` / `data-api` son overrides solo para test local.
+La URL sale de `GET /api/embed/loader` → `${EMBED_CDN_URL}/v1/loader.js`. Con
+`EMBED_SRI=true` el snippet suma `integrity` + `crossorigin` (requiere que el
+host mande `Access-Control-Allow-Origin: *` en loader.js). `data-frame` /
+`data-api` son overrides solo para test local.
 
 **Build versionado inmutable**: todo sale a `embed-dist/v1/`. Una nueva versión
 = carpeta `v2/`, hash nuevo, el snippet viejo sigue apuntando a `v1` intacto.
 
 ## Deploy
 
-El loader y el frame son estáticos (`embed-dist/v1/`). El loader **deriva la
-URL del frame de su propio `src`** (`.../embed/v1/loader.js` → `.../embed/v1`),
-así que funcionan desde cualquier host sin configurar el frame aparte.
+El loader y el frame son estáticos. El loader **deriva la URL del frame de su
+propio `src`** (`.../v1/loader.js` → `.../v1` → `.../v1/frame/index.html`), así
+que funcionan desde cualquier host sin configurar el frame aparte. La URL
+pública es el archivo directo — sin rewrites.
 
 `npm run build:embed` deja en `embed-dist/`:
 
 ```
 embed-dist/
-├─ v1/loader.js         · el <script> del cliente (+ manifest.json con el SRI)
-├─ v1/frame/…           · la página del iframe (index.html + assets)
-├─ _headers             · CORS abierto (Cloudflare Pages / Netlify)
-└─ _redirects           · /embed/*  →  /*   (rewrite 200)
+├─ v1/loader.js   · el <script> del cliente (+ manifest.json con el hash)
+├─ v1/frame/…     · la página del iframe (index.html + assets)
+└─ _headers       · CORS abierto (lo leen Cloudflare / Netlify; inofensivo si no)
 ```
 
-El `_redirects` hace que la URL pública sea `.../embed/v1/loader.js` en las dos
-formas, igual que en el self-host desde la API.
+`EMBED_CDN_URL` es la base a la que se le pega `/v1/loader.js`.
 
-### A · Cloudflare Pages → `embed.scrolllab.com.ar` (recomendado, gratis)
+### A · Cloudflare Worker (static assets)
 
-1. **Cloudflare → Workers & Pages → Create → Pages → Connect to Git** → el repo.
-2. Build:
-   - Framework preset: **None**
-   - Build command: `npm run build:embed`
-   - Build output directory: `embed-dist`
-   - Root directory: *(vacío)*
-   - Variables: ninguna.
-3. **Save and Deploy**. Sale un `https://<proyecto>.pages.dev` — probalo:
-   `https://<proyecto>.pages.dev/embed/v1/loader.js` tiene que dar 200.
-4. **Custom domains → Set up a custom domain → `embed.scrolllab.com.ar`**.
-   - DNS de `scrolllab.com.ar` en Cloudflare → agrega el `CNAME` solo.
-   - DNS en otro lado → creá un `CNAME` `embed` → `<proyecto>.pages.dev`.
-5. En **Railway** (API): `EMBED_CDN_URL=https://embed.scrolllab.com.ar` → redeploy.
-6. Verificá en LAB que el snippet salga con
-   `src="https://embed.scrolllab.com.ar/embed/v1/loader.js"` y pegalo en una
-   página de prueba.
+El repo trae `wrangler.jsonc` con `assets.directory: ./embed-dist` (deploy de
+solo estáticos, sin Worker).
 
-Cada push que toque `embed/` → Pages redeploya solo. Nueva versión del loader
-= carpeta `v2/` (nunca pisar `v1/`), y el `_redirects` la cubre igual.
+1. **Cloudflare → Compute → Workers & Pages → Create → Workers → Import a
+   repository** → repo `scrolllab`.
+2. Build command: `npm run build:embed` · Deploy command: `npx wrangler deploy`.
+3. **Deploy**. En **Domains** del proyecto, activá la URL de producción
+   `*.workers.dev`. Probá `https://<worker>.workers.dev/v1/loader.js` → 200.
+4. **Railway**: `EMBED_CDN_URL=https://<worker>.workers.dev` → redeploy. (O el
+   dominio custom, ver abajo.)
 
-> Netlify es equivalente: *Add new site → Import*, build `npm run build:embed`,
-> publish dir `embed-dist`. Lee `_headers` y `_redirects` igual.
+**Dominio custom** (`embed.scrolllab.com.ar`): el Worker exige la zona DNS en
+Cloudflare. Si el DNS está afuera (Vercel), o movés la zona a Cloudflare
+("Onboard domain", cambio de nameservers — poné los A del sitio principal en
+"DNS only"), o hosteás el embed en el mismo proveedor del DNS (ver B).
 
-### B · Sin infra — desde la propia API (para arrancar rápido)
+### B · Vercel / Netlify (estático)
 
-Si el build de la API incluye `npm run build:embed` y `embed-dist/` viaja en el
-deploy, `server/app.js` lo sirve en `/embed` (CORS `*`, sin `X-Frame-Options`,
-cache inmutable). Poné `EMBED_CDN_URL=https://TU-API` → el snippet queda
-`https://TU-API/embed/v1/loader.js`. Mismo origen que la API: más simple,
-menos ideal para escalar. Migrás a Pages cambiando solo `EMBED_CDN_URL`.
+Proyecto nuevo, mismo repo, build `npm run build:embed`, output `embed-dist`.
+Si el DNS ya está ahí, `embed.scrolllab.com.ar` es un click. `EMBED_CDN_URL`
+apunta a ese dominio.
 
-`EMBED_CDN_URL` solo arma la URL del `<script>` en el snippet (`loaderInfo()`).
-El `connect-src` del frame ya permite `https:` para el fetch de la config a la
-API.
+### C · Desde la propia API (sin infra aparte)
+
+Si el build de la API corre `npm run build:embed` y `embed-dist/` viaja en el
+deploy, `server/app.js` la sirve en la raíz (`/v1/loader.js`, `/v1/frame/…`;
+CORS `*`, sin `X-Frame-Options`). `EMBED_CDN_URL=https://TU-API`. Mismo origen
+que la API: simple para arrancar, se migra cambiando solo `EMBED_CDN_URL`.
 
 ## Peso
 

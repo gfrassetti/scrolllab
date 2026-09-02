@@ -100,9 +100,11 @@ export function isAllowedSectionId(id) {
  */
 export const HOSTABLE_SECTIONS = Object.freeze([
   'chapters/FooterCTA',
-  // `variant: "type"` — sección pineada, paneles de texto. Los paneles todavía
-  // no son editables (array), pero el resto de los textos sí.
-  'chapters/HorizontalPanels',
+  // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
+  // scroll de window, boot que bloquea scroll): dentro del iframe del embed
+  // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:
+  // `chapters/HorizontalPanels`. Necesitan una "embed edition" acotada primero
+  // (ver docs/hosted-component-plan.md).
 ])
 
 export const HOSTABLE_SECTION_SET = new Set(HOSTABLE_SECTIONS)

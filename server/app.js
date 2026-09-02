@@ -102,12 +102,12 @@ export async function createApp(config) {
 
   // Servir el embed (loader + frame) desde la propia API, si `embed-dist/` está
   // presente en el deploy. Es la opción sin infra: `EMBED_CDN_URL` apunta a la
-  // API y listo. Si el embed vive en un CDN aparte, esta carpeta no existe acá
-  // y el mount es un no-op. Assets versionados e inmutables → cache duro.
+  // API (sin sufijo) y el snippet queda `${API}/v1/loader.js`. Si el embed vive
+  // en un CDN aparte, esta carpeta no existe acá y el mount es un no-op.
+  // `embed-dist/` solo tiene `/v1/*` (+ `_headers`), no choca con `/api/*`.
   const embedDir = path.join(process.cwd(), 'embed-dist')
   if (fs.existsSync(embedDir)) {
     app.use(
-      '/embed',
       express.static(embedDir, {
         immutable: true,
         maxAge: '365d',
@@ -120,7 +120,7 @@ export async function createApp(config) {
         },
       }),
     )
-    console.log('embed self-host: sirviendo embed-dist/ en /embed')
+    console.log('embed self-host: sirviendo embed-dist/ (/v1/loader.js, /v1/frame/…)')
   }
 
   let sessionStore
@@ -722,8 +722,9 @@ export async function createApp(config) {
     }
     loaderInfoCache = {
       version,
-      url: `${config.embedCdnUrl}/embed/${version}/loader.js`,
-      integrity,
+      url: `${config.embedCdnUrl}/${version}/loader.js`,
+      // Solo mandamos el hash si SRI está habilitado (el host tiene CORS).
+      integrity: config.embedSri ? integrity : null,
     }
     return loaderInfoCache
   }
@@ -864,6 +865,15 @@ export async function createApp(config) {
         inst.domains = cleanDomains(req.body.domains)
       }
       if (req.body?.publish === true) {
+        // Una sección puede haber salido de HOSTABLE_SECTIONS después de crearse
+        // la instancia (ej: scrolljack que rompe en el embed). No re-publicar.
+        if (!isHostableSectionId(inst.sectionId)) {
+          throw new HttpError(
+            409,
+            'Esta sección ya no se puede hostear. Borrá la instancia.',
+            { expose: true },
+          )
+        }
         // Cuota: publicar de nuevo una ya publicada no cuenta (se excluye).
         if (inst.status !== 'published') {
           await assertCanPublish({

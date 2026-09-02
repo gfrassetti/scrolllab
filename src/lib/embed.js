@@ -1,4 +1,4 @@
-const FALLBACK_LOADER_URL = 'https://embed.scrolllab.com.ar/embed/v1/loader.js'
+const FALLBACK_LOADER_URL = 'https://embed.scrolllab.com.ar/v1/loader.js'
 
 /**
  * Snippet que el usuario pega en su sitio. Con SRI + crossorigin cuando el

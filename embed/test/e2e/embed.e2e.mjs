@@ -24,8 +24,11 @@ const REPO = path.normalize(
 )
 const HOST_URL = 'http://localhost:4178/embed/test/iframe-host.html'
 const SELFBASE_URL = 'http://localhost:4178/embed/test/iframe-host-selfbase.html'
-const PIN_URL = 'http://localhost:4178/embed/test/iframe-pin.html'
 const CTA_TOKEN = 'EMBEDDEDOK'
+// PIN mode: no hay sección scrolljack en HOSTABLE_SECTIONS (ver server/sections.js
+// — HorizontalPanels quedó fuera hasta tener una "embed edition" acotada). El
+// mecanismo del loader (sticky wrapper + progress) se prueba a mano con
+// embed/test/iframe-pin.html cuando haya una sección hosteable con pin.
 
 // localhost→localhost entre puertos distintos dispara los chequeos de Local /
 // Private Network Access de Chromium y el iframe queda en chrome-error://. En
@@ -71,7 +74,6 @@ describe('embed e2e (Chromium)', () => {
   const procs = []
   let browser
   let hostedKey = ''
-  let pinKey = ''
 
   before(async () => {
     for (const child of await Promise.all([
@@ -123,27 +125,6 @@ describe('embed e2e (Chromium)', () => {
     hostedKey = (await published.json()).instance.key
     assert.ok(hostedKey, 'key pública')
 
-    // Segunda instancia, sección con pin (Horizontal Panels) para el modo PIN.
-    const pinCreated = await fetch(`${api}/api/hosted`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ sectionId: 'chapters/HorizontalPanels' }),
-    })
-    assert.ok(pinCreated.ok, 'crear instancia pin')
-    const pinId = (await pinCreated.json()).instance.id
-    const pinPub = await fetch(`${api}/api/hosted/${pinId}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({
-        draftProps: { variant: 'type', heading: 'PIN E2E' },
-        domains: [],
-        publish: true,
-      }),
-    })
-    assert.ok(pinPub.ok, 'publicar pin')
-    pinKey = (await pinPub.json()).instance.key
-    assert.ok(pinKey, 'key pin')
-
     browser = await chromium.launch({ args: LAUNCH_ARGS })
   })
 
@@ -154,13 +135,10 @@ describe('embed e2e (Chromium)', () => {
     for (const p of procs) if (!p.killed) p.kill('SIGKILL')
   })
 
-  async function openHost(url = HOST_URL, key = hostedKey, opts = {}) {
+  async function openHost(url = HOST_URL, key = hostedKey) {
     const context = await browser.newContext({
       viewport: { width: 1280, height: 900 },
-      // Las secciones scrolljack (PIN) se degradan a stack con reduced motion,
-      // así que el test de PIN lo desactiva; el resto lo deja para tener texto
-      // determinista.
-      reducedMotion: opts.motion ? 'no-preference' : 'reduce',
+      reducedMotion: 'reduce', // texto determinista (sin animación de entrada)
     })
     const page = await context.newPage()
     // La anfitriona trae data-key="__E2E_KEY__" — le metemos la real.
@@ -299,34 +277,6 @@ describe('embed e2e (Chromium)', () => {
         await sleep(500)
       }
       assert.ok(h > 50, `alto del iframe = ${h}`)
-    } finally {
-      await context.close()
-    }
-  })
-
-  it('modo PIN: la sección con pin entra en sticky sobre un spacer', async () => {
-    const { context, page } = await openHost(PIN_URL, pinKey, { motion: true })
-    try {
-      // El loader crea <div data-scrolllab-pin> cuando el frame le manda
-      // scrolllab:pinlength (PIN mode enganchado).
-      const wrap = page.locator('div[data-scrolllab-pin]')
-      await wrap.waitFor({ state: 'attached', timeout: 20_000 })
-
-      const wrapH = await wrap.evaluate((el) => el.getBoundingClientRect().height)
-      assert.ok(wrapH > 900, `el spacer del pin debería pasar el viewport, fue ${wrapH}`)
-
-      const pos = await page
-        .locator('iframe[data-scrolllab-frame]')
-        .evaluate((el) => getComputedStyle(el).position)
-      assert.ok(/sticky/.test(pos), `iframe position = ${pos}`)
-
-      // scrollear el host y ver que el iframe sigue pegado arriba (sticky).
-      await page.mouse.wheel(0, 600)
-      await sleep(400)
-      const top = await page
-        .locator('iframe[data-scrolllab-frame]')
-        .evaluate((el) => el.getBoundingClientRect().top)
-      assert.ok(Math.abs(top) < 4, `iframe top tras scroll = ${top} (debería seguir ~0)`)
     } finally {
       await context.close()
     }

@@ -234,6 +234,11 @@ export function loadConfig() {
     embedCdnUrl: (
       process.env.EMBED_CDN_URL || "https://embed.scrolllab.com.ar"
     ).replace(/\/$/, ""),
+    // SRI en el snippet (integrity + crossorigin). Requiere que el host del
+    // embed mande `Access-Control-Allow-Origin: *` en loader.js. Off por
+    // defecto para que ande en cualquier host sin configurar headers; prendelo
+    // (`EMBED_SRI=true`) una vez confirmado el CORS.
+    embedSri: process.env.EMBED_SRI === "true",
     adminToken: process.env.ADMIN_TOKEN || "",
     // Cuántas instancias hosteadas se pueden publicar SIN suscripción.
     // 1 = "una sección gratis" para probar; 0 = hay que suscribirse siempre.

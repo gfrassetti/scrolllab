@@ -6,10 +6,9 @@
  * Escribe también embed-dist/v1/manifest.json { version, integrity, bytes }
  * para que el server lo lea y arme el snippet con el hash correcto.
  *
- * Y embed-dist/_headers + _redirects para Cloudflare Pages / Netlify: CORS
- * abierto (el <script> se pide con crossorigin por el SRI) y un rewrite de
- * /embed/* → /* para que la URL pública sea .../embed/v1/loader.js igual que
- * en el self-host desde la API. Ver embed/README.md#deploy.
+ * Y embed-dist/_headers (CORS abierto) para los hosts que lo leen (Cloudflare,
+ * Netlify). La URL pública es .../v1/loader.js — directo al archivo, sin
+ * rewrites. Ver embed/README.md#deploy.
  */
 import { build } from 'esbuild'
 import path from 'node:path'
@@ -43,7 +42,8 @@ writeFileSync(
   JSON.stringify({ version: VERSION, integrity, bytes: bytes.length }, null, 2) + '\n',
 )
 
-// Cloudflare Pages / Netlify leen estos en la raíz del publish (embed-dist/).
+// Cloudflare / Netlify leen esto en la raíz del publish (embed-dist/). CORS
+// abierto por si el snippet vuelve a usar SRI (crossorigin); inofensivo si no.
 writeFileSync(
   path.join(embedRoot, '_headers'),
   [
@@ -55,10 +55,6 @@ writeFileSync(
     '  Cache-Control: public, max-age=60',
     '',
   ].join('\n'),
-)
-writeFileSync(
-  path.join(embedRoot, '_redirects'),
-  '/embed/*  /:splat  200\n',
 )
 
 console.log(`loader.js  ${bytes.length} B`)
