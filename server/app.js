@@ -760,7 +760,7 @@ export async function createApp(config) {
       if (inst.status === 'suspended') {
         throw new HttpError(402, 'Instancia suspendida')
       }
-      if (inst.status !== 'published' || !inst.publishedProps) {
+      if (inst.status !== 'published') {
         throw new HttpError(409, 'La instancia todavía no se publicó')
       }
       if (!domainAllowed(inst.domains, requestHost(req))) {
