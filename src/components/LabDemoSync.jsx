@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
+import { useI18n } from '../i18n'
 
 /**
  * LabDemoSync — segundo demo animado de LAB (compañero de LabDemo).
@@ -9,17 +10,42 @@ import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
  * sitios donde el <script> esté pegado. Ventana de LAB a la izquierda, tres
  * mini-navegadores a la derecha que reciben el cambio en cascada.
  *
- * Misma mecánica que LabDemo: una `gsap.timeline({ repeat: -1 })`, puntero
- * falso, tipeo carácter por carácter, respeta `prefers-reduced-motion` y solo
- * corre en pantalla (IntersectionObserver). Paleta fija (labDemoKit).
+ * Sigue el tema (`--ld-*`) y el idioma del sitio (COPY). Una
+ * `gsap.timeline({ repeat: -1 })`, puntero falso, respeta
+ * `prefers-reduced-motion` y solo corre en pantalla.
  */
 
-const OLD_TEXT = 'EMPECEMOS'
-const NEW_TEXT = 'HABLEMOS'
 const SITES = ['micliente.com', 'blog.taller.co', 'agencia.studio']
+
+const COPY = {
+  es: {
+    caption: 'Editás una vez, cambia en todos lados',
+    sr: 'Demostración animada: se cambia la palabra CTA una sola vez en el panel de LAB y el nuevo texto se propaga a tres sitios distintos que tienen el mismo embed.',
+    back: '‹ Mis secciones',
+    published: 'Publicado',
+    fCta: 'Palabra CTA',
+    note: 'Se guarda una vez. El <script> ya pegado toma el cambio solo.',
+    updated: '✓ actualizado',
+    oldText: 'EMPECEMOS',
+    newText: 'HABLEMOS',
+  },
+  en: {
+    caption: 'Edit once, changes everywhere',
+    sr: 'Animated demo: the CTA word is changed once in the LAB panel and the new text propagates to three different sites running the same embed.',
+    back: '‹ My sections',
+    published: 'Published',
+    fCta: 'CTA word',
+    note: 'Saved once. The <script> already pasted picks up the change on its own.',
+    updated: '✓ updated',
+    oldText: 'GET STARTED',
+    newText: "LET'S TALK",
+  },
+}
 
 export default function LabDemoSync() {
   const root = useRef(null)
+  const { locale } = useI18n()
+  const c = COPY[locale === 'en' ? 'en' : 'es']
 
   useGSAP(
     () => {
@@ -47,8 +73,8 @@ export default function LabDemoSync() {
       const reset = () => {
         gsap.set(hl, { autoAlpha: 0 })
         gsap.set(q('[data-ok]'), { autoAlpha: 0, scale: 0.6 })
-        setText('[data-type-field]', OLD_TEXT)
-        SITES.forEach((_, i) => setText(`[data-site-word="${i}"]`, OLD_TEXT))
+        setText('[data-type-field]', c.oldText)
+        SITES.forEach((_, i) => setText(`[data-site-word="${i}"]`, c.oldText))
       }
 
       const reduced = window.matchMedia(
@@ -57,8 +83,8 @@ export default function LabDemoSync() {
 
       if (reduced) {
         reset()
-        setText('[data-type-field]', NEW_TEXT)
-        SITES.forEach((_, i) => setText(`[data-site-word="${i}"]`, NEW_TEXT))
+        setText('[data-type-field]', c.newText)
+        SITES.forEach((_, i) => setText(`[data-site-word="${i}"]`, c.newText))
         gsap.set(q('[data-ok]'), { autoAlpha: 1, scale: 1 })
         return
       }
@@ -98,7 +124,6 @@ export default function LabDemoSync() {
           at,
         )
 
-      // Tipeo carácter por carácter en `sel`.
       const type = (sel, str, at) => {
         const proxy = { n: 0 }
         return tl.to(
@@ -113,7 +138,7 @@ export default function LabDemoSync() {
         )
       }
 
-      // Fan-out a los 3 sitios, con retardo escalonado — se ve la propagación.
+      // Fan-out a los 3 sitios, con retardo escalonado.
       const propagate = (str, at) => {
         SITES.forEach((_, i) => {
           const proxy = { n: 0 }
@@ -124,7 +149,10 @@ export default function LabDemoSync() {
               duration: Math.max(0.4, str.length * 0.06),
               ease: 'none',
               onUpdate: () =>
-                setText(`[data-site-word="${i}"]`, str.slice(0, Math.round(proxy.n))),
+                setText(
+                  `[data-site-word="${i}"]`,
+                  str.slice(0, Math.round(proxy.n)),
+                ),
             },
             `${at}+=${i * 0.16}`,
           )
@@ -132,7 +160,7 @@ export default function LabDemoSync() {
             q(`[data-ok="${i}"]`),
             { autoAlpha: 0, scale: 0.6 },
             { autoAlpha: 1, scale: 1, duration: 0.3, ease: 'back.out(3)' },
-            `>-0.1`,
+            '>-0.1',
           )
         })
       }
@@ -147,7 +175,7 @@ export default function LabDemoSync() {
       focus('[data-field]', '-=0.15')
       tl.to(q('[data-field]'), {
         duration: 0.14,
-        backgroundColor: 'rgba(255,75,0,0.12)',
+        backgroundColor: 'rgba(255,110,0,0.14)',
         yoyo: true,
         repeat: 1,
       })
@@ -155,10 +183,10 @@ export default function LabDemoSync() {
 
       // 2 · retipear el nuevo texto
       const typeStart = tl.duration()
-      type('[data-type-field]', NEW_TEXT, typeStart)
+      type('[data-type-field]', c.newText, typeStart)
 
       // 3 · propagación a los 3 sitios, en cascada
-      propagate(NEW_TEXT, '>-0.1')
+      propagate(c.newText, '>-0.1')
 
       // 4 · hold + reset
       tl.to(hl, { autoAlpha: 0, duration: 0.3 }, '>0.2')
@@ -185,7 +213,7 @@ export default function LabDemoSync() {
   return (
     <figure className="m-0">
       <figcaption className="mb-2 text-[11px] uppercase tracking-[0.2em] text-ink/45">
-        Editás una vez, cambia en todos lados
+        {c.caption}
       </figcaption>
       <div
         ref={root}
@@ -193,11 +221,7 @@ export default function LabDemoSync() {
         className={LD_STAGE_CLASS}
         aria-hidden="true"
       >
-        <p className="sr-only">
-          Demostración animada: se cambia la palabra CTA una sola vez en el
-          panel de LAB y el nuevo texto se propaga a tres sitios distintos que
-          tienen el mismo embed.
-        </p>
+        <p className="sr-only">{c.sr}</p>
 
         <div
           data-scene
@@ -216,10 +240,10 @@ export default function LabDemoSync() {
             <div className="flex-1 p-4 md:p-5">
               <div className="flex items-center justify-between">
                 <span className="text-[8.5px] uppercase tracking-[0.24em] text-[var(--ld-faint)]">
-                  ‹ Mis secciones
+                  {c.back}
                 </span>
                 <span className="border border-[var(--ld-ok-line)] bg-[var(--ld-ok-bg)] px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] text-[var(--ld-ok)]">
-                  Publicado
+                  {c.published}
                 </span>
               </div>
               <p className="mt-2 text-[13px] font-medium">Outro CTA</p>
@@ -228,7 +252,7 @@ export default function LabDemoSync() {
               </p>
               <label className="mt-4 block">
                 <span className="text-[8px] uppercase tracking-[0.22em] text-[var(--ld-faint)]">
-                  Palabra CTA
+                  {c.fCta}
                 </span>
                 <span
                   data-field
@@ -238,14 +262,13 @@ export default function LabDemoSync() {
                     data-type-field
                     className="font-mono text-[12px] text-[var(--ld-ink)]"
                   >
-                    {OLD_TEXT}
+                    {c.oldText}
                   </span>
                   <span className="inline-block h-3.5 w-px animate-pulse bg-[var(--ld-soft)]" />
                 </span>
               </label>
               <p className="mt-4 text-[9.5px] leading-relaxed text-[var(--ld-faint)]">
-                Se guarda una vez. El <code className="font-mono">&lt;script&gt;</code>{' '}
-                ya pegado toma el cambio solo.
+                {c.note}
               </p>
             </div>
           </div>
@@ -268,7 +291,7 @@ export default function LabDemoSync() {
                     data-ok={i}
                     className="ml-auto flex items-center gap-0.5 text-[8px] font-medium uppercase tracking-[0.15em] text-[var(--ld-ok)]"
                   >
-                    ✓ actualizado
+                    {c.updated}
                   </span>
                 </div>
                 <div className="flex flex-1 items-center bg-[var(--ld-band)] px-3">
@@ -276,7 +299,7 @@ export default function LabDemoSync() {
                     data-site-word={i}
                     className="block font-brico text-[clamp(0.8rem,2.4vw,1.35rem)] font-extrabold leading-none tracking-[-0.02em] text-[var(--ld-band-ink)] uppercase"
                   >
-                    {OLD_TEXT}
+                    {c.oldText}
                   </span>
                 </div>
               </div>

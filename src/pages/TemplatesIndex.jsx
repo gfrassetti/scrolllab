@@ -702,6 +702,21 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
+        {/* Qué es esto, en 10 segundos: el modelo (elegís secciones → se arma →
+            comprás → ZIP) antes del catálogo, para que el scroll de modelos se
+            recorra con intención. El demo de LAB vive en /lab, no se repite acá. */}
+        <div className="mx-auto mt-14 max-w-[1300px] md:mt-24">
+          <p className="text-center text-[11px] uppercase tracking-[0.25em] text-accent">
+            En 10 segundos
+          </p>
+          <h2 className="mt-2 text-center text-[clamp(1.4rem,3.5vw,2.4rem)] font-medium tracking-[-0.02em]">
+            Lo armás y te lo llevás
+          </h2>
+          <div className="mt-6">
+            <BuilderDemo key={locale} />
+          </div>
+        </div>
+
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
           <div className="flex items-baseline justify-between pt-4">
             <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
@@ -1122,20 +1137,6 @@ export default function TemplatesIndex() {
             </code>
           </div>
         </Link>
-
-        {/* Cómo funciona el Builder, en 10 segundos. El demo de LAB vive en
-            /lab, no se repite acá. Prototipo animado. */}
-        <div className="mx-auto mt-14 max-w-[1300px] md:mt-24">
-          <p className="text-center text-[11px] uppercase tracking-[0.25em] text-accent">
-            En 10 segundos
-          </p>
-          <h2 className="mt-2 text-center text-[clamp(1.4rem,3.5vw,2.4rem)] font-medium tracking-[-0.02em]">
-            Lo armás y te lo llevás
-          </h2>
-          <div className="mt-6">
-            <BuilderDemo />
-          </div>
-        </div>
 
         {/* Confianza / proceso: después de las ofertas. */}
         <section

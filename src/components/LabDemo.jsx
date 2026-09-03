@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
+import { useI18n } from '../i18n'
 
 /**
  * LabDemo — prototipo de "demo animado de producto" al estilo cursor.com,
@@ -8,22 +9,68 @@ import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
  * copiar el <script> → verlo renderizado en un sitio ajeno.
  *
  * Dos ventanas superpuestas: a la izquierda el editor de LAB, a la derecha el
- * sitio del cliente donde aparece el embed. Todo el DOM es real (tokens del
- * sitio, sigue el tema). Lo maneja UNA `gsap.timeline({ repeat: -1 })` que
+ * sitio del cliente donde aparece el embed. Sigue el tema (`--ld-*`) y el
+ * idioma del sitio (COPY). Lo maneja UNA `gsap.timeline({ repeat: -1 })` que
  * mueve un puntero falso, un recuadro de foco y tipea texto carácter por
- * carácter. Respeta `prefers-reduced-motion` (muestra el estado final) y solo
- * corre en pantalla (IntersectionObserver).
- *
- * Todavía NO es una sección del catálogo: componente suelto para /lab.
+ * carácter. Respeta `prefers-reduced-motion` y solo corre en pantalla.
  */
 
-const CTA_TEXT = 'EMPECEMOS'
-const EMAIL_TEXT = 'hola@estudio.film'
-const LEGAL_TEXT = '© 2026 Estudio'
+// Nombres de sección (no se traducen).
+const OPTIONS = ['Footer CTA', 'Outro CTA', 'Footer Brutal', 'Footer Splash']
+
 const SNIPPET = `<script src="https://embed.scrolllab.com.ar/v1/loader.js"
   data-scrolllab data-key="pub_3f9a…" async></script>`
 
-const OPTIONS = ['Footer CTA', 'Outro CTA', 'Footer Brutal', 'Footer Splash']
+const COPY = {
+  es: {
+    caption: 'Configurás y publicás',
+    sr: 'Demostración animada: en el panel de LAB se elige una sección, se completan los campos y se publica; el snippet resultante aparece renderizado en el sitio de un cliente.',
+    mySections: 'Mis secciones',
+    back: '‹ Mis secciones',
+    newBtn: '＋ Nueva',
+    edit: 'Editar',
+    del: 'Borrar',
+    statusPub: 'PUBLICADA',
+    statusDraft: 'BORRADOR',
+    badgeDraft: 'BORRADOR',
+    badgeLive: 'PUBLICADO',
+    fCta: 'Palabra CTA',
+    fEmail: 'Email',
+    fLegal: 'Pie legal',
+    saveDraft: 'Guardar borrador',
+    publish: 'Publicar',
+    theSnippet: 'El snippet',
+    sitebWord: 'TU TEXTO ACÁ',
+    sitebNote: 'sección renderizada por el <script>',
+    cta: 'EMPECEMOS',
+    email: 'hola@estudio.film',
+    legal: '© 2026 Estudio',
+  },
+  en: {
+    caption: 'Configure and publish',
+    sr: 'Animated demo: in the LAB panel a section is picked, the fields are filled in and published; the resulting snippet appears rendered on a client site.',
+    mySections: 'My sections',
+    back: '‹ My sections',
+    newBtn: '＋ New',
+    edit: 'Edit',
+    del: 'Delete',
+    statusPub: 'PUBLISHED',
+    statusDraft: 'DRAFT',
+    badgeDraft: 'DRAFT',
+    badgeLive: 'PUBLISHED',
+    fCta: 'CTA word',
+    fEmail: 'Email',
+    fLegal: 'Legal line',
+    saveDraft: 'Save draft',
+    publish: 'Publish',
+    theSnippet: 'The snippet',
+    sitebWord: 'YOUR TEXT HERE',
+    sitebNote: 'section rendered by the <script>',
+    cta: 'GET STARTED',
+    email: 'hi@studio.film',
+    legal: '© 2026 Studio',
+  },
+}
 
 const BADGE_DRAFT =
   'border-[var(--ld-line2)] bg-[var(--ld-line)] text-[var(--ld-soft)]'
@@ -32,6 +79,8 @@ const BADGE_LIVE =
 
 export default function LabDemo() {
   const root = useRef(null)
+  const { locale } = useI18n()
+  const c = COPY[locale === 'en' ? 'en' : 'es']
 
   useGSAP(
     () => {
@@ -69,10 +118,10 @@ export default function LabDemo() {
         setText('[data-type-email]', '')
         setText('[data-type-legal]', '')
         setText('[data-type-snippet]', '')
-        setText('[data-siteb-word]', 'TU TEXTO ACÁ')
+        setText('[data-siteb-word]', c.sitebWord)
         const badge = q('[data-badge]')[0]
         badge.className = badge.dataset.base + ' ' + BADGE_DRAFT
-        setText('[data-badge]', 'BORRADOR')
+        setText('[data-badge]', c.badgeDraft)
       }
 
       const reduced = window.matchMedia(
@@ -85,14 +134,14 @@ export default function LabDemo() {
         gsap.set(q('[data-view="editor"]'), { autoAlpha: 1, x: 0 })
         gsap.set(q('[data-snippet]'), { autoAlpha: 1, y: 0 })
         gsap.set(q('[data-siteb-embed]'), { autoAlpha: 1 })
-        setText('[data-type-cta]', CTA_TEXT)
-        setText('[data-type-email]', EMAIL_TEXT)
-        setText('[data-type-legal]', LEGAL_TEXT)
+        setText('[data-type-cta]', c.cta)
+        setText('[data-type-email]', c.email)
+        setText('[data-type-legal]', c.legal)
         setText('[data-type-snippet]', SNIPPET)
-        setText('[data-siteb-word]', CTA_TEXT)
+        setText('[data-siteb-word]', c.cta)
         const badge = q('[data-badge]')[0]
         badge.className = badge.dataset.base + ' ' + BADGE_LIVE
-        setText('[data-badge]', 'PUBLICADO')
+        setText('[data-badge]', c.badgeLive)
         return
       }
 
@@ -134,8 +183,6 @@ export default function LabDemo() {
       const clickPulse = (at) =>
         tl.to(cursor, { duration: 0.09, scale: 0.78, yoyo: true, repeat: 1 }, at)
 
-      // Tipeo carácter por carácter. `mirror` refleja el mismo texto en el
-      // embed del sitio del cliente en vivo.
       const type = (sel, str, at, mirror) => {
         const proxy = { n: 0 }
         return tl.to(
@@ -147,7 +194,7 @@ export default function LabDemo() {
             onUpdate: () => {
               const s = str.slice(0, Math.round(proxy.n))
               setText(sel, s)
-              if (mirror) setText(mirror, s || 'TU TEXTO ACÁ')
+              if (mirror) setText(mirror, s || c.sitebWord)
             },
           },
           at,
@@ -182,22 +229,22 @@ export default function LabDemo() {
       // 3 · tipear props — CTA se refleja en el sitio del cliente
       point('[data-field-cta]', '<')
       focus('[data-field-cta]', '<0.1')
-      type('[data-type-cta]', CTA_TEXT, '>-0.1', '[data-siteb-word]')
+      type('[data-type-cta]', c.cta, '>-0.1', '[data-siteb-word]')
       point('[data-field-email]', '<0.15')
       focus('[data-field-email]', '<0.1')
-      type('[data-type-email]', EMAIL_TEXT, '>-0.1')
+      type('[data-type-email]', c.email, '>-0.1')
       point('[data-field-legal]', '<0.15')
       focus('[data-field-legal]', '<0.1')
-      type('[data-type-legal]', LEGAL_TEXT, '>-0.1')
+      type('[data-type-legal]', c.legal, '>-0.1')
 
-      // 4 · publicar → badge + snippet + el embed del cliente "prende"
+      // 4 · publicar → badge + snippet + el embed "prende"
       point('[data-publish]', '>')
       focus('[data-publish]', '<0.1')
       clickPulse('>-0.05')
       tl.add(() => {
         const badge = q('[data-badge]')[0]
         badge.className = badge.dataset.base + ' ' + BADGE_LIVE
-        setText('[data-badge]', 'PUBLICADO')
+        setText('[data-badge]', c.badgeLive)
       }, '>')
       tl.fromTo(
         q('[data-badge]'),
@@ -207,11 +254,7 @@ export default function LabDemo() {
       )
       tl.to(q('[data-snippet]'), { autoAlpha: 1, y: 0, duration: 0.25 }, '>-0.05')
       type('[data-type-snippet]', SNIPPET, '>-0.1')
-      tl.to(
-        q('[data-siteb-embed]'),
-        { autoAlpha: 1, duration: 0.4 },
-        '<',
-      )
+      tl.to(q('[data-siteb-embed]'), { autoAlpha: 1, duration: 0.4 }, '<')
       tl.fromTo(
         q('[data-siteb]'),
         { scale: 0.985 },
@@ -244,7 +287,7 @@ export default function LabDemo() {
   return (
     <figure className="m-0">
       <figcaption className="mb-2 text-[11px] uppercase tracking-[0.2em] text-ink/45">
-        Configurás y publicás
+        {c.caption}
       </figcaption>
       <div
         ref={root}
@@ -252,17 +295,13 @@ export default function LabDemo() {
         className={LD_STAGE_CLASS}
         aria-hidden="true"
       >
-        <p className="sr-only">
-          Demostración animada: en el panel de LAB se elige una sección, se
-          completan los campos palabra CTA, email y pie legal, se publica, y el
-          snippet resultante aparece renderizado en el sitio de un cliente.
-        </p>
+        <p className="sr-only">{c.sr}</p>
 
         <div
           data-scene
           className="absolute inset-0 p-4 text-[var(--ld-ink)] sm:p-6"
         >
-          {/* Ventana B — el sitio del cliente, en un navegador (a la derecha) */}
+          {/* Ventana B — el sitio del cliente, en un navegador */}
           <div
             data-siteb
             className="absolute right-0 top-5 bottom-5 hidden w-[47%] flex-col overflow-hidden rounded-lg border border-[var(--ld-line2)] bg-[var(--ld-surface)] shadow-[0_16px_40px_rgba(0,0,0,0.22)] sm:flex"
@@ -291,16 +330,16 @@ export default function LabDemo() {
                   data-siteb-word
                   className="block font-brico text-[clamp(1.1rem,3.2vw,1.9rem)] font-extrabold leading-none tracking-[-0.02em] text-[var(--ld-band-ink)] uppercase"
                 >
-                  TU TEXTO ACÁ
+                  {c.sitebWord}
                 </span>
                 <p className="mt-2 text-[8.5px] uppercase tracking-[0.2em] text-[var(--ld-band-ink)]/40">
-                  sección renderizada por el &lt;script&gt;
+                  {c.sitebNote}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Ventana A — el panel de LAB (adelante, a la izquierda) */}
+          {/* Ventana A — el panel de LAB */}
           <div className="absolute inset-y-0 left-0 z-10 flex w-full flex-col overflow-hidden rounded-lg border border-[var(--ld-line2)] bg-[var(--ld-surface)] shadow-[0_22px_55px_rgba(0,0,0,0.2)] sm:w-[60%]">
             <div className="flex h-7 shrink-0 items-center gap-1.5 bg-[var(--ld-chrome)] px-3">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--ld-line2)]" />
@@ -315,7 +354,7 @@ export default function LabDemo() {
               {/* Vista lista */}
               <div data-view="list" className="absolute inset-4 md:inset-5">
                 <p className="text-[9px] uppercase tracking-[0.24em] text-[var(--ld-faint)]">
-                  Mis secciones
+                  {c.mySections}
                 </p>
                 <div className="mt-2.5 flex items-center gap-2">
                   <div
@@ -329,7 +368,7 @@ export default function LabDemo() {
                     data-new
                     className="border border-[var(--ld-ink)] px-2.5 py-1.5 text-[10px] uppercase tracking-[0.24em]"
                   >
-                    ＋ Nueva
+                    {c.newBtn}
                   </div>
                 </div>
 
@@ -350,8 +389,8 @@ export default function LabDemo() {
 
                 <div className="mt-14 space-y-2.5">
                   {[
-                    ['chapters/FooterCTA', 'PUBLICADA', BADGE_LIVE],
-                    ['nocturne/OutroCTA', 'BORRADOR', BADGE_DRAFT],
+                    ['chapters/FooterCTA', c.statusPub, BADGE_LIVE],
+                    ['nocturne/OutroCTA', c.statusDraft, BADGE_DRAFT],
                   ].map(([id, st, tone]) => (
                     <div
                       key={id}
@@ -366,10 +405,10 @@ export default function LabDemo() {
                         {st}
                       </span>
                       <span className="ml-auto text-[8.5px] uppercase tracking-[0.2em] text-[var(--ld-faint)]">
-                        Editar
+                        {c.edit}
                       </span>
                       <span className="text-[8.5px] uppercase tracking-[0.2em] text-[var(--ld-faint)]">
-                        Borrar
+                        {c.del}
                       </span>
                     </div>
                   ))}
@@ -380,14 +419,14 @@ export default function LabDemo() {
               <div data-view="editor" className="absolute inset-4 md:inset-5">
                 <div className="flex items-center justify-between">
                   <span className="text-[8.5px] uppercase tracking-[0.24em] text-[var(--ld-faint)]">
-                    ‹ Mis secciones
+                    {c.back}
                   </span>
                   <span
                     data-badge
                     data-base="border px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] transition-colors"
                     className={`border px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] transition-colors ${BADGE_DRAFT}`}
                   >
-                    BORRADOR
+                    {c.badgeDraft}
                   </span>
                 </div>
                 <p className="mt-2 text-[14px] font-medium">Outro CTA</p>
@@ -397,9 +436,9 @@ export default function LabDemo() {
 
                 <div className="mt-3 space-y-2.5">
                   {[
-                    ['data-field-cta', 'data-type-cta', 'Palabra CTA'],
-                    ['data-field-email', 'data-type-email', 'Email'],
-                    ['data-field-legal', 'data-type-legal', 'Pie legal'],
+                    ['data-field-cta', 'data-type-cta', c.fCta],
+                    ['data-field-email', 'data-type-email', c.fEmail],
+                    ['data-field-legal', 'data-type-legal', c.fLegal],
                   ].map(([fk, tk, label]) => (
                     <label key={fk} className="block">
                       <span className="text-[8px] uppercase tracking-[0.22em] text-[var(--ld-faint)]">
@@ -421,19 +460,19 @@ export default function LabDemo() {
 
                 <div className="mt-3 flex items-center gap-2">
                   <span className="border border-[var(--ld-line2)] px-2.5 py-1.5 text-[9px] uppercase tracking-[0.22em] text-[var(--ld-soft)]">
-                    Guardar borrador
+                    {c.saveDraft}
                   </span>
                   <span
                     data-publish
                     className="bg-[var(--ld-ink)] px-2.5 py-1.5 text-[9px] uppercase tracking-[0.22em] text-[var(--ld-surface)]"
                   >
-                    Publicar
+                    {c.publish}
                   </span>
                 </div>
 
                 <div className="mt-3">
                   <p className="mb-1 text-[8px] uppercase tracking-[0.24em] text-[var(--ld-faint)]">
-                    El snippet
+                    {c.theSnippet}
                   </p>
                   <pre
                     data-snippet

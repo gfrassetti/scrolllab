@@ -158,8 +158,8 @@ export default function LabPage() {
             <code className="font-mono">&lt;script&gt;</code> en cualquier sitio
           </h2>
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <LabDemo />
-            <LabDemoSync />
+            <LabDemo key={locale} />
+            <LabDemoSync key={locale} />
           </div>
           <p className="mt-4 max-w-[70ch] text-xs leading-relaxed text-ink/40">
             Prototipo. <strong className="font-medium text-ink/60">Izquierda</strong>:

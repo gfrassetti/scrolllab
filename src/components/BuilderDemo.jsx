@@ -1,62 +1,26 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS_HERO, LD_CURSOR_STYLE } from './labDemoKit'
-import { formatArs } from '../lib/pricing'
+import { formatArs, formatUsd, arsFromUsd, FALLBACK_USD_ARS } from '../lib/pricing'
+import { useI18n } from '../i18n'
 
 /**
  * BuilderDemo — demo animado del Builder (pago único). Elegís secciones del
  * catálogo → el lienzo se arma → el precio sube → comprás → te llevás el ZIP.
- * Réplica chata de la UI real de /builder (paleta propia que flipea con el
- * tema, ver `--ld-*` en src/index.css). Grande y centrado en la home.
+ * Réplica chata de la UI real de /builder. Sigue el tema (`--ld-*`) y el
+ * idioma del sitio (COPY): en ES el precio va en pesos, en EN en dólares.
  *
  * Una `gsap.timeline({ repeat: -1 })`, puntero falso, respeta
  * `prefers-reduced-motion` y solo corre en pantalla (IntersectionObserver).
  */
 
-// Montos ARS acumulados (demo — el precio real lo calcula /builder + fx).
+// USD acumulado por sección (demo — el precio real lo calcula /builder + fx).
 const CARDS = [
-  {
-    name: 'Nav Minimal',
-    kind: 'NAV',
-    step: 'nav',
-    blurb: 'Header fijo que invierte sobre cualquier fondo',
-    price: 190000,
-  },
-  {
-    name: 'Hero Kinetic',
-    kind: 'HERO',
-    step: 'hero',
-    blurb: 'Tipografía enorme que sube desde máscaras',
-    price: 245000,
-  },
-  {
-    name: 'Manifesto Reveal',
-    kind: 'SECCIÓN',
-    step: 'sec',
-    blurb: 'Párrafo gigante que se entinta palabra por palabra',
-    price: 300000,
-  },
-  {
-    name: 'Big Numbers',
-    kind: 'SECCIÓN',
-    step: 'sec',
-    blurb: 'Contadores que suben al entrar en pantalla',
-    price: 360000,
-  },
-  {
-    name: 'Footer CTA',
-    kind: 'FOOTER',
-    step: 'footer',
-    blurb: 'Palabra de cierre a pantalla completa',
-    price: 425000,
-  },
-]
-
-const STEPS = [
-  ['nav', 'Nav'],
-  ['hero', 'Hero'],
-  ['sec', 'Secciones'],
-  ['footer', 'Cierre'],
+  { name: 'Nav Minimal', step: 'nav', usd: 149 },
+  { name: 'Hero Kinetic', step: 'hero', usd: 199 },
+  { name: 'Manifesto Reveal', step: 'sec', usd: 249 },
+  { name: 'Big Numbers', step: 'sec', usd: 299 },
+  { name: 'Footer CTA', step: 'footer', usd: 349 },
 ]
 
 const FILES = [
@@ -70,10 +34,57 @@ const FILES = [
   'README.md',
 ]
 
-const PRICE = (n) => formatArs(n)
+const COPY = {
+  es: {
+    sr: 'Demostración animada del Builder: se agregan cinco secciones del catálogo, el lienzo y el precio se arman, se compra y se descarga el proyecto como ZIP.',
+    modelBlurb: 'Editorial cinético',
+    kinds: ['NAV', 'HERO', 'SECCIÓN', 'SECCIÓN', 'FOOTER'],
+    blurbs: [
+      'Header fijo que invierte sobre cualquier fondo',
+      'Tipografía enorme que sube desde máscaras',
+      'Párrafo gigante que se entinta palabra por palabra',
+      'Contadores que suben al entrar en pantalla',
+      'Palabra de cierre a pantalla completa',
+    ],
+    steps: ['Nav', 'Hero', 'Secciones', 'Cierre'],
+    add: 'Añadir',
+    yourPage: 'Tu página',
+    sections: 'secciones',
+    emptyHint: 'Arrastrá o tocá “Añadir”',
+    buy: 'Comprar ahora',
+    paid: '✓ Pago aprobado · Mercado Pago',
+    zipName: 'mi-plantilla.zip',
+    zipFoot: 'Es tuyo · código abierto · sin atadura',
+    price: (usd) => formatArs(arsFromUsd(usd, FALLBACK_USD_ARS) ?? 0),
+  },
+  en: {
+    sr: 'Animated Builder demo: five catalog sections are added, the canvas and price build up, checkout runs and the project downloads as a ZIP.',
+    modelBlurb: 'Kinetic editorial',
+    kinds: ['NAV', 'HERO', 'SECTION', 'SECTION', 'FOOTER'],
+    blurbs: [
+      'Fixed header that inverts over any background',
+      'Oversized type rising out of masks',
+      'Giant paragraph inking in word by word',
+      'Counters that count up on enter',
+      'Giant closing word, full screen',
+    ],
+    steps: ['Nav', 'Hero', 'Sections', 'Closing'],
+    add: 'Add',
+    yourPage: 'Your page',
+    sections: 'sections',
+    emptyHint: 'Drag or tap “Add”',
+    buy: 'Buy now',
+    paid: '✓ Payment approved · Mercado Pago',
+    zipName: 'my-template.zip',
+    zipFoot: "It's yours · open source · no lock-in",
+    price: (usd) => formatUsd(usd),
+  },
+}
 
 export default function BuilderDemo() {
   const root = useRef(null)
+  const { locale } = useI18n()
+  const c = COPY[locale === 'en' ? 'en' : 'es']
 
   useGSAP(
     () => {
@@ -98,6 +109,8 @@ export default function BuilderDemo() {
         if (el) el.textContent = str
       }
 
+      let curUsd = 0
+
       const reset = () => {
         gsap.set(hl, { autoAlpha: 0 })
         gsap.set(q('[data-check]'), { autoAlpha: 0, scale: 0.5 })
@@ -108,8 +121,9 @@ export default function BuilderDemo() {
         gsap.set(q('[data-zip]'), { autoAlpha: 0, xPercent: 14 })
         gsap.set(q('[data-file]'), { autoAlpha: 0, x: -6 })
         gsap.set(q('[data-canvas-empty]'), { autoAlpha: 1 })
-        setText('[data-price]', PRICE(0))
-        setText('[data-count]', '0 secciones')
+        curUsd = 0
+        setText('[data-price]', c.price(0))
+        setText('[data-count]', `0 ${c.sections}`)
       }
 
       const reduced = window.matchMedia(
@@ -126,8 +140,8 @@ export default function BuilderDemo() {
         gsap.set(q('[data-zip]'), { autoAlpha: 1, xPercent: 0 })
         gsap.set(q('[data-file]'), { autoAlpha: 1, x: 0 })
         gsap.set(q('[data-canvas-empty]'), { autoAlpha: 0 })
-        setText('[data-price]', PRICE(CARDS[CARDS.length - 1].price))
-        setText('[data-count]', `${CARDS.length} secciones`)
+        setText('[data-price]', c.price(CARDS[CARDS.length - 1].usd))
+        setText('[data-count]', `${CARDS.length} ${c.sections}`)
         return
       }
 
@@ -169,18 +183,16 @@ export default function BuilderDemo() {
       const clickPulse = (at) =>
         tl.to(cursor, { duration: 0.09, scale: 0.78, yoyo: true, repeat: 1 }, at)
 
-      const priceTo = (n, at) => {
-        const cur = Number(
-          q('[data-price]')[0]?.textContent.replace(/\D/g, '') || 0,
-        )
-        const proxy = { v: cur }
+      const priceTo = (usd, at) => {
+        const proxy = { v: curUsd }
+        curUsd = usd
         return tl.to(
           proxy,
           {
-            v: n,
+            v: usd,
             duration: 0.4,
             ease: 'power1.out',
-            onUpdate: () => setText('[data-price]', PRICE(Math.round(proxy.v))),
+            onUpdate: () => setText('[data-price]', c.price(Math.round(proxy.v))),
           },
           at,
         )
@@ -201,17 +213,10 @@ export default function BuilderDemo() {
           { autoAlpha: 1, scale: 1, duration: 0.22, ease: 'back.out(3)' },
           '>-0.05',
         )
-        tl.to(
-          q(`[data-row-add="${i}"]`),
-          { autoAlpha: 1, duration: 0.25 },
-          '<',
-        )
-        if (i === 0) tl.to(q('[data-canvas-empty]'), { autoAlpha: 0, duration: 0.2 }, '<')
-        tl.to(
-          q(`[data-crow="${i}"]`),
-          { autoAlpha: 1, x: 0, duration: 0.3 },
-          '<',
-        )
+        tl.to(q(`[data-row-add="${i}"]`), { autoAlpha: 1, duration: 0.25 }, '<')
+        if (i === 0)
+          tl.to(q('[data-canvas-empty]'), { autoAlpha: 0, duration: 0.2 }, '<')
+        tl.to(q(`[data-crow="${i}"]`), { autoAlpha: 1, x: 0, duration: 0.3 }, '<')
         tl.add(
           () =>
             gsap.set(q(`[data-step-dot="${card.step}"]`), {
@@ -219,8 +224,8 @@ export default function BuilderDemo() {
             }),
           '<',
         )
-        tl.add(() => setText('[data-count]', `${i + 1} secciones`), '<')
-        priceTo(card.price, '<')
+        tl.add(() => setText('[data-count]', `${i + 1} ${c.sections}`), '<')
+        priceTo(card.usd, '<')
       })
 
       // 2 · comprar
@@ -271,11 +276,7 @@ export default function BuilderDemo() {
         className={LD_STAGE_CLASS_HERO}
         aria-hidden="true"
       >
-        <p className="sr-only">
-          Demostración animada del Builder: se agregan cinco secciones del
-          catálogo, el lienzo y el precio se arman, se compra y se descarga el
-          proyecto como ZIP.
-        </p>
+        <p className="sr-only">{c.sr}</p>
 
         <div
           data-scene
@@ -290,7 +291,7 @@ export default function BuilderDemo() {
               <span className="h-2 w-2 rounded-full bg-[var(--ld-line2)]" />
               <span className="h-2 w-2 rounded-full bg-[var(--ld-line2)]" />
               <span className="ml-2 truncate text-[11px] tracking-[0.05em] text-[var(--ld-soft)]">
-                mi-plantilla.zip
+                {c.zipName}
               </span>
             </div>
             <div className="flex flex-1 flex-col justify-center gap-3.5 px-5 font-mono text-[12px] text-[var(--ld-soft)]">
@@ -301,7 +302,7 @@ export default function BuilderDemo() {
               ))}
             </div>
             <div className="border-t border-[var(--ld-line)] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-[var(--ld-faint)]">
-              Es tuyo · código abierto · sin atadura
+              {c.zipFoot}
             </div>
           </div>
 
@@ -325,7 +326,7 @@ export default function BuilderDemo() {
                     CHAPTERS
                   </p>
                   <span className="ml-auto text-[10px] tracking-[0.2em] text-[var(--ld-faint)]">
-                    Editorial cinético
+                    {c.modelBlurb}
                   </span>
                 </div>
                 <div className="flex flex-1 flex-col">
@@ -354,18 +355,18 @@ export default function BuilderDemo() {
                         <p className="flex items-baseline gap-2 text-[12.5px] font-medium">
                           <span className="truncate">{card.name}</span>
                           <span className="shrink-0 text-[8.5px] tracking-[0.22em] text-[var(--ld-faint)]">
-                            {card.kind}
+                            {c.kinds[i]}
                           </span>
                         </p>
                         <p className="truncate text-[10px] text-[var(--ld-soft)]">
-                          {card.blurb}
+                          {c.blurbs[i]}
                         </p>
                       </div>
                       <span
                         data-add={i}
                         className="relative shrink-0 border border-[var(--ld-line2)] px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-[var(--ld-soft)]"
                       >
-                        Añadir
+                        {c.add}
                       </span>
                     </div>
                   ))}
@@ -375,10 +376,11 @@ export default function BuilderDemo() {
               {/* Lienzo + precio */}
               <div className="flex min-w-0 flex-1 flex-col p-4 md:p-5">
                 <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--ld-faint)]">
-                  Tu página · <span data-count>0 secciones</span>
+                  {c.yourPage} ·{' '}
+                  <span data-count>{`0 ${c.sections}`}</span>
                 </p>
                 <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[9.5px] uppercase tracking-[0.16em] text-[var(--ld-faint)]">
-                  {STEPS.map(([key, label]) => (
+                  {['nav', 'hero', 'sec', 'footer'].map((key, idx) => (
                     <span
                       key={key}
                       data-step-dot={key}
@@ -386,7 +388,7 @@ export default function BuilderDemo() {
                       style={{ color: 'var(--ld-faint)' }}
                     >
                       <span aria-hidden="true">●</span>
-                      {label}
+                      {c.steps[idx]}
                     </span>
                   ))}
                 </div>
@@ -396,7 +398,7 @@ export default function BuilderDemo() {
                     data-canvas-empty
                     className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-[10.5px] text-[var(--ld-faint)]"
                   >
-                    Arrastrá o tocá “Añadir”
+                    {c.emptyHint}
                   </p>
                   <div className="flex h-full flex-col gap-2">
                     {CARDS.map((card, i) => (
@@ -413,7 +415,7 @@ export default function BuilderDemo() {
                           {card.name}
                         </span>
                         <span className="ml-auto shrink-0 text-[8.5px] uppercase tracking-[0.18em] text-[var(--ld-faint)]">
-                          Chapters · {card.kind}
+                          Chapters · {c.kinds[i]}
                         </span>
                       </div>
                     ))}
@@ -428,7 +430,7 @@ export default function BuilderDemo() {
                     data-buy
                     className="bg-[var(--ld-ink)] px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] text-[var(--ld-surface)]"
                   >
-                    Comprar ahora
+                    {c.buy}
                   </span>
                 </div>
               </div>
@@ -439,7 +441,7 @@ export default function BuilderDemo() {
               data-paid
               className="absolute bottom-4 left-4 flex items-center gap-1.5 border border-[var(--ld-ok-line)] bg-[var(--ld-ok-bg)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--ld-ok)]"
             >
-              ✓ Pago aprobado · Mercado Pago
+              {c.paid}
             </div>
           </div>
 
