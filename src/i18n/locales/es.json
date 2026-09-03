@@ -21,7 +21,7 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "Componentes hosteados",
+    "eyebrow": "Componentes alojados",
     "body": "Configurá una sección y mostrala en cualquier sitio con una línea de <script>. El código nunca sale de nuestro lado: editás acá, se actualiza allá.",
     "yours": "Tus secciones",
     "publishedCount": "{{n}} de {{total}} publicadas",
@@ -68,7 +68,7 @@
     "faqTitle": "Preguntas",
     "faq": [
       {
-        "q": "¿Qué es un componente hosteado?",
+        "q": "¿Qué es un componente alojado?",
         "a": "Una sección del sitio que configurás acá y se muestra en cualquier página con una línea de código. A diferencia de bajar el ZIP, el código no sale de nuestro lado: lo editás desde LAB y se actualiza solo donde lo pegaste."
       },
       {
@@ -93,11 +93,11 @@
       },
       {
         "q": "¿En qué se diferencia del Builder?",
-        "a": "El Builder arma una página entera y te da el código fuente para descargar: pago único, es tuyo. LAB sirve una sección suelta, hosteada por nosotros: se actualiza sola."
+        "a": "El Builder arma una página entera y te da el código fuente para descargar: pago único, es tuyo. LAB sirve una sección suelta desde nuestra infraestructura: se actualiza sola."
       }
     ],
     "views": "{{n}} vistas",
-    "loginPrompt": "Entrá para crear y gestionar tus secciones hosteadas.",
+    "loginPrompt": "Entrá para crear y gestionar tus secciones alojadas.",
     "plansTitle": "Planes",
     "cycle": {
       "monthly": "Mensual",
@@ -129,7 +129,7 @@
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
     "planSubscribe": "Suscribirme",
-    "freeTierNote": "El plan gratis incluye {{n}} sección hosteada publicada, sin tarjeta ni vencimiento. Los planes suman más y sacan el tope.",
+    "freeTierNote": "El plan gratis incluye {{n}} sección publicada, sin tarjeta ni vencimiento. Los planes suman más y sacan el tope.",
     "planTrialCta": "Probar {{n}} días gratis",
     "planTrialNote": "Sin cargo los primeros {{n}} días.",
     "planTrialActive": "Prueba gratis — primer cobro el {{date}}",
@@ -213,7 +213,7 @@
     "step3Body": "Pagás con Mercado Pago. La compra aparece en Mis compras.",
     "step4Title": "Descargá el ZIP",
     "step4Body": "Tu compra queda en Mis compras. Descargá el ZIP cuando quieras.",
-    "howHostedNote": "¿Solo necesitás una sección suelta, no una página entera? Algunas se sirven hosteadas con un <script>: las editás online, por suscripción.",
+    "howHostedNote": "¿Solo necesitás una sección suelta, no una página entera? Algunas las servimos nosotros con un <script>: las editás online, por suscripción.",
     "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
     "paymentsBody": "Pagás con Mercado Pago. No vemos ni guardamos los datos de tu tarjeta.",
@@ -939,7 +939,7 @@
         "body": "Podemos actualizar esta política para reflejar cambios del servicio o requisitos legales. La versión vigente y su fecha siempre estarán publicadas en esta página."
       },
       {
-        "title": "Componentes hosteados (LAB)",
+        "title": "Componentes alojados (LAB)",
         "items": [
           "Al publicar una instancia guardamos su configuración (textos y dominios permitidos) asociada a tu cuenta. Se elimina cuando borrás la instancia o tu cuenta.",
           "El <script> que insertás en tu sitio carga contenido desde nuestro dominio. Al hacerlo, nuestro servidor y CDN registran datos técnicos de la request (IP, user-agent, referer) para operar el servicio, prevenir abuso y medir uso de forma agregada.",
@@ -988,10 +988,10 @@
         "body": "Podemos actualizar el servicio y estos Términos. La versión vigente y su fecha estarán publicadas en esta página. El uso posterior a una actualización implica la aceptación de los nuevos Términos."
       },
       {
-        "title": "Componentes hosteados (LAB)",
+        "title": "Componentes alojados (LAB)",
         "items": [
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
-          "El código del componente permanece hosteado por nosotros: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
+          "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
           "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago y se renueva automáticamente al final de cada período hasta que la des de baja.",
           "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
