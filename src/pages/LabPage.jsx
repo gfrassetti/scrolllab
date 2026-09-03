@@ -215,8 +215,16 @@ export default function LabPage() {
               <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5">
                 <p className="text-sm leading-relaxed text-ink/75">
                   {trialAvailable
-                    ? t('lab.lockedTrial', { n: trialDays || 7 })
-                    : t('lab.lockedSubscribe')}
+                    ? t(
+                        quota > 0
+                          ? 'lab.lockedMoreTrial'
+                          : 'lab.lockedPaidTrial',
+                        { n: trialDays || 7 },
+                      )
+                    : t(
+                        quota > 0 ? 'lab.lockedMoreSub' : 'lab.lockedPaidSub',
+                      )}
+                  {instances.length > 0 && ` ${t('lab.lockedSaved')}`}
                 </p>
                 <a
                   href="#planes"
