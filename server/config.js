@@ -240,11 +240,19 @@ export function loadConfig() {
     // (`EMBED_SRI=true`) una vez confirmado el CORS.
     embedSri: process.env.EMBED_SRI === "true",
     adminToken: process.env.ADMIN_TOKEN || "",
-    // Cuántas instancias hosteadas se pueden publicar SIN suscripción.
-    // 1 = "una sección gratis" para probar; 0 = hay que suscribirse siempre.
+    // Cuántas instancias hosteadas puede tener un usuario SIN suscripción.
+    // Default 0: LAB es de pago; la prueba de 7 días (`hostedTrialDays`) es el
+    // "probá antes de pagar". Subilo a 1+ solo si querés un free tier real.
     hostedFreeQuota: (() => {
       const n = Number(process.env.HOSTED_FREE_QUOTA);
-      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 1;
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+    })(),
+    // Días de prueba gratis al abrir la PRIMERA suscripción (una vez por
+    // usuario, cualquier plan). 0 = sin prueba. MP lo aplica como
+    // `auto_recurring.free_trial`: autoriza la tarjeta, no cobra N días.
+    hostedTrialDays: (() => {
+      const n = Number(process.env.HOSTED_TRIAL_DAYS);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 7;
     })(),
     // Suscripciones (LAB) — MercadoPago PreApproval con monto inline (sin plan
     // pre-creado). Es la misma app de MP que Checkout Pro: si no seteás las env

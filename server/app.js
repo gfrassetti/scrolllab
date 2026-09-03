@@ -822,8 +822,35 @@ export async function createApp(config) {
     '/api/hosted',
     requireAuth,
     asyncHandler(async (req, res) => {
-      const rows = await db.findHostedInstancesByUser(db.uid(req.user))
-      res.json({ instances: rows.map(publicHosted) })
+      const userId = db.uid(req.user)
+      const rows = await db.findHostedInstancesByUser(userId)
+      // Flags derivados, NO se persisten — mismas reglas de orden por
+      // `createdAt` que `/api/embed/:key/config`:
+      //  - `frozen`: el plan YA no la cubre → hoy responde 402. LAB muestra
+      //    "Congelada" en vez de "Publicada".
+      //  - `stopsOnPlanEnd`: hoy se sirve, pero caería fuera de la cuota
+      //    free → si la suscripción no se reactiva, se apaga al fin de
+      //    período. LAB avisa "se apaga el <fecha>".
+      // Al re-suscribirse ambos se apagan solos (no hubo cambio de estado).
+      const ent = await resolveEntitlement(userId, config, { persist: false })
+      const freeQuota = config.hostedFreeQuota
+      const instances = await Promise.all(
+        rows.map(async (r) => {
+          let frozen = false
+          let stopsOnPlanEnd = false
+          if (r.status === 'published') {
+            const older = await db.countPublishedHostedCreatedBefore(
+              userId,
+              r.createdAt,
+              db.uid(r) || r.id,
+            )
+            frozen = Number.isFinite(ent.quota) && older >= ent.quota
+            stopsOnPlanEnd = !frozen && older >= freeQuota
+          }
+          return { ...publicHosted(r), frozen, stopsOnPlanEnd }
+        }),
+      )
+      res.json({ instances })
     }),
   )
 
@@ -836,10 +863,27 @@ export async function createApp(config) {
       if (!isHostableSectionId(sectionId)) {
         throw new HttpError(400, 'Sección no hosteable')
       }
+      // LAB es de pago: un usuario free solo puede tener hasta
+      // `hostedFreeQuota` instancias (0 = ninguna). Con plan/prueba activa
+      // el tope lo pone `assertCanPublish` al publicar, no acá.
+      const userId = db.uid(req.user)
+      const ent = await resolveEntitlement(userId, config, { persist: false })
+      if (ent.plan === 'free') {
+        const mine = await db.findHostedInstancesByUser(userId)
+        if (mine.length >= config.hostedFreeQuota) {
+          throw new HttpError(
+            402,
+            config.hostedFreeQuota > 0
+              ? 'Llegaste al límite gratis. Suscribite o empezá tu prueba para crear más.'
+              : 'Suscribite o empezá tu prueba gratis para crear secciones en LAB.',
+            { expose: true },
+          )
+        }
+      }
       const draftProps =
         sanitizeSectionProps(sectionId, req.body?.draftProps) || {}
       const inst = await db.createHostedInstance({
-        userId: db.uid(req.user),
+        userId,
         key: newHostedKey(),
         sectionId,
         status: 'draft',
@@ -955,11 +999,19 @@ export async function createApp(config) {
       const userId = db.uid(req.user)
       const ent = await resolveEntitlement(userId, config)
       const used = await db.countPublishedHosted(userId, null)
+      // Prueba disponible = plan free y nunca tuvo una suscripción real.
+      let trialAvailable = false
+      if (ent.plan === 'free' && config.hostedTrialDays > 0) {
+        const prior = await db.findSubscriptionsByUser(userId)
+        trialAvailable = !prior.some((s) => s.status !== 'pending')
+      }
       res.json({
         ...ent,
         quota: quotaForWire(ent.quota),
         used,
         canPublish: used < ent.quota,
+        trialDays: config.hostedTrialDays,
+        trialAvailable,
       })
     }),
   )
@@ -974,6 +1026,17 @@ export async function createApp(config) {
       if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
 
       const userId = db.uid(req.user)
+
+      // Prueba gratis: solo si el usuario NUNCA tuvo una suscripción real
+      // (cualquier estado ≠ pending). Cancelar y volver a suscribirse NO
+      // reabre la prueba. Snapshot antes de tocar nada.
+      const priorSubs = await db.findSubscriptionsByUser(userId)
+      const hadRealSub = priorSubs.some((s) => s.status !== 'pending')
+      const trialDays = hadRealSub ? 0 : config.hostedTrialDays
+      const trialEndsAt =
+        trialDays > 0
+          ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000)
+          : null
 
       // Dedup: una sola suscripción activa, y no acumular altas a medio hacer.
       // Si ya la canceló (sigue con acceso hasta fin de período) o si el período
@@ -1012,6 +1075,7 @@ export async function createApp(config) {
         plan,
         cycle,
         status: 'pending',
+        ...(trialEndsAt ? { trialEndsAt } : {}),
       })
       const subId = db.uid(sub) || sub.id
 
@@ -1019,6 +1083,7 @@ export async function createApp(config) {
         return res.json({
           mock: true,
           subscriptionId: subId,
+          trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
           activateUrl: `/api/subscriptions/${subId}/mock-activate`,
         })
       }
@@ -1034,10 +1099,15 @@ export async function createApp(config) {
         payerEmail: req.user.email,
         externalReference: subId,
         backUrl: `${config.clientUrl}/lab`,
+        trialDays,
       })
       sub.mpPreapprovalId = String(pre.id)
       await sub.save()
-      res.json({ init_point: pre.init_point, subscriptionId: subId })
+      res.json({
+        init_point: pre.init_point,
+        subscriptionId: subId,
+        trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
+      })
     }),
   )
 
@@ -1052,9 +1122,15 @@ export async function createApp(config) {
         throw new HttpError(404, 'Suscripción no encontrada')
       }
       sub.status = 'authorized'
-      const end = new Date()
-      end.setDate(end.getDate() + (sub.cycle === 'yearly' ? 365 : 31))
-      sub.currentPeriodEnd = end
+      // Con prueba: el "período" corre hasta el fin de la prueba (ahí MP haría
+      // el primer cobro). Sin prueba: ciclo completo.
+      if (sub.trialEndsAt && new Date(sub.trialEndsAt).getTime() > Date.now()) {
+        sub.currentPeriodEnd = new Date(sub.trialEndsAt)
+      } else {
+        const end = new Date()
+        end.setDate(end.getDate() + (sub.cycle === 'yearly' ? 365 : 31))
+        sub.currentPeriodEnd = end
+      }
       await sub.save()
       sendSubscriptionWelcomeOnce({ subscription: sub, config }).catch((err) =>
         console.error('subs welcome email', err?.message),

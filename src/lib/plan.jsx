@@ -12,6 +12,10 @@ const EMPTY = {
   canceledAt: null,
   createdAt: null,
   currentPeriodEnd: null,
+  trialEndsAt: null,
+  trialing: false,
+  trialAvailable: false,
+  trialDays: 0,
   loading: true,
 }
 
@@ -45,6 +49,10 @@ export function PlanProvider({ children }) {
         canceledAt: d.canceledAt ?? null,
         createdAt: d.createdAt ?? null,
         currentPeriodEnd: d.currentPeriodEnd ?? null,
+        trialEndsAt: d.trialEndsAt ?? null,
+        trialing: d.trialing ?? false,
+        trialAvailable: d.trialAvailable ?? false,
+        trialDays: d.trialDays ?? 0,
         loading: false,
       })
     } catch {

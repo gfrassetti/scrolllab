@@ -16,12 +16,38 @@ const STATUS_TONE = {
   draft: 'text-ink/60 border-ink/25 bg-ink/5',
   suspended: 'text-danger border-danger/40 bg-danger/10',
 }
+// Congelada por el plan: no es un estado guardado, es derivado (el server
+// manda `frozen`). Naranja, no rojo — es reversible: vuelve al re-suscribirse.
+const FROZEN_TONE = 'text-accent border-accent/40 bg-accent/10'
 
 export default function LabPage() {
   const { user, loading } = useAuth()
-  const { refresh: refreshPlan } = usePlan()
-  const { t } = useI18n()
+  const {
+    plan,
+    quota,
+    canceledAt,
+    currentPeriodEnd,
+    trialAvailable,
+    trialDays,
+    loading: planLoading,
+    refresh: refreshPlan,
+  } = usePlan()
+  const { t, locale } = useI18n()
   const navigate = useNavigate()
+
+  const goToPlanes = (e) => {
+    e?.preventDefault?.()
+    if (window.location.hash !== '#planes') {
+      window.location.hash = 'planes'
+    } else {
+      document
+        .getElementById('planes')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  const fmtDate = (d) =>
+    d ? new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-AR') : ''
 
   const [instances, setInstances] = useState([])
   const [sections, setSections] = useState([])
@@ -32,6 +58,15 @@ export default function LabPage() {
   const [copied, setCopied] = useState('')
 
   const faq = t('lab.faq')
+
+  // LAB es de pago: un usuario free solo llega hasta `hostedFreeQuota`
+  // instancias (0 = ninguna). Sobre eso, "＋ Nueva" queda bloqueada. Las que
+  // ya tenía siguen guardadas (y se ven, congeladas). El server enforce esto.
+  const labLocked =
+    !!user &&
+    !planLoading &&
+    plan === 'free' &&
+    instances.length >= (quota ?? 0)
 
   const load = useCallback(async () => {
     try {
@@ -56,6 +91,10 @@ export default function LabPage() {
   }, [user, load])
 
   const create = async () => {
+    if (labLocked) {
+      goToPlanes()
+      return
+    }
     const sectionId = picked || sections[0]
     if (!sectionId || busy) return
     setBusy(true)
@@ -149,9 +188,9 @@ export default function LabPage() {
                 <select
                   value={picked}
                   onChange={(e) => setPicked(e.target.value)}
-                  disabled={sections.length === 0}
+                  disabled={sections.length === 0 || labLocked}
                   aria-label={t('lab.pickSection')}
-                  className="border border-ink/20 bg-[#f2efe9] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[#1a1a1a] outline-none focus:border-ink"
+                  className="border border-ink/20 bg-[#f2efe9] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[#1a1a1a] outline-none focus:border-ink disabled:opacity-40"
                   style={{ colorScheme: 'light' }}
                 >
                   {sections.map((id) => (
@@ -163,7 +202,8 @@ export default function LabPage() {
                 <button
                   type="button"
                   onClick={create}
-                  disabled={busy || sections.length === 0}
+                  disabled={busy || sections.length === 0 || labLocked}
+                  title={labLocked ? t('lab.lockedTip') : undefined}
                   className="ui-press border border-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone disabled:opacity-40"
                 >
                   {t('lab.new')}
@@ -171,8 +211,29 @@ export default function LabPage() {
               </div>
             </div>
 
+            {labLocked && (
+              <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5">
+                <p className="text-sm leading-relaxed text-ink/75">
+                  {trialAvailable
+                    ? t('lab.lockedTrial', { n: trialDays || 7 })
+                    : t('lab.lockedSubscribe')}
+                </p>
+                <a
+                  href="#planes"
+                  onClick={goToPlanes}
+                  className="ui-press mt-3 inline-block border border-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone"
+                >
+                  {trialAvailable
+                    ? t('lab.planTrialCta', { n: trialDays || 7 })
+                    : t('lab.viewOtherPlans')}
+                </a>
+              </div>
+            )}
+
             {instances.length === 0 ? (
-              <p className="mt-6 text-sm text-ink/50">{t('lab.empty')}</p>
+              labLocked ? null : (
+                <p className="mt-6 text-sm text-ink/50">{t('lab.empty')}</p>
+              )
             ) : (
               <ul className="mt-6 space-y-4">
                 {instances.map((inst) => (
@@ -184,16 +245,29 @@ export default function LabPage() {
                   <span className="font-mono text-sm">{inst.sectionId}</span>
                   <span
                     className={`border px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
-                      STATUS_TONE[inst.status] || STATUS_TONE.draft
+                      inst.frozen
+                        ? FROZEN_TONE
+                        : STATUS_TONE[inst.status] || STATUS_TONE.draft
                     }`}
                   >
-                    {t(`lab.status.${inst.status}`)}
+                    {inst.frozen
+                      ? t('lab.status.frozen')
+                      : t(`lab.status.${inst.status}`)}
                   </span>
-                  {inst.status === 'published' && inst.views > 0 && (
+                  {inst.status === 'published' && !inst.frozen && inst.views > 0 && (
                     <span className="text-[11px] tabular-nums text-ink/40">
                       {t('lab.views', { n: inst.views })}
                     </span>
                   )}
+                  {inst.status === 'published' &&
+                    !inst.frozen &&
+                    inst.stopsOnPlanEnd &&
+                    canceledAt &&
+                    currentPeriodEnd && (
+                      <span className="text-[11px] uppercase tracking-[0.2em] text-accent/90">
+                        {t('lab.stopsOn', { date: fmtDate(currentPeriodEnd) })}
+                      </span>
+                    )}
                   <Link
                     to={`/lab/${inst.id}`}
                     className="ml-auto text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent"
@@ -212,6 +286,11 @@ export default function LabPage() {
 
                 {inst.status === 'published' ? (
                   <div className="mt-4">
+                    {inst.frozen && (
+                      <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-xs leading-relaxed text-ink/70">
+                        {t('lab.frozenHint')}
+                      </p>
+                    )}
                     <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-ink/50">
                       {t('lab.snippet')}
                     </p>

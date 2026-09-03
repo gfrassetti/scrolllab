@@ -52,9 +52,12 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
   }
 
   async function publish(agent, sectionId = 'chapters/FooterCTA') {
-    const { body } = await agent.post('/api/hosted').send({ sectionId })
+    const created = await agent.post('/api/hosted').send({ sectionId })
+    // Crear ya puede fallar (402) si el usuario free llegó a su tope — se
+    // devuelve esa respuesta para que el test la vea como el bloqueo.
+    if (created.status !== 201) return created
     return agent
-      .put(`/api/hosted/${body.instance.id}`)
+      .put(`/api/hosted/${created.body.instance.id}`)
       .send({ draftProps: { ctaWord: 'X' }, publish: true })
   }
 
@@ -71,6 +74,90 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     const me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'free')
     assert.equal(me.body.quota, 1)
+  })
+
+  it('crear sección: free llega hasta HOSTED_FREE_QUOTA, después 402; con plan se destraba', async () => {
+    const agent = await loginAs('createlock@test.com')
+
+    // free, 0 instancias, quota 1 → puede crear una
+    const first = await agent
+      .post('/api/hosted')
+      .send({ sectionId: 'chapters/FooterCTA' })
+    assert.equal(first.status, 201)
+
+    // free, ya tiene 1 → 402 al crear otra
+    const blocked = await agent
+      .post('/api/hosted')
+      .send({ sectionId: 'chapters/FooterCTA' })
+    assert.equal(blocked.status, 402)
+    assert.match(blocked.body.error, /[Ss]uscrib|[Ll][ií]mite/)
+
+    // con plan activo → vuelve a crear
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    const afterSub = await agent
+      .post('/api/hosted')
+      .send({ sectionId: 'chapters/FooterCTA' })
+    assert.equal(afterSub.status, 201)
+  })
+
+  it('prueba gratis: primera suscripción arranca en trial; cancelar y volver NO reabre la prueba', async () => {
+    const agent = await loginAs('trial@test.com')
+
+    // Antes de suscribirse: la prueba está disponible.
+    let me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.trialAvailable, true)
+    assert.equal(me.body.trialDays, 7)
+
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    assert.ok(sub.body.trialEndsAt) // el server lo devuelve en el alta
+    await agent.post(sub.body.activateUrl)
+
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.quota, 15) // entitlement plena durante la prueba
+    assert.equal(me.body.trialing, true)
+    assert.equal(me.body.trialAvailable, false) // ya no
+    assert.ok(me.body.trialEndsAt)
+    // El "período" corre hasta el fin de la prueba (~7 días), no un mes.
+    const days =
+      (new Date(me.body.currentPeriodEnd) - Date.now()) / 86_400_000
+    assert.ok(days > 6 && days < 8, `esperaba ~7 días, dio ${days}`)
+
+    // Cancela y vuelve a suscribirse → sin prueba esta vez.
+    await agent.post('/api/subscriptions/cancel')
+    const again = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_starter', cycle: 'monthly' })
+    assert.equal(again.body.trialEndsAt, null)
+    await agent.post(again.body.activateUrl)
+
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.trialing, false)
+    const days2 =
+      (new Date(me.body.currentPeriodEnd) - Date.now()) / 86_400_000
+    assert.ok(days2 > 28, `esperaba un mes, dio ${days2}`)
+  })
+
+  it('prueba vencida sin primer cobro → baja a free (como una suscripción vencida)', async () => {
+    const agent = await loginAs('trialexp@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+
+    const { fileDb } = await import('../fileStore.js')
+    const s = await fileDb.findSubscriptionById(sub.body.subscriptionId)
+    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
+    await s.save()
+
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'free')
+    assert.equal(me.body.trialing, false)
   })
 
   it('la cuota frena el 2do publish y la suscripción lo destraba', async () => {
@@ -212,6 +299,67 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
       (await agent.post('/api/subscriptions/change').send({ plan: 'nope' }))
         .status,
       400,
+    )
+  })
+
+  it('GET /api/hosted marca `frozen` en las publicadas que el plan dejó de cubrir', async () => {
+    const agent = await loginAs('frozenlist@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+
+    await publish(agent)
+    await new Promise((r) => setTimeout(r, 5)) // createdAt distinto
+    await publish(agent)
+
+    const asc = (list) =>
+      [...list.body.instances].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      )
+
+    let list = await agent.get('/api/hosted')
+    assert.deepEqual(
+      asc(list).map((i) => i.frozen),
+      [false, false],
+    )
+    // Con plan activo pero free_quota=1: la 2da se apagaría si cae el plan.
+    assert.deepEqual(
+      asc(list).map((i) => i.stopsOnPlanEnd),
+      [false, true],
+    )
+
+    // vence el período → cuota vuelve a 1 (HOSTED_FREE_QUOTA)
+    const { fileDb } = await import('../fileStore.js')
+    const s = await fileDb.findSubscriptionById(sub.body.subscriptionId)
+    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
+    await s.save()
+
+    list = await agent.get('/api/hosted')
+    assert.deepEqual(
+      asc(list).map((i) => i.frozen),
+      [false, true], // la más vieja sigue, la nueva se congela
+    )
+    // Ya congelada: el aviso previo deja de tener sentido.
+    assert.deepEqual(
+      asc(list).map((i) => i.stopsOnPlanEnd),
+      [false, false],
+    )
+    // No se tocó el status guardado: siguen "published", no borradas.
+    assert.deepEqual(
+      asc(list).map((i) => i.status),
+      ['published', 'published'],
+    )
+
+    // re-suscribirse las descongela sin más
+    const again = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_starter', cycle: 'monthly' })
+    await agent.post(again.body.activateUrl)
+    list = await agent.get('/api/hosted')
+    assert.deepEqual(
+      asc(list).map((i) => i.frozen),
+      [false, false],
     )
   })
 

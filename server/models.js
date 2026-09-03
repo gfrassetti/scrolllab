@@ -126,6 +126,12 @@ const subscriptionSchema = new mongoose.Schema(
       index: true,
     },
     currentPeriodEnd: Date,
+    // Prueba gratis (primera suscripción del usuario): MP autoriza la tarjeta
+    // y no cobra hasta esta fecha. Durante la prueba `status` es `authorized`
+    // y `currentPeriodEnd` = `trialEndsAt`, así que la entitlement es plena.
+    // Si la prueba vence sin primer cobro, `currentPeriodEnd` queda en el
+    // pasado y `resolveEntitlement` baja a free (igual que una baja).
+    trialEndsAt: Date,
     // Cancelada por el usuario: sigue `authorized` (con acceso) hasta
     // `currentPeriodEnd`; no renueva. `resolveEntitlement` la cierra al vencer.
     canceledAt: Date,

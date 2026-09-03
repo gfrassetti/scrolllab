@@ -30,6 +30,8 @@ const FREE = (config, extra = {}) => ({
   currentPeriodEnd: null,
   canceledAt: null,
   createdAt: null,
+  trialEndsAt: null,
+  trialing: false,
   ...extra,
 })
 
@@ -57,6 +59,11 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
     return FREE(config)
   }
 
+  const trialing =
+    !!sub.trialEndsAt &&
+    new Date(sub.trialEndsAt).getTime() > Date.now() &&
+    !sub.canceledAt
+
   return {
     plan: sub.plan,
     cycle: sub.cycle,
@@ -66,6 +73,8 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
     currentPeriodEnd: sub.currentPeriodEnd || null,
     canceledAt: sub.canceledAt || null,
     createdAt: sub.createdAt || null,
+    trialEndsAt: sub.trialEndsAt || null,
+    trialing,
   }
 }
 

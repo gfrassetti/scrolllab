@@ -164,18 +164,26 @@ export function buildPreapprovalBody({
   payerEmail,
   externalReference,
   backUrl,
+  trialDays = 0,
 }) {
+  const autoRecurring = {
+    frequency,
+    frequency_type: frequencyType,
+    transaction_amount: amount,
+    currency_id: currencyId,
+  }
+  if (trialDays > 0) {
+    autoRecurring.free_trial = {
+      frequency: Math.floor(trialDays),
+      frequency_type: 'days',
+    }
+  }
   return {
     reason,
     external_reference: externalReference,
     payer_email: payerEmail,
     back_url: backUrl,
-    auto_recurring: {
-      frequency,
-      frequency_type: frequencyType,
-      transaction_amount: amount,
-      currency_id: currencyId,
-    },
+    auto_recurring: autoRecurring,
     status: 'pending',
   }
 }

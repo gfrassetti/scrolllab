@@ -29,6 +29,10 @@ export default function HostedPlans() {
     canceledAt,
     currentPeriodEnd,
     cycle: billingCycle,
+    trialing,
+    trialEndsAt,
+    trialAvailable,
+    trialDays,
     refresh: refreshPlan,
   } = usePlan()
   const { t, locale } = useI18n()
@@ -255,6 +259,17 @@ export default function HostedPlans() {
                 </>
               )}
             </p>
+            {trialing && !canceledAt && (
+              <p className="mt-1 text-xs text-accent">
+                {t('lab.planTrialActive', {
+                  date: trialEndsAt
+                    ? new Date(trialEndsAt).toLocaleDateString(
+                        locale === 'en' ? 'en-US' : 'es-AR',
+                      )
+                    : '',
+                })}
+              </p>
+            )}
             {canceledAt ? (
               <p className="mt-1 text-xs text-ink/45">
                 {t('lab.planCanceledUntil', {
@@ -362,8 +377,13 @@ export default function HostedPlans() {
                       {t('lab.save', { pct: saving })}
                     </p>
                   )}
-                  <p className="mt-4 flex-1 text-sm text-ink/70">
+                  <p className="mt-4 text-sm text-ink/70">
                     {t('lab.planQuota', { n: displayQuota(p.instanceQuota) })}
+                  </p>
+                  <p className="mt-1 flex-1 text-xs text-ink/45">
+                    {user && !activePlan && trialAvailable && trialDays > 0
+                      ? t('lab.planTrialNote', { n: trialDays })
+                      : ' '}
                   </p>
                   {!user ? (
                     <Link
@@ -404,7 +424,11 @@ export default function HostedPlans() {
                           : 'border border-ink bg-ink text-bone hover:opacity-90'
                       }`}
                     >
-                      {busy === p.id ? '…' : t('lab.planSubscribe')}
+                      {busy === p.id
+                        ? '…'
+                        : trialAvailable && trialDays > 0
+                          ? t('lab.planTrialCta', { n: trialDays })
+                          : t('lab.planSubscribe')}
                     </button>
                   )}
                 </div>

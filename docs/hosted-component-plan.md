@@ -226,7 +226,9 @@ snippet.
   anterior). Firma con `config.mpSubs.webhookSecret`.
 - **Enforcement**: `assertCanPublish` en `PUT /api/hosted/:id {publish:true}` —
   cuenta instancias `published` del usuario vs cuota del plan (o
-  `HOSTED_FREE_QUOTA`, default 1). Sobre la cuota → 402. Draft siempre permitido.
+  `HOSTED_FREE_QUOTA`, default **0**). Además `POST /api/hosted` frena la
+  creación de un usuario free que ya llegó a `HOSTED_FREE_QUOTA` (0 → no crea
+  nada). La prueba de 7 días (`HOSTED_TRIAL_DAYS`) es el "probá antes de pagar".
 - **Rutas**: `GET /api/subscriptions/plans` (público) ·
   `GET /api/subscriptions/me` (entitlement + uso) · `POST /api/subscriptions`
   (mock → `activateUrl`; real → `init_point`) ·
@@ -337,12 +339,12 @@ revalidación), badge "congelada por el plan" en la lista de LAB.
 
 ### Cuota gratis
 
-`HOSTED_FREE_QUOTA` (Railway, default **1**): secciones **publicadas** que se
-permiten sin suscripción.
-- `1` → una sección gratis (para probar).
-- `0` → hace falta suscripción para publicar cualquier cosa. El borrador se
-  puede crear/editar, pero **Publicar** tira 402. Las secciones publicadas
-  cuando la cuota era 1 dejan de servir (freeze).
+`HOSTED_FREE_QUOTA` (Railway, default **0**): cuántas instancias hosteadas
+puede tener un usuario **sin suscripción**.
+- `0` (default) → LAB 100% de pago: un usuario free no crea ni borradores
+  (`POST /api/hosted` → 402). Lo publicado antes deja de servir (freeze) y
+  vuelve al re-suscribirse. La prueba de 7 días es el "probá antes de pagar".
+- `1+` → free tier real: N instancias sin pagar (crear + publicar hasta N).
 
 ### Suscripción MP — flujo real confirmado
 

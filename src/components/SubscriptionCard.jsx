@@ -20,6 +20,8 @@ export default function SubscriptionCard() {
     canceledAt,
     createdAt,
     currentPeriodEnd,
+    trialing,
+    trialEndsAt,
     loading,
     refresh,
   } = usePlan()
@@ -153,7 +155,9 @@ export default function SubscriptionCard() {
               ? t('account.subCanceled', { date: fmtDate(currentPeriodEnd) })
               : subscriptionStatus === 'paused'
                 ? t('account.subPaused')
-                : t('account.subActive', { date: fmtDate(currentPeriodEnd) })}
+                : trialing
+                  ? t('account.subTrial', { date: fmtDate(trialEndsAt) })
+                  : t('account.subActive', { date: fmtDate(currentPeriodEnd) })}
           </p>
 
           <dl className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">

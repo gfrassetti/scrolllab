@@ -70,6 +70,14 @@ describe('Embed: se apaga cuando cae la suscripción (HOSTED_FREE_QUOTA=0)', () 
       .get(`/api/embed/${key}/config`)
       .then((r) => r.status)
 
+  it('con HOSTED_FREE_QUOTA=0, un usuario free no puede ni crear una sección', async () => {
+    const agent = await loginAs('nocreate@test.com')
+    const res = await agent
+      .post('/api/hosted')
+      .send({ sectionId: 'chapters/FooterCTA' })
+    assert.equal(res.status, 402)
+  })
+
   it('cancelar + vencer el período apaga TODAS las instancias; re-suscribir las revive', async () => {
     const agent = await loginAs('lapse@test.com')
 

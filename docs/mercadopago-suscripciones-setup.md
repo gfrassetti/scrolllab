@@ -24,8 +24,9 @@ Solo tocás esto si querés una **app de MP separada** para suscripciones:
 `MP_SUBS_ACCESS_TOKEN` (y `MP_SUBS_WEBHOOK_SECRET`) con las credenciales de esa
 otra app. No es el caso hoy.
 
-Opcional: `HOSTED_FREE_QUOTA` (default `1`) — secciones publicadas sin
-suscripción; `0` = siempre hace falta suscripción.
+Opcional: `HOSTED_FREE_QUOTA` (default `0` = LAB 100% de pago, ni se crean
+secciones sin plan/prueba; `1+` = free tier real). `HOSTED_TRIAL_DAYS`
+(default `7`) — días de prueba gratis en la primera alta.
 
 ---
 
@@ -62,12 +63,13 @@ Cambialos y redeploy. No hace falta tocar nada en MP (el monto viaja en el alta)
 
 ### Cuota gratis (`HOSTED_FREE_QUOTA`)
 
-Env en Railway, **default `1`**: secciones publicadas permitidas **sin**
-suscripción.
-- `1` → una sección gratis para probar.
-- `0` → **sin plan no se publica nada**. El borrador se crea/edita igual, pero
-  **Publicar** tira `402` ("Suscribite para publicar"). Las secciones que se
-  publicaron cuando la cuota era 1 dejan de servir (freeze).
+Env en Railway, **default `0`**: cuántas instancias hosteadas puede tener un
+usuario **sin** suscripción.
+- `0` (default) → **LAB 100% de pago**. Un usuario free ni crea borradores
+  (`POST /api/hosted` → `402`). Lo publicado antes deja de servir (freeze) y
+  vuelve al re-suscribirse. La prueba de 7 días (`HOSTED_TRIAL_DAYS`) es el
+  "probá antes de pagar".
+- `1+` → free tier real: N instancias sin pagar.
 
 ---
 
