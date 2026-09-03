@@ -94,8 +94,9 @@ export async function createApp(config) {
   assertWritableDir(config.storageDir)
 
   const app = express()
-  // Railway / Vercel proxy: trust X-Forwarded-* so secure session cookies stick.
-  app.set('trust proxy', config.isProd ? true : 1)
+  // Railway / Vercel proxy: 1 hop. NO `true` (confía en cualquier proxy → un
+  // X-Forwarded-For spoofeado evade rate limits y ensucia la IP de los logs).
+  app.set('trust proxy', 1)
   app.disable('x-powered-by')
 
   app.use(requestId)

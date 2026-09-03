@@ -137,7 +137,9 @@ export async function changeSubscriptionPlan(
     )
   }
 
+  const previousPlan = sub.plan
   const mock = !config.mpSubs?.accessToken || config.mpMock
+  let mpUpdated = false
   if (!mock && sub.mpPreapprovalId) {
     const update = deps.updateAmount || updatePreapprovalAmount
     const tierMeta = HOSTED_PLANS[targetPlan]
@@ -148,11 +150,25 @@ export async function changeSubscriptionPlan(
         sub.cycle === 'yearly' ? 'anual' : 'mensual'
       })`,
     })
+    mpUpdated = true
   }
 
-  const previousPlan = sub.plan
   sub.plan = targetPlan
-  await sub.save()
+  try {
+    await sub.save()
+  } catch (err) {
+    // MP ya tiene el monto nuevo pero la fila local no. Reintentar el endpoint
+    // arregla (el PUT de MP es idempotente). Log greppable para reconciliar a
+    // mano si el reintento no llega.
+    if (mpUpdated) {
+      console.error(
+        `subs change RECONCILE: MP en ${targetPlan} pero local sigue en ` +
+          `${previousPlan} sub=${db.uid(sub) || sub.id} preapproval=${sub.mpPreapprovalId}`,
+        err?.message,
+      )
+    }
+    throw err
+  }
 
   return {
     plan: sub.plan,
@@ -247,6 +263,28 @@ export async function handleAuthorizedPaymentEvent(
 
   const approved =
     ap.status === 'processed' || ap?.payment?.status === 'approved'
+
+  // Defensa en profundidad: el monto cobrado debería parecerse al precio del
+  // plan. No bloqueamos (proración / promos de MP pueden diferir), pero un
+  // desvío grande queda logueado para revisar una config equivocada.
+  if (approved) {
+    const charged = Number(
+      ap?.payment?.transaction_amount ?? ap?.transaction_amount,
+    )
+    const expected = hostedPlanPrice(sub.plan, sub.cycle)
+    if (
+      Number.isFinite(charged) &&
+      Number.isFinite(expected) &&
+      expected > 0 &&
+      Math.abs(charged - expected) / expected > 0.5
+    ) {
+      console.warn(
+        `subs authorized_payment monto sospechoso sub=${db.uid(sub) || sub.id} ` +
+          `plan=${sub.plan}/${sub.cycle} cobrado=${charged} esperado=${expected}`,
+      )
+    }
+  }
+
   if (approved) {
     const now = new Date()
     const base =
