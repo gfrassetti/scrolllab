@@ -1,7 +1,16 @@
 import { db } from '../db.js'
 import { HttpError } from '../validation.js'
-import { HOSTED_PLANS, hostedPlanQuota } from '../catalog.js'
-import { fetchPreapproval, fetchAuthorizedPayment } from './mercadoPago.js'
+import {
+  HOSTED_PLANS,
+  hostedPlanQuota,
+  hostedPlanPrice,
+  isHostedPlanId,
+} from '../catalog.js'
+import {
+  fetchPreapproval,
+  fetchAuthorizedPayment,
+  updatePreapprovalAmount,
+} from './mercadoPago.js'
 import { sendSubscriptionWelcomeOnce } from './email.js'
 
 /** Mail de bienvenida al activarse — fire-and-forget, idempotente por el claim. */
@@ -75,6 +84,74 @@ export async function assertCanPublish({ userId, instanceId, config }) {
         : 'Llegaste al límite de tu plan. Subí de plan para publicar más.',
       { expose: true },
     )
+  }
+}
+
+/**
+ * Cambio de plan sin dar de baja. Solo entre tiers del MISMO ciclo: MP no deja
+ * mutar la frecuencia de un preapproval, así que mensual↔anual sigue por
+ * cancelar + re-suscribir (lo maneja la UI). Semántica:
+ *   - la cuota nueva rige YA (deja publicar de una al subir de plan)
+ *   - el precio nuevo rige desde el próximo cobro (MP no prorratea)
+ *   - bajar de plan se bloquea si el usuario ya publicó más de lo que el
+ *     plan nuevo permite — primero despublica.
+ * `deps.updateAmount` es el seam para tests.
+ */
+export async function changeSubscriptionPlan(
+  { userId, plan: targetPlan, config },
+  deps = {},
+) {
+  if (!isHostedPlanId(targetPlan)) throw new HttpError(400, 'Plan inválido')
+
+  const sub = await db.findActiveSubscriptionByUser(userId)
+  if (!sub || sub.status !== 'authorized') {
+    throw new HttpError(404, 'No tenés una suscripción activa', { expose: true })
+  }
+  if (sub.canceledAt) {
+    throw new HttpError(
+      409,
+      'Tu suscripción está dada de baja. Volvé a suscribirte al plan que quieras.',
+      { expose: true },
+    )
+  }
+  if (sub.plan === targetPlan) {
+    throw new HttpError(409, 'Ya estás en ese plan', { expose: true })
+  }
+
+  const used = await db.countPublishedHosted(userId, null)
+  const targetQuota = hostedPlanQuota(targetPlan)
+  if (used > targetQuota) {
+    throw new HttpError(
+      402,
+      `Ese plan permite ${targetQuota} secciones publicadas y tenés ${used}. Despublicá ${used - targetQuota} antes de bajar de plan.`,
+      { expose: true },
+    )
+  }
+
+  const mock = !config.mpSubs?.accessToken || config.mpMock
+  if (!mock && sub.mpPreapprovalId) {
+    const update = deps.updateAmount || updatePreapprovalAmount
+    const tierMeta = HOSTED_PLANS[targetPlan]
+    await update(config.mpSubs.accessToken, sub.mpPreapprovalId, {
+      amount: hostedPlanPrice(targetPlan, sub.cycle),
+      currencyId: tierMeta.currency_id,
+      reason: `ScrollLab LAB — ${tierMeta.tier} (${
+        sub.cycle === 'yearly' ? 'anual' : 'mensual'
+      })`,
+    })
+  }
+
+  const previousPlan = sub.plan
+  sub.plan = targetPlan
+  await sub.save()
+
+  return {
+    plan: sub.plan,
+    previousPlan,
+    quota: targetQuota,
+    cycle: sub.cycle,
+    // El monto nuevo lo cobra MP recién en el próximo ciclo.
+    priceEffectiveAt: sub.currentPeriodEnd || null,
   }
 }
 

@@ -104,60 +104,53 @@ export function requireSameOrigin(config) {
 }
 
 export function rateLimits() {
+  // Bypass solo para tests (`RATE_LIMIT_DISABLED=true` en el setup): las suites
+  // comparten IP y agotarían la ventana. Nunca se prende en prod.
+  const skip =
+    process.env.RATE_LIMIT_DISABLED === 'true'
+      ? () => true
+      : undefined
+  const mk = (opts) => rateLimit({ standardHeaders: true, legacyHeaders: false, skip, ...opts })
   return {
-    auth: rateLimit({
+    auth: mk({
       windowMs: 15 * 60 * 1000,
       max: 30,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Demasiados intentos de login' },
     }),
-    checkout: rateLimit({
+    checkout: mk({
       windowMs: 60 * 60 * 1000,
       max: 20,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Demasiados checkouts' },
     }),
-    webhook: rateLimit({
+    webhook: mk({
       windowMs: 60 * 1000,
       max: 120,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Rate limit' },
     }),
     // Emitir el link es lo que conviene frenar (un script pidiendo tokens para
     // repartir); bajar el ZIP es generoso porque el browser reintenta y resume.
-    downloadToken: rateLimit({
+    downloadToken: mk({
       windowMs: 60 * 1000,
       max: 20,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Demasiados pedidos de descarga' },
     }),
-    download: rateLimit({
+    download: mk({
       windowMs: 60 * 1000,
       max: 60,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Demasiadas descargas' },
     }),
     // Config del embed: público y cacheable (CDN + max-age), así que el origin
     // recibe pocos hits. Generoso porque muchos visitantes pueden compartir IP.
-    embedConfig: rateLimit({
+    embedConfig: mk({
       windowMs: 60 * 1000,
       max: 240,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Rate limit' },
     }),
     // Mutaciones de LAB (crear/editar/borrar instancias hosteadas). Holgado
     // para editar de verdad, corta el scripteo de creación masiva de keys.
-    hosted: rateLimit({
+    hosted: mk({
       windowMs: 60 * 1000,
       max: 40,
-      standardHeaders: true,
-      legacyHeaders: false,
       message: { error: 'Demasiadas operaciones, probá en un momento' },
     }),
   }

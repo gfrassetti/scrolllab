@@ -24,6 +24,7 @@
     "eyebrow": "Componentes hosteados",
     "body": "Configurá una sección y mostrala en cualquier sitio con una línea de <script>. El código nunca sale de nuestro lado: editás acá, se actualiza allá.",
     "yours": "Tus secciones",
+    "publishedCount": "{{n}} de {{total}} publicadas",
     "new": "＋ Nueva",
     "pickSection": "Elegí una sección",
     "empty": "Todavía no tenés ninguna. Creá una para empezar.",
@@ -119,8 +120,10 @@
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
     "planSubscribe": "Suscribirme",
-    "planViaResub": "Disponible al re-suscribirte",
-    "planChangeHint": "Para cambiar de plan, cancelás la actual y te suscribís de nuevo al terminar el período.",
+    "planChangeTo": "Cambiar a este plan",
+    "planChanged": "Plan actualizado. La cuota nueva ya rige; el precio nuevo lo cobra Mercado Pago en el próximo ciclo.",
+    "planChangeHint": "Cambiás de plan en el acto, sin dar de baja: la cuota nueva rige ya y el precio nuevo se cobra en el próximo ciclo.",
+    "planCycleHint": "Pasar de facturación mensual a anual (o al revés) sí requiere dar de baja y volver a suscribirte.",
     "planRecommended": "Más elegido"
   },
   "common": {

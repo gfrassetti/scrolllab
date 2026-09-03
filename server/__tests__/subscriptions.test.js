@@ -21,6 +21,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     process.env.FX_OFFLINE = 'true'
     process.env.FX_FALLBACK_RATE = '1560'
     process.env.HOSTED_FREE_QUOTA = '1'
+    process.env.RATE_LIMIT_DISABLED = 'true'
     storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-subs-'))
     process.env.STORAGE_DIR = storageDir
     process.env.FILE_DB_DIR = path.join(storageDir, 'db')
@@ -141,6 +142,77 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
       .post('/api/subscriptions')
       .send({ plan: 'hosted_pro', cycle: 'monthly' })
     assert.equal(again.status, 200)
+  })
+
+  it('cambiar de plan en el acto: sube la cuota, misma suscripción, sin dar de baja', async () => {
+    const agent = await loginAs('change@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_starter', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+
+    const change = await agent
+      .post('/api/subscriptions/change')
+      .send({ plan: 'hosted_pro' })
+    assert.equal(change.status, 200)
+    assert.equal(change.body.plan, 'hosted_pro')
+    assert.equal(change.body.previousPlan, 'hosted_starter')
+    assert.equal(change.body.quota, 15)
+
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.quota, 15)
+    assert.equal(me.body.subscriptionId, sub.body.subscriptionId) // no se dio de baja
+    assert.equal(me.body.canceledAt, null)
+  })
+
+  it('bajar de plan se bloquea si ya publicaste más de lo que el nuevo permite', async () => {
+    // Studio (sin tope) → publicamos 6 → intentar bajar a Starter (tope 5) → 402.
+    const agent = await loginAs('downgrade@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_studio', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    for (let i = 0; i < 6; i++) {
+      const p = await publish(agent)
+      assert.equal(p.status, 200)
+    }
+
+    const bad = await agent
+      .post('/api/subscriptions/change')
+      .send({ plan: 'hosted_starter' })
+    assert.equal(bad.status, 402)
+    assert.match(bad.body.error, /[Dd]espublic/)
+
+    // Sigue en Studio, intacto.
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_studio')
+  })
+
+  it('change: rechaza mismo plan, plan inválido y sin suscripción', async () => {
+    const noSub = await loginAs('nosub-change@test.com')
+    assert.equal(
+      (await noSub.post('/api/subscriptions/change').send({ plan: 'hosted_pro' }))
+        .status,
+      404,
+    )
+
+    const agent = await loginAs('samep@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+
+    assert.equal(
+      (await agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' }))
+        .status,
+      409,
+    )
+    assert.equal(
+      (await agent.post('/api/subscriptions/change').send({ plan: 'nope' }))
+        .status,
+      400,
+    )
   })
 
   it('período vencido → vuelve a free (barrido perezoso)', async () => {

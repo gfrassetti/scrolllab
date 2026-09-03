@@ -244,7 +244,10 @@ export default function SiteHeader({ solid = true }) {
             {showAccount ? (
               <>
                 <li>
-                  <Link to="/account" className="block py-3.5 hover:text-accent">
+                  <Link
+                    to="/account#compras"
+                    className="block py-3.5 hover:text-accent"
+                  >
                     {t('nav.account')}
                   </Link>
                 </li>

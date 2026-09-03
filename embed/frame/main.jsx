@@ -1,6 +1,6 @@
 import { h, render } from 'preact'
 import './main.css'
-import { loadSection } from '../src/registry'
+import { loadSection, canvasFor } from '../src/registry'
 import { ScrollTrigger } from '../src/gsap'
 
 const params = new URLSearchParams(location.hash.slice(1))
@@ -111,6 +111,10 @@ async function main() {
     console.error('[scrolllab] sección desconocida:', config.sectionId)
     return
   }
+
+  // Canvas del modelo: fuera del sitio la sección no hereda `wrapperClass`.
+  const canvas = canvasFor(config.sectionId)
+  if (canvas) root.className = canvas
 
   render(h(Section, config.props || {}), root)
 

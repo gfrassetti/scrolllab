@@ -409,33 +409,133 @@ Este correo confirma la activación y no reemplaza una factura fiscal.`
   }
 }
 
+/** Contenido del mail de confirmación de baja — puro, testeable. */
+export function buildSubscriptionCanceled({
+  subscription,
+  user,
+  accountUrl,
+  logoUrl,
+}) {
+  const plan = HOSTED_PLANS[subscription.plan] || {}
+  const tier = TIER_LABEL[plan.tier] || subscription.plan
+  const endsAt = formatDateOnly(subscription.currentPeriodEnd)
+  const name = user.name || user.email
+  const accessLine = endsAt
+    ? `Seguís con acceso al plan <strong>${escapeHtml(tier)}</strong> hasta el <strong>${escapeHtml(endsAt)}</strong>. No se te va a cobrar de nuevo.`
+    : `Tu acceso al plan <strong>${escapeHtml(tier)}</strong> termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const accessText = endsAt
+    ? `Seguís con acceso al plan ${tier} hasta el ${endsAt}. No se te va a cobrar de nuevo.`
+    : `Tu acceso al plan ${tier} termina al final del período pagado. No se te va a cobrar de nuevo.`
+
+  const html = `<!doctype html>
+<html lang="es">
+  <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
+    <div style="display:none;max-height:0;overflow:hidden;">
+      Cancelaste tu suscripción a ScrollLab LAB.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#f2efe9;border:1px solid #d6d1c8;">
+            <tr>
+              <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:40px 32px 20px;">
+                <p style="margin:0 0 12px;color:#77716a;font-size:12px;letter-spacing:3px;text-transform:uppercase;">Suscripción cancelada</p>
+                <h1 style="margin:0 0 18px;font-size:32px;line-height:1.1;font-weight:600;">Listo, ${escapeHtml(name)}.</h1>
+                <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">
+                  Cancelamos la renovación automática de tu suscripción a LAB. ${accessLine}
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 24px;color:#5b5650;font-size:15px;line-height:1.6;">
+                Al terminar el período, las secciones publicadas por encima del tope gratis dejan de mostrarse. Volvés a activar cuando quieras.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 32px 40px;">
+                <a href="${escapeHtml(accountUrl)}" style="display:inline-block;background:#161412;color:#f2efe9;text-decoration:none;padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+                  Reactivar en LAB →
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
+                Si esto no lo hiciste vos, respondé a este email.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+
+  const text = `SCROLLLAB — Suscripción cancelada
+
+Listo, ${name}.
+
+Cancelamos la renovación automática de tu suscripción a LAB.
+${accessText}
+
+Al terminar el período, las secciones publicadas por encima del tope gratis
+dejan de mostrarse. Volvés a activar cuando quieras:
+${accountUrl}
+
+Si esto no lo hiciste vos, respondé a este email.`
+
+  return {
+    subject: `Cancelaste tu suscripción a ScrollLab LAB`,
+    html,
+    text,
+  }
+}
+
+const SUB_EMAIL = {
+  welcome: {
+    build: buildSubscriptionWelcome,
+    tag: 'subscription_welcome',
+    idPrefix: 'scrolllab-sub-welcome',
+  },
+  canceled: {
+    build: buildSubscriptionCanceled,
+    tag: 'subscription_canceled',
+    idPrefix: 'scrolllab-sub-canceled',
+  },
+}
+
 /**
- * Un solo mail de bienvenida por suscripción, al pasar a `authorized`.
- * Idempotente por el claim en DB + Idempotency-Key de Resend. Fire-and-forget
- * desde los paths que activan (webhook / sync / mock-activate).
+ * Un solo mail de suscripción por evento (`welcome` al activarse / `canceled`
+ * al dar de baja). Idempotente por el claim en DB + Idempotency-Key de Resend.
+ * Fire-and-forget desde los paths que disparan (webhook / sync / cancel route).
  */
-export async function sendSubscriptionWelcomeOnce({ subscription, config, client }) {
+async function sendSubscriptionEmailOnce({ kind, subscription, config, client }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
+  const spec = SUB_EMAIL[kind]
 
   const subId = String(db.uid(subscription) || subscription.id)
-  const claimed = await db.claimSubscriptionWelcome(subId)
-  if (!claimed) return { skipped: 'already-sent-or-not-authorized' }
+  const claimed = await db.claimSubscriptionEmail(subId, kind)
+  if (!claimed) return { skipped: 'already-sent-or-not-applicable' }
 
   const user = await db.findUserById(String(claimed.userId))
   if (!user?.email) {
-    await db.releaseSubscriptionWelcome(subId, 'usuario sin email')
+    await db.releaseSubscriptionEmail(subId, kind, 'usuario sin email')
     return { skipped: 'no-user-email' }
   }
 
   const accountUrl = new URL('/lab', config.clientUrl).toString()
   const logoUrl =
     config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
-  const message = buildSubscriptionWelcome({
-    subscription: claimed,
-    user,
-    accountUrl,
-    logoUrl,
-  })
+  const message = spec.build({ subscription: claimed, user, accountUrl, logoUrl })
 
   const resend = client || new Resend(config.email.apiKey)
   try {
@@ -447,19 +547,32 @@ export async function sendSubscriptionWelcomeOnce({ subscription, config, client
         subject: message.subject,
         html: message.html,
         text: message.text,
-        tags: [{ name: 'type', value: 'subscription_welcome' }],
+        tags: [{ name: 'type', value: spec.tag }],
       },
-      { idempotencyKey: `scrolllab-sub-welcome-${subId}` },
+      { idempotencyKey: `${spec.idPrefix}-${subId}` },
     )
     if (response.error) {
       throw new Error(response.error.message || 'Resend rechazó el correo')
     }
-    await db.completeSubscriptionWelcome(subId, response.data?.id || null)
+    await db.completeSubscriptionEmail(subId, kind, response.data?.id || null)
     return { sent: true, id: response.data?.id || null }
   } catch (err) {
-    await db.releaseSubscriptionWelcome(subId, err.message)
+    await db.releaseSubscriptionEmail(subId, kind, err.message)
     throw err
   }
+}
+
+export function sendSubscriptionWelcomeOnce({ subscription, config, client }) {
+  return sendSubscriptionEmailOnce({ kind: 'welcome', subscription, config, client })
+}
+
+export function sendSubscriptionCanceledOnce({ subscription, config, client }) {
+  return sendSubscriptionEmailOnce({
+    kind: 'canceled',
+    subscription,
+    config,
+    client,
+  })
 }
 
 /**

@@ -24,6 +24,7 @@
     "eyebrow": "Hosted components",
     "body": "Configure a section and serve it on any site with one line of <script>. The code never leaves our side: you edit here, it updates there.",
     "yours": "Your sections",
+    "publishedCount": "{{n}} of {{total}} published",
     "new": "＋ New",
     "pickSection": "Pick a section",
     "empty": "You don't have any yet. Create one to get started.",
@@ -119,8 +120,10 @@
     "hideOtherPlans": "Hide other plans",
     "planCurrent": "Your plan",
     "planSubscribe": "Subscribe",
-    "planViaResub": "Available when you re-subscribe",
-    "planChangeHint": "To change plans, cancel your current one and subscribe again once the period ends.",
+    "planChangeTo": "Switch to this plan",
+    "planChanged": "Plan updated. The new quota applies now; Mercado Pago charges the new price on your next cycle.",
+    "planChangeHint": "You switch plans right away, no cancellation: the new quota applies now and the new price is charged on your next cycle.",
+    "planCycleHint": "Moving between monthly and yearly billing does require canceling and subscribing again.",
     "planRecommended": "Most popular"
   },
   "common": {

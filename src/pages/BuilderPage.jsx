@@ -231,17 +231,26 @@ export default function BuilderPage() {
   return (
     <div className="min-h-svh bg-bone px-5 pb-10 text-ink md:px-10">
       <header className="sticky top-0 z-30 -mx-5 mb-10 flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 bg-bone/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
-        <div className="flex items-baseline gap-6">
+        <nav className="flex items-baseline gap-5">
           <Link
             to="/"
             className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors duration-300 hover:text-accent md:text-xs"
           >
             {t('builder.back')}
           </Link>
-          <p className="text-sm font-medium uppercase tracking-[0.25em]">
+          <Link
+            to="/lab"
+            className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors duration-300 hover:text-accent md:text-xs"
+          >
+            {t('nav.lab')}
+          </Link>
+          <p
+            aria-current="page"
+            className="text-sm font-medium uppercase tracking-[0.25em] text-ink"
+          >
             {t('builder.title')}
           </p>
-        </div>
+        </nav>
 
         <div className="flex flex-wrap items-center gap-3">
           <button

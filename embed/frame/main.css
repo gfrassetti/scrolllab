@@ -27,9 +27,39 @@
 }
 
 @theme {
+  /* CHAPTERS */
   --color-accent: #ff4b00;
+
+  /* Tokens por modelo que usa la familia footer hosteable. Deben coincidir
+     con los @theme de src/index.css. */
+  /* NOCTURNE — OutroCTA */
+  --color-noir: #0e0e11;
+  --color-salt: #ece9e2;
+  --color-acid: #d9ff3f;
+  /* MONOLITH — FooterBrutal (bg-concrete/text-carbon canvas, bg-klein bloque) */
+  --color-concrete: #cdcbc4;
+  --color-carbon: #101010;
+  --color-klein: #2b3cff;
+  /* FIZZ — FooterSplash */
+  --color-grape: #241352;
+  --color-foam: #fff3e2;
+  --color-fizz: #ff3ea5;
+  /* ATRIUM — FooterAtrium */
+  --color-atrium-paper: #f4f1ea;
+  --color-atrium-ink: #111111;
+
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-brico: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-anton: "Anton", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ATRIUM — clase de nota (FooterAtrium). Clamp resuelto de src/index.css. */
+.atrium-note {
+  font-size: clamp(11px, 0.9vw, 13px);
+  line-height: 1.45;
+  letter-spacing: 0;
 }
 
 html,

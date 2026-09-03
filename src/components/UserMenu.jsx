@@ -76,7 +76,7 @@ export default function UserMenu({ user, onLogout, loggingOut }) {
             panelIn ? 'ui-enter-to' : 'ui-enter-from'
           }`}
         >
-          <Link to="/account" role="menuitem" className={itemClass}>
+          <Link to="/account#compras" role="menuitem" className={itemClass}>
             {t('nav.account')}
           </Link>
           <Link

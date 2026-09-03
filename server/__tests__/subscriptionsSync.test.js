@@ -240,4 +240,60 @@ describe('syncSubscriptionForUser (file store, MP inyectado)', () => {
     })
     assert.equal(r.skipped, 'disabled')
   })
+
+  it('mail de baja: se manda una sola vez y solo si canceledAt', async () => {
+    const { sendSubscriptionCanceledOnce } = await import('../services/email.js')
+    const user = await db.createUser({ email: 'cancel@test.com', name: 'C' })
+    const emailCfg = {
+      clientUrl: 'https://www.scrolllab.com.ar',
+      email: { enabled: true, apiKey: 'x', from: 'x', replyTo: '', logoUrl: '' },
+    }
+    let calls = 0
+    const client = {
+      emails: {
+        send: async () => {
+          calls++
+          return { data: { id: `em-${calls}` } }
+        },
+      },
+    }
+
+    const sub = await db.createSubscription({
+      userId: user.id,
+      plan: 'hosted_starter',
+      cycle: 'monthly',
+      status: 'authorized',
+    })
+    sub.currentPeriodEnd = '2026-11-01T00:00:00.000Z'
+    await sub.save()
+
+    // sin canceledAt → no manda
+    let r = await sendSubscriptionCanceledOnce({
+      subscription: sub,
+      config: emailCfg,
+      client,
+    })
+    assert.ok(r.skipped)
+    assert.equal(calls, 0)
+
+    sub.canceledAt = new Date().toISOString()
+    await sub.save()
+
+    r = await sendSubscriptionCanceledOnce({
+      subscription: sub,
+      config: emailCfg,
+      client,
+    })
+    assert.equal(r.sent, true)
+    assert.equal(calls, 1)
+
+    // dedup + no pisa el mail de bienvenida (kind distinto)
+    r = await sendSubscriptionCanceledOnce({
+      subscription: sub,
+      config: emailCfg,
+      client,
+    })
+    assert.ok(r.skipped)
+    assert.equal(calls, 1)
+  })
 })

@@ -34,6 +34,23 @@ export default function AccountPage() {
       .catch((err) => setError(err.message))
   }, [user])
 
+  // `ScrollToTop` (App.jsx) fuerza scroll(0,0) en cada cambio de pathname —
+  // así que "Mis compras" (#compras) y "Plan" (#suscripcion) terminaban en
+  // el mismo lugar (el tope). Reenganchamos el scroll acá después de ese
+  // reset. #compras vive en un <ul> que solo existe una vez que llegan las
+  // órdenes, por eso depende de `orders`.
+  useEffect(() => {
+    if (!location.hash) return undefined
+    const id = location.hash.slice(1)
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const raf = requestAnimationFrame(() => {
+      document
+        .getElementById(id)
+        ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [location.hash, orders])
+
   // Modal post-compra: ?purchase=1&orderId=… (state opcional desde confirm)
   useEffect(() => {
     if (!user || params.get('purchase') !== '1') return undefined
@@ -168,7 +185,7 @@ export default function AccountPage() {
           </div>
         ) : (
           <>
-            <ul className="mt-10 border-t border-ink/15">
+            <ul id="compras" className="mt-10 scroll-mt-24 border-t border-ink/15">
               {pageOrders.map((order) => {
                 const previews = orderPreviews(order)
                 return (

@@ -99,12 +99,24 @@ export function isAllowedSectionId(id) {
  * ALLOWED_PROPS_BY_SECTION. Se amplía a medida que cada sección lo cumple.
  */
 export const HOSTABLE_SECTIONS = Object.freeze([
+  // Familia footer: misma mecánica que FooterCTA (SplitText de entrada `once`,
+  // sin pin, sin scrub, alto acotado) → FLOW puro en el iframe. Todos sus textos
+  // son props string editables. El frame trae los tokens/fuentes de cada modelo
+  // (embed/frame/main.css + index.html).
   'chapters/FooterCTA',
+  'nocturne/OutroCTA',
+  'monolith/FooterBrutal',
+  'fizz/FooterSplash',
+  'velocity/FooterVelocity',
+  'atelier/FooterAtelier',
+  'atrium/FooterAtrium',
   // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
   // scroll de window, boot que bloquea scroll): dentro del iframe del embed
   // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:
   // `chapters/HorizontalPanels`. Necesitan una "embed edition" acotada primero
   // (ver docs/hosted-component-plan.md).
+  // Tampoco secciones scrub sin pin (ManifestoReveal, QuoteBreak, StatField…):
+  // en FLOW el frame no scrollea, el scrub queda congelado en el estado inicial.
 ])
 
 export const HOSTABLE_SECTION_SET = new Set(HOSTABLE_SECTIONS)

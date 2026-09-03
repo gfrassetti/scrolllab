@@ -43,6 +43,7 @@ import {
 import {
   resolveEntitlement,
   assertCanPublish,
+  changeSubscriptionPlan,
   handlePreapprovalEvent,
   handleAuthorizedPaymentEvent,
   syncSubscriptionForUser,
@@ -58,6 +59,7 @@ import {
   sendOrderReceiptOnce,
   sendOrderAdminNotifyOnce,
   sendSubscriptionWelcomeOnce,
+  sendSubscriptionCanceledOnce,
 } from './services/email.js'
 import {
   signDownloadToken,
@@ -1099,11 +1101,30 @@ export async function createApp(config) {
       sub.canceledAt = new Date()
       if (!sub.currentPeriodEnd) sub.status = 'cancelled'
       await sub.save()
+      sendSubscriptionCanceledOnce({ subscription: sub, config }).catch((err) =>
+        console.error('subs canceled email', err?.message),
+      )
       res.json({
         ok: true,
         endsAt: sub.currentPeriodEnd || null,
         status: sub.status,
       })
+    }),
+  )
+
+  // Cambio de plan sin dar de baja (mismo ciclo). Distinto ciclo (mensual↔
+  // anual) no se puede sobre un preapproval de MP → la UI manda por cancelar.
+  app.post(
+    '/api/subscriptions/change',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      const out = await changeSubscriptionPlan({
+        userId: db.uid(req.user),
+        plan: String(req.body?.plan || ''),
+        config,
+      })
+      res.json({ ok: true, ...out })
     }),
   )
 

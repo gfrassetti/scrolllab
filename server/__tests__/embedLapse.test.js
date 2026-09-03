@@ -25,6 +25,7 @@ describe('Embed: se apaga cuando cae la suscripción (HOSTED_FREE_QUOTA=0)', () 
     process.env.FX_OFFLINE = 'true'
     process.env.FX_FALLBACK_RATE = '1560'
     process.env.HOSTED_FREE_QUOTA = '0'
+    process.env.RATE_LIMIT_DISABLED = 'true'
     storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lapse-'))
     process.env.STORAGE_DIR = storageDir
     process.env.FILE_DB_DIR = path.join(storageDir, 'db')

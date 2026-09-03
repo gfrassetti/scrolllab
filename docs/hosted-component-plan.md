@@ -390,6 +390,50 @@ pre-creado) **funciona** contra MP real. Notas:
 
 ---
 
+## Fase 7 — Catálogo hosteable: familia footer (2026-09)
+
+Primer paso de la expansión más allá de `chapters/FooterCTA`. Se agregan los
+**6 footers restantes** del catálogo a `HOSTABLE_SECTIONS`:
+
+`nocturne/OutroCTA` · `monolith/FooterBrutal` · `fizz/FooterSplash` ·
+`velocity/FooterVelocity` · `atelier/FooterAtelier` · `atrium/FooterAtrium`
+
+Por qué estos y no otros: comparten la mecánica de FooterCTA — SplitText de
+entrada `once` (o estáticos), **sin pin, sin scrub, alto acotado** → FLOW puro
+en el iframe. Todos sus textos son props string ya declaradas en
+`SECTION_FIELDS` / `ALLOWED_PROPS_BY_SECTION` (paridad ya verificada por
+`scripts/check-consistency.mjs`).
+
+Qué hizo falta:
+
+1. `embed/src/registry.js` — import estático + entrada en `SECTIONS` de cada uno
+   (inline en el bundle del frame; +~3 KB gz JS).
+2. `embed/frame/main.css` — tokens `@theme` de cada modelo (NOCTURNE
+   `salt/acid/noir`, MONOLITH `carbon/klein/concrete`, FIZZ `foam/fizz/grape`,
+   ATRIUM `atrium-ink/atrium-paper`) + fuentes (`--font-brico`, `--font-anton`,
+   `--font-mono`) + clase `.atrium-note`. Deben coincidir con `src/index.css`.
+   (+~1.5 KB gz CSS.)
+3. `embed/frame/index.html` — Bricolage Grotesque + Anton + JetBrains Mono al
+   `<link>` de Google Fonts.
+4. `server/sections.js` — los 6 IDs en `HOSTABLE_SECTIONS`.
+
+El editor (`/lab`), el dropdown "＋ Nueva", el preview en vivo y el snippet
+funcionan sin tocar nada más: leen `HOSTABLE_SECTIONS` + `getSectionFields`.
+
+Tests: 272 unit + 6 e2e Chromium + `npm run check`, todo verde. El e2e sigue
+ejercitando `chapters/FooterCTA` (misma ruta de render).
+
+### Siguiente tanda (candidatas, aún NO hosteables)
+
+Bloques de contenido estáticos, entrada-`once`, sin scrub: `atrium/ManifestoType`,
+`atrium/ScopeSerif`, `atelier/StudioCards`. Requieren verificación de render en
+el iframe caso por caso. **Fuera**: scrub sin pin (`chapters/ManifestoReveal`,
+`chapters/QuoteBreak`, `atrium/StatField` — el scrub queda congelado en FLOW),
+todos los `Nav*` (header fijo en una caja no tiene sentido), y las pineadas
+(necesitan modo PIN o "embed edition").
+
+---
+
 ## No se toca
 
 - Builder → template/sección ZIP, pago único, Checkout Pro.

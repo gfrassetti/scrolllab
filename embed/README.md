@@ -181,6 +181,6 @@ compilado y lo rompe.
 | ~~Scrub por el iframe~~ | ✅ hecho. Modo PIN: el frame manda `scrolllab:pinlength`, el loader lo hace `position:sticky` sobre un spacer de `viewportH + pinLen` y manda `scrolllab:progress` 0→1; el frame lo traduce a `window.scrollTo`. La sección corre pin/scrub nativo, sin tocarla. Probado con `HorizontalPanels` en `embed/test/iframe-pin.html`. |
 | CSS amplio | `@source` escanea todas las secciones (16.9 KB gz). Scopear a `HOSTABLE_SECTIONS`. |
 | `data-frame` / `data-api` defaults | placeholders (`embed.scrolllab.com.ar`, `cdn.scrolllab.com.ar`). |
-| `HOSTABLE_SECTIONS` | server: solo `chapters/FooterCTA`. Ampliar con embed verificado + schema de props (`ALLOWED_PROPS_BY_SECTION`). |
+| `HOSTABLE_SECTIONS` | familia footer (7): `chapters/FooterCTA`, `nocturne/OutroCTA`, `monolith/FooterBrutal`, `fizz/FooterSplash`, `velocity/FooterVelocity`, `atelier/FooterAtelier`, `atrium/FooterAtrium`. Ampliar con embed verificado + schema de props (`ALLOWED_PROPS_BY_SECTION`). Cada modelo nuevo suma sus tokens/fuentes a `frame/main.css` + `frame/index.html`. |
 | gsap recortado | `src/gsap.js` registra solo ScrollTrigger + SplitText. Sumar MotionPath cuando entre una sección que lo use. |
 | dark mode | v1 light-only. |

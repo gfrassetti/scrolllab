@@ -89,6 +89,11 @@ export const api = {
   subscriptionMockActivate: (url) => request(url, { method: 'POST' }),
   subscriptionSync: () =>
     request('/api/subscriptions/sync', { method: 'POST' }),
+  subscriptionChange: (plan) =>
+    request('/api/subscriptions/change', {
+      method: 'POST',
+      body: JSON.stringify({ plan }),
+    }),
   subscriptionCancel: () =>
     request('/api/subscriptions/cancel', { method: 'POST' }),
 }

@@ -38,6 +38,7 @@ export default function HostedPlans() {
   const [cycle, setCycle] = useState('monthly')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   // Con un plan pago activo, la grilla de 3 arranca colapsada: cambiar de
   // tier hoy exige cancelar y esperar (el server rechaza una 2da alta
   // activa, ver /api/subscriptions), así que la comparación completa no es
@@ -130,8 +131,33 @@ export default function HostedPlans() {
     }
   }
 
+  // Cambio de plan en el acto (mismo ciclo, sin dar de baja). La cuota sube
+  // ya; el precio nuevo lo cobra MP en el próximo ciclo.
+  const changePlan = async (planId) => {
+    if (busy) return
+    setBusy(planId)
+    setError('')
+    setNotice('')
+    try {
+      await api.subscriptionChange(planId)
+      await refreshPlan()
+      setNotice(t('lab.planChanged'))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
   const features = t('lab.planFeatures')
   const activePlan = user && plan !== 'free' ? plan : null
+
+  // Con plan pago el ciclo queda fijado al suyo: MP no deja pasar un
+  // preapproval de mensual a anual, así que mostrar precios del otro ciclo
+  // sería ofrecer un cambio que este flujo no hace (ese va por cancelar).
+  useEffect(() => {
+    if (activePlan && billingCycle) setCycle(billingCycle)
+  }, [activePlan, billingCycle])
   // Free/sin plan: siempre se ve la comparación completa, es la única acción
   // posible. Con plan pago: colapsada por default, el toggle la despliega.
   const comparisonVisible = !activePlan || showComparison
@@ -161,13 +187,13 @@ export default function HostedPlans() {
     <section
       ref={root}
       id="planes"
-      className="mt-14 scroll-mt-24 border-t border-ink/15 pt-10"
+      className="mt-14 scroll-mt-24 border border-accent/45 bg-accent/[0.04] p-6 md:p-8 md:shadow-[0_24px_60px_-28px_rgba(255,75,0,0.45)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.25em] text-accent">
           {t('lab.plansTitle')}
         </h2>
-        {comparisonVisible && (
+        {comparisonVisible && !activePlan && (
           <div className="inline-flex border border-ink/20 text-[11px] uppercase tracking-[0.2em]">
             {['monthly', 'yearly'].map((c) => (
               <button
@@ -190,6 +216,11 @@ export default function HostedPlans() {
       {error && (
         <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
           {error}
+        </p>
+      )}
+      {notice && (
+        <p className="mt-4 border border-success/40 bg-success/10 px-4 py-3 text-sm">
+          {notice}
         </p>
       )}
 
@@ -268,10 +299,15 @@ export default function HostedPlans() {
               {t('lab.planChangeHint')}
             </p>
           )}
+          {activePlan && (
+            <p className="mt-2 text-xs text-ink/40">
+              {t('lab.planCycleHint')}
+            </p>
+          )}
           {/* Compartidas por los 3 planes — una sola vez, no repetidas card
               por card. Ninguna se gatea por tier del lado del backend, así
               que listarlas 3 veces solo se veía como relleno. */}
-          <div className="mt-6 border border-ink/10 bg-ink/[0.02] p-4">
+          <div className="mt-6 border border-accent/20 bg-bone p-4">
             <p className="text-[10px] uppercase tracking-[0.2em] text-ink/45">
               {t('lab.planFeaturesTitle')}
             </p>
@@ -345,9 +381,18 @@ export default function HostedPlans() {
                       {t('lab.planCurrent')}
                     </span>
                   ) : activePlan ? (
-                    <span className="mt-5 block border border-ink/15 px-4 py-2 text-center text-[11px] uppercase tracking-[0.2em] text-ink/35">
-                      {t('lab.planViaResub')}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => changePlan(p.id)}
+                      disabled={!!busy}
+                      className={`ui-press mt-5 px-4 py-2 text-[11px] uppercase tracking-[0.25em] disabled:opacity-40 ${
+                        featured
+                          ? 'border border-accent bg-accent text-ink hover:opacity-85'
+                          : 'border border-ink bg-ink text-bone hover:opacity-90'
+                      }`}
+                    >
+                      {busy === p.id ? '…' : t('lab.planChangeTo')}
+                    </button>
                   ) : (
                     <button
                       type="button"

@@ -136,6 +136,14 @@ export default function LabPage() {
             <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
                 {t('lab.yours')}
+                {instances.length > 0 && (
+                  <span className="ml-3 normal-case tracking-normal text-ink/40">
+                    {t('lab.publishedCount', {
+                      n: instances.filter((i) => i.status === 'published').length,
+                      total: instances.length,
+                    })}
+                  </span>
+                )}
               </h2>
               <div className="flex items-center gap-2">
                 <select

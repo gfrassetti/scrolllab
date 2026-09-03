@@ -39,6 +39,7 @@ import {
   buildOrderReceipt,
   buildOrderAdminNotify,
   buildSubscriptionWelcome,
+  buildSubscriptionCanceled,
 } from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
 import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
@@ -619,6 +620,32 @@ describe('order receipt email', () => {
     assert.match(message.text, /Studio · anual/)
     assert.match(message.text, /sin tope/)
     assert.doesNotMatch(message.text, /Próximo pago/)
+  })
+
+  it('baja de suscripción: dice hasta cuándo hay acceso y que no se cobra más', () => {
+    const message = buildSubscriptionCanceled({
+      subscription: {
+        plan: 'hosted_starter',
+        currentPeriodEnd: '2026-11-01T00:00:00.000Z',
+      },
+      user: { email: 'sub@example.com', name: 'Sub' },
+      accountUrl: 'https://www.scrolllab.com.ar/lab',
+      logoUrl: 'https://www.scrolllab.com.ar/logo.svg',
+    })
+    assert.match(message.subject, /Cancelaste tu suscripción/)
+    assert.match(message.text, /acceso al plan Starter hasta el /)
+    assert.match(message.text, /No se te va a cobrar de nuevo/)
+    assert.match(message.html, /Reactivar en LAB/)
+  })
+
+  it('baja sin currentPeriodEnd: no rompe, dice "fin del período pagado"', () => {
+    const message = buildSubscriptionCanceled({
+      subscription: { plan: 'hosted_pro' },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.text, /termina al final del período pagado/)
   })
 })
 

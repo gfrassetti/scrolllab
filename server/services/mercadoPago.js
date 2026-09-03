@@ -214,6 +214,30 @@ export async function cancelPreapproval(accessToken, id) {
   return pa.update({ id, body: { status: 'cancelled' } })
 }
 
+/**
+ * Cambio de plan sin dar de baja: `PUT /preapproval/{id}` con el nuevo monto.
+ * MP solo deja mutar `transaction_amount` (y `reason`) — la frecuencia
+ * (`frequency` / `frequency_type`) es inmutable, así que mensual↔anual sigue
+ * necesitando alta nueva. El monto nuevo rige desde el próximo cobro (MP no
+ * prorratea). El webhook `subscription_preapproval` refleja el cambio.
+ */
+export async function updatePreapprovalAmount(
+  accessToken,
+  id,
+  { amount, currencyId = 'ARS', reason },
+) {
+  const pa = new PreApproval(createMpClient(accessToken))
+  const body = {
+    auto_recurring: { transaction_amount: amount, currency_id: currencyId },
+  }
+  if (reason) body.reason = reason
+  try {
+    return await pa.update({ id, body })
+  } catch (err) {
+    throw mpPaymentError(err, id)
+  }
+}
+
 export async function fetchPayment(accessToken, paymentId) {
   const client = createMpClient(accessToken)
   const paymentApi = new Payment(client)
