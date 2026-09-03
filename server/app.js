@@ -989,7 +989,11 @@ export async function createApp(config) {
 
   app.get('/api/subscriptions/plans', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=300')
-    res.json({ plans: publicPlans(), mock: subsMock() })
+    res.json({
+      plans: publicPlans(),
+      mock: subsMock(),
+      freeQuota: config.hostedFreeQuota,
+    })
   })
 
   app.get(

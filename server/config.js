@@ -240,12 +240,12 @@ export function loadConfig() {
     // (`EMBED_SRI=true`) una vez confirmado el CORS.
     embedSri: process.env.EMBED_SRI === "true",
     adminToken: process.env.ADMIN_TOKEN || "",
-    // Cuántas instancias hosteadas puede tener un usuario SIN suscripción.
-    // Default 0: LAB es de pago; la prueba de 7 días (`hostedTrialDays`) es el
-    // "probá antes de pagar". Subilo a 1+ solo si querés un free tier real.
+    // Cuántas instancias hosteadas PUBLICADAS puede tener un usuario sin
+    // suscripción. Default 1: el plan gratis incluye 1 sección hosteada real.
+    // Crear/publicar una 2da → 402. 0 = LAB 100% de pago.
     hostedFreeQuota: (() => {
       const n = Number(process.env.HOSTED_FREE_QUOTA);
-      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 1;
     })(),
     // Días de prueba gratis al abrir la PRIMERA suscripción (una vez por
     // usuario, cualquier plan). 0 = sin prueba. MP lo aplica como

@@ -39,6 +39,7 @@ export default function HostedPlans() {
   const root = useRef(null)
 
   const [plans, setPlans] = useState([])
+  const [freeQuota, setFreeQuota] = useState(0)
   const [cycle, setCycle] = useState('monthly')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -57,6 +58,7 @@ export default function HostedPlans() {
           (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
         ),
       )
+      setFreeQuota(Number(p.freeQuota) || 0)
     } catch (err) {
       setError(err.message)
     }
@@ -309,6 +311,11 @@ export default function HostedPlans() {
 
       {comparisonVisible && (
         <>
+          {!activePlan && freeQuota > 0 && (
+            <p className="mt-6 border border-ink/15 bg-ink/[0.02] px-4 py-3 text-sm text-ink/65">
+              {t('lab.freeTierNote', { n: freeQuota })}
+            </p>
+          )}
           {activePlan && (
             <p className="mt-6 text-sm text-ink/55">
               {t('lab.planChangeHint')}
