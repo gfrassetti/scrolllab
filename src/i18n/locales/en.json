@@ -21,7 +21,7 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "Hosted components",
+    "eyebrow": "Live sections",
     "body": "Configure a section and serve it on any site with one line of <script>. The code never leaves our side: you edit here, it updates there.",
     "yours": "Your sections",
     "publishedCount": "{{n}} of {{total}} published",
@@ -68,7 +68,7 @@
     "faqTitle": "FAQ",
     "faq": [
       {
-        "q": "What is a hosted component?",
+        "q": "What is a live section?",
         "a": "A section you configure here and show on any page with one line of code. Unlike downloading the ZIP, the code never leaves our side: you edit it from LAB and it updates on its own wherever you pasted it."
       },
       {
@@ -97,7 +97,7 @@
       }
     ],
     "views": "{{n}} views",
-    "loginPrompt": "Sign in to create and manage your hosted sections.",
+    "loginPrompt": "Sign in to create and manage your live sections.",
     "plansTitle": "Plans",
     "cycle": {
       "monthly": "Monthly",

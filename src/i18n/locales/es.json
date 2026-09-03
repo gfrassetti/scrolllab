@@ -21,7 +21,7 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "Componentes alojados",
+    "eyebrow": "Secciones en vivo",
     "body": "Configurá una sección y mostrala en cualquier sitio con una línea de <script>. El código nunca sale de nuestro lado: editás acá, se actualiza allá.",
     "yours": "Tus secciones",
     "publishedCount": "{{n}} de {{total}} publicadas",
@@ -68,7 +68,7 @@
     "faqTitle": "Preguntas",
     "faq": [
       {
-        "q": "¿Qué es un componente alojado?",
+        "q": "¿Qué es una sección en vivo?",
         "a": "Una sección del sitio que configurás acá y se muestra en cualquier página con una línea de código. A diferencia de bajar el ZIP, el código no sale de nuestro lado: lo editás desde LAB y se actualiza solo donde lo pegaste."
       },
       {
@@ -97,7 +97,7 @@
       }
     ],
     "views": "{{n}} vistas",
-    "loginPrompt": "Entrá para crear y gestionar tus secciones alojadas.",
+    "loginPrompt": "Entrá para crear y gestionar tus secciones en vivo.",
     "plansTitle": "Planes",
     "cycle": {
       "monthly": "Mensual",
