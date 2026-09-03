@@ -10,6 +10,7 @@ import PlayableHeadline from '../components/PlayableHeadline'
 import TemplateBuyPill from '../components/TemplateBuyPill'
 import HomeContact from '../components/HomeContact'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
+import BuilderDemo from '../components/BuilderDemo'
 import { useCart } from '../lib/cart'
 import { startCheckout } from '../lib/startCheckout'
 import { useAuth } from '../lib/auth'
@@ -1122,6 +1123,20 @@ export default function TemplatesIndex() {
           </div>
         </Link>
 
+        {/* Cómo funciona el Builder, en 10 segundos. El demo de LAB vive en
+            /lab, no se repite acá. Prototipo animado. */}
+        <div className="mx-auto mt-14 max-w-[1300px] md:mt-24">
+          <p className="text-center text-[11px] uppercase tracking-[0.25em] text-accent">
+            En 10 segundos
+          </p>
+          <h2 className="mt-2 text-center text-[clamp(1.4rem,3.5vw,2.4rem)] font-medium tracking-[-0.02em]">
+            Lo armás y te lo llevás
+          </h2>
+          <div className="mt-6">
+            <BuilderDemo />
+          </div>
+        </div>
+
         {/* Confianza / proceso: después de las ofertas. */}
         <section
           id="como-funciona"
@@ -1234,23 +1249,23 @@ export default function TemplatesIndex() {
         data-footer
         className="border-t border-ink/15 px-5 pt-24 pb-6 md:px-10 md:pt-36"
       >
-        <div className="mb-20 grid gap-12 md:mb-28 md:grid-cols-12">
+        <div className="mb-20 grid grid-cols-3 gap-x-4 gap-y-10 md:mb-28 md:grid-cols-12 md:gap-12">
           <p
             data-footer-bit
-            className="max-w-[40ch] text-sm leading-relaxed text-ink/70 md:col-span-4 md:text-base"
+            className="col-span-3 max-w-[40ch] text-sm leading-relaxed text-ink/70 md:col-span-4 md:text-base"
           >
             {t('meta.tagline')}
           </p>
 
           <nav
             data-footer-bit
-            className="md:col-span-2"
+            className="min-w-0 md:col-span-2"
             aria-label={t('home.footerTemplates')}
           >
             <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerTemplates')}
             </p>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-[13px] break-words md:text-sm">
               {templates.map((template) => {
                 const soon = Boolean(
                   template.comingSoon || isCatalogComingSoon(template.sku),
@@ -1279,13 +1294,13 @@ export default function TemplatesIndex() {
 
           <nav
             data-footer-bit
-            className="md:col-span-3"
+            className="min-w-0 md:col-span-3"
             aria-label={t('home.footerBuilder')}
           >
             <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerBuilder')}
             </p>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-[13px] break-words md:text-sm">
               <li>
                 <Link
                   to="/builder"
@@ -1339,13 +1354,13 @@ export default function TemplatesIndex() {
 
           <nav
             data-footer-bit
-            className="md:col-span-3"
+            className="min-w-0 md:col-span-3"
             aria-label={t('home.footerContact')}
           >
             <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('home.footerContact')}
             </p>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-[13px] break-words md:text-sm">
               <li>
                 <a
                   href="#contacto"

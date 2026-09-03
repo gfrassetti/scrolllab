@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import LabSplash from '../components/LabSplash'
+import LabDemo from '../components/LabDemo'
+import LabDemoSync from '../components/LabDemoSync'
 import FaqAccordion from '../components/FaqAccordion'
 import HostedPlans from '../components/HostedPlans'
 import { api } from '../lib/api'
@@ -146,6 +148,28 @@ export default function LabPage() {
         <p className="mt-4 max-w-[56ch] text-sm leading-relaxed text-ink/70">
           {t('lab.body')}
         </p>
+
+        <div className="mt-8">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
+            Cómo funciona
+          </p>
+          <h2 className="mt-2 text-[clamp(1.4rem,3.5vw,2.2rem)] font-medium tracking-[-0.02em]">
+            De una sección del catálogo a un{' '}
+            <code className="font-mono">&lt;script&gt;</code> en cualquier sitio
+          </h2>
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <LabDemo />
+            <LabDemoSync />
+          </div>
+          <p className="mt-4 max-w-[70ch] text-xs leading-relaxed text-ink/40">
+            Prototipo. <strong className="font-medium text-ink/60">Izquierda</strong>:
+            configurás la sección en LAB y pegás el{' '}
+            <code className="font-mono">&lt;script&gt;</code> en el sitio.{' '}
+            <strong className="font-medium text-ink/60">Derecha</strong>: cambiás
+            el texto una vez y se actualiza en todos los sitios donde esté
+            pegado. El mismo flujo real vive acá abajo.
+          </p>
+        </div>
 
         {error && (
           <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">

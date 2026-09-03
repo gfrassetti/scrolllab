@@ -105,6 +105,42 @@ html.dark {
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+/* Demos animados (LabDemo, LabDemoSync, BuilderDemo): paleta propia, chata,
+   que flipea con el tema del sitio (html.dark). */
+:root {
+  --ld-bg: #e7e4db;
+  --ld-surface: #faf9f6;
+  --ld-chrome: #f0eee7;
+  --ld-ink: #1a1712;
+  --ld-soft: rgba(26, 23, 18, 0.55);
+  --ld-faint: rgba(26, 23, 18, 0.4);
+  --ld-line: rgba(26, 23, 18, 0.13);
+  --ld-line2: rgba(26, 23, 18, 0.24);
+  --ld-band: #14120b;
+  --ld-band-ink: #f4f1ea;
+  --ld-ok: #2f9e6a;
+  --ld-ok-bg: rgba(47, 158, 106, 0.13);
+  --ld-ok-line: rgba(47, 158, 106, 0.42);
+  --ld-accent: #ff4b00;
+}
+
+html.dark {
+  --ld-bg: #14130d;
+  --ld-surface: #201d15;
+  --ld-chrome: #29251d;
+  --ld-ink: #ece9df;
+  --ld-soft: rgba(236, 233, 223, 0.58);
+  --ld-faint: rgba(236, 233, 223, 0.42);
+  --ld-line: rgba(236, 233, 223, 0.14);
+  --ld-line2: rgba(236, 233, 223, 0.26);
+  --ld-band: #0b0a06;
+  --ld-band-ink: #f4f1ea;
+  --ld-ok: #4bbe86;
+  --ld-ok-bg: rgba(75, 190, 134, 0.15);
+  --ld-ok-line: rgba(75, 190, 134, 0.45);
+  --ld-accent: #ff5c1f;
+}
+
 html {
   background-color: var(--color-bone);
   scroll-behavior: auto;

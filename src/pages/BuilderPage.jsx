@@ -283,8 +283,8 @@ export default function BuilderPage() {
         </div>
       </header>
 
-      <div className="grid items-start gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+      <div className="space-y-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 lg:space-y-0">
+        <div className="min-w-0 lg:col-span-5">
           <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
             {t('builder.paletteTitle')}
           </p>
@@ -408,7 +408,7 @@ export default function BuilderPage() {
         {/* Sticky en desktop: acompaña el scroll de la paleta. Solo la lista
             scrollea; el precio y los botones quedan siempre a la vista.
             El max-h deja aire bajo el header sticky y sobre el borde inferior. */}
-        <div className="lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
           <div className="shrink-0">
             <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
               {t('builder.canvasTitle')} ({items.length}{' '}
@@ -479,13 +479,16 @@ export default function BuilderPage() {
                         onDragEnd={() => setDragOver(null)}
                         onDragOver={allowDropAt(i)}
                         onDrop={(e) => handleDrop(e, i)}
-                        className={`flex cursor-grab items-center gap-4 border-b border-ink/15 py-4 active:cursor-grabbing ${
+                        className={`flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink/15 py-4 sm:flex-nowrap sm:cursor-grab sm:active:cursor-grabbing ${
                           dragOver === i
                             ? 'shadow-[inset_0_2px_0_0_var(--color-accent)]'
                             : ''
                         }`}
                       >
-                        <span aria-hidden="true" className="text-ink/30">
+                        <span
+                          aria-hidden="true"
+                          className="hidden text-ink/30 sm:inline"
+                        >
                           ⠿
                         </span>
 
@@ -523,7 +526,7 @@ export default function BuilderPage() {
                           </p>
                         </div>
 
-                        <div className="flex shrink-0 items-center gap-1.5">
+                        <div className="flex w-full shrink-0 items-center justify-end gap-1.5 sm:w-auto">
                           <button
                             type="button"
                             onClick={() => moveItem(item.uid, -1)}
