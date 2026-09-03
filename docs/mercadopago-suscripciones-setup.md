@@ -50,12 +50,16 @@ App SCROLL LAB → **Webhooks / Notificaciones**:
 
 `server/catalog.js` → `HOSTED_PLANS`. Ahí viven los tres tiers
 (`hosted_starter` / `hosted_pro` / `hosted_studio`) con `priceMonthly`,
-`priceYearly` e `instanceQuota`. Los precios los ajusta quien maneje el
-pricing; las cuotas (5 / 15 / sin tope) son fijas.
+`priceYearly` e `instanceQuota`. Cuotas fijas (5 / 15 / sin tope).
+
+Precios vigentes (ARS/mes · año, fijados por el owner 2026-09):
+- Starter 24.900 · 249.000
+- Pro 54.900 · 549.000
+- Studio 149.900 · 1.499.000
 
 - ARS enteros, sin decimales, sin fx.
-- `priceYearly` < `priceMonthly × 12` → esa diferencia es el "ahorro" que
-  muestra el front.
+- `priceYearly` = `priceMonthly × 10` (2 meses gratis), siempre < `× 12` →
+  esa diferencia es el "ahorro" que muestra el front.
 - `instanceQuota`: secciones **publicadas** que permite el plan. `Infinity` =
   sin tope (se serializa a `null` en el wire → el front lo lee como "ilimitado").
 
