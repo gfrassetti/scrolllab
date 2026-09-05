@@ -230,23 +230,23 @@ export default function BuilderPage() {
 
   return (
     <div className="min-h-svh bg-bone px-5 pb-10 text-ink md:px-10">
-      <header className="sticky top-0 z-30 -mx-5 mb-10 flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 bg-bone/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
+      <header className="sticky top-0 z-30 -mx-5 mb-8 flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 bg-bone/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
         <nav className="flex items-baseline gap-5">
           <Link
             to="/"
-            className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors duration-300 hover:text-accent md:text-xs"
+            className="text-eyebrow uppercase text-ink/50 transition-colors duration-300 hover:text-accent"
           >
             {t('builder.back')}
           </Link>
           <Link
             to="/lab"
-            className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors duration-300 hover:text-accent md:text-xs"
+            className="text-eyebrow uppercase text-ink/50 transition-colors duration-300 hover:text-accent"
           >
             {t('nav.lab')}
           </Link>
           <p
             aria-current="page"
-            className="text-sm font-medium uppercase tracking-[0.25em] text-ink"
+            className="text-body-sm font-medium uppercase tracking-[0.15em] text-ink"
           >
             {t('builder.title')}
           </p>
@@ -257,7 +257,7 @@ export default function BuilderPage() {
             type="button"
             onClick={clearItems}
             disabled={items.length === 0}
-            className="border border-ink/30 px-4 py-2 text-[11px] uppercase tracking-[0.25em] transition-colors duration-300 not-disabled:hover:border-ink disabled:opacity-30 md:text-xs"
+            className="btn btn-ghost disabled:opacity-30"
           >
             {t('builder.clear')}
           </button>
@@ -265,14 +265,14 @@ export default function BuilderPage() {
             type="button"
             onClick={openPreview}
             disabled={items.length === 0}
-            className="border-2 border-ink bg-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors duration-300 not-disabled:hover:bg-accent not-disabled:hover:border-accent disabled:opacity-30 md:text-xs"
+            className="btn btn-primary disabled:opacity-30"
           >
             {t('builder.preview')}
           </button>
           {looksLoggedIn && (
             <Link
               to="/account"
-              className="text-[11px] uppercase tracking-[0.25em] text-ink/50 transition-colors duration-300 hover:text-accent md:text-xs"
+              className="text-eyebrow uppercase text-ink/50 transition-colors duration-300 hover:text-accent"
             >
               {t('nav.account')}
             </Link>
@@ -283,9 +283,26 @@ export default function BuilderPage() {
         </div>
       </header>
 
-      <div className="space-y-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 lg:space-y-0">
+      {/* Franja de precio: visible antes de bajar a las columnas, no solo al
+          fondo del panel sticky. */}
+      <div className="flex flex-wrap items-end justify-between gap-6 border-b border-ink/15 pt-6 pb-6 md:pt-8">
+        <p className="text-eyebrow uppercase text-ink/45">{t('builder.title')}</p>
+        <div className="text-right">
+          <p className="text-eyebrow uppercase text-ink/45">
+            {t('builder.estimatedPrice')}
+          </p>
+          <p className="mt-1 text-title-sm font-medium tracking-[-0.02em]">
+            {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
+          </p>
+          <p className="mt-1 max-w-[42ch] text-body-sm text-ink/55">
+            {priceHint}
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-12 pt-10 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 lg:space-y-0">
         <div className="min-w-0 lg:col-span-5">
-          <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+          <p className="mb-6 text-title-sm font-medium tracking-[-0.01em]">
             {t('builder.paletteTitle')}
           </p>
 
@@ -298,17 +315,19 @@ export default function BuilderPage() {
                     className="inline-block size-3 rounded-full"
                     style={{ backgroundColor: model.accent }}
                   />
-                  <p className="text-sm font-medium tracking-[0.15em]">{model.name}</p>
+                  <p className="text-body-sm font-semibold tracking-[0.08em]">
+                    {model.name}
+                  </p>
                 </div>
                 {model.id === 'commerce' && (
-                  <p className="mb-3 text-xs leading-relaxed text-ink/50">
+                  <p className="mb-3 text-body-sm text-ink/55">
                     {t('builder.commerceHint', {
                       price: commerceSurcharge,
                     })}
                   </p>
                 )}
                 {model.sections.some((s) => s.beat) && (
-                  <p className="mb-3 text-xs leading-relaxed text-ink/50">
+                  <p className="mb-3 text-body-sm text-ink/55">
                     {t('builder.beatHint')}
                   </p>
                 )}
@@ -350,23 +369,23 @@ export default function BuilderPage() {
                             {added ? '✓' : '⠿'}
                           </span>
                           <div className="min-w-0">
-                            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm font-medium">
+                            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-body font-medium">
                               {name}
-                              <span className="text-[9px] tracking-[0.2em] text-ink/40">
+                              <span className="text-eyebrow text-ink/40">
                                 {t(kindLabelKeys[section.kind])}
                               </span>
                               {section.beat && (
-                                <span className="border border-accent/50 px-1.5 py-0.5 text-[9px] tracking-[0.16em] text-accent">
+                                <span className="border border-accent/50 px-1.5 py-0.5 text-eyebrow text-accent">
                                   {t('builder.beatBadge')}
                                 </span>
                               )}
                               {added && (
-                                <span className="text-[10px] tracking-[0.16em] text-accent">
+                                <span className="text-eyebrow text-accent">
                                   {t('builder.addedCount', { count })}
                                 </span>
                               )}
                             </p>
-                            <p className="truncate text-xs text-ink/50">
+                            <p className="truncate text-body-sm text-ink/55">
                               {kindBlocked
                                 ? t('builder.uniqueKindShort', {
                                     kind: t(kindLabelKeys[section.kind]),
@@ -388,7 +407,7 @@ export default function BuilderPage() {
                               ? t('builder.addedAria', { name, count })
                               : t('builder.addAria', { name })
                           }
-                          className={`min-h-10 shrink-0 border px-3 py-2 text-xs transition-colors duration-200 disabled:opacity-40 ${
+                          className={`min-h-10 shrink-0 border px-3 py-2 text-body-sm transition-colors duration-200 disabled:opacity-40 ${
                             added
                               ? 'border-accent/60 text-accent not-disabled:hover:border-accent not-disabled:hover:bg-accent not-disabled:hover:text-ink'
                               : 'border-ink/30 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone'
@@ -410,14 +429,14 @@ export default function BuilderPage() {
             El max-h deja aire bajo el header sticky y sobre el borde inferior. */}
         <div className="min-w-0 lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
           <div className="shrink-0">
-            <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+            <p className="mb-3 text-title-sm font-medium tracking-[-0.01em]">
               {t('builder.canvasTitle')} ({items.length}{' '}
               {items.length === 1
                 ? t('builder.sectionCountOne')
                 : t('builder.sectionCountMany')})
             </p>
 
-            <ol className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase tracking-[0.18em] text-ink/40 md:text-[11px]">
+            <ol className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-eyebrow text-ink/45">
               {[
                 { key: 'nav', label: t('builder.emptyStepNav'), count: structure.nav },
                 { key: 'hero', label: t('builder.emptyStepHero'), count: structure.hero },
@@ -434,7 +453,7 @@ export default function BuilderPage() {
               ].map((step) => (
                 <li
                   key={step.key}
-                  className={`flex items-center gap-1.5 ${
+                  className={`flex items-center gap-1.5 uppercase ${
                     step.count > 0 ? 'text-accent' : ''
                   }`}
                 >
@@ -458,7 +477,7 @@ export default function BuilderPage() {
                   dragOver === 'end' ? 'border-accent bg-accent/5' : 'border-ink/20'
                 }`}
               >
-                <p className="max-w-[36ch] text-sm text-ink/50">
+                <p className="max-w-[36ch] text-body text-ink/55">
                   {t('builder.emptyCanvas')}
                 </p>
               </div>
@@ -492,7 +511,7 @@ export default function BuilderPage() {
                           ⠿
                         </span>
 
-                        <span className="w-8 text-[11px] tracking-[0.2em] text-ink/40">
+                        <span className="w-8 text-eyebrow text-ink/45">
                           {String(i + 1).padStart(2, '0')}
                         </span>
 
@@ -503,23 +522,23 @@ export default function BuilderPage() {
                         />
 
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-base font-medium md:text-lg">
+                          <p className="truncate text-title-sm font-medium">
                             {t(sectionCopyKey(section.id, 'name'))}
                           </p>
-                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                            <span>
+                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-eyebrow text-ink/45">
+                            <span className="uppercase">
                               {section.model.name} ·{' '}
                               {t(kindLabelKeys[section.kind])}
                             </span>
                             {section.model.id === 'commerce' && (
-                              <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
+                              <span className="border border-accent/50 px-1.5 py-0.5 text-eyebrow text-accent">
                                 {t('builder.commerceBadge', {
                                   price: commerceSurcharge,
                                 })}
                               </span>
                             )}
                             {section.beat && (
-                              <span className="border border-accent/50 px-1.5 py-0.5 text-[10px] tracking-[0.16em] text-accent">
+                              <span className="border border-accent/50 px-1.5 py-0.5 text-eyebrow text-accent">
                                 {t('builder.beatBadge')}
                               </span>
                             )}
@@ -569,7 +588,7 @@ export default function BuilderPage() {
             )}
 
             {limitNotice && (
-              <p className="mt-4 border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+              <p className="mt-4 border border-accent/40 bg-accent/10 px-4 py-3 text-body">
                 {limitNotice}
               </p>
             )}
@@ -578,28 +597,28 @@ export default function BuilderPage() {
           {items.length > 0 && (
             <div className="mt-3 shrink-0 space-y-3 border border-ink/15 bg-bone p-4 md:p-5">
               {hasDuplicateChrome && (
-                <p className="text-xs leading-relaxed text-accent">
+                <p className="text-body-sm text-accent">
                   {t('builder.duplicateChromeWarn')}
                 </p>
               )}
 
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                  <p className="text-eyebrow uppercase text-ink/50">
                     {t('builder.estimatedPrice')}
                   </p>
-                  <p className="mt-1 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+                  <p className="mt-1 text-title font-medium tracking-[-0.02em]">
                     {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
                   </p>
                   <p
-                    className={`mt-1 max-w-[46ch] text-xs leading-relaxed ${
+                    className={`mt-1 max-w-[46ch] text-body-sm ${
                       atMaxSections ? 'text-accent' : 'text-ink/55'
                     }`}
                   >
                     {priceHint}
                   </p>
                   {hasCommerce && (
-                    <p className="mt-0.5 text-xs text-ink/55">
+                    <p className="mt-0.5 text-body-sm text-ink/55">
                       {t('builder.commerceIncluded', {
                         price: commerceSurcharge,
                       })}
@@ -609,7 +628,7 @@ export default function BuilderPage() {
                 <button
                   type="button"
                   onClick={openPreview}
-                  className="border-2 border-ink bg-ink px-4 py-2.5 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
+                  className="btn btn-ghost"
                 >
                   {t('builder.previewBeforeBuy')}
                 </button>
@@ -619,14 +638,14 @@ export default function BuilderPage() {
                 <button
                   type="button"
                   onClick={addCompositionToCart}
-                  className="border-2 border-ink px-4 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone sm:flex-1"
+                  className="btn btn-ghost sm:flex-1"
                 >
                   {t('common.addToCart')}
                 </button>
                 <button
                   type="button"
                   onClick={buyComposition}
-                  className="border-2 border-accent bg-accent px-4 py-2.5 text-[11px] uppercase tracking-[0.25em] text-ink transition-opacity hover:opacity-80 sm:flex-1"
+                  className="btn border-accent bg-accent text-ink transition-opacity hover:opacity-80 sm:flex-1"
                 >
                   {looksLoggedIn
                     ? t('builder.buyLoggedIn')

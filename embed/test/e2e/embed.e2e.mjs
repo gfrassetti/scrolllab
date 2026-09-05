@@ -24,6 +24,7 @@ const REPO = path.normalize(
 )
 const HOST_URL = 'http://localhost:4178/embed/test/iframe-host.html'
 const SELFBASE_URL = 'http://localhost:4178/embed/test/iframe-host-selfbase.html'
+const RENDER_URL = 'http://localhost:4178/embed/test/iframe-host-render.html'
 const CTA_TOKEN = 'EMBEDDEDOK'
 // PIN mode: no hay sección scrolljack en HOSTABLE_SECTIONS (ver server/sections.js
 // — HorizontalPanels quedó fuera hasta tener una "embed edition" acotada). El
@@ -260,6 +261,21 @@ describe('embed e2e (Chromium)', () => {
         }),
         'blocked',
       )
+    } finally {
+      await context.close()
+    }
+  })
+
+  it('window.ScrollLab.render monta el embed en un div (framework path)', async () => {
+    const { context, page } = await openHost(RENDER_URL)
+    try {
+      // el loader se cargó sin data-key: solo monta porque el host llamó render()
+      const mounted = page.locator('#sl-mount iframe[data-scrolllab-frame]')
+      await mounted.waitFor({ state: 'attached', timeout: 15_000 })
+      const src = await mounted.getAttribute('src')
+      assert.match(src, /^http:\/\/localhost:4179\/embed-dist\/v1\/frame\/index\.html#/)
+      const { text } = await waitFrameRoot(page)
+      assert.match(text, /EMBEDDEDOK/)
     } finally {
       await context.close()
     }

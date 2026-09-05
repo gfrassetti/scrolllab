@@ -33,9 +33,12 @@ export default function TypeAccordion({
   total = '05',
   label = 'The drawers',
   items = defaultItems,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const [open, setOpen] = useState(0)
+  const rows = Array.isArray(items) && items.length ? items : defaultItems
 
   const toggle = (index) => {
     setOpen((current) => (current === index ? -1 : index))
@@ -43,7 +46,11 @@ export default function TypeAccordion({
   }
 
   return (
-    <section ref={root} className="px-5 py-20 md:px-8 md:py-32">
+    <section
+      ref={root}
+      className="px-5 py-20 md:px-8 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>
           Unit {unit} / {total}
@@ -52,10 +59,10 @@ export default function TypeAccordion({
       </div>
 
       <div className="border-b-2 border-carbon">
-        {items.map((item, i) => {
+        {rows.map((item, i) => {
           const isOpen = open === i
           return (
-            <div key={item.title} className="border-t-2 border-carbon">
+            <div key={i} className="border-t-2 border-carbon">
               <button
                 type="button"
                 onClick={() => toggle(i)}
@@ -89,16 +96,22 @@ export default function TypeAccordion({
                 style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
               >
                 <div className="overflow-hidden">
-                  <div className="grid gap-6 pt-2 pb-8 md:grid-cols-2 md:gap-10">
+                  <div
+                    className={`grid gap-6 pt-2 pb-8 md:gap-10 ${
+                      item.img ? 'md:grid-cols-2' : ''
+                    }`}
+                  >
                     <p className="max-w-[46ch] font-mono text-sm leading-relaxed">
                       {item.body}
                     </p>
-                    <img
-                      src={item.img}
-                      alt=""
-                      loading="lazy"
-                      className="aspect-8/5 w-full border-2 border-carbon object-cover"
-                    />
+                    {item.img ? (
+                      <img
+                        src={item.img}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-8/5 w-full border-2 border-carbon object-cover"
+                      />
+                    ) : null}
                   </div>
                 </div>
               </div>

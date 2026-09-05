@@ -41,9 +41,17 @@ export default function WorkIndex({
   seq = '04',
   total = '06',
   label = 'The index',
-  works = defaultWorks,
+  works,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  // `works` editable trae index/title/category/year; la imagen (stubeada en el
+  // embed) sale por índice del set de ejemplo, igual que en SplitReveals.
+  const rows =
+    Array.isArray(works) && works.length
+      ? works.map((w, i) => ({ ...w, img: w.img || defaultWorks[i % defaultWorks.length].img }))
+      : defaultWorks
   const floatImg = useRef(null)
   const quick = useRef({ x: null, y: null })
 
@@ -89,7 +97,11 @@ export default function WorkIndex({
   }
 
   return (
-    <section ref={root} className="px-5 py-24 md:px-10 md:py-36">
+    <section
+      ref={root}
+      className="px-5 py-24 md:px-10 md:py-36"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
           Seq. {seq} / {total}
@@ -98,9 +110,9 @@ export default function WorkIndex({
       </div>
 
       <ul onMouseMove={handleMove} onMouseLeave={hidePreview}>
-        {works.map((work) => (
+        {rows.map((work, i) => (
           <li
-            key={work.index}
+            key={i}
             data-work-row
             className="border-b border-salt/15 first:border-t"
           >
@@ -139,7 +151,7 @@ export default function WorkIndex({
       {/* Cursor-trailing preview — desktop only */}
       <img
         ref={floatImg}
-        src={works[0]?.img}
+        src={rows[0]?.img}
         alt=""
         aria-hidden="true"
         className="pointer-events-none fixed top-0 left-0 z-40 hidden w-56 -translate-x-1/2 -translate-y-1/2 scale-90 object-cover opacity-0 invisible md:block lg:w-64"

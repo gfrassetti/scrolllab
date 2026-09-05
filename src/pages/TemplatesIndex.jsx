@@ -634,7 +634,7 @@ export default function TemplatesIndex() {
         <section className="flex min-h-[85svh] flex-col overflow-x-clip pt-20 pb-8 sm:min-h-[90svh] md:pt-24 md:pb-14">
           <p
             data-hero-meta
-            className="max-w-[36ch] text-[11px] uppercase tracking-[0.2em] text-ink/60 sm:tracking-[0.25em] md:text-xs"
+            className="max-w-[36ch] text-eyebrow uppercase text-ink/55"
           >
             {t('meta.tagline')}
           </p>
@@ -670,7 +670,7 @@ export default function TemplatesIndex() {
 
             <p
               data-hero-meta
-              className="mt-5 max-w-[52ch] text-sm leading-relaxed text-ink/70 sm:mt-6 md:mt-8 md:text-base"
+              className="mt-5 max-w-[52ch] text-body-lg leading-relaxed text-ink/80 sm:mt-6 md:mt-8"
             >
               {t('home.heroBody')}
             </p>
@@ -678,23 +678,20 @@ export default function TemplatesIndex() {
               data-hero-meta
               className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 sm:mt-10 md:mt-12"
             >
-              <a
-                href="#templates"
-                className="ui-press inline-flex min-h-11 items-center border border-ink bg-ink px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-bone hover:bg-accent hover:border-accent"
-              >
+              <a href="#templates" className="btn btn-primary">
                 {t('home.heroCtaModels')}
               </a>
               <Link
                 to="/templates/chapters"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center text-[11px] uppercase tracking-[0.2em] text-ink/70 transition-colors hover:text-accent"
+                className="inline-flex min-h-11 items-center text-body-sm text-ink/65 transition-colors hover:text-accent"
               >
                 {t('home.heroCtaDemo')} →
               </Link>
               <Link
                 to="/builder"
-                className="inline-flex min-h-11 items-center text-[11px] uppercase tracking-[0.2em] text-ink/70 transition-colors hover:text-accent"
+                className="inline-flex min-h-11 items-center text-body-sm text-ink/65 transition-colors hover:text-accent"
               >
                 {t('home.heroCtaBuilder')} →
               </Link>
@@ -705,11 +702,11 @@ export default function TemplatesIndex() {
         {/* Qué es esto, en 10 segundos: el modelo (elegís secciones → se arma →
             comprás → ZIP) antes del catálogo, para que el scroll de modelos se
             recorra con intención. El demo de LAB vive en /lab, no se repite acá. */}
-        <div className="mx-auto mt-14 max-w-[1300px] md:mt-24">
-          <p className="text-center text-[11px] uppercase tracking-[0.25em] text-accent">
+        <div className="mx-auto mt-14 mb-16 max-w-[1300px] md:mt-24 md:mb-24">
+          <p className="text-center text-eyebrow uppercase text-accent">
             En 10 segundos
           </p>
-          <h2 className="mt-2 text-center text-[clamp(1.4rem,3.5vw,2.4rem)] font-medium tracking-[-0.02em]">
+          <h2 className="mx-auto mt-3 max-w-[18ch] text-center text-[clamp(1.9rem,1rem+4.5vw,3.75rem)] leading-[1.03] font-medium tracking-[-0.03em]">
             Lo armás y te lo llevás
           </h2>
           <div className="mt-6">
@@ -718,11 +715,11 @@ export default function TemplatesIndex() {
         </div>
 
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
-          <div className="flex items-baseline justify-between pt-4">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+          <div className="flex items-baseline justify-between pt-8 md:pt-10">
+            <p className="text-eyebrow uppercase text-ink/50">
               {t('home.modelsLabel')}
             </p>
-            <p className="hidden text-[11px] uppercase tracking-[0.25em] text-ink/40 md:block md:text-xs">
+            <p className="hidden text-eyebrow uppercase text-ink/40 md:block">
               {t('home.modelsScrollHint')}
             </p>
           </div>
@@ -773,7 +770,7 @@ export default function TemplatesIndex() {
                     />
                     {soon ? (
                       <span className="absolute inset-0 z-10 flex items-center justify-center bg-bone/50">
-                        <span className="border border-ink/20 bg-bone px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-ink/50">
+                        <span className="border border-ink/20 bg-bone px-4 py-2 text-eyebrow uppercase text-ink/50">
                           {t('home.comingSoon')}
                         </span>
                       </span>
@@ -785,7 +782,7 @@ export default function TemplatesIndex() {
                       soon ? 'opacity-40' : ''
                     }`}
                   >
-                    <p className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
+                    <p className="text-eyebrow uppercase text-accent">
                       {template.id} /{' '}
                       {String(templates.length).padStart(2, '0')}
                     </p>
@@ -827,26 +824,26 @@ export default function TemplatesIndex() {
                   )}
 
                   <p
-                    className={`mt-5 text-[11px] uppercase tracking-[0.25em] ${
+                    className={`mt-5 text-eyebrow uppercase ${
                       soon ? 'text-ink/30' : 'text-ink/50'
                     }`}
                   >
                     {soon ? t('home.comingSoon') : template.vibe}
                   </p>
                   {template.desktopOnly && !soon ? (
-                    <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-ink/45">
+                    <p className="mt-2 text-eyebrow uppercase text-ink/45">
                       {t('home.desktopOnly')}
                     </p>
                   ) : null}
                   <p
-                    className={`mt-3 max-w-[46ch] text-sm leading-relaxed md:text-base ${
-                      soon ? 'text-ink/35' : 'text-ink/70'
+                    className={`mt-3 max-w-[46ch] text-body leading-relaxed ${
+                      soon ? 'text-ink/35' : 'text-ink/75'
                     }`}
                   >
                     {template.description}
                   </p>
                   <p
-                    className={`mt-5 max-w-[56ch] text-[10px] leading-relaxed tracking-[0.16em] uppercase ${
+                    className={`mt-5 max-w-[56ch] text-eyebrow leading-relaxed uppercase ${
                       soon ? 'text-ink/25' : 'text-ink/40'
                     }`}
                   >
@@ -856,13 +853,13 @@ export default function TemplatesIndex() {
                   </p>
 
                   {soon ? (
-                    <p className="mt-8 text-[11px] uppercase tracking-[0.22em] text-ink/40">
+                    <p className="mt-8 text-eyebrow uppercase text-ink/40">
                       {t('home.comingSoon')}
                     </p>
                   ) : (
                     <>
                       {sellable && templatePriceUsd(template.sku) != null && (
-                        <p className="mt-6 text-[clamp(1.35rem,2.5vw,1.75rem)] font-medium tracking-[-0.02em]">
+                        <p className="mt-6 text-title-sm font-medium tracking-[-0.02em]">
                           {formatPriceFromUsd(
                             templatePriceUsd(template.sku),
                             locale,
@@ -871,12 +868,12 @@ export default function TemplatesIndex() {
                         </p>
                       )}
 
-                      <div className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]">
+                      <div className="mt-8 flex flex-wrap items-center gap-5">
                         <Link
                           to={template.path}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ui-press min-h-11 border border-ink bg-ink px-5 py-2.5 text-bone hover:border-accent hover:bg-accent"
+                          className="btn btn-primary"
                         >
                           {t('home.openDemo')} →
                         </Link>
@@ -892,7 +889,7 @@ export default function TemplatesIndex() {
                                   }),
                                 })
                               }
-                              className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
+                              className="btn btn-ghost"
                             >
                               {t('common.addToCart')}
                             </button>
@@ -907,7 +904,7 @@ export default function TemplatesIndex() {
                                   }),
                                 })
                               }
-                              className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
+                              className="ui-press min-h-11 px-1 text-body-sm font-medium text-ink hover:text-accent disabled:opacity-40"
                             >
                               {buyingSku === template.sku
                                 ? t('cart.redirecting')
@@ -934,7 +931,7 @@ export default function TemplatesIndex() {
           <div className="md:col-span-8">
             <p
               data-cta-bit
-              className="mb-3 text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
+              className="mb-3 text-eyebrow uppercase text-ink/55"
             >
               {t('home.bundleEyebrow')}
             </p>
@@ -952,13 +949,13 @@ export default function TemplatesIndex() {
             </p>
             <p
               data-cta-bit
-              className="mt-3 max-w-[52ch] text-sm leading-relaxed text-ink/70 md:text-base"
+              className="mt-3 max-w-[52ch] text-body leading-relaxed text-ink/75"
             >
               {t('home.bundleBody')}
             </p>
             <p
               data-cta-bit
-              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/50"
+              className="mt-4 text-eyebrow uppercase text-ink/50"
             >
               {t('home.bundleSaving', {
                 list: formatPriceFromUsd(bundleListPriceUsd(), locale, rate),
@@ -967,14 +964,14 @@ export default function TemplatesIndex() {
             </p>
             <div
               data-cta-bit
-              className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.2em]"
+              className="mt-8 flex flex-wrap items-center gap-5"
             >
               <button
                 type="button"
                 onClick={() =>
                   addItem({ sku: 'bundle', title: t('home.bundleCartTitle') })
                 }
-                className="ui-press min-h-11 border border-ink/30 px-5 py-2.5 text-ink hover:border-ink hover:bg-ink hover:text-bone"
+                className="btn btn-ghost"
               >
                 {t('common.addToCart')}
               </button>
@@ -987,7 +984,7 @@ export default function TemplatesIndex() {
                     title: t('home.bundleCartTitle'),
                   })
                 }
-                className="ui-press min-h-11 px-1 text-ink hover:text-accent disabled:opacity-40"
+                className="ui-press min-h-11 px-1 text-body-sm font-medium text-ink hover:text-accent disabled:opacity-40"
               >
                 {buyingSku === 'bundle'
                   ? t('cart.redirecting')
@@ -1026,7 +1023,7 @@ export default function TemplatesIndex() {
           <div className="relative z-10">
             <p
               data-cta-bit
-              className="mb-4 text-[11px] uppercase tracking-[0.25em] text-bone/55 md:text-xs"
+              className="mb-4 text-eyebrow uppercase text-bone/55"
             >
               {t('home.builderEyebrow')}
             </p>
@@ -1053,13 +1050,13 @@ export default function TemplatesIndex() {
             </p>
             <p
               data-cta-bit
-              className="mt-5 max-w-[48ch] text-sm leading-relaxed text-bone/65 md:text-base"
+              className="mt-5 max-w-[48ch] text-body leading-relaxed text-bone/70"
             >
               {t('home.builderBody')}
             </p>
             <p
               data-cta-bit
-              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-bone/45"
+              className="mt-4 text-eyebrow uppercase text-bone/50"
             >
               {t('home.builderPrices', {
                 base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
@@ -1095,7 +1092,7 @@ export default function TemplatesIndex() {
           <div className="relative z-10">
             <p
               data-cta-bit
-              className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 group-hover:text-bone/55 md:text-xs"
+              className="mb-4 text-eyebrow uppercase text-ink/50 group-hover:text-bone/55"
             >
               {t('home.labEyebrow')}
             </p>
@@ -1122,7 +1119,7 @@ export default function TemplatesIndex() {
             </p>
             <p
               data-cta-bit
-              className="mt-5 max-w-[52ch] text-sm leading-relaxed text-ink/60 group-hover:text-bone/65 md:text-base"
+              className="mt-5 max-w-[52ch] text-body leading-relaxed text-ink/70 group-hover:text-bone/70"
             >
               {t('home.labBodyBefore')}
               <span className="text-accent">{t('home.labBodyLink')}</span>
@@ -1130,7 +1127,7 @@ export default function TemplatesIndex() {
             </p>
             <code
               data-cta-code
-              className="mt-5 block overflow-x-auto whitespace-nowrap font-mono text-[11px] text-ink/35 group-hover:text-bone/40 md:text-xs"
+              className="mt-5 block overflow-x-auto whitespace-nowrap font-mono text-body-sm text-ink/40 group-hover:text-bone/45"
             >
               &lt;script src=&quot;.../embed/v1/loader.js&quot; data-key=&quot;pub_…&quot;
               async&gt;&lt;/script&gt;
@@ -1159,7 +1156,7 @@ export default function TemplatesIndex() {
               sección suelta, suscripción). Solo un puntero a LAB. */}
           <p
             data-soft-fade
-            className="mt-8 px-5 text-sm leading-relaxed text-ink/55 md:px-10 md:text-base"
+            className="mt-8 px-5 text-body leading-relaxed text-ink/60 md:px-10"
           >
             {t('home.howHostedNote')}{' '}
             <Link
@@ -1175,10 +1172,10 @@ export default function TemplatesIndex() {
             className="mt-12 flex flex-col items-center justify-center gap-8 border-y border-ink/15 px-5 py-14 text-center md:flex-row md:gap-16 md:px-10 md:py-20"
           >
             <div className="max-w-[42ch]">
-              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+              <p className="text-eyebrow uppercase text-ink/50">
                 {t('home.paymentsTitle')}
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-ink/60">
+              <p className="mt-2 text-body leading-relaxed text-ink/65">
                 {t('home.paymentsBody')}
               </p>
             </div>
@@ -1209,10 +1206,10 @@ export default function TemplatesIndex() {
             className="mt-12 mx-5 grid gap-6 border border-ink/15 p-6 md:mx-10 md:grid-cols-2 md:p-8"
           >
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+              <p className="text-eyebrow uppercase text-ink/50">
                 {t('home.zipTitle')}
               </p>
-              <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
+              <ul className="mt-4 space-y-2 text-body leading-relaxed text-ink/75">
                 <li>{t('home.zip1')}</li>
                 <li>{t('home.zip2')}</li>
                 <li>{t('home.zip3')}</li>
@@ -1220,10 +1217,10 @@ export default function TemplatesIndex() {
               </ul>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+              <p className="text-eyebrow uppercase text-ink/50">
                 {t('home.reqTitle')}
               </p>
-              <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink/70">
+              <ul className="mt-4 space-y-2 text-body leading-relaxed text-ink/75">
                 <li>{t('home.req1')}</li>
                 <li>
                   {t('home.req2Before')}{' '}
@@ -1253,7 +1250,7 @@ export default function TemplatesIndex() {
         <div className="mb-20 grid grid-cols-3 gap-x-4 gap-y-10 md:mb-28 md:grid-cols-12 md:gap-12">
           <p
             data-footer-bit
-            className="col-span-3 max-w-[40ch] text-sm leading-relaxed text-ink/70 md:col-span-4 md:text-base"
+            className="col-span-3 max-w-[40ch] text-body leading-relaxed text-ink/75 md:col-span-4"
           >
             {t('meta.tagline')}
           </p>
@@ -1263,10 +1260,10 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-2"
             aria-label={t('home.footerTemplates')}
           >
-            <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+            <p className="mb-4 text-eyebrow uppercase text-ink/50">
               {t('home.footerTemplates')}
             </p>
-            <ul className="space-y-2 text-[13px] break-words md:text-sm">
+            <ul className="space-y-2 text-body-sm break-words">
               {templates.map((template) => {
                 const soon = Boolean(
                   template.comingSoon || isCatalogComingSoon(template.sku),
@@ -1298,10 +1295,10 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-3"
             aria-label={t('home.footerBuilder')}
           >
-            <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+            <p className="mb-4 text-eyebrow uppercase text-ink/50">
               {t('home.footerBuilder')}
             </p>
-            <ul className="space-y-2 text-[13px] break-words md:text-sm">
+            <ul className="space-y-2 text-body-sm break-words">
               <li>
                 <Link
                   to="/builder"
@@ -1358,10 +1355,10 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-3"
             aria-label={t('home.footerContact')}
           >
-            <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:text-xs">
+            <p className="mb-4 text-eyebrow uppercase text-ink/50">
               {t('home.footerContact')}
             </p>
-            <ul className="space-y-2 text-[13px] break-words md:text-sm">
+            <ul className="space-y-2 text-body-sm break-words">
               <li>
                 <a
                   href="#contacto"
@@ -1401,7 +1398,7 @@ export default function TemplatesIndex() {
 
         <div
           data-footer-legal
-          className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs"
+          className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-eyebrow uppercase text-ink/50 md:flex-row md:items-baseline md:justify-between"
         >
           <p>©{new Date().getFullYear()} {SITE_NAME}</p>
           <a

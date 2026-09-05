@@ -43,6 +43,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "snippet": "Paste this into the site",
+    "snippetStack": "Drop this component in your project. It loads the loader once and mounts the embed with window.ScrollLab.render; everything else works just like the <script>.",
     "copy": "Copy",
     "copied": "Copied!",
     "draftHint": "Draft — open the editor to configure and publish it.",
@@ -423,7 +424,7 @@
     "editing": "Editing",
     "editPanel": "Edit section",
     "noEditableFields": "This section has no editable text fields yet.",
-    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). Payment ships in demo mode: wire your Mercado Pago or Stripe in checkoutAdapter.js. Adding the grid turns on the full kit (+{{price}}).",
+    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). The kit is frontend-only on purpose: wire your Mercado Pago or Stripe in checkoutAdapter.js whenever you're ready (paste the docs into an AI assistant and it's a quick job). Adding the grid turns on the full kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
     "priceNext": "You reached the {{included}} sections the base covers: the next one adds {{next}}.",
@@ -441,6 +442,8 @@
     "imageUpload": "Try a local image / SVG",
     "imageClear": "Remove image",
     "imageHelp": "PNG, SVG, WebP or JPG. A local file only works in this preview (it replaces the placeholder SVG). To ship it in your ZIP: enter a public https URL, or in the downloaded project save the file under public/ (e.g. public/can-1.svg) and pass can1Image=\"/can-1.svg\". Without an image, the template SVG can renders.",
+    "listAdd": "Add",
+    "hrefHint": "#anchor · /path · https://… · mailto:… · tel:…",
     "sections": {
       "chapters": {
         "NavMinimal": {

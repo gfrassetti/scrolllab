@@ -110,6 +110,24 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'velocity/FooterVelocity',
   'atelier/FooterAtelier',
   'atrium/FooterAtrium',
+  // Fase C — bloques de contenido más allá de los footers. Mismo criterio:
+  // entrada `once` (o sin ScrollTrigger), sin pin, sin scrub, padding en
+  // rem/px/vw (nada de `svh`, que dentro del iframe FLOW no tiene viewport
+  // estable). Modelos ya tokenizados en el frame por la familia footer.
+  'chapters/BigNumbers',
+  'atelier/KeyFacts',
+  'monolith/TypeAccordion',
+  // Fase D — segunda tanda. Ribbons continuos (loop `repeat:-1` sin pin; el
+  // boost por velocidad de scroll no dispara si el host no scrollea, pero el
+  // loop de fondo sigue andando — no rompe) + más bloques `once`.
+  'chapters/VelocityMarquee',
+  'nocturne/DiagonalMarquee',
+  'nocturne/SplitReveals',
+  'nocturne/WorkIndex',
+  'monolith/SkewScroller',
+  'monolith/ExhibitGrid',
+  'fizz/BubbleBenefits',
+  'atelier/AboutClarity',
   // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
   // scroll de window, boot que bloquea scroll): dentro del iframe del embed
   // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:

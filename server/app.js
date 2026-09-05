@@ -137,6 +137,14 @@ export async function createApp(config) {
       mongoUrl: config.mongoUri,
       ttl: 14 * 24 * 60 * 60,
     })
+  } else {
+    // Dev: sin Mongo, express-session usaría MemoryStore y nodemon te
+    // desloguearía en cada reinicio. Persistimos a un JSON en storage/.
+    const { DevFileSessionStore } = await import('./devSessionStore.js')
+    sessionStore = new DevFileSessionStore({
+      file: path.resolve(config.storageDir, '..', 'dev-sessions.json'),
+      ttlMs: config.cookie.maxAge,
+    })
   }
 
   app.use(

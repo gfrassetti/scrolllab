@@ -30,9 +30,12 @@ const defaultBenefits = [
 export default function BubbleBenefits({
   eyebrow = 'Section eyebrow',
   title = 'YOUR SECTION TITLE',
-  benefits = defaultBenefits,
+  benefits,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  const rows = Array.isArray(benefits) && benefits.length ? benefits : defaultBenefits
 
   useGSAP(
     () => {
@@ -96,6 +99,7 @@ export default function BubbleBenefits({
     <section
       ref={root}
       className="relative overflow-hidden px-5 py-24 md:px-10 md:py-36"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       {[...Array(12)].map((_, i) => (
         <span
@@ -123,9 +127,9 @@ export default function BubbleBenefits({
       </div>
 
       <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {benefits.map((benefit) => (
+        {rows.map((benefit, i) => (
           <article
-            key={benefit.title}
+            key={i}
             data-benefit-card
             className="group rounded-3xl border border-foam/20 p-6 transition-transform duration-300 hover:-rotate-2 hover:scale-[1.02] md:p-7"
           >

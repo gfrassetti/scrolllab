@@ -7,6 +7,7 @@ import { commerceThemeFromItems } from '../lib/shop/theme'
 import { checkoutPropsFromItems } from '../lib/shop/checkoutProps'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
+import SectionFieldRow from './SectionFieldRow'
 import { useT } from '../i18n'
 
 /**
@@ -184,45 +185,12 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
               }
 
               return (
-                <label key={field.key} className="block">
-                  <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                    {field.label}
-                  </span>
-                  {field.type === 'select' ? (
-                    <select
-                      value={value}
-                      onChange={(e) => onFieldChange(e.target.value)}
-                      // Native <select> on Windows: popup blanco + text-ink claro = ilegible.
-                      // Esquema claro fijo en el control (cerrado y abierto).
-                      className="mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink"
-                      style={{ colorScheme: 'light' }}
-                    >
-                      {(field.options || []).map((opt) => (
-                        <option
-                          key={opt.value}
-                          value={opt.value}
-                          style={{ backgroundColor: '#f2efe9', color: '#1a1a1a' }}
-                        >
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : field.type === 'textarea' ? (
-                    <textarea
-                      rows={4}
-                      value={value}
-                      onChange={(e) => onFieldChange(e.target.value)}
-                      className={fieldClass}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e) => onFieldChange(e.target.value)}
-                      className={fieldClass}
-                    />
-                  )}
-                </label>
+                <SectionFieldRow
+                  key={field.key}
+                  field={field}
+                  value={value}
+                  onChange={onFieldChange}
+                />
               )
             })}
           </div>

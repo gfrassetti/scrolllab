@@ -13,8 +13,9 @@ const defaultStats = [
  * enter the viewport. Final values render by default, so users with
  * reduced motion (or no JS) always see the real numbers.
  */
-export default function BigNumbers({ stats = defaultStats }) {
+export default function BigNumbers({ stats = defaultStats, bg, fg }) {
   const root = useRef(null)
+  const rows = Array.isArray(stats) && stats.length ? stats : defaultStats
 
   useGSAP(
     () => {
@@ -43,10 +44,14 @@ export default function BigNumbers({ stats = defaultStats }) {
   )
 
   return (
-    <section ref={root} className="border-t border-ink/15 px-5 py-20 md:px-10 md:py-32">
+    <section
+      ref={root}
+      className="border-t border-ink/15 px-5 py-20 md:px-10 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="space-y-3">
+        {rows.map((stat, i) => (
+          <div key={i} className="space-y-3">
             <p className="text-[clamp(3rem,9vw,7.5rem)] leading-none font-medium tracking-[-0.03em]">
               <span data-counter={stat.value}>{stat.value}</span>
               <span className="text-accent">{stat.suffix}</span>

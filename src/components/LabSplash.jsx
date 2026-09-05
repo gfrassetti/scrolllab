@@ -44,7 +44,10 @@ export default function LabSplash({ onDone }) {
     const el = root.current
     if (!el) return undefined
 
+    let done = false
     const finish = () => {
+      if (done) return
+      done = true
       setVisible(false)
       onDoneRef.current?.()
     }
@@ -57,6 +60,10 @@ export default function LabSplash({ onDone }) {
       const id = window.setTimeout(finish, 280)
       return () => window.clearTimeout(id)
     }
+
+    // Red de seguridad: si el timeline no completa (tab sin foco, rAF
+    // throttleado), el overlay fixed inset-0 no debe quedar pegado.
+    const safetyId = window.setTimeout(finish, 2500)
 
     const bars = gsap.utils.toArray('[data-logo-bar]', el)
     const accent = el.querySelector('[data-logo-accent]')
@@ -88,6 +95,7 @@ export default function LabSplash({ onDone }) {
     )
 
     return () => {
+      window.clearTimeout(safetyId)
       tl.kill()
     }
   }, [])

@@ -43,6 +43,7 @@
     "edit": "Editar",
     "delete": "Borrar",
     "snippet": "Pegá esto en el sitio",
+    "snippetStack": "Pegá este componente en tu proyecto. Carga el loader una vez y monta el embed con window.ScrollLab.render; el resto funciona igual que el <script>.",
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "draftHint": "Borrador — abrí el editor para configurarla y publicarla.",
@@ -423,7 +424,7 @@
     "editing": "Editando",
     "editPanel": "Editar sección",
     "noEditableFields": "Esta sección no tiene campos de texto editables todavía.",
-    "commerceHint": "Sumá una tienda a tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). El pago viene en modo demo: conectás tu Mercado Pago o Stripe en checkoutAdapter.js. Al agregar la grilla se activa el kit completo (+{{price}}).",
+    "commerceHint": "Sumá una tienda a tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). El kit es solo frontend a propósito: conectás tu Mercado Pago o Stripe en checkoutAdapter.js cuando quieras (le pasás la doc a una IA y te lo arma en minutos). Al agregar la grilla se activa el kit completo (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "La base incluye {{included}} secciones: te quedan {{left}} sin costo extra.",
     "priceNext": "Llegaste a las {{included}} secciones de la base: la próxima suma {{next}}.",
@@ -441,6 +442,8 @@
     "imageUpload": "Probar imagen / SVG local",
     "imageClear": "Quitar imagen",
     "imageHelp": "PNG, SVG, WebP o JPG. El archivo local sirve solo para esta vista previa (reemplaza el SVG placeholder). Para que viaje en tu ZIP: escribí una URL https pública, o en el proyecto descargado guardá el archivo en public/ (ej. public/lata-1.svg) y pasá can1Image=\"/lata-1.svg\". Sin imagen, queda la lata SVG del template.",
+    "listAdd": "Agregar",
+    "hrefHint": "#ancla · /ruta · https://… · mailto:… · tel:…",
     "sections": {
       "chapters": {
         "NavMinimal": {

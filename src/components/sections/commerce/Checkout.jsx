@@ -70,7 +70,7 @@ export default function Checkout({
   stepsText = 'Cart\nInformation\nPayment',
   eyebrow = 'Checkout',
   title = 'Almost there',
-  body = 'Placeholder checkout. Payments run through your provider — this kit ships with a mock adapter, so swap createCheckout() for Mercado Pago or Stripe.',
+  body = 'Placeholder checkout. This kit ships frontend-only — wire createCheckout() in checkoutAdapter.js to Mercado Pago or Stripe (ask an AI assistant to do it from their docs, it is a quick job).',
   contactTitle = 'Contact',
   emailLabel = 'Email',
   emailPlaceholder = 'you@example.com',
@@ -120,7 +120,7 @@ export default function Checkout({
   payingLabel = 'Processing…',
   trustText = 'Encrypted checkout\n30-day returns\nSupport in 24 hs',
   successTitle = 'Order received',
-  successBody = 'This is the mock adapter response. Wire createCheckout() to your provider to charge for real.',
+  successBody = 'This is the demo response — no payment provider is connected yet. Wire createCheckout() in checkoutAdapter.js to charge for real.',
   successCta = 'Keep shopping',
 }) {
   const uid = useId()

@@ -10,10 +10,18 @@ const defaultLinks = ['System', 'Units', 'Archive', 'Instagram', 'Contact']
 export default function FooterBrutal({
   ctaWord = 'GET THE KIT',
   email = 'hello@placeholder.systems',
+  ctaHref,
   links = defaultLinks,
+  bg,
+  fg,
   legal = '©2026 Placeholder Systems — Template, not a promise',
 }) {
   const root = useRef(null)
+  const cta = ctaHref || `mailto:${email}`
+  // `links` puede ser string[] (default) o {label, href}[] (editor).
+  const linkItems = (Array.isArray(links) ? links : defaultLinks)
+    .map((l) => (typeof l === 'string' ? { label: l, href: '#' } : l))
+    .filter((l) => l && l.label)
 
   useGSAP(
     () => {
@@ -42,9 +50,10 @@ export default function FooterBrutal({
     <footer
       ref={root}
       className="border-t-2 border-carbon bg-klein text-concrete"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <div className="px-5 pt-16 md:px-8 md:pt-24">
-        <a href={`mailto:${email}`} className="group block" aria-label={email}>
+        <a href={cta} className="group block" aria-label={email}>
           <span
             data-brutal-word
             className="block font-anton text-[13vw] leading-[0.9] whitespace-nowrap uppercase transition-colors duration-300 group-hover:text-carbon"
@@ -55,13 +64,13 @@ export default function FooterBrutal({
       </div>
 
       <ul className="mt-12 flex flex-wrap border-t-2 border-carbon md:mt-20">
-        {links.map((link) => (
-          <li key={link} className="border-r-2 border-carbon">
+        {linkItems.map((link, i) => (
+          <li key={i} className="border-r-2 border-carbon">
             <a
-              href="#"
+              href={link.href || '#'}
               className="block px-5 py-3 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors duration-200 hover:bg-carbon md:px-8 md:text-xs"
             >
-              {link}
+              {link.label}
             </a>
           </li>
         ))}

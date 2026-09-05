@@ -105,6 +105,53 @@ html.dark {
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+@theme {
+  /* ═══ Escala tipográfica — un solo sistema para marketing + app ═══
+     Uso: text-eyebrow / text-body-sm / text-body / text-body-lg /
+     text-title-sm / text-title / text-display / text-mega.
+     Reemplaza los text-[11px], text-[9px] y text-[clamp(...)] sueltos.
+     Regla: headings = 2–5 palabras (así se ven grandes); la oración
+     larga va debajo como text-body-lg, nunca como el heading. */
+
+  /* Eyebrow / kicker — 12px. El acento naranja se reserva para precio o CTA. */
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.14em;
+  --text-eyebrow--font-weight: 500;
+
+  /* Meta / captions / texto secundario de filas — NO para párrafos de lectura. */
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+
+  /* Párrafo por defecto — piso comercial de 16px. */
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+
+  /* Lead / subtítulo de hero / descripción de planes. */
+  --text-body-lg: 1.1875rem;
+  --text-body-lg--line-height: 1.55;
+
+  /* Título de fila / item de lista / título de card. */
+  --text-title-sm: clamp(1.25rem, 1rem + 1.1vw, 1.625rem);
+  --text-title-sm--line-height: 1.2;
+  --text-title-sm--letter-spacing: -0.015em;
+
+  /* h2 de sección. */
+  --text-title: clamp(1.875rem, 1.2rem + 2.6vw, 2.75rem);
+  --text-title--line-height: 1.08;
+  --text-title--letter-spacing: -0.025em;
+
+  /* h1 de página / headline de hero. */
+  --text-display: clamp(2.75rem, 1.4rem + 6vw, 5.25rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.035em;
+
+  /* Wordmark de marca — solo eso. */
+  --text-mega: clamp(3.5rem, 1rem + 13vw, 11rem);
+  --text-mega--line-height: 0.85;
+  --text-mega--letter-spacing: -0.045em;
+}
+
 /* Demos animados (LabDemo, LabDemoSync, BuilderDemo): paleta propia, chata,
    que flipea con el tema del sitio (html.dark). */
 :root {
@@ -147,7 +194,7 @@ html {
 }
 
 body {
-  @apply bg-bone font-grotesk text-ink antialiased;
+  @apply bg-bone font-grotesk text-ink text-body antialiased;
   overflow-x: clip;
 }
 
@@ -232,6 +279,50 @@ body {
   :focus-visible {
     outline: 2px solid var(--color-ink);
     outline-offset: 3px;
+  }
+}
+
+/* ═══ Botones — CTA como componente, no como tamaño suelto ═══
+   Reemplaza los `text-[11px] uppercase tracking-[0.2em]` que hacían que el
+   botón primario se viera igual que un epígrafe. `.btn` fija alto de touch
+   (44px), tamaño 14px legible y peso; el color lo pone la variante. */
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 border
+      px-5 py-3 text-body-sm font-medium;
+    transition:
+      transform var(--duration-press) var(--ease-out),
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .btn-primary {
+    @apply border-ink bg-ink text-bone;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    @apply border-accent bg-accent;
+  }
+
+  .btn-ghost {
+    @apply border-ink/25 text-ink;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    @apply border-ink bg-ink text-bone;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    .btn:active:not(:disabled) {
+      transition: none;
+      transform: none;
+    }
   }
 }
 

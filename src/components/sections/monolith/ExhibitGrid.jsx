@@ -20,9 +20,18 @@ export default function ExhibitGrid({
   unit = '03',
   total = '05',
   label = 'The exhibits',
-  exhibits = defaultExhibits,
+  exhibits,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  const rows =
+    Array.isArray(exhibits) && exhibits.length
+      ? exhibits.map((e, i) => ({
+          ...e,
+          img: e.img || defaultExhibits[i % defaultExhibits.length].img,
+        }))
+      : defaultExhibits
 
   useGSAP(
     () => {
@@ -40,7 +49,11 @@ export default function ExhibitGrid({
   )
 
   return (
-    <section ref={root} className="px-5 py-20 md:px-8 md:py-32">
+    <section
+      ref={root}
+      className="px-5 py-20 md:px-8 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>
           Unit {unit} / {total}
@@ -49,8 +62,8 @@ export default function ExhibitGrid({
       </div>
 
       <div className="grid grid-cols-2 gap-[2px] border-2 border-carbon bg-carbon md:grid-cols-4">
-        {exhibits.map((exhibit) => (
-          <figure key={exhibit.code} data-exhibit className="group bg-concrete">
+        {rows.map((exhibit, i) => (
+          <figure key={i} data-exhibit className="group bg-concrete">
             <div className="overflow-hidden">
               <img
                 src={exhibit.img}

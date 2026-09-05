@@ -9,6 +9,8 @@ export default function VelocityMarquee({
   text = 'Placeholder ribbon',
   separator = '✺',
   repeat = 6,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -58,6 +60,7 @@ export default function VelocityMarquee({
       ref={root}
       aria-hidden="true"
       className="overflow-hidden border-y border-ink/15 py-4 md:py-6"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <div data-track className="flex w-max whitespace-nowrap will-change-transform">
         <div className="text-[9vw] leading-none font-medium uppercase tracking-[-0.02em] md:text-[5vw]">

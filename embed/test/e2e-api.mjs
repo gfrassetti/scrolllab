@@ -16,6 +16,9 @@ Object.assign(process.env, {
   STORE: 'file',
   AUTH_DEV_ENABLED: 'true',
   MP_MOCK_ENABLED: 'true',
+  // El e2e crea/publica/borra decenas de instancias en ráfaga (una por sección
+  // hosteable × 3 viewports). Sin esto el limiter de `/api/hosted` tira 429.
+  RATE_LIMIT_DISABLED: 'true',
   SESSION_SECRET: 'e2e-session-secret-min-24-characters',
   DOWNLOAD_SECRET: 'e2e-download-secret-min-24-characters',
   CLIENT_URL: 'http://localhost:4178',

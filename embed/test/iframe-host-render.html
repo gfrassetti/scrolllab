@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed — window.ScrollLab.render (framework path)</title>
+    <style>
+      * { box-sizing: border-box; }
+      html { font-size: 21px; }
+      body { margin: 0; font-family: Georgia, serif; background: #fff; color: #1a1a1a; }
+      .host-block { padding: 5rem 3rem; }
+      #secret { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="secret" data-token="HOST-SECRET-DO-NOT-LEAK">x</div>
+
+    <div class="host-block">
+      <h1>Página anfitriona (render API)</h1>
+      <p>
+        El loader se carga <strong>sin</strong> <code>data-key</code> (no
+        auto-monta). Un componente React/Vue haría lo mismo y después llamaría a
+        <code>window.ScrollLab.render(el, { key })</code>.
+      </p>
+    </div>
+
+    <div id="sl-mount"></div>
+
+    <script src="http://localhost:4179/embed-dist/v1/loader.js" async></script>
+    <script>
+      ;(function () {
+        var KEY = '__E2E_KEY__'
+        var API = 'http://localhost:8787'
+        function go() {
+          if (window.ScrollLab && window.ScrollLab.render) {
+            window.ScrollLab.render('#sl-mount', { key: KEY, api: API })
+          } else {
+            setTimeout(go, 30)
+          }
+        }
+        go()
+      })()
+    </script>
+  </body>
+</html>

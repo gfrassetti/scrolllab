@@ -11,10 +11,16 @@ export default function SkewScroller({
   unit = '01',
   total = '05',
   label = 'The mantra',
-  words = defaultWords,
+  words,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const track = useRef(null)
+  const rows =
+    Array.isArray(words) && words.length
+      ? words.map((w) => (typeof w === 'string' ? w : w.word || ''))
+      : defaultWords
 
   useGSAP(
     () => {
@@ -55,7 +61,11 @@ export default function SkewScroller({
   )
 
   return (
-    <section ref={root} className="overflow-hidden px-5 py-20 md:px-8 md:py-32">
+    <section
+      ref={root}
+      className="overflow-hidden px-5 py-20 md:px-8 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>
           Unit {unit} / {total}
@@ -64,9 +74,9 @@ export default function SkewScroller({
       </div>
 
       <div ref={track} className="will-change-transform">
-        {words.map((word, i) => (
+        {rows.map((word, i) => (
           <p
-            key={word}
+            key={i}
             data-skew-row
             className={`border-b-2 border-carbon font-anton text-[13vw] leading-[1.05] uppercase select-none md:text-[10vw] ${
               i % 2 === 1 ? 'text-right text-klein' : ''

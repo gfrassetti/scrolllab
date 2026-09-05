@@ -1,9 +1,14 @@
 export default function FooterVelocity({
   line = 'Closing line.',
   legal = '©2026 Brand — Lorem ipsum dolor sit amet.',
+  bg,
+  fg,
 }) {
   return (
-    <footer className="border-t border-[#ece9e2]/10 bg-[#07140e] px-5 py-16 text-[#ece9e2] md:px-10 md:py-20">
+    <footer
+      className="border-t border-[#ece9e2]/10 bg-[#07140e] px-5 py-16 text-[#ece9e2] md:px-10 md:py-20"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <p className="max-w-[16ch] font-display text-[clamp(2.2rem,6vw,4.5rem)] leading-[0.95] italic">
         {line}
       </p>

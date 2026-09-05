@@ -1,0 +1,11 @@
+{
+  "watch": ["server"],
+  "ext": "js,mjs,json",
+  "delay": "400",
+  "ignore": [
+    "server/__tests__/**",
+    "server/**/*.test.js",
+    "storage/**",
+    "embed-dist/**"
+  ]
+}

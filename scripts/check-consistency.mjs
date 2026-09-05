@@ -18,7 +18,10 @@ import {
   CUSTOM_EXTRA_SECTION_USD as SERVER_EXTRA_SECTION,
 } from '../server/catalog.js'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
-import { ALLOWED_PROPS_BY_SECTION } from '../server/sectionFields.js'
+import {
+  ALLOWED_PROPS_BY_SECTION,
+  LIST_PROPS_BY_SECTION,
+} from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
   CUSTOM_BASE_PRICE_USD,
@@ -142,6 +145,39 @@ for (const [id, keys] of Object.entries(ALLOWED_PROPS_BY_SECTION)) {
   const clientKeys = SECTION_FIELDS[id].map((f) => f.key)
   for (const key of diff(keys, clientKeys)) {
     fail('props', `'${id}.${key}' lo acepta el servidor pero no es editable en el builder`)
+  }
+}
+
+// 3a2. Campos `list`: el schema del server (LIST_PROPS_BY_SECTION) tiene que
+// existir como campo `type:'list'` en el builder, con los mismos sub-campos.
+for (const [id, schema] of Object.entries(LIST_PROPS_BY_SECTION)) {
+  const clientFields = SECTION_FIELDS[id] || []
+  for (const [key, spec] of Object.entries(schema)) {
+    const field = clientFields.find((f) => f.key === key)
+    if (!field) {
+      fail('props', `'${id}.${key}' es un list del server sin campo en el builder`)
+      continue
+    }
+    if (field.type !== 'list') {
+      fail('props', `'${id}.${key}' es list en el server pero '${field.type}' en el builder`)
+      continue
+    }
+    const clientSub = new Set((field.item || []).map((f) => f.key))
+    const serverSub = new Set(Object.keys(spec.item || {}))
+    for (const k of diff([...serverSub], [...clientSub])) {
+      fail('props', `'${id}.${key}[].${k}' lo valida el server pero el builder no lo edita`)
+    }
+    for (const k of diff([...clientSub], [...serverSub])) {
+      fail('props', `'${id}.${key}[].${k}' es editable en el builder pero el server lo descarta`)
+    }
+  }
+}
+for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
+  for (const field of fields) {
+    if (field.type !== 'list') continue
+    if (!LIST_PROPS_BY_SECTION[id]?.[field.key]) {
+      fail('props', `'${id}.${field.key}' es list en el builder pero el server no tiene su schema`)
+    }
   }
 }
 

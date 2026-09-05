@@ -33,13 +33,31 @@ corre con `root: embed/frame` y si no Tailwind no ve las clases de las secciones
 
 ## Instalación (lo que pega el cliente)
 
+**HTML / Webflow / WordPress / Framer** — el `<script>` crudo:
+
 ```html
 <script src="https://embed.scrolllab.com.ar/v1/loader.js"
         data-scrolllab data-key="pub_xxxxx" async></script>
 ```
 
+Al cargar, el loader escanea los `<script data-scrolllab data-key>` y monta cada
+uno (también en `DOMContentLoaded`, por si va en `<head>`).
+
+**React / Next / Vue / cualquier framework** — el loader expone una API y el
+componente monta cuando quiere:
+
+```js
+window.ScrollLab.render(elemento, { key: 'pub_xxxxx', api, frame }) // monta en `elemento`
+window.ScrollLab.scan()                                             // re-escanea <script> nuevos
+```
+
+`render()` es idempotente (`data-scrolllab-done`) y reusa el mismo `mount()` que
+el path HTML. Los snippets por stack los arma `src/lib/embed.js`
+(`embedSnippet(key, loader, variant)` — `html` | `react` | `next` | `vue`) y se
+eligen en `/lab` con `<SnippetBox>`.
+
 La URL sale de `GET /api/embed/loader` → `${EMBED_CDN_URL}/v1/loader.js`. Con
-`EMBED_SRI=true` el snippet suma `integrity` + `crossorigin` (requiere que el
+`EMBED_SRI=true` el snippet HTML suma `integrity` + `crossorigin` (requiere que el
 host mande `Access-Control-Allow-Origin: *` en loader.js). `data-frame` /
 `data-api` son overrides solo para test local.
 
@@ -109,7 +127,7 @@ Vercel → un click, SSL automático por el wildcard `*.scrolllab.com.ar`).
 
 | pieza | tamaño |
 |---|---|
-| `loader.js` (lo baja el host) | **1.7 KB** sin comprimir |
+| `loader.js` (lo baja el host) | **~3.7 KB** minificado (incluye `window.ScrollLab.render`/`scan`) |
 | frame core (Preact + GSAP + framework) | 57.5 KB gz — nuestro origen, cache compartida entre sitios |
 | frame CSS (Tailwind) | 16.9 KB gz — escanea TODAS las secciones (pendiente: scopear a `HOSTABLE_SECTIONS`) |
 | secciones | inline en el bundle del frame (~1 KB gz cada una) |

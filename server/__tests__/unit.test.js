@@ -42,6 +42,7 @@ import {
   buildSubscriptionCanceled,
 } from '../services/email.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
+import { sanitizeSectionProps } from '../sectionFields.js'
 import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
 import {
   PENDING_RETENTION_MS,
@@ -50,6 +51,92 @@ import {
   pendingExpiresAt,
   visibleOrders,
 } from '../orderRetention.js'
+
+describe('sanitizeSectionProps — color / href / list', () => {
+  const S = 'chapters/FooterCTA'
+
+  it('acepta color válido y descarta lo que no es color', () => {
+    assert.deepEqual(sanitizeSectionProps(S, { bg: '#0e0e11', fg: 'red' }), {
+      bg: '#0e0e11',
+    })
+  })
+
+  it('acepta href seguro y rechaza javascript:', () => {
+    assert.deepEqual(
+      sanitizeSectionProps(S, { ctaHref: 'https://x.com' }),
+      { ctaHref: 'https://x.com' },
+    )
+    assert.equal(sanitizeSectionProps(S, { ctaHref: 'javascript:alert(1)' }), undefined)
+  })
+
+  it('list: valida items, descarta href malo, corta al max y tira items vacíos', () => {
+    const clean = sanitizeSectionProps(S, {
+      links: [
+        { label: 'Inicio', href: '#top' },
+        { label: 'X', href: 'javascript:x' },
+        { label: '', href: '' },
+        ...Array.from({ length: 15 }, () => ({ label: 'L', href: '/x' })),
+      ],
+    })
+    assert.equal(clean.links.length, 8)
+    assert.deepEqual(clean.links[0], { label: 'Inicio', href: '#top' })
+    assert.deepEqual(clean.links[1], { label: 'X' })
+    // el item {label:'', href:''} no aporta nada → el server lo descarta
+    assert.deepEqual(clean.links[2], { label: 'L', href: '/x' })
+  })
+
+  it('descarta claves fuera de la allowlist y arrays no declarados', () => {
+    assert.equal(sanitizeSectionProps(S, { onClick: 'x' }), undefined)
+    assert.equal(sanitizeSectionProps(S, { legal: ['no', 'array'] }), undefined)
+  })
+
+  it('Fase C: BigNumbers stats / KeyFacts facts / TypeAccordion items', () => {
+    const bn = sanitizeSectionProps('chapters/BigNumbers', {
+      bg: '#101014',
+      stats: [{ value: '128', suffix: '+', label: 'Proyectos' }, { value: '', suffix: '', label: '' }],
+    })
+    assert.equal(bn.bg, '#101014')
+    assert.equal(bn.stats.length, 1) // el item vacío se descarta al persistir
+
+    const kf = sanitizeSectionProps('atelier/KeyFacts', {
+      facts: Array.from({ length: 9 }, (_, i) => ({ value: `${i}`, label: `L${i}` })),
+    })
+    assert.equal(kf.facts.length, 6)
+
+    const ta = sanitizeSectionProps('monolith/TypeAccordion', {
+      items: [{ title: 'Uno', body: 'Texto', img: '/x.png' }],
+    })
+    assert.deepEqual(ta.items[0], { title: 'Uno', body: 'Texto' })
+  })
+
+  it('Fase D: SplitReveals/WorkIndex/SkewScroller/ExhibitGrid/BubbleBenefits', () => {
+    const sr = sanitizeSectionProps('nocturne/SplitReveals', {
+      beats: [{ kicker: 'K', title: 'T', body: 'B' }],
+    })
+    assert.deepEqual(sr.beats[0], { kicker: 'K', title: 'T', body: 'B' })
+
+    const wi = sanitizeSectionProps('nocturne/WorkIndex', {
+      works: Array.from({ length: 10 }, (_, i) => ({ title: `T${i}` })),
+    })
+    assert.equal(wi.works.length, 8)
+
+    const sk = sanitizeSectionProps('monolith/SkewScroller', {
+      words: [{ word: 'RAW' }, {}],
+    })
+    assert.equal(sk.words.length, 1) // el item vacío se descarta al persistir
+
+    const eg = sanitizeSectionProps('monolith/ExhibitGrid', {
+      exhibits: [{ code: 'EX-09', caption: 'x' }],
+    })
+    assert.deepEqual(eg.exhibits[0], { code: 'EX-09', caption: 'x' })
+
+    const bb = sanitizeSectionProps('fizz/BubbleBenefits', {
+      benefits: [{ title: 'T', color: '#ff3ea5' }, { title: 'T2', color: 'hotpink' }],
+    })
+    assert.equal(bb.benefits[0].color, '#ff3ea5')
+    assert.equal(bb.benefits[1].color, undefined)
+  })
+})
 
 describe('validateRecipe', () => {
   it('acepta secciones de la allowlist (legacy string[])', () => {

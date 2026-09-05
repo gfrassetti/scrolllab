@@ -9,6 +9,8 @@ export default function DiagonalMarquee({
   textA = 'Placeholder ribbon',
   textB = 'Generic subtitle strip',
   repeat = 6,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -44,6 +46,7 @@ export default function DiagonalMarquee({
       ref={root}
       aria-hidden="true"
       className="relative overflow-hidden py-24 md:py-36"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <div className="rotate-[-2.5deg]">
         <div className="-mx-[5vw] bg-acid py-3 md:py-4">

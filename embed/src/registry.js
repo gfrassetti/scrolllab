@@ -17,6 +17,22 @@ import FooterSplash from '../../src/components/sections/fizz/FooterSplash.jsx'
 import FooterVelocity from '../../src/components/sections/velocity/FooterVelocity.jsx'
 import FooterAtelier from '../../src/components/sections/atelier/FooterAtelier.jsx'
 import FooterAtrium from '../../src/components/sections/atrium/FooterAtrium.jsx'
+// v1.1 — bloques de contenido FLOW-safe (entrada `once`, sin pin/scrub, padding
+// en rem/px). Mismos modelos que la familia footer → tokens ya en main.css.
+import BigNumbers from '../../src/components/sections/chapters/BigNumbers.jsx'
+import KeyFacts from '../../src/components/sections/atelier/KeyFacts.jsx'
+import TypeAccordion from '../../src/components/sections/monolith/TypeAccordion.jsx'
+// v1.2 — segunda tanda: ribbons continuos (sin ScrollTrigger pineado; el boost
+// por velocidad de scroll simplemente no dispara si el host no scrollea, el
+// loop de fondo sigue andando) + más bloques de contenido `once`.
+import VelocityMarquee from '../../src/components/sections/chapters/VelocityMarquee.jsx'
+import DiagonalMarquee from '../../src/components/sections/nocturne/DiagonalMarquee.jsx'
+import SplitReveals from '../../src/components/sections/nocturne/SplitReveals.jsx'
+import WorkIndex from '../../src/components/sections/nocturne/WorkIndex.jsx'
+import SkewScroller from '../../src/components/sections/monolith/SkewScroller.jsx'
+import ExhibitGrid from '../../src/components/sections/monolith/ExhibitGrid.jsx'
+import BubbleBenefits from '../../src/components/sections/fizz/BubbleBenefits.jsx'
+import AboutClarity from '../../src/components/sections/atelier/AboutClarity.jsx'
 
 const SECTIONS = {
   'chapters/FooterCTA': FooterCTA,
@@ -26,6 +42,17 @@ const SECTIONS = {
   'velocity/FooterVelocity': FooterVelocity,
   'atelier/FooterAtelier': FooterAtelier,
   'atrium/FooterAtrium': FooterAtrium,
+  'chapters/BigNumbers': BigNumbers,
+  'atelier/KeyFacts': KeyFacts,
+  'monolith/TypeAccordion': TypeAccordion,
+  'chapters/VelocityMarquee': VelocityMarquee,
+  'nocturne/DiagonalMarquee': DiagonalMarquee,
+  'nocturne/SplitReveals': SplitReveals,
+  'nocturne/WorkIndex': WorkIndex,
+  'monolith/SkewScroller': SkewScroller,
+  'monolith/ExhibitGrid': ExhibitGrid,
+  'fizz/BubbleBenefits': BubbleBenefits,
+  'atelier/AboutClarity': AboutClarity,
 }
 
 /**

@@ -43,7 +43,10 @@ export default function BrandSplash({ onDone }) {
     const el = root.current
     if (!el) return undefined
 
+    let done = false
     const finish = () => {
+      if (done) return
+      done = true
       try {
         sessionStorage.setItem(SESSION_KEY, '1')
       } catch {
@@ -61,6 +64,12 @@ export default function BrandSplash({ onDone }) {
       const id = window.setTimeout(finish, 280)
       return () => window.clearTimeout(id)
     }
+
+    // Red de seguridad: si el tab pierde foco/rAF se throttlea (o cualquier
+    // otra causa detiene el timeline antes de onComplete), la página queda
+    // con scroll bloqueado para siempre (ver overflow:hidden en TemplatesIndex
+    // mientras !introReady). Nunca debe durar más que esto.
+    const safetyId = window.setTimeout(finish, 2500)
 
     const bars = gsap.utils.toArray('[data-logo-bar]', el)
     const accent = el.querySelector('[data-logo-accent]')
@@ -103,6 +112,7 @@ export default function BrandSplash({ onDone }) {
     )
 
     return () => {
+      window.clearTimeout(safetyId)
       tl.kill()
     }
   }, [visible])

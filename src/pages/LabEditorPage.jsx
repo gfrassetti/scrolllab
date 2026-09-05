@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
-import { embedSnippet } from '../lib/embed'
+import SnippetBox from '../components/SnippetBox'
+import SectionFieldRow from '../components/SectionFieldRow'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
@@ -154,49 +155,19 @@ export default function LabEditorPage() {
                   {fields.length === 0 && (
                     <p className="text-sm text-ink/50">{t('lab.noFields')}</p>
                   )}
-                  {fields.map((field) => {
-                    const value =
-                      props[field.key] ??
-                      (field.type === 'select'
-                        ? field.options?.[0]?.value
-                        : '') ??
-                      ''
-                    return (
-                      <label key={field.key} className="block">
-                        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                          {field.label}
-                        </span>
-                        {field.type === 'select' ? (
-                          <select
-                            value={value}
-                            onChange={(e) => setField(field.key, e.target.value)}
-                            className="mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink"
-                            style={{ colorScheme: 'light' }}
-                          >
-                            {(field.options || []).map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
-                        ) : field.type === 'textarea' ? (
-                          <textarea
-                            rows={4}
-                            value={value}
-                            onChange={(e) => setField(field.key, e.target.value)}
-                            className={fieldClass}
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            value={value}
-                            onChange={(e) => setField(field.key, e.target.value)}
-                            className={fieldClass}
-                          />
-                        )}
-                      </label>
-                    )
-                  })}
+                  {fields.map((field) => (
+                    <SectionFieldRow
+                      key={field.key}
+                      field={field}
+                      value={
+                        props[field.key] ??
+                        (field.type === 'select'
+                          ? field.options?.[0]?.value
+                          : undefined)
+                      }
+                      onChange={(next) => setField(field.key, next)}
+                    />
+                  ))}
 
                   <label className="block border-t border-ink/15 pt-4">
                     <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
@@ -250,12 +221,7 @@ export default function LabEditorPage() {
                 </div>
 
                 <div className="mt-8">
-                  <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                    {t('lab.snippet')}
-                  </p>
-                  <pre className="overflow-x-auto border border-ink/15 bg-ink/[0.03] p-3 text-xs">
-                    {embedSnippet(inst.key, loaderInfo)}
-                  </pre>
+                  <SnippetBox embedKey={inst.key} loaderInfo={loaderInfo} />
                   {inst.status !== 'published' && (
                     <p className="mt-2 text-xs text-ink/45">{t('lab.publishFirst')}</p>
                   )}

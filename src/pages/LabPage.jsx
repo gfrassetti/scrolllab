@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { gsap, useGSAP, SplitText } from '../lib/gsap'
 import SiteHeader from '../components/SiteHeader'
 import LabSplash from '../components/LabSplash'
 import LabDemo from '../components/LabDemo'
-import LabDemoSync from '../components/LabDemoSync'
+import LabDemoCopy from '../components/LabDemoCopy'
+import LabDemoPaste from '../components/LabDemoPaste'
 import FaqAccordion from '../components/FaqAccordion'
 import HostedPlans from '../components/HostedPlans'
 import { api } from '../lib/api'
-import { embedSnippet } from '../lib/embed'
+import SnippetBox from '../components/SnippetBox'
 import { getSection } from '../lib/sectionRegistry'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
@@ -36,6 +38,8 @@ export default function LabPage() {
   } = usePlan()
   const { t, locale } = useI18n()
   const navigate = useNavigate()
+  const root = useRef(null)
+  const demoPin = useRef(null)
 
   const goToPlanes = (e) => {
     e?.preventDefault?.()
@@ -57,7 +61,6 @@ export default function LabPage() {
   const [loaderInfo, setLoaderInfo] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const [copied, setCopied] = useState('')
 
   const faq = t('lab.faq')
 
@@ -124,261 +127,344 @@ export default function LabPage() {
     }
   }
 
-  const copy = async (key) => {
-    try {
-      await navigator.clipboard.writeText(embedSnippet(key, loaderInfo))
-      setCopied(key)
-      setTimeout(() => setCopied(''), 1800)
-    } catch {
-      /* clipboard bloqueado */
-    }
-  }
+  const steps = [t('lab.guide1'), t('lab.guide2'), t('lab.guide3')]
+
+  useGSAP(
+    () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+      // Mismo lenguaje que el wordmark del home: máscara + chars, LAB es la
+      // marca de este producto puntual.
+      const split = new SplitText('[data-lab-title]', {
+        type: 'chars',
+        mask: 'chars',
+      })
+
+      gsap.from(split.chars, {
+        yPercent: 115,
+        duration: 1,
+        ease: 'power4.out',
+        stagger: { each: 0.05 },
+        delay: 0.1,
+      })
+
+      gsap.from('[data-lab-hero-meta]', {
+        opacity: 0,
+        y: 14,
+        duration: 0.9,
+        ease: 'power2.out',
+        stagger: 0.12,
+        delay: 0.5,
+      })
+
+      // Las 3 columnas de "cómo funciona": P1 de la bitácora de efectos
+      // (docs/motion-cookbook.md) — pin + scrub, mismo método que
+      // HorizontalPanels. La fila se fija y el scroll destapa cada demo en
+      // cascada; volver para arriba las vuelve a tapar porque el scrub ata
+      // el progreso del timeline directo a la posición de scroll (no hace
+      // falta reverse manual). En mobile no pinea: reveal normal por
+      // ScrollTrigger, con la misma regla play/reverse.
+      const mm = gsap.matchMedia()
+
+      mm.add('(min-width: 768px)', () => {
+        const cols = gsap.utils.toArray('[data-demo-col]', demoPin.current)
+        gsap.set(cols, { opacity: 0, y: 28 })
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: demoPin.current,
+            start: 'top top',
+            end: '+=120%',
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        })
+
+        cols.forEach((col, i) => {
+          tl.to(col, { opacity: 1, y: 0, ease: 'none', duration: 1 }, i)
+        })
+
+        return () => gsap.set(cols, { clearProps: 'all' })
+      })
+
+      mm.add('(max-width: 767px)', () => {
+        gsap.utils.toArray('[data-demo-col]', demoPin.current).forEach((col, i) => {
+          gsap.from(col, {
+            opacity: 0,
+            y: 28,
+            duration: 0.6,
+            delay: i * 0.1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: col,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse',
+            },
+          })
+        })
+      })
+
+      // El revert del contexto no deshace el DOM que crea SplitText.
+      return () => {
+        mm.revert()
+        split.revert()
+      }
+    },
+    { scope: root, dependencies: [locale], revertOnUpdate: true },
+  )
 
   return (
-    <div className="min-h-svh bg-bone text-ink">
+    <div ref={root} className="min-h-svh bg-bone text-ink">
       <LabSplash />
       <SiteHeader />
-      <main className="px-5 py-12 md:px-10">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
-          {t('lab.eyebrow')}
-        </p>
-        <h1 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.02em]">
-          LAB
-        </h1>
-        <p className="mt-4 max-w-[56ch] text-sm leading-relaxed text-ink/70">
-          {t('lab.body')}
-        </p>
-
-        <div className="mt-8">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-accent">
-            Cómo funciona
+      <main className="px-5 py-16 md:px-10 md:py-24">
+        {/* Hero — bloque centrado (el "momento"). Todo lo de abajo va alineado
+            a la izquierda dentro del mismo contenedor. */}
+        <div className="mx-auto max-w-2xl text-center">
+          <p
+            data-lab-hero-meta
+            className="text-eyebrow uppercase text-ink/45"
+          >
+            {t('lab.eyebrow')}
           </p>
-          <h2 className="mt-2 text-[clamp(1.4rem,3.5vw,2.2rem)] font-medium tracking-[-0.02em]">
-            De una sección del catálogo a un{' '}
-            <code className="font-mono">&lt;script&gt;</code> en cualquier sitio
-          </h2>
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <LabDemo key={locale} />
-            <LabDemoSync key={locale} />
-          </div>
-          <p className="mt-4 max-w-[70ch] text-xs leading-relaxed text-ink/40">
-            Prototipo. <strong className="font-medium text-ink/60">Izquierda</strong>:
-            configurás la sección en LAB y pegás el{' '}
-            <code className="font-mono">&lt;script&gt;</code> en el sitio.{' '}
-            <strong className="font-medium text-ink/60">Derecha</strong>: cambiás
-            el texto una vez y se actualiza en todos los sitios donde esté
-            pegado. El mismo flujo real vive acá abajo.
+          <h1
+            data-lab-title
+            className="mt-3 font-brico text-display font-semibold text-accent-ink"
+          >
+            LAB
+          </h1>
+          <p
+            data-lab-hero-meta
+            className="mx-auto mt-5 max-w-[52ch] text-body-lg text-ink/80"
+          >
+            {t('lab.body')}
           </p>
         </div>
 
+        {/* Cómo funciona — 3 pasos + un prototipo del cambio en vivo. */}
+        <section className="mt-20 md:mt-28">
+          <p className="text-eyebrow uppercase text-ink/45">Cómo funciona</p>
+          <h2 className="mt-3 max-w-[22ch] text-title font-medium">
+            De una sección del catálogo a un{' '}
+            <code className="font-mono text-[0.8em]">&lt;script&gt;</code> en
+            cualquier sitio
+          </h2>
+
+          <div
+            ref={demoPin}
+            className="relative mt-10 md:flex md:h-svh md:items-center"
+          >
+            <ol className="grid w-full gap-10 sm:grid-cols-3 sm:gap-8">
+              {[LabDemo, LabDemoCopy, LabDemoPaste].map((Demo, i) => (
+                <li key={i} className="border-t border-ink/20 pt-4">
+                  <span className="font-mono text-body-sm text-accent">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <p className="mt-2 text-body text-ink/80">{steps[i]}</p>
+                  <div data-demo-col className="mt-6">
+                    <Demo key={locale} />
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <p className="mt-8 max-w-[72ch] text-body-sm text-ink/60">
+            Prototipo. El flujo real vive más abajo.
+          </p>
+        </section>
+
+        {/* Planes — la decisión. Subido acá, antes de "tus secciones". */}
+        <div className="mt-20 md:mt-28">
+          <HostedPlans />
+        </div>
+
         {error && (
-          <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+          <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm">
             {error}
           </p>
         )}
 
-        {!user ? (
-          loading ? null : (
-            <div className="mt-10 border border-ink/15 p-6">
-              <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                {t('lab.yours')}
-              </h2>
-              <p className="mt-3 max-w-[48ch] text-sm text-ink/60">
-                {t('lab.loginPrompt')}
-              </p>
-              <Link
-                to="/login?next=/lab"
-                className="ui-press mt-4 inline-block border border-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone"
-              >
-                {t('nav.login')}
-              </Link>
-            </div>
-          )
-        ) : (
-          <>
-            <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                {t('lab.yours')}
-                {instances.length > 0 && (
-                  <span className="ml-3 normal-case tracking-normal text-ink/40">
-                    {t('lab.publishedCount', {
-                      n: instances.filter((i) => i.status === 'published').length,
-                      total: instances.length,
-                    })}
-                  </span>
-                )}
-              </h2>
-              <div className="flex items-center gap-2">
-                <select
-                  value={picked}
-                  onChange={(e) => setPicked(e.target.value)}
-                  disabled={sections.length === 0 || labLocked}
-                  aria-label={t('lab.pickSection')}
-                  className="border border-ink/20 bg-[#f2efe9] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[#1a1a1a] outline-none focus:border-ink disabled:opacity-40"
-                  style={{ colorScheme: 'light' }}
-                >
-                  {sections.map((id) => (
-                    <option key={id} value={id}>
-                      {sectionLabel(id)}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={create}
-                  disabled={busy || sections.length === 0 || labLocked}
-                  title={labLocked ? t('lab.lockedTip') : undefined}
-                  className="ui-press border border-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone disabled:opacity-40"
-                >
-                  {t('lab.new')}
-                </button>
-              </div>
-            </div>
-
-            {labLocked && (
-              <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5">
-                <p className="text-sm leading-relaxed text-ink/75">
-                  {trialAvailable
-                    ? t(
-                        quota > 0
-                          ? 'lab.lockedMoreTrial'
-                          : 'lab.lockedPaidTrial',
-                        { n: trialDays || 7 },
-                      )
-                    : t(
-                        quota > 0 ? 'lab.lockedMoreSub' : 'lab.lockedPaidSub',
-                      )}
-                  {instances.length > 0 && ` ${t('lab.lockedSaved')}`}
+        {/* Tus secciones / login. */}
+        <section className="mt-20 md:mt-28">
+          {!user ? (
+            loading ? null : (
+              <div className="border border-ink/15 p-6 md:p-8">
+                <h2 className="text-eyebrow uppercase text-ink/50">
+                  {t('lab.yours')}
+                </h2>
+                <p className="mt-3 max-w-[48ch] text-body text-ink/70">
+                  {t('lab.loginPrompt')}
                 </p>
-                <a
-                  href="#planes"
-                  onClick={goToPlanes}
-                  className="ui-press mt-3 inline-block border border-ink px-4 py-2 text-[11px] uppercase tracking-[0.25em] hover:bg-ink hover:text-bone"
-                >
-                  {trialAvailable
-                    ? t('lab.planTrialCta', { n: trialDays || 7 })
-                    : t('lab.viewOtherPlans')}
-                </a>
+                <Link to="/login?next=/lab" className="btn btn-primary mt-5">
+                  {t('nav.login')}
+                </Link>
               </div>
-            )}
-
-            {instances.length === 0 ? (
-              labLocked ? null : (
-                <p className="mt-6 text-sm text-ink/50">{t('lab.empty')}</p>
-              )
-            ) : (
-              <ul className="mt-6 space-y-4">
-                {instances.map((inst) => (
-              <li
-                key={inst.id}
-                className="border border-ink/15 p-4 md:p-5"
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-mono text-sm">{inst.sectionId}</span>
-                  <span
-                    className={`border px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
-                      inst.frozen
-                        ? FROZEN_TONE
-                        : STATUS_TONE[inst.status] || STATUS_TONE.draft
-                    }`}
-                  >
-                    {inst.frozen
-                      ? t('lab.status.frozen')
-                      : t(`lab.status.${inst.status}`)}
-                  </span>
-                  {inst.status === 'published' && !inst.frozen && inst.views > 0 && (
-                    <span className="text-[11px] tabular-nums text-ink/40">
-                      {t('lab.views', { n: inst.views })}
+            )
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-eyebrow uppercase text-ink/50">
+                  {t('lab.yours')}
+                  {instances.length > 0 && (
+                    <span className="ml-3 normal-case tracking-normal text-ink/40">
+                      {t('lab.publishedCount', {
+                        n: instances.filter((i) => i.status === 'published')
+                          .length,
+                        total: instances.length,
+                      })}
                     </span>
                   )}
-                  {inst.status === 'published' &&
-                    !inst.frozen &&
-                    inst.stopsOnPlanEnd &&
-                    canceledAt &&
-                    currentPeriodEnd && (
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-accent/90">
-                        {t('lab.stopsOn', { date: fmtDate(currentPeriodEnd) })}
-                      </span>
-                    )}
-                  <Link
-                    to={`/lab/${inst.id}`}
-                    className="ml-auto text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent"
+                </h2>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={picked}
+                    onChange={(e) => setPicked(e.target.value)}
+                    disabled={sections.length === 0 || labLocked}
+                    aria-label={t('lab.pickSection')}
+                    className="min-h-11 border border-ink/20 bg-[#f2efe9] px-3 text-body-sm uppercase tracking-[0.12em] text-[#1a1a1a] outline-none focus:border-ink disabled:opacity-40"
+                    style={{ colorScheme: 'light' }}
                   >
-                    {t('lab.edit')}
-                  </Link>
+                    {sections.map((id) => (
+                      <option key={id} value={id}>
+                        {sectionLabel(id)}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     type="button"
-                    onClick={() => remove(inst.id)}
-                    disabled={busy}
-                    className="text-[11px] uppercase tracking-[0.2em] text-ink/40 hover:text-danger disabled:opacity-40"
+                    onClick={create}
+                    disabled={busy || sections.length === 0 || labLocked}
+                    title={labLocked ? t('lab.lockedTip') : undefined}
+                    className="btn btn-ghost disabled:opacity-40"
                   >
-                    {t('lab.delete')}
+                    {t('lab.new')}
                   </button>
                 </div>
+              </div>
 
-                {inst.status === 'published' ? (
-                  <div className="mt-4">
-                    {inst.frozen && (
-                      <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-xs leading-relaxed text-ink/70">
-                        {t('lab.frozenHint')}
-                      </p>
-                    )}
-                    <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                      {t('lab.snippet')}
-                    </p>
-                    <pre className="overflow-x-auto border border-ink/15 bg-ink/[0.03] p-3 text-xs">
-                      {embedSnippet(inst.key, loaderInfo)}
-                    </pre>
-                    <button
-                      type="button"
-                      onClick={() => copy(inst.key)}
-                      className="ui-press mt-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent"
+              {labLocked && (
+                <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5 md:p-6">
+                  <p className="text-body text-ink/80">
+                    {trialAvailable
+                      ? t(
+                          quota > 0
+                            ? 'lab.lockedMoreTrial'
+                            : 'lab.lockedPaidTrial',
+                          { n: trialDays || 7 },
+                        )
+                      : t(
+                          quota > 0 ? 'lab.lockedMoreSub' : 'lab.lockedPaidSub',
+                        )}
+                    {instances.length > 0 && ` ${t('lab.lockedSaved')}`}
+                  </p>
+                  <a
+                    href="#planes"
+                    onClick={goToPlanes}
+                    className="btn btn-primary mt-4"
+                  >
+                    {trialAvailable
+                      ? t('lab.planTrialCta', { n: trialDays || 7 })
+                      : t('lab.viewOtherPlans')}
+                  </a>
+                </div>
+              )}
+
+              {instances.length === 0 ? (
+                labLocked ? null : (
+                  <p className="mt-6 text-body text-ink/55">{t('lab.empty')}</p>
+                )
+              ) : (
+                <ul className="mt-6 space-y-4">
+                  {instances.map((inst) => (
+                    <li
+                      key={inst.id}
+                      className="border border-ink/15 p-4 md:p-5"
                     >
-                      {copied === inst.key ? t('lab.copied') : t('lab.copy')}
-                    </button>
-                  </div>
-                ) : (
-                  <p className="mt-4 text-sm text-ink/50">{t('lab.draftHint')}</p>
-                )}
-              </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="font-mono text-body-sm">
+                          {inst.sectionId}
+                        </span>
+                        <span
+                          className={`border px-2 py-0.5 text-eyebrow uppercase ${
+                            inst.frozen
+                              ? FROZEN_TONE
+                              : STATUS_TONE[inst.status] || STATUS_TONE.draft
+                          }`}
+                        >
+                          {inst.frozen
+                            ? t('lab.status.frozen')
+                            : t(`lab.status.${inst.status}`)}
+                        </span>
+                        {inst.status === 'published' &&
+                          !inst.frozen &&
+                          inst.views > 0 && (
+                            <span className="text-body-sm tabular-nums text-ink/45">
+                              {t('lab.views', { n: inst.views })}
+                            </span>
+                          )}
+                        {inst.status === 'published' &&
+                          !inst.frozen &&
+                          inst.stopsOnPlanEnd &&
+                          canceledAt &&
+                          currentPeriodEnd && (
+                            <span className="text-body-sm uppercase tracking-[0.14em] text-accent/90">
+                              {t('lab.stopsOn', {
+                                date: fmtDate(currentPeriodEnd),
+                              })}
+                            </span>
+                          )}
+                        <Link
+                          to={`/lab/${inst.id}`}
+                          className="ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
+                        >
+                          {t('lab.edit')}
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => remove(inst.id)}
+                          disabled={busy}
+                          className="text-body-sm uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
+                        >
+                          {t('lab.delete')}
+                        </button>
+                      </div>
 
-        <HostedPlans />
-
-        <section className="mt-16 border-t border-ink/15 pt-10">
-          <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-            {t('lab.guideTitle')}
-          </h2>
-          <ol className="mt-4 max-w-[60ch] space-y-3 text-sm leading-relaxed text-ink/70">
-            <li>
-              <span className="mr-2 font-mono text-ink/40">1</span>
-              {t('lab.guide1')}
-            </li>
-            <li>
-              <span className="mr-2 font-mono text-ink/40">2</span>
-              {t('lab.guide2')}
-            </li>
-            <li>
-              <span className="mr-2 font-mono text-ink/40">3</span>
-              {t('lab.guide3')}
-            </li>
-          </ol>
+                      {inst.status === 'published' ? (
+                        <div className="mt-4">
+                          {inst.frozen && (
+                            <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-body-sm text-ink/75">
+                              {t('lab.frozenHint')}
+                            </p>
+                          )}
+                          <SnippetBox
+                            embedKey={inst.key}
+                            loaderInfo={loaderInfo}
+                          />
+                        </div>
+                      ) : (
+                        <p className="mt-4 text-body-sm text-ink/55">
+                          {t('lab.draftHint')}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </section>
 
-        <section className="mt-14 border-t border-ink/15 pt-10">
-          <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-            {t('lab.faqTitle')}
-          </h2>
-          <div className="mt-4 max-w-[68ch]">
+        {/* FAQ. */}
+        <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">
+          <h2 className="text-title-sm font-medium">{t('lab.faqTitle')}</h2>
+          <div className="mt-6 max-w-[68ch]">
             <FaqAccordion items={Array.isArray(faq) ? faq : []} />
           </div>
         </section>
 
-        <p className="mt-14 max-w-[56ch] text-xs leading-relaxed text-ink/40">
+        <p className="mt-16 max-w-[56ch] text-body-sm text-ink/60">
           {t('lab.footnote')}{' '}
           <Link
             to="/builder"

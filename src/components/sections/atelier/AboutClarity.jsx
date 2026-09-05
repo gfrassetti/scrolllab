@@ -6,6 +6,8 @@ export default function AboutClarity({
   eyebrow = 'Section eyebrow',
   title = 'Placeholder statement — swap this line with the sentence that defines your studio.',
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder body copy: replace it with your own story from the builder or the code.',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -36,6 +38,7 @@ export default function AboutClarity({
     <section
       ref={root}
       className="relative overflow-hidden border-t border-white/10 bg-[#0b0c10] px-5 py-24 text-white md:px-10 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <ScrollFog density={0.45} />
       <div className="relative z-10 grid gap-10 md:grid-cols-12">

@@ -1,6 +1,9 @@
 /**
- * Campos de texto editables por sección (builder preview).
- * Solo strings simples en v1; arrays complejos quedan fuera.
+ * Campos editables por sección (builder preview + LAB).
+ * Tipos: text · textarea · select · image · model · color · href · list.
+ * `list` = array de items; `item` describe sus sub-campos (text/textarea/
+ * href/color). El schema server-side espeja esto en server/sectionFields.js
+ * (ALLOWED_PROPS_BY_SECTION + LIST_PROPS_BY_SECTION).
  * Recetas Beat (pasos dx/dy) aún no son un campo: el motion vive en JSX/presets.
  * Ver docs/scrolllab-beat.md.
  */
@@ -36,7 +39,20 @@ export const SECTION_FIELDS = {
   'chapters/FooterCTA': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'links',
+      label: 'Enlaces',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
   ],
   'chapters/HorizontalPanels': [
     {
@@ -52,6 +68,27 @@ export const SECTION_FIELDS = {
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'heading', label: 'Heading', type: 'text' },
+  ],
+  'chapters/VelocityMarquee': [
+    { key: 'text', label: 'Texto', type: 'text' },
+    { key: 'separator', label: 'Separador', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'chapters/BigNumbers': [
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'stats',
+      label: 'Métricas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'value', label: 'Número', type: 'text' },
+        { key: 'suffix', label: 'Sufijo (+, %, …)', type: 'text' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+      ],
+    },
   ],
   'nocturne/NavNocturne': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -69,10 +106,66 @@ export const SECTION_FIELDS = {
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
   ],
+  'nocturne/DiagonalMarquee': [
+    { key: 'textA', label: 'Texto — cinta 1', type: 'text' },
+    { key: 'textB', label: 'Texto — cinta 2', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'nocturne/SplitReveals': [
+    { key: 'seq', label: 'Secuencia', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'beats',
+      label: 'Escenas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'kicker', label: 'Kicker', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+      ],
+    },
+  ],
+  'nocturne/WorkIndex': [
+    { key: 'seq', label: 'Secuencia', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'works',
+      label: 'Trabajos',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'index', label: 'Índice', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'category', label: 'Categoría', type: 'text' },
+        { key: 'year', label: 'Año', type: 'text' },
+      ],
+    },
+  ],
   'nocturne/OutroCTA': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'links',
+      label: 'Enlaces',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
   ],
   'monolith/NavBrutal': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -101,10 +194,71 @@ export const SECTION_FIELDS = {
     },
     { key: 'modelUrl', label: 'Modelo 3D propio (.glb)', type: 'model' },
   ],
+  'monolith/SkewScroller': [
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'words',
+      label: 'Palabras',
+      type: 'list',
+      max: 8,
+      item: [{ key: 'word', label: 'Palabra', type: 'text' }],
+    },
+  ],
+  'monolith/ExhibitGrid': [
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'exhibits',
+      label: 'Piezas',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'code', label: 'Código', type: 'text' },
+        { key: 'caption', label: 'Descripción', type: 'text' },
+      ],
+    },
+  ],
+  'monolith/TypeAccordion': [
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'items',
+      label: 'Filas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+      ],
+    },
+  ],
   'monolith/FooterBrutal': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'links',
+      label: 'Enlaces',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
   ],
   'fizz/NavFizz': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -149,6 +303,19 @@ export const SECTION_FIELDS = {
   'fizz/BubbleBenefits': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'benefits',
+      label: 'Beneficios',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+        { key: 'color', label: 'Color del punto', type: 'color' },
+      ],
+    },
   ],
   'fizz/CanCarousel': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -178,7 +345,20 @@ export const SECTION_FIELDS = {
   'fizz/FooterSplash': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'links',
+      label: 'Enlaces',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
   ],
   'velocity/NavVelocity': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -220,6 +400,8 @@ export const SECTION_FIELDS = {
   'velocity/FooterVelocity': [
     { key: 'line', label: 'Line', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/NavAtelier': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -242,6 +424,8 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'textarea' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/ServicesStone': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -269,6 +453,18 @@ export const SECTION_FIELDS = {
   'atelier/KeyFacts': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'facts',
+      label: 'Datos',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'value', label: 'Cifra', type: 'text' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+      ],
+    },
   ],
   'atelier/WordStripe': [
     { key: 'line1', label: 'Line 1', type: 'text' },
@@ -285,11 +481,24 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'line', label: 'Headline', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
     { key: 'brand', label: 'Brand mark', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'phone', label: 'Phone', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'social',
+      label: 'Redes',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
   ],
   'unity/NavUnity': [
     { key: 'brand', label: 'Brand / phrase', type: 'text' },
@@ -532,6 +741,8 @@ export const SECTION_FIELDS = {
     { key: 'development', label: 'Development credit', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
     { key: 'year', label: 'Year', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'contact/ContactForm': [
     {
@@ -652,6 +863,63 @@ export function isEphemeralAssetUrl(value) {
   return typeof value === 'string' && /^(blob:|data:)/i.test(value)
 }
 
+// #rgb / #rgba / #rrggbb / #rrggbbaa · rgb()/rgba(). Nada de nombres ni CSS
+// arbitrario: el color entra crudo en un `style` inline de la sección.
+const COLOR_RE =
+  /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$|^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+))?\s*\)$/i
+// #ancla · /ruta · http(s):// · mailto: · tel:. Sin `javascript:` ni otros esquemas.
+const HREF_RE =
+  /^(?:#[\w-]*|\/[^\s"'<>]*|https?:\/\/[^\s"'<>]+|mailto:[^\s"'<>]+|tel:\+?[\d\s()-]{3,})$/i
+
+export function sanitizeColor(value) {
+  if (typeof value !== 'string') return undefined
+  const s = value.trim().toLowerCase()
+  return COLOR_RE.test(s) ? s : undefined
+}
+
+export function sanitizeHref(value) {
+  if (typeof value !== 'string') return undefined
+  const s = value.trim()
+  if (!s || s.length > 500 || /^\s*javascript:/i.test(s)) return undefined
+  return HREF_RE.test(s) ? s : undefined
+}
+
+// Item de un campo `list`: objeto con sub-campos text/textarea/href/color.
+// Se conservan los slots vacíos ({}) para que agregar una fila no la borre en
+// el acto; el server descarta los items sin ninguna clase al persistir.
+function sanitizeListItem(subFields, raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined
+  const sub = new Map(subFields.map((f) => [f.key, f]))
+  const item = {}
+  for (const [k, v] of Object.entries(raw)) {
+    const f = sub.get(k)
+    if (!f || typeof v !== 'string') continue
+    const t = v.slice(0, 500)
+    if (f.type === 'color') {
+      const c = sanitizeColor(t)
+      if (c) item[k] = c
+    } else if (f.type === 'href') {
+      const h = sanitizeHref(t)
+      if (h) item[k] = h
+    } else if (t) {
+      item[k] = t
+    }
+  }
+  return item
+}
+
+function sanitizeList(field, value) {
+  if (!Array.isArray(value)) return undefined
+  const subFields = field.item || []
+  const max = field.max ?? 12
+  const out = []
+  for (const raw of value.slice(0, max)) {
+    const item = sanitizeListItem(subFields, raw)
+    if (item) out.push(item)
+  }
+  return out
+}
+
 export function sanitizeProps(sectionId, props) {
   if (!props || typeof props !== 'object') return undefined
   const fields = getSectionFields(sectionId)
@@ -660,8 +928,26 @@ export function sanitizeProps(sectionId, props) {
   const cleaned = {}
   for (const [key, value] of Object.entries(props)) {
     const field = byKey.get(key)
-    if (!field || typeof value !== 'string') continue
+    if (!field) continue
+
+    if (field.type === 'list') {
+      const arr = sanitizeList(field, value)
+      if (arr && arr.length) cleaned[key] = arr
+      continue
+    }
+    if (typeof value !== 'string') continue
     const trimmed = value.slice(0, 2000)
+
+    if (field.type === 'color') {
+      const c = sanitizeColor(trimmed)
+      if (c) cleaned[key] = c
+      continue
+    }
+    if (field.type === 'href') {
+      const h = sanitizeHref(trimmed)
+      if (h) cleaned[key] = h
+      continue
+    }
     if (!trimmed) continue
     if (field.type === 'select') {
       const ok = (field.options || []).some((o) => o.value === trimmed)

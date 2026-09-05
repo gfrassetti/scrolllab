@@ -438,6 +438,209 @@ todos los `Nav*` (header fijo en una caja no tiene sentido), y las pineadas
 
 ---
 
+## Fase 8 — Snippets por framework (2026-09)
+
+El embed dejó de ser "un `<script>` y nada más". Sigue siendo un iframe cross-
+origin; lo que cambia es cómo cada stack lo inyecta.
+
+- **`embed/loader/loader.js`**: además del auto-scan de `<script data-scrolllab
+  data-key>` (ahora también en `DOMContentLoaded`), expone
+  `window.ScrollLab.render(el, { key, api, frame })` y `window.ScrollLab.scan()`.
+  `render()` reusa el mismo `mount()` interno, es idempotente
+  (`data-scrolllab-done`) y deriva la base del frame del `src` del propio loader.
+  Minificado pasó de ~2.7 KB a ~3.7 KB.
+- **`src/lib/embed.js`**: `embedSnippet(key, loader, variant)` con
+  `variant: 'html' | 'react' | 'next' | 'vue'`. `html` es el default y no
+  cambió. `react`/`next`/`vue` devuelven un componente que carga el loader una
+  vez y monta con `render`.
+- **`src/components/SnippetBox.jsx`**: selector de stack (HTML · React · Next.js
+  · Vue) + copiar, usado en `/lab` y `/lab/:id`. i18n: `lab.snippetStack`.
+- Tests: `embed/test/iframe-host-render.html` + caso e2e nuevo ("window.
+  ScrollLab.render monta el embed en un div") — 7 e2e verdes. 277 unit + `check`.
+
+Pendiente: publicar `@scrolllab/embed` en npm (por ahora copy-paste alcanza);
+snippet para Astro/Svelte si hay demanda.
+
+---
+
+## Fase 9 — Edición total: color / href / list (2026-09) — infra ✅
+
+Objetivo: que cada hosteable se pueda editar entera (textos, enlaces, colores),
+no solo un puñado de strings.
+
+**Infra (esta fase):**
+- Tipos de campo nuevos: **`color`** (hex/rgb, entra crudo en un `style` inline),
+  **`href`** (`#ancla` / `/ruta` / http(s) / `mailto:` / `tel:` — nada de
+  `javascript:`), **`list`** (array de items; `item` = sub-campos
+  text/textarea/href/color).
+- `sanitizeProps` (cliente) + `sanitizeSectionProps` (server) validan por tipo.
+  Server: `LIST_PROPS_BY_SECTION` (schema de los `list`) + convención de nombre
+  para color (`bg`/`fg`/`accent`) y href (`*Href` / `href` / `link`). El
+  cliente conserva los slots vacíos del `list` (para editar); el server los
+  descarta al persistir.
+- **`src/components/SectionFieldRow.jsx`**: renderer compartido (LabEditorPage +
+  BuilderPreview). `list` con agregar / reordenar / quitar. `image`/`model`
+  siguen inline en cada editor (traen upload).
+- `scripts/check-consistency.mjs`: valida paridad de los `list` (schema server ↔
+  campo cliente + sub-campos).
+- i18n: `builder.listAdd`, `builder.hrefHint`.
+
+**Piloto:** `chapters/FooterCTA` gana `ctaHref` (href), `bg`/`fg` (color) y
+`links` (list de `{ label, href }` que reemplaza las columnas placeholder). El
+`<footer>` aplica `bg`/`fg` por `style` inline. Verificado end-to-end en el
+builder: fondo `#101014` + link `/nosotros` renderizados.
+
+Tests: 289 unit (client + server sanitizers) + 7 e2e + `npm run check`.
+
+### Fase B — familia footer completa ✅
+
+Los 7 footers hosteables ya se editan enteros:
+
+| footer | agrega |
+|---|---|
+| `chapters/FooterCTA` | `bg` `fg` `ctaHref` `links` |
+| `nocturne/OutroCTA` | `bg` `fg` `ctaHref` `links` (reemplaza columns) |
+| `monolith/FooterBrutal` | `bg` `fg` `ctaHref` `links` (normaliza el `string[]` viejo a `{label,href}`) |
+| `fizz/FooterSplash` | `bg` `fg` `ctaHref` `links` (reemplaza columns) |
+| `velocity/FooterVelocity` | `bg` `fg` |
+| `atelier/FooterAtelier` | `bg` `fg` `ctaHref` (antes no editable) · `social` (list) |
+| `atrium/FooterAtrium` | `bg` `fg` |
+
+`bg`/`fg` = `style` inline en el `<footer>` (pisa la clase del modelo). `links`/
+`social` vacíos → cae al default del componente. `check-consistency` valida que
+cada key sea prop real del componente + paridad client/server + schema de los
+`list`.
+
+### Fase C — bloques de contenido, primera tanda ✅
+
+Primeros hosteables **no-footer**. Criterio: entrada `once` (o sin
+ScrollTrigger), sin pin, sin scrub, y padding en `rem`/`px`/`vw` — nada de `svh`,
+que dentro del iframe FLOW no tiene viewport estable. Los 3 usan modelos que la
+familia footer ya dejó tokenizados en `embed/frame/main.css` → **cero cambios en
+el frame** (ni `main.css` ni `index.html` ni `MODEL_CANVAS`).
+
+| sección | modelo | agrega |
+|---|---|---|
+| `chapters/BigNumbers` | chapters | `bg` `fg` · `stats` (list: `value`/`suffix`/`label`, max 6) |
+| `atelier/KeyFacts` | atelier | `bg` `fg` · `facts` (list: `value`/`label`, max 6) — `FACTS` hardcodeado pasó a prop |
+| `monolith/TypeAccordion` | monolith | `unit` `total` `label` · `bg` `fg` · `items` (list: `title`/`body`, max 6). El `<img>` por fila queda sólo si el item lo trae (en el embed los assets se stubean). |
+
+`KeyFacts` mantiene su `ScrollFog` (canvas 2D, sin assets ni WebGL → CSP-safe;
+en FLOW no scrollea, la niebla deriva sólo con el tiempo).
+
+Tests: 293 unit (nuevos casos de sanitize por sección) + `npm run check`.
+`build:embed` OK — bundle del frame 63 KB gz JS · 18.4 KB gz CSS.
+
+### E2E — cada hosteable embebida en un sitio ajeno ✅
+
+`embed/test/e2e/hosted-sections.e2e.mjs` (Chromium real, corre en `npm run
+test:e2e` junto con `embed.e2e.mjs`, `--test-concurrency=1`). Itera
+`HOSTABLE_SECTIONS` directamente — **un id nuevo sin su caso en `CASES` hace
+fallar el test**, así que la cobertura no se puede olvidar:
+
+- **Una por una, todas las `HOSTABLE_SECTIONS`**: login dev → crear → publicar
+  con props (marcador de texto único + `bg`/`fg`) → cargar la página
+  anfitriona con el `<script>` del loader → verificar que el iframe
+  cross-origin montó, que el host **no** lo puede leer (`contentDocument ===
+  null`), que `#root` renderió **ese** marcador, que `bg` se aplicó por
+  `style` inline, que **no hay scroll horizontal** en el frame y que el
+  puente de altura dimensionó el iframe.
+- **Responsive, las mismas, a 375 / 768 / 1280 px** (`iframe-host-plain.html`,
+  host a sangre): marcador visible, frame nunca más ancho que el viewport,
+  `#root` con alto real, el iframe siguiéndolo. (`FooterAtrium`, con `svh`,
+  corre el mismo chequeo salvo el de "el iframe sigue al contenido en el
+  primer settle" — ver Fase D.)
+- Infra: `RATE_LIMIT_DISABLED=true` en `e2e-api.mjs` (18 secciones × 3
+  viewports en ráfaga tiran 429 sin esto).
+
+**Fix que salió del e2e:** los cierres con palabra gigante
+(`FooterCTA`/`FooterBrutal`, `text-[13.5vw]` `whitespace-nowrap`) desbordaban
+horizontalmente con un texto largo → **`#root { overflow-x: clip; max-width:
+100% }`** en `embed/frame/main.css`: recorta sin crear contenedor de scroll (no
+toca el `window.scrollTo` del modo PIN). Ninguna sección puede ya generar scroll
+horizontal en la página del host.
+
+---
+
+## Fase D — segunda tanda: 8 más, 18 hosteables en total (2026-09)
+
+`chapters/VelocityMarquee` · `nocturne/DiagonalMarquee` · `nocturne/SplitReveals`
+· `nocturne/WorkIndex` · `monolith/SkewScroller` · `monolith/ExhibitGrid` ·
+`fizz/BubbleBenefits` · `atelier/AboutClarity`.
+
+Mismo criterio FLOW-safe que las Fases 7/C, con una variante nueva: los
+**ribbons continuos** (`VelocityMarquee`, `DiagonalMarquee`) tienen un
+`ScrollTrigger.create` que acelera el loop con la velocidad de scroll — pero
+el loop de fondo es un `gsap.to({repeat:-1})` independiente. En el iframe FLOW
+el host no scrollea el frame, así que el boost simplemente nunca dispara; el
+ribbon se ve corriendo a velocidad base. **No rompe**, degrada bien.
+
+Los 8 caen en modelos que la familia footer ya dejó tokenizados
+(`chapters`/`nocturne`/`monolith`/`fizz`/`atelier`) → **cero cambios en
+`embed/frame/`** otra vez.
+
+### El patrón de edición total (ya es el estándar — se repite acá y de acá en más)
+
+Toda sección que entra a `HOSTABLE_SECTIONS` sale con:
+
+- `bg` / `fg` (color) — `style` inline en el elemento raíz, pisa el canvas del modelo.
+- Toda colección de contenido repetible como campo **`list`** (sub-campos
+  `text`/`textarea`/`href`/`color` — `color` incluido cuando aporta, ver
+  `fizz/BubbleBenefits.benefits[].color`: cada card tiene su propio color).
+- **Límite conocido de las `list`**: el sub-campo no soporta `image` todavía
+  (`SectionFieldRow` no trae upload en filas de lista). Las secciones con
+  imagen **bundleada** por ítem (`SplitReveals.beats`, `WorkIndex.works`,
+  `ExhibitGrid.exhibits`) quedan con la imagen de fondo por índice del set de
+  ejemplo — el texto se edita entero, la imagen no (mismo trato que
+  `TypeAccordion` en Fase C). Distinto de una imagen **por URL** ya declarada
+  como campo `image` suelto (`CanCarousel.can1Image…`), que sí es editable hoy.
+- `HOSTABLE_SECTIONS` (`server/sections.js`) + import/registro en
+  `embed/src/registry.js` (`SECTIONS`, y `MODEL_CANVAS` solo si el modelo es
+  nuevo para el frame).
+
+### Testeo obligatorio — el checklist que se repite por cada sección nueva
+
+1. **Se ve embebida en un sitio ajeno** (host hostil, 1280px) — caso en
+   `CASES` de `hosted-sections.e2e.mjs`, ver arriba.
+2. **Mobile / tablet / desktop** (375 / 768 / 1280px, host a sangre) — mismo
+   archivo, mismo `CASES`, corre automático para toda `HOSTABLE_SECTIONS`.
+3. Sanitize por sección en **ambos** lados (`sanitizeProps` cliente +
+   `sanitizeSectionProps` server): color válido vs. nombre CSS rechazado, `max`
+   de la `list` respetado, item vacío descartado al persistir.
+4. `npm run check` — cada key es prop real del componente (check 3c,
+   parseado), paridad `SECTION_FIELDS` ↔ `ALLOWED_PROPS_BY_SECTION` en ambas
+   direcciones, paridad de los `list` (`LIST_PROPS_BY_SECTION` ↔ sub-campos
+   cliente) en ambas direcciones.
+
+Tests: **79 e2e** (7 base + 18 por-sección + 54 responsive, las 18 × 3
+viewports) + **301 unit** + `npm run check`. `build:embed`: 66.6 KB gz JS /
+18.46 KB gz CSS.
+
+### Siguiente tanda (candidatas, requieren más trabajo antes de sumar)
+
+- `fizz/CanCarousel` — ya tiene 5 campos `image` sueltos editables (no
+  bloqueado por la limitación de las `list`), pero el fallback SVG
+  (`CanIllustration`) se rompe en el embed: el `can.image` stubeado
+  (`data:image/gif;base64,…` 1×1) es *truthy*, así que pisa el fallback bonito
+  con una imagen transparente en vez de mostrar la lata ilustrada. Necesita una
+  función `isStubImage()` compartida con el frame antes de sumarla.
+- `monolith/HelmetGrid`, `atelier/StudioCards` — el catálogo de ítems es una
+  `const` fuera de props (no un default de prop): hay que refactorizarlas a
+  `items = ITEMS` primero, y ahí sí exponer `list`.
+- `unity/*`, `ratio/*` — ningún candidato limpio todavía sin sumar tokens/
+  fuentes nuevas al frame (`embed/frame/main.css` + `index.html`).
+- `atrium/ManifestoType` + `atrium/ScopeSerif`: usan `svh` para el aire (están
+  pensadas para vivir sobre un hero pineado). Necesitan una "embed edition" con
+  alturas acotadas antes de entrar.
+- El resto de `ALLOWED_SECTIONS` queda afuera por diseño: todos los `Nav*`
+  (header fijo en una caja no tiene sentido), pin+scrub (`HorizontalPanels` ya
+  tiene mecánica probada pero sin props de contenido editables — ver Fase 2),
+  y scrub-sin-pin (`ManifestoReveal`, `QuoteBreak`, `StatField`, `ClarityPair`,
+  `ZoomPortal`, `StickyWordCycle`, `TrackMerge`, `ParallaxRise`, `PopManifesto`,
+  `SpecSheet`… — se congelan en FLOW porque el frame no scrollea).
+
+---
+
 ## No se toca
 
 - Builder → template/sección ZIP, pago único, Checkout Pro.

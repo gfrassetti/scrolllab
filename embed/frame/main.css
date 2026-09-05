@@ -86,6 +86,13 @@ body {
 #root {
   opacity: 0;
   transition: opacity 0.25s ease;
+  /* Guarda de embed: ninguna sección puede provocar scroll horizontal en la
+     página del host. Los cierres con palabra gigante (`text-[13.5vw]`
+     whitespace-nowrap) se desbordan si el texto es largo. `clip` recorta sin
+     crear un contenedor de scroll (no afecta el `window.scrollTo` del modo PIN,
+     que corre sobre `documentElement`). */
+  overflow-x: clip;
+  max-width: 100%;
 }
 #root[data-inview] {
   opacity: 1;

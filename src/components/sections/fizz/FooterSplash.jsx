@@ -15,10 +15,16 @@ const defaultColumns = [
 export default function FooterSplash({
   ctaWord = 'YOUR CTA',
   email = 'hello@placeholder.studio',
+  ctaHref,
   columns = defaultColumns,
+  links,
+  bg,
+  fg,
   legal = '©2026 Placeholder Brand — Template, not a promise',
 }) {
   const root = useRef(null)
+  const cta = ctaHref || `mailto:${email}`
+  const flatLinks = Array.isArray(links) ? links.filter((l) => l && l.label) : []
 
   useGSAP(
     () => {
@@ -62,6 +68,7 @@ export default function FooterSplash({
     <footer
       ref={root}
       className="relative overflow-hidden px-5 pt-24 pb-6 md:px-10 md:pt-36"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       {[...Array(9)].map((_, i) => (
         <span
@@ -84,33 +91,46 @@ export default function FooterSplash({
           text and the link columns in the code.
         </p>
         <div className="grid grid-cols-2 gap-8 md:col-span-7 md:justify-items-end">
-          {columns.map((column) => (
-            <nav key={column.heading} aria-label={column.heading}>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em] text-foam/50 md:text-xs">
-                {column.heading}
-              </p>
-              <ul className="space-y-2">
-                {column.items.map((item) => (
-                  <li key={item}>
+          {flatLinks.length > 0 ? (
+            <nav aria-label="Links" className="col-span-2">
+              <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
+                {flatLinks.map((l, i) => (
+                  <li key={i}>
                     <a
-                      href="#"
+                      href={l.href || '#'}
                       className="text-sm transition-colors duration-300 hover:text-fizz md:text-base"
                     >
-                      {item}
+                      {l.label}
                     </a>
                   </li>
                 ))}
               </ul>
             </nav>
-          ))}
+          ) : (
+            columns.map((column) => (
+              <nav key={column.heading} aria-label={column.heading}>
+                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em] text-foam/50 md:text-xs">
+                  {column.heading}
+                </p>
+                <ul className="space-y-2">
+                  {column.items.map((item) => (
+                    <li key={item}>
+                      <a
+                        href="#"
+                        className="text-sm transition-colors duration-300 hover:text-fizz md:text-base"
+                      >
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))
+          )}
         </div>
       </div>
 
-      <a
-        href={`mailto:${email}`}
-        className="group relative block"
-        aria-label={email}
-      >
+      <a href={cta} className="group relative block" aria-label={email}>
         <span
           data-splash-word
           className="block font-brico text-[clamp(3rem,13vw,11rem)] leading-[0.9] font-extrabold tracking-[-0.03em] whitespace-nowrap uppercase"

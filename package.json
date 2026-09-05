@@ -22,7 +22,7 @@
     "capture:catalog": "node scripts/capture-catalog-posters.mjs",
     "server": "node server/index.js",
     "start": "node server/index.js",
-    "test:e2e": "npm run build:embed && node --test embed/test/e2e/embed.e2e.mjs",
+    "test:e2e": "npm run build:embed && node --test --test-concurrency=1 embed/test/e2e/embed.e2e.mjs embed/test/e2e/hosted-sections.e2e.mjs",
     "test": "node --test server/__tests__/unit.test.js server/__tests__/api.test.js server/__tests__/hosted.test.js server/__tests__/hostedKey.test.js server/__tests__/subscriptions.test.js server/__tests__/subscriptionsSync.test.js server/__tests__/embedLapse.test.js server/__tests__/fulfill.test.js server/__tests__/packaging.test.js src/lib/__tests__/authReturn.test.js src/lib/__tests__/pricing.test.js src/lib/__tests__/cart.test.js src/lib/__tests__/startCheckout.test.js src/lib/__tests__/sectionTheme.test.js src/lib/__tests__/sectionFields.test.js src/lib/__tests__/composition.test.js src/lib/__tests__/checkoutOutcome.test.js src/lib/__tests__/orderPreview.test.js src/lib/__tests__/contactForm.test.js src/lib/__tests__/beatLayout.test.js src/lib/__tests__/seo.test.js src/lib/__tests__/gtm.test.js embed/loader/__tests__/lib.test.js"
   },
   "dependencies": {

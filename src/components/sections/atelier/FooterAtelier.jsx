@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
  * FooterAtelier — dark studio closer (Trionn-style layout, generic copy):
  * CTA block + enquiry/social columns + oversized lined brand mark.
  */
+const defaultSocial = [
+  { label: 'Link one', href: '#' },
+  { label: 'Link two', href: '#' },
+  { label: 'Link three', href: '#' },
+  { label: 'Link four', href: '#' },
+]
+
 export default function FooterAtelier({
   eyebrow = "Let's build work that inspires.",
   line = 'Ready to build something bold?',
@@ -14,8 +21,14 @@ export default function FooterAtelier({
   email = 'hello@placeholder.studio',
   phone = '+00 000 000 0000',
   hint = 'Hover the lines.',
+  social,
+  bg,
+  fg,
 }) {
   const [clock, setClock] = useState('')
+  const socialLinks = (Array.isArray(social) && social.length ? social : defaultSocial).filter(
+    (l) => l && l.label,
+  )
 
   useEffect(() => {
     const tick = () => {
@@ -30,7 +43,10 @@ export default function FooterAtelier({
   }, [])
 
   return (
-    <footer className="relative overflow-hidden bg-[#0b0c10] px-5 pt-20 pb-0 text-white md:px-10 md:pt-28">
+    <footer
+      className="relative overflow-hidden bg-[#0b0c10] px-5 pt-20 pb-0 text-white md:px-10 md:pt-28"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-40"
@@ -88,26 +104,13 @@ export default function FooterAtelier({
                   Social
                 </p>
                 <ul className="mt-3 space-y-1.5 text-sm text-white/70">
-                  <li>
-                    <a href="#" className="hover:text-white">
-                      Link one
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="hover:text-white">
-                      Link two
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="hover:text-white">
-                      Link three
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="hover:text-white">
-                      Link four
-                    </a>
-                  </li>
+                  {socialLinks.map((l, i) => (
+                    <li key={i}>
+                      <a href={l.href || '#'} className="hover:text-white">
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>

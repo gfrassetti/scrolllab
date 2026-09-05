@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollLab embed — host plano (responsive)</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #fff; }
+      /* El embed se monta acá, a sangre — el caso realista de "un slot ancho
+         completo en la página del cliente". Sin padding hostil: así los anchos
+         del viewport del test (375 / 768 / 1280) son los que llegan a la sección. */
+    </style>
+  </head>
+  <body>
+    <script
+      src="http://localhost:4178/embed-dist/v1/loader.js"
+      data-scrolllab
+      data-key="__E2E_KEY__"
+      data-frame="http://localhost:4179/embed-dist/v1"
+      data-api="http://localhost:8787"
+      async
+    ></script>
+  </body>
+</html>

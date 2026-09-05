@@ -7,15 +7,25 @@
  * contenedor). Toda la lógica pesada vive dentro del iframe, en NUESTRO origen,
  * aislada por el navegador de las cookies / formularios / storage del host.
  *
- * Modos:
+ * Dos formas de usarlo:
+ *
+ *  1. HTML — pegás el <script>; al cargar escanea los tags y monta cada uno.
+ *
+ *       <script src="https://embed.scrolllab.com.ar/v1/loader.js"
+ *               data-scrolllab data-key="pub_xxxxx" async></script>
+ *
+ *  2. Framework (React/Vue/Next/…) — el <script> se carga una vez y el
+ *     componente monta cuando quiere:
+ *
+ *       window.ScrollLab.render(elemento, { key: 'pub_xxxxx', api, frame })
+ *       window.ScrollLab.scan()   // re-escanea <script data-scrolllab> nuevos
+ *
+ * Modos de render (idénticos en las dos formas):
  *  - FLOW: el frame manda su alto (`scrolllab:height`) y el loader dimensiona
  *    el iframe. El loader avisa `inView` para la animación de entrada.
  *  - PIN: el frame manda cuánto scroll necesita (`scrolllab:pinlength`). El
  *    loader mete el iframe en un contenedor alto y lo hace `position:sticky`,
  *    y en cada frame le manda `progress` 0→1 según cuánto scrolleó el host.
- *
- * <script src="https://embed.scrolllab.com.ar/v1/loader.js"
- *         data-scrolllab data-key="pub_xxxxx" async></script>
  */
 import { clamp, resolveFrameBase } from './lib.js'
 
@@ -26,27 +36,92 @@ import { clamp, resolveFrameBase } from './lib.js'
   // navegador raro), el frame se sirve desde acá.
   var FRAME_BASE_FALLBACK = 'https://embed.scrolllab.com.ar/v1'
 
-  var nodes = document.querySelectorAll(
-    'script[data-scrolllab][data-key]:not([data-scrolllab-done])',
-  )
-  for (var i = 0; i < nodes.length; i++) mount(nodes[i])
+  // El `src` de este mismo loader — para derivar la base del frame cuando
+  // `render()` se llama sin un <script> de referencia.
+  var SELF_SRC =
+    (document.currentScript && document.currentScript.src) ||
+    (function () {
+      var s = document.querySelector('script[data-scrolllab][src]')
+      return s ? s.src : ''
+    })()
 
-  function mount(script) {
+  // ── API pública ──────────────────────────────────────────────────────
+  if (!window.ScrollLab) window.ScrollLab = {}
+  window.ScrollLab.render = render
+  window.ScrollLab.scan = scan
+
+  scan()
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scan)
+  }
+
+  // Monta todo <script data-scrolllab data-key> que no se haya montado aún.
+  function scan() {
+    var nodes = document.querySelectorAll(
+      'script[data-scrolllab][data-key]:not([data-scrolllab-done])',
+    )
+    for (var i = 0; i < nodes.length; i++) mountFromScript(nodes[i])
+  }
+
+  function mountFromScript(script) {
     script.setAttribute('data-scrolllab-done', '1')
-
     var key = script.getAttribute('data-key')
     if (!key) {
       console.error('[scrolllab] <script> sin data-key')
       return
     }
+    mount({
+      key: key,
+      apiUrl: script.getAttribute('data-api') || '',
+      frameBase: resolveFrameBase(script, FRAME_BASE_FALLBACK),
+      parent: script.parentNode,
+      before: script.nextSibling,
+    })
+  }
 
-    var frameBase = resolveFrameBase(script, FRAME_BASE_FALLBACK)
-    var api = script.getAttribute('data-api') || ''
+  /**
+   * Monta un embed dentro de `target` (elemento o selector). Para frameworks.
+   * `opts`: { key, api, frame }. Idempotente por `data-scrolllab-done`.
+   */
+  function render(target, opts) {
+    opts = opts || {}
+    var el = typeof target === 'string' ? document.querySelector(target) : target
+    if (!el || !el.setAttribute) {
+      console.error('[scrolllab] render: target inválido', target)
+      return
+    }
+    var key = opts.key || el.getAttribute('data-key') || ''
+    if (!key) {
+      console.error('[scrolllab] render: falta `key`')
+      return
+    }
+    if (el.getAttribute('data-scrolllab-done')) return // ya montado
+    el.setAttribute('data-scrolllab-done', '1')
+
+    // Shim con la forma que espera `resolveFrameBase` (getAttribute + src).
+    var shim = {
+      src: SELF_SRC,
+      getAttribute: function (n) {
+        return n === 'data-frame' ? opts.frame || null : null
+      },
+    }
+    mount({
+      key: key,
+      apiUrl: opts.api || el.getAttribute('data-api') || '',
+      frameBase: resolveFrameBase(shim, FRAME_BASE_FALLBACK),
+      parent: el,
+      before: null, // insertBefore(node, null) === appendChild
+    })
+  }
+
+  // ── Montaje real ─────────────────────────────────────────────────────
+  function mount(o) {
+    var key = o.key
     var src =
-      frameBase +
+      o.frameBase +
       '/frame/index.html#key=' +
       encodeURIComponent(key) +
-      (api ? '&api=' + encodeURIComponent(api) : '')
+      (o.apiUrl ? '&api=' + encodeURIComponent(o.apiUrl) : '')
 
     var frameOrigin
     try {
@@ -69,7 +144,7 @@ import { clamp, resolveFrameBase } from './lib.js'
       'display:block;width:100%;border:0;overflow:hidden;height:0;' +
       'transition:height .18s ease;background:transparent'
 
-    script.parentNode.insertBefore(iframe, script.nextSibling)
+    o.parent.insertBefore(iframe, o.before || null)
 
     var pinMode = false
     var pinLen = 0

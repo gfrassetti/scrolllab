@@ -30,9 +30,17 @@ export default function SplitReveals({
   seq = '03',
   total = '06',
   label = 'The frames',
-  beats = defaultBeats,
+  beats,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  // `beats` editable trae solo kicker/title/body (la imagen del embed viene
+  // stubeada); la imagen por defecto se toma por índice del set de ejemplo.
+  const rows =
+    Array.isArray(beats) && beats.length
+      ? beats.map((b, i) => ({ ...b, img: b.img || defaultBeats[i % defaultBeats.length].img }))
+      : defaultBeats
 
   useGSAP(
     () => {
@@ -65,7 +73,11 @@ export default function SplitReveals({
   )
 
   return (
-    <section ref={root} className="px-5 py-24 md:px-10 md:py-36">
+    <section
+      ref={root}
+      className="px-5 py-24 md:px-10 md:py-36"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="mb-14 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-24">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
           Seq. {seq} / {total}
@@ -74,9 +86,9 @@ export default function SplitReveals({
       </div>
 
       <div className="space-y-20 md:space-y-32">
-        {beats.map((beat, i) => (
+        {rows.map((beat, i) => (
           <div
-            key={beat.kicker}
+            key={i}
             data-beat
             className="grid items-center gap-8 md:grid-cols-2 md:gap-16"
           >

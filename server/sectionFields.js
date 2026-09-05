@@ -21,6 +21,8 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'hint',
   ],
   'chapters/ManifestoReveal': ['chapter', 'total', 'label'],
+  'chapters/BigNumbers': ['bg', 'fg', 'stats'],
+  'chapters/VelocityMarquee': ['text', 'separator', 'bg', 'fg'],
   'chapters/QuoteBreak': [
     'chapter',
     'total',
@@ -28,7 +30,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'quote',
     'attribution',
   ],
-  'chapters/FooterCTA': ['ctaWord', 'email', 'legal'],
+  'chapters/FooterCTA': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'nocturne/NavNocturne': ['brand', 'marker', 'linksText'],
   'nocturne/HeroCinematic': [
     'titleTop',
@@ -37,10 +39,16 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'meta',
     'hint',
   ],
-  'nocturne/OutroCTA': ['ctaWord', 'email', 'legal'],
+  'nocturne/DiagonalMarquee': ['textA', 'textB', 'bg', 'fg'],
+  'nocturne/SplitReveals': ['seq', 'total', 'label', 'bg', 'fg', 'beats'],
+  'nocturne/WorkIndex': ['seq', 'total', 'label', 'bg', 'fg', 'works'],
+  'nocturne/OutroCTA': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'monolith/NavBrutal': ['brand', 'linksText'],
   'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
-  'monolith/FooterBrutal': ['ctaWord', 'email', 'legal'],
+  'monolith/TypeAccordion': ['unit', 'total', 'label', 'bg', 'fg', 'items'],
+  'monolith/SkewScroller': ['unit', 'total', 'label', 'bg', 'fg', 'words'],
+  'monolith/ExhibitGrid': ['unit', 'total', 'label', 'bg', 'fg', 'exhibits'],
+  'monolith/FooterBrutal': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'fizz/NavFizz': [
     'brand',
     'shopLabel',
@@ -61,7 +69,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'modelUrl',
   ],
   'fizz/FlavorWorlds': ['eyebrow'],
-  'fizz/BubbleBenefits': ['eyebrow', 'title'],
+  'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
   'fizz/CanCarousel': [
     'eyebrow',
     'title',
@@ -84,7 +92,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'can5Image',
   ],
   'fizz/PopManifesto': ['eyebrow', 'text'],
-  'fizz/FooterSplash': ['ctaWord', 'email', 'legal'],
+  'fizz/FooterSplash': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'velocity/NavVelocity': ['brand', 'cta', 'linksText'],
   'velocity/HeroStrike': [
     'lineLeft',
@@ -105,10 +113,10 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'mergeAccent',
   ],
   'velocity/ParallaxRise': ['eyebrow', 'title', 'body', 'cta'],
-  'velocity/FooterVelocity': ['line', 'legal'],
+  'velocity/FooterVelocity': ['line', 'legal', 'bg', 'fg'],
   'atelier/NavAtelier': ['brand', 'cta', 'label', 'menuLabel', 'linksText'],
   'atelier/HeroMeaning': ['line1', 'line2', 'meta', 'hint'],
-  'atelier/AboutClarity': ['eyebrow', 'title', 'body'],
+  'atelier/AboutClarity': ['eyebrow', 'title', 'body', 'bg', 'fg'],
   'atelier/ServicesStone': [
     'eyebrow',
     'title',
@@ -123,18 +131,22 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
   'atelier/VisionShutter': ['line1', 'line2', 'word1', 'word2', 'word3'],
   'atelier/SelectedWork': ['title', 'cta'],
-  'atelier/KeyFacts': ['eyebrow', 'title'],
+  'atelier/KeyFacts': ['eyebrow', 'title', 'bg', 'fg', 'facts'],
   'atelier/WordStripe': ['line1', 'line2', 'word1', 'word2', 'word3'],
   'atelier/StudioCards': ['note', 'cta'],
   'atelier/FooterAtelier': [
     'eyebrow',
     'line',
     'cta',
+    'ctaHref',
     'brand',
     'legal',
     'email',
     'phone',
     'hint',
+    'bg',
+    'fg',
+    'social',
   ],
   'unity/NavUnity': ['brand', 'logo', 'logoSrc', 'linksText', 'menuLabel'],
   'unity/HeroTwin': ['body', 'headline'],
@@ -318,6 +330,8 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'development',
     'legal',
     'year',
+    'bg',
+    'fg',
   ],
   'contact/ContactForm': [
     'theme',
@@ -423,16 +437,131 @@ const ASSET_URL_KEYS = new Set([
   'orbSrc',
 ])
 
+/**
+ * Tipos que el server no infiere de `ALLOWED_PROPS_BY_SECTION` (que es un
+ * array de nombres). Espejan los `type` de src/lib/sectionFields.js.
+ *  - COLOR_PROP_KEYS / isHrefKey: por convención de nombre (`bg`/`fg`/`accent`,
+ *    cualquier `*Href`, o `href`/`link`).
+ *  - LIST_PROPS_BY_SECTION: schema de los campos `list` (prop → { max, item }).
+ */
+const COLOR_RE =
+  /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$|^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+))?\s*\)$/i
+const HREF_RE =
+  /^(?:#[\w-]*|\/[^\s"'<>]*|https?:\/\/[^\s"'<>]+|mailto:[^\s"'<>]+|tel:\+?[\d\s()-]{3,})$/i
+
+const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
+const HREF_PROP_KEYS = new Set(['href', 'link'])
+const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
+
+export const LIST_PROPS_BY_SECTION = Object.freeze({
+  'chapters/FooterCTA': {
+    links: { max: 8, item: { label: 'text', href: 'href' } },
+  },
+  'chapters/BigNumbers': {
+    stats: { max: 6, item: { value: 'text', suffix: 'text', label: 'text' } },
+  },
+  'atelier/KeyFacts': {
+    facts: { max: 6, item: { value: 'text', label: 'text' } },
+  },
+  'monolith/TypeAccordion': {
+    items: { max: 6, item: { title: 'text', body: 'text' } },
+  },
+  'nocturne/OutroCTA': {
+    links: { max: 8, item: { label: 'text', href: 'href' } },
+  },
+  'monolith/FooterBrutal': {
+    links: { max: 8, item: { label: 'text', href: 'href' } },
+  },
+  'fizz/FooterSplash': {
+    links: { max: 8, item: { label: 'text', href: 'href' } },
+  },
+  'atelier/FooterAtelier': {
+    social: { max: 6, item: { label: 'text', href: 'href' } },
+  },
+  'nocturne/SplitReveals': {
+    beats: { max: 6, item: { kicker: 'text', title: 'text', body: 'text' } },
+  },
+  'nocturne/WorkIndex': {
+    works: { max: 8, item: { index: 'text', title: 'text', category: 'text', year: 'text' } },
+  },
+  'monolith/SkewScroller': {
+    words: { max: 8, item: { word: 'text' } },
+  },
+  'monolith/ExhibitGrid': {
+    exhibits: { max: 8, item: { code: 'text', caption: 'text' } },
+  },
+  'fizz/BubbleBenefits': {
+    benefits: { max: 6, item: { title: 'text', body: 'text', color: 'color' } },
+  },
+})
+
+function sanitizeColor(value) {
+  const s = String(value).trim().toLowerCase()
+  return COLOR_RE.test(s) ? s : undefined
+}
+
+function sanitizeHref(value) {
+  const s = String(value).trim()
+  if (!s || s.length > 500 || /^\s*javascript:/i.test(s)) return undefined
+  return HREF_RE.test(s) ? s : undefined
+}
+
+function sanitizeListValue(schema, value) {
+  if (!Array.isArray(value)) return undefined
+  const max = schema.max ?? 12
+  const out = []
+  for (const raw of value) {
+    if (out.length >= max) break
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue
+    const item = {}
+    for (const [k, type] of Object.entries(schema.item || {})) {
+      const v = raw[k]
+      if (typeof v !== 'string') continue
+      const t = v.slice(0, 500)
+      if (type === 'color') {
+        const c = sanitizeColor(t)
+        if (c) item[k] = c
+      } else if (type === 'href') {
+        const h = sanitizeHref(t)
+        if (h) item[k] = h
+      } else if (t) {
+        item[k] = t
+      }
+    }
+    // El server descarta el item sin ninguna clase (slot vacío del editor).
+    if (Object.keys(item).length) out.push(item)
+  }
+  return out
+}
+
 export function sanitizeSectionProps(sectionId, props) {
   if (!props || typeof props !== 'object' || Array.isArray(props)) return undefined
   const allowed = ALLOWED_PROPS_BY_SECTION[sectionId]
   if (!allowed) return undefined
   const allow = new Set(allowed)
+  const listSchemas = LIST_PROPS_BY_SECTION[sectionId] || {}
   const cleaned = {}
   for (const [key, value] of Object.entries(props)) {
     if (!allow.has(key)) continue
+
+    if (listSchemas[key]) {
+      const arr = sanitizeListValue(listSchemas[key], value)
+      if (arr && arr.length) cleaned[key] = arr
+      continue
+    }
     if (typeof value !== 'string') continue
     const trimmed = value.slice(0, 2000)
+
+    if (COLOR_PROP_KEYS.has(key)) {
+      const c = sanitizeColor(trimmed)
+      if (c) cleaned[key] = c
+      continue
+    }
+    if (isHrefKey(key)) {
+      const h = sanitizeHref(trimmed)
+      if (h) cleaned[key] = h
+      continue
+    }
     if (!trimmed) continue
     if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue

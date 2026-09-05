@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import ScrollFog from './ScrollFog'
 
-const FACTS = [
+const defaultFacts = [
   { value: '00+', label: 'Placeholder metric' },
   { value: '0K+', label: 'Placeholder metric' },
   { value: '00+', label: 'Placeholder metric' },
@@ -12,8 +12,12 @@ const FACTS = [
 export default function KeyFacts({
   eyebrow = 'Section eyebrow',
   title = 'YOUR FACTS TITLE',
+  facts,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  const rows = Array.isArray(facts) && facts.length ? facts : defaultFacts
 
   useGSAP(
     () => {
@@ -38,6 +42,7 @@ export default function KeyFacts({
       id="facts"
       ref={root}
       className="relative overflow-hidden border-t border-white/10 bg-[#0b0c10] px-5 py-24 text-white md:px-10 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <ScrollFog density={0.4} />
       <div className="relative z-10">
@@ -48,7 +53,7 @@ export default function KeyFacts({
           {title}
         </h2>
         <ul className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {FACTS.map((fact, i) => (
+          {rows.map((fact, i) => (
             <li key={i} data-fact>
               <p className="font-brico text-[clamp(2.8rem,6vw,4.5rem)] leading-none tracking-[-0.04em]">
                 {fact.value}

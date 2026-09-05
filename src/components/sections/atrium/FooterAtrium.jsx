@@ -11,9 +11,14 @@ export default function FooterAtrium({
   development = 'Development Placeholder',
   legal = 'Legal documents',
   year = '© 2026',
+  bg,
+  fg,
 }) {
   return (
-    <footer className="overflow-hidden bg-atrium-ink px-4 pt-[14svh] pb-5 text-atrium-paper md:px-8 md:pb-6">
+    <footer
+      className="overflow-hidden bg-atrium-ink px-4 pt-[14svh] pb-5 text-atrium-paper md:px-8 md:pb-6"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <p className="-ml-[0.055em] font-grotesk text-[clamp(5.5rem,31vw,32rem)] leading-[0.74] font-medium tracking-[-0.07em] whitespace-nowrap uppercase">
         {mark}
       </p>
