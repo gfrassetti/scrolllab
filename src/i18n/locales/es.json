@@ -43,7 +43,7 @@
     "edit": "Editar",
     "delete": "Borrar",
     "snippet": "Pegá esto en el sitio",
-    "snippetStack": "Pegá este componente en tu proyecto. Carga el loader una vez y monta el embed con window.ScrollLab.render; el resto funciona igual que el <script>.",
+    "snippetStack": "Instalá el componente: npm i @scrolllab/embed. Ya trae adentro el loader y el endpoint; solo le pasás la key.",
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "draftHint": "Borrador — abrí el editor para configurarla y publicarla.",

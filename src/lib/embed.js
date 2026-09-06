@@ -1,5 +1,4 @@
 const FALLBACK_LOADER_URL = 'https://embed.scrolllab.com.ar/v1/loader.js'
-const FALLBACK_API = 'https://www.scrolllab.com.ar'
 
 /** Stacks para los que hay un snippet listo. `html` es el default. */
 export const EMBED_VARIANTS = ['html', 'react', 'next', 'vue']
@@ -8,11 +7,7 @@ function loaderUrl(loader) {
   return loader?.url || FALLBACK_LOADER_URL
 }
 
-function apiBase(loader) {
-  return loader?.api || FALLBACK_API
-}
-
-/** El <script> crudo — para HTML, Webflow, WordPress, etc. */
+/** El <script> crudo — para HTML, Webflow, WordPress, etc. Autocontenido. */
 function htmlSnippet(key, loader) {
   const url = loaderUrl(loader)
   const sri = loader?.integrity
@@ -23,106 +18,42 @@ function htmlSnippet(key, loader) {
 }
 
 /**
- * Componente que carga el loader una vez y monta el embed vía
- * `window.ScrollLab.render`. Sirve igual en React, Preact y Next (client).
+ * Framework: solo el tag. El componente `<ScrollLabEmbed>` vive en el paquete
+ * `@scrolllab/embed` (lo instala el dev); ya trae adentro el loader y el
+ * endpoint. Acá no repetimos URLs ni el cableado — solo la key.
  */
-function reactComponent(key, loader, { clientDirective = false } = {}) {
-  const url = loaderUrl(loader)
-  const api = apiBase(loader)
-  const head = clientDirective ? "'use client'\n\n" : ''
-  return `${head}import { useEffect, useRef } from 'react'
+function reactTag(key, { clientDirective = false } = {}) {
+  const head = clientDirective ? "'use client'\n" : ''
+  return `${head}import ScrollLabEmbed from '@scrolllab/embed'
 
-const LOADER = '${url}'
-const API = '${api}'
-
-export default function ScrollLabEmbed({ embedKey = '${key}' }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    let cancelled = false
-    const mount = () => {
-      if (!cancelled) window.ScrollLab?.render?.(el, { key: embedKey, api: API })
-    }
-
-    if (window.ScrollLab?.render) {
-      mount()
-    } else {
-      let s = document.querySelector('script[data-scrolllab-loader]')
-      if (!s) {
-        s = document.createElement('script')
-        s.src = LOADER
-        s.async = true
-        s.dataset.scrolllabLoader = ''
-        document.head.appendChild(s)
-      }
-      s.addEventListener('load', mount)
-    }
-
-    return () => {
-      cancelled = true
-      el.querySelector('iframe')?.remove()
-      el.removeAttribute('data-scrolllab-done')
-    }
-  }, [embedKey])
-
-  return <div ref={ref} />
+<ScrollLabEmbed embedKey="${key}" />`
 }
 
-// uso:  <ScrollLabEmbed embedKey="${key}" />`
-}
-
-/** Vue 3 (<script setup>). */
-function vueComponent(key, loader) {
-  const url = loaderUrl(loader)
-  const api = apiBase(loader)
+function vueTag(key) {
   return `<script setup>
-import { onMounted, onBeforeUnmount, ref } from 'vue'
-
-const el = ref(null)
-const embedKey = '${key}'
-const LOADER = '${url}'
-const API = '${api}'
-
-onMounted(() => {
-  const mount = () =>
-    window.ScrollLab?.render?.(el.value, { key: embedKey, api: API })
-  if (window.ScrollLab?.render) {
-    mount()
-  } else {
-    const s = document.createElement('script')
-    s.src = LOADER
-    s.async = true
-    s.addEventListener('load', mount)
-    document.head.appendChild(s)
-  }
-})
-
-onBeforeUnmount(() => {
-  el.value?.querySelector('iframe')?.remove()
-})
+import ScrollLabEmbed from '@scrolllab/embed/vue'
 </script>
 
 <template>
-  <div ref="el" />
+  <ScrollLabEmbed embed-key="${key}" />
 </template>`
 }
 
 /**
  * Snippet que el usuario pega en su sitio.
- *  - `html` (default): el <script> crudo. `data-api` lo manda el server en
- *    GET /api/embed/loader; SRI+crossorigin solo si `EMBED_SRI=true`.
- *  - `react` / `next` / `vue`: un componente que usa `window.ScrollLab.render`.
+ *  - `html` (default): el <script> crudo, autocontenido. `data-api` lo manda el
+ *    server en GET /api/embed/loader; SRI+crossorigin solo si `EMBED_SRI=true`.
+ *  - `react` / `next` / `vue`: solo el tag `<ScrollLabEmbed embedKey=…>`. El
+ *    componente lo trae `@scrolllab/embed` (npm i @scrolllab/embed).
  */
 export function embedSnippet(key, loader, variant = 'html') {
   switch (variant) {
     case 'react':
-      return reactComponent(key, loader)
+      return reactTag(key)
     case 'next':
-      return reactComponent(key, loader, { clientDirective: true })
+      return reactTag(key, { clientDirective: true })
     case 'vue':
-      return vueComponent(key, loader)
+      return vueTag(key)
     default:
       return htmlSnippet(key, loader)
   }

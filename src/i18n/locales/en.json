@@ -43,7 +43,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "snippet": "Paste this into the site",
-    "snippetStack": "Drop this component in your project. It loads the loader once and mounts the embed with window.ScrollLab.render; everything else works just like the <script>.",
+    "snippetStack": "Install the component: npm i @scrolllab/embed. The loader and endpoint are baked in; you just pass the key.",
     "copy": "Copy",
     "copied": "Copied!",
     "draftHint": "Draft — open the editor to configure and publish it.",

@@ -1,20 +1,24 @@
 import { useState } from 'react'
 import { embedSnippet, EMBED_VARIANTS } from '../lib/embed'
+import { useAuth } from '../lib/auth'
 import { useI18n } from '../i18n'
 
 const LABELS = { html: 'HTML', react: 'React', next: 'Next.js', vue: 'Vue' }
 
 /**
  * Snippet del embed con selector de stack (HTML · React · Next.js · Vue).
- * Todas las variantes apuntan al mismo `loader.js`; las de framework usan
- * `window.ScrollLab.render`. Ver src/lib/embed.js y embed/loader/loader.js.
+ * Solo se muestra a usuarios logueados: la key pública de una instancia es
+ * revocable pero igual no tiene por qué verla nadie sin sesión.
  */
 export default function SnippetBox({ embedKey, loaderInfo }) {
   const { t } = useI18n()
+  const { user } = useAuth()
   const [variant, setVariant] = useState('html')
   const [copied, setCopied] = useState(false)
 
   const code = embedSnippet(embedKey, loaderInfo, variant)
+
+  if (!user) return null
 
   const copy = async () => {
     try {

@@ -1,0 +1,36 @@
+{
+  "name": "@scrolllab/embed",
+  "version": "0.1.0",
+  "description": "Embed a ScrollLab hosted section with one tag. React, Next and Vue.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./react.js",
+    "./vue": "./vue.js"
+  },
+  "files": [
+    "react.js",
+    "vue.js",
+    "loader-client.js",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "react": ">=17",
+    "vue": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "vue": { "optional": true }
+  },
+  "homepage": "https://www.scrolllab.com.ar/lab",
+  "keywords": [
+    "scrolllab",
+    "embed",
+    "gsap",
+    "scrollytelling",
+    "iframe",
+    "react",
+    "vue"
+  ]
+}

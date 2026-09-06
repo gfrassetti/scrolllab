@@ -450,16 +450,63 @@ origin; lo que cambia es cómo cada stack lo inyecta.
   (`data-scrolllab-done`) y deriva la base del frame del `src` del propio loader.
   Minificado pasó de ~2.7 KB a ~3.7 KB.
 - **`src/lib/embed.js`**: `embedSnippet(key, loader, variant)` con
-  `variant: 'html' | 'react' | 'next' | 'vue'`. `html` es el default y no
-  cambió. `react`/`next`/`vue` devuelven un componente que carga el loader una
-  vez y monta con `render`.
+  `variant: 'html' | 'react' | 'next' | 'vue'`. `html` es el default:
+  `<script>` crudo, autocontenido.
 - **`src/components/SnippetBox.jsx`**: selector de stack (HTML · React · Next.js
   · Vue) + copiar, usado en `/lab` y `/lab/:id`. i18n: `lab.snippetStack`.
-- Tests: `embed/test/iframe-host-render.html` + caso e2e nuevo ("window.
-  ScrollLab.render monta el embed en un div") — 7 e2e verdes. 277 unit + `check`.
+  **Solo se renderiza a usuarios logueados** (`useAuth()` → `if (!user) return
+  null`); los dos callers ya gatean por `user`, esto es el candado a nivel
+  componente.
+- Tests: `embed/test/iframe-host-render.html` + caso e2e ("window.
+  ScrollLab.render monta el embed en un div").
 
-Pendiente: publicar `@scrolllab/embed` en npm (por ahora copy-paste alcanza);
-snippet para Astro/Svelte si hay demanda.
+### 2026-09-05 — snippets de framework: solo el tag
+
+Antes las variantes `react`/`next`/`vue` volcaban el componente entero (consts
+`LOADER`/`API`, `useEffect` con la inyección del loader, cleanup…). Demasiado
+ruido para pegar en una card. Ahora **solo devuelven el tag**:
+
+```jsx
+import ScrollLabEmbed from '@scrolllab/embed'
+
+<ScrollLabEmbed embedKey="pub_…" />
+```
+
+(`next` antepone `'use client'`; `vue` usa `@scrolllab/embed/vue` +
+`embed-key`.) El cableado —loader + endpoint de config— vive **dentro** del
+paquete `@scrolllab/embed`, no en el snippet. `html` no cambió: ese sí es
+autocontenido porque no hay paquete que pegue el `<script>` por vos.
+
+### El paquete: `packages/embed/` (2026-09-05)
+
+`@scrolllab/embed` ya está armado, **listo para `npm publish`** (falta el
+publish real — cuenta npm + `npm login`, ver abajo).
+
+- **Sin build**: los 3 archivos son ESM plano, sin JSX (`createElement` en
+  React, `h()` en Vue) → se publican tal cual.
+- `packages/embed/loader-client.js` — `mountEmbed(el, key)`: inyecta
+  `loader.js` una vez (marker `data-scrolllab-loader` para dedupe entre varios
+  embeds), llama `window.ScrollLab.render(el, { key, api })`, devuelve un
+  cleanup idempotente (saca el iframe + `data-scrolllab-done`). Hornea `LOADER
+  = https://embed.scrolllab.com.ar/v1/loader.js` y `API =
+  https://www.scrolllab.com.ar`. Guarda contra SSR (`typeof window`).
+- `react.js` (`'use client'` en la primera línea, para el App Router de Next) —
+  export `./`.
+- `vue.js` — `defineComponent` + `setup`, export `./vue`.
+- `package.json`: `peerDependencies` react/vue **opcionales**
+  (`peerDependenciesMeta`), `type: module`, `exports` con los dos entries,
+  `sideEffects: false`. MIT.
+
+**Publicar** (una vez que exista la cuenta/org `scrolllab` en npm):
+
+```bash
+cd packages/embed
+npm login          # usuario scrolllab, 2FA
+npm publish --access public   # --access public: obligatorio la 1ra vez para paquetes con scope
+```
+
+Releases siguientes: `npm version patch && npm publish`. Snippet para
+Astro/Svelte si hay demanda.
 
 ---
 
