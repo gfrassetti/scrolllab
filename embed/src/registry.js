@@ -33,6 +33,12 @@ import SkewScroller from '../../src/components/sections/monolith/SkewScroller.js
 import ExhibitGrid from '../../src/components/sections/monolith/ExhibitGrid.jsx'
 import BubbleBenefits from '../../src/components/sections/fizz/BubbleBenefits.jsx'
 import AboutClarity from '../../src/components/sections/atelier/AboutClarity.jsx'
+// v1.3 — grillas con imagen editable por ítem (list sub-field `image`). Las
+// imágenes default son imports bundleados → stubeadas a '' en el embed, cada
+// sección guarda su `<img>` con `src ? … : fallback`.
+import CanCarousel from '../../src/components/sections/fizz/CanCarousel.jsx'
+import StudioCards from '../../src/components/sections/atelier/StudioCards.jsx'
+import HelmetGrid from '../../src/components/sections/velocity/HelmetGrid.jsx'
 
 const SECTIONS = {
   'chapters/FooterCTA': FooterCTA,
@@ -53,6 +59,9 @@ const SECTIONS = {
   'monolith/ExhibitGrid': ExhibitGrid,
   'fizz/BubbleBenefits': BubbleBenefits,
   'atelier/AboutClarity': AboutClarity,
+  'fizz/CanCarousel': CanCarousel,
+  'atelier/StudioCards': StudioCards,
+  'velocity/HelmetGrid': HelmetGrid,
 }
 
 /**

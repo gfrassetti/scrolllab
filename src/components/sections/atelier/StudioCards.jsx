@@ -54,9 +54,20 @@ export default function StudioCards({
   note = 'Concepts, explorations, and interface experiments shared openly as part of our creative process.',
   cta = 'View collection →',
   ctaHref = '#top',
-  cards = defaultCards,
+  cards,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  // Lista editable `{ title, label, img }`. El degradé `tone` no es editable:
+  // se toma por índice del set de ejemplo (queda de fondo si no hay imagen).
+  const rows =
+    Array.isArray(cards) && cards.length
+      ? cards.map((c, i) => ({
+          ...c,
+          tone: c.tone || defaultCards[i % defaultCards.length].tone,
+        }))
+      : defaultCards
 
   useGSAP(
     () => {
@@ -95,23 +106,26 @@ export default function StudioCards({
     <section
       ref={root}
       className="bg-[#e8e8e6] px-5 py-20 text-[#111214] md:px-10 md:py-28"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <ul
         data-studio-grid
         className="mx-auto grid max-w-[1400px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5"
       >
-        {cards.map((card) => (
-          <li key={card.title} data-studio-card>
+        {rows.map((card, i) => (
+          <li key={i} data-studio-card>
             <article className="group relative aspect-[16/11] overflow-hidden rounded-2xl bg-gradient-to-br shadow-[0_20px_50px_rgba(0,0,0,0.08)] md:rounded-3xl">
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${card.tone}`}
               />
-              <img
-                src={card.img}
-                alt=""
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-[1.04]"
-              />
+              {card.img ? (
+                <img
+                  src={card.img}
+                  alt=""
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-[1.04]"
+                />
+              ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
                 <p className="text-[10px] tracking-[0.22em] text-white/70 uppercase">

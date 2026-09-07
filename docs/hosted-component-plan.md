@@ -663,17 +663,51 @@ Tests: **79 e2e** (7 base + 18 por-sección + 54 responsive, las 18 × 3
 viewports) + **301 unit** + `npm run check`. `build:embed`: 66.6 KB gz JS /
 18.46 KB gz CSS.
 
+---
+
+## Fase E — grillas con imagen editable por ítem (2026-09-05)
+
+`fizz/CanCarousel` · `atelier/StudioCards` · `velocity/HelmetGrid` → **21
+hosteables**. Modelos ya tokenizados (fizz/atelier/velocity) → cero cambios en
+`embed/frame/`.
+
+### Infra nueva: `image` como sub-campo de `list`
+
+Antes los `list` solo aceptaban `text`/`textarea`/`href`/`color`. Ahora también
+**`image`** = URL (`https://` · `/ruta` · `blob:`/`data:` en preview; el server
+descarta blob/data al persistir, igual que el campo `image` suelto).
+
+- `sanitizeImageUrl()` (cliente, `src/lib/sectionFields.js`) +
+  `sanitizeListValue` con branch `image` (server) validan por tipo.
+- `SectionFieldRow`: el sub-campo `image` es un input de URL con thumbnail
+  de preview. (El upload real por fila queda para más adelante — hoy se pega
+  una URL.)
+- Retroactivo: `SplitReveals.beats`, `WorkIndex.works`, `ExhibitGrid.exhibits`
+  también ganaron su sub-campo `img` (antes la imagen quedaba fija en el
+  default). Todas las `list` con contenido visual son 100% editables.
+
+### Stub de imágenes del embed: `''` en vez de un gif 1×1
+
+`embed/vite.config.js` — `stubMedia` ahora stubea los `import png` a **`''`**
+(falsy) en vez de un `data:image/gif;base64,…` 1×1. Cada sección hosteable con
+`<img>` de un asset bundleado lo guarda con `src ? <img> : fallback`, así una
+default sin imagen cae limpio a su fallback en vez de mostrar un pixel:
+`CanCarousel` → SVG `CanIllustration`, `StudioCards` → el degradé `tone`,
+`HelmetGrid` → el outline del notch, `ExhibitGrid`/`TypeAccordion` → sin foto.
+
+### Editabilidad de las 3
+
+| sección | agrega |
+|---|---|
+| `fizz/CanCarousel` | `bg` `fg` · `cans` (list: `name`/`note`/`color`/`image`, max 6). Reemplaza los 15 campos `canN*` planos. |
+| `atelier/StudioCards` | `bg` `fg` `ctaHref` · `cards` (list: `title`/`label`/`img`, max 6). `tone` (degradé) queda por índice del default. |
+| `velocity/HelmetGrid` | `bg` `fg` · `items` (list: `name`/`year`/`img`, max 6). `const ITEMS` → `items = defaultItems`; `active` pasó a índice. `offset`/`mask` (visual) por índice del default. |
+
+Tests: **91 e2e** (7 base + 21 por-sección + 63 responsive, las 21 × 3
+viewports) + **305 unit** + `npm run check`. `build:embed`: 69.4 KB gz JS.
+
 ### Siguiente tanda (candidatas, requieren más trabajo antes de sumar)
 
-- `fizz/CanCarousel` — ya tiene 5 campos `image` sueltos editables (no
-  bloqueado por la limitación de las `list`), pero el fallback SVG
-  (`CanIllustration`) se rompe en el embed: el `can.image` stubeado
-  (`data:image/gif;base64,…` 1×1) es *truthy*, así que pisa el fallback bonito
-  con una imagen transparente en vez de mostrar la lata ilustrada. Necesita una
-  función `isStubImage()` compartida con el frame antes de sumarla.
-- `monolith/HelmetGrid`, `atelier/StudioCards` — el catálogo de ítems es una
-  `const` fuera de props (no un default de prop): hay que refactorizarlas a
-  `items = ITEMS` primero, y ahí sí exponer `list`.
 - `unity/*`, `ratio/*` — ningún candidato limpio todavía sin sumar tokens/
   fuentes nuevas al frame (`embed/frame/main.css` + `index.html`).
 - `atrium/ManifestoType` + `atrium/ScopeSerif`: usan `svh` para el aire (están

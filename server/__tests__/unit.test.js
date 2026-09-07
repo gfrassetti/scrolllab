@@ -136,6 +136,36 @@ describe('sanitizeSectionProps — color / href / list', () => {
     assert.equal(bb.benefits[0].color, '#ff3ea5')
     assert.equal(bb.benefits[1].color, undefined)
   })
+
+  it('Fase E: image sub-field en list (CanCarousel / StudioCards / HelmetGrid)', () => {
+    const cc = sanitizeSectionProps('fizz/CanCarousel', {
+      bg: '#241352',
+      cans: [
+        { name: 'Uva', note: 'x', color: '#ff3ea5', image: 'https://cdn.test/u.png' },
+        { name: 'Local', image: '/latas/x.png' },
+        { name: 'Mala', image: 'data:image/png;base64,AAAA' }, // blob:/data: no persisten
+      ],
+    })
+    assert.equal(cc.bg, '#241352')
+    assert.deepEqual(cc.cans[0], {
+      name: 'Uva',
+      note: 'x',
+      color: '#ff3ea5',
+      image: 'https://cdn.test/u.png',
+    })
+    assert.equal(cc.cans[1].image, '/latas/x.png')
+    assert.equal(cc.cans[2].image, undefined)
+
+    const sc = sanitizeSectionProps('atelier/StudioCards', {
+      cards: [{ title: 'C1', label: 'L1', img: 'https://cdn.test/c.jpg' }],
+    })
+    assert.equal(sc.cards[0].img, 'https://cdn.test/c.jpg')
+
+    const hg = sanitizeSectionProps('velocity/HelmetGrid', {
+      items: Array.from({ length: 8 }, (_, i) => ({ name: `N${i}`, year: `${i}` })),
+    })
+    assert.equal(hg.items.length, 6)
+  })
 })
 
 describe('validateRecipe', () => {
@@ -179,9 +209,10 @@ describe('validateRecipe', () => {
       {
         id: 'fizz/CanCarousel',
         props: {
-          can1Name: 'Custom',
-          can1Image: '/can-1.svg',
-          can2Image: 'blob:http://localhost/x',
+          cans: [
+            { name: 'Custom', image: '/can-1.svg' },
+            { name: 'Nope', image: 'blob:http://localhost/x' },
+          ],
         },
       },
     ])
@@ -189,9 +220,9 @@ describe('validateRecipe', () => {
       title: 'MY TITLE',
       flavor: 'mint',
     })
+    // la URL del sitio se conserva; blob: se descarta al persistir
     assert.deepEqual(recipe[1].props, {
-      can1Name: 'Custom',
-      can1Image: '/can-1.svg',
+      cans: [{ name: 'Custom', image: '/can-1.svg' }, { name: 'Nope' }],
     })
   })
 

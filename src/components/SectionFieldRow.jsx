@@ -2,8 +2,9 @@ import { useI18n } from '../i18n'
 
 /**
  * Un campo editable de sección. Tipos: text · textarea · select · color · href
- * · list. `image` / `model` los sigue manejando cada editor inline (traen
- * upload). Compartido por LabEditorPage y BuilderPreview.
+ * · image (URL) · list (sub-campos text/textarea/href/color/image). El `image`
+ * suelto de nivel raíz + `model` los sigue manejando cada editor inline cuando
+ * traen upload. Compartido por LabEditorPage y BuilderPreview.
  *
  *   <SectionFieldRow field={field} value={props[field.key]} onChange={next => …} />
  *
@@ -96,6 +97,28 @@ function Scalar({ field, value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         className={inputCls}
       />
+    )
+  }
+
+  if (field.type === 'image') {
+    return (
+      <div className="mt-2">
+        <input
+          type="text"
+          inputMode="url"
+          value={value}
+          placeholder="https://… · /imagen.png"
+          onChange={(e) => onChange(e.target.value)}
+          className={inputCls.replace('mt-2 ', '')}
+        />
+        {value ? (
+          <img
+            src={value}
+            alt=""
+            className="mt-2 h-16 w-auto rounded border border-ink/15 object-cover"
+          />
+        ) : null}
+      </div>
     )
   }
 

@@ -5,24 +5,22 @@ import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
-// 1x1 transparente. Las secciones importan assets por default
-// (import png from './assets/x.png'). En el embed las imágenes vienen SIEMPRE
-// de la config (props con URLs), así que los defaults se stubean para no
-// arrastrar PNGs de MB al bundle.
-const STUB_IMG =
-  'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
-
+// Las secciones importan assets por default (import png from './assets/x.png').
+// En el embed las imágenes vienen SIEMPRE de la config (props con URLs), así que
+// los defaults se stubean a `''` para no arrastrar PNGs de MB al bundle. String
+// vacío = falsy: cada sección hosteable guarda su `<img>` con `src ? <img> :
+// fallback`, así que un default sin imagen cae al SVG/estado sin foto en vez de
+// mostrar un pixel roto.
 const stubMedia = {
   name: 'embed-stub-media',
   enforce: 'pre',
   resolveId(id) {
     if (/\.(png|jpe?g|webp|gif|avif|svg|glb|gltf|mp4|webm)(\?.*)?$/.test(id)) {
-      return `\0stub-media:${/\.(glb|gltf|mp4|webm)/.test(id) ? 'empty' : 'img'}`
+      return '\0stub-media:empty'
     }
     return null
   },
   load(id) {
-    if (id === '\0stub-media:img') return `export default ${JSON.stringify(STUB_IMG)}`
     if (id === '\0stub-media:empty') return 'export default ""'
     return null
   },

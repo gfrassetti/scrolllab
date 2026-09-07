@@ -151,6 +151,39 @@ const CASES = {
     props: { eyebrow: 'x', title: 'MKABTC', body: 'cuerpo', bg: '#0b0c10', fg: '#ffffff' },
     marker: 'MKABTC',
   },
+  'fizz/CanCarousel': {
+    props: {
+      eyebrow: 'x',
+      title: 'MKCANS',
+      cta: 'x',
+      canLabel: 'MK',
+      bg: '#241352',
+      fg: '#fff3e2',
+      cans: [{ name: 'MKCANS', note: 'x', color: '#ff3ea5' }],
+    },
+    marker: 'MKCANS',
+  },
+  'atelier/StudioCards': {
+    props: {
+      note: 'MKSTUD',
+      cta: 'x',
+      bg: '#e8e8e6',
+      fg: '#111214',
+      cards: [{ title: 'MKSTUD', label: 'x' }],
+    },
+    marker: 'MKSTUD',
+  },
+  'velocity/HelmetGrid': {
+    props: {
+      eyebrow: 'x',
+      title: 'MKHELM',
+      body: 'cuerpo',
+      bg: '#0a1a12',
+      fg: '#ece9e2',
+      items: [{ name: 'MKHELM', year: '01' }],
+    },
+    marker: 'MKHELM',
+  },
 }
 
 // Responsive: las 18 HOSTABLE_SECTIONS, no solo una muestra — "cada una debe

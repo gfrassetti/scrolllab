@@ -85,7 +85,7 @@ describe('sanitizeProps — campos con opciones', () => {
 })
 
 describe('sanitizeProps — assets', () => {
-  const section = 'fizz/CanCarousel'
+  const section = 'fizz/HeroBubbles'
   const field = SECTION_FIELDS[section].find((f) => f.type === 'image')
 
   it('acepta https:// y rutas del sitio', () => {
@@ -209,11 +209,21 @@ describe('sanitizeProps — Fase D (segunda tanda)', () => {
     const dm = sanitizeProps('nocturne/DiagonalMarquee', { textA: 'A', textB: 'B', fg: '#eee' })
     assert.deepEqual(dm, { textA: 'A', textB: 'B', fg: '#eee' })
   })
-  it('SplitReveals: beats list con kicker/title/body', () => {
+  it('SplitReveals: beats list con kicker/title/body/img (image)', () => {
     const clean = sanitizeProps('nocturne/SplitReveals', {
-      beats: [{ kicker: 'K1', title: 'T1', body: 'B1', img: 'https://hack.test/x.png' }],
+      beats: [
+        { kicker: 'K1', title: 'T1', body: 'B1', img: 'https://cdn.test/x.png' },
+        { kicker: 'K2', title: 'T2', body: 'B2', img: 'javascript:alert(1)' },
+      ],
     })
-    assert.deepEqual(clean.beats[0], { kicker: 'K1', title: 'T1', body: 'B1' })
+    // URL válida se conserva; esquema raro cae, el resto del item queda
+    assert.deepEqual(clean.beats[0], {
+      kicker: 'K1',
+      title: 'T1',
+      body: 'B1',
+      img: 'https://cdn.test/x.png',
+    })
+    assert.deepEqual(clean.beats[1], { kicker: 'K2', title: 'T2', body: 'B2' })
   })
   it('WorkIndex: works list respeta el max de 8', () => {
     const clean = sanitizeProps('nocturne/WorkIndex', {
@@ -247,6 +257,45 @@ describe('sanitizeProps — Fase D (segunda tanda)', () => {
   })
 })
 
+describe('sanitizeProps — Fase E (grillas con imagen editable)', () => {
+  it('CanCarousel: cans list con name/note/color/image', () => {
+    const clean = sanitizeProps('fizz/CanCarousel', {
+      bg: '#241352',
+      cans: [
+        { name: 'Uva', note: 'x', color: '#ff3ea5', image: '/latas/uva.png' },
+        { name: 'Mala', note: 'y', color: 'blue', image: 'ftp://nope' },
+      ],
+    })
+    assert.equal(clean.bg, '#241352')
+    assert.deepEqual(clean.cans[0], {
+      name: 'Uva',
+      note: 'x',
+      color: '#ff3ea5',
+      image: '/latas/uva.png',
+    })
+    // color inválido y URL con esquema raro caen; el texto queda
+    assert.deepEqual(clean.cans[1], { name: 'Mala', note: 'y' })
+  })
+  it('StudioCards: cards list title/label/img', () => {
+    const clean = sanitizeProps('atelier/StudioCards', {
+      cards: [{ title: 'C1', label: 'L1', img: 'https://cdn.test/c1.jpg' }],
+      ctaHref: '/coleccion',
+    })
+    assert.equal(clean.ctaHref, '/coleccion')
+    assert.deepEqual(clean.cards[0], {
+      title: 'C1',
+      label: 'L1',
+      img: 'https://cdn.test/c1.jpg',
+    })
+  })
+  it('HelmetGrid: items list name/year/img, respeta max 6', () => {
+    const clean = sanitizeProps('velocity/HelmetGrid', {
+      items: Array.from({ length: 9 }, (_, i) => ({ name: `N${i}`, year: `${i}` })),
+    })
+    assert.equal(clean.items.length, 6)
+  })
+})
+
 describe('isEphemeralAssetUrl', () => {
   it('reconoce lo que no puede viajar en el ZIP', () => {
     assert.ok(isEphemeralAssetUrl('blob:http://localhost/abc'))
@@ -275,7 +324,7 @@ describe('getSectionFields', () => {
           for (const sf of field.item) {
             assert.ok(sf.key && sf.label && sf.type, `${id}.${field.key}[]: sub-campo incompleto`)
             assert.ok(
-              ['text', 'textarea', 'href', 'color'].includes(sf.type),
+              ['text', 'textarea', 'href', 'color', 'image'].includes(sf.type),
               `${id}.${field.key}[].${sf.key}: tipo '${sf.type}' no permitido en list`,
             )
           }

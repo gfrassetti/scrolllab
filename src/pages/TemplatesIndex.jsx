@@ -200,6 +200,64 @@ export default function TemplatesIndex() {
     [t],
   )
 
+  const minTemplateUsd = useMemo(() => {
+    const prices = TEMPLATE_META.filter((m) => !isComingSoonSku(m.sku))
+      .map((m) => templatePriceUsd(m.sku))
+      .filter((n) => n != null)
+    return prices.length ? Math.min(...prices) : null
+  }, [])
+
+  // Comparación de las 3 formas de usarlo. Copy hardcodeada en ES por ahora
+  // (los locale files están en edición por otra sesión); mover a i18n después.
+  const ways = [
+    {
+      key: 'template',
+      name: 'Template',
+      kind: 'Compra única',
+      rows: [
+        ['Qué es', 'Un template entero, listo'],
+        ['Te llevás', 'El código, en un ZIP'],
+        ['Editás', 'Vos, el código'],
+      ],
+      price:
+        minTemplateUsd != null
+          ? `desde ${formatPriceFromUsd(minTemplateUsd, locale, rate)}`
+          : '—',
+      to: '#templates',
+      cta: 'Ver templates',
+    },
+    {
+      key: 'builder',
+      name: 'Builder',
+      kind: 'Compra única',
+      rows: [
+        ['Qué es', 'Lo armás sección por sección'],
+        ['Te llevás', 'El código, en un ZIP'],
+        ['Editás', 'Vos, el código'],
+      ],
+      price: `desde ${formatPriceFromUsd(
+        CUSTOM_BASE_PRICE_USD,
+        locale,
+        rate,
+      )} · ${CUSTOM_BASE_SECTIONS} incl.`,
+      to: '/builder',
+      cta: 'Abrir el builder',
+    },
+    {
+      key: 'lab',
+      name: 'LAB',
+      kind: 'Suscripción',
+      rows: [
+        ['Qué es', 'Una sección suelta, en vivo'],
+        ['Te llevás', 'Un <script>, sin bajar código'],
+        ['Editás', 'Un panel, sin tocar código'],
+      ],
+      price: 'Suscripción · 7 días gratis',
+      to: '/lab',
+      cta: 'Ver LAB',
+    },
+  ]
+
   const howPanels = useMemo(
     () => [
       {
@@ -1135,6 +1193,60 @@ export default function TemplatesIndex() {
           </div>
         </Link>
 
+        {/* Comparación de las 3 formas — resumen de decisión al final del bloque
+            de ofertas. Convive con las bandas de arriba a propósito: el eyebrow
+            deja claro que es un recap, no contenido nuevo. */}
+        <section data-cta-card className="mt-12 md:mt-16">
+          <p data-cta-bit className="text-eyebrow uppercase text-ink/50">
+            Las tres, comparadas
+          </p>
+          <div className="mt-6 grid gap-px overflow-hidden border border-ink/15 bg-ink/15 sm:grid-cols-3">
+            {ways.map((w) => {
+              const isHash = w.to.startsWith('#')
+              const cls =
+                'group flex flex-col bg-bone p-6 transition-colors hover:bg-ink/[0.03]'
+              const inner = (
+                <>
+                  <p className="flex items-center gap-2 text-title-sm font-medium">
+                    {w.name}
+                    <span
+                      aria-hidden="true"
+                      className="text-body-sm text-ink/35 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-accent"
+                    >
+                      →
+                    </span>
+                  </p>
+                  <p className="mt-1 text-eyebrow uppercase text-ink/45">
+                    {w.kind}
+                  </p>
+                  <dl className="mt-5 flex-1 space-y-3">
+                    {w.rows.map(([label, val]) => (
+                      <div key={label}>
+                        <dt className="text-eyebrow uppercase text-ink/40">
+                          {label}
+                        </dt>
+                        <dd className="mt-0.5 text-body-sm text-ink/75">{val}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <p className="mt-5 text-body font-medium tracking-[-0.02em]">
+                    {w.price}
+                  </p>
+                </>
+              )
+              return isHash ? (
+                <a key={w.key} data-cta-bit href={w.to} className={cls}>
+                  {inner}
+                </a>
+              ) : (
+                <Link key={w.key} data-cta-bit to={w.to} className={cls}>
+                  {inner}
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+
         {/* Confianza / proceso: después de las ofertas. */}
         <section
           id="como-funciona"
@@ -1247,10 +1359,10 @@ export default function TemplatesIndex() {
         data-footer
         className="border-t border-ink/15 px-5 pt-24 pb-6 md:px-10 md:pt-36"
       >
-        <div className="mb-20 grid grid-cols-3 gap-x-4 gap-y-10 md:mb-28 md:grid-cols-12 md:gap-12">
+        <div className="mb-20 grid grid-cols-2 gap-x-4 gap-y-10 md:mb-28 md:grid-cols-12 md:gap-12">
           <p
             data-footer-bit
-            className="col-span-3 max-w-[40ch] text-body leading-relaxed text-ink/75 md:col-span-4"
+            className="col-span-2 max-w-[40ch] text-body leading-relaxed text-ink/75 md:col-span-4"
           >
             {t('meta.tagline')}
           </p>
@@ -1292,7 +1404,7 @@ export default function TemplatesIndex() {
 
           <nav
             data-footer-bit
-            className="min-w-0 md:col-span-3"
+            className="min-w-0 md:col-span-2"
             aria-label={t('home.footerBuilder')}
           >
             <p className="mb-4 text-eyebrow uppercase text-ink/50">
@@ -1308,30 +1420,6 @@ export default function TemplatesIndex() {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/legal/license"
-                  className="transition-colors duration-300 hover:text-accent"
-                >
-                  {t('home.footerLicense')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/legal/privacy"
-                  className="transition-colors duration-300 hover:text-accent"
-                >
-                  {t('home.footerPrivacy')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/legal/terms"
-                  className="transition-colors duration-300 hover:text-accent"
-                >
-                  {t('home.footerTerms')}
-                </Link>
-              </li>
-              <li>
                 <a
                   href="#como-funciona"
                   className="transition-colors duration-300 hover:text-accent"
@@ -1339,12 +1427,40 @@ export default function TemplatesIndex() {
                   {t('home.footerHow')}
                 </a>
               </li>
+            </ul>
+          </nav>
+
+          <nav
+            data-footer-bit
+            className="min-w-0 md:col-span-2"
+            aria-label={t('nav.lab')}
+          >
+            <p className="mb-4 text-eyebrow uppercase text-ink/50">
+              {t('nav.lab')}
+            </p>
+            <ul className="space-y-2 text-body-sm break-words">
               <li>
                 <Link
-                  to="/account"
+                  to="/lab"
                   className="transition-colors duration-300 hover:text-accent"
                 >
-                  {t('home.footerAccount')}
+                  {t('lab.eyebrow')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/lab#planes"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('lab.plansTitle')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/lab"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('lab.yours')}
                 </Link>
               </li>
             </ul>
@@ -1352,7 +1468,7 @@ export default function TemplatesIndex() {
 
           <nav
             data-footer-bit
-            className="min-w-0 md:col-span-3"
+            className="min-w-0 md:col-span-2"
             aria-label={t('home.footerContact')}
           >
             <p className="mb-4 text-eyebrow uppercase text-ink/50">
@@ -1374,6 +1490,14 @@ export default function TemplatesIndex() {
                 >
                   {SUPPORT_EMAIL}
                 </a>
+              </li>
+              <li>
+                <Link
+                  to="/account"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerAccount')}
+                </Link>
               </li>
             </ul>
           </nav>
@@ -1398,9 +1522,32 @@ export default function TemplatesIndex() {
 
         <div
           data-footer-legal
-          className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-eyebrow uppercase text-ink/50 md:flex-row md:items-baseline md:justify-between"
+          className="mt-10 flex flex-col gap-3 border-t border-ink/15 pt-4 text-eyebrow uppercase text-ink/50 md:flex-row md:items-baseline md:justify-between md:gap-6"
         >
           <p>©{new Date().getFullYear()} {SITE_NAME}</p>
+          <nav
+            className="flex flex-wrap gap-x-5 gap-y-2"
+            aria-label={t('home.footerLicense')}
+          >
+            <Link
+              to="/legal/license"
+              className="transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerLicense')}
+            </Link>
+            <Link
+              to="/legal/privacy"
+              className="transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerPrivacy')}
+            </Link>
+            <Link
+              to="/legal/terms"
+              className="transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerTerms')}
+            </Link>
+          </nav>
           <a
             href="#top"
             className="transition-colors duration-300 hover:text-accent"

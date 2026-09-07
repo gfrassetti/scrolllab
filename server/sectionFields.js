@@ -70,27 +70,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
   'fizz/FlavorWorlds': ['eyebrow'],
   'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
-  'fizz/CanCarousel': [
-    'eyebrow',
-    'title',
-    'cta',
-    'canLabel',
-    'can1Name',
-    'can1Note',
-    'can1Image',
-    'can2Name',
-    'can2Note',
-    'can2Image',
-    'can3Name',
-    'can3Note',
-    'can3Image',
-    'can4Name',
-    'can4Note',
-    'can4Image',
-    'can5Name',
-    'can5Note',
-    'can5Image',
-  ],
+  'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
   'fizz/PopManifesto': ['eyebrow', 'text'],
   'fizz/FooterSplash': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'velocity/NavVelocity': ['brand', 'cta', 'linksText'],
@@ -104,7 +84,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'imgMid',
     'imgFront',
   ],
-  'velocity/HelmetGrid': ['eyebrow', 'title', 'body'],
+  'velocity/HelmetGrid': ['eyebrow', 'title', 'body', 'bg', 'fg', 'items'],
   'velocity/TrackMerge': [
     'pathLabelA',
     'pathLabelB',
@@ -133,7 +113,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'atelier/SelectedWork': ['title', 'cta'],
   'atelier/KeyFacts': ['eyebrow', 'title', 'bg', 'fg', 'facts'],
   'atelier/WordStripe': ['line1', 'line2', 'word1', 'word2', 'word3'],
-  'atelier/StudioCards': ['note', 'cta'],
+  'atelier/StudioCards': ['note', 'cta', 'ctaHref', 'bg', 'fg', 'cards'],
   'atelier/FooterAtelier': [
     'eyebrow',
     'line',
@@ -419,11 +399,6 @@ const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
 
 const ASSET_URL_KEYS = new Set([
   'modelUrl',
-  'can1Image',
-  'can2Image',
-  'can3Image',
-  'can4Image',
-  'can5Image',
   'img',
   'img1',
   'img2',
@@ -479,19 +454,31 @@ export const LIST_PROPS_BY_SECTION = Object.freeze({
     social: { max: 6, item: { label: 'text', href: 'href' } },
   },
   'nocturne/SplitReveals': {
-    beats: { max: 6, item: { kicker: 'text', title: 'text', body: 'text' } },
+    beats: { max: 6, item: { kicker: 'text', title: 'text', body: 'text', img: 'image' } },
   },
   'nocturne/WorkIndex': {
-    works: { max: 8, item: { index: 'text', title: 'text', category: 'text', year: 'text' } },
+    works: {
+      max: 8,
+      item: { index: 'text', title: 'text', category: 'text', year: 'text', img: 'image' },
+    },
   },
   'monolith/SkewScroller': {
     words: { max: 8, item: { word: 'text' } },
   },
   'monolith/ExhibitGrid': {
-    exhibits: { max: 8, item: { code: 'text', caption: 'text' } },
+    exhibits: { max: 8, item: { code: 'text', caption: 'text', img: 'image' } },
   },
   'fizz/BubbleBenefits': {
     benefits: { max: 6, item: { title: 'text', body: 'text', color: 'color' } },
+  },
+  'fizz/CanCarousel': {
+    cans: { max: 6, item: { name: 'text', note: 'text', color: 'color', image: 'image' } },
+  },
+  'atelier/StudioCards': {
+    cards: { max: 6, item: { title: 'text', label: 'text', img: 'image' } },
+  },
+  'velocity/HelmetGrid': {
+    items: { max: 6, item: { name: 'text', year: 'text', img: 'image' } },
   },
 })
 
@@ -524,6 +511,9 @@ function sanitizeListValue(schema, value) {
       } else if (type === 'href') {
         const h = sanitizeHref(t)
         if (h) item[k] = h
+      } else if (type === 'image') {
+        // URL real: https:// o /ruta. blob:/data: no sobreviven al persist.
+        if (ASSET_URL_RE.test(t)) item[k] = t
       } else if (t) {
         item[k] = t
       }

@@ -30,6 +30,7 @@ export default function LabEditorPage() {
   // Varias secciones corren SplitText/GSAP una sola vez al montar, así que un
   // cambio de texto no se refleja. Remontamos el preview con debounce.
   const [previewKey, setPreviewKey] = useState(0)
+  const [fullPreview, setFullPreview] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -62,6 +63,19 @@ export default function LabEditorPage() {
     const t = setTimeout(() => setPreviewKey((k) => k + 1), 350)
     return () => clearTimeout(t)
   }, [props])
+
+  // Pantalla completa: Escape cierra, se bloquea el scroll del body.
+  useEffect(() => {
+    if (!fullPreview) return undefined
+    const onKey = (e) => e.key === 'Escape' && setFullPreview(false)
+    window.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [fullPreview])
 
   const setField = (key, value) => {
     setProps((prev) => sanitizeProps(inst.sectionId, { ...prev, [key]: value }) || {})
@@ -230,14 +244,51 @@ export default function LabEditorPage() {
 
               {/* preview */}
               <div>
-                <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                  {t('lab.preview')}
-                </h2>
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+                    {t('lab.preview')}
+                  </h2>
+                  {Preview && (
+                    <button
+                      type="button"
+                      onClick={() => setFullPreview(true)}
+                      className="ui-press text-[11px] uppercase tracking-[0.2em] text-ink/50 hover:text-accent"
+                    >
+                      {t('lab.previewFull')} ⤢
+                    </button>
+                  )}
+                </div>
                 <div className="mt-4 max-h-[70vh] overflow-y-auto border border-ink/15 bg-bone">
-                  {Preview ? <Preview key={previewKey} {...props} /> : null}
+                  {!Preview ? null : fullPreview ? (
+                    <p className="p-6 text-sm text-ink/45">
+                      {t('lab.previewInFull')}
+                    </p>
+                  ) : (
+                    <Preview key={previewKey} {...props} />
+                  )}
                 </div>
               </div>
             </div>
+
+            {fullPreview && Preview && (
+              <div className="fixed inset-0 z-[60] flex flex-col bg-bone">
+                <div className="flex shrink-0 items-center justify-between border-b border-ink/15 px-5 py-3">
+                  <span className="font-mono text-xs text-ink/60">
+                    {section?.name || inst.sectionId}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setFullPreview(false)}
+                    className="ui-press text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent"
+                  >
+                    {t('lab.previewExit')} ✕
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <Preview key={previewKey} {...props} />
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>

@@ -66,37 +66,19 @@ export default function CanCarousel({
   title = 'YOUR LINEUP TITLE',
   cta = 'Your CTA',
   canLabel = 'BRAND*',
-  cans = defaultCans,
-  can1Name,
-  can1Note,
-  can1Image,
-  can2Name,
-  can2Note,
-  can2Image,
-  can3Name,
-  can3Note,
-  can3Image,
-  can4Name,
-  can4Note,
-  can4Image,
-  can5Name,
-  can5Note,
-  can5Image,
+  cans,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
-  const overrides = [
-    { name: can1Name, note: can1Note, image: can1Image },
-    { name: can2Name, note: can2Note, image: can2Image },
-    { name: can3Name, note: can3Note, image: can3Image },
-    { name: can4Name, note: can4Note, image: can4Image },
-    { name: can5Name, note: can5Note, image: can5Image },
-  ]
-  const shelf = cans.map((can, i) => ({
-    ...can,
-    name: overrides[i]?.name || can.name,
-    note: overrides[i]?.note || can.note,
-    image: overrides[i]?.image || can.image || '',
+  // Lista editable `{ name, note, color, image }`. Sin imagen (o con la default
+  // stubeada en el embed) cae al SVG `CanIllustration`.
+  const shelf = (Array.isArray(cans) && cans.length ? cans : defaultCans).map((can) => ({
+    name: can.name,
+    note: can.note,
+    color: can.color || '#5b3df0',
+    image: can.image || '',
   }))
 
   useGSAP(
@@ -117,7 +99,11 @@ export default function CanCarousel({
   )
 
   return (
-    <section ref={root} className="py-24 md:py-36">
+    <section
+      ref={root}
+      className="py-24 md:py-36"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+    >
       <div className="mx-auto max-w-7xl px-5 text-center md:px-10">
         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
           {eyebrow}

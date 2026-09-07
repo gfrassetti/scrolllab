@@ -128,6 +128,13 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'monolith/ExhibitGrid',
   'fizz/BubbleBenefits',
   'atelier/AboutClarity',
+  // Fase E — grillas con imagen editable por ítem (list sub-field `image`).
+  // Las imágenes default (imports bundleados) se stubean a '' en el embed;
+  // cada sección cae a su fallback (SVG en CanCarousel, degradé en StudioCards,
+  // outline en HelmetGrid) si el ítem no trae URL.
+  'fizz/CanCarousel',
+  'atelier/StudioCards',
+  'velocity/HelmetGrid',
   // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
   // scroll de window, boot que bloquea scroll): dentro del iframe del embed
   // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:

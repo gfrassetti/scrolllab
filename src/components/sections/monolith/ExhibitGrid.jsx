@@ -64,13 +64,15 @@ export default function ExhibitGrid({
       <div className="grid grid-cols-2 gap-[2px] border-2 border-carbon bg-carbon md:grid-cols-4">
         {rows.map((exhibit, i) => (
           <figure key={i} data-exhibit className="group bg-concrete">
-            <div className="overflow-hidden">
-              <img
-                src={exhibit.img}
-                alt=""
-                loading="lazy"
-                className="aspect-square w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
-              />
+            <div className="aspect-square overflow-hidden">
+              {exhibit.img ? (
+                <img
+                  src={exhibit.img}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-square w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
+                />
+              ) : null}
             </div>
             <figcaption className="flex items-baseline justify-between border-t-2 border-carbon px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] md:text-[11px]">
               <span className="text-klein">{exhibit.code}</span>

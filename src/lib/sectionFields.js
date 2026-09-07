@@ -127,6 +127,7 @@ export const SECTION_FIELDS = {
         { key: 'kicker', label: 'Kicker', type: 'text' },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'body', label: 'Texto', type: 'textarea' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
   ],
@@ -146,6 +147,7 @@ export const SECTION_FIELDS = {
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'category', label: 'Categoría', type: 'text' },
         { key: 'year', label: 'Año', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
   ],
@@ -222,6 +224,7 @@ export const SECTION_FIELDS = {
       item: [
         { key: 'code', label: 'Código', type: 'text' },
         { key: 'caption', label: 'Descripción', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
   ],
@@ -322,21 +325,20 @@ export const SECTION_FIELDS = {
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
     { key: 'canLabel', label: 'Texto en latas (fallback SVG)', type: 'text' },
-    { key: 'can1Name', label: 'Lata 1 — nombre', type: 'text' },
-    { key: 'can1Note', label: 'Lata 1 — nota', type: 'text' },
-    { key: 'can1Image', label: 'Lata 1 — PNG (override)', type: 'image' },
-    { key: 'can2Name', label: 'Lata 2 — nombre', type: 'text' },
-    { key: 'can2Note', label: 'Lata 2 — nota', type: 'text' },
-    { key: 'can2Image', label: 'Lata 2 — PNG (override)', type: 'image' },
-    { key: 'can3Name', label: 'Lata 3 — nombre', type: 'text' },
-    { key: 'can3Note', label: 'Lata 3 — nota', type: 'text' },
-    { key: 'can3Image', label: 'Lata 3 — PNG (override)', type: 'image' },
-    { key: 'can4Name', label: 'Lata 4 — nombre', type: 'text' },
-    { key: 'can4Note', label: 'Lata 4 — nota', type: 'text' },
-    { key: 'can4Image', label: 'Lata 4 — PNG (override)', type: 'image' },
-    { key: 'can5Name', label: 'Lata 5 — nombre', type: 'text' },
-    { key: 'can5Note', label: 'Lata 5 — nota', type: 'text' },
-    { key: 'can5Image', label: 'Lata 5 — PNG (override)', type: 'image' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'cans',
+      label: 'Latas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'note', label: 'Nota', type: 'text' },
+        { key: 'color', label: 'Color del sabor', type: 'color' },
+        { key: 'image', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
   ],
   'fizz/PopManifesto': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -383,6 +385,19 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'items',
+      label: 'Piezas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'year', label: 'Año / nº', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
   ],
   'velocity/TrackMerge': [
     { key: 'pathLabelA', label: 'Path label A', type: 'text' },
@@ -476,6 +491,20 @@ export const SECTION_FIELDS = {
   'atelier/StudioCards': [
     { key: 'note', label: 'Note', type: 'textarea' },
     { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'cards',
+      label: 'Tarjetas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
   ],
   'atelier/FooterAtelier': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -884,7 +913,17 @@ export function sanitizeHref(value) {
   return HREF_RE.test(s) ? s : undefined
 }
 
-// Item de un campo `list`: objeto con sub-campos text/textarea/href/color.
+// `image` en una lista = URL: https:// · /ruta · blob:/data: (preview). Misma
+// regla que el campo `image` suelto.
+export function sanitizeImageUrl(value) {
+  if (typeof value !== 'string') return undefined
+  const s = value.trim().slice(0, 500)
+  if (!s) return undefined
+  if (isEphemeralAssetUrl(s) || /^(https:\/\/|\/)\S/i.test(s)) return s
+  return undefined
+}
+
+// Item de un campo `list`: objeto con sub-campos text/textarea/href/color/image.
 // Se conservan los slots vacíos ({}) para que agregar una fila no la borre en
 // el acto; el server descarta los items sin ninguna clase al persistir.
 function sanitizeListItem(subFields, raw) {
@@ -901,6 +940,9 @@ function sanitizeListItem(subFields, raw) {
     } else if (f.type === 'href') {
       const h = sanitizeHref(t)
       if (h) item[k] = h
+    } else if (f.type === 'image') {
+      const u = sanitizeImageUrl(t)
+      if (u) item[k] = u
     } else if (t) {
       item[k] = t
     }

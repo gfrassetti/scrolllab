@@ -26,7 +26,7 @@ const STROKE_PATHS = [
   'M 3 3 H 97 L 97 97 H 3 Z',
 ]
 
-const ITEMS = [
+const defaultItems = [
   {
     id: 'item-1',
     name: 'Title 1',
@@ -146,12 +146,14 @@ function HelmCard({ item, isActive, onActivate }) {
             className="absolute inset-0 overflow-hidden"
             style={{ clipPath: MASKS[item.mask] }}
           >
-            <img
-              src={item.img}
-              alt=""
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-            />
+            {item.img ? (
+              <img
+                src={item.img}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+              />
+            ) : null}
             <div
               className="absolute inset-0"
               style={{
@@ -162,12 +164,14 @@ function HelmCard({ item, isActive, onActivate }) {
                 transition: 'clip-path 0.55s ease, opacity 0.35s ease',
               }}
             >
-              <img
-                src={item.hover}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
+              {item.hover ? (
+                <img
+                  src={item.hover}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
             </div>
           </div>
           <NotchStroke active={isActive} maskIndex={item.mask} />
@@ -191,9 +195,23 @@ export default function HelmetGrid({
   eyebrow = 'Section label',
   title = 'Title grid',
   body = 'Body 1 — replace with hall copy.',
+  items,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
-  const [active, setActive] = useState(ITEMS[0].id)
+  const [active, setActive] = useState(0)
+
+  // Lista editable `{ name, year, img }`. offset/mask (visual) salen por índice
+  // del set de ejemplo; `hover` reusa la misma imagen.
+  const rows =
+    Array.isArray(items) && items.length
+      ? items.slice(0, 6).map((it, i) => {
+          const d = defaultItems[i % defaultItems.length]
+          const img = it.img || d.img
+          return { name: it.name || d.name, year: it.year || d.year, img, hover: img, offset: d.offset, mask: d.mask }
+        })
+      : defaultItems
 
   useGSAP(
     () => {
@@ -219,6 +237,7 @@ export default function HelmetGrid({
       id="hall"
       ref={root}
       className="scroll-mt-20 bg-black px-5 py-24 text-[#ece9e2] md:px-10 md:py-32"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <p className="text-[11px] tracking-[0.25em] text-acid uppercase">
         {eyebrow}
@@ -231,12 +250,12 @@ export default function HelmetGrid({
       </p>
 
       <ul className="mt-14 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-8 md:gap-y-6">
-        {ITEMS.map((item) => (
+        {rows.map((item, i) => (
           <HelmCard
-            key={item.id}
+            key={i}
             item={item}
-            isActive={active === item.id}
-            onActivate={() => setActive(item.id)}
+            isActive={active === i}
+            onActivate={() => setActive(i)}
           />
         ))}
       </ul>

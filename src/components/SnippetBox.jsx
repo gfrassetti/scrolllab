@@ -48,7 +48,7 @@ export default function SnippetBox({ embedKey, loaderInfo }) {
               aria-pressed={variant === v}
               className={`border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
                 variant === v
-                  ? 'border-ink bg-ink text-bone'
+                  ? 'border-accent bg-accent text-ink'
                   : 'border-ink/25 text-ink/55 hover:border-ink/50'
               }`}
             >
