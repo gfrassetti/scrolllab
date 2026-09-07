@@ -54,8 +54,8 @@ App SCROLL LAB → **Webhooks / Notificaciones**:
 
 Precios vigentes (ARS/mes · año, fijados por el owner 2026-09):
 - Starter 24.900 · 249.000
-- Pro 54.900 · 549.000
-- Studio 149.900 · 1.499.000
+- Pro 99.900 · 999.000
+- Studio 299.900 · 2.999.000
 
 - ARS enteros, sin decimales, sin fx.
 - `priceYearly` = `priceMonthly × 10` (2 meses gratis), siempre < `× 12` →

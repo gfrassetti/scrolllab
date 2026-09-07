@@ -143,9 +143,9 @@ export const PRODUCTS = {
 /**
  * Planes de suscripción de LAB (secciones en vivo). A diferencia de los
  * one-time, el precio es ARS fijo (no pasa por fx). Precios fijados por el
- * owner (escala "decidido" ~2.5× del piloto). `instanceQuota` es definitivo
- * (5 / 15 / sin tope). `yearly` = 10× `monthly` (2 meses gratis) y siempre
- * por debajo de 12× (ese descuento es el "ahorro").
+ * owner: ladder marcado 24.900 / 99.900 / 299.900 (Pro 4× Starter, Studio
+ * 12×). `instanceQuota` es definitivo (5 / 15 / sin tope). `yearly` = 10×
+ * `monthly` (2 meses gratis) y siempre por debajo de 12× (el "ahorro").
  * Cambiar un precio es una acción explícita; nunca automática.
  */
 export const HOSTED_PLANS = Object.freeze({
@@ -160,16 +160,16 @@ export const HOSTED_PLANS = Object.freeze({
   hosted_pro: {
     id: 'hosted_pro',
     tier: 'pro',
-    priceMonthly: 54900,
-    priceYearly: 549000,
+    priceMonthly: 99900,
+    priceYearly: 999000,
     instanceQuota: 15,
     currency_id: 'ARS',
   },
   hosted_studio: {
     id: 'hosted_studio',
     tier: 'studio',
-    priceMonthly: 149900,
-    priceYearly: 1499000,
+    priceMonthly: 299900,
+    priceYearly: 2999000,
     // Sin tope: Infinity vive acá adentro (las comparaciones `used >= quota`
     // dan siempre false). Se serializa a `null` en el borde HTTP — ver
     // `quotaForWire` en app.js — y el cliente lo lee como "ilimitado".
