@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PLUM — frame source</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #0b0b0d;
+        overflow: hidden;
+      }
+      #c {
+        display: block;
+        width: 1600px;
+        height: 1000px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" width="1600" height="1000"></canvas>
+    <script type="module">
+      import * as THREE from 'https://esm.sh/three@0.185.1'
+
+      const W = 1600
+      const H = 1000
+      const canvas = document.getElementById('c')
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: false,
+        // Required so canvas.toDataURL() reads a filled buffer.
+        preserveDrawingBuffer: true,
+      })
+      // pixelRatio 1: the drawing buffer is exactly 1600x1000, so every
+      // exported webp is that size — small enough to keep ~200 of them
+      // resident in the browser without thrashing.
+      renderer.setPixelRatio(1)
+      renderer.setSize(W, H, false)
+      renderer.setClearColor(0x0b0b0d, 1)
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 1.12
+
+      const scene = new THREE.Scene()
+      const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100)
+
+      // —— Lights: soft key + cool rim + low fill. Monochrome so a brand
+      //    accent can tint the whole sequence later with a CSS blend. ——
+      const key = new THREE.DirectionalLight(0xffffff, 2.7)
+      key.position.set(4, 6, 8)
+      const rim = new THREE.DirectionalLight(0xa9c4ff, 1.7)
+      rim.position.set(-6, 2, -5)
+      const fill = new THREE.HemisphereLight(0x3a3a46, 0x08080a, 0.95)
+      scene.add(key, rim, fill)
+
+      // —— The form: a subdivided icosahedron. `t` (0..1) plays a three-act
+      //    story on it:
+      //      0.00–0.30  ASSEMBLE  — shards fly in along their normals and
+      //                             lock into a clean sphere, group scales up
+      //      0.30–0.66  BLOOM     — layered trig turbulence swells the surface
+      //      0.66–1.00  SETTLE    — turbulence eases to a low residual, the
+      //                             camera pulls back, roughness drops
+      //    Deterministic: seeded only by vertex position + t. ——
+      const DETAIL = 5
+      const baseGeo = new THREE.IcosahedronGeometry(2.2, DETAIL)
+      const geo = baseGeo.clone()
+      const basePos = baseGeo.attributes.position.array.slice()
+      const baseNrm = baseGeo.attributes.normal.array.slice()
+      const vCount = geo.attributes.position.count
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0xf3f1ec,
+        metalness: 0.05,
+        roughness: 0.5,
+        flatShading: false,
+      })
+      const mesh = new THREE.Mesh(geo, mat)
+      const group = new THREE.Group()
+      group.add(mesh)
+      scene.add(group)
+
+      const clamp01 = (x) => Math.max(0, Math.min(1, x))
+      function smoothstep(a, b, x) {
+        const u = clamp01((x - a) / (b - a))
+        return u * u * (3 - 2 * u)
+      }
+      // Deterministic per-vertex hash, 0..1.
+      function hash(i) {
+        const s = Math.sin(i * 12.9898) * 43758.5453
+        return s - Math.floor(s)
+      }
+
+      function fbm(x, y, z, t) {
+        let n = 0
+        n += 0.55 * Math.sin(1.7 * x + 2.1 * y - 1.3 * z + t * 1.9)
+        n += 0.3 * Math.sin(3.3 * y + 2.7 * z - 1.9 * x + t * 2.6 + 1.7)
+        n += 0.18 * Math.sin(5.9 * z + 4.4 * x - 3.1 * y + t * 3.4 + 4.2)
+        n += 0.1 * Math.sin(9.1 * x - 7.3 * y + 5.5 * z + t * 4.1)
+        return n
+      }
+
+      // Turbulence envelope: 0 during ASSEMBLE, rises to a peak mid-BLOOM,
+      // eases to a small residual through SETTLE.
+      function ampFor(t) {
+        if (t <= 0.3) return 0
+        const u = (t - 0.3) / 0.7
+        const rise = smoothstep(0, 0.42, u)
+        const fall = 1 - 0.8 * smoothstep(0.5, 1, u)
+        return 0.52 * rise * fall
+      }
+
+      const pos = geo.attributes.position.array
+      function deform(t) {
+        const amp = ampFor(t)
+        const assembled = smoothstep(0, 0.3, t) // 0 → 1 as shards fly in
+        for (let i = 0; i < vCount; i++) {
+          const ix = i * 3
+          const bx = basePos[ix]
+          const by = basePos[ix + 1]
+          const bz = basePos[ix + 2]
+          const explode = (1 - assembled) * (2.4 + 2.2 * hash(i))
+          const turb = amp * fbm(bx, by, bz, t)
+          const d = explode + turb
+          pos[ix] = bx + baseNrm[ix] * d
+          pos[ix + 1] = by + baseNrm[ix + 1] * d
+          pos[ix + 2] = bz + baseNrm[ix + 2] * d
+        }
+        geo.attributes.position.needsUpdate = true
+        geo.computeVertexNormals()
+      }
+
+      function setFrame(t) {
+        t = clamp01(t)
+        deform(t)
+
+        const s = 0.62 + 0.38 * smoothstep(0, 0.3, t)
+        group.scale.setScalar(s)
+        group.rotation.y = t * Math.PI * 2.6
+        group.rotation.x = 0.3 + Math.sin(t * Math.PI) * 0.24
+
+        mat.roughness = 0.5 - 0.22 * smoothstep(0.2, 0.85, t)
+
+        // Dolly: start a little wide to read the assembly, push in through
+        // the bloom, pull back out for the resolve.
+        const ease = smoothstep(0, 1, t)
+        camera.position.set(0, 0.15 + Math.sin(ease * Math.PI) * 0.2, 8.4 - Math.sin(ease * Math.PI) * 1.7)
+        camera.lookAt(0, 0, 0)
+
+        renderer.render(scene, camera)
+      }
+
+      window.__setFrame = setFrame
+      window.__meta = { w: W, h: H }
+      setFrame(0)
+      // Two RAFs so the first real screenshot isn't a half-composited frame.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          window.__ready = true
+        }),
+      )
+    </script>
+  </body>
+</html>

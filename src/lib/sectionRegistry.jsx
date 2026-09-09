@@ -81,6 +81,7 @@ import PeopleScatter from '../components/sections/atrium/PeopleScatter'
 import OrbitRing from '../components/sections/atrium/OrbitRing'
 import StatField from '../components/sections/atrium/StatField'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
+import FilmScroll from '../components/sections/plum/FilmScroll'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 import { isBuilderHiddenSku } from './pricing.js'
@@ -240,6 +241,15 @@ const allModels = [
       { id: 'atrium/OrbitRing', name: 'Orbit Ring', kind: 'section', component: OrbitRing, blurb: 'Black pin, a rotating ring of studio photographs around the founding year' },
       { id: 'atrium/StatField', name: 'Stat Field', kind: 'section', component: StatField, blurb: 'Practice counters that count up on enter, closing on a typographic statement' },
       { id: 'atrium/FooterAtrium', name: 'Footer Atrium', kind: 'footer', component: FooterAtrium, blurb: 'Giant wordmark closer and a legal row' },
+    ],
+  },
+  {
+    id: 'plum',
+    name: 'PLUM',
+    accent: '#6f5bff',
+    wrapperClass: 'bg-plum-void text-plum-mist',
+    sections: [
+      { id: 'plum/FilmScroll', name: 'Film Scroll', kind: 'hero', component: FilmScroll, blurb: 'The whole page as a pre-rendered webp film — a JSON manifest (chapters of frame folders + text beats) drives a fixed canvas that scroll plays frame by frame' },
     ],
   },
   {

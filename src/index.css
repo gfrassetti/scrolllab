@@ -93,6 +93,11 @@ html.dark {
   --color-atrium-paper: #f4f1ea;
   --color-atrium-ink: #111111;
 
+  /* ——— Model 11 "PLUM": scroll-scrubbed frame sequence ——— */
+  --color-plum-void: #0b0b0d;
+  --color-plum-mist: #f3f1ec;
+  --color-plum-accent: #6f5bff;
+
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
@@ -262,6 +267,84 @@ body {
 
 .atrium-world :focus-visible {
   outline-color: var(--atrium-ink);
+}
+
+/* ——— Model 11 "PLUM": the page is drawn as a scroll-scrubbed image
+   sequence on a pinned canvas. Near-black void, warm off-white type,
+   a single electric accent. ——— */
+.plum-world {
+  --plum-void: #0b0b0d;
+  --plum-mist: #f3f1ec;
+  --plum-accent: #6f5bff;
+
+  --plum-display: clamp(4rem, 17vw, 13rem);
+  --plum-note: clamp(11px, 0.9vw, 13px);
+}
+
+.plum-world ::selection {
+  background: var(--plum-accent);
+  color: var(--plum-mist);
+}
+
+.plum-world :focus-visible {
+  outline-color: var(--plum-accent);
+}
+
+/* Drifting decorative figures over the film (the halftone "cloud"). Applied to
+   the INNER element so it never fights the overlay's centering transform. */
+@keyframes plum-drift-x {
+  from {
+    transform: translate3d(-7%, 0, 0);
+  }
+  to {
+    transform: translate3d(7%, 0, 0);
+  }
+}
+@keyframes plum-drift-y {
+  from {
+    transform: translate3d(0, -5%, 0);
+  }
+  to {
+    transform: translate3d(0, 6%, 0);
+  }
+}
+@keyframes plum-bob {
+  0%,
+  100% {
+    transform: translate3d(-4%, -3%, 0);
+  }
+  50% {
+    transform: translate3d(5%, 4%, 0);
+  }
+}
+.plum-drift {
+  animation: plum-drift-x 16s ease-in-out infinite alternate;
+}
+.plum-drift-y {
+  animation: plum-drift-y 13s ease-in-out infinite alternate;
+}
+.plum-bob {
+  animation: plum-bob 22s ease-in-out infinite;
+}
+/* The halftone dots of the scene-change curtain, kept alive with a slow crawl. */
+@keyframes plum-dot-crawl {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 22px 22px;
+  }
+}
+.plum-curtain {
+  animation: plum-dot-crawl 2.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .plum-drift,
+  .plum-drift-y,
+  .plum-bob,
+  .plum-curtain {
+    animation: none;
+  }
 }
 
 /* Preflight de Tailwind v4 deja los botones con cursor default. */

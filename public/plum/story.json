@@ -1,0 +1,149 @@
+{
+  "title": "PLUM",
+  "theme": { "bg": "#0b0b0d", "ink": "#f3f1ec", "accent": "#6f5bff" },
+  "frames": { "basePath": "/plum/seq", "pad": 4, "ext": "webp" },
+  "scroll": { "pxPerFrame": 32, "ease": 0.14 },
+  "loader": { "window": 44, "decodeWidth": 1280, "keyframeStride": 6, "keyframeWidth": 512 },
+  "ui": { "progress": true, "grid": true, "transitions": true },
+
+  "nav": {
+    "brand": "PLUM",
+    "links": [
+      { "label": "The film", "href": "#top" },
+      { "label": "The story", "href": "#top" }
+    ],
+    "cta": { "label": "Build a page", "href": "/builder" }
+  },
+
+  "chapters": [
+    { "id": "blossom", "frames": 72, "label": "01 — In blossom" },
+    { "id": "grove", "frames": 80, "label": "02 — The grove" },
+    { "id": "harvest", "frames": 80, "label": "03 — The pick", "tint": "#123f2a", "tintAlpha": 0.28 },
+    { "id": "journey", "frames": 80, "label": "04 — The line", "tint": "#0f2f5c", "tintAlpha": 0.4 },
+    { "id": "market", "frames": 80, "label": "05 — The crates" },
+    { "id": "table", "frames": 80, "label": "06 — The table", "tint": "#1a0f08", "tintAlpha": 0.3 },
+    { "id": "savor", "frames": 72, "label": "07 — The first bite", "tint": "#000000", "tintAlpha": 0.35 }
+  ],
+
+  "beats": [
+    {
+      "at": 0.04,
+      "kicker": "01 — In blossom",
+      "title": "Every story\nstarts small.",
+      "body": "The whole page is one pre-rendered film. Scroll is the only camera move — and it begins here, in spring.",
+      "align": "left",
+      "y": "center",
+      "font": "serif",
+      "size": "lg"
+    },
+    {
+      "at": 0.19,
+      "kicker": "02 — The grove",
+      "title": "It ripens on the branch.",
+      "align": "right",
+      "y": "top",
+      "font": "serif",
+      "size": "lg"
+    },
+    {
+      "at": 0.34,
+      "kicker": "03 — The pick",
+      "title": "One hand. One motion.",
+      "body": "Swap these frames for your own product — a phone off the line, a bean roasting, a part being machined.",
+      "align": "left",
+      "y": "bottom",
+      "font": "serif",
+      "size": "lg"
+    },
+    {
+      "at": 0.5,
+      "kicker": "04 — The line",
+      "title": "Then it <em>moves</em>.",
+      "align": "left",
+      "y": "top",
+      "font": "serif",
+      "size": "xl"
+    },
+    {
+      "at": 0.66,
+      "kicker": "05 — The crates",
+      "title": "It is gathered\nand carried.",
+      "align": "right",
+      "y": "center",
+      "font": "serif",
+      "size": "lg"
+    },
+    {
+      "at": 0.82,
+      "kicker": "06 — The table",
+      "title": "And it arrives.",
+      "body": "Every chapter is a folder of frames; every line is one entry in story.json.",
+      "align": "left",
+      "y": "center",
+      "font": "serif",
+      "size": "lg"
+    },
+    {
+      "at": 0.97,
+      "kicker": "07 — The first bite",
+      "title": "A page that plays like film.",
+      "body": "Storytelling templates, frame by frame.",
+      "align": "center",
+      "y": "center",
+      "font": "serif",
+      "size": "lg",
+      "hold": true,
+      "cta": { "label": "Build a page", "href": "/builder" }
+    }
+  ],
+
+  "clips": [],
+
+  "overlays": [
+    { "mark": "cloud", "x": "68%", "y": "16%", "w": "220px", "color": "#f3f1ec", "opacity": 0.5, "motion": "drift", "at": [0.06, 0.46] },
+    { "mark": "cloud", "x": "20%", "y": "22%", "w": "150px", "color": "#a9c4ff", "opacity": 0.4, "motion": "bob", "at": [0.46, 0.78] },
+    { "mark": "plus", "x": "12%", "y": "30%", "w": "22px", "color": "#6f5bff", "opacity": 0.8, "at": [0.0, 0.5] },
+    { "mark": "sparkle", "x": "82%", "y": "62%", "w": "26px", "color": "#f3f1ec", "opacity": 0.7, "motion": "bob", "at": [0.28, 0.66] },
+    { "mark": "brackets", "x": "right", "y": "bottom", "w": "40px", "color": "#f3f1ec", "opacity": 0.5 },
+    { "mark": "ring", "x": "16%", "y": "72%", "w": "30px", "color": "#a9c4ff", "opacity": 0.55, "motion": "drift-y", "at": [0.6, 1.0] }
+  ],
+
+  "footer": {
+    "bg": "#0b0b0d",
+    "ink": "#f3f1ec",
+    "accent": "#6f5bff",
+    "clip": "/plum/clips/footer.mp4",
+    "wordmark": "PLUM",
+    "tagline": "A page that plays like film.",
+    "cta": { "label": "Build a page", "href": "/builder" },
+    "columns": [
+      {
+        "title": "Template",
+        "links": [
+          { "label": "The film", "href": "#top" }
+        ]
+      },
+      {
+        "title": "ScrollLab",
+        "links": [
+          { "label": "All templates", "href": "/" },
+          { "label": "Builder", "href": "/builder" },
+          { "label": "LAB", "href": "/lab" }
+        ]
+      },
+      {
+        "title": "Legal",
+        "links": [
+          { "label": "License", "href": "/legal/license" },
+          { "label": "Terms", "href": "/legal/terms" },
+          { "label": "Privacy", "href": "/legal/privacy" }
+        ]
+      },
+      {
+        "title": "Edit",
+        "links": [{ "label": "story.json", "href": "/plum/README.md" }]
+      }
+    ],
+    "legal": ["© 2026 PLUM", "A ScrollLab template", "Frame by frame"]
+  }
+}

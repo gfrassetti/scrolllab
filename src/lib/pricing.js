@@ -21,14 +21,15 @@ export const COMING_SOON_SKUS = ['ratio']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
+ * PLUM está en scaffolding (secuencia de frames scroll-scrubbed).
  */
-export const LOCAL_ONLY_SKUS = ['ratio']
+export const LOCAL_ONLY_SKUS = ['ratio', 'plum']
 
 /**
  * Modelos que no entran a la paleta del builder.
- * RATIO sigue en obra: va acá y en COMING_SOON_SKUS.
+ * RATIO y PLUM siguen en obra.
  */
-export const BUILDER_HIDDEN_SKUS = ['ratio']
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)

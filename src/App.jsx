@@ -22,6 +22,7 @@ const ComicPage = lazy(() => import('./pages/ComicPage'))
 const UnityPage = lazy(() => import('./pages/UnityPage'))
 const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
+const PlumPage = lazy(() => import('./pages/PlumPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
@@ -98,6 +99,16 @@ export default function App() {
                     }
                   />
                   <Route path="/templates/atrium" element={<AtriumPage />} />
+                  <Route
+                    path="/templates/plum"
+                    element={
+                      import.meta.env.DEV ? (
+                        <PlumPage />
+                      ) : (
+                        <Navigate to="/" replace />
+                      )
+                    }
+                  />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />

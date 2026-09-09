@@ -20,6 +20,8 @@
     "analyze:ref": "node scripts/analyze-reference.mjs",
     "gen:brand": "node scripts/gen-brand-assets.mjs",
     "capture:catalog": "node scripts/capture-catalog-posters.mjs",
+    "gen:plum": "node scripts/gen-plum-frames.mjs",
+    "plum:slice": "node scripts/plum-frames-from-video.mjs",
     "server": "node server/index.js",
     "start": "node server/index.js",
     "test:e2e": "npm run build:embed && node --test --test-concurrency=1 embed/test/e2e/embed.e2e.mjs embed/test/e2e/hosted-sections.e2e.mjs",

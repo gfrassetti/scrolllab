@@ -83,3 +83,7 @@ docs/reference-analysis/_vault/*
 
 # Ads (solo para Google Ads, no van al repo)
 public/ads/
+
+# PLUM — raw generated clips/stills (build inputs; frames live in public/plum/seq/)
+media/
+.agents/skills/
