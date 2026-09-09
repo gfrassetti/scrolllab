@@ -4,7 +4,7 @@
   "frames": { "basePath": "/plum/seq", "pad": 4, "ext": "webp" },
   "scroll": { "pxPerFrame": 32, "ease": 0.14 },
   "loader": { "window": 44, "decodeWidth": 1280, "keyframeStride": 6, "keyframeWidth": 512 },
-  "ui": { "progress": true, "grid": true, "transitions": true },
+  "ui": { "progress": true, "grid": true, "transitions": false },
 
   "nav": {
     "brand": "PLUM",
