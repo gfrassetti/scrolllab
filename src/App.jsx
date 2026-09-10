@@ -23,6 +23,7 @@ const UnityPage = lazy(() => import('./pages/UnityPage'))
 const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
+const SignalPage = lazy(() => import('./pages/SignalPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
@@ -104,6 +105,16 @@ export default function App() {
                     element={
                       import.meta.env.DEV ? (
                         <PlumPage />
+                      ) : (
+                        <Navigate to="/" replace />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/templates/signal"
+                    element={
+                      import.meta.env.DEV ? (
+                        <SignalPage />
                       ) : (
                         <Navigate to="/" replace />
                       )
