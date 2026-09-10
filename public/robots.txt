@@ -9,4 +9,37 @@ Disallow: /preview
 Disallow: /checkout
 Disallow: /api/
 
+# Bots de entrenamiento/scraping de IA: fuera del catálogo, Builder y LAB.
+# No afecta a Googlebot/Bingbot (SEO normal) ni al User-agent: * de arriba.
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: OAI-SearchBot
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: Claude-User
+User-agent: anthropic-ai
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bytespider
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Amazonbot
+User-agent: Meta-ExternalAgent
+User-agent: Meta-ExternalFetcher
+User-agent: FacebookBot
+User-agent: Diffbot
+User-agent: ImagesiftBot
+User-agent: Omgilibot
+User-agent: Omgili
+User-agent: YouBot
+User-agent: AI2Bot
+User-agent: cohere-ai
+User-agent: Timpibot
+User-agent: Google-CloudVertexBot
+Disallow: /$
+Disallow: /templates/
+Disallow: /builder
+Disallow: /lab
+
 Sitemap: https://www.scrolllab.com.ar/sitemap.xml
