@@ -23,6 +23,7 @@ const UnityPage = lazy(() => import('./pages/UnityPage'))
 const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
+const SignalPage = lazy(() => import('./pages/SignalPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
@@ -109,6 +110,11 @@ export default function App() {
                       )
                     }
                   />
+                  {/* Unlisted preview: reachable in prod by direct URL for
+                      review, but not linked from the home catalog, the
+                      builder palette, or the sitemap — see
+                      docs/reference-analysis/signal.md and public/robots.txt. */}
+                  <Route path="/templates/signal" element={<SignalPage />} />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />

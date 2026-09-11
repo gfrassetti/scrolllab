@@ -774,6 +774,24 @@
           "blurb": "Wordmark gigante y fila legal"
         }
       },
+      "signal": {
+        "NavSignal": {
+          "name": "Nav signal",
+          "blurb": "Header fijo minimalista · menú mobile a pantalla completa"
+        },
+        "HeroSignal": {
+          "name": "Hero signal",
+          "blurb": "Hero cinético con palabras que rotan — caracteres que entran con blur y se cruzan por temporizador"
+        },
+        "PixelRevealGrid": {
+          "name": "Pixel reveal grid",
+          "blurb": "Tarjetas de caso detrás de una grilla de tiles que se disuelve al scroll, solo DOM"
+        },
+        "FooterSignal": {
+          "name": "Footer signal",
+          "blurb": "Cierre con CTA y wordmark gigante"
+        }
+      },
       "contact": {
         "ContactForm": {
           "name": "Formulario de contacto",

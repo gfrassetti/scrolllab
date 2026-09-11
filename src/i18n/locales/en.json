@@ -774,6 +774,24 @@
           "blurb": "Giant wordmark closer and a legal row"
         }
       },
+      "signal": {
+        "NavSignal": {
+          "name": "Nav signal",
+          "blurb": "Minimal fixed header · full-screen mobile menu"
+        },
+        "HeroSignal": {
+          "name": "Hero signal",
+          "blurb": "Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer"
+        },
+        "PixelRevealGrid": {
+          "name": "Pixel reveal grid",
+          "blurb": "Case-study cards behind a tile grid that dissolves on scroll, DOM only"
+        },
+        "FooterSignal": {
+          "name": "Footer signal",
+          "blurb": "Closing CTA with an oversized wordmark"
+        }
+      },
       "contact": {
         "ContactForm": {
           "name": "Contact Form",

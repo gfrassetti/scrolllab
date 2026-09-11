@@ -9,6 +9,8 @@ Disallow: /preview
 Disallow: /checkout
 Disallow: /api/
 
+# Preview sin listar (SIGNAL, WIP) — reachable by direct URL, not indexed.
+Disallow: /templates/signal
 # Bots de entrenamiento/scraping de IA: fuera del catálogo, Builder y LAB.
 # No afecta a Googlebot/Bingbot (SEO normal) ni al User-agent: * de arriba.
 User-agent: GPTBot
