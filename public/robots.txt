@@ -9,4 +9,7 @@ Disallow: /preview
 Disallow: /checkout
 Disallow: /api/
 
+# Preview sin listar (SIGNAL, WIP) — reachable by direct URL, not indexed.
+Disallow: /templates/signal
+
 Sitemap: https://www.scrolllab.com.ar/sitemap.xml

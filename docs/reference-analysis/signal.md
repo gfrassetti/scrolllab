@@ -2,7 +2,7 @@
 
 **SKU:** `signal` (WIP — `LOCAL_ONLY_SKUS` + `BUILDER_HIDDEN_SKUS` en `src/lib/pricing.js`, mismo estado que `ratio`/`plum`. Sin registrar en `server/` todavía: no hay checkout, sigue el precedente de PLUM, no el de RATIO.)
 
-**Ruta dev:** `/templates/signal` (solo `import.meta.env.DEV`, ver `src/App.jsx`).
+**Ruta:** `/templates/signal` — reachable en prod por URL directa (a pedido del usuario, para dar feedback contra el deploy real), pero **sin listar**: no está en `TEMPLATE_META` de `TemplatesIndex.jsx`, no entra a la paleta del builder (`BUILDER_HIDDEN_SKUS`), no está en `public/sitemap.xml`, y `public/robots.txt` la desindexa explícitamente. Ver `src/App.jsx`.
 
 ## Referencia
 

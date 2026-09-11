@@ -110,16 +110,11 @@ export default function App() {
                       )
                     }
                   />
-                  <Route
-                    path="/templates/signal"
-                    element={
-                      import.meta.env.DEV ? (
-                        <SignalPage />
-                      ) : (
-                        <Navigate to="/" replace />
-                      )
-                    }
-                  />
+                  {/* Unlisted preview: reachable in prod by direct URL for
+                      review, but not linked from the home catalog, the
+                      builder palette, or the sitemap — see
+                      docs/reference-analysis/signal.md and public/robots.txt. */}
+                  <Route path="/templates/signal" element={<SignalPage />} />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />
