@@ -783,9 +783,21 @@
           "name": "Hero signal",
           "blurb": "Hero cinético con palabras que rotan — caracteres que entran con blur y se cruzan por temporizador"
         },
+        "ManifestoMarquee": {
+          "name": "Manifesto marquee",
+          "blurb": "Frase que se revela palabra por palabra con blur, sobre una cinta de capacidades en loop"
+        },
+        "RecognitionStats": {
+          "name": "Recognition stats",
+          "blurb": "Cifras que suben al entrar, tres en fila"
+        },
         "PixelRevealGrid": {
           "name": "Pixel reveal grid",
           "blurb": "Tarjetas de caso detrás de una grilla de tiles que se disuelve al scroll, solo DOM"
+        },
+        "ServicesAccordion": {
+          "name": "Services accordion",
+          "blurb": "Lista de servicios expandible"
         },
         "FooterSignal": {
           "name": "Footer signal",

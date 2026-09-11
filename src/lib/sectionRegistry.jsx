@@ -84,7 +84,10 @@ import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import FilmScroll from '../components/sections/plum/FilmScroll'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
+import ManifestoMarquee from '../components/sections/signal/ManifestoMarquee'
+import RecognitionStats from '../components/sections/signal/RecognitionStats'
 import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
+import ServicesAccordion from '../components/sections/signal/ServicesAccordion'
 import FooterSignal from '../components/sections/signal/FooterSignal'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
@@ -264,7 +267,10 @@ const allModels = [
     sections: [
       { id: 'signal/NavSignal', name: 'Nav Signal', kind: 'nav', component: NavSignal, blurb: 'Minimal fixed header · full-screen mobile menu' },
       { id: 'signal/HeroSignal', name: 'Hero Signal', kind: 'hero', component: HeroSignal, blurb: 'Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer' },
+      { id: 'signal/ManifestoMarquee', name: 'Manifesto Marquee', kind: 'section', component: ManifestoMarquee, blurb: 'Blurred word-by-word statement reveal over a looping capability marquee' },
+      { id: 'signal/RecognitionStats', name: 'Recognition Stats', kind: 'section', component: RecognitionStats, blurb: 'Figures that count up on enter, three across' },
       { id: 'signal/PixelRevealGrid', name: 'Pixel Reveal Grid', kind: 'section', component: PixelRevealGrid, blurb: 'Case-study cards behind a tile grid that dissolves on scroll, DOM only' },
+      { id: 'signal/ServicesAccordion', name: 'Services Accordion', kind: 'section', component: ServicesAccordion, blurb: 'Expandable services list' },
       { id: 'signal/FooterSignal', name: 'Footer Signal', kind: 'footer', component: FooterSignal, blurb: 'Closing CTA with an oversized wordmark' },
     ],
   },

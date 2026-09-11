@@ -1,7 +1,10 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
+import ManifestoMarquee from '../components/sections/signal/ManifestoMarquee'
+import RecognitionStats from '../components/sections/signal/RecognitionStats'
 import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
+import ServicesAccordion from '../components/sections/signal/ServicesAccordion'
 import FooterSignal from '../components/sections/signal/FooterSignal'
 
 /**
@@ -24,7 +27,10 @@ export default function SignalPage() {
         <NavSignal />
         <main>
           <HeroSignal />
+          <ManifestoMarquee />
+          <RecognitionStats />
           <PixelRevealGrid />
+          <ServicesAccordion />
         </main>
         <FooterSignal />
       </div>

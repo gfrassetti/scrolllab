@@ -313,6 +313,17 @@ body {
   outline-color: var(--signal-accent);
 }
 
+/* Capability marquee (ManifestoMarquee) — the list is duplicated in JSX so
+   a 50% translate loops seamlessly. */
+@keyframes signal-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.signal-marquee {
+  animation: signal-marquee 22s linear infinite;
+}
+
 /* Drifting decorative figures over the film (the halftone "cloud"). Applied to
    the INNER element so it never fights the overlay's centering transform. */
 @keyframes plum-drift-x {

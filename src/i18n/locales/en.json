@@ -783,9 +783,21 @@
           "name": "Hero signal",
           "blurb": "Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer"
         },
+        "ManifestoMarquee": {
+          "name": "Manifesto marquee",
+          "blurb": "Blurred word-by-word statement reveal over a looping capability marquee"
+        },
+        "RecognitionStats": {
+          "name": "Recognition stats",
+          "blurb": "Figures that count up on enter, three across"
+        },
         "PixelRevealGrid": {
           "name": "Pixel reveal grid",
           "blurb": "Case-study cards behind a tile grid that dissolves on scroll, DOM only"
+        },
+        "ServicesAccordion": {
+          "name": "Services accordion",
+          "blurb": "Expandable services list"
         },
         "FooterSignal": {
           "name": "Footer signal",
