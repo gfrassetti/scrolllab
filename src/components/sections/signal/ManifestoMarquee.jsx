@@ -53,11 +53,11 @@ export default function ManifestoMarquee({
       <div className="mt-20 overflow-hidden border-y border-signal-paper/15 py-5">
         <div className="signal-marquee flex w-max gap-10 motion-reduce:[animation:none]">
           {[...tags, ...tags].map((tag, i) => (
-            <span
-              key={`${tag}-${i}`}
-              className="shrink-0 text-[11px] tracking-[0.24em] text-signal-paper/50 uppercase"
-            >
-              {tag}
+            <span key={`${tag}-${i}`} className="flex shrink-0 items-center gap-10">
+              <span className="text-[11px] tracking-[0.24em] text-signal-paper/60 uppercase">
+                {tag}
+              </span>
+              <span aria-hidden="true" className="h-1 w-1 shrink-0 rounded-full bg-signal-accent" />
             </span>
           ))}
         </div>

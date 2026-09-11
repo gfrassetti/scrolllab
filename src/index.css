@@ -324,6 +324,24 @@ body {
   animation: signal-marquee 22s linear infinite;
 }
 
+/* Equalizer waveform (RecognitionStats) — bars pulse around their static
+   height, so reduced-motion (animation off) still reads as a waveform
+   silhouette instead of collapsing to nothing. */
+@keyframes signal-eq {
+  0%,
+  100% {
+    transform: scaleY(0.55);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+.signal-eq-bar {
+  animation: signal-eq 1.7s ease-in-out infinite;
+}
+
 /* Drifting decorative figures over the film (the halftone "cloud"). Applied to
    the INNER element so it never fights the overlay's centering transform. */
 @keyframes plum-drift-x {

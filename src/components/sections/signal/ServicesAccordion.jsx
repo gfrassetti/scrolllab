@@ -23,9 +23,11 @@ const defaultServices = [
 /**
  * ServicesAccordion — expand/collapse list (Dolsten's grid-template-rows
  * mechanic, ported here with the GSAP height:'auto' idiom already used by
- * components/FaqAccordion.jsx, restyled for SIGNAL).
+ * components/FaqAccordion.jsx). Indexed like ratio/atrium's numbered rows
+ * and lit with the signal-accent cyan so it reads as SIGNAL, not a generic
+ * FAQ block. See docs/reference-analysis/signal.md.
  */
-function Row({ item, isOpen, onToggle }) {
+function Row({ index, item, isOpen, onToggle }) {
   const panelRef = useRef(null)
   const tweenRef = useRef(null)
 
@@ -48,26 +50,34 @@ function Row({ item, isOpen, onToggle }) {
   }
 
   return (
-    <div className="border-b border-signal-ink/15 py-6">
+    <div
+      className="border-b border-signal-ink/15 py-7 transition-colors"
+      style={{ borderLeft: isOpen ? '2px solid var(--signal-accent)' : '2px solid transparent' }}
+    >
       <button
         type="button"
         onClick={toggle}
         aria-expanded={isOpen}
-        className="flex w-full cursor-pointer items-center justify-between gap-6 text-left"
+        className="flex w-full cursor-pointer items-baseline gap-5 pl-5 text-left"
       >
-        <span className="font-grotesk text-[clamp(1.2rem,2.4vw,1.7rem)] font-medium tracking-[-0.01em]">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-signal-accent">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <span className="flex-1 font-grotesk text-[clamp(1.4rem,3.2vw,2.2rem)] font-medium tracking-[-0.02em]">
           {item.title}
         </span>
         <span
           aria-hidden="true"
-          className={`shrink-0 text-2xl text-signal-ink/40 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
+          className={`shrink-0 text-2xl transition-transform duration-300 ${isOpen ? 'rotate-45 text-signal-accent' : 'text-signal-ink/35'}`}
         >
           +
         </span>
       </button>
       {isOpen && (
-        <div ref={panelRef} className="overflow-hidden">
-          <p className="max-w-[55ch] pt-4 text-sm leading-relaxed text-signal-ink/65">{item.body}</p>
+        <div ref={panelRef} className="overflow-hidden pl-5">
+          <p className="max-w-[55ch] pt-4 pl-[2.6em] text-sm leading-relaxed text-signal-ink/65">
+            {item.body}
+          </p>
         </div>
       )}
     </div>
@@ -85,6 +95,7 @@ export default function ServicesAccordion({ eyebrow = 'Services', items = defaul
           {items.map((item, i) => (
             <Row
               key={item.title}
+              index={i}
               item={item}
               isOpen={openIndex === i}
               onToggle={() => setOpenIndex((cur) => (cur === i ? null : i))}
