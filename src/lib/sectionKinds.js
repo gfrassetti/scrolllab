@@ -87,6 +87,7 @@ export const SECTION_KINDS = {
   'plum/FilmScroll': 'hero',
   'signal/NavSignal': 'nav',
   'signal/HeroSignal': 'hero',
+  'signal/SelectedWorkIndex': 'section',
   'signal/ManifestoMarquee': 'section',
   'signal/RecognitionStats': 'section',
   'signal/PixelRevealGrid': 'section',

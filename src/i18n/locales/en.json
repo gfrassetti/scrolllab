@@ -783,6 +783,10 @@
           "name": "Hero signal",
           "blurb": "Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer"
         },
+        "SelectedWorkIndex": {
+          "name": "Selected work index",
+          "blurb": "Work list with a cursor-trailing preview image that swaps per row"
+        },
         "ManifestoMarquee": {
           "name": "Manifesto marquee",
           "blurb": "Blurred word-by-word statement reveal over a looping capability marquee"

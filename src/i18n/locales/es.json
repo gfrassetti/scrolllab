@@ -783,6 +783,10 @@
           "name": "Hero signal",
           "blurb": "Hero cinético con palabras que rotan — caracteres que entran con blur y se cruzan por temporizador"
         },
+        "SelectedWorkIndex": {
+          "name": "Selected work index",
+          "blurb": "Lista de trabajos con una preview que sigue el cursor y cambia por fila"
+        },
         "ManifestoMarquee": {
           "name": "Manifesto marquee",
           "blurb": "Frase que se revela palabra por palabra con blur, sobre una cinta de capacidades en loop"
