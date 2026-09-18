@@ -84,6 +84,11 @@ export const SECTION_KINDS = {
   'atrium/OrbitRing': 'section',
   'atrium/StatField': 'section',
   'atrium/FooterAtrium': 'footer',
+  'plum/FilmScroll': 'hero',
+  'signal/NavSignal': 'nav',
+  'signal/HeroSignal': 'hero',
+  'signal/PixelRevealGrid': 'section',
+  'signal/FooterSignal': 'footer',
   'contact/ContactForm': 'section',
   'commerce/ProductGrid': 'section',
 }

@@ -82,6 +82,10 @@ import OrbitRing from '../components/sections/atrium/OrbitRing'
 import StatField from '../components/sections/atrium/StatField'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import FilmScroll from '../components/sections/plum/FilmScroll'
+import NavSignal from '../components/sections/signal/NavSignal'
+import HeroSignal from '../components/sections/signal/HeroSignal'
+import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
+import FooterSignal from '../components/sections/signal/FooterSignal'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 import { isBuilderHiddenSku } from './pricing.js'
@@ -250,6 +254,18 @@ const allModels = [
     wrapperClass: 'bg-plum-void text-plum-mist',
     sections: [
       { id: 'plum/FilmScroll', name: 'Film Scroll', kind: 'hero', component: FilmScroll, blurb: 'The whole page as a pre-rendered webp film — a JSON manifest (chapters of frame folders + text beats) drives a fixed canvas that scroll plays frame by frame' },
+    ],
+  },
+  {
+    id: 'signal',
+    name: 'SIGNAL',
+    accent: '#2fe0ff',
+    wrapperClass: 'bg-signal-ink text-signal-paper',
+    sections: [
+      { id: 'signal/NavSignal', name: 'Nav Signal', kind: 'nav', component: NavSignal, blurb: 'Minimal fixed header · full-screen mobile menu' },
+      { id: 'signal/HeroSignal', name: 'Hero Signal', kind: 'hero', component: HeroSignal, blurb: 'Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer' },
+      { id: 'signal/PixelRevealGrid', name: 'Pixel Reveal Grid', kind: 'section', component: PixelRevealGrid, blurb: 'Case-study cards behind a tile grid that dissolves on scroll, DOM only' },
+      { id: 'signal/FooterSignal', name: 'Footer Signal', kind: 'footer', component: FooterSignal, blurb: 'Closing CTA with an oversized wordmark' },
     ],
   },
   {

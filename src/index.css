@@ -98,6 +98,11 @@ html.dark {
   --color-plum-mist: #f3f1ec;
   --color-plum-accent: #6f5bff;
 
+  /* ——— Model 12 "SIGNAL": motion & sound studio ——— */
+  --color-signal-ink: #0c0d10;
+  --color-signal-paper: #efece5;
+  --color-signal-accent: #2fe0ff;
+
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
@@ -288,6 +293,24 @@ body {
 
 .plum-world :focus-visible {
   outline-color: var(--plum-accent);
+}
+
+/* ——— Model 12 "SIGNAL": motion & sound studio. Near-black ground, warm
+   paper for the pixel-reveal tiles, one electric-cyan accent (pulled from
+   the light-trail card art). ——— */
+.signal-world {
+  --signal-ink: #0c0d10;
+  --signal-paper: #efece5;
+  --signal-accent: #2fe0ff;
+}
+
+.signal-world ::selection {
+  background: var(--signal-accent);
+  color: var(--signal-ink);
+}
+
+.signal-world :focus-visible {
+  outline-color: var(--signal-accent);
 }
 
 /* Drifting decorative figures over the film (the halftone "cloud"). Applied to
