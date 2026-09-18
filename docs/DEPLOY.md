@@ -228,6 +228,30 @@ recibe una `Idempotency-Key`, por lo que los reintentos no duplican el correo.
 
 El email es un comprobante/detalle de compra, no una factura fiscal de ARCA.
 
+## Tarjetas para compartir (og por demo) — front en Vercel
+
+El SPA devuelve el mismo `index.html` en toda ruta, y Facebook / LinkedIn / X /
+WhatsApp / Slack no ejecutan JS: sin esto, cualquier demo compartida mostraba la
+tarjeta de la home.
+
+- `npm run gen:og` genera `public/og/<sku>.jpg` (1200×630, una por demo pública)
+  con Chromium + Google Fonts (necesita red). **Se commitean**: si falta alguna
+  el build falla a propósito. `npm run gen:og nocturne` regenera una sola.
+- `npm run build` corre `vite build` y después `scripts/gen-share-pages.mjs`, que
+  emite `dist/templates/<sku>/index.html` y `dist/builder/index.html`: el mismo
+  HTML del build con sus tags `og:*` / `twitter:*` (lógica en `src/lib/sharePages.js`).
+  Las demos siguen `noindex` con canonical a la home; solo cambian las tarjetas.
+- Las rutas salen de `publicDemoSkus()` (`src/lib/pricing.js`): al sumar un
+  modelo, agregá su `templates.<sku>` en `en.json`, su poster en `public/catalog/`
+  y corré `npm run gen:og <sku>`.
+- Vercel da prioridad al filesystem sobre los rewrites, y con `trailingSlash`
+  sin definir `/x` sirve `x/index.html` sin redirigir. `vite preview` **no** lo
+  hace (cae al SPA sin barra final): verificalo en un preview de Vercel con
+  `curl -s https://<preview>/templates/nocturne | grep og:image`.
+- Para revisar una tarjeta en las redes: [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/),
+  [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/). Si ya
+  compartieron el link antes, hay que pedir el re-scrape.
+
 ## Notas
 
 - Una sola réplica de API hasta tener storage compartido (S3/R2) — el volume de Railway no se comparte entre instancias.

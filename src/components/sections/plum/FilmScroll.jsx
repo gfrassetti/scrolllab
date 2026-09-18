@@ -115,23 +115,38 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
   const beats = cfg.beats || []
   const clips = cfg.clips || []
   const overlays = cfg.overlays || []
-  const total = chapters.reduce((n, c) => n + c.frames, 0)
   const pad = fr.pad || 4
+
+  // A chapter is one or more frame folders played back-to-back. A single-folder
+  // chapter uses { id, frames }; a chapter that spans several folders uses
+  // { id, parts: [{ id, frames }, …] } so several source clips read as ONE act
+  // without renaming any files on disk.
+  const chapterParts = (ch) =>
+    ch.parts?.length ? ch.parts : [{ id: ch.id, frames: ch.frames || 0 }]
+  const chapterFrames = (ch) => chapterParts(ch).reduce((n, p) => n + (p.frames || 0), 0)
+  const total = chapters.reduce((n, c) => n + chapterFrames(c), 0)
 
   // chapter → [startFrac, endFrac] across the whole scroll
   const spans = []
   {
     let acc = 0
     for (const ch of chapters) {
-      spans.push([acc / total, (acc + ch.frames) / total, ch])
-      acc += ch.frames
+      const cf = chapterFrames(ch)
+      spans.push([acc / total, (acc + cf) / total, ch])
+      acc += cf
     }
   }
-  // scroll fractions where one chapter hands off to the next (the scene changes)
-  const boundaries = spans.slice(1).map((s) => s[0])
+  // The scene-change transition fires ONLY at boundaries whose chapter opts in
+  // with `"cut": true` — one deliberate cut in the story, not a veil on every
+  // hand-off.
+  const boundaries = spans
+    .slice(1)
+    .filter((s) => s[2]?.cut)
+    .map((s) => s[0])
   // the very first frame, shown as a poster so the first paint is never black
-  const firstUrl = chapters[0]
-    ? `${fr.basePath}/${chapters[0].id}/${String(1).padStart(pad, '0')}.${fr.ext}`
+  const firstPart = chapters[0] ? chapterParts(chapters[0])[0] : null
+  const firstUrl = firstPart
+    ? `${fr.basePath}/${firstPart.id}/${String(1).padStart(pad, '0')}.${fr.ext}`
     : null
 
   const track = useRef(null)
@@ -156,18 +171,31 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
 
       const urls = []
       for (const ch of chapters) {
-        for (let n = 1; n <= ch.frames; n++) {
-          urls.push(`${fr.basePath}/${ch.id}/${String(n).padStart(fr.pad, '0')}.${fr.ext}`)
+        for (const part of chapterParts(ch)) {
+          for (let n = 1; n <= part.frames; n++) {
+            urls.push(`${fr.basePath}/${part.id}/${String(n).padStart(fr.pad, '0')}.${fr.ext}`)
+          }
         }
       }
       const count = urls.length
       if (count < 2) return
 
+      // frame index where each chapter (after the first) begins — the scene
+      // changes the dissolve smooths over.
+      const boundaryFrames = []
+      {
+        let acc = 0
+        for (const ch of chapters) {
+          if (acc > 0) boundaryFrames.push(acc)
+          acc += chapterFrames(ch)
+        }
+      }
+
       const blobs = new Array(count)
       const bitmaps = new Map()
       const keys = new Map()
       const decoding = new Set()
-      let fetchCursor = 0
+      const fetching = new Set()
       let inFetch = 0
       const MAX_FETCH = 8
       const MAX_DECODE = 6
@@ -180,6 +208,16 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
       const KEY_W = Math.max(160, ld.keyframeWidth | 0)
       const DEC_W = Math.max(480, ld.decodeWidth | 0)
       const EASE = Math.min(0.9, Math.max(0.02, sc.ease || 0.14))
+      // Progressive download: only blobs near the playhead are fetched, plus a
+      // sparse always-resident proxy (every KEY_STRIDE) across the whole film.
+      // Frames stream in as you scroll — visible in the Network panel — instead
+      // of the whole film loading up front (pear.no's loading model).
+      const FETCH_BACK = WIN + 24
+      const FETCH_FWD = WIN + 64
+      const RELEASE = FETCH_FWD + 140
+      // frames-long cross-dissolve that softens each scene change (a filmic
+      // dissolve of the real footage, not an overlay). 0 = hard cut.
+      const DISSOLVE = Math.max(0, (ui.dissolve | 0) || 0)
 
       let targetProg = 0
       let prog = 0
@@ -238,25 +276,48 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
       // concurrent createImageBitmap() calls stay bounded.
       const keyQueue = []
 
+      function fetchOne(i) {
+        if (i < 0 || i >= count || blobs[i] || fetching.has(i) || inFetch >= MAX_FETCH) return
+        fetching.add(i)
+        inFetch++
+        fetch(urls[i], { cache: 'force-cache' })
+          .then((r) => (r.ok ? r.blob() : null))
+          .then((bl) => {
+            if (!bl || !alive.v) return
+            blobs[i] = bl
+            if (i % KEY_STRIDE === 0 && !keys.has(i)) keyQueue.push(i)
+            dirty = true
+          })
+          .catch(() => {})
+          .finally(() => {
+            fetching.delete(i)
+            inFetch--
+            if (alive.v) {
+              pumpFetch()
+              pumpDecode()
+            }
+          })
+      }
+
+      // Fetch nearest-to-playhead first, then top up the sparse whole-film
+      // proxy, then release far full-res blobs so memory stays bounded and the
+      // network keeps working as the playhead moves.
       function pumpFetch() {
-        while (inFetch < MAX_FETCH && fetchCursor < count) {
-          const i = fetchCursor++
-          inFetch++
-          fetch(urls[i], { cache: 'force-cache' })
-            .then((r) => (r.ok ? r.blob() : null))
-            .then((bl) => {
-              if (!bl || !alive.v) return
-              blobs[i] = bl
-              if (i % KEY_STRIDE === 0 && !keys.has(i)) keyQueue.push(i)
-            })
-            .catch(() => {})
-            .finally(() => {
-              inFetch--
-              if (alive.v) {
-                pumpFetch()
-                pumpDecode()
-              }
-            })
+        if (!alive.v) return
+        const here = idxOf(prog)
+        for (let d = 0; d <= FETCH_FWD && inFetch < MAX_FETCH; d++) {
+          const cands = d === 0 ? [here] : [here + d, here - d]
+          for (const i of cands) {
+            if (i < here - FETCH_BACK || i > here + FETCH_FWD) continue
+            fetchOne(i)
+            if (inFetch >= MAX_FETCH) break
+          }
+        }
+        for (let i = 0; i < count && inFetch < MAX_FETCH; i += KEY_STRIDE) fetchOne(i)
+        for (let i = 0; i < count; i++) {
+          if (blobs[i] && i % KEY_STRIDE !== 0 && (i < here - RELEASE || i > here + RELEASE)) {
+            blobs[i] = undefined
+          }
         }
       }
 
@@ -330,24 +391,42 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
         return null
       }
 
-      function paint() {
-        const fi = idxOf(prog)
-        if (fi === shown && !dirty) return
-        const bm = nearest(fi)
-        if (!bm) return
+      function drawCover(bm, alpha) {
         const cw = canvas.width
         const cah = canvas.height
         const scale = Math.max(cw / bm.width, cah / bm.height)
         const dw = bm.width * scale
         const dh = bm.height * scale
-        ctx.fillStyle = theme.bg
-        ctx.fillRect(0, 0, cw, cah)
+        if (alpha != null) ctx.globalAlpha = alpha
         ctx.drawImage(bm, (cw - dw) / 2, (cah - dh) / 2, dw, dh)
+        if (alpha != null) ctx.globalAlpha = 1
+      }
+
+      function paint() {
+        const fi = idxOf(prog)
+        if (fi === shown && !dirty) return
+        const bm = nearest(fi)
+        if (!bm) return
+        ctx.fillStyle = theme.bg
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        drawCover(bm)
+        // cross-dissolve: just after a scene change, hold the outgoing scene's
+        // last frame on top and fade it out over DISSOLVE frames of scroll, so
+        // one scene melts into the next instead of hard-cutting.
+        if (DISSOLVE > 0) {
+          for (const b of boundaryFrames) {
+            if (fi >= b && fi < b + DISSOLVE) {
+              const obm = nearest(b - 1)
+              if (obm) drawCover(obm, 1 - (fi - b) / DISSOLVE)
+              break
+            }
+          }
+        }
         const w = washAt(prog)
         if (w && w.alpha > 0.001) {
           ctx.globalAlpha = w.alpha
           ctx.fillStyle = w.color
-          ctx.fillRect(0, 0, cw, cah)
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
           ctx.globalAlpha = 1
         }
         shown = fi
@@ -436,6 +515,7 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
         updateClips(prog)
         updateTransition(prog)
         updateUi()
+        pumpFetch()
         pumpDecode()
       }
 
@@ -443,7 +523,7 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
         window.__plum = {
           seek(f) {
             targetProg = prog = Math.max(0, Math.min(1, f))
-            paint(); layoutBeats(); updateOverlays(prog); updateTransition(prog); updateUi(); pumpDecode()
+            paint(); layoutBeats(); updateOverlays(prog); updateTransition(prog); updateUi(); pumpFetch(); pumpDecode()
           },
           get info() {
             return { prog: +prog.toFixed(3), shown, url: urls[idxOf(prog)], bmp: bitmaps.size, key: keys.size }
@@ -464,6 +544,26 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
       }, 100)
       pumpFetch()
 
+      // Autoplay pre-roll: a few frames of motion the instant the page loads,
+      // before any scroll — the hero equivalent of pear.no's autoplaying
+      // reveal.mp4, built from footage we already own instead of a new asset.
+      // It drives prog/targetProg directly and hands off to the normal
+      // scroll-driven system once done; any real scroll/touch/key cancels it
+      // immediately so the two never fight over the same variables.
+      let prerollTween = null
+      function startFilmSystem() {
+        gsap.ticker.add(frameTick)
+        ScrollTrigger.create({
+          trigger: track.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          onUpdate: (self) => {
+            targetProg = self.progress
+          },
+          onRefresh: resize,
+        })
+      }
+
       if (reduced) {
         targetProg = prog = 0.3
         dirty = true
@@ -477,16 +577,36 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
           if (bitmaps.size || keys.size) clearInterval(iv)
         }, 120)
       } else {
-        gsap.ticker.add(frameTick)
-        ScrollTrigger.create({
-          trigger: track.current,
-          start: 'top top',
-          end: 'bottom bottom',
-          onUpdate: (self) => {
-            targetProg = self.progress
-          },
-          onRefresh: resize,
-        })
+        if (window.scrollY > 4 || cfg.hero?.clip) {
+          // A real <video> hero (below) carries the opening motion, so the
+          // canvas doesn't need the frame-sequence preroll.
+          startFilmSystem()
+        } else {
+          const PREROLL_FRAMES = Math.min(10, Math.floor(count * 0.02))
+          let prerollDone = false
+          const finishPreroll = () => {
+            if (prerollDone) return
+            prerollDone = true
+            prerollTween?.kill()
+            startFilmSystem()
+          }
+          prerollTween = gsap.to(
+            {},
+            {
+              duration: 2.2,
+              ease: 'sine.inOut',
+              onUpdate() {
+                prog = targetProg = (this.progress() * PREROLL_FRAMES) / (count - 1)
+                dirty = true
+                paint()
+              },
+              onComplete: finishPreroll,
+            },
+          )
+          window.addEventListener('wheel', finishPreroll, { passive: true, once: true })
+          window.addEventListener('touchstart', finishPreroll, { passive: true, once: true })
+          window.addEventListener('keydown', finishPreroll, { once: true })
+        }
 
         const split = new SplitText('[data-plum-brand]', { type: 'chars', mask: 'chars' })
         gsap.from(split.chars, {
@@ -514,11 +634,23 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
             scrub: true,
           },
         })
+        // the <video> hero hands off to the canvas film over the first viewport
+        gsap.to('[data-plum-hero]', {
+          opacity: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: track.current,
+            start: 'top top',
+            end: '+=90%',
+            scrub: true,
+          },
+        })
       }
 
       return () => {
         alive.v = false
         clearInterval(settle)
+        prerollTween?.kill()
         gsap.ticker.remove(frameTick)
         window.removeEventListener('resize', resize)
         window.removeEventListener('load', resize)
@@ -570,6 +702,20 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
         />
+        {/* real <video> hero — plays on load and hands off to the canvas film
+            over the first viewport (pear.no's opening) */}
+        {cfg.hero?.clip && (
+          <video
+            data-plum-hero
+            className="pointer-events-none absolute inset-0 z-[5] h-full w-full object-cover"
+            src={cfg.hero.clip}
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          />
+        )}
         {/* mp4 clips mount here, between imagery and type */}
         <div ref={clipLayer} className="pointer-events-none absolute inset-0 z-10" aria-hidden="true" />
 
@@ -678,7 +824,7 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
             className="mb-4 text-[11px] uppercase tracking-[0.24em]"
             style={{ color: theme.ink, opacity: 0.65 }}
           >
-            {cfg.title || 'PLUM'} — scroll to play the film
+            {cfg.hero?.kicker || `${cfg.title || 'PLUM'} — scroll`}
           </p>
           <h1
             data-plum-brand
