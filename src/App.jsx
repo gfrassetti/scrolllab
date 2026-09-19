@@ -1,10 +1,12 @@
-import { lazy, Suspense, useLayoutEffect } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import TemplatesIndex from './pages/TemplatesIndex'
 import LicensePage from './pages/LicensePage'
 import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
 import { AuthProvider } from './lib/auth'
 import { PlanProvider } from './lib/plan'
+import { captureCouponFromUrl } from './lib/coupon'
+import { captureUtmFromUrl } from './lib/utm'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
@@ -68,6 +70,13 @@ function Loader() {
 }
 
 export default function App() {
+  // El botón del mail del cupón abre el sitio con ?cupon=…: se guarda para el carrito.
+  // Los utm_* de un video o un post se guardan para saber qué canal trae mails.
+  useEffect(() => {
+    captureCouponFromUrl()
+    captureUtmFromUrl()
+  }, [])
+
   return (
     <I18nProvider>
       <AuthProvider>

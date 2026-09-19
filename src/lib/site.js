@@ -9,22 +9,23 @@ export const SITE_URL = 'https://www.scrolllab.com.ar'
 
 /**
  * Meta SEO del marketplace.
- * Categoría: plantillas web / web templates (radar Envato-like).
- * Diferencial: storytelling + fuente React.
+ * Posicionamiento: templates scrollytelling con fuente React + GSAP, para devs y
+ * estudios. Antes apuntaba a "plantillas web" (Envato, Wix): una búsqueda de
+ * gente que quiere armar un sitio sin código y no puede usar un ZIP de React.
  */
 export const SITE_SEO = {
-  title: 'SCROLL LAB — Plantillas web | Web templates',
+  title: 'SCROLL LAB — Templates scrollytelling en React + GSAP',
   description:
-    'Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable.',
+    'Modelos de sitio scrollytelling con código fuente en React + GSAP. Elegí uno completo o armá el tuyo en el builder y descargá el proyecto listo para editar.',
   keywords:
-    'plantillas web, web templates, website templates, plantillas para sitios web, react templates, storytelling templates, landing page templates',
+    'scrollytelling templates, plantillas scrollytelling, react templates, gsap templates, scroll animation template, plantillas web, web templates, código fuente React, landing page templates',
 }
 
 /** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
 export const BUILDER_SEO = {
-  title: 'SCROLL LAB — Builder | Armá tu plantilla web',
+  title: 'SCROLL LAB — Builder | Armá tu sitio scrollytelling',
   description:
-    'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente React, editable.',
+    'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente React + GSAP, editable.',
 }
 
 const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large'

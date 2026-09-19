@@ -607,3 +607,140 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
 
   return { sent: true, id: response.data?.id || null }
 }
+
+const COUPON_COPY = {
+  es: {
+    subject: (percent) => `Tu cupón del ${percent}% en SCROLL LAB`,
+    preheader: (percent) => `${percent}% en tu primera compra. Tu código está adentro.`,
+    eyebrow: 'Tu cupón',
+    title: (percent) => `${percent}% menos en tu primera compra.`,
+    body: (date) =>
+      `Usalo en el carrito con cualquier modelo, con tu composición del builder o con el bundle. Vale hasta el ${date}, se usa una sola vez y es solo para este mail: al comprar, entrá con esa cuenta de Google.`,
+    codeLabel: 'Tu código',
+    cta: 'Elegir mi modelo',
+    foot: 'Recibís este mail porque pediste el cupón en scrolllab.com.ar. Es el único mail que te mandamos: no enviamos newsletters.',
+  },
+  en: {
+    subject: (percent) => `Your ${percent}% coupon for SCROLL LAB`,
+    preheader: (percent) => `${percent}% off your first purchase. Your code is inside.`,
+    eyebrow: 'Your coupon',
+    title: (percent) => `${percent}% off your first purchase.`,
+    body: (date) =>
+      `Use it in the cart with any model, your builder composition, or the bundle. It’s valid until ${date}, works once, and is only for this email: when you buy, sign in with that Google account.`,
+    codeLabel: 'Your code',
+    cta: 'Pick my model',
+    foot: 'You’re getting this email because you asked for the coupon at scrolllab.com.ar. It’s the only email we send you: no newsletters.',
+  },
+}
+
+/** Mail del cupón de bienvenida. El botón lleva `?cupon=` y el front lo guarda solo. */
+export function buildCouponEmail({
+  code,
+  percent,
+  expiresAt,
+  locale = 'es',
+  shopUrl,
+  logoUrl,
+}) {
+  const lang = locale === 'en' ? 'en' : 'es'
+  const c = COUPON_COPY[lang]
+  const date = new Intl.DateTimeFormat(lang === 'en' ? 'en-US' : 'es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    dateStyle: 'long',
+  }).format(new Date(expiresAt))
+  const link = `${String(shopUrl).replace(/\/$/, '')}/?cupon=${encodeURIComponent(code)}#templates`
+
+  const html = `<!doctype html>
+<html lang="${lang}">
+  <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
+    <div style="display:none;max-height:0;overflow:hidden;">${escapeHtml(c.preheader(percent))}</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#f2efe9;border:1px solid #d6d1c8;">
+            <tr>
+              <td style="padding:24px 32px;border-bottom:1px solid #d6d1c8;">
+                <img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:36px 32px 12px;">
+                <p style="margin:0 0 12px;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">${escapeHtml(c.eyebrow)}</p>
+                <h1 style="margin:0 0 16px;font-size:30px;line-height:1.1;font-weight:600;">${escapeHtml(c.title(percent))}</h1>
+                <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">${escapeHtml(c.body(date))}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 32px 8px;">
+                <p style="margin:0 0 8px;color:#5b5650;font-size:12px;letter-spacing:2px;text-transform:uppercase;">${escapeHtml(c.codeLabel)}</p>
+                <p style="margin:0;padding:18px 20px;border:2px dashed #161412;font-family:'Courier New',Courier,monospace;font-size:28px;letter-spacing:4px;font-weight:700;text-align:center;">${escapeHtml(code)}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px 36px;">
+                <a href="${escapeHtml(link)}" style="display:inline-block;background:#161412;color:#f2efe9;padding:14px 26px;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">${escapeHtml(c.cta)}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px;border-top:1px solid #d6d1c8;color:#7a746b;font-size:12px;line-height:1.6;">${escapeHtml(c.foot)}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+
+  const text = [
+    c.title(percent),
+    '',
+    c.body(date),
+    '',
+    `${c.codeLabel}: ${code}`,
+    link,
+    '',
+    c.foot,
+  ].join('\n')
+
+  return { subject: c.subject(percent), html, text }
+}
+
+/**
+ * Manda el cupón al mail del lead. Idempotente vía Resend (una key por lead):
+ * un reintento no duplica el mail.
+ */
+export async function sendCouponEmail({ lead, config, client }) {
+  if (!config.email.enabled) return { skipped: 'disabled' }
+  if (!lead?.couponCode) return { skipped: 'no-coupon' }
+
+  const logoUrl =
+    config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
+  const message = buildCouponEmail({
+    code: lead.couponCode,
+    percent: lead.couponPercent,
+    expiresAt: lead.couponExpiresAt,
+    locale: lead.locale,
+    shopUrl: config.clientUrl,
+    logoUrl,
+  })
+  const resend = client || new Resend(config.email.apiKey)
+
+  const response = await resend.emails.send(
+    {
+      from: config.email.from,
+      to: [lead.email],
+      replyTo: config.email.replyTo || undefined,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      tags: [{ name: 'type', value: 'welcome_coupon' }],
+    },
+    { idempotencyKey: `scrolllab-coupon-${db.uid(lead) || lead.id}` },
+  )
+
+  if (response.error) {
+    throw new Error(response.error.message || 'Resend rechazó el cupón')
+  }
+
+  return { sent: true, id: response.data?.id || null }
+}

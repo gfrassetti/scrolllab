@@ -153,6 +153,18 @@ export function rateLimits() {
       max: 40,
       message: { error: 'Demasiadas operaciones, probá en un momento' },
     }),
+    // Alta de mails: pública y sin sesión, así que el techo es por IP.
+    leads: mk({
+      windowMs: 60 * 60 * 1000,
+      max: 10,
+      message: { error: 'Demasiados intentos, probá más tarde' },
+    }),
+    // Chequeo público de cupones: frena a quien prueba códigos a ciegas.
+    coupons: mk({
+      windowMs: 60 * 60 * 1000,
+      max: 30,
+      message: { error: 'Demasiados intentos, probá más tarde' },
+    }),
   }
 }
 
@@ -169,9 +181,18 @@ export function errorHandler(config) {
     }
     const masked = status >= 500 && config.isProd && err.expose !== true
     const message = masked ? 'Error interno' : err.message || 'Error interno'
+    // `code` y `details` solo salen de un HttpError: otros errores traen `code`
+    // propios (ECONNREFUSED, 11000 de Mongo) que no son para el cliente.
+    const extra =
+      err.name === 'HttpError'
+        ? {
+            ...(typeof err.code === 'string' ? { code: err.code } : {}),
+            ...(err.details ? { details: err.details } : {}),
+          }
+        : {}
     // El requestId viaja siempre: es lo único que ata la pantalla del comprador
     // al log del servidor cuando el mensaje va enmascarado.
-    res.status(status).json({ error: message, requestId })
+    res.status(status).json({ error: message, ...extra, requestId })
   }
 }
 

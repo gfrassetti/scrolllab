@@ -116,6 +116,20 @@ export function arsFromUsd(usd, rate) {
   return Math.ceil((usd * rate) / ARS_ROUNDING) * ARS_ROUNDING
 }
 
+/**
+ * Cupón de bienvenida: el mismo porcentaje que aplica el servidor
+ * (server/catalog.js; `npm run check` falla si se despegan). Solo primera compra.
+ */
+export const WELCOME_COUPON_PERCENT = 10
+
+/** Precio en pesos con cupón: la misma cuenta que `discountedArsFromUsd` del servidor. */
+export function discountedArsFromUsd(usd, rate, percent) {
+  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null
+  if (!Number.isFinite(percent) || percent < 0 || percent >= 100) return null
+  const cents = Math.round(usd * (100 - percent))
+  return Math.ceil((cents * rate) / (100 * ARS_ROUNDING)) * ARS_ROUNDING
+}
+
 export function formatArs(amount) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',

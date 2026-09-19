@@ -7,6 +7,7 @@ import {
   templatePriceUsd,
 } from './pricing.js'
 import { recipeHasCommerce } from './composition.js'
+import { couponLinePrice } from './coupon.js'
 import { trackAddToCart } from './gtm.js'
 
 export function isCustomSku(sku) {
@@ -38,6 +39,41 @@ export function cartLinePriceUsd(item, catalog) {
   return (
     catalog?.[item?.sku]?.unit_price_usd ?? templatePriceUsd(item?.sku) ?? null
   )
+}
+
+/**
+ * Precios del carrito con cupón opcional: lo que muestra la página. `payable`
+ * tiene que ser lo que cobra el servidor (`discountedArsFromUsd` de
+ * server/catalog.js): hay un test que compara los dos.
+ */
+export function priceCartLines({
+  items,
+  catalog,
+  rate,
+  showUsd = false,
+  coupon = null,
+}) {
+  const currency = showUsd ? 'USD' : 'ARS'
+  const lines = (items || []).map((item) => {
+    const usd = cartLinePriceUsd(item, catalog)
+    const list = showUsd ? usd : cartLinePriceArs(item, catalog, rate)
+    const discounted =
+      coupon && list != null
+        ? couponLinePrice({ usd, rate, percent: coupon.percent, currency })
+        : null
+    return {
+      ...item,
+      unit_price: list,
+      discounted_price: discounted,
+      currency_id: currency,
+    }
+  })
+  const total = lines.reduce((sum, l) => sum + (l.unit_price || 0), 0)
+  const payable = lines.reduce(
+    (sum, l) => sum + ((l.discounted_price ?? l.unit_price) || 0),
+    0,
+  )
+  return { lines, total, payable, discount: total - payable }
 }
 
 const CHECKOUT_INTENT_KEY = 'scrolllab-checkout-intent'

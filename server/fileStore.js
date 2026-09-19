@@ -226,4 +226,49 @@ export const fileDb = {
     write('subscriptions', rows)
     return true
   },
+
+  // Leads (formulario de novedades). Alta idempotente por email.
+  async upsertLead(data) {
+    const rows = read('leads')
+    const email = String(data.email).toLowerCase()
+    const found = rows.find((l) => l.email === email)
+    if (found) return { lead: withSaveDoc('leads', found), created: false }
+    const now = new Date().toISOString()
+    const lead = {
+      id: nid(),
+      source: 'home',
+      locale: 'es',
+      ...data,
+      email,
+      consentAt: now,
+      createdAt: now,
+      updatedAt: now,
+    }
+    rows.push(lead)
+    write('leads', rows)
+    return { lead: withSaveDoc('leads', lead), created: true }
+  },
+  async listLeads({ unsyncedOnly = false } = {}) {
+    return read('leads')
+      .filter((l) => !unsyncedOnly || !l.crmSyncedAt)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((l) => withSaveDoc('leads', l))
+  },
+  async findLeadByCoupon(code) {
+    return withSaveDoc('leads', read('leads').find((l) => l.couponCode === code) || null)
+  },
+  // Canje en una sola escritura: gana el primero; repetir con la misma orden es ok.
+  async redeemCoupon({ code, orderId }) {
+    const rows = read('leads')
+    const lead = rows.find((l) => l.couponCode === code)
+    if (!lead) return { redeemed: false }
+    if (lead.couponRedeemedAt) {
+      return { redeemed: String(lead.couponOrderId) === String(orderId) }
+    }
+    lead.couponRedeemedAt = new Date().toISOString()
+    lead.couponOrderId = String(orderId)
+    lead.updatedAt = lead.couponRedeemedAt
+    write('leads', rows)
+    return { redeemed: true }
+  },
 }

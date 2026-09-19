@@ -26,6 +26,9 @@ async function request(path, options = {}) {
   if (!res.ok) {
     const error = new Error(data.error || `Error ${res.status}`)
     error.status = res.status
+    // `code` y `details` (opcionales) distinguen errores con el mismo status.
+    error.code = data.code || ''
+    error.details = data.details || null
     // El requestId es lo único que ata este error al log del servidor.
     error.requestId = data.requestId || res.headers.get('x-request-id') || ''
     throw error
@@ -47,8 +50,17 @@ export const api = {
     return `${url}?${q}`
   },
   orders: () => request('/api/orders'),
-  checkout: (items) =>
-    request('/api/checkout', { method: 'POST', body: JSON.stringify({ items }) }),
+  // El cupón viaja como código: el descuento lo calcula el servidor.
+  checkout: (items, couponCode) =>
+    request('/api/checkout', {
+      method: 'POST',
+      body: JSON.stringify(couponCode ? { items, couponCode } : { items }),
+    }),
+  couponCheck: (code) =>
+    request('/api/coupons/check', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
   mockPay: (orderId) =>
     request('/api/checkout/mock-pay', {
       method: 'POST',
@@ -60,6 +72,10 @@ export const api = {
       body: JSON.stringify({ paymentId, orderId }),
     }),
   downloadLink: (orderId) => request(`/api/orders/${orderId}/download`),
+
+  // Formulario de novedades (sin sesión) — ver src/lib/leads.js
+  lead: (body) =>
+    request('/api/leads', { method: 'POST', body: JSON.stringify(body || {}) }),
 
   // Hosted Components (LAB) — docs/hosted-component-plan.md
   embedLoader: () => request('/api/embed/loader'),

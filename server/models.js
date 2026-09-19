@@ -43,6 +43,9 @@ const orderSchema = new mongoose.Schema(
     // Precio de lista en USD y cotización aplicada al cobrar, para auditar.
     totalUsd: Number,
     fxRate: Number,
+    // Cupón de bienvenida: `total` y los `unit_price` ya vienen descontados.
+    couponCode: String,
+    discountPct: Number,
     currency_id: { type: String, default: "ARS" },
     mpPreferenceId: String,
     mpPaymentId: { type: String, sparse: true, unique: true },
@@ -151,6 +154,41 @@ const subscriptionSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+/**
+ * Lead: mail que alguien dejó en el formulario de novedades (no es un usuario).
+ * Se guarda siempre acá; el CRM (Brevo) es una copia que se sincroniza aparte
+ * (`crmSyncedAt` / `crmError`). Ver server/services/crm.js.
+ */
+const leadSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    // Dónde se anotó (home, builder…). Sale en el CSV y sirve para medir.
+    source: { type: String, default: "home" },
+    // Canal de la primera visita (utm_* del link): mide qué trae mails.
+    utmSource: String,
+    utmMedium: String,
+    utmCampaign: String,
+    locale: { type: String, enum: ["es", "en"], default: "es" },
+    // Cuándo aceptó recibir novedades: el formulario lo dice junto al botón.
+    consentAt: { type: Date, default: Date.now },
+    crmSyncedAt: Date,
+    crmError: String,
+    // Cupón de bienvenida (uno por mail). Se canjea cuando se paga la orden.
+    couponCode: { type: String, unique: true, sparse: true },
+    couponPercent: Number,
+    couponExpiresAt: Date,
+    couponRedeemedAt: Date,
+    couponOrderId: String,
+  },
+  { timestamps: true },
+);
+
 export const User = mongoose.models.User || mongoose.model("User", userSchema);
 export const Order =
   mongoose.models.Order || mongoose.model("Order", orderSchema);
@@ -160,3 +198,4 @@ export const HostedInstance =
 export const Subscription =
   mongoose.models.Subscription ||
   mongoose.model("Subscription", subscriptionSchema);
+export const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);

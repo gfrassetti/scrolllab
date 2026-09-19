@@ -10,6 +10,7 @@ const {
   gtmPush,
   trackAddToCart,
   trackBeginCheckout,
+  trackLead,
   trackPurchase,
 } = await import('../gtm.js')
 
@@ -45,6 +46,16 @@ describe('gtm dataLayer', () => {
     gtmPush({ event: 'keep' })
     trackBeginCheckout([])
     assert.equal(globalThis.window.dataLayer.length, 1)
+  })
+
+  it('generate_lead lleva el origen del alta (home por defecto)', () => {
+    trackLead({ source: 'builder' })
+    trackLead()
+    const leads = globalThis.window.dataLayer.filter((e) => e.event === 'generate_lead')
+    assert.deepEqual(
+      leads.map((e) => e.lead_source),
+      ['builder', 'home'],
+    )
   })
 
   it('purchase se registra una sola vez por orden', () => {
