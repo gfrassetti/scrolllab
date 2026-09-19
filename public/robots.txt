@@ -41,6 +41,7 @@ User-agent: Timpibot
 User-agent: Google-CloudVertexBot
 Disallow: /$
 Disallow: /templates/
+Disallow: /plantillas/
 Disallow: /builder
 Disallow: /lab
 

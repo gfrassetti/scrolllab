@@ -911,6 +911,15 @@ export default function TemplatesIndex() {
                       : template.tags}
                   </p>
 
+                  {sellable && !soon ? (
+                    <Link
+                      to={`/plantillas/${template.sku}`}
+                      className="mt-4 inline-block text-eyebrow uppercase text-ink/60 underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent"
+                    >
+                      {t('home.viewDetails')}
+                    </Link>
+                  ) : null}
+
                   {soon ? (
                     <p className="mt-8 text-eyebrow uppercase text-ink/40">
                       {t('home.comingSoon')}

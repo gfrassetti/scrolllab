@@ -26,6 +26,7 @@ const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
 const SignalPage = lazy(() => import('./pages/SignalPage'))
+const ProductPage = lazy(() => import('./pages/ProductPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
@@ -124,6 +125,12 @@ export default function App() {
                       builder palette, or the sitemap — see
                       docs/reference-analysis/signal.md and public/robots.txt. */}
                   <Route path="/templates/signal" element={<SignalPage />} />
+                  {/* Páginas de producto para Google (src/lib/productPages.js). */}
+                  <Route
+                    path="/plantillas"
+                    element={<Navigate to="/#templates" replace />}
+                  />
+                  <Route path="/plantillas/:sku" element={<ProductPage />} />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />

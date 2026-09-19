@@ -251,6 +251,36 @@ tarjeta de la home.
 - Para revisar una tarjeta en las redes: [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/),
   [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/). Si ya
   compartieron el link antes, hay que pedir el re-scrape.
+- Vercel sí sirve `/templates/<sku>` sin barra final desde el archivo estático
+  (verificado en producción el 2026-09-18: `og:image` de CHAPTERS = `/og/chapters.jpg`).
+
+## Páginas de producto (SEO) — `/plantillas/<sku>`
+
+Una página por template en venta, en español, para que Google los encuentre por
+lo que hacen y lo que cuestan. Las demos (`/templates/<sku>`) siguen `noindex`:
+son pantalla completa con textos de relleno.
+
+- El texto sale de `templates.<sku>` y `builder.sections.<sku>` de `es.json` más
+  `PRODUCT_COPY` en `src/lib/productPages.js`. Ese objeto lo leen la página de
+  React (`src/pages/ProductPage.jsx`), el HTML del build y los tests, así que no
+  se despegan. Las secciones son opcionales (COMIC no está en el builder y sale sin
+  esa lista).
+- `npm run build` emite `dist/plantillas/<sku>/index.html` con title, descripción,
+  canonical, tarjeta `og/<sku>.jpg`, datos `schema.org/Product` (precio de lista en
+  USD, el mismo que muestra la página) y el contenido dentro de `#root`, fuera de
+  pantalla: lo lee quien no ejecuta JS y React lo reemplaza al arrancar.
+- El cuerpo va siempre en español (lo que se indexa), aunque el navegador esté en
+  inglés: Googlebot pide en inglés y, si no, indexaría la versión en inglés.
+- Al sumar un template a la venta: agregá su URL en `public/sitemap.xml` y en el
+  `ItemList` de `index.html`. `npm test` (`productPages.test.js`) falla si falta,
+  y también si falta su `public/og/<sku>.jpg` o `public/catalog/<sku>.jpg`.
+  `robots.txt` ya cierra `/plantillas/` a los bots de IA, como el resto del catálogo.
+- Una sola vez: en [Google Search Console](https://search.google.com/search-console)
+  agregar `https://www.scrolllab.com.ar` (verificación por DNS, que está en Vercel)
+  y enviar `sitemap.xml`. Sin eso Google igual llega por los links de la home, pero
+  más lento y sin decirte con qué búsquedas te encuentran.
+- Los resultados tardan semanas o meses. Mirar en Search Console, a las 4 a 6
+  semanas, qué búsquedas muestran las páginas antes de tocar los textos.
 
 ## Cupón de bienvenida (leads)
 

@@ -28,7 +28,7 @@ export const BUILDER_SEO = {
     'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente React + GSAP, editable.',
 }
 
-const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large'
+export const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large'
 
 function normalizePath(pathname) {
   const path = String(pathname || '/')
