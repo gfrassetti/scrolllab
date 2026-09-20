@@ -9,14 +9,19 @@ export const SITE_URL = 'https://www.scrolllab.com.ar'
 
 /**
  * Meta SEO del marketplace.
- * Posicionamiento: templates scrollytelling con fuente React + GSAP, para devs y
- * estudios. Antes apuntaba a "plantillas web" (Envato, Wix): una búsqueda de
- * gente que quiere armar un sitio sin código y no puede usar un ZIP de React.
+ * Posicionamiento (2026-09-20): "Immersive Scrolling Web Templates" → en español
+ * "Templates web con scroll inmersivo", con fuente React + GSAP, para devs y
+ * estudios. Va en español porque el mercado de hoy es Argentina (cobro en pesos,
+ * casi todos los clics de Google son de acá). La versión en inglés tiene que ir
+ * en su propia URL (/en/) con hreflang, no en un meta tag de esta: una URL tiene
+ * un solo title para Google. Conviene hacerla cuando haya cobro en dólares.
+ * No apunta a "plantillas web" (Envato, Wix): esa búsqueda es de gente que quiere
+ * armar un sitio sin código y no puede usar un ZIP de React.
  */
 export const SITE_SEO = {
-  title: 'SCROLL LAB — Templates scrollytelling en React + GSAP',
+  title: 'SCROLL LAB — Templates web con scroll inmersivo',
   description:
-    'Modelos de sitio scrollytelling con código fuente en React + GSAP. Elegí uno completo o armá el tuyo en el builder y descargá el proyecto listo para editar.',
+    'Templates web con scroll inmersivo en React + GSAP. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar.',
   keywords:
     'scrollytelling templates, plantillas scrollytelling, react templates, gsap templates, scroll animation template, plantillas web, web templates, código fuente React, landing page templates',
 }
