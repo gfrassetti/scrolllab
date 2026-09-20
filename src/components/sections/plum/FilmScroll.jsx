@@ -474,8 +474,11 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
           // salir. FilmScroll sigue mandando sobre el CONTENEDOR (opacidad y
           // translate); Motion sólo toca los segmentos de texto de adentro, así
           // que nunca pelean por el transform del mismo nodo.
-          const active = o > 0.55
-          if (active !== beatActiveRef.current[k]) {
+          // Histéresis: entra con o>0.35 y sólo se rearma por debajo de 0.12,
+          // así el scroll parado justo en el umbral no lo re-dispara en loop.
+          const wasActive = beatActiveRef.current[k] === true
+          const active = wasActive ? o > 0.12 : o > 0.35
+          if (active !== wasActive) {
             beatActiveRef.current[k] = active
             const reveal = titleRefs.current[k]
             if (reveal) {
@@ -552,7 +555,7 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
             paint(); layoutBeats(); updateOverlays(prog); updateTransition(prog); updateUi(); pumpFetch(); pumpDecode()
           },
           get info() {
-            return { prog: +prog.toFixed(3), shown, url: urls[idxOf(prog)], bmp: bitmaps.size, key: keys.size }
+            return { prog: +prog.toFixed(3), shown, url: urls[idxOf(prog)], bmp: bitmaps.size, key: keys.size, reveal: { ...revealCalls } }
           },
         }
       }
