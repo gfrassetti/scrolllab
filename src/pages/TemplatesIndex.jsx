@@ -29,6 +29,7 @@ import {
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
+import TextMorph from '../components/TextMorph'
 
 const TEMPLATE_META = [
   {
@@ -720,6 +721,15 @@ export default function TemplatesIndex() {
                   t('home.heroLine1'),
                   {
                     text: t('home.heroLine2'),
+                    node: (
+                      <TextMorph
+                        align="start"
+                        words={[
+                          t('home.heroLine2'),
+                          ...t('home.heroWords').split('|'),
+                        ]}
+                      />
+                    ),
                     className: 'font-display font-normal italic text-accent',
                   },
                 ]}
