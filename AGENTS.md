@@ -29,6 +29,8 @@ En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, pol
 | 6 | **Higgsfield** (plugin MCP) | Generar fotos, cutouts PNG, video, GLB — **preferido** para assets de templates | namespace `plugin-higgsfield-higgsfield` · [higgsfield.ai](https://higgsfield.ai) · plugin [Cursor Marketplace](https://cursor.com/marketplace/higgsfield) |
 | 7 | **playwright-cli** | Verificar demos/UI en el browser (open / snapshot / click / screenshot). Token-efficient | `.agents/skills/playwright-cli/` · [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) · [docs](https://playwright.dev/docs/getting-started-cli) |
 | 8 | **img2threejs** | Reconstruir un objeto de una foto como Three.js **procedural** (código, no GLB) | `.agents/skills/img2threejs/` · [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs) |
+| 9 | **Componentry** | Librería de componentes UI "copy-paste" (React + Tailwind) — origen de `text-morph`, base para futuros widgets de micro-interacción | `src/components/ui/` · [componentry.dev](https://componentry.dev) · repo [harshjdhv/componentry](https://github.com/harshjdhv/componentry) |
+| 10 | **Motion** (ex Framer Motion) | Motor de animación para componentes puntuales de UI que lo necesiten — no reemplaza GSAP+Lenis en scroll storytelling | [motion.dev/docs/react](https://motion.dev/docs/react) |
 
 ### Reglas de uso (no negociables)
 
@@ -39,6 +41,7 @@ En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, pol
 5. **Higgsfield para piezas de imagen** de templates (fotos, cutouts, upscale). No picsum. `GenerateImage` nativo de Cursor es fallback si el plugin no está. Video / GLB: preflight `get_cost` y confirmar créditos con el usuario.
 6. **playwright-cli para verificar** templates y chrome en el browser (`npx playwright-cli …`). Leer el skill antes de automatizar. No sustituye `check:visual` / `check:builder`.
 7. **img2threejs** cuando hay que esculpir un objeto **genérico y reemplazable** desde una foto a código Three.js. No para caras/artistas/productos únicos (mismo filtro que Tabasco). GLB texturizado: Higgsfield `generate_3d` o Meshy.
+8. **Motion/Componentry son para UI puntual**, no para scroll cinematográfico: `text-morph` (`src/components/ui/`) y cualquier componente futuro de Componentry sirven micro-interacciones de componente. El scroll storytelling sigue siendo GSAP + `docs/motion-cookbook.md` (regla 4). Instalación manual: `ui.shadcn.com`, `componentry.dev` y `motion.dev` están bloqueados en sandboxes remotos, así que el CLI de shadcn no resuelve el registry ahí — copiar el source de GitHub a mano. Detalle en `docs/componentry-motion.md`.
 
 ### Instalar / actualizar (local, gitignored)
 
