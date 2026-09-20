@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
 import { markSvg } from './marks'
+import { KineticTextReveal } from '../../ui/KineticTextReveal'
 
 /**
  * PLUM — FilmScroll
@@ -154,6 +155,10 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
   const canvasRef = useRef(null)
   const clipLayer = useRef(null)
   const beatRefs = useRef([])
+  // Instancias de <KineticTextReveal> (una por beat) + si el beat ya está
+  // activo, para disparar el revelado una sola vez al entrar.
+  const titleRefs = useRef([])
+  const beatActiveRef = useRef([])
   const overlayRefs = useRef([])
   const progressRef = useRef(null)
   const chapterRef = useRef(null)
@@ -448,6 +453,12 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
         paint()
       }
 
+      // Sólo DEV: cuenta los disparos del revelado de títulos, para poder
+      // verificar el cableado aunque la ventana esté oculta (con la pestaña en
+      // segundo plano el navegador congela requestAnimationFrame y la
+      // animación no se ve, pero el disparo igual ocurre).
+      const revealCalls = { play: 0, reset: 0 }
+
       function layoutBeats() {
         for (let k = 0; k < beatRefs.current.length; k++) {
           const el = beatRefs.current[k]
@@ -458,6 +469,21 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
           el.style.opacity = o.toFixed(3)
           el.style.transform = `translateY(${((1 - o) * 18).toFixed(1)}px)`
           el.style.pointerEvents = o > 0.6 ? 'auto' : 'none'
+
+          // El título se revela con Motion al entrar el beat y se rearma al
+          // salir. FilmScroll sigue mandando sobre el CONTENEDOR (opacidad y
+          // translate); Motion sólo toca los segmentos de texto de adentro, así
+          // que nunca pelean por el transform del mismo nodo.
+          const active = o > 0.55
+          if (active !== beatActiveRef.current[k]) {
+            beatActiveRef.current[k] = active
+            const reveal = titleRefs.current[k]
+            if (reveal) {
+              if (active) reveal.play()
+              else reveal.reset()
+              if (import.meta.env.DEV) revealCalls[active ? 'play' : 'reset']++
+            }
+          }
         }
       }
 
@@ -836,7 +862,11 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
         </div>
 
         {/* beats */}
-        {beats.map((b, k) => (
+        {beats.map((b, k) => {
+          // Un título con <em> usa la cara script y se sigue renderizando a la
+          // vieja usanza (KineticTextReveal sólo acepta texto plano).
+          const hasEm = /<em>/.test(b.title || '')
+          return (
           <div
             key={`${b.at}-${k}`}
             ref={(el) => (beatRefs.current[k] = el)}
@@ -861,10 +891,25 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
                   fontFamily: FONT[b.font] || FONT.serif,
                   fontSize: SIZE[b.size] || SIZE.md,
                   lineHeight: 1.05,
-                  whiteSpace: 'pre-line',
+                  // El revelado por líneas ya arma los saltos con flex-col; el
+                  // `pre-line` sólo hace falta en el camino de fallback.
+                  whiteSpace: hasEm ? 'pre-line' : 'normal',
                 }}
               >
-                {renderTitle(b.title, FONT.script)}
+                {hasEm ? (
+                  renderTitle(b.title, FONT.script)
+                ) : (
+                  <KineticTextReveal
+                    ref={(el) => (titleRefs.current[k] = el)}
+                    text={b.title || ''}
+                    splitBy="lines"
+                    direction="up"
+                    distance={26}
+                    stagger={0.09}
+                    autoPlay={false}
+                    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
               </h2>
               {b.body && (
                 <p
@@ -885,7 +930,8 @@ export default function FilmScroll({ src = '/plum/story.json', story: inlineStor
               )}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
     </section>
   )

@@ -173,6 +173,10 @@ Usar cuando el brief pide reconstruir **el objeto de una imagen** como modelo Th
 
 - Vite + React 19 + Tailwind CSS v4
 - GSAP 3 + Lenis + three (vanilla in monolith)
+- Motion for React (`motion`) para micro-interacción de componente; GSAP sigue
+  siendo el motor de scroll — ver [`docs/motion-componentry.md`](docs/motion-componentry.md)
+- `cn()` en `src/lib/utils.js` (clsx + tailwind-merge) para componentes copiados
+  de registros shadcn (componentry.dev) en `src/components/ui/`
 - Express API (`server/`) + MongoDB + Passport Google OAuth + Mercado Pago SDK
 - Zustand cart (UX only; prices validated server-side)
 
@@ -273,6 +277,22 @@ El scrollytelling **no es imposible**: son capas DOM + CSS + GSAP/Lenis. Antes d
 | Obsidian (canónico) | `Storytelling motion cookbook.md` en ScrollLab |
 | Wiring | `src/lib/gsap.js` + `SmoothScrollProvider` / `useLenis` |
 | Beat (producto) | [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) · `src/lib/beat/` |
+| Motion + Componentry | [`docs/motion-componentry.md`](docs/motion-componentry.md) · `src/components/ui/` |
+
+### Qué motor usa cada cosa (no mezclar en el mismo elemento)
+
+| Capa | Herramienta |
+|---|---|
+| Scroll / storytelling (P1–P14, Beat) | **GSAP + ScrollTrigger + Lenis** — no migrar |
+| Enter/exit, layout animations, gestos, springs | **Motion for React** (`import { motion } from 'motion/react'`) |
+| Piezas listas para copiar (MIT, quedan como código nuestro) | **Componentry** (`componentry.dev`) → `src/components/ui/` |
+
+Si el efecto se scrubea con el scroll es GSAP. Motion y GSAP peleando por el
+`transform` del mismo nodo es un bug garantizado.
+
+**Docs de Motion dentro del agente:** `npx motion-ai` instala un MCP con la
+documentación siempre actualizada (búsqueda gratis, sin token). Es interactivo
+— lo corre el usuario, no el agente. Detalle en el doc de arriba.
 
 ### Primitivos (P1–P14) — lib y método
 
