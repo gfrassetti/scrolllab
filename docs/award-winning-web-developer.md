@@ -58,6 +58,8 @@ abajo.
 - [ ] Sensación de progresión "capítulo a capítulo" al scrollear, no de
       folleto — si hay nav/índice lateral, evaluar P11 (rail numérico) /
       Beat en vez de un nav estático.
+- [ ] El hero evoca algo **antes de leer el copy** — abrirlo en silencio,
+      sin leer el headline: si no se siente nada, no está terminado.
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -109,6 +111,30 @@ section).
    que se la expliquen, forward/stop/reverse se comportan como se espera,
    headline legible todo el scrub, next section alcanzable, versión mobile
    deliberada, la página tiene sentido sin motion.
+
+**Ampliación — por qué white space en el hero (fragmento pegado por el
+usuario, probable Module 5 "Building the hero section", previo al Module
+6 de arriba):**
+
+> "...because the designer values the white space. Researchers point out
+> that giving elements room to breathe improves readability and reduces
+> cognitive load for visitors. So a great hero should evoke a feeling
+> before you even read anything."
+
+Dos puntos nuevos, específicos de hero (no genéricos de página larga como
+el white space ya logueado en Detalle #2):
+
+1. **Justificación research-backed, no solo estética**: el white space no
+   es gusto, reduce carga cognitiva y mejora legibilidad — argumento útil
+   para el "Design Read" de una línea que pide `taste-skill` cuando alguien
+   cuestione por qué un hero "tiene mucho espacio vacío".
+2. **El hero tiene que evocar antes de leerse**: la primera impresión es
+   pre-verbal — atmósfera/composición/movimiento antes que el copy. Esto es
+   un criterio de aceptación concreto para cualquier hero (incluido el de
+   Module 6): si al abrir la página en silencio, sin leer el headline, no
+   se siente nada — el hero no está terminado. Sumar como pregunta a la
+   checklist de cierre del Module 6 (punto 7 de la lista de arriba) y al
+   checklist de acción de Lesson 1 (arriba del todo del doc).
 
 **Nota técnica — toca una convención existente:**
 
