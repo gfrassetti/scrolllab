@@ -559,6 +559,37 @@ solo el chrome — usando los tokens de easing ya existentes (`--ease-out`,
 `--ease-drawer`) como base común para que el catálogo completo comparta
 timing, no solo estilo visual.
 
+#### Cierre de Lesson 4
+
+Citas de cierre que vale la pena fijar tal cual, complementan (no repiten)
+el catálogo de arriba:
+
+> "Interaction isn't just clicking a button. It's how the button reacts
+> when you hover, how the page transitions when you scroll, and how the
+> form responds when you type."
+
+Redefine "interacción" para el estándar award-level: no es el evento click,
+es la suma de reacciones en cada punto de contacto (hover, scroll, type).
+Ningún ítem del catálogo #6 es opcional bajo esta definición — cada uno es
+una de esas reacciones.
+
+> "A polished site is not built with one big effect. It's crafted from
+> countless small moments... Treat every hover and every scroll as an
+> opportunity to delight the user and reinforce your brand."
+
+Confirma explícitamente el meta-principio ya logueado arriba (consistencia
+antes que cantidad de efectos): no hay una sola micro-interacción "hero" que
+salve el resto, es la suma prolija de todas.
+
+> "Every time you move your cursor, the site acknowledges your presence.
+> Small animations give you a sense of control and connection, making the
+> experience feel personal."
+
+Framing psicológico nuevo, no solo estético: el feedback constante
+(incluido el feedback *ambiente*, no solo en elementos puntuales) genera
+sensación de control — argumento extra para no dejar ningún link/botón/
+campo del catálogo sin su reacción correspondiente.
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
