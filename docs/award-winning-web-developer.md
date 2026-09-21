@@ -258,6 +258,34 @@ en "Qué vendemos" (`AGENTS.md`):
       criterio que el repo ya usaba — no hay conflicto acá, es la misma
       barra dicha con otras palabras.
 
+#### Cierre de Lesson 1 (mismo video, tramo final)
+
+Dos ideas puntuales del cierre que valen la pena fijar aparte porque son
+citables tal cual, no solo repetición del principio general:
+
+1. **Framing de "capítulo"**: el sitio cuenta una historia scrolleando,
+   cada sección es su propio capítulo — el instructor lo compara con hojear
+   una novela (Romeo and Juliet), y el nav lateral con numerales romanos
+   **refuerza ese framing narrativo**, no es solo navegación. Esto sube de
+   nivel el punto 6 del Detalle #3 (P11/rail numérico como "capítulos"): no
+   es solo un patrón visual a portar, es la excusa narrativa completa para
+   justificar por qué una página larga con secciones muy distintas entre sí
+   se siente coherente en vez de desarmada — conecta directo con la regla
+   "layout NO repetitivo" y con "wayfinding en páginas largas" ya logueadas.
+2. **La cita que cierra el argumento del curso** (útil para no relitigar
+   esto de vuelta si alguna vez se cuestiona el approach):
+   > "The high-end site isn't using exotic technology. It's built with the
+   > same tools you have access to. But every detail is considered... The
+   > difference lies in the execution, not the technology... Cheap sites
+   > cut corners and feel generic because they don't tell a story and guide
+   > the user."
+
+   Confirma explícitamente lo que ya es el principio rector de este doc
+   (Detalle #2): no hace falta tooling exótico para subir de nivel un SKU
+   existente, alcanza con aplicar con disciplina lo que ya está disponible
+   en el repo (Impeccable, Emil, taste-skill, UI/UX Pro Max, cookbook,
+   Beat) — el gap nunca fue de herramientas, es de ejecución consistente.
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
