@@ -30,6 +30,47 @@
 4. Si el concepto es un primitivo de motion nuevo, referenciar/promover a
    `docs/motion-cookbook.md` en vez de duplicarlo acá.
 
+## ⚡ Checklist de acción — Award-level vs. genérico (Lesson 1)
+
+Comparación fija, siempre a mano. Usar en **cualquier** `Impeccable
+critique`/`audit`/`polish` de un template (nuevo o existente), antes de
+darlo por cerrado — es la aplicación directa de "Qué vendemos" en
+`AGENTS.md`. Detalle completo y fuente de cada punto: Detalle #2 y #3 más
+abajo.
+
+**Tiene que cumplir (para pasar la barra award-level):**
+
+- [ ] Paleta acotada y deliberada — un sistema completo, no "lo que vino
+      por default" (`UI/UX Pro Max` + Design Read de `taste-skill`).
+- [ ] Elementos clave (CTA, marcadores de nav) con espacio de sobra
+      **a propósito**, para que nada compita por atención.
+- [ ] Un foco claro por sección/viewport — el whitespace dirige la mirada,
+      no solo "hay aire".
+- [ ] Jerarquía tipográfica de mínimo 3 niveles, con contraste de estilo
+      entre ellos (no todo el mismo peso).
+- [ ] Cada sección tiene su propia composición — **el layout nunca se
+      repite** entre dos secciones consecutivas (grid, ritmo, peso
+      imagen/texto distintos).
+- [ ] Secciones marcadas por combo color + tipografía + márgenes, no por
+      un divider/borde — página larga sin sensación de estar perdido.
+- [ ] Micro-interacciones **dentro del template** (hover, click feedback en
+      cards/paneles/CTAs propios del SKU), no solo en el chrome del market.
+- [ ] Sensación de progresión "capítulo a capítulo" al scrollear, no de
+      folleto — si hay nav/índice lateral, evaluar P11 (rail numérico) /
+      Beat en vez de un nav estático.
+
+**Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
+
+- [ ] Layout boxy/cramped, sin aire entre elementos.
+- [ ] Iconos genéricos (stock, sin dirección propia).
+- [ ] Tipografía uniforme, sin jerarquía real.
+- [ ] Layout repetitivo, poca variación de ritmo/tono entre secciones.
+- [ ] Cero micro-interacciones — nada responde a la acción del usuario.
+- [ ] Whitespace mínimo — secciones se mezclan, nada resalta.
+- [ ] CTAs compitiendo con otros elementos, fáciles de pasar por alto.
+- [ ] Estructura intercambiable con "cientos de otros sitios" — el mismo
+      test ThemeForest/Awwwards que ya define `AGENTS.md`.
+
 ## Log de conceptos
 
 | # | Concepto | Principio / por qué | Dónde aplica en SCROLLLAB | Estado |
