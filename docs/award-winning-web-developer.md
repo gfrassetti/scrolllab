@@ -64,6 +64,8 @@ abajo.
       Beat en vez de un nav estático.
 - [ ] El hero evoca algo **antes de leer el copy** — abrirlo en silencio,
       sin leer el headline: si no se siente nada, no está terminado.
+- [ ] Nav del hero mínima/discreta — el hero se destaca por sí solo, sin
+      competir con la navegación (Detalle #4.8).
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -409,7 +411,17 @@ etc.) — eso no se documenta, no aporta nada reusable.
    directamente la filosofía de secciones componibles de SCROLLLAB**
    (`sectionRegistry.jsx`, el builder armando composiciones a partir de
    secciones independientes) ya existente en el repo.
-8. **Receta de cierre de la lección** (checklist reusable):
+8. **El hero se destaca por sí solo con navegación mínima**: del resumen de
+   la lección — "the hero welcomed us with a strong visual and minimal
+   navigation. It set the mood and hinted at the brand's promise." La nav
+   discreta/mínima en el hero **no es un detalle menor**, es lo que le deja
+   espacio al visual para pararse solo sin competir por atención — mismo
+   principio de "aislamiento intencional" ya logueado (Detalle #3.2) pero
+   aplicado puntualmente a la relación hero↔nav. Complementa (no reemplaza)
+   el criterio ya anotado en Detalle #1 de que el hero tiene que evocar
+   antes de leerse — acá el punto es *cómo* se logra ese protagonismo: sacando
+   de encima todo lo que no sea el hero mismo, empezando por el nav.
+9. **Receta de cierre de la lección** (checklist reusable):
    - Setear el mood con un hero fuerte.
    - Dividir la historia en secciones digeribles.
    - Transiciones + micro-interacciones para guiar, sin distraer.
