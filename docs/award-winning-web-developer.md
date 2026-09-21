@@ -50,7 +50,11 @@ abajo.
       entre ellos (no todo el mismo peso).
 - [ ] Cada sección tiene su propia composición — **el layout nunca se
       repite** entre dos secciones consecutivas (grid, ritmo, peso
-      imagen/texto distintos).
+      imagen/texto distintos). Dentro de un mismo listado/carrusel de ítems
+      del mismo tipo, sí repetir el patrón deliberadamente (Detalle #4.3) —
+      no confundir las dos escalas.
+- [ ] Una sola acción primaria por sección — un CTA claro, no varios
+      compitiendo (Detalle #4.2).
 - [ ] Secciones marcadas por combo color + tipografía + márgenes, no por
       un divider/borde — página larga sin sensación de estar perdido.
 - [ ] Micro-interacciones **dentro del template** (hover, click feedback en
@@ -80,6 +84,7 @@ abajo.
 | 1 | Hero de video controlado por scroll ("Make the hero move with scroll", Module 6) | Scroll adelante = avanza la escena, parar = congela, scroll atrás = rebobina. Pipeline: brief beginning/middle/end → imagen IA → imagen-a-video (Higgsfield) → still del primer frame como poster → wire al scroll | Toca `docs/scroll-media.md` — ver detalle abajo | Documentado — implementación pendiente de que el usuario la pida |
 | 2 | Básico vs. high-end: white space, tipografía, jerarquía, imaginería y **micro-interacciones** (Lesson 1) | Lo que separa un sitio "de template" de uno premium no es la herramienta ni la complejidad técnica, es la ejecución intencional de esos 5 elementos + crear una experiencia memorable | Transversal a **todos** los templates — Design craft (Impeccable/Emil/taste-skill/UI-UX Pro Max) en `AGENTS.md`, ver detalle abajo | Documentado — es un lente de evaluación, no una tarea puntual |
 | 3 | Walkthrough comparado Shopify award-level vs. landscaping genérico (Lesson 1, video) | Mismo ejercicio del curso pero con técnicas puntuales identificables por sitio: paleta acotada + aislamiento de elementos, sección de cards con motion coordinado, jerarquía tipográfica de 3 niveles, nav vertical con numerales como "capítulos", vs. checklist de anti-patrones del sitio genérico | Toca taste-skill, Emil, motion-cookbook (P11/P13), Impeccable audit — ver detalle abajo | Documentado — checklist listo para usar en audits |
+| 4 | Anatomía de un sitio premium por módulos repetibles (Lesson 2, walkthrough de un real-estate site) | Un sitio sofisticado no es 100 componentes únicos: es un vocabulario chico de módulos (hero, content block, transición, closing) ejecutados con disciplina — macro white space, una acción primaria por sección, repetición **deliberada** dentro de listados del mismo tipo, jerarquía por tamaño/peso/espacio, cierre grácil | Valida la filosofía de secciones componibles del builder (`sectionRegistry.jsx`); toca taste-skill, Emil, P13 — ver detalle abajo | Documentado |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -352,6 +357,65 @@ citables tal cual, no solo repetición del principio general:
    existente, alcanza con aplicar con disciplina lo que ya está disponible
    en el repo (Impeccable, Emil, taste-skill, UI/UX Pro Max, cookbook,
    Beat) — el gap nunca fue de herramientas, es de ejecución consistente.
+
+### Detalle #4 — Anatomía de un sitio premium por módulos repetibles (Lesson 2)
+
+**Fuente:** Lesson 2 del curso, walkthrough de un real-estate site. Por
+pedido explícito del usuario, acá van **solo los principios extraídos**, sin
+nada del ejemplo puntual de la página (fotos de living, "flats"/townhouses,
+etc.) — eso no se documenta, no aporta nada reusable.
+
+1. **Macro white space ≠ micro white space**: el white space "macro" (entre
+   bloques grandes de la página) dirige el ojo y ayuda a escanear, setea
+   mood, invita curiosidad — es un rol distinto al white space "micro" ya
+   logueado en Detalle #2/#3 (aislar un CTA puntual). Los dos hacen falta,
+   en escalas distintas.
+2. **Una acción primaria por sección** (citado como design best practice):
+   cada sección/bloque de contenido tiene **un solo** CTA claro, no varios
+   compitiendo. El botón se distingue por contraste + padding generoso; el
+   hover confirma que es interactivo con un cambio sutil (color/estado) —
+   ejemplo concreto más de micro-interacción **dentro del template** (mismo
+   gap señalado en Detalle #2).
+3. **Repetición deliberada de estructura *dentro* de un listado de mismo
+   tipo — no confundir con "layout no repetitivo"**: cuando un módulo
+   presenta varios ítems de la misma categoría (ej. distintas unidades de
+   una misma tipología), reusar exactamente el mismo patrón (imagen grande +
+   label corto + descripción + un CTA) en cada ítem **es la técnica
+   correcta** — construye familiaridad y ritmo, el usuario deja de
+   adivinar dónde mirar. Esto **no contradice** la regla de Lesson 1 ("el
+   layout NO debe ser repetitivo") — esa regla aplica entre **secciones de
+   tipo distinto** (hero vs. features vs. galería vs. footer); esta aplica
+   **dentro** de un mismo módulo repetido para variar contenido, no
+   composición. Los dos principios conviven: variar entre secciones, repetir
+   dentro de un carrusel/listado.
+4. **Jerarquía = tamaño + peso + espacio, asignados a propósito**: decidir
+   qué tiene que verse primero y darle el mayor espacio y contraste;
+   elementos secundarios (ej. thumbnails) pueden solo **insinuar** que hay
+   más contenido sin necesitar que se haga click — profundidad por
+   presencia, no por interacción obligatoria.
+5. **Cierre grácil, no hard-sell**: la sección de cierre vuelve a un fondo
+   sobrio, restablece la marca (wordmark/script grande), un único CTA
+   discreto (ya visto antes en la nav, no uno nuevo insistente), y
+   detalles/links secundarios en tipografía chica que no compiten porque
+   están posicionados con sutileza, no porque estén escondidos.
+6. **Transiciones y micro-interacciones usadas con moderación**: guían y
+   confirman acciones, no reemplazan al contenido ni se usan por default en
+   todo — refuerza (no contradice) "el scrollytelling no se reemplaza por
+   micro-UI" ya escrito en `AGENTS.md`.
+7. **El sitio completo es un vocabulario chico de módulos repetibles**:
+   hero, content block (imagen + texto + CTA), pantalla de transición,
+   cierre. La sofisticación percibida viene de **ejecutar bien pocos
+   módulos**, no de tener cientos de piezas únicas — **esto valida
+   directamente la filosofía de secciones componibles de SCROLLLAB**
+   (`sectionRegistry.jsx`, el builder armando composiciones a partir de
+   secciones independientes) ya existente en el repo.
+8. **Receta de cierre de la lección** (checklist reusable):
+   - Setear el mood con un hero fuerte.
+   - Dividir la historia en secciones digeribles.
+   - Transiciones + micro-interacciones para guiar, sin distraer.
+   - Cerrar con un CTA simple y contundente.
+   - Ingredientes: espaciado intencional, jerarquía clara, patrones
+     consistentes, motion restringido — nada de esto requiere tooling caro.
 
 ## Aplicación a templates existentes
 
