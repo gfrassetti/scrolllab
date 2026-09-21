@@ -101,20 +101,21 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
     assert.equal(res.status, 200)
     return agent
   }
-  async function newCode(email) {
-    const res = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email })
-    assert.equal(res.status, 200)
-    return res.body.coupon.code
-  }
+  const welcome = (agent, body = {}) =>
+    agent.post('/api/coupons/welcome').set('Origin', ORIGIN).send(body)
   async function checkout(agent, body) {
     const res = await agent.post('/api/checkout').set('Origin', ORIGIN).send(body)
     return res
   }
-  /** Pide el cupón y entra con la misma cuenta: el cupón es de ese mail. */
+  /** Entra con Google (dev-login) y recibe su cupón de bienvenida: es de ese mail. */
   async function buyerWithCoupon(email) {
-    const code = await newCode(email)
     const agent = await login(email)
-    return { code, agent }
+    const res = await welcome(agent)
+    assert.equal(res.status, 200)
+    return { code: res.body.coupon.code, agent }
+  }
+  async function newCode(email) {
+    return (await buyerWithCoupon(email)).code
   }
   async function pendingOrder(agent, body) {
     const res = await checkout(agent, body)
@@ -419,35 +420,40 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
   })
 
   describe('mail del cupón por Resend', () => {
-    it('el alta manda el mail con el código y un link que guarda el cupón', async () => {
+    it('la primera vez que entra con su cuenta le manda el mail: ya está en la cuenta, sin código que tipear', async () => {
       config.email.enabled = true
-      const res = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email: 'mail1@test.com', locale: 'es' })
+      const res = await welcome(await login('mail1@test.com'), { locale: 'es' })
       assert.equal(res.status, 200)
+      assert.equal(res.body.created, true)
       assert.equal(res.body.emailed, true)
 
       assert.equal(resendMails.length, 1)
       const { body, headers } = resendMails[0]
       assert.deepEqual(body.to, ['mail1@test.com'])
       assert.match(body.subject, /10%/)
-      assert.ok(body.html.includes(res.body.coupon.code))
-      assert.ok(body.html.includes(`?cupon=${res.body.coupon.code}`))
+      assert.ok(body.html.includes('mail1@test.com'), 'el mail dice con qué cuenta hay que pagar')
+      assert.ok(body.html.includes('/#templates'))
+      assert.ok(!body.html.includes('?cupon='), 'ya no hay link que guarde un código')
+      assert.ok(body.html.includes(res.body.coupon.code), 'el código va como referencia en el pie')
       assert.match(headers.get('idempotency-key'), /^scrolllab-coupon-/)
     })
 
-    it('volver a anotarse con el mismo mail no manda otro mail y devuelve el mismo cupón', async () => {
+    it('entrar de nuevo con la misma cuenta no manda otro mail y devuelve el mismo cupón', async () => {
       config.email.enabled = true
-      const first = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email: 'mail2@test.com' })
-      const again = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email: 'mail2@test.com' })
+      const agent = await login('mail2@test.com')
+      const first = await welcome(agent)
+      const again = await welcome(agent)
 
       assert.equal(resendMails.length, 1)
+      assert.equal(again.body.created, false)
       assert.equal(again.body.emailed, false)
       assert.equal(again.body.coupon.code, first.body.coupon.code)
     })
 
-    it('si Resend falla, el alta igual devuelve el cupón para mostrarlo en pantalla', async () => {
+    it('si Resend falla, igual devuelve el cupón: el carrito y la cuenta lo muestran', async () => {
       config.email.enabled = true
       resendOk = false
-      const res = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email: 'mail3@test.com' })
+      const res = await welcome(await login('mail3@test.com'))
       assert.equal(res.status, 200)
       assert.equal(res.body.emailed, false)
       assert.match(res.body.coupon.code, COUPON_CODE_RE)
@@ -455,9 +461,25 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
     })
 
     it('con el mail apagado no se llama a Resend', async () => {
-      const res = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email: 'mail4@test.com' })
+      const res = await welcome(await login('mail4@test.com'))
       assert.equal(res.body.emailed, false)
       assert.equal(resendMails.length, 0)
+    })
+
+    it('un cliente que ya compró no recibe cupón ni mail', async () => {
+      config.email.enabled = true
+      const agent = await login('cliente-viejo@test.com')
+      const { order, orderId } = await pendingOrder(agent, { items: [{ sku: 'chapters' }] })
+      await webhook(approved(order))
+      assert.equal((await db.findOrderById(orderId)).status, 'paid')
+
+      const res = await welcome(agent)
+      assert.equal(res.body.eligible, false)
+      assert.equal(res.body.coupon, null)
+      // Sí salió el comprobante de la compra; el del cupón, no.
+      const couponMails = resendMails.filter((m) => (m.body.tags || []).some((tag) => tag.value === 'welcome_coupon'))
+      assert.equal(couponMails.length, 0)
+      assert.equal(rowFor('cliente-viejo@test.com'), undefined)
     })
   })
 })

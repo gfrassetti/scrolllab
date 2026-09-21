@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import es from '../i18n/locales/es.json'
 import SiteHeader from '../components/SiteHeader'
-import LeadCapture from '../components/LeadCapture'
 import NotFoundPage from './NotFoundPage'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
@@ -218,8 +217,6 @@ function ProductView({ data }) {
           </ul>
         </section>
       </main>
-
-      <LeadCapture source={`plantilla-${data.sku}`} />
     </div>
   )
 }

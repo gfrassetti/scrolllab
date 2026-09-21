@@ -272,29 +272,6 @@
     "contactErrGeneric": "No se pudo enviar. Probá de nuevo.",
     "contactErrNetwork": "Sin conexión. Revisá tu red e intentá otra vez.",
     "contactErrConfig": "El formulario aún no está configurado. Escribinos por email.",
-    "leadEyebrow": "Primera compra",
-    "leadTitle": "{{percent}}% menos en tu primera compra.",
-    "leadBody": "Dejá tu mail y te damos un cupón para tu primer modelo, tu composición del builder o el bundle. Sin newsletters: solo el cupón.",
-    "leadLabel": "Tu email (el de tu cuenta de Google)",
-    "leadPlaceholder": "vos@estudio.com",
-    "leadSubmit": "Quiero mi cupón",
-    "leadSending": "Enviando…",
-    "leadSuccess": "Listo.",
-    "leadErrEmail": "Ingresá un email válido.",
-    "leadErrRate": "Demasiados intentos. Probá de nuevo en un rato.",
-    "leadErrGeneric": "No pudimos anotarte. Probá de nuevo.",
-    "leadErrNetwork": "Sin conexión. Revisá tu red e intentá otra vez.",
-    "leadConsent": "Te mandamos el cupón por mail y nada más: no enviamos newsletters. El cupón es personal: vale solo para ese mail. Solo guardamos tu mail para eso.",
-    "leadPrivacy": "Política de privacidad",
-    "leadCouponEyebrow": "Tu cupón",
-    "leadCouponBody": "{{percent}}% en tu primera compra. Vale hasta el {{date}} y se usa una sola vez.",
-    "leadCouponBound": "Es personal: vale solo para {{email}}. Cuando compres, entrá con esa cuenta de Google.",
-    "leadCouponEmailed": "También te lo mandamos por mail.",
-    "leadCouponCta": "Elegir mi modelo",
-    "leadCouponCopy": "Copiar",
-    "leadCouponCopied": "Copiado",
-    "leadUsed": "Ese mail ya usó su cupón.",
-    "leadExpired": "El cupón de ese mail venció.",
     "labBodyBefore": "Configurás una sección en LAB y la mostrás en cualquier sitio con una etiqueta script — sin bajar nada, sin tocar tu código. La editás desde el ",
     "labBodyLink": "Lab",
     "labBodyAfter": ".",
@@ -840,23 +817,13 @@
     "redirecting": "Un momento…",
     "preview": "Ver preview",
     "clearAll": "Quitar todo",
-    "couponLabel": "Cupón",
-    "couponPlaceholder": "SL-XXXXXX",
-    "couponApply": "Aplicar",
-    "couponApplying": "Verificando…",
-    "couponAppliedPct": "{{percent}}% menos",
     "couponUntil": "vence el {{date}}",
-    "couponRemove": "Quitar",
     "couponSubtotal": "Subtotal",
-    "couponDiscount": "Cupón {{code}} ({{percent}}%)",
-    "couponErrInvalid": "Ese cupón no existe. Revisá el código.",
+    "couponDiscount": "Cupón de bienvenida {{percent}}%",
     "couponErrUsed": "Ese cupón ya se usó.",
     "couponErrExpired": "Ese cupón venció.",
-    "couponFor": "para {{email}}",
-    "couponErrOther": "Este cupón es para otro mail. Entrá con la cuenta de Google con la que lo pediste.",
-    "couponErrOtherFor": "Este cupón es para {{email}}. Entrá con esa cuenta de Google.",
     "couponErrFirst": "El cupón vale solo para la primera compra.",
-    "couponErrGeneric": "No pudimos verificar el cupón. Probá de nuevo."
+    "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo."
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -909,7 +876,8 @@
     "subCancelDone": "Suscripción cancelada",
     "subSync": "Sincronizar con Mercado Pago",
     "subSyncHint": "¿Te suscribiste recién y no se refleja?",
-    "subSyncDone": "Estado actualizado"
+    "subSyncDone": "Estado actualizado",
+    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra hasta el {{date}}. Se aplica solo al pagar."
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",
@@ -978,7 +946,7 @@
           "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
           "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago y cantidad de descargas.",
           "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión.",
-          "El email que dejás para recibir tu cupón de bienvenida, junto con cuándo te anotaste, desde qué parte del sitio y el cupón que te dimos."
+          "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste."
         ]
       },
       {
@@ -987,7 +955,7 @@
           "Crear y administrar tu cuenta y mantener tu sesión iniciada.",
           "Procesar pagos, confirmar órdenes y habilitar descargas.",
           "Enviar comprobantes y comunicaciones operativas relacionadas con tus compras.",
-          "Enviarte el cupón de bienvenida que pediste. No enviamos newsletters.",
+          "Enviarte por mail el cupón de bienvenida de tu primera compra. No enviamos newsletters.",
           "Prevenir fraude, abuso y accesos no autorizados, y cumplir obligaciones legales."
         ]
       },

@@ -155,9 +155,11 @@ const subscriptionSchema = new mongoose.Schema(
 );
 
 /**
- * Lead: mail que alguien dejó en el formulario de novedades (no es un usuario).
- * Se guarda siempre acá; el CRM (Brevo) es una copia que se sincroniza aparte
- * (`crmSyncedAt` / `crmError`). Ver server/services/crm.js.
+ * Lead: el mail que recibió el cupón de bienvenida. Hoy sale de quien entra con
+ * su cuenta de Google y todavía no compró (`source: "account"`); los primeros
+ * salieron de un formulario de la home (`source: "home"`), que ya no existe.
+ * Se guarda siempre acá; el CRM (Brevo, opcional) es una copia que se sincroniza
+ * a mano con `npm run leads:sync` (`crmSyncedAt` / `crmError`). Ver server/services/crm.js.
  */
 const leadSchema = new mongoose.Schema(
   {
@@ -168,14 +170,14 @@ const leadSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    // Dónde se anotó (home, builder…). Sale en el CSV y sirve para medir.
+    // De dónde salió el cupón (account, o home en los primeros). Sale en el CSV.
     source: { type: String, default: "home" },
     // Canal de la primera visita (utm_* del link): mide qué trae mails.
     utmSource: String,
     utmMedium: String,
     utmCampaign: String,
     locale: { type: String, enum: ["es", "en"], default: "es" },
-    // Cuándo aceptó recibir novedades: el formulario lo dice junto al botón.
+    // Cuándo se le dio el cupón (y se le mandó el mail). No hay newsletters.
     consentAt: { type: Date, default: Date.now },
     crmSyncedAt: Date,
     crmError: String,

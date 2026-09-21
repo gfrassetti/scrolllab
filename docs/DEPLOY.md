@@ -282,54 +282,64 @@ son pantalla completa con textos de relleno.
 - Los resultados tardan semanas o meses. Mirar en Search Console, a las 4 a 6
   semanas, qué búsquedas muestran las páginas antes de tocar los textos.
 
-## Cupón de bienvenida (leads)
+## Cupón de bienvenida (por cuenta, sin formulario)
 
-Quien no compra deja su mail en la franja de la home
-(`src/components/LeadCapture.jsx`) y recibe un cupón del 10% para su **primera
-compra**. Sin newsletters: el único mail que sale es el cupón.
+Quien entra con su cuenta de Google y todavía no compró recibe un cupón del 10%
+para su **primera compra**. No hay formulario en el sitio: el cupón sale de la
+cuenta (antes había una franja en la home que pedía el mail; se sacó). Sin
+newsletters: el único mail que sale es el cupón, una sola vez.
 
 **Flujo**
-- `POST /api/leads` (sin sesión, 10 por hora por IP, honeypot `website`) guarda el
-  mail en nuestra base (colección `leads`; en dev `storage/db/leads.json`) y le da
-  un código `SL-XXXXXX`: uno por mail, vence a los 14 días, un solo uso. El código
-  vuelve en la respuesta (se ve en pantalla) y, con `EMAIL_ENABLED=true`, sale por
-  mail con Resend (el de los recibos). Sin Resend igual se ve en pantalla.
-- El front guarda el código (`localStorage`, o el link `?cupon=` del mail) y el
-  carrito lo aplica solo: `POST /api/coupons/check` (30 por hora por IP).
+- Al haber sesión, el front (`WelcomeCouponSync`, montado en `App.jsx`) pide
+  `POST /api/coupons/welcome` (con sesión; 120 por hora **por usuario**, no por IP,
+  porque se pide en cada carga de página: si se cortara, el comprador perdería el
+  descuento sin enterarse). Manda el idioma y los `utm_*` guardados.
+- La primera vez el servidor crea el cupón en la colección `leads` (en dev
+  `storage/db/leads.json`, `source: "account"`): código `SL-XXXXXX`, uno por mail,
+  vence a los 14 días, un solo uso, y con `EMAIL_ENABLED=true` sale **un mail**
+  por Resend diciendo que el descuento ya está en la cuenta y se aplica solo (el
+  código va en el pie, solo de referencia). Las siguientes veces devuelve el mismo
+  cupón, sin mail.
+- Un cliente que ya compró (`eligible: false`) no recibe cupón ni queda anotado.
+- El carrito (`CartPage.jsx`) lo aplica solo si hay sesión y muestra una línea con
+  el descuento y el vencimiento; la cuenta (`AccountPage.jsx`) lo menciona en una
+  línea. Sin sesión no se muestra nada. No hay campo para escribir códigos.
 - `POST /api/checkout` recibe **solo el código**. El servidor lo revalida (existe,
-  no usado, no vencido y el usuario no tiene compras pagas) y descuenta sobre el
-  precio de lista en USD (`discountedArsFromUsd`, mismo redondeo que
-  `arsFromUsd`). Así el monto de la preference de Mercado Pago, `order.total` y lo
-  que compara el webhook coinciden. El cliente nunca manda un precio ni un %.
+  no usado, no vencido, es de ese mail y el usuario no tiene compras pagas) y
+  descuenta sobre el precio de lista en USD (`discountedArsFromUsd`, mismo
+  redondeo que `arsFromUsd`). Así el monto de la preference de Mercado Pago,
+  `order.total` y lo que compara el webhook coinciden. El cliente nunca manda un
+  precio ni un %.
 - Se canjea cuando la orden pasa a `paid` (`markOrderPaid`): webhook, confirm o
-  mock. Canjear es contabilidad: si falla, no frena la entrega.
+  mock. Canjear es contabilidad: si falla, no frena la entrega. Al confirmar el
+  pago el front también borra el cupón guardado.
 - Aplica a modelos, bundle y composiciones del builder. No a LAB.
-- **Es personal**: solo vale si se compra con la cuenta de Google del mail que
-  lo pidió (los puntos y la `+etiqueta` de Gmail cuentan como el mismo mail).
-  Sin esto sería un código al portador: aunque se reenvíe a miles de personas lo
-  canjea el primero que pague, que puede ser un tercero. Con otra cuenta el
-  checkout responde 403 con `code: coupon_other_account` y el mail enmascarado
-  (`a***@gmail.com`); el carrito lo muestra sin descartar el cupón. El intento
-  ajeno no lo gasta. Quien pide el cupón con un mail y compra con otra cuenta de
-  Google no puede usarlo: la franja lo avisa y el carrito dice con cuál entrar.
+- **Es personal**: el cupón se crea con el mail de la cuenta, así que solo vale
+  pagando con esa cuenta (los puntos y la `+etiqueta` de Gmail cuentan como el
+  mismo mail). Con otra cuenta el checkout responde 403 con
+  `code: coupon_other_account`.
+- El endpoint público `POST /api/leads` **ya no existe** (servía para anotar
+  cualquier mail y mandarle un cupón a un tercero). Los cupones que se generaron
+  con la franja siguen valiendo: al entrar con esa cuenta se devuelve el mismo
+  cupón, sin mail nuevo.
 
 **Ajustes**: constantes, no env. `WELCOME_COUPON_PERCENT`, `WELCOME_COUPON_DAYS` y
-`WELCOME_COUPON_BOUND_TO_EMAIL` (en `false` vuelve a ser un código al portador)
-en `server/catalog.js`; el porcentaje está espejado en `src/lib/pricing.js` y
-`npm run check` falla si se despegan.
+`WELCOME_COUPON_BOUND_TO_EMAIL` en `server/catalog.js`; el porcentaje está
+espejado en `src/lib/pricing.js` y `npm run check` falla si se despegan.
 
-**Leads**
+**Medición**
 - `npm run leads:export > leads.csv` saca la lista, con el cupón, si lo canjearon
   y de qué canal llegó (`utmSource`, `utmMedium`, `utmCampaign`: los `utm_*` de la
-  primera visita, guardados 30 días). `npm run leads:stats` resume mails y
-  canjes por canal y por campaña. Ambos usan la misma base que el server.
-- Brevo es **opcional** y hoy no hace falta. Sin `BREVO_API_KEY` no se sincroniza
-  nada; con key, cada alta nueva sube (`POST /v3/contacts`, `updateEnabled`) y, si
-  hay `BREVO_LIST_ID`, entra a esa lista. `npm run leads:sync` sube los pendientes.
-- GTM: el front empuja `generate_lead` (con `lead_source`) al dataLayer. Falta el
-  trigger + tag de GA4 en el contenedor.
-- La política de privacidad (es/en) dice que se guarda el mail para el cupón y
-  que se usan proveedores de email.
+  primera visita, guardados 30 días, que viajan con el pedido del cupón).
+  `npm run leads:stats` resume cuentas y canjes por canal y por campaña. Ambos
+  usan la misma base que el server.
+- Brevo es **opcional** y no se usa: el alta ya no sube sola. `npm run leads:sync`
+  sube a mano los pendientes si algún día se configura `BREVO_API_KEY`.
+- GTM: el front empuja `generate_lead` (con `lead_source: "account"`) al dataLayer
+  cuando se crea el cupón de una cuenta nueva. Falta el trigger + tag de GA4 en el
+  contenedor.
+- La política de privacidad (es/en) dice que se guarda el cupón de bienvenida
+  (mail, cuándo, canal y si lo usaste) y que se manda por mail.
 
 **Probar con Mercado Pago real**: los tests y la prueba en el navegador usan el
 pago simulado. Antes de promocionarlo, hacé una compra de prueba con cupón con

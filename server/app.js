@@ -22,13 +22,7 @@ import {
   asyncHandler,
   HttpError,
 } from './middleware.js'
-import {
-  validateCheckoutItems,
-  assertObjectIdLike,
-  normalizeLeadEmail,
-  cleanLeadSource,
-  cleanUtm,
-} from './validation.js'
+import { validateCheckoutItems, assertObjectIdLike } from './validation.js'
 import { isHostableSectionId, HOSTABLE_SECTIONS } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
 import {
@@ -81,14 +75,10 @@ import {
   discountedArsFromUsd,
 } from './catalog.js'
 import { getUsdArsRate } from './fx.js'
-import { syncLeadSafely } from './services/crm.js'
 import {
-  ensureCoupon,
-  couponStatus,
+  claimWelcomeCoupon,
   maskEmail,
-  publicCoupon,
   resolveCouponForCheckout,
-  sendCouponEmailSafely,
 } from './services/coupons.js'
 
 function publicUser(user) {
@@ -1251,48 +1241,28 @@ export async function createApp(config) {
     }),
   )
 
-  // Cupón de bienvenida: cualquiera deja su mail (sin sesión) y recibe su cupón,
-  // uno por mail. Se guarda siempre en nuestra base; el CRM (Brevo, opcional) es
-  // una copia y su fallo no puede tirar el alta.
+  // Cupón de bienvenida de quien tiene sesión: la primera vez lo crea y le manda
+  // el mail; después devuelve el mismo. No hay formulario ni mail que tipear: el
+  // mail es el de su cuenta de Google. Ver `claimWelcomeCoupon`.
   app.post(
-    '/api/leads',
-    limits.leads,
+    '/api/coupons/welcome',
+    requireAuth,
+    limits.welcome,
     asyncHandler(async (req, res) => {
-      // Honeypot: un humano no ve el campo `website`, un bot lo completa.
-      if (String(req.body?.website ?? '').trim()) {
-        return res.json({ ok: true, coupon: null })
-      }
-
-      const { lead, created } = await db.upsertLead({
-        email: normalizeLeadEmail(req.body?.email),
-        source: cleanLeadSource(req.body?.source),
-        locale: req.body?.locale === 'en' ? 'en' : 'es',
-        // De qué canal llegó: se guarda en el alta y no se pisa después.
-        ...cleanUtm(req.body?.utm),
+      const out = await claimWelcomeCoupon({
+        user: req.user,
+        locale: req.body?.locale,
+        utm: req.body?.utm,
+        config,
       })
-      await ensureCoupon(lead)
-      // El mail sale solo en el alta: pedirlo de nuevo no sirve para llenarle la
-      // casilla a un tercero. Quien vuelve a anotarse ve su código en pantalla.
-      const emailed = created
-        ? await sendCouponEmailSafely({ lead, config })
-        : false
-      // Un lead que quedó sin sincronizar reintenta cuando vuelve a anotarse.
-      if (created || !lead.crmSyncedAt) await syncLeadSafely({ lead, config })
-
-      const status = couponStatus(lead)
-      res.json({
-        ok: true,
-        coupon: status === 'active' ? publicCoupon(lead) : null,
-        couponStatus: status,
-        emailed,
-      })
+      res.set('Cache-Control', 'no-store')
+      res.json({ ok: true, ...out })
     }),
   )
 
-  // Chequeo público del cupón (sin sesión) para mostrar el descuento en el
-  // carrito. Si hay sesión también mira de quién es y "primera compra"; sin
-  // sesión devuelve el mail enmascarado para decir con qué cuenta entrar. El
-  // checkout lo revalida.
+  // Chequeo del cupón por código. Si hay sesión también mira de quién es y
+  // "primera compra"; sin sesión devuelve el mail enmascarado. El checkout lo
+  // revalida.
   app.post(
     '/api/coupons/check',
     limits.coupons,

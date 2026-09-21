@@ -153,10 +153,13 @@ export function rateLimits() {
       max: 40,
       message: { error: 'Demasiadas operaciones, probá en un momento' },
     }),
-    // Alta de mails: pública y sin sesión, así que el techo es por IP.
-    leads: mk({
+    // Cupón de bienvenida: lo pide el front al cargar cada página con sesión, así
+    // que el techo es por usuario (va después de requireAuth) y no por IP: si se
+    // cortara, el comprador perdería el descuento sin enterarse.
+    welcome: mk({
       windowMs: 60 * 60 * 1000,
-      max: 10,
+      max: 120,
+      keyGenerator: (req) => String(req.user?.id ?? req.user?._id ?? 'sin-sesion'),
       message: { error: 'Demasiados intentos, probá más tarde' },
     }),
     // Chequeo público de cupones: frena a quien prueba códigos a ciegas.

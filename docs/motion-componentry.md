@@ -67,26 +67,46 @@ al repo y a partir de ahí es nuestro.
 npx shadcn@latest add @componentry/<componente>
 ```
 
-### Ojo: este repo no tiene shadcn inicializado
+### Cómo traer un componente nuevo
 
-No hay `components.json` ni alias `@/`, y el repo es **JSX, no TypeScript**. Los
-componentes del registro vienen en `.tsx` e importan `cn` desde `@/lib/utils`.
-Correr `shadcn init` tocaría la config de Tailwind v4 (que tiene tokens propios
-en `src/index.css`), así que el flujo es **manual**:
+`shadcn init` **no** se corrió (tocaría la config de Tailwind v4 y los tokens de
+`src/index.css`), pero hay `components.json` + alias `@/`, así que el CLI de
+`add` funciona directo y —por `tsx: false`— ya convierte el componente a `.jsx`.
 
-1. Bajar el JSON del registro: `https://componentry.dev/r/<componente>.json`
-2. Sacar `files[].content`, convertir TSX → JSX (borrar tipos)
-3. Guardar en `src/components/ui/<Nombre>.jsx`
-4. Cambiar `from "@/lib/utils"` por `from '../../lib/utils'`
-5. Instalar lo que liste `dependencies` del JSON
+```bash
+npx shadcn@latest add @componentry/<componente> --dry-run   # 1) ver qué escribiría
+npx shadcn@latest add @componentry/<componente>             # 2) traerlo
+```
+
+Después, tres retoques (el registro está pensado para proyectos Next/TS):
+
+1. **`framer-motion` → `motion/react`.** Si el CLI lista `framer-motion` como
+   dependencia, cambiá el import del archivo nuevo por `motion/react` y corré
+   `npm uninstall framer-motion`. Es la misma librería (`motion` es su sucesora);
+   dejar los dos duplica el motor de animación en el bundle.
+2. **`motion.span` → `Motion.span`** (`import { motion as Motion } …`): la regla
+   `no-unused-vars` del repo sólo reconoce como usados los identificadores que
+   empiezan en mayúscula.
+3. Correr `npx eslint <archivo>` y `npm test`.
+
+Sin el CLI, el camino manual sigue valiendo: bajar
+`https://componentry.dev/r/<componente>.json`, sacar `files[].content`, convertir
+TSX → JSX y guardarlo en `src/components/ui/<Nombre>.jsx`.
 
 ### Ya instalado
 
 | Componente | Archivo | Dependencias |
 |---|---|---|
 | `text-morph` | `src/components/ui/TextMorph.jsx` | `clsx`, `tailwind-merge` |
+| `kinetic-text-reveal` | `src/components/ui/KineticTextReveal.jsx` | `motion` (era `framer-motion`), `clsx`, `tailwind-merge` — **usado en los beats de PLUM** |
 
-`TextMorph` hace una transición fluida entre palabras con un filtro SVG de
+> **Hay dos `TextMorph` en el repo.** `src/components/ui/TextMorph.jsx` es el port
+> fiel de Componentry (filtro SVG de umbral = efecto "gooey") y hoy **no lo usa
+> nadie**. El hero del home usa `src/components/TextMorph.jsx`, una versión propia
+> más simple (blur + fade, "inspirada en" Componentry). Si se unifican, decidir
+> cuál queda y borrar la otra.
+
+`ui/TextMorph` hace una transición fluida entre palabras con un filtro SVG de
 umbral y dos capas cruzándose (sin librería de animación). Uso:
 
 ```jsx
@@ -98,20 +118,89 @@ import { TextMorph } from '../components/ui/TextMorph'
 Helper compartido: `src/lib/utils.js` exporta `cn()` (clsx + tailwind-merge),
 que es lo que esperan todos los componentes de registros shadcn.
 
-## Efecto en el ZIP que se vende
+## Uso en PLUM: revelado de títulos (`KineticTextReveal`)
 
-El `package.json` del template **se genera a partir de los imports del código**
-(ver `server/packaging.js`). O sea:
+Cada beat de `story.json` (sin `<em>`) revela su título línea por línea con blur
+suave al entrar. Reparto para que GSAP y Motion **no compartan ningún nodo**:
 
-- Si una sección importa `motion/react`, el comprador recibe `motion` en sus
-  dependencias automáticamente. No hay que tocar nada.
-- Los componentes de Componentry viajan como **código fuente** dentro del ZIP
-  (son archivos del repo), así que no suman dependencia ni problema de licencia
-  — MIT permite redistribuir.
+| Quién | Qué toca |
+|---|---|
+| `FilmScroll` (GSAP ticker) | opacidad + `translateY` del **contenedor** del beat, según el scroll |
+| `KineticTextReveal` (Motion) | los **segmentos de texto de adentro** (`opacity`, `blur`, `y`) |
+
+- `autoPlay={false}` + ref imperativo: `layoutBeats()` llama `play()` al entrar el
+  beat y `reset()` al salir. Ver `titleRefs` / `beatActiveRef` en `FilmScroll.jsx`.
+- **Histéresis** (entra con opacidad > 0.35, se rearma por debajo de 0.12): con el
+  scroll parado justo en el umbral no se re-dispara en loop.
+- Los títulos con `<em>` (cara script) mantienen el render clásico
+  (`renderTitle`) porque el componente sólo acepta texto plano.
+- **Verificar sin ver la pantalla:** con la pestaña oculta el navegador congela
+  `requestAnimationFrame` y la animación no se ve. En DEV,
+  `window.__plum.info.reveal` cuenta los disparos (`{ play, reset }`):
+  `window.__plum.seek(0.08)` → `play: 1`; repetir el mismo `seek` no suma.
+
+## MCP de Componentry (shadcn)
+
+Sirve para que el agente busque/traiga componentes del registro en lenguaje
+natural ("agregá el kinetic text reveal"). Está configurado **sin correr
+`shadcn init`** (que toca la config de Tailwind v4):
+
+| Archivo | Para qué |
+|---|---|
+| `components.json` | registro `@componentry`, `tsx: false`, css `src/index.css` |
+| `jsconfig.json` | alias `@/*` → `src/*` (el CLI lo exige para arrancar) |
+| `vite.config.js` | mismo alias `@` para que resuelva en build |
+| `.mcp.json` | servidor `npx shadcn@latest mcp` |
+
+- **Alias `@/`: sólo para `src/components/ui/*` y `src/lib/*`.** No lo uses en
+  `src/components/sections/*`: esas carpetas se copian verbatim al ZIP y el
+  proyecto del comprador no tiene el alias.
+- El primer arranque de `npx` en Windows tarda más de 30 s → Claude Code marca
+  `CONNECT_TIMEOUT`. Con el paquete ya en caché el saludo de protocolo responde en
+  ~4 s. Es un servidor de **proyecto**: se reconecta con `/mcp` (lo hace el
+  usuario) y la primera vez pide aprobarlo.
+- El registro completo también se consulta sin MCP:
+  `npx shadcn@latest search @componentry -q "text"` o
+  `https://componentry.dev/r/registry.json` (54 componentes).
+
+### Evaluados para PLUM
+
+PLUM es **una sola película** — nada de secciones apiladas. Sólo sirve lo que se
+superpone al canvas.
+
+| Componente | Veredicto |
+|---|---|
+| `kinetic-text-reveal` | ✅ **conectado** — expone `play()`/`reset()`, encaja con beats controlados por scroll |
+| `text-morph` | port fiel en `ui/` sin usar (el home usa su propia versión simple); candidato para PLUM: rotar palabras en el kicker del hero |
+| `scroll-based-velocity` | candidato: texto que se inclina según la velocidad del scroll; falta probar con Lenis |
+| `grain-gradient` | candidato: grano/luz sobre el canvas (sin dependencias); falta medir costo en GPU |
+| `letter-cascade`, `text-repel`, `annotated-text` | descartados por ahora: no aportan al relato del film |
+| Bloques de sección (`pricing-*`, `hero-*`, `sticky-scroll-cards`, `scroll-split-card`…) | ❌ rompen la regla de "una sola película continua" |
+
+## Efecto en el ZIP que se vende (verificado en `server/packaging.js`)
+
+El empaquetador copia **sólo**: la lista fija `SHARED`, la carpeta de la sección
+del modelo y los archivos WebGL si hacen falta (`needsWebgl`). **No sigue
+imports relativos.** Y el `package.json` del ZIP se arma con lo que importan los
+archivos *que sí se copian* (las versiones salen del `package.json` raíz).
+
+Consecuencia: un componente de `src/components/ui/` (o `src/lib/utils.js`)
+importado desde una sección **no viaja** en el ZIP, y sus dependencias
+(`motion`, `clsx`, `tailwind-merge`) tampoco se agregan.
+
+> **Bloqueante antes de vender PLUM.** `FilmScroll` importa
+> `../../ui/KineticTextReveal` (→ `../../lib/utils`). Hoy no afecta a nadie
+> porque PLUM está en `LOCAL_ONLY_SKUS`, pero un ZIP de PLUM saldría roto.
+> Salidas: (1) sumar esos dos archivos al pack con el patrón de
+> `WEBGL_FILES`/`needsWebgl`, o (2) co-ubicarlos en `src/components/sections/plum/`.
+> `npm test` (`packaging.test.js`) lo va a marcar al liberar PLUM.
+
+**Regla para los templates que se venden hoy:** no importar `components/ui/*` ni
+`lib/utils` desde sus secciones.
 
 Después de usar cualquiera de los dos en un template, correr:
 
 ```bash
 npm test          # incluye packaging.test.js (arma el ZIP y verifica imports)
-npm run check     # invariantes cruzadas
+npm run check     # invariantes cruzadas (hoy falla sólo por plum/signal, esperado)
 ```

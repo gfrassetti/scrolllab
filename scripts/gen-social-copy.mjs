@@ -24,7 +24,7 @@ const locales = {
   en: JSON.parse(fs.readFileSync(path.join(ROOT, 'src/i18n/locales/en.json'), 'utf8')),
 }
 
-/** Cada canal con su utm_source / utm_medium. El link va a la franja del cupón. */
+/** Cada canal con su utm_source / utm_medium. El link va a los templates de la home. */
 const CHANNELS = [
   { id: 'instagram', label: { es: 'Instagram (bio o historias)', en: 'Instagram (bio or stories)' }, source: 'instagram', medium: 'reels' },
   { id: 'tiktok', label: { es: 'TikTok (bio)', en: 'TikTok (bio)' }, source: 'tiktok', medium: 'video' },
@@ -44,7 +44,7 @@ function link(channel, sku) {
     utm_medium: channel.medium,
     utm_campaign: sku,
   })
-  return `${SITE_URL}/?${params}#cupon`
+  return `${SITE_URL}/?${params}#templates`
 }
 
 const COPY = {

@@ -1,12 +1,14 @@
 /**
  * Cupón de bienvenida: 10% en la primera compra, uno por mail y de un solo uso.
+ * Se le da a quien entra con su cuenta de Google y todavía no compró (ver
+ * `claimWelcomeCoupon`): no hay formulario, el mail sale una sola vez al crearlo.
  * Vive en el lead (couponCode / couponPercent / couponExpiresAt / couponRedeemedAt).
  * El cliente solo manda el código: el descuento lo calcula el servidor sobre el
  * precio de lista (ver POST /api/checkout) y nunca sale de un monto del cliente.
  */
 import crypto from 'node:crypto'
 import { db } from '../db.js'
-import { HttpError } from '../validation.js'
+import { HttpError, cleanUtm, normalizeLeadEmail } from '../validation.js'
 import {
   WELCOME_COUPON_BOUND_TO_EMAIL,
   WELCOME_COUPON_DAYS,
@@ -137,6 +139,49 @@ export async function resolveCouponForCheckout({
     }
   }
   return { lead, code: canonical, percent: lead.couponPercent }
+}
+
+/**
+ * El cupón de bienvenida de quien tiene sesión. Idempotente: la primera vez lo
+ * crea (y manda el mail); las siguientes devuelven el mismo, sin mail.
+ *
+ *  - Solo para quien todavía no compró (`eligible: false` si ya hay una orden
+ *    paga): el cupón es de primera compra y no se le ofrece a un cliente.
+ *  - El mail es el de la cuenta de Google, así que el cupón queda atado a la
+ *    cuenta con la que va a pagar sin pedirle nada.
+ *  - El canal de origen (utm) se guarda en el alta y la primera visita gana.
+ */
+export async function claimWelcomeCoupon({
+  user,
+  locale,
+  utm,
+  config,
+  now = new Date(),
+  sendEmail = sendCouponEmailSafely,
+}) {
+  const orders = await db.findOrdersByUser(db.uid(user))
+  if (orders.some((order) => order.status === 'paid')) {
+    return { eligible: false, coupon: null, couponStatus: 'none', created: false, emailed: false }
+  }
+
+  const { lead, created } = await db.upsertLead({
+    email: normalizeLeadEmail(user.email),
+    source: 'account',
+    locale: locale === 'en' ? 'en' : 'es',
+    ...cleanUtm(utm),
+  })
+  await ensureCoupon(lead, now)
+  // El mail sale solo al crear el cupón: entrar cien veces no llena la casilla.
+  const emailed = created ? await sendEmail({ lead, config }) : false
+
+  const status = couponStatus(lead, now)
+  return {
+    eligible: true,
+    coupon: status === 'active' ? publicCoupon(lead) : null,
+    couponStatus: status,
+    created,
+    emailed,
+  }
 }
 
 /** Canjea el cupón de una orden recién pagada. Repetir con la misma orden es ok. */

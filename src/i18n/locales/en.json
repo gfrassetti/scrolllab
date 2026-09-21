@@ -272,29 +272,6 @@
     "contactErrGeneric": "Couldn’t send. Please try again.",
     "contactErrNetwork": "No connection. Check your network and try again.",
     "contactErrConfig": "The form isn’t configured yet. Email us instead.",
-    "leadEyebrow": "First purchase",
-    "leadTitle": "{{percent}}% off your first purchase.",
-    "leadBody": "Leave your email and we’ll send a coupon for your first model, builder composition, or the bundle. No newsletters: just the coupon.",
-    "leadLabel": "Your email (the one on your Google account)",
-    "leadPlaceholder": "you@studio.com",
-    "leadSubmit": "Get my coupon",
-    "leadSending": "Sending…",
-    "leadSuccess": "Done.",
-    "leadErrEmail": "Enter a valid email.",
-    "leadErrRate": "Too many attempts. Try again in a bit.",
-    "leadErrGeneric": "Couldn’t sign you up. Please try again.",
-    "leadErrNetwork": "No connection. Check your network and try again.",
-    "leadConsent": "We email you the coupon and nothing else: no newsletters. The coupon is personal: it only works for that email. We only keep your email for that.",
-    "leadPrivacy": "Privacy policy",
-    "leadCouponEyebrow": "Your coupon",
-    "leadCouponBody": "{{percent}}% off your first purchase. Valid until {{date}}, one use only.",
-    "leadCouponBound": "It’s personal: only valid for {{email}}. When you buy, sign in with that Google account.",
-    "leadCouponEmailed": "We also emailed it to you.",
-    "leadCouponCta": "Pick my model",
-    "leadCouponCopy": "Copy",
-    "leadCouponCopied": "Copied",
-    "leadUsed": "That email already used its coupon.",
-    "leadExpired": "The coupon for that email has expired.",
     "labBodyBefore": "Configure a section in LAB and show it on any site with a script tag — no download, no touching your code. Edit it from the ",
     "labBodyLink": "Lab",
     "labBodyAfter": ".",
@@ -840,23 +817,13 @@
     "redirecting": "One moment…",
     "preview": "View preview",
     "clearAll": "Clear all",
-    "couponLabel": "Coupon",
-    "couponPlaceholder": "SL-XXXXXX",
-    "couponApply": "Apply",
-    "couponApplying": "Checking…",
-    "couponAppliedPct": "{{percent}}% off",
     "couponUntil": "valid until {{date}}",
-    "couponRemove": "Remove",
     "couponSubtotal": "Subtotal",
-    "couponDiscount": "Coupon {{code}} ({{percent}}%)",
-    "couponErrInvalid": "That coupon doesn’t exist. Check the code.",
+    "couponDiscount": "Welcome coupon {{percent}}%",
     "couponErrUsed": "That coupon was already used.",
     "couponErrExpired": "That coupon has expired.",
-    "couponFor": "for {{email}}",
-    "couponErrOther": "This coupon is for a different email. Sign in with the Google account you used to request it.",
-    "couponErrOtherFor": "This coupon is for {{email}}. Sign in with that Google account.",
     "couponErrFirst": "The coupon only works on a first purchase.",
-    "couponErrGeneric": "We couldn’t check the coupon. Please try again."
+    "couponErrGeneric": "We couldn’t apply the coupon. Please try again."
   },
   "login": {
     "eyebrow": "Account",
@@ -909,7 +876,8 @@
     "subCancelDone": "Subscription canceled",
     "subSync": "Sync with Mercado Pago",
     "subSyncHint": "Subscribed just now and it's not showing?",
-    "subSyncDone": "Status updated"
+    "subSyncDone": "Status updated",
+    "welcomeCoupon": "You get {{percent}}% off your first purchase until {{date}}. It applies automatically at checkout."
   },
   "preview": {
     "backToAccount": "← Back to My purchases",
@@ -978,7 +946,7 @@
           "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
           "Purchase and order data: products, amount, currency, payment status, Mercado Pago identifiers, and download count.",
           "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies.",
-          "The email address you submit to receive your welcome coupon, along with when and where on the site you signed up and the coupon we issued you."
+          "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it."
         ]
       },
       {
@@ -987,7 +955,7 @@
           "Create and manage your account and keep you signed in.",
           "Process payments, confirm orders, and enable downloads.",
           "Send receipts and operational messages related to your purchases.",
-          "Send you the welcome coupon you asked for. We do not send newsletters.",
+          "Email you the welcome coupon for your first purchase. We do not send newsletters.",
           "Prevent fraud, abuse, and unauthorized access, and comply with legal obligations."
         ]
       },

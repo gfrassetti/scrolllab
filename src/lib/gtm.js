@@ -117,7 +117,7 @@ function markTrackedPurchase(id) {
   }
 }
 
-/** Alta al formulario de novedades (evento recomendado de GA4: generate_lead). */
+/** Cupón de bienvenida creado para una cuenta nueva (evento recomendado de GA4: generate_lead). */
 export function trackLead({ source } = {}) {
   gtmPush({ event: 'generate_lead', lead_source: String(source || 'home') })
 }

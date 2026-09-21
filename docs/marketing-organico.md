@@ -10,8 +10,8 @@ estudios que venden sitios) mostrando el producto, no diciendo que es bueno.
 | Video vertical por demo (`9x16-es.mp4` y `9x16-en.mp4`, unos 25 s, sin audio) | `media/marketing/<demo>/` | `npm run video:demos` |
 | Texto para publicar por demo (es y en) con links con UTM por canal | `media/marketing/<demo>/caption-*.txt` | `npm run copy:social` |
 | Tarjeta propia al compartir cada demo | `public/og/` | `npm run gen:og` |
-| Franja del cupón (10% primera compra) en la home | `/#cupon` | — |
-| Qué canal trajo cada mail | terminal | `npm run leads:stats` |
+| Cupón del 10% en la primera compra: se crea solo cuando alguien entra con Google, le llega por mail y aparece en el carrito y en la cuenta | sitio | — |
+| Qué canal trajo cada cuenta | terminal | `npm run leads:stats` |
 
 Qué ve quien mira el video (sin sonido, se entiende leyendo): arriba una frase que
 dice qué es ("Webs que cuentan una historia mientras scrolleás"), la demo grande
@@ -21,13 +21,14 @@ sitio y el 10% de la primera compra. La primera frase ya está en el cuadro 0, a
 que sirve de portada.
 
 Cada link que publiques lleva UTM (`utm_source`, `utm_medium`, `utm_campaign`) y
-apunta a `/#cupon`. La primera visita queda guardada 30 días: quien vio un video
-el lunes y se anota el jueves sigue contando como "del video".
+apunta a los templates de la home (`/#templates`). La primera visita queda guardada
+30 días: quien vio un video el lunes y entra con su cuenta el jueves sigue contando
+como "del video". El 10% no es un formulario: se lo dan al entrar con Google.
 
 ## Antes de publicar (una sola vez)
 
-1. Commit y deploy de todo lo pendiente. Sin eso el link lleva a un sitio sin cupón.
-2. `EMAIL_ENABLED=true` en Railway (el mail del cupón). Sin eso el cupón igual se ve en pantalla.
+1. Commit y deploy de todo lo pendiente. Sin eso el link lleva a un sitio sin cupón por cuenta.
+2. `EMAIL_ENABLED=true` en Railway (el mail del cupón). Sin eso el cupón igual se ve en el carrito y en la cuenta.
 3. Tag de GA4 para el evento `generate_lead` en GTM.
 4. Una compra de prueba con cupón con credenciales de prueba de Mercado Pago.
 5. Reservar los perfiles. `@scrolllab` en Instagram ya existe y parece de otra marca: probá `@scrolllab.dev` o similar.
@@ -76,7 +77,7 @@ link. Muestra la calidad del código antes de que compren, que era la duda que
 más frena a un dev.
 
 Borrador listo (sale de un bug real del héroe de CHAPTERS, `HeroKinetic.jsx`).
-Capturas: el video `chapters/16x9-es.mp4` en el segundo 0 al 2, y una captura
+Capturas: el video `chapters/9x16-es.mp4` en el segundo 0 al 2, y una captura
 del "storv" si la tenés de antes del arreglo.
 
 **Hilo en español (X / LinkedIn)**
@@ -97,7 +98,7 @@ del "storv" si la tenés de antes del arreglo.
    ```
 
 4. ¿Por qué `135` y no `100`? Con la máscara más alta, al 100% se asoma un pedazo de la letra antes de que arranque la animación.
-5. Ese héroe es de CHAPTERS, un template scrollytelling en React + GSAP con código fuente. Demo y 10% en tu primera compra: https://www.scrolllab.com.ar/?utm_source=x&utm_medium=social&utm_campaign=como-esta-hecho#cupon
+5. Ese héroe es de CHAPTERS, un template scrollytelling en React + GSAP con código fuente. Demo y 10% en tu primera compra: https://www.scrolllab.com.ar/?utm_source=x&utm_medium=social&utm_campaign=como-esta-hecho#templates
 
 **Thread in English**
 
@@ -105,7 +106,7 @@ del "storv" si la tenés de antes del arreglo.
 2. Cause: GSAP `SplitText` with `mask: 'chars'` clips each letter to its line's height. With `line-height: .82` that box is shorter than the glyph.
 3. The fix (grow the mask downward; the negative margin keeps the layout the same): same snippet as above.
 4. Why `135` and not `100`? With the taller mask, at 100% a sliver of the letter peeks in before the animation starts.
-5. That hero ships in CHAPTERS, a scrollytelling template in React + GSAP with full source code. Demo and 10% off your first purchase: https://www.scrolllab.com.ar/?utm_source=x&utm_medium=social&utm_campaign=como-esta-hecho#cupon
+5. That hero ships in CHAPTERS, a scrollytelling template in React + GSAP with full source code. Demo and 10% off your first purchase: https://www.scrolllab.com.ar/?utm_source=x&utm_medium=social&utm_campaign=como-esta-hecho#templates
 
 El hilo en inglés recién sirve cuando exista el cobro en dólares (punto 6 de
 "Antes de publicar").
@@ -116,23 +117,23 @@ El hilo en inglés recién sirve cuando exista el cobro en dólares (punto 6 de
 npm run leads:stats
 ```
 
-Muestra mails y cupones canjeados por canal y por campaña. Cuatro números:
+Muestra cuentas con cupón y cupones canjeados por canal y por campaña. Cuatro números:
 
-1. Mails por canal.
+1. Cuentas nuevas por canal.
 2. Cupones canjeados (compras) por canal.
-3. Qué demo trae más mails (`utm_campaign`).
-4. Cuántos mails llegaron "directo" (sin UTM): son los que no supiste rastrear.
+3. Qué demo trae más cuentas (`utm_campaign`).
+4. Cuántas cuentas llegaron "directo" (sin UTM): son las que no supiste rastrear.
 
 Reglas de corte:
 
-- Un canal que en 3 semanas no trae ningún mail se abandona.
+- Un canal que en 3 semanas no trae ninguna cuenta se abandona.
 - El que trae, se duplica: más frecuencia y más variantes.
 - Con datos de 3 a 4 semanas se puede decidir si vale sumar plata (Fase 2).
 
 ## Cuándo sumar plata (Fase 2)
 
-Cuando ya sepas cuántos mails por semana trae lo orgánico y qué porcentaje
-canjea. Recién ahí, retargeting a quien visitó una demo y no se anotó: US$3 a 5
+Cuando ya sepas cuántas cuentas por semana trae lo orgánico y qué porcentaje
+canjea. Recién ahí, retargeting a quien visitó una demo y no compró: US$3 a 5
 por día, con un tope y un criterio de corte definidos de antemano.
 
 ## Regenerar el contenido

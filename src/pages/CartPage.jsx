@@ -4,12 +4,8 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
-import {
-  clearCoupon,
-  formatCouponDate,
-  loadCoupon,
-  saveCoupon,
-} from '../lib/coupon'
+import { formatCouponDate } from '../lib/coupon'
+import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { startCheckout } from '../lib/startCheckout'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
@@ -17,9 +13,11 @@ import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
 
-/** Status de la API → texto (el servidor habla español; la UI puede estar en inglés). */
+/**
+ * Cuando el servidor rechaza el cupón al pagar: status de la API → texto (el
+ * servidor habla español; la UI puede estar en inglés). Lo demás cae en el genérico.
+ */
 const COUPON_ERRORS = {
-  404: 'cart.couponErrInvalid',
   409: 'cart.couponErrUsed',
   410: 'cart.couponErrExpired',
   422: 'cart.couponErrFirst',
@@ -27,11 +25,6 @@ const COUPON_ERRORS = {
 
 /** El cupón existe pero es de otro mail (el `code` lo manda el servidor). */
 const COUPON_OTHER_ACCOUNT = 'coupon_other_account'
-
-function otherAccountMessage(t, err) {
-  const email = err.details?.emailHint
-  return email ? t('cart.couponErrOtherFor', { email }) : t('cart.couponErrOther')
-}
 
 export default function CartPage() {
   const { user, loading: authLoading, hadSession } = useAuth()
@@ -47,14 +40,14 @@ export default function CartPage() {
   const { t, locale } = useI18n()
   const showUsd = locale === 'en'
 
-  // Cupón de bienvenida: `coupon` es lo que el servidor ya validó.
-  const [coupon, setCoupon] = useState(null)
-  const [couponInput, setCouponInput] = useState('')
-  const [couponError, setCouponError] = useState('')
-  const [couponBusy, setCouponBusy] = useState(false)
-  // Con un cupón guardado esperamos su chequeo antes de retomar un pago
-  // pendiente: si no, el pago saldría sin descuento.
-  const [couponReady, setCouponReady] = useState(() => !loadCoupon())
+  // Cupón de bienvenida: se aplica solo si hay sesión (lo pide WelcomeCouponSync al
+  // entrar). Antes de retomar un pago pendiente esperamos su respuesta: si no, el
+  // pago saldría sin descuento.
+  const welcome = useWelcomeCoupon((s) => s.coupon)
+  const welcomeStatus = useWelcomeCoupon((s) => s.status)
+  const dropWelcome = useWelcomeCoupon((s) => s.drop)
+  const coupon = user ? welcome : null
+  const couponReady = !looksLoggedIn || welcomeStatus === 'ready'
 
   useEffect(() => {
     api
@@ -66,58 +59,6 @@ export default function CartPage() {
       })
       .catch(() => {})
   }, [])
-
-  const applyCoupon = useCallback(
-    async (raw, { silent = false } = {}) => {
-      const code = String(raw || '').trim()
-      if (!code) return
-      setCouponBusy(true)
-      setCouponError('')
-      try {
-        const data = await api.couponCheck(code)
-        setCoupon({
-          code: data.code,
-          percent: data.percent,
-          expiresAt: data.expiresAt,
-          emailHint: data.emailHint,
-        })
-        saveCoupon(data)
-        setCouponInput('')
-      } catch (err) {
-        setCoupon(null)
-        if (err.code === COUPON_OTHER_ACCOUNT) {
-          // Es de otro mail: se avisa con qué cuenta entrar y no se descarta,
-          // porque puede cambiar de cuenta.
-          setCouponError(otherAccountMessage(t, err))
-        } else {
-          // Un cupón guardado que ya no sirve se descarta.
-          if (COUPON_ERRORS[err.status]) clearCoupon()
-          if (!silent) {
-            setCouponError(t(COUPON_ERRORS[err.status] || 'cart.couponErrGeneric'))
-          }
-        }
-      } finally {
-        setCouponBusy(false)
-      }
-    },
-    [t],
-  )
-
-  // Cupón guardado (de la home o del link del mail): se aplica solo, una vez.
-  const couponInit = useRef(false)
-  useEffect(() => {
-    if (couponInit.current) return
-    couponInit.current = true
-    const saved = loadCoupon()
-    if (!saved) return
-    applyCoupon(saved.code, { silent: true }).finally(() => setCouponReady(true))
-  }, [applyCoupon])
-
-  const removeCoupon = () => {
-    setCoupon(null)
-    setCouponError('')
-    clearCoupon()
-  }
 
   const { lines, total, payable, discount } = priceCartLines({
     items,
@@ -144,20 +85,16 @@ export default function CartPage() {
       // redirect a MP: dejamos busy. login: liberamos por si vuelve con atrás.
       if (result !== 'redirect') setBusy(false)
     } catch (err) {
-      if (coupon && err.code === COUPON_OTHER_ACCOUNT) {
-        setCoupon(null)
-        setError(otherAccountMessage(t, err))
-      } else if (coupon && COUPON_ERRORS[err.status]) {
-        // El cupón dejó de valer entre el chequeo y el pago: se saca y se avisa.
-        setCoupon(null)
-        clearCoupon()
-        setError(t(COUPON_ERRORS[err.status]))
+      if (coupon && (COUPON_ERRORS[err.status] || err.code === COUPON_OTHER_ACCOUNT || err.status === 404)) {
+        // El cupón dejó de valer (lo usó en otra pestaña, venció…): se saca y se avisa.
+        dropWelcome()
+        setError(t(COUPON_ERRORS[err.status] || 'cart.couponErrGeneric'))
       } else {
         setError(err.message)
       }
       setBusy(false)
     }
-  }, [items, navigate, user, coupon, t])
+  }, [items, navigate, user, coupon, dropWelcome, t])
 
   // Volvió del login con el pago ya pedido: sigue derecho a Mercado Pago.
   const resumed = useRef(false)
@@ -254,83 +191,7 @@ export default function CartPage() {
               })}
             </ul>
 
-            <div className="mt-8 border border-ink/15 p-6">
-              {coupon ? (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm">
-                    <span className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-                      {t('cart.couponLabel')}
-                    </span>{' '}
-                    <strong data-coupon-applied className="font-mono tracking-[0.1em]">
-                      {coupon.code}
-                    </strong>{' '}
-                    <span className="text-ink/60">
-                      · {t('cart.couponAppliedPct', { percent: coupon.percent })}
-                      {coupon.expiresAt
-                        ? ` · ${t('cart.couponUntil', { date: formatCouponDate(coupon.expiresAt, locale) })}`
-                        : ''}
-                      {coupon.emailHint
-                        ? ` · ${t('cart.couponFor', { email: coupon.emailHint })}`
-                        : ''}
-                    </span>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={removeCoupon}
-                    disabled={busy}
-                    className="text-[11px] uppercase tracking-[0.2em] text-ink/60 underline underline-offset-4 transition-colors hover:text-accent disabled:opacity-40"
-                  >
-                    {t('cart.couponRemove')}
-                  </button>
-                </div>
-              ) : (
-                <form
-                  noValidate
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    applyCoupon(couponInput)
-                  }}
-                  className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-5"
-                >
-                  <div className="flex-1">
-                    <label
-                      htmlFor="cart-coupon"
-                      className="text-[11px] uppercase tracking-[0.25em] text-ink/50"
-                    >
-                      {t('cart.couponLabel')}
-                    </label>
-                    <input
-                      id="cart-coupon"
-                      value={couponInput}
-                      onChange={(e) => {
-                        setCouponInput(e.target.value.slice(0, 40))
-                        if (couponError) setCouponError('')
-                      }}
-                      placeholder={t('cart.couponPlaceholder')}
-                      autoComplete="off"
-                      autoCapitalize="characters"
-                      spellCheck={false}
-                      disabled={couponBusy}
-                      className="mt-1 w-full border-0 border-b border-ink/25 bg-transparent px-0 py-3 font-mono text-base uppercase tracking-[0.1em] text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent disabled:opacity-50"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={couponBusy || !couponInput.trim()}
-                    className="min-h-11 border border-ink/30 px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink/70 transition-colors hover:border-ink hover:text-ink disabled:opacity-40"
-                  >
-                    {couponBusy ? t('cart.couponApplying') : t('cart.couponApply')}
-                  </button>
-                </form>
-              )}
-              {couponError ? (
-                <p role="alert" className="mt-3 text-sm text-accent-ink">
-                  {couponError}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="mt-4 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
+            <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
               <p className="text-sm">
                 {coupon && discount > 0 ? (
                   <>
@@ -338,10 +199,10 @@ export default function CartPage() {
                       {t('cart.couponSubtotal')}: {formatLine(total)}
                     </span>
                     <span data-coupon-discount className="mb-2 block text-accent-ink">
-                      {t('cart.couponDiscount', {
-                        code: coupon.code,
-                        percent: coupon.percent,
-                      })}
+                      {t('cart.couponDiscount', { percent: coupon.percent })}
+                      {coupon.expiresAt
+                        ? ` · ${t('cart.couponUntil', { date: formatCouponDate(coupon.expiresAt, locale) })}`
+                        : ''}
                       : −{formatLine(discount)}
                     </span>
                   </>

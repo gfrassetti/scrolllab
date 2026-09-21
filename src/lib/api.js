@@ -56,10 +56,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(couponCode ? { items, couponCode } : { items }),
     }),
-  couponCheck: (code) =>
-    request('/api/coupons/check', {
+  // Cupón de bienvenida de quien tiene sesión: lo crea la primera vez (y manda el mail).
+  welcomeCoupon: (body) =>
+    request('/api/coupons/welcome', {
       method: 'POST',
-      body: JSON.stringify({ code }),
+      body: JSON.stringify(body || {}),
     }),
   mockPay: (orderId) =>
     request('/api/checkout/mock-pay', {
@@ -72,10 +73,6 @@ export const api = {
       body: JSON.stringify({ paymentId, orderId }),
     }),
   downloadLink: (orderId) => request(`/api/orders/${orderId}/download`),
-
-  // Formulario de novedades (sin sesión) — ver src/lib/leads.js
-  lead: (body) =>
-    request('/api/leads', { method: 'POST', body: JSON.stringify(body || {}) }),
 
   // Hosted Components (LAB) — docs/hosted-component-plan.md
   embedLoader: () => request('/api/embed/loader'),

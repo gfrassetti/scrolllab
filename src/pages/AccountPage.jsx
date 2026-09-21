@@ -6,14 +6,17 @@ import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { formatCouponDate } from '../lib/coupon'
 import { orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
+import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { useI18n } from '../i18n'
 
 const PAGE_SIZE = 20
 
 export default function AccountPage() {
   const { user, loading } = useAuth()
+  const welcome = useWelcomeCoupon((s) => s.coupon)
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -158,6 +161,24 @@ export default function AccountPage() {
             {t('common.howItWorksLink')}
           </Link>
         </p>
+
+        {welcome && !orders.some((o) => o.status === 'paid') ? (
+          <p
+            data-welcome-coupon
+            className="mt-4 max-w-[52ch] text-sm leading-relaxed text-accent-ink"
+          >
+            {t('account.welcomeCoupon', {
+              percent: welcome.percent,
+              date: formatCouponDate(welcome.expiresAt, locale),
+            })}{' '}
+            <Link
+              to="/#templates"
+              className="underline decoration-current/40 underline-offset-2 hover:text-accent"
+            >
+              {t('common.seeTemplates')}
+            </Link>
+          </p>
+        ) : null}
 
         <SubscriptionCard />
 

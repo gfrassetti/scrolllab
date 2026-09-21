@@ -9,7 +9,6 @@ import BrandSplash from '../components/BrandSplash'
 import PlayableHeadline from '../components/PlayableHeadline'
 import TemplateBuyPill from '../components/TemplateBuyPill'
 import HomeContact from '../components/HomeContact'
-import LeadCapture from '../components/LeadCapture'
 import HorizontalPanels from '../components/sections/chapters/HorizontalPanels'
 import BuilderDemo from '../components/BuilderDemo'
 import { useCart } from '../lib/cart'
@@ -1372,8 +1371,6 @@ export default function TemplatesIndex() {
         </section>
 
       </main>
-
-      <LeadCapture source="home" />
 
       <HomeContact />
 

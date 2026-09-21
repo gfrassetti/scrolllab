@@ -35,21 +35,15 @@ export function assertObjectIdLike(id) {
 
 // El mail termina en un CSV y en la API del CRM: sin < > " ' ` \ ni espacios.
 const LEAD_EMAIL_RE = /^[^\s@<>"'`\\]+@[^\s@<>"'`\\]+\.[^\s@<>"'`\\]{2,}$/
-const LEAD_EMAIL_MAX = 120 // igual que LIMITS.email del formulario del front
+const LEAD_EMAIL_MAX = 120
 
-/** Email del formulario de novedades: en minúsculas y con forma de mail, o 400. */
+/** Email del cupón de bienvenida (el de la cuenta de Google): en minúsculas y con forma de mail, o 400. */
 export function normalizeLeadEmail(raw) {
   const email = String(raw ?? '').trim().toLowerCase()
   if (!email || email.length > LEAD_EMAIL_MAX || !LEAD_EMAIL_RE.test(email)) {
     throw new HttpError(400, 'Email inválido')
   }
   return email
-}
-
-/** De dónde vino el alta (home, builder…): slug corto; lo demás cae en "home". */
-export function cleanLeadSource(raw) {
-  const source = String(raw ?? '').trim().toLowerCase()
-  return /^[a-z0-9][a-z0-9_-]{0,31}$/.test(source) ? source : 'home'
 }
 
 /**

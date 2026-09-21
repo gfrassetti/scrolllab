@@ -227,7 +227,7 @@ export const fileDb = {
     return true
   },
 
-  // Leads (formulario de novedades). Alta idempotente por email.
+  // Leads (cupón de bienvenida). Alta idempotente por email.
   async upsertLead(data) {
     const rows = read('leads')
     const email = String(data.email).toLowerCase()

@@ -38,6 +38,7 @@ process.env.FILE_DB_DIR = dbDir
 const {
   COUPON_CODE_RE,
   canonicalEmail,
+  claimWelcomeCoupon,
   couponStatus,
   generateCouponCode,
   maskEmail,
@@ -175,27 +176,35 @@ describe('mail del cupón', () => {
     code: 'SL-7K2P9X',
     percent: 10,
     expiresAt: '2026-10-02T15:00:00Z',
+    email: 'ana@estudio.com',
     shopUrl: 'https://www.scrolllab.com.ar/',
     logoUrl: 'https://www.scrolllab.com.ar/icon-192.png',
   }
 
-  it('lleva el código, el porcentaje y un link que guarda el cupón', () => {
+  it('dice que el descuento ya está en la cuenta y se aplica solo: sin código para tipear ni link que lo guarde', () => {
     const mail = buildCouponEmail(args)
     assert.match(mail.subject, /10%/)
-    assert.ok(mail.html.includes('SL-7K2P9X'))
-    assert.ok(mail.html.includes('https://www.scrolllab.com.ar/?cupon=SL-7K2P9X#templates'))
-    assert.match(mail.text, /SL-7K2P9X/)
+    assert.ok(mail.html.includes('ana@estudio.com'), 'dice con qué cuenta hay que pagar')
+    assert.match(mail.text, /se aplica solo/)
+    assert.ok(mail.html.includes('https://www.scrolllab.com.ar/#templates'))
+    assert.ok(!mail.html.includes('?cupon='))
     assert.match(mail.text, /newsletters/)
+    // El código queda solo como referencia, en el pie.
+    assert.match(mail.text, /Código de referencia: SL-7K2P9X/)
+    assert.ok(!/Tu código/.test(mail.html) && !/Your code/.test(mail.html), 'no hay caja de código')
   })
 
-  it('sale en inglés si el lead se anotó en inglés', () => {
+  it('sale en inglés si la cuenta está en inglés', () => {
     const mail = buildCouponEmail({ ...args, locale: 'en' })
-    assert.match(mail.subject, /Your 10% coupon/)
+    assert.match(mail.subject, /Your 10% welcome discount/)
+    assert.match(mail.text, /applied automatically/)
+    assert.match(mail.text, /Reference code: SL-7K2P9X/)
   })
 
   it('escapa HTML en lo que interpola', () => {
-    const mail = buildCouponEmail({ ...args, code: '<b>x</b>' })
+    const mail = buildCouponEmail({ ...args, code: '<b>x</b>', email: '<i>y</i>@x.com' })
     assert.ok(!mail.html.includes('<b>x</b>'))
+    assert.ok(!mail.html.includes('<i>y</i>'))
     assert.ok(mail.html.includes('&lt;b&gt;'))
   })
 
@@ -255,8 +264,8 @@ describe('cupón de bienvenida — API (file store)', () => {
   }
   const rowFor = (email) => leadRows().find((l) => l.email === email)
 
-  const signup = (email, extra = {}) =>
-    request(app).post('/api/leads').set('Origin', ORIGIN).send({ email, ...extra })
+  const welcome = (agent, body = {}) =>
+    agent.post('/api/coupons/welcome').set('Origin', ORIGIN).send(body)
   const check = (code, agent = request(app)) =>
     agent.post('/api/coupons/check').set('Origin', ORIGIN).send({ code })
   const checkout = (agent, body) =>
@@ -271,19 +280,18 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.equal(res.status, 200)
     return agent
   }
-  async function newCode(email) {
-    const res = await signup(email)
-    assert.equal(res.status, 200)
-    return res.body.coupon.code
-  }
   async function orderOf(orderId) {
     return db.findOrderById(orderId)
   }
-  /** Pide el cupón y entra con la misma cuenta: el cupón es de ese mail. */
+  /** Entra con Google (dev-login) y recibe su cupón de bienvenida: es de ese mail. */
   async function buyerWithCoupon(email) {
-    const code = await newCode(email)
     const agent = await login(email)
-    return { code, agent }
+    const res = await welcome(agent)
+    assert.equal(res.status, 200)
+    return { code: res.body.coupon.code, agent }
+  }
+  async function newCode(email) {
+    return (await buyerWithCoupon(email)).code
   }
 
   before(async () => {
@@ -305,25 +313,110 @@ describe('cupón de bienvenida — API (file store)', () => {
     }
   })
 
-  it('el alta devuelve un cupón del 10% que vence en 14 días', async () => {
-    const res = await signup('alta@test.com')
+  it('quien entra con su cuenta recibe un cupón del 10% que vence en 14 días, atado a su mail', async () => {
+    const res = await welcome(await login('alta@test.com'))
     assert.equal(res.status, 200)
     assert.equal(res.body.ok, true)
+    assert.equal(res.body.eligible, true)
+    assert.equal(res.body.created, true)
     assert.match(res.body.coupon.code, COUPON_CODE_RE)
     assert.equal(res.body.coupon.percent, WELCOME_COUPON_PERCENT)
     assert.equal(res.body.couponStatus, 'active')
-    assert.equal(res.body.emailed, false)
+    assert.equal(res.body.emailed, false) // en los tests el mail está apagado
 
     const expected = Date.now() + WELCOME_COUPON_DAYS * 24 * 60 * 60 * 1000
     assert.ok(Math.abs(Date.parse(res.body.coupon.expiresAt) - expected) < 60_000)
-    assert.equal(rowFor('alta@test.com').couponCode, res.body.coupon.code)
+    const row = rowFor('alta@test.com')
+    assert.equal(row.couponCode, res.body.coupon.code)
+    assert.equal(row.source, 'account')
+    assert.equal(row.locale, 'es')
   })
 
-  it('anotarse de nuevo devuelve el mismo cupón, no genera otro', async () => {
-    const first = await signup('repite@test.com')
-    const again = await signup('REPITE@test.com')
+  it('pedirlo de nuevo devuelve el mismo cupón, sin crear otro', async () => {
+    const agent = await login('repite@test.com')
+    const first = await welcome(agent)
+    const again = await welcome(agent)
+    assert.equal(again.body.created, false)
     assert.equal(again.body.coupon.code, first.body.coupon.code)
     assert.equal(leadRows().filter((l) => l.email === 'repite@test.com').length, 1)
+  })
+
+  it('sin sesión no hay cupón (ya no existe el formulario público de mails)', async () => {
+    const anonymous = await request(app).post('/api/coupons/welcome').set('Origin', ORIGIN).send({})
+    assert.equal(anonymous.status, 401)
+
+    // Antes cualquiera podía anotar cualquier mail: se cerró porque servía para
+    // mandarle mails a terceros.
+    const leads = await request(app).post('/api/leads').set('Origin', ORIGIN).send({ email: 'tercero@test.com' })
+    assert.equal(leads.status, 404)
+    assert.equal(rowFor('tercero@test.com'), undefined)
+  })
+
+  it('rechaza un Origin ajeno', async () => {
+    const agent = await login('origen@test.com')
+    const res = await agent.post('/api/coupons/welcome').set('Origin', 'https://evil.example').send({})
+    assert.equal(res.status, 403)
+    assert.equal(rowFor('origen@test.com'), undefined)
+  })
+
+  it('el mail sale una sola vez: al crear el cupón, no al volver a entrar', async () => {
+    await buyerWithCoupon('ya-tenia@test.com')
+    const user = await db.findUser({ email: 'ya-tenia@test.com' })
+    let sent = 0
+    const sendEmail = async () => {
+      sent += 1
+      return true
+    }
+    const fresh = await db.createUser({ email: 'mail-una-vez@test.com', name: 'Nueva', googleId: 'dev-mail-una-vez' })
+    const first = await claimWelcomeCoupon({ user: fresh, config: {}, sendEmail })
+    const again = await claimWelcomeCoupon({ user: fresh, config: {}, sendEmail })
+    assert.deepEqual([first.created, first.emailed], [true, true])
+    assert.deepEqual([again.created, again.emailed], [false, false])
+    assert.equal(sent, 1)
+    // Quien ya tenía cupón desde antes tampoco recibe otro mail.
+    const old = await claimWelcomeCoupon({ user, config: {}, sendEmail })
+    assert.equal(old.created, false)
+    assert.equal(sent, 1)
+  })
+
+  it('un cliente que ya compró no recibe cupón: no se lo ofrece ni queda anotado', async () => {
+    const agent = await login('cliente@ya.com')
+    const first = await checkout(agent, { items: [{ sku: 'chapters' }] })
+    await agent.post('/api/checkout/mock-pay').set('Origin', ORIGIN).send({ orderId: first.body.orderId })
+
+    const res = await welcome(agent)
+    assert.equal(res.status, 200)
+    assert.equal(res.body.eligible, false)
+    assert.equal(res.body.coupon, null)
+    assert.equal(res.body.couponStatus, 'none')
+    assert.equal(rowFor('cliente@ya.com'), undefined)
+  })
+
+  it('guarda de qué canal llegó (utm), saneado, y la primera visita gana', async () => {
+    const agent = await login('canal@test.com')
+    await welcome(agent, { utm: { source: 'Instagram', medium: 'reels', campaign: 'Nocturne!!' } })
+    await welcome(agent, { utm: { source: 'reddit' } })
+    const row = rowFor('canal@test.com')
+    assert.deepEqual([row.utmSource, row.utmMedium, row.utmCampaign], ['instagram', 'reels', 'nocturne'])
+
+    const raro = await welcome(await login('raro@test.com'), { utm: 'instagram', locale: 'fr' })
+    assert.equal(raro.status, 200)
+    assert.equal(rowFor('raro@test.com').utmSource, undefined)
+    assert.equal(rowFor('raro@test.com').locale, 'es')
+    assert.equal((await welcome(await login('ingles@test.com'), { locale: 'en' })).status, 200)
+    assert.equal(rowFor('ingles@test.com').locale, 'en')
+  })
+
+  it('un lead viejo (del formulario que ya no existe) conserva su cupón al entrar con esa cuenta', async () => {
+    const { lead } = await db.upsertLead({ email: 'viejo@test.com', source: 'home' })
+    const { ensureCoupon } = await import('../services/coupons.js')
+    await ensureCoupon(lead)
+
+    const res = await welcome(await login('viejo@test.com'))
+    assert.equal(res.body.created, false)
+    assert.equal(res.body.emailed, false)
+    assert.equal(res.body.coupon.code, lead.couponCode)
+    assert.equal(rowFor('viejo@test.com').source, 'home')
   })
 
   it('el chequeo acepta el código con minúsculas y espacios', async () => {
@@ -337,12 +430,14 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.equal((await check('SL-AAAAAA')).status, 404)
     assert.equal((await check('hola')).status, 404)
 
-    const code = await newCode('vencido@test.com')
+    const { code, agent } = await buyerWithCoupon('vencido@test.com')
     editLeads((rows) => {
       rows.find((l) => l.email === 'vencido@test.com').couponExpiresAt = '2020-01-01T00:00:00.000Z'
     })
     assert.equal((await check(code)).status, 410)
-    assert.equal((await signup('vencido@test.com')).body.couponStatus, 'expired')
+    const again = await welcome(agent)
+    assert.equal(again.body.couponStatus, 'expired')
+    assert.equal(again.body.coupon, null)
   })
 
   it('el checkout con cupón descuenta en el servidor y guarda el cupón en la orden', async () => {
@@ -438,7 +533,10 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.ok(rowFor('canje@test.com').couponRedeemedAt)
     assert.equal(rowFor('canje@test.com').couponOrderId, body.orderId)
     assert.equal((await check(code)).status, 409)
-    assert.equal((await signup('canje@test.com')).body.couponStatus, 'redeemed')
+    // Ya compró: no se le vuelve a ofrecer nada.
+    const after = await welcome(agent)
+    assert.equal(after.body.eligible, false)
+    assert.equal(after.body.coupon, null)
 
     const other = await login('otro-canje@test.com')
     const reuse = await checkout(other, { items: [{ sku: 'chapters' }], couponCode: code })
@@ -448,12 +546,11 @@ describe('cupón de bienvenida — API (file store)', () => {
   })
 
   it('vale solo para la primera compra', async () => {
-    const agent = await login('recurrente@test.com')
+    // Tiene su cupón, pero primero compra sin usarlo: después ya no es su primera compra.
+    const { code, agent } = await buyerWithCoupon('recurrente@test.com')
     const first = await checkout(agent, { items: [{ sku: 'chapters' }] })
     await agent.post('/api/checkout/mock-pay').set('Origin', ORIGIN).send({ orderId: first.body.orderId })
 
-    // Un cliente que ya compró pide su cupón: es de su mail pero ya no es su primera compra.
-    const code = await newCode('recurrente@test.com')
     const res = await checkout(agent, { items: [{ sku: 'nocturne' }], couponCode: code })
     assert.equal(res.status, 422)
     assert.equal((await check(code, agent)).status, 422)

@@ -5,12 +5,12 @@ import LicensePage from './pages/LicensePage'
 import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
 import { AuthProvider } from './lib/auth'
 import { PlanProvider } from './lib/plan'
-import { captureCouponFromUrl } from './lib/coupon'
 import { captureUtmFromUrl } from './lib/utm'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
 import DocumentHead from './components/DocumentHead'
+import WelcomeCouponSync from './components/WelcomeCouponSync'
 import ChunkErrorBoundary from './components/ChunkErrorBoundary'
 import './lib/theme'
 
@@ -71,10 +71,9 @@ function Loader() {
 }
 
 export default function App() {
-  // El botón del mail del cupón abre el sitio con ?cupon=…: se guarda para el carrito.
-  // Los utm_* de un video o un post se guardan para saber qué canal trae mails.
+  // Los utm_* de un video o un post se guardan para saber qué canal trae cuentas
+  // (viajan con el cupón de bienvenida cuando alguien entra).
   useEffect(() => {
-    captureCouponFromUrl()
     captureUtmFromUrl()
   }, [])
 
@@ -85,6 +84,7 @@ export default function App() {
           <BrowserRouter>
             <HomeCursor />
             <DocumentHead />
+            <WelcomeCouponSync />
             <ScrollToTop />
             <CartToast />
             <ChunkErrorBoundary>

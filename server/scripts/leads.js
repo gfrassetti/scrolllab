@@ -1,5 +1,5 @@
 /**
- * Leads del formulario de novedades (POST /api/leads).
+ * Leads: los mails que recibieron el cupón de bienvenida (al entrar con su cuenta).
  *
  *   npm run leads:export > leads.csv   CSV por stdout, para importar en cualquier herramienta
  *   npm run leads:sync                 sube a Brevo los que todavía no están sincronizados

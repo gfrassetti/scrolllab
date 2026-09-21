@@ -610,34 +610,38 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
 
 const COUPON_COPY = {
   es: {
-    subject: (percent) => `Tu cupón del ${percent}% en SCROLL LAB`,
-    preheader: (percent) => `${percent}% en tu primera compra. Tu código está adentro.`,
-    eyebrow: 'Tu cupón',
+    subject: (percent) => `Tu ${percent}% de bienvenida en SCROLL LAB`,
+    preheader: (percent) => `${percent}% menos en tu primera compra. Ya está en tu cuenta.`,
+    eyebrow: 'Cupón de bienvenida',
     title: (percent) => `${percent}% menos en tu primera compra.`,
-    body: (date) =>
-      `Usalo en el carrito con cualquier modelo, con tu composición del builder o con el bundle. Vale hasta el ${date}, se usa una sola vez y es solo para este mail: al comprar, entrá con esa cuenta de Google.`,
-    codeLabel: 'Tu código',
+    body: (date, email) =>
+      `Ya está en tu cuenta: cuando pagues con ${email}, el descuento se aplica solo en el carrito. Sirve para cualquier modelo, para tu composición del builder o para el bundle. Vale hasta el ${date} y se usa una sola vez.`,
     cta: 'Elegir mi modelo',
-    foot: 'Recibís este mail porque pediste el cupón en scrolllab.com.ar. Es el único mail que te mandamos: no enviamos newsletters.',
+    foot: (code) =>
+      `Recibís este mail porque entraste a scrolllab.com.ar con tu cuenta de Google. Es el único mail promocional que te mandamos: no enviamos newsletters. Código de referencia: ${code}.`,
   },
   en: {
-    subject: (percent) => `Your ${percent}% coupon for SCROLL LAB`,
-    preheader: (percent) => `${percent}% off your first purchase. Your code is inside.`,
-    eyebrow: 'Your coupon',
+    subject: (percent) => `Your ${percent}% welcome discount at SCROLL LAB`,
+    preheader: (percent) => `${percent}% off your first purchase. It’s already in your account.`,
+    eyebrow: 'Welcome coupon',
     title: (percent) => `${percent}% off your first purchase.`,
-    body: (date) =>
-      `Use it in the cart with any model, your builder composition, or the bundle. It’s valid until ${date}, works once, and is only for this email: when you buy, sign in with that Google account.`,
-    codeLabel: 'Your code',
+    body: (date, email) =>
+      `It’s already in your account: when you pay with ${email}, the discount is applied automatically in the cart. It works for any model, your builder composition, or the bundle. It’s valid until ${date} and can be used once.`,
     cta: 'Pick my model',
-    foot: 'You’re getting this email because you asked for the coupon at scrolllab.com.ar. It’s the only email we send you: no newsletters.',
+    foot: (code) =>
+      `You’re getting this email because you signed in to scrolllab.com.ar with your Google account. It’s the only promotional email we send you: no newsletters. Reference code: ${code}.`,
   },
 }
 
-/** Mail del cupón de bienvenida. El botón lleva `?cupon=` y el front lo guarda solo. */
+/**
+ * Mail del cupón de bienvenida: dice que el descuento ya está en la cuenta y se
+ * aplica solo. No hay código para tipear; se muestra solo como referencia.
+ */
 export function buildCouponEmail({
   code,
   percent,
   expiresAt,
+  email,
   locale = 'es',
   shopUrl,
   logoUrl,
@@ -648,7 +652,7 @@ export function buildCouponEmail({
     timeZone: 'America/Argentina/Buenos_Aires',
     dateStyle: 'long',
   }).format(new Date(expiresAt))
-  const link = `${String(shopUrl).replace(/\/$/, '')}/?cupon=${encodeURIComponent(code)}#templates`
+  const link = `${String(shopUrl).replace(/\/$/, '')}/#templates`
 
   const html = `<!doctype html>
 <html lang="${lang}">
@@ -667,13 +671,7 @@ export function buildCouponEmail({
               <td style="padding:36px 32px 12px;">
                 <p style="margin:0 0 12px;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">${escapeHtml(c.eyebrow)}</p>
                 <h1 style="margin:0 0 16px;font-size:30px;line-height:1.1;font-weight:600;">${escapeHtml(c.title(percent))}</h1>
-                <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">${escapeHtml(c.body(date))}</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:12px 32px 8px;">
-                <p style="margin:0 0 8px;color:#5b5650;font-size:12px;letter-spacing:2px;text-transform:uppercase;">${escapeHtml(c.codeLabel)}</p>
-                <p style="margin:0;padding:18px 20px;border:2px dashed #161412;font-family:'Courier New',Courier,monospace;font-size:28px;letter-spacing:4px;font-weight:700;text-align:center;">${escapeHtml(code)}</p>
+                <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">${escapeHtml(c.body(date, email))}</p>
               </td>
             </tr>
             <tr>
@@ -682,7 +680,7 @@ export function buildCouponEmail({
               </td>
             </tr>
             <tr>
-              <td style="padding:20px 32px;border-top:1px solid #d6d1c8;color:#7a746b;font-size:12px;line-height:1.6;">${escapeHtml(c.foot)}</td>
+              <td style="padding:20px 32px;border-top:1px solid #d6d1c8;color:#7a746b;font-size:12px;line-height:1.6;">${escapeHtml(c.foot(code))}</td>
             </tr>
           </table>
         </td>
@@ -691,16 +689,7 @@ export function buildCouponEmail({
   </body>
 </html>`
 
-  const text = [
-    c.title(percent),
-    '',
-    c.body(date),
-    '',
-    `${c.codeLabel}: ${code}`,
-    link,
-    '',
-    c.foot,
-  ].join('\n')
+  const text = [c.title(percent), '', c.body(date, email), '', link, '', c.foot(code)].join('\n')
 
   return { subject: c.subject(percent), html, text }
 }
@@ -719,6 +708,7 @@ export async function sendCouponEmail({ lead, config, client }) {
     code: lead.couponCode,
     percent: lead.couponPercent,
     expiresAt: lead.couponExpiresAt,
+    email: lead.email,
     locale: lead.locale,
     shopUrl: config.clientUrl,
     logoUrl,

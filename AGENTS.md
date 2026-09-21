@@ -290,6 +290,14 @@ El scrollytelling **no es imposible**: son capas DOM + CSS + GSAP/Lenis. Antes d
 Si el efecto se scrubea con el scroll es GSAP. Motion y GSAP peleando por el
 `transform` del mismo nodo es un bug garantizado.
 
+**ZIP:** el empaquetador (`server/packaging.js`) copia `SHARED` + la carpeta de la
+sección y **no sigue imports relativos**. Una sección de un template a la venta
+no puede importar `components/ui/*` ni `lib/utils` (no viajan, ni sus deps). PLUM
+sí los importa y está bloqueado para vender hasta resolverlo — ver el bloque
+"Bloqueante" en [`docs/motion-componentry.md`](docs/motion-componentry.md).
+El alias `@/` (→ `src/`) es sólo para `components/ui` y `lib`, nunca dentro de
+`components/sections/*`.
+
 **Docs de Motion dentro del agente:** `npx motion-ai` instala un MCP con la
 documentación siempre actualizada (búsqueda gratis, sin token). Es interactivo
 — lo corre el usuario, no el agente. Detalle en el doc de arriba.
