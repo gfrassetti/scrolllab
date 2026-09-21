@@ -149,6 +149,31 @@ scrollytelling GSAP, que sigue siendo dominio del cookbook. Esto es una
 ampliación de regla existente, no un anti-patrón a revertir como el
 Detalle #1.
 
+**Ampliación — técnica concreta de white space (misma Lesson 1, ejemplo de
+video walkthrough de un e-commerce de skate):**
+
+> "Aunque la página es larga, no te sientes perdido porque cada sección está
+> claramente definida por cambios de color, cambios de tipografía y
+> márgenes generosos." / "the layout never feels crowded — the whitespace
+> distribution directs the eye to focus on one thing at a time."
+
+Dos reglas puntuales, no solo el principio genérico de "dejar aire":
+
+1. **Wayfinding en páginas largas**: cada sección se marca como un bloque
+   distinto por *combinación* de cambio de color de fondo + cambio de
+   tipografía + márgenes generosos — no por un divider o borde. Es el mismo
+   handoff que ya pide **P13** (overlap sin hard cut) pero aplicado a
+   secciones de contenido/comercio normales, no solo a beats con pin/scrub.
+2. **Un foco por vez**: la distribución del whitespace no es solo estética,
+   es jerarquía — dirige la mirada a *una* cosa por sección/viewport en vez
+   de competir por atención. Reforzar en Impeccable `critique`/`audit` como
+   chequeo explícito ("¿esta sección tiene un solo foco claro?"), no solo
+   "hay aire de sobra".
+
+Relevancia directa para **commerce** (el ejemplo del curso es justo un grid
+de e-commerce) y para cualquier template con secciones largas tipo catálogo
+(listados, grids de producto, index pages).
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
