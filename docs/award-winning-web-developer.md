@@ -174,6 +174,19 @@ Relevancia directa para **commerce** (el ejemplo del curso es justo un grid
 de e-commerce) y para cualquier template con secciones largas tipo catálogo
 (listados, grids de producto, index pages).
 
+**Regla adicional (misma Lesson 1):** *"el layout NO debe ser repetitivo
+para nada"* — cada sección tiene que tener su propia composición (grid
+distinto, ritmo distinto, peso de imagen vs. texto distinto), no la misma
+estructura de columnas repetida con contenido diferente. Es la versión
+"layout" del mismo anti-patrón que ya cubre `design-taste-frontend`
+(taste-skill) para look genérico — pero acá aplicado específicamente a
+**estructura/composición**, no a paleta/tipografía. Chequeo concreto para
+Impeccable `audit`/`critique`: mirar el wireframe de la página completa y
+preguntar si dos secciones consecutivas comparten el mismo layout — si sí,
+variar (columna → full-bleed → grid asimétrico → texto centrado, etc.), el
+mismo criterio que ya aplica RATIO/MONOLITH/FIZZ al alternar pin/scrub,
+WebGL y contenido estático en vez de repetir un patrón.
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
