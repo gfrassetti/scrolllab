@@ -73,6 +73,10 @@ abajo.
       (Detalle #5.2).
 - [ ] Entrada de contenido en orden: headline → subtítulo → imagen, con
       pausa deliberada entre pasos, nunca todo junto (Detalle #5.3/5.5).
+- [ ] Cada link/botón/form field/accordion del template tiene su
+      micro-interacción correspondiente del catálogo (Detalle #6), y todas
+      comparten el mismo lenguaje de feedback — no solo el chrome del
+      market.
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -95,6 +99,7 @@ abajo.
 | 3 | Walkthrough comparado Shopify award-level vs. landscaping genérico (Lesson 1, video) | Mismo ejercicio del curso pero con técnicas puntuales identificables por sitio: paleta acotada + aislamiento de elementos, sección de cards con motion coordinado, jerarquía tipográfica de 3 niveles, nav vertical con numerales como "capítulos", vs. checklist de anti-patrones del sitio genérico | Toca taste-skill, Emil, motion-cookbook (P11/P13), Impeccable audit — ver detalle abajo | Documentado — checklist listo para usar en audits |
 | 4 | Anatomía de un sitio premium por módulos repetibles (Lesson 2, walkthrough de un real-estate site) | Un sitio sofisticado no es 100 componentes únicos: es un vocabulario chico de módulos (hero, content block, transición, closing) ejecutados con disciplina — macro white space, una acción primaria por sección, repetición **deliberada** dentro de listados del mismo tipo, jerarquía por tamaño/peso/espacio, cierre grácil | Valida la filosofía de secciones componibles del builder (`sectionRegistry.jsx`); toca taste-skill, Emil, P13 — ver detalle abajo | Documentado |
 | 5 | **Motion como cornerstone** (Lesson 3, ref. YK Produce) | El motion award-level no es sobre complejidad, es sobre **vocabulario reducido + consistencia + control del timing**: mismos tipos de movimiento reusados en todo el sitio, orden de aparición deliberado (texto antes que imagen), pausas que generan anticipación, cero motion decorativo sin propósito | Toca `docs/motion-cookbook.md` (P2/P8), tokens de easing en `src/index.css`, Beat/P11 (progress rail) — ver detalle abajo | Documentado — trae 2 candidatos a primitivo/token nuevo |
+| 6 | **Catálogo de micro-interacciones** (Lesson 4, walkthrough de un sitio de agencia) | 14 micro-interacciones puntuales (hover de botón/link, drawer de nav, stagger de texto, underline variable, expand de cards, blur→clear en hero, parallax sutil, accordion, floating label de form, ícono que se rellena) + el meta-principio de que la **consistencia total** entre todas ellas es lo que las hace sumar a algo premium | **Cierra el gap señalado desde Detalle #2**: Emil hoy solo cubre chrome del market — este catálogo es el "cómo" concreto para extenderlo a micro-interacciones dentro de cada template | Documentado — catálogo listo para portar cuando se implemente |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -511,6 +516,48 @@ puntualmente en motion. Principios extraídos, mínima referencia al ejemplo.
    que notarse primero → decidir el orden → sumar motion simple que guíe
    ese orden. Nada más. Mismo espíritu que la Receta de cierre de Detalle
    #4, aplicado específicamente a motion.
+
+### Detalle #6 — Catálogo de micro-interacciones (Lesson 4)
+
+**Fuente:** Lesson 4 del curso, walkthrough de un sitio de agencia. Por
+pedido del usuario, acá va **solo el catálogo de micro-interacciones**
+generalizado — qué es, cómo se construye, dónde aplica y por qué es
+must-have — sin nada del sitio de ejemplo puntual.
+
+**Por qué importa esta lección como conjunto:** cada micro-interacción
+individual "puede parecer trivial vista sola" (cita del curso), pero el
+efecto acumulado de aplicar el **mismo lenguaje de feedback en absolutamente
+todo** (menú, botones, links, forms) es lo que reafirma la personalidad de
+marca. Esto es la pieza que faltaba desde Detalle #2: ahí se señaló que
+Emil/`emil-design-eng` hoy solo cubre chrome del market y que la UI *dentro*
+de cada template no tenía regla explícita — este catálogo es el "cómo"
+concreto para esa extensión pendiente.
+
+| # | Micro-interacción | Trigger | Cómo se construye | Dónde en SCROLLLAB | Por qué es must-have |
+|---|---|---|---|---|---|
+| 1 | Botón con glow/outline sutil | hover | CSS transition en `box-shadow`/`outline`, sin JS | Botón de menú, cualquier botón icon-only (chrome **y** templates) | Señala interactividad sin gritar — el mínimo indispensable en cualquier elemento clickeable |
+| 2 | Panel/drawer que entra deslizando | click | `translateX` + easing — el repo ya tiene el token `--ease-drawer` en `src/index.css`, usar ese | Nav lateral de templates con menú propio, no solo el chrome del market | Ya hay infraestructura lista, es gratis implementarlo bien |
+| 3 | Underline que aparece en hover sobre links | hover | `::after` con `scaleX` 0→1 y `transform-origin`, o Motion for React | Nav, CTAs, "learn more" dentro de cualquier sección | El más barato de implementar y el más faltante hoy — mínimo viable de micro-interacción "dentro del template" |
+| 4 | Stagger de líneas/párrafos al entrar en viewport | scroll into view | Ya existe **P8** (SplitText) en `motion-cookbook.md` — aplicar con delay entre líneas para dar "ritmo de lectura" | Bloques de texto largo en cualquier sección | No es primitivo nuevo, es una aplicación puntual de uno que ya está |
+| 5 | Underline con variación de estilo por sección | hover | Mismo mecanismo que #3, con curva/origen distinto por sección (dentro del vocabulario chico de Detalle #5.2) | Secciones con "personalidad" propia (features vs. servicios vs. galería) | Da variedad sin salirse del sistema — variar la ejecución, no inventar un patrón nuevo por sección |
+| 6 | Expand + zoom/glow sutil en items de lista | hover | `transform: scale()` + `box-shadow` transition; GSAP solo si hay overlap/depth | Grids de casos, portfolio, testimonios, catálogo (`commerce`) | Evita que listas largas se sientan planas — mismo espíritu que "un foco por vez" de Detalle #2 |
+| 7 | Hero con blur→clear al cargar | load | CSS `filter: blur()` animado a `0`, o GSAP si hay más control de timing | Heroes con texto grande como elemento central | Alternativa de entrada dentro del vocabulario de Detalle #5.2 (no reemplaza fade/slide, es una tercera opción) |
+| 8 | Parallax sutil (imagen se mueve distinto que el scroll) | scroll | Ya existe: **P2** en `motion-cookbook.md`. La clave del curso: "casi imperceptible" — no exagerar el ratio de desplazamiento | Imágenes junto a texto en secciones de contenido | No es primitivo nuevo — el matiz nuevo es la **intensidad**: sutil, no un parallax agresivo |
+| 9 | Underline + rotación de ícono combinados en un mismo hover | hover | Dos transiciones CSS sincronizadas (underline `scaleX` + `rotate` del ícono/SVG) en el mismo `:hover` | CTAs principales tipo "empezar proyecto" / botones de cierre de sección | Combinar dos señales en un solo hover refuerza el CTA sin agregar texto ni peso visual |
+| 10 | Fade-in de sección con timing individual (no uniforme) | scroll into view | GSAP ScrollTrigger — cada sección con su propia duración/delay, no un valor global copiado | Todas las secciones del template | Matiz sobre P13/Detalle #3.6: la progresión "revista" pide timing propio por sección, no una sola curva repetida |
+| 11 | Hover en headings/subheadings (underline que se dibuja o cambio de weight) | hover | `::after` con `width` animado, o `font-variation-settings` transition si la tipografía es variable | Headings dentro del cuerpo de contenido (no solo el H1 del hero) | Decorativo pero refuerza la jerarquía tipográfica de forma interactiva, no solo estática |
+| 12 | Accordion: ícono +/− que rota + expand/collapse suave | click | Ícono con `rotate(45deg)` transition; contenido con `grid-template-rows: 0fr → 1fr` (o GSAP `height: auto`) | FAQ, specs colapsables — cualquier sección con contenido opcional (`contact`, `commerce`) | Patrón estándar de la industria — su ausencia en un FAQ se nota como genérico/desactualizado |
+| 13 | Floating label + underline en foco de campo de formulario | focus | CSS `:focus` + `:not(:placeholder-shown)` para mover el label; `border-color`/`width` transition en la línea inferior | Cualquier form (`contact`, checkout) — **la misma animación exacta en todos los campos**, sin excepción | Guía sin instrucciones — mínimo viable de un form que se sienta cuidado, no un `<input>` default del browser |
+| 14 | Ícono que se rellena (stroke→fill) en botón de submit/CTA final | hover | SVG con `fill`/`stroke` animado vía CSS o GSAP | Botón de envío de cualquier form, CTA de cierre de sección | Consistencia con el resto de botones del sitio — mismo lenguaje visual de principio a fin |
+| — | **Consistencia total entre todas las anteriores** (meta-principio, no una técnica en sí) | — | No es una técnica nueva: es reusar exactamente los mismos patrones 1–14 en cada instancia del sitio, sin variar la firma de cada una | Todo el SKU, de punta a punta | Es lo que convierte 14 detalles "triviales vistos uno por uno" en una sensación de marca coherente — mismo argumento del vocabulario reducido de Detalle #4.7 y #5.2, aplicado a micro-interacciones |
+
+**Acción pendiente cuando se implemente** (cierra el gap de Detalle #2):
+extender `AGENTS.md` regla #2 (hoy: "Emil... chrome del market + micro-
+interacciones de templates: nav, botones, popovers, toasts") para que
+explícitamente cubra este catálogo dentro de cualquier sección vendible, no
+solo el chrome — usando los tokens de easing ya existentes (`--ease-out`,
+`--ease-drawer`) como base común para que el catálogo completo comparta
+timing, no solo estilo visual.
 
 ## Aplicación a templates existentes
 
