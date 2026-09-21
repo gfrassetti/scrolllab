@@ -127,4 +127,22 @@ Conceptos que ameritan un SKU nuevo (no un ajuste a uno existente) van acá,
 con el flujo estándar de `AGENTS.md` (`analyze:ref`, template-image-designer,
 Beat/WebGL según corresponda) una vez que haya una referencia concreta.
 
-- *(pendiente)*
+- **Tres direcciones de escena para el hero de Module 6** (pág. 11 del PDF,
+  "Try a different direction" — referencias reales usadas en el curso):
+  - **Wider reveal** (ref. Naveera) — arranca cerca de un vehículo/objeto
+    único y al hacer scroll se aleja revelando una red más amplia (rutas,
+    sistema, conexiones). Sirve para logística, transporte, infraestructura.
+  - **Camera journey** (ref. Delphi Markets) — recorrido de cámara entre
+    edificios hacia un skyline abierto; el headline explica la oferta
+    mientras el setting construye el mood. Sirve cuando el lugar/ciudad es
+    parte de la historia (fintech, real estate, city-focused).
+  - **Object reveal** (ref. Georgie's Aesthetics) — un objeto con buena luz
+    es el foco, arranca en plano abierto y cierra en un detalle; puede
+    combinarse con la variante "reveal por texto" (palabra grande detrás de
+    la que se ve la escena). Sirve para producto único / aesthetics /
+    e-commerce premium.
+  - Las tres son variaciones del mismo motor (hero de Module 6, ver Detalle
+    #1); no son SKUs nuevos por sí solas sino **briefs de escena** para
+    aplicar el mismo hero a rubros distintos. Evaluar si alguna amerita un
+    SKU dedicado cuando se implemente el primero y se vea qué tan
+    reusable/parametrizable queda el componente.

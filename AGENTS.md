@@ -1,5 +1,26 @@
 # AGENTS.md — SCROLLLAB (storytelling-pages-templates)
 
+## 📖 Fuente de verdad — Curso "The Award-Winning Web Developer" (prioridad máxima, no negociable)
+
+Todo lo que enseña el curso pago del usuario ("The Award-Winning Web
+Developer Program") es la **biblia** de este repo de acá en adelante:
+
+- Se documenta en [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md)
+  a medida que el usuario pega contenido del curso en el chat.
+- Se **implementa tal cual**, sin discutirlo, sin ofrecer una alternativa
+  "más segura" y sin pausar a pedir confirmación por las dudas.
+- Si un concepto del curso contradice cualquier convención del resto de
+  este archivo (cookbook de motion, Beat, WebGL, design craft, lo que sea)
+  — **gana el curso**. La convención vieja se actualiza o se elimina para
+  reflejar lo nuevo del curso, nunca al revés.
+- **Todo lo que sigue de acá para abajo en este `AGENTS.md` es el sistema
+  anterior al curso** (pre-existente, "lo viejo"). Se mantiene documentado y
+  deliberadamente separado de esta sección: si en algún momento se decide
+  tirar el sistema viejo entero, se puede borrar en bloque sin tocar esta
+  sección ni `docs/award-winning-web-developer.md`.
+
+---
+
 Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro. Auth: Google (o login de desarrollo).
 
 **Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. Brand: `src/lib/site.js` → `SCROLLLAB`.
