@@ -42,6 +42,8 @@ abajo.
 
 - [ ] Paleta acotada y deliberada — un sistema completo, no "lo que vino
       por default" (`UI/UX Pro Max` + Design Read de `taste-skill`).
+- [ ] Imágenes de alta resolución que cuentan una historia, no relleno
+      decorativo (Higgsfield, nunca picsum — Detalle #4.9).
 - [ ] Elementos clave (CTA, marcadores de nav) con espacio de sobra
       **a propósito**, para que nada compita por atención.
 - [ ] Un foco claro por sección/viewport — el whitespace dirige la mirada,
@@ -421,7 +423,15 @@ etc.) — eso no se documenta, no aporta nada reusable.
    el criterio ya anotado en Detalle #1 de que el hero tiene que evocar
    antes de leerse — acá el punto es *cómo* se logra ese protagonismo: sacando
    de encima todo lo que no sea el hero mismo, empezando por el nav.
-9. **Receta de cierre de la lección** (checklist reusable):
+9. **Imágenes de alta resolución que cuentan una historia**: de la lección
+   — "these images are high quality, like extremely high quality, and tell
+   a story." No es solo un requisito técnico de nitidez: la foto tiene que
+   aportar narrativa, no ser relleno decorativo. Refuerza (no agrega regla
+   nueva, pero la hace explícita) lo ya escrito en `AGENTS.md` sobre
+   Higgsfield como default para piezas de imagen y la prohibición de picsum
+   — y es motivo extra para no bajar la calidad de generación/upscale
+   (`upscale_image`) en ningún SKU, incluso en placeholders.
+10. **Receta de cierre de la lección** (checklist reusable):
    - Setear el mood con un hero fuerte.
    - Dividir la historia en secciones digeribles.
    - Transiciones + micro-interacciones para guiar, sin distraer.
