@@ -77,6 +77,9 @@ abajo.
       micro-interacción correspondiente del catálogo (Detalle #6), y todas
       comparten el mismo lenguaje de feedback — no solo el chrome del
       market.
+- [ ] (Evaluar por template, no obligatorio en todos) Header/nav con texto
+      que refleja la sección activa del scroll — wayfinding extra en
+      páginas largas con muchas secciones distintas (Detalle #7).
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -100,6 +103,7 @@ abajo.
 | 4 | Anatomía de un sitio premium por módulos repetibles (Lesson 2, walkthrough de un real-estate site) | Un sitio sofisticado no es 100 componentes únicos: es un vocabulario chico de módulos (hero, content block, transición, closing) ejecutados con disciplina — macro white space, una acción primaria por sección, repetición **deliberada** dentro de listados del mismo tipo, jerarquía por tamaño/peso/espacio, cierre grácil | Valida la filosofía de secciones componibles del builder (`sectionRegistry.jsx`); toca taste-skill, Emil, P13 — ver detalle abajo | Documentado |
 | 5 | **Motion como cornerstone** (Lesson 3, ref. YK Produce) | El motion award-level no es sobre complejidad, es sobre **vocabulario reducido + consistencia + control del timing**: mismos tipos de movimiento reusados en todo el sitio, orden de aparición deliberado (texto antes que imagen), pausas que generan anticipación, cero motion decorativo sin propósito | Toca `docs/motion-cookbook.md` (P2/P8), tokens de easing en `src/index.css`, Beat/P11 (progress rail) — ver detalle abajo | Documentado — trae 2 candidatos a primitivo/token nuevo |
 | 6 | **Catálogo de micro-interacciones** (Lesson 4, walkthrough de un sitio de agencia) | 14 micro-interacciones puntuales (hover de botón/link, drawer de nav, stagger de texto, underline variable, expand de cards, blur→clear en hero, parallax sutil, accordion, floating label de form, ícono que se rellena) + el meta-principio de que la **consistencia total** entre todas ellas es lo que las hace sumar a algo premium | **Cierra el gap señalado desde Detalle #2**: Emil hoy solo cubre chrome del market — este catálogo es el "cómo" concreto para extenderlo a micro-interacciones dentro de cada template | Documentado — catálogo listo para portar cuando se implemente |
+| 7 | Animaciones puntuales desarmadas + principios de timing (Lesson 5) | 7 animaciones nombradas (fade/slide, stagger de listas, cross-fade de color entre secciones, forma grande señalando transición, label lateral que se desliza a posición, hover mínimo, **header que cambia de texto según la sección activa**) + 4 takeaways de timing citados textualmente | El header dinámico es candidato a técnica nueva — toca P1/P3/P4/P8/P13 para el resto — ver detalle abajo | Documentado — desarmado punto por punto como pidió el usuario |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -589,6 +593,92 @@ Framing psicológico nuevo, no solo estético: el feedback constante
 (incluido el feedback *ambiente*, no solo en elementos puntuales) genera
 sensación de control — argumento extra para no dejar ningún link/botón/
 campo del catálogo sin su reacción correspondiente.
+
+### Detalle #7 — Animaciones puntuales desarmadas + principios de timing (Lesson 5)
+
+**Fuente:** Lesson 5 del curso. Acá van las animaciones nombradas por el
+instructor, **desarmadas una por una** (pedido explícito del usuario), sin
+la narrativa del sitio de ejemplo.
+
+**Las 7 animaciones, desarmadas:**
+
+- **Fade in / slide up de elementos**: transform básico (`translateY` +
+  `opacity`) al entrar en viewport. No es primitivo nuevo — es la base más
+  simple del vocabulario chico ya logueado en Detalle #5.2. El punto del
+  curso acá no es la técnica (trivial), es que se **reusa igual en todo el
+  sitio** sin variarla porque sí.
+- **Listas que aparecen con delay leve entre ítems**: stagger clásico. Ya
+  cubierto por **P8** (SplitText) y por el punto #6.4 del catálogo de
+  micro-interacciones — mismo primitivo, tercera vez que aparece en el
+  curso, confirma que es un básico no-negociable.
+- **Cross-fade de *color* entre secciones** (no de imagen): a diferencia de
+  **P3** (que es crossfade de capas/imagen), esto es específicamente el
+  **fondo de la sección** transicionando de color en vez de cortar en seco
+  al cambiar de sección — técnica concreta para el handoff de **P13**
+  (overlap sin hard cut): animar `background-color` durante el scroll de
+  transición, no solo superponer contenido.
+- **Forma grande señalando una transición** (el instructor menciona un
+  anillo/círculo azul): esto **ya es P4** (disco / zoom-through circular,
+  `rounded-full` `scale 0→1`, bg = color de la sección siguiente) tal cual
+  está documentado en `motion-cookbook.md` — no hay nada nuevo que anotar,
+  es confirmación de que P4 es exactamente esta técnica vista "en la
+  vida real" en otro sitio de referencia.
+- **Label lateral que se desliza a su posición** (ej. un tag/kicker tipo
+  "Everlasting Story"): un elemento chico de contexto (etiqueta, categoría,
+  nombre de proyecto) que entra con un translate corto hasta anclarse en un
+  costado de la sección. No es un primitivo nuevo (es P1/fade-slide básico
+  aplicado a un elemento pequeño), pero vale la pena nombrarlo como patrón
+  reconocible — "kicker label" — para no reinventar el nombre cada vez que
+  aparezca en un template.
+- **Hover effects mínimos y restringidos**: refuerza (tercera vez en el
+  curso) el principio de "cero motion sin propósito" ya logueado en
+  Detalle #5.6 — hover discreto, no un festival de efectos por elemento.
+- **Header/nav con texto que cambia según la sección activa** (⭐ el punto
+  que el usuario pidió destacar en detalle): en algún momento de la
+  lección, un texto en el header **cambia** cuando el scroll llega a una
+  sección nueva — el header no es estático, refleja "dónde estás" en la
+  página. Es distinto a todo lo ya logueado:
+  - No es el nav de numerales romanos de Detalle #3.6 (eso marca
+    "capítulos" con un índice fijo).
+  - No es la progress rail de Detalle #5.4 (eso es un indicador continuo
+    0→100%, no texto).
+  - Esto es un **label de texto en el header que se actualiza por
+    sección** — ej. el header podría decir "Inicio" en el hero y cambiar a
+    "Nuestro trabajo" al entrar a la sección de portfolio, sin que el
+    usuario haga click en nada.
+  - **Cómo se construiría** (no implementado, solo el approach): un
+    `ScrollTrigger` por sección con `onEnter`/`onEnterBack` que actualiza
+    un único nodo de texto en el header (mismo mecanismo que ya usa **P11**
+    para el proxy numérico, pero con un string en vez de un número) — o,
+    si el header ya vive en React, un `IntersectionObserver`/`ScrollTrigger`
+    que setea qué sección está "activa" y el header renderiza el label
+    correspondiente. Transición del texto: swap simple con fade, o
+    SplitText (P8) si se quiere que el cambio de label tenga su propio
+    micro-momento.
+  - **Por qué es valioso**: es wayfinding activo, no pasivo — profundiza el
+    principio de "página larga sin sentirse perdido" ya logueado en
+    Detalle #2 (ahí era color+tipografía+márgenes marcando la sección;
+    esto es el header mismo confirmando en qué parte de la historia estás).
+    Combina bien con el framing de "capítulo a capítulo" de Detalle #3.6.
+  - **Candidato a primitivo nuevo** en `docs/motion-cookbook.md` cuando se
+    implemente — no encaja limpio en ninguno de los P1–P14 existentes.
+
+**Principios de timing citados textualmente** (los 4 takeaways de cierre de
+la lección, útiles como criterio de aceptación, no solo inspiración):
+
+> "Motion is not random decoration. It guides the eye and supports the
+> story."
+
+> "Timing creates the premium feel."
+
+> "Delays and staggered sequences make simple animations feel elegant."
+
+> "Flow connects sections through consistent patterns and soft transitions."
+
+Y el método práctico de cierre: para cada elemento nuevo que se anima,
+preguntarse **cómo entra y sale, qué tan rápido se mueve, y cómo se
+relaciona con los elementos de alrededor** — no animar aislado, animar en
+relación al resto de la escena.
 
 ## Aplicación a templates existentes
 
