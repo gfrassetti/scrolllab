@@ -68,6 +68,11 @@ abajo.
       sin leer el headline: si no se siente nada, no está terminado.
 - [ ] Nav del hero mínima/discreta — el hero se destaca por sí solo, sin
       competir con la navegación (Detalle #4.8).
+- [ ] Motion reusa el mismo vocabulario chico (2-3 tipos) en todo el
+      template, no una animación de entrada distinta por sección
+      (Detalle #5.2).
+- [ ] Entrada de contenido en orden: headline → subtítulo → imagen, con
+      pausa deliberada entre pasos, nunca todo junto (Detalle #5.3/5.5).
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -89,6 +94,7 @@ abajo.
 | 2 | Básico vs. high-end: white space, tipografía, jerarquía, imaginería y **micro-interacciones** (Lesson 1) | Lo que separa un sitio "de template" de uno premium no es la herramienta ni la complejidad técnica, es la ejecución intencional de esos 5 elementos + crear una experiencia memorable | Transversal a **todos** los templates — Design craft (Impeccable/Emil/taste-skill/UI-UX Pro Max) en `AGENTS.md`, ver detalle abajo | Documentado — es un lente de evaluación, no una tarea puntual |
 | 3 | Walkthrough comparado Shopify award-level vs. landscaping genérico (Lesson 1, video) | Mismo ejercicio del curso pero con técnicas puntuales identificables por sitio: paleta acotada + aislamiento de elementos, sección de cards con motion coordinado, jerarquía tipográfica de 3 niveles, nav vertical con numerales como "capítulos", vs. checklist de anti-patrones del sitio genérico | Toca taste-skill, Emil, motion-cookbook (P11/P13), Impeccable audit — ver detalle abajo | Documentado — checklist listo para usar en audits |
 | 4 | Anatomía de un sitio premium por módulos repetibles (Lesson 2, walkthrough de un real-estate site) | Un sitio sofisticado no es 100 componentes únicos: es un vocabulario chico de módulos (hero, content block, transición, closing) ejecutados con disciplina — macro white space, una acción primaria por sección, repetición **deliberada** dentro de listados del mismo tipo, jerarquía por tamaño/peso/espacio, cierre grácil | Valida la filosofía de secciones componibles del builder (`sectionRegistry.jsx`); toca taste-skill, Emil, P13 — ver detalle abajo | Documentado |
+| 5 | **Motion como cornerstone** (Lesson 3, ref. YK Produce) | El motion award-level no es sobre complejidad, es sobre **vocabulario reducido + consistencia + control del timing**: mismos tipos de movimiento reusados en todo el sitio, orden de aparición deliberado (texto antes que imagen), pausas que generan anticipación, cero motion decorativo sin propósito | Toca `docs/motion-cookbook.md` (P2/P8), tokens de easing en `src/index.css`, Beat/P11 (progress rail) — ver detalle abajo | Documentado — trae 2 candidatos a primitivo/token nuevo |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -438,6 +444,73 @@ etc.) — eso no se documenta, no aporta nada reusable.
    - Cerrar con un CTA simple y contundente.
    - Ingredientes: espaciado intencional, jerarquía clara, patrones
      consistentes, motion restringido — nada de esto requiere tooling caro.
+
+### Detalle #5 — Motion como cornerstone (Lesson 3, ref. YK Produce)
+
+**Fuente:** Lesson 3 del curso, walkthrough de un site (YK Produce) centrado
+puntualmente en motion. Principios extraídos, mínima referencia al ejemplo.
+
+1. **Zoom lento sobre foto estática = cinematográfico**: un gentle zoom
+   (tipo Ken Burns) sobre una imagen fija. Ya tiene primitivo en el repo —
+   **P2** (zoom/parallax con UI fija) en `docs/motion-cookbook.md` — no hace
+   falta nada nuevo, solo aplicarlo con esta intención puntual en heroes/
+   imágenes estáticas.
+2. **Vocabulario de motion consistente y reducido — la regla central de la
+   lección**: el headline "desliza hacia arriba" al scrollear, y el
+   *siguiente* headline aparece con el **mismo** estilo — misma entrada,
+   mismo timing. Los loaders y reveals de otras secciones/páginas del sitio
+   reusan el mismo tipo de motion aunque la imaginería cambie. Consistencia
+   en la animación **construye confianza**: el usuario aprende cómo se
+   comporta la interfaz y se siente cómodo explorando. Cita textual: *"it's
+   almost easier to implement than custom animation on every single page.
+   Simplicity and repetition lead to quality."*
+   - **Acción concreta cuando se implemente**: cada template debería
+     declarar su propio vocabulario chico de motion (2-3 tipos: ej. fade +
+     slide + tiny zoom) y reusarlo en todas las secciones, en vez de una
+     animación de entrada distinta por sección. Es la versión "motion" del
+     mismo principio de vocabulario reducido de módulos ya logueado en
+     Detalle #4.7.
+3. **Orden de aparición deliberado — texto antes que imagen**: en cada
+   página, el texto más grande aparece primero, el texto secundario
+   después, y las **imágenes entran después del texto** — le da al cerebro
+   un momento para leer antes de mirar lo visual. Es una secuencia
+   específica a respetar en los timelines GSAP de entrada (headline → sub →
+   imagen), no solo "todo hace stagger junto".
+4. **Micro-detalles conectores + progress rail**: puntos/líneas sutiles que
+   atan la composición, y una **barra vertical delgada a un costado que
+   trackea el progreso de scroll silenciosamente**. Esto es un widget
+   nuevo a considerar — no es lo mismo que el nav de numerales romanos de
+   Detalle #3.6 (que marca "capítulos"), es un **indicador continuo de
+   progreso** (0→100% del scroll). Candidato a primitivo o a extensión de
+   Beat/P11 cuando se implemente; evaluar si un mismo widget puede cumplir
+   las dos funciones (capítulo + progreso) o si conviene separarlos.
+5. **Timing deliberado genera anticipación — no instantáneo**: una pausa
+   breve entre que el loader termina y aparece la imagen del hero crea
+   anticipación; una pausa de **medio segundo** entre el heading y el
+   subtítulo deja absorber las palabras antes de seguir. No es lentitud porque
+   sí, es tiempo suficiente para apreciar el contenido.
+   - **Candidato a token nuevo**: hoy `src/index.css` tiene tokens de
+     *easing* (`--ease-out`, `--ease-in-out`, `--ease-drawer`) pero no un
+     token de *delay* estándar para este patrón heading→subtítulo. Evaluar
+     un delay convencional (~0.4–0.6s) cuando se implemente, en vez de
+     valores sueltos por sección.
+6. **Cero motion sin propósito**: nada rebota porque sí, no hay animaciones
+   de fondo que distraigan del mensaje, el motion siempre está atado al
+   contenido — invita, ordena la información, y **se quita del medio**.
+   Extiende (no reemplaza) la regla ya escrita en `AGENTS.md` ("el
+   scrollytelling... no se reemplaza por micro-UI") a **todo** motion
+   decorativo del template, no solo al chrome del market.
+7. **Cita de cierre, citable tal cual**: *"Good motion design is like good
+   typography. If it's doing its job, you don't notice it, but you feel
+   the effect."* Y la definición explícita de award-level motion de esta
+   lección: *"not about complexity. It's about intention and control"* —
+   movimientos lo más simples posible (fades, slides, tiny zooms) aplicados
+   con consistencia, decidiendo cuándo mostrar y cuándo contener, movimiento
+   pareado con quietud para que cada transición tenga sentido.
+8. **Método práctico de arranque** (checklist reusable): decidir qué tiene
+   que notarse primero → decidir el orden → sumar motion simple que guíe
+   ese orden. Nada más. Mismo espíritu que la Receta de cierre de Detalle
+   #4, aplicado específicamente a motion.
 
 ## Aplicación a templates existentes
 
