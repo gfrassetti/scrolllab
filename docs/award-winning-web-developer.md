@@ -5,6 +5,14 @@
 > templates nuevos y la revisión de los existentes contra el estándar Awwwards
 > (ver "Qué vendemos" en `AGENTS.md`).
 
+> **Regla del usuario (2026-09-21, no negociable):** todo lo que diga el curso
+> se documenta y **se implementa tal cual**, de ahora en adelante, sin debate.
+> Si un concepto del curso contradice una convención ya escrita en el repo
+> (ej. `docs/scroll-media.md`), la convención existente es la que se revisa —
+> no se cuestiona el concepto del curso. Por ahora la fase activa es
+> **solo documentar**; la implementación arranca cuando el usuario lo pida
+> explícitamente, pero en ese momento se hace sin reabrir la discusión.
+
 ## Cómo se usa
 
 1. El usuario pega un concepto/lección del curso en el chat (texto, snippet,
@@ -12,10 +20,13 @@
 2. Se agrega una fila a la tabla de log de abajo: principio, por qué importa
    para el estándar award-level, y dónde pega en SCROLLLAB (Beat, WebGL,
    cookbook de motion, UI/UX Pro Max, chrome del builder, etc.).
-3. Si el concepto es accionable sobre un template existente, se anota en
-   "Aplicación a templates existentes" y se ejecuta como tarea aparte (no se
-   mezcla el dump de notas con el refactor de código en el mismo commit salvo
-   que el usuario lo pida así).
+3. Cuando el usuario pida implementarlo, se aplica **tal cual lo dice el
+   curso**. Si choca con una convención existente (ej. un anti-patrón
+   documentado), se actualiza esa doc/convención para reflejar la nueva regla
+   del curso — no se propone una alternativa "más segura" ni se pausa a
+   pedir confirmación por el choque. Se ejecuta como tarea aparte del dump de
+   notas (no se mezcla en el mismo commit) salvo que el usuario pida lo
+   contrario.
 4. Si el concepto es un primitivo de motion nuevo, referenciar/promover a
    `docs/motion-cookbook.md` en vez de duplicarlo acá.
 
@@ -23,7 +34,7 @@
 
 | # | Concepto | Principio / por qué | Dónde aplica en SCROLLLAB | Estado |
 |---|---|---|---|---|
-| 1 | Hero de video controlado por scroll ("Make the hero move with scroll", Module 6) | Scroll adelante = avanza la escena, parar = congela, scroll atrás = rebobina. Pipeline: brief beginning/middle/end → imagen IA → imagen-a-video (Higgsfield) → still del primer frame como poster → wire al scroll | **Conflicto con `docs/scroll-media.md`** — ver detalle abajo | ⚠️ pendiente de reconciliar antes de aplicar |
+| 1 | Hero de video controlado por scroll ("Make the hero move with scroll", Module 6) | Scroll adelante = avanza la escena, parar = congela, scroll atrás = rebobina. Pipeline: brief beginning/middle/end → imagen IA → imagen-a-video (Higgsfield) → still del primer frame como poster → wire al scroll | Toca `docs/scroll-media.md` — ver detalle abajo | Documentado — implementación pendiente de que el usuario la pida |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -56,36 +67,38 @@ section).
    headline legible todo el scrub, next section alcanzable, versión mobile
    deliberada, la página tiene sentido sin motion.
 
-**⚠️ Conflicto a resolver antes de portarlo a un template:**
+**Nota técnica — toca una convención existente:**
 
 El curso conecta el scroll directo a `<video currentTime = progress *
-duration>`. `docs/scroll-media.md` (sección "Por qué canvas 2D y no `<img
-src>` ni `<video>`", líneas 119–127) marca esto como **anti-patrón** en
-SCROLLLAB: seek asíncrono, no frame-exacto, se rompe en Safari. La Familia B
-del repo (estilo pear.no) exige extraer fotogramas del clip con `ffmpeg` y
-pintarlos en canvas 2D según `progress` (P1 + `drawImage`), no scrubear el
-elemento `<video>` en vivo.
+duration>`. Hoy `docs/scroll-media.md` (sección "Por qué canvas 2D y no `<img
+src>` ni `<video>`", líneas 119–127) documenta el scrub de `<video>` como
+anti-patrón en SCROLLLAB (seek asíncrono, no frame-exacto, se rompe en
+Safari) a favor de la Familia B: extraer fotogramas con `ffmpeg` y pintarlos
+en canvas 2D según `progress`.
 
-**Reconciliación propuesta** (no implementada todavía, queda para cuando se
-aplique a un template real):
+Por la regla de arriba, esto **no es una decisión pendiente**: cuando se
+implemente, se sigue el guion del curso tal cual (Higgsfield img2video → wire
+del `<video>` al scroll) y `docs/scroll-media.md` se actualiza para dejar de
+marcarlo como anti-patrón — o para acotar en qué casos sigue aplicando el
+anti-patrón viejo (ej. secuencias renderizadas a mano vs. clips cortos de
+IA). Esa actualización de `scroll-media.md` se hace en el mismo trabajo que
+implemente el primer hero de este tipo, no antes.
 
-1. Usar el pipeline del curso tal cual para el **arte**: brief de escena →
-   imagen IA (con la regla del tercio muerto) → Higgsfield img2video →
-   aprobar el clip.
-2. En vez de servir el `.mp4` al `<video>` y scrubear `currentTime`,
-   extraerlo a WebP con `ffmpeg` (mismo pipeline que ya documenta
-   `scroll-media.md`: `ffmpeg -i clip.mp4 -vf "fps=24,scale=…" frame-%04d.png`
-   → `cwebp`) y montarlo como Familia B: canvas 2D + `drawImage` por
-   `frameIndex`.
-3. El resto del guion del curso (poster del primer frame, hold exacto al
-   parar, reverse, mobile estático, reduced motion, checklist de cierre) se
-   aplica **igual**, es agnóstico a si el medio final es `<video>` o canvas
-   2D — de hecho ya coincide con las reglas de performance de
-   `scroll-media.md` (frame estático en reduced motion, primer frame con
-   `fetchPriority: high`).
-4. La variante "reveal por texto" (mask que crece) es la única pieza sin
-   home todavía — evaluar como candidato a primitivo nuevo en
-   `docs/motion-cookbook.md` cuando haya un template concreto que lo pida.
+Piezas del guion del curso a llevar igual, sin ambigüedad:
+
+1. Brief de escena beginning/middle/end + regla del tercio muerto en el
+   prompt de imagen (Higgsfield `generate_image`, via `template-image-designer`).
+2. Imagen → Higgsfield img2video, con las frases de corrección del curso
+   para deformación/exceso de movimiento de cámara.
+3. Still del primer frame como poster/loading state.
+4. Wire al scroll: forward al bajar, hold exacto al parar, reverse al subir,
+   handoff sin hard cut a la siguiente sección (mismo espíritu que P13).
+5. Mobile / `prefers-reduced-motion`: imagen estática, nunca el scrub.
+6. Variante "reveal por texto" (máscara que crece revelando la escena) —
+   candidata a primitivo nuevo en `docs/motion-cookbook.md` la primera vez
+   que un template la use.
+7. Checklist de cierre del curso (oferta entendible sin explicación,
+   forward/stop/reverse, legibilidad, mobile deliberado, degrada sin motion).
 
 ## Aplicación a templates existentes
 
