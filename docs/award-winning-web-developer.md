@@ -104,6 +104,7 @@ abajo.
 | 5 | **Motion como cornerstone** (Lesson 3, ref. YK Produce) | El motion award-level no es sobre complejidad, es sobre **vocabulario reducido + consistencia + control del timing**: mismos tipos de movimiento reusados en todo el sitio, orden de aparición deliberado (texto antes que imagen), pausas que generan anticipación, cero motion decorativo sin propósito | Toca `docs/motion-cookbook.md` (P2/P8), tokens de easing en `src/index.css`, Beat/P11 (progress rail) — ver detalle abajo | Documentado — trae 2 candidatos a primitivo/token nuevo |
 | 6 | **Catálogo de micro-interacciones** (Lesson 4, walkthrough de un sitio de agencia) | 14 micro-interacciones puntuales (hover de botón/link, drawer de nav, stagger de texto, underline variable, expand de cards, blur→clear en hero, parallax sutil, accordion, floating label de form, ícono que se rellena) + el meta-principio de que la **consistencia total** entre todas ellas es lo que las hace sumar a algo premium | **Cierra el gap señalado desde Detalle #2**: Emil hoy solo cubre chrome del market — este catálogo es el "cómo" concreto para extenderlo a micro-interacciones dentro de cada template | Documentado — catálogo listo para portar cuando se implemente |
 | 7 | Animaciones puntuales desarmadas + principios de timing (Lesson 5) | 7 animaciones nombradas (fade/slide, stagger de listas, cross-fade de color entre secciones, forma grande señalando transición, label lateral que se desliza a posición, hover mínimo, **header que cambia de texto según la sección activa**) + 4 takeaways de timing citados textualmente | El header dinámico es candidato a técnica nueva — toca P1/P3/P4/P8/P13 para el resto — ver detalle abajo | Documentado — desarmado punto por punto como pidió el usuario |
+| 8 | Blueprint de página narrativa de 5 beats (Lesson 6, "build a plan") | Estructura completa: Hook (hero) → Introduce (collage) → Offer (grid 3 cards) → Explain (two-column de valores) → Invite (CTA de cierre) — con reglas puntuales por sección y la disciplina de **excluir** lo que no sirve a la historia | Blueprint reusable para un template nuevo tipo "landing narrativa" **o** checklist de estructura a transpolar a templates existentes — ver detalle abajo y "Templates nuevos" | Documentado — candidato a template nuevo o a checklist de estructura |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -680,6 +681,100 @@ preguntarse **cómo entra y sale, qué tan rápido se mueve, y cómo se
 relaciona con los elementos de alrededor** — no animar aislado, animar en
 relación al resto de la escena.
 
+### Detalle #8 — Blueprint de página narrativa de 5 beats (Lesson 6)
+
+**Fuente:** Lesson 6, ejercicio de "armar un plan" combinando piezas de
+varias referencias reales del curso (menciona "demo", "Singer" y
+"Portland" como fuentes de cada sección puntual). Es un blueprint completo
+de página, no una técnica aislada — por eso además de logueado acá va
+referenciado en "Templates nuevos" más abajo.
+
+**El framework narrativo (5 beats):** Hook → Introduce → Offer → Explain →
+Invite. Cada sección de la página cumple **un solo** rol narrativo — mismo
+principio de "una acción/foco por sección" ya logueado en Detalle #4.2,
+aplicado acá al nivel de la página completa, no de un módulo individual.
+
+**Las 5 secciones, desarmadas:**
+
+1. **Hero (Hook)**: video o foto que capture el mood de marca, logo chico y
+   discreto, una sola línea de valor, **un solo botón** a la acción
+   primaria (ej. "Contact us"). No sobrecargar — el hero solo setea mood y
+   enfoca atención, no vende. Medio y copy tienen que matchear la emoción
+   que se sostiene en el resto de la página. Coincide con todo lo ya
+   logueado en Detalle #1 (evocar antes de leer) y #4.8 (nav mínima,
+   protagonismo del hero) — nada nuevo acá, es la misma regla aplicada al
+   punto de partida del plan.
+2. **Introducción estilo collage (Introduce)**: una sola oración sobre
+   quién sos y por qué existís, rodeada de fotos chicas que **se
+   superponen levemente al texto** — la lección lo nombra explícitamente:
+   "that imperfection makes it human and unique." Transición de lo general
+   (hero) a lo personal (historia). Técnica nueva no logueada antes: el
+   overlap deliberado imagen↔texto como recurso de humanización, distinto
+   del overlap de profundidad entre paneles de Detalle #3.3.
+3. **Grid de ofrecimientos, 3 cards (Offer)**: cada card = imagen + título
+   + descripción concisa. Reglas puntuales:
+   - Si la foto del producto es "ruidosa", agregar un **overlay oscuro con
+     transparencia** para que el texto siga siendo legible — a la vez
+     agrega profundidad a la foto. Técnica concreta y simple, aplicable a
+     cualquier card con imagen de fondo + texto encima en el catálogo.
+   - Si hay más de 3 ítems: agregar otra fila, o pasar a un layout de 4
+     cards — nunca forzar todo en una fila.
+   - **Nunca autoplay de sliders** — la meta es claridad, que el visitante
+     entienda la oferta de un vistazo. Es una prohibición explícita, no una
+     preferencia.
+   - Si hay muchos ítems, agruparlos para que **cada fila cuente algo**, no
+     una lista plana.
+   - Tamaños de imagen consistentes entre cards — evita "caos visual".
+4. **Sección de valor, dos columnas (Explain)**: columna izquierda =
+   statement contundente sobre filosofía/proceso; columna derecha = imagen
+   que lo ilustra; párrafo corto debajo del headline para profundidad.
+   Botón opcional — **solo si aporta un propósito real**, nunca obligatorio,
+   y si existe debe quedar secundario (no compite con el CTA de cierre).
+   Es sobre **conexión, no conversión** — un respiro después del grid
+   cargado de la sección anterior, para "dejar que el visitante respire".
+   Construye confianza, no vende. Statement memorable, imagen que se sienta
+   real (no stock genérico — reconecta con Detalle #4.9, imágenes que
+   cuentan una historia).
+5. **CTA de cierre (Invite)**: fondo full-width (foto fija o video si la
+   marca lo permite), invitación fuerte tipo "start your journey today" o
+   "let's build something together", una oración de apoyo debajo, **un
+   solo botón** al objetivo de conversión. Todo centrado, simple. Es lo
+   último que ve el visitante — tiene que dejar una **elección clara**, no
+   varias opciones compitiendo (mismo principio de Detalle #4.2/#4.5
+   aplicado al cierre de toda la página, no solo de una sección).
+
+**El principio más valioso de la lección — exclusión deliberada:** el plan
+final **deja afuera a propósito** videos extra, sliders complejos y
+secciones redundantes. Cita textual: *"By choosing only what supports the
+story, you make the build easier and the site more premium and clearer."*
+Es el mismo principio de vocabulario reducido ya logueado en Detalle #4.7 y
+#5.2 (módulos y motion), pero llevado un nivel más arriba: acá aplica a la
+**decisión de qué secciones incluye la página entera**, no solo a qué
+módulos o qué tipos de motion se repiten dentro de ella.
+
+**Pregunta de cierre para usar cualquier referencia** (método reusable, no
+solo para esta página puntual):
+
+> "When you pull from references, ask yourself: why does each element work,
+> and does it fit your story?"
+
+Es una versión operacionalizada del Design Read de una línea que ya pide
+`taste-skill` — antes de copiar un elemento de una referencia, justificar
+por qué funciona y si encaja en el plan, no copiarlo porque se ve bien
+aislado.
+
+**Cómo usar esto en SCROLLLAB** (sin implementar todavía, quedan dos
+caminos abiertos, a decidir cuando se pida):
+
+- **Como template nuevo**: un SKU "landing narrativa" completo con estas 5
+  secciones como base — candidato anotado en "Templates nuevos" abajo.
+- **Como checklist de estructura transpolable**: aplicar el framework de 5
+  beats (Hook/Introduce/Offer/Explain/Invite) como lente de revisión sobre
+  templates existentes que ya tengan una intención similar (ej. `atelier`,
+  `signal`, cualquier landing de servicios) — sin necesariamente adoptar el
+  layout exacto de cada sección, solo el criterio de "cada sección cumple
+  un rol narrativo, y lo que no sirve a la historia se saca".
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
@@ -726,3 +821,18 @@ Beat/WebGL según corresponda) una vez que haya una referencia concreta.
     aplicar el mismo hero a rubros distintos. Evaluar si alguna amerita un
     SKU dedicado cuando se implemente el primero y se vea qué tan
     reusable/parametrizable queda el componente.
+
+- **Landing narrativa de 5 secciones** (Lesson 6, ver Detalle #8 arriba) —
+  candidato a SKU nuevo, distinto de los templates scrollytelling
+  cinematográficos que ya tiene el catálogo (RATIO/MONOLITH/FIZZ, etc.):
+  este es más cercano a una **landing de servicios/agencia**, con foco en
+  estructura narrativa clara y disciplina de contenido (nada de pin/scrub
+  pesado obligatorio). Hero → collage intro → grid de 3 ofrecimientos →
+  valor de dos columnas → CTA de cierre. Encaja bien como SKU "entry-level"
+  del catálogo (o como base del builder para quien arma un sitio de
+  servicios) precisamente porque **no** depende de Beat/WebGL para verse
+  premium — la calidad viene de estructura + motion vocabulario chico +
+  micro-interacciones (Detalle #4–#7), no de una escena firme 3D. Sirve
+  también como caso de prueba para el filtro "¿de verdad hace falta Canvas/
+  WebGL acá?" de `AGENTS.md` ("Qué vendemos") — este template pasaría la
+  barra Awwwards sin esa capa.
