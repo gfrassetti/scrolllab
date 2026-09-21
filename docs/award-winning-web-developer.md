@@ -35,6 +35,7 @@
 | # | Concepto | Principio / por qué | Dónde aplica en SCROLLLAB | Estado |
 |---|---|---|---|---|
 | 1 | Hero de video controlado por scroll ("Make the hero move with scroll", Module 6) | Scroll adelante = avanza la escena, parar = congela, scroll atrás = rebobina. Pipeline: brief beginning/middle/end → imagen IA → imagen-a-video (Higgsfield) → still del primer frame como poster → wire al scroll | Toca `docs/scroll-media.md` — ver detalle abajo | Documentado — implementación pendiente de que el usuario la pida |
+| 2 | Básico vs. high-end: white space, tipografía, jerarquía, imaginería y **micro-interacciones** (Lesson 1) | Lo que separa un sitio "de template" de uno premium no es la herramienta ni la complejidad técnica, es la ejecución intencional de esos 5 elementos + crear una experiencia memorable | Transversal a **todos** los templates — Design craft (Impeccable/Emil/taste-skill/UI-UX Pro Max) en `AGENTS.md`, ver detalle abajo | Documentado — es un lente de evaluación, no una tarea puntual |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -99,6 +100,54 @@ Piezas del guion del curso a llevar igual, sin ambigüedad:
    que un template la use.
 7. Checklist de cierre del curso (oferta entendible sin explicación,
    forward/stop/reverse, legibilidad, mobile deliberado, degrada sin motion).
+
+### Detalle #2 — Básico vs. high-end (Lesson 1)
+
+**Fuente:** Lesson 1 del curso. Compara un sitio genérico "de template" contra
+uno premium, experience-driven, para establecer la diferencia central que
+recorre todo el programa.
+
+**Lo que enseña, resumido (pegado por el usuario):**
+
+> This lesson establishes the core difference between basic and high-end
+> websites by comparing a generic template-style site with a premium,
+> experience-driven one. It highlights how elements like white space,
+> typography, hierarchy, imagery, and micro-interactions shape how a site
+> feels. The key takeaway is that high-end design is not about tools or
+> complexity, but about intentional execution and crafting a memorable user
+> experience.
+
+**Los 5 elementos que marca la lección** — y dónde ya vive cada uno en
+SCROLLLAB:
+
+| Elemento | Dónde pega hoy en el repo |
+|---|---|
+| White space | `UI/UX Pro Max` (sistemas/checklist), taste-skill (anti-slop) |
+| Tipografía | `UI/UX Pro Max`, P8 (SplitText reveal) en `docs/motion-cookbook.md` |
+| Jerarquía | Impeccable `critique`/`audit`, taste-skill |
+| Imaginería | Higgsfield (`generate_image`/`remove_background`), `template-image-designer` — nunca picsum |
+| **Micro-interacciones** | **Emil Kowalski / emil-design-eng** — hoy acotado a chrome del market (nav, botones, popovers, toasts) en `AGENTS.md` regla #2 |
+
+**Por qué importa esta lección puntualmente — micro-interacciones:**
+
+Es el elemento de los 5 donde el repo tiene **menos cobertura hoy**. La regla
+actual de `AGENTS.md` (Design craft, regla #2) limita Emil al chrome del
+market/builder ("nav, botones, popovers, toasts") y dice explícitamente que
+el "scrollytelling cinematográfico... no se reemplaza por micro-UI". La
+lección del curso pone micro-interacciones al mismo nivel que white
+space/tipografía/jerarquía/imaginería como diferenciador high-end — no solo
+en el chrome del market, sino **dentro de cada template vendible** (hover
+states, feedback de click, transiciones entre estados de UI propia del
+template: CTAs, cards, nav del template, form de contacto, etc.), que hoy no
+tiene una regla explícita.
+
+**Acción pendiente (no implementada, solo señalada):** cuando se pida
+aplicar esto, extender el alcance de Emil/`emil-design-eng` más allá del
+chrome del market para cubrir también la UI no-cinemática **dentro** de cada
+template (botones, cards, nav, forms del propio SKU) — sin tocar el
+scrollytelling GSAP, que sigue siendo dominio del cookbook. Esto es una
+ampliación de regla existente, no un anti-patrón a revertir como el
+Detalle #1.
 
 ## Aplicación a templates existentes
 
