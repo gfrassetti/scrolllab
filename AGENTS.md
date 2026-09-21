@@ -29,6 +29,7 @@ En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, pol
 | 6 | **Higgsfield** (plugin MCP) | Generar fotos, cutouts PNG, video, GLB — **preferido** para assets de templates | namespace `plugin-higgsfield-higgsfield` · [higgsfield.ai](https://higgsfield.ai) · plugin [Cursor Marketplace](https://cursor.com/marketplace/higgsfield) |
 | 7 | **playwright-cli** | Verificar demos/UI en el browser (open / snapshot / click / screenshot). Token-efficient | `.agents/skills/playwright-cli/` · [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) · [docs](https://playwright.dev/docs/getting-started-cli) |
 | 8 | **img2threejs** | Reconstruir un objeto de una foto como Three.js **procedural** (código, no GLB) | `.agents/skills/img2threejs/` · [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs) |
+| 9 | **The Award-Winning Web Developer** (curso propio) | Notas de un curso pago del usuario sobre craft award-level; se van sumando conceptos por chat y aplicando a templates nuevos/existentes | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) |
 
 ### Reglas de uso (no negociables)
 
@@ -91,6 +92,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 | Template existente "no está al nivel de la ref" (handoff / review) | [`docs/rebuild-against-reference.md`](docs/rebuild-against-reference.md) — reconstruir contra beats, no contra el JSX actual |
+| Concepto nuevo del curso "Award-Winning Web Developer" para documentar o aplicar a un template | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) |
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
 
