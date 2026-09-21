@@ -36,6 +36,7 @@
 |---|---|---|---|---|
 | 1 | Hero de video controlado por scroll ("Make the hero move with scroll", Module 6) | Scroll adelante = avanza la escena, parar = congela, scroll atrás = rebobina. Pipeline: brief beginning/middle/end → imagen IA → imagen-a-video (Higgsfield) → still del primer frame como poster → wire al scroll | Toca `docs/scroll-media.md` — ver detalle abajo | Documentado — implementación pendiente de que el usuario la pida |
 | 2 | Básico vs. high-end: white space, tipografía, jerarquía, imaginería y **micro-interacciones** (Lesson 1) | Lo que separa un sitio "de template" de uno premium no es la herramienta ni la complejidad técnica, es la ejecución intencional de esos 5 elementos + crear una experiencia memorable | Transversal a **todos** los templates — Design craft (Impeccable/Emil/taste-skill/UI-UX Pro Max) en `AGENTS.md`, ver detalle abajo | Documentado — es un lente de evaluación, no una tarea puntual |
+| 3 | Walkthrough comparado Shopify award-level vs. landscaping genérico (Lesson 1, video) | Mismo ejercicio del curso pero con técnicas puntuales identificables por sitio: paleta acotada + aislamiento de elementos, sección de cards con motion coordinado, jerarquía tipográfica de 3 niveles, nav vertical con numerales como "capítulos", vs. checklist de anti-patrones del sitio genérico | Toca taste-skill, Emil, motion-cookbook (P11/P13), Impeccable audit — ver detalle abajo | Documentado — checklist listo para usar en audits |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -186,6 +187,76 @@ preguntar si dos secciones consecutivas comparten el mismo layout — si sí,
 variar (columna → full-bleed → grid asimétrico → texto centrado, etc.), el
 mismo criterio que ya aplica RATIO/MONOLITH/FIZZ al alternar pin/scrub,
 WebGL y contenido estático en vez de repetir un patrón.
+
+### Detalle #3 — Walkthrough comparado: Shopify award-level vs. landscaping genérico (Lesson 1)
+
+**Fuente:** mismo video de Lesson 1, tramo donde el instructor navega dos
+sitios reales en vivo y va señalando técnicas puntuales en cada uno. Acá van
+separadas la técnica (accionable) de la comparación (narrativa) — solo se
+loguea lo primero.
+
+#### A. Técnicas del sitio award-level (Shopify)
+
+1. **Paleta acotada + negative space como default**: blacks, golds, creams.
+   No es "poco color" porque falte trabajo, es la paleta completa del sitio.
+   Mapea a `UI/UX Pro Max` (sistema de color) y al Design Read de una línea
+   que pide `taste-skill` antes de inventar look.
+2. **Aislamiento intencional de elementos clave**: el CTA y los numerales
+   romanos de navegación tienen espacio de sobra alrededor **a propósito**,
+   para que nada compita por atención — no es espacio "que sobró", es una
+   decisión de foco. Mismo principio que "un foco por vez" ya logueado en
+   Detalle #2, pero aplicado a elementos puntuales (CTA, marcadores de nav),
+   no solo a secciones completas.
+3. **Sección "Complexity Delegated" — motion coordinado**: texto en script
+   ornamentado que atraviesa la pantalla + cards que entran en slide/pop
+   mostrando ejemplos, paneles rectangulares que **se superponen entre sí**
+   generando profundidad (no solo capas planas). Es composición tipo P6/P7
+   (piezas que entran coordinadas) + superposición para profundidad, que hoy
+   el cookbook no tiene como primitivo explícito de "cards apiladas con
+   depth" — candidato a evaluar como variante de P7 o primitivo nuevo cuando
+   se porte a un template concreto.
+4. **Hover micro-interaction**: al pasar el mouse sobre un panel, reacciona
+   con un scale o shift suave — "da la impresión de que la página está
+   viva". Es exactamente el gap de micro-interacciones **dentro del
+   template** que señala el Detalle #2 (hoy Emil solo cubre chrome del
+   market) — este es un ejemplo concreto de dónde aplicarlo primero: cards/
+   paneles interactivos de secciones tipo features/servicios.
+5. **Jerarquía tipográfica de 3 niveles**: headline grande, subheading
+   mediano, body chico, cada uno con weight/estilo propio; serif delicado
+   contrastado con serif bold para guiar la narrativa. Mapea a `UI/UX Pro
+   Max` + P8 (SplitText reveal) para el headline.
+6. **Progresión tipo revista, no folleto**: el layout cambia a medida que
+   se scrollea — nav vertical con **numerales romanos marcando "capítulos"**,
+   imágenes full-bleed que llegan a los bordes, el fondo cambia para marcar
+   secciones nuevas. El nav vertical con numeral/índice **ya tiene primitivo
+   base en el repo: P11 (rail numérico, `docs/motion-cookbook.md`)** y
+   emparenta con P7 (lista índice que crece) — evaluar portarlo como widget
+   Beat (riel + seek) si un template lo pide, en vez de reinventar con
+   tweens sueltos.
+7. **Whitespace dirigido al CTA**: espacio amplio alrededor de cada botón de
+   CTA hace obvio dónde hacer click — refuerza el punto 2, pero puntualizado
+   en CTAs específicamente (no solo "elementos clave" en general).
+
+#### B. Checklist de anti-patrones (sitio genérico tipo landscaping)
+
+Útil como checklist negativo para Impeccable `audit`/`critique` — si un
+template cae en 2+ de estos puntos, no pasa el estándar Awwwards ya descrito
+en "Qué vendemos" (`AGENTS.md`):
+
+- [ ] Layout boxy/cramped, sin aire entre elementos.
+- [ ] Iconos genéricos (stock icon sets, sin dirección propia).
+- [ ] Tipografía uniforme — sin jerarquía real de tamaños/pesos.
+- [ ] Layout repetitivo, poca variación de ritmo/tono entre secciones (ver
+      regla "layout NO repetitivo" arriba).
+- [ ] Cero micro-interacciones — nada responde a la acción del usuario.
+- [ ] Whitespace mínimo — las secciones se mezclan entre sí, nada resalta.
+- [ ] CTAs compitiendo con otros elementos, fáciles de pasar por alto.
+- [ ] Estructura idéntica a "cientos de otros sitios de negocios" — **esto
+      es literalmente el mismo test que ya escribe `AGENTS.md` en "Qué
+      vendemos"** ("¿esto podría estar en Awwwards... o es interchangeable
+      con ThemeForest?"). El curso valida de forma independiente un
+      criterio que el repo ya usaba — no hay conflicto acá, es la misma
+      barra dicha con otras palabras.
 
 ## Aplicación a templates existentes
 
