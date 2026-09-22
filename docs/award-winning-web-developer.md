@@ -77,6 +77,17 @@ Gemini el diseño (mockup de imagen, dirección de estilo en texto, paleta/
 tipografía, etc.) y el paso concreto de cómo ese output se integra al plan
 `.txt` — el usuario dio la regla, falta el detalle operativo.
 
+**Paso 0b — modelo de Claude para tareas complejas (regla del usuario
+2026-09-22, sin excepción):** para las tareas **más complejas** (template
+nuevo completo, 3D/storyline de Detalle #11, cualquier trabajo que combine
+varios Detalle a la vez) usar **Opus** — no el modelo default de la
+sesión. Esto es una elección del usuario al arrancar o continuar una
+sesión/tarea (`/model` en Claude Code, o el selector correspondiente), no
+algo que el agente pueda cambiarse a sí mismo mid-sesión. Cuando una tarea
+entrante se vea claramente compleja bajo este criterio, es válido
+recordárselo al usuario si la sesión no está ya en Opus, en vez de asumir
+en silencio que el modelo actual alcanza.
+
 ## 🎯 Consigna base — obligatoria en TODO template/página nueva (Lesson 9)
 
 **Regla del usuario (2026-09-22, mandatory, sin excepción):** el siguiente
