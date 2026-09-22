@@ -106,6 +106,7 @@ abajo.
 | 7 | Animaciones puntuales desarmadas + principios de timing (Lesson 5) | 7 animaciones nombradas (fade/slide, stagger de listas, cross-fade de color entre secciones, forma grande señalando transición, label lateral que se desliza a posición, hover mínimo, **header que cambia de texto según la sección activa**) + 4 takeaways de timing citados textualmente | El header dinámico es candidato a técnica nueva — toca P1/P3/P4/P8/P13 para el resto — ver detalle abajo | Documentado — desarmado punto por punto como pidió el usuario |
 | 8 | Blueprint de página narrativa de 5 beats (Lesson 6, "build a plan") | Estructura completa: Hook (hero) → Introduce (collage) → Offer (grid 3 cards) → Explain (two-column de valores) → Invite (CTA de cierre) — con reglas puntuales por sección y la disciplina de **excluir** lo que no sirve a la historia | Blueprint reusable para un template nuevo tipo "landing narrativa" **o** checklist de estructura a transpolar a templates existentes — ver detalle abajo y "Templates nuevos" | Documentado — candidato a template nuevo o a checklist de estructura |
 | 9 | **Stacking + de "animado" a "intencional"** (Lesson 7, arranque — en curso) | Las técnicas de Detalle #2–#7 (scroll reveal, stagger, hover, micro-acciones) no se usan una por una: se **apilan sobre el mismo contenido** — esa combinación es la que da el efecto premium. Después de motion + interacción, falta una tercera capa para pasar de "se ve cool" a "se siente caro": **depth + timing + sequencing**. Arranca depth con parallax multi-capa (fragmento cortado, sigue en próximos mensajes) | Reencuadra todo lo logueado hasta ahora como capas que se combinan, no un catálogo de opciones sueltas; parallax multi-capa amplía P2 — ver detalle abajo | **Documentado — lección abierta/en curso, se completa con próximos mensajes** |
+| 10 | **Taxonomía de errores para corregir con IA** (Lesson 8, arranque — en curso, instrucciones dirigidas a la IA) | Clasificar el problema **antes** de corregirlo = arreglo mucho más rápido. 4 categorías: Layout, Animation, Interaction, Visual polish. Solo **Layout** está desarrollada hasta ahora: spacing inconsistente, jerarquía débil, alineación mala, estructura pobre — el síntoma es "la sección existe pero no se siente compuesta, se siente random" | Protocolo de diagnóstico directo para mí (el agente) al correr Impeccable `critique`/`audit` — ver detalle abajo | **Documentado — lección abierta, faltan 3 de 4 categorías** |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -894,6 +895,65 @@ fragmento empieza en "other", así que hay contenido previo no pegado
 todavía) y el resto de depth/timing/sequencing en profundidad — anotar en
 cuanto lleguen los próximos mensajes, como continuación de este mismo
 Detalle #9, no como un concepto nuevo aparte.
+
+### Detalle #10 — Taxonomía de errores para corregir con IA (Lesson 8, en curso)
+
+**Fuente:** Lesson 8, arranque. **Distinta de Detalle #9** (esa es sobre
+depth/timing/sequencing al construir; esta es específicamente un protocolo
+de **diagnóstico al corregir**) — lección propia, no continuación de la
+anterior. También sigue en curso: solo la primera de 4 categorías está
+desarrollada.
+
+**Por qué esta lección es distinta a las anteriores — está dirigida
+explícitamente a la IA que corrige, no solo a quien diseña:**
+
+> "I want you to watch out for and write these down. Layout problems,
+> animation problems, interaction problems, and visual polish problems. If
+> you can classify the problem, you can fix it much, much faster."
+
+El curso da acá un **protocolo de diagnóstico**, no solo criterio estético:
+antes de tocar código para arreglar una UI que "no se siente bien", primero
+**clasificar** en cuál de las 4 categorías cae el problema. Esto aplica
+directo al flujo ya existente de Impeccable en `AGENTS.md` (regla #1:
+`critique`/`audit`/`polish` obligatorio al tocar UI) — es el checklist
+mental a correr **antes** de pedirle a Impeccable que arregle algo, para
+saber qué tipo de arreglo hace falta.
+
+**Las 4 categorías (solo la #1 desarrollada hasta ahora):**
+
+1. **Layout problems** ✅ desarrollado:
+   - Síntomas: spacing inconsistente, jerarquía débil, alineación mala,
+     estructura pobre.
+   - Diagnóstico clave, textual: *"a section technically exists, but it
+     does not feel composed. It does not feel expensive. It feels
+     random."* — la sección está ahí, el problema no es que falte
+     contenido, es que no está **compuesta** con intención.
+   - Ejemplo antes/después citado (genérico, sin sitio de referencia
+     puntual): *"the spacing was loose, the hierarchy was weak, the
+     section seemed flat, everything was all similar sizing and
+     carding"* → corregido en **un solo prompt**. El síntoma "todo el
+     mismo tamaño y el mismo tipo de card" es literalmente el anti-patrón
+     de "layout repetitivo" ya logueado en Detalle #2 y #4.3 — este
+     protocolo lo nombra como *categoría de bug* (Layout), no solo como
+     regla de diseño a seguir.
+2. **Animation problems** — nombrada, sin desarrollar todavía.
+3. **Interaction problems** — nombrada, sin desarrollar todavía.
+4. **Visual polish problems** — nombrada, sin desarrollar todavía.
+
+**Mapeo preliminar a lo ya logueado** (a confirmar/ajustar cuando lleguen
+las 3 categorías que faltan): Layout ↔ Detalle #2/#3/#4 (composición,
+jerarquía, módulos); Animation ↔ Detalle #5/#7/#9 (motion, timing,
+sequencing); Interaction ↔ Detalle #6 (catálogo de micro-interacciones);
+Visual polish ↔ probablemente tipografía/color/imaginería de Detalle #2,
+a confirmar. Si el mapeo se sostiene, esta taxonomía terminaría siendo el
+**índice** que organiza todo el resto del documento por tipo de problema,
+útil como filtro rápido: "¿esto que estoy viendo es un problema de layout,
+de animación, de interacción, o de polish visual?" antes de ir a buscar el
+detalle correspondiente.
+
+**Pendiente:** las 3 categorías restantes (Animation, Interaction, Visual
+polish) — anotar como continuación de este mismo Detalle #10 cuando
+lleguen, no como conceptos nuevos aparte.
 
 ## Aplicación a templates existentes
 
