@@ -62,6 +62,21 @@ extrae beats de una referencia visual concreta. Un template nuevo puede
 tener los dos: el `.txt` de plan y, si aplica, el `beats.json` de una
 referencia.
 
+**Paso 0, antes de armar el plan — Gemini para la fase de diseño (regla
+del usuario 2026-09-22, fundamental, sin excepción):** el diseño de un
+template/página nueva se piensa/genera primero en **Gemini**, y ese diseño
+es lo que se le pasa a Claude (el agente de código) para implementar — no
+al revés. Es decir: Gemini decide/propone el diseño → Claude lo lleva a
+código siguiendo el plan `.txt` de arriba. `AGENTS.md` ya tiene
+infraestructura de Gemini configurada (`GEMINI_API_KEY`/`GOOGLE_API_KEY` en
+`.env`, usada hoy solo para anotar fondo/figura/texto en `analyze:ref`) —
+mismas credenciales, pero **este es un uso distinto y más fundamental**:
+generar el diseño en sí, no solo anotar una referencia ya existente.
+**Pendiente de precisar cuando se implemente**: en qué formato entrega
+Gemini el diseño (mockup de imagen, dirección de estilo en texto, paleta/
+tipografía, etc.) y el paso concreto de cómo ese output se integra al plan
+`.txt` — el usuario dio la regla, falta el detalle operativo.
+
 ## 🎯 Consigna base — obligatoria en TODO template/página nueva (Lesson 9)
 
 **Regla del usuario (2026-09-22, mandatory, sin excepción):** el siguiente
