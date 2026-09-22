@@ -30,6 +30,38 @@
 4. Si el concepto es un primitivo de motion nuevo, referenciar/promover a
    `docs/motion-cookbook.md` en vez de duplicarlo acá.
 
+## 📋 Flujo obligatorio: plan en .txt para páginas/templates nuevos
+
+**Regla del usuario (2026-09-22) — no es contenido del curso, es workflow
+de proceso a partir de ahora:**
+
+Cada vez que un cliente (o el usuario) pida una **página nueva o un
+template nuevo**, antes de construir, el agente arma un **plan** con estas
+características:
+
+1. **Incorpora todo lo relevante ya documentado en este archivo** —
+   checklist de acción + los Detalle #1–#N que apliquen al pedido puntual
+   (tipo de hero, si necesita 3D/storyline, estructura de 5 beats si
+   encaja, catálogo de micro-interacciones, motion vocabulario, etc.). No
+   se re-explica el curso desde cero cada vez, se **aplica** lo ya logueado.
+2. **Incorpora los detalles específicos** que dé el cliente sobre esa
+   página/template puntual — rubro, referencias, contenido, objetivo.
+3. **Máximo detalle posible** — "upload as much detail as Claude can". Ante
+   la duda, más detalle es mejor que un resumen corto.
+4. **Se entrega como archivo `.txt`** (no `.md`, no solo en el chat) —
+   formato simple y barato de parsear, para que cualquier IA (esta sesión,
+   otra, o el agente de código en un momento posterior) lo consuma sin
+   fricción.
+
+**No reemplaza** el flujo `analyze:ref` de `AGENTS.md` (Second brain →
+`npm run analyze:ref`, que genera `beats.json` + `docs/reference-analysis/
+<sku>.md` cuando hay una URL de referencia puntual) — son artefactos
+distintos y complementarios. El `.txt` sintetiza las decisiones de diseño/
+motion derivadas del curso en un plan legible para IA; `analyze:ref`
+extrae beats de una referencia visual concreta. Un template nuevo puede
+tener los dos: el `.txt` de plan y, si aplica, el `beats.json` de una
+referencia.
+
 ## ⚡ Checklist de acción — Award-level vs. genérico (Lesson 1)
 
 Comparación fija, siempre a mano. Usar en **cualquier** `Impeccable
