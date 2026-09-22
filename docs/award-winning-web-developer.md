@@ -841,8 +841,41 @@ de velocidad cada una**, no a una sola. Candidato a nota/ejemplo adicional
 en P2 cuando se implemente, no a un primitivo nuevo — es P2 con más de una
 capa y coeficientes distintos por capa.
 
-**Pendiente:** el resto de esta lección (más sobre depth, timing,
-sequencing, y cómo se combinan con el stacking del punto 1) — anotar en
+**4. Checklist de errores comunes** (continuación pegada por el usuario —
+el fragmento arranca con "so **other** mistakes", confirma que hay más
+puntos antes de este que todavía no llegaron):
+
+> "Other mistakes are too much motion, no flow, no sequence, overly
+> aggressive effects. High-end design is controlled, not chaotic."
+
+Cuatro anti-patrones puntuales, uno por uno:
+
+- **Demasiado motion**: animar de más, no menos — contraparte directa del
+  "cero motion sin propósito" ya logueado (Detalle #5.6), pero encuadrado
+  como error de **cantidad**, no solo de propósito. Exceso de capas
+  stackeadas (punto 1 de este mismo detalle) sin criterio es el riesgo
+  específico: el stacking es la técnica, pero stackear sin control es
+  exactamente este error.
+- **Sin flow**: transiciones/movimientos que no se conectan entre sí — ya
+  logueado como concepto (Detalle #3, "Flow connects sections through
+  consistent patterns" en los takeaways de Lesson 5), acá aparece nombrado
+  explícitamente como **error** cuando falta, no solo como cualidad cuando
+  está.
+- **Sin sequencing**: todo entra junto, sin orden — contraparte directa del
+  orden deliberado headline→subtítulo→imagen ya logueado (Detalle #5.3).
+- **Efectos demasiado agresivos**: movimientos grandes/llamativos en vez de
+  sutiles — contraparte directa de "casi imperceptible" ya logueado para
+  parallax (Detalle #6.8) y de los "simplest possible movements" de
+  Detalle #5.7.
+
+**Conclusión de la lección, citable:** *"High-end design is controlled, not
+chaotic."* — resume el criterio para decidir si el stacking del punto 1 se
+pasó de rosca: no es "cuántas capas", es si el resultado se siente
+controlado o caótico.
+
+**Pendiente:** sigue faltando la primera parte de "otros errores" (el
+fragmento empieza en "other", así que hay contenido previo no pegado
+todavía) y el resto de depth/timing/sequencing en profundidad — anotar en
 cuanto lleguen los próximos mensajes, como continuación de este mismo
 Detalle #9, no como un concepto nuevo aparte.
 
