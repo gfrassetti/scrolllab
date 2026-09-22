@@ -105,6 +105,7 @@ abajo.
 | 6 | **Catálogo de micro-interacciones** (Lesson 4, walkthrough de un sitio de agencia) | 14 micro-interacciones puntuales (hover de botón/link, drawer de nav, stagger de texto, underline variable, expand de cards, blur→clear en hero, parallax sutil, accordion, floating label de form, ícono que se rellena) + el meta-principio de que la **consistencia total** entre todas ellas es lo que las hace sumar a algo premium | **Cierra el gap señalado desde Detalle #2**: Emil hoy solo cubre chrome del market — este catálogo es el "cómo" concreto para extenderlo a micro-interacciones dentro de cada template | Documentado — catálogo listo para portar cuando se implemente |
 | 7 | Animaciones puntuales desarmadas + principios de timing (Lesson 5) | 7 animaciones nombradas (fade/slide, stagger de listas, cross-fade de color entre secciones, forma grande señalando transición, label lateral que se desliza a posición, hover mínimo, **header que cambia de texto según la sección activa**) + 4 takeaways de timing citados textualmente | El header dinámico es candidato a técnica nueva — toca P1/P3/P4/P8/P13 para el resto — ver detalle abajo | Documentado — desarmado punto por punto como pidió el usuario |
 | 8 | Blueprint de página narrativa de 5 beats (Lesson 6, "build a plan") | Estructura completa: Hook (hero) → Introduce (collage) → Offer (grid 3 cards) → Explain (two-column de valores) → Invite (CTA de cierre) — con reglas puntuales por sección y la disciplina de **excluir** lo que no sirve a la historia | Blueprint reusable para un template nuevo tipo "landing narrativa" **o** checklist de estructura a transpolar a templates existentes — ver detalle abajo y "Templates nuevos" | Documentado — candidato a template nuevo o a checklist de estructura |
+| 9 | **Stacking + de "animado" a "intencional"** (Lesson 7, arranque — en curso) | Las técnicas de Detalle #2–#7 (scroll reveal, stagger, hover, micro-acciones) no se usan una por una: se **apilan sobre el mismo contenido** — esa combinación es la que da el efecto premium. Después de motion + interacción, falta una tercera capa para pasar de "se ve cool" a "se siente caro": **depth + timing + sequencing**. Arranca depth con parallax multi-capa (fragmento cortado, sigue en próximos mensajes) | Reencuadra todo lo logueado hasta ahora como capas que se combinan, no un catálogo de opciones sueltas; parallax multi-capa amplía P2 — ver detalle abajo | **Documentado — lección abierta/en curso, se completa con próximos mensajes** |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -774,6 +775,76 @@ caminos abiertos, a decidir cuando se pida):
   `signal`, cualquier landing de servicios) — sin necesariamente adoptar el
   layout exacto de cada sección, solo el criterio de "cada sección cumple
   un rol narrativo, y lo que no sirve a la historia se saca".
+
+### Detalle #9 — Stacking + de "animado" a "intencional" (Lesson 7, en curso)
+
+**Fuente:** Lesson 7, arranque. **Esta lección sigue en curso** — el
+fragmento pegado corta justo cuando empieza a definir parallax. Esta
+sección se va a completar con los próximos mensajes; no cerrar el Estado
+de la fila #9 en la tabla de arriba hasta que llegue el resto.
+
+**1. El principio de "stacking" — la pieza que faltaba para unir todo lo
+logueado hasta ahora:**
+
+> "You're not using these individually, you're stacking them. Scroll
+> reveals content, stagger controls flow, hover adds interactivity, micro
+> actions confirm actions. Together, that's what creates a premium
+> experience."
+
+Esto reencuadra **todo** lo documentado en Detalle #2 a #7: no son técnicas
+alternativas entre las que elegir una por elemento, son **capas que se
+aplican simultáneamente sobre el mismo contenido**. Un solo bloque de texto
+en una sección puede (y debería) tener a la vez: scroll reveal (P8/P1),
+stagger entre líneas (Detalle #5.3), hover en sus links (Detalle #6.3), y
+micro-confirmación en sus botones (Detalle #6.12-14) — no una sola de esas
+cosas elegida "para no sobrecargar". La moderación de la que habla el curso
+en varios puntos anteriores (Detalle #5.6, #6 meta-principio) es sobre
+**no inventar efectos nuevos por elemento**, no sobre aplicar pocas capas.
+
+**2. El framework nuevo — de "animado" a "intencional":**
+
+Cita clave, marca el techo de todo lo logueado hasta Lesson 6: *"Right now,
+it still just feels like animation... this is the part that's gonna
+separate 'this looks cool' from 'this feels expensive'."* La lección
+propone que Motion (cómo aparecen las cosas) + Interacción (hover, micro-
+acciones) **no alcanzan solas** — hace falta una tercera capa para que se
+sienta intencional en vez de solo animado:
+
+| Capa | Ya logueado en | Qué agrega Lesson 7 |
+|---|---|---|
+| **Motion** | Detalle #5 (vocabulario, orden, timing básico) | — |
+| **Interacción** | Detalle #6 (catálogo de micro-interacciones) | — |
+| **Depth** | P2 (parallax simple) | Parallax **multi-capa** — ver punto 3 |
+| **Timing** | Detalle #5.5 (delays puntuales) | Pendiente de más detalle en próximos mensajes |
+| **Sequencing** | Detalle #5.3 (orden headline→sub→imagen) | Pendiente de más detalle en próximos mensajes |
+
+Depth/Timing/Sequencing no son conceptos 100% nuevos — son una
+**generalización** de piezas sueltas ya logueadas, presentadas ahora como
+la capa que las conecta a todas. Falta ver qué agrega el curso puntualmente
+a Timing y Sequencing más allá de lo ya anotado — pendiente.
+
+**3. Depth vía parallax — arranca, corta a mitad de la definición:**
+
+> "Right now, everything on your screen moves the same way. But in real
+> life, things closer to you move differently than things far away. And
+> that's what we create on a website. That's called parallax."
+
+Matiz importante sobre **P2** (`docs/motion-cookbook.md`): P2 hoy está
+descrito como "zoom/parallax imagen, UI fija" — un solo elemento de media
+moviéndose contra un UI fijo. Lo que describe acá es **parallax multi-capa**:
+varios elementos en la misma escena moviéndose cada uno a **velocidad
+distinta según su "distancia" percibida** (cerca = se mueve más rápido/más,
+lejos = se mueve menos), no un solo elemento contra un fondo estático. Es
+el mismo primitivo base (`scrollTrigger` + `scrub` moviendo `y`/`scale` en
+función de `progress`) pero aplicado a **N capas con distinto multiplicador
+de velocidad cada una**, no a una sola. Candidato a nota/ejemplo adicional
+en P2 cuando se implemente, no a un primitivo nuevo — es P2 con más de una
+capa y coeficientes distintos por capa.
+
+**Pendiente:** el resto de esta lección (más sobre depth, timing,
+sequencing, y cómo se combinan con el stacking del punto 1) — anotar en
+cuanto lleguen los próximos mensajes, como continuación de este mismo
+Detalle #9, no como un concepto nuevo aparte.
 
 ## Aplicación a templates existentes
 
