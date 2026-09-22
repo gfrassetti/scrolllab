@@ -220,6 +220,7 @@ abajo.
 | 9 | **Stacking + de "animado" a "intencional"** (Lesson 7, arranque — en curso) | Las técnicas de Detalle #2–#7 (scroll reveal, stagger, hover, micro-acciones) no se usan una por una: se **apilan sobre el mismo contenido** — esa combinación es la que da el efecto premium. Después de motion + interacción, falta una tercera capa para pasar de "se ve cool" a "se siente caro": **depth + timing + sequencing**. Arranca depth con parallax multi-capa (fragmento cortado, sigue en próximos mensajes) | Reencuadra todo lo logueado hasta ahora como capas que se combinan, no un catálogo de opciones sueltas; parallax multi-capa amplía P2 — ver detalle abajo | **Documentado — lección abierta/en curso, se completa con próximos mensajes** |
 | 10 | **Taxonomía de errores para corregir con IA** (Lesson 8, arranque — en curso, instrucciones dirigidas a la IA) | Clasificar el problema **antes** de corregirlo = arreglo mucho más rápido. 4 categorías: Layout, Animation, Interaction, Visual polish. Solo **Layout** está desarrollada hasta ahora: spacing inconsistente, jerarquía débil, alineación mala, estructura pobre — el síntoma es "la sección existe pero no se siente compuesta, se siente random" | Protocolo de diagnóstico directo para mí (el agente) al correr Impeccable `critique`/`audit` — ver detalle abajo | **Documentado — lección abierta, faltan 3 de 4 categorías** |
 | 11 | **Cómo promptear un hero con 3D + storyline** (Lesson 9, arranque — en curso) | Al pedirle un hero 3D a una IA (Three.js custom o modelo 3D pre-hecho/libre de uso), pensar siempre en **historia**: algunos templates cuentan una historia **a lo largo de toda la homepage**, no solo muestran algo en el hero y listo. Ejemplo de prompt citado: escena/aesthetic única con 3D render que sostiene un storyline en toda la homepage | Toca WebGL mini motor (`docs/scrolllab-webgl.md`), img2threejs/Meshy en `AGENTS.md`, y el framework de 5 beats de Detalle #8 — ver detalle abajo | **Documentado — lección abierta, falta el resto de la clase de prompting** |
+| 12 | ⭐ **Modelo 3D que se fragmenta/explota y se reensambla, atado a la narrativa** (ejemplo statua) | Técnica completa: el modelo (fragmentado en piezas) se aleja hasta entrar en viewport, tiene un shift sutil para leerse como 3D real, después **explota** (fragmentos se separan y se vuelven transparentes hasta desaparecer) como metáfora de "strip away what doesn't serve", y más adelante en la página **se reensambla** entrando de a fragmentos desde los costados. Meta-técnica de prompting: describirle la historia a la IA alcanza para que infiera la animación sola | Implementación directa de Detalle #11 (storyline por toda la homepage) + Detalle #9 (depth/shift sutil) — candidato a receta nueva en `docs/scrolllab-webgl.md` — ver detalle abajo | **Documentado — marcado como sumamente importante por el usuario** |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -1229,6 +1230,101 @@ Dos cosas nuevas acá:
 agencia). Útil como referencia de rubro cuando se implemente — no es una
 regla de rubro, es el ejemplo que usó el curso para plantear la pregunta.
 
+### Detalle #12 — Modelo 3D que se fragmenta/explota y se reensambla, atado a la narrativa
+
+**Fuente:** continuación de la clase de 3D/storyline (Lesson 9), ejemplo
+concreto con una estatua. **Marcado por el usuario como sumamente
+importante.** Es la implementación más completa y concreta hasta ahora del
+principio de Detalle #11 (storyline a lo largo de toda la homepage).
+
+**Encuadre del usuario antes de la cita (no es texto del curso, es el
+resumen con el que introduce el ejemplo):** el modelo 3D muchas veces tiene
+que alejarse, acercarse, destruirse, o rearmarse en **otro punto de la
+página**, pedazo por pedazo — pero siempre atado al scroll: se desarma al
+bajar, se rearma si se sube. Mismo contrato de `progress` que ya usa todo
+el motion de SCROLLLAB (`docs/scroll-media.md`): forward construye/
+destruye, backward invierte exactamente lo mismo, no hay una animación
+"aparte" que deshacer.
+
+**La secuencia completa, desarmada paso a paso:**
+
+1. **Entrada — zoom out hasta encajar en el viewport**: el modelo arranca
+   más cerca/grande de lo que se ve al final y, durante el scroll, se aleja
+   («zoom out») hasta caber completo en pantalla. Primitivo base: `camera.
+   position` o `scale` interpolado por `progress`, mismo patrón que
+   `docs/scroll-media.md` ya documenta para Familia A.
+2. **Shift sutil para que se lea como 3D real, no como una foto que
+   escala**: un desplazamiento leve (no solo cambio de tamaño) durante el
+   scroll, para que se note que hay volumen/profundidad real. Es la
+   aplicación práctica y literal del punto de depth/parallax de Detalle
+   #9 — la misma idea de "las cosas cerca se mueven distinto que las
+   lejos", acá usada para vender que el objeto es 3D de verdad.
+3. **Explosión — el modelo se fragmenta y desaparece**: en un punto de la
+   página, el modelo (que tiene que estar **fragmentado en piezas** desde
+   el modelado, no fragmentado en runtime) explota — los fragmentos se
+   separan entre sí — y a la vez se vuelven progresivamente transparentes
+   hasta desaparecer del todo. Nota de traducción/aclaración: el curso usa
+   "opaque" y se **autocorrige en la misma oración** a "transparent...
+   slowly become invisible" — la intención real es opacidad **decreciente**
+   (fade out), no "opaco" en el sentido común. Registrar así para no
+   confundir a futuro: fragmentos → se alejan entre sí (`position`) →
+   `opacity`/`alpha` baja a 0 en función de `progress`.
+4. **La explosión es narrativa, no solo efecto visual**: el curso lo
+   encuadra como *"strip away what doesn't serve the experience"* —
+   storytelling explícito, la desintegración representa algo (ej. quitar
+   lo superfluo de una marca) y termina en una frase de marca cortada en
+   la transcripción ("Your brand becomes...") — el patrón es: el motion no
+   es gratuito, ilustra un concepto de marca puntual. Mismo principio ya
+   logueado varias veces (Detalle #5.6, #9.4: motion atado al contenido,
+   nunca decorativo porque sí), acá llevado a su expresión más literal.
+5. **Reensamble en otra sección de la página**: más adelante en la
+   homepage, los fragmentos **entran desde ambos costados** (izquierda y
+   derecha) de la pantalla y convergen hasta formar la estatua completa de
+   nuevo. Coreografía de entrada bilateral — no es lo mismo que P6 (cutout
+   parallax) ni P1 puro; es más cercano a una versión 3D del patrón
+   "piezas que convergen desde los bordes", candidato a receta nueva
+   (ver abajo).
+
+**Meta-técnica de prompting — la pieza más valiosa de todo el ejemplo:**
+
+> "So naturally, my explaining what I wanted to be presented with the
+> model actually created the motion and transition... it also acted as a
+> two-in-one."
+
+Describirle a la IA **la historia** de qué le pasa al objeto (se
+desarma, desaparece, se rearma en otro punto, por qué) fue **suficiente**
+para que la IA generara la animación técnica correspondiente — no hizo
+falta especificar parámetros de motion por separado. Es un cuarto nivel de
+prompting que se suma a los tres ya logueados en Detalle #11 (elección de
+render → brief de generación → brief de construcción): acá el brief
+**narrativo** funciona directamente como spec de motion. Aplica en
+cualquier pedido de 3D storytelling futuro en este repo: describir qué le
+pasa al objeto y por qué, no solo qué keyframes tiene que tener.
+
+**Cómo pega en SCROLLLAB (sin implementar, solo la conexión técnica):**
+
+- **Filtro de `img2threejs`/generación**: una estatua específica con rasgos
+  reconocibles caería en el filtro de "no caras/artistas/productos únicos"
+  que ya define `AGENTS.md`. Para que este patrón sea vendible/reusable,
+  el objeto tiene que ser **genérico** (un busto abstracto, una forma
+  geométrica, un objeto sin identidad reconocible) — mismo criterio que ya
+  aplica el catálogo, no una excepción nueva.
+- El modelo necesita estar **modelado en fragmentos desde el origen**
+  (Blender/generación 3D con piezas separadas), no fragmentado por código
+  en runtime — el fragmentado en runtime de una malla sólida es mucho más
+  caro/complejo y no es lo que describe el curso.
+- **Candidato a receta nueva en `docs/scrolllab-webgl.md`** (Familia A):
+  un patrón "explode/reassemble" — grupo de meshes, cada uno con `position`
+  + `opacity` interpolados por `progress`, con dos tramos de la página:
+  tramo A = entrada + explosión + fade a 0, tramo B (sección distinta,
+  más adelante) = fade a 1 + convergencia desde los bordes de vuelta al
+  origen. No confundir con Beat (eso es DOM en riel) ni con la secuencia
+  WebP de Familia B (eso es fotogramas pre-renderizados, acá la escena se
+  calcula en vivo).
+- Encaja directo como el "objeto que atraviesa toda la homepage" que pide
+  Detalle #11 — el mismo mesh (o grupo de fragmentos) puede ser la columna
+  vertebral visual de un template completo, no solo del hero.
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
@@ -1290,3 +1386,17 @@ Beat/WebGL según corresponda) una vez que haya una referencia concreta.
   también como caso de prueba para el filtro "¿de verdad hace falta Canvas/
   WebGL acá?" de `AGENTS.md` ("Qué vendemos") — este template pasaría la
   barra Awwwards sin esa capa.
+
+- ⭐ **Hero/objeto 3D que explota y se reensambla a lo largo de la página**
+  (ver Detalle #12 arriba) — marcado por el usuario como sumamente
+  importante. Candidato fuerte a template propio o a upgrade de un SKU
+  WebGL existente (`monolith`, `fizz`, `atelier`): un objeto 3D **genérico**
+  (busto abstracto, forma geométrica — nunca un rostro/producto único, por
+  el filtro ya existente de `img2threejs`) que se desarma en una sección y
+  se rearma en otra, sirviendo de columna vertebral narrativa a toda la
+  homepage. Requiere: (1) el objeto modelado en fragmentos desde el
+  origen — Higgsfield `generate_3d` o Meshy, pidiendo explícitamente piezas
+  separadas, no una malla sólida; (2) receta nueva "explode/reassemble" en
+  `docs/scrolllab-webgl.md` (Familia A) — no existe todavía. Es el mejor
+  candidato actual para validar en la práctica el principio de Detalle #11
+  (storyline de página completa) apenas se decida implementar.
