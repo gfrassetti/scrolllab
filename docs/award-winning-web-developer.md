@@ -1099,6 +1099,45 @@ calidad, en vez de un pedido genérico tipo "hacé un hero 3D lindo". Cuando
 se pida implementar el concepto de Detalle #11, este es el nivel de detalle
 de brief a esperar/pedir si falta.
 
+**Continuación — paso previo: consultarle a la IA qué render conviene y
+por qué, antes de generar nada:**
+
+Nueva pieza de la lección, técnica de prompting distinta a las dos
+anteriores (esas eran brief para generar/construir; esta es para **decidir
+qué construir**). Cita:
+
+> "If I had to create a storyline landing page with a 3D render that
+> followed me throughout the page — at the bottom — and this is used to
+> display my design studio, what type of render would I use and why?"
+
+Dos cosas nuevas acá:
+
+1. **El paso de consulta antes de generar**: en vez de decidir el objeto/
+   escena 3D de entrada, primero preguntarle a la IA **qué** tipo de render
+   conviene para ese rubro/marca puntual y **por qué** — la IA razona la
+   elección (justificada), recién después se genera con Higgsfield/modelo
+   libre siguiendo esa elección. Es un paso de brief adicional antes de los
+   dos prompts ya logueados arriba (generación de asset → construcción del
+   sitio): consulta → elección justificada → generación → construcción.
+   Aplica el mismo criterio que ya pide `template-image-designer` (brief
+   antes de generar), pero acá específicamente para elegir el **tipo** de
+   objeto/render, no solo su composición.
+2. **Detalle compositivo nuevo — "at the bottom", sigue a lo largo de toda
+   la página**: distinto de un hero 3D a pantalla completa (Detalle #1,
+   #11 punto 1) — acá el render es más chico, **anclado abajo**, y
+   **persiste/sigue** al usuario mientras scrollea toda la página, más
+   parecido a un compañero/mascota flotante que a un fondo de escena. Esto
+   encaja directo con el **patrón KPR** ya obligatorio en `AGENTS.md` para
+   heroes WebGL (`#canvas-container` fijo + `<canvas>` Three.js + DOM
+   encima, `pointer-events-none`) — mismo mecanismo de canvas fijo, solo
+   que posicionado abajo y de tamaño menor en vez de ocupar todo el
+   viewport. No hace falta infraestructura nueva, es una variante de
+   posición/escala del patrón que ya es obligatorio.
+
+**Caso de uso dado como ejemplo**: mostrar un **design studio** (portfolio/
+agencia). Útil como referencia de rubro cuando se implemente — no es una
+regla de rubro, es el ejemplo que usó el curso para plantear la pregunta.
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
