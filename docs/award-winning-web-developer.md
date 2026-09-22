@@ -873,6 +873,22 @@ chaotic."* — resume el criterio para decidir si el stacking del punto 1 se
 pasó de rosca: no es "cuántas capas", es si el resultado se siente
 controlado o caótico.
 
+**5. Nota del usuario (no cita textual del curso, pero directamente
+relacionada con el checklist de errores de arriba): "3D models solo cuando
+sea necesario, nada más".**
+
+Extiende el mismo principio de restricción del punto 4 (demasiado motion /
+efectos agresivos) puntualmente a WebGL/3D. Refuerza —no agrega regla
+nueva, la hace explícita para este caso puntual— lo que ya dice `AGENTS.md`
+en "Qué vendemos": *"Cuando el efecto lo pide, usamos Canvas 2D y/o
+WebGL... Si el promedio se resuelve con CSS, nosotros no bajamos el
+listón: usamos la API que haga falta"* — es decir, WebGL/3D se usa cuando
+el beat **lo pide**, no por default ni para impresionar. Mismo filtro que
+ya aplican `img2threejs` y Meshy en `AGENTS.md` ("objeto genérico y
+reemplazable", nunca 3D porque sí). El candidato a template nuevo de
+Detalle #8 (landing narrativa de 5 beats) es justamente un buen ejemplo de
+esto en la práctica: pasa la barra Awwwards sin necesitar WebGL/Beat.
+
 **Pendiente:** sigue faltando la primera parte de "otros errores" (el
 fragmento empieza en "other", así que hay contenido previo no pegado
 todavía) y el resto de depth/timing/sequencing en profundidad — anotar en
