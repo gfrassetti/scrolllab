@@ -301,7 +301,7 @@
     "monolith": {
       "vibe": "Sistema brutalista",
       "tags": [
-        "Hero en Three.js",
+        "Hero 3D",
         "Skew por velocidad",
         "Ficha técnica",
         "Acordeón tipográfico"
@@ -336,7 +336,7 @@
         "Piedra scrubeada",
         "Servicios asimétricos"
       ],
-      "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas Three.js que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
+      "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas 3D que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
     },
     "comic": {
       "vibe": "Historieta scrollytelling",
