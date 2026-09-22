@@ -190,6 +190,8 @@ abajo.
 - [ ] (Evaluar por template, no obligatorio en todos) Header/nav con texto
       que refleja la sección activa del scroll — wayfinding extra en
       páginas largas con muchas secciones distintas (Detalle #7).
+- [ ] **Footer al 100% del viewport (alto)** — `100vh`/`100svh`, no solo
+      full-width — sin excepción (Detalle #4.5).
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -531,6 +533,15 @@ etc.) — eso no se documenta, no aporta nada reusable.
    discreto (ya visto antes en la nav, no uno nuevo insistente), y
    detalles/links secundarios en tipografía chica que no compiten porque
    están posicionados con sutileza, no porque estén escondidos.
+   - **Regla adicional del usuario (2026-09-22, sin excepción): el footer
+     tiene que ocupar el 100% del alto del viewport** (`100vh`/`100svh`,
+     no solo full-width). Es lo que le da ese aire minimalista y moderno
+     "award-winning" en vez de un footer chico apretado al fondo de la
+     página. Aplica al mismo elemento que ya describe el punto 5 de
+     Detalle #8 (CTA de cierre "full-width") — ahí decía full-width, esto
+     agrega explícitamente el alto: full-**height** también, no solo
+     ancho. Mismo patrón `h-svh`/`min-h-[Nsvh]` que ya usa el repo para
+     secciones pin (`docs/motion-cookbook.md`, receta para un beat nuevo).
 6. **Transiciones y micro-interacciones usadas con moderación**: guían y
    confirman acciones, no reemplazan al contenido ni se usan por default en
    todo — refuerza (no contradice) "el scrollytelling no se reemplaza por
@@ -848,13 +859,15 @@ aplicado acá al nivel de la página completa, no de un módulo individual.
    Construye confianza, no vende. Statement memorable, imagen que se sienta
    real (no stock genérico — reconecta con Detalle #4.9, imágenes que
    cuentan una historia).
-5. **CTA de cierre (Invite)**: fondo full-width (foto fija o video si la
-   marca lo permite), invitación fuerte tipo "start your journey today" o
-   "let's build something together", una oración de apoyo debajo, **un
-   solo botón** al objetivo de conversión. Todo centrado, simple. Es lo
-   último que ve el visitante — tiene que dejar una **elección clara**, no
-   varias opciones compitiendo (mismo principio de Detalle #4.2/#4.5
-   aplicado al cierre de toda la página, no solo de una sección).
+5. **CTA de cierre (Invite)**: fondo full-width **y full-height** (`100vh`/
+   `100svh` — regla explícita del usuario, ver Detalle #4.5) (foto fija o
+   video si la marca lo permite), invitación fuerte tipo "start your
+   journey today" o "let's build something together", una oración de
+   apoyo debajo, **un solo botón** al objetivo de conversión. Todo
+   centrado, simple. Es lo último que ve el visitante — tiene que dejar
+   una **elección clara**, no varias opciones compitiendo (mismo principio
+   de Detalle #4.2/#4.5 aplicado al cierre de toda la página, no solo de
+   una sección).
 
 **El principio más valioso de la lección — exclusión deliberada:** el plan
 final **deja afuera a propósito** videos extra, sliders complejos y
