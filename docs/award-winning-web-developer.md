@@ -62,6 +62,58 @@ extrae beats de una referencia visual concreta. Un template nuevo puede
 tener los dos: el `.txt` de plan y, si aplica, el `beats.json` de una
 referencia.
 
+## 🎯 Consigna base — obligatoria en TODO template/página nueva (Lesson 9)
+
+**Regla del usuario (2026-09-22, mandatory, sin excepción):** el siguiente
+prompt del curso es la base no-negociable de **cada** plan `.txt` de la
+sección anterior — se incluye textual o parafraseado en el punto 1 de ese
+plan (junto con los Detalle #1–#N que apliquen), para cada template o
+página nueva de acá en adelante, sin excepción:
+
+> "Yes, please build this for me while maintaining an award-winning,
+> scroll-based, beautiful animation feeling throughout the entire sequence
+> of events. Different sections need to have different scroll-based
+> animations. Implement GSAP, GSAP, 3JS, and other beautiful scroll-based
+> behaviors. Be very unique and make sure that we have visual breaks or
+> some sort of clear separation between sections. We do not want any
+> templated-like style, no typical SAS AI slop. We want an award-winning
+> vibe. Something unique, something artsy, something beautiful, and
+> something people don't usually do. Award-winning style."
+
+**Desglosada — y por qué no pide nada nuevo, es el resumen de todo lo ya
+logueado en este documento:**
+
+- **"Award-winning... throughout the entire sequence of events"**: mismo
+  estándar de `AGENTS.md` ("Qué vendemos") + la continuidad de principio a
+  fin ya logueada en Detalle #9 (stacking) y #11 (storyline de página
+  completa).
+- **"Different sections need to have different scroll-based animations"**:
+  la regla "layout NO repetitivo" (Detalle #2/#4.3) pero aplicada
+  puntualmente a las **animaciones** por sección, no solo a la composición
+  visual — refuerza también el vocabulario reducido *reusado con
+  variación* de Detalle #5.2/#6.5.
+- **"Implement GSAP, GSAP, 3JS"**: exactamente el stack que ya define
+  `AGENTS.md` (GSAP + Lenis + Three.js) — cero tooling nuevo que evaluar.
+- **"Visual breaks or clear separation between sections"**: el mismo
+  wayfinding de página larga de Detalle #2 (combo color+tipografía+
+  márgenes marcando cada sección) y el handoff de **P13**.
+- **"No templated-like style, no typical SaaS AI slop"**: es literalmente
+  el filtro ThemeForest/Awwwards que ya define `AGENTS.md` en "Qué
+  vendemos", más el anti-slop que ya pide `taste-skill` — dicho con otras
+  palabras, tercera vez que el curso valida el mismo criterio de forma
+  independiente (ver también el cierre de Detalle #3).
+- **"Something unique, something artsy... something people don't usually
+  do"**: mismo criterio que ya pide `taste-skill` antes de inventar look
+  (Design Read de una línea, evitar defaults LLM).
+
+**Por qué se documenta como consigna aparte y no solo como una fila más del
+log:** todo lo demás en este archivo (Detalle #1–#11) son piezas — heroes,
+micro-interacciones, motion, estructura de página, prompting por capas.
+Esta consigna es el **techo que las une a todas**: el pedido base que
+garantiza que, sin importar qué combinación de piezas se use para un
+template puntual, el resultado nunca cae por debajo del estándar completo
+del curso. Va en cada plan `.txt`, no es opcional ni se resume.
+
 ## ⚡ Checklist de acción — Award-level vs. genérico (Lesson 1)
 
 Comparación fija, siempre a mano. Usar en **cualquier** `Impeccable
