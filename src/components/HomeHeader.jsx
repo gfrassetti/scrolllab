@@ -13,11 +13,13 @@ import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
 
 /**
- * Chrome compartido del market (cart, account, login, builder, LAB…).
- * La home tiene su propio header — ver HomeHeader.jsx.
+ * Chrome exclusivo de la home del market — no lo comparte con el resto de
+ * las rutas (esas usan SiteHeader.jsx). Bifurcado a propósito para poder
+ * iterar detalles de home (underline animado, futuro nav mínimo/dinámico)
+ * sin arriesgar cart/account/builder/LAB.
  * En <md los links colapsan en un menú desplegable; carrito queda visible.
  */
-export default function SiteHeader({ solid = true }) {
+export default function HomeHeader({ solid = true }) {
   const { user, loading, hadSession, logout } = useAuth()
   const { plan, used, quota, loading: planLoading } = usePlan()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -47,7 +49,7 @@ export default function SiteHeader({ solid = true }) {
   }, [menuOpen])
 
   const linkClass =
-    'text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs'
+    'link-underline text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs'
 
   // Recarga dura al home: `navigate('/')` desde la home no remonta la página,
   // así que el splash no se vería, y el reload deja el estado en memoria limpio.
@@ -119,7 +121,7 @@ export default function SiteHeader({ solid = true }) {
           </Link>
           <Link
             to="/lab"
-            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-accent transition-colors ease-out-strong hover:text-ink md:text-xs"
+            className="link-underline flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-accent transition-colors ease-out-strong hover:text-ink md:text-xs"
           >
             {t('nav.lab')}
             {showPlanBadge && (

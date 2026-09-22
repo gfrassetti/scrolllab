@@ -2,10 +2,11 @@ import { useRef, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
-import SiteHeader from '../components/SiteHeader'
+import HomeHeader from '../components/HomeHeader'
 import Logo from '../components/Logo'
 import LabMark from '../components/LabMark'
 import BrandSplash from '../components/BrandSplash'
+import ScrollProgressBar from '../components/ScrollProgressBar'
 import PlayableHeadline from '../components/PlayableHeadline'
 import TemplateBuyPill from '../components/TemplateBuyPill'
 import HomeContact from '../components/HomeContact'
@@ -688,7 +689,8 @@ export default function TemplatesIndex() {
   return (
     <div ref={root} id="top" className="min-h-svh bg-bone text-ink">
       <BrandSplash onDone={() => setIntroReady(true)} />
-      <SiteHeader />
+      <ScrollProgressBar />
+      <HomeHeader />
 
       <main className="px-5 md:px-10">
         <section className="flex min-h-[85svh] flex-col overflow-x-clip pt-20 pb-8 sm:min-h-[90svh] md:pt-24 md:pb-14">
@@ -754,13 +756,13 @@ export default function TemplatesIndex() {
                 to="/templates/chapters"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center text-body-sm text-ink/65 transition-colors hover:text-accent"
+                className="link-underline inline-flex min-h-11 items-center text-body-sm text-ink/65 transition-colors hover:text-accent"
               >
                 {t('home.heroCtaDemo')} →
               </Link>
               <Link
                 to="/builder"
-                className="inline-flex min-h-11 items-center text-body-sm text-ink/65 transition-colors hover:text-accent"
+                className="link-underline inline-flex min-h-11 items-center text-body-sm text-ink/65 transition-colors hover:text-accent"
               >
                 {t('home.heroCtaBuilder')} →
               </Link>
@@ -924,7 +926,7 @@ export default function TemplatesIndex() {
                   {sellable && !soon ? (
                     <Link
                       to={`/plantillas/${template.sku}`}
-                      className="mt-4 inline-block text-eyebrow uppercase text-ink/60 underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent"
+                      className="link-underline mt-4 inline-block text-eyebrow uppercase text-ink/60 transition-colors hover:text-accent"
                     >
                       {t('home.viewDetails')}
                     </Link>
@@ -1358,7 +1360,7 @@ export default function TemplatesIndex() {
                   {t('home.req2Before')}{' '}
                   <Link
                     to="/legal/license"
-                    className="underline decoration-ink/30 underline-offset-2 transition-colors hover:text-accent"
+                    className="link-underline transition-colors hover:text-accent"
                   >
                     {t('home.req2License')}
                   </Link>
@@ -1379,12 +1381,12 @@ export default function TemplatesIndex() {
 
       <footer
         data-footer
-        className="border-t border-ink/15 px-5 pt-24 pb-6 md:px-10 md:pt-36"
+        className="flex min-h-[100svh] flex-col justify-between border-t border-ink/15 px-5 pt-16 pb-6 md:px-10 md:pt-20"
       >
-        <div className="mb-20 grid grid-cols-2 gap-x-4 gap-y-10 md:mb-28 md:grid-cols-12 md:gap-12">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-12 md:gap-8">
           <p
             data-footer-bit
-            className="col-span-2 max-w-[40ch] text-body leading-relaxed text-ink/75 md:col-span-4"
+            className="col-span-2 max-w-[40ch] text-body-sm leading-relaxed text-ink/60 md:col-span-4"
           >
             {t('meta.tagline')}
           </p>
@@ -1394,10 +1396,10 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-2"
             aria-label={t('home.footerTemplates')}
           >
-            <p className="mb-4 text-eyebrow uppercase text-ink/50">
+            <p className="mb-3 text-eyebrow uppercase text-ink/40">
               {t('home.footerTemplates')}
             </p>
-            <ul className="space-y-2 text-body-sm break-words">
+            <ul className="space-y-1.5 text-body-sm break-words">
               {templates.map((template) => {
                 const soon = Boolean(
                   template.comingSoon || isCatalogComingSoon(template.sku),
@@ -1413,7 +1415,7 @@ export default function TemplatesIndex() {
                         to={template.path}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="transition-colors duration-300 hover:text-accent"
+                        className="link-underline transition-colors duration-300 hover:text-accent"
                       >
                         {template.name}
                       </Link>
@@ -1429,14 +1431,14 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-2"
             aria-label={t('home.footerBuilder')}
           >
-            <p className="mb-4 text-eyebrow uppercase text-ink/50">
+            <p className="mb-3 text-eyebrow uppercase text-ink/40">
               {t('home.footerBuilder')}
             </p>
-            <ul className="space-y-2 text-body-sm break-words">
+            <ul className="space-y-1.5 text-body-sm break-words">
               <li>
                 <Link
                   to="/builder"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('home.footerBuildPage')}
                 </Link>
@@ -1444,7 +1446,7 @@ export default function TemplatesIndex() {
               <li>
                 <a
                   href="#como-funciona"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('home.footerHow')}
                 </a>
@@ -1457,14 +1459,14 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-2"
             aria-label={t('nav.lab')}
           >
-            <p className="mb-4 text-eyebrow uppercase text-ink/50">
+            <p className="mb-3 text-eyebrow uppercase text-ink/40">
               {t('nav.lab')}
             </p>
-            <ul className="space-y-2 text-body-sm break-words">
+            <ul className="space-y-1.5 text-body-sm break-words">
               <li>
                 <Link
                   to="/lab"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('lab.eyebrow')}
                 </Link>
@@ -1472,7 +1474,7 @@ export default function TemplatesIndex() {
               <li>
                 <Link
                   to="/lab#planes"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('lab.plansTitle')}
                 </Link>
@@ -1480,7 +1482,7 @@ export default function TemplatesIndex() {
               <li>
                 <Link
                   to="/lab"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('lab.yours')}
                 </Link>
@@ -1493,14 +1495,14 @@ export default function TemplatesIndex() {
             className="min-w-0 md:col-span-2"
             aria-label={t('home.footerContact')}
           >
-            <p className="mb-4 text-eyebrow uppercase text-ink/50">
+            <p className="mb-3 text-eyebrow uppercase text-ink/40">
               {t('home.footerContact')}
             </p>
-            <ul className="space-y-2 text-body-sm break-words">
+            <ul className="space-y-1.5 text-body-sm break-words">
               <li>
                 <a
                   href="#contacto"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('home.footerContactForm')}
                 </a>
@@ -1508,7 +1510,7 @@ export default function TemplatesIndex() {
               <li>
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {SUPPORT_EMAIL}
                 </a>
@@ -1516,7 +1518,7 @@ export default function TemplatesIndex() {
               <li>
                 <Link
                   to="/account"
-                  className="transition-colors duration-300 hover:text-accent"
+                  className="link-underline transition-colors duration-300 hover:text-accent"
                 >
                   {t('home.footerAccount')}
                 </Link>
@@ -1525,22 +1527,28 @@ export default function TemplatesIndex() {
           </nav>
         </div>
 
-        <a
-          data-footer-brand
-          href="#top"
-          className="group flex items-end gap-[2.5vw] text-ink transition-colors duration-500 hover:text-accent"
-          aria-label={`${SITE_NAME} — ${t('home.backTop')}`}
-        >
-          <span data-footer-logo className="mb-[0.08em] shrink-0">
-            <Logo className="size-[clamp(2.75rem,9.5vw,8.5rem)]" />
-          </span>
-          <span
-            data-footer-word
-            className="min-w-0 select-none font-brico text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] font-semibold tracking-[-0.04em] uppercase"
+        <div className="flex flex-1 flex-col items-center justify-center gap-8 py-12 text-center">
+          <a
+            data-footer-brand
+            href="#top"
+            className="group flex items-end gap-[2.5vw] text-ink transition-colors duration-500 hover:text-accent"
+            aria-label={`${SITE_NAME} — ${t('home.backTop')}`}
           >
-            {SITE_NAME}
-          </span>
-        </a>
+            <span data-footer-logo className="mb-[0.08em] shrink-0">
+              <Logo className="size-[clamp(2.75rem,9.5vw,8.5rem)]" />
+            </span>
+            <span
+              data-footer-word
+              className="min-w-0 select-none font-brico text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] font-semibold tracking-[-0.04em] uppercase"
+            >
+              {SITE_NAME}
+            </span>
+          </a>
+
+          <Link data-footer-bit to="/builder" className="btn btn-primary">
+            {t('home.footerCta')}
+          </Link>
+        </div>
 
         <div
           data-footer-legal
@@ -1553,26 +1561,26 @@ export default function TemplatesIndex() {
           >
             <Link
               to="/legal/license"
-              className="transition-colors duration-300 hover:text-accent"
+              className="link-underline transition-colors duration-300 hover:text-accent"
             >
               {t('home.footerLicense')}
             </Link>
             <Link
               to="/legal/privacy"
-              className="transition-colors duration-300 hover:text-accent"
+              className="link-underline transition-colors duration-300 hover:text-accent"
             >
               {t('home.footerPrivacy')}
             </Link>
             <Link
               to="/legal/terms"
-              className="transition-colors duration-300 hover:text-accent"
+              className="link-underline transition-colors duration-300 hover:text-accent"
             >
               {t('home.footerTerms')}
             </Link>
           </nav>
           <a
             href="#top"
-            className="transition-colors duration-300 hover:text-accent"
+            className="link-underline transition-colors duration-300 hover:text-accent"
           >
             {t('home.backTop')} <span aria-hidden="true">↑</span>
           </a>

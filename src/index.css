@@ -469,6 +469,23 @@ body {
   height: 0 !important;
 }
 
+/* Home: scrollbar nativo oculto mientras <ScrollProgressBar> está montado
+   (la clase la agrega/saca ese componente — nunca aplica bajo reduced
+   motion, ya que ahí el componente no se monta). !important como el
+   precedente de arriba (.playable-toolbar), para no depender de dónde
+   cae esta regla en el cascade de layers de Tailwind v4. */
+html.has-scroll-progress,
+html.has-scroll-progress body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+html.has-scroll-progress::-webkit-scrollbar,
+html.has-scroll-progress body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Menú Turn into: portal en body, siempre 100% opaco */
 .playable-block-menu {
   background-color: #ffffff !important;
@@ -520,12 +537,38 @@ body {
     transform: scale(1) translateY(0);
   }
 
+  .link-underline {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.15em;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-popover) var(--ease-out);
+  }
+
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    transform: scaleX(1);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .ui-press,
     .ui-enter,
     .ui-press:active:not(:disabled) {
       transition: none;
       transform: none;
+    }
+
+    .link-underline::after {
+      transition: none;
     }
   }
 }
