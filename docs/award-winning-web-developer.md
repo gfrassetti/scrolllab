@@ -107,6 +107,7 @@ abajo.
 | 8 | Blueprint de página narrativa de 5 beats (Lesson 6, "build a plan") | Estructura completa: Hook (hero) → Introduce (collage) → Offer (grid 3 cards) → Explain (two-column de valores) → Invite (CTA de cierre) — con reglas puntuales por sección y la disciplina de **excluir** lo que no sirve a la historia | Blueprint reusable para un template nuevo tipo "landing narrativa" **o** checklist de estructura a transpolar a templates existentes — ver detalle abajo y "Templates nuevos" | Documentado — candidato a template nuevo o a checklist de estructura |
 | 9 | **Stacking + de "animado" a "intencional"** (Lesson 7, arranque — en curso) | Las técnicas de Detalle #2–#7 (scroll reveal, stagger, hover, micro-acciones) no se usan una por una: se **apilan sobre el mismo contenido** — esa combinación es la que da el efecto premium. Después de motion + interacción, falta una tercera capa para pasar de "se ve cool" a "se siente caro": **depth + timing + sequencing**. Arranca depth con parallax multi-capa (fragmento cortado, sigue en próximos mensajes) | Reencuadra todo lo logueado hasta ahora como capas que se combinan, no un catálogo de opciones sueltas; parallax multi-capa amplía P2 — ver detalle abajo | **Documentado — lección abierta/en curso, se completa con próximos mensajes** |
 | 10 | **Taxonomía de errores para corregir con IA** (Lesson 8, arranque — en curso, instrucciones dirigidas a la IA) | Clasificar el problema **antes** de corregirlo = arreglo mucho más rápido. 4 categorías: Layout, Animation, Interaction, Visual polish. Solo **Layout** está desarrollada hasta ahora: spacing inconsistente, jerarquía débil, alineación mala, estructura pobre — el síntoma es "la sección existe pero no se siente compuesta, se siente random" | Protocolo de diagnóstico directo para mí (el agente) al correr Impeccable `critique`/`audit` — ver detalle abajo | **Documentado — lección abierta, faltan 3 de 4 categorías** |
+| 11 | **Cómo promptear un hero con 3D + storyline** (Lesson 9, arranque — en curso) | Al pedirle un hero 3D a una IA (Three.js custom o modelo 3D pre-hecho/libre de uso), pensar siempre en **historia**: algunos templates cuentan una historia **a lo largo de toda la homepage**, no solo muestran algo en el hero y listo. Ejemplo de prompt citado: escena/aesthetic única con 3D render que sostiene un storyline en toda la homepage | Toca WebGL mini motor (`docs/scrolllab-webgl.md`), img2threejs/Meshy en `AGENTS.md`, y el framework de 5 beats de Detalle #8 — ver detalle abajo | **Documentado — lección abierta, falta el resto de la clase de prompting** |
 
 ### Detalle #1 — Hero de video scrubeado (Module 6)
 
@@ -954,6 +955,75 @@ detalle correspondiente.
 **Pendiente:** las 3 categorías restantes (Animation, Interaction, Visual
 polish) — anotar como continuación de este mismo Detalle #10 cuando
 lleguen, no como conceptos nuevos aparte.
+
+### Detalle #11 — Cómo promptear un hero con 3D + storyline (Lesson 9, en curso)
+
+**Fuente:** Lesson 9, arranque — clase sobre cómo promptear, con foco en el
+hero section cuando involucra modelos 3D. **Distinta de Detalle #1**
+(Module 6, hero de video scrubeado) y de Detalle #10 (taxonomía de
+corrección) — lección propia sobre briefing/prompting para 3D.
+
+**Encuadre del usuario (no es cita textual, es el criterio con el que
+introduce el tema):** a veces el hero 3D se resuelve con Three.js
+custom-generado, y a veces con **modelos 3D pre-hechos, libres de uso** —
+las dos son rutas válidas según el caso. Y en cualquiera de las dos, el
+criterio rector es siempre el mismo: **pensar en la historia**. Algunos
+templates tienen que contar una historia **a lo largo de toda la
+homepage**, no ser una página que "muestra algo y ya".
+
+**Nota de sourcing — pieza nueva, no logueada antes:** "modelos 3D ya
+hechos, libres de uso" es una tercera vía de sourcing para assets 3D,
+distinta de las dos que ya documenta `AGENTS.md` (Higgsfield `generate_3d`
+o Meshy, ambos generación). Un modelo 3D libre/CC pre-existente puede
+resolver el mismo filtro de "objeto genérico y reemplazable" que ya aplican
+`img2threejs`/Meshy — más rápido y sin gastar créditos cuando ya existe uno
+que sirve. Pendiente decidir, cuando se implemente, dónde entra esta
+tercera vía en la tabla de `AGENTS.md` ("Necesidad → Tool") junto a
+`generate_3d`/Meshy.
+
+**Ejemplo de prompt citado, desarmado por partes** (útil como plantilla,
+no solo como ejemplo puntual):
+
+> "I'm in the digital space. And I'm looking for a unique aesthetic with a
+> 3D render that portrays a storyline throughout the website homepage."
+
+- **Contexto/industria**: "I'm in the digital space" — sitúa el rubro
+  primero, antes de pedir nada visual.
+- **Dirección estética**: "unique aesthetic" — pide diferenciación, no un
+  default (mismo espíritu que `taste-skill`, evitar el look genérico LLM).
+- **Medio**: "3D render" — especifica la técnica, no dice "algo bonito".
+- **El requisito clave, y lo distinto de todo lo logueado hasta ahora**:
+  "portrays a storyline **throughout the website homepage**" — el 3D no es
+  una pieza aislada del hero, es un **hilo narrativo que atraviesa toda la
+  homepage**. Esto es más ambicioso que Module 6 (Detalle #1, que confina
+  la escena al hero) y más ambicioso que un WebGL card/hero puntual
+  (`docs/scrolllab-webgl.md`) — acá el mismo objeto/escena 3D (o su estado)
+  tiene que evolucionar/reaparecer sección tras sección como columna
+  vertebral de la narrativa, no solo abrir la página.
+
+**Cómo esto pega en SCROLLLAB (sin implementar, solo la conexión técnica):**
+la infraestructura para esto **ya existe** — es la Familia A de
+`docs/scroll-media.md` ("Tiempo real 3D": canvas WebGL + Three.js,
+cámara/rotación/morph interpolados por el mismo `progress` de scroll que
+usa todo el resto del sitio), la misma que ya corre en `monolith/HeroThree.jsx`
+o `fizz/HeroBubbles.jsx`. Lo que aporta esta lección no es una técnica
+nueva de motor — es la **disciplina de brief**: al prompteru un hero 3D,
+pedir explícitamente que la escena tenga arco narrativo pensado para **toda
+la página**, no solo para el hero, y después implementarlo extendiendo el
+mismo `progress` a lo largo de las secciones siguientes (mismo patrón que
+ya usa `scroll-media.md` para "tiempo real 3D"), en vez de tratar el hero
+3D como una pieza aislada y el resto de la página como contenido plano
+separado.
+
+**Conexión con Detalle #8** (blueprint de 5 beats): si un template usa esta
+técnica, el framework Hook→Introduce→Offer→Explain→Invite podría mapearse
+directamente a los "capítulos" del arco narrativo del objeto 3D — el hero
+es el Hook del objeto, y cada sección siguiente es un beat de su historia,
+no una sección de contenido separada con su propio motion aparte.
+
+**Pendiente:** el resto de la clase de prompting — probablemente más
+ejemplos de prompts y guía sobre cuándo Three.js custom vs. modelo libre —
+anotar como continuación de este mismo Detalle #11 cuando lleguen.
 
 ## Aplicación a templates existentes
 
