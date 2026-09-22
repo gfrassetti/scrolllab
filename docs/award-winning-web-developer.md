@@ -192,6 +192,8 @@ abajo.
       páginas largas con muchas secciones distintas (Detalle #7).
 - [ ] **Footer al 100% del viewport (alto)** — `100vh`/`100svh`, no solo
       full-width — sin excepción (Detalle #4.5).
+- [ ] Scrollbar nativo del navegador oculto, reemplazado por uno propio —
+      evaluar si dobla como progress rail (Detalle #5.4).
 
 **Descartar / rehacer si cae en 2+ de estos (anti-patrón genérico):**
 
@@ -619,6 +621,18 @@ puntualmente en motion. Principios extraídos, mínima referencia al ejemplo.
    progreso** (0→100% del scroll). Candidato a primitivo o a extensión de
    Beat/P11 cuando se implemente; evaluar si un mismo widget puede cumplir
    las dos funciones (capítulo + progreso) o si conviene separarlos.
+   - **Regla del usuario (2026-09-22, no es cita del curso): ocultar el
+     scrollbar nativo del navegador y reemplazarlo por uno propio** — queda
+     mucho más prolijo y "award-winning" que el scrollbar default del
+     sistema. Esto se **cruza directo con la progress rail** de este mismo
+     punto: en vez de dos elementos separados (scrollbar custom + rail de
+     progreso), lo más probable es que sea **un solo widget** que hace las
+     dos cosas — la barra lateral *es* el scrollbar reemplazado. A nivel
+     técnico: `scrollbar-width: none` / `::-webkit-scrollbar { display:
+     none }` para ocultar el nativo (con Lenis ya interceptando el scroll
+     real vía `useLenis`), y el widget custom simplemente refleja
+     `progress` — mismo mecanismo que ya usa todo el motion del repo, no
+     hace falta lógica nueva de tracking, solo la pieza visual.
 5. **Timing deliberado genera anticipación — no instantáneo**: una pausa
    breve entre que el loader termina y aparece la imagen del hero crea
    anticipación; una pausa de **medio segundo** entre el heading y el
