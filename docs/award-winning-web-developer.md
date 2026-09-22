@@ -1025,6 +1025,48 @@ no una sección de contenido separada con su propio motion aparte.
 ejemplos de prompts y guía sobre cuándo Three.js custom vs. modelo libre —
 anotar como continuación de este mismo Detalle #11 cuando lleguen.
 
+**Continuación — el segundo nivel de prompt: al agente que construye, no
+solo a la herramienta que genera el asset (marcado por el usuario como muy
+importante):**
+
+Hasta el punto anterior, el prompt de ejemplo era para una herramienta de
+generación (imagen/3D). Esta parte de la lección da el **siguiente prompt
+en la cadena**: el que se le da al agente de código para que entienda qué
+construir, antes de tocar el proyecto. Cita del curso:
+
+> "Build this website in full. Now, you need to prompt the agent to
+> understand exactly what you're doing... I need a 3D immersive
+> storytelling homepage that has a 3D render and basically animates/
+> transforms throughout the website in a beautiful presentation,
+> award-winning style."
+
+Desarmado por partes, mismo método que el prompt anterior:
+
+- **Formato/género**: "3D immersive storytelling homepage" — nombra el
+  tipo de página que se está pidiendo, no solo "hacé un sitio lindo".
+- **Asset central**: "3D render" — mismo requisito que el prompt de
+  generación anterior, pero repetido acá para que el agente de código sepa
+  que tiene que construir *alrededor* de ese asset, no como un elemento más.
+- **Comportamiento, refuerza el punto clave de arriba**: "animates/
+  transforms **throughout the website**" — de nuevo la continuidad de
+  principio a fin, no solo en el hero. Confirma que no fue un detalle
+  suelto del prompt anterior, es el requisito central que se repite en las
+  dos capas de prompting (generación **y** construcción).
+- **Barra de calidad explícita en el prompt mismo**: "beautiful
+  presentation, award-winning style" — el curso mete la palabra
+  "award-winning" directo en el prompt al agente, no la da por sobreentendida.
+  Coincide exactamente con el estándar que ya define `AGENTS.md` en "Qué
+  vendemos" — confirma que nombrar el estándar explícitamente en el pedido,
+  en vez de asumir que el agente lo va a inferir solo, es parte del método.
+
+**Por qué importa esto para cómo se me pide trabajo a mí (el agente) en
+este repo:** es, en la práctica, el formato que debería tener un pedido de
+template 3D-storytelling nuevo acá — nombrar el género de página, el asset
+central, el comportamiento (continuidad en toda la página), y la barra de
+calidad, en vez de un pedido genérico tipo "hacé un hero 3D lindo". Cuando
+se pida implementar el concepto de Detalle #11, este es el nivel de detalle
+de brief a esperar/pedir si falta.
+
 ## Aplicación a templates existentes
 
 Checklist de templates a revisar contra los conceptos del curso una vez que
