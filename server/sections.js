@@ -80,6 +80,7 @@ export const ALLOWED_SECTIONS = Object.freeze([
   'atrium/OrbitRing',
   'atrium/StatField',
   'atrium/FooterAtrium',
+  'meridian/Hero',
   'contact/ContactForm',
   'commerce/ProductGrid',
 ])

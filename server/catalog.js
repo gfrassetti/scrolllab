@@ -33,15 +33,15 @@ export const BUNDLE_MODELS = [
 ]
 
 /** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['ratio']
+export const COMING_SOON_SKUS = ['ratio', 'meridian']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en local.
  */
-export const LOCAL_ONLY_SKUS = ['ratio']
+export const LOCAL_ONLY_SKUS = ['ratio', 'meridian']
 
 /** Espejo de src/lib/pricing.js — no se venden por sección en el builder. */
-export const BUILDER_HIDDEN_SKUS = ['ratio']
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'meridian']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -124,6 +124,13 @@ export const PRODUCTS = {
     unit_price_usd: 189,
     currency_id: 'ARS',
   },
+  meridian: {
+    sku: 'meridian',
+    title: 'MERIDIAN — template',
+    description: 'Modelo real estate: hero scrubeado por scroll (flythrough en canvas 2D + WebP), drawer menu con roll-up, texto que reveal word-by-word con el scroll (código fuente).',
+    unit_price_usd: 289,
+    currency_id: 'ARS',
+  },
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',
@@ -135,7 +142,7 @@ export const PRODUCTS = {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 279,
+    unit_price_usd: 299,
     currency_id: 'ARS',
   },
 }

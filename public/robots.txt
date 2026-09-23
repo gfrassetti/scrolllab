@@ -11,6 +11,9 @@ Disallow: /api/
 
 # Preview sin listar (SIGNAL, WIP) — reachable by direct URL, not indexed.
 Disallow: /templates/signal
+# Preview sin listar (MERIDIAN, WIP — solo Hero construido) — reachable by
+# direct URL, not indexed, not linked from the home catalog.
+Disallow: /templates/meridian
 # Bots de entrenamiento/scraping de IA: fuera del catálogo, Builder y LAB.
 # No afecta a Googlebot/Bingbot (SEO normal) ni al User-agent: * de arriba.
 User-agent: GPTBot

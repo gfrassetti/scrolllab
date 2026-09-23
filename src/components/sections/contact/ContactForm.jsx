@@ -135,6 +135,18 @@ const THEMES = {
     note: 'text-atrium-ink/45',
     radius: '',
   },
+  meridian: {
+    surface: 'bg-[#dfd8cf] text-[#2a2622]',
+    eyebrow: 'text-[#2a2622]/45',
+    title: 'font-display tracking-[-0.02em]',
+    body: 'text-[#2a2622]/70',
+    field:
+      'border-[#2a2622]/20 focus:border-[#2a2622] placeholder:text-[#2a2622]/35',
+    button:
+      'border border-[#2a2622] bg-[#2a2622] text-[#dfd8cf] hover:bg-transparent hover:text-[#2a2622] disabled:opacity-40',
+    note: 'text-[#2a2622]/45',
+    radius: '',
+  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

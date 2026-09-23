@@ -776,6 +776,12 @@
           "blurb": "Wordmark gigante y fila legal"
         }
       },
+      "meridian": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Flythrough aéreo scrubeado por scroll con tres estados de texto en crossfade — wordmark, cita de valor, invitación + CTA. El video/imaginery vienen como placeholder: se reemplaza la carpeta de frames en el código descargado — no es editable desde el builder."
+        }
+      },
       "signal": {
         "NavSignal": {
           "name": "Nav signal",

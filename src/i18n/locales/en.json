@@ -776,6 +776,12 @@
           "blurb": "Giant wordmark closer and a legal row"
         }
       },
+      "meridian": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Scroll-scrubbed aerial flythrough with three crossfading text states — wordmark, value quote, invite + CTA. Video/imagery ship as placeholders: swap the frames folder in the downloaded source — not editable from the builder."
+        }
+      },
       "signal": {
         "NavSignal": {
           "name": "Nav signal",

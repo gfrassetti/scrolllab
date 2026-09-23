@@ -14,23 +14,41 @@ export const TEMPLATE_PRICES_USD = {
   unity: 189,
   ratio: 269,
   atrium: 189,
+  meridian: 289,
 }
 
-/** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
-export const COMING_SOON_SKUS = ['ratio']
+/**
+ * En catálogo se ven grayed-out; no se venden ni tienen demo pública.
+ * MERIDIAN: local-only + con precio real necesita estar acá también (si
+ * no, `npm run check` lo marca — un SKU priceado y oculto sin ser
+ * "coming soon" deja un estado inconsistente: se podría agregar al
+ * carrito algo que nadie puede encontrar). Sacar de esta lista cuando el
+ * resto de las secciones (más allá del Hero) estén listas para vender.
+ */
+export const COMING_SOON_SKUS = ['ratio', 'meridian']
 
 /**
- * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
+ * Sin card en home, sin sitemap/product pages — pero la ruta SÍ vive en
+ * producción (no gateada a `npm run dev`), alcanzable solo por quien ya
+ * conoce la URL. Mismo patrón que SIGNAL (ver public/robots.txt).
  * PLUM está en scaffolding (secuencia de frames scroll-scrubbed).
  * SIGNAL está en scaffolding (hero word-cycle + pixel-reveal grid).
+ * MERIDIAN — regla del usuario (2026-09-23): dejar todo el catálogo/precio
+ * funcional pero sin publicar en el home hasta que el resto de las
+ * secciones (más allá del Hero) estén construidas.
  */
-export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal']
+export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal', 'meridian']
 
 /**
- * Modelos que no entran a la paleta del builder.
- * RATIO, PLUM y SIGNAL siguen en obra.
+ * Modelos que no entran a la paleta PÚBLICA del builder (la que ve
+ * cualquier visitante en /builder). RATIO, PLUM y SIGNAL siguen en obra.
+ * MERIDIAN entra acá también — "solo yo accedo por URL" implica que
+ * ningún visitante random debería poder descubrirlo armando una
+ * composición en el builder público. Esto NO bloquea seguir probando el
+ * Hero vía composición manual (localStorage) durante el desarrollo — solo
+ * saca la card de la lista que ve todo el mundo.
  */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal']
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal', 'meridian']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -53,7 +71,7 @@ export function isBuilderHiddenSku(sku) {
  * Una composición del tamaño de un template (10 secciones) queda en 309 USD.
  * El piso tiene que superar al template más caro en venta.
  */
-export const CUSTOM_BASE_PRICE_USD = 279
+export const CUSTOM_BASE_PRICE_USD = 299
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 15
 /** Tope de secciones de una receta — espejo de `maxRecipeSections`. */

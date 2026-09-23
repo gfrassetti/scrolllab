@@ -82,6 +82,7 @@ import OrbitRing from '../components/sections/atrium/OrbitRing'
 import StatField from '../components/sections/atrium/StatField'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import FilmScroll from '../components/sections/plum/FilmScroll'
+import MeridianHero from '../components/sections/meridian/Hero'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
@@ -254,6 +255,15 @@ const allModels = [
     wrapperClass: 'bg-plum-void text-plum-mist',
     sections: [
       { id: 'plum/FilmScroll', name: 'Film Scroll', kind: 'hero', component: FilmScroll, blurb: 'The whole page as a pre-rendered webp film — a JSON manifest (chapters of frame folders + text beats) drives a fixed canvas that scroll plays frame by frame' },
+    ],
+  },
+  {
+    id: 'meridian',
+    name: 'MERIDIAN',
+    accent: '#8f7a5e',
+    wrapperClass: 'bg-[#dfd8cf] text-[#2a2622]',
+    sections: [
+      { id: 'meridian/Hero', name: 'Hero', kind: 'hero', component: MeridianHero, blurb: 'Scroll-scrubbed aerial flythrough with three crossfading text states — wordmark, value quote, invite + CTA. Video/imagery ship as placeholders: swap the frames folder in the downloaded source, not editable from the builder.' },
     ],
   },
   {

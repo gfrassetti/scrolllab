@@ -26,6 +26,7 @@ const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
 const SignalPage = lazy(() => import('./pages/SignalPage'))
+const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
@@ -125,6 +126,20 @@ export default function App() {
                       builder palette, or the sitemap — see
                       docs/reference-analysis/signal.md and public/robots.txt. */}
                   <Route path="/templates/signal" element={<SignalPage />} />
+                  {/* Coming-soon + local-only (Hero only so far, see
+                      docs/template-plans/meridian.txt): same gating as
+                      ratio — live only under `npm run dev`, redirects home
+                      in production until the rest of the template ships. */}
+                  <Route
+                    path="/templates/meridian"
+                    element={
+                      import.meta.env.DEV ? (
+                        <MeridianPage />
+                      ) : (
+                        <Navigate to="/" replace />
+                      )
+                    }
+                  />
                   {/* Páginas de producto para Google (src/lib/productPages.js). */}
                   <Route
                     path="/plantillas"

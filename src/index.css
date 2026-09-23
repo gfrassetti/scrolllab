@@ -24,6 +24,9 @@
   --duration-press: 140ms;
   --duration-popover: 200ms;
   --duration-toast: 280ms;
+  /* Award-Winning Web Developer, Detalle #5.5 — pausa deliberada
+     heading→subtítulo, no instantánea. */
+  --duration-reveal: 500ms;
 }
 
 html.dark {

@@ -85,6 +85,7 @@ export const SECTION_KINDS = {
   'atrium/StatField': 'section',
   'atrium/FooterAtrium': 'footer',
   'plum/FilmScroll': 'hero',
+  'meridian/Hero': 'hero',
   'signal/NavSignal': 'nav',
   'signal/HeroSignal': 'hero',
   'signal/PixelRevealGrid': 'section',

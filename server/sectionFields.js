@@ -313,6 +313,18 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'bg',
     'fg',
   ],
+  'meridian/Hero': [
+    'wordmark',
+    'menuLabel',
+    'floorPlansLabel',
+    'welcomeText',
+    'quoteKicker',
+    'quoteTitle',
+    'inviteKicker',
+    'inviteTitle',
+    'inviteBody',
+    'inviteCta',
+  ],
   'contact/ContactForm': [
     'theme',
     'eyebrow',
@@ -388,6 +400,7 @@ const THEME_PRESETS = new Set([
   'unity',
   'ratio',
   'atrium',
+  'meridian',
 ])
 
 /**
