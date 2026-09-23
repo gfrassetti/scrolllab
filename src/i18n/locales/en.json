@@ -379,6 +379,16 @@
         "Giant wordmark"
       ],
       "description": "Bone paper, editorial serif, and generic architecture photography. The pinned hero holds a single massing shot under a typographic manifesto; a project index, a pinned process, and a black ring of studio photos set the pace before the practice figures. Ideal for architecture studios, real estate developers, or any practice that wants to show its work at this scale of type."
+    },
+    "meridian": {
+      "vibe": "Real estate development",
+      "tags": [
+        "Scroll-driven aerial flythrough",
+        "Interactive map with pins",
+        "Mask-effect slider",
+        "Interior hotspots"
+      ],
+      "description": "Warm sand, editorial serif, and an aerial flythrough that plays as you scroll: a frame-sequence hero whose logo docks into the header, a drawer menu, a full-screen slider with a mask transition, a map whose pins trace dotted routes, and interior photos with hotspots that open tooltips. Ideal for real estate developments, cabin complexes, apartment or condo buildings, developers and builders with several complexes to showcase, or resorts."
     }
   },
   "builder": {
@@ -780,6 +790,34 @@
         "Hero": {
           "name": "Hero",
           "blurb": "Scroll-scrubbed aerial flythrough with three crossfading text states — wordmark, value quote, invite + CTA. Video/imagery ship as placeholders: swap the frames folder in the downloaded source — not editable from the builder."
+        },
+        "Concept": {
+          "name": "Concept",
+          "blurb": "Centred kicker + one large serif statement that reveals word by word; the hero above parallaxes away as it rises."
+        },
+        "GallerySlider": {
+          "name": "Gallery slider",
+          "blurb": "Full-viewport photo slider with a stretch-and-push mask transition, drag / arrows and a counter."
+        },
+        "Location": {
+          "name": "Location",
+          "blurb": "Parallax map with hoverable pins that draw a dotted route from the HQ, plus a draggable row of distance cards that reveal their photo with a circle wipe."
+        },
+        "Panorama": {
+          "name": "Panorama",
+          "blurb": "Full-width parallax photo with a big serif title and a CTA wrapped in pulsing rings."
+        },
+        "Interior": {
+          "name": "Interior",
+          "blurb": "Full-viewport slider driven by a link menu, mask transition, and pulsing hotspots that open tooltips."
+        },
+        "Amenities": {
+          "name": "Amenities",
+          "blurb": "Parallax headline and a draggable row of ruled cells: click the + and the photo collapses into a paragraph."
+        },
+        "Masterplan": {
+          "name": "Masterplan",
+          "blurb": "Full-width aerial with pulsing numbered dots; hover one and the property outline is drawn with a tooltip (rooms, area, unit name)."
         }
       },
       "signal": {

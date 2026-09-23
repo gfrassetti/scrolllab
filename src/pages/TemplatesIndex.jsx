@@ -112,6 +112,15 @@ const TEMPLATE_META = [
     tagline: 'mass and measure',
     palette: ['#f4f1ea', '#111111', '#111111'],
   },
+  // MERIDIAN (10) — deliberately NOT listed yet: it is hidden from the home
+  // until launch (see LOCAL_ONLY_SKUS in src/lib/pricing.js). The copy
+  // (templates.meridian.{vibe,tags,description}) already lives in both
+  // locales. To launch: uncomment this entry, add public/catalog/meridian.jpg
+  // and take it out of COMING_SOON / LOCAL_ONLY / BUILDER_HIDDEN. Entry to
+  // add (same shape as the ones above): id '10', name 'MERIDIAN', path
+  // '/templates/meridian', category 'REAL ESTATE', tagline 'scroll the site',
+  // palette ['#dfd8cf', '#2a2622', '#8f7a5e']. (Written as prose on purpose:
+  // scripts/check-consistency.mjs greps this file for the sku literal.)
 ]
 
 function catalogCoverSrc(sku) {

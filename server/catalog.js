@@ -127,8 +127,8 @@ export const PRODUCTS = {
   meridian: {
     sku: 'meridian',
     title: 'MERIDIAN — template',
-    description: 'Modelo real estate: hero scrubeado por scroll (flythrough en canvas 2D + WebP), drawer menu con roll-up, texto que reveal word-by-word con el scroll (código fuente).',
-    unit_price_usd: 289,
+    description: 'Modelo para desarrollos inmobiliarios, complejos de cabañas o departamentos, desarrolladoras y resorts: hero de flythrough aéreo scrubeado por scroll, menú drawer, sliders con efecto mask, mapa con pines interactivos e interiores con hotspots (código fuente).',
+    unit_price_usd: 389,
     currency_id: 'ARS',
   },
   bundle: {
@@ -142,7 +142,7 @@ export const PRODUCTS = {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 299,
+    unit_price_usd: 399,
     currency_id: 'ARS',
   },
 }

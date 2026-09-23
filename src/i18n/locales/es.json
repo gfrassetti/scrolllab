@@ -379,6 +379,16 @@
         "Wordmark gigante"
       ],
       "description": "Papel hueso, serif editorial y fotografías genéricas de arquitectura. El hero pineado sostiene una sola toma de massing bajo un manifiesto tipográfico; un índice de obras, el proceso en pin y un anillo negro de fotos de estudio marcan el ritmo antes de las cifras de la práctica. Ideal para estudios de arquitectura, desarrolladoras inmobiliarias o cualquier práctica que quiera mostrar su obra a esta escala de tipo."
+    },
+    "meridian": {
+      "vibe": "Desarrollo inmobiliario",
+      "tags": [
+        "Flythrough aéreo por scroll",
+        "Mapa con pines interactivos",
+        "Slider con efecto mask",
+        "Hotspots en interiores"
+      ],
+      "description": "Arena cálida, serif editorial y un recorrido aéreo que se reproduce mientras scrolleás: hero de frames con el logo que se acopla al header, menú tipo drawer, slider de pantalla completa con transición de máscara, un mapa con pines que trazan rutas punteadas y fotos de interiores con hotspots que abren tooltips. Ideal para desarrollos inmobiliarios, complejos de cabañas, edificios o departamentos, desarrolladoras y constructoras que quieren destacar cada uno de sus complejos, o resorts."
     }
   },
   "builder": {
@@ -780,6 +790,34 @@
         "Hero": {
           "name": "Hero",
           "blurb": "Flythrough aéreo scrubeado por scroll con tres estados de texto en crossfade — wordmark, cita de valor, invitación + CTA. El video/imaginery vienen como placeholder: se reemplaza la carpeta de frames en el código descargado — no es editable desde el builder."
+        },
+        "Concept": {
+          "name": "Concept",
+          "blurb": "Kicker centrado + una frase grande en serif que se revela palabra a palabra; el hero de arriba se aleja en parallax mientras sube."
+        },
+        "GallerySlider": {
+          "name": "Gallery slider",
+          "blurb": "Slider de fotos a pantalla completa con transición de máscara (empuje + estiramiento), arrastre / flechas y contador."
+        },
+        "Location": {
+          "name": "Location",
+          "blurb": "Mapa con parallax y pines interactivos que trazan una ruta punteada desde la sede, más una fila arrastrable de tarjetas de distancia que revelan su foto con un círculo."
+        },
+        "Panorama": {
+          "name": "Panorama",
+          "blurb": "Foto a ancho completo con parallax, título serif grande y un CTA envuelto en anillos que laten."
+        },
+        "Interior": {
+          "name": "Interior",
+          "blurb": "Slider a pantalla completa gobernado por un menú de enlaces, con transición de máscara y hotspots que laten y abren tooltips."
+        },
+        "Amenities": {
+          "name": "Amenities",
+          "blurb": "Titular con parallax y una fila arrastrable de celdas: al hacer clic en el + la foto colapsa y aparece un párrafo."
+        },
+        "Masterplan": {
+          "name": "Masterplan",
+          "blurb": "Aérea a ancho completo con puntos numerados que laten; al pasar el mouse por uno se dibuja el contorno de la propiedad con un tooltip (ambientes, superficie, nombre)."
         }
       },
       "signal": {

@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
-import MenuOverlay, { Hamburger } from './MenuOverlay'
+import MenuOverlay, { Hamburger, LINKS_PRIMARY_DEFAULT } from './MenuOverlay'
+import { HeaderCta, HeaderLink } from './NavBits'
+import Preloader from './Preloader'
 
 /**
  * MERIDIAN — Hero
@@ -51,13 +53,17 @@ const FRAME_PAD = 4
 // scroll notch. Tuned so a normal wheel push moves several frames, not
 // one — that's what makes it feel like a fluid video, not a slideshow.
 const PX_PER_FRAME = 16
+// The preloader waits for this many frames (the first stretch of the
+// flythrough); the rest keep loading while the visitor already scrolls.
+const PRELOAD_GATE = 60
 
 // Wordmark scrub: progress 0 -> WORDMARK_RANGE, giant+centered -> small+docked
 // in the nav row. Past that point it just sits there, same as the reference.
 const WORDMARK_RANGE = 0.18
 const WORDMARK_BIG_PX = 132
 const WORDMARK_SMALL_PX = 15
-const WORDMARK_TOP_SMALL = '34px'
+const WORDMARK_SMALL_PX_MOBILE = 18
+const MOBILE_MQ = '(max-width: 767px)'
 
 // Welcome copy has its own little scrubbed window at the very start:
 // fades in word by word as you begin, then out as the wordmark docks.
@@ -150,6 +156,7 @@ export default function Hero({
   inviteTitle,
   inviteBody = '[Region], [Country]',
   inviteCta = 'Explore Villas',
+  menuLinks = LINKS_PRIMARY_DEFAULT,
 }) {
   const track = useRef(null)
   const stage = useRef(null)
@@ -157,7 +164,38 @@ export default function Hero({
   const wordmarkRef = useRef(null)
   const welcomeRef = useRef(null)
   const stateRefs = useRef([])
+  const navRef = useRef(null)
+  const navBgRef = useRef(null)
+  const brandRef = useRef(null)
+  const bgRef = useRef(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuOpenRef = useRef(false)
+  menuOpenRef.current = menuOpen
+
+  // Preloader ↔ hero handshake: frames report progress through a ref (no
+  // re-render per frame); the hero's intro tweens wait on `introRef`.
+  const loadedRef = useRef(0)
+  const loaderDoneRef = useRef(false)
+  const introRef = useRef(null)
+  const handleLoaderDone = () => {
+    loaderDoneRef.current = true
+    introRef.current?.()
+  }
+
+  // Mobile is a different composition, not a squeezed desktop (verified on
+  // the reference at 375px): no giant wordmark — the logo is docked in the
+  // header from the first frame; the background pans left → right as you
+  // scroll; the scrubbed welcome/quote copy is gone and only the invite
+  // (kicker, title, circle CTA) stays, static.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_MQ).matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MQ)
+    const onChange = () => setIsMobile(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   // The invite headline repeats the wordmark by default ("MEET /
   // MERIDIAN") — falls back to whatever `wordmark` resolves to so the
@@ -188,13 +226,20 @@ export default function Hero({
       const idxOf = (p) =>
         Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(p * (FRAME_COUNT - 1))))
 
+      // Mobile: a landscape frame cover-cropped into a portrait screen
+      // only shows ~30% of its width, so the crop slides left → right with
+      // scroll (panT 0 → 1) — same idea as the reference's translating
+      // wide image. Desktop stays centred (0.5).
+      const mobile = isMobile
+      let panT = mobile ? 0 : 0.5
+
       function drawCover(img) {
         const cw = canvas.width
         const ch = canvas.height
         const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight)
         const dw = img.naturalWidth * scale
         const dh = img.naturalHeight * scale
-        ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh)
+        ctx.drawImage(img, (cw - dw) * panT, (ch - dh) / 2, dw, dh)
       }
 
       let shown = -1
@@ -224,18 +269,94 @@ export default function Hero({
         paint(Math.max(0, shown))
       }
 
+      // Smart header (verified on the reference: `.header` is fixed, gets
+      // `.hidden` = translateY(-100%) while scrolling down, and
+      // `.background` = solid sand + 1px border while scrolling up; 0.4s
+      // cubic-bezier(0.16,1,0.3,1) on transform + background-color).
+      //   top    → transparent over the video (scrollY < 24)
+      //   hidden → scrolling down
+      //   solid  → scrolling up: painted bar with the CTA
+      // The docked wordmark is the header's logo: it stays put when the bar
+      // hides (verified on the reference) and only turns dark when the bar
+      // paints.
+      let hdr = 'top'
+      let pastHero = false
+      let lastY = window.scrollY
+      let wmDocked = false
+
+      function paintHeader() {
+        const nav = navRef.current
+        const bg = navBgRef.current
+        const wm = wordmarkRef.current
+        if (!nav || !bg) return
+        nav.style.transform = hdr === 'hidden' ? 'translateY(-100%)' : 'translateY(0)'
+        nav.dataset.solid = hdr === 'solid' ? 'true' : 'false'
+        bg.style.transform = hdr === 'solid' ? 'translateY(0)' : 'translateY(-100%)'
+        if (wm) {
+          wm.style.color = wmDocked && hdr === 'solid' ? '#2a2622' : ''
+          // once the sticky stage starts scrolling away the docked
+          // wordmark leaves with it — the header's own brand takes over
+          wm.style.opacity = pastHero ? '0' : ''
+        }
+        const brand = brandRef.current
+        if (brand) {
+          const show = pastHero && hdr === 'solid'
+          brand.style.opacity = show ? '1' : '0'
+          brand.style.pointerEvents = show ? 'auto' : 'none'
+        }
+      }
+
+      function onHeaderScroll() {
+        if (menuOpenRef.current) return
+        const y = window.scrollY
+        const dy = y - lastY
+        let next = hdr
+        if (y < 24) {
+          next = 'top'
+          lastY = y
+        } else if (Math.abs(dy) >= 2) {
+          next = dy > 0 ? 'hidden' : 'solid'
+          lastY = y
+        }
+        if (next === hdr) return
+        hdr = next
+        paintHeader()
+      }
+
+      // Docked wordmark sits vertically centred in the nav row (h1 has
+      // line-height 1.1, so its box is font-size * 1.1 tall).
+      let dockTop = 34
+      const wmSmallPx = mobile ? WORDMARK_SMALL_PX_MOBILE : WORDMARK_SMALL_PX
+      function sizeHeaderBg() {
+        if (navRef.current && navBgRef.current) {
+          const navH = navRef.current.offsetHeight
+          navBgRef.current.style.height = `${navH}px`
+          dockTop = (navH - wmSmallPx * 1.1) / 2
+        }
+      }
+      sizeHeaderBg()
+      if (brandRef.current) brandRef.current.style.fontSize = `${wmSmallPx}px`
+      paintHeader()
+      const onHeaderResize = () => {
+        sizeHeaderBg()
+        layoutWordmark(prog)
+      }
+      window.addEventListener('scroll', onHeaderScroll, { passive: true })
+      window.addEventListener('resize', onHeaderResize)
+
       function layoutWordmark(prog) {
         const el = wordmarkRef.current
         if (!el) return
-        const t = Math.max(0, Math.min(1, prog / WORDMARK_RANGE))
-        el.style.fontSize = `${lerp(WORDMARK_BIG_PX, WORDMARK_SMALL_PX, t)}px`
-        if (t > 0.98) {
-          el.style.top = WORDMARK_TOP_SMALL
-          el.style.transform = 'translate(-50%, 0)'
-        } else {
-          el.style.top = `${lerp(50, 0, t)}%`
-          el.style.transform = `translate(-50%, ${lerp(-50, 0, t)}%)`
+        const t = mobile ? 1 : Math.max(0, Math.min(1, prog / WORDMARK_RANGE))
+        const docked = t > 0.98
+        if (docked !== wmDocked) {
+          wmDocked = docked
+          paintHeader()
         }
+        el.style.fontSize = `${lerp(WORDMARK_BIG_PX, wmSmallPx, t)}px`
+        const stageH = stage.current?.clientHeight || window.innerHeight
+        el.style.top = `${lerp(stageH / 2, dockTop, t)}px`
+        el.style.transform = `translate(-50%, ${lerp(-50, 0, t)}%)`
       }
 
       /**
@@ -299,13 +420,33 @@ export default function Hero({
         })
       }
 
+      // Mobile: welcome + quote are dropped, the last (invite) state is
+      // simply on screen — no per-word scrub.
+      function layoutMobileStatic() {
+        if (welcomeRef.current) welcomeRef.current.style.display = 'none'
+        stateRefs.current.forEach((el, k) => {
+          if (!el) return
+          if (k !== STATES.length - 1) {
+            el.style.display = 'none'
+            return
+          }
+          el.querySelectorAll('[data-word-i], [data-scrub-tail]').forEach((w) => {
+            w.style.opacity = '1'
+            w.style.filter = 'none'
+          })
+          el.style.pointerEvents = 'auto'
+        })
+      }
+
       function layoutWelcome(prog) {
+        if (mobile) return
         const el = welcomeRef.current
         if (!el) return
         layoutScrub(el, prog, WELCOME_AT, WELCOME_SPAN, false)
       }
 
       function layoutStates(prog) {
+        if (mobile) return
         for (let k = 0; k < STATES.length; k++) {
           const el = stateRefs.current[k]
           const st = STATES[k]
@@ -322,10 +463,22 @@ export default function Hero({
       let prog = 0
       const EASE = 0.18
 
+      // The whole point of `dirty`/`shown` in paint() is to skip redundant
+      // canvas redraws — but this function used to set `dirty = true` and
+      // re-run every layout* pass on EVERY gsap.ticker frame regardless of
+      // whether anything actually moved. That's a full canvas redraw +
+      // querySelectorAll + per-word style writes, 60 times a second,
+      // forever, even at rest — stealing frame budget from anything else
+      // animating on the page (the menu drawer's own CSS transition was
+      // visibly janky because of this, not because of the transition
+      // itself). Bail out the instant the lerp has nothing left to do.
       function frameTick() {
+        const before = prog
         prog += (targetProg - prog) * EASE
         if (Math.abs(targetProg - prog) < 0.0005) prog = targetProg
+        if (prog === before) return
         dirty = true
+        if (mobile) panT = prog
         paint(idxOf(prog))
         layoutWordmark(prog)
         layoutWelcome(prog)
@@ -348,15 +501,21 @@ export default function Hero({
         layoutWordmark(WORDMARK_RANGE)
         layoutWelcome(WELCOME_AT)
         layoutStates(STATES[STATES.length - 1].at)
+        if (mobile) layoutMobileStatic()
       } else {
+        loadedRef.current = 0
         urls.forEach((url, i) => {
           const img = new Image()
           img.decoding = 'async'
           img.onload = () => {
+            loadedRef.current += 1
             if (i === 0 && alive.v) {
               dirty = true
               paint(0)
             }
+          }
+          img.onerror = () => {
+            loadedRef.current += 1
           }
           img.src = url
           images[i] = img
@@ -365,6 +524,7 @@ export default function Hero({
         layoutWordmark(0)
         layoutWelcome(0)
         layoutStates(0)
+        if (mobile) layoutMobileStatic()
 
         gsap.ticker.add(frameTick)
         ScrollTrigger.create({
@@ -377,48 +537,96 @@ export default function Hero({
           onRefresh: resize,
         })
 
+        // Intro waits for the preloader (loaderDoneRef) — it is built
+        // paused and started by handleLoaderDone().
+        const intro = gsap.timeline({ paused: true })
         const split = new SplitText(wordmarkRef.current, { type: 'chars', mask: 'chars' })
         gsap.set(split.chars, { autoAlpha: 0, filter: 'blur(10px)' })
-        gsap.to(split.chars, {
-          autoAlpha: 1,
-          filter: 'blur(0px)',
-          duration: 0.85,
-          stagger: { each: 0.02, from: 'random' },
-          ease: 'power2.out',
-          delay: 0.2,
-        })
+        intro.to(
+          split.chars,
+          {
+            autoAlpha: 1,
+            filter: 'blur(0px)',
+            duration: 1.9,
+            stagger: { each: 0.07, from: 'random' },
+            ease: 'power2.out',
+          },
+          0.1,
+        )
 
         const navSplit = new SplitText('[data-meridian-hero-nav]', { type: 'chars', mask: 'chars' })
         gsap.set(navSplit.chars, { autoAlpha: 0, filter: 'blur(10px)' })
-        gsap.to(navSplit.chars, {
-          autoAlpha: 1,
-          filter: 'blur(0px)',
-          duration: 0.85,
-          stagger: { each: 0.02, from: 'random' },
-          ease: 'power2.out',
-          delay: 0.35,
-        })
+        intro.to(
+          navSplit.chars,
+          {
+            autoAlpha: 1,
+            filter: 'blur(0px)',
+            duration: 1.7,
+            stagger: { each: 0.06, from: 'random' },
+            ease: 'power2.out',
+          },
+          0.6,
+        )
+
+        introRef.current = () => intro.play()
+        if (loaderDoneRef.current) intro.play()
       }
+
+      // Past the end of the sticky runway the stage scrolls away at full
+      // speed while its background drifts down at 30% of the scroll (numbers
+      // read off the reference: bg translateY = 0.3 × distance past the
+      // end) — that lag is the parallax the next section rises against.
+      const bgEl = bgRef.current
+      ScrollTrigger.create({
+        trigger: track.current,
+        start: 'bottom bottom',
+        end: 'bottom top',
+        onUpdate: (self) => {
+          if (!reduced && bgEl) {
+            const h = stage.current?.clientHeight || window.innerHeight
+            bgEl.style.transform = `translate3d(0, ${(self.progress * h * 0.3).toFixed(1)}px, 0)`
+          }
+          const past = self.progress > 0
+          if (past !== pastHero) {
+            pastHero = past
+            paintHeader()
+          }
+        },
+      })
 
       return () => {
         alive.v = false
         gsap.ticker.remove(frameTick)
         window.removeEventListener('resize', resize)
+        window.removeEventListener('scroll', onHeaderScroll)
+        window.removeEventListener('resize', onHeaderResize)
+        if (welcomeRef.current) welcomeRef.current.style.display = ''
+        stateRefs.current.forEach((el) => {
+          if (el) el.style.display = ''
+        })
         images.length = 0
       }
     },
-    { scope: track, revertOnUpdate: true },
+    { scope: track, revertOnUpdate: true, dependencies: [isMobile] },
   )
 
   return (
     <section ref={track} className="relative" style={{ height: `${FRAME_COUNT * PX_PER_FRAME}px` }}>
-      <div ref={stage} className="sticky top-0 h-svh overflow-hidden" style={{ background: '#dfd8cf' }}>
+      <Preloader
+        wordmark={wordmark}
+        getLoaded={() => loadedRef.current / PRELOAD_GATE}
+        bigPx={WORDMARK_BIG_PX}
+        onFadeStart={handleLoaderDone}
+        onDone={handleLoaderDone}
+      />
+      <div ref={stage} className="sticky top-0 z-30 h-svh overflow-hidden" style={{ background: '#dfd8cf' }}>
+        <div ref={bgRef} className="absolute inset-0 z-0 will-change-transform">
         {/* poster: first frame, so the first paint is never blank */}
         <img
           src={frameUrl(1)}
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover max-md:object-left"
         />
         <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] h-full w-full" />
         {/* scrim: darkens the flythrough so white type stays legible over
@@ -431,6 +639,7 @@ export default function Hero({
               'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 22%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.55) 100%)',
           }}
         />
+        </div>
 
         {/* nav — hamburger + Floor Plans are fixed chrome; the wordmark
             between them is the SAME element as the giant hero title,
@@ -440,49 +649,75 @@ export default function Hero({
             to dark when the menu opens so it stays legible on the cream
             drawer background. */}
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-[70] flex items-center justify-between px-6 py-6 md:px-10"
+          ref={navBgRef}
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 z-[15] border-b border-[#2a2622]/10 bg-[#dfd8cf]"
           style={{
-            color: menuOpen ? '#2a2622' : '#ffffff',
-            transition: 'color 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+            transform: 'translateY(-100%)',
+            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        />
+        <div
+          ref={navRef}
+          data-solid="false"
+          className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex items-center justify-between px-6 py-6 text-white data-[solid=true]:text-[#2a2622] md:px-10"
+          style={{
+            color: menuOpen ? '#2a2622' : undefined,
+            transition:
+              'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
-          {/* When the menu is open the drawer's own CLOSE button takes
-              over (bigger, always visible on the cream background); the
-              hero's fixed hamburger only owns the opening state. */}
-          {menuOpen ? (
+          {/* Desktop: when the menu is open the drawer's own CLOSE button
+              takes over, so the hamburger only owns the opening state.
+              Mobile: the header stays put over the full-screen drawer
+              (logo included) and the hamburger itself becomes the X —
+              same as the reference. */}
+          {menuOpen && !isMobile ? (
             <span aria-hidden="true" />
           ) : (
-            <Hamburger open={false} label={menuLabel} onClick={() => setMenuOpen(true)} />
+            <div className="flex items-center gap-6">
+              <Hamburger
+                open={menuOpen}
+                label={menuLabel}
+                onClick={() => setMenuOpen((o) => !o)}
+              />
+              {!menuOpen && <HeaderCta href="#villas" label={inviteCta} />}
+            </div>
           )}
-          <span aria-hidden="true" />
           <a
-            href="#floor-plans"
-            data-meridian-hero-nav
-            className="pointer-events-auto text-[11px] uppercase tracking-[0.2em] underline decoration-transparent underline-offset-4 transition-[text-decoration-color] duration-300"
+            ref={brandRef}
+            href="#top"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap uppercase tracking-[-0.01em]"
             style={{
-              fontFamily: "'Space Mono', monospace",
-              textDecorationColor: 'transparent',
+              fontFamily: "'Fraunces', serif",
+              lineHeight: 1.1,
+              opacity: 0,
+              pointerEvents: 'none',
+              transition: 'opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.textDecorationColor = 'currentColor')}
-            onMouseLeave={(e) => (e.currentTarget.style.textDecorationColor = 'transparent')}
           >
-            {floorPlansLabel}
+            {wordmark}
           </a>
+          <HeaderLink href="#floor-plans" label={floorPlansLabel} introAttr />
         </div>
 
-        <MenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
+        <MenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} links={menuLinks} />
 
         {/* the wordmark — starts giant/centered, scrubs into the nav's
             center slot as layoutWordmark() runs each tick */}
         <h1
           ref={wordmarkRef}
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 z-20 whitespace-nowrap uppercase tracking-[-0.01em] text-white"
+          data-menu={menuOpen ? 'true' : 'false'}
+          className="pointer-events-none absolute left-1/2 z-20 whitespace-nowrap uppercase tracking-[-0.01em] text-white max-md:data-[menu=true]:z-[75] max-md:data-[menu=true]:text-[#2a2622]"
           style={{
             fontFamily: "'Fraunces', serif",
             top: '50%',
             transform: 'translate(-50%, -50%)',
+            lineHeight: 1.1,
             fontSize: `${WORDMARK_BIG_PX}px`,
+            transition:
+              'color 0.4s cubic-bezier(0.16, 1, 0.3, 1), translate 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
           {wordmark}
@@ -532,7 +767,7 @@ export default function Hero({
               <a
                 href="#villas"
                 data-scrub-tail
-                className="group pointer-events-auto mt-8 inline-flex h-32 w-32 flex-col items-center justify-center gap-2 rounded-full border border-white/50 text-[11px] uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-white hover:text-[#2a2622] md:h-40 md:w-40"
+                className="group pointer-events-auto mt-8 inline-flex h-32 w-32 flex-col max-md:absolute max-md:right-[10%] max-md:bottom-[14%] max-md:mt-0 max-md:h-36 max-md:w-36 max-md:shadow-[0_0_0_10px_rgba(255,255,255,0.14),0_0_0_20px_rgba(255,255,255,0.07)] items-center justify-center gap-2 rounded-full border border-white/50 text-[11px] uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-white hover:text-[#2a2622] md:h-40 md:w-40"
                 style={{ fontFamily: "'Space Mono', monospace", opacity: 0 }}
               >
                 {/* underline + icon rotate combined on the same hover —

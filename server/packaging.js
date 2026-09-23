@@ -103,7 +103,13 @@ const MODEL_FILES = {
     // get swept by the sectionsDir walk. See the REPLACE ME comment in
     // Hero.jsx for how a buyer regenerates this folder from their own
     // footage; the packer just needs every current file listed.
-    publicAssets: publicDirAssets('meridian/hero/seq'),
+    publicAssets: [
+      ...publicDirAssets('meridian/hero/seq'),
+      // Gallery slider demo stills (2560px WebP)
+      ...publicDirAssets('meridian/gallery'),
+      // Location section map image (generated, 2304×1331 WebP)
+      ...publicDirAssets('meridian/map'),
+    ],
   },
 }
 

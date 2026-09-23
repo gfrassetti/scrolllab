@@ -1,5 +1,12 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import Hero from '../components/sections/meridian/Hero'
+import Concept from '../components/sections/meridian/Concept'
+import GallerySlider from '../components/sections/meridian/GallerySlider'
+import Location from '../components/sections/meridian/Location'
+import Panorama from '../components/sections/meridian/Panorama'
+import Interior from '../components/sections/meridian/Interior'
+import Amenities from '../components/sections/meridian/Amenities'
+import Masterplan from '../components/sections/meridian/Masterplan'
 
 /**
  * Template model — "MERIDIAN" (WIP, first pass — Hero only)
@@ -23,6 +30,13 @@ export default function MeridianPage() {
       <div id="top" className="meridian-world bg-[#dfd8cf] text-[#2a2622]">
         <main>
           <Hero />
+          <Concept />
+          <GallerySlider />
+          <Location />
+          <Panorama />
+          <Interior />
+          <Amenities />
+          <Masterplan />
         </main>
       </div>
     </SmoothScrollProvider>

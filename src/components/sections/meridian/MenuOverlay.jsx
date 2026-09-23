@@ -19,7 +19,11 @@ import { useEffect, useRef } from 'react'
  * whole surface feels like one instrument, not a collage.
  */
 
-const LINKS_PRIMARY = [
+// Default/fallback — used when `links` isn't passed (e.g. rendered
+// outside the builder's props system) or comes back empty. Exported so
+// Hero.jsx can use the exact same array as its own `menuLinks` default —
+// one list, not two copies that could drift.
+export const LINKS_PRIMARY_DEFAULT = [
   { label: 'Home', href: '#top' },
   { label: 'Villas', href: '#villas' },
   { label: 'Residences', href: '#residences' },
@@ -43,7 +47,7 @@ function MenuLink({ label, href }) {
   return (
     <a
       href={href}
-      className="meridian-menu-link relative block overflow-hidden text-left align-middle text-[clamp(2.4rem,5.4vw,4.6rem)] tracking-[-0.02em] text-[#2a2622]"
+      className="meridian-menu-link relative block overflow-hidden text-left align-middle text-[2.1rem] tracking-[-0.02em] md:text-[clamp(2.4rem,5.4vw,4.6rem)] text-[#2a2622]"
       style={{
         fontFamily: "'Fraunces', serif",
         lineHeight: 1.05,
@@ -78,7 +82,12 @@ function PillLink({ label, href }) {
   )
 }
 
-export default function MenuOverlay({ open, onClose }) {
+export default function MenuOverlay({ open, onClose, links }) {
+  // Builder-editable (list field, `meridian/Hero` → menuLinks): buyers
+  // rename/re-point these without touching code. Anything visual on the
+  // right pane (photo, headline, contact strip) stays code-only on
+  // purpose — see docs/template-plans/meridian.txt for the reasoning.
+  const primaryLinks = links?.length ? links : LINKS_PRIMARY_DEFAULT
   const rootRef = useRef(null)
 
   // Trap body scroll while open so wheeling inside the drawer doesn't
@@ -101,14 +110,33 @@ export default function MenuOverlay({ open, onClose }) {
     <div
       ref={rootRef}
       aria-hidden={!open}
-      className="pointer-events-none fixed inset-0 z-[60] flex flex-col overflow-hidden"
+      // Reference leaves ~1/4 of the viewport showing the page underneath
+      // instead of covering it entirely — a glimpse of "you're still on
+      // this page, just browsing the menu," not a full takeover.
+      // Mobile (verified at 375px on the reference): full-screen, and the
+      // whole drawer scrolls as one column instead of two panes.
+      data-lenis-prevent
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex h-[100dvh] flex-col overflow-y-auto pt-[78px] md:h-[78vh] md:overflow-hidden md:pt-0"
       style={{
         transform: open ? 'translateY(0)' : 'translateY(-100%)',
-        // Fast at the start, gentle settle — matches the reference feel.
-        // 0.75s so the roll registers as an event, not a snap.
-        transition: 'transform 0.75s cubic-bezier(0.16, 1, 0.3, 1)',
+        // Verified against the live reference: it drives this with GSAP
+        // using a CustomEase literally named "default-ease" registered as
+        // cubic-bezier(0.16, 1, 0.3, 1) — same curve we already had — at
+        // duration 1.2s (we had 0.75s, which read as a snap instead of a
+        // considered, weighted drop). Matched both here.
+        transition: 'transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
         pointerEvents: open ? 'auto' : 'none',
         background: '#efe8dd',
+        // Static, not toggled by `open` — a shadow that flips on/off is an
+        // extra paint on top of the transform animation; a constant one
+        // just rides along for free once this layer is composited (it's
+        // off-screen and invisible anyway while closed).
+        boxShadow: '0 24px 48px -12px rgba(0,0,0,0.25)',
+        // Promote to its own compositor layer up front instead of letting
+        // the browser decide mid-transition — the difference between a
+        // GPU-composited slide and a thread fighting the menu's own DOM
+        // (photo backgrounds, text) for paint time on every frame.
+        willChange: 'transform',
       }}
     >
       {/* explicit CLOSE control — matches the reference (a large "CLOSE"
@@ -121,7 +149,7 @@ export default function MenuOverlay({ open, onClose }) {
         type="button"
         onClick={onClose}
         aria-label="Close menu"
-        className="meridian-menu-close pointer-events-auto absolute top-4 left-4 z-10 inline-flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.24em] text-[#2a2622] md:top-6 md:left-6"
+        className="meridian-menu-close pointer-events-auto absolute top-4 left-4 z-10 hidden items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.24em] text-[#2a2622] md:top-6 md:left-6 md:inline-flex"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
         <span
@@ -146,12 +174,28 @@ export default function MenuOverlay({ open, onClose }) {
         <span>Close</span>
       </button>
 
-      {/* two-pane body */}
-      <div className="flex h-full flex-1 flex-col md:flex-row">
+      {/* two-pane body — its own scroll in case content doesn't fit the
+          78vh box on a short viewport; the drawer itself never grows
+          past that height. */}
+      {/* mobile-only utility row — the reference moves language / portal /
+          plan links out of the header and into the drawer at this width */}
+      <div
+        className="flex shrink-0 items-center justify-between border-y border-[#2a2622]/15 px-6 py-5 text-[11px] uppercase tracking-[0.2em] text-[#2a2622] md:hidden"
+        style={{ fontFamily: "'Space Mono', monospace" }}
+      >
+        <span className="flex items-center gap-4">
+          <span>EN</span>
+          <span aria-hidden="true" className="h-5 w-px bg-[#2a2622]/20" />
+          <a href="#portal">Client Portal</a>
+        </span>
+        <a href="#brochure">Brochure</a>
+      </div>
+
+      <div className="flex shrink-0 flex-col md:h-full md:flex-1 md:shrink md:flex-row md:overflow-y-auto">
         {/* LEFT — link list */}
-        <div className="flex flex-1 flex-col justify-between px-6 pt-24 pb-12 md:px-10 md:pt-28 md:pb-16">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-2 md:gap-x-12 md:gap-y-3">
-            {LINKS_PRIMARY.map((l) => (
+        <div className="flex flex-1 flex-col justify-between px-6 pt-8 pb-8 md:px-10 md:pt-28 md:pb-16">
+          <div className="grid grid-cols-1 gap-y-1 md:grid-cols-2 md:gap-x-12 md:gap-y-3">
+            {primaryLinks.map((l) => (
               <MenuLink key={l.href} {...l} />
             ))}
           </div>
@@ -163,9 +207,9 @@ export default function MenuOverlay({ open, onClose }) {
         </div>
 
         {/* RIGHT — feature card with photo + headline + CTA */}
-        <div className="relative m-6 flex-1 overflow-hidden rounded-md md:m-10 md:max-w-[46%]">
+        <div className="relative flex-1 overflow-hidden md:m-10 md:max-w-[46%] md:rounded-md">
           <div
-            className="meridian-menu-card relative h-full min-h-[52vh] w-full cursor-pointer"
+            className="meridian-menu-card relative h-full min-h-[38vh] w-full cursor-pointer"
             role="link"
             tabIndex={0}
           >
@@ -218,13 +262,22 @@ export default function MenuOverlay({ open, onClose }) {
 
       {/* footer strip */}
       <div
-        className="border-t border-[#2a2622]/15 px-6 py-6 text-xs uppercase tracking-[0.24em] text-[#2a2622]/70 md:px-10"
+        className="shrink-0 border-t border-[#2a2622]/15 px-6 py-6 text-xs uppercase tracking-[0.24em] text-[#2a2622]/70 md:px-10"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
-        <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <span>+00 (000) 000-0000</span>
-          <span>info@example.com</span>
-          <span>Facebook · Instagram · Whatsapp</span>
+        <div className="flex flex-col gap-6 md:flex-row md:flex-wrap md:items-baseline md:justify-between md:gap-4">
+          <span>
+            <span className="mb-1 block text-[#2a2622]/40 md:hidden">Phone</span>
+            +00 (000) 000-0000
+          </span>
+          <span>
+            <span className="mb-1 block text-[#2a2622]/40 md:hidden">Email</span>
+            info@example.com
+          </span>
+          <span>
+            <span className="mb-1 block text-[#2a2622]/40 md:hidden">Socials</span>
+            Facebook · Instagram · Whatsapp
+          </span>
         </div>
       </div>
       <style>{`
@@ -272,8 +325,12 @@ export function Hamburger({ open, onClick, label = 'Menu', className = '', style
         <span className="fill fill-1" />
         <span className="fill fill-2" />
       </span>
-      <span>{open ? 'Close' : label}</span>
+      <span className="lbl">{open ? 'Close' : label}</span>
       <style>{`
+        @media (max-width: 767px) {
+          .meridian-hamburger .lbl { display: none; }
+          .meridian-hamburger { padding: 10px 10px 10px 0; }
+        }
         .meridian-hamburger .line,
         .meridian-hamburger .fill {
           position: absolute;

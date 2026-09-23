@@ -14,7 +14,7 @@ export const TEMPLATE_PRICES_USD = {
   unity: 189,
   ratio: 269,
   atrium: 189,
-  meridian: 289,
+  meridian: 389,
 }
 
 /**
@@ -71,7 +71,7 @@ export function isBuilderHiddenSku(sku) {
  * Una composición del tamaño de un template (10 secciones) queda en 309 USD.
  * El piso tiene que superar al template más caro en venta.
  */
-export const CUSTOM_BASE_PRICE_USD = 299
+export const CUSTOM_BASE_PRICE_USD = 399
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 15
 /** Tope de secciones de una receta — espejo de `maxRecipeSections`. */

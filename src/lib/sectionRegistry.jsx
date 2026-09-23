@@ -83,6 +83,13 @@ import StatField from '../components/sections/atrium/StatField'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import FilmScroll from '../components/sections/plum/FilmScroll'
 import MeridianHero from '../components/sections/meridian/Hero'
+import MeridianConcept from '../components/sections/meridian/Concept'
+import MeridianGallerySlider from '../components/sections/meridian/GallerySlider'
+import MeridianLocation from '../components/sections/meridian/Location'
+import MeridianPanorama from '../components/sections/meridian/Panorama'
+import MeridianInterior from '../components/sections/meridian/Interior'
+import MeridianAmenities from '../components/sections/meridian/Amenities'
+import MeridianMasterplan from '../components/sections/meridian/Masterplan'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
@@ -264,6 +271,13 @@ const allModels = [
     wrapperClass: 'bg-[#dfd8cf] text-[#2a2622]',
     sections: [
       { id: 'meridian/Hero', name: 'Hero', kind: 'hero', component: MeridianHero, blurb: 'Scroll-scrubbed aerial flythrough with three crossfading text states — wordmark, value quote, invite + CTA. Video/imagery ship as placeholders: swap the frames folder in the downloaded source, not editable from the builder.' },
+      { id: 'meridian/Concept', name: 'Concept', kind: 'section', component: MeridianConcept, blurb: 'Centred kicker + one large serif statement that reveals word by word; the hero above parallaxes away as it rises.' },
+      { id: 'meridian/GallerySlider', name: 'Gallery slider', kind: 'section', component: MeridianGallerySlider, blurb: 'Full-viewport photo slider with a stretch-and-push mask transition, drag / arrows and a counter.' },
+      { id: 'meridian/Location', name: 'Location', kind: 'section', component: MeridianLocation, blurb: 'Parallax map with hoverable pins that draw a dotted route from the HQ, plus a draggable row of distance cards that reveal their photo with a circle wipe.' },
+      { id: 'meridian/Panorama', name: 'Panorama', kind: 'section', component: MeridianPanorama, blurb: 'Full-width parallax photo with a big serif title and a CTA wrapped in pulsing rings.' },
+      { id: 'meridian/Interior', name: 'Interior', kind: 'section', component: MeridianInterior, blurb: 'Full-viewport slider driven by a link menu, mask transition, and pulsing hotspots that open tooltips.' },
+      { id: 'meridian/Amenities', name: 'Amenities', kind: 'section', component: MeridianAmenities, blurb: 'Parallax headline and a draggable row of ruled cards: click the + and the photo collapses into a paragraph.' },
+      { id: 'meridian/Masterplan', name: 'Masterplan', kind: 'section', component: MeridianMasterplan, blurb: 'Full-width aerial with pulsing numbered dots; hover one and the property outline is drawn with a tooltip (rooms, area, unit name).' },
     ],
   },
   {
