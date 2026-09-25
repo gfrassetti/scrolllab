@@ -167,8 +167,31 @@ function TemplatePoster({ template, index = 0, soonLabel = 'Coming soon' }) {
 }
 
 /**
+ * Marca de zona: separa las 3 formas de comprar (Templates / Builder / Lab)
+ * con un título grande y animado. `zone` alimenta el scrollspy del header
+ * (SiteHeader observa `[data-zone]`) — el id es solo para eso, no para links
+ * de hash (esos siguen usando el id de la sección real, ej. `#templates`).
+ */
+function ZoneHeadline({ index, label, zone }) {
+  return (
+    <div
+      id={`zone-${zone}`}
+      data-zone={zone}
+      data-soft-fade
+      className="pt-14 pb-2 md:pt-20"
+    >
+      <p className="text-eyebrow uppercase text-ink/40">{index}</p>
+      <p className="mt-2 font-brico text-[clamp(3rem,9vw,7rem)] leading-[0.85] font-semibold tracking-[-0.03em] uppercase">
+        {label}
+      </p>
+    </div>
+  )
+}
+
+/**
  * Home del catálogo.
- * Flujo: hero → manifiesto → modelos (editorial) → Bundle/Builder → cómo funciona → contacto.
+ * Flujo: hero → Templates (modelos) → Builder (demo, abrir el builder,
+ * catálogo completo) → Lab → comparación → cómo funciona → contacto.
  */
 export default function TemplatesIndex() {
   const root = useRef(null)
@@ -784,6 +807,7 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
+        <ZoneHeadline index="01" label={t('nav.templates')} zone="templates" />
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
           <div className="flex items-baseline justify-between pt-8 md:pt-10">
             <p className="text-eyebrow uppercase text-ink/50">
@@ -1003,7 +1027,8 @@ export default function TemplatesIndex() {
 
         {/* Ya viste el catálogo: ahora el otro camino — armar la tuya en vez
             de un modelo fijo. El demo de LAB vive en /lab, no se repite acá. */}
-        <div className="mx-auto mt-16 mb-16 max-w-[1300px] md:mt-20 md:mb-24">
+        <ZoneHeadline index="02" label={t('nav.builder')} zone="builder" />
+        <div className="mx-auto mb-16 max-w-[1300px] md:mb-24">
           <p className="text-center text-eyebrow uppercase text-accent">
             {t('home.builderDemoEyebrow')}
           </p>
@@ -1018,11 +1043,86 @@ export default function TemplatesIndex() {
           </div>
         </div>
 
-        {/* Ofertas justo después del deseo (Bundle → Builder). */}
+        {/* Abrir el builder: primero el CTA de armar la propia (lo que
+            acabás de ver en el demo), después el atajo de llevarte los 8
+            modelos ya armados — la otra forma de resolverlo rápido. */}
+        <Link
+          to="/builder"
+          data-cta-card
+          data-cta-demo="builder"
+          className="group relative mt-16 -mx-5 block overflow-hidden border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-20 md:-mx-10 md:px-10 md:py-20"
+        >
+          {/* Identidad de fondo: el logo de la marca es literalmente
+              "secciones apiladas" — la misma metáfora que arma el builder.
+              Opacity real en el wrapper (no un modificador de color), igual
+              que el watermark de HomeContact — si no, el bloque accent del
+              logo (fill fijo, no currentColor) queda naranja pleno.
+              Solo desktop: en mobile el precio ya envuelve a 2 líneas y
+              choca contra la marca — el título ya identifica la card ahí. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-6 bottom-6 hidden text-bone opacity-25 md:block"
+            style={{ ['--color-accent']: 'currentColor' }}
+          >
+            <Logo className="h-40 w-40" />
+          </div>
+          <div className="relative z-10">
+            <p
+              data-cta-bit
+              className="mb-4 text-eyebrow uppercase text-bone/55"
+            >
+              {t('home.builderEyebrow')}
+            </p>
+            <p className="flex items-end justify-between gap-6">
+              <span
+                data-cta-bit
+                className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
+              >
+                {t('home.builderTitleBefore')}{' '}
+                <em
+                  data-cta-accent
+                  className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
+                >
+                  {t('home.builderTitleEm')}
+                </em>
+              </span>
+              <span
+                data-cta-arrow
+                aria-hidden="true"
+                className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
+              >
+                →
+              </span>
+            </p>
+            <p
+              data-cta-bit
+              className="mt-5 max-w-[48ch] text-body leading-relaxed text-bone/70"
+            >
+              {t('home.builderBody')}
+            </p>
+            <p
+              data-cta-bit
+              className="mt-4 text-eyebrow uppercase text-bone/50"
+            >
+              {t('home.builderPrices', {
+                base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
+                included: CUSTOM_BASE_SECTIONS,
+                extra: formatNextSectionPrice(
+                  CUSTOM_BASE_SECTIONS,
+                  false,
+                  locale,
+                  rate,
+                ),
+              })}
+            </p>
+          </div>
+        </Link>
+
+        {/* Bundle: para quien ya decidió llevarse todo el catálogo en vez de armar uno a medida. */}
         <section
           id="ofertas"
           data-cta-card
-          className="mt-16 scroll-mt-20 border-2 border-ink p-6 md:mt-20 md:grid md:grid-cols-12 md:gap-10 md:p-10"
+          className="mt-10 scroll-mt-20 border-2 border-ink p-6 md:mt-12 md:grid md:grid-cols-12 md:gap-10 md:p-10"
         >
           <div className="md:col-span-8">
             <p
@@ -1096,77 +1196,7 @@ export default function TemplatesIndex() {
           </p>
         </section>
 
-        <Link
-          to="/builder"
-          data-cta-card
-          data-cta-demo="builder"
-          className="group relative mt-10 -mx-5 block overflow-hidden border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-12 md:-mx-10 md:px-10 md:py-20"
-        >
-          {/* Identidad de fondo: el logo de la marca es literalmente
-              "secciones apiladas" — la misma metáfora que arma el builder.
-              Opacity real en el wrapper (no un modificador de color), igual
-              que el watermark de HomeContact — si no, el bloque accent del
-              logo (fill fijo, no currentColor) queda naranja pleno.
-              Solo desktop: en mobile el precio ya envuelve a 2 líneas y
-              choca contra la marca — el título ya identifica la card ahí. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute right-6 bottom-6 hidden text-bone opacity-25 md:block"
-            style={{ ['--color-accent']: 'currentColor' }}
-          >
-            <Logo className="h-40 w-40" />
-          </div>
-          <div className="relative z-10">
-            <p
-              data-cta-bit
-              className="mb-4 text-eyebrow uppercase text-bone/55"
-            >
-              {t('home.builderEyebrow')}
-            </p>
-            <p className="flex items-end justify-between gap-6">
-              <span
-                data-cta-bit
-                className="text-[clamp(2.2rem,6vw,5.5rem)] leading-[0.92] font-medium tracking-[-0.035em]"
-              >
-                {t('home.builderTitleBefore')}{' '}
-                <em
-                  data-cta-accent
-                  className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
-                >
-                  {t('home.builderTitleEm')}
-                </em>
-              </span>
-              <span
-                data-cta-arrow
-                aria-hidden="true"
-                className="mb-1 shrink-0 text-3xl transition-transform duration-300 group-hover:translate-x-2 md:text-4xl"
-              >
-                →
-              </span>
-            </p>
-            <p
-              data-cta-bit
-              className="mt-5 max-w-[48ch] text-body leading-relaxed text-bone/70"
-            >
-              {t('home.builderBody')}
-            </p>
-            <p
-              data-cta-bit
-              className="mt-4 text-eyebrow uppercase text-bone/50"
-            >
-              {t('home.builderPrices', {
-                base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
-                included: CUSTOM_BASE_SECTIONS,
-                extra: formatNextSectionPrice(
-                  CUSTOM_BASE_SECTIONS,
-                  false,
-                  locale,
-                  rate,
-                ),
-              })}
-            </p>
-          </div>
-        </Link>
+        <ZoneHeadline index="03" label={t('nav.lab')} zone="lab" />
 
         {/* LAB: el otro camino — no lo bajás, lo enchufás. */}
         <Link
@@ -1267,7 +1297,7 @@ export default function TemplatesIndex() {
                       </div>
                     ))}
                   </dl>
-                  <p className="mt-5 text-body font-medium tracking-[-0.02em]">
+                  <p className="mt-5 inline-flex w-fit items-center border border-accent/40 bg-accent/10 px-3 py-1.5 text-body-sm font-medium tracking-[-0.02em] text-accent">
                     {w.price}
                   </p>
                 </>

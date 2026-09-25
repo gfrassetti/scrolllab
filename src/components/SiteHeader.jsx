@@ -22,9 +22,35 @@ export default function SiteHeader({ solid = true }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutFailed, setLogoutFailed] = useState(false)
+  const [activeZone, setActiveZone] = useState(null)
   const location = useLocation()
   const t = useT()
   const builderCount = useCompositionCount()
+
+  // Scrollspy: en la home, Templates/Builder/Lab del nav se van iluminando
+  // según la zona (`[data-zone]`, marcado por <ZoneHeadline> en TemplatesIndex)
+  // que esté cruzando la franja superior del viewport. En cualquier otra
+  // ruta no hay zonas que observar, así que el nav queda neutro.
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      setActiveZone(null)
+      return undefined
+    }
+    const targets = Array.from(document.querySelectorAll('[data-zone]'))
+    if (!targets.length) return undefined
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveZone(entry.target.dataset.zone)
+        })
+      },
+      { rootMargin: '-15% 0px -50% 0px', threshold: 0 },
+    )
+    targets.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [location.pathname])
+
+  const zoneClass = (zone) => (activeZone === zone ? 'text-accent' : '')
 
   // Durante la carga usamos la pista de sesión previa para no invertir
   // el menú a mitad de camino. Al salir lo mantenemos hasta que la recarga
@@ -106,19 +132,23 @@ export default function SiteHeader({ solid = true }) {
 
         {/* Desktop / tablet */}
         <div className="hidden items-center gap-6 md:flex">
-          <Link to="/#templates" className={linkClass}>
+          <Link to="/#templates" className={`${linkClass} ${zoneClass('templates')}`}>
             {t('nav.templates')}
           </Link>
           <Link to="/#como-funciona" className={linkClass}>
             {t('nav.howItWorks')}
           </Link>
-          <Link to="/builder" className={linkClass} aria-label={builderLabel}>
+          <Link
+            to="/builder"
+            className={`${linkClass} ${zoneClass('builder')}`}
+            aria-label={builderLabel}
+          >
             {t('nav.builder')}
             {builderBadge}
           </Link>
           <Link
             to="/lab"
-            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-accent transition-colors ease-out-strong hover:text-ink md:text-xs"
+            className={`flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs ${zoneClass('lab')}`}
           >
             {t('nav.lab')}
             {showPlanBadge && (
@@ -198,7 +228,10 @@ export default function SiteHeader({ solid = true }) {
         <div className="border-t border-ink/15 bg-bone px-5 pb-6 pt-2 md:hidden">
           <ul className="divide-y divide-ink/10 text-[12px] uppercase tracking-[0.22em]">
             <li>
-              <Link to="/#templates" className="block py-3.5 hover:text-accent">
+              <Link
+                to="/#templates"
+                className={`block py-3.5 hover:text-accent ${zoneClass('templates')}`}
+              >
                 {t('nav.templates')}
               </Link>
             </li>
@@ -213,7 +246,7 @@ export default function SiteHeader({ solid = true }) {
             <li>
               <Link
                 to="/builder"
-                className="block py-3.5 hover:text-accent"
+                className={`block py-3.5 hover:text-accent ${zoneClass('builder')}`}
                 aria-label={builderLabel}
               >
                 {t('nav.builder')}
@@ -223,7 +256,7 @@ export default function SiteHeader({ solid = true }) {
             <li>
               <Link
                 to="/lab"
-                className="flex items-center justify-between py-3.5 text-accent hover:text-ink"
+                className={`flex items-center justify-between py-3.5 hover:text-accent ${zoneClass('lab')}`}
               >
                 {t('nav.lab')}
                 {showPlanBadge && (
