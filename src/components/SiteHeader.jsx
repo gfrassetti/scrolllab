@@ -171,9 +171,6 @@ export default function SiteHeader({ solid = true }) {
           <Link to="/#templates" className={`${linkClass} ${zoneClass('templates')}`}>
             {t('nav.templates')}
           </Link>
-          <Link to="/#como-funciona" className={linkClass}>
-            {t('nav.howItWorks')}
-          </Link>
           <Link
             to="/builder"
             className={`${linkClass} ${zoneClass('builder')}`}
@@ -199,6 +196,9 @@ export default function SiteHeader({ solid = true }) {
                 {planLabel}
               </span>
             )}
+          </Link>
+          <Link to="/#como-funciona" className={linkClass}>
+            {t('nav.howItWorks')}
           </Link>
           <CartPopover />
           {showAccount ? (
@@ -273,14 +273,6 @@ export default function SiteHeader({ solid = true }) {
             </li>
             <li>
               <Link
-                to="/#como-funciona"
-                className="block py-3.5 hover:text-accent"
-              >
-                {t('nav.howItWorks')}
-              </Link>
-            </li>
-            <li>
-              <Link
                 to="/builder"
                 className={`block py-3.5 hover:text-accent ${zoneClass('builder')}`}
                 aria-label={builderLabel}
@@ -308,6 +300,14 @@ export default function SiteHeader({ solid = true }) {
                     {used}/{planQuotaLabel}
                   </span>
                 )}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/#como-funciona"
+                className="block py-3.5 hover:text-accent"
+              >
+                {t('nav.howItWorks')}
               </Link>
             </li>
             {showAccount ? (
