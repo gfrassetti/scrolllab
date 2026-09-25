@@ -1,14 +1,16 @@
-import { lazy, Suspense, useLayoutEffect } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import TemplatesIndex from './pages/TemplatesIndex'
 import LicensePage from './pages/LicensePage'
 import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
 import { AuthProvider } from './lib/auth'
 import { PlanProvider } from './lib/plan'
+import { captureUtmFromUrl } from './lib/utm'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
 import DocumentHead from './components/DocumentHead'
+import WelcomeCouponSync from './components/WelcomeCouponSync'
 import ChunkErrorBoundary from './components/ChunkErrorBoundary'
 import './lib/theme'
 
@@ -23,6 +25,9 @@ const UnityPage = lazy(() => import('./pages/UnityPage'))
 const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
+const SignalPage = lazy(() => import('./pages/SignalPage'))
+const MeridianPage = lazy(() => import('./pages/MeridianPage'))
+const ProductPage = lazy(() => import('./pages/ProductPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
@@ -67,6 +72,12 @@ function Loader() {
 }
 
 export default function App() {
+  // Los utm_* de un video o un post se guardan para saber qué canal trae cuentas
+  // (viajan con el cupón de bienvenida cuando alguien entra).
+  useEffect(() => {
+    captureUtmFromUrl()
+  }, [])
+
   return (
     <I18nProvider>
       <AuthProvider>
@@ -74,6 +85,7 @@ export default function App() {
           <BrowserRouter>
             <HomeCursor />
             <DocumentHead />
+            <WelcomeCouponSync />
             <ScrollToTop />
             <CartToast />
             <ChunkErrorBoundary>
@@ -109,6 +121,18 @@ export default function App() {
                       )
                     }
                   />
+                  {/* Unlisted preview: reachable in prod by direct URL for
+                      review, but not linked from the home catalog, the
+                      builder palette, or the sitemap — see
+                      docs/reference-analysis/signal.md and public/robots.txt. */}
+                  <Route path="/templates/signal" element={<SignalPage />} />
+                  <Route path="/templates/meridian" element={<MeridianPage />} />
+                  {/* Páginas de producto para Google (src/lib/productPages.js). */}
+                  <Route
+                    path="/plantillas"
+                    element={<Navigate to="/#templates" replace />}
+                  />
+                  <Route path="/plantillas/:sku" element={<ProductPage />} />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />

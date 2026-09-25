@@ -3,18 +3,28 @@ import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import {
-  cartLinePriceArs,
-  cartLinePriceUsd,
-  takeCheckoutIntent,
-  useCart,
-} from '../lib/cart'
+import { priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
+import { formatCouponDate } from '../lib/coupon'
+import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { startCheckout } from '../lib/startCheckout'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
+
+/**
+ * Cuando el servidor rechaza el cupón al pagar: status de la API → texto (el
+ * servidor habla español; la UI puede estar en inglés). Lo demás cae en el genérico.
+ */
+const COUPON_ERRORS = {
+  409: 'cart.couponErrUsed',
+  410: 'cart.couponErrExpired',
+  422: 'cart.couponErrFirst',
+}
+
+/** El cupón existe pero es de otro mail (el `code` lo manda el servidor). */
+const COUPON_OTHER_ACCOUNT = 'coupon_other_account'
 
 export default function CartPage() {
   const { user, loading: authLoading, hadSession } = useAuth()
@@ -30,6 +40,15 @@ export default function CartPage() {
   const { t, locale } = useI18n()
   const showUsd = locale === 'en'
 
+  // Cupón de bienvenida: se aplica solo si hay sesión (lo pide WelcomeCouponSync al
+  // entrar). Antes de retomar un pago pendiente esperamos su respuesta: si no, el
+  // pago saldría sin descuento.
+  const welcome = useWelcomeCoupon((s) => s.coupon)
+  const welcomeStatus = useWelcomeCoupon((s) => s.status)
+  const dropWelcome = useWelcomeCoupon((s) => s.drop)
+  const coupon = user ? welcome : null
+  const couponReady = !looksLoggedIn || welcomeStatus === 'ready'
+
   useEffect(() => {
     api
       .catalog()
@@ -41,15 +60,13 @@ export default function CartPage() {
       .catch(() => {})
   }, [])
 
-  const lines = items.map((item) => ({
-    ...item,
-    unit_price: showUsd
-      ? cartLinePriceUsd(item, catalog)
-      : cartLinePriceArs(item, catalog, rate),
-    currency_id: showUsd ? 'USD' : 'ARS',
-  }))
-
-  const total = lines.reduce((s, l) => s + (l.unit_price || 0), 0)
+  const { lines, total, payable, discount } = priceCartLines({
+    items,
+    catalog,
+    rate,
+    showUsd,
+    coupon,
+  })
   const formatLine = (amount) => {
     if (amount == null) return '—'
     return showUsd ? formatUsd(amount) : formatArs(amount)
@@ -59,23 +76,34 @@ export default function CartPage() {
     setBusy(true)
     setError('')
     try {
-      const result = await startCheckout({ items, user, navigate })
+      const result = await startCheckout({
+        items,
+        user,
+        navigate,
+        couponCode: coupon?.code,
+      })
       // redirect a MP: dejamos busy. login: liberamos por si vuelve con atrás.
       if (result !== 'redirect') setBusy(false)
     } catch (err) {
-      setError(err.message)
+      if (coupon && (COUPON_ERRORS[err.status] || err.code === COUPON_OTHER_ACCOUNT || err.status === 404)) {
+        // El cupón dejó de valer (lo usó en otra pestaña, venció…): se saca y se avisa.
+        dropWelcome()
+        setError(t(COUPON_ERRORS[err.status] || 'cart.couponErrGeneric'))
+      } else {
+        setError(err.message)
+      }
       setBusy(false)
     }
-  }, [items, navigate, user])
+  }, [items, navigate, user, coupon, dropWelcome, t])
 
   // Volvió del login con el pago ya pedido: sigue derecho a Mercado Pago.
   const resumed = useRef(false)
   useEffect(() => {
-    if (resumed.current || !user || items.length === 0) return
+    if (resumed.current || !user || items.length === 0 || !couponReady) return
     if (!takeCheckoutIntent()) return
     resumed.current = true
     checkout()
-  }, [user, items.length, checkout])
+  }, [user, items.length, checkout, couponReady])
 
   return (
     <div className="min-h-svh bg-bone text-ink">
@@ -127,7 +155,18 @@ export default function CartPage() {
                         </p>
                         {line.unit_price != null && (
                           <p className="mt-1 text-sm text-ink/70">
-                            {formatLine(line.unit_price)}
+                            {line.discounted_price != null ? (
+                              <>
+                                <span className="text-ink/40 line-through">
+                                  {formatLine(line.unit_price)}
+                                </span>{' '}
+                                <span className="text-ink">
+                                  {formatLine(line.discounted_price)}
+                                </span>
+                              </>
+                            ) : (
+                              formatLine(line.unit_price)
+                            )}
                           </p>
                         )}
                         {previewHref && (
@@ -154,8 +193,22 @@ export default function CartPage() {
 
             <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
               <p className="text-sm">
+                {coupon && discount > 0 ? (
+                  <>
+                    <span className="block text-ink/60">
+                      {t('cart.couponSubtotal')}: {formatLine(total)}
+                    </span>
+                    <span data-coupon-discount className="mb-2 block text-accent-ink">
+                      {t('cart.couponDiscount', { percent: coupon.percent })}
+                      {coupon.expiresAt
+                        ? ` · ${t('cart.couponUntil', { date: formatCouponDate(coupon.expiresAt, locale) })}`
+                        : ''}
+                      : −{formatLine(discount)}
+                    </span>
+                  </>
+                ) : null}
                 {t('common.estimatedTotal')}:{' '}
-                <strong>{formatLine(total)}</strong>
+                <strong>{formatLine(payable)}</strong>
                 <span className="mt-2 block text-xs text-ink/55">
                   {t('cart.trustNote')}
                 </span>

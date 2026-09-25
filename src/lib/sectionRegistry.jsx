@@ -82,6 +82,20 @@ import OrbitRing from '../components/sections/atrium/OrbitRing'
 import StatField from '../components/sections/atrium/StatField'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import FilmScroll from '../components/sections/plum/FilmScroll'
+import MeridianHero from '../components/sections/meridian/Hero'
+import MeridianConcept from '../components/sections/meridian/Concept'
+import MeridianGallerySlider from '../components/sections/meridian/GallerySlider'
+import MeridianLocation from '../components/sections/meridian/Location'
+import MeridianPanorama from '../components/sections/meridian/Panorama'
+import MeridianInterior from '../components/sections/meridian/Interior'
+import MeridianAmenities from '../components/sections/meridian/Amenities'
+import MeridianMasterplan from '../components/sections/meridian/Masterplan'
+import MeridianContact from '../components/sections/meridian/Contact'
+import MeridianFooter from '../components/sections/meridian/Footer'
+import NavSignal from '../components/sections/signal/NavSignal'
+import HeroSignal from '../components/sections/signal/HeroSignal'
+import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
+import FooterSignal from '../components/sections/signal/FooterSignal'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 import { isBuilderHiddenSku } from './pricing.js'
@@ -250,6 +264,36 @@ const allModels = [
     wrapperClass: 'bg-plum-void text-plum-mist',
     sections: [
       { id: 'plum/FilmScroll', name: 'Film Scroll', kind: 'hero', component: FilmScroll, blurb: 'The whole page as a pre-rendered webp film — a JSON manifest (chapters of frame folders + text beats) drives a fixed canvas that scroll plays frame by frame' },
+    ],
+  },
+  {
+    id: 'meridian',
+    name: 'MERIDIAN',
+    accent: '#8f7a5e',
+    wrapperClass: 'bg-[#dfd8cf] text-[#2a2622]',
+    sections: [
+      { id: 'meridian/Hero', name: 'Hero', kind: 'hero', component: MeridianHero, blurb: 'Scroll-scrubbed aerial flythrough with three crossfading text states — wordmark, value quote, invite + CTA. Video/imagery ship as placeholders: swap the frames folder in the downloaded source, not editable from the builder.' },
+      { id: 'meridian/Concept', name: 'Concept', kind: 'section', component: MeridianConcept, blurb: 'Centred kicker + one large serif statement that reveals word by word; the hero above parallaxes away as it rises.' },
+      { id: 'meridian/GallerySlider', name: 'Gallery slider', kind: 'section', component: MeridianGallerySlider, blurb: 'Full-viewport photo slider with a stretch-and-push mask transition, drag / arrows and a counter.' },
+      { id: 'meridian/Location', name: 'Location', kind: 'section', component: MeridianLocation, blurb: 'Parallax map with hoverable pins that draw a dotted route from the HQ, plus a draggable row of distance cards that reveal their photo with a circle wipe.' },
+      { id: 'meridian/Panorama', name: 'Panorama', kind: 'section', component: MeridianPanorama, blurb: 'Full-width parallax photo with a big serif title and a CTA wrapped in pulsing rings.' },
+      { id: 'meridian/Interior', name: 'Interior', kind: 'section', component: MeridianInterior, blurb: 'Full-viewport slider driven by a link menu, mask transition, and pulsing hotspots that open tooltips.' },
+      { id: 'meridian/Amenities', name: 'Amenities', kind: 'section', component: MeridianAmenities, blurb: 'Parallax headline and a draggable row of ruled cards: click the + and the photo collapses into a paragraph.' },
+      { id: 'meridian/Masterplan', name: 'Masterplan', kind: 'section', component: MeridianMasterplan, blurb: 'Full-width aerial with pulsing numbered dots; hover one and the property outline is drawn with a tooltip (rooms, area, unit name).' },
+      { id: 'meridian/Contact', name: 'Contact', kind: 'section', component: MeridianContact, blurb: 'Large serif headline beside an underline-field form with floating labels, inline validation and a filling submit button.' },
+      { id: 'meridian/Footer', name: 'Footer', kind: 'footer', component: MeridianFooter, blurb: 'About 80% of the viewport: contact block, big phone and email, monogram, address with map button and socials, hairline legal row.' },
+    ],
+  },
+  {
+    id: 'signal',
+    name: 'SIGNAL',
+    accent: '#2fe0ff',
+    wrapperClass: 'bg-signal-ink text-signal-paper',
+    sections: [
+      { id: 'signal/NavSignal', name: 'Nav Signal', kind: 'nav', component: NavSignal, blurb: 'Minimal fixed header · full-screen mobile menu' },
+      { id: 'signal/HeroSignal', name: 'Hero Signal', kind: 'hero', component: HeroSignal, blurb: 'Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer' },
+      { id: 'signal/PixelRevealGrid', name: 'Pixel Reveal Grid', kind: 'section', component: PixelRevealGrid, blurb: 'Case-study cards behind a tile grid that dissolves on scroll, DOM only' },
+      { id: 'signal/FooterSignal', name: 'Footer Signal', kind: 'footer', component: FooterSignal, blurb: 'Closing CTA with an oversized wordmark' },
     ],
   },
   {

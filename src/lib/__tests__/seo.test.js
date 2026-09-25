@@ -19,10 +19,10 @@ describe('seoForPath', () => {
     assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/builder')
   })
 
-  it('las demos de templates se indexan con canónico propio', () => {
+  it('las demos de templates quedan noindex; /plantillas/:sku es la que indexa', () => {
     const seo = seoForPath('/templates/comic')
-    assert.match(seo.robots, /^index, follow/)
+    assert.match(seo.robots, /^noindex, follow/)
     assert.match(seo.robots, /noai, noimageai/)
-    assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/templates/comic')
+    assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/')
   })
 })

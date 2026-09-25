@@ -23,6 +23,7 @@ export function checkoutPayloadFromItems(items) {
  *   user: unknown,
  *   navigate: (to: string) => void,
  *   loginNext?: string,
+ *   couponCode?: string,
  * }} opts
  * @returns {Promise<'login' | 'redirect'>}
  */
@@ -31,6 +32,7 @@ export async function startCheckout({
   user,
   navigate,
   loginNext = '/cart',
+  couponCode,
 }) {
   const payload = checkoutPayloadFromItems(items)
   if (payload.length === 0) {
@@ -45,7 +47,7 @@ export async function startCheckout({
     return 'login'
   }
 
-  const data = await api.checkout(payload)
+  const data = await api.checkout(payload, couponCode)
   if (!data?.init_point) {
     throw new Error('Checkout sin init_point')
   }

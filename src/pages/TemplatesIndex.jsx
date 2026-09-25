@@ -28,6 +28,7 @@ import {
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
+import TextMorph from '../components/TextMorph'
 
 const TEMPLATE_META = [
   {
@@ -111,6 +112,15 @@ const TEMPLATE_META = [
     tagline: 'mass and measure',
     palette: ['#f4f1ea', '#111111', '#111111'],
   },
+  {
+    id: '10',
+    sku: 'meridian',
+    name: 'MERIDIAN',
+    path: '/templates/meridian',
+    category: 'REAL ESTATE',
+    tagline: 'scroll the site',
+    palette: ['#dfd8cf', '#2a2622', '#8f7a5e'],
+  },
 ]
 
 function catalogCoverSrc(sku) {
@@ -189,9 +199,17 @@ export default function TemplatesIndex() {
     }
   }
 
+  // Ordered by list price, cheapest first (stable: ties keep their order
+  // in TEMPLATE_META). The displayed "NN /" number follows the position, so
+  // a price change reorders the catalog without anyone renumbering by hand.
+  // To show the most expensive first, flip the comparison below.
   const templates = useMemo(
     () =>
-      TEMPLATE_META.map((meta) => ({
+      [...TEMPLATE_META]
+        .map((meta, i) => ({ meta, i, price: templatePriceUsd(meta.sku) ?? Infinity }))
+        .sort((a, b) => a.price - b.price || a.i - b.i)
+        .map(({ meta }, pos) => ({ ...meta, id: String(pos + 1).padStart(2, '0') }))
+        .map((meta) => ({
         ...meta,
         vibe: t(`templates.${meta.sku}.vibe`),
         tags: t(`templates.${meta.sku}.tags`),
@@ -719,6 +737,15 @@ export default function TemplatesIndex() {
                   t('home.heroLine1'),
                   {
                     text: t('home.heroLine2'),
+                    node: (
+                      <TextMorph
+                        align="start"
+                        words={[
+                          t('home.heroLine2'),
+                          ...t('home.heroWords').split('|'),
+                        ]}
+                      />
+                    ),
                     className: 'font-display font-normal italic text-accent',
                   },
                 ]}
@@ -894,6 +921,15 @@ export default function TemplatesIndex() {
                       ? template.tags.join(' · ')
                       : template.tags}
                   </p>
+
+                  {sellable && !soon ? (
+                    <Link
+                      to={`/plantillas/${template.sku}`}
+                      className="mt-4 inline-block text-eyebrow uppercase text-ink/60 underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent"
+                    >
+                      {t('home.viewDetails')}
+                    </Link>
+                  ) : null}
 
                   {soon ? (
                     <p className="mt-8 text-eyebrow uppercase text-ink/40">

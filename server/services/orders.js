@@ -11,6 +11,7 @@ import { HttpError } from '../validation.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
 import { sendOrderReceiptOnce, sendOrderAdminNotifyOnce } from './email.js'
+import { redeemCouponForOrder } from './coupons.js'
 
 const packingLocks = new Map()
 
@@ -101,7 +102,21 @@ export async function ensureOrderZip(order, user, config) {
  * Devuelve { order, created: boolean } donde created=false si ya estaba paga.
  */
 export async function markOrderPaid({ orderId, mpPaymentId }) {
-  return db.markOrderPaidAtomic({ orderId, mpPaymentId })
+  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId })
+  // Canjear el cupón es contabilidad: si falla no puede frenar lo ya pagado.
+  if (result.created && result.order?.couponCode) {
+    try {
+      const { redeemed } = await redeemCouponForOrder(result.order)
+      if (!redeemed) {
+        console.warn(
+          `Cupón ${result.order.couponCode} ya estaba canjeado (order=${orderId})`,
+        )
+      }
+    } catch (err) {
+      console.error('Coupon redeem failed', err)
+    }
+  }
+  return result
 }
 
 /**

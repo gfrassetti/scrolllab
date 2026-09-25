@@ -14,22 +14,28 @@ export const TEMPLATE_PRICES_USD = {
   unity: 189,
   ratio: 269,
   atrium: 189,
+  meridian: 379,
 }
 
-/** En catálogo se ven grayed-out; no se venden ni tienen demo pública. */
+/**
+ * En catálogo se ven grayed-out; no se venden ni tienen demo pública.
+ */
 export const COMING_SOON_SKUS = ['ratio']
 
 /**
- * En el repo, no en el marketplace: sin card en home, ruta solo en `npm run dev`.
+ * Sin card en home, sin sitemap/product pages — pero la ruta SÍ vive en
+ * producción (no gateada a `npm run dev`), alcanzable solo por quien ya
+ * conoce la URL. Mismo patrón que SIGNAL (ver public/robots.txt).
  * PLUM está en scaffolding (secuencia de frames scroll-scrubbed).
+ * SIGNAL está en scaffolding (hero word-cycle + pixel-reveal grid).
  */
-export const LOCAL_ONLY_SKUS = ['ratio', 'plum']
+export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal']
 
 /**
- * Modelos que no entran a la paleta del builder.
- * RATIO y PLUM siguen en obra.
+ * Modelos que no entran a la paleta PÚBLICA del builder (la que ve
+ * cualquier visitante en /builder). RATIO, PLUM y SIGNAL siguen en obra.
  */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum']
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
@@ -49,11 +55,11 @@ export function isBuilderHiddenSku(sku) {
 
 /**
  * Composición del builder: base por tramo + adicional por sección extra.
- * Una composición del tamaño de un template (10 secciones) queda en 265 USD.
+ * Una composición del tamaño de un template (10 secciones) queda en 419 USD.
  * El piso tiene que superar al template más caro en venta (no cuenta
  * COMING_SOON_SKUS — ver la validación en scripts/check-consistency.mjs).
  */
-export const CUSTOM_BASE_PRICE_USD = 235
+export const CUSTOM_BASE_PRICE_USD = 389
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 15
 /** Tope de secciones de una receta — espejo de `maxRecipeSections`. */
@@ -114,6 +120,20 @@ export function bundleDiscountPct() {
 export function arsFromUsd(usd, rate) {
   if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null
   return Math.ceil((usd * rate) / ARS_ROUNDING) * ARS_ROUNDING
+}
+
+/**
+ * Cupón de bienvenida: el mismo porcentaje que aplica el servidor
+ * (server/catalog.js; `npm run check` falla si se despegan). Solo primera compra.
+ */
+export const WELCOME_COUPON_PERCENT = 10
+
+/** Precio en pesos con cupón: la misma cuenta que `discountedArsFromUsd` del servidor. */
+export function discountedArsFromUsd(usd, rate, percent) {
+  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null
+  if (!Number.isFinite(percent) || percent < 0 || percent >= 100) return null
+  const cents = Math.round(usd * (100 - percent))
+  return Math.ceil((cents * rate) / (100 * ARS_ROUNDING)) * ARS_ROUNDING
 }
 
 export function formatArs(amount) {

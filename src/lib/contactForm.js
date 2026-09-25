@@ -12,6 +12,10 @@ const LIMITS = {
   messageMin: 12,
 }
 
+export function isValidEmail(email) {
+  return EMAIL_RE.test(String(email ?? ''))
+}
+
 /** Strip tags, control chars, and zero-width junk. */
 export function sanitizePlainText(raw, maxLen) {
   let value = String(raw ?? '')

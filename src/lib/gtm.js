@@ -117,6 +117,11 @@ function markTrackedPurchase(id) {
   }
 }
 
+/** Cupón de bienvenida creado para una cuenta nueva (evento recomendado de GA4: generate_lead). */
+export function trackLead({ source } = {}) {
+  gtmPush({ event: 'generate_lead', lead_source: String(source || 'home') })
+}
+
 /** Una sola vez por orden (StrictMode / modal + confirm no duplican). */
 export function trackPurchase(order) {
   const id = purchaseId(order)

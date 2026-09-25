@@ -228,6 +228,123 @@ recibe una `Idempotency-Key`, por lo que los reintentos no duplican el correo.
 
 El email es un comprobante/detalle de compra, no una factura fiscal de ARCA.
 
+## Tarjetas para compartir (og por demo) — front en Vercel
+
+El SPA devuelve el mismo `index.html` en toda ruta, y Facebook / LinkedIn / X /
+WhatsApp / Slack no ejecutan JS: sin esto, cualquier demo compartida mostraba la
+tarjeta de la home.
+
+- `npm run gen:og` genera `public/og/<sku>.jpg` (1200×630, una por demo pública)
+  con Chromium + Google Fonts (necesita red). **Se commitean**: si falta alguna
+  el build falla a propósito. `npm run gen:og nocturne` regenera una sola.
+- `npm run build` corre `vite build` y después `scripts/gen-share-pages.mjs`, que
+  emite `dist/templates/<sku>/index.html` y `dist/builder/index.html`: el mismo
+  HTML del build con sus tags `og:*` / `twitter:*` (lógica en `src/lib/sharePages.js`).
+  Las demos siguen `noindex` con canonical a la home; solo cambian las tarjetas.
+- Las rutas salen de `publicDemoSkus()` (`src/lib/pricing.js`): al sumar un
+  modelo, agregá su `templates.<sku>` en `en.json`, su poster en `public/catalog/`
+  y corré `npm run gen:og <sku>`.
+- Vercel da prioridad al filesystem sobre los rewrites, y con `trailingSlash`
+  sin definir `/x` sirve `x/index.html` sin redirigir. `vite preview` **no** lo
+  hace (cae al SPA sin barra final): verificalo en un preview de Vercel con
+  `curl -s https://<preview>/templates/nocturne | grep og:image`.
+- Para revisar una tarjeta en las redes: [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/),
+  [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/). Si ya
+  compartieron el link antes, hay que pedir el re-scrape.
+- Vercel sí sirve `/templates/<sku>` sin barra final desde el archivo estático
+  (verificado en producción el 2026-09-18: `og:image` de CHAPTERS = `/og/chapters.jpg`).
+
+## Páginas de producto (SEO) — `/plantillas/<sku>`
+
+Una página por template en venta, en español, para que Google los encuentre por
+lo que hacen y lo que cuestan. Las demos (`/templates/<sku>`) siguen `noindex`:
+son pantalla completa con textos de relleno.
+
+- El texto sale de `templates.<sku>` y `builder.sections.<sku>` de `es.json` más
+  `PRODUCT_COPY` en `src/lib/productPages.js`. Ese objeto lo leen la página de
+  React (`src/pages/ProductPage.jsx`), el HTML del build y los tests, así que no
+  se despegan. Las secciones son opcionales (COMIC no está en el builder y sale sin
+  esa lista).
+- `npm run build` emite `dist/plantillas/<sku>/index.html` con title, descripción,
+  canonical, tarjeta `og/<sku>.jpg`, datos `schema.org/Product` (precio de lista en
+  USD, el mismo que muestra la página) y el contenido dentro de `#root`, fuera de
+  pantalla: lo lee quien no ejecuta JS y React lo reemplaza al arrancar.
+- El cuerpo va siempre en español (lo que se indexa), aunque el navegador esté en
+  inglés: Googlebot pide en inglés y, si no, indexaría la versión en inglés.
+- Al sumar un template a la venta: agregá su URL en `public/sitemap.xml` y en el
+  `ItemList` de `index.html`. `npm test` (`productPages.test.js`) falla si falta,
+  y también si falta su `public/og/<sku>.jpg` o `public/catalog/<sku>.jpg`.
+  `robots.txt` ya cierra `/plantillas/` a los bots de IA, como el resto del catálogo.
+- Una sola vez: en [Google Search Console](https://search.google.com/search-console)
+  agregar `https://www.scrolllab.com.ar` (verificación por DNS, que está en Vercel)
+  y enviar `sitemap.xml`. Sin eso Google igual llega por los links de la home, pero
+  más lento y sin decirte con qué búsquedas te encuentran.
+- Los resultados tardan semanas o meses. Mirar en Search Console, a las 4 a 6
+  semanas, qué búsquedas muestran las páginas antes de tocar los textos.
+
+## Cupón de bienvenida (por cuenta, sin formulario)
+
+Quien entra con su cuenta de Google y todavía no compró recibe un cupón del 10%
+para su **primera compra**. No hay formulario en el sitio: el cupón sale de la
+cuenta (antes había una franja en la home que pedía el mail; se sacó). Sin
+newsletters: el único mail que sale es el cupón, una sola vez.
+
+**Flujo**
+- Al haber sesión, el front (`WelcomeCouponSync`, montado en `App.jsx`) pide
+  `POST /api/coupons/welcome` (con sesión; 120 por hora **por usuario**, no por IP,
+  porque se pide en cada carga de página: si se cortara, el comprador perdería el
+  descuento sin enterarse). Manda el idioma y los `utm_*` guardados.
+- La primera vez el servidor crea el cupón en la colección `leads` (en dev
+  `storage/db/leads.json`, `source: "account"`): código `SL-XXXXXX`, uno por mail,
+  vence a los 14 días, un solo uso, y con `EMAIL_ENABLED=true` sale **un mail**
+  por Resend diciendo que el descuento ya está en la cuenta y se aplica solo (el
+  código va en el pie, solo de referencia). Las siguientes veces devuelve el mismo
+  cupón, sin mail.
+- Un cliente que ya compró (`eligible: false`) no recibe cupón ni queda anotado.
+- El carrito (`CartPage.jsx`) lo aplica solo si hay sesión y muestra una línea con
+  el descuento y el vencimiento; la cuenta (`AccountPage.jsx`) lo menciona en una
+  línea. Sin sesión no se muestra nada. No hay campo para escribir códigos.
+- `POST /api/checkout` recibe **solo el código**. El servidor lo revalida (existe,
+  no usado, no vencido, es de ese mail y el usuario no tiene compras pagas) y
+  descuenta sobre el precio de lista en USD (`discountedArsFromUsd`, mismo
+  redondeo que `arsFromUsd`). Así el monto de la preference de Mercado Pago,
+  `order.total` y lo que compara el webhook coinciden. El cliente nunca manda un
+  precio ni un %.
+- Se canjea cuando la orden pasa a `paid` (`markOrderPaid`): webhook, confirm o
+  mock. Canjear es contabilidad: si falla, no frena la entrega. Al confirmar el
+  pago el front también borra el cupón guardado.
+- Aplica a modelos, bundle y composiciones del builder. No a LAB.
+- **Es personal**: el cupón se crea con el mail de la cuenta, así que solo vale
+  pagando con esa cuenta (los puntos y la `+etiqueta` de Gmail cuentan como el
+  mismo mail). Con otra cuenta el checkout responde 403 con
+  `code: coupon_other_account`.
+- El endpoint público `POST /api/leads` **ya no existe** (servía para anotar
+  cualquier mail y mandarle un cupón a un tercero). Los cupones que se generaron
+  con la franja siguen valiendo: al entrar con esa cuenta se devuelve el mismo
+  cupón, sin mail nuevo.
+
+**Ajustes**: constantes, no env. `WELCOME_COUPON_PERCENT`, `WELCOME_COUPON_DAYS` y
+`WELCOME_COUPON_BOUND_TO_EMAIL` en `server/catalog.js`; el porcentaje está
+espejado en `src/lib/pricing.js` y `npm run check` falla si se despegan.
+
+**Medición**
+- `npm run leads:export > leads.csv` saca la lista, con el cupón, si lo canjearon
+  y de qué canal llegó (`utmSource`, `utmMedium`, `utmCampaign`: los `utm_*` de la
+  primera visita, guardados 30 días, que viajan con el pedido del cupón).
+  `npm run leads:stats` resume cuentas y canjes por canal y por campaña. Ambos
+  usan la misma base que el server.
+- Brevo es **opcional** y no se usa: el alta ya no sube sola. `npm run leads:sync`
+  sube a mano los pendientes si algún día se configura `BREVO_API_KEY`.
+- GTM: el front empuja `generate_lead` (con `lead_source: "account"`) al dataLayer
+  cuando se crea el cupón de una cuenta nueva. Falta el trigger + tag de GA4 en el
+  contenedor.
+- La política de privacidad (es/en) dice que se guarda el cupón de bienvenida
+  (mail, cuándo, canal y si lo usaste) y que se manda por mail.
+
+**Probar con Mercado Pago real**: los tests y la prueba en el navegador usan el
+pago simulado. Antes de promocionarlo, hacé una compra de prueba con cupón con
+credenciales de prueba de MP y mirá que el monto cobrado sea el descontado.
+
 ## Notas
 
 - Una sola réplica de API hasta tener storage compartido (S3/R2) — el volume de Railway no se comparte entre instancias.

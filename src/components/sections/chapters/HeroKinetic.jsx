@@ -25,8 +25,17 @@ export default function HeroKinetic({
         mask: 'chars',
       })
 
+      // La máscara mide lo que la línea (leading .82) y cortaba la cola de la "y"
+      // en cursiva ("story" se leía "storv"). Se la agranda hacia abajo y el
+      // margen negativo deja el layout igual; 135% mantiene las letras
+      // escondidas al arrancar.
+      for (const mask of split.masks || []) {
+        mask.style.paddingBottom = '0.2em'
+        mask.style.marginBottom = '-0.2em'
+      }
+
       gsap.from(split.chars, {
-        yPercent: 115,
+        yPercent: 135,
         duration: 1.3,
         ease: 'power4.out',
         stagger: { each: 0.03 },

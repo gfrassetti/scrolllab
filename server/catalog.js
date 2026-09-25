@@ -124,6 +124,13 @@ export const PRODUCTS = {
     unit_price_usd: 189,
     currency_id: 'ARS',
   },
+  meridian: {
+    sku: 'meridian',
+    title: 'MERIDIAN — template',
+    description: 'Modelo para desarrollos inmobiliarios, complejos de cabañas o departamentos, desarrolladoras y resorts: hero de flythrough aéreo scrubeado por scroll, menú drawer, sliders con efecto mask, mapa con pines interactivos e interiores con hotspots (código fuente).',
+    unit_price_usd: 379,
+    currency_id: 'ARS',
+  },
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',
@@ -135,7 +142,7 @@ export const PRODUCTS = {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 235,
+    unit_price_usd: 389,
     currency_id: 'ARS',
   },
 }
@@ -199,6 +206,34 @@ export function arsFromUsd(usd, rate) {
     throw new Error('Conversión USD→ARS inválida')
   }
   return Math.ceil((usd * rate) / ARS_ROUNDING) * ARS_ROUNDING
+}
+
+/**
+ * Cupón de bienvenida: un solo uso por mail y solo en la primera compra. El
+ * porcentaje es el que muestra la home, espejado en src/lib/pricing.js
+ * (`npm run check` falla si se despegan).
+ */
+export const WELCOME_COUPON_PERCENT = 10
+export const WELCOME_COUPON_DAYS = 14
+/**
+ * El cupón es personal: solo lo canjea quien compra con la cuenta de Google de
+ * ese mail. En `false` es un código al portador y lo usa el primero que pague.
+ */
+export const WELCOME_COUPON_BOUND_TO_EMAIL = true
+
+/**
+ * Precio en pesos con cupón: descuenta en USD (en centavos enteros) y redondea
+ * igual que `arsFromUsd`, así el total de la orden es la suma de sus líneas.
+ */
+export function discountedArsFromUsd(usd, rate, percent) {
+  if (!Number.isFinite(percent) || percent < 0 || percent >= 100) {
+    throw new Error('Descuento inválido')
+  }
+  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) {
+    throw new Error('Conversión USD→ARS inválida')
+  }
+  const cents = Math.round(usd * (100 - percent))
+  return Math.ceil((cents * rate) / (100 * ARS_ROUNDING)) * ARS_ROUNDING
 }
 
 export function recipeSectionId(entry) {
