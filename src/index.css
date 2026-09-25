@@ -472,6 +472,19 @@ body {
   height: 0 !important;
 }
 
+/* Chrome del market: ScrollProgress reemplaza la barra nativa (la clase la
+   pone/saca ese componente al montar/desmontar — solo vive en el market,
+   no en los demos de templates). */
+html.hide-native-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+html.hide-native-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Menú Turn into: portal en body, siempre 100% opaco */
 .playable-block-menu {
   background-color: #ffffff !important;

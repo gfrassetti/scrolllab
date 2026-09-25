@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { SITE_NAME } from '../lib/site'
 import { useAuth } from '../lib/auth'
@@ -6,11 +6,40 @@ import { usePlan } from '../lib/plan'
 import { useCompositionCount } from '../hooks/useCompositionCount'
 import { useT } from '../i18n'
 import { resetBrandSplash } from './BrandSplash'
+import { gsap } from '../lib/gsap'
 import CartPopover from './CartPopover'
 import UserMenu from './UserMenu'
 import Logo from './Logo'
+import ScrollProgress from './ScrollProgress'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
+
+/**
+ * Reensambla el logo (barras + accent) al clic, mismo lenguaje que la
+ * intro del hero (TemplatesIndex) pero en miniatura y replayable. `host`
+ * es el elemento que envuelve el <Logo> (busca sus data-logo-bar/-accent).
+ */
+function playLogoAssembly(host) {
+  if (!host) return
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  const bars = gsap.utils.toArray(host.querySelectorAll('[data-logo-bar]'))
+  const accent = host.querySelector('[data-logo-accent]')
+  if (!bars.length && !accent) return
+
+  gsap.killTweensOf([...bars, accent].filter(Boolean))
+  if (bars[0]) gsap.set(bars[0], { x: -8, opacity: 0 })
+  if (bars[1]) gsap.set(bars[1], { x: 10, opacity: 0 })
+  if (bars[2]) gsap.set(bars[2], { y: 6, opacity: 0 })
+  if (accent) {
+    gsap.set(accent, { scale: 0.5, opacity: 0, transformOrigin: '50% 50%' })
+  }
+
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+  if (bars[0]) tl.to(bars[0], { x: 0, opacity: 1, duration: 0.4 }, 0)
+  if (bars[1]) tl.to(bars[1], { x: 0, opacity: 1, duration: 0.4 }, 0.05)
+  if (bars[2]) tl.to(bars[2], { y: 0, opacity: 1, duration: 0.4 }, 0.1)
+  if (accent) tl.to(accent, { scale: 1, opacity: 1, duration: 0.3 }, 0.14)
+}
 
 /**
  * Chrome compartido del market (home, cart, account, login…).
@@ -23,6 +52,7 @@ export default function SiteHeader({ solid = true }) {
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutFailed, setLogoutFailed] = useState(false)
   const [activeZone, setActiveZone] = useState(null)
+  const logoHostRef = useRef(null)
   const location = useLocation()
   const t = useT()
   const builderCount = useCompositionCount()
@@ -116,14 +146,20 @@ export default function SiteHeader({ solid = true }) {
       : t('lab.planActiveState', { plan: planLabel, used, quota: planQuotaLabel })
 
   return (
-    <header
-      className={`sticky top-0 z-50 border-b border-ink/15 ${
-        solid ? 'bg-bone/90 backdrop-blur-sm' : ''
-      }`}
-    >
+    <Fragment>
+      {/* Fuera del <header>: backdrop-blur-sm crea containing block para
+          fixed y le achicaría el alto a la barra al svh del header. */}
+      <ScrollProgress />
+      <header
+        className={`sticky top-0 z-50 border-b border-ink/15 ${
+          solid ? 'bg-bone/90 backdrop-blur-sm' : ''
+        }`}
+      >
       <nav className="flex items-center justify-between gap-3 px-5 py-3 md:px-10 md:py-5">
         <Link
           to="/"
+          ref={logoHostRef}
+          onClick={() => playLogoAssembly(logoHostRef.current)}
           className="flex min-w-0 items-center gap-2.5 text-sm font-medium uppercase tracking-[0.2em] transition-colors hover:text-accent md:tracking-[0.25em]"
         >
           <Logo className="size-5 shrink-0" />
@@ -318,6 +354,7 @@ export default function SiteHeader({ solid = true }) {
           </div>
         </div>
       )}
-    </header>
+      </header>
+    </Fragment>
   )
 }
