@@ -26,7 +26,18 @@ otra app. No es el caso hoy.
 
 Opcional: `HOSTED_FREE_QUOTA` (default `1` = el plan gratis incluye 1 sección
 hosteada publicada; `0` = LAB 100% de pago). `HOSTED_TRIAL_DAYS` (default `7`)
-— días de prueba gratis en la primera alta.
+— días de prueba gratis en la primera alta; viajan a MP como
+`auto_recurring.start_date` (fecha del primer cobro). `HOSTED_GRACE_DAYS`
+(default `10`, como la ventana de reintentos de MP) — días que el plan sigue
+cuando una renovación no se cobró; el primer cobro (fin de la prueba) tiene
+como mucho 1 día.
+
+> **Por qué `start_date` y no `free_trial`:** MP documenta `free_trial` solo
+> para `/preapproval_plan`. Estas altas son `/preapproval` sin plan, donde el
+> campo documentado para diferir el primer cobro es `start_date`. Hasta
+> 2026-09 se mandaba `free_trial` y nunca se verificó que MP lo respetara (sin
+> él, MP cobra la primera cuota ~1 h después de suscribirse). Verificalo con el
+> paso 5.
 
 ---
 
@@ -87,24 +98,39 @@ usando el sync manual (paso 4).
 
 > **MP para suscripciones NO tiene `auto_return`.** Tras autorizar, muestra la
 > pantalla de éxito con el botón **"Volver al sitio del vendedor"** (va a
-> `${CLIENT_URL}/lab`). No redirige solo — es el comportamiento normal de
-> PreApproval, no un bug.
+> `${CLIENT_URL}/lab?suscripcion=volver`). No redirige solo — es el
+> comportamiento normal de PreApproval, no un bug. Al volver con ese parámetro,
+> `/lab` sincroniza solo (mismo efecto que el botón de `/account`).
 
-1. `/lab` logueado → **Planes** → **Suscribirme**.
+1. `/lab` logueado → **Planes** → **Probar 7 días gratis** / **Suscribirme**.
 2. Redirige al `init_point` de MP → autorizás con una
    [tarjeta de prueba](https://www.mercadopago.com.ar/developers/es/docs/checkout-api/additional-content/your-integrations/test/cards)
    (usuario de test como pagador).
-3. Volvés a `/lab`. La suscripción arranca `pending`.
+3. Volvés a `/lab`: se sincroniza sola y avisa si ya está activa.
 4. **Bajar el estado real desde MP.** Dos caminos, el mismo efecto:
    - **Webhook** (prod): MP dispara `subscription_preapproval` →
      `POST /api/webhooks/mercadopago` → pasa a `authorized` y setea
-     `currentPeriodEnd`. Necesita que la URL sea pública.
-   - **Sync manual** (sirve en localhost, sin túnel): `/account` →
-     **Sincronizar con Mercado Pago** (botón visible cuando el mock está
-     apagado), o `POST /api/subscriptions/sync` a mano. Consulta el preapproval
-     por API y aplica el mismo cambio que haría el webhook.
-5. `GET /api/subscriptions/me` muestra `plan` y `quota` del tier.
-6. Publicá más secciones que el free tier → te deja.
+     `currentPeriodEnd` (el primer cobro). Necesita que la URL sea pública.
+   - **Sync manual** (sirve en localhost, sin túnel): automático al volver a
+     `/lab`, o `/account` → **Sincronizar con Mercado Pago**, o
+     `POST /api/subscriptions/sync` a mano. Consulta el preapproval por API y
+     aplica el mismo cambio que haría el webhook.
+5. **Verificar la prueba gratis** (pendiente de confirmar contra MP): con la
+   suscripción de prueba autorizada, consultá el preapproval (`mpPreapprovalId`
+   de la fila, o el panel de MP):
+
+   ```bash
+   curl -s https://api.mercadopago.com/preapproval/<ID> \
+     -H "Authorization: Bearer $MP_ACCESS_TOKEN" \
+     | jq '{status, next_payment_date, start: .auto_recurring.start_date}'
+   ```
+
+   `next_payment_date` tiene que caer ~7 días después del alta (y coincidir
+   con `start_date`). Si queda en el día del alta, MP no difiere el cobro con
+   `start_date` en altas `pending` y hay que pasar a `/preapproval_plan` (con
+   `free_trial` documentado): avisá antes de abrir la prueba al público.
+6. `GET /api/subscriptions/me` muestra `plan` y `quota` del tier.
+7. Publicá más secciones que el free tier → te deja.
 
 `POST /api/subscriptions/sync` (auth, sin body): toma la suscripción más
 reciente del usuario con `mpPreapprovalId`, hace `fetchPreapproval` y baja
@@ -119,14 +145,47 @@ server (`MP subs webhook …`). El historial también se ve por el MCP
 
 ---
 
+## Estados y acceso
+
+`resolveEntitlement` (`server/services/subscriptions.js`) es la fuente de
+verdad; la UI (`usePlan`) solo lee `/api/subscriptions/me`.
+
+| Situación | Acceso | UI |
+|---|---|---|
+| Prueba | plena hasta `trialEndsAt` (= primer cobro) | "Prueba gratis · primer cobro el …" |
+| Activa | hasta `currentPeriodEnd` | "Activa · próximo cobro el …" |
+| Cobro pendiente / rechazado | sigue en **gracia**: 1 día si nunca pagó, `HOSTED_GRACE_DAYS` si ya pagó (`pastDue`) | aviso con la fecha de suspensión |
+| Suspendida (gracia vencida) | free; sigue abierta en MP y un reintento cobrado la revive (`lapsedPlan`) | aviso + cancelar (corta los reintentos) |
+| Cancelada | hasta `currentPeriodEnd`, también si después llega el webhook `cancelled` | "Cancelada · acceso hasta …" + Reactivar |
+| En pausa (MP) | hasta `currentPeriodEnd`, sin gracia | "En pausa en MP · acceso hasta …" |
+
+- **Período:** solo lo extiende un cobro aprobado (`payment.status ===
+  'approved'`; `processed` solo no alcanza: MP deja así la cuota cuando agota
+  los reintentos con el pago rechazado). Queda en `debit_date + 1 ciclo`, un
+  valor absoluto: webhooks duplicados o en otro orden no regalan días.
+- **Cancelar:** si MP no confirma la baja → 502 y no se marca nada (una baja
+  local que MP no hizo seguiría cobrando).
+- **Re-suscribirse tras cancelar** (también mensual↔anual): el primer cobro de
+  la nueva (`start_date`) es cuando termina lo ya pagado → no paga dos veces.
+- **Re-suscribirse con una renovación caída:** primero se da de baja la vieja en
+  MP; si MP no deja, 502 y no se abre otra.
+- **Altas a medio hacer:** un nuevo intento cancela en MP el preapproval
+  pendiente y abre otro (sin bloqueo de 30 min); si resulta que se había
+  completado, se activa. Un alta abandonada no consume la prueba.
+
+Logs greppables que piden revisión manual (reembolso / baja):
+`subs cancel FALLÓ`, `subs alta FALLÓ`, `subs COBRO SOBRE BAJA`,
+`subs COBRO SOBRE SUSCRIPCIÓN REEMPLAZADA`, `subs DOBLE SUSCRIPCIÓN`,
+`subs MP AUTORIZADA SOBRE BAJA`, `subs change RECONCILE`.
+
 ## Qué maneja el código y qué no
 
-**Sí:** alta, sync de estado por webhook **o sync manual**
-(`/api/subscriptions/sync`), cuota al publicar, cancelación
-(`/api/subscriptions/cancel`), pausa por impago (MP pausa → llega
-`subscription_preapproval` con `paused` → deja de contar como activa).
+**Sí:** alta con prueba, sync por webhook, al volver del checkout o manual,
+cuota al publicar, gracia por cobro pendiente/rechazado, pausa, suspensión
+(las publicadas por encima del tope free dejan de servir y reviven al
+re-suscribirse), cancelación confirmada contra MP, re-suscripción sin doble
+cobro, mails de alta y de baja.
 
-**Todavía no:** días de gracia configurables, auto-suspender las instancias ya
-publicadas cuando cae la suscripción (hoy: no podés publicar nuevas, las viejas
-siguen hasta despublicarlas o suspenderlas con `x-admin-token`), proración al
-cambiar de plan, emails de alta/impago/baja.
+**Todavía no:** mail de pago rechazado, reconciliación automática del caso
+`RECONCILE` del cambio de plan, proración al cambiar de plan, reembolsos
+automáticos.

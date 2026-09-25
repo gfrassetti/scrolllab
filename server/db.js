@@ -339,11 +339,13 @@ export const db = {
       return fileDb.findSubscriptionByPreapproval(preapprovalId);
     return MongoSubscription.findOne({ mpPreapprovalId: String(preapprovalId) });
   },
+  // Vigente = `authorized` o `paused` (una pausa respeta lo ya pagado).
   async findActiveSubscriptionByUser(userId) {
     if (mode === "file") return fileDb.findActiveSubscriptionByUser(userId);
-    return MongoSubscription.findOne({ userId, status: "authorized" }).sort({
-      createdAt: -1,
-    });
+    return MongoSubscription.findOne({
+      userId,
+      status: { $in: ["authorized", "paused"] },
+    }).sort({ createdAt: -1 });
   },
   async findSubscriptionsByUser(userId) {
     if (mode === "file") return fileDb.findSubscriptionsByUser(userId);

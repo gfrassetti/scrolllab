@@ -51,6 +51,26 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     return agent
   }
 
+  const DAY = 86_400_000
+  const daysFromNow = (n) => new Date(Date.now() + n * DAY).toISOString()
+
+  async function patchSub(id, patch) {
+    const { fileDb } = await import('../fileStore.js')
+    const s = await fileDb.findSubscriptionById(id)
+    Object.assign(s, patch)
+    await s.save()
+    return s
+  }
+
+  async function subRow(id) {
+    const { fileDb } = await import('../fileStore.js')
+    return fileDb.findSubscriptionById(id)
+  }
+
+  // Vencida hace un mes: más allá de cualquier gracia (1 día sin cobros, 10
+  // con cobros). Es el "se cayó el plan" de verdad.
+  const expireForGood = (id) => patchSub(id, { currentPeriodEnd: daysFromNow(-30) })
+
   async function publish(agent, sectionId = 'chapters/FooterCTA') {
     const created = await agent.post('/api/hosted').send({ sectionId })
     // Crear ya puede fallar (402) si el usuario free llegó a su tope — se
@@ -103,7 +123,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(afterSub.status, 201)
   })
 
-  it('prueba gratis: primera suscripción arranca en trial; cancelar y volver NO reabre la prueba', async () => {
+  it('prueba gratis: primera suscripción arranca en trial; cancelar y volver NO reabre la prueba ni cobra antes de tiempo', async () => {
     const agent = await loginAs('trial@test.com')
 
     // Antes de suscribirse: la prueba está disponible.
@@ -128,36 +148,116 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
       (new Date(me.body.currentPeriodEnd) - Date.now()) / 86_400_000
     assert.ok(days > 6 && days < 8, `esperaba ~7 días, dio ${days}`)
 
-    // Cancela y vuelve a suscribirse → sin prueba esta vez.
+    // Cancela y vuelve a suscribirse → sin prueba esta vez. Tampoco se cobra
+    // antes: el primer cobro de la nueva es cuando terminaba la prueba.
+    const trialEnd = me.body.currentPeriodEnd
     await agent.post('/api/subscriptions/cancel')
     const again = await agent
       .post('/api/subscriptions')
       .send({ plan: 'hosted_starter', cycle: 'monthly' })
     assert.equal(again.body.trialEndsAt, null)
+    assert.equal(
+      new Date(again.body.firstChargeAt).toISOString(),
+      new Date(trialEnd).toISOString(),
+    )
     await agent.post(again.body.activateUrl)
 
     me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_starter')
     assert.equal(me.body.trialing, false)
-    const days2 =
-      (new Date(me.body.currentPeriodEnd) - Date.now()) / 86_400_000
-    assert.ok(days2 > 28, `esperaba un mes, dio ${days2}`)
+    assert.equal(me.body.canceledAt, null) // la nueva no hereda la baja
+    assert.equal(
+      new Date(me.body.currentPeriodEnd).toISOString(),
+      new Date(trialEnd).toISOString(),
+    )
   })
 
-  it('prueba vencida sin primer cobro → baja a free (como una suscripción vencida)', async () => {
+  it('prueba vencida: 1 día de margen para el primer cobro; sin cobro → free', async () => {
     const agent = await loginAs('trialexp@test.com')
     const sub = await agent
       .post('/api/subscriptions')
       .send({ plan: 'hosted_pro', cycle: 'monthly' })
     await agent.post(sub.body.activateUrl)
 
-    const { fileDb } = await import('../fileStore.js')
-    const s = await fileDb.findSubscriptionById(sub.body.subscriptionId)
-    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
-    await s.save()
-
-    const me = await agent.get('/api/subscriptions/me')
-    assert.equal(me.body.plan, 'free')
+    // Recién vencida: MP está haciendo el primer cobro (~1 h) y el webhook
+    // todavía no llegó. No se corta. (Fin de prueba = primer cobro = período.)
+    const justEnded = new Date(Date.now() - 60_000).toISOString()
+    await patchSub(sub.body.subscriptionId, {
+      trialEndsAt: justEnded,
+      firstChargeAt: justEnded,
+      currentPeriodEnd: justEnded,
+    })
+    let me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.pastDue, true)
     assert.equal(me.body.trialing, false)
+
+    // Pasó el margen sin cobro → free.
+    await patchSub(sub.body.subscriptionId, { currentPeriodEnd: daysFromNow(-2) })
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'free')
+    assert.equal(me.body.lapsedPlan, 'hosted_pro')
+    assert.equal(me.body.trialAvailable, false) // la prueba ya se usó
+  })
+
+  it('renovación sin cobrar: sigue HOSTED_GRACE_DAYS con aviso; pasada la gracia, free', async () => {
+    const agent = await loginAs('grace@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    // Ya pagó un ciclo y MP no pudo cobrar el siguiente (reintenta 10 días).
+    await patchSub(sub.body.subscriptionId, {
+      trialEndsAt: undefined,
+      firstChargeAt: undefined,
+      lastPaidAt: daysFromNow(-33),
+      currentPeriodEnd: daysFromNow(-3),
+      paymentFailedAt: daysFromNow(-3),
+    })
+
+    let me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.pastDue, true)
+    assert.equal(me.body.paymentFailed, true)
+    const graceLeft = (new Date(me.body.graceEndsAt) - Date.now()) / DAY
+    assert.ok(graceLeft > 6.5 && graceLeft < 7.5, `gracia restante ${graceLeft}`)
+    // En gracia no se puede subir de plan (sería cuota nueva sin cobro).
+    const change = await agent
+      .post('/api/subscriptions/change')
+      .send({ plan: 'hosted_studio' })
+    assert.equal(change.status, 409)
+
+    await patchSub(sub.body.subscriptionId, { currentPeriodEnd: daysFromNow(-11) })
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'free')
+    assert.equal(me.body.lapsedPlan, 'hosted_pro')
+    assert.equal(me.body.paymentFailed, true)
+    // No se marca `cancelled`: sigue abierta en MP y un reintento la revive.
+    assert.equal((await subRow(sub.body.subscriptionId)).status, 'authorized')
+  })
+
+  it('suscripción en pausa: conserva lo pagado y lo muestra; al vencer, free', async () => {
+    const agent = await loginAs('paused@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    await patchSub(sub.body.subscriptionId, {
+      status: 'paused',
+      currentPeriodEnd: daysFromNow(5),
+    })
+
+    let me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.subscriptionStatus, 'paused')
+
+    // Una pausa no se cobra sola: sin gracia.
+    await patchSub(sub.body.subscriptionId, {
+      currentPeriodEnd: new Date(Date.now() - 60_000).toISOString(),
+    })
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'free')
+    assert.equal(me.body.lapsedPlan, 'hosted_pro')
   })
 
   it('la cuota frena el 2do publish y la suscripción lo destraba', async () => {
@@ -223,12 +323,52 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'hosted_starter')
     assert.ok(me.body.canceledAt)
+    const paidUntil = me.body.currentPeriodEnd
 
-    // y puede volver a suscribirse (la nueva reemplaza)
+    // y puede volver a suscribirse (la nueva reemplaza) sin pagar dos veces:
+    // el primer cobro de la nueva es cuando termina lo ya pagado.
     const again = await agent
       .post('/api/subscriptions')
       .send({ plan: 'hosted_pro', cycle: 'monthly' })
     assert.equal(again.status, 200)
+    assert.equal(again.body.trialEndsAt, null)
+    assert.equal(
+      new Date(again.body.firstChargeAt).toISOString(),
+      new Date(paidUntil).toISOString(),
+    )
+
+    // Mientras la nueva no se completa, la vieja sigue cubriendo.
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_starter')
+
+    await agent.post(again.body.activateUrl)
+    me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.canceledAt, null)
+    assert.equal(
+      new Date(me.body.currentPeriodEnd).toISOString(),
+      new Date(paidUntil).toISOString(),
+    )
+    // La vieja quedó cerrada (la cubre la nueva).
+    assert.equal((await subRow(sub.body.subscriptionId)).status, 'cancelled')
+  })
+
+  it('cancelar una suscripción caída (vencida sin cobro) la cierra en el acto', async () => {
+    const agent = await loginAs('cancel-lapsed@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_pro', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    await expireForGood(sub.body.subscriptionId)
+
+    // Pasada la gracia se ve free, pero sigue abierta: se puede dar de baja.
+    const cancel = await agent.post('/api/subscriptions/cancel')
+    assert.equal(cancel.status, 200)
+    assert.equal(cancel.body.status, 'cancelled')
+    assert.equal(cancel.body.endsAt, null)
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'free')
+    assert.equal(me.body.lapsedPlan, null)
   })
 
   it('cambiar de plan en el acto: sube la cuota, misma suscripción, sin dar de baja', async () => {
@@ -329,11 +469,8 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
       [false, true],
     )
 
-    // vence el período → cuota vuelve a 1 (HOSTED_FREE_QUOTA)
-    const { fileDb } = await import('../fileStore.js')
-    const s = await fileDb.findSubscriptionById(sub.body.subscriptionId)
-    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
-    await s.save()
+    // vence el período (y la gracia) → cuota vuelve a 1 (HOSTED_FREE_QUOTA)
+    await expireForGood(sub.body.subscriptionId)
 
     list = await agent.get('/api/hosted')
     assert.deepEqual(
@@ -371,14 +508,27 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     const { subscriptionId } = sub.body
     await agent.post(sub.body.activateUrl)
 
-    // forzar vencimiento vía el store de archivo
-    const { fileDb } = await import('../fileStore.js')
-    const s = await fileDb.findSubscriptionById(subscriptionId)
-    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
-    await s.save()
+    await expireForGood(subscriptionId)
 
     const me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'free')
+  })
+
+  it('cancelada y vencida: el barrido la cierra (sin gracia)', async () => {
+    const agent = await loginAs('expired-canceled@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_starter', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    await agent.post('/api/subscriptions/cancel')
+    await patchSub(sub.body.subscriptionId, {
+      currentPeriodEnd: new Date(Date.now() - 60_000).toISOString(),
+    })
+
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'free')
+    assert.equal(me.body.lapsedPlan, null)
+    assert.equal((await subRow(sub.body.subscriptionId)).status, 'cancelled')
   })
 
   it('rechaza un plan inválido', async () => {
@@ -389,16 +539,34 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(res.status, 400)
   })
 
-  it('no deja acumular altas: 2do POST sin activar → 409', async () => {
+  it('no acumula altas: un 2do POST sin completar reemplaza al primero (sin bloquear ni quemar la prueba)', async () => {
     const agent = await loginAs('dedup@test.com')
     const a = await agent
       .post('/api/subscriptions')
       .send({ plan: 'hosted_pro', cycle: 'monthly' })
     assert.equal(a.status, 200)
+    // Tarjeta rechazada en MP / checkout abandonado → vuelve a intentar ya.
     const b = await agent
       .post('/api/subscriptions')
-      .send({ plan: 'hosted_pro', cycle: 'monthly' })
-    assert.equal(b.status, 409)
+      .send({ plan: 'hosted_starter', cycle: 'yearly' })
+    assert.equal(b.status, 200)
+    assert.ok(b.body.trialEndsAt, 'un alta abandonada no consume la prueba')
+
+    const first = await subRow(a.body.subscriptionId)
+    assert.equal(first.status, 'pending')
+    assert.ok(first.abandonedAt)
+    const { fileDb } = await import('../fileStore.js')
+    const live = (await fileDb.findSubscriptionsByUser(first.userId)).filter(
+      (s) => s.status === 'pending' && !s.abandonedAt,
+    )
+    assert.equal(live.length, 1)
+
+    // El link viejo ya no sirve para activar nada (en MP quedó cancelado).
+    const stale = await agent.post(a.body.activateUrl)
+    assert.equal(stale.status, 409)
+    await agent.post(b.body.activateUrl)
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_starter')
   })
 
   it('con suscripción activa, otro POST → 409', async () => {
@@ -468,11 +636,8 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal((await request(app).get(`/api/embed/${keyA}/config`)).status, 200)
     assert.equal((await request(app).get(`/api/embed/${keyB}/config`)).status, 200)
 
-    // vence el período → vuelve a free (quota = 1)
-    const { fileDb } = await import('../fileStore.js')
-    const s = await fileDb.findSubscriptionById(sub.body.subscriptionId)
-    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
-    await s.save()
+    // vence el período, y la gracia → vuelve a free (quota = 1)
+    await expireForGood(sub.body.subscriptionId)
 
     // la más vieja queda cubierta, la nueva se congela (402, como suspendida)
     assert.equal((await request(app).get(`/api/embed/${keyA}/config`)).status, 200)

@@ -31,11 +31,16 @@ export default function LabPage() {
     quota,
     canceledAt,
     currentPeriodEnd,
+    pastDue,
+    graceEndsAt,
     trialAvailable,
     trialDays,
     loading: planLoading,
     refresh: refreshPlan,
   } = usePlan()
+  // Cuándo se apagan las publicadas por encima del tope free si el plan no
+  // sigue: fin de lo pagado (baja) o fin de la gracia (cobro pendiente).
+  const planStopsAt = canceledAt ? currentPeriodEnd : pastDue ? graceEndsAt : null
   const { t, locale } = useI18n()
   const navigate = useNavigate()
   const root = useRef(null)
@@ -407,11 +412,10 @@ export default function LabPage() {
                         {inst.status === 'published' &&
                           !inst.frozen &&
                           inst.stopsOnPlanEnd &&
-                          canceledAt &&
-                          currentPeriodEnd && (
+                          planStopsAt && (
                             <span className="text-body-sm uppercase tracking-[0.14em] text-accent/90">
                               {t('lab.stopsOn', {
-                                date: fmtDate(currentPeriodEnd),
+                                date: fmtDate(planStopsAt),
                               })}
                             </span>
                           )}

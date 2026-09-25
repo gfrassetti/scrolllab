@@ -164,7 +164,7 @@ export function buildPreapprovalBody({
   payerEmail,
   externalReference,
   backUrl,
-  trialDays = 0,
+  startDate = null,
 }) {
   const autoRecurring = {
     frequency,
@@ -172,11 +172,11 @@ export function buildPreapprovalBody({
     transaction_amount: amount,
     currency_id: currencyId,
   }
-  if (trialDays > 0) {
-    autoRecurring.free_trial = {
-      frequency: Math.floor(trialDays),
-      frequency_type: 'days',
-    }
+  // Primer cobro diferido (prueba gratis o días ya pagados). `start_date` es
+  // el campo documentado para altas sin plan; `free_trial` solo lo es para
+  // `/preapproval_plan`.
+  if (startDate) {
+    autoRecurring.start_date = new Date(startDate).toISOString()
   }
   return {
     reason,
@@ -219,7 +219,11 @@ export async function fetchAuthorizedPayment(accessToken, id) {
 
 export async function cancelPreapproval(accessToken, id) {
   const pa = new PreApproval(createMpClient(accessToken))
-  return pa.update({ id, body: { status: 'cancelled' } })
+  try {
+    return await pa.update({ id, body: { status: 'cancelled' } })
+  } catch (err) {
+    throw mpPaymentError(err, id)
+  }
 }
 
 /**

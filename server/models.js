@@ -125,16 +125,27 @@ const subscriptionSchema = new mongoose.Schema(
       default: "pending",
       index: true,
     },
+    // Hasta cuándo está pago (o, en la prueba, hasta el primer cobro). Solo lo
+    // extiende un cobro aprobado; pasada esta fecha corre la gracia
+    // (`HOSTED_GRACE_DAYS`) y después `resolveEntitlement` baja a free.
     currentPeriodEnd: Date,
     // Prueba gratis (primera suscripción del usuario): MP autoriza la tarjeta
     // y no cobra hasta esta fecha. Durante la prueba `status` es `authorized`
     // y `currentPeriodEnd` = `trialEndsAt`, así que la entitlement es plena.
-    // Si la prueba vence sin primer cobro, `currentPeriodEnd` queda en el
-    // pasado y `resolveEntitlement` baja a free (igual que una baja).
     trialEndsAt: Date,
-    // Cancelada por el usuario: sigue `authorized` (con acceso) hasta
-    // `currentPeriodEnd`; no renueva. `resolveEntitlement` la cierra al vencer.
+    // Cuándo hace MP el primer cobro (`auto_recurring.start_date`): el fin de
+    // la prueba, o el fin de lo ya pagado al re-suscribirse tras una baja.
+    firstChargeAt: Date,
+    // Cancelada: sigue con acceso hasta `currentPeriodEnd`; no renueva.
+    // `resolveEntitlement` la cierra al vencer.
     canceledAt: Date,
+    // Primera vez que llegó a `authorized` (la prueba se pierde con esto).
+    activatedAt: Date,
+    // Alta que nunca se completó y se dio de baja en MP (no quema la prueba).
+    abandonedAt: Date,
+    lastPaidAt: Date,
+    // MP no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
+    paymentFailedAt: Date,
     mpPreapprovalId: { type: String, sparse: true },
     // Mails de suscripción (una vez cada uno). Mismo patrón claim/complete/
     // release que el recibo de orden. `welcome` al pasar a `authorized`,

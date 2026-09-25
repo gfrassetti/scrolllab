@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
@@ -33,10 +33,16 @@ export default function HostedPlans() {
     trialEndsAt,
     trialAvailable,
     trialDays,
+    subscriptionStatus,
+    pastDue,
+    graceEndsAt,
+    paymentFailed,
+    lapsedPlan,
     refresh: refreshPlan,
   } = usePlan()
   const { t, locale } = useI18n()
   const root = useRef(null)
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [plans, setPlans] = useState([])
   const [freeQuota, setFreeQuota] = useState(0)
@@ -44,10 +50,15 @@ export default function HostedPlans() {
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  // Con un plan pago activo, la grilla de 3 arranca colapsada: cambiar de
-  // tier hoy exige cancelar y esperar (el server rechaza una 2da alta
-  // activa, ver /api/subscriptions), así que la comparación completa no es
-  // la acción principal — "ver mi plan" sí. Queda a un click de distancia.
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+
+  const fmtDate = (d) =>
+    d
+      ? new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-AR')
+      : ''
+  const tierName = (planId) => t(`lab.tier.${String(planId).replace('hosted_', '')}`)
+  // Con un plan pago activo, la grilla de 3 arranca colapsada: la acción
+  // principal es "ver mi plan", no comparar. Queda a un click de distancia.
   const [showComparison, setShowComparison] = useState(false)
 
   const refresh = useCallback(async () => {
@@ -103,12 +114,39 @@ export default function HostedPlans() {
     return () => cancelAnimationFrame(id)
   }, [hashIntent, plans.length])
 
-  const subscribe = async (planId) => {
+  // Volver del checkout de MP (`back_url` = /lab?suscripcion=volver): bajamos
+  // el estado real sin esperar al webhook. Una sola vez; se limpia la URL.
+  const returnedFromMp = !!user && searchParams.get('suscripcion') === 'volver'
+  const returnSynced = useRef(false)
+  useEffect(() => {
+    if (!returnedFromMp || returnSynced.current) return
+    returnSynced.current = true
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('suscripcion')
+        return next
+      },
+      { replace: true },
+    )
+    api
+      .subscriptionSync()
+      .then((out) =>
+        setNotice(
+          t(out?.status === 'authorized' ? 'lab.returnSynced' : 'lab.returnPending'),
+        ),
+      )
+      .catch(() => setNotice(t('lab.returnPending')))
+      .finally(() => refreshPlan())
+  }, [returnedFromMp, setSearchParams, refreshPlan, t])
+
+  const subscribe = async (planId, planCycle = cycle) => {
     if (busy) return
     setBusy(planId)
     setError('')
+    setNotice('')
     try {
-      const res = await api.subscribe(planId, cycle)
+      const res = await api.subscribe(planId, planCycle)
       if (res.init_point) {
         window.location.href = res.init_point
         return
@@ -127,8 +165,10 @@ export default function HostedPlans() {
   const cancel = async () => {
     if (busy) return
     setBusy('cancel')
+    setError('')
     try {
       await api.subscriptionCancel()
+      setConfirmingCancel(false)
       await refreshPlan()
     } catch (err) {
       setError(err.message)
@@ -157,8 +197,11 @@ export default function HostedPlans() {
 
   const features = t('lab.planFeatures')
   const activePlan = user && plan !== 'free' ? plan : null
+  // Cancelada con días pagos: puede re-suscribirse a cualquier plan o ciclo
+  // (el primer cobro nuevo es cuando termina lo pagado → no paga dos veces).
+  const canResubscribe = !!activePlan && !!canceledAt
 
-  // Con plan pago el ciclo queda fijado al suyo: MP no deja pasar un
+  // Con plan pago vigente el ciclo queda fijado al suyo: MP no deja pasar un
   // preapproval de mensual a anual, así que mostrar precios del otro ciclo
   // sería ofrecer un cambio que este flujo no hace (ese va por cancelar).
   useEffect(() => {
@@ -199,7 +242,7 @@ export default function HostedPlans() {
         <h2 className="text-eyebrow font-semibold uppercase text-accent">
           {t('lab.plansTitle')}
         </h2>
-        {comparisonVisible && !activePlan && (
+        {comparisonVisible && (!activePlan || canResubscribe) && (
           <div className="inline-flex border border-ink/20 text-eyebrow uppercase">
             {['monthly', 'yearly'].map((c) => (
               <button
@@ -230,11 +273,9 @@ export default function HostedPlans() {
         </p>
       )}
 
-      {/* Con plan pago activo, cambiar de tier hoy exige cancelar y esperar
-          (el server rechaza una 2da alta activa) — así que lo que el
-          suscriptor necesita ver por default es SU plan, no una grilla de
-          3 planes con 2 botones que van a tirar error. La comparación queda
-          a un click ("Ver otros planes"), no escondida del todo. */}
+      {/* Con plan pago, lo que el suscriptor necesita ver por default es SU
+          plan (estado de cobro, baja, reactivar). La comparación queda a un
+          click ("Ver otros planes"), no escondida del todo. */}
       {activePlan ? (
         <div className="mt-4 flex flex-col gap-4 border border-ink/15 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -263,31 +304,73 @@ export default function HostedPlans() {
             </p>
             {trialing && !canceledAt && (
               <p className="mt-1 text-body-sm text-accent">
-                {t('lab.planTrialActive', {
-                  date: trialEndsAt
-                    ? new Date(trialEndsAt).toLocaleDateString(
-                        locale === 'en' ? 'en-US' : 'es-AR',
-                      )
-                    : '',
+                {t('lab.planTrialActive', { date: fmtDate(trialEndsAt) })}
+              </p>
+            )}
+            {pastDue && !canceledAt && (
+              <p
+                className={`mt-3 border px-3 py-2 text-body-sm ${
+                  paymentFailed
+                    ? 'border-danger/40 bg-danger/10'
+                    : 'border-accent/40 bg-accent/10'
+                }`}
+              >
+                {t(paymentFailed ? 'lab.planPaymentFailed' : 'lab.planPastDue', {
+                  date: fmtDate(graceEndsAt),
                 })}
               </p>
             )}
-            {canceledAt ? (
+            {subscriptionStatus === 'paused' && !canceledAt && (
               <p className="mt-1 text-body-sm text-ink/50">
-                {t('lab.planCanceledUntil', {
-                  date: currentPeriodEnd
-                    ? new Date(currentPeriodEnd).toLocaleDateString(
-                        locale === 'en' ? 'en-US' : 'es-AR',
-                      )
-                    : '',
-                })}
+                {t('lab.planPausedUntil', { date: fmtDate(currentPeriodEnd) })}
+              </p>
+            )}
+            {canceledAt ? (
+              <div className="mt-1">
+                <p className="text-body-sm text-ink/50">
+                  {t('lab.planCanceledUntil', { date: fmtDate(currentPeriodEnd) })}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => subscribe(plan, billingCycle)}
+                  disabled={!!busy}
+                  className="btn mt-3 border-accent bg-accent text-ink hover:opacity-85 disabled:opacity-40"
+                >
+                  {busy === plan ? '…' : t('lab.planReactivate')}
+                </button>
+                <p className="mt-2 text-body-sm text-ink/50">
+                  {t('lab.planReactivateNote', { date: fmtDate(currentPeriodEnd) })}
+                </p>
+              </div>
+            ) : confirmingCancel ? (
+              <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-body-sm text-ink/70">
+                <span>
+                  {pastDue
+                    ? t('lab.planCancelConfirmNow')
+                    : t('lab.planCancelConfirm', { date: fmtDate(currentPeriodEnd) })}
+                </span>
+                <button
+                  type="button"
+                  onClick={cancel}
+                  disabled={busy === 'cancel'}
+                  className="text-danger underline underline-offset-2 disabled:opacity-40"
+                >
+                  {busy === 'cancel' ? '…' : t('lab.planCancelYes')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingCancel(false)}
+                  disabled={busy === 'cancel'}
+                  className="text-ink/55 hover:text-ink disabled:opacity-40"
+                >
+                  {t('lab.planCancelKeep')}
+                </button>
               </p>
             ) : (
               <button
                 type="button"
-                onClick={cancel}
-                disabled={busy === 'cancel'}
-                className="mt-1 text-body-sm text-ink/55 underline decoration-ink/30 underline-offset-2 hover:text-danger disabled:opacity-40"
+                onClick={() => setConfirmingCancel(true)}
+                className="mt-1 text-body-sm text-ink/55 underline decoration-ink/30 underline-offset-2 hover:text-danger"
               >
                 {t('lab.planCancel')}
               </button>
@@ -303,9 +386,21 @@ export default function HostedPlans() {
         </div>
       ) : (
         user && (
-          <p className="mt-4 text-body-sm text-ink/55">
-            {t('lab.planFreeState', { used, quota: displayQuota(quota) })}
-          </p>
+          <>
+            {lapsedPlan && (
+              <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm">
+                {t(
+                  subscriptionStatus === 'paused'
+                    ? 'lab.planLapsedPaused'
+                    : 'lab.planLapsed',
+                  { plan: tierName(lapsedPlan) },
+                )}
+              </p>
+            )}
+            <p className="mt-4 text-body-sm text-ink/55">
+              {t('lab.planFreeState', { used, quota: displayQuota(quota) })}
+            </p>
+          </>
         )
       )}
 
@@ -316,15 +411,20 @@ export default function HostedPlans() {
               {t('lab.freeTierNote', { n: freeQuota })}
             </p>
           )}
-          {activePlan && (
+          {canResubscribe && (
             <p className="mt-6 text-body-sm text-ink/55">
-              {t('lab.planChangeHint')}
+              {t('lab.planResubscribeHint', { date: fmtDate(currentPeriodEnd) })}
             </p>
           )}
-          {activePlan && (
-            <p className="mt-2 text-body-sm text-ink/50">
-              {t('lab.planCycleHint')}
-            </p>
+          {activePlan && !canResubscribe && (
+            <>
+              <p className="mt-6 text-body-sm text-ink/55">
+                {t('lab.planChangeHint')}
+              </p>
+              <p className="mt-2 text-body-sm text-ink/50">
+                {t('lab.planCycleHint')}
+              </p>
+            </>
           )}
           {/* Compartidas por los 3 planes — una sola vez, no repetidas card
               por card. Ninguna se gatea por tier del lado del backend, así
@@ -349,7 +449,9 @@ export default function HostedPlans() {
               const saving = Math.round(
                 100 - (p.priceYearly / (p.priceMonthly * 12)) * 100,
               )
-              const isCurrent = activePlan === p.id
+              // Cancelada: el mismo plan en otro ciclo es una suscripción nueva.
+              const isCurrent =
+                activePlan === p.id && (!canResubscribe || cycle === billingCycle)
               const featured = p.tier === 'pro'
               return (
                 <div
@@ -403,11 +505,24 @@ export default function HostedPlans() {
                     >
                       {t('nav.login')}
                     </Link>
+                  ) : isCurrent && canResubscribe ? (
+                    <button
+                      type="button"
+                      onClick={() => subscribe(p.id)}
+                      disabled={!!busy}
+                      className={`btn mt-5 w-full disabled:opacity-40 ${
+                        featured
+                          ? 'border-accent bg-accent text-ink hover:opacity-85'
+                          : 'border-ink bg-ink text-bone hover:opacity-90'
+                      }`}
+                    >
+                      {busy === p.id ? '…' : t('lab.planReactivate')}
+                    </button>
                   ) : isCurrent ? (
                     <span className="btn mt-5 w-full border-ink/20 text-ink/40">
                       {t('lab.planCurrent')}
                     </span>
-                  ) : activePlan ? (
+                  ) : activePlan && !canResubscribe ? (
                     <button
                       type="button"
                       onClick={() => changePlan(p.id)}

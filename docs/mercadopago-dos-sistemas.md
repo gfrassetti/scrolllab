@@ -108,7 +108,7 @@ otro `type`:
 |---|---|---|
 | `payment` | pago único (flujo actual) | fulfill orden → ZIP |
 | `subscription_preapproval` | alta / cambio / baja de una suscripción | crear/actualizar `Subscription` local |
-| `subscription_authorized_payment` | se cobró (o falló) una cuota recurrente | OK → extender `currentPeriodEnd`, reactivar instancias · falló → marcar grace/suspended |
+| `subscription_authorized_payment` | se cobró (o falló) una cuota recurrente | OK (`payment.status === 'approved'`) → `currentPeriodEnd = debit_date + 1 ciclo`, reactiva · falló → `paymentFailedAt` (gracia `HOSTED_GRACE_DAYS`, después suspendida) |
 
 ```js
 app.post('/api/webhooks/mercadopago', async (req, res) => {

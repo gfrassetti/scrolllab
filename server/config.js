@@ -248,11 +248,20 @@ export function loadConfig() {
       return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 1;
     })(),
     // Días de prueba gratis al abrir la PRIMERA suscripción (una vez por
-    // usuario, cualquier plan). 0 = sin prueba. MP lo aplica como
-    // `auto_recurring.free_trial`: autoriza la tarjeta, no cobra N días.
+    // usuario, cualquier plan). 0 = sin prueba. Va a MP como
+    // `auto_recurring.start_date` (fecha del primer cobro): `free_trial` solo
+    // está documentado para `/preapproval_plan`, no para altas sin plan.
     hostedTrialDays: (() => {
       const n = Number(process.env.HOSTED_TRIAL_DAYS);
       return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 7;
+    })(),
+    // Días que el plan sigue activo cuando la renovación no se cobró todavía
+    // (webhook demorado, o MP reintentando: hasta 4 veces en 10 días). Pasada
+    // la gracia cae a free; si un reintento cobra, vuelve solo. El primer
+    // cobro (fin de la prueba) tiene como mucho 1 día. 0 = sin gracia.
+    hostedGraceDays: (() => {
+      const n = Number(process.env.HOSTED_GRACE_DAYS);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 10;
     })(),
     // Suscripciones (LAB) — MercadoPago PreApproval con monto inline (sin plan
     // pre-creado). Es la misma app de MP que Checkout Pro: si no seteás las env

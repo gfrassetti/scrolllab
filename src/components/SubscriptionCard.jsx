@@ -22,6 +22,10 @@ export default function SubscriptionCard() {
     currentPeriodEnd,
     trialing,
     trialEndsAt,
+    pastDue,
+    graceEndsAt,
+    paymentFailed,
+    lapsedPlan,
     loading,
     refresh,
   } = usePlan()
@@ -47,6 +51,7 @@ export default function SubscriptionCard() {
 
   const fmtDate = (d) =>
     d ? new Date(d).toLocaleDateString(dateLocale, { dateStyle: 'long' }) : null
+  const tierName = (planId) => t(`lab.tier.${String(planId).replace('hosted_', '')}`)
 
   const cancel = async () => {
     if (busy) return
@@ -92,7 +97,71 @@ export default function SubscriptionCard() {
       </button>
     )
 
+  // Con días pagos por delante, la confirmación dice hasta cuándo sigue; en
+  // gracia o suspendida no hay nada pago que prometer.
+  const keepsAccess = !pastDue && !lapsedPlan && !!currentPeriodEnd
+  const cancelControl = confirming ? (
+    <span className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.2em]">
+      <span className="text-sm normal-case tracking-normal text-ink/70">
+        {keepsAccess
+          ? t('account.subCancelConfirmUntil', { date: fmtDate(currentPeriodEnd) })
+          : t('account.subCancelConfirm')}
+      </span>
+      <button
+        type="button"
+        onClick={cancel}
+        disabled={busy}
+        className="text-danger underline underline-offset-2 disabled:opacity-40"
+      >
+        {t('account.subCancelYes')}
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirming(false)}
+        className="text-ink/50 hover:text-ink"
+      >
+        {t('common.close')}
+      </button>
+    </span>
+  ) : (
+    <button
+      type="button"
+      onClick={() => setConfirming(true)}
+      className="text-[11px] uppercase tracking-[0.2em] text-ink/45 hover:text-danger"
+    >
+      {t('account.subCancel')}
+    </button>
+  )
+
+  const messages = (
+    <>
+      {error && (
+        <p className="mt-4 border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-success">
+          {notice}
+        </p>
+      )}
+    </>
+  )
+
   if (loading) return null
+
+  const paymentAlert = pastDue && paymentFailed && !canceledAt
+  const statusLine = canceledAt
+    ? t('account.subCanceled', { date: fmtDate(currentPeriodEnd) })
+    : subscriptionStatus === 'paused'
+      ? t('account.subPaused', { date: fmtDate(currentPeriodEnd) })
+      : pastDue
+        ? t(paymentFailed ? 'account.subPaymentFailed' : 'account.subRenewing', {
+            date: fmtDate(graceEndsAt),
+          })
+        : trialing
+          ? t('account.subTrial', { date: fmtDate(trialEndsAt) })
+          : t('account.subActive', { date: fmtDate(currentPeriodEnd) })
 
   return (
     <section
@@ -103,7 +172,31 @@ export default function SubscriptionCard() {
         {t('account.subTitle')}
       </p>
 
-      {plan === 'free' ? (
+      {plan === 'free' && lapsedPlan ? (
+        <>
+          {/* Se cayó por falta de cobro (o pausa vencida): ya es free, pero
+              sigue abierta en MP. Cancelar corta los reintentos. */}
+          <p className="mt-3 border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
+            {t(
+              subscriptionStatus === 'paused'
+                ? 'account.subLapsedPaused'
+                : 'account.subLapsed',
+              { plan: tierName(lapsedPlan) },
+            )}
+          </p>
+          {messages}
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            <Link
+              to="/lab#planes"
+              className="text-[11px] uppercase tracking-[0.2em] text-ink/45 hover:text-accent"
+            >
+              {t('account.subSeePlans')}
+            </Link>
+            <SyncButton />
+            {cancelControl}
+          </div>
+        </>
+      ) : plan === 'free' ? (
         <>
           <p className="mt-3 text-sm text-ink/65">
             {t('account.subNone')}{' '}
@@ -119,22 +212,13 @@ export default function SubscriptionCard() {
               {t('account.subSyncHint')} <SyncButton />
             </p>
           )}
-          {error && (
-            <p className="mt-4 border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
-              {error}
-            </p>
-          )}
-          {notice && (
-            <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-success">
-              {notice}
-            </p>
-          )}
+          {messages}
         </>
       ) : (
         <>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="text-xl font-medium tracking-[-0.02em]">
-              {t(`lab.tier.${plan.replace('hosted_', '')}`)}
+              {tierName(plan)}
             </span>
             {(() => {
               const p = plans.find((x) => x.id === plan)
@@ -150,14 +234,14 @@ export default function SubscriptionCard() {
             })()}
           </div>
 
-          <p className="mt-2 text-sm text-ink/70">
-            {canceledAt
-              ? t('account.subCanceled', { date: fmtDate(currentPeriodEnd) })
-              : subscriptionStatus === 'paused'
-                ? t('account.subPaused')
-                : trialing
-                  ? t('account.subTrial', { date: fmtDate(trialEndsAt) })
-                  : t('account.subActive', { date: fmtDate(currentPeriodEnd) })}
+          <p
+            className={
+              paymentAlert
+                ? 'mt-3 border border-danger/40 bg-danger/10 px-3 py-2 text-sm'
+                : 'mt-2 text-sm text-ink/70'
+            }
+          >
+            {statusLine}
           </p>
 
           <dl className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
@@ -173,16 +257,7 @@ export default function SubscriptionCard() {
             </div>
           </dl>
 
-          {error && (
-            <p className="mt-4 border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
-              {error}
-            </p>
-          )}
-          {notice && (
-            <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-success">
-              {notice}
-            </p>
-          )}
+          {messages}
 
           <div className="mt-5 flex flex-wrap items-center gap-4">
             <Link
@@ -194,35 +269,7 @@ export default function SubscriptionCard() {
 
             <SyncButton />
 
-            {!canceledAt &&
-              (confirming ? (
-                <span className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em]">
-                  {t('account.subCancelConfirm')}
-                  <button
-                    type="button"
-                    onClick={cancel}
-                    disabled={busy}
-                    className="text-danger underline underline-offset-2 disabled:opacity-40"
-                  >
-                    {t('account.subCancelYes')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirming(false)}
-                    className="text-ink/50 hover:text-ink"
-                  >
-                    {t('common.close')}
-                  </button>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setConfirming(true)}
-                  className="text-[11px] uppercase tracking-[0.2em] text-ink/45 hover:text-danger"
-                >
-                  {t('account.subCancel')}
-                </button>
-              ))}
+            {!canceledAt && cancelControl}
           </div>
         </>
       )}

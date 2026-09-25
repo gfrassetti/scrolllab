@@ -418,14 +418,24 @@ export function buildSubscriptionCanceled({
 }) {
   const plan = HOSTED_PLANS[subscription.plan] || {}
   const tier = TIER_LABEL[plan.tier] || subscription.plan
-  const endsAt = formatDateOnly(subscription.currentPeriodEnd)
+  // `cancelled` en el acto = no quedaban días pagos (p. ej. una renovación
+  // que no se cobró): no hay "acceso hasta" que prometer.
+  const closed = subscription.status === 'cancelled'
+  const endsAt = closed ? null : formatDateOnly(subscription.currentPeriodEnd)
   const name = user.name || user.email
-  const accessLine = endsAt
-    ? `Seguís con acceso al plan <strong>${escapeHtml(tier)}</strong> hasta el <strong>${escapeHtml(endsAt)}</strong>. No se te va a cobrar de nuevo.`
-    : `Tu acceso al plan <strong>${escapeHtml(tier)}</strong> termina al final del período pagado. No se te va a cobrar de nuevo.`
-  const accessText = endsAt
-    ? `Seguís con acceso al plan ${tier} hasta el ${endsAt}. No se te va a cobrar de nuevo.`
-    : `Tu acceso al plan ${tier} termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const accessLine = closed
+    ? `Tu plan <strong>${escapeHtml(tier)}</strong> quedó dado de baja. No se te va a cobrar de nuevo.`
+    : endsAt
+      ? `Seguís con acceso al plan <strong>${escapeHtml(tier)}</strong> hasta el <strong>${escapeHtml(endsAt)}</strong>. No se te va a cobrar de nuevo.`
+      : `Tu acceso al plan <strong>${escapeHtml(tier)}</strong> termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const accessText = closed
+    ? `Tu plan ${tier} quedó dado de baja. No se te va a cobrar de nuevo.`
+    : endsAt
+      ? `Seguís con acceso al plan ${tier} hasta el ${endsAt}. No se te va a cobrar de nuevo.`
+      : `Tu acceso al plan ${tier} termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const freezeLine = closed
+    ? 'Las secciones publicadas por encima del tope gratis dejan de mostrarse.'
+    : 'Al terminar el período, las secciones publicadas por encima del tope gratis dejan de mostrarse.'
 
   const html = `<!doctype html>
 <html lang="es">
@@ -458,7 +468,7 @@ export function buildSubscriptionCanceled({
             </tr>
             <tr>
               <td style="padding:0 32px 24px;color:#5b5650;font-size:15px;line-height:1.6;">
-                Al terminar el período, las secciones publicadas por encima del tope gratis dejan de mostrarse. Volvés a activar cuando quieras.
+                ${freezeLine} Volvés a activar cuando quieras.
               </td>
             </tr>
             <tr>
@@ -487,8 +497,7 @@ Listo, ${name}.
 Cancelamos la renovación automática de tu suscripción a LAB.
 ${accessText}
 
-Al terminar el período, las secciones publicadas por encima del tope gratis
-dejan de mostrarse. Volvés a activar cuando quieras:
+${freezeLine} Volvés a activar cuando quieras:
 ${accountUrl}
 
 Si esto no lo hiciste vos, respondé a este email.`

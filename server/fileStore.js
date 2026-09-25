@@ -206,7 +206,8 @@ export const fileDb = {
       read('subscriptions')
         .filter(
           (s) =>
-            String(s.userId) === String(userId) && s.status === 'authorized',
+            String(s.userId) === String(userId) &&
+            (s.status === 'authorized' || s.status === 'paused'),
         )
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((s) => withSaveDoc('subscriptions', s))[0] || null

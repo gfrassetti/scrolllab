@@ -119,7 +119,7 @@ describe('Embed: se apaga cuando cae la suscripción (HOSTED_FREE_QUOTA=0)', () 
     assert.equal(await configStatus(keyB), 200)
   })
 
-  it('período vencido sin cancelar (impago) también apaga todo', async () => {
+  it('impago (vencido sin cancelar): sigue durante la gracia y después apaga todo', async () => {
     const agent = await loginAs('unpaid@test.com')
 
     const sub = await agent
@@ -130,12 +130,20 @@ describe('Embed: se apaga cuando cae la suscripción (HOSTED_FREE_QUOTA=0)', () 
     const key = await publish(agent)
     assert.equal(await configStatus(key), 200)
 
-    // La renovación no llegó: el período quedó en el pasado, sin canceledAt.
+    // La renovación no se cobró: período en el pasado, sin canceledAt. Ya
+    // había pagado antes, así que corre la gracia (MP reintenta el cobro):
+    // el sitio del cliente no se cae por un webhook demorado.
+    const DAY = 86_400_000
     const { fileDb } = await import('../fileStore.js')
     const s = await fileDb.findSubscriptionById(sub.body.subscriptionId)
-    s.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
+    s.lastPaidAt = new Date(Date.now() - 32 * DAY).toISOString()
+    s.currentPeriodEnd = new Date(Date.now() - 2 * DAY).toISOString()
     await s.save()
+    assert.equal(await configStatus(key), 200)
 
+    // Pasada la gracia sin cobro: el embed desaparece.
+    s.currentPeriodEnd = new Date(Date.now() - 11 * DAY).toISOString()
+    await s.save()
     assert.equal(await configStatus(key), 402)
   })
 })

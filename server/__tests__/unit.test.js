@@ -765,6 +765,22 @@ describe('order receipt email', () => {
     })
     assert.match(message.text, /termina al final del período pagado/)
   })
+
+  it('baja cerrada en el acto (sin días pagos): no promete un "acceso hasta"', () => {
+    const message = buildSubscriptionCanceled({
+      subscription: {
+        plan: 'hosted_pro',
+        status: 'cancelled',
+        currentPeriodEnd: '2026-09-01T00:00:00.000Z',
+      },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.text, /quedó dado de baja/)
+    assert.doesNotMatch(message.text, /hasta el/)
+    assert.match(message.text, /No se te va a cobrar de nuevo/)
+  })
 })
 
 describe('sanitizeAuthReturn', () => {
@@ -953,6 +969,15 @@ describe('buildPreapprovalBody', () => {
   it('no cuela un preapproval_plan_id (el monto va inline)', () => {
     const body = buildPreapprovalBody(args)
     assert.equal('preapproval_plan_id' in body, false)
+  })
+
+  it('primer cobro diferido (prueba / días pagos) va como start_date, nunca free_trial', () => {
+    const body = buildPreapprovalBody({
+      ...args,
+      startDate: new Date('2026-10-02T15:00:00.000Z'),
+    })
+    assert.equal(body.auto_recurring.start_date, '2026-10-02T15:00:00.000Z')
+    assert.equal('free_trial' in body.auto_recurring, false)
   })
 })
 
