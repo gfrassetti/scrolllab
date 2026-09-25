@@ -200,6 +200,9 @@ export default function HostedPlans() {
   // Cancelada con días pagos: puede re-suscribirse a cualquier plan o ciclo
   // (el primer cobro nuevo es cuando termina lo pagado → no paga dos veces).
   const canResubscribe = !!activePlan && !!canceledAt
+  // Hasta cuándo tiene acceso hoy: lo pagado, o el fin de la gracia si hay un
+  // cobro pendiente.
+  const activeUntil = activePlan ? (pastDue ? graceEndsAt : currentPeriodEnd) : null
 
   // Con plan pago vigente el ciclo queda fijado al suyo: MP no deja pasar un
   // preapproval de mensual a anual, así que mostrar precios del otro ciclo
@@ -302,6 +305,11 @@ export default function HostedPlans() {
                 </>
               )}
             </p>
+            {activeUntil && (
+              <p className="mt-1 text-body-sm font-medium text-ink/80">
+                {t('lab.planActiveUntil', { date: fmtDate(activeUntil) })}
+              </p>
+            )}
             {trialing && !canceledAt && (
               <p className="mt-1 text-body-sm text-accent">
                 {t('lab.planTrialActive', { date: fmtDate(trialEndsAt) })}
@@ -322,13 +330,13 @@ export default function HostedPlans() {
             )}
             {subscriptionStatus === 'paused' && !canceledAt && (
               <p className="mt-1 text-body-sm text-ink/50">
-                {t('lab.planPausedUntil', { date: fmtDate(currentPeriodEnd) })}
+                {t('lab.planPausedNote')}
               </p>
             )}
             {canceledAt ? (
               <div className="mt-1">
                 <p className="text-body-sm text-ink/50">
-                  {t('lab.planCanceledUntil', { date: fmtDate(currentPeriodEnd) })}
+                  {t('lab.planCanceledNote')}
                 </p>
                 <button
                   type="button"

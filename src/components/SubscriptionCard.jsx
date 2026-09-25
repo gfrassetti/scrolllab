@@ -250,6 +250,12 @@ export default function SubscriptionCard() {
               <dd>{fmtDate(createdAt) || '—'}</dd>
             </div>
             <div className="flex justify-between border-b border-ink/10 pb-2">
+              <dt className="text-ink/50">{t('account.subActiveUntil')}</dt>
+              <dd className="font-medium">
+                {fmtDate(pastDue ? graceEndsAt : currentPeriodEnd) || '—'}
+              </dd>
+            </div>
+            <div className="flex justify-between border-b border-ink/10 pb-2">
               <dt className="text-ink/50">{t('account.subUsage')}</dt>
               <dd className="tabular-nums">
                 {used} / {quota == null ? t('account.subUnlimited') : quota}
