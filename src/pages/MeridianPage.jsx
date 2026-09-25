@@ -7,6 +7,9 @@ import Panorama from '../components/sections/meridian/Panorama'
 import Interior from '../components/sections/meridian/Interior'
 import Amenities from '../components/sections/meridian/Amenities'
 import Masterplan from '../components/sections/meridian/Masterplan'
+import Contact from '../components/sections/meridian/Contact'
+import Footer from '../components/sections/meridian/Footer'
+import { LangProvider } from '../components/sections/meridian/lang'
 
 /**
  * Template model — "MERIDIAN" (WIP, first pass — Hero only)
@@ -26,6 +29,7 @@ import Masterplan from '../components/sections/meridian/Masterplan'
  */
 export default function MeridianPage() {
   return (
+    <LangProvider>
     <SmoothScrollProvider>
       <div id="top" className="meridian-world bg-[#dfd8cf] text-[#2a2622]">
         <main>
@@ -37,8 +41,11 @@ export default function MeridianPage() {
           <Interior />
           <Amenities />
           <Masterplan />
+          <Contact />
         </main>
+        <Footer />
       </div>
     </SmoothScrollProvider>
+    </LangProvider>
   )
 }

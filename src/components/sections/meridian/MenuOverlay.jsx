@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import { useLang } from './lang'
+import { LangSwitch } from './NavBits'
 
 /**
  * MERIDIAN — Menu overlay
@@ -19,24 +21,22 @@ import { useEffect, useRef } from 'react'
  * whole surface feels like one instrument, not a collage.
  */
 
-// Default/fallback — used when `links` isn't passed (e.g. rendered
-// outside the builder's props system) or comes back empty. Exported so
-// Hero.jsx can use the exact same array as its own `menuLinks` default —
-// one list, not two copies that could drift.
-export const LINKS_PRIMARY_DEFAULT = [
-  { label: 'Home', href: '#top' },
-  { label: 'Villas', href: '#villas' },
-  { label: 'Residences', href: '#residences' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
+// Default links, built from the language dictionary (the builder's
+// `menuLinks` list overrides them in every language).
+const defaultLinks = (t) => [
+  { label: t('home'), href: '#top' },
+  { label: t('villas'), href: '#villas' },
+  { label: t('residences'), href: '#residences' },
+  { label: t('about'), href: '#about' },
+  { label: t('contact'), href: '#contact' },
 ]
 
 // Small pills (secondary) — the reference groups these under the primary
 // list with pill outlines instead of the roll-up type treatment.
-const LINKS_PILLS = [
-  { label: 'Investment', href: '#investment' },
-  { label: 'Team', href: '#team' },
-  { label: 'Partners', href: '#partners' },
+const defaultPills = (t) => [
+  { label: t('investment'), href: '#investment' },
+  { label: t('team'), href: '#team' },
+  { label: t('partners'), href: '#partners' },
 ]
 
 function MenuLink({ label, href }) {
@@ -87,7 +87,8 @@ export default function MenuOverlay({ open, onClose, links }) {
   // rename/re-point these without touching code. Anything visual on the
   // right pane (photo, headline, contact strip) stays code-only on
   // purpose — see docs/template-plans/meridian.txt for the reasoning.
-  const primaryLinks = links?.length ? links : LINKS_PRIMARY_DEFAULT
+  const { t } = useLang()
+  const primaryLinks = links?.length ? links : defaultLinks(t)
   const rootRef = useRef(null)
 
   // Trap body scroll while open so wheeling inside the drawer doesn't
@@ -148,7 +149,7 @@ export default function MenuOverlay({ open, onClose, links }) {
       <button
         type="button"
         onClick={onClose}
-        aria-label="Close menu"
+        aria-label={t('close')}
         className="meridian-menu-close pointer-events-auto absolute top-4 left-4 z-10 hidden items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.24em] text-[#2a2622] md:top-6 md:left-6 md:inline-flex"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
@@ -171,7 +172,7 @@ export default function MenuOverlay({ open, onClose, links }) {
             }}
           />
         </span>
-        <span>Close</span>
+        <span>{t('close')}</span>
       </button>
 
       {/* two-pane body — its own scroll in case content doesn't fit the
@@ -184,11 +185,11 @@ export default function MenuOverlay({ open, onClose, links }) {
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
         <span className="flex items-center gap-4">
-          <span>EN</span>
+          <LangSwitch />
           <span aria-hidden="true" className="h-5 w-px bg-[#2a2622]/20" />
-          <a href="#portal">Client Portal</a>
+          <a href="#portal">{t('clientPortal')}</a>
         </span>
-        <a href="#brochure">Brochure</a>
+        <a href="#brochure">{t('brochure')}</a>
       </div>
 
       <div className="flex shrink-0 flex-col md:h-full md:flex-1 md:shrink md:flex-row md:overflow-y-auto">
@@ -200,7 +201,7 @@ export default function MenuOverlay({ open, onClose, links }) {
             ))}
           </div>
           <div className="mt-10 flex flex-wrap gap-3">
-            {LINKS_PILLS.map((l) => (
+            {defaultPills(t).map((l) => (
               <PillLink key={l.href} {...l} />
             ))}
           </div>
@@ -236,20 +237,20 @@ export default function MenuOverlay({ open, onClose, links }) {
                 className="text-[11px] uppercase tracking-[0.28em] text-white/85"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                Visual Selection
+                {t('visualSelection')}
               </p>
               <div>
                 <h3
                   className="mb-8 max-w-[16ch] text-[clamp(1.6rem,3.4vw,2.6rem)] leading-[1.1] text-white"
                   style={{ fontFamily: "'Fraunces', serif" }}
                 >
-                  It's easier to choose when you're inside.
+                  {t('easierToChoose')}
                 </h3>
                 <span
                   className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-colors duration-300 hover:bg-white hover:text-[#2a2622]"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
-                  Select on Genplan
+                  {t('selectOnGenplan')}
                   <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -267,15 +268,15 @@ export default function MenuOverlay({ open, onClose, links }) {
       >
         <div className="flex flex-col gap-6 md:flex-row md:flex-wrap md:items-baseline md:justify-between md:gap-4">
           <span>
-            <span className="mb-1 block text-[#2a2622]/40 md:hidden">Phone</span>
+            <span className="mb-1 block text-[#2a2622]/40 md:hidden">{t('phone')}</span>
             +00 (000) 000-0000
           </span>
           <span>
-            <span className="mb-1 block text-[#2a2622]/40 md:hidden">Email</span>
+            <span className="mb-1 block text-[#2a2622]/40 md:hidden">{t('email')}</span>
             info@example.com
           </span>
           <span>
-            <span className="mb-1 block text-[#2a2622]/40 md:hidden">Socials</span>
+            <span className="mb-1 block text-[#2a2622]/40 md:hidden">{t('socials')}</span>
             Facebook · Instagram · Whatsapp
           </span>
         </div>
@@ -306,12 +307,13 @@ export default function MenuOverlay({ open, onClose, links }) {
  * (drawn from left to right) on hover; open transforms the pair into a
  * cross. One shared transition curve so hover and open share a family.
  */
-export function Hamburger({ open, onClick, label = 'Menu', className = '', style }) {
+export function Hamburger({ open, onClick, label, className = '', style }) {
+  const { t } = useLang()
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={open ? 'Close menu' : 'Open menu'}
+      aria-label={open ? t('close') : t('menu')}
       aria-expanded={open}
       data-open={open ? 'true' : 'false'}
       className={`meridian-hamburger group pointer-events-auto inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] ${className}`}
@@ -325,7 +327,7 @@ export function Hamburger({ open, onClick, label = 'Menu', className = '', style
         <span className="fill fill-1" />
         <span className="fill fill-2" />
       </span>
-      <span className="lbl">{open ? 'Close' : label}</span>
+      <span className="lbl">{open ? t('close') : (label ?? t('menu'))}</span>
       <style>{`
         @media (max-width: 767px) {
           .meridian-hamburger .lbl { display: none; }

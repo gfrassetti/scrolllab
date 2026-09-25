@@ -58,6 +58,22 @@ export const SECTION_FIELDS = {
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'text', label: 'Statement', type: 'textarea' },
   ],
+  'meridian/Contact': [
+    { key: 'eyebrow', label: 'Eyebrow (vacío = según idioma)', type: 'text' },
+    { key: 'title', label: 'Title (vacío = según idioma)', type: 'text' },
+    { key: 'body', label: 'Texto (vacío = según idioma)', type: 'textarea' },
+    { key: 'submitLabel', label: 'Botón (vacío = según idioma)', type: 'text' },
+    { key: 'note', label: 'Nota (vacío = según idioma)', type: 'text' },
+  ],
+  'meridian/Footer': [
+    { key: 'wordmark', label: 'Wordmark', type: 'text' },
+    { key: 'phone', label: 'Teléfono', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'location', label: 'Ubicación', type: 'text' },
+    { key: 'mapHref', label: 'Ver en el mapa — enlace', type: 'href' },
+    { key: 'studio', label: 'Estudio (Hecho por)', type: 'text' },
+    { key: 'studioHref', label: 'Estudio — enlace', type: 'href' },
+  ],
   'meridian/Masterplan': [
     {
       key: 'units',

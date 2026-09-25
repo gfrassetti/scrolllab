@@ -88,6 +88,8 @@ export const ALLOWED_SECTIONS = Object.freeze([
   'meridian/Interior',
   'meridian/Amenities',
   'meridian/Masterplan',
+  'meridian/Contact',
+  'meridian/Footer',
   'contact/ContactForm',
   'commerce/ProductGrid',
 ])

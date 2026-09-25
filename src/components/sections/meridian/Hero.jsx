@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
-import MenuOverlay, { Hamburger, LINKS_PRIMARY_DEFAULT } from './MenuOverlay'
-import { HeaderCta, HeaderLink } from './NavBits'
+import MenuOverlay, { Hamburger } from './MenuOverlay'
+import { HeaderCta, HeaderLink, LangSwitch } from './NavBits'
+import { useLang } from './lang'
 import Preloader from './Preloader'
 
 /**
@@ -147,17 +148,21 @@ function ScrubText({ text, tag: Tag = 'span', className, style }) {
 
 export default function Hero({
   wordmark = 'Meridian',
-  menuLabel = 'Menu',
-  floorPlansLabel = 'Floor Plans',
+  menuLabel,
+  floorPlansLabel,
   welcomeText = 'A real estate scrollytelling template — replace this copy, the hero sequence and the rest of the imagery with your own.',
   quoteKicker = 'THE VISION',
   quoteTitle = 'A scroll-scrubbed real estate template —\nreplace this headline with your\nown value statement.',
   inviteKicker = 'MEET',
   inviteTitle,
   inviteBody = '[Region], [Country]',
-  inviteCta = 'Explore Villas',
-  menuLinks = LINKS_PRIMARY_DEFAULT,
+  inviteCta,
+  menuLinks,
 }) {
+  const { lang, t } = useLang()
+  const menuText = menuLabel ?? t('menu')
+  const floorPlansText = floorPlansLabel ?? t('floorPlans')
+  const ctaText = inviteCta ?? t('exploreVillas')
   const track = useRef(null)
   const stage = useRef(null)
   const canvasRef = useRef(null)
@@ -209,7 +214,7 @@ export default function Hero({
       kicker: inviteKicker,
       title: resolvedInviteTitle,
       body: inviteBody,
-      cta: inviteCta,
+      cta: ctaText,
     },
   ]
 
@@ -678,10 +683,10 @@ export default function Hero({
             <div className="flex items-center gap-6">
               <Hamburger
                 open={menuOpen}
-                label={menuLabel}
+                label={menuText}
                 onClick={() => setMenuOpen((o) => !o)}
               />
-              {!menuOpen && <HeaderCta href="#villas" label={inviteCta} />}
+              {!menuOpen && <HeaderCta href="#villas" label={ctaText} />}
             </div>
           )}
           <a
@@ -698,7 +703,11 @@ export default function Hero({
           >
             {wordmark}
           </a>
-          <HeaderLink href="#floor-plans" label={floorPlansLabel} introAttr />
+          <div className="flex items-center gap-7">
+            <LangSwitch className="max-md:hidden" />
+            {/* keyed by language: the intro SplitText replaces this node's DOM, so React needs a fresh node to change its text */}
+            <HeaderLink key={lang} href="#floor-plans" label={floorPlansText} introAttr />
+          </div>
         </div>
 
         <MenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} links={menuLinks} />
@@ -802,7 +811,7 @@ export default function Hero({
           className="pointer-events-none absolute inset-x-0 bottom-8 z-20 text-center text-[11px] uppercase tracking-[0.3em] text-white/60"
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
-          Scroll down
+          {t('scrollDown')}
         </div>
       </div>
     </section>

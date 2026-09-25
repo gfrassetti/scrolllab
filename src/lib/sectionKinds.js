@@ -93,6 +93,8 @@ export const SECTION_KINDS = {
   'meridian/Interior': 'section',
   'meridian/Amenities': 'section',
   'meridian/Masterplan': 'section',
+  'meridian/Contact': 'section',
+  'meridian/Footer': 'footer',
   'signal/NavSignal': 'nav',
   'signal/HeroSignal': 'hero',
   'signal/PixelRevealGrid': 'section',

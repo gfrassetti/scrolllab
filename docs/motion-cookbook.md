@@ -41,6 +41,7 @@ Reglas: importar GSAP solo desde `lib/gsap.js`; página dentro de `SmoothScrollP
 | **P19** | Reveal circular en card (clip-path) | CSS | foto con `clip-path: circle(0 at <esquina del pin>)` → `circle(150%)` al activar; el título pasa a blanco; al salir colapsa hacia adentro |
 | **P20** | Slider por menú de links + hotspots | GSAP + React | mismo motor de máscara que P16 pero `pos` animado por click (1.3s `power3.inOut`); hotspots `%` dentro de la caja del slide (no de la foto) + tooltip a nivel de stage — ver abajo |
 | **P21** | Cards con foto ⇄ párrafo ("+" → "×") | CSS clip-path + GSAP | foto con `clip-path: circle(150% at <esquina>)` que colapsa a `circle(0)` al abrir; botón con fill que crece desde el centro en hover, tinta + `rotate(45deg)` al abrir; fotos con parallax interno — ver abajo |
+| **P22** | Aérea con puntos que laten + contorno al hover | GSAP + SVG | foto, contornos SVG y puntos comparten una caja con el aspect de la foto y coordenadas en px de la foto; hover = punto desaparece, contorno se traza (`strokeDashoffset` con largo REAL) + tooltip — ver abajo |
 | **P17** | Handoff con parallax (hero sticky → sección siguiente) | ScrollTrigger | al salir del sticky, el fondo baja `0.3 × distancia` mientras el stage sube 1:1 — ver abajo |
 
 ### Beat (producto SCROLLLAB — no es P15)
@@ -131,6 +132,14 @@ Sección `.infrastructure` de la referencia, reconstruida. Un solo estado `activ
 - Cada foto es más alta que su marco (`-top-[8%] h-[116%]`) y hace `yPercent -7 → 7` scrub: el parallax vive dentro del marco.
 - **Abrir:** clic en "+" → la foto colapsa hacia el botón (mismo círculo de P19) y aparece el párrafo que estaba detrás; "+" gira 45° a "×" y el botón pasa a fondo tinta. **Hover:** relleno gris que crece desde adentro (`clip-path: circle(0 → 75%)`).
 - Mobile = mismo layout, celdas de 82vw.
+
+### P22 — Masterplan (`Masterplan.jsx`)
+
+- **Una sola caja:** `aspect-ratio 16/9` (el de la foto) con la foto, un SVG de contornos (`viewBox` = píxeles de la foto) y los puntos en `%`. Así nada se desalinea con el viewport; en pantallas angostas la caja tiene `min-width: 1000px` y la banda hace scroll horizontal centrada.
+- **Punto:** botón de 44px fijo como zona de hover + un hijo visual (`.mer-mp-vis`) con dos anillos que laten (`scale 1 → 2.3`, `opacity .9 → 0`). Al activar, **solo el hijo** se achica a 0: si el propio botón desapareciera, el mouse "saldría" y el estado parpadearía.
+- **Contorno:** `<path>` blanco con relleno al 10% que se traza con `strokeDasharray/Offset = getTotalLength()`. **No usar `pathLength="1"`:** GSAP redondea los offsets sub-unitarios y el trazo "salta" de 1 a 0 en vez de dibujarse (medido: a 0.3s seguía en 1.00, a 0.6s ya en 0.00). Con el largo real (≈940) los valores intermedios sí se ven (923 → 801 → 470 → 139 → 0). Mismo criterio aplicado al croquis del preloader.
+- **Tooltip:** tarjeta arena anclada al punto, con flecha (cuadrado rotado); si el punto está a la derecha (>60%) se invierte. Contiene ambientes, superficie y el nombre de la unidad en serif grande.
+- **Touch:** el tap abre, otro tap (o tocar la foto) cierra. El builder edita solo los textos de cada unidad, no la geometría.
 
 ## Receta para un beat nuevo
 

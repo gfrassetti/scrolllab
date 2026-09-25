@@ -5,7 +5,47 @@
  * component.
  */
 
+import { useLang } from './lang'
+
 const MONO = { fontFamily: "'Space Mono', monospace" }
+
+// ES / EN toggle. The active language stays full-strength, the other one
+// dims and lifts on hover (an underline sweeps under it).
+export function LangSwitch({ className = '' }) {
+  const { lang, setLang } = useLang()
+  return (
+    <div
+      className={`meridian-lang pointer-events-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ${className}`}
+      style={MONO}
+      role="group"
+      aria-label="Language"
+    >
+      {['es', 'en'].map((code, i) => (
+        <span key={code} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden="true" className="h-3 w-px bg-current opacity-30" />}
+          <button
+            type="button"
+            lang={code}
+            aria-pressed={lang === code}
+            data-active={lang === code}
+            onClick={() => setLang(code)}
+            className="meridian-lang-btn relative py-1"
+          >
+            {code}
+          </button>
+        </span>
+      ))}
+      <style>{`
+        .meridian-lang-btn { opacity: 0.5; transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .meridian-lang-btn::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+        .meridian-lang-btn:hover { opacity: 0.9; }
+        .meridian-lang-btn:hover::after { transform: scaleX(1); }
+        .meridian-lang-btn[data-active="true"] { opacity: 1; }
+        .meridian-lang-btn[data-active="true"]::after { transform: scaleX(1); }
+      `}</style>
+    </div>
+  )
+}
 
 // Same vertical roll as the drawer links: the label slides up and an
 // italic clone rides in from below. `introAttr` lets Hero target the

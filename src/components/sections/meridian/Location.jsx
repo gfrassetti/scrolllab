@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
+import { useLang } from './lang'
 
 /**
  * MERIDIAN — Location (interactive map + distance cards)
@@ -60,20 +61,21 @@ const PINS = [
 
 const frame = (n) => `/meridian/hero/seq/${String(n).padStart(4, '0')}.webp`
 
+// unitKey resolves through the language dictionary at render time
 const DEFAULT_PLACES = [
-  ['5', 'min drive by car', 'Location 1', 8],
-  ['10', 'min drive by car', 'Location 2', 28],
-  ['12', 'min drive by car', 'Location 3', 48],
-  ['15', 'min drive by car', 'Location 4', 68],
-  ['20', 'min drive by car', 'Location 5', 88],
-  ['25', 'min drive by car', 'Location 6', 108],
-  ['30', 'min drive by car', 'Location 7', 128],
-  ['35', 'min drive by car', 'Location 8', 148],
-  ['40', 'min drive by car', 'Location 9', 168],
-  ['45', 'min drive by car', 'Location 10', 188],
-  ['1', 'hour drive by car', 'Location 11', 208],
-  ['70', 'min drive by car', 'Location 12', 228],
-].map(([distance, unit, title, f]) => ({ distance, unit, title, img: frame(f) }))
+  ['5', 'minDrive', 'Location 1', 8],
+  ['10', 'minDrive', 'Location 2', 28],
+  ['12', 'minDrive', 'Location 3', 48],
+  ['15', 'minDrive', 'Location 4', 68],
+  ['20', 'minDrive', 'Location 5', 88],
+  ['25', 'minDrive', 'Location 6', 108],
+  ['30', 'minDrive', 'Location 7', 128],
+  ['35', 'minDrive', 'Location 8', 148],
+  ['40', 'minDrive', 'Location 9', 168],
+  ['45', 'minDrive', 'Location 10', 188],
+  ['1', 'hourDrive', 'Location 11', 208],
+  ['70', 'minDrive', 'Location 12', 228],
+].map(([distance, unitKey, title, f]) => ({ distance, unitKey, title, img: frame(f) }))
 
 const SMALL_WORDS = new Set([
   'between', 'and', 'on', 'the', 'of', 'in', 'at', 'by', 'to', 'from', 'near', 'with', 'a',
@@ -138,13 +140,16 @@ function CloseIcon() {
 
 export default function Location({
   title = 'Prime location between [Area One], [Area Two], and [Area Three] on the picturesque coastline of [Country]',
-  ctaLabel = 'See on map',
+  ctaLabel,
   ctaHref = '#',
   location = '[Region], [Country]',
   places,
 }) {
+  const { t } = useLang()
   const valid = places?.filter((p) => p?.title || p?.img)
-  const list = (valid?.length ? valid : DEFAULT_PLACES).slice(0, PINS.length)
+  const list = (valid?.length ? valid : DEFAULT_PLACES)
+    .slice(0, PINS.length)
+    .map((p) => ({ ...p, unit: p.unit ?? t(p.unitKey || 'minDrive') }))
 
   const root = useRef(null)
   const bgRef = useRef(null)
@@ -371,7 +376,7 @@ export default function Location({
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
           <span aria-hidden="true" className="mer-cta-fill absolute inset-0" />
-          <span className="relative">{ctaLabel}</span>
+          <span className="relative">{ctaLabel ?? t('seeOnMap')}</span>
         </a>
         <p
           className="absolute top-28 right-5 text-[12px] uppercase tracking-[0.12em] max-md:hidden md:top-36 md:right-16"

@@ -818,6 +818,14 @@
         "Masterplan": {
           "name": "Masterplan",
           "blurb": "Aérea a ancho completo con puntos numerados que laten; al pasar el mouse por uno se dibuja el contorno de la propiedad con un tooltip (ambientes, superficie, nombre)."
+        },
+        "Contact": {
+          "name": "Contact",
+          "blurb": "Titular serif grande junto a un formulario de campos subrayados con etiquetas que flotan, validación en línea y botón que se rellena."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "Cerca del 80% del viewport: bloque de contacto, teléfono y email grandes, monograma, dirección con botón de mapa y redes, fila legal."
         }
       },
       "signal": {

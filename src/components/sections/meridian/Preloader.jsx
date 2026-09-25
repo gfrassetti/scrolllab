@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from '../../../lib/gsap'
 import { getLenis } from '../../../hooks/useLenis'
+import { useLang } from './lang'
 
 /**
  * MERIDIAN — Preloader
@@ -184,6 +185,7 @@ export default function Preloader({
   const markRef = useRef(null)
   const labelRef = useRef(null)
   const [gone, setGone] = useState(false)
+  const { t } = useLang()
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -357,7 +359,7 @@ export default function Preloader({
           className="text-[11px] uppercase tracking-[0.24em]"
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
-          Loading...
+          {t('loading')}
         </p>
         <p
           className="text-4xl leading-none md:text-5xl"

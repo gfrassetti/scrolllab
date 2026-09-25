@@ -333,6 +333,16 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'meridian/Interior': ['links'],
   'meridian/Amenities': ['title', 'label', 'items'],
   'meridian/Masterplan': ['units'],
+  'meridian/Contact': ['eyebrow', 'title', 'body', 'submitLabel', 'note'],
+  'meridian/Footer': [
+    'wordmark',
+    'phone',
+    'email',
+    'location',
+    'mapHref',
+    'studio',
+    'studioHref',
+  ],
   'contact/ContactForm': [
     'theme',
     'eyebrow',

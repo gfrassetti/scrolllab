@@ -16,7 +16,9 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  * band scrolls sideways.
  *
  * Touch has no hover: a tap opens a unit, another tap (or tapping the
- * photo) closes it.
+ * photo) closes it. Where the band scrolls sideways (< 1000px) a thin
+ * progress bar sits along the bottom and two floating arrows hint at, and
+ * drive, the scroll.
  *
  * REPLACE ME: public/meridian/gallery/masterplan.webp is a demo aerial. If
  * you swap it, redraw OUTLINES / DOTS below on your own plots (image pixel
@@ -81,11 +83,38 @@ export default function Masterplan({ units }) {
     { scope: scroller },
   )
 
-  // on narrow screens start centred in the wide band
+  const barRef = useRef(null)
+  const [edge, setEdge] = useState({ left: false, right: true })
+
+  // on narrow screens start centred in the wide band, and keep the
+  // progress bar + arrow visibility in sync with the scroll position
   useEffect(() => {
     const el = scroller.current
-    if (el && el.scrollWidth > el.clientWidth) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+    if (!el) return undefined
+    if (el.scrollWidth > el.clientWidth) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+    const sync = () => {
+      const max = el.scrollWidth - el.clientWidth
+      const w = Math.min(1, el.clientWidth / el.scrollWidth)
+      const x = max > 0 ? (el.scrollLeft / max) * (1 - w) : 0
+      if (barRef.current) {
+        barRef.current.style.width = `${w * 100}%`
+        barRef.current.style.left = `${x * 100}%`
+      }
+      setEdge({ left: el.scrollLeft > 8, right: el.scrollLeft < max - 8 })
+    }
+    sync()
+    el.addEventListener('scroll', sync, { passive: true })
+    window.addEventListener('resize', sync)
+    return () => {
+      el.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
+    }
   }, [])
+
+  const nudge = (dir) => {
+    const el = scroller.current
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.6, behavior: 'smooth' })
+  }
 
   const drawn = useRef(new Set())
   const setOutline = (i, on) => {
@@ -128,6 +157,34 @@ export default function Masterplan({ units }) {
 
   return (
     <section id="masterplan" className="relative bg-[#2a2622]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-6 bottom-5 z-20 h-[2px] bg-white/35 min-[1000px]:hidden"
+      >
+        <span ref={barRef} className="absolute top-0 h-full bg-white" style={{ width: '30%' }} />
+      </div>
+      {[-1, 1].map((dir) => (
+        <button
+          key={dir}
+          type="button"
+          aria-label={dir < 0 ? 'Scroll left' : 'Scroll right'}
+          onClick={() => nudge(dir)}
+          className="mer-mp-arrow absolute top-1/2 z-20 -mt-5 flex h-10 w-10 items-center justify-center rounded-full min-[1000px]:hidden"
+          data-show={dir < 0 ? edge.left : edge.right}
+          style={dir < 0 ? { left: '12px', '--dir': -1 } : { right: '12px', '--dir': 1 }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            style={{ transform: dir < 0 ? 'rotate(180deg)' : 'none' }}
+          >
+            <path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      ))}
       <div ref={scroller} className="mer-mp-scroll overflow-x-auto">
         <div
           className="relative w-full min-w-[1000px]"
@@ -233,6 +290,10 @@ export default function Masterplan({ units }) {
       </div>
 
       <style>{`
+        .mer-mp-arrow { color: #fff; background: rgba(42, 38, 34, 0.45); border: 1px solid rgba(255, 255, 255, 0.55); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .mer-mp-arrow[data-show="true"] { opacity: 1; pointer-events: auto; animation: mer-mp-nudge 2.2s ease-in-out infinite; }
+        @keyframes mer-mp-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(calc(var(--dir) * 3px)); } }
+        @media (prefers-reduced-motion: reduce) { .mer-mp-arrow[data-show="true"] { animation: none; } }
         .mer-mp-scroll { scrollbar-width: none; -ms-overflow-style: none; }
         .mer-mp-scroll::-webkit-scrollbar { display: none; }
 

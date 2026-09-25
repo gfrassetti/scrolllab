@@ -90,6 +90,8 @@ import MeridianPanorama from '../components/sections/meridian/Panorama'
 import MeridianInterior from '../components/sections/meridian/Interior'
 import MeridianAmenities from '../components/sections/meridian/Amenities'
 import MeridianMasterplan from '../components/sections/meridian/Masterplan'
+import MeridianContact from '../components/sections/meridian/Contact'
+import MeridianFooter from '../components/sections/meridian/Footer'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import PixelRevealGrid from '../components/sections/signal/PixelRevealGrid'
@@ -278,6 +280,8 @@ const allModels = [
       { id: 'meridian/Interior', name: 'Interior', kind: 'section', component: MeridianInterior, blurb: 'Full-viewport slider driven by a link menu, mask transition, and pulsing hotspots that open tooltips.' },
       { id: 'meridian/Amenities', name: 'Amenities', kind: 'section', component: MeridianAmenities, blurb: 'Parallax headline and a draggable row of ruled cards: click the + and the photo collapses into a paragraph.' },
       { id: 'meridian/Masterplan', name: 'Masterplan', kind: 'section', component: MeridianMasterplan, blurb: 'Full-width aerial with pulsing numbered dots; hover one and the property outline is drawn with a tooltip (rooms, area, unit name).' },
+      { id: 'meridian/Contact', name: 'Contact', kind: 'section', component: MeridianContact, blurb: 'Large serif headline beside an underline-field form with floating labels, inline validation and a filling submit button.' },
+      { id: 'meridian/Footer', name: 'Footer', kind: 'footer', component: MeridianFooter, blurb: 'About 80% of the viewport: contact block, big phone and email, monogram, address with map button and socials, hairline legal row.' },
     ],
   },
   {

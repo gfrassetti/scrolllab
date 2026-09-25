@@ -112,15 +112,15 @@ const TEMPLATE_META = [
     tagline: 'mass and measure',
     palette: ['#f4f1ea', '#111111', '#111111'],
   },
-  // MERIDIAN (10) — deliberately NOT listed yet: it is hidden from the home
-  // until launch (see LOCAL_ONLY_SKUS in src/lib/pricing.js). The copy
-  // (templates.meridian.{vibe,tags,description}) already lives in both
-  // locales. To launch: uncomment this entry, add public/catalog/meridian.jpg
-  // and take it out of COMING_SOON / LOCAL_ONLY / BUILDER_HIDDEN. Entry to
-  // add (same shape as the ones above): id '10', name 'MERIDIAN', path
-  // '/templates/meridian', category 'REAL ESTATE', tagline 'scroll the site',
-  // palette ['#dfd8cf', '#2a2622', '#8f7a5e']. (Written as prose on purpose:
-  // scripts/check-consistency.mjs greps this file for the sku literal.)
+  {
+    id: '10',
+    sku: 'meridian',
+    name: 'MERIDIAN',
+    path: '/templates/meridian',
+    category: 'REAL ESTATE',
+    tagline: 'scroll the site',
+    palette: ['#dfd8cf', '#2a2622', '#8f7a5e'],
+  },
 ]
 
 function catalogCoverSrc(sku) {
@@ -199,9 +199,17 @@ export default function TemplatesIndex() {
     }
   }
 
+  // Ordered by list price, cheapest first (stable: ties keep their order
+  // in TEMPLATE_META). The displayed "NN /" number follows the position, so
+  // a price change reorders the catalog without anyone renumbering by hand.
+  // To show the most expensive first, flip the comparison below.
   const templates = useMemo(
     () =>
-      TEMPLATE_META.map((meta) => ({
+      [...TEMPLATE_META]
+        .map((meta, i) => ({ meta, i, price: templatePriceUsd(meta.sku) ?? Infinity }))
+        .sort((a, b) => a.price - b.price || a.i - b.i)
+        .map(({ meta }, pos) => ({ ...meta, id: String(pos + 1).padStart(2, '0') }))
+        .map((meta) => ({
         ...meta,
         vibe: t(`templates.${meta.sku}.vibe`),
         tags: t(`templates.${meta.sku}.tags`),

@@ -818,6 +818,14 @@
         "Masterplan": {
           "name": "Masterplan",
           "blurb": "Full-width aerial with pulsing numbered dots; hover one and the property outline is drawn with a tooltip (rooms, area, unit name)."
+        },
+        "Contact": {
+          "name": "Contact",
+          "blurb": "Large serif headline beside an underline-field form with floating labels, inline validation and a filling submit button."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "About 80% of the viewport: contact block, big phone and email, monogram, address with map button and socials, hairline legal row."
         }
       },
       "signal": {
