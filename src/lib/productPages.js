@@ -25,7 +25,7 @@ export function isProductSku(sku) {
 
 /** Textos que no cambian de un template a otro. Todo lo que dicen es verificable en el sitio. */
 export const PRODUCT_COPY = {
-  subtitle: 'Template scrollytelling en React + GSAP',
+  subtitle: 'Template scrollytelling',
   idealForLabel: 'Ideal para',
   priceLabel: (usd) => `USD ${usd} de lista`,
   priceNote: 'Pago único, sin suscripción. Se cobra en pesos a la cotización vigente.',
@@ -123,8 +123,8 @@ export function productPageData(sku, messages) {
   const { pitch, idealFor } = splitDescription(meta.description)
   const url = productUrl(sku)
 
-  const title = `${name} — Template ${lowerFirst(meta.vibe)} en React + GSAP | ${SITE_NAME}`
-  const description = `${firstSentence(pitch, 125)} Template en React + GSAP con código fuente, desde USD ${priceUsd}.`
+  const title = `${name} — Template ${lowerFirst(meta.vibe)} | ${SITE_NAME}`
+  const description = `${firstSentence(pitch, 125)} Template con código fuente, desde USD ${priceUsd}.`
 
   return {
     sku,
@@ -153,7 +153,7 @@ export function productPageData(sku, messages) {
     robots: INDEXABLE_ROBOTS,
     canonical: url,
     ogImage: `${SITE_URL}/og/${sku}.jpg`,
-    ogImageAlt: `${name} — ${meta.vibe}: template scrollytelling en React + GSAP, ${SITE_NAME}`,
+    ogImageAlt: `${name} — ${meta.vibe}: template scrollytelling, ${SITE_NAME}`,
     copy: PRODUCT_COPY,
   }
 }
@@ -171,7 +171,7 @@ export function productJsonLd(data) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: `${data.name} — template ${lowerFirst(data.vibe)} en React + GSAP`,
+    name: `${data.name} — template ${lowerFirst(data.vibe)}`,
     description: data.description,
     sku: data.sku,
     url: data.url,

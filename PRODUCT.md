@@ -40,7 +40,7 @@ impeccable:product-schema: 1
 
 **Personality:** editorial, preciso, cinematográfico, con voz rioplatense en el chrome del producto (“vos”).
 
-**Tone of voice:** directo, craft-first, sin marketing vacío. Tagline: *Solo scrolleá.* Nombre de marca: **SCROLL LAB** (`src/lib/site.js`). Soporte: `hola@scrolllab.com.ar`. Dominio: `https://www.scrolllab.com.ar`.
+**Tone of voice:** directo, craft-first, sin marketing vacío. Tagline: *Webs que se mueven.* Nombre de marca: **SCROLL LAB** (`src/lib/site.js`). Soporte: `hola@scrolllab.com.ar`. Dominio: `https://www.scrolllab.com.ar`.
 
 **Emotional goals:** que el comprador sienta “esto podría estar en Awwwards” y que el marketplace se sienta a la altura de lo que vende.
 

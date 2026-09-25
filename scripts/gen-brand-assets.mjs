@@ -72,7 +72,7 @@ const ogHtml = `<!doctype html>
 </style>
 </head>
 <body>
-  <p class="eyebrow">Templates scrollytelling · React + GSAP</p>
+  <p class="eyebrow">Templates scrollytelling · código fuente incluido</p>
 
   <div>
     <div class="lockup">

@@ -49,9 +49,9 @@ function link(channel, sku) {
 
 const COPY = {
   es: {
-    hook: 'Webs que cuentan una historia mientras scrolleás.',
+    hook: 'Webs que cuentan una historia mientras se mueven.',
     intro: (name, vibe) => `${name} — ${vibe}.`,
-    body: (tags) => `Template en React + GSAP, con el código fuente incluido: ${tags}.`,
+    body: (tags) => `Template con el código fuente incluido: ${tags}.`,
     cta: `Mirá la demo y, si te sirve para un proyecto, tenés ${WELCOME_COUPON_PERCENT}% menos en tu primera compra.`,
     bio: 'Link en la bio 👆',
     sections: {
@@ -61,9 +61,9 @@ const COPY = {
     },
   },
   en: {
-    hook: 'Websites that tell a story as you scroll.',
+    hook: 'Websites that tell a story as they move.',
     intro: (name, vibe) => `${name} — ${vibe}.`,
-    body: (tags) => `A React + GSAP template, source code included: ${tags}.`,
+    body: (tags) => `A template with source code included: ${tags}.`,
     cta: `Watch the demo — and if it fits a project, get ${WELCOME_COUPON_PERCENT}% off your first purchase.`,
     bio: 'Link in bio 👆',
     sections: {

@@ -57,7 +57,7 @@ describe('productPageData — cada template en venta', () => {
       const d = productPageData(sku, es)
 
       assert.ok(d.title.startsWith(sku.toUpperCase()), d.title)
-      assert.ok(d.title.includes('React + GSAP'), d.title)
+      assert.ok(!d.title.includes('React') && !d.title.includes('GSAP'), d.title)
       assert.ok(d.title.length <= 75, `título de ${d.title.length} caracteres: ${d.title}`)
 
       assert.ok(d.description.length >= 90 && d.description.length <= 190, `descripción de ${d.description.length}: ${d.description}`)
@@ -190,7 +190,7 @@ describe('renderProductPage', () => {
   it('deja el contenido dentro de #root: título, precio, secciones y links', () => {
     assert.ok(!html.includes('<div id="root"></div>'), '#root quedó vacío')
     const root = html.slice(html.indexOf('<div id="root">'))
-    assert.ok(root.includes('<h1>NOCTURNE — Template scrollytelling en React + GSAP</h1>'))
+    assert.ok(root.includes('<h1>NOCTURNE — Template scrollytelling</h1>'))
     assert.ok(root.includes(`USD ${TEMPLATE_PRICES_USD.nocturne} de lista`))
     for (const s of data.sections) assert.ok(root.includes(s.name), s.name)
     for (const t of data.tags) assert.ok(root.includes(t), t)

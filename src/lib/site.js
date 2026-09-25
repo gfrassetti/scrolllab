@@ -1,6 +1,6 @@
 // Marca centralizada del sitio vendedor.
 export const SITE_NAME = 'SCROLL LAB'
-export const SITE_TAGLINE = 'Solo scrolleá.'
+export const SITE_TAGLINE = 'Webs que se mueven.'
 
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 

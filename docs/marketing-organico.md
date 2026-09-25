@@ -14,9 +14,9 @@ estudios que venden sitios) mostrando el producto, no diciendo que es bueno.
 | Qué canal trajo cada cuenta | terminal | `npm run leads:stats` |
 
 Qué ve quien mira el video (sin sonido, se entiende leyendo): arriba una frase que
-dice qué es ("Webs que cuentan una historia mientras scrolleás"), la demo grande
-scrolleando, a los pocos segundos el nombre del template y "React + GSAP, código
-fuente incluido", y un cierre con "Llevate el código y usalo en tu proyecto", el
+dice qué es ("Webs que cuentan una historia mientras se mueven"), la demo grande
+scrolleando, a los pocos segundos el nombre del template y "código fuente
+incluido", y un cierre con "Llevate el código y usalo en tu proyecto", el
 sitio y el 10% de la primera compra. La primera frase ya está en el cuadro 0, así
 que sirve de portada.
 
