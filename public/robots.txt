@@ -1,7 +1,59 @@
-User-agent: *
+# ──────────────────────────────────────────────────────────────────────────
+# Crawlers de ENTRENAMIENTO de IA: se bloquean. No queremos que los demos
+# (diseño + código de cada template) alimenten modelos. Los answer/search
+# engines de IA quedan PERMITIDOS más abajo, a propósito, porque citan la
+# marca y traen tráfico. Política: docs/ip-protection-brief.md §3.6.
+# ──────────────────────────────────────────────────────────────────────────
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+# Answer / search engines de IA: permitidos (visibilidad + tráfico de cita).
+User-agent: OAI-SearchBot
 Allow: /
 
-# Rutas privadas o de sesión: no aportan a la búsqueda.
+User-agent: Chatgpt-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Resto de crawlers (incluye Googlebot y Bingbot): indexar todo salvo rutas
+# privadas o de sesión, que no aportan a la búsqueda.
+User-agent: *
+Allow: /
 Disallow: /account
 Disallow: /cart
 Disallow: /login

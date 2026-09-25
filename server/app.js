@@ -24,6 +24,7 @@ import {
 } from './middleware.js'
 import { validateCheckoutItems, assertObjectIdLike } from './validation.js'
 import { isHostableSectionId, HOSTABLE_SECTIONS } from './sections.js'
+import { purchaseCode } from './license.js'
 import { sanitizeSectionProps } from './sectionFields.js'
 import {
   newHostedKey,
@@ -396,6 +397,7 @@ export async function createApp(config) {
           currency_id: o.currency_id,
           createdAt: o.createdAt,
           downloadCount: o.downloadCount || 0,
+          purchaseCode: purchaseCode(db.uid(o) || o.id, config.downloadSecret),
         })),
       })
     }),

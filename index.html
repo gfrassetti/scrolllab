@@ -23,7 +23,7 @@
 
     <!--
       SEO: categoría = plantillas web / web templates (mismo radar que Envato, etc.).
-      Diferencial = storytelling + código fuente React.
+      Diferencial = storytelling + código fuente propio.
     -->
     <title>SCROLL LAB — Plantillas web | Web templates</title>
     <meta
@@ -32,11 +32,14 @@
     />
     <meta
       name="keywords"
-      content="plantillas web, web templates, website templates, plantillas para sitios web, react templates, storytelling templates, landing page templates, plantillas HTML, código fuente"
+      content="plantillas web, web templates, website templates, plantillas para sitios web, storytelling templates, landing page templates, plantillas HTML, código fuente"
     />
     <meta name="author" content="SCROLL LAB" />
     <meta name="application-name" content="SCROLL LAB" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, noai, noimageai"
+    />
     <link rel="canonical" href="https://www.scrolllab.com.ar/" />
 
     <!-- Open Graph -->
@@ -98,15 +101,17 @@
           if (el) el.setAttribute(attr, value)
         }
         if (path.indexOf('/templates/') === 0) {
-          if (robots) robots.setAttribute('content', 'noindex, follow')
-          if (canonical) canonical.setAttribute('href', 'https://www.scrolllab.com.ar/')
-          set(ogUrl, 'content', 'https://www.scrolllab.com.ar/')
+          // Los demos indexan (canónico propio). El bloqueo de IA (noai) ya está
+          // en la meta base + robots.txt; no se toca acá.
+          var here = 'https://www.scrolllab.com.ar' + path
+          if (canonical) canonical.setAttribute('href', here)
+          set(ogUrl, 'content', here)
           return
         }
         if (path === '/builder') {
           var title = 'SCROLL LAB — Builder | Armá tu plantilla web'
           var body =
-            'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente React, editable.'
+            'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente, editable.'
           document.title = title
           set(desc, 'content', body)
           set(ogTitle, 'content', title)
@@ -141,7 +146,7 @@
             "url": "https://www.scrolllab.com.ar/",
             "email": "hola@scrolllab.com.ar",
             "logo": "https://www.scrolllab.com.ar/logo.svg",
-            "description": "Marketplace de plantillas web / storytelling templates. Web templates con código fuente React para desarrolladores."
+            "description": "Marketplace de plantillas web / storytelling templates. Web templates con código fuente para desarrolladores."
           },
           {
             "@type": "WebSite",

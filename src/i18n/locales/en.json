@@ -195,6 +195,9 @@
     "scrollDown": "Scroll to explore",
     "modelsLabel": "The models — 09",
     "modelsScrollHint": "Scroll to explore",
+    "builderDemoEyebrow": "In 10 seconds",
+    "builderDemoTitle": "You build it, you take it",
+    "builderDemoBody": "Here's how the builder works: pick sections from our models, put together your own page, and take the source code with you — no need to pay for a whole template if you don't need one.",
     "modelsBrowseHint": "Hover · open a demo",
     "cycleLabel": "The bar",
     "cycleWords": [
@@ -818,6 +821,8 @@
     "pending": "Confirming payment…",
     "failed": "Failed",
     "download": "Download ZIP",
+    "license": "License",
+    "downloadsCount": "Downloads: {{count}}",
     "preview": "See preview",
     "previewOf": "Preview · {{name}}",
     "previewCustom": "Your composition",

@@ -6,6 +6,7 @@ import {
   packBundleTemplate,
 } from '../packaging.js'
 import { BUNDLE_MODELS } from '../catalog.js'
+import { purchaseCode } from '../license.js'
 import { HttpError } from '../validation.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
@@ -52,6 +53,7 @@ export async function ensureOrderZip(order, user, config) {
       orderId,
       email: user.email,
       date: new Date().toISOString().slice(0, 10),
+      purchaseCode: purchaseCode(orderId, config.downloadSecret),
     }
 
     const item = order.items[0]

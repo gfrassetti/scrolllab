@@ -1,3 +1,24 @@
+import crypto from 'node:crypto'
+
+/**
+ * Código de compra legible y determinístico por orden (estilo Envato). No usa
+ * base de datos: se deriva del número de orden, así que es estable y hasta las
+ * órdenes viejas tienen el suyo. Hoy es cosmético (se muestra en la cuenta y en
+ * el LICENSE.txt); el día que LAB necesite validar compras, se verifica
+ * recomputándolo. Alfabeto sin I/L/O/U para que no se confunda al leerlo/dictarlo.
+ */
+const PC_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
+export function purchaseCode(orderId, secret) {
+  if (!orderId) return null
+  const h = crypto
+    .createHmac('sha256', secret || 'scrolllab')
+    .update(`pc:${orderId}`)
+    .digest()
+  let s = ''
+  for (let i = 0; i < 12; i++) s += PC_ALPHABET[h[i] % 32]
+  return `SL-${s.slice(0, 4)}-${s.slice(4, 8)}-${s.slice(8, 12)}`
+}
+
 /**
  * Texto de la Licencia Regular que viaja como `LICENSE.txt` en cada ZIP
  * (docs/ip-protection-brief.md §3.1: "el EULA viaja en el ZIP").
@@ -9,12 +30,13 @@
  * NOTA LEGAL: la redacción final la revisa un abogado (brief §6). Este texto es
  * la política del producto puesta en prosa, no un dictamen legal.
  */
-export function buildLicenseText({ siteName, orderId, email, sku, date }) {
+export function buildLicenseText({ siteName, orderId, email, sku, date, purchaseCode }) {
+  const codeLine = purchaseCode ? `Código:    ${purchaseCode}\n` : ''
   return `${siteName} — LICENCIA REGULAR
 =====================================
 
 Orden:     ${orderId}
-Comprador: ${email}
+${codeLine}Comprador: ${email}
 Ítem:      ${sku}
 Fecha:     ${date}
 

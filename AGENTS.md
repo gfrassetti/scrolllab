@@ -243,11 +243,12 @@ src/lib/
 ```
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 279 con 8 secciones incluidas, USD 15 por cada sección
+tramos**: base de USD 235 con 8 secciones incluidas, USD 15 por cada sección
 extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
-receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269; la
-base del builder tiene que quedar **arriba** del template más caro. Las constantes
-viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
+receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
+sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
+que quedar **arriba** del template más caro que SÍ está en venta (hoy USD 229).
+Las constantes viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
 valida la paridad. Detalle en `docs/DEPLOY.md`.
 
 Never trust client prices. Never obfuscate sold JSX — license + account + signed links + watermark.
@@ -316,7 +317,7 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 #### Precio
 
 - RATIO lista **USD 269** (Beat, el más caro). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
-- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 279) tiene que superar al template más caro. Si subís un SKU, subí la base o `npm run check` falla.
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 235) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
 

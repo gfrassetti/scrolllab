@@ -7,6 +7,7 @@ import {
   COMMERCE_PACK_SURCHARGE_USD,
   MAX_CUSTOM_SECTIONS,
   TEMPLATE_PRICES_USD,
+  COMING_SOON_SKUS,
   arsFromUsd,
   customExtraSections,
   estimateCustomPriceUsd,
@@ -61,8 +62,15 @@ describe('estimateCustomPriceUsd', () => {
     )
   })
 
-  it('la base queda arriba del template más caro', () => {
-    assert.ok(CUSTOM_BASE_PRICE_USD > Math.max(...Object.values(TEMPLATE_PRICES_USD)))
+  it('la base queda arriba del template más caro en venta', () => {
+    // Los coming-soon (ej. ratio) no cuentan: todavía no se pueden comprar,
+    // así que no deberían fijar el piso del builder (ver check-consistency.mjs).
+    const priciestSellable = Math.max(
+      ...Object.entries(TEMPLATE_PRICES_USD)
+        .filter(([sku]) => !COMING_SOON_SKUS.includes(sku))
+        .map(([, usd]) => usd),
+    )
+    assert.ok(CUSTOM_BASE_PRICE_USD > priciestSellable)
   })
 
   it('nunca baja al agregar secciones', () => {

@@ -6,10 +6,13 @@ import { after, before, describe, it } from 'node:test'
 
 import { BUNDLE_MODELS } from '../catalog.js'
 import {
+  extractInvisibleMark,
+  licenseFingerprint,
   packBundleTemplate,
   packCustomTemplate,
   packFixedTemplate,
 } from '../packaging.js'
+import { purchaseCode } from '../license.js'
 import { brokenImports, readZip } from './helpers/zip.js'
 
 /**
@@ -19,7 +22,11 @@ import { brokenImports, readZip } from './helpers/zip.js'
  * quedó afuera. Un ZIP roto no lo detecta ningún test del repo.
  */
 
-const LICENSE = { orderId: 'test-order', email: 'buyer@test.com' }
+const LICENSE = {
+  orderId: 'test-order',
+  email: 'buyer@test.com',
+  purchaseCode: 'SL-TEST-0000-0001',
+}
 
 let tmp
 
@@ -127,6 +134,11 @@ describe('ZIP de cada template', () => {
         /buyer@test\.com/,
         'la licencia no lleva el watermark del comprador',
       )
+      assert.match(
+        files.get('LICENSE.txt').toString('utf8'),
+        /SL-TEST-0000-0001/,
+        'la licencia no muestra el código de compra',
+      )
       assert.deepEqual(brokenImports(files), [])
 
       for (const name of files.keys()) {
@@ -171,6 +183,63 @@ describe('ZIP de cada template', () => {
       packFixedTemplate({ model: 'monolith', destPath, licenseMeta: LICENSE }),
     )
     assert.ok(files.has('src/components/sections/contact/ContactForm.jsx'))
+  })
+})
+
+describe('purchase code', () => {
+  it('es determinístico por orden y con formato SL-XXXX-XXXX-XXXX', () => {
+    const a = purchaseCode('order-abc', 'secret-1')
+    assert.equal(a, purchaseCode('order-abc', 'secret-1'), 'no es estable para la misma orden')
+    assert.match(a, /^SL-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/, 'formato inesperado')
+    assert.notEqual(a, purchaseCode('order-xyz', 'secret-1'), 'dos órdenes dan el mismo código')
+    assert.doesNotMatch(a.slice(3), /[ILOU]/, 'usa letras ambiguas (I/L/O/U) en el cuerpo')
+    assert.equal(purchaseCode('', 'secret-1'), null, 'sin orderId debería ser null')
+  })
+})
+
+describe('fingerprint distribuido + invisible', () => {
+  const EDGE = '⁠⁠'
+
+  it('reparte la marca visible + invisible en varios archivos', async () => {
+    const files = await pack('fp', (destPath) =>
+      packFixedTemplate({ model: 'chapters', destPath, licenseMeta: LICENSE }),
+    )
+
+    const app = files.get('src/App.jsx').toString('utf8')
+    const css = files.get('src/index.css').toString('utf8')
+    const readme = files.get('README.md').toString('utf8')
+    const carriers = [
+      ['App.jsx', app],
+      ['index.css', css],
+      ['README.md', readme],
+    ]
+
+    // 1 · marca VISIBLE repartida: borrar el encabezado de App.jsx no borra la traza.
+    for (const [name, body] of carriers) {
+      assert.match(body, /SCROLLLAB-LICENSE test-order/, `${name} sin marca visible`)
+    }
+
+    // 2 · marca INVISIBLE recuperable e idéntica en los tres archivos.
+    const expected = licenseFingerprint(LICENSE)
+    assert.ok(expected, 'no se derivó el fingerprint')
+    for (const [name, body] of carriers) {
+      assert.equal(
+        extractInvisibleMark(body),
+        expected,
+        `${name} sin marca invisible recuperable`,
+      )
+    }
+
+    // 3 · el fingerprint es determinístico por orden y distinto para otra compra.
+    assert.notEqual(expected, licenseFingerprint({ orderId: 'otra', email: 'x@y.com' }))
+
+    // 4 · la marca invisible vive SÓLO dentro de comentarios (no rompe el build):
+    //     en App.jsx cae dentro del bloque /** */ del encabezado.
+    assert.ok(app.includes(EDGE), 'App.jsx sin marca invisible')
+    assert.ok(
+      app.indexOf(EDGE) < app.indexOf('*/'),
+      'la marca invisible de App.jsx quedó fuera del comentario',
+    )
   })
 })
 

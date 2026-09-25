@@ -757,21 +757,6 @@ export default function TemplatesIndex() {
           </div>
         </section>
 
-        {/* Qué es esto, en 10 segundos: el modelo (elegís secciones → se arma →
-            comprás → ZIP) antes del catálogo, para que el scroll de modelos se
-            recorra con intención. El demo de LAB vive en /lab, no se repite acá. */}
-        <div className="mx-auto mt-14 mb-16 max-w-[1300px] md:mt-24 md:mb-24">
-          <p className="text-center text-eyebrow uppercase text-accent">
-            En 10 segundos
-          </p>
-          <h2 className="mx-auto mt-3 max-w-[18ch] text-center text-[clamp(1.9rem,1rem+4.5vw,3.75rem)] leading-[1.03] font-medium tracking-[-0.03em]">
-            Lo armás y te lo llevás
-          </h2>
-          <div className="mt-6">
-            <BuilderDemo key={locale} />
-          </div>
-        </div>
-
         <section id="templates" className="scroll-mt-20 border-t border-ink/15">
           <div className="flex items-baseline justify-between pt-8 md:pt-10">
             <p className="text-eyebrow uppercase text-ink/50">
@@ -979,6 +964,23 @@ export default function TemplatesIndex() {
             </div>
           </div>
         </section>
+
+        {/* Ya viste el catálogo: ahora el otro camino — armar la tuya en vez
+            de un modelo fijo. El demo de LAB vive en /lab, no se repite acá. */}
+        <div className="mx-auto mt-16 mb-16 max-w-[1300px] md:mt-20 md:mb-24">
+          <p className="text-center text-eyebrow uppercase text-accent">
+            {t('home.builderDemoEyebrow')}
+          </p>
+          <h2 className="mx-auto mt-3 max-w-[18ch] text-center text-[clamp(1.9rem,1rem+4.5vw,3.75rem)] leading-[1.03] font-medium tracking-[-0.03em]">
+            {t('home.builderDemoTitle')}
+          </h2>
+          <p className="mx-auto mt-4 max-w-[52ch] text-center text-body-lg leading-relaxed text-ink/70">
+            {t('home.builderDemoBody')}
+          </p>
+          <div className="mt-8">
+            <BuilderDemo key={locale} />
+          </div>
+        </div>
 
         {/* Ofertas justo después del deseo (Bundle → Builder). */}
         <section

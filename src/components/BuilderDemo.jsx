@@ -422,26 +422,35 @@ export default function BuilderDemo() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between border-t border-[var(--ld-line)] pt-3">
-                  <span className="font-mono text-[15px] font-medium tabular-nums">
-                    <span data-price>$ 0</span>
-                  </span>
-                  <span
-                    data-buy
-                    className="bg-[var(--ld-ink)] px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] text-[var(--ld-surface)]"
+                {/* precio + compra: relative para que el aviso de "pago
+                    aprobado" pueda cubrir esta fila exacta (inset-0), sea de
+                    una línea (desktop / EN) o dos (ARS + "Comprar ahora" no
+                    entran lado a lado en una columna angosta). */}
+                <div className="relative mt-3 border-t border-[var(--ld-line)] pt-3">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-0">
+                    <span className="font-mono text-[15px] font-medium tabular-nums">
+                      <span data-price>$ 0</span>
+                    </span>
+                    <span
+                      data-buy
+                      className="w-full bg-[var(--ld-ink)] px-3.5 py-1.5 text-center text-[10px] uppercase tracking-[0.2em] text-[var(--ld-surface)] md:w-auto md:shrink-0 md:whitespace-nowrap"
+                    >
+                      {c.buy}
+                    </span>
+                  </div>
+                  {/* pago aprobado: cubre esta fila entera (inset-0) al pasar a
+                      autoAlpha:1 — reemplaza el CTA sin importar su altura. */}
+                  <div
+                    data-paid
+                    className="absolute inset-0 z-20 flex items-center justify-center gap-1.5 border-t border-[var(--ld-ok-line)] px-3 text-center text-[9.5px] font-medium uppercase tracking-[0.14em] text-[var(--ld-ok)]"
+                    style={{
+                      background: 'color-mix(in srgb, var(--ld-ok) 14%, var(--ld-surface))',
+                    }}
                   >
-                    {c.buy}
-                  </span>
+                    {c.paid}
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* overlay: pago aprobado */}
-            <div
-              data-paid
-              className="absolute bottom-4 left-4 flex items-center gap-1.5 border border-[var(--ld-ok-line)] bg-[var(--ld-ok-bg)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--ld-ok)]"
-            >
-              {c.paid}
             </div>
           </div>
 

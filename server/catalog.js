@@ -135,7 +135,7 @@ export const PRODUCTS = {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 279,
+    unit_price_usd: 235,
     currency_id: 'ARS',
   },
 }

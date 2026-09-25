@@ -10,24 +10,24 @@ export const SITE_URL = 'https://www.scrolllab.com.ar'
 /**
  * Meta SEO del marketplace.
  * Categoría: plantillas web / web templates (radar Envato-like).
- * Diferencial: storytelling + fuente React.
+ * Diferencial: storytelling + código fuente propio.
  */
 export const SITE_SEO = {
   title: 'SCROLL LAB — Plantillas web | Web templates',
   description:
     'Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable.',
   keywords:
-    'plantillas web, web templates, website templates, plantillas para sitios web, react templates, storytelling templates, landing page templates',
+    'plantillas web, web templates, website templates, plantillas para sitios web, storytelling templates, landing page templates',
 }
 
 /** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
 export const BUILDER_SEO = {
   title: 'SCROLL LAB — Builder | Armá tu plantilla web',
   description:
-    'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente React, editable.',
+    'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente, editable.',
 }
 
-const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large'
+const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large, noai, noimageai'
 
 function normalizePath(pathname) {
   const path = String(pathname || '/')
@@ -39,11 +39,13 @@ function normalizePath(pathname) {
 export function seoForPath(pathname) {
   const path = normalizePath(pathname)
   if (path.startsWith('/templates/')) {
+    // Los demos SÍ indexan (descubrimiento): el render es público igual y el
+    // bloqueo de crawlers de IA vive aparte (robots.txt + noai). Canónico propio.
     return {
       title: SITE_SEO.title,
       description: SITE_SEO.description,
-      robots: 'noindex, follow',
-      canonical: `${SITE_URL}/`,
+      robots: INDEXABLE_ROBOTS,
+      canonical: `${SITE_URL}${path}`,
     }
   }
   if (path === '/builder') {

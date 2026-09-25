@@ -195,6 +195,9 @@
     "scrollDown": "Bajá para ver",
     "modelsLabel": "Los modelos — 09",
     "modelsScrollHint": "Scrolleá para recorrer",
+    "builderDemoEyebrow": "En 10 segundos",
+    "builderDemoTitle": "Lo armás y te lo llevás",
+    "builderDemoBody": "Así funciona el builder: elegís secciones de nuestros modelos, armás tu página a medida y te la llevás en código fuente — sin pagar por un template entero si no lo necesitás.",
     "modelsBrowseHint": "Pasá el cursor · abrí la demo",
     "cycleLabel": "El listón",
     "cycleWords": [
@@ -818,6 +821,8 @@
     "pending": "Confirmando pago…",
     "failed": "Fallida",
     "download": "Descargar ZIP",
+    "license": "Licencia",
+    "downloadsCount": "Descargas: {{count}}",
     "preview": "Ver preview",
     "previewOf": "Preview · {{name}}",
     "previewCustom": "Tu composición",

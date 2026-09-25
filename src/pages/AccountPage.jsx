@@ -215,6 +215,15 @@ export default function AccountPage() {
                           {t('account.pendingHint')}
                         </p>
                       )}
+                      {order.status === 'paid' && (
+                        <p className="mt-2 text-[11px] tracking-[0.08em] text-ink/40">
+                          {t('account.license')}:{' '}
+                          <span className="font-mono text-ink/55">
+                            {order.purchaseCode || order.id}
+                          </span>{' '}
+                          · {t('account.downloadsCount', { count: order.downloadCount || 0 })}
+                        </p>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       {previews.map(({ item, index, href }) => (

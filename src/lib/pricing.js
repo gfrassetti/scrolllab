@@ -49,10 +49,11 @@ export function isBuilderHiddenSku(sku) {
 
 /**
  * Composición del builder: base por tramo + adicional por sección extra.
- * Una composición del tamaño de un template (10 secciones) queda en 309 USD.
- * El piso tiene que superar al template más caro en venta.
+ * Una composición del tamaño de un template (10 secciones) queda en 265 USD.
+ * El piso tiene que superar al template más caro en venta (no cuenta
+ * COMING_SOON_SKUS — ver la validación en scripts/check-consistency.mjs).
  */
-export const CUSTOM_BASE_PRICE_USD = 279
+export const CUSTOM_BASE_PRICE_USD = 235
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 15
 /** Tope de secciones de una receta — espejo de `maxRecipeSections`. */

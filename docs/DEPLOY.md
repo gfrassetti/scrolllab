@@ -170,7 +170,7 @@ No es un precio plano. `priceCustomRecipeUsd()` (servidor) y
 `estimateCustomPriceUsd()` (cliente) calculan lo mismo:
 
 ```
-base (USD 279, incluye 8 secciones)
+base (USD 235, incluye 8 secciones)
 + USD 15 × secciones por encima de 8
 + USD 39 si la receta trae alguna sección commerce/
 ```

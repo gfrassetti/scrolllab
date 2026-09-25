@@ -97,13 +97,19 @@ if (maxRecipeSections !== MAX_CUSTOM_SECTIONS) {
   )
 }
 
-// 1c. El piso del builder tiene que quedar arriba del template más caro: si no,
-// armar una composición sale menos que comprar un modelo entero.
-const priciestTemplate = Math.max(...Object.values(TEMPLATE_PRICES_USD))
+// 1c. El piso del builder tiene que quedar arriba del template más caro EN
+// VENTA: si no, armar una composición sale menos que comprar un modelo
+// entero. Los `coming soon` (ej. ratio) no cuentan — no se pueden comprar
+// todavía, así que no deberían fijar el piso del builder.
+const priciestTemplate = Math.max(
+  ...Object.entries(TEMPLATE_PRICES_USD)
+    .filter(([sku]) => !CLIENT_COMING_SOON.includes(sku))
+    .map(([, usd]) => usd),
+)
 if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
   fail(
     'precios',
-    `la base del builder (USD ${CUSTOM_BASE_PRICE_USD}) no supera al template más caro (USD ${priciestTemplate})`,
+    `la base del builder (USD ${CUSTOM_BASE_PRICE_USD}) no supera al template más caro en venta (USD ${priciestTemplate})`,
   )
 }
 
@@ -459,13 +465,9 @@ if (!indexHtml.includes(SITE_SEO.description)) {
 if (!indexHtml.includes(BUILDER_SEO.title) || !indexHtml.includes(BUILDER_SEO.description)) {
   fail('seo', 'el boot de index.html no espeja BUILDER_SEO')
 }
-if (!indexHtml.includes("noindex, follow")) {
-  fail('seo', 'index.html debe marcar noindex en /templates/')
-}
-
 const sitemapSrc = read('public/sitemap.xml')
-if (sitemapSrc.includes('/templates/')) {
-  fail('seo', 'sitemap.xml no debe listar demos /templates/ (son noindex)')
+if (!sitemapSrc.includes('/templates/')) {
+  fail('seo', 'sitemap.xml debe listar los demos /templates/ (ahora indexan)')
 }
 if (!sitemapSrc.includes('https://www.scrolllab.com.ar/builder')) {
   fail('seo', 'sitemap.xml debe incluir /builder')
