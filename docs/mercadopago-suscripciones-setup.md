@@ -28,9 +28,10 @@ Opcional: `HOSTED_FREE_QUOTA` (default `1` = el plan gratis incluye 1 sección
 hosteada publicada; `0` = LAB 100% de pago). `HOSTED_TRIAL_DAYS` (default `7`)
 — días de prueba gratis en la primera alta; viajan a MP como
 `auto_recurring.start_date` (fecha del primer cobro). `HOSTED_GRACE_DAYS`
-(default `10`, como la ventana de reintentos de MP) — días que el plan sigue
-cuando una renovación no se cobró; el primer cobro (fin de la prueba) tiene
-como mucho 1 día.
+(default `7`) — tolerancia por cobro fallido, no confundir con la prueba: días
+que el plan sigue cuando una renovación no se cobró. MP reintenta hasta 4 veces
+en 10 días; si cobra pasada la tolerancia, el plan vuelve solo. El primer cobro
+(fin de la prueba) tiene como mucho 1 día.
 
 > **Por qué `start_date` y no `free_trial`:** MP documenta `free_trial` solo
 > para `/preapproval_plan`; en `/preapproval` sin plan el campo documentado
@@ -198,7 +199,7 @@ Logs greppables que piden revisión manual (reembolso / baja):
 |---|---|---|
 | `npm test` → `subscriptions*.test.js` | MP simulado en memoria (`__tests__/helpers/fakeMercadoPago.js`), webhooks firmados, mails interceptados | siempre, sin red ni credenciales |
 | `subscriptionsJourney.test.js` | recorridos con el **reloj simulado**: alta → prueba → cobro del día 7 → renovación → baja → vencimiento; arrepentimiento en la prueba; tarjeta rechazada; upgrade; mensual → anual | dentro de `npm test` |
-| `npm run check:mp-sandbox` | **sandbox real de MP** con las mismas funciones de la app: prueba de 7 días, anual, alta autorizada con tarjeta de test (no cobra antes), bajas | cuando cambie algo de MP; necesita `MP_TEST_ACCESS_TOKEN`, `MP_TEST_PUBLIC_KEY`, `MP_TEST_PAYER_EMAIL` (credenciales de **prueba**; aborta si el token no es de un usuario de test) y salida a `api.mercadopago.com` |
+| `npm run check:mp-sandbox` | **sandbox real de MP** con las mismas funciones de la app: prueba de 7 días, anual, alta autorizada con tarjeta de test (no cobra antes), cambio de plan (cambia el monto de la misma suscripción, no abre otra ni cobra en el acto), bajas | cuando cambie algo de MP; necesita `MP_TEST_ACCESS_TOKEN`, `MP_TEST_PUBLIC_KEY`, `MP_TEST_PAYER_EMAIL` (credenciales de **prueba**; aborta si el token no es de un usuario de test) y salida a `api.mercadopago.com` |
 
 Lo que ningún test cubre: la entrega de webhooks a producción (se ve en el
 historial de notificaciones de la app en MP; sano al 2026-09-26: 100 % con

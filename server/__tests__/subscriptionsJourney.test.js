@@ -248,7 +248,7 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal(mp.charges(pre.id).length, 1)
   })
 
-  it('renovación rechazada de un cliente que ya pagaba: 10 días de gracia; si MP no cobra y da de baja, queda free', async () => {
+  it('renovación rechazada de un cliente que ya pagaba: 7 días de gracia; si MP no cobra y da de baja, queda free', async () => {
     const c = await customer('journey-rejected-renewal@test.com')
     const { pre } = await subscribe(c, 'hosted_pro')
     const key = (await publish(c)).body.instance.key
@@ -261,13 +261,13 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal(me.plan, 'hosted_pro')
     assert.equal(me.pastDue, true)
     assert.equal(me.paymentFailed, true)
-    assert.equal(iso(me.graceEndsAt), '2026-11-18T15:00:00.000Z')
+    assert.equal(iso(me.graceEndsAt), '2026-11-15T15:00:00.000Z')
 
-    await c.goTo(45)
+    await c.goTo(44)
     assert.equal((await c.me()).plan, 'hosted_pro') // en gracia, su sitio sigue andando
     assert.equal(await embedStatus(key), 200)
 
-    await c.goTo(48, 1)
+    await c.goTo(45, 1)
     me = await c.me()
     assert.equal(me.plan, 'free')
     assert.equal(me.lapsedPlan, 'hosted_pro')
@@ -309,10 +309,14 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal((await publish(c)).status, 402)
 
     await c.goTo(20)
+    const preapprovalsBefore = mp.preapprovals.size
     const change = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
     assert.equal(change.status, 200)
     assert.equal((await c.me()).quota, 15)
     assert.equal((await publish(c)).status, 200)
+    // Cambia el monto de la MISMA suscripción: no hay otra que cobre Starter aparte.
+    assert.equal(mp.preapprovals.size, preapprovalsBefore)
+    assert.equal(mp.preapprovals.get(pre.id).status, 'authorized')
     assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, 99900)
 
     await c.goTo(38, 1)

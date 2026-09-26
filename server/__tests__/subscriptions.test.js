@@ -220,7 +220,8 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(me.body.pastDue, true)
     assert.equal(me.body.paymentFailed, true)
     const graceLeft = (new Date(me.body.graceEndsAt) - Date.now()) / DAY
-    assert.ok(graceLeft > 6.5 && graceLeft < 7.5, `gracia restante ${graceLeft}`)
+    // Default HOSTED_GRACE_DAYS = 7: venció hace 3 días, le quedan 4.
+    assert.ok(graceLeft > 3.5 && graceLeft < 4.5, `gracia restante ${graceLeft}`)
     // En gracia no se puede subir de plan (sería cuota nueva sin cobro).
     const change = await agent
       .post('/api/subscriptions/change')

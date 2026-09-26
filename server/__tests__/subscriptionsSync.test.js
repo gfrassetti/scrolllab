@@ -21,7 +21,7 @@ describe('syncSubscriptionForUser (file store, MP inyectado)', () => {
   let trialEligible
   let storageDir
   const config = { mpSubs: { accessToken: 'TEST-TOKEN' } }
-  const entConfig = { ...config, hostedFreeQuota: 1, hostedGraceDays: 10 }
+  const entConfig = { ...config, hostedFreeQuota: 1, hostedGraceDays: 7 }
 
   before(async () => {
     process.env.NODE_ENV = 'development'

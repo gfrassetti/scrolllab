@@ -5,7 +5,8 @@
  * `npm test` prueba nuestra lógica contra un MP simulado; esto confirma que MP
  * se comporta como ese simulador supone: que difiere el primer cobro con
  * `start_date` (prueba gratis y re-suscripción sin doble cobro), que una alta
- * autorizada con tarjeta no cobra antes de tiempo y que la baja funciona.
+ * autorizada con tarjeta no cobra antes de tiempo, que el cambio de plan
+ * modifica esa misma suscripción (no abre otra) y que la baja funciona.
  * Todo lo que crea lo cancela al final.
  *
  * Requiere credenciales de PRUEBA (nunca las de producción: el script aborta
@@ -22,8 +23,10 @@ import {
   buildPreapprovalBody,
   cancelPreapproval,
   fetchPreapproval,
+  updatePreapprovalAmount,
 } from '../server/services/mercadoPago.js'
 import { cancelPreapprovalConfirmed } from '../server/services/subscriptions.js'
+import { hostedPlanPrice } from '../server/catalog.js'
 
 const token = process.env.MP_TEST_ACCESS_TOKEN
 const publicKey = process.env.MP_TEST_PUBLIC_KEY
@@ -123,8 +126,9 @@ async function main() {
   )
   check('tarjeta de test tokenizada', tok.status === 201, `HTTP ${tok.status}`)
   if (tok.json.id) {
+    const ref = `check-authorized-${Date.now()}`
     const authorized = await create({
-      ...body({ ref: 'check-authorized', startDate: trialStart }),
+      ...body({ ref, startDate: trialStart }),
       card_token_id: tok.json.id,
       status: 'authorized',
     })
@@ -139,7 +143,38 @@ async function main() {
     const charged = (aps.json.results || []).filter((a) => a.payment?.status === 'approved')
     check('autorizada: no se cobró nada durante la prueba', charged.length === 0, `${charged.length} cobros`)
 
-    // 4. Baja con la función de la app, y una segunda baja (MP devuelve 400).
+    // 4. Cambio de plan Pro → Studio con la función de la app: MP cambia el
+    //    monto de ESA suscripción (no abre otra que cobre aparte el plan
+    //    anterior), no cobra en el acto y el próximo cobro queda en su fecha.
+    const studio = hostedPlanPrice('hosted_studio', 'monthly')
+    await updatePreapprovalAmount(token, pre.id, {
+      amount: studio,
+      currencyId: 'ARS',
+      reason: 'ScrollLab LAB — studio (mensual) [check sandbox]',
+    })
+    const changed = await fetchPreapproval(token, pre.id)
+    check(
+      'cambio de plan: MP cambia el monto de la misma suscripción',
+      changed.status === 'authorized' && changed.auto_recurring?.transaction_amount === studio,
+      `status ${changed.status}, monto ${changed.auto_recurring?.transaction_amount}`,
+    )
+    check(
+      'cambio de plan: el próximo cobro sigue en su fecha (no cobra en el acto)',
+      sameMinute(changed.next_payment_date, trialStart),
+      `next_payment_date ${changed.next_payment_date}`,
+    )
+    const active = await mp('GET', `/preapproval/search?external_reference=${ref}&status=authorized`)
+    const ids = (active.json.results || []).map((p) => p.id)
+    check(
+      'cambio de plan: queda UNA sola suscripción activa (la misma)',
+      ids.length === 1 && ids[0] === pre.id,
+      `${ids.length} activas`,
+    )
+    const apsAfter = await mp('GET', `/authorized_payments/search?preapproval_id=${pre.id}`)
+    const chargedAfter = (apsAfter.json.results || []).filter((a) => a.payment?.status === 'approved')
+    check('cambio de plan: no se cobró nada', chargedAfter.length === 0, `${chargedAfter.length} cobros`)
+
+    // 5. Baja con la función de la app, y una segunda baja (MP devuelve 400).
     await cancelPreapproval(token, pre.id)
     const after = await fetchPreapproval(token, pre.id)
     check('baja: MP la deja cancelada', after.status === 'cancelled', `status ${after.status}`)
