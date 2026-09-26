@@ -285,6 +285,79 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(third.status, 200)
   })
 
+  // ——— Cuotas exactas por plan (lo que el cliente paga) ———
+
+  async function fillPlan(email, plan, n) {
+    const agent = await loginAs(email)
+    const sub = await agent.post('/api/subscriptions').send({ plan, cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    const published = []
+    for (let i = 0; i < n; i++) {
+      const r = await publish(agent)
+      assert.equal(r.status, 200, `publicación ${i + 1} de ${n}: ${JSON.stringify(r.body)}`)
+      published.push(r.body.instance)
+    }
+    return { agent, published, sub }
+  }
+
+  const embedStatus = (key) =>
+    request(app)
+      .get(`/api/embed/${key}/config`)
+      .then((r) => r.status)
+
+  for (const [plan, quota] of [
+    ['hosted_starter', 5],
+    ['hosted_pro', 15],
+  ]) {
+    it(`${plan}: publica exactamente ${quota}, las ${quota} se sirven y la ${quota + 1}ª da 402`, async () => {
+      const { agent, published } = await fillPlan(`exact-${plan}@test.com`, plan, quota)
+
+      let me = await agent.get('/api/subscriptions/me')
+      assert.equal(me.body.quota, quota)
+      assert.equal(me.body.used, quota)
+      assert.equal(me.body.canPublish, false)
+      for (const inst of published) assert.equal(await embedStatus(inst.key), 200)
+
+      const extra = await publish(agent)
+      assert.equal(extra.status, 402)
+      assert.match(extra.body.error, /límite de tu plan/)
+
+      // Editar y re-publicar una que ya estaba publicada no suma, aun en el tope.
+      const edit = await agent
+        .put(`/api/hosted/${published[0].id}`)
+        .send({ draftProps: { ctaWord: 'Editada' }, publish: true })
+      assert.equal(edit.status, 200)
+
+      // Despublicar una libera el lugar para otra.
+      await agent.put(`/api/hosted/${published[1].id}`).send({ unpublish: true })
+      me = await agent.get('/api/subscriptions/me')
+      assert.equal(me.body.used, quota - 1)
+      assert.equal((await publish(agent)).status, 200)
+      assert.equal((await publish(agent)).status, 402)
+    })
+  }
+
+  it('hosted_studio: sin tope (20 publicadas, todas se sirven)', async () => {
+    const { agent, published } = await fillPlan('exact-studio@test.com', 'hosted_studio', 20)
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.quota, null)
+    assert.equal(me.body.used, 20)
+    assert.equal(me.body.canPublish, true)
+    for (const inst of published) assert.equal(await embedStatus(inst.key), 200)
+  })
+
+  it('aunque se cuele una publicada de más (p. ej. dos publish simultáneos), solo se sirven las N del plan', async () => {
+    const { agent, published } = await fillPlan('race@test.com', 'hosted_starter', 5)
+    const draft = await agent.post('/api/hosted').send({ sectionId: 'chapters/FooterCTA' })
+    const { fileDb } = await import('../fileStore.js')
+    const sixth = await fileDb.findHostedInstanceById(draft.body.instance.id)
+    Object.assign(sixth, { status: 'published', publishedProps: { ctaWord: 'X' } })
+    await sixth.save()
+
+    for (const inst of published) assert.equal(await embedStatus(inst.key), 200)
+    assert.equal(await embedStatus(sixth.key), 402)
+  })
+
   it('studio es ilimitado: quota llega null y nunca frena el publish', async () => {
     const agent = await loginAs('studio@test.com')
     const sub = await agent

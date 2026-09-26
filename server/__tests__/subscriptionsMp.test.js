@@ -28,6 +28,8 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
     calls: [],
     failNext: {},
     seq: 0,
+    // Mails que la app le mandó a Resend (interceptado, no sale nada).
+    outbox: [],
   }
 
   const json = (status, body) =>
@@ -38,6 +40,14 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
 
   async function fakeMp(url, init = {}) {
     const u = new URL(String(url))
+    if (u.hostname === 'api.resend.com') {
+      mp.outbox.push({
+        path: u.pathname,
+        body: init.body ? JSON.parse(init.body) : null,
+        idempotencyKey: new Headers(init.headers).get('idempotency-key'),
+      })
+      return json(200, { id: `em_${mp.outbox.length}` })
+    }
     if (u.hostname !== 'api.mercadopago.com') return realFetch(url, init)
     const method = String(init.method || 'GET').toUpperCase()
     const body = init.body ? JSON.parse(init.body) : null
@@ -91,6 +101,9 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
       FX_FALLBACK_RATE: '1560',
       HOSTED_FREE_QUOTA: '1',
       RATE_LIMIT_DISABLED: 'true',
+      EMAIL_ENABLED: 'true',
+      RESEND_API_KEY: 're_test_fake_key',
+      EMAIL_FROM: 'SCROLLLAB <lab@scrolllab.test>',
     })
     storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-subs-mp-'))
     process.env.STORAGE_DIR = storageDir
@@ -375,6 +388,75 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
     assert.equal(me.body.plan, 'hosted_pro') // en gracia
     assert.equal(me.body.pastDue, true)
     assert.equal(me.body.paymentFailed, true)
+  })
+
+  // ——— Mails (Resend interceptado) ———
+
+  const mailsTo = (email) => mp.outbox.filter((m) => m.body?.to?.includes(email))
+  async function waitFor(check, what) {
+    const t0 = Date.now()
+    while (!check()) {
+      if (Date.now() - t0 > 3000) throw new Error(`timeout esperando ${what}`)
+      await new Promise((r) => setTimeout(r, 20))
+    }
+  }
+  // Los mails salen fire-and-forget: margen para que uno de más se note.
+  const settle = () => new Promise((r) => setTimeout(r, 250))
+
+  it('mail al suscribirse y mail al cancelar: le llegan al usuario, una sola vez cada uno', async () => {
+    const email = 'mp-mails@test.com'
+    const agent = await loginAs(email)
+    const { pre } = await subscribeAndAuthorize(agent)
+
+    await waitFor(() => mailsTo(email).length >= 1, 'el mail de bienvenida')
+    const [welcome] = mailsTo(email)
+    assert.equal(welcome.path, '/emails')
+    assert.deepEqual(welcome.body.to, [email])
+    assert.match(welcome.body.subject, /prueba gratis de ScrollLab LAB/)
+    assert.match(welcome.body.text, /no se te cobra nada hasta ese día/)
+    assert.ok(welcome.idempotencyKey?.startsWith('scrolllab-sub-welcome-'))
+
+    // Eventos repetidos (otro sync, el webhook de MP) no lo reenvían.
+    await agent.post('/api/subscriptions/sync')
+    await webhook('subscription_preapproval', pre.id)
+    await settle()
+    assert.equal(mailsTo(email).length, 1)
+
+    assert.equal((await agent.post('/api/subscriptions/cancel')).status, 200)
+    await waitFor(() => mailsTo(email).length >= 2, 'el mail de baja')
+    const canceled = mailsTo(email)[1]
+    assert.match(canceled.body.subject, /Cancelaste tu suscripción/)
+    assert.match(canceled.body.text, /no se te cobra nada/)
+    assert.ok(canceled.idempotencyKey?.startsWith('scrolllab-sub-canceled-'))
+
+    // El webhook "cancelled" que MP manda después tampoco lo duplica.
+    await webhook('subscription_preapproval', pre.id)
+    await settle()
+    assert.equal(mailsTo(email).length, 2)
+  })
+
+  it('baja desde la app de MP: también le llega el mail de baja', async () => {
+    const email = 'mp-mails-mpcancel@test.com'
+    const agent = await loginAs(email)
+    const { pre } = await subscribeAndAuthorize(agent)
+    await waitFor(() => mailsTo(email).length >= 1, 'el mail de bienvenida')
+
+    pre.status = 'cancelled'
+    await webhook('subscription_preapproval', pre.id)
+    await waitFor(() => mailsTo(email).length >= 2, 'el mail de baja')
+    assert.match(mailsTo(email)[1].body.subject, /Cancelaste tu suscripción/)
+  })
+
+  it('si MP no confirma la baja, no sale el mail de baja (no se promete algo que no pasó)', async () => {
+    const email = 'mp-mails-cancelfail@test.com'
+    const agent = await loginAs(email)
+    await subscribeAndAuthorize(agent)
+    await waitFor(() => mailsTo(email).length >= 1, 'el mail de bienvenida')
+
+    mp.failNext['PUT /preapproval'] = 400
+    assert.equal((await agent.post('/api/subscriptions/cancel')).status, 502)
+    await settle()
+    assert.equal(mailsTo(email).length, 1)
   })
 
   it('webhook con firma inválida → 401 y no toca nada', async () => {

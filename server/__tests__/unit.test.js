@@ -766,6 +766,63 @@ describe('order receipt email', () => {
     assert.match(message.text, /termina al final del período pagado/)
   })
 
+  it('bienvenida con prueba gratis: dice hasta cuándo no se cobra y que cancelar antes no cuesta nada', () => {
+    const trialEndsAt = new Date(Date.now() + 7 * 86_400_000).toISOString()
+    const message = buildSubscriptionWelcome({
+      subscription: {
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        trialEndsAt,
+        currentPeriodEnd: trialEndsAt,
+      },
+      user: { email: 'trial@example.com', name: 'Trial' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.subject, /prueba gratis/)
+    assert.match(message.text, /prueba gratis hasta el .+ no se te cobra nada/)
+    assert.match(message.text, /Si cancelás antes .*no pagás nada/)
+    assert.match(message.text, /Primer cobro: /)
+    assert.doesNotMatch(message.text, /Próximo pago/)
+    assert.match(message.html, /Prueba gratis/)
+  })
+
+  it('bienvenida sin prueba (ya cobrada): el mail de siempre', () => {
+    const message = buildSubscriptionWelcome({
+      subscription: {
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        trialEndsAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+        lastPaidAt: new Date().toISOString(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+      },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.subject, /está activa/)
+    assert.match(message.text, /Próximo pago: /)
+  })
+
+  it('baja durante la prueba: aclara que no se cobra nada (no "de nuevo")', () => {
+    const trialEndsAt = new Date(Date.now() + 4 * 86_400_000).toISOString()
+    const message = buildSubscriptionCanceled({
+      subscription: {
+        plan: 'hosted_starter',
+        status: 'authorized',
+        trialEndsAt,
+        currentPeriodEnd: trialEndsAt,
+        canceledAt: new Date().toISOString(),
+      },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.text, /Cancelaste durante la prueba gratis: no se te cobra nada/)
+    assert.match(message.text, /acceso al plan Starter hasta el /)
+    assert.doesNotMatch(message.text, /de nuevo/)
+  })
+
   it('baja cerrada en el acto (sin días pagos): no promete un "acceso hasta"', () => {
     const message = buildSubscriptionCanceled({
       subscription: {
