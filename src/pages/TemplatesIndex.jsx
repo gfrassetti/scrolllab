@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
-import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
+import { INSTAGRAM_URL, SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
 import LabMark from '../components/LabMark'
@@ -1557,6 +1557,16 @@ export default function TemplatesIndex() {
                   className="transition-colors duration-300 hover:text-accent"
                 >
                   {SUPPORT_EMAIL}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerInstagram')}
                 </a>
               </li>
               <li>

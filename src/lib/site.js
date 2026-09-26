@@ -4,6 +4,9 @@ export const SITE_TAGLINE = 'Webs que se mueven.'
 
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 
+export const INSTAGRAM_HANDLE = '@scrolllab_ar'
+export const INSTAGRAM_URL = 'https://www.instagram.com/scrolllab_ar/'
+
 /** Canonical origin (SEO / OG). Mantener alineado con index.html. */
 export const SITE_URL = 'https://www.scrolllab.com.ar'
 
