@@ -16,6 +16,7 @@
     "orders:prune": "node scripts/prune-orders.mjs",
     "check": "node scripts/check-consistency.mjs",
     "check:visual": "node scripts/check-visual.mjs",
+    "check:responsive": "node scripts/check-responsive.mjs",
     "check:builder": "node scripts/check-builder.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
     "analyze:ref": "node scripts/analyze-reference.mjs",

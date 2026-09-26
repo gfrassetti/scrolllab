@@ -41,7 +41,7 @@ export default function NavComic({
           </p>
         </div>
 
-        <ul className="hidden items-center gap-7 lg:flex">
+        <ul className="hidden items-center gap-7 md:flex">
           {items.map((item) => (
             <li key={item.label}>
               <a
@@ -63,7 +63,7 @@ export default function NavComic({
           </a>
           <button
             {...triggerProps}
-            className="text-[11px] tracking-[0.2em] uppercase drop-shadow lg:hidden"
+            className="text-[11px] tracking-[0.2em] uppercase drop-shadow md:hidden"
           >
             {open ? closeLabel : menuLabel}
           </button>
@@ -74,7 +74,7 @@ export default function NavComic({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
-        className={`pointer-events-auto fixed inset-0 bg-[#1a1816]/96 text-white backdrop-blur-sm transition-opacity duration-500 lg:hidden motion-reduce:transition-none ${
+        className={`pointer-events-auto fixed inset-0 bg-[#1a1816]/96 text-white backdrop-blur-sm transition-opacity duration-500 md:hidden motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
