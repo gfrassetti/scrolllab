@@ -1,33 +1,44 @@
 // Marca centralizada del sitio vendedor.
 export const SITE_NAME = 'SCROLL LAB'
-export const SITE_TAGLINE = 'Solo scrolleá.'
+export const SITE_TAGLINE = 'Webs que se mueven.'
 
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
+
+export const INSTAGRAM_HANDLE = '@scrolllab_ar'
+export const INSTAGRAM_URL = 'https://www.instagram.com/scrolllab_ar/'
 
 /** Canonical origin (SEO / OG). Mantener alineado con index.html. */
 export const SITE_URL = 'https://www.scrolllab.com.ar'
 
 /**
  * Meta SEO del marketplace.
- * Categoría: plantillas web / web templates (radar Envato-like).
- * Diferencial: storytelling + fuente React.
+ * Posicionamiento (2026-09-20): "Immersive Scrolling Web Templates" → en español
+ * "Templates web con scroll inmersivo", para devs y estudios. Va en español
+ * porque el mercado de hoy es Argentina (cobro en pesos, casi todos los clics
+ * de Google son de acá). La versión en inglés tiene que ir en su propia URL
+ * (/en/) con hreflang, no en un meta tag de esta: una URL tiene un solo title
+ * para Google. Conviene hacerla cuando haya cobro en dólares.
+ * No apunta a "plantillas web" (Envato, Wix): esa búsqueda es de gente que
+ * quiere armar un sitio sin código y no puede usar un ZIP de código fuente.
+ * No mencionamos el stack (React/GSAP) en copy público — no hace falta
+ * anunciarlo.
  */
 export const SITE_SEO = {
-  title: 'SCROLL LAB — Plantillas web | Web templates',
+  title: 'SCROLL LAB — Templates web con scroll inmersivo',
   description:
-    'Plantillas web / Storytelling templates. Elegí un modelo completo o armá tu propia página en el builder y descargá el código fuente, editable.',
+    'Templates web con scroll inmersivo. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar.',
   keywords:
-    'plantillas web, web templates, website templates, plantillas para sitios web, react templates, storytelling templates, landing page templates',
+    'scrollytelling templates, plantillas scrollytelling, scroll animation template, plantillas web, web templates, código fuente, landing page templates',
 }
 
 /** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
 export const BUILDER_SEO = {
-  title: 'SCROLL LAB — Builder | Armá tu plantilla web',
+  title: 'SCROLL LAB — Builder | Armá tu sitio scrollytelling',
   description:
-    'Builder / Armá tu página. Mezclá secciones de los modelos, previsualizá en vivo y descargá el código fuente React, editable.',
+    'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente, editable.',
 }
 
-const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large'
+export const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large, noai, noimageai'
 
 function normalizePath(pathname) {
   const path = String(pathname || '/')
@@ -39,10 +50,12 @@ function normalizePath(pathname) {
 export function seoForPath(pathname) {
   const path = normalizePath(pathname)
   if (path.startsWith('/templates/')) {
+    // La página de producto en /plantillas/:sku es la que indexa; esta es el
+    // demo interactivo en sí (pesado para crawlers, no hace falta indexarlo).
     return {
       title: SITE_SEO.title,
       description: SITE_SEO.description,
-      robots: 'noindex, follow',
+      robots: 'noindex, follow, noai, noimageai',
       canonical: `${SITE_URL}/`,
     }
   }

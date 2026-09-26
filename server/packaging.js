@@ -15,6 +15,22 @@ import { checkoutPropsFromItems } from '../src/lib/shop/checkoutProps.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 
+/**
+ * List every file under `public/<relDir>` as a `publicAssets` entry
+ * (relative to ROOT, forward-slashed). Used for asset folders with many
+ * files (e.g. meridian's hero frame sequence) where hand-listing each
+ * path would be unmaintainable — swap the folder's contents and the ZIP
+ * picks up the new file count automatically.
+ */
+function publicDirAssets(relDir) {
+  const abs = path.join(ROOT, 'public', relDir)
+  if (!fs.existsSync(abs)) return []
+  return fs
+    .readdirSync(abs, { withFileTypes: true })
+    .filter((e) => e.isFile())
+    .map((e) => path.posix.join('public', relDir, e.name))
+}
+
 const MODEL_FILES = {
   chapters: {
     page: 'src/pages/ChaptersPage.jsx',
@@ -77,6 +93,23 @@ const MODEL_FILES = {
     sectionsDir: 'src/components/sections/atrium',
     pageName: 'App.jsx',
     importPrefix: './components/sections/atrium',
+  },
+  meridian: {
+    page: 'src/pages/MeridianPage.jsx',
+    sectionsDir: 'src/components/sections/meridian',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/meridian',
+    // Hero frame sequence — WebP files, not a JS import, so they don't
+    // get swept by the sectionsDir walk. See the REPLACE ME comment in
+    // Hero.jsx for how a buyer regenerates this folder from their own
+    // footage; the packer just needs every current file listed.
+    publicAssets: [
+      ...publicDirAssets('meridian/hero/seq'),
+      // Gallery slider demo stills (2560px WebP)
+      ...publicDirAssets('meridian/gallery'),
+      // Location section map image (generated, 2304×1331 WebP)
+      ...publicDirAssets('meridian/map'),
+    ],
   },
 }
 
@@ -363,24 +396,99 @@ function rewritePageToApp(content, model) {
 }
 
 /**
- * Marca de agua embebida en el `src/App.jsx` del ZIP: si una copia se filtra
- * sin el `LICENSE.txt`, este encabezado sigue atando el código al comprador
- * (docs/ip-protection-brief.md §3.5). El token `SCROLLLAB-LICENSE` es estable
- * a propósito — así un search en GitHub/marketplaces encuentra las filtraciones.
+ * Trazabilidad por comprador (docs/ip-protection-brief.md §3.5). Cada ZIP lleva
+ * el número de orden en TEXTO VISIBLE (token estable `SCROLLLAB-LICENSE`, para
+ * buscar filtraciones en GitHub/marketplaces) y, además, un identificador
+ * INVISIBLE de respaldo por si borran lo visible. Las marcas van repartidas en
+ * varios archivos (App.jsx, index.css, README) — quitar una no borra la traza.
+ * Nada de esto altera el runtime: son sólo comentarios.
  */
-function fingerprintComment({ orderId, email, date } = {}) {
+
+// Código corto y estable por orden. No expone el orderId directamente (hay que
+// recomputarlo contra la tabla de órdenes), pero es determinístico y recuperable.
+function fingerprintId({ orderId, email } = {}) {
+  return crypto
+    .createHash('sha256')
+    .update(`${orderId || ''}|${email || ''}`)
+    .digest('hex')
+    .slice(0, 16)
+}
+
+// Marca invisible: el payload se codifica como bits en caracteres de ancho cero
+// (U+200B/U+200C) entre dos centinelas (U+2060). Va SIEMPRE dentro de un
+// comentario — fuera de un comentario, U+200B rompería el parseo del build.
+const FP_ZERO = '​'
+const FP_ONE = '‌'
+const FP_EDGE = '⁠⁠'
+
+function encodeInvisible(payload) {
+  const bits = []
+  for (const byte of Buffer.from(payload, 'utf8')) {
+    for (let b = 7; b >= 0; b--) bits.push((byte >> b) & 1)
+  }
+  return FP_EDGE + bits.map((bit) => (bit ? FP_ONE : FP_ZERO)).join('') + FP_EDGE
+}
+
+/** Recupera el payload invisible de un archivo filtrado (para trazar la fuga). */
+export function extractInvisibleMark(content) {
+  const text = String(content || '')
+  const start = text.indexOf(FP_EDGE)
+  if (start === -1) return null
+  const from = start + FP_EDGE.length
+  const end = text.indexOf(FP_EDGE, from)
+  if (end === -1) return null
+  const bits = []
+  for (const ch of text.slice(from, end)) {
+    if (ch === FP_ONE) bits.push(1)
+    else if (ch === FP_ZERO) bits.push(0)
+  }
+  const bytes = []
+  for (let i = 0; i + 8 <= bits.length; i += 8) {
+    let v = 0
+    for (let b = 0; b < 8; b++) v = (v << 1) | bits[i + b]
+    bytes.push(v)
+  }
+  return bytes.length ? Buffer.from(bytes).toString('utf8') : null
+}
+
+/** Id de fingerprint (público) para el test / verificación de fugas. */
+export function licenseFingerprint(licenseMeta) {
+  return licenseMeta ? `SL:${fingerprintId(licenseMeta)}` : null
+}
+
+function invisibleMark(licenseMeta) {
+  return licenseMeta ? encodeInvisible(`SL:${fingerprintId(licenseMeta)}`) : ''
+}
+
+function fingerprintComment(licenseMeta = {}) {
+  const { orderId, email, date } = licenseMeta
+  const inv = invisibleMark(licenseMeta)
   return `/**
  * SCROLLLAB-LICENSE ${orderId || 'unknown'}
  * Licencia regular emitida a ${email || 'unknown'}${date ? ` el ${date}` : ''}.
  * Uso permitido según LICENSE.txt (incluido en este ZIP). Redistribuir,
  * revender o republicar el código fuente está prohibido. Este encabezado
- * identifica al comprador original; quitarlo no cambia los términos.
+ * identifica al comprador original; quitarlo no cambia los términos.${inv ? `\n * ${inv}` : ''}
  */
 `
 }
 
 function stampApp(appSrc, licenseMeta) {
   return licenseMeta ? `${fingerprintComment(licenseMeta)}\n${appSrc}` : appSrc
+}
+
+// Marca de respaldo en archivos "silenciosos": si el comprador borra el
+// encabezado de App.jsx, la traza sigue viva en index.css y en el README.
+function stampCss(cssText, licenseMeta) {
+  if (!licenseMeta) return cssText
+  const { orderId } = licenseMeta
+  return `${cssText}\n/* SCROLLLAB-LICENSE ${orderId || 'unknown'} — identifica al comprador original (ver LICENSE.txt).${invisibleMark(licenseMeta)} */\n`
+}
+
+function stampReadme(md, licenseMeta) {
+  if (!licenseMeta) return md
+  const { orderId } = licenseMeta
+  return `${md}\n<!-- SCROLLLAB-LICENSE ${orderId || 'unknown'} — identifica al comprador original (ver LICENSE.txt).${invisibleMark(licenseMeta)} -->\n`
 }
 
 function createZip(destPath) {
@@ -415,6 +523,8 @@ function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
       body = Buffer.from(
         buildTemplateIndexHtml(`${model.toUpperCase()} — SCROLLLAB template`),
       )
+    } else if (rel === 'src/index.css') {
+      body = Buffer.from(stampCss(body.toString('utf8'), licenseMeta))
     }
     sources.push(body.toString('utf8'))
     archive.append(body, { name: `${prefix}${rel}` })
@@ -476,9 +586,12 @@ function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
     ? 'See LICENSE.txt at the root of this bundle for usage terms.'
     : 'See LICENSE.txt for usage terms.'
   archive.append(
-    `# ${model.toUpperCase()} — SCROLLLAB\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n\n${licenseNote}\n${
-      MODEL_3D_NOTES[model] ? `\n${MODEL_3D_NOTES[model]}` : ''
-    }${sectionDirs.includes('contact') ? `\n${CONTACT_FORM_NOTE}` : ''}`,
+    stampReadme(
+      `# ${model.toUpperCase()} — SCROLLLAB\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n\n${licenseNote}\n${
+        MODEL_3D_NOTES[model] ? `\n${MODEL_3D_NOTES[model]}` : ''
+      }${sectionDirs.includes('contact') ? `\n${CONTACT_FORM_NOTE}` : ''}`,
+      licenseMeta,
+    ),
     { name: `${prefix}README.md` },
   )
 }
@@ -496,6 +609,7 @@ export async function packFixedTemplate({ model, destPath, licenseMeta }) {
       siteName: 'SCROLLLAB',
       orderId: licenseMeta.orderId,
       email: licenseMeta.email,
+      purchaseCode: licenseMeta.purchaseCode,
       sku: model,
       date: licenseMeta.date,
     }),
@@ -526,6 +640,7 @@ export async function packBundleTemplate({ models, destPath, licenseMeta }) {
       siteName: 'SCROLLLAB',
       orderId: licenseMeta.orderId,
       email: licenseMeta.email,
+      purchaseCode: licenseMeta.purchaseCode,
       sku: `bundle:${list.join(',')}`,
       date: licenseMeta.date,
     }),
@@ -533,9 +648,12 @@ export async function packBundleTemplate({ models, destPath, licenseMeta }) {
   )
 
   archive.append(
-    `# SCROLLLAB — bundle\n\n${list.length} models, one folder each. Every folder is a standalone Vite project:\n\n${list
-      .map((model) => `- \`${model}/\` — ${model.toUpperCase()}`)
-      .join('\n')}\n\n\`\`\`\ncd ${list[0]}\nnpm install\nnpm run dev\n\`\`\`\n\nThe license at the root covers all ${list.length} models. See LICENSE.txt.\n`,
+    stampReadme(
+      `# SCROLLLAB — bundle\n\n${list.length} models, one folder each. Every folder is a standalone Vite project:\n\n${list
+        .map((model) => `- \`${model}/\` — ${model.toUpperCase()}`)
+        .join('\n')}\n\n\`\`\`\ncd ${list[0]}\nnpm install\nnpm run dev\n\`\`\`\n\nThe license at the root covers all ${list.length} models. See LICENSE.txt.\n`,
+      licenseMeta,
+    ),
     { name: 'README.md' },
   )
 
@@ -559,6 +677,8 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
     let body = fs.readFileSync(abs)
     if (rel === 'index.html') {
       body = Buffer.from(buildTemplateIndexHtml('Custom composition — SCROLLLAB'))
+    } else if (rel === 'src/index.css') {
+      body = Buffer.from(stampCss(body.toString('utf8'), licenseMeta))
     }
     sources.push(body.toString('utf8'))
     archive.append(body, { name: rel })
@@ -771,12 +891,13 @@ ${renderLines.join('\n')}
       siteName: 'SCROLLLAB',
       orderId: licenseMeta.orderId,
       email: licenseMeta.email,
+      purchaseCode: licenseMeta.purchaseCode,
       sku: `custom:${idList.join(',')}`,
       date: licenseMeta.date,
     }),
     { name: 'LICENSE.txt' },
   )
-  archive.append(readme, { name: 'README.md' })
+  archive.append(stampReadme(readme, licenseMeta), { name: 'README.md' })
 
   await archive.finalize()
   await done

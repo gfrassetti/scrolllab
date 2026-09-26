@@ -313,6 +313,36 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'bg',
     'fg',
   ],
+  'meridian/Hero': [
+    'wordmark',
+    'menuLabel',
+    'floorPlansLabel',
+    'welcomeText',
+    'quoteKicker',
+    'quoteTitle',
+    'inviteKicker',
+    'inviteTitle',
+    'inviteBody',
+    'inviteCta',
+    'menuLinks',
+  ],
+  'meridian/Concept': ['kicker', 'text'],
+  'meridian/GallerySlider': ['slides'],
+  'meridian/Location': ['title', 'ctaLabel', 'ctaHref', 'location', 'places'],
+  'meridian/Panorama': ['title', 'ctaLabel', 'ctaHref', 'image'],
+  'meridian/Interior': ['links'],
+  'meridian/Amenities': ['title', 'label', 'items'],
+  'meridian/Masterplan': ['units'],
+  'meridian/Contact': ['eyebrow', 'title', 'body', 'submitLabel', 'note'],
+  'meridian/Footer': [
+    'wordmark',
+    'phone',
+    'email',
+    'location',
+    'mapHref',
+    'studio',
+    'studioHref',
+  ],
   'contact/ContactForm': [
     'theme',
     'eyebrow',
@@ -388,6 +418,7 @@ const THEME_PRESETS = new Set([
   'unity',
   'ratio',
   'atrium',
+  'meridian',
 ])
 
 /**
@@ -431,6 +462,24 @@ const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 export const LIST_PROPS_BY_SECTION = Object.freeze({
   'chapters/FooterCTA': {
     links: { max: 8, item: { label: 'text', href: 'href' } },
+  },
+  'meridian/Hero': {
+    menuLinks: { max: 6, item: { label: 'text', href: 'href' } },
+  },
+  'meridian/Masterplan': {
+    units: { max: 8, item: { name: 'text', line1: 'text', line2: 'text' } },
+  },
+  'meridian/Amenities': {
+    items: { max: 10, item: { title: 'text', text: 'text', img: 'image' } },
+  },
+  'meridian/Interior': {
+    links: { max: 6, item: { label: 'text', img: 'image' } },
+  },
+  'meridian/Location': {
+    places: { max: 12, item: { distance: 'text', unit: 'text', title: 'text', img: 'image' } },
+  },
+  'meridian/GallerySlider': {
+    slides: { max: 8, item: { img: 'image', alt: 'text' } },
   },
   'chapters/BigNumbers': {
     stats: { max: 6, item: { value: 'text', suffix: 'text', label: 'text' } },

@@ -54,6 +54,102 @@ export const SECTION_FIELDS = {
       ],
     },
   ],
+  'meridian/Concept': [
+    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'text', label: 'Statement', type: 'textarea' },
+  ],
+  'meridian/Contact': [
+    { key: 'eyebrow', label: 'Eyebrow (vacío = según idioma)', type: 'text' },
+    { key: 'title', label: 'Title (vacío = según idioma)', type: 'text' },
+    { key: 'body', label: 'Texto (vacío = según idioma)', type: 'textarea' },
+    { key: 'submitLabel', label: 'Botón (vacío = según idioma)', type: 'text' },
+    { key: 'note', label: 'Nota (vacío = según idioma)', type: 'text' },
+  ],
+  'meridian/Footer': [
+    { key: 'wordmark', label: 'Wordmark', type: 'text' },
+    { key: 'phone', label: 'Teléfono', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'location', label: 'Ubicación', type: 'text' },
+    { key: 'mapHref', label: 'Ver en el mapa — enlace', type: 'href' },
+    { key: 'studio', label: 'Estudio (Hecho por)', type: 'text' },
+    { key: 'studioHref', label: 'Estudio — enlace', type: 'href' },
+  ],
+  'meridian/Masterplan': [
+    {
+      key: 'units',
+      label: 'Unidades (una por punto)',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'line1', label: 'Línea 1 (habitaciones / baños)', type: 'text' },
+        { key: 'line2', label: 'Línea 2 (superficie)', type: 'text' },
+      ],
+    },
+  ],
+  'meridian/Amenities': [
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'items',
+      label: 'Amenities',
+      type: 'list',
+      max: 10,
+      item: [
+        { key: 'title', label: 'Nombre', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'textarea' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
+  ],
+  'meridian/Panorama': [
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'ctaLabel', label: 'CTA — texto', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'image', label: 'Imagen (URL)', type: 'image' },
+  ],
+  'meridian/Interior': [
+    {
+      key: 'links',
+      label: 'Enlaces del menú (uno por slide)',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
+  ],
+  'meridian/Location': [
+    { key: 'title', label: 'Title', type: 'textarea' },
+    { key: 'ctaLabel', label: 'CTA — texto', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'location', label: 'Location label', type: 'text' },
+    {
+      key: 'places',
+      label: 'Lugares (uno por pin)',
+      type: 'list',
+      max: 12,
+      item: [
+        { key: 'distance', label: 'Distancia', type: 'text' },
+        { key: 'unit', label: 'Unidad', type: 'text' },
+        { key: 'title', label: 'Nombre', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
+  ],
+  'meridian/GallerySlider': [
+    {
+      key: 'slides',
+      label: 'Slides',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+        { key: 'alt', label: 'Texto alternativo', type: 'text' },
+      ],
+    },
+  ],
   'chapters/HorizontalPanels': [
     {
       key: 'variant',
@@ -762,6 +858,32 @@ export const SECTION_FIELDS = {
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'closer', label: 'Closing statement', type: 'textarea' },
   ],
+  'meridian/Hero': [
+    { key: 'wordmark', label: 'Wordmark', type: 'text' },
+    { key: 'menuLabel', label: 'Nav — Menu label', type: 'text' },
+    { key: 'floorPlansLabel', label: 'Nav — link label', type: 'text' },
+    { key: 'welcomeText', label: 'Welcome copy', type: 'textarea' },
+    { key: 'quoteKicker', label: 'Quote — kicker', type: 'text' },
+    { key: 'quoteTitle', label: 'Quote — headline', type: 'textarea' },
+    { key: 'inviteKicker', label: 'Invite — kicker', type: 'text' },
+    {
+      key: 'inviteTitle',
+      label: 'Invite — headline (vacío = usa el wordmark)',
+      type: 'text',
+    },
+    { key: 'inviteBody', label: 'Invite — location', type: 'text' },
+    { key: 'inviteCta', label: 'Invite — CTA', type: 'text' },
+    {
+      key: 'menuLinks',
+      label: 'Menú — enlaces',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+  ],
   'atrium/FooterAtrium': [
     { key: 'mark', label: 'Mark', type: 'text' },
     { key: 'reserved', label: 'Reserved', type: 'text' },
@@ -790,6 +912,7 @@ export const SECTION_FIELDS = {
         { value: 'unity', label: 'Unity' },
         { value: 'ratio', label: 'Ratio' },
         { value: 'atrium', label: 'Atrium' },
+        { value: 'meridian', label: 'Meridian' },
       ],
     },
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -826,6 +949,7 @@ export const SECTION_FIELDS = {
         { value: 'unity', label: 'Unity · #f4c518' },
         { value: 'ratio', label: 'Ratio · #e23c24' },
         { value: 'atrium', label: 'Atrium · #111111' },
+        { value: 'meridian', label: 'Meridian · #8f7a5e' },
       ],
     },
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },

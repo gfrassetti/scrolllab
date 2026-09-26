@@ -6,14 +6,17 @@ import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { formatCouponDate } from '../lib/coupon'
 import { orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
+import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { useI18n } from '../i18n'
 
 const PAGE_SIZE = 20
 
 export default function AccountPage() {
   const { user, loading } = useAuth()
+  const welcome = useWelcomeCoupon((s) => s.coupon)
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -159,6 +162,24 @@ export default function AccountPage() {
           </Link>
         </p>
 
+        {welcome && !orders.some((o) => o.status === 'paid') ? (
+          <p
+            data-welcome-coupon
+            className="mt-4 max-w-[52ch] text-sm leading-relaxed text-accent-ink"
+          >
+            {t('account.welcomeCoupon', {
+              percent: welcome.percent,
+              date: formatCouponDate(welcome.expiresAt, locale),
+            })}{' '}
+            <Link
+              to="/#templates"
+              className="underline decoration-current/40 underline-offset-2 hover:text-accent"
+            >
+              {t('common.seeTemplates')}
+            </Link>
+          </p>
+        ) : null}
+
         <SubscriptionCard />
 
         {error && (
@@ -213,6 +234,15 @@ export default function AccountPage() {
                       {order.status === 'pending' && (
                         <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
                           {t('account.pendingHint')}
+                        </p>
+                      )}
+                      {order.status === 'paid' && (
+                        <p className="mt-2 text-[11px] tracking-[0.08em] text-ink/40">
+                          {t('account.license')}:{' '}
+                          <span className="font-mono text-ink/55">
+                            {order.purchaseCode || order.id}
+                          </span>{' '}
+                          · {t('account.downloadsCount', { count: order.downloadCount || 0 })}
                         </p>
                       )}
                     </div>

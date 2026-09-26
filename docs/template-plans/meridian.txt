@@ -1,0 +1,783 @@
+PLAN DE TEMPLATE NUEVO — MERIDIAN
+SCROLLLAB (storytelling-pages-templates)
+Generado: 2026-09-22
+Estado: plan inicial, listo para implementar (Paso 0 resuelto: la referencia
+visual ES el diseño, no se corrió una pasada de Gemini separada — decisión
+del usuario, 2026-09-22)
+
+================================================================
+0. METADATA
+================================================================
+SKU:              meridian
+Título de venta:  MERIDIAN — template
+Rubro:            Real estate de lujo — villas / desarrollo residencial
+Referencia:       https://horizonte-village.com/?category=villas
+Alcance:          SOLO "villas" (decisión del usuario) — se descarta el
+                   toggle villas/residences del sitio original; MERIDIAN
+                   es un único mundo (villas), no dos catálogos de producto.
+Artefactos ya generados:
+  - docs/reference-analysis/meridian.md (nota de analyze:ref)
+  - docs/reference-analysis/meridian/beats.json (13 beats)
+  - docs/reference-analysis/meridian/beats/*.jpg (capturas)
+  - Obsidian: "Meridian - analisis de referencia.md" (bóveda ScrollLab)
+
+CAVEAT IMPORTANTE sobre beats.json: el sampler automático de
+analyze:ref quedó atrapado en la pantalla de "Loading... 0%" del preloader
+de horizonte-village.com (el sitio usa un preloader Nuxt con canvas antes
+de mostrar contenido real) — los 13 beats capturados son casi todos el
+mismo frame de loading, no son útiles para portar motion 1:1. El contenido
+real de este plan sale de inspección manual del sitio ya cargado
+(get_page_text + screenshots + fuentes/colores computados), no del JSON.
+No confiar en beats.json para este SKU — es ruido, dejarlo commiteado
+solo como evidencia de que se corrió el paso obligatorio de AGENTS.md.
+
+================================================================
+1. CONSIGNA BASE — OBLIGATORIA (Lesson 9, docs/award-winning-web-developer.md)
+================================================================
+Va textual, como pide la regla del usuario (2026-09-22, sin excepción) en
+TODO plan de template nuevo:
+
+"Yes, please build this for me while maintaining an award-winning,
+scroll-based, beautiful animation feeling throughout the entire sequence
+of events. Different sections need to have different scroll-based
+animations. Implement GSAP, GSAP, 3JS, and other beautiful scroll-based
+behaviors. Be very unique and make sure that we have visual breaks or
+some sort of clear separation between sections. We do not want any
+templated-like style, no typical SAS AI slop. We want an award-winning
+vibe. Something unique, something artsy, something beautiful, and
+something people don't usually do. Award-winning style."
+
+Aplicado a MERIDIAN puntualmente: el stack es GSAP + Lenis + Three.js
+(ya definido en AGENTS.md, cero tooling nuevo), cada sección de la lista
+del punto 7 tiene su propio tipo de animación (no repetir la misma
+entrada scroll en dos secciones seguidas), y el criterio de cierre es el
+mismo de siempre: si esto fuera un template inmobiliario de ThemeForest,
+no pasa. Tiene que sentirse Awwwards.
+
+================================================================
+2. BRIEF DEL CLIENTE (detalles puntuales de este pedido)
+================================================================
+- Rubro: desarrollo inmobiliario de villas de lujo, tono editorial/
+  minimalista, mercado costero-serrano tipo Costa del Sol (no se copia la
+  ubicación real de Horizonte — el copy de MERIDIAN es genérico/
+  placeholder con tokens [LOCATION] donde haría falta un dato concreto).
+- Modelo de referencia: horizonte-village.com — se clona la ESTRUCTURA,
+  el vocabulario de interacción y el lenguaje visual (paleta cálida,
+  tipografía editorial, nav mínima, storytelling por capítulos), NUNCA el
+  copy real del sitio (evitar reproducir texto propio de Horizonte —
+  reescribir todo el copy en inglés genérico, placeholder, como el resto
+  del catálogo SCROLLLAB).
+- Nombre elegido: MERIDIAN (evita el nombre "Horizonte" pero conserva la
+  misma metáfora — la línea donde el cielo se encuentra con el mar/las
+  montañas — coherente como nombre de desarrollo Y como nombre de SKU).
+- Objetivo del SKU: cubrir un rubro que HOY el catálogo SCROLLLAB no tiene
+  (ningún SKU existente — chapters/nocturne/monolith/velocity/fizz/
+  atelier/comic/unity/ratio/atrium/constellation/plum/signal — está
+  posicionado como real estate). Nicho nuevo, no un reemplazo de nada.
+
+================================================================
+3. DESIGN READ (taste-skill, una línea antes de diseñar)
+================================================================
+"Editorial de lujo serrano-costero: tipografía serif fina y numerales
+mono geométricos flotando sobre paisaje cálido color arena, silencio
+visual entre capítulos, nada de card genérica ni azul corporativo — la
+página se hojea como un dossier de arquitectura, no se navega como un
+sitio de bienes raíces promedio."
+
+Anti-slop explícito a evitar (taste-skill / AGENTS.md): sin gradiente
+morado, sin Inter+slate, sin cards con sombra genérica, sin iconos stock
+de "casa"/"llave"/"ubicación" sacados de un icon pack sin dirección.
+
+================================================================
+4. QUÉ SE OBSERVÓ EN LA REFERENCIA (inspección manual, 2026-09-22)
+================================================================
+Stack detectado (analyze:ref): Lenis (smooth scroll), Swiper (carousels),
+React — el bundle real es Nuxt/Vue (`_nuxt/entry.*.js`) pero la firma de
+interacción (Lenis + Swiper) es 100% portable a React/GSAP sin depender
+del framework.
+
+Fondo dominante: rgb(223, 216, 207) — beige/arena cálido, NO blanco puro.
+Tinta: probablemente carbón/negro cálido sobre ese fondo (a confirmar con
+UI/UX Pro Max al armar la paleta completa — el análisis mecánico no student
+capturó el color de texto real).
+
+Tipografía cargada: "Canela" (serif editorial, alta gama — Colophon
+Foundry, licencia paga) para headlines/números grandes, "ApercuMono"
+(mono geométrico, Colophon Foundry, licencia paga) para labels/kickers/
+numerales de UI. NINGUNA de las dos se puede shippear en un template que
+se vende como código fuente (licencia comercial de fuente, no del sitio)
+— ver punto 9 para las alternativas de licencia libre elegidas.
+
+Estructura de página (scroll único, sin rutas separadas — SPA de una
+sola página larga), en orden:
+
+  1. Preloader — "Loading... 0%→100%" sobre fondo beige, wordmark chico
+     centrado con un ícono circular (H estilizada). Opcional para
+     MERIDIAN (ver punto 15).
+  2. Hero — CORREGIDO 2026-09-22 tras inspección visual + Network tab del
+     usuario (ver punto 4-bis): NO es un canvas atmosférico. Es una
+     SECUENCIA DE FRAMES pre-renderizada (flythrough aéreo/dron sobre el
+     complejo de villas, cámara "Cam_09", ~125 WebP 1920x1080, nombres
+     tipo `VILLAS_IN_MARBELLA_Cam_09_v10...webp`, cargando uno por uno
+     por red) pintada en el `<canvas>` que ya había detectado analyze:ref
+     — Familia B de docs/scroll-media.md (canvas 2D + cientos de WebP,
+     mismo patrón que pear.no), NO Familia A (Three.js tiempo real). El
+     wordmark gigante en outline ("HORIZONTE"), la nav mínima (hamburger
+     izq., wordmark chico centro, teléfono + "floor plans" derecha), el
+     toggle "VILLAS / RESIDENCES" y "SCROLL DOWN" van ENCIMA de ese
+     canvas como capas DOM fijas (mismo patrón KPR de AGENTS.md:
+     `#canvas-container` fijo + canvas + DOM con pointer-events donde
+     corresponda). Coreografía completa en el punto 7.2 (reescrito).
+  3. Concept — párrafo único de valor ("Majestic villas and residences in
+     the picturesque mountains offer a unique opportunity to savour the
+     tranquil beauty from dusk to dawn...") + toggle villas/residences
+     repetido.
+  4. Gallery — carrusel numerado "02 / 06" (Swiper), fotografía de alta
+     resolución, sin thumbnails compitiendo.
+  5. Location — copy de posicionamiento ("PRIME LOCATION BETWEEN...") +
+     "SEE ON MAP" + lista arrastrable (DRAG) de puntos de interés con
+     tiempo en auto (17 MIN — Malaga Airport, 5 MIN — Marbella, etc.) —
+     ~18 ítems, ritmo de card repetida deliberadamente (Detalle #4.3).
+  6. Architecture — cita grande superpuesta a un video con control
+     "0:00 / 0:00" (probablemente dos videos o video + su control
+     replicado, a confirmar), "VIEW OF THE PANORAMA".
+  7. Floor plans — selector de tabs (ONE-STORY / TWO-STORY / KITCHEN /
+     BEDROOM / BATHROOM / BASEMENT) — configurador simple, no 3D.
+  8. Amenities — tres bloques de specs técnicas (Home Automation /
+     Windows and Glazing / Underfloor Heating) + grid de 5 amenities con
+     foto + label + descripción corta (Clubhouse, Private Pool, Outdoor
+     Gym, Playground, Coworking) — mismo patrón de card repetida
+     deliberada dentro de un listado (Detalle #4.3).
+  9. Construction progress — vista de plano/mapa con bloques numerados
+     1–23 agrupados en BLOCK 1–4, indicador de avance de obra. Elemento
+     más gráfico/técnico de todo el sitio — candidato fuerte a escena
+     firma Beat (ver punto 12).
+  10. Journal / blog — 3 cards editoriales (Leisure / Night life /
+      Weekend — "What to do in the south of Spain during the day/night/
+      weekends") con firma "— HORIZONTE TEAM, 2024" y tags (REAL ESTATE,
+      MALAGA). Contenido de marca/blog, no esencial al producto.
+  11. Closing CTA — "TRUST US TO GUIDE YOU TO YOUR FUTURE HOME" + botón
+      "REQUEST" — fondo sobrio, un solo CTA.
+  12. Footer/contact — sales office, teléfono, email, "SEE ON MAP",
+      copyright, privacy/terms, crédito de agencia ("MADE BY THE FIRST
+      THE LAST").
+
+No hay indicios de un modelo 3D figurativo explotando/reensamblándose
+(Detalle #12) en este sitio — descartado igual que antes, pero por la
+razón correcta ahora (ver 4-bis): el hero es una secuencia de FRAMES
+pre-renderizados, no un objeto 3D en tiempo real ni una escena que se
+fragmenta. "3D models solo cuando sea necesario, nada más" (Detalle
+#9.5) sigue aplicando — acá ni hace falta, Familia B alcanza. Ver punto
+12 para dónde SÍ tiene sentido meter la escena firme Beat en MERIDIAN
+(que es un widget distinto, no compite con el hero).
+
+----------------------------------------------------------------
+4-bis. ADDENDUM 2026-09-22 — corrección del hero tras inspección visual
+----------------------------------------------------------------
+El usuario inspeccionó el sitio ya cargado (capturas + Network tab) y
+corrigió la lectura inicial de este plan, que había asumido "canvas
+atmosférico sutil" a partir solo del DOM mecánico de analyze:ref. Lo
+confirmado:
+
+- El `<canvas>` que ya había detectado analyze:ref es el PLAYER de una
+  película en fotogramas — exactamente la Familia B de
+  docs/scroll-media.md (canvas 2D + cientos de WebP, como pear.no), NO
+  un efecto de partículas ambiguo. Se ve en Network: archivos
+  `VILLAS_IN_MARBELLA_Cam_09_v10...webp`, 1920x1080, `image/webp`,
+  cargando de a uno (81/125 requests capturados por el usuario en el
+  momento de la inspección) — un flythrough/dron pre-renderizado
+  (probable V-Ray/Lumion/Corona, cámara con nombre de toma "Cam_09")
+  sobre el complejo de villas completo, exportado como secuencia y
+  scrubeado con el scroll (forward = avanza el flythrough, backward =
+  retrocede) — el mismo contrato de `progress` que ya usa todo el motion
+  de SCROLLLAB.
+- Coreografía verificada visualmente (3 estados de texto sobre el mismo
+  flythrough, sin cortar el fondo — mismo espíritu que P13 pero dentro
+  de una sola sección pineada, no entre secciones):
+    Estado A (scroll ~0%): wordmark gigante en outline "HORIZONTE"
+      centrado sobre el frame inicial (vista más cercana/alta del
+      complejo) + párrafo de bienvenida abajo-izquierda + toggle
+      "VILLAS / RESIDENCES" (pills) abajo-izquierda + "SCROLL DOWN"
+      centrado abajo.
+    Estado B (scroll intermedio): el wordmark gigante se retira (el
+      usuario lo describe alejándose/achicándose hacia arriba — no
+      confirmado en píxeles exactos, tratar como dirección de intención
+      más que spec exacta) y en su lugar aparece una cita grande en
+      serif itálica centrada: "PANORAMIC VIEWS, SPACIOUS LAYOUTS, GATED
+      COMMUNITY - SPENDING TIME AT HOME IS SIMPLY A PLEASURE." — el
+      flythrough sigue avanzando de fondo (cámara ya más alejada/
+      distinta angulación), toggle y "SCROLL DOWN" persisten fijos.
+    Estado C (scroll más avanzado): la cita sale, aparece "MEET
+      THE HORIZONTE" (kicker "MEET" chico + wordmark serif itálica) +
+      DOS CTAs circulares grandes tipo pill ("VILLAS" / "RESIDENCES",
+      anillos concéntricos) a la derecha del texto + label
+      "LOCATION / COSTA DEL SOL, SPAIN" abajo-centro — el toggle
+      original abajo-izquierda sigue ahí también.
+  Los tres estados son CROSSFADES sobre el mismo fondo continuo (P3
+  aplicado a capas de texto, no al fondo) — el fondo nunca corta, solo
+  el texto rota. Toggle "VILLAS/RESIDENCES" y "SCROLL DOWN" son capas
+  DOM fijas que sobreviven los tres estados (chrome persistente del
+  hero, no parte del crossfade).
+- Implica una corrección al punto 6 (Detalle #1): esta NO es una
+  variante "evaluada y con alternativa recomendada" — es LA técnica
+  confirmada del hero de referencia, se implementa tal cual (regla de
+  AGENTS.md: lo que enseña el curso se implementa sin discutir, y este
+  es exactamente el Module 6 del curso — hero scrubeado por scroll —
+  pero con secuencia de frames en vez de `<video>`, que es además la
+  variante que docs/scroll-media.md ya prefiere sobre `<video src>`
+  scrubbing).
+- Pendiente de pipeline de generación (ver punto 11 y 15): el usuario
+  pidió explícitamente NO usar Higgsfield para esto ("no tengo el plan
+  pago") y sugirió "nano banana" (Gemini 2.5 Flash Image, nombre
+  coloquial del modelo) "o cualquier generador de imágenes" — pero
+  generar ~120-125 frames de un flythrough con continuidad de cámara
+  frame a frame vía un generador de IMÁGENES sueltas (nano banana u
+  otro) es propenso a parpadeo/inconsistencia entre frames, que es
+  justo el riesgo que Familia B busca evitar (docs/scroll-media.md dice
+  explícitamente: esta familia sirve cuando "el look es un turntable/
+  morph YA RENDERIZADO" — la fuente ideal es un clip de VIDEO continuo
+  del que se extraen frames con ffmpeg, no frames generados sueltos uno
+  por uno). Queda como decisión abierta en el punto 15 cuál generador de
+  VIDEO corto (no Higgsfield) se usa como fuente antes de correr
+  `ffmpeg -i flythrough.mp4 -vf "fps=24,scale=1920:-1" frames/frame-%04d.webp`
+  — no bloquea el resto del plan, sí bloquea específicamente el asset
+  del hero.
+
+================================================================
+5. CHECKLIST DE ACCIÓN AWARD-LEVEL (Lesson 1 — obligatoria en TODO template)
+================================================================
+Tiene que cumplir, sin excepción, antes de dar MERIDIAN por cerrado:
+
+[ ] Paleta acotada y deliberada (arena/carbón + un acento, ver punto 9)
+[ ] Imágenes de alta resolución que cuentan una historia (Higgsfield,
+    nunca picsum)
+[ ] CTA y marcadores de nav con espacio de sobra a propósito
+[ ] Un foco claro por sección/viewport
+[ ] Jerarquía tipográfica de mínimo 3 niveles con contraste de estilo
+[ ] Layout que NUNCA se repite entre secciones consecutivas (grid, ritmo,
+    peso imagen/texto distintos) — repetición SÍ permitida dentro de un
+    mismo listado (gallery, POI list, amenities grid, journal cards)
+[ ] Una sola acción primaria por sección
+[ ] Secciones marcadas por combo color+tipografía+márgenes, no dividers
+[ ] Micro-interacciones dentro del template (no solo chrome del market)
+[ ] Sensación de progresión "capítulo a capítulo"
+[ ] El hero evoca antes de leerse (abrir en silencio, sin leer el
+    headline — si no se siente nada, no está terminado)
+[ ] Nav del hero mínima/discreta
+[ ] Motion reusa 2-3 tipos en todo el template
+[ ] Entrada de contenido: headline → subtítulo → imagen, con pausa
+[ ] Cada link/botón/form field/accordion tiene su micro-interacción
+[ ] Header con texto que refleja la sección activa (evaluar — ver #7)
+[ ] Footer al 100% del viewport (100vh/100svh) — SIN EXCEPCIÓN
+[ ] Scrollbar nativo oculto, reemplazado por uno propio — SIN EXCEPCIÓN
+
+Descartar/rehacer si MERIDIAN cae en 2+ de estos:
+[ ] Layout boxy/cramped
+[ ] Iconos genéricos de stock
+[ ] Tipografía uniforme sin jerarquía
+[ ] Layout repetitivo entre secciones distintas
+[ ] Cero micro-interacciones
+[ ] Whitespace mínimo
+[ ] CTAs compitiendo entre sí
+[ ] Estructura intercambiable con "cientos de otros sitios inmobiliarios"
+
+================================================================
+6. DETALLES DEL CURSO QUE APLICAN A ESTE TEMPLATE PUNTUAL
+================================================================
+(docs/award-winning-web-developer.md — solo lo relevante a MERIDIAN, no
+se re-explica el curso entero)
+
+- Detalle #1 (Module 6, hero scrubeado por scroll) — CONFIRMADO como
+  técnica central del hero tras la corrección del punto 4-bis, no
+  opcional: la referencia usa exactamente este patrón (forward = avanza
+  el flythrough, hold = congela, backward = rebobina), solo que con
+  secuencia de WebP (Familia B de scroll-media.md) en vez de `<video>`
+  scrubeado — variante que el propio scroll-media.md ya prefiere. Piezas
+  del guion del curso a llevar tal cual: brief de escena (acá ya no hace
+  falta describir beginning/middle/end porque la referencia YA es la
+  escena a seguir), still del primer frame como poster/loading state,
+  mobile/`prefers-reduced-motion` → imagen estática (nunca el scrub),
+  checklist de cierre del Module 6 (oferta entendible sin explicar,
+  forward/stop/reverse se comportan como se espera, legible todo el
+  scrub, next section alcanzable). La variante "reveal por texto"
+  (máscara que crece) NO aplica acá — la referencia usa crossfade de
+  capas de texto (P3), no una máscara.
+
+- Detalle #4 (Lesson 2, walkthrough de un sitio de REAL ESTATE — el más
+  directamente aplicable de todo el doc, mismo rubro exacto):
+  macro white space entre bloques grandes, una acción primaria por
+  sección, repetición deliberada DENTRO de listados del mismo tipo
+  (gallery, POI list, amenities, journal — no violar la regla de "layout
+  no repetitivo" que aplica ENTRE secciones distintas), jerarquía por
+  tamaño+peso+espacio, cierre grácil con fondo sobrio y wordmark grande,
+  footer 100vh (regla explícita), hero con nav mínima que se destaca
+  solo, imágenes de alta resolución que cuentan historia (nunca picsum).
+  MERIDIAN es la aplicación 1:1 de esta lección — el vocabulario chico de
+  módulos (hero / content block / transición / cierre) organiza toda la
+  sección 7 de este plan.
+
+- Detalle #5 (motion cornerstone): zoom lento (Ken Burns, P2) sobre las
+  fotos de Gallery/Concept/Amenities en vez de fotos estáticas puras;
+  vocabulario de motion reducido (elegir 2-3 tipos, ver punto 8); orden
+  headline→subtítulo→imagen en cada sección; progress rail vertical que
+  además reemplaza el scrollbar nativo (cruce directo con la regla del
+  usuario de ocultar el scrollbar — un solo widget hace las dos cosas,
+  ver punto 8); timing con pausa deliberada (~0.4-0.6s) entre heading y
+  subtítulo; cero motion sin propósito.
+
+- Detalle #6 (catálogo de micro-interacciones, 14 ítems) — aplicar
+  completo dentro del template, no solo en el chrome. Mapeo puntual en
+  el punto 10.
+
+- Detalle #7 (header que cambia de texto según la sección activa) —
+  MERIDIAN tiene 9 secciones de contenido bien distintas (Concept,
+  Gallery, Location, Architecture, Floor plans, Amenities, Progress,
+  Journal, Contact) en una página larga de scroll único — caso de uso
+  ideal para esta técnica. Ver punto 8 para cómo se integra con la
+  progress rail.
+
+- Detalle #8 (blueprint narrativo de 5 beats) — usado como LENTE de
+  revisión, no como estructura literal a forzar: MERIDIAN tiene más de 5
+  secciones porque el rubro real estate necesita contenido informativo
+  real (mapa, plantas, specs técnicas) que un blueprint puramente
+  narrativo no contempla. Mapeo aproximado igual, útil para chequear que
+  cada tramo cumple un rol:
+    Hook      → Hero
+    Introduce → Concept (collage-like: texto + fotos que se superponen
+                levemente, técnica explícita de Detalle #8.2)
+    Offer     → Gallery + Amenities grid (cards del mismo tipo, oferta
+                concreta del producto)
+    Explain   → Architecture + Floor plans + Location (valor/contexto,
+                construye confianza, no vende directo)
+    Invite    → Construction progress (confianza en la ejecución) →
+                Journal (marca) → Closing CTA (conversión) → Contact
+  El principio de EXCLUSIÓN deliberada de Detalle #8 aplica así: Journal
+  (blog) es el candidato más débil a recortar si en algún momento el SKU
+  se siente sobrecargado — es contenido de marca, no de producto: bajar
+  a 3 secciones máximo y sin autoplay de sliders (prohibición explícita
+  de Detalle #8.3) si se mantiene.
+
+- Detalle #9 (stacking + depth/timing/sequencing, "controlled not
+  chaotic"): cada bloque de texto de MERIDIAN debería stackear scroll
+  reveal + stagger + hover + micro-confirmación a la vez (no elegir una
+  sola capa por elemento). Parallax multi-capa (no un solo elemento
+  contra fondo fijo) en Gallery y Amenities — capas con distinto
+  multiplicador de velocidad. Nota del usuario: 3D solo cuando sea
+  necesario — confirma la decisión del punto 4 de NO meter un modelo 3D
+  figurativo en el hero de MERIDIAN sin una razón narrativa concreta.
+
+- Detalle #10 (taxonomía de errores Layout/Animation/Interaction/Visual
+  polish) — usar como protocolo de diagnóstico en el QA final (punto 13),
+  antes de correr Impeccable critique/audit/polish.
+
+- Detalle #11/#12 (3D storyline / explode-reassemble) — evaluados y
+  DESCARTADOS como obligatorios para MERIDIAN (ver punto 4 y 12): el
+  sitio de referencia no los usa, y forzarlos sin que sirvan a la
+  historia sería el anti-patrón "efectos agresivos" que el mismo curso
+  marca como error (Detalle #9.4). Queda una única excepción evaluada
+  en el punto 12 (construction progress como escena firme Beat), que no
+  es un modelo 3D figurativo sino una pieza de UI/data-viz — distinta de
+  Detalle #12.
+
+================================================================
+7. BLUEPRINT DE PÁGINA — SECCIÓN POR SECCIÓN
+================================================================
+Convención: cada fila es un módulo del vocabulario chico (Detalle #4.7).
+Copy siempre en inglés, genérico, con tokens [ENTRE CORCHETES] donde el
+comprador pone su dato real (nunca el copy textual de Horizonte).
+
+7.1 PRELOADER (opcional — ver punto 15)
+  - Wordmark "MERIDIAN" chico centrado + contador 0→100% en mono.
+  - Primitivo: React state + CSS, sin GSAP pesado. No bloquea si
+    reduced-motion.
+
+7.2 HERO — Hook
+  - REESCRITO 2026-09-22 — hero pineado, un solo `<canvas>` con
+    secuencia de frames scrubeada (Familia B, ver 4-bis) + tres estados
+    de texto en crossfade (P3) encima, sin cortar nunca el fondo. Nav
+    fija (hamburger izq., wordmark chico centro, teléfono/"Floor Plans"
+    derecha) visible en todo el hero, capa DOM sobre el canvas (patrón
+    KPR: `#canvas-container` fijo + canvas + DOM `pointer-events` donde
+    corresponda).
+  - Fondo (todo el hero): flythrough/dron pre-renderizado sobre un
+    complejo de villas MERIDIAN genérico (~120-125 frames WebP 1920x1080,
+    ver punto 11 para el pipeline de generación), pintado en canvas 2D,
+    `progress` del scroll elige el índice de frame — forward avanza,
+    backward rebobina, hold congela exacto (mismo contrato que
+    docs/scroll-media.md). Poster = primer frame, para loading state.
+  - Estado A (progress 0-33% aprox.): wordmark GIGANTE en outline
+    ("MERIDIAN", stroke fino, casi full-bleed) centrado sobre el primer
+    frame + párrafo de bienvenida corto abajo-izquierda + toggle/chip
+    de categoría abajo-izquierda (ver nota de scope abajo) + "SCROLL
+    DOWN" centrado abajo.
+  - Estado B (progress ~33-66%): el wordmark gigante sale (crossfade,
+    P3 — no cambia el fondo, que sigue avanzando de frame); entra una
+    cita grande en serif itálica centrada, tipo "[Panoramic views,
+    private pools, a gated hillside community — coming home is the
+    whole point.]" (parafraseado, nunca copiar el texto real de
+    Horizonte). Chip/toggle y "SCROLL DOWN" persisten fijos.
+  - Estado C (progress ~66-100%): la cita sale, entra "MEET THE
+    MERIDIAN" (kicker chico "MEET" + wordmark serif itálica) + UN
+    (no dos — ver nota de scope) CTA circular grande tipo pill,
+    "EXPLORE VILLAS", ring concéntrico como en la referencia + label
+    "LOCATION / [REGION], [COUNTRY]" abajo-centro.
+  - NOTA DE SCOPE (alcance villas-only, decisión ya tomada con el
+    usuario): la referencia tiene DOS CTAs circulares (Villas/
+    Residences) porque vende dos catálogos. MERIDIAN es un solo mundo
+    (villas) — un solo CTA circular ("Explore Villas" o equivalente),
+    sin el toggle de categoría que aparece en Estado A/persistente en
+    la referencia. Esto simplifica el hero, no lo desvirtúa: sigue
+    siendo 3 estados de texto sobre el mismo flythrough.
+  - Motion: SplitText (P8) en el wordmark/kicker de cada estado, mismo
+    timing que el resto del vocabulario chico (punto 8); crossfade P3
+    entre los 3 estados de texto, nunca instantáneo; el fondo scrubea
+    en scrub puro (sin easing propio, 1:1 con el scroll, como pide P1).
+  - Micro-interacción: underline en hover de los links de nav (#3 del
+    catálogo); CTA circular "Explore Villas" con glow + micro-scale en
+    hover (#1/#6); toggle/chip con underline o fill sutil al activar.
+  - Copy: ningún texto literal de Horizonte — reescribir todo en inglés
+    genérico manteniendo el TONO (editorial, corto, una idea por
+    estado).
+  - Mobile / `prefers-reduced-motion`: imagen estática (el primer o
+    último frame, el que mejor comunique el producto), nunca el scrub
+    — regla sin excepción del Module 6.
+  - Checklist de cierre Module 6 (Detalle #1) aplica completo acá: la
+    oferta se entiende sin explicar, forward/stop/reverse se comportan
+    como se espera, headline legible todo el scrub, la siguiente
+    sección (Concept) es alcanzable, la página tiene sentido si se
+    desactiva el motion.
+
+7.3 CONCEPT — Introduce
+  - Layout: una sola oración de valor grande, centrada, tipografía
+    serif; 3-4 fotos chicas que se superponen levemente al bloque de
+    texto (técnica de Detalle #8.2 — "imperfection makes it human").
+  - Motion: texto entra con stagger de líneas (P8 + Detalle #6.4);
+    fotos entran después del texto (orden Detalle #5.3), con leve
+    parallax entre ellas (profundidad, no todas a la misma velocidad).
+  - Copy: "[One sentence about the vision behind the development —
+    landscape, lifestyle, exclusivity]."
+
+7.4 GALLERY — Offer (parte 1)
+  - Layout: carrusel de foto única grande + contador "0N / 0M" en mono
+    (kicker style, como ApercuMono en la ref — ver punto 9 para
+    alternativa libre), sin thumbnails compitiendo, flechas mínimas.
+  - Motion: crossfade entre imágenes (P3, nunca cambiar `src` en scrub),
+    Ken Burns sutil en la imagen activa (P2), contador anima con
+    SplitText al cambiar de número (P8, reusa el mismo primitivo que el
+    hero — vocabulario chico).
+  - Micro-interacción: hover en flechas con underline+rotación de ícono
+    combinados (#9 del catálogo).
+  - Copy: alt text genérico por foto ("Exterior view", "Living area",
+    "Pool deck", etc.) — 5-6 fotos.
+
+7.5 LOCATION — Explain (parte 1)
+  - Layout: copy de posicionamiento a la izquierda + botón "See on Map"
+    (mapa estático o embed simplificado — NO Google Maps API real en el
+    template vendible salvo que el comprador lo configure) + lista
+    horizontal arrastrable de puntos de interés (P10-like hotspots, o
+    Swiper-equivalente en React) — cada ítem = tiempo en auto + nombre
+    del lugar, mismo patrón repetido deliberadamente (Detalle #4.3).
+  - Motion: la lista entra con stagger (P8), drag con inercia (Lenis ya
+    disponible, o pointer events simples); hover en cada ítem = expand +
+    glow sutil (#6 del catálogo).
+  - Copy: 8-10 ítems genéricos tipo "[N] MIN DRIVE — [Landmark name]"
+    (placeholder, el comprador reemplaza con su propia ubicación real).
+
+7.6 ARCHITECTURE — Explain (parte 2)
+  - Layout: cita grande superpuesta a video/imagen panorámica de fondo,
+    "View of the panorama" como kicker.
+  - Decisión de costo: si se usa VIDEO real acá, es Higgsfield
+    generate_video con get_cost:true + confirmación de créditos con el
+    usuario ANTES de generar (regla #5 de AGENTS.md) — alternativa sin
+    costo: imagen fija de alta resolución + Ken Burns (P2), mismo efecto
+    percibido a costo cero. Recomendado para la primera versión: imagen
+    fija. Video queda como upsell/variante posterior.
+  - Motion: SplitText en la cita (P8) revelando línea por línea con
+    pausa deliberada; overlay oscuro con transparencia si la foto es
+    "ruidosa" para mantener legibilidad (técnica de Detalle #8.3).
+  - Copy: cita de una oración sobre vistas/paisaje, genérica.
+
+7.7 FLOOR PLANS — Explain (parte 3)
+  - Layout: tabs simples (One-story / Two-story / Kitchen / Bedroom /
+    Bathroom / Basement) que cambian una imagen de plano + specs cortas.
+    Configurador liviano, sin 3D — coherente con "3D solo cuando sea
+    necesario" (Detalle #9.5).
+  - Motion: crossfade de plano al cambiar tab (P3); tab activo con
+    underline animado (#3/#11 del catálogo, aplicado a un tab en vez de
+    un link de nav).
+  - Copy: nombres de tab genéricos, imagen de plano placeholder.
+
+7.8 AMENITIES — Offer (parte 2)
+  - Layout: 3 specs técnicas cortas (ícono/label/descripción — Home
+    Automation, Windows & Glazing, Underfloor Heating) + grid de 5 cards
+    de amenity (foto + label + descripción, Clubhouse/Pool/Gym/
+    Playground/Coworking) — mismo patrón repetido deliberadamente dentro
+    del grid (Detalle #4.3), NUNCA el mismo layout que Gallery o Location
+    (regla de "layout no repetitivo" entre secciones distintas).
+  - Motion: specs entran con fade+slide simple (vocabulario chico);
+    cards de amenity con hover = scale + glow (#6 del catálogo,
+    reforzando "la página está viva" citado en Detalle #3.4).
+  - Copy: 5 amenities genéricas, descripciones cortas en inglés.
+
+7.9 CONSTRUCTION PROGRESS — Invite (parte 1) — candidata a escena firme
+  - Layout: plano/mapa esquemático con bloques numerados agrupados
+    (BLOCK 1-4), indicador de avance de obra.
+  - Ver punto 12 — candidata fuerte a widget Beat (riel + seek) en vez
+    de tweens sueltos: cada bloque numerado es una "pieza" que se
+    activa/ilumina a medida que el escenario hace seek con el scroll,
+    mismo mecanismo que P11 (rail numérico) pero aplicado a un layout
+    de plano en vez de una lista vertical.
+  - Copy: nombres de bloque genéricos ("Block 1"..."Block 4"),
+    porcentaje de avance placeholder.
+
+7.10 JOURNAL — Invite (parte 2) — candidato a recortar/simplificar
+  - Layout: 3 cards editoriales (no más de 3, regla de Detalle #8.3) con
+    foto + categoría + título + firma de marca. Sin autoplay.
+  - Motion: fade+slide simple, hover con underline en el link "read
+    more" (#3/#5 del catálogo).
+  - Copy: 3 títulos genéricos tipo "[Topic] guide", sin contenido real
+    de blog inventado que suene a marca ajena.
+  - Nota: evaluar si este módulo entra en la v1 del SKU o queda para una
+    v1.1 — no es esencial al producto (real estate), es contenido de
+    marca/SEO. Si se corta, MERIDIAN queda en 8 módulos en vez de 10.
+
+7.11 CLOSING CTA — Invite (parte 3)
+  - Layout: fondo sobrio (foto fija o color plano), wordmark grande
+    repetido, headline de invitación corta, un solo botón.
+  - Motion: mismo vocabulario del hero (SplitText + fade), NO un efecto
+    nuevo — refuerza el cierre "grácil" de Detalle #4.5.
+  - Copy: "[Trust us to guide you to your future home]" (parafraseado,
+    no copiar textual) + botón único "Request Info".
+
+7.12 CONTACT / FOOTER — cierre
+  - Layout: 100vh/100svh completo (regla sin excepción), datos de
+    contacto (teléfono/email/ubicación placeholder), "See on Map",
+    legal links chicos, crédito de agencia opcional.
+  - Motion: entrada simple, sin efectos nuevos — es el cierre, tiene que
+    sentirse sobrio, no un finale con fuegos artificiales.
+  - Form de contacto (si se incluye): floating label + underline en
+    focus (#13 del catálogo, MISMA animación en todos los campos), ícono
+    de submit con stroke→fill al hover (#14).
+
+================================================================
+8. VOCABULARIO DE MOTION + PROGRESS RAIL / SCROLLBAR
+================================================================
+Vocabulario chico elegido para TODO MERIDIAN (Detalle #5.2 — no variar
+por sección):
+  1. Fade + slide up (entrada base de texto/bloques)
+  2. Ken Burns lento (P2) en toda foto estática protagonista
+  3. SplitText stagger (P8) en headlines/kickers/números — reusa el
+     mismo timing en hero, gallery counter, architecture quote, CTA
+
+Timing: delay ~0.4-0.6s entre heading→subtítulo en cada sección
+(candidato a token nuevo en src/index.css junto a --ease-out/--ease-drawer,
+evaluar --delay-reveal: 0.5s al implementar).
+
+Scrollbar nativo oculto + progress rail vertical custom (regla del
+usuario, sin excepción) — MISMO widget resuelve tres cosas a la vez
+(cruce explícito documentado en Detalle #5.4):
+  a) reemplaza el scrollbar nativo (scrollbar-width:none / ::-webkit-
+     scrollbar{display:none}, con Lenis interceptando el scroll real)
+  b) indicador continuo de progreso 0→100% (barra que crece)
+  c) header/nav con texto de sección activa (Detalle #7) — el rail
+     muestra el nombre de la sección activa (CONCEPT / GALLERY /
+     LOCATION / ARCHITECTURE / FLOOR PLANS / AMENITIES / PROGRESS /
+     [JOURNAL] / CONTACT) actualizado por ScrollTrigger onEnter/
+     onEnterBack, mismo mecanismo que el proxy de P11 pero con string.
+  Implementación: proxy `{ progress, activeLabel }` + onUpdate, sin
+  lógica de tracking nueva — es la pieza visual la que es nueva.
+
+================================================================
+9. SISTEMA VISUAL (paleta + tipografía — a confirmar con UI/UX Pro Max)
+================================================================
+Paleta de partida (deliberada y acotada, nunca "lo que vino por
+default"):
+  - Fondo base:   arena cálido ~#DFD8CF (rgb(223,216,207), medido en la
+                   referencia)
+  - Tinta:        carbón cálido, no negro puro (~#2A2622 o similar — a
+                   afinar con UI/UX Pro Max)
+  - Acento único: a elegir en fase de diseño — candidato: terracota/
+                   bronce apagado o verde oliva desaturado (coherente con
+                   paisaje serrano-costero), UNO solo, no una paleta de
+                   colores de marca genérica.
+
+Tipografía — Canela y ApercuMono son fuentes de licencia PAGA (Colophon
+Foundry) y NO se pueden shippear en un template que se vende como código
+fuente. Alternativas de licencia libre/comercial-friendly a evaluar (UI/
+UX Pro Max define la elección final):
+  - Display serif editorial (reemplaza Canela): candidatos "Fraunces"
+    (Google Fonts, variable, tiene el mismo carácter editorial/alto
+    contraste) o "Reckless" si se consigue licencia — default recomendado:
+    Fraunces.
+  - Mono/label geométrico (reemplaza ApercuMono): candidatos "Space
+    Mono" o "JetBrains Mono" (Google Fonts) para kickers/numerales/UI —
+    default recomendado: Space Mono (más cercano al carácter editorial
+    que JetBrains, que es más "código").
+  Jerarquía mínima de 3 niveles: wordmark/H1 (Fraunces grande), H2/kicker
+  (Space Mono, tracking amplio, mayúsculas), body (Fraunces regular o un
+  sans-serif neutro de soporte a definir).
+
+================================================================
+10. CATÁLOGO DE MICRO-INTERACCIONES — MAPEO A MERIDIAN
+================================================================
+(Detalle #6, 14 ítems — cuáles aplican y dónde exactamente)
+
+ 1. Glow/outline en hover        → botones de nav, CTA "Floor Plans"/
+                                     "Request Info"
+ 2. Panel/drawer deslizando       → menú hamburger del hero (--ease-drawer)
+ 3. Underline en hover de links   → nav, "See on Map", "Read more" journal
+ 4. Stagger de líneas al entrar   → Concept, cita de Architecture
+ 5. Underline con variación       → distinto origen/curva entre Location
+                                     y Amenities (misma familia, matiz)
+ 6. Expand+glow en hover de lista → Location POI items, Amenity cards
+ 7. Blur→clear en hero            → alternativa de entrada del wordmark
+                                     (evaluar vs. SplitText, elegir uno)
+ 8. Parallax sutil                → Gallery, Amenities (imagen vs. texto)
+ 9. Underline+rotación combinada  → CTA "Request Info" (cierre)
+10. Fade-in con timing individual → cada sección de la 7 con su propio
+                                     delay, no una curva global copiada
+11. Hover en headings             → subtítulos dentro de Concept/Explain
+12. Accordion +/- rotando         → si se agrega FAQ (no está en la ref,
+                                     evaluar si suma o es scope extra)
+13. Floating label en forms       → form de contacto del footer
+14. Ícono stroke→fill en submit   → botón de envío del form de contacto
+
+Meta-principio (Detalle #6, cierre): consistencia TOTAL entre los 14 —
+mismos tokens de easing (--ease-out, --ease-drawer) en todos, no una
+firma de motion distinta por ítem.
+
+================================================================
+11. ASSETS — PLAN DE IMÁGENES/VIDEO
+================================================================
+Inventario a correr con template-image-designer antes de generar (brief
+completo, no generar a ciegas):
+  - Hero — REESCRITO 2026-09-22 (ver 4-bis): NO es una foto suelta, es
+    una secuencia de ~120-125 frames WebP 1920x1080 de un flythrough/dron
+    sobre un complejo de villas MERIDIAN genérico. Pipeline:
+      1. Generar un clip de VIDEO corto y continuo (no frames sueltos)
+         del flythrough — cámara aérea que se aleja/recorre el complejo,
+         look consistente con Estado A→C del punto 7.2. Fuente EXCLUIDA
+         por pedido explícito del usuario: Higgsfield (sin plan pago).
+         Candidatos a evaluar: el modelo que el usuario llama "nano
+         banana" (Gemini 2.5 Flash Image — hoy genera imagen, no video
+         continuo, así que sirve para stills/keyframes pero NO resuelve
+         solo la continuidad de cámara de 120+ frames) u otro generador
+         de VIDEO corto disponible. DECISIÓN ABIERTA — ver punto 15, no
+         bloquea el resto del plan.
+      2. Extraer frames con ffmpeg del clip resultante, patrón ya
+         documentado en docs/scroll-media.md:
+         `ffmpeg -i flythrough.mp4 -vf "fps=24,scale=1920:-1" frames/frame-%04d.webp`
+      3. Frame 0 = poster/loading state.
+      4. Guardar en src/components/sections/meridian/assets/hero/
+    Evitar generar los 120+ frames como imágenes sueltas independientes
+    (nano banana u otro generador de imagen a imagen) salvo como último
+    recurso — alto riesgo de parpadeo/inconsistencia entre frames, que
+    es justo lo que Familia B busca evitar.
+  - Concept: 3-4 fotos chicas (detalle arquitectónico/lifestyle)
+  - Gallery: 5-6 fotos de alta resolución (exterior, living, pool,
+    dormitorio, vista)
+  - Architecture: 1 imagen panorámica grande (o video, ver 7.6 —
+    decisión de costo pendiente de confirmar con el usuario)
+  - Floor plans: 6 imágenes de plano placeholder (simples, no fotos)
+  - Amenities: 5 fotos (clubhouse, pool, gym, playground, coworking)
+  - Journal (si se mantiene): 3 fotos editoriales
+  - Closing CTA: 1 foto fija de cierre (puede reusar la del hero con
+    tratamiento distinto — coherencia de marca sin repetir composición)
+Ninguna pieza en picsum — regla sin excepción de AGENTS.md. Video de
+Architecture: get_cost:true + confirmación de créditos ANTES de generar,
+si se decide ir por esa vía en vez de imagen fija.
+
+================================================================
+12. ESCENA FIRME — BEAT (obligatorio elegir UNA, regla de AGENTS.md)
+================================================================
+Candidata recomendada: CONSTRUCTION PROGRESS (7.9) como widget Beat
+(riel + seek) — no un modelo 3D figurativo (Detalle #11/#12 descartados
+en el punto 6), sino una pieza de UI/data-viz: los bloques numerados
+1-23 agrupados en 4 blocks se arman/iluminan sobre un riel a medida que
+el escenario hace seek con el scroll — justificado por el contenido
+mismo de la referencia (ya es literalmente una progresión numerada), no
+un efecto 3D forzado. `<BeatStage>` + `<Beat mag recipe>` propia, receta
+nueva (no copiar el cubo de RATIO).
+
+Nota 2026-09-22: la alternativa que este plan tenía originalmente (el
+wordmark del hero como riel Beat) queda DESCARTADA — el hero ya no es un
+wordmark estático con SplitText, es la secuencia de frames scrubeada del
+punto 7.2 (Familia B, un mecanismo distinto y ya de por sí la escena más
+compleja del template). No hace falta una segunda escena firme en el
+hero — Construction Progress queda como única candidata Beat.
+
+Esta sección entra al builder con badge Beat una vez terminada
+(sectionRegistry.jsx → beat: true), como el resto del catálogo.
+
+================================================================
+13. QA / CHECKLIST DE CIERRE
+================================================================
+Taxonomía de diagnóstico (Detalle #10) a correr ANTES de Impeccable:
+  - Layout: ¿cada sección se siente compuesta o random? ¿spacing
+    consistente? ¿jerarquía real?
+  - Animation: ¿el vocabulario de motion del punto 8 se mantiene en las
+    12 secciones sin inventar uno nuevo por sección?
+  - Interaction: ¿los 14 ítems del punto 10 están todos implementados
+    con la MISMA firma de easing?
+  - Visual polish: paleta/tipografía consistente con el punto 9, sin
+    defaults LLM.
+
+Checklist Module 6 — OBLIGATORIO en el Hero (7.2, secuencia de frames
+scrubeada) y opcional en Architecture (7.6) si esa sección termina
+usando video real en vez de imagen fija: alguien de afuera entiende la
+oferta sin explicación, forward/stop/reverse se comportan como se
+espera, headline legible en los 3 estados, mobile deliberado (imagen
+estática, nunca el scrub), página con sentido sin motion.
+
+Checklist final: correr Impeccable critique/audit/polish (regla #1 de
+AGENTS.md, obligatoria) + playwright-cli para verificar la demo en
+browser antes de dar por cerrado.
+
+================================================================
+14. INTEGRACIÓN TÉCNICA (pointers, no parte del diseño)
+================================================================
+- Secciones en src/components/sections/meridian/
+- Registrar en src/lib/sectionRegistry.jsx (beat: true en la sección de
+  Construction Progress una vez armada)
+- Registrar SKU en server/catalog.js + server/sections.js (mantener en
+  sync)
+- Precio de lista: a definir — MERIDIAN no depende de WebGL Three.js
+  pesado (solo un riel Beat + primitivos P1-P14), más cercano a
+  atrium/fizz (189 USD) que a ratio (269 USD, Beat completo). Sugerido
+  de arranque: 189 USD, confirmar con el usuario antes de cerrar
+  server/catalog.js (npm run check valida paridad con pricing.js).
+- Assets en src/components/sections/meridian/assets/
+- npm run check:visual + npm run check:builder tras integrar al builder
+
+================================================================
+15. DECISIONES PENDIENTES / A CONFIRMAR ANTES DE EMPEZAR A CODEAR
+================================================================
+- [ ] Preloader (7.1): ¿se incluye en v1 o es una firma visual opcional
+      a agregar después? No es mandatorio para pasar la barra award-level.
+- [ ] NUEVO 2026-09-22 — Fuente del flythrough del Hero (7.2/11): qué
+      generador de VIDEO corto se usa como origen de los ~120-125 frames
+      (Higgsfield descartado por el usuario, "nano banana"/Gemini 2.5
+      Flash Image genera imagen no video continuo — evaluar si alcanza
+      con pocos keyframes + interpolación, o si hace falta un generador
+      de video real disponible en este entorno). Bloquea específicamente
+      el asset del hero, no el resto del plan.
+- [ ] Architecture (7.6): ¿video real (con costo, mismo problema de
+      fuente que el Hero) o imagen fija + Ken Burns (costo cero,
+      recomendado para v1)?
+- [ ] Journal (7.10): ¿entra en v1 (10 módulos) o se corta a v1.1 (8
+      módulos, más ajustado al principio de exclusión de Detalle #8)?
+- [ ] Acento de color único (punto 9): terracota/bronce vs. verde oliva
+      vs. otra opción — a cerrar con UI/UX Pro Max en la fase de diseño
+      visual antes de tocar código.
+- [ ] Precio de lista final (punto 14): 189 USD sugerido, a confirmar.
+
+================================================================
+16. PRÓXIMO PASO
+================================================================
+Con este plan aprobado: (1) resolver la fuente del flythrough del Hero
+(pendiente nuevo del punto 15 — bloquea 7.2/11 específicamente), (2) fase
+de diseño visual (paleta + tipografía final vía UI/UX Pro Max, Design
+Read confirmado), (3) scaffolding de src/components/sections/meridian/
+módulo por módulo siguiendo el orden del punto 7, empezando por el Hero
+(7.2, una vez resuelto el pendiente 1) y la escena Beat de Construction
+Progress (7.9/12) como las dos piezas de mayor riesgo/decisión.

@@ -220,6 +220,15 @@ export function loadConfig() {
       notifyTo: process.env.EMAIL_NOTIFY_TO || "",
       logoUrl: process.env.EMAIL_LOGO_URL || "",
     },
+    // CRM de marketing (Brevo). Sin key no se sincroniza: los leads quedan
+    // guardados y `npm run leads:sync` los sube cuando se configure.
+    crm: {
+      brevoApiKey: process.env.BREVO_API_KEY || "",
+      brevoListId: (() => {
+        const n = Number(process.env.BREVO_LIST_ID);
+        return Number.isInteger(n) && n > 0 ? n : null;
+      })(),
+    },
     cookie: {
       name: "sp.sid",
       httpOnly: true,

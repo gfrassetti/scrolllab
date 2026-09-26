@@ -18,6 +18,7 @@ const POSTERS = {
   unity: '/catalog/unity.jpg',
   ratio: '/catalog/ratio.jpg',
   atrium: '/catalog/atrium.jpg',
+  meridian: '/catalog/meridian.jpg',
 }
 
 /**

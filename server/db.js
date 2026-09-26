@@ -4,6 +4,7 @@ import {
   Order as MongoOrder,
   HostedInstance as MongoHostedInstance,
   Subscription as MongoSubscription,
+  Lead as MongoLead,
 } from "./models.js";
 import { fileDb } from "./fileStore.js";
 
@@ -77,6 +78,47 @@ export const db = {
   async updateUser(user) {
     if (mode === "file") return fileDb.updateUser(user);
     return user.save();
+  },
+  // Alta idempotente de un lead por email: `created` dice si es el primer alta.
+  async upsertLead(data) {
+    if (mode === "file") return fileDb.upsertLead(data);
+    try {
+      return { lead: await MongoLead.create(data), created: true };
+    } catch (err) {
+      if (err?.code !== 11000) throw err;
+      return {
+        lead: await MongoLead.findOne({
+          email: String(data.email).toLowerCase(),
+        }),
+        created: false,
+      };
+    }
+  },
+  async listLeads({ unsyncedOnly = false } = {}) {
+    if (mode === "file") return fileDb.listLeads({ unsyncedOnly });
+    return MongoLead.find(unsyncedOnly ? { crmSyncedAt: null } : {}).sort({
+      createdAt: 1,
+    });
+  },
+  async findLeadByCoupon(code) {
+    if (mode === "file") return fileDb.findLeadByCoupon(code);
+    return MongoLead.findOne({ couponCode: code });
+  },
+  // Canje atómico: gana el primero; repetir con la misma orden es ok.
+  async redeemCoupon({ code, orderId }) {
+    if (mode === "file") return fileDb.redeemCoupon({ code, orderId });
+    const won = await MongoLead.findOneAndUpdate(
+      { couponCode: code, couponRedeemedAt: null },
+      {
+        $set: { couponRedeemedAt: new Date(), couponOrderId: String(orderId) },
+      },
+      { new: true },
+    );
+    if (won) return { redeemed: true };
+    const lead = await MongoLead.findOne({ couponCode: code });
+    return {
+      redeemed: Boolean(lead) && String(lead.couponOrderId) === String(orderId),
+    };
   },
   async createOrder(data) {
     if (mode === "file") return fileDb.createOrder(data);

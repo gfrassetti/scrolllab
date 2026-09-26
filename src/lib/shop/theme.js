@@ -18,6 +18,7 @@ export const SHOP_THEME_IDS = [
   'unity',
   'ratio',
   'atrium',
+  'meridian',
 ]
 
 /** Acento de cada modelo — mismo hex que `models[].accent` en el registry. */
@@ -32,6 +33,7 @@ export const TEMPLATE_ACCENTS = {
   unity: '#f4c518',
   ratio: '#e23c24',
   atrium: '#111111',
+  meridian: '#8f7a5e',
 }
 
 const THEMES = {
@@ -132,6 +134,15 @@ const THEMES = {
     '--shop-border': 'rgba(17, 17, 17, 0.15)',
     '--shop-accent': TEMPLATE_ACCENTS.atrium,
     '--shop-accent-fg': '#f4f1ea',
+    '--shop-radius': '0px',
+  },
+  meridian: {
+    '--shop-bg': '#dfd8cf',
+    '--shop-fg': '#2a2622',
+    '--shop-muted': 'rgba(42, 38, 34, 0.55)',
+    '--shop-border': 'rgba(42, 38, 34, 0.18)',
+    '--shop-accent': TEMPLATE_ACCENTS.meridian,
+    '--shop-accent-fg': '#f0eae0',
     '--shop-radius': '0px',
   },
 }

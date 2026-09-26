@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -10,6 +11,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    resolve: {
+      // Alias `@/` → src/. Lo pide el CLI/MCP de shadcn (componentry.dev).
+      // OJO: NO usar `@/` dentro de src/components/sections/* — esas secciones
+      // se copian verbatim al ZIP que compra el cliente y su proyecto no tiene
+      // este alias. Ahí van imports relativos. Ver docs/motion-componentry.md.
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
     server: {
       proxy: {
         '/api': {

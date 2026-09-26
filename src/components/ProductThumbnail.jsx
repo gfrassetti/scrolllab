@@ -53,6 +53,12 @@ const styles = {
     accent: '#111111',
     code: 'AU',
   },
+  meridian: {
+    background: '#dfd8cf',
+    color: '#2a2622',
+    accent: '#8f7a5e',
+    code: 'MR',
+  },
   ratio: {
     background: '#ffffff',
     color: '#111111',

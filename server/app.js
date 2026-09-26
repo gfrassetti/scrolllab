@@ -24,6 +24,7 @@ import {
 } from './middleware.js'
 import { validateCheckoutItems, assertObjectIdLike } from './validation.js'
 import { isHostableSectionId, HOSTABLE_SECTIONS } from './sections.js'
+import { purchaseCode } from './license.js'
 import { sanitizeSectionProps } from './sectionFields.js'
 import {
   newHostedKey,
@@ -76,8 +77,14 @@ import {
   COMMERCE_PACK_SURCHARGE_USD,
   HOSTED_PLANS,
   isHostedPlanId,
+  discountedArsFromUsd,
 } from './catalog.js'
 import { getUsdArsRate } from './fx.js'
+import {
+  claimWelcomeCoupon,
+  maskEmail,
+  resolveCouponForCheckout,
+} from './services/coupons.js'
 
 function publicUser(user) {
   if (!user) return null
@@ -400,6 +407,7 @@ export async function createApp(config) {
           currency_id: o.currency_id,
           createdAt: o.createdAt,
           downloadCount: o.downloadCount || 0,
+          purchaseCode: purchaseCode(db.uid(o) || o.id, config.downloadSecret),
         })),
       })
     }),
@@ -462,11 +470,27 @@ export async function createApp(config) {
         rate: fx.rate,
       })
 
-      const total = resolved.reduce((sum, i) => sum + i.unit_price, 0)
+      // Cupón de bienvenida: el cliente manda solo el código; el descuento lo
+      // calcula el servidor sobre el precio de lista, nunca sale de un monto suyo.
+      const coupon = req.body?.couponCode
+        ? await resolveCouponForCheckout({
+            code: req.body.couponCode,
+            userId: db.uid(req.user),
+            userEmail: req.user.email,
+          })
+        : null
+      const lines = coupon
+        ? resolved.map((i) => ({
+            ...i,
+            unit_price: discountedArsFromUsd(i.unit_price_usd, fx.rate, coupon.percent),
+          }))
+        : resolved
+
+      const total = lines.reduce((sum, i) => sum + i.unit_price, 0)
       const order = await db.createOrder({
         userId: db.uid(req.user),
         status: 'pending',
-        items: resolved.map((i) => ({
+        items: lines.map((i) => ({
           sku: i.sku,
           title: i.title,
           unit_price: i.unit_price,
@@ -477,6 +501,8 @@ export async function createApp(config) {
         total,
         totalUsd: resolved.reduce((sum, i) => sum + i.unit_price_usd, 0),
         fxRate: fx.rate,
+        couponCode: coupon?.code,
+        discountPct: coupon?.percent,
         currency_id: 'ARS',
         expiresAt: pendingExpiresAt(),
       })
@@ -493,7 +519,7 @@ export async function createApp(config) {
 
       const result = await createCheckoutPreference({
         accessToken: config.mpAccessToken,
-        items: resolved,
+        items: lines,
         orderId,
         userId: db.uid(req.user),
         clientUrl: config.clientUrl,
@@ -1224,6 +1250,47 @@ export async function createApp(config) {
         config,
       })
       res.json({ ok: true, ...out })
+    }),
+  )
+
+  // Cupón de bienvenida de quien tiene sesión: la primera vez lo crea y le manda
+  // el mail; después devuelve el mismo. No hay formulario ni mail que tipear: el
+  // mail es el de su cuenta de Google. Ver `claimWelcomeCoupon`.
+  app.post(
+    '/api/coupons/welcome',
+    requireAuth,
+    limits.welcome,
+    asyncHandler(async (req, res) => {
+      const out = await claimWelcomeCoupon({
+        user: req.user,
+        locale: req.body?.locale,
+        utm: req.body?.utm,
+        config,
+      })
+      res.set('Cache-Control', 'no-store')
+      res.json({ ok: true, ...out })
+    }),
+  )
+
+  // Chequeo del cupón por código. Si hay sesión también mira de quién es y
+  // "primera compra"; sin sesión devuelve el mail enmascarado. El checkout lo
+  // revalida.
+  app.post(
+    '/api/coupons/check',
+    limits.coupons,
+    asyncHandler(async (req, res) => {
+      const { lead, code, percent } = await resolveCouponForCheckout({
+        code: req.body?.code,
+        userId: req.user ? db.uid(req.user) : null,
+        userEmail: req.user?.email || null,
+      })
+      res.json({
+        ok: true,
+        code,
+        percent,
+        expiresAt: new Date(lead.couponExpiresAt).toISOString(),
+        emailHint: maskEmail(lead.email),
+      })
     }),
   )
 

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "tagline": "Solo scrolleá."
+    "tagline": "Webs que se mueven."
   },
   "nav": {
     "templates": "Templates",
@@ -199,17 +199,22 @@
   "home": {
     "heroLine1": "Crea tu propia",
     "heroLine2": "historia",
+    "heroWords": "marca|web|idea|experiencia",
     "heroLine3": "",
     "heroBody": "Páginas pensadas para scrollear. Un modelo completo o el builder; te llevás el código.",
     "heroCtaModels": "Ver modelos",
     "heroCtaDemo": "Abrir una demo",
     "heroCtaBuilder": "Probar el builder",
     "openDemo": "Ver demo",
+    "viewDetails": "Ver detalles",
     "comingSoon": "Próximamente",
     "desktopOnly": "Solo desktop",
     "scrollDown": "Bajá para ver",
     "modelsLabel": "Los modelos — 09",
     "modelsScrollHint": "Scrolleá para recorrer",
+    "builderDemoEyebrow": "En 10 segundos",
+    "builderDemoTitle": "Lo armás y te lo llevás",
+    "builderDemoBody": "Así funciona el builder: elegís secciones de nuestros modelos, armás tu página a medida y te la llevás en código fuente — sin pagar por un template entero si no lo necesitás.",
     "modelsBrowseHint": "Pasá el cursor · abrí la demo",
     "cycleLabel": "El listón",
     "cycleWords": [
@@ -262,6 +267,7 @@
     "footerBuilder": "Builder",
     "footerContact": "Contacto",
     "footerContactForm": "Escribinos",
+    "footerInstagram": "Instagram",
     "footerBuildPage": "Armar mi página",
     "footerLicense": "Licencia",
     "footerPrivacy": "Privacidad",
@@ -316,7 +322,7 @@
     "monolith": {
       "vibe": "Sistema brutalista",
       "tags": [
-        "Hero en Three.js",
+        "Hero 3D",
         "Skew por velocidad",
         "Ficha técnica",
         "Acordeón tipográfico"
@@ -351,7 +357,7 @@
         "Piedra scrubeada",
         "Servicios asimétricos"
       ],
-      "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas Three.js que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
+      "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas 3D que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
     },
     "comic": {
       "vibe": "Historieta scrollytelling",
@@ -392,6 +398,16 @@
         "Wordmark gigante"
       ],
       "description": "Papel hueso, serif editorial y fotografías genéricas de arquitectura. El hero pineado sostiene una sola toma de massing bajo un manifiesto tipográfico; un índice de obras, el proceso en pin y un anillo negro de fotos de estudio marcan el ritmo antes de las cifras de la práctica. Ideal para estudios de arquitectura, desarrolladoras inmobiliarias o cualquier práctica que quiera mostrar su obra a esta escala de tipo."
+    },
+    "meridian": {
+      "vibe": "Desarrollo inmobiliario",
+      "tags": [
+        "Flythrough aéreo por scroll",
+        "Mapa con pines interactivos",
+        "Slider con efecto mask",
+        "Hotspots en interiores"
+      ],
+      "description": "Arena cálida, serif editorial y un recorrido aéreo que se reproduce mientras scrolleás: hero de frames con el logo que se acopla al header, menú tipo drawer, slider de pantalla completa con transición de máscara, un mapa con pines que trazan rutas punteadas y fotos de interiores con hotspots que abren tooltips. Ideal para desarrollos inmobiliarios, complejos de cabañas, edificios o departamentos, desarrolladoras y constructoras que quieren destacar cada uno de sus complejos, o resorts."
     }
   },
   "builder": {
@@ -789,6 +805,66 @@
           "blurb": "Wordmark gigante y fila legal"
         }
       },
+      "meridian": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Flythrough aéreo scrubeado por scroll con tres estados de texto en crossfade — wordmark, cita de valor, invitación + CTA. El video/imaginery vienen como placeholder: se reemplaza la carpeta de frames en el código descargado — no es editable desde el builder."
+        },
+        "Concept": {
+          "name": "Concept",
+          "blurb": "Kicker centrado + una frase grande en serif que se revela palabra a palabra; el hero de arriba se aleja en parallax mientras sube."
+        },
+        "GallerySlider": {
+          "name": "Gallery slider",
+          "blurb": "Slider de fotos a pantalla completa con transición de máscara (empuje + estiramiento), arrastre / flechas y contador."
+        },
+        "Location": {
+          "name": "Location",
+          "blurb": "Mapa con parallax y pines interactivos que trazan una ruta punteada desde la sede, más una fila arrastrable de tarjetas de distancia que revelan su foto con un círculo."
+        },
+        "Panorama": {
+          "name": "Panorama",
+          "blurb": "Foto a ancho completo con parallax, título serif grande y un CTA envuelto en anillos que laten."
+        },
+        "Interior": {
+          "name": "Interior",
+          "blurb": "Slider a pantalla completa gobernado por un menú de enlaces, con transición de máscara y hotspots que laten y abren tooltips."
+        },
+        "Amenities": {
+          "name": "Amenities",
+          "blurb": "Titular con parallax y una fila arrastrable de celdas: al hacer clic en el + la foto colapsa y aparece un párrafo."
+        },
+        "Masterplan": {
+          "name": "Masterplan",
+          "blurb": "Aérea a ancho completo con puntos numerados que laten; al pasar el mouse por uno se dibuja el contorno de la propiedad con un tooltip (ambientes, superficie, nombre)."
+        },
+        "Contact": {
+          "name": "Contact",
+          "blurb": "Titular serif grande junto a un formulario de campos subrayados con etiquetas que flotan, validación en línea y botón que se rellena."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "Cerca del 80% del viewport: bloque de contacto, teléfono y email grandes, monograma, dirección con botón de mapa y redes, fila legal."
+        }
+      },
+      "signal": {
+        "NavSignal": {
+          "name": "Nav signal",
+          "blurb": "Header fijo minimalista · menú mobile a pantalla completa"
+        },
+        "HeroSignal": {
+          "name": "Hero signal",
+          "blurb": "Hero cinético con palabras que rotan — caracteres que entran con blur y se cruzan por temporizador"
+        },
+        "PixelRevealGrid": {
+          "name": "Pixel reveal grid",
+          "blurb": "Tarjetas de caso detrás de una grilla de tiles que se disuelve al scroll, solo DOM"
+        },
+        "FooterSignal": {
+          "name": "Footer signal",
+          "blurb": "Cierre con CTA y wordmark gigante"
+        }
+      },
       "contact": {
         "ContactForm": {
           "name": "Formulario de contacto",
@@ -811,7 +887,14 @@
     "payLoggedOut": "Entrá para pagar →",
     "redirecting": "Un momento…",
     "preview": "Ver preview",
-    "clearAll": "Quitar todo"
+    "clearAll": "Quitar todo",
+    "couponUntil": "vence el {{date}}",
+    "couponSubtotal": "Subtotal",
+    "couponDiscount": "Cupón de bienvenida {{percent}}%",
+    "couponErrUsed": "Ese cupón ya se usó.",
+    "couponErrExpired": "Ese cupón venció.",
+    "couponErrFirst": "El cupón vale solo para la primera compra.",
+    "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo."
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -821,7 +904,12 @@
     "devLogin": "Entrar sin Google (solo desarrollo)",
     "errorGoogle": "No se pudo iniciar sesión con Google.",
     "errorNotConfiguredDev": "Google no está configurado. Usá el acceso de desarrollo o pedile a quien administra el sitio que lo active.",
-    "errorNotConfiguredProd": "El inicio de sesión no está disponible ahora. Probá de nuevo más tarde."
+    "errorNotConfiguredProd": "El inicio de sesión no está disponible ahora. Probá de nuevo más tarde.",
+    "inAppTitle": "Estás dentro de otra app",
+    "inAppTitleNamed": "Estás en el navegador de {{app}}",
+    "inAppBody": "Google no deja iniciar sesión desde acá. Abrí esta página en Chrome o Safari (menú ⋯ → «Abrir en el navegador») o copiá el link y pegalo ahí.",
+    "inAppCopy": "Copiar link",
+    "inAppCopied": "¡Copiado! Pegalo en Chrome o Safari"
   },
   "account": {
     "eyebrow": "Mis compras",
@@ -833,6 +921,8 @@
     "pending": "Confirmando pago…",
     "failed": "Fallida",
     "download": "Descargar ZIP",
+    "license": "Licencia",
+    "downloadsCount": "Descargas: {{count}}",
     "preview": "Ver preview",
     "previewOf": "Preview · {{name}}",
     "previewCustom": "Tu composición",
@@ -865,7 +955,8 @@
     "subCancelDone": "Suscripción cancelada",
     "subSync": "Sincronizar con Mercado Pago",
     "subSyncHint": "¿Te suscribiste recién y no se refleja?",
-    "subSyncDone": "Estado actualizado"
+    "subSyncDone": "Estado actualizado",
+    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra hasta el {{date}}. Se aplica solo al pagar."
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",
@@ -933,7 +1024,8 @@
         "items": [
           "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
           "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago y cantidad de descargas.",
-          "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión."
+          "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión.",
+          "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste."
         ]
       },
       {
@@ -942,12 +1034,13 @@
           "Crear y administrar tu cuenta y mantener tu sesión iniciada.",
           "Procesar pagos, confirmar órdenes y habilitar descargas.",
           "Enviar comprobantes y comunicaciones operativas relacionadas con tus compras.",
+          "Enviarte por mail el cupón de bienvenida de tu primera compra. No enviamos newsletters.",
           "Prevenir fraude, abuso y accesos no autorizados, y cumplir obligaciones legales."
         ]
       },
       {
         "title": "Servicios de terceros",
-        "body": "Usamos Google para autenticación y Mercado Pago para procesar pagos. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
       },
       {
         "title": "Cookies y almacenamiento local",

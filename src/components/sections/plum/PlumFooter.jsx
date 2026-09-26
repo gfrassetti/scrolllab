@@ -48,7 +48,7 @@ export default function PlumFooter({ story }) {
   return (
     <footer
       ref={root}
-      className="relative overflow-hidden px-6 pt-24 pb-6 md:px-10"
+      className="relative flex min-h-svh flex-col overflow-hidden px-6 pt-24 pb-6 md:px-10"
       style={{ background: bg, color: ink }}
     >
       {/* looping mp4 backdrop (pear.no footer-loop), under a dark scrim */}
@@ -118,24 +118,28 @@ export default function PlumFooter({ story }) {
         )}
       </div>
 
-      <p
-        data-mark
-        className="relative z-10 mt-14 -ml-[0.02em] font-medium leading-[0.72] tracking-[-0.06em] whitespace-nowrap uppercase"
-        style={{ fontSize: 'clamp(5.5rem,30vw,30rem)', color: ink }}
-      >
-        {f.wordmark || story?.title || 'PLUM'}
-      </p>
-
-      {legal.length > 0 && (
-        <div
-          className="relative z-10 mt-6 flex flex-col gap-2 border-t pt-4 text-[11px] uppercase tracking-[0.08em] md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-6"
-          style={{ borderColor: 'rgba(255,255,255,0.15)', opacity: 0.6 }}
+      {/* pushed to the bottom of the viewport by the footer's own min-h-svh +
+          flex-col — on tall viewports the gap above stretches, not the wordmark */}
+      <div className="relative z-10 mt-auto">
+        <p
+          data-mark
+          className="-ml-[0.02em] font-medium leading-[0.72] tracking-[-0.06em] whitespace-nowrap uppercase"
+          style={{ fontSize: 'clamp(5.5rem,30vw,30rem)', color: ink }}
         >
-          {legal.map((line, i) => (
-            <span key={i}>{line}</span>
-          ))}
-        </div>
-      )}
+          {f.wordmark || story?.title || 'PLUM'}
+        </p>
+
+        {legal.length > 0 && (
+          <div
+            className="mt-6 flex flex-col gap-2 border-t pt-4 text-[11px] uppercase tracking-[0.08em] md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-6"
+            style={{ borderColor: 'rgba(255,255,255,0.15)', opacity: 0.6 }}
+          >
+            {legal.map((line, i) => (
+              <span key={i}>{line}</span>
+            ))}
+          </div>
+        )}
+      </div>
     </footer>
   )
 }

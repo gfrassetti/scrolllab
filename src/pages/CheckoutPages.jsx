@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
+import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { outcomeForStatus, shouldClearCart } from '../lib/checkoutOutcome'
 import { useT } from '../i18n'
 
@@ -50,6 +51,8 @@ export default function CheckoutSuccessPage() {
   const t = useT()
   const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
+  // Ya compró: el cupón de primera compra deja de valer y no debe seguir mostrándose.
+  const dropWelcome = useWelcomeCoupon((s) => s.drop)
   const { user, loading: authLoading } = useAuth()
   const [params] = useSearchParams()
   const [confirmState, setConfirmState] = useState('idle')
@@ -67,8 +70,11 @@ export default function CheckoutSuccessPage() {
   // Vaciarlo al llegar acá dejaba al comprador rechazado volviendo a un carrito
   // vacío, con todo para rearmar.
   useEffect(() => {
-    if (shouldClearCart(confirmState)) clearCart()
-  }, [confirmState, clearCart])
+    if (shouldClearCart(confirmState)) {
+      clearCart()
+      dropWelcome()
+    }
+  }, [confirmState, clearCart, dropWelcome])
 
   // Nunca girar para siempre: si /api/auth/me o el confirm se cuelgan, la orden
   // ya quedó paga por el webhook y el comprador tiene que poder llegar a
@@ -114,6 +120,7 @@ export default function CheckoutSuccessPage() {
         if (cancelled) return
         const confirmedId = data.orderId || orderId
         clearCart()
+        dropWelcome()
         navigate(
           `/account?purchase=1&orderId=${encodeURIComponent(confirmedId)}`,
           {
@@ -132,7 +139,7 @@ export default function CheckoutSuccessPage() {
     return () => {
       cancelled = true
     }
-  }, [authLoading, user, paymentId, status, orderId, navigate, clearCart])
+  }, [authLoading, user, paymentId, status, orderId, navigate, clearCart, dropWelcome])
 
   const panel = RESOLVED_PANELS[confirmState]
   if (panel) {
@@ -211,6 +218,7 @@ export function CheckoutMockPage() {
   const t = useT()
   const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
+  const dropWelcome = useWelcomeCoupon((s) => s.drop)
 
   useEffect(() => {
     if (!user || !orderId) return undefined
@@ -221,6 +229,7 @@ export function CheckoutMockPage() {
         if (!cancelled) {
           setDone(true)
           clearCart()
+          dropWelcome()
           navigate(
             `/account?purchase=1&orderId=${encodeURIComponent(orderId)}`,
             { replace: true },
@@ -233,7 +242,7 @@ export function CheckoutMockPage() {
     return () => {
       cancelled = true
     }
-  }, [user, orderId, clearCart, navigate])
+  }, [user, orderId, clearCart, dropWelcome, navigate])
 
   if (loading) {
     return (

@@ -24,6 +24,9 @@
   --duration-press: 140ms;
   --duration-popover: 200ms;
   --duration-toast: 280ms;
+  /* Award-Winning Web Developer, Detalle #5.5 — pausa deliberada
+     heading→subtítulo, no instantánea. */
+  --duration-reveal: 500ms;
 }
 
 html.dark {
@@ -97,6 +100,11 @@ html.dark {
   --color-plum-void: #0b0b0d;
   --color-plum-mist: #f3f1ec;
   --color-plum-accent: #6f5bff;
+
+  /* ——— Model 12 "SIGNAL": motion & sound studio ——— */
+  --color-signal-ink: #0c0d10;
+  --color-signal-paper: #efece5;
+  --color-signal-accent: #2fe0ff;
 
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
@@ -290,6 +298,24 @@ body {
   outline-color: var(--plum-accent);
 }
 
+/* ——— Model 12 "SIGNAL": motion & sound studio. Near-black ground, warm
+   paper for the pixel-reveal tiles, one electric-cyan accent (pulled from
+   the light-trail card art). ——— */
+.signal-world {
+  --signal-ink: #0c0d10;
+  --signal-paper: #efece5;
+  --signal-accent: #2fe0ff;
+}
+
+.signal-world ::selection {
+  background: var(--signal-accent);
+  color: var(--signal-ink);
+}
+
+.signal-world :focus-visible {
+  outline-color: var(--signal-accent);
+}
+
 /* Drifting decorative figures over the film (the halftone "cloud"). Applied to
    the INNER element so it never fights the overlay's centering transform. */
 @keyframes plum-drift-x {
@@ -441,6 +467,19 @@ body {
   -ms-overflow-style: none !important;
 }
 .playable-toolbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Chrome del market: ScrollProgress reemplaza la barra nativa (la clase la
+   pone/saca ese componente al montar/desmontar — solo vive en el market,
+   no en los demos de templates). */
+html.hide-native-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+html.hide-native-scrollbar::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;

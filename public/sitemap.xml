@@ -11,6 +11,56 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/chapters</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/nocturne</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/monolith</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/velocity</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/fizz</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/atelier</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/comic</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/unity</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/atrium</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scrolllab.com.ar/plantillas/meridian</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.scrolllab.com.ar/legal/license</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>

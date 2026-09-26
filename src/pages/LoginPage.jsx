@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
@@ -8,6 +8,7 @@ import {
   stashAuthReturn,
   takeAuthReturn,
 } from '../lib/authReturn'
+import { detectInAppBrowser } from '../lib/inAppBrowser'
 import { SITE_NAME } from '../lib/site'
 import { useT } from '../i18n'
 
@@ -34,6 +35,49 @@ function GoogleLogo() {
   )
 }
 
+/**
+ * Quien llega desde un video (Instagram, TikTok…) suele estar en el navegador
+ * de esa app, y Google no deja iniciar sesión ahí: el botón lo llevaría a un
+ * error 403 sin vuelta. Se avisa antes y se ofrece copiar el link.
+ */
+function InAppBrowserNotice({ app }) {
+  const t = useT()
+  const [copy, setCopy] = useState('idle') // idle | ok | fail
+  const url = window.location.href
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopy('ok')
+    } catch {
+      setCopy('fail')
+    }
+  }
+
+  return (
+    <div
+      role="note"
+      data-testid="in-app-notice"
+      className="border border-accent/50 bg-accent/10 px-4 py-4 text-sm leading-relaxed"
+    >
+      <p className="font-medium">
+        {app ? t('login.inAppTitleNamed', { app }) : t('login.inAppTitle')}
+      </p>
+      <p className="mt-1 text-ink/75">{t('login.inAppBody')}</p>
+      <button
+        type="button"
+        onClick={copyLink}
+        className="mt-3 border border-ink/40 px-3 py-2 text-[11px] uppercase tracking-[0.2em] transition-colors hover:border-ink"
+      >
+        {copy === 'ok' ? t('login.inAppCopied') : t('login.inAppCopy')}
+      </button>
+      {copy === 'fail' && (
+        <p className="mt-2 break-all text-xs text-ink/60 select-all">{url}</p>
+      )}
+    </div>
+  )
+}
+
 export default function LoginPage() {
   const { user, refresh } = useAuth()
   const navigate = useNavigate()
@@ -41,6 +85,7 @@ export default function LoginPage() {
   const error = params.get('error')
   const next = sanitizeAuthReturn(params.get('next')) || '/account'
   const t = useT()
+  const [inApp] = useState(() => detectInAppBrowser(navigator.userAgent))
 
   useEffect(() => {
     stashAuthReturn(next)
@@ -83,6 +128,8 @@ export default function LoginPage() {
               : t('login.errorGoogle')}
           </p>
         )}
+
+        {inApp.inApp && <InAppBrowserNotice app={inApp.app} />}
 
         <a
           href={googleHref}

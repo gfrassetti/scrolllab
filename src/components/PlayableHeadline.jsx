@@ -24,6 +24,27 @@ function run(command, value) {
   }
 }
 
+/**
+ * Las palabras rotativas (TextMorph) son islas contentEditable=false: el
+ * execCommand del navegador las saltea (y si no, rompe su grilla). Les
+ * aplicamos el formato a mano, sobre el contenedor, para que herede a todas.
+ */
+function formatMorphs(root, sel, command, value) {
+  root.querySelectorAll('[data-morph]').forEach((el) => {
+    if (sel && !sel.containsNode(el, true)) return
+    const cs = getComputedStyle(el)
+    if (command === 'foreColor') el.style.color = value
+    else if (command === 'bold')
+      el.style.fontWeight = Number(cs.fontWeight) >= 600 ? '400' : '700'
+    else if (command === 'italic')
+      el.style.fontStyle = cs.fontStyle === 'italic' ? 'normal' : 'italic'
+    else if (command === 'underline')
+      el.style.textDecorationLine = cs.textDecorationLine.includes('underline')
+        ? 'none'
+        : 'underline'
+  })
+}
+
 function selectEditorContents(el) {
   if (!el) return
   const range = document.createRange()
@@ -121,11 +142,16 @@ export default function PlayableHeadline({
       !sel.isCollapsed
     if (!inside) selectEditorContents(el)
     el.focus({ preventScroll: true })
-    fn()
+    fn(el, sel)
     window.requestAnimationFrame(() => {
       el.blur()
       window.getSelection()?.removeAllRanges()
     })
+  }
+
+  const format = (el, sel, command, value) => {
+    run(command, value)
+    formatMorphs(el, sel, command, value)
   }
 
   const applyBlock = (value) => {
@@ -134,7 +160,7 @@ export default function PlayableHeadline({
   }
 
   const paint = (hex) => {
-    withSelection(() => run('foreColor', hex))
+    withSelection((el, sel) => format(el, sel, 'foreColor', hex))
     setColorOpen(false)
   }
 
@@ -256,6 +282,8 @@ export default function PlayableHeadline({
       >
         {lines.map((line, i) => {
           const text = typeof line === 'string' ? line : line?.text
+          const content =
+            typeof line === 'object' && line?.node ? line.node : text
           const extra =
             typeof line === 'object' && line?.className ? line.className : ''
           return (
@@ -263,7 +291,7 @@ export default function PlayableHeadline({
               key={`${text}-${i}`}
               className={`block ${lineClassName} ${extra}`.trim()}
             >
-              {text}
+              {content}
             </span>
           )
         })}
@@ -303,19 +331,19 @@ export default function PlayableHeadline({
 
           <ToolbarBtn
             label="Bold"
-            onClick={() => withSelection(() => run('bold'))}
+            onClick={() => withSelection((el, sel) => format(el, sel, 'bold'))}
           >
             <span className="font-bold">B</span>
           </ToolbarBtn>
           <ToolbarBtn
             label="Italic"
-            onClick={() => withSelection(() => run('italic'))}
+            onClick={() => withSelection((el, sel) => format(el, sel, 'italic'))}
           >
             <span className="italic">I</span>
           </ToolbarBtn>
           <ToolbarBtn
             label="Underline"
-            onClick={() => withSelection(() => run('underline'))}
+            onClick={() => withSelection((el, sel) => format(el, sel, 'underline'))}
           >
             <span className="underline">U</span>
           </ToolbarBtn>

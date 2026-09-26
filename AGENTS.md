@@ -173,6 +173,10 @@ Usar cuando el brief pide reconstruir **el objeto de una imagen** como modelo Th
 
 - Vite + React 19 + Tailwind CSS v4
 - GSAP 3 + Lenis + three (vanilla in monolith)
+- Motion for React (`motion`) para micro-interacción de componente; GSAP sigue
+  siendo el motor de scroll — ver [`docs/motion-componentry.md`](docs/motion-componentry.md)
+- `cn()` en `src/lib/utils.js` (clsx + tailwind-merge) para componentes copiados
+  de registros shadcn (componentry.dev) en `src/components/ui/`
 - Express API (`server/`) + MongoDB + Passport Google OAuth + Mercado Pago SDK
 - Zustand cart (UX only; prices validated server-side)
 
@@ -244,11 +248,12 @@ src/lib/
 ```
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 279 con 8 secciones incluidas, USD 15 por cada sección
+tramos**: base de USD 235 con 8 secciones incluidas, USD 15 por cada sección
 extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
-receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269; la
-base del builder tiene que quedar **arriba** del template más caro. Las constantes
-viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
+receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
+sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
+que quedar **arriba** del template más caro que SÍ está en venta (hoy USD 229).
+Las constantes viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
 valida la paridad. Detalle en `docs/DEPLOY.md`.
 
 Never trust client prices. Never obfuscate sold JSX — license + account + signed links + watermark.
@@ -274,6 +279,30 @@ El scrollytelling **no es imposible**: son capas DOM + CSS + GSAP/Lenis. Antes d
 | Obsidian (canónico) | `Storytelling motion cookbook.md` en ScrollLab |
 | Wiring | `src/lib/gsap.js` + `SmoothScrollProvider` / `useLenis` |
 | Beat (producto) | [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) · `src/lib/beat/` |
+| Motion + Componentry | [`docs/motion-componentry.md`](docs/motion-componentry.md) · `src/components/ui/` |
+
+### Qué motor usa cada cosa (no mezclar en el mismo elemento)
+
+| Capa | Herramienta |
+|---|---|
+| Scroll / storytelling (P1–P14, Beat) | **GSAP + ScrollTrigger + Lenis** — no migrar |
+| Enter/exit, layout animations, gestos, springs | **Motion for React** (`import { motion } from 'motion/react'`) |
+| Piezas listas para copiar (MIT, quedan como código nuestro) | **Componentry** (`componentry.dev`) → `src/components/ui/` |
+
+Si el efecto se scrubea con el scroll es GSAP. Motion y GSAP peleando por el
+`transform` del mismo nodo es un bug garantizado.
+
+**ZIP:** el empaquetador (`server/packaging.js`) copia `SHARED` + la carpeta de la
+sección y **no sigue imports relativos**. Una sección de un template a la venta
+no puede importar `components/ui/*` ni `lib/utils` (no viajan, ni sus deps). PLUM
+sí los importa y está bloqueado para vender hasta resolverlo — ver el bloque
+"Bloqueante" en [`docs/motion-componentry.md`](docs/motion-componentry.md).
+El alias `@/` (→ `src/`) es sólo para `components/ui` y `lib`, nunca dentro de
+`components/sections/*`.
+
+**Docs de Motion dentro del agente:** `npx motion-ai` instala un MCP con la
+documentación siempre actualizada (búsqueda gratis, sin token). Es interactivo
+— lo corre el usuario, no el agente. Detalle en el doc de arriba.
 
 ### Primitivos (P1–P14) — lib y método
 
@@ -317,7 +346,7 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 #### Precio
 
 - RATIO lista **USD 269** (Beat, el más caro). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
-- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 279) tiene que superar al template más caro. Si subís un SKU, subí la base o `npm run check` falla.
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 235) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
 

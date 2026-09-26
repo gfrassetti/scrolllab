@@ -13,12 +13,16 @@ export class HttpError extends Error {
   /**
    * `expose` habilita que el mensaje viaje al cliente aunque sea 5xx: los 5xx
    * crudos se enmascaran porque pueden traer detalles internos.
+   * `code` y `details` son opcionales y viajan al cliente: sirven para que el
+   * front distinga dos errores con el mismo status sin leer el texto.
    */
-  constructor(status, message, { expose } = {}) {
+  constructor(status, message, { expose, code, details } = {}) {
     super(message)
     this.status = status
     this.name = 'HttpError'
     this.expose = expose ?? status < 500
+    if (code) this.code = code
+    if (details) this.details = details
   }
 }
 
@@ -27,6 +31,42 @@ export function assertObjectIdLike(id) {
     throw new HttpError(400, 'ID inválido')
   }
   return id
+}
+
+// El mail termina en un CSV y en la API del CRM: sin < > " ' ` \ ni espacios.
+const LEAD_EMAIL_RE = /^[^\s@<>"'`\\]+@[^\s@<>"'`\\]+\.[^\s@<>"'`\\]{2,}$/
+const LEAD_EMAIL_MAX = 120
+
+/** Email del cupón de bienvenida (el de la cuenta de Google): en minúsculas y con forma de mail, o 400. */
+export function normalizeLeadEmail(raw) {
+  const email = String(raw ?? '').trim().toLowerCase()
+  if (!email || email.length > LEAD_EMAIL_MAX || !LEAD_EMAIL_RE.test(email)) {
+    throw new HttpError(400, 'Email inválido')
+  }
+  return email
+}
+
+/**
+ * utm_source / utm_medium / utm_campaign que trae el front (de un video o un
+ * post): slugs de hasta 32 caracteres o nada. Devuelve `{ utmSource, utmMedium,
+ * utmCampaign }` con solo los que sirven.
+ */
+export function cleanUtm(raw) {
+  const out = {}
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out
+  for (const field of ['source', 'medium', 'campaign']) {
+    const value =
+      typeof raw[field] === 'string'
+        ? raw[field]
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 32)
+        : ''
+    if (value) out[`utm${field[0].toUpperCase()}${field.slice(1)}`] = value
+  }
+  return out
 }
 
 /**
