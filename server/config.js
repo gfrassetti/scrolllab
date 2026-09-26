@@ -249,8 +249,8 @@ export function loadConfig() {
     })(),
     // Días de prueba gratis al abrir la PRIMERA suscripción (una vez por
     // usuario, cualquier plan). 0 = sin prueba. Va a MP como
-    // `auto_recurring.start_date` (fecha del primer cobro): `free_trial` solo
-    // está documentado para `/preapproval_plan`, no para altas sin plan.
+    // `auto_recurring.start_date` (fecha del primer cobro; verificado en
+    // sandbox: MP agenda el cobro ahí y lo registra como `free_trial`).
     hostedTrialDays: (() => {
       const n = Number(process.env.HOSTED_TRIAL_DAYS);
       return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 7;

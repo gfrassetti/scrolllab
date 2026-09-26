@@ -33,11 +33,21 @@ cuando una renovación no se cobró; el primer cobro (fin de la prueba) tiene
 como mucho 1 día.
 
 > **Por qué `start_date` y no `free_trial`:** MP documenta `free_trial` solo
-> para `/preapproval_plan`. Estas altas son `/preapproval` sin plan, donde el
-> campo documentado para diferir el primer cobro es `start_date`. Hasta
-> 2026-09 se mandaba `free_trial` y nunca se verificó que MP lo respetara (sin
-> él, MP cobra la primera cuota ~1 h después de suscribirse). Verificalo con el
-> paso 5.
+> para `/preapproval_plan`; en `/preapproval` sin plan el campo documentado
+> para diferir el primer cobro es `start_date`, y además sirve para fechas
+> arbitrarias (los días ya pagados al re-suscribirse).
+>
+> **Verificado en sandbox (2026-09-25)**, vendedor y comprador de test:
+> - `start_date` +7 días → `next_payment_date` +7 días; MP lo registra solo
+>   como `free_trial: { frequency: 7, frequency_type: 'days' }`.
+> - Autorizada con tarjeta de test → `authorized`, ninguna cuota creada ni
+>   cobrada; primer cobro agendado a +7 días.
+> - `start_date` +25 y +330 días → aceptados (re-suscripción sin doble cobro,
+>   también en anual).
+> - `free_trial` en `/preapproval` (lo que se mandaba antes) también lo acepta
+>   (+7 días). Sin nada, `next_payment_date` = el momento del alta.
+> - Cancelar dos veces → 400 `You can not modify a cancelled preapproval`:
+>   `cancelPreapprovalConfirmed` lo toma como baja hecha.
 
 ---
 
@@ -115,9 +125,9 @@ usando el sync manual (paso 4).
      `/lab`, o `/account` → **Sincronizar con Mercado Pago**, o
      `POST /api/subscriptions/sync` a mano. Consulta el preapproval por API y
      aplica el mismo cambio que haría el webhook.
-5. **Verificar la prueba gratis** (pendiente de confirmar contra MP): con la
-   suscripción de prueba autorizada, consultá el preapproval (`mpPreapprovalId`
-   de la fila, o el panel de MP):
+5. **Re-verificar la prueba gratis** (ya verificada en sandbox, ver arriba;
+   útil si MP cambia algo): con la suscripción autorizada, consultá el
+   preapproval (`mpPreapprovalId` de la fila, o el panel de MP):
 
    ```bash
    curl -s https://api.mercadopago.com/preapproval/<ID> \
@@ -126,9 +136,9 @@ usando el sync manual (paso 4).
    ```
 
    `next_payment_date` tiene que caer ~7 días después del alta (y coincidir
-   con `start_date`). Si queda en el día del alta, MP no difiere el cobro con
-   `start_date` en altas `pending` y hay que pasar a `/preapproval_plan` (con
-   `free_trial` documentado): avisá antes de abrir la prueba al público.
+   con `start_date`). Si algún día queda en el día del alta, MP dejó de
+   diferir el cobro con `start_date` y hay que pasar a `/preapproval_plan`
+   (con `free_trial` documentado).
 6. `GET /api/subscriptions/me` muestra `plan` y `quota` del tier.
 7. Publicá más secciones que el free tier → te deja.
 
