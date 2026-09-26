@@ -7,6 +7,23 @@ import { useI18n } from '../i18n'
 import { gsap, useGSAP } from '../lib/gsap'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
+const tierIndex = (planId) => TIER_ORDER.indexOf(String(planId).replace('hosted_', ''))
+
+// Lo que Checkout Pro agrega a la back_url; se limpia al volver.
+const MP_RETURN_PARAMS = [
+  'upgrade',
+  'payment_id',
+  'collection_id',
+  'collection_status',
+  'status',
+  'external_reference',
+  'payment_type',
+  'merchant_order_id',
+  'preference_id',
+  'site_id',
+  'processing_mode',
+  'merchant_account_id',
+]
 
 function fmtArs(n, locale) {
   return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'es-AR', {
@@ -38,6 +55,7 @@ export default function HostedPlans() {
     graceEndsAt,
     paymentFailed,
     lapsedPlan,
+    paidPlan,
     refresh: refreshPlan,
   } = usePlan()
   const { t, locale } = useI18n()
@@ -51,6 +69,9 @@ export default function HostedPlans() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [confirmingCancel, setConfirmingCancel] = useState(false)
+  // Cambio de plan a confirmar: la cotización del server (monto a pagar ya,
+  // precio desde el próximo cobro). Se muestra en la card del plan destino.
+  const [changeQuote, setChangeQuote] = useState(null)
 
   const fmtDate = (d) =>
     d
@@ -140,6 +161,46 @@ export default function HostedPlans() {
       .finally(() => refreshPlan())
   }, [returnedFromMp, setSearchParams, refreshPlan, t])
 
+  // Volver del checkout de la diferencia (`/lab?upgrade=volver&payment_id=…`):
+  // se confirma el pago acá, sin esperar al webhook. Una sola vez.
+  const upgradeReturn = !!user && searchParams.get('upgrade') === 'volver'
+  const upgradeHandled = useRef(false)
+  useEffect(() => {
+    if (!upgradeReturn || upgradeHandled.current) return
+    upgradeHandled.current = true
+    const paymentId = searchParams.get('payment_id') || searchParams.get('collection_id')
+    const status = searchParams.get('status') || searchParams.get('collection_status')
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        MP_RETURN_PARAMS.forEach((k) => next.delete(k))
+        return next
+      },
+      { replace: true },
+    )
+    if (status !== 'approved' || !paymentId || paymentId === 'null') {
+      setNotice(
+        t(status === 'pending' || status === 'in_process' ? 'lab.upgradePending' : 'lab.upgradeNotPaid'),
+      )
+      return
+    }
+    api
+      .subscriptionUpgradeConfirm(paymentId)
+      .then((out) =>
+        setNotice(
+          t('lab.upgradeApplied', {
+            plan: t(`lab.tier.${String(out.plan).replace('hosted_', '')}`),
+          }),
+        ),
+      )
+      .catch((err) =>
+        err.status === 409 && /procesando/.test(err.message)
+          ? setNotice(t('lab.upgradePending'))
+          : setError(err.message),
+      )
+      .finally(() => refreshPlan())
+  }, [upgradeReturn, searchParams, setSearchParams, refreshPlan, t])
+
   const subscribe = async (planId, planCycle = cycle) => {
     if (busy) return
     setBusy(planId)
@@ -177,17 +238,40 @@ export default function HostedPlans() {
     }
   }
 
-  // Cambio de plan en el acto (mismo ciclo, sin dar de baja). La cuota sube
-  // ya; el precio nuevo lo cobra MP en el próximo ciclo.
+  // Cambio de plan (mismo ciclo, sin dar de baja). Primero la cotización: se
+  // confirma viendo cuánto se paga ya (la diferencia, si sube con días pagos)
+  // y cuánto desde el próximo cobro.
   const changePlan = async (planId) => {
     if (busy) return
     setBusy(planId)
     setError('')
     setNotice('')
     try {
-      await api.subscriptionChange(planId)
+      setChangeQuote(await api.subscriptionChangeQuote(planId))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const confirmChange = async () => {
+    if (busy || !changeQuote) return
+    const planId = changeQuote.plan
+    setBusy(planId)
+    setError('')
+    try {
+      const res = await api.subscriptionChange(planId)
+      if (res.requiresPayment && res.init_point) {
+        window.location.href = res.init_point
+        return
+      }
+      if (res.requiresPayment && res.mock && res.payUrl) {
+        await api.subscriptionUpgradeMockPay(res.payUrl)
+      }
+      setChangeQuote(null)
       await refreshPlan()
-      setNotice(t('lab.planChanged'))
+      setNotice(t('lab.upgradeApplied', { plan: tierName(planId) }))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -427,7 +511,7 @@ export default function HostedPlans() {
           {activePlan && !canResubscribe && (
             <>
               <p className="mt-6 text-body-sm text-ink/55">
-                {t('lab.planChangeHint')}
+                {t(trialing ? 'lab.planChangeHintTrial' : 'lab.planChangeHint')}
               </p>
               <p className="mt-2 text-body-sm text-ink/50">
                 {t('lab.planCycleHint')}
@@ -530,6 +614,49 @@ export default function HostedPlans() {
                     <span className="btn mt-5 w-full border-ink/20 text-ink/40">
                       {t('lab.planCurrent')}
                     </span>
+                  ) : activePlan && !canResubscribe && changeQuote?.plan === p.id ? (
+                    <div className="mt-5 border-t border-ink/15 pt-4" role="group" aria-live="polite">
+                      <p className="text-body-sm text-ink/75">
+                        {t(
+                          changeQuote.amount > 0
+                            ? 'lab.changeConfirmPaid'
+                            : changeQuote.trialing
+                              ? 'lab.changeConfirmTrial'
+                              : 'lab.changeConfirmFree',
+                          {
+                            plan: tierName(p.id),
+                            amount: fmtArs(changeQuote.amount, locale),
+                            days:
+                              changeQuote.days === 1
+                                ? t('lab.daysOne')
+                                : t('lab.daysMany', { n: changeQuote.days }),
+                            price: fmtArs(changeQuote.newPrice, locale),
+                            per: t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth'),
+                            date: fmtDate(changeQuote.priceEffectiveAt),
+                          },
+                        )}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={confirmChange}
+                        disabled={!!busy}
+                        className="btn mt-3 w-full border-accent bg-accent text-ink hover:opacity-85 disabled:opacity-40"
+                      >
+                        {busy === p.id
+                          ? '…'
+                          : changeQuote.amount > 0
+                            ? t('lab.changePay', { amount: fmtArs(changeQuote.amount, locale) })
+                            : t('lab.changeYes', { plan: tierName(p.id) })}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setChangeQuote(null)}
+                        disabled={!!busy}
+                        className="mt-2 w-full text-body-sm text-ink/55 hover:text-ink disabled:opacity-40"
+                      >
+                        {t('lab.changeKeep')}
+                      </button>
+                    </div>
                   ) : activePlan && !canResubscribe ? (
                     <button
                       type="button"
@@ -543,6 +670,12 @@ export default function HostedPlans() {
                     >
                       {busy === p.id ? '…' : t('lab.planChangeTo')}
                     </button>
+                  ) : canResubscribe && paidPlan && tierIndex(p.id) > tierIndex(paidPlan) ? (
+                    // Días pagos con un plan más barato: re-suscribirse más
+                    // arriba sería la cuota nueva sin pagar la diferencia.
+                    <p className="mt-5 text-body-sm text-ink/55">
+                      {t('lab.planUpgradeAfterReactivate', { plan: tierName(paidPlan) })}
+                    </p>
                   ) : (
                     <button
                       type="button"

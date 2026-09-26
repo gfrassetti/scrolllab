@@ -15,6 +15,7 @@ import {
   mpPaymentError,
   buildPreferenceBody,
   buildPreapprovalBody,
+  buildUpgradePreferenceBody,
   billingFrequency,
   absoluteClientAsset,
   MP_STATEMENT_DESCRIPTOR,
@@ -42,6 +43,15 @@ import {
   buildSubscriptionWelcome,
   buildSubscriptionCanceled,
 } from '../services/email.js'
+import {
+  quoteUpgrade,
+  upgradeReference,
+  parseUpgradeReference,
+  isUpgradeReference,
+  subtractBillingCycle,
+  addBillingCycle,
+  MIN_UPGRADE_CHARGE,
+} from '../services/subscriptions.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
 import { sanitizeSectionProps } from '../sectionFields.js'
 import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
@@ -1039,6 +1049,158 @@ describe('buildPreapprovalBody', () => {
     })
     assert.equal(body.auto_recurring.start_date, '2026-10-02T15:00:00.000Z')
     assert.equal('free_trial' in body.auto_recurring, false)
+  })
+})
+
+describe('buildUpgradePreferenceBody', () => {
+  it('pago único de la diferencia: vence, sin efectivo, binary_mode y notificación ?source=lab', () => {
+    const body = buildUpgradePreferenceBody({
+      reference: 'labup:abc:hosted_pro:43549:deadbeef',
+      title: 'ScrollLab LAB — pasar a pro (18 días)',
+      amount: 43549,
+      expiresAt: new Date('2026-10-21T17:00:00.000Z'),
+      clientUrl: 'https://www.scrolllab.com.ar',
+      apiPublicUrl: 'https://api.scrolllab.com.ar',
+    })
+    assert.equal(body.items.length, 1)
+    assert.equal(body.items[0].unit_price, 43549)
+    assert.equal(body.items[0].currency_id, 'ARS')
+    assert.equal(body.external_reference, 'labup:abc:hosted_pro:43549:deadbeef')
+    assert.equal(body.binary_mode, true)
+    assert.deepEqual(body.payment_methods.excluded_payment_types, [
+      { id: 'ticket' },
+      { id: 'atm' },
+    ])
+    assert.equal(body.expires, true)
+    assert.equal(body.expiration_date_to, '2026-10-21T17:00:00.000Z')
+    assert.equal(
+      body.notification_url,
+      'https://api.scrolllab.com.ar/api/webhooks/mercadopago?source=lab',
+    )
+    assert.equal(body.back_urls.success, 'https://www.scrolllab.com.ar/lab?upgrade=volver')
+    assert.equal(body.back_urls.failure, 'https://www.scrolllab.com.ar/lab?upgrade=volver')
+    assert.equal(body.auto_return, 'approved')
+    assert.equal(body.statement_descriptor, MP_STATEMENT_DESCRIPTOR)
+  })
+})
+
+describe('cotización de la subida de plan', () => {
+  const DAY = 86_400_000
+  const HOUR = 3_600_000
+  const end = Date.parse('2026-11-08T15:00:00.000Z')
+  // Pagó Starter mensual el 8/10: el período es 8/10 → 8/11 (31 días).
+  const paid = (extra = {}) => ({
+    plan: 'hosted_starter',
+    cycle: 'monthly',
+    lastPaidAt: new Date('2026-10-08T15:00:00.000Z'),
+    currentPeriodEnd: new Date(end),
+    ...extra,
+  })
+
+  it('un ciclo para atrás es el inverso de uno para adelante', () => {
+    for (const cycle of ['monthly', 'yearly']) {
+      const d = new Date('2026-10-08T15:00:00.000Z')
+      assert.equal(subtractBillingCycle(addBillingCycle(d, cycle), cycle).toISOString(), d.toISOString())
+    }
+  })
+
+  it('subir a mitad del período cobra la diferencia por los días que quedan', () => {
+    const q = quoteUpgrade(paid(), 'hosted_pro', end - 18 * DAY)
+    assert.equal(q.amount, 43549) // (99.900 − 24.900) × 18/31, redondeado para arriba
+    assert.equal(q.days, 18)
+    assert.equal(q.reason, 'prorated')
+    assert.equal(q.newPrice, 99900)
+    assert.equal(q.periodEnd.toISOString(), '2026-11-08T15:00:00.000Z')
+  })
+
+  it('en la prueba no hay nada pago: cambiar es gratis', () => {
+    const trial = {
+      plan: 'hosted_starter',
+      cycle: 'monthly',
+      trialEndsAt: new Date(end),
+      currentPeriodEnd: new Date(end),
+    }
+    const q = quoteUpgrade(trial, 'hosted_studio', end - 3 * DAY)
+    assert.equal(q.amount, 0)
+    assert.equal(q.reason, 'unpaid')
+  })
+
+  it('bajar, o volver al plan que ya pagó, es gratis; más arriba se cobra contra lo pagado', () => {
+    assert.equal(quoteUpgrade(paid({ plan: 'hosted_pro' }), 'hosted_starter', end - 10 * DAY).amount, 0)
+    const downgraded = paid({ plan: 'hosted_starter', paidPlan: 'hosted_pro', paidCycle: 'monthly' })
+    const back = quoteUpgrade(downgraded, 'hosted_pro', end - 10 * DAY)
+    assert.equal(back.amount, 0)
+    assert.equal(back.reason, 'covered')
+    // Studio: la diferencia con Pro (lo pagado), no con Starter.
+    assert.equal(quoteUpgrade(downgraded, 'hosted_studio', end - 26 * DAY).amount, 167742)
+  })
+
+  it('las últimas horas no se cobran (por debajo del mínimo)', () => {
+    const q = quoteUpgrade(paid(), 'hosted_pro', end - 3 * HOUR) // 75.000 × 3/744 ≈ 303
+    assert.equal(q.amount, 0)
+    assert.equal(q.reason, 'minimal')
+    assert.ok(MIN_UPGRADE_CHARGE > 303)
+  })
+
+  it('anual: el período es el año entero', () => {
+    const yearly = paid({
+      cycle: 'yearly',
+      currentPeriodEnd: new Date('2027-10-08T15:00:00.000Z'),
+    })
+    const q = quoteUpgrade(yearly, 'hosted_studio', Date.parse('2026-10-09T16:00:00.000Z'))
+    assert.equal(q.amount, 2742152) // 2.750.000 × 8735 h / 8760 h
+    assert.equal(q.days, 364)
+    assert.equal(q.newPrice, 2999000)
+  })
+
+  it('re-suscripción: cotiza con el plan y el ciclo que pagó la suscripción vieja', () => {
+    const carried = {
+      plan: 'hosted_starter',
+      cycle: 'yearly',
+      paidPlan: 'hosted_starter',
+      paidCycle: 'monthly',
+      currentPeriodEnd: new Date(end),
+    }
+    const q = quoteUpgrade(carried, 'hosted_pro', end - 23 * DAY)
+    assert.equal(q.amount, 55646) // mensual: 75.000 × 23/31
+    assert.equal(q.newPrice, 999000) // lo que MP cobra desde el 8/11 (anual)
+  })
+
+  it('con el período vencido no hay contra qué cotizar', () => {
+    assert.equal(quoteUpgrade(paid(), 'hosted_pro', end + DAY).reason, 'unpaid')
+  })
+})
+
+describe('referencia del pago de la diferencia', () => {
+  it('ida y vuelta', () => {
+    const ref = upgradeReference({
+      subscriptionId: 'a'.repeat(24),
+      plan: 'hosted_pro',
+      amount: 43549,
+      nonce: 'deadbeef',
+    })
+    assert.equal(isUpgradeReference(ref), true)
+    assert.deepEqual(parseUpgradeReference(ref), {
+      subscriptionId: 'a'.repeat(24),
+      plan: 'hosted_pro',
+      amount: 43549,
+    })
+  })
+
+  it('rechaza lo que no armamos nosotros', () => {
+    for (const bad of [
+      null,
+      '',
+      'deadbeefdeadbeefdeadbeef',
+      'labup:x:hosted_pro:0:n',
+      'labup:x:nope:100:n',
+      'labup:x:hosted_pro:12.5:n',
+      'labup:x:hosted_pro:100',
+      'labup::hosted_pro:100:n',
+    ]) {
+      assert.equal(parseUpgradeReference(bad), null, String(bad))
+    }
+    assert.equal(isUpgradeReference('deadbeefdeadbeefdeadbeef'), false)
   })
 })
 

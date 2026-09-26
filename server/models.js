@@ -147,6 +147,36 @@ const subscriptionSchema = new mongoose.Schema(
     // Alta que nunca se completó y se dio de baja en MP (no quema la prueba).
     abandonedAt: Date,
     lastPaidAt: Date,
+    // Con qué plan y ciclo está pago el período en curso (cobro de MP, o la
+    // diferencia al subir). Base para cotizar la próxima subida; bajar de plan
+    // no lo cambia. En una re-suscripción arranca con lo de la vieja.
+    paidPlan: String,
+    paidCycle: { type: String, enum: ["monthly", "yearly"] },
+    // Subida de plan esperando el pago de la diferencia (checkout abierto).
+    pendingUpgrade: {
+      plan: String,
+      amount: Number,
+      reference: String,
+      preferenceId: String,
+      initPoint: String,
+      expiresAt: Date,
+      createdAt: Date,
+    },
+    // Pagos de diferencia ya procesados (idempotencia). `outcome: refund` =
+    // llegó pero no se pudo aplicar: devolver a mano.
+    upgradePayments: {
+      type: [
+        {
+          _id: false,
+          paymentId: String,
+          plan: String,
+          amount: Number,
+          at: Date,
+          outcome: String,
+        },
+      ],
+      default: undefined,
+    },
     // MP no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
     paymentFailedAt: Date,
     mpPreapprovalId: { type: String, sparse: true },

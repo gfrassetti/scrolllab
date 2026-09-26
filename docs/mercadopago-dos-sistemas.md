@@ -106,7 +106,7 @@ otro `type`:
 
 | `type` / `topic` | Qué es | Acción |
 |---|---|---|
-| `payment` | pago único (flujo actual) | fulfill orden → ZIP |
+| `payment` | pago único (flujo actual) | fulfill orden → ZIP · si `external_reference` es `labup:…` (diferencia al subir de plan en LAB; esa preference notifica con `?source=lab` y se valida con el secreto/token de suscripciones) → `applyUpgradePayment` |
 | `subscription_preapproval` | alta / cambio / baja de una suscripción | crear/actualizar `Subscription` local |
 | `subscription_authorized_payment` | se cobró (o falló) una cuota recurrente | OK (`payment.status === 'approved'`) → `currentPeriodEnd = debit_date + 1 ciclo`, reactiva · falló → `paymentFailedAt` (gracia `HOSTED_GRACE_DAYS`, después suspendida) |
 

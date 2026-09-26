@@ -22,6 +22,8 @@ const EMPTY = {
   paymentFailed: false,
   // Plan que se cayó por falta de cobro (o pausa vencida); ya es free.
   lapsedPlan: null,
+  // Plan con el que está pago el período en curso (null en la prueba).
+  paidPlan: null,
   loading: true,
 }
 
@@ -63,6 +65,7 @@ export function PlanProvider({ children }) {
         graceEndsAt: d.graceEndsAt ?? null,
         paymentFailed: d.paymentFailed ?? false,
         lapsedPlan: d.lapsedPlan ?? null,
+        paidPlan: d.paidPlan ?? null,
         loading: false,
       })
     } catch {

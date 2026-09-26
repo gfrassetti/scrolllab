@@ -8,13 +8,16 @@ import request from 'supertest'
  * MercadoPago y Resend falsos, en memoria, detrás del `fetch` global (lo usan
  * el SDK de MP, `fetchAuthorizedPayment` y el SDK de Resend). Emula lo que la
  * app le pide a MP: preapprovals (alta, consulta, baja, cambio de monto),
- * authorized_payments y el cobro de cuotas en `next_payment_date` (`bill`,
- * `retry`). Las fechas salen del reloj actual, así que `mock.timers` las mueve.
+ * authorized_payments, el cobro de cuotas en `next_payment_date` (`bill`,
+ * `retry`) y los pagos únicos de Checkout Pro (preference → `pay`). Las fechas
+ * salen del reloj actual, así que `mock.timers` las mueve.
  */
 export function createFakeMercadoPago(realFetch = globalThis.fetch) {
   const mp = {
     preapprovals: new Map(),
     authorizedPayments: new Map(),
+    preferences: new Map(),
+    payments: new Map(),
     calls: [],
     // `mp.failNext['PUT /preapproval'] = 400` → el próximo PUT falla.
     failNext: {},
@@ -43,7 +46,10 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
 
     const method = String(init.method || 'GET').toUpperCase()
     const body = init.body ? JSON.parse(init.body) : null
-    const [resource, id] = u.pathname.split('/').filter(Boolean)
+    // /v1/payments/:id y /checkout/preferences → payments / preferences.
+    let parts = u.pathname.split('/').filter(Boolean)
+    if (parts[0] === 'v1' || parts[0] === 'checkout') parts = parts.slice(1)
+    const [resource, id] = parts
     const route = `${method} /${resource}`
     mp.calls.push({ method, resource, id, body })
 
@@ -90,6 +96,20 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
     if (resource === 'authorized_payments' && id) {
       const ap = mp.authorizedPayments.get(id)
       return ap ? json(200, ap) : json(404, { message: 'not found', status: 404 })
+    }
+    if (resource === 'preferences' && method === 'POST') {
+      const pref = {
+        ...body,
+        id: `pref${++mp.seq}`,
+        init_point: `https://mp.test/checkout/pref${mp.seq}`,
+        date_created: new Date().toISOString(),
+      }
+      mp.preferences.set(pref.id, pref)
+      return json(201, pref)
+    }
+    if (resource === 'payments' && id) {
+      const pay = mp.payments.get(id)
+      return pay ? json(200, pay) : json(404, { message: 'not found', status: 404 })
     }
     return json(404, { message: `ruta desconocida ${route}`, status: 404 })
   }
@@ -141,6 +161,29 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
     }
     if (approved) pre.next_payment_date = nextCycle(ap.debit_date, pre.auto_recurring)
   }
+
+  /**
+   * El comprador paga una preference en Checkout Pro. Como MP, no deja pagar
+   * una vencida. `amount` fuerza otro monto (pago que no coincide).
+   */
+  mp.pay = (preferenceId, { approved = true, amount } = {}) => {
+    const pref = mp.preferences.get(preferenceId)
+    if (!pref) throw new Error(`preference desconocida ${preferenceId}`)
+    if (pref.expires && new Date(pref.expiration_date_to) <= new Date()) {
+      throw new Error('MP no deja pagar una preference vencida')
+    }
+    const payment = {
+      id: 700000 + ++mp.seq,
+      status: approved ? 'approved' : 'rejected',
+      transaction_amount: amount ?? pref.items[0].unit_price,
+      currency_id: pref.items[0].currency_id,
+      external_reference: pref.external_reference,
+    }
+    mp.payments.set(String(payment.id), payment)
+    return payment
+  }
+
+  mp.lastPreference = () => [...mp.preferences.values()].at(-1)
 
   /** Cobros aprobados de un preapproval (lo que el cliente pagó de verdad). */
   mp.charges = (preapprovalId) =>
@@ -224,9 +267,16 @@ export async function startAppAgainstFakeMp(mp, { secret = 'whsec_subs_test_secr
     return { 'x-signature': `ts=${ts},v1=${v1}`, 'x-request-id': requestId }
   }
 
-  const webhook = (type, dataId) =>
+  // `query` suma parámetros de la notification_url (p. ej. `{ source: 'lab' }`).
+  const webhook = (type, dataId, query = {}) =>
     request(app)
-      .post(`/api/webhooks/mercadopago?type=${type}&data.id=${dataId}`)
+      .post(
+        `/api/webhooks/mercadopago?${new URLSearchParams({
+          ...query,
+          type,
+          'data.id': String(dataId),
+        })}`,
+      )
       .set(signed(dataId))
       .send({ type, data: { id: dataId } })
 

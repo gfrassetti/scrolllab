@@ -67,7 +67,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     return fileDb.findSubscriptionById(id)
   }
 
-  // Vencida hace un mes: más allá de cualquier gracia (1 día sin cobros, 10
+  // Vencida hace un mes: más allá de cualquier gracia (1 día sin cobros, 7
   // con cobros). Es el "se cayó el plan" de verdad.
   const expireForGood = (id) => patchSub(id, { currentPeriodEnd: daysFromNow(-30) })
 
@@ -512,6 +512,51 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(
       (await agent.post('/api/subscriptions/change').send({ plan: 'nope' }))
         .status,
+      400,
+    )
+  })
+
+  it('subir con días pagos pide pagar la diferencia: hasta que se paga sigue igual; pagada, sube (mock)', async () => {
+    const agent = await loginAs('upgrade-mock@test.com')
+    const sub = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_starter', cycle: 'monthly' })
+    await agent.post(sub.body.activateUrl)
+    // Ya pagó un ciclo y le quedan 15 días.
+    await patchSub(sub.body.subscriptionId, {
+      trialEndsAt: undefined,
+      firstChargeAt: undefined,
+      lastPaidAt: daysFromNow(-15),
+      paidPlan: 'hosted_starter',
+      paidCycle: 'monthly',
+      currentPeriodEnd: daysFromNow(15),
+    })
+
+    const quote = await agent.get('/api/subscriptions/change/quote?plan=hosted_pro')
+    assert.equal(quote.status, 200)
+    assert.equal(quote.body.direction, 'upgrade')
+    assert.equal(quote.body.trialing, false)
+    // 75.000 × 15 días de un mes de 28 a 31.
+    assert.ok(quote.body.amount > 36000 && quote.body.amount < 40500, String(quote.body.amount))
+
+    const change = await agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
+    assert.equal(change.status, 200)
+    assert.equal(change.body.requiresPayment, true)
+    assert.equal(change.body.mock, true)
+    assert.equal(change.body.amount, quote.body.amount)
+    assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'hosted_starter')
+
+    const paid = await agent.post(change.body.payUrl)
+    assert.equal(paid.status, 200)
+    assert.equal(paid.body.plan, 'hosted_pro')
+    const me = await agent.get('/api/subscriptions/me')
+    assert.equal(me.body.plan, 'hosted_pro')
+    assert.equal(me.body.quota, 15)
+    // Ya no queda checkout abierto.
+    assert.equal((await agent.post('/api/subscriptions/upgrade/mock-pay')).status, 404)
+    // La confirmación contra MP no existe en mock.
+    assert.equal(
+      (await agent.post('/api/subscriptions/upgrade/confirm').send({ paymentId: '1' })).status,
       400,
     )
   })

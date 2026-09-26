@@ -182,6 +182,27 @@ verdad; la UI (`usePlan`) solo lee `/api/subscriptions/me`.
   local que MP no hizo seguiría cobrando).
 - **Re-suscribirse tras cancelar** (también mensual↔anual): el primer cobro de
   la nueva (`start_date`) es cuando termina lo ya pagado → no paga dos veces.
+  A un plan **más caro** no (409): arrancaría con la cuota nueva sin pagar la
+  diferencia. Para subir ya: reactivar y cambiar de plan.
+- **Cambiar de plan** (mismo ciclo, `POST /api/subscriptions/change`; la UI
+  muestra antes `GET /api/subscriptions/change/quote`). MP no prorratea, así
+  que:
+  - **Subir con días pagos:** se cobra la diferencia por lo que queda del
+    período con un pago único de Checkout Pro (`quoteUpgrade`: diferencia de
+    precio × días que quedan / días del período, redondeado para arriba). El
+    plan nuevo rige cuando ese pago se aprueba: webhook `payment` (la
+    preference notifica con `?source=lab`) o `POST
+    /api/subscriptions/upgrade/confirm` al volver a `/lab?upgrade=volver` (con
+    credenciales de prueba MP no manda webhooks). Recién ahí se hace el PUT de
+    monto sobre el mismo preapproval.
+  - **Bajar, subir en la prueba, o una diferencia menor a
+    `MIN_UPGRADE_CHARGE` (ARS 1.000):** rige ya, sin cargo.
+  - En los dos casos los cobros siguientes de MP salen con el precio nuevo.
+    `paidPlan` guarda con qué plan está pago el período: bajar y volver a subir
+    antes del próximo cobro no paga dos veces.
+  - El checkout de la diferencia vence a las 2 h (o al fin del período) y es
+    uno por plan: dos clicks no abren dos cobros. Cada pago se aplica una sola
+    vez (`upgradePayments`).
 - **Re-suscribirse con una renovación caída:** primero se da de baja la vieja en
   MP; si MP no deja, 502 y no se abre otra.
 - **Altas a medio hacer:** un nuevo intento cancela en MP el preapproval
@@ -191,15 +212,19 @@ verdad; la UI (`usePlan`) solo lee `/api/subscriptions/me`.
 Logs greppables que piden revisión manual (reembolso / baja):
 `subs cancel FALLÓ`, `subs alta FALLÓ`, `subs COBRO SOBRE BAJA`,
 `subs COBRO SOBRE SUSCRIPCIÓN REEMPLAZADA`, `subs DOBLE SUSCRIPCIÓN`,
-`subs MP AUTORIZADA SOBRE BAJA`, `subs change RECONCILE`.
+`subs MP AUTORIZADA SOBRE BAJA`, `subs change RECONCILE`,
+`subs upgrade PAGO SIN APLICAR` (llegó el pago de una diferencia que ya no se
+puede aplicar, p. ej. canceló con el checkout abierto: reembolsar),
+`subs upgrade MONTO NO COINCIDE`, `subs upgrade PUT FALLÓ` (MP no aceptó el
+monto nuevo: el webhook se reintenta; si no entra, actualizar a mano).
 
 ## Tests
 
 | Qué | Contra qué | Cuándo |
 |---|---|---|
 | `npm test` → `subscriptions*.test.js` | MP simulado en memoria (`__tests__/helpers/fakeMercadoPago.js`), webhooks firmados, mails interceptados | siempre, sin red ni credenciales |
-| `subscriptionsJourney.test.js` | recorridos con el **reloj simulado**: alta → prueba → cobro del día 7 → renovación → baja → vencimiento; arrepentimiento en la prueba; tarjeta rechazada; upgrade; mensual → anual | dentro de `npm test` |
-| `npm run check:mp-sandbox` | **sandbox real de MP** con las mismas funciones de la app: prueba de 7 días, anual, alta autorizada con tarjeta de test (no cobra antes), cambio de plan (cambia el monto de la misma suscripción, no abre otra ni cobra en el acto), bajas | cuando cambie algo de MP; necesita `MP_TEST_ACCESS_TOKEN`, `MP_TEST_PUBLIC_KEY`, `MP_TEST_PAYER_EMAIL` (credenciales de **prueba**; aborta si el token no es de un usuario de test) y salida a `api.mercadopago.com` |
+| `subscriptionsJourney.test.js` | recorridos con el **reloj simulado**: alta → prueba → cobro del día 7 → renovación → baja → vencimiento; arrepentimiento en la prueba; tarjeta rechazada; subir de plan pagando la diferencia (mensual, anual, en la prueba, confirm sin webhook, cancelado con días pagos, pagos que no corresponden); mensual → anual | dentro de `npm test` |
+| `npm run check:mp-sandbox` | **sandbox real de MP** con las mismas funciones de la app: prueba de 7 días, anual, alta autorizada con tarjeta de test (no cobra antes), cambio de plan (cambia el monto de la misma suscripción, no abre otra ni cobra en el acto), bajas, preference de la diferencia al subir de plan (referencia, monto, vencimiento, `binary_mode`, sin efectivo) | cuando cambie algo de MP; necesita `MP_TEST_ACCESS_TOKEN`, `MP_TEST_PUBLIC_KEY`, `MP_TEST_PAYER_EMAIL` (credenciales de **prueba**; aborta si el token no es de un usuario de test) y salida a `api.mercadopago.com` |
 
 Lo que ningún test cubre: la entrega de webhooks a producción (se ve en el
 historial de notificaciones de la app en MP; sano al 2026-09-26: 100 % con
@@ -213,8 +238,9 @@ prueba → llegan los dos mails y no se cobra nada.
 cuota al publicar, gracia por cobro pendiente/rechazado, pausa, suspensión
 (las publicadas por encima del tope free dejan de servir y reviven al
 re-suscribirse), cancelación confirmada contra MP, re-suscripción sin doble
-cobro, mails de alta y de baja.
+cobro, cobro de la diferencia al subir de plan, mails de alta y de baja.
 
-**Todavía no:** mail de pago rechazado, reconciliación automática del caso
-`RECONCILE` del cambio de plan, proración al cambiar de plan, reembolsos
-automáticos.
+**Todavía no:** mail de pago rechazado, mail propio al subir de plan (MP manda
+el comprobante del pago), reconciliación automática del caso `RECONCILE` del
+cambio de plan, reembolsos automáticos (una diferencia pagada que no se pudo
+aplicar se devuelve a mano).

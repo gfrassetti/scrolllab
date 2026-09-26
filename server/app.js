@@ -45,6 +45,11 @@ import {
   resolveEntitlement,
   assertCanPublish,
   changeSubscriptionPlan,
+  previewPlanChange,
+  applyUpgradePayment,
+  applyMockUpgrade,
+  isUpgradeReference,
+  isHigherPlan,
   handlePreapprovalEvent,
   handleAuthorizedPaymentEvent,
   syncSubscriptionForUser,
@@ -605,7 +610,12 @@ export async function createApp(config) {
       }
 
       // ——— Pago único (Checkout Pro) ———
-      if (config.mpMock || !config.mpAccessToken) {
+      // Compras del market, y la diferencia al subir de plan en LAB: esa
+      // preference la arma la app de suscripciones y notifica con
+      // `?source=lab` (su secreto y su token, por si son otra app de MP).
+      const lab = req.query.source === 'lab'
+      const payToken = lab ? config.mpSubs.accessToken : config.mpAccessToken
+      if (config.mpMock || !payToken) {
         return res.sendStatus(200)
       }
       if (type !== 'payment') {
@@ -613,7 +623,7 @@ export async function createApp(config) {
       }
 
       verifyMpWebhookSignature({
-        secret: config.mpWebhookSecret,
+        secret: lab ? config.mpSubs.webhookSecret : config.mpWebhookSecret,
         xSignature: req.headers['x-signature'],
         xRequestId: req.headers['x-request-id'],
         dataId,
@@ -622,8 +632,12 @@ export async function createApp(config) {
       // Un 4xx no se arregla reintentando: cortamos con 200 para que MP no
       // repita el evento. Los 5xx (MP caído, Mongo) sí tienen que reintentarse.
       try {
-        const payment = await fetchPayment(config.mpAccessToken, dataId)
-        await fulfillApprovedPayment({ payment, config })
+        const payment = await fetchPayment(payToken, dataId)
+        if (isUpgradeReference(payment.external_reference)) {
+          await applyUpgradePayment({ payment, config })
+        } else {
+          await fulfillApprovedPayment({ payment, config })
+        }
       } catch (err) {
         if (err instanceof HttpError && err.status < 500) {
           console.error('MP webhook fulfill skipped', err.message, {
@@ -1082,6 +1096,23 @@ export async function createApp(config) {
           expose: true,
         })
       }
+      // Re-suscripción con días pagos: el primer cobro de la nueva es cuando
+      // terminan, y lo pagado viaja a la nueva (con eso se cotiza una subida
+      // antes de ese cobro). Un plan MÁS CARO no puede arrancar sobre días
+      // pagados con uno más barato: sería la cuota nueva sin pagar la
+      // diferencia. Para subir ya: reactivar y cambiar de plan.
+      const carryOver =
+        current?.canceledAt && currentEnd > now ? new Date(currentEnd) : null
+      const carriedPaidPlan = carryOver
+        ? current.paidPlan || (current.lastPaidAt ? current.plan : null)
+        : null
+      if (carriedPaidPlan && isHigherPlan(plan, carriedPaidPlan)) {
+        throw new HttpError(
+          409,
+          'Tu plan actual está pago hasta el fin del período. Para subir ya, reactivalo y cambiá de plan: pagás solo la diferencia por los días que quedan.',
+          { expose: true },
+        )
+      }
 
       // Altas a medio hacer: se dan de baja en MP antes de abrir otra (un
       // checkout viejo abierto no puede terminar en un segundo cobro). Si una
@@ -1105,8 +1136,6 @@ export async function createApp(config) {
       const trialDays = trialEligible(priorSubs) ? config.hostedTrialDays : 0
       const trialEndsAt =
         trialDays > 0 ? new Date(now + trialDays * 24 * 60 * 60 * 1000) : null
-      const carryOver =
-        current?.canceledAt && currentEnd > now ? new Date(currentEnd) : null
       const firstChargeAt = trialEndsAt || carryOver
 
       const sub = await db.createSubscription({
@@ -1116,6 +1145,12 @@ export async function createApp(config) {
         status: 'pending',
         ...(trialEndsAt ? { trialEndsAt } : {}),
         ...(firstChargeAt ? { firstChargeAt } : {}),
+        ...(carriedPaidPlan
+          ? {
+              paidPlan: carriedPaidPlan,
+              paidCycle: current.paidCycle || current.cycle,
+            }
+          : {}),
       })
       const subId = db.uid(sub) || sub.id
       const out = {
@@ -1239,6 +1274,20 @@ export async function createApp(config) {
 
   // Cambio de plan sin dar de baja (mismo ciclo). Distinto ciclo (mensual↔
   // anual) no se puede sobre un preapproval de MP → la UI manda por cancelar.
+  // Subir con días pagos devuelve `requiresPayment` + checkout de la diferencia.
+  app.get(
+    '/api/subscriptions/change/quote',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const out = await previewPlanChange({
+        userId: db.uid(req.user),
+        plan: String(req.query?.plan || ''),
+      })
+      res.set('Cache-Control', 'no-store')
+      res.json({ ok: true, ...out })
+    }),
+  )
+
   app.post(
     '/api/subscriptions/change',
     requireAuth,
@@ -1249,6 +1298,42 @@ export async function createApp(config) {
         plan: String(req.body?.plan || ''),
         config,
       })
+      res.json({ ok: true, ...out })
+    }),
+  )
+
+  // Vuelta del checkout de la diferencia (`/lab?upgrade=volver&payment_id=…`):
+  // aplica el plan sin esperar al webhook (en test MP no lo manda).
+  app.post(
+    '/api/subscriptions/upgrade/confirm',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (subsMock()) {
+        throw new HttpError(400, 'Confirmación MP no disponible en modo mock')
+      }
+      const paymentId = String(
+        req.body?.paymentId || req.body?.collection_id || '',
+      ).trim()
+      if (!paymentId || paymentId === 'null') {
+        throw new HttpError(400, 'paymentId requerido')
+      }
+      const payment = await fetchPayment(config.mpSubs.accessToken, paymentId)
+      const out = await applyUpgradePayment({
+        payment,
+        config,
+        expectedUserId: db.uid(req.user),
+      })
+      res.json({ ok: true, ...out })
+    }),
+  )
+
+  app.post(
+    '/api/subscriptions/upgrade/mock-pay',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      if (!subsMock()) throw new HttpError(403, 'Mock deshabilitado')
+      const out = await applyMockUpgrade({ userId: db.uid(req.user), config })
       res.json({ ok: true, ...out })
     }),
   )

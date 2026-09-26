@@ -6,8 +6,9 @@
  * se comporta como ese simulador supone: que difiere el primer cobro con
  * `start_date` (prueba gratis y re-suscripción sin doble cobro), que una alta
  * autorizada con tarjeta no cobra antes de tiempo, que el cambio de plan
- * modifica esa misma suscripción (no abre otra) y que la baja funciona.
- * Todo lo que crea lo cancela al final.
+ * modifica esa misma suscripción (no abre otra), que la baja funciona y que
+ * MP acepta la preference de la diferencia al subir de plan tal como la arma
+ * la app. Todo lo que crea lo cancela al final.
  *
  * Requiere credenciales de PRUEBA (nunca las de producción: el script aborta
  * si el token no es de un usuario de test) y salida a api.mercadopago.com:
@@ -24,8 +25,12 @@ import {
   cancelPreapproval,
   fetchPreapproval,
   updatePreapprovalAmount,
+  createUpgradePreference,
 } from '../server/services/mercadoPago.js'
-import { cancelPreapprovalConfirmed } from '../server/services/subscriptions.js'
+import {
+  cancelPreapprovalConfirmed,
+  upgradeReference,
+} from '../server/services/subscriptions.js'
 import { hostedPlanPrice } from '../server/catalog.js'
 
 const token = process.env.MP_TEST_ACCESS_TOKEN
@@ -83,6 +88,21 @@ async function create(payload) {
   return r
 }
 
+async function cardToken() {
+  return mp(
+    'POST',
+    `/v1/card_tokens?public_key=${encodeURIComponent(publicKey)}`,
+    {
+      card_number: '5031755734530604',
+      expiration_month: 11,
+      expiration_year: new Date().getFullYear() + 4,
+      security_code: '123',
+      cardholder: { name: 'APRO', identification: { type: 'DNI', number: '12345678' } },
+    },
+    { auth: false },
+  )
+}
+
 async function main() {
   // 0. Nunca contra una cuenta real.
   const me = await mp('GET', '/users/me')
@@ -112,18 +132,7 @@ async function main() {
   )
 
   // 3. Autorizada con tarjeta de test: no se cobra nada antes del día 7.
-  const tok = await mp(
-    'POST',
-    `/v1/card_tokens?public_key=${encodeURIComponent(publicKey)}`,
-    {
-      card_number: '5031755734530604',
-      expiration_month: 11,
-      expiration_year: new Date().getFullYear() + 4,
-      security_code: '123',
-      cardholder: { name: 'APRO', identification: { type: 'DNI', number: '12345678' } },
-    },
-    { auth: false },
-  )
+  const tok = await cardToken()
   check('tarjeta de test tokenizada', tok.status === 201, `HTTP ${tok.status}`)
   if (tok.json.id) {
     const ref = `check-authorized-${Date.now()}`
@@ -163,8 +172,19 @@ async function main() {
       sameMinute(changed.next_payment_date, trialStart),
       `next_payment_date ${changed.next_payment_date}`,
     )
-    const active = await mp('GET', `/preapproval/search?external_reference=${ref}&status=authorized`)
-    const ids = (active.json.results || []).map((p) => p.id)
+    // La búsqueda de MP ignora `external_reference` como filtro e indexa con
+    // unos segundos de demora: se busca por texto (`q`), se filtra acá y se
+    // reintenta hasta que aparezca la que acabamos de crear.
+    let ids = []
+    for (let i = 0; i < 15; i++) {
+      const found = await mp('GET', `/preapproval/search?q=${encodeURIComponent(ref)}`)
+      const rows = (found.json.results || []).filter((p) => p.external_reference === ref)
+      if (rows.some((p) => p.id === pre.id)) {
+        ids = rows.filter((p) => p.status === 'authorized').map((p) => p.id)
+        break
+      }
+      await new Promise((r) => setTimeout(r, 2000))
+    }
     check(
       'cambio de plan: queda UNA sola suscripción activa (la misma)',
       ids.length === 1 && ids[0] === pre.id,
@@ -186,6 +206,44 @@ async function main() {
     }
     check('baja repetida: la app la toma como hecha (sin error)', secondOk)
   }
+
+  // 6. Diferencia al subir de plan: la preference que arma la app. El pago se
+  //    hace en la web de Checkout Pro (con credenciales de un usuario de test,
+  //    la API de pagos directos responde "Unauthorized use of live
+  //    credentials"); los campos del pago que lee `applyUpgradePayment` son
+  //    los mismos que ya valida el flujo de compras del market.
+  const amount = 43549
+  const reference = upgradeReference({
+    subscriptionId: 'c'.repeat(24),
+    plan: 'hosted_pro',
+    amount,
+    nonce: crypto.randomUUID().slice(0, 8),
+  })
+  const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000)
+  const pref = await createUpgradePreference({
+    accessToken: token,
+    reference,
+    title: 'ScrollLab LAB — pasar a pro (18 días) [check sandbox]',
+    amount,
+    expiresAt,
+    clientUrl: 'https://www.scrolllab.com.ar',
+    apiPublicUrl: 'https://api.scrolllab.com.ar',
+  })
+  check('diferencia: MP acepta la preference', !!pref.id && !!pref.init_point)
+  const stored = await mp('GET', `/checkout/preferences/${pref.id}`)
+  const excluded = (stored.json.payment_methods?.excluded_payment_types || []).map((t) => t.id)
+  check(
+    'diferencia: guarda referencia, monto, vencimiento, binary_mode y sin efectivo',
+    stored.json.external_reference === reference &&
+      stored.json.items?.[0]?.unit_price === amount &&
+      stored.json.expires === true &&
+      sameMinute(stored.json.expiration_date_to, expiresAt) &&
+      stored.json.binary_mode === true &&
+      excluded.includes('ticket') &&
+      excluded.includes('atm') &&
+      /\/api\/webhooks\/mercadopago\?source=lab$/.test(stored.json.notification_url || ''),
+    `ref ${stored.json.external_reference === reference} · vence ${stored.json.expiration_date_to} · excluidos ${excluded.join(',')}`,
+  )
 }
 
 try {

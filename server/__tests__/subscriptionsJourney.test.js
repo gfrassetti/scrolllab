@@ -27,10 +27,11 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
   let loginAs
   let webhook
   let cleanup
+  let fileDb
 
   before(async () => {
     mock.timers.enable({ apis: ['Date'], now: T0 })
-    ;({ app, loginAs, webhook, cleanup } = await startAppAgainstFakeMp(mp))
+    ;({ app, loginAs, webhook, cleanup, fileDb } = await startAppAgainstFakeMp(mp))
   })
 
   after(() => {
@@ -299,25 +300,69 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal(me.lapsedPlan, null)
   })
 
-  it('sube de Starter a Pro a mitad de mes: la cuota nueva rige ya y MP cobra el precio nuevo desde el próximo ciclo', async () => {
+  /** Pide subir de plan: tiene que abrir el checkout de la diferencia. */
+  async function upgradeCheckout(c, plan, amount) {
+    const change = await c.agent.post('/api/subscriptions/change').send({ plan })
+    assert.equal(change.status, 200, JSON.stringify(change.body))
+    assert.equal(change.body.requiresPayment, true)
+    assert.equal(change.body.amount, amount)
+    const pref = mp.lastPreference()
+    assert.equal(change.body.init_point, pref.init_point)
+    assert.equal(pref.items[0].unit_price, amount)
+    return pref
+  }
+
+  it('sube de Starter a Pro a mitad de mes: paga la diferencia por los días que quedan y MP cobra Pro desde el próximo ciclo', async () => {
     const c = await customer('journey-upgrade@test.com')
     const { pre } = await subscribe(c, 'hosted_starter')
     await c.goTo(7, 1)
-    await mpCharges(pre)
+    await mpCharges(pre) // pagó Starter del 8/10 al 8/11
 
     for (let i = 0; i < 5; i++) assert.equal((await publish(c)).status, 200)
     assert.equal((await publish(c)).status, 402)
 
+    // 21/10: quedan 18 de los 31 días pagos → (99.900 − 24.900) × 18/31.
     await c.goTo(20)
+    const quote = await c.agent.get('/api/subscriptions/change/quote?plan=hosted_pro')
+    assert.equal(quote.status, 200)
+    assert.equal(quote.body.amount, 43549)
+    assert.equal(quote.body.days, 18)
+    assert.equal(quote.body.newPrice, 99900)
+    assert.equal(iso(quote.body.priceEffectiveAt), '2026-11-08T15:00:00.000Z')
+
     const preapprovalsBefore = mp.preapprovals.size
-    const change = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
-    assert.equal(change.status, 200)
-    assert.equal((await c.me()).quota, 15)
+    const pref = await upgradeCheckout(c, 'hosted_pro', 43549)
+    assert.equal(pref.binary_mode, true)
+    assert.match(pref.notification_url, /\/api\/webhooks\/mercadopago\?source=lab$/)
+    assert.match(pref.back_urls.success, /\/lab\?upgrade=volver$/)
+    assert.ok(new Date(pref.expiration_date_to) > new Date())
+    // Dos clicks no abren dos checkouts.
+    await upgradeCheckout(c, 'hosted_pro', 43549)
+    assert.equal(mp.lastPreference().id, pref.id)
+    // Hasta que paga, sigue en Starter.
+    assert.equal((await c.me()).plan, 'hosted_starter')
+    assert.equal((await publish(c)).status, 402)
+
+    const payment = mp.pay(pref.id)
+    assert.equal((await webhook('payment', payment.id, { source: 'lab' })).status, 200)
+    const me = await c.me()
+    assert.equal(me.plan, 'hosted_pro')
+    assert.equal(me.quota, 15)
     assert.equal((await publish(c)).status, 200)
     // Cambia el monto de la MISMA suscripción: no hay otra que cobre Starter aparte.
     assert.equal(mp.preapprovals.size, preapprovalsBefore)
     assert.equal(mp.preapprovals.get(pre.id).status, 'authorized')
     assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, 99900)
+
+    // Volver de MP después del webhook, o el webhook repetido: no aplica dos veces.
+    const confirm = await c.agent
+      .post('/api/subscriptions/upgrade/confirm')
+      .send({ paymentId: payment.id })
+    assert.equal(confirm.status, 200)
+    assert.equal(confirm.body.alreadyApplied, true)
+    assert.equal((await webhook('payment', payment.id, { source: 'lab' })).status, 200)
+    const sub = await fileDb.findSubscriptionByPreapproval(pre.id)
+    assert.equal(sub.upgradePayments.length, 1)
 
     await c.goTo(38, 1)
     await mpCharges(pre)
@@ -325,6 +370,159 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
       mp.charges(pre.id).map((a) => a.transaction_amount),
       [24900, 99900],
     )
+  })
+
+  it('vuelve de MP sin webhook: el confirm aplica el plan; si MP no responde al actualizar el monto, no se marca nada y el reintento entra', async () => {
+    const c = await customer('journey-upgrade-confirm@test.com')
+    const { pre } = await subscribe(c, 'hosted_starter')
+    await c.goTo(7, 1)
+    await mpCharges(pre)
+
+    await c.goTo(15) // 16/10: quedan 23 de 31 días → 275.000 × 23/31
+    const payment = mp.pay((await upgradeCheckout(c, 'hosted_studio', 204033)).id)
+
+    mp.failNext['PUT /preapproval'] = 400
+    const failed = await c.agent
+      .post('/api/subscriptions/upgrade/confirm')
+      .send({ paymentId: payment.id })
+    assert.equal(failed.status, 502)
+    assert.equal((await c.me()).plan, 'hosted_starter')
+    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, 24900)
+
+    const ok = await c.agent
+      .post('/api/subscriptions/upgrade/confirm')
+      .send({ paymentId: payment.id })
+    assert.equal(ok.status, 200)
+    assert.equal(ok.body.plan, 'hosted_studio')
+    assert.equal(ok.body.alreadyApplied, false)
+    assert.equal((await c.me()).plan, 'hosted_studio')
+    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, 299900)
+
+    // Otra cuenta no puede usar ese pago.
+    const intruder = await loginAs('journey-intruder@test.com')
+    const stolen = await intruder
+      .post('/api/subscriptions/upgrade/confirm')
+      .send({ paymentId: payment.id })
+    assert.equal(stolen.status, 403)
+  })
+
+  it('en la prueba gratis cambiar de plan no cobra nada: el primer cobro ya sale con el precio nuevo', async () => {
+    const c = await customer('journey-upgrade-trial@test.com')
+    const { pre } = await subscribe(c, 'hosted_starter')
+    await c.goTo(3)
+    const quote = await c.agent.get('/api/subscriptions/change/quote?plan=hosted_studio')
+    assert.equal(quote.body.amount, 0)
+    assert.equal(quote.body.trialing, true)
+
+    const prefsBefore = mp.preferences.size
+    const change = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_studio' })
+    assert.equal(change.status, 200)
+    assert.equal(change.body.requiresPayment, false)
+    assert.equal(mp.preferences.size, prefsBefore)
+    assert.equal((await c.me()).plan, 'hosted_studio')
+
+    await c.goTo(7, 1)
+    await mpCharges(pre)
+    assert.deepEqual(mp.charges(pre.id).map((a) => a.transaction_amount), [299900])
+  })
+
+  it('anual: subir de Starter a Studio al día siguiente del cobro cuesta la diferencia de casi todo el año', async () => {
+    const c = await customer('journey-upgrade-yearly@test.com')
+    const { pre } = await subscribe(c, 'hosted_starter', 'yearly')
+    await c.goTo(7, 1)
+    await mpCharges(pre) // pagó 249.000 hasta el 8/10/2027
+
+    // 9/10 16:00: quedan 364 días menos 1 h de 365 → 2.750.000 × 8735/8760.
+    await c.goTo(8, 1)
+    const payment = mp.pay((await upgradeCheckout(c, 'hosted_studio', 2742152)).id)
+    assert.equal((await webhook('payment', payment.id, { source: 'lab' })).status, 200)
+    assert.equal((await c.me()).plan, 'hosted_studio')
+    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, 2999000)
+  })
+
+  it('baja de plan y vuelve a subir en el mismo período: no paga dos veces lo que ya pagó', async () => {
+    const c = await customer('journey-down-up@test.com')
+    const { pre } = await subscribe(c, 'hosted_pro')
+    await c.goTo(7, 1)
+    await mpCharges(pre) // pagó Pro hasta el 8/11
+
+    await c.goTo(10)
+    const down = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })
+    assert.equal(down.body.requiresPayment, false)
+    assert.equal((await c.me()).plan, 'hosted_starter')
+
+    await c.goTo(12)
+    const back = await c.agent.get('/api/subscriptions/change/quote?plan=hosted_pro')
+    assert.equal(back.body.amount, 0)
+    const up = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
+    assert.equal(up.body.requiresPayment, false)
+    assert.equal((await c.me()).plan, 'hosted_pro')
+    // A Studio sí: la diferencia con Pro (lo pagado), 26 de 31 días.
+    const studio = await c.agent.get('/api/subscriptions/change/quote?plan=hosted_studio')
+    assert.equal(studio.body.amount, 167742)
+  })
+
+  it('cancelado con días pagos: no se re-suscribe a un plan más caro sin pagar la diferencia; reactiva y sube pagándola', async () => {
+    const c = await customer('journey-carry-upgrade@test.com')
+    const { pre } = await subscribe(c, 'hosted_starter')
+    await c.goTo(7, 1)
+    await mpCharges(pre) // Starter pago hasta el 8/11
+    await c.goTo(15)
+    assert.equal((await c.agent.post('/api/subscriptions/cancel')).status, 200)
+
+    const preapprovalsBefore = mp.preapprovals.size
+    const higher = await c.agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_studio', cycle: 'monthly' })
+    assert.equal(higher.status, 409)
+    assert.match(higher.body.error, /reactivalo/)
+    assert.equal(mp.preapprovals.size, preapprovalsBefore)
+
+    // Reactiva Starter (primer cobro al fin de lo pagado) y sube a Pro.
+    const { pre: again } = await subscribe(c, 'hosted_starter')
+    assert.equal(
+      mp.lastCall('POST', 'preapproval').body.auto_recurring.start_date,
+      '2026-11-08T15:00:00.000Z',
+    )
+    // 16/10: quedan 23 de los 31 días que pagó con la suscripción vieja.
+    const payment = mp.pay((await upgradeCheckout(c, 'hosted_pro', 55646)).id)
+    assert.equal((await webhook('payment', payment.id, { source: 'lab' })).status, 200)
+    assert.equal((await c.me()).plan, 'hosted_pro')
+    // El monto nuevo va a la suscripción nueva: su primer cobro ya sale con Pro.
+    assert.equal(mp.preapprovals.get(again.id).auto_recurring.transaction_amount, 99900)
+
+    await c.goTo(38, 1)
+    await mpCharges(again)
+    assert.deepEqual(mp.charges(again.id).map((a) => a.transaction_amount), [99900])
+    assert.equal(mp.charges(pre.id).length, 1)
+  })
+
+  it('un pago de diferencia que no corresponde no cambia el plan: monto distinto, o suscripción dada de baja (queda para reembolsar)', async () => {
+    const c = await customer('journey-upgrade-orphan@test.com')
+    const { pre } = await subscribe(c, 'hosted_starter')
+    await c.goTo(7, 1)
+    await mpCharges(pre)
+    await c.goTo(12)
+    const pref = await upgradeCheckout(c, 'hosted_pro', 62904)
+
+    const wrong = mp.pay(pref.id, { amount: 1000 })
+    assert.equal((await webhook('payment', wrong.id, { source: 'lab' })).status, 200)
+    assert.equal((await c.me()).plan, 'hosted_starter')
+
+    // Cancela con el checkout abierto y después paga.
+    assert.equal((await c.agent.post('/api/subscriptions/cancel')).status, 200)
+    const late = mp.pay(pref.id)
+    assert.equal((await webhook('payment', late.id, { source: 'lab' })).status, 200)
+    const me = await c.me()
+    assert.equal(me.plan, 'hosted_starter')
+    assert.ok(me.canceledAt)
+    const sub = await fileDb.findSubscriptionByPreapproval(pre.id)
+    assert.deepEqual(
+      sub.upgradePayments.map((p) => [p.paymentId, p.outcome]),
+      [[String(late.id), 'refund']],
+    )
+    // Tampoco sube de plan pagando otra vez.
+    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, 24900)
   })
 
   it('pasa de mensual a anual sin pagar dos veces: el anual empieza a cobrarse cuando termina el mes pagado', async () => {

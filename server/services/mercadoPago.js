@@ -85,6 +85,57 @@ export async function createCheckoutPreference({
   })
 }
 
+/**
+ * Preference de Checkout Pro por la diferencia al subir de plan en LAB. Es un
+ * pago único: no toca el preapproval (eso lo hace el PUT de monto al aplicarse).
+ * `binary_mode` y sin medios en efectivo para que se apruebe o rechace en el
+ * acto, y vence en `expiresAt` porque el monto depende de los días que quedan.
+ * `?source=lab` en la notificación: el webhook la valida con el secreto de la
+ * app de suscripciones.
+ */
+export function buildUpgradePreferenceBody({
+  reference,
+  title,
+  amount,
+  expiresAt,
+  clientUrl,
+  apiPublicUrl,
+}) {
+  const back = `${clientUrl}/lab?upgrade=volver`
+  return {
+    items: [
+      {
+        id: 'lab-upgrade',
+        title,
+        quantity: 1,
+        unit_price: amount,
+        currency_id: 'ARS',
+        picture_url: absoluteClientAsset(clientUrl, MP_DEFAULT_ITEM_PICTURE),
+      },
+    ],
+    external_reference: reference,
+    back_urls: { success: back, failure: back, pending: back },
+    auto_return: 'approved',
+    binary_mode: true,
+    payment_methods: {
+      excluded_payment_types: [{ id: 'ticket' }, { id: 'atm' }],
+    },
+    expires: true,
+    expiration_date_to: new Date(expiresAt).toISOString(),
+    notification_url: `${apiPublicUrl}/api/webhooks/mercadopago?source=lab`,
+    statement_descriptor: MP_STATEMENT_DESCRIPTOR,
+  }
+}
+
+export async function createUpgradePreference({ accessToken, ...rest }) {
+  const preference = new Preference(createMpClient(accessToken))
+  try {
+    return await preference.create({ body: buildUpgradePreferenceBody(rest) })
+  } catch (err) {
+    throw mpPaymentError(err, 'preference')
+  }
+}
+
 export function verifyMpWebhookSignature({
   secret,
   xSignature,
