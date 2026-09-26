@@ -187,6 +187,7 @@ npm run check          # invariantes cruzadas (precios, secciones, props, i18n, 
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
+npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 ```
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté

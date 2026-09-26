@@ -154,6 +154,17 @@ export function mpPaymentError(err, paymentId) {
 // MP_SUBS_ACCESS_TOKEN — nada de seed ni plan IDs.
 // ————————————————————————————————————————————————————————————————
 
+/**
+ * Frecuencia de cobro por ciclo. MP solo acepta `frequency_type` `days` o
+ * `months` (con `years` responde 400 — verificado en sandbox): el anual va
+ * como 12 meses.
+ */
+export function billingFrequency(cycle) {
+  return cycle === 'yearly'
+    ? { frequency: 12, frequencyType: 'months' }
+    : { frequency: 1, frequencyType: 'months' }
+}
+
 /** Body del preapproval — puro, testeable sin pegarle a MP. */
 export function buildPreapprovalBody({
   reason,

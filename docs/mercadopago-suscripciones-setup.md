@@ -48,6 +48,10 @@ como mucho 1 día.
 >   (+7 días). Sin nada, `next_payment_date` = el momento del alta.
 > - Cancelar dos veces → 400 `You can not modify a cancelled preapproval`:
 >   `cancelPreapprovalConfirmed` lo toma como baja hecha.
+> - **Anual:** MP solo acepta `frequency_type` `days` / `months`; con `years`
+>   responde 400 y el alta anual fallaba siempre (bug corregido 2026-09-26).
+>   El anual va como `frequency: 12, frequency_type: 'months'`
+>   (`billingFrequency`).
 
 ---
 
@@ -187,6 +191,20 @@ Logs greppables que piden revisión manual (reembolso / baja):
 `subs cancel FALLÓ`, `subs alta FALLÓ`, `subs COBRO SOBRE BAJA`,
 `subs COBRO SOBRE SUSCRIPCIÓN REEMPLAZADA`, `subs DOBLE SUSCRIPCIÓN`,
 `subs MP AUTORIZADA SOBRE BAJA`, `subs change RECONCILE`.
+
+## Tests
+
+| Qué | Contra qué | Cuándo |
+|---|---|---|
+| `npm test` → `subscriptions*.test.js` | MP simulado en memoria (`__tests__/helpers/fakeMercadoPago.js`), webhooks firmados, mails interceptados | siempre, sin red ni credenciales |
+| `subscriptionsJourney.test.js` | recorridos con el **reloj simulado**: alta → prueba → cobro del día 7 → renovación → baja → vencimiento; arrepentimiento en la prueba; tarjeta rechazada; upgrade; mensual → anual | dentro de `npm test` |
+| `npm run check:mp-sandbox` | **sandbox real de MP** con las mismas funciones de la app: prueba de 7 días, anual, alta autorizada con tarjeta de test (no cobra antes), bajas | cuando cambie algo de MP; necesita `MP_TEST_ACCESS_TOKEN`, `MP_TEST_PUBLIC_KEY`, `MP_TEST_PAYER_EMAIL` (credenciales de **prueba**; aborta si el token no es de un usuario de test) y salida a `api.mercadopago.com` |
+
+Lo que ningún test cubre: la entrega de webhooks a producción (se ve en el
+historial de notificaciones de la app en MP; sano al 2026-09-26: 100 % con
+200), el cobro real del día 7 y los mails reales. Tras cada deploy que toque
+suscripciones: una alta real con tarjeta propia, cancelada dentro de la
+prueba → llegan los dos mails y no se cobra nada.
 
 ## Qué maneja el código y qué no
 

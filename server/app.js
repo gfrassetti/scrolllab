@@ -38,6 +38,7 @@ import {
   verifyMpWebhookSignature,
   fetchPayment,
   createPreapproval,
+  billingFrequency,
 } from './services/mercadoPago.js'
 import {
   resolveEntitlement,
@@ -1113,8 +1114,7 @@ export async function createApp(config) {
           reason: `ScrollLab LAB — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
           amount: cycle === 'yearly' ? plof.priceYearly : plof.priceMonthly,
           currencyId: plof.currency_id,
-          frequency: 1,
-          frequencyType: cycle === 'yearly' ? 'years' : 'months',
+          ...billingFrequency(cycle),
           payerEmail: req.user.email,
           externalReference: subId,
           // `?suscripcion=volver`: la UI sincroniza sola al volver de MP.

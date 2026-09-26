@@ -15,6 +15,7 @@ import {
   mpPaymentError,
   buildPreferenceBody,
   buildPreapprovalBody,
+  billingFrequency,
   absoluteClientAsset,
   MP_STATEMENT_DESCRIPTOR,
   MP_DEFAULT_ITEM_PICTURE,
@@ -1011,15 +1012,18 @@ describe('buildPreapprovalBody', () => {
     assert.equal(body.reason, args.reason)
   })
 
-  it('currency_id default ARS y frequency_type years para el anual', () => {
+  it('el anual va como 12 meses: MP no acepta "years" (400, verificado en sandbox)', () => {
+    assert.deepEqual(billingFrequency('yearly'), { frequency: 12, frequencyType: 'months' })
+    assert.deepEqual(billingFrequency('monthly'), { frequency: 1, frequencyType: 'months' })
     const body = buildPreapprovalBody({
       ...args,
+      ...billingFrequency('yearly'),
       currencyId: undefined,
-      frequencyType: 'years',
       amount: 199000,
     })
     assert.equal(body.auto_recurring.currency_id, 'ARS')
-    assert.equal(body.auto_recurring.frequency_type, 'years')
+    assert.equal(body.auto_recurring.frequency, 12)
+    assert.equal(body.auto_recurring.frequency_type, 'months')
     assert.equal(body.auto_recurring.transaction_amount, 199000)
   })
 

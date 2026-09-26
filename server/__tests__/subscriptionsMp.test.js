@@ -1,161 +1,36 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import path from 'node:path'
-import fs from 'node:fs'
-import os from 'node:os'
-import crypto from 'node:crypto'
 import request from 'supertest'
+import {
+  createFakeMercadoPago,
+  startAppAgainstFakeMp,
+  waitFor,
+} from './helpers/fakeMercadoPago.js'
 
 /**
  * Rutas de suscripción con MercadoPago "real" (mock apagado). MP es un doble
- * en memoria detrás del `fetch` global — lo usan el SDK y
- * `fetchAuthorizedPayment` —, así corren los caminos que el modo mock no
- * toca: `start_date` en el alta, fallas de MP al dar de alta o de baja, altas
- * abandonadas y webhooks firmados.
+ * en memoria detrás del `fetch` global (`helpers/fakeMercadoPago.js`), así
+ * corren los caminos que el modo mock no toca: `start_date` en el alta, fallas
+ * de MP al dar de alta o de baja, altas abandonadas, webhooks firmados y mails.
  */
 describe('Suscripciones contra MP (doble en memoria)', () => {
-  let app
-  let storageDir
-  let fileDb
-  const SECRET = 'whsec_subs_test_secret_value'
   const DAY = 86_400_000
   const iso = (d) => new Date(d).toISOString()
-  const realFetch = globalThis.fetch
-
-  const mp = {
-    preapprovals: new Map(),
-    authorizedPayments: new Map(),
-    calls: [],
-    failNext: {},
-    seq: 0,
-    // Mails que la app le mandó a Resend (interceptado, no sale nada).
-    outbox: [],
-  }
-
-  const json = (status, body) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { 'content-type': 'application/json' },
-    })
-
-  async function fakeMp(url, init = {}) {
-    const u = new URL(String(url))
-    if (u.hostname === 'api.resend.com') {
-      mp.outbox.push({
-        path: u.pathname,
-        body: init.body ? JSON.parse(init.body) : null,
-        idempotencyKey: new Headers(init.headers).get('idempotency-key'),
-      })
-      return json(200, { id: `em_${mp.outbox.length}` })
-    }
-    if (u.hostname !== 'api.mercadopago.com') return realFetch(url, init)
-    const method = String(init.method || 'GET').toUpperCase()
-    const body = init.body ? JSON.parse(init.body) : null
-    const [resource, id] = u.pathname.split('/').filter(Boolean)
-    const route = `${method} /${resource}`
-    mp.calls.push({ method, resource, id, body })
-
-    const fail = mp.failNext[route]
-    if (fail) {
-      delete mp.failNext[route]
-      return json(fail, { message: 'fake MP error', status: fail })
-    }
-    if (resource === 'preapproval' && method === 'POST') {
-      const pre = {
-        id: `pre${++mp.seq}`,
-        status: body.status || 'pending',
-        init_point: `https://mp.test/checkout/pre${mp.seq}`,
-        external_reference: body.external_reference,
-        auto_recurring: body.auto_recurring,
-        next_payment_date: body.auto_recurring?.start_date || new Date().toISOString(),
-      }
-      mp.preapprovals.set(pre.id, pre)
-      return json(201, pre)
-    }
-    if (resource === 'preapproval' && id) {
-      const pre = mp.preapprovals.get(id)
-      if (!pre) return json(404, { message: 'not found', status: 404 })
-      if (method === 'PUT') Object.assign(pre, body)
-      return json(200, pre)
-    }
-    if (resource === 'authorized_payments' && id) {
-      const ap = mp.authorizedPayments.get(id)
-      return ap ? json(200, ap) : json(404, { message: 'not found', status: 404 })
-    }
-    return json(404, { message: `ruta desconocida ${route}`, status: 404 })
-  }
+  const mp = createFakeMercadoPago()
+  let app
+  let fileDb
+  let loginAs
+  let webhook
+  let cleanup
 
   before(async () => {
-    Object.assign(process.env, {
-      NODE_ENV: 'development',
-      STORE: 'file',
-      AUTH_DEV_ENABLED: 'true',
-      MP_MOCK_ENABLED: 'false',
-      MP_ACCESS_TOKEN: 'TEST-fake-access-token',
-      MP_WEBHOOK_SECRET: SECRET,
-      SESSION_SECRET: 'test-session-secret-min-24-chars',
-      DOWNLOAD_SECRET: 'test-download-secret-min-24-chars',
-      CLIENT_URL: 'http://localhost:5173',
-      API_PUBLIC_URL: 'http://localhost:8787',
-      FX_OFFLINE: 'true',
-      FX_FALLBACK_RATE: '1560',
-      HOSTED_FREE_QUOTA: '1',
-      RATE_LIMIT_DISABLED: 'true',
-      EMAIL_ENABLED: 'true',
-      RESEND_API_KEY: 're_test_fake_key',
-      EMAIL_FROM: 'SCROLLLAB <lab@scrolllab.test>',
-    })
-    storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-subs-mp-'))
-    process.env.STORAGE_DIR = storageDir
-    process.env.FILE_DB_DIR = path.join(storageDir, 'db')
-
-    const { loadConfig } = await import('../config.js')
-    const config = loadConfig()
-    config.storageDir = storageDir
-    config.store = 'file'
-    config.authDev = true
-    config.mpMock = false
-
-    const { createApp } = await import('../app.js')
-    app = await createApp(config)
-    ;({ fileDb } = await import('../fileStore.js'))
-    globalThis.fetch = fakeMp
+    ;({ app, fileDb, loginAs, webhook, cleanup } = await startAppAgainstFakeMp(mp))
   })
 
-  after(() => {
-    globalThis.fetch = realFetch
-    try {
-      fs.rmSync(storageDir, { recursive: true, force: true })
-    } catch {
-      /* ignore */
-    }
-  })
+  after(() => cleanup())
 
-  async function loginAs(email) {
-    const agent = request.agent(app)
-    await agent.post('/api/auth/dev-login').send({ email })
-    return agent
-  }
-
-  const lastPreapproval = () => [...mp.preapprovals.values()].at(-1)
-  const lastCall = (method, resource) =>
-    mp.calls.findLast((c) => c.method === method && c.resource === resource)
-
-  function signed(dataId) {
-    const ts = String(Date.now())
-    const requestId = crypto.randomUUID()
-    const v1 = crypto
-      .createHmac('sha256', SECRET)
-      .update(`id:${dataId};request-id:${requestId};ts:${ts};`)
-      .digest('hex')
-    return { 'x-signature': `ts=${ts},v1=${v1}`, 'x-request-id': requestId }
-  }
-
-  const webhook = (type, dataId) =>
-    request(app)
-      .post(`/api/webhooks/mercadopago?type=${type}&data.id=${dataId}`)
-      .set(signed(dataId))
-      .send({ type, data: { id: dataId } })
+  const lastPreapproval = () => mp.lastPreapproval()
+  const lastCall = (method, resource) => mp.lastCall(method, resource)
 
   /** Alta completa: POST → el usuario autoriza en MP → vuelve y sincroniza. */
   async function subscribeAndAuthorize(agent, plan = 'hosted_pro', cycle = 'monthly') {
@@ -193,6 +68,21 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
     assert.equal(me.body.plan, 'hosted_pro')
     assert.equal(me.body.trialing, true)
     assert.equal(iso(me.body.currentPeriodEnd), iso(ar.start_date))
+  })
+
+  it('alta anual: le llega a MP como 12 meses (MP rechaza "years") y se puede contratar', async () => {
+    const agent = await loginAs('mp-yearly@test.com')
+    const res = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_studio', cycle: 'yearly' })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    assert.ok(res.body.init_point)
+    const ar = lastCall('POST', 'preapproval').body.auto_recurring
+    assert.equal(ar.frequency, 12)
+    assert.equal(ar.frequency_type, 'months')
+    assert.equal(ar.transaction_amount, 2999000)
+    const days = (new Date(ar.start_date) - Date.now()) / DAY
+    assert.ok(days > 6.9 && days < 7.1, 'también arranca con la prueba gratis')
   })
 
   it('MP rechaza el alta → 502 claro, y el reintento no queda bloqueado', async () => {
@@ -301,7 +191,8 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
       .send({ plan: 'hosted_pro', cycle: 'yearly' })
     assert.equal(res.status, 200)
     const ar = lastCall('POST', 'preapproval').body.auto_recurring
-    assert.equal(ar.frequency_type, 'years')
+    assert.equal(ar.frequency, 12)
+    assert.equal(ar.frequency_type, 'months')
     assert.equal(ar.transaction_amount, 999000)
     assert.equal(iso(ar.start_date), iso(paidUntil))
     assert.equal(res.body.trialEndsAt, null)
@@ -392,14 +283,7 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
 
   // ——— Mails (Resend interceptado) ———
 
-  const mailsTo = (email) => mp.outbox.filter((m) => m.body?.to?.includes(email))
-  async function waitFor(check, what) {
-    const t0 = Date.now()
-    while (!check()) {
-      if (Date.now() - t0 > 3000) throw new Error(`timeout esperando ${what}`)
-      await new Promise((r) => setTimeout(r, 20))
-    }
-  }
+  const mailsTo = (email) => mp.mailsTo(email)
   // Los mails salen fire-and-forget: margen para que uno de más se note.
   const settle = () => new Promise((r) => setTimeout(r, 250))
 

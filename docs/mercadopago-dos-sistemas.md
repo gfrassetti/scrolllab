@@ -62,7 +62,7 @@ await plans.create({
     reason: 'ScrollLab Hosted — Pro (mensual)',
     auto_recurring: {
       frequency: 1,
-      frequency_type: 'months',        // anual: frequency 1 + 'years'
+      frequency_type: 'months',        // anual: frequency 12 + 'months' (MP rechaza 'years')
       transaction_amount: 8000,        // ARS fijo
       currency_id: 'ARS',
     },
