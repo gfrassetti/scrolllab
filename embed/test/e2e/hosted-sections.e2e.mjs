@@ -184,17 +184,37 @@ const CASES = {
     },
     marker: 'MKHELM',
   },
+  'atrium/ManifestoType': {
+    props: {
+      lineOne: 'MKMANI',
+      lineTwo: 'type',
+      left: 'x',
+      right: 'x',
+      bg: '#f4f1ea',
+      fg: '#111111',
+    },
+    marker: 'MKMANI',
+  },
+  'atrium/ScopeSerif': {
+    props: { body: 'MKSCOP', bg: '#f4f1ea', fg: '#111111' },
+    marker: 'MKSCOP',
+  },
 }
 
-// Responsive: las 18 HOSTABLE_SECTIONS, no solo una muestra — "cada una debe
+// Responsive: las 23 HOSTABLE_SECTIONS, no solo una muestra — "cada una debe
 // verse bien" en mobile/tablet/desktop.
 const RESPONSIVE_SECTIONS = HOSTABLE_SECTIONS
-// `FooterAtrium` usa `pt-[14svh]`: dentro del iframe FLOW el `svh` no tiene un
-// viewport estable (retroalimenta con el propio alto que el puente le va
-// asignando), así que el puente tarda más pasadas en converger. Se sigue
-// probando sin overflow / con marcador / visible — solo se salta el chequeo
-// estricto de "el iframe sigue al contenido en el primer settle".
-const SKIP_HEIGHT_FOLLOW = new Set(['atrium/FooterAtrium'])
+// `FooterAtrium`/`ManifestoType`/`ScopeSerif` usan `svh` para el aire: dentro
+// del iframe FLOW el `svh` no tiene un viewport estable (retroalimenta con el
+// propio alto que el puente le va asignando), así que el puente tarda más
+// pasadas en converger. Se sigue probando sin overflow / con marcador /
+// visible — solo se salta el chequeo estricto de "el iframe sigue al
+// contenido en el primer settle".
+const SKIP_HEIGHT_FOLLOW = new Set([
+  'atrium/FooterAtrium',
+  'atrium/ManifestoType',
+  'atrium/ScopeSerif',
+])
 const VIEWPORTS = [
   { name: 'mobile', width: 375, height: 780 },
   { name: 'tablet', width: 768, height: 1024 },

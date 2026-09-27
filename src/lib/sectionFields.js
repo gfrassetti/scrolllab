@@ -733,8 +733,14 @@ export const SECTION_FIELDS = {
     { key: 'lineTwo', label: 'Line 2', type: 'text' },
     { key: 'left', label: 'Left column', type: 'textarea' },
     { key: 'right', label: 'Right column', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
-  'atrium/ScopeSerif': [{ key: 'body', label: 'Body', type: 'textarea' }],
+  'atrium/ScopeSerif': [
+    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
   'atrium/ClarityPair': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'left', label: 'Left headline', type: 'text' },

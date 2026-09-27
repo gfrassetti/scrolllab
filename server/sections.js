@@ -135,6 +135,12 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'fizz/CanCarousel',
   'atelier/StudioCards',
   'velocity/HelmetGrid',
+  // Fase F — bloques de contenido `once`, mismo trato que FooterAtrium: usan
+  // `svh` para el aire (el iframe FLOW tarda más pasadas en converger el alto,
+  // no rompe — ver SKIP_HEIGHT_FOLLOW en el e2e). Atrium ya está tokenizado en
+  // el frame por FooterAtrium, cero cambios en embed/frame/.
+  'atrium/ManifestoType',
+  'atrium/ScopeSerif',
   // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
   // scroll de window, boot que bloquea scroll): dentro del iframe del embed
   // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:
