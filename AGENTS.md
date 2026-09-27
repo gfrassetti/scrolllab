@@ -214,6 +214,7 @@ npm run check          # invariantes cruzadas (precios, secciones, props, i18n, 
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
+npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 ```

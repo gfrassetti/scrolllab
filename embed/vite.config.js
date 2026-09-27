@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { hostViewportUnits } from './hostViewportUnits.js'
 
@@ -58,6 +59,14 @@ export default defineConfig({
   plugins: [stubMedia, tailwindcss(), hostViewport],
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),
+    // Sitios que pueden usar el frame como vista previa del editor de LAB
+    // (frame/main.jsx#preview). localhost siempre (dev).
+    __SL_PREVIEW_ORIGINS__: JSON.stringify(
+      (process.env.EMBED_PREVIEW_ORIGINS || 'https://www.scrolllab.com.ar,https://scrolllab.com.ar')
+        .split(',')
+        .map((s) => s.trim().replace(/\/$/, ''))
+        .filter(Boolean),
+    ),
   },
   resolve: {
     alias: [

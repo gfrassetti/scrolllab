@@ -1200,3 +1200,35 @@ export function sanitizeProps(sectionId, props) {
   }
   return Object.keys(cleaned).length ? cleaned : undefined
 }
+
+/**
+ * LAB: la sección corre en un iframe en OTRO dominio (embed.scrolllab…), así
+ * que una ruta /archivo apunta ahí y no al sitio del cliente. En LAB las
+ * imágenes van con URL completa (https://…): lo relativo no se guarda y el
+ * campo avisa. Misma regla que `sanitizeHostedProps` del servidor.
+ */
+const ABSOLUTE_ASSET_RE = /^https:\/\//i
+
+export function sanitizeHostedProps(sectionId, props) {
+  const clean = sanitizeProps(sectionId, props)
+  if (!clean) return clean
+  for (const field of getSectionFields(sectionId)) {
+    const value = clean[field.key]
+    if (field.type === 'image' || field.type === 'url') {
+      if (typeof value === 'string' && !ABSOLUTE_ASSET_RE.test(value)) delete clean[field.key]
+      continue
+    }
+    if (field.type !== 'list' || !Array.isArray(value)) continue
+    const imageKeys = (field.item || []).filter((sub) => sub.type === 'image').map((sub) => sub.key)
+    if (!imageKeys.length) continue
+    // Las filas vacías ({}) quedan: son el «Agregar» del editor.
+    clean[field.key] = value.map((row) => {
+      const out = { ...row }
+      for (const k of imageKeys) {
+        if (typeof out[k] === 'string' && !ABSOLUTE_ASSET_RE.test(out[k])) delete out[k]
+      }
+      return out
+    })
+  }
+  return Object.keys(clean).length ? clean : undefined
+}

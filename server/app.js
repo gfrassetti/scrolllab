@@ -25,7 +25,7 @@ import {
 import { validateCheckoutItems, assertObjectIdLike } from './validation.js'
 import { isHostableSectionId, HOSTABLE_SECTIONS } from './sections.js'
 import { purchaseCode } from './license.js'
-import { sanitizeSectionProps } from './sectionFields.js'
+import { sanitizeHostedProps } from './sectionFields.js'
 import {
   newHostedKey,
   isHostedKey,
@@ -862,7 +862,12 @@ export async function createApp(config) {
       // próxima carga (el ETag débil de Express hace que lo igual devuelva 304
       // barato). `s-maxage` deja un margen para un cache compartido/CDN futuro.
       res.set('Cache-Control', 'public, max-age=0, s-maxage=5, must-revalidate')
-      res.json({ sectionId: inst.sectionId, props: inst.publishedProps || {} })
+      res.json({
+        sectionId: inst.sectionId,
+        // Otra pasada al servir: instancias publicadas antes de que LAB exigiera
+        // URL completa en las imágenes (una /ruta ahí sale rota).
+        props: sanitizeHostedProps(inst.sectionId, inst.publishedProps) || {},
+      })
     }),
   )
 
@@ -943,7 +948,7 @@ export async function createApp(config) {
         }
       }
       const draftProps =
-        sanitizeSectionProps(sectionId, req.body?.draftProps) || {}
+        sanitizeHostedProps(sectionId, req.body?.draftProps) || {}
       const inst = await db.createHostedInstance({
         userId,
         key: newHostedKey(),
@@ -979,7 +984,7 @@ export async function createApp(config) {
 
       if (req.body?.draftProps !== undefined) {
         inst.draftProps =
-          sanitizeSectionProps(inst.sectionId, req.body.draftProps) || {}
+          sanitizeHostedProps(inst.sectionId, req.body.draftProps) || {}
         touch('draftProps')
       }
       if (req.body?.domains !== undefined) {

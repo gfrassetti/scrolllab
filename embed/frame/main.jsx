@@ -151,10 +151,10 @@ let hostVh = 0
  * o un resize grande.
  */
 let slVh = 0
-function setHostVh(px) {
+function setHostVh(px, force = false) {
   const next = Number(px) / 100
   if (!(next > 0)) return
-  if (slVh && Math.abs(next - slVh) / slVh < 0.2) return
+  if (!force && slVh && Math.abs(next - slVh) / slVh < 0.2) return
   slVh = next
   document.documentElement.style.setProperty('--sl-vh', `${next}px`)
 }
@@ -219,7 +219,68 @@ function onMessage(e) {
   }
 }
 
+/**
+ * Vista previa del editor de LAB (/lab/:id): este mismo frame, con los props
+ * que el editor manda por postMessage (lo que está sin guardar) en vez de la
+ * config publicada. Así el preview es el embed real: mismas fuentes, mismo
+ * CSS, imágenes por defecto sin foto y `vw`/breakpoints según el ancho.
+ * Solo acepta props del sitio de ScrollLab (o localhost en dev): si no,
+ * cualquiera podría usar el frame para mostrar secciones sin plan.
+ */
+/* global __SL_PREVIEW_ORIGINS__ */
+const PREVIEW_ORIGINS =
+  typeof __SL_PREVIEW_ORIGINS__ !== 'undefined' ? __SL_PREVIEW_ORIGINS__ : []
+
+function previewOriginAllowed(origin) {
+  if (PREVIEW_ORIGINS.includes(origin)) return true
+  try {
+    const url = new URL(origin)
+    return url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)
+  } catch {
+    return false
+  }
+}
+
+function preview() {
+  let editor = ''
+  let n = 0
+  const sendHeight = () => {
+    if (!editor) return
+    parent.postMessage(
+      { type: 'scrolllab:height', px: Math.ceil(document.documentElement.scrollHeight) },
+      editor,
+    )
+  }
+  new ResizeObserver(sendHeight).observe(document.documentElement)
+  // Links: #ancla y relativos se le avisan al editor (que no navega); los
+  // externos abren pestaña nueva, como en el sitio.
+  routeLinks('')
+  window.addEventListener('message', async (e) => {
+    if (e.source !== window.parent || !previewOriginAllowed(e.origin)) return
+    const m = e.data
+    if (!m || m.type !== 'scrolllab:preview' || typeof m.sectionId !== 'string') return
+    const Section = await loadSection(m.sectionId)
+    if (!Section) return
+    editor = e.origin
+    setHostVh(m.viewportHeight, true)
+    root.className = canvasFor(m.sectionId)
+    // Key nueva = remonta: SplitText/GSAP corren una vez al montar.
+    n += 1
+    render(h(Section, { ...(m.props || {}), key: n }), root)
+    reveal()
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh()
+      sendHeight()
+    })
+  })
+  parent.postMessage({ type: 'scrolllab:preview-ready' }, '*')
+}
+
 async function main() {
+  if (params.get('preview') === '1') {
+    if (window.parent !== window) preview()
+    return
+  }
   if (!key) {
     console.error('[scrolllab] frame sin key')
     return

@@ -33,6 +33,9 @@ Sin `MP_ACCESS_TOKEN`, el checkout usa mock pay. Sin credenciales de Google, us�
 | `npm run build` | Build del front |
 | `npm start` | API en producción |
 | `npm test` | Tests de API |
+| `npm run test:e2e` | Embed de LAB en Chromium (secciones, responsive, publicar, dominios, links) |
+| `npm run check:builder` | El editor del builder aplica cada cambio (Chromium) |
+| `npm run check:lab` | LAB desde el editor: editar → preview → publicar → se ve en un sitio ajeno |
 | `npm run pack:templates` | Prearma ZIPs del catálogo |
 
 ## Suscripciones LAB (Mercado Pago)
@@ -201,6 +204,64 @@ Lo que salió de ese QA y se corrigió:
   y abiertas en Chromium a 1280 y 390 sin errores ni scroll horizontal.
 - `npm run check:mp-sandbox`: MP real acepta una composición de 30 secciones
   con su SKU y su precio.
+
+## LAB (secciones en vivo)
+
+Una sección que el suscriptor configura en `/lab/:id` y pega en su sitio: un
+`<script>` (HTML, Webflow, WordPress…) o `@scrolllab/embed` (React, Next, Vue).
+El loader crea un iframe en otro origen y la sección corre ahí, aislada de la
+página. Lo publicado se ve en la próxima carga del sitio; un borrador no sale.
+Hay 23 secciones hosteables (las que no pinean ni scrubean: dentro de un iframe
+de alto acotado esas se rompen). Detalle técnico en [`embed/README.md`](embed/README.md).
+
+### Auditoría y fixes
+
+- **Dominios permitidos:** estaban rotos. El config lo pide el iframe, que corre
+  en nuestro origen, así que el server veía siempre `embed.scrolllab…` y una
+  sección con dominios cargados daba 403 también en el sitio autorizado. Ahora
+  el frame manda el sitio que lo contiene. Se puede sumar `localhost` para
+  probar local, y lo que no es un dominio se avisa en vez de desaparecer.
+- **Links dentro del embed:** un link externo cargaba el otro sitio adentro del
+  iframe; `#ancla` y «Back to top» no hacían nada. Ahora anclas y volver arriba
+  scrollean la página del cliente, un link de su sitio navega en la misma
+  pestaña, uno externo abre pestaña nueva (como página normal, sin sandbox) y
+  mailto/tel abren la app. El loader solo navega a su propio origen y solo
+  después de un click.
+- **Alto infinito:** `vh`/`svh` dentro del iframe medían el propio iframe; la
+  recién sumada ManifestoType crecía sin fin en desktop (646 → 4220 px en 4 s).
+  El build las reescribe al viewport del sitio. Y un embed puesto arriba de
+  todo no aparecía hasta scrollear.
+- **Todo el texto se edita:** nota de cierre y «Back to top» de los footers,
+  rótulos de FooterAtelier, «Unit»/«Seq.», etiquetas de AboutClarity (también en
+  el builder y en el ZIP). Quedan fijos solo decorativos (*, !, ◆, /), la hora
+  local de FooterAtelier y la numeración automática de filas.
+- **Imágenes:** en LAB van con URL completa (`https://…`). Una `/ruta` apuntaba
+  al dominio del embed y en el sitio del cliente salía rota: el editor avisa, el
+  server no la guarda y la saca al servir (instancias viejas).
+- **La vista previa es el embed real:** antes era la sección de React del sitio,
+  con otro fondo, las fotos por defecto que el embed no muestra y `vw` medido
+  contra la ventana. Ahora es el frame del embed con lo que está sin guardar,
+  en desktop (1280, escalado), tablet y mobile; en el teléfono va arriba del
+  formulario. Avisa «cambios sin publicar».
+- **Next:** el snippet ya no pide `'use client'`: el paquete lo trae y entra en
+  un Server Component.
+- **Limitador por plan:** sin cambios; cubierto por tests (Starter 5, Pro 15,
+  Studio sin tope, 402 en la N+1, congeladas cuando el plan baja o se cae).
+
+### Testeado
+
+- `npm run check:lab` (nuevo): las 23 secciones en Chromium desde el editor
+  real — editar → la vista previa cambia → Publicar → el embed en un sitio
+  ajeno muestra el cambio → otro cambio sin publicar avisa y no sale en vivo.
+  Además: preview mobile de 390 px reales, imagen relativa rechazada, consola
+  limpia. Probado que detecta un publicar roto (mutación).
+- `npm run test:e2e` (103): las 23 embebidas en un sitio ajeno, responsive a
+  375/768/1280 con el alto que converge, aislamiento, y `lab-live`: publicar,
+  borrador, despublicar, dominios y links.
+- `@scrolllab/embed` tal como está en npm (idéntico al repo), en apps reales:
+  React 19 con StrictMode, Vue 3.5 y Next 15.5 (Server Component y el snippet
+  viejo): renderiza, un solo iframe y un solo loader, y al desmontar no quedan
+  listeners colgados.
 
 ## Deploy
 

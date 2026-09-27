@@ -169,7 +169,17 @@
     "upgradeApplied": "Listo: ya estás en {{plan}}.",
     "upgradeNotPaid": "El pago no se completó. Tu plan no cambió.",
     "upgradePending": "Mercado Pago todavía está procesando el pago. Apenas se acredite, tu plan cambia solo.",
-    "planRecommended": "Más elegido"
+    "planRecommended": "Más elegido",
+    "invalidUrl": "Todavía no se guarda: en LAB la imagen va con la URL completa (https://…). Una ruta /archivo apunta a nuestro dominio y en tu sitio sale rota.",
+    "assetHint": "URL completa de la imagen (https://…), por ejemplo de tu sitio o de un CDN. Sin imagen, la sección usa su versión sin foto.",
+    "unpublished": "Hay cambios sin publicar: tu sitio sigue mostrando la última versión publicada.",
+    "previewLoading": "Cargando la vista previa…",
+    "previewWidth": "Ancho",
+    "previewDesktop": "Desktop",
+    "previewTablet": "Tablet",
+    "previewMobile": "Mobile",
+    "previewNote": "Es el mismo embed que va a tu sitio, con lo que tenés sin guardar. Los links no navegan acá.",
+    "domainsDropped": "No son dominios y no se guardaron: {{list}}"
   },
   "common": {
     "loading": "Cargando…",

@@ -359,3 +359,21 @@ describe('getSectionFields', () => {
     }
   })
 })
+
+describe('sanitizeHostedProps (LAB)', () => {
+  it('imágenes solo con URL completa; conserva el resto y las filas vacías del editor', async () => {
+    const { sanitizeHostedProps } = await import('../sectionFields.js')
+    const out = sanitizeHostedProps('atelier/StudioCards', {
+      note: 'Hola',
+      cards: [
+        { title: 'Con foto', img: 'https://cdn.cliente.com/a.jpg' },
+        { title: 'Relativa', img: '/a.jpg' },
+        {},
+      ],
+    })
+    assert.deepEqual(out, {
+      note: 'Hola',
+      cards: [{ title: 'Con foto', img: 'https://cdn.cliente.com/a.jpg' }, { title: 'Relativa' }, {}],
+    })
+  })
+})

@@ -169,7 +169,17 @@
     "upgradeApplied": "Done: you’re on {{plan}} now.",
     "upgradeNotPaid": "The payment didn’t go through. Your plan didn’t change.",
     "upgradePending": "Mercado Pago is still processing the payment. As soon as it clears, your plan switches on its own.",
-    "planRecommended": "Most popular"
+    "planRecommended": "Most popular",
+    "invalidUrl": "Not saved yet: in LAB the image needs its full URL (https://…). A /file path points at our domain and breaks on your site.",
+    "assetHint": "Full image URL (https://…), for example from your site or a CDN. Without an image the section uses its photo-less version.",
+    "unpublished": "You have unpublished changes: your site still shows the last published version.",
+    "previewLoading": "Loading preview…",
+    "previewWidth": "Width",
+    "previewDesktop": "Desktop",
+    "previewTablet": "Tablet",
+    "previewMobile": "Mobile",
+    "previewNote": "This is the same embed that goes on your site, with your unsaved edits. Links don't navigate here.",
+    "domainsDropped": "Not domains, not saved: {{list}}"
   },
   "common": {
     "loading": "Loading…",

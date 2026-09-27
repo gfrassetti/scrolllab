@@ -656,3 +656,43 @@ export function sanitizeSectionProps(sectionId, props) {
   }
   return Object.keys(cleaned).length ? cleaned : undefined
 }
+
+/**
+ * LAB: la sección corre en un iframe en OTRO dominio (embed.scrolllab…), así
+ * que una ruta /archivo apunta ahí y no al sitio del cliente: la imagen sale
+ * rota. En LAB las imágenes van siempre con URL completa (https://…) y lo
+ * relativo se descarta — al guardar y también al servir, por las instancias
+ * que se publicaron antes de esta regla. El builder sí acepta /ruta (va al
+ * `public/` del ZIP).
+ */
+const ABSOLUTE_ASSET_RE = /^https:\/\//i
+
+export function sanitizeHostedProps(sectionId, props) {
+  const clean = sanitizeSectionProps(sectionId, props)
+  if (!clean) return clean
+  const listSchemas = LIST_PROPS_BY_SECTION[sectionId] || {}
+  for (const [key, value] of Object.entries(clean)) {
+    if (ASSET_URL_KEYS.has(key) && typeof value === 'string') {
+      if (!ABSOLUTE_ASSET_RE.test(value)) delete clean[key]
+      continue
+    }
+    const schema = listSchemas[key]
+    if (!schema || !Array.isArray(value)) continue
+    const imageKeys = Object.entries(schema.item || {})
+      .filter(([, type]) => type === 'image')
+      .map(([k]) => k)
+    if (!imageKeys.length) continue
+    const rows = value
+      .map((row) => {
+        const out = { ...row }
+        for (const k of imageKeys) {
+          if (typeof out[k] === 'string' && !ABSOLUTE_ASSET_RE.test(out[k])) delete out[k]
+        }
+        return out
+      })
+      .filter((row) => Object.keys(row).length)
+    if (rows.length) clean[key] = rows
+    else delete clean[key]
+  }
+  return Object.keys(clean).length ? clean : undefined
+}

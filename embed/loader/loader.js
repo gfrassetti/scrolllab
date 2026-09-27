@@ -190,7 +190,7 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       push()
     }
 
-    window.addEventListener('message', function (e) {
+    function onMessage(e) {
       if (frameOrigin && e.origin !== frameOrigin) return
       if (e.source !== iframe.contentWindow) return
       var m = e.data
@@ -209,13 +209,16 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       } else if (m.type === 'scrolllab:navigate') {
         navigateHost(m.href)
       }
-    })
+    }
 
     // Puente host → iframe: el frame no puede leer su posición en el viewport
     // del host, así que se la mandamos cada frame.
     var ticking = false
     function push() {
       ticking = false
+      // Un framework desmontó el embed (React/Vue sacan el iframe al
+      // desmontar): se sueltan los listeners en vez de quedar colgados.
+      if (!iframe.isConnected) return detach()
       var w = iframe.contentWindow
       if (!w) return
       var vh = window.innerHeight || document.documentElement.clientHeight
@@ -248,11 +251,19 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       requestAnimationFrame(push)
     }
 
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', function () {
+    function onResize() {
       sizeWrap()
       schedule()
-    })
+    }
+    function detach() {
+      window.removeEventListener('message', onMessage)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', onResize)
+    }
+
+    window.addEventListener('message', onMessage)
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', onResize)
     iframe.addEventListener('load', push)
   }
 

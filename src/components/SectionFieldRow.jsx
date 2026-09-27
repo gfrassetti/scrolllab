@@ -9,7 +9,9 @@ import { useI18n } from '../i18n'
  *   <SectionFieldRow field={field} value={props[field.key]} onChange={next => …} hint="…" />
  *
  * `onChange` recibe un string, o un array de items para `list`. `hint` es una
- * ayuda opcional debajo del campo (cada editor pone la suya).
+ * ayuda opcional debajo del campo (cada editor pone la suya). `absoluteUrls`:
+ * imágenes solo con URL completa (LAB: la sección corre en otro dominio y una
+ * /ruta no llega al sitio del cliente).
  */
 
 const inputCls =
@@ -44,17 +46,20 @@ function useDraft(value) {
   return [draft, setDraft]
 }
 
-function Scalar({ field, value, onChange }) {
+function Scalar({ field, value, onChange, absoluteUrls = false }) {
   const { t } = useI18n()
   const [draft, setDraft] = useDraft(value)
   const edit = (next) => {
     setDraft(next)
     onChange(next)
   }
+  const isUrl = field.type === 'image' || field.type === 'url'
   const invalid = VALIDATED.has(field.type) && draft.trim() !== '' && !value
   const warning = invalid ? (
     <span role="status" className="mt-1 block text-xs text-danger">
-      {t(`builder.invalid.${field.type === 'image' ? 'url' : field.type}`)}
+      {isUrl && absoluteUrls
+        ? t('lab.invalidUrl')
+        : t(`builder.invalid.${isUrl ? 'url' : field.type}`)}
     </span>
   ) : null
 
@@ -140,7 +145,7 @@ function Scalar({ field, value, onChange }) {
   if (field.type === 'href' || field.type === 'url' || field.type === 'price') {
     const placeholder = {
       href: '#seccion · /pagina · https://… · mailto:…',
-      url: 'https://… · /api/…',
+      url: absoluteUrls ? 'https://…' : 'https://… · /api/…',
       price: '15000',
     }[field.type]
     return (
@@ -165,7 +170,7 @@ function Scalar({ field, value, onChange }) {
           type="text"
           inputMode="url"
           value={draft}
-          placeholder="https://… · /imagen.png"
+          placeholder={absoluteUrls ? 'https://…/imagen.jpg' : 'https://… · /imagen.png'}
           onChange={(e) => edit(e.target.value)}
           className={inputCls.replace('mt-2 ', '')}
         />
@@ -191,7 +196,7 @@ function Scalar({ field, value, onChange }) {
   )
 }
 
-export default function SectionFieldRow({ field, value, onChange, hint }) {
+export default function SectionFieldRow({ field, value, onChange, hint, absoluteUrls = false }) {
   const { t } = useI18n()
 
   if (field.type === 'list') {
@@ -264,6 +269,7 @@ export default function SectionFieldRow({ field, value, onChange, hint }) {
                       field={sf}
                       value={it[sf.key] ?? ''}
                       onChange={(v) => update(i, sf.key, v)}
+                      absoluteUrls={absoluteUrls}
                     />
                   </label>
                 ))}
@@ -289,7 +295,12 @@ export default function SectionFieldRow({ field, value, onChange, hint }) {
       <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
         {field.label}
       </span>
-      <Scalar field={field} value={value ?? ''} onChange={onChange} />
+      <Scalar
+        field={field}
+        value={value ?? ''}
+        onChange={onChange}
+        absoluteUrls={absoluteUrls}
+      />
       {field.type === 'href' || hint ? (
         <span className="mt-1 block text-xs text-ink/45">
           {hint || t('builder.hrefHint')}

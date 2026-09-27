@@ -88,6 +88,37 @@ describe('Hosted Component API (file store)', () => {
     assert.equal(pub.body.props.email, 'hola@demo.com')
   })
 
+  // La sección corre en un iframe en OTRO dominio: una /ruta apunta al embed,
+  // no al sitio del cliente, y la imagen sale rota. En LAB va URL completa.
+  it('imágenes: solo URL completa (https://); una /ruta no se guarda ni se sirve', async () => {
+    const agent = await loginAgent()
+    const created = await agent.post('/api/hosted').send({ sectionId: 'atelier/StudioCards' })
+    const inst = created.body.instance
+    const res = await agent.put(`/api/hosted/${inst.id}`).send({
+      draftProps: {
+        cards: [
+          { title: 'Con foto', img: 'https://cdn.cliente.com/a.jpg' },
+          { title: 'Relativa', img: '/a.jpg' },
+          { img: '/solo-imagen.jpg' },
+        ],
+      },
+      publish: true,
+    })
+    assert.equal(res.status, 200)
+    const cards = [{ title: 'Con foto', img: 'https://cdn.cliente.com/a.jpg' }, { title: 'Relativa' }]
+    assert.deepEqual(res.body.instance.draftProps.cards, cards)
+    const pub = await request(app).get(`/api/embed/${inst.key}/config`)
+    assert.deepEqual(pub.body.props.cards, cards)
+
+    // Una instancia publicada antes de la regla: la /ruta se saca al servir.
+    const { db } = await import('../db.js')
+    const doc = await db.findHostedInstanceByKey(inst.key)
+    doc.publishedProps = { note: 'vieja', cards: [{ title: 'Vieja', img: '/vieja.jpg' }] }
+    await doc.save()
+    const legacy = await request(app).get(`/api/embed/${inst.key}/config`)
+    assert.deepEqual(legacy.body.props, { note: 'vieja', cards: [{ title: 'Vieja' }] })
+  })
+
   it('rechaza secciones no hosteables', async () => {
     const agent = await loginAgent()
     const res = await agent
