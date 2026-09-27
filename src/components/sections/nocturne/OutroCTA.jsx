@@ -19,6 +19,8 @@ export default function OutroCTA({
   bg,
   fg,
   legal = '©2026 Placeholder Films — Template, not a promise',
+  note = 'Placeholder closing note. The lights come up, the room is quiet — tell the audience where to go next.',
+  backToTop = 'Back to top ↑',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -55,8 +57,7 @@ export default function OutroCTA({
     >
       <div className="mb-20 grid gap-12 border-t border-salt/20 pt-10 md:mb-28 md:grid-cols-12">
         <p className="max-w-[30ch] text-sm leading-relaxed text-salt/60 md:col-span-5 md:text-base">
-          Placeholder closing note. The lights come up, the room is quiet —
-          tell the audience where to go next.
+          {note}
         </p>
         <div className="grid grid-cols-2 gap-8 md:col-span-7 md:justify-items-end">
           {flatLinks.length > 0 ? (
@@ -110,7 +111,7 @@ export default function OutroCTA({
       <div className="mt-10 flex flex-col gap-2 border-t border-salt/20 pt-4 text-[11px] uppercase tracking-[0.3em] text-salt/40 md:flex-row md:items-baseline md:justify-between md:text-xs">
         <p>{legal}</p>
         <a href="#top" className="transition-colors duration-300 hover:text-acid">
-          Back to top ↑
+          {backToTop}
         </a>
       </div>
     </footer>

@@ -1,6 +1,7 @@
 export default function FooterVelocity({
   line = 'Closing line.',
   legal = '©2026 Brand — Lorem ipsum dolor sit amet.',
+  backToTop = 'Back to top ↑',
   bg,
   fg,
 }) {
@@ -15,7 +16,7 @@ export default function FooterVelocity({
       <div className="mt-12 flex flex-col gap-3 border-t border-[#ece9e2]/10 pt-6 text-[11px] tracking-[0.2em] text-[#ece9e2]/50 uppercase md:flex-row md:items-baseline md:justify-between">
         <p>{legal}</p>
         <a href="#top" className="text-acid hover:opacity-80">
-          Back to top ↑
+          {backToTop}
         </a>
       </div>
     </footer>

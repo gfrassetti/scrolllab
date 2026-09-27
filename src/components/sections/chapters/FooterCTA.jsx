@@ -20,6 +20,8 @@ export default function FooterCTA({
   bg,
   fg,
   legal = '©2026 Placeholder Studio — Template, not a promise',
+  note = 'Placeholder closing note. Tell the reader what happens after the story ends — a form, a call, a door left open.',
+  backToTop = 'Back to top ↑',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -57,8 +59,7 @@ export default function FooterCTA({
     >
       <div className="mb-20 grid gap-12 md:mb-32 md:grid-cols-12">
         <p className="max-w-[28ch] text-sm leading-relaxed text-ink/70 md:col-span-5 md:text-base">
-          Placeholder closing note. Tell the reader what happens after the
-          story ends — a form, a call, a door left open.
+          {note}
         </p>
         <div className="grid grid-cols-2 gap-8 md:col-span-7 md:grid-cols-2 md:justify-items-end">
           {flatLinks.length > 0 ? (
@@ -115,7 +116,7 @@ export default function FooterCTA({
       <div className="mt-10 flex flex-col gap-2 border-t border-ink/15 pt-4 text-[11px] uppercase tracking-[0.25em] text-ink/50 md:flex-row md:items-baseline md:justify-between md:text-xs">
         <p>{legal}</p>
         <a href="#top" className="transition-colors duration-300 hover:text-accent">
-          Back to top ↑
+          {backToTop}
         </a>
       </div>
     </footer>

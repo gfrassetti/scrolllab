@@ -6,6 +6,7 @@
  */
 @source "../src";
 @source "../../src/components/sections";
+@source "../../src/lib/modelWrappers.js";
 
 /*
  * El frame corre en NUESTRO origen: no hay CSS del host que aislar, así que

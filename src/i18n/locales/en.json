@@ -55,7 +55,7 @@
     "fields": "Content",
     "noFields": "This section has no editable fields.",
     "domains": "Allowed domains (one per line)",
-    "domainsHint": "Leave it empty and the section shows on any domain. Add domains and it's limited to those.",
+    "domainsHint": "Leave it empty and the section shows on any domain. Add domains and it's limited to those (and their www). To test it on your machine, add localhost.",
     "preview": "Preview",
     "previewFull": "Fullscreen",
     "previewExit": "Exit",

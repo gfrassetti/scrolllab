@@ -280,7 +280,8 @@ const problems = []
 let browser
 
 try {
-  browser = await chromium.launch()
+  // PLAYWRIGHT_CHROMIUM_PATH: un Chromium del sistema (contenedor/CI sin `playwright install`).
+  browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined })
   // Lo que ofrece la paleta pública: los modelos en obra (RATIO…) no.
   const sectionIds = Object.keys(SECTION_FIELDS).filter(
     (id) =>

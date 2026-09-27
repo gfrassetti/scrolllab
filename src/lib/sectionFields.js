@@ -44,6 +44,8 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -212,6 +214,7 @@ export const SECTION_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'nocturne/SplitReveals': [
+    { key: 'seqLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'seq', label: 'Secuencia', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -231,6 +234,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'nocturne/WorkIndex': [
+    { key: 'seqLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'seq', label: 'Secuencia', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -255,6 +259,8 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -285,6 +291,7 @@ export const SECTION_FIELDS = {
     // en el código (forma o GLB propio, ver el README del ZIP).
   ],
   'monolith/SkewScroller': [
+    { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -299,6 +306,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'monolith/ExhibitGrid': [
+    { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -317,6 +325,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'monolith/TypeAccordion': [
+    { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -338,6 +347,7 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -436,6 +446,8 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -502,6 +514,7 @@ export const SECTION_FIELDS = {
   'velocity/FooterVelocity': [
     { key: 'line', label: 'Line', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -526,6 +539,7 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'textarea' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'tags', label: 'Etiquetas (línea chica)', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -603,6 +617,11 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'phone', label: 'Phone', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'clockLabel', label: 'Hora local — rótulo', type: 'text' },
+    { key: 'enquiryLabel', label: 'Contacto — título', type: 'text' },
+    { key: 'emailLabel', label: 'Email — prefijo', type: 'text' },
+    { key: 'phoneLabel', label: 'Teléfono — prefijo', type: 'text' },
+    { key: 'socialLabel', label: 'Redes — título', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {

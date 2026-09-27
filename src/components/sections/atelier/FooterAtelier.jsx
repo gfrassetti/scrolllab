@@ -21,6 +21,11 @@ export default function FooterAtelier({
   email = 'hello@placeholder.studio',
   phone = '+00 000 000 0000',
   hint = 'Hover the lines.',
+  clockLabel = 'Local →',
+  enquiryLabel = 'Business enquiry',
+  emailLabel = 'E.',
+  phoneLabel = 'P.',
+  socialLabel = 'Social',
   social,
   bg,
   fg,
@@ -76,7 +81,7 @@ export default function FooterAtelier({
           <div className="flex flex-col items-start gap-8 lg:items-end lg:text-right">
             {clock ? (
               <p className="text-[11px] tracking-[0.2em] text-white/40 uppercase">
-                Local → {clock}
+                {clockLabel} {clock}
               </p>
             ) : null}
             <a
@@ -89,19 +94,21 @@ export default function FooterAtelier({
             <div className="grid w-full max-w-md grid-cols-2 gap-8 text-left lg:text-right">
               <div>
                 <p className="text-[10px] tracking-[0.22em] text-white/35 uppercase">
-                  Business enquiry
+                  {enquiryLabel}
                 </p>
                 <a
                   href={`mailto:${email}`}
                   className="mt-3 block text-sm text-white/70 hover:text-white"
                 >
-                  E. {email}
+                  {emailLabel} {email}
                 </a>
-                <p className="mt-1 text-sm text-white/70">P. {phone}</p>
+                <p className="mt-1 text-sm text-white/70">
+                  {phoneLabel} {phone}
+                </p>
               </div>
               <div>
                 <p className="text-[10px] tracking-[0.22em] text-white/35 uppercase">
-                  Social
+                  {socialLabel}
                 </p>
                 <ul className="mt-3 space-y-1.5 text-sm text-white/70">
                   {socialLinks.map((l, i) => (

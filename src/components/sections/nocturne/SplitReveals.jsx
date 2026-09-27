@@ -30,6 +30,7 @@ export default function SplitReveals({
   seq = '03',
   total = '06',
   label = 'The frames',
+  seqLabel = 'Seq.',
   beats,
   bg,
   fg,
@@ -80,7 +81,7 @@ export default function SplitReveals({
     >
       <div className="mb-14 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-24">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
-          Seq. {seq} / {total}
+          {seqLabel} {seq} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
       </div>

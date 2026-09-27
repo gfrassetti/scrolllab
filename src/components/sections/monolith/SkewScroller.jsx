@@ -11,6 +11,7 @@ export default function SkewScroller({
   unit = '01',
   total = '05',
   label = 'The mantra',
+  unitLabel = 'Unit',
   words,
   bg,
   fg,
@@ -68,7 +69,7 @@ export default function SkewScroller({
     >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>
-          Unit {unit} / {total}
+          {unitLabel} {unit} / {total}
         </p>
         <p>{label}</p>
       </div>

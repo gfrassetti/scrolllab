@@ -15,6 +15,7 @@ export default function FooterBrutal({
   bg,
   fg,
   legal = '©2026 Placeholder Systems — Template, not a promise',
+  backToTop = 'Back to top ↑',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -79,7 +80,7 @@ export default function FooterBrutal({
       <div className="flex flex-col gap-2 border-t-2 border-carbon px-5 py-4 font-mono text-[10px] uppercase tracking-[0.1em] md:flex-row md:items-baseline md:justify-between md:px-8 md:text-[11px]">
         <p>{legal}</p>
         <a href="#top" className="transition-colors duration-200 hover:text-carbon">
-          Back to top ↑
+          {backToTop}
         </a>
       </div>
     </footer>

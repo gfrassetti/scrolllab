@@ -41,6 +41,7 @@ export default function WorkIndex({
   seq = '04',
   total = '06',
   label = 'The index',
+  seqLabel = 'Seq.',
   works,
   bg,
   fg,
@@ -104,7 +105,7 @@ export default function WorkIndex({
     >
       <div className="mb-10 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
-          Seq. {seq} / {total}
+          {seqLabel} {seq} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
       </div>

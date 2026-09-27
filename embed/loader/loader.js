@@ -27,7 +27,7 @@
  *    loader mete el iframe en un contenedor alto y lo hace `position:sticky`,
  *    y en cada frame le manda `progress` 0→1 según cuánto scrolleó el host.
  */
-import { clamp, resolveFrameBase } from './lib.js'
+import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
 
 ;(function () {
   'use strict'
@@ -117,11 +117,20 @@ import { clamp, resolveFrameBase } from './lib.js'
   // ── Montaje real ─────────────────────────────────────────────────────
   function mount(o) {
     var key = o.key
+    // `origin`: el sitio del cliente (domain-lock, links relativos). El frame
+    // usa primero lo que le da el navegador (ancestorOrigins / referrer); esto
+    // es el respaldo. `vh`: alto del viewport, para que `vh`/`svh` de la
+    // sección midan esta página y no el iframe desde el primer render.
     var src =
       o.frameBase +
       '/frame/index.html#key=' +
       encodeURIComponent(key) +
-      (o.apiUrl ? '&api=' + encodeURIComponent(o.apiUrl) : '')
+      (o.apiUrl ? '&api=' + encodeURIComponent(o.apiUrl) : '') +
+      (/^https?:$/.test(location.protocol)
+        ? '&origin=' + encodeURIComponent(location.origin)
+        : '') +
+      '&vh=' +
+      Math.round(window.innerHeight || document.documentElement.clientHeight || 0)
 
     var frameOrigin
     try {
@@ -137,8 +146,14 @@ import { clamp, resolveFrameBase } from './lib.js'
     iframe.setAttribute('scrolling', 'no')
     // allow-same-origin: el frame corre en NUESTRO origen (fetch a la config,
     // fuentes). Sigue aislado del host porque es otro origen. Sin allow-forms
-    // ni allow-top-navigation: no puede navegar la página del cliente.
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups')
+    // ni allow-top-navigation: no puede navegar la página del cliente. Los
+    // links abren en pestaña nueva (allow-popups) y esa pestaña es una página
+    // normal, no un sandbox heredado donde el sitio de destino se rompe
+    // (allow-popups-to-escape-sandbox).
+    iframe.setAttribute(
+      'sandbox',
+      'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox',
+    )
     iframe.setAttribute('data-scrolllab-frame', key)
     iframe.style.cssText =
       'display:block;width:100%;border:0;overflow:hidden;height:0;' +
@@ -184,8 +199,15 @@ import { clamp, resolveFrameBase } from './lib.js'
         push() // el frame ya está listo: mandale su posición en el viewport
       } else if (m.type === 'scrolllab:height' && !pinMode && typeof m.px === 'number') {
         iframe.style.height = Math.max(0, Math.round(m.px)) + 'px'
+        // Cambió su rect: puede haber entrado en pantalla sin que nadie scrollee
+        // (un embed arriba de todo, con alto 0 hasta acá, nunca se revelaba).
+        schedule()
       } else if (m.type === 'scrolllab:pinlength' && typeof m.px === 'number') {
         if (m.px > 8) enterPinMode(m.px)
+      } else if (m.type === 'scrolllab:anchor') {
+        scrollHost(anchorTarget(m.hash))
+      } else if (m.type === 'scrolllab:navigate') {
+        navigateHost(m.href)
       }
     })
 
@@ -215,7 +237,7 @@ import { clamp, resolveFrameBase } from './lib.js'
           rectTop: r.top,
           rectHeight: r.height,
           viewportHeight: vh,
-          inView: r.top < vh && r.top + r.height > 0,
+          inView: r.top < vh && r.top + r.height >= 0,
         },
         frameOrigin || '*',
       )
@@ -232,5 +254,28 @@ import { clamp, resolveFrameBase } from './lib.js'
       schedule()
     })
     iframe.addEventListener('load', push)
+  }
+
+  // «Back to top» o un #ancla dentro del embed: el scroll es de la página del
+  // cliente. No toca `location.hash` (un router del host podría reaccionar).
+  function scrollHost(t) {
+    if (!t) return
+    var reduce =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    var behavior = reduce ? 'auto' : 'smooth'
+    var el = t.id ? document.getElementById(t.id) : null
+    if (el) el.scrollIntoView({ behavior: behavior, block: 'start' })
+    else if (t.top) window.scrollTo({ top: 0, behavior: behavior })
+  }
+
+  // Un link del propio sitio tocado dentro del embed: navega esta página, en la
+  // misma pestaña. Solo a URLs de este mismo origen (nunca a otro sitio) y solo
+  // justo después de un click (el del iframe activa también a esta página).
+  function navigateHost(href) {
+    var url = sameOriginUrl(href, location.href)
+    if (!url) return
+    var ua = navigator.userActivation
+    if (ua && !ua.isActive) return
+    location.assign(url)
   }
 })()
