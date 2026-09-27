@@ -127,8 +127,15 @@ if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
   )
 }
 
+// Modelos solo locales (LOCAL_ONLY_SKUS: en producción su ruta redirige a la
+// home y validateRecipe rechaza sus secciones): no se venden, así que no se
+// les exige allowlist del server ni copy del builder. Ej. PLUM y SIGNAL, que
+// no se van a terminar.
+const isLocalOnlyModel = (id) => SERVER_LOCAL_ONLY.includes(String(id).split('/')[0])
+
 // 2. Sellable sections: registry (client) vs allowlist (server).
 for (const id of diff(registryIds, [...ALLOWED_SECTIONS])) {
+  if (isLocalOnlyModel(id)) continue
   fail('secciones', `'${id}' está en sectionRegistry pero no en server/sections.js`)
 }
 for (const id of diff([...ALLOWED_SECTIONS], registryIds)) {
@@ -402,6 +409,7 @@ for (const k of diff(enKeys, esKeys)) fail('i18n', `'${k}' falta en es.json`)
 
 // 5. Every registry section needs its builder copy in both locales.
 for (const id of registryIds) {
+  if (isLocalOnlyModel(id)) continue
   const key = `builder.sections.${id.replace('/', '.')}`
   for (const [name, keys] of [['es', esKeys], ['en', enKeys]]) {
     if (!keys.includes(`${key}.name`)) fail('i18n', `falta '${key}.name' en ${name}.json`)

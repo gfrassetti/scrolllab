@@ -335,8 +335,10 @@ Si el efecto se scrubea con el scroll es GSAP. Motion y GSAP peleando por el
 **ZIP:** el empaquetador (`server/packaging.js`) copia `SHARED` + la carpeta de la
 sección y **no sigue imports relativos**. Una sección de un template a la venta
 no puede importar `components/ui/*` ni `lib/utils` (no viajan, ni sus deps). PLUM
-sí los importa y está bloqueado para vender hasta resolverlo — ver el bloque
-"Bloqueante" en [`docs/motion-componentry.md`](docs/motion-componentry.md).
+sí los importa — ver el bloque "Bloqueante" en
+[`docs/motion-componentry.md`](docs/motion-componentry.md). PLUM y SIGNAL no se
+van a terminar: quedan solo en local (`LOCAL_ONLY_SKUS`, ruta que en producción
+redirige a la home, fuera del builder, sus frames no viajan en el build).
 El alias `@/` (→ `src/`) es sólo para `components/ui` y `lib`, nunca dentro de
 `components/sections/*`.
 

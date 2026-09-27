@@ -121,11 +121,18 @@ export default function App() {
                       )
                     }
                   />
-                  {/* Unlisted preview: reachable in prod by direct URL for
-                      review, but not linked from the home catalog, the
-                      builder palette, or the sitemap — see
-                      docs/reference-analysis/signal.md and public/robots.txt. */}
-                  <Route path="/templates/signal" element={<SignalPage />} />
+                  {/* SIGNAL y PLUM no se van a terminar: solo en local, en
+                      producción redirigen a la home (como RATIO). */}
+                  <Route
+                    path="/templates/signal"
+                    element={
+                      import.meta.env.DEV ? (
+                        <SignalPage />
+                      ) : (
+                        <Navigate to="/" replace />
+                      )
+                    }
+                  />
                   <Route path="/templates/meridian" element={<MeridianPage />} />
                   {/* Páginas de producto para Google (src/lib/productPages.js). */}
                   <Route

@@ -16,9 +16,10 @@ import FooterSignal from '../components/sections/signal/FooterSignal'
  * — techniques ported, not brand/copy/clients. See
  * docs/reference-analysis/signal.md.
  *
- * Still in scaffolding — LOCAL_ONLY_SKUS / BUILDER_HIDDEN_SKUS in
- * src/lib/pricing.js, same status as ratio/plum. Reachable in prod by
- * direct URL only (src/App.jsx) — not linked anywhere.
+ * Abandoned (won't be finished): local only. LOCAL_ONLY_SKUS /
+ * COMING_SOON_SKUS / BUILDER_HIDDEN_SKUS in src/lib/pricing.js and
+ * server/catalog.js, same status as plum; in production the route redirects
+ * to the home (src/App.jsx).
  */
 export default function SignalPage() {
   return (
