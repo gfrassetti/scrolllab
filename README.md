@@ -35,6 +35,34 @@ Sin `MP_ACCESS_TOKEN`, el checkout usa mock pay. Sin credenciales de Google, us�
 | `npm test` | Tests de API |
 | `npm run pack:templates` | Prearma ZIPs del catálogo |
 
+## Suscripciones LAB (Mercado Pago)
+
+Sistema de PreApproval de Mercado Pago detrás de LAB (planes hosteados). Estado:
+**en producción, testeado contra MP real**. Detalle técnico completo (estados,
+logs greppables, cómo correr `check:mp-sandbox`) en
+[`docs/mercadopago-suscripciones-setup.md`](docs/mercadopago-suscripciones-setup.md).
+
+### Auditoría y fixes
+
+- **Prueba gratis (7 días):** confirmado en sandbox real que `auto_recurring.start_date` difiere el primer cobro sin cobrar nada; cancelar durante la prueba no cobra un peso.
+- **Cancelación:** conserva el acceso hasta `currentPeriodEnd` (antes cortaba en el acto aunque quedaran días pagos). La baja se confirma contra MP antes de marcarla local — si MP no confirma, 502, nunca una baja que MP no hizo.
+- **Cobro rechazado / renovación caída:** gracia de 7 días (`HOSTED_GRACE_DAYS`) antes de caer a free; si un reintento de MP cobra después (reintenta hasta 4 veces en 10 días), el plan vuelve solo. El primer cobro (fin de la prueba) tiene 1 día de margen, no 7.
+- **Pausa en Mercado Pago** (la puede activar el vendedor desde el panel de MP): conserva el acceso pagado en vez de cortarlo en el acto; visible en la cuenta ("En pausa en MP").
+- **UI:** confirmación antes de cancelar, botón de reactivar, "Tu plan está activo hasta …", avisos de pago pendiente/rechazado/pausado, sincroniza sola al volver del checkout de MP.
+- **Cambio de plan sin dar de baja** (mismo ciclo): la cuota nueva rige en el acto; bajar de plan se bloquea si ya publicaste más secciones de las que el plan nuevo permite.
+- **Emails:** bienvenida (distingue si hay prueba en curso) y cancelación (distingue si fue durante la prueba, donde no se cobró nada).
+
+### Lo último que se sumó
+
+- **Cobro de la diferencia al subir de plan.** MP no prorratea: antes, subir de plan con días ya pagados regalaba la diferencia hasta la próxima renovación (en un plan anual, hasta un año entero). Ahora, si quedan días pagos, la UI muestra el monto exacto y abre un Checkout Pro por esa diferencia; el plan nuevo rige recién cuando el pago se aprueba (webhook o al volver de MP). Bajar de plan, cambiar durante la prueba, o una diferencia menor a ARS 1.000, sigue sin cargo. Cancelado con días pagos no te podés re-suscribir de una a un plan más caro sin pagar la diferencia — primero reactivás.
+- **Recordatorio de fin de prueba por email** (`server/services/trialReminders.js`): corre cada hora dentro del proceso de la API, avisa `HOSTED_TRIAL_REMINDER_DAYS` días antes del primer cobro, idempotente (no manda dos veces aunque el server se reinicie en el medio).
+
+### Testeado
+
+- `npm test` — 607/607: recorridos con reloj simulado (prueba → cobro del día 7 → renovación → gracia → pausa → cambio de plan → subida pagando la diferencia → mensual↔anual).
+- `npm run check:mp-sandbox` — contra el sandbox **real** de Mercado Pago (16/16): no un simulador, la API de MP de verdad con credenciales de prueba.
+- Mutation testing manual sobre la cotización/pago de la diferencia al subir de plan: 5 fallos inyectados a propósito (cotización en cero, sin validar monto, sin bloquear re-suscripción más cara, sin idempotencia, aplica sobre una baja), los 5 detectados por los tests.
+
 ## Deploy
 
 Ver [`docs/DEPLOY.md`](docs/DEPLOY.md).
