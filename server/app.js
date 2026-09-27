@@ -39,15 +39,25 @@ import {
   verifyMpWebhookSignature,
   fetchPayment,
   createPreapproval,
-  cancelPreapproval,
+  billingFrequency,
 } from './services/mercadoPago.js'
 import {
   resolveEntitlement,
   assertCanPublish,
   changeSubscriptionPlan,
+  previewPlanChange,
+  applyUpgradePayment,
+  applyMockUpgrade,
+  isUpgradeReference,
+  isHigherPlan,
   handlePreapprovalEvent,
   handleAuthorizedPaymentEvent,
   syncSubscriptionForUser,
+  trialEligible,
+  retirePendingSubscription,
+  closeLapsedSubscription,
+  cancelPreapprovalConfirmed,
+  activateMockSubscription,
 } from './services/subscriptions.js'
 import {
   ensureOrderZip,
@@ -59,7 +69,6 @@ import {
 import {
   sendOrderReceiptOnce,
   sendOrderAdminNotifyOnce,
-  sendSubscriptionWelcomeOnce,
   sendSubscriptionCanceledOnce,
 } from './services/email.js'
 import {
@@ -601,7 +610,12 @@ export async function createApp(config) {
       }
 
       // ——— Pago único (Checkout Pro) ———
-      if (config.mpMock || !config.mpAccessToken) {
+      // Compras del market, y la diferencia al subir de plan en LAB: esa
+      // preference la arma la app de suscripciones y notifica con
+      // `?source=lab` (su secreto y su token, por si son otra app de MP).
+      const lab = req.query.source === 'lab'
+      const payToken = lab ? config.mpSubs.accessToken : config.mpAccessToken
+      if (config.mpMock || !payToken) {
         return res.sendStatus(200)
       }
       if (type !== 'payment') {
@@ -609,7 +623,7 @@ export async function createApp(config) {
       }
 
       verifyMpWebhookSignature({
-        secret: config.mpWebhookSecret,
+        secret: lab ? config.mpSubs.webhookSecret : config.mpWebhookSecret,
         xSignature: req.headers['x-signature'],
         xRequestId: req.headers['x-request-id'],
         dataId,
@@ -618,8 +632,12 @@ export async function createApp(config) {
       // Un 4xx no se arregla reintentando: cortamos con 200 para que MP no
       // repita el evento. Los 5xx (MP caído, Mongo) sí tienen que reintentarse.
       try {
-        const payment = await fetchPayment(config.mpAccessToken, dataId)
-        await fulfillApprovedPayment({ payment, config })
+        const payment = await fetchPayment(payToken, dataId)
+        if (isUpgradeReference(payment.external_reference)) {
+          await applyUpgradePayment({ payment, config })
+        } else {
+          await fulfillApprovedPayment({ payment, config })
+        }
       } catch (err) {
         if (err instanceof HttpError && err.status < 500) {
           console.error('MP webhook fulfill skipped', err.message, {
@@ -1038,11 +1056,10 @@ export async function createApp(config) {
       const userId = db.uid(req.user)
       const ent = await resolveEntitlement(userId, config)
       const used = await db.countPublishedHosted(userId, null)
-      // Prueba disponible = plan free y nunca tuvo una suscripción real.
+      // Prueba disponible = plan free y nunca tuvo una suscripción activa.
       let trialAvailable = false
       if (ent.plan === 'free' && config.hostedTrialDays > 0) {
-        const prior = await db.findSubscriptionsByUser(userId)
-        trialAvailable = !prior.some((s) => s.status !== 'pending')
+        trialAvailable = trialEligible(await db.findSubscriptionsByUser(userId))
       }
       res.json({
         ...ent,
@@ -1065,49 +1082,61 @@ export async function createApp(config) {
       if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
 
       const userId = db.uid(req.user)
+      const now = Date.now()
 
-      // Prueba gratis: solo si el usuario NUNCA tuvo una suscripción real
-      // (cualquier estado ≠ pending). Cancelar y volver a suscribirse NO
-      // reabre la prueba. Snapshot antes de tocar nada.
-      const priorSubs = await db.findSubscriptionsByUser(userId)
-      const hadRealSub = priorSubs.some((s) => s.status !== 'pending')
-      const trialDays = hadRealSub ? 0 : config.hostedTrialDays
-      const trialEndsAt =
-        trialDays > 0
-          ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000)
-          : null
-
-      // Dedup: una sola suscripción activa, y no acumular altas a medio hacer.
-      // Si ya la canceló (sigue con acceso hasta fin de período) o si el período
-      // ya venció (el barrido perezoso todavía no la marcó), sí puede volver a
-      // suscribirse — la nueva reemplaza.
+      // Una sola suscripción vigente. Si ya la canceló (le quedan días pagos)
+      // o la renovación se cayó, puede abrir otra: la nueva reemplaza.
       const current = await db.findActiveSubscriptionByUser(userId)
-      const currentExpired =
-        current?.currentPeriodEnd &&
-        new Date(current.currentPeriodEnd).getTime() <= Date.now()
-      if (current && !current.canceledAt && !currentExpired) {
+      const currentEnd = current?.currentPeriodEnd
+        ? new Date(current.currentPeriodEnd).getTime()
+        : null
+      const currentLapsed = currentEnd != null && currentEnd <= now
+      if (current && !current.canceledAt && !currentLapsed) {
         throw new HttpError(409, 'Ya tenés una suscripción activa', {
           expose: true,
         })
       }
-      if (current && (current.canceledAt || currentExpired)) {
-        current.status = 'cancelled'
-        await current.save()
+      // Re-suscripción con días pagos: el primer cobro de la nueva es cuando
+      // terminan, y lo pagado viaja a la nueva (con eso se cotiza una subida
+      // antes de ese cobro). Un plan MÁS CARO no puede arrancar sobre días
+      // pagados con uno más barato: sería la cuota nueva sin pagar la
+      // diferencia. Para subir ya: reactivar y cambiar de plan.
+      const carryOver =
+        current?.canceledAt && currentEnd > now ? new Date(currentEnd) : null
+      const carriedPaidPlan = carryOver
+        ? current.paidPlan || (current.lastPaidAt ? current.plan : null)
+        : null
+      if (carriedPaidPlan && isHigherPlan(plan, carriedPaidPlan)) {
+        throw new HttpError(
+          409,
+          'Tu plan actual está pago hasta el fin del período. Para subir ya, reactivalo y cambiá de plan: pagás solo la diferencia por los días que quedan.',
+          { expose: true },
+        )
       }
-      const STALE_MS = 30 * 60 * 1000
-      const now = Date.now()
-      for (const s of await db.findSubscriptionsByUser(userId)) {
-        if (s.status !== 'pending') continue
-        if (now - new Date(s.createdAt).getTime() > STALE_MS) {
-          await db.deleteSubscription(db.uid(s) || s.id)
-        } else {
-          throw new HttpError(
-            409,
-            'Tenés un alta en curso. Completala o esperá unos minutos.',
-            { expose: true },
-          )
+
+      // Altas a medio hacer: se dan de baja en MP antes de abrir otra (un
+      // checkout viejo abierto no puede terminar en un segundo cobro). Si una
+      // se había completado sin que nos enteráramos, se activa y listo.
+      const priorSubs = await db.findSubscriptionsByUser(userId)
+      for (const s of priorSubs) {
+        if (s.status !== 'pending' || s.abandonedAt) continue
+        if ((await retirePendingSubscription(s, config)) === 'activated') {
+          throw new HttpError(409, 'Ya tenés una suscripción activa', {
+            expose: true,
+          })
         }
       }
+      if (current && !current.canceledAt && currentLapsed) {
+        await closeLapsedSubscription(current, config)
+      }
+
+      // Prueba gratis solo si nunca tuvo una suscripción activa (cancelar y
+      // volver NO la reabre). Los días ya pagados de una suscripción cancelada
+      // se respetan: el primer cobro de la nueva es cuando termina la vieja.
+      const trialDays = trialEligible(priorSubs) ? config.hostedTrialDays : 0
+      const trialEndsAt =
+        trialDays > 0 ? new Date(now + trialDays * 24 * 60 * 60 * 1000) : null
+      const firstChargeAt = trialEndsAt || carryOver
 
       const sub = await db.createSubscription({
         userId,
@@ -1115,38 +1144,61 @@ export async function createApp(config) {
         cycle,
         status: 'pending',
         ...(trialEndsAt ? { trialEndsAt } : {}),
+        ...(firstChargeAt ? { firstChargeAt } : {}),
+        ...(carriedPaidPlan
+          ? {
+              paidPlan: carriedPaidPlan,
+              paidCycle: current.paidCycle || current.cycle,
+            }
+          : {}),
       })
       const subId = db.uid(sub) || sub.id
+      const out = {
+        subscriptionId: subId,
+        trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
+        firstChargeAt: firstChargeAt ? firstChargeAt.toISOString() : null,
+      }
 
       if (subsMock()) {
         return res.json({
+          ...out,
           mock: true,
-          subscriptionId: subId,
-          trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
           activateUrl: `/api/subscriptions/${subId}/mock-activate`,
         })
       }
 
       const plof = HOSTED_PLANS[plan]
-      const pre = await createPreapproval({
-        accessToken: config.mpSubs.accessToken,
-        reason: `ScrollLab LAB — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
-        amount: cycle === 'yearly' ? plof.priceYearly : plof.priceMonthly,
-        currencyId: plof.currency_id,
-        frequency: 1,
-        frequencyType: cycle === 'yearly' ? 'years' : 'months',
-        payerEmail: req.user.email,
-        externalReference: subId,
-        backUrl: `${config.clientUrl}/lab`,
-        trialDays,
-      })
+      let pre
+      try {
+        pre = await createPreapproval({
+          accessToken: config.mpSubs.accessToken,
+          reason: `ScrollLab LAB — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
+          amount: cycle === 'yearly' ? plof.priceYearly : plof.priceMonthly,
+          currencyId: plof.currency_id,
+          ...billingFrequency(cycle),
+          payerEmail: req.user.email,
+          externalReference: subId,
+          // `?suscripcion=volver`: la UI sincroniza sola al volver de MP.
+          backUrl: `${config.clientUrl}/lab?suscripcion=volver`,
+          startDate: firstChargeAt,
+        })
+      } catch (err) {
+        // Sin preapproval en MP no hay nada que completar: la fila no puede
+        // bloquear el próximo intento.
+        await db.deleteSubscription(subId)
+        console.error(
+          `subs alta FALLÓ en MP user=${userId}`,
+          err?.message || JSON.stringify(err)?.slice(0, 300),
+        )
+        throw new HttpError(
+          502,
+          'No pudimos iniciar la suscripción en Mercado Pago. Probá de nuevo en unos minutos.',
+          { expose: true },
+        )
+      }
       sub.mpPreapprovalId = String(pre.id)
       await sub.save()
-      res.json({
-        init_point: pre.init_point,
-        subscriptionId: subId,
-        trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
-      })
+      res.json({ ...out, init_point: pre.init_point })
     }),
   )
 
@@ -1160,20 +1212,11 @@ export async function createApp(config) {
       if (!sub || String(sub.userId) !== String(db.uid(req.user))) {
         throw new HttpError(404, 'Suscripción no encontrada')
       }
-      sub.status = 'authorized'
-      // Con prueba: el "período" corre hasta el fin de la prueba (ahí MP haría
-      // el primer cobro). Sin prueba: ciclo completo.
-      if (sub.trialEndsAt && new Date(sub.trialEndsAt).getTime() > Date.now()) {
-        sub.currentPeriodEnd = new Date(sub.trialEndsAt)
-      } else {
-        const end = new Date()
-        end.setDate(end.getDate() + (sub.cycle === 'yearly' ? 365 : 31))
-        sub.currentPeriodEnd = end
+      // Igual que en MP: un alta reemplazada quedó cancelada y ya no se completa.
+      if (sub.abandonedAt || sub.status === 'cancelled') {
+        throw new HttpError(409, 'Esa alta ya no está vigente', { expose: true })
       }
-      await sub.save()
-      sendSubscriptionWelcomeOnce({ subscription: sub, config }).catch((err) =>
-        console.error('subs welcome email', err?.message),
-      )
+      await activateMockSubscription(sub, config)
       res.json({ ok: true, status: sub.status })
     }),
   )
@@ -1204,24 +1247,26 @@ export async function createApp(config) {
       if (!sub || sub.canceledAt) {
         throw new HttpError(404, 'No tenés una suscripción activa')
       }
+      // Si MP no confirma la baja, 502 y no se marca nada: una baja local que
+      // MP no hizo seguiría cobrando.
       if (!subsMock() && sub.mpPreapprovalId) {
-        try {
-          await cancelPreapproval(config.mpSubs.accessToken, sub.mpPreapprovalId)
-        } catch (err) {
-          console.error('cancelPreapproval falló', err?.message)
-        }
+        await cancelPreapprovalConfirmed(sub, config)
       }
       // No la matamos ya: sigue con acceso hasta `currentPeriodEnd`. MP no
-      // renueva. Si no hay fecha (edge), la cerramos en el acto.
+      // renueva. Sin días pagos por delante (sin fecha, o renovación que no se
+      // cobró) se cierra en el acto.
       sub.canceledAt = new Date()
-      if (!sub.currentPeriodEnd) sub.status = 'cancelled'
+      const end = sub.currentPeriodEnd
+        ? new Date(sub.currentPeriodEnd).getTime()
+        : null
+      if (end == null || end <= Date.now()) sub.status = 'cancelled'
       await sub.save()
       sendSubscriptionCanceledOnce({ subscription: sub, config }).catch((err) =>
         console.error('subs canceled email', err?.message),
       )
       res.json({
         ok: true,
-        endsAt: sub.currentPeriodEnd || null,
+        endsAt: sub.status === 'cancelled' ? null : sub.currentPeriodEnd,
         status: sub.status,
       })
     }),
@@ -1229,6 +1274,20 @@ export async function createApp(config) {
 
   // Cambio de plan sin dar de baja (mismo ciclo). Distinto ciclo (mensual↔
   // anual) no se puede sobre un preapproval de MP → la UI manda por cancelar.
+  // Subir con días pagos devuelve `requiresPayment` + checkout de la diferencia.
+  app.get(
+    '/api/subscriptions/change/quote',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const out = await previewPlanChange({
+        userId: db.uid(req.user),
+        plan: String(req.query?.plan || ''),
+      })
+      res.set('Cache-Control', 'no-store')
+      res.json({ ok: true, ...out })
+    }),
+  )
+
   app.post(
     '/api/subscriptions/change',
     requireAuth,
@@ -1239,6 +1298,42 @@ export async function createApp(config) {
         plan: String(req.body?.plan || ''),
         config,
       })
+      res.json({ ok: true, ...out })
+    }),
+  )
+
+  // Vuelta del checkout de la diferencia (`/lab?upgrade=volver&payment_id=…`):
+  // aplica el plan sin esperar al webhook (en test MP no lo manda).
+  app.post(
+    '/api/subscriptions/upgrade/confirm',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (subsMock()) {
+        throw new HttpError(400, 'Confirmación MP no disponible en modo mock')
+      }
+      const paymentId = String(
+        req.body?.paymentId || req.body?.collection_id || '',
+      ).trim()
+      if (!paymentId || paymentId === 'null') {
+        throw new HttpError(400, 'paymentId requerido')
+      }
+      const payment = await fetchPayment(config.mpSubs.accessToken, paymentId)
+      const out = await applyUpgradePayment({
+        payment,
+        config,
+        expectedUserId: db.uid(req.user),
+      })
+      res.json({ ok: true, ...out })
+    }),
+  )
+
+  app.post(
+    '/api/subscriptions/upgrade/mock-pay',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      if (!subsMock()) throw new HttpError(403, 'Mock deshabilitado')
+      const out = await applyMockUpgrade({ userId: db.uid(req.user), config })
       res.json({ ok: true, ...out })
     }),
   )

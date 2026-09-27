@@ -221,9 +221,12 @@ snippet.
 - **Modelo `Subscription`** `{ userId, plan, cycle, status, currentPeriodEnd,
   mpPreapprovalId }` + métodos db/fileStore. Una activa por usuario.
 - **Webhook** con branch por `type`: `payment` (intacto) ·
-  `subscription_preapproval` → `handlePreapprovalEvent` (sync status + período)
-  · `subscription_authorized_payment` → log (el período lo cubre el evento
-  anterior). Firma con `config.mpSubs.webhookSecret`.
+  `subscription_preapproval` → `handlePreapprovalEvent` (sync status; el
+  período solo se inicializa al activarse) · `subscription_authorized_payment`
+  → `handleAuthorizedPaymentEvent` (cobro aprobado → período =
+  `debit_date + 1 ciclo`; rechazado → gracia). Firma con
+  `config.mpSubs.webhookSecret`. Semántica completa (gracia, pausa, bajas):
+  `docs/mercadopago-suscripciones-setup.md` → "Estados y acceso".
 - **Enforcement**: `assertCanPublish` en `PUT /api/hosted/:id {publish:true}` —
   cuenta instancias `published` del usuario vs cuota del plan (o
   `HOSTED_FREE_QUOTA`, default **1** = el plan gratis incluye 1 sección

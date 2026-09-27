@@ -85,6 +85,57 @@ export async function createCheckoutPreference({
   })
 }
 
+/**
+ * Preference de Checkout Pro por la diferencia al subir de plan en LAB. Es un
+ * pago único: no toca el preapproval (eso lo hace el PUT de monto al aplicarse).
+ * `binary_mode` y sin medios en efectivo para que se apruebe o rechace en el
+ * acto, y vence en `expiresAt` porque el monto depende de los días que quedan.
+ * `?source=lab` en la notificación: el webhook la valida con el secreto de la
+ * app de suscripciones.
+ */
+export function buildUpgradePreferenceBody({
+  reference,
+  title,
+  amount,
+  expiresAt,
+  clientUrl,
+  apiPublicUrl,
+}) {
+  const back = `${clientUrl}/lab?upgrade=volver`
+  return {
+    items: [
+      {
+        id: 'lab-upgrade',
+        title,
+        quantity: 1,
+        unit_price: amount,
+        currency_id: 'ARS',
+        picture_url: absoluteClientAsset(clientUrl, MP_DEFAULT_ITEM_PICTURE),
+      },
+    ],
+    external_reference: reference,
+    back_urls: { success: back, failure: back, pending: back },
+    auto_return: 'approved',
+    binary_mode: true,
+    payment_methods: {
+      excluded_payment_types: [{ id: 'ticket' }, { id: 'atm' }],
+    },
+    expires: true,
+    expiration_date_to: new Date(expiresAt).toISOString(),
+    notification_url: `${apiPublicUrl}/api/webhooks/mercadopago?source=lab`,
+    statement_descriptor: MP_STATEMENT_DESCRIPTOR,
+  }
+}
+
+export async function createUpgradePreference({ accessToken, ...rest }) {
+  const preference = new Preference(createMpClient(accessToken))
+  try {
+    return await preference.create({ body: buildUpgradePreferenceBody(rest) })
+  } catch (err) {
+    throw mpPaymentError(err, 'preference')
+  }
+}
+
 export function verifyMpWebhookSignature({
   secret,
   xSignature,
@@ -154,6 +205,17 @@ export function mpPaymentError(err, paymentId) {
 // MP_SUBS_ACCESS_TOKEN — nada de seed ni plan IDs.
 // ————————————————————————————————————————————————————————————————
 
+/**
+ * Frecuencia de cobro por ciclo. MP solo acepta `frequency_type` `days` o
+ * `months` (con `years` responde 400 — verificado en sandbox): el anual va
+ * como 12 meses.
+ */
+export function billingFrequency(cycle) {
+  return cycle === 'yearly'
+    ? { frequency: 12, frequencyType: 'months' }
+    : { frequency: 1, frequencyType: 'months' }
+}
+
 /** Body del preapproval — puro, testeable sin pegarle a MP. */
 export function buildPreapprovalBody({
   reason,
@@ -164,7 +226,7 @@ export function buildPreapprovalBody({
   payerEmail,
   externalReference,
   backUrl,
-  trialDays = 0,
+  startDate = null,
 }) {
   const autoRecurring = {
     frequency,
@@ -172,11 +234,11 @@ export function buildPreapprovalBody({
     transaction_amount: amount,
     currency_id: currencyId,
   }
-  if (trialDays > 0) {
-    autoRecurring.free_trial = {
-      frequency: Math.floor(trialDays),
-      frequency_type: 'days',
-    }
+  // Primer cobro diferido (prueba gratis o días ya pagados). `start_date` es
+  // el campo documentado para altas sin plan; `free_trial` solo lo es para
+  // `/preapproval_plan`.
+  if (startDate) {
+    autoRecurring.start_date = new Date(startDate).toISOString()
   }
   return {
     reason,
@@ -219,7 +281,11 @@ export async function fetchAuthorizedPayment(accessToken, id) {
 
 export async function cancelPreapproval(accessToken, id) {
   const pa = new PreApproval(createMpClient(accessToken))
-  return pa.update({ id, body: { status: 'cancelled' } })
+  try {
+    return await pa.update({ id, body: { status: 'cancelled' } })
+  } catch (err) {
+    throw mpPaymentError(err, id)
+  }
 }
 
 /**
