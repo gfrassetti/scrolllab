@@ -2,8 +2,8 @@ import { useI18n } from '../i18n'
 
 /**
  * Un campo editable de sección. Tipos: text · textarea · select · color · href
- * · image / model / url (URL o ruta) · list (sub-campos text/textarea/href/
- * color/image). Compartido por LabEditorPage y BuilderPreview.
+ * · image / url (URL o ruta) · list (sub-campos text/textarea/href/color/
+ * image). Compartido por LabEditorPage y BuilderPreview.
  *
  *   <SectionFieldRow field={field} value={props[field.key]} onChange={next => …} hint="…" />
  *
@@ -112,13 +112,13 @@ function Scalar({ field, value, onChange }) {
     )
   }
 
-  if (field.type === 'model' || field.type === 'url') {
+  if (field.type === 'url') {
     return (
       <input
         type="text"
         inputMode="url"
         value={value}
-        placeholder={field.type === 'model' ? 'https://… · /modelo.glb' : 'https://… · /api/…'}
+        placeholder="https://… · /api/…"
         onChange={(e) => onChange(e.target.value)}
         className={inputCls}
       />

@@ -42,7 +42,6 @@ function freePort() {
 /** Props que no se ven como texto: URLs de assets y endpoints. */
 const NON_VISIBLE_KEYS = new Set([
   'endpoint',
-  'modelUrl',
   'can1Image',
   'can2Image',
   'can3Image',
@@ -55,7 +54,6 @@ const NON_VISIBLE_KEYS = new Set([
  * motivo — para que la lista no se convierta en un lugar donde esconder bugs.
  */
 const NOT_IN_DOM = {
-  'fizz/HeroBubbles.canLabel': 'se dibuja en la textura WebGL de la lata',
   'fizz/CanCarousel.canLabel': 'solo en latas sin foto; las de ejemplo traen PNG',
   'unity/FooterTrophy.accentWord': 'resalta esa palabra dentro del título; sola no se ve',
   'contact/ContactForm.sendingLabel': 'solo visible mientras se envía',

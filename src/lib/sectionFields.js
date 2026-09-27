@@ -1,7 +1,8 @@
 /**
  * Campos editables por sección (builder preview + LAB).
- * Tipos: text · textarea · select · image · model · url · color · href · list.
- * `image` / `model` / `url` = una URL https:// o una ruta /archivo.
+ * Tipos: text · textarea · select · image · url · color · href · list.
+ * `image` / `url` = una URL https:// o una ruta /archivo. Los objetos 3D
+ * (formas, GLB) no son editables a propósito: se cambian en el código.
  * `list` = array de items; `item` describe sus sub-campos (text/textarea/
  * href/color). El schema server-side espeja esto en server/sectionFields.js
  * (ALLOWED_PROPS_BY_SECTION + LIST_PROPS_BY_SECTION).
@@ -279,19 +280,8 @@ export const SECTION_FIELDS = {
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
-    {
-      key: 'shape',
-      label: '3D shape',
-      type: 'select',
-      options: [
-        { value: 'icosahedron', label: 'Icosahedron' },
-        { value: 'box', label: 'Box' },
-        { value: 'octahedron', label: 'Octahedron' },
-        { value: 'torus', label: 'Torus' },
-        { value: 'sphere', label: 'Sphere' },
-      ],
-    },
-    { key: 'modelUrl', label: 'Modelo 3D propio (.glb)', type: 'model' },
+    // El objeto 3D no se edita en el builder: queda el de la demo y se cambia
+    // en el código (forma o GLB propio, ver el README del ZIP).
   ],
   'monolith/SkewScroller': [
     { key: 'unit', label: 'Unit', type: 'text' },
@@ -394,8 +384,7 @@ export const SECTION_FIELDS = {
       ],
     },
     { key: 'canImage', label: 'Lata PNG (override)', type: 'image' },
-    { key: 'canLabel', label: 'Texto lata (legacy)', type: 'text' },
-    { key: 'modelUrl', label: 'Modelo 3D propio (.glb)', type: 'model' },
+    // Sin modelo 3D propio en el builder: se pasa `modelUrl` en el código.
   ],
   'fizz/FlavorWorlds': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -1037,7 +1026,7 @@ export function sanitizeHref(value) {
   return HREF_RE.test(s) ? s : undefined
 }
 
-// Imagen, modelo o endpoint: https:// o /ruta, sin espacios. La misma regla
+// Imagen o endpoint: https:// o /ruta, sin espacios. La misma regla
 // que el servidor (ASSET_URL_RE en server/sectionFields.js): el preview no
 // puede mostrar una URL que después no viaja al ZIP. Por eso tampoco blob: ni
 // data:, que además no sobreviven a la sesión.
@@ -1148,7 +1137,7 @@ export function sanitizeProps(sectionId, props) {
       const ok = (field.options || []).some((o) => o.value === trimmed)
       if (!ok) continue
     }
-    if (field.type === 'model' || field.type === 'image' || field.type === 'url') {
+    if (field.type === 'image' || field.type === 'url') {
       const url = sanitizeAssetUrl(trimmed)
       if (url) cleaned[key] = url
       continue

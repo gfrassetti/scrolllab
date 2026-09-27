@@ -44,7 +44,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'nocturne/WorkIndex': ['seq', 'total', 'label', 'bg', 'fg', 'works'],
   'nocturne/OutroCTA': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'monolith/NavBrutal': ['brand', 'linksText'],
-  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
+  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint'],
   'monolith/TypeAccordion': ['unit', 'total', 'label', 'bg', 'fg', 'items'],
   'monolith/SkewScroller': ['unit', 'total', 'label', 'bg', 'fg', 'words'],
   'monolith/ExhibitGrid': ['unit', 'total', 'label', 'bg', 'fg', 'exhibits'],
@@ -58,16 +58,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'linkLabel',
     'cta',
   ],
-  'fizz/HeroBubbles': [
-    'title',
-    'tagline',
-    'meta',
-    'hint',
-    'flavor',
-    'canImage',
-    'canLabel',
-    'modelUrl',
-  ],
+  'fizz/HeroBubbles': ['title', 'tagline', 'meta', 'hint', 'flavor', 'canImage'],
   'fizz/FlavorWorlds': ['eyebrow'],
   'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
   'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
@@ -395,14 +386,6 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
 })
 
-const SHAPE_PRESETS = new Set([
-  'icosahedron',
-  'box',
-  'octahedron',
-  'torus',
-  'sphere',
-])
-
 const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
 
@@ -429,7 +412,6 @@ const THEME_PRESETS = new Set([
 const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
 
 export const ASSET_URL_KEYS = new Set([
-  'modelUrl',
   'canImage',
   'image',
   'img',
@@ -610,7 +592,6 @@ export function sanitizeSectionProps(sectionId, props) {
       continue
     }
     if (!trimmed) continue
-    if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue

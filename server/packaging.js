@@ -41,8 +41,10 @@ function publicDirAssets(relDir) {
  *  2 — la composición del builder trae las listas editadas y los archivos de
  *      public/ de MERIDIAN, y el fondo de cada sección igual al del preview.
  *  3 — BigNumbers muestra el valor como se escribió (1.500, 4,8, 24/7).
+ *  4 — README: cómo cambiar el 3D en el código, sin las notas que no eran
+ *      ciertas (el GLB de MONOLITH, los can1Image del carrusel de FIZZ).
  */
-export const PACK_VERSION = 3
+export const PACK_VERSION = 4
 
 const MODEL_FILES = {
   chapters: {
@@ -359,38 +361,61 @@ const SHOP_ROUTE_COMPONENTS = [
 ]
 
 /** READMEs: how to swap the hero's 3D object for a custom GLB. */
-const MODEL_3D_NOTES = {
-  fizz: `## Custom 3D model (hero)
+/**
+ * Lo que el builder no edita y el comprador cambia en el código: el objeto 3D
+ * de los heroes (forma o GLB propio) y las latas del carrusel de FIZZ. El
+ * README es la guía: tiene que decir la verdad para cada ZIP (el template
+ * completo trae el GLB de la demo; una composición del builder, no).
+ */
+const fizzHero3dNote = ({ demoGlb }) => `## 3D model (hero)
 
-The demo ships with \`public/fizz/soda-can.glb\` as \`modelUrl\` on \`HeroBubbles\`.
-The PNG cutout is only used when \`modelUrl\` is omitted. To use your own model:
+${
+  demoGlb
+    ? 'The demo passes `public/fizz/soda-can.glb` as `modelUrl` to `HeroBubbles`.'
+    : '`HeroBubbles` renders the photoreal PNG can (`flavor`: berry / citrus / tropical / mint, or your own image with `canImage`).'
+} To use your own model:
 
-1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
+1. Export it as **GLB** (binary glTF, a single file; GLTF also works).
 2. Drop it in \`public/\`, e.g. \`public/my-can.glb\`.
-3. In \`src/App.jsx\`, pass it to the hero: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
+3. In \`src/App.jsx\`: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
 
-The model is auto-centered and auto-scaled; it keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works. Without \`modelUrl\`, a photoreal PNG cutout renders (flavor via \`flavor\`: berry / citrus / tropical / mint).
+It is auto-centered and auto-scaled, and keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works.${
+  demoGlb
+    ? ' Without `modelUrl`, the photoreal PNG can renders (`flavor`, or `canImage` for your own image).'
+    : ''
+}
+`
 
-## Custom can images (carousel)
+const FIZZ_CANS_NOTE = `## Can images (carousel)
 
-The lineup ships photoreal PNG cutouts. To replace each one:
+\`CanCarousel\` takes a \`cans\` list, one object per can:
 
-1. Export your art as **SVG**, PNG, WebP or JPG.
-2. Drop files in \`public/\`, e.g. \`public/can-1.svg\`.
-3. Pass them to the carousel: \`<CanCarousel can1Image="/can-1.svg" can2Image="/can-2.png" … />\`.
+\`\`\`jsx
+<CanCarousel cans={[{ name: 'Citrus', note: 'Lemon & lime', color: '#ffb400', image: '/can-1.png' }]} />
+\`\`\`
 
-A hosted \`https://\` URL also works. Without \`canNImage\`, the SVG placeholder renders (\`canLabel\` prints on it).
-`,
-  monolith: `## Custom 3D model (hero)
+Images can be PNG, SVG, WebP or JPG in \`public/\`, or a hosted \`https://\` URL. A can without \`image\` renders the SVG illustration, with \`canLabel\` printed on it.
+`
 
-The demo ships with \`public/monolith/monolith-form.glb\` as \`modelUrl\` on \`HeroThree\` (carbon wireframe). To use your own model:
+const monolith3dNote = ({ sampleGlb }) => `## 3D object (hero)
 
-1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
+\`HeroThree\` renders a built-in wireframe shape: \`shape\` = \`icosahedron\` (default), \`box\`, \`octahedron\`, \`torus\` or \`sphere\`. To use your own model instead:
+
+1. Export it as **GLB** (binary glTF, a single file; GLTF also works).
 2. Drop it in \`public/\`, e.g. \`public/my-object.glb\`.
-3. In \`src/App.jsx\`, pass it to the hero: \`<HeroThree modelUrl="/my-object.glb" />\`.
+3. In \`src/App.jsx\`: \`<HeroThree modelUrl="/my-object.glb" />\`.
 
-The model is auto-centered, auto-scaled and re-materialized as a carbon wireframe to keep the brutalist look. A hosted \`https://\` URL also works.
-`,
+It is auto-centered, auto-scaled and re-materialized as a carbon wireframe to keep the brutalist look. A hosted \`https://\` URL also works.${
+  sampleGlb
+    ? ' The ZIP includes a sample model: `<HeroThree modelUrl="/monolith/monolith-form.glb" />`.'
+    : ''
+}
+`
+
+/** Notas del template completo (su ZIP trae los GLB de public/). */
+const MODEL_3D_NOTES = {
+  fizz: `${fizzHero3dNote({ demoGlb: true })}\n${FIZZ_CANS_NOTE}`,
+  monolith: monolith3dNote({ sampleGlb: true }),
 }
 
 /** Section folders shared across models — packed when a page imports them. */
@@ -912,13 +937,12 @@ ${renderLines.join('\n')}
 
   const idList = entries.map((e) => e.id).filter(Boolean)
   let readme = `# Composición custom — SCROLLLAB\n\nReceta:\n${idList.map((r) => `- ${r}`).join('\n')}\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n`
-  if (
-    idList.includes('fizz/HeroBubbles') ||
-    idList.includes('fizz/CanCarousel')
-  ) {
-    readme += `\n${MODEL_3D_NOTES.fizz}`
+  // Una composición no trae los GLB de las demos: las notas lo dicen así.
+  if (idList.includes('fizz/HeroBubbles')) readme += `\n${fizzHero3dNote({ demoGlb: false })}`
+  if (idList.includes('fizz/CanCarousel')) readme += `\n${FIZZ_CANS_NOTE}`
+  if (idList.includes('monolith/HeroThree')) {
+    readme += `\n${monolith3dNote({ sampleGlb: false })}`
   }
-  if (idList.includes('monolith/HeroThree')) readme += `\n${MODEL_3D_NOTES.monolith}`
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
   if (needsShop) {
     readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`

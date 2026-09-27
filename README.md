@@ -104,9 +104,11 @@ si suma commerce.
 
 A propósito no es un editor completo: se vende código para seguir en el
 editor, no un Wix. Se editan textos, enlaces, colores de fondo y texto, y
-listas cortas (links, métricas, ítems). Las imágenes y el 3D se cargan como URL
-o ruta: se ve en el preview y viaja igual al ZIP. Motion, layout y recetas Beat
-quedan en el código.
+listas cortas (links, métricas, ítems). Las imágenes se cargan como URL o ruta:
+se ven en el preview y viajan igual al ZIP. El 3D (la forma del hero de
+MONOLITH, un GLB propio en FIZZ o MONOLITH) no se edita en el builder: queda el
+de la demo y se cambia en el código, con los pasos en el README del ZIP.
+Motion, layout y recetas Beat también quedan en el código.
 
 ### Auditoría y fixes
 
@@ -142,8 +144,8 @@ Todo lo que el comprador edita en el builder llega al ZIP tal cual. Está
 cubierto para cada campo de cada sección, no para una muestra:
 
 - `builderRoundTrip.test.js` (en `npm test`):
-  - Por campo: para los 402 campos editables de las 81 secciones y cada tipo de
-    valor (válidos, bordes y basura; 4.278 combinaciones), lo que muestra el
+  - Por campo: para los 398 campos editables de las 81 secciones y cada tipo de
+    valor (válidos, bordes y basura; 4.242 combinaciones), lo que muestra el
     preview es exactamente lo que manda el carrito y guarda el servidor.
   - De punta a punta: una composición con las 81 secciones y todos sus campos
     editados (listas llenas hasta el tope, textos de 2.000 caracteres con

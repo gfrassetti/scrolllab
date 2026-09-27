@@ -98,7 +98,6 @@ const PROBES = {
 }
 PROBES.textarea = PROBES.text
 PROBES.image = PROBES.asset
-PROBES.model = PROBES.asset
 PROBES.url = [...PROBES.asset, '/api/contact', 'https://formspree.io/f/abc', 'Mi endpoint']
 
 function probesFor(field) {
@@ -142,8 +141,6 @@ function validValue(field, tag) {
       return `https://example.com/${slug}`
     case 'image':
       return `https://cdn.example.com/${slug}.webp`
-    case 'model':
-      return `https://cdn.example.com/${slug}.glb`
     case 'url':
       return `https://api.example.com/${slug}`
     default:
@@ -289,7 +286,12 @@ describe('builder → ZIP: una composición con todo editado', () => {
         )
       }
     }
-    assert.ok(edited > 400, `solo ${edited} campos editados`)
+    const offered = BUILDER_SECTIONS.reduce(
+      (sum, id) => sum + (SECTION_FIELDS[id] || []).length,
+      0,
+    )
+    assert.ok(offered > 300, `el builder ofrece solo ${offered} campos`)
+    assert.equal(edited, offered, 'quedaron campos del builder sin editar en la prueba')
 
     const recipe = validateRecipe(compositionToRecipe(items), items.length)
     const dest = path.join(tmp, 'all.zip')

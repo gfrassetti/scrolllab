@@ -11,14 +11,13 @@ import SectionFieldRow from './SectionFieldRow'
 import { useT } from '../i18n'
 
 /**
- * Ayudas del builder bajo cada tipo de campo. Una imagen o un modelo viajan
- * al ZIP como la URL o ruta que se escribe (antes había un «probar archivo
- * local» que solo se veía en el preview y no llegaba a la descarga). Una
- * lista reemplaza entera a la de ejemplo de la sección.
+ * Ayudas del builder bajo cada tipo de campo. Una imagen viaja al ZIP como la
+ * URL o ruta que se escribe (antes había un «probar archivo local» que solo se
+ * veía en el preview y no llegaba a la descarga). Una lista reemplaza entera a
+ * la de ejemplo de la sección.
  */
 const FIELD_HINT_KEY = {
   image: 'builder.assetHint',
-  model: 'builder.assetHint',
   list: 'builder.listHint',
 }
 
@@ -44,9 +43,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
   const editingSection = editing ? getSection(editing.sectionId) : null
   const fields = editing ? getSectionFields(editing.sectionId) : []
   // La ayuda de imágenes va una vez por panel, no repetida en cada campo.
-  const firstAssetKey = fields.find(
-    (f) => f.type === 'image' || f.type === 'model',
-  )?.key
+  const firstAssetKey = fields.find((f) => f.type === 'image')?.key
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
