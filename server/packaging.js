@@ -40,8 +40,9 @@ function publicDirAssets(relDir) {
  *  1 — sin marca (hasta 2026-09).
  *  2 — la composición del builder trae las listas editadas y los archivos de
  *      public/ de MERIDIAN, y el fondo de cada sección igual al del preview.
+ *  3 — BigNumbers muestra el valor como se escribió (1.500, 4,8, 24/7).
  */
-export const PACK_VERSION = 2
+export const PACK_VERSION = 3
 
 const MODEL_FILES = {
   chapters: {
