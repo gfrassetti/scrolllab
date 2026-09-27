@@ -26,7 +26,8 @@ const recipeOf = (ids, times = 1) => Array.from({ length: times }, () => ids).fl
 
 const CARTS = {
   'un modelo': [{ sku: 'chapters', title: 'CHAPTERS' }],
-  'varios modelos y el bundle': [{ sku: 'nocturne' }, { sku: 'fizz' }, { sku: 'bundle' }],
+  // Modelos que el bundle no trae: los que sí trae no pueden ir al lado.
+  'varios modelos y el bundle': [{ sku: 'meridian' }, { sku: 'atrium' }, { sku: 'bundle' }],
   'una composición chica': [{ sku: 'custom:a', recipe: ['chapters/HeroKinetic'] }],
   'una composición con secciones extra (más de 8)': [
     { sku: 'custom:b', recipe: recipeOf(['chapters/HeroKinetic', 'chapters/QuoteBreak'], 5) },

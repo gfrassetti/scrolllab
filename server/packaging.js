@@ -663,12 +663,12 @@ export async function packBundleTemplate({ models, destPath, licenseMeta }) {
 }
 
 /**
- * Pack a custom builder recipe.
+ * Appends one runnable custom composition (the builder recipe) under `prefix`.
+ * Empty prefix: the root of a single-composition ZIP. Returns the recipe ids
+ * so the caller writes the license.
  * recipe: string[] (legacy) or [{ id, props? }, ...]
  */
-export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
-  const { archive, done } = createZip(destPath)
-
+function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const sources = [TEMPLATE_VITE_CONFIG]
 
   for (const rel of SHARED) {
@@ -681,10 +681,10 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
       body = Buffer.from(stampCss(body.toString('utf8'), licenseMeta))
     }
     sources.push(body.toString('utf8'))
-    archive.append(body, { name: rel })
+    archive.append(body, { name: `${prefix}${rel}` })
   }
 
-  archive.append(TEMPLATE_VITE_CONFIG, { name: 'vite.config.js' })
+  archive.append(TEMPLATE_VITE_CONFIG, { name: `${prefix}vite.config.js` })
 
   const entries = (recipe || []).map((entry) => ({
     id: recipeSectionId(entry),
@@ -701,14 +701,14 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
       if (!fs.existsSync(abs)) continue
       const body = fs.readFileSync(abs)
       sources.push(body.toString('utf8'))
-      archive.append(body, { name: rel })
+      archive.append(body, { name: `${prefix}${rel}` })
     }
     // Fotos del catálogo demo importadas por products.js.
     const shopAssets = path.join(ROOT, 'src', 'lib', 'shop', 'assets')
     if (fs.existsSync(shopAssets)) {
       for (const file of fs.readdirSync(shopAssets)) {
         archive.append(fs.readFileSync(path.join(shopAssets, file)), {
-          name: `src/lib/shop/assets/${file}`,
+          name: `${prefix}src/lib/shop/assets/${file}`,
         })
       }
     }
@@ -756,7 +756,7 @@ export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
             if (entry.name.endsWith('.jsx') || entry.name.endsWith('.js')) {
               sources.push(body.toString('utf8'))
             }
-            archive.append(body, { name: rel })
+            archive.append(body, { name: `${prefix}${rel}` })
           }
         }
         walk(modelDir, path.posix.join('src/components/sections', model))
@@ -866,10 +866,10 @@ ${renderLines.join('\n')}
   }
   appSrc = stampApp(appSrc, licenseMeta)
   sources.push(appSrc)
-  archive.append(appSrc, { name: 'src/App.jsx' })
-  appendWebglIfNeeded(archive, sources)
+  archive.append(appSrc, { name: `${prefix}src/App.jsx` })
+  appendWebglIfNeeded(archive, sources, prefix)
   archive.append(buildTemplatePackageJson('scrolllab-custom', sources), {
-    name: 'package.json',
+    name: `${prefix}package.json`,
   })
 
   const idList = entries.map((e) => e.id).filter(Boolean)
@@ -886,6 +886,18 @@ ${renderLines.join('\n')}
     readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
   }
 
+  if (prefix) readme += '\nSee LICENSE.txt at the root of this ZIP for usage terms.\n'
+  archive.append(stampReadme(readme, licenseMeta), { name: `${prefix}README.md` })
+  return { idList }
+}
+
+/**
+ * Pack a custom builder recipe.
+ * recipe: string[] (legacy) or [{ id, props? }, ...]
+ */
+export async function packCustomTemplate({ recipe, destPath, licenseMeta }) {
+  const { archive, done } = createZip(destPath)
+  const { idList } = appendCustomProject(archive, recipe, '', licenseMeta)
   archive.append(
     buildLicenseText({
       siteName: 'SCROLLLAB',
@@ -897,7 +909,97 @@ ${renderLines.join('\n')}
     }),
     { name: 'LICENSE.txt' },
   )
-  archive.append(stampReadme(readme, licenseMeta), { name: 'README.md' })
+  await archive.finalize()
+  await done
+  return destPath
+}
+
+const isCustomItem = (item) =>
+  item?.sku === 'custom' ||
+  String(item?.sku || '').startsWith('custom:') ||
+  !!item?.recipe?.length
+
+/**
+ * El ZIP de una orden. Un ítem: el de siempre (template, bundle o composición
+ * en la raíz). Varios (el carrito deja comprar más de uno a la vez): una
+ * carpeta por proyecto, cada una se instala sola, y una licencia en la raíz
+ * que cubre todo, igual que el bundle. Un modelo que viene en el bundle y
+ * también suelto se empaqueta una vez.
+ */
+export async function packOrderTemplate({
+  items,
+  destPath,
+  licenseMeta,
+  bundleModels = [],
+}) {
+  const list = (items || []).filter(Boolean)
+  if (!list.length) throw new Error('Orden sin ítems')
+  if (list.length === 1) {
+    const [item] = list
+    if (isCustomItem(item)) {
+      return packCustomTemplate({ recipe: item.recipe || [], destPath, licenseMeta })
+    }
+    if (item.sku === 'bundle') {
+      return packBundleTemplate({ models: bundleModels, destPath, licenseMeta })
+    }
+    return packFixedTemplate({ model: item.sku, destPath, licenseMeta })
+  }
+
+  const { archive, done } = createZip(destPath)
+  const folders = []
+  const skus = []
+  const packed = new Set()
+  const addModel = (model) => {
+    if (packed.has(model)) return
+    if (!MODEL_FILES[model]) throw new Error(`Unknown model: ${model}`)
+    packed.add(model)
+    appendModelProject(archive, model, `${model}/`, licenseMeta)
+    folders.push({ folder: model, label: model.toUpperCase() })
+  }
+
+  for (const item of list) {
+    if (isCustomItem(item)) {
+      const folder = packed.has('custom') ? `custom-${folders.length + 1}` : 'custom'
+      packed.add(folder)
+      const { idList } = appendCustomProject(
+        archive,
+        item.recipe || [],
+        `${folder}/`,
+        licenseMeta,
+      )
+      folders.push({ folder, label: `Custom composition (${idList.length} sections)` })
+      skus.push(`custom:${idList.join(',')}`)
+    } else if (item.sku === 'bundle') {
+      const models = bundleModels.filter((model) => MODEL_FILES[model])
+      if (!models.length) throw new Error('Bundle sin modelos')
+      models.forEach(addModel)
+      skus.push(`bundle:${models.join(',')}`)
+    } else {
+      addModel(item.sku)
+      skus.push(item.sku)
+    }
+  }
+
+  archive.append(
+    buildLicenseText({
+      siteName: 'SCROLLLAB',
+      orderId: licenseMeta.orderId,
+      email: licenseMeta.email,
+      purchaseCode: licenseMeta.purchaseCode,
+      sku: skus.join(' + '),
+      date: licenseMeta.date,
+    }),
+    { name: 'LICENSE.txt' },
+  )
+  archive.append(
+    stampReadme(
+      `# SCROLLLAB — your purchase\n\n${folders.length} projects, one folder each. Every folder is a standalone Vite project:\n\n${folders
+        .map(({ folder, label }) => `- \`${folder}/\` — ${label}`)
+        .join('\n')}\n\n\`\`\`\ncd ${folders[0].folder}\nnpm install\nnpm run dev\n\`\`\`\n\nThe license at the root covers everything in this ZIP. See LICENSE.txt.\n`,
+      licenseMeta,
+    ),
+    { name: 'README.md' },
+  )
 
   await archive.finalize()
   await done

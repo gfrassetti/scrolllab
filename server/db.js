@@ -208,6 +208,30 @@ export const db = {
     const current = await MongoOrder.findById(orderId);
     return { order: current, created: false };
   },
+  /**
+   * paid→refunded atómica, solo si el pago devuelto es el que la pagó (el
+   * reembolso de un segundo pago duplicado no toca la orden).
+   */
+  async markOrderRefundedAtomic({ orderId, mpPaymentId, reason }) {
+    const at = new Date();
+    if (mode === "file") {
+      const order = await fileDb.findOrderById(orderId);
+      if (!order) return null;
+      if (order.status !== "paid" || order.mpPaymentId !== String(mpPaymentId)) {
+        return null;
+      }
+      order.status = "refunded";
+      order.refundedAt = at.toISOString();
+      order.refundReason = reason;
+      await order.save();
+      return order;
+    }
+    return MongoOrder.findOneAndUpdate(
+      { _id: orderId, status: "paid", mpPaymentId: String(mpPaymentId) },
+      { $set: { status: "refunded", refundedAt: at, refundReason: reason } },
+      { new: true },
+    );
+  },
   // maxDownloads 0 = sin tope: el contador se sigue llevando, pero no frena.
   // `meta` ({ ip }) alimenta el log de descargas (ip-protection-brief §3.5).
   async consumeDownloadAtomic(orderId, maxDownloads, meta = {}) {

@@ -236,6 +236,11 @@ export default function AccountPage() {
                           {t('account.pendingHint')}
                         </p>
                       )}
+                      {order.status === 'refunded' && (
+                        <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
+                          {t('account.refundedHint')}
+                        </p>
+                      )}
                       {order.status === 'paid' && (
                         <p className="mt-2 text-[11px] tracking-[0.08em] text-ink/40">
                           {t('account.license')}:{' '}
@@ -274,11 +279,11 @@ export default function AccountPage() {
                             ? t('account.preparing')
                             : t('account.download')}
                         </button>
-                      ) : (
+                      ) : order.status === 'pending' ? (
                         <span className="text-[11px] uppercase tracking-[0.25em] text-warning">
                           {t('account.waiting')}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </li>
                 )

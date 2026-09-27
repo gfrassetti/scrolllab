@@ -63,6 +63,35 @@ logs greppables, cómo correr `check:mp-sandbox`) en
 - `npm run check:mp-sandbox` — contra el sandbox **real** de Mercado Pago (16/16): no un simulador, la API de MP de verdad con credenciales de prueba.
 - Mutation testing manual sobre la cotización/pago de la diferencia al subir de plan: 5 fallos inyectados a propósito (cotización en cero, sin validar monto, sin bloquear re-suscripción más cara, sin idempotencia, aplica sobre una baja), los 5 detectados por los tests.
 
+## Checkout de templates (Mercado Pago)
+
+Compra única con Checkout Pro: carrito → `POST /api/checkout` (precios del
+servidor, en pesos con la cotización del día) → pago en MP → webhook o
+confirmación al volver → orden paga → ZIP con licencia marcada → Mis compras.
+
+- **Varios ítems en una compra:** el ZIP trae todos, uno por carpeta (cada una
+  es un proyecto que se instala solo) con una licencia en la raíz, igual que el
+  bundle. Con un solo ítem el ZIP es el de siempre. El servidor rechaza pagar
+  dos veces lo mismo (template repetido, o un modelo que el bundle ya trae) y
+  el carrito lo evita.
+- **Avisos al dueño** (mail a `EMAIL_NOTIFY_TO` + log greppable), uno por pago:
+  - `COMPRA PAGADA DOS VECES` — MP deja pagar el mismo link más de una vez; la
+    orden queda paga con el primero y el segundo hay que reembolsarlo.
+  - `PAGO SIN ORDEN` — llegó un pago cuya orden ya no existe (venció): entregar
+    o reembolsar. Los cobros de LAB que llegan como `payment` no avisan.
+  - `ORDEN REEMBOLSADA` / `CONTRACARGO` — la orden pasa a *Reembolsada* y deja
+    de descargarse. Reembolsar un pago duplicado no toca la orden.
+- **Efectivo** (Rapipago, Pago Fácil): el ticket vence a los 3 días, antes que
+  la orden pendiente (7), así no se puede pagar una orden ya borrada.
+- **Datos para MP** (su checklist de calidad, pesan en el antifraude): mail,
+  nombre y apellido del comprador, y descripción y categoría (`virtual_goods`)
+  de cada ítem.
+- El mail de compra es un detalle de la compra, **no una factura fiscal**.
+
+Testeado: `checkoutPayments.test.js` (doble pago, pago sin orden, reembolso,
+contracargo, dos templates juntos contra el MP simulado), tests del ZIP con
+varios ítems y `npm run check:mp-sandbox` contra MP real.
+
 ## Deploy
 
 Ver [`docs/DEPLOY.md`](docs/DEPLOY.md).

@@ -49,6 +49,23 @@ describe('esquemas de Mongoose (sin base)', () => {
     assert.equal(order.validateSync(), undefined)
   })
 
+  it('una orden reembolsada guarda el estado, cuándo y por qué (Mongoose no descarta nada)', () => {
+    const order = new Order({
+      userId: new mongoose.Types.ObjectId(),
+      items: [{ sku: 'chapters', unit_price: 233000, unit_price_usd: 149 }],
+      total: 233000,
+      status: 'refunded',
+      refundedAt: new Date('2026-10-01T12:00:00.000Z'),
+      refundReason: 'charged_back',
+    })
+    assert.equal(order.validateSync(), undefined)
+    const plain = order.toObject()
+    assert.equal(plain.status, 'refunded')
+    assert.equal(plain.refundReason, 'charged_back')
+    assert.equal(plain.refundedAt.toISOString(), '2026-10-01T12:00:00.000Z')
+    assert.ok(new Order({ ...plain, status: 'devuelta' }).validateSync()?.errors?.status)
+  })
+
   it('una orden sin cupón no inventa esos campos', () => {
     const order = new Order({
       userId: new mongoose.Types.ObjectId(),

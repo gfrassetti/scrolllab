@@ -5,6 +5,7 @@ import {
   recipeSectionId,
   arsFromUsd,
   BUILDER_HIDDEN_SKUS,
+  BUNDLE_MODELS,
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
@@ -88,6 +89,8 @@ export function validateCheckoutItems(
   }
 
   const resolved = []
+  const skus = new Set()
+  let hasCustom = false
   for (const raw of rawItems) {
     if (!raw || typeof raw !== 'object') {
       throw new HttpError(400, 'Ítem inválido')
@@ -98,6 +101,21 @@ export function validateCheckoutItems(
 
     const line = resolveLineItem({ sku: raw.sku })
     if (!line) throw new HttpError(400, `SKU inválido: ${raw.sku}`)
+
+    // El mismo template dos veces se cobraría dos veces (el front no lo deja,
+    // pero el servidor no confía en el front).
+    if (line.sku === 'custom' || String(line.sku).startsWith('custom:')) {
+      if (hasCustom) {
+        throw new HttpError(400, 'Solo una composición del builder por compra', {
+          expose: true,
+        })
+      }
+      hasCustom = true
+    } else if (skus.has(line.sku)) {
+      throw new HttpError(400, `${line.title} ya está en el carrito`, { expose: true })
+    } else {
+      skus.add(line.sku)
+    }
 
     if (line.sku === 'custom' || String(line.sku).startsWith('custom:')) {
       const recipe = validateRecipe(raw.recipe, maxRecipeSections)
@@ -113,11 +131,24 @@ export function validateCheckoutItems(
     resolved.push({
       sku: line.sku,
       title: line.title,
+      description: line.description,
       unit_price: arsFromUsd(line.unit_price_usd, rate),
       unit_price_usd: line.unit_price_usd,
       currency_id: line.currency_id,
       recipe: line.recipe,
     })
+  }
+
+  // Un modelo suelto que ya viene en el bundle también se pagaría dos veces.
+  if (skus.has('bundle')) {
+    const inBundle = resolved.find((i) => BUNDLE_MODELS.includes(i.sku))
+    if (inBundle) {
+      throw new HttpError(
+        400,
+        `${inBundle.title} ya viene en el bundle: sacalo del carrito`,
+        { expose: true },
+      )
+    }
   }
 
   return resolved

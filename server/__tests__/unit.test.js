@@ -318,6 +318,34 @@ describe('validateCheckoutItems', () => {
     )
   })
 
+  it('rechaza pagar dos veces lo mismo: template repetido, dos composiciones o un modelo que ya trae el bundle', () => {
+    const status = (items) => {
+      try {
+        validateCheckoutItems(items, opts)
+        return 200
+      } catch (err) {
+        return err.status
+      }
+    }
+    assert.equal(status([{ sku: 'chapters' }, { sku: 'chapters' }]), 400)
+    assert.equal(status([{ sku: 'bundle' }, { sku: 'unity' }]), 400)
+    assert.equal(status([{ sku: 'unity' }, { sku: 'bundle' }]), 400)
+    assert.equal(
+      status([
+        { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
+        { sku: 'custom:b', recipe: ['nocturne/SplitReveals'] },
+      ]),
+      400,
+    )
+    assert.equal(status([{ sku: 'chapters' }, { sku: 'nocturne' }]), 200)
+    assert.equal(status([{ sku: 'bundle' }, { sku: 'meridian' }]), 200)
+  })
+
+  it('cada línea lleva la descripción del catálogo (va a Mercado Pago)', () => {
+    const [line] = validateCheckoutItems([{ sku: 'chapters' }], opts)
+    assert.equal(line.description, PRODUCTS.chapters.description)
+  })
+
   it('rechaza SKUs en próximamente', () => {
     assert.throws(
       () => validateCheckoutItems([{ sku: 'ratio' }], opts),
@@ -985,6 +1013,48 @@ describe('buildPreferenceBody', () => {
       body.items[0].picture_url,
       'https://www.scrolllab.com.ar/og.png',
     )
+  })
+
+  it('lleva lo que pide el checklist de MP: comprador, descripción y categoría del ítem', () => {
+    const body = buildPreferenceBody({
+      ...base,
+      payer: { email: 'ana@test.com', name: 'Ana María Pérez' },
+      items: [
+        {
+          sku: 'meridian',
+          title: 'MERIDIAN — template',
+          description: 'x'.repeat(400),
+          unit_price: 1000,
+          currency_id: 'ARS',
+        },
+        { sku: 'chapters', title: 'CHAPTERS — template', unit_price: 1000, currency_id: 'ARS' },
+      ],
+    })
+    assert.deepEqual(body.payer, { email: 'ana@test.com', name: 'Ana', surname: 'María Pérez' })
+    assert.equal(body.items[0].category_id, 'virtual_goods')
+    assert.equal(body.items[0].description.length, 250)
+    // Sin descripción en el catálogo, va el título.
+    assert.equal(body.items[1].description, 'CHAPTERS — template')
+  })
+
+  it('sin mail no manda comprador; con un solo nombre no inventa apellido', () => {
+    const item = { sku: 'fizz', title: 'FIZZ', unit_price: 1000, currency_id: 'ARS' }
+    assert.equal('payer' in buildPreferenceBody({ ...base, items: [item] }), false)
+    assert.deepEqual(
+      buildPreferenceBody({ ...base, items: [item], payer: { email: 'a@b.com', name: 'Ana' } }).payer,
+      { email: 'a@b.com', name: 'Ana' },
+    )
+  })
+
+  it('el ticket de efectivo vence a los 3 días, antes que la orden pendiente (7)', () => {
+    const now = Date.parse('2026-10-01T12:00:00.000Z')
+    const body = buildPreferenceBody({
+      ...base,
+      now,
+      items: [{ sku: 'fizz', title: 'FIZZ', unit_price: 1000, currency_id: 'ARS' }],
+    })
+    assert.equal(body.date_of_expiration, '2026-10-04T12:00:00.000Z')
+    assert.ok(Date.parse(body.date_of_expiration) - now < PENDING_RETENTION_MS)
   })
 
   it('absoluteClientAsset normaliza barra final y path relativo', () => {

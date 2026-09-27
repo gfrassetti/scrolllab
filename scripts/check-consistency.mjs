@@ -32,6 +32,7 @@ import {
   COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
   WELCOME_COUPON_PERCENT as CLIENT_COUPON_PERCENT,
   BUNDLE_PRICE_USD,
+  BUNDLE_MODELS as CLIENT_BUNDLE_MODELS,
   COMING_SOON_SKUS as CLIENT_COMING_SOON,
   LOCAL_ONLY_SKUS as CLIENT_LOCAL_ONLY,
   BUILDER_HIDDEN_SKUS,
@@ -72,6 +73,12 @@ for (const sku of Object.keys(PRODUCTS)) {
 }
 if (PRODUCTS.custom.unit_price_usd !== CUSTOM_BASE_PRICE_USD) {
   fail('precios', `custom: cliente ${CUSTOM_BASE_PRICE_USD} vs servidor ${PRODUCTS.custom.unit_price_usd}`)
+}
+if (CLIENT_BUNDLE_MODELS.join(',') !== BUNDLE_MODELS.join(',')) {
+  fail(
+    'catálogo',
+    `BUNDLE_MODELS no coincide: cliente [${CLIENT_BUNDLE_MODELS}] vs servidor [${BUNDLE_MODELS}]`,
+  )
 }
 if (PRODUCTS.bundle.unit_price_usd !== BUNDLE_PRICE_USD) {
   fail('precios', `bundle: cliente ${BUNDLE_PRICE_USD} vs servidor ${PRODUCTS.bundle.unit_price_usd}`)

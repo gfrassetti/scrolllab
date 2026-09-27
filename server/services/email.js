@@ -786,6 +786,36 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
   return { sent: true, id: response.data?.id || null }
 }
 
+/**
+ * Aviso interno de un pago que pide acción a mano (reembolsar, entregar).
+ * Uno por evento: la clave de idempotencia evita que los reintentos del
+ * webhook repitan el mail. Sin mail configurado queda solo el log.
+ */
+export async function sendAdminAlert({ kind, key, subject, lines, config, client }) {
+  if (!config?.email?.enabled) return { skipped: 'disabled' }
+  const notifyTo = config.email.notifyTo
+  if (!notifyTo) return { skipped: 'no-notify-to' }
+  const resend = client || new Resend(config.email.apiKey)
+  const text = lines.join('\n')
+  const response = await resend.emails.send(
+    {
+      from: config.email.from,
+      to: [notifyTo],
+      subject: `[SCROLLLAB] ${subject}`,
+      html: `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">${lines
+        .map((line) => escapeHtml(line))
+        .join('<br>')}</div>`,
+      text,
+      tags: [{ name: 'type', value: `alert_${kind}` }],
+    },
+    { idempotencyKey: `scrolllab-alert-${kind}-${key}` },
+  )
+  if (response.error) {
+    throw new Error(response.error.message || 'Resend rechazó el aviso')
+  }
+  return { sent: true, id: response.data?.id || null }
+}
+
 const COUPON_COPY = {
   es: {
     subject: (percent) => `Tu ${percent}% de bienvenida en SCROLL LAB`,

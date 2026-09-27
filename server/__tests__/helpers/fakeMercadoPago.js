@@ -175,9 +175,12 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
     const payment = {
       id: 700000 + ++mp.seq,
       status: approved ? 'approved' : 'rejected',
-      transaction_amount: amount ?? pref.items[0].unit_price,
+      operation_type: 'regular_payment',
+      transaction_amount:
+        amount ?? pref.items.reduce((sum, i) => sum + i.unit_price * (i.quantity || 1), 0),
       currency_id: pref.items[0].currency_id,
       external_reference: pref.external_reference,
+      payer: { email: pref.payer?.email || 'comprador@test.com' },
     }
     mp.payments.set(String(payment.id), payment)
     return payment

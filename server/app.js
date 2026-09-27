@@ -65,6 +65,8 @@ import {
   consumeDownload,
   assertPathInsideStorage,
   fulfillApprovedPayment,
+  reverseOrderPayment,
+  REVERSED_PAYMENT_STATUSES,
 } from './services/orders.js'
 import {
   sendOrderReceiptOnce,
@@ -529,6 +531,7 @@ export async function createApp(config) {
         userId: db.uid(req.user),
         clientUrl: config.clientUrl,
         apiPublicUrl: config.apiPublicUrl,
+        payer: { email: req.user.email, name: req.user.name },
       })
 
       order.mpPreferenceId = result.id
@@ -601,7 +604,7 @@ export async function createApp(config) {
           }
         } catch (err) {
           if (err instanceof HttpError && err.status < 500) {
-            console.error('MP subs webhook skipped', err.message, { id: dataId })
+            console.error(`MP subs webhook skipped id=${dataId}: ${err.message}`)
             return res.sendStatus(200)
           }
           throw err
@@ -635,14 +638,14 @@ export async function createApp(config) {
         const payment = await fetchPayment(payToken, dataId)
         if (isUpgradeReference(payment.external_reference)) {
           await applyUpgradePayment({ payment, config })
+        } else if (REVERSED_PAYMENT_STATUSES.has(payment.status)) {
+          await reverseOrderPayment({ payment, config })
         } else {
           await fulfillApprovedPayment({ payment, config })
         }
       } catch (err) {
         if (err instanceof HttpError && err.status < 500) {
-          console.error('MP webhook fulfill skipped', err.message, {
-            paymentId: dataId,
-          })
+          console.error(`MP webhook skipped payment=${dataId}: ${err.message}`)
           return res.sendStatus(200)
         }
         throw err
@@ -661,6 +664,12 @@ export async function createApp(config) {
       const order = await db.findOrderById(req.params.id)
       if (!order || String(order.userId) !== String(db.uid(req.user))) {
         throw new HttpError(404, 'Orden no encontrada')
+      }
+      if (order.status === 'refunded') {
+        throw new HttpError(
+          403,
+          'Esta compra fue reembolsada: la descarga ya no está disponible.',
+        )
       }
       if (order.status !== 'paid') {
         throw new HttpError(403, 'La orden todavía no está paga')

@@ -187,6 +187,8 @@
     "addedToCart": "Added to cart",
     "alreadyInCart": "Already in cart",
     "updatedInCart": "Composition updated",
+    "inBundleCart": "Already included in the bundle in your cart",
+    "bundleAbsorbed": "Added · replaces {{count}} model(s) the bundle already includes",
     "cartItemTitle": "{{name}} — template",
     "buy": "Buy →"
   },
@@ -957,6 +959,8 @@
     "preparing": "Preparing…",
     "waiting": "Confirming payment…",
     "pendingHint": "If you just paid, this can take a few seconds. Refresh if it stays like this.",
+    "refunded": "Refunded",
+    "refundedHint": "The payment was returned, so the download is no longer available.",
     "linkExpired": "That download link expired: for security it only lasts a few minutes. Just hit Download again.",
     "prevPage": "← Previous",
     "nextPage": "Next →",

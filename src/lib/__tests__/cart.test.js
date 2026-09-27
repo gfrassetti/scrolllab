@@ -11,6 +11,7 @@ const {
   cartLinePriceUsd,
   markCheckoutIntent,
   takeCheckoutIntent,
+  withoutBundleOverlap,
 } = await import('../cart.js')
 const { estimateCustomPriceUsd, arsFromUsd } = await import('../pricing.js')
 
@@ -32,6 +33,35 @@ describe('useCart', () => {
     assert.equal(again, false)
     assert.equal(useCart.getState().items.length, 1)
     assert.equal(useCartNotice.getState().notice?.already, true)
+  })
+
+  it('un modelo que el bundle ya trae no se agrega aparte', () => {
+    useCart.getState().addItem({ sku: 'bundle', title: 'BUNDLE' })
+    const ok = useCart.getState().addItem({ sku: 'fizz', title: 'FIZZ' })
+    assert.equal(ok, false)
+    assert.deepEqual(useCart.getState().items.map((i) => i.sku), ['bundle'])
+    assert.equal(useCartNotice.getState().notice?.inBundle, true)
+  })
+
+  it('el bundle reemplaza los modelos sueltos que ya trae', () => {
+    useCart.getState().addItem({ sku: 'chapters', title: 'CHAPTERS' })
+    useCart.getState().addItem({ sku: 'fizz', title: 'FIZZ' })
+    useCart.getState().addItem({
+      sku: 'custom:x',
+      title: 'Mía',
+      recipe: [{ id: 'chapters/HeroKinetic' }],
+    })
+    useCart.getState().addItem({ sku: 'bundle', title: 'BUNDLE' })
+    assert.deepEqual(
+      useCart.getState().items.map((i) => i.sku),
+      ['custom', 'bundle'],
+    )
+    assert.equal(useCartNotice.getState().notice?.absorbed, 2)
+    // Un carrito viejo guardado con los dos se limpia igual.
+    assert.deepEqual(
+      withoutBundleOverlap([{ sku: 'bundle' }, { sku: 'comic' }]).map((i) => i.sku),
+      ['bundle'],
+    )
   })
 
   it('normaliza custom:* a sku custom y reemplaza la composición previa', () => {

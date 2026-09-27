@@ -7,8 +7,10 @@
  * `start_date` (prueba gratis y re-suscripción sin doble cobro), que una alta
  * autorizada con tarjeta no cobra antes de tiempo, que el cambio de plan
  * modifica esa misma suscripción (no abre otra), que la baja funciona y que
- * MP acepta la preference de la diferencia al subir de plan tal como la arma
- * la app. Todo lo que crea lo cancela al final.
+ * MP acepta las preferences de pago único tal como las arma la app (la de la
+ * diferencia al subir de plan y la de compra de templates, con los datos del
+ * comprador y el vencimiento del efectivo). Todo lo que crea lo cancela al
+ * final.
  *
  * Requiere credenciales de PRUEBA (nunca las de producción: el script aborta
  * si el token no es de un usuario de test) y salida a api.mercadopago.com:
@@ -26,6 +28,7 @@ import {
   fetchPreapproval,
   updatePreapprovalAmount,
   createUpgradePreference,
+  createCheckoutPreference,
 } from '../server/services/mercadoPago.js'
 import {
   cancelPreapprovalConfirmed,
@@ -243,6 +246,38 @@ async function main() {
       excluded.includes('atm') &&
       /\/api\/webhooks\/mercadopago\?source=lab$/.test(stored.json.notification_url || ''),
     `ref ${stored.json.external_reference === reference} · vence ${stored.json.expiration_date_to} · excluidos ${excluded.join(',')}`,
+  )
+
+  // 7. Compra de templates (Checkout Pro): dos ítems, con lo que pide el
+  //    checklist de MP (comprador, descripción, categoría) y el vencimiento
+  //    del ticket de efectivo antes de que venza la orden pendiente.
+  const orderRef = 'd'.repeat(24)
+  const order = await createCheckoutPreference({
+    accessToken: token,
+    items: [
+      { sku: 'chapters', title: 'CHAPTERS — template [check sandbox]', description: 'Template scrollytelling (código fuente).', unit_price: 233000, currency_id: 'ARS' },
+      { sku: 'nocturne', title: 'NOCTURNE — template [check sandbox]', description: 'Template scrollytelling (código fuente).', unit_price: 233000, currency_id: 'ARS' },
+    ],
+    orderId: orderRef,
+    userId: 'check-sandbox',
+    clientUrl: 'https://www.scrolllab.com.ar',
+    apiPublicUrl: 'https://api.scrolllab.com.ar',
+    payer: { email: payerEmail, name: 'Comprador Test Sandbox' },
+  })
+  check('compra: MP acepta la preference de dos templates', !!order.id && !!order.init_point)
+  const saved = (await mp('GET', `/checkout/preferences/${order.id}`)).json
+  const ticketDays = (Date.parse(saved.date_of_expiration) - Date.now()) / DAY
+  check(
+    'compra: guarda comprador, categoría, descripción y vencimiento del efectivo (3 días)',
+    saved.external_reference === orderRef &&
+      saved.items?.length === 2 &&
+      saved.items.every((i) => i.category_id === 'virtual_goods' && i.description) &&
+      saved.payer?.email === payerEmail &&
+      saved.payer?.name === 'Comprador' &&
+      saved.payer?.surname === 'Test Sandbox' &&
+      ticketDays > 2.9 &&
+      ticketDays < 3.1,
+    `payer ${saved.payer?.email}/${saved.payer?.name}/${saved.payer?.surname} · categorías ${saved.items?.map((i) => i.category_id).join(',')} · ticket ${ticketDays.toFixed(2)} días`,
   )
 }
 

@@ -31,6 +31,27 @@ function picturePathForSku(sku) {
   return PRODUCTS[key]?.picture || MP_DEFAULT_ITEM_PICTURE
 }
 
+/**
+ * Tickets de efectivo (Rapipago, Pago Fácil): vencen antes que la orden
+ * pendiente (7 días, `orderRetention.js`). Un ticket pagado después
+ * encontraría la orden borrada: cobro sin entrega.
+ */
+export const CASH_TICKET_DAYS = 3
+
+/** Categoría de MP para descargas digitales (lista oficial: GET /item_categories). */
+export const MP_ITEM_CATEGORY = 'virtual_goods'
+
+/** Comprador para MP (lo pide su checklist de calidad: pesa en el antifraude). */
+function preferencePayer(payer) {
+  if (!payer?.email) return null
+  const [name, ...rest] = String(payer.name || '').trim().split(/\s+/).filter(Boolean)
+  return {
+    email: payer.email,
+    ...(name ? { name } : {}),
+    ...(rest.length ? { surname: rest.join(' ') } : {}),
+  }
+}
+
 /** Body de la preference — puro, testeable sin pegarle a MP. */
 export function buildPreferenceBody({
   items,
@@ -38,11 +59,16 @@ export function buildPreferenceBody({
   userId,
   clientUrl,
   apiPublicUrl,
+  payer = null,
+  now = Date.now(),
 }) {
+  const buyer = preferencePayer(payer)
   return {
     items: items.map((i) => ({
       id: i.sku,
       title: i.title,
+      description: String(i.description || i.title).slice(0, 250),
+      category_id: MP_ITEM_CATEGORY,
       quantity: 1,
       unit_price: i.unit_price,
       currency_id: i.currency_id,
@@ -51,6 +77,8 @@ export function buildPreferenceBody({
         i.picture || picturePathForSku(i.sku),
       ),
     })),
+    ...(buyer ? { payer: buyer } : {}),
+    date_of_expiration: new Date(now + CASH_TICKET_DAYS * 86_400_000).toISOString(),
     external_reference: orderId,
     metadata: { orderId, userId },
     back_urls: {
@@ -71,6 +99,7 @@ export async function createCheckoutPreference({
   userId,
   clientUrl,
   apiPublicUrl,
+  payer,
 }) {
   const client = createMpClient(accessToken)
   const preference = new Preference(client)
@@ -81,6 +110,7 @@ export async function createCheckoutPreference({
       userId,
       clientUrl,
       apiPublicUrl,
+      payer,
     }),
   })
 }

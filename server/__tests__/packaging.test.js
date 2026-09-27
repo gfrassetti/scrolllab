@@ -11,6 +11,7 @@ import {
   packBundleTemplate,
   packCustomTemplate,
   packFixedTemplate,
+  packOrderTemplate,
 } from '../packaging.js'
 import { purchaseCode } from '../license.js'
 import { brokenImports, readZip } from './helpers/zip.js'
@@ -183,6 +184,73 @@ describe('ZIP de cada template', () => {
       packFixedTemplate({ model: 'monolith', destPath, licenseMeta: LICENSE }),
     )
     assert.ok(files.has('src/components/sections/contact/ContactForm.jsx'))
+  })
+})
+
+describe('ZIP de una orden', () => {
+  // El carrito deja comprar varias cosas juntas. Antes el ZIP traía solo la
+  // primera: quien compraba dos templates pagaba los dos y recibía uno.
+  it('con varios ítems trae todos: una carpeta por proyecto y una licencia que los cubre', async () => {
+    const recipe = ['chapters/HeroKinetic', 'atelier/FooterAtelier']
+    const files = await pack('order-multi', (destPath) =>
+      packOrderTemplate({
+        items: [{ sku: 'chapters' }, { sku: 'nocturne' }, { sku: 'custom:x', recipe }],
+        destPath,
+        licenseMeta: LICENSE,
+        bundleModels: BUNDLE_MODELS,
+      }),
+    )
+
+    for (const prefix of ['chapters/', 'nocturne/', 'custom/']) {
+      assertRunnableProject(files, prefix)
+      assertDepsCoverImports(files, prefix)
+      assert.match(
+        files.get(`${prefix}src/App.jsx`).toString('utf8'),
+        /SCROLLLAB-LICENSE test-order/,
+        `${prefix}src/App.jsx sin marca de licencia`,
+      )
+    }
+    assert.deepEqual(brokenImports(files), [])
+    assert.match(files.get('custom/src/App.jsx').toString('utf8'), /HeroKinetic_chapters/)
+
+    const license = files.get('LICENSE.txt').toString('utf8')
+    for (const sku of ['chapters', 'nocturne', 'custom:chapters/HeroKinetic']) {
+      assert.ok(license.includes(sku), `la licencia no cubre ${sku}`)
+    }
+    const readme = files.get('README.md').toString('utf8')
+    for (const folder of ['chapters/', 'nocturne/', 'custom/']) {
+      assert.ok(readme.includes(`\`${folder}\``), `el README no lista ${folder}`)
+    }
+    const atRoot = [...files.keys()].filter((name) => !name.includes('/'))
+    assert.deepEqual(atRoot.sort(), ['LICENSE.txt', 'README.md'])
+  })
+
+  it('con un solo ítem es el ZIP de siempre: el proyecto en la raíz', async () => {
+    const files = await pack('order-single', (destPath) =>
+      packOrderTemplate({
+        items: [{ sku: 'chapters' }],
+        destPath,
+        licenseMeta: LICENSE,
+        bundleModels: BUNDLE_MODELS,
+      }),
+    )
+    assertRunnableProject(files)
+    assert.ok(!files.has('chapters/package.json'))
+    assert.match(files.get('LICENSE.txt').toString('utf8'), /chapters/)
+  })
+
+  it('bundle + composición: cada modelo del bundle y la composición en su carpeta', async () => {
+    const files = await pack('order-bundle-custom', (destPath) =>
+      packOrderTemplate({
+        items: [{ sku: 'bundle' }, { sku: 'custom:y', recipe: ['nocturne/SplitReveals'] }],
+        destPath,
+        licenseMeta: LICENSE,
+        bundleModels: BUNDLE_MODELS,
+      }),
+    )
+    for (const model of BUNDLE_MODELS) assertRunnableProject(files, `${model}/`)
+    assertRunnableProject(files, 'custom/')
+    assert.deepEqual(brokenImports(files), [])
   })
 })
 

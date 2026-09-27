@@ -34,7 +34,8 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "paid", "failed"],
+      // refunded: MP devolvió el pago o hubo contracargo; ya no se descarga.
+      enum: ["pending", "paid", "failed", "refunded"],
       default: "pending",
       index: true,
     },
@@ -49,6 +50,9 @@ const orderSchema = new mongoose.Schema(
     currency_id: { type: String, default: "ARS" },
     mpPreferenceId: String,
     mpPaymentId: { type: String, sparse: true, unique: true },
+    refundedAt: Date,
+    // Estado del pago en MP que la dio vuelta: refunded | charged_back.
+    refundReason: String,
     downloadCount: { type: Number, default: 0 },
     // Log de descargas (docs/ip-protection-brief.md §3.5): quién bajó qué y
     // cuándo. Acotado a las últimas 50 para no crecer sin techo.

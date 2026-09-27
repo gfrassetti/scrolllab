@@ -67,6 +67,17 @@ export const MAX_CUSTOM_SECTIONS = 30
 
 export const COMMERCE_PACK_SURCHARGE_USD = 39
 export const BUNDLE_PRICE_USD = 649
+/** Modelos que trae el bundle — espejo de `BUNDLE_MODELS` en server/catalog.js. */
+export const BUNDLE_MODELS = [
+  'chapters',
+  'nocturne',
+  'monolith',
+  'velocity',
+  'fizz',
+  'atelier',
+  'comic',
+  'unity',
+]
 
 /** Respaldo para el primer render, antes de que llegue la cotización real. */
 export const FALLBACK_USD_ARS = 1560

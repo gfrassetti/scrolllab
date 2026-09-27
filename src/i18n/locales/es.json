@@ -187,6 +187,8 @@
     "addedToCart": "Agregado al carrito",
     "alreadyInCart": "Ya está en el carrito",
     "updatedInCart": "Composición actualizada",
+    "inBundleCart": "Ya viene en el bundle de tu carrito",
+    "bundleAbsorbed": "Agregado · reemplaza {{count}} modelo(s) que el bundle ya trae",
     "cartItemTitle": "{{name}} — modelo",
     "buy": "Comprar →"
   },
@@ -957,6 +959,8 @@
     "preparing": "Preparando…",
     "waiting": "Confirmando pago…",
     "pendingHint": "Si acabás de pagar, puede tardar unos segundos. Refrescá la página si sigue así.",
+    "refunded": "Reembolsada",
+    "refundedHint": "Se devolvió el pago, así que la descarga ya no está disponible.",
     "linkExpired": "El link de descarga venció: por seguridad dura solo unos minutos. Tocá Descargar de nuevo y listo.",
     "prevPage": "← Anterior",
     "nextPage": "Siguiente →",

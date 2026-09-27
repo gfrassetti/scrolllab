@@ -186,7 +186,8 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
     it('la preference lleva los precios ya descontados y suman el total de la orden', async () => {
       const { code, agent } = await buyerWithCoupon('mp1@test.com')
       const { order, res } = await pendingOrder(agent, {
-        items: [{ sku: 'chapters' }, { sku: 'bundle' }],
+        // Meridian no viene en el bundle: un modelo que sí viene no puede ir al lado.
+        items: [{ sku: 'meridian' }, { sku: 'bundle' }],
         couponCode: code,
       })
 
@@ -197,11 +198,11 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       assert.deepEqual(
         body.items.map((i) => [i.id, i.unit_price, i.quantity, i.currency_id]),
         [
-          ['chapters', discountedArsFromUsd(149, RATE, 10), 1, 'ARS'],
+          ['meridian', discountedArsFromUsd(379, RATE, 10), 1, 'ARS'],
           ['bundle', discountedArsFromUsd(649, RATE, 10), 1, 'ARS'],
         ],
       )
-      assert.equal(body.items[0].unit_price, 210000)
+      assert.equal(body.items[0].unit_price, 533000)
       assert.equal(body.items[1].unit_price, 912000)
       // Lo que cobra MP (la suma de los ítems) es lo que la orden espera cobrar.
       assert.equal(body.items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0), order.total)
