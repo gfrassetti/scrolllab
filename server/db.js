@@ -6,7 +6,7 @@ import {
   Subscription as MongoSubscription,
   Lead as MongoLead,
 } from "./models.js";
-import { fileDb } from "./fileStore.js";
+import { fileDb, trialReminderDue } from "./fileStore.js";
 
 let mode =
   process.env.STORE === "file"
@@ -62,6 +62,26 @@ export function storeMode() {
 
 function uid(user) {
   return user?.id || user?._id?.toString();
+}
+
+// Prefijo de los campos de cada mail de suscripción (`<prefijo>SentAt`, etc.).
+const EMAIL_PREFIX = {
+  welcome: "welcomeEmail",
+  canceled: "canceledEmail",
+  trialReminder: "trialReminderEmail",
+};
+function emailPrefix(kind) {
+  const p = EMAIL_PREFIX[kind];
+  if (!p) throw new Error(`Mail de suscripción desconocido: ${kind}`);
+  return p;
+}
+// Gate de cada mail en el file store (en Mongo es el filtro del findOneAndUpdate).
+function subscriptionEmailGate(kind, sub, at, withinMs) {
+  if (kind === "canceled") return !!sub.canceledAt;
+  if (kind === "trialReminder") {
+    return trialReminderDue(sub, at.getTime(), withinMs);
+  }
+  return sub.status === "authorized";
 }
 
 export const db = {
@@ -397,19 +417,22 @@ export const db = {
     return res.deletedCount > 0;
   },
 
-  // Mails de suscripción (bienvenida al activarse / confirmación al cancelar).
-  // claim/complete/release igual que el recibo de orden — se manda una vez.
-  // `kind`: 'welcome' (gate: status authorized) | 'canceled' (gate: canceledAt).
-  async claimSubscriptionEmail(subId, kind) {
-    const p = `${kind === "canceled" ? "canceled" : "welcome"}Email`;
+  // Mails de suscripción: bienvenida al activarse, confirmación al cancelar y
+  // aviso antes del primer cobro de la prueba. claim/complete/release igual que
+  // el recibo de orden — se manda una vez.
+  // `kind` (y su gate): 'welcome' (status authorized) | 'canceled' (canceledAt) |
+  // 'trialReminder' (prueba sin cancelar que termina dentro de `withinMs`).
+  // `now` solo lo inyectan los tests para mover el reloj de la prueba.
+  async claimSubscriptionEmail(subId, kind, { withinMs, now: at } = {}) {
+    const p = emailPrefix(kind);
+    if (kind === "trialReminder" && !(withinMs > 0)) return null;
     const now = new Date();
+    const trialNow = at ? new Date(at) : now;
     const staleBefore = new Date(now.getTime() - 10 * 60 * 1000);
     if (mode === "file") {
       const sub = await fileDb.findSubscriptionById(subId);
       if (!sub || sub[`${p}SentAt`]) return null;
-      if (kind === "canceled" ? !sub.canceledAt : sub.status !== "authorized") {
-        return null;
-      }
+      if (!subscriptionEmailGate(kind, sub, trialNow, withinMs)) return null;
       if (sub[`${p}SendingAt`] && new Date(sub[`${p}SendingAt`]) >= staleBefore) {
         return null;
       }
@@ -418,10 +441,19 @@ export const db = {
       await sub.save();
       return sub;
     }
-    const gate =
-      kind === "canceled"
-        ? { canceledAt: { $ne: null } }
-        : { status: "authorized" };
+    const gate = {
+      welcome: { status: "authorized" },
+      canceled: { canceledAt: { $ne: null } },
+      trialReminder: {
+        status: "authorized",
+        canceledAt: null,
+        lastPaidAt: null,
+        trialEndsAt: {
+          $gt: trialNow,
+          $lte: new Date(trialNow.getTime() + withinMs),
+        },
+      },
+    }[kind];
     return MongoSubscription.findOneAndUpdate(
       {
         _id: subId,
@@ -437,7 +469,7 @@ export const db = {
     );
   },
   async completeSubscriptionEmail(subId, kind, emailId) {
-    const p = `${kind === "canceled" ? "canceled" : "welcome"}Email`;
+    const p = emailPrefix(kind);
     if (mode === "file") {
       const sub = await fileDb.findSubscriptionById(subId);
       if (!sub) return null;
@@ -458,7 +490,7 @@ export const db = {
     );
   },
   async releaseSubscriptionEmail(subId, kind, message) {
-    const p = `${kind === "canceled" ? "canceled" : "welcome"}Email`;
+    const p = emailPrefix(kind);
     const safe = String(message || "Error de email").slice(0, 500);
     if (mode === "file") {
       const sub = await fileDb.findSubscriptionById(subId);
@@ -473,6 +505,21 @@ export const db = {
       { $set: { [`${p}Error`]: safe }, $unset: { [`${p}SendingAt`]: 1 } },
       { new: true },
     );
+  },
+
+  // Pruebas de LAB que terminan dentro de `withinMs` y todavía no recibieron el
+  // aviso del primer cobro (server/services/trialReminders.js).
+  async listTrialReminderCandidates({ now = new Date(), withinMs }) {
+    if (mode === "file") {
+      return fileDb.listTrialReminderCandidates({ now, withinMs });
+    }
+    return MongoSubscription.find({
+      status: "authorized",
+      canceledAt: null,
+      lastPaidAt: null,
+      trialReminderEmailSentAt: null,
+      trialEndsAt: { $gt: now, $lte: new Date(now.getTime() + withinMs) },
+    });
   },
 
   async isReady() {

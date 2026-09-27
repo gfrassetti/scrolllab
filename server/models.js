@@ -141,7 +141,8 @@ const subscriptionSchema = new mongoose.Schema(
     mpPreapprovalId: { type: String, sparse: true },
     // Mails de suscripción (una vez cada uno). Mismo patrón claim/complete/
     // release que el recibo de orden. `welcome` al pasar a `authorized`,
-    // `canceled` al setear `canceledAt`.
+    // `canceled` al setear `canceledAt`, `trialReminder` unos días antes del
+    // primer cobro (server/services/trialReminders.js).
     welcomeEmailSendingAt: Date,
     welcomeEmailSentAt: Date,
     welcomeEmailId: String,
@@ -150,6 +151,10 @@ const subscriptionSchema = new mongoose.Schema(
     canceledEmailSentAt: Date,
     canceledEmailId: String,
     canceledEmailError: String,
+    trialReminderEmailSendingAt: Date,
+    trialReminderEmailSentAt: Date,
+    trialReminderEmailId: String,
+    trialReminderEmailError: String,
   },
   { timestamps: true },
 );

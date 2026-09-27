@@ -263,6 +263,13 @@ export function loadConfig() {
       const n = Number(process.env.HOSTED_TRIAL_DAYS);
       return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 7;
     })(),
+    // Mail de aviso N días antes del primer cobro, a quien está en la prueba
+    // (server/services/trialReminders.js). 0 = sin aviso. Si la prueba dura N
+    // días o menos no se manda: el mail de bienvenida ya trae la fecha.
+    hostedTrialReminderDays: (() => {
+      const n = Number(process.env.HOSTED_TRIAL_REMINDER_DAYS);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 2;
+    })(),
     // Suscripciones (LAB) — MercadoPago PreApproval con monto inline (sin plan
     // pre-creado). Es la misma app de MP que Checkout Pro: si no seteás las env
     // `MP_SUBS_*`, reusa las de Checkout Pro. `MP_SUBS_*` solo si querés una app

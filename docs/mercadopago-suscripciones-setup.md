@@ -26,7 +26,12 @@ otra app. No es el caso hoy.
 
 Opcional: `HOSTED_FREE_QUOTA` (default `1` = el plan gratis incluye 1 sección
 hosteada publicada; `0` = LAB 100% de pago). `HOSTED_TRIAL_DAYS` (default `7`)
-— días de prueba gratis en la primera alta.
+— días de prueba gratis en la primera alta. `HOSTED_TRIAL_REMINDER_DAYS`
+(default `2`) — cuántos días antes del primer cobro se le manda un mail a quien
+está en la prueba, con la fecha, el importe y cómo cancelar (`0` = sin aviso; hace
+falta `EMAIL_ENABLED=true`). El server lo revisa cada hora y manda uno solo por
+suscripción; si la prueba dura 2 días o menos no se manda, porque el mail de
+bienvenida ya trae la fecha.
 
 ---
 

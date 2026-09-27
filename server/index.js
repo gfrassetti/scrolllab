@@ -2,6 +2,7 @@ import './loadEnv.js'
 import { loadConfig, assertWritableDir, authDiagnostics } from './config.js'
 import { createApp } from './app.js'
 import { db, storeMode } from './db.js'
+import { startTrialReminders } from './services/trialReminders.js'
 
 const config = loadConfig()
 const auth = authDiagnostics(config)
@@ -30,8 +31,16 @@ async function boot() {
     process.exit(1)
   })
 
+  const stopTrialReminders = startTrialReminders({ config })
+  if (config.email.enabled && config.hostedTrialReminderDays > 0) {
+    console.log(
+      `Aviso de fin de prueba (LAB): ${config.hostedTrialReminderDays} días antes del primer cobro`,
+    )
+  }
+
   const shutdown = async (signal) => {
     console.log(`${signal} received — shutting down`)
+    stopTrialReminders()
     server.close(async () => {
       try {
         await db.disconnect()
