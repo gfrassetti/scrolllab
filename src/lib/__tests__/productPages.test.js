@@ -160,6 +160,11 @@ describe('productJsonLd', () => {
       assert.equal(ld.url, d.canonical)
       assert.ok(ld.image[0].startsWith('https://'), 'la imagen tiene que ser absoluta')
       assert.match(ld.offers.availability, /InStock$/)
+      assert.equal(
+        ld.offers.hasMerchantReturnPolicy.returnPolicyCategory,
+        'https://schema.org/MerchantReturnNotPermitted',
+      )
+      assert.equal(ld.offers.hasMerchantReturnPolicy.applicableCountry, 'AR')
     }
   })
 })

@@ -166,7 +166,23 @@ export function productSeoForPath(pathname, messages) {
   return { title, description, robots, canonical }
 }
 
-/** Datos estructurados schema.org/Product: precio de lista en USD, el mismo que muestra la página. */
+/**
+ * Datos estructurados schema.org/Product: precio de lista en USD, el mismo
+ * que muestra la página.
+ *
+ * `hasMerchantReturnPolicy`: refleja la política real (locale
+ * `legal.terms.refunds.body` — sin reembolso salvo que el archivo no se
+ * pueda entregar o tenga un defecto técnico sustancial). Esas excepciones se
+ * resuelven por soporte caso a caso, no son una devolución de retail — por
+ * eso `MerchantReturnNotPermitted`, la categoría más cercana.
+ *
+ * Google también sugiere `aggregateRating`/`review` (no hay reseñas: no se
+ * inventan — política de Google, además de ilegal en varias jurisdicciones)
+ * y `shippingDetails` (no aplica: no hay envío físico, es un ZIP; ese campo
+ * es para el rich result de "Merchant listing" de logística física, que acá
+ * no corresponde perseguir). Ninguno de los dos es un error, son "no
+ * críticos" — Search Console los ofrece igual aunque no apliquen.
+ */
 export function productJsonLd(data) {
   return {
     '@context': 'https://schema.org',
@@ -184,6 +200,11 @@ export function productJsonLd(data) {
       priceCurrency: 'USD',
       price: data.priceUsd.toFixed(2),
       availability: 'https://schema.org/InStock',
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        applicableCountry: 'AR',
+      },
     },
   }
 }
