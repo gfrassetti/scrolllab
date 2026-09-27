@@ -207,7 +207,7 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
 const serverListType = (type) => (type === 'textarea' ? 'text' : type)
 for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   for (const field of fields) {
-    const isAsset = field.type === 'image' || field.type === 'model'
+    const isAsset = ['image', 'model', 'url'].includes(field.type)
     if (isAsset && !ASSET_URL_KEYS.has(field.key)) {
       fail('props', `'${id}.${field.key}' es ${field.type} en el builder pero el server no lo valida como URL`)
     }

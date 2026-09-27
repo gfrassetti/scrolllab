@@ -22,15 +22,21 @@ export default function BigNumbers({ stats = defaultStats, bg, fg }) {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
       gsap.utils.toArray('[data-counter]').forEach((el) => {
-        const target = parseFloat(el.dataset.counter)
+        // Solo cuenta un entero (127). Cualquier otro valor (1.500, 4,8, 24/7)
+        // queda como se escribió: el conteo nunca termina en NaN ni recortado.
+        const raw = el.dataset.counter
+        if (!/^\d+$/.test(raw)) return
         const proxy = { value: 0 }
 
         gsap.to(proxy, {
-          value: target,
+          value: Number(raw),
           duration: 1.8,
           ease: 'power3.out',
           onUpdate: () => {
             el.textContent = String(Math.round(proxy.value))
+          },
+          onComplete: () => {
+            el.textContent = raw
           },
           scrollTrigger: {
             trigger: el,

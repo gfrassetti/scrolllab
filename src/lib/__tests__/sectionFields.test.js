@@ -97,9 +97,18 @@ describe('sanitizeProps — assets', () => {
     })
   })
 
-  it('acepta blob: para poder previsualizar una subida local', () => {
-    const clean = sanitizeProps(section, { [field.key]: 'blob:http://x/123' })
-    assert.deepEqual(clean, { [field.key]: 'blob:http://x/123' })
+  // Lo que el preview muestra es lo que viaja al ZIP: nada que el servidor
+  // descarte (subidas locales, data:, rutas con espacios).
+  it('no acepta blob:, data: ni rutas con espacios: no llegan al ZIP', () => {
+    for (const value of ['blob:http://x/123', 'data:image/png;base64,AAA', '/mi lata.svg']) {
+      assert.equal(sanitizeProps(section, { [field.key]: value }), undefined, value)
+    }
+  })
+
+  it('recorta espacios alrededor de una URL pegada', () => {
+    assert.deepEqual(sanitizeProps(section, { [field.key]: '  /lata.svg ' }), {
+      [field.key]: '/lata.svg',
+    })
   })
 
   it('descarta cualquier otra cosa', () => {

@@ -171,6 +171,23 @@ export const useCart = create(
         trackAddToCart(item)
         return true
       },
+      /**
+       * La composición del carrito sigue a la del builder: si después de
+       * «Agregar al carrito» se siguió editando, se paga (y se descarga) la
+       * versión actual, no la foto del momento en que se agregó. Sin
+       * composición en el carrito no agrega nada, y un builder vacío no borra
+       * la que ya estaba.
+       */
+      syncComposition: (recipe) => {
+        if (!Array.isArray(recipe) || recipe.length === 0) return
+        const items = get().items
+        const current = items.find((i) => isCustomSku(i.sku))
+        if (!current) return
+        if (JSON.stringify(current.recipe) === JSON.stringify(recipe)) return
+        set({
+          items: items.map((i) => (isCustomSku(i.sku) ? { ...i, recipe } : i)),
+        })
+      },
       removeItem: (sku) => {
         // Solo ese ítem (templates o la única composición `custom`).
         set({ items: get().items.filter((i) => i.sku !== sku) })

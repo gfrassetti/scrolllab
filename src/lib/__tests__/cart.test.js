@@ -123,6 +123,36 @@ describe('useCart', () => {
     assert.equal(checkoutPayload.sku, 'custom')
   })
 
+  // Agregar al carrito y seguir editando en el builder: antes se pagaba la foto
+  // del momento en que se agregó y el ZIP no traía lo editado después.
+  it('la composición del carrito sigue a la del builder', () => {
+    useCart.getState().addItem({ sku: 'chapters', title: 'CHAPTERS' })
+    useCart.getState().addItem({
+      sku: 'custom',
+      title: 'Mía',
+      recipe: [{ id: 'chapters/HeroKinetic', props: { lineOne: 'Antes' } }],
+    })
+    const edited = [
+      { id: 'chapters/HeroKinetic', props: { lineOne: 'Después' } },
+      { id: 'chapters/FooterCTA' },
+    ]
+    useCart.getState().syncComposition(edited)
+    const items = useCart.getState().items
+    assert.deepEqual(items.find((i) => i.sku === 'custom').recipe, edited)
+    assert.equal(items.find((i) => i.sku === 'custom').title, 'Mía')
+    assert.deepEqual(items.map((i) => i.sku), ['chapters', 'custom'])
+  })
+
+  it('sincronizar no agrega una composición que no estaba ni borra la que está', () => {
+    useCart.getState().syncComposition([{ id: 'chapters/HeroKinetic' }])
+    assert.deepEqual(useCart.getState().items, [])
+
+    const recipe = [{ id: 'chapters/HeroKinetic' }]
+    useCart.getState().addItem({ sku: 'custom', title: 'Mía', recipe })
+    useCart.getState().syncComposition([])
+    assert.deepEqual(useCart.getState().items[0].recipe, recipe)
+  })
+
   it('vacía todos los ítems de una', () => {
     useCart.getState().addItem({ sku: 'chapters', title: 'CHAPTERS' })
     useCart.getState().addItem({ sku: 'fizz', title: 'FIZZ' })

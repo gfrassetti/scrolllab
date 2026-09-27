@@ -136,6 +136,39 @@ quedan en el código.
   deja de ser fijo en mobile; el panel de edición abre abajo y deja ver la
   sección.
 
+### Lo editado es lo que se descarga
+
+Todo lo que el comprador edita en el builder llega al ZIP tal cual. Está
+cubierto para cada campo de cada sección, no para una muestra:
+
+- `builderRoundTrip.test.js` (en `npm test`):
+  - Por campo: para los 402 campos editables de las 81 secciones y cada tipo de
+    valor (válidos, bordes y basura; 4.278 combinaciones), lo que muestra el
+    preview es exactamente lo que manda el carrito y guarda el servidor.
+  - De punta a punta: una composición con las 81 secciones y todos sus campos
+    editados (listas llenas hasta el tope, textos de 2.000 caracteres con
+    comillas, llaves, saltos de línea y emoji) se empaqueta, se ejecuta su
+    `App.jsx` y cada sección recibe exactamente las props del preview.
+  - Se validó rompiendo el código a propósito: detecta las 7 fallas probadas.
+- `npm run check:builder`: cada texto, link e imagen editable (sueltos y dentro
+  de listas) aparece en pantalla.
+- A mano: 457 valores editados, en 3 ZIP compilados y abiertos en Chromium,
+  están todos. 452 se ven directamente o en su atributo (alt, aria-label,
+  mailto). Los otros 5 dependen de otra cosa: la lata de FIZZ se ve sin
+  modelo 3D, y los tooltips del masterplan al pasar el mouse.
+
+Lo que salió de ese QA y se corrigió:
+
+- El editor aceptaba valores que el servidor descartaba (rutas de imagen con
+  espacios, `data:`, un endpoint del formulario sin https): se veían en el
+  preview y no llegaban al ZIP. Ahora rige la misma regla en los dos lados.
+- El carrito guardaba una foto de la composición: lo editado después de
+  «Agregar al carrito» no se compraba. Ahora sigue a la del builder.
+- BigNumbers contaba con `parseFloat`: «1.500» terminaba en «2», «4,8» en «5»
+  y «24/7» en «NaN», en el preview y en el ZIP. Ahora cuenta los enteros y
+  deja el resto como se escribió.
+- Una fila de lista agregada y dejada en blanco ya no se dibuja ni se manda.
+
 ### Testeado
 
 - `npm test`: compra de una composición de punta a punta contra el MP simulado

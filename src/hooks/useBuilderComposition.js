@@ -14,6 +14,7 @@ import {
   reorderCompositionItem,
 } from '../lib/composition'
 import { estimateCustomPriceUsd, MAX_CUSTOM_SECTIONS } from '../lib/pricing'
+import { useCart } from '../lib/cart'
 
 /**
  * Estado + mutaciones del builder. La UI (BuilderPage) solo renderiza.
@@ -29,6 +30,9 @@ export function useBuilderComposition() {
 
   useEffect(() => {
     saveComposition(items)
+    // Si la composición ya está en el carrito, que no se quede con una foto
+    // vieja: se compra lo último que se editó.
+    useCart.getState().syncComposition(compositionToRecipe(items))
   }, [items])
 
   useEffect(() => {

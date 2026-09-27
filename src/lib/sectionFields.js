@@ -1,6 +1,7 @@
 /**
  * Campos editables por sección (builder preview + LAB).
- * Tipos: text · textarea · select · image · model · color · href · list.
+ * Tipos: text · textarea · select · image · model · url · color · href · list.
+ * `image` / `model` / `url` = una URL https:// o una ruta /archivo.
  * `list` = array de items; `item` describe sus sub-campos (text/textarea/
  * href/color). El schema server-side espeja esto en server/sectionFields.js
  * (ALLOWED_PROPS_BY_SECTION + LIST_PROPS_BY_SECTION).
@@ -928,7 +929,7 @@ export const SECTION_FIELDS = {
     {
       key: 'endpoint',
       label: 'Endpoint — https:// or /path (empty = demo)',
-      type: 'text',
+      type: 'url',
     },
   ],
   'commerce/ProductGrid': [
@@ -1036,14 +1037,43 @@ export function sanitizeHref(value) {
   return HREF_RE.test(s) ? s : undefined
 }
 
-// `image` en una lista = URL: https:// · /ruta · blob:/data: (preview). Misma
-// regla que el campo `image` suelto.
-export function sanitizeImageUrl(value) {
+// Imagen, modelo o endpoint: https:// o /ruta, sin espacios. La misma regla
+// que el servidor (ASSET_URL_RE en server/sectionFields.js): el preview no
+// puede mostrar una URL que después no viaja al ZIP. Por eso tampoco blob: ni
+// data:, que además no sobreviven a la sesión.
+const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
+
+export function sanitizeAssetUrl(value, max = 2000) {
   if (typeof value !== 'string') return undefined
-  const s = value.trim().slice(0, 500)
-  if (!s) return undefined
-  if (isEphemeralAssetUrl(s) || /^(https:\/\/|\/)\S/i.test(s)) return s
-  return undefined
+  const s = value.trim().slice(0, max)
+  return ASSET_URL_RE.test(s) ? s : undefined
+}
+
+// `image` dentro de una lista: misma regla, con el tope de los sub-campos.
+export function sanitizeImageUrl(value) {
+  return sanitizeAssetUrl(value, 500)
+}
+
+/**
+ * Sin las filas de lista que quedaron vacías. El editor las conserva para que
+ * «Agregar» muestre una fila en blanco, pero no son contenido: ni el preview
+ * las dibuja ni la receta las manda, igual que el servidor que las descarta.
+ */
+export function withoutEmptyRows(props) {
+  if (!props || typeof props !== 'object') return props
+  let changed = false
+  const out = {}
+  for (const [key, value] of Object.entries(props)) {
+    if (!Array.isArray(value)) {
+      out[key] = value
+      continue
+    }
+    const rows = value.filter((row) => row && Object.keys(row).length)
+    if (rows.length !== value.length) changed = true
+    if (rows.length) out[key] = rows
+  }
+  if (!changed) return props
+  return Object.keys(out).length ? out : undefined
 }
 
 // Item de un campo `list`: objeto con sub-campos text/textarea/href/color/image.
@@ -1118,12 +1148,9 @@ export function sanitizeProps(sectionId, props) {
       const ok = (field.options || []).some((o) => o.value === trimmed)
       if (!ok) continue
     }
-    // Preview: allow blob:/data:. Checkout strips them via compositionToRecipe.
-    if (
-      (field.type === 'model' || field.type === 'image') &&
-      !isEphemeralAssetUrl(trimmed) &&
-      !/^(https:\/\/|\/)\S/i.test(trimmed)
-    ) {
+    if (field.type === 'model' || field.type === 'image' || field.type === 'url') {
+      const url = sanitizeAssetUrl(trimmed)
+      if (url) cleaned[key] = url
       continue
     }
     cleaned[key] = trimmed

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { getSection } from '../lib/sectionRegistry'
 import { resolveSectionTheme } from '../lib/sectionTheme'
+import { withoutEmptyRows } from '../lib/sectionFields'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
 /**
@@ -42,9 +43,12 @@ export default function CompositionCanvas({
         const section = getSection(item.sectionId)
         if (!section) return null
         const Component = section.component
+        // Lo mismo que manda la receta: una fila de lista recién agregada y
+        // todavía vacía no se dibuja (tampoco viaja al ZIP).
+        const props = withoutEmptyRows(item.props)
         const theme = resolveSectionTheme(
           item.sectionId,
-          item.props,
+          props,
           modelIds,
           index,
         )
@@ -59,7 +63,7 @@ export default function CompositionCanvas({
             {renderChrome?.(item, section)}
             <Component
               key={signature}
-              {...(item.props || {})}
+              {...(props || {})}
               {...(theme ? { theme } : {})}
             />
           </div>

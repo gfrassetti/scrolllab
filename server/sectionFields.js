@@ -447,6 +447,8 @@ export const ASSET_URL_KEYS = new Set([
   'nextImg',
   'logoSrc',
   'orbSrc',
+  // El form de contacto hace POST acá: una URL https o una ruta del sitio.
+  'endpoint',
 ])
 
 /**
@@ -613,7 +615,6 @@ export function sanitizeSectionProps(sectionId, props) {
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
-    if (key === 'endpoint' && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed
   }
   return Object.keys(cleaned).length ? cleaned : undefined
