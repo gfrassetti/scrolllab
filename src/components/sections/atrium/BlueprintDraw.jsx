@@ -6,7 +6,6 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  * No unique building mesh: rooms, a courtyard void, and a north mark.
  */
 export default function BlueprintDraw({
-  index = '01',
   title = 'Plan before mass',
   body = 'Lines first. A courtyard holds the centre; rooms gather around light. Swap this drawing for your own plan. The motion stays.',
   caption = 'Courtyard house, 1:200',

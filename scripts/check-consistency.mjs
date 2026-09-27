@@ -22,6 +22,7 @@ import { ALLOWED_SECTIONS } from '../server/sections.js'
 import {
   ALLOWED_PROPS_BY_SECTION,
   LIST_PROPS_BY_SECTION,
+  ASSET_URL_KEYS,
 } from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
@@ -196,6 +197,29 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
     if (field.type !== 'list') continue
     if (!LIST_PROPS_BY_SECTION[id]?.[field.key]) {
       fail('props', `'${id}.${field.key}' es list en el builder pero el server no tiene su schema`)
+    }
+  }
+}
+
+// 3a3. Tipos que el server valida: una imagen o un modelo que el server no
+// valida como URL viaja al ZIP con cualquier cosa (un `blob:` del preview, un
+// texto suelto); un sub-campo de lista con otro tipo en cada lado se descarta.
+const serverListType = (type) => (type === 'textarea' ? 'text' : type)
+for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
+  for (const field of fields) {
+    const isAsset = ['image', 'url'].includes(field.type)
+    if (isAsset && !ASSET_URL_KEYS.has(field.key)) {
+      fail('props', `'${id}.${field.key}' es ${field.type} en el builder pero el server no lo valida como URL`)
+    }
+    if (!isAsset && ASSET_URL_KEYS.has(field.key) && field.type !== 'list') {
+      fail('props', `'${id}.${field.key}' el server lo valida como URL pero en el builder es '${field.type}'`)
+    }
+    if (field.type !== 'list') continue
+    const spec = LIST_PROPS_BY_SECTION[id]?.[field.key]?.item || {}
+    for (const sub of field.item || []) {
+      if (spec[sub.key] && spec[sub.key] !== serverListType(sub.type)) {
+        fail('props', `'${id}.${field.key}[].${sub.key}' es '${sub.type}' en el builder y '${spec[sub.key]}' en el server`)
+      }
     }
   }
 }

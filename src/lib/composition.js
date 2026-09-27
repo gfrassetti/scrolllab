@@ -1,4 +1,4 @@
-import { sanitizeProps, isEphemeralAssetUrl } from './sectionFields.js'
+import { sanitizeProps, isEphemeralAssetUrl, withoutEmptyRows } from './sectionFields.js'
 import { sectionKindOf, isKnownSection } from './sectionKinds.js'
 
 export const STORAGE_KEY = 'builder-composition-v1'
@@ -29,8 +29,8 @@ export function isUniqueKind(kind) {
 }
 
 /**
- * Normalize a composition item and drop unknown sections / bad props.
- * Preview-only blob: URLs are kept here so the builder can show local assets.
+ * Normalize a composition item and drop unknown sections / bad props (las
+ * mismas reglas que el servidor: lo que queda acá es lo que viaja al ZIP).
  */
 export function normalizeCompositionItem(raw) {
   if (!raw || typeof raw !== 'object') return null
@@ -122,10 +122,14 @@ export function readCompositionCount() {
   return countCacheValue
 }
 
-/** Recipe payload for checkout: [{ id, props? }, ...] — never ships blob:/data:. */
+/**
+ * Receta para el checkout: [{ id, props? }, ...]. Es lo que se va a empaquetar,
+ * así que lleva lo mismo que dibuja el preview: sin filas de lista vacías (ver
+ * withoutEmptyRows) y nunca blob:/data:.
+ */
 export function compositionToRecipe(items) {
   return (items || []).map((item) => {
-    const props = sanitizeProps(item.sectionId, item.props)
+    const props = withoutEmptyRows(sanitizeProps(item.sectionId, item.props))
     if (!props) return { id: item.sectionId }
     const exported = {}
     for (const [key, value] of Object.entries(props)) {

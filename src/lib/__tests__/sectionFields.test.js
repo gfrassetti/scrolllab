@@ -97,9 +97,18 @@ describe('sanitizeProps — assets', () => {
     })
   })
 
-  it('acepta blob: para poder previsualizar una subida local', () => {
-    const clean = sanitizeProps(section, { [field.key]: 'blob:http://x/123' })
-    assert.deepEqual(clean, { [field.key]: 'blob:http://x/123' })
+  // Lo que el preview muestra es lo que viaja al ZIP: nada que el servidor
+  // descarte (subidas locales, data:, rutas con espacios).
+  it('no acepta blob:, data: ni rutas con espacios: no llegan al ZIP', () => {
+    for (const value of ['blob:http://x/123', 'data:image/png;base64,AAA', '/mi lata.svg']) {
+      assert.equal(sanitizeProps(section, { [field.key]: value }), undefined, value)
+    }
+  })
+
+  it('recorta espacios alrededor de una URL pegada', () => {
+    assert.deepEqual(sanitizeProps(section, { [field.key]: '  /lata.svg ' }), {
+      [field.key]: '/lata.svg',
+    })
   })
 
   it('descarta cualquier otra cosa', () => {
@@ -305,6 +314,23 @@ describe('isEphemeralAssetUrl', () => {
   })
 })
 
+describe('precio de un producto (sub-campo price)', () => {
+  const section = 'commerce/ProductGrid'
+  const row = (price) => sanitizeProps(section, { products: [{ name: 'Mate', price }] })?.products?.[0]
+
+  it('guarda enteros y hasta dos decimales, con punto o coma', () => {
+    for (const price of ['15000', '12.5', '12,50', ' 900 ']) {
+      assert.equal(row(price).price, price.trim(), price)
+    }
+  })
+
+  it('descarta lo que no es un precio (el resto de la fila queda)', () => {
+    for (const price of ['15.000', '1e3', '-5', 'abc', '12.555']) {
+      assert.deepEqual(row(price), { name: 'Mate' }, price)
+    }
+  })
+})
+
 describe('getSectionFields', () => {
   it('devuelve lista vacía para una sección desconocida', () => {
     assert.deepEqual(getSectionFields('inventada/NoExiste'), [])
@@ -324,7 +350,7 @@ describe('getSectionFields', () => {
           for (const sf of field.item) {
             assert.ok(sf.key && sf.label && sf.type, `${id}.${field.key}[]: sub-campo incompleto`)
             assert.ok(
-              ['text', 'textarea', 'href', 'color', 'image'].includes(sf.type),
+              ['text', 'textarea', 'href', 'color', 'image', 'price'].includes(sf.type),
               `${id}.${field.key}[].${sf.key}: tipo '${sf.type}' no permitido en list`,
             )
           }

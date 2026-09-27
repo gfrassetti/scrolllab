@@ -1,5 +1,8 @@
 /**
- * Verifica que el editor del builder realmente cambie lo que se ve.
+ * Verifica que el editor del builder realmente cambie lo que se ve: cada
+ * texto, link e imagen editable (sueltos y dentro de listas) aparece en el
+ * preview. Junto con server/__tests__/builderRoundTrip.test.js (el ZIP recibe
+ * exactamente las props del preview) cubre que lo editado se descarga.
  *
  * Nace de un bug concreto: varias secciones animan el texto con SplitText, que
  * reemplaza el contenido del nodo por divs de caracteres. A partir de ahí React
@@ -19,6 +22,7 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
+import { BUILDER_HIDDEN_SKUS } from '../src/lib/pricing.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const STORAGE_KEY = 'builder-composition-v1'
@@ -38,7 +42,6 @@ function freePort() {
 /** Props que no se ven como texto: URLs de assets y endpoints. */
 const NON_VISIBLE_KEYS = new Set([
   'endpoint',
-  'modelUrl',
   'can1Image',
   'can2Image',
   'can3Image',
@@ -51,10 +54,13 @@ const NON_VISIBLE_KEYS = new Set([
  * motivo — para que la lista no se convierta en un lugar donde esconder bugs.
  */
 const NOT_IN_DOM = {
-  'fizz/HeroBubbles.canLabel': 'se dibuja en la textura WebGL de la lata',
+  'fizz/CanCarousel.canLabel': 'solo en latas sin foto; las de ejemplo traen PNG',
+  'unity/FooterTrophy.accentWord': 'resalta esa palabra dentro del título; sola no se ve',
   'contact/ContactForm.sendingLabel': 'solo visible mientras se envía',
   'contact/ContactForm.successMessage': 'solo visible tras enviar',
   'contact/ContactForm.errorMessage': 'solo visible si falla el envío',
+  'meridian/Masterplan.units.line1': 'tooltip: aparece al pasar el mouse por el punto',
+  'meridian/Masterplan.units.line2': 'tooltip: aparece al pasar el mouse por el punto',
 }
 
 const ROUTES = ['/', '/builder', '/cart', '/login']
@@ -104,29 +110,61 @@ function startVite(port) {
   })
 }
 
-/** Campos de texto libre: los únicos que deberían aparecer tal cual en pantalla. */
-function editableTextFields(sectionId) {
-  return (SECTION_FIELDS[sectionId] || []).filter(
-    (field) =>
-      ['text', 'textarea'].includes(field.type) && !NON_VISIBLE_KEYS.has(field.key),
-  )
-}
-
 /** Un token sin espacios sobrevive al split por caracteres y por palabras. */
 function marker(index) {
   return `ZQMARK${index}`
 }
 
+/** Qué se busca en pantalla según el tipo: el texto, o la URL en un atributo. */
+function checkKind(field) {
+  if (['text', 'textarea'].includes(field.type) && !NON_VISIBLE_KEYS.has(field.key)) return 'text'
+  if (field.type === 'href' || field.type === 'image') return 'url'
+  return null
+}
+
+/**
+ * Lo que el comprador puede editar y tiene que verse: textos, links e
+ * imágenes, sueltos y dentro de listas (dos filas por lista). Devuelve las
+ * props a cargar y qué buscar de cada una. Los `checkout*` del ProductGrid se
+ * ven en la ruta /checkout, no en la grilla.
+ */
+function editsFor(sectionId) {
+  const props = {}
+  const expect = []
+  let n = 0
+  const valueFor = (kind) => (kind === 'text' ? marker(n++) : `https://zq.example/${marker(n++)}`)
+  for (const field of SECTION_FIELDS[sectionId] || []) {
+    if (sectionId === 'commerce/ProductGrid' && field.key.startsWith('checkout')) continue
+    const id = `${sectionId}.${field.key}`
+    if (field.type === 'list') {
+      const rows = [0, 1].map((row) => {
+        const item = {}
+        for (const sub of field.item || []) {
+          const kind = checkKind(sub)
+          if (!kind) continue
+          item[sub.key] = valueFor(kind)
+          if (!(`${id}.${sub.key}` in NOT_IN_DOM)) {
+            expect.push({ id: `${id}[${row}].${sub.key}`, value: item[sub.key] })
+          }
+        }
+        return item
+      })
+      if (rows.some((row) => Object.keys(row).length)) props[field.key] = rows
+      continue
+    }
+    const kind = checkKind(field)
+    if (!kind) continue
+    props[field.key] = valueFor(kind)
+    if (!(id in NOT_IN_DOM)) expect.push({ id, value: props[field.key] })
+  }
+  return { props, expect }
+}
+
 const squash = (text) => text.replace(/\s+/g, '')
 
 async function checkSectionRendersProps(page, sectionId) {
-  const fields = editableTextFields(sectionId)
-  if (!fields.length) return []
-
-  const props = {}
-  fields.forEach((field, i) => {
-    props[field.key] = marker(i)
-  })
+  const { props, expect } = editsFor(sectionId)
+  if (!expect.length) return []
 
   await page.addInitScript(
     ([key, value]) => window.localStorage.setItem(key, value),
@@ -136,10 +174,10 @@ async function checkSectionRendersProps(page, sectionId) {
   await page.waitForTimeout(1200)
 
   // Algunas props viajan en atributos (un mail en `mailto:`, un alt, un
-  // placeholder) en vez de ser texto visible.
+  // placeholder, una imagen en src o en un background) en vez de ser texto.
   const haystack = squash(
     await page.evaluate(() => {
-      const attrs = ['href', 'aria-label', 'alt', 'title', 'placeholder', 'value']
+      const attrs = ['href', 'src', 'aria-label', 'alt', 'title', 'placeholder', 'value', 'id', 'style']
       const values = [...document.querySelectorAll('*')].flatMap((el) =>
         attrs.map((name) => el.getAttribute(name)).filter(Boolean),
       )
@@ -147,13 +185,7 @@ async function checkSectionRendersProps(page, sectionId) {
     }),
   )
 
-  return fields
-    .map((field, i) => {
-      const id = `${sectionId}.${field.key}`
-      if (id in NOT_IN_DOM) return null
-      return haystack.includes(marker(i)) ? null : id
-    })
-    .filter(Boolean)
+  return expect.filter(({ value }) => !haystack.includes(value)).map(({ id }) => id)
 }
 
 /** El caso reportado: editar en vivo desde el panel del preview. */
@@ -174,7 +206,8 @@ async function checkLiveEditing(page) {
   const heading = page.locator('h1[data-atelier-hero]')
   const before = (await heading.innerText()).trim()
 
-  await page.locator('button', { hasText: /editar/i }).first().click()
+  // «Editar hero» / «Edit hero»: el navegador del check puede estar en inglés.
+  await page.locator('button', { hasText: /edit/i }).first().click()
   await page.waitForTimeout(300)
   await page.locator('aside input[type="text"]').first().fill('ZQLIVE')
   await page.waitForTimeout(1500)
@@ -242,19 +275,36 @@ async function checkConsole(page, route) {
 const port = await freePort()
 const BASE = `http://127.0.0.1:${port}`
 const vite = await startVite(port)
-const browser = await chromium.launch()
 const problems = []
+// Adentro del try: si Chromium no abre, igual se cierra vite (quedaba zombi).
+let browser
 
 try {
+  browser = await chromium.launch()
+  // Lo que ofrece la paleta pública: los modelos en obra (RATIO…) no.
   const sectionIds = Object.keys(SECTION_FIELDS).filter(
-    (id) => editableTextFields(id).length > 0,
+    (id) =>
+      editsFor(id).expect.length > 0 &&
+      !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0]),
   )
+  const total = sectionIds.reduce((sum, id) => sum + editsFor(id).expect.length, 0)
 
-  console.log(`Revisando ${sectionIds.length} secciones con texto editable…`)
-  for (const sectionId of sectionIds) {
+  console.log(`Revisando ${total} valores editados en ${sectionIds.length} secciones…`)
+  const checkOnce = async (sectionId) => {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } })
     const missing = await checkSectionRendersProps(page, sectionId)
     await page.close()
+    return missing
+  }
+  for (const sectionId of sectionIds) {
+    let missing = await checkOnce(sectionId)
+    // Faltan todos a la vez: la página no llegó a pintar (Vite recarga cuando
+    // descubre una dependencia nueva a mitad de la corrida). Un reintento lo
+    // distingue de un bug, que falla igual la segunda vez.
+    const expected = editsFor(sectionId).expect.length
+    if (expected > 1 && missing.length === expected) {
+      missing = await checkOnce(sectionId)
+    }
     if (missing.length) {
       console.log(`  ✖ ${sectionId} — no renderiza: ${missing.join(', ')}`)
       problems.push(...missing.map((m) => `${m} no aparece en pantalla`))
@@ -279,7 +329,7 @@ try {
     await page.close()
   }
 } finally {
-  await browser.close()
+  await browser?.close()
   vite.kill()
 }
 

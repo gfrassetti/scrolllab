@@ -103,20 +103,22 @@ import FooterSignal from '../components/sections/signal/FooterSignal'
 import ContactForm from '../components/sections/contact/ContactForm'
 import ProductGrid from '../components/sections/commerce/ProductGrid'
 import { isBuilderHiddenSku } from './pricing.js'
+import { MODEL_WRAPPER_CLASS } from './modelWrappers.js'
 
 /**
  * Central catalog of every section across all template models.
  * Builder preview can pass text props; defaults live on each component.
  *
  * `wrapperClass` gives every section instance its model's canvas
- * (background + text color) when mixed with sections of other models.
+ * (background + text color) when mixed with sections of other models. Sale
+ * de modelWrappers.js, la misma tabla que usa el App.jsx del ZIP.
  */
 const allModels = [
   {
     id: 'chapters',
     name: 'CHAPTERS',
     accent: '#ff4b00',
-    wrapperClass: 'bg-bone text-ink',
+    wrapperClass: MODEL_WRAPPER_CLASS.chapters,
     sections: [
       { id: 'chapters/NavMinimal', name: 'Nav Minimal', kind: 'nav', component: NavMinimal, blurb: 'Fixed header that inverts over any background · full-screen mobile menu' },
       { id: 'chapters/HeroKinetic', name: 'Hero Kinetic', kind: 'hero', component: HeroKinetic, blurb: 'Oversized type rising out of masks' },
@@ -135,7 +137,7 @@ const allModels = [
     id: 'nocturne',
     name: 'NOCTURNE',
     accent: '#d9ff3f',
-    wrapperClass: 'bg-noir text-salt',
+    wrapperClass: MODEL_WRAPPER_CLASS.nocturne,
     sections: [
       { id: 'nocturne/NavNocturne', name: 'Nav Nocturne', kind: 'nav', component: NavNocturne, blurb: 'Fixed dark header with reel marker · numbered mobile menu' },
       { id: 'nocturne/HeroCinematic', name: 'Hero Cinematic', kind: 'hero', component: HeroCinematic, blurb: 'Full-bleed photo with slow zoom, credit type' },
@@ -151,7 +153,7 @@ const allModels = [
     id: 'monolith',
     name: 'MONOLITH',
     accent: '#2b3cff',
-    wrapperClass: 'bg-concrete text-carbon',
+    wrapperClass: MODEL_WRAPPER_CLASS.monolith,
     sections: [
       { id: 'monolith/NavBrutal', name: 'Nav Brutal', kind: 'nav', component: NavBrutal, blurb: 'Solid blocky header with hard borders · slab mobile menu' },
       { id: 'monolith/HeroThree', name: 'Hero Three', kind: 'hero', component: HeroThree, blurb: 'Wireframe 3D monolith behind giant type' },
@@ -166,7 +168,7 @@ const allModels = [
     id: 'fizz',
     name: 'FIZZ',
     accent: '#ff3ea5',
-    wrapperClass: 'bg-grape text-foam',
+    wrapperClass: MODEL_WRAPPER_CLASS.fizz,
     sections: [
       { id: 'fizz/NavFizz', name: 'Nav Fizz', kind: 'nav', component: NavFizz, blurb: 'Floating pill header with dropdown menus' },
       { id: 'fizz/HeroBubbles', name: 'Hero Bubbles', kind: 'hero', component: HeroBubbles, blurb: 'Photoreal can PNG over scroll bubbles; optional GLB override' },
@@ -181,7 +183,7 @@ const allModels = [
     id: 'velocity',
     name: 'VELOCITY',
     accent: '#d9ff3f',
-    wrapperClass: 'bg-[#0a1a12] text-[#ece9e2]',
+    wrapperClass: MODEL_WRAPPER_CLASS.velocity,
     sections: [
       { id: 'velocity/NavVelocity', name: 'Nav Velocity', kind: 'nav', component: NavVelocity, blurb: 'Fixed athlete header with lime CTA · full-screen mobile menu' },
       { id: 'velocity/HeroStrike', name: 'Hero Strike', kind: 'hero', component: HeroStrike, blurb: 'Full-bleed multi-layer parallax — titles peel, layers blur out' },
@@ -195,7 +197,7 @@ const allModels = [
     id: 'atelier',
     name: 'ATELIER',
     accent: '#c8d0dc',
-    wrapperClass: 'bg-[#0b0c10] text-white',
+    wrapperClass: MODEL_WRAPPER_CLASS.atelier,
     sections: [
       { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Floating MENU pill + CTA · full-screen overlay' },
       { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Blur-in type with a scroll-scrubbed WebGL emblem' },
@@ -213,7 +215,7 @@ const allModels = [
     id: 'unity',
     name: 'UNITY',
     accent: '#2c4a42',
-    wrapperClass: 'bg-[#e7e4dc] text-[#0a0a0a]',
+    wrapperClass: MODEL_WRAPPER_CLASS.unity,
     sections: [
       { id: 'unity/NavUnity', name: 'Nav Unity', kind: 'nav', component: NavUnity, blurb: 'Phrase left · logo center · 3 links right' },
       { id: 'unity/HeroTwin', name: 'Hero Twin', kind: 'hero', component: HeroTwin, blurb: 'Two headlines peeling apart on scroll parallax' },
@@ -229,7 +231,7 @@ const allModels = [
     id: 'ratio',
     name: 'RATIO',
     accent: '#e23c24',
-    wrapperClass: 'bg-ratio-paper text-ratio-ink',
+    wrapperClass: MODEL_WRAPPER_CLASS.ratio,
     sections: [
       { id: 'ratio/NavRatio', name: 'Nav Ratio', kind: 'nav', component: NavRatio, beat: true, blurb: 'Hairline bar; index rides Beat into the header, one link at a time' },
       { id: 'ratio/HeroTools', name: 'Hero Tools', kind: 'hero', component: HeroTools, beat: true, blurb: 'Sticky drawing, tumbling cube, overlapping type on a Beat motion path' },
@@ -245,7 +247,7 @@ const allModels = [
     id: 'atrium',
     name: 'ATRIUM',
     accent: '#111111',
-    wrapperClass: 'bg-[#f4f1ea] text-[#111111]',
+    wrapperClass: MODEL_WRAPPER_CLASS.atrium,
     sections: [
       { id: 'atrium/NavAtrium', name: 'Nav Atrium', kind: 'nav', component: NavAtrium, blurb: 'Stacked bureau mark on a blurred dark header bar' },
       { id: 'atrium/HeroMassing', name: 'Hero Massing', kind: 'hero', component: HeroMassing, blurb: 'Pinned full-bleed massing photo with a drifting parallax' },
@@ -265,7 +267,7 @@ const allModels = [
     id: 'plum',
     name: 'PLUM',
     accent: '#6f5bff',
-    wrapperClass: 'bg-plum-void text-plum-mist',
+    wrapperClass: MODEL_WRAPPER_CLASS.plum,
     sections: [
       { id: 'plum/FilmScroll', name: 'Film Scroll', kind: 'hero', component: FilmScroll, blurb: 'The whole page as a pre-rendered webp film — a JSON manifest (chapters of frame folders + text beats) drives a fixed canvas that scroll plays frame by frame' },
     ],
@@ -274,7 +276,7 @@ const allModels = [
     id: 'meridian',
     name: 'MERIDIAN',
     accent: '#8f7a5e',
-    wrapperClass: 'bg-[#dfd8cf] text-[#2a2622]',
+    wrapperClass: MODEL_WRAPPER_CLASS.meridian,
     sections: [
       { id: 'meridian/Hero', name: 'Hero', kind: 'hero', component: MeridianHero, blurb: 'Scroll-scrubbed aerial flythrough with three crossfading text states — wordmark, value quote, invite + CTA. Video/imagery ship as placeholders: swap the frames folder in the downloaded source, not editable from the builder.' },
       { id: 'meridian/Concept', name: 'Concept', kind: 'section', component: MeridianConcept, blurb: 'Centred kicker + one large serif statement that reveals word by word; the hero above parallaxes away as it rises.' },
@@ -292,7 +294,7 @@ const allModels = [
     id: 'signal',
     name: 'SIGNAL',
     accent: '#2fe0ff',
-    wrapperClass: 'bg-signal-ink text-signal-paper',
+    wrapperClass: MODEL_WRAPPER_CLASS.signal,
     sections: [
       { id: 'signal/NavSignal', name: 'Nav Signal', kind: 'nav', component: NavSignal, blurb: 'Minimal fixed header · full-screen mobile menu' },
       { id: 'signal/HeroSignal', name: 'Hero Signal', kind: 'hero', component: HeroSignal, blurb: 'Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer' },
@@ -309,7 +311,7 @@ const allModels = [
     name: 'CONTACT',
     accent: '#7c5cff',
     // Empty on purpose: the section paints its own theme (or inherits with `auto`).
-    wrapperClass: '',
+    wrapperClass: MODEL_WRAPPER_CLASS.contact,
     sections: [
       {
         id: 'contact/ContactForm',
@@ -325,7 +327,7 @@ const allModels = [
     name: 'COMMERCE',
     accent: '#00c08b',
     // Empty: ProductGrid (+ ShopThemeProvider) paint the palette from `theme`.
-    wrapperClass: '',
+    wrapperClass: MODEL_WRAPPER_CLASS.commerce,
     sections: [
       {
         id: 'commerce/ProductGrid',

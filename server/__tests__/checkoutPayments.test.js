@@ -8,6 +8,14 @@ import {
   startAppAgainstFakeMp,
   waitFor,
 } from './helpers/fakeMercadoPago.js'
+import { readZip } from './helpers/zip.js'
+import {
+  arsFromUsd,
+  CUSTOM_BASE_SECTIONS,
+  CUSTOM_EXTRA_SECTION_USD,
+  COMMERCE_PACK_SURCHARGE_USD,
+  PRODUCTS,
+} from '../catalog.js'
 
 /**
  * Pagos de templates contra el MP simulado: lo que pasa después de que el
@@ -81,6 +89,68 @@ describe('Pagos de templates (MP simulado)', () => {
     const names = zip.toString('latin1')
     assert.ok(names.includes('chapters/package.json'))
     assert.ok(names.includes('nocturne/package.json'))
+  })
+
+  // La composición del builder de punta a punta: precio por tramos del
+  // servidor (no el del cliente), lo que ve MP, y un ZIP pago que trae lo que
+  // el comprador armó y editó (textos, listas, fotos de MERIDIAN).
+  it('comprar una composición del builder: cobra los tramos del servidor y el ZIP trae lo editado', async () => {
+    const recipe = [
+      { id: 'chapters/NavMinimal', props: { brand: 'ESTUDIO SUR' } },
+      { id: 'meridian/Hero', props: { wordmark: 'Casa Arena' } },
+      { id: 'chapters/BigNumbers', props: { stats: [{ value: '12', suffix: 'k', label: 'Visitas' }] } },
+      { id: 'meridian/GallerySlider' },
+      { id: 'atelier/KeyFacts' },
+      { id: 'nocturne/DiagonalMarquee' },
+      { id: 'unity/HeroTwin' },
+      { id: 'atrium/ScopeSerif' },
+      { id: 'velocity/ParallaxRise' },
+      { id: 'commerce/ProductGrid', props: { title: 'Tienda' } },
+      {
+        id: 'chapters/FooterCTA',
+        props: { links: [{ label: 'Instagram', href: 'https://instagram.com/sur' }] },
+      },
+    ]
+    const agent = await loginAs('builder-buyer@test.com')
+    const res = await agent.post('/api/checkout').send({
+      items: [{ sku: 'custom', title: 'Inventado', unit_price: 1, recipe }],
+    })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    const pref = mp.lastPreference()
+
+    const usd =
+      PRODUCTS.custom.unit_price_usd +
+      (recipe.length - CUSTOM_BASE_SECTIONS) * CUSTOM_EXTRA_SECTION_USD +
+      COMMERCE_PACK_SURCHARGE_USD
+    const order = await fileDb.findOrderById(res.body.orderId)
+    assert.equal(order.items[0].unit_price_usd, usd)
+    assert.equal(order.total, arsFromUsd(usd, order.fxRate))
+    assert.equal(pref.items.length, 1)
+    assert.equal(pref.items[0].unit_price, order.total)
+    assert.equal(pref.items[0].title, PRODUCTS.custom.title)
+    assert.equal(pref.items[0].category_id, 'virtual_goods')
+    assert.match(pref.items[0].id, /^custom:chapters\/NavMinimal\+meridian\/Hero/)
+
+    const payment = mp.pay(pref.id)
+    assert.equal((await webhook('payment', payment.id)).status, 200)
+    assert.equal(payment.transaction_amount, order.total)
+
+    // Mis compras: la receta con sus props, la misma que arma el ZIP.
+    const listed = (await agent.get('/api/orders')).body.orders.find((o) => o.id === order.id)
+    assert.equal(listed.status, 'paid')
+    assert.deepEqual(listed.items[0].recipe[2].props.stats, recipe[2].props.stats)
+
+    assert.equal((await agent.get(`/api/orders/${order.id}/download`)).status, 200)
+    const files = readZip(fs.readFileSync((await fileDb.findOrderById(order.id)).zipPath))
+    const app = files.get('src/App.jsx').toString('utf8')
+    assert.match(app, /brand=\{"ESTUDIO SUR"\}/)
+    assert.match(app, /wordmark=\{"Casa Arena"\}/)
+    assert.match(app, /label: "Visitas"/, 'la lista editada no llegó al ZIP')
+    assert.match(app, /href: "https:\/\/instagram\.com\/sur"/)
+    assert.ok(files.has('public/meridian/hero/seq/0001.webp'), 'faltan los frames del hero')
+    assert.ok(files.has('public/meridian/gallery/01.webp'), 'falta la galería')
+    assert.ok(files.has('src/lib/shop/checkoutAdapter.js'), 'falta el kit de commerce')
+    assert.match(files.get('LICENSE.txt').toString('utf8'), /builder-buyer@test\.com/)
   })
 
   it('pagar dos veces la misma orden: queda paga una vez y le llega el aviso al dueño', async () => {

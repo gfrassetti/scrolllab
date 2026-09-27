@@ -44,7 +44,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'nocturne/WorkIndex': ['seq', 'total', 'label', 'bg', 'fg', 'works'],
   'nocturne/OutroCTA': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
   'monolith/NavBrutal': ['brand', 'linksText'],
-  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
+  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint'],
   'monolith/TypeAccordion': ['unit', 'total', 'label', 'bg', 'fg', 'items'],
   'monolith/SkewScroller': ['unit', 'total', 'label', 'bg', 'fg', 'words'],
   'monolith/ExhibitGrid': ['unit', 'total', 'label', 'bg', 'fg', 'exhibits'],
@@ -58,16 +58,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'linkLabel',
     'cta',
   ],
-  'fizz/HeroBubbles': [
-    'title',
-    'tagline',
-    'meta',
-    'hint',
-    'flavor',
-    'canImage',
-    'canLabel',
-    'modelUrl',
-  ],
+  'fizz/HeroBubbles': ['title', 'tagline', 'meta', 'hint', 'flavor', 'canImage'],
   'fizz/FlavorWorlds': ['eyebrow'],
   'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
   'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
@@ -296,7 +287,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'atrium/ManifestoType': ['lineOne', 'lineTwo', 'left', 'right'],
   'atrium/ScopeSerif': ['body'],
   'atrium/ClarityPair': ['kicker', 'left', 'right', 'bodyLeft', 'bodyRight'],
-  'atrium/BlueprintDraw': ['index', 'title', 'body', 'caption'],
+  'atrium/BlueprintDraw': ['title', 'body', 'caption'],
   'atrium/ProjectRail': ['kicker', 'title'],
   'atrium/ProcessPin': ['label'],
   'atrium/PeopleScatter': ['label', 'title'],
@@ -365,6 +356,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'eyebrow',
     'title',
     'body',
+    'products',
     'checkoutEyebrow',
     'checkoutTitle',
     'checkoutBody',
@@ -395,14 +387,6 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
 })
 
-const SHAPE_PRESETS = new Set([
-  'icosahedron',
-  'box',
-  'octahedron',
-  'torus',
-  'sphere',
-])
-
 const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
 
@@ -428,8 +412,9 @@ const THEME_PRESETS = new Set([
  */
 const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
 
-const ASSET_URL_KEYS = new Set([
-  'modelUrl',
+export const ASSET_URL_KEYS = new Set([
+  'canImage',
+  'image',
   'img',
   'img1',
   'img2',
@@ -439,8 +424,14 @@ const ASSET_URL_KEYS = new Set([
   'img6',
   'img7',
   'img8',
+  'imgBack',
+  'imgMid',
+  'imgFront',
+  'nextImg',
   'logoSrc',
   'orbSrc',
+  // El form de contacto hace POST acá: una URL https o una ruta del sitio.
+  'endpoint',
 ])
 
 /**
@@ -455,11 +446,20 @@ const COLOR_RE =
 const HREF_RE =
   /^(?:#[\w-]*|\/[^\s"'<>]*|https?:\/\/[^\s"'<>]+|mailto:[^\s"'<>]+|tel:\+?[\d\s()-]{3,})$/i
 
+// Precio de un producto del kit commerce: número con hasta 2 decimales.
+const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
+
 const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 
 export const LIST_PROPS_BY_SECTION = Object.freeze({
+  'commerce/ProductGrid': {
+    products: {
+      max: 8,
+      item: { name: 'text', price: 'price', blurb: 'text', img: 'image' },
+    },
+  },
   'chapters/FooterCTA': {
     links: { max: 8, item: { label: 'text', href: 'href' } },
   },
@@ -563,6 +563,8 @@ function sanitizeListValue(schema, value) {
       } else if (type === 'image') {
         // URL real: https:// o /ruta. blob:/data: no sobreviven al persist.
         if (ASSET_URL_RE.test(t)) item[k] = t
+      } else if (type === 'price') {
+        if (PRICE_RE.test(t.trim())) item[k] = t.trim()
       } else if (t) {
         item[k] = t
       }
@@ -602,12 +604,10 @@ export function sanitizeSectionProps(sectionId, props) {
       continue
     }
     if (!trimmed) continue
-    if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
-    if (key === 'endpoint' && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed
   }
   return Object.keys(cleaned).length ? cleaned : undefined

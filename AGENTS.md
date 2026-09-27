@@ -291,6 +291,7 @@ receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
 sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
 que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN,
 USD 379).
+que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN, USD 379).
 Las constantes viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
 valida la paridad. Detalle en `docs/DEPLOY.md`.
 
@@ -384,6 +385,7 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 #### Precio
 
 - RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379 (el más caro hoy).
+- RATIO lista **USD 269** (Beat). Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379.
 - La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 389) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió

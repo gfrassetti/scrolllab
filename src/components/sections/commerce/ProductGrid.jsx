@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   DEMO_PRODUCTS,
@@ -5,6 +6,8 @@ import {
   formatShopPrice,
 } from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
+import { useShopCatalog } from '../../../lib/shop/ShopCatalog'
+import { catalogFromEdits } from '../../../lib/shop/catalog'
 import { shopThemeVars } from '../../../lib/shop/theme'
 
 /**
@@ -12,14 +15,22 @@ import { shopThemeVars } from '../../../lib/shop/theme'
  * PDP / cart / checkout live on separate routes (see ShopChrome + packaging).
  *
  * `theme` picks a template palette (or `auto` = neighbour / market tokens).
+ * `products` (name / price / blurb / img) replaces the demo catalog; the
+ * product page, cart and checkout read the same list from ShopCatalogProvider.
  */
 export default function ProductGrid({
   theme = 'auto',
   eyebrow = 'Shop',
   title = 'The drop',
   body = 'Placeholder products. Replace names, prices and images with yours.',
+  products,
 }) {
   const addItem = useShopCart((s) => s.addItem)
+  const catalog = useShopCatalog()
+  const shelf = useMemo(
+    () => (products?.length ? catalogFromEdits(products, DEMO_PRODUCTS) : catalog),
+    [products, catalog],
+  )
 
   return (
     <section
@@ -38,7 +49,7 @@ export default function ProductGrid({
       </p>
 
       <ul className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {DEMO_PRODUCTS.map((product) => (
+        {shelf.map((product) => (
           <li key={product.id}>
             <Link
               to={`/product/${product.id}`}
@@ -67,7 +78,7 @@ export default function ProductGrid({
             <div className="mt-4 flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => addItem(product.id, 1, defaultVariant(product))}
+                onClick={() => addItem(product, 1, defaultVariant(product))}
                 className="border border-[color:var(--shop-border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-fg)] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
                 style={{ borderRadius: 'var(--shop-radius)' }}
               >

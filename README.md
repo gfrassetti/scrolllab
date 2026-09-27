@@ -92,6 +92,116 @@ Testeado: `checkoutPayments.test.js` (doble pago, pago sin orden, reembolso,
 contracargo, dos templates juntos contra el MP simulado), tests del ZIP con
 varios ítems y `npm run check:mp-sandbox` contra MP real.
 
+## Builder (composiciones)
+
+El comprador arma una página con secciones de varios modelos, la ve en vivo,
+edita textos y la compra. El ZIP es un proyecto Vite con esas secciones, en
+ese orden y con lo que editó. Precio por tramos, calculado por el servidor:
+base USD 389 con 8 secciones, USD 15 por cada sección extra (tope 30) y USD 39
+si suma commerce.
+
+### Qué se edita (y qué no)
+
+A propósito no es un editor completo: se vende código para seguir en el
+editor, no un Wix. Se editan textos, enlaces, colores de fondo y texto, y
+listas cortas (links, métricas, ítems). Las imágenes se cargan como URL o ruta:
+se ven en el preview y viajan igual al ZIP. En el kit commerce se editan los
+productos (nombre, precio, descripción y foto, hasta 8): los usan la grilla, la
+ficha, el carrito y el checkout; lo que se deja vacío queda como el producto de
+ejemplo. El 3D (la forma del hero de
+MONOLITH, un GLB propio en FIZZ o MONOLITH) no se edita en el builder: queda el
+de la demo y se cambia en el código, con los pasos en el README del ZIP.
+Motion, layout y recetas Beat también quedan en el código.
+
+### Kit commerce (solo frontend)
+
+Grilla de productos, ficha, carrito (agregar, quitar, cantidades) y checkout
+completo. Sin backend, a propósito: pagos, stock y cuentas dependen del stack de
+cada comprador (credenciales, base de datos, hosting) y empaquetarlo no tiene
+sentido. El kit trae `checkoutAdapter.js`, una sola función donde se conecta
+Mercado Pago o Stripe. En el builder se editan los productos y los textos del
+checkout; las variantes (talle, color) se agregan en el código, con la forma
+que muestra `src/lib/shop/products.js`.
+
+### Auditoría y fixes
+
+- **Composiciones con MERIDIAN:** el ZIP no traía `public/meridian/` (frames
+  del hero, galería, mapa). Compilaba, pero el hero rompía el canvas y las
+  fotos salían rotas. Ahora viaja todo lo que el modelo sirve desde `public/`.
+- **Listas editadas** (links del footer, métricas, amenities…): quedaban en la
+  orden y se veían en el preview, pero el `App.jsx` del ZIP salía con los de
+  ejemplo. Ahora van como constantes legibles arriba del `App.jsx`.
+- **Fondo de cada sección:** preview y ZIP usaban dos tablas que se habían
+  despegado (UNITY y MERIDIAN bajaban con otro color). Ahora es una sola
+  (`src/lib/modelWrappers.js`).
+- **ZIPs ya vendidos:** se cacheaban para siempre, así que un arreglo no le
+  llegaba a quien ya había comprado. Con `PACK_VERSION` se rearman en la
+  próxima descarga (la licencia conserva su fecha), sin cortar una descarga en
+  curso.
+- **Editor:** el botón *Editar nav* quedaba tapado por el del hero (no se
+  podía editar la nav); el «probar archivo local» de imágenes y GLB se veía en
+  el preview pero no llegaba al ZIP, así que se sacó (queda la URL); campos con
+  el tipo mal puesto (capas de VELOCITY como texto, colores de UNITY sin
+  selector) y uno que no hacía nada (Index de ATRIUM Blueprint).
+- **Servidor:** valida como URL todas las imágenes (la lata de FIZZ y la foto
+  de MERIDIAN Panorama pasaban cualquier texto). `npm run check` ahora cruza
+  también los tipos entre builder y servidor.
+- **Mobile:** barra fija con el total y un atajo a *Tu página* (el botón de
+  compra quedaba a ~8.000 px de scroll, después de toda la paleta); el header
+  deja de ser fijo en mobile; el panel de edición abre abajo y deja ver la
+  sección.
+
+### Lo editado es lo que se descarga
+
+Todo lo que el comprador edita en el builder llega al ZIP tal cual. Está
+cubierto para cada campo de cada sección, no para una muestra:
+
+- `builderRoundTrip.test.js` (en `npm test`):
+  - Por campo: para los 399 campos editables de las 81 secciones y cada tipo de
+    valor (válidos, bordes y basura; 4.254 combinaciones), lo que muestra el
+    preview es exactamente lo que manda el carrito y guarda el servidor.
+  - De punta a punta: una composición con las 81 secciones y todos sus campos
+    editados (listas llenas hasta el tope, textos de 2.000 caracteres con
+    comillas, llaves, saltos de línea y emoji) se empaqueta, se ejecuta su
+    `App.jsx` y cada sección recibe exactamente las props del preview.
+  - Se validó rompiendo el código a propósito: detecta las 7 fallas probadas.
+- `npm run check:builder`: cada texto, link e imagen editable (sueltos y dentro
+  de listas) aparece en pantalla.
+- A mano: 457 valores editados, en 3 ZIP compilados y abiertos en Chromium,
+  están todos. 452 se ven directamente o en su atributo (alt, aria-label,
+  mailto). Los otros 5 dependen de otra cosa: la lata de FIZZ se ve sin
+  modelo 3D, y los tooltips del masterplan al pasar el mouse.
+
+Lo que salió de ese QA y se corrigió:
+
+- El editor aceptaba valores que el servidor descartaba (rutas de imagen con
+  espacios, `data:`, un endpoint del formulario sin https): se veían en el
+  preview y no llegaban al ZIP. Ahora rige la misma regla en los dos lados.
+- El carrito guardaba una foto de la composición: lo editado después de
+  «Agregar al carrito» no se compraba. Ahora sigue a la del builder.
+- BigNumbers contaba con `parseFloat`: «1.500» terminaba en «2», «4,8» en «5»
+  y «24/7» en «NaN», en el preview y en el ZIP. Ahora cuenta los enteros y
+  deja el resto como se escribió.
+- Una fila de lista agregada y dejada en blanco ya no se dibuja ni se manda.
+- Los campos validados (link, color, URL de imagen) no se podían escribir letra
+  por letra: cada tecla que dejaba el valor inválido lo borraba («https://…»
+  terminaba en «//…», un color quedaba vacío). Ahora el campo muestra lo que se
+  tipea, guarda solo cuando es válido y avisa si así no se guarda.
+
+### Testeado
+
+- `npm test`: compra de una composición de punta a punta contra el MP simulado
+  (precio por tramos, ítem de MP, ZIP pago con textos, listas, fotos de
+  MERIDIAN y kit commerce), tests del ZIP (archivos de `public/`, listas
+  intactas aun con comillas y llaves, fondos iguales al preview) y el rearmado
+  de ZIPs viejos.
+- `npm run check:builder`: cada campo editable de la paleta pública se ve en
+  pantalla, edición en vivo, contador y consola limpia.
+- Las 81 secciones del builder, en 3 composiciones: empaquetadas, `vite build`
+  y abiertas en Chromium a 1280 y 390 sin errores ni scroll horizontal.
+- `npm run check:mp-sandbox`: MP real acepta una composición de 30 secciones
+  con su SKU y su precio.
+
 ## Deploy
 
 Ver [`docs/DEPLOY.md`](docs/DEPLOY.md).

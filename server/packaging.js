@@ -11,6 +11,8 @@ import { recipeSectionId } from './catalog.js'
 import { resolveSectionTheme } from '../src/lib/sectionTheme.js'
 import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
 import { checkoutPropsFromItems } from '../src/lib/shop/checkoutProps.js'
+// El mismo fondo por modelo que pinta el preview del builder.
+import { modelWrapperClass } from '../src/lib/modelWrappers.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -30,6 +32,21 @@ function publicDirAssets(relDir) {
     .filter((e) => e.isFile())
     .map((e) => path.posix.join('public', relDir, e.name))
 }
+
+/**
+ * Versión de lo que entra en el ZIP de una orden. Subila cuando un arreglo
+ * cambie el contenido de ZIPs ya vendidos: los armados con otra versión se
+ * rearman en la próxima descarga (ver ensureOrderZip).
+ *  1 — sin marca (hasta 2026-09).
+ *  2 — la composición del builder trae las listas editadas y los archivos de
+ *      public/ de MERIDIAN, y el fondo de cada sección igual al del preview.
+ *  3 — BigNumbers muestra el valor como se escribió (1.500, 4,8, 24/7).
+ *  4 — README: cómo cambiar el 3D en el código, sin las notas que no eran
+ *      ciertas (el GLB de MONOLITH, los can1Image del carrusel de FIZZ).
+ *  5 — Kit commerce: catálogo compartido (ShopCatalog), precios con
+ *      centavos, y la ficha de un producto que no existe dice "not found".
+ */
+export const PACK_VERSION = 5
 
 const MODEL_FILES = {
   chapters: {
@@ -251,16 +268,34 @@ function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8')
 }
 
-/** Serialize props as JSX attributes (strings only). */
-function propsToJsx(props) {
+/**
+ * Props como atributos JSX. Los textos van en línea; las listas (links,
+ * stats, cards…) las resuelve `hoist`, que las declara como constante arriba
+ * del App.jsx y devuelve el nombre. Sin `hoist` se descartan: antes se
+ * descartaban siempre, y lo editado en una lista no llegaba al ZIP.
+ */
+function propsToJsx(props, hoist = null) {
   if (!props || typeof props !== 'object') return ''
   return Object.entries(props)
-    .filter(([, v]) => typeof v === 'string')
     .map(([k, v]) => {
-      const escaped = JSON.stringify(v)
-      return ` ${k}={${escaped}}`
+      if (typeof v === 'string') return ` ${k}={${JSON.stringify(v)}}`
+      if (hoist && Array.isArray(v) && v.length) return ` ${k}={${hoist(k, v)}}`
+      return ''
     })
     .join('')
+}
+
+const JS_IDENTIFIER = /^[A-Za-z_$][\w$]*$/
+
+/** Una lista de la receta como literal JS legible: un item por línea. */
+function listLiteral(items) {
+  const rows = items.map((item) => {
+    const fields = Object.entries(item || {})
+      .filter(([, v]) => typeof v === 'string')
+      .map(([k, v]) => `${JS_IDENTIFIER.test(k) ? k : JSON.stringify(k)}: ${JSON.stringify(v)}`)
+    return `  { ${fields.join(', ')} },`
+  })
+  return `[\n${rows.join('\n')}\n]`
 }
 
 /** Los `checkout*` del ProductGrid son para la ruta /checkout, no para la grilla. */
@@ -272,24 +307,6 @@ function stripCheckoutProps(props) {
     out[key] = value
   }
   return out
-}
-
-function modelWrapperClass(model) {
-  if (model === 'chapters') return 'bg-bone text-ink'
-  if (model === 'nocturne') return 'bg-noir text-salt'
-  if (model === 'monolith') return 'bg-concrete text-carbon'
-  if (model === 'velocity') return 'bg-[#0a1a12] text-[#ece9e2]'
-  if (model === 'fizz') return 'bg-grape text-foam'
-  if (model === 'atelier') return 'bg-[#0b0c10] text-white'
-  if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
-  if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
-  if (model === 'ratio') return 'bg-white text-[#111]'
-  if (model === 'atrium') return 'bg-[#f4f1ea] text-[#111111]'
-
-  // contact / commerce paint their own theme — no wrapper canvas.
-  if (model === 'contact') return ''
-  if (model === 'commerce') return ''
-  return 'bg-bone text-ink'
 }
 
 /** Solo entra si alguna fuente empaquetada de verdad importa `lib/webgl` (ver needsWebgl). */
@@ -307,6 +324,17 @@ function needsWebgl(sources) {
   return sources.some((s) => /['"][^'"]*\blib\/webgl(?:\/[^'"]*)?['"]/.test(s))
 }
 
+/** Los `publicAssets` de un modelo (ver MODEL_FILES), en la misma ruta bajo `prefix`. */
+function appendPublicAssets(archive, cfg, prefix = '') {
+  for (const rel of cfg?.publicAssets || []) {
+    const abs = path.join(ROOT, rel)
+    if (!fs.existsSync(abs)) continue
+    archive.append(fs.readFileSync(abs), {
+      name: `${prefix}${rel.replace(/\\/g, '/')}`,
+    })
+  }
+}
+
 function appendWebglIfNeeded(archive, sources, prefix = '') {
   if (!needsWebgl(sources)) return
   for (const rel of WEBGL_FILES) {
@@ -320,6 +348,8 @@ function appendWebglIfNeeded(archive, sources, prefix = '') {
 
 const SHOP_FILES = [
   'src/lib/shop/products.js',
+  'src/lib/shop/catalog.js',
+  'src/lib/shop/ShopCatalog.jsx',
   'src/lib/shop/cartStore.js',
   'src/lib/shop/checkoutAdapter.js',
   'src/lib/shop/theme.js',
@@ -334,39 +364,61 @@ const SHOP_ROUTE_COMPONENTS = [
   'src/components/sections/commerce/ShopChrome.jsx',
 ]
 
-/** READMEs: how to swap the hero's 3D object for a custom GLB. */
-const MODEL_3D_NOTES = {
-  fizz: `## Custom 3D model (hero)
+/**
+ * Lo que el builder no edita y el comprador cambia en el código: el objeto 3D
+ * de los heroes (forma o GLB propio) y las latas del carrusel de FIZZ. El
+ * README es la guía: tiene que decir la verdad para cada ZIP (el template
+ * completo trae el GLB de la demo; una composición del builder, no).
+ */
+const fizzHero3dNote = ({ demoGlb }) => `## 3D model (hero)
 
-The demo ships with \`public/fizz/soda-can.glb\` as \`modelUrl\` on \`HeroBubbles\`.
-The PNG cutout is only used when \`modelUrl\` is omitted. To use your own model:
+${
+  demoGlb
+    ? 'The demo passes `public/fizz/soda-can.glb` as `modelUrl` to `HeroBubbles`.'
+    : '`HeroBubbles` renders the photoreal PNG can (`flavor`: berry / citrus / tropical / mint, or your own image with `canImage`).'
+} To use your own model:
 
-1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
+1. Export it as **GLB** (binary glTF, a single file; GLTF also works).
 2. Drop it in \`public/\`, e.g. \`public/my-can.glb\`.
-3. In \`src/App.jsx\`, pass it to the hero: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
+3. In \`src/App.jsx\`: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
 
-The model is auto-centered and auto-scaled; it keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works. Without \`modelUrl\`, a photoreal PNG cutout renders (flavor via \`flavor\`: berry / citrus / tropical / mint).
+It is auto-centered and auto-scaled, and keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works.${
+  demoGlb
+    ? ' Without `modelUrl`, the photoreal PNG can renders (`flavor`, or `canImage` for your own image).'
+    : ''
+}
+`
 
-## Custom can images (carousel)
+const FIZZ_CANS_NOTE = `## Can images (carousel)
 
-The lineup ships photoreal PNG cutouts. To replace each one:
+\`CanCarousel\` takes a \`cans\` list, one object per can:
 
-1. Export your art as **SVG**, PNG, WebP or JPG.
-2. Drop files in \`public/\`, e.g. \`public/can-1.svg\`.
-3. Pass them to the carousel: \`<CanCarousel can1Image="/can-1.svg" can2Image="/can-2.png" … />\`.
+\`\`\`jsx
+<CanCarousel cans={[{ name: 'Citrus', note: 'Lemon & lime', color: '#ffb400', image: '/can-1.png' }]} />
+\`\`\`
 
-A hosted \`https://\` URL also works. Without \`canNImage\`, the SVG placeholder renders (\`canLabel\` prints on it).
-`,
-  monolith: `## Custom 3D model (hero)
+Images can be PNG, SVG, WebP or JPG in \`public/\`, or a hosted \`https://\` URL. A can without \`image\` renders the SVG illustration, with \`canLabel\` printed on it.
+`
 
-The demo ships with \`public/monolith/monolith-form.glb\` as \`modelUrl\` on \`HeroThree\` (carbon wireframe). To use your own model:
+const monolith3dNote = ({ sampleGlb }) => `## 3D object (hero)
 
-1. Export your model as **GLB** (binary glTF — single file; GLTF also works).
+\`HeroThree\` renders a built-in wireframe shape: \`shape\` = \`icosahedron\` (default), \`box\`, \`octahedron\`, \`torus\` or \`sphere\`. To use your own model instead:
+
+1. Export it as **GLB** (binary glTF, a single file; GLTF also works).
 2. Drop it in \`public/\`, e.g. \`public/my-object.glb\`.
-3. In \`src/App.jsx\`, pass it to the hero: \`<HeroThree modelUrl="/my-object.glb" />\`.
+3. In \`src/App.jsx\`: \`<HeroThree modelUrl="/my-object.glb" />\`.
 
-The model is auto-centered, auto-scaled and re-materialized as a carbon wireframe to keep the brutalist look. A hosted \`https://\` URL also works.
-`,
+It is auto-centered, auto-scaled and re-materialized as a carbon wireframe to keep the brutalist look. A hosted \`https://\` URL also works.${
+  sampleGlb
+    ? ' The ZIP includes a sample model: `<HeroThree modelUrl="/monolith/monolith-form.glb" />`.'
+    : ''
+}
+`
+
+/** Notas del template completo (su ZIP trae los GLB de public/). */
+const MODEL_3D_NOTES = {
+  fizz: `${fizzHero3dNote({ demoGlb: true })}\n${FIZZ_CANS_NOTE}`,
+  monolith: monolith3dNote({ sampleGlb: true }),
 }
 
 /** Section folders shared across models — packed when a page imports them. */
@@ -568,13 +620,7 @@ function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
     walk(sectionsAbs, dir)
   }
 
-  for (const rel of cfg.publicAssets || []) {
-    const abs = path.join(ROOT, rel)
-    if (!fs.existsSync(abs)) continue
-    archive.append(fs.readFileSync(abs), {
-      name: `${prefix}${rel.replace(/\\/g, '/')}`,
-    })
-  }
+  appendPublicAssets(archive, cfg, prefix)
 
   appendWebglIfNeeded(archive, sources, prefix)
 
@@ -718,6 +764,19 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const renderLines = []
   const seen = new Set()
   const packedModels = new Set()
+  // Listas editadas en el builder: una constante por prop, arriba del App.
+  const dataConsts = []
+  // Nombre de la constante con los productos del ProductGrid, si se editaron.
+  let shopProducts = null
+  const constNames = new Set()
+  const hoistFor = (component) => (key, list) => {
+    const base = `${component[0].toLowerCase()}${component.slice(1)}${key[0].toUpperCase()}${key.slice(1)}`
+    let name = base
+    for (let n = 2; constNames.has(name); n += 1) name = `${base}${n}`
+    constNames.add(name)
+    dataConsts.push(`const ${name} = ${listLiteral(list)}`)
+    return name
+  }
 
   // Same order the preview used, so `auto` resolves to the same neighbour.
   const modelIds = entries.map((entry) => String(entry.id || '').split('/')[0])
@@ -761,6 +820,10 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
         }
         walk(modelDir, path.posix.join('src/components/sections', model))
       }
+      // Lo que el modelo sirve desde public/ (los frames del hero de MERIDIAN,
+      // su galería y su mapa): sin esto la composición compila, pero las
+      // secciones piden archivos que no están y el hero rompe el canvas.
+      appendPublicAssets(archive, MODEL_FILES[model], prefix)
     }
 
     if (!seen.has(sectionId)) {
@@ -777,7 +840,15 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
       sectionId === 'commerce/ProductGrid'
         ? stripCheckoutProps(entry.props)
         : entry.props
-    const attrs = propsToJsx(theme ? { ...ownProps, theme } : ownProps)
+    const hoist = hoistFor(component)
+    const attrs = propsToJsx(theme ? { ...ownProps, theme } : ownProps, (key, list) => {
+      const name = hoist(key, list)
+      // El catálogo editado lo usa también la tienda (ficha, carrito, checkout).
+      if (sectionId === 'commerce/ProductGrid' && key === 'products' && !shopProducts) {
+        shopProducts = name
+      }
+      return name
+    })
     renderLines.push(
       `        <div key="${i}" className="${wrapper}"><${Comp}${attrs} /></div>`,
     )
@@ -795,6 +866,8 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
 
   const checkoutAttrs = needsShop ? propsToJsx(checkoutPropsFromItems(entries)) : ''
 
+  const dataBlock = dataConsts.length ? `\n${dataConsts.join('\n\n')}\n` : ''
+
   let appSrc
   if (needsShop) {
     appSrc = `import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -803,8 +876,9 @@ import ProductDetail from './components/sections/commerce/ProductDetail'
 import Checkout from './components/sections/commerce/Checkout'
 import ShopChrome from './components/sections/commerce/ShopChrome'
 import { ShopThemeProvider } from './lib/shop/ShopTheme'
+import { ShopCatalogProvider } from './lib/shop/ShopCatalog'
 ${imports.join('\n')}
-
+${dataBlock}
 function Home() {
   return (
     <SmoothScrollProvider>
@@ -823,27 +897,29 @@ export default function App() {
         theme="${shopTheme}"
         className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]"
       >
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/product/:productId"
-            element={
-              <>
-                <ProductDetail />
-                <ShopChrome />
-              </>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <>
-                <Checkout${checkoutAttrs} />
-                <ShopChrome />
-              </>
-            }
-          />
-        </Routes>
+        <ShopCatalogProvider${shopProducts ? ` products={${shopProducts}}` : ''}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/product/:productId"
+              element={
+                <>
+                  <ProductDetail />
+                  <ShopChrome />
+                </>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <>
+                  <Checkout${checkoutAttrs} />
+                  <ShopChrome />
+                </>
+              }
+            />
+          </Routes>
+        </ShopCatalogProvider>
       </ShopThemeProvider>
     </BrowserRouter>
   )
@@ -852,7 +928,7 @@ export default function App() {
   } else {
     appSrc = `import SmoothScrollProvider from './components/SmoothScrollProvider'
 ${imports.join('\n')}
-
+${dataBlock}
 export default function App() {
   return (
     <SmoothScrollProvider>
@@ -874,16 +950,18 @@ ${renderLines.join('\n')}
 
   const idList = entries.map((e) => e.id).filter(Boolean)
   let readme = `# Composición custom — SCROLLLAB\n\nReceta:\n${idList.map((r) => `- ${r}`).join('\n')}\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n`
-  if (
-    idList.includes('fizz/HeroBubbles') ||
-    idList.includes('fizz/CanCarousel')
-  ) {
-    readme += `\n${MODEL_3D_NOTES.fizz}`
+  // Una composición no trae los GLB de las demos: las notas lo dicen así.
+  if (idList.includes('fizz/HeroBubbles')) readme += `\n${fizzHero3dNote({ demoGlb: false })}`
+  if (idList.includes('fizz/CanCarousel')) readme += `\n${FIZZ_CANS_NOTE}`
+  if (idList.includes('monolith/HeroThree')) {
+    readme += `\n${monolith3dNote({ sampleGlb: false })}`
   }
-  if (idList.includes('monolith/HeroThree')) readme += `\n${MODEL_3D_NOTES.monolith}`
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
   if (needsShop) {
-    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
+    const productsNote = shopProducts
+      ? `Products: the ones you edited in the builder are \`${shopProducts}\` in \`src/App.jsx\`, passed to \`<ProductGrid products>\` and to \`<ShopCatalogProvider products>\` (the product page, cart and checkout read it from there).`
+      : 'Products: the demo catalog in `src/lib/shop/products.js`. To use yours, pass the same list to `<ProductGrid products>` and `<ShopCatalogProvider products>` in `src/App.jsx`.'
+    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\n${productsNote} Each product: \`{ name, price, blurb, img }\`; size or colour pickers use \`variants\` (see \`src/lib/shop/products.js\`).\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
   }
 
   if (prefix) readme += '\nSee LICENSE.txt at the root of this ZIP for usage terms.\n'

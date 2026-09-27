@@ -5,10 +5,33 @@ import { recipeHasCommerce } from '../lib/composition'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
 import { checkoutPropsFromItems } from '../lib/shop/checkoutProps'
+import { productsFromItems } from '../lib/shop/catalog'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
 import { useT } from '../i18n'
+
+/**
+ * Ayudas del builder bajo cada tipo de campo. Una imagen viaja al ZIP como la
+ * URL o ruta que se escribe (antes había un «probar archivo local» que solo se
+ * veía en el preview y no llegaba a la descarga). Una lista reemplaza entera a
+ * la de ejemplo de la sección.
+ */
+const FIELD_HINT_KEY = {
+  image: 'builder.assetHint',
+  list: 'builder.listHint',
+}
+
+/**
+ * Dónde va el botón «Editar» de cada sección. La nav es `fixed` y su wrapper
+ * mide 0: en el mismo lugar que el resto, su botón quedaba tapado por el del
+ * hero y no había forma de editarla. Todos bajan por debajo de la barra de la
+ * nav (así no tapan su menú); el de la nav va a la izquierda.
+ */
+const CHIP_POSITION = {
+  nav: 'top-24 left-3',
+  section: 'top-24 right-3',
+}
 
 /**
  * Live composition preview with a side panel to edit text props per section.
@@ -20,9 +43,12 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
   const editing = items.find((item) => item.uid === editingUid)
   const editingSection = editing ? getSection(editing.sectionId) : null
   const fields = editing ? getSectionFields(editing.sectionId) : []
+  // La ayuda de imágenes va una vez por panel, no repetida en cada campo.
+  const firstAssetKey = fields.find((f) => f.type === 'image')?.key
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
+  const shopProducts = productsFromItems(items)
 
   const editLabelFor = (section) => {
     if (section.kind === 'nav') return t('builder.editNav')
@@ -43,7 +69,9 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
               onClick={() =>
                 setEditingUid((uid) => (uid === item.uid ? null : item.uid))
               }
-              className={`absolute top-3 right-3 z-[60] min-h-9 border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
+              className={`absolute z-[60] min-h-9 border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
+                section.kind === 'nav' ? CHIP_POSITION.nav : CHIP_POSITION.section
+              } ${
                 active
                   ? 'border-accent bg-accent text-bone'
                   : 'border-ink/30 bg-bone/90 text-ink hover:border-ink'
@@ -70,6 +98,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}
+          products={shopProducts}
         />
       ) : (
         home
@@ -78,7 +107,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
       {editing && editingSection && fields.length > 0 && (
         <aside
           data-native-cursor
-          className="fixed top-0 right-0 z-9998 flex h-svh w-full max-w-md flex-col border-l border-ink/20 bg-bone text-ink shadow-xl"
+          className="fixed inset-x-0 bottom-0 z-9998 flex max-h-[62svh] flex-col border-t border-ink/20 bg-bone text-ink shadow-xl md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-md md:border-t-0 md:border-l"
         >
           <div className="flex items-center justify-between border-b border-ink/15 px-5 py-4">
             <div>
@@ -115,74 +144,6 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
                 })
                 onChangeProps(editing.uid, nextProps)
               }
-              const fieldClass =
-                'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink'
-
-              if (field.type === 'model' || field.type === 'image') {
-                const isImage = field.type === 'image'
-                return (
-                  <div key={field.key} className="block border-t border-ink/15 pt-4">
-                    <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                      {field.label}
-                    </span>
-                    <input
-                      type="text"
-                      value={value}
-                      placeholder={
-                        isImage
-                          ? '/can.svg — https://…'
-                          : '/model.glb — https://…'
-                      }
-                      onChange={(e) => onFieldChange(e.target.value)}
-                      className={fieldClass}
-                    />
-                    {isImage && value ? (
-                      <img
-                        src={value}
-                        alt=""
-                        className="mt-2 h-20 w-auto max-w-full object-contain"
-                      />
-                    ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <label className="cursor-pointer border border-ink/30 px-3 py-2 text-[10px] uppercase tracking-[0.15em] transition-colors hover:border-ink hover:bg-ink hover:text-bone">
-                        {isImage
-                          ? t('builder.imageUpload')
-                          : t('builder.modelUpload')}
-                        <input
-                          type="file"
-                          accept={
-                            isImage
-                              ? 'image/*,.svg,.png,.webp,.jpg,.jpeg'
-                              : '.glb,.gltf,model/gltf-binary,model/gltf+json'
-                          }
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) onFieldChange(URL.createObjectURL(file))
-                            e.target.value = ''
-                          }}
-                        />
-                      </label>
-                      {value && (
-                        <button
-                          type="button"
-                          onClick={() => onFieldChange('')}
-                          className="border border-ink/30 px-3 py-2 text-[10px] uppercase tracking-[0.15em] transition-colors hover:border-danger hover:text-danger"
-                        >
-                          {isImage
-                            ? t('builder.imageClear')
-                            : t('builder.modelClear')}
-                        </button>
-                      )}
-                    </div>
-                    <p className="mt-2 text-xs leading-relaxed text-ink/55">
-                      {isImage
-                        ? t('builder.imageHelp')
-                        : t('builder.modelHelp')}
-                    </p>
-                  </div>
-                )
-              }
 
               return (
                 <SectionFieldRow
@@ -190,6 +151,12 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
                   field={field}
                   value={value}
                   onChange={onFieldChange}
+                  hint={
+                    FIELD_HINT_KEY[field.type] &&
+                    (field.type === 'list' || field.key === firstAssetKey)
+                      ? t(FIELD_HINT_KEY[field.type])
+                      : undefined
+                  }
                 />
               )
             })}
@@ -219,7 +186,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
         onClick={onExit}
         className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
           hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
-        }`}
+        } ${editing ? 'max-md:hidden' : ''}`}
       >
         {t('builder.exitPreview')} ({items.length})
       </button>

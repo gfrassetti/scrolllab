@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import {
-  defaultVariant,
-  getProduct,
-  formatShopPrice,
-} from '../../../lib/shop/products'
+import { defaultVariant, formatShopPrice } from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
+import { useShopProduct } from '../../../lib/shop/ShopCatalog'
 
 /**
  * ProductDetail — PDP page at /product/:productId (not a scroll section).
@@ -22,7 +19,7 @@ export default function ProductDetail({
 }) {
   const { productId } = useParams()
   const addItem = useShopCart((s) => s.addItem)
-  const product = getProduct(productId)
+  const product = useShopProduct(productId)
   const [variant, setVariant] = useState(() => defaultVariant(product))
 
   // React Router reuses this component across /product/:productId — without
@@ -106,7 +103,7 @@ export default function ProductDetail({
 
             <button
               type="button"
-              onClick={() => addItem(product.id, 1, variant)}
+              onClick={() => addItem(product, 1, variant)}
               className="mt-8 border-2 border-[color:var(--shop-fg)] px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
               style={{ borderRadius: 'var(--shop-radius)' }}
             >

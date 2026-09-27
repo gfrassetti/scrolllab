@@ -34,7 +34,9 @@ import {
   cancelPreapprovalConfirmed,
   upgradeReference,
 } from '../server/services/subscriptions.js'
-import { hostedPlanPrice } from '../server/catalog.js'
+import { hostedPlanPrice, BUILDER_HIDDEN_SKUS } from '../server/catalog.js'
+import { validateCheckoutItems } from '../server/validation.js'
+import { ALLOWED_SECTIONS } from '../server/sections.js'
 
 const token = process.env.MP_TEST_ACCESS_TOKEN
 const publicKey = process.env.MP_TEST_PUBLIC_KEY
@@ -278,6 +280,36 @@ async function main() {
       ticketDays > 2.9 &&
       ticketDays < 3.1,
     `payer ${saved.payer?.email}/${saved.payer?.name}/${saved.payer?.surname} · categorías ${saved.items?.map((i) => i.category_id).join(',')} · ticket ${ticketDays.toFixed(2)} días`,
+  )
+
+  // 8. Composición del builder con el tope de secciones: la línea sale de la
+  //    misma validación que el checkout (precio por tramos, SKU `custom:…`
+  //    con el id más largo que se genera) y MP la tiene que guardar entera.
+  const sections = [...ALLOWED_SECTIONS]
+    .filter((id) => !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0]))
+    .slice(0, 30)
+  const [line] = validateCheckoutItems(
+    [{ sku: 'custom', recipe: sections.map((id) => ({ id })) }],
+    { maxCartItems: 5, maxRecipeSections: 30, rate: 1560 },
+  )
+  const composition = await createCheckoutPreference({
+    accessToken: token,
+    items: [{ ...line, title: `${line.title} [check sandbox]` }],
+    orderId: 'e'.repeat(24),
+    userId: 'check-sandbox',
+    clientUrl: 'https://www.scrolllab.com.ar',
+    apiPublicUrl: 'https://api.scrolllab.com.ar',
+    payer: { email: payerEmail, name: 'Comprador Test Sandbox' },
+  })
+  const savedComposition = (await mp('GET', `/checkout/preferences/${composition.id}`)).json
+  const item = savedComposition.items?.[0] || {}
+  check(
+    'builder: MP acepta la composición de 30 secciones con su SKU y precio',
+    !!composition.init_point &&
+      item.id === line.sku &&
+      Number(item.unit_price) === line.unit_price &&
+      item.category_id === 'virtual_goods',
+    `id ${String(item.id).length} caracteres · ARS ${item.unit_price} (USD ${line.unit_price_usd})`,
   )
 }
 
