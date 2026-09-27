@@ -8,8 +8,9 @@
  *  4. otro cambio sin publicar: el editor avisa y el sitio sigue igual.
  *
  * Una vez: el ancho Mobile del preview mide 390px de verdad, una imagen con
- * ruta relativa avisa y no se guarda (en LAB va URL completa), y la consola
- * del editor queda limpia.
+ * ruta relativa avisa y no se guarda (en LAB va URL completa), la consola
+ * del editor queda limpia, y con Starter (5) la 6ª publicación avisa el tope
+ * al lado del botón y queda en borrador.
  *
  * Levanta la API (store de archivo temporal, login dev, MP mock), el embed
  * recién buildeado (embed-dist) en un estático y Vite dev apuntando a esa API.
@@ -313,6 +314,55 @@ try {
     }
     problems.push(...consoleHits.map((h) => `consola del editor: ${h}`))
     await page.close()
+  }
+  console.log('Tope del plan: Starter publica 5 y la 6ª avisa…')
+  {
+    // Otro usuario (otra cookie): Starter por el mock de Mercado Pago.
+    const planCtx = await browser.newContext({
+      viewport: { width: 1400, height: 900 },
+      reducedMotion: 'reduce',
+      locale: 'es-AR',
+    })
+    await planCtx.request.post(`${BASE}/api/auth/dev-login`, {
+      data: { email: 'check-lab-starter@test.com' },
+    })
+    const sub = await (
+      await planCtx.request.post(`${BASE}/api/subscriptions`, {
+        data: { plan: 'hosted_starter', cycle: 'monthly' },
+      })
+    ).json()
+    await planCtx.request.post(`${BASE}${sub.activateUrl}`)
+    const ids = []
+    for (let i = 0; i < 6; i++) {
+      const res = await planCtx.request.post(`${BASE}/api/hosted`, {
+        data: { sectionId: 'chapters/FooterCTA' },
+      })
+      ids.push((await res.json()).instance.id)
+    }
+    for (const id of ids.slice(0, 5)) {
+      const res = await planCtx.request.put(`${BASE}/api/hosted/${id}`, { data: { publish: true } })
+      if (!res.ok()) problems.push(`Starter: la publicación ${ids.indexOf(id) + 1} de 5 dio HTTP ${res.status()}`)
+    }
+    const page = await planCtx.newPage()
+    await page.goto(`${BASE}/lab/${ids[5]}`)
+    await page.locator('[data-lab-preview]').waitFor({ timeout: 15000 })
+    await page.getByRole('button', { name: 'Publicar', exact: true }).click()
+    const alert = page.getByRole('alert').filter({ hasText: 'límite de tu plan' })
+    try {
+      await alert.waitFor({ timeout: 5000 })
+      if (!(await alert.isVisible())) problems.push('Starter: el aviso del tope no se ve')
+      const box = await alert.boundingBox()
+      const vh = page.viewportSize().height
+      if (!box || box.y < 0 || box.y > vh) {
+        problems.push('Starter: el aviso del tope queda fuera de pantalla al tocar Publicar')
+      }
+    } catch {
+      problems.push('Starter: publicar la 6ª no muestra el aviso del tope')
+    }
+    if (!page.url().endsWith(`/lab/${ids[5]}`)) problems.push('Starter: con el tope, el editor igual navegó')
+    const sixth = await (await planCtx.request.get(`${BASE}/api/hosted/${ids[5]}`)).json()
+    if (sixth.instance.status !== 'draft') problems.push('Starter: la 6ª quedó publicada')
+    await planCtx.close()
   }
 } catch (err) {
   problems.push(`excepción: ${err.message}`)

@@ -185,6 +185,7 @@ export default function LabEditorPage() {
   const unpublish = async () => {
     if (busy) return
     setBusy(true)
+    setError('')
     try {
       const { instance } = await api.hostedUpdate(id, { unpublish: true })
       setInst(instance)
@@ -246,8 +247,11 @@ export default function LabEditorPage() {
           {t('lab.back')}
         </Link>
 
-        {error && (
-          <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+        {/* Sin instancia (no cargó): arriba. Con instancia, el error va al lado
+            de los botones — el tope del plan al publicar salía acá, fuera de
+            pantalla, y parecía que «Publicar» no hacía nada. */}
+        {error && !inst && (
+          <p role="alert" className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
             {error}
           </p>
         )}
@@ -338,6 +342,14 @@ export default function LabEditorPage() {
                     </span>
                   )}
                 </div>
+                {error && (
+                  <p
+                    role="alert"
+                    className="mt-3 border border-danger/40 bg-danger/10 px-4 py-3 text-sm"
+                  >
+                    {error}
+                  </p>
+                )}
                 {unpublished && (
                   <p role="status" className="mt-3 text-xs text-ink/60">
                     {t('lab.unpublished')}

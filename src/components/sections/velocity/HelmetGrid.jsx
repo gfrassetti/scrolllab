@@ -153,7 +153,11 @@ function HelmCard({ item, isActive, onActivate }) {
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
               />
-            ) : null}
+            ) : (
+              // Sin foto (un ítem nuevo, el embed de LAB): la máscara se lee
+              // como un panel en vez de quedar solo el trazo sobre negro.
+              <div className="h-full w-full bg-gradient-to-br from-[#ece9e2]/[0.1] via-[#ece9e2]/[0.04] to-transparent" />
+            )}
             <div
               className="absolute inset-0"
               style={{

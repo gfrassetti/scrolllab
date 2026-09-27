@@ -245,8 +245,13 @@ de alto acotado esas se rompen). Detalle técnico en [`embed/README.md`](embed/R
   formulario. Avisa «cambios sin publicar».
 - **Next:** el snippet ya no pide `'use client'`: el paquete lo trae y entra en
   un Server Component.
-- **Limitador por plan:** sin cambios; cubierto por tests (Starter 5, Pro 15,
-  Studio sin tope, 402 en la N+1, congeladas cuando el plan baja o se cae).
+- **Limitador por plan:** la regla ya estaba bien y cubierta por tests
+  (Starter 5, Pro 15, Studio sin tope, 402 en la N+1, congeladas cuando el plan
+  baja o se cae). Lo roto era el aviso: al pasarse del tope, el error salía
+  arriba de todo, fuera de pantalla, y parecía que «Publicar» no hacía nada.
+  Ahora aparece al lado de los botones.
+- **Sin foto:** HelmetGrid sin imágenes (un ítem nuevo, el embed) mostraba solo
+  trazos sueltos sobre negro; ahora sus máscaras se leen como paneles.
 
 ### Testeado
 
@@ -254,7 +259,9 @@ de alto acotado esas se rompen). Detalle técnico en [`embed/README.md`](embed/R
   real — editar → la vista previa cambia → Publicar → el embed en un sitio
   ajeno muestra el cambio → otro cambio sin publicar avisa y no sale en vivo.
   Además: preview mobile de 390 px reales, imagen relativa rechazada, consola
-  limpia. Probado que detecta un publicar roto (mutación).
+  limpia, y con Starter la 6ª publicación avisa el tope en pantalla y queda en
+  borrador. Probado que detecta un publicar roto y el aviso fuera de pantalla
+  (mutaciones).
 - `npm run test:e2e` (103): las 23 embebidas en un sitio ajeno, responsive a
   375/768/1280 con el alto que converge, aislamiento, y `lab-live`: publicar,
   borrador, despublicar, dominios y links.
