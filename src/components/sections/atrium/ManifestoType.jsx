@@ -11,6 +11,8 @@ export default function ManifestoType({
   lineTwo = 'goes right here',
   left = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
   right = 'Ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -47,6 +49,7 @@ export default function ManifestoType({
       ref={root}
       id="bureau"
       className="relative z-10 bg-atrium-paper px-5 pt-[30svh] pb-[26svh] text-atrium-ink md:px-10 md:pt-[34svh] md:pb-[30svh]"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <h1
         data-manifesto-head

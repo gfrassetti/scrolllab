@@ -39,6 +39,10 @@ import AboutClarity from '../../src/components/sections/atelier/AboutClarity.jsx
 import CanCarousel from '../../src/components/sections/fizz/CanCarousel.jsx'
 import StudioCards from '../../src/components/sections/atelier/StudioCards.jsx'
 import HelmetGrid from '../../src/components/sections/velocity/HelmetGrid.jsx'
+// v1.4 — mismo trato que FooterAtrium: usan `svh` para el aire (el puente de
+// altura tarda más pasadas en converger, no rompe). Atrium ya tokenizado.
+import ManifestoType from '../../src/components/sections/atrium/ManifestoType.jsx'
+import ScopeSerif from '../../src/components/sections/atrium/ScopeSerif.jsx'
 
 const SECTIONS = {
   'chapters/FooterCTA': FooterCTA,
@@ -62,6 +66,8 @@ const SECTIONS = {
   'fizz/CanCarousel': CanCarousel,
   'atelier/StudioCards': StudioCards,
   'velocity/HelmetGrid': HelmetGrid,
+  'atrium/ManifestoType': ManifestoType,
+  'atrium/ScopeSerif': ScopeSerif,
 }
 
 /**
