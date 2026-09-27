@@ -92,6 +92,64 @@ Testeado: `checkoutPayments.test.js` (doble pago, pago sin orden, reembolso,
 contracargo, dos templates juntos contra el MP simulado), tests del ZIP con
 varios ítems y `npm run check:mp-sandbox` contra MP real.
 
+## Builder (composiciones)
+
+El comprador arma una página con secciones de varios modelos, la ve en vivo,
+edita textos y la compra. El ZIP es un proyecto Vite con esas secciones, en
+ese orden y con lo que editó. Precio por tramos, calculado por el servidor:
+base USD 389 con 8 secciones, USD 15 por cada sección extra (tope 30) y USD 39
+si suma commerce.
+
+### Qué se edita (y qué no)
+
+A propósito no es un editor completo: se vende código para seguir en el
+editor, no un Wix. Se editan textos, enlaces, colores de fondo y texto, y
+listas cortas (links, métricas, ítems). Las imágenes y el 3D se cargan como URL
+o ruta: se ve en el preview y viaja igual al ZIP. Motion, layout y recetas Beat
+quedan en el código.
+
+### Auditoría y fixes
+
+- **Composiciones con MERIDIAN:** el ZIP no traía `public/meridian/` (frames
+  del hero, galería, mapa). Compilaba, pero el hero rompía el canvas y las
+  fotos salían rotas. Ahora viaja todo lo que el modelo sirve desde `public/`.
+- **Listas editadas** (links del footer, métricas, amenities…): quedaban en la
+  orden y se veían en el preview, pero el `App.jsx` del ZIP salía con los de
+  ejemplo. Ahora van como constantes legibles arriba del `App.jsx`.
+- **Fondo de cada sección:** preview y ZIP usaban dos tablas que se habían
+  despegado (UNITY y MERIDIAN bajaban con otro color). Ahora es una sola
+  (`src/lib/modelWrappers.js`).
+- **ZIPs ya vendidos:** se cacheaban para siempre, así que un arreglo no le
+  llegaba a quien ya había comprado. Con `PACK_VERSION` se rearman en la
+  próxima descarga (la licencia conserva su fecha), sin cortar una descarga en
+  curso.
+- **Editor:** el botón *Editar nav* quedaba tapado por el del hero (no se
+  podía editar la nav); el «probar archivo local» de imágenes y GLB se veía en
+  el preview pero no llegaba al ZIP, así que se sacó (queda la URL); campos con
+  el tipo mal puesto (capas de VELOCITY como texto, colores de UNITY sin
+  selector) y uno que no hacía nada (Index de ATRIUM Blueprint).
+- **Servidor:** valida como URL todas las imágenes (la lata de FIZZ y la foto
+  de MERIDIAN Panorama pasaban cualquier texto). `npm run check` ahora cruza
+  también los tipos entre builder y servidor.
+- **Mobile:** barra fija con el total y un atajo a *Tu página* (el botón de
+  compra quedaba a ~8.000 px de scroll, después de toda la paleta); el header
+  deja de ser fijo en mobile; el panel de edición abre abajo y deja ver la
+  sección.
+
+### Testeado
+
+- `npm test`: compra de una composición de punta a punta contra el MP simulado
+  (precio por tramos, ítem de MP, ZIP pago con textos, listas, fotos de
+  MERIDIAN y kit commerce), tests del ZIP (archivos de `public/`, listas
+  intactas aun con comillas y llaves, fondos iguales al preview) y el rearmado
+  de ZIPs viejos.
+- `npm run check:builder`: cada campo editable de la paleta pública se ve en
+  pantalla, edición en vivo, contador y consola limpia.
+- Las 81 secciones del builder, en 3 composiciones: empaquetadas, `vite build`
+  y abiertas en Chromium a 1280 y 390 sin errores ni scroll horizontal.
+- `npm run check:mp-sandbox`: MP real acepta una composición de 30 secciones
+  con su SKU y su precio.
+
 ## Deploy
 
 Ver [`docs/DEPLOY.md`](docs/DEPLOY.md).

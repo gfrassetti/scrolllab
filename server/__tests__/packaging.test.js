@@ -14,6 +14,8 @@ import {
   packOrderTemplate,
 } from '../packaging.js'
 import { purchaseCode } from '../license.js'
+import { validateRecipe } from '../validation.js'
+import { MODEL_WRAPPER_CLASS } from '../../src/lib/modelWrappers.js'
 import { brokenImports, readZip } from './helpers/zip.js'
 
 /**
@@ -45,6 +47,26 @@ async function pack(name, run) {
   const buf = fs.readFileSync(dest)
   assert.equal(buf.subarray(0, 2).toString('latin1'), 'PK', 'no es un ZIP')
   return readZip(buf)
+}
+
+const REPO_ROOT = path.resolve(import.meta.dirname, '..', '..')
+const PUBLIC_REF = /["'`(](\/[\w./-]+\.(?:png|jpe?g|webp|avif|svg|glb|gltf|mp4|webm|json))\b/g
+
+/**
+ * Rutas absolutas (`/meridian/map/map.webp`) que el código del ZIP pide y que
+ * el marketplace sirve desde su public/, pero que no viajaron en el ZIP. Una
+ * ruta que no existe en el repo (un ejemplo en un comentario) no cuenta.
+ */
+function missingPublicAssets(files, prefix = '') {
+  const missing = new Set()
+  for (const [name, buf] of files) {
+    if (!name.startsWith(prefix) || !/\.(jsx?|css|html)$/.test(name)) continue
+    for (const [, ref] of buf.toString('utf8').matchAll(PUBLIC_REF)) {
+      if (!fs.existsSync(path.join(REPO_ROOT, 'public', ref))) continue
+      if (!files.has(`${prefix}public${ref}`)) missing.add(ref)
+    }
+  }
+  return [...missing]
 }
 
 /** Un proyecto Vite que arranca necesita al menos esto. */
@@ -401,6 +423,87 @@ describe('ZIP del builder', () => {
     const pkg = JSON.parse(files.get('package.json').toString('utf8'))
     assert.ok(pkg.dependencies['react-router-dom'], 'el kit de shop usa rutas')
     assert.ok(pkg.dependencies.zustand, 'el carrito usa zustand')
+  })
+
+  // Las secciones de MERIDIAN piden los frames del hero, la galería y el mapa a
+  // public/. El ZIP del builder no los copiaba: compilaba igual, pero el hero
+  // rompía el canvas y las fotos salían rotas.
+  it('trae los archivos de public/ que piden sus secciones', async () => {
+    const recipe = ['meridian/Hero', 'meridian/GallerySlider', 'meridian/Location']
+    const files = await pack('custom-public', (destPath) =>
+      packCustomTemplate({ recipe, destPath, licenseMeta: LICENSE }),
+    )
+    assert.deepEqual(missingPublicAssets(files), [])
+    assert.ok(files.has('public/meridian/hero/seq/0001.webp'), 'faltan los frames del hero')
+
+    const order = await pack('order-custom-public', (destPath) =>
+      packOrderTemplate({
+        items: [{ sku: 'chapters' }, { sku: 'custom:m', recipe }],
+        destPath,
+        licenseMeta: LICENSE,
+        bundleModels: BUNDLE_MODELS,
+      }),
+    )
+    assert.deepEqual(missingPublicAssets(order, 'custom/'), [])
+    assert.ok(order.has('custom/public/meridian/hero/seq/0001.webp'))
+  })
+
+  // Lo editado en una lista (links, stats, cards…) quedaba en la orden y se
+  // veía en el preview, pero el App.jsx del ZIP salía con los de ejemplo.
+  it('lleva al App.jsx lo editado en las listas, tal cual', async () => {
+    const tricky = 'Say "hola" </div> {x} \\ `y` ${z} — ñ'
+    const recipe = validateRecipe([
+      {
+        id: 'chapters/BigNumbers',
+        props: { stats: [{ value: '42', suffix: '%', label: tricky }] },
+      },
+      {
+        id: 'chapters/BigNumbers',
+        props: { stats: [{ value: '7', label: 'Otra' }, { value: '9', label: 'Más' }] },
+      },
+      {
+        id: 'chapters/FooterCTA',
+        props: {
+          ctaWord: 'Escribime',
+          links: [{ label: 'Instagram', href: 'https://instagram.com/x' }],
+        },
+      },
+    ])
+    const files = await pack('custom-lists', (destPath) =>
+      packCustomTemplate({ recipe, destPath, licenseMeta: LICENSE }),
+    )
+    const app = files.get('src/App.jsx').toString('utf8')
+    const listProp = (component, prop, nth = 0) => {
+      const tags = [...app.matchAll(new RegExp(`<${component}_chapters[^>]*/>`, 'g'))]
+      const name = tags[nth]?.[0].match(new RegExp(`${prop}=\\{(\\w+)\\}`))?.[1]
+      assert.ok(name, `${component} #${nth} no recibe ${prop}`)
+      const literal = app.match(new RegExp(`const ${name} = (\\[[\\s\\S]*?\\n\\])`))?.[1]
+      assert.ok(literal, `falta la constante ${name}`)
+      return new Function(`return ${literal}`)()
+    }
+    assert.deepEqual(listProp('BigNumbers', 'stats', 0), recipe[0].props.stats)
+    assert.deepEqual(listProp('BigNumbers', 'stats', 1), recipe[1].props.stats)
+    assert.deepEqual(listProp('FooterCTA', 'links'), recipe[2].props.links)
+    assert.match(app, /ctaWord=\{"Escribime"\}/)
+  })
+
+  // El fondo de cada sección salía de dos tablas (preview y ZIP) que se habían
+  // despegado: UNITY y MERIDIAN bajaban con otro color que el aprobado.
+  it('pinta cada sección con el mismo fondo que el preview', async () => {
+    const files = await pack('custom-wrappers', (destPath) =>
+      packCustomTemplate({
+        recipe: ['unity/HeroTwin', 'meridian/Concept', 'atrium/ScopeSerif'],
+        destPath,
+        licenseMeta: LICENSE,
+      }),
+    )
+    const app = files.get('src/App.jsx').toString('utf8')
+    for (const model of ['unity', 'meridian', 'atrium']) {
+      assert.ok(
+        app.includes(`className="${MODEL_WRAPPER_CLASS[model]}"`),
+        `${model} no usa el fondo del preview`,
+      )
+    }
   })
 
   it('no arrastra three cuando la receta no lo usa', async () => {

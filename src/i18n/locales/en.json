@@ -471,7 +471,7 @@
     "editSection": "Edit section",
     "editing": "Editing",
     "editPanel": "Edit section",
-    "noEditableFields": "This section has no editable text fields yet.",
+    "noEditableFields": "Nothing to edit here for this section: you tune it in the ZIP's code.",
     "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). The kit is frontend-only on purpose: wire your Mercado Pago or Stripe in checkoutAdapter.js whenever you're ready (paste the docs into an AI assistant and it's a quick job). Adding the grid turns on the full kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
@@ -484,14 +484,11 @@
     "beatBadge": "Beat",
     "beatHint": "These pieces ship with Beat: the rail plays in preview and in the ZIP. The panel edits copy; recipes stay in code.",
     "beatEditHint": "Beat: the cube and type move on their own. Change the words here; the rail stays in code.",
-    "modelUpload": "Try a local .glb",
-    "modelClear": "Remove model",
-    "modelHelp": "GLB/GLTF format (recommended: .glb, single file). A local file only works in this preview. To ship it in your ZIP: enter a public https URL, or leave the field empty and, in the downloaded project, save your model as public/my-model.glb and pass modelUrl=\"/my-model.glb\" (explained in the ZIP's README). Without a model, the placeholder object renders.",
-    "imageUpload": "Try a local image / SVG",
-    "imageClear": "Remove image",
-    "imageHelp": "PNG, SVG, WebP or JPG. A local file only works in this preview (it replaces the placeholder SVG). To ship it in your ZIP: enter a public https URL, or in the downloaded project save the file under public/ (e.g. public/can-1.svg) and pass can1Image=\"/can-1.svg\". Without an image, the template SVG can renders.",
     "listAdd": "Add",
     "hrefHint": "#anchor · /path · https://… · mailto:… · tel:…",
+    "assetHint": "Ships in the ZIP as typed: an https:// URL or a /path (then drop the file in the downloaded project's public/).",
+    "listHint": "What you add here replaces the section's sample list.",
+    "mobileBarCta": "See my page",
     "sections": {
       "chapters": {
         "NavMinimal": {

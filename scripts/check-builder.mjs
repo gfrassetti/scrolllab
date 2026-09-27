@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
+import { BUILDER_HIDDEN_SKUS } from '../src/lib/pricing.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const STORAGE_KEY = 'builder-composition-v1'
@@ -52,6 +53,8 @@ const NON_VISIBLE_KEYS = new Set([
  */
 const NOT_IN_DOM = {
   'fizz/HeroBubbles.canLabel': 'se dibuja en la textura WebGL de la lata',
+  'fizz/CanCarousel.canLabel': 'solo en latas sin foto; las de ejemplo traen PNG',
+  'unity/FooterTrophy.accentWord': 'resalta esa palabra dentro del título; sola no se ve',
   'contact/ContactForm.sendingLabel': 'solo visible mientras se envía',
   'contact/ContactForm.successMessage': 'solo visible tras enviar',
   'contact/ContactForm.errorMessage': 'solo visible si falla el envío',
@@ -104,11 +107,16 @@ function startVite(port) {
   })
 }
 
-/** Campos de texto libre: los únicos que deberían aparecer tal cual en pantalla. */
+/**
+ * Campos de texto libre: los únicos que deberían aparecer tal cual en pantalla.
+ * Los `checkout*` del ProductGrid se ven en la ruta /checkout, no en la grilla.
+ */
 function editableTextFields(sectionId) {
   return (SECTION_FIELDS[sectionId] || []).filter(
     (field) =>
-      ['text', 'textarea'].includes(field.type) && !NON_VISIBLE_KEYS.has(field.key),
+      ['text', 'textarea'].includes(field.type) &&
+      !NON_VISIBLE_KEYS.has(field.key) &&
+      !(sectionId === 'commerce/ProductGrid' && field.key.startsWith('checkout')),
   )
 }
 
@@ -139,7 +147,7 @@ async function checkSectionRendersProps(page, sectionId) {
   // placeholder) en vez de ser texto visible.
   const haystack = squash(
     await page.evaluate(() => {
-      const attrs = ['href', 'aria-label', 'alt', 'title', 'placeholder', 'value']
+      const attrs = ['href', 'aria-label', 'alt', 'title', 'placeholder', 'value', 'id']
       const values = [...document.querySelectorAll('*')].flatMap((el) =>
         attrs.map((name) => el.getAttribute(name)).filter(Boolean),
       )
@@ -174,7 +182,8 @@ async function checkLiveEditing(page) {
   const heading = page.locator('h1[data-atelier-hero]')
   const before = (await heading.innerText()).trim()
 
-  await page.locator('button', { hasText: /editar/i }).first().click()
+  // «Editar hero» / «Edit hero»: el navegador del check puede estar en inglés.
+  await page.locator('button', { hasText: /edit/i }).first().click()
   await page.waitForTimeout(300)
   await page.locator('aside input[type="text"]').first().fill('ZQLIVE')
   await page.waitForTimeout(1500)
@@ -246,15 +255,31 @@ const browser = await chromium.launch()
 const problems = []
 
 try {
+  // Lo que ofrece la paleta pública: los modelos en obra (RATIO…) no.
   const sectionIds = Object.keys(SECTION_FIELDS).filter(
-    (id) => editableTextFields(id).length > 0,
+    (id) =>
+      editableTextFields(id).length > 0 &&
+      !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0]),
   )
 
   console.log(`Revisando ${sectionIds.length} secciones con texto editable…`)
-  for (const sectionId of sectionIds) {
+  const checkOnce = async (sectionId) => {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } })
     const missing = await checkSectionRendersProps(page, sectionId)
     await page.close()
+    return missing
+  }
+  for (const sectionId of sectionIds) {
+    let missing = await checkOnce(sectionId)
+    // Faltan todos a la vez: la página no llegó a pintar (Vite recarga cuando
+    // descubre una dependencia nueva a mitad de la corrida). Un reintento lo
+    // distingue de un bug, que falla igual la segunda vez.
+    const fields = editableTextFields(sectionId).filter(
+      (field) => !(`${sectionId}.${field.key}` in NOT_IN_DOM),
+    )
+    if (fields.length > 1 && missing.length === fields.length) {
+      missing = await checkOnce(sectionId)
+    }
     if (missing.length) {
       console.log(`  ✖ ${sectionId} — no renderiza: ${missing.join(', ')}`)
       problems.push(...missing.map((m) => `${m} no aparece en pantalla`))

@@ -152,17 +152,20 @@ export const db = {
       ? fileDb.findOrdersByUser(userId)
       : MongoOrder.find({ userId }).sort({ createdAt: -1 });
   },
-  async setOrderZipPath(orderId, zipPath) {
+  async setOrderZipPath(orderId, zipPath, { zipVersion, licenseDate } = {}) {
+    const fields = { zipPath };
+    if (zipVersion !== undefined) fields.zipVersion = zipVersion;
+    if (licenseDate) fields.licenseDate = licenseDate;
     if (mode === "file") {
       const order = await fileDb.findOrderById(orderId);
       if (!order) return null;
-      order.zipPath = zipPath;
+      Object.assign(order, fields);
       await order.save();
       return order;
     }
     return MongoOrder.findByIdAndUpdate(
       orderId,
-      { $set: { zipPath } },
+      { $set: fields },
       { new: true },
     );
   },

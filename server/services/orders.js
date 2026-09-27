@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { packOrderTemplate } from '../packaging.js'
+import { packOrderTemplate, PACK_VERSION } from '../packaging.js'
 import { BUNDLE_MODELS } from '../catalog.js'
 import { purchaseCode } from '../license.js'
 import { HttpError } from '../validation.js'
@@ -32,7 +32,9 @@ export function assertPathInsideStorage(filePath, storageDir) {
  */
 export async function ensureOrderZip(order, user, config) {
   const orderId = db.uid(order) || order.id
-  if (order.zipPath) {
+  // Un ZIP armado con otra versión del empaquetador (PACK_VERSION) se rearma:
+  // así un arreglo le llega también a quien ya había comprado.
+  if (order.zipPath && order.zipVersion === PACK_VERSION) {
     try {
       const safe = assertPathInsideStorage(order.zipPath, config.storageDir)
       if (fs.existsSync(safe)) return safe
@@ -52,23 +54,41 @@ export async function ensureOrderZip(order, user, config) {
     )
     fs.mkdirSync(path.dirname(dest), { recursive: true })
 
+    // La licencia se fecha al emitirse (el primer armado) y rearmar no la
+    // cambia. Un ZIP de antes de guardar la fecha usa la de la orden.
+    const reissue = Boolean(order.zipPath)
+    const licenseDate =
+      order.licenseDate ||
+      new Date(reissue ? order.createdAt || Date.now() : Date.now())
+        .toISOString()
+        .slice(0, 10)
     const licenseMeta = {
       orderId,
       email: user.email,
-      date: new Date().toISOString().slice(0, 10),
+      date: licenseDate,
       purchaseCode: purchaseCode(orderId, config.downloadSecret),
     }
 
     if (!order.items?.length) throw new HttpError(500, 'Orden sin ítems')
-    await packOrderTemplate({
-      items: order.items,
-      destPath: dest,
-      licenseMeta,
-      bundleModels: BUNDLE_MODELS,
-    })
+    // Se arma aparte y se renombra encima: una descarga en curso del ZIP
+    // anterior sigue leyendo su archivo, nunca uno a medio escribir.
+    const tmp = `${dest}.${process.pid}-${Date.now()}.tmp`
+    try {
+      await packOrderTemplate({
+        items: order.items,
+        destPath: tmp,
+        licenseMeta,
+        bundleModels: BUNDLE_MODELS,
+      })
+      fs.renameSync(tmp, dest)
+    } finally {
+      fs.rmSync(tmp, { force: true })
+    }
 
-    await db.setOrderZipPath(orderId, dest)
+    await db.setOrderZipPath(orderId, dest, { zipVersion: PACK_VERSION, licenseDate })
     order.zipPath = dest
+    order.zipVersion = PACK_VERSION
+    order.licenseDate = licenseDate
     return dest
   })()
 

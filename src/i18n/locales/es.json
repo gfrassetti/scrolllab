@@ -471,7 +471,7 @@
     "editSection": "Editar sección",
     "editing": "Editando",
     "editPanel": "Editar sección",
-    "noEditableFields": "Esta sección no tiene campos de texto editables todavía.",
+    "noEditableFields": "Esta sección no tiene textos para editar acá: se ajusta en el código del ZIP.",
     "commerceHint": "Sumá una tienda a tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). El kit es solo frontend a propósito: conectás tu Mercado Pago o Stripe en checkoutAdapter.js cuando quieras (le pasás la doc a una IA y te lo arma en minutos). Al agregar la grilla se activa el kit completo (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "La base incluye {{included}} secciones: te quedan {{left}} sin costo extra.",
@@ -484,14 +484,11 @@
     "beatBadge": "Beat",
     "beatHint": "Estas piezas llevan Beat: el riel se mueve solo en el preview y viaja en el ZIP. El panel edita copy; las recetas no se tocan acá.",
     "beatEditHint": "Beat: el cubo y las letras se mueven solas. Acá cambiás las palabras; el riel queda en el código.",
-    "modelUpload": "Probar un .glb local",
-    "modelClear": "Quitar modelo",
-    "modelHelp": "Formato GLB/GLTF (recomendado: .glb, un solo archivo). El archivo local sirve solo para esta vista previa. Para que viaje en tu ZIP: escribí una URL https pública, o dejá el campo vacío y en el proyecto descargado guardá tu modelo como public/mi-modelo.glb y pasá modelUrl=\"/mi-modelo.glb\" (viene explicado en el README del ZIP). Sin modelo, queda el objeto placeholder.",
-    "imageUpload": "Probar imagen / SVG local",
-    "imageClear": "Quitar imagen",
-    "imageHelp": "PNG, SVG, WebP o JPG. El archivo local sirve solo para esta vista previa (reemplaza el SVG placeholder). Para que viaje en tu ZIP: escribí una URL https pública, o en el proyecto descargado guardá el archivo en public/ (ej. public/lata-1.svg) y pasá can1Image=\"/lata-1.svg\". Sin imagen, queda la lata SVG del template.",
     "listAdd": "Agregar",
     "hrefHint": "#ancla · /ruta · https://… · mailto:… · tel:…",
+    "assetHint": "Va al ZIP tal cual: una URL https:// o una ruta /archivo (en ese caso, dejá el archivo en public/ del proyecto que bajás).",
+    "listHint": "Lo que cargues acá reemplaza la lista de ejemplo de la sección.",
+    "mobileBarCta": "Ver mi página",
     "sections": {
       "chapters": {
         "NavMinimal": {

@@ -2,13 +2,13 @@ import { useI18n } from '../i18n'
 
 /**
  * Un campo editable de sección. Tipos: text · textarea · select · color · href
- * · image (URL) · list (sub-campos text/textarea/href/color/image). El `image`
- * suelto de nivel raíz + `model` los sigue manejando cada editor inline cuando
- * traen upload. Compartido por LabEditorPage y BuilderPreview.
+ * · image / model (URL o ruta) · list (sub-campos text/textarea/href/color/
+ * image). Compartido por LabEditorPage y BuilderPreview.
  *
- *   <SectionFieldRow field={field} value={props[field.key]} onChange={next => …} />
+ *   <SectionFieldRow field={field} value={props[field.key]} onChange={next => …} hint="…" />
  *
- * `onChange` recibe un string, o un array de items para `list`.
+ * `onChange` recibe un string, o un array de items para `list`. `hint` es una
+ * ayuda opcional debajo del campo (cada editor pone la suya).
  */
 
 const inputCls =
@@ -56,16 +56,28 @@ function Scalar({ field, value, onChange }) {
   }
 
   if (field.type === 'color') {
+    // Vacío = el color de la sección. El picker nativo no tiene «ninguno» y
+    // mostraba negro, como si la sección fuera a quedar negra.
     return (
       <div className="mt-2 flex items-center gap-2">
-        <input
-          type="color"
-          value={toPickerHex(value)}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-12 shrink-0 cursor-pointer border border-ink/20 bg-transparent p-0"
-          style={{ colorScheme: 'light' }}
-          aria-label={field.label}
-        />
+        <span className="relative h-9 w-12 shrink-0 border border-ink/20 text-ink/35">
+          {!value && (
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 bg-[linear-gradient(to_top_right,transparent_calc(50%-1px),currentColor_calc(50%-1px),currentColor_calc(50%+1px),transparent_calc(50%+1px))]"
+            />
+          )}
+          <input
+            type="color"
+            value={toPickerHex(value)}
+            onChange={(e) => onChange(e.target.value)}
+            className={`absolute inset-0 h-full w-full cursor-pointer bg-transparent p-0 ${
+              value ? '' : 'opacity-0'
+            }`}
+            style={{ colorScheme: 'light' }}
+            aria-label={field.label}
+          />
+        </span>
         <input
           type="text"
           value={value}
@@ -94,6 +106,19 @@ function Scalar({ field, value, onChange }) {
         inputMode="url"
         value={value}
         placeholder="#seccion · /pagina · https://… · mailto:…"
+        onChange={(e) => onChange(e.target.value)}
+        className={inputCls}
+      />
+    )
+  }
+
+  if (field.type === 'model') {
+    return (
+      <input
+        type="text"
+        inputMode="url"
+        value={value}
+        placeholder="https://… · /modelo.glb"
         onChange={(e) => onChange(e.target.value)}
         className={inputCls}
       />
@@ -132,7 +157,7 @@ function Scalar({ field, value, onChange }) {
   )
 }
 
-export default function SectionFieldRow({ field, value, onChange }) {
+export default function SectionFieldRow({ field, value, onChange, hint }) {
   const { t } = useI18n()
 
   if (field.type === 'list') {
@@ -158,6 +183,7 @@ export default function SectionFieldRow({ field, value, onChange }) {
         <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
           {field.label}
         </span>
+        {hint ? <span className="mt-1 block text-xs text-ink/45">{hint}</span> : null}
         <div className="mt-2 space-y-3">
           {items.map((it, i) => (
             <div key={i} className="border border-ink/15 p-3">
@@ -230,9 +256,9 @@ export default function SectionFieldRow({ field, value, onChange }) {
         {field.label}
       </span>
       <Scalar field={field} value={value ?? ''} onChange={onChange} />
-      {field.type === 'href' ? (
+      {field.type === 'href' || hint ? (
         <span className="mt-1 block text-xs text-ink/45">
-          {t('builder.hrefHint')}
+          {hint || t('builder.hrefHint')}
         </span>
       ) : null}
     </label>

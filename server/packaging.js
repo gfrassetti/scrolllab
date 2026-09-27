@@ -11,6 +11,8 @@ import { recipeSectionId } from './catalog.js'
 import { resolveSectionTheme } from '../src/lib/sectionTheme.js'
 import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
 import { checkoutPropsFromItems } from '../src/lib/shop/checkoutProps.js'
+// El mismo fondo por modelo que pinta el preview del builder.
+import { modelWrapperClass } from '../src/lib/modelWrappers.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -30,6 +32,16 @@ function publicDirAssets(relDir) {
     .filter((e) => e.isFile())
     .map((e) => path.posix.join('public', relDir, e.name))
 }
+
+/**
+ * Versión de lo que entra en el ZIP de una orden. Subila cuando un arreglo
+ * cambie el contenido de ZIPs ya vendidos: los armados con otra versión se
+ * rearman en la próxima descarga (ver ensureOrderZip).
+ *  1 — sin marca (hasta 2026-09).
+ *  2 — la composición del builder trae las listas editadas y los archivos de
+ *      public/ de MERIDIAN, y el fondo de cada sección igual al del preview.
+ */
+export const PACK_VERSION = 2
 
 const MODEL_FILES = {
   chapters: {
@@ -251,16 +263,34 @@ function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8')
 }
 
-/** Serialize props as JSX attributes (strings only). */
-function propsToJsx(props) {
+/**
+ * Props como atributos JSX. Los textos van en línea; las listas (links,
+ * stats, cards…) las resuelve `hoist`, que las declara como constante arriba
+ * del App.jsx y devuelve el nombre. Sin `hoist` se descartan: antes se
+ * descartaban siempre, y lo editado en una lista no llegaba al ZIP.
+ */
+function propsToJsx(props, hoist = null) {
   if (!props || typeof props !== 'object') return ''
   return Object.entries(props)
-    .filter(([, v]) => typeof v === 'string')
     .map(([k, v]) => {
-      const escaped = JSON.stringify(v)
-      return ` ${k}={${escaped}}`
+      if (typeof v === 'string') return ` ${k}={${JSON.stringify(v)}}`
+      if (hoist && Array.isArray(v) && v.length) return ` ${k}={${hoist(k, v)}}`
+      return ''
     })
     .join('')
+}
+
+const JS_IDENTIFIER = /^[A-Za-z_$][\w$]*$/
+
+/** Una lista de la receta como literal JS legible: un item por línea. */
+function listLiteral(items) {
+  const rows = items.map((item) => {
+    const fields = Object.entries(item || {})
+      .filter(([, v]) => typeof v === 'string')
+      .map(([k, v]) => `${JS_IDENTIFIER.test(k) ? k : JSON.stringify(k)}: ${JSON.stringify(v)}`)
+    return `  { ${fields.join(', ')} },`
+  })
+  return `[\n${rows.join('\n')}\n]`
 }
 
 /** Los `checkout*` del ProductGrid son para la ruta /checkout, no para la grilla. */
@@ -272,24 +302,6 @@ function stripCheckoutProps(props) {
     out[key] = value
   }
   return out
-}
-
-function modelWrapperClass(model) {
-  if (model === 'chapters') return 'bg-bone text-ink'
-  if (model === 'nocturne') return 'bg-noir text-salt'
-  if (model === 'monolith') return 'bg-concrete text-carbon'
-  if (model === 'velocity') return 'bg-[#0a1a12] text-[#ece9e2]'
-  if (model === 'fizz') return 'bg-grape text-foam'
-  if (model === 'atelier') return 'bg-[#0b0c10] text-white'
-  if (model === 'comic') return 'bg-comic-paper text-[#2a2622]'
-  if (model === 'unity') return 'bg-[#f3efe6] text-[#0a0a0a]'
-  if (model === 'ratio') return 'bg-white text-[#111]'
-  if (model === 'atrium') return 'bg-[#f4f1ea] text-[#111111]'
-
-  // contact / commerce paint their own theme — no wrapper canvas.
-  if (model === 'contact') return ''
-  if (model === 'commerce') return ''
-  return 'bg-bone text-ink'
 }
 
 /** Solo entra si alguna fuente empaquetada de verdad importa `lib/webgl` (ver needsWebgl). */
@@ -305,6 +317,17 @@ const WEBGL_FILES = [
 /** El sufijo `lib/webgl` sobrevive a cualquier reescritura de `../` relativo. */
 function needsWebgl(sources) {
   return sources.some((s) => /['"][^'"]*\blib\/webgl(?:\/[^'"]*)?['"]/.test(s))
+}
+
+/** Los `publicAssets` de un modelo (ver MODEL_FILES), en la misma ruta bajo `prefix`. */
+function appendPublicAssets(archive, cfg, prefix = '') {
+  for (const rel of cfg?.publicAssets || []) {
+    const abs = path.join(ROOT, rel)
+    if (!fs.existsSync(abs)) continue
+    archive.append(fs.readFileSync(abs), {
+      name: `${prefix}${rel.replace(/\\/g, '/')}`,
+    })
+  }
 }
 
 function appendWebglIfNeeded(archive, sources, prefix = '') {
@@ -568,13 +591,7 @@ function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
     walk(sectionsAbs, dir)
   }
 
-  for (const rel of cfg.publicAssets || []) {
-    const abs = path.join(ROOT, rel)
-    if (!fs.existsSync(abs)) continue
-    archive.append(fs.readFileSync(abs), {
-      name: `${prefix}${rel.replace(/\\/g, '/')}`,
-    })
-  }
+  appendPublicAssets(archive, cfg, prefix)
 
   appendWebglIfNeeded(archive, sources, prefix)
 
@@ -718,6 +735,17 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const renderLines = []
   const seen = new Set()
   const packedModels = new Set()
+  // Listas editadas en el builder: una constante por prop, arriba del App.
+  const dataConsts = []
+  const constNames = new Set()
+  const hoistFor = (component) => (key, list) => {
+    const base = `${component[0].toLowerCase()}${component.slice(1)}${key[0].toUpperCase()}${key.slice(1)}`
+    let name = base
+    for (let n = 2; constNames.has(name); n += 1) name = `${base}${n}`
+    constNames.add(name)
+    dataConsts.push(`const ${name} = ${listLiteral(list)}`)
+    return name
+  }
 
   // Same order the preview used, so `auto` resolves to the same neighbour.
   const modelIds = entries.map((entry) => String(entry.id || '').split('/')[0])
@@ -761,6 +789,10 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
         }
         walk(modelDir, path.posix.join('src/components/sections', model))
       }
+      // Lo que el modelo sirve desde public/ (los frames del hero de MERIDIAN,
+      // su galería y su mapa): sin esto la composición compila, pero las
+      // secciones piden archivos que no están y el hero rompe el canvas.
+      appendPublicAssets(archive, MODEL_FILES[model], prefix)
     }
 
     if (!seen.has(sectionId)) {
@@ -777,7 +809,10 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
       sectionId === 'commerce/ProductGrid'
         ? stripCheckoutProps(entry.props)
         : entry.props
-    const attrs = propsToJsx(theme ? { ...ownProps, theme } : ownProps)
+    const attrs = propsToJsx(
+      theme ? { ...ownProps, theme } : ownProps,
+      hoistFor(component),
+    )
     renderLines.push(
       `        <div key="${i}" className="${wrapper}"><${Comp}${attrs} /></div>`,
     )
@@ -795,6 +830,8 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
 
   const checkoutAttrs = needsShop ? propsToJsx(checkoutPropsFromItems(entries)) : ''
 
+  const dataBlock = dataConsts.length ? `\n${dataConsts.join('\n\n')}\n` : ''
+
   let appSrc
   if (needsShop) {
     appSrc = `import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -804,7 +841,7 @@ import Checkout from './components/sections/commerce/Checkout'
 import ShopChrome from './components/sections/commerce/ShopChrome'
 import { ShopThemeProvider } from './lib/shop/ShopTheme'
 ${imports.join('\n')}
-
+${dataBlock}
 function Home() {
   return (
     <SmoothScrollProvider>
@@ -852,7 +889,7 @@ export default function App() {
   } else {
     appSrc = `import SmoothScrollProvider from './components/SmoothScrollProvider'
 ${imports.join('\n')}
-
+${dataBlock}
 export default function App() {
   return (
     <SmoothScrollProvider>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { models, getSection } from '../lib/sectionRegistry'
 import {
@@ -71,6 +71,29 @@ export default function BuilderPage() {
   } = useBuilderComposition()
 
   const { rate } = useFxRate()
+
+  // Mobile: la paleta va primero y son ~80 filas, así que el total y la compra
+  // quedaban a miles de px. Una barra fija los trae hasta que el resumen de
+  // verdad entra en pantalla.
+  const summaryRef = useRef(null)
+  const [summaryInView, setSummaryInView] = useState(false)
+  const hasItems = items.length > 0
+  useEffect(() => {
+    const el = summaryRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const io = new IntersectionObserver(([entry]) =>
+      setSummaryInView(entry.isIntersecting),
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [hasItems, preview])
+
+  const goToCanvas = () => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document
+      .getElementById('builder-canvas')
+      ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+  }
   const commerceSurcharge = formatPriceFromUsd(
     COMMERCE_PACK_SURCHARGE_USD,
     locale,
@@ -229,8 +252,10 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="min-h-svh bg-bone px-5 pb-10 text-ink md:px-10">
-      <header className="sticky top-0 z-30 -mx-5 mb-8 flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 bg-bone/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
+    <div className="min-h-svh bg-bone px-5 pb-28 text-ink md:px-10 lg:pb-10">
+      {/* Sticky solo en desktop: en mobile son tres filas (~170px) fijas
+          encima de una paleta larga; ahí manda la barra de abajo. */}
+      <header className="z-30 -mx-5 mb-8 flex flex-wrap items-baseline justify-between gap-4 border-b border-ink/15 bg-bone/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10 lg:sticky lg:top-0">
         <nav className="flex items-baseline gap-5">
           <Link
             to="/"
@@ -427,7 +452,10 @@ export default function BuilderPage() {
         {/* Sticky en desktop: acompaña el scroll de la paleta. Solo la lista
             scrollea; el precio y los botones quedan siempre a la vista.
             El max-h deja aire bajo el header sticky y sobre el borde inferior. */}
-        <div className="min-w-0 lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start">
+        <div
+          id="builder-canvas"
+          className="min-w-0 scroll-mt-4 lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start"
+        >
           <div className="shrink-0">
             <p className="mb-3 text-title-sm font-medium tracking-[-0.01em]">
               {t('builder.canvasTitle')} ({items.length}{' '}
@@ -595,7 +623,10 @@ export default function BuilderPage() {
           </div>
 
           {items.length > 0 && (
-            <div className="mt-3 shrink-0 space-y-3 border border-ink/15 bg-bone p-4 md:p-5">
+            <div
+              ref={summaryRef}
+              className="mt-3 shrink-0 space-y-3 border border-ink/15 bg-bone p-4 md:p-5"
+            >
               {hasDuplicateChrome && (
                 <p className="text-body-sm text-accent">
                   {t('builder.duplicateChromeWarn')}
@@ -656,6 +687,36 @@ export default function BuilderPage() {
           )}
         </div>
       </div>
+
+      {hasItems && (
+        <div
+          inert={summaryInView}
+          className={`fixed inset-x-0 bottom-0 z-40 border-t border-ink/15 bg-bone/95 px-5 py-3 backdrop-blur-sm transition-[translate,opacity] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none lg:hidden ${
+            summaryInView ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-eyebrow uppercase text-ink/50">
+                {items.length}{' '}
+                {items.length === 1
+                  ? t('builder.sectionCountOne')
+                  : t('builder.sectionCountMany')}
+              </p>
+              <p className="text-title-sm font-medium tracking-[-0.02em]">
+                {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={goToCanvas}
+              className="btn btn-primary shrink-0"
+            >
+              {t('builder.mobileBarCta')} ↓
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

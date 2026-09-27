@@ -70,6 +70,10 @@ const orderSchema = new mongoose.Schema(
     // abandonados. Se borra al pagar (ver db.markOrderPaidAtomic).
     expiresAt: { type: Date, index: { expires: 0 } },
     zipPath: String,
+    // Versión del empaquetador con que se armó (PACK_VERSION): si cambió, el
+    // ZIP se rearma en la próxima descarga. La licencia conserva su fecha.
+    zipVersion: Number,
+    licenseDate: String,
     receiptEmailSendingAt: Date,
     receiptEmailSentAt: Date,
     receiptEmailId: String,

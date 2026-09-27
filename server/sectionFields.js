@@ -296,7 +296,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   'atrium/ManifestoType': ['lineOne', 'lineTwo', 'left', 'right'],
   'atrium/ScopeSerif': ['body'],
   'atrium/ClarityPair': ['kicker', 'left', 'right', 'bodyLeft', 'bodyRight'],
-  'atrium/BlueprintDraw': ['index', 'title', 'body', 'caption'],
+  'atrium/BlueprintDraw': ['title', 'body', 'caption'],
   'atrium/ProjectRail': ['kicker', 'title'],
   'atrium/ProcessPin': ['label'],
   'atrium/PeopleScatter': ['label', 'title'],
@@ -428,8 +428,10 @@ const THEME_PRESETS = new Set([
  */
 const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
 
-const ASSET_URL_KEYS = new Set([
+export const ASSET_URL_KEYS = new Set([
   'modelUrl',
+  'canImage',
+  'image',
   'img',
   'img1',
   'img2',
@@ -439,6 +441,10 @@ const ASSET_URL_KEYS = new Set([
   'img6',
   'img7',
   'img8',
+  'imgBack',
+  'imgMid',
+  'imgFront',
+  'nextImg',
   'logoSrc',
   'orbSrc',
 ])
