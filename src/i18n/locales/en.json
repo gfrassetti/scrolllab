@@ -488,6 +488,12 @@
     "hrefHint": "#anchor · /path · https://… · mailto:… · tel:…",
     "assetHint": "Ships in the ZIP as typed: an https:// URL or a /path (then drop the file in the downloaded project's public/).",
     "listHint": "What you add here replaces the section's sample list.",
+    "invalid": {
+      "href": "Not a valid link yet, so it isn't saved. Use #anchor, /path, https://…, mailto: or tel:",
+      "color": "Not a valid color yet, so it isn't saved. Use #rgb, #rrggbb or rgba(…).",
+      "url": "Not a valid URL yet, so it isn't saved. Use https://… or a /path, with no spaces.",
+      "price": "Numbers only, up to two decimals (15000 or 12.50): not saved like this."
+    },
     "mobileBarCta": "See my page",
     "sections": {
       "chapters": {

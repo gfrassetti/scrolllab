@@ -488,6 +488,12 @@
     "hrefHint": "#ancla · /ruta · https://… · mailto:… · tel:…",
     "assetHint": "Va al ZIP tal cual: una URL https:// o una ruta /archivo (en ese caso, dejá el archivo en public/ del proyecto que bajás).",
     "listHint": "Lo que cargues acá reemplaza la lista de ejemplo de la sección.",
+    "invalid": {
+      "href": "Todavía no es un enlace válido y no se guarda. Usá #ancla, /ruta, https://…, mailto: o tel:",
+      "color": "Todavía no es un color válido y no se guarda. Usá #rgb, #rrggbb o rgba(…).",
+      "url": "Todavía no es una URL válida y no se guarda. Usá https://… o una ruta /archivo, sin espacios.",
+      "price": "Solo números, con hasta dos decimales (15000 o 12,50): así no se guarda."
+    },
     "mobileBarCta": "Ver mi página",
     "sections": {
       "chapters": {

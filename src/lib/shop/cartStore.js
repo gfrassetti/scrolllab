@@ -20,9 +20,13 @@ export const useShopCart = create(
       closeDrawer: () => set({ drawerOpen: false }),
       toggleDrawer: () => set({ drawerOpen: !get().drawerOpen }),
 
-      addItem: (productId, qty = 1, variant = null) => {
-        const product = getProduct(productId)
-        if (!product) return
+      addItem: (productOrId, qty = 1, variant = null) => {
+        // La grilla y la ficha pasan el producto de su catálogo (puede ser el
+        // editado en el builder, ver ShopCatalog); un id suelto se busca en el
+        // de ejemplo.
+        const product =
+          typeof productOrId === 'string' ? getProduct(productOrId) : productOrId
+        if (!product?.id) return
         const id = cartLineId(product.id, variant)
         const lines = [...get().lines]
         const existing = lines.find((l) => l.id === id)

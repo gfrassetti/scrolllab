@@ -14,6 +14,7 @@ import {
 import { compositionToRecipe } from '../../src/lib/composition.js'
 import { resolveSectionTheme } from '../../src/lib/sectionTheme.js'
 import { checkoutPropsFromItems } from '../../src/lib/shop/checkoutProps.js'
+import { productsFromItems } from '../../src/lib/shop/catalog.js'
 import { sanitizeSectionProps } from '../sectionFields.js'
 import { ALLOWED_SECTIONS } from '../sections.js'
 import { BUILDER_HIDDEN_SKUS } from '../catalog.js'
@@ -99,6 +100,7 @@ const PROBES = {
 PROBES.textarea = PROBES.text
 PROBES.image = PROBES.asset
 PROBES.url = [...PROBES.asset, '/api/contact', 'https://formspree.io/f/abc', 'Mi endpoint']
+PROBES.price = ['15000', '12.5', '12,50', ' 900 ', '15.000', '1e3', '-5', 'abc', '', '0', '1234567890']
 
 function probesFor(field) {
   if (field.type === 'select') {
@@ -143,6 +145,8 @@ function validValue(field, tag) {
       return `https://cdn.example.com/${slug}.webp`
     case 'url':
       return `https://api.example.com/${slug}`
+    case 'price':
+      return '12345.67'
     default:
       // Bordes con espacios, salto de línea y caracteres que rompen JSX o JSON.
       return `  Editado ${tag}\n"comillas" {llaves} \\ </div> \${x} ñ 🙂  `
@@ -235,6 +239,9 @@ async function appInstances(source) {
     if (typeof type === 'function' && type.stubName.startsWith('./components/sections/')) {
       found.push({ id: type.stubName.replace('./components/sections/', ''), props })
     }
+    if (typeof type === 'function' && type.stubName === './lib/shop/ShopCatalog#ShopCatalogProvider') {
+      found.push({ id: 'ShopCatalogProvider', props })
+    }
     if (props.element) walk(props.element)
     walk(children)
   }
@@ -303,7 +310,10 @@ describe('builder → ZIP: una composición con todo editado', () => {
     const app = readZip(fs.readFileSync(dest)).get('src/App.jsx').toString('utf8')
     const found = await appInstances(app)
 
-    const sections = found.filter((f) => !['commerce/Checkout', 'commerce/ProductDetail', 'commerce/ShopChrome'].includes(f.id))
+    const sections = found.filter(
+      (f) =>
+        !['commerce/Checkout', 'commerce/ProductDetail', 'commerce/ShopChrome', 'ShopCatalogProvider'].includes(f.id),
+    )
     assert.deepEqual(
       sections.map((s) => s.id),
       items.map((item) => item.sectionId),
@@ -324,5 +334,12 @@ describe('builder → ZIP: una composición con todo editado', () => {
     const checkout = found.find((f) => f.id === 'commerce/Checkout')
     assert.ok(checkout, 'falta el Checkout del kit')
     assert.deepEqual(checkout.props, checkoutPropsFromItems(items))
+
+    // Los productos editados: la ficha, el carrito y el checkout leen los mismos
+    // que la grilla, desde el provider de la tienda.
+    const catalog = found.find((f) => f.id === 'ShopCatalogProvider')
+    assert.ok(catalog, 'falta ShopCatalogProvider en el App.jsx')
+    assert.deepEqual(catalog.props.products, productsFromItems(items))
+    assert.equal(productsFromItems(items).length, 8, 'la prueba no llenó los productos')
   })
 })

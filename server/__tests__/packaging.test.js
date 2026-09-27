@@ -411,6 +411,9 @@ describe('ZIP del builder', () => {
     )
     assert.ok(files.has('src/components/sections/commerce/ProductGrid.jsx'))
     assert.ok(files.has('src/lib/shop/ShopTheme.jsx'))
+    // El catálogo que comparten grilla, ficha, carrito y checkout.
+    assert.ok(files.has('src/lib/shop/ShopCatalog.jsx'))
+    assert.ok(files.has('src/lib/shop/catalog.js'))
     const app = files.get('src/App.jsx').toString('utf8')
     assert.match(
       app,
@@ -504,6 +507,28 @@ describe('ZIP del builder', () => {
         `${model} no usa el fondo del preview`,
       )
     }
+  })
+
+  // Los productos editados en el builder llegan a la grilla y a la tienda
+  // (ficha, carrito, checkout) desde la misma constante.
+  it('los productos editados van a la grilla y al catálogo de la tienda', async () => {
+    const products = [
+      { name: 'Mate', price: '15000', blurb: 'Calabaza', img: 'https://cdn.x/mate.jpg' },
+      { name: 'Bombilla', price: '12,50' },
+    ]
+    const files = await pack('custom-products', (destPath) =>
+      packCustomTemplate({
+        recipe: validateRecipe([{ id: 'commerce/ProductGrid', props: { products } }]),
+        destPath,
+        licenseMeta: LICENSE,
+      }),
+    )
+    const app = files.get('src/App.jsx').toString('utf8')
+    assert.match(app, /<ProductGrid_commerce[^>]*products=\{productGridProducts\}/)
+    assert.match(app, /<ShopCatalogProvider products=\{productGridProducts\}>/)
+    assert.match(app, /name: "Bombilla", price: "12,50"/)
+    assert.match(files.get('README.md').toString('utf8'), /`productGridProducts` in `src\/App\.jsx`/)
+    assert.deepEqual(brokenImports(files), [])
   })
 
   it('no arrastra three cuando la receta no lo usa', async () => {

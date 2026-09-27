@@ -1,6 +1,7 @@
 /**
  * Campos editables por sección (builder preview + LAB).
- * Tipos: text · textarea · select · image · url · color · href · list.
+ * Tipos: text · textarea · select · image · url · color · href · list (con
+ * sub-campo `price` para los productos del kit commerce).
  * `image` / `url` = una URL https:// o una ruta /archivo. Los objetos 3D
  * (formas, GLB) no son editables a propósito: se cambian en el código.
  * `list` = array de items; `item` describe sus sub-campos (text/textarea/
@@ -944,6 +945,21 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    // El catálogo del kit: la grilla, la ficha, el carrito y el checkout usan
+    // estos productos (src/lib/shop/catalog.js). Lo que una fila deja vacío
+    // toma el valor del producto de ejemplo en esa posición.
+    {
+      key: 'products',
+      label: 'Productos (lo vacío queda como el de ejemplo)',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'price', label: 'Precio (solo números)', type: 'price' },
+        { key: 'blurb', label: 'Descripción', type: 'textarea' },
+        { key: 'img', label: 'Foto (URL)', type: 'image' },
+      ],
+    },
     // El checkout es una ruta (/checkout), no una sección seleccionable:
     // sus textos se editan desde acá y viajan como props `checkout*`.
     { key: 'checkoutEyebrow', label: 'Checkout · Eyebrow', type: 'text' },
@@ -1043,6 +1059,16 @@ export function sanitizeImageUrl(value) {
   return sanitizeAssetUrl(value, 500)
 }
 
+// Precio de un producto: número con hasta 2 decimales (15000, 12.5, 12,50).
+// Misma regla que el servidor (PRICE_RE en server/sectionFields.js).
+const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
+
+export function sanitizePrice(value) {
+  if (typeof value !== 'string') return undefined
+  const s = value.trim()
+  return PRICE_RE.test(s) ? s : undefined
+}
+
 /**
  * Sin las filas de lista que quedaron vacías. El editor las conserva para que
  * «Agregar» muestre una fila en blanco, pero no son contenido: ni el preview
@@ -1085,6 +1111,9 @@ function sanitizeListItem(subFields, raw) {
     } else if (f.type === 'image') {
       const u = sanitizeImageUrl(t)
       if (u) item[k] = u
+    } else if (f.type === 'price') {
+      const price = sanitizePrice(t)
+      if (price) item[k] = price
     } else if (t) {
       item[k] = t
     }

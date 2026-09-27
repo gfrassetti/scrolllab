@@ -59,6 +59,7 @@ export function formatShopPrice(amount, currency = 'ARS') {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency,
-    maximumFractionDigits: 0,
+    // Enteros sin decimales (18.000); un precio con centavos los muestra (12,50).
+    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
   }).format(amount)
 }

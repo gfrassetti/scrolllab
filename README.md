@@ -105,10 +105,23 @@ si suma commerce.
 A propósito no es un editor completo: se vende código para seguir en el
 editor, no un Wix. Se editan textos, enlaces, colores de fondo y texto, y
 listas cortas (links, métricas, ítems). Las imágenes se cargan como URL o ruta:
-se ven en el preview y viajan igual al ZIP. El 3D (la forma del hero de
+se ven en el preview y viajan igual al ZIP. En el kit commerce se editan los
+productos (nombre, precio, descripción y foto, hasta 8): los usan la grilla, la
+ficha, el carrito y el checkout; lo que se deja vacío queda como el producto de
+ejemplo. El 3D (la forma del hero de
 MONOLITH, un GLB propio en FIZZ o MONOLITH) no se edita en el builder: queda el
 de la demo y se cambia en el código, con los pasos en el README del ZIP.
 Motion, layout y recetas Beat también quedan en el código.
+
+### Kit commerce (solo frontend)
+
+Grilla de productos, ficha, carrito (agregar, quitar, cantidades) y checkout
+completo. Sin backend, a propósito: pagos, stock y cuentas dependen del stack de
+cada comprador (credenciales, base de datos, hosting) y empaquetarlo no tiene
+sentido. El kit trae `checkoutAdapter.js`, una sola función donde se conecta
+Mercado Pago o Stripe. En el builder se editan los productos y los textos del
+checkout; las variantes (talle, color) se agregan en el código, con la forma
+que muestra `src/lib/shop/products.js`.
 
 ### Auditoría y fixes
 
@@ -144,8 +157,8 @@ Todo lo que el comprador edita en el builder llega al ZIP tal cual. Está
 cubierto para cada campo de cada sección, no para una muestra:
 
 - `builderRoundTrip.test.js` (en `npm test`):
-  - Por campo: para los 398 campos editables de las 81 secciones y cada tipo de
-    valor (válidos, bordes y basura; 4.242 combinaciones), lo que muestra el
+  - Por campo: para los 399 campos editables de las 81 secciones y cada tipo de
+    valor (válidos, bordes y basura; 4.254 combinaciones), lo que muestra el
     preview es exactamente lo que manda el carrito y guarda el servidor.
   - De punta a punta: una composición con las 81 secciones y todos sus campos
     editados (listas llenas hasta el tope, textos de 2.000 caracteres con
@@ -170,6 +183,10 @@ Lo que salió de ese QA y se corrigió:
   y «24/7» en «NaN», en el preview y en el ZIP. Ahora cuenta los enteros y
   deja el resto como se escribió.
 - Una fila de lista agregada y dejada en blanco ya no se dibuja ni se manda.
+- Los campos validados (link, color, URL de imagen) no se podían escribir letra
+  por letra: cada tecla que dejaba el valor inválido lo borraba («https://…»
+  terminaba en «//…», un color quedaba vacío). Ahora el campo muestra lo que se
+  tipea, guarda solo cuando es válido y avisa si así no se guarda.
 
 ### Testeado
 

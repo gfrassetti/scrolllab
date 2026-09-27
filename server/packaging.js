@@ -43,8 +43,10 @@ function publicDirAssets(relDir) {
  *  3 — BigNumbers muestra el valor como se escribió (1.500, 4,8, 24/7).
  *  4 — README: cómo cambiar el 3D en el código, sin las notas que no eran
  *      ciertas (el GLB de MONOLITH, los can1Image del carrusel de FIZZ).
+ *  5 — Kit commerce: catálogo compartido (ShopCatalog), precios con
+ *      centavos, y la ficha de un producto que no existe dice "not found".
  */
-export const PACK_VERSION = 4
+export const PACK_VERSION = 5
 
 const MODEL_FILES = {
   chapters: {
@@ -346,6 +348,8 @@ function appendWebglIfNeeded(archive, sources, prefix = '') {
 
 const SHOP_FILES = [
   'src/lib/shop/products.js',
+  'src/lib/shop/catalog.js',
+  'src/lib/shop/ShopCatalog.jsx',
   'src/lib/shop/cartStore.js',
   'src/lib/shop/checkoutAdapter.js',
   'src/lib/shop/theme.js',
@@ -360,7 +364,6 @@ const SHOP_ROUTE_COMPONENTS = [
   'src/components/sections/commerce/ShopChrome.jsx',
 ]
 
-/** READMEs: how to swap the hero's 3D object for a custom GLB. */
 /**
  * Lo que el builder no edita y el comprador cambia en el código: el objeto 3D
  * de los heroes (forma o GLB propio) y las latas del carrusel de FIZZ. El
@@ -763,6 +766,8 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const packedModels = new Set()
   // Listas editadas en el builder: una constante por prop, arriba del App.
   const dataConsts = []
+  // Nombre de la constante con los productos del ProductGrid, si se editaron.
+  let shopProducts = null
   const constNames = new Set()
   const hoistFor = (component) => (key, list) => {
     const base = `${component[0].toLowerCase()}${component.slice(1)}${key[0].toUpperCase()}${key.slice(1)}`
@@ -835,10 +840,15 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
       sectionId === 'commerce/ProductGrid'
         ? stripCheckoutProps(entry.props)
         : entry.props
-    const attrs = propsToJsx(
-      theme ? { ...ownProps, theme } : ownProps,
-      hoistFor(component),
-    )
+    const hoist = hoistFor(component)
+    const attrs = propsToJsx(theme ? { ...ownProps, theme } : ownProps, (key, list) => {
+      const name = hoist(key, list)
+      // El catálogo editado lo usa también la tienda (ficha, carrito, checkout).
+      if (sectionId === 'commerce/ProductGrid' && key === 'products' && !shopProducts) {
+        shopProducts = name
+      }
+      return name
+    })
     renderLines.push(
       `        <div key="${i}" className="${wrapper}"><${Comp}${attrs} /></div>`,
     )
@@ -866,6 +876,7 @@ import ProductDetail from './components/sections/commerce/ProductDetail'
 import Checkout from './components/sections/commerce/Checkout'
 import ShopChrome from './components/sections/commerce/ShopChrome'
 import { ShopThemeProvider } from './lib/shop/ShopTheme'
+import { ShopCatalogProvider } from './lib/shop/ShopCatalog'
 ${imports.join('\n')}
 ${dataBlock}
 function Home() {
@@ -886,27 +897,29 @@ export default function App() {
         theme="${shopTheme}"
         className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]"
       >
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/product/:productId"
-            element={
-              <>
-                <ProductDetail />
-                <ShopChrome />
-              </>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <>
-                <Checkout${checkoutAttrs} />
-                <ShopChrome />
-              </>
-            }
-          />
-        </Routes>
+        <ShopCatalogProvider${shopProducts ? ` products={${shopProducts}}` : ''}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/product/:productId"
+              element={
+                <>
+                  <ProductDetail />
+                  <ShopChrome />
+                </>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <>
+                  <Checkout${checkoutAttrs} />
+                  <ShopChrome />
+                </>
+              }
+            />
+          </Routes>
+        </ShopCatalogProvider>
       </ShopThemeProvider>
     </BrowserRouter>
   )
@@ -945,7 +958,10 @@ ${renderLines.join('\n')}
   }
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
   if (needsShop) {
-    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
+    const productsNote = shopProducts
+      ? `Products: the ones you edited in the builder are \`${shopProducts}\` in \`src/App.jsx\`, passed to \`<ProductGrid products>\` and to \`<ShopCatalogProvider products>\` (the product page, cart and checkout read it from there).`
+      : 'Products: the demo catalog in `src/lib/shop/products.js`. To use yours, pass the same list to `<ProductGrid products>` and `<ShopCatalogProvider products>` in `src/App.jsx`.'
+    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\n${productsNote} Each product: \`{ name, price, blurb, img }\`; size or colour pickers use \`variants\` (see \`src/lib/shop/products.js\`).\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
   }
 
   if (prefix) readme += '\nSee LICENSE.txt at the root of this ZIP for usage terms.\n'

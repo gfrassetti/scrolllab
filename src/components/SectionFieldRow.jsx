@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { useI18n } from '../i18n'
 
 /**
  * Un campo editable de sección. Tipos: text · textarea · select · color · href
- * · image / url (URL o ruta) · list (sub-campos text/textarea/href/color/
- * image). Compartido por LabEditorPage y BuilderPreview.
+ * · image / url (URL o ruta) · price · list (sub-campos text/textarea/href/
+ * color/image/price). Compartido por LabEditorPage y BuilderPreview.
  *
  *   <SectionFieldRow field={field} value={props[field.key]} onChange={next => …} hint="…" />
  *
@@ -22,7 +23,41 @@ function toPickerHex(v) {
   return '#000000'
 }
 
+/** Tipos que el editor valida: lo tipeado puede no guardarse todavía. */
+const VALIDATED = new Set(['color', 'href', 'url', 'image', 'price'])
+
+/**
+ * Lo tipeado se ve tal cual aunque todavía no sea válido ("h", "#1"); el valor
+ * guardado, el que viaja al ZIP, cambia solo cuando lo es. Antes cada tecla que
+ * dejaba el valor inválido lo borraba y un link o un color no se podían
+ * escribir letra por letra. Un cambio que llega de afuera (reordenar filas, un
+ * reset) manda sobre lo tipeado.
+ */
+function useDraft(value) {
+  const saved = value ?? ''
+  const [draft, setDraft] = useState(saved)
+  const [prev, setPrev] = useState(saved)
+  if (saved !== prev) {
+    setPrev(saved)
+    if (saved !== '' || prev === draft) setDraft(saved)
+  }
+  return [draft, setDraft]
+}
+
 function Scalar({ field, value, onChange }) {
+  const { t } = useI18n()
+  const [draft, setDraft] = useDraft(value)
+  const edit = (next) => {
+    setDraft(next)
+    onChange(next)
+  }
+  const invalid = VALIDATED.has(field.type) && draft.trim() !== '' && !value
+  const warning = invalid ? (
+    <span role="status" className="mt-1 block text-xs text-danger">
+      {t(`builder.invalid.${field.type === 'image' ? 'url' : field.type}`)}
+    </span>
+  ) : null
+
   if (field.type === 'select') {
     return (
       <select
@@ -48,8 +83,8 @@ function Scalar({ field, value, onChange }) {
     return (
       <textarea
         rows={4}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={draft}
+        onChange={(e) => edit(e.target.value)}
         className={inputCls}
       />
     )
@@ -59,69 +94,67 @@ function Scalar({ field, value, onChange }) {
     // Vacío = el color de la sección. El picker nativo no tiene «ninguno» y
     // mostraba negro, como si la sección fuera a quedar negra.
     return (
-      <div className="mt-2 flex items-center gap-2">
-        <span className="relative h-9 w-12 shrink-0 border border-ink/20 text-ink/35">
-          {!value && (
-            <span
-              aria-hidden="true"
-              className="absolute inset-0 bg-[linear-gradient(to_top_right,transparent_calc(50%-1px),currentColor_calc(50%-1px),currentColor_calc(50%+1px),transparent_calc(50%+1px))]"
+      <>
+        <div className="mt-2 flex items-center gap-2">
+          <span className="relative h-9 w-12 shrink-0 border border-ink/20 text-ink/35">
+            {!value && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 bg-[linear-gradient(to_top_right,transparent_calc(50%-1px),currentColor_calc(50%-1px),currentColor_calc(50%+1px),transparent_calc(50%+1px))]"
+              />
+            )}
+            <input
+              type="color"
+              value={toPickerHex(value)}
+              onChange={(e) => edit(e.target.value)}
+              className={`absolute inset-0 h-full w-full cursor-pointer bg-transparent p-0 ${
+                value ? '' : 'opacity-0'
+              }`}
+              style={{ colorScheme: 'light' }}
+              aria-label={field.label}
             />
-          )}
+          </span>
           <input
-            type="color"
-            value={toPickerHex(value)}
-            onChange={(e) => onChange(e.target.value)}
-            className={`absolute inset-0 h-full w-full cursor-pointer bg-transparent p-0 ${
-              value ? '' : 'opacity-0'
-            }`}
-            style={{ colorScheme: 'light' }}
-            aria-label={field.label}
+            type="text"
+            value={draft}
+            placeholder="#0e0e11 · rgba(14,14,17,.9)"
+            onChange={(e) => edit(e.target.value)}
+            className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink"
           />
-        </span>
+          {draft ? (
+            <button
+              type="button"
+              onClick={() => edit('')}
+              aria-label="reset"
+              className="shrink-0 px-2 py-2 text-[13px] text-ink/40 hover:text-danger"
+            >
+              ×
+            </button>
+          ) : null}
+        </div>
+        {warning}
+      </>
+    )
+  }
+
+  if (field.type === 'href' || field.type === 'url' || field.type === 'price') {
+    const placeholder = {
+      href: '#seccion · /pagina · https://… · mailto:…',
+      url: 'https://… · /api/…',
+      price: '15000',
+    }[field.type]
+    return (
+      <>
         <input
           type="text"
-          value={value}
-          placeholder="#0e0e11 · rgba(14,14,17,.9)"
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink"
+          inputMode={field.type === 'price' ? 'decimal' : 'url'}
+          value={draft}
+          placeholder={placeholder}
+          onChange={(e) => edit(e.target.value)}
+          className={inputCls}
         />
-        {value ? (
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            aria-label="reset"
-            className="shrink-0 px-2 py-2 text-[13px] text-ink/40 hover:text-danger"
-          >
-            ×
-          </button>
-        ) : null}
-      </div>
-    )
-  }
-
-  if (field.type === 'href') {
-    return (
-      <input
-        type="text"
-        inputMode="url"
-        value={value}
-        placeholder="#seccion · /pagina · https://… · mailto:…"
-        onChange={(e) => onChange(e.target.value)}
-        className={inputCls}
-      />
-    )
-  }
-
-  if (field.type === 'url') {
-    return (
-      <input
-        type="text"
-        inputMode="url"
-        value={value}
-        placeholder="https://… · /api/…"
-        onChange={(e) => onChange(e.target.value)}
-        className={inputCls}
-      />
+        {warning}
+      </>
     )
   }
 
@@ -131,11 +164,12 @@ function Scalar({ field, value, onChange }) {
         <input
           type="text"
           inputMode="url"
-          value={value}
+          value={draft}
           placeholder="https://… · /imagen.png"
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => edit(e.target.value)}
           className={inputCls.replace('mt-2 ', '')}
         />
+        {warning}
         {value ? (
           <img
             src={value}
@@ -150,8 +184,8 @@ function Scalar({ field, value, onChange }) {
   return (
     <input
       type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
+      value={draft}
+      onChange={(e) => edit(e.target.value)}
       className={inputCls}
     />
   )

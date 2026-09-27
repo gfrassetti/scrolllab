@@ -5,6 +5,7 @@ import { recipeHasCommerce } from '../lib/composition'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
 import { checkoutPropsFromItems } from '../lib/shop/checkoutProps'
+import { productsFromItems } from '../lib/shop/catalog'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
@@ -47,6 +48,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
+  const shopProducts = productsFromItems(items)
 
   const editLabelFor = (section) => {
     if (section.kind === 'nav') return t('builder.editNav')
@@ -96,6 +98,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}
+          products={shopProducts}
         />
       ) : (
         home

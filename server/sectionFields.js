@@ -356,6 +356,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'eyebrow',
     'title',
     'body',
+    'products',
     'checkoutEyebrow',
     'checkoutTitle',
     'checkoutBody',
@@ -445,11 +446,20 @@ const COLOR_RE =
 const HREF_RE =
   /^(?:#[\w-]*|\/[^\s"'<>]*|https?:\/\/[^\s"'<>]+|mailto:[^\s"'<>]+|tel:\+?[\d\s()-]{3,})$/i
 
+// Precio de un producto del kit commerce: número con hasta 2 decimales.
+const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
+
 const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 
 export const LIST_PROPS_BY_SECTION = Object.freeze({
+  'commerce/ProductGrid': {
+    products: {
+      max: 8,
+      item: { name: 'text', price: 'price', blurb: 'text', img: 'image' },
+    },
+  },
   'chapters/FooterCTA': {
     links: { max: 8, item: { label: 'text', href: 'href' } },
   },
@@ -553,6 +563,8 @@ function sanitizeListValue(schema, value) {
       } else if (type === 'image') {
         // URL real: https:// o /ruta. blob:/data: no sobreviven al persist.
         if (ASSET_URL_RE.test(t)) item[k] = t
+      } else if (type === 'price') {
+        if (PRICE_RE.test(t.trim())) item[k] = t.trim()
       } else if (t) {
         item[k] = t
       }
