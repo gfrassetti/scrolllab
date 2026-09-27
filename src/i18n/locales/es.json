@@ -8,6 +8,7 @@
     "builder": "Builder",
     "builderWithCount": "Builder, {{count}} secciones armadas",
     "lab": "LAB",
+    "studio": "Estudio",
     "cart": "Carrito",
     "account": "Mis compras",
     "login": "Entrar",
@@ -265,7 +266,8 @@
     "req2Before": "Uso en proyectos propios o de clientes —",
     "req2License": "ver licencia",
     "req3": "Prohibido revender o redistribuir el ZIP / el código como template",
-    "req4": "No incluye hosting, dominio ni soporte de deploy",
+    "req4Before": "No incluye hosting, dominio ni soporte de deploy —",
+    "req4Link": "para eso está el Estudio",
     "bundleEyebrow": "Los 8 modelos juntos",
     "bundleTitleBefore": "Llevate el",
     "bundleTitleEm": "catálogo completo",
@@ -277,6 +279,21 @@
     "builderTitleEm": "builder",
     "builderBody": "Mezclá secciones de todos los modelos, reordenalas y previsualizá la página en vivo antes de comprar.",
     "builderPrices": "Desde {{base}} con {{included}} secciones · cada sección extra suma {{extra}}",
+    "studioEyebrow": "Trabajo a medida",
+    "studioTitleBefore": "Un sitio",
+    "studioTitleEm": "a la altura de tu marca",
+    "studioBody": "Trabajamos con marcas que necesitan un sitio a la altura de su trabajo, no una plantilla genérica. Primero entendemos tu marca y tu proyecto; después lo construimos con el mismo nivel que ves en nuestros modelos.",
+    "studioForLabel": "Para quién",
+    "studioGetsLabel": "Te llevás",
+    "studioService1Name": "Sitio a medida",
+    "studioService1Kind": "Proyecto a medida",
+    "studioService1For": "Marcas que quieren un sitio propio, no un modelo.",
+    "studioService1Gets": "Diseño, desarrollo y lanzamiento — de punta a punta.",
+    "studioService2Name": "Adaptar un modelo",
+    "studioService2Kind": "Proyecto a medida",
+    "studioService2For": "Quien ya vio un modelo del catálogo y lo quiere con su marca.",
+    "studioService2Gets": "Rebranding, contenido propio y ayuda para publicarlo.",
+    "studioCta": "Contanos tu proyecto",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
     "footerContact": "Contacto",
@@ -291,11 +308,18 @@
     "backTop": "Volver arriba",
     "contactEyebrow": "Contacto personalizado",
     "contactTitle": "¿Necesitás algo a medida?",
-    "contactBody": "Pedidos especiales o una página scrollytelling hecha para tu marca. Contanos qué necesitás y te respondemos.",
+    "contactBody": "Pedidos especiales o una página hecha a medida para tu marca. Contanos qué necesitás y te respondemos.",
     "contactNote": "También podés escribirnos a",
     "contactName": "Nombre",
     "contactEmail": "Email",
-    "contactMessage": "Mensaje",
+    "contactTypeLabel": "¿Qué necesitás?",
+    "contactTypePlaceholder": "Elegí una opción",
+    "contactTypeCustom": "Un sitio a medida",
+    "contactTypeAdapt": "Adaptar un modelo a mi marca",
+    "contactTypeMaintenance": "Mantenimiento y soporte",
+    "contactTypeOther": "Otra consulta",
+    "contactMessage": "Contanos tu objetivo",
+    "contactMessagePlaceholder": "Ej.: quiero un sitio nuevo, o mejorar el que ya tengo",
     "contactSubmit": "Enviar",
     "contactSending": "Enviando…",
     "contactSuccess": "Listo — te respondemos a la brevedad.",
@@ -374,7 +398,7 @@
       "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas 3D que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
     },
     "comic": {
-      "vibe": "Historieta scrollytelling",
+      "vibe": "Historieta ilustrada",
       "tags": [
         "Paneles rasgados",
         "Camión en capas",
@@ -391,7 +415,7 @@
         "Language bands",
         "Cutout rising"
       ],
-      "description": "Canvas piedra, cuerpo Playfair y display Anton, un mosaico de fotos que se despliega en un slider full-bleed y un cierre con cutout que sube al scroll. Para campañas, eventos o marcas que quieren scrollytelling editorial de alto impacto."
+      "description": "Canvas piedra, cuerpo Playfair y display Anton, un mosaico de fotos que se despliega en un slider full-bleed y un cierre con cutout que sube al scroll. Para campañas, eventos o marcas que quieren storytelling editorial de alto impacto."
     },
     "ratio": {
       "vibe": "Coreografía Beat",
@@ -401,7 +425,7 @@
         "Cubo y tipo",
         "Placas al scroll"
       ],
-      "description": "Template Beat de scrollytelling para desktop: cubo y tipo en un riel, placas que atraviesan el viewport, un pozo que encastra y un cierre horizontal. Papel de taller y registro vermillion. No está pensado para móvil."
+      "description": "Template Beat de storytelling para desktop: cubo y tipo en un riel, placas que atraviesan el viewport, un pozo que encastra y un cierre horizontal. Papel de taller y registro vermillion. No está pensado para móvil."
     },
     "atrium": {
       "vibe": "Estudio de arquitectura",

@@ -7,6 +7,7 @@ import {
   sanitizePlainText,
   validateContactPayload,
 } from '../lib/contactForm'
+import { trackLead } from '../lib/gtm'
 import { useT } from '../i18n'
 
 /**
@@ -22,7 +23,12 @@ export default function HomeContact() {
       'https://formspree.io/f/mrenneqe',
   ).trim()
 
-  const [values, setValues] = useState({ name: '', email: '', message: '' })
+  const [values, setValues] = useState({
+    name: '',
+    email: '',
+    message: '',
+    projectType: '',
+  })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
 
@@ -119,6 +125,13 @@ export default function HomeContact() {
     if (status === 'error' || status === 'sent') setStatus('idle')
   }
 
+  // El select no pasa por sanitizePlainText: es un enum cerrado (ver
+  // PROJECT_TYPES en contactForm.js), no texto libre.
+  const onProjectTypeChange = (e) => {
+    setValues((prev) => ({ ...prev, projectType: e.target.value }))
+    if (status === 'error' || status === 'sent') setStatus('idle')
+  }
+
   const onSubmit = async (e) => {
     e.preventDefault()
     if (e.currentTarget.elements._gotcha?.value) return
@@ -145,6 +158,7 @@ export default function HomeContact() {
       body.set('name', result.data.name)
       body.set('email', result.data.email)
       body.set('message', result.data.message)
+      body.set('project_type', result.data.projectType || 'other')
       body.set('_replyto', result.data.email)
       body.set('_subject', `SCROLL LAB — ${result.data.name}`)
 
@@ -168,7 +182,10 @@ export default function HomeContact() {
       }
 
       setStatus('sent')
-      setValues({ name: '', email: '', message: '' })
+      // "Estudio" vs. genérico: separado en GTM para no mezclarlos con leads
+      // que no piden nada a medida (ver docs/estudio-positioning.md).
+      trackLead({ source: `home_contact_${result.data.projectType || 'other'}` })
+      setValues({ name: '', email: '', message: '', projectType: '' })
     } catch {
       setStatus('error')
       setErrors({ form: t('home.contactErrNetwork') })
@@ -301,6 +318,33 @@ export default function HomeContact() {
             ) : null}
           </div>
 
+          <div data-contact-field className="mb-7">
+            <label
+              htmlFor={`${uid}-projectType`}
+              className="text-xs uppercase tracking-[0.25em] text-ink/50 md:text-[13px]"
+            >
+              {t('home.contactTypeLabel')}
+            </label>
+            <select
+              id={`${uid}-projectType`}
+              name="project_type"
+              value={values.projectType}
+              onChange={onProjectTypeChange}
+              disabled={sending}
+              className={fieldClass}
+            >
+              <option value="" disabled>
+                {t('home.contactTypePlaceholder')}
+              </option>
+              <option value="custom">{t('home.contactTypeCustom')}</option>
+              <option value="adapt">{t('home.contactTypeAdapt')}</option>
+              <option value="maintenance">
+                {t('home.contactTypeMaintenance')}
+              </option>
+              <option value="other">{t('home.contactTypeOther')}</option>
+            </select>
+          </div>
+
           <div data-contact-field className="mb-10">
             <label
               htmlFor={`${uid}-message`}
@@ -315,6 +359,7 @@ export default function HomeContact() {
               maxLength={LIMITS.message}
               value={values.message}
               onChange={onChange('message')}
+              placeholder={t('home.contactMessagePlaceholder')}
               disabled={sending}
               aria-invalid={errors.message ? 'true' : undefined}
               aria-describedby={

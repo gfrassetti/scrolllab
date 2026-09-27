@@ -25,7 +25,7 @@ export function isProductSku(sku) {
 
 /** Textos que no cambian de un template a otro. Todo lo que dicen es verificable en el sitio. */
 export const PRODUCT_COPY = {
-  subtitle: 'Template scrollytelling',
+  subtitle: 'Template de storytelling',
   idealForLabel: 'Ideal para',
   priceLabel: (usd) => `USD ${usd} de lista`,
   priceNote: 'Pago único, sin suscripción. Se cobra en pesos a la cotización vigente.',
@@ -153,7 +153,7 @@ export function productPageData(sku, messages) {
     robots: INDEXABLE_ROBOTS,
     canonical: url,
     ogImage: `${SITE_URL}/og/${sku}.jpg`,
-    ogImageAlt: `${name} — ${meta.vibe}: template scrollytelling, ${SITE_NAME}`,
+    ogImageAlt: `${name} — ${meta.vibe}: template de storytelling, ${SITE_NAME}`,
     copy: PRODUCT_COPY,
   }
 }

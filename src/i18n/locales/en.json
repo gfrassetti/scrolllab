@@ -8,6 +8,7 @@
     "builder": "Builder",
     "builderWithCount": "Builder, {{count}} sections added",
     "lab": "LAB",
+    "studio": "Studio",
     "cart": "Cart",
     "account": "My purchases",
     "login": "Log in",
@@ -265,7 +266,8 @@
     "req2Before": "Use in your own or client projects —",
     "req2License": "see license",
     "req3": "No reselling or redistributing the ZIP / code as a template",
-    "req4": "Does not include hosting, domain, or deploy support",
+    "req4Before": "Doesn't include hosting, domain, or deploy support —",
+    "req4Link": "that's what the Studio is for",
     "bundleEyebrow": "All 8 models together",
     "bundleTitleBefore": "Get the",
     "bundleTitleEm": "full catalog",
@@ -277,6 +279,21 @@
     "builderTitleEm": "builder",
     "builderBody": "Mix sections from every model, reorder them, and preview the live page before you buy.",
     "builderPrices": "From {{base}} with {{included}} sections · every extra section adds {{extra}}",
+    "studioEyebrow": "Bespoke work",
+    "studioTitleBefore": "A site",
+    "studioTitleEm": "as good as your brand",
+    "studioBody": "We work with brands that need a site as good as their work, not a generic template. We start by understanding your brand and your project, then we build it with the same craft you see in our models.",
+    "studioForLabel": "Who it's for",
+    "studioGetsLabel": "You get",
+    "studioService1Name": "Custom site",
+    "studioService1Kind": "Bespoke project",
+    "studioService1For": "Brands that want a site of their own, not a model.",
+    "studioService1Gets": "Design, development and launch — end to end.",
+    "studioService2Name": "Adapt a model",
+    "studioService2Kind": "Bespoke project",
+    "studioService2For": "You've seen a model in the catalog and want it with your brand.",
+    "studioService2Gets": "Rebranding, your own content, and help publishing it.",
+    "studioCta": "Tell us about your project",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
     "footerContact": "Contact",
@@ -291,11 +308,18 @@
     "backTop": "Back to top",
     "contactEyebrow": "Custom contact",
     "contactTitle": "Need something bespoke?",
-    "contactBody": "Special requests or a scrollytelling page built for your brand. Tell us what you need and we’ll reply.",
+    "contactBody": "Special requests or a page built just for your brand. Tell us what you need and we’ll reply.",
     "contactNote": "You can also email",
     "contactName": "Name",
     "contactEmail": "Email",
-    "contactMessage": "Message",
+    "contactTypeLabel": "What do you need?",
+    "contactTypePlaceholder": "Choose one",
+    "contactTypeCustom": "A custom site",
+    "contactTypeAdapt": "Adapt a model to my brand",
+    "contactTypeMaintenance": "Maintenance & support",
+    "contactTypeOther": "Something else",
+    "contactMessage": "Tell us your goal",
+    "contactMessagePlaceholder": "E.g.: I need a new site, or want to improve the one I have",
     "contactSubmit": "Send",
     "contactSending": "Sending…",
     "contactSuccess": "Got it — we’ll get back to you soon.",
@@ -374,7 +398,7 @@
       "description": "Atmospheric dark canvas, scroll-tied fog, and 3D pieces that rotate or shatter as you scroll. Digital studio aesthetic. Ideal for agencies, creative studios, or architecture practices selling premium services with a prestige site."
     },
     "comic": {
-      "vibe": "Comic scrollytelling",
+      "vibe": "Illustrated comic",
       "tags": [
         "Torn panels",
         "Layered truck scene",
@@ -391,7 +415,7 @@
         "Language bands",
         "Rising cutout"
       ],
-      "description": "Stone canvas, Playfair body + Anton display, a photo mosaic that unfolds into a full-bleed slider, and a closer with a rising cutout. For campaigns, events, or brands that want high-impact editorial scrollytelling."
+      "description": "Stone canvas, Playfair body + Anton display, a photo mosaic that unfolds into a full-bleed slider, and a closer with a rising cutout. For campaigns, events, or brands that want high-impact editorial storytelling."
     },
     "ratio": {
       "vibe": "Beat choreography",
@@ -401,7 +425,7 @@
         "Cube and type",
         "Scroll plates"
       ],
-      "description": "A Beat scrollytelling template for desktop: cube and type on a rail, plates that punch through the viewport, a stacking well, and a horizontal closer. Print-shop stock and vermillion register. Not built for mobile."
+      "description": "A Beat storytelling template for desktop: cube and type on a rail, plates that punch through the viewport, a stacking well, and a horizontal closer. Print-shop stock and vermillion register. Not built for mobile."
     },
     "atrium": {
       "vibe": "Architecture bureau",

@@ -15,6 +15,29 @@ Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, qu
 
 El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento. La plusvalía junto al builder es **Beat** (`docs/scrolllab-beat.md`, `src/lib/beat/`): riel + seek en nuestras secciones, no un fade genérico. Si la URL de referencia es un proyecto **Readymag**, extraer recetas y alimentar Beat — no interpolar a ojo con GSAP ni copiar el viewer (`docs/readymag-motion.md`).
 
+**Estudio (trabajo a medida).** Además del marketplace, ScrollLab también es un
+estudio: hace sitios a medida y adapta un modelo del catálogo a la marca del
+cliente — las dos únicas tarjetas en el home. También ofrece mantenimiento/
+soporte, pero **sin tarjeta ni suscripción propia** (no es self-serve como
+LAB): sale solo si surge en la conversación con quien ya contactó por uno de
+los dos servicios de arriba. Todo por cotización
+manual (no pasa por el checkout de Mercado Pago), enmarcado en la calidad del
+sitio y el proceso (diagnóstico antes de construir), nunca por hora. **No
+prometer resultados de negocio** (más clientes, más conversión, más
+consultas): eso depende de marketing/tráfico/oferta, no de nosotros — somos
+un estudio de desarrollo web, no una agencia de marketing (2026-09-28,
+decisión explícita del dueño tras dudar de la lección de un curso). Público: marcas
+que quieren un sitio de nivel superior al promedio — no se nombran rubros
+específicos (arquitectura, moda, etc.) en copy público ni en el pitch, no
+suma acotar la lista. Los precios ancla del Estudio no se muestran en el
+sitio (se hablan con el cliente) y tienen que quedar siempre arriba del techo
+del builder (`CUSTOM_BASE_PRICE_USD` + secciones extra + commerce,
+`src/lib/pricing.js`) y del template más caro en venta: no afirmar cupos
+fijos ("1 por mes") — la capacidad depende del proyecto. Copy y sección viven
+en el home
+(`src/pages/TemplatesIndex.jsx`, zona `estudio`, componente `ZoneHeadline`);
+detalle completo en `docs/estudio-positioning.md`.
+
 ## Design craft — obligatorio (siempre)
 
 En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, polish, animación):
@@ -262,11 +285,12 @@ src/lib/
 ```
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 235 con 8 secciones incluidas, USD 15 por cada sección
+tramos**: base de USD 389 con 8 secciones incluidas, USD 15 por cada sección
 extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
 receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
 sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
-que quedar **arriba** del template más caro que SÍ está en venta (hoy USD 229).
+que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN,
+USD 379).
 Las constantes viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
 valida la paridad. Detalle en `docs/DEPLOY.md`.
 
@@ -359,8 +383,8 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 #### Precio
 
-- RATIO lista **USD 269** (Beat, el más caro). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
-- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 235) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
+- RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379 (el más caro hoy).
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 389) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
 

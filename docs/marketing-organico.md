@@ -72,7 +72,12 @@ para mostrar proyectos. Participá un par de días antes respondiendo dudas.
 - **Hacker News**: "Show HN: Scroll-driven website templates in React + GSAP". Tiene que poder probarse: las demos son públicas.
 - **Codrops y medios de creative dev**: un tutorial de una técnica de una demo, por ejemplo el héroe con máscara por letra de CHAPTERS. Revisá cómo se envían colaboraciones.
 - **Discords y grupos de devs de LatAm**: mostrar una demo cuando alguien pregunta por animaciones en scroll.
-- **Mensajes directos a estudios y freelancers**: 10 por semana, con la demo que mejor les cierra y el link con `utm_source=dm`. Es lo más lento y lo que más convierte.
+- **Mensajes directos a estudios y freelancers**: 10 por semana, con la demo que mejor les cierra y el link con `utm_source=dm`. Es lo más lento y lo que más convierte. Si el estudio ya tiene sitio y pregunta por algo que ningún template resuelve (rebranding, mantenimiento, un sitio 100% a medida), ahí se menciona el Estudio — sin convertir el DM en un pitch de servicios: mostrás la demo primero, el Estudio es la respuesta a su pregunta, no la apertura.
+
+Los leads del Estudio entran por `#contacto` en el home (Formspree + evento GTM
+`generate_lead` con `lead_source=home_contact_*`) — no por `leads:stats` (eso
+sigue siendo solo cuentas con cupón). Detalle de servicios y precios ancla:
+`docs/estudio-positioning.md`.
 
 ## El "cómo está hecho" de la semana 4
 
