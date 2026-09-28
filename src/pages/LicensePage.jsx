@@ -26,6 +26,9 @@ export default function LicensePage() {
         <h1 className="text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] font-medium tracking-[-0.02em]">
           {t('license.title')}
         </h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-ink/45">
+          {t('license.effectiveDate')}
+        </p>
         <p className="text-sm leading-relaxed text-ink/70 md:text-base">
           {t('license.intro', { site: SITE_NAME })}
         </p>
@@ -60,6 +63,15 @@ export default function LicensePage() {
           </h2>
           <p className="text-sm leading-relaxed text-ink/70 md:text-base">
             {t('license.ownerBody', { site: SITE_NAME })}
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium uppercase tracking-[0.2em]">
+            {t('license.estudioTitle')}
+          </h2>
+          <p className="text-sm leading-relaxed text-ink/70 md:text-base">
+            {t('license.estudioBody')}
           </p>
         </section>
 

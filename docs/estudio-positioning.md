@@ -37,6 +37,14 @@ caso por caso a quien ya contactó por alguno de los dos de arriba; el select
 del formulario ("¿Qué necesitás?") igual tiene la opción `maintenance`, para
 no perder ese lead si alguien pregunta puntualmente por esto.
 
+**Propiedad del resultado (decisión del dueño, 2026-09-28):** en "Sitio a
+medida" (desde cero) la propiedad del código final es del cliente una vez
+completado el pago acordado — es trabajo por encargo, el cliente contrata y
+el diseño/desarrollo es suyo. "Adaptar un modelo" sigue bajo la Licencia
+Regular normal (`src/i18n/locales/{es,en}.json` → `license.estudioBody`,
+`terms.sections` → "Estudio (trabajo a medida)"), porque parte de un template
+que sigue siendo de ScrollLab. Mantenimiento no cambia la propiedad de nada.
+
 Todos por **cotización manual** — nunca pasan por el checkout de Mercado Pago,
 nunca tocan `server/catalog.js` ni `src/lib/pricing.js` (esas rutas son solo
 para lo que sí se compra online: templates, builder, LAB).

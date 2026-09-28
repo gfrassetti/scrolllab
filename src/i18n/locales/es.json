@@ -1067,6 +1067,7 @@
   "license": {
     "eyebrow": "Licencia Regular",
     "title": "Licencia Regular",
+    "effectiveDate": "Vigente desde el 28 de septiembre de 2026",
     "intro": "Al comprar un template o una composición de {{site}}, obtenés una licencia no exclusiva e intransferible sobre ese ítem (el “Ítem”). Esta es la licencia estándar que acompaña cada descarga.",
     "canTitle": "Qué podés hacer",
     "can1": "Usar el Ítem en proyectos propios o de clientes, sin límite de cantidad de sitios o aplicaciones.",
@@ -1080,13 +1081,15 @@
     "cant4": "Compartir el link de descarga o tu cuenta con terceros.",
     "ownerTitle": "Propiedad",
     "ownerBody": "{{site}} (y sus licenciantes) retienen todos los derechos de propiedad intelectual sobre el Ítem. Solo se otorgan los derechos descritos acá. Cada ZIP incluye un archivo LICENSE.txt con el número de orden y el email del comprador; esa marca identifica la licencia otorgada.",
+    "estudioTitle": "Trabajo a medida (Estudio)",
+    "estudioBody": "Los proyectos de Estudio no se rigen por esta Licencia Regular. En un sitio a medida (desde cero), la propiedad del resultado final es tuya una vez completado el pago acordado: es un trabajo por encargo. Adaptar un modelo sigue bajo esta Licencia Regular, porque parte de uno de nuestros templates. El mantenimiento y soporte no cambia la propiedad de tu sitio. El precio, los plazos y los entregables de cada proyecto se acuerdan por separado.",
     "contact": "Consultas:"
   },
   "privacy": {
     "eyebrow": "Legal",
     "title": "Política de Privacidad",
-    "effectiveDate": "Vigente desde el 29 de julio de 2026",
-    "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra o descargás un producto.",
+    "effectiveDate": "Vigente desde el 28 de septiembre de 2026",
+    "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra, descargás un producto o nos escribís por un proyecto de Estudio.",
     "sections": [
       {
         "title": "Datos que recopilamos",
@@ -1094,7 +1097,8 @@
           "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
           "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago y cantidad de descargas.",
           "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión.",
-          "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste."
+          "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste.",
+          "Si nos escribís por el formulario de contacto o de Estudio: tu nombre, email, mensaje y qué tipo de proyecto marcaste."
         ]
       },
       {
@@ -1104,16 +1108,17 @@
           "Procesar pagos, confirmar órdenes y habilitar descargas.",
           "Enviar comprobantes y comunicaciones operativas relacionadas con tus compras.",
           "Enviarte por mail el cupón de bienvenida de tu primera compra. No enviamos newsletters.",
+          "Responder tu consulta cuando nos escribís por el formulario de contacto, incluidos los proyectos de Estudio (trabajo a medida).",
           "Prevenir fraude, abuso y accesos no autorizados, y cumplir obligaciones legales."
         ]
       },
       {
         "title": "Servicios de terceros",
-        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos, Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
       },
       {
         "title": "Cookies y almacenamiento local",
-        "body": "Usamos una cookie de sesión para mantener tu cuenta autenticada. También podemos guardar en tu navegador preferencias como idioma, tema, carrito y composiciones del builder. Podés borrar estos datos desde la configuración de tu navegador, aunque algunas funciones pueden dejar de operar correctamente."
+        "body": "Usamos una cookie de sesión para mantener tu cuenta autenticada. Google Tag Manager y Analytics pueden guardar sus propias cookies para medir visitas de forma agregada. También podemos guardar en tu navegador preferencias como idioma, tema, carrito y composiciones del builder. Podés borrar estos datos desde la configuración de tu navegador, aunque algunas funciones pueden dejar de operar correctamente."
       },
       {
         "title": "Conservación y seguridad",
@@ -1141,7 +1146,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 30 de julio de 2026",
+    "effectiveDate": "Vigentes desde el 28 de septiembre de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
       {
@@ -1175,6 +1180,15 @@
       {
         "title": "Cambios",
         "body": "Podemos actualizar el servicio y estos Términos. La versión vigente y su fecha estarán publicadas en esta página. El uso posterior a una actualización implica la aceptación de los nuevos Términos."
+      },
+      {
+        "title": "Estudio (trabajo a medida)",
+        "items": [
+          "Sitio a medida, adaptar un modelo, y mantenimiento y soporte son servicios por cotización manual: no se compran desde el catálogo ni se pagan con Mercado Pago dentro del sitio. El precio y el alcance se acuerdan antes de empezar, caso por caso.",
+          "No garantizamos resultados de negocio (más clientes, más ventas, más conversión): construimos y entregamos el sitio con el nivel de calidad que ves en nuestros modelos; el resultado de negocio depende de factores que no controlamos, como el marketing o el tráfico.",
+          "En un sitio a medida (desde cero), la propiedad del resultado final es tuya una vez completado el pago acordado: es un trabajo por encargo. Adaptar un modelo sigue bajo la Licencia Regular, porque parte de uno de nuestros templates.",
+          "El precio, los plazos, los entregables y las condiciones de cancelación de cada proyecto de Estudio se establecen en el acuerdo específico de ese proyecto, no en estos Términos ni en la Licencia Regular."
+        ]
       },
       {
         "title": "Componentes alojados (LAB)",

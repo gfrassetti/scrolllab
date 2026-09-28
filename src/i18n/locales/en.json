@@ -1067,6 +1067,7 @@
   "license": {
     "eyebrow": "Regular License",
     "title": "Regular License",
+    "effectiveDate": "Effective September 28, 2026",
     "intro": "By purchasing a template or composition from {{site}}, you receive a non-exclusive, non-transferable license to that item (the “Item”). This is the standard license that ships with every download.",
     "canTitle": "What you can do",
     "can1": "Use the Item in your own or client projects, with no limit on the number of sites or apps.",
@@ -1080,13 +1081,15 @@
     "cant4": "Share the download link or your account with third parties.",
     "ownerTitle": "Ownership",
     "ownerBody": "{{site}} (and its licensors) retain all intellectual property rights to the Item. Only the rights described here are granted. Each ZIP includes a LICENSE.txt with the order number and buyer email; that mark identifies the license granted.",
+    "estudioTitle": "Bespoke work (Studio)",
+    "estudioBody": "Studio projects are not governed by this Regular License. On a custom site (built from scratch), ownership of the final result is yours once the agreed payment is completed: it's work made for hire. Adapting a model stays under this Regular License, since it starts from one of our templates. Maintenance and support doesn't change who owns your site. Price, timeline, and deliverables for each project are agreed separately.",
     "contact": "Questions:"
   },
   "privacy": {
     "eyebrow": "Legal",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective July 29, 2026",
-    "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, or download a product.",
+    "effectiveDate": "Effective September 28, 2026",
+    "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, download a product, or write to us about a Studio project.",
     "sections": [
       {
         "title": "Data we collect",
@@ -1094,7 +1097,8 @@
           "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
           "Purchase and order data: products, amount, currency, payment status, Mercado Pago identifiers, and download count.",
           "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies.",
-          "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it."
+          "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it.",
+          "If you write to us through the contact or Studio form: your name, email, message, and the project type you selected."
         ]
       },
       {
@@ -1104,16 +1108,17 @@
           "Process payments, confirm orders, and enable downloads.",
           "Send receipts and operational messages related to your purchases.",
           "Email you the welcome coupon for your first purchase. We do not send newsletters.",
+          "Reply to you when you write through the contact form, including Studio (bespoke work) inquiries.",
           "Prevent fraud, abuse, and unauthorized access, and comply with legal obligations."
         ]
       },
       {
         "title": "Third-party services",
-        "body": "We use Google for authentication, Mercado Pago to process payments, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+        "body": "We use Google for authentication, Mercado Pago to process payments, Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
       },
       {
         "title": "Cookies and local storage",
-        "body": "We use a session cookie to keep your account authenticated. We may also store preferences such as language, theme, cart, and builder compositions in your browser. You can delete this data through your browser settings, although some features may stop working correctly."
+        "body": "We use a session cookie to keep your account authenticated. Google Tag Manager and Analytics may set their own cookies to measure aggregate visits. We may also store preferences such as language, theme, cart, and builder compositions in your browser. You can delete this data through your browser settings, although some features may stop working correctly."
       },
       {
         "title": "Retention and security",
@@ -1141,7 +1146,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective July 30, 2026",
+    "effectiveDate": "Effective September 28, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -1175,6 +1180,15 @@
       {
         "title": "Changes",
         "body": "We may update the service and these Terms. The current version and effective date will be posted on this page. Continued use after an update means you accept the revised Terms."
+      },
+      {
+        "title": "Studio (bespoke work)",
+        "items": [
+          "Custom sites, adapting a model, and maintenance and support are quote-based services: they are not purchased from the catalog or paid through Mercado Pago inside the site. Price and scope are agreed before starting, case by case.",
+          "We do not guarantee business results (more clients, more sales, more conversion): we build and deliver the site at the quality level you see in our models; business results depend on factors we don't control, like marketing or traffic.",
+          "On a custom site (built from scratch), ownership of the final result is yours once the agreed payment is completed: it's work made for hire. Adapting a model stays under the Regular License, since it starts from one of our templates.",
+          "Payment, timelines, deliverables, and cancellation terms for each Studio project are set out in that project's specific agreement, not in these Terms or the Regular License."
+        ]
       },
       {
         "title": "Hosted components (LAB)",
