@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { picsumAttrs } from './picsum'
 
 const defaultBeats = [
   {
@@ -95,9 +96,11 @@ export default function SplitReveals({
           >
             <img
               data-beat-img
-              src={beat.img}
+              {...picsumAttrs(beat.img)}
+              sizes="(min-width: 768px) 50vw, 100vw"
               alt=""
               loading="lazy"
+              decoding="async"
               className={`aspect-4/3 w-full object-cover ${i % 2 === 1 ? 'md:order-2' : ''}`}
             />
             <div data-beat-copy className="space-y-5">

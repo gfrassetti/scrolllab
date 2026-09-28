@@ -2,8 +2,8 @@ import { useRef, useState } from 'react'
 import { gsap } from '../../../lib/gsap'
 import PaperFrame from './PaperFrame'
 import { usePinnedScrub } from './usePinnedScrub'
-import heroRoad from './assets/hero-road.png'
-import closedYards from './assets/closed-yards.png'
+import { heroRoad, closedYards, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const DEFAULT_FACTS = [
   {
@@ -149,13 +149,16 @@ export default function ChapterWorlds({
               <div className="relative h-[min(32vh,240px)] overflow-hidden sm:h-[min(36vh,280px)] md:h-[min(38vh,320px)]">
                 <img
                   data-world-img="open"
-                  src={heroRoad}
+                  {...imgAttrs(heroRoad, variants)}
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover will-change-transform"
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
-                <p className="absolute top-3 left-3 text-[10px] tracking-[0.25em] text-white/85 uppercase">
+                <p className="absolute top-3 left-3 text-[11px] tracking-[0.25em] text-white/85 uppercase">
                   {sceneOpen}
                 </p>
                 <span
@@ -167,7 +170,7 @@ export default function ChapterWorlds({
                   type="button"
                   data-hotspot
                   onClick={() => setOpenId(openId === 'lab' ? null : 'lab')}
-                  className="absolute top-[48%] left-[32%] z-10 max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[9px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3 sm:text-[10px]"
+                  className="absolute top-[48%] left-[32%] z-10 max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[9px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3 sm:text-[11px]"
                 >
                   {hotspotOpen}
                 </button>
@@ -180,13 +183,16 @@ export default function ChapterWorlds({
               <div className="relative h-[min(32vh,240px)] overflow-hidden sm:h-[min(36vh,280px)] md:h-[min(38vh,320px)]">
                 <img
                   data-world-img="closed"
-                  src={closedYards}
+                  {...imgAttrs(closedYards, variants)}
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover will-change-transform"
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/25" />
-                <p className="absolute top-3 left-3 text-[10px] tracking-[0.25em] text-white/85 uppercase">
+                <p className="absolute top-3 left-3 text-[11px] tracking-[0.25em] text-white/85 uppercase">
                   {sceneClosed}
                 </p>
                 <span
@@ -198,7 +204,7 @@ export default function ChapterWorlds({
                   type="button"
                   data-hotspot
                   onClick={() => setOpenId(openId === 'yard' ? null : 'yard')}
-                  className="absolute top-[44%] right-[20%] z-10 max-w-[9.5rem] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[9px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3 sm:text-[10px]"
+                  className="absolute top-[44%] right-[20%] z-10 max-w-[9.5rem] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[9px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3 sm:text-[11px]"
                 >
                   {hotspotClosed}
                 </button>

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import stageA from './assets/stage-a.png'
-import stageB from './assets/stage-b.png'
+import { stageA, stageB, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * StageLines — two typographic beats over drifting media.
@@ -78,9 +78,11 @@ export default function StageLines({
           <div className="absolute inset-0 opacity-35">
             <img
               data-stage-img
-              src={band.img}
+              {...imgAttrs(band.img, variants)}
+              sizes="100vw"
               alt=""
               loading="lazy"
+              decoding="async"
               className="h-[130%] w-full object-cover will-change-transform"
             />
           </div>

@@ -1,14 +1,18 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import {
+  sodaCan01 as canCitrus,
+  sodaCan02 as canBerry,
+  sodaCan03 as canMint,
+  sodaCan04 as canTropical,
+  sodaCan05 as canPurple,
+  variants,
+} from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const gltfLoaderMod = () =>
   import('three/examples/jsm/loaders/GLTFLoader.js')
-import canCitrus from './assets/soda-can-01.png'
-import canBerry from './assets/soda-can-02.png'
-import canMint from './assets/soda-can-03.png'
-import canTropical from './assets/soda-can-04.png'
-import canPurple from './assets/soda-can-05.png'
 
 /** Curated flavor presets — PNG cutout + bubble / backdrop tint. */
 export const FIZZ_FLAVORS = {
@@ -227,7 +231,8 @@ export default function HeroBubbles({
         alpha: true,
         powerPreference: 'high-performance',
       })
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2))
       renderer.outputColorSpace = THREE.SRGBColorSpace
       renderer.toneMapping = THREE.ACESFilmicToneMapping
       renderer.toneMappingExposure = 1.15
@@ -567,7 +572,8 @@ export default function HeroBubbles({
             <img
               ref={canImgRef}
               data-fizz-can
-              src={heroCanSrc}
+              {...imgAttrs(heroCanSrc, variants)}
+              sizes="(min-width: 768px) 380px, 58vw"
               alt=""
               draggable={false}
               className="h-[min(78svh,720px)] w-auto max-w-[min(58vw,340px)] origin-center opacity-0 select-none object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.65)] will-change-transform md:max-w-[380px]"

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import portrait from './assets/portrait.png'
+import { portrait, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * LastPortrait — dark portrait closer ("Last Dance" beat).
@@ -76,9 +77,11 @@ export default function LastPortrait({
           <div className="relative aspect-[4/5] overflow-hidden">
             <img
               data-last-img
-              src={img}
+              {...imgAttrs(img, variants)}
+              sizes="(min-width: 1024px) 40vw, 100vw"
               alt=""
               loading="lazy"
+              decoding="async"
               className="absolute inset-0 h-full w-full object-cover will-change-transform"
             />
           </div>
@@ -115,7 +118,7 @@ export default function LastPortrait({
               [stat3Label, stat3Value],
             ].map(([label, value]) => (
               <div key={label}>
-                <dt className="text-[10px] tracking-[0.22em] uppercase opacity-45">
+                <dt className="text-[11px] tracking-[0.22em] uppercase opacity-45">
                   {label}
                 </dt>
                 <dd className="mt-1 font-oswald text-2xl font-semibold uppercase">

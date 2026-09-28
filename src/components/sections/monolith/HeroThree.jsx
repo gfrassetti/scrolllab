@@ -87,7 +87,8 @@ export default function HeroThree({
         antialias: true,
         alpha: true,
       })
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2))
 
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
@@ -253,9 +254,10 @@ export default function HeroThree({
       />
 
       <div className="pointer-events-none relative z-10 flex h-full flex-col justify-between">
+        {/* Chip de concreto: sin él, la malla del objeto cruza el texto chico. */}
         <p
           data-mono-fade
-          className="max-w-70 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs"
+          className="-mx-2 w-fit max-w-72 bg-concrete px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs"
         >
           {subtitle}
         </p>
@@ -268,7 +270,9 @@ export default function HeroThree({
         </h1>
 
         <div className="relative z-10 flex items-end justify-between border-t-2 border-carbon pt-3 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
-          <p data-mono-fade>{meta}</p>
+          <p data-mono-fade className="-ml-2 bg-concrete px-2 py-1">
+            {meta}
+          </p>
           <p data-mono-fade className="bg-carbon px-2 py-1 text-concrete">
             {hint} <span aria-hidden="true">↓</span>
           </p>

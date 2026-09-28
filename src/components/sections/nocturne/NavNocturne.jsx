@@ -19,7 +19,7 @@ export default function NavNocturne({
   return (
     <header className="fixed inset-x-0 top-0 z-50 text-salt">
       <nav className="relative z-10 flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
-        <a href="#top" className="text-sm font-medium uppercase tracking-[0.25em]">
+        <a href="#top" className="tpl-hit relative text-sm font-medium uppercase tracking-[0.25em]">
           {brand}
         </a>
 
@@ -32,7 +32,7 @@ export default function NavNocturne({
             <li key={item.label}>
               <a
                 href={item.href}
-                className="text-xs uppercase tracking-[0.25em] transition-colors duration-300 hover:text-acid"
+                className="tpl-link tpl-hit relative text-xs uppercase tracking-[0.25em] transition-colors duration-300 hover:text-acid"
               >
                 {item.label}
               </a>
@@ -42,7 +42,7 @@ export default function NavNocturne({
 
         <button
           {...triggerProps}
-          className="text-xs uppercase tracking-[0.25em] transition-colors duration-300 hover:text-acid md:hidden"
+          className="ui-press tpl-hit relative text-xs uppercase tracking-[0.25em] transition-colors duration-300 hover:text-acid md:hidden"
         >
           {open ? closeLabel : menuLabel}
         </button>
@@ -57,7 +57,7 @@ export default function NavNocturne({
         }`}
       >
         <div className="flex h-full flex-col justify-center px-5">
-          <p className="mb-8 text-[10px] uppercase tracking-[0.3em] text-salt/35">
+          <p className="mb-8 text-[11px] uppercase tracking-[0.3em] text-salt/40">
             {marker}
           </p>
           <ul>
@@ -71,7 +71,7 @@ export default function NavNocturne({
                     open ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
                   }`}
                 >
-                  <span className="text-[10px] tracking-[0.3em] text-salt/35">
+                  <span className="text-[11px] tracking-[0.3em] text-salt/40">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="text-[clamp(1.9rem,10vw,3.25rem)] leading-none font-medium tracking-[-0.03em]">

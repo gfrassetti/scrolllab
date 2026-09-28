@@ -1,9 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import ex01 from './assets/ex-01.png'
-import ex02 from './assets/ex-02.png'
-import ex03 from './assets/ex-03.png'
-import ex04 from './assets/ex-04.png'
+import { ex01, ex02, ex03, ex04, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultExhibits = [
   { code: 'EX-01', caption: 'Placeholder exhibit', img: ex01 },
@@ -68,16 +66,18 @@ export default function ExhibitGrid({
             <div className="aspect-square overflow-hidden">
               {exhibit.img ? (
                 <img
-                  src={exhibit.img}
+                  {...imgAttrs(exhibit.img, variants)}
+                  sizes="(min-width: 768px) 25vw, 50vw"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="aspect-square w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
                 />
               ) : null}
             </div>
-            <figcaption className="flex items-baseline justify-between border-t-2 border-carbon px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] md:text-[11px]">
-              <span className="text-klein">{exhibit.code}</span>
-              <span>{exhibit.caption}</span>
+            <figcaption className="flex items-baseline justify-between gap-3 border-t-2 border-carbon px-3 py-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
+              <span className="whitespace-nowrap text-klein">{exhibit.code}</span>
+              <span className="text-right">{exhibit.caption}</span>
             </figcaption>
           </figure>
         ))}

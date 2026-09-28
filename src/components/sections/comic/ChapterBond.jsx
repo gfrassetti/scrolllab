@@ -1,9 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import PaperFrame from './PaperFrame'
-import closeupBuddies from './assets/closeup-buddies.png'
-import heroRoad from './assets/hero-road.png'
-import driveSunset from './assets/drive-sunset.png'
+import { closeupBuddies, heroRoad, driveSunset, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * ChapterBond — pinned comic pages that tear over each other.
@@ -122,14 +121,17 @@ export default function ChapterBond({
                   <div className="relative min-h-48 overflow-hidden">
                     <img
                       data-page-img
-                      src={page.img}
+                      {...imgAttrs(page.img, variants)}
+                      sizes="(min-width: 768px) 60vw, 100vw"
+                      loading="lazy"
+                      decoding="async"
                       alt=""
                       className="absolute inset-0 h-full w-full object-cover"
                       draggable={false}
                     />
                   </div>
                   <div className="flex flex-col justify-center gap-3 bg-[#f7f4ee] p-6 md:p-8">
-                    <p className="text-[10px] tracking-[0.25em] text-comic-flare uppercase">
+                    <p className="text-[11px] tracking-[0.25em] text-comic-flare uppercase">
                       {page.kicker}
                     </p>
                     <h2 className="font-brico text-2xl font-bold tracking-[-0.03em] md:text-3xl">

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { picsumAttrs } from './picsum'
 
 const defaultWorks = [
   {
@@ -120,7 +121,7 @@ export default function WorkIndex({
             <a
               href="#"
               onMouseEnter={() => showPreview(work.img)}
-              className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 py-6 md:grid-cols-[6rem_1fr_auto_6rem] md:gap-8 md:py-8"
+              className="group grid grid-cols-[auto_1fr] items-center gap-4 py-6 md:grid-cols-[6rem_1fr_auto_6rem] md:gap-8 md:py-8"
             >
               <span className="text-[11px] tracking-[0.3em] text-salt/40 md:text-xs">
                 {work.index}
@@ -128,20 +129,29 @@ export default function WorkIndex({
 
               <span className="flex min-w-0 items-center gap-4">
                 <img
-                  src={work.img}
+                  {...picsumAttrs(work.img, [160])}
+                  sizes="44px"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="h-14 w-11 shrink-0 object-cover md:hidden"
                 />
-                <span className="min-w-0 break-words font-brico text-[clamp(1.6rem,4.5vw,3.8rem)] leading-none font-extrabold tracking-[-0.02em] uppercase transition-all duration-300 group-hover:translate-x-2 group-hover:text-acid">
-                  {work.title}
+                {/* En mobile el año pasa abajo del título: la columna propia
+                    le dejaba al título ~110 px y cortaba las palabras al medio. */}
+                <span className="min-w-0">
+                  <span className="block break-words font-brico text-[clamp(1.35rem,6.2vw,2.4rem)] leading-none font-extrabold tracking-[-0.02em] uppercase transition-all duration-300 group-hover:translate-x-2 group-hover:text-acid md:text-[clamp(1.6rem,4.5vw,3.8rem)]">
+                    {work.title}
+                  </span>
+                  <span className="mt-2 block text-[11px] tracking-[0.3em] text-salt/40 md:hidden">
+                    {work.year}
+                  </span>
                 </span>
               </span>
 
               <span className="hidden text-[11px] uppercase tracking-[0.3em] text-salt/40 md:block md:text-xs">
                 {work.category}
               </span>
-              <span className="justify-self-end text-[11px] tracking-[0.3em] text-salt/40 md:text-xs">
+              <span className="hidden justify-self-end text-xs tracking-[0.3em] text-salt/40 md:block">
                 {work.year}
               </span>
             </a>
@@ -153,6 +163,7 @@ export default function WorkIndex({
       <img
         ref={floatImg}
         src={rows[0]?.img}
+        loading="lazy"
         alt=""
         aria-hidden="true"
         className="pointer-events-none fixed top-0 left-0 z-40 hidden w-56 -translate-x-1/2 -translate-y-1/2 scale-90 object-cover opacity-0 invisible md:block lg:w-64"

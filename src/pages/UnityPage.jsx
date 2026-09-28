@@ -7,15 +7,17 @@ import LanguageBlock from '../components/sections/unity/LanguageBlock'
 import LastPortrait from '../components/sections/unity/LastPortrait'
 import StageLines from '../components/sections/unity/StageLines'
 import FooterTrophy from '../components/sections/unity/FooterTrophy'
-import joyA from '../components/sections/unity/assets/joy-a.png'
-import joyB from '../components/sections/unity/assets/joy-b.png'
-import joyC from '../components/sections/unity/assets/joy-c.png'
-import hopeA from '../components/sections/unity/assets/hope-a.png'
-import hopeB from '../components/sections/unity/assets/hope-b.png'
-import hopeC from '../components/sections/unity/assets/hope-c.png'
-import heatA from '../components/sections/unity/assets/heat-a.png'
-import heatB from '../components/sections/unity/assets/heat-b.png'
-import heatC from '../components/sections/unity/assets/heat-c.png'
+import {
+  joyA,
+  joyB,
+  joyC,
+  hopeA,
+  hopeB,
+  hopeC,
+  heatA,
+  heatB,
+  heatC,
+} from '../components/sections/unity/assets/images'
 
 /**
  * Template model — "UNITY"

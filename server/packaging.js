@@ -139,6 +139,8 @@ const SHARED = [
   // `three` como dependencia hasta en un ZIP 100% 2D (chapters, nocturne...).
   // Ver WEBGL_FILES + needsWebgl más abajo.
   'src/lib/navLinks.js',
+  // srcset de las fotos de ejemplo (assets/images.js de cada modelo).
+  'src/lib/responsiveImage.js',
   'src/hooks/useLenis.js',
   'src/hooks/useMobileMenu.js',
   'src/hooks/useReducedMotion.js',

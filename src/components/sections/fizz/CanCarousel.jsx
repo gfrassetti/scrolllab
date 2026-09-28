@@ -1,10 +1,14 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import can01 from './assets/soda-can-01.png'
-import can02 from './assets/soda-can-02.png'
-import can03 from './assets/soda-can-03.png'
-import can04 from './assets/soda-can-04.png'
-import can05 from './assets/soda-can-05.png'
+import {
+  sodaCan01 as can01,
+  sodaCan02 as can02,
+  sodaCan03 as can03,
+  sodaCan04 as can04,
+  sodaCan05 as can05,
+  variants,
+} from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultCans = [
   { name: 'FLAVOR 01', note: 'Ingredient + ingredient', color: '#ffb02e', image: can01 },
@@ -137,8 +141,11 @@ export default function CanCarousel({
               <div className="relative z-10 flex h-52 items-center justify-center transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:rotate-3">
                 {can.image ? (
                   <img
-                    src={can.image}
+                    {...imgAttrs(can.image, variants)}
+                    sizes="136px"
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     draggable={false}
                     className="max-h-52 w-auto max-w-[8.5rem] select-none object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]"
                   />

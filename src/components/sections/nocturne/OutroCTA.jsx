@@ -62,12 +62,12 @@ export default function OutroCTA({
         <div className="grid grid-cols-2 gap-8 md:col-span-7 md:justify-items-end">
           {flatLinks.length > 0 ? (
             <nav aria-label="Links" className="col-span-2">
-              <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
+              <ul className="grid grid-cols-2 gap-x-8 md:gap-y-2">
                 {flatLinks.map((l, i) => (
                   <li key={i}>
                     <a
                       href={l.href || '#'}
-                      className="text-sm transition-colors duration-300 hover:text-acid md:text-base"
+                      className="tpl-link inline-block py-3 text-sm transition-colors duration-300 hover:text-acid md:py-0 md:text-base"
                     >
                       {l.label}
                     </a>
@@ -78,15 +78,15 @@ export default function OutroCTA({
           ) : (
             columns.map((column) => (
               <nav key={column.heading} aria-label={column.heading}>
-                <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
+                <p className="mb-1 text-[11px] uppercase tracking-[0.3em] text-salt/40 md:mb-4 md:text-xs">
                   {column.heading}
                 </p>
-                <ul className="space-y-2">
+                <ul className="md:space-y-2">
                   {column.items.map((item) => (
                     <li key={item}>
                       <a
                         href="#"
-                        className="text-sm transition-colors duration-300 hover:text-acid md:text-base"
+                        className="tpl-link inline-block py-3 text-sm transition-colors duration-300 hover:text-acid md:py-0 md:text-base"
                       >
                         {item}
                       </a>
@@ -105,12 +105,18 @@ export default function OutroCTA({
           className="block font-brico text-[11.5vw] leading-[0.85] font-extrabold tracking-[-0.02em] whitespace-nowrap uppercase transition-colors duration-500 group-hover:text-acid"
         >
           {ctaWord}
+          <span
+            aria-hidden="true"
+            className="inline-block origin-bottom text-acid transition-transform duration-500 ease-out-strong group-hover:scale-150 motion-reduce:transition-none"
+          >
+            .
+          </span>
         </span>
       </a>
 
       <div className="mt-10 flex flex-col gap-2 border-t border-salt/20 pt-4 text-[11px] uppercase tracking-[0.3em] text-salt/40 md:flex-row md:items-baseline md:justify-between md:text-xs">
         <p>{legal}</p>
-        <a href="#top" className="transition-colors duration-300 hover:text-acid">
+        <a href="#top" className="tpl-link tpl-hit relative self-start transition-colors duration-300 hover:text-acid md:self-auto">
           {backToTop}
         </a>
       </div>

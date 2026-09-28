@@ -93,7 +93,7 @@ export default function FooterAtelier({
 
             <div className="grid w-full max-w-md grid-cols-2 gap-8 text-left lg:text-right">
               <div>
-                <p className="text-[10px] tracking-[0.22em] text-white/35 uppercase">
+                <p className="text-[11px] tracking-[0.22em] text-white/35 uppercase">
                   {enquiryLabel}
                 </p>
                 <a
@@ -107,7 +107,7 @@ export default function FooterAtelier({
                 </p>
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.22em] text-white/35 uppercase">
+                <p className="text-[11px] tracking-[0.22em] text-white/35 uppercase">
                   {socialLabel}
                 </p>
                 <ul className="mt-3 space-y-1.5 text-sm text-white/70">

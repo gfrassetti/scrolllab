@@ -24,7 +24,7 @@ export default function NavMinimal({
         <nav className="flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
           <a
             href="#top"
-            className="text-sm font-medium uppercase tracking-[0.25em]"
+            className="tpl-hit relative text-sm font-medium uppercase tracking-[0.25em]"
           >
             {brand}
           </a>
@@ -34,8 +34,7 @@ export default function NavMinimal({
               <li key={item.label}>
                 <a
                   href={item.href}
-                  className="text-xs uppercase tracking-[0.25em] transition-opacity ease-out-strong hover:opacity-50"
-                  style={{ transitionDuration: '180ms' }}
+                  className="tpl-link tpl-hit relative text-xs uppercase tracking-[0.25em]"
                 >
                   {item.label}
                 </a>
@@ -45,7 +44,7 @@ export default function NavMinimal({
 
           <button
             {...triggerProps}
-            className="ui-press text-xs uppercase tracking-[0.25em] md:hidden"
+            className="ui-press tpl-hit relative text-xs uppercase tracking-[0.25em] md:hidden"
           >
             {open ? closeLabel : menuLabel}
           </button>

@@ -1,9 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import editA from './assets/edit-a.png'
-import editB from './assets/edit-b.png'
-import editC from './assets/edit-c.png'
-import editD from './assets/edit-d.png'
+import { editA, editB, editC, editD, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultFigures = [
   {
@@ -93,9 +91,11 @@ export default function ParallaxEditorial({
             className={figure.className}
           >
             <img
-              src={figure.img}
+              {...imgAttrs(figure.img, variants)}
+              sizes="(min-width: 768px) 34vw, 66vw"
               alt=""
               loading="lazy"
+              decoding="async"
               className="w-full object-cover"
             />
             <figcaption className="mt-2 text-[11px] uppercase tracking-[0.25em] text-ink/60">

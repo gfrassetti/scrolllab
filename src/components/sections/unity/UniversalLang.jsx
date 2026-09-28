@@ -116,7 +116,7 @@ export default function UniversalLang({
               <ul className="grid grid-cols-2 gap-x-8 gap-y-5 text-left">
                 {rows.map((row) => (
                   <li key={row.label}>
-                    <p className="text-[10px] tracking-[0.22em] uppercase opacity-45">
+                    <p className="text-[11px] tracking-[0.22em] uppercase opacity-45">
                       {row.label}
                     </p>
                     <p className="mt-1 font-oswald text-xl font-semibold uppercase md:text-2xl">

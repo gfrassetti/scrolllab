@@ -1,16 +1,20 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import trackA1 from './assets/track-a1.png'
-import trackA2 from './assets/track-a2.png'
-import trackA3 from './assets/track-a3.png'
-import trackA4 from './assets/track-a4.png'
-import trackB1 from './assets/track-b1.png'
-import trackB2 from './assets/track-b2.png'
-import trackB3 from './assets/track-b3.png'
-import trackB4 from './assets/track-b4.png'
-import trackB5 from './assets/track-b5.png'
-import onTrack from './assets/on-track.png'
-import offTrack from './assets/off-track.png'
+import {
+  trackA1,
+  trackA2,
+  trackA3,
+  trackA4,
+  trackB1,
+  trackB2,
+  trackB3,
+  trackB4,
+  trackB5,
+  onTrack,
+  offTrack,
+  variants,
+} from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const ROW_A = [
   {
@@ -310,7 +314,7 @@ export default function TrackMerge({
 
           <p
             data-tm-path-tag
-            className="pointer-events-none absolute top-[12%] left-5 z-20 text-[10px] tracking-[0.3em] text-acid uppercase opacity-0 md:left-10"
+            className="pointer-events-none absolute top-[12%] left-5 z-20 text-[11px] tracking-[0.3em] text-acid uppercase opacity-0 md:left-10"
           >
             Dual track
           </p>
@@ -328,7 +332,7 @@ export default function TrackMerge({
                   <blockquote className="font-display text-[clamp(1.35rem,3.2vw,2.4rem)] leading-[1.1] italic text-[#ece9e2]">
                     {item.quote}
                   </blockquote>
-                  <p className="mt-4 text-[10px] tracking-[0.25em] text-acid uppercase">
+                  <p className="mt-4 text-[11px] tracking-[0.25em] text-acid uppercase">
                     — Caption
                   </p>
                 </figure>
@@ -336,13 +340,15 @@ export default function TrackMerge({
                 <figure key={item.label} className={`${item.w} shrink-0`}>
                   <div className="aspect-3/4 overflow-hidden border border-white/15">
                     <img
-                      src={item.img}
+                      {...imgAttrs(item.img, variants)}
+                      sizes="(min-width: 768px) 24vw, 50vw"
                       alt=""
                       loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <figcaption className="mt-2 text-[10px] tracking-[0.2em] text-white/50 uppercase">
+                  <figcaption className="mt-2 text-[11px] tracking-[0.2em] text-white/50 uppercase">
                     {item.label}
                   </figcaption>
                 </figure>
@@ -358,13 +364,15 @@ export default function TrackMerge({
               <figure key={item.label} className={`${item.w} shrink-0`}>
                 <div className="aspect-square overflow-hidden border border-white/15">
                   <img
-                    src={item.img}
+                    {...imgAttrs(item.img, variants)}
+                    sizes="(min-width: 768px) 24vw, 50vw"
                     alt=""
                     loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <figcaption className="mt-2 text-[10px] tracking-[0.2em] text-white/50 uppercase">
+                <figcaption className="mt-2 text-[11px] tracking-[0.2em] text-white/50 uppercase">
                   {item.label}
                 </figcaption>
               </figure>
@@ -380,24 +388,30 @@ export default function TrackMerge({
             <div data-tm-on className="will-change-transform">
               <div className="mx-auto aspect-square w-[78%] overflow-hidden md:w-[70%]">
                 <img
-                  src={onTrack}
+                  {...imgAttrs(onTrack, variants)}
+                  sizes="(min-width: 768px) 420px, 40vw"
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
+              <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
                 {pathLabelA}
               </p>
             </div>
             <div data-tm-off className="will-change-transform">
               <div className="mx-auto aspect-3/4 w-[70%] overflow-hidden md:w-[58%]">
                 <img
-                  src={offTrack}
+                  {...imgAttrs(offTrack, variants)}
+                  sizes="(min-width: 768px) 420px, 40vw"
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
+              <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
                 {pathLabelB}
               </p>
             </div>

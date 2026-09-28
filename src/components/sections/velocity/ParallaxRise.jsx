@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import parallaxImg from './assets/parallax.png'
+import { parallax as parallaxImg, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * ParallaxRise — generic band with a background that drifts upward
@@ -75,13 +76,22 @@ export default function ParallaxRise({
       <div className="absolute inset-0 overflow-hidden">
         <img
           data-rise-bg
-          src={img}
+          {...imgAttrs(img, variants)}
+          sizes="100vw"
+          loading="lazy"
+          decoding="async"
           alt=""
           className="absolute inset-x-0 -top-[18%] h-[145%] w-full origin-center object-cover will-change-transform"
         />
         <div
           data-rise-veil
           className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/25"
+        />
+        {/* Fijo, debajo del texto: el velo de arriba se anima y a mitad de
+            camino la foto (el tablero) competía con el cuerpo en mobile. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/35 to-transparent md:from-black/55"
         />
       </div>
 
@@ -95,12 +105,12 @@ export default function ParallaxRise({
         <h2 className="mt-3 max-w-[14ch] font-brico text-[clamp(2.4rem,7vw,5rem)] leading-[0.92] font-semibold tracking-[-0.04em]">
           {title}
         </h2>
-        <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-white/70 md:text-base">
+        <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-white/80 md:text-base">
           {body}
         </p>
         <a
           href="#top"
-          className="mt-8 inline-flex w-fit border border-acid bg-acid px-5 py-2.5 text-[10px] font-medium tracking-[0.22em] text-black uppercase transition-opacity hover:opacity-90"
+          className="ui-press tpl-hit relative mt-8 inline-flex w-fit border border-acid bg-acid px-5 py-2.5 text-[11px] font-medium tracking-[0.22em] text-black uppercase transition-opacity hover:opacity-90"
         >
           {cta}
         </a>

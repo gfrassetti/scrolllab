@@ -138,7 +138,7 @@ export default function FooterTrophy({
         background: 'linear-gradient(180deg, #1c2a28 0%, #2c4a42 48%, #4a675c 100%)',
       }}
     >
-      <p className="relative z-30 text-center text-[10px] tracking-[0.32em] uppercase md:text-[11px]">
+      <p className="relative z-30 text-center text-[11px] tracking-[0.32em] uppercase">
         {eyebrow}
       </p>
 
@@ -160,7 +160,7 @@ export default function FooterTrophy({
         </div>
       </div>
 
-      <div className="relative z-30 mt-2 flex items-end justify-between gap-4 border-t border-white/25 pt-4 text-[10px] tracking-[0.22em] uppercase md:mt-4">
+      <div className="relative z-30 mt-2 flex items-end justify-between gap-4 border-t border-white/25 pt-4 text-[11px] tracking-[0.22em] uppercase md:mt-4">
         <span>{metaLeft}</span>
         <a href="#top" className="transition-opacity hover:opacity-70">
           {metaRight}

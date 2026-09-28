@@ -107,7 +107,9 @@ export default function StickyWordCycle({
       style={{ height: `${words.length * 100}vh` }}
     >
       <div className="sticky top-0 flex h-svh items-center justify-center overflow-hidden">
-        <div className="absolute top-0 inset-x-0 mx-5 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mx-10">
+        {/* Mientras la sección está pegada arriba, el rótulo baja lo que mide
+            la nav fija para no pisarse con ella. */}
+        <div className="absolute top-16 inset-x-0 mx-5 flex items-baseline justify-between border-t border-salt/20 pt-4 md:top-20 md:mx-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
             Seq. {seq} / {total}
           </p>

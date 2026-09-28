@@ -7,7 +7,8 @@
  *
  *   tpl-world  raíz del template: foco visible con el color del texto.
  *   tpl-link   subrayado que se dibuja de izquierda a derecha y se retira
- *              hacia la derecha (hover y foco). Para links en línea.
+ *              hacia la derecha (hover y foco). Queda pegado al texto aunque
+ *              el link tenga padding para agrandar la zona de toque.
  *   tpl-hit    zona de toque de 44 px sin mover el layout. El elemento tiene
  *              que estar posicionado: sumale `relative` si no lo está.
  *   tpl-lift   card que se eleva apenas en hover. No va en un nodo que anima
@@ -23,6 +24,7 @@
     text-decoration: none;
     background-image: linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
+    background-origin: content-box;
     background-position: 100% 100%;
     background-size: 0% 1px;
     transition: background-size 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));

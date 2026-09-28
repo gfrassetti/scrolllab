@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import heroField from './assets/hero-field.jpg'
+import { heroField, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * HeroMassing — one full-bleed massing photograph, pinned. The picture
@@ -48,7 +49,8 @@ export default function HeroMassing({
     <section ref={root} className="sticky top-0 z-0 h-svh overflow-hidden bg-atrium-ink">
       <img
         data-hero-media
-        src={img}
+        {...imgAttrs(img, variants)}
+        sizes="100vw"
         alt=""
         fetchPriority="high"
         decoding="sync"
