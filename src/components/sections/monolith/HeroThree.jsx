@@ -179,7 +179,16 @@ export default function HeroThree({
         pointer.y = (e.clientY / window.innerHeight) * 2 - 1
       }
 
+      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
+      // el 3D mientras se leía el resto de la página.
+      let onScreen = true
+      const io = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting
+      })
+      io.observe(root.current)
+
       const tick = () => {
+        if (!onScreen) return
         group.rotation.y += 0.0022
         group.rotation.x += (pointer.y * 0.35 + 0.4 - group.rotation.x) * 0.04
         group.rotation.z += (pointer.x * 0.25 - group.rotation.z) * 0.04
@@ -232,6 +241,7 @@ export default function HeroThree({
         window.removeEventListener('resize', resize)
         window.removeEventListener('pointermove', onPointerMove)
         gsap.ticker.remove(tick)
+        io.disconnect()
         geometry.dispose()
         wireframe.material.dispose()
         points.material.dispose()

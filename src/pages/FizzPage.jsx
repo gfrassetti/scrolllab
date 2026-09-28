@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import ScrollRail from '../components/ScrollRail'
 import NavFizz from '../components/sections/fizz/NavFizz'
 import HeroBubbles from '../components/sections/fizz/HeroBubbles'
 import FlavorWorlds from '../components/sections/fizz/FlavorWorlds'
@@ -32,7 +33,8 @@ export default function FizzPage() {
 
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-grape text-foam">
+      <div id="top" className="tpl-world bg-grape text-foam selection:bg-fizz selection:text-foam">
+        <ScrollRail trackClassName="bg-foam/15" fillClassName="bg-fizz" />
         <NavFizz />
 
         <main>

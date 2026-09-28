@@ -36,6 +36,8 @@ Sin `MP_ACCESS_TOKEN`, el checkout usa mock pay. Sin credenciales de Google, us�
 | `npm run test:e2e` | Embed de LAB en Chromium (secciones, responsive, publicar, dominios, links) |
 | `npm run check:builder` | El editor del builder aplica cada cambio (Chromium) |
 | `npm run check:lab` | LAB desde el editor: editar → preview → publicar → se ve en un sitio ajeno |
+| `npm run check:mobile` | Cada sección de los 9 templates de 320 a 1280 px: desbordes, texto cortado o chico, zonas de toque, imágenes |
+| `npm run images` | Regenera las fotos WebP (y sus `srcset`) desde `design/masters/` |
 | `npm run pack:templates` | Prearma ZIPs del catálogo |
 
 ## Suscripciones LAB (Mercado Pago)
@@ -269,6 +271,35 @@ de alto acotado esas se rompen). Detalle técnico en [`embed/README.md`](embed/R
   React 19 con StrictMode, Vue 3.5 y Next 15.5 (Server Component y el snippet
   viejo): renderiza, un solo iframe y un solo loader, y al desmontar no quedan
   listeners colgados.
+
+## Templates en mobile y tablet
+
+Los 9 templates en venta (MERIDIAN aparte) tienen un piso común de 320 px en
+adelante, medido por `npm run check:mobile` sección por sección:
+
+- **Texto:** micro-labels de 11 px o más, cuerpo de 14 px o más, y ninguna
+  palabra de un titular partida en dos líneas.
+- **Toque:** controles de 44 px o más en táctil (24 px en desktop). Si el
+  dibujo es más chico, `tpl-hit` agranda la zona sin mover el layout; los links
+  dentro de un párrafo quedan exentos.
+- **Nada tapado:** los rótulos de las secciones pinneadas quedan debajo de la
+  nav fija; texto chico sobre fotos o 3D con chip o velo.
+- **Reduced motion:** todo el contenido queda visible y nada se superpone.
+
+Micro-interacciones (guía «The Award-Winning Web Developer», Detalle #6): la
+capa `tpl-*` de `src/styles/tpl.css` (subrayado de links, zona de toque, foco
+visible, cards que se elevan) y `ScrollRail`, la barra de scroll propia que
+monta cada página con su paleta (solo con mouse). Viajan en el ZIP.
+
+Imágenes: los originales viven en `design/masters/<sku>/` y no entran al build
+ni al ZIP. `npm run images` genera WebP a tamaño completo más 640/1080 px (320
+en recortes con alfa) y un `assets/images.js` por modelo; cada `<img>` usa
+`imgAttrs` (`src/lib/responsiveImage.js`) con su `sizes`. Una foto que carga
+el comprador sigue como `src` simple.
+
+La auditoría corre contra el dev server; con `--snapshot` compila una copia
+sin minificar y se puede seguir editando mientras corre. Las hojas de contacto
+quedan en `storage/responsive-check/mobile/<sku>/sheet-normal.html`.
 
 ## Deploy
 

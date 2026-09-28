@@ -105,7 +105,16 @@ export default function HeroMeaning({
         },
       )
 
+      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
+      // el 3D mientras se leía el resto de la página.
+      let onScreen = true
+      const io = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting
+      })
+      io.observe(root.current)
+
       const tick = () => {
+        if (!onScreen) return
         const spin = reduced ? 0.002 : 0.008
         group.rotation.y += spin
         group.rotation.x += (mouse.y * 0.35 - group.rotation.x) * 0.06
@@ -131,6 +140,7 @@ export default function HeroMeaning({
         window.removeEventListener('pointermove', onPointer)
         window.removeEventListener('resize', resize)
         gsap.ticker.remove(tick)
+        io.disconnect()
         st.scrollTrigger?.kill()
         st.kill()
         renderer.dispose()
@@ -174,7 +184,7 @@ export default function HeroMeaning({
         </h1>
       </div>
 
-      <div className="relative z-10 flex items-end justify-between gap-4 border-t border-white/15 pt-4">
+      <div className="relative z-10 flex flex-col gap-3 border-t border-white/15 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <p
           data-atelier-meta
           className="max-w-[40ch] text-sm text-white/55"

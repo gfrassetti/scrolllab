@@ -73,6 +73,14 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
     draw()
     window.addEventListener('resize', resize)
 
+    // Fuera de pantalla se corta el loop: cada cuadro repintaba la niebla (y
+    // medía el canvas) aunque nadie la viera.
+    const io = new IntersectionObserver(([entry]) => {
+      cancelAnimationFrame(raf)
+      if (entry.isIntersecting) raf = requestAnimationFrame(draw)
+    })
+    io.observe(canvas)
+
     const st = ScrollTrigger.create({
       trigger: canvas,
       start: 'top bottom',
@@ -84,6 +92,7 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
 
     return () => {
       cancelAnimationFrame(raf)
+      io.disconnect()
       window.removeEventListener('resize', resize)
       st.kill()
     }

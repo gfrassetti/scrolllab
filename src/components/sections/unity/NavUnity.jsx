@@ -21,7 +21,7 @@ export default function NavUnity({
       <div className="relative flex items-center justify-between gap-3">
         <a
           href="#top"
-          className="relative z-10 max-w-[36%] text-[11px] font-medium tracking-[0.22em] uppercase"
+          className="tpl-hit relative z-10 max-w-[36%] text-[11px] font-medium tracking-[0.22em] uppercase"
         >
           {brand}
         </a>
@@ -29,7 +29,7 @@ export default function NavUnity({
         <a
           href="#top"
           aria-label={logo}
-          className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center justify-center"
+          className="tpl-hit absolute left-1/2 z-10 flex -translate-x-1/2 items-center justify-center"
         >
           {logoSrc ? (
             <img
@@ -50,7 +50,7 @@ export default function NavUnity({
               <li key={item.label}>
                 <a
                   href={item.href}
-                  className="text-[11px] tracking-[0.2em] uppercase transition-opacity hover:opacity-55"
+                  className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] uppercase"
                 >
                   {item.label}
                 </a>
@@ -61,7 +61,7 @@ export default function NavUnity({
           <button
             {...triggerProps}
             aria-label={menuLabel}
-            className="relative grid size-9 place-items-center border border-current/25 md:hidden"
+            className="ui-press tpl-hit relative grid size-9 place-items-center border border-current/25 md:hidden"
           >
             <span
               aria-hidden="true"

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const defaultWorlds = [
   {
@@ -45,6 +46,7 @@ export default function FlavorWorlds({
   worlds = defaultWorlds,
 }) {
   const root = useRef(null)
+  const reducedMotion = useReducedMotion()
 
   useGSAP(
     () => {
@@ -153,6 +155,31 @@ export default function FlavorWorlds({
     { scope: root, dependencies: [worlds] },
   )
 
+  // Sin motion no hay scrub que cambie de mundo: se muestran todos, uno
+  // debajo del otro, cada uno con su color (antes quedaba solo el primero).
+  if (reducedMotion) {
+    return (
+      <section ref={root} className="relative">
+        {worlds.map((world, i) => (
+          <div
+            key={world.name}
+            className="flex min-h-[80svh] flex-col px-5 py-16 md:px-10 md:py-20"
+            style={{ backgroundColor: world.bg, color: world.ink }}
+          >
+            {i === 0 ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-60 md:text-xs">
+                {eyebrow}
+              </p>
+            ) : null}
+            <article className="flex flex-1 flex-col items-center justify-center px-2 text-center">
+              <WorldCopy world={world} index={i} total={worlds.length} />
+            </article>
+          </div>
+        ))}
+      </section>
+    )
+  }
+
   return (
     <section
       ref={root}
@@ -212,26 +239,33 @@ export default function FlavorWorlds({
               className="absolute inset-x-0 flex flex-col items-center justify-center px-2 text-center"
               style={{ opacity: i === 0 ? 1 : 0 }}
             >
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] opacity-70 md:text-xs">
-                {String(i + 1).padStart(2, '0')} /{' '}
-                {String(worlds.length).padStart(2, '0')}
-              </p>
-
-              <h2 className="mt-4 font-brico text-[clamp(3rem,14vw,11rem)] leading-[0.9] font-extrabold tracking-[-0.03em] uppercase">
-                {world.name}
-              </h2>
-
-              <p className="mt-5 text-base font-semibold uppercase tracking-[0.14em] md:text-lg">
-                {world.tagline}
-              </p>
-
-              <p className="mt-6 max-w-[44ch] text-sm leading-relaxed opacity-80 md:text-base">
-                {world.body}
-              </p>
+              <WorldCopy world={world} index={i} total={worlds.length} />
             </article>
           ))}
         </div>
       </div>
     </section>
+  )
+}
+
+function WorldCopy({ world, index, total }) {
+  return (
+    <>
+      <p className="text-[11px] font-bold uppercase tracking-[0.3em] opacity-70 md:text-xs">
+        {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+      </p>
+
+      <h2 className="mt-4 font-brico text-[clamp(3rem,14vw,11rem)] leading-[0.9] font-extrabold tracking-[-0.03em] uppercase">
+        {world.name}
+      </h2>
+
+      <p className="mt-5 text-base font-semibold uppercase tracking-[0.14em] md:text-lg">
+        {world.tagline}
+      </p>
+
+      <p className="mt-6 max-w-[44ch] text-sm leading-relaxed opacity-80 md:text-base">
+        {world.body}
+      </p>
+    </>
   )
 }

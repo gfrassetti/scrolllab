@@ -371,7 +371,16 @@ export default function HeroBubbles({
         el.style.transform = `translate3d(${px}px, ${canDom.liftY + bob + py}px, 0) rotateX(${canDom.rotX + pointer.y * 4}deg) rotateY(${canDom.rotY + pointer.x * 10}deg) rotateZ(${canDom.rotZ}deg) scale(${canDom.scale})`
       }
 
+      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
+      // el 3D mientras se leía el resto de la página.
+      let onScreen = true
+      const io = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting
+      })
+      io.observe(root.current)
+
       const tick = () => {
+        if (!onScreen) return
         if (can && modelLoaded) {
           can.position.y =
             Math.sin(gsap.ticker.time * 1.1) * 0.1 + (can.userData.liftY || 0)
@@ -542,6 +551,7 @@ export default function HeroBubbles({
         window.removeEventListener('resize', resize)
         window.removeEventListener('pointermove', onPointerMove)
         gsap.ticker.remove(tick)
+        io.disconnect()
         bubbleGeo.dispose()
         bubbleMat.dispose()
         disposeObject(backdrop)

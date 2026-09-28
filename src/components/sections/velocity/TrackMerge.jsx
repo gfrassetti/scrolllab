@@ -90,8 +90,12 @@ export default function TrackMerge({
     () => {
       const mm = gsap.matchMedia()
 
+      // Sin motion, galería y cruce quedaban visibles a la vez, una encima de
+      // la otra. Queda el cruce (el remate de la sección) sobre su fondo
+      // claro; la galería es una pieza de movimiento y sin scroll no se lee.
       mm.add('(prefers-reduced-motion: reduce)', () => {
-        gsap.set('[data-tm-gallery]', { opacity: 1, x: 0 })
+        gsap.set('[data-tm-gallery]', { display: 'none' })
+        gsap.set('[data-tm-bg]', { backgroundColor: '#e6e4dc' })
         gsap.set('[data-tm-merge]', { opacity: 1 })
         gsap.set('[data-tm-on]', { y: 0, x: 0 })
         gsap.set('[data-tm-off]', { y: 0, x: 0 })

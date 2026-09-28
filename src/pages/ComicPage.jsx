@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import ScrollRail from '../components/ScrollRail'
 import NavComic from '../components/sections/comic/NavComic'
 import ChapterRail from '../components/sections/comic/ChapterRail'
 import ChapterDusty from '../components/sections/comic/ChapterDusty'
@@ -15,7 +16,8 @@ import FooterComic from '../components/sections/comic/FooterComic'
 export default function ComicPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-[#1f1c19] text-white">
+      <div id="top" className="tpl-world bg-[#1f1c19] text-white selection:bg-comic-flare selection:text-white">
+        <ScrollRail trackClassName="bg-white/10" fillClassName="bg-comic-flare" />
         <NavComic />
         <ChapterRail />
 

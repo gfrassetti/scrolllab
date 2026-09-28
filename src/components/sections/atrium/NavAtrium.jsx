@@ -31,7 +31,7 @@ export default function NavAtrium({
     <>
       <header className="fixed inset-x-0 top-0 z-[90] bg-atrium-ink/70 text-atrium-paper backdrop-blur-md">
         <nav className="flex items-start justify-between px-5 py-5 md:px-10 md:py-6">
-          <a href="#top" className="text-[11px] leading-[1.25] tracking-[0.08em] md:text-xs">
+          <a href="#top" className="tpl-hit relative text-[11px] leading-[1.25] tracking-[0.08em] md:text-xs">
             <span className="block">{lineOne}</span>
             <span className="block">{lineTwo}</span>
           </a>
@@ -41,7 +41,7 @@ export default function NavAtrium({
               <li key={item.label}>
                 <a
                   href={item.href}
-                  className="text-[11px] tracking-[0.2em] uppercase transition-opacity duration-200 ease-out-strong hover:opacity-50 md:text-xs"
+                  className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] uppercase md:text-xs"
                 >
                   {item.label}
                 </a>
@@ -51,7 +51,7 @@ export default function NavAtrium({
 
           <button
             {...triggerProps}
-            className="ui-press pt-1 text-[11px] tracking-[0.2em] uppercase md:hidden"
+            className="ui-press tpl-hit relative pt-1 text-[11px] tracking-[0.2em] uppercase md:hidden"
           >
             {open ? closeLabel : menuLabel}
           </button>

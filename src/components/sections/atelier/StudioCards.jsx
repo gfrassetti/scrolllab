@@ -147,7 +147,7 @@ export default function StudioCards({
         </p>
         <a
           href={ctaHref}
-          className="shrink-0 text-[11px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-black/30 hover:decoration-black"
+          className="tpl-hit relative shrink-0 self-start text-[11px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-black/30 transition-[text-decoration-color] duration-300 hover:decoration-black md:self-auto"
         >
           {cta}
         </a>

@@ -69,7 +69,7 @@ export default function FooterBrutal({
           <li key={i} className="border-r-2 border-carbon">
             <a
               href={link.href || '#'}
-              className="block px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors duration-200 hover:bg-carbon md:px-8 md:py-3 md:text-xs"
+              className="block px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors duration-200 hover:bg-carbon md:px-8 md:text-xs lg:py-3"
             >
               {link.label}
             </a>

@@ -79,7 +79,7 @@ export default function StageLines({
             <img
               data-stage-img
               {...imgAttrs(band.img, variants)}
-              sizes="100vw"
+              sizes="(max-aspect-ratio: 3/2) 170vh, 100vw"
               alt=""
               loading="lazy"
               decoding="async"

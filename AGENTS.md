@@ -155,7 +155,7 @@ Es la misma cuenta pero **no las mismas tools**: la API pública expone los 48 e
 | Video de un beat | `generate_video` — `get_cost:true` y confirmar créditos |
 | GLB desde foto | `generate_3d` — mismo filtro genérico/vendible; o Meshy |
 
-Bajar el archivo a `src/components/sections/<sku>/assets/` e importarlo en el JSX. Fallback si el plugin no está: tool `GenerateImage` de Cursor.
+Bajar el original a `design/masters/<sku>/` y correr `npm run images`: genera los WebP livianos (completo + 640/1080, 320 en recortes con alfa) y `src/components/sections/<sku>/assets/images.js`; la sección importa de ahí y usa `imgAttrs` (`src/lib/responsiveImage.js`) con su `sizes`. El original no viaja al build ni al ZIP. Fallback si el plugin no está: tool `GenerateImage` de Cursor.
 
 Video, 3D y batches caros: no gastar créditos a ciegas. Entrada `/higgs` para pedidos sueltos de media.
 
@@ -219,6 +219,8 @@ npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
+npm run check:mobile   # cada sección de los 9 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
+npm run images         # WebP + srcset de las fotos de los templates desde design/masters/<sku>/
 ```
 
 ### Responsive — 3 tiers (mobile / tablet / desktop)
@@ -306,7 +308,7 @@ In production: Mongo required (no silent file fallback), mock/dev auth off, MP w
 
 (Same as before: self-contained sections, `lib/gsap.js`, reduced motion, matchMedia for heavy scroll.)
 
-Image pieces for new models: generate realistic local assets under `sections/<sku>/assets/` (see `.cursor/rules/template-image-assets.mdc`). Do not ship sellable defaults on picsum.
+Image pieces for new models: generate realistic local assets (see `.cursor/rules/template-image-assets.mdc`), keep the originals in `design/masters/<sku>/` and run `npm run images` — it writes the WebP variants plus `sections/<sku>/assets/images.js`, and each `<img>` uses `imgAttrs(src, variants)` with its own `sizes`. Do not ship sellable defaults on picsum.
 
 Riel / cubo / letras que siguen un path: **Beat** (`src/lib/beat`, [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md)). `<BeatStage>` + `<Beat>`. No copies el motor a `sections/<sku>/`.
 
@@ -434,7 +436,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 2. **Template nuevo desde URL de referencia** → correr solo  
    `npm run analyze:ref -- <url> --sku <sku> --name "<Name>"`  
    (ver `.cursor/rules/analyze-reference.mdc`). Playwright muestrea el scroll y **solo guarda beats donde cambia la firma** (fondo / sticky / transforms / texto) + JPEG livianos en `docs/reference-analysis/<sku>/beats/`. Si hay `GEMINI_API_KEY` o `GOOGLE_API_KEY` en `.env`, una pasada de Gemini anota fondo/figura/texto. Salida: Obsidian + `docs/reference-analysis/<sku>.md` + `beats.json`. No esperar a que el usuario lo pida.
-3. **Piezas de imagen del template** → inventariar cada foto/cutout que la ref anima (skill `template-image-designer`), generarlas con **Higgsfield** (`generate_image`, cutout con `remove_background`), guardar en `src/components/sections/<sku>/assets/`, **sin picsum**. Si el beat pide un objeto 3D **procedural genérico** → **img2threejs**. Si pide un GLB texturizado → Higgsfield `generate_3d` o Meshy.
+3. **Piezas de imagen del template** → inventariar cada foto/cutout que la ref anima (skill `template-image-designer`), generarlas con **Higgsfield** (`generate_image`, cutout con `remove_background`), guardar el original en `design/masters/<sku>/` y correr `npm run images` (WebP + `assets/images.js`), **sin picsum**. Si el beat pide un objeto 3D **procedural genérico** → **img2threejs**. Si pide un GLB texturizado → Higgsfield `generate_3d` o Meshy.
 4. Si hace falta narrativa o decisión ya anotada → leer notas en la bóveda Obsidian (abajo).
 5. **Motion / transitions de un template** → leer `Storytelling motion cookbook.md` (Obsidian) + `docs/motion-cookbook.md`. Piezas que recorren un riel → **Beat** (`docs/scrolllab-beat.md`, `useBeatStage`). Si la ref es Readymag → extraer recetas ([`docs/readymag-motion.md`](docs/readymag-motion.md)) y alimentar Beat, no tweens `x/y` “parecidos”.
 6. Recién después: `Read` / `Grep` sobre archivos concretos para editar.
@@ -455,7 +457,7 @@ Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre�
 ### Plugin: Higgsfield (imágenes, video, 3D)
 
 - Ya vinculado: namespace MCP `plugin-higgsfield-higgsfield`. Si no aparece, Customize → Plugins / MCPs y reautenticar.
-- Default para fotos y cutouts de templates (`generate_image`, `remove_background`). Guardar en `sections/<sku>/assets/`.
+- Default para fotos y cutouts de templates (`generate_image`, `remove_background`). Original en `design/masters/<sku>/` + `npm run images`.
 - Video y `generate_3d`: `get_cost:true` y confirmar créditos. Mismo filtro de plantilla genérica que el resto del catálogo.
 
 ### MCP: Meshy (generación de assets 3D)

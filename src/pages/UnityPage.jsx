@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import ScrollRail from '../components/ScrollRail'
 import NavUnity from '../components/sections/unity/NavUnity'
 import HeroTwin from '../components/sections/unity/HeroTwin'
 import MosaicSlider from '../components/sections/unity/MosaicSlider'
@@ -28,7 +29,8 @@ import {
 export default function UnityPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-[#e7e4dc] text-[#0a0a0a]">
+      <div id="top" className="tpl-world bg-[#e7e4dc] text-[#0a0a0a] selection:bg-unity-gold selection:text-unity-cream">
+        <ScrollRail trackClassName="bg-[#0a0a0a]/10" fillClassName="bg-unity-gold" />
         <NavUnity />
 
         <main>

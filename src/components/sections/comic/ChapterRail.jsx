@@ -31,7 +31,7 @@ export default function ChapterRail({ chapters = DEFAULT_CHAPTERS }) {
   return (
     <nav
       aria-label="Story chapters"
-      className="pointer-events-none fixed top-1/2 right-3 z-40 hidden -translate-y-1/2 flex-col items-end gap-4 md:right-6 lg:flex"
+      className="pointer-events-none fixed top-1/2 right-3 z-40 hidden -translate-y-1/2 flex-col items-end gap-1.5 md:right-6 lg:flex"
     >
       {chapters.map((ch) => {
         const on = active === ch.id
@@ -39,7 +39,7 @@ export default function ChapterRail({ chapters = DEFAULT_CHAPTERS }) {
           <a
             key={ch.id}
             href={`#chapter-${ch.id}`}
-            className="pointer-events-auto group flex items-center gap-3"
+            className="pointer-events-auto group flex min-h-6 items-center gap-3"
           >
             <span
               className={`max-w-0 overflow-hidden text-right text-[11px] tracking-[0.08em] whitespace-nowrap text-white transition-all duration-300 group-hover:max-w-48 ${

@@ -66,7 +66,7 @@ export default function ZoomPortal({
         <div data-portal className="absolute inset-0 will-change-transform">
           <img
             {...picsumAttrs(img)}
-            sizes="100vw"
+            sizes="(max-aspect-ratio: 8/5) 160vh, 100vw"
             alt=""
             loading="lazy"
             decoding="async"

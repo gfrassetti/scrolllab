@@ -19,7 +19,10 @@
  *   los `::before` que la agrandan (`tpl-hit`). Los links dentro de un
  *   párrafo quedan exentos, como en WCAG;
  * - image: imágenes deformadas, rotas o que se ven a más de 1,5× su
- *   resolución en una pantalla DPR 2;
+ *   resolución en una pantalla DPR 2 habiendo una versión más grande en el
+ *   srcset (el `sizes` está corto);
+ * - image-master: lo mismo, pero ya con la versión más grande: hace falta un
+ *   original de más resolución (aviso, no error);
  * - hidden: con reduced motion, texto que queda invisible (una animación que
  *   solo arranca con motion y deja el contenido en opacidad 0);
  * - error: errores de consola y de página;
@@ -104,7 +107,9 @@ const DPR = 2
  * Como NOT_IN_DOM en check-builder: una por una y con el porqué, para que la
  * lista no sea un lugar donde esconder problemas.
  */
-const ALLOW = {}
+const ALLOW = {
+  'atelier/NavAtelier:hidden': 'la marca se oculta a propósito al scrollear en mobile y vuelve arriba de todo',
+}
 
 const IGNORED_CONSOLE = [
   /favicon/i,
@@ -392,11 +397,22 @@ function installPageHelpers() {
     return rect
   }
 
-  /** Marquesinas y tracks horizontales: anchos a propósito. */
-  const inTrack = (el, stop) => {
+  /**
+   * Marquesinas y tracks horizontales: anchos a propósito. Una fila flex con
+   * ítems `shrink-0` desborda su propia caja sin agrandarla, así que además
+   * del ancho se mira el contenido (scrollWidth).
+   */
+  const inTrack = (el, stop, clip = { left: 0, right: innerWidth }) => {
     for (let a = el.parentElement; a && a !== stop && a !== document.body; a = a.parentElement) {
       const r = a.getBoundingClientRect()
-      if (r.width > innerWidth * 1.45) return true
+      if (r.width > innerWidth * 1.45 || a.scrollWidth > Math.max(a.clientWidth, 1) * 1.45) return true
+      // Una fila que GSAP corre en x (xPercent) y se sale del recorte es un
+      // track aunque no sea tan ancha. Un `-translate-x-1/2` de centrado no:
+      // queda adentro.
+      const t = getComputedStyle(a).transform
+      if (t && t !== 'none' && Math.abs(new DOMMatrixReadOnly(t).m41) > 1) {
+        if (r.left < clip.left - 1 || r.right > clip.right + 1 || a.scrollWidth > a.clientWidth + 2) return true
+      }
     }
     return false
   }
@@ -409,13 +425,20 @@ function installPageHelpers() {
     return false
   }
 
-  /** Zona de toque efectiva: toca alrededor del centro (cuentan ::before/::after). */
+  /**
+   * Zona de toque efectiva: toca alrededor del centro (cuentan ::before y
+   * ::after). Si algún punto cae fuera del viewport no se puede medir acá:
+   * devuelve null y el control se mide en otra posición de scroll.
+   */
   const hitSize = (el, r, min) => {
     const cx = r.left + r.width / 2
     const cy = r.top + r.height / 2
     const half = min / 2 - 1
+    const probes = []
+    if (r.width < min) probes.push([cx - half, cy], [cx + half, cy])
+    if (r.height < min) probes.push([cx, cy - half], [cx, cy + half])
+    if (probes.some(([x, y]) => x < 0 || y < 0 || x >= innerWidth || y >= innerHeight)) return null
     const hits = (x, y) => {
-      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return null
       const h = document.elementFromPoint(x, y)
       return !!h && (h === el || el.contains(h))
     }
@@ -435,22 +458,30 @@ function installPageHelpers() {
 
   const SVG_TEXT = new Set(['text', 'textpath', 'tspan'])
 
+  // Los <label for> no cuentan: el control es el campo, que se mide aparte.
   const CONTROLS =
-    'a[href], button, [role=button], [role=tab], [role=link], input:not([type=hidden]), select, textarea, summary, label[for]'
+    'a[href], button, [role=button], [role=tab], [role=link], input:not([type=hidden]), select, textarea, summary'
 
   const blockIndexOf = (blocks, el) => {
     for (let i = 0; i < blocks.length; i++) if (blocks[i].el.contains(el)) return i
     return -1
   }
 
-  /** Tamaño real del recurso de una imagen (srcset con `w` corrige naturalWidth). */
+  /**
+   * Tamaño real del recurso de una imagen (srcset con `w` corrige
+   * naturalWidth) y si es la versión más grande que ofrece el srcset.
+   */
   const resourceSize = (img) => {
     const src = img.currentSrc || img.src
     const set = img.getAttribute('srcset')
     if (set) {
+      let current = null
+      let maxW = 0
       for (const part of set.split(',')) {
         const [u, d] = part.trim().split(/\s+/)
-        if (!u) continue
+        if (!u || !d) continue
+        const w = d.endsWith('w') ? Number(d.slice(0, -1)) : null
+        if (w) maxW = Math.max(maxW, w)
         let abs
         try {
           abs = new URL(u, location.href).href
@@ -458,17 +489,15 @@ function installPageHelpers() {
           continue
         }
         if (abs !== src) continue
-        if (d?.endsWith('w')) {
-          const w = Number(d.slice(0, -1))
-          return { w, h: (w * img.naturalHeight) / img.naturalWidth }
-        }
-        if (d?.endsWith('x')) {
+        if (w) current = { w, h: (w * img.naturalHeight) / img.naturalWidth }
+        else if (d.endsWith('x')) {
           const x = Number(d.slice(0, -1))
-          return { w: img.naturalWidth * x, h: img.naturalHeight * x }
+          current = { w: img.naturalWidth * x, h: img.naturalHeight * x }
         }
       }
+      if (current) return { ...current, largest: !maxW || current.w >= maxW }
     }
-    return { w: img.naturalWidth, h: img.naturalHeight }
+    return { w: img.naturalWidth, h: img.naturalHeight, largest: true }
   }
 
   const imageIssue = (img, r, dpr) => {
@@ -496,7 +525,13 @@ function installPageHelpers() {
         return { kind: 'distorted', detail: `aspecto ${Math.round((ar - 1) * 100)}%` }
     }
     const up = Math.max((W * dpr) / res.w, (H * dpr) / res.h)
-    if (up > 1.5 && r.width > 80) return { kind: 'low-res', detail: `${up.toFixed(1)}× (${Math.round(res.w)}px → ${Math.round(W)}px css)` }
+    if (up > 1.5 && r.width > 80) {
+      const detail = `${up.toFixed(1)}× (${Math.round(res.w)}px → ${Math.round(W)}px css)`
+      // Si había una versión más grande en el srcset, el `sizes` está corto
+      // (se arregla en el código). Si ya es la más grande, falta un original
+      // de más resolución: se avisa aparte y no cuenta como error.
+      return res.largest ? { kind: 'master', detail } : { kind: 'low-res', detail: `${detail}, sizes corto` }
+    }
     return null
   }
 
@@ -521,8 +556,10 @@ function installPageHelpers() {
   const brokenWords = (root) => {
     const groups = new Map()
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    // Los nodos que son solo un espacio también cuentan: `{' '}` de React
+    // separa palabras que si no se leerían pegadas («a» + «direction»).
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      if (!n.nodeValue.trim()) continue
+      if (!n.nodeValue) continue
       const parent = n.parentElement
       if (!parent || parent.closest('svg, [aria-hidden="true"], [inert]')) continue
       const r = parent.getBoundingClientRect()
@@ -661,7 +698,7 @@ function installPageHelpers() {
             const partial =
               tr.left < ar.right && tr.right > ar.left && tr.top < ar.bottom && tr.bottom > ar.top
             if (partial && (outX > 3 || outY > tolY)) {
-              if (outY <= tolY && inTrack(el, a.parentElement)) break
+              if (outY <= tolY && inTrack(el, a.parentElement, ar)) break
               report(unit, 'clipped', {
                 detail: outY > tolY ? `${Math.round(outY)}px en alto` : `${Math.round(outX)}px en ancho`,
               })
@@ -687,7 +724,7 @@ function installPageHelpers() {
         if (r.width <= 1 || r.height <= 1) continue // sr-only
         if (isInlineLink(el)) continue
         const eff = hitSize(el, r, minTarget)
-        if (eff.w < minTarget - 0.5 || eff.h < minTarget - 0.5) {
+        if (eff && (eff.w < minTarget - 0.5 || eff.h < minTarget - 0.5)) {
           report(el, 'target', {
             detail: `${Math.round(eff.w)}×${Math.round(eff.h)} (mín ${minTarget})`,
           })
@@ -696,7 +733,9 @@ function installPageHelpers() {
 
       if (el.tagName === 'IMG') {
         const issue = imageIssue(el, r, dpr)
-        if (issue) report(el, 'image', { detail: `${issue.kind}: ${issue.detail}` })
+        if (issue) {
+          report(el, issue.kind === 'master' ? 'image-master' : 'image', { detail: `${issue.kind}: ${issue.detail}` })
+        }
       }
     }
     for (const { block, word } of brokenWords(root)) {
@@ -852,7 +891,7 @@ async function auditJob(browser, base, job, opts) {
     let n = 0
     const shoot = async (name, label) => {
       const file = `${String(n++).padStart(2, '0')}-${slugOf(name)}-${label}.jpg`
-      await page.screenshot({ path: path.join(shotDir, file), type: 'jpeg', quality: 62, scale: 'css' })
+      await page.screenshot({ path: path.join(shotDir, file), type: 'jpeg', quality: 62, scale: 'css', timeout: 60000 })
       shots.push({ name, label, file: path.relative(OUT, path.join(shotDir, file)) })
     }
     const auditHere = async (where, scopeSel) => {
@@ -866,13 +905,24 @@ async function auditJob(browser, base, job, opts) {
     // Menú mobile: se abre arriba de todo, antes de scrollear.
     const menuSel = await page.evaluate(() => window.__mc.menuTrigger())
     if (menuSel) {
-      const trigger = page.locator(`button[aria-controls="${menuSel.slice(1).replace(/\\/g, '')}"]`).first()
       try {
-        await trigger.click({ timeout: 3000 })
+        // Click programático: con WebGL por software el botón puede no quedar
+        // «estable» a tiempo para Playwright, y acá solo interesa abrir el panel.
+        await page.evaluate((sel) => {
+          const id = document.querySelector(sel)?.id
+          const button = [...document.querySelectorAll('button[aria-controls]')].find(
+            (b) => b.getAttribute('aria-controls') === id,
+          )
+          if (!button) throw new Error('sin botón para ' + sel)
+          button.click()
+        }, menuSel)
         await page.waitForTimeout(900)
         await shoot('menu', 'open')
         await auditHere('menu', menuSel)
         await page.keyboard.press('Escape')
+        // Cerrar con Escape devuelve el foco (visible) al botón: se saca para
+        // que el anillo de foco no aparezca en todas las capturas.
+        await page.evaluate(() => document.activeElement?.blur?.())
         await page.waitForTimeout(700)
       } catch (err) {
         issues.push({ check: 'error', block: 'menu', detail: `no se pudo abrir el menú: ${String(err).slice(0, 120)}`, where: 'menu' })
@@ -882,6 +932,20 @@ async function auditJob(browser, base, job, opts) {
     for (const pos of positions) {
       await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), pos.y)
       await page.waitForTimeout(opts.settle)
+      // Con varias páginas en paralelo (y WebGL por software) una foto lazy
+      // puede tardar más que el settle: se espera a las que están a la vista.
+      await page
+        .waitForFunction(
+          () =>
+            [...document.images].every((i) => {
+              const r = i.getBoundingClientRect()
+              const inView = r.bottom > 0 && r.top < innerHeight && r.width > 0 && r.height > 0
+              return !inView || i.complete
+            }),
+          null,
+          { timeout: 4000 },
+        )
+        .catch(() => {})
       await shoot(pos.name, pos.label)
       await auditHere(`${pos.name}:${pos.label}`)
     }
@@ -954,7 +1018,7 @@ function groupIssues(results) {
       g.details.add(i.detail)
     }
   }
-  const order = ['error', 'overflow', 'clipped', 'broken-word', 'hidden', 'image', 'text<11', 'target', 'body<14']
+  const order = ['error', 'overflow', 'clipped', 'broken-word', 'hidden', 'image', 'text<11', 'target', 'body<14', 'image-master']
   return [...groups.values()].sort(
     (a, b) => order.indexOf(a.check) - order.indexOf(b.check) || a.block.localeCompare(b.block),
   )
@@ -1113,6 +1177,7 @@ async function main() {
           `${r.bytes.model ? ` · 3D ${mb(r.bytes.model)}` : ''}${canvas} · overflow ${count('overflow')} · clipped ${count('clipped')}` +
           ` · broken ${count('broken-word')}` +
           ` · text<11 ${count('text<11')} · body<14 ${count('body<14')} · target ${count('target')} · image ${count('image')}` +
+          ` · master ${count('image-master')}` +
           ` · hidden ${count('hidden')} · error ${count('error')}`,
       )
     }

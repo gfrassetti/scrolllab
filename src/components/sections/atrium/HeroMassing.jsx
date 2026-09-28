@@ -50,7 +50,7 @@ export default function HeroMassing({
       <img
         data-hero-media
         {...imgAttrs(img, variants)}
-        sizes="100vw"
+        sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
         alt=""
         fetchPriority="high"
         decoding="sync"

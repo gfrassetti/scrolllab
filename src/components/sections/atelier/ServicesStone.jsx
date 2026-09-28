@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import ScrollFog from './ScrollFog'
 
 const SERVICES = [
@@ -54,6 +55,7 @@ export default function ServicesStone({
     { title: service3Title, body: service3Body },
     { title: service4Title, body: service4Body },
   ]
+  const reducedMotion = useReducedMotion()
   const services = SERVICES.map((service, i) => ({
     ...service,
     title: overrides[i]?.title || service.title,
@@ -114,62 +116,77 @@ export default function ServicesStone({
       // Two absolute slots (left / right). Cards share slots by index parity —
       // must crossfade pairs or titles stack on top of each other.
       const cards = gsap.utils.toArray('[data-service-card]')
-      const pairA = cards.filter((_, i) => i < 2)
-      const pairB = cards.filter((_, i) => i >= 2)
-      gsap.set(cards, { autoAlpha: 0, y: 28 })
+      // Sin motion no se pincha ni se scrubea: las cuatro tarjetas quedan a la
+      // vista (el JSX las pone en grilla) y la piedra, quieta.
+      if (!reduced) {
+        const pairA = cards.filter((_, i) => i < 2)
+        const pairB = cards.filter((_, i) => i >= 2)
+        gsap.set(cards, { autoAlpha: 0, y: 28 })
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root.current,
-          start: 'top top',
-          end: '+=320%',
-          pin: true,
-          scrub: 0.7,
-          anticipatePin: 1,
-        },
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top top',
+            end: '+=320%',
+            pin: true,
+            scrub: 0.7,
+            anticipatePin: 1,
+          },
+        })
+
+        tl.to(
+          stone.rotation,
+          {
+            x: 1.1,
+            y: 2.4,
+            ease: 'none',
+          },
+          0,
+        )
+        tl.to(
+          stone.position,
+          {
+            y: 0.15,
+            ease: 'none',
+          },
+          0,
+        )
+
+        tl.to(
+          pairA,
+          { autoAlpha: 1, y: 0, duration: 0.18, stagger: 0.06, ease: 'power2.out' },
+          0.1,
+        )
+        tl.to(
+          pairA,
+          { autoAlpha: 0, y: -20, duration: 0.14, ease: 'power1.in' },
+          0.48,
+        )
+        tl.fromTo(
+          pairB,
+          { autoAlpha: 0, y: 28 },
+          { autoAlpha: 1, y: 0, duration: 0.18, stagger: 0.06, ease: 'power2.out' },
+          0.52,
+        )
+
+      }
+
+      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
+      // el 3D mientras se leía el resto de la página.
+      let onScreen = true
+      const io = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting
       })
-
-      tl.to(
-        stone.rotation,
-        {
-          x: reduced ? 0.4 : 1.1,
-          y: reduced ? 0.6 : 2.4,
-          ease: 'none',
-        },
-        0,
-      )
-      tl.to(
-        stone.position,
-        {
-          y: 0.15,
-          ease: 'none',
-        },
-        0,
-      )
-
-      tl.to(
-        pairA,
-        { autoAlpha: 1, y: 0, duration: 0.18, stagger: 0.06, ease: 'power2.out' },
-        0.1,
-      )
-      tl.to(
-        pairA,
-        { autoAlpha: 0, y: -20, duration: 0.14, ease: 'power1.in' },
-        0.48,
-      )
-      tl.fromTo(
-        pairB,
-        { autoAlpha: 0, y: 28 },
-        { autoAlpha: 1, y: 0, duration: 0.18, stagger: 0.06, ease: 'power2.out' },
-        0.52,
-      )
-
-      const tick = () => renderer.render(scene, camera)
+      io.observe(root.current)
+      const tick = () => {
+        if (onScreen) renderer.render(scene, camera)
+      }
       gsap.ticker.add(tick)
 
       return () => {
         window.removeEventListener('resize', resize)
         gsap.ticker.remove(tick)
+        io.disconnect()
         renderer.dispose()
         geo.dispose()
         mat.dispose()
@@ -186,7 +203,7 @@ export default function ServicesStone({
       ref={root}
       className="relative bg-[#0b0c10] text-white"
     >
-      <div className="relative h-svh overflow-hidden">
+      <div className={`relative overflow-hidden ${reducedMotion ? 'min-h-svh' : 'h-svh'}`}>
         <ScrollFog density={0.65} />
         <canvas
           ref={canvasRef}
@@ -205,15 +222,23 @@ export default function ServicesStone({
             </p>
           </div>
 
-          <div className="relative mt-8 flex-1">
+          <div
+            className={
+              reducedMotion
+                ? 'mt-8 grid flex-1 content-center gap-8 py-8 sm:grid-cols-2'
+                : 'relative mt-8 flex-1'
+            }
+          >
             {services.map((service, i) => (
               <article
                 key={i}
                 data-service-card
-                className={`absolute max-w-[280px] md:max-w-[320px] ${
-                  service.side === 'left'
-                    ? 'left-0 top-[12%] md:top-[18%]'
-                    : 'right-0 bottom-[18%] md:bottom-[22%]'
+                className={`max-w-[280px] md:max-w-[320px] ${
+                  reducedMotion
+                    ? ''
+                    : service.side === 'left'
+                      ? 'absolute left-0 top-[12%] md:top-[18%]'
+                      : 'absolute right-0 bottom-[18%] md:bottom-[22%]'
                 }`}
               >
                 <h3 className="text-[clamp(1.25rem,2.4vw,1.85rem)] leading-tight font-medium tracking-[-0.02em]">
@@ -232,7 +257,7 @@ export default function ServicesStone({
             </p>
             <a
               href="#facts"
-              className="text-[11px] tracking-[0.2em] text-white uppercase hover:opacity-70"
+              className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] text-white uppercase"
             >
               View services →
             </a>

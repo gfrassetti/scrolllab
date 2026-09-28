@@ -136,14 +136,14 @@ export default function SelectedWork({
         ))}
       </div>
 
-      <div className="relative flex h-svh flex-col justify-between py-20 md:py-24">
+      <div className="relative flex h-svh flex-col justify-between pt-20 pb-10 md:pt-24 md:pb-16">
         <div className="flex items-end justify-between gap-6 px-5 md:px-10">
           <h2 className="max-w-[14ch] text-[clamp(1.8rem,3.5vw,2.8rem)] leading-[1.1] font-medium tracking-[-0.03em]">
             {title}
           </h2>
           <a
             href="#facts"
-            className="shrink-0 text-[11px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-black/30 hover:decoration-black"
+            className="tpl-hit relative shrink-0 text-[11px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-black/30 transition-[text-decoration-color] duration-300 hover:decoration-black"
           >
             {cta}
           </a>
@@ -190,7 +190,7 @@ export default function SelectedWork({
                   </div>
                   <a
                     href="#work"
-                    className="shrink-0 pt-1 text-[11px] tracking-[0.18em] uppercase underline underline-offset-4 decoration-black/25 hover:decoration-black"
+                    className="tpl-hit relative shrink-0 pt-1 text-[11px] tracking-[0.18em] uppercase underline underline-offset-4 decoration-black/25 transition-[text-decoration-color] duration-300 hover:decoration-black"
                   >
                     Explore →
                   </a>

@@ -65,7 +65,7 @@ export default function NavAtelier({
     >
       <a
         href="#top"
-        className={`relative z-10 text-sm font-medium tracking-[0.2em] text-white uppercase transition-opacity duration-300 ${onLight('group-data-on-light:text-[#111214]')} group-data-scrolled:opacity-0 group-data-scrolled:pointer-events-none md:group-data-scrolled:opacity-100 md:group-data-scrolled:pointer-events-auto`}
+        className={`tpl-hit relative z-10 text-sm font-medium tracking-[0.2em] text-white uppercase transition-opacity duration-300 ${onLight('group-data-on-light:text-[#111214]')} group-data-scrolled:opacity-0 group-data-scrolled:pointer-events-none md:group-data-scrolled:opacity-100 md:group-data-scrolled:pointer-events-auto`}
       >
         {brand}
       </a>
@@ -79,14 +79,14 @@ export default function NavAtelier({
       <div className="relative z-50 ml-auto flex items-center gap-2">
         <a
           href={ctaHref}
-          className={`rounded-full bg-white px-4 py-2.5 text-[11px] font-medium tracking-[0.18em] text-black uppercase shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-transform duration-300 group-data-scrolled:scale-[1.02] ${onLight('group-data-on-light:bg-[#111214] group-data-on-light:text-white')}`}
+          className={`ui-press tpl-hit relative rounded-full bg-white px-4 py-2.5 text-[11px] font-medium tracking-[0.18em] text-black uppercase shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-transform duration-300 group-data-scrolled:scale-[1.02] ${onLight('group-data-on-light:bg-[#111214] group-data-on-light:text-white')}`}
         >
           {cta}
         </a>
         <button
           {...triggerProps}
           aria-label={menuLabel}
-          className={`relative inline-flex items-center gap-2.5 rounded-full border border-white/55 bg-black/25 px-4 py-2.5 text-[11px] font-medium tracking-[0.2em] text-white uppercase backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-[background-color,border-color,color] duration-300 ${onLight('group-data-on-light:border-black/35 group-data-on-light:bg-white/70 group-data-on-light:text-[#111214]')}`}
+          className={`ui-press tpl-hit relative inline-flex items-center gap-2.5 rounded-full border border-white/55 bg-black/25 px-4 py-2.5 text-[11px] font-medium tracking-[0.2em] text-white uppercase backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-[background-color,border-color,color] duration-300 ${onLight('group-data-on-light:border-black/35 group-data-on-light:bg-white/70 group-data-on-light:text-[#111214]')}`}
         >
           <span>{menuLabel}</span>
           <span aria-hidden="true" className="relative grid h-2.5 w-3.5 place-items-center">

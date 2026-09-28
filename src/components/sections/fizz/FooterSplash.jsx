@@ -94,12 +94,12 @@ export default function FooterSplash({
         <div className="grid grid-cols-2 gap-8 md:col-span-7 md:justify-items-end">
           {flatLinks.length > 0 ? (
             <nav aria-label="Links" className="col-span-2">
-              <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
+              <ul className="grid grid-cols-2 gap-x-8 lg:gap-y-2">
                 {flatLinks.map((l, i) => (
                   <li key={i}>
                     <a
                       href={l.href || '#'}
-                      className="text-sm transition-colors duration-300 hover:text-fizz md:text-base"
+                      className="tpl-link tpl-hit relative inline-block py-3 text-sm transition-colors duration-300 hover:text-fizz md:text-base lg:py-0"
                     >
                       {l.label}
                     </a>
@@ -110,15 +110,15 @@ export default function FooterSplash({
           ) : (
             columns.map((column) => (
               <nav key={column.heading} aria-label={column.heading}>
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em] text-foam/50 md:text-xs">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-foam/50 md:text-xs lg:mb-4">
                   {column.heading}
                 </p>
-                <ul className="space-y-2">
+                <ul className="lg:space-y-2">
                   {column.items.map((item) => (
                     <li key={item}>
                       <a
                         href="#"
-                        className="text-sm transition-colors duration-300 hover:text-fizz md:text-base"
+                        className="tpl-link tpl-hit relative inline-block py-3 text-sm transition-colors duration-300 hover:text-fizz md:text-base lg:py-0"
                       >
                         {item}
                       </a>
@@ -131,13 +131,18 @@ export default function FooterSplash({
         </div>
       </div>
 
-      <a href={cta} className="group relative block" aria-label={email}>
+      <a href={cta} className="group tpl-hit relative block" aria-label={email}>
         <span
           data-splash-word
           className="block font-brico text-[clamp(3rem,13vw,11rem)] leading-[0.9] font-extrabold tracking-[-0.03em] whitespace-nowrap uppercase"
         >
           {ctaWord}
-          <span aria-hidden="true">!</span>
+          <span
+            aria-hidden="true"
+            className="inline-block origin-bottom transition-transform duration-500 ease-out-strong group-hover:rotate-12 motion-reduce:transition-none"
+          >
+            !
+          </span>
         </span>
       </a>
 
@@ -145,7 +150,7 @@ export default function FooterSplash({
         <p>{legal}</p>
         <a
           href="#top"
-          className="transition-colors duration-300 hover:text-fizz"
+          className="tpl-link tpl-hit relative self-start transition-colors duration-300 hover:text-fizz md:self-auto"
         >
           {backToTop}
         </a>

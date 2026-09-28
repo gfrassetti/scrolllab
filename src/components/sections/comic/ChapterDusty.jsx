@@ -144,7 +144,7 @@ export default function ChapterDusty({
             <img
               data-hero-img
               {...imgAttrs(heroRoad, variants)}
-              sizes="100vw"
+              sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
               fetchPriority="high"
               alt=""
               className="absolute inset-0 h-full w-full origin-center object-cover will-change-transform"

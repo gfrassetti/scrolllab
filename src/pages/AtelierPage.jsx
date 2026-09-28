@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import ScrollRail from '../components/ScrollRail'
 import NavAtelier from '../components/sections/atelier/NavAtelier'
 import HeroMeaning from '../components/sections/atelier/HeroMeaning'
 import AboutClarity from '../components/sections/atelier/AboutClarity'
@@ -20,7 +21,8 @@ import ContactForm from '../components/sections/contact/ContactForm'
 export default function AtelierPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-[#0b0c10] text-white">
+      <div id="top" className="tpl-world bg-[#0b0c10] text-white selection:bg-white selection:text-[#0b0c10]">
+        <ScrollRail trackClassName="bg-white/10" fillClassName="bg-white" />
         <NavAtelier />
         <main>
           <HeroMeaning />

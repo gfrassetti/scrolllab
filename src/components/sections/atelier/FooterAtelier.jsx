@@ -86,7 +86,7 @@ export default function FooterAtelier({
             ) : null}
             <a
               href={ctaHref}
-              className="text-[12px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-white/35 hover:decoration-white"
+              className="tpl-hit relative text-[12px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-white/35 transition-[text-decoration-color] duration-300 hover:decoration-white"
             >
               {cta}
             </a>
@@ -98,7 +98,7 @@ export default function FooterAtelier({
                 </p>
                 <a
                   href={`mailto:${email}`}
-                  className="mt-3 block text-sm text-white/70 hover:text-white"
+                  className="tpl-link mt-3 block w-fit py-3 text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto lg:py-0"
                 >
                   {emailLabel} {email}
                 </a>
@@ -110,10 +110,10 @@ export default function FooterAtelier({
                 <p className="text-[11px] tracking-[0.22em] text-white/35 uppercase">
                   {socialLabel}
                 </p>
-                <ul className="mt-3 space-y-1.5 text-sm text-white/70">
+                <ul className="mt-3 text-sm text-white/70 lg:space-y-1.5">
                   {socialLinks.map((l, i) => (
                     <li key={i}>
-                      <a href={l.href || '#'} className="hover:text-white">
+                      <a href={l.href || '#'} className="tpl-link tpl-hit relative inline-block py-3 transition-colors duration-300 hover:text-white lg:py-0">
                         {l.label}
                       </a>
                     </li>

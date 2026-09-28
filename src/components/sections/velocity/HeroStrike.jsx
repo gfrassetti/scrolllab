@@ -132,7 +132,7 @@ export default function HeroStrike({
               <img
                 data-strike-layer-back
                 {...imgAttrs(imgBack, variants)}
-                sizes="100vw"
+                sizes="(max-aspect-ratio: 3/2) 190vh, 100vw"
                 fetchPriority="high"
                 alt=""
                 className="absolute inset-x-0 -top-[12%] h-[124%] w-full object-cover opacity-55 will-change-transform"
@@ -142,7 +142,7 @@ export default function HeroStrike({
               <img
                 data-strike-layer-mid
                 {...imgAttrs(midSrc, variants)}
-                sizes="100vw"
+                sizes="(max-aspect-ratio: 3/2) 190vh, 100vw"
                 alt=""
                 className="absolute inset-x-0 -top-[10%] h-[130%] w-full object-cover opacity-80 mix-blend-lighten will-change-transform"
               />
@@ -151,7 +151,7 @@ export default function HeroStrike({
               <img
                 data-strike-layer-front
                 {...imgAttrs(imgFront, variants)}
-                sizes="100vw"
+                sizes="(max-aspect-ratio: 3/2) 190vh, 100vw"
                 alt=""
                 className="absolute inset-x-0 top-[18%] h-[95%] w-full object-cover opacity-70 [mask-image:linear-gradient(to_bottom,transparent_0%,black_18%,black_78%,transparent_100%)] will-change-transform"
               />

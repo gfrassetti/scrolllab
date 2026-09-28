@@ -32,7 +32,7 @@ export default function NavComic({
         <div className="min-w-0">
           <a
             href="#top"
-            className="block text-sm font-semibold tracking-[0.22em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
+            className="tpl-hit relative block text-sm font-semibold tracking-[0.22em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
           >
             {brand}
           </a>
@@ -46,7 +46,7 @@ export default function NavComic({
             <li key={item.label}>
               <a
                 href={item.href}
-                className="text-[11px] tracking-[0.2em] uppercase drop-shadow transition-opacity hover:opacity-70"
+                className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] uppercase drop-shadow"
               >
                 {item.label}
               </a>
@@ -57,13 +57,13 @@ export default function NavComic({
         <div className="flex items-center gap-3">
           <a
             href="#contact"
-            className="rounded-md bg-comic-flare px-3 py-2 text-[11px] font-semibold tracking-[0.14em] text-white uppercase shadow-[0_8px_20px_rgba(232,90,36,0.45)] transition-transform hover:scale-[1.03]"
+            className="ui-press tpl-hit relative rounded-md bg-comic-flare px-3 py-2 text-[11px] font-semibold tracking-[0.14em] text-white uppercase shadow-[0_8px_20px_rgba(232,90,36,0.45)] transition-transform hover:scale-[1.03]"
           >
             {cta}
           </a>
           <button
             {...triggerProps}
-            className="text-[11px] tracking-[0.2em] uppercase drop-shadow md:hidden"
+            className="ui-press tpl-hit relative text-[11px] tracking-[0.2em] uppercase drop-shadow md:hidden"
           >
             {open ? closeLabel : menuLabel}
           </button>

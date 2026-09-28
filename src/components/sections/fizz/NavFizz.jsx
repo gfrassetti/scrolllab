@@ -65,7 +65,7 @@ function Dropdown({ label, items, open, onOpen, onClose }) {
         aria-expanded={open}
         aria-controls={id}
         onClick={() => (open ? onClose() : onOpen())}
-        className="inline-flex items-center gap-1.5 rounded-full border border-foam/15 bg-foam/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-foam transition-colors duration-200 hover:bg-foam/20"
+        className="ui-press tpl-hit relative inline-flex items-center gap-1.5 rounded-full border border-foam/15 bg-foam/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-foam transition-colors duration-200 hover:bg-foam/20"
       >
         {label}
         <Chevron open={open} />
@@ -86,7 +86,7 @@ function Dropdown({ label, items, open, onOpen, onClose }) {
               <a
                 href="#"
                 role="menuitem"
-                className="block rounded-xl px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-foam/75 transition-colors duration-150 hover:bg-foam/10 hover:text-fizz"
+                className="block rounded-xl px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foam/75 transition-colors duration-150 hover:bg-foam/10 hover:text-fizz"
                 onClick={onClose}
               >
                 {item}
@@ -127,7 +127,7 @@ export default function NavFizz({
       <nav className="mx-auto flex max-w-5xl items-center justify-between rounded-full border border-foam/20 bg-grape/80 py-2 pr-2 pl-5 backdrop-blur-md md:pl-7">
         <a
           href="#top"
-          className="font-brico text-lg font-extrabold tracking-tight text-foam"
+          className="tpl-hit relative font-brico text-lg font-extrabold tracking-tight text-foam"
         >
           {brand}
         </a>
@@ -149,13 +149,13 @@ export default function NavFizz({
           />
           <a
             href="#"
-            className="rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-foam/70 transition-colors duration-200 hover:text-foam"
+            className="tpl-hit relative rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-foam/70 transition-colors duration-200 hover:text-foam"
           >
             {linkLabel}
           </a>
           <a
             href="#"
-            className="rounded-full bg-fizz px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-grape transition-transform duration-200 hover:scale-105"
+            className="ui-press tpl-hit relative rounded-full bg-fizz px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-grape transition-transform duration-200 hover:scale-105"
           >
             {cta}
           </a>
@@ -164,7 +164,7 @@ export default function NavFizz({
         <button
           {...triggerProps}
           aria-label="Menu"
-          className="grid size-10 place-items-center rounded-full border border-foam/20 text-foam md:hidden"
+          className="ui-press tpl-hit relative grid size-10 place-items-center rounded-full border border-foam/20 text-foam md:hidden"
         >
           <span className="font-brico text-sm font-bold">{mobileOpen ? '×' : '≡'}</span>
         </button>
@@ -184,7 +184,7 @@ export default function NavFizz({
               <li key={item}>
                 <a
                   href="#"
-                  className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-foam/85"
+                  className="block rounded-xl px-3 py-3 text-sm font-semibold text-foam/85"
                   onClick={closeMobile}
                 >
                   {item}
@@ -200,7 +200,7 @@ export default function NavFizz({
               <li key={item}>
                 <a
                   href="#"
-                  className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-foam/85"
+                  className="block rounded-xl px-3 py-3 text-sm font-semibold text-foam/85"
                   onClick={closeMobile}
                 >
                   {item}
@@ -210,14 +210,14 @@ export default function NavFizz({
           </ul>
           <a
             href="#"
-            className="mt-4 block rounded-full border border-foam/20 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-foam"
+            className="mt-4 block rounded-full border border-foam/20 px-4 py-3.5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-foam"
             onClick={closeMobile}
           >
             {linkLabel}
           </a>
           <a
             href="#"
-            className="mt-2 block rounded-full bg-fizz px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-grape"
+            className="ui-press mt-2 block rounded-full bg-fizz px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-grape"
             onClick={closeMobile}
           >
             {cta}

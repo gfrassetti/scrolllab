@@ -77,7 +77,7 @@ export default function ParallaxRise({
         <img
           data-rise-bg
           {...imgAttrs(img, variants)}
-          sizes="100vw"
+          sizes="(max-aspect-ratio: 3/2) 210vh, 100vw"
           loading="lazy"
           decoding="async"
           alt=""

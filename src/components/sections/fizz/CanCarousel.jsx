@@ -161,7 +161,7 @@ export default function CanCarousel({
               </p>
               <a
                 href="#"
-                className="relative z-10 mt-6 rounded-full border border-transparent bg-foam/15 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-foam transition-[transform,background-color,color,border-color] duration-300 group-hover:scale-105 group-hover:border-grape/20 group-hover:bg-grape group-hover:text-foam"
+                className="ui-press tpl-hit relative z-10 mt-6 rounded-full border border-transparent bg-foam/15 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-foam transition-[transform,background-color,color,border-color] duration-300 group-hover:scale-105 group-hover:border-grape/20 group-hover:bg-grape group-hover:text-foam"
               >
                 {cta}
               </a>

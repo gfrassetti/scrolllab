@@ -68,7 +68,7 @@ export default function HeroCinematic({
       <img
         data-hero-img
         {...picsumAttrs(img)}
-        sizes="100vw"
+        sizes="(max-aspect-ratio: 8/5) 160vh, 100vw"
         fetchPriority="high"
         alt=""
         className="absolute inset-0 h-full w-full object-cover opacity-60"
