@@ -52,11 +52,12 @@ En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, pol
 | 6 | **Higgsfield** (plugin MCP) | Generar fotos, cutouts PNG, video, GLB — **preferido** para assets de templates | namespace `plugin-higgsfield-higgsfield` · [higgsfield.ai](https://higgsfield.ai) · plugin [Cursor Marketplace](https://cursor.com/marketplace/higgsfield) |
 | 7 | **playwright-cli** | Verificar demos/UI en el browser (open / snapshot / click / screenshot). Token-efficient | `.agents/skills/playwright-cli/` · [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) · [docs](https://playwright.dev/docs/getting-started-cli) |
 | 8 | **img2threejs** | Reconstruir un objeto de una foto como Three.js **procedural** (código, no GLB) | `.agents/skills/img2threejs/` · [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs) |
+| 9 | **The Award-Winning Web Developer** (curso del usuario) | Craft award-level: white space, jerarquía, motion con vocabulario chico, catálogo de micro-interacciones, checklist award vs. genérico | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) |
 
 ### Reglas de uso (no negociables)
 
 1. **Impeccable siempre**: al crear o tocar UI, **leer** `.cursor/skills/impeccable/SKILL.md` y correr el flujo relevante (`critique` / `audit` / **`polish`**). No shippear chrome “a ojo” sin pasar por Impeccable.
-2. **Emil en motion de UI**: chrome del market + microinteracciones de templates (nav, botones, popovers, toasts). Tokens en `src/index.css` (`--ease-out`, `--ease-in-out`, `--ease-drawer`). Nunca `ease-in` en UI. Scroll storytelling sigue en GSAP + cookbook.
+2. **Emil en motion de UI**: chrome del market + microinteracciones de templates (nav, botones, popovers, toasts) **y la UI propia de cada template** — links, CTAs, cards, accordions, forms — con la capa `tpl-*` de `src/styles/tpl.css` (catálogo del Detalle #6 de la guía del curso, un mismo lenguaje en todo el template) y la barra de scroll propia `src/components/ScrollRail.jsx`. Tokens en `src/index.css` (`--ease-out`, `--ease-in-out`, `--ease-drawer`, `--duration-reveal` para la pausa titular → subtítulo). Nunca `ease-in` en UI. Scroll storytelling sigue en GSAP + cookbook.
 3. **taste-skill antes de inventar look**: declarar un “Design Read” de una línea; evitar defaults LLM (purple mesh, Inter+slate, cards genéricas). Skill canónico: `design-taste-frontend`.
 4. El scrollytelling cinematográfico (pin/scrub/WebGL) **no** se reemplaza por micro-UI: Emil/Impeccable pulen el chrome y los detalles; el cookbook manda el scroll.
 5. **Higgsfield para piezas de imagen** de templates (fotos, cutouts, upscale). No picsum. `GenerateImage` nativo de Cursor es fallback si el plugin no está. Video / GLB: preflight `get_cost` y confirmar créditos con el usuario.
@@ -114,6 +115,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 | Template existente "no está al nivel de la ref" (handoff / review) | [`docs/rebuild-against-reference.md`](docs/rebuild-against-reference.md) — reconstruir contra beats, no contra el JSX actual |
+| Revisar o pulir un template contra el estándar award-level (white space, micro-interacciones, orden de entrada) | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) — checklist «Award-level vs. genérico» |
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
 
@@ -231,6 +233,7 @@ Reglas:
 - Navs de template + market colapsan en `md:` (consistente; no mezclar `lg:` como hacía comic).
 - Grid/flex items que puedan quedar más anchos que su track necesitan `min-w-0` (el default `min-width:auto` los expande a min-content y desborda; fue el bug del builder en mobile).
 - `body { overflow-x: clip }` enmascara leaks horizontales pero **no** arregla layout; usar `npm run check:responsive` para detectar elementos que se salen del viewport. Ojo: secciones con scroll horizontal/marquee/pin (HorizontalPanels, TrackMerge, SelectedWork, ChapterRail, marquees) son anchas *a propósito* y van clippeadas — no son overflow real.
+- Piso en mobile (≤ 480, probado desde 320): micro-labels ≥ 11 px y cuerpo ≥ 14 px; controles con zona de toque ≥ 44 px (`tpl-hit` si el dibujo es más chico; los links dentro de un párrafo quedan exentos); alturas en `svh`; nada que solo se descubra con hover (Tailwind v4 ya limita `hover:` a dispositivos con hover, pero el contenido tiene que tener camino táctil); imágenes con `srcSet`/`sizes`. `npm run check:mobile` lo mide por sección.
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
 roto. Dos redes lo cubren:

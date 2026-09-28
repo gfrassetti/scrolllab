@@ -143,7 +143,11 @@ const SHARED = [
   'src/hooks/useMobileMenu.js',
   'src/hooks/useReducedMotion.js',
   'src/components/SmoothScrollProvider.jsx',
+  // Barra de scroll propia de cada template (la monta la página).
+  'src/components/ScrollRail.jsx',
   'src/index.css',
+  // Micro-interacciones comunes (tpl-*), las importa index.css.
+  'src/styles/tpl.css',
   'src/main.jsx',
   'index.html',
 ]

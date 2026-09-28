@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Las mismas micro-interacciones que en el sitio (tpl-*): las secciones las usan. */
+@import "../../src/styles/tpl.css";
 
 /*
  * El build corre con root=embed/frame, así que Tailwind no ve las secciones.
