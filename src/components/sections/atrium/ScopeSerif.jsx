@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 /**
  * ScopeSerif — the scope of the practice set as one serif paragraph at
@@ -11,10 +13,11 @@ export default function ScopeSerif({
   fg,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-scope-line]', { y: 16 })
 
       const split = new SplitText('[data-scope-line]', {
         type: 'lines',
@@ -35,7 +38,7 @@ export default function ScopeSerif({
         scrollTrigger: { trigger: root.current, start: 'top 78%', once: true },
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (

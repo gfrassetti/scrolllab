@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { civic, tower, courtyard, gallery, heroHouse, interior, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -39,10 +41,11 @@ export default function ProjectRail({
   works = defaultWorks,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-work-head], [data-work-item]', { y: 16, stagger: 0.1 })
 
       gsap.from('[data-work-head]', {
         yPercent: 40,
@@ -80,7 +83,7 @@ export default function ProjectRail({
         })
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (

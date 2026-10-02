@@ -786,9 +786,25 @@ async function auditJob(browser, base, job, opts) {
       }
     }
 
+    let widened = false
     for (const pos of positions) {
       await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), pos.y)
       await page.waitForTimeout(opts.settle)
+      // En un teléfono, algo que se sale por la derecha hace que el navegador
+      // ensanche la pantalla (la página se ve achicada) y todas las medidas de
+      // abajo se toman contra ese ancho inflado: no se ve como `overflow`.
+      if (!widened && job.width < 1024) {
+        const iw = await page.evaluate(() => window.innerWidth)
+        if (iw > width + 1) {
+          widened = true
+          issues.push({
+            check: 'overflow',
+            block: pos.name,
+            detail: `la pantalla se ensanchó a ${iw}px (el teléfono es de ${width}px): algo se sale por la derecha`,
+            where: `${pos.name}:${pos.label}`,
+          })
+        }
+      }
       // Con varias páginas en paralelo (y WebGL por software) una foto lazy
       // puede tardar más que el settle: se espera a las que están a la vista.
       await page

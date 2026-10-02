@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import {
   orbitMeeting,
   orbitScreens,
@@ -39,10 +41,11 @@ export default function PeopleScatter({
   plates = defaultPlates,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-people-title], [data-people-plate]', { y: 16, stagger: 0.1 })
 
       const split = new SplitText('[data-people-title]', {
         type: 'lines',
@@ -101,7 +104,7 @@ export default function PeopleScatter({
         )
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (

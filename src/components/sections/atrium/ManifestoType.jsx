@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 /**
  * ManifestoType — the page H1 on paper. The paper slides over the pinned
@@ -15,10 +17,11 @@ export default function ManifestoType({
   fg,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-manifesto-head], [data-manifesto-col]', { y: 16, stagger: 0.12 })
 
       const split = new SplitText('[data-manifesto-line]', {
         type: 'chars',
@@ -48,7 +51,7 @@ export default function ManifestoType({
         scrollTrigger: { trigger: '[data-manifesto-cols]', start: 'top 88%', once: true },
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (
