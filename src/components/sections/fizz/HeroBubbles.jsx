@@ -560,11 +560,14 @@ export default function HeroBubbles({
         uFizzFill: { value: 1e6 },
         uFizzEdge: { value: 0.001 },
         uFizzTint: { value: new THREE.Color(flavorCfg.liquid) },
+        // La capa lechosa: el color del escenario aclarado.
+        uFizzVeil: { value: new THREE.Color(flavorCfg.bg).lerp(new THREE.Color(0xffffff), 0.6) },
       }
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xf4fffa,
         transmission: 1,
-        roughness: 0.02,
+        // Un poco áspero: desenfoca apenas lo que hay detrás, como un vidrio esmerilado.
+        roughness: 0.14,
         ior: 1.5,
         thickness: 0.016,
         dispersion: narrow ? 0 : 2.5,
@@ -582,14 +585,15 @@ export default function HeroBubbles({
         shader.fragmentShader = shader.fragmentShader
           .replace(
             '#include <common>',
-            '#include <common>\nvarying float vFizzY;\nuniform float uFizzFill;\nuniform float uFizzEdge;\nuniform vec3 uFizzTint;',
+            '#include <common>\nvarying float vFizzY;\nuniform float uFizzFill;\nuniform float uFizzEdge;\nuniform vec3 uFizzTint;\nuniform vec3 uFizzVeil;',
           )
           .replace(
             '#include <transmission_fragment>',
             `#include <transmission_fragment>
             float fizzLiquid = 1.0 - smoothstep(uFizzFill - uFizzEdge, uFizzFill + uFizzEdge, vFizzY);
             float fizzLine = 1.0 - smoothstep(0.0, uFizzEdge * 4.0, abs(vFizzY - uFizzFill));
-            totalDiffuse = mix(totalDiffuse, totalDiffuse * mix(vec3(1.0), uFizzTint, 0.35), fizzLiquid) + fizzLine * 0.22;`,
+            totalDiffuse = mix(totalDiffuse, totalDiffuse * mix(vec3(1.0), uFizzTint, 0.35), fizzLiquid) + fizzLine * 0.22;
+            totalDiffuse = mix(totalDiffuse, uFizzVeil, 0.1 + fizzLiquid * 0.2);`,
           )
       }
       const capMat = new THREE.MeshStandardMaterial({
