@@ -14,11 +14,6 @@ import ScrollProgress from './ScrollProgress'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
 
-/**
- * Reensambla el logo (barras + accent) al clic, mismo lenguaje que la
- * intro del hero (TemplatesIndex) pero en miniatura y replayable. `host`
- * es el elemento que envuelve el <Logo> (busca sus data-logo-bar/-accent).
- */
 // Una sola vez para toda la app: arregla el scroll en mobile (toolbar que
 // aparece/desaparece, overscroll) donde SiteHeader vive — el chrome del
 // market, sin Lenis. NUNCA en páginas con Lenis (demos de templates, ver
@@ -32,6 +27,11 @@ function ensureNormalizedScroll() {
   ScrollTrigger.normalizeScroll(true)
 }
 
+/**
+ * Reensambla el logo (barras + accent) al clic, mismo lenguaje que la
+ * intro del hero (TemplatesIndex) pero en miniatura y replayable. `host`
+ * es el elemento que envuelve el <Logo> (busca sus data-logo-bar/-accent).
+ */
 function playLogoAssembly(host) {
   if (!host) return
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -214,11 +214,11 @@ export default function SiteHeader({ solid = true }) {
               </span>
             )}
           </Link>
-          <Link to="/#estudio" className={`${linkClass} ${zoneClass('estudio')}`}>
-            {t('nav.studio')}
-          </Link>
           <Link to="/#como-funciona" className={linkClass}>
             {t('nav.howItWorks')}
+          </Link>
+          <Link to="/#estudio" className={`${linkClass} ${zoneClass('estudio')}`}>
+            {t('nav.studio')}
           </Link>
           <CartPopover />
           {showAccount ? (
@@ -324,18 +324,18 @@ export default function SiteHeader({ solid = true }) {
             </li>
             <li>
               <Link
-                to="/#estudio"
-                className={`block py-3.5 hover:text-accent ${zoneClass('estudio')}`}
-              >
-                {t('nav.studio')}
-              </Link>
-            </li>
-            <li>
-              <Link
                 to="/#como-funciona"
                 className="block py-3.5 hover:text-accent"
               >
                 {t('nav.howItWorks')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/#estudio"
+                className={`block py-3.5 hover:text-accent ${zoneClass('estudio')}`}
+              >
+                {t('nav.studio')}
               </Link>
             </li>
             {showAccount ? (
