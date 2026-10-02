@@ -4,7 +4,7 @@ import { useLenis } from '../hooks/useLenis'
  * Wrap the whole page once. Everything inside scrolls through Lenis,
  * and every ScrollTrigger stays in sync automatically.
  */
-export default function SmoothScrollProvider({ children }) {
-  useLenis()
+export default function SmoothScrollProvider({ children, normalizeTouch = true }) {
+  useLenis({ normalizeTouch })
   return children
 }

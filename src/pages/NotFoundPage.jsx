@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { gsap, useGSAP } from '../lib/gsap'
 import SiteHeader from '../components/SiteHeader'
 import { useT } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 const FRAMES = 7
 
@@ -17,7 +18,7 @@ export default function NotFoundPage() {
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const reduced = prefersReducedMotion()
       if (reduced) return
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })

@@ -1,12 +1,14 @@
 import { useEffect } from 'react'
 import Lenis from 'lenis'
 import { gsap, ScrollTrigger } from '../lib/gsap'
+import { retainTouchScroll } from '../lib/touchScroll'
+import { prefersReducedMotion } from '../lib/motion'
 
 let instance = null
 
 /**
  * The running Lenis instance, or null when smooth scroll is off
- * (reduced motion). Overlays use it to freeze the page behind them.
+ * (calm version). Overlays use it to freeze the page behind them.
  */
 export function getLenis() {
   return instance
@@ -17,11 +19,17 @@ export function getLenis() {
  * Lenis drives the scroll, ScrollTrigger listens to it, and both
  * share the GSAP ticker so scroll and animation share one rhythm.
  *
- * Skipped entirely when the user prefers reduced motion.
+ * Lenis only smooths the wheel; on phones and tablets the touch scroll is
+ * normalized instead (src/lib/touchScroll.js), also in the calm version.
+ * Pass `normalizeTouch: false` where the page is an app with its own panels.
+ *
+ * Lenis is skipped entirely in the calm version (src/lib/motion.js).
  */
-export function useLenis() {
+export function useLenis({ normalizeTouch = true } = {}) {
+  useEffect(() => (normalizeTouch ? retainTouchScroll() : undefined), [normalizeTouch])
+
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    if (prefersReducedMotion()) return undefined
 
     const lenis = new Lenis({
       lerp: 0.1,

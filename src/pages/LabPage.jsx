@@ -14,6 +14,7 @@ import { getSection } from '../lib/sectionRegistry'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 const STATUS_TONE = {
   published: 'text-success border-success/40 bg-success/10',
@@ -136,7 +137,7 @@ export default function LabPage() {
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return
 
       // Mismo lenguaje que el wordmark del home: máscara + chars, LAB es la
       // marca de este producto puntual.

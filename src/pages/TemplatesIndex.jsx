@@ -29,6 +29,7 @@ import {
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
 import TextMorph from '../components/TextMorph'
+import { fullMotionQuery, prefersReducedMotion } from '../lib/motion'
 
 const TEMPLATE_META = [
   {
@@ -376,7 +377,7 @@ export default function TemplatesIndex() {
   useGSAP(
     () => {
       if (!introReady) return
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return
 
       // Logo del hero: mismo ensamble que el contact (barras + accent).
       const heroLogo = root.current?.querySelector('[data-hero-logo]')
@@ -462,7 +463,7 @@ export default function TemplatesIndex() {
       const mm = gsap.matchMedia()
 
       mm.add(
-        '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
+        fullMotionQuery('(min-width: 768px)'),
         () => {
           const stage = root.current?.querySelector('[data-template-stage]')
           const artworks = stage
@@ -494,7 +495,7 @@ export default function TemplatesIndex() {
         },
       )
 
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+      mm.add(fullMotionQuery(), () => {
         gsap.utils.toArray('[data-soft-fade]').forEach((el) => {
           gsap.from(el, {
             opacity: 0,

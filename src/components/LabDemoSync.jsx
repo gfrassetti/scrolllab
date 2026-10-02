@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * LabDemoSync — segundo demo animado de LAB (compañero de LabDemo).
@@ -77,9 +78,7 @@ export default function LabDemoSync() {
         SITES.forEach((_, i) => setText(`[data-site-word="${i}"]`, c.oldText))
       }
 
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
 
       if (reduced) {
         reset()

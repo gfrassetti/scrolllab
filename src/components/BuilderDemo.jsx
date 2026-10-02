@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS_HERO, LD_CURSOR_STYLE } from './labDemoKit'
 import { formatArs, formatUsd, arsFromUsd, FALLBACK_USD_ARS } from '../lib/pricing'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * BuilderDemo — demo animado del Builder (pago único). Elegís secciones del
@@ -126,9 +127,7 @@ export default function BuilderDemo() {
         setText('[data-count]', `0 ${c.sections}`)
       }
 
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
 
       if (reduced) {
         reset()

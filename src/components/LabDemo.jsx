@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * LabDemo — prototipo de "demo animado de producto" al estilo cursor.com,
@@ -124,9 +125,7 @@ export default function LabDemo() {
         setText('[data-badge]', c.badgeDraft)
       }
 
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
 
       if (reduced) {
         reset()

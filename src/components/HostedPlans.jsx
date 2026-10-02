@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
 import { gsap, useGSAP } from '../lib/gsap'
+import { prefersReducedMotion } from '../lib/motion'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
 const tierIndex = (planId) => TIER_ORDER.indexOf(String(planId).replace('hosted_', ''))
@@ -124,7 +125,7 @@ export default function HostedPlans() {
   // `ScrollToTop` (useLayoutEffect en App) ya corrió para entonces.
   useEffect(() => {
     if (!hashIntent || !plans.length || !root.current) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduce = prefersReducedMotion()
     const id = requestAnimationFrame(() => {
       root.current?.scrollIntoView({
         behavior: reduce ? 'auto' : 'smooth',
@@ -302,7 +303,7 @@ export default function HostedPlans() {
   useGSAP(
     () => {
       if (!plans.length) return
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return
       gsap.from('[data-plan-card]', {
         y: 24,
         opacity: 0,

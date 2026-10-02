@@ -13,7 +13,23 @@
  *              que estar posicionado: sumale `relative` si no lo está.
  *   tpl-lift   card que se eleva apenas en hover. No va en un nodo que anima
  *              GSAP (pelean por el transform): va en un wrapper interno.
+ *   tpl-gpu    capa propia de GPU para lo que se mueve con el scroll (fotos de
+ *              un pin, parallax, tracks). No en cada letra: en un teléfono,
+ *              demasiadas capas gastan memoria y dejan el texto borroso.
+ *
+ *   calm:      variante para la versión calma (ver src/lib/motion.js): aplica
+ *              con «reducir movimiento» prendido, salvo que la página haya
+ *              pedido el movimiento completo con <html data-motion="full">.
+ *              `h-[400vh] calm:h-auto` saca el alto que solo sirve para scrubear.
  */
+@custom-variant calm {
+  @media (prefers-reduced-motion: reduce) {
+    &:not(:where([data-motion='full'] *)) {
+      @slot;
+    }
+  }
+}
+
 @layer utilities {
   .tpl-world :focus-visible {
     outline: 2px solid currentColor;
@@ -43,6 +59,12 @@
     width: max(100%, 44px);
     height: max(100%, 44px);
     transform: translate(-50%, -50%);
+  }
+
+  .tpl-gpu {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .tpl-lift {

@@ -3,6 +3,7 @@ import { gsap } from '../lib/gsap'
 import Logo from './Logo'
 import { useT } from '../i18n'
 import { useTheme } from '../lib/theme'
+import { prefersReducedMotion } from '../lib/motion'
 
 // Mismo par bg/mark en los dos sentidos — nada de negro fijo si el sitio
 // está en claro. Los corchetes usan el mismo degradé que "LAB": no son un
@@ -52,9 +53,7 @@ export default function LabSplash({ onDone }) {
       onDoneRef.current?.()
     }
 
-    const reduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
+    const reduced = prefersReducedMotion()
 
     if (reduced) {
       const id = window.setTimeout(finish, 280)

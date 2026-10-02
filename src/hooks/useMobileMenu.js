@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { getLenis } from './useLenis'
+import { pauseTouchScroll } from '../lib/touchScroll'
 
 /**
  * Everything a header overlay needs except the looks: open state, Escape,
@@ -28,11 +29,13 @@ export function useMobileMenu({ breakpoint = '(min-width: 768px)' } = {}) {
   }, [open])
 
   // Lenis keeps scrolling behind a fixed overlay unless it is stopped, and
-  // the body lock covers the reduced-motion case where Lenis never booted.
+  // the body lock covers the calm version where Lenis never booted. On
+  // touch, the normalized scroll would still move the page under the panel.
   useEffect(() => {
     if (!open) return undefined
     const lenis = getLenis()
     lenis?.stop()
+    const resumeTouchScroll = pauseTouchScroll()
 
     const { body, documentElement } = document
     const previousOverflow = body.style.overflow
@@ -45,6 +48,7 @@ export function useMobileMenu({ breakpoint = '(min-width: 768px)' } = {}) {
     return () => {
       body.style.overflow = previousOverflow
       body.style.paddingRight = previousPadding
+      resumeTouchScroll()
       lenis?.start()
     }
   }, [open])

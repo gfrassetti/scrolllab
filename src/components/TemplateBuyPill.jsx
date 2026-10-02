@@ -88,7 +88,7 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
             </span>
             <span className="truncate text-[10px] text-white/55">
               {t('demoBuy.only')}{' '}
-              <span className="text-white">{priceLabel || 'â€”'}</span>
+              <span className="text-white">{priceLabel || '—'}</span>
             </span>
           </span>
 

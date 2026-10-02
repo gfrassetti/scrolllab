@@ -20,6 +20,7 @@ import { useCart } from '../lib/cart'
 import { startCheckout } from '../lib/startCheckout'
 import { useAuth } from '../lib/auth'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 const kindLabelKeys = {
   nav: 'builder.kind.nav',
@@ -89,7 +90,7 @@ export default function BuilderPage() {
   }, [hasItems, preview])
 
   const goToCanvas = () => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduce = prefersReducedMotion()
     document
       .getElementById('builder-canvas')
       ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
@@ -240,8 +241,9 @@ export default function BuilderPage() {
   }
 
   if (preview) {
+    // El panel de edición tiene scroll propio: sin scroll táctil normalizado.
     return (
-      <SmoothScrollProvider>
+      <SmoothScrollProvider normalizeTouch={false}>
         <BuilderPreview
           items={items}
           onChangeProps={updateItemProps}

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import Logo from './Logo'
 import { useT } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 const SESSION_KEY = 'scrolllab-splash-seen'
 
@@ -55,9 +56,7 @@ export default function BrandSplash({ onDone }) {
       onDoneRef.current?.()
     }
 
-    const reduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
+    const reduced = prefersReducedMotion()
 
     if (reduced) {
       const id = window.setTimeout(finish, 280)

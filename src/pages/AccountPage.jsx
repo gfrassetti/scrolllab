@@ -11,6 +11,7 @@ import { orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 const PAGE_SIZE = 20
 
@@ -45,7 +46,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (!location.hash) return undefined
     const id = location.hash.slice(1)
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduce = prefersReducedMotion()
     const raf = requestAnimationFrame(() => {
       document
         .getElementById(id)

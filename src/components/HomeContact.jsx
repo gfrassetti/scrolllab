@@ -9,6 +9,7 @@ import {
 } from '../lib/contactForm'
 import { trackLead } from '../lib/gtm'
 import { useT } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * Home contact — form always usable on top; subtle B/W logo
@@ -34,9 +35,7 @@ export default function HomeContact() {
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
       const logoHost = root.current?.querySelector('[data-contact-logo]')
       const bars = gsap.utils.toArray('[data-logo-bar]', logoHost)
       const accent = logoHost?.querySelector('[data-logo-accent]')

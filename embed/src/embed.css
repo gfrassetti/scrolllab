@@ -1,6 +1,19 @@
 @import "tailwindcss";
 
 /*
+ * Versión calma (src/lib/motion.js), igual que en src/styles/tpl.css. Dentro
+ * del shadow root el selector no ve el <html> del host: manda el ajuste de
+ * «reducir movimiento» del dispositivo.
+ */
+@custom-variant calm {
+  @media (prefers-reduced-motion: reduce) {
+    &:not(:where([data-motion='full'] *)) {
+      @slot;
+    }
+  }
+}
+
+/*
  * Subconjunto de tokens de src/index.css que las secciones hosteables usan.
  * Sin variante `.dark` (el shadow root no ve la clase del host); v1 es light.
  * Tailwind v4 emite sus tokens en :root; entry.jsx los reapunta a :host en

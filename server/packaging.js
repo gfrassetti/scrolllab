@@ -144,6 +144,10 @@ const SHARED = [
   'src/lib/navLinks.js',
   // srcset de las fotos de ejemplo (assets/images.js de cada modelo).
   'src/lib/responsiveImage.js',
+  // Versión calma con «reducir movimiento» (las secciones la consultan).
+  'src/lib/motion.js',
+  // Scroll táctil normalizado en teléfonos (lo prende useLenis).
+  'src/lib/touchScroll.js',
   'src/hooks/useLenis.js',
   'src/hooks/useMobileMenu.js',
   'src/hooks/useReducedMotion.js',

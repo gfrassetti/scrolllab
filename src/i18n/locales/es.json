@@ -1209,5 +1209,12 @@
   "theme": {
     "toLight": "Cambiar a tema claro",
     "toDark": "Cambiar a tema oscuro"
+  },
+  "motionNotice": {
+    "label": "Movimiento",
+    "calm": "Tu dispositivo pide menos movimiento, así que estás viendo la versión calma.",
+    "full": "Estás viendo las animaciones completas.",
+    "showFull": "Ver con animaciones",
+    "showCalm": "Volver a la versión calma"
   }
 }

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { gsap } from '../lib/gsap'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * Un item: <details> nativo no anima su altura de forma confiable entre
@@ -12,9 +13,7 @@ function FaqItem({ q, a }) {
   const tweenRef = useRef(null)
 
   const toggle = () => {
-    const reduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
+    const reduced = prefersReducedMotion()
 
     if (reduced) {
       setOpen((v) => !v)

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * Rota entre palabras fundiendo una en la otra (blur + fade) conservando el
@@ -16,9 +17,7 @@ export default function TextMorph({
   className = '',
 }) {
   const [index, setIndex] = useState(0)
-  const reduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const reduced = prefersReducedMotion()
 
   useEffect(() => {
     if (reduced || words.length < 2) return undefined

@@ -6,26 +6,15 @@ import { usePlan } from '../lib/plan'
 import { useCompositionCount } from '../hooks/useCompositionCount'
 import { useT } from '../i18n'
 import { resetBrandSplash } from './BrandSplash'
-import { gsap, ScrollTrigger } from '../lib/gsap'
+import { gsap } from '../lib/gsap'
+import { pauseTouchScroll, retainTouchScroll } from '../lib/touchScroll'
 import CartPopover from './CartPopover'
 import UserMenu from './UserMenu'
 import Logo from './Logo'
 import ScrollProgress from './ScrollProgress'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
-
-// Una sola vez para toda la app: arregla el scroll en mobile (toolbar que
-// aparece/desaparece, overscroll) donde SiteHeader vive — el chrome del
-// market, sin Lenis. NUNCA en páginas con Lenis (demos de templates, ver
-// SmoothScrollProvider/useLenis.js): normalizeScroll toma el control del
-// scroll igual que Lenis y las dos pelean — ahí el mobile se arregla con
-// ignoreMobileResize solo (gsap.js), no con esto.
-let normalizedScroll = false
-function ensureNormalizedScroll() {
-  if (normalizedScroll) return
-  normalizedScroll = true
-  ScrollTrigger.normalizeScroll(true)
-}
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * Reensambla el logo (barras + accent) al clic, mismo lenguaje que la
@@ -34,7 +23,7 @@ function ensureNormalizedScroll() {
  */
 function playLogoAssembly(host) {
   if (!host) return
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  if (prefersReducedMotion()) return
   const bars = gsap.utils.toArray(host.querySelectorAll('[data-logo-bar]'))
   const accent = host.querySelector('[data-logo-accent]')
   if (!bars.length && !accent) return
@@ -101,9 +90,10 @@ export default function SiteHeader({ solid = true }) {
   // "Entrar" antes de irse y vuelve el parpadeo que queremos evitar.
   const showAccount = loggingOut || (user ? true : loading ? hadSession : false)
 
-  useEffect(() => {
-    ensureNormalizedScroll()
-  }, [])
+  // Scroll táctil normalizado mientras el chrome del market esté montado
+  // (src/lib/touchScroll.js): se apaga al salir, no se filtra a las demos.
+  useEffect(() => retainTouchScroll(), [])
+  useEffect(() => (menuOpen ? pauseTouchScroll() : undefined), [menuOpen])
 
   useEffect(() => {
     setMenuOpen(false)

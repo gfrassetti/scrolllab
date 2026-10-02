@@ -1209,5 +1209,12 @@
   "theme": {
     "toLight": "Switch to light theme",
     "toDark": "Switch to dark theme"
+  },
+  "motionNotice": {
+    "label": "Motion",
+    "calm": "Your device asks for less motion, so you are seeing the calm version.",
+    "full": "You are seeing the full animations.",
+    "showFull": "Show animations",
+    "showCalm": "Back to the calm version"
   }
 }

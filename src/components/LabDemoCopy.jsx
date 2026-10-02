@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS, LD_CURSOR_STYLE } from './labDemoKit'
 import { useI18n } from '../i18n'
+import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * LabDemoCopy — tercer demo animado de LAB (paso 02: copiar el script).
@@ -70,9 +71,7 @@ export default function LabDemoCopy() {
         gsap.set(q('[data-flash]'), { opacity: 0 })
       }
 
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
 
       if (reduced) {
         reset()
