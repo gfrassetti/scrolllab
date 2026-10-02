@@ -1,21 +1,29 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import ComicPanel from './ComicPanel'
 import PaperFrame from './PaperFrame'
 import { closeupBuddies, heroRoad, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * ChapterBond — pinned comic pages that tear over each other.
+ *
+ * Calma: las tres páginas son `absolute inset-0` (el scrub las destapa una
+ * sobre otra) — sin scrub, apiladas, tapándose entre sí. En calma son tres
+ * viñetas en fila (ComicPanel) con fundido al entrar.
  */
 export default function ChapterBond({
   label = 'Chapter 2',
   lead = 'Lead 1 — replace with chapter intro.',
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-comic-reveal]')
 
       const pin = root.current.querySelector('[data-pin]')
       const pages = gsap.utils.toArray('[data-page]')
@@ -55,7 +63,7 @@ export default function ChapterBond({
         }
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   const pages = [
@@ -78,6 +86,35 @@ export default function ChapterBond({
       img: driveSunset,
     },
   ]
+
+  if (reduced) {
+    return (
+      <section
+        id="chapter-bond"
+        ref={root}
+        className="relative bg-comic-paper py-20 text-[#2a2622] md:py-28"
+      >
+        <div data-comic-reveal className="mb-10 px-5 text-center md:px-10">
+          <p className="mb-3 text-[11px] tracking-[0.28em] text-comic-flare uppercase">{label}</p>
+          <p className="mx-auto max-w-2xl font-brico text-[clamp(1.3rem,3vw,2rem)] leading-snug font-semibold">
+            {lead}
+          </p>
+        </div>
+        {pages.map((page) => (
+          <div data-comic-reveal key={page.title}>
+            <ComicPanel
+              img={page.img}
+              variants={variants}
+              sizes="(min-width: 768px) 880px, 100vw"
+              kicker={page.kicker}
+              title={page.title}
+              lines={[page.body]}
+            />
+          </div>
+        ))}
+      </section>
+    )
+  }
 
   return (
     <section

@@ -1,11 +1,18 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import PaperFrame from './PaperFrame'
 import { driveSunset, closedYards, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * ChapterFork — pinned split: two futures tear apart on scroll.
+ *
+ * Calma: a diferencia de Dusty/Bond, las dos cards ya son columnas de una
+ * grilla (`md:grid-cols-2`), no capas `absolute` superpuestas — sin pin no
+ * se tapan entre sí, solo sobra el alto de pin (`h-svh overflow-hidden`,
+ * `calm:` lo saca) y la entrada se reemplaza por un fundido simple.
  */
 export default function ChapterFork({
   label = 'Chapter 3',
@@ -20,10 +27,11 @@ export default function ChapterFork({
   },
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-comic-reveal]')
 
       const pin = root.current.querySelector('[data-fork-pin]')
       const tl = gsap.timeline({
@@ -55,18 +63,18 @@ export default function ChapterFork({
       tl.to('[data-fork-prompt]', { opacity: 0.35, duration: 1.2 }, 2.8)
       tl.to('[data-crack]', { scaleX: 1, opacity: 1, duration: 1.6 }, 3)
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (
     <section
       id="chapter-fork"
       ref={root}
-      className="relative h-[420vh] bg-[#1f1c19] text-white"
+      className="relative h-[420vh] bg-[#1f1c19] text-white calm:h-auto"
     >
       <div
         data-fork-pin
-        className="relative flex h-svh items-center justify-center overflow-hidden px-4 md:px-8"
+        className="relative flex h-svh items-center justify-center overflow-hidden px-4 calm:static calm:block calm:h-auto calm:overflow-visible calm:py-20 md:px-8 md:calm:py-28"
       >
         <div
           aria-hidden="true"
@@ -83,6 +91,7 @@ export default function ChapterFork({
           </p>
           <p
             data-fork-prompt
+            data-comic-reveal
             className="mx-auto mb-6 max-w-2xl text-center font-brico text-[clamp(1.5rem,3.6vw,2.5rem)] leading-snug font-bold tracking-[-0.02em] md:mb-10"
           >
             {prompt}
@@ -101,7 +110,7 @@ export default function ChapterFork({
               style={{ opacity: 0 }}
             />
 
-            <div data-path-left className="will-change-transform">
+            <div data-path-left data-comic-reveal className="will-change-transform">
               <PaperFrame>
                 <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
                   <img
@@ -129,7 +138,7 @@ export default function ChapterFork({
               </PaperFrame>
             </div>
 
-            <div data-path-right className="will-change-transform">
+            <div data-path-right data-comic-reveal className="will-change-transform">
               <PaperFrame>
                 <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
                   <img

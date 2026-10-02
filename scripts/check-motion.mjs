@@ -207,6 +207,24 @@ async function touchSwipeX(cdp, { y, startX, endX, steps = 10, stepDelay = 16 })
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
 }
 
+/**
+ * Espera a que termine la inercia: tras soltar el dedo, normalizeScroll y
+ * Lenis siguen moviendo la página unos cientos de ms, y una captura a mitad
+ * de ese tramo sale con el cuadro corrido (una franja del fondo arriba, que
+ * decae a 0 con la inercia). Los diffs y las capturas se toman ya asentados.
+ */
+async function settleScroll(page, { poll = 90, stable = 3, max = 3000 } = {}) {
+  let last = await page.evaluate(() => scrollY)
+  let same = 0
+  const t0 = Date.now()
+  while (same < stable && Date.now() - t0 < max) {
+    await page.waitForTimeout(poll)
+    const y = await page.evaluate(() => scrollY)
+    same = Math.abs(y - last) < 0.5 ? same + 1 : 0
+    last = y
+  }
+}
+
 /** Cuadro chico en gris (barato de diffear) de lo que se ve ahora mismo. */
 async function grabFrame(page) {
   const jpeg = await page.screenshot({ type: 'jpeg', quality: 45 })
@@ -241,6 +259,8 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
   await context.addInitScript(() => {
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
+      // El aviso «Ver con animaciones» (MotionNotice) tapa controles y capturas.
+      sessionStorage.setItem('scrolllab-motion-notice', '1')
     } catch {
       /* ignore */
     }
@@ -346,7 +366,7 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
   while (gestures < MAX_GESTURES) {
     const before = await page.evaluate(() => scrollY)
     await swipeDown(cdp, vp, Math.round(vp.height * 0.7))
-    await page.waitForTimeout(260)
+    await settleScroll(page)
     const after = await page.evaluate(() => scrollY)
     gestures++
     const delta = after - before

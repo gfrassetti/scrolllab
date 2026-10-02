@@ -167,6 +167,24 @@ function installPageHelpers() {
   const visible = (el) =>
     el.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && !el.closest('[inert]')
 
+  /**
+   * Un fundido o una escala a medias (el reveal de un scrub todavía corriendo):
+   * la zona de toque de un botón que entra con `scale: 0.5 → 1` mide la mitad
+   * hasta que termina. Se mide con la geometría de reposo, que aparece en otra
+   * posición de scroll de la misma auditoría.
+   */
+  const midTween = (el) => {
+    for (let a = el; a && a !== document.body; a = a.parentElement) {
+      const cs = getComputedStyle(a)
+      if (parseFloat(cs.opacity) < 0.9) return true
+      if (cs.transform && cs.transform !== 'none') {
+        const m = new DOMMatrix(cs.transform)
+        if (Math.hypot(m.a, m.b) < 0.95) return true
+      }
+    }
+    return false
+  }
+
   const shortText = (s, n = 48) => {
     const t = (s || '').replace(/\s+/g, ' ').trim()
     return t.length > n ? `${t.slice(0, n - 1)}…` : t
@@ -556,6 +574,7 @@ function installPageHelpers() {
       if (el.matches(CONTROLS) && visible(el)) {
         if (r.width <= 1 || r.height <= 1) continue // sr-only
         if (isInlineLink(el)) continue
+        if (midTween(el)) continue
         const eff = hitSize(el, r, minTarget)
         if (eff && (eff.w < minTarget - 0.5 || eff.h < minTarget - 0.5)) {
           report(el, 'target', {
@@ -647,6 +666,8 @@ async function auditJob(browser, base, job, opts) {
   await context.addInitScript(() => {
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
+      // El aviso «Ver con animaciones» (MotionNotice) tapa controles y capturas.
+      sessionStorage.setItem('scrolllab-motion-notice', '1')
     } catch {
       /* ignore */
     }

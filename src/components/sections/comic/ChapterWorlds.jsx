@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
-import { gsap } from '../../../lib/gsap'
+import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import PaperFrame from './PaperFrame'
 import { usePinnedScrub } from './usePinnedScrub'
 import { heroRoad, closedYards, variants } from './assets/images'
@@ -21,7 +23,15 @@ const DEFAULT_FACTS = [
 ]
 
 /**
- * ChapterWorlds — pinned collide reel (stage absolutos = nunca colapsa a vacío).
+ * ChapterWorlds — pinned collide reel.
+ *
+ * Título, stage y fact cards son hijos de una columna flex (no tres bloques
+ * `absolute` anclados cada uno desde un borde distinto): eso es lo que hacía
+ * que, en una pantalla baja, las fact cards (ancladas abajo) se superpusieran
+ * con las fotos del stage (ancladas al 28% desde arriba). Con flex, uno
+ * empuja al siguiente — no se pisan en ningún alto de viewport, con o sin
+ * movimiento. En calma, `usePinnedScrub` no arma el pin (controla su propio
+ * `prefers-reduced-motion`): el fundido de entrada corre aparte, con `calmReveal`.
  */
 export default function ChapterWorlds({
   label = 'Chapter 4',
@@ -34,6 +44,14 @@ export default function ChapterWorlds({
 }) {
   const root = useRef(null)
   const [openId, setOpenId] = useState(null)
+  const reduced = useReducedMotion()
+
+  useGSAP(
+    () => {
+      if (reduced) return calmReveal('[data-comic-reveal]')
+    },
+    { scope: root, dependencies: [reduced] },
+  )
 
   usePinnedScrub(root, {
     scrub: 0.4,
@@ -108,9 +126,12 @@ export default function ChapterWorlds({
     <section
       id="chapter-worlds"
       ref={root}
-      className="relative h-[620vh] bg-[#1a1512] text-white"
+      className="relative h-[620vh] bg-[#1a1512] text-white calm:h-auto"
     >
-      <div data-pin className="relative h-svh overflow-hidden">
+      <div
+        data-pin
+        className="relative flex h-svh flex-col justify-center gap-4 overflow-hidden px-4 py-6 calm:h-auto calm:overflow-visible calm:py-16 md:gap-6 md:px-8 md:py-8 md:calm:py-24"
+      >
         <div
           aria-hidden="true"
           className="absolute inset-0"
@@ -121,10 +142,7 @@ export default function ChapterWorlds({
         />
 
         {/* Headline */}
-        <div
-          data-worlds-head
-          className="absolute inset-x-0 top-[4.5rem] z-30 px-4 text-center md:top-20"
-        >
+        <div data-worlds-head data-comic-reveal className="relative z-30 shrink-0 text-center">
           <p className="mb-2 text-[11px] tracking-[0.28em] text-comic-flare uppercase">
             {label}
           </p>
@@ -133,10 +151,11 @@ export default function ChapterWorlds({
           </h2>
         </div>
 
-        {/* Stage — altura fija, nunca colapsa */}
+        {/* Stage */}
         <div
           data-stage-worlds
-          className="absolute top-[28%] left-1/2 z-20 grid w-[min(100%-2rem,72rem)] -translate-x-1/2 gap-4 md:grid-cols-2 md:gap-6"
+          data-comic-reveal
+          className="relative z-20 mx-auto grid w-full max-w-4xl shrink-0 gap-4 md:grid-cols-2 md:gap-6"
         >
           <span
             data-crack
@@ -213,8 +232,11 @@ export default function ChapterWorlds({
           </div>
         </div>
 
-        {/* Fact cards — ancladas abajo del pin, no pelean el layout del stage */}
-        <div className="absolute bottom-6 left-1/2 z-30 grid w-[min(100%-2rem,72rem)] -translate-x-1/2 gap-3 md:grid-cols-2 md:gap-4">
+        {/* Fact cards — mismo ancho que el stage, debajo en la columna flex. */}
+        <div
+          data-comic-reveal
+          className="relative z-30 mx-auto grid w-full max-w-4xl shrink-0 gap-3 md:grid-cols-2 md:gap-4"
+        >
           {facts.map((fact) => {
             const active = openId === fact.id
             return (
