@@ -170,7 +170,7 @@ export default function ChapterWorlds({
                   type="button"
                   data-hotspot
                   onClick={() => setOpenId(openId === 'lab' ? null : 'lab')}
-                  className="absolute top-[48%] left-[32%] z-10 max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[9px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3 sm:text-[11px]"
+                  className="tpl-hit absolute top-[48%] left-[32%] z-10 max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3"
                 >
                   {hotspotOpen}
                 </button>
@@ -204,7 +204,7 @@ export default function ChapterWorlds({
                   type="button"
                   data-hotspot
                   onClick={() => setOpenId(openId === 'yard' ? null : 'yard')}
-                  className="absolute top-[44%] right-[20%] z-10 max-w-[9.5rem] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[9px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3 sm:text-[11px]"
+                  className="tpl-hit absolute top-[44%] right-[20%] z-10 max-w-[9.5rem] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3"
                 >
                   {hotspotClosed}
                 </button>

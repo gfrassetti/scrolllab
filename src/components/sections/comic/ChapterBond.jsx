@@ -118,11 +118,11 @@ export default function ChapterBond({
             >
               <PaperFrame className="h-full !w-full">
                 <div className="grid h-full md:grid-cols-[1.4fr_0.6fr]">
-                  <div className="relative min-h-48 overflow-hidden">
+                  <div className="relative min-h-[min(12rem,28svh)] overflow-hidden">
                     <img
                       data-page-img
                       {...imgAttrs(page.img, variants)}
-                      sizes="(min-width: 768px) 60vw, 100vw"
+                      sizes="(min-width: 768px) 880px, 100vw"
                       loading="lazy"
                       decoding="async"
                       alt=""

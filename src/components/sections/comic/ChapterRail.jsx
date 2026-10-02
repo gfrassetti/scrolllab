@@ -39,7 +39,7 @@ export default function ChapterRail({ chapters = DEFAULT_CHAPTERS }) {
           <a
             key={ch.id}
             href={`#chapter-${ch.id}`}
-            className="pointer-events-auto group flex min-h-6 items-center gap-3"
+            className="pointer-events-auto group flex min-h-6 min-w-6 items-center justify-end gap-3"
           >
             <span
               className={`max-w-0 overflow-hidden text-right text-[11px] tracking-[0.08em] whitespace-nowrap text-white transition-all duration-300 group-hover:max-w-48 ${

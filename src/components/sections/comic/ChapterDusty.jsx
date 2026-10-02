@@ -190,7 +190,7 @@ export default function ChapterDusty({
                 <img
                   data-close-img
                   {...imgAttrs(closeupBuddies, variants)}
-                  sizes="(min-width: 768px) 50vw, 90vw"
+                  sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
                   loading="lazy"
                   decoding="async"
                   alt=""
@@ -220,7 +220,7 @@ export default function ChapterDusty({
                 <img
                   data-drive-img
                   {...imgAttrs(driveSunset, variants)}
-                  sizes="(min-width: 768px) 50vw, 90vw"
+                  sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
                   loading="lazy"
                   decoding="async"
                   alt=""

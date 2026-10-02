@@ -83,7 +83,7 @@ export default function ChapterFork({
           </p>
           <p
             data-fork-prompt
-            className="mx-auto mb-10 max-w-2xl text-center font-brico text-[clamp(1.5rem,3.6vw,2.5rem)] leading-snug font-bold tracking-[-0.02em]"
+            className="mx-auto mb-6 max-w-2xl text-center font-brico text-[clamp(1.5rem,3.6vw,2.5rem)] leading-snug font-bold tracking-[-0.02em] md:mb-10"
           >
             {prompt}
           </p>
@@ -103,7 +103,7 @@ export default function ChapterFork({
 
             <div data-path-left className="will-change-transform">
               <PaperFrame>
-                <div className="relative min-h-72 overflow-hidden md:min-h-85">
+                <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
                   <img
                     {...imgAttrs(driveSunset, variants)}
                     sizes="(min-width: 768px) 50vw, 100vw"
@@ -114,7 +114,7 @@ export default function ChapterFork({
                     draggable={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                  <div className="relative z-10 flex h-full min-h-72 flex-col justify-end p-7 md:min-h-85 md:p-9">
+                  <div className="relative z-10 flex h-full min-h-[min(18rem,32svh)] flex-col justify-end p-7 md:min-h-85 md:p-9">
                     <p className="mb-3 text-[11px] tracking-[0.25em] text-white/55 uppercase">
                       Path 1
                     </p>
@@ -131,7 +131,7 @@ export default function ChapterFork({
 
             <div data-path-right className="will-change-transform">
               <PaperFrame>
-                <div className="relative min-h-72 overflow-hidden md:min-h-85">
+                <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
                   <img
                     {...imgAttrs(closedYards, variants)}
                     sizes="(min-width: 768px) 50vw, 100vw"
@@ -142,7 +142,7 @@ export default function ChapterFork({
                     draggable={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                  <div className="relative z-10 flex h-full min-h-72 flex-col justify-end p-7 md:min-h-85 md:p-9">
+                  <div className="relative z-10 flex h-full min-h-[min(18rem,32svh)] flex-col justify-end p-7 md:min-h-85 md:p-9">
                     <p className="mb-3 text-[11px] tracking-[0.25em] text-white/55 uppercase">
                       Path 2
                     </p>

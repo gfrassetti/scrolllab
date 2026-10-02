@@ -36,7 +36,7 @@ export default function NavComic({
           >
             {brand}
           </a>
-          <p className="mt-0.5 hidden text-[11px] tracking-[0.18em] text-white/75 drop-shadow sm:block">
+          <p className="pointer-events-none mt-0.5 hidden text-[11px] tracking-[0.18em] text-white/75 drop-shadow sm:block">
             {tagline}
           </p>
         </div>

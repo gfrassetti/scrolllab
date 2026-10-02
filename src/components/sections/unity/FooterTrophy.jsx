@@ -162,7 +162,7 @@ export default function FooterTrophy({
 
       <div className="relative z-30 mt-2 flex items-end justify-between gap-4 border-t border-white/25 pt-4 text-[11px] tracking-[0.22em] uppercase md:mt-4">
         <span>{metaLeft}</span>
-        <a href="#top" className="transition-opacity hover:opacity-70">
+        <a href="#top" className="tpl-link tpl-hit relative">
           {metaRight}
         </a>
       </div>

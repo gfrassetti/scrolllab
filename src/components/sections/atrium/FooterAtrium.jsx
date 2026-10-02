@@ -19,7 +19,7 @@ export default function FooterAtrium({
       className="overflow-hidden bg-atrium-ink px-4 pt-[14svh] pb-5 text-atrium-paper md:px-8 md:pb-6"
       style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
-      <p className="-ml-[0.055em] font-grotesk text-[clamp(5.5rem,31vw,32rem)] leading-[0.74] font-medium tracking-[-0.07em] whitespace-nowrap uppercase">
+      <p className="-ml-[0.055em] font-grotesk text-[clamp(5.5rem,30vw,32rem)] leading-[0.74] font-medium tracking-[-0.07em] whitespace-nowrap uppercase lg:text-[clamp(5.5rem,31vw,32rem)]">
         {mark}
       </p>
       <div className="atrium-note mt-8 flex flex-col gap-2 border-t border-white/15 pt-4 tracking-[0.06em] text-atrium-paper/65 uppercase md:mt-10 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-6 md:gap-y-2">

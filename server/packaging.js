@@ -45,8 +45,11 @@ function publicDirAssets(relDir) {
  *      ciertas (el GLB de MONOLITH, los can1Image del carrusel de FIZZ).
  *  5 — Kit commerce: catálogo compartido (ShopCatalog), precios con
  *      centavos, y la ficha de un producto que no existe dice "not found".
+ *  6 — Pulido mobile/tablet de los 9 templates: fotos WebP con srcset
+ *      (responsiveImage), capa tpl-* y ScrollRail, zonas de toque, reduced
+ *      motion sin contenido oculto y WebGL en pausa fuera de pantalla.
  */
-export const PACK_VERSION = 5
+export const PACK_VERSION = 6
 
 const MODEL_FILES = {
   chapters: {

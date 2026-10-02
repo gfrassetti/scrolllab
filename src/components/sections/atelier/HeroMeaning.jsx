@@ -26,6 +26,12 @@ export default function HeroMeaning({
         type: 'chars',
         mask: 'chars',
       })
+      // La máscara mide lo que la línea y con este interlineado cortaba los
+      // descendentes: se la agranda hacia abajo sin mover el layout.
+      for (const mask of split.masks || []) {
+        mask.style.paddingBottom = '0.22em'
+        mask.style.marginBottom = '-0.22em'
+      }
       gsap.set(split.chars, { autoAlpha: 0, filter: 'blur(12px)' })
       gsap.to(split.chars, {
         autoAlpha: 1,

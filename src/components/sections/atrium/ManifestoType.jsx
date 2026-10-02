@@ -24,8 +24,15 @@ export default function ManifestoType({
         type: 'chars',
         mask: 'chars',
       })
+      // La máscara mide lo que la línea y con este interlineado cortaba los
+      // descendentes (la «q» de «aliqua»): se la agranda hacia abajo sin mover
+      // el layout, y el texto arranca más abajo para seguir escondido.
+      for (const mask of split.masks || []) {
+        mask.style.paddingBottom = '0.22em'
+        mask.style.marginBottom = '-0.22em'
+      }
       gsap.from(split.chars, {
-        yPercent: 110,
+        yPercent: 135,
         duration: 1.1,
         ease: 'power4.out',
         stagger: 0.014,
