@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const DEFAULT_STATS = [
   { label: 'STAT 1', value: 'Value 1' },
@@ -11,6 +13,10 @@ const DEFAULT_STATS = [
 /**
  * UniversalLang — intro scrolls away; giant number stays sticky/centered
  * while barcode + stats scrub past.
+ *
+ * Calma: sin scrub, el escenario sticky se quedaba quieto 2,6 pantallas
+ * (`h-[260vh]`) con la página scrolleando por detrás — el «se traba» de los
+ * stats. En calma el alto de scrub se va y el bloque queda en el flujo.
  */
 export default function UniversalLang({
   eyebrow = 'EYEBROW 2',
@@ -21,10 +27,11 @@ export default function UniversalLang({
   stats = DEFAULT_STATS,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-uni-number], [data-uni-stats]', { y: 16, stagger: 0.12 })
 
       gsap.fromTo(
         '[data-uni-bars] > *',
@@ -58,7 +65,7 @@ export default function UniversalLang({
         },
       )
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   const rows = Array.isArray(stats) && stats.length ? stats : DEFAULT_STATS
@@ -82,8 +89,8 @@ export default function UniversalLang({
       </div>
 
       {/* Tall scroller: number pinned center; stats move through */}
-      <div data-uni-pin className="relative mt-10 h-[260vh] md:h-[280vh]">
-        <div className="sticky top-0 flex h-svh flex-col items-center justify-center px-5">
+      <div data-uni-pin className="relative mt-10 h-[260vh] calm:h-auto md:h-[280vh] md:calm:h-auto">
+        <div className="sticky top-0 flex h-svh flex-col items-center justify-center px-5 calm:static calm:h-auto calm:py-16">
           <div className="flex w-full max-w-3xl flex-col items-center text-center">
             <p
               data-uni-number

@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import {
   mosaic1,
   mosaic2,
@@ -39,6 +41,11 @@ const MOSAIC = [
 /**
  * MosaicSlider — continuous scrub (no mid-timeline gsap.set).
  * Same left-origin coords from mosaic → unfold → pan.
+ *
+ * Calma: las ocho fotos se posicionan por JS (`gsap.set`, absolutas) y el
+ * escenario queda pegado 8 pantallas (`h-[800vh]`); sin scrub eso eran ocho
+ * pantallas con el mismo cuadro. En calma es una fila que se desliza con el
+ * dedo (scroll-snap): mismas fotos, mismo orden, sin altura de scrub.
  */
 export default function MosaicSlider({
   eyebrow = 'EYEBROW 1',
@@ -54,6 +61,7 @@ export default function MosaicSlider({
   img8,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
   const sources = [
     img1 || slides[0],
     img2 || slides[1],
@@ -72,7 +80,7 @@ export default function MosaicSlider({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-calm-reveal]', { y: 16, stagger: 0.12 })
       if (!root.current) return
 
       const pin = root.current.querySelector('[data-pin]')
@@ -221,8 +229,52 @@ export default function MosaicSlider({
         tl.to(panel, { rotate: 0, duration: 1.1 }, 3.5)
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
+
+  if (reduced) {
+    return (
+      <section ref={root} id="peace" className="relative bg-black py-20 text-white md:py-28">
+        <div data-calm-reveal className="px-5 text-center">
+          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-[#8fb3a6] uppercase md:text-xs">
+            {eyebrow}
+          </p>
+          <h2 className="font-display text-[clamp(2.4rem,7vw,6rem)] leading-[0.95] tracking-[-0.02em] uppercase">
+            {titleLines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </h2>
+        </div>
+
+        {/* Un dedo desliza la fila; la foto que sigue asoma por el borde. */}
+        <div
+          data-calm-reveal
+          role="region"
+          aria-label="Gallery"
+          tabIndex={0}
+          className="mt-12 flex snap-x snap-mandatory scroll-pl-[9vw] gap-4 overflow-x-auto px-[9vw] pb-6 md:gap-6 md:px-[10vw] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {sources.map((src, i) => (
+            <div
+              key={`${src}-${i}`}
+              className="aspect-[4/5] w-[min(82vw,34rem)] shrink-0 snap-start overflow-hidden bg-[#1a1a1a]"
+            >
+              <img
+                {...imgAttrs(src, variants)}
+                sizes="(min-width: 768px) 544px, 82vw"
+                alt=""
+                loading={i < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
