@@ -263,38 +263,44 @@ export default function PlayableHeadline({
 
   return (
     <div ref={rootRef} className="relative">
-      <Tag
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        spellCheck={false}
-        autoCorrect="off"
-        autoCapitalize="off"
-        data-gramm="false"
-        data-gramm_editor="false"
-        data-enable-grammarly="false"
-        data-block={block}
-        role="textbox"
-        aria-multiline="true"
-        aria-label={ariaLabel}
-        aria-controls={toolbarId}
-        className={`playable-headline outline-none transition-[font-size] duration-200 ease-[var(--ease-out)] ${className}`}
-      >
-        {lines.map((line, i) => {
-          const text = typeof line === 'string' ? line : line?.text
-          const content =
-            typeof line === 'object' && line?.node ? line.node : text
-          const extra =
-            typeof line === 'object' && line?.className ? line.className : ''
-          return (
-            <span
-              key={`${text}-${i}`}
-              className={`block ${lineClassName} ${extra}`.trim()}
-            >
-              {content}
-            </span>
-          )
-        })}
+      {/* El <h1> real queda afuera y el campo editable adentro: un heading no
+          puede llevar role="textbox" (axe: aria-allowed-role) y un agente de IA
+          lee el título como título, no como un input. Tailwind resetea el
+          tamaño/margen de los headings, así que el wrapper no se nota. */}
+      <Tag>
+        <span
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+          data-gramm="false"
+          data-gramm_editor="false"
+          data-enable-grammarly="false"
+          data-block={block}
+          role="textbox"
+          aria-multiline="true"
+          aria-label={ariaLabel}
+          aria-controls={toolbarId}
+          className={`playable-headline block outline-none transition-[font-size] duration-200 ease-[var(--ease-out)] ${className}`}
+        >
+          {lines.map((line, i) => {
+            const text = typeof line === 'string' ? line : line?.text
+            const content =
+              typeof line === 'object' && line?.node ? line.node : text
+            const extra =
+              typeof line === 'object' && line?.className ? line.className : ''
+            return (
+              <span
+                key={`${text}-${i}`}
+                className={`block ${lineClassName} ${extra}`.trim()}
+              >
+                {content}
+              </span>
+            )
+          })}
+        </span>
       </Tag>
 
       <div className="relative mt-4 w-max max-w-full">
@@ -312,7 +318,7 @@ export default function PlayableHeadline({
             ref={blockBtnRef}
             type="button"
             title="Turn into"
-            aria-label="Turn into"
+            aria-label={`${current.label}, turn into`}
             aria-haspopup="menu"
             aria-expanded={blockOpen}
             onClick={() => {
@@ -352,7 +358,8 @@ export default function PlayableHeadline({
 
           <ToolbarBtn
             ref={colorBtnRef}
-            label="Text color"
+            label="A, text color"
+            title="Text color"
             onClick={() => {
               setColorOpen((v) => !v)
               setBlockOpen(false)
@@ -375,13 +382,13 @@ export default function PlayableHeadline({
   )
 }
 
-function ToolbarBtn({ label, onClick, children, ref }) {
+function ToolbarBtn({ label, title = label, onClick, children, ref }) {
   return (
     <button
       ref={ref}
       type="button"
       aria-label={label}
-      title={label}
+      title={title}
       onClick={onClick}
       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] transition-colors duration-[var(--duration-press)] ease-[var(--ease-out)] hover:bg-black/5 active:scale-95"
     >

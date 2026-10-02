@@ -84,7 +84,7 @@ export default function HorizontalPanels({
             ? new SplitText(title, { type: 'words' })
             : null
           const captionSplit = caption
-            ? new SplitText(caption, { type: 'words' })
+            ? new SplitText(caption, { type: 'words', aria: 'none' })
             : null
           if (titleSplit) splits.push(titleSplit)
           if (captionSplit) splits.push(captionSplit)
@@ -336,8 +336,12 @@ export default function HorizontalPanels({
               >
                 {panel.title}
               </h3>
+              {/* SplitText le pone aria-label al <p> y axe lo prohíbe: el texto
+                  real va en un sr-only y el animado queda aria-hidden. */}
+              <p className="sr-only">{panel.caption}</p>
               <p
                 data-panel-caption
+                aria-hidden="true"
                 className="max-w-[36ch] text-base leading-relaxed text-ink/65 md:text-lg"
               >
                 {panel.caption}

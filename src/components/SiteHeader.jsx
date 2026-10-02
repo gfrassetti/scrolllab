@@ -6,13 +6,26 @@ import { usePlan } from '../lib/plan'
 import { useCompositionCount } from '../hooks/useCompositionCount'
 import { useT } from '../i18n'
 import { resetBrandSplash } from './BrandSplash'
-import { gsap } from '../lib/gsap'
+import { gsap, ScrollTrigger } from '../lib/gsap'
 import CartPopover from './CartPopover'
 import UserMenu from './UserMenu'
 import Logo from './Logo'
 import ScrollProgress from './ScrollProgress'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
+
+// Una sola vez para toda la app: arregla el scroll en mobile (toolbar que
+// aparece/desaparece, overscroll) donde SiteHeader vive — el chrome del
+// market, sin Lenis. NUNCA en páginas con Lenis (demos de templates, ver
+// SmoothScrollProvider/useLenis.js): normalizeScroll toma el control del
+// scroll igual que Lenis y las dos pelean — ahí el mobile se arregla con
+// ignoreMobileResize solo (gsap.js), no con esto.
+let normalizedScroll = false
+function ensureNormalizedScroll() {
+  if (normalizedScroll) return
+  normalizedScroll = true
+  ScrollTrigger.normalizeScroll(true)
+}
 
 /**
  * Reensambla el logo (barras + accent) al clic, mismo lenguaje que la
@@ -87,6 +100,10 @@ export default function SiteHeader({ solid = true }) {
   // reemplace el documento: si no, el botón "Saliendo…" se convierte en
   // "Entrar" antes de irse y vuelve el parpadeo que queremos evitar.
   const showAccount = loggingOut || (user ? true : loading ? hadSession : false)
+
+  useEffect(() => {
+    ensureNormalizedScroll()
+  }, [])
 
   useEffect(() => {
     setMenuOpen(false)
@@ -197,11 +214,11 @@ export default function SiteHeader({ solid = true }) {
               </span>
             )}
           </Link>
-          <Link to="/#estudio" className={`${linkClass} ${zoneClass('estudio')}`}>
-            {t('nav.studio')}
-          </Link>
           <Link to="/#como-funciona" className={linkClass}>
             {t('nav.howItWorks')}
+          </Link>
+          <Link to="/#estudio" className={`${linkClass} ${zoneClass('estudio')}`}>
+            {t('nav.studio')}
           </Link>
           <CartPopover />
           {showAccount ? (
@@ -307,18 +324,18 @@ export default function SiteHeader({ solid = true }) {
             </li>
             <li>
               <Link
-                to="/#estudio"
-                className={`block py-3.5 hover:text-accent ${zoneClass('estudio')}`}
-              >
-                {t('nav.studio')}
-              </Link>
-            </li>
-            <li>
-              <Link
                 to="/#como-funciona"
                 className="block py-3.5 hover:text-accent"
               >
                 {t('nav.howItWorks')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/#estudio"
+                className={`block py-3.5 hover:text-accent ${zoneClass('estudio')}`}
+              >
+                {t('nav.studio')}
               </Link>
             </li>
             {showAccount ? (

@@ -33,6 +33,8 @@ export function bootGtm() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return
   if (!isGtmId(GTM_ID)) return
   if (window.__scrolllabGtm) return
+  // index.html ya lo carga diferido (primera interacción o 5 s).
+  if (window.__scrolllabGtmLazy) return
   if (document.querySelector('script[src*="googletagmanager.com/gtm.js"]')) {
     window.__scrolllabGtm = true
     return

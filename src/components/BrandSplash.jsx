@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { gsap } from '../lib/gsap'
 import Logo from './Logo'
 import { useT } from '../i18n'
 
@@ -71,49 +70,64 @@ export default function BrandSplash({ onDone }) {
     // mientras !introReady). Nunca debe durar más que esto.
     const safetyId = window.setTimeout(finish, 2500)
 
-    const bars = gsap.utils.toArray('[data-logo-bar]', el)
+    const bars = Array.from(el.querySelectorAll('[data-logo-bar]'))
     const accent = el.querySelector('[data-logo-accent]')
     const mark = el.querySelector('[data-splash-mark]')
 
-    gsap.set(bars, { y: -18, opacity: 0, transformOrigin: '50% 50%' })
-    if (accent) {
-      gsap.set(accent, { scale: 0, opacity: 0, transformOrigin: '50% 50%' })
+    // Web Animations en vez de GSAP: gsap.set/to leen getComputedStyle y, con
+    // todo el home ya montado debajo, eso fuerza el primer layout completo
+    // dentro de este efecto (era lo más caro del arranque). animate() no lee
+    // estilos, así que el layout queda para el render normal del navegador.
+    const out = 'cubic-bezier(0.22, 1, 0.36, 1)'
+    const anims = []
+    const run = (node, keyframes, options) => {
+      if (!node?.animate) return null
+      const a = node.animate(keyframes, { fill: 'both', ...options })
+      anims.push(a)
+      return a
     }
 
-    const tl = gsap.timeline({
-      defaults: { ease: 'power3.out' },
-      onComplete: finish,
+    bars.forEach((bar, i) => {
+      run(
+        bar,
+        [
+          { transform: 'translateY(-18px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 },
+        ],
+        { duration: 380, delay: i * 70, easing: out },
+      )
     })
-
-    tl.to(bars, {
-      y: 0,
-      opacity: 1,
-      duration: 0.45,
-      stagger: 0.09,
-    })
-
     if (accent) {
-      tl.to(
+      accent.style.transformBox = 'fill-box'
+      accent.style.transformOrigin = 'center'
+      run(
         accent,
-        { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2.2)' },
-        '-=0.2',
+        [
+          { transform: 'scale(0)', opacity: 0 },
+          { transform: 'scale(1)', opacity: 1 },
+        ],
+        { duration: 300, delay: 300, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
       )
     }
-
-    tl.to({}, { duration: 0.35 }).to(mark, {
-      opacity: 0,
-      scale: 0.92,
-      duration: 0.4,
-      ease: 'power2.in',
-    }).to(
-      el,
-      { opacity: 0, duration: 0.35, ease: 'power2.inOut' },
-      '-=0.15',
+    run(
+      mark,
+      [
+        { opacity: 1, transform: 'scale(1)' },
+        { opacity: 0, transform: 'scale(0.92)' },
+      ],
+      { duration: 300, delay: 700, easing: 'cubic-bezier(0.4, 0, 1, 1)' },
     )
+    const overlay = run(el, [{ opacity: 1 }, { opacity: 0 }], {
+      duration: 280,
+      delay: 780,
+      easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+    })
+    if (overlay) overlay.onfinish = finish
+    else window.setTimeout(finish, 0)
 
     return () => {
       window.clearTimeout(safetyId)
-      tl.kill()
+      anims.forEach((a) => a.cancel())
     }
   }, [visible])
 
