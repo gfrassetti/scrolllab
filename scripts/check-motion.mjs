@@ -328,35 +328,35 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     frames.push({ section: sectionName, scrollY: Math.round(scrollY), file: path.relative(OUT, file) })
   }
 
-  // Salto de la barra del navegador a mitad de página: el alto baja 64px y
-  // vuelve, como al scrollear en un celular de verdad. `scrollY` y el cuadro
-  // pueden correrse un poco solo por eso (secciones en `svh`: el alto de lo
-  // que está arriba cambia, y el scroll-anchoring nativo del navegador
-  // compensa el número para que la pantalla no salte de golpe — eso es una
-  // ayuda del browser, no el bug, y un scrub reacciona proporcional al
-  // scrollY aunque el `progress` interno no haya saltado). Lo que señala el
-  // bug de verdad es el `progress` de cada ScrollTrigger: si
-  // `ignoreMobileResize` (src/lib/gsap.js) funciona, no debería moverse más
-  // que el redondeo por este resize puntual.
-  const progressSnapshot = () =>
-    page.evaluate(async () => {
-      const { ScrollTrigger } = await import('/src/lib/gsap.js')
-      return ScrollTrigger.getAll().map((st) => Math.round(st.progress * 1000) / 1000)
-    })
+  // Barra del navegador: en un celular, al scrollear aparece y se esconde, y
+  // el alto de la ventana cambia ~64px. `ScrollTrigger.config({ignoreMobileResize})`
+  // (src/lib/gsap.js) existe para que eso NO re-mida los pins a mitad de scroll.
+  // Se emula bajando y subiendo el alto 64px y se cuentan los `refresh` de
+  // ScrollTrigger durante ese tramo: tiene que ser 0.
+  //
+  // No se compara scrollY ni el `progress` de los triggers: con `setViewportSize`
+  // cambian también las unidades `svh`/`vh` (en un celular real NO cambian con
+  // la barra), así que lo de arriba se reacomoda y el scroll-anchoring del
+  // navegador corre el número — un efecto del emulador, no un bug.
   const barJumpCheck = async () => {
-    const before = await progressSnapshot()
+    await page.evaluate(async () => {
+      const { ScrollTrigger } = await import('/src/lib/gsap.js')
+      window.__stRefreshes = 0
+      ScrollTrigger.addEventListener('refresh', () => {
+        window.__stRefreshes += 1
+      })
+    })
     await page.setViewportSize({ width: vp.width, height: vp.height - 64 })
-    await page.waitForTimeout(350)
+    await page.waitForTimeout(500)
     await page.setViewportSize({ width: vp.width, height: vp.height })
-    await page.waitForTimeout(350)
-    const after = await progressSnapshot()
-    if (before.length !== after.length) {
-      issues.push({ check: 'bar-jump', section: lastSection?.name || '?', detail: `ScrollTrigger.getAll() cambió de ${before.length} a ${after.length} triggers (se reconstruyeron)` })
-      return
-    }
-    const jumped = before.reduce((n, p, i) => n + (Math.abs(after[i] - p) > 0.02 ? 1 : 0), 0)
-    if (jumped) {
-      issues.push({ check: 'bar-jump', section: lastSection?.name || '?', detail: `${jumped} ScrollTrigger(s) saltaron de progreso al bajar y subir el alto 64px` })
+    await page.waitForTimeout(500)
+    const refreshes = await page.evaluate(() => window.__stRefreshes)
+    if (refreshes > 0) {
+      issues.push({
+        check: 'bar-jump',
+        section: lastSection?.name || '?',
+        detail: `ScrollTrigger se re-midió ${refreshes} vez/veces por un cambio de alto de 64px (ignoreMobileResize no lo frenó)`,
+      })
     }
   }
   let barJumpDone = false
