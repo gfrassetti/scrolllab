@@ -63,7 +63,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { buildSnapshot, freePort, launchChromium, routePicsum, startPreview, startVite } from './lib/servers.mjs'
-import { installBlockHelpers } from './lib/page-helpers.mjs'
+import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'responsive-check', 'mobile')
@@ -109,23 +109,6 @@ const ALLOW = {
   'atelier/NavAtelier:hidden': 'la marca se oculta a propósito al scrollear en mobile y vuelve arriba de todo',
 }
 
-const IGNORED_CONSOLE = [
-  /favicon/i,
-  /React DevTools/i,
-  /GL Driver Message/i, // ruido de GPU en headless
-  /GPU stall due to ReadPixels/i,
-  /Automatic fallback to software WebGL/i,
-  /Failed to load resource/i, // sin URL: se reporta desde requestfailed/response
-  /\[vite\]/i,
-]
-
-/** Pedidos que fallan por el entorno de la auditoría, no por el template. */
-const IGNORED_URLS = [
-  /\/api\//, // la API no corre durante la auditoría (AuthProvider pide /api/auth/me)
-  /googletagmanager\.com|google-analytics\.com/,
-  /picsum\.photos/,
-  /favicon/,
-]
 
 const ERROR_CHECKS = new Set(['overflow', 'clipped', 'broken-word', 'text<11', 'target', 'image', 'hidden', 'error'])
 

@@ -73,3 +73,26 @@ export function installBlockHelpers() {
     mc.blocks().map(({ name, fixed, top, height, pinned }) => ({ name, fixed, top, height, pinned }))
 
 }
+
+/**
+ * Ruido del entorno de auditoría (no del template): GPU por software, el
+ * proxy de fuentes, GTM/picsum sin red. Lo comparten check-mobile y
+ * check-motion para no divergir en qué cuenta como error real.
+ */
+export const IGNORED_CONSOLE = [
+  /favicon/i,
+  /React DevTools/i,
+  /GL Driver Message/i, // ruido de GPU en headless
+  /GPU stall due to ReadPixels/i,
+  /Automatic fallback to software WebGL/i,
+  /Failed to load resource/i, // sin URL: se reporta desde requestfailed/response
+  /\[vite\]/i,
+]
+
+/** Pedidos que fallan por el entorno de la auditoría, no por el template. */
+export const IGNORED_URLS = [
+  /\/api\//, // la API no corre durante la auditoría (AuthProvider pide /api/auth/me)
+  /googletagmanager\.com|google-analytics\.com/,
+  /picsum\.photos/,
+  /favicon/,
+]
