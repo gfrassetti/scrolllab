@@ -37,13 +37,19 @@ export const SITE_URL = 'https://www.scrolllab.com.ar'
  * evitar (atrae a quien busca un builder no-code tipo Wix, no un ZIP de
  * código). Se prioriza que cualquiera entienda el título por sobre ese
  * matiz de intención de búsqueda — decisión consciente, no un descuido.
+ * Título y descripción (2026-10-02, pedido del dueño tras mirar a la
+ * competencia en Google): lo que trae gente a Envato, ThemeForest, Webflow y
+ * Colorlib es "scroll animation / smooth scroll / parallax website templates"
+ * y, en español, "plantillas web scroll / parallax". Se calcó ese vocabulario
+ * ("plantillas web con scroll animado", "parallax", "scroll suave") sin nombrar
+ * librerías ni usar "scrollytelling" afuera de `keywords`.
  */
 export const SITE_SEO = {
-  title: 'Scroll Lab — Estudio digital y plantillas web',
+  title: 'Scroll Lab — Plantillas web con scroll animado | Estudio web',
   description:
-    'Descargá un template completo, armalo vos en el builder, o sumá nuestros componentes con un script a cualquier sitio. Siempre con el código fuente.',
+    'Plantillas web con scroll animado, parallax y scroll suave, con el código fuente. Armá la tuya en el builder o pedinos un sitio a medida.',
   keywords:
-    'scrollytelling templates, plantillas scrollytelling, scroll animation template, plantillas web, web templates, código fuente, landing page templates',
+    'plantillas web con scroll animado, plantillas parallax, scroll suave, templates con animaciones, plantillas html, plantillas con código fuente, scroll animation website templates, parallax website templates, smooth scroll templates, scrollytelling templates, plantillas scrollytelling, landing page templates, estudio de diseño web',
 }
 
 /** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
