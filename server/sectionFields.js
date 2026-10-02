@@ -78,16 +78,19 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'fg',
     'links',
   ],
-  'fizz/NavFizz': [
-    'brand',
-    'shopLabel',
-    'shopItems',
-    'learnLabel',
-    'learnItems',
-    'linkLabel',
+  'fizz/NavFizz': ['brand', 'links', 'cta', 'menuBg', 'menuInk'],
+  'fizz/HeroBubbles': [
+    'title',
+    'tagline',
+    'meta',
+    'hint',
+    'statement',
     'cta',
+    'ctaHref',
+    'canLabel',
+    'flavor',
+    'canImage',
   ],
-  'fizz/HeroBubbles': ['title', 'tagline', 'meta', 'hint', 'flavor', 'canImage'],
   'fizz/FlavorWorlds': ['eyebrow'],
   'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
   'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
@@ -431,7 +434,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
 })
 
-const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
+const FLAVOR_PRESETS = new Set(['cobalt', 'berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
 
 const THEME_PRESETS = new Set([

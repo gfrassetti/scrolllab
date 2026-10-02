@@ -390,12 +390,12 @@
     "fizz": {
       "vibe": "Pop carbonatado",
       "tags": [
-        "Lata 3D con burbujas",
+        "Botella de vidrio 3D con burbujas",
         "Mundos que repintan la página",
         "Tipografía candy",
         "Estante de latas"
       ],
-      "description": "Violeta uva, colores golosina y una lata 3D girando entre burbujas. Cada sabor es una pantalla completa que tiñe la página al scrollear. Ideal para bebidas, snacks, golosinas u otro producto comestible con sabores o variantes para mostrar."
+      "description": "Azul eléctrico, colores golosina y una botella de vidrio 3D girando entre burbujas. Cada sabor es una pantalla completa que tiñe la página al scrollear. Ideal para bebidas, snacks, golosinas u otro producto comestible con sabores o variantes para mostrar."
     },
     "atelier": {
       "vibe": "Studio WebGL",
@@ -643,11 +643,11 @@
       "fizz": {
         "NavFizz": {
           "name": "Nav fizz",
-          "blurb": "Header píldora flotante con menús que se despliegan"
+          "blurb": "Marca y botón de menú; el menú sube a pantalla completa con borde de olas"
         },
         "HeroBubbles": {
           "name": "Hero burbujas",
-          "blurb": "Lata PBR con reflejos y fondo que gira con el scroll"
+          "blurb": "Botella de vidrio que refracta el titular y gira con el scroll; burbujas 3D"
         },
         "FlavorWorlds": {
           "name": "Mundos de sabor",

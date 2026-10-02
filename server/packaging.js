@@ -82,7 +82,7 @@ const MODEL_FILES = {
     sectionsDir: 'src/components/sections/fizz',
     pageName: 'App.jsx',
     importPrefix: './components/sections/fizz',
-    publicAssets: ['public/fizz/soda-can.glb'],
+    publicAssets: ['public/fizz/soda-bottle.glb'],
   },
   atelier: {
     page: 'src/pages/AtelierPage.jsx',
@@ -387,17 +387,17 @@ const fizzHero3dNote = ({ demoGlb }) => `## 3D model (hero)
 
 ${
   demoGlb
-    ? 'The demo passes `public/fizz/soda-can.glb` as `modelUrl` to `HeroBubbles`.'
-    : '`HeroBubbles` renders the photoreal PNG can (`flavor`: berry / citrus / tropical / mint, or your own image with `canImage`).'
-} To use your own model:
+    ? 'The demo passes `public/fizz/soda-bottle.glb` as `modelUrl` to `HeroBubbles`.'
+    : '`HeroBubbles` draws a glass bottle in code (`flavor`: berry / citrus / tropical / mint sets the stage color and the drink tint).'
+} The headline is drawn inside the same canvas, so the glass refracts it. The label prints \`canLabel\`, or your own artwork with \`canImage\`. To use your own model:
 
 1. Export it as **GLB** (binary glTF, a single file; GLTF also works).
-2. Drop it in \`public/\`, e.g. \`public/my-can.glb\`.
-3. In \`src/App.jsx\`: \`<HeroBubbles modelUrl="/my-can.glb" />\`.
+2. Drop it in \`public/\`, e.g. \`public/my-bottle.glb\`.
+3. In \`src/App.jsx\`: \`<HeroBubbles modelUrl="/my-bottle.glb" />\`.
 
-It is auto-centered and auto-scaled, and keeps the scroll rotation, the pointer parallax and the rising bubbles. A hosted \`https://\` URL also works.${
+It is auto-centered and auto-scaled, and keeps the scroll spin, the idle float and the rising bubbles. A hosted \`https://\` URL also works. Name the meshes \`glass\`, \`liquid\`, \`label\`, \`stopper\`, \`seal\` and \`wire\` (or \`cap\` for a crown cap) to get the see-through glass, the flavor tint, the bubbles inside, the label and the stopper materials; any other model keeps its own materials.${
   demoGlb
-    ? ' Without `modelUrl`, the photoreal PNG can renders (`flavor`, or `canImage` for your own image).'
+    ? ' Without `modelUrl`, a simpler bottle built in code stands in.'
     : ''
 }
 `

@@ -9,21 +9,21 @@ import CanCarousel from '../components/sections/fizz/CanCarousel'
 import PopManifesto from '../components/sections/fizz/PopManifesto'
 import FooterSplash from '../components/sections/fizz/FooterSplash'
 
-const FIZZ_CAN_GLB = '/fizz/soda-can.glb'
+const FIZZ_BOTTLE_GLB = '/fizz/soda-bottle.glb'
 
 /**
  * Template model — "FIZZ"
- * Carbonated pop: 3D can hero + flavor worlds that repaint the page.
+ * Carbonated pop: glass bottle hero + flavor worlds that repaint the page.
  * Family refs: Fizzi / La Revoltosa (confirm exact URL). Generic copy only.
  * See Obsidian: "Fizz — mapa de referencia".
  */
 export default function FizzPage() {
-  // Warm the GLB so the PNG bridge is as short as possible.
+  // Warm the GLB so the bottle is ready when the headline finishes.
   useEffect(() => {
     const link = document.createElement('link')
     link.rel = 'preload'
     link.as = 'fetch'
-    link.href = FIZZ_CAN_GLB
+    link.href = FIZZ_BOTTLE_GLB
     link.crossOrigin = 'anonymous'
     document.head.appendChild(link)
     return () => {
@@ -38,7 +38,7 @@ export default function FizzPage() {
         <NavFizz />
 
         <main>
-          <HeroBubbles modelUrl={FIZZ_CAN_GLB} />
+          <HeroBubbles modelUrl={FIZZ_BOTTLE_GLB} />
           <FlavorWorlds />
           <BubbleBenefits />
           <CanCarousel />
