@@ -13,7 +13,7 @@
       "destination": "https://scrolllab-production.up.railway.app/api/:path*"
     },
     {
-      "source": "/((?!assets/|v1/).*)",
+      "source": "/((?!assets/|v1/|\\.well-known/).*)",
       "destination": "/index.html"
     }
   ],

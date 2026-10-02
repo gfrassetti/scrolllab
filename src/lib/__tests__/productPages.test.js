@@ -247,6 +247,23 @@ describe('el sitio apunta a las páginas de producto', () => {
     assert.ok(ia.includes('Disallow: /plantillas/'), 'los bots de IA tienen que quedar afuera del catálogo')
   })
 
+  it('llms.txt cumple lo que mide Lighthouse (H1, un link markdown, 50+ caracteres) y lista cada template', () => {
+    const llms = read('public/llms.txt')
+    assert.match(llms, /^\s*#\s+.+/m, 'falta el H1')
+    assert.match(llms, /\[[^\]]+\]\(https?:\/\/[^)]+\)/, 'falta un link en formato markdown')
+    assert.ok(llms.length >= 50)
+    for (const sku of skus) {
+      assert.ok(llms.includes(`](${productUrl(sku)})`), `falta ${productUrl(sku)} en public/llms.txt`)
+    }
+    assert.ok(!/react|gsap|three\.?js/i.test(llms), 'el stack no se menciona en copy público')
+  })
+
+  it('vercel.json no reescribe /.well-known al SPA: un 404 real es "no aplica" para Lighthouse, un HTML es "inválido"', () => {
+    const vercel = JSON.parse(read('vercel.json'))
+    const spa = vercel.rewrites.find((r) => r.destination === '/index.html')
+    assert.ok(spa.source.includes('\\.well-known/'), 'el rewrite del SPA tiene que excluir /.well-known/')
+  })
+
   it('el ItemList del index.html apunta a las páginas de producto (y no a las demos, que son noindex)', () => {
     const graph = JSON.parse(ldScripts(indexHtml)[0])['@graph']
     const list = graph.find((node) => node['@type'] === 'ItemList')

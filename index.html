@@ -3,11 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-T8CW46DC');</script>
+    <!-- Mismo contenedor de siempre, pero se carga recién con la primera
+         interacción (o 5 s después de cargar): no compite con el primer render. -->
+    <script>
+      (function (w, d, l, i) {
+        w[l] = w[l] || [];
+        w.__scrolllabGtmLazy = true;
+        var started = false;
+        function load() {
+          if (started) return;
+          started = true;
+          w.__scrolllabGtm = true;
+          w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+          var j = d.createElement('script');
+          j.async = true;
+          j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i;
+          d.head.appendChild(j);
+        }
+        var evs = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'];
+        function go() {
+          evs.forEach(function (e) { w.removeEventListener(e, go, true); });
+          load();
+        }
+        evs.forEach(function (e) { w.addEventListener(e, go, { capture: true, passive: true }); });
+        w.addEventListener('load', function () { setTimeout(load, 5000); });
+      })(window, document, 'dataLayer', 'GTM-T8CW46DC');
+    </script>
     <!-- End Google Tag Manager -->
     <script>
       // Aplica el tema guardado antes del primer paint (evita flash).
@@ -143,10 +164,20 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Las fuentes no bloquean el primer render: se piden como "print" y se
+         activan al llegar (display=swap muestra el texto mientras tanto). -->
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Mr+Bedfort&family=Space+Grotesk:wght@300..700&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Mr+Bedfort&family=Space+Grotesk:wght@300..700&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <script type="application/ld+json">
       {

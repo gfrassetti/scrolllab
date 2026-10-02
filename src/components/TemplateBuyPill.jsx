@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
@@ -8,17 +8,17 @@ import { formatPriceFromUsd, templatePriceUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 
 const POSTERS = {
-  chapters: '/catalog/chapters.jpg',
-  nocturne: '/catalog/nocturne.jpg',
-  monolith: '/catalog/monolith.jpg',
-  velocity: '/catalog/velocity.jpg',
-  fizz: '/catalog/fizz.jpg',
-  atelier: '/catalog/atelier.jpg',
-  comic: '/catalog/comic.jpg',
-  unity: '/catalog/unity.jpg',
-  ratio: '/catalog/ratio.jpg',
-  atrium: '/catalog/atrium.jpg',
-  meridian: '/catalog/meridian.jpg',
+  chapters: '/catalog/chapters.webp',
+  nocturne: '/catalog/nocturne.webp',
+  monolith: '/catalog/monolith.webp',
+  velocity: '/catalog/velocity.webp',
+  fizz: '/catalog/fizz.webp',
+  atelier: '/catalog/atelier.webp',
+  comic: '/catalog/comic.webp',
+  unity: '/catalog/unity.webp',
+  ratio: '/catalog/ratio.webp',
+  atrium: '/catalog/atrium.webp',
+  meridian: '/catalog/meridian.webp',
 }
 
 /**
@@ -68,7 +68,6 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
         type="button"
         disabled={busy || authLoading}
         onClick={buy}
-        aria-label={t('demoBuy.aria', { name })}
         className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98] disabled:opacity-60"
       >
         <span className="relative h-8 w-11 shrink-0 overflow-hidden rounded-[10px] border border-white bg-white/10 sm:h-9 sm:w-12">
@@ -89,13 +88,13 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
             </span>
             <span className="truncate text-[10px] text-white/55">
               {t('demoBuy.only')}{' '}
-              <span className="text-white">{priceLabel || '—'}</span>
+              <span className="text-white">{priceLabel || 'â€”'}</span>
             </span>
           </span>
 
           <span className="pointer-events-none absolute inset-0 flex items-center gap-1 text-[11px] font-semibold tracking-tight opacity-0 transition-all duration-300 ease-[var(--ease-drawer)] translate-y-1 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
             {busy ? t('cart.redirecting') : t('demoBuy.getTemplate')}
-            {!busy && <span aria-hidden="true">→</span>}
+            {!busy && <span aria-hidden="true">â†’</span>}
           </span>
         </span>
       </button>

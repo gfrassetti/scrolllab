@@ -124,7 +124,7 @@ const TEMPLATE_META = [
 ]
 
 function catalogCoverSrc(sku) {
-  return `/catalog/${sku}.jpg`
+  return `/catalog/${sku}.webp`
 }
 
 function TemplatePoster({ template, index = 0, soonLabel = 'Coming soon' }) {
@@ -138,6 +138,8 @@ function TemplatePoster({ template, index = 0, soonLabel = 'Coming soon' }) {
         src={catalogCoverSrc(template.sku)}
         alt=""
         draggable={false}
+        decoding="async"
+        loading={index === 0 ? 'eager' : 'lazy'}
         className={`absolute inset-0 h-full w-full object-cover object-top ${
           template.comingSoon || isCatalogComingSoon(template.sku) ? 'grayscale' : ''
         }`}
@@ -421,6 +423,7 @@ export default function TemplatesIndex() {
       const split = new SplitText('[data-hero-brand]', {
         type: 'chars',
         mask: 'chars',
+        aria: 'none',
       })
 
       gsap.from(split.chars, {
@@ -767,8 +770,13 @@ export default function TemplatesIndex() {
               <span data-hero-logo className="shrink-0 self-center">
                 <Logo className="size-[clamp(2rem,1.25rem+6vw,3.25rem)] md:size-[clamp(3.5rem,5vw+1.5rem,6.5rem)] xl:size-[clamp(5.5rem,6vw,8.5rem)]" />
               </span>
+              {/* SplitText le pone aria-label al <p> y axe lo prohíbe (un <p>
+                  no se nombra): el texto real va en un sr-only y el animado
+                  queda aria-hidden. */}
+              <span className="sr-only">{SITE_NAME}</span>
               <p
                 data-hero-brand
+                aria-hidden="true"
                 className="min-w-0 select-none font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
               >
                 {SITE_NAME}

@@ -1,0 +1,35 @@
+# Scroll Lab
+
+> Estudio digital y plantillas web con scroll cinematográfico. Vendemos templates completos con el código fuente incluido, un builder para armar tu propia página, secciones alojadas (LAB) que se insertan en cualquier sitio con un script, y hacemos trabajo a medida.
+
+Scroll Lab es un proyecto argentino. Los precios de lista están en dólares (USD) y se cobran en pesos a la cotización vigente, con Mercado Pago. Cada compra de un template o del builder es un pago único y trae una licencia de uso (usable en proyectos propios o de clientes; no se puede revender). El sitio está en español.
+
+## Qué ofrecemos
+
+- [Templates](https://www.scrolllab.com.ar/#templates): diez modelos de páginas con scroll cinematográfico, cada uno con su demo en vivo. Se descargan como un proyecto completo con el código fuente.
+- [Builder](https://www.scrolllab.com.ar/builder): armás tu página eligiendo secciones de todos los modelos, con vista previa del scroll en vivo, y te llevás el código.
+- [LAB](https://www.scrolllab.com.ar/lab): una sección con nuestro nivel de diseño que se inserta en cualquier sitio con una línea de código, sin bajar nada. Se edita desde un panel online y funciona por suscripción, con un plan gratuito.
+- [Trabajo a medida](https://www.scrolllab.com.ar/#estudio): diseño y desarrollo de un sitio propio, o adaptación de uno de los modelos a tu marca. Se cotiza caso por caso a través del formulario de contacto.
+
+## Los templates
+
+- [CHAPTERS](https://www.scrolllab.com.ar/plantillas/chapters): editorial cinética
+- [NOCTURNE](https://www.scrolllab.com.ar/plantillas/nocturne): noir cinematográfico
+- [MONOLITH](https://www.scrolllab.com.ar/plantillas/monolith): sistema brutalista
+- [VELOCITY](https://www.scrolllab.com.ar/plantillas/velocity): energía athlete
+- [FIZZ](https://www.scrolllab.com.ar/plantillas/fizz): pop carbonatado
+- [ATELIER](https://www.scrolllab.com.ar/plantillas/atelier): studio WebGL
+- [COMIC](https://www.scrolllab.com.ar/plantillas/comic): historieta ilustrada
+- [UNITY](https://www.scrolllab.com.ar/plantillas/unity): editorial deportivo
+- [ATRIUM](https://www.scrolllab.com.ar/plantillas/atrium): estudio de arquitectura
+- [MERIDIAN](https://www.scrolllab.com.ar/plantillas/meridian): desarrollo inmobiliario
+
+## Legal
+
+- [Licencia Regular](https://www.scrolllab.com.ar/legal/license): qué se puede y qué no se puede hacer con un template comprado
+- [Términos del servicio](https://www.scrolllab.com.ar/legal/terms): compra, descargas, reembolsos, LAB y trabajo a medida
+- [Política de privacidad](https://www.scrolllab.com.ar/legal/privacy): qué datos se recopilan y para qué
+
+## Contacto
+
+- [Escribinos](https://www.scrolllab.com.ar/#contacto): formulario de contacto, o por mail a hola@scrolllab.com.ar
