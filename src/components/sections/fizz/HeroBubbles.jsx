@@ -172,9 +172,22 @@ function drawTitleLine(text, { family, weight, tracking, targetWidth, maxSize, d
   ctx.fillStyle = '#fff'
   ctx.fillText(text, pad, pad + m.actualBoundingBoxAscent)
 
+  // Where each letter sits in the line, so every one can fly in on its own.
+  const advance = (n) => ctx.measureText(text.slice(0, n)).width
+  const cuts = []
+  for (let i = 0; i < text.length; i += 1) {
+    if (text[i] === ' ') continue
+    // Cut along the glyph's own ink, so a neighbour's edge never rides along.
+    const glyph = ctx.measureText(text[i])
+    const origin = pad + advance(i + 1) - glyph.width
+    const x0 = Math.max(0, origin - glyph.actualBoundingBoxLeft - 1)
+    const x1 = Math.min(width, origin + glyph.actualBoundingBoxRight + 1)
+    cuts.push({ x0, x1, u0: x0 / width, u1: x1 / width })
+  }
+
   const texture = new THREE.CanvasTexture(canvas)
   texture.anisotropy = 8
-  return { texture, width, height }
+  return { texture, width, height, cuts }
 }
 
 /** Brand label: `canLabel` set in the page font, plus small print and paper grain. */
@@ -251,21 +264,20 @@ const TITLE_VERTEX = /* glsl */ `
 `
 
 // Opaque on purpose: the glass only refracts what the opaque pass drew, so the
-// headline lives in the canvas instead of the DOM. `uReveal` lifts it from
-// below its own box, left to right.
+// headline lives in the canvas instead of the DOM. Each letter is its own quad
+// reading its slice of the line (`uUv0`..`uUv1`); `uIn` fades it up as it lands.
 const TITLE_FRAGMENT = /* glsl */ `
   uniform sampler2D map;
   uniform vec3 uInk;
   uniform vec3 uPaper;
-  uniform float uReveal;
+  uniform float uUv0;
+  uniform float uUv1;
+  uniform float uIn;
   uniform float uFade;
   varying vec2 vUv;
   void main() {
-    float local = clamp(uReveal * 1.6 - vUv.x * 0.6, 0.0, 1.0);
-    float lift = pow(1.0 - local, 4.0);
-    vec2 uv = vec2(vUv.x, vUv.y + lift);
-    if (uv.y > 1.0) discard;
-    float a = texture2D(map, uv).a * uFade;
+    vec2 uv = vec2(mix(uUv0, uUv1, vUv.x), vUv.y);
+    float a = texture2D(map, uv).a * uFade * uIn;
     if (a < 0.004) discard;
     gl_FragColor = vec4(mix(uPaper, uInk, a), 1.0);
     #include <colorspace_fragment>
@@ -404,48 +416,91 @@ export default function HeroBubbles({
               },
             ]
       const planeGeo = new THREE.PlaneGeometry(1, 1)
-      const titleMeshes = lines.map(() => {
-        const mesh = new THREE.Mesh(
-          planeGeo,
-          new THREE.ShaderMaterial({
-            uniforms: {
-              map: { value: null },
-              uInk: { value: new THREE.Color(flavorCfg.ink) },
-              uPaper: { value: new THREE.Color(flavorCfg.bg) },
-              uReveal: { value: reduced ? 1 : 0 },
-              uFade: { value: 1 },
-            },
-            vertexShader: TITLE_VERTEX,
-            fragmentShader: TITLE_FRAGMENT,
-          }),
-        )
-        titleGroup.add(mesh)
-        return mesh
-      })
+      const lineTextures = []
+      let letters = []
+      // The state outlives every re-layout (fonts arriving, resizes): t goes 0 → 1
+      // as the letter flies in from its scattered start.
+      const letterStates = []
+      const letterState = (i) =>
+        (letterStates[i] ||= {
+          t: reduced ? 1 : 0,
+          ox: (Math.random() - 0.5) * W * 0.6,
+          oy: -(0.12 + Math.random() * 0.4) * H,
+          rot: (Math.random() - 0.5) * 1.8,
+          s0: 0.35 + Math.random() * 1.1,
+        })
+
+      const applyLetters = () => {
+        letters.forEach(({ mesh, state, x, y, w, h }) => {
+          const k = 1 - state.t
+          const sc = lerp(state.s0, 1, state.t)
+          mesh.position.set(x + k * state.ox, y + k * state.oy, 0)
+          mesh.rotation.z = k * state.rot
+          mesh.scale.set(w * sc, h * sc, 1)
+          mesh.material.uniforms.uIn.value = clamp01(state.t * 2)
+        })
+      }
+
+      const clearTitle = () => {
+        letters.forEach(({ mesh }) => {
+          titleGroup.remove(mesh)
+          mesh.material.dispose()
+        })
+        lineTextures.forEach((texture) => texture.dispose())
+        letters = []
+        lineTextures.length = 0
+      }
 
       const layoutTitle = () => {
-        let total = 0
+        clearTitle()
         const gap = H * 0.035
-        titleMeshes.forEach((mesh, i) => {
-          const line = lines[i]
-          mesh.material.uniforms.map.value?.dispose()
-          const drawn = drawTitleLine(line.text, {
+        const drawnLines = lines.map((line) =>
+          drawTitleLine(line.text, {
             family,
             weight: line.weight,
             tracking: line.tracking,
             targetWidth: W * (narrow ? line.widthNarrow : line.width),
             maxSize: H * line.max,
             dpr,
+          }),
+        )
+        const total = drawnLines.reduce((sum, d, i) => sum + d.height + (i ? gap : 0), 0)
+        let top = total / 2 + H * 0.02
+        let n = 0
+        drawnLines.forEach((drawn) => {
+          lineTextures.push(drawn.texture)
+          const y = top - drawn.height / 2
+          drawn.cuts.forEach((cut) => {
+            const mesh = new THREE.Mesh(
+              planeGeo,
+              new THREE.ShaderMaterial({
+                uniforms: {
+                  map: { value: drawn.texture },
+                  uInk: { value: new THREE.Color(flavorCfg.ink) },
+                  uPaper: { value: new THREE.Color(flavorCfg.bg) },
+                  uUv0: { value: cut.u0 },
+                  uUv1: { value: cut.u1 },
+                  uIn: { value: 0 },
+                  uFade: { value: 1 },
+                },
+                vertexShader: TITLE_VERTEX,
+                fragmentShader: TITLE_FRAGMENT,
+              }),
+            )
+            titleGroup.add(mesh)
+            letters.push({
+              mesh,
+              state: letterState(n),
+              x: (cut.x0 + cut.x1) / 2 - drawn.width / 2,
+              y,
+              w: cut.x1 - cut.x0,
+              h: drawn.height,
+            })
+            n += 1
           })
-          mesh.material.uniforms.map.value = drawn.texture
-          mesh.scale.set(drawn.width, drawn.height, 1)
-          total += drawn.height + (i ? gap : 0)
+          top -= drawn.height + gap
         })
-        let y = total / 2 + H * 0.02
-        titleMeshes.forEach((mesh) => {
-          mesh.position.y = y - mesh.scale.y / 2
-          y -= mesh.scale.y + gap
-        })
+        applyLetters()
       }
 
       /* ── Sombra sobre el fondo ─────────────────────────────────── */
@@ -717,12 +772,20 @@ export default function HeroBubbles({
         b.born = b.y
         return b
       }
-      const bubbles = Array.from({ length: bubbleCount }, () => spawnBubble({}, true))
+      const bubbles = Array.from({ length: bubbleCount }, () => {
+        const b = spawnBubble({}, true)
+        b.delay = Math.random() * 0.5
+        return b
+      })
+      // The first thing on screen: the bubbles, popping in one by one.
+      const intro = { bubbles: reduced ? 1 : 0 }
       const placeBubbles = (time, dt, boost) => {
         bubbles.forEach((b, i) => {
           b.y += b.speed * H * dt * boost
           if (b.y > H * 0.5 + b.r * 3) spawnBubble(b, false)
-          const grow = clamp01((b.y - b.born) / (H * 0.12) + (b.born > -H * 0.5 ? 1 : 0))
+          const grow =
+            clamp01((b.y - b.born) / (H * 0.12) + (b.born > -H * 0.5 ? 1 : 0)) *
+            smooth(clamp01((intro.bubbles - (b.delay || 0)) / 0.5))
           const wobble = Math.sin(time * 3.1 + b.phase) * 0.05
           bubbleDummy.position.set(b.x + Math.sin(time * 0.9 + b.phase) * b.sway, b.y, b.z)
           bubbleDummy.scale.set(b.r * grow * (1 + wobble), b.r * grow * (1 - wobble), b.r * grow)
@@ -801,9 +864,10 @@ export default function HeroBubbles({
         titleGroup.position.y = Math.min(Math.max(-rect.top, 0), rect.height - H)
         // Al irse hacia arriba el titular se apaga, sin cortarse de golpe.
         const fade = 1 - smooth(clamp01((-rect.top - H * 0.05) / (H * 0.55)))
-        titleMeshes.forEach((mesh) => {
+        letters.forEach(({ mesh }) => {
           mesh.material.uniforms.uFade.value = fade
         })
+        applyLetters()
         // Scrollear agita el gas.
         const speed = Math.abs(rect.top - lastTop)
         lastTop = rect.top
@@ -826,7 +890,7 @@ export default function HeroBubbles({
       let introDone = reduced
       function startBottle() {
         if (reduced || !introDone || !model) return
-        gsap.to(state, { enter: 0, duration: 1.7, ease: 'power3.out' })
+        gsap.to(state, { enter: 0, duration: 2, ease: 'power3.out' })
       }
 
       layout()
@@ -885,21 +949,25 @@ export default function HeroBubbles({
           },
         })
 
-        // Entrada en orden: titular → textos chicos → botella.
-        titleMeshes.forEach((mesh, i) => {
-          gsap.to(mesh.material.uniforms.uReveal, {
-            value: 1,
-            duration: 1.3,
-            ease: 'power1.out',
-            delay: 0.15 + i * 0.14,
+        // Entrada en orden, sin prisa: burbujas → titular letra por letra → textos
+        // chicos → botella.
+        const LETTERS_AT = 1.5
+        gsap.to(intro, { bubbles: 1, duration: 1.8, ease: 'none' })
+        letters.forEach(({ state }, i) => {
+          gsap.to(state, {
+            t: 1,
+            duration: 1.25,
+            ease: 'power3.out',
+            delay: LETTERS_AT + i * 0.06,
           })
         })
+        const lettersDone = LETTERS_AT + letters.length * 0.06 + 1.25
         gsap.to('[data-fizz-fade]', {
           opacity: 1,
-          duration: 0.7,
+          duration: 0.8,
           ease: 'power2.out',
           stagger: 0.1,
-          delay: 0.95,
+          delay: lettersDone - 0.7,
         })
         gsap.to('[data-fizz-arrow]', {
           y: 6,
@@ -909,7 +977,7 @@ export default function HeroBubbles({
           repeat: -1,
           yoyo: true,
         })
-        gsap.delayedCall(0.6, () => {
+        gsap.delayedCall(lettersDone - 0.9, () => {
           introDone = true
           startBottle()
         })
@@ -945,10 +1013,7 @@ export default function HeroBubbles({
         io.disconnect()
         window.removeEventListener('pointermove', onPointerMove)
         gsap.ticker.remove(tick)
-        titleMeshes.forEach((mesh) => {
-          mesh.material.uniforms.map.value?.dispose()
-          mesh.material.dispose()
-        })
+        clearTitle()
         planeGeo.dispose()
         shadowMesh.geometry.dispose()
         shadowMat.dispose()
