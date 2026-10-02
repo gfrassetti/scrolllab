@@ -228,8 +228,7 @@ export default function Hero({
       const urls = Array.from({ length: FRAME_COUNT }, (_, i) => frameUrl(i + 1))
       const images = new Array(FRAME_COUNT)
 
-      const idxOf = (p) =>
-        Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(p * (FRAME_COUNT - 1))))
+      const idxOf = (p) => Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(p * (FRAME_COUNT - 1))))
 
       // Mobile: a landscape frame cover-cropped into a portrait screen
       // only shows ~30% of its width, so the crop slides left → right with
@@ -250,9 +249,28 @@ export default function Hero({
       let shown = -1
       let dirty = true
 
-      function paint(fi) {
+      const ready = (i) => {
+        const im = images[i]
+        return Boolean(im && im.complete && im.naturalWidth > 0)
+      }
+
+      // The frame we WANT may not have arrived yet (phones on mobile data
+      // load the sequence in order, front to back). Rather than freezing on
+      // whatever was drawn last, show the closest frame that IS ready — the
+      // scrub keeps moving and catches up as the rest streams in.
+      function nearest(fi) {
+        if (ready(fi)) return fi
+        for (let d = 1; d < FRAME_COUNT; d += 1) {
+          if (fi - d >= 0 && ready(fi - d)) return fi - d
+          if (fi + d < FRAME_COUNT && ready(fi + d)) return fi + d
+        }
+        return -1
+      }
+
+      function paint(want) {
+        const fi = nearest(want)
+        if (fi < 0) return
         const img = images[fi]
-        if (!img || !img.complete) return
         if (fi === shown && !dirty) return
         ctx.fillStyle = '#dfd8cf'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -466,7 +484,9 @@ export default function Hero({
 
       let targetProg = 0
       let prog = 0
-      const EASE = 0.18
+      // Reduced motion keeps the scrub (it is 1:1 with the visitor's own
+      // scroll, not autonomous motion) but drops the smoothing lag.
+      const EASE = reduced ? 1 : 0.18
 
       // The whole point of `dirty`/`shown` in paint() is to skip redundant
       // canvas redraws — but this function used to set `dirty = true` and
@@ -493,38 +513,36 @@ export default function Hero({
       resize()
       window.addEventListener('resize', resize)
 
-      if (reduced) {
-        // Static: no ticker, no scrub — one representative frame, the
-        // wordmark already docked, the invite state shown at rest.
-        images[0] = new Image()
-        images[0].src = urls[0]
-        images[0].onload = () => {
-          if (!alive.v) return
-          dirty = true
-          paint(0)
-        }
-        layoutWordmark(WORDMARK_RANGE)
-        layoutWelcome(WELCOME_AT)
-        layoutStates(STATES[STATES.length - 1].at)
-        if (mobile) layoutMobileStatic()
-      } else {
+      {
         loadedRef.current = 0
-        urls.forEach((url, i) => {
+        // Load in order, a few at a time, so the first frames always land
+        // first (a flat Promise.all-style burst of 239 requests leaves a
+        // phone with the END of the sequence and none of the start).
+        let next = 0
+        const LANES = 8
+        const pump = () => {
+          if (!alive.v || next >= urls.length) return
+          const i = next
+          next += 1
           const img = new Image()
           img.decoding = 'async'
-          img.onload = () => {
+          const done = () => {
             loadedRef.current += 1
-            if (i === 0 && alive.v) {
-              dirty = true
-              paint(0)
+            if (alive.v) {
+              // repaint if this was the frame the visitor is looking for
+              if (nearest(idxOf(prog)) !== shown) {
+                dirty = true
+                paint(idxOf(prog))
+              }
             }
+            pump()
           }
-          img.onerror = () => {
-            loadedRef.current += 1
-          }
-          img.src = url
+          img.onload = done
+          img.onerror = done
+          img.src = urls[i]
           images[i] = img
-        })
+        }
+        for (let l = 0; l < LANES; l += 1) pump()
 
         layoutWordmark(0)
         layoutWelcome(0)
@@ -543,38 +561,44 @@ export default function Hero({
         })
 
         // Intro waits for the preloader (loaderDoneRef) — it is built
-        // paused and started by handleLoaderDone().
-        const intro = gsap.timeline({ paused: true })
-        const split = new SplitText(wordmarkRef.current, { type: 'chars', mask: 'chars' })
-        gsap.set(split.chars, { autoAlpha: 0, filter: 'blur(10px)' })
-        intro.to(
-          split.chars,
-          {
-            autoAlpha: 1,
-            filter: 'blur(0px)',
-            duration: 1.9,
-            stagger: { each: 0.07, from: 'random' },
-            ease: 'power2.out',
-          },
-          0.1,
-        )
+        // paused and started by handleLoaderDone(). Skipped entirely under
+        // reduced motion: the wordmark and nav just show.
+        if (!reduced) {
+          const intro = gsap.timeline({ paused: true })
+          const split = new SplitText(wordmarkRef.current, { type: 'chars', mask: 'chars' })
+          gsap.set(split.chars, { autoAlpha: 0, filter: 'blur(10px)' })
+          intro.to(
+            split.chars,
+            {
+              autoAlpha: 1,
+              filter: 'blur(0px)',
+              duration: 1.9,
+              stagger: { each: 0.07, from: 'random' },
+              ease: 'power2.out',
+            },
+            0.1,
+          )
 
-        const navSplit = new SplitText('[data-meridian-hero-nav]', { type: 'chars', mask: 'chars' })
-        gsap.set(navSplit.chars, { autoAlpha: 0, filter: 'blur(10px)' })
-        intro.to(
-          navSplit.chars,
-          {
-            autoAlpha: 1,
-            filter: 'blur(0px)',
-            duration: 1.7,
-            stagger: { each: 0.06, from: 'random' },
-            ease: 'power2.out',
-          },
-          0.6,
-        )
+          const navSplit = new SplitText('[data-meridian-hero-nav]', {
+            type: 'chars',
+            mask: 'chars',
+          })
+          gsap.set(navSplit.chars, { autoAlpha: 0, filter: 'blur(10px)' })
+          intro.to(
+            navSplit.chars,
+            {
+              autoAlpha: 1,
+              filter: 'blur(0px)',
+              duration: 1.7,
+              stagger: { each: 0.06, from: 'random' },
+              ease: 'power2.out',
+            },
+            0.6,
+          )
 
-        introRef.current = () => intro.play()
-        if (loaderDoneRef.current) intro.play()
+          introRef.current = () => intro.play()
+          if (loaderDoneRef.current) intro.play()
+        }
       }
 
       // Past the end of the sticky runway the stage scrolls away at full
@@ -624,26 +648,34 @@ export default function Hero({
         onFadeStart={handleLoaderDone}
         onDone={handleLoaderDone}
       />
-      <div ref={stage} className="sticky top-0 z-30 h-svh overflow-hidden" style={{ background: '#dfd8cf' }}>
+      <div
+        ref={stage}
+        className="sticky top-0 z-30 h-svh overflow-hidden"
+        style={{ background: '#dfd8cf' }}
+      >
         <div ref={bgRef} className="absolute inset-0 z-0 will-change-transform">
-        {/* poster: first frame, so the first paint is never blank */}
-        <img
-          src={frameUrl(1)}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover max-md:object-left"
-        />
-        <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] h-full w-full" />
-        {/* scrim: darkens the flythrough so white type stays legible over
+          {/* poster: first frame, so the first paint is never blank */}
+          <img
+            src={frameUrl(1)}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover max-md:object-left"
+          />
+          <canvas
+            ref={canvasRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
+          />
+          {/* scrim: darkens the flythrough so white type stays legible over
             any frame — heavier at top/bottom where the nav and copy sit */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[2]"
-          style={{
-            background:
-              'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 22%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.55) 100%)',
-          }}
-        />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[2]"
+            style={{
+              background:
+                'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 22%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.55) 100%)',
+            }}
+          />
         </div>
 
         {/* nav — hamburger + Floor Plans are fixed chrome; the wordmark
@@ -681,11 +713,7 @@ export default function Hero({
             <span aria-hidden="true" />
           ) : (
             <div className="flex items-center gap-6">
-              <Hamburger
-                open={menuOpen}
-                label={menuText}
-                onClick={() => setMenuOpen((o) => !o)}
-              />
+              <Hamburger open={menuOpen} label={menuText} onClick={() => setMenuOpen((o) => !o)} />
               {!menuOpen && <HeaderCta href="#villas" label={ctaText} />}
             </div>
           )}
