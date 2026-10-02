@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { portrait, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -22,10 +24,11 @@ export default function LastPortrait({
   stat3Value = '00',
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-last-rise]', { y: 14, stagger: 0.08 })
 
       gsap.from('[data-last-rise]', {
         y: 48,
@@ -56,7 +59,7 @@ export default function LastPortrait({
         },
       )
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (

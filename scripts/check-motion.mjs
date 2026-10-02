@@ -19,6 +19,9 @@
  *   «pinneado» que no tiene nada que mostrar en este modo.
  * - hidden: texto a la vista con `opacity:0`/`visibility:hidden` — quedó
  *   esperando una animación que en este modo no corre.
+ * - viewport: algo se sale por la derecha y el navegador del teléfono ensancha
+ *   la pantalla (`innerWidth` > ancho del dispositivo): la página se ve
+ *   achicada. `overflow-x: clip` en el body no lo tapa en mobile.
  * - bar-jump: el alto del viewport baja 64px y vuelve (la barra del
  *   navegador al scrollear) y el scroll salta — ScrollTrigger se
  *   re-midió a mitad de camino.
@@ -26,7 +29,7 @@
  *   al deslizar el dedo.
  * - error: errores de consola/página (mismo filtro de ruido que check:mobile).
  *
- * Perfiles: Pixel 7 (Chromium real) e iPhone 13 (WebKit no está disponible
+ * Perfiles: Pixel 7 (Chromium real), iPhone 13 y iPad Mini (WebKit no está disponible
  * en este entorno: se emulan pantalla/DPR 3/táctil/UA del iPhone, el motor
  * sigue siendo Chromium — ver AGENTS.md).
  *
@@ -42,7 +45,7 @@
  *   MOTION=reduce PROFILE=pixel npm run check:motion -- meridian
  *   PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium …
  *
- * Variables: BASE, MOTION (reduce|normal|both), PROFILE (pixel|iphone|both),
+ * Variables: BASE, MOTION (reduce|normal|both), PROFILE (pixel|iphone|ipad|both|all),
  * CPU (multiplicador de frenado, default 4), CHROMIUM_ARGS.
  */
 import fs from 'node:fs'
@@ -84,11 +87,15 @@ const PROFILES = {
     const { defaultBrowserType, ...rest } = devices['iPhone 13']
     return { label: 'iPhone 13 (metrics; motor Chromium)', ...rest }
   })(),
+  ipad: (() => {
+    const { defaultBrowserType, ...rest } = devices['iPad Mini']
+    return { label: 'iPad Mini (metrics; motor Chromium)', ...rest }
+  })(),
 }
 
 const MAX_GESTURES = 60
 const STUCK_AFTER = 3 // gestos seguidos sin avanzar antes de marcar scroll-stuck
-const FROZEN_AFTER = 3 // gestos seguidos con el mismo cuadro antes de marcar frozen
+const FROZEN_SCREENS = 1.5 // pantallas de scroll con el mismo cuadro antes de marcar frozen
 const FRAME_DIFF_THRESHOLD = 3 // diferencia media (0-255) por debajo de la cual dos cuadros «son el mismo»
 
 function parseArgs(argv) {
@@ -102,10 +109,16 @@ function parseArgs(argv) {
   const quick = flags.has('--quick')
   const motion = process.env.MOTION || 'both'
   const profileArg = process.env.PROFILE || (quick ? 'pixel' : 'both')
+  const wanted = profileArg === 'both' ? ['pixel', 'iphone'] : profileArg === 'all' ? Object.keys(PROFILES) : profileArg.split(',')
+  const badProfile = wanted.filter((n) => !PROFILES[n])
+  if (badProfile.length) {
+    console.error(`Perfiles desconocidos: ${badProfile.join(', ')}. Opciones: ${Object.keys(PROFILES).join(', ')}, both, all`)
+    process.exit(2)
+  }
   return {
     templates: names.length ? names : TEMPLATES,
     motions: motion === 'both' ? ['normal', 'reduce'] : [motion],
-    profiles: profileArg === 'both' ? ['pixel', 'iphone'] : [profileArg],
+    profiles: profileArg === 'both' ? ['pixel', 'iphone'] : profileArg === 'all' ? Object.keys(PROFILES) : profileArg.split(','),
     video: flags.has('--video'),
     cpu: Number(process.env.CPU) || 4,
   }
@@ -142,6 +155,9 @@ function installMotionHelpers() {
     while ((n = walker.nextNode())) {
       const parent = n.parentElement
       if (!parent) continue
+      // Un menú cerrado, un panel inerte o un texto `aria-hidden` están
+      // ocultos a propósito (mismo criterio que check:mobile).
+      if (parent.closest('[inert], [aria-hidden="true"], [hidden]')) continue
       const r = parent.getBoundingClientRect()
       const centerY = r.top + r.height / 2
       const solidlyOnscreen = centerY > innerHeight * 0.12 && centerY < innerHeight * 0.88 && r.width > 0 && r.right > 0 && r.left < innerWidth
@@ -314,9 +330,9 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
   }
   let lastSection = null
   let lastSmallFrame = null
+  let lastFrameY = 0
   let stuckRun = 0
-  let frozenRun = 0
-  let frozenStartY = 0
+  let frozenFromY = null
   let gestures = 0
 
   const saveFrame = async (sectionName, scrollY) => {
@@ -328,40 +344,45 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     frames.push({ section: sectionName, scrollY: Math.round(scrollY), file: path.relative(OUT, file) })
   }
 
-  // Salto de la barra del navegador a mitad de página: el alto baja 64px y
-  // vuelve, como al scrollear en un celular de verdad. `scrollY` y el cuadro
-  // pueden correrse un poco solo por eso (secciones en `svh`: el alto de lo
-  // que está arriba cambia, y el scroll-anchoring nativo del navegador
-  // compensa el número para que la pantalla no salte de golpe — eso es una
-  // ayuda del browser, no el bug, y un scrub reacciona proporcional al
-  // scrollY aunque el `progress` interno no haya saltado). Lo que señala el
-  // bug de verdad es el `progress` de cada ScrollTrigger: si
-  // `ignoreMobileResize` (src/lib/gsap.js) funciona, no debería moverse más
-  // que el redondeo por este resize puntual.
-  const progressSnapshot = () =>
-    page.evaluate(async () => {
-      const { ScrollTrigger } = await import('/src/lib/gsap.js')
-      return ScrollTrigger.getAll().map((st) => Math.round(st.progress * 1000) / 1000)
-    })
+  // Barra del navegador: en un celular, al scrollear aparece y se esconde, y
+  // el alto de la ventana cambia ~64px. `ScrollTrigger.config({ignoreMobileResize})`
+  // (src/lib/gsap.js) existe para que eso NO re-mida los pins a mitad de scroll.
+  // Se emula bajando y subiendo el alto 64px y se cuentan los `refresh` de
+  // ScrollTrigger durante ese tramo: tiene que ser 0.
+  //
+  // No se compara scrollY ni el `progress` de los triggers: con `setViewportSize`
+  // cambian también las unidades `svh`/`vh` (en un celular real NO cambian con
+  // la barra), así que lo de arriba se reacomoda y el scroll-anchoring del
+  // navegador corre el número — un efecto del emulador, no un bug.
   const barJumpCheck = async () => {
-    const before = await progressSnapshot()
+    // Sin triggers (la versión calma no crea ninguno) un refresh no tiene qué
+    // desfasar: se mide solo si hay pins/scrubs en juego.
+    const triggers = await page.evaluate(async () => {
+      const { ScrollTrigger } = await import('/src/lib/gsap.js')
+      window.__stRefreshes = 0
+      ScrollTrigger.addEventListener('refresh', () => {
+        window.__stRefreshes += 1
+      })
+      return ScrollTrigger.getAll().length
+    })
     await page.setViewportSize({ width: vp.width, height: vp.height - 64 })
-    await page.waitForTimeout(350)
+    await page.waitForTimeout(500)
     await page.setViewportSize({ width: vp.width, height: vp.height })
-    await page.waitForTimeout(350)
-    const after = await progressSnapshot()
-    if (before.length !== after.length) {
-      issues.push({ check: 'bar-jump', section: lastSection?.name || '?', detail: `ScrollTrigger.getAll() cambió de ${before.length} a ${after.length} triggers (se reconstruyeron)` })
-      return
-    }
-    const jumped = before.reduce((n, p, i) => n + (Math.abs(after[i] - p) > 0.02 ? 1 : 0), 0)
-    if (jumped) {
-      issues.push({ check: 'bar-jump', section: lastSection?.name || '?', detail: `${jumped} ScrollTrigger(s) saltaron de progreso al bajar y subir el alto 64px` })
+    await page.waitForTimeout(500)
+    const refreshes = await page.evaluate(() => window.__stRefreshes)
+    if (refreshes > 0 && triggers > 0) {
+      issues.push({
+        check: 'bar-jump',
+        section: lastSection?.name || '?',
+        detail: `ScrollTrigger se re-midió ${refreshes} vez/veces por un cambio de alto de 64px (ignoreMobileResize no lo frenó)`,
+      })
     }
   }
   let barJumpDone = false
+  let viewportWidened = false
 
   await saveFrame('inicio', 0)
+  lastSmallFrame = await grabFrame(page)
 
   while (gestures < MAX_GESTURES) {
     const before = await page.evaluate(() => scrollY)
@@ -370,10 +391,30 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     const after = await page.evaluate(() => scrollY)
     gestures++
     const delta = after - before
-    const atBottom = after + vp.height >= scrollHeight - 2
-
+    // El alto cambia durante el recorrido (fotos que cargan, fuentes, secciones
+    // que se acomodan): se mide de nuevo, no el de la carga.
+    const { heightNow, innerW, innerH } = await page.evaluate(() => ({
+      heightNow: document.documentElement.scrollHeight,
+      innerW: window.innerWidth,
+      innerH: window.innerHeight,
+    }))
+    // innerHeight y no el alto del dispositivo: si la pantalla se ensanchó, el
+    // alto visible en px de CSS también creció.
+    const atBottom = after + innerH >= heightNow - 2
     const centerY = after + vp.height / 2
     const section = currentSection(blocks, centerY)
+
+    // Algo se sale por la derecha y el navegador del teléfono ensancha la
+    // pantalla para que entre (la página se ve achicada): el desborde que
+    // `overflow-x: clip` no tapa en mobile.
+    if (innerW > vp.width + 1 && !viewportWidened) {
+      viewportWidened = true
+      issues.push({
+        check: 'viewport',
+        section: section?.name || '?',
+        detail: `la pantalla se ensanchó a ${innerW}px (el teléfono es de ${vp.width}px): algo se sale por la derecha`,
+      })
+    }
     if (section && section.name !== lastSection?.name) {
       // Recién al salir de una sección tuvo su última chance de revelarse:
       // un paso tardío de un crossfade pinneado está bien que siga en
@@ -382,7 +423,6 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
       if (lastSection) await checkHidden(lastSection)
       await saveFrame(section.name, after)
       lastSection = section
-      frozenRun = 0
     }
 
     // scroll-stuck: el gesto casi no mueve scrollY habiendo más página abajo.
@@ -392,7 +432,7 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
         issues.push({
           check: 'scroll-stuck',
           section: section?.name || '?',
-          detail: `${STUCK_AFTER} gestos sin avanzar en scrollY≈${Math.round(after)} — se fuerza un salto para seguir auditando`,
+          detail: `${STUCK_AFTER} gestos sin avanzar en scrollY≈${Math.round(after)} (alto ${Math.round(heightNow)}, máx ${Math.round(heightNow - innerH)}) — se fuerza un salto para seguir auditando`,
         })
         // Sin esto la corrida completa de este job queda colgada reintentando
         // el mismo gesto: se documenta el bug y se sigue.
@@ -404,24 +444,28 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     }
 
     // frozen: scrollY avanza pero el cuadro no cambia — hueco vacío o
-    // escenario pinneado sin nada que mostrar en este modo.
+    // escenario pinneado sin nada que mostrar en este modo. Se mide por
+    // distancia, no por cantidad de gestos: con la inercia cada gesto recorre
+    // más de una pantalla, y un escenario pegado de 2 pantallas son 2 gestos.
     const smallFrame = await grabFrame(page)
     const diff = frameDiff(lastSmallFrame, smallFrame)
     if (diff < FRAME_DIFF_THRESHOLD) {
-      if (frozenRun === 0) frozenStartY = before
-      frozenRun++
-      if (frozenRun === FROZEN_AFTER && !seenFrozenAt.has(section?.name)) {
+      if (frozenFromY === null) frozenFromY = lastFrameY
+      const travelled = after - frozenFromY
+      if (travelled >= vp.height * FROZEN_SCREENS && !seenFrozenAt.has(section?.name)) {
         seenFrozenAt.add(section?.name)
         issues.push({
           check: 'frozen',
           section: section?.name || '?',
-          detail: `el cuadro no cambia entre scrollY≈${Math.round(frozenStartY)} y ≈${Math.round(after)} (~${Math.round((after - frozenStartY) / vp.height)} pantallas)`,
+          detail: `el cuadro no cambia entre scrollY≈${Math.round(frozenFromY)} y ≈${Math.round(after)} (~${(travelled / vp.height).toFixed(1)} pantallas)`,
         })
+        await saveFrame(`frozen-${section?.name || 'x'}`, after) // la evidencia queda en la hoja de contacto
       }
     } else {
-      frozenRun = 0
+      frozenFromY = null
     }
     lastSmallFrame = smallFrame
+    lastFrameY = after
 
     if (!barJumpDone && after > scrollHeight * 0.3) {
       barJumpDone = true

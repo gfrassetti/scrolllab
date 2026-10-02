@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { stageA, stageB, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -15,10 +17,11 @@ export default function StageLines({
   img2 = stageB,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-stage-type]', { y: 14, stagger: 0.1 })
 
       gsap.utils.toArray('[data-stage-band]', root.current).forEach((band) => {
         const img = band.querySelector('[data-stage-img]')
@@ -58,7 +61,7 @@ export default function StageLines({
         }
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   const bands = [
@@ -83,7 +86,7 @@ export default function StageLines({
               alt=""
               loading="lazy"
               decoding="async"
-              className="h-[130%] w-full object-cover will-change-transform"
+              className="h-[130%] w-full object-cover will-change-transform calm:h-full"
             />
           </div>
           <div className="relative z-10 flex min-h-[85svh] flex-col justify-end px-5 py-16 md:px-10 md:py-24">

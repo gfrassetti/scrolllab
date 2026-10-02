@@ -1,9 +1,13 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 /**
  * BlueprintDraw — a generic floor plan that traces itself on scrub.
  * No unique building mesh: rooms, a courtyard void, and a north mark.
+ *
+ * Calma: el plano queda trazado entero y el alto de scrub se va
+ * (`calm:h-auto`): sin pin eran 1,2 pantallas vacías debajo del dibujo.
  */
 export default function BlueprintDraw({
   title = 'Plan before mass',
@@ -11,10 +15,10 @@ export default function BlueprintDraw({
   caption = 'Courtyard house, 1:200',
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const paths = gsap.utils.toArray('[data-plan-stroke]')
       paths.forEach((path) => {
         const length = path.getTotalLength()
@@ -39,11 +43,11 @@ export default function BlueprintDraw({
         },
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (
-    <section ref={root} className="relative h-[220svh] bg-atrium-ink text-atrium-paper">
+    <section ref={root} className="relative h-[220svh] bg-atrium-ink text-atrium-paper calm:h-auto">
       <div
         data-plan-pin
         className="flex h-svh flex-col justify-between px-5 py-24 md:flex-row md:items-end md:px-10 md:py-16"

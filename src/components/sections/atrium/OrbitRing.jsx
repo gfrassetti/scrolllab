@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import {
   orbitCivic,
   orbitFacade,
@@ -40,6 +42,13 @@ const defaultTiles = [
  * carries its own `rotate + translateY` and the two would fight. The centre
  * holds a single scene — the founding year — so the pin reads as one idea,
  * not a carousel. The figures for the stats come after, in StatField.
+ *
+ * Calma: el anillo queda quieto (una composición de una pantalla: aro de
+ * fotos alrededor del año) y el escenario deja de estar pegado 3,4 pantallas
+ * (`calm:h-auto` / `calm:relative`: tiene que seguir siendo el bloque
+ * contenedor del aro, si no el `overflow-hidden` deja de recortarlo y el
+ * teléfono ensancha la pantalla): sin scrub eran dos pantallas con el mismo
+ * cuadro. El texto central entra con un fundido.
  */
 export default function OrbitRing({
   tiles = defaultTiles,
@@ -50,10 +59,11 @@ export default function OrbitRing({
   turn = 290,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-orbit-scene]', { y: 16 })
 
       gsap.set('[data-orbit-scene]', { autoAlpha: 0, y: 34 })
 
@@ -85,12 +95,12 @@ export default function OrbitRing({
       tl.to('[data-orbit-scene]', { autoAlpha: 1, y: 0, ease: 'none', duration: 0.1 }, 0.04)
       tl.to('[data-orbit-scene]', { autoAlpha: 0, y: -28, ease: 'none', duration: 0.06 }, 0.94)
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (
-    <section ref={root} id="foundation" className="relative h-[340svh] bg-atrium-ink text-atrium-paper">
-      <div data-orbit-pin className="sticky top-0 h-svh overflow-hidden">
+    <section ref={root} id="foundation" className="relative h-[340svh] bg-atrium-ink text-atrium-paper calm:h-auto">
+      <div data-orbit-pin className="sticky top-0 h-svh overflow-hidden calm:relative">
         <div
           data-orbit-ring
           className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-0 w-0 [--orbit-r:min(34vw,40vh)] will-change-transform md:[--orbit-r:min(30vw,46vh)]"

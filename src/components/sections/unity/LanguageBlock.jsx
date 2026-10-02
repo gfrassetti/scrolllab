@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { joyA, joyB, joyC, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -7,6 +9,10 @@ import { imgAttrs } from '../../../lib/responsiveImage'
  * LanguageBlock — solid type/image block.
  * Each row is one continuous line: image window + type, no mid-row voids.
  * Image windows are slightly taller than the type.
+ *
+ * Calma: las fotos están agrandadas al 180 % para que el parallax las pasee
+ * por la ventana; sin parallax se veía el 55 % del medio, mal encuadrado. En
+ * calma la foto ocupa la ventana (`calm:inset-0 calm:h-full`).
  */
 export default function LanguageBlock({
   eyebrow = 'EYEBROW 3',
@@ -22,9 +28,12 @@ export default function LanguageBlock({
   anchor = 'lang-a',
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
+      const stopReveal = reduced ? calmReveal('[data-lang-row]', { y: 14, stagger: 0.12 }) : undefined
+
       const fitRows = () => {
         root.current?.querySelectorAll('[data-lang-row]').forEach((row) => {
           const type = row.querySelector('[data-lang-type]')
@@ -52,7 +61,7 @@ export default function LanguageBlock({
       requestAnimationFrame(() => fitRows())
       window.addEventListener('resize', onResize)
 
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!reduced) {
         gsap.utils.toArray('[data-lang-window]', root.current).forEach((win) => {
           const img = win.querySelector('img')
           if (!img) return
@@ -73,9 +82,12 @@ export default function LanguageBlock({
         })
       }
 
-      return () => window.removeEventListener('resize', onResize)
+      return () => {
+        window.removeEventListener('resize', onResize)
+        stopReveal?.()
+      }
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   const rowClass = 'flex w-full flex-nowrap items-center gap-3'
@@ -105,7 +117,7 @@ export default function LanguageBlock({
                 alt=""
                 loading="lazy"
                 decoding="async"
-                className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform"
+                className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform calm:inset-0 calm:h-full"
               />
             </div>
             <h2 data-lang-type className={typeClass}>
@@ -124,7 +136,7 @@ export default function LanguageBlock({
                 alt=""
                 loading="lazy"
                 decoding="async"
-                className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform"
+                className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform calm:inset-0 calm:h-full"
               />
             </div>
           </div>
@@ -137,7 +149,7 @@ export default function LanguageBlock({
                 alt=""
                 loading="lazy"
                 decoding="async"
-                className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform"
+                className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform calm:inset-0 calm:h-full"
               />
             </div>
             <h2 data-lang-type className={typeClass}>

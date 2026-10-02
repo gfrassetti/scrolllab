@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const CX = 720
 const CY = 450
@@ -34,6 +36,13 @@ const SPOKES = Array.from({ length: 8 }, (_, i) => {
  * draws itself under a 60px statement; halfway through the pin the field
  * inverts and the second statement takes over (P1 + P13). This is the only
  * hard colour change in ATRIUM, and it happens inside a single pin.
+ *
+ * Calma: las dos frases viven una encima de la otra (la segunda es `absolute`
+ * y entra cuando el campo se invierte) — sin scrub se veían las dos pisadas.
+ * En calma la bisagra papel → tinta son dos bandas en fila: la primera con el
+ * diagrama ya trazado, la segunda sobre tinta. Mismo texto, sin pin. La banda
+ * del diagrama mide una pantalla (como el pin): el SVG escala con el alto, y
+ * en una banda más baja los números quedaban en 9–11 px.
  */
 export default function ClarityPair({
   kicker = 'Section label',
@@ -43,22 +52,19 @@ export default function ClarityPair({
   bodyRight = 'Ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation.',
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
+      if (reduced) return calmReveal('[data-calm-reveal]', { y: 16, stagger: 0.12 })
+
       const pin = root.current.querySelector('[data-clarity-pin]')
       const strokes = gsap.utils.toArray('[data-clarity-stroke]')
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
       strokes.forEach((path) => {
         const length = path.getTotalLength()
-        gsap.set(path, {
-          strokeDasharray: length,
-          strokeDashoffset: reduced ? 0 : length,
-        })
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
       })
-
-      if (reduced) return
 
       gsap.set('[data-clarity-b]', { autoAlpha: 0 })
       gsap.set('[data-clarity-body]', { autoAlpha: 0, y: 18 })
@@ -84,8 +90,72 @@ export default function ClarityPair({
 
       tl.to('[data-clarity-body]', { autoAlpha: 1, y: 0, stagger: 0.06, ease: 'none' }, 0.66)
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
+
+  const figure = (
+    <svg
+      data-clarity-figure
+      viewBox="0 0 1440 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      className="absolute inset-0 h-full w-full will-change-transform"
+    >
+      {SPOKES.map((s) => (
+        <path
+          key={s.id}
+          data-clarity-stroke
+          d={s.d}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+          opacity="0.5"
+        />
+      ))}
+      {SPOKES.map((s) => (
+        <text
+          key={`n-${s.id}`}
+          data-clarity-num
+          x={s.lx}
+          y={s.ly}
+          fill="currentColor"
+          className="text-[18px] sm:text-[12px] lg:text-[13px]"
+          letterSpacing="0.5"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          opacity="0.6"
+        >
+          {s.id}
+        </text>
+      ))}
+    </svg>
+  )
+
+  if (reduced) {
+    return (
+      <section ref={root} id="practice" className="relative">
+        <div className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-atrium-paper px-5 py-24 text-atrium-ink md:px-10">
+          {figure}
+          {kicker ? (
+            <p className="atrium-note absolute top-[10svh] left-5 font-display opacity-65 md:left-10">
+              {kicker}
+            </p>
+          ) : null}
+          <div data-calm-reveal className="relative flex flex-col items-center gap-10 text-center">
+            <h2 className="atrium-mid max-w-[15ch] text-balance">{left}</h2>
+            <p className="atrium-note max-w-[34ch] opacity-60">{bodyLeft}</p>
+          </div>
+        </div>
+        <div className="relative flex min-h-[70svh] flex-col justify-center bg-atrium-ink px-5 py-24 text-atrium-paper md:px-10">
+          <div data-calm-reveal className="flex flex-col items-center gap-10 text-center">
+            <h2 className="atrium-mid max-w-[15ch] text-balance">{right}</h2>
+            <p className="atrium-note max-w-[34ch] opacity-60">{bodyRight}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section ref={root} id="practice" className="relative h-[300svh] bg-atrium-ink">
@@ -97,42 +167,7 @@ export default function ClarityPair({
         <div data-clarity-ink className="absolute inset-0 bg-atrium-ink opacity-0" />
 
         <div className="relative h-full">
-          <svg
-            data-clarity-figure
-            viewBox="0 0 1440 900"
-            preserveAspectRatio="xMidYMid slice"
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full will-change-transform"
-          >
-            {SPOKES.map((s) => (
-              <path
-                key={s.id}
-                data-clarity-stroke
-                d={s.d}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                vectorEffect="non-scaling-stroke"
-                opacity="0.5"
-              />
-            ))}
-            {SPOKES.map((s) => (
-              <text
-                key={`n-${s.id}`}
-                data-clarity-num
-                x={s.lx}
-                y={s.ly}
-                fill="currentColor"
-                className="text-[18px] sm:text-[12px] lg:text-[13px]"
-                letterSpacing="0.5"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                opacity="0.6"
-              >
-                {s.id}
-              </text>
-            ))}
-          </svg>
+          {figure}
 
           {kicker ? (
             <p className="atrium-note absolute top-[13svh] left-5 font-display opacity-65 md:left-10">

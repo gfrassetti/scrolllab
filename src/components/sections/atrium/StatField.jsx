@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
+import { calmCount, calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const defaultStats = [
   { value: 10, suffix: '+', label: 'Placeholder metric' },
@@ -14,6 +16,10 @@ const defaultStats = [
  * travel. Counters run on enter; the final value renders first so reduced
  * motion still reads the real number. The page closes on the typographic
  * statement underneath.
+ *
+ * Calma: cada cifra entra con un fundido y los contadores cuentan igual (es
+ * contenido que cambia, no movimiento): en el teléfono con «reducir
+ * movimiento» los números quedaban quietos.
  */
 export default function StatField({
   kicker = 'Practice',
@@ -21,10 +27,20 @@ export default function StatField({
   closer = 'Placeholder statement — swap this line for your own closing sentence.',
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) {
+        const stopReveal = calmReveal('[data-stat], [data-closer]', { y: 16, stagger: 0.1 })
+        const stopCount = calmCount('[data-atrium-counter]', {
+          read: (el) => parseFloat(el.dataset.atriumCounter),
+        })
+        return () => {
+          stopReveal()
+          stopCount()
+        }
+      }
 
       gsap.utils.toArray('[data-stat]').forEach((el) => {
         gsap.fromTo(
@@ -90,7 +106,7 @@ export default function StatField({
         scrollTrigger: { trigger: '[data-closer]', start: 'top 82%', once: true },
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
 
   return (

@@ -101,3 +101,59 @@ export function calmReveal(targets, { y = 12, stagger = 0.08, duration = 0.7 } =
   els.forEach((el) => io.observe(el))
   return () => io.disconnect()
 }
+
+/**
+ * Contadores de la versión calma: cuentan hasta el valor la primera vez que
+ * entran en pantalla. Cambia el contenido del número, no se mueve nada, así
+ * que sigue siendo calma. Antes de entrar muestran 0; la limpieza deja los
+ * valores finales (sin JS o al volver a la versión completa se lee el real).
+ *
+ * `read(el)` devuelve el valor final: por defecto el `data-count` o el texto.
+ * Devolvé el resultado desde `useGSAP`, como con `calmReveal`.
+ */
+export function calmCount(
+  targets,
+  { duration = 1.4, read = (el) => parseFloat(el.dataset.count ?? el.textContent) } = {},
+) {
+  const els = gsap.utils.toArray(targets)
+  if (!els.length) return () => {}
+
+  const finals = new Map(els.map((el) => [el, read(el)]))
+  els.forEach((el) => {
+    el.textContent = '0'
+  })
+
+  const started = new Set()
+  const tweens = []
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting || started.has(entry.target)) return
+      started.add(entry.target)
+      const el = entry.target
+      const to = finals.get(el)
+      const proxy = { value: 0 }
+      tweens.push(
+        gsap.to(proxy, {
+          value: to,
+          duration,
+          ease: 'power3.out',
+          onUpdate: () => {
+            el.textContent = String(Math.round(proxy.value))
+          },
+          onComplete: () => {
+            el.textContent = String(to)
+          },
+        }),
+      )
+    })
+  })
+  els.forEach((el) => io.observe(el))
+
+  return () => {
+    io.disconnect()
+    tweens.forEach((tween) => tween.kill())
+    els.forEach((el) => {
+      el.textContent = String(finals.get(el))
+    })
+  }
+}
