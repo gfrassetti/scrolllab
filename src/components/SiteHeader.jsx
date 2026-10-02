@@ -174,8 +174,9 @@ export default function SiteHeader({ solid = true }) {
           <span className="truncate">{SITE_NAME}</span>
         </Link>
 
-        {/* Desktop / tablet */}
-        <div className="hidden items-center gap-6 md:flex">
+        {/* Escritorio: de 1024 para arriba. En tablet vertical (768–1023) el menú en
+            español no entra y ensanchaba el documento: ahí va la hamburguesa. */}
+        <div className="hidden items-center gap-6 lg:flex">
           <Link to="/#templates" className={`${linkClass} ${zoneClass('templates')}`}>
             {t('nav.templates')}
           </Link>
@@ -234,8 +235,8 @@ export default function SiteHeader({ solid = true }) {
           <ThemeToggle />
         </div>
 
-        {/* Mobile: carrito siempre a mano + hamburguesa */}
-        <div className="flex items-center gap-1 md:hidden">
+        {/* Mobile y tablet: carrito siempre a mano + hamburguesa */}
+        <div className="flex items-center gap-1 lg:hidden">
           <CartPopover />
           <button
             type="button"
@@ -273,7 +274,7 @@ export default function SiteHeader({ solid = true }) {
       )}
 
       {menuOpen && (
-        <div className="border-t border-ink/15 bg-bone px-5 pb-6 pt-2 md:hidden">
+        <div className="border-t border-ink/15 bg-bone px-5 pb-6 pt-2 md:px-10 lg:hidden">
           <ul className="divide-y divide-ink/10 text-[12px] uppercase tracking-[0.22em]">
             <li>
               <Link

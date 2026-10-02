@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { editA, editB, editC, editD, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -34,6 +35,8 @@ const defaultFigures = [
  * ParallaxEditorial — scattered editorial image grid where each
  * figure drifts vertically at its own speed while a huge outlined
  * word floats behind the composition.
+ *
+ * Calma: cada figura queda en su lugar (sin deriva) y entra con un fundido.
  */
 export default function ParallaxEditorial({
   chapter = '04',
@@ -46,7 +49,7 @@ export default function ParallaxEditorial({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('figure', { y: 18, stagger: 0.12 })
 
       gsap.utils.toArray('[data-parallax]').forEach((el) => {
         const speed = parseFloat(el.dataset.parallax)

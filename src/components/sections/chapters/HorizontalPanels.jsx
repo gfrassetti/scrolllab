@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { panelA, panelB, panelC, panelD, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -38,6 +39,14 @@ const defaultPanels = [
  * `variant="media"` (default): image + caption (Chapters template).
  * `variant="type"`: oversized step titles, no images; letter/word
  * reveals in the ManifestoReveal / HeroKinetic storytelling style.
+ *
+ * En el teléfono (< 768) las fotos de cada panel entran con un zoom suave y el
+ * pie sube al aparecer (antes solo `variant="type"` se animaba ahí).
+ *
+ * Calma: sin pin ni recorrido horizontal, en tablet y escritorio quedaba un
+ * escenario de 100svh con los paneles 2 a 4 tapados fuera de pantalla. Pasa a la
+ * pila vertical (clases `calm:`), cada bloque entra con un fundido y los títulos
+ * quedan enteros.
  */
 export default function HorizontalPanels({
   chapter = '03',
@@ -60,8 +69,11 @@ export default function HorizontalPanels({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return undefined
+      if (prefersReducedMotion()) {
+        return calmReveal('[data-panels-intro], [data-type-panel], [data-panel-fig]', {
+          y: 18,
+          stagger: 0.1,
+        })
       }
 
       const mm = gsap.matchMedia()
@@ -251,6 +263,32 @@ export default function HorizontalPanels({
               )
             }
           })
+
+          if (!typeOnly) {
+            gsap.utils.toArray('[data-panel-fig]').forEach((fig) => {
+              const img = fig.querySelector('[data-panel-img]')
+              const bits = fig.querySelectorAll('[data-panel-bit]')
+              if (img) {
+                gsap.fromTo(
+                  img,
+                  { scale: 1.14 },
+                  {
+                    scale: 1,
+                    ease: 'none',
+                    scrollTrigger: { trigger: fig, start: 'top bottom', end: 'center center', scrub: 0.5 },
+                  },
+                )
+              }
+              gsap.from(bits, {
+                y: 24,
+                opacity: 0,
+                duration: 0.7,
+                ease: 'power3.out',
+                stagger: 0.08,
+                scrollTrigger: { trigger: fig, start: 'top 78%', once: true },
+              })
+            })
+          }
         },
       )
 
@@ -263,10 +301,10 @@ export default function HorizontalPanels({
   )
 
   return (
-    <section ref={root} className="relative overflow-hidden md:h-svh">
+    <section ref={root} className="relative overflow-hidden md:h-svh calm:md:h-auto">
       {/* Pinneada, la sección queda en el tope del viewport: el rótulo baja
           lo que mide la nav fija para no pisarse con ella. */}
-      <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0">
+      <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0 calm:md:static calm:md:mx-0 calm:md:px-10">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
           Chapter {chapter} / {total}
         </p>
@@ -277,15 +315,15 @@ export default function HorizontalPanels({
         ref={track}
         className={
           typeOnly
-            ? 'flex flex-col md:h-full md:w-max md:flex-row md:items-stretch md:gap-20 lg:gap-28'
-            : 'flex flex-col md:h-full md:w-max md:flex-row md:items-stretch'
+            ? 'flex flex-col md:h-full md:w-max md:flex-row md:items-stretch md:gap-20 lg:gap-28 calm:md:h-auto calm:md:w-auto calm:md:flex-col calm:md:gap-0 calm:lg:gap-0'
+            : 'flex flex-col md:h-full md:w-max md:flex-row md:items-stretch calm:md:h-auto calm:md:w-auto calm:md:flex-col'
         }
       >
         <div
           className={
             typeOnly
-              ? 'flex flex-col justify-center px-5 py-16 md:h-full md:w-[36vw] md:shrink-0 md:px-10 lg:w-[30vw]'
-              : 'flex flex-col justify-center px-5 py-16 md:h-full md:w-[60vw] md:shrink-0 md:px-10 lg:w-[45vw]'
+              ? 'flex flex-col justify-center px-5 py-16 md:h-full md:w-[36vw] md:shrink-0 md:px-10 lg:w-[30vw] calm:md:h-auto calm:md:w-auto calm:lg:w-auto'
+              : 'flex flex-col justify-center px-5 py-16 md:h-full md:w-[60vw] md:shrink-0 md:px-10 lg:w-[45vw] calm:md:h-auto calm:md:w-auto calm:lg:w-auto'
           }
         >
           <h2
@@ -322,7 +360,7 @@ export default function HorizontalPanels({
             <article
               key={panel.index}
               data-type-panel
-              className="flex flex-col justify-center gap-5 px-5 pb-20 md:h-full md:w-[48vw] md:shrink-0 md:px-12 md:py-24 lg:w-[40vw] lg:px-16"
+              className="flex flex-col justify-center gap-5 px-5 pb-20 md:h-full md:w-[48vw] md:shrink-0 md:px-12 md:py-24 lg:w-[40vw] lg:px-16 calm:md:h-auto calm:md:w-auto calm:lg:w-auto calm:md:px-10 calm:lg:px-10 calm:md:py-10"
             >
               <p
                 data-panel-index
@@ -350,23 +388,30 @@ export default function HorizontalPanels({
           ) : (
             <figure
               key={panel.index}
-              className="flex flex-col justify-center gap-4 px-5 pb-16 md:h-full md:w-[52vw] md:shrink-0 md:px-8 md:py-24 lg:w-[36vw]"
+              data-panel-fig
+              className="flex flex-col justify-center gap-4 px-5 pb-16 md:h-full md:w-[52vw] md:shrink-0 md:px-8 md:py-24 lg:w-[36vw] calm:md:mx-auto calm:md:h-auto calm:md:w-full calm:md:max-w-xl calm:lg:w-full calm:md:px-5 calm:md:py-10"
             >
-              <div className="flex items-baseline justify-between text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
+              <div
+                data-panel-bit
+                className="flex items-baseline justify-between text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs"
+              >
                 <span className="text-accent">{panel.index}</span>
                 <span>{panel.title}</span>
               </div>
               {panel.img ? (
-                <img
-                  {...imgAttrs(panel.img, variants)}
-                  sizes="(min-width: 1024px) 36vw, (min-width: 768px) 52vw, 100vw"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-4/5 w-full object-cover"
-                />
+                <div className="aspect-4/5 w-full overflow-hidden">
+                  <img
+                    data-panel-img
+                    {...imgAttrs(panel.img, variants)}
+                    sizes="(min-width: 1024px) 36vw, (min-width: 768px) 52vw, 100vw"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover will-change-transform"
+                  />
+                </div>
               ) : null}
-              <figcaption className="text-sm text-ink/70">
+              <figcaption data-panel-bit className="text-sm text-ink/70">
                 {panel.caption}
               </figcaption>
             </figure>

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { sceneA, sceneB, sceneC, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -28,6 +29,14 @@ const defaultScenes = [
  * StickyImageStory — classic scrollytelling pattern: a sticky image
  * column on the left, narrative blocks flowing on the right. Each
  * block crossfades the pinned image. On mobile, images render inline.
+ *
+ * En el teléfono (< 768) cada escena trae su foto en línea: la foto entra con
+ * un zoom suave y el texto sube al aparecer — antes ahí no se animaba nada.
+ *
+ * Calma: la foto pegada no cambia (el cambio lo dispara el scroll), así que con
+ * ella, en tablet y escritorio, las fotos de la escena B y C nunca se veían. Sin
+ * movimiento no hay columna pegada: cada escena va con su foto en línea, en todos
+ * los anchos, y entra con un fundido.
  */
 export default function StickyImageStory({
   chapter = '02',
@@ -39,9 +48,35 @@ export default function StickyImageStory({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-scene-step]', { y: 16, stagger: 0.1 })
 
       const mm = gsap.matchMedia()
+
+      mm.add('(max-width: 767px)', () => {
+        gsap.utils.toArray('[data-scene-step]').forEach((step) => {
+          const img = step.querySelector('[data-scene-inline]')
+          const bits = step.querySelectorAll('[data-scene-bit]')
+          if (img) {
+            gsap.fromTo(
+              img,
+              { scale: 1.14 },
+              {
+                scale: 1,
+                ease: 'none',
+                scrollTrigger: { trigger: step, start: 'top bottom', end: 'center center', scrub: 0.5 },
+              },
+            )
+          }
+          gsap.from(bits, {
+            y: 28,
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            stagger: 0.1,
+            scrollTrigger: { trigger: step, start: 'top 72%', once: true },
+          })
+        })
+      })
 
       mm.add('(min-width: 768px)', () => {
         const images = gsap.utils.toArray('[data-scene-img]')
@@ -82,9 +117,9 @@ export default function StickyImageStory({
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
 
-      <div className="grid gap-10 md:grid-cols-2 md:gap-16">
+      <div className="grid gap-10 md:grid-cols-2 md:gap-16 calm:md:grid-cols-1">
         {/* Sticky image column — desktop only */}
-        <div className="hidden md:block">
+        <div className="hidden md:block calm:md:hidden">
           <div className="sticky top-0 flex h-svh items-center py-10">
             <div className="relative aspect-3/4 w-full max-w-115 overflow-hidden">
               {scenes.map((scene, i) => (
@@ -105,30 +140,36 @@ export default function StickyImageStory({
         </div>
 
         {/* Narrative steps */}
-        <div>
+        <div className="calm:md:mx-auto calm:md:w-full calm:md:max-w-3xl">
           {scenes.map((scene, i) => (
             <article
               key={scene.title}
               data-scene-step
-              className="flex min-h-[70svh] flex-col justify-center gap-5 py-14 md:min-h-svh md:py-0"
+              className="flex min-h-[70svh] flex-col justify-center gap-5 py-14 md:min-h-svh md:py-0 calm:md:min-h-0 calm:md:py-16"
             >
-              <p className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
+              <p data-scene-bit className="text-[11px] uppercase tracking-[0.25em] text-accent md:text-xs">
                 {scene.kicker} — {String(i + 1).padStart(2, '0')}
               </p>
 
-              <img
-                {...imgAttrs(scene.img, variants)}
-                sizes="100vw"
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="aspect-4/3 w-full object-cover md:hidden"
-              />
+              <div className="aspect-4/3 w-full overflow-hidden md:hidden calm:md:block">
+                <img
+                  data-scene-inline
+                  {...imgAttrs(scene.img, variants)}
+                  sizes="(min-width: 768px) 48rem, 100vw"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover will-change-transform"
+                />
+              </div>
 
-              <h3 className="text-[clamp(1.8rem,4.5vw,3.6rem)] leading-[1.02] font-medium tracking-[-0.02em]">
+              <h3
+                data-scene-bit
+                className="text-[clamp(1.8rem,4.5vw,3.6rem)] leading-[1.02] font-medium tracking-[-0.02em]"
+              >
                 {scene.title}
               </h3>
-              <p className="max-w-[42ch] text-sm leading-relaxed text-ink/70 md:text-base">
+              <p data-scene-bit className="max-w-[42ch] text-sm leading-relaxed text-ink/70 md:text-base">
                 {scene.body}
               </p>
             </article>

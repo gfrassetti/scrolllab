@@ -1,11 +1,14 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 /**
  * ManifestoReveal — oversized statement paragraph whose words fade
  * from faint to full ink as the user scrolls through it (scrubbed).
  * Pass custom JSX as children to override the default copy;
  * <em> spans inside are rendered as accent serif italics.
+ *
+ * Calma: el párrafo entra entero con un fundido (sin las palabras que se entintan).
  */
 export default function ManifestoReveal({
   chapter = '01',
@@ -18,7 +21,7 @@ export default function ManifestoReveal({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-manifesto]', { y: 18, duration: 1 })
 
       const split = new SplitText('[data-manifesto]', { type: 'words' })
 

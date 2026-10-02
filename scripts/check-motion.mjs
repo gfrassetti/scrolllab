@@ -19,6 +19,10 @@
  *   «pinneado» que no tiene nada que mostrar en este modo.
  * - hidden: texto a la vista con `opacity:0`/`visibility:hidden` — quedó
  *   esperando una animación que en este modo no corre.
+ * - unreachable (solo en calma): texto o fotos que ningún gesto puede traer a la
+ *   pantalla — quedan fuera de un contenedor con `overflow-x: hidden` que no se
+ *   desliza (un recorrido horizontal que con «reducir movimiento» perdió el pin).
+ *   A plena opacidad: `hidden` no lo ve, el elemento existe y no se ve nunca.
  * - viewport: algo se sale por la derecha y el navegador del teléfono ensancha
  *   la pantalla (`innerWidth` > ancho del dispositivo): la página se ve
  *   achicada. `overflow-x: clip` en el body no lo tapa en mobile.
@@ -189,6 +193,43 @@ function installMotionHelpers() {
     return [...out]
   }
 
+  /**
+   * Contenido que ningún gesto puede traer a la pantalla: texto o fotos que
+   * quedan por fuera de la caja de un ancestro con `overflow-x: hidden|clip` que
+   * no se desliza. Solo tiene sentido en calma: con el movimiento completo es
+   * GSAP quien corre el track con un transform, y ahí lo de afuera sí llega.
+   * (Las filas con `overflow-x: auto|scroll` son carruseles: se deslizan.)
+   */
+  mc.unreachable = (index) => {
+    const b = mc.__blocks?.[index]
+    if (!b) return []
+    const found = new Set()
+    for (const el of b.el.querySelectorAll('*')) {
+      let label = ''
+      if (el.tagName === 'IMG') label = (el.currentSrc || '').split('/').pop() || 'img'
+      else for (const n of el.childNodes) if (n.nodeType === 3) label += n.nodeValue
+      label = label.trim()
+      if (label.length < 3) continue
+      if (el.closest('[inert], [aria-hidden="true"], [hidden], [data-scrub-tail]')) continue
+      if (!el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true })) continue
+      const cs0 = getComputedStyle(el)
+      if (cs0.position === 'fixed') continue
+      const r = el.getBoundingClientRect()
+      if (r.width < 8 || r.height < 8) continue
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        const cs = getComputedStyle(a)
+        if (cs.overflowX !== 'hidden' && cs.overflowX !== 'clip') continue
+        const ar = a.getBoundingClientRect()
+        const outside = Math.max(0, ar.left - r.left) + Math.max(0, r.right - ar.right)
+        if (outside > r.width * 0.5) {
+          found.add(label.slice(0, 40))
+          break
+        }
+      }
+    }
+    return [...found].slice(0, 4)
+  }
+
   /** Filas con scroll horizontal propio (carruseles por overflow, no por pin de GSAP). */
   mc.swipableRows = () => {
     mc.__rows = [...document.querySelectorAll('*')].filter((el) => {
@@ -285,6 +326,9 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
   const profileCfg = PROFILES[profile]
   const context = await browser.newContext({
     ...profileCfg,
+    // El chrome del market sale en el idioma del navegador: con en-US el menú
+    // entra a 768 px y con es-AR (el público real) no — así se escondió un desborde.
+    locale: 'es-AR',
     reducedMotion: mode === 'reduce' ? 'reduce' : 'no-preference',
     ...(opts.video ? { recordVideo: { dir: jobDir, size: profileCfg.viewport } } : {}),
   })
@@ -344,6 +388,15 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     if (hidden.length) {
       seenHiddenAt.add(sec.name)
       issues.push({ check: 'hidden', section: sec.name, detail: hidden.slice(0, 3).join(' · ') })
+    }
+  }
+  const seenUnreachableAt = new Set()
+  const checkUnreachable = async (sec) => {
+    if (mode !== 'reduce' || seenUnreachableAt.has(sec.name)) return
+    const lost = await page.evaluate((i) => window.__mc.unreachable(i), blocks.indexOf(sec))
+    if (lost.length) {
+      seenUnreachableAt.add(sec.name)
+      issues.push({ check: 'unreachable', section: sec.name, detail: `fuera de un contenedor que no se desliza: ${lost.join(' · ')}` })
     }
   }
   let lastSection = null
@@ -438,7 +491,10 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
       // un paso tardío de un crossfade pinneado está bien que siga en
       // opacity:0 a mitad de camino (todavía no le tocó). Chequear antes
       // de pisar lastSection.
-      if (lastSection) await checkHidden(lastSection)
+      if (lastSection) {
+        await checkHidden(lastSection)
+        await checkUnreachable(lastSection)
+      }
       await saveFrame(section.name, after)
       lastSection = section
     }
@@ -495,7 +551,11 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
   if (gestures >= MAX_GESTURES) {
     issues.push({ check: 'error', section: lastSection?.name || '?', detail: `no llegó al final en ${MAX_GESTURES} gestos` })
   }
-  if (lastSection) await checkHidden(lastSection) // la última sección nunca "sale": se chequea acá.
+  if (lastSection) {
+    // la última sección nunca "sale": se chequea acá.
+    await checkHidden(lastSection)
+    await checkUnreachable(lastSection)
+  }
   await saveFrame('final', await page.evaluate(() => scrollY))
 
   // Filas con scroll horizontal propio: ¿responden al dedo?

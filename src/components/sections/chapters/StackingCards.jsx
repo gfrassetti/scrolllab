@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultCards = [
   {
@@ -31,6 +32,9 @@ const defaultCards = [
 /**
  * StackingCards — cards pin via position:sticky and pile on top of
  * each other; GSAP gently scales each card down as the next covers it.
+ *
+ * Calma: el apilado es CSS puro (sticky), así que se queda; solo se va el
+ * escalado de la carta de abajo, y cada carta entra con un fundido.
  */
 export default function StackingCards({
   chapter = '05',
@@ -42,7 +46,7 @@ export default function StackingCards({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-card]', { y: 24, duration: 0.9 })
 
       const wrappers = gsap.utils.toArray('[data-card-wrap]')
 

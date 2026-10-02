@@ -1,9 +1,12 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 /**
  * QuoteBreak — full-screen inverted interlude. The serif quote
  * reveals line by line out of a mask, scrubbed by the scroll.
+ *
+ * Calma: la cita y su firma entran con un fundido, una después de la otra.
  */
 export default function QuoteBreak({
   chapter = '06',
@@ -16,7 +19,9 @@ export default function QuoteBreak({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        return calmReveal('[data-quote], [data-quote-meta]', { y: 20, stagger: 0.25, duration: 1 })
+      }
 
       // autoSplit vuelve a partir las líneas si cambia el ancho (o carga la
       // fuente): la animación se arma en onSplit para que siga a las nuevas.

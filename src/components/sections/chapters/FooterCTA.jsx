@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultColumns = [
   { heading: 'Sitemap', items: ['Story', 'Index', 'About', 'Contact'] },
@@ -10,6 +11,8 @@ const defaultColumns = [
  * FooterCTA — closing section with a giant call-to-action word,
  * link columns (or a flat `links` list) and a thin legal line.
  * `bg` / `fg` override the model canvas; `ctaHref` overrides the mailto.
+ *
+ * Calma: la palabra entra con un fundido, sin la máscara por letra.
  */
 export default function FooterCTA({
   ctaWord = 'SAY HELLO',
@@ -29,7 +32,7 @@ export default function FooterCTA({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-cta-word]', { y: 24, duration: 1 })
 
       const split = new SplitText('[data-cta-word]', {
         type: 'chars',

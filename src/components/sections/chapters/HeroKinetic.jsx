@@ -1,10 +1,14 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 /**
  * HeroKinetic — full-viewport hero with oversized kinetic typography.
  * Characters rise out of a mask on load; the whole block drifts up
  * and fades as the user starts scrolling (cinematic exit).
+ *
+ * Calma (reducir movimiento): las tres líneas y las notas entran con un fundido,
+ * sin máscara ni deriva al scrollear.
  */
 export default function HeroKinetic({
   lineOne = 'EVERY',
@@ -18,7 +22,9 @@ export default function HeroKinetic({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        return calmReveal('[data-hero-line], [data-hero-meta]', { y: 18, stagger: 0.14, duration: 0.9 })
+      }
 
       const split = new SplitText('[data-hero-line]', {
         type: 'chars',

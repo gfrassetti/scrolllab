@@ -234,7 +234,7 @@ Modelo acordado, mapeado a Tailwind v4 (breakpoints default):
 - **Desktop**: `lg:` (≥1024). Referencias 1280/1440.
 
 Reglas:
-- Navs de template + market colapsan en `md:` (consistente; no mezclar `lg:` como hacía comic).
+- Navs de template + market colapsan en `md:` (consistente; no mezclar `lg:` como hacía comic). Excepción: el `SiteHeader` del market colapsa en `lg:` — con las etiquetas en español el menú no entra entre 768 y ~900 px y ensanchaba el documento (los audits corren con `locale: 'es-AR'` por eso).
 - Grid/flex items que puedan quedar más anchos que su track necesitan `min-w-0` (el default `min-width:auto` los expande a min-content y desborda; fue el bug del builder en mobile).
 - `body { overflow-x: clip }` enmascara leaks horizontales pero **no** arregla layout; usar `npm run check:responsive` para detectar elementos que se salen del viewport. Ojo: secciones con scroll horizontal/marquee/pin (HorizontalPanels, TrackMerge, SelectedWork, ChapterRail, marquees) son anchas *a propósito* y van clippeadas — no son overflow real.
 - Piso en mobile (≤ 480, probado desde 320): micro-labels ≥ 11 px y cuerpo ≥ 14 px; controles con zona de toque ≥ 44 px (`tpl-hit` si el dibujo es más chico; los links dentro de un párrafo quedan exentos); alturas en `svh`; nada que solo se descubra con hover (Tailwind v4 ya limita `hover:` a dispositivos con hover, pero el contenido tiene que tener camino táctil); imágenes con `srcSet`/`sizes`. `npm run check:mobile` lo mide por sección.

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmCount, calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultStats = [
   { value: 128, suffix: '+', label: 'Placeholder metric' },
@@ -12,6 +13,10 @@ const defaultStats = [
  * BigNumbers — oversized stat counters that count up once when they
  * enter the viewport. Final values render by default, so users with
  * reduced motion (or no JS) always see the real numbers.
+ *
+ * Calma: cada cifra entra con un fundido y los contadores cuentan igual (es
+ * contenido que cambia, no movimiento): en el teléfono con «reducir movimiento»
+ * los números quedaban quietos.
  */
 export default function BigNumbers({ stats = defaultStats, bg, fg }) {
   const root = useRef(null)
@@ -19,7 +24,18 @@ export default function BigNumbers({ stats = defaultStats, bg, fg }) {
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        // Mismo criterio que abajo: solo cuenta un entero.
+        const counters = gsap.utils
+          .toArray('[data-counter]')
+          .filter((el) => /^\d+$/.test(el.dataset.counter))
+        const stopReveal = calmReveal('[data-stat]', { y: 16, stagger: 0.1 })
+        const stopCount = calmCount(counters, { read: (el) => Number(el.dataset.counter) })
+        return () => {
+          stopReveal()
+          stopCount()
+        }
+      }
 
       gsap.utils.toArray('[data-counter]').forEach((el) => {
         // Solo cuenta un entero (127). Cualquier otro valor (1.500, 4,8, 24/7)
@@ -57,7 +73,7 @@ export default function BigNumbers({ stats = defaultStats, bg, fg }) {
     >
       <div className="grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-4">
         {rows.map((stat, i) => (
-          <div key={i} className="space-y-3">
+          <div key={i} data-stat className="space-y-3">
             <p className="text-[clamp(3rem,9vw,7.5rem)] leading-none font-medium tracking-[-0.03em]">
               <span data-counter={stat.value}>{stat.value}</span>
               <span className="text-accent">{stat.suffix}</span>
