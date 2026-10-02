@@ -123,7 +123,7 @@ export default function ClarityPair({
                 x={s.lx}
                 y={s.ly}
                 fill="currentColor"
-                fontSize="12"
+                className="text-[18px] sm:text-[12px] lg:text-[13px]"
                 letterSpacing="0.5"
                 textAnchor="middle"
                 dominantBaseline="middle"

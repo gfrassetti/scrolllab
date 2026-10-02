@@ -98,7 +98,7 @@ export default function FooterAtelier({
                 </p>
                 <a
                   href={`mailto:${email}`}
-                  className="tpl-link mt-3 block w-fit py-3 text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto lg:py-0"
+                  className="tpl-link mt-3 block w-fit py-3 text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto lg:py-0.5"
                 >
                   {emailLabel} {email}
                 </a>
@@ -113,7 +113,7 @@ export default function FooterAtelier({
                 <ul className="mt-3 text-sm text-white/70 lg:space-y-1.5">
                   {socialLinks.map((l, i) => (
                     <li key={i}>
-                      <a href={l.href || '#'} className="tpl-link tpl-hit relative inline-block py-3 transition-colors duration-300 hover:text-white lg:py-0">
+                      <a href={l.href || '#'} className="tpl-link tpl-hit relative inline-block py-3 transition-colors duration-300 hover:text-white lg:py-0.5">
                         {l.label}
                       </a>
                     </li>

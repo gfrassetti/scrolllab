@@ -161,7 +161,7 @@ export default function SelectedWork({
                 className="group relative w-[min(78vw,28rem)] shrink-0 will-change-transform md:w-[min(42vw,32rem)]"
               >
                 <div
-                  className={`relative aspect-[16/11] overflow-hidden rounded-2xl bg-gradient-to-br ${project.tone}`}
+                  className={`relative aspect-[16/10] overflow-hidden rounded-2xl bg-gradient-to-br ${project.tone}`}
                 >
                   <img
                     {...imgAttrs(project.img, variants)}

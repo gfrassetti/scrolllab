@@ -18,6 +18,17 @@ const defaultWorks = [
 ]
 
 /**
+ * La foto es 22 % más alta que su marco (parallax) y lo cubre: en un marco
+ * vertical se ve bastante más ancha que el marco, y `sizes` tiene que decirlo
+ * para que el teléfono no baje una versión chica. Las fotos de ejemplo son 3:2.
+ */
+const coverFactor = (ratio) => {
+  const [a, b] = String(ratio).split('/').map(Number)
+  const box = a && b ? a / b : 1.5
+  return Math.max(1, (1.22 * 1.5) / box)
+}
+
+/**
  * ProjectRail — work index. Photographs of different widths land on their
  * own bands; each one drifts inside its crop (P2) and carries a caption
  * row: name on the left, area on the right.
@@ -105,7 +116,7 @@ export default function ProjectRail({
               <img
                 data-work-media
                 {...imgAttrs(work.img, variants)}
-                sizes="(min-width: 768px) 54vw, 100vw"
+                sizes={`(min-width: 768px) ${Math.round(work.w * coverFactor(work.ratio))}vw, ${Math.round(100 * coverFactor(work.ratio))}vw`}
                 alt=""
                 loading="lazy"
                 decoding="async"

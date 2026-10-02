@@ -772,11 +772,15 @@ function installPageHelpers() {
       })
       .filter(Boolean)
 
-  /** Botón que abre el menú mobile (useMobileMenu pone aria-controls + aria-expanded). */
+  /**
+   * Botón que abre el menú mobile (useMobileMenu pone aria-controls +
+   * aria-expanded). Devuelve el id del panel tal cual: hay navs que montan el
+   * panel recién al abrirlo, así que todavía puede no existir.
+   */
   mc.menuTrigger = () => {
     for (const b of document.querySelectorAll('button[aria-controls][aria-expanded]')) {
       const r = b.getBoundingClientRect()
-      if (r.width && r.height && visible(b) && r.top < innerHeight) return `#${CSS.escape(b.getAttribute('aria-controls'))}`
+      if (r.width && r.height && visible(b) && r.top < innerHeight) return b.getAttribute('aria-controls')
     }
     return null
   }
@@ -903,19 +907,19 @@ async function auditJob(browser, base, job, opts) {
     }
 
     // Menú mobile: se abre arriba de todo, antes de scrollear.
-    const menuSel = await page.evaluate(() => window.__mc.menuTrigger())
-    if (menuSel) {
+    const menuId = await page.evaluate(() => window.__mc.menuTrigger())
+    if (menuId) {
       try {
         // Click programático: con WebGL por software el botón puede no quedar
         // «estable» a tiempo para Playwright, y acá solo interesa abrir el panel.
-        await page.evaluate((sel) => {
-          const id = document.querySelector(sel)?.id
+        const menuSel = await page.evaluate((id) => {
           const button = [...document.querySelectorAll('button[aria-controls]')].find(
             (b) => b.getAttribute('aria-controls') === id,
           )
-          if (!button) throw new Error('sin botón para ' + sel)
+          if (!button) throw new Error(`sin botón para ${id}`)
           button.click()
-        }, menuSel)
+          return `#${CSS.escape(id)}`
+        }, menuId)
         await page.waitForTimeout(900)
         await shoot('menu', 'open')
         await auditHere('menu', menuSel)

@@ -86,7 +86,7 @@ function Dropdown({ label, items, open, onOpen, onClose }) {
               <a
                 href="#"
                 role="menuitem"
-                className="block rounded-xl px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foam/75 transition-colors duration-150 hover:bg-foam/10 hover:text-fizz"
+                className="block rounded-xl px-3 py-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-foam/75 transition-colors duration-150 hover:bg-foam/10 hover:text-fizz"
                 onClick={onClose}
               >
                 {item}
