@@ -390,12 +390,12 @@
     "fizz": {
       "vibe": "Carbonated pop",
       "tags": [
-        "3D can with bubbles",
+        "3D glass bottle with bubbles",
         "Page-repainting worlds",
         "Candy type",
         "Can shelf"
       ],
-      "description": "Grape violet, candy colors and a 3D can spinning through bubbles. Every flavor is a full screen that repaints the page as you scroll. Ideal for drinks, snacks, candy, or any edible product with flavors or variants to showcase."
+      "description": "Electric blue, candy colors and a 3D glass bottle spinning through bubbles. Every flavor is a full screen that repaints the page as you scroll. Ideal for drinks, snacks, candy, or any edible product with flavors or variants to showcase."
     },
     "atelier": {
       "vibe": "WebGL studio",
@@ -643,11 +643,11 @@
       "fizz": {
         "NavFizz": {
           "name": "Nav Fizz",
-          "blurb": "Floating pill header with dropdown menus"
+          "blurb": "Wordmark and menu button; full-screen menu rising on a wavy edge"
         },
         "HeroBubbles": {
           "name": "Hero Bubbles",
-          "blurb": "PBR soda can with reflections and scroll-driven backdrop"
+          "blurb": "Glass bottle that refracts the headline and spins with scroll; real 3D bubbles"
         },
         "FlavorWorlds": {
           "name": "Flavor Worlds",

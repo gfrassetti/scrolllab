@@ -92,7 +92,7 @@ export const PRODUCTS = {
   fizz: {
     sku: 'fizz',
     title: 'FIZZ — template',
-    description: 'Modelo pop carbonatado con lata 3D y mundos de color (código fuente).',
+    description: 'Modelo pop carbonatado con botella de vidrio 3D y mundos de color (código fuente).',
     unit_price_usd: 189,
     currency_id: 'ARS',
   },
