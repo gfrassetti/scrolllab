@@ -174,7 +174,8 @@ function installMotionHelpers() {
       if (!parent) continue
       // Un menú cerrado, un panel inerte o un texto `aria-hidden` están
       // ocultos a propósito (mismo criterio que check:mobile).
-      if (parent.closest('[inert], [aria-hidden="true"], [hidden]')) continue
+      // `data-scrub-tail`: lo revela el scroll a propósito (CTA del hero de MERIDIAN).
+      if (parent.closest('[inert], [aria-hidden="true"], [hidden], [data-scrub-tail]')) continue
       const r = parent.getBoundingClientRect()
       const centerY = r.top + r.height / 2
       const solidlyOnscreen = centerY > innerHeight * 0.12 && centerY < innerHeight * 0.88 && r.width > 0 && r.right > 0 && r.left < innerWidth

@@ -169,7 +169,7 @@ export default function Masterplan({ units }) {
           type="button"
           aria-label={dir < 0 ? 'Scroll left' : 'Scroll right'}
           onClick={() => nudge(dir)}
-          className="mer-mp-arrow absolute top-1/2 z-20 -mt-5 flex h-10 w-10 items-center justify-center rounded-full min-[1000px]:hidden"
+          className="mer-mp-arrow absolute top-1/2 z-20 -mt-[22px] flex h-11 w-11 items-center justify-center rounded-full min-[1000px]:hidden"
           data-show={dir < 0 ? edge.left : edge.right}
           style={dir < 0 ? { left: '12px', '--dir': -1 } : { right: '12px', '--dir': 1 }}
         >

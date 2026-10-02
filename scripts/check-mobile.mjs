@@ -42,7 +42,7 @@
  * BASE apunta a un server ya levantado.
  *
  * Uso:
- *   npm run check:mobile                          # 9 templates, 12 anchos
+ *   npm run check:mobile                          # 10 templates, 12 anchos
  *   npm run check:mobile -- chapters nocturne     # solo esos
  *   npm run check:mobile -- --quick               # 320 · 390 · 768 · 1280
  *   npm run check:mobile -- --snapshot            # build sin minificar + preview
@@ -79,6 +79,7 @@ const TEMPLATES = [
   'comic',
   'unity',
   'atrium',
+  'meridian',
 ]
 
 const ALL_WIDTHS = [320, 360, 375, 390, 414, 430, 480, 600, 768, 834, 1024, 1280]
@@ -560,8 +561,10 @@ function installPageHelpers() {
         }
       }
 
-      // hidden: con reduced motion todo el copy tiene que quedar visible.
-      if (reduced && text && !visible(el) && !el.closest('[inert],[aria-hidden="true"],[hidden]')) {
+      // hidden: con reduced motion todo el copy tiene que quedar visible, salvo lo que
+      // el scroll revela a propósito (`data-scrub-tail`: el CTA del hero de MERIDIAN,
+      // que sigue el scroll también en calma).
+      if (reduced && text && !visible(el) && !el.closest('[inert],[aria-hidden="true"],[hidden],[data-scrub-tail]')) {
         if (cs.display !== 'none' && r.width > 4 && r.height > 4) {
           let why = cs.visibility === 'hidden' ? 'visibility hidden' : null
           for (let a = el; !why && a && a !== document.body; a = a.parentElement) {
@@ -731,6 +734,15 @@ async function auditJob(browser, base, job, opts) {
       slowLoad = true
     }
     await page.evaluate(() => document.fonts?.ready)
+    // MERIDIAN abre con una pantalla de carga a pantalla completa (8 s la primera
+    // vez): mientras está, tapa el hero y las zonas de toque no se pueden medir.
+    // La ruta es lazy: se le da un respiro para que monte antes de esperar que se vaya.
+    await page.waitForTimeout(1200)
+    await page
+      .waitForFunction(() => !document.querySelector('[role="status"][aria-label="Loading"]'), null, {
+        timeout: 25000,
+      })
+      .catch(() => {})
     await page.waitForTimeout(1800)
     loaded = true
 

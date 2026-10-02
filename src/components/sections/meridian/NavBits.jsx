@@ -29,7 +29,7 @@ export function LangSwitch({ className = '' }) {
             aria-pressed={lang === code}
             data-active={lang === code}
             onClick={() => setLang(code)}
-            className="meridian-lang-btn relative py-1"
+            className="meridian-lang-btn tpl-hit relative py-1"
           >
             {code}
           </button>
@@ -54,15 +54,18 @@ export function HeaderLink({ href, label, introAttr = false }) {
   return (
     <a
       href={href}
-      className="meridian-hdr-link pointer-events-auto relative inline-block overflow-hidden text-[11px] uppercase tracking-[0.2em]"
-      style={{ ...MONO, height: '1.5em', lineHeight: '1.5em' }}
+      className="meridian-hdr-link tpl-hit pointer-events-auto relative inline-block text-[11px] uppercase tracking-[0.2em]"
+      style={MONO}
     >
-      <span className="meridian-hdr-link-inner block will-change-transform">
-        <span className="block" {...(introAttr ? { 'data-meridian-hero-nav': true } : {})}>
-          {label}
-        </span>
-        <span aria-hidden="true" className="block italic">
-          {label}
+      {/* el recorte del roll va acá adentro: tpl-hit necesita que el <a> no recorte */}
+      <span className="block overflow-hidden" style={{ height: '1.5em', lineHeight: '1.5em' }}>
+        <span className="meridian-hdr-link-inner block will-change-transform">
+          <span className="block" {...(introAttr ? { 'data-meridian-hero-nav': true } : {})}>
+            {label}
+          </span>
+          <span aria-hidden="true" className="block italic">
+            {label}
+          </span>
         </span>
       </span>
       <style>{`
@@ -81,7 +84,7 @@ export function HeaderCta({ href, label }) {
   return (
     <a
       href={href}
-      className="meridian-hdr-cta pointer-events-auto relative hidden items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] md:inline-flex"
+      className="meridian-hdr-cta pointer-events-auto relative hidden items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[11px] uppercase tracking-[0.2em] md:inline-flex"
       style={MONO}
     >
       <span aria-hidden="true" className="meridian-hdr-cta-fill absolute inset-0" />

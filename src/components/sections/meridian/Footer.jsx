@@ -77,14 +77,14 @@ export default function Footer({
         <div data-ft-reveal className="md:text-right">
           <a
             href={`tel:${phone.replace(/[^\d+]/g, '')}`}
-            className="mer-ft-link block text-[clamp(2rem,4.2vw,4rem)] leading-[1.05] tracking-[-0.01em]"
+            className="mer-ft-link block py-2 text-[clamp(1.7rem,8.4vw,2rem)] leading-[1.05] tracking-[-0.01em] md:text-[clamp(2rem,4.2vw,4rem)]"
             style={SERIF}
           >
             {phone}
           </a>
           <a
             href={`mailto:${email}`}
-            className="mer-ft-link mt-4 block text-[clamp(1.3rem,2vw,1.9rem)] leading-[1.1]"
+            className="mer-ft-link block py-3 text-[clamp(1.3rem,2vw,1.9rem)] leading-[1.1]"
             style={SERIF}
           >
             {email}
@@ -149,7 +149,7 @@ export default function Footer({
           <a
             data-ft-reveal
             href="#villas"
-            className="mer-ft-link text-[12px] uppercase tracking-[0.12em]"
+            className="mer-ft-link tpl-hit text-[12px] uppercase tracking-[0.12em] max-md:self-start"
             style={MONO}
           >
             {t('selectVillas')}
@@ -164,16 +164,16 @@ export default function Footer({
             © {wordmark} — {new Date().getFullYear()} {t('rights')}
           </span>
           <span className="flex gap-5">
-            <a href="#privacy" className="mer-ft-link">
+            <a href="#privacy" className="mer-ft-link tpl-hit">
               {t('privacy')}
             </a>
-            <a href="#terms" className="mer-ft-link">
+            <a href="#terms" className="mer-ft-link tpl-hit">
               {t('terms')}
             </a>
           </span>
           <span>
             {t('madeBy')}{' '}
-            <a href={studioHref} className="mer-ft-link" style={{ color: SAND }}>
+            <a href={studioHref} className="mer-ft-link tpl-hit" style={{ color: SAND }}>
               {studio}
             </a>
           </span>
@@ -181,7 +181,11 @@ export default function Footer({
       </div>
 
       <style>{`
-        .mer-ft-link { position: relative; display: inline-block; transition: opacity 0.4s ease; }
+        /* Sin transition de opacity: GSAP anima la opacity de estos links (data-ft-reveal)
+           y, con una transición CSS en la misma propiedad, un ScrollTrigger.refresh() a
+           mitad del reveal le hace capturar mal el valor final y el link queda en 0. */
+        .mer-ft-link { position: relative; }
+        .mer-ft-link:not(.block) { display: inline-block; }
         .mer-ft-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-ft-link:hover::after { transform: scaleX(1); transform-origin: left; }
 

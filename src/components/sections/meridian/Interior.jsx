@@ -285,6 +285,7 @@ export default function Interior({ links }) {
 
       <style>{`
         .mer-int-link { font-size: clamp(2rem, 3.6vw, 3.6rem); line-height: 1.05; padding: 0; background: none; border: 0; cursor: pointer; border-bottom: 1px solid transparent; transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease; }
+        @media (max-width: 1023px) { .mer-int-link { padding-block: 5px; } }
         .mer-int-link[data-tone="light"] { color: #fff; }
         .mer-int-link[data-tone="dark"] { color: ${INK}; font-size: 2rem; }
         .mer-int-link[data-active="false"] { opacity: 0.45; border-bottom-color: currentColor; }

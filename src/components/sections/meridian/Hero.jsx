@@ -326,6 +326,9 @@ export default function Hero({
           const show = pastHero && hdr === 'solid'
           brand.style.opacity = show ? '1' : '0'
           brand.style.pointerEvents = show ? 'auto' : 'none'
+          // Invisible no es inexistente: sin esto el link se podía enfocar con el teclado.
+          brand.tabIndex = show ? 0 : -1
+          brand.setAttribute('aria-hidden', show ? 'false' : 'true')
         }
       }
 

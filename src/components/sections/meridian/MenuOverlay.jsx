@@ -316,7 +316,7 @@ export function Hamburger({ open, onClick, label, className = '', style }) {
       aria-label={open ? t('close') : t('menu')}
       aria-expanded={open}
       data-open={open ? 'true' : 'false'}
-      className={`meridian-hamburger group pointer-events-auto inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] ${className}`}
+      className={`meridian-hamburger tpl-hit group pointer-events-auto relative inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] ${className}`}
       style={{ fontFamily: "'Space Mono', monospace", ...style }}
     >
       <span className="relative inline-block h-[10px] w-[22px] shrink-0" aria-hidden="true">

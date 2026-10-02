@@ -333,7 +333,7 @@ export default function Location({
               type="button"
               aria-label={`${list[i].title} — ${list[i].distance} ${list[i].unit}`}
               data-active={active === i}
-              className="mer-pin absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              className="mer-pin tpl-hit absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{ left: `${(x / MAP_W) * 100}%`, top: `${(y / MAP_H) * 100}%` }}
               onMouseEnter={() => hoverIn(i, true)}
               onMouseLeave={hoverOut}
@@ -489,7 +489,7 @@ export default function Location({
         .mer-pin[data-active="true"] { transform: scale(1.1); }
         .mer-pin[data-active="true"] .mer-pin-fill { clip-path: circle(75% at 50% 50%); }
         .mer-pin[data-active="true"] svg { color: ${LAND}; }
-        .mer-pin-label { position: absolute; left: 50%; top: 100%; margin-top: 4px; transform: translateX(-50%); white-space: nowrap; font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(42, 38, 34, 0.62); pointer-events: none; transition: color 0.4s ease; }
+        .mer-pin-label { position: absolute; left: 50%; top: 100%; margin-top: 4px; transform: translateX(-50%); white-space: nowrap; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(42, 38, 34, 0.62); pointer-events: none; transition: color 0.4s ease; }
         .mer-pin[data-active="true"] .mer-pin-label { color: ${INK}; }
         @media (max-width: 767px) {
           .mer-pin-label { display: none; }

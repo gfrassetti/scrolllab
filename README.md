@@ -36,7 +36,7 @@ Sin `MP_ACCESS_TOKEN`, el checkout usa mock pay. Sin credenciales de Google, us�
 | `npm run test:e2e` | Embed de LAB en Chromium (secciones, responsive, publicar, dominios, links) |
 | `npm run check:builder` | El editor del builder aplica cada cambio (Chromium) |
 | `npm run check:lab` | LAB desde el editor: editar → preview → publicar → se ve en un sitio ajeno |
-| `npm run check:mobile` | Cada sección de los 9 templates de 320 a 1280 px: desbordes, texto cortado o chico, zonas de toque, imágenes |
+| `npm run check:mobile` | Cada sección de los 10 templates de 320 a 1280 px: desbordes, texto cortado o chico, zonas de toque, imágenes |
 | `npm run check:motion` | Emulador de teléfono (gestos táctiles reales, CPU ×4) en los 10 templates y el home: huecos, trabas, texto oculto; con «reducir movimiento» y con «Ver con animaciones» |
 | `npm run check:motion-notice` | El aviso «Ver con animaciones»: se pregunta una sola vez, el botón anda en todo, el toggle del header |
 | `npm run images` | Regenera las fotos WebP (y sus `srcset`) desde `design/masters/` |

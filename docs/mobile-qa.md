@@ -78,7 +78,7 @@ Alto de la página en un Pixel 7 (390×844), en px: normal → calma.
 | COMIC | 22085 → 5404 | Calma sin huecos (tira vertical), ChapterWorlds sin superposición. `check:motion` y `check:mobile` limpios |
 | UNITY | 14583 → 6966 | Mosaico como fila deslizable, stats visibles, fotos a tamaño normal. 0 hallazgos con fuentes reales |
 | ATRIUM | 17735 → 14532 | Escenarios pegados colapsados, contadores que cuentan, ProcessPin con rama mobile. Limpio en teléfono y tablet |
-| MERIDIAN | — | Pendiente: hero de una pantalla en calma |
+| MERIDIAN | 13868 → 13868 | El hero sigue el scroll 1:1 también en calma (decisión del dueño: el scrub es del visitante, no movimiento autónomo), así que el alto no cambia. Link del footer que quedaba invisible (transición CSS de opacity vs GSAP), zonas de toque ≥ 44 px, rótulos de 11 px. `check:mobile` 40 → 3 grupos (contador que rueda, recorte del mapa a 320, dos pines pegados en tablet); `check:motion` limpio en teléfono y tablet |
 | CHAPTERS | — | Pendiente |
 | NOCTURNE | — | Pendiente |
 | FIZZ | — | Pendiente |
