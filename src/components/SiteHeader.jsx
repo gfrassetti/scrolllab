@@ -6,7 +6,7 @@ import { usePlan } from '../lib/plan'
 import { useCompositionCount } from '../hooks/useCompositionCount'
 import { useT } from '../i18n'
 import { resetBrandSplash } from './BrandSplash'
-import { gsap } from '../lib/gsap'
+import { gsap, ScrollTrigger } from '../lib/gsap'
 import CartPopover from './CartPopover'
 import UserMenu from './UserMenu'
 import Logo from './Logo'
@@ -19,6 +19,19 @@ import LanguageSelector from './LanguageSelector'
  * intro del hero (TemplatesIndex) pero en miniatura y replayable. `host`
  * es el elemento que envuelve el <Logo> (busca sus data-logo-bar/-accent).
  */
+// Una sola vez para toda la app: arregla el scroll en mobile (toolbar que
+// aparece/desaparece, overscroll) donde SiteHeader vive — el chrome del
+// market, sin Lenis. NUNCA en páginas con Lenis (demos de templates, ver
+// SmoothScrollProvider/useLenis.js): normalizeScroll toma el control del
+// scroll igual que Lenis y las dos pelean — ahí el mobile se arregla con
+// ignoreMobileResize solo (gsap.js), no con esto.
+let normalizedScroll = false
+function ensureNormalizedScroll() {
+  if (normalizedScroll) return
+  normalizedScroll = true
+  ScrollTrigger.normalizeScroll(true)
+}
+
 function playLogoAssembly(host) {
   if (!host) return
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -87,6 +100,10 @@ export default function SiteHeader({ solid = true }) {
   // reemplace el documento: si no, el botón "Saliendo…" se convierte en
   // "Entrar" antes de irse y vuelve el parpadeo que queremos evitar.
   const showAccount = loggingOut || (user ? true : loading ? hadSession : false)
+
+  useEffect(() => {
+    ensureNormalizedScroll()
+  }, [])
 
   useEffect(() => {
     setMenuOpen(false)

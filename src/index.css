@@ -472,6 +472,28 @@ body {
   height: 0 !important;
 }
 
+/* Mobile: el elemento que ScrollTrigger pinea (pin: true) queda siempre
+   como hijo directo del .pin-spacer que GSAP arma en runtime — selector
+   universal, llega a cualquier sección pineada del market y de los 10
+   templates sin tocar archivo por archivo. will-change + translateZ(0)
+   fuerzan su propia capa de GPU: sin esto, en mobile de gama media/baja
+   el pin se ve entrecortado o directamente no se nota el movimiento. */
+.pin-spacer > * {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Mismo motivo, para los scrub de la home que no pinean pero sí quedan
+   atados al scroll todo el tiempo que dura la sección: el swap de poster
+   del carrusel de templates, las cards de Bundle/Builder/Lab y los
+   fade+rise (incluye los headlines de zona). */
+[data-template-art],
+[data-cta-card],
+[data-soft-fade] {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
 /* Chrome del market: ScrollProgress reemplaza la barra nativa (la clase la
    pone/saca ese componente al montar/desmontar — solo vive en el market,
    no en los demos de templates). */
