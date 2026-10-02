@@ -116,7 +116,7 @@ export default function Panorama({
         @keyframes mer-pano-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 0.5; } }
         .mer-pano-cta span:last-child { transition: letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-pano-cta:hover span:last-child { letter-spacing: 0.22em; }
-        @media (prefers-reduced-motion: reduce) { .mer-pano-ring { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { :where(:root:not([data-motion='full'])) .mer-pano-ring { animation: none; } }
       `}</style>
     </section>
   )

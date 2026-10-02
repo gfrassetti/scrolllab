@@ -395,11 +395,12 @@ body {
 .plum-curtain {
   animation: plum-dot-crawl 2.4s linear infinite;
 }
+/* Con `<html data-motion="full">` (src/lib/motionOverride.js) vuelven las animaciones. */
 @media (prefers-reduced-motion: reduce) {
-  .plum-drift,
-  .plum-drift-y,
-  .plum-bob,
-  .plum-curtain {
+  :where(:root:not([data-motion='full'])) .plum-drift,
+  :where(:root:not([data-motion='full'])) .plum-drift-y,
+  :where(:root:not([data-motion='full'])) .plum-bob,
+  :where(:root:not([data-motion='full'])) .plum-curtain {
     animation: none;
   }
 }
@@ -457,8 +458,8 @@ body {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .btn,
-    .btn:active:not(:disabled) {
+    :where(:root:not([data-motion='full'])) .btn,
+    :where(:root:not([data-motion='full'])) .btn:active:not(:disabled) {
       transition: none;
       transform: none;
     }
@@ -590,9 +591,9 @@ html.hide-native-scrollbar::-webkit-scrollbar {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ui-press,
-    .ui-enter,
-    .ui-press:active:not(:disabled) {
+    :where(:root:not([data-motion='full'])) .ui-press,
+    :where(:root:not([data-motion='full'])) .ui-enter,
+    :where(:root:not([data-motion='full'])) .ui-press:active:not(:disabled) {
       transition: none;
       transform: none;
     }
@@ -885,22 +886,22 @@ html.cursor-egg #cursor-dot {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-ratio-rupture='on'] [data-rupture-fly] {
+  html[data-ratio-rupture='on']:not([data-motion='full']) [data-rupture-fly] {
     animation: none;
     margin-left: -154px;
     margin-top: -95px;
   }
 
-  [data-hero-rule] {
+  :where(:root:not([data-motion='full'])) [data-hero-rule] {
     transition: none;
   }
 
-  [data-loader-square],
-  [data-loader-spin] {
+  :where(:root:not([data-motion='full'])) [data-loader-square],
+  :where(:root:not([data-motion='full'])) [data-loader-spin] {
     animation: none !important;
   }
 
-  [data-ratio-block] {
+  :where(:root:not([data-motion='full'])) [data-ratio-block] {
     transition: none;
     rotate: none;
     translate: none;

@@ -1212,9 +1212,11 @@
   },
   "motionNotice": {
     "label": "Motion",
-    "calm": "Your device asks for less motion, so you are seeing the calm version.",
-    "full": "You are seeing the full animations.",
+    "body": "Your device has “reduce motion” turned on, so the demos run with fewer animations. You can see them in full without changing that setting.",
     "showFull": "Show animations",
-    "showCalm": "Back to the calm version"
+    "keepCalm": "Keep it as is"
+  },
+  "motionToggle": {
+    "label": "Show demos with animations"
   }
 }

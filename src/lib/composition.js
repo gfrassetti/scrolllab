@@ -105,8 +105,15 @@ let countCacheKey = null
 let countCacheValue = 0
 
 export function readCompositionCount() {
-  if (typeof localStorage === 'undefined') return 0
-  const raw = localStorage.getItem(STORAGE_KEY)
+  let raw
+  try {
+    raw = localStorage.getItem(STORAGE_KEY)
+  } catch {
+    // Sin storage (no existe o el navegador lo bloquea: acceder ya tira
+    // SecurityError, `typeof` no alcanza). Esto corre en el render del header:
+    // si tira, el sitio entero queda en blanco.
+    return 0
+  }
   if (raw === countCacheKey) return countCacheValue
 
   countCacheKey = raw

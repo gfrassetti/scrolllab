@@ -85,13 +85,14 @@
     }
   }
 
+  /* Sin movimiento, salvo que la página haya pedido el completo (data-motion). */
   @media (prefers-reduced-motion: reduce) {
-    .tpl-link,
-    .tpl-lift {
+    :where(:root:not([data-motion='full'])) .tpl-link,
+    :where(:root:not([data-motion='full'])) .tpl-lift {
       transition: none;
     }
 
-    .tpl-lift:hover {
+    :where(:root:not([data-motion='full'])) .tpl-lift:hover {
       transform: none;
     }
   }

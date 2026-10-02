@@ -303,7 +303,7 @@ export default function Interior({ links }) {
         @keyframes mer-tip-in { from { opacity: 0; transform: scale(0.94) translateY(6px); } to { opacity: 1; transform: none; } }
         .mer-int-fade { animation: mer-int-fade 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
         @keyframes mer-int-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-        @media (prefers-reduced-motion: reduce) { .mer-spot-ring, .mer-tip, .mer-int-fade { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { :where(:root:not([data-motion='full'])) .mer-spot-ring, :where(:root:not([data-motion='full'])) .mer-tip, :where(:root:not([data-motion='full'])) .mer-int-fade { animation: none; } }
       `}</style>
     </section>
   )

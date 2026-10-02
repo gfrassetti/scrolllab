@@ -29,6 +29,17 @@
  *   al deslizar el dedo.
  * - error: errores de consola/página (mismo filtro de ruido que check:mobile).
  *
+ * Modo `forced` (MOTION=forced o MOTION=all): lo que deja el botón «Ver con
+ * animaciones» (src/lib/motionOverride.js) — «reducir movimiento» prendido en
+ * el dispositivo MÁS la preferencia guardada de pedir el movimiento completo.
+ * Tiene que verse igual que el modo normal; se compara por página el alto del
+ * documento y la cantidad de ScrollTrigger vivos:
+ *
+ * - override-ignored: la página con el botón puesto NO queda igual que sin
+ *   «reducir movimiento» — alguna sección sigue leyendo el ajuste del
+ *   dispositivo y se ignora el botón. (Es el chequeo que faltó cuando el botón
+ *   solo andaba en los templates ya migrados.)
+ *
  * Perfiles: Pixel 7 (Chromium real), iPhone 13 y iPad Mini (WebKit no está disponible
  * en este entorno: se emulan pantalla/DPR 3/táctil/UA del iPhone, el motor
  * sigue siendo Chromium — ver AGENTS.md).
@@ -43,9 +54,10 @@
  *   npm run check:motion -- --quick                # Pixel 7, ambos modos
  *   npm run check:motion -- --video                # + .webm por corrida
  *   MOTION=reduce PROFILE=pixel npm run check:motion -- meridian
+ *   MOTION=forced npm run check:motion                 # el botón anda en todos
  *   PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium …
  *
- * Variables: BASE, MOTION (reduce|normal|both), PROFILE (pixel|iphone|ipad|both|all),
+ * Variables: BASE, MOTION (reduce|normal|forced|both|all), PROFILE (pixel|iphone|ipad|both|all),
  * CPU (multiplicador de frenado, default 4), CHROMIUM_ARGS.
  */
 import fs from 'node:fs'
@@ -108,6 +120,11 @@ function parseArgs(argv) {
   }
   const quick = flags.has('--quick')
   const motion = process.env.MOTION || 'both'
+  const MODES = ['normal', 'reduce', 'forced']
+  if (!['both', 'all', ...MODES].includes(motion)) {
+    console.error(`MOTION desconocido: ${motion}. Opciones: ${MODES.join(', ')}, both (normal+reduce), all`)
+    process.exit(2)
+  }
   const profileArg = process.env.PROFILE || (quick ? 'pixel' : 'both')
   const wanted = profileArg === 'both' ? ['pixel', 'iphone'] : profileArg === 'all' ? Object.keys(PROFILES) : profileArg.split(',')
   const badProfile = wanted.filter((n) => !PROFILES[n])
@@ -117,7 +134,7 @@ function parseArgs(argv) {
   }
   return {
     templates: names.length ? names : TEMPLATES,
-    motions: motion === 'both' ? ['normal', 'reduce'] : [motion],
+    motions: motion === 'both' ? ['normal', 'reduce'] : motion === 'all' ? MODES : [motion],
     profiles: profileArg === 'both' ? ['pixel', 'iphone'] : profileArg === 'all' ? Object.keys(PROFILES) : profileArg.split(','),
     video: flags.has('--video'),
     cpu: Number(process.env.CPU) || 4,
@@ -276,7 +293,7 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
       // El aviso «Ver con animaciones» (MotionNotice) tapa controles y capturas.
-      sessionStorage.setItem('scrolllab-motion-notice', '1')
+      localStorage.setItem('scrolllab-motion-notice', '1')
     } catch {
       /* ignore */
     }
@@ -515,6 +532,88 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
 }
 
 // ---------------------------------------------------------------------------
+// Modo forced: ¿el botón «Ver con animaciones» deja la página como el modo normal?
+// ---------------------------------------------------------------------------
+
+/** Carga una página y mide lo que no puede diferir: alto del documento y ScrollTrigger vivos. */
+async function loadAndMeasure(browser, base, { template, profile, reduce, forced }) {
+  const context = await browser.newContext({
+    ...PROFILES[profile],
+    reducedMotion: reduce ? 'reduce' : 'no-preference',
+    locale: 'es-AR',
+  })
+  await context.addInitScript((override) => {
+    try {
+      sessionStorage.setItem('scrolllab-splash-seen', '1')
+      localStorage.setItem('scrolllab-motion-notice', '1')
+      if (override) localStorage.setItem('scrolllab-motion', 'full')
+    } catch {
+      /* ignore */
+    }
+  }, forced)
+  await routePicsum(context)
+  const page = await context.newPage()
+  let fontsFailed = false
+  page.on('requestfailed', (req) => {
+    if (/fonts\.(googleapis|gstatic)\.com/.test(req.url())) fontsFailed = true
+  })
+  await page.goto(`${base}${TEMPLATE_PATHS[template]}`, { waitUntil: 'networkidle', timeout: 90000 })
+  await page.evaluate(() => document.fonts?.ready).catch(() => {})
+  await page.waitForTimeout(2200)
+  const measured = await page.evaluate(async () => {
+    const { ScrollTrigger } = await import('/src/lib/gsap.js')
+    return {
+      height: Math.round(document.documentElement.scrollHeight),
+      triggers: ScrollTrigger.getAll().length,
+      dataMotion: document.documentElement.dataset.motion || null,
+      reduces: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    }
+  })
+  await context.close()
+  return { ...measured, fontsFailed }
+}
+
+async function probeOverride(browser, base, { template, profile }) {
+  const normal = await loadAndMeasure(browser, base, { template, profile, reduce: false, forced: false })
+  const forced = await loadAndMeasure(browser, base, { template, profile, reduce: true, forced: true })
+  const issues = []
+
+  if (forced.dataMotion !== 'full' || forced.reduces) {
+    issues.push({
+      check: 'override-ignored',
+      section: '(página)',
+      detail: `con el botón puesto <html data-motion> = ${forced.dataMotion} y matchMedia sigue avisando «reducir» (${forced.reduces})`,
+    })
+  }
+  const tolerance = Math.max(40, normal.height * 0.02)
+  if (Math.abs(forced.height - normal.height) > tolerance) {
+    issues.push({
+      check: 'override-ignored',
+      section: '(página)',
+      detail: `alto con el botón ${forced.height}px vs ${normal.height}px sin «reducir movimiento»: alguna sección sigue en la versión calma`,
+    })
+  }
+  if (forced.triggers !== normal.triggers) {
+    issues.push({
+      check: 'override-ignored',
+      section: '(página)',
+      detail: `ScrollTrigger vivos con el botón: ${forced.triggers}, sin «reducir movimiento»: ${normal.triggers}`,
+    })
+  }
+  return {
+    template,
+    profile,
+    mode: 'forced',
+    issues,
+    scrollHeight: forced.height,
+    gestures: 0,
+    frames: [],
+    fontsFailed: forced.fontsFailed || normal.fontsFailed,
+    videoPath: null,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Reporte
 // ---------------------------------------------------------------------------
 
@@ -588,11 +687,14 @@ async function main() {
     for (const job of jobs) {
       const jobDir = path.join(OUT, job.template, `${job.profile}-${job.mode}`)
       fs.mkdirSync(jobDir, { recursive: true })
-      const r = await runJob(browser, base, { ...job, opts, jobDir })
+      const r =
+        job.mode === 'forced'
+          ? await probeOverride(browser, base, job)
+          : await runJob(browser, base, { ...job, opts, jobDir })
       results.push(r)
       const bad = r.issues.length
       console.log(
-        `[${results.length}/${jobs.length}] ${job.template} ${PROFILES[job.profile].label} ${job.mode}: ${bad ? `${bad} hallazgos` : 'OK'} (${r.gestures} gestos)`,
+        `[${results.length}/${jobs.length}] ${job.template} ${PROFILES[job.profile].label} ${job.mode}: ${bad ? `${bad} hallazgos` : 'OK'} (${job.mode === 'forced' ? `igual que normal: ${Math.round(r.scrollHeight)}px` : `${r.gestures} gestos`})`,
       )
     }
   } finally {

@@ -220,6 +220,8 @@ npm run check:lab      # LAB: editar → preview (el embed real) → publicar �
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 npm run check:mobile   # cada sección de los 9 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
+npm run check:motion   # emulador de teléfono: gestos táctiles reales, CPU ×4, 10 templates + home, normal / reduce / forced (huecos, trabas, texto oculto)
+npm run check:motion-notice # el aviso «Ver con animaciones»: una sola vez, el botón anda, el toggle del header (Chromium)
 npm run images         # WebP + srcset de las fotos de los templates desde design/masters/<sku>/
 ```
 
@@ -236,6 +238,40 @@ Reglas:
 - Grid/flex items que puedan quedar más anchos que su track necesitan `min-w-0` (el default `min-width:auto` los expande a min-content y desborda; fue el bug del builder en mobile).
 - `body { overflow-x: clip }` enmascara leaks horizontales pero **no** arregla layout; usar `npm run check:responsive` para detectar elementos que se salen del viewport. Ojo: secciones con scroll horizontal/marquee/pin (HorizontalPanels, TrackMerge, SelectedWork, ChapterRail, marquees) son anchas *a propósito* y van clippeadas — no son overflow real.
 - Piso en mobile (≤ 480, probado desde 320): micro-labels ≥ 11 px y cuerpo ≥ 14 px; controles con zona de toque ≥ 44 px (`tpl-hit` si el dibujo es más chico; los links dentro de un párrafo quedan exentos); alturas en `svh`; nada que solo se descubra con hover (Tailwind v4 ya limita `hover:` a dispositivos con hover, pero el contenido tiene que tener camino táctil); imágenes con `srcSet`/`sizes`. `npm run check:mobile` lo mide por sección.
+
+### Reducir movimiento — versión calma, nunca rota
+
+Con `prefers-reduced-motion: reduce` los templates **no apagan todo**: pasan a la
+versión calma (`src/lib/motion.js`): fundidos cortos en vez de pin/parallax/zoom,
+contadores que cuentan, carruseles que se deslizan con el dedo. **Nunca** un
+contenedor alto vacío ni contenido oculto: los altos de scrub colapsan por CSS
+con la variante `calm:` (`h-[400vh] calm:h-auto`), y el JS tiene una rama calma
+(`calmReveal` / `calmCount`) en vez de un `return` temprano. `npm run check:motion`
+lo mide (huecos, trabas, texto oculto) con gestos táctiles reales.
+
+«Ver con animaciones» (`MotionNotice` / `MotionToggle`, solo market, no viaja en el
+ZIP) deja ver la demo completa **sin tocar el ajuste del dispositivo** (la web solo
+lo lee):
+
+- Se pregunta **una sola vez, en total**. La respuesta (`scrolllab-motion`) y el «ya
+  te lo mostré» (`scrolllab-motion-notice`) viven en `localStorage`; después se
+  cambia desde el header (`MotionToggle`, visible solo si el dispositivo pide reducir).
+  No lo vuelvas a preguntar por pestaña, por template ni al navegar.
+- Con `full`, `src/lib/motionOverride.js` pone `<html data-motion="full">` y reescribe
+  `window.matchMedia`: `prefers-reduced-motion` da «sin preferencia» para TODO lo que
+  corre en el market, incluidas las secciones que leen el ajuste directo y
+  `gsap.matchMedia`. Por eso una sección nueva puede leer
+  `matchMedia('(prefers-reduced-motion: reduce)')` sin romper el botón.
+- **CSS**: una regla `@media (prefers-reduced-motion: reduce)` escrita a mano tiene que
+  llevar `:where(:root:not([data-motion='full']))` adelante (o usar `calm:`), porque
+  el CSS no pasa por `matchMedia`. En el ZIP y en el embed `data-motion` no existe y
+  queda igual que siempre.
+- Para saber qué pide el dispositivo de verdad (aviso, toggle) usá
+  `deviceWantsLessMotion()`, no `matchMedia`: con el botón puesto esta última miente
+  a propósito.
+- `MOTION=forced npm run check:motion` verifica que, con «reducir movimiento» + el
+  botón, cada página quede **igual que sin reducir** (alto y ScrollTrigger vivos);
+  una sección que ignore el botón sale como `override-ignored`.
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
 roto. Dos redes lo cubren:

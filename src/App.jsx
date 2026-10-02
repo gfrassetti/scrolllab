@@ -48,8 +48,9 @@ const CheckoutMockPage = lazy(() =>
 )
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
-// «Ver con animaciones» (MotionNotice) vale para toda la pestaña: se aplica
-// antes del primer render para que las secciones arranquen ya con ese modo.
+// «Ver con animaciones» (MotionNotice / MotionToggle) queda guardado en el
+// navegador y vale para todo ScrollLab: se aplica antes del primer render para
+// que las secciones arranquen ya con ese modo.
 bootMotionOverride()
 
 function ScrollToTop() {

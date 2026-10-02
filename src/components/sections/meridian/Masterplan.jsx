@@ -293,7 +293,7 @@ export default function Masterplan({ units }) {
         .mer-mp-arrow { color: #fff; background: rgba(42, 38, 34, 0.45); border: 1px solid rgba(255, 255, 255, 0.55); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         .mer-mp-arrow[data-show="true"] { opacity: 1; pointer-events: auto; animation: mer-mp-nudge 2.2s ease-in-out infinite; }
         @keyframes mer-mp-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(calc(var(--dir) * 3px)); } }
-        @media (prefers-reduced-motion: reduce) { .mer-mp-arrow[data-show="true"] { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { :where(:root:not([data-motion='full'])) .mer-mp-arrow[data-show="true"] { animation: none; } }
         .mer-mp-scroll { scrollbar-width: none; -ms-overflow-style: none; }
         .mer-mp-scroll::-webkit-scrollbar { display: none; }
 
@@ -305,7 +305,7 @@ export default function Masterplan({ units }) {
 
         .mer-mp-tip { animation: mer-mp-tip-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
         @keyframes mer-mp-tip-in { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
-        @media (prefers-reduced-motion: reduce) { .mer-mp-ring, .mer-mp-tip { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { :where(:root:not([data-motion='full'])) .mer-mp-ring, :where(:root:not([data-motion='full'])) .mer-mp-tip { animation: none; } }
       `}</style>
     </section>
   )

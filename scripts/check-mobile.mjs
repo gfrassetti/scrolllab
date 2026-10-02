@@ -667,7 +667,7 @@ async function auditJob(browser, base, job, opts) {
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
       // El aviso «Ver con animaciones» (MotionNotice) tapa controles y capturas.
-      sessionStorage.setItem('scrolllab-motion-notice', '1')
+      localStorage.setItem('scrolllab-motion-notice', '1')
     } catch {
       /* ignore */
     }

@@ -1,70 +1,76 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useT } from '../i18n'
-import { REDUCED_MOTION_QUERY } from '../lib/motion'
-import { isMotionForced, requestMotion } from '../lib/motionOverride'
+import {
+  canRemember,
+  deviceWantsLessMotion,
+  markNoticeSeen,
+  noticeSeen,
+  setMotion,
+} from '../lib/motionOverride'
 
-const CLOSED_KEY = 'scrolllab-motion-notice'
-
-function readClosed() {
-  try {
-    return sessionStorage.getItem(CLOSED_KEY) === '1'
-  } catch {
-    return false
-  }
-}
+// Donde se ve el movimiento: el home y las demos.
+const askable = (pathname) => pathname === '/' || pathname.startsWith('/templates/')
 
 /**
- * Aviso del market en el home y en las demos, solo si el dispositivo pide
- * menos movimiento: explica que ve la versión calma y ofrece verla completa
- * (o volver). Recarga para que cada sección arme su animación de cero.
+ * Pregunta UNA sola vez, en total, si quien tiene «reducir movimiento» prendido
+ * en el dispositivo quiere ver las demos con animaciones. Sale en la primera
+ * pantalla donde se pueda ver (el home, o una demo abierta por link directo) y
+ * no vuelve: ni al navegar, ni al recargar, ni en otra pestaña. Se marca como
+ * visto al mostrarse, aunque lo ignore. Cambiar de idea después: MotionToggle,
+ * en el header.
+ *
+ * - «Dejarlo así» (o Escape) guarda la respuesta y cierra, sin recargar.
+ * - «Ver con animaciones» guarda y recarga: cada sección arma su animación al
+ *   montarse. No cambia ningún ajuste del dispositivo (src/lib/motionOverride.js).
  */
 export default function MotionNotice() {
   const { pathname } = useLocation()
   const t = useT()
-  const [deviceCalm, setDeviceCalm] = useState(
-    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
-  )
-  const [closed, setClosed] = useState(readClosed)
+  const [state, setState] = useState('idle') // idle → open → done
   const [visible, setVisible] = useState(false)
-  const full = isMotionForced()
+  const shownOn = useRef(null)
 
   useEffect(() => {
-    const mql = window.matchMedia(REDUCED_MOTION_QUERY)
-    const onChange = () => setDeviceCalm(mql.matches)
-    mql.addEventListener('change', onChange)
-    return () => mql.removeEventListener('change', onChange)
-  }, [])
-
-  const onHome = pathname === '/'
-  const show = deviceCalm && (onHome || pathname.startsWith('/templates/')) && !closed
-
-  useEffect(() => {
-    if (!show) return undefined
-    const enter = requestAnimationFrame(() => setVisible(true))
-    return () => cancelAnimationFrame(enter)
-  }, [show])
-
-  if (!show) return null
-
-  const close = () => {
-    setClosed(true)
-    try {
-      sessionStorage.setItem(CLOSED_KEY, '1')
-    } catch {
-      /* se cierra igual hasta recargar */
+    if (state === 'idle') {
+      if (!askable(pathname)) return
+      if (!deviceWantsLessMotion() || noticeSeen() || !canRemember()) return
+      shownOn.current = pathname
+      markNoticeSeen()
+      setState('open')
+    } else if (state === 'open' && pathname !== shownOn.current) {
+      // Siguió de largo sin responder: se va y no vuelve.
+      setState('done')
     }
-  }
+  }, [pathname, state])
+
+  useEffect(() => {
+    if (state !== 'open') return undefined
+    const enter = requestAnimationFrame(() => setVisible(true))
+    const onKey = (event) => {
+      if (event.key !== 'Escape') return
+      setMotion('calm')
+      setState('done')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      cancelAnimationFrame(enter)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [state])
+
+  if (state !== 'open') return null
+
+  // En el home, en mobile, va arriba de la pastilla de compra (TemplateBuyPill).
+  const bottom =
+    pathname === '/'
+      ? 'bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))_+_3.75rem)] sm:bottom-[max(1.25rem,env(safe-area-inset-bottom))]'
+      : 'bottom-[max(1.25rem,env(safe-area-inset-bottom))]'
 
   return (
     <aside
       aria-label={t('motionNotice.label')}
-      className={`fixed left-5 right-5 z-[60] border ${
-        // En el home, en mobile, va arriba de la pastilla de compra (TemplateBuyPill).
-        onHome
-          ? 'bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))_+_3.75rem)] sm:bottom-[max(1.25rem,env(safe-area-inset-bottom))]'
-          : 'bottom-[max(1.25rem,env(safe-area-inset-bottom))]'
-      } border border-ink/20 bg-bone p-3 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-opacity sm:right-auto sm:w-[min(23rem,calc(100vw-2.5rem))] ${
+      className={`fixed left-5 right-5 z-[60] border border-ink/20 bg-bone p-4 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-opacity sm:right-auto sm:w-[min(24rem,calc(100vw-2.5rem))] ${bottom} ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       style={{
@@ -72,28 +78,26 @@ export default function MotionNotice() {
         transitionTimingFunction: 'var(--ease-out)',
       }}
     >
-      <div className="flex items-start gap-3">
-        <p className="min-w-0 flex-1 pt-1 text-sm leading-snug text-pretty">
-          {full ? t('motionNotice.full') : t('motionNotice.calm')}
-        </p>
+      <p className="text-sm leading-snug text-pretty">{t('motionNotice.body')}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-x-5">
         <button
           type="button"
-          onClick={close}
-          aria-label={t('common.close')}
-          className="-mr-1 -mt-1 grid size-11 shrink-0 place-items-center text-ink/45 transition-colors hover:text-ink"
+          onClick={() => setMotion('full')}
+          className="min-h-11 border border-ink bg-ink px-4 text-[11px] uppercase tracking-[0.22em] text-bone ui-press hover:border-accent hover:bg-accent"
         >
-          <svg viewBox="0 0 20 20" className="size-4" aria-hidden="true">
-            <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.6" />
-          </svg>
+          {t('motionNotice.showFull')}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMotion('calm')
+            setState('done')
+          }}
+          className="min-h-11 text-[11px] uppercase tracking-[0.22em] text-ink/70 underline decoration-ink/30 underline-offset-4 ui-press hover:text-ink hover:decoration-ink"
+        >
+          {t('motionNotice.keepCalm')}
         </button>
       </div>
-      <button
-        type="button"
-        onClick={() => requestMotion(full ? 'calm' : 'full')}
-        className="mt-3 block min-h-11 w-full border border-ink bg-ink px-3 py-3 text-center text-[11px] uppercase tracking-[0.22em] text-bone ui-press hover:border-accent hover:bg-accent"
-      >
-        {full ? t('motionNotice.showCalm') : t('motionNotice.showFull')}
-      </button>
     </aside>
   )
 }
