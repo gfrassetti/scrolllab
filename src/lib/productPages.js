@@ -124,7 +124,7 @@ export function productPageData(sku, messages) {
   const url = productUrl(sku)
 
   const title = `${name} — Template ${lowerFirst(meta.vibe)} | ${SITE_NAME}`
-  const description = `${firstSentence(pitch, 125)} Template con código fuente, desde USD ${priceUsd}.`
+  const description = `${firstSentence(pitch, 125)} Plantilla web con scroll animado y código fuente, desde USD ${priceUsd}.`
 
   return {
     sku,

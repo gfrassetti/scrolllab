@@ -18,6 +18,7 @@
     "check:visual": "node scripts/check-visual.mjs",
     "check:responsive": "node scripts/check-responsive.mjs",
     "check:mobile": "node scripts/check-mobile.mjs",
+    "check:motion": "node scripts/check-motion.mjs",
     "images": "node scripts/gen-image-variants.mjs",
     "check:builder": "node scripts/check-builder.mjs",
     "check:lab": "node scripts/check-lab.mjs",

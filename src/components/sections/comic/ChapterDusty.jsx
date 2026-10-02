@@ -1,5 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal } from '../../../lib/motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import ComicPanel from './ComicPanel'
 import PaperFrame from './PaperFrame'
 import { heroRoad, closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
@@ -14,6 +17,11 @@ const CAPTIONS = [
 /**
  * ChapterDusty — full-bleed illustrated comic reel.
  * Camera zoom → torn close-up panel → drive panel wipe. Image art + GSAP scrub.
+ *
+ * Calma: las tres escenas (hero, close-up, drive) viven apiladas una arriba
+ * de otra (`absolute inset-0`) para que el scrub las cruce — sin scrub se
+ * verían las tres pisándose. En calma son tres viñetas en fila, cada una un
+ * bloque normal del documento (ComicPanel), con fundido al entrar.
  */
 export default function ChapterDusty({
   eyebrow = 'Eyebrow 1',
@@ -21,10 +29,11 @@ export default function ChapterDusty({
   captions = CAPTIONS,
 }) {
   const root = useRef(null)
+  const reduced = useReducedMotion()
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (reduced) return calmReveal('[data-comic-reveal]')
 
       const pin = root.current.querySelector('[data-pin]')
       const titleEl = root.current.querySelector('[data-hero-title]')
@@ -129,8 +138,51 @@ export default function ChapterDusty({
         10.6,
       )
     },
-    { scope: root },
+    { scope: root, dependencies: [reduced] },
   )
+
+  if (reduced) {
+    return (
+      <section
+        id="chapter-dusty"
+        ref={root}
+        className="relative bg-[#1a1512] py-20 text-white md:py-28"
+      >
+        <div data-comic-reveal className="mb-10 px-5 text-center md:px-10">
+          <p className="mb-4 text-[11px] tracking-[0.3em] text-white/85 uppercase md:text-xs">
+            {eyebrow}
+          </p>
+          <h1 className="mx-auto max-w-5xl font-brico text-[clamp(2.2rem,8vw,5.5rem)] leading-[0.92] font-extrabold tracking-[-0.03em]">
+            {title}
+          </h1>
+        </div>
+        <div data-comic-reveal>
+          <ComicPanel
+            img={heroRoad}
+            variants={variants}
+            sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
+            lines={[captions[0], captions[1]]}
+          />
+        </div>
+        <div data-comic-reveal>
+          <ComicPanel
+            img={closeupBuddies}
+            variants={variants}
+            sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
+            lines={[captions[2]]}
+          />
+        </div>
+        <div data-comic-reveal>
+          <ComicPanel
+            img={driveSunset}
+            variants={variants}
+            sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
+            lines={[captions[3]]}
+          />
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section

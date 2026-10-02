@@ -52,27 +52,52 @@ export function calmMotionQuery(extra) {
 /**
  * Revelado de la versión calma: cada elemento aparece con un fundido corto,
  * con a lo sumo `y` px de recorrido, la primera vez que entra en pantalla.
- * Los que llegan juntos entran escalonados. Usalo dentro de `useGSAP`, que
- * revierte los ScrollTrigger que crea.
+ * Los que llegan juntos entran escalonados.
+ *
+ * `IntersectionObserver`, no `ScrollTrigger.batch`: a un salto de scroll
+ * instantáneo (`scrollTo({behavior:'instant'})`, el que usa check:mobile, y
+ * el que da un dedo rápido en un celular de verdad) `batch` puede no
+ * registrar la «entrada» de un elemento que queda detrás — confirmado con
+ * check:mobile en ChapterWorlds/ChapterBond de COMIC, quedaban en
+ * `opacity:0` para siempre. El observer evalúa la posición actual ni bien
+ * lo creás, sin importar cómo cambió el scroll.
+ *
+ * Usalo dentro de `useGSAP` y devolvé su resultado (la limpieza): GSAP
+ * revierte los tweens que crea, pero el observer no es un objeto de GSAP —
+ * `useGSAP`/`gsap.context()` sí invoca lo que el callback devuelva.
+ *
+ *   useGSAP(() => {
+ *     if (reduced) return calmReveal('[data-reveal]')
+ *     …
+ *   }, { scope: root, dependencies: [reduced] })
  */
-export function calmReveal(
-  targets,
-  { y = 12, stagger = 0.08, duration = 0.7, start = 'top 92%' } = {},
-) {
+export function calmReveal(targets, { y = 12, stagger = 0.08, duration = 0.7 } = {}) {
   const els = gsap.utils.toArray(targets)
-  if (!els.length) return []
+  if (!els.length) return () => {}
   gsap.set(els, { opacity: 0, y })
-  return ScrollTrigger.batch(els, {
-    start,
-    once: true,
-    onEnter: (batch) =>
-      gsap.to(batch, {
-        opacity: 1,
-        y: 0,
-        duration,
-        stagger,
-        ease: 'power2.out',
-        overwrite: true,
-      }),
+
+  const revealed = new Set()
+  const reveal = (batch) => {
+    const fresh = batch.filter((el) => !revealed.has(el))
+    if (!fresh.length) return
+    fresh.forEach((el) => revealed.add(el))
+    gsap.to(fresh, {
+      opacity: 1,
+      y: 0,
+      duration,
+      stagger,
+      ease: 'power2.out',
+      overwrite: true,
+    })
+  }
+
+  // Sin margen: todo lo que se ve ya se reveló. Con un margen abajo queda una
+  // banda donde el elemento está a la vista pero sigue en opacity:0 (en un
+  // alto bajo, 320×568, es la primera fila de una card).
+  const io = new IntersectionObserver((entries) => {
+    const visible = entries.filter((e) => e.isIntersecting).map((e) => e.target)
+    if (visible.length) reveal(visible)
   })
+  els.forEach((el) => io.observe(el))
+  return () => io.disconnect()
 }
