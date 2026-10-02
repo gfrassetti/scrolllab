@@ -16,6 +16,14 @@ const EMPTY = {
   trialing: false,
   trialAvailable: false,
   trialDays: 0,
+  // Renovación sin cobro confirmado: el plan sigue hasta `graceEndsAt`.
+  pastDue: false,
+  graceEndsAt: null,
+  paymentFailed: false,
+  // Plan que se cayó por falta de cobro (o pausa vencida); ya es free.
+  lapsedPlan: null,
+  // Plan con el que está pago el período en curso (null en la prueba).
+  paidPlan: null,
   loading: true,
 }
 
@@ -53,6 +61,11 @@ export function PlanProvider({ children }) {
         trialing: d.trialing ?? false,
         trialAvailable: d.trialAvailable ?? false,
         trialDays: d.trialDays ?? 0,
+        pastDue: d.pastDue ?? false,
+        graceEndsAt: d.graceEndsAt ?? null,
+        paymentFailed: d.paymentFailed ?? false,
+        lapsedPlan: d.lapsedPlan ?? null,
+        paidPlan: d.paidPlan ?? null,
         loading: false,
       })
     } catch {

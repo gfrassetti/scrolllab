@@ -4,35 +4,65 @@ export const SITE_TAGLINE = 'Webs que se mueven.'
 
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 
+export const INSTAGRAM_HANDLE = '@scrolllab_ar'
+export const INSTAGRAM_URL = 'https://www.instagram.com/scrolllab_ar/'
+
 /** Canonical origin (SEO / OG). Mantener alineado con index.html. */
 export const SITE_URL = 'https://www.scrolllab.com.ar'
 
 /**
  * Meta SEO del marketplace.
- * Posicionamiento (2026-09-20): "Immersive Scrolling Web Templates" → en español
- * "Templates web con scroll inmersivo", para devs y estudios. Va en español
- * porque el mercado de hoy es Argentina (cobro en pesos, casi todos los clics
- * de Google son de acá). La versión en inglés tiene que ir en su propia URL
- * (/en/) con hreflang, no en un meta tag de esta: una URL tiene un solo title
- * para Google. Conviene hacerla cuando haya cobro en dólares.
+ * Posicionamiento (2026-09-27): "Scroll Lab" en el título va en title case
+ * (no ALL CAPS — más legible en un resultado de Google; el wordmark visual
+ * del sitio sigue en mayúsculas, es un tema aparte). El título suma "estudio"
+ * a "templates" para reflejar que ya no vendemos solo plantillas (ver
+ * docs/estudio-positioning.md) sin perder el término que ya tenía ranking.
+ * Va en español porque el mercado de hoy es Argentina (cobro en pesos, casi
+ * todos los clics de Google son de acá). La versión en inglés tiene que ir en
+ * su propia URL (/en/) con hreflang, no en un meta tag de esta: una URL tiene
+ * un solo title para Google. Conviene hacerla cuando haya cobro en dólares.
  * No apunta a "plantillas web" (Envato, Wix): esa búsqueda es de gente que
  * quiere armar un sitio sin código y no puede usar un ZIP de código fuente.
  * No mencionamos el stack (React/GSAP) en copy público — no hace falta
  * anunciarlo.
+ * "scrollytelling" AFUERA del copy público (2026-09-28, feedback directo del
+ * dueño): es jerga de diseño/dev, nadie fuera del rubro entiende qué es. Se
+ * reemplaza por "scroll cinematográfico" (ya se usaba en otra copy del sitio,
+ * plain-language) o "storytelling" (palabra real, sin el blend). Sigue en
+ * `keywords` de abajo nomás como variante de búsqueda — ese campo no lo lee
+ * nadie, solo lo indexa Google.
+ * Título de la home (2026-09-28, decisión final del dueño): "Estudio digital
+ * y plantillas web" — nombra las dos patas del negocio en lenguaje llano.
+ * Nota: "plantillas web" es justo el término que el párrafo de arriba decía
+ * evitar (atrae a quien busca un builder no-code tipo Wix, no un ZIP de
+ * código). Se prioriza que cualquiera entienda el título por sobre ese
+ * matiz de intención de búsqueda — decisión consciente, no un descuido.
  */
 export const SITE_SEO = {
-  title: 'SCROLL LAB — Templates web con scroll inmersivo',
+  title: 'Scroll Lab — Estudio digital y plantillas web',
   description:
-    'Templates web con scroll inmersivo. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar.',
+    'Descargá un template completo, armalo vos en el builder, o sumá nuestros componentes con un script a cualquier sitio. Siempre con el código fuente.',
   keywords:
     'scrollytelling templates, plantillas scrollytelling, scroll animation template, plantillas web, web templates, código fuente, landing page templates',
 }
 
 /** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
 export const BUILDER_SEO = {
-  title: 'SCROLL LAB — Builder | Armá tu sitio scrollytelling',
+  title: 'Scroll Lab — Builder | Sitio con scroll cinematográfico',
   description:
     'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente, editable.',
+}
+
+/**
+ * Meta propia de /lab (sí se indexa). Antes caía en el default de SITE_SEO
+ * y terminaba diciendo "plantillas web" en una página que no vende templates
+ * — LAB es la sección hosteada por suscripción (embed con <script>). Espejo
+ * en el boot de index.html.
+ */
+export const LAB_SEO = {
+  title: 'Scroll Lab — LAB | Secciones que insertás con un script',
+  description:
+    'Una sección con nuestro nivel de diseño, lista para insertar en cualquier sitio con un script, sin bajar código. La editás desde un panel. Empezá gratis.',
 }
 
 export const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large, noai, noimageai'
@@ -62,6 +92,14 @@ export function seoForPath(pathname) {
       description: BUILDER_SEO.description,
       robots: INDEXABLE_ROBOTS,
       canonical: `${SITE_URL}/builder`,
+    }
+  }
+  if (path === '/lab') {
+    return {
+      title: LAB_SEO.title,
+      description: LAB_SEO.description,
+      robots: INDEXABLE_ROBOTS,
+      canonical: `${SITE_URL}/lab`,
     }
   }
   return {

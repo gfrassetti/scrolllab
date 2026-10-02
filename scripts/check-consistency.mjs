@@ -22,6 +22,7 @@ import { ALLOWED_SECTIONS } from '../server/sections.js'
 import {
   ALLOWED_PROPS_BY_SECTION,
   LIST_PROPS_BY_SECTION,
+  ASSET_URL_KEYS,
 } from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
@@ -32,6 +33,7 @@ import {
   COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
   WELCOME_COUPON_PERCENT as CLIENT_COUPON_PERCENT,
   BUNDLE_PRICE_USD,
+  BUNDLE_MODELS as CLIENT_BUNDLE_MODELS,
   COMING_SOON_SKUS as CLIENT_COMING_SOON,
   LOCAL_ONLY_SKUS as CLIENT_LOCAL_ONLY,
   BUILDER_HIDDEN_SKUS,
@@ -40,7 +42,7 @@ import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
 import { SECTION_KINDS } from '../src/lib/sectionKinds.js'
 import { checkoutPropsFrom } from '../src/lib/shop/checkoutProps.js'
-import { BUILDER_SEO, SITE_SEO } from '../src/lib/site.js'
+import { BUILDER_SEO, LAB_SEO, SITE_SEO } from '../src/lib/site.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
@@ -72,6 +74,12 @@ for (const sku of Object.keys(PRODUCTS)) {
 }
 if (PRODUCTS.custom.unit_price_usd !== CUSTOM_BASE_PRICE_USD) {
   fail('precios', `custom: cliente ${CUSTOM_BASE_PRICE_USD} vs servidor ${PRODUCTS.custom.unit_price_usd}`)
+}
+if (CLIENT_BUNDLE_MODELS.join(',') !== BUNDLE_MODELS.join(',')) {
+  fail(
+    'catálogo',
+    `BUNDLE_MODELS no coincide: cliente [${CLIENT_BUNDLE_MODELS}] vs servidor [${BUNDLE_MODELS}]`,
+  )
 }
 if (PRODUCTS.bundle.unit_price_usd !== BUNDLE_PRICE_USD) {
   fail('precios', `bundle: cliente ${BUNDLE_PRICE_USD} vs servidor ${PRODUCTS.bundle.unit_price_usd}`)
@@ -119,8 +127,15 @@ if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
   )
 }
 
+// Modelos solo locales (LOCAL_ONLY_SKUS: en producción su ruta redirige a la
+// home y validateRecipe rechaza sus secciones): no se venden, así que no se
+// les exige allowlist del server ni copy del builder. Ej. PLUM y SIGNAL, que
+// no se van a terminar.
+const isLocalOnlyModel = (id) => SERVER_LOCAL_ONLY.includes(String(id).split('/')[0])
+
 // 2. Sellable sections: registry (client) vs allowlist (server).
 for (const id of diff(registryIds, [...ALLOWED_SECTIONS])) {
+  if (isLocalOnlyModel(id)) continue
   fail('secciones', `'${id}' está en sectionRegistry pero no en server/sections.js`)
 }
 for (const id of diff([...ALLOWED_SECTIONS], registryIds)) {
@@ -189,6 +204,29 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
     if (field.type !== 'list') continue
     if (!LIST_PROPS_BY_SECTION[id]?.[field.key]) {
       fail('props', `'${id}.${field.key}' es list en el builder pero el server no tiene su schema`)
+    }
+  }
+}
+
+// 3a3. Tipos que el server valida: una imagen o un modelo que el server no
+// valida como URL viaja al ZIP con cualquier cosa (un `blob:` del preview, un
+// texto suelto); un sub-campo de lista con otro tipo en cada lado se descarta.
+const serverListType = (type) => (type === 'textarea' ? 'text' : type)
+for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
+  for (const field of fields) {
+    const isAsset = ['image', 'url'].includes(field.type)
+    if (isAsset && !ASSET_URL_KEYS.has(field.key)) {
+      fail('props', `'${id}.${field.key}' es ${field.type} en el builder pero el server no lo valida como URL`)
+    }
+    if (!isAsset && ASSET_URL_KEYS.has(field.key) && field.type !== 'list') {
+      fail('props', `'${id}.${field.key}' el server lo valida como URL pero en el builder es '${field.type}'`)
+    }
+    if (field.type !== 'list') continue
+    const spec = LIST_PROPS_BY_SECTION[id]?.[field.key]?.item || {}
+    for (const sub of field.item || []) {
+      if (spec[sub.key] && spec[sub.key] !== serverListType(sub.type)) {
+        fail('props', `'${id}.${field.key}[].${sub.key}' es '${sub.type}' en el builder y '${spec[sub.key]}' en el server`)
+      }
     }
   }
 }
@@ -371,6 +409,7 @@ for (const k of diff(enKeys, esKeys)) fail('i18n', `'${k}' falta en es.json`)
 
 // 5. Every registry section needs its builder copy in both locales.
 for (const id of registryIds) {
+  if (isLocalOnlyModel(id)) continue
   const key = `builder.sections.${id.replace('/', '.')}`
   for (const [name, keys] of [['es', esKeys], ['en', enKeys]]) {
     if (!keys.includes(`${key}.name`)) fail('i18n', `falta '${key}.name' en ${name}.json`)
@@ -470,6 +509,9 @@ if (!indexHtml.includes(SITE_SEO.description)) {
 }
 if (!indexHtml.includes(BUILDER_SEO.title) || !indexHtml.includes(BUILDER_SEO.description)) {
   fail('seo', 'el boot de index.html no espeja BUILDER_SEO')
+}
+if (!indexHtml.includes(LAB_SEO.title) || !indexHtml.includes(LAB_SEO.description)) {
+  fail('seo', 'el boot de index.html no espeja LAB_SEO')
 }
 const sitemapSrc = read('public/sitemap.xml')
 if (!sitemapSrc.includes('/plantillas/')) {

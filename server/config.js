@@ -257,10 +257,27 @@ export function loadConfig() {
       return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 1;
     })(),
     // Días de prueba gratis al abrir la PRIMERA suscripción (una vez por
-    // usuario, cualquier plan). 0 = sin prueba. MP lo aplica como
-    // `auto_recurring.free_trial`: autoriza la tarjeta, no cobra N días.
+    // usuario, cualquier plan). 0 = sin prueba. Va a MP como
+    // `auto_recurring.start_date` (fecha del primer cobro; verificado en
+    // sandbox: MP agenda el cobro ahí y lo registra como `free_trial`).
     hostedTrialDays: (() => {
       const n = Number(process.env.HOSTED_TRIAL_DAYS);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 7;
+    })(),
+    // Mail de aviso N días antes del primer cobro, a quien está en la prueba
+    // (server/services/trialReminders.js). 0 = sin aviso. Si la prueba dura N
+    // días o menos no se manda: el mail de bienvenida ya trae la fecha.
+    hostedTrialReminderDays: (() => {
+      const n = Number(process.env.HOSTED_TRIAL_REMINDER_DAYS);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 2;
+    })(),
+    // Tolerancia por cobro fallido (no confundir con la prueba gratis): días
+    // que el plan sigue cuando una renovación no se cobró (tarjeta rechazada o
+    // webhook demorado). Pasados, cae a free; MP sigue reintentando hasta 4
+    // veces en 10 días y, si un reintento cobra, el plan vuelve solo. El
+    // primer cobro (fin de la prueba) tiene como mucho 1 día. 0 = sin gracia.
+    hostedGraceDays: (() => {
+      const n = Number(process.env.HOSTED_GRACE_DAYS);
       return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 7;
     })(),
     // Suscripciones (LAB) — MercadoPago PreApproval con monto inline (sin plan

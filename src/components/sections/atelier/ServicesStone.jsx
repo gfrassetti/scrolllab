@@ -72,7 +72,8 @@ export default function ServicesStone({
         antialias: true,
         alpha: true,
       })
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2))
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 40)
       camera.position.z = 7

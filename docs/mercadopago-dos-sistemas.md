@@ -62,7 +62,7 @@ await plans.create({
     reason: 'ScrollLab Hosted — Pro (mensual)',
     auto_recurring: {
       frequency: 1,
-      frequency_type: 'months',        // anual: frequency 1 + 'years'
+      frequency_type: 'months',        // anual: frequency 12 + 'months' (MP rechaza 'years')
       transaction_amount: 8000,        // ARS fijo
       currency_id: 'ARS',
     },
@@ -106,9 +106,9 @@ otro `type`:
 
 | `type` / `topic` | Qué es | Acción |
 |---|---|---|
-| `payment` | pago único (flujo actual) | fulfill orden → ZIP |
+| `payment` | pago único (flujo actual) | fulfill orden → ZIP con todos sus ítems · `refunded`/`charged_back` del pago de la orden → orden `refunded`, sin descargas · segundo pago de una orden paga o pago sin orden → aviso al admin (`EMAIL_NOTIFY_TO`) · si `external_reference` es `labup:…` (diferencia al subir de plan en LAB; esa preference notifica con `?source=lab` y se valida con el secreto/token de suscripciones) → `applyUpgradePayment` |
 | `subscription_preapproval` | alta / cambio / baja de una suscripción | crear/actualizar `Subscription` local |
-| `subscription_authorized_payment` | se cobró (o falló) una cuota recurrente | OK → extender `currentPeriodEnd`, reactivar instancias · falló → marcar grace/suspended |
+| `subscription_authorized_payment` | se cobró (o falló) una cuota recurrente | OK (`payment.status === 'approved'`) → `currentPeriodEnd = debit_date + 1 ciclo`, reactiva · falló → `paymentFailedAt` (gracia `HOSTED_GRACE_DAYS`, después suspendida) |
 
 ```js
 app.post('/api/webhooks/mercadopago', async (req, res) => {

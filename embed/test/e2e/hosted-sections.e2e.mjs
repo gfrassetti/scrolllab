@@ -184,17 +184,31 @@ const CASES = {
     },
     marker: 'MKHELM',
   },
+  'atrium/ManifestoType': {
+    props: {
+      lineOne: 'MKMANI',
+      lineTwo: 'type',
+      left: 'x',
+      right: 'x',
+      bg: '#f4f1ea',
+      fg: '#111111',
+    },
+    marker: 'MKMANI',
+  },
+  'atrium/ScopeSerif': {
+    props: { body: 'MKSCOP', bg: '#f4f1ea', fg: '#111111' },
+    marker: 'MKSCOP',
+  },
 }
 
-// Responsive: las 18 HOSTABLE_SECTIONS, no solo una muestra — "cada una debe
+// Responsive: las 23 HOSTABLE_SECTIONS, no solo una muestra — "cada una debe
 // verse bien" en mobile/tablet/desktop.
 const RESPONSIVE_SECTIONS = HOSTABLE_SECTIONS
-// `FooterAtrium` usa `pt-[14svh]`: dentro del iframe FLOW el `svh` no tiene un
-// viewport estable (retroalimenta con el propio alto que el puente le va
-// asignando), así que el puente tarda más pasadas en converger. Se sigue
-// probando sin overflow / con marcador / visible — solo se salta el chequeo
-// estricto de "el iframe sigue al contenido en el primer settle".
-const SKIP_HEIGHT_FOLLOW = new Set(['atrium/FooterAtrium'])
+// `FooterAtrium`/`ManifestoType`/`ScopeSerif` usan `svh` para el aire. Antes
+// se saltaban el chequeo de alto: dentro del iframe el `svh` medía el propio
+// iframe y el alto se retroalimentaba (ManifestoType crecía sin fin en
+// desktop). Ahora el build las reescribe al viewport del sitio
+// (embed/hostViewportUnits.js) y tienen que converger como las demás.
 const VIEWPORTS = [
   { name: 'mobile', width: 375, height: 780 },
   { name: 'tablet', width: 768, height: 1024 },
@@ -256,7 +270,11 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     assert.ok(cookie, 'cookie de sesión')
     headers = { 'content-type': 'application/json', cookie }
 
-    browser = await chromium.launch({ args: LAUNCH_ARGS })
+    browser = await chromium.launch({
+      args: LAUNCH_ARGS,
+      // Un Chromium del sistema (contenedores/CI sin `playwright install`).
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
+    })
   })
 
   after(async () => {
@@ -399,12 +417,19 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
             await sleep(300)
           }
           assert.ok(iframeH > 50, `${sectionId} @${vp.name}: iframe casi sin alto (${iframeH}px)`)
-          if (!SKIP_HEIGHT_FOLLOW.has(sectionId)) {
-            assert.ok(
-              iframeH >= m.rootH * 0.85,
-              `${sectionId} @${vp.name}: iframe (${iframeH}px) no sigue al contenido (${m.rootH}px)`,
-            )
-          }
+          assert.ok(
+            iframeH >= m.rootH * 0.85,
+            `${sectionId} @${vp.name}: iframe (${iframeH}px) no sigue al contenido (${m.rootH}px)`,
+          )
+          // Y se queda quieto: una sección con `svh` no puede seguir creciendo
+          // (el bug sumaba ~500px cada medio segundo; unos px son la transición
+          // de alto del iframe o una fuente que termina de cargar).
+          await sleep(900)
+          const later = await iframeLoc.evaluate((el) => el.getBoundingClientRect().height)
+          assert.ok(
+            Math.abs(later - iframeH) <= 16,
+            `${sectionId} @${vp.name}: el alto no converge (${iframeH}px → ${later}px)`,
+          )
         } finally {
           await context.close()
           await unseed(id)

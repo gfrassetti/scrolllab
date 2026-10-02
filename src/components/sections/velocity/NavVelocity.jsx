@@ -21,7 +21,7 @@ export default function NavVelocity({
     <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between gap-3 px-5 py-4 md:px-10">
       <a
         href="#top"
-        className="relative z-10 text-[11px] font-medium tracking-[0.28em] uppercase md:text-xs"
+        className="tpl-hit relative z-10 text-[11px] font-medium tracking-[0.28em] uppercase md:text-xs"
       >
         {brand}
       </a>
@@ -31,7 +31,7 @@ export default function NavVelocity({
           <li key={item.label}>
             <a
               href={item.href}
-              className="text-[10px] tracking-[0.22em] uppercase transition-colors duration-200 hover:text-acid"
+              className="tpl-link tpl-hit relative text-[11px] tracking-[0.22em] uppercase transition-colors duration-200 hover:text-acid"
             >
               {item.label}
             </a>
@@ -42,14 +42,14 @@ export default function NavVelocity({
       <div className="relative z-10 flex items-center gap-2">
         <a
           href={ctaHref}
-          className="border border-acid bg-acid px-4 py-2 text-[10px] font-medium tracking-[0.22em] text-[#0a1a12] uppercase transition-opacity hover:opacity-90"
+          className="ui-press tpl-hit relative border border-acid bg-acid px-4 py-2 text-[11px] font-medium tracking-[0.22em] text-[#0a1a12] uppercase transition-opacity hover:opacity-90"
         >
           {cta}
         </a>
         <button
           {...triggerProps}
           aria-label={menuLabel}
-          className="relative grid size-9 place-items-center border border-salt/25 md:hidden"
+          className="ui-press tpl-hit relative grid size-9 place-items-center border border-salt/25 md:hidden"
         >
           <span
             aria-hidden="true"
@@ -85,7 +85,7 @@ export default function NavVelocity({
                   open ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                 }`}
               >
-                <span className="text-[10px] tracking-[0.3em] text-acid">
+                <span className="text-[11px] tracking-[0.3em] text-acid">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="font-anton text-[clamp(2.25rem,13vw,4.5rem)] leading-[0.9] uppercase">

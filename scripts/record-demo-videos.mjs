@@ -9,6 +9,7 @@
  *   2. la demo grande, scrolleando de punta a punta;
  *   3. a los pocos segundos la frase cambia y dice qué es este template
  *      (nombre + "código fuente incluido");
+ *      (nombre + "Un modelo listo para usar, con el código incluido");
  *   4. cierre: "Llevate el código y usalo en tu proyecto" + sitio + 10%.
  *
  * Captura frame a frame (mueve el scroll, espera, saca la captura), así el
@@ -105,6 +106,8 @@ const COPY = {
     hookKicker: 'Scrollytelling',
     hook: 'Webs que cuentan una historia mientras se mueven',
     what: 'Template con el código fuente incluido',
+    hook: 'Webs que cuentan una historia mientras scrolleás',
+    what: 'Un modelo listo para usar, con el código incluido',
     endTitle: 'Llevate el código y usalo en tu proyecto',
     endOffer: `${WELCOME_COUPON_PERCENT}% menos en tu primera compra`,
   },
@@ -113,6 +116,8 @@ const COPY = {
     hookKicker: 'Scrollytelling',
     hook: 'Websites that tell a story as they move',
     what: 'A template with source code included',
+    hook: 'Websites that tell a story as you scroll',
+    what: 'A ready-to-use template, source code included',
     endTitle: 'Get the code and use it in your project',
     endOffer: `${WELCOME_COUPON_PERCENT}% off your first purchase`,
   },

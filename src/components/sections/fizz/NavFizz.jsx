@@ -176,7 +176,7 @@ export default function NavFizz({
           aria-label="Menu"
           className="mx-auto mt-2 max-w-5xl rounded-3xl border border-foam/15 bg-grape/95 p-4 backdrop-blur-md md:hidden"
         >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-foam/45">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-foam/45">
             {shopLabel}
           </p>
           <ul className="mt-2 space-y-1">
@@ -192,7 +192,7 @@ export default function NavFizz({
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-foam/45">
+          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-foam/45">
             {learnLabel}
           </p>
           <ul className="mt-2 space-y-1">

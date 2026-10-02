@@ -22,7 +22,8 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
     ).matches
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      // En un teléfono (DPR 3) 1.5 alcanza: la niebla es un degradé suave.
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2)
       const { width, height } = canvas.getBoundingClientRect()
       canvas.width = Math.max(1, Math.floor(width * dpr))
       canvas.height = Math.max(1, Math.floor(height * dpr))

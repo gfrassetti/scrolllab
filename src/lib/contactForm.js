@@ -31,11 +31,20 @@ export function sanitizePlainText(raw, maxLen) {
   return value
 }
 
+/** Qué tipo de proyecto marcó en el select del Estudio ("" = no eligió nada). */
+export const PROJECT_TYPES = ['custom', 'adapt', 'maintenance', 'other']
+
+export function normalizeProjectType(value) {
+  const v = String(value ?? '').trim()
+  return PROJECT_TYPES.includes(v) ? v : ''
+}
+
 export function sanitizeContactPayload(input) {
   return {
     name: sanitizePlainText(input.name, LIMITS.name),
     email: sanitizePlainText(input.email, LIMITS.email).toLowerCase(),
     message: sanitizePlainText(input.message, LIMITS.message),
+    projectType: normalizeProjectType(input.projectType),
   }
 }
 

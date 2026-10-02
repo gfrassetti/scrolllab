@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
-import sceneA from './assets/scene-a.png'
-import sceneB from './assets/scene-b.png'
-import sceneC from './assets/scene-c.png'
+import { sceneA, sceneB, sceneC, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultScenes = [
   {
@@ -92,9 +91,11 @@ export default function StickyImageStory({
                 <img
                   key={scene.img}
                   data-scene-img
-                  src={scene.img}
+                  {...imgAttrs(scene.img, variants)}
+                  sizes="(min-width: 768px) 460px, 100vw"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{ opacity: i === 0 ? 1 : 0 }}
                 />
@@ -116,9 +117,11 @@ export default function StickyImageStory({
               </p>
 
               <img
-                src={scene.img}
+                {...imgAttrs(scene.img, variants)}
+                sizes="100vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="aspect-4/3 w-full object-cover md:hidden"
               />
 

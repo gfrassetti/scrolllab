@@ -1,13 +1,17 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import mosaic1 from './assets/mosaic-1.png'
-import mosaic2 from './assets/mosaic-2.png'
-import mosaic3 from './assets/mosaic-3.png'
-import mosaic4 from './assets/mosaic-4.png'
-import mosaic5 from './assets/mosaic-5.png'
-import mosaic6 from './assets/mosaic-6.png'
-import mosaic7 from './assets/mosaic-7.png'
-import mosaic8 from './assets/mosaic-8.png'
+import {
+  mosaic1,
+  mosaic2,
+  mosaic3,
+  mosaic4,
+  mosaic5,
+  mosaic6,
+  mosaic7,
+  mosaic8,
+  variants,
+} from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const DEFAULT_SLIDES = [
   mosaic1,
@@ -236,9 +240,11 @@ export default function MosaicSlider({
               style={{ zIndex: MOSAIC[i]?.z || 1 }}
             >
               <img
-                src={src}
+                {...imgAttrs(src, variants)}
+                sizes="(min-width: 768px) 820px, 88vw"
                 alt=""
                 loading={i < 3 ? 'eager' : 'lazy'}
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             </div>

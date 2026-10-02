@@ -8,6 +8,7 @@
     "builder": "Builder",
     "builderWithCount": "Builder, {{count}} secciones armadas",
     "lab": "LAB",
+    "studio": "Estudio",
     "cart": "Carrito",
     "account": "Mis compras",
     "login": "Entrar",
@@ -54,7 +55,7 @@
     "fields": "Contenido",
     "noFields": "Esta sección no tiene campos editables.",
     "domains": "Dominios permitidos (uno por línea)",
-    "domainsHint": "Si dejás la lista vacía, la sección se muestra en cualquier dominio. Si ponés dominios, solo ahí.",
+    "domainsHint": "Si dejás la lista vacía, la sección se muestra en cualquier dominio. Si ponés dominios, solo ahí (y en los subdominios www). Para probarla en tu máquina, sumá localhost.",
     "preview": "Vista previa",
     "previewFull": "Pantalla completa",
     "previewExit": "Salir",
@@ -127,8 +128,23 @@
     ],
     "planFreeState": "Plan gratis — {{used}} / {{quota}} publicadas",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} publicadas",
+    "planActiveUntil": "Tu plan está activo hasta el {{date}}.",
     "planCancel": "Cancelar suscripción",
-    "planCanceledUntil": "cancelada · acceso hasta {{date}}",
+    "planCancelConfirm": "¿Cancelar? Seguís con acceso hasta el {{date}} y no se te cobra de nuevo.",
+    "planCancelConfirmNow": "¿Cancelar? El plan se da de baja ahora.",
+    "planCancelYes": "Sí, cancelar",
+    "planCancelKeep": "No, seguir",
+    "planCanceledNote": "cancelada · no se renueva",
+    "planPausedNote": "en pausa en Mercado Pago · no se renueva",
+    "planReactivate": "Reactivar",
+    "planReactivateNote": "Sin cargo hasta el {{date}}: ahí termina lo que ya pagaste.",
+    "planResubscribeHint": "Tu plan sigue hasta el {{date}}. Si te suscribís ahora (a este plan o a uno menor, en cualquier ciclo), el primer cobro es ese día: no pagás dos veces.",
+    "planPastDue": "Estamos confirmando el cobro con Mercado Pago. Si no se acredita, el plan se suspende el {{date}}.",
+    "planPaymentFailed": "No pudimos cobrar tu plan. Mercado Pago lo reintenta; si no se resuelve, se suspende el {{date}}. Revisá tu medio de pago en Mercado Pago.",
+    "planLapsed": "Tu plan {{plan}} está suspendido porque no pudimos cobrarlo. Si Mercado Pago logra el cobro, vuelve solo. Si te suscribís de nuevo, damos de baja el anterior: no hay doble cobro.",
+    "planLapsedPaused": "Tu plan {{plan}} está en pausa en Mercado Pago y ya no cubre tus secciones. Reactivalo ahí o suscribite de nuevo (damos de baja el anterior).",
+    "returnSynced": "Listo: tu suscripción está activa.",
+    "returnPending": "Todavía no vemos la confirmación de Mercado Pago. Si ya autorizaste, se refleja en unos segundos.",
     "viewOtherPlans": "Ver otros planes →",
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
@@ -138,10 +154,32 @@
     "planTrialNote": "Sin cargo los primeros {{n}} días.",
     "planTrialActive": "Prueba gratis — primer cobro el {{date}}",
     "planChangeTo": "Cambiar a este plan",
-    "planChanged": "Plan actualizado. La cuota nueva ya rige; el precio nuevo lo cobra Mercado Pago en el próximo ciclo.",
-    "planChangeHint": "Cambiás de plan en el acto, sin dar de baja: la cuota nueva rige ya y el precio nuevo se cobra en el próximo ciclo.",
-    "planCycleHint": "Pasar de facturación mensual a anual (o al revés) sí requiere dar de baja y volver a suscribirte.",
-    "planRecommended": "Más elegido"
+    "planChangeHint": "Cambiás de plan sin dar de baja. Si subís, pagás ahora solo la diferencia por lo que queda de tu período; si bajás, no pagás nada. Desde el próximo cobro, Mercado Pago cobra el precio nuevo.",
+    "planCycleHint": "Pasar de mensual a anual (o al revés) requiere dar de baja y volver a suscribirte. Lo que ya pagaste se respeta: el primer cobro nuevo es cuando termina.",
+    "planChangeHintTrial": "Estás en la prueba gratis: cambiar de plan no tiene cargo y el primer cobro ya sale con el precio del plan que elijas.",
+    "planUpgradeAfterReactivate": "Tenés {{plan}} pago hasta el fin del período. Para subir ya, reactivalo y cambiá de plan: pagás solo la diferencia por los días que quedan.",
+    "changeConfirmPaid": "Pasás a {{plan}} ahora. Pagás {{amount}} por lo que queda de tu período ({{days}}); desde el {{date}}, Mercado Pago cobra {{price}} {{per}}.",
+    "changeConfirmFree": "Pasás a {{plan}} ahora, sin cargo. Desde el {{date}}, Mercado Pago cobra {{price}} {{per}}.",
+    "changeConfirmTrial": "Pasás a {{plan}} ahora, sin cargo: estás en la prueba gratis. El primer cobro, el {{date}}, ya sale con {{price}} {{per}}.",
+    "changePay": "Pagar {{amount}}",
+    "changeYes": "Cambiar a {{plan}}",
+    "changeKeep": "Volver",
+    "daysOne": "1 día",
+    "daysMany": "{{n}} días",
+    "upgradeApplied": "Listo: ya estás en {{plan}}.",
+    "upgradeNotPaid": "El pago no se completó. Tu plan no cambió.",
+    "upgradePending": "Mercado Pago todavía está procesando el pago. Apenas se acredite, tu plan cambia solo.",
+    "planRecommended": "Más elegido",
+    "invalidUrl": "Todavía no se guarda: en LAB la imagen va con la URL completa (https://…). Una ruta /archivo apunta a nuestro dominio y en tu sitio sale rota.",
+    "assetHint": "URL completa de la imagen (https://…), por ejemplo de tu sitio o de un CDN. Sin imagen, la sección usa su versión sin foto.",
+    "unpublished": "Hay cambios sin publicar: tu sitio sigue mostrando la última versión publicada.",
+    "previewLoading": "Cargando la vista previa…",
+    "previewWidth": "Ancho",
+    "previewDesktop": "Desktop",
+    "previewTablet": "Tablet",
+    "previewMobile": "Mobile",
+    "previewNote": "Es el mismo embed que va a tu sitio, con lo que tenés sin guardar. Los links no navegan acá.",
+    "domainsDropped": "No son dominios y no se guardaron: {{list}}"
   },
   "common": {
     "loading": "Cargando…",
@@ -160,6 +198,8 @@
     "addedToCart": "Agregado al carrito",
     "alreadyInCart": "Ya está en el carrito",
     "updatedInCart": "Composición actualizada",
+    "inBundleCart": "Ya viene en el bundle de tu carrito",
+    "bundleAbsorbed": "Agregado · reemplaza {{count}} modelo(s) que el bundle ya trae",
     "cartItemTitle": "{{name}} — modelo",
     "buy": "Comprar →"
   },
@@ -236,7 +276,8 @@
     "req2Before": "Uso en proyectos propios o de clientes —",
     "req2License": "ver licencia",
     "req3": "Prohibido revender o redistribuir el ZIP / el código como template",
-    "req4": "No incluye hosting, dominio ni soporte de deploy",
+    "req4Before": "No incluye hosting, dominio ni soporte de deploy —",
+    "req4Link": "para eso está el Estudio",
     "bundleEyebrow": "Los 8 modelos juntos",
     "bundleTitleBefore": "Llevate el",
     "bundleTitleEm": "catálogo completo",
@@ -248,10 +289,26 @@
     "builderTitleEm": "builder",
     "builderBody": "Mezclá secciones de todos los modelos, reordenalas y previsualizá la página en vivo antes de comprar.",
     "builderPrices": "Desde {{base}} con {{included}} secciones · cada sección extra suma {{extra}}",
+    "studioEyebrow": "Trabajo a medida",
+    "studioTitleBefore": "Un sitio",
+    "studioTitleEm": "a la altura de tu marca",
+    "studioBody": "Trabajamos con marcas que necesitan un sitio a la altura de su trabajo, no una plantilla genérica. Primero entendemos tu marca y tu proyecto; después lo construimos con el mismo nivel que ves en nuestros modelos.",
+    "studioForLabel": "Para quién",
+    "studioGetsLabel": "Te llevás",
+    "studioService1Name": "Sitio a medida",
+    "studioService1Kind": "Proyecto a medida",
+    "studioService1For": "Marcas que quieren un sitio propio, no un modelo.",
+    "studioService1Gets": "Diseño, desarrollo y lanzamiento — de punta a punta.",
+    "studioService2Name": "Adaptar un modelo",
+    "studioService2Kind": "Proyecto a medida",
+    "studioService2For": "Quien ya vio un modelo del catálogo y lo quiere con su marca.",
+    "studioService2Gets": "Rebranding, contenido propio y ayuda para publicarlo.",
+    "studioCta": "Contanos tu proyecto",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
     "footerContact": "Contacto",
     "footerContactForm": "Escribinos",
+    "footerInstagram": "Instagram",
     "footerBuildPage": "Armar mi página",
     "footerLicense": "Licencia",
     "footerPrivacy": "Privacidad",
@@ -261,11 +318,18 @@
     "backTop": "Volver arriba",
     "contactEyebrow": "Contacto personalizado",
     "contactTitle": "¿Necesitás algo a medida?",
-    "contactBody": "Pedidos especiales o una página scrollytelling hecha para tu marca. Contanos qué necesitás y te respondemos.",
+    "contactBody": "Pedidos especiales o una página hecha a medida para tu marca. Contanos qué necesitás y te respondemos.",
     "contactNote": "También podés escribirnos a",
     "contactName": "Nombre",
     "contactEmail": "Email",
-    "contactMessage": "Mensaje",
+    "contactTypeLabel": "¿Qué necesitás?",
+    "contactTypePlaceholder": "Elegí una opción",
+    "contactTypeCustom": "Un sitio a medida",
+    "contactTypeAdapt": "Adaptar un modelo a mi marca",
+    "contactTypeMaintenance": "Mantenimiento y soporte",
+    "contactTypeOther": "Otra consulta",
+    "contactMessage": "Contanos tu objetivo",
+    "contactMessagePlaceholder": "Ej.: quiero un sitio nuevo, o mejorar el que ya tengo",
     "contactSubmit": "Enviar",
     "contactSending": "Enviando…",
     "contactSuccess": "Listo — te respondemos a la brevedad.",
@@ -344,7 +408,7 @@
       "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas 3D que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
     },
     "comic": {
-      "vibe": "Historieta scrollytelling",
+      "vibe": "Historieta ilustrada",
       "tags": [
         "Paneles rasgados",
         "Camión en capas",
@@ -361,7 +425,7 @@
         "Language bands",
         "Cutout rising"
       ],
-      "description": "Canvas piedra, cuerpo Playfair y display Anton, un mosaico de fotos que se despliega en un slider full-bleed y un cierre con cutout que sube al scroll. Para campañas, eventos o marcas que quieren scrollytelling editorial de alto impacto."
+      "description": "Canvas piedra, cuerpo Playfair y display Anton, un mosaico de fotos que se despliega en un slider full-bleed y un cierre con cutout que sube al scroll. Para campañas, eventos o marcas que quieren storytelling editorial de alto impacto."
     },
     "ratio": {
       "vibe": "Coreografía Beat",
@@ -371,7 +435,7 @@
         "Cubo y tipo",
         "Placas al scroll"
       ],
-      "description": "Template Beat de scrollytelling para desktop: cubo y tipo en un riel, placas que atraviesan el viewport, un pozo que encastra y un cierre horizontal. Papel de taller y registro vermillion. No está pensado para móvil."
+      "description": "Template Beat de storytelling para desktop: cubo y tipo en un riel, placas que atraviesan el viewport, un pozo que encastra y un cierre horizontal. Papel de taller y registro vermillion. No está pensado para móvil."
     },
     "atrium": {
       "vibe": "Estudio de arquitectura",
@@ -441,7 +505,7 @@
     "editSection": "Editar sección",
     "editing": "Editando",
     "editPanel": "Editar sección",
-    "noEditableFields": "Esta sección no tiene campos de texto editables todavía.",
+    "noEditableFields": "Esta sección no tiene textos para editar acá: se ajusta en el código del ZIP.",
     "commerceHint": "Sumá una tienda a tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). El kit es solo frontend a propósito: conectás tu Mercado Pago o Stripe en checkoutAdapter.js cuando quieras (le pasás la doc a una IA y te lo arma en minutos). Al agregar la grilla se activa el kit completo (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "La base incluye {{included}} secciones: te quedan {{left}} sin costo extra.",
@@ -454,14 +518,17 @@
     "beatBadge": "Beat",
     "beatHint": "Estas piezas llevan Beat: el riel se mueve solo en el preview y viaja en el ZIP. El panel edita copy; las recetas no se tocan acá.",
     "beatEditHint": "Beat: el cubo y las letras se mueven solas. Acá cambiás las palabras; el riel queda en el código.",
-    "modelUpload": "Probar un .glb local",
-    "modelClear": "Quitar modelo",
-    "modelHelp": "Formato GLB/GLTF (recomendado: .glb, un solo archivo). El archivo local sirve solo para esta vista previa. Para que viaje en tu ZIP: escribí una URL https pública, o dejá el campo vacío y en el proyecto descargado guardá tu modelo como public/mi-modelo.glb y pasá modelUrl=\"/mi-modelo.glb\" (viene explicado en el README del ZIP). Sin modelo, queda el objeto placeholder.",
-    "imageUpload": "Probar imagen / SVG local",
-    "imageClear": "Quitar imagen",
-    "imageHelp": "PNG, SVG, WebP o JPG. El archivo local sirve solo para esta vista previa (reemplaza el SVG placeholder). Para que viaje en tu ZIP: escribí una URL https pública, o en el proyecto descargado guardá el archivo en public/ (ej. public/lata-1.svg) y pasá can1Image=\"/lata-1.svg\". Sin imagen, queda la lata SVG del template.",
     "listAdd": "Agregar",
     "hrefHint": "#ancla · /ruta · https://… · mailto:… · tel:…",
+    "assetHint": "Va al ZIP tal cual: una URL https:// o una ruta /archivo (en ese caso, dejá el archivo en public/ del proyecto que bajás).",
+    "listHint": "Lo que cargues acá reemplaza la lista de ejemplo de la sección.",
+    "invalid": {
+      "href": "Todavía no es un enlace válido y no se guarda. Usá #ancla, /ruta, https://…, mailto: o tel:",
+      "color": "Todavía no es un color válido y no se guarda. Usá #rgb, #rrggbb o rgba(…).",
+      "url": "Todavía no es una URL válida y no se guarda. Usá https://… o una ruta /archivo, sin espacios.",
+      "price": "Solo números, con hasta dos decimales (15000 o 12,50): así no se guarda."
+    },
+    "mobileBarCta": "Ver mi página",
     "sections": {
       "chapters": {
         "NavMinimal": {
@@ -840,9 +907,25 @@
           "name": "Hero signal",
           "blurb": "Hero cinético con palabras que rotan — caracteres que entran con blur y se cruzan por temporizador"
         },
+        "SelectedWorkIndex": {
+          "name": "Selected work index",
+          "blurb": "Lista de trabajos con una preview que sigue el cursor y cambia por fila"
+        },
+        "ManifestoMarquee": {
+          "name": "Manifesto marquee",
+          "blurb": "Frase que se revela palabra por palabra con blur, sobre una cinta de capacidades en loop"
+        },
+        "RecognitionStats": {
+          "name": "Recognition stats",
+          "blurb": "Cifras que suben al entrar, tres en fila"
+        },
         "PixelRevealGrid": {
           "name": "Pixel reveal grid",
           "blurb": "Tarjetas de caso detrás de una grilla de tiles que se disuelve al scroll, solo DOM"
+        },
+        "ServicesAccordion": {
+          "name": "Services accordion",
+          "blurb": "Lista de servicios expandible"
         },
         "FooterSignal": {
           "name": "Footer signal",
@@ -913,6 +996,8 @@
     "preparing": "Preparando…",
     "waiting": "Confirmando pago…",
     "pendingHint": "Si acabás de pagar, puede tardar unos segundos. Refrescá la página si sigue así.",
+    "refunded": "Reembolsada",
+    "refundedHint": "Se devolvió el pago, así que la descarga ya no está disponible.",
     "linkExpired": "El link de descarga venció: por seguridad dura solo unos minutos. Tocá Descargar de nuevo y listo.",
     "prevPage": "← Anterior",
     "nextPage": "Siguiente →",
@@ -923,12 +1008,18 @@
     "subActive": "Activa · próximo cobro el {{date}}",
     "subTrial": "Prueba gratis · primer cobro el {{date}}",
     "subCanceled": "Cancelada · seguís con acceso hasta el {{date}}",
-    "subPaused": "En pausa — revisá tu medio de pago en Mercado Pago",
+    "subPaused": "En pausa en Mercado Pago · seguís con acceso hasta el {{date}}",
+    "subRenewing": "Confirmando el cobro con Mercado Pago · si no se acredita, el plan se suspende el {{date}}",
+    "subPaymentFailed": "No pudimos cobrar la renovación. Mercado Pago lo reintenta; si no se resuelve, el plan se suspende el {{date}}. Revisá tu medio de pago en Mercado Pago.",
+    "subLapsed": "Tu plan {{plan}} está suspendido: no pudimos cobrarlo. Si Mercado Pago logra el cobro, vuelve solo. Si no querés seguir, cancelalo y no se reintenta más.",
+    "subLapsedPaused": "Tu plan {{plan}} está en pausa en Mercado Pago y ya no cubre tus secciones.",
     "subSince": "Desde",
+    "subActiveUntil": "Activo hasta",
     "subUsage": "Publicadas",
     "subUnlimited": "ilimitadas",
     "subCancel": "Cancelar suscripción",
     "subCancelConfirm": "¿Cancelar?",
+    "subCancelConfirmUntil": "¿Cancelar? Seguís con acceso hasta el {{date}}.",
     "subCancelYes": "Sí, cancelar",
     "subCancelDone": "Suscripción cancelada",
     "subSync": "Sincronizar con Mercado Pago",
@@ -976,6 +1067,7 @@
   "license": {
     "eyebrow": "Licencia Regular",
     "title": "Licencia Regular",
+    "effectiveDate": "Vigente desde el 28 de septiembre de 2026",
     "intro": "Al comprar un template o una composición de {{site}}, obtenés una licencia no exclusiva e intransferible sobre ese ítem (el “Ítem”). Esta es la licencia estándar que acompaña cada descarga.",
     "canTitle": "Qué podés hacer",
     "can1": "Usar el Ítem en proyectos propios o de clientes, sin límite de cantidad de sitios o aplicaciones.",
@@ -989,13 +1081,15 @@
     "cant4": "Compartir el link de descarga o tu cuenta con terceros.",
     "ownerTitle": "Propiedad",
     "ownerBody": "{{site}} (y sus licenciantes) retienen todos los derechos de propiedad intelectual sobre el Ítem. Solo se otorgan los derechos descritos acá. Cada ZIP incluye un archivo LICENSE.txt con el número de orden y el email del comprador; esa marca identifica la licencia otorgada.",
+    "estudioTitle": "Trabajo a medida (Estudio)",
+    "estudioBody": "Los proyectos de Estudio no se rigen por esta Licencia Regular. En un sitio a medida (desde cero), la propiedad del resultado final es tuya una vez completado el pago acordado: es un trabajo por encargo. Adaptar un modelo sigue bajo esta Licencia Regular, porque parte de uno de nuestros templates. El mantenimiento y soporte no cambia la propiedad de tu sitio. El precio, los plazos y los entregables de cada proyecto se acuerdan por separado.",
     "contact": "Consultas:"
   },
   "privacy": {
     "eyebrow": "Legal",
     "title": "Política de Privacidad",
-    "effectiveDate": "Vigente desde el 29 de julio de 2026",
-    "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra o descargás un producto.",
+    "effectiveDate": "Vigente desde el 28 de septiembre de 2026",
+    "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra, descargás un producto o nos escribís por un proyecto de Estudio.",
     "sections": [
       {
         "title": "Datos que recopilamos",
@@ -1003,7 +1097,8 @@
           "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
           "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago y cantidad de descargas.",
           "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión.",
-          "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste."
+          "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste.",
+          "Si nos escribís por el formulario de contacto o de Estudio: tu nombre, email, mensaje y qué tipo de proyecto marcaste."
         ]
       },
       {
@@ -1013,16 +1108,17 @@
           "Procesar pagos, confirmar órdenes y habilitar descargas.",
           "Enviar comprobantes y comunicaciones operativas relacionadas con tus compras.",
           "Enviarte por mail el cupón de bienvenida de tu primera compra. No enviamos newsletters.",
+          "Responder tu consulta cuando nos escribís por el formulario de contacto, incluidos los proyectos de Estudio (trabajo a medida).",
           "Prevenir fraude, abuso y accesos no autorizados, y cumplir obligaciones legales."
         ]
       },
       {
         "title": "Servicios de terceros",
-        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos, Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
       },
       {
         "title": "Cookies y almacenamiento local",
-        "body": "Usamos una cookie de sesión para mantener tu cuenta autenticada. También podemos guardar en tu navegador preferencias como idioma, tema, carrito y composiciones del builder. Podés borrar estos datos desde la configuración de tu navegador, aunque algunas funciones pueden dejar de operar correctamente."
+        "body": "Usamos una cookie de sesión para mantener tu cuenta autenticada. Google Tag Manager y Analytics pueden guardar sus propias cookies para medir visitas de forma agregada. También podemos guardar en tu navegador preferencias como idioma, tema, carrito y composiciones del builder. Podés borrar estos datos desde la configuración de tu navegador, aunque algunas funciones pueden dejar de operar correctamente."
       },
       {
         "title": "Conservación y seguridad",
@@ -1050,7 +1146,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 30 de julio de 2026",
+    "effectiveDate": "Vigentes desde el 28 de septiembre de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
       {
@@ -1084,6 +1180,15 @@
       {
         "title": "Cambios",
         "body": "Podemos actualizar el servicio y estos Términos. La versión vigente y su fecha estarán publicadas en esta página. El uso posterior a una actualización implica la aceptación de los nuevos Términos."
+      },
+      {
+        "title": "Estudio (trabajo a medida)",
+        "items": [
+          "Sitio a medida, adaptar un modelo, y mantenimiento y soporte son servicios por cotización manual: no se compran desde el catálogo ni se pagan con Mercado Pago dentro del sitio. El precio y el alcance se acuerdan antes de empezar, caso por caso.",
+          "No garantizamos resultados de negocio (más clientes, más ventas, más conversión): construimos y entregamos el sitio con el nivel de calidad que ves en nuestros modelos; el resultado de negocio depende de factores que no controlamos, como el marketing o el tráfico.",
+          "En un sitio a medida (desde cero), la propiedad del resultado final es tuya una vez completado el pago acordado: es un trabajo por encargo. Adaptar un modelo sigue bajo la Licencia Regular, porque parte de uno de nuestros templates.",
+          "El precio, los plazos, los entregables y las condiciones de cancelación de cada proyecto de Estudio se establecen en el acuerdo específico de ese proyecto, no en estos Términos ni en la Licencia Regular."
+        ]
       },
       {
         "title": "Componentes alojados (LAB)",

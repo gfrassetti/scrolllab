@@ -15,6 +15,7 @@ export default function FooterBrutal({
   bg,
   fg,
   legal = '©2026 Placeholder Systems — Template, not a promise',
+  backToTop = 'Back to top ↑',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -53,7 +54,7 @@ export default function FooterBrutal({
       style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <div className="px-5 pt-16 md:px-8 md:pt-24">
-        <a href={cta} className="group block" aria-label={email}>
+        <a href={cta} className="group tpl-hit relative block" aria-label={email}>
           <span
             data-brutal-word
             className="block font-anton text-[13vw] leading-[0.9] whitespace-nowrap uppercase transition-colors duration-300 group-hover:text-carbon"
@@ -68,7 +69,7 @@ export default function FooterBrutal({
           <li key={i} className="border-r-2 border-carbon">
             <a
               href={link.href || '#'}
-              className="block px-5 py-3 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors duration-200 hover:bg-carbon md:px-8 md:text-xs"
+              className="block px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors duration-200 hover:bg-carbon md:px-8 md:py-3 md:text-xs"
             >
               {link.label}
             </a>
@@ -76,10 +77,10 @@ export default function FooterBrutal({
         ))}
       </ul>
 
-      <div className="flex flex-col gap-2 border-t-2 border-carbon px-5 py-4 font-mono text-[10px] uppercase tracking-[0.1em] md:flex-row md:items-baseline md:justify-between md:px-8 md:text-[11px]">
+      <div className="flex flex-col gap-2 border-t-2 border-carbon px-5 py-4 font-mono text-[11px] uppercase tracking-[0.1em] md:flex-row md:items-baseline md:justify-between md:px-8 md:text-xs">
         <p>{legal}</p>
-        <a href="#top" className="transition-colors duration-200 hover:text-carbon">
-          Back to top ↑
+        <a href="#top" className="tpl-hit relative self-start transition-colors duration-200 hover:text-carbon md:self-auto">
+          {backToTop}
         </a>
       </div>
     </footer>

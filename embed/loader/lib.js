@@ -32,3 +32,37 @@ export function resolveFrameBase(script, fallback) {
   }
   return fallback
 }
+
+/**
+ * Un #ancla clickeado dentro del embed, traducido a la página del cliente (el
+ * iframe no la puede scrollear). `#algo` → el elemento con ese id, si la
+ * página lo tiene; `#` y `#top` sin elemento → arriba de todo. null = nada.
+ */
+export function anchorTarget(hash) {
+  if (typeof hash !== 'string' || hash.charAt(0) !== '#' || hash.length > 512) {
+    return null
+  }
+  let id = hash.slice(1)
+  try {
+    id = decodeURIComponent(id)
+  } catch {
+    /* queda crudo */
+  }
+  return { id, top: id === '' || id === 'top' }
+}
+
+/**
+ * `href` resuelto contra `base` si es una URL http(s) del MISMO origen; si no,
+ * null. El frame le pide al loader navegar la página del cliente y el loader
+ * solo acepta ir a su propio sitio: nunca a otro dominio ni a `javascript:`.
+ */
+export function sameOriginUrl(href, base) {
+  if (typeof href !== 'string' || !href || href.length > 2048) return null
+  try {
+    const url = new URL(href, base)
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
+    return url.origin === new URL(base).origin ? url.href : null
+  } catch {
+    return null
+  }
+}

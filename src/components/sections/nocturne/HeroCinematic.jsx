@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { picsumAttrs } from './picsum'
 
 /**
  * HeroCinematic — full-bleed photographic hero. The image settles
@@ -66,7 +67,9 @@ export default function HeroCinematic({
     <section ref={root} className="relative h-svh overflow-hidden">
       <img
         data-hero-img
-        src={img}
+        {...picsumAttrs(img)}
+        sizes="100vw"
+        fetchPriority="high"
         alt=""
         className="absolute inset-0 h-full w-full object-cover opacity-60"
       />

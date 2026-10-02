@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { picsumAttrs } from './picsum'
 
 const defaultBeats = [
   {
@@ -30,6 +31,7 @@ export default function SplitReveals({
   seq = '03',
   total = '06',
   label = 'The frames',
+  seqLabel = 'Seq.',
   beats,
   bg,
   fg,
@@ -80,7 +82,7 @@ export default function SplitReveals({
     >
       <div className="mb-14 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-24">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
-          Seq. {seq} / {total}
+          {seqLabel} {seq} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
       </div>
@@ -94,9 +96,11 @@ export default function SplitReveals({
           >
             <img
               data-beat-img
-              src={beat.img}
+              {...picsumAttrs(beat.img)}
+              sizes="(min-width: 768px) 50vw, 100vw"
               alt=""
               loading="lazy"
+              decoding="async"
               className={`aspect-4/3 w-full object-cover ${i % 2 === 1 ? 'md:order-2' : ''}`}
             />
             <div data-beat-copy className="space-y-5">

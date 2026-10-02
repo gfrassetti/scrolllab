@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
-import model from './assets/model.jpg'
-import material from './assets/material.jpg'
-import orbitSite from './assets/orbit-site.jpg'
+import { model, material, orbitSite, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultScenes = [
   {
@@ -99,8 +98,11 @@ export default function ProcessPin({ label = 'Approach', scenes = defaultScenes 
                   <img
                     key={scene.title}
                     data-process-img
-                    src={scene.img}
+                    {...imgAttrs(scene.img, variants)}
+                    sizes="100vw"
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="absolute inset-0 h-full w-full max-w-none object-cover"
                     style={{ opacity: i === 0 ? 1 : 0 }}
                   />
@@ -119,9 +121,11 @@ export default function ProcessPin({ label = 'Approach', scenes = defaultScenes 
             >
               <p className="atrium-note font-display text-atrium-ink/65">{scene.kicker}</p>
               <img
-                src={scene.img}
+                {...imgAttrs(scene.img, variants)}
+                sizes="100vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="aspect-4/3 w-full object-cover md:hidden"
               />
               <h3 className="atrium-mid max-w-[13ch]">{scene.title}</h3>

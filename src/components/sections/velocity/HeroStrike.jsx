@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import heroBack from './assets/hero-back.png'
-import heroMid from './assets/hero-mid.png'
-import heroFront from './assets/hero-front.png'
+import { heroBack, heroMid, heroFront, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * HeroStrike — full-bleed multi-layer parallax hero.
@@ -132,7 +131,9 @@ export default function HeroStrike({
             <div className="absolute inset-0 overflow-hidden">
               <img
                 data-strike-layer-back
-                src={imgBack}
+                {...imgAttrs(imgBack, variants)}
+                sizes="100vw"
+                fetchPriority="high"
                 alt=""
                 className="absolute inset-x-0 -top-[12%] h-[124%] w-full object-cover opacity-55 will-change-transform"
               />
@@ -140,7 +141,8 @@ export default function HeroStrike({
             <div className="absolute inset-0 overflow-hidden">
               <img
                 data-strike-layer-mid
-                src={midSrc}
+                {...imgAttrs(midSrc, variants)}
+                sizes="100vw"
                 alt=""
                 className="absolute inset-x-0 -top-[10%] h-[130%] w-full object-cover opacity-80 mix-blend-lighten will-change-transform"
               />
@@ -148,7 +150,8 @@ export default function HeroStrike({
             <div className="absolute inset-0 overflow-hidden">
               <img
                 data-strike-layer-front
-                src={imgFront}
+                {...imgAttrs(imgFront, variants)}
+                sizes="100vw"
                 alt=""
                 className="absolute inset-x-0 top-[18%] h-[95%] w-full object-cover opacity-70 [mask-image:linear-gradient(to_bottom,transparent_0%,black_18%,black_78%,transparent_100%)] will-change-transform"
               />

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import {
   arsFromUsd,
+  BUNDLE_MODELS,
   estimateCustomPriceUsd,
   isComingSoonSku,
   templatePriceUsd,
@@ -107,7 +108,7 @@ export function takeCheckoutIntent(now = Date.now()) {
 
 export const useCartNotice = create((set) => ({
   notice: null,
-  show: (item, { already = false, updated = false } = {}) =>
+  show: (item, { already = false, updated = false, inBundle = false, absorbed = 0 } = {}) =>
     set({
       notice: {
         id: crypto.randomUUID(),
@@ -116,14 +117,23 @@ export const useCartNotice = create((set) => ({
         recipe: item.recipe,
         already,
         updated,
+        inBundle,
+        absorbed,
       },
     }),
   clear: () => set({ notice: null }),
 }))
 
+/** Modelos sueltos que el bundle ya trae: tenerlos al lado sería pagarlos dos veces. */
+export function withoutBundleOverlap(items) {
+  if (!(items || []).some((i) => i.sku === 'bundle')) return items || []
+  return items.filter((i) => !BUNDLE_MODELS.includes(i.sku))
+}
+
 /**
  * Cart is UX-only. Prices are re-validated on the server at checkout.
  * Solo una composición del builder a la vez: al re-agregar, se reemplaza.
+ * El bundle absorbe los modelos sueltos que ya trae.
  */
 export const useCart = create(
   persist(
@@ -149,10 +159,34 @@ export const useCart = create(
           useCartNotice.getState().show(item, { already: true })
           return false
         }
-        set({ items: [...items, { ...item, qty: 1 }] })
-        useCartNotice.getState().show(item)
+        if (BUNDLE_MODELS.includes(item.sku) && items.some((i) => i.sku === 'bundle')) {
+          useCartNotice.getState().show(item, { inBundle: true })
+          return false
+        }
+        const next = withoutBundleOverlap([...items, { ...item, qty: 1 }])
+        set({ items: next })
+        useCartNotice
+          .getState()
+          .show(item, { absorbed: items.length + 1 - next.length })
         trackAddToCart(item)
         return true
+      },
+      /**
+       * La composición del carrito sigue a la del builder: si después de
+       * «Agregar al carrito» se siguió editando, se paga (y se descarga) la
+       * versión actual, no la foto del momento en que se agregó. Sin
+       * composición en el carrito no agrega nada, y un builder vacío no borra
+       * la que ya estaba.
+       */
+      syncComposition: (recipe) => {
+        if (!Array.isArray(recipe) || recipe.length === 0) return
+        const items = get().items
+        const current = items.find((i) => isCustomSku(i.sku))
+        if (!current) return
+        if (JSON.stringify(current.recipe) === JSON.stringify(recipe)) return
+        set({
+          items: items.map((i) => (isCustomSku(i.sku) ? { ...i, recipe } : i)),
+        })
       },
       removeItem: (sku) => {
         // Solo ese ítem (templates o la única composición `custom`).
@@ -166,7 +200,9 @@ export const useCart = create(
       name: 'scrolllab-cart-v2',
       merge: (persisted, current) => {
         const items = Array.isArray(persisted?.items)
-          ? persisted.items.filter((item) => !isComingSoonSku(item?.sku))
+          ? withoutBundleOverlap(
+              persisted.items.filter((item) => !isComingSoonSku(item?.sku)),
+            )
           : current.items
         return { ...current, ...persisted, items }
       },

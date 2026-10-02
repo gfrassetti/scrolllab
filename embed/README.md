@@ -123,11 +123,37 @@ Vercel → un click, SSL automático por el wildcard `*.scrolllab.com.ar`).
   `server/app.js` la sirve en la raíz (`/v1/loader.js`, `/v1/frame/…`; CORS
   `*`, sin `X-Frame-Options`). `EMBED_CDN_URL=https://TU-API`.
 
+## El embed como parte del sitio del cliente
+
+El iframe está sandboxeado (sin `allow-top-navigation` ni `allow-forms`): no
+puede navegar ni leer la página del cliente. Lo que necesita de ella pasa por
+el loader, que corre en esa página:
+
+| qué | cómo |
+|---|---|
+| **Links** | `#ancla` / «Back to top» → `scrolllab:anchor`, el loader scrollea la página. Link del mismo sitio (relativo o con su dominio) → `scrolllab:navigate`, el loader navega en la misma pestaña, **solo a su propio origen y justo después de un click** (`navigator.userActivation`). Externo → pestaña nueva como página normal (`allow-popups-to-escape-sandbox`). `mailto:`/`tel:` → la app. Los relativos se reescriben a la URL absoluta del sitio del cliente (ctrl+click, botón del medio). |
+| **Dominios permitidos** | el config lo pide el iframe (nuestro origen), así que su `Origin` es siempre el del embed. El frame manda `?host=` con el sitio que lo contiene: `location.ancestorOrigins` → `document.referrer` → `#origin=` del loader. Es un freno para que nadie reuse la key, no un DRM. |
+| **`vh` / `svh`** | dentro del iframe medían el iframe, que en FLOW mide lo que su contenido: una sección con `pt-[30svh]` crecía sin fin. El build las reescribe a `calc(var(--sl-vh)*N)` (`hostViewportUnits.js`) y el frame fija `--sl-vh` con el viewport del sitio (`#vh=` del loader + `scrolllab:viewport`). Como `svh`, ignora los cambios chicos (barra del navegador). |
+| **Por qué no se ve** | con 402/403/404/409 el iframe queda en alto 0 y la consola dice el motivo (`[scrolllab] la sección no se muestra: …`). |
+
+### Vista previa del editor de LAB
+
+`/lab/:id` muestra este mismo frame (`frame/index.html#preview=1`), no la
+sección de React del sitio: el editor manda los props sin guardar por
+`postMessage` (`scrolllab:preview`) y el frame contesta `scrolllab:height`. Así
+el preview tiene las fuentes, el CSS, las imágenes por defecto (sin foto, como
+el embed) y los breakpoints/`vw` del ancho elegido (desktop 1280 escalado,
+tablet 768, mobile 390). El frame solo acepta props de los orígenes de
+`EMBED_PREVIEW_ORIGINS` (build; default `https://www.scrolllab.com.ar`,
+`https://scrolllab.com.ar`) o de `http://localhost` — si no, cualquiera podría
+mostrar secciones sin plan. Si el frame no contesta en 8 s, el editor vuelve a
+la vista previa en React.
+
 ## Peso
 
 | pieza | tamaño |
 |---|---|
-| `loader.js` (lo baja el host) | **~3.7 KB** minificado (incluye `window.ScrollLab.render`/`scan`) |
+| `loader.js` (lo baja el host) | **~4.9 KB** minificado (incluye `window.ScrollLab.render`/`scan`, anclas, navegación y `vh`) |
 | frame core (Preact + GSAP + framework) | 57.5 KB gz — nuestro origen, cache compartida entre sitios |
 | frame CSS (Tailwind) | 16.9 KB gz — escanea TODAS las secciones (pendiente: scopear a `HOSTABLE_SECTIONS`) |
 | secciones | inline en el bundle del frame (~1 KB gz cada una) |
@@ -147,13 +173,23 @@ npm run build:loader    # solo el loader
 npm run test:e2e
 ```
 
-Buildea el embed y corre `embed/test/e2e/embed.e2e.mjs` (`node --test` +
+Buildea el embed y corre `embed/test/e2e/*.e2e.mjs` (`node --test` +
 librería `playwright`, sin `@playwright/test`). Levanta la API en :8787 (store
 de archivo, MP mock, `embed/test/e2e-api.mjs`), dos static servers cross-origin
 (:4178 host, :4179 frame), publica una instancia y verifica: se monta el iframe
 cross-origin, `contentDocument` queda `null`, el frame no puede tocar el DOM del
 host, la sección renderiza con los props publicados, el CSS del host no se
-filtra y el puente de altura dimensiona el iframe.
+filtra y el puente de altura dimensiona el iframe. `hosted-sections` monta
+cada sección de `HOSTABLE_SECTIONS` a 375/768/1280 (sin scroll horizontal, con
+el alto que converge) y `lab-live` recorre lo que hace el dueño: publicar se ve
+en la próxima carga, un borrador no sale, despublicar apaga, dominios
+permitidos (cliente.test / otro.test por `--host-resolver-rules`) y links.
+
+`npm run check:lab` hace lo mismo desde el editor real (Vite + API + embed):
+editar → la vista previa cambia → Publicar → se ve en un sitio ajeno, para
+cada sección hosteable.
+
+Con un Chromium del sistema: `PLAYWRIGHT_CHROMIUM_PATH=/ruta/al/chromium`.
 
 > Chromium bloquea `localhost:4178 → localhost:4179` con Local/Private Network
 > Access; el harness lo lanza con `--disable-features=LocalNetworkAccessChecks,…`.

@@ -52,6 +52,19 @@ function withSave(order) {
   return withSaveDoc('orders', order)
 }
 
+/**
+ * ¿Prueba de LAB en curso que termina dentro de `withinMs` y todavía sin aviso?
+ * Compartido por el listado y por el claim del mail (en Mongo es el filtro).
+ */
+export function trialReminderDue(sub, nowMs, withinMs) {
+  if (!sub || sub.status !== 'authorized' || sub.canceledAt) return false
+  // `lastPaidAt`: ya se le cobró algo, así que no está en la prueba (mismo
+  // criterio que el mail de bienvenida).
+  if (sub.trialReminderEmailSentAt || sub.lastPaidAt || !sub.trialEndsAt) return false
+  const end = new Date(sub.trialEndsAt).getTime()
+  return end > nowMs && end <= nowMs + withinMs
+}
+
 export const fileDb = {
   async findUser(query) {
     return (
@@ -206,7 +219,8 @@ export const fileDb = {
       read('subscriptions')
         .filter(
           (s) =>
-            String(s.userId) === String(userId) && s.status === 'authorized',
+            String(s.userId) === String(userId) &&
+            (s.status === 'authorized' || s.status === 'paused'),
         )
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((s) => withSaveDoc('subscriptions', s))[0] || null
@@ -216,6 +230,11 @@ export const fileDb = {
     return read('subscriptions')
       .filter((s) => String(s.userId) === String(userId))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map((s) => withSaveDoc('subscriptions', s))
+  },
+  async listTrialReminderCandidates({ now, withinMs }) {
+    return read('subscriptions')
+      .filter((s) => trialReminderDue(s, now.getTime(), withinMs))
       .map((s) => withSaveDoc('subscriptions', s))
   },
   async deleteSubscription(id) {

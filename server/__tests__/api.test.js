@@ -127,6 +127,67 @@ describe('API HTTP (file store)', () => {
     )
   })
 
+  it('comprar dos templates juntos entrega los dos en el ZIP', async () => {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email: 'two-templates@test.com' })
+    const checkout = await agent
+      .post('/api/checkout')
+      .set('Origin', config.clientUrl)
+      .send({ items: [{ sku: 'chapters' }, { sku: 'nocturne' }] })
+    assert.equal(checkout.status, 200)
+    const { orderId } = checkout.body
+    await agent
+      .post('/api/checkout/mock-pay')
+      .set('Origin', config.clientUrl)
+      .send({ orderId })
+
+    const link = await agent
+      .get(`/api/orders/${orderId}/download`)
+      .set('Origin', config.clientUrl)
+    const dl = await agent.get(link.body.url).buffer().parse(binaryParser)
+    const files = readZip(dl.body)
+    for (const model of ['chapters', 'nocturne']) {
+      assert.ok(files.has(`${model}/package.json`), `el ZIP no trae ${model}`)
+      assert.ok(files.has(`${model}/src/App.jsx`), `el ZIP no trae ${model}/src/App.jsx`)
+    }
+    assert.deepEqual(brokenImports(files), [])
+    assert.match(files.get('LICENSE.txt').toString('utf8'), /two-templates@test\.com/)
+  })
+
+  it('el checkout rechaza pagar dos veces lo mismo', async () => {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email: 'dup-cart@test.com' })
+    const post = (items) =>
+      agent.post('/api/checkout').set('Origin', config.clientUrl).send({ items })
+
+    const twice = await post([{ sku: 'chapters' }, { sku: 'chapters' }])
+    assert.equal(twice.status, 400)
+    assert.match(twice.body.error, /ya está en el carrito/)
+
+    const inBundle = await post([{ sku: 'bundle' }, { sku: 'fizz' }])
+    assert.equal(inBundle.status, 400)
+    assert.match(inBundle.body.error, /ya viene en el bundle/)
+
+    const twoCompositions = await post([
+      { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
+      { sku: 'custom', recipe: ['nocturne/SplitReveals'] },
+    ])
+    assert.equal(twoCompositions.status, 400)
+
+    // Un template y una composición sí van juntos.
+    const mixed = await post([
+      { sku: 'chapters' },
+      { sku: 'custom', recipe: ['nocturne/SplitReveals'] },
+    ])
+    assert.equal(mixed.status, 200)
+  })
+
   /** dev-login + checkout mock + mock-pay: deja una orden paga lista para bajar. */
   async function seedPaidOrder(email) {
     const agent = request.agent(app)

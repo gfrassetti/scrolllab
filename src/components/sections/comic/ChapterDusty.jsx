@@ -1,9 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import PaperFrame from './PaperFrame'
-import heroRoad from './assets/hero-road.png'
-import closeupBuddies from './assets/closeup-buddies.png'
-import driveSunset from './assets/drive-sunset.png'
+import { heroRoad, closeupBuddies, driveSunset, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const CAPTIONS = [
   'Caption 1 — replace with story beat.',
@@ -144,7 +143,9 @@ export default function ChapterDusty({
           <div data-camera className="absolute inset-0 origin-center will-change-transform">
             <img
               data-hero-img
-              src={heroRoad}
+              {...imgAttrs(heroRoad, variants)}
+              sizes="100vw"
+              fetchPriority="high"
               alt=""
               className="absolute inset-0 h-full w-full origin-center object-cover will-change-transform"
               draggable={false}
@@ -188,7 +189,10 @@ export default function ChapterDusty({
               <div className="relative h-full overflow-hidden">
                 <img
                   data-close-img
-                  src={closeupBuddies}
+                  {...imgAttrs(closeupBuddies, variants)}
+                  sizes="(min-width: 768px) 50vw, 90vw"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover will-change-transform"
                   draggable={false}
@@ -215,7 +219,10 @@ export default function ChapterDusty({
               <div className="relative h-full overflow-hidden">
                 <img
                   data-drive-img
-                  src={driveSunset}
+                  {...imgAttrs(driveSunset, variants)}
+                  sizes="(min-width: 768px) 50vw, 90vw"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover will-change-transform"
                   draggable={false}

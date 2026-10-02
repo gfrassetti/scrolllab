@@ -1,6 +1,9 @@
 /**
  * Campos editables por sección (builder preview + LAB).
- * Tipos: text · textarea · select · image · model · color · href · list.
+ * Tipos: text · textarea · select · image · url · color · href · list (con
+ * sub-campo `price` para los productos del kit commerce).
+ * `image` / `url` = una URL https:// o una ruta /archivo. Los objetos 3D
+ * (formas, GLB) no son editables a propósito: se cambian en el código.
  * `list` = array de items; `item` describe sus sub-campos (text/textarea/
  * href/color). El schema server-side espeja esto en server/sectionFields.js
  * (ALLOWED_PROPS_BY_SECTION + LIST_PROPS_BY_SECTION).
@@ -41,6 +44,8 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -209,6 +214,7 @@ export const SECTION_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'nocturne/SplitReveals': [
+    { key: 'seqLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'seq', label: 'Secuencia', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -228,6 +234,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'nocturne/WorkIndex': [
+    { key: 'seqLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'seq', label: 'Secuencia', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -252,6 +259,8 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -278,21 +287,11 @@ export const SECTION_FIELDS = {
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
-    {
-      key: 'shape',
-      label: '3D shape',
-      type: 'select',
-      options: [
-        { value: 'icosahedron', label: 'Icosahedron' },
-        { value: 'box', label: 'Box' },
-        { value: 'octahedron', label: 'Octahedron' },
-        { value: 'torus', label: 'Torus' },
-        { value: 'sphere', label: 'Sphere' },
-      ],
-    },
-    { key: 'modelUrl', label: 'Modelo 3D propio (.glb)', type: 'model' },
+    // El objeto 3D no se edita en el builder: queda el de la demo y se cambia
+    // en el código (forma o GLB propio, ver el README del ZIP).
   ],
   'monolith/SkewScroller': [
+    { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -307,6 +306,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'monolith/ExhibitGrid': [
+    { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -325,6 +325,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'monolith/TypeAccordion': [
+    { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -346,6 +347,7 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -393,8 +395,7 @@ export const SECTION_FIELDS = {
       ],
     },
     { key: 'canImage', label: 'Lata PNG (override)', type: 'image' },
-    { key: 'canLabel', label: 'Texto lata (legacy)', type: 'text' },
-    { key: 'modelUrl', label: 'Modelo 3D propio (.glb)', type: 'model' },
+    // Sin modelo 3D propio en el builder: se pasa `modelUrl` en el código.
   ],
   'fizz/FlavorWorlds': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -445,6 +446,8 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -473,9 +476,9 @@ export const SECTION_FIELDS = {
     { key: 'lineRight', label: 'Line right', type: 'text' },
     { key: 'lineRight2', label: 'Line right 2', type: 'text' },
     { key: 'caption', label: 'Caption', type: 'text' },
-    { key: 'imgBack', label: 'Layer back (URL)', type: 'text' },
-    { key: 'imgMid', label: 'Layer mid (URL)', type: 'text' },
-    { key: 'imgFront', label: 'Layer front (URL)', type: 'text' },
+    { key: 'imgBack', label: 'Layer back (URL)', type: 'image' },
+    { key: 'imgMid', label: 'Layer mid (URL)', type: 'image' },
+    { key: 'imgFront', label: 'Layer front (URL)', type: 'image' },
   ],
   'velocity/HelmetGrid': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -511,6 +514,7 @@ export const SECTION_FIELDS = {
   'velocity/FooterVelocity': [
     { key: 'line', label: 'Line', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -535,6 +539,7 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'textarea' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'tags', label: 'Etiquetas (línea chica)', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -612,6 +617,11 @@ export const SECTION_FIELDS = {
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'phone', label: 'Phone', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'clockLabel', label: 'Hora local — rótulo', type: 'text' },
+    { key: 'enquiryLabel', label: 'Contacto — título', type: 'text' },
+    { key: 'emailLabel', label: 'Email — prefijo', type: 'text' },
+    { key: 'phoneLabel', label: 'Teléfono — prefijo', type: 'text' },
+    { key: 'socialLabel', label: 'Redes — título', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -661,8 +671,8 @@ export const SECTION_FIELDS = {
     { key: 'line2', label: 'Line 2', type: 'text' },
     { key: 'line3', label: 'Line 3', type: 'text' },
     { key: 'note', label: 'Note', type: 'text' },
-    { key: 'bg', label: 'Background', type: 'text' },
-    { key: 'fg', label: 'Foreground', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'img1', label: 'Image 1', type: 'image' },
     { key: 'img2', label: 'Image 2', type: 'image' },
     { key: 'img3', label: 'Image 3', type: 'image' },
@@ -829,8 +839,14 @@ export const SECTION_FIELDS = {
     { key: 'lineTwo', label: 'Line 2', type: 'text' },
     { key: 'left', label: 'Left column', type: 'textarea' },
     { key: 'right', label: 'Right column', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
-  'atrium/ScopeSerif': [{ key: 'body', label: 'Body', type: 'textarea' }],
+  'atrium/ScopeSerif': [
+    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
   'atrium/ClarityPair': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'left', label: 'Left headline', type: 'text' },
@@ -839,7 +855,6 @@ export const SECTION_FIELDS = {
     { key: 'bodyRight', label: 'Right body', type: 'textarea' },
   ],
   'atrium/BlueprintDraw': [
-    { key: 'index', label: 'Index', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
     { key: 'caption', label: 'Caption', type: 'text' },
@@ -929,7 +944,7 @@ export const SECTION_FIELDS = {
     {
       key: 'endpoint',
       label: 'Endpoint — https:// or /path (empty = demo)',
-      type: 'text',
+      type: 'url',
     },
   ],
   'commerce/ProductGrid': [
@@ -955,6 +970,21 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    // El catálogo del kit: la grilla, la ficha, el carrito y el checkout usan
+    // estos productos (src/lib/shop/catalog.js). Lo que una fila deja vacío
+    // toma el valor del producto de ejemplo en esa posición.
+    {
+      key: 'products',
+      label: 'Productos (lo vacío queda como el de ejemplo)',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'price', label: 'Precio (solo números)', type: 'price' },
+        { key: 'blurb', label: 'Descripción', type: 'textarea' },
+        { key: 'img', label: 'Foto (URL)', type: 'image' },
+      ],
+    },
     // El checkout es una ruta (/checkout), no una sección seleccionable:
     // sus textos se editan desde acá y viajan como props `checkout*`.
     { key: 'checkoutEyebrow', label: 'Checkout · Eyebrow', type: 'text' },
@@ -1037,14 +1067,53 @@ export function sanitizeHref(value) {
   return HREF_RE.test(s) ? s : undefined
 }
 
-// `image` en una lista = URL: https:// · /ruta · blob:/data: (preview). Misma
-// regla que el campo `image` suelto.
-export function sanitizeImageUrl(value) {
+// Imagen o endpoint: https:// o /ruta, sin espacios. La misma regla
+// que el servidor (ASSET_URL_RE en server/sectionFields.js): el preview no
+// puede mostrar una URL que después no viaja al ZIP. Por eso tampoco blob: ni
+// data:, que además no sobreviven a la sesión.
+const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
+
+export function sanitizeAssetUrl(value, max = 2000) {
   if (typeof value !== 'string') return undefined
-  const s = value.trim().slice(0, 500)
-  if (!s) return undefined
-  if (isEphemeralAssetUrl(s) || /^(https:\/\/|\/)\S/i.test(s)) return s
-  return undefined
+  const s = value.trim().slice(0, max)
+  return ASSET_URL_RE.test(s) ? s : undefined
+}
+
+// `image` dentro de una lista: misma regla, con el tope de los sub-campos.
+export function sanitizeImageUrl(value) {
+  return sanitizeAssetUrl(value, 500)
+}
+
+// Precio de un producto: número con hasta 2 decimales (15000, 12.5, 12,50).
+// Misma regla que el servidor (PRICE_RE en server/sectionFields.js).
+const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
+
+export function sanitizePrice(value) {
+  if (typeof value !== 'string') return undefined
+  const s = value.trim()
+  return PRICE_RE.test(s) ? s : undefined
+}
+
+/**
+ * Sin las filas de lista que quedaron vacías. El editor las conserva para que
+ * «Agregar» muestre una fila en blanco, pero no son contenido: ni el preview
+ * las dibuja ni la receta las manda, igual que el servidor que las descarta.
+ */
+export function withoutEmptyRows(props) {
+  if (!props || typeof props !== 'object') return props
+  let changed = false
+  const out = {}
+  for (const [key, value] of Object.entries(props)) {
+    if (!Array.isArray(value)) {
+      out[key] = value
+      continue
+    }
+    const rows = value.filter((row) => row && Object.keys(row).length)
+    if (rows.length !== value.length) changed = true
+    if (rows.length) out[key] = rows
+  }
+  if (!changed) return props
+  return Object.keys(out).length ? out : undefined
 }
 
 // Item de un campo `list`: objeto con sub-campos text/textarea/href/color/image.
@@ -1067,6 +1136,9 @@ function sanitizeListItem(subFields, raw) {
     } else if (f.type === 'image') {
       const u = sanitizeImageUrl(t)
       if (u) item[k] = u
+    } else if (f.type === 'price') {
+      const price = sanitizePrice(t)
+      if (price) item[k] = price
     } else if (t) {
       item[k] = t
     }
@@ -1119,15 +1191,44 @@ export function sanitizeProps(sectionId, props) {
       const ok = (field.options || []).some((o) => o.value === trimmed)
       if (!ok) continue
     }
-    // Preview: allow blob:/data:. Checkout strips them via compositionToRecipe.
-    if (
-      (field.type === 'model' || field.type === 'image') &&
-      !isEphemeralAssetUrl(trimmed) &&
-      !/^(https:\/\/|\/)\S/i.test(trimmed)
-    ) {
+    if (field.type === 'image' || field.type === 'url') {
+      const url = sanitizeAssetUrl(trimmed)
+      if (url) cleaned[key] = url
       continue
     }
     cleaned[key] = trimmed
   }
   return Object.keys(cleaned).length ? cleaned : undefined
+}
+
+/**
+ * LAB: la sección corre en un iframe en OTRO dominio (embed.scrolllab…), así
+ * que una ruta /archivo apunta ahí y no al sitio del cliente. En LAB las
+ * imágenes van con URL completa (https://…): lo relativo no se guarda y el
+ * campo avisa. Misma regla que `sanitizeHostedProps` del servidor.
+ */
+const ABSOLUTE_ASSET_RE = /^https:\/\//i
+
+export function sanitizeHostedProps(sectionId, props) {
+  const clean = sanitizeProps(sectionId, props)
+  if (!clean) return clean
+  for (const field of getSectionFields(sectionId)) {
+    const value = clean[field.key]
+    if (field.type === 'image' || field.type === 'url') {
+      if (typeof value === 'string' && !ABSOLUTE_ASSET_RE.test(value)) delete clean[field.key]
+      continue
+    }
+    if (field.type !== 'list' || !Array.isArray(value)) continue
+    const imageKeys = (field.item || []).filter((sub) => sub.type === 'image').map((sub) => sub.key)
+    if (!imageKeys.length) continue
+    // Las filas vacías ({}) quedan: son el «Agregar» del editor.
+    clean[field.key] = value.map((row) => {
+      const out = { ...row }
+      for (const k of imageKeys) {
+        if (typeof out[k] === 'string' && !ABSOLUTE_ASSET_RE.test(out[k])) delete out[k]
+      }
+      return out
+    })
+  }
+  return Object.keys(clean).length ? clean : undefined
 }

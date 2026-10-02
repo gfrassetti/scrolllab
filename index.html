@@ -22,16 +22,17 @@
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131313" />
 
     <!--
-      SEO: "Templates web con scroll inmersivo" (Immersive Scrolling Web Templates)
-      con código fuente, para devs y estudios (no "plantillas web":
-      esa búsqueda es de gente sin código). En español: el mercado de hoy es
-      Argentina; el inglés va en su propia URL con hreflang, ver src/lib/site.js.
+      SEO: título final del dueño (2026-09-28) — "Estudio digital y plantillas
+      web", en lenguaje llano por sobre matices de intención de búsqueda; no
+      "scrollytelling" en ningún lado (jerga que nadie entiende fuera del
+      rubro). En español: el mercado de hoy es Argentina; el inglés va en su
+      propia URL con hreflang, ver src/lib/site.js.
       Espejo de SITE_SEO en src/lib/site.js (`npm run check` los compara).
     -->
-    <title>SCROLL LAB — Templates web con scroll inmersivo</title>
+    <title>Scroll Lab — Estudio digital y plantillas web</title>
     <meta
       name="description"
-      content="Templates web con scroll inmersivo. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar."
+      content="Descargá un template completo, armalo vos en el builder, o sumá nuestros componentes con un script a cualquier sitio. Siempre con el código fuente."
     />
     <meta
       name="keywords"
@@ -50,11 +51,11 @@
     <meta property="og:url" content="https://www.scrolllab.com.ar/" />
     <meta
       property="og:title"
-      content="SCROLL LAB — Templates web con scroll inmersivo"
+      content="Scroll Lab — Estudio digital y plantillas web"
     />
     <meta
       property="og:description"
-      content="Templates web con scroll inmersivo. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar."
+      content="Descargá un template completo, armalo vos en el builder, o sumá nuestros componentes con un script a cualquier sitio. Siempre con el código fuente."
     />
     <meta property="og:image" content="https://www.scrolllab.com.ar/og.png" />
     <meta property="og:image:type" content="image/png" />
@@ -62,23 +63,23 @@
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="SCROLL LAB — templates scrollytelling con código fuente"
+      content="SCROLL LAB — templates de storytelling con código fuente"
     />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="SCROLL LAB — Templates web con scroll inmersivo"
+      content="Scroll Lab — Estudio digital y plantillas web"
     />
     <meta
       name="twitter:description"
-      content="Templates web con scroll inmersivo. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar."
+      content="Descargá un template completo, armalo vos en el builder, o sumá nuestros componentes con un script a cualquier sitio. Siempre con el código fuente."
     />
     <meta name="twitter:image" content="https://www.scrolllab.com.ar/og.png" />
     <meta
       name="twitter:image:alt"
-      content="SCROLL LAB — templates scrollytelling con código fuente"
+      content="SCROLL LAB — templates de storytelling con código fuente"
     />
 
     <script>
@@ -107,7 +108,7 @@
           return
         }
         if (path === '/builder') {
-          var title = 'SCROLL LAB — Builder | Armá tu sitio scrollytelling'
+          var title = 'Scroll Lab — Builder | Sitio con scroll cinematográfico'
           var body =
             'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente, editable.'
           document.title = title
@@ -118,6 +119,20 @@
           set(twTitle, 'content', title)
           set(twDesc, 'content', body)
           if (canonical) canonical.setAttribute('href', 'https://www.scrolllab.com.ar/builder')
+          return
+        }
+        if (path === '/lab') {
+          var labTitle = 'Scroll Lab — LAB | Secciones que insertás con un script'
+          var labBody =
+            'Una sección con nuestro nivel de diseño, lista para insertar en cualquier sitio con un script, sin bajar código. La editás desde un panel. Empezá gratis.'
+          document.title = labTitle
+          set(desc, 'content', labBody)
+          set(ogTitle, 'content', labTitle)
+          set(ogDesc, 'content', labBody)
+          set(ogUrl, 'content', 'https://www.scrolllab.com.ar/lab')
+          set(twTitle, 'content', labTitle)
+          set(twDesc, 'content', labBody)
+          if (canonical) canonical.setAttribute('href', 'https://www.scrolllab.com.ar/lab')
         }
       })()
     </script>
@@ -144,21 +159,21 @@
             "url": "https://www.scrolllab.com.ar/",
             "email": "hola@scrolllab.com.ar",
             "logo": "https://www.scrolllab.com.ar/logo.svg",
-            "description": "Marketplace de templates scrollytelling con código fuente para desarrolladores y estudios."
+            "description": "Templates, builder y estudio de desarrollo web con scroll cinematográfico, con código fuente, para desarrolladores y marcas."
           },
           {
             "@type": "WebSite",
             "@id": "https://www.scrolllab.com.ar/#website",
             "name": "SCROLL LAB",
             "url": "https://www.scrolllab.com.ar/",
-            "description": "Templates web con scroll inmersivo. Elegí uno completo o armá el tuyo en el builder y descargá el código fuente, listo para editar.",
+            "description": "Descargá un template completo, armalo vos en el builder, o sumá nuestros componentes con un script a cualquier sitio. Siempre con el código fuente.",
             "inLanguage": ["es-AR", "en"],
             "publisher": { "@id": "https://www.scrolllab.com.ar/#organization" }
           },
           {
             "@type": "ItemList",
             "@id": "https://www.scrolllab.com.ar/#templates",
-            "name": "Templates scrollytelling / scrollytelling templates",
+            "name": "Templates de storytelling / storytelling templates",
             "itemListElement": [
               {
                 "@type": "ListItem",
@@ -199,7 +214,7 @@
               {
                 "@type": "ListItem",
                 "position": 7,
-                "name": "COMIC — template historieta scrollytelling",
+                "name": "COMIC — template historieta ilustrada",
                 "url": "https://www.scrolllab.com.ar/plantillas/comic"
               },
               {

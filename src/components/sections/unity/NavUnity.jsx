@@ -21,7 +21,7 @@ export default function NavUnity({
       <div className="relative flex items-center justify-between gap-3">
         <a
           href="#top"
-          className="relative z-10 max-w-[36%] text-[10px] font-medium tracking-[0.22em] uppercase md:text-[11px]"
+          className="relative z-10 max-w-[36%] text-[11px] font-medium tracking-[0.22em] uppercase"
         >
           {brand}
         </a>
@@ -50,7 +50,7 @@ export default function NavUnity({
               <li key={item.label}>
                 <a
                   href={item.href}
-                  className="text-[10px] tracking-[0.2em] uppercase transition-opacity hover:opacity-55"
+                  className="text-[11px] tracking-[0.2em] uppercase transition-opacity hover:opacity-55"
                 >
                   {item.label}
                 </a>
@@ -98,7 +98,7 @@ export default function NavUnity({
                   open ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                 }`}
               >
-                <span className="text-[10px] tracking-[0.3em] text-[#0a0a0a]/45">
+                <span className="text-[11px] tracking-[0.3em] text-[#0a0a0a]/45">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="font-oswald text-[clamp(2.25rem,12vw,4rem)] leading-[0.9] font-semibold uppercase">

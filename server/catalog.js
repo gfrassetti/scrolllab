@@ -32,16 +32,23 @@ export const BUNDLE_MODELS = [
   'unity',
 ]
 
-/** Listados en home como “próximamente”; no se venden ni van en el bundle. */
-export const COMING_SOON_SKUS = ['ratio']
+/**
+ * No se venden ni van en el bundle. Los que además son LOCAL_ONLY no se
+ * listan en la home. Espejo de src/lib/pricing.js.
+ */
+export const COMING_SOON_SKUS = ['ratio', 'plum', 'signal']
 
 /**
  * En el repo, no en el marketplace: sin card en home, ruta solo en local.
+ * PLUM y SIGNAL no se van a terminar; RATIO sigue en obra.
  */
-export const LOCAL_ONLY_SKUS = ['ratio']
+export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal']
 
-/** Espejo de src/lib/pricing.js — no se venden por sección en el builder. */
-export const BUILDER_HIDDEN_SKUS = ['ratio']
+/**
+ * Espejo de src/lib/pricing.js — no se venden por sección en el builder
+ * (validateRecipe rechaza sus secciones aunque alguien arme la receta a mano).
+ */
+export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal']
 
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)

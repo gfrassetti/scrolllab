@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import joyA from './assets/joy-a.png'
-import joyB from './assets/joy-b.png'
-import joyC from './assets/joy-c.png'
+import { joyA, joyB, joyC, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * LanguageBlock — solid type/image block.
@@ -101,9 +100,11 @@ export default function LanguageBlock({
           <div data-lang-row data-align="start" className={rowClass}>
             <div data-lang-window className={winClass}>
               <img
-                src={img1}
+                {...imgAttrs(img1, variants)}
+                sizes="(min-width: 768px) 20rem, 36vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform"
               />
             </div>
@@ -118,9 +119,11 @@ export default function LanguageBlock({
             </h2>
             <div data-lang-window className={winClass}>
               <img
-                src={img2}
+                {...imgAttrs(img2, variants)}
+                sizes="(min-width: 768px) 20rem, 36vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform"
               />
             </div>
@@ -129,9 +132,11 @@ export default function LanguageBlock({
           <div data-lang-row data-align="start" className={rowClass}>
             <div data-lang-window className={winClass}>
               <img
-                src={img3}
+                {...imgAttrs(img3, variants)}
+                sizes="(min-width: 768px) 20rem, 36vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="absolute inset-[-40%_0] h-[180%] w-full object-cover will-change-transform"
               />
             </div>
@@ -141,7 +146,7 @@ export default function LanguageBlock({
           </div>
         </div>
 
-        <p className="mt-8 text-right text-[10px] tracking-[0.28em] uppercase opacity-55 md:mt-10">
+        <p className="mt-8 text-right text-[11px] tracking-[0.28em] uppercase opacity-55 md:mt-10">
           {note}
         </p>
       </div>

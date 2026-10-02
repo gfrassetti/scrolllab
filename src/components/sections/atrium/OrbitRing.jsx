@@ -1,14 +1,18 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import orbitCivic from './assets/orbit-civic.jpg'
-import orbitFacade from './assets/orbit-facade.jpg'
-import orbitMaterials from './assets/orbit-materials.jpg'
-import civic from './assets/civic.jpg'
-import tower from './assets/tower.jpg'
-import courtyard from './assets/courtyard.jpg'
-import gallery from './assets/gallery.jpg'
-import heroHouse from './assets/hero-house.jpg'
-import interior from './assets/interior.jpg'
+import {
+  orbitCivic,
+  orbitFacade,
+  orbitMaterials,
+  civic,
+  tower,
+  courtyard,
+  gallery,
+  heroHouse,
+  interior,
+  variants,
+} from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 // `model.jpg` / `material.jpg` / `orbit-site.jpg` quedan solo para ProcessPin
 // y las seis de PeopleScatter (orbit-board/meeting/screens/hands/desk/model)
@@ -102,9 +106,11 @@ export default function OrbitRing({
             >
               <img
                 data-orbit-media
-                src={src}
+                {...imgAttrs(src, variants)}
+                sizes="40vw"
                 alt=""
                 loading={i > 3 ? 'lazy' : undefined}
+                decoding="async"
                 className="h-[116%] w-full max-w-none -translate-y-[7%] object-cover will-change-transform"
               />
             </div>

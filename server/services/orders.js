@@ -1,16 +1,16 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import {
-  packFixedTemplate,
-  packCustomTemplate,
-  packBundleTemplate,
-} from '../packaging.js'
+import { packOrderTemplate, PACK_VERSION } from '../packaging.js'
 import { BUNDLE_MODELS } from '../catalog.js'
 import { purchaseCode } from '../license.js'
 import { HttpError } from '../validation.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
-import { sendOrderReceiptOnce, sendOrderAdminNotifyOnce } from './email.js'
+import {
+  sendOrderReceiptOnce,
+  sendOrderAdminNotifyOnce,
+  sendAdminAlert,
+} from './email.js'
 import { redeemCouponForOrder } from './coupons.js'
 
 const packingLocks = new Map()
@@ -26,11 +26,15 @@ export function assertPathInsideStorage(filePath, storageDir) {
 }
 
 /**
- * Empaqueta el ZIP de una orden una sola vez (lock por orderId).
+ * Empaqueta el ZIP de una orden una sola vez (lock por orderId). Con todos sus
+ * ítems: antes solo entraba el primero y quien compraba dos templates juntos
+ * pagaba los dos y recibía uno.
  */
 export async function ensureOrderZip(order, user, config) {
   const orderId = db.uid(order) || order.id
-  if (order.zipPath) {
+  // Un ZIP armado con otra versión del empaquetador (PACK_VERSION) se rearma:
+  // así un arreglo le llega también a quien ya había comprado.
+  if (order.zipPath && order.zipVersion === PACK_VERSION) {
     try {
       const safe = assertPathInsideStorage(order.zipPath, config.storageDir)
       if (fs.existsSync(safe)) return safe
@@ -50,42 +54,41 @@ export async function ensureOrderZip(order, user, config) {
     )
     fs.mkdirSync(path.dirname(dest), { recursive: true })
 
+    // La licencia se fecha al emitirse (el primer armado) y rearmar no la
+    // cambia. Un ZIP de antes de guardar la fecha usa la de la orden.
+    const reissue = Boolean(order.zipPath)
+    const licenseDate =
+      order.licenseDate ||
+      new Date(reissue ? order.createdAt || Date.now() : Date.now())
+        .toISOString()
+        .slice(0, 10)
     const licenseMeta = {
       orderId,
       email: user.email,
-      date: new Date().toISOString().slice(0, 10),
+      date: licenseDate,
       purchaseCode: purchaseCode(orderId, config.downloadSecret),
     }
 
-    const item = order.items[0]
-    if (!item) throw new HttpError(500, 'Orden sin ítems')
-
-    if (
-      item.sku === 'custom' ||
-      String(item.sku).startsWith('custom:') ||
-      item.recipe?.length
-    ) {
-      await packCustomTemplate({
-        recipe: item.recipe || [],
-        destPath: dest,
+    if (!order.items?.length) throw new HttpError(500, 'Orden sin ítems')
+    // Se arma aparte y se renombra encima: una descarga en curso del ZIP
+    // anterior sigue leyendo su archivo, nunca uno a medio escribir.
+    const tmp = `${dest}.${process.pid}-${Date.now()}.tmp`
+    try {
+      await packOrderTemplate({
+        items: order.items,
+        destPath: tmp,
         licenseMeta,
+        bundleModels: BUNDLE_MODELS,
       })
-    } else if (item.sku === 'bundle') {
-      await packBundleTemplate({
-        models: BUNDLE_MODELS,
-        destPath: dest,
-        licenseMeta,
-      })
-    } else {
-      await packFixedTemplate({
-        model: item.sku,
-        destPath: dest,
-        licenseMeta,
-      })
+      fs.renameSync(tmp, dest)
+    } finally {
+      fs.rmSync(tmp, { force: true })
     }
 
-    await db.setOrderZipPath(orderId, dest)
+    await db.setOrderZipPath(orderId, dest, { zipVersion: PACK_VERSION, licenseDate })
     order.zipPath = dest
+    order.zipVersion = PACK_VERSION
+    order.licenseDate = licenseDate
     return dest
   })()
 
@@ -108,8 +111,10 @@ export async function markOrderPaid({ orderId, mpPaymentId }) {
     try {
       const { redeemed } = await redeemCouponForOrder(result.order)
       if (!redeemed) {
+        // Dos checkouts abiertos con el mismo cupón y pagados los dos: el
+        // segundo ya se cobró con descuento.
         console.warn(
-          `Cupón ${result.order.couponCode} ya estaba canjeado (order=${orderId})`,
+          `checkout CUPÓN USADO DOS VECES code=${result.order.couponCode} order=${orderId}`,
         )
       }
     } catch (err) {
@@ -117,6 +122,47 @@ export async function markOrderPaid({ orderId, mpPaymentId }) {
     }
   }
   return result
+}
+
+const money = (payment) =>
+  `${payment.transaction_amount} ${payment.currency_id || 'ARS'}`
+const payerOf = (payment) => payment.payer?.email || 'mail desconocido'
+
+/**
+ * Pago que pide acción a mano: log greppable + mail al admin (una vez por
+ * evento). Nunca tira: el webhook tiene que responder igual.
+ */
+function alertAdmin({ kind, key, title, lines, config }) {
+  console.error(`checkout ${title} ${lines.join(' · ')}`)
+  sendAdminAlert({ kind, key, subject: title, lines: [title, '', ...lines], config }).catch(
+    (err) => console.error('checkout alert email', err?.message),
+  )
+}
+
+/**
+ * Un pago aprobado cuya orden no existe. Si es nuestro (la referencia tiene
+ * forma de orden y no es una suscripción de LAB, cuyos cobros también llegan
+ * como `payment`), alguien pagó y no recibe nada: la orden venció (efectivo
+ * acreditado tarde) o se borró.
+ */
+async function reportPaymentWithoutOrder(payment, ref, config) {
+  if (payment.operation_type === 'recurring_payment') return
+  if (!/^[a-f0-9]{24}$/i.test(String(ref))) return
+  try {
+    if (await db.findSubscriptionById(ref)) return
+  } catch {
+    /* no es una suscripción */
+  }
+  alertAdmin({
+    kind: 'orphan',
+    key: String(payment.id),
+    title: 'PAGO SIN ORDEN — entregar o reembolsar',
+    lines: [
+      `pago MP ${payment.id} · ${money(payment)} · ${payerOf(payment)}`,
+      `referencia ${ref}: la orden no existe (venció o se borró)`,
+    ],
+    config,
+  })
 }
 
 /**
@@ -152,12 +198,10 @@ export async function fulfillApprovedPayment({
   try {
     order = await db.findOrderById(orderId)
   } catch (err) {
-    if (err?.name === 'CastError') {
-      throw new HttpError(404, 'No encontramos la orden de ese pago')
-    }
-    throw err
+    if (err?.name !== 'CastError') throw err
   }
   if (!order) {
+    await reportPaymentWithoutOrder(payment, orderId, config)
     throw new HttpError(404, 'No encontramos la orden de ese pago')
   }
 
@@ -182,6 +226,21 @@ export async function fulfillApprovedPayment({
   // El webhook puede haber cumplido la orden antes del confirm: confirmar de
   // nuevo tiene que devolver éxito, no un error.
   const paid = updated || order
+
+  // Otro pago aprobado para una orden que ya estaba paga (MP deja pagar el
+  // mismo link más de una vez): se cobró dos veces.
+  if (!created && paid.mpPaymentId && String(paid.mpPaymentId) !== String(payment.id)) {
+    alertAdmin({
+      kind: 'duplicate',
+      key: String(payment.id),
+      title: 'COMPRA PAGADA DOS VECES — reembolsar',
+      lines: [
+        `pago MP ${payment.id} · ${money(payment)} · ${payerOf(payment)}`,
+        `orden ${db.uid(paid) || paid.id} (${paid.status}) ya pagada con el pago ${paid.mpPaymentId}`,
+      ],
+      config,
+    })
+  }
 
   let user = null
   if (paid.status === 'paid') {
@@ -220,6 +279,56 @@ export async function fulfillApprovedPayment({
     orderId: db.uid(paid) || paid.id || orderId,
     alreadyFulfilled: !created,
   }
+}
+
+/** Estados de MP que dan vuelta un pago aprobado. */
+export const REVERSED_PAYMENT_STATUSES = new Set(['refunded', 'charged_back'])
+
+/**
+ * Reembolso o contracargo del pago de una orden: la orden pasa a `refunded`
+ * y deja de descargarse. Si el pago devuelto no es el que la pagó (el
+ * reembolso de un pago duplicado), la orden sigue paga.
+ */
+export async function reverseOrderPayment({ payment, config }) {
+  const ref = payment.external_reference
+  if (!ref) return { skipped: 'sin referencia' }
+  let order = null
+  try {
+    order = await db.findOrderById(ref)
+  } catch (err) {
+    if (err?.name !== 'CastError') throw err
+  }
+  if (!order) return { skipped: 'sin orden' }
+  const orderId = db.uid(order) || order.id
+  if (String(order.mpPaymentId) !== String(payment.id)) {
+    console.warn(
+      `checkout reembolso de otro pago order=${orderId} pago=${payment.id} ` +
+        `(la orden sigue ${order.status}, pagada con ${order.mpPaymentId || '-'})`,
+    )
+    return { skipped: 'otro pago' }
+  }
+  if (order.status === 'refunded') return { alreadyReversed: true }
+
+  const updated = await db.markOrderRefundedAtomic({
+    orderId,
+    mpPaymentId: payment.id,
+    reason: payment.status,
+  })
+  if (!updated) return { skipped: `orden ${order.status}` }
+  alertAdmin({
+    kind: 'reversed',
+    key: `${payment.id}-${payment.status}`,
+    title:
+      payment.status === 'charged_back'
+        ? 'CONTRACARGO — descargas cortadas'
+        : 'ORDEN REEMBOLSADA — descargas cortadas',
+    lines: [
+      `pago MP ${payment.id} · ${money(payment)} · ${payerOf(payment)}`,
+      `orden ${orderId}: ${order.items.map((i) => i.title || i.sku).join(', ')}`,
+    ],
+    config,
+  })
+  return { reversed: true, order: updated }
 }
 
 /**

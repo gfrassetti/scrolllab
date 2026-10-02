@@ -21,10 +21,13 @@ function htmlSnippet(key, loader) {
  * Framework: solo el tag. El componente `<ScrollLabEmbed>` vive en el paquete
  * `@scrolllab/embed` (lo instala el dev); ya trae adentro el loader y el
  * endpoint. Acá no repetimos URLs ni el cableado — solo la key.
+ *
+ * Next usa el mismo tag: el paquete ya declara 'use client', así que entra
+ * también en un Server Component (probado con Next 15, App Router). Antes el
+ * snippet sumaba 'use client' arriba y convertía toda la página en cliente.
  */
-function reactTag(key, { clientDirective = false } = {}) {
-  const head = clientDirective ? "'use client'\n" : ''
-  return `${head}import ScrollLabEmbed from '@scrolllab/embed'
+function reactTag(key) {
+  return `import ScrollLabEmbed from '@scrolllab/embed'
 
 <ScrollLabEmbed embedKey="${key}" />`
 }
@@ -49,9 +52,8 @@ import ScrollLabEmbed from '@scrolllab/embed/vue'
 export function embedSnippet(key, loader, variant = 'html') {
   switch (variant) {
     case 'react':
-      return reactTag(key)
     case 'next':
-      return reactTag(key, { clientDirective: true })
+      return reactTag(key)
     case 'vue':
       return vueTag(key)
     default:

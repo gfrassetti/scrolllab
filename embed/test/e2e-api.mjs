@@ -4,12 +4,16 @@
  * que se descarta al terminar. No lee `.env` del proyecto.
  *
  *   node embed/test/e2e-api.mjs
+ *
+ * `npm run check:lab` la reusa en otro puerto y con el sitio en otro origen:
+ * E2E_API_PORT, E2E_CLIENT_URL y E2E_EMBED_CDN_URL pisan los defaults.
  */
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sl-embed-e2e-'))
+const PORT = Number(process.env.E2E_API_PORT) || 8787
 
 Object.assign(process.env, {
   NODE_ENV: 'development',
@@ -21,9 +25,10 @@ Object.assign(process.env, {
   RATE_LIMIT_DISABLED: 'true',
   SESSION_SECRET: 'e2e-session-secret-min-24-characters',
   DOWNLOAD_SECRET: 'e2e-download-secret-min-24-characters',
-  CLIENT_URL: 'http://localhost:4178',
-  API_PUBLIC_URL: 'http://localhost:8787',
-  PORT: '8787',
+  CLIENT_URL: process.env.E2E_CLIENT_URL || 'http://localhost:4178',
+  API_PUBLIC_URL: `http://localhost:${PORT}`,
+  ...(process.env.E2E_EMBED_CDN_URL ? { EMBED_CDN_URL: process.env.E2E_EMBED_CDN_URL } : {}),
+  PORT: String(PORT),
   FX_OFFLINE: 'true',
   FX_FALLBACK_RATE: '1560',
   HOSTED_FREE_QUOTA: '50',
@@ -40,8 +45,8 @@ config.authDev = true
 config.mpMock = true
 
 const app = await createApp(config)
-const server = app.listen(8787, () => {
-  console.log('e2e API → http://localhost:8787 (store=file, mpMock)')
+const server = app.listen(PORT, () => {
+  console.log(`e2e API → http://localhost:${PORT} (store=file, mpMock)`)
 })
 server.on('error', (err) => {
   console.error(`e2e API no pudo escuchar: ${err.code || err.message}`)

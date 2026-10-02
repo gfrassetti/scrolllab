@@ -126,7 +126,11 @@ describe('embed e2e (Chromium)', () => {
     hostedKey = (await published.json()).instance.key
     assert.ok(hostedKey, 'key pública')
 
-    browser = await chromium.launch({ args: LAUNCH_ARGS })
+    browser = await chromium.launch({
+      args: LAUNCH_ARGS,
+      // Un Chromium del sistema (contenedores/CI sin `playwright install`).
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
+    })
   })
 
   after(async () => {

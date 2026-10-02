@@ -62,7 +62,8 @@ Disallow: /preview
 Disallow: /checkout
 Disallow: /api/
 
-# Preview sin listar (SIGNAL, WIP) — alcanzable por URL directa, no indexado.
+# SIGNAL y PLUM no salen a producción (redirigen a la home); por si quedó un link viejo.
 Disallow: /templates/signal
+Disallow: /templates/plum
 
 Sitemap: https://www.scrolllab.com.ar/sitemap.xml

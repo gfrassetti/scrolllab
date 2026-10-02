@@ -4,6 +4,8 @@ import {
   sanitizePlainText,
   sanitizeContactPayload,
   validateContactPayload,
+  normalizeProjectType,
+  PROJECT_TYPES,
 } from '../contactForm.js'
 
 const labels = {
@@ -63,5 +65,32 @@ describe('contactForm sanitize', () => {
     assert.equal(result.email, 'ana@mail.com')
     assert.equal(result.message.includes('<'), false)
     assert.equal(/onerror\s*=/i.test(result.message), false)
+  })
+
+  it('normaliza el tipo de proyecto del select del Estudio: solo deja pasar valores del enum', () => {
+    for (const type of PROJECT_TYPES) {
+      assert.equal(normalizeProjectType(type), type)
+    }
+    assert.equal(normalizeProjectType('urgent'), '')
+    assert.equal(normalizeProjectType(''), '')
+    assert.equal(normalizeProjectType(undefined), '')
+    assert.equal(normalizeProjectType('<script>custom</script>'), '')
+  })
+
+  it('sanitizeContactPayload incluye projectType ya normalizado', () => {
+    const withType = sanitizeContactPayload({
+      name: 'Ana',
+      email: 'ana@mail.com',
+      message: 'Necesito un sitio a medida.',
+      projectType: 'custom',
+    })
+    assert.equal(withType.projectType, 'custom')
+
+    const withoutType = sanitizeContactPayload({
+      name: 'Ana',
+      email: 'ana@mail.com',
+      message: 'Necesito un sitio a medida.',
+    })
+    assert.equal(withoutType.projectType, '')
   })
 })

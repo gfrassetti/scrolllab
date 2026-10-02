@@ -221,9 +221,12 @@ snippet.
 - **Modelo `Subscription`** `{ userId, plan, cycle, status, currentPeriodEnd,
   mpPreapprovalId }` + métodos db/fileStore. Una activa por usuario.
 - **Webhook** con branch por `type`: `payment` (intacto) ·
-  `subscription_preapproval` → `handlePreapprovalEvent` (sync status + período)
-  · `subscription_authorized_payment` → log (el período lo cubre el evento
-  anterior). Firma con `config.mpSubs.webhookSecret`.
+  `subscription_preapproval` → `handlePreapprovalEvent` (sync status; el
+  período solo se inicializa al activarse) · `subscription_authorized_payment`
+  → `handleAuthorizedPaymentEvent` (cobro aprobado → período =
+  `debit_date + 1 ciclo`; rechazado → gracia). Firma con
+  `config.mpSubs.webhookSecret`. Semántica completa (gracia, pausa, bajas):
+  `docs/mercadopago-suscripciones-setup.md` → "Estados y acceso".
 - **Enforcement**: `assertCanPublish` en `PUT /api/hosted/:id {publish:true}` —
   cuenta instancias `published` del usuario vs cuota del plan (o
   `HOSTED_FREE_QUOTA`, default **1** = el plan gratis incluye 1 sección
@@ -708,17 +711,45 @@ viewports) + **305 unit** + `npm run check`. `build:embed`: 69.4 KB gz JS.
 
 ### Siguiente tanda (candidatas, requieren más trabajo antes de sumar)
 
-- `unity/*`, `ratio/*` — ningún candidato limpio todavía sin sumar tokens/
-  fuentes nuevas al frame (`embed/frame/main.css` + `index.html`).
-- `atrium/ManifestoType` + `atrium/ScopeSerif`: usan `svh` para el aire (están
-  pensadas para vivir sobre un hero pineado). Necesitan una "embed edition" con
-  alturas acotadas antes de entrar.
+- `unity/*`, `ratio/*` — **verificado archivo por archivo (2026-09): ninguna
+  candidata limpia.** Las 14 secciones de ambas familias usan `scrub` (la
+  mayoría con `pin` también) — no es solo un tema de tokens/fuentes nuevas al
+  frame, es que ninguna es FLOW-safe. Corrige la nota anterior de este doc.
 - El resto de `ALLOWED_SECTIONS` queda afuera por diseño: todos los `Nav*`
   (header fijo en una caja no tiene sentido), pin+scrub (`HorizontalPanels` ya
   tiene mecánica probada pero sin props de contenido editables — ver Fase 2),
   y scrub-sin-pin (`ManifestoReveal`, `QuoteBreak`, `StatField`, `ClarityPair`,
   `ZoomPortal`, `StickyWordCycle`, `TrackMerge`, `ParallaxRise`, `PopManifesto`,
   `SpecSheet`… — se congelan en FLOW porque el frame no scrollea).
+
+---
+
+## Fase F — ManifestoType + ScopeSerif, 23 hosteables en total (2026-09)
+
+`atrium/ManifestoType` · `atrium/ScopeSerif`. Mismo criterio `once`/sin pin/sin
+scrub que toda tanda anterior — la nota de la fase pasada las daba por
+bloqueadas en un "embed edition" por usar `svh`; **no hizo falta**: mismo trato
+que `FooterAtrium` (que ya vive con `pt-[14svh]` desde Fase 7), el puente de
+altura converge en un par de pasadas más, no rompe. `SKIP_HEIGHT_FOLLOW` en el
+e2e suma las dos.
+
+Bug real encontrado por el e2e, no por lectura de código: `ScopeSerif` caía a
+`#root` de ~30px (invisible) en las 3 resoluciones. Causa — `.atrium-lead` y
+`.atrium-display` (las clases de tipografía que usan `ManifestoType`/
+`ScopeSerif`) nunca se habían portado a `embed/frame/main.css`; Fase 7 solo
+tokenizó lo que `FooterAtrium` necesitaba (`.atrium-note` + colores). Fix:
+mismas dos clases + `--atrium-display`/`--atrium-lead` copiadas de
+`src/index.css` a `embed/frame/main.css` (`--font-display`/Playfair Display ya
+estaban). `ManifestoType` pasaba igual porque su columna de notas (`.atrium-note`,
+ya tokenizada) le daba suficiente alto propio para no notarse — **una sección
+puede pasar el checklist "se ve, no hay overflow" y aun así estar mal
+tokenizada; el chequeo de alto (`#root > 40px`) fue el que lo agarró.**
+
+Sin `list` en ninguna de las dos (no tienen colección repetible): solo
+`bg`/`fg`, igual que toda sección sin contenido en grilla.
+
+Tests: 508 unit + 99 e2e (7 base + 23 por-sección + 69 responsive, las 23 × 3
+viewports) + `npm run check`.
 
 ---
 

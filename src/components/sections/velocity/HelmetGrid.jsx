@@ -1,11 +1,7 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import helm1 from './assets/helm-1.png'
-import helm2 from './assets/helm-2.png'
-import helm3 from './assets/helm-3.png'
-import helm4 from './assets/helm-4.png'
-import helm5 from './assets/helm-5.png'
-import helm6 from './assets/helm-6.png'
+import { helm1, helm2, helm3, helm4, helm5, helm6, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /** Varied notch / irregular masks — storytelling “hall of fame” feel. */
 const MASKS = [
@@ -148,12 +144,18 @@ function HelmCard({ item, isActive, onActivate }) {
           >
             {item.img ? (
               <img
-                src={item.img}
+                {...imgAttrs(item.img, variants)}
+                sizes="(min-width: 768px) 30vw, 50vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
               />
-            ) : null}
+            ) : (
+              // Sin foto (un ítem nuevo, el embed de LAB): la máscara se lee
+              // como un panel en vez de quedar solo el trazo sobre negro.
+              <div className="h-full w-full bg-gradient-to-br from-[#ece9e2]/[0.1] via-[#ece9e2]/[0.04] to-transparent" />
+            )}
             <div
               className="absolute inset-0"
               style={{
@@ -166,9 +168,11 @@ function HelmCard({ item, isActive, onActivate }) {
             >
               {item.hover ? (
                 <img
-                  src={item.hover}
+                  {...imgAttrs(item.hover, variants)}
+                  sizes="(min-width: 768px) 30vw, 50vw"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
               ) : null}
@@ -176,7 +180,7 @@ function HelmCard({ item, isActive, onActivate }) {
           </div>
           <NotchStroke active={isActive} maskIndex={item.mask} />
           <p
-            className={`absolute right-0 bottom-[2%] w-[42%] pl-2 text-[10px] leading-tight tracking-[0.18em] uppercase md:text-[11px] ${
+            className={`absolute right-0 bottom-[2%] w-[42%] pl-2 text-[11px] leading-tight tracking-[0.18em] uppercase ${
               isActive ? 'text-[#ece9e2]' : 'text-white/55'
             }`}
           >

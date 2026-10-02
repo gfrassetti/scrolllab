@@ -8,6 +8,7 @@ import {
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
 import { checkoutPropsFromItems } from '../lib/shop/checkoutProps'
+import { productsFromItems } from '../lib/shop/catalog'
 import { useCart } from '../lib/cart'
 import { api } from '../lib/api'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
@@ -169,6 +170,7 @@ export default function PreviewPage() {
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}
+          products={productsFromItems(items)}
         />
       ) : (
         home

@@ -10,6 +10,7 @@ estudios que venden sitios) mostrando el producto, no diciendo que es bueno.
 | Video vertical por demo (`9x16-es.mp4` y `9x16-en.mp4`, unos 25 s, sin audio) | `media/marketing/<demo>/` | `npm run video:demos` |
 | Texto para publicar por demo (es y en) con links con UTM por canal | `media/marketing/<demo>/caption-*.txt` | `npm run copy:social` |
 | Tarjeta propia al compartir cada demo | `public/og/` | `npm run gen:og` |
+| Grilla del perfil de Instagram: mosaico del logo (9 piezas) y 3 posts de info (Templates, Builder, LAB), con el orden de subida en `LEEME.txt` | `media/instagram/` | `npm run gen:instagram` |
 | Cupón del 10% en la primera compra: se crea solo cuando alguien entra con Google, le llega por mail y aparece en el carrito y en la cuenta | sitio | — |
 | Qué canal trajo cada cuenta | terminal | `npm run leads:stats` |
 
@@ -17,6 +18,9 @@ Qué ve quien mira el video (sin sonido, se entiende leyendo): arriba una frase 
 dice qué es ("Webs que cuentan una historia mientras se mueven"), la demo grande
 scrolleando, a los pocos segundos el nombre del template y "código fuente
 incluido", y un cierre con "Llevate el código y usalo en tu proyecto", el
+dice qué es ("Webs que cuentan una historia mientras scrolleás"), la demo grande
+scrolleando, a los pocos segundos el nombre del template y "un modelo listo para
+usar, con el código incluido", y un cierre con "Llevate el código y usalo en tu proyecto", el
 sitio y el 10% de la primera compra. La primera frase ya está en el cuadro 0, así
 que sirve de portada.
 
@@ -68,12 +72,18 @@ para mostrar proyectos. Participá un par de días antes respondiendo dudas.
 - **Hacker News**: "Show HN: Scroll-driven website templates in React + GSAP". Tiene que poder probarse: las demos son públicas.
 - **Codrops y medios de creative dev**: un tutorial de una técnica de una demo, por ejemplo el héroe con máscara por letra de CHAPTERS. Revisá cómo se envían colaboraciones.
 - **Discords y grupos de devs de LatAm**: mostrar una demo cuando alguien pregunta por animaciones en scroll.
-- **Mensajes directos a estudios y freelancers**: 10 por semana, con la demo que mejor les cierra y el link con `utm_source=dm`. Es lo más lento y lo que más convierte.
+- **Mensajes directos a estudios y freelancers**: 10 por semana, con la demo que mejor les cierra y el link con `utm_source=dm`. Es lo más lento y lo que más convierte. Si el estudio ya tiene sitio y pregunta por algo que ningún template resuelve (rebranding, mantenimiento, un sitio 100% a medida), ahí se menciona el Estudio — sin convertir el DM en un pitch de servicios: mostrás la demo primero, el Estudio es la respuesta a su pregunta, no la apertura.
+
+Los leads del Estudio entran por `#contacto` en el home (Formspree + evento GTM
+`generate_lead` con `lead_source=home_contact_*`) — no por `leads:stats` (eso
+sigue siendo solo cuentas con cupón). Detalle de servicios y precios ancla:
+`docs/estudio-positioning.md`.
 
 ## El "cómo está hecho" de la semana 4
 
 Un hilo o carrusel corto: una técnica, 3 capturas, el código de 10 líneas y el
-link. Muestra la calidad del código antes de que compren, que era la duda que
+link. Este sí habla de GSAP y React: es para X, Reddit y comunidades de devs, no para
+Instagram, donde el perfil no menciona la tecnología. Muestra la calidad del código antes de que compren, que era la duda que
 más frena a un dev.
 
 Borrador listo (sale de un bug real del héroe de CHAPTERS, `HeroKinetic.jsx`).
@@ -82,7 +92,7 @@ del "storv" si la tenés de antes del arreglo.
 
 **Hilo en español (X / LinkedIn)**
 
-1. Bug de la semana: mi héroe decía «storv». La cola de la «y» en cursiva quedaba cortada 🧵
+1. Bug de la semana: mi héroe decía «storv». La cola de la «y» en cursiva quedaba cortada
 2. Causa: con `SplitText` de GSAP, `mask: 'chars'` recorta cada letra a la altura de su línea. Con `line-height: .82` esa caja es más baja que el glifo.
 3. El arreglo (agrandar la máscara hacia abajo; el margen negativo deja el layout igual):
 
@@ -102,7 +112,7 @@ del "storv" si la tenés de antes del arreglo.
 
 **Thread in English**
 
-1. Bug of the week: my hero read "storv". The tail of the italic "y" was clipped 🧵
+1. Bug of the week: my hero read "storv". The tail of the italic "y" was clipped
 2. Cause: GSAP `SplitText` with `mask: 'chars'` clips each letter to its line's height. With `line-height: .82` that box is shorter than the glyph.
 3. The fix (grow the mask downward; the negative margin keeps the layout the same): same snippet as above.
 4. Why `135` and not `100`? With the taller mask, at 100% a sliver of the letter peeks in before the animation starts.

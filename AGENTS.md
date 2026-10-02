@@ -15,6 +15,29 @@ Vendemos **páginas de nivel Awwwards**: demos originales, cinematográficas, qu
 
 El cookbook de motion (`docs/motion-cookbook.md`) y Canvas/WebGL son herramientas para ese estándar, no ornamento. La plusvalía junto al builder es **Beat** (`docs/scrolllab-beat.md`, `src/lib/beat/`): riel + seek en nuestras secciones, no un fade genérico. Si la URL de referencia es un proyecto **Readymag**, extraer recetas y alimentar Beat — no interpolar a ojo con GSAP ni copiar el viewer (`docs/readymag-motion.md`).
 
+**Estudio (trabajo a medida).** Además del marketplace, ScrollLab también es un
+estudio: hace sitios a medida y adapta un modelo del catálogo a la marca del
+cliente — las dos únicas tarjetas en el home. También ofrece mantenimiento/
+soporte, pero **sin tarjeta ni suscripción propia** (no es self-serve como
+LAB): sale solo si surge en la conversación con quien ya contactó por uno de
+los dos servicios de arriba. Todo por cotización
+manual (no pasa por el checkout de Mercado Pago), enmarcado en la calidad del
+sitio y el proceso (diagnóstico antes de construir), nunca por hora. **No
+prometer resultados de negocio** (más clientes, más conversión, más
+consultas): eso depende de marketing/tráfico/oferta, no de nosotros — somos
+un estudio de desarrollo web, no una agencia de marketing (2026-09-28,
+decisión explícita del dueño tras dudar de la lección de un curso). Público: marcas
+que quieren un sitio de nivel superior al promedio — no se nombran rubros
+específicos (arquitectura, moda, etc.) en copy público ni en el pitch, no
+suma acotar la lista. Los precios ancla del Estudio no se muestran en el
+sitio (se hablan con el cliente) y tienen que quedar siempre arriba del techo
+del builder (`CUSTOM_BASE_PRICE_USD` + secciones extra + commerce,
+`src/lib/pricing.js`) y del template más caro en venta: no afirmar cupos
+fijos ("1 por mes") — la capacidad depende del proyecto. Copy y sección viven
+en el home
+(`src/pages/TemplatesIndex.jsx`, zona `estudio`, componente `ZoneHeadline`);
+detalle completo en `docs/estudio-positioning.md`.
+
 ## Design craft — obligatorio (siempre)
 
 En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, polish, animación):
@@ -29,11 +52,12 @@ En **cualquier** tarea de UI/UX (homepage, templates, builder, cart, chrome, pol
 | 6 | **Higgsfield** (plugin MCP) | Generar fotos, cutouts PNG, video, GLB — **preferido** para assets de templates | namespace `plugin-higgsfield-higgsfield` · [higgsfield.ai](https://higgsfield.ai) · plugin [Cursor Marketplace](https://cursor.com/marketplace/higgsfield) |
 | 7 | **playwright-cli** | Verificar demos/UI en el browser (open / snapshot / click / screenshot). Token-efficient | `.agents/skills/playwright-cli/` · [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) · [docs](https://playwright.dev/docs/getting-started-cli) |
 | 8 | **img2threejs** | Reconstruir un objeto de una foto como Three.js **procedural** (código, no GLB) | `.agents/skills/img2threejs/` · [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs) |
+| 9 | **The Award-Winning Web Developer** (curso del usuario) | Craft award-level: white space, jerarquía, motion con vocabulario chico, catálogo de micro-interacciones, checklist award vs. genérico | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) |
 
 ### Reglas de uso (no negociables)
 
 1. **Impeccable siempre**: al crear o tocar UI, **leer** `.cursor/skills/impeccable/SKILL.md` y correr el flujo relevante (`critique` / `audit` / **`polish`**). No shippear chrome “a ojo” sin pasar por Impeccable.
-2. **Emil en motion de UI**: chrome del market + microinteracciones de templates (nav, botones, popovers, toasts). Tokens en `src/index.css` (`--ease-out`, `--ease-in-out`, `--ease-drawer`). Nunca `ease-in` en UI. Scroll storytelling sigue en GSAP + cookbook.
+2. **Emil en motion de UI**: chrome del market + microinteracciones de templates (nav, botones, popovers, toasts) **y la UI propia de cada template** — links, CTAs, cards, accordions, forms — con la capa `tpl-*` de `src/styles/tpl.css` (catálogo del Detalle #6 de la guía del curso, un mismo lenguaje en todo el template) y la barra de scroll propia `src/components/ScrollRail.jsx`. Tokens en `src/index.css` (`--ease-out`, `--ease-in-out`, `--ease-drawer`, `--duration-reveal` para la pausa titular → subtítulo). Nunca `ease-in` en UI. Scroll storytelling sigue en GSAP + cookbook.
 3. **taste-skill antes de inventar look**: declarar un “Design Read” de una línea; evitar defaults LLM (purple mesh, Inter+slate, cards genéricas). Skill canónico: `design-taste-frontend`.
 4. El scrollytelling cinematográfico (pin/scrub/WebGL) **no** se reemplaza por micro-UI: Emil/Impeccable pulen el chrome y los detalles; el cookbook manda el scroll.
 5. **Higgsfield para piezas de imagen** de templates (fotos, cutouts, upscale). No picsum. `GenerateImage` nativo de Cursor es fallback si el plugin no está. Video / GLB: preflight `get_cost` y confirmar créditos con el usuario.
@@ -91,6 +115,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 | Template existente "no está al nivel de la ref" (handoff / review) | [`docs/rebuild-against-reference.md`](docs/rebuild-against-reference.md) — reconstruir contra beats, no contra el JSX actual |
+| Revisar o pulir un template contra el estándar award-level (white space, micro-interacciones, orden de entrada) | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) — checklist «Award-level vs. genérico» |
 
 ## Design craft — Impeccable + UI/UX Pro Max (detalle)
 
@@ -191,7 +216,24 @@ npm run check          # invariantes cruzadas (precios, secciones, props, i18n, 
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
+npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
+npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
+npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 ```
+
+### Responsive — 3 tiers (mobile / tablet / desktop)
+
+Modelo acordado, mapeado a Tailwind v4 (breakpoints default):
+
+- **Mobile**: base sin prefijo, `< 640`. Referencias 390 y 480.
+- **Tablet**: `sm:` (≥640) hasta 1023. Referencias 768 y 834. `md:` (768) es refinamiento *dentro* de tablet (los navs colapsan a hamburguesa en `md`; excepción intencional: `NavAtelier` siempre overlay vía `useMobileMenu({ breakpoint: null })`).
+- **Desktop**: `lg:` (≥1024). Referencias 1280/1440.
+
+Reglas:
+- Navs de template + market colapsan en `md:` (consistente; no mezclar `lg:` como hacía comic).
+- Grid/flex items que puedan quedar más anchos que su track necesitan `min-w-0` (el default `min-width:auto` los expande a min-content y desborda; fue el bug del builder en mobile).
+- `body { overflow-x: clip }` enmascara leaks horizontales pero **no** arregla layout; usar `npm run check:responsive` para detectar elementos que se salen del viewport. Ojo: secciones con scroll horizontal/marquee/pin (HorizontalPanels, TrackMerge, SelectedWork, ChapterRail, marquees) son anchas *a propósito* y van clippeadas — no son overflow real.
+- Piso en mobile (≤ 480, probado desde 320): micro-labels ≥ 11 px y cuerpo ≥ 14 px; controles con zona de toque ≥ 44 px (`tpl-hit` si el dibujo es más chico; los links dentro de un párrafo quedan exentos); alturas en `svh`; nada que solo se descubra con hover (Tailwind v4 ya limita `hover:` a dispositivos con hover, pero el contenido tiene que tener camino táctil); imágenes con `srcSet`/`sizes`. `npm run check:mobile` lo mide por sección.
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
 roto. Dos redes lo cubren:
@@ -247,11 +289,13 @@ src/lib/
 ```
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 235 con 8 secciones incluidas, USD 15 por cada sección
+tramos**: base de USD 389 con 8 secciones incluidas, USD 15 por cada sección
 extra hasta 30, más USD 39 si la receta trae commerce. Cuenta cada entrada de la
 receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
 sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
-que quedar **arriba** del template más caro que SÍ está en venta (hoy USD 229).
+que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN,
+USD 379).
+que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN, USD 379).
 Las constantes viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
 valida la paridad. Detalle en `docs/DEPLOY.md`.
 
@@ -294,8 +338,10 @@ Si el efecto se scrubea con el scroll es GSAP. Motion y GSAP peleando por el
 **ZIP:** el empaquetador (`server/packaging.js`) copia `SHARED` + la carpeta de la
 sección y **no sigue imports relativos**. Una sección de un template a la venta
 no puede importar `components/ui/*` ni `lib/utils` (no viajan, ni sus deps). PLUM
-sí los importa y está bloqueado para vender hasta resolverlo — ver el bloque
-"Bloqueante" en [`docs/motion-componentry.md`](docs/motion-componentry.md).
+sí los importa — ver el bloque "Bloqueante" en
+[`docs/motion-componentry.md`](docs/motion-componentry.md). PLUM y SIGNAL no se
+van a terminar: quedan solo en local (`LOCAL_ONLY_SKUS`, ruta que en producción
+redirige a la home, fuera del builder, sus frames no viajan en el build).
 El alias `@/` (→ `src/`) es sólo para `components/ui` y `lib`, nunca dentro de
 `components/sections/*`.
 
@@ -344,8 +390,9 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 #### Precio
 
-- RATIO lista **USD 269** (Beat, el más caro). Catálogo en venta: entry 149 / mid 189 / top 229 / Beat 269.
-- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 235) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
+- RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379 (el más caro hoy).
+- RATIO lista **USD 269** (Beat). Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379.
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 389) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
 

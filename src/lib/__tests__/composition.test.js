@@ -71,6 +71,26 @@ describe('compositionToRecipe', () => {
     ])
   })
 
+  // Una fila que se agregó y quedó en blanco no es contenido: el preview no la
+  // dibuja y el servidor la descarta, así que la receta tampoco la manda.
+  it('no manda filas de lista vacías', () => {
+    const recipe = compositionToRecipe([
+      {
+        uid: 'a',
+        sectionId: 'chapters/FooterCTA',
+        props: { links: [{}, { label: 'IG', href: 'https://instagram.com/x' }, {}] },
+      },
+      { uid: 'b', sectionId: 'chapters/BigNumbers', props: { stats: [{}] } },
+    ])
+    assert.deepEqual(recipe, [
+      {
+        id: 'chapters/FooterCTA',
+        props: { links: [{ label: 'IG', href: 'https://instagram.com/x' }] },
+      },
+      { id: 'chapters/BigNumbers' },
+    ])
+  })
+
   it('no deja pasar blob: ni data: — no sobreviven al ZIP', () => {
     const recipe = compositionToRecipe([
       {

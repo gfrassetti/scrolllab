@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import ScrollRail from '../components/ScrollRail'
 import NavNocturne from '../components/sections/nocturne/NavNocturne'
 import HeroCinematic from '../components/sections/nocturne/HeroCinematic'
 import ZoomPortal from '../components/sections/nocturne/ZoomPortal'
@@ -16,7 +17,8 @@ import OutroCTA from '../components/sections/nocturne/OutroCTA'
 export default function NocturnePage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-noir text-salt">
+      <div id="top" className="tpl-world bg-noir text-salt selection:bg-acid selection:text-noir">
+        <ScrollRail trackClassName="bg-salt/10" fillClassName="bg-acid" />
         <NavNocturne />
 
         <main>

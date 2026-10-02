@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { picsumAttrs } from './picsum'
 
 /**
  * ZoomPortal — a small image window pinned at screen center grows
@@ -45,7 +46,9 @@ export default function ZoomPortal({
   return (
     <section ref={root} className="relative h-[260vh] md:h-[300vh]">
       <div className="sticky top-0 flex h-svh items-center justify-center overflow-hidden">
-        <div className="absolute top-0 inset-x-0 mx-5 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mx-10">
+        {/* Mientras la sección está pegada arriba, el rótulo baja lo que mide
+            la nav fija para no pisarse con ella. */}
+        <div className="absolute top-16 inset-x-0 mx-5 flex items-baseline justify-between border-t border-salt/20 pt-4 md:top-20 md:mx-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
             Seq. {seq} / {total}
           </p>
@@ -62,9 +65,11 @@ export default function ZoomPortal({
 
         <div data-portal className="absolute inset-0 will-change-transform">
           <img
-            src={img}
+            {...picsumAttrs(img)}
+            sizes="100vw"
             alt=""
             loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         </div>

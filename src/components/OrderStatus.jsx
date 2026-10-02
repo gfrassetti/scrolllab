@@ -4,6 +4,7 @@ const STATUS_CLASS = {
   paid: 'text-success',
   pending: 'text-warning',
   failed: 'text-danger',
+  refunded: 'text-ink/50',
 }
 
 /** Único lugar donde se decide cómo se ve un estado de orden. */

@@ -21,6 +21,8 @@ export default function FooterSplash({
   bg,
   fg,
   legal = '©2026 Placeholder Brand — Template, not a promise',
+  note = 'Placeholder closing note. Tell people where to go next — swap this text and the links for your own.',
+  backToTop = 'Back to top ↑',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -87,8 +89,7 @@ export default function FooterSplash({
 
       <div className="relative mb-20 grid gap-12 md:mb-28 md:grid-cols-12">
         <p className="max-w-[30ch] text-sm leading-relaxed text-foam/70 md:col-span-5 md:text-base">
-          Placeholder closing note. Tell people where to go next — swap this
-          text and the link columns in the code.
+          {note}
         </p>
         <div className="grid grid-cols-2 gap-8 md:col-span-7 md:justify-items-end">
           {flatLinks.length > 0 ? (
@@ -146,7 +147,7 @@ export default function FooterSplash({
           href="#top"
           className="transition-colors duration-300 hover:text-fizz"
         >
-          Back to top ↑
+          {backToTop}
         </a>
       </div>
     </footer>

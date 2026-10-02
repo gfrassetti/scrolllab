@@ -18,22 +18,23 @@ export const TEMPLATE_PRICES_USD = {
 }
 
 /**
- * En catálogo se ven grayed-out; no se venden ni tienen demo pública.
+ * No se venden ni tienen demo pública. Los que además son LOCAL_ONLY no se
+ * listan en ningún lado (ver abajo).
  */
-export const COMING_SOON_SKUS = ['ratio']
+export const COMING_SOON_SKUS = ['ratio', 'plum', 'signal']
 
 /**
- * Sin card en home, sin sitemap/product pages — pero la ruta SÍ vive en
- * producción (no gateada a `npm run dev`), alcanzable solo por quien ya
- * conoce la URL. Mismo patrón que SIGNAL (ver public/robots.txt).
- * PLUM está en scaffolding (secuencia de frames scroll-scrubbed).
- * SIGNAL está en scaffolding (hero word-cycle + pixel-reveal grid).
+ * Solo en local: sin card en home, sin sitemap ni páginas de producto, y en
+ * producción la ruta redirige a la home (`import.meta.env.DEV` en App.jsx).
+ * RATIO sigue en obra. PLUM y SIGNAL no se van a terminar: quedan en el repo
+ * solo como referencia local, no salen a producción.
  */
 export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal']
 
 /**
  * Modelos que no entran a la paleta PÚBLICA del builder (la que ve
- * cualquier visitante en /builder). RATIO, PLUM y SIGNAL siguen en obra.
+ * cualquier visitante en /builder). RATIO sigue en obra; PLUM y SIGNAL no se
+ * terminan.
  */
 export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal']
 
@@ -67,6 +68,17 @@ export const MAX_CUSTOM_SECTIONS = 30
 
 export const COMMERCE_PACK_SURCHARGE_USD = 39
 export const BUNDLE_PRICE_USD = 649
+/** Modelos que trae el bundle — espejo de `BUNDLE_MODELS` en server/catalog.js. */
+export const BUNDLE_MODELS = [
+  'chapters',
+  'nocturne',
+  'monolith',
+  'velocity',
+  'fizz',
+  'atelier',
+  'comic',
+  'unity',
+]
 
 /** Respaldo para el primer render, antes de que llegue la cotización real. */
 export const FALLBACK_USD_ARS = 1560

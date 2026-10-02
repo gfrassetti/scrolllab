@@ -1,9 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import panelA from './assets/panel-a.png'
-import panelB from './assets/panel-b.png'
-import panelC from './assets/panel-c.png'
-import panelD from './assets/panel-d.png'
+import { panelA, panelB, panelC, panelD, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultPanels = [
   {
@@ -266,7 +264,9 @@ export default function HorizontalPanels({
 
   return (
     <section ref={root} className="relative overflow-hidden md:h-svh">
-      <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-0 md:z-10 md:mx-10 md:px-0">
+      {/* Pinneada, la sección queda en el tope del viewport: el rótulo baja
+          lo que mide la nav fija para no pisarse con ella. */}
+      <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
           Chapter {chapter} / {total}
         </p>
@@ -354,9 +354,11 @@ export default function HorizontalPanels({
               </div>
               {panel.img ? (
                 <img
-                  src={panel.img}
+                  {...imgAttrs(panel.img, variants)}
+                  sizes="(min-width: 1024px) 36vw, (min-width: 768px) 52vw, 100vw"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="aspect-4/5 w-full object-cover"
                 />
               ) : null}

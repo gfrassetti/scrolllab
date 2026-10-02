@@ -39,6 +39,11 @@ import AboutClarity from '../../src/components/sections/atelier/AboutClarity.jsx
 import CanCarousel from '../../src/components/sections/fizz/CanCarousel.jsx'
 import StudioCards from '../../src/components/sections/atelier/StudioCards.jsx'
 import HelmetGrid from '../../src/components/sections/velocity/HelmetGrid.jsx'
+// v1.4 — mismo trato que FooterAtrium: usan `svh` para el aire (el puente de
+// altura tarda más pasadas en converger, no rompe). Atrium ya tokenizado.
+import ManifestoType from '../../src/components/sections/atrium/ManifestoType.jsx'
+import ScopeSerif from '../../src/components/sections/atrium/ScopeSerif.jsx'
+import { MODEL_WRAPPER_CLASS } from '../../src/lib/modelWrappers.js'
 
 const SECTIONS = {
   'chapters/FooterCTA': FooterCTA,
@@ -62,31 +67,23 @@ const SECTIONS = {
   'fizz/CanCarousel': CanCarousel,
   'atelier/StudioCards': StudioCards,
   'velocity/HelmetGrid': HelmetGrid,
+  'atrium/ManifestoType': ManifestoType,
+  'atrium/ScopeSerif': ScopeSerif,
 }
 
 /**
  * Canvas del modelo (fondo + color de texto). Fuera del sitio la sección no
  * hereda el `wrapperClass` de sectionRegistry, así que el frame lo aplica al
  * `#root`. Varias secciones (OutroCTA, FooterSplash) no pintan fondo propio y
- * dependen de esto para ser legibles. Strings literales para que Tailwind las
- * escanee (`@source "../src"`) y genere las clases. Coinciden con
- * `wrapperClass` en src/lib/sectionRegistry.jsx.
+ * dependen de esto para ser legibles. Misma tabla que el builder, el ZIP y el
+ * preview del editor de LAB (src/lib/modelWrappers.js): eran copias y se
+ * podían despegar. main.css la escanea con `@source` para generar las clases.
  */
-const MODEL_CANVAS = {
-  chapters: 'bg-bone text-ink',
-  nocturne: 'bg-noir text-salt',
-  monolith: 'bg-concrete text-carbon',
-  fizz: 'bg-grape text-foam',
-  velocity: 'bg-[#0a1a12] text-[#ece9e2]',
-  atelier: 'bg-[#0b0c10] text-white',
-  atrium: 'bg-[#f4f1ea] text-[#111111]',
-}
-
 export async function loadSection(sectionId) {
   return SECTIONS[sectionId] || null
 }
 
 export function canvasFor(sectionId) {
   const model = String(sectionId || '').split('/')[0]
-  return MODEL_CANVAS[model] || ''
+  return MODEL_WRAPPER_CLASS[model] || ''
 }

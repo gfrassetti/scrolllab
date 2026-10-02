@@ -7,6 +7,8 @@ import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
  */
 export default function ScopeSerif({
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -33,6 +35,7 @@ export default function ScopeSerif({
     <section
       ref={root}
       className="bg-atrium-paper px-5 pt-[14svh] pb-[26svh] text-atrium-ink md:px-10 md:pt-[18svh] md:pb-[32svh]"
+      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <h2
         data-scope-line

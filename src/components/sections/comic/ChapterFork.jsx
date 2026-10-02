@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import PaperFrame from './PaperFrame'
-import driveSunset from './assets/drive-sunset.png'
-import closedYards from './assets/closed-yards.png'
+import { driveSunset, closedYards, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * ChapterFork — pinned split: two futures tear apart on scroll.
@@ -105,14 +105,17 @@ export default function ChapterFork({
               <PaperFrame>
                 <div className="relative min-h-72 overflow-hidden md:min-h-85">
                   <img
-                    src={driveSunset}
+                    {...imgAttrs(driveSunset, variants)}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    loading="lazy"
+                    decoding="async"
                     alt=""
                     className="absolute inset-0 h-full w-full object-cover"
                     draggable={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                   <div className="relative z-10 flex h-full min-h-72 flex-col justify-end p-7 md:min-h-85 md:p-9">
-                    <p className="mb-3 text-[10px] tracking-[0.25em] text-white/55 uppercase">
+                    <p className="mb-3 text-[11px] tracking-[0.25em] text-white/55 uppercase">
                       Path 1
                     </p>
                     <h2 className="mb-3 font-brico text-2xl font-bold tracking-[-0.03em] md:text-3xl">
@@ -130,14 +133,17 @@ export default function ChapterFork({
               <PaperFrame>
                 <div className="relative min-h-72 overflow-hidden md:min-h-85">
                   <img
-                    src={closedYards}
+                    {...imgAttrs(closedYards, variants)}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    loading="lazy"
+                    decoding="async"
                     alt=""
                     className="absolute inset-0 h-full w-full object-cover"
                     draggable={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                   <div className="relative z-10 flex h-full min-h-72 flex-col justify-end p-7 md:min-h-85 md:p-9">
-                    <p className="mb-3 text-[10px] tracking-[0.25em] text-white/55 uppercase">
+                    <p className="mb-3 text-[11px] tracking-[0.25em] text-white/55 uppercase">
                       Path 2
                     </p>
                     <h2 className="mb-3 font-brico text-2xl font-bold tracking-[-0.03em] md:text-3xl">

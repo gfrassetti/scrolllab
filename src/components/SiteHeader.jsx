@@ -214,6 +214,9 @@ export default function SiteHeader({ solid = true }) {
               </span>
             )}
           </Link>
+          <Link to="/#estudio" className={`${linkClass} ${zoneClass('estudio')}`}>
+            {t('nav.studio')}
+          </Link>
           <Link to="/#como-funciona" className={linkClass}>
             {t('nav.howItWorks')}
           </Link>
@@ -317,6 +320,14 @@ export default function SiteHeader({ solid = true }) {
                     {used}/{planQuotaLabel}
                   </span>
                 )}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/#estudio"
+                className={`block py-3.5 hover:text-accent ${zoneClass('estudio')}`}
+              >
+                {t('nav.studio')}
               </Link>
             </li>
             <li>

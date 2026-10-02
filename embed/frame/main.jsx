@@ -9,6 +9,121 @@ const key = params.get('key')
 // está la API — abortamos en vez de adivinar un dominio.
 const api = (params.get('api') || '').replace(/\/$/, '')
 
+/**
+ * Origen de la página donde está embebida la sección: para el domain-lock y
+ * para resolver sus links relativos. El fetch de la config sale de este iframe
+ * (nuestro origen): sin esto el server veía siempre embed.scrolllab… y una
+ * instancia con dominios cargados daba 403 también en el sitio autorizado.
+ * Primero `ancestorOrigins` (lo fija el navegador, la página no lo puede
+ * falsear; Chromium/WebKit), después el referrer (Firefox) y por último lo
+ * que manda el loader. Es un freno para que nadie reuse la key, no un DRM.
+ */
+function hostOrigin() {
+  try {
+    const ancestors = location.ancestorOrigins
+    if (ancestors && ancestors.length) return new URL(ancestors[0]).origin
+  } catch {
+    /* sigue */
+  }
+  try {
+    if (document.referrer) return new URL(document.referrer).origin
+  } catch {
+    /* sigue */
+  }
+  try {
+    return new URL(params.get('origin') || '').origin
+  } catch {
+    return ''
+  }
+}
+
+function hostName(origin) {
+  try {
+    return new URL(origin).hostname
+  } catch {
+    return ''
+  }
+}
+
+const SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i
+const APP_LINK_RE = /^(mailto|tel|sms):/i
+
+/**
+ * Los links relativos (`/contacto`) son del sitio del cliente, no de
+ * embed.scrolllab…: se reescriben a su URL absoluta para que un ctrl+click,
+ * el botón del medio o «abrir en pestaña nueva» vayan al lugar correcto.
+ */
+function absolutizeLinks(origin) {
+  if (!origin) return
+  for (const a of root.querySelectorAll('a[href]')) {
+    const href = (a.getAttribute('href') || '').trim()
+    if (!href || href.startsWith('#') || href.startsWith('//') || SCHEME_RE.test(href)) continue
+    try {
+      a.setAttribute('href', new URL(href, `${origin}/`).href)
+    } catch {
+      /* queda como está */
+    }
+  }
+}
+
+/**
+ * Click en un link dentro del embed. El iframe no puede navegar la página del
+ * cliente (sandbox sin allow-top-navigation): antes un link externo cargaba el
+ * otro sitio ADENTRO del iframe y un #ancla o «Back to top» no hacía nada.
+ *  - `#ancla` → el loader hace scroll en la página del cliente.
+ *  - un link del mismo sitio (relativo o con su dominio) → el loader navega,
+ *    en la misma pestaña, como un link normal de su página.
+ *  - mailto: / tel: → el navegador abre la app; el iframe no navega.
+ *  - otro sitio → pestaña nueva.
+ */
+function routeLinks(origin) {
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0) return
+    const a = e.target instanceof Element ? e.target.closest('a[href]') : null
+    if (!a) return
+    const href = (a.getAttribute('href') || '').trim()
+    if (href.startsWith('#')) {
+      e.preventDefault()
+      post({ type: 'scrolllab:anchor', hash: href })
+      return
+    }
+    if (APP_LINK_RE.test(href)) return
+    const modified = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
+    if (!href.startsWith('//') && !SCHEME_RE.test(href)) {
+      // Relativo sin origen conocido: lo resuelve el loader contra su URL.
+      e.preventDefault()
+      if (!modified) post({ type: 'scrolllab:navigate', href })
+      return
+    }
+    let url
+    try {
+      url = new URL(href, location.href)
+    } catch {
+      e.preventDefault()
+      return
+    }
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+      e.preventDefault() // javascript:, data:… — nada
+      return
+    }
+    if (origin && url.origin === origin && !modified) {
+      e.preventDefault()
+      post({ type: 'scrolllab:navigate', href: url.href })
+      return
+    }
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
+  })
+}
+
+// Por qué la API no entrega la sección (ver /api/embed/:key/config).
+const WHY = {
+  402: 'está pausada: el plan de LAB no la cubre',
+  403: 'este dominio no está en los dominios permitidos de la sección (LAB → editor)',
+  404: 'la key no existe (¿se borró la sección?)',
+  409: 'todavía no se publicó',
+}
+
 const root = document.getElementById('root')
 
 /*
@@ -26,6 +141,23 @@ const root = document.getElementById('root')
  */
 let mode = null // null = todavía sin decidir
 let hostVh = 0
+
+/**
+ * `--sl-vh` = 1vh del SITIO del cliente. El build reescribe `vh`/`svh` de las
+ * secciones a `calc(var(--sl-vh) * N)` (embed/hostViewportUnits.js): dentro
+ * del iframe esas unidades medían el propio iframe, que en FLOW mide lo que su
+ * contenido, y una sección con `pt-[30svh]` crecía sin fin. Como `svh`, no
+ * sigue los cambios chicos (la barra del navegador en mobile): solo rotación
+ * o un resize grande.
+ */
+let slVh = 0
+function setHostVh(px, force = false) {
+  const next = Number(px) / 100
+  if (!(next > 0)) return
+  if (!force && slVh && Math.abs(next - slVh) / slVh < 0.2) return
+  slVh = next
+  document.documentElement.style.setProperty('--sl-vh', `${next}px`)
+}
 let scrollMax = 0
 let revealed = false
 
@@ -68,7 +200,10 @@ function onMessage(e) {
   if (!m || typeof m !== 'object') return
 
   if (m.type === 'scrolllab:viewport') {
-    if (m.viewportHeight) hostVh = m.viewportHeight
+    if (m.viewportHeight) {
+      hostVh = m.viewportHeight
+      setHostVh(m.viewportHeight)
+    }
     if (mode === null) decide()
     if (mode === 'flow' && m.inView && !revealed) {
       reveal()
@@ -84,7 +219,68 @@ function onMessage(e) {
   }
 }
 
+/**
+ * Vista previa del editor de LAB (/lab/:id): este mismo frame, con los props
+ * que el editor manda por postMessage (lo que está sin guardar) en vez de la
+ * config publicada. Así el preview es el embed real: mismas fuentes, mismo
+ * CSS, imágenes por defecto sin foto y `vw`/breakpoints según el ancho.
+ * Solo acepta props del sitio de ScrollLab (o localhost en dev): si no,
+ * cualquiera podría usar el frame para mostrar secciones sin plan.
+ */
+/* global __SL_PREVIEW_ORIGINS__ */
+const PREVIEW_ORIGINS =
+  typeof __SL_PREVIEW_ORIGINS__ !== 'undefined' ? __SL_PREVIEW_ORIGINS__ : []
+
+function previewOriginAllowed(origin) {
+  if (PREVIEW_ORIGINS.includes(origin)) return true
+  try {
+    const url = new URL(origin)
+    return url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)
+  } catch {
+    return false
+  }
+}
+
+function preview() {
+  let editor = ''
+  let n = 0
+  const sendHeight = () => {
+    if (!editor) return
+    parent.postMessage(
+      { type: 'scrolllab:height', px: Math.ceil(document.documentElement.scrollHeight) },
+      editor,
+    )
+  }
+  new ResizeObserver(sendHeight).observe(document.documentElement)
+  // Links: #ancla y relativos se le avisan al editor (que no navega); los
+  // externos abren pestaña nueva, como en el sitio.
+  routeLinks('')
+  window.addEventListener('message', async (e) => {
+    if (e.source !== window.parent || !previewOriginAllowed(e.origin)) return
+    const m = e.data
+    if (!m || m.type !== 'scrolllab:preview' || typeof m.sectionId !== 'string') return
+    const Section = await loadSection(m.sectionId)
+    if (!Section) return
+    editor = e.origin
+    setHostVh(m.viewportHeight, true)
+    root.className = canvasFor(m.sectionId)
+    // Key nueva = remonta: SplitText/GSAP corren una vez al montar.
+    n += 1
+    render(h(Section, { ...(m.props || {}), key: n }), root)
+    reveal()
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh()
+      sendHeight()
+    })
+  })
+  parent.postMessage({ type: 'scrolllab:preview-ready' }, '*')
+}
+
 async function main() {
+  if (params.get('preview') === '1') {
+    if (window.parent !== window) preview()
+    return
+  }
   if (!key) {
     console.error('[scrolllab] frame sin key')
     return
@@ -94,15 +290,23 @@ async function main() {
     return
   }
 
+  // Embebido: las unidades de viewport miden el sitio desde el primer render.
+  if (window.parent !== window) setHostVh(params.get('vh'))
+
+  const origin = hostOrigin()
   let config
   try {
-    const res = await fetch(`${api}/api/embed/${encodeURIComponent(key)}/config`, {
-      credentials: 'omit',
-    })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const host = hostName(origin)
+    const res = await fetch(
+      `${api}/api/embed/${encodeURIComponent(key)}/config${host ? `?host=${encodeURIComponent(host)}` : ''}`,
+      { credentials: 'omit' },
+    )
+    if (!res.ok) throw new Error(`${WHY[res.status] || 'error'} (HTTP ${res.status})`)
     config = await res.json()
   } catch (err) {
-    console.error('[scrolllab] no se pudo cargar la config:', err)
+    // El iframe queda en alto 0: en el sitio del cliente no se ve nada roto.
+    // El motivo queda en la consola para quien lo está instalando.
+    console.error('[scrolllab] la sección no se muestra:', err.message || err)
     return
   }
 
@@ -131,6 +335,8 @@ async function main() {
     return
   }
 
+  absolutizeLinks(origin)
+  routeLinks(origin)
   window.addEventListener('message', onMessage)
   // Handshake: el loader manda `viewport` en load/scroll/resize; si el load ya
   // pasó cuando montamos, se perdió. Pedímoslo.

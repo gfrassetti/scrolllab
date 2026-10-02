@@ -107,6 +107,14 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ plan }),
     }),
+  subscriptionChangeQuote: (plan) =>
+    request(`/api/subscriptions/change/quote?plan=${encodeURIComponent(plan)}`),
+  subscriptionUpgradeConfirm: (paymentId) =>
+    request('/api/subscriptions/upgrade/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ paymentId }),
+    }),
+  subscriptionUpgradeMockPay: (url) => request(url, { method: 'POST' }),
   subscriptionCancel: () =>
     request('/api/subscriptions/cancel', { method: 'POST' }),
 }

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { readZip } from './helpers/zip.js'
 
 /**
  * Webhook y confirm cumplen la misma orden. Confirmar un pago que el webhook ya
@@ -11,6 +12,8 @@ import path from 'node:path'
  */
 describe('fulfillApprovedPayment (file store)', () => {
   let fulfillApprovedPayment
+  let ensureOrderZip
+  let PACK_VERSION
   let db
   let HttpError
   let config
@@ -25,7 +28,8 @@ describe('fulfillApprovedPayment (file store)', () => {
 
     ;({ db } = await import('../db.js'))
     ;({ HttpError } = await import('../validation.js'))
-    ;({ fulfillApprovedPayment } = await import('../services/orders.js'))
+    ;({ fulfillApprovedPayment, ensureOrderZip } = await import('../services/orders.js'))
+    ;({ PACK_VERSION } = await import('../packaging.js'))
 
     config = {
       storageDir,
@@ -103,6 +107,44 @@ describe('fulfillApprovedPayment (file store)', () => {
     assert.equal(second.alreadyFulfilled, true)
     assert.equal(second.order.status, 'paid')
     assert.equal(second.orderId, order.id)
+  })
+
+  // Los ZIP quedan cacheados en STORAGE_DIR. Sin versión, un arreglo del
+  // empaquetador nunca le llegaba a quien ya había comprado: bajaba el ZIP roto.
+  it('un ZIP de otra versión del empaquetador se rearma y la licencia conserva su fecha', async () => {
+    const { user, order } = await seedOrder()
+    const { order: paid } = await fulfillApprovedPayment({
+      payment: approvedPayment(order, { id: 2233445566 }),
+      config,
+    })
+    assert.equal(paid.zipVersion, PACK_VERSION)
+
+    // Como quedó una orden vendida antes de versionar: sin marca y con su ZIP viejo.
+    const stale = await db.findOrderById(order.id)
+    stale.zipVersion = undefined
+    stale.licenseDate = undefined
+    stale.createdAt = '2026-03-14T12:00:00.000Z'
+    await stale.save()
+    fs.writeFileSync(stale.zipPath, 'zip viejo')
+
+    const zipPath = await ensureOrderZip(stale, user, config)
+    const buf = fs.readFileSync(zipPath)
+    assert.equal(buf.subarray(0, 2).toString('latin1'), 'PK', 'no lo rearmó')
+    const license = readZip(buf).get('LICENSE.txt').toString('utf8')
+    assert.match(license, /2026-03-14/, 'la licencia cambió de fecha')
+    const saved = await db.findOrderById(order.id)
+    assert.equal(saved.zipVersion, PACK_VERSION)
+    assert.equal(saved.licenseDate, '2026-03-14')
+    assert.deepEqual(
+      fs.readdirSync(path.dirname(zipPath)).filter((f) => f.endsWith('.tmp')),
+      [],
+      'quedó un temporal en storage',
+    )
+
+    // Con la versión al día no se toca: mismo archivo.
+    const before = fs.statSync(zipPath).mtimeMs
+    await ensureOrderZip(saved, user, config)
+    assert.equal(fs.statSync(zipPath).mtimeMs, before)
   })
 
   it('un pago en proceso es 409, no 500', async () => {

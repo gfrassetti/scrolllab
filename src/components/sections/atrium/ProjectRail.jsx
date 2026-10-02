@@ -1,11 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import civic from './assets/civic.jpg'
-import tower from './assets/tower.jpg'
-import courtyard from './assets/courtyard.jpg'
-import gallery from './assets/gallery.jpg'
-import heroHouse from './assets/hero-house.jpg'
-import interior from './assets/interior.jpg'
+import { civic, tower, courtyard, gallery, heroHouse, interior, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * Cada obra ocupa un ancho y una banda distintos: la pagina se lee como un
@@ -108,9 +104,11 @@ export default function ProjectRail({
             >
               <img
                 data-work-media
-                src={work.img}
+                {...imgAttrs(work.img, variants)}
+                sizes="(min-width: 768px) 54vw, 100vw"
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="absolute top-1/2 left-0 h-[122%] w-full max-w-none -translate-y-1/2 object-cover will-change-transform"
               />
             </div>

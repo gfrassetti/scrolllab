@@ -30,7 +30,17 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'quote',
     'attribution',
   ],
-  'chapters/FooterCTA': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
+  'chapters/FooterCTA': [
+    'ctaWord',
+    'email',
+    'ctaHref',
+    'legal',
+    'note',
+    'backToTop',
+    'bg',
+    'fg',
+    'links',
+  ],
   'nocturne/NavNocturne': ['brand', 'marker', 'linksText'],
   'nocturne/HeroCinematic': [
     'titleTop',
@@ -40,15 +50,34 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'hint',
   ],
   'nocturne/DiagonalMarquee': ['textA', 'textB', 'bg', 'fg'],
-  'nocturne/SplitReveals': ['seq', 'total', 'label', 'bg', 'fg', 'beats'],
-  'nocturne/WorkIndex': ['seq', 'total', 'label', 'bg', 'fg', 'works'],
-  'nocturne/OutroCTA': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
+  'nocturne/SplitReveals': ['seqLabel', 'seq', 'total', 'label', 'bg', 'fg', 'beats'],
+  'nocturne/WorkIndex': ['seqLabel', 'seq', 'total', 'label', 'bg', 'fg', 'works'],
+  'nocturne/OutroCTA': [
+    'ctaWord',
+    'email',
+    'ctaHref',
+    'legal',
+    'note',
+    'backToTop',
+    'bg',
+    'fg',
+    'links',
+  ],
   'monolith/NavBrutal': ['brand', 'linksText'],
-  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint', 'shape', 'modelUrl'],
-  'monolith/TypeAccordion': ['unit', 'total', 'label', 'bg', 'fg', 'items'],
-  'monolith/SkewScroller': ['unit', 'total', 'label', 'bg', 'fg', 'words'],
-  'monolith/ExhibitGrid': ['unit', 'total', 'label', 'bg', 'fg', 'exhibits'],
-  'monolith/FooterBrutal': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
+  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint'],
+  'monolith/TypeAccordion': ['unitLabel', 'unit', 'total', 'label', 'bg', 'fg', 'items'],
+  'monolith/SkewScroller': ['unitLabel', 'unit', 'total', 'label', 'bg', 'fg', 'words'],
+  'monolith/ExhibitGrid': ['unitLabel', 'unit', 'total', 'label', 'bg', 'fg', 'exhibits'],
+  'monolith/FooterBrutal': [
+    'ctaWord',
+    'email',
+    'ctaHref',
+    'legal',
+    'backToTop',
+    'bg',
+    'fg',
+    'links',
+  ],
   'fizz/NavFizz': [
     'brand',
     'shopLabel',
@@ -58,21 +87,22 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'linkLabel',
     'cta',
   ],
-  'fizz/HeroBubbles': [
-    'title',
-    'tagline',
-    'meta',
-    'hint',
-    'flavor',
-    'canImage',
-    'canLabel',
-    'modelUrl',
-  ],
+  'fizz/HeroBubbles': ['title', 'tagline', 'meta', 'hint', 'flavor', 'canImage'],
   'fizz/FlavorWorlds': ['eyebrow'],
   'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
   'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
   'fizz/PopManifesto': ['eyebrow', 'text'],
-  'fizz/FooterSplash': ['ctaWord', 'email', 'ctaHref', 'legal', 'bg', 'fg', 'links'],
+  'fizz/FooterSplash': [
+    'ctaWord',
+    'email',
+    'ctaHref',
+    'legal',
+    'note',
+    'backToTop',
+    'bg',
+    'fg',
+    'links',
+  ],
   'velocity/NavVelocity': ['brand', 'cta', 'linksText'],
   'velocity/HeroStrike': [
     'lineLeft',
@@ -93,10 +123,10 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'mergeAccent',
   ],
   'velocity/ParallaxRise': ['eyebrow', 'title', 'body', 'cta'],
-  'velocity/FooterVelocity': ['line', 'legal', 'bg', 'fg'],
+  'velocity/FooterVelocity': ['line', 'legal', 'backToTop', 'bg', 'fg'],
   'atelier/NavAtelier': ['brand', 'cta', 'label', 'menuLabel', 'linksText'],
   'atelier/HeroMeaning': ['line1', 'line2', 'meta', 'hint'],
-  'atelier/AboutClarity': ['eyebrow', 'title', 'body', 'bg', 'fg'],
+  'atelier/AboutClarity': ['eyebrow', 'title', 'body', 'tags', 'bg', 'fg'],
   'atelier/ServicesStone': [
     'eyebrow',
     'title',
@@ -124,6 +154,11 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'email',
     'phone',
     'hint',
+    'clockLabel',
+    'enquiryLabel',
+    'emailLabel',
+    'phoneLabel',
+    'socialLabel',
     'bg',
     'fg',
     'social',
@@ -293,10 +328,10 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
   'atrium/NavAtrium': ['lineOne', 'lineTwo', 'linksText', 'menuLabel'],
   'atrium/HeroMassing': ['lineOne', 'lineTwo', 'hint'],
-  'atrium/ManifestoType': ['lineOne', 'lineTwo', 'left', 'right'],
-  'atrium/ScopeSerif': ['body'],
+  'atrium/ManifestoType': ['lineOne', 'lineTwo', 'left', 'right', 'bg', 'fg'],
+  'atrium/ScopeSerif': ['body', 'bg', 'fg'],
   'atrium/ClarityPair': ['kicker', 'left', 'right', 'bodyLeft', 'bodyRight'],
-  'atrium/BlueprintDraw': ['index', 'title', 'body', 'caption'],
+  'atrium/BlueprintDraw': ['title', 'body', 'caption'],
   'atrium/ProjectRail': ['kicker', 'title'],
   'atrium/ProcessPin': ['label'],
   'atrium/PeopleScatter': ['label', 'title'],
@@ -365,6 +400,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'eyebrow',
     'title',
     'body',
+    'products',
     'checkoutEyebrow',
     'checkoutTitle',
     'checkoutBody',
@@ -395,14 +431,6 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
   ],
 })
 
-const SHAPE_PRESETS = new Set([
-  'icosahedron',
-  'box',
-  'octahedron',
-  'torus',
-  'sphere',
-])
-
 const FLAVOR_PRESETS = new Set(['berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
 
@@ -428,8 +456,9 @@ const THEME_PRESETS = new Set([
  */
 const ASSET_URL_RE = /^(https:\/\/|\/)\S{1,500}$/i
 
-const ASSET_URL_KEYS = new Set([
-  'modelUrl',
+export const ASSET_URL_KEYS = new Set([
+  'canImage',
+  'image',
   'img',
   'img1',
   'img2',
@@ -439,8 +468,14 @@ const ASSET_URL_KEYS = new Set([
   'img6',
   'img7',
   'img8',
+  'imgBack',
+  'imgMid',
+  'imgFront',
+  'nextImg',
   'logoSrc',
   'orbSrc',
+  // El form de contacto hace POST acá: una URL https o una ruta del sitio.
+  'endpoint',
 ])
 
 /**
@@ -455,11 +490,20 @@ const COLOR_RE =
 const HREF_RE =
   /^(?:#[\w-]*|\/[^\s"'<>]*|https?:\/\/[^\s"'<>]+|mailto:[^\s"'<>]+|tel:\+?[\d\s()-]{3,})$/i
 
+// Precio de un producto del kit commerce: número con hasta 2 decimales.
+const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
+
 const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 
 export const LIST_PROPS_BY_SECTION = Object.freeze({
+  'commerce/ProductGrid': {
+    products: {
+      max: 8,
+      item: { name: 'text', price: 'price', blurb: 'text', img: 'image' },
+    },
+  },
   'chapters/FooterCTA': {
     links: { max: 8, item: { label: 'text', href: 'href' } },
   },
@@ -563,6 +607,8 @@ function sanitizeListValue(schema, value) {
       } else if (type === 'image') {
         // URL real: https:// o /ruta. blob:/data: no sobreviven al persist.
         if (ASSET_URL_RE.test(t)) item[k] = t
+      } else if (type === 'price') {
+        if (PRICE_RE.test(t.trim())) item[k] = t.trim()
       } else if (t) {
         item[k] = t
       }
@@ -602,13 +648,51 @@ export function sanitizeSectionProps(sectionId, props) {
       continue
     }
     if (!trimmed) continue
-    if (key === 'shape' && !SHAPE_PRESETS.has(trimmed)) continue
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
-    if (key === 'endpoint' && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed
   }
   return Object.keys(cleaned).length ? cleaned : undefined
+}
+
+/**
+ * LAB: la sección corre en un iframe en OTRO dominio (embed.scrolllab…), así
+ * que una ruta /archivo apunta ahí y no al sitio del cliente: la imagen sale
+ * rota. En LAB las imágenes van siempre con URL completa (https://…) y lo
+ * relativo se descarta — al guardar y también al servir, por las instancias
+ * que se publicaron antes de esta regla. El builder sí acepta /ruta (va al
+ * `public/` del ZIP).
+ */
+const ABSOLUTE_ASSET_RE = /^https:\/\//i
+
+export function sanitizeHostedProps(sectionId, props) {
+  const clean = sanitizeSectionProps(sectionId, props)
+  if (!clean) return clean
+  const listSchemas = LIST_PROPS_BY_SECTION[sectionId] || {}
+  for (const [key, value] of Object.entries(clean)) {
+    if (ASSET_URL_KEYS.has(key) && typeof value === 'string') {
+      if (!ABSOLUTE_ASSET_RE.test(value)) delete clean[key]
+      continue
+    }
+    const schema = listSchemas[key]
+    if (!schema || !Array.isArray(value)) continue
+    const imageKeys = Object.entries(schema.item || {})
+      .filter(([, type]) => type === 'image')
+      .map(([k]) => k)
+    if (!imageKeys.length) continue
+    const rows = value
+      .map((row) => {
+        const out = { ...row }
+        for (const k of imageKeys) {
+          if (typeof out[k] === 'string' && !ABSOLUTE_ASSET_RE.test(out[k])) delete out[k]
+        }
+        return out
+      })
+      .filter((row) => Object.keys(row).length)
+    if (rows.length) clean[key] = rows
+    else delete clean[key]
+  }
+  return Object.keys(clean).length ? clean : undefined
 }

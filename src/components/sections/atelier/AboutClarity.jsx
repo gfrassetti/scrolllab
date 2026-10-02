@@ -6,6 +6,7 @@ export default function AboutClarity({
   eyebrow = 'Section eyebrow',
   title = 'Placeholder statement — swap this line with the sentence that defines your studio.',
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder body copy: replace it with your own story from the builder or the code.',
+  tags = 'Placeholder label · Placeholder label',
   bg,
   fg,
 }) {
@@ -56,7 +57,7 @@ export default function AboutClarity({
             {body}
           </p>
           <p className="mt-6 text-[11px] tracking-[0.22em] text-white/35 uppercase">
-            Placeholder label · Placeholder label
+            {tags}
           </p>
         </div>
       </div>

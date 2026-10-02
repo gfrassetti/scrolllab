@@ -160,6 +160,11 @@ describe('productJsonLd', () => {
       assert.equal(ld.url, d.canonical)
       assert.ok(ld.image[0].startsWith('https://'), 'la imagen tiene que ser absoluta')
       assert.match(ld.offers.availability, /InStock$/)
+      assert.equal(
+        ld.offers.hasMerchantReturnPolicy.returnPolicyCategory,
+        'https://schema.org/MerchantReturnNotPermitted',
+      )
+      assert.equal(ld.offers.hasMerchantReturnPolicy.applicableCountry, 'AR')
     }
   })
 })
@@ -190,7 +195,7 @@ describe('renderProductPage', () => {
   it('deja el contenido dentro de #root: título, precio, secciones y links', () => {
     assert.ok(!html.includes('<div id="root"></div>'), '#root quedó vacío')
     const root = html.slice(html.indexOf('<div id="root">'))
-    assert.ok(root.includes('<h1>NOCTURNE — Template scrollytelling</h1>'))
+    assert.ok(root.includes('<h1>NOCTURNE — Template de storytelling</h1>'))
     assert.ok(root.includes(`USD ${TEMPLATE_PRICES_USD.nocturne} de lista`))
     for (const s of data.sections) assert.ok(root.includes(s.name), s.name)
     for (const t of data.tags) assert.ok(root.includes(t), t)

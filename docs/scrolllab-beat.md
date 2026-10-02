@@ -119,9 +119,9 @@ El panel edita **copy** (`word1`, etc.). **No** hay un campo de recetas JSON en 
 
 Precio: RATIO lista USD 269 pero sigue en `COMING_SOON_SKUS` (no cuenta para
 el piso del builder — ver `scripts/check-consistency.mjs`). La base del
-builder (USD 235) tiene que quedar arriba del template más caro que SÍ se
-vende (hoy Atelier/Comic, USD 229). Si RATIO sale de `COMING_SOON_SKUS`, va a
-exigir subir la base del builder por encima de USD 269.
+builder (USD 389) tiene que quedar arriba del template más caro que SÍ se
+vende (hoy MERIDIAN, USD 379). Si RATIO sale de `COMING_SOON_SKUS` la base ya
+le queda arriba (USD 269).
 
 No pongas Beat en el chrome del marketplace (nav, carrito): eso es Emil / Impeccable.
 

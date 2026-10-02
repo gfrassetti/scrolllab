@@ -8,6 +8,7 @@
     "builder": "Builder",
     "builderWithCount": "Builder, {{count}} sections added",
     "lab": "LAB",
+    "studio": "Studio",
     "cart": "Cart",
     "account": "My purchases",
     "login": "Log in",
@@ -54,7 +55,7 @@
     "fields": "Content",
     "noFields": "This section has no editable fields.",
     "domains": "Allowed domains (one per line)",
-    "domainsHint": "Leave it empty and the section shows on any domain. Add domains and it's limited to those.",
+    "domainsHint": "Leave it empty and the section shows on any domain. Add domains and it's limited to those (and their www). To test it on your machine, add localhost.",
     "preview": "Preview",
     "previewFull": "Fullscreen",
     "previewExit": "Exit",
@@ -127,8 +128,23 @@
     ],
     "planFreeState": "Free plan — {{used}} / {{quota}} published",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} published",
+    "planActiveUntil": "Your plan is active until {{date}}.",
     "planCancel": "Cancel subscription",
-    "planCanceledUntil": "canceled · access until {{date}}",
+    "planCancelConfirm": "Cancel? You keep access until {{date}} and won’t be charged again.",
+    "planCancelConfirmNow": "Cancel? The plan ends now.",
+    "planCancelYes": "Yes, cancel",
+    "planCancelKeep": "No, keep it",
+    "planCanceledNote": "canceled · won’t renew",
+    "planPausedNote": "paused in Mercado Pago · won’t renew",
+    "planReactivate": "Reactivate",
+    "planReactivateNote": "No charge until {{date}}, when what you already paid ends.",
+    "planResubscribeHint": "Your plan runs until {{date}}. If you subscribe now (to this plan or a lower one, any cycle), the first charge is that day: you don’t pay twice.",
+    "planPastDue": "We’re confirming the charge with Mercado Pago. If it doesn’t go through, the plan is suspended on {{date}}.",
+    "planPaymentFailed": "We couldn’t charge your plan. Mercado Pago will retry; if it isn’t resolved, it’s suspended on {{date}}. Check your payment method in Mercado Pago.",
+    "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Mercado Pago gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
+    "planLapsedPaused": "Your {{plan}} plan is paused in Mercado Pago and no longer covers your sections. Resume it there or subscribe again (we cancel the old one).",
+    "returnSynced": "Done: your subscription is active.",
+    "returnPending": "We don’t see Mercado Pago’s confirmation yet. If you already authorized it, it shows up in a few seconds.",
     "viewOtherPlans": "View other plans →",
     "hideOtherPlans": "Hide other plans",
     "planCurrent": "Your plan",
@@ -138,10 +154,32 @@
     "planTrialNote": "Free for the first {{n}} days.",
     "planTrialActive": "Free trial — first charge on {{date}}",
     "planChangeTo": "Switch to this plan",
-    "planChanged": "Plan updated. The new quota applies now; Mercado Pago charges the new price on your next cycle.",
-    "planChangeHint": "You switch plans right away, no cancellation: the new quota applies now and the new price is charged on your next cycle.",
-    "planCycleHint": "Moving between monthly and yearly billing does require canceling and subscribing again.",
-    "planRecommended": "Most popular"
+    "planChangeHint": "You switch plans without canceling. Moving up, you pay only the difference for the rest of your period; moving down costs nothing. From your next charge, Mercado Pago bills the new price.",
+    "planCycleHint": "Moving between monthly and yearly requires canceling and subscribing again. What you already paid is kept: the first new charge happens when it ends.",
+    "planChangeHintTrial": "You’re on the free trial: switching plans is free, and the first charge already uses the price of the plan you pick.",
+    "planUpgradeAfterReactivate": "You have {{plan}} paid until the end of the period. To move up now, reactivate it and switch plans: you pay only the difference for the days left.",
+    "changeConfirmPaid": "You move to {{plan}} now. You pay {{amount}} for the rest of your period ({{days}}); from {{date}}, Mercado Pago charges {{price}} {{per}}.",
+    "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Mercado Pago charges {{price}} {{per}}.",
+    "changeConfirmTrial": "You move to {{plan}} now, at no charge: you’re on the free trial. The first charge, on {{date}}, already uses {{price}} {{per}}.",
+    "changePay": "Pay {{amount}}",
+    "changeYes": "Switch to {{plan}}",
+    "changeKeep": "Go back",
+    "daysOne": "1 day",
+    "daysMany": "{{n}} days",
+    "upgradeApplied": "Done: you’re on {{plan}} now.",
+    "upgradeNotPaid": "The payment didn’t go through. Your plan didn’t change.",
+    "upgradePending": "Mercado Pago is still processing the payment. As soon as it clears, your plan switches on its own.",
+    "planRecommended": "Most popular",
+    "invalidUrl": "Not saved yet: in LAB the image needs its full URL (https://…). A /file path points at our domain and breaks on your site.",
+    "assetHint": "Full image URL (https://…), for example from your site or a CDN. Without an image the section uses its photo-less version.",
+    "unpublished": "You have unpublished changes: your site still shows the last published version.",
+    "previewLoading": "Loading preview…",
+    "previewWidth": "Width",
+    "previewDesktop": "Desktop",
+    "previewTablet": "Tablet",
+    "previewMobile": "Mobile",
+    "previewNote": "This is the same embed that goes on your site, with your unsaved edits. Links don't navigate here.",
+    "domainsDropped": "Not domains, not saved: {{list}}"
   },
   "common": {
     "loading": "Loading…",
@@ -160,6 +198,8 @@
     "addedToCart": "Added to cart",
     "alreadyInCart": "Already in cart",
     "updatedInCart": "Composition updated",
+    "inBundleCart": "Already included in the bundle in your cart",
+    "bundleAbsorbed": "Added · replaces {{count}} model(s) the bundle already includes",
     "cartItemTitle": "{{name}} — template",
     "buy": "Buy →"
   },
@@ -236,7 +276,8 @@
     "req2Before": "Use in your own or client projects —",
     "req2License": "see license",
     "req3": "No reselling or redistributing the ZIP / code as a template",
-    "req4": "Does not include hosting, domain, or deploy support",
+    "req4Before": "Doesn't include hosting, domain, or deploy support —",
+    "req4Link": "that's what the Studio is for",
     "bundleEyebrow": "All 8 models together",
     "bundleTitleBefore": "Get the",
     "bundleTitleEm": "full catalog",
@@ -248,10 +289,26 @@
     "builderTitleEm": "builder",
     "builderBody": "Mix sections from every model, reorder them, and preview the live page before you buy.",
     "builderPrices": "From {{base}} with {{included}} sections · every extra section adds {{extra}}",
+    "studioEyebrow": "Bespoke work",
+    "studioTitleBefore": "A site",
+    "studioTitleEm": "as good as your brand",
+    "studioBody": "We work with brands that need a site as good as their work, not a generic template. We start by understanding your brand and your project, then we build it with the same craft you see in our models.",
+    "studioForLabel": "Who it's for",
+    "studioGetsLabel": "You get",
+    "studioService1Name": "Custom site",
+    "studioService1Kind": "Bespoke project",
+    "studioService1For": "Brands that want a site of their own, not a model.",
+    "studioService1Gets": "Design, development and launch — end to end.",
+    "studioService2Name": "Adapt a model",
+    "studioService2Kind": "Bespoke project",
+    "studioService2For": "You've seen a model in the catalog and want it with your brand.",
+    "studioService2Gets": "Rebranding, your own content, and help publishing it.",
+    "studioCta": "Tell us about your project",
     "footerTemplates": "Templates",
     "footerBuilder": "Builder",
     "footerContact": "Contact",
     "footerContactForm": "Write to us",
+    "footerInstagram": "Instagram",
     "footerBuildPage": "Build my page",
     "footerLicense": "License",
     "footerPrivacy": "Privacy",
@@ -261,11 +318,18 @@
     "backTop": "Back to top",
     "contactEyebrow": "Custom contact",
     "contactTitle": "Need something bespoke?",
-    "contactBody": "Special requests or a scrollytelling page built for your brand. Tell us what you need and we’ll reply.",
+    "contactBody": "Special requests or a page built just for your brand. Tell us what you need and we’ll reply.",
     "contactNote": "You can also email",
     "contactName": "Name",
     "contactEmail": "Email",
-    "contactMessage": "Message",
+    "contactTypeLabel": "What do you need?",
+    "contactTypePlaceholder": "Choose one",
+    "contactTypeCustom": "A custom site",
+    "contactTypeAdapt": "Adapt a model to my brand",
+    "contactTypeMaintenance": "Maintenance & support",
+    "contactTypeOther": "Something else",
+    "contactMessage": "Tell us your goal",
+    "contactMessagePlaceholder": "E.g.: I need a new site, or want to improve the one I have",
     "contactSubmit": "Send",
     "contactSending": "Sending…",
     "contactSuccess": "Got it — we’ll get back to you soon.",
@@ -344,7 +408,7 @@
       "description": "Atmospheric dark canvas, scroll-tied fog, and 3D pieces that rotate or shatter as you scroll. Digital studio aesthetic. Ideal for agencies, creative studios, or architecture practices selling premium services with a prestige site."
     },
     "comic": {
-      "vibe": "Comic scrollytelling",
+      "vibe": "Illustrated comic",
       "tags": [
         "Torn panels",
         "Layered truck scene",
@@ -361,7 +425,7 @@
         "Language bands",
         "Rising cutout"
       ],
-      "description": "Stone canvas, Playfair body + Anton display, a photo mosaic that unfolds into a full-bleed slider, and a closer with a rising cutout. For campaigns, events, or brands that want high-impact editorial scrollytelling."
+      "description": "Stone canvas, Playfair body + Anton display, a photo mosaic that unfolds into a full-bleed slider, and a closer with a rising cutout. For campaigns, events, or brands that want high-impact editorial storytelling."
     },
     "ratio": {
       "vibe": "Beat choreography",
@@ -371,7 +435,7 @@
         "Cube and type",
         "Scroll plates"
       ],
-      "description": "A Beat scrollytelling template for desktop: cube and type on a rail, plates that punch through the viewport, a stacking well, and a horizontal closer. Print-shop stock and vermillion register. Not built for mobile."
+      "description": "A Beat storytelling template for desktop: cube and type on a rail, plates that punch through the viewport, a stacking well, and a horizontal closer. Print-shop stock and vermillion register. Not built for mobile."
     },
     "atrium": {
       "vibe": "Architecture bureau",
@@ -441,7 +505,7 @@
     "editSection": "Edit section",
     "editing": "Editing",
     "editPanel": "Edit section",
-    "noEditableFields": "This section has no editable text fields yet.",
+    "noEditableFields": "Nothing to edit here for this section: you tune it in the ZIP's code.",
     "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). The kit is frontend-only on purpose: wire your Mercado Pago or Stripe in checkoutAdapter.js whenever you're ready (paste the docs into an AI assistant and it's a quick job). Adding the grid turns on the full kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
@@ -454,14 +518,17 @@
     "beatBadge": "Beat",
     "beatHint": "These pieces ship with Beat: the rail plays in preview and in the ZIP. The panel edits copy; recipes stay in code.",
     "beatEditHint": "Beat: the cube and type move on their own. Change the words here; the rail stays in code.",
-    "modelUpload": "Try a local .glb",
-    "modelClear": "Remove model",
-    "modelHelp": "GLB/GLTF format (recommended: .glb, single file). A local file only works in this preview. To ship it in your ZIP: enter a public https URL, or leave the field empty and, in the downloaded project, save your model as public/my-model.glb and pass modelUrl=\"/my-model.glb\" (explained in the ZIP's README). Without a model, the placeholder object renders.",
-    "imageUpload": "Try a local image / SVG",
-    "imageClear": "Remove image",
-    "imageHelp": "PNG, SVG, WebP or JPG. A local file only works in this preview (it replaces the placeholder SVG). To ship it in your ZIP: enter a public https URL, or in the downloaded project save the file under public/ (e.g. public/can-1.svg) and pass can1Image=\"/can-1.svg\". Without an image, the template SVG can renders.",
     "listAdd": "Add",
     "hrefHint": "#anchor · /path · https://… · mailto:… · tel:…",
+    "assetHint": "Ships in the ZIP as typed: an https:// URL or a /path (then drop the file in the downloaded project's public/).",
+    "listHint": "What you add here replaces the section's sample list.",
+    "invalid": {
+      "href": "Not a valid link yet, so it isn't saved. Use #anchor, /path, https://…, mailto: or tel:",
+      "color": "Not a valid color yet, so it isn't saved. Use #rgb, #rrggbb or rgba(…).",
+      "url": "Not a valid URL yet, so it isn't saved. Use https://… or a /path, with no spaces.",
+      "price": "Numbers only, up to two decimals (15000 or 12.50): not saved like this."
+    },
+    "mobileBarCta": "See my page",
     "sections": {
       "chapters": {
         "NavMinimal": {
@@ -840,9 +907,25 @@
           "name": "Hero signal",
           "blurb": "Kinetic word-cycle hero — chars blur-rise in, then swap to the next word on a timer"
         },
+        "SelectedWorkIndex": {
+          "name": "Selected work index",
+          "blurb": "Work list with a cursor-trailing preview image that swaps per row"
+        },
+        "ManifestoMarquee": {
+          "name": "Manifesto marquee",
+          "blurb": "Blurred word-by-word statement reveal over a looping capability marquee"
+        },
+        "RecognitionStats": {
+          "name": "Recognition stats",
+          "blurb": "Figures that count up on enter, three across"
+        },
         "PixelRevealGrid": {
           "name": "Pixel reveal grid",
           "blurb": "Case-study cards behind a tile grid that dissolves on scroll, DOM only"
+        },
+        "ServicesAccordion": {
+          "name": "Services accordion",
+          "blurb": "Expandable services list"
         },
         "FooterSignal": {
           "name": "Footer signal",
@@ -913,6 +996,8 @@
     "preparing": "Preparing…",
     "waiting": "Confirming payment…",
     "pendingHint": "If you just paid, this can take a few seconds. Refresh if it stays like this.",
+    "refunded": "Refunded",
+    "refundedHint": "The payment was returned, so the download is no longer available.",
     "linkExpired": "That download link expired: for security it only lasts a few minutes. Just hit Download again.",
     "prevPage": "← Previous",
     "nextPage": "Next →",
@@ -923,12 +1008,18 @@
     "subActive": "Active · next charge on {{date}}",
     "subTrial": "Free trial · first charge on {{date}}",
     "subCanceled": "Canceled · you keep access until {{date}}",
-    "subPaused": "Paused — check your payment method in Mercado Pago",
+    "subPaused": "Paused in Mercado Pago · you keep access until {{date}}",
+    "subRenewing": "Confirming the charge with Mercado Pago · if it doesn’t go through, the plan is suspended on {{date}}",
+    "subPaymentFailed": "We couldn’t charge the renewal. Mercado Pago will retry; if it isn’t resolved, the plan is suspended on {{date}}. Check your payment method in Mercado Pago.",
+    "subLapsed": "Your {{plan}} plan is suspended: we couldn’t charge it. If Mercado Pago gets the charge through, it comes back on its own. If you don’t want to continue, cancel it and it won’t be retried.",
+    "subLapsedPaused": "Your {{plan}} plan is paused in Mercado Pago and no longer covers your sections.",
     "subSince": "Since",
+    "subActiveUntil": "Active until",
     "subUsage": "Published",
     "subUnlimited": "unlimited",
     "subCancel": "Cancel subscription",
     "subCancelConfirm": "Cancel?",
+    "subCancelConfirmUntil": "Cancel? You keep access until {{date}}.",
     "subCancelYes": "Yes, cancel",
     "subCancelDone": "Subscription canceled",
     "subSync": "Sync with Mercado Pago",
@@ -976,6 +1067,7 @@
   "license": {
     "eyebrow": "Regular License",
     "title": "Regular License",
+    "effectiveDate": "Effective September 28, 2026",
     "intro": "By purchasing a template or composition from {{site}}, you receive a non-exclusive, non-transferable license to that item (the “Item”). This is the standard license that ships with every download.",
     "canTitle": "What you can do",
     "can1": "Use the Item in your own or client projects, with no limit on the number of sites or apps.",
@@ -989,13 +1081,15 @@
     "cant4": "Share the download link or your account with third parties.",
     "ownerTitle": "Ownership",
     "ownerBody": "{{site}} (and its licensors) retain all intellectual property rights to the Item. Only the rights described here are granted. Each ZIP includes a LICENSE.txt with the order number and buyer email; that mark identifies the license granted.",
+    "estudioTitle": "Bespoke work (Studio)",
+    "estudioBody": "Studio projects are not governed by this Regular License. On a custom site (built from scratch), ownership of the final result is yours once the agreed payment is completed: it's work made for hire. Adapting a model stays under this Regular License, since it starts from one of our templates. Maintenance and support doesn't change who owns your site. Price, timeline, and deliverables for each project are agreed separately.",
     "contact": "Questions:"
   },
   "privacy": {
     "eyebrow": "Legal",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective July 29, 2026",
-    "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, or download a product.",
+    "effectiveDate": "Effective September 28, 2026",
+    "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, download a product, or write to us about a Studio project.",
     "sections": [
       {
         "title": "Data we collect",
@@ -1003,7 +1097,8 @@
           "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
           "Purchase and order data: products, amount, currency, payment status, Mercado Pago identifiers, and download count.",
           "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies.",
-          "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it."
+          "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it.",
+          "If you write to us through the contact or Studio form: your name, email, message, and the project type you selected."
         ]
       },
       {
@@ -1013,16 +1108,17 @@
           "Process payments, confirm orders, and enable downloads.",
           "Send receipts and operational messages related to your purchases.",
           "Email you the welcome coupon for your first purchase. We do not send newsletters.",
+          "Reply to you when you write through the contact form, including Studio (bespoke work) inquiries.",
           "Prevent fraud, abuse, and unauthorized access, and comply with legal obligations."
         ]
       },
       {
         "title": "Third-party services",
-        "body": "We use Google for authentication, Mercado Pago to process payments, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+        "body": "We use Google for authentication, Mercado Pago to process payments, Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
       },
       {
         "title": "Cookies and local storage",
-        "body": "We use a session cookie to keep your account authenticated. We may also store preferences such as language, theme, cart, and builder compositions in your browser. You can delete this data through your browser settings, although some features may stop working correctly."
+        "body": "We use a session cookie to keep your account authenticated. Google Tag Manager and Analytics may set their own cookies to measure aggregate visits. We may also store preferences such as language, theme, cart, and builder compositions in your browser. You can delete this data through your browser settings, although some features may stop working correctly."
       },
       {
         "title": "Retention and security",
@@ -1050,7 +1146,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective July 30, 2026",
+    "effectiveDate": "Effective September 28, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -1084,6 +1180,15 @@
       {
         "title": "Changes",
         "body": "We may update the service and these Terms. The current version and effective date will be posted on this page. Continued use after an update means you accept the revised Terms."
+      },
+      {
+        "title": "Studio (bespoke work)",
+        "items": [
+          "Custom sites, adapting a model, and maintenance and support are quote-based services: they are not purchased from the catalog or paid through Mercado Pago inside the site. Price and scope are agreed before starting, case by case.",
+          "We do not guarantee business results (more clients, more sales, more conversion): we build and deliver the site at the quality level you see in our models; business results depend on factors we don't control, like marketing or traffic.",
+          "On a custom site (built from scratch), ownership of the final result is yours once the agreed payment is completed: it's work made for hire. Adapting a model stays under the Regular License, since it starts from one of our templates.",
+          "Payment, timelines, deliverables, and cancellation terms for each Studio project are set out in that project's specific agreement, not in these Terms or the Regular License."
+        ]
       },
       {
         "title": "Hosted components (LAB)",

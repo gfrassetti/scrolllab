@@ -1,0 +1,76 @@
+/*
+ * Capa común de micro-interacciones de los templates: el mismo lenguaje de
+ * feedback en todo el sitio (guía «The Award-Winning Web Developer»,
+ * Detalle #6). No trae paleta: cada template la tiñe con su `currentColor`.
+ * Viaja en el ZIP (SHARED en server/packaging.js) y la importa también el
+ * frame de LAB (embed/frame/main.css).
+ *
+ *   tpl-world  raíz del template: foco visible con el color del texto.
+ *   tpl-link   subrayado que se dibuja de izquierda a derecha y se retira
+ *              hacia la derecha (hover y foco). Queda pegado al texto aunque
+ *              el link tenga padding para agrandar la zona de toque.
+ *   tpl-hit    zona de toque de 44 px sin mover el layout. El elemento tiene
+ *              que estar posicionado: sumale `relative` si no lo está.
+ *   tpl-lift   card que se eleva apenas en hover. No va en un nodo que anima
+ *              GSAP (pelean por el transform): va en un wrapper interno.
+ */
+@layer utilities {
+  .tpl-world :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  .tpl-link {
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-origin: content-box;
+    background-position: 100% 100%;
+    background-size: 0% 1px;
+    transition: background-size 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .tpl-link:focus-visible {
+    background-position: 0 100%;
+    background-size: 100% 1px;
+  }
+
+  .tpl-hit::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+
+  .tpl-lift {
+    transition:
+      transform 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+      box-shadow 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  @media (hover: hover) {
+    .tpl-link:hover {
+      background-position: 0 100%;
+      background-size: 100% 1px;
+    }
+
+    .tpl-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 40px -28px rgb(0 0 0 / 0.55);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tpl-link,
+    .tpl-lift {
+      transition: none;
+    }
+
+    .tpl-lift:hover {
+      transform: none;
+    }
+  }
+}

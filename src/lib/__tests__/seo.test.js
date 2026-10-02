@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { BUILDER_SEO, SITE_SEO, seoForPath } from '../site.js'
+import { BUILDER_SEO, LAB_SEO, SITE_SEO, seoForPath } from '../site.js'
 
 describe('seoForPath', () => {
   it('la home se indexa con el copy del marketplace', () => {
@@ -17,6 +17,15 @@ describe('seoForPath', () => {
     assert.equal(seo.description, BUILDER_SEO.description)
     assert.match(seo.robots, /^index/)
     assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/builder')
+  })
+
+  it('/lab se indexa con meta propia, no con la de templates', () => {
+    const seo = seoForPath('/lab')
+    assert.equal(seo.title, LAB_SEO.title)
+    assert.equal(seo.description, LAB_SEO.description)
+    assert.doesNotMatch(seo.description, /template/i)
+    assert.match(seo.robots, /^index/)
+    assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/lab')
   })
 
   it('las demos de templates quedan noindex; /plantillas/:sku es la que indexa', () => {

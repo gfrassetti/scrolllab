@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP, SplitText, ScrollTrigger } from '../lib/gsap'
-import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
+import { INSTAGRAM_URL, SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import SiteHeader from '../components/SiteHeader'
 import Logo from '../components/Logo'
 import LabMark from '../components/LabMark'
@@ -297,6 +297,30 @@ export default function TemplatesIndex() {
       to: '/lab',
       cta: 'Ver LAB',
     },
+  ]
+
+  // Estudio: trabajo a medida por cotización (no pasa por checkout). Los
+  // precios no se muestran acá — se hablan con el cliente (ver
+  // docs/estudio-positioning.md, que sí tiene los anchors de referencia).
+  const studioServices = [
+    {
+      key: 'custom',
+      name: t('home.studioService1Name'),
+      kind: t('home.studioService1Kind'),
+      forWhom: t('home.studioService1For'),
+      gets: t('home.studioService1Gets'),
+    },
+    {
+      key: 'adapt',
+      name: t('home.studioService2Name'),
+      kind: t('home.studioService2Kind'),
+      forWhom: t('home.studioService2For'),
+      gets: t('home.studioService2Gets'),
+    },
+    // Mantenimiento/soporte no va como 3ra tarjeta: no es algo que se
+    // contrate desde la UI (no hay una suscripción self-serve para esto,
+    // a diferencia de LAB). Se ofrece caso por caso a quien ya contactó por
+    // alguno de los dos servicios de arriba — ver docs/estudio-positioning.md.
   ]
 
   const howPanels = useMemo(
@@ -1412,11 +1436,75 @@ export default function TemplatesIndex() {
                   </Link>
                 </li>
                 <li>{t('home.req3')}</li>
-                <li>{t('home.req4')}</li>
+                <li>
+                  {t('home.req4Before')}{' '}
+                  <a
+                    href="#estudio"
+                    className="underline decoration-ink/30 underline-offset-2 transition-colors hover:text-accent"
+                  >
+                    {t('home.req4Link')}
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
+        </section>
+
+        {/* Estudio: capa de posicionamiento arriba del marketplace — trabajo a
+            medida por cotización manual (no toca checkout/precios de
+            catálogo). Detalle: docs/estudio-positioning.md. */}
+        <ZoneHeadline index="04" label={t('nav.studio')} zone="estudio" />
+        <section id="estudio" className="scroll-mt-20 border-t border-ink/15 pt-8 pb-16 md:pt-10 md:pb-24">
+          <div className="mx-auto max-w-[1300px]">
+            <p className="text-center text-eyebrow uppercase text-accent">
+              {t('home.studioEyebrow')}
+            </p>
+            <h2 className="mx-auto mt-3 max-w-[22ch] text-center text-[clamp(1.9rem,1rem+4.5vw,3.75rem)] leading-[1.03] font-medium tracking-[-0.03em]">
+              {t('home.studioTitleBefore')}{' '}
+              <em className="inline-block font-display font-normal italic text-accent">
+                {t('home.studioTitleEm')}
+              </em>
+            </h2>
+            <p className="mx-auto mt-4 max-w-[60ch] text-center text-body-lg leading-relaxed text-ink/70">
+              {t('home.studioBody')}
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 grid max-w-[900px] gap-px overflow-hidden border border-ink/15 bg-ink/15 sm:grid-cols-2 md:mt-14">
+            {studioServices.map((s) => (
+              <div key={s.key} className="flex flex-col bg-bone p-6 md:p-8">
+                <p className="text-title-sm font-medium">{s.name}</p>
+                <p className="mt-1 text-eyebrow uppercase text-ink/45">
+                  {s.kind}
+                </p>
+                <dl className="mt-5 flex-1 space-y-3">
+                  <div>
+                    <dt className="text-eyebrow uppercase text-ink/40">
+                      {t('home.studioForLabel')}
+                    </dt>
+                    <dd className="mt-0.5 text-body-sm text-ink/75">
+                      {s.forWhom}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-eyebrow uppercase text-ink/40">
+                      {t('home.studioGetsLabel')}
+                    </dt>
+                    <dd className="mt-0.5 text-body-sm text-ink/75">
+                      {s.gets}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex justify-center md:mt-14">
+            <a href="#contacto" className="btn btn-primary">
+              {t('home.studioCta')}
+            </a>
+          </div>
         </section>
 
       </main>
@@ -1557,6 +1645,16 @@ export default function TemplatesIndex() {
                   className="transition-colors duration-300 hover:text-accent"
                 >
                   {SUPPORT_EMAIL}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerInstagram')}
                 </a>
               </li>
               <li>

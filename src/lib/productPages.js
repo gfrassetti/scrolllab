@@ -25,7 +25,7 @@ export function isProductSku(sku) {
 
 /** Textos que no cambian de un template a otro. Todo lo que dicen es verificable en el sitio. */
 export const PRODUCT_COPY = {
-  subtitle: 'Template scrollytelling',
+  subtitle: 'Template de storytelling',
   idealForLabel: 'Ideal para',
   priceLabel: (usd) => `USD ${usd} de lista`,
   priceNote: 'Pago único, sin suscripción. Se cobra en pesos a la cotización vigente.',
@@ -153,7 +153,7 @@ export function productPageData(sku, messages) {
     robots: INDEXABLE_ROBOTS,
     canonical: url,
     ogImage: `${SITE_URL}/og/${sku}.jpg`,
-    ogImageAlt: `${name} — ${meta.vibe}: template scrollytelling, ${SITE_NAME}`,
+    ogImageAlt: `${name} — ${meta.vibe}: template de storytelling, ${SITE_NAME}`,
     copy: PRODUCT_COPY,
   }
 }
@@ -166,7 +166,23 @@ export function productSeoForPath(pathname, messages) {
   return { title, description, robots, canonical }
 }
 
-/** Datos estructurados schema.org/Product: precio de lista en USD, el mismo que muestra la página. */
+/**
+ * Datos estructurados schema.org/Product: precio de lista en USD, el mismo
+ * que muestra la página.
+ *
+ * `hasMerchantReturnPolicy`: refleja la política real (locale
+ * `legal.terms.refunds.body` — sin reembolso salvo que el archivo no se
+ * pueda entregar o tenga un defecto técnico sustancial). Esas excepciones se
+ * resuelven por soporte caso a caso, no son una devolución de retail — por
+ * eso `MerchantReturnNotPermitted`, la categoría más cercana.
+ *
+ * Google también sugiere `aggregateRating`/`review` (no hay reseñas: no se
+ * inventan — política de Google, además de ilegal en varias jurisdicciones)
+ * y `shippingDetails` (no aplica: no hay envío físico, es un ZIP; ese campo
+ * es para el rich result de "Merchant listing" de logística física, que acá
+ * no corresponde perseguir). Ninguno de los dos es un error, son "no
+ * críticos" — Search Console los ofrece igual aunque no apliquen.
+ */
 export function productJsonLd(data) {
   return {
     '@context': 'https://schema.org',
@@ -184,6 +200,11 @@ export function productJsonLd(data) {
       priceCurrency: 'USD',
       price: data.priceUsd.toFixed(2),
       availability: 'https://schema.org/InStock',
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        applicableCountry: 'AR',
+      },
     },
   }
 }

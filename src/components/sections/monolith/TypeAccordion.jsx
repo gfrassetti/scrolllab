@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react'
 import { ScrollTrigger } from '../../../lib/gsap'
-import accA from './assets/acc-a.png'
-import accB from './assets/acc-b.png'
-import accC from './assets/acc-c.png'
+import { accA, accB, accC, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultItems = [
   {
@@ -32,6 +31,7 @@ export default function TypeAccordion({
   unit = '04',
   total = '05',
   label = 'The drawers',
+  unitLabel = 'Unit',
   items = defaultItems,
   bg,
   fg,
@@ -53,7 +53,7 @@ export default function TypeAccordion({
     >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>
-          Unit {unit} / {total}
+          {unitLabel} {unit} / {total}
         </p>
         <p>{label}</p>
       </div>
@@ -106,9 +106,11 @@ export default function TypeAccordion({
                     </p>
                     {item.img ? (
                       <img
-                        src={item.img}
+                        {...imgAttrs(item.img, variants)}
+                        sizes="(min-width: 768px) 45vw, 100vw"
                         alt=""
                         loading="lazy"
+                        decoding="async"
                         className="aspect-8/5 w-full border-2 border-carbon object-cover"
                       />
                     ) : null}

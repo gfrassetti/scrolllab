@@ -36,7 +36,10 @@ const CHANNELS = [
   { id: 'dm', label: { es: 'Mensajes directos / mail', en: 'Direct messages / email' }, source: 'dm', medium: 'direct' },
 ]
 
-const HASHTAGS = '#scrollytelling #gsap #reactjs #webdesign #frontend #creativecoding #webdev'
+const HASHTAGS = {
+  es: '#diseñoweb #paginasweb #webdesign #scrollytelling #templatesweb',
+  en: '#webdesign #scrollytelling #websitetemplates #uxdesign #creativeweb',
+}
 
 function link(channel, sku) {
   const params = new URLSearchParams({
@@ -54,6 +57,7 @@ const COPY = {
     body: (tags) => `Template con el código fuente incluido: ${tags}.`,
     cta: `Mirá la demo y, si te sirve para un proyecto, tenés ${WELCOME_COUPON_PERCENT}% menos en tu primera compra.`,
     bio: 'Link en la bio 👆',
+    bio: 'Link en la bio',
     sections: {
       bio: '[Instagram · TikTok · YouTube Shorts] el link va en la bio',
       text: '[X · LinkedIn] el link va en el texto',
@@ -64,8 +68,10 @@ const COPY = {
     hook: 'Websites that tell a story as they move.',
     intro: (name, vibe) => `${name} — ${vibe}.`,
     body: (tags) => `A template with source code included: ${tags}.`,
+    body: (tags) => `A ready-to-use template, source code included: ${tags}.`,
     cta: `Watch the demo — and if it fits a project, get ${WELCOME_COUPON_PERCENT}% off your first purchase.`,
     bio: 'Link in bio 👆',
+    bio: 'Link in bio',
     sections: {
       bio: '[Instagram · TikTok · YouTube Shorts] the link goes in the bio',
       text: '[X · LinkedIn] the link goes in the post',
@@ -79,7 +85,8 @@ function caption(sku, lang) {
   if (!t?.vibe) throw new Error(`Falta templates.${sku}.vibe en ${lang}.json`)
   const c = COPY[lang]
   const name = sku.toUpperCase()
-  const tags = (t.tags || []).slice(0, 3).join(', ').toLowerCase()
+  // "Three.js" es jerga de devs: en redes se dice "3D".
+  const tags = (t.tags || []).slice(0, 3).join(', ').toLowerCase().replace(/three\.js/g, '3D')
   const head = [c.hook, '', c.intro(name, t.vibe), c.body(tags), '', c.cta].join('\n')
   const x = CHANNELS.find((ch) => ch.id === 'x')
 
@@ -89,7 +96,7 @@ function caption(sku, lang) {
     head,
     c.bio,
     '',
-    HASHTAGS,
+    HASHTAGS[lang],
     '',
     '---',
     '',
@@ -98,7 +105,7 @@ function caption(sku, lang) {
     head,
     link(x, sku),
     '',
-    HASHTAGS,
+    HASHTAGS[lang],
     '',
     '---',
     '',

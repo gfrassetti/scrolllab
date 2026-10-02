@@ -1,9 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import work1 from './assets/work-1.png'
-import work2 from './assets/work-2.png'
-import work3 from './assets/work-3.png'
-import work4 from './assets/work-4.png'
+import { work1, work2, work3, work4, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const PROJECTS = [
   {
@@ -166,12 +164,15 @@ export default function SelectedWork({
                   className={`relative aspect-[16/11] overflow-hidden rounded-2xl bg-gradient-to-br ${project.tone}`}
                 >
                   <img
-                    src={project.img}
+                    {...imgAttrs(project.img, variants)}
+                    sizes="(min-width: 768px) min(42vw, 32rem), min(78vw, 28rem)"
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <p className="absolute top-5 left-5 z-10 max-w-[28ch] text-[10px] tracking-[0.18em] text-white/80 uppercase md:text-[11px]">
+                  <p className="absolute top-5 left-5 z-10 max-w-[28ch] text-[11px] tracking-[0.18em] text-white/80 uppercase">
                     {project.tag}
                   </p>
                   <p className="absolute bottom-6 left-5 z-10 font-brico text-[clamp(1.6rem,3.2vw,2.6rem)] leading-none font-semibold tracking-[-0.03em] text-white">
@@ -189,7 +190,7 @@ export default function SelectedWork({
                   </div>
                   <a
                     href="#work"
-                    className="shrink-0 pt-1 text-[10px] tracking-[0.18em] uppercase underline underline-offset-4 decoration-black/25 hover:decoration-black"
+                    className="shrink-0 pt-1 text-[11px] tracking-[0.18em] uppercase underline underline-offset-4 decoration-black/25 hover:decoration-black"
                   >
                     Explore →
                   </a>

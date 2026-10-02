@@ -1,4 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import ScrollRail from '../components/ScrollRail'
 import NavBrutal from '../components/sections/monolith/NavBrutal'
 import HeroThree from '../components/sections/monolith/HeroThree'
 import SkewScroller from '../components/sections/monolith/SkewScroller'
@@ -16,7 +17,8 @@ import ContactForm from '../components/sections/contact/ContactForm'
 export default function MonolithPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="bg-concrete text-carbon">
+      <div id="top" className="tpl-world bg-concrete text-carbon selection:bg-klein selection:text-concrete">
+        <ScrollRail trackClassName="bg-carbon/15" fillClassName="bg-klein" />
         <NavBrutal />
 
         <main>

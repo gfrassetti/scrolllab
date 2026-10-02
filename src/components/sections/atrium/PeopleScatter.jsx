@@ -1,11 +1,15 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import orbitMeeting from './assets/orbit-meeting.jpg'
-import orbitScreens from './assets/orbit-screens.jpg'
-import orbitHands from './assets/orbit-hands.jpg'
-import orbitBoard from './assets/orbit-board.jpg'
-import orbitDesk from './assets/orbit-desk.jpg'
-import orbitModel from './assets/orbit-model.jpg'
+import {
+  orbitMeeting,
+  orbitScreens,
+  orbitHands,
+  orbitBoard,
+  orbitDesk,
+  orbitModel,
+  variants,
+} from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 /**
  * El arco de la referencia: las placas suben hacia la derecha, se solapan y
@@ -135,9 +139,11 @@ export default function PeopleScatter({
               >
                 <img
                   data-people-media
-                  src={plate.src}
+                  {...imgAttrs(plate.src, variants)}
+                  sizes="(min-width: 768px) 28vw, 66vw"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="h-[114%] w-full max-w-none -translate-y-[6%] object-cover will-change-transform"
                 />
               </div>

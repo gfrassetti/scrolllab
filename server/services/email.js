@@ -324,12 +324,26 @@ export function buildSubscriptionWelcome({
     : 'secciones publicadas sin tope'
   const nextPayment = formatDateOnly(subscription.currentPeriodEnd)
   const name = user.name || user.email
+  // Primera suscripción = prueba gratis: nada se cobra hasta que termina.
+  const trialEnd =
+    subscription.trialEndsAt &&
+    !subscription.lastPaidAt &&
+    new Date(subscription.trialEndsAt) > new Date()
+      ? formatDateOnly(subscription.trialEndsAt)
+      : null
+  const nextPaymentLabel = trialEnd ? 'Primer cobro' : 'Próximo pago'
+  const headline = trialEnd
+    ? 'Tu prueba gratis de ScrollLab LAB arrancó.'
+    : 'Tu suscripción a ScrollLab LAB está activa.'
+  const trialLine = trialEnd
+    ? `Tenés prueba gratis hasta el ${trialEnd}: no se te cobra nada hasta ese día. Si cancelás antes desde “Mi cuenta”, no pagás nada.`
+    : null
 
   const html = `<!doctype html>
 <html lang="es">
   <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
     <div style="display:none;max-height:0;overflow:hidden;">
-      Tu suscripción a ScrollLab LAB está activa.
+      ${escapeHtml(headline)}
     </div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
       <tr>
@@ -347,11 +361,12 @@ export function buildSubscriptionWelcome({
             </tr>
             <tr>
               <td style="padding:40px 32px 20px;">
-                <p style="margin:0 0 12px;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">Suscripción activa</p>
+                <p style="margin:0 0 12px;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">${trialEnd ? 'Prueba gratis' : 'Suscripción activa'}</p>
                 <h1 style="margin:0 0 18px;font-size:32px;line-height:1.1;font-weight:600;">Ya estás en LAB, ${escapeHtml(name)}.</h1>
                 <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">
                   Tu plan <strong>${escapeHtml(tier)}</strong> (${escapeHtml(cycle)}) está activo. Ya podés publicar y editar tus secciones hosteadas.
                 </p>
+                ${trialLine ? `<p style="margin:16px 0 0;padding:12px 14px;border:1px solid #ffb899;background:#fff1ea;color:#161412;font-size:15px;line-height:1.5;">${escapeHtml(trialLine)}</p>` : ''}
               </td>
             </tr>
             <tr>
@@ -360,7 +375,7 @@ export function buildSubscriptionWelcome({
                   <tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Plan</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(tier)} · ${escapeHtml(cycle)}</td></tr>
                   ${priceLabel ? `<tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Importe</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(priceLabel)} / ${escapeHtml(cycle === 'anual' ? 'año' : 'mes')}</td></tr>` : ''}
                   <tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Incluye</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(quota)}</td></tr>
-                  ${nextPayment ? `<tr><td style="padding:10px 0;color:#77716a;">Próximo pago</td><td style="padding:10px 0;text-align:right;">${escapeHtml(nextPayment)}</td></tr>` : ''}
+                  ${nextPayment ? `<tr><td style="padding:10px 0;color:#77716a;">${nextPaymentLabel}</td><td style="padding:10px 0;text-align:right;">${escapeHtml(nextPayment)}</td></tr>` : ''}
                 </table>
               </td>
             </tr>
@@ -387,12 +402,12 @@ export function buildSubscriptionWelcome({
   </body>
 </html>`
 
-  const text = `SCROLLLAB — Suscripción activa
+  const text = `SCROLLLAB — ${trialEnd ? 'Prueba gratis' : 'Suscripción activa'}
 
 Ya estás en LAB, ${name}.
-
+${trialLine ? `\n${trialLine}\n` : ''}
 Plan: ${tier} · ${cycle}${priceLabel ? `\nImporte: ${priceLabel} / ${cycle === 'anual' ? 'año' : 'mes'}` : ''}
-Incluye: ${quota}${nextPayment ? `\nPróximo pago: ${nextPayment}` : ''}
+Incluye: ${quota}${nextPayment ? `\n${nextPaymentLabel}: ${nextPayment}` : ''}
 
 Ir a LAB:
 ${accountUrl}
@@ -403,7 +418,9 @@ seguís con acceso hasta el fin del período pagado.
 Este correo confirma la activación y no reemplaza una factura fiscal.`
 
   return {
-    subject: `Tu suscripción a ScrollLab LAB está activa · ${tier}`,
+    subject: trialEnd
+      ? `Tu prueba gratis de ScrollLab LAB arrancó · ${tier}`
+      : `Tu suscripción a ScrollLab LAB está activa · ${tier}`,
     html,
     text,
   }
@@ -418,14 +435,38 @@ export function buildSubscriptionCanceled({
 }) {
   const plan = HOSTED_PLANS[subscription.plan] || {}
   const tier = TIER_LABEL[plan.tier] || subscription.plan
-  const endsAt = formatDateOnly(subscription.currentPeriodEnd)
+  // `cancelled` en el acto = no quedaban días pagos (p. ej. una renovación
+  // que no se cobró): no hay "acceso hasta" que prometer.
+  const closed = subscription.status === 'cancelled'
+  // Baja durante la prueba gratis: nunca se cobró y ya no se va a cobrar.
+  const inTrial =
+    !closed &&
+    !!subscription.trialEndsAt &&
+    !subscription.lastPaidAt &&
+    new Date(subscription.trialEndsAt) > new Date()
+  const endsAt = closed
+    ? null
+    : formatDateOnly(subscription.currentPeriodEnd || (inTrial && subscription.trialEndsAt))
   const name = user.name || user.email
-  const accessLine = endsAt
-    ? `Seguís con acceso al plan <strong>${escapeHtml(tier)}</strong> hasta el <strong>${escapeHtml(endsAt)}</strong>. No se te va a cobrar de nuevo.`
-    : `Tu acceso al plan <strong>${escapeHtml(tier)}</strong> termina al final del período pagado. No se te va a cobrar de nuevo.`
-  const accessText = endsAt
-    ? `Seguís con acceso al plan ${tier} hasta el ${endsAt}. No se te va a cobrar de nuevo.`
-    : `Tu acceso al plan ${tier} termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const accessLine = closed
+    ? `Tu plan <strong>${escapeHtml(tier)}</strong> quedó dado de baja. No se te va a cobrar de nuevo.`
+    : inTrial
+      ? `Cancelaste durante la prueba gratis: <strong>no se te cobra nada</strong>. Seguís con acceso al plan <strong>${escapeHtml(tier)}</strong> hasta el <strong>${escapeHtml(endsAt)}</strong>.`
+      : endsAt
+        ? `Seguís con acceso al plan <strong>${escapeHtml(tier)}</strong> hasta el <strong>${escapeHtml(endsAt)}</strong>. No se te va a cobrar de nuevo.`
+        : `Tu acceso al plan <strong>${escapeHtml(tier)}</strong> termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const accessText = closed
+    ? `Tu plan ${tier} quedó dado de baja. No se te va a cobrar de nuevo.`
+    : inTrial
+      ? `Cancelaste durante la prueba gratis: no se te cobra nada. Seguís con acceso al plan ${tier} hasta el ${endsAt}.`
+      : endsAt
+        ? `Seguís con acceso al plan ${tier} hasta el ${endsAt}. No se te va a cobrar de nuevo.`
+        : `Tu acceso al plan ${tier} termina al final del período pagado. No se te va a cobrar de nuevo.`
+  const freezeLine = closed
+    ? 'Las secciones publicadas por encima del tope gratis dejan de mostrarse.'
+    : inTrial
+      ? 'Al terminar la prueba, las secciones publicadas por encima del tope gratis dejan de mostrarse.'
+      : 'Al terminar el período, las secciones publicadas por encima del tope gratis dejan de mostrarse.'
 
   const html = `<!doctype html>
 <html lang="es">
@@ -458,7 +499,7 @@ export function buildSubscriptionCanceled({
             </tr>
             <tr>
               <td style="padding:0 32px 24px;color:#5b5650;font-size:15px;line-height:1.6;">
-                Al terminar el período, las secciones publicadas por encima del tope gratis dejan de mostrarse. Volvés a activar cuando quieras.
+                ${freezeLine} Volvés a activar cuando quieras.
               </td>
             </tr>
             <tr>
@@ -487,14 +528,119 @@ Listo, ${name}.
 Cancelamos la renovación automática de tu suscripción a LAB.
 ${accessText}
 
-Al terminar el período, las secciones publicadas por encima del tope gratis
-dejan de mostrarse. Volvés a activar cuando quieras:
+${freezeLine} Volvés a activar cuando quieras:
 ${accountUrl}
 
 Si esto no lo hiciste vos, respondé a este email.`
 
   return {
     subject: `Cancelaste tu suscripción a ScrollLab LAB`,
+    html,
+    text,
+  }
+}
+
+/**
+ * Aviso unos días antes del primer cobro, para quien está en la prueba gratis:
+ * dice cuándo se cobra, cuánto, y que cancelando antes no se paga nada.
+ * Puro, testeable.
+ */
+export function buildSubscriptionTrialReminder({
+  subscription,
+  user,
+  accountUrl,
+  logoUrl,
+}) {
+  const plan = HOSTED_PLANS[subscription.plan] || {}
+  const tier = TIER_LABEL[plan.tier] || subscription.plan
+  const cycle = subscription.cycle === 'yearly' ? 'anual' : 'mensual'
+  const per = cycle === 'anual' ? 'año' : 'mes'
+  const price = hostedPlanPrice(subscription.plan, subscription.cycle)
+  const priceLabel = price != null ? formatMoney(price, 'ARS') : null
+  const chargeDate = formatDateOnly(subscription.trialEndsAt)
+  const when = chargeDate ? `el ${chargeDate}` : 'pronto'
+  const amount = priceLabel ? `el primer pago de ${priceLabel}` : 'el primer pago'
+  const name = user.name || user.email
+
+  const html = `<!doctype html>
+<html lang="es">
+  <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
+    <div style="display:none;max-height:0;overflow:hidden;">
+      Tu prueba gratis de ScrollLab LAB termina ${escapeHtml(when)}. Si cancelás antes, no se te cobra nada.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#f2efe9;border:1px solid #d6d1c8;">
+            <tr>
+              <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:40px 32px 20px;">
+                <p style="margin:0 0 12px;color:#ff4b00;font-size:12px;letter-spacing:3px;text-transform:uppercase;">Prueba gratis</p>
+                <h1 style="margin:0 0 18px;font-size:32px;line-height:1.1;font-weight:600;">Tu prueba termina ${escapeHtml(when)}, ${escapeHtml(name)}.</h1>
+                <p style="margin:0;color:#5b5650;font-size:16px;line-height:1.6;">
+                  Al terminar se cobra ${escapeHtml(amount)} de tu plan <strong>${escapeHtml(tier)}</strong> (${escapeHtml(cycle)}).
+                  Si querés seguir, no tenés que hacer nada. Si no, cancelá antes y no se te cobra nada: seguís con acceso hasta esa fecha.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 24px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+                  <tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Plan</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(tier)} · ${escapeHtml(cycle)}</td></tr>
+                  ${priceLabel ? `<tr><td style="padding:10px 0;border-bottom:1px solid #dedad2;color:#77716a;">Importe</td><td style="padding:10px 0;border-bottom:1px solid #dedad2;text-align:right;">${escapeHtml(priceLabel)} / ${escapeHtml(per)}</td></tr>` : ''}
+                  ${chargeDate ? `<tr><td style="padding:10px 0;color:#77716a;">Primer cobro</td><td style="padding:10px 0;text-align:right;">${escapeHtml(chargeDate)}</td></tr>` : ''}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 32px 40px;">
+                <a href="${escapeHtml(accountUrl)}" style="display:inline-block;background:#161412;color:#f2efe9;text-decoration:none;padding:16px 24px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+                  Ver mi plan →
+                </a>
+                <p style="margin:20px 0 0;color:#77716a;font-size:13px;line-height:1.5;">
+                  Podés cancelar cuando quieras desde LAB, en “Cancelar suscripción”.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
+                Te escribimos porque tenés una prueba gratis activa en ScrollLab LAB.
+                Si necesitás ayuda, respondé a este email.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+
+  const text = `SCROLLLAB — Prueba gratis
+
+Tu prueba de LAB termina ${when}, ${name}.
+
+Al terminar se cobra ${amount} de tu plan ${tier} (${cycle}).
+Si querés seguir, no tenés que hacer nada. Si no, cancelá antes y no se te cobra
+nada: seguís con acceso hasta esa fecha.
+
+Plan: ${tier} · ${cycle}${priceLabel ? `\nImporte: ${priceLabel} / ${per}` : ''}${chargeDate ? `\nPrimer cobro: ${chargeDate}` : ''}
+
+Ver mi plan:
+${accountUrl}
+
+Podés cancelar cuando quieras desde LAB, en "Cancelar suscripción".`
+
+  return {
+    subject: `Tu prueba de ScrollLab LAB termina ${when}`,
     html,
     text,
   }
@@ -511,19 +657,33 @@ const SUB_EMAIL = {
     tag: 'subscription_canceled',
     idPrefix: 'scrolllab-sub-canceled',
   },
+  trialReminder: {
+    build: buildSubscriptionTrialReminder,
+    tag: 'subscription_trial_reminder',
+    idPrefix: 'scrolllab-sub-trial-reminder',
+  },
 }
 
 /**
  * Un solo mail de suscripción por evento (`welcome` al activarse / `canceled`
- * al dar de baja). Idempotente por el claim en DB + Idempotency-Key de Resend.
- * Fire-and-forget desde los paths que disparan (webhook / sync / cancel route).
+ * al dar de baja / `trialReminder` antes del primer cobro). Idempotente por el
+ * claim en DB + Idempotency-Key de Resend. Fire-and-forget desde los paths que
+ * disparan (webhook / sync / cancel route); el aviso sale del barrido de
+ * services/trialReminders.js, que pasa `withinMs` (el plazo) y `now`.
  */
-async function sendSubscriptionEmailOnce({ kind, subscription, config, client }) {
+async function sendSubscriptionEmailOnce({
+  kind,
+  subscription,
+  config,
+  client,
+  withinMs,
+  now,
+}) {
   if (!config.email.enabled) return { skipped: 'disabled' }
   const spec = SUB_EMAIL[kind]
 
   const subId = String(db.uid(subscription) || subscription.id)
-  const claimed = await db.claimSubscriptionEmail(subId, kind)
+  const claimed = await db.claimSubscriptionEmail(subId, kind, { withinMs, now })
   if (!claimed) return { skipped: 'already-sent-or-not-applicable' }
 
   const user = await db.findUserById(String(claimed.userId))
@@ -575,6 +735,24 @@ export function sendSubscriptionCanceledOnce({ subscription, config, client }) {
   })
 }
 
+/** Aviso de fin de prueba: solo si termina dentro de `withinMs` (ms) y sigue sin cancelar. */
+export function sendSubscriptionTrialReminderOnce({
+  subscription,
+  config,
+  client,
+  withinMs,
+  now,
+}) {
+  return sendSubscriptionEmailOnce({
+    kind: 'trialReminder',
+    subscription,
+    config,
+    client,
+    withinMs,
+    now,
+  })
+}
+
 /**
  * Aviso interno al dueño del marketplace. Idempotente vía Resend (webhook + confirm).
  */
@@ -605,6 +783,36 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
     throw new Error(response.error.message || 'Resend rechazó el aviso interno')
   }
 
+  return { sent: true, id: response.data?.id || null }
+}
+
+/**
+ * Aviso interno de un pago que pide acción a mano (reembolsar, entregar).
+ * Uno por evento: la clave de idempotencia evita que los reintentos del
+ * webhook repitan el mail. Sin mail configurado queda solo el log.
+ */
+export async function sendAdminAlert({ kind, key, subject, lines, config, client }) {
+  if (!config?.email?.enabled) return { skipped: 'disabled' }
+  const notifyTo = config.email.notifyTo
+  if (!notifyTo) return { skipped: 'no-notify-to' }
+  const resend = client || new Resend(config.email.apiKey)
+  const text = lines.join('\n')
+  const response = await resend.emails.send(
+    {
+      from: config.email.from,
+      to: [notifyTo],
+      subject: `[SCROLLLAB] ${subject}`,
+      html: `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">${lines
+        .map((line) => escapeHtml(line))
+        .join('<br>')}</div>`,
+      text,
+      tags: [{ name: 'type', value: `alert_${kind}` }],
+    },
+    { idempotencyKey: `scrolllab-alert-${kind}-${key}` },
+  )
+  if (response.error) {
+    throw new Error(response.error.message || 'Resend rechazó el aviso')
+  }
   return { sent: true, id: response.data?.id || null }
 }
 

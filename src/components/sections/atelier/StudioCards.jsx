@@ -1,11 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import card1 from './assets/card-1.png'
-import card2 from './assets/card-2.png'
-import card3 from './assets/card-3.png'
-import card4 from './assets/card-4.png'
-import card5 from './assets/card-5.png'
-import card6 from './assets/card-6.png'
+import { card1, card2, card3, card4, card5, card6, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultCards = [
   {
@@ -120,15 +116,17 @@ export default function StudioCards({
               />
               {card.img ? (
                 <img
-                  src={card.img}
+                  {...imgAttrs(card.img, variants)}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-[1.04]"
                 />
               ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
-                <p className="text-[10px] tracking-[0.22em] text-white/70 uppercase">
+                <p className="text-[11px] tracking-[0.22em] text-white/70 uppercase">
                   {card.label}
                 </p>
                 <h3 className="mt-1 font-brico text-xl font-semibold tracking-[-0.02em] text-white md:text-2xl">

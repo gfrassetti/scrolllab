@@ -11,6 +11,7 @@ import ProductDetail from './sections/commerce/ProductDetail'
 import Checkout from './sections/commerce/Checkout'
 import ShopChrome from './sections/commerce/ShopChrome'
 import { ShopThemeProvider } from '../lib/shop/ShopTheme'
+import { ShopCatalogProvider } from '../lib/shop/ShopCatalog'
 
 /**
  * El shop del preview corre en su propio MemoryRouter, pero la app ya vive
@@ -39,42 +40,46 @@ export default function CompositionShopShell({
   home,
   theme = 'auto',
   checkoutProps,
+  products,
 }) {
   return (
     <IsolatedRouterBoundary>
       <ShopThemeProvider theme={theme} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
-        <MemoryRouter initialEntries={['/']}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <>
-                  {home}
-                  <ShopChrome />
-                </>
-              }
-            />
-            <Route
-              path="/product/:productId"
-              element={
-                <>
-                  <ProductDetail />
-                  <ShopChrome />
-                </>
-              }
-            />
-            <Route
-              path="/checkout"
-              element={
-                <>
-                  <Checkout {...(checkoutProps || {})} />
-                  <ShopChrome />
-                </>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </MemoryRouter>
+        {/* Los productos editados en el builder: grilla, ficha, carrito y checkout. */}
+        <ShopCatalogProvider products={products}>
+          <MemoryRouter initialEntries={['/']}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    {home}
+                    <ShopChrome />
+                  </>
+                }
+              />
+              <Route
+                path="/product/:productId"
+                element={
+                  <>
+                    <ProductDetail />
+                    <ShopChrome />
+                  </>
+                }
+              />
+              <Route
+                path="/checkout"
+                element={
+                  <>
+                    <Checkout {...(checkoutProps || {})} />
+                    <ShopChrome />
+                  </>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </MemoryRouter>
+        </ShopCatalogProvider>
       </ShopThemeProvider>
     </IsolatedRouterBoundary>
   )

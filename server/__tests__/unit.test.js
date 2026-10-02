@@ -15,6 +15,8 @@ import {
   mpPaymentError,
   buildPreferenceBody,
   buildPreapprovalBody,
+  buildUpgradePreferenceBody,
+  billingFrequency,
   absoluteClientAsset,
   MP_STATEMENT_DESCRIPTOR,
   MP_DEFAULT_ITEM_PICTURE,
@@ -41,6 +43,15 @@ import {
   buildSubscriptionWelcome,
   buildSubscriptionCanceled,
 } from '../services/email.js'
+import {
+  quoteUpgrade,
+  upgradeReference,
+  parseUpgradeReference,
+  isUpgradeReference,
+  subtractBillingCycle,
+  addBillingCycle,
+  MIN_UPGRADE_CHARGE,
+} from '../services/subscriptions.js'
 import { sanitizeAuthReturn } from '../authReturn.js'
 import { sanitizeSectionProps } from '../sectionFields.js'
 import { allowedOrigins, errorHandler, requireSameOrigin } from '../middleware.js'
@@ -305,6 +316,34 @@ describe('validateCheckoutItems', () => {
       () => validateCheckoutItems([{ sku: 'nope' }], opts),
       HttpError,
     )
+  })
+
+  it('rechaza pagar dos veces lo mismo: template repetido, dos composiciones o un modelo que ya trae el bundle', () => {
+    const status = (items) => {
+      try {
+        validateCheckoutItems(items, opts)
+        return 200
+      } catch (err) {
+        return err.status
+      }
+    }
+    assert.equal(status([{ sku: 'chapters' }, { sku: 'chapters' }]), 400)
+    assert.equal(status([{ sku: 'bundle' }, { sku: 'unity' }]), 400)
+    assert.equal(status([{ sku: 'unity' }, { sku: 'bundle' }]), 400)
+    assert.equal(
+      status([
+        { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
+        { sku: 'custom:b', recipe: ['nocturne/SplitReveals'] },
+      ]),
+      400,
+    )
+    assert.equal(status([{ sku: 'chapters' }, { sku: 'nocturne' }]), 200)
+    assert.equal(status([{ sku: 'bundle' }, { sku: 'meridian' }]), 200)
+  })
+
+  it('cada línea lleva la descripción del catálogo (va a Mercado Pago)', () => {
+    const [line] = validateCheckoutItems([{ sku: 'chapters' }], opts)
+    assert.equal(line.description, PRODUCTS.chapters.description)
   })
 
   it('rechaza SKUs en próximamente', () => {
@@ -765,6 +804,79 @@ describe('order receipt email', () => {
     })
     assert.match(message.text, /termina al final del período pagado/)
   })
+
+  it('bienvenida con prueba gratis: dice hasta cuándo no se cobra y que cancelar antes no cuesta nada', () => {
+    const trialEndsAt = new Date(Date.now() + 7 * 86_400_000).toISOString()
+    const message = buildSubscriptionWelcome({
+      subscription: {
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        trialEndsAt,
+        currentPeriodEnd: trialEndsAt,
+      },
+      user: { email: 'trial@example.com', name: 'Trial' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.subject, /prueba gratis/)
+    assert.match(message.text, /prueba gratis hasta el .+ no se te cobra nada/)
+    assert.match(message.text, /Si cancelás antes .*no pagás nada/)
+    assert.match(message.text, /Primer cobro: /)
+    assert.doesNotMatch(message.text, /Próximo pago/)
+    assert.match(message.html, /Prueba gratis/)
+  })
+
+  it('bienvenida sin prueba (ya cobrada): el mail de siempre', () => {
+    const message = buildSubscriptionWelcome({
+      subscription: {
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        trialEndsAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+        lastPaidAt: new Date().toISOString(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+      },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.subject, /está activa/)
+    assert.match(message.text, /Próximo pago: /)
+  })
+
+  it('baja durante la prueba: aclara que no se cobra nada (no "de nuevo")', () => {
+    const trialEndsAt = new Date(Date.now() + 4 * 86_400_000).toISOString()
+    const message = buildSubscriptionCanceled({
+      subscription: {
+        plan: 'hosted_starter',
+        status: 'authorized',
+        trialEndsAt,
+        currentPeriodEnd: trialEndsAt,
+        canceledAt: new Date().toISOString(),
+      },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.text, /Cancelaste durante la prueba gratis: no se te cobra nada/)
+    assert.match(message.text, /acceso al plan Starter hasta el /)
+    assert.doesNotMatch(message.text, /de nuevo/)
+  })
+
+  it('baja cerrada en el acto (sin días pagos): no promete un "acceso hasta"', () => {
+    const message = buildSubscriptionCanceled({
+      subscription: {
+        plan: 'hosted_pro',
+        status: 'cancelled',
+        currentPeriodEnd: '2026-09-01T00:00:00.000Z',
+      },
+      user: { email: 's@e.com' },
+      accountUrl: 'https://x/lab',
+      logoUrl: 'https://x/logo.svg',
+    })
+    assert.match(message.text, /quedó dado de baja/)
+    assert.doesNotMatch(message.text, /hasta el/)
+    assert.match(message.text, /No se te va a cobrar de nuevo/)
+  })
 })
 
 describe('sanitizeAuthReturn', () => {
@@ -903,6 +1015,48 @@ describe('buildPreferenceBody', () => {
     )
   })
 
+  it('lleva lo que pide el checklist de MP: comprador, descripción y categoría del ítem', () => {
+    const body = buildPreferenceBody({
+      ...base,
+      payer: { email: 'ana@test.com', name: 'Ana María Pérez' },
+      items: [
+        {
+          sku: 'meridian',
+          title: 'MERIDIAN — template',
+          description: 'x'.repeat(400),
+          unit_price: 1000,
+          currency_id: 'ARS',
+        },
+        { sku: 'chapters', title: 'CHAPTERS — template', unit_price: 1000, currency_id: 'ARS' },
+      ],
+    })
+    assert.deepEqual(body.payer, { email: 'ana@test.com', name: 'Ana', surname: 'María Pérez' })
+    assert.equal(body.items[0].category_id, 'virtual_goods')
+    assert.equal(body.items[0].description.length, 250)
+    // Sin descripción en el catálogo, va el título.
+    assert.equal(body.items[1].description, 'CHAPTERS — template')
+  })
+
+  it('sin mail no manda comprador; con un solo nombre no inventa apellido', () => {
+    const item = { sku: 'fizz', title: 'FIZZ', unit_price: 1000, currency_id: 'ARS' }
+    assert.equal('payer' in buildPreferenceBody({ ...base, items: [item] }), false)
+    assert.deepEqual(
+      buildPreferenceBody({ ...base, items: [item], payer: { email: 'a@b.com', name: 'Ana' } }).payer,
+      { email: 'a@b.com', name: 'Ana' },
+    )
+  })
+
+  it('el ticket de efectivo vence a los 3 días, antes que la orden pendiente (7)', () => {
+    const now = Date.parse('2026-10-01T12:00:00.000Z')
+    const body = buildPreferenceBody({
+      ...base,
+      now,
+      items: [{ sku: 'fizz', title: 'FIZZ', unit_price: 1000, currency_id: 'ARS' }],
+    })
+    assert.equal(body.date_of_expiration, '2026-10-04T12:00:00.000Z')
+    assert.ok(Date.parse(body.date_of_expiration) - now < PENDING_RETENTION_MS)
+  })
+
   it('absoluteClientAsset normaliza barra final y path relativo', () => {
     assert.equal(
       absoluteClientAsset('https://www.scrolllab.com.ar/', 'icon-512.png'),
@@ -938,21 +1092,185 @@ describe('buildPreapprovalBody', () => {
     assert.equal(body.reason, args.reason)
   })
 
-  it('currency_id default ARS y frequency_type years para el anual', () => {
+  it('el anual va como 12 meses: MP no acepta "years" (400, verificado en sandbox)', () => {
+    assert.deepEqual(billingFrequency('yearly'), { frequency: 12, frequencyType: 'months' })
+    assert.deepEqual(billingFrequency('monthly'), { frequency: 1, frequencyType: 'months' })
     const body = buildPreapprovalBody({
       ...args,
+      ...billingFrequency('yearly'),
       currencyId: undefined,
-      frequencyType: 'years',
       amount: 199000,
     })
     assert.equal(body.auto_recurring.currency_id, 'ARS')
-    assert.equal(body.auto_recurring.frequency_type, 'years')
+    assert.equal(body.auto_recurring.frequency, 12)
+    assert.equal(body.auto_recurring.frequency_type, 'months')
     assert.equal(body.auto_recurring.transaction_amount, 199000)
   })
 
   it('no cuela un preapproval_plan_id (el monto va inline)', () => {
     const body = buildPreapprovalBody(args)
     assert.equal('preapproval_plan_id' in body, false)
+  })
+
+  it('primer cobro diferido (prueba / días pagos) va como start_date, nunca free_trial', () => {
+    const body = buildPreapprovalBody({
+      ...args,
+      startDate: new Date('2026-10-02T15:00:00.000Z'),
+    })
+    assert.equal(body.auto_recurring.start_date, '2026-10-02T15:00:00.000Z')
+    assert.equal('free_trial' in body.auto_recurring, false)
+  })
+})
+
+describe('buildUpgradePreferenceBody', () => {
+  it('pago único de la diferencia: vence, sin efectivo, binary_mode y notificación ?source=lab', () => {
+    const body = buildUpgradePreferenceBody({
+      reference: 'labup:abc:hosted_pro:43549:deadbeef',
+      title: 'ScrollLab LAB — pasar a pro (18 días)',
+      amount: 43549,
+      expiresAt: new Date('2026-10-21T17:00:00.000Z'),
+      clientUrl: 'https://www.scrolllab.com.ar',
+      apiPublicUrl: 'https://api.scrolllab.com.ar',
+    })
+    assert.equal(body.items.length, 1)
+    assert.equal(body.items[0].unit_price, 43549)
+    assert.equal(body.items[0].currency_id, 'ARS')
+    assert.equal(body.external_reference, 'labup:abc:hosted_pro:43549:deadbeef')
+    assert.equal(body.binary_mode, true)
+    assert.deepEqual(body.payment_methods.excluded_payment_types, [
+      { id: 'ticket' },
+      { id: 'atm' },
+    ])
+    assert.equal(body.expires, true)
+    assert.equal(body.expiration_date_to, '2026-10-21T17:00:00.000Z')
+    assert.equal(
+      body.notification_url,
+      'https://api.scrolllab.com.ar/api/webhooks/mercadopago?source=lab',
+    )
+    assert.equal(body.back_urls.success, 'https://www.scrolllab.com.ar/lab?upgrade=volver')
+    assert.equal(body.back_urls.failure, 'https://www.scrolllab.com.ar/lab?upgrade=volver')
+    assert.equal(body.auto_return, 'approved')
+    assert.equal(body.statement_descriptor, MP_STATEMENT_DESCRIPTOR)
+  })
+})
+
+describe('cotización de la subida de plan', () => {
+  const DAY = 86_400_000
+  const HOUR = 3_600_000
+  const end = Date.parse('2026-11-08T15:00:00.000Z')
+  // Pagó Starter mensual el 8/10: el período es 8/10 → 8/11 (31 días).
+  const paid = (extra = {}) => ({
+    plan: 'hosted_starter',
+    cycle: 'monthly',
+    lastPaidAt: new Date('2026-10-08T15:00:00.000Z'),
+    currentPeriodEnd: new Date(end),
+    ...extra,
+  })
+
+  it('un ciclo para atrás es el inverso de uno para adelante', () => {
+    for (const cycle of ['monthly', 'yearly']) {
+      const d = new Date('2026-10-08T15:00:00.000Z')
+      assert.equal(subtractBillingCycle(addBillingCycle(d, cycle), cycle).toISOString(), d.toISOString())
+    }
+  })
+
+  it('subir a mitad del período cobra la diferencia por los días que quedan', () => {
+    const q = quoteUpgrade(paid(), 'hosted_pro', end - 18 * DAY)
+    assert.equal(q.amount, 43549) // (99.900 − 24.900) × 18/31, redondeado para arriba
+    assert.equal(q.days, 18)
+    assert.equal(q.reason, 'prorated')
+    assert.equal(q.newPrice, 99900)
+    assert.equal(q.periodEnd.toISOString(), '2026-11-08T15:00:00.000Z')
+  })
+
+  it('en la prueba no hay nada pago: cambiar es gratis', () => {
+    const trial = {
+      plan: 'hosted_starter',
+      cycle: 'monthly',
+      trialEndsAt: new Date(end),
+      currentPeriodEnd: new Date(end),
+    }
+    const q = quoteUpgrade(trial, 'hosted_studio', end - 3 * DAY)
+    assert.equal(q.amount, 0)
+    assert.equal(q.reason, 'unpaid')
+  })
+
+  it('bajar, o volver al plan que ya pagó, es gratis; más arriba se cobra contra lo pagado', () => {
+    assert.equal(quoteUpgrade(paid({ plan: 'hosted_pro' }), 'hosted_starter', end - 10 * DAY).amount, 0)
+    const downgraded = paid({ plan: 'hosted_starter', paidPlan: 'hosted_pro', paidCycle: 'monthly' })
+    const back = quoteUpgrade(downgraded, 'hosted_pro', end - 10 * DAY)
+    assert.equal(back.amount, 0)
+    assert.equal(back.reason, 'covered')
+    // Studio: la diferencia con Pro (lo pagado), no con Starter.
+    assert.equal(quoteUpgrade(downgraded, 'hosted_studio', end - 26 * DAY).amount, 167742)
+  })
+
+  it('las últimas horas no se cobran (por debajo del mínimo)', () => {
+    const q = quoteUpgrade(paid(), 'hosted_pro', end - 3 * HOUR) // 75.000 × 3/744 ≈ 303
+    assert.equal(q.amount, 0)
+    assert.equal(q.reason, 'minimal')
+    assert.ok(MIN_UPGRADE_CHARGE > 303)
+  })
+
+  it('anual: el período es el año entero', () => {
+    const yearly = paid({
+      cycle: 'yearly',
+      currentPeriodEnd: new Date('2027-10-08T15:00:00.000Z'),
+    })
+    const q = quoteUpgrade(yearly, 'hosted_studio', Date.parse('2026-10-09T16:00:00.000Z'))
+    assert.equal(q.amount, 2742152) // 2.750.000 × 8735 h / 8760 h
+    assert.equal(q.days, 364)
+    assert.equal(q.newPrice, 2999000)
+  })
+
+  it('re-suscripción: cotiza con el plan y el ciclo que pagó la suscripción vieja', () => {
+    const carried = {
+      plan: 'hosted_starter',
+      cycle: 'yearly',
+      paidPlan: 'hosted_starter',
+      paidCycle: 'monthly',
+      currentPeriodEnd: new Date(end),
+    }
+    const q = quoteUpgrade(carried, 'hosted_pro', end - 23 * DAY)
+    assert.equal(q.amount, 55646) // mensual: 75.000 × 23/31
+    assert.equal(q.newPrice, 999000) // lo que MP cobra desde el 8/11 (anual)
+  })
+
+  it('con el período vencido no hay contra qué cotizar', () => {
+    assert.equal(quoteUpgrade(paid(), 'hosted_pro', end + DAY).reason, 'unpaid')
+  })
+})
+
+describe('referencia del pago de la diferencia', () => {
+  it('ida y vuelta', () => {
+    const ref = upgradeReference({
+      subscriptionId: 'a'.repeat(24),
+      plan: 'hosted_pro',
+      amount: 43549,
+      nonce: 'deadbeef',
+    })
+    assert.equal(isUpgradeReference(ref), true)
+    assert.deepEqual(parseUpgradeReference(ref), {
+      subscriptionId: 'a'.repeat(24),
+      plan: 'hosted_pro',
+      amount: 43549,
+    })
+  })
+
+  it('rechaza lo que no armamos nosotros', () => {
+    for (const bad of [
+      null,
+      '',
+      'deadbeefdeadbeefdeadbeef',
+      'labup:x:hosted_pro:0:n',
+      'labup:x:nope:100:n',
+      'labup:x:hosted_pro:12.5:n',
+      'labup:x:hosted_pro:100',
+      'labup::hosted_pro:100:n',
+    ]) {
+      assert.equal(parseUpgradeReference(bad), null, String(bad))
+    }
+    assert.equal(isUpgradeReference('deadbeefdeadbeefdeadbeef'), false)
   })
 })
 
