@@ -279,7 +279,7 @@ export default function BuilderDemo() {
 
         <div
           data-scene
-          className="absolute inset-0 p-4 text-[var(--ld-ink)] sm:p-6 md:p-8"
+          className="absolute inset-0 p-3 text-[var(--ld-ink)] sm:p-6 md:p-8"
         >
           {/* Ventana B — la descarga (detrás, a la derecha) */}
           <div
@@ -318,13 +318,13 @@ export default function BuilderDemo() {
 
             <div className="flex min-h-0 flex-1">
               {/* Catálogo de secciones */}
-              <div className="flex w-[52%] shrink-0 flex-col border-r border-[var(--ld-line)] p-4 md:p-5">
-                <div className="mb-3 flex items-center gap-2">
+              <div className="flex w-[52%] shrink-0 flex-col border-r border-[var(--ld-line)] p-4 max-sm:w-[58%] max-sm:p-2.5 max-[360px]:p-2 md:p-5">
+                <div className="mb-3 flex items-center gap-2 max-sm:mb-2 max-sm:gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-[var(--ld-accent)]" />
-                  <p className="text-[12px] font-medium tracking-[0.14em]">
+                  <p className="text-[12px] font-medium tracking-[0.14em] max-sm:text-[11px] max-sm:tracking-[0.1em]">
                     CHAPTERS
                   </p>
-                  <span className="ml-auto text-[10px] tracking-[0.2em] text-[var(--ld-faint)]">
+                  <span className="ml-auto text-[10px] tracking-[0.2em] text-[var(--ld-faint)] max-sm:hidden">
                     {c.modelBlurb}
                   </span>
                 </div>
@@ -332,7 +332,7 @@ export default function BuilderDemo() {
                   {CARDS.map((card, i) => (
                     <div
                       key={card.name}
-                      className="relative flex flex-1 items-center gap-3 border-b border-[var(--ld-line)] pr-1"
+                      className="relative flex flex-1 items-center gap-3 border-b border-[var(--ld-line)] pr-1 max-sm:gap-2 max-[360px]:gap-1.5"
                     >
                       <div
                         data-row-add={i}
@@ -340,30 +340,30 @@ export default function BuilderDemo() {
                       />
                       <span
                         aria-hidden="true"
-                        className="relative grid size-5 shrink-0 place-items-center text-[12px] text-[var(--ld-faint)]"
+                        className="relative grid size-5 shrink-0 place-items-center text-[12px] text-[var(--ld-faint)] max-sm:size-4 max-sm:text-[10px] max-[360px]:size-3.5"
                       >
                         ⠿
                         <span
                           data-check={i}
-                          className="absolute inset-0 grid place-items-center border border-[var(--ld-ok-line)] bg-[var(--ld-surface)] text-[11px] text-[var(--ld-ok)]"
+                          className="absolute inset-0 grid place-items-center border border-[var(--ld-ok-line)] bg-[var(--ld-surface)] text-[11px] text-[var(--ld-ok)] max-sm:text-[9px]"
                         >
                           ✓
                         </span>
                       </span>
                       <div className="relative min-w-0 flex-1">
-                        <p className="flex items-baseline gap-2 text-[12.5px] font-medium">
+                        <p className="flex items-baseline gap-2 text-[12.5px] font-medium max-sm:flex-col max-sm:items-stretch max-sm:gap-0 max-sm:text-[11.5px] max-[360px]:text-[10.5px]">
                           <span className="truncate">{card.name}</span>
-                          <span className="shrink-0 text-[8.5px] tracking-[0.22em] text-[var(--ld-faint)]">
+                          <span className="shrink-0 text-[8.5px] tracking-[0.22em] text-[var(--ld-faint)] max-sm:order-first max-sm:text-[7.5px] max-sm:tracking-[0.2em]">
                             {c.kinds[i]}
                           </span>
                         </p>
-                        <p className="truncate text-[10px] text-[var(--ld-soft)]">
+                        <p className="truncate text-[10px] text-[var(--ld-soft)] max-sm:line-clamp-2 max-sm:whitespace-normal max-sm:text-[9px] max-sm:leading-[1.25]">
                           {c.blurbs[i]}
                         </p>
                       </div>
                       <span
                         data-add={i}
-                        className="relative shrink-0 border border-[var(--ld-line2)] px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-[var(--ld-soft)]"
+                        className="relative shrink-0 border border-[var(--ld-line2)] px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-[var(--ld-soft)] max-sm:px-1.5 max-sm:py-0.5 max-sm:text-[8px] max-sm:tracking-[0.12em] max-[360px]:px-1 max-[360px]:text-[7.5px] max-[360px]:tracking-[0.06em]"
                       >
                         {c.add}
                       </span>
@@ -373,12 +373,12 @@ export default function BuilderDemo() {
               </div>
 
               {/* Lienzo + precio */}
-              <div className="flex min-w-0 flex-1 flex-col p-4 md:p-5">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--ld-faint)]">
-                  {c.yourPage} ·{' '}
+              <div className="flex min-w-0 flex-1 flex-col p-4 max-sm:p-2.5 max-[360px]:p-2 md:p-5">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--ld-faint)] max-sm:text-[9px] max-sm:tracking-[0.12em]">
+                  <span className="max-sm:hidden">{c.yourPage} · </span>
                   <span data-count>{`0 ${c.sections}`}</span>
                 </p>
-                <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[9.5px] uppercase tracking-[0.16em] text-[var(--ld-faint)]">
+                <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[9.5px] uppercase tracking-[0.16em] text-[var(--ld-faint)] max-sm:gap-x-2.5 max-sm:text-[8px] max-sm:tracking-[0.1em]">
                   {['nav', 'hero', 'sec', 'footer'].map((key, idx) => (
                     <span
                       key={key}
@@ -404,16 +404,16 @@ export default function BuilderDemo() {
                       <div
                         key={card.name}
                         data-crow={i}
-                        className="flex flex-1 items-center gap-2.5 border border-[var(--ld-line)] bg-[var(--ld-bg)] px-2.5"
+                        className="flex flex-1 items-center gap-2.5 border border-[var(--ld-line)] bg-[var(--ld-bg)] px-2.5 max-sm:gap-1.5 max-sm:px-1.5"
                       >
-                        <span className="w-6 shrink-0 text-[10px] tracking-[0.18em] text-[var(--ld-faint)]">
+                        <span className="w-6 shrink-0 text-[10px] tracking-[0.18em] text-[var(--ld-faint)] max-sm:w-4 max-sm:text-[8.5px] max-sm:tracking-normal">
                           {String(i + 1).padStart(2, '0')}
                         </span>
                         <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--ld-accent)]" />
-                        <span className="truncate text-[11.5px] font-medium">
+                        <span className="truncate text-[11.5px] font-medium max-sm:text-[10.5px] max-[360px]:text-[10px]">
                           {card.name}
                         </span>
-                        <span className="ml-auto shrink-0 text-[8.5px] uppercase tracking-[0.18em] text-[var(--ld-faint)]">
+                        <span className="ml-auto shrink-0 text-[8.5px] uppercase tracking-[0.18em] text-[var(--ld-faint)] max-sm:hidden">
                           Chapters · {c.kinds[i]}
                         </span>
                       </div>
@@ -432,7 +432,7 @@ export default function BuilderDemo() {
                     </span>
                     <span
                       data-buy
-                      className="w-full bg-[var(--ld-ink)] px-3.5 py-1.5 text-center text-[10px] uppercase tracking-[0.2em] text-[var(--ld-surface)] md:w-auto md:shrink-0 md:whitespace-nowrap"
+                      className="w-full bg-[var(--ld-ink)] px-3.5 py-1.5 text-center text-[10px] uppercase tracking-[0.2em] text-[var(--ld-surface)] max-sm:px-2 max-sm:text-[9px] max-sm:tracking-[0.12em] md:w-auto md:shrink-0 md:whitespace-nowrap"
                     >
                       {c.buy}
                     </span>
@@ -441,7 +441,7 @@ export default function BuilderDemo() {
                       autoAlpha:1 — reemplaza el CTA sin importar su altura. */}
                   <div
                     data-paid
-                    className="absolute inset-0 z-20 flex items-center justify-center gap-1.5 border-t border-[var(--ld-ok-line)] px-3 text-center text-[9.5px] font-medium uppercase tracking-[0.14em] text-[var(--ld-ok)]"
+                    className="absolute inset-0 z-20 flex items-center justify-center gap-1.5 border-t border-[var(--ld-ok-line)] px-3 text-center text-[9.5px] font-medium uppercase tracking-[0.14em] text-[var(--ld-ok)] max-sm:px-2 max-sm:text-[8.5px] max-sm:tracking-[0.08em]"
                     style={{
                       background: 'color-mix(in srgb, var(--ld-ok) 14%, var(--ld-surface))',
                     }}

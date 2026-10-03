@@ -294,6 +294,11 @@ como en PC: el mismo beat, adaptado al toque (no una copia píxel por píxel).
   dibuja en las dos vistas. Lo que sí es una decisión se declara en `ACCEPTED`
   (`scripts/check-parity.mjs`, con el motivo).
 - `motion-reduce:` de Tailwind significa lo mismo que `calm:` (respeta el botón).
+- Todo 3D con `PerspectiveCamera` encuadra con `fitCameraDistance`
+  (`src/lib/motion.js`): con la cámara fija el objeto llena el alto de la pantalla y
+  en un teléfono en vertical ocupa más del doble del ancho (MONOLITH lo hacía). La
+  función aleja la cámara solo en pantallas angostas; en PC devuelve la distancia de
+  siempre.
 - Las escenas WebGL llaman a `createFrameBudget` (`src/lib/motion.js`): si el teléfono no llega a
   ~30 cuadros, baja el pixel ratio de a escalones. En un equipo rápido no cambia nada.
 - `npm run check:parity` compara cada sección PC ↔ teléfono ↔ tablet y falla con

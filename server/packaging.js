@@ -57,8 +57,12 @@ function publicDirAssets(relDir) {
  *      aro de ATRIUM OrbitRing entero (`calm:scale-[0.7]`) y las marcas
  *      `data-pan` / `data-bleed` (MERIDIAN Location, ATRIUM PeopleScatter) que
  *      llegaron después de que se armaran ZIPs con la 7.
+ *  9 — Encuadre del 3D por proporción de pantalla: MONOLITH `HeroThree` y ATELIER
+ *      `HeroMeaning` alejan la cámara en vertical (`fitCameraDistance` en
+ *      lib/motion.js) y el objeto entra en el ancho en vez de salirse por los
+ *      costados (en un teléfono ocupaba más del doble del ancho). En PC no cambia.
  */
-export const PACK_VERSION = 8
+export const PACK_VERSION = 9
 
 const MODEL_FILES = {
   chapters: {

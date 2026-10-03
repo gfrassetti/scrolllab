@@ -1,8 +1,14 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
+import { createFrameBudget, fitCameraDistance, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
+
+// Cámara del emblema. En PC queda en EMBLEM_Z; en vertical se aleja (`fitCameraDistance`)
+// hasta que el emblema entra en el ancho: el aro (1,35 + 0,08) es lo más ancho, con margen.
+const EMBLEM_FOV = 40
+const EMBLEM_Z = 6
+const EMBLEM_RADIUS = 1.45
 
 /**
  * HeroMeaning — Trionn-inspired hero: blur text reveal + WebGL emblem
@@ -55,8 +61,8 @@ export default function HeroMeaning({
       const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
       renderer.setPixelRatio(dpr)
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 50)
-      camera.position.z = 6
+      const camera = new THREE.PerspectiveCamera(EMBLEM_FOV, 1, 0.1, 50)
+      camera.position.z = EMBLEM_Z
 
       const group = new THREE.Group()
       const mat = new THREE.MeshStandardMaterial({
@@ -89,6 +95,13 @@ export default function HeroMeaning({
         const { clientWidth: w, clientHeight: h } = canvas
         renderer.setSize(w, h, false)
         camera.aspect = w / Math.max(h, 1)
+        // En vertical la cámara se aleja hasta que el emblema entra en el ancho.
+        camera.position.z = fitCameraDistance({
+          fov: EMBLEM_FOV,
+          aspect: camera.aspect,
+          radius: EMBLEM_RADIUS,
+          base: EMBLEM_Z,
+        })
         camera.updateProjectionMatrix()
       }
       resize()
