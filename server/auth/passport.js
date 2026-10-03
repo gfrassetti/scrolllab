@@ -60,6 +60,10 @@ export function configurePassport(config) {
           clientID: config.google.clientId,
           clientSecret: config.google.clientSecret,
           callbackURL: config.google.callbackUrl,
+          // `state` de OAuth guardado en la sesión: ata el callback al login que
+          // lo empezó (anti login-CSRF). Va acá, en la estrategia: pasado a
+          // authenticate() la librería lo ignora y no valida nada.
+          state: true,
         },
         async (_accessToken, _refreshToken, profile, done) => {
           try {

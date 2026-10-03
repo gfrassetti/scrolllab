@@ -281,9 +281,9 @@ export async function createApp(config) {
 
     req.session.save((err) => {
       if (err) return next(err)
+      // El `state` anti-CSRF lo pone la estrategia (auth/passport.js).
       passport.authenticate('google', {
         scope: ['profile', 'email'],
-        state: true,
       })(req, res, next)
     })
   })

@@ -145,3 +145,107 @@ describe('rutas de login con Google', () => {
     assert.match(url.searchParams.get('scope'), /email/)
   })
 })
+
+/**
+ * Vuelta de Google: el `state` de OAuth ata el callback a la sesión que
+ * empezó el login (anti login-CSRF). Sin él, un atacante podía mandar a
+ * alguien a /callback con un `code` propio y dejarlo logueado en la cuenta
+ * del atacante. Las dos llamadas de red a Google (token y perfil) se stubean.
+ */
+describe('callback de Google y state anti-CSRF', () => {
+  let dir
+  let app
+  let request
+  let passport
+
+  const CLIENT = 'http://localhost:5173'
+
+  before(async () => {
+    process.env.NODE_ENV = 'development'
+    process.env.STORE = 'file'
+    process.env.SESSION_SECRET = 'test-session-secret-min-24-chars'
+    process.env.DOWNLOAD_SECRET = 'test-download-secret-min-24-chars'
+    process.env.FX_OFFLINE = 'true'
+    process.env.CLIENT_URL = CLIENT
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-google-cb-'))
+    process.env.STORAGE_DIR = dir
+    process.env.FILE_DB_DIR = path.join(dir, 'db')
+    const { loadConfig } = await import('../config.js')
+    const config = loadConfig()
+    config.storageDir = dir
+    config.store = 'file'
+    config.clientUrl = CLIENT
+    config.google = {
+      clientId: 'test-client-id',
+      clientSecret: 'test-client-secret',
+      callbackUrl: 'http://localhost:8787/api/auth/google/callback',
+    }
+    const { createApp } = await import('../app.js')
+    app = await createApp(config)
+    request = (await import('supertest')).default
+    passport = (await import('passport')).default
+
+    const strategy = passport._strategy('google')
+    strategy._oauth2.getOAuthAccessToken = (_code, _params, cb) =>
+      cb(null, 'access-token', 'refresh-token', {})
+    strategy.userProfile = (_token, done) =>
+      done(null, {
+        id: 'g-cb-user',
+        emails: [{ value: 'cb@x.com' }],
+        displayName: 'Callback User',
+        photos: [],
+      })
+  })
+
+  after(() => {
+    fs.rmSync(dir, { recursive: true, force: true })
+  })
+
+  async function startLogin(agent, next) {
+    const res = await agent.get(`/api/auth/google${next ? `?next=${encodeURIComponent(next)}` : ''}`)
+    assert.equal(res.status, 302)
+    return new URL(res.headers.location).searchParams.get('state')
+  }
+
+  it('el redirect a Google lleva un state', async () => {
+    const state = await startLogin(request.agent(app))
+    assert.ok(state && state.length >= 16, `state: ${state}`)
+  })
+
+  it('rechaza un callback con state falso', async () => {
+    const agent = request.agent(app)
+    await startLogin(agent)
+    const res = await agent.get('/api/auth/google/callback?code=attacker-code&state=forjado')
+    assert.equal(res.status, 302)
+    assert.equal(res.headers.location, `${CLIENT}/login?error=google_failed`)
+    const me = await agent.get('/api/auth/me')
+    assert.equal(me.body.user, null)
+  })
+
+  it('rechaza un callback sin state (el link armado por un atacante)', async () => {
+    const victim = request.agent(app)
+    const res = await victim.get('/api/auth/google/callback?code=attacker-code')
+    assert.equal(res.status, 302)
+    assert.equal(res.headers.location, `${CLIENT}/login?error=google_failed`)
+    const me = await victim.get('/api/auth/me')
+    assert.equal(me.body.user, null)
+  })
+
+  it('con el state correcto loguea y vuelve a `next`', async () => {
+    const agent = request.agent(app)
+    const state = await startLogin(agent, '/builder')
+    const res = await agent.get(`/api/auth/google/callback?code=good-code&state=${encodeURIComponent(state)}`)
+    assert.equal(res.status, 302)
+    assert.equal(res.headers.location, `${CLIENT}/builder`)
+    const me = await agent.get('/api/auth/me')
+    assert.equal(me.body.user?.email, 'cb@x.com')
+  })
+
+  it('un state ya usado no sirve dos veces', async () => {
+    const agent = request.agent(app)
+    const state = await startLogin(agent)
+    await agent.get(`/api/auth/google/callback?code=good-code&state=${encodeURIComponent(state)}`)
+    const replay = await request.agent(app).get(`/api/auth/google/callback?code=good-code&state=${encodeURIComponent(state)}`)
+    assert.equal(replay.headers.location, `${CLIENT}/login?error=google_failed`)
+  })
+})
