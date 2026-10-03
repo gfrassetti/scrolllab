@@ -185,7 +185,9 @@ function installMotionHelpers() {
       const solidlyOnscreen = centerY > innerHeight * 0.12 && centerY < innerHeight * 0.88 && r.width > 0 && r.right > 0 && r.left < innerWidth
       if (!solidlyOnscreen) continue
       const cs = getComputedStyle(parent)
-      const transparentColor = /rgba?\([^)]*,\s*0\s*\)/.test(cs.color)
+      // Solo `rgba(…, 0)` (alfa 0) o `transparent`: el regex anterior también
+      // agarraba `rgb(0, 0, 0)` — texto negro puro — y cualquier color sin azul.
+      const transparentColor = cs.color === 'transparent' || /^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*0(\.0+)?\s*\)$/.test(cs.color)
       if (cs.visibility === 'hidden' || Number(cs.opacity) === 0 || transparentColor) {
         out.add(n.textContent.trim().slice(0, 48))
       }

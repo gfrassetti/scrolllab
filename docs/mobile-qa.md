@@ -83,7 +83,8 @@ Alto de la página en un Pixel 7 (390×844), en px: normal → calma.
 | NOCTURNE | 9882 → 6575 | `StickyWordCycle` en calma pasa de pila de palabras a lista con índice (01 CRAFT, 02 MOTION…): la palabra que cruza el medio de la pantalla se enciende y las otras se apagan con un fundido. `ZoomPortal` sin alto de scrub (`calm:h-auto`) con la foto y el pie entrando con fundido; el resto con `calmReveal`; la vista previa de `WorkIndex` sigue al cursor sin rezago (antes quedaba clavada arriba a la izquierda). `check:motion` (teléfono y tablet) y `check:mobile` en los dos modos: 0 hallazgos |
 | FIZZ | 11220 → 9123 | La botella sigue al dedo como al mouse (`trackPointer`: antes ignoraba todo puntero que no fuera mouse). `BubbleBenefits`, `CanCarousel`, `PopManifesto` y `FooterSplash` cortaban con reducir movimiento y quedaban sin entrada: ahora fundidos (`calmReveal`). `check:builder`: `canLabel` y `canImage` se imprimen en la botella (canvas), no llegan al DOM (`NOT_IN_DOM`). `check:motion`, `check:parity` y `check:mobile` limpios |
 | MONOLITH | 4904 → 4904 | El objeto 3D responde al dedo (`trackPointer`), con el movimiento completo y en calma (en calma sin giro automático ni zoom: queda quieto y solo se mueve con el mouse o el dedo, y se dibuja mientras se mueve). `SkewScroller`, `SpecSheet`, `ExhibitGrid` y `FooterBrutal` cortaban con reducir movimiento: ahora fundidos. `check:motion` y `check:parity` limpios; `check:mobile` solo marca el título «MONOLITH» a 320/390 en calma, que sale cortado con la fuente de reemplazo (sin Google Fonts en el entorno), no con Anton |
-| VELOCITY, ATELIER | — | Pendiente |
+| VELOCITY | 8280 → 3749 | `HeroStrike` (280/320vh) en calma pasa a una pantalla (`calm:h-auto`) con los títulos entrando con un fundido; en el teléfono con movimiento completo el disuelto final ya no desenfoca (`blur(18px)` con scrub sobre tres fotos con `mix-blend` y máscara): el mismo beat con opacidad y escala, y en PC queda el blur. `ParallaxRise` y `HelmetGrid` cortaban con reducir movimiento: ahora fundidos. `TrackMerge` ya traía sus tres ramas. `check:motion` y `check:parity` limpios; `check:mobile` solo marca las fotos del hero que necesitan masters de más resolución (`image-master`, necesita créditos de Higgsfield) |
+| ATELIER | — | Pendiente |
 
 ## Paridad PC ↔ teléfono
 
@@ -133,7 +134,7 @@ Cada marca es una decisión. Una que no se arregla se declara en `ACCEPTED`
 | MONOLITH | `solo-mouse` · `HeroThree` | Escucha `pointermove` y nada táctil | Resuelto: `trackPointer` |
 | FIZZ | `solo-mouse` · `HeroBubbles` | Ignora todo puntero que no sea mouse | Resuelto: `trackPointer` |
 | ATELIER | `solo-mouse` · `HeroMeaning` | Escucha `pointermove` y nada táctil | Pendiente |
-| VELOCITY | `blur-pesado` · `HeroStrike` | `blur(18px)` con scrub sobre las capas a pantalla completa | Pendiente |
+| VELOCITY | `blur-pesado` · `HeroStrike` | `blur(18px)` con scrub sobre las capas a pantalla completa | Resuelto: opacidad y escala en táctil |
 
 CHAPTERS, NOCTURNE, UNITY, ATRIUM y MERIDIAN salieron sin marcas: mismas
 secciones, mismos efectos, en los tres anchos.

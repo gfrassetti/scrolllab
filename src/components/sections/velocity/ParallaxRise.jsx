@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { parallax as parallaxImg, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -18,9 +19,9 @@ export default function ParallaxRise({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (prefersReducedMotion()) {
         gsap.set('[data-rise-bg]', { yPercent: -10 })
-        return
+        return calmReveal('[data-rise-copy]', { y: 18, duration: 0.9 })
       }
 
       gsap.fromTo(

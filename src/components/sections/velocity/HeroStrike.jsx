@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { heroBack, heroMid, heroFront, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -7,6 +8,14 @@ import { imgAttrs } from '../../../lib/responsiveImage'
  * HeroStrike — full-bleed multi-layer parallax hero.
  * Titles start clustered mid-frame and peel apart on scroll;
  * layers drift at different speeds then blur out (no zoom-out).
+ *
+ * Teléfono: el disuelto final no desenfoca. Un `filter: blur()` animado sobre
+ * tres fotos a pantalla completa (con mix-blend y máscara) se re-dibuja cuadro a
+ * cuadro y en un teléfono real traba; el mismo beat — la imagen se disuelve y se
+ * va — con opacidad y una escala suave. En PC queda el blur.
+ *
+ * Calma: sin pin ni parallax. Una pantalla con la composición y los títulos
+ * entrando con un fundido (`calm:h-auto` saca el alto de scrub).
  */
 export default function HeroStrike({
   lineLeft = 'TITLE 1',
@@ -25,7 +34,13 @@ export default function HeroStrike({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        return calmReveal('[data-strike-type-left], [data-strike-type-right], [data-strike-caption]', {
+          y: 16,
+          duration: 0.9,
+        })
+      }
+      const coarse = window.matchMedia('(pointer: coarse)').matches
 
       // Start clustered toward center
       gsap.set('[data-strike-type-left]', { xPercent: 28 })
@@ -83,11 +98,9 @@ export default function HeroStrike({
       // Act 3 — dissolve with blur (keep scale ~1)
       tl.to(
         '[data-strike-layers]',
-        {
-          filter: 'blur(18px)',
-          opacity: 0.2,
-          duration: 2.4,
-        },
+        coarse
+          ? { scale: 1.06, opacity: 0.2, duration: 2.4 }
+          : { filter: 'blur(18px)', opacity: 0.2, duration: 2.4 },
         3.4,
       )
       tl.to(
@@ -115,7 +128,7 @@ export default function HeroStrike({
   return (
     <section
       ref={root}
-      className="relative h-[280vh] bg-[#0a1a12] text-[#ece9e2] md:h-[320vh]"
+      className="relative h-[280vh] bg-[#0a1a12] text-[#ece9e2] md:h-[320vh] calm:h-auto"
     >
       <div className="sticky top-0 h-svh overflow-hidden">
         <div
@@ -185,8 +198,10 @@ export default function HeroStrike({
             </div>
           </div>
 
+          {/* `data-scrub-tail`: el scroll lo apaga a propósito (último acto del hero). */}
           <p
             data-strike-caption
+            data-scrub-tail
             className="absolute right-5 bottom-6 z-10 text-[11px] tracking-[0.25em] text-white/55 uppercase md:right-10 md:text-xs"
           >
             {caption} <span aria-hidden="true">↓</span>
