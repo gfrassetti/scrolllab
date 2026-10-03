@@ -9,7 +9,7 @@ const WORD_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
  * scroll, with every fourth-ish word landing in a flavor color.
  */
 export default function PopManifesto({
-  eyebrow = 'Section eyebrow',
+  eyebrow = '',
   text = 'Lorem ipsum, but honest: this manifesto is placeholder text. It inks in word by word as you scroll and some words land in flavor colors — replace it with your own story from the builder or straight in the code.',
 }) {
   const root = useRef(null)
@@ -56,12 +56,14 @@ export default function PopManifesto({
 
   return (
     <section ref={root} className="px-5 py-24 md:px-10 md:py-40">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
-        {eyebrow}
-      </p>
+      {eyebrow ? (
+        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
+          {eyebrow}
+        </p>
+      ) : null}
       <p
         data-pop-manifesto
-        className="mt-8 max-w-5xl font-brico text-[clamp(1.6rem,4.6vw,3.6rem)] leading-[1.15] font-bold tracking-[-0.01em]"
+        className="max-w-5xl font-brico text-[clamp(1.6rem,4.6vw,3.6rem)] leading-[1.15] font-bold tracking-[-0.01em]"
       >
         {text}
       </p>

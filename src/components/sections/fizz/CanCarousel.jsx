@@ -50,7 +50,7 @@ function CanIllustration({ color, label }) {
  * overrides any slot (PNG / SVG / WebP / JPG).
  */
 export default function CanCarousel({
-  eyebrow = 'Section eyebrow',
+  eyebrow = '',
   title = 'YOUR LINEUP TITLE',
   cta = 'Your CTA',
   canLabel = 'BRAND*',
@@ -93,10 +93,12 @@ export default function CanCarousel({
       style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
       <div className="mx-auto max-w-7xl px-5 text-center md:px-10">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
-          {eyebrow}
-        </p>
-        <h2 className="mt-4 font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
+        {eyebrow ? (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h2 className="font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
           {title}
         </h2>
 

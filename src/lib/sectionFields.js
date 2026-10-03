@@ -40,9 +40,9 @@ export const SECTION_FIELDS = {
     { key: 'attribution', label: 'Attribution', type: 'text' },
   ],
   'chapters/FooterCTA': [
-    { key: 'ctaWord', label: 'CTA', type: 'text' },
+    { key: 'ctaWord', label: 'Marca gigante', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
-    { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
+    { key: 'ctaHref', label: 'Enlace del email (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
     { key: 'note', label: 'Nota de cierre', type: 'textarea' },
     { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },

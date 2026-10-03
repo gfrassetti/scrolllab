@@ -83,7 +83,7 @@ function hexToHsl(hex) {
  * It opens on `startBg`, the color the hero ends on, so the page never cuts.
  */
 export default function FlavorWorlds({
-  eyebrow = 'Section eyebrow',
+  eyebrow = '',
   startBg = '#2c4bff',
   startInk = '#fff3e2',
   brand = 'BRAND*',
@@ -456,7 +456,7 @@ export default function FlavorWorlds({
             className="flex min-h-[80svh] flex-col px-5 py-16 md:px-10 md:py-20"
             style={{ backgroundColor: world.bg, color: world.ink }}
           >
-            {i === 0 ? (
+            {i === 0 && eyebrow ? (
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-60 md:text-xs">
                 {eyebrow}
               </p>
@@ -484,9 +484,11 @@ export default function FlavorWorlds({
         />
 
         <div className="relative z-10 flex h-full flex-col px-5 py-16 md:px-10 md:py-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-60 md:text-xs">
-            {eyebrow}
-          </p>
+          {eyebrow ? (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-60 md:text-xs">
+              {eyebrow}
+            </p>
+          ) : null}
 
           <div className="relative flex-1">
             {worlds.map((world, i) => (

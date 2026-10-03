@@ -258,15 +258,17 @@ export default function ContactForm({
     >
       <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2 md:gap-16">
         <div>
-          <p
-            data-contact-reveal
-            className={`text-[11px] uppercase tracking-[0.25em] ${skin.eyebrow}`}
-          >
-            {eyebrow}
-          </p>
+          {eyebrow ? (
+            <p
+              data-contact-reveal
+              className={`mb-3 text-[11px] uppercase tracking-[0.25em] ${skin.eyebrow}`}
+            >
+              {eyebrow}
+            </p>
+          ) : null}
           <h2
             data-contact-reveal
-            className={`mt-3 max-w-[14ch] text-[clamp(2rem,5vw,3.75rem)] leading-[0.95] ${skin.title}`}
+            className={`max-w-[14ch] text-[clamp(2rem,5vw,3.75rem)] leading-[0.95] ${skin.title}`}
           >
             {title}
           </h2>

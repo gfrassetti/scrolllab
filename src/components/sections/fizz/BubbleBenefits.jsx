@@ -29,7 +29,7 @@ const defaultBenefits = [
  * BubbleBenefits — springy stagger pop-in + denser drifting bubbles.
  */
 export default function BubbleBenefits({
-  eyebrow = 'Section eyebrow',
+  eyebrow = '',
   title = 'YOUR SECTION TITLE',
   benefits,
   bg,
@@ -120,10 +120,12 @@ export default function BubbleBenefits({
       ))}
 
       <div data-benefit-head>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
-          {eyebrow}
-        </p>
-        <h2 className="mt-4 max-w-[16ch] font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
+        {eyebrow ? (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-foam/60 md:text-xs">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h2 className="max-w-[16ch] font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
           {title}
         </h2>
       </div>
