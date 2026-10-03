@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { card1, card2, card3, card4, card5, card6, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -67,7 +68,7 @@ export default function StudioCards({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-studio-card], [data-studio-foot]', { y: 20, stagger: 0.06 })
 
       gsap.from('[data-studio-card]', {
         y: 64,

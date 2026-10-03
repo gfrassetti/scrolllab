@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { prefersReducedMotion, trackPointer } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 /**
@@ -18,9 +19,10 @@ export default function HeroMeaning({
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
+      // En un teléfono las letras entran sin desenfoque: veinte capas con
+      // `filter` animado, justo cuando el 3D está arrancando, traban.
+      const coarse = window.matchMedia('(pointer: coarse)').matches
 
       const split = new SplitText('[data-atelier-hero]', {
         type: 'chars',
@@ -32,10 +34,10 @@ export default function HeroMeaning({
         mask.style.paddingBottom = '0.22em'
         mask.style.marginBottom = '-0.22em'
       }
-      gsap.set(split.chars, { autoAlpha: 0, filter: 'blur(12px)' })
+      gsap.set(split.chars, coarse ? { autoAlpha: 0 } : { autoAlpha: 0, filter: 'blur(12px)' })
       gsap.to(split.chars, {
         autoAlpha: 1,
-        filter: 'blur(0px)',
+        ...(coarse ? {} : { filter: 'blur(0px)' }),
         duration: 0.85,
         stagger: { each: 0.035, from: 'random' },
         ease: 'power2.out',
@@ -78,13 +80,9 @@ export default function HeroMeaning({
       key.position.set(3, 4, 5)
       scene.add(key)
 
-      const mouse = { x: 0, y: 0 }
-      const onPointer = (e) => {
-        const r = root.current.getBoundingClientRect()
-        mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1
-        mouse.y = -(((e.clientY - r.top) / r.height) * 2 - 1)
-      }
-      window.addEventListener('pointermove', onPointer)
+      // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
+      // pointermove y el emblema quedaba sin reaccionar).
+      const pointer = trackPointer()
 
       const resize = () => {
         const { clientWidth: w, clientHeight: h } = canvas
@@ -123,8 +121,8 @@ export default function HeroMeaning({
         if (!onScreen) return
         const spin = reduced ? 0.002 : 0.008
         group.rotation.y += spin
-        group.rotation.x += (mouse.y * 0.35 - group.rotation.x) * 0.06
-        group.rotation.y += (mouse.x * 0.35 - group.rotation.y) * 0.04
+        group.rotation.x += (-pointer.y * 0.35 - group.rotation.x) * 0.06
+        group.rotation.y += (pointer.x * 0.35 - group.rotation.y) * 0.04
         core.position.z = explode * 0.8
         ring.scale.setScalar(1 + explode * 0.55)
         ring.material.opacity = 1 - explode * 0.7
@@ -143,7 +141,7 @@ export default function HeroMeaning({
       })
 
       return () => {
-        window.removeEventListener('pointermove', onPointer)
+        pointer.dispose()
         window.removeEventListener('resize', resize)
         gsap.ticker.remove(tick)
         io.disconnect()

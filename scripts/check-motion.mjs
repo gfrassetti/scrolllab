@@ -220,6 +220,10 @@ function installMotionHelpers() {
       if (r.width < 8 || r.height < 8) continue
       for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
         const cs = getComputedStyle(a)
+        // Una fila con scroll propio (auto|scroll) trae lo de afuera con el dedo:
+        // lo que quede más allá de un ancestro `hidden` más arriba no está perdido.
+        // (Que la fila responda al swipe lo mide `row-stuck`.)
+        if (cs.overflowX === 'auto' || cs.overflowX === 'scroll') break
         if (cs.overflowX !== 'hidden' && cs.overflowX !== 'clip') continue
         const ar = a.getBoundingClientRect()
         const outside = Math.max(0, ar.left - r.left) + Math.max(0, r.right - ar.right)

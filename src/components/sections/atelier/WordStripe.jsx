@@ -133,8 +133,11 @@ export default function WordStripe({
         </div>
 
         <div className="absolute inset-0 z-10 flex items-center overflow-hidden">
+          {/* `data-scrub-tail`: la cinta de palabras corre de lado con el scroll a
+              propósito y nunca se ve entera (en calma recorre menos). */}
           <p
             data-shutter-words
+            data-scrub-tail
             className="flex whitespace-nowrap font-brico text-[clamp(4.5rem,14vw,11rem)] leading-none font-semibold tracking-[-0.04em] text-white will-change-transform"
           >
             {words.map((word, i) => (

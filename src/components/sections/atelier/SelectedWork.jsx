@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { work1, work2, work3, work4, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -50,17 +51,14 @@ export default function SelectedWork({
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
       const track = root.current?.querySelector('[data-work-track]')
       const cards = gsap.utils.toArray('[data-work-card]', root.current)
       if (!track || cards.length === 0) return
 
-      if (reduced) {
-        gsap.set(cards, { opacity: 1, y: 0 })
-        return
-      }
+      // Calma: sin pin ni recorrido atado al scroll. Las tarjetas quedan en una
+      // fila que se desliza con el dedo (CSS `calm:`); la fila entera entra con un
+      // fundido (las tarjetas de afuera no esperan a un swipe para aparecer).
+      if (prefersReducedMotion()) return calmReveal(track, { y: 16, duration: 0.9 })
 
       gsap.set(cards, { yPercent: 55, opacity: 0 })
 
@@ -149,16 +147,16 @@ export default function SelectedWork({
           </a>
         </div>
 
-        <div className="relative mt-10 flex-1 overflow-hidden">
+        <div className="relative mt-10 flex-1 overflow-hidden calm:snap-x calm:snap-mandatory calm:overflow-x-auto calm:overflow-y-hidden calm:scroll-px-5 calm:[scrollbar-width:none] calm:md:scroll-px-10 calm:[&::-webkit-scrollbar]:hidden">
           <div
             data-work-track
-            className="flex h-full items-center gap-5 px-5 will-change-transform md:gap-7 md:px-10"
+            className="flex h-full items-center gap-5 px-5 will-change-transform md:gap-7 md:px-10 calm:w-max"
           >
             {PROJECTS.map((project) => (
               <article
                 key={project.title}
                 data-work-card
-                className="group relative w-[min(78vw,28rem)] shrink-0 will-change-transform md:w-[min(42vw,32rem)]"
+                className="group relative w-[min(78vw,28rem)] shrink-0 will-change-transform md:w-[min(42vw,32rem)] calm:snap-start"
               >
                 <div
                   className={`relative aspect-[16/10] overflow-hidden rounded-2xl bg-gradient-to-br ${project.tone}`}
