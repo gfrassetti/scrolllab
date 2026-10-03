@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal, prefersReducedMotion, trackPointer } from '../../../lib/motion'
+import { calmReveal, createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 
 const gltfLoaderMod = () => import('three/examples/jsm/loaders/GLTFLoader.js')
 
@@ -862,6 +862,16 @@ export default function HeroBubbles({
       })
       io.observe(root.current)
 
+      // Si el teléfono no llega a ~30 cuadros (vidrio con transmisión, DPR alto),
+      // baja la resolución de a escalones. En un equipo rápido no cambia nada.
+      const budget = createFrameBudget({
+        dpr,
+        apply: (value) => {
+          renderer.setPixelRatio(value)
+          layout()
+        },
+      })
+
       const tick = (time, deltaMs) => {
         if (!onScreen) return
         const dt = Math.min(deltaMs / 1000, 0.05)
@@ -885,6 +895,7 @@ export default function HeroBubbles({
         placeBubbles(time, dt, boost)
         fizz?.update(time, dt * boost)
         render()
+        budget.tick(deltaMs)
       }
 
       let introDone = reduced

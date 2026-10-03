@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { createFrameBudget } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 const SERVICES = [
@@ -75,7 +76,8 @@ export default function ServicesStone({
         alpha: true,
       })
       // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2))
+      const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
+      renderer.setPixelRatio(dpr)
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 40)
       camera.position.z = 7
@@ -178,8 +180,18 @@ export default function ServicesStone({
         onScreen = entry.isIntersecting
       })
       io.observe(root.current)
-      const tick = () => {
-        if (onScreen) renderer.render(scene, camera)
+      // Si el teléfono no llega a ~30 cuadros baja la resolución de a escalones.
+      const budget = createFrameBudget({
+        dpr,
+        apply: (value) => {
+          renderer.setPixelRatio(value)
+          resize()
+        },
+      })
+      const tick = (time, deltaMs) => {
+        if (!onScreen) return
+        renderer.render(scene, camera)
+        budget.tick(deltaMs)
       }
       gsap.ticker.add(tick)
 

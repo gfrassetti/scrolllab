@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { prefersReducedMotion, trackPointer } from '../../../lib/motion'
+import { createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 /**
@@ -52,7 +52,8 @@ export default function HeroMeaning({
         alpha: true,
       })
       // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2))
+      const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
+      renderer.setPixelRatio(dpr)
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 50)
       camera.position.z = 6
@@ -117,7 +118,16 @@ export default function HeroMeaning({
       })
       io.observe(root.current)
 
-      const tick = () => {
+      // Si el teléfono no llega a ~30 cuadros baja la resolución de a escalones.
+      const budget = createFrameBudget({
+        dpr,
+        apply: (value) => {
+          renderer.setPixelRatio(value)
+          resize()
+        },
+      })
+
+      const tick = (time, deltaMs) => {
         if (!onScreen) return
         const spin = reduced ? 0.002 : 0.008
         group.rotation.y += spin
@@ -129,6 +139,7 @@ export default function HeroMeaning({
         ring.material.transparent = true
         group.scale.setScalar(1 + explode * 0.35)
         renderer.render(scene, camera)
+        budget.tick(deltaMs)
       }
       gsap.ticker.add(tick)
 

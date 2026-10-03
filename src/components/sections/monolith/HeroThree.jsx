@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal, prefersReducedMotion, trackPointer } from '../../../lib/motion'
+import { calmReveal, createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 
 /** Presets curados — sin upload de GLB. */
 export const HERO_THREE_SHAPES = [
@@ -87,7 +87,8 @@ export default function HeroThree({
         alpha: true,
       })
       // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2))
+      const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
+      renderer.setPixelRatio(dpr)
 
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
@@ -185,12 +186,22 @@ export default function HeroThree({
       })
       io.observe(root.current)
 
-      const tick = () => {
+      // Si el teléfono no llega a ~30 cuadros baja la resolución de a escalones.
+      const budget = createFrameBudget({
+        dpr,
+        apply: (value) => {
+          renderer.setPixelRatio(value)
+          resize()
+        },
+      })
+
+      const tick = (time, deltaMs) => {
         if (!onScreen) return
         group.rotation.y += 0.0022
         group.rotation.x += (pointer.y * 0.35 + 0.4 - group.rotation.x) * 0.04
         group.rotation.z += (pointer.x * 0.25 - group.rotation.z) * 0.04
         render()
+        budget.tick(deltaMs)
       }
 
       // Calma: sin giro automático ni zoom con el scroll. El objeto queda quieto y

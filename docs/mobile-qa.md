@@ -127,10 +127,9 @@ Cada marca es una decisión. Una que no se arregla se declara en `ACCEPTED`
 
 | Página | Marca | Qué pasa | Estado |
 |---|---|---|---|
-| Home | `sin-trigger` · lista «Los modelos» | PC: 10 ScrollTriggers (el escenario pegado cambia de póster al scrollear la lista). Teléfono: 0 (cada fila trae su póster, sin animación) | Pendiente |
+| Home | `sin-trigger` · lista «Los modelos» | PC: 10 ScrollTriggers (el escenario pegado cambia de póster al scrollear la lista). Teléfono: 0 (cada fila trae su póster, sin animación) | Resuelto: rama < 768 (el póster de la fila se «enciende» con un zoom atado al scroll y el texto sube al cruzar) |
 | Home | `quieta` · «O armá la tuya» | La marca de fondo del CTA del builder es solo desktop a propósito (en mobile choca con el precio) | Aceptada |
-| COMIC | `quieta` · `ChapterFork` | Efecto de PC 57,7 → teléfono 1,4 | Pendiente |
-| COMIC | `quieta` · `ChapterWorlds` | Efecto de PC 51,4 → teléfono 9,6 | Pendiente |
+| COMIC | `quieta` · `ChapterFork` y `ChapterWorlds` | Efecto de PC 57,7 → teléfono 1,4 y 51,4 → 9,6 | Falso positivo: lo que inflaba el número de PC eran una línea de 1 px y un punto (`data-split-line`, `data-crack`) que son solo de PC (`hidden md:block`). `check:parity` ahora ignora piezas de menos del 0,4 % de la pantalla; el beat de las cards es el mismo |
 | MONOLITH | `solo-mouse` · `HeroThree` | Escucha `pointermove` y nada táctil | Resuelto: `trackPointer` |
 | FIZZ | `solo-mouse` · `HeroBubbles` | Ignora todo puntero que no sea mouse | Resuelto: `trackPointer` |
 | ATELIER | `solo-mouse` · `HeroMeaning` | Escucha `pointermove` y nada táctil | Resuelto: `trackPointer` |
@@ -153,3 +152,15 @@ la pestaña (`?motion-debug=0` lo apaga) y muestra el modo de movimiento (dispos
 / botón), el puntero, la pantalla y el DPR, `normalizeScroll` y Lenis, ScrollTriggers
 y pines activos, cuadros por segundo, canvas y contextos WebGL perdidos. Una captura
 alcanza para saber por qué una demo se ve distinta que en PC.
+
+### Presupuesto de GPU del teléfono
+
+El emulador dibuja por software, así que no dice cuántos cuadros por segundo da un
+teléfono real. Las escenas con WebGL (FIZZ, MONOLITH, ATELIER) traen una red de
+seguridad: `createFrameBudget` (`src/lib/motion.js`). Tras 15 cuadros de
+calentamiento mide cuánto tarda cada cuadro dibujado (en 30 cuadros o 2,5 s, lo que
+llegue primero) y, si el promedio pasa de 34 ms (menos de ~30 cuadros por segundo),
+baja el pixel ratio un escalón (×0,75, hasta 1) y vuelve a medir, hasta 3 veces. Si
+anda bien deja de medir. En un equipo rápido no cambia nada. Con un navegador
+automatizado (`navigator.webdriver`) no actúa, para que las capturas salgan siempre
+a la misma resolución.

@@ -292,6 +292,8 @@ como en PC: el mismo beat, adaptado al toque (no una copia píxel por píxel).
   que también anima. Un adorno que existe solo en PC se declara a propósito
   (`ACCEPTED` en `scripts/check-parity.mjs`, con el motivo).
 - `motion-reduce:` de Tailwind significa lo mismo que `calm:` (respeta el botón).
+- Las escenas WebGL llaman a `createFrameBudget` (`src/lib/motion.js`): si el teléfono no llega a
+  ~30 cuadros, baja el pixel ratio de a escalones. En un equipo rápido no cambia nada.
 - `npm run check:parity` compara cada sección PC ↔ teléfono ↔ tablet y falla con
   las marcas que no estén en `ACCEPTED`: `sin-trigger`, `quieta`, `solo-mouse`,
   `blur-pesado`, `canvas-quieto`, `css-quieto`.
