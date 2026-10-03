@@ -53,8 +53,12 @@ function publicDirAssets(relDir) {
  *      oculto en los 10 templates; paridad con PC en el teléfono: trackPointer
  *      (el 3D de FIZZ, MONOLITH y ATELIER responde al dedo), presupuesto de GPU
  *      (createFrameBudget) y sin blur animado sobre capas grandes.
+ *  8 — Calma: COMIC ChapterFork sin desborde en tablet (`calm:w-full`), el
+ *      aro de ATRIUM OrbitRing entero (`calm:scale-[0.7]`) y las marcas
+ *      `data-pan` / `data-bleed` (MERIDIAN Location, ATRIUM PeopleScatter) que
+ *      llegaron después de que se armaran ZIPs con la 7.
  */
-export const PACK_VERSION = 7
+export const PACK_VERSION = 8
 
 const MODEL_FILES = {
   chapters: {

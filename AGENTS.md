@@ -214,7 +214,7 @@ npm run start          # API production
 npm test               # API unit + HTTP tests
 npm run check          # invariantes cruzadas (precios, secciones, props, i18n, rutas)
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
-npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
+npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
