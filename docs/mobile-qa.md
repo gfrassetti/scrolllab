@@ -83,3 +83,71 @@ Alto de la página en un Pixel 7 (390×844), en px: normal → calma.
 | NOCTURNE | 9882 → 6575 | `StickyWordCycle` en calma pasa de pila de palabras a lista con índice (01 CRAFT, 02 MOTION…): la palabra que cruza el medio de la pantalla se enciende y las otras se apagan con un fundido. `ZoomPortal` sin alto de scrub (`calm:h-auto`) con la foto y el pie entrando con fundido; el resto con `calmReveal`; la vista previa de `WorkIndex` sigue al cursor sin rezago (antes quedaba clavada arriba a la izquierda). `check:motion` (teléfono y tablet) y `check:mobile` en los dos modos: 0 hallazgos |
 | FIZZ | — | Pendiente |
 | MONOLITH, VELOCITY, ATELIER | — | Pendiente |
+
+## Paridad PC ↔ teléfono
+
+La calma resuelve «reducir movimiento». Esto es lo otro: con el movimiento
+completo (sin el ajuste, o con «Ver con animaciones»), un template tiene que verse
+y animarse en un teléfono como en PC. `npm run check:parity` lo mide.
+
+Compara cada sección entre PC (1440×900, mouse), teléfono (Pixel 7) y tablet (iPad
+Mini):
+
+- **ScrollTriggers** (cuántos, con pin, con scrub, recorrido) y el **tamaño del
+  efecto** de cada uno: se lleva `animation.progress` a 0 y a 1 y se mide, en lo
+  que anima, el desplazamiento (en tamaños del propio elemento: una máscara que
+  sube 1,2 alturas es el mismo gesto con una letra de 230 px que de 60 px), la
+  escala, la opacidad y el blur.
+- **CSS** corriendo, **canvas** que cambia solo, **listeners de puntero** (qué
+  sección escucha mouse y nada táctil) y **peso** (blur animado sobre media
+  pantalla con scrub o sobre fotos, `mix-blend` y `backdrop-filter` grandes).
+
+Cada marca es una decisión. Una que no se arregla se declara en `ACCEPTED`
+(`scripts/check-parity.mjs`), con el motivo.
+
+### Por qué unas demos se veían bien en el teléfono y otras no
+
+1. **El 3D que sigue al mouse.** FIZZ (la botella), MONOLITH y ATELIER mueven la
+   escena con `pointermove`. Un dedo que scrollea cancela esos eventos: en el
+   teléfono quedaban apagadas aunque el movimiento estuviera completo.
+2. **Efectos baratos en PC, caros en un teléfono real.** VELOCITY `HeroStrike`
+   desenfoca 18 px, con scrub, una pila de tres fotos con `mix-blend` y máscara.
+3. **Coreografía de PC sin su rama móvil.** COMIC `ChapterFork` y `ChapterWorlds`
+   muestran en el teléfono una fracción del efecto de PC; en el home, la lista de
+   modelos tiene el escenario pegado que cambia de póster solo en ≥ 768 px.
+4. **El botón no cubría el CSS.** `motion-reduce:` de Tailwind compila a un
+   `@media` pelado que no pasa por el reemplazo de `matchMedia`. Ahora es `calm:`.
+5. **Lo que medíamos no comparaba con PC.** `check:motion` mide huecos, trabas y
+   texto oculto dentro de un modo; no ve una animación que en PC recorre 400 px y
+   en el teléfono 20.
+
+### Línea base (2026-10-03, antes de esta ronda)
+
+| Página | Marca | Qué pasa | Estado |
+|---|---|---|---|
+| Home | `sin-trigger` · lista «Los modelos» | PC: 10 ScrollTriggers (el escenario pegado cambia de póster al scrollear la lista). Teléfono: 0 (cada fila trae su póster, sin animación) | Pendiente |
+| Home | `quieta` · «O armá la tuya» | La marca de fondo del CTA del builder es solo desktop a propósito (en mobile choca con el precio) | Aceptada |
+| COMIC | `quieta` · `ChapterFork` | Efecto de PC 57,7 → teléfono 1,4 | Pendiente |
+| COMIC | `quieta` · `ChapterWorlds` | Efecto de PC 51,4 → teléfono 9,6 | Pendiente |
+| MONOLITH | `solo-mouse` · `HeroThree` | Escucha `pointermove` y nada táctil | Pendiente |
+| FIZZ | `solo-mouse` · `HeroBubbles` | Ignora todo puntero que no sea mouse | Pendiente |
+| ATELIER | `solo-mouse` · `HeroMeaning` | Escucha `pointermove` y nada táctil | Pendiente |
+| VELOCITY | `blur-pesado` · `HeroStrike` | `blur(18px)` con scrub sobre las capas a pantalla completa | Pendiente |
+
+CHAPTERS, NOCTURNE, UNITY, ATRIUM y MERIDIAN salieron sin marcas: mismas
+secciones, mismos efectos, en los tres anchos.
+
+### Por qué un emulador no es un teléfono
+
+El emulador es Chromium con perfil de teléfono (Pixel 7, iPhone 13, iPad Mini), DPR
+3, gestos táctiles por CDP y CPU ×4: el mismo motor que el «modo móvil» de Chrome,
+con scroll táctil real y la CPU frenada. **No prueba la GPU ni Safari (WebKit no
+existe en este entorno)**: el blur animado, el vidrio con transmisión de FIZZ o el
+límite de memoria de un iPhone no se ven acá. Por eso las reglas de arriba arreglan
+lo que se sabe que falla en teléfonos reales aunque el emulador no lo vea.
+
+Para mirar un teléfono de verdad: `?motion-debug` en cualquier URL del market. Dura
+la pestaña (`?motion-debug=0` lo apaga) y muestra el modo de movimiento (dispositivo
+/ botón), el puntero, la pantalla y el DPR, `normalizeScroll` y Lenis, ScrollTriggers
+y pines activos, cuadros por segundo, canvas y contextos WebGL perdidos. Una captura
+alcanza para saber por qué una demo se ve distinta que en PC.

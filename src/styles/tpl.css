@@ -30,6 +30,20 @@
   }
 }
 
+/*
+ * `motion-reduce:` de Tailwind compila a un @media pelado que no pasa por el
+ * reemplazo de matchMedia del botón «Ver con animaciones»: con el botón puesto
+ * los menús a pantalla completa seguían apareciendo sin transición. Mismo
+ * significado que `calm:`.
+ */
+@custom-variant motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    &:not(:where([data-motion='full'] *)) {
+      @slot;
+    }
+  }
+}
+
 @layer utilities {
   .tpl-world :focus-visible {
     outline: 2px solid currentColor;

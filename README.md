@@ -39,6 +39,7 @@ Sin `MP_ACCESS_TOKEN`, el checkout usa mock pay. Sin credenciales de Google, us�
 | `npm run check:mobile` | Cada sección de los 10 templates de 320 a 1280 px: desbordes, texto cortado o chico, zonas de toque, imágenes |
 | `npm run check:motion` | Emulador de teléfono (gestos táctiles reales, CPU ×4) en los 10 templates y el home: huecos, trabas, texto oculto; con «reducir movimiento» y con «Ver con animaciones» |
 | `npm run check:motion-notice` | El aviso «Ver con animaciones»: se pregunta una sola vez, el botón anda en todo, el toggle del header |
+| `npm run check:parity` | PC ↔ teléfono ↔ tablet por sección: ScrollTriggers, tamaño del efecto, canvas, listeners de puntero y blur pesado. Lo que anima PC tiene que animarse en el teléfono |
 | `npm run images` | Regenera las fotos WebP (y sus `srcset`) desde `design/masters/` |
 | `npm run pack:templates` | Prearma ZIPs del catálogo |
 

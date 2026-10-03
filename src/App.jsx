@@ -47,6 +47,19 @@ const CheckoutMockPage = lazy(() =>
   import('./pages/CheckoutPages').then((m) => ({ default: m.CheckoutMockPage })),
 )
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+// Diagnóstico para mirar en un teléfono real (`?motion-debug`): carga diferida,
+// solo existe si se lo pide. Dura la pestaña (`?motion-debug=0` lo apaga).
+const MotionDebug = lazy(() => import('./components/MotionDebug'))
+const SHOW_MOTION_DEBUG = (() => {
+  try {
+    const flag = new URLSearchParams(window.location.search).get('motion-debug')
+    if (flag === '0') sessionStorage.removeItem('scrolllab-motion-debug')
+    else if (flag !== null) sessionStorage.setItem('scrolllab-motion-debug', '1')
+    return sessionStorage.getItem('scrolllab-motion-debug') === '1'
+  } catch {
+    return false
+  }
+})()
 
 // «Ver con animaciones» (MotionNotice / MotionToggle) queda guardado en el
 // navegador y vale para todo ScrollLab: se aplica antes del primer render para
@@ -96,6 +109,11 @@ export default function App() {
             <ScrollToTop />
             <CartToast />
             <MotionNotice />
+            {SHOW_MOTION_DEBUG ? (
+              <Suspense fallback={null}>
+                <MotionDebug />
+              </Suspense>
+            ) : null}
             <ChunkErrorBoundary>
               <Suspense fallback={<Loader />}>
                 <Routes>

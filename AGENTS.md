@@ -222,6 +222,7 @@ npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de ove
 npm run check:mobile   # cada sección de los 10 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
 npm run check:motion   # emulador de teléfono: gestos táctiles reales, CPU ×4, 10 templates + home, normal / reduce / forced (huecos, trabas, texto oculto)
 npm run check:motion-notice # el aviso «Ver con animaciones»: una sola vez, el botón anda, el toggle del header (Chromium)
+npm run check:parity   # PC ↔ teléfono ↔ tablet por sección: ScrollTriggers, tamaño del efecto, canvas, listeners de puntero, blur pesado (dev server, Chromium)
 npm run images         # WebP + srcset de las fotos de los templates desde design/masters/<sku>/
 ```
 
@@ -272,6 +273,31 @@ lo lee):
 - `MOTION=forced npm run check:motion` verifica que, con «reducir movimiento» + el
   botón, cada página quede **igual que sin reducir** (alto y ScrollTrigger vivos);
   una sección que ignore el botón sale como `override-ignored`.
+
+### Paridad con PC — lo que anima el mouse, lo anima el dedo
+
+Con el movimiento completo un template tiene que verse y animarse en el teléfono
+como en PC: el mismo beat, adaptado al toque (no una copia píxel por píxel).
+
+- Lo que en PC responde al mouse (`pointermove`) usa `trackPointer()` de
+  `src/lib/motion.js`: el mouse en PC, el dedo en el teléfono. Un dedo que
+  scrollea cancela los eventos de puntero: una escena que solo escucha
+  `pointermove` queda apagada en el teléfono. Es el caso de los 3D de FIZZ,
+  MONOLITH y ATELIER.
+- Blur animado solo en elementos chicos. Sobre una capa a pantalla completa o
+  sobre fotos / canvas con scrub, el mismo beat en el teléfono con opacidad y
+  escala: un `filter` animado se re-dibuja cuadro a cuadro y cuesta GPU (barato
+  en PC, caro en un teléfono real).
+- Un efecto con `matchMedia('(min-width: …)')` necesita su rama `(max-width: …)`
+  que también anima. Un adorno que existe solo en PC se declara a propósito
+  (`ACCEPTED` en `scripts/check-parity.mjs`, con el motivo).
+- `motion-reduce:` de Tailwind significa lo mismo que `calm:` (respeta el botón).
+- `npm run check:parity` compara cada sección PC ↔ teléfono ↔ tablet y falla con
+  las marcas que no estén en `ACCEPTED`: `sin-trigger`, `quieta`, `solo-mouse`,
+  `blur-pesado`, `canvas-quieto`, `css-quieto`.
+- Un emulador no es un teléfono: es Chromium con perfil de teléfono, gestos
+  táctiles por CDP y CPU ×4. No prueba la GPU ni Safari. Para mirar un teléfono
+  real: `?motion-debug` en cualquier URL del market (`?motion-debug=0` lo apaga).
 
 Lo que se vende es el ZIP, no el repo, y el repo compila aunque el ZIP esté
 roto. Dos redes lo cubren:

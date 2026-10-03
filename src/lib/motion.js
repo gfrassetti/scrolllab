@@ -157,3 +157,71 @@ export function calmCount(
     })
   }
 }
+
+/**
+ * Puntero «virtual» para las escenas que siguen al mouse (el 3D de FIZZ,
+ * MONOLITH y ATELIER): el mouse en PC y, en un teléfono, el dedo.
+ *
+ * Un dedo que scrollea cancela los eventos de puntero (`pointercancel`), así que
+ * una escena que solo escucha `pointermove` queda apagada en el teléfono. Los
+ * eventos táctiles (`touchstart` / `touchmove`, pasivos) siguen llegando durante
+ * el scroll, también con `normalizeScroll`. Al soltar el dedo vuelve al centro;
+ * el mouse se queda donde quedó, como antes.
+ *
+ *   const pointer = trackPointer()
+ *   // en el tick:      rotation += (pointer.x * 0.3 - rotation) * 0.05
+ *   // en la limpieza:  pointer.dispose()
+ *
+ * `x` e `y` van de -1 a 1 sobre el viewport (`y` crece hacia abajo); `clientX` y
+ * `clientY` son los px, por si la escena mide contra su propia caja.
+ */
+export function trackPointer() {
+  const pointer = { x: 0, y: 0, clientX: 0, clientY: 0, touching: false, dispose() {} }
+  if (typeof window === 'undefined') return pointer
+
+  const center = () => {
+    pointer.clientX = window.innerWidth / 2
+    pointer.clientY = window.innerHeight / 2
+  }
+  const set = (clientX, clientY) => {
+    pointer.clientX = clientX
+    pointer.clientY = clientY
+    pointer.x = (clientX / window.innerWidth) * 2 - 1
+    pointer.y = (clientY / window.innerHeight) * 2 - 1
+  }
+  const onPointer = (event) => {
+    if (event.pointerType === 'touch') return // lo cubren los eventos táctiles
+    pointer.touching = false
+    set(event.clientX, event.clientY)
+  }
+  const onTouch = (event) => {
+    const touch = event.touches?.[0]
+    if (!touch) return
+    pointer.touching = true
+    set(touch.clientX, touch.clientY)
+  }
+  const onRelease = (event) => {
+    if (event.touches?.length) return onTouch(event) // sigue otro dedo apoyado
+    pointer.touching = false
+    pointer.x = 0
+    pointer.y = 0
+    center()
+  }
+
+  center()
+  const options = { passive: true }
+  window.addEventListener('pointermove', onPointer, options)
+  window.addEventListener('touchstart', onTouch, options)
+  window.addEventListener('touchmove', onTouch, options)
+  window.addEventListener('touchend', onRelease, options)
+  window.addEventListener('touchcancel', onRelease, options)
+
+  pointer.dispose = () => {
+    window.removeEventListener('pointermove', onPointer)
+    window.removeEventListener('touchstart', onTouch)
+    window.removeEventListener('touchmove', onTouch)
+    window.removeEventListener('touchend', onRelease)
+    window.removeEventListener('touchcancel', onRelease)
+  }
+  return pointer
+}
