@@ -2,8 +2,8 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import passport from 'passport'
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { sanitizeAuthReturn } from './authReturn.js'
+import { configurePassport } from './auth/passport.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
@@ -184,59 +184,7 @@ export async function createApp(config) {
   app.use(passport.initialize())
   app.use(passport.session())
 
-  passport.serializeUser((user, done) => done(null, db.uid(user)))
-  passport.deserializeUser(async (id, done) => {
-    try {
-      done(null, await db.findUserById(id))
-    } catch (err) {
-      done(err)
-    }
-  })
-
-  if (config.google.clientId && config.google.clientSecret) {
-    passport.use(
-      new GoogleStrategy(
-        {
-          clientID: config.google.clientId,
-          clientSecret: config.google.clientSecret,
-          callbackURL: config.google.callbackUrl,
-        },
-        async (_accessToken, _refreshToken, profile, done) => {
-          try {
-            const email = profile.emails?.[0]?.value
-            if (!email) return done(new Error('Google profile without email'))
-            let user = await db.findUser({ googleId: profile.id })
-            if (!user) {
-              const byEmail = await db.findUser({ email })
-              // Solo linkear por email si aún no tiene googleId (evitar takeover)
-              if (byEmail && !byEmail.googleId) {
-                byEmail.googleId = profile.id
-                byEmail.name = profile.displayName || byEmail.name
-                byEmail.avatar = profile.photos?.[0]?.value || byEmail.avatar
-                user = await db.updateUser(byEmail)
-              } else if (!byEmail) {
-                user = await db.createUser({
-                  googleId: profile.id,
-                  email,
-                  name: profile.displayName,
-                  avatar: profile.photos?.[0]?.value,
-                })
-              } else {
-                return done(new Error('Email ya asociado a otra cuenta'))
-              }
-            } else {
-              user.name = profile.displayName || user.name
-              user.avatar = profile.photos?.[0]?.value || user.avatar
-              await db.updateUser(user)
-            }
-            done(null, user)
-          } catch (err) {
-            done(err)
-          }
-        },
-      ),
-    )
-  }
+  configurePassport(config)
 
   const limits = rateLimits()
 
