@@ -92,7 +92,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'flavor',
     'canImage',
   ],
-  'fizz/FlavorWorlds': ['eyebrow', 'startBg', 'startInk'],
+  'fizz/FlavorWorlds': ['eyebrow', 'startBg', 'startInk', 'brand', 'cta', 'ctaHref'],
   'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
   'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
   'fizz/PopManifesto': ['eyebrow', 'text'],

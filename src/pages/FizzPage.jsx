@@ -41,7 +41,7 @@ export default function FizzPage() {
 
         <main>
           <HeroBubbles modelUrl={FIZZ_BOTTLE_GLB} envUrl={FIZZ_STUDIO_HDR} />
-          <FlavorWorlds />
+          <FlavorWorlds modelUrl={FIZZ_BOTTLE_GLB} envUrl={FIZZ_STUDIO_HDR} />
           <BubbleBenefits />
           <CanCarousel />
           <PopManifesto />

@@ -401,6 +401,9 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'startBg', label: 'Color de entrada (el del final del hero)', type: 'color' },
     { key: 'startInk', label: 'Texto sobre el color de entrada', type: 'color' },
+    { key: 'brand', label: 'Marca en la serigrafía', type: 'text' },
+    { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
   ],
   'fizz/BubbleBenefits': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
