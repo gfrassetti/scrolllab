@@ -4,6 +4,8 @@ import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 
 const gltfLoaderMod = () => import('three/examples/jsm/loaders/GLTFLoader.js')
+const dracoLoaderMod = () => import('three/examples/jsm/loaders/DRACOLoader.js')
+const hdrLoaderMod = () => import('three/examples/jsm/loaders/HDRLoader.js')
 
 /** Curated flavor presets — one flat stage color, its type ink and the drink tint. */
 export const FIZZ_FLAVORS = {
@@ -15,7 +17,6 @@ export const FIZZ_FLAVORS = {
 }
 
 const FOAM = '#fff3e2'
-const LABEL_INK = '#241352'
 const TURNS = 2
 const LABEL_ARC = (70 * Math.PI) / 180
 
@@ -190,69 +191,166 @@ function drawTitleLine(text, { family, weight, tracking, targetWidth, maxSize, d
   return { texture, width, height, cuts }
 }
 
-/** Brand label: `canLabel` set in the page font, plus small print and paper grain. */
-function drawLabel(brand, { family, ink }) {
-  const W = 1024
-  const H = 876
+/**
+ * Screen print straight on the glass, in white ink, like a returnable bottle:
+ * a bubble emblem, `canLabel` as the wordmark and a little small print. The
+ * texture is transparent; the glass shows through everywhere else.
+ */
+function drawPrint(brand, { family }) {
+  const S = 2048
   const canvas = document.createElement('canvas')
-  canvas.width = W
-  canvas.height = H
+  canvas.width = S
+  canvas.height = S
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = FOAM
-  ctx.fillRect(0, 0, W, H)
-
-  // Paper grain: a few thousand faint specks.
-  for (let i = 0; i < 5200; i += 1) {
-    ctx.fillStyle = `rgba(36, 19, 82, ${Math.random() * 0.05})`
-    ctx.fillRect(
-      Math.random() * W,
-      Math.random() * H,
-      1 + Math.random() * 1.6,
-      1 + Math.random() * 1.6,
-    )
+  const cx = S / 2
+  ctx.fillStyle = '#fff'
+  ctx.strokeStyle = '#fff'
+  ctx.textAlign = 'center'
+  const track = (px) => {
+    if ('letterSpacing' in ctx) ctx.letterSpacing = `${px}px`
   }
 
-  ctx.strokeStyle = ink
-  ctx.lineWidth = 6
-  ctx.strokeRect(30, 30, W - 60, H - 60)
-  ctx.lineWidth = 2
-  ctx.strokeRect(46, 46, W - 92, H - 92)
-
-  ctx.fillStyle = ink
-  ctx.textAlign = 'center'
-  ctx.font = `700 34px ${family}`
-  if ('letterSpacing' in ctx) ctx.letterSpacing = '9px'
-  ctx.fillText('SPARKLING DRINK', W / 2, 128)
-  ctx.fillText('1 L  ·  EST. 2026', W / 2, H - 100)
-  if ('letterSpacing' in ctx) ctx.letterSpacing = '0px'
-
-  // Three little bubbles, the only ornament.
+  // Bubbles rising out of the wordmark.
   ;[
-    [W / 2 - 46, 168, 9],
-    [W / 2, 160, 14],
-    [W / 2 + 46, 168, 9],
+    [cx - 170, 700, 46],
+    [cx - 30, 590, 74],
+    [cx + 120, 690, 40],
+    [cx + 205, 520, 30],
+    [cx - 150, 470, 24],
+    [cx + 40, 405, 18],
+    [cx - 60, 330, 11],
   ].forEach(([x, y, r]) => {
     ctx.beginPath()
     ctx.arc(x, y, r, 0, Math.PI * 2)
-    ctx.lineWidth = 3
+    ctx.lineWidth = Math.max(6, r * 0.16)
     ctx.stroke()
+    ctx.beginPath()
+    ctx.ellipse(x - r * 0.38, y - r * 0.38, r * 0.22, r * 0.13, -Math.PI / 4, 0, Math.PI * 2)
+    ctx.fill()
   })
 
   const text = String(brand || '').toUpperCase()
+  track(0)
   ctx.font = `800 100px ${family}`
-  const size = Math.min(260, ((W * 0.7) / Math.max(ctx.measureText(text).width, 1)) * 100)
+  const size = Math.min(380, ((S * 0.56) / Math.max(ctx.measureText(text).width, 1)) * 100)
   ctx.font = `800 ${size}px ${family}`
-  const m = ctx.measureText(text)
-  ctx.fillText(
-    text,
-    W / 2,
-    H / 2 + 38 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2,
-  )
+  ctx.fillText(text, cx, 1080)
+
+  ctx.fillRect(cx - S * 0.19, 1150, S * 0.38, 7)
+  track(20)
+  ctx.font = `700 58px ${family}`
+  ctx.fillText('SPARKLING SODA', cx + 10, 1265)
+  track(14)
+  ctx.font = `500 44px ${family}`
+  ctx.fillText('EST. 2026  ·  1 L  ·  RETURNABLE', cx + 7, 1345)
+
+  // A short column of small print on the right, a number on the left.
+  track(2)
+  ctx.textAlign = 'left'
+  ctx.font = `600 40px ${family}`
+  ;['BUBBLES', 'FIRST,', 'QUESTIONS', 'LATER.', '', 'SERVE', 'ICE COLD.'].forEach((line, i) => {
+    ctx.fillText(line, S * 0.79, 760 + i * 52)
+  })
+  ctx.save()
+  ctx.translate(S * 0.2, 1000)
+  ctx.rotate(-Math.PI / 2)
+  ctx.textAlign = 'center'
+  track(16)
+  ctx.font = `700 48px ${family}`
+  ctx.fillText('N° 01  —  FIZZ CO.', 0, 0)
+  ctx.restore()
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
   texture.anisotropy = 16
   return texture
+}
+
+/**
+ * Wear for the glass: smudges, a couple of fingerprints and fine scratches.
+ * Barely there head-on, they light up when the bottle turns into the light.
+ * Returns a roughness map and the normal map derived from the same marks.
+ */
+function drawGlassWear() {
+  const S = 1024
+  const canvas = document.createElement('canvas')
+  canvas.width = S
+  canvas.height = S
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = '#000'
+  ctx.fillRect(0, 0, S, S)
+
+  for (let i = 0; i < 30; i += 1) {
+    const x = Math.random() * S
+    const y = Math.random() * S
+    const r = 30 + Math.random() * 120
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r)
+    g.addColorStop(0, `rgba(255,255,255,${0.08 + Math.random() * 0.16})`)
+    g.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.ellipse(x, y, r, r * (0.5 + Math.random() * 0.6), Math.random() * Math.PI, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  for (let f = 0; f < 4; f += 1) {
+    const x = Math.random() * S
+    const y = Math.random() * S
+    for (let k = 0; k < 14; k += 1) {
+      ctx.strokeStyle = `rgba(255,255,255,${0.12 + Math.random() * 0.1})`
+      ctx.lineWidth = 1.4
+      ctx.beginPath()
+      ctx.ellipse(x, y, 6 + k * 3.2, 4 + k * 2.4, 0.5, 0.2, Math.PI * 1.7)
+      ctx.stroke()
+    }
+  }
+  for (let i = 0; i < 170; i += 1) {
+    const x = Math.random() * S
+    const y = Math.random() * S
+    const len = 8 + Math.random() * 110
+    const a = (Math.random() - 0.5) * 0.7
+    ctx.strokeStyle = `rgba(255,255,255,${0.35 + Math.random() * 0.55})`
+    ctx.lineWidth = 0.5 + Math.random() * 1.1
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len)
+    ctx.stroke()
+  }
+
+  const height = ctx.getImageData(0, 0, S, S).data
+  const rough = ctx.createImageData(S, S)
+  const normal = ctx.createImageData(S, S)
+  const h = (x, y) => height[(((y + S) % S) * S + ((x + S) % S)) * 4] / 255
+  for (let y = 0; y < S; y += 1) {
+    for (let x = 0; x < S; x += 1) {
+      const i = (y * S + x) * 4
+      const v = h(x, y)
+      // Roughness lives in G: clean glass 0.04, smudges and scratches up to ~0.55.
+      const r = Math.round((0.04 + v * 0.5) * 255)
+      rough.data[i] = r
+      rough.data[i + 1] = r
+      rough.data[i + 2] = r
+      rough.data[i + 3] = 255
+      const dx = (h(x + 1, y) - h(x - 1, y)) * 2.4
+      const dy = (h(x, y + 1) - h(x, y - 1)) * 2.4
+      const len = Math.hypot(dx, dy, 1)
+      normal.data[i] = Math.round((-dx / len) * 127.5 + 127.5)
+      normal.data[i + 1] = Math.round((dy / len) * 127.5 + 127.5)
+      normal.data[i + 2] = Math.round((1 / len) * 127.5 + 127.5)
+      normal.data[i + 3] = 255
+    }
+  }
+  const toTexture = (data) => {
+    const c = document.createElement('canvas')
+    c.width = S
+    c.height = S
+    c.getContext('2d').putImageData(data, 0, 0)
+    const texture = new THREE.CanvasTexture(c)
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.anisotropy = 8
+    return texture
+  }
+  return { roughness: toTexture(rough), normal: toTexture(normal) }
 }
 
 const TITLE_VERTEX = /* glsl */ `
@@ -337,6 +435,8 @@ export default function HeroBubbles({
   canLabel = 'BRAND*',
   canImage = '',
   modelUrl = '',
+  envUrl = '',
+  dracoPath = '/fizz/draco/',
 }) {
   const root = useRef(null)
   const stageRef = useRef(null)
@@ -361,7 +461,9 @@ export default function HeroBubbles({
         powerPreference: 'high-performance',
       })
       // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      const dpr = Math.min(window.devicePixelRatio, narrow ? 1.5 : 2)
+      // En escritorio se dibuja un poco por encima de la pantalla: las líneas finas
+      // del vidrio y la serigrafía quedan nítidas.
+      const dpr = Math.min(window.devicePixelRatio * (narrow ? 1 : 1.25), narrow ? 1.5 : 2)
       renderer.setPixelRatio(dpr)
       renderer.outputColorSpace = THREE.SRGBColorSpace
       // Sin tone mapping: el fondo visto a través del vidrio tiene que ser el
@@ -372,6 +474,25 @@ export default function HeroBubbles({
       scene.background = new THREE.Color(flavorCfg.bg)
       const envMap = buildStudioEnv(renderer, flavorCfg.bg)
       scene.environment = envMap
+      // Un HDRI de estudio real (si se pasa `envUrl`) reemplaza al estudio armado
+      // a mano: reflejos de cajas de luz de verdad en el vidrio y el metal.
+      let hdrEnv = null
+      if (envUrl) {
+        hdrLoaderMod()
+          .then(({ HDRLoader }) => {
+            new HDRLoader().load(envUrl, (texture) => {
+              if (disposed) return texture.dispose()
+              const pmrem = new THREE.PMREMGenerator(renderer)
+              hdrEnv = pmrem.fromEquirectangular(texture).texture
+              pmrem.dispose()
+              texture.dispose()
+              scene.environment = hdrEnv
+              scene.environmentRotation.set(0, Math.PI * 0.55, 0)
+              renderOnce()
+            })
+          })
+          .catch(() => {})
+      }
       const keyLight = new THREE.DirectionalLight(0xffffff, 2.2)
       keyLight.position.set(-3, 4, 6)
       scene.add(keyLight)
@@ -563,15 +684,19 @@ export default function HeroBubbles({
         // La capa lechosa: el color del escenario aclarado.
         uFizzVeil: { value: new THREE.Color(flavorCfg.bg).lerp(new THREE.Color(0xffffff), 0.6) },
       }
+      const wear = drawGlassWear()
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xf4fffa,
         transmission: 1,
-        // Un poco áspero: desenfoca apenas lo que hay detrás, como un vidrio esmerilado.
-        roughness: 0.14,
+        // La aspereza la pone el mapa: vidrio limpio y nítido, salvo huellas y rayones.
+        roughness: 1,
+        roughnessMap: wear.roughness,
+        normalMap: wear.normal,
+        normalScale: new THREE.Vector2(0.1, 0.1),
         ior: 1.5,
         thickness: 0.016,
         dispersion: narrow ? 0 : 2.5,
-        envMapIntensity: 1.6,
+        envMapIntensity: 1.25,
         specularIntensity: 1,
       })
       // El vidrio y el líquido no pueden ser dos mallas con transmisión (una
@@ -593,7 +718,7 @@ export default function HeroBubbles({
             float fizzLiquid = 1.0 - smoothstep(uFizzFill - uFizzEdge, uFizzFill + uFizzEdge, vFizzY);
             float fizzLine = 1.0 - smoothstep(0.0, uFizzEdge * 4.0, abs(vFizzY - uFizzFill));
             totalDiffuse = mix(totalDiffuse, totalDiffuse * mix(vec3(1.0), uFizzTint, 0.35), fizzLiquid) + fizzLine * 0.22;
-            totalDiffuse = mix(totalDiffuse, uFizzVeil, 0.1 + fizzLiquid * 0.2);`,
+            totalDiffuse = mix(totalDiffuse, uFizzVeil, 0.05 + fizzLiquid * 0.12);`,
           )
       }
       const capMat = new THREE.MeshStandardMaterial({
@@ -619,10 +744,17 @@ export default function HeroBubbles({
         roughness: 0.26,
         envMapIntensity: 1.4,
       })
+      // Serigrafía: tinta blanca sobre el vidrio. Va en la pasada transparente,
+      // después del vidrio: si estuviera en la opaca, el vidrio la volvería a
+      // refractar entre los trazos y se vería doble.
       const labelMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.6,
-        side: THREE.DoubleSide,
+        color: 0xf6f3ea,
+        roughness: 0.38,
+        envMapIntensity: 0.6,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
       })
 
       let model = null
@@ -632,8 +764,7 @@ export default function HeroBubbles({
       const paintLabel = () => {
         if (!model || canImage) return
         labelMat.map?.dispose()
-        // La etiqueta es crema en todos los sabores: la tinta no sigue a la del escenario.
-        labelMat.map = drawLabel(canLabel, { family, ink: LABEL_INK })
+        labelMat.map = drawPrint(canLabel, { family })
         labelMat.map.flipY = labelFlipY
         labelMat.needsUpdate = true
       }
@@ -643,7 +774,7 @@ export default function HeroBubbles({
         const count = narrow ? 50 : 90
         const mesh = new THREE.InstancedMesh(
           new THREE.SphereGeometry(1, 8, 6),
-          new THREE.MeshBasicMaterial({ color: FOAM, toneMapped: false }),
+          new THREE.MeshBasicMaterial({ color: FOAM, toneMapped: false, transparent: true, opacity: 0.85 }),
           count,
         )
         const streams = Array.from({ length: 11 }, () => ({
@@ -654,7 +785,7 @@ export default function HeroBubbles({
           stream: streams[i % streams.length],
           t: Math.random(),
           speed: 0.2 + Math.random() * 0.22,
-          size: (0.016 + Math.random() * 0.03) * box.radius,
+          size: (0.012 + Math.random() * 0.02) * box.radius,
           jitter: Math.random() * Math.PI * 2,
         }))
         const dummy = new THREE.Object3D()
@@ -927,11 +1058,13 @@ export default function HeroBubbles({
       })
 
       if (modelUrl) {
-        gltfLoaderMod()
-          .then(({ GLTFLoader }) => {
-            new GLTFLoader().load(
+        Promise.all([gltfLoaderMod(), dracoLoaderMod()])
+          .then(([{ GLTFLoader }, { DRACOLoader }]) => {
+            const draco = new DRACOLoader().setDecoderPath(dracoPath)
+            new GLTFLoader().setDRACOLoader(draco).load(
               modelUrl,
               (gltf) => {
+                draco.dispose()
                 if (disposed) return disposeObject(gltf.scene)
                 mountModel(gltf.scene)
               },
@@ -1045,12 +1178,15 @@ export default function HeroBubbles({
           m.dispose()
         })
         envMap.dispose()
+        hdrEnv?.dispose()
+        wear.roughness.dispose()
+        wear.normal.dispose()
         renderer.dispose()
       }
     },
     {
       scope: root,
-      dependencies: [resolvedFlavor, modelUrl, canImage, canLabel, title],
+      dependencies: [resolvedFlavor, modelUrl, envUrl, dracoPath, canImage, canLabel, title],
       revertOnUpdate: true,
     },
   )

@@ -95,7 +95,11 @@ const MODEL_FILES = {
     sectionsDir: 'src/components/sections/fizz',
     pageName: 'App.jsx',
     importPrefix: './components/sections/fizz',
-    publicAssets: ['public/fizz/soda-bottle.glb'],
+    publicAssets: [
+      'public/fizz/soda-bottle.glb',
+      'public/fizz/studio.hdr',
+      ...publicDirAssets('fizz/draco'),
+    ],
   },
   atelier: {
     page: 'src/pages/AtelierPage.jsx',

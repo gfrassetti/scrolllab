@@ -2,68 +2,51 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import {
-  sodaCan01 as can01,
-  sodaCan02 as can02,
-  sodaCan03 as can03,
-  sodaCan04 as can04,
-  sodaCan05 as can05,
+  sodaBottle01 as bottle01,
+  sodaBottle02 as bottle02,
+  sodaBottle03 as bottle03,
+  sodaBottle04 as bottle04,
+  sodaBottle05 as bottle05,
   variants,
 } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultCans = [
-  { name: 'FLAVOR 01', note: 'Ingredient + ingredient', color: '#ffb02e', image: can01 },
-  { name: 'FLAVOR 02', note: 'Ingredient + ingredient', color: '#ff3ea5', image: can02 },
-  { name: 'FLAVOR 03', note: 'Ingredient + ingredient', color: '#3ddc97', image: can03 },
-  { name: 'FLAVOR 04', note: 'Ingredient + ingredient', color: '#ff6b35', image: can04 },
-  { name: 'FLAVOR 05', note: 'Ingredient + ingredient', color: '#5b3df0', image: can05 },
+  { name: 'FLAVOR 01', note: 'Ingredient + ingredient', color: '#ffb02e', image: bottle01 },
+  { name: 'FLAVOR 02', note: 'Ingredient + ingredient', color: '#ff3ea5', image: bottle02 },
+  { name: 'FLAVOR 03', note: 'Ingredient + ingredient', color: '#3ddc97', image: bottle03 },
+  { name: 'FLAVOR 04', note: 'Ingredient + ingredient', color: '#ff6b35', image: bottle04 },
+  { name: 'FLAVOR 05', note: 'Ingredient + ingredient', color: '#5b3df0', image: bottle05 },
 ]
 
-/** Fallback SVG if a can has no image override and no default asset. */
+/** Fallback SVG if a bottle has no image override and no default asset. */
 function CanIllustration({ color, label }) {
-  // Label must stay inside the can body (88 wide) whatever the font that loads,
-  // so size it by length and pin the run length with textLength.
+  // Label text must stay inside the label band whatever font loads, so size it
+  // by length and pin the run length with textLength.
   const text = String(label || '')
-  const maxWidth = 70
+  const maxWidth = 40
   const chars = Math.max(text.length, 1)
-  const fontSize = Math.max(9, Math.min(24, Math.round(maxWidth / (chars * 0.62))))
+  const fontSize = Math.max(7, Math.min(16, Math.round(maxWidth / (chars * 0.62))))
   const runLength = Math.min(fontSize * 0.62 * chars, maxWidth)
 
   return (
-    <svg viewBox="0 0 120 200" className="h-44 w-auto md:h-52" aria-hidden="true">
-      <ellipse cx="60" cy="14" rx="44" ry="10" fill="#d9d4cf" />
-      <rect x="16" y="14" width="88" height="168" rx="14" fill={color} />
-      <path
-        d="M16 118 Q38 106 60 118 T104 118 L104 182 Q104 196 90 196 L30 196 Q16 196 16 182 Z"
-        fill="#fff3e2"
-        opacity="0.92"
-      />
-      <text
-        x="60"
-        y="70"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontFamily="Bricolage Grotesque, sans-serif"
-        fontWeight="800"
-        fontSize={fontSize}
-        textLength={runLength}
-        lengthAdjust="spacingAndGlyphs"
-        fill="#241352"
-      >
-        {text}
-      </text>
-      <ellipse cx="60" cy="186" rx="44" ry="10" fill={color} opacity="0.55" />
-      <rect x="50" y="6" width="20" height="6" rx="3" fill="#8f8a85" />
+    <svg viewBox="0 0 60 230" className="h-52 w-auto md:h-60" aria-hidden="true">
+      <path d="M26 6 h8 v8 q0 3 -1 5 v9 q1 4 1 8 q8 14 10 30 v140 q0 12 -8 14 h-12 q-8 -2 -8 -14 v-140 q2 -16 10 -30 q0 -4 1 -8 v-9 q-1 -2 -1 -5 z" fill={color} opacity="0.85" />
+      <path d="M26 6 h8 v6 h-8 z" fill="#fff3e2" />
+      <rect x="14" y="112" width="32" height="62" fill="#fff3e2" opacity="0.95" />
+      <text x="30" y="143" textAnchor="middle" dominantBaseline="middle" fontFamily="Bricolage Grotesque, sans-serif" fontWeight="800" fontSize={fontSize} textLength={runLength} lengthAdjust="spacingAndGlyphs" fill="#241352">{text}</text>
     </svg>
   )
 }
 
 /**
- * CanCarousel — photorealistic can shelf (PNG cutouts) in a wrapping grid.
+ * CanCarousel — photorealistic bottle shelf (PNG cutouts) in a wrapping grid.
+ * (The file/id keeps its old name so saved builder compositions still load.)
  * On hover the flavor color softly fills the card (and a soft outer glow),
  * like the MANA product shelf.
  *
- * Defaults ship with local `assets/soda-can-0N.png`. Builder `canNImage`
+ * Defaults ship with local `assets/soda-bottle-0N.webp` (rendered from the
+ * same 3D bottle as the hero). Builder `canNImage`
  * overrides any slot (PNG / SVG / WebP / JPG).
  */
 export default function CanCarousel({
@@ -139,16 +122,16 @@ export default function CanCarousel({
                 style={{ backgroundColor: can.color }}
               />
 
-              <div className="relative z-10 flex h-52 items-center justify-center transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:rotate-3">
+              <div className="relative z-10 flex h-60 items-center justify-center transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:rotate-3">
                 {can.image ? (
                   <img
                     {...imgAttrs(can.image, variants)}
-                    sizes="136px"
+                    sizes="96px"
                     alt=""
                     loading="lazy"
                     decoding="async"
                     draggable={false}
-                    className="max-h-52 w-auto max-w-[8.5rem] select-none object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]"
+                    className="max-h-60 w-auto max-w-[6rem] select-none object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]"
                   />
                 ) : (
                   <CanIllustration color={can.color} label={canLabel} />
