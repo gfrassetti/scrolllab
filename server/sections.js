@@ -35,6 +35,7 @@ export const ALLOWED_SECTIONS = Object.freeze([
   'fizz/BubbleBenefits',
   'fizz/CanCarousel',
   'fizz/PopManifesto',
+  'fizz/ContactSteps',
   'fizz/FooterSplash',
   'velocity/NavVelocity',
   'velocity/HeroStrike',

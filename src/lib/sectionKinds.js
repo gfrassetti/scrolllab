@@ -39,6 +39,7 @@ export const SECTION_KINDS = {
   'fizz/BubbleBenefits': 'section',
   'fizz/CanCarousel': 'section',
   'fizz/PopManifesto': 'section',
+  'fizz/ContactSteps': 'section',
   'fizz/FooterSplash': 'footer',
   'velocity/NavVelocity': 'nav',
   'velocity/HeroStrike': 'hero',

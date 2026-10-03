@@ -665,6 +665,10 @@
           "name": "Manifesto pop",
           "blurb": "Párrafo gigante que se entinta con colores de sabor"
         },
+        "ContactSteps": {
+          "name": "Contacto por pasos",
+          "blurb": "Formulario que pregunta de a una cosa, con validación y botón para volver"
+        },
         "FooterSplash": {
           "name": "Footer splash",
           "blurb": "Palabra CTA candy con burbujas subiendo detrás"

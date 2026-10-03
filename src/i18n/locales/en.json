@@ -665,6 +665,10 @@
           "name": "Pop Manifesto",
           "blurb": "Giant paragraph inking in with flavor colors"
         },
+        "ContactSteps": {
+          "name": "Contact Steps",
+          "blurb": "Contact form that asks one question at a time, with validation and Back"
+        },
         "FooterSplash": {
           "name": "Footer Splash",
           "blurb": "Candy CTA word with bubbles rising behind"

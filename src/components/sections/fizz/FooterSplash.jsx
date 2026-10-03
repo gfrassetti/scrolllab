@@ -1,13 +1,12 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { riseBubbles } from './riseBubbles'
 
 const defaultColumns = [
   { heading: 'Navigation', items: ['Flavors', 'Our story', 'Shop', 'Press'] },
   { heading: 'Legal', items: ['Legal notice', 'Privacy', 'Cookies'] },
 ]
-
-const rand = (min, max) => min + Math.random() * (max - min)
 
 /**
  * FooterSplash — the closing screen: one full viewport of flat color, the link
@@ -45,80 +44,8 @@ export default function FooterSplash({
         scrollTrigger: { trigger: root.current, start: 'top 35%', once: true },
       })
 
-      /* ── Burbujas: un pool de círculos de vidrio que sube y se achica ── */
-      const host = bubblesRef.current
-      const phone = window.innerWidth < 768
-      const pool = Array.from({ length: phone ? 10 : 20 }, () => {
-        const el = document.createElement('span')
-        el.style.cssText =
-          'position:absolute;left:0;bottom:0;border-radius:9999px;border:2px solid currentColor;opacity:0;will-change:transform'
-        const shine = document.createElement('i')
-        shine.style.cssText =
-          'position:absolute;top:15%;left:20%;width:34%;height:19%;border-radius:9999px;background:currentColor;transform:rotate(-35deg)'
-        el.appendChild(shine)
-        host.appendChild(el)
-        return { el, busy: false }
-      })
-
-      const spawn = () => {
-        const bubble = pool.find((b) => !b.busy)
-        if (!bubble) return
-        bubble.busy = true
-        const size = phone ? rand(34, 84) : rand(44, 128)
-        const rise = host.clientHeight + size + 60
-        gsap.set(bubble.el, {
-          width: size,
-          height: size,
-          left: `${rand(0, 100)}%`,
-          xPercent: -50,
-          y: size,
-          x: 0,
-          scale: 1,
-          opacity: 0,
-        })
-        const tl = gsap.timeline({
-          onComplete: () => {
-            bubble.busy = false
-          },
-        })
-        tl.to(bubble.el, { opacity: 1, duration: 0.3, ease: 'none' }, 0)
-        tl.to(bubble.el, { y: -rise, duration: rand(4.5, 8), ease: 'power1.out' }, 0)
-        tl.to(bubble.el, { x: rand(-110, 110), duration: rand(4.5, 8), ease: 'sine.inOut' }, 0)
-        tl.to(bubble.el, { scale: 0.5, duration: 1.4, ease: 'power1.in' }, '>-1.4')
-        tl.to(bubble.el, { opacity: 0, duration: 0.5, ease: 'none' }, '>-0.5')
-      }
-
-      let inView = false
-      let burst = true
-      let acc = 0
-      const io = new IntersectionObserver(([entry]) => {
-        inView = entry.isIntersecting
-        if (inView && burst) {
-          burst = false
-          for (let i = 0; i < (phone ? 4 : 8); i += 1) gsap.delayedCall(i * 0.12, spawn)
-        }
-      })
-      io.observe(root.current)
-
-      const step = (_, deltaMs) => {
-        if (!inView) return
-        acc += deltaMs / 1000
-        const every = phone ? 0.65 : 0.42
-        if (acc >= every) {
-          acc = 0
-          spawn()
-        }
-      }
-      gsap.ticker.add(step)
-
-      return () => {
-        io.disconnect()
-        gsap.ticker.remove(step)
-        pool.forEach(({ el }) => {
-          gsap.killTweensOf(el)
-          el.remove()
-        })
-      }
+      // Las burbujas de vidrio, las mismas que en el resto de la página.
+      return riseBubbles(bubblesRef.current, root.current)
     },
     { scope: root },
   )

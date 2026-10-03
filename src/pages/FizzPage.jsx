@@ -5,7 +5,7 @@ import NavFizz from '../components/sections/fizz/NavFizz'
 import HeroBubbles from '../components/sections/fizz/HeroBubbles'
 import FlavorWorlds from '../components/sections/fizz/FlavorWorlds'
 import BubbleBenefits from '../components/sections/fizz/BubbleBenefits'
-import ContactForm from '../components/sections/contact/ContactForm'
+import ContactSteps from '../components/sections/fizz/ContactSteps'
 import PopManifesto from '../components/sections/fizz/PopManifesto'
 import FooterSplash from '../components/sections/fizz/FooterSplash'
 
@@ -44,14 +44,7 @@ export default function FizzPage() {
           <FlavorWorlds modelUrl={FIZZ_BOTTLE_GLB} envUrl={FIZZ_STUDIO_HDR} />
           <BubbleBenefits />
           <PopManifesto />
-          <ContactForm
-            theme="fizz"
-            eyebrow=""
-            title="Say hi"
-            body="Placeholder contact copy — tell people what to write about and how fast you answer."
-            submitLabel="Send"
-            note="Placeholder reply time. We answer within two business days."
-          />
+          <ContactSteps />
         </main>
 
         <FooterSplash />

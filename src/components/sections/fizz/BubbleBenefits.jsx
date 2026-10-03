@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { riseBubbles } from './riseBubbles'
 
 const defaultBenefits = [
   {
@@ -26,7 +27,8 @@ const defaultBenefits = [
 ]
 
 /**
- * BubbleBenefits — springy stagger pop-in + denser drifting bubbles.
+ * BubbleBenefits — springy stagger pop-in; each benefit gets a glass bubble in
+ * its color and the same rising bubbles as the footer.
  */
 export default function BubbleBenefits({
   eyebrow = '',
@@ -36,6 +38,7 @@ export default function BubbleBenefits({
   fg,
 }) {
   const root = useRef(null)
+  const bubblesRef = useRef(null)
   const rows = Array.isArray(benefits) && benefits.length ? benefits : defaultBenefits
 
   useGSAP(
@@ -71,27 +74,12 @@ export default function BubbleBenefits({
         scrollTrigger: { trigger: root.current, start: 'top 62%', once: true },
       })
 
-      gsap.utils.toArray('[data-float-bubble]', root.current).forEach((el, i) => {
-        gsap.fromTo(
-          el,
-          { y: 40, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.6,
-            delay: 0.05 * i,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
-          },
-        )
-        gsap.to(el, {
-          y: -36 - (i % 4) * 16,
-          x: i % 2 === 0 ? 16 : -14,
-          duration: 2.6 + (i % 5) * 0.7,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1,
-        })
+      // Las burbujas de vidrio de siempre, más ralas: acompañan, no tapan las tarjetas.
+      return riseBubbles(bubblesRef.current, root.current, {
+        size: [28, 90],
+        every: 0.8,
+        burst: 5,
+        pool: 12,
       })
     },
     { scope: root },
@@ -103,21 +91,7 @@ export default function BubbleBenefits({
       className="relative overflow-hidden px-5 py-24 md:px-10 md:py-36"
       style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
-      {[...Array(12)].map((_, i) => (
-        <span
-          key={i}
-          data-float-bubble
-          aria-hidden="true"
-          className="absolute rounded-full border border-foam/25"
-          style={{
-            width: `${14 + (i % 5) * 12}px`,
-            height: `${14 + (i % 5) * 12}px`,
-            left: `${4 + ((i * 8) % 90)}%`,
-            top: `${8 + ((i * 17) % 78)}%`,
-            opacity: 0.35 + (i % 3) * 0.15,
-          }}
-        />
-      ))}
+      <div ref={bubblesRef} aria-hidden="true" className="pointer-events-none absolute inset-0 text-foam/45" />
 
       <div data-benefit-head>
         {eyebrow ? (
@@ -140,9 +114,14 @@ export default function BubbleBenefits({
             <span
               data-benefit-dot
               aria-hidden="true"
-              className="block h-10 w-10 rounded-full transition-transform duration-300 group-hover:scale-125"
-              style={{ backgroundColor: benefit.color }}
-            />
+              className="relative block h-11 w-11 rounded-full border-2 transition-transform duration-300 group-hover:scale-125"
+              style={{ borderColor: benefit.color, backgroundColor: `${benefit.color}26` }}
+            >
+              <i
+                className="absolute top-[15%] left-[20%] h-[19%] w-[34%] -rotate-[35deg] rounded-full"
+                style={{ backgroundColor: benefit.color }}
+              />
+            </span>
             <h3 className="mt-6 font-brico text-xl font-extrabold uppercase tracking-tight md:text-2xl">
               {benefit.title}
             </h3>
