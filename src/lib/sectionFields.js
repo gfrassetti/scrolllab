@@ -420,12 +420,12 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
-    { key: 'canLabel', label: 'Texto en latas (fallback SVG)', type: 'text' },
+    { key: 'canLabel', label: 'Texto en botellas (fallback SVG)', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
       key: 'cans',
-      label: 'Latas',
+      label: 'Botellas',
       type: 'list',
       max: 6,
       item: [

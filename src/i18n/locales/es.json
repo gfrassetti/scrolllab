@@ -393,7 +393,7 @@
         "Botella de vidrio 3D con burbujas",
         "Mundos que repintan la página",
         "Tipografía candy",
-        "Estante de latas"
+        "Estante de botellas"
       ],
       "description": "Azul eléctrico, colores golosina y una botella de vidrio 3D girando entre burbujas. Cada sabor es una pantalla completa que tiñe la página al scrollear. Ideal para bebidas, snacks, golosinas u otro producto comestible con sabores o variantes para mostrar."
     },
@@ -658,7 +658,7 @@
           "blurb": "Cards con rebote y burbujas flotando detrás"
         },
         "CanCarousel": {
-          "name": "Carrusel de latas",
+          "name": "Carrusel de botellas",
           "blurb": "Estante con snap; el color del sabor aparece suave al hover"
         },
         "PopManifesto": {
