@@ -29,7 +29,14 @@
  *
  * - sin-trigger     PC tiene ScrollTriggers en la sección y el teléfono ninguno.
  * - quieta          lo que se ve en el teléfono (desplazamiento en tamaños propios,
- *                   opacidad, escala, blur) es < 35 % de lo que se ve en PC.
+ *                   opacidad, escala, blur) es < 35 % de lo que se ve en PC. Por
+ *                   pieza (su camino en el DOM: el DOM es el mismo, cambia el CSS):
+ *                   de PC cuentan las piezas que se mueven y que también se dibujan
+ *                   en el teléfono (un adorno `hidden md:block` no cuenta contra
+ *                   él); en el teléfono esas mismas piezas, quietas = cero, más las
+ *                   que anima por su cuenta, porque adaptar un beat al teléfono es
+ *                   moverlo en otras piezas (un recorrido horizontal que pasa a una
+ *                   pila vertical con zoom por panel).
  * - solo-mouse      escucha mouse y nada táctil (teléfono / tablet).
  * - blur-pesado     blur animado sobre ≥ 25 % de la pantalla con scrub o sobre
  *                   fotos / canvas (un texto que se desenfoca una vez no cuenta).
@@ -58,7 +65,7 @@ import sharp from 'sharp'
 import { devices } from 'playwright'
 
 import { installBlockHelpers } from './lib/page-helpers.mjs'
-import { freePort, launchChromium, routePicsum, startVite } from './lib/servers.mjs'
+import { freePort, launchChromium, routeGoogleFonts, routePicsum, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'parity-check')
@@ -92,6 +99,7 @@ const VIEWS = {
 const VISIBLE = { travel: 0.04, rel: 0.15, opacity: 0.25, scale: 0.1, blur: 6 }
 const QUIET_RATIO = 0.35 // el teléfono tiene que llegar al menos a esta parte del efecto de PC
 const BIG_AREA = 0.25 // fracción de la pantalla a partir de la cual un blur animado pesa
+const OWN_MIN_SIZE = 0.004 // una pieza que solo anima el teléfono cuenta si ocupa al menos esto de la pantalla (no un punto)
 const MOUSE_EVENTS = /^(pointermove|mousemove|mouseenter|mouseover|pointerenter)$/
 const TOUCH_EVENTS = /^(touchstart|touchmove|pointerdown|deviceorientation|devicemotion)$/
 
@@ -100,10 +108,10 @@ const TOUCH_EVENTS = /^(touchstart|touchmove|pointerdown|deviceorientation|devic
  * por una, con el motivo, para que la lista no se vuelva un lugar donde esconder
  * brechas.
  */
-const ACCEPTED = {
-  'home/Link/quieta':
-    'la marca de fondo del CTA del builder es solo desktop a propósito: en mobile choca con el precio (ver el comentario en TemplatesIndex.jsx)',
-}
+const ACCEPTED = {}
+
+/** Las `ACCEPTED` que se usaron en esta corrida: una que ya no se marca sobra. */
+const usedAccepted = new Set()
 
 const HARD = new Set(['sin-trigger', 'quieta', 'solo-mouse', 'blur-pesado', 'canvas-quieto', 'css-quieto'])
 
@@ -147,7 +155,7 @@ function installListenerProbe() {
 }
 
 /** Inventario de ScrollTriggers, tamaño del efecto y peso, por sección. */
-async function inventoryInPage(thresholds) {
+async function inventoryInPage({ thresholds, expect }) {
   const { gsap, ScrollTrigger } = await import('/src/lib/gsap.js')
   const blocks = window.__mc.blocks()
   const vw = innerWidth
@@ -169,12 +177,8 @@ async function inventoryInPage(thresholds) {
     pins: 0,
     scrubs: 0,
     distance: 0,
-    beats: 0,
-    travel: 0,
-    rel: 0,
-    opacity: 0,
-    scale: 0,
-    blur: 0,
+    fx: [],
+    drawn: [],
     bigBlur: 0,
     loops: 0,
     cssAnims: 0,
@@ -195,6 +199,17 @@ async function inventoryInPage(thresholds) {
       o: Number(cs.opacity),
       blur: blur ? Number(blur[1]) : 0,
     }
+  }
+  // La misma pieza en PC y en el teléfono: el camino desde la sección (el DOM es el
+  // mismo, cambia el CSS). Así se compara lo mismo con lo mismo y lo que solo existe
+  // en PC (`hidden md:block`) no cuenta contra el teléfono.
+  const pathKey = (el, root) => {
+    const parts = []
+    for (let n = el; n && n !== root; n = n.parentElement) {
+      const parent = n.parentElement
+      parts.push(`${n.tagName.toLowerCase()}:${parent ? Array.prototype.indexOf.call(parent.children, n) : 0}`)
+    }
+    return parts.reverse().join('>')
   }
   const targetsOf = (anim) => {
     const out = new Set()
@@ -221,11 +236,7 @@ async function inventoryInPage(thresholds) {
 
     const anim = st.animation
     if (!anim) continue
-    const els = targetsOf(anim)
-      .map((el) => ({ el, a: el.getBoundingClientRect() }))
-      .sort((x, y) => area(y.a) - area(x.a))
-      .slice(0, 80)
-      .map((x) => x.el)
+    const els = targetsOf(anim).slice(0, 200)
     if (!els.length) continue
 
     const prev = anim.progress()
@@ -235,45 +246,26 @@ async function inventoryInPage(thresholds) {
     const to = els.map(measure)
     anim.progress(prev)
 
-    let travel = 0
-    let rel = 0
-    let opacity = 0
-    let scale = 0
-    let blur = 0
-    els.forEach((_, i) => {
+    els.forEach((el, i) => {
       const p = from[i]
       const q = to[i]
-      // Una línea de 1 px o un punto decorativo que se escala de 0 a 1 tiene un
-      // efecto «enorme» en tamaños propios y no es el beat de la sección (y
-      // muchos son solo de PC: `hidden md:block`). Se miden las piezas que se ven:
-      // por forma (hilo o punto), no por área relativa al viewport, que dejaba
-      // afuera las letras chicas de un teléfono.
-      const thin = (e) => Math.min(e.w, e.h) < 6 || (e.w < 14 && e.h < 14)
-      if (thin(p) && thin(q)) return
-      travel = Math.max(travel, Math.hypot((q.cx - p.cx) / vw, (q.cy - p.cy) / vh))
-      rel = Math.max(rel, Math.hypot(q.cx - p.cx, q.cy - p.cy) / Math.sqrt(Math.max(p.area, q.area, 1)))
-      opacity = Math.max(opacity, Math.abs(q.o - p.o))
-      scale = Math.max(scale, Math.abs(Math.log((Math.sqrt(q.area) || 1) / (Math.sqrt(p.area) || 1))))
+      if (!p.area && !q.area) return // no se dibuja en esta vista
+      const biggest = Math.max(p.area, q.area)
       const db = Math.abs(q.blur - p.blur)
-      blur = Math.max(blur, db)
+      row.fx.push({
+        k: pathKey(el, blocks[index].el),
+        size: biggest / (vw * vh),
+        travel: Math.hypot((q.cx - p.cx) / vw, (q.cy - p.cy) / vh),
+        rel: Math.hypot(q.cx - p.cx, q.cy - p.cy) / Math.sqrt(Math.max(biggest, 1)),
+        opacity: Math.abs(q.o - p.o),
+        scale: Math.abs(Math.log((Math.sqrt(q.area) || 1) / (Math.sqrt(p.area) || 1))),
+        blur: db,
+      })
       // Pesa un blur que se re-dibuja cuadro a cuadro (scrub) o que cae sobre
       // fotos / canvas; un texto que se desenfoca una vez al entrar no.
-      const media = els[i].matches('img, canvas, video, picture, svg') || els[i].querySelector('img, canvas, video, picture')
-      if (db >= 2 && Math.max(p.area, q.area) >= vw * vh * thresholds.bigArea && (scrub || media)) row.bigBlur += 1
+      const media = el.matches('img, canvas, video, picture, svg') || el.querySelector('img, canvas, video, picture')
+      if (db >= 2 && biggest >= vw * vh * thresholds.bigArea && (scrub || media)) row.bigBlur += 1
     })
-    const score = Math.max(
-      travel / thresholds.travel,
-      rel / thresholds.rel,
-      opacity / thresholds.opacity,
-      scale / thresholds.scale,
-      blur / thresholds.blur,
-    )
-    if (score >= 1) row.beats += 1
-    row.travel = Math.max(row.travel, travel)
-    row.rel = Math.max(row.rel, rel)
-    row.opacity = Math.max(row.opacity, opacity)
-    row.scale = Math.max(row.scale, scale)
-    row.blur = Math.max(row.blur, blur)
   }
 
   for (const child of gsap.globalTimeline.getChildren(true, true, true)) {
@@ -301,6 +293,26 @@ async function inventoryInPage(thresholds) {
       if (!blends && !backdrop) continue
       if (area(el.getBoundingClientRect()) >= vw * vh * 0.5) rows[index].blend += 1
     }
+  })
+
+  // Las piezas que se mueven en PC: ¿se dibujan en esta vista? Una que sí y acá no
+  // se mueve es una brecha; una que no existe acá (`hidden md:block`) no lo es.
+  const resolve = (root, key) => {
+    let node = root
+    for (const part of key ? key.split('>') : []) {
+      const [tag, at] = part.split(':')
+      node = node?.children?.[Number(at)]
+      if (!node || node.tagName.toLowerCase() !== tag) return null
+    }
+    return node
+  }
+  blocks.forEach((b, index) => {
+    const keys = expect?.[b.name]
+    if (!keys) return
+    rows[index].drawn = keys.filter((key) => {
+      const el = resolve(b.el, key)
+      return el && area(el.getBoundingClientRect()) > 0
+    })
   })
 
   return { rows, outside, scrollHeight: Math.round(document.documentElement.scrollHeight) }
@@ -357,7 +369,7 @@ async function canvasChange(page, index) {
   return frameDiff(a, await grab())
 }
 
-async function runView(browser, base, { template, view }) {
+async function runView(browser, base, { template, view, expect }) {
   const cfg = VIEWS[view]
   const context = await browser.newContext({ ...cfg.options, locale: 'es-AR', reducedMotion: 'no-preference' })
   await context.addInitScript(installBlockHelpers)
@@ -372,6 +384,7 @@ async function runView(browser, base, { template, view }) {
     }
   })
   await routePicsum(context)
+  await routeGoogleFonts(context)
   const page = await context.newPage()
   const errors = new Set()
   page.on('pageerror', (e) => errors.add(`pageerror: ${e.message}`.slice(0, 160)))
@@ -385,7 +398,7 @@ async function runView(browser, base, { template, view }) {
     .catch(() => {})
   await page.waitForTimeout(1800)
 
-  const inv = await page.evaluate(inventoryInPage, { ...VISIBLE, bigArea: BIG_AREA })
+  const inv = await page.evaluate(inventoryInPage, { thresholds: { ...VISIBLE, bigArea: BIG_AREA }, expect })
   const listeners = await page.evaluate(() => window.__listeners)
 
   const byComponent = {}
@@ -410,8 +423,56 @@ async function runView(browser, base, { template, view }) {
 // ---------------------------------------------------------------------------
 
 /** Lo que se ve: el desplazamiento en tamaños propios, la opacidad, la escala y el blur. */
+const DIMS = ['travel', 'rel', 'opacity', 'scale', 'blur']
 const SHOWN = ['rel', 'opacity', 'scale', 'blur']
 const score = (r) => Math.max(...SHOWN.map((k) => r[k] / VISIBLE[k]))
+
+/** Máximo de cada dimensión sobre unas piezas `{ travel, rel, opacity, scale, blur }`. */
+function effectOf(items) {
+  const out = { travel: 0, rel: 0, opacity: 0, scale: 0, blur: 0, size: 0 }
+  for (const item of items) for (const k of [...DIMS, 'size']) out[k] = Math.max(out[k], item[k] ?? 0)
+  return out
+}
+
+/** Por pieza (su camino en el DOM): el mayor efecto entre los triggers que la mueven. */
+function byKey(fx) {
+  const map = new Map()
+  for (const f of fx) {
+    const prev = map.get(f.k)
+    map.set(f.k, prev ? effectOf([prev, f]) : f)
+  }
+  return map
+}
+
+/** Las piezas que en PC se mueven lo bastante como para notarse, por sección: su camino en el DOM. */
+const expectOf = (view) =>
+  Object.fromEntries(
+    view.rows
+      .map((r) => [r.name, [...new Set(r.fx.filter((f) => score(f) >= 1).map((f) => f.k))]])
+      .filter(([, keys]) => keys.length),
+  )
+
+/**
+ * PC contra el teléfono en una sección. PC: las piezas que se mueven y que también se
+ * dibujan acá (un adorno `hidden md:block` no cuenta contra el teléfono). Teléfono: esas
+ * mismas piezas (quietas = cero: es la brecha) y las que anima por su cuenta, porque
+ * adaptar un beat al teléfono es moverlo en otras piezas (un recorrido horizontal que
+ * pasa a una pila vertical con zoom por panel).
+ */
+function matched(d, p) {
+  const dMap = byKey(d.fx)
+  const pMap = byKey(p.fx)
+  const drawn = new Set(p.drawn)
+  const keys = [...dMap.keys()].filter((k) => pMap.has(k) || drawn.has(k))
+  const still = { travel: 0, rel: 0, opacity: 0, scale: 0, blur: 0, size: 0 }
+  const own = [...pMap].filter(([k, f]) => !dMap.has(k) && f.size >= OWN_MIN_SIZE).map(([, f]) => f)
+  return {
+    count: keys.length,
+    own: own.length,
+    d: effectOf(keys.map((k) => dMap.get(k))),
+    p: effectOf([...keys.map((k) => pMap.get(k) || still), ...own]),
+  }
+}
 
 /**
  * El teléfono muestra menos de un tercio de lo que muestra PC. El recorrido en
@@ -438,8 +499,9 @@ function compare(template, desktop, other) {
     }
     const push = (flag, detail, note = false) => flags.push({ section: d.name, flag, note: note || !HARD.has(flag), detail })
 
+    const m = matched(d, p)
     if (d.triggers > 0 && p.triggers === 0) push('sin-trigger', `PC ${d.triggers} ScrollTrigger(s), acá 0`)
-    else if (quieter(d, p)) push('quieta', `PC: ${dims(d)} → acá: ${dims(p)}`)
+    else if (m.count > 0 && quieter(m.d, m.p)) push('quieta', `${m.count} pieza(s) que se mueven en PC y se dibujan acá${m.own ? `, y ${m.own} que anima solo el teléfono` : ''} — PC: ${dims(m.d)} → acá: ${dims(m.p)}`)
     if (d.pins > 0 && p.pins === 0) push('sin-pin', `PC ${d.pins} pin(es), acá 0`, true)
     if (p.bigBlur > 0) push('blur-pesado', `${p.bigBlur} blur(es) animado(s) sobre ≥ ${BIG_AREA * 100} % de la pantalla`)
     if (p.blend > 0) push('blend-grande', `${p.blend} mix-blend / backdrop-filter sobre ≥ 50 % de la pantalla`, true)
@@ -456,15 +518,19 @@ function compare(template, desktop, other) {
     }
   }
   for (const f of flags) {
-    const reason = ACCEPTED[`${template}/${f.section}/${f.flag}`]
-    if (reason) Object.assign(f, { accepted: reason, note: true })
+    const key = `${template}/${f.section}/${f.flag}`
+    const reason = ACCEPTED[key]
+    if (reason) {
+      usedAccepted.add(key)
+      Object.assign(f, { accepted: reason, note: true })
+    }
   }
   return flags
 }
 
 function fmtRow(r) {
   if (!r) return '—'
-  return `${r.triggers}t ${r.pins}p ${r.scrubs}s e${score(r).toFixed(1)}`
+  return `${r.triggers}t ${r.pins}p ${r.scrubs}s e${score(effectOf(r.fx)).toFixed(1)}`
 }
 
 function writeReports(results) {
@@ -514,7 +580,7 @@ async function main() {
     for (const template of opts.templates) {
       const views = {}
       for (const view of opts.views) {
-        views[view] = await runView(browser, base, { template, view })
+        views[view] = await runView(browser, base, { template, view, expect: view === 'desktop' ? undefined : expectOf(views.desktop) })
         const v = views[view]
         console.log(`${template} ${VIEWS[view].label}: ${v.rows.length} secciones, ${v.rows.reduce((n, r) => n + r.triggers, 0)} ScrollTriggers`)
       }
@@ -532,6 +598,8 @@ async function main() {
   }
 
   writeReports(results)
+  const stale = Object.keys(ACCEPTED).filter((k) => opts.templates.includes(k.split('/')[0]) && !usedAccepted.has(k))
+  if (stale.length) console.log(`\n⚠ ACCEPTED que ya no se marca (borrala): ${stale.join(', ')}`)
   const hard = results.reduce((n, t) => n + t.flags.filter((f) => !f.note).length, 0)
   const minutes = ((Date.now() - started) / 60000).toFixed(1)
   console.log(`\n${hard} marca(s) en ${results.length} páginas · ${minutes} min`)

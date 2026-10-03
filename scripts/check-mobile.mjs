@@ -52,17 +52,20 @@
  * Variables: BASE, WIDTHS, REDUCED_WIDTHS, MOTION (normal|reduce|both),
  * WORKERS (páginas en paralelo, default 2), SETTLE (ms de espera tras cada
  * scroll, default 1100), CHROMIUM_ARGS (flags extra para Chromium, separados
- * por espacios; p. ej. para confiar en el CA de un proxy corporativo).
+ * por espacios; p. ej. para confiar en el CA de un proxy corporativo),
+ * FONTS_VIA_CURL=1 (las fuentes de Google las baja `curl` y se las entrega al
+ * navegador: para un proxy cuyo CA Chromium no reconoce, sin tocar TLS).
  *
  * Ojo: las fuentes vienen de Google Fonts. Si Chromium no las puede bajar
  * (proxy, sin red), el texto se mide con la fuente de reemplazo y los anchos
- * no son los reales: el reporte lo avisa.
+ * no son los reales (salen recortes que en un teléfono no existen y se pueden
+ * esconder otros): el reporte lo avisa. Con las reales, FONTS_VIA_CURL=1.
  */
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { buildSnapshot, freePort, launchChromium, routePicsum, startPreview, startVite } from './lib/servers.mjs'
+import { buildSnapshot, freePort, launchChromium, routeGoogleFonts, routePicsum, startPreview, startVite } from './lib/servers.mjs'
 import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -110,6 +113,14 @@ const ALLOW = {
   'atelier/NavAtelier:hidden': 'la marca se oculta a propósito al scrollear en mobile y vuelve arriba de todo',
   'fizz/NavFizz:clipped':
     'las líneas del menú a pantalla completa entran con máscara de SplitText: el recorte medido es la máscara de la animación, el texto se ve entero (captura menu-open)',
+  'chapters/QuoteBreak:clipped':
+    'las líneas de la cita entran con una máscara de SplitText atada al scroll: la auditoría frena a mitad del reveal (BigNumbers:top, con la cita asomando abajo) y el recorte medido es la máscara en movimiento; en QuoteBreak:top las líneas están enteras (transform identidad)',
+  'comic/ChapterBond:clipped':
+    'cada página sube desde abajo del escenario (yPercent 108 → 0 con scrub): en `mid` la que entra todavía está cortada por el borde del escenario; en reposo el texto entra con 48 px o más de margen, de 320 a 834 de ancho (sonda de reposo)',
+  'meridian/Location:clipped':
+    'el mapa es más ancho que la pantalla y se desplaza al tocar una tarjeta o un pin (`data-pan`): lo que queda junto al borde del recuadro se corta por diseño',
+  'meridian/Location:target':
+    'dos pines vecinos se pisan la zona de toque de 44 px (`tpl-hit`) y la de arriba gana: el dibujo es de 32 px y cada pin tiene su zona de 44 px',
 }
 
 
@@ -687,6 +698,7 @@ async function auditJob(browser, base, job, opts) {
     }
   })
   await routePicsum(context)
+  await routeGoogleFonts(context)
 
   const page = await context.newPage()
   const errors = []
@@ -1108,7 +1120,7 @@ async function main() {
     }
   }
   if (results.some((r) => r.fontsFailed)) {
-    lines.push('\n⚠ Google Fonts no cargó en Chromium: el texto se midió con la fuente de reemplazo (ver CHROMIUM_ARGS).')
+    lines.push('\n⚠ Google Fonts no cargó en Chromium: el texto se midió con la fuente de reemplazo (ver FONTS_VIA_CURL y CHROMIUM_ARGS).')
   }
   const secs = Math.round((Date.now() - started) / 1000)
   lines.push(`\n${totalErrors} grupos de issues · ${results.length} corridas · ${secs}s`)

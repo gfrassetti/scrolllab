@@ -72,7 +72,7 @@ import sharp from 'sharp'
 import { devices } from 'playwright'
 
 import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
-import { freePort, launchChromium, routePicsum, startVite } from './lib/servers.mjs'
+import { freePort, launchChromium, routeGoogleFonts, routePicsum, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'motion-check')
@@ -353,6 +353,7 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     }
   })
   await routePicsum(context)
+  await routeGoogleFonts(context)
 
   const page = await context.newPage()
   const issues = []
@@ -622,6 +623,7 @@ async function loadAndMeasure(browser, base, { template, profile, reduce, forced
     }
   }, forced)
   await routePicsum(context)
+  await routeGoogleFonts(context)
   const page = await context.newPage()
   let fontsFailed = false
   page.on('requestfailed', (req) => {
@@ -778,7 +780,7 @@ async function main() {
   console.log(`\n${totalIssues} hallazgos en ${results.length} corridas · ${mb} min`)
   console.log(`Reportes: storage/motion-check/report.txt · storage/motion-check/<template>/sheet.html`)
   if (results.some((r) => r.fontsFailed)) {
-    console.log('\n⚠ Google Fonts no cargó en Chromium: lo visual se vio con la fuente de reemplazo (ver CHROMIUM_ARGS en check:mobile).')
+    console.log('\n⚠ Google Fonts no cargó en Chromium: lo visual se vio con la fuente de reemplazo (ver FONTS_VIA_CURL y CHROMIUM_ARGS en check:mobile).')
   }
   process.exit(totalIssues ? 1 : 0)
 }
