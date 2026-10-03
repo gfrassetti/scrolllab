@@ -388,7 +388,17 @@ Image pieces for new models: generate realistic local assets (see `.cursor/rules
 
 Riel / cubo / letras que siguen un path: **Beat** (`src/lib/beat`, [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md)). `<BeatStage>` + `<Beat>`. No copies el motor a `sections/<sku>/`.
 
-Register new sellable SKUs in `server/catalog.js` and pack logic in `server/packaging.js`. Keep `server/sections.js` in sync with `src/lib/sectionRegistry.jsx`.
+Register new sellable SKUs in `server/catalog.js` (copy de Checkout Pro) + su precio en `src/domain/catalog.js`, and pack logic in `server/packaging.js`.
+
+**Sumar una sección nueva** (la tabla de secciones vive una sola vez en `src/domain/sections.js`):
+1. `src/domain/sections.js` → el id y su `kind` dentro de su modelo (el orden es el de la paleta).
+2. `src/lib/sectionRegistry.jsx` → componente, nombre y blurb (mismo id, mismo orden).
+3. `server/__tests__/sections.test.js` → sumar el id a `APPROVED` si se vende: la allowlist del servidor
+   (`server/sections.js`) se deriva sola, el test la fija para que habilitarla sea a propósito.
+4. Campos editables, i18n del builder y `HOSTABLE_SECTIONS` como siempre.
+
+`src/lib/sectionKinds.js` y `ALLOWED_SECTIONS` ya **no se editan a mano** (no existe más
+`gen-section-kinds.mjs`). `npm run verify` avisa si algo quedó afuera.
 
 ## Storytelling motion (HTML + CSS + JS — no magia)
 

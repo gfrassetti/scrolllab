@@ -1,99 +1,20 @@
+import { SECTION_IDS, sectionModelOf } from '../src/domain/sections.js'
+import { isRetiredSku } from '../src/domain/catalog.js'
+
 /**
- * Allowlist server-side de secciones vendibles.
- * Debe coincidir con src/lib/sectionRegistry.jsx.
+ * Allowlist server-side de secciones: qué ids acepta una receta y qué
+ * componentes se copian al ZIP (packaging.js). Sale de la tabla de dominio
+ * (src/domain/sections.js) sin los modelos retirados (PLUM, SIGNAL). Los que
+ * siguen en obra (RATIO) entran acá y los frena BUILDER_HIDDEN_SKUS en
+ * validateRecipe.
+ *
+ * Es una frontera de seguridad: la lista resultante está aprobada a mano en
+ * server/__tests__/sections.test.js, así que sumar una sección vendible
+ * obliga a tocar ese test a propósito.
  */
-export const ALLOWED_SECTIONS = Object.freeze([
-  'chapters/NavMinimal',
-  'chapters/HeroKinetic',
-  'chapters/VelocityMarquee',
-  'chapters/ManifestoReveal',
-  'chapters/StickyImageStory',
-  'chapters/HorizontalPanels',
-  'chapters/ParallaxEditorial',
-  'chapters/StackingCards',
-  'chapters/BigNumbers',
-  'chapters/QuoteBreak',
-  'chapters/FooterCTA',
-  'nocturne/NavNocturne',
-  'nocturne/HeroCinematic',
-  'nocturne/ZoomPortal',
-  'nocturne/DiagonalMarquee',
-  'nocturne/SplitReveals',
-  'nocturne/WorkIndex',
-  'nocturne/StickyWordCycle',
-  'nocturne/OutroCTA',
-  'monolith/NavBrutal',
-  'monolith/HeroThree',
-  'monolith/SkewScroller',
-  'monolith/SpecSheet',
-  'monolith/ExhibitGrid',
-  'monolith/TypeAccordion',
-  'monolith/FooterBrutal',
-  'fizz/NavFizz',
-  'fizz/HeroBubbles',
-  'fizz/FlavorWorlds',
-  'fizz/BubbleBenefits',
-  'fizz/CanCarousel',
-  'fizz/PopManifesto',
-  'fizz/ContactSteps',
-  'fizz/FooterSplash',
-  'velocity/NavVelocity',
-  'velocity/HeroStrike',
-  'velocity/TrackMerge',
-  'velocity/HelmetGrid',
-  'velocity/ParallaxRise',
-  'velocity/FooterVelocity',
-  'atelier/NavAtelier',
-  'atelier/HeroMeaning',
-  'atelier/AboutClarity',
-  'atelier/ServicesStone',
-  'atelier/VisionShutter',
-  'atelier/SelectedWork',
-  'atelier/KeyFacts',
-  'atelier/WordStripe',
-  'atelier/StudioCards',
-  'atelier/FooterAtelier',
-  'unity/NavUnity',
-  'unity/HeroTwin',
-  'unity/MosaicSlider',
-  'unity/UniversalLang',
-  'unity/LanguageBlock',
-  'unity/LastPortrait',
-  'unity/StageLines',
-  'unity/FooterTrophy',
-  'ratio/NavRatio',
-  'ratio/HeroTools',
-  'ratio/FourPlates',
-  'ratio/SplitStudy',
-  'ratio/FitStack',
-  'ratio/PlateStudy',
-  'ratio/BreakRules',
-  'ratio/FooterLedger',
-  'atrium/NavAtrium',
-  'atrium/HeroMassing',
-  'atrium/ManifestoType',
-  'atrium/ScopeSerif',
-  'atrium/ClarityPair',
-  'atrium/BlueprintDraw',
-  'atrium/ProjectRail',
-  'atrium/ProcessPin',
-  'atrium/PeopleScatter',
-  'atrium/OrbitRing',
-  'atrium/StatField',
-  'atrium/FooterAtrium',
-  'meridian/Hero',
-  'meridian/Concept',
-  'meridian/GallerySlider',
-  'meridian/Location',
-  'meridian/Panorama',
-  'meridian/Interior',
-  'meridian/Amenities',
-  'meridian/Masterplan',
-  'meridian/Contact',
-  'meridian/Footer',
-  'contact/ContactForm',
-  'commerce/ProductGrid',
-])
+export const ALLOWED_SECTIONS = Object.freeze(
+  SECTION_IDS.filter((id) => !isRetiredSku(sectionModelOf(id))),
+)
 
 export const ALLOWED_SECTION_SET = new Set(ALLOWED_SECTIONS)
 

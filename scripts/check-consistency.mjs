@@ -8,7 +8,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { PRODUCTS } from '../server/catalog.js'
-import { ALLOWED_SECTIONS } from '../server/sections.js'
 import {
   ALLOWED_PROPS_BY_SECTION,
   LIST_PROPS_BY_SECTION,
@@ -24,7 +23,7 @@ import {
 } from '../src/domain/catalog.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
-import { SECTION_KINDS } from '../src/lib/sectionKinds.js'
+import { SECTION_KINDS, SECTION_IDS } from '../src/domain/sections.js'
 import { checkoutPropsFrom } from '../src/lib/shop/checkoutProps.js'
 import { BUILDER_SEO, LAB_SEO, SITE_SEO } from '../src/lib/site.js'
 
@@ -77,24 +76,32 @@ if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
 // no se van a terminar.
 const isLocalOnlyModel = (id) => LOCAL_ONLY_SKUS.includes(String(id).split('/')[0])
 
-// 2. Sellable sections: registry (client) vs allowlist (server).
-for (const id of diff(registryIds, [...ALLOWED_SECTIONS])) {
-  if (isLocalOnlyModel(id)) continue
-  fail('secciones', `'${id}' está en sectionRegistry pero no en server/sections.js`)
+// 2. Secciones: la tabla de src/domain/sections.js es la fuente (ids, kind y
+// orden de la paleta); la allowlist del servidor se deriva de ahí y la fija
+// server/__tests__/sections.test.js. El registry JSX suma componente, nombre
+// y blurb, y tiene que cubrir exactamente la misma tabla.
+const registryKinds = new Map(
+  [...registrySrc.matchAll(/id:\s*'([a-z]+\/[A-Za-z0-9]+)'[\s\S]*?kind:\s*'([^']+)'/g)].map(
+    (m) => [m[1], m[2]],
+  ),
+)
+for (const id of diff(registryIds, SECTION_IDS)) {
+  fail('secciones', `'${id}' está en sectionRegistry pero no en src/domain/sections.js`)
 }
-for (const id of diff([...ALLOWED_SECTIONS], registryIds)) {
-  fail('secciones', `'${id}' está en server/sections.js pero no en sectionRegistry`)
+for (const id of diff(SECTION_IDS, registryIds)) {
+  fail('secciones', `'${id}' está en src/domain/sections.js pero no en sectionRegistry`)
 }
-
-// 2b. sectionKinds.js es el mapa plano que usa composition.js (y sus tests).
-// Tiene que coincidir con el registry: si no, el builder deja agregar algo
-// que el preview no sabe renderizar, o al revés.
-const kindIds = Object.keys(SECTION_KINDS)
-for (const id of diff(registryIds, kindIds)) {
-  fail('secciones', `'${id}' está en el registry pero no en sectionKinds.js — corré node scripts/gen-section-kinds.mjs`)
+if (
+  !diff(registryIds, SECTION_IDS).length &&
+  !diff(SECTION_IDS, registryIds).length &&
+  registryIds.join(',') !== SECTION_IDS.join(',')
+) {
+  fail('secciones', 'sectionRegistry y src/domain/sections.js tienen las secciones en distinto orden')
 }
-for (const id of diff(kindIds, registryIds)) {
-  fail('secciones', `'${id}' está en sectionKinds.js pero no en el registry`)
+for (const [id, kind] of registryKinds) {
+  if (SECTION_KINDS[id] && SECTION_KINDS[id] !== kind) {
+    fail('secciones', `'${id}': kind '${kind}' en el registry vs '${SECTION_KINDS[id]}' en src/domain/sections.js`)
+  }
 }
 
 // 3. Editable props: builder fields vs server allowlist.

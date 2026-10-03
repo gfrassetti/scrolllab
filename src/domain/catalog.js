@@ -80,6 +80,18 @@ export const LOCAL_ONLY_SKUS = Object.freeze(['ratio', 'plum', 'signal'])
  */
 export const BUILDER_HIDDEN_SKUS = Object.freeze(['ratio', 'plum', 'signal'])
 
+/**
+ * No se van a terminar: quedan en el repo solo como referencia local y el
+ * servidor no acepta sus secciones en ninguna receta (server/sections.js).
+ * A diferencia de RATIO, que sigue en obra: sus secciones pasan la allowlist
+ * y las frena BUILDER_HIDDEN_SKUS hasta que salga a la venta.
+ */
+export const RETIRED_SKUS = Object.freeze(['plum', 'signal'])
+
+export function isRetiredSku(sku) {
+  return RETIRED_SKUS.includes(sku)
+}
+
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
 }
