@@ -1,455 +1,17 @@
+import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
+
 /**
- * Allowlist server-side de props editables por sección.
- * Debe coincidir con src/lib/sectionFields.js.
+ * Allowlist server-side de props editables por sección. Sale de los campos del
+ * builder (src/lib/sectionFields.js, la fuente única): una prop es editable si
+ * tiene campo. Lo que el servidor NO toma del cliente es cómo se valida cada
+ * valor: eso lo deciden las reglas de abajo (por nombre de prop y por el schema
+ * de listas), sin confiar en el `type` de la UI.
  */
-export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
-  'chapters/NavMinimal': ['brand', 'linksText'],
-  // Hosteable: los `panels` (array) aún no son editables; sí los textos sueltos.
-  'chapters/HorizontalPanels': [
-    'variant',
-    'chapter',
-    'total',
-    'label',
-    'heading',
-  ],
-  'chapters/HeroKinetic': [
-    'lineOne',
-    'lineTwo',
-    'lineThree',
-    'kicker',
-    'meta',
-    'hint',
-  ],
-  'chapters/ManifestoReveal': ['chapter', 'total', 'label'],
-  'chapters/BigNumbers': ['bg', 'fg', 'stats'],
-  'chapters/VelocityMarquee': ['text', 'separator', 'bg', 'fg'],
-  'chapters/QuoteBreak': [
-    'chapter',
-    'total',
-    'label',
-    'quote',
-    'attribution',
-  ],
-  'chapters/FooterCTA': [
-    'ctaWord',
-    'email',
-    'ctaHref',
-    'legal',
-    'note',
-    'backToTop',
-    'bg',
-    'fg',
-    'links',
-  ],
-  'nocturne/NavNocturne': ['brand', 'marker', 'linksText'],
-  'nocturne/HeroCinematic': [
-    'titleTop',
-    'titleBottom',
-    'kicker',
-    'meta',
-    'hint',
-  ],
-  'nocturne/DiagonalMarquee': ['textA', 'textB', 'bg', 'fg'],
-  'nocturne/SplitReveals': ['seqLabel', 'seq', 'total', 'label', 'bg', 'fg', 'beats'],
-  'nocturne/WorkIndex': ['seqLabel', 'seq', 'total', 'label', 'bg', 'fg', 'works'],
-  'nocturne/OutroCTA': [
-    'ctaWord',
-    'email',
-    'ctaHref',
-    'legal',
-    'note',
-    'backToTop',
-    'bg',
-    'fg',
-    'links',
-  ],
-  'monolith/NavBrutal': ['brand', 'linksText'],
-  'monolith/HeroThree': ['title', 'subtitle', 'meta', 'hint'],
-  'monolith/TypeAccordion': ['unitLabel', 'unit', 'total', 'label', 'bg', 'fg', 'items'],
-  'monolith/SkewScroller': ['unitLabel', 'unit', 'total', 'label', 'bg', 'fg', 'words'],
-  'monolith/ExhibitGrid': ['unitLabel', 'unit', 'total', 'label', 'bg', 'fg', 'exhibits'],
-  'monolith/FooterBrutal': [
-    'ctaWord',
-    'email',
-    'ctaHref',
-    'legal',
-    'backToTop',
-    'bg',
-    'fg',
-    'links',
-  ],
-  'fizz/NavFizz': ['brand', 'links', 'cta', 'menuBg', 'menuInk'],
-  'fizz/HeroBubbles': [
-    'title',
-    'tagline',
-    'meta',
-    'hint',
-    'statement',
-    'cta',
-    'ctaHref',
-    'marquee',
-    'canLabel',
-    'flavor',
-    'canImage',
-  ],
-  'fizz/FlavorWorlds': ['eyebrow', 'startBg', 'startInk', 'brand', 'cta', 'ctaHref'],
-  'fizz/BubbleBenefits': ['eyebrow', 'title', 'bg', 'fg', 'benefits'],
-  'fizz/CanCarousel': ['eyebrow', 'title', 'cta', 'canLabel', 'bg', 'fg', 'cans'],
-  'fizz/PopManifesto': ['eyebrow', 'text'],
-  'fizz/ContactSteps': [
-    'nameTitle',
-    'nameHint',
-    'namePlaceholder',
-    'emailTitle',
-    'emailHint',
-    'emailPlaceholder',
-    'messageTitle',
-    'messageHint',
-    'messagePlaceholder',
-    'backLabel',
-    'successTitle',
-    'successBody',
-    'bg',
-    'fg',
-  ],
-  'fizz/FooterSplash': [
-    'ctaWord',
-    'email',
-    'ctaHref',
-    'legal',
-    'note',
-    'backToTop',
-    'bg',
-    'fg',
-    'links',
-  ],
-  'velocity/NavVelocity': ['brand', 'cta', 'linksText'],
-  'velocity/HeroStrike': [
-    'lineLeft',
-    'lineLeft2',
-    'lineRight',
-    'lineRight2',
-    'caption',
-    'imgBack',
-    'imgMid',
-    'imgFront',
-  ],
-  'velocity/HelmetGrid': ['eyebrow', 'title', 'body', 'bg', 'fg', 'items'],
-  'velocity/TrackMerge': [
-    'pathLabelA',
-    'pathLabelB',
-    'mergeTitleA',
-    'mergeTitleB',
-    'mergeAccent',
-  ],
-  'velocity/ParallaxRise': ['eyebrow', 'title', 'body', 'cta'],
-  'velocity/FooterVelocity': ['line', 'legal', 'backToTop', 'bg', 'fg'],
-  'atelier/NavAtelier': ['brand', 'cta', 'label', 'menuLabel', 'linksText'],
-  'atelier/HeroMeaning': ['line1', 'line2', 'meta', 'hint'],
-  'atelier/AboutClarity': ['eyebrow', 'title', 'body', 'tags', 'bg', 'fg'],
-  'atelier/ServicesStone': [
-    'eyebrow',
-    'title',
-    'service1Title',
-    'service1Body',
-    'service2Title',
-    'service2Body',
-    'service3Title',
-    'service3Body',
-    'service4Title',
-    'service4Body',
-  ],
-  'atelier/VisionShutter': ['line1', 'line2', 'word1', 'word2', 'word3'],
-  'atelier/SelectedWork': ['title', 'cta'],
-  'atelier/KeyFacts': ['eyebrow', 'title', 'bg', 'fg', 'facts'],
-  'atelier/WordStripe': ['line1', 'line2', 'word1', 'word2', 'word3'],
-  'atelier/StudioCards': ['note', 'cta', 'ctaHref', 'bg', 'fg', 'cards'],
-  'atelier/FooterAtelier': [
-    'eyebrow',
-    'line',
-    'cta',
-    'ctaHref',
-    'brand',
-    'legal',
-    'email',
-    'phone',
-    'hint',
-    'clockLabel',
-    'enquiryLabel',
-    'emailLabel',
-    'phoneLabel',
-    'socialLabel',
-    'bg',
-    'fg',
-    'social',
-  ],
-  'unity/NavUnity': ['brand', 'logo', 'logoSrc', 'linksText', 'menuLabel'],
-  'unity/HeroTwin': ['body', 'headline'],
-  'unity/MosaicSlider': [
-    'eyebrow',
-    'title',
-    'img1',
-    'img2',
-    'img3',
-    'img4',
-    'img5',
-    'img6',
-    'img7',
-    'img8',
-  ],
-  'unity/UniversalLang': ['eyebrow', 'title', 'body', 'number', 'numberLabel'],
-  'unity/LanguageBlock': [
-    'eyebrow',
-    'line1',
-    'line2',
-    'line3',
-    'note',
-    'bg',
-    'fg',
-    'img1',
-    'img2',
-    'img3',
-    'anchor',
-  ],
-  'unity/LastPortrait': [
-    'title',
-    'name',
-    'body',
-    'question',
-    'caption',
-    'img',
-    'stat1Label',
-    'stat1Value',
-    'stat2Label',
-    'stat2Value',
-    'stat3Label',
-    'stat3Value',
-  ],
-  'unity/StageLines': [
-    'eyebrow1',
-    'line1',
-    'img1',
-    'eyebrow2',
-    'line2',
-    'img2',
-  ],
-  'unity/FooterTrophy': [
-    'eyebrow',
-    'title',
-    'accentWord',
-    'metaLeft',
-    'metaRight',
-    'orbSrc',
-  ],
-  'ratio/NavRatio': [
-    'brand',
-    'linksText',
-    'credit',
-    'menuLabel',
-  ],
-  'ratio/HeroTools': [
-    'word1',
-    'word2',
-    'word3',
-    'word4',
-    'word5',
-    'note',
-    'aside',
-  ],
-  'ratio/FourPlates': [
-    'eyebrow',
-    'plate1Title',
-    'plate2Title',
-    'plate3Title',
-    'plate4Title',
-    'nextImg',
-  ],
-  'ratio/SplitStudy': [
-    'kicker',
-    'meta',
-    'index',
-    'specLabel',
-    'specValue',
-    'spec2Label',
-    'spec2Value',
-    'spec3Label',
-    'spec3Value',
-    'spec4Label',
-    'spec4Value',
-    'quote',
-    'quoteBy',
-    'quoteRole',
-    'panel2Label',
-    'panel2Size',
-    'img',
-    'img2',
-    'anchor',
-  ],
-  'ratio/FitStack': [
-    'noteLabel',
-    'note1',
-    'note1Mark',
-    'note2',
-    'note2Mark',
-    'note3',
-    'note3Mark',
-    'phrase',
-    'breakLine',
-    'rulesLine',
-    'worthLine',
-    'closer',
-    'brand',
-    'studio',
-    'anchor',
-  ],
-  'ratio/PlateStudy': [
-    'index',
-    'title',
-    'variant',
-    'specLabel',
-    'specValue',
-    'spec2Label',
-    'spec2Value',
-    'spec3Label',
-    'spec3Value',
-    'spec4Label',
-    'spec4Value',
-    'caseTitle',
-    'caseMeta',
-    'img',
-    'img2',
-    'step1Label',
-    'step1Body',
-    'step2Label',
-    'step2Body',
-    'notes',
-    'anchor',
-  ],
-  'ratio/BreakRules': ['line1', 'line2', 'line3', 'aside', 'anchor'],
-  'ratio/FooterLedger': [
-    'title',
-    'ghost',
-    'hint',
-    'brand',
-    'studio',
-    'row1Label',
-    'row1Value',
-    'row2Label',
-    'row2Value',
-    'row3Label',
-    'row3Value',
-    'row4Label',
-    'row4Value',
-    'spine1Title',
-    'spine2Title',
-    'spine3Title',
-    'spine4Title',
-    'spine5Title',
-  ],
-  'atrium/NavAtrium': ['lineOne', 'lineTwo', 'linksText', 'menuLabel'],
-  'atrium/HeroMassing': ['lineOne', 'lineTwo', 'hint'],
-  'atrium/ManifestoType': ['lineOne', 'lineTwo', 'left', 'right', 'bg', 'fg'],
-  'atrium/ScopeSerif': ['body', 'bg', 'fg'],
-  'atrium/ClarityPair': ['kicker', 'left', 'right', 'bodyLeft', 'bodyRight'],
-  'atrium/BlueprintDraw': ['title', 'body', 'caption'],
-  'atrium/ProjectRail': ['kicker', 'title'],
-  'atrium/ProcessPin': ['label'],
-  'atrium/PeopleScatter': ['label', 'title'],
-  'atrium/OrbitRing': [],
-  'atrium/StatField': ['kicker', 'closer'],
-  'atrium/FooterAtrium': [
-    'mark',
-    'reserved',
-    'license',
-    'design',
-    'development',
-    'legal',
-    'year',
-    'bg',
-    'fg',
-  ],
-  'meridian/Hero': [
-    'wordmark',
-    'menuLabel',
-    'floorPlansLabel',
-    'welcomeText',
-    'quoteKicker',
-    'quoteTitle',
-    'inviteKicker',
-    'inviteTitle',
-    'inviteBody',
-    'inviteCta',
-    'menuLinks',
-  ],
-  'meridian/Concept': ['kicker', 'text'],
-  'meridian/GallerySlider': ['slides'],
-  'meridian/Location': ['title', 'ctaLabel', 'ctaHref', 'location', 'places'],
-  'meridian/Panorama': ['title', 'ctaLabel', 'ctaHref', 'image'],
-  'meridian/Interior': ['links'],
-  'meridian/Amenities': ['title', 'label', 'items'],
-  'meridian/Masterplan': ['units'],
-  'meridian/Contact': ['eyebrow', 'title', 'body', 'submitLabel', 'note'],
-  'meridian/Footer': [
-    'wordmark',
-    'phone',
-    'email',
-    'location',
-    'mapHref',
-    'studio',
-    'studioHref',
-  ],
-  'contact/ContactForm': [
-    'theme',
-    'eyebrow',
-    'title',
-    'body',
-    'nameLabel',
-    'emailLabel',
-    'messageLabel',
-    'submitLabel',
-    'sendingLabel',
-    'successMessage',
-    'errorMessage',
-    'note',
-    'endpoint',
-  ],
-  // Los `checkout*` no los usa la grilla: viajan a la ruta /checkout
-  // (src/lib/shop/checkoutProps.js) y por eso se validan acá igual.
-  'commerce/ProductGrid': [
-    'theme',
-    'eyebrow',
-    'title',
-    'body',
-    'products',
-    'checkoutEyebrow',
-    'checkoutTitle',
-    'checkoutBody',
-    'checkoutStepsText',
-    'checkoutContactTitle',
-    'checkoutShippingTitle',
-    'checkoutCountryOptionsText',
-    'checkoutDeliveryTitle',
-    'checkoutStandardLabel',
-    'checkoutStandardNote',
-    'checkoutExpressLabel',
-    'checkoutExpressNote',
-    'checkoutPaymentTitle',
-    'checkoutPayCardLabel',
-    'checkoutPayWalletLabel',
-    'checkoutPayTransferLabel',
-    'checkoutSummaryTitle',
-    'checkoutPromoLabel',
-    'checkoutPromoCode',
-    'checkoutPromoOff',
-    'checkoutShippingFlat',
-    'checkoutExpressPrice',
-    'checkoutFreeShippingOver',
-    'checkoutPayLabel',
-    'checkoutTrustText',
-    'checkoutSuccessTitle',
-    'checkoutSuccessBody',
-  ],
-})
+export const ALLOWED_PROPS_BY_SECTION = Object.freeze(
+  Object.fromEntries(
+    Object.entries(SECTION_FIELDS).map(([id, fields]) => [id, fields.map((f) => f.key)]),
+  ),
+)
 
 const FLAVOR_PRESETS = new Set(['cobalt', 'berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
@@ -500,7 +62,7 @@ export const ASSET_URL_KEYS = new Set([
 
 /**
  * Tipos que el server no infiere de `ALLOWED_PROPS_BY_SECTION` (que es un
- * array de nombres). Espejan los `type` de src/lib/sectionFields.js.
+ * array de nombres): las reglas propias del servidor.
  *  - COLOR_PROP_KEYS / isHrefKey: por convención de nombre (`bg`/`fg`/`accent`,
  *    cualquier `*Href`, o `href`/`link`).
  *  - LIST_PROPS_BY_SECTION: schema de los campos `list` (prop → { max, item }).
@@ -513,87 +75,36 @@ const HREF_RE =
 // Precio de un producto del kit commerce: número con hasta 2 decimales.
 const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
 
-const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
+export const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
-const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
+export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 
-export const LIST_PROPS_BY_SECTION = Object.freeze({
-  'commerce/ProductGrid': {
-    products: {
-      max: 8,
-      item: { name: 'text', price: 'price', blurb: 'text', img: 'image' },
-    },
-  },
-  'chapters/FooterCTA': {
-    links: { max: 8, item: { label: 'text', href: 'href' } },
-  },
-  'meridian/Hero': {
-    menuLinks: { max: 6, item: { label: 'text', href: 'href' } },
-  },
-  'meridian/Masterplan': {
-    units: { max: 8, item: { name: 'text', line1: 'text', line2: 'text' } },
-  },
-  'meridian/Amenities': {
-    items: { max: 10, item: { title: 'text', text: 'text', img: 'image' } },
-  },
-  'meridian/Interior': {
-    links: { max: 6, item: { label: 'text', img: 'image' } },
-  },
-  'meridian/Location': {
-    places: { max: 12, item: { distance: 'text', unit: 'text', title: 'text', img: 'image' } },
-  },
-  'meridian/GallerySlider': {
-    slides: { max: 8, item: { img: 'image', alt: 'text' } },
-  },
-  'chapters/BigNumbers': {
-    stats: { max: 6, item: { value: 'text', suffix: 'text', label: 'text' } },
-  },
-  'atelier/KeyFacts': {
-    facts: { max: 6, item: { value: 'text', label: 'text' } },
-  },
-  'monolith/TypeAccordion': {
-    items: { max: 6, item: { title: 'text', body: 'text' } },
-  },
-  'nocturne/OutroCTA': {
-    links: { max: 8, item: { label: 'text', href: 'href' } },
-  },
-  'monolith/FooterBrutal': {
-    links: { max: 8, item: { label: 'text', href: 'href' } },
-  },
-  'fizz/FooterSplash': {
-    links: { max: 8, item: { label: 'text', href: 'href' } },
-  },
-  'atelier/FooterAtelier': {
-    social: { max: 6, item: { label: 'text', href: 'href' } },
-  },
-  'nocturne/SplitReveals': {
-    beats: { max: 6, item: { kicker: 'text', title: 'text', body: 'text', img: 'image' } },
-  },
-  'nocturne/WorkIndex': {
-    works: {
-      max: 8,
-      item: { index: 'text', title: 'text', category: 'text', year: 'text', img: 'image' },
-    },
-  },
-  'monolith/SkewScroller': {
-    words: { max: 8, item: { word: 'text' } },
-  },
-  'monolith/ExhibitGrid': {
-    exhibits: { max: 8, item: { code: 'text', caption: 'text', img: 'image' } },
-  },
-  'fizz/BubbleBenefits': {
-    benefits: { max: 6, item: { title: 'text', body: 'text', color: 'color' } },
-  },
-  'fizz/CanCarousel': {
-    cans: { max: 6, item: { name: 'text', note: 'text', color: 'color', image: 'image' } },
-  },
-  'atelier/StudioCards': {
-    cards: { max: 6, item: { title: 'text', label: 'text', img: 'image' } },
-  },
-  'velocity/HelmetGrid': {
-    items: { max: 6, item: { name: 'text', year: 'text', img: 'image' } },
-  },
-})
+// Para el servidor un `textarea` es texto: solo color / href / image / price
+// tienen regla propia en sanitizeListValue.
+const serverItemType = (type) => (type === 'textarea' ? 'text' : type)
+
+export const LIST_PROPS_BY_SECTION = Object.freeze(
+  Object.fromEntries(
+    Object.entries(SECTION_FIELDS)
+      .map(([id, fields]) => [
+        id,
+        Object.fromEntries(
+          fields
+            .filter((field) => field.type === 'list')
+            .map((field) => [
+              field.key,
+              {
+                max: field.max,
+                item: Object.fromEntries(
+                  (field.item || []).map((sub) => [sub.key, serverItemType(sub.type)]),
+                ),
+              },
+            ]),
+        ),
+      ])
+      .filter(([, lists]) => Object.keys(lists).length),
+  ),
+)
 
 function sanitizeColor(value) {
   const s = String(value).trim().toLowerCase()

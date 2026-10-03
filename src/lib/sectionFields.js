@@ -5,8 +5,11 @@
  * `image` / `url` = una URL https:// o una ruta /archivo. Los objetos 3D
  * (formas, GLB) no son editables a propósito: se cambian en el código.
  * `list` = array de items; `item` describe sus sub-campos (text/textarea/
- * href/color). El schema server-side espeja esto en server/sectionFields.js
- * (ALLOWED_PROPS_BY_SECTION + LIST_PROPS_BY_SECTION).
+ * href/color). Fuente única: server/sectionFields.js deriva de esta tabla qué
+ * props acepta (ALLOWED_PROPS_BY_SECTION + LIST_PROPS_BY_SECTION). El servidor
+ * valida colores y links por nombre de prop: un campo `color` se llama
+ * bg/fg/accent… y uno `href` termina en `Href` (`npm run check` lo exige).
+ * Este archivo lo importa Node: sin imports de React ni del browser.
  * Recetas Beat (pasos dx/dy) aún no son un campo: el motion vive en JSX/presets.
  * Ver docs/scrolllab-beat.md.
  */

@@ -395,10 +395,12 @@ Register new sellable SKUs in `server/catalog.js` (copy de Checkout Pro) + su pr
 2. `src/lib/sectionRegistry.jsx` → componente, nombre y blurb (mismo id, mismo orden).
 3. `server/__tests__/sections.test.js` → sumar el id a `APPROVED` si se vende: la allowlist del servidor
    (`server/sections.js`) se deriva sola, el test la fija para que habilitarla sea a propósito.
-4. Campos editables, i18n del builder y `HOSTABLE_SECTIONS` como siempre.
+4. Campos editables **solo** en `src/lib/sectionFields.js`: el servidor deriva de ahí qué props acepta.
+   Un campo `color` se llama `bg`/`fg`/`accent`… y uno `href` termina en `Href`: el servidor valida por
+   nombre y `npm run check` lo exige. Después, i18n del builder y `HOSTABLE_SECTIONS` como siempre.
 
-`src/lib/sectionKinds.js` y `ALLOWED_SECTIONS` ya **no se editan a mano** (no existe más
-`gen-section-kinds.mjs`). `npm run verify` avisa si algo quedó afuera.
+`src/lib/sectionKinds.js`, `ALLOWED_SECTIONS` y `ALLOWED_PROPS_BY_SECTION` / `LIST_PROPS_BY_SECTION`
+(`server/sectionFields.js`) ya **no se editan a mano** (no existe más `gen-section-kinds.mjs`). `npm run verify` avisa si algo quedó afuera.
 
 ## Storytelling motion (HTML + CSS + JS — no magia)
 

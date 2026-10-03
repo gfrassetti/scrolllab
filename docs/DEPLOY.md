@@ -153,8 +153,9 @@ Mercado Pago Argentina **siempre procesa en moneda local**. Mandar
 monto a pesos al crear la preferencia, con una cotización que no controlamos.
 Por eso la conversión es nuestra.
 
-- Los precios de lista están en dólares: `server/catalog.js` (`unit_price_usd`)
-  y `src/lib/pricing.js`. **Los dos archivos tienen que coincidir.**
+- Los precios de lista están en dólares, una sola vez, en `src/domain/catalog.js`
+  (`TEMPLATE_PRICES_USD`). Lo importan el front (`src/lib/pricing.js`) y el servidor
+  (`server/catalog.js`, que suma el copy de cada producto para Checkout Pro).
 - `server/fx.js` trae el dólar blue (venta) de `dolarapi.com`, lo cachea
   15 minutos, le aplica `FX_SPREAD_PCT` y cae a `FX_FALLBACK_RATE` si la API
   falla: una caída de la API externa no puede tumbar el checkout.
@@ -176,12 +177,12 @@ base (USD 389, incluye 8 secciones)
 ```
 
 - Constantes: `CUSTOM_BASE_PRICE_USD` / `CUSTOM_BASE_SECTIONS` /
-  `CUSTOM_EXTRA_SECTION_USD` en `src/lib/pricing.js`, espejadas en
-  `server/catalog.js`. `npm run check` falla si se despegan.
+  `CUSTOM_EXTRA_SECTION_USD` en `src/domain/catalog.js` (las usan el front y el
+  servidor). `npm run check` falla si la base no supera al template más caro en venta.
 - **Cuenta cada entrada de la receta**, incluidas nav, footer y repeticiones:
   cada una es un componente renderizado en el `App.jsx` del ZIP. El tope son
-  30 (`maxRecipeSections` en `server/config.js`, espejado en
-  `MAX_CUSTOM_SECTIONS`).
+  30 (`MAX_CUSTOM_SECTIONS` en `src/domain/catalog.js`; `maxRecipeSections` de
+  `server/config.js` sale de ahí).
 - Anclajes: 8 secciones = el piso, 10 = USD 419, 30 = USD 719. El piso queda
   arriba del template más caro en venta (MERIDIAN, USD 379).
 - El carrito **no guarda el monto**: lo recalcula desde la receta con la misma
@@ -241,7 +242,7 @@ tarjeta de la home.
   emite `dist/templates/<sku>/index.html` y `dist/builder/index.html`: el mismo
   HTML del build con sus tags `og:*` / `twitter:*` (lógica en `src/lib/sharePages.js`).
   Las demos siguen `noindex` con canonical a la home; solo cambian las tarjetas.
-- Las rutas salen de `publicDemoSkus()` (`src/lib/pricing.js`): al sumar un
+- Las rutas salen de `publicDemoSkus()` (`src/lib/sharePages.js`): al sumar un
   modelo, agregá su `templates.<sku>` en `en.json`, su poster en `public/catalog/`
   y corré `npm run gen:og <sku>`.
 - Vercel da prioridad al filesystem sobre los rewrites, y con `trailingSlash`
@@ -324,8 +325,8 @@ newsletters: el único mail que sale es el cupón, una sola vez.
   cupón, sin mail nuevo.
 
 **Ajustes**: constantes, no env. `WELCOME_COUPON_PERCENT`, `WELCOME_COUPON_DAYS` y
-`WELCOME_COUPON_BOUND_TO_EMAIL` en `server/catalog.js`; el porcentaje está
-espejado en `src/lib/pricing.js` y `npm run check` falla si se despegan.
+`WELCOME_COUPON_BOUND_TO_EMAIL` en `server/catalog.js`; el porcentaje
+(`WELCOME_COUPON_PERCENT`) vive en `src/domain/catalog.js`, el mismo para la home y el checkout.
 
 **Medición**
 - `npm run leads:export > leads.csv` saca la lista, con el cupón, si lo canjearon

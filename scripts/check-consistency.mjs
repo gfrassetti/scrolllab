@@ -8,11 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { PRODUCTS } from '../server/catalog.js'
-import {
-  ALLOWED_PROPS_BY_SECTION,
-  LIST_PROPS_BY_SECTION,
-  ASSET_URL_KEYS,
-} from '../server/sectionFields.js'
+import { ASSET_URL_KEYS, COLOR_PROP_KEYS, isHrefKey } from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
   CUSTOM_BASE_PRICE_USD,
@@ -104,65 +100,13 @@ for (const [id, kind] of registryKinds) {
   }
 }
 
-// 3. Editable props: builder fields vs server allowlist.
-for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
-  const server = ALLOWED_PROPS_BY_SECTION[id]
-  if (!server) {
-    fail('props', `'${id}' tiene campos en el builder pero no en server/sectionFields.js`)
-    continue
-  }
-  for (const key of diff(fields.map((f) => f.key), server)) {
-    fail('props', `'${id}.${key}' es editable en el builder pero el servidor lo descarta`)
-  }
-}
-for (const [id, keys] of Object.entries(ALLOWED_PROPS_BY_SECTION)) {
-  if (!SECTION_FIELDS[id]) {
-    fail('props', `'${id}' está en server/sectionFields.js pero no en el builder`)
-    continue
-  }
-  const clientKeys = SECTION_FIELDS[id].map((f) => f.key)
-  for (const key of diff(keys, clientKeys)) {
-    fail('props', `'${id}.${key}' lo acepta el servidor pero no es editable en el builder`)
-  }
-}
-
-// 3a2. Campos `list`: el schema del server (LIST_PROPS_BY_SECTION) tiene que
-// existir como campo `type:'list'` en el builder, con los mismos sub-campos.
-for (const [id, schema] of Object.entries(LIST_PROPS_BY_SECTION)) {
-  const clientFields = SECTION_FIELDS[id] || []
-  for (const [key, spec] of Object.entries(schema)) {
-    const field = clientFields.find((f) => f.key === key)
-    if (!field) {
-      fail('props', `'${id}.${key}' es un list del server sin campo en el builder`)
-      continue
-    }
-    if (field.type !== 'list') {
-      fail('props', `'${id}.${key}' es list en el server pero '${field.type}' en el builder`)
-      continue
-    }
-    const clientSub = new Set((field.item || []).map((f) => f.key))
-    const serverSub = new Set(Object.keys(spec.item || {}))
-    for (const k of diff([...serverSub], [...clientSub])) {
-      fail('props', `'${id}.${key}[].${k}' lo valida el server pero el builder no lo edita`)
-    }
-    for (const k of diff([...clientSub], [...serverSub])) {
-      fail('props', `'${id}.${key}[].${k}' es editable en el builder pero el server lo descarta`)
-    }
-  }
-}
-for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
-  for (const field of fields) {
-    if (field.type !== 'list') continue
-    if (!LIST_PROPS_BY_SECTION[id]?.[field.key]) {
-      fail('props', `'${id}.${field.key}' es list en el builder pero el server no tiene su schema`)
-    }
-  }
-}
+// 3. Props editables: el servidor deriva su allowlist y el schema de listas de
+// SECTION_FIELDS (server/sectionFields.js), así que no hay espejo que comparar.
+// Lo que sigue chequea las reglas que el servidor aplica por su cuenta.
 
 // 3a3. Tipos que el server valida: una imagen o un modelo que el server no
 // valida como URL viaja al ZIP con cualquier cosa (un `blob:` del preview, un
-// texto suelto); un sub-campo de lista con otro tipo en cada lado se descarta.
-const serverListType = (type) => (type === 'textarea' ? 'text' : type)
+// texto suelto).
 for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   for (const field of fields) {
     const isAsset = ['image', 'url'].includes(field.type)
@@ -172,12 +116,30 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
     if (!isAsset && ASSET_URL_KEYS.has(field.key) && field.type !== 'list') {
       fail('props', `'${id}.${field.key}' el server lo valida como URL pero en el builder es '${field.type}'`)
     }
-    if (field.type !== 'list') continue
-    const spec = LIST_PROPS_BY_SECTION[id]?.[field.key]?.item || {}
-    for (const sub of field.item || []) {
-      if (spec[sub.key] && spec[sub.key] !== serverListType(sub.type)) {
-        fail('props', `'${id}.${field.key}[].${sub.key}' es '${sub.type}' en el builder y '${spec[sub.key]}' en el server`)
-      }
+  }
+}
+
+// 3a4. El servidor reconoce colores y links por el NOMBRE de la prop
+// (COLOR_PROP_KEYS, isHrefKey en server/sectionFields.js), no por el `type` del
+// campo. Un campo color/href con otro nombre se valida como texto libre: un
+// `javascript:` en un href o CSS suelto en un style llegaría al ZIP / a LAB.
+// Excepciones conocidas, previas a la regla: pendientes de pasar a validación
+// de color en el servidor (nombre fuera de COLOR_PROP_KEYS).
+const KNOWN_UNVALIDATED = new Set([
+  'fizz/NavFizz.menuBg',
+  'fizz/NavFizz.menuInk',
+  'fizz/FlavorWorlds.startBg',
+  'fizz/FlavorWorlds.startInk',
+])
+for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
+  for (const field of fields) {
+    const ref = `${id}.${field.key}`
+    if (KNOWN_UNVALIDATED.has(ref)) continue
+    if (field.type === 'href' && !isHrefKey(field.key)) {
+      fail('props', `'${ref}' es href pero el server lo valida como texto: renombrala a *Href o sumá la regla`)
+    }
+    if (field.type === 'color' && !COLOR_PROP_KEYS.has(field.key)) {
+      fail('props', `'${ref}' es color pero el server lo valida como texto: usá bg/fg/accent o sumá la clave a COLOR_PROP_KEYS`)
     }
   }
 }
