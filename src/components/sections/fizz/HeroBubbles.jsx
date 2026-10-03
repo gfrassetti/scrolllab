@@ -1,21 +1,9 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal, createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
-
-import {
-  FOAM,
-  TITLE_FRAGMENT,
-  TITLE_VERTEX,
-  buildStandInBottle,
-  buildStudioEnv,
-  createBottle,
-  createStageShadow,
-  disposeObject,
-  drawTitleLine,
-  loadBottleModel,
-  loadHdrEnv,
-} from './bottleKit'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { FOAM, TITLE_FRAGMENT, TITLE_VERTEX, drawTitleLine } from './bottleKit'
+import { acquireFizzStage } from './fizzStage'
 
 /** Curated flavor presets — one flat stage color, its type ink and the drink tint. */
 export const FIZZ_FLAVORS = {
@@ -64,13 +52,19 @@ const BUBBLE_FRAGMENT = /* glsl */ `
 `
 
 /**
- * HeroBubbles — a glass bottle, the headline and the fizz in one Three.js
- * canvas. The headline is drawn inside the canvas so the glass refracts it;
- * scroll spins the bottle across the stage while it keeps floating on its own.
+ * HeroBubbles — the glass bottle, the headline and the fizz. The headline is
+ * drawn in the canvas so the glass refracts it; scroll spins the bottle across
+ * the stage while it keeps floating on its own.
  *
- * `modelUrl` swaps in a GLB (meshes named glass / liquid / cap / label get the
- * glass, the flavor tint, the inner bubbles and the label). Without it, a
- * lathe-built bottle stands in. `canImage` replaces the drawn label.
+ * The canvas and the bottle belong to the FIZZ stage (`fizzStage.js`), shared
+ * with FlavorWorlds: the bottle that leaves the hero is the very same one that
+ * turns through the flavors. This section adds the headline, the marquee and
+ * the bubbles to that stage and drives the bottle while it is on screen.
+ *
+ * `modelUrl` swaps in a GLB (meshes named glass / liquid / label / stopper /
+ * seal / wire get the glass, the flavor tint, the inner bubbles, the print and
+ * the stopper). Without it, a lathe-built bottle stands in. `canImage`
+ * replaces the drawn print.
  */
 export default function HeroBubbles({
   title = 'YOUR BIG TITLE',
@@ -89,7 +83,6 @@ export default function HeroBubbles({
   dracoPath = '/fizz/draco/',
 }) {
   const root = useRef(null)
-  const stageRef = useRef(null)
   const canvasRef = useRef(null)
   const titleRef = useRef(null)
   const statementRef = useRef(null)
@@ -100,59 +93,29 @@ export default function HeroBubbles({
   useGSAP(
     () => {
       const reduced = prefersReducedMotion()
-      const stage = stageRef.current
-      let W = stage.clientWidth
-      let H = stage.clientHeight
-      let narrow = W < 768
-      let disposed = false
-
-      const renderer = new THREE.WebGLRenderer({
+      const family = getComputedStyle(titleRef.current).fontFamily
+      const { stage, release } = acquireFizzStage({
         canvas: canvasRef.current,
-        antialias: true,
-        alpha: false,
-        powerPreference: 'high-performance',
+        family,
+        reduced,
+        flavor: flavorCfg,
+        brand: canLabel,
+        image: canImage,
+        modelUrl,
+        envUrl,
+        dracoPath,
       })
-      // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      // En escritorio se dibuja un poco por encima de la pantalla: las líneas finas
-      // del vidrio y la serigrafía quedan nítidas.
-      const dpr = Math.min(window.devicePixelRatio * (narrow ? 1 : 1.25), narrow ? 1.5 : 2)
-      renderer.setPixelRatio(dpr)
-      renderer.outputColorSpace = THREE.SRGBColorSpace
-      // Sin tone mapping: el fondo visto a través del vidrio tiene que ser el
-      // mismo color que el fondo de al lado.
-      renderer.toneMapping = THREE.NoToneMapping
-
-      const scene = new THREE.Scene()
-      scene.background = new THREE.Color(flavorCfg.bg)
-      const envMap = buildStudioEnv(renderer, flavorCfg.bg)
-      scene.environment = envMap
-      // Un HDRI de estudio real (si se pasa `envUrl`) reemplaza al estudio armado
-      // a mano: reflejos de cajas de luz de verdad en el vidrio y el metal.
-      let hdrEnv = null
-      if (envUrl) {
-        loadHdrEnv(renderer, envUrl)
-          .then((env) => {
-            if (disposed) return env.dispose()
-            hdrEnv = env
-            scene.environment = env
-            scene.environmentRotation.set(0, Math.PI * 0.55, 0)
-            renderOnce()
-          })
-          .catch(() => {})
-      }
-      const keyLight = new THREE.DirectionalLight(0xffffff, 2.2)
-      keyLight.position.set(-3, 4, 6)
-      scene.add(keyLight)
-
-      // 1 unidad = 1 px CSS en el plano z = 0: se maqueta como en el DOM.
-      const camera = new THREE.PerspectiveCamera(30, 1, 10, 10000)
-      scene.add(camera)
+      // The hero sets the look of the stage (color, drink, print).
+      stage.configure({ flavor: flavorCfg, brand: canLabel, image: canImage })
+      if (stage.canvas !== canvasRef.current) canvasRef.current.style.display = 'none'
+      const { scene, camera, color: stageColor } = stage
+      let { W, H, narrow, dpr } = stage.size()
 
       /* ── Headline, dentro del canvas ───────────────────────────── */
       const titleGroup = new THREE.Group()
       camera.add(titleGroup)
-      const family = getComputedStyle(titleRef.current).fontFamily
       const words = String(title).trim().toUpperCase().split(/\s+/).filter(Boolean)
+      const heavy = { weight: 800, tracking: -0.03, width: 0.86, widthNarrow: 0.9, max: 0.36 }
       const lines =
         words.length > 1
           ? [
@@ -164,25 +127,9 @@ export default function HeroBubbles({
                 widthNarrow: 0.6,
                 max: 0.19,
               },
-              {
-                text: words.at(-1),
-                weight: 800,
-                tracking: -0.03,
-                width: 0.86,
-                widthNarrow: 0.9,
-                max: 0.36,
-              },
+              { text: words.at(-1), ...heavy },
             ]
-          : [
-              {
-                text: words[0] || '',
-                weight: 800,
-                tracking: -0.03,
-                width: 0.86,
-                widthNarrow: 0.9,
-                max: 0.36,
-              },
-            ]
+          : [{ text: words[0] || '', ...heavy }]
       const planeGeo = new THREE.PlaneGeometry(1, 1)
       const lineTextures = []
       let letters = []
@@ -209,25 +156,25 @@ export default function HeroBubbles({
         })
       }
 
-      // «SOOO MUCH FIZZ»: one huge line that crosses the screen between the
-      // statement and the flavors. Same opaque shader as the headline, so the
-      // glass refracts it as the bottle tumbles through.
-      const marqueeMesh = new THREE.Mesh(
-        planeGeo,
+      const textMaterial = (map, uv0 = 0, uv1 = 1, inValue = 0) =>
         new THREE.ShaderMaterial({
           uniforms: {
-            map: { value: null },
+            map: { value: map },
             uInk: { value: new THREE.Color(flavorCfg.ink) },
-            uPaper: { value: new THREE.Color(flavorCfg.bg) },
-            uUv0: { value: 0 },
-            uUv1: { value: 1 },
-            uIn: { value: 1 },
+            uPaper: { value: stageColor },
+            uUv0: { value: uv0 },
+            uUv1: { value: uv1 },
+            uIn: { value: inValue },
             uFade: { value: 1 },
           },
           vertexShader: TITLE_VERTEX,
           fragmentShader: TITLE_FRAGMENT,
-        }),
-      )
+        })
+
+      // «SOOO MUCH FIZZ»: one huge line that crosses the screen between the
+      // statement and the flavors. Same opaque shader as the headline, so the
+      // glass refracts it as the bottle tumbles through.
+      const marqueeMesh = new THREE.Mesh(planeGeo, textMaterial(null, 0, 1, 1))
       marqueeMesh.visible = false
       camera.add(marqueeMesh)
       let marqueeWidth = 0
@@ -276,22 +223,7 @@ export default function HeroBubbles({
           lineTextures.push(drawn.texture)
           const y = top - drawn.height / 2
           drawn.cuts.forEach((cut) => {
-            const mesh = new THREE.Mesh(
-              planeGeo,
-              new THREE.ShaderMaterial({
-                uniforms: {
-                  map: { value: drawn.texture },
-                  uInk: { value: new THREE.Color(flavorCfg.ink) },
-                  uPaper: { value: new THREE.Color(flavorCfg.bg) },
-                  uUv0: { value: cut.u0 },
-                  uUv1: { value: cut.u1 },
-                  uIn: { value: 0 },
-                  uFade: { value: 1 },
-                },
-                vertexShader: TITLE_VERTEX,
-                fragmentShader: TITLE_FRAGMENT,
-              }),
-            )
+            const mesh = new THREE.Mesh(planeGeo, textMaterial(drawn.texture, cut.u0, cut.u1, 0))
             titleGroup.add(mesh)
             letters.push({
               mesh,
@@ -307,40 +239,6 @@ export default function HeroBubbles({
         })
         applyLetters()
         layoutMarquee()
-      }
-
-      /* ── Sombra sobre el fondo ─────────────────────────────────── */
-      const stageColor = new THREE.Color(flavorCfg.bg)
-      const shadow = createStageShadow(stageColor, { W, H })
-      scene.add(shadow.mesh)
-
-      /* ── Botella ───────────────────────────────────────────────── */
-      const rig = new THREE.Group()
-      const spin = new THREE.Group()
-      rig.add(spin)
-      rig.visible = false
-      scene.add(rig)
-
-      const bottle = createBottle({ narrow, liquid: flavorCfg.liquid, stage: flavorCfg.bg })
-      let model = null
-
-      const paintLabel = () => {
-        if (!model || canImage) return
-        bottle.paintPrint({ family, brand: canLabel })
-      }
-
-      const mountModel = (object) => {
-        model = object
-        bottle.dress(model, {
-          image: canImage,
-          isDisposed: () => disposed,
-          onImage: () => renderOnce(),
-        })
-        paintLabel()
-        spin.add(model)
-        rig.visible = true
-        startBottle()
-        renderOnce()
       }
 
       /* ── Burbujas del escenario ────────────────────────────────── */
@@ -394,7 +292,7 @@ export default function HeroBubbles({
       })
       // The first thing on screen: the bubbles, popping in one by one.
       const intro = { bubbles: reduced ? 1 : 0 }
-      const placeBubbles = (time, dt, boost, burst = 0) => {
+      const placeBubbles = (time, dt, boost, burst, presence) => {
         bubbles.forEach((b, i) => {
           b.y += b.speed * H * dt * boost * (b.burst ? 1.5 : 1)
           if (b.y > H * 0.5 + b.r * 3) {
@@ -404,7 +302,8 @@ export default function HeroBubbles({
           const grow =
             clamp01((b.y - b.born) / (H * 0.12) + (b.born > -H * 0.5 ? 1 : 0)) *
             smooth(clamp01((intro.bubbles - (b.delay || 0)) / 0.5)) *
-            (b.burst ? smooth(clamp01(burst * 1.6 - b.k)) : 1)
+            (b.burst ? smooth(clamp01(burst * 1.6 - b.k)) : 1) *
+            presence
           const wobble = Math.sin(time * 3.1 + b.phase) * 0.05
           bubbleDummy.position.set(b.x + Math.sin(time * 0.9 + b.phase) * b.sway, b.y, b.z)
           bubbleDummy.scale.set(b.r * grow * (1 + wobble), b.r * grow * (1 - wobble), b.r * grow)
@@ -414,175 +313,98 @@ export default function HeroBubbles({
         bubbleMesh.instanceMatrix.needsUpdate = true
       }
 
-      /* ── Medidas ───────────────────────────────────────────────── */
-      let cameraZ = 1
-      const layout = () => {
-        W = stage.clientWidth
-        H = stage.clientHeight
-        narrow = W < 768
-        renderer.setSize(W, H, false)
-        shadow.resize(W, H)
-        cameraZ = H / (2 * Math.tan((Math.PI / 180) * 15))
-        camera.aspect = W / Math.max(H, 1)
-        camera.near = cameraZ / 10
-        camera.far = cameraZ * 10
-        camera.position.z = cameraZ
-        camera.updateProjectionMatrix()
-        titleGroup.position.z = -cameraZ
-        marqueeMesh.position.z = -cameraZ
-        layoutTitle()
-      }
-
-      // `top`: cuánto subió este escenario (≤ 0) al irse; la botella lo compensa.
-      const state = { p: 0, m: 0, enter: reduced ? 0 : 1, top: 0 }
-      // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
-      // pointermove). En calma la botella queda quieta: no escucha nada.
-      const pointer = reduced ? { x: 0, y: 0 } : trackPointer()
-      // Lo que la botella usa de ese puntero, suavizado: un dedo aparece de golpe
-      // (touchstart) y se va de golpe (touchend), y sin esto la botella daba un salto.
-      const look = { x: 0, y: 0 }
-      let lastTop = 0
+      /* ── La botella mientras el hero está en pantalla ──────────── */
+      const state = { p: 0, m: 0, enter: reduced ? 0 : 1 }
+      let lastTop = null
       let boost = 1
 
-      const pose = (time) => {
-        const { p, enter } = state
+      const heroPose = (time, look) => {
+        const { p, m, enter } = state
         const s = smooth(p)
         const out = 1 - (1 - p) * (1 - p)
         const bob = reduced ? 0 : Math.sin(time * 1.05) * H * 0.016
         const sway = reduced ? 0 : Math.sin(time * 0.29) * 0.42
         const size = narrow ? Math.min(H * 0.5, W * 1.35) : Math.min(H * 0.86, W * 0.62)
-        rig.position.x = W * (narrow ? lerp(0, 0.22, s) : lerp(-0.06, 0.29, s))
-        rig.position.y =
-          H * (narrow ? lerp(-0.04, -0.2, s) : lerp(-0.03, -0.05, s)) + bob - enter * H * 1.05
-        rig.rotation.z = narrow ? lerp(0.3, -0.34, s) : lerp(0.4, -0.2, s)
-        rig.rotation.x = Math.sin(Math.PI * p) * 0.3 + look.y * 0.06
-        spin.rotation.y = -TURNS * Math.PI * 2 * out + sway + look.x * 0.25 - enter * 2.4
-        rig.scale.setScalar(size * lerp(1, 1.12, s))
-
+        const pose = {
+          x: W * (narrow ? lerp(0, 0.22, s) : lerp(-0.06, 0.29, s)),
+          y: H * (narrow ? lerp(-0.04, -0.2, s) : lerp(-0.03, -0.05, s)) + bob - enter * H * 1.05,
+          rotZ: narrow ? lerp(0.3, -0.34, s) : lerp(0.4, -0.2, s),
+          rotX: Math.sin(Math.PI * p) * 0.3 + look.y * 0.06,
+          spinY: -TURNS * Math.PI * 2 * out + sway + look.x * 0.25 - enter * 2.4,
+          scale: size * lerp(1, 1.12, s),
+          shadow: 0.55 * (1 - enter),
+        }
         // The «much fizz» stretch: the bottle tumbles across to the center while
         // the line slides by behind it.
-        const { m } = state
         if (m > 0) {
           const ms = smooth(m)
           const arc = Math.sin(Math.PI * m)
-          rig.position.x = lerp(rig.position.x, W * (narrow ? 0 : -0.04), ms)
-          rig.position.y -= arc * H * 0.05
-          rig.rotation.z -= Math.PI * 2 * ms
-          spin.rotation.y += Math.PI * 2 * ms
-          rig.scale.multiplyScalar(1 + arc * 0.14)
+          pose.x = lerp(pose.x, W * (narrow ? 0 : -0.04), ms)
+          pose.y -= arc * H * 0.05
+          pose.rotZ -= Math.PI * 2 * ms
+          pose.spinY += Math.PI * 2 * ms
+          pose.scale *= 1 + arc * 0.14
         }
-        marqueeMesh.visible = m > 0.001 && m < 0.999
-        marqueeMesh.position.x = lerp(W / 2 + marqueeWidth / 2, -(W / 2 + marqueeWidth / 2), m)
-        // Cuando este escenario se va hacia arriba, la botella se queda clavada en
-        // la pantalla: es la misma que sigue en los sabores.
-        rig.position.y += state.top
-        shadow.place({
-          x: rig.position.x,
-          y: rig.position.y,
-          scale: rig.scale.x,
-          rotZ: rig.rotation.z,
-          strength: 0.55 * (1 - enter),
-        })
+        return pose
       }
 
-      const render = () => renderer.render(scene, camera)
-      const renderOnce = () => {
-        if (!reduced || disposed) return
-        pose(0)
-        render()
-      }
-
-      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
-      // el 3D mientras se leía el resto de la página.
-      let onScreen = true
-      const io = new IntersectionObserver(([entry]) => {
-        onScreen = entry.isIntersecting
-      })
-      io.observe(root.current)
-
-      // Si el teléfono no llega a ~30 cuadros (vidrio con transmisión, DPR alto),
-      // baja la resolución de a escalones. En un equipo rápido no cambia nada.
-      const budget = createFrameBudget({
-        dpr,
-        apply: (value) => {
-          renderer.setPixelRatio(value)
-          layout()
+      const layer = {
+        el: root.current,
+        resize(next) {
+          ;({ W, H, narrow, dpr } = next)
+          const cameraZ = H / (2 * Math.tan((Math.PI / 180) * 15))
+          titleGroup.position.z = -cameraZ
+          marqueeMesh.position.z = -cameraZ
+          layoutTitle()
         },
-      })
+        fontsReady() {
+          layoutTitle()
+        },
+        update({ time, dt, look }) {
+          const rect = root.current.getBoundingClientRect()
+          // El titular sube con la página, 1:1, como si fuera DOM.
+          titleGroup.position.y = Math.min(Math.max(-rect.top, 0), rect.height - H)
+          // Al irse hacia arriba el titular se apaga, sin cortarse de golpe.
+          const fade = 1 - smooth(clamp01((-rect.top - H * 0.05) / (H * 0.55)))
+          letters.forEach(({ mesh }) => {
+            mesh.material.uniforms.uFade.value = fade
+          })
+          applyLetters()
+          // Scrollear agita el gas.
+          const speed = lastTop === null ? 0 : Math.abs(rect.top - lastTop)
+          lastTop = rect.top
+          boost += (1 + Math.min(speed * 0.06, 2.5) - boost) * 0.12
 
-      const tick = (time, deltaMs) => {
-        if (!onScreen) return
-        const dt = Math.min(deltaMs / 1000, 0.05)
-        // El titular sube con la página, 1:1, como si fuera DOM.
-        const rect = root.current.getBoundingClientRect()
-        state.top = Math.min(stage.getBoundingClientRect().top, 0)
-        titleGroup.position.y = Math.min(Math.max(-rect.top, 0), rect.height - H)
-        // Al irse hacia arriba el titular se apaga, sin cortarse de golpe.
-        const fade = 1 - smooth(clamp01((-rect.top - H * 0.05) / (H * 0.55)))
-        letters.forEach(({ mesh }) => {
-          mesh.material.uniforms.uFade.value = fade
-        })
-        applyLetters()
-        // Scrollear agita el gas.
-        const speed = Math.abs(rect.top - lastTop)
-        lastTop = rect.top
-        boost += (1 + Math.min(speed * 0.06, 2.5) - boost) * 0.12
-
-        camera.position.x += (pointer.x * W * 0.04 - camera.position.x) * 0.03
-        camera.position.y += (-pointer.y * H * 0.04 - camera.position.y) * 0.03
-        const follow = 1 - Math.exp(-dt * 12)
-        look.x += (pointer.x - look.x) * follow
-        look.y += (pointer.y - look.y) * follow
-        pose(time)
-        placeBubbles(time, dt, boost, Math.sin(Math.PI * state.m))
-        bottle.update(time)
-        render()
-        budget.tick(deltaMs)
+          stage.setPose('hero', heroPose(time, look), 1, 0)
+          marqueeMesh.visible = state.m > 0.001 && state.m < 0.999
+          marqueeMesh.position.x = lerp(
+            W / 2 + marqueeWidth / 2,
+            -(W / 2 + marqueeWidth / 2),
+            state.m,
+          )
+          // The hero's bubbles go as the hero itself leaves the screen.
+          const presence = smooth(clamp01(rect.bottom / H))
+          placeBubbles(time, dt, boost, Math.sin(Math.PI * state.m), presence)
+        },
       }
+      const removeLayer = stage.addLayer(layer)
 
       let introDone = reduced
-      function startBottle() {
-        if (reduced || !introDone || !model) return
+      let modelReady = false
+      const startBottle = () => {
+        if (reduced || !introDone || !modelReady) return
         gsap.to(state, { enter: 0, duration: 2, ease: 'power3.out' })
       }
-
-      layout()
-      placeBubbles(0, 0, 1)
-      const ro = new ResizeObserver(() => {
-        if (stage.clientWidth === W && stage.clientHeight === H) return
-        layout()
-        renderOnce()
+      stage.onModel(() => {
+        modelReady = true
+        startBottle()
       })
-      ro.observe(stage)
-      // La tipografía de la página llega después del primer dibujo.
-      document.fonts?.ready.then(() => {
-        if (disposed) return
-        layoutTitle()
-        paintLabel()
-        renderOnce()
-      })
-
-      if (modelUrl) {
-        loadBottleModel(modelUrl, dracoPath)
-          .then((object) => {
-            if (disposed) return disposeObject(object)
-            mountModel(object)
-          })
-          .catch(() => {
-            console.warn(`HeroBubbles: could not load model "${modelUrl}"`)
-            if (!disposed) mountModel(buildStandInBottle())
-          })
-      } else {
-        mountModel(buildStandInBottle())
-      }
 
       if (reduced) {
         gsap.set('[data-fizz-fade]', { opacity: 1 })
         calmReveal('[data-fizz-statement], [data-fizz-cta]')
-        renderOnce()
+        stage.renderOnce()
       } else {
-        gsap.ticker.add(tick)
-
         gsap.to(state, {
           p: 1,
           ease: 'none',
@@ -610,8 +432,8 @@ export default function HeroBubbles({
         // chicos → botella.
         const LETTERS_AT = 1.5
         gsap.to(intro, { bubbles: 1, duration: 1.8, ease: 'none' })
-        letters.forEach(({ state }, i) => {
-          gsap.to(state, {
+        letters.forEach(({ state: letter }, i) => {
+          gsap.to(letter, {
             t: 1,
             duration: 1.25,
             ease: 'power3.out',
@@ -665,23 +487,19 @@ export default function HeroBubbles({
       }
 
       return () => {
-        disposed = true
-        ro.disconnect()
-        io.disconnect()
-        pointer.dispose?.()
-        gsap.ticker.remove(tick)
+        removeLayer()
+        stage.clearPose('hero')
         clearTitle()
+        camera.remove(titleGroup)
+        camera.remove(marqueeMesh)
         marqueeMesh.material.uniforms.map.value?.dispose()
         marqueeMesh.material.dispose()
         planeGeo.dispose()
-        shadow.dispose()
+        scene.remove(bubbleMesh)
         bubbleMesh.geometry.dispose()
         bubbleMesh.material.dispose()
-        bottle.dispose()
-        if (model) disposeObject(model)
-        envMap.dispose()
-        hdrEnv?.dispose()
-        renderer.dispose()
+        canvasRef.current?.style.removeProperty('display')
+        release()
       }
     },
     {
@@ -702,14 +520,10 @@ export default function HeroBubbles({
         '--fizz-ink': flavorCfg.ink,
       }}
     >
-      <div
-        ref={stageRef}
-        className="pointer-events-none sticky top-0 h-svh w-full overflow-hidden calm:absolute calm:inset-x-0"
-      >
-        <canvas ref={canvasRef} aria-hidden="true" className="block h-full w-full" />
-      </div>
+      {/* The FIZZ stage canvas (fixed, shared with FlavorWorlds). */}
+      <canvas ref={canvasRef} aria-hidden="true" />
 
-      <div className="relative -mt-[100svh] calm:mt-0">
+      <div className="relative z-[2]">
         <div className="pointer-events-none h-[170svh] calm:h-svh">
           <div className="flex h-svh flex-col justify-between px-5 pt-28 pb-6 md:px-10">
             <p

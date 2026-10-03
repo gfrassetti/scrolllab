@@ -653,26 +653,6 @@ export function createBottle({ narrow = false, liquid, stage }) {
 }
 
 /**
- * Where the hero leaves the bottle when «SOOO MUCH FIZZ» is over, and where
- * FlavorWorlds picks it up. Both sections draw the bottle at exactly this pose
- * (in screen space) while one stage hands over to the next, so the page never
- * has two bottles. Mirrors the hero's pose at p = m = 1.
- */
-export function heroEndPose({ W, H, narrow, time, look, reduced = false }) {
-  const bob = reduced ? 0 : Math.sin(time * 1.05) * H * 0.016
-  const sway = reduced ? 0 : Math.sin(time * 0.29) * 0.42
-  const size = narrow ? Math.min(H * 0.5, W * 1.35) : Math.min(H * 0.86, W * 0.62)
-  return {
-    x: W * (narrow ? 0 : -0.04),
-    y: H * (narrow ? -0.2 : -0.05) + bob,
-    scale: size * 1.12,
-    rotZ: narrow ? -0.34 : -0.2,
-    rotX: look.y * 0.06,
-    spinY: sway + look.x * 0.25,
-  }
-}
-
-/**
  * The soft shadow the bottle throws on the stage: an opaque full-screen plane
  * (opaque so the glass refracts it too) that mixes the stage color with a
  * darker one around the bottle. `color` is a live THREE.Color.
