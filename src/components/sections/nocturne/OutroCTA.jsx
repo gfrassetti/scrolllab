@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultColumns = [
   { heading: 'Reel', items: ['Films', 'Index', 'Stills', 'About'] },
@@ -9,6 +10,8 @@ const defaultColumns = [
 /**
  * OutroCTA — closing credits. Giant CTA word rises out of a mask,
  * link columns above, thin legal line at the very bottom.
+ *
+ * Calma: la palabra entra con un fundido, sin la máscara por letra.
  */
 export default function OutroCTA({
   ctaWord = 'ROLL CREDITS',
@@ -28,7 +31,7 @@ export default function OutroCTA({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-outro-word]', { y: 24, duration: 1 })
 
       const split = new SplitText('[data-outro-word]', {
         type: 'chars',

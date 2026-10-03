@@ -1,11 +1,15 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { picsumAttrs } from './picsum'
 
 /**
  * HeroCinematic — full-bleed photographic hero. The image settles
  * with a slow zoom-out on load while the title rises out of a mask;
  * scrolling parallaxes the title away like an opening credit.
+ *
+ * Calma (reducir movimiento): la foto queda quieta y el título y las notas entran
+ * con un fundido, sin máscara ni zoom.
  */
 export default function HeroCinematic({
   titleTop = 'NIGHT',
@@ -19,7 +23,9 @@ export default function HeroCinematic({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        return calmReveal('[data-hero-title], [data-hero-fade]', { y: 18, stagger: 0.12, duration: 0.9 })
+      }
 
       gsap.from('[data-hero-img]', {
         scale: 1.25,

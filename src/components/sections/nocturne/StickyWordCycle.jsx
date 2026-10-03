@@ -1,15 +1,21 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { prefersReducedMotion } from '../../../lib/motion'
 
 const defaultWords = ['CRAFT', 'MOTION', 'SILENCE', 'IMPACT']
 
 /**
  * StickyWordCycle — the viewport pins while scroll steps through a
  * cycle of giant words, each dissolving into the next. A thin
- * progress bar tracks the sequence. Static word list under reduced
- * motion. `accentClass` defaults to Nocturne acid; home can pass
- * marketplace orange (`text-accent` / `bg-accent`).
+ * progress bar tracks the sequence. `accentClass` defaults to Nocturne
+ * acid; home can pass marketplace orange (`text-accent` / `bg-accent`).
+ *
+ * Calma (reducir movimiento): sin pin ni scroll-jacking. Era una pila de las
+ * cuatro palabras una abajo de la otra, sin sentido. Ahora es una lista con
+ * índice (01 CRAFT, 02 MOTION…): la palabra que cruza el centro de la pantalla
+ * se enciende y las otras se apagan con un fundido — el mismo ciclo, pero lo
+ * elige el dedo con un scroll normal.
  */
 export default function StickyWordCycle({
   seq = '05',
@@ -26,12 +32,14 @@ export default function StickyWordCycle({
     ? 'absolute max-w-[min(92vw,18ch)] px-4 text-center font-brico text-[clamp(1.75rem,7.5vw,5.5rem)] leading-[0.95] font-extrabold tracking-[-0.03em] uppercase select-none'
     : 'absolute font-brico text-[16vw] leading-none font-extrabold tracking-[-0.02em] uppercase select-none'
   const reducedType = phrase
-    ? 'font-brico text-[clamp(1.5rem,6vw,3.5rem)] leading-[0.95] font-extrabold tracking-[-0.03em] uppercase'
-    : 'font-brico text-[13vw] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase'
+    ? 'min-w-0 break-words font-brico text-[clamp(1.5rem,6vw,3.5rem)] leading-[0.95] font-extrabold tracking-[-0.03em] uppercase'
+    : 'min-w-0 break-words font-brico text-[13vw] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase md:text-[11vw]'
+  const [active, setActive] = useState(0)
+  const rows = useRef([])
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return
 
       const wordEls = gsap.utils.toArray('[data-cycle-word]')
       let current = 0
@@ -79,23 +87,62 @@ export default function StickyWordCycle({
     { scope: root, dependencies: [words.length] },
   )
 
+  // Calma: la fila que cruza la franja del medio de la pantalla es la activa.
+  useEffect(() => {
+    if (!reduced) return undefined
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(Number(entry.target.dataset.index))
+        }
+      },
+      { rootMargin: '-45% 0px -45% 0px' },
+    )
+    rows.current.forEach((el) => el && io.observe(el))
+    return () => io.disconnect()
+  }, [reduced, words.length])
+
   if (reduced) {
     return (
       <section className="px-5 py-24 md:px-10 md:py-36">
-        <div className="mb-10 flex items-baseline justify-between border-t border-salt/20 pt-4">
+        <div className="mb-6 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
             Seq. {seq} / {total}
           </p>
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>
-        {words.map((word) => (
-          <p key={word} className={reducedType}>
-            {word}
-            <span aria-hidden="true" className={accentClass}>
-              .
-            </span>
-          </p>
-        ))}
+        <ol className="m-0 list-none p-0">
+          {words.map((word, i) => (
+            <li
+              key={word}
+              ref={(el) => {
+                rows.current[i] = el
+              }}
+              data-index={i}
+              className="flex min-h-[34svh] items-center gap-4 md:min-h-[40svh] md:gap-8"
+            >
+              <span
+                aria-hidden="true"
+                className={`w-7 shrink-0 text-[11px] tracking-[0.3em] transition-colors duration-500 md:w-12 md:text-xs ${
+                  i === active ? accentClass : 'text-salt/30'
+                }`}
+              >
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span
+                className={`${reducedType} transition-opacity duration-500 ${
+                  i === active ? 'opacity-100' : 'opacity-30'
+                }`}
+                style={{ transitionTimingFunction: 'var(--ease-out)' }}
+              >
+                {word}
+                <span aria-hidden="true" className={accentClass}>
+                  .
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
       </section>
     )
   }

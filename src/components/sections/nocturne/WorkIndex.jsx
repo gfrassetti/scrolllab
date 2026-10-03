@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { picsumAttrs } from './picsum'
 
 const defaultWorks = [
@@ -37,6 +38,10 @@ const defaultWorks = [
  * WorkIndex — index-style list of works. On desktop, a floating
  * preview image trails the cursor and swaps per hovered row.
  * On mobile each row carries its own inline thumbnail.
+ *
+ * Calma: las filas entran con un fundido, y la vista previa sigue al cursor sin
+ * rezago (el cursor es del visitante; antes, sin quickTo, la imagen se quedaba
+ * clavada arriba a la izquierda).
  */
 export default function WorkIndex({
   seq = '04',
@@ -59,7 +64,11 @@ export default function WorkIndex({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        quick.current.x = (x) => gsap.set(floatImg.current, { x })
+        quick.current.y = (y) => gsap.set(floatImg.current, { y })
+        return calmReveal('[data-work-row]', { y: 16, stagger: 0.08 })
+      }
 
       gsap.from('[data-work-row]', {
         y: 40,

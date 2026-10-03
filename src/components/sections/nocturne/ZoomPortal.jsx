@@ -1,11 +1,16 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { picsumAttrs } from './picsum'
 
 /**
  * ZoomPortal — a small image window pinned at screen center grows
  * until it swallows the whole viewport, scrubbed by scroll. A giant
  * outlined word behind it fades away as the portal opens.
+ *
+ * Calma: sin scrub el pin eran 2,6 a 3 pantallas con la foto quieta. El alto de
+ * scrub se va (`calm:h-auto`): queda la escena abierta, una pantalla, con la
+ * foto y el pie entrando con un fundido.
  */
 export default function ZoomPortal({
   seq = '02',
@@ -19,7 +24,14 @@ export default function ZoomPortal({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        const stopPhoto = calmReveal('[data-portal]', { y: 0, duration: 1.1 })
+        const stopCaption = calmReveal('[data-portal-end]', { y: 14, duration: 0.9 })
+        return () => {
+          stopPhoto()
+          stopCaption()
+        }
+      }
 
       gsap.set('[data-portal]', { scale: 0.22 })
 
@@ -44,7 +56,7 @@ export default function ZoomPortal({
   )
 
   return (
-    <section ref={root} className="relative h-[260vh] md:h-[300vh]">
+    <section ref={root} className="relative h-[260vh] md:h-[300vh] calm:h-auto">
       <div className="sticky top-0 flex h-svh items-center justify-center overflow-hidden">
         {/* Mientras la sección está pegada arriba, el rótulo baja lo que mide
             la nav fija para no pisarse con ella. */}

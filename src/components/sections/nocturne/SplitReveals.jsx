@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { picsumAttrs } from './picsum'
 
 const defaultBeats = [
@@ -26,6 +27,8 @@ const defaultBeats = [
 /**
  * SplitReveals — alternating image/text rows. Images reveal with a
  * clip-path wipe; text slides up. Direction flips on every row.
+ *
+ * Calma: foto y texto de cada fila entran con un fundido (sin el wipe).
  */
 export default function SplitReveals({
   seq = '03',
@@ -46,7 +49,9 @@ export default function SplitReveals({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) {
+        return calmReveal('[data-beat-img], [data-beat-copy]', { y: 20, stagger: 0.12, duration: 0.9 })
+      }
 
       gsap.utils.toArray('[data-beat]').forEach((row, i) => {
         const fromLeft = i % 2 === 0
