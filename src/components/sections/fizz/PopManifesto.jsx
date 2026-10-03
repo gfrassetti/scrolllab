@@ -2,11 +2,12 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
-const WORD_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
+// The hero's cobalt family, light enough to read on the dark grape stage.
+const WORD_COLORS = ['#9db8ff', '#6c86ff', '#c9d6ff', '#4f6bff']
 
 /**
  * PopManifesto — a giant paragraph that inks in word by word as you
- * scroll, with every fourth-ish word landing in a flavor color.
+ * scroll, with every fourth-ish word landing in a cobalt tone.
  */
 export default function PopManifesto({
   eyebrow = '',

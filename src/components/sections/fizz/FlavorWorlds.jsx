@@ -168,6 +168,8 @@ export default function FlavorWorlds({
 
       const layer = {
         el: root.current,
+        // The next section (with its wavy edge) rises over the canvas.
+        coveredAtEnd: true,
         resize(next) {
           ;({ W, H, narrow, dpr } = next)
           const cameraZ = H / (2 * Math.tan((Math.PI / 180) * 15))
@@ -181,13 +183,17 @@ export default function FlavorWorlds({
           const size = narrow ? Math.min(H * 0.46, W * 1.2) : Math.min(H * 0.8, W * 0.5)
           const bob = Math.sin(time * 1.05) * H * 0.016
           const sway = Math.sin(time * 0.31) * 0.35
+          // Al final la botella se hunde un poco mientras la sección siguiente
+          // sube por encima: se esconde detrás, con parallax.
+          const rect = root.current.getBoundingClientRect()
+          const sink = Math.min(1, Math.max(0, 1 - rect.bottom / H))
           // El escenario mezcla esta pose con la del hero según `hand`: la botella
           // del hero se viene a su lugar, con la vuelta de llegada encima.
           stage.setPose(
             'flavors',
             {
               x: narrow ? 0 : W * 0.06,
-              y: (narrow ? H * 0.16 : -H * 0.02) + bob,
+              y: (narrow ? H * 0.16 : -H * 0.02) + bob - sink * H * 0.22,
               scale: size * (1 - state.dip * 0.08),
               rotZ: -0.12 + state.dip * 0.18,
               rotX: 0.08 + look.y * 0.06,
@@ -200,7 +206,7 @@ export default function FlavorWorlds({
           )
           numerals.forEach((n) => {
             n.mesh.position.x = narrow ? 0 : W * 0.24
-            n.mesh.position.y = narrow ? H * 0.16 : -H * 0.01
+            n.mesh.position.y = (narrow ? H * 0.16 : -H * 0.01) - sink * H * 0.22
             n.mesh.scale.set(n.w * n.s, n.h * n.s, 1)
             n.mesh.rotation.z = n.r
             n.mesh.visible = n.o > 0.002

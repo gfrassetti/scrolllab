@@ -273,18 +273,24 @@ function createStage({
     let top = Infinity
     let bottom = -Infinity
     let any = false
+    // A layer with `coveredAtEnd` doesn't carry the canvas away with its bottom
+    // edge: the next section slides over the canvas and hides the bottle.
+    let covered = false
     layers.forEach((layer) => {
       const r = layer.el.getBoundingClientRect()
       if (r.bottom <= 0 || r.top >= vh) return
       any = true
       top = Math.min(top, r.top)
-      bottom = Math.max(bottom, r.bottom)
+      if (r.bottom > bottom) {
+        bottom = r.bottom
+        covered = !!layer.coveredAtEnd
+      }
     })
     canvas.style.visibility = any ? 'visible' : 'hidden'
     if (!any) return false
     let offset = 0
     if (top > 0) offset = top
-    else if (bottom < H) offset = bottom - H
+    else if (bottom < H && !covered) offset = bottom - H
     canvas.style.transform = offset ? `translate3d(0, ${offset}px, 0)` : ''
     return true
   }

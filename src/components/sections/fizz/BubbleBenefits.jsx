@@ -34,7 +34,7 @@ export default function BubbleBenefits({
   eyebrow = '',
   title = 'YOUR SECTION TITLE',
   benefits,
-  bg,
+  bg = '#2c4bff',
   fg,
 }) {
   const root = useRef(null)
@@ -88,10 +88,24 @@ export default function BubbleBenefits({
   return (
     <section
       ref={root}
-      className="relative overflow-hidden px-5 py-24 md:px-10 md:py-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      className="relative z-[3] px-5 py-24 md:px-10 md:py-36"
+      style={{ backgroundColor: bg, color: fg || undefined }}
     >
-      <div ref={bubblesRef} aria-hidden="true" className="pointer-events-none absolute inset-0 text-foam/45" />
+      {/* Wavy top edge: this section rises over the flavors' canvas and hides the bottle. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 1440 48"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-1px)] block h-8 w-full md:h-12"
+        style={{ fill: bg }}
+      >
+        <path d="M0 48V22C120 6 240 2 360 12s240 26 360 22 240-24 360-28 240 8 360 18v22Z" />
+      </svg>
+      <div
+        ref={bubblesRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden text-foam/45"
+      />
 
       <div data-benefit-head>
         {eyebrow ? (
