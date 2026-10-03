@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { ex01, ex02, ex03, ex04, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -34,7 +35,8 @@ export default function ExhibitGrid({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      // Calma: cada pieza entra con un fundido en vez de abrirse con una máscara.
+      if (prefersReducedMotion()) return calmReveal('[data-exhibit]', { y: 14, stagger: 0.08 })
 
       gsap.from('[data-exhibit]', {
         clipPath: 'inset(0 0 100% 0)',

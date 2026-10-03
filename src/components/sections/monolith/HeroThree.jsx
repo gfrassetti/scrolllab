@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 
 /** Presets curados — sin upload de GLB. */
 export const HERO_THREE_SHAPES = [
@@ -76,9 +77,7 @@ export default function HeroThree({
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const reduced = prefersReducedMotion()
 
       // —— Three.js scene ——
       const canvas = canvasRef.current
@@ -118,7 +117,8 @@ export default function HeroThree({
       )
       const group = new THREE.Group()
       group.add(wireframe, points)
-      group.rotation.set(0.28, 0.4, 0)
+      // En calma ya nace en la pose de reposo: el objeto no se acomoda solo.
+      group.rotation.set(reduced ? 0.4 : 0.28, 0.4, 0)
       group.position.set(0, -0.35, 0)
       group.scale.setScalar(1.05)
       scene.add(group)
@@ -160,7 +160,10 @@ export default function HeroThree({
           .catch(() => {})
       }
 
-      const pointer = { x: 0, y: 0 }
+      // El mouse en PC, el dedo en el teléfono: un dedo que scrollea cancela
+      // pointermove y el objeto quedaba sin reaccionar a nada.
+      const pointer = trackPointer()
+      let calmStop = null
 
       const resize = () => {
         const host = canvasRef.current?.parentElement || root.current
@@ -173,11 +176,6 @@ export default function HeroThree({
       resize()
 
       const render = () => renderer.render(scene, camera)
-
-      const onPointerMove = (e) => {
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1
-        pointer.y = (e.clientY / window.innerHeight) * 2 - 1
-      }
 
       // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
       // el 3D mientras se leía el resto de la página.
@@ -195,12 +193,25 @@ export default function HeroThree({
         render()
       }
 
+      // Calma: sin giro automático ni zoom con el scroll. El objeto queda quieto y
+      // solo responde al mouse o al dedo; se dibuja mientras se mueve.
+      const calmTick = () => {
+        if (!onScreen) return
+        const dx = pointer.y * 0.35 + 0.4 - group.rotation.x
+        const dz = pointer.x * 0.25 - group.rotation.z
+        if (Math.abs(dx) + Math.abs(dz) < 0.0005) return
+        group.rotation.x += dx * 0.08
+        group.rotation.z += dz * 0.08
+        render()
+      }
+
       window.addEventListener('resize', resize)
 
       if (reduced) {
         render()
+        gsap.ticker.add(calmTick)
+        calmStop = calmReveal('[data-mono-title], [data-mono-fade]', { y: 10 })
       } else {
-        window.addEventListener('pointermove', onPointerMove)
         gsap.ticker.add(tick)
 
         gsap.to(group.scale, {
@@ -239,8 +250,10 @@ export default function HeroThree({
       return () => {
         cancelled = true
         window.removeEventListener('resize', resize)
-        window.removeEventListener('pointermove', onPointerMove)
+        pointer.dispose()
+        calmStop?.()
         gsap.ticker.remove(tick)
+        gsap.ticker.remove(calmTick)
         io.disconnect()
         geometry.dispose()
         wireframe.material.dispose()

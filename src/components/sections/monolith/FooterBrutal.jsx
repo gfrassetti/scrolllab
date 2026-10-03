@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultLinks = ['System', 'Units', 'Archive', 'Instagram', 'Contact']
 
@@ -26,7 +27,7 @@ export default function FooterBrutal({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-brutal-word]', { y: 16, duration: 0.9 })
 
       const split = new SplitText('[data-brutal-word]', {
         type: 'chars',

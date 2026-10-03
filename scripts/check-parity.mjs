@@ -92,6 +92,7 @@ const VIEWS = {
 const VISIBLE = { travel: 0.04, rel: 0.15, opacity: 0.25, scale: 0.1, blur: 6 }
 const QUIET_RATIO = 0.35 // el teléfono tiene que llegar al menos a esta parte del efecto de PC
 const BIG_AREA = 0.25 // fracción de la pantalla a partir de la cual un blur animado pesa
+const MIN_AREA = 0.004 // piezas más chicas que esto (líneas, puntos decorativos) no cuentan como beat
 const MOUSE_EVENTS = /^(pointermove|mousemove|mouseenter|mouseover|pointerenter)$/
 const TOUCH_EVENTS = /^(touchstart|touchmove|pointerdown|deviceorientation|devicemotion)$/
 
@@ -235,7 +236,10 @@ async function inventoryInPage(thresholds) {
     els.forEach((_, i) => {
       const p = from[i]
       const q = to[i]
-      if (!p.area && !q.area) return
+      // Una línea de 1 px o un punto decorativo que se escala de 0 a 1 tiene un
+      // efecto «enorme» en tamaños propios y no es el beat de la sección (y
+      // muchos son solo de PC: `hidden md:block`). Se miden las piezas que se ven.
+      if (Math.max(p.area, q.area) < vw * vh * thresholds.minArea) return
       travel = Math.max(travel, Math.hypot((q.cx - p.cx) / vw, (q.cy - p.cy) / vh))
       rel = Math.max(rel, Math.hypot(q.cx - p.cx, q.cy - p.cy) / Math.sqrt(Math.max(p.area, q.area, 1)))
       opacity = Math.max(opacity, Math.abs(q.o - p.o))
@@ -371,7 +375,7 @@ async function runView(browser, base, { template, view }) {
     .catch(() => {})
   await page.waitForTimeout(1800)
 
-  const inv = await page.evaluate(inventoryInPage, { ...VISIBLE, bigArea: BIG_AREA })
+  const inv = await page.evaluate(inventoryInPage, { ...VISIBLE, bigArea: BIG_AREA, minArea: MIN_AREA })
   const listeners = await page.evaluate(() => window.__listeners)
 
   const byComponent = {}
