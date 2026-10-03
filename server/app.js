@@ -6,6 +6,7 @@ import { configurePassport } from './auth/passport.js'
 import { createHealthRouter } from './http/routes/health.js'
 import { createAuthRouter } from './http/routes/auth.js'
 import { createOrdersRouter } from './http/routes/orders.js'
+import { createCouponsRouter } from './http/routes/coupons.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
@@ -79,11 +80,7 @@ import {
   discountedArsFromUsd,
 } from './catalog.js'
 import { getUsdArsRate } from './fx.js'
-import {
-  claimWelcomeCoupon,
-  maskEmail,
-  resolveCouponForCheckout,
-} from './services/coupons.js'
+import { resolveCouponForCheckout } from './services/coupons.js'
 
 /**
  * Construye la app Express (sin listen) para poder testearla.
@@ -1045,46 +1042,7 @@ export async function createApp(config) {
     }),
   )
 
-  // Cupón de bienvenida de quien tiene sesión: la primera vez lo crea y le manda
-  // el mail; después devuelve el mismo. No hay formulario ni mail que tipear: el
-  // mail es el de su cuenta de Google. Ver `claimWelcomeCoupon`.
-  app.post(
-    '/api/coupons/welcome',
-    requireAuth,
-    limits.welcome,
-    asyncHandler(async (req, res) => {
-      const out = await claimWelcomeCoupon({
-        user: req.user,
-        locale: req.body?.locale,
-        utm: req.body?.utm,
-        config,
-      })
-      res.set('Cache-Control', 'no-store')
-      res.json({ ok: true, ...out })
-    }),
-  )
-
-  // Chequeo del cupón por código. Si hay sesión también mira de quién es y
-  // "primera compra"; sin sesión devuelve el mail enmascarado. El checkout lo
-  // revalida.
-  app.post(
-    '/api/coupons/check',
-    limits.coupons,
-    asyncHandler(async (req, res) => {
-      const { lead, code, percent } = await resolveCouponForCheckout({
-        code: req.body?.code,
-        userId: req.user ? db.uid(req.user) : null,
-        userEmail: req.user?.email || null,
-      })
-      res.json({
-        ok: true,
-        code,
-        percent,
-        expiresAt: new Date(lead.couponExpiresAt).toISOString(),
-        emailHint: maskEmail(lead.email),
-      })
-    }),
-  )
+  app.use(createCouponsRouter({ config, limits }))
 
   // Revocación de key: solo con ADMIN_TOKEN (header x-admin-token). Sin UI.
   // Suspender → el config público responde 402 y el embed deja de renderizar.
