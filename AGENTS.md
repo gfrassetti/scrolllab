@@ -32,7 +32,7 @@ específicos (arquitectura, moda, etc.) en copy público ni en el pitch, no
 suma acotar la lista. Los precios ancla del Estudio no se muestran en el
 sitio (se hablan con el cliente) y tienen que quedar siempre arriba del techo
 del builder (`CUSTOM_BASE_PRICE_USD` + secciones extra + commerce,
-`src/lib/pricing.js`) y del template más caro en venta: no afirmar cupos
+`src/domain/catalog.js`) y del template más caro en venta: no afirmar cupos
 fijos ("1 por mes") — la capacidad depende del proyecto. Copy y sección viven
 en el home
 (`src/pages/TemplatesIndex.jsx`, zona `estudio`, componente `ZoneHeadline`);
@@ -373,9 +373,9 @@ receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
 sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
 que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN,
 USD 379).
-que quedar **arriba** del template más caro que SÍ está en venta (hoy MERIDIAN, USD 379).
-Las constantes viven en `src/lib/pricing.js` y se espejan en `server/catalog.js`; `npm run check`
-valida la paridad. Detalle en `docs/DEPLOY.md`.
+Las constantes viven **una sola vez** en `src/domain/catalog.js` (dominio puro, sin React):
+las importan `src/lib/pricing.js` (UI) y `server/catalog.js` (copy de Checkout Pro, conversión
+a ARS). `npm run check` valida que la base supere al template más caro en venta. Detalle en `docs/DEPLOY.md`.
 
 Never trust client prices. Never obfuscate sold JSX — license + account + signed links + watermark.
 In production: Mongo required (no silent file fallback), mock/dev auth off, MP webhook signature required, persistent `STORAGE_DIR`.

@@ -7,17 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import {
-  PRODUCTS,
-  BUNDLE_MODELS,
-  COMING_SOON_SKUS as SERVER_COMING_SOON,
-  LOCAL_ONLY_SKUS as SERVER_LOCAL_ONLY,
-  BUILDER_HIDDEN_SKUS as SERVER_BUILDER_HIDDEN,
-  COMMERCE_PACK_SURCHARGE_USD as SERVER_SURCHARGE,
-  CUSTOM_BASE_SECTIONS as SERVER_BASE_SECTIONS,
-  CUSTOM_EXTRA_SECTION_USD as SERVER_EXTRA_SECTION,
-  WELCOME_COUPON_PERCENT as SERVER_COUPON_PERCENT,
-} from '../server/catalog.js'
+import { PRODUCTS } from '../server/catalog.js'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
 import {
   ALLOWED_PROPS_BY_SECTION,
@@ -27,17 +17,11 @@ import {
 import {
   TEMPLATE_PRICES_USD,
   CUSTOM_BASE_PRICE_USD,
-  CUSTOM_BASE_SECTIONS as CLIENT_BASE_SECTIONS,
-  CUSTOM_EXTRA_SECTION_USD as CLIENT_EXTRA_SECTION,
-  MAX_CUSTOM_SECTIONS,
-  COMMERCE_PACK_SURCHARGE_USD as CLIENT_SURCHARGE,
-  WELCOME_COUPON_PERCENT as CLIENT_COUPON_PERCENT,
-  BUNDLE_PRICE_USD,
-  BUNDLE_MODELS as CLIENT_BUNDLE_MODELS,
-  COMING_SOON_SKUS as CLIENT_COMING_SOON,
-  LOCAL_ONLY_SKUS as CLIENT_LOCAL_ONLY,
+  COMING_SOON_SKUS,
+  LOCAL_ONLY_SKUS,
   BUILDER_HIDDEN_SKUS,
-} from '../src/lib/pricing.js'
+  BUNDLE_MODELS,
+} from '../src/domain/catalog.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
 import { SECTION_KINDS } from '../src/lib/sectionKinds.js'
@@ -58,57 +42,17 @@ const registryIds = [...registrySrc.matchAll(/id:\s*'([a-z]+\/[A-Za-z0-9]+)'/g)]
 
 const diff = (a, b) => a.filter((x) => !b.includes(x))
 
-// 1. Prices: server catalog is the source of truth, client must mirror it.
-for (const [sku, usd] of Object.entries(TEMPLATE_PRICES_USD)) {
-  const server = PRODUCTS[sku]
-  if (!server) fail('precios', `'${sku}' está en pricing.js pero no en catalog.js`)
-  else if (server.unit_price_usd !== usd) {
-    fail('precios', `'${sku}': cliente USD ${usd} vs servidor USD ${server.unit_price_usd}`)
-  }
+// 1. Precios: los dos lados importan src/domain/catalog.js, así que no hay
+// espejo que comparar. Lo que sí puede faltar es el copy de Checkout Pro:
+// cada SKU con precio necesita su producto en server/catalog.js.
+for (const sku of Object.keys(TEMPLATE_PRICES_USD)) {
+  if (!PRODUCTS[sku]) fail('precios', `'${sku}' tiene precio pero no producto en server/catalog.js`)
 }
 for (const sku of Object.keys(PRODUCTS)) {
   if (['bundle', 'custom'].includes(sku)) continue
   if (!(sku in TEMPLATE_PRICES_USD)) {
-    fail('precios', `'${sku}' está en catalog.js pero no en pricing.js`)
+    fail('precios', `'${sku}' está en server/catalog.js sin precio en src/domain/catalog.js`)
   }
-}
-if (PRODUCTS.custom.unit_price_usd !== CUSTOM_BASE_PRICE_USD) {
-  fail('precios', `custom: cliente ${CUSTOM_BASE_PRICE_USD} vs servidor ${PRODUCTS.custom.unit_price_usd}`)
-}
-if (CLIENT_BUNDLE_MODELS.join(',') !== BUNDLE_MODELS.join(',')) {
-  fail(
-    'catálogo',
-    `BUNDLE_MODELS no coincide: cliente [${CLIENT_BUNDLE_MODELS}] vs servidor [${BUNDLE_MODELS}]`,
-  )
-}
-if (PRODUCTS.bundle.unit_price_usd !== BUNDLE_PRICE_USD) {
-  fail('precios', `bundle: cliente ${BUNDLE_PRICE_USD} vs servidor ${PRODUCTS.bundle.unit_price_usd}`)
-}
-
-if (SERVER_SURCHARGE !== CLIENT_SURCHARGE) {
-  fail('precios', `recargo commerce: cliente ${CLIENT_SURCHARGE} vs servidor ${SERVER_SURCHARGE}`)
-}
-if (SERVER_BASE_SECTIONS !== CLIENT_BASE_SECTIONS) {
-  fail('precios', `secciones incluidas: cliente ${CLIENT_BASE_SECTIONS} vs servidor ${SERVER_BASE_SECTIONS}`)
-}
-if (SERVER_EXTRA_SECTION !== CLIENT_EXTRA_SECTION) {
-  fail('precios', `sección extra: cliente USD ${CLIENT_EXTRA_SECTION} vs servidor USD ${SERVER_EXTRA_SECTION}`)
-}
-// El % que promete la home tiene que ser el que descuenta el checkout.
-if (SERVER_COUPON_PERCENT !== CLIENT_COUPON_PERCENT) {
-  fail('precios', `cupón de bienvenida: cliente ${CLIENT_COUPON_PERCENT}% vs servidor ${SERVER_COUPON_PERCENT}%`)
-}
-
-// 1b. El tope que muestra el builder tiene que ser el que aplica el checkout.
-const configSrc = read('server/config.js')
-const maxRecipeSections = Number(
-  (configSrc.match(/maxRecipeSections:\s*(\d+)/) || [])[1],
-)
-if (maxRecipeSections !== MAX_CUSTOM_SECTIONS) {
-  fail(
-    'precios',
-    `tope de secciones: pricing.js ${MAX_CUSTOM_SECTIONS} vs config.js ${maxRecipeSections}`,
-  )
 }
 
 // 1c. El piso del builder tiene que quedar arriba del template más caro EN
@@ -117,7 +61,7 @@ if (maxRecipeSections !== MAX_CUSTOM_SECTIONS) {
 // todavía, así que no deberían fijar el piso del builder.
 const priciestTemplate = Math.max(
   ...Object.entries(TEMPLATE_PRICES_USD)
-    .filter(([sku]) => !CLIENT_COMING_SOON.includes(sku))
+    .filter(([sku]) => !COMING_SOON_SKUS.includes(sku))
     .map(([, usd]) => usd),
 )
 if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
@@ -131,7 +75,7 @@ if (CUSTOM_BASE_PRICE_USD <= priciestTemplate) {
 // home y validateRecipe rechaza sus secciones): no se venden, así que no se
 // les exige allowlist del server ni copy del builder. Ej. PLUM y SIGNAL, que
 // no se van a terminar.
-const isLocalOnlyModel = (id) => SERVER_LOCAL_ONLY.includes(String(id).split('/')[0])
+const isLocalOnlyModel = (id) => LOCAL_ONLY_SKUS.includes(String(id).split('/')[0])
 
 // 2. Sellable sections: registry (client) vs allowlist (server).
 for (const id of diff(registryIds, [...ALLOWED_SECTIONS])) {
@@ -333,42 +277,21 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   }
 }
 
-const sameSkuList = (a, b) =>
-  JSON.stringify([...a].sort()) === JSON.stringify([...b].sort())
-
-if (!sameSkuList(CLIENT_COMING_SOON, SERVER_COMING_SOON)) {
-  fail(
-    'catálogo',
-    `COMING_SOON_SKUS no coincide: cliente [${CLIENT_COMING_SOON}] vs servidor [${SERVER_COMING_SOON}]`,
-  )
-}
-if (!sameSkuList(CLIENT_LOCAL_ONLY, SERVER_LOCAL_ONLY)) {
-  fail(
-    'catálogo',
-    `LOCAL_ONLY_SKUS no coincide: cliente [${CLIENT_LOCAL_ONLY}] vs servidor [${SERVER_LOCAL_ONLY}]`,
-  )
-}
-if (!sameSkuList(BUILDER_HIDDEN_SKUS, SERVER_BUILDER_HIDDEN)) {
-  fail(
-    'catálogo',
-    `BUILDER_HIDDEN_SKUS no coincide: cliente [${BUILDER_HIDDEN_SKUS}] vs servidor [${SERVER_BUILDER_HIDDEN}]`,
-  )
-}
-for (const sku of SERVER_COMING_SOON) {
+for (const sku of COMING_SOON_SKUS) {
   if (BUNDLE_MODELS.includes(sku)) {
     fail('catálogo', `'${sku}' está en COMING_SOON_SKUS y también en BUNDLE_MODELS`)
   }
 }
 for (const sku of BUILDER_HIDDEN_SKUS) {
-  if (!CLIENT_COMING_SOON.includes(sku)) {
+  if (!COMING_SOON_SKUS.includes(sku)) {
     fail(
       'catálogo',
       `'${sku}' está en BUILDER_HIDDEN_SKUS pero no en COMING_SOON_SKUS — no ocultes un modelo en venta`,
     )
   }
 }
-for (const sku of SERVER_LOCAL_ONLY) {
-  if (!SERVER_COMING_SOON.includes(sku)) {
+for (const sku of LOCAL_ONLY_SKUS) {
+  if (!COMING_SOON_SKUS.includes(sku)) {
     fail('catálogo', `'${sku}' es local-only pero no está en COMING_SOON_SKUS`)
   }
   if (!BUILDER_HIDDEN_SKUS.includes(sku)) {
@@ -430,18 +353,18 @@ const metaBlock = indexSrc.slice(
   indexSrc.indexOf('function TemplatePoster'),
 )
 const listed = [...metaBlock.matchAll(/sku:\s*'([a-z]+)'/g)].map((m) => m[1])
-for (const sku of SERVER_LOCAL_ONLY) {
+for (const sku of LOCAL_ONLY_SKUS) {
   if (listed.includes(sku)) {
     fail('catálogo', `'${sku}' es local-only pero se lista en la home`)
   }
 }
-for (const sku of SERVER_COMING_SOON) {
-  if (SERVER_LOCAL_ONLY.includes(sku)) continue
+for (const sku of COMING_SOON_SKUS) {
+  if (LOCAL_ONLY_SKUS.includes(sku)) continue
   if (!listed.includes(sku)) {
     fail('catálogo', `'${sku}' es próximamente pero no se lista en la home`)
   }
 }
-for (const sku of SERVER_COMING_SOON) {
+for (const sku of COMING_SOON_SKUS) {
   if (!appSrc.includes(`/templates/${sku}`)) {
     fail('catálogo', `'${sku}' no tiene ruta en App.jsx`)
   }
@@ -461,7 +384,7 @@ for (const sku of listed) {
   if (!appSrc.includes(`/templates/${sku}`)) {
     fail('catálogo', `'${sku}' se lista en la home pero no tiene ruta en App.jsx`)
   }
-  const comingSoon = SERVER_COMING_SOON.includes(sku)
+  const comingSoon = COMING_SOON_SKUS.includes(sku)
   if (comingSoon && !new RegExp(`sku:\\s*'${sku}'[\\s\\S]*?comingSoon:\\s*true`).test(metaBlock)) {
     fail('catálogo', `'${sku}' es próximamente pero la home no lo marca comingSoon`)
   }

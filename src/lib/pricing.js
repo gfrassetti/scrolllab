@@ -1,108 +1,52 @@
 /**
- * Precios de lista en USD — deben coincidir con server/catalog.js.
- * El monto en pesos se calcula con la cotización que devuelve /api/catalog
- * (ver useFxRate) y el total final siempre lo confirma el servidor.
+ * Precios para la UI. Las reglas (precios de lista, tramos del builder, qué
+ * se vende) viven en src/domain/catalog.js, compartido con el servidor; acá
+ * queda lo que es solo de pantalla: pesos con la cotización de /api/catalog
+ * (ver useFxRate), formateo y deltas del builder. El total final siempre lo
+ * confirma el servidor.
  */
-export const TEMPLATE_PRICES_USD = {
-  chapters: 149,
-  nocturne: 149,
-  monolith: 189,
-  velocity: 149,
-  fizz: 189,
-  atelier: 229,
-  comic: 229,
-  unity: 189,
-  ratio: 269,
-  atrium: 189,
-  meridian: 379,
-}
+import {
+  arsFromUsdOrNull,
+  discountedArsFromUsdOrNull,
+  estimateCustomPriceUsd,
+  isComingSoonSku,
+  BUNDLE_PRICE_USD,
+  TEMPLATE_PRICES_USD,
+} from '../domain/catalog.js'
 
-/**
- * No se venden ni tienen demo pública. Los que además son LOCAL_ONLY no se
- * listan en ningún lado (ver abajo).
- */
-export const COMING_SOON_SKUS = ['ratio', 'plum', 'signal']
-
-/**
- * Solo en local: sin card en home, sin sitemap ni páginas de producto, y en
- * producción la ruta redirige a la home (`import.meta.env.DEV` en App.jsx).
- * RATIO sigue en obra. PLUM y SIGNAL no se van a terminar: quedan en el repo
- * solo como referencia local, no salen a producción.
- */
-export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal']
-
-/**
- * Modelos que no entran a la paleta PÚBLICA del builder (la que ve
- * cualquier visitante en /builder). RATIO sigue en obra; PLUM y SIGNAL no se
- * terminan.
- */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal']
-
-export function isComingSoonSku(sku) {
-  return COMING_SOON_SKUS.includes(sku)
-}
-
-export function isLocalOnlySku(sku) {
-  return LOCAL_ONLY_SKUS.includes(sku)
-}
+export {
+  TEMPLATE_PRICES_USD,
+  COMING_SOON_SKUS,
+  LOCAL_ONLY_SKUS,
+  BUILDER_HIDDEN_SKUS,
+  isComingSoonSku,
+  isLocalOnlySku,
+  isBuilderHiddenSku,
+  CUSTOM_BASE_PRICE_USD,
+  CUSTOM_BASE_SECTIONS,
+  CUSTOM_EXTRA_SECTION_USD,
+  MAX_CUSTOM_SECTIONS,
+  COMMERCE_PACK_SURCHARGE_USD,
+  BUNDLE_PRICE_USD,
+  BUNDLE_MODELS,
+  WELCOME_COUPON_PERCENT,
+  templatePriceUsd,
+  customExtraSections,
+  estimateCustomPriceUsd,
+} from '../domain/catalog.js'
 
 export function isCatalogComingSoon(sku) {
   return isComingSoonSku(sku)
 }
 
-export function isBuilderHiddenSku(sku) {
-  return BUILDER_HIDDEN_SKUS.includes(sku)
-}
-
-/**
- * Composición del builder: base por tramo + adicional por sección extra.
- * Una composición del tamaño de un template (10 secciones) queda en 419 USD.
- * El piso tiene que superar al template más caro en venta (no cuenta
- * COMING_SOON_SKUS — ver la validación en scripts/check-consistency.mjs).
- */
-export const CUSTOM_BASE_PRICE_USD = 389
-export const CUSTOM_BASE_SECTIONS = 8
-export const CUSTOM_EXTRA_SECTION_USD = 15
-/** Tope de secciones de una receta — espejo de `maxRecipeSections`. */
-export const MAX_CUSTOM_SECTIONS = 30
-
-export const COMMERCE_PACK_SURCHARGE_USD = 39
-export const BUNDLE_PRICE_USD = 649
-/** Modelos que trae el bundle — espejo de `BUNDLE_MODELS` en server/catalog.js. */
-export const BUNDLE_MODELS = [
-  'chapters',
-  'nocturne',
-  'monolith',
-  'velocity',
-  'fizz',
-  'atelier',
-  'comic',
-  'unity',
-]
-
 /** Respaldo para el primer render, antes de que llegue la cotización real. */
 export const FALLBACK_USD_ARS = 1560
 
-const ARS_ROUNDING = 1000
+/** Mismo redondeo que el servidor: al millar de arriba. `null` si no hay cotización. */
+export const arsFromUsd = arsFromUsdOrNull
 
-export function templatePriceUsd(sku) {
-  return TEMPLATE_PRICES_USD[sku] ?? null
-}
-
-
-/** Secciones por encima de las que trae la base. Cuenta cada instancia. */
-export function customExtraSections(sectionCount) {
-  const count = Number.isFinite(sectionCount) ? Math.floor(sectionCount) : 0
-  return Math.max(0, count - CUSTOM_BASE_SECTIONS)
-}
-
-export function estimateCustomPriceUsd(sectionCount, hasCommerce) {
-  return (
-    CUSTOM_BASE_PRICE_USD +
-    customExtraSections(sectionCount) * CUSTOM_EXTRA_SECTION_USD +
-    (hasCommerce ? COMMERCE_PACK_SURCHARGE_USD : 0)
-  )
-}
+/** Precio en pesos con cupón: la misma cuenta que el servidor. */
+export const discountedArsFromUsd = discountedArsFromUsdOrNull
 
 /**
  * Lo que suma la próxima sección, en pesos. Sale de la resta de dos totales
@@ -126,26 +70,6 @@ export function bundleListPriceUsd() {
 
 export function bundleDiscountPct() {
   return Math.round((1 - BUNDLE_PRICE_USD / bundleListPriceUsd()) * 100)
-}
-
-/** Mismo redondeo que el servidor: al millar de arriba. */
-export function arsFromUsd(usd, rate) {
-  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null
-  return Math.ceil((usd * rate) / ARS_ROUNDING) * ARS_ROUNDING
-}
-
-/**
- * Cupón de bienvenida: el mismo porcentaje que aplica el servidor
- * (server/catalog.js; `npm run check` falla si se despegan). Solo primera compra.
- */
-export const WELCOME_COUPON_PERCENT = 10
-
-/** Precio en pesos con cupón: la misma cuenta que `discountedArsFromUsd` del servidor. */
-export function discountedArsFromUsd(usd, rate, percent) {
-  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null
-  if (!Number.isFinite(percent) || percent < 0 || percent >= 100) return null
-  const cents = Math.round(usd * (100 - percent))
-  return Math.ceil((cents * rate) / (100 * ARS_ROUNDING)) * ARS_ROUNDING
 }
 
 export function formatArs(amount) {

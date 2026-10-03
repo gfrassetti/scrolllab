@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { MAX_CUSTOM_SECTIONS } from "../src/domain/catalog.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -237,7 +238,7 @@ export function loadConfig() {
       maxAge: 1000 * 60 * 60 * 24 * 14,
     },
     maxCartItems: 5,
-    maxRecipeSections: 30,
+    maxRecipeSections: MAX_CUSTOM_SECTIONS,
     // Hosted Component (LAB): origen del CDN que sirve loader/frame y token
     // para suspender/reactivar una instancia (revocación de key).
     embedCdnUrl: (

@@ -1,155 +1,117 @@
 /**
- * Catálogo del servidor. Los precios de lista están en USD y se convierten a
- * ARS con la cotización de fx.js recién al crear la orden — así el valor no se
- * licúa con la inflación y la conversión queda auditable en cada orden.
- * Nunca se confía en el precio que manda el cliente.
- *
- * Mantener los USD en sync con src/lib/pricing.js.
+ * Catálogo del servidor. Los precios de lista y las reglas de qué se vende
+ * vienen de src/domain/catalog.js (los mismos que ve el front); acá viven el
+ * copy de cada producto para Checkout Pro, los planes de LAB y la conversión a
+ * pesos, que corta la orden si no hay cotización. Nunca se confía en el precio
+ * que manda el cliente.
  */
-export const COMMERCE_PACK_SURCHARGE_USD = 39
+import {
+  arsFromUsdOrNull,
+  discountedArsFromUsdOrNull,
+  isComingSoonSku,
+  BUNDLE_PRICE_USD,
+  CUSTOM_BASE_PRICE_USD,
+  TEMPLATE_PRICES_USD,
+} from '../src/domain/catalog.js'
 
-/**
- * Composición del builder: `PRODUCTS.custom.unit_price_usd` es la base e
- * incluye CUSTOM_BASE_SECTIONS secciones; cada sección extra suma
- * CUSTOM_EXTRA_SECTION_USD. Cuenta cada entrada de la receta, porque cada una
- * es un componente renderizado en el App.jsx del ZIP.
- */
-export const CUSTOM_BASE_SECTIONS = 8
-export const CUSTOM_EXTRA_SECTION_USD = 15
+export {
+  COMMERCE_PACK_SURCHARGE_USD,
+  CUSTOM_BASE_SECTIONS,
+  CUSTOM_EXTRA_SECTION_USD,
+  ARS_ROUNDING,
+  BUNDLE_MODELS,
+  COMING_SOON_SKUS,
+  LOCAL_ONLY_SKUS,
+  BUILDER_HIDDEN_SKUS,
+  isComingSoonSku,
+  isLocalOnlySku,
+  WELCOME_COUPON_PERCENT,
+  recipeSectionId,
+  recipeHasCommerce,
+  customExtraSections,
+  priceCustomRecipeUsd,
+} from '../src/domain/catalog.js'
 
-/** Redondeo del monto en pesos: al millar de arriba, para no perder en el cambio. */
-export const ARS_ROUNDING = 1000
-
-/** Modelos incluidos en el SKU `bundle`. Orden = orden del ZIP. */
-export const BUNDLE_MODELS = [
-  'chapters',
-  'nocturne',
-  'monolith',
-  'velocity',
-  'fizz',
-  'atelier',
-  'comic',
-  'unity',
-]
-
-/**
- * No se venden ni van en el bundle. Los que además son LOCAL_ONLY no se
- * listan en la home. Espejo de src/lib/pricing.js.
- */
-export const COMING_SOON_SKUS = ['ratio', 'plum', 'signal']
-
-/**
- * En el repo, no en el marketplace: sin card en home, ruta solo en local.
- * PLUM y SIGNAL no se van a terminar; RATIO sigue en obra.
- */
-export const LOCAL_ONLY_SKUS = ['ratio', 'plum', 'signal']
-
-/**
- * Espejo de src/lib/pricing.js — no se venden por sección en el builder
- * (validateRecipe rechaza sus secciones aunque alguien arme la receta a mano).
- */
-export const BUILDER_HIDDEN_SKUS = ['ratio', 'plum', 'signal']
-
-export function isComingSoonSku(sku) {
-  return COMING_SOON_SKUS.includes(sku)
+function template(sku, title, description) {
+  return {
+    sku,
+    title,
+    description,
+    unit_price_usd: TEMPLATE_PRICES_USD[sku],
+    currency_id: 'ARS',
+  }
 }
 
-export function isLocalOnlySku(sku) {
-  return LOCAL_ONLY_SKUS.includes(sku)
-}
-
+// Opcional por SKU: `picture: '/ruta.png'` (público bajo CLIENT_URL).
+// Si falta, Checkout Pro usa /icon-512.png.
 export const PRODUCTS = {
-  // Opcional por SKU: `picture: '/ruta.png'` (público bajo CLIENT_URL).
-  // Si falta, Checkout Pro usa /icon-512.png.
-  chapters: {
-    sku: 'chapters',
-    title: 'CHAPTERS — template',
-    description: 'Modelo editorial cinético completo (código fuente).',
-    unit_price_usd: 149,
-    currency_id: 'ARS',
-  },
-  nocturne: {
-    sku: 'nocturne',
-    title: 'NOCTURNE — template',
-    description: 'Modelo noir cinematográfico completo (código fuente).',
-    unit_price_usd: 149,
-    currency_id: 'ARS',
-  },
-  monolith: {
-    sku: 'monolith',
-    title: 'MONOLITH — template',
-    description: 'Modelo brutalista con Three.js (código fuente).',
-    unit_price_usd: 189,
-    currency_id: 'ARS',
-  },
-  velocity: {
-    sku: 'velocity',
-    title: 'VELOCITY — template',
-    description: 'Modelo de energía athlete / scroll cinematográfico (código fuente).',
-    unit_price_usd: 149,
-    currency_id: 'ARS',
-  },
-  fizz: {
-    sku: 'fizz',
-    title: 'FIZZ — template',
-    description: 'Modelo pop carbonatado con botella de vidrio 3D y mundos de color (código fuente).',
-    unit_price_usd: 189,
-    currency_id: 'ARS',
-  },
-  atelier: {
-    sku: 'atelier',
-    title: 'ATELIER — template',
-    description: 'Modelo studio con WebGL + fondos reactivos al scroll (código fuente).',
-    unit_price_usd: 229,
-    currency_id: 'ARS',
-  },
-  comic: {
-    sku: 'comic',
-    title: 'COMIC — template',
-    description: 'Modelo historieta scrollytelling con paneles y escena en capas (código fuente).',
-    unit_price_usd: 229,
-    currency_id: 'ARS',
-  },
-  unity: {
-    sku: 'unity',
-    title: 'UNITY — template',
-    description: 'Modelo editorial deportivo con mosaico→slider y footer de trofeo (código fuente).',
-    unit_price_usd: 189,
-    currency_id: 'ARS',
-  },
-  ratio: {
-    sku: 'ratio',
-    title: 'RATIO — template',
-    description: 'Modelo Beat (riel + seek): cubo, tipo y placas coreografiados. Solo desktop (código fuente).',
-    unit_price_usd: 269,
-    currency_id: 'ARS',
-  },
-  atrium: {
-    sku: 'atrium',
-    title: 'ATRIUM — template',
-    description: 'Modelo de estudio de arquitectura: massing, manifiesto, anillo de fotos y wordmark (código fuente).',
-    unit_price_usd: 189,
-    currency_id: 'ARS',
-  },
-  meridian: {
-    sku: 'meridian',
-    title: 'MERIDIAN — template',
-    description: 'Modelo para desarrollos inmobiliarios, complejos de cabañas o departamentos, desarrolladoras y resorts: hero de flythrough aéreo scrubeado por scroll, menú drawer, sliders con efecto mask, mapa con pines interactivos e interiores con hotspots (código fuente).',
-    unit_price_usd: 379,
-    currency_id: 'ARS',
-  },
+  chapters: template(
+    'chapters',
+    'CHAPTERS — template',
+    'Modelo editorial cinético completo (código fuente).',
+  ),
+  nocturne: template(
+    'nocturne',
+    'NOCTURNE — template',
+    'Modelo noir cinematográfico completo (código fuente).',
+  ),
+  monolith: template(
+    'monolith',
+    'MONOLITH — template',
+    'Modelo brutalista con Three.js (código fuente).',
+  ),
+  velocity: template(
+    'velocity',
+    'VELOCITY — template',
+    'Modelo de energía athlete / scroll cinematográfico (código fuente).',
+  ),
+  fizz: template(
+    'fizz',
+    'FIZZ — template',
+    'Modelo pop carbonatado con botella de vidrio 3D y mundos de color (código fuente).',
+  ),
+  atelier: template(
+    'atelier',
+    'ATELIER — template',
+    'Modelo studio con WebGL + fondos reactivos al scroll (código fuente).',
+  ),
+  comic: template(
+    'comic',
+    'COMIC — template',
+    'Modelo historieta scrollytelling con paneles y escena en capas (código fuente).',
+  ),
+  unity: template(
+    'unity',
+    'UNITY — template',
+    'Modelo editorial deportivo con mosaico→slider y footer de trofeo (código fuente).',
+  ),
+  ratio: template(
+    'ratio',
+    'RATIO — template',
+    'Modelo Beat (riel + seek): cubo, tipo y placas coreografiados. Solo desktop (código fuente).',
+  ),
+  atrium: template(
+    'atrium',
+    'ATRIUM — template',
+    'Modelo de estudio de arquitectura: massing, manifiesto, anillo de fotos y wordmark (código fuente).',
+  ),
+  meridian: template(
+    'meridian',
+    'MERIDIAN — template',
+    'Modelo para desarrollos inmobiliarios, complejos de cabañas o departamentos, desarrolladoras y resorts: hero de flythrough aéreo scrubeado por scroll, menú drawer, sliders con efecto mask, mapa con pines interactivos e interiores con hotspots (código fuente).',
+  ),
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',
     description: 'Los ocho modelos completos en un solo ZIP (código fuente).',
-    unit_price_usd: 649,
+    unit_price_usd: BUNDLE_PRICE_USD,
     currency_id: 'ARS',
   },
   custom: {
     sku: 'custom',
     title: 'Composición del builder',
     description: 'ZIP a medida según la receta armada en el builder.',
-    unit_price_usd: 389,
+    unit_price_usd: CUSTOM_BASE_PRICE_USD,
     currency_id: 'ARS',
   },
 }
@@ -209,10 +171,9 @@ export function hostedPlanQuota(planId) {
 }
 
 export function arsFromUsd(usd, rate) {
-  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) {
-    throw new Error('Conversión USD→ARS inválida')
-  }
-  return Math.ceil((usd * rate) / ARS_ROUNDING) * ARS_ROUNDING
+  const ars = arsFromUsdOrNull(usd, rate)
+  if (ars == null) throw new Error('Conversión USD→ARS inválida')
+  return ars
 }
 
 /**
@@ -220,7 +181,6 @@ export function arsFromUsd(usd, rate) {
  * porcentaje es el que muestra la home, espejado en src/lib/pricing.js
  * (`npm run check` falla si se despegan).
  */
-export const WELCOME_COUPON_PERCENT = 10
 export const WELCOME_COUPON_DAYS = 14
 /**
  * El cupón es personal: solo lo canjea quien compra con la cuenta de Google de
@@ -236,35 +196,9 @@ export function discountedArsFromUsd(usd, rate, percent) {
   if (!Number.isFinite(percent) || percent < 0 || percent >= 100) {
     throw new Error('Descuento inválido')
   }
-  if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) {
-    throw new Error('Conversión USD→ARS inválida')
-  }
-  const cents = Math.round(usd * (100 - percent))
-  return Math.ceil((cents * rate) / (100 * ARS_ROUNDING)) * ARS_ROUNDING
-}
-
-export function recipeSectionId(entry) {
-  return typeof entry === 'string' ? entry : entry?.id
-}
-
-export function recipeHasCommerce(recipe) {
-  return (recipe || []).some((entry) =>
-    String(recipeSectionId(entry) || '').startsWith('commerce/'),
-  )
-}
-
-export function customExtraSections(sectionCount) {
-  const count = Number.isFinite(sectionCount) ? Math.floor(sectionCount) : 0
-  return Math.max(0, count - CUSTOM_BASE_SECTIONS)
-}
-
-export function priceCustomRecipeUsd(recipe) {
-  const sections = Array.isArray(recipe) ? recipe.length : 0
-  return (
-    PRODUCTS.custom.unit_price_usd +
-    customExtraSections(sections) * CUSTOM_EXTRA_SECTION_USD +
-    (recipeHasCommerce(recipe) ? COMMERCE_PACK_SURCHARGE_USD : 0)
-  )
+  const ars = discountedArsFromUsdOrNull(usd, rate, percent)
+  if (ars == null) throw new Error('Conversión USD→ARS inválida')
+  return ars
 }
 
 export function resolveLineItem(item) {

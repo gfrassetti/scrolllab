@@ -47,4 +47,22 @@ export default [
       ],
     },
   },
+  {
+    // Dominio puro: lo importan el front y el servidor (Node). Nada de UI,
+    // motores de animación ni globals del browser.
+    files: ['src/domain/**/*.js'],
+    languageOptions: { globals: {} },
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['react', 'react-*', 'react/*'], message: 'src/domain no depende de React.' },
+            { group: ['gsap', 'gsap/*', 'lenis', 'three', 'three/*', 'motion', 'motion/*'], message: 'src/domain no depende de motores de UI.' },
+            { group: ['**/components/**', '**/pages/**', '**/hooks/**', '**/server/**'], message: 'src/domain no importa capas de arriba.' },
+          ],
+        },
+      ],
+    },
+  },
 ]
