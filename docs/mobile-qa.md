@@ -114,9 +114,10 @@ Cada marca es una decisión. Una que no se arregla se declara en `ACCEPTED`
    teléfono quedaban apagadas aunque el movimiento estuviera completo.
 2. **Efectos baratos en PC, caros en un teléfono real.** VELOCITY `HeroStrike`
    desenfoca 18 px, con scrub, una pila de tres fotos con `mix-blend` y máscara.
-3. **Coreografía de PC sin su rama móvil.** COMIC `ChapterFork` y `ChapterWorlds`
-   muestran en el teléfono una fracción del efecto de PC; en el home, la lista de
-   modelos tiene el escenario pegado que cambia de póster solo en ≥ 768 px.
+3. **Coreografía de PC sin su rama móvil.** En el home, la lista de modelos tiene
+   un escenario pegado que cambia de póster solo en ≥ 768 px: en el teléfono no
+   había animación. (La línea base también marcó a COMIC `ChapterFork` y
+   `ChapterWorlds`, pero era un falso positivo: ver abajo.)
 4. **El botón no cubría el CSS.** `motion-reduce:` de Tailwind compila a un
    `@media` pelado que no pasa por el reemplazo de `matchMedia`. Ahora es `calm:`.
 5. **Lo que medíamos no comparaba con PC.** `check:motion` mide huecos, trabas y
@@ -164,3 +165,26 @@ baja el pixel ratio un escalón (×0,75, hasta 1) y vuelve a medir, hasta 3 vece
 anda bien deja de medir. En un equipo rápido no cambia nada. Con un navegador
 automatizado (`navigator.webdriver`) no actúa, para que las capturas salgan siempre
 a la misma resolución.
+
+### Lo que encontró la corrida completa del cierre
+
+`check:motion` en los 10 templates y el home (Pixel 7 + iPad Mini, normal / calma /
+forzado: 66 corridas) encontró cuatro cosas que los pases por template no veían
+(el chequeo `unreachable` y el perfil de tablet en calma llegaron después de
+COMIC, ATRIUM y MERIDIAN):
+
+- **COMIC `ChapterFork`, calma, tablet:** las dos cards usaban el ancho por defecto
+  de `PaperFrame` (`min(94vw, 1180px)`) dentro de una grilla de dos columnas: la
+  de la derecha se salía y el teléfono ensanchaba la pantalla a 1122 px (y de
+  rebote, `ScrollTrigger` se re-medía al subir y bajar la barra). Con el pin, el
+  `overflow-hidden` lo tapaba; en calma no. `calm:w-full`.
+- **ATRIUM `OrbitRing`, calma:** quieto, el aro de fotos no está centrado (cada
+  foto gira sobre su propio centro) y una foto quedaba 50 a 65 % fuera del
+  escenario a cualquier ancho. En calma el aro se achica a 0,7 y entra entero.
+- **MERIDIAN `Location`:** el mapa es más ancho que la pantalla y se desplaza al
+  tocar una tarjeta o un pin (`panToPin`), no con el scroll: `data-pan`.
+- **ATRIUM `PeopleScatter`:** las fotos se salen del borde a propósito
+  (composición editorial): `data-bleed`.
+
+`data-scrub-tail`, `data-pan` y `data-bleed` son las tres marcas con que una
+sección le dice a `check:motion` «esto no se ve entero a propósito».

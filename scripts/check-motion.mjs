@@ -212,7 +212,10 @@ function installMotionHelpers() {
       else for (const n of el.childNodes) if (n.nodeType === 3) label += n.nodeValue
       label = label.trim()
       if (label.length < 3) continue
-      if (el.closest('[inert], [aria-hidden="true"], [hidden], [data-scrub-tail]')) continue
+      // `data-pan`: el contenido se trae con una interacción (tocar un pin y el mapa se
+      // desplaza), no con el scroll: el mapa de MERIDIAN es más ancho que la pantalla.
+      // `data-bleed`: la composición se sale del borde a propósito (fotos recortadas).
+      if (el.closest('[inert], [aria-hidden="true"], [hidden], [data-scrub-tail], [data-pan], [data-bleed]')) continue
       if (!el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true })) continue
       const cs0 = getComputedStyle(el)
       if (cs0.position === 'fixed') continue
