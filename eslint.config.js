@@ -60,6 +60,13 @@ export default [
     rules: {
       'no-undef': 'error',
       'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
+      // El `crypto` global de Node es WebCrypto (sin timingSafeEqual,
+      // createHmac…): sin `import crypto from 'node:crypto'` el código
+      // revienta en runtime y no-undef no lo ve.
+      'no-restricted-globals': [
+        'error',
+        { name: 'crypto', message: "Importá crypto de 'node:crypto'." },
+      ],
     },
   },
   {
