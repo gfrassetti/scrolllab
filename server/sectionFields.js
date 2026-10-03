@@ -87,6 +87,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze({
     'statement',
     'cta',
     'ctaHref',
+    'marquee',
     'canLabel',
     'flavor',
     'canImage',

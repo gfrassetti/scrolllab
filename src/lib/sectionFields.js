@@ -380,6 +380,7 @@ export const SECTION_FIELDS = {
     { key: 'statement', label: 'Statement', type: 'textarea' },
     { key: 'cta', label: 'CTA', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'marquee', label: 'Frase que cruza la pantalla', type: 'text' },
     { key: 'canLabel', label: 'Marca en la etiqueta', type: 'text' },
     {
       key: 'flavor',

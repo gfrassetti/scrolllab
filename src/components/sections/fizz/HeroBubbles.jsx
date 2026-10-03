@@ -431,6 +431,7 @@ export default function HeroBubbles({
   statement = 'Placeholder statement — two or three short lines about the drink, set big.',
   cta = 'Placeholder CTA',
   ctaHref = '#',
+  marquee = 'SOOO MUCH FIZZ',
   flavor = 'cobalt',
   canLabel = 'BRAND*',
   canImage = '',
@@ -442,6 +443,8 @@ export default function HeroBubbles({
   const stageRef = useRef(null)
   const canvasRef = useRef(null)
   const titleRef = useRef(null)
+  const statementRef = useRef(null)
+  const marqueeRef = useRef(null)
   const resolvedFlavor = flavor in FIZZ_FLAVORS ? flavor : 'cobalt'
   const flavorCfg = FIZZ_FLAVORS[resolvedFlavor]
 
@@ -562,6 +565,43 @@ export default function HeroBubbles({
         })
       }
 
+      // «SOOO MUCH FIZZ»: one huge line that crosses the screen between the
+      // statement and the flavors. Same opaque shader as the headline, so the
+      // glass refracts it as the bottle tumbles through.
+      const marqueeMesh = new THREE.Mesh(
+        planeGeo,
+        new THREE.ShaderMaterial({
+          uniforms: {
+            map: { value: null },
+            uInk: { value: new THREE.Color(flavorCfg.ink) },
+            uPaper: { value: new THREE.Color(flavorCfg.bg) },
+            uUv0: { value: 0 },
+            uUv1: { value: 1 },
+            uIn: { value: 1 },
+            uFade: { value: 1 },
+          },
+          vertexShader: TITLE_VERTEX,
+          fragmentShader: TITLE_FRAGMENT,
+        }),
+      )
+      marqueeMesh.visible = false
+      camera.add(marqueeMesh)
+      let marqueeWidth = 0
+      const layoutMarquee = () => {
+        marqueeMesh.material.uniforms.map.value?.dispose()
+        const drawn = drawTitleLine(String(marquee).toUpperCase(), {
+          family,
+          weight: 800,
+          tracking: -0.02,
+          targetWidth: 1e6,
+          maxSize: H * (narrow ? 0.24 : 0.32),
+          dpr,
+        })
+        marqueeMesh.material.uniforms.map.value = drawn.texture
+        marqueeMesh.scale.set(drawn.width, drawn.height, 1)
+        marqueeWidth = drawn.width
+      }
+
       const clearTitle = () => {
         letters.forEach(({ mesh }) => {
           titleGroup.remove(mesh)
@@ -622,6 +662,7 @@ export default function HeroBubbles({
           top -= drawn.height + gap
         })
         applyLetters()
+        layoutMarquee()
       }
 
       /* ── Sombra sobre el fondo ─────────────────────────────────── */
@@ -870,6 +911,8 @@ export default function HeroBubbles({
 
       /* ── Burbujas del escenario ────────────────────────────────── */
       const bubbleCount = narrow ? 14 : 30
+      // Extra, bigger bubbles that only show up during the «much fizz» burst.
+      const burstCount = narrow ? 26 : 56
       const bubbleMesh = new THREE.InstancedMesh(
         new THREE.SphereGeometry(1, 32, 20),
         new THREE.ShaderMaterial({
@@ -879,7 +922,7 @@ export default function HeroBubbles({
           transparent: true,
           depthWrite: false,
         }),
-        bubbleCount,
+        bubbleCount + burstCount,
       )
       bubbleMesh.frustumCulled = false
       scene.add(bubbleMesh)
@@ -906,20 +949,28 @@ export default function HeroBubbles({
         b.born = b.y
         return b
       }
-      const bubbles = Array.from({ length: bubbleCount }, () => {
+      const bubbles = Array.from({ length: bubbleCount + burstCount }, (_, i) => {
         const b = spawnBubble({}, true)
         b.delay = Math.random() * 0.5
+        if (i >= bubbleCount) {
+          b.burst = true
+          b.k = Math.random() * 0.6
+        }
         return b
       })
       // The first thing on screen: the bubbles, popping in one by one.
       const intro = { bubbles: reduced ? 1 : 0 }
-      const placeBubbles = (time, dt, boost) => {
+      const placeBubbles = (time, dt, boost, burst = 0) => {
         bubbles.forEach((b, i) => {
-          b.y += b.speed * H * dt * boost
-          if (b.y > H * 0.5 + b.r * 3) spawnBubble(b, false)
+          b.y += b.speed * H * dt * boost * (b.burst ? 1.5 : 1)
+          if (b.y > H * 0.5 + b.r * 3) {
+            spawnBubble(b, false)
+            if (b.burst) b.r *= 1.8
+          }
           const grow =
             clamp01((b.y - b.born) / (H * 0.12) + (b.born > -H * 0.5 ? 1 : 0)) *
-            smooth(clamp01((intro.bubbles - (b.delay || 0)) / 0.5))
+            smooth(clamp01((intro.bubbles - (b.delay || 0)) / 0.5)) *
+            (b.burst ? smooth(clamp01(burst * 1.6 - b.k)) : 1)
           const wobble = Math.sin(time * 3.1 + b.phase) * 0.05
           bubbleDummy.position.set(b.x + Math.sin(time * 0.9 + b.phase) * b.sway, b.y, b.z)
           bubbleDummy.scale.set(b.r * grow * (1 + wobble), b.r * grow * (1 - wobble), b.r * grow)
@@ -944,10 +995,11 @@ export default function HeroBubbles({
         camera.position.z = cameraZ
         camera.updateProjectionMatrix()
         titleGroup.position.z = -cameraZ
+        marqueeMesh.position.z = -cameraZ
         layoutTitle()
       }
 
-      const state = { p: 0, enter: reduced ? 0 : 1 }
+      const state = { p: 0, m: 0, enter: reduced ? 0 : 1 }
       // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
       // pointermove). En calma la botella queda quieta: no escucha nada.
       const pointer = reduced ? { x: 0, y: 0 } : trackPointer()
@@ -971,6 +1023,21 @@ export default function HeroBubbles({
         rig.rotation.x = Math.sin(Math.PI * p) * 0.3 + look.y * 0.06
         spin.rotation.y = -TURNS * Math.PI * 2 * out + sway + look.x * 0.25 - enter * 2.4
         rig.scale.setScalar(size * lerp(1, 1.12, s))
+
+        // The «much fizz» stretch: the bottle tumbles across to the center while
+        // the line slides by behind it.
+        const { m } = state
+        if (m > 0) {
+          const ms = smooth(m)
+          const arc = Math.sin(Math.PI * m)
+          rig.position.x = lerp(rig.position.x, W * (narrow ? 0 : -0.04), ms)
+          rig.position.y -= arc * H * 0.05
+          rig.rotation.z -= Math.PI * 2 * ms
+          spin.rotation.y += Math.PI * 2 * ms
+          rig.scale.multiplyScalar(1 + arc * 0.14)
+        }
+        marqueeMesh.visible = m > 0.001 && m < 0.999
+        marqueeMesh.position.x = lerp(W / 2 + marqueeWidth / 2, -(W / 2 + marqueeWidth / 2), m)
         // Luz de arriba a la izquierda: la sombra cae abajo a la derecha.
         const u = shadowMat.uniforms
         const scale = rig.scale.x
@@ -1028,7 +1095,7 @@ export default function HeroBubbles({
         look.x += (pointer.x - look.x) * follow
         look.y += (pointer.y - look.y) * follow
         pose(time)
-        placeBubbles(time, dt, boost)
+        placeBubbles(time, dt, boost, Math.sin(Math.PI * state.m))
         fizz?.update(time, dt * boost)
         render()
         budget.tick(deltaMs)
@@ -1092,6 +1159,18 @@ export default function HeroBubbles({
           scrollTrigger: {
             trigger: root.current,
             start: 'top top',
+            endTrigger: statementRef.current,
+            end: 'bottom bottom',
+            scrub: 0.6,
+          },
+        })
+        gsap.to(state, {
+          m: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: marqueeRef.current,
+            // Starts once the statement is halfway gone, so the line never runs over it.
+            start: 'top 45%',
             end: 'bottom bottom',
             scrub: 0.6,
           },
@@ -1162,6 +1241,8 @@ export default function HeroBubbles({
         pointer.dispose?.()
         gsap.ticker.remove(tick)
         clearTitle()
+        marqueeMesh.material.uniforms.map.value?.dispose()
+        marqueeMesh.material.dispose()
         planeGeo.dispose()
         shadowMesh.geometry.dispose()
         shadowMat.dispose()
@@ -1185,7 +1266,7 @@ export default function HeroBubbles({
     },
     {
       scope: root,
-      dependencies: [resolvedFlavor, modelUrl, envUrl, dracoPath, canImage, canLabel, title],
+      dependencies: [resolvedFlavor, modelUrl, envUrl, dracoPath, canImage, canLabel, title, marquee],
       revertOnUpdate: true,
     },
   )
@@ -1239,7 +1320,10 @@ export default function HeroBubbles({
           </div>
         </div>
 
-        <div className="flex min-h-[90svh] items-start px-5 pt-8 pb-24 md:items-center md:px-10 md:pt-0">
+        <div
+          ref={statementRef}
+          className="flex min-h-[90svh] items-start px-5 pt-8 pb-24 md:items-center md:px-10 md:pt-0"
+        >
           <div className="md:w-[58%]">
             <p
               data-fizz-statement
@@ -1256,6 +1340,10 @@ export default function HeroBubbles({
             </a>
           </div>
         </div>
+
+        {/* The «much fizz» stretch: the line itself is drawn in the canvas. */}
+        <div ref={marqueeRef} aria-hidden="true" className="h-[220svh] calm:hidden" />
+        <p className="sr-only">{marquee}</p>
       </div>
     </section>
   )
