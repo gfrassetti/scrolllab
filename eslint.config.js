@@ -8,7 +8,6 @@ export default [
     ignores: [
       'dist',
       'embed-dist',
-      'server/**',
       'scripts/**',
       'storage/**',
       // Código de terceros: skills instalados y el decoder Draco vendorizado.
@@ -20,6 +19,7 @@ export default [
   },
   {
     files: ['**/*.{js,jsx}'],
+    ignores: ['server/**'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -45,6 +45,21 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    // Servidor (Node): por ahora solo lo que rompe en runtime — un nombre sin
+    // definir (un import que faltó al mover código) o un import que quedó
+    // colgado. El resto de las reglas entra en una pasada aparte.
+    files: ['server/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.node,
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
     },
   },
   {
