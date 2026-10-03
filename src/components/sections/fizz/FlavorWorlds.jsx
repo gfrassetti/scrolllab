@@ -37,12 +37,40 @@ const defaultWorlds = [
   },
 ]
 
+/** '#rrggbb' → { h, s, l } (h in degrees, s/l in percent). */
+function hexToHsl(hex) {
+  const n = parseInt(String(hex).replace('#', ''), 16)
+  const r = ((n >> 16) & 255) / 255
+  const g = ((n >> 8) & 255) / 255
+  const b = (n & 255) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const l = (max + min) / 2
+  const d = max - min
+  let h = 0
+  let sat = 0
+  if (d) {
+    sat = d / (1 - Math.abs(2 * l - 1))
+    if (max === r) h = ((g - b) / d) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+    h *= 60
+  }
+  return { h: (h + 360) % 360, s: sat * 100, l: l * 100 }
+}
+
 /**
  * FlavorWorlds — pinned stage; one scrub progress crossfades
  * (1) background wash (2) illustration blobs (3) copy per flavor.
+ *
+ * It opens on `startBg`, the color the section above ends on (the hero's
+ * stage), so the page never cuts: the first flavor washes in once the stage
+ * is pinned, and every flavor after that eases into the next.
  */
 export default function FlavorWorlds({
   eyebrow = 'Section eyebrow',
+  startBg = '#2c4bff',
+  startInk = '#fff3e2',
   worlds = defaultWorlds,
 }) {
   const root = useRef(null)
@@ -54,16 +82,11 @@ export default function FlavorWorlds({
         '(prefers-reduced-motion: reduce)',
       ).matches
       const panels = gsap.utils.toArray('[data-world]', root.current)
-      const washes = gsap.utils.toArray('[data-world-wash]', root.current)
       const arts = gsap.utils.toArray('[data-world-art]', root.current)
 
       if (reduced || panels.length === 0) {
         panels.forEach((panel, i) => {
           gsap.set(panel, { opacity: i === 0 ? 1 : 0 })
-          if (washes[i]) {
-            washes[i].style.backgroundColor = worlds[i]?.bg || '#241352'
-            washes[i].style.opacity = i === 0 ? 1 : 0
-          }
         })
         if (root.current && worlds[0]) {
           root.current.style.backgroundColor = worlds[0].bg
@@ -73,13 +96,29 @@ export default function FlavorWorlds({
       }
 
       gsap.set(panels, { opacity: 0 })
-      gsap.set(washes, { opacity: 0 })
       gsap.set(arts, { opacity: 0, scale: 0.75, rotate: -12 })
-      gsap.set(panels[0], { opacity: 1 })
-      gsap.set(washes[0], { opacity: 1 })
-      gsap.set(arts[0], { opacity: 0.9, scale: 1, rotate: 0 })
-      if (root.current && worlds[0]) {
-        root.current.style.color = worlds[0].ink
+      gsap.set(root.current, { color: startInk })
+
+      // The stage color travels around the color wheel (shortest way) instead
+      // of crossfading two layers: blue → amber goes through violet and
+      // magenta, never through the grey-brown an opacity blend lands on.
+      const stage = hexToHsl(startBg)
+      const paint = () => {
+        root.current.style.backgroundColor = `hsl(${stage.h} ${stage.s}% ${stage.l}%)`
+      }
+      paint()
+      let hue = stage.h
+      const tintTo = (hex, position, duration = 0.85) => {
+        const target = hexToHsl(hex)
+        let h = target.h
+        while (h - hue > 180) h -= 360
+        while (h - hue < -180) h += 360
+        hue = h
+        tl.to(
+          stage,
+          { h, s: target.s, l: target.l, duration, ease: 'sine.inOut', onUpdate: paint },
+          position,
+        )
       }
 
       const tl = gsap.timeline({
@@ -87,28 +126,39 @@ export default function FlavorWorlds({
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
-          end: () => `+=${Math.max(worlds.length, 1) * 100}%`,
+          end: () => `+=${(Math.max(worlds.length, 1) + 0.6) * 100}%`,
           pin: true,
           scrub: 0.55,
           anticipatePin: 1,
         },
       })
 
-      // Intro hold on first world
-      tl.to({}, { duration: 0.35 })
+      // Arrive on the hero's color and start tinting right away.
+      tl.addLabel('intro', 0.05)
+      tintTo(worlds[0]?.bg || startBg, 'intro', 1)
+      tl.to(root.current, { color: worlds[0]?.ink || startInk, duration: 0.7, ease: 'sine.inOut' }, 'intro+=0.1')
+      tl.fromTo(
+        arts[0],
+        { opacity: 0, scale: 0.7, rotate: -16 },
+        { opacity: 0.9, scale: 1, rotate: 0, duration: 0.8, ease: 'sine.out' },
+        'intro+=0.25',
+      )
+      tl.fromTo(
+        panels[0],
+        { opacity: 0, y: 36 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'sine.out' },
+        'intro+=0.45',
+      )
+      tl.to({}, { duration: 0.4 })
 
       for (let i = 0; i < worlds.length - 1; i += 1) {
         const next = i + 1
         const nextInk = worlds[next]?.ink || '#241352'
 
         // Layer 1 — background wash crossfade
-        tl.to(washes[i], { opacity: 0, duration: 0.55 }, `world-${i}`)
-        tl.fromTo(
-          washes[next],
-          { opacity: 0 },
-          { opacity: 1, duration: 0.55 },
-          `world-${i}`,
-        )
+        // Slow, eased color changes: the page tints over, it doesn't flip.
+        tl.addLabel(`world-${i}`)
+        tintTo(worlds[next]?.bg || startBg, `world-${i}`)
 
         // Layer 2 — illustration blob exit / enter
         tl.to(
@@ -137,8 +187,8 @@ export default function FlavorWorlds({
         )
         tl.to(
           root.current,
-          { color: nextInk, duration: 0.45 },
-          `world-${i}`,
+          { color: nextInk, duration: 0.6, ease: 'sine.inOut' },
+          `world-${i}+=0.1`,
         )
 
         // Hold beat so the world reads before the next dive
@@ -152,7 +202,7 @@ export default function FlavorWorlds({
         '+=0.05',
       )
     },
-    { scope: root, dependencies: [worlds] },
+    { scope: root, dependencies: [worlds, startBg, startInk] },
   )
 
   // Sin motion no hay scrub que cambie de mundo: se muestran todos, uno
@@ -184,20 +234,8 @@ export default function FlavorWorlds({
     <section
       ref={root}
       className="relative overflow-hidden"
-      style={{ backgroundColor: worlds[0]?.bg || '#241352', color: worlds[0]?.ink }}
+      style={{ backgroundColor: startBg, color: startInk }}
     >
-      {/* Layer 1 — stacked color washes */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        {worlds.map((world, i) => (
-          <div
-            key={`wash-${world.name}`}
-            data-world-wash
-            className="absolute inset-0"
-            style={{ backgroundColor: world.bg, opacity: i === 0 ? 1 : 0 }}
-          />
-        ))}
-      </div>
-
       {/* Layer 2 — per-world illustration blobs */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         {worlds.map((world, i) => (
@@ -205,7 +243,7 @@ export default function FlavorWorlds({
             key={`art-${world.name}`}
             data-world-art
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{ opacity: i === 0 ? 0.9 : 0 }}
+            style={{ opacity: 0 }}
           >
             <span
               className="block aspect-square w-[min(78vw,38rem)] rounded-[42%_58%_55%_45%/50%_44%_56%_50%] opacity-90"
@@ -237,7 +275,7 @@ export default function FlavorWorlds({
               key={world.name}
               data-world
               className="absolute inset-x-0 flex flex-col items-center justify-center px-2 text-center"
-              style={{ opacity: i === 0 ? 1 : 0 }}
+              style={{ opacity: 0 }}
             >
               <WorldCopy world={world} index={i} total={worlds.length} />
             </article>

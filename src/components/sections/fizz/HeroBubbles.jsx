@@ -695,7 +695,6 @@ export default function HeroBubbles({
         normalScale: new THREE.Vector2(0.1, 0.1),
         ior: 1.5,
         thickness: 0.016,
-        dispersion: narrow ? 0 : 2.5,
         envMapIntensity: 1.25,
         specularIntensity: 1,
       })
