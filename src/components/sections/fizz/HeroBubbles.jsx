@@ -10,6 +10,7 @@ import {
   buildStandInBottle,
   buildStudioEnv,
   createBottle,
+  createStageShadow,
   disposeObject,
   drawTitleLine,
   loadBottleModel,
@@ -309,50 +310,9 @@ export default function HeroBubbles({
       }
 
       /* ── Sombra sobre el fondo ─────────────────────────────────── */
-      // Un plano opaco al fondo con la sombra suave de la botella: opaco, para
-      // que el vidrio también la refracte.
-      const shadowMat = new THREE.ShaderMaterial({
-        uniforms: {
-          uBg: { value: new THREE.Color(flavorCfg.bg) },
-          uDark: { value: new THREE.Color(flavorCfg.bg).multiplyScalar(0.28) },
-          uRes: { value: new THREE.Vector2(W, H) },
-          uCenter: { value: new THREE.Vector2() },
-          uAxes: { value: new THREE.Vector2(1, 1) },
-          uAngle: { value: 0 },
-          uStrength: { value: 0 },
-        },
-        vertexShader: /* glsl */ `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = vec4(position.xy * 2.0, 0.9999, 1.0);
-          }
-        `,
-        fragmentShader: /* glsl */ `
-          uniform vec3 uBg;
-          uniform vec3 uDark;
-          uniform vec2 uRes;
-          uniform vec2 uCenter;
-          uniform vec2 uAxes;
-          uniform float uAngle;
-          uniform float uStrength;
-          varying vec2 vUv;
-          void main() {
-            vec2 p = (vUv - 0.5) * uRes - uCenter;
-            float c = cos(uAngle);
-            float s = sin(uAngle);
-            vec2 q = vec2(c * p.x + s * p.y, -s * p.x + c * p.y) / uAxes;
-            float a = exp(-dot(q, q) * 2.2) * uStrength;
-            gl_FragColor = vec4(mix(uBg, uDark, a), 1.0);
-            #include <colorspace_fragment>
-          }
-        `,
-        depthWrite: false,
-      })
-      const shadowMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadowMat)
-      shadowMesh.frustumCulled = false
-      shadowMesh.renderOrder = -10
-      scene.add(shadowMesh)
+      const stageColor = new THREE.Color(flavorCfg.bg)
+      const shadow = createStageShadow(stageColor, { W, H })
+      scene.add(shadow.mesh)
 
       /* ── Botella ───────────────────────────────────────────────── */
       const rig = new THREE.Group()
@@ -461,7 +421,7 @@ export default function HeroBubbles({
         H = stage.clientHeight
         narrow = W < 768
         renderer.setSize(W, H, false)
-        shadowMat.uniforms.uRes.value.set(W, H)
+        shadow.resize(W, H)
         cameraZ = H / (2 * Math.tan((Math.PI / 180) * 15))
         camera.aspect = W / Math.max(H, 1)
         camera.near = cameraZ / 10
@@ -473,7 +433,8 @@ export default function HeroBubbles({
         layoutTitle()
       }
 
-      const state = { p: 0, m: 0, enter: reduced ? 0 : 1 }
+      // `top`: cuánto subió este escenario (≤ 0) al irse; la botella lo compensa.
+      const state = { p: 0, m: 0, enter: reduced ? 0 : 1, top: 0 }
       // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
       // pointermove). En calma la botella queda quieta: no escucha nada.
       const pointer = reduced ? { x: 0, y: 0 } : trackPointer()
@@ -512,13 +473,16 @@ export default function HeroBubbles({
         }
         marqueeMesh.visible = m > 0.001 && m < 0.999
         marqueeMesh.position.x = lerp(W / 2 + marqueeWidth / 2, -(W / 2 + marqueeWidth / 2), m)
-        // Luz de arriba a la izquierda: la sombra cae abajo a la derecha.
-        const u = shadowMat.uniforms
-        const scale = rig.scale.x
-        u.uCenter.value.set(rig.position.x + scale * 0.1, rig.position.y - scale * 0.05)
-        u.uAxes.value.set(scale * 0.2, scale * 0.58)
-        u.uAngle.value = rig.rotation.z
-        u.uStrength.value = 0.55 * (1 - enter)
+        // Cuando este escenario se va hacia arriba, la botella se queda clavada en
+        // la pantalla: es la misma que sigue en los sabores.
+        rig.position.y += state.top
+        shadow.place({
+          x: rig.position.x,
+          y: rig.position.y,
+          scale: rig.scale.x,
+          rotZ: rig.rotation.z,
+          strength: 0.55 * (1 - enter),
+        })
       }
 
       const render = () => renderer.render(scene, camera)
@@ -551,6 +515,7 @@ export default function HeroBubbles({
         const dt = Math.min(deltaMs / 1000, 0.05)
         // El titular sube con la página, 1:1, como si fuera DOM.
         const rect = root.current.getBoundingClientRect()
+        state.top = Math.min(stage.getBoundingClientRect().top, 0)
         titleGroup.position.y = Math.min(Math.max(-rect.top, 0), rect.height - H)
         // Al irse hacia arriba el titular se apaga, sin cortarse de golpe.
         const fade = 1 - smooth(clamp01((-rect.top - H * 0.05) / (H * 0.55)))
@@ -570,7 +535,7 @@ export default function HeroBubbles({
         look.y += (pointer.y - look.y) * follow
         pose(time)
         placeBubbles(time, dt, boost, Math.sin(Math.PI * state.m))
-        bottle.update(time, dt * boost)
+        bottle.update(time)
         render()
         budget.tick(deltaMs)
       }
@@ -709,8 +674,7 @@ export default function HeroBubbles({
         marqueeMesh.material.uniforms.map.value?.dispose()
         marqueeMesh.material.dispose()
         planeGeo.dispose()
-        shadowMesh.geometry.dispose()
-        shadowMat.dispose()
+        shadow.dispose()
         bubbleMesh.geometry.dispose()
         bubbleMesh.material.dispose()
         bottle.dispose()

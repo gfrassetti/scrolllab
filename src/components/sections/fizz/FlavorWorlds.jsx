@@ -2,14 +2,17 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { trackPointer } from '../../../lib/motion'
 import {
   TITLE_FRAGMENT,
   TITLE_VERTEX,
   buildStandInBottle,
   buildStudioEnv,
   createBottle,
+  createStageShadow,
   disposeObject,
   drawTitleLine,
+  heroEndPose,
   loadBottleModel,
   loadHdrEnv,
 } from './bottleKit'
@@ -49,6 +52,8 @@ const defaultWorlds = [
   },
 ]
 
+const lerp = (a, b, t) => a + (b - a) * t
+
 /** '#rrggbb' → { h, s, l } (h in degrees, s/l in percent). */
 function hexToHsl(hex) {
   const n = parseInt(String(hex).replace('#', ''), 16)
@@ -86,6 +91,7 @@ export default function FlavorWorlds({
   eyebrow = '',
   startBg = '#2c4bff',
   startInk = '#fff3e2',
+  startLiquid = '#9db8ff',
   brand = 'BRAND*',
   cta = 'Placeholder CTA',
   ctaHref = '#',
@@ -183,8 +189,9 @@ export default function FlavorWorlds({
       rig.add(spin)
       rig.visible = false
       scene.add(rig)
-      const first = worlds[0]
-      const bottle = createBottle({ narrow, liquid: first.liquid || first.bg, stage: startBg })
+      const shadow = createStageShadow(stageColor, { W, H })
+      scene.add(shadow.mesh)
+      const bottle = createBottle({ narrow, liquid: startLiquid, stage: startBg })
       let model = null
       let printFor = -1
       const paintPrint = (i) => {
@@ -195,13 +202,16 @@ export default function FlavorWorlds({
       const mountModel = (object) => {
         model = object
         bottle.dress(model, { isDisposed: () => disposed })
-        paintPrint(Math.max(state.index, 0))
+        paintPrint(state.index)
         spin.add(model)
         rig.visible = true
       }
 
       /* ── Estado y medidas ──────────────────────────────────── */
-      const state = { index: -1, enter: 1, spin: 0, dip: 0 }
+      // hand: 1 = la botella está donde la dejó el hero; 0 = en su lugar de los sabores.
+      const state = { index: -1, hand: 1, turn: 0, spin: 0, dip: 0, top: 0 }
+      const pointer = trackPointer()
+      const look = { x: 0, y: 0 }
       const hsl = hexToHsl(startBg)
       let hue = hsl.h
       const paintStage = () => {
@@ -228,18 +238,38 @@ export default function FlavorWorlds({
       }
 
       const pose = (time) => {
+        // La posición de la botella cuando termina el hero, en pantalla.
+        const end = heroEndPose({ W, H, narrow, time, look })
         const size = narrow ? Math.min(H * 0.46, W * 1.2) : Math.min(H * 0.8, W * 0.5)
-        const bob = Math.sin(time * 1.05) * H * 0.014
+        const bob = Math.sin(time * 1.05) * H * 0.016
         const sway = Math.sin(time * 0.31) * 0.35
+        const own = {
+          x: narrow ? 0 : W * 0.06,
+          y: (narrow ? H * 0.16 : -H * 0.02) + bob,
+          scale: size * (1 - state.dip * 0.08),
+          rotZ: -0.12 + state.dip * 0.18,
+          rotX: 0.08 + look.y * 0.06,
+          spinY: state.spin + sway + look.x * 0.25,
+        }
+        // Mientras este escenario sube a su lugar, la botella sigue clavada en el
+        // mismo punto de la pantalla que en el hero (`state.top` es lo que falta).
+        const hand = state.hand
         rig.position.set(
-          narrow ? 0 : W * 0.06,
-          (narrow ? H * 0.16 : -H * 0.02) + bob - state.enter * H * 1.1,
+          lerp(own.x, end.x, hand),
+          lerp(own.y, end.y + Math.max(state.top, 0), hand),
           0,
         )
-        rig.rotation.z = -0.12 + state.dip * 0.18
-        rig.rotation.x = 0.08
-        spin.rotation.y = state.spin + sway
-        rig.scale.setScalar(size * (1 - state.dip * 0.08))
+        rig.rotation.z = lerp(own.rotZ, end.rotZ, hand)
+        rig.rotation.x = lerp(own.rotX, end.rotX, hand)
+        spin.rotation.y = lerp(own.spinY, end.spinY, hand) + state.turn
+        rig.scale.setScalar(lerp(own.scale, end.scale, hand))
+        shadow.place({
+          x: rig.position.x,
+          y: rig.position.y,
+          scale: rig.scale.x,
+          rotZ: rig.rotation.z,
+          strength: 0.55,
+        })
         numerals.forEach((n) => {
           n.mesh.position.x = narrow ? 0 : W * 0.24
           n.mesh.position.y = narrow ? H * 0.16 : -H * 0.01
@@ -258,8 +288,16 @@ export default function FlavorWorlds({
 
       const tick = (time, deltaMs) => {
         if (!onScreen) return
+        const dt = Math.min(deltaMs / 1000, 0.05)
+        state.top = stage.getBoundingClientRect().top
+        // Mismo parallax del puntero que el hero: en el empalme no se nota el corte.
+        camera.position.x += (pointer.x * W * 0.04 - camera.position.x) * 0.03
+        camera.position.y += (-pointer.y * H * 0.04 - camera.position.y) * 0.03
+        const follow = 1 - Math.exp(-dt * 12)
+        look.x += (pointer.x - look.x) * follow
+        look.y += (pointer.y - look.y) * follow
         pose(time)
-        bottle.update(time, Math.min(deltaMs / 1000, 0.05))
+        bottle.update(time)
         renderer.render(scene, camera)
       }
 
@@ -327,7 +365,7 @@ export default function FlavorWorlds({
         gsap.to(root.current, { color: ink, duration: 0.8, ease: 'sine.inOut', overwrite: true })
 
         // El líquido y el sello toman el color del sabor; el velo, el del escenario.
-        const liquid = new THREE.Color(world ? world.liquid || world.bg : first.liquid || first.bg)
+        const liquid = new THREE.Color(world ? world.liquid || world.bg : startLiquid)
         const veil = new THREE.Color(bg).lerp(new THREE.Color(0xffffff), 0.6)
         const seal = new THREE.Color(bg).multiplyScalar(0.5)
         ;[
@@ -338,14 +376,20 @@ export default function FlavorWorlds({
           gsap.to(from, { r: to.r, g: to.g, b: to.b, duration: 0.9, ease: 'sine.inOut', overwrite: true }),
         )
 
-        // La botella: entra desde abajo la primera vez; después da una vuelta y
-        // cambia la serigrafía cuando queda de espaldas.
+        // La botella es la del hero: no entra ni se va, solo se acomoda. La primera
+        // vez pasa de su lugar del empalme al de los sabores con una vuelta, y la
+        // serigrafía cambia cuando queda de espaldas.
         if (prev < 0 && next >= 0) {
-          gsap.to(state, { enter: 0, duration: 1.4, ease: 'power3.out', overwrite: 'auto' })
-          gsap.fromTo(state, { spin: state.spin - Math.PI * 2 }, { spin: state.spin, duration: 1.4, ease: 'power3.out', overwrite: 'auto' })
-          paintPrint(next)
+          gsap.to(state, { hand: 0, duration: 1.5, ease: 'power3.inOut', overwrite: 'auto' })
+          gsap.fromTo(state, { turn: -Math.PI * 2 }, { turn: 0, duration: 1.5, ease: 'power3.out', overwrite: 'auto' })
+          gsap.delayedCall(0.55, () => {
+            if (state.index >= 0 && printFor !== state.index) paintPrint(state.index)
+          })
         } else if (next < 0) {
-          gsap.to(state, { enter: 1, duration: 0.9, ease: 'power3.in', overwrite: 'auto' })
+          gsap.to(state, { hand: 1, duration: 1, ease: 'power3.inOut', overwrite: 'auto' })
+          gsap.delayedCall(0.5, () => {
+            if (state.index < 0 && printFor !== -1) paintPrint(-1)
+          })
         } else {
           const turn = next > prev ? Math.PI * 2 : -Math.PI * 2
           gsap.to(state, { spin: state.spin + turn, duration: 1.1, ease: 'power3.inOut', overwrite: 'auto' })
@@ -382,7 +426,7 @@ export default function FlavorWorlds({
       document.fonts?.ready.then(() => {
         if (disposed) return
         layoutNumerals()
-        if (model) paintPrint(Math.max(state.index, 0))
+        if (model) paintPrint(state.index)
       })
       if (envUrl) {
         loadHdrEnv(renderer, envUrl)
@@ -413,7 +457,7 @@ export default function FlavorWorlds({
       const triggers = steps.map((step, i) =>
         ScrollTrigger.create({
           trigger: step,
-          start: i === 0 ? 'top 15%' : 'top 55%',
+          start: i === 0 ? 'top top' : 'top 55%',
           onEnter: () => goTo(i),
           onLeaveBack: () => goTo(i - 1),
         }),
@@ -431,6 +475,8 @@ export default function FlavorWorlds({
           n.mesh.material.dispose()
         })
         planeGeo.dispose()
+        shadow.dispose()
+        pointer.dispose?.()
         bottle.dispose()
         if (model) disposeObject(model)
         envMap.dispose()
@@ -440,7 +486,7 @@ export default function FlavorWorlds({
     },
     {
       scope: root,
-      dependencies: [worlds, startBg, startInk, brand, modelUrl, envUrl, dracoPath, reducedMotion],
+      dependencies: [worlds, startBg, startInk, startLiquid, brand, modelUrl, envUrl, dracoPath, reducedMotion],
       revertOnUpdate: true,
     },
   )

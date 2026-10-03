@@ -12,6 +12,18 @@ import * as THREE from 'three'
 
 export const FOAM = '#fff3e2'
 
+/** Small seeded PRNG: the same bottle in every canvas (wear, fizz) so a handoff has no seam. */
+export function seededRandom(seed) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 const gltfLoaderMod = () => import('three/examples/jsm/loaders/GLTFLoader.js')
 const dracoLoaderMod = () => import('three/examples/jsm/loaders/DRACOLoader.js')
 const hdrLoaderMod = () => import('three/examples/jsm/loaders/HDRLoader.js')
@@ -227,6 +239,7 @@ export function drawPrint(brand, { family, subtitle = 'SPARKLING SODA' }) {
  * Returns a roughness map and the normal map derived from the same marks.
  */
 export function drawGlassWear() {
+  const rnd = seededRandom(7331)
   const S = 1024
   const canvas = document.createElement('canvas')
   canvas.width = S
@@ -236,22 +249,22 @@ export function drawGlassWear() {
   ctx.fillRect(0, 0, S, S)
 
   for (let i = 0; i < 30; i += 1) {
-    const x = Math.random() * S
-    const y = Math.random() * S
-    const r = 30 + Math.random() * 120
+    const x = rnd() * S
+    const y = rnd() * S
+    const r = 30 + rnd() * 120
     const g = ctx.createRadialGradient(x, y, 0, x, y, r)
-    g.addColorStop(0, `rgba(255,255,255,${0.08 + Math.random() * 0.16})`)
+    g.addColorStop(0, `rgba(255,255,255,${0.08 + rnd() * 0.16})`)
     g.addColorStop(1, 'rgba(255,255,255,0)')
     ctx.fillStyle = g
     ctx.beginPath()
-    ctx.ellipse(x, y, r, r * (0.5 + Math.random() * 0.6), Math.random() * Math.PI, 0, Math.PI * 2)
+    ctx.ellipse(x, y, r, r * (0.5 + rnd() * 0.6), rnd() * Math.PI, 0, Math.PI * 2)
     ctx.fill()
   }
   for (let f = 0; f < 4; f += 1) {
-    const x = Math.random() * S
-    const y = Math.random() * S
+    const x = rnd() * S
+    const y = rnd() * S
     for (let k = 0; k < 14; k += 1) {
-      ctx.strokeStyle = `rgba(255,255,255,${0.12 + Math.random() * 0.1})`
+      ctx.strokeStyle = `rgba(255,255,255,${0.12 + rnd() * 0.1})`
       ctx.lineWidth = 1.4
       ctx.beginPath()
       ctx.ellipse(x, y, 6 + k * 3.2, 4 + k * 2.4, 0.5, 0.2, Math.PI * 1.7)
@@ -259,12 +272,12 @@ export function drawGlassWear() {
     }
   }
   for (let i = 0; i < 170; i += 1) {
-    const x = Math.random() * S
-    const y = Math.random() * S
-    const len = 8 + Math.random() * 110
-    const a = (Math.random() - 0.5) * 0.7
-    ctx.strokeStyle = `rgba(255,255,255,${0.35 + Math.random() * 0.55})`
-    ctx.lineWidth = 0.5 + Math.random() * 1.1
+    const x = rnd() * S
+    const y = rnd() * S
+    const len = 8 + rnd() * 110
+    const a = (rnd() - 0.5) * 0.7
+    ctx.strokeStyle = `rgba(255,255,255,${0.35 + rnd() * 0.55})`
+    ctx.lineWidth = 0.5 + rnd() * 1.1
     ctx.beginPath()
     ctx.moveTo(x, y)
     ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len)
@@ -517,23 +530,24 @@ export function createBottle({ narrow = false, liquid, stage }) {
       new THREE.MeshBasicMaterial({ color: FOAM, toneMapped: false, transparent: true, opacity: 0.85 }),
       count,
     )
+    const rnd = seededRandom(424242)
     const streams = Array.from({ length: 11 }, () => ({
-      angle: Math.random() * Math.PI * 2,
-      radius: 0.2 + Math.random() * 0.62,
+      angle: rnd() * Math.PI * 2,
+      radius: 0.2 + rnd() * 0.62,
     }))
     const items = Array.from({ length: count }, (_, i) => ({
       stream: streams[i % streams.length],
-      t: Math.random(),
-      speed: 0.2 + Math.random() * 0.22,
-      size: (0.012 + Math.random() * 0.02) * box.radius,
-      jitter: Math.random() * Math.PI * 2,
+      t0: rnd(),
+      speed: 0.2 + rnd() * 0.22,
+      size: (0.012 + rnd() * 0.02) * box.radius,
+      jitter: rnd() * Math.PI * 2,
     }))
     const dummy = new THREE.Object3D()
     const span = box.y1 - box.y0
-    const update = (time, dt) => {
+    // Función pura del tiempo: dos canvases con la misma botella la ven igual.
+    const update = (time) => {
       items.forEach((b, i) => {
-        b.t += b.speed * dt
-        if (b.t > 1) b.t -= 1
+        b.t = (b.t0 + time * b.speed) % 1
         // El hombro angosta la botella: las burbujas se cierran al subir.
         const reach = b.t < 0.78 ? 1 : lerp(1, 0.5, (b.t - 0.78) / 0.22)
         const r = b.stream.radius * box.radius * reach
@@ -545,7 +559,7 @@ export function createBottle({ narrow = false, liquid, stage }) {
       })
       mesh.instanceMatrix.needsUpdate = true
     }
-    update(0, 0)
+    update(0)
     host.add(mesh)
     return { mesh, update }
   }
@@ -619,8 +633,8 @@ export function createBottle({ narrow = false, liquid, stage }) {
       label.needsUpdate = true
     },
 
-    update(time, dt) {
-      fizz?.update(time, dt)
+    update(time) {
+      fizz?.update(time)
     },
 
     dispose() {
@@ -634,6 +648,92 @@ export function createBottle({ narrow = false, liquid, stage }) {
       })
       wear.roughness.dispose()
       wear.normal.dispose()
+    },
+  }
+}
+
+/**
+ * Where the hero leaves the bottle when «SOOO MUCH FIZZ» is over, and where
+ * FlavorWorlds picks it up. Both sections draw the bottle at exactly this pose
+ * (in screen space) while one stage hands over to the next, so the page never
+ * has two bottles. Mirrors the hero's pose at p = m = 1.
+ */
+export function heroEndPose({ W, H, narrow, time, look, reduced = false }) {
+  const bob = reduced ? 0 : Math.sin(time * 1.05) * H * 0.016
+  const sway = reduced ? 0 : Math.sin(time * 0.29) * 0.42
+  const size = narrow ? Math.min(H * 0.5, W * 1.35) : Math.min(H * 0.86, W * 0.62)
+  return {
+    x: W * (narrow ? 0 : -0.04),
+    y: H * (narrow ? -0.2 : -0.05) + bob,
+    scale: size * 1.12,
+    rotZ: narrow ? -0.34 : -0.2,
+    rotX: look.y * 0.06,
+    spinY: sway + look.x * 0.25,
+  }
+}
+
+/**
+ * The soft shadow the bottle throws on the stage: an opaque full-screen plane
+ * (opaque so the glass refracts it too) that mixes the stage color with a
+ * darker one around the bottle. `color` is a live THREE.Color.
+ */
+export function createStageShadow(color, size) {
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uBg: { value: color },
+      uRes: { value: new THREE.Vector2(size.W, size.H) },
+      uCenter: { value: new THREE.Vector2() },
+      uAxes: { value: new THREE.Vector2(1, 1) },
+      uAngle: { value: 0 },
+      uStrength: { value: 0 },
+    },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy * 2.0, 0.9999, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uBg;
+      uniform vec2 uRes;
+      uniform vec2 uCenter;
+      uniform vec2 uAxes;
+      uniform float uAngle;
+      uniform float uStrength;
+      varying vec2 vUv;
+      void main() {
+        vec2 p = (vUv - 0.5) * uRes - uCenter;
+        float c = cos(uAngle);
+        float s = sin(uAngle);
+        vec2 q = vec2(c * p.x + s * p.y, -s * p.x + c * p.y) / uAxes;
+        float a = exp(-dot(q, q) * 2.2) * uStrength;
+        gl_FragColor = vec4(mix(uBg, uBg * 0.28, a), 1.0);
+        #include <colorspace_fragment>
+      }
+    `,
+    depthWrite: false,
+  })
+  const geometry = new THREE.PlaneGeometry(1, 1)
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.frustumCulled = false
+  mesh.renderOrder = -10
+  return {
+    mesh,
+    resize(W, H) {
+      material.uniforms.uRes.value.set(W, H)
+    },
+    /** Luz de arriba a la izquierda: la sombra cae abajo a la derecha. */
+    place({ x, y, scale, rotZ, strength }) {
+      const u = material.uniforms
+      u.uCenter.value.set(x + scale * 0.1, y - scale * 0.05)
+      u.uAxes.value.set(scale * 0.2, scale * 0.58)
+      u.uAngle.value = rotZ
+      u.uStrength.value = strength
+    },
+    dispose() {
+      geometry.dispose()
+      material.dispose()
     },
   }
 }
