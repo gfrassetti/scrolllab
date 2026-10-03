@@ -276,7 +276,12 @@ function componentProps(file) {
   if (end === -1) return null
 
   // Top-level commas only: defaults can be arrays or objects with commas inside.
-  const body = src.slice(open + 1, end)
+  // Sin comentarios: sus paréntesis/comas partirían mal la lista. Solo líneas
+  // que arrancan con `//` (un `//` suelto puede ser parte de una URL default).
+  const body = src
+    .slice(open + 1, end)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '')
   const parts = []
   let level = 0
   let current = ''

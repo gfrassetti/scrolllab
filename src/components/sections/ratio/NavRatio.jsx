@@ -16,6 +16,8 @@ export default function NavRatio({
   links = ['Plates | #intro', 'Notes | #notes', 'Press | #index'],
   linksText,
   credit = '',
+  // Campo del schema (sectionFields) sin menú que lo use todavía: RATIO en obra.
+  // eslint-disable-next-line no-unused-vars
   menuLabel = 'MENU',
 }) {
   const root = useRef(null)

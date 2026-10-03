@@ -211,8 +211,9 @@ npm run dev:web        # only Vite
 npm run dev:api        # only Express
 npm run build
 npm run start          # API production
-npm test               # API unit + HTTP tests
+npm test               # cada *.test.js de server/, src/lib/ y embed/ (scripts/run-tests.mjs los descubre)
 npm run check          # invariantes cruzadas (precios, secciones, props, i18n, rutas)
+npm run verify         # lint + test + check: el gate antes de cada commit
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)

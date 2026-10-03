@@ -19,6 +19,7 @@ export function isValidEmail(email) {
 /** Strip tags, control chars, and zero-width junk. */
 export function sanitizePlainText(raw, maxLen) {
   let value = String(raw ?? '')
+  // eslint-disable-next-line no-control-regex -- sacar los caracteres de control es el punto
   value = value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
   value = value.replace(/[\u200B-\u200D\uFEFF]/g, '')
   // Drop HTML/XML tags entirely, then any leftover brackets
