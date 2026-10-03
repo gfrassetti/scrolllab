@@ -495,6 +495,39 @@ export default function TemplatesIndex() {
         },
       )
 
+      // Teléfono: no hay escenario pegado que cambie de póster; cada fila trae el
+      // suyo. El mismo gesto de PC con lo que hay: el póster de la fila se «enciende»
+      // (zoom suave atado al scroll) y el texto sube al cruzar la fila.
+      mm.add(fullMotionQuery('(max-width: 767px)'), () => {
+        gsap.utils.toArray('[data-template-step]').forEach((step) => {
+          const poster = step.querySelector('[data-template-art]')
+          if (poster) {
+            gsap.fromTo(
+              poster,
+              { scale: 1.12 },
+              {
+                scale: 1,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: step,
+                  start: 'top 90%',
+                  end: 'top 35%',
+                  scrub: 0.6,
+                },
+              },
+            )
+          }
+          gsap.from(Array.from(step.children).slice(1), {
+            opacity: 0,
+            y: 28,
+            duration: 0.7,
+            stagger: 0.07,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: step, start: 'top 68%', once: true },
+          })
+        })
+      })
+
       mm.add(fullMotionQuery(), () => {
         gsap.utils.toArray('[data-soft-fade]').forEach((el) => {
           gsap.from(el, {

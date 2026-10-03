@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 export default function AboutClarity({
@@ -14,7 +15,7 @@ export default function AboutClarity({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-atelier-about]', { y: 16, duration: 0.9 })
       const split = new SplitText('[data-atelier-about]', {
         type: 'words',
         mask: 'words',

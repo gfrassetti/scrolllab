@@ -290,8 +290,11 @@ export default function Location({
       style={{ minHeight: 'calc(100svh + 9rem)' }}
     >
       {/* MAP — one parent: image + monogram + routes + pins share coordinates */}
+      {/* `data-pan`: en el teléfono el mapa es más ancho que la pantalla y se
+          desplaza al tocar una tarjeta o un pin (panToPin), no con el scroll. */}
       <div
         ref={bgRef}
+        data-pan
         className="absolute top-0 left-1/2 -translate-x-1/2 will-change-transform max-md:top-[200px]"
         style={{ width: 'max(100%, 1100px)', aspectRatio: `${MAP_W} / ${MAP_H}` }}
       >

@@ -225,3 +225,70 @@ export function trackPointer() {
   }
   return pointer
 }
+
+/**
+ * Resolución adaptativa del 3D. Un teléfono de gama media con el vidrio de
+ * transmisión de FIZZ, o con DPR 3, puede no llegar a los 30 cuadros. Tras unos
+ * cuadros de calentamiento (shaders, texturas) mide cuánto tarda cada cuadro
+ * dibujado y, si va lento, baja el pixel ratio un escalón (×0,75, hasta `min`) y
+ * vuelve a medir. Si anda bien deja de medir: en un equipo rápido no cambia nada.
+ * La ventana de medición es de `span` cuadros o `windowMs`, lo que llegue primero:
+ * un teléfono que dibuja a 3 cuadros por segundo no espera medio minuto.
+ *
+ *   const budget = createFrameBudget({
+ *     dpr,
+ *     apply: (value) => {
+ *       renderer.setPixelRatio(value)
+ *       resize()
+ *     },
+ *   })
+ *   // en el tick, solo cuando dibuja:  budget.tick(deltaMs)
+ *
+ * Con un navegador automatizado (`navigator.webdriver`: los chequeos de Playwright
+ * dibujan por software) no actúa, para que las capturas salgan siempre a la misma
+ * resolución.
+ */
+export function createFrameBudget({
+  dpr,
+  apply,
+  min = 1,
+  slowMs = 34,
+  warmup = 15,
+  span = 30,
+  windowMs = 2500,
+  steps = 3,
+}) {
+  const inert = typeof navigator !== 'undefined' && navigator.webdriver === true
+  let current = dpr
+  let seen = 0
+  let count = 0
+  let sum = 0
+  let used = 0
+  return {
+    get dpr() {
+      return current
+    },
+    tick(deltaMs) {
+      if (inert || used >= steps || current <= min) return
+      // Más de un segundo es una pestaña en segundo plano o volver de otra app,
+      // no el costo del dibujo.
+      if (!(deltaMs > 0) || deltaMs > 1000) return
+      seen += 1
+      if (seen <= warmup) return
+      sum += deltaMs
+      count += 1
+      if (count < span && sum < windowMs) return
+      const avg = sum / count
+      count = 0
+      sum = 0
+      if (avg <= slowMs) {
+        used = steps // anda bien: no se vuelve a medir
+        return
+      }
+      current = Math.max(min, Math.round(current * 0.75 * 100) / 100)
+      used += 1
+      seen = 0 // el cambio de resolución se vuelve a calentar
+      apply(current)
+    },
+  }
+}

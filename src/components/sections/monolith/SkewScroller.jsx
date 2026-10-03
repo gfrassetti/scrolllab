@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultWords = ['RAW', 'CONCRETE', 'SYSTEM', 'GRID', 'FORCE', 'MASS']
 
@@ -25,7 +26,8 @@ export default function SkewScroller({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      // Calma: las palabras entran con un fundido; sin el sesgo por velocidad.
+      if (prefersReducedMotion()) return calmReveal('[data-skew-row]', { y: 24, stagger: 0.07 })
 
       const proxy = { skew: 0 }
       const setSkew = gsap.quickSetter(track.current, 'skewX', 'deg')

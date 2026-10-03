@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultSpecs = [
   { key: 'Form', value: 'Vertical scroll monument' },
@@ -23,7 +24,7 @@ export default function SpecSheet({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-spec-row]', { y: 20, stagger: 0.07 })
 
       gsap.from('[data-spec-row]', {
         y: 36,

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 const defaultFacts = [
@@ -21,7 +22,7 @@ export default function KeyFacts({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-fact]', { y: 20, stagger: 0.08 })
       gsap.from('[data-fact]', {
         opacity: 0,
         y: 40,

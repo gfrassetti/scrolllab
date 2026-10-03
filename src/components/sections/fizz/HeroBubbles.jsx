@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { calmReveal, createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 
 const gltfLoaderMod = () => import('three/examples/jsm/loaders/GLTFLoader.js')
 const dracoLoaderMod = () => import('three/examples/jsm/loaders/DRACOLoader.js')
@@ -949,7 +949,12 @@ export default function HeroBubbles({
       }
 
       const state = { p: 0, enter: reduced ? 0 : 1 }
-      const pointer = { x: 0, y: 0 }
+      // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
+      // pointermove). En calma la botella queda quieta: no escucha nada.
+      const pointer = reduced ? { x: 0, y: 0 } : trackPointer()
+      // Lo que la botella usa de ese puntero, suavizado: un dedo aparece de golpe
+      // (touchstart) y se va de golpe (touchend), y sin esto la botella daba un salto.
+      const look = { x: 0, y: 0 }
       let lastTop = 0
       let boost = 1
 
@@ -964,8 +969,8 @@ export default function HeroBubbles({
         rig.position.y =
           H * (narrow ? lerp(-0.04, -0.2, s) : lerp(-0.03, -0.05, s)) + bob - enter * H * 1.05
         rig.rotation.z = narrow ? lerp(0.3, -0.34, s) : lerp(0.4, -0.2, s)
-        rig.rotation.x = Math.sin(Math.PI * p) * 0.3 + pointer.y * 0.06
-        spin.rotation.y = -TURNS * Math.PI * 2 * out + sway + pointer.x * 0.25 - enter * 2.4
+        rig.rotation.x = Math.sin(Math.PI * p) * 0.3 + look.y * 0.06
+        spin.rotation.y = -TURNS * Math.PI * 2 * out + sway + look.x * 0.25 - enter * 2.4
         rig.scale.setScalar(size * lerp(1, 1.12, s))
         // Luz de arriba a la izquierda: la sombra cae abajo a la derecha.
         const u = shadowMat.uniforms
@@ -991,6 +996,16 @@ export default function HeroBubbles({
       })
       io.observe(root.current)
 
+      // Si el teléfono no llega a ~30 cuadros (vidrio con transmisión, DPR alto),
+      // baja la resolución de a escalones. En un equipo rápido no cambia nada.
+      const budget = createFrameBudget({
+        dpr,
+        apply: (value) => {
+          renderer.setPixelRatio(value)
+          layout()
+        },
+      })
+
       const tick = (time, deltaMs) => {
         if (!onScreen) return
         const dt = Math.min(deltaMs / 1000, 0.05)
@@ -1010,16 +1025,14 @@ export default function HeroBubbles({
 
         camera.position.x += (pointer.x * W * 0.04 - camera.position.x) * 0.03
         camera.position.y += (-pointer.y * H * 0.04 - camera.position.y) * 0.03
+        const follow = 1 - Math.exp(-dt * 12)
+        look.x += (pointer.x - look.x) * follow
+        look.y += (pointer.y - look.y) * follow
         pose(time)
         placeBubbles(time, dt, boost)
         fizz?.update(time, dt * boost)
         render()
-      }
-
-      const onPointerMove = (e) => {
-        if (e.pointerType !== 'mouse') return
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1
-        pointer.y = (e.clientY / window.innerHeight) * 2 - 1
+        budget.tick(deltaMs)
       }
 
       let introDone = reduced
@@ -1072,7 +1085,6 @@ export default function HeroBubbles({
         calmReveal('[data-fizz-statement], [data-fizz-cta]')
         renderOnce()
       } else {
-        window.addEventListener('pointermove', onPointerMove)
         gsap.ticker.add(tick)
 
         gsap.to(state, {
@@ -1148,7 +1160,7 @@ export default function HeroBubbles({
         disposed = true
         ro.disconnect()
         io.disconnect()
-        window.removeEventListener('pointermove', onPointerMove)
+        pointer.dispose?.()
         gsap.ticker.remove(tick)
         clearTitle()
         planeGeo.dispose()

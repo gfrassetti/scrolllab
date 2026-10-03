@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const WORD_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
 
@@ -15,7 +16,8 @@ export default function PopManifesto({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      // Calma: el párrafo entra con un fundido, sin tintarse palabra por palabra.
+      if (prefersReducedMotion()) return calmReveal('[data-pop-manifesto]', { y: 14, duration: 0.9 })
 
       const split = new SplitText('[data-pop-manifesto]', { type: 'words' })
 

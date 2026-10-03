@@ -55,6 +55,8 @@ const NON_VISIBLE_KEYS = new Set([
  */
 const NOT_IN_DOM = {
   'fizz/CanCarousel.canLabel': 'solo en latas sin foto; las de ejemplo traen PNG',
+  'fizz/HeroBubbles.canLabel': 'se imprime en la etiqueta de la botella, dentro del canvas WebGL: no llega al DOM',
+  'fizz/HeroBubbles.canImage': 'es la etiqueta de la botella (textura WebGL), no un <img> del DOM',
   'unity/FooterTrophy.accentWord': 'resalta esa palabra dentro del título; sola no se ve',
   'contact/ContactForm.sendingLabel': 'solo visible mientras se envía',
   'contact/ContactForm.successMessage': 'solo visible tras enviar',

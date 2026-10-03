@@ -72,7 +72,7 @@ import sharp from 'sharp'
 import { devices } from 'playwright'
 
 import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
-import { freePort, launchChromium, routePicsum, startVite } from './lib/servers.mjs'
+import { freePort, launchChromium, routeGoogleFonts, routePicsum, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'motion-check')
@@ -185,7 +185,9 @@ function installMotionHelpers() {
       const solidlyOnscreen = centerY > innerHeight * 0.12 && centerY < innerHeight * 0.88 && r.width > 0 && r.right > 0 && r.left < innerWidth
       if (!solidlyOnscreen) continue
       const cs = getComputedStyle(parent)
-      const transparentColor = /rgba?\([^)]*,\s*0\s*\)/.test(cs.color)
+      // Solo `rgba(…, 0)` (alfa 0) o `transparent`: el regex anterior también
+      // agarraba `rgb(0, 0, 0)` — texto negro puro — y cualquier color sin azul.
+      const transparentColor = cs.color === 'transparent' || /^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*0(\.0+)?\s*\)$/.test(cs.color)
       if (cs.visibility === 'hidden' || Number(cs.opacity) === 0 || transparentColor) {
         out.add(n.textContent.trim().slice(0, 48))
       }
@@ -210,7 +212,10 @@ function installMotionHelpers() {
       else for (const n of el.childNodes) if (n.nodeType === 3) label += n.nodeValue
       label = label.trim()
       if (label.length < 3) continue
-      if (el.closest('[inert], [aria-hidden="true"], [hidden], [data-scrub-tail]')) continue
+      // `data-pan`: el contenido se trae con una interacción (tocar un pin y el mapa se
+      // desplaza), no con el scroll: el mapa de MERIDIAN es más ancho que la pantalla.
+      // `data-bleed`: la composición se sale del borde a propósito (fotos recortadas).
+      if (el.closest('[inert], [aria-hidden="true"], [hidden], [data-scrub-tail], [data-pan], [data-bleed]')) continue
       if (!el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true })) continue
       const cs0 = getComputedStyle(el)
       if (cs0.position === 'fixed') continue
@@ -218,6 +223,10 @@ function installMotionHelpers() {
       if (r.width < 8 || r.height < 8) continue
       for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
         const cs = getComputedStyle(a)
+        // Una fila con scroll propio (auto|scroll) trae lo de afuera con el dedo:
+        // lo que quede más allá de un ancestro `hidden` más arriba no está perdido.
+        // (Que la fila responda al swipe lo mide `row-stuck`.)
+        if (cs.overflowX === 'auto' || cs.overflowX === 'scroll') break
         if (cs.overflowX !== 'hidden' && cs.overflowX !== 'clip') continue
         const ar = a.getBoundingClientRect()
         const outside = Math.max(0, ar.left - r.left) + Math.max(0, r.right - ar.right)
@@ -344,6 +353,7 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
     }
   })
   await routePicsum(context)
+  await routeGoogleFonts(context)
 
   const page = await context.newPage()
   const issues = []
@@ -613,6 +623,7 @@ async function loadAndMeasure(browser, base, { template, profile, reduce, forced
     }
   }, forced)
   await routePicsum(context)
+  await routeGoogleFonts(context)
   const page = await context.newPage()
   let fontsFailed = false
   page.on('requestfailed', (req) => {
@@ -769,7 +780,7 @@ async function main() {
   console.log(`\n${totalIssues} hallazgos en ${results.length} corridas · ${mb} min`)
   console.log(`Reportes: storage/motion-check/report.txt · storage/motion-check/<template>/sheet.html`)
   if (results.some((r) => r.fontsFailed)) {
-    console.log('\n⚠ Google Fonts no cargó en Chromium: lo visual se vio con la fuente de reemplazo (ver CHROMIUM_ARGS en check:mobile).')
+    console.log('\n⚠ Google Fonts no cargó en Chromium: lo visual se vio con la fuente de reemplazo (ver FONTS_VIA_CURL y CHROMIUM_ARGS en check:mobile).')
   }
   process.exit(totalIssues ? 1 : 0)
 }

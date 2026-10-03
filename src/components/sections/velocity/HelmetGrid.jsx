@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { helm1, helm2, helm3, helm4, helm5, helm6, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -219,7 +220,7 @@ export default function HelmetGrid({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-helm-card]', { y: 20, stagger: 0.07 })
       gsap.from('[data-helm-card]', {
         opacity: 0,
         y: 48,

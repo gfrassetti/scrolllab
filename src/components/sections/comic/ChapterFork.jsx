@@ -111,7 +111,7 @@ export default function ChapterFork({
             />
 
             <div data-path-left data-comic-reveal className="will-change-transform">
-              <PaperFrame>
+              <PaperFrame className="calm:w-full">
                 <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
                   <img
                     {...imgAttrs(driveSunset, variants)}
@@ -139,7 +139,7 @@ export default function ChapterFork({
             </div>
 
             <div data-path-right data-comic-reveal className="will-change-transform">
-              <PaperFrame>
+              <PaperFrame className="calm:w-full">
                 <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
                   <img
                     {...imgAttrs(closedYards, variants)}

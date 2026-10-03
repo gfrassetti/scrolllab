@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 
 import { chromium } from 'playwright'
 
-import { BUNDLE_MODELS } from '../server/catalog.js'
+import { BUNDLE_MODELS, COMING_SOON_SKUS, PRODUCTS } from '../server/catalog.js'
 import { packCustomTemplate, packFixedTemplate } from '../server/packaging.js'
 import { readZip } from '../server/__tests__/helpers/zip.js'
 
@@ -88,6 +88,11 @@ async function inspect(browser, dist, name) {
 
   try {
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' })
+    // MERIDIAN abre con una pantalla de carga (8 s la primera vez): se espera a que
+    // se vaya. Si nunca se va, la página queda casi vacía y sale como problema.
+    await page
+      .waitForFunction(() => !document.querySelector('[role="status"][aria-label="Loading"]'), null, { timeout: 30000 })
+      .catch(() => {})
     await page.waitForTimeout(2500) // que corran las animaciones de entrada
 
     const text = (await page.locator('body').innerText()).trim()
@@ -152,8 +157,13 @@ async function check(browser, name, packTo) {
 }
 
 const only = process.argv.slice(2)
+// Los que se venden sueltos y no entran en el bundle (ATRIUM, MERIDIAN) también
+// se entregan como ZIP: sin esto solo los cubrían los tests de empaquetado.
+const SOLD_ALONE = Object.keys(PRODUCTS).filter(
+  (sku) => !['bundle', 'custom'].includes(sku) && !BUNDLE_MODELS.includes(sku) && !COMING_SOON_SKUS.includes(sku),
+)
 const targets = [
-  ...BUNDLE_MODELS.map((model) => ({
+  ...[...BUNDLE_MODELS, ...SOLD_ALONE].map((model) => ({
     name: model,
     packTo: (destPath) => packFixedTemplate({ model, destPath, licenseMeta: LICENSE }),
   })),
@@ -166,7 +176,8 @@ const targets = [
 
 fs.mkdirSync(SHOTS, { recursive: true })
 
-const browser = await chromium.launch()
+// PLAYWRIGHT_CHROMIUM_PATH: el Chromium ya instalado (como en check:builder y check:motion), sin `playwright install`.
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined })
 const problems = []
 
 for (const target of targets) {

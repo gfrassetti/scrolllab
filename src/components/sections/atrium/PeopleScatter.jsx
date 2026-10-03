@@ -123,7 +123,11 @@ export default function PeopleScatter({
         {title}
       </h2>
 
-      <div className="pointer-events-none absolute inset-x-0 top-[62svh] h-[122svh] md:top-[24svh] md:h-[78svh]">
+      {/* `data-bleed`: las fotos se salen del borde a propósito (composición editorial). */}
+      <div
+        data-bleed
+        className="pointer-events-none absolute inset-x-0 top-[62svh] h-[122svh] md:top-[24svh] md:h-[78svh]"
+      >
         {plates.map((plate) => (
           <figure
             key={plate.src}

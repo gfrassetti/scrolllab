@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const BUBBLE_COLORS = ['#ffb02e', '#ff3ea5', '#3ddc97', '#ff6b35']
 
@@ -30,7 +31,8 @@ export default function FooterSplash({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      // Calma: la palabra entra con un fundido; las burbujas que suben no se prenden.
+      if (prefersReducedMotion()) return calmReveal('[data-splash-word]', { y: 18, duration: 0.9 })
 
       const split = new SplitText('[data-splash-word]', {
         type: 'chars',

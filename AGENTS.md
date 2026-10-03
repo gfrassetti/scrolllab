@@ -214,7 +214,7 @@ npm run start          # API production
 npm test               # API unit + HTTP tests
 npm run check          # invariantes cruzadas (precios, secciones, props, i18n, rutas)
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
-npm run check:visual   # instala, compila y fotografía cada ZIP (lento, ~2 min)
+npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
@@ -289,12 +289,20 @@ como en PC: el mismo beat, adaptado al toque (no una copia píxel por píxel).
   escala: un `filter` animado se re-dibuja cuadro a cuadro y cuesta GPU (barato
   en PC, caro en un teléfono real).
 - Un efecto con `matchMedia('(min-width: …)')` necesita su rama `(max-width: …)`
-  que también anima. Un adorno que existe solo en PC se declara a propósito
-  (`ACCEPTED` en `scripts/check-parity.mjs`, con el motivo).
+  que también anima. Un adorno que existe solo en PC (`hidden md:block`) no
+  cuenta contra el teléfono: `check:parity` compara por pieza solo lo que se
+  dibuja en las dos vistas. Lo que sí es una decisión se declara en `ACCEPTED`
+  (`scripts/check-parity.mjs`, con el motivo).
 - `motion-reduce:` de Tailwind significa lo mismo que `calm:` (respeta el botón).
+- Las escenas WebGL llaman a `createFrameBudget` (`src/lib/motion.js`): si el teléfono no llega a
+  ~30 cuadros, baja el pixel ratio de a escalones. En un equipo rápido no cambia nada.
 - `npm run check:parity` compara cada sección PC ↔ teléfono ↔ tablet y falla con
   las marcas que no estén en `ACCEPTED`: `sin-trigger`, `quieta`, `solo-mouse`,
   `blur-pesado`, `canvas-quieto`, `css-quieto`.
+- Si Chromium no baja Google Fonts (proxy cuyo CA no reconoce), el texto se
+  mide con la fuente de reemplazo: `FONTS_VIA_CURL=1` (`check:mobile`,
+  `check:motion`, `check:parity`) las baja con `curl` y se las entrega al
+  navegador, sin tocar TLS.
 - Un emulador no es un teléfono: es Chromium con perfil de teléfono, gestos
   táctiles por CDP y CPU ×4. No prueba la GPU ni Safari. Para mirar un teléfono
   real: `?motion-debug` en cualquier URL del market (`?motion-debug=0` lo apaga).

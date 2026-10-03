@@ -48,7 +48,10 @@ const defaultTiles = [
  * (`calm:h-auto` / `calm:relative`: tiene que seguir siendo el bloque
  * contenedor del aro, si no el `overflow-hidden` deja de recortarlo y el
  * teléfono ensancha la pantalla): sin scrub eran dos pantallas con el mismo
- * cuadro. El texto central entra con un fundido.
+ * cuadro. El texto central entra con un fundido. Quieto, el aro no está
+ * centrado (cada foto gira sobre su propio centro: una de ellas quedaba 50 a
+ * 65 % fuera del escenario a cualquier ancho), así que en calma se achica a
+ * 0,7 y entra entero (`calm:scale-[0.7]`).
  */
 export default function OrbitRing({
   tiles = defaultTiles,
@@ -103,7 +106,7 @@ export default function OrbitRing({
       <div data-orbit-pin className="sticky top-0 h-svh overflow-hidden calm:relative">
         <div
           data-orbit-ring
-          className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-0 w-0 [--orbit-r:min(34vw,40vh)] will-change-transform md:[--orbit-r:min(30vw,46vh)]"
+          className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-0 w-0 [--orbit-r:min(34vw,40vh)] will-change-transform calm:scale-[0.7] md:[--orbit-r:min(30vw,46vh)]"
         >
           {tiles.map((src, i) => (
             <div
