@@ -1,7 +1,21 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal, createFrameBudget, prefersReducedMotion, trackPointer } from '../../../lib/motion'
+import {
+  calmReveal,
+  createFrameBudget,
+  fitCameraDistance,
+  prefersReducedMotion,
+  trackPointer,
+} from '../../../lib/motion'
+
+// Cámara y escala de reposo. En PC (pantalla ancha) el objeto llena el alto; en vertical
+// la cámara se aleja hasta que entra en el ancho (ver `fitCameraDistance`).
+const CAMERA_FOV = 42
+const CAMERA_Z = 9.2
+const REST_SCALE = 1.05
+const FIT_FILL = 0.9
+const POINT_SIZE = 0.14
 
 /** Presets curados — sin upload de GLB. */
 export const HERO_THREE_SHAPES = [
@@ -62,6 +76,10 @@ function disposeObject(obj) {
  * preset shape is replaced by the custom model, re-materialized as a
  * carbon wireframe to keep the brutalist look. Buyers drop their file
  * in `public/` and point to it, e.g. modelUrl="/my-object.glb".
+ *
+ * Encuadre: la cámara se aleja (`fitCameraDistance`) cuando la pantalla es angosta,
+ * así que en un teléfono en vertical el objeto entra en el ancho (90 %) en vez de
+ * salirse por los costados. En PC la cámara queda donde estaba.
  */
 export default function HeroThree({
   title = 'MONOLITH',
@@ -91,12 +109,19 @@ export default function HeroThree({
       renderer.setPixelRatio(dpr)
 
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
+      const camera = new THREE.PerspectiveCamera(CAMERA_FOV, 1, 0.1, 100)
       // Ligero offset Y: el título vive bajo el nav, no en el centro geométrico.
-      camera.position.set(0, -0.15, 9.2)
-      camera.lookAt(0, -0.35, 0)
+      const placeCamera = (distance) => {
+        camera.position.set(0, -0.15, distance)
+        camera.lookAt(0, -0.35, 0)
+      }
+      placeCamera(CAMERA_Z)
 
       const geometry = createShapeGeometry(resolvedShape)
+      geometry.computeBoundingSphere()
+      // Radio de la esfera que envuelve al objeto (con su escala de reposo): con él
+      // la cámara sabe cuánto alejarse para que entre en el ancho de la pantalla.
+      let fitRadius = geometry.boundingSphere.radius * REST_SCALE
       const wireframe = new THREE.Mesh(
         geometry,
         new THREE.MeshBasicMaterial({
@@ -109,7 +134,7 @@ export default function HeroThree({
       const points = new THREE.Points(
         geometry,
         new THREE.PointsMaterial({
-          size: 0.14,
+          size: POINT_SIZE,
           color: 0x2b3cff,
           transparent: true,
           opacity: 0.98,
@@ -121,7 +146,7 @@ export default function HeroThree({
       // En calma ya nace en la pose de reposo: el objeto no se acomoda solo.
       group.rotation.set(reduced ? 0.4 : 0.28, 0.4, 0)
       group.position.set(0, -0.35, 0)
-      group.scale.setScalar(1.05)
+      group.scale.setScalar(REST_SCALE)
       scene.add(group)
 
       // —— Optional custom model (GLB/GLTF), re-skinned as wireframe ——
@@ -150,6 +175,9 @@ export default function HeroThree({
                 fitObjectToScene(customModel)
                 group.remove(wireframe, points)
                 group.add(customModel)
+                const sphere = new THREE.Box3().setFromObject(customModel).getBoundingSphere(new THREE.Sphere())
+                fitRadius = sphere.radius * REST_SCALE
+                resize()
                 render()
               },
               undefined,
@@ -172,6 +200,17 @@ export default function HeroThree({
         const { clientWidth: w, clientHeight: h } = host
         renderer.setSize(w, h, false)
         camera.aspect = w / Math.max(h, 1)
+        const distance = fitCameraDistance({
+          fov: CAMERA_FOV,
+          aspect: camera.aspect,
+          radius: fitRadius,
+          base: CAMERA_Z,
+          fill: FIT_FILL,
+        })
+        placeCamera(distance)
+        // Más lejos, los nodos azules se achican junto con el objeto y dejan de
+        // leerse: se compensan a medias. En PC la distancia es CAMERA_Z y no cambia.
+        points.material.size = POINT_SIZE * (distance / CAMERA_Z) ** 0.4
         camera.updateProjectionMatrix()
       }
       resize()

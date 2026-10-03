@@ -292,3 +292,28 @@ export function createFrameBudget({
     },
   }
 }
+
+/**
+ * Distancia de cámara a la que una esfera de `radius` ocupa `fill` del ANCHO
+ * visible, sin acercarse más que `base`.
+ *
+ * Con la cámara fija el objeto llena el alto de la pantalla: en PC sobra ancho,
+ * pero en un teléfono en vertical (390×844) el objeto mide más del doble del
+ * ancho y se ve gigante, cortado por los costados. Esta distancia lo aleja solo
+ * cuando la pantalla es angosta; en pantallas anchas devuelve `base`, así que la
+ * composición de PC queda igual, y es continua (sin saltos entre un ancho y otro).
+ *
+ *   camera.position.z = fitCameraDistance({
+ *     fov: camera.fov, aspect: camera.aspect, radius: 3.6, base: 9.2,
+ *   })
+ *   // en cada resize, después de actualizar camera.aspect
+ *
+ * `radius` es el radio de la esfera que envuelve al objeto (con su escala de
+ * reposo); `fov` es el vertical, en grados, como en THREE.PerspectiveCamera.
+ */
+export function fitCameraDistance({ fov, aspect, radius, base, fill = 0.9 }) {
+  if (!(aspect > 0) || !(radius > 0) || !(fov > 0)) return base
+  const halfVertical = (fov * Math.PI) / 360
+  const halfHorizontal = Math.atan(Math.tan(halfVertical) * aspect)
+  return Math.max(base, radius / Math.sin(halfHorizontal * fill))
+}

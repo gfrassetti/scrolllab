@@ -89,9 +89,9 @@ Alto de la página en un Pixel 7 (390×844), en px: normal → calma.
 | CHAPTERS | 12834 → 12834 | Calma con fundidos (`calmReveal`) y contadores que cuentan (`calmCount`). `HorizontalPanels` (también en el home, «cómo funciona») dejaba los paneles 2 a 4 fuera de pantalla en tablet: pasa a pila vertical en calma. `StickyImageStory`: en calma sin columna pegada (las fotos B y C no se veían) y en completo gana rama < 768 (zoom + texto que sube). Nuevo chequeo `unreachable` que lo detecta. `check:motion` y `check:builder` limpios; `check:mobile` con las fuentes reales solo marca la cita de `QuoteBreak` a mitad de su reveal (máscara de SplitText en movimiento, declarada en `ALLOW`; en reposo las líneas están enteras) |
 | NOCTURNE | 9882 → 6575 | `StickyWordCycle` en calma pasa de pila de palabras a lista con índice (01 CRAFT, 02 MOTION…): la palabra que cruza el medio de la pantalla se enciende y las otras se apagan con un fundido. `ZoomPortal` sin alto de scrub (`calm:h-auto`) con la foto y el pie entrando con fundido; el resto con `calmReveal`; la vista previa de `WorkIndex` sigue al cursor sin rezago (antes quedaba clavada arriba a la izquierda). `check:motion` (teléfono y tablet) y `check:mobile` en los dos modos: 0 hallazgos |
 | FIZZ | 11220 → 9123 | La botella sigue al dedo como al mouse (`trackPointer`: antes ignoraba todo puntero que no fuera mouse). `BubbleBenefits`, `CanCarousel`, `PopManifesto` y `FooterSplash` cortaban con reducir movimiento y quedaban sin entrada: ahora fundidos (`calmReveal`). `check:builder`: `canLabel` y `canImage` se imprimen en la botella (canvas), no llegan al DOM (`NOT_IN_DOM`). `check:motion`, `check:parity` y `check:mobile` limpios |
-| MONOLITH | 4904 → 4904 | El objeto 3D responde al dedo (`trackPointer`), con el movimiento completo y en calma (en calma sin giro automático ni zoom: queda quieto y solo se mueve con el mouse o el dedo, y se dibuja mientras se mueve). `SkewScroller`, `SpecSheet`, `ExhibitGrid` y `FooterBrutal` cortaban con reducir movimiento: ahora fundidos. `check:motion`, `check:parity` y `check:mobile` limpios (el título «MONOLITH» a 320/390 salía cortado solo con la fuente de reemplazo; con Anton entra) |
+| MONOLITH | 4904 → 4904 | El objeto 3D responde al dedo (`trackPointer`), con el movimiento completo y en calma (en calma sin giro automático ni zoom: queda quieto y solo se mueve con el mouse o el dedo, y se dibuja mientras se mueve). `SkewScroller`, `SpecSheet`, `ExhibitGrid` y `FooterBrutal` cortaban con reducir movimiento: ahora fundidos. `check:motion`, `check:parity` y `check:mobile` limpios (el título «MONOLITH» a 320/390 salía cortado solo con la fuente de reemplazo; con Anton entra). El objeto se encuadra por proporción de pantalla (`fitCameraDistance`): en un teléfono (390×844) ocupaba el 237 % del ancho y ahora el 90 %; en PC no cambia |
 | VELOCITY | 8280 → 3749 | `HeroStrike` (280/320vh) en calma pasa a una pantalla (`calm:h-auto`) con los títulos entrando con un fundido; en el teléfono con movimiento completo el disuelto final ya no desenfoca (`blur(18px)` con scrub sobre tres fotos con `mix-blend` y máscara): el mismo beat con opacidad y escala, y en PC queda el blur. `ParallaxRise` y `HelmetGrid` cortaban con reducir movimiento: ahora fundidos. `TrackMerge` ya traía sus tres ramas. `check:motion` y `check:parity` limpios; `check:mobile` solo marca las fotos del hero que necesitan masters de más resolución (`image-master`, necesita créditos de Higgsfield) |
-| ATELIER | 19546 → 13695 | El emblema 3D del hero responde al dedo (`trackPointer`) y las letras del titular entran sin desenfoque en el teléfono (veinte capas con `filter` animado mientras arranca el 3D). `SelectedWork` en calma: fila que se desliza con el dedo y snap, que entra con un fundido (antes las tarjetas 2 a 4 quedaban fuera de pantalla y no había forma de traerlas). `AboutClarity`, `KeyFacts` y `StudioCards` cortaban con reducir movimiento: ahora fundidos. `VisionShutter`, `WordStripe` y `ServicesStone` ya tenían su versión atenuada y se mantienen (la cinta de palabras lleva `data-scrub-tail`: corre de lado con el scroll a propósito). `check:motion`, `check:parity` y `check:mobile` limpios (el texto de las tarjetas de `SelectedWork` a 320 de ancho se cortaba 13 px solo con la fuente de reemplazo) |
+| ATELIER | 19546 → 13695 | El emblema 3D del hero responde al dedo (`trackPointer`) y las letras del titular entran sin desenfoque en el teléfono (veinte capas con `filter` animado mientras arranca el 3D). `SelectedWork` en calma: fila que se desliza con el dedo y snap, que entra con un fundido (antes las tarjetas 2 a 4 quedaban fuera de pantalla y no había forma de traerlas). `AboutClarity`, `KeyFacts` y `StudioCards` cortaban con reducir movimiento: ahora fundidos. `VisionShutter`, `WordStripe` y `ServicesStone` ya tenían su versión atenuada y se mantienen (la cinta de palabras lleva `data-scrub-tail`: corre de lado con el scroll a propósito). `check:motion`, `check:parity` y `check:mobile` limpios (el texto de las tarjetas de `SelectedWork` a 320 de ancho se cortaba 13 px solo con la fuente de reemplazo). El emblema del hero también se encuadra por proporción de pantalla: ocupaba el 121–152 % del ancho en un teléfono y ahora el 90 % |
 
 ## Paridad PC ↔ teléfono
 
@@ -182,6 +182,26 @@ baja el pixel ratio un escalón (×0,75, hasta 1) y vuelve a medir, hasta 3 vece
 anda bien deja de medir. En un equipo rápido no cambia nada. Con un navegador
 automatizado (`navigator.webdriver`) no actúa, para que las capturas salgan siempre
 a la misma resolución.
+
+### Encuadre del 3D: la cámara mira la proporción de la pantalla
+
+Con la cámara fija el objeto llena el **alto** de la pantalla. En PC sobra ancho, pero
+en un teléfono en vertical no: el hero de MONOLITH ocupaba el 237 % del ancho a 390×844
+(195 % a 320, 146–157 % en tablet vertical) y el emblema de ATELIER el 121–152 %. No lo
+vio ningún chequeo: `check:motion` y `check:parity` miden movimiento, no cuánto ocupa
+el objeto (lo marcó el dueño con una captura).
+
+`fitCameraDistance({ fov, aspect, radius, base, fill })` (`src/lib/motion.js`, viaja en
+el ZIP) devuelve `max(base, radius / sin(mitadFovHorizontal · fill))`: aleja la cámara
+solo cuando la pantalla es angosta, hasta que la esfera que envuelve al objeto ocupa
+`fill` (0,9) del ancho. En pantallas anchas devuelve `base`, así que PC queda igual, y es
+continua (sin saltos entre anchos). Lo llaman `HeroThree` (MONOLITH) y `HeroMeaning`
+(ATELIER) en cada `resize()`; FIZZ resuelve el caso angosto a mano (`narrow` en `layout()`).
+En MONOLITH los nodos azules se compensan a medias con la distancia
+(`POINT_SIZE · (distancia / CAMERA_Z)^0,4`) para que el acento siga leyéndose.
+
+Una escena 3D nueva con `PerspectiveCamera` encuadra con esa función. Se verifica con
+una hoja de contacto a 320, 390, 430, 768 y 1440 de ancho.
 
 ### Lo que encontró la corrida completa del cierre
 
