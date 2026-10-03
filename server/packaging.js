@@ -48,8 +48,13 @@ function publicDirAssets(relDir) {
  *  6 — Pulido mobile/tablet de los 9 templates: fotos WebP con srcset
  *      (responsiveImage), capa tpl-* y ScrollRail, zonas de toque, reduced
  *      motion sin contenido oculto y WebGL en pausa fuera de pantalla.
+ *  7 — Versión calma con «reducir movimiento» (lib/motion.js: calmReveal,
+ *      calmCount, la variante calm: y motion-reduce:), sin huecos ni contenido
+ *      oculto en los 10 templates; paridad con PC en el teléfono: trackPointer
+ *      (el 3D de FIZZ, MONOLITH y ATELIER responde al dedo), presupuesto de GPU
+ *      (createFrameBudget) y sin blur animado sobre capas grandes.
  */
-export const PACK_VERSION = 6
+export const PACK_VERSION = 7
 
 const MODEL_FILES = {
   chapters: {

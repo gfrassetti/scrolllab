@@ -166,7 +166,8 @@ const targets = [
 
 fs.mkdirSync(SHOTS, { recursive: true })
 
-const browser = await chromium.launch()
+// PLAYWRIGHT_CHROMIUM_PATH: el Chromium ya instalado (como en check:builder y check:motion), sin `playwright install`.
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined })
 const problems = []
 
 for (const target of targets) {
