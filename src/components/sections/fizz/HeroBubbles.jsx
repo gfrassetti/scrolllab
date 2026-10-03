@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { calmReveal, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 
 const gltfLoaderMod = () => import('three/examples/jsm/loaders/GLTFLoader.js')
 
@@ -818,7 +818,9 @@ export default function HeroBubbles({
       }
 
       const state = { p: 0, enter: reduced ? 0 : 1 }
-      const pointer = { x: 0, y: 0 }
+      // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
+      // pointermove). En calma la botella queda quieta: no escucha nada.
+      const pointer = reduced ? { x: 0, y: 0 } : trackPointer()
       let lastTop = 0
       let boost = 1
 
@@ -885,12 +887,6 @@ export default function HeroBubbles({
         render()
       }
 
-      const onPointerMove = (e) => {
-        if (e.pointerType !== 'mouse') return
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1
-        pointer.y = (e.clientY / window.innerHeight) * 2 - 1
-      }
-
       let introDone = reduced
       function startBottle() {
         if (reduced || !introDone || !model) return
@@ -939,7 +935,6 @@ export default function HeroBubbles({
         calmReveal('[data-fizz-statement], [data-fizz-cta]')
         renderOnce()
       } else {
-        window.addEventListener('pointermove', onPointerMove)
         gsap.ticker.add(tick)
 
         gsap.to(state, {
@@ -1015,7 +1010,7 @@ export default function HeroBubbles({
         disposed = true
         ro.disconnect()
         io.disconnect()
-        window.removeEventListener('pointermove', onPointerMove)
+        pointer.dispose?.()
         gsap.ticker.remove(tick)
         clearTitle()
         planeGeo.dispose()

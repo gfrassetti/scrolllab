@@ -108,6 +108,8 @@ const DPR = 2
  */
 const ALLOW = {
   'atelier/NavAtelier:hidden': 'la marca se oculta a propósito al scrollear en mobile y vuelve arriba de todo',
+  'fizz/NavFizz:clipped':
+    'las líneas del menú a pantalla completa entran con máscara de SplitText: el recorte medido es la máscara de la animación, el texto se ve entero (captura menu-open)',
 }
 
 
@@ -290,12 +292,21 @@ function installPageHelpers() {
     if (r.width < min) probes.push([cx - half, cy], [cx + half, cy])
     if (r.height < min) probes.push([cx, cy - half], [cx, cy + half])
     if (probes.some(([x, y]) => x < 0 || y < 0 || x >= innerWidth || y >= innerHeight)) return null
+    // Un elemento fijo (el botón flotante del menú) tapando el punto no es un
+    // defecto del control: al scrollear sale de abajo. No se puede medir ahí.
+    let coveredByFixed = false
     const hits = (x, y) => {
       const h = document.elementFromPoint(x, y)
-      return !!h && (h === el || el.contains(h))
+      if (!h) return false
+      if (h === el || el.contains(h)) return true
+      for (let a = h; a && a !== document.body; a = a.parentElement) {
+        if (getComputedStyle(a).position === 'fixed') coveredByFixed = true
+      }
+      return false
     }
     const w = r.width >= min || (hits(cx - half, cy) && hits(cx + half, cy))
     const h = r.height >= min || (hits(cx, cy - half) && hits(cx, cy + half))
+    if (coveredByFixed && (!w || !h)) return null
     return { w: w ? Math.max(min, r.width) : r.width, h: h ? Math.max(min, r.height) : r.height }
   }
 
@@ -785,7 +796,7 @@ async function auditJob(browser, base, job, opts) {
           button.click()
           return `#${CSS.escape(id)}`
         }, menuId)
-        await page.waitForTimeout(900)
+        await page.waitForTimeout(1500)
         await shoot('menu', 'open')
         await auditHere('menu', menuSel)
         await page.keyboard.press('Escape')
@@ -801,6 +812,27 @@ async function auditJob(browser, base, job, opts) {
     let widened = false
     for (const pos of positions) {
       await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), pos.y)
+      // El primer salto largo puede frenar el hilo principal más de un segundo
+      // (decodificar fotos, dibujar por software): los fundidos de la calma
+      // recién arrancan cuando vuelven los cuadros. Se espera a 3 cuadros
+      // seguidos normales antes de contar el `settle`.
+      await page
+        .evaluate(
+          () =>
+            new Promise((resolve) => {
+              const t0 = performance.now()
+              let ok = 0
+              let last = t0
+              const loop = (t) => {
+                ok = t - last < 80 ? ok + 1 : 0
+                last = t
+                if (ok >= 3 || t - t0 > 6000) resolve()
+                else requestAnimationFrame(loop)
+              }
+              requestAnimationFrame(loop)
+            }),
+        )
+        .catch(() => {})
       await page.waitForTimeout(opts.settle)
       // En un teléfono, algo que se sale por la derecha hace que el navegador
       // ensanche la pantalla (la página se ve achicada) y todas las medidas de

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import {
   sodaCan01 as can01,
   sodaCan02 as can02,
@@ -87,7 +88,7 @@ export default function CanCarousel({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (prefersReducedMotion()) return calmReveal('[data-can-card]', { y: 18 })
 
       gsap.from('[data-can-card]', {
         y: 36,

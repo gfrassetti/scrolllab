@@ -81,7 +81,7 @@ Alto de la página en un Pixel 7 (390×844), en px: normal → calma.
 | MERIDIAN | 13868 → 13868 | El hero sigue el scroll 1:1 también en calma (decisión del dueño: el scrub es del visitante, no movimiento autónomo), así que el alto no cambia. Link del footer que quedaba invisible (transición CSS de opacity vs GSAP), zonas de toque ≥ 44 px, rótulos de 11 px. `check:mobile` 40 → 3 grupos (contador que rueda, recorte del mapa a 320, dos pines pegados en tablet); `check:motion` limpio en teléfono y tablet |
 | CHAPTERS | 12834 → 12834 | Calma con fundidos (`calmReveal`) y contadores que cuentan (`calmCount`). `HorizontalPanels` (también en el home, «cómo funciona») dejaba los paneles 2 a 4 fuera de pantalla en tablet: pasa a pila vertical en calma. `StickyImageStory`: en calma sin columna pegada (las fotos B y C no se veían) y en completo gana rama < 768 (zoom + texto que sube). Nuevo chequeo `unreachable` que lo detecta. `check:motion` y `check:builder` limpios |
 | NOCTURNE | 9882 → 6575 | `StickyWordCycle` en calma pasa de pila de palabras a lista con índice (01 CRAFT, 02 MOTION…): la palabra que cruza el medio de la pantalla se enciende y las otras se apagan con un fundido. `ZoomPortal` sin alto de scrub (`calm:h-auto`) con la foto y el pie entrando con fundido; el resto con `calmReveal`; la vista previa de `WorkIndex` sigue al cursor sin rezago (antes quedaba clavada arriba a la izquierda). `check:motion` (teléfono y tablet) y `check:mobile` en los dos modos: 0 hallazgos |
-| FIZZ | — | Pendiente |
+| FIZZ | 11220 → 9123 | La botella sigue al dedo como al mouse (`trackPointer`: antes ignoraba todo puntero que no fuera mouse). `BubbleBenefits`, `CanCarousel`, `PopManifesto` y `FooterSplash` cortaban con reducir movimiento y quedaban sin entrada: ahora fundidos (`calmReveal`). `check:builder`: `canLabel` y `canImage` se imprimen en la botella (canvas), no llegan al DOM (`NOT_IN_DOM`). `check:motion`, `check:parity` y `check:mobile` limpios |
 | MONOLITH, VELOCITY, ATELIER | — | Pendiente |
 
 ## Paridad PC ↔ teléfono
@@ -130,7 +130,7 @@ Cada marca es una decisión. Una que no se arregla se declara en `ACCEPTED`
 | COMIC | `quieta` · `ChapterFork` | Efecto de PC 57,7 → teléfono 1,4 | Pendiente |
 | COMIC | `quieta` · `ChapterWorlds` | Efecto de PC 51,4 → teléfono 9,6 | Pendiente |
 | MONOLITH | `solo-mouse` · `HeroThree` | Escucha `pointermove` y nada táctil | Pendiente |
-| FIZZ | `solo-mouse` · `HeroBubbles` | Ignora todo puntero que no sea mouse | Pendiente |
+| FIZZ | `solo-mouse` · `HeroBubbles` | Ignora todo puntero que no sea mouse | Resuelto: `trackPointer` |
 | ATELIER | `solo-mouse` · `HeroMeaning` | Escucha `pointermove` y nada táctil | Pendiente |
 | VELOCITY | `blur-pesado` · `HeroStrike` | `blur(18px)` con scrub sobre las capas a pantalla completa | Pendiente |
 

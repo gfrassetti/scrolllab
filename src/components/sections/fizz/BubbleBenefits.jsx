@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultBenefits = [
   {
@@ -39,7 +40,8 @@ export default function BubbleBenefits({
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      // Calma: título y tarjetas entran con un fundido; las burbujas quedan quietas.
+      if (prefersReducedMotion()) return calmReveal('[data-benefit-head], [data-benefit-card]', { y: 18 })
 
       gsap.from('[data-benefit-head]', {
         y: 36,
