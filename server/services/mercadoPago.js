@@ -7,7 +7,7 @@ import {
   InvalidWebhookSignatureError,
 } from 'mercadopago'
 import { PRODUCTS } from '../catalog.js'
-import { HttpError } from '../validation.js'
+import { HttpError } from '../errors.js'
 
 /** Máx. 13 caracteres: sale en el resumen de la tarjeta del comprador. */
 export const MP_STATEMENT_DESCRIPTOR = 'SCROLLLAB'

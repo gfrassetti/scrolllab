@@ -9,23 +9,10 @@ import {
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
 import { sanitizeSectionProps } from './sectionFields.js'
+import { HttpError } from './errors.js'
 
-export class HttpError extends Error {
-  /**
-   * `expose` habilita que el mensaje viaje al cliente aunque sea 5xx: los 5xx
-   * crudos se enmascaran porque pueden traer detalles internos.
-   * `code` y `details` son opcionales y viajan al cliente: sirven para que el
-   * front distinga dos errores con el mismo status sin leer el texto.
-   */
-  constructor(status, message, { expose, code, details } = {}) {
-    super(message)
-    this.status = status
-    this.name = 'HttpError'
-    this.expose = expose ?? status < 500
-    if (code) this.code = code
-    if (details) this.details = details
-  }
-}
+// Re-export: varios módulos y tests la importan de acá.
+export { HttpError }
 
 export function assertObjectIdLike(id) {
   if (typeof id !== 'string' || !/^[a-fA-F0-9]{12,24}$/.test(id)) {

@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import { db } from '../db.js'
-import { HttpError } from '../validation.js'
+import { HttpError } from '../errors.js'
 import {
   HOSTED_PLANS,
   hostedPlanQuota,

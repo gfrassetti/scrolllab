@@ -8,7 +8,8 @@
  */
 import crypto from 'node:crypto'
 import { db } from '../db.js'
-import { HttpError, cleanUtm, normalizeLeadEmail } from '../validation.js'
+import { HttpError } from '../errors.js'
+import { cleanUtm, normalizeLeadEmail } from '../validation.js'
 import {
   WELCOME_COUPON_BOUND_TO_EMAIL,
   WELCOME_COUPON_DAYS,

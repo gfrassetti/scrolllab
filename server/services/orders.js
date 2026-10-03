@@ -3,7 +3,7 @@ import path from 'node:path'
 import { packOrderTemplate, PACK_VERSION } from '../packaging.js'
 import { BUNDLE_MODELS } from '../catalog.js'
 import { purchaseCode } from '../license.js'
-import { HttpError } from '../validation.js'
+import { HttpError } from '../errors.js'
 import { db } from '../db.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
 import {
