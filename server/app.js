@@ -4,11 +4,12 @@ import session from 'express-session'
 import passport from 'passport'
 import { sanitizeAuthReturn } from './authReturn.js'
 import { configurePassport } from './auth/passport.js'
+import { createHealthRouter } from './http/routes/health.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { connectDb, db, storeMode } from './db.js'
-import { assertWritableDir, authDiagnostics } from './config.js'
+import { assertWritableDir } from './config.js'
 import {
   createCors,
   createHelmet,
@@ -79,9 +80,6 @@ import {
   storageRoot,
 } from './packaging.js'
 import {
-  catalogWithArs,
-  arsFromUsd,
-  COMMERCE_PACK_SURCHARGE_USD,
   HOSTED_PLANS,
   isHostedPlanId,
   discountedArsFromUsd,
@@ -207,61 +205,7 @@ export async function createApp(config) {
     }
   }
 
-  app.get('/api/health', (_req, res) => {
-    res.json({
-      ok: true,
-      brand: 'SCROLLLAB',
-      uptime: process.uptime(),
-    })
-  })
-
-  app.get(
-    '/api/ready',
-    asyncHandler(async (_req, res) => {
-      const mongoOk = await db.isReady()
-      let storageOk = false
-      try {
-        assertWritableDir(config.storageDir)
-        storageOk = true
-      } catch {
-        storageOk = false
-      }
-      if (!mongoOk || !storageOk) {
-        return res.status(503).json({
-          ok: false,
-          store: storeMode(),
-          mongo: mongoOk,
-          storage: storageOk,
-        })
-      }
-      res.json({
-        ok: true,
-        store: storeMode(),
-        mongo: mongoOk,
-        storage: storageOk,
-        mpMock: config.mpMock,
-        auth: authDiagnostics(config),
-      })
-    }),
-  )
-
-  app.get(
-    '/api/catalog',
-    asyncHandler(async (_req, res) => {
-      const fx = await getUsdArsRate()
-      res.json({
-        products: catalogWithArs(fx.rate),
-        commercePackSurchargeUsd: COMMERCE_PACK_SURCHARGE_USD,
-        commercePackSurcharge: arsFromUsd(COMMERCE_PACK_SURCHARGE_USD, fx.rate),
-        fx: {
-          rate: fx.rate,
-          spreadPct: fx.spreadPct,
-          updatedAt: fx.updatedAt,
-          stale: fx.stale,
-        },
-      })
-    }),
-  )
+  app.use(createHealthRouter({ config }))
 
   app.get('/api/auth/me', (req, res) => {
     res.set('Cache-Control', 'no-store')
