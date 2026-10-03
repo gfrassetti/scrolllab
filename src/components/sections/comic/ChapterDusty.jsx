@@ -1,10 +1,11 @@
 import { useRef } from 'react'
-import { gsap, useGSAP } from '../../../lib/gsap'
+import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import ComicPanel from './ComicPanel'
 import PaperFrame from './PaperFrame'
-import { heroRoad, closeupBuddies, driveSunset, variants } from './assets/images'
+import RoadHero from './RoadHero'
+import { closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
 const CAPTIONS = [
@@ -23,9 +24,15 @@ const CAPTIONS = [
  * verían las tres pisándose. En calma son tres viñetas en fila, cada una un
  * bloque normal del documento (ComicPanel), con fundido al entrar.
  */
+const LAYER_ZOOM = { sky: 1.04, far: 1.08, peak: 1.12, hills: 1.22, road: 1.34, shrubs: 1.55, fore: 1.7 }
+
+/** Small connective words ("a", "of") are set small, like a hand-lettered cover. */
+const isSmall = (word) => word.replace(/[^a-z]/gi, '').length <= 2
+
 export default function ChapterDusty({
   eyebrow = 'Eyebrow 1',
-  title = 'TITLE 1',
+  title = 'A TALE OF ROAD AND DUST',
+  onomatopoeia = 'VROOM',
   captions = CAPTIONS,
 }) {
   const root = useRef(null)
@@ -38,18 +45,70 @@ export default function ChapterDusty({
       const pin = root.current.querySelector('[data-pin]')
       const titleEl = root.current.querySelector('[data-hero-title]')
       const camera = root.current.querySelector('[data-camera]')
-      const heroImg = root.current.querySelector('[data-hero-img]')
       const close = root.current.querySelector('[data-panel="close"]')
       const drive = root.current.querySelector('[data-panel="drive"]')
       const closeImg = root.current.querySelector('[data-close-img]')
       const driveImg = root.current.querySelector('[data-drive-img]')
       const captionsEls = gsap.utils.toArray('[data-caption]')
-      const bits = gsap.utils.toArray('[data-dust-bit]')
-      const vignette = root.current.querySelector('[data-vignette]')
+      const strip = root.current.querySelector('[data-caption-strip]')
+      const sfx = root.current.querySelector('[data-sfx]')
+      const q = (sel) => gsap.utils.toArray(sel, root.current)
+      const truckPos = root.current.querySelector('[data-truck-pos]')
+      const tails = q('[data-tail]')
+      const heads = q('[data-head]')
+      const puffs = q('[data-smoke-puff]')
 
+      // The title is hand-cut: every letter sits a little off its baseline.
+      const split = SplitText.create(titleEl.querySelector('[data-hero-words]'), {
+        type: 'chars',
+        charsClass: 'comic-char',
+      })
+      split.chars.forEach((char) => {
+        gsap.set(char, { rotate: gsap.utils.random(-5, 5), y: gsap.utils.random(-4, 4), display: 'inline-block' })
+      })
+
+      // The truck starts far down the road: small, near the vanishing point.
+      // `rig.s` is how close it is: it sets the scale and, with the horizon at
+      // y = 500, how far down the road it sits.
+      // In a portrait phone the scene is cropped to its middle: keep the truck smaller.
+      const narrow = window.innerWidth < 768
+      const near = narrow ? { mid: 0.56, end: 0.64, zoom: 1.08 } : { mid: 0.9, end: 0.98, zoom: 1.45 }
+      const rig = { s: narrow ? 0.26 : 0.38 }
+      const applyRig = () =>
+        truckPos.setAttribute('transform', `translate(800 ${500 + 340 * rig.s}) scale(${rig.s})`)
+      applyRig()
+      gsap.set(tails, { y: 150 })
+      gsap.set(heads, { y: 230 })
+      gsap.set(puffs, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' })
+      gsap.set(camera, { transformOrigin: '50% 68%' })
       gsap.set(close, { yPercent: 112, rotate: 2.8 })
       gsap.set(drive, { xPercent: 112, rotate: -2.4 })
       gsap.set(captionsEls, { opacity: 0, y: 28 })
+      gsap.set(strip, { opacity: 0 })
+      gsap.set(sfx, { opacity: 0, scale: 0.7, xPercent: 6, rotate: -8 })
+
+      // Idle life, not tied to the scroll: the tails wag, the heads bob.
+      tails.forEach((tail, i) => {
+        gsap.to(tail.querySelector('[data-tail-sway]'), {
+          rotate: i ? -16 : 20,
+          duration: 0.32 + i * 0.07,
+          yoyo: true,
+          repeat: -1,
+          ease: 'sine.inOut',
+          transformOrigin: '0px 0px',
+        })
+      })
+      heads.forEach((head, i) => {
+        gsap.to(head.querySelector('[data-head-bob]'), {
+          y: 5,
+          rotate: i ? -1.2 : 1.6,
+          duration: 0.9 + i * 0.15,
+          yoyo: true,
+          repeat: -1,
+          ease: 'sine.inOut',
+          transformOrigin: '0px 40px',
+        })
+      })
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
@@ -64,49 +123,72 @@ export default function ChapterDusty({
         },
       })
 
-      // Act 1 — title + slow push-in
-      tl.to(titleEl, { opacity: 0, y: -60, scale: 0.92, duration: 1.4 }, 1)
-      tl.fromTo(
-        heroImg,
-        { scale: 1.08, xPercent: 0, yPercent: 0 },
-        { scale: 1.18, xPercent: -2, yPercent: 1, duration: 3.5 },
-        0,
-      )
-      tl.fromTo(vignette, { opacity: 0.15 }, { opacity: 0.45, duration: 3 }, 0)
-
-      // Act 2 — hard zoom toward truck / animals
+      // Act 1 — the truck rolls toward us; the title breaks up letter by letter
+      tl.to(rig, { s: near.mid, duration: 3.2, ease: 'power1.in', onUpdate: applyRig }, 0)
       tl.to(
-        camera,
+        split.chars,
         {
-          scale: 1.85,
-          xPercent: 4,
-          yPercent: 10,
-          duration: 3.8,
-          transformOrigin: '48% 62%',
+          opacity: 0,
+          y: () => gsap.utils.random(-320, -140),
+          x: () => gsap.utils.random(-90, 90),
+          rotate: () => gsap.utils.random(-50, 50),
+          scale: 0.7,
+          duration: 0.9,
+          stagger: { each: 0.045, from: 'random' },
+          ease: 'power2.in',
         },
-        2.4,
+        0.25,
       )
-      tl.to(heroImg, { scale: 1.35, duration: 3.8 }, 2.4)
-      tl.to(vignette, { opacity: 0.62, duration: 2 }, 2.8)
+      tl.to(titleEl.querySelector('[data-hero-eyebrow]'), { opacity: 0, y: -14, duration: 0.7 }, 0.6)
 
-      bits.forEach((bit, i) => {
-        tl.fromTo(
-          bit,
-          { opacity: 0, x: 20, y: 10 },
-          {
-            opacity: 0.55 + (i % 3) * 0.1,
-            x: -100 - i * 14,
-            y: -30 + (i % 4) * 10,
-            duration: 2.4,
-          },
-          2.6 + i * 0.06,
-        )
+      // the engine noise rips across the left of the frame
+      tl.to(sfx, { opacity: 1, scale: 1, xPercent: 0, rotate: -4, duration: 0.7, ease: 'back.out(1.7)' }, 0.55)
+      tl.to(sfx, { xPercent: -3, scale: 1.08, duration: 1.7 }, 1.25)
+      tl.to(sfx, { opacity: 0, duration: 0.6 }, 2.35)
+
+      // tails pop over the tailgate, wag, then the animals turn around
+      tails.forEach((tail, i) => {
+        tl.to(tail, { y: 0, duration: 0.5, ease: 'back.out(2)' }, 0.55 + i * 0.12)
+        tl.to(tail, { y: 150, duration: 0.45, ease: 'power2.in' }, 1.95 + i * 0.1)
+      })
+      heads.forEach((head, i) => {
+        tl.to(head, { y: 0, duration: 0.9, ease: 'back.out(1.35)' }, 2.25 + i * 0.22)
       })
 
-      tl.to(captionsEls[0], { opacity: 1, y: 0, duration: 0.55 }, 2.5)
-      tl.to(captionsEls[0], { opacity: 0, y: -20, duration: 0.4 }, 3.7)
-      tl.to(captionsEls[1], { opacity: 1, y: 0, duration: 0.55 }, 3.8)
+      // smoke churns out of the wheels
+      puffs.forEach((puff, i) => {
+        const at = 1.0 + (i % 4) * 0.28 + (i > 3 ? 0.1 : 0)
+        const side = i > 3 ? 1 : -1
+        tl.fromTo(
+          puff,
+          { opacity: 0, scale: 0.3, x: 0, y: 0 },
+          { opacity: 0.96, scale: 1.1, x: side * 18, y: -10, duration: 0.7 },
+          at,
+        )
+        tl.to(puff, { opacity: 0, scale: 2.4, x: side * (60 + i * 6), y: -50 - (i % 3) * 14, duration: 1.7 }, at + 0.7)
+      })
+
+      // the paragraph arrives with a soft blur behind it
+      tl.to(strip, { opacity: 1, duration: 0.6 }, 1.7)
+      tl.to(captionsEls[0], { opacity: 1, y: 0, duration: 0.55 }, 1.9)
+      tl.to(captionsEls[0], { opacity: 0, y: -20, duration: 0.4 }, 3.9)
+      tl.to(captionsEls[1], { opacity: 1, y: 0, duration: 0.55 }, 4.0)
       tl.to(captionsEls[1], { opacity: 0, y: -20, duration: 0.4 }, 5.1)
+      tl.to(strip, { opacity: 0, duration: 0.4 }, 4.3)
+
+      // Act 2 — the camera pushes in and tilts down onto the truck, layer by layer
+      tl.to(
+        camera,
+        { scale: near.zoom, yPercent: -3, duration: 3.6, ease: 'power1.inOut' },
+        2.3,
+      )
+      Object.entries(LAYER_ZOOM).forEach(([name, zoom]) => {
+        const layer = root.current.querySelector(`[data-layer="${name}"]`)
+        if (layer) {
+          tl.to(layer, { scale: zoom, svgOrigin: '800 640', duration: 3.6, ease: 'power1.inOut' }, 2.3)
+        }
+      })
+      tl.to(rig, { s: near.end, duration: 2.6, ease: 'power1.inOut', onUpdate: applyRig }, 3.2)
 
       // Act 3 — torn close-up slides up over the zoom
       tl.to(close, { yPercent: 0, rotate: -0.6, duration: 2.3 }, 5.4)
@@ -152,17 +234,20 @@ export default function ChapterDusty({
           <p className="mb-4 text-[11px] tracking-[0.3em] text-white/85 uppercase md:text-xs">
             {eyebrow}
           </p>
-          <h1 className="mx-auto max-w-5xl font-brico text-[clamp(2.2rem,8vw,5.5rem)] leading-[0.92] font-extrabold tracking-[-0.03em]">
+          <h1 className="mx-auto max-w-5xl font-hand text-[clamp(2.6rem,9vw,6rem)] leading-[0.9] font-black tracking-[0.01em] uppercase">
             {title}
           </h1>
         </div>
-        <div data-comic-reveal>
-          <ComicPanel
-            img={heroRoad}
-            variants={variants}
-            sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
-            lines={[captions[0], captions[1]]}
-          />
+        <div data-comic-reveal className="mx-auto mb-6 max-w-4xl px-5 md:px-10">
+          <PaperFrame className="h-full !w-full">
+            <div className="relative aspect-[16/10] overflow-hidden md:aspect-[16/8]">
+              <RoadHero calm />
+            </div>
+            <div className="bg-[#f7f4ee] p-6 text-[#2a2622] md:p-8">
+              <p className="text-sm leading-relaxed text-[#2a2622]/75">{captions[0]}</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#2a2622]/75">{captions[1]}</p>
+            </div>
+          </PaperFrame>
         </div>
         <div data-comic-reveal>
           <ComicPanel
@@ -193,45 +278,17 @@ export default function ChapterDusty({
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
           <div data-camera className="absolute inset-0 origin-center will-change-transform">
-            <img
-              data-hero-img
-              {...imgAttrs(heroRoad, variants)}
-              sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
-              fetchPriority="high"
-              alt=""
-              className="absolute inset-0 h-full w-full origin-center object-cover will-change-transform"
-              draggable={false}
-            />
+            <RoadHero />
           </div>
 
           <div
-            data-vignette
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply"
             style={{
-              opacity: 0.15,
               background:
-                'radial-gradient(ellipse at center, transparent 35%, rgba(10,8,6,0.75) 100%)',
+                'radial-gradient(ellipse at 50% 60%, transparent 40%, rgba(40,18,10,0.45) 100%)',
             }}
           />
-
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <span
-                key={i}
-                data-dust-bit
-                className="absolute rounded-full bg-[#f0e6d6]"
-                style={{
-                  width: 4 + (i % 5) * 3,
-                  height: 3 + (i % 4) * 2,
-                  left: `${42 + (i % 6) * 3}%`,
-                  top: `${58 + (i % 5) * 4}%`,
-                  opacity: 0,
-                  filter: 'blur(1px)',
-                }}
-              />
-            ))}
-          </div>
 
           <div
             data-panel="close"
@@ -286,30 +343,85 @@ export default function ChapterDusty({
 
         <div
           data-hero-title
-          className="pointer-events-none absolute inset-x-0 top-[20%] z-40 px-5 text-center md:top-[18%]"
+          className="pointer-events-none absolute inset-x-0 top-[10%] z-40 px-5 text-center md:top-[9%]"
         >
-          <p className="mb-4 text-[11px] tracking-[0.3em] text-white/85 uppercase drop-shadow md:text-xs">
+          <p
+            data-hero-eyebrow
+            className="mb-3 text-[13px] font-semibold tracking-[0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] md:text-[15px]"
+          >
             {eyebrow}
           </p>
           <h1
-            className="mx-auto max-w-5xl font-brico text-[clamp(2.6rem,9vw,6.2rem)] leading-[0.86] font-extrabold tracking-[-0.045em] text-white drop-shadow-[0_10px_40px_rgba(0,0,0,0.55)]"
-            style={{ transform: 'rotate(-1.2deg)' }}
+            className="mx-auto max-w-[17ch] font-hand text-[clamp(3.2rem,10vw,8.6rem)] leading-[0.84] font-black tracking-[0.015em] text-balance text-white uppercase drop-shadow-[0_8px_0_rgba(20,10,8,0.28)]"
+            aria-label={title}
           >
-            {title}
+            <span data-hero-words aria-hidden="true">
+              {title.split(' ').map((word, i) => (
+                <span
+                  key={i}
+                  className="inline-block whitespace-nowrap"
+                  style={{ fontSize: isSmall(word) ? '0.42em' : undefined, margin: '0 0.12em' }}
+                >
+                  {word}
+                </span>
+              ))}
+            </span>
           </h1>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 top-[10%] z-50 flex justify-center px-6 md:top-[8%]">
-          <div className="relative h-28 w-full max-w-3xl text-center">
-            {captions.map((text) => (
-              <p
-                key={text}
-                data-caption
-                className="absolute inset-x-0 text-[15px] leading-relaxed text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)] md:text-lg"
-              >
-                {text}
-              </p>
-            ))}
+        {/* the engine, as sound */}
+        <div
+          data-sfx
+          aria-hidden="true"
+          className="pointer-events-none absolute top-[30%] left-[1%] z-30 w-[58vw] max-w-[760px] md:left-[3%] md:w-[40vw]"
+        >
+          <svg viewBox="0 0 640 330" className="h-auto w-full overflow-visible">
+            <defs>
+              <path id="sfx-path" d="M20 270 C140 80 330 40 610 150" />
+            </defs>
+            <text
+              className="font-hand"
+              fontSize="170"
+              fontWeight="900"
+              letterSpacing="4"
+              fill="#fff"
+              stroke="#1d1311"
+              strokeWidth="9"
+              strokeLinejoin="round"
+              paintOrder="stroke"
+            >
+              <textPath href="#sfx-path" startOffset="0">
+                {onomatopoeia}
+              </textPath>
+            </text>
+          </svg>
+        </div>
+
+        {/* paragraph over a soft blur of the scene */}
+        <div className="pointer-events-none absolute inset-x-0 top-[12%] z-50 flex justify-center px-6 md:top-[11%]">
+          <div className="relative w-full max-w-4xl text-center">
+            <div
+              data-caption-strip
+              aria-hidden="true"
+              className="absolute -inset-x-[12%] -inset-y-5 backdrop-blur-[6px]"
+              style={{
+                background: 'rgba(20,34,32,0.14)',
+                WebkitMaskImage:
+                  'radial-gradient(ellipse 70% 62% at 50% 50%, #000 55%, transparent 100%)',
+                maskImage: 'radial-gradient(ellipse 70% 62% at 50% 50%, #000 55%, transparent 100%)',
+              }}
+            />
+            <div className="relative h-24 md:h-20">
+              {captions.map((text) => (
+                <p
+                  key={text}
+                  data-caption
+                  className="absolute inset-x-0 text-[15px] leading-relaxed font-semibold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] md:text-lg"
+                >
+                  {text}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </div>

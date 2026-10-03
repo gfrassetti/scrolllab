@@ -117,6 +117,8 @@ html.dark {
   --font-anton: "Anton", ui-sans-serif, system-ui, sans-serif;
   --font-oswald: "Oswald", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Comic hero lettering — chunky hand-cut caps (Google: Londrina Solid). */
+  --font-hand: "Londrina Solid", "Bricolage Grotesque", ui-sans-serif, sans-serif;
 }
 
 @theme {
