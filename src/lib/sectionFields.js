@@ -398,6 +398,8 @@ export const SECTION_FIELDS = {
   ],
   'fizz/FlavorWorlds': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'startBg', label: 'Color de entrada (el del final del hero)', type: 'color' },
+    { key: 'startInk', label: 'Texto sobre el color de entrada', type: 'color' },
   ],
   'fizz/BubbleBenefits': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
