@@ -113,7 +113,7 @@ export default function BubbleBenefits({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="max-w-[16ch] font-brico text-[clamp(2.2rem,6.5vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.02em] uppercase">
+        <h2 className="max-w-[10ch] font-brico text-[clamp(3.25rem,13vw,11rem)] leading-[0.88] font-extrabold tracking-[-0.02em] uppercase">
           {title}
         </h2>
       </div>
