@@ -10,6 +10,7 @@ import { createCouponsRouter } from './http/routes/coupons.js'
 import { createHostedRouter } from './http/routes/hosted.js'
 import { createSubscriptionsRouter } from './http/routes/subscriptions.js'
 import { createCheckoutRouter } from './http/routes/checkout.js'
+import { createWebhooksRouter } from './http/routes/webhooks.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { connectDb, storeMode } from './db.js'
@@ -23,24 +24,7 @@ import {
   rateLimits,
   notFound,
   errorHandler,
-  asyncHandler,
-  HttpError,
 } from './middleware.js'
-import {
-  verifyMpWebhookSignature,
-  fetchPayment,
-} from './services/mercadoPago.js'
-import {
-  applyUpgradePayment,
-  isUpgradeReference,
-  handlePreapprovalEvent,
-  handleAuthorizedPaymentEvent,
-} from './services/subscriptions.js'
-import {
-  fulfillApprovedPayment,
-  reverseOrderPayment,
-  REVERSED_PAYMENT_STATUSES,
-} from './services/orders.js'
 import { storageRoot } from './packaging.js'
 
 /**
@@ -136,89 +120,7 @@ export async function createApp(config) {
 
   app.use(createCheckoutRouter({ config, limits }))
 
-  app.post(
-    '/api/webhooks/mercadopago',
-    limits.webhook,
-    asyncHandler(async (req, res) => {
-      const type = req.query.type || req.body?.type
-      const dataId = req.query['data.id'] || req.body?.data?.id
-      if (!dataId) return res.sendStatus(200)
-
-      // ——— Suscripciones (LAB) — misma URL, otro `type` ———
-      if (
-        type === 'subscription_preapproval' ||
-        type === 'subscription_authorized_payment'
-      ) {
-        if (!config.mpSubs.accessToken) return res.sendStatus(200)
-        verifyMpWebhookSignature({
-          secret: config.mpSubs.webhookSecret,
-          xSignature: req.headers['x-signature'],
-          xRequestId: req.headers['x-request-id'],
-          dataId,
-        })
-        try {
-          if (type === 'subscription_preapproval') {
-            await handlePreapprovalEvent({ preapprovalId: dataId, config })
-          } else {
-            // authorized_payment: se cobró una cuota. Extiende el período —
-            // sin esto la renovación no lo mueve y el usuario cae a free
-            // aunque le sigan cobrando.
-            await handleAuthorizedPaymentEvent(
-              { authorizedPaymentId: dataId, config },
-            )
-          }
-        } catch (err) {
-          if (err instanceof HttpError && err.status < 500) {
-            console.error(`MP subs webhook skipped id=${dataId}: ${err.message}`)
-            return res.sendStatus(200)
-          }
-          throw err
-        }
-        return res.sendStatus(200)
-      }
-
-      // ——— Pago único (Checkout Pro) ———
-      // Compras del market, y la diferencia al subir de plan en LAB: esa
-      // preference la arma la app de suscripciones y notifica con
-      // `?source=lab` (su secreto y su token, por si son otra app de MP).
-      const lab = req.query.source === 'lab'
-      const payToken = lab ? config.mpSubs.accessToken : config.mpAccessToken
-      if (config.mpMock || !payToken) {
-        return res.sendStatus(200)
-      }
-      if (type !== 'payment') {
-        return res.sendStatus(200)
-      }
-
-      verifyMpWebhookSignature({
-        secret: lab ? config.mpSubs.webhookSecret : config.mpWebhookSecret,
-        xSignature: req.headers['x-signature'],
-        xRequestId: req.headers['x-request-id'],
-        dataId,
-      })
-
-      // Un 4xx no se arregla reintentando: cortamos con 200 para que MP no
-      // repita el evento. Los 5xx (MP caído, Mongo) sí tienen que reintentarse.
-      try {
-        const payment = await fetchPayment(payToken, dataId)
-        if (isUpgradeReference(payment.external_reference)) {
-          await applyUpgradePayment({ payment, config })
-        } else if (REVERSED_PAYMENT_STATUSES.has(payment.status)) {
-          await reverseOrderPayment({ payment, config })
-        } else {
-          await fulfillApprovedPayment({ payment, config })
-        }
-      } catch (err) {
-        if (err instanceof HttpError && err.status < 500) {
-          console.error(`MP webhook skipped payment=${dataId}: ${err.message}`)
-          return res.sendStatus(200)
-        }
-        throw err
-      }
-
-      res.sendStatus(200)
-    }),
-  )
+  app.use(createWebhooksRouter({ config, limits }))
 
   app.use(createHostedRouter({ config, limits }))
 
