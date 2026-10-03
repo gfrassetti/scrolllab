@@ -96,7 +96,7 @@ export default function BubbleBenefits({
         aria-hidden="true"
         viewBox="0 0 1440 48"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-1px)] block h-8 w-full md:h-12"
+        className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-2px)] block h-8 w-full md:h-12"
         style={{ fill: bg }}
       >
         <path d="M0 48V22C120 6 240 2 360 12s240 26 360 22 240-24 360-28 240 8 360 18v22Z" />

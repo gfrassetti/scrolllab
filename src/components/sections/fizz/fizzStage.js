@@ -292,6 +292,10 @@ function createStage({
     if (top > 0) offset = top
     else if (bottom < H && !covered) offset = bottom - H
     canvas.style.transform = offset ? `translate3d(0, ${offset}px, 0)` : ''
+    // Covered at the end: the canvas stops where the section does, so it never
+    // paints over what comes after (the next section hides the rest).
+    const cut = covered && bottom < H ? Math.max(0, H - bottom) : 0
+    canvas.style.clipPath = cut ? `inset(0 0 ${cut}px 0)` : ''
     return true
   }
 
@@ -397,6 +401,7 @@ function createStage({
       renderer.dispose()
       canvas.style.visibility = 'hidden'
       canvas.style.transform = ''
+      canvas.style.clipPath = ''
     },
   }
 }
