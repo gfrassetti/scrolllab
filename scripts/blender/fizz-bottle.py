@@ -33,7 +33,7 @@ ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 PREVIEW_OUT = ARGS[0] if ARGS else ''
 
 CM = 0.01
-SEGMENTS = 112
+SEGMENTS = 144
 FLUTES = 24
 
 # Perfil exterior (radio, altura): base con picadura, anillo en relieve, cuerpo
@@ -60,16 +60,16 @@ LIQUID = [
     (2.3, FILL - 0.04), (2.2, FILL + 0.04), (1.8, FILL), (0.0, FILL),
 ]
 STOPPER = [
-    (0.0, 28.78), (1.5, 28.78), (1.6, 28.9), (1.6, 29.15), (1.46, 29.3),
-    (1.58, 29.45), (1.7, 29.65), (1.7, 30.2), (1.5, 30.75), (1.0, 31.1),
-    (0.0, 31.2),
+    (0.0, 28.78), (1.5, 28.78), (1.62, 28.9), (1.62, 29.18), (1.5, 29.3),
+    (1.56, 29.48), (1.7, 29.78), (1.72, 30.3), (1.62, 30.72), (1.32, 31.0),
+    (0.8, 31.16), (0.0, 31.2),
 ]
 SEAL = [
     (1.5, 28.4), (1.78, 28.42), (1.84, 28.56), (1.78, 28.74), (1.5, 28.78),
 ]
 FLUTE_BAND = (1.9, 3.3)
-LABEL_BAND = (6.0, 14.0)
-LABEL_ARC = math.radians(66)
+LABEL_BAND = (5.2, 16.2)
+LABEL_ARC = math.radians(80)
 NECK_Z = 27.12
 PIVOT = (2.0, NECK_Z + 0.4)
 
@@ -127,6 +127,29 @@ def lathe(name, profile, segments, offset=None):
 
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(verts, [], faces)
+
+    # UV: u alrededor (la costura cierra en 1.0), v a lo largo del perfil.
+    # Hacen falta para los mapas de rayones y huellas del vidrio.
+    zs = [z for _, z in profile]
+    z0, z1 = min(zs), max(zs)
+    angle_of = {}
+    for ring in rings:
+        if len(ring) > 1:
+            for s_, vi in enumerate(ring):
+                angle_of[vi] = s_ / segments
+    layer = mesh.uv_layers.new(name='UVMap')
+    for poly in mesh.polygons:
+        us = [angle_of.get(mesh.loops[li].vertex_index) for li in poly.loop_indices]
+        known = [u for u in us if u is not None]
+        wraps = known and max(known) - min(known) > 0.5
+        for li in poly.loop_indices:
+            vi = mesh.loops[li].vertex_index
+            u = angle_of.get(vi, sum(known) / len(known) if known else 0.0)
+            if wraps and u < 0.5:
+                u += 1.0
+            v = (mesh.vertices[vi].co.z / CM - z0) / ((z1 - z0) or 1)
+            layer.data[li].uv = (u, v)
+
     bm = bmesh.new()
     bm.from_mesh(mesh)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -151,7 +174,7 @@ def material(name, color, *, roughness=0.5, metallic=0.0, transmission=0.0, ior=
 
 
 def build_glass():
-    outer = resample(OUTER, 0.16)
+    outer = resample(OUTER, 0.1)
     inner = resample(INNER, 0.5)
     lo, hi = FLUTE_BAND
 
@@ -177,7 +200,7 @@ def build_liquid():
 
 
 def build_stopper():
-    obj = lathe('stopper', resample(STOPPER, 0.1, smooth=2), 64)
+    obj = lathe('stopper', resample(STOPPER, 0.08, smooth=3), 96)
     obj.data.materials.append(
         material('stopper', (0.97, 0.95, 0.9), roughness=0.2, metallic=0.0, ior=1.55)
     )
@@ -185,7 +208,7 @@ def build_stopper():
 
 
 def build_seal():
-    obj = lathe('seal', resample(SEAL, 0.05, smooth=1), 64)
+    obj = lathe('seal', resample(SEAL, 0.04, smooth=1), 96)
     obj.data.materials.append(material('seal', (1.0, 0.24, 0.65), roughness=0.55))
     return obj
 
@@ -231,34 +254,44 @@ def bezier(p0, p1, p2, p3, steps=28):
 
 
 def build_wire():
-    """Aro bajo el aro del cuello + arco que pasa por encima del tapón."""
+    """Herraje del tapón mecánico: aro del cuello y arco que cruza sobre el tapón."""
     ring = [
-        (2.16 * math.cos(2 * math.pi * i / 64), 2.16 * math.sin(2 * math.pi * i / 64), NECK_Z)
-        for i in range(64)
+        (2.18 * math.cos(2 * math.pi * i / 96), 2.18 * math.sin(2 * math.pi * i / 96), NECK_Z)
+        for i in range(96)
     ]
     px, pz = PIVOT
-    left = bezier((-px, 0, pz), (-px, 0, pz + 2.2), (-1.5, 0, 32.4), (0, 0, 32.4))
-    right = bezier((0, 0, 32.4), (1.5, 0, 32.4), (px, 0, pz + 2.2), (px, 0, pz))
-    arch = tube('wire_arch', left + right[1:], 0.1)
-    loop = tube('wire_ring', ring, 0.1, closed=True)
-    for o in (arch, loop):
-        bpy.context.view_layer.objects.active = o
+    top = 31.42
+    left = bezier((-px, 0, pz), (-px, 0, pz + 2.6), (-1.6, 0, top), (0, 0, top), 36)
+    right = bezier((0, 0, top), (1.6, 0, top), (px, 0, pz + 2.6), (px, 0, pz), 36)
+    parts = [
+        tube('wire_ring', ring, 0.11, sides=14, closed=True),
+        tube('wire_bail', left + right[1:], 0.1, sides=14),
+    ]
+    # Bujes donde pivotea el alambre.
+    for sx in (-1, 1):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2 * CM, location=(sx * px * CM, 0, pz * CM), segments=20, ring_count=12)
+        hub = bpy.context.active_object
+        bpy.ops.object.shade_smooth()
+        parts.append(hub)
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in parts:
         o.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
     bpy.ops.object.join()
     obj = bpy.context.view_layer.objects.active
     obj.name = 'wire'
     obj.data.name = 'wire'
     obj.data.materials.append(
-        material('wire', (0.8, 0.8, 0.82), roughness=0.28, metallic=1.0)
+        material('wire', (0.85, 0.86, 0.88), roughness=0.22, metallic=1.0)
     )
     return obj
 
 
 def build_label():
     """Parche curvo sobre la zona lisa, con UV 0–1 para la textura de marca."""
-    cols, rows = 40, 4
+    cols, rows = 72, 8
     z0, z1 = LABEL_BAND
-    radius = 4.05 + 0.025
+    radius = 4.05 + 0.012
     verts, uvs, faces = [], [], []
     for j in range(rows + 1):
         v = j / rows
@@ -349,6 +382,13 @@ def main():
         export_cameras=False,
         export_lights=False,
         export_animations=False,
+        # Draco: el GLB baja de ~3 MB a unos cientos de KB. El hero trae el
+        # decodificador en public/fizz/draco/.
+        export_draco_mesh_compression_enable=True,
+        export_draco_mesh_compression_level=7,
+        export_draco_position_quantization=16,
+        export_draco_normal_quantization=12,
+        export_draco_texcoord_quantization=12,
     )
 
     scene = bpy.context.scene

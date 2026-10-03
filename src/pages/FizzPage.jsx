@@ -10,6 +10,8 @@ import PopManifesto from '../components/sections/fizz/PopManifesto'
 import FooterSplash from '../components/sections/fizz/FooterSplash'
 
 const FIZZ_BOTTLE_GLB = '/fizz/soda-bottle.glb'
+// Studio Small 03 — Greg Zaal, Poly Haven (CC0), reducido a 512 px.
+const FIZZ_STUDIO_HDR = '/fizz/studio.hdr'
 
 /**
  * Template model — "FIZZ"
@@ -38,7 +40,7 @@ export default function FizzPage() {
         <NavFizz />
 
         <main>
-          <HeroBubbles modelUrl={FIZZ_BOTTLE_GLB} />
+          <HeroBubbles modelUrl={FIZZ_BOTTLE_GLB} envUrl={FIZZ_STUDIO_HDR} />
           <FlavorWorlds />
           <BubbleBenefits />
           <CanCarousel />
