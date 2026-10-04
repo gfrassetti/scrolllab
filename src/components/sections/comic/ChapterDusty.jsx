@@ -251,7 +251,7 @@ export default function ChapterDusty({
         return `${r.left + r.w / 2}px ${r.top + r.h / 2}px`
       }
       gsap.set(farmScene, { scale: 0.7, transformOrigin: slotCenter })
-      gsap.set(sideTruck, { x: () => -pin.clientWidth * 1.25, scale: 1.55, transformOrigin: '50% 100%', opacity: 1 })
+      gsap.set(sideTruck, { x: () => -pin.clientWidth * 0.95, scale: 1.25, transformOrigin: '50% 100%', opacity: 1 })
       gsap.set([buddies, trio], { opacity: 0 })
 
       tl.to(curtain, { yPercent: 0, duration: 1.7, ease: 'power2.out' }, 5.0)
@@ -268,18 +268,22 @@ export default function ChapterDusty({
       tl.to(farm, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 9.36)
       tl.to(ink[1], { opacity: 1, y: 0, duration: 0.7 }, 9.9)
 
-      // the truck rolls in from the left — big, close to the camera — while the
-      // last scene grows into the page; then it settles back into the scene
-      tl.to(sideTruck, { x: 0, duration: 4.4, ease: 'power2.inOut' }, 11.0)
-      tl.to(sideTruck, { scale: 1, duration: 2.6, ease: 'power2.inOut' }, 12.8)
-      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: 4.4, ease: 'power2.inOut' }, 11.0)
-      tl.to(farmScene, { scale: 1, duration: 4.4, ease: 'power2.inOut' }, 11.0)
-      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, 11.0)
-      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.8 }, 11.0)
-      tl.to(ink[1], { color: '#fff', duration: 1.0 }, 13.4)
-      tl.to(curtain, { opacity: 0, duration: 0.6 }, 15.6)
+      // the truck slides in from the left edge, a bit bigger than life, and shrinks
+      // into its place under the first scene while everything else holds still
+      tl.to(sideTruck, { x: () => -pin.clientWidth * 0.29, duration: 2.6, ease: 'power2.out' }, 11.0)
+      tl.to(sideTruck, { scale: 1, duration: 2.4, ease: 'power2.inOut' }, 11.6)
+
+      // then the last scene grows over the others into the whole page and the truck
+      // rolls to the middle of it
+      tl.to(sideTruck, { x: 0, duration: 4.4, ease: 'power2.inOut' }, 13.8)
+      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: 4.4, ease: 'power2.inOut' }, 13.8)
+      tl.to(farmScene, { scale: 1, duration: 4.4, ease: 'power2.inOut' }, 13.8)
+      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, 14.2)
+      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.8 }, 14.2)
+      tl.to(ink[1], { color: '#fff', duration: 1.0 }, 16.2)
+      tl.to(curtain, { opacity: 0, duration: 0.6 }, 18.4)
       // a beat to look at the finished scene
-      tl.to({}, { duration: 1.6 }, 16.0)
+      tl.to({}, { duration: 1.6 }, 18.8)
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -334,7 +338,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[880vh] bg-[#1a1512] text-white"
+      className="relative h-[1000vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
