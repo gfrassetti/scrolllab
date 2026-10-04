@@ -633,9 +633,26 @@ export default function TemplatesIndex() {
       <main className="px-5 md:px-10">
         <HomeHero t={t} locale={locale} />
 
-        <TemplatesZone t={t} templates={templates} locale={locale} rate={rate} addItem={addItem} buyingSku={buyingSku} authLoading={authLoading} buyNow={buyNow} />
+        <TemplatesZone
+          t={t}
+          templates={templates}
+          locale={locale}
+          rate={rate}
+          addItem={addItem}
+          buyingSku={buyingSku}
+          authLoading={authLoading}
+          buyNow={buyNow}
+        />
 
-        <BuilderZone t={t} locale={locale} rate={rate} addItem={addItem} buyingSku={buyingSku} authLoading={authLoading} buyNow={buyNow} />
+        <BuilderZone
+          t={t}
+          locale={locale}
+          rate={rate}
+          addItem={addItem}
+          buyingSku={buyingSku}
+          authLoading={authLoading}
+          buyNow={buyNow}
+        />
 
         <LabZone t={t} ways={ways} />
 
