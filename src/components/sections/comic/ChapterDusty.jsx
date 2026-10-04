@@ -251,7 +251,7 @@ export default function ChapterDusty({
         return `${r.left + r.w / 2}px ${r.top + r.h / 2}px`
       }
       gsap.set(farmScene, { scale: 0.7, transformOrigin: slotCenter })
-      gsap.set(sideTruck, { x: () => -pin.clientWidth * 1.05, opacity: 1 })
+      gsap.set(sideTruck, { x: () => -pin.clientWidth * 1.25, scale: 1.55, transformOrigin: '50% 100%', opacity: 1 })
       gsap.set([buddies, trio], { opacity: 0 })
 
       tl.to(curtain, { yPercent: 0, duration: 1.7, ease: 'power2.out' }, 5.0)
@@ -268,16 +268,18 @@ export default function ChapterDusty({
       tl.to(farm, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 9.36)
       tl.to(ink[1], { opacity: 1, y: 0, duration: 0.7 }, 9.9)
 
-      // the truck rolls in from the left while the last scene grows into the page
-      tl.to(sideTruck, { x: 0, duration: 2.6, ease: 'power2.inOut' }, 11.0)
-      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: 2.6, ease: 'power2.inOut' }, 11.0)
-      tl.to(farmScene, { scale: 1, duration: 2.6, ease: 'power2.inOut' }, 11.0)
-      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 1.4, ease: 'power2.in' }, 11.0)
-      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.2 }, 11.0)
-      tl.to(ink[1], { color: '#fff', duration: 0.8 }, 12.0)
-      tl.to(curtain, { opacity: 0, duration: 0.6 }, 13.2)
+      // the truck rolls in from the left — big, close to the camera — while the
+      // last scene grows into the page; then it settles back into the scene
+      tl.to(sideTruck, { x: 0, duration: 4.4, ease: 'power2.inOut' }, 11.0)
+      tl.to(sideTruck, { scale: 1, duration: 2.6, ease: 'power2.inOut' }, 12.8)
+      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: 4.4, ease: 'power2.inOut' }, 11.0)
+      tl.to(farmScene, { scale: 1, duration: 4.4, ease: 'power2.inOut' }, 11.0)
+      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, 11.0)
+      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.8 }, 11.0)
+      tl.to(ink[1], { color: '#fff', duration: 1.0 }, 13.4)
+      tl.to(curtain, { opacity: 0, duration: 0.6 }, 15.6)
       // a beat to look at the finished scene
-      tl.to({}, { duration: 1.2 }, 13.6)
+      tl.to({}, { duration: 1.6 }, 16.0)
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -332,7 +334,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[680vh] bg-[#1a1512] text-white"
+      className="relative h-[880vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
