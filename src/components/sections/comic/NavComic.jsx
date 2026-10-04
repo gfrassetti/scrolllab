@@ -29,35 +29,41 @@ export default function NavComic({
       : defaults
   const { open, close, panelProps, triggerProps } = useMobileMenu()
   const linksRef = useRef(null)
+  const brandRef = useRef(null)
 
-  // The links ride up and out as the story starts, one after another, and come
-  // back when you return to the top (the brand and the CTA stay).
+  // The brand and the links ride up and out as the story starts, one piece
+  // after another, and come back when you return to the top (the CTA and the
+  // menu button stay).
   useGSAP(
     () => {
       const list = linksRef.current
-      if (!list || prefersReducedMotion()) return
-      gsap.to(list.children, {
-        yPercent: -220,
+      const brand = brandRef.current
+      if (!list || !brand || prefersReducedMotion()) return
+      const pieces = [...brand.children, ...list.children]
+      gsap.to(pieces, {
+        yPercent: -240,
         opacity: 0,
-        stagger: 0.12,
+        stagger: 0.1,
         ease: 'power2.in',
         scrollTrigger: {
           start: 0,
-          end: '+=140',
+          end: '+=150',
           scrub: 0.3,
           onUpdate: (self) => {
-            list.style.pointerEvents = self.progress > 0.3 ? 'none' : ''
+            const gone = self.progress > 0.35 ? 'none' : ''
+            list.style.pointerEvents = gone
+            brand.style.pointerEvents = gone
           },
         },
       })
     },
-    { scope: linksRef },
+    { scope: brandRef },
   )
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 text-white">
       <nav className="pointer-events-auto relative z-10 flex items-center justify-between gap-4 px-4 py-4 md:px-8 md:py-5">
-        <div className="min-w-0">
+        <div ref={brandRef} className="min-w-0">
           <a
             href="#top"
             className="tpl-hit relative block text-sm font-semibold tracking-[0.22em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"

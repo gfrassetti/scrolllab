@@ -14,15 +14,21 @@
 
 const INK = '#1d1311'
 
+// Wheel smoke: soft blobs, six per side (left puffs first), rubbed into wisps by
+// an SVG turbulence filter. Their shapes only matter as a starting size.
 const SMOKE = [
-  { x: -190, y: -14, r: 34 },
-  { x: -226, y: -34, r: 26 },
-  { x: -158, y: -44, r: 24 },
-  { x: -204, y: -64, r: 20 },
-  { x: 190, y: -14, r: 34 },
-  { x: 226, y: -34, r: 26 },
-  { x: 158, y: -44, r: 24 },
-  { x: 204, y: -64, r: 20 },
+  { x: -170, y: -18, rx: 46, ry: 30 },
+  { x: -212, y: -30, rx: 60, ry: 34 },
+  { x: -150, y: -46, rx: 40, ry: 26 },
+  { x: -234, y: -14, rx: 72, ry: 26 },
+  { x: -190, y: -62, rx: 50, ry: 30 },
+  { x: -254, y: -42, rx: 56, ry: 32 },
+  { x: 170, y: -18, rx: 46, ry: 30 },
+  { x: 212, y: -30, rx: 60, ry: 34 },
+  { x: 150, y: -46, rx: 40, ry: 26 },
+  { x: 234, y: -14, rx: 72, ry: 26 },
+  { x: 190, y: -62, rx: 50, ry: 30 },
+  { x: 254, y: -42, rx: 56, ry: 32 },
 ]
 
 export default function RoadHero({ calm = false }) {
@@ -69,6 +75,17 @@ export default function RoadHero({ calm = false }) {
         <pattern id="rh-dots" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
           <circle cx="4.5" cy="4.5" r="1.7" fill="#120b09" />
         </pattern>
+        <radialGradient id="rh-smoke-fill" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#f6e6d3" stopOpacity="0.95" />
+          <stop offset="0.5" stopColor="#e8d0b8" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#dcc3aa" stopOpacity="0" />
+        </radialGradient>
+        {/* rubs the blobs into drifting wisps */}
+        <filter id="rh-smoke-filter" filterUnits="userSpaceOnUse" x="-620" y="-220" width="1240" height="300">
+          <feTurbulence type="fractalNoise" baseFrequency="0.016 0.03" numOctaves="3" seed="9" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="64" xChannelSelector="R" yChannelSelector="G" result="rough" />
+          <feGaussianBlur in="rough" stdDeviation="2.4" />
+        </filter>
         <clipPath id="rh-bed-clip">
           <rect x="-230" y="-560" width="460" height="560" />
         </clipPath>
@@ -372,13 +389,18 @@ export default function RoadHero({ calm = false }) {
             </g>
 
             {/* smoke churning at the wheels */}
-            <g data-smoke>
+            <g data-smoke filter="url(#rh-smoke-filter)">
               {SMOKE.map((puff, i) => (
-                <g key={i} data-smoke-puff transform={`translate(${puff.x} ${puff.y})`} opacity="0">
-                  <circle r={puff.r} fill="#e8d6c4" stroke="#cdb29a" strokeWidth="2" />
-                  <circle cx={-puff.r * 0.25} cy={-puff.r * 0.3} r={puff.r * 0.6} fill="#fff1de" />
-                  <circle cx={puff.r * 0.3} cy={puff.r * 0.3} r={puff.r * 0.42} fill="#cfb8a2" opacity="0.7" />
-                </g>
+                <ellipse
+                  key={i}
+                  data-smoke-puff
+                  cx={puff.x}
+                  cy={puff.y}
+                  rx={puff.rx}
+                  ry={puff.ry}
+                  fill="url(#rh-smoke-fill)"
+                  opacity="0"
+                />
               ))}
             </g>
           </g>

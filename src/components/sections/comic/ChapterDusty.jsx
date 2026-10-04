@@ -155,17 +155,22 @@ export default function ChapterDusty({
         tl.to(head, { y: 0, duration: 0.9, ease: 'back.out(1.35)' }, 2.25 + i * 0.22)
       })
 
-      // smoke churns out of the wheels
+      // smoke churns out of the wheels, billows and drifts wide along the road
       puffs.forEach((puff, i) => {
-        const at = 1.0 + (i % 4) * 0.28 + (i > 3 ? 0.1 : 0)
-        const side = i > 3 ? 1 : -1
+        const side = i >= 6 ? 1 : -1
+        const k = i % 6
+        const at = 0.9 + k * 0.2
         tl.fromTo(
           puff,
-          { opacity: 0, scale: 0.3, x: 0, y: 0 },
-          { opacity: 0.96, scale: 1.1, x: side * 18, y: -10, duration: 0.7 },
+          { opacity: 0, scale: 0.35, x: 0, y: 0 },
+          { opacity: 0.98, scale: 1.4, x: side * (14 + k * 6), y: -8 - k * 3, duration: 0.8 },
           at,
         )
-        tl.to(puff, { opacity: 0, scale: 2.4, x: side * (60 + i * 6), y: -50 - (i % 3) * 14, duration: 1.7 }, at + 0.7)
+        tl.to(
+          puff,
+          { opacity: 0, scale: 3.4 + (k % 3) * 0.5, x: side * (150 + k * 46), y: -34 - k * 9, duration: 2.4 },
+          at + 0.8,
+        )
       })
 
       // the paragraph arrives with a soft blur behind it
