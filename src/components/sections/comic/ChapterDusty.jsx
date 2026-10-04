@@ -273,7 +273,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[1000vh] bg-[#1a1512] text-white"
+      className="relative h-[580vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
@@ -406,9 +406,9 @@ export default function ChapterDusty({
               className="absolute -inset-x-[12%] -inset-y-5 backdrop-blur-[6px]"
               style={{
                 background: 'rgba(20,34,32,0.14)',
-                WebkitMaskImage:
-                  'radial-gradient(ellipse 70% 62% at 50% 50%, #000 55%, transparent 100%)',
-                maskImage: 'radial-gradient(ellipse 70% 62% at 50% 50%, #000 55%, transparent 100%)',
+                // closest-side: the fade ends exactly at the box edge, so no hard rectangle
+                WebkitMaskImage: 'radial-gradient(closest-side, #000 35%, transparent 100%)',
+                maskImage: 'radial-gradient(closest-side, #000 35%, transparent 100%)',
               }}
             />
             <div className="relative h-24 md:h-20">

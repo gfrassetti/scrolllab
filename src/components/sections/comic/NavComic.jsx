@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { gsap, useGSAP } from '../../../lib/gsap'
+import { prefersReducedMotion } from '../../../lib/motion'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
 
@@ -25,6 +28,31 @@ export default function NavComic({
       ? parsed.map((item, i) => ({ ...item, href: item.href || defaults[i].href }))
       : defaults
   const { open, close, panelProps, triggerProps } = useMobileMenu()
+  const linksRef = useRef(null)
+
+  // The links ride up and out as the story starts, one after another, and come
+  // back when you return to the top (the brand and the CTA stay).
+  useGSAP(
+    () => {
+      const list = linksRef.current
+      if (!list || prefersReducedMotion()) return
+      gsap.to(list.children, {
+        yPercent: -220,
+        opacity: 0,
+        stagger: 0.12,
+        ease: 'power2.in',
+        scrollTrigger: {
+          start: 0,
+          end: '+=140',
+          scrub: 0.3,
+          onUpdate: (self) => {
+            list.style.pointerEvents = self.progress > 0.3 ? 'none' : ''
+          },
+        },
+      })
+    },
+    { scope: linksRef },
+  )
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 text-white">
@@ -41,7 +69,7 @@ export default function NavComic({
           </p>
         </div>
 
-        <ul className="hidden items-center gap-7 md:flex">
+        <ul ref={linksRef} className="hidden items-center gap-7 md:flex">
           {items.map((item) => (
             <li key={item.label}>
               <a
