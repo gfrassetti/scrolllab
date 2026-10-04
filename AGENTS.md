@@ -213,7 +213,9 @@ npm run build
 npm run start          # API production
 npm test               # cada *.test.js de server/, src/lib/ y embed/ (scripts/run-tests.mjs los descubre)
 npm run check          # invariantes cruzadas (precios, secciones, props, i18n, rutas)
-npm run verify         # lint + test + check: el gate antes de cada commit
+npm run verify         # lint + typecheck + test + check: el gate antes de cada commit
+npm run typecheck      # tsc sobre src/domain y server (tipos JSDoc, gradual; ver docs/adr/0004)
+npm run ssr:snapshot   # HTML renderizado en el servidor: la red de los refactors de UI
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
@@ -344,27 +346,29 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 
 ## Architecture (extra)
 
+Mapa completo y la regla de dependencia: [`docs/architecture.md`](docs/architecture.md). Las decisiones y su
+porqué: [`docs/adr/`](docs/adr/README.md). En corto:
+
 ```
+src/domain/            precios, qué se vende y secciones: JS puro que importan el front y el servidor
 server/
-├── index.js              # boot + graceful shutdown
-├── app.js                # Express app factory (testable)
-├── config.js             # env validation (fail-fast in prod)
-├── middleware.js         # helmet, CORS, origin CSRF, rate limits
-├── validation.js         # cart / recipe allowlist
-├── sections.js           # sellable section IDs
-├── catalog.js            # server prices (ARS)
-├── models.js             # User, Order (mongoose)
-├── packaging.js          # ZIP pack + signed tokens
-├── license.js
-├── services/
-│   ├── mercadoPago.js
-│   └── orders.js
-└── __tests__/
-src/lib/
-├── api.js
-├── auth.jsx
-└── cart.js
+├── app.js             composition root (middlewares, sesión, Passport y el montaje de los routers)
+├── http/routes/       un router por dominio: solo traduce HTTP ↔ servicios (sin reglas de negocio)
+├── services/          las reglas de negocio (checkout, payments, subscriptions/, email, orders…)
+├── repositories/      persistencia por entidad; db.js los compone (archivos en dev, Mongo en prod)
+├── auth/passport.js   sesión y login con Google
+├── errors.js          HttpError (una sola clase)
+└── packaging.js       arma el ZIP (+ licenseWatermark.js, downloadToken.js)
+src/features/          bloques de la home y del builder; la página los compone
+src/lib/               utilidades del market (cart, api, pricing de UI…)
 ```
+
+**Regla de dependencia**: se importa solo hacia abajo. `src/domain` no importa React ni capas de arriba (ESLint lo
+hace cumplir); las rutas no tienen reglas de negocio; los servicios no conocen `req`/`res`.
+
+**Refactors**: antes de mover código que mueve plata, mails, la base o el ZIP, sacar una foto del comportamiento y
+compararla después (ver [ADR 0005](docs/adr/0005-refactors-con-foto.md)). Con otras sesiones trabajando en el mismo
+árbol, nunca `git stash`/`checkout`/`add -A`: para comparar contra `HEAD` limpio, una copia con `git archive`.
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
 tramos**: base de USD 389 con 8 secciones incluidas, USD 15 por cada sección
