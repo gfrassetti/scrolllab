@@ -35,7 +35,7 @@ del builder (`CUSTOM_BASE_PRICE_USD` + secciones extra + commerce,
 `src/domain/catalog.js`) y del template más caro en venta: no afirmar cupos
 fijos ("1 por mes") — la capacidad depende del proyecto. Copy y sección viven
 en el home
-(`src/pages/TemplatesIndex.jsx`, zona `estudio`, componente `ZoneHeadline`);
+(`src/features/home/StudioZone.jsx`, zona `estudio`, componente `ZoneHeadline`);
 detalle completo en `docs/estudio-positioning.md`.
 
 ## Design craft — obligatorio (siempre)

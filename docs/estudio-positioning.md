@@ -5,7 +5,7 @@ fijo, comprador desarrollador) **y** un estudio que hace trabajo a medida por
 cotización manual. Este doc es la referencia canónica del segundo — para que
 nadie reabra esta discusión desde cero ni la contradiga con copy nuevo.
 
-Sección en el home: `src/pages/TemplatesIndex.jsx`, zona `estudio` (misma
+Sección en el home: `src/features/home/StudioZone.jsx`, zona `estudio` (misma
 mecánica de `<ZoneHeadline>` que Templates/Builder/LAB). Copy en
 `src/i18n/locales/{es,en}.json` bajo `home.studio*` y `home.req4*`.
 
@@ -50,7 +50,7 @@ nunca tocan `server/catalog.js` ni `src/lib/pricing.js` (esas rutas son solo
 para lo que sí se compra online: templates, builder, LAB).
 
 **Estos precios no se muestran en el sitio.** Las tarjetas de servicio del home
-(`src/pages/TemplatesIndex.jsx`, zona `estudio`) solo listan para quién es cada
+(`src/features/home/StudioZone.jsx`, zona `estudio`) solo listan para quién es cada
 servicio y qué se lleva — sin precio y sin prometer un resultado de negocio
 (regla 6 más abajo). El monto se habla en la conversación con el cliente, caso
 por caso; esta tabla es la referencia interna para esa charla, no un texto que

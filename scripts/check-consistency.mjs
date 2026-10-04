@@ -22,6 +22,7 @@ import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.
 import { SECTION_KINDS, SECTION_IDS } from '../src/domain/sections.js'
 import { checkoutPropsFrom } from '../src/lib/shop/checkoutProps.js'
 import { BUILDER_SEO, LAB_SEO, SITE_SEO } from '../src/lib/site.js'
+import { TEMPLATE_META } from '../src/features/home/templateMeta.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
@@ -315,13 +316,12 @@ for (const id of registryIds) {
 }
 
 // 6. Catalog home: every listed model needs a route, a page and its copy.
-const indexSrc = read('src/pages/TemplatesIndex.jsx')
 const appSrc = read('src/App.jsx')
-const metaBlock = indexSrc.slice(
-  indexSrc.indexOf('const TEMPLATE_META'),
-  indexSrc.indexOf('function TemplatePoster'),
-)
-const listed = [...metaBlock.matchAll(/sku:\s*'([a-z]+)'/g)].map((m) => m[1])
+// Se importa (no regex sobre el JSX): si la lista se mueve o queda vacía, falla.
+const listed = TEMPLATE_META.map((m) => m.sku)
+if (listed.length === 0) {
+  fail('catálogo', 'TEMPLATE_META (src/features/home/templateMeta.js) está vacío')
+}
 for (const sku of LOCAL_ONLY_SKUS) {
   if (listed.includes(sku)) {
     fail('catálogo', `'${sku}' es local-only pero se lista en la home`)
@@ -354,7 +354,7 @@ for (const sku of listed) {
     fail('catálogo', `'${sku}' se lista en la home pero no tiene ruta en App.jsx`)
   }
   const comingSoon = COMING_SOON_SKUS.includes(sku)
-  if (comingSoon && !new RegExp(`sku:\\s*'${sku}'[\\s\\S]*?comingSoon:\\s*true`).test(metaBlock)) {
+  if (comingSoon && !TEMPLATE_META.find((m) => m.sku === sku)?.comingSoon) {
     fail('catálogo', `'${sku}' es próximamente pero la home no lo marca comingSoon`)
   }
   for (const [name, keys] of [['es', esKeys], ['en', enKeys]]) {
