@@ -6,14 +6,16 @@ export default function PaperFrame({
   className = '',
   fullBleed = false,
   shadow = true,
+  bg = '#1a1816',
 }) {
   return (
     <div
       className={`relative ${fullBleed ? 'h-full w-full' : 'mx-auto w-[min(94vw,1180px)]'} ${className}`}
     >
       <div
-        className={`relative h-full overflow-hidden bg-[#1a1816] ${shadow ? 'shadow-[0_24px_80px_rgba(30,25,20,0.35)]' : ''}`}
+        className={`relative h-full overflow-hidden ${shadow ? 'shadow-[0_24px_80px_rgba(30,25,20,0.35)]' : ''}`}
         style={{
+          backgroundColor: bg,
           clipPath: fullBleed
             ? 'none'
             : 'polygon(0.8% 1.2%, 98.8% 0.2%, 100% 2.5%, 99.4% 50%, 100% 97.5%, 97.5% 100%, 50% 99.4%, 1.5% 100%, 0% 97%, 0.5% 50%, 0% 3%)',

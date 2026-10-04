@@ -5,6 +5,8 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import ComicPanel from './ComicPanel'
 import PaperFrame from './PaperFrame'
 import RoadHero from './RoadHero'
+import SideTruck from './SideTruck'
+import { CanyonScene, FarmScene, FenceScene } from './Vignettes'
 import { closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -24,6 +26,24 @@ const CAPTIONS = [
  * verían las tres pisándose. En calma son tres viñetas en fila, cada una un
  * bloque normal del documento (ComicPanel), con fundido al entrar.
  */
+/** A ragged top edge for the paper curtain: x in %, y in px, the same every render. */
+const TORN_TOP = (() => {
+  let a = 7
+  const rand = () => {
+    a = (a * 16807) % 2147483647
+    return a / 2147483647
+  }
+  const pts = Array.from({ length: 41 }, (_, i) => `${((i / 40) * 100).toFixed(2)}% ${(4 + rand() * 30).toFixed(1)}px`)
+  return `polygon(${pts.join(', ')}, 100% 100%, 0 100%)`
+})()
+
+// crumpled grey paper: flat colour under a soft fractal-noise shading
+const PAPER = {
+  backgroundColor: '#c3c1bd',
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.011 0.02' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.42  0 0 0 0 0.41  0 0 0 0.9 -0.18'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+}
+
 const LAYER_ZOOM = { sky: 1.04, far: 1.08, peak: 1.12, hills: 1.22, road: 1.34, shrubs: 1.55, fore: 1.7 }
 
 /** Small connective words ("a", "of") are set small, like a hand-lettered cover. */
@@ -45,10 +65,6 @@ export default function ChapterDusty({
       const pin = root.current.querySelector('[data-pin]')
       const titleEl = root.current.querySelector('[data-hero-title]')
       const camera = root.current.querySelector('[data-camera]')
-      const close = root.current.querySelector('[data-panel="close"]')
-      const drive = root.current.querySelector('[data-panel="drive"]')
-      const closeImg = root.current.querySelector('[data-close-img]')
-      const driveImg = root.current.querySelector('[data-drive-img]')
       const captionsEls = gsap.utils.toArray('[data-caption]')
       const strip = root.current.querySelector('[data-caption-strip]')
       const sfx = root.current.querySelector('[data-sfx]')
@@ -81,8 +97,6 @@ export default function ChapterDusty({
       gsap.set(heads, { y: 230 })
       gsap.set(puffs, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' })
       gsap.set(camera, { transformOrigin: '50% 68%' })
-      gsap.set(close, { yPercent: 112, rotate: 2.8 })
-      gsap.set(drive, { xPercent: 112, rotate: -2.4 })
       gsap.set(captionsEls, { opacity: 0, y: 28 })
       gsap.set(strip, { opacity: 0 })
       gsap.set(sfx, { opacity: 0, scale: 0.7, xPercent: 6, rotate: -8 })
@@ -195,35 +209,75 @@ export default function ChapterDusty({
       })
       tl.to(rig, { s: near.end, duration: 2.6, ease: 'power1.inOut', onUpdate: applyRig }, 3.2)
 
-      // Act 3 — torn close-up slides up over the zoom
-      tl.to(close, { yPercent: 0, rotate: -0.6, duration: 2.3 }, 5.4)
-      tl.fromTo(
-        closeImg,
-        { scale: 1.2, yPercent: 8 },
-        { scale: 1.05, yPercent: 0, duration: 2.6 },
-        5.4,
-      )
-      tl.to(captionsEls[2], { opacity: 1, y: 0, duration: 0.6 }, 6.4)
-      tl.to(captionsEls[2], { opacity: 0, y: -18, duration: 0.4 }, 7.8)
+      // Act 3 — a torn paper curtain rises over the zoom; the dog and the pig
+      // come in from the two edges of the page and meet in the middle
+      const half = root.current.querySelectorAll('[data-buddy-half]')
+      const ink = q('[data-ink]')
+      const tiles = q('[data-tile]')
+      const farm = root.current.querySelector('[data-farm]')
+      const farmScene = root.current.querySelector('[data-farm-scene]')
+      const slot = root.current.querySelector('[data-slot-farm]')
+      const trio = root.current.querySelector('[data-trio]')
+      const buddies = root.current.querySelector('[data-buddies]')
+      const sideTruck = root.current.querySelector('[data-side-truck]')
+      const curtain = root.current.querySelector('[data-curtain]')
 
-      // Act 4 — drive panel wipes from the right (comic page turn)
-      tl.to(drive, { xPercent: 0, rotate: 0.5, duration: 2.5 }, 8)
-      tl.to(close, { xPercent: -22, rotate: -4, scale: 0.96, duration: 2.5 }, 8)
-      tl.fromTo(
-        driveImg,
-        { scale: 1.15, xPercent: -6 },
-        { scale: 1.05, xPercent: 4, duration: 3.2 },
-        8,
-      )
-      tl.to(captionsEls[3], { opacity: 1, y: 0, duration: 0.65 }, 8.8)
-      tl.to(captionsEls[3], { opacity: 0.9, duration: 1.2 }, 10)
+      // where the slot sits in the pin, ignoring transforms (the clip starts there)
+      const slotRect = () => {
+        let left = 0
+        let top = 0
+        for (let el = slot; el && el !== pin; el = el.offsetParent) {
+          left += el.offsetLeft
+          top += el.offsetTop
+        }
+        return { left, top, w: slot.offsetWidth, h: slot.offsetHeight }
+      }
+      const clipFor = () => {
+        const r = slotRect()
+        const W = pin.clientWidth
+        const H = pin.clientHeight
+        return `inset(${r.top}px ${W - r.left - r.w}px ${H - r.top - r.h}px ${r.left}px)`
+      }
 
-      // Exit
-      tl.to(
-        [camera, close, drive],
-        { yPercent: -4, scale: 0.95, duration: 1.5 },
-        10.6,
-      )
+      gsap.set(curtain, { yPercent: 106 })
+      gsap.set(half[0], { x: () => -pin.clientWidth * 0.62 })
+      gsap.set(half[1], { x: () => pin.clientWidth * 0.62 })
+      gsap.set(ink, { opacity: 0, y: 24 })
+      gsap.set(tiles, { opacity: 0, y: 70, rotate: (i) => (i % 2 ? 4 : -4) })
+      gsap.set(farm, { opacity: 0, y: 70, clipPath: clipFor })
+      // the scene grows from the middle of its square, so it always covers the window
+      const slotCenter = () => {
+        const r = slotRect()
+        return `${r.left + r.w / 2}px ${r.top + r.h / 2}px`
+      }
+      gsap.set(farmScene, { scale: 0.7, transformOrigin: slotCenter })
+      gsap.set(sideTruck, { x: () => -pin.clientWidth * 1.05, opacity: 1 })
+      gsap.set([buddies, trio], { opacity: 0 })
+
+      tl.to(curtain, { yPercent: 0, duration: 1.7, ease: 'power2.out' }, 5.0)
+      tl.set(buddies, { opacity: 1 }, 6.6)
+      tl.to(half[0], { x: 0, duration: 1.2, ease: 'power3.out' }, 6.6)
+      tl.to(half[1], { x: 0, duration: 1.2, ease: 'power3.out' }, 6.6)
+      tl.to(ink[0], { opacity: 1, y: 0, duration: 0.7 }, 7.6)
+      tl.to(ink[0], { opacity: 0, y: -16, duration: 0.5 }, 9.0)
+
+      // the three scenes take the place the dog and the pig held
+      tl.set(trio, { opacity: 1 }, 9.0)
+      tl.to(buddies, { opacity: 0, scale: 0.94, duration: 0.7 }, 9.0)
+      tl.to(tiles, { opacity: 1, y: 0, rotate: 0, duration: 0.9, stagger: 0.18, ease: 'power3.out' }, 9.0)
+      tl.to(farm, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 9.36)
+      tl.to(ink[1], { opacity: 1, y: 0, duration: 0.7 }, 9.9)
+
+      // the truck rolls in from the left while the last scene grows into the page
+      tl.to(sideTruck, { x: 0, duration: 2.6, ease: 'power2.inOut' }, 11.0)
+      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: 2.6, ease: 'power2.inOut' }, 11.0)
+      tl.to(farmScene, { scale: 1, duration: 2.6, ease: 'power2.inOut' }, 11.0)
+      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 1.4, ease: 'power2.in' }, 11.0)
+      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.2 }, 11.0)
+      tl.to(ink[1], { color: '#fff', duration: 0.8 }, 12.0)
+      tl.to(curtain, { opacity: 0, duration: 0.6 }, 13.2)
+      // a beat to look at the finished scene
+      tl.to({}, { duration: 1.2 }, 13.6)
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -278,7 +332,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[580vh] bg-[#1a1512] text-white"
+      className="relative h-[680vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
@@ -295,54 +349,101 @@ export default function ChapterDusty({
             }}
           />
 
+          {/* the torn paper curtain that rises over the zoom */}
           <div
-            data-panel="close"
-            className="absolute inset-x-[3%] top-[7%] bottom-[8%] z-20 will-change-transform md:inset-x-[7%]"
+            data-curtain
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -top-9 -bottom-2 z-20 will-change-transform"
+            style={{ filter: 'drop-shadow(0 -8px 14px rgba(20,12,8,0.4))' }}
           >
-            <PaperFrame className="h-full !w-full">
-              <div className="relative h-full overflow-hidden">
-                <img
-                  data-close-img
-                  {...imgAttrs(closeupBuddies, variants)}
-                  sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover will-change-transform"
-                  draggable={false}
-                />
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-0 h-12 from-white to-transparent"
-                  style={{
-                    background:
-                      'linear-gradient(to bottom, rgba(255,255,255,0.95), transparent)',
-                    clipPath:
-                      'polygon(0 45%, 7% 0, 16% 40%, 28% 4%, 40% 42%, 52% 0, 64% 38%, 76% 6%, 88% 40%, 100% 8%, 100% 100%, 0 100%)',
-                  }}
-                />
-              </div>
-            </PaperFrame>
+            <div className="h-full w-full" style={{ ...PAPER, clipPath: TORN_TOP }} />
           </div>
 
-          <div
-            data-panel="drive"
-            className="absolute inset-x-[2%] top-[8%] bottom-[7%] z-30 will-change-transform md:inset-x-[5%]"
-          >
-            <PaperFrame className="h-full !w-full">
-              <div className="relative h-full overflow-hidden">
-                <img
-                  data-drive-img
-                  {...imgAttrs(driveSunset, variants)}
-                  sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover will-change-transform"
-                  draggable={false}
-                />
+          {/* the dog comes in from the left edge, the pig from the right, and they meet */}
+          <div className="pointer-events-none absolute inset-x-0 top-[26%] z-30 flex justify-center">
+            <div
+              data-buddies
+              className="h-[min(54svh,44vw)] aspect-[2/1] max-w-[94vw]"
+            >
+              <PaperFrame bg="transparent" className="h-full !w-full">
+                <div className="relative h-full overflow-hidden">
+                  {[0, 1].map((side) => (
+                    <div
+                      key={side}
+                      data-buddy-half
+                      className={`absolute inset-y-0 w-1/2 overflow-hidden will-change-transform ${side ? 'right-0' : 'left-0'}`}
+                    >
+                      <img
+                        {...imgAttrs(closeupBuddies, variants)}
+                        sizes="(max-aspect-ratio: 3/2) 130vh, 90vw"
+                        loading="lazy"
+                        decoding="async"
+                        alt=""
+                        className={`absolute top-0 h-full w-[200%] max-w-none object-cover ${side ? 'right-0' : 'left-0'}`}
+                        draggable={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </PaperFrame>
+            </div>
+          </div>
+
+          {/* three scenes take the place the dog and the pig held */}
+          <div className="pointer-events-none absolute inset-x-0 top-[26%] z-30 flex justify-center">
+            <div
+              data-trio
+              className="[--s:min(25vw,50svh)] max-md:[--s:min(27vw,34svh)]"
+              style={{ width: 'calc(var(--s) * 3 + 8vw)', maxWidth: '96vw' }}
+            >
+              <div data-trio-frame>
+                <PaperFrame bg="transparent" shadow={false} className="!w-full">
+                  <div className="flex items-center justify-center gap-[1.6vw] px-[2.4vw] py-[2.6vw]">
+                    {[CanyonScene, FenceScene].map((Scene, i) => (
+                      <div
+                        key={i}
+                        data-tile
+                        className="relative aspect-square w-[var(--s)] shrink-0 overflow-hidden shadow-[0_14px_40px_rgba(30,25,20,0.35)]"
+                      >
+                        <Scene className="absolute inset-0 h-full w-full" />
+                      </div>
+                    ))}
+                    <div data-slot-farm className="aspect-square w-[var(--s)] shrink-0" />
+                  </div>
+                </PaperFrame>
               </div>
-            </PaperFrame>
+            </div>
+          </div>
+
+          {/* the last scene: starts as the third square, grows to the whole page */}
+          <div
+            data-farm
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[35] overflow-hidden will-change-transform"
+          >
+            <FarmScene className="absolute inset-0 h-full w-full" data-farm-scene />
+          </div>
+
+          {/* and the truck that drives into it */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-[17%] z-40 flex justify-center max-md:bottom-[24%]">
+            <div data-side-truck className="w-[min(46vw,96svh)] will-change-transform max-md:w-[82vw]">
+              <SideTruck className="block h-auto w-full" />
+            </div>
+          </div>
+
+          {/* black ink on the paper: later it turns white over the farm */}
+          <div className="pointer-events-none absolute inset-x-0 top-[10%] z-[45] flex justify-center px-6 md:top-[9%]">
+            <div className="relative h-24 w-full max-w-3xl text-center md:h-20">
+              {captions.slice(2, 4).map((text) => (
+                <p
+                  key={text}
+                  data-ink
+                  className="absolute inset-x-0 text-[15px] leading-relaxed font-semibold text-[#1b1a18] md:text-lg"
+                >
+                  {text}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -417,7 +518,7 @@ export default function ChapterDusty({
               }}
             />
             <div className="relative h-24 md:h-20">
-              {captions.map((text) => (
+              {captions.slice(0, 2).map((text) => (
                 <p
                   key={text}
                   data-caption
