@@ -307,6 +307,8 @@ function read(rel) {
  * stats, cards…) las resuelve `hoist`, que las declara como constante arriba
  * del App.jsx y devuelve el nombre. Sin `hoist` se descartan: antes se
  * descartaban siempre, y lo editado en una lista no llegaba al ZIP.
+ * @param {object | null | undefined} props
+ * @param {((key: string, list: any[]) => string) | null} [hoist]
  */
 function propsToJsx(props, hoist = null) {
   if (!props || typeof props !== 'object') return ''

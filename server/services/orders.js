@@ -281,7 +281,11 @@ export async function fulfillApprovedPayment({
   }
 }
 
-/** Estados de MP que dan vuelta un pago aprobado. */
+/**
+ * Estados de MP que dan vuelta un pago aprobado. Se consulta con `payment.status`,
+ * que MP puede no mandar: `has(undefined)` es false.
+ * @type {Set<string | undefined>}
+ */
 export const REVERSED_PAYMENT_STATUSES = new Set(['refunded', 'charged_back'])
 
 /**

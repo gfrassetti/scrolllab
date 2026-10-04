@@ -82,9 +82,11 @@ export function createAuthRouter({ config, limits }) {
           googleId: `dev-${email}`,
         })
       }
-      await new Promise((resolve, reject) => {
-        req.login(user, (err) => (err ? reject(err) : resolve()))
-      })
+      await /** @type {Promise<void>} */ (
+        new Promise((resolve, reject) => {
+          req.login(user, (err) => (err ? reject(err) : resolve()))
+        })
+      )
       res.json({ user: publicUser(user) })
     }),
   )

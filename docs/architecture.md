@@ -112,8 +112,9 @@ El método con el que se hizo esta reorganización ([ADR 0005](adr/0005-refactor
 
 ## Deuda conocida y próximos pasos
 
-- **`strictNullChecks`** está apagado para ser gradual. Prenderlo da 21 errores en `server/` y ninguno en `src/domain/`;
-  están en `config.js`, `devSessionStore.js`, las rutas de suscripciones y los cobros de LAB, y piden revisarlos de a uno.
+- **`strict` completo**: `strictNullChecks` ya está prendido (los 21 errores iniciales se revisaron de a uno: ninguno era un
+  bug, todos eran un chequeo que el código ya hacía y TypeScript no veía). Falta `noImplicitAny` y el resto de `strict`, y
+  sumar carpetas a `include` (`src/lib`, `src/features`).
 - **Mongo en los tests**: no hay. Las ramas de Mongo de `server/repositories/` se probaron contra un `mongod` descartable
   con una foto de 105 pasos, pero esa foto no vive en el repo. Sumar `mongodb-memory-server` o un `mongod` en CI la
   volvería permanente.

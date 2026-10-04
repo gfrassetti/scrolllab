@@ -20,6 +20,10 @@ export const ALLOWED_SECTION_SET = new Set(ALLOWED_SECTIONS)
 
 const SECTION_RE = /^[a-z]+\/[A-Za-z0-9]+$/
 
+/**
+ * @param {unknown} id
+ * @returns {id is string}
+ */
 export function isAllowedSectionId(id) {
   return typeof id === 'string' && SECTION_RE.test(id) && ALLOWED_SECTION_SET.has(id)
 }

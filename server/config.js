@@ -121,9 +121,9 @@ export function loadConfig() {
     assertStrongSecret("SESSION_SECRET", process.env.SESSION_SECRET);
     assertStrongSecret("DOWNLOAD_SECRET", process.env.DOWNLOAD_SECRET);
 
-    const clientUrl = process.env.CLIENT_URL;
-    const apiUrl = process.env.API_PUBLIC_URL;
-    const googleCallback = process.env.GOOGLE_CALLBACK_URL;
+    const clientUrl = requireEnv("CLIENT_URL");
+    const apiUrl = requireEnv("API_PUBLIC_URL");
+    const googleCallback = requireEnv("GOOGLE_CALLBACK_URL");
     if (!clientUrl.startsWith("https://") || !apiUrl.startsWith("https://")) {
       throw new Error(
         "CLIENT_URL y API_PUBLIC_URL deben ser HTTPS en producción",

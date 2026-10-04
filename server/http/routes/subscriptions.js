@@ -112,7 +112,9 @@ export function createSubscriptionsRouter({ config, limits }) {
       // pagados con uno más barato: sería la cuota nueva sin pagar la
       // diferencia. Para subir ya: reactivar y cambiar de plan.
       const carryOver =
-        current?.canceledAt && currentEnd > now ? new Date(currentEnd) : null
+        current?.canceledAt && currentEnd != null && currentEnd > now
+          ? new Date(currentEnd)
+          : null
       const carriedPaidPlan = carryOver
         ? current.paidPlan || (current.lastPaidAt ? current.plan : null)
         : null

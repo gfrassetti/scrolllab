@@ -249,7 +249,10 @@ export function billingFrequency(cycle) {
     : { frequency: 1, frequencyType: 'months' }
 }
 
-/** Body del preapproval — puro, testeable sin pegarle a MP. */
+/**
+ * Body del preapproval — puro, testeable sin pegarle a MP.
+ * @param {{ reason: string, amount: number, currencyId?: string, frequency: number, frequencyType: string, payerEmail: string, externalReference?: string, backUrl: string, startDate?: Date | string | null }} args
+ */
 export function buildPreapprovalBody({
   reason,
   amount,

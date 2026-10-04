@@ -71,7 +71,9 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
   }
 
   const trialing =
-    !!sub.trialEndsAt && toMs(sub.trialEndsAt) > now && !sub.canceledAt
+    !!sub.trialEndsAt &&
+    /** @type {number} */ (toMs(sub.trialEndsAt)) > now &&
+    !sub.canceledAt
 
   return {
     plan: sub.plan,

@@ -1,4 +1,23 @@
 /**
+ * @typedef {Object} SectionFieldOption
+ * @property {string} value
+ * @property {string} label
+ *
+ * @typedef {Object} SectionSubField Un campo de cada fila de una lista.
+ * @property {string} key
+ * @property {string} label
+ * @property {string} type
+ *
+ * @typedef {Object} SectionField
+ * @property {string} key
+ * @property {string} label
+ * @property {'text' | 'textarea' | 'select' | 'image' | 'url' | 'color' | 'href' | 'list'} type
+ * @property {SectionFieldOption[]} [options] Solo `select`.
+ * @property {number} [max] Solo `list`: tope de filas.
+ * @property {SectionSubField[]} [item] Solo `list`: los campos de cada fila.
+ */
+
+/**
  * Campos editables por sección (builder preview + LAB).
  * Tipos: text · textarea · select · image · url · color · href · list (con
  * sub-campo `price` para los productos del kit commerce).
@@ -12,6 +31,7 @@
  * Este archivo lo importa Node: sin imports de React ni del browser.
  * Recetas Beat (pasos dx/dy) aún no son un campo: el motion vive en JSX/presets.
  * Ver docs/scrolllab-beat.md.
+ * @type {Record<string, SectionField[]>}
  */
 export const SECTION_FIELDS = {
   'chapters/NavMinimal': [

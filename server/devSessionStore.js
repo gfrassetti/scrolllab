@@ -20,7 +20,8 @@ export class DevFileSessionStore extends session.Store {
    */
   constructor({ file, ttlMs = 1000 * 60 * 60 * 24 * 14 } = {}) {
     super()
-    this.file = file
+    // Obligatorio: app.js siempre lo pasa (el `= {}` solo evita un TypeError al desestructurar).
+    this.file = /** @type {string} */ (file)
     this.ttlMs = ttlMs
     this.sessions = new Map()
     this._writeTimer = null

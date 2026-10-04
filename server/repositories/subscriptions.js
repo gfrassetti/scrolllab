@@ -73,7 +73,9 @@ export const subscriptionsRepo = {
    */
   async claimSubscriptionEmail(subId, kind, { withinMs, now: at } = {}) {
     const p = emailPrefix(kind);
-    if (kind === "trialReminder" && !(withinMs > 0)) return null;
+    if (kind === "trialReminder" && !(/** @type {number} */ (withinMs) > 0)) {
+      return null;
+    }
     const now = new Date();
     const trialNow = at ? new Date(at) : now;
     const staleBefore = new Date(now.getTime() - 10 * 60 * 1000);
@@ -98,7 +100,8 @@ export const subscriptionsRepo = {
         lastPaidAt: null,
         trialEndsAt: {
           $gt: trialNow,
-          $lte: new Date(trialNow.getTime() + withinMs),
+          // Solo se arma para trialReminder, y arriba se exigió withinMs > 0.
+          $lte: new Date(trialNow.getTime() + /** @type {number} */ (withinMs)),
         },
       },
     }[kind];
