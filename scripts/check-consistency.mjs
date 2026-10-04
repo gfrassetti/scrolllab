@@ -124,18 +124,9 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
 // (COLOR_PROP_KEYS, isHrefKey en server/sectionFields.js), no por el `type` del
 // campo. Un campo color/href con otro nombre se valida como texto libre: un
 // `javascript:` en un href o CSS suelto en un style llegaría al ZIP / a LAB.
-// Excepciones conocidas, previas a la regla: pendientes de pasar a validación
-// de color en el servidor (nombre fuera de COLOR_PROP_KEYS).
-const KNOWN_UNVALIDATED = new Set([
-  'fizz/NavFizz.menuBg',
-  'fizz/NavFizz.menuInk',
-  'fizz/FlavorWorlds.startBg',
-  'fizz/FlavorWorlds.startInk',
-])
 for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   for (const field of fields) {
     const ref = `${id}.${field.key}`
-    if (KNOWN_UNVALIDATED.has(ref)) continue
     if (field.type === 'href' && !isHrefKey(field.key)) {
       fail('props', `'${ref}' es href pero el server lo valida como texto: renombrala a *Href o sumá la regla`)
     }

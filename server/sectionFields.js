@@ -75,7 +75,19 @@ const HREF_RE =
 // Precio de un producto del kit commerce: número con hasta 2 decimales.
 const PRICE_RE = /^\d{1,9}(?:[.,]\d{1,2})?$/
 
-export const COLOR_PROP_KEYS = new Set(['bg', 'fg', 'accent', 'bg2', 'fg2'])
+export const COLOR_PROP_KEYS = new Set([
+  'bg',
+  'fg',
+  'accent',
+  'bg2',
+  'fg2',
+  // FIZZ: colores del menú y de la entrada de los sabores. Iban como texto libre
+  // (2000 caracteres hasta un `style` inline); los validaba solo el cliente.
+  'menuBg',
+  'menuInk',
+  'startBg',
+  'startInk',
+])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 
