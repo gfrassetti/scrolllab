@@ -104,8 +104,6 @@ const COPY = {
   es: {
     brand: 'Scroll Lab',
     hookKicker: 'Scrollytelling',
-    hook: 'Webs que cuentan una historia mientras se mueven',
-    what: 'Template con el código fuente incluido',
     hook: 'Webs que cuentan una historia mientras scrolleás',
     what: 'Un modelo listo para usar, con el código incluido',
     endTitle: 'Llevate el código y usalo en tu proyecto',
@@ -114,8 +112,6 @@ const COPY = {
   en: {
     brand: 'Scroll Lab',
     hookKicker: 'Scrollytelling',
-    hook: 'Websites that tell a story as they move',
-    what: 'A template with source code included',
     hook: 'Websites that tell a story as you scroll',
     what: 'A ready-to-use template, source code included',
     endTitle: 'Get the code and use it in your project',

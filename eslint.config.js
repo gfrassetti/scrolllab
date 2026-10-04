@@ -8,7 +8,6 @@ export default [
     ignores: [
       'dist',
       'embed-dist',
-      'scripts/**',
       'storage/**',
       // Código de terceros: skills instalados y el decoder Draco vendorizado.
       '.cursor/**',
@@ -19,7 +18,7 @@ export default [
   },
   {
     files: ['**/*.{js,jsx}'],
-    ignores: ['server/**'],
+    ignores: ['server/**', 'scripts/**'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -48,9 +47,9 @@ export default [
     },
   },
   {
-    // Servidor (Node): por ahora solo lo que rompe en runtime — un nombre sin
-    // definir (un import que faltó al mover código) o un import que quedó
-    // colgado. El resto de las reglas entra en una pasada aparte.
+    // Servidor (Node): las reglas recomendadas completas. Lo que más cuida es lo
+    // que rompe en runtime — un nombre sin definir (un import que faltó al mover
+    // código) o un import que quedó colgado.
     files: ['server/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -58,7 +57,7 @@ export default [
       globals: globals.node,
     },
     rules: {
-      'no-undef': 'error',
+      ...js.configs.recommended.rules,
       'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
       // El `crypto` global de Node es WebCrypto (sin timingSafeEqual,
       // createHmac…): sin `import crypto from 'node:crypto'` el código
@@ -67,6 +66,21 @@ export default [
         'error',
         { name: 'crypto', message: "Importá crypto de 'node:crypto'." },
       ],
+    },
+  },
+  {
+    // Scripts de mantenimiento y verificación (Node). Los de Playwright llevan
+    // código que corre en el navegador dentro de page.evaluate(() => …): por eso
+    // también los globals del navegador (document, window…).
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: { ...globals.node, ...globals.browser },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
     },
   },
   {

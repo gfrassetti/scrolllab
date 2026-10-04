@@ -56,7 +56,6 @@ const COPY = {
     intro: (name, vibe) => `${name} — ${vibe}.`,
     body: (tags) => `Template con el código fuente incluido: ${tags}.`,
     cta: `Mirá la demo y, si te sirve para un proyecto, tenés ${WELCOME_COUPON_PERCENT}% menos en tu primera compra.`,
-    bio: 'Link en la bio 👆',
     bio: 'Link en la bio',
     sections: {
       bio: '[Instagram · TikTok · YouTube Shorts] el link va en la bio',
@@ -67,10 +66,8 @@ const COPY = {
   en: {
     hook: 'Websites that tell a story as they move.',
     intro: (name, vibe) => `${name} — ${vibe}.`,
-    body: (tags) => `A template with source code included: ${tags}.`,
     body: (tags) => `A ready-to-use template, source code included: ${tags}.`,
     cta: `Watch the demo — and if it fits a project, get ${WELCOME_COUPON_PERCENT}% off your first purchase.`,
-    bio: 'Link in bio 👆',
     bio: 'Link in bio',
     sections: {
       bio: '[Instagram · TikTok · YouTube Shorts] the link goes in the bio',
