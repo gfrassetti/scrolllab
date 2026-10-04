@@ -10,7 +10,7 @@ import {
   consumeDownload,
   assertPathInsideStorage,
 } from '../../services/orders.js'
-import { signDownloadToken, verifyDownloadToken } from '../../packaging.js'
+import { signDownloadToken, verifyDownloadToken } from '../../downloadToken.js'
 
 /**
  * Mis compras y la entrega del ZIP: la orden paga pide un link firmado (TTL +

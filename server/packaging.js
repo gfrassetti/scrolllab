@@ -1,9 +1,13 @@
-import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import archiver from 'archiver'
 import { buildLicenseText } from './license.js'
+import { stampApp, stampCss, stampReadme } from './licenseWatermark.js'
+
+// API pública que antes vivía acá (tests, scripts y rutas la importan de este módulo).
+export { extractInvisibleMark, licenseFingerprint } from './licenseWatermark.js'
+export { signDownloadToken, verifyDownloadToken } from './downloadToken.js'
 import { isAllowedSectionId } from './sections.js'
 import { recipeSectionId } from './catalog.js'
 // Shared with the builder preview on purpose: if the two resolved `auto`
@@ -475,102 +479,6 @@ function rewritePageToApp(content, model) {
     .replaceAll("from '../components/", "from './components/")
     .replaceAll(`export default function ${model.charAt(0).toUpperCase() + model.slice(1)}Page`, 'export default function App')
     .replace(/export default function \w+Page/, 'export default function App')
-}
-
-/**
- * Trazabilidad por comprador (docs/ip-protection-brief.md §3.5). Cada ZIP lleva
- * el número de orden en TEXTO VISIBLE (token estable `SCROLLLAB-LICENSE`, para
- * buscar filtraciones en GitHub/marketplaces) y, además, un identificador
- * INVISIBLE de respaldo por si borran lo visible. Las marcas van repartidas en
- * varios archivos (App.jsx, index.css, README) — quitar una no borra la traza.
- * Nada de esto altera el runtime: son sólo comentarios.
- */
-
-// Código corto y estable por orden. No expone el orderId directamente (hay que
-// recomputarlo contra la tabla de órdenes), pero es determinístico y recuperable.
-function fingerprintId({ orderId, email } = {}) {
-  return crypto
-    .createHash('sha256')
-    .update(`${orderId || ''}|${email || ''}`)
-    .digest('hex')
-    .slice(0, 16)
-}
-
-// Marca invisible: el payload se codifica como bits en caracteres de ancho cero
-// (U+200B/U+200C) entre dos centinelas (U+2060). Va SIEMPRE dentro de un
-// comentario — fuera de un comentario, U+200B rompería el parseo del build.
-const FP_ZERO = '​'
-const FP_ONE = '‌'
-const FP_EDGE = '⁠⁠'
-
-function encodeInvisible(payload) {
-  const bits = []
-  for (const byte of Buffer.from(payload, 'utf8')) {
-    for (let b = 7; b >= 0; b--) bits.push((byte >> b) & 1)
-  }
-  return FP_EDGE + bits.map((bit) => (bit ? FP_ONE : FP_ZERO)).join('') + FP_EDGE
-}
-
-/** Recupera el payload invisible de un archivo filtrado (para trazar la fuga). */
-export function extractInvisibleMark(content) {
-  const text = String(content || '')
-  const start = text.indexOf(FP_EDGE)
-  if (start === -1) return null
-  const from = start + FP_EDGE.length
-  const end = text.indexOf(FP_EDGE, from)
-  if (end === -1) return null
-  const bits = []
-  for (const ch of text.slice(from, end)) {
-    if (ch === FP_ONE) bits.push(1)
-    else if (ch === FP_ZERO) bits.push(0)
-  }
-  const bytes = []
-  for (let i = 0; i + 8 <= bits.length; i += 8) {
-    let v = 0
-    for (let b = 0; b < 8; b++) v = (v << 1) | bits[i + b]
-    bytes.push(v)
-  }
-  return bytes.length ? Buffer.from(bytes).toString('utf8') : null
-}
-
-/** Id de fingerprint (público) para el test / verificación de fugas. */
-export function licenseFingerprint(licenseMeta) {
-  return licenseMeta ? `SL:${fingerprintId(licenseMeta)}` : null
-}
-
-function invisibleMark(licenseMeta) {
-  return licenseMeta ? encodeInvisible(`SL:${fingerprintId(licenseMeta)}`) : ''
-}
-
-function fingerprintComment(licenseMeta = {}) {
-  const { orderId, email, date } = licenseMeta
-  const inv = invisibleMark(licenseMeta)
-  return `/**
- * SCROLLLAB-LICENSE ${orderId || 'unknown'}
- * Licencia regular emitida a ${email || 'unknown'}${date ? ` el ${date}` : ''}.
- * Uso permitido según LICENSE.txt (incluido en este ZIP). Redistribuir,
- * revender o republicar el código fuente está prohibido. Este encabezado
- * identifica al comprador original; quitarlo no cambia los términos.${inv ? `\n * ${inv}` : ''}
- */
-`
-}
-
-function stampApp(appSrc, licenseMeta) {
-  return licenseMeta ? `${fingerprintComment(licenseMeta)}\n${appSrc}` : appSrc
-}
-
-// Marca de respaldo en archivos "silenciosos": si el comprador borra el
-// encabezado de App.jsx, la traza sigue viva en index.css y en el README.
-function stampCss(cssText, licenseMeta) {
-  if (!licenseMeta) return cssText
-  const { orderId } = licenseMeta
-  return `${cssText}\n/* SCROLLLAB-LICENSE ${orderId || 'unknown'} — identifica al comprador original (ver LICENSE.txt).${invisibleMark(licenseMeta)} */\n`
-}
-
-function stampReadme(md, licenseMeta) {
-  if (!licenseMeta) return md
-  const { orderId } = licenseMeta
-  return `${md}\n<!-- SCROLLLAB-LICENSE ${orderId || 'unknown'} — identifica al comprador original (ver LICENSE.txt).${invisibleMark(licenseMeta)} -->\n`
 }
 
 function createZip(destPath) {
@@ -1112,28 +1020,6 @@ export async function packOrderTemplate({
   await archive.finalize()
   await done
   return destPath
-}
-
-export function signDownloadToken({ orderId, userId, secret, ttlSeconds }) {
-  const exp = Math.floor(Date.now() / 1000) + ttlSeconds
-  const payload = Buffer.from(JSON.stringify({ orderId, userId, exp })).toString(
-    'base64url',
-  )
-  const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url')
-  return `${payload}.${sig}`
-}
-
-export function verifyDownloadToken(token, secret) {
-  const [payload, sig] = String(token).split('.')
-  if (!payload || !sig) return null
-  const expected = crypto.createHmac('sha256', secret).update(payload).digest('base64url')
-  if (sig.length !== expected.length) return null
-  const a = Buffer.from(sig)
-  const b = Buffer.from(expected)
-  if (!crypto.timingSafeEqual(a, b)) return null
-  const data = JSON.parse(Buffer.from(payload, 'base64url').toString())
-  if (data.exp < Math.floor(Date.now() / 1000)) return null
-  return data
 }
 
 export function storageRoot(explicitDir) {
