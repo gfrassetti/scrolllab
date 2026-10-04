@@ -11,6 +11,12 @@
  * al crear la orden, así el valor no se licúa con la inflación.
  */
 
+/**
+ * Una sección de una receta del builder: su id (`'chapters/HeroKinetic'`) o
+ * `{ id, props }` con los textos / listas editados.
+ * @typedef {string | { id: string, props?: Record<string, unknown> }} RecipeEntry
+ */
+
 /** Precio de lista por template. Incluye los que todavía no se venden (RATIO). */
 export const TEMPLATE_PRICES_USD = Object.freeze({
   chapters: 149,
@@ -88,31 +94,59 @@ export const BUILDER_HIDDEN_SKUS = Object.freeze(['ratio', 'plum', 'signal'])
  */
 export const RETIRED_SKUS = Object.freeze(['plum', 'signal'])
 
+/**
+ * @param {string} sku
+ * @returns {boolean}
+ */
 export function isRetiredSku(sku) {
   return RETIRED_SKUS.includes(sku)
 }
 
+/**
+ * @param {string} sku
+ * @returns {boolean}
+ */
 export function isComingSoonSku(sku) {
   return COMING_SOON_SKUS.includes(sku)
 }
 
+/**
+ * @param {string} sku
+ * @returns {boolean}
+ */
 export function isLocalOnlySku(sku) {
   return LOCAL_ONLY_SKUS.includes(sku)
 }
 
+/**
+ * @param {string} sku
+ * @returns {boolean}
+ */
 export function isBuilderHiddenSku(sku) {
   return BUILDER_HIDDEN_SKUS.includes(sku)
 }
 
+/**
+ * @param {string} sku
+ * @returns {number | null} USD de lista, o null si el SKU no tiene precio
+ */
 export function templatePriceUsd(sku) {
   return TEMPLATE_PRICES_USD[sku] ?? null
 }
 
 /** Una entrada de receta es un id (`'chapters/HeroKinetic'`) o `{ id, props }`. */
+/**
+ * @param {RecipeEntry | null | undefined} entry
+ * @returns {string | undefined}
+ */
 export function recipeSectionId(entry) {
   return typeof entry === 'string' ? entry : entry?.id
 }
 
+/**
+ * @param {RecipeEntry[] | null | undefined} recipe
+ * @returns {boolean}
+ */
 export function recipeHasCommerce(recipe) {
   return (recipe || []).some((entry) =>
     String(recipeSectionId(entry) || '').startsWith('commerce/'),
@@ -120,11 +154,20 @@ export function recipeHasCommerce(recipe) {
 }
 
 /** Secciones por encima de las que trae la base. Cuenta cada instancia. */
+/**
+ * @param {number} sectionCount
+ * @returns {number}
+ */
 export function customExtraSections(sectionCount) {
   const count = Number.isFinite(sectionCount) ? Math.floor(sectionCount) : 0
   return Math.max(0, count - CUSTOM_BASE_SECTIONS)
 }
 
+/**
+ * @param {number} sectionCount
+ * @param {boolean} hasCommerce
+ * @returns {number} USD
+ */
 export function estimateCustomPriceUsd(sectionCount, hasCommerce) {
   return (
     CUSTOM_BASE_PRICE_USD +
@@ -134,6 +177,10 @@ export function estimateCustomPriceUsd(sectionCount, hasCommerce) {
 }
 
 /** Precio de una receta del builder: el mismo cálculo en el carrito y en la orden. */
+/**
+ * @param {RecipeEntry[] | null | undefined} recipe
+ * @returns {number} USD
+ */
 export function priceCustomRecipeUsd(recipe) {
   const sections = Array.isArray(recipe) ? recipe.length : 0
   return estimateCustomPriceUsd(sections, recipeHasCommerce(recipe))
@@ -143,6 +190,9 @@ export function priceCustomRecipeUsd(recipe) {
  * USD → ARS redondeado al millar de arriba, o `null` si la entrada no sirve.
  * Cada lado decide qué hacer con el `null`: el front no muestra precio, el
  * servidor corta la orden (server/catalog.js).
+ * @param {number} usd
+ * @param {number} rate cotización USD→ARS
+ * @returns {number | null} pesos, o null si la entrada no sirve
  */
 export function arsFromUsdOrNull(usd, rate) {
   if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null
@@ -153,6 +203,10 @@ export function arsFromUsdOrNull(usd, rate) {
  * Precio en pesos con cupón: descuenta en USD (en centavos enteros) y redondea
  * igual que `arsFromUsdOrNull`, así el total de la orden es la suma de sus
  * líneas. `null` si la entrada o el porcentaje no sirven.
+ * @param {number} usd
+ * @param {number} rate cotización USD→ARS
+ * @param {number} percent descuento, 0 a menos de 100
+ * @returns {number | null} pesos, o null si la entrada no sirve
  */
 export function discountedArsFromUsdOrNull(usd, rate, percent) {
   if (!Number.isFinite(usd) || !Number.isFinite(rate) || rate <= 0) return null

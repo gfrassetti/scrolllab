@@ -144,6 +144,9 @@ export function validateCheckoutItems(
 /**
  * Accepts legacy string[] or [{ id, props? }, ...].
  * Returns normalized [{ id, props? }, ...].
+ * @param {unknown} recipe lo que mandó el cliente
+ * @param {number} [maxRecipeSections]
+ * @returns {import('../src/domain/catalog.js').RecipeEntry[]} la receta limpia: cada sección permitida, con sus props saneadas
  */
 export function validateRecipe(recipe, maxRecipeSections = 30) {
   if (!Array.isArray(recipe) || recipe.length === 0) {

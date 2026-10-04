@@ -13,6 +13,7 @@
  * `kind` ordena la composición: `nav` arriba, `footer` abajo, `hero` / `section`
  * en el medio. El orden de los modelos y de sus secciones es el de la paleta.
  */
+/** @type {Record<string, Record<string, SectionKind>>} */
 const BY_MODEL = {
   chapters: {
     NavMinimal: 'nav',
@@ -143,6 +144,11 @@ const BY_MODEL = {
   },
 }
 
+/**
+ * Para qué sirve una sección en la página: `nav` arriba, `footer` abajo.
+ * @typedef {'nav' | 'hero' | 'section' | 'footer'} SectionKind
+ */
+
 /** `{ modelo: { Componente: kind } }`, en el orden de la paleta. */
 export const SECTIONS_BY_MODEL = Object.freeze(
   Object.fromEntries(
@@ -151,6 +157,7 @@ export const SECTIONS_BY_MODEL = Object.freeze(
 )
 
 /** Mapa plano `'modelo/Componente' → kind`. */
+/** @type {Readonly<Record<string, SectionKind>>} */
 export const SECTION_KINDS = Object.freeze(
   Object.fromEntries(
     Object.entries(BY_MODEL).flatMap(([model, sections]) =>
@@ -162,14 +169,26 @@ export const SECTION_KINDS = Object.freeze(
 /** Todos los ids, en el orden de la paleta. */
 export const SECTION_IDS = Object.freeze(Object.keys(SECTION_KINDS))
 
+/**
+ * @param {string} sectionId
+ * @returns {string} el modelo: `'chapters/HeroKinetic'` → `'chapters'`
+ */
 export function sectionModelOf(sectionId) {
   return String(sectionId).split('/')[0]
 }
 
+/**
+ * @param {string} sectionId
+ * @returns {SectionKind | undefined}
+ */
 export function sectionKindOf(sectionId) {
   return SECTION_KINDS[sectionId]
 }
 
+/**
+ * @param {string} sectionId
+ * @returns {boolean}
+ */
 export function isKnownSection(sectionId) {
   return Object.prototype.hasOwnProperty.call(SECTION_KINDS, sectionId)
 }

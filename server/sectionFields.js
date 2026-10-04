@@ -150,12 +150,18 @@ function sanitizeListValue(schema, value) {
   return out
 }
 
+/**
+ * @param {string} sectionId
+ * @param {unknown} props lo que mandó el cliente: no se confía en nada de ahí
+ * @returns {Record<string, unknown> | undefined} solo las props permitidas y válidas, o undefined si no queda ninguna
+ */
 export function sanitizeSectionProps(sectionId, props) {
   if (!props || typeof props !== 'object' || Array.isArray(props)) return undefined
   const allowed = ALLOWED_PROPS_BY_SECTION[sectionId]
   if (!allowed) return undefined
   const allow = new Set(allowed)
   const listSchemas = LIST_PROPS_BY_SECTION[sectionId] || {}
+  /** @type {Record<string, unknown>} */
   const cleaned = {}
   for (const [key, value] of Object.entries(props)) {
     if (!allow.has(key)) continue
@@ -198,6 +204,11 @@ export function sanitizeSectionProps(sectionId, props) {
  */
 const ABSOLUTE_ASSET_RE = /^https:\/\//i
 
+/**
+ * @param {string} sectionId
+ * @param {unknown} props lo que mandó el cliente: no se confía en nada de ahí
+ * @returns {Record<string, unknown> | undefined} igual que sanitizeSectionProps, y sin imágenes de ruta relativa (en LAB van con URL completa)
+ */
 export function sanitizeHostedProps(sectionId, props) {
   const clean = sanitizeSectionProps(sectionId, props)
   if (!clean) return clean
