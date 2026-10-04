@@ -40,7 +40,7 @@ export async function syncLeadToCrm({
 
   let detail = ''
   try {
-    detail = (await res.json())?.message || ''
+    detail = /** @type {{ message?: string } | null} */ (await res.json())?.message || ''
   } catch {
     /* sin cuerpo JSON */
   }
@@ -50,6 +50,7 @@ export async function syncLeadToCrm({
 /**
  * Sync + registro del resultado en el lead. Nunca tira: un fallo del CRM no
  * puede perder el alta, que ya está guardada.
+ * @param {{ lead: any, config: any, fetchImpl?: typeof fetch }} args
  */
 export async function syncLeadSafely({ lead, config, fetchImpl }) {
   try {

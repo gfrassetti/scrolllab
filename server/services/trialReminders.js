@@ -12,6 +12,7 @@ const HOUR_MS = 60 * 60 * 1000
  * y le manda el mail a cada una una sola vez: el claim en la base evita
  * duplicados aunque haya dos instancias del server o se reinicie en el medio.
  * Si Resend falla, el claim se suelta y la próxima pasada lo reintenta.
+ * @param {{ config: any, client?: any, now?: Date }} args
  */
 export async function sendDueTrialReminders({ config, client, now = new Date() }) {
   const days = config.hostedTrialReminderDays
@@ -27,7 +28,8 @@ export async function sendDueTrialReminders({ config, client, now = new Date() }
     // Una prueba que dura lo mismo que el aviso (o menos) no lo necesita: el
     // mail de bienvenida, que sale al activarse, ya trae la fecha del cobro.
     const trialMs =
-      new Date(subscription.trialEndsAt) - new Date(subscription.createdAt)
+      new Date(subscription.trialEndsAt).getTime() -
+      new Date(subscription.createdAt).getTime()
     if (!(trialMs > withinMs)) continue
     try {
       const out = await sendSubscriptionTrialReminderOnce({

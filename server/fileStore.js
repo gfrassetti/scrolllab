@@ -116,7 +116,7 @@ export const fileDb = {
   async findOrdersByUser(userId) {
     return read('orders')
       .filter((o) => String(o.userId) === String(userId))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .map(withSave)
   },
 
@@ -151,7 +151,7 @@ export const fileDb = {
   async findHostedInstancesByUser(userId) {
     return read('hosted')
       .filter((h) => String(h.userId) === String(userId))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .map((h) => withSaveDoc('hosted', h))
   },
   async deleteHostedInstance(id) {
@@ -222,14 +222,14 @@ export const fileDb = {
             String(s.userId) === String(userId) &&
             (s.status === 'authorized' || s.status === 'paused'),
         )
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .map((s) => withSaveDoc('subscriptions', s))[0] || null
     )
   },
   async findSubscriptionsByUser(userId) {
     return read('subscriptions')
       .filter((s) => String(s.userId) === String(userId))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .map((s) => withSaveDoc('subscriptions', s))
   },
   async listTrialReminderCandidates({ now, withinMs }) {
@@ -270,7 +270,7 @@ export const fileDb = {
   async listLeads({ unsyncedOnly = false } = {}) {
     return read('leads')
       .filter((l) => !unsyncedOnly || !l.crmSyncedAt)
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
       .map((l) => withSaveDoc('leads', l))
   },
   async findLeadByCoupon(code) {

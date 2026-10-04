@@ -245,13 +245,26 @@ const leadSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+/**
+ * Los modelos se exportan con `mongoose.models.X || mongoose.model(...)` (para
+ * no registrarlos dos veces en tests / recargas): esa expresión es una unión
+ * que TypeScript no deja llamar. Se tipan como `Model<any>`; los documentos
+ * son los de los esquemas de arriba.
+ * @typedef {import('mongoose').Model<any>} AnyModel
+ */
+
+/** @type {AnyModel} */
 export const User = mongoose.models.User || mongoose.model("User", userSchema);
+/** @type {AnyModel} */
 export const Order =
   mongoose.models.Order || mongoose.model("Order", orderSchema);
+/** @type {AnyModel} */
 export const HostedInstance =
   mongoose.models.HostedInstance ||
   mongoose.model("HostedInstance", hostedInstanceSchema);
+/** @type {AnyModel} */
 export const Subscription =
   mongoose.models.Subscription ||
   mongoose.model("Subscription", subscriptionSchema);
+/** @type {AnyModel} */
 export const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);

@@ -20,6 +20,11 @@ export const ordersRepo = {
       ? fileDb.findOrdersByUser(userId)
       : MongoOrder.find({ userId }).sort({ createdAt: -1 });
   },
+  /**
+   * @param {string} orderId
+   * @param {string} zipPath
+   * @param {{ zipVersion?: number, licenseDate?: string }} [options]
+   */
   async setOrderZipPath(orderId, zipPath, { zipVersion, licenseDate } = {}) {
     const fields = { zipPath };
     if (zipVersion !== undefined) fields.zipVersion = zipVersion;

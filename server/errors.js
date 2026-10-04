@@ -10,6 +10,9 @@ export class HttpError extends Error {
    * crudos se enmascaran porque pueden traer detalles internos.
    * `code` y `details` son opcionales y viajan al cliente: sirven para que el
    * front distinga dos errores con el mismo status sin leer el texto.
+   * @param {number} status
+   * @param {string} message
+   * @param {{ expose?: boolean, code?: string, details?: any }} [options]
    */
   constructor(status, message, { expose, code, details } = {}) {
     super(message)

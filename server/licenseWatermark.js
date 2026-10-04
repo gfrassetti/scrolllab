@@ -11,6 +11,9 @@ import crypto from 'node:crypto'
 
 // Código corto y estable por orden. No expone el orderId directamente (hay que
 // recomputarlo contra la tabla de órdenes), pero es determinístico y recuperable.
+/**
+ * @param {{ orderId?: string, email?: string }} [meta]
+ */
 function fingerprintId({ orderId, email } = {}) {
   return crypto
     .createHash('sha256')

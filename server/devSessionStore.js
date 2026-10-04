@@ -15,6 +15,9 @@ import session from 'express-session'
  * archivo. Producción usa connect-mongo (ver app.js).
  */
 export class DevFileSessionStore extends session.Store {
+  /**
+   * @param {{ file?: string, ttlMs?: number }} [options]
+   */
   constructor({ file, ttlMs = 1000 * 60 * 60 * 24 * 14 } = {}) {
     super()
     this.file = file

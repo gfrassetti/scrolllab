@@ -194,7 +194,10 @@ export async function redeemCouponForOrder(order) {
   })
 }
 
-/** Mail del cupón, sin tirar: el cupón ya se muestra en pantalla. */
+/**
+ * Mail del cupón, sin tirar: el cupón ya se muestra en pantalla.
+ * @param {{ lead: any, config: any, client?: any }} args
+ */
 export async function sendCouponEmailSafely({ lead, config, client }) {
   try {
     const out = await sendCouponEmail({ lead, config, client })

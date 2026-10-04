@@ -157,6 +157,9 @@ export function buildUpgradePreferenceBody({
   }
 }
 
+/**
+ * @param {{ accessToken: string } & Parameters<typeof buildUpgradePreferenceBody>[0]} args
+ */
 export async function createUpgradePreference({ accessToken, ...rest }) {
   const preference = new Preference(createMpClient(accessToken))
   try {
@@ -281,6 +284,9 @@ export function buildPreapprovalBody({
 }
 
 /** Alta de una suscripción con monto inline. Devuelve `init_point`. */
+/**
+ * @param {{ accessToken: string } & Parameters<typeof buildPreapprovalBody>[0]} args
+ */
 export async function createPreapproval({ accessToken, ...rest }) {
   const pa = new PreApproval(createMpClient(accessToken))
   return pa.create({ body: buildPreapprovalBody(rest) })

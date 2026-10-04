@@ -24,6 +24,7 @@ export {
 /**
  * Envía una sola confirmación por orden. Resend también recibe una
  * Idempotency-Key estable para cubrir reintentos tras cortes de proceso.
+ * @param {{ order: any, user: any, config: any, client?: any }} args
  */
 export async function sendOrderReceiptOnce({ order, user, config, client }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
@@ -94,6 +95,7 @@ const SUB_EMAIL = {
  * claim en DB + Idempotency-Key de Resend. Fire-and-forget desde los paths que
  * disparan (webhook / sync / cancel route); el aviso sale del barrido de
  * services/trialReminders.js, que pasa `withinMs` (el plazo) y `now`.
+ * @param {{ kind: string, subscription: any, config: any, client?: any, withinMs?: number, now?: Date }} args
  */
 async function sendSubscriptionEmailOnce({
   kind,
@@ -146,10 +148,16 @@ async function sendSubscriptionEmailOnce({
   }
 }
 
+/**
+ * @param {{ subscription: any, config: any, client?: any }} args
+ */
 export function sendSubscriptionWelcomeOnce({ subscription, config, client }) {
   return sendSubscriptionEmailOnce({ kind: 'welcome', subscription, config, client })
 }
 
+/**
+ * @param {{ subscription: any, config: any, client?: any }} args
+ */
 export function sendSubscriptionCanceledOnce({ subscription, config, client }) {
   return sendSubscriptionEmailOnce({
     kind: 'canceled',
@@ -160,6 +168,9 @@ export function sendSubscriptionCanceledOnce({ subscription, config, client }) {
 }
 
 /** Aviso de fin de prueba: solo si termina dentro de `withinMs` (ms) y sigue sin cancelar. */
+/**
+ * @param {{ subscription: any, config: any, client?: any, withinMs?: number, now?: Date }} args
+ */
 export function sendSubscriptionTrialReminderOnce({
   subscription,
   config,
@@ -179,6 +190,7 @@ export function sendSubscriptionTrialReminderOnce({
 
 /**
  * Aviso interno al dueño del marketplace. Idempotente vía Resend (webhook + confirm).
+ * @param {{ order: any, user: any, config: any, client?: any }} args
  */
 export async function sendOrderAdminNotifyOnce({ order, user, config, client }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
@@ -214,6 +226,7 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
  * Aviso interno de un pago que pide acción a mano (reembolsar, entregar).
  * Uno por evento: la clave de idempotencia evita que los reintentos del
  * webhook repitan el mail. Sin mail configurado queda solo el log.
+ * @param {{ kind: string, key: string, subject: string, lines: string[], config: any, client?: any }} args
  */
 export async function sendAdminAlert({ kind, key, subject, lines, config, client }) {
   if (!config?.email?.enabled) return { skipped: 'disabled' }
@@ -243,6 +256,7 @@ export async function sendAdminAlert({ kind, key, subject, lines, config, client
 /**
  * Manda el cupón al mail del lead. Idempotente vía Resend (una key por lead):
  * un reintento no duplica el mail.
+ * @param {{ lead: any, config: any, client?: any }} args
  */
 export async function sendCouponEmail({ lead, config, client }) {
   if (!config.email.enabled) return { skipped: 'disabled' }

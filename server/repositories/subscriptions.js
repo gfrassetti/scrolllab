@@ -66,6 +66,11 @@ export const subscriptionsRepo = {
   // `kind` (y su gate): 'welcome' (status authorized) | 'canceled' (canceledAt) |
   // 'trialReminder' (prueba sin cancelar que termina dentro de `withinMs`).
   // `now` solo lo inyectan los tests para mover el reloj de la prueba.
+  /**
+   * @param {string} subId
+   * @param {string} kind
+   * @param {{ withinMs?: number, now?: Date | string | number }} [options]
+   */
   async claimSubscriptionEmail(subId, kind, { withinMs, now: at } = {}) {
     const p = emailPrefix(kind);
     if (kind === "trialReminder" && !(withinMs > 0)) return null;

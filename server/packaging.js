@@ -485,6 +485,7 @@ function createZip(destPath) {
   ensureDir(path.dirname(destPath))
   const output = fs.createWriteStream(destPath)
   const archive = archiver('zip', { zlib: { level: 9 } })
+  /** @type {Promise<void>} */
   const done = new Promise((resolve, reject) => {
     output.on('close', resolve)
     archive.on('error', reject)
@@ -941,6 +942,7 @@ const isCustomItem = (item) =>
  * carpeta por proyecto, cada una se instala sola, y una licencia en la raíz
  * que cubre todo, igual que el bundle. Un modelo que viene en el bundle y
  * también suelto se empaqueta una vez.
+ * @param {{ items: any[], destPath: string, licenseMeta?: any, bundleModels?: readonly string[] }} args
  */
 export async function packOrderTemplate({
   items,
