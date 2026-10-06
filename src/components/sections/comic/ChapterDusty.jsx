@@ -222,16 +222,17 @@ export default function ChapterDusty({
       const sideTruck = root.current.querySelector('[data-side-truck]')
       const curtain = root.current.querySelector('[data-curtain]')
 
-      // where the slot sits in the pin, ignoring transforms (the clip starts there)
-      const slotRect = () => {
+      // where an element sits in the pin, ignoring transforms
+      const rectIn = (el) => {
         let left = 0
         let top = 0
-        for (let el = slot; el && el !== pin; el = el.offsetParent) {
-          left += el.offsetLeft
-          top += el.offsetTop
+        for (let node = el; node && node !== pin; node = node.offsetParent) {
+          left += node.offsetLeft
+          top += node.offsetTop
         }
-        return { left, top, w: slot.offsetWidth, h: slot.offsetHeight }
+        return { left, top, w: el.offsetWidth, h: el.offsetHeight }
       }
+      const slotRect = () => rectIn(slot)
       const clipFor = () => {
         const r = slotRect()
         const W = pin.clientWidth
@@ -251,7 +252,21 @@ export default function ChapterDusty({
         return `${r.left + r.w / 2}px ${r.top + r.h / 2}px`
       }
       gsap.set(farmScene, { scale: 0.7, transformOrigin: slotCenter })
-      gsap.set(sideTruck, { x: () => -pin.clientWidth * 0.95, scale: 1.25, transformOrigin: '50% 100%', opacity: 1 })
+      // The truck is placed by its own wrapper (centered, bottom edge on the pin's
+      // bottom); x / y / scale carry it from the lower-left corner onto the road.
+      const truckW = () => sideTruck.offsetWidth
+      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.36)
+      const START_Y = () => pin.clientHeight * 0.2
+      // the farm's road, in the pin: the scene is cropped with `slice`
+      const roadY = () => {
+        const W = pin.clientWidth
+        const H = pin.clientHeight
+        const k = Math.max(W / 1600, H / 900)
+        return (H - 900 * k) / 2 + 706 * k
+      }
+      // y that puts the wheels on that road (they sit 10 % of the truck's height above its bottom edge)
+      const END_Y = () => roadY() + 0.102 * ((truckW() * 470) / 900) - pin.clientHeight
+      gsap.set(sideTruck, { x: START_X, y: START_Y, scale: 1.4, transformOrigin: '50% 100%', opacity: 0 })
       gsap.set([buddies, trio], { opacity: 0 })
 
       tl.to(curtain, { yPercent: 0, duration: 1.7, ease: 'power2.out' }, 5.0)
@@ -268,22 +283,28 @@ export default function ChapterDusty({
       tl.to(farm, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 9.36)
       tl.to(ink[1], { opacity: 1, y: 0, duration: 0.7 }, 9.9)
 
-      // the truck slides in from the left edge, a bit bigger than life, and shrinks
-      // into its place under the first scene while everything else holds still
-      tl.to(sideTruck, { x: () => -pin.clientWidth * 0.29, duration: 2.6, ease: 'power2.out' }, 11.0)
-      tl.to(sideTruck, { scale: 1, duration: 2.4, ease: 'power2.inOut' }, 11.6)
-
-      // then the last scene grows over the others into the whole page and the truck
-      // rolls to the middle of it
-      tl.to(sideTruck, { x: 0, duration: 4.4, ease: 'power2.inOut' }, 13.8)
-      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: 4.4, ease: 'power2.inOut' }, 13.8)
-      tl.to(farmScene, { scale: 1, duration: 4.4, ease: 'power2.inOut' }, 13.8)
-      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, 14.2)
-      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.8 }, 14.2)
-      tl.to(ink[1], { color: '#fff', duration: 1.0 }, 16.2)
-      tl.to(curtain, { opacity: 0, duration: 0.6 }, 18.4)
+      // The truck is always moving. It comes up out of the lower-left corner the
+      // moment the squares arrive, big and close, and keeps shrinking and climbing
+      // toward the road. The instant its hood touches the first square the last
+      // scene starts to grow, and both finish together: the truck on the farm road.
+      const TRUCK_AT = 9.8
+      const TRUCK_FOR = 6.6
+      const hood = 0.44 * truckW() // front of the hood, from the truck's center, at scale 1
+      const touch = rectIn(tiles[0]).left - hood - pin.clientWidth / 2
+      const u = Math.min(0.8, Math.max(0.3, 1 - touch / START_X()))
+      const HIT = TRUCK_AT + TRUCK_FOR * u
+      tl.to(sideTruck, { opacity: 1, duration: 0.25 }, TRUCK_AT)
+      tl.to(sideTruck, { x: 0, duration: TRUCK_FOR, ease: 'none' }, TRUCK_AT)
+      tl.to(sideTruck, { y: END_Y, duration: TRUCK_FOR, ease: 'power1.inOut' }, TRUCK_AT)
+      tl.to(sideTruck, { scale: 1, duration: HIT - TRUCK_AT, ease: 'power1.out' }, TRUCK_AT)
+      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: TRUCK_FOR - (HIT - TRUCK_AT), ease: 'power1.inOut' }, HIT)
+      tl.to(farmScene, { scale: 1, duration: TRUCK_FOR - (HIT - TRUCK_AT), ease: 'power1.inOut' }, HIT)
+      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, HIT + 0.4)
+      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.8 }, HIT + 0.4)
+      tl.to(ink[1], { color: '#fff', duration: 1.0 }, HIT + 2.6)
+      tl.to(curtain, { opacity: 0, duration: 0.6 }, TRUCK_AT + TRUCK_FOR + 0.4)
       // a beat to look at the finished scene
-      tl.to({}, { duration: 1.6 }, 18.8)
+      tl.to({}, { duration: 1.6 }, TRUCK_AT + TRUCK_FOR + 0.8)
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -338,7 +359,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[1000vh] bg-[#1a1512] text-white"
+      className="relative h-[960vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
@@ -431,7 +452,7 @@ export default function ChapterDusty({
           </div>
 
           {/* and the truck that drives into it */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-[17%] z-40 flex justify-center max-md:bottom-[24%]">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-center">
             <div data-side-truck className="w-[min(46vw,96svh)] will-change-transform max-md:w-[82vw]">
               <SideTruck className="block h-auto w-full" />
             </div>
