@@ -753,6 +753,24 @@ viewports) + `npm run check`.
 
 ---
 
+## Pendiente — `frame-sizing: content-height` nativo (2026-10)
+
+Chrome 154 (shippeó ~2026-09) resuelve el auto-resize del iframe sin
+postMessage: CSS `frame-sizing: content-height` en el `<iframe>` del host +
+`<meta name="responsive-embedded-sizing" content="allow-origins=*">` en el
+documento embebido + `window.requestResize()` para recalcular después del
+`load` inicial. Spec/explainer oficial (confirmado, no es rumor):
+`w3c/csswg-drafts` → `css-sizing-4/responsive-iframes-explainer.md`.
+
+**No se implementó esta sesión** — investigado y dejado anotado, ver
+`docs/sessions/` o pedir la tarea sugerida al dueño. Detalle de por qué no es
+un simple "agregar la propiedad CSS", el trampa del `height` explícito
+pisando el sizing nativo, y por qué hace falta Chrome 154+ real (no este
+sandbox) para implementarlo bien: tarea sugerida al usuario desde esta misma
+sesión — pedirle el handoff si hace falta retomarlo.
+
+---
+
 ## No se toca
 
 - Builder → template/sección ZIP, pago único, Checkout Pro.
