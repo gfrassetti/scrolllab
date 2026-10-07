@@ -43,6 +43,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
   after(() => cleanup())
 
   const orderRow = (id) => fileDb.findOrderById(id)
+  const alerts = (title) => mp.mailsTo(OWNER).filter((m) => m.body.subject.includes(title))
   const later = () => new Date(Date.now() + DELAY + 60_000)
 
   async function paddleCheckout(agent, items, extra = {}) {
@@ -227,6 +228,29 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       tampered.items[0].price.unit_price.amount = '100'
       assert.equal((await paddleWebhook('transaction.completed', tampered)).status, 200)
       assert.equal((await orderRow(out.orderId)).status, 'pending')
+      // Pagaron y no se entrega: le llega un mail al dueño con el motivo (uno solo).
+      await waitFor(() => alerts('NO COINCIDE').some((m) => m.body.text.includes(txn.id)), 'el aviso de monto distinto')
+      const mail = alerts('NO COINCIDE').find((m) => m.body.text.includes(txn.id))
+      assert.match(mail.body.text, /Monto del pago no coincide/)
+      assert.match(mail.body.text, new RegExp(`orden ${out.orderId} espera`))
+      await paddleWebhook('transaction.completed', tampered)
+      await new Promise((r) => setTimeout(r, 80))
+      // Resend deduplica por la clave de idempotencia: el mismo evento repetido usa la misma.
+      const keys = alerts('NO COINCIDE').filter((m) => m.body.text.includes(txn.id)).map((m) => m.idempotencyKey)
+      assert.equal(new Set(keys).size, 1, keys.join(' | '))
+    })
+
+    it('una transacción en otra moneda tampoco paga la orden, y avisa', async () => {
+      const agent = await loginAs('moneda@test.com')
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      const eur = { ...structuredClone(txn), currency_code: 'EUR' }
+      assert.equal((await paddleWebhook('transaction.completed', eur)).status, 200)
+      assert.equal((await orderRow(out.orderId)).status, 'pending')
+      await waitFor(
+        () => alerts('NO COINCIDE').some((m) => m.body.text.includes(txn.id) && /Moneda/.test(m.body.text)),
+        'el aviso de moneda distinta',
+      )
     })
 
     it('una transacción ajena con el orderId de otra orden no la paga', async () => {
@@ -239,6 +263,10 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await paddleWebhook('transaction.completed', forged)
       assert.equal((await orderRow(target.orderId)).status, 'pending')
       assert.equal((await orderRow(own.orderId)).status, 'pending')
+      await waitFor(
+        () => alerts('NO COINCIDE').some((m) => m.body.text.includes(txn.id) && /Referencia/.test(m.body.text)),
+        'el aviso de referencia que no coincide',
+      )
     })
 
     it('webhook sin firma, con otra firma o viejo: 401 y no toca nada', async () => {

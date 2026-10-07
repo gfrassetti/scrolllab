@@ -29,6 +29,25 @@ import {
   closeSupersededSubscriptions,
   hasOtherActiveSubscription,
 } from './mpSync.js'
+import { alertAdmin } from '../orders.js'
+
+/**
+ * Un cobro de LAB que no se pudo asociar a un acceso: avisa por mail (uno por cobro y motivo).
+ * @param {{ txn: any, sub?: any, reason: string, kind: string, config: any }} args
+ */
+function alertLabCharge({ txn, sub, reason, kind, config }) {
+  const total = Number(txn?.details?.totals?.grand_total)
+  alertAdmin({
+    kind: 'lab-charge',
+    key: `paddle-${txn?.id}-${kind}`,
+    title: `COBRO DE LAB ${reason} — revisar o reembolsar`,
+    lines: [
+      `transacción Paddle ${txn?.id} · ${Number.isFinite(total) ? total / 100 : '—'} ${txn?.currency_code || 'USD'} · ${txn?.customer_id || 'cliente desconocido'}`,
+      sub ? `suscripción local ${subId(sub)} (${sub.status})` : `suscripción de Paddle ${txn?.subscription_id || '-'}: sin fila local`,
+    ],
+    config,
+  })
+}
 
 /**
  * LAB cobrado por Paddle (USD, ver docs/paddle.md): alta, estados de la
@@ -250,6 +269,7 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
     console.error(
       `subs paddle COBRO SIN SUSCRIPCIÓN txn=${txn?.id} paddleSub=${txn?.subscription_id || '-'} — revisar`,
     )
+    alertLabCharge({ txn, reason: 'SIN SUSCRIPCIÓN', kind: 'sin-suscripcion', config })
     return { skipped: 'sin suscripción local' }
   }
   if (txn.subscription_id && !sub.paddleSubscriptionId) {
@@ -292,12 +312,14 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
     console.error(
       `subs paddle COBRO SOBRE BAJA sub=${subId(sub)} txn=${txn.id} — revisar y reembolsar`,
     )
+    alertLabCharge({ txn, sub, reason: 'SOBRE UNA BAJA', kind: 'sobre-baja', config })
   }
   if (sub.status !== 'authorized') {
     if (sub.status === 'cancelled' && (await hasOtherActiveSubscription(sub))) {
       console.error(
         `subs paddle COBRO SOBRE SUSCRIPCIÓN REEMPLAZADA sub=${subId(sub)} txn=${txn.id} — revisar y reembolsar`,
       )
+      alertLabCharge({ txn, sub, reason: 'SOBRE UNA SUSCRIPCIÓN REEMPLAZADA', kind: 'reemplazada', config })
     } else {
       markActivated(sub)
       activated = true

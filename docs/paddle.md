@@ -110,6 +110,12 @@ un monto del cliente.
   la suscripción; los en inglés viven en `emailTemplatesBilling.js`).
 - Paddle además manda su propia factura (es el vendedor legal): el recibo
   nuestro lo aclara y no se presenta como factura.
+- **Avisos al dueño** (`alertAdmin`, mail a `EMAIL_NOTIFY_TO`, uno por evento):
+  pago sin orden, pago duplicado, reembolso / contracargo y, desde el punto 8,
+  **un pago que no coincide con su orden** (monto, moneda o referencia: el
+  cliente pagó y no se le entrega; antes solo quedaba en el log y el webhook
+  respondía 200), en Mercado Pago y en Paddle. En LAB, un **cobro de Paddle sin
+  suscripción local** o **sobre una baja / una suscripción reemplazada**.
 - Idempotencia: claim en la base + `Idempotency-Key` de Resend, como los
   mails que ya existían. Los de LAB por cobro guardan el cobro (`…EmailRef`).
 

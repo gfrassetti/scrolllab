@@ -28,7 +28,11 @@ describe('LAB con Paddle (reloj simulado)', () => {
   let sweep
   let DELAY
 
+  const OWNER = 'owner@scrolllab.test'
+  const alerts = (title) => mp.mailsTo(OWNER).filter((m) => m.body.subject.includes(title))
+
   before(async () => {
+    process.env.EMAIL_NOTIFY_TO = OWNER
     mock.timers.enable({ apis: ['Date'], now: T0 })
     ;({ pd, mp, loginAs, paddleWebhook, cleanup, config, fileDb } =
       await startAppAgainstFakePaddle({ HOSTED_TRIAL_DAYS: '7', HOSTED_GRACE_DAYS: '7' }))
@@ -337,6 +341,43 @@ describe('LAB con Paddle (reloj simulado)', () => {
       .send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'paddle' })
     assert.equal(again.status, 409)
     assert.equal((await c.me()).plan, 'hosted_starter')
+  })
+
+  it('un cobro de LAB que no se puede asociar a un acceso avisa al dueño para reembolsar', async () => {
+    const ghost = {
+      id: 'txn_ghost_lab',
+      status: 'completed',
+      currency_code: 'USD',
+      customer_id: 'ctm_ghost',
+      subscription_id: 'sub_ghost',
+      custom_data: { kind: 'lab', subscriptionId: 'f'.repeat(24), userId: 'u' },
+      details: { totals: { grand_total: '7900', total: '7900' } },
+      billing_period: { ends_at: '2026-11-01T00:00:00Z' },
+      items: [],
+    }
+    assert.equal((await paddleWebhook('transaction.completed', ghost)).status, 200)
+    await waitFor(() => alerts('COBRO DE LAB SIN SUSCRIPCIÓN').length === 1, 'el aviso de cobro sin suscripción')
+    const [mail] = alerts('COBRO DE LAB SIN SUSCRIPCIÓN')
+    assert.match(mail.body.text, /txn_ghost_lab/)
+    assert.match(mail.body.text, /79 USD/)
+    await paddleWebhook('transaction.completed', ghost)
+    await new Promise((r) => setTimeout(r, 80))
+    const keys = alerts('COBRO DE LAB SIN SUSCRIPCIÓN').map((m) => m.idempotencyKey)
+    assert.equal(new Set(keys).size, 1, keys.join(' | '))
+  })
+
+  it('un cobro sobre una suscripción dada de baja avisa para reembolsar (antes solo el log)', async () => {
+    const c = await customer('cobro-baja@test.com')
+    const out = await openCheckout(c, 'hosted_starter')
+    const { psub } = await payCheckout(out.transactionId)
+    await c.goTo(7)
+    await renews(psub)
+    await c.goTo(10)
+    assert.equal((await c.agent.post('/api/subscriptions/cancel')).status, 200)
+    // Paddle cobra igual (p. ej. un cobro que ya estaba en curso).
+    await c.goTo(38, 1)
+    const txn = await renews(psub)
+    await waitFor(() => alerts('COBRO DE LAB SOBRE UNA BAJA').some((m) => m.body.text.includes(txn.id)), 'el aviso de cobro sobre una baja')
   })
 
   it('alta rechazada en el checkout: un mail después de la espera, si no se pagó', async () => {
