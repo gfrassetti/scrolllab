@@ -1108,14 +1108,14 @@
   "privacy": {
     "eyebrow": "Legal",
     "title": "Política de Privacidad",
-    "effectiveDate": "Vigente desde el 28 de septiembre de 2026",
+    "effectiveDate": "Vigente desde el 7 de octubre de 2026",
     "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra, descargás un producto o nos escribís por un proyecto de Estudio.",
     "sections": [
       {
         "title": "Datos que recopilamos",
         "items": [
           "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
-          "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago y cantidad de descargas.",
+          "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago o de Paddle (según cómo pagues) y cantidad de descargas.",
           "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión.",
           "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste.",
           "Si nos escribís por el formulario de contacto o de Estudio: tu nombre, email, mensaje y qué tipo de proyecto marcaste."
@@ -1134,7 +1134,7 @@
       },
       {
         "title": "Servicios de terceros",
-        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos, Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos desde Argentina en pesos y Paddle.com, nuestro revendedor autorizado (Merchant of Record), para los pagos desde otros países en dólares: Paddle recibe tu nombre, email, país y datos de pago para cobrar, emitir la factura y calcular impuestos, y trata esos datos bajo su propia política de privacidad (paddle.com/legal/privacy), Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
       },
       {
         "title": "Cookies y almacenamiento local",
