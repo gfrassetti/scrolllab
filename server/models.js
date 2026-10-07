@@ -288,6 +288,25 @@ const leadSchema = new mongoose.Schema(
 );
 
 /**
+ * Evento de analítica propia (clics y vistas): ver server/services/analytics.js.
+ * Anónimo a propósito: un id de visitante random, sin IP ni mail. Se borra solo
+ * a los 400 días (índice TTL).
+ */
+const eventSchema = new mongoose.Schema(
+  {
+    vid: { type: String, required: true },
+    type: { type: String, enum: ["click", "view"], required: true },
+    path: { type: String, required: true },
+    sku: { type: String, default: "" },
+    label: { type: String, default: "" },
+    tag: { type: String, default: "" },
+    href: { type: String, default: "" },
+    createdAt: { type: Date, default: Date.now, index: { expires: 400 * 86400 } },
+  },
+  { versionKey: false },
+);
+
+/**
  * Los modelos se exportan con `mongoose.models.X || mongoose.model(...)` (para
  * no registrarlos dos veces en tests / recargas): esa expresión es una unión
  * que TypeScript no deja llamar. Se tipan como `Model<any>`; los documentos
@@ -310,3 +329,6 @@ export const Subscription =
   mongoose.model("Subscription", subscriptionSchema);
 /** @type {AnyModel} */
 export const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+/** @type {AnyModel} */
+export const Event =
+  mongoose.models.Event || mongoose.model("Event", eventSchema);

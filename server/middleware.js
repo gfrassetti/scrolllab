@@ -122,6 +122,13 @@ export function rateLimits() {
       max: 20,
       message: { error: 'Demasiados checkouts' },
     }),
+    // Analítica propia: lotes chicos y frecuentes; generoso porque varios
+    // visitantes pueden compartir IP.
+    track: mk({
+      windowMs: 60 * 1000,
+      max: 120,
+      message: { error: 'Rate limit' },
+    }),
     webhook: mk({
       windowMs: 60 * 1000,
       max: 120,

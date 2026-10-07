@@ -295,6 +295,39 @@ export const fileDb = {
     return true
   },
 
+  // Analítica propia: un evento por línea (NDJSON), solo se agrega al final.
+  async addEvents(rows) {
+    if (!rows.length) return
+    ensure()
+    fs.appendFileSync(
+      path.join(DATA_DIR, 'events.ndjson'),
+      rows.map((r) => JSON.stringify(r)).join('\n') + '\n',
+    )
+  },
+  async listEvents({ since } = {}) {
+    const p = path.join(DATA_DIR, 'events.ndjson')
+    if (!fs.existsSync(p)) return []
+    const t = since ? new Date(since).getTime() : 0
+    return fs
+      .readFileSync(p, 'utf8')
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => {
+        try {
+          return JSON.parse(line)
+        } catch {
+          return null
+        }
+      })
+      .filter((e) => e && new Date(e.createdAt).getTime() >= t)
+  },
+  async listUsers() {
+    return read('users')
+  },
+  async listOrders() {
+    return read('orders')
+  },
+
   // Leads (cupón de bienvenida). Alta idempotente por email.
   async upsertLead(data) {
     const rows = read('leads')

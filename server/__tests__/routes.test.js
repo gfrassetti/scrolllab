@@ -13,6 +13,7 @@ import { routeInventory, shadowedRoutes } from './helpers/routes.js'
  */
 const EXPECTED = [
   'DELETE /api/hosted/:id',
+  'GET /api/admin/analytics',
   'GET /api/auth/google',
   'GET /api/auth/google/callback',
   'GET /api/auth/me',
@@ -50,6 +51,7 @@ const EXPECTED = [
   'POST /api/subscriptions/sync',
   'POST /api/subscriptions/upgrade/confirm',
   'POST /api/subscriptions/upgrade/mock-pay',
+  'POST /api/track',
   'POST /api/webhooks/mercadopago',
   'POST /api/webhooks/paddle',
   'PUT /api/hosted/:id',
