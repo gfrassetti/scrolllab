@@ -193,4 +193,39 @@ describe('startCheckout', () => {
     // Paddle.js se inicializa una sola vez por token.
     assert.equal(seen.inits, 1)
   })
+
+  it('Paddle: el checkout no ofrece cargar descuentos (van en nuestro precio)', async () => {
+    await paddleCheckout({ name: 'checkout.closed', data: {} })
+    assert.equal(seen.opened.settings.showAddDiscounts, false)
+  })
+
+  it('Paddle: si el overlay no puede abrir (checkout.error), el botón no queda girando', async () => {
+    await assert.rejects(
+      paddleCheckout({ name: 'checkout.error', data: {} }),
+      /No pudimos abrir el pago con tarjeta|couldn’t open the card payment/,
+    )
+    assert.equal(seen.closed, 1)
+  })
+
+  it('Paddle: si el overlay nunca termina de cargar, se corta con un mensaje', async () => {
+    const { openPaddleCheckout } = await import('../paddleCheckout.js')
+    next.event = { name: 'checkout.payment.selected', data: {} } // ni cargó, ni terminó
+    seen.closed = 0
+    await assert.rejects(
+      openPaddleCheckout({ environment: 'sandbox', clientToken: 'test_tok', transactionId: 'txn_slow', loadTimeoutMs: 30 }),
+      /No pudimos abrir el pago con tarjeta|couldn’t open the card payment/,
+    )
+    assert.equal(seen.closed, 1)
+  })
+
+  it('Paddle: una tarjeta rechazada deja el overlay abierto para reintentar', async () => {
+    const { openPaddleCheckout } = await import('../paddleCheckout.js')
+    next.event = { name: 'checkout.loaded', data: {} }
+    const pending = openPaddleCheckout({ environment: 'sandbox', clientToken: 'test_tok', transactionId: 'txn_retry', loadTimeoutMs: 30 })
+    await new Promise((r) => setTimeout(r, 0))
+    paddleCallback({ name: 'checkout.payment.failed', data: {} })
+    await new Promise((r) => setTimeout(r, 60)) // pasó el plazo de carga: ya había cargado
+    paddleCallback({ name: 'checkout.completed', data: { transaction_id: 'txn_retry' } })
+    assert.deepEqual(await pending, { status: 'completed', transactionId: 'txn_retry' })
+  })
 })

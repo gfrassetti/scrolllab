@@ -34,9 +34,21 @@ const money = (txn) => {
   return total == null ? '—' : `${total} ${txn.currency_code || PADDLE_CURRENCY}`
 }
 
-/** ¿La transacción es de LAB (alta, cuota o diferencia de plan)? */
-export function isLabTransaction(txn) {
-  return Boolean(txn?.subscription_id) || txn?.custom_data?.kind === 'lab'
+/**
+ * ¿De quién es esta transacción? Lo deciden los ids que guardó el servidor, no
+ * `custom_data` (viaja dentro de la transacción y no lo firmamos nosotros):
+ * - una orden con ese `paddleTransactionId` → compra;
+ * - `subscription_id` (lo pone Paddle) o un alta de LAB con ese
+ *   `paddleTransactionId` → LAB;
+ * - ninguna → nadie la reclama (se avisa si se cobró).
+ * @returns {Promise<'order' | 'lab' | 'none'>}
+ */
+export async function transactionOwner(txn) {
+  if (!txn?.id) return 'none'
+  if (await db.findOrderByPaddleTransaction(txn.id)) return 'order'
+  if (txn.subscription_id) return 'lab'
+  if (await db.findSubscriptionByPaddle({ transactionId: txn.id })) return 'lab'
+  return 'none'
 }
 
 /**
@@ -62,18 +74,17 @@ export async function fulfillPaddleTransaction({ transaction: txn, config, expec
 
   const order = await db.findOrderByPaddleTransaction(txn.id)
   if (!order) {
-    if (txn.custom_data?.kind === 'order') {
-      alertAdmin({
-        kind: 'orphan',
-        key: `paddle-${txn.id}`,
-        title: 'PAGO SIN ORDEN — entregar o reembolsar',
-        lines: [
-          `transacción Paddle ${txn.id} · ${money(txn)} · ${payerOf(txn)}`,
-          `orden ${txn.custom_data.orderId || '-'}: no existe (venció o se borró)`,
-        ],
-        config,
-      })
-    }
+    // Cobrada y sin dueño: ninguna orden ni alta de LAB guardó este id.
+    alertAdmin({
+      kind: 'orphan',
+      key: `paddle-${txn.id}`,
+      title: 'PAGO SIN ORDEN — entregar o reembolsar',
+      lines: [
+        `transacción Paddle ${txn.id} · ${money(txn)} · ${payerOf(txn)}`,
+        `ninguna orden ni suscripción la abrió (orden indicada: ${txn.custom_data?.orderId || '-'})`,
+      ],
+      config,
+    })
     throw new HttpError(404, 'No encontramos la orden de ese pago')
   }
   const orderId = String(db.uid(order) || order.id)
@@ -110,6 +121,11 @@ export async function fulfillPaddleTransaction({ transaction: txn, config, expec
   }
   if (txn.currency_code !== PADDLE_CURRENCY) {
     throw mismatch('Moneda del pago no coincide')
+  }
+  // Nuestros descuentos (cupón) ya vienen en el precio: uno hecho en Paddle
+  // (código en el checkout o desde el panel) cobraría menos de lo que vale.
+  if (txn.discount_id || Number(txn.details?.totals?.discount || 0) !== 0) {
+    throw mismatch('El pago trae un descuento hecho en Paddle')
   }
   if (transactionItemsCents(txn) !== usdCents(order.total)) {
     console.error(
@@ -232,13 +248,13 @@ export async function handlePaddleNotification({ rawBody, signature, config }, d
 
   try {
     if (type === 'transaction.completed' || type === 'transaction.paid') {
-      if (isLabTransaction(data)) {
+      if ((await transactionOwner(data)) === 'lab') {
         return await handlePaddleLabTransaction({ transaction: data, config }, deps)
       }
       return await fulfillPaddleTransaction({ transaction: data, config })
     }
     if (type === 'transaction.payment_failed') {
-      if (isLabTransaction(data)) {
+      if ((await transactionOwner(data)) === 'lab') {
         return await handlePaddleLabPaymentFailed({ transaction: data, config }, deps)
       }
       const order = await db.findOrderByPaddleTransaction(data.id)

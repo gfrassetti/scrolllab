@@ -259,6 +259,9 @@ describe('LAB con Paddle (reloj simulado)', () => {
     const me = await c.me()
     assert.equal(me.plan, 'free')
     assert.equal(me.lapsedPlan, 'hosted_starter')
+    // Vencido sigue siendo de Paddle (USD): «Mi cuenta» ofrece actualizar la tarjeta.
+    assert.equal(me.provider, 'paddle')
+    assert.equal(me.currency_id, 'USD')
   })
 
   it('subir con días pagos: Paddle prorratea y cobra; la cotización sale de Paddle', async () => {
@@ -345,6 +348,46 @@ describe('LAB con Paddle (reloj simulado)', () => {
     assert.ok((await fileDb.findSubscriptionById(first.subscriptionId)).abandonedAt)
     // La prueba sigue disponible: el alta abandonada no la quemó.
     assert.equal(iso(second.trialEndsAt), iso(T0 + 7 * DAY))
+  })
+
+  it('alta abandonada que Paddle no deja cancelar: no bloquea, abre otra', async () => {
+    const c = await customer('no-cancela@test.com')
+    const first = await openCheckout(c, 'hosted_starter')
+    pd.failNext['PATCH /transactions/:id'] = 400
+    const second = await openCheckout(c, 'hosted_pro')
+    assert.notEqual(first.transactionId, second.transactionId)
+    assert.ok((await fileDb.findSubscriptionById(first.subscriptionId)).abandonedAt)
+  })
+
+  it('si lo que cobra Paddle no es el plan vendido, no se activa y avisa', async () => {
+    const c = await customer('precio-raro@test.com')
+    const out = await openCheckout(c, 'hosted_studio')
+    // Precio alterado en la transacción (no es el que armó el servidor).
+    pd.transactions.get(out.transactionId).items[0].price.unit_price.amount = '100'
+    const { psub } = await payCheckout(out.transactionId)
+    assert.equal((await c.me()).plan, 'free')
+    assert.equal((await fileDb.findSubscriptionById(out.subscriptionId)).status, 'pending')
+    await waitFor(
+      () => alerts('NO COINCIDE CON EL PLAN').some((m) => m.body.text.includes(psub.id) && /precio 100/.test(m.body.text)),
+      'el aviso del plan que no coincide',
+    )
+  })
+
+  it('subscription.created antes que el cobro: se asocia solo si Paddle confirma la transacción del alta', async () => {
+    const c = await customer('created-primero@test.com')
+    const out = await openCheckout(c, 'hosted_pro')
+    const { sub } = pd.pay(out.transactionId)
+    // Llega primero la suscripción (la fila todavía no tiene su id).
+    assert.equal((await paddleWebhook('subscription.created', sub)).status, 200)
+    assert.equal((await c.me()).plan, 'hosted_pro')
+    // Una suscripción ajena que copia el custom_data de esta fila no la toma.
+    const other = await customer('copia-custom@test.com')
+    const otherOut = await openCheckout(other, 'hosted_starter')
+    const { sub: otherSub } = pd.pay(otherOut.transactionId)
+    otherSub.custom_data = { ...sub.custom_data }
+    pd.subscriptions.get(otherSub.id).custom_data = { ...sub.custom_data }
+    assert.equal((await paddleWebhook('subscription.created', otherSub)).status, 200)
+    assert.equal((await fileDb.findSubscriptionById(out.subscriptionId)).paddleSubscriptionId, sub.id)
   })
 
   it('alta que en realidad se pagó: al reintentar se activa en vez de abrir otra', async () => {

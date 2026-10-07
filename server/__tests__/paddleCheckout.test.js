@@ -269,6 +269,68 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       )
     })
 
+    it('un descuento hecho en Paddle no entrega el ZIP y avisa', async () => {
+      const agent = await loginAs('descuento-paddle@test.com')
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      txn.discount_id = 'dsc_01'
+      txn.details.totals.discount = '1500'
+      assert.equal((await paddleWebhook('transaction.completed', txn)).status, 200)
+      assert.equal((await orderRow(out.orderId)).status, 'pending')
+      await waitFor(
+        () => alerts('NO COINCIDE').some((m) => m.body.text.includes(txn.id) && /descuento hecho en Paddle/.test(m.body.text)),
+        'el aviso del descuento',
+      )
+    })
+
+    it('custom_data no decide: un pago de template que dice ser de LAB no activa nada de LAB', async () => {
+      const agent = await loginAs('custom-lab@test.com')
+      const lab = await agent.post('/api/subscriptions').send({ plan: 'hosted_studio', cycle: 'yearly', provider: 'paddle' })
+      assert.equal(lab.status, 200, JSON.stringify(lab.body))
+      const me = (await agent.get('/api/auth/me')).body.user
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      const forged = {
+        ...structuredClone(txn),
+        custom_data: { kind: 'lab', subscriptionId: lab.body.subscriptionId, userId: me.id, plan: 'hosted_studio', cycle: 'yearly' },
+      }
+      assert.equal((await paddleWebhook('transaction.completed', forged)).status, 200)
+      // Pagó un template: recibe el template; el alta de LAB sigue pendiente.
+      assert.equal((await orderRow(out.orderId)).status, 'paid')
+      assert.equal((await fileDb.findSubscriptionById(lab.body.subscriptionId)).status, 'pending')
+      assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'free')
+    })
+
+    it('una transacción que nadie abrió (custom_data inventado) no activa nada y avisa', async () => {
+      const agent = await loginAs('nadie-la-abrio@test.com')
+      const lab = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'paddle' })
+      const me = (await agent.get('/api/auth/me')).body.user
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      const ghost = {
+        ...structuredClone(txn),
+        id: 'txn_ghost_000001',
+        custom_data: { kind: 'lab', subscriptionId: lab.body.subscriptionId, userId: me.id },
+      }
+      assert.equal((await paddleWebhook('transaction.completed', ghost)).status, 200)
+      assert.equal((await fileDb.findSubscriptionById(lab.body.subscriptionId)).status, 'pending')
+      await waitFor(
+        () => alerts('PAGO SIN ORDEN').some((m) => m.body.text.includes('txn_ghost_000001')),
+        'el aviso de pago sin dueño',
+      )
+    })
+
+    it('un error de la API de Paddle no llega crudo al navegador', async () => {
+      const agent = await loginAs('error-crudo@test.com')
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      pd.failNext['GET /transactions/:id'] = 404
+      const res = await agent.post('/api/checkout/paddle/confirm').send({ transactionId: out.transactionId })
+      assert.equal(res.status, 502)
+      assert.equal(res.body.code, 'payment_provider')
+      assert.match(res.body.error, /procesador de pagos/)
+      assert.ok(!/fake Paddle|internal_error|txn_/.test(res.body.error))
+    })
+
     it('webhook sin firma, con otra firma o viejo: 401 y no toca nada', async () => {
       const agent = await loginAs('firma@test.com')
       const out = await paddleCheckout(agent, [{ sku: 'chapters' }])

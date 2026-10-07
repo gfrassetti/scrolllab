@@ -99,10 +99,11 @@ async function loadChangeableSubscription(userId, targetPlan) {
   if (!isHostedPlanId(targetPlan)) throw new HttpError(400, 'Plan inválido')
 
   const sub = await db.findActiveSubscriptionByUser(userId)
+  const gateway = sub?.provider === 'paddle' ? 'Paddle' : 'Mercado Pago'
   if (sub?.status === 'paused') {
     throw new HttpError(
       409,
-      'Tu suscripción está en pausa en Mercado Pago. Reactivala ahí o cancelala para suscribirte de nuevo.',
+      `Tu suscripción está en pausa en ${gateway}. Reactivala ahí o cancelala para suscribirte de nuevo.`,
       { expose: true },
     )
   }
@@ -121,7 +122,7 @@ async function loadChangeableSubscription(userId, targetPlan) {
     // En gracia: subir de plan acá regalaría la cuota nueva sin cobro.
     throw new HttpError(
       409,
-      'Tenés un cobro pendiente en Mercado Pago. Cuando se acredite, vas a poder cambiar de plan.',
+      `Tenés un cobro pendiente en ${gateway}. Cuando se acredite, vas a poder cambiar de plan.`,
       { expose: true },
     )
   }

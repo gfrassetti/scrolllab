@@ -81,6 +81,12 @@ export async function createCheckoutOrder({
       : i
   })
 
+  // Un cupón al 100 % (o un precio mal cargado) no se manda a Paddle: cobraría
+  // cero y entregaría el ZIP gratis.
+  if (paddle && lines.some((l) => !(Number(l.unit_price) > 0))) {
+    throw new HttpError(400, 'Ese precio no se puede cobrar con tarjeta', { expose: true })
+  }
+
   // En USD se suma en centavos: 0.1 + 0.2 no es 0.3.
   const total = paddle
     ? lines.reduce((sum, i) => sum + Math.round(i.unit_price * 100), 0) / 100

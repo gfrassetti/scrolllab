@@ -46,7 +46,25 @@ const RESOLVED_PANELS = {
     to: '/login?next=/account',
     cta: 'checkout.needsLoginCta',
   },
+  // Paddle: el pago es de otra cuenta (403).
+  'wrong-account': {
+    title: 'checkout.wrongAccountTitle',
+    body: 'checkout.wrongAccountBody',
+    to: '/login?next=/account',
+    cta: 'checkout.needsLoginCta',
+  },
+  // Paddle: cobró, pero el servidor no lo pudo asociar a la compra (400/404).
+  // Al dueño ya le llegó el aviso para entregar o devolver.
+  review: {
+    title: 'checkout.reviewTitle',
+    body: 'checkout.reviewBody',
+    to: '/account',
+    cta: 'checkout.goAccount',
+  },
 }
+
+/** Estados con el mensaje del servidor a la vista (y su referencia para soporte). */
+const SHOWS_ERROR = new Set(['error', 'review', 'wrong-account'])
 
 /**
  * Vuelta del pago: Mercado Pago pega su `payment_id` en la URL; Paddle (overlay)
@@ -77,8 +95,8 @@ function ResolvedPanel({ panel, confirmState, confirmError, confirmRef }) {
         <p className="mt-4 text-sm leading-relaxed text-ink/70">
           {t(panel.body)}
         </p>
-        {confirmState === 'error' && confirmError && (
-          <div className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+        {SHOWS_ERROR.has(confirmState) && confirmError && (
+          <div role="alert" className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
             <p>{confirmError}</p>
             {confirmRef && (
               <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ink/50">
@@ -109,7 +127,9 @@ const PADDLE_MAX_TRIES = 6
  * Vuelta del overlay de Paddle. El pago ya está hecho del lado de Paddle: se
  * confirma contra la API (que trae la transacción de Paddle, no confía en la
  * URL) y se manda a Mis compras. Mientras Paddle procesa (409) se reintenta un
- * rato; el webhook cumple la orden igual aunque esto falle.
+ * rato; el webhook cumple la orden igual aunque esto falle. Nunca gira para
+ * siempre (15 s) y cada error tiene su panel: otra cuenta (403) o un pago que
+ * no se pudo asociar (400/404, el carrito queda como estaba).
  */
 function PaddleCheckoutSuccess() {
   const t = useT()
@@ -135,11 +155,20 @@ function PaddleCheckoutSuccess() {
     }
     let cancelled = false
     setConfirmState('busy')
+    // Si la API se cuelga, el webhook igual cumple la orden: a Mis compras.
+    const watchdog = setTimeout(() => {
+      if (cancelled) return
+      cancelled = true
+      clearCart()
+      dropWelcome()
+      setConfirmState((prev) => (prev === 'busy' ? 'received' : prev))
+    }, CONFIRM_TIMEOUT_MS)
     ;(async () => {
       for (let attempt = 1; attempt <= PADDLE_MAX_TRIES; attempt += 1) {
         try {
           const data = await api.confirmPaddleCheckout(transactionId)
           if (cancelled) return
+          clearTimeout(watchdog)
           clearCart()
           dropWelcome()
           navigate(`/account?purchase=1&orderId=${encodeURIComponent(data.orderId)}`, {
@@ -153,22 +182,29 @@ function PaddleCheckoutSuccess() {
             await new Promise((r) => setTimeout(r, PADDLE_RETRY_MS))
             continue
           }
-          // El pago está hecho: se vacía el carrito y queda el camino a Mis compras.
+          clearTimeout(watchdog)
+          setConfirmError(err.message)
+          setConfirmRef(err.requestId || '')
+          if (err.status === 403) {
+            setConfirmState('wrong-account')
+            return
+          }
+          if (err.status === 400 || err.status === 404) {
+            // No se asoció a la compra: el carrito queda como estaba.
+            setConfirmState('review')
+            return
+          }
+          // 409 que no terminó o una falla nuestra: el pago está hecho, a Mis compras.
           clearCart()
           dropWelcome()
-          if (err.status === 409) {
-            setConfirmState('received')
-          } else {
-            setConfirmError(err.message)
-            setConfirmRef(err.requestId || '')
-            setConfirmState('error')
-          }
+          setConfirmState(err.status === 409 ? 'received' : 'error')
           return
         }
       }
     })()
     return () => {
       cancelled = true
+      clearTimeout(watchdog)
     }
   }, [authLoading, user, transactionId, navigate, clearCart, dropWelcome])
 
@@ -306,12 +342,16 @@ function MercadoPagoCheckoutSuccess() {
   )
 }
 
+/** Si Paddle no avisa que el checkout cargó en este tiempo, se muestra el error con salida. */
+const PAY_LINK_TIMEOUT_MS = 20_000
+
 /**
  * Link de pago de Paddle (`/checkout/pay?_ptxn=txn_…`): el «default payment
  * link» del panel de Paddle. Lo usan los mails de Paddle (p. ej. pagar una
  * cuota vencida). Paddle.js abre solo el checkout de `_ptxn` al inicializarse;
- * acá se carga con el token público y, al pagar, se vuelve al lugar que
- * corresponde (LAB o Mis compras).
+ * si ya estaba inicializado (se llegó navegando dentro del sitio) se abre a
+ * mano. Al pagar se cierra el overlay y se vuelve al lugar que corresponde:
+ * LAB si la transacción es de una suscripción, Mis compras si es de una orden.
  */
 export function CheckoutPayPage() {
   const t = useT()
@@ -326,36 +366,59 @@ export function CheckoutPayPage() {
       return undefined
     }
     let cancelled = false
+    let paddleRef = null
+    const watchdog = setTimeout(() => {
+      if (!cancelled) setState((prev) => (prev === 'loading' ? 'error' : prev))
+    }, PAY_LINK_TIMEOUT_MS)
     ;(async () => {
       try {
         const methods = await api.checkoutMethods()
         const paddle = methods?.providers?.paddle
         if (!paddle?.enabled || !paddle.clientToken) throw new Error('Paddle no disponible')
-        await ensurePaddle({
+        const { Paddle, fresh } = await ensurePaddle({
           environment: paddle.environment,
           clientToken: paddle.clientToken,
           handler: (event) => {
             if (cancelled) return
-            if (event?.name === 'checkout.loaded') setState('open')
-            if (event?.name === 'checkout.completed') {
-              const lab = event.data?.custom_data?.kind === 'lab'
+            const name = event?.name
+            if (name === 'checkout.loaded') {
+              clearTimeout(watchdog)
+              setState('open')
+            } else if (name === 'checkout.completed') {
+              clearTimeout(watchdog)
+              // Una cuota o un alta de LAB trae su suscripción; una compra, no.
+              const lab = Boolean(event.data?.subscription_id) || event.data?.custom_data?.kind === 'lab'
+              paddleRef?.Checkout.close()
               navigate(
                 lab
                   ? '/lab?suscripcion=volver'
                   : `/checkout/success?provider=paddle&txn=${encodeURIComponent(transactionId)}`,
                 { replace: true },
               )
+            } else if (name === 'checkout.closed') {
+              clearTimeout(watchdog)
+              setState('closed')
+            } else if (name === 'checkout.error') {
+              clearTimeout(watchdog)
+              setState('error')
             }
-            if (event?.name === 'checkout.closed') setState('closed')
           },
         })
-        if (!cancelled) setState((prev) => (prev === 'loading' ? 'open' : prev))
+        paddleRef = Paddle
+        // Recién inicializado, Paddle abre solo el `_ptxn` de la URL.
+        if (!fresh && !cancelled) {
+          Paddle.Checkout.open({ transactionId, settings: { showAddDiscounts: false } })
+        }
       } catch {
-        if (!cancelled) setState('error')
+        if (!cancelled) {
+          clearTimeout(watchdog)
+          setState('error')
+        }
       }
     })()
     return () => {
       cancelled = true
+      clearTimeout(watchdog)
     }
   }, [transactionId, navigate])
 
@@ -375,12 +438,23 @@ export function CheckoutPayPage() {
           {message}
         </p>
         {state !== 'loading' && state !== 'open' && (
-          <Link
-            to="/account"
-            className="mt-8 inline-block border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone"
-          >
-            {t('checkout.goAccount')}
-          </Link>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {(state === 'error' || state === 'closed') && (
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
+              >
+                {t('pay.retry')}
+              </button>
+            )}
+            <Link
+              to="/account"
+              className="border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone"
+            >
+              {t('checkout.goAccount')}
+            </Link>
+          </div>
         )}
       </main>
     </div>

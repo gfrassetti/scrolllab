@@ -65,6 +65,8 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
         subscriptionId: subId(sub),
         paymentFailed,
         lapsedPlan: sub.plan,
+        provider: sub.provider || 'mercadopago',
+        currency_id: sub.currency_id || 'ARS',
       })
     }
     graceEndsAt = new Date(end + grace)

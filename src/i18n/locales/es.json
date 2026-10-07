@@ -1052,7 +1052,15 @@
     "subSync": "Sincronizar con Mercado Pago",
     "subSyncHint": "¿Te suscribiste recién y no se refleja?",
     "subSyncDone": "Estado actualizado",
-    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra hasta el {{date}}. Se aplica solo al pagar."
+    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra hasta el {{date}}. Se aplica solo al pagar.",
+    "paddle": {
+      "subPaused": "En pausa en Paddle · seguís con acceso hasta el {{date}}",
+      "subRenewing": "Confirmando el cobro con Paddle · si no se acredita, el plan se suspende el {{date}}",
+      "subPaymentFailed": "No pudimos cobrar la renovación. Paddle lo reintenta; si no se resuelve, el plan se suspende el {{date}}. Actualizá tu tarjeta para que el próximo intento pase.",
+      "subLapsed": "Tu plan {{plan}} está suspendido: no pudimos cobrarlo. Si Paddle logra el cobro, vuelve solo. Actualizá tu tarjeta, o cancelalo y no se reintenta más.",
+      "subLapsedPaused": "Tu plan {{plan}} está en pausa en Paddle y ya no cubre tus secciones.",
+      "subSync": "Sincronizar con Paddle"
+    }
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",
@@ -1089,7 +1097,11 @@
     "mockDone": "Pago simulado OK",
     "mockBusy": "Simulando pago…",
     "mockNeedLogin": "Tenés que estar logueado para simular el pago.",
-    "mockDownload": "Descargar en Mis compras →"
+    "mockDownload": "Descargar en Mis compras →",
+    "wrongAccountTitle": "Ese pago es de otra cuenta",
+    "wrongAccountBody": "Entrá con la cuenta con la que compraste: ahí vas a ver la compra en Mis compras.",
+    "reviewTitle": "Estamos revisando tu pago",
+    "reviewBody": "Paddle registró el pago, pero no lo pudimos asociar a tu compra. Ya nos llegó el aviso: te escribimos para entregarte lo que compraste o devolverte el dinero."
   },
   "license": {
     "eyebrow": "Licencia Regular",
@@ -1341,6 +1353,7 @@
     "opening": "Abriendo el pago…",
     "invalidLink": "Ese link de pago no es válido. Si te llegó por mail, escribinos y te mandamos uno nuevo.",
     "openError": "No pudimos abrir el pago. Probá de nuevo en unos minutos o escribinos.",
-    "closed": "Cerraste el pago sin completarlo: no se te cobró nada."
+    "closed": "Cerraste el pago sin completarlo: no se te cobró nada.",
+    "retry": "Probar de nuevo"
   }
 }

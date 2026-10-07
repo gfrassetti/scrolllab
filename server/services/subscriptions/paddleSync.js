@@ -162,6 +162,19 @@ export async function applyPaddleSubscriptionState(sub, ps, config) {
     }
   } else if (next === 'authorized') {
     if (sub.status !== 'authorized') {
+      const wrong = planMismatch(sub, ps)
+      if (wrong) {
+        console.error(`subs PADDLE NO COINCIDE CON EL PLAN sub=${subId(sub)} paddle=${ps.id}: ${wrong}`)
+        alertAdmin({
+          kind: 'lab-mismatch',
+          key: `paddle-sub-${ps.id}-mismatch`,
+          title: 'SUSCRIPCIÓN DE PADDLE NO COINCIDE CON EL PLAN — no se activó, revisar o reembolsar',
+          lines: [`suscripción Paddle ${ps.id} · fila ${subId(sub)}`, `motivo: ${wrong}`],
+          config,
+        })
+        await sub.save()
+        return { status: sub.status, currentPeriodEnd: sub.currentPeriodEnd || null }
+      }
       if (sub.status === 'cancelled' && (await hasOtherActiveSubscription(sub))) {
         console.error(
           `subs PADDLE ACTIVA SOBRE SUSCRIPCIÓN REEMPLAZADA sub=${subId(sub)} ` +
@@ -215,14 +228,31 @@ async function subscriptionFromCustomData(custom) {
   return sub
 }
 
-/** La fila local de una transacción de LAB: por suscripción, por la transacción del alta o por custom_data. */
+/**
+ * La fila local de una transacción de LAB, solo por ids que guardó el servidor
+ * (la suscripción de Paddle o la transacción del alta). `custom_data` no
+ * decide: viaja dentro de la transacción.
+ */
 async function findLabSubscription(txn) {
-  return (
-    (await db.findSubscriptionByPaddle({
-      subscriptionId: txn?.subscription_id || null,
-      transactionId: txn?.id || null,
-    })) || (await subscriptionFromCustomData(txn?.custom_data))
-  )
+  return db.findSubscriptionByPaddle({
+    subscriptionId: txn?.subscription_id || null,
+    transactionId: txn?.id || null,
+  })
+}
+
+/**
+ * `subscription.created` puede llegar antes que el cobro del alta: la fila
+ * todavía no tiene el id de la suscripción. `custom_data` es solo la pista; se
+ * confirma con Paddle que la transacción que guardó el servidor terminó en
+ * ESTA suscripción.
+ */
+async function confirmedFromCustomData(ps, config, deps) {
+  const hint = await subscriptionFromCustomData(ps?.custom_data)
+  if (!hint?.paddleTransactionId || !ps?.id) return null
+  const txn = await api(deps)
+    .getTransaction(config, hint.paddleTransactionId)
+    .catch(() => null)
+  return txn?.subscription_id === ps.id ? hint : null
 }
 
 /**
@@ -233,9 +263,30 @@ export async function syncPaddleSubscription({ paddleSubscriptionId, config }, d
   const ps = await api(deps).getSubscription(config, paddleSubscriptionId)
   const sub =
     (await db.findSubscriptionByPaddle({ subscriptionId: ps?.id })) ||
-    (await subscriptionFromCustomData(ps?.custom_data))
+    (await confirmedFromCustomData(ps, config, deps))
   if (!sub) return { skipped: 'sin suscripción local' }
   return applyPaddleSubscriptionState(sub, ps, config)
+}
+
+/**
+ * ¿Lo que Paddle va a cobrar es el plan que vendimos? Precio unitario y ciclo
+ * del plan, sin descuento de Paddle. Se mira al activar: una suscripción que no
+ * coincide no da acceso (se avisa para revisar o reembolsar).
+ * @returns {string | null} el motivo, o null si coincide
+ */
+function planMismatch(sub, ps) {
+  const price = ps?.items?.[0]?.price
+  const expected = Math.round((hostedPlanPriceIn(sub.plan, sub.cycle, 'USD') || 0) * 100)
+  const interval = sub.cycle === 'yearly' ? 'year' : 'month'
+  if (!ps?.current_billing_period?.ends_at) return 'sin período de facturación'
+  if (Number(price?.unit_price?.amount) !== expected) {
+    return `precio ${price?.unit_price?.amount ?? '—'} ≠ ${expected} centavos (${sub.plan}/${sub.cycle})`
+  }
+  if (price?.billing_cycle?.interval && price.billing_cycle.interval !== interval) {
+    return `ciclo ${price.billing_cycle.interval} ≠ ${interval}`
+  }
+  if (ps.discount) return 'trae un descuento hecho en Paddle'
+  return null
 }
 
 function warnIfSuspiciousUsd(txn, sub) {
@@ -297,6 +348,11 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   }
 
   warnIfSuspiciousUsd(txn, sub)
+  // Un descuento hecho en Paddle sobre una cuota: no se le corta el acceso a
+  // quien pagó, pero se avisa para revisarlo.
+  if (txn.discount_id || Number(txn.details?.totals?.discount || 0) !== 0) {
+    alertLabCharge({ txn, sub, reason: 'CON UN DESCUENTO HECHO EN PADDLE', kind: 'descuento', config })
+  }
   const firstCharge = !sub.lastPaidAt
   let activated = false
   const periodEnd = txn.billing_period?.ends_at ? new Date(txn.billing_period.ends_at) : null
@@ -470,9 +526,17 @@ export async function retirePendingPaddle(sub, config, deps = {}) {
         await p.cancelTransaction(config, sub.paddleTransactionId)
         txn = null
       } catch (err) {
-        // Se pagó entre la consulta y la baja: la volvemos a mirar.
-        txn = await p.getTransaction(config, sub.paddleTransactionId)
-        if (!PADDLE_PAID_STATUSES.has(txn?.status)) throw err
+        // Se pagó entre la consulta y la baja: la volvemos a mirar. Si Paddle
+        // igual no la deja cancelar, el alta abandonada no bloquea al usuario:
+        // queda retirada y un pago tardío lo ordena el webhook (avisa).
+        txn = await p.getTransaction(config, sub.paddleTransactionId).catch(() => null)
+        if (!PADDLE_PAID_STATUSES.has(txn?.status)) {
+          console.error(
+            `subs paddle no se pudo cancelar el alta pendiente sub=${subId(sub)} ` +
+              `txn=${sub.paddleTransactionId}: ${err?.message || err} — se retira igual`,
+          )
+          txn = null
+        }
       }
     }
     if (txn && PADDLE_PAID_STATUSES.has(txn.status) && txn.subscription_id) {

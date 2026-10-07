@@ -1052,7 +1052,15 @@
     "subSync": "Sync with Mercado Pago",
     "subSyncHint": "Subscribed just now and it's not showing?",
     "subSyncDone": "Status updated",
-    "welcomeCoupon": "You get {{percent}}% off your first purchase until {{date}}. It applies automatically at checkout."
+    "welcomeCoupon": "You get {{percent}}% off your first purchase until {{date}}. It applies automatically at checkout.",
+    "paddle": {
+      "subPaused": "Paused in Paddle · you keep access until {{date}}",
+      "subRenewing": "Confirming the charge with Paddle · if it doesn’t go through, the plan is suspended on {{date}}",
+      "subPaymentFailed": "We couldn’t charge the renewal. Paddle will retry; if it isn’t resolved, the plan is suspended on {{date}}. Update your card so the next attempt goes through.",
+      "subLapsed": "Your {{plan}} plan is suspended: we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. Update your card, or cancel it and it won’t be retried.",
+      "subLapsedPaused": "Your {{plan}} plan is paused in Paddle and no longer covers your sections.",
+      "subSync": "Sync with Paddle"
+    }
   },
   "preview": {
     "backToAccount": "← Back to My purchases",
@@ -1089,7 +1097,11 @@
     "mockDone": "Mock payment OK",
     "mockBusy": "Simulating payment…",
     "mockNeedLogin": "You must be logged in to simulate payment.",
-    "mockDownload": "Download in My purchases →"
+    "mockDownload": "Download in My purchases →",
+    "wrongAccountTitle": "That payment belongs to another account",
+    "wrongAccountBody": "Sign in with the account you bought with: you’ll find the purchase in My purchases.",
+    "reviewTitle": "We’re reviewing your payment",
+    "reviewBody": "Paddle recorded the payment, but we couldn’t match it to your purchase. We’ve been notified and will email you to deliver what you bought or refund you."
   },
   "license": {
     "eyebrow": "Regular License",
@@ -1341,6 +1353,7 @@
     "opening": "Opening the payment…",
     "invalidLink": "That payment link isn’t valid. If you got it by email, write to us and we’ll send a new one.",
     "openError": "We couldn’t open the payment. Try again in a few minutes or write to us.",
-    "closed": "You closed the payment without finishing it: you haven’t been charged."
+    "closed": "You closed the payment without finishing it: you haven’t been charged.",
+    "retry": "Try again"
   }
 }
