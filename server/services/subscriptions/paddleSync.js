@@ -363,6 +363,11 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   }
   const paidAt = new Date(txn.billed_at || txn.updated_at || Date.now())
   if (!sub.lastPaidAt || paidAt > new Date(sub.lastPaidAt)) sub.lastPaidAt = paidAt
+  // El primer cobro (el único que se puede devolver por arrepentimiento). La
+  // diferencia de una subida de plan no cuenta como cobro de período.
+  if (!sub.firstPaidAt && txn.origin !== 'subscription_update' && txn.origin !== 'subscription_charge') {
+    sub.firstPaidAt = paidAt
+  }
   // Un cobro termina la prueba aunque faltaran días (Paddle la activó antes):
   // sin esto la app seguía mostrando «en prueba» sobre un mes ya cobrado.
   if (sub.trialEndsAt && paidAt < new Date(sub.trialEndsAt)) sub.trialEndsAt = paidAt

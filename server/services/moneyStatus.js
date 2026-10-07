@@ -1,4 +1,4 @@
-import { refundEligibility, REFUND_DAYS } from "../../src/domain/policy.js";
+import { refundEligibility, labRefundEligibility, REFUND_DAYS } from "../../src/domain/policy.js";
 import { hostedPlanPriceIn, HOSTED_PLANS } from "../catalog.js";
 
 /**
@@ -108,12 +108,13 @@ export function buildMoneyStatus({
     }
   }
 
-  // LAB: el último cobro de cada suscripción viva, durante el plazo.
+  // LAB: solo el primer cobro, mientras dure el plazo (que corre desde el alta,
+  // con la prueba gratis adentro). Las renovaciones no se devuelven.
   for (const s of subscriptions) {
-    if (!["authorized", "paused"].includes(s.status) || !s.lastPaidAt) continue;
-    const paidAt = new Date(s.lastPaidAt).getTime();
-    const until = paidAt + REFUND_DAYS * DAY_MS;
-    if (!(until > t)) continue;
+    if (!["authorized", "paused"].includes(s.status)) continue;
+    const e = labRefundEligibility(s, { now: t });
+    if (!e.eligible) continue;
+    const until = Date.parse(e.deadline || "");
     const usd = s.currency_id === "USD";
     const plan = s.paidPlan || s.plan;
     const price = HOSTED_PLANS[plan] ? hostedPlanPriceIn(plan, s.paidCycle || s.cycle, usd ? "USD" : "ARS") : 0;
@@ -127,7 +128,7 @@ export function buildMoneyStatus({
       until: new Date(until).toISOString(),
       what: `LAB ${HOSTED_PLANS[plan].tier.replace(/^./, (c) => c.toUpperCase())}`,
       provider: s.provider || "mercadopago",
-      why: "cobro de LAB, en plazo",
+      why: "primer cobro de LAB, en plazo",
     });
   }
   locked.sort((a, b) => new Date(a.until || 0).getTime() - new Date(b.until || 0).getTime());

@@ -6,7 +6,7 @@ import {
   startAppAgainstFakeMp,
   waitFor,
 } from './helpers/fakeMercadoPago.js'
-import { refundEligibility, REFUND_DAYS } from '../../src/domain/policy.js'
+import { refundEligibility, labRefundEligibility, REFUND_DAYS } from '../../src/domain/policy.js'
 
 const DAY = 86_400_000
 
@@ -54,6 +54,31 @@ describe('refundEligibility', () => {
   it('órdenes viejas sin paidAt cuentan desde que se crearon', () => {
     const legacy = { status: 'paid', createdAt: new Date(now - 2 * DAY).toISOString() }
     assert.equal(refundEligibility(legacy, { now }).eligible, true)
+  })
+})
+
+describe('labRefundEligibility', () => {
+  const now = Date.parse('2026-10-20T12:00:00Z')
+  const ago = (d) => new Date(now - d * DAY).toISOString()
+
+  it('en la prueba no hay cobro: alcanza con cancelar', () => {
+    assert.equal(labRefundEligibility({ activatedAt: ago(3) }, { now }).reason, 'trial')
+  })
+  it('primer cobro dentro de los 14 días desde el alta (prueba adentro): elegible', () => {
+    const r = labRefundEligibility({ activatedAt: ago(9), firstPaidAt: ago(2), lastPaidAt: ago(2) }, { now })
+    assert.equal(r.eligible, true)
+    assert.equal(r.deadline, new Date(now - 9 * DAY + REFUND_DAYS * DAY).toISOString())
+  })
+  it('el plazo corre desde el alta, no desde el cobro: día 15 ya no', () => {
+    const r = labRefundEligibility({ activatedAt: ago(REFUND_DAYS + 1), firstPaidAt: ago(REFUND_DAYS - 6), lastPaidAt: ago(REFUND_DAYS - 6) }, { now })
+    assert.equal(r.reason, 'expired')
+  })
+  it('las renovaciones no se devuelven', () => {
+    const r = labRefundEligibility({ activatedAt: ago(40), firstPaidAt: ago(33), lastPaidAt: ago(3) }, { now })
+    assert.equal(r.reason, 'renewal')
+  })
+  it('sin suscripción', () => {
+    assert.equal(labRefundEligibility(null, { now }).reason, 'no_subscription')
   })
 })
 

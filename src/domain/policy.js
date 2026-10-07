@@ -34,3 +34,29 @@ export function refundEligibility(order, { now = Date.now(), days = REFUND_DAYS 
   if (downloads > 0) return { eligible: false, reason: 'downloaded', ...base }
   return { eligible: true, reason: 'ok', ...base }
 }
+
+/**
+ * ¿Una suscripción de LAB todavía tiene reembolso por arrepentimiento? El plazo
+ * son REFUND_DAYS contados DESDE QUE SE SUSCRIBE, con la prueba gratis adentro:
+ * días 1–7 gratis (arrepentirse = cancelar, no hay nada que devolver), día 8 el
+ * primer cobro, y hasta el día 14 se puede devolver ese primer cobro. Las
+ * renovaciones no se devuelven nunca. Sin prueba, el alta es el cobro.
+ * @param {{ status?: string, activatedAt?: any, createdAt?: any, firstPaidAt?: any, lastPaidAt?: any } | null | undefined} sub
+ * @param {{ now?: number, days?: number }} [options]
+ * @returns {{ eligible: boolean, reason: 'ok' | 'trial' | 'renewal' | 'expired' | 'no_subscription', deadline: string | null, days: number, chargedAt: string | null }}
+ */
+export function labRefundEligibility(sub, { now = Date.now(), days = REFUND_DAYS } = {}) {
+  if (!sub) return { eligible: false, reason: 'no_subscription', deadline: null, days, chargedAt: null }
+  const startMs = new Date(sub.activatedAt || sub.createdAt || now).getTime()
+  const deadline = new Date((Number.isFinite(startMs) ? startMs : now) + days * DAY_MS).toISOString()
+  // Filas de antes de `firstPaidAt`: el último cobro hace de primero.
+  const first = sub.firstPaidAt || sub.lastPaidAt || null
+  const chargedAt = first ? new Date(first).toISOString() : null
+  const base = { deadline, days, chargedAt }
+  if (!first) return { eligible: false, reason: 'trial', ...base }
+  const renewed =
+    sub.lastPaidAt && sub.firstPaidAt && new Date(sub.lastPaidAt).getTime() > new Date(sub.firstPaidAt).getTime()
+  if (renewed) return { eligible: false, reason: 'renewal', ...base }
+  if (now > Date.parse(deadline)) return { eligible: false, reason: 'expired', ...base }
+  return { eligible: true, reason: 'ok', ...base }
+}

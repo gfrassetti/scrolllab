@@ -193,7 +193,7 @@
       "returnPending": "Todavía no vemos la confirmación de Paddle. Si ya pagaste, se refleja en unos segundos.",
       "updateCard": "Actualizar tarjeta"
     },
-    "refundNote": "Cancelás cuando quieras y podés pedir el reembolso de cada cobro dentro de {{days}} días.",
+    "refundNote": "Cancelás cuando quieras. Podés pedir que te devolvamos el primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro); las renovaciones no se devuelven.",
     "refundLink": "Política de reembolsos"
   },
   "common": {
@@ -1208,7 +1208,7 @@
       },
       {
         "title": "Reembolsos",
-        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: reembolso total de cada cobro dentro de los {{days}} días, sin condiciones. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Paddle) y la licencia y las descargas de esa orden quedan sin efecto. Para pedirlo usá el Botón de arrepentimiento, al pie del home.",
+        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro), y la suscripción se da de baja en el momento; las renovaciones no se devuelven y cancelar detiene los próximos cobros. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Paddle) y la licencia y las descargas de esa orden quedan sin efecto. Para pedirlo usá el Botón de arrepentimiento, al pie del home.",
         "link": {
           "to": "/legal/refunds",
           "label": "Ver la Política de reembolsos →"
@@ -1261,7 +1261,7 @@
         "title": "Plazo",
         "items": [
           "Templates, bundle y builder: reembolso total dentro de los {{days}} días corridos desde la compra, por cualquier motivo, siempre que no hayas descargado el ZIP.",
-          "LAB: reembolso total de cada cobro dentro de los {{days}} días corridos, sin condiciones. El plazo corre desde cada cobro: el primero después de la prueba gratis y cada renovación."
+          "LAB: el plazo son {{days}} días corridos desde que te suscribís, con la prueba gratis adentro. En la prueba no se cobra nada (si cancelás, no pagás); dentro de ese plazo podés pedir la devolución total del primer cobro y la suscripción se da de baja en el momento. Las renovaciones no se devuelven."
         ]
       },
       {
@@ -1276,7 +1276,7 @@
         "title": "Qué pasa con lo que compraste",
         "items": [
           "Templates, bundle y builder: al aprobarse el reembolso, la licencia y las descargas de esa orden quedan sin efecto, y tenés que dejar de usar y borrar el código.",
-          "LAB: la suscripción se da de baja y el plan vuelve al gratis; las secciones publicadas por encima del tope gratis dejan de mostrarse."
+          "LAB: al devolverse el primer cobro, la suscripción se da de baja en el momento y el plan vuelve al gratis; las secciones publicadas por encima del tope gratis dejan de mostrarse."
         ]
       },
       {
@@ -1297,7 +1297,7 @@
       },
       {
         "title": "Prueba gratis y cancelación (LAB)",
-        "body": "La primera suscripción tiene una prueba sin cargo: si cancelás antes de que termine, no pagás nada. Podés cancelar cuando quieras desde Mi cuenta; la cancelación detiene las renovaciones y conservás el acceso hasta el final del período ya pagado."
+        "body": "La primera suscripción tiene una prueba sin cargo: si cancelás antes de que termine, no pagás nada. Podés cancelar cuando quieras desde Mi cuenta o LAB: la cancelación detiene las renovaciones y conservás el acceso hasta el final del período ya pagado, sin devolución de ese período."
       },
       {
         "title": "Estudio (trabajo a medida)",
@@ -1315,7 +1315,7 @@
     "title": "Botón de arrepentimiento",
     "intro": "Si te arrepentiste de una compra, pedilo acá. No hace falta cuenta. Te damos un código de seguimiento al instante y te lo mandamos por mail. Revisamos cada pedido según la Política de reembolsos:",
     "ruleZip": "Templates, bundle y builder: reembolso total dentro de los {{days}} días de la compra si no descargaste el ZIP. Si ya lo descargaste, solo por un defecto técnico o si no es lo descripto.",
-    "ruleLab": "LAB: reembolso total de cada cobro dentro de los {{days}} días, sin condiciones. Para que no se te cobre de nuevo, cancelá también la suscripción desde LAB.",
+    "ruleLab": "LAB: en la prueba gratis no se cobra nada, así que alcanza con cancelar. Después, podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribiste (la prueba cuenta adentro): al devolverlo, la suscripción se da de baja en el momento. Las renovaciones no se devuelven: cancelás y no se te cobra más.",
     "name": "Nombre y apellido",
     "email": "Mail de la compra",
     "order": "Número de orden (opcional)",

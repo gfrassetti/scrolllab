@@ -175,6 +175,8 @@ const subscriptionSchema = new mongoose.Schema(
     // Alta que nunca se completó y se dio de baja en MP (no quema la prueba).
     abandonedAt: Date,
     lastPaidAt: Date,
+    // Primer cobro de período: el único que se puede devolver (src/domain/policy.js).
+    firstPaidAt: Date,
     // Con qué plan y ciclo está pago el período en curso (cobro de MP, o la
     // diferencia al subir). Base para cotizar la próxima subida; bajar de plan
     // no lo cambia. En una re-suscripción arranca con lo de la vieja.

@@ -193,7 +193,7 @@
       "returnPending": "We don’t see Paddle’s confirmation yet. If you already paid, it shows up in a few seconds.",
       "updateCard": "Update card"
     },
-    "refundNote": "Cancel anytime and ask for a refund of any charge within {{days}} days.",
+    "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
     "refundLink": "Refund policy"
   },
   "common": {
@@ -1208,7 +1208,7 @@
       },
       {
         "title": "Refunds",
-        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: full refund of each charge within {{days}} days, no conditions. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
+        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: you can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it), and the subscription ends right away; renewals aren’t refunded and canceling stops future charges. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
         "link": {
           "to": "/legal/refunds",
           "label": "See the Refund policy →"
@@ -1261,7 +1261,7 @@
         "title": "Refund period",
         "items": [
           "Templates, bundle and builder: full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP.",
-          "LAB: full refund of each charge within {{days}} calendar days, no conditions. The period runs from each charge: the first one after the free trial and every renewal."
+          "LAB: the period is {{days}} calendar days from when you subscribe, free trial included. Nothing is charged during the trial (cancel and you pay nothing); within that period you can ask for a full refund of the first charge and the subscription ends right away. Renewals aren’t refunded."
         ]
       },
       {
@@ -1276,7 +1276,7 @@
         "title": "What happens to what you bought",
         "items": [
           "Templates, bundle and builder: once the refund is approved, the license and downloads for that order are revoked, and you must stop using and delete the code.",
-          "LAB: the subscription is canceled and the plan goes back to free; sections published above the free limit stop showing."
+          "LAB: when the first charge is refunded, the subscription ends right away and the plan goes back to free; sections published above the free limit stop showing."
         ]
       },
       {
@@ -1297,7 +1297,7 @@
       },
       {
         "title": "Free trial and cancellation (LAB)",
-        "body": "The first subscription has a free trial: if you cancel before it ends, you pay nothing. You can cancel anytime from My account; canceling stops renewals and you keep access until the end of the period already paid."
+        "body": "Your first subscription comes with a free trial: cancel before it ends and you pay nothing. You can cancel anytime from My account or LAB: canceling stops renewals and you keep access until the end of the period already paid, with no refund for that period."
       },
       {
         "title": "Studio (custom work)",
@@ -1315,7 +1315,7 @@
     "title": "Withdrawal request",
     "intro": "Changed your mind about a purchase? Ask here. No account needed. You get a tracking code right away and by email. We review every request under the Refund policy:",
     "ruleZip": "Templates, bundle and builder: full refund within {{days}} days of purchase if you haven’t downloaded the ZIP. If you already did, only for a technical defect or if it isn’t as described.",
-    "ruleLab": "LAB: full refund of each charge within {{days}} days, no conditions. To avoid being charged again, also cancel the subscription from LAB.",
+    "ruleLab": "LAB: nothing is charged during the free trial, so canceling is enough. After that, you can ask for a refund of the first charge within {{days}} days of subscribing (the trial counts toward it): once refunded, the subscription ends right away. Renewals aren’t refunded: cancel and you won’t be charged again.",
     "name": "Full name",
     "email": "Purchase email",
     "order": "Order number (optional)",

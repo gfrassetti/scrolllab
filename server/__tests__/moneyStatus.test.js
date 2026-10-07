@@ -39,14 +39,21 @@ describe('buildMoneyStatus', () => {
     assert.equal(row.until, new Date(Date.parse(ago(2)) + REFUND_DAYS * DAY).toISOString())
   })
 
-  it('LAB: el último cobro queda sin tocar durante el plazo', () => {
+  it('LAB: solo el primer cobro queda sin tocar, mientras dure el plazo desde el alta', () => {
+    const lab = (extra) => ({ status: 'authorized', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', provider: 'paddle', ...extra })
     const out = buildMoneyStatus({
       now,
       users,
       subscriptions: [
-        { _id: 's1', userId: 'u1', status: 'authorized', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', provider: 'paddle', lastPaidAt: ago(3) },
-        { _id: 's2', userId: 'u2', status: 'authorized', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', lastPaidAt: ago(REFUND_DAYS + 2) },
-        { _id: 's3', userId: 'u3', status: 'cancelled', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', lastPaidAt: ago(1) },
+        // Se suscribió hace 10 días (7 de prueba) y pagó hace 3: le quedan 4 para pedirlo.
+        lab({ _id: 's1', userId: 'u1', activatedAt: ago(10), firstPaidAt: ago(3), lastPaidAt: ago(3) }),
+        // Renovación: no se devuelve.
+        lab({ _id: 's2', userId: 'u2', activatedAt: ago(40), firstPaidAt: ago(33), lastPaidAt: ago(3) }),
+        // En la prueba: no hay cobro que guardar.
+        lab({ _id: 's4', userId: 'u2', activatedAt: ago(2) }),
+        // Primer cobro pero ya pasaron los días desde el alta.
+        lab({ _id: 's5', userId: 'u3', activatedAt: ago(REFUND_DAYS + 1), firstPaidAt: ago(REFUND_DAYS - 6), lastPaidAt: ago(REFUND_DAYS - 6) }),
+        lab({ _id: 's3', userId: 'u3', status: 'cancelled', activatedAt: ago(5), lastPaidAt: ago(1) }),
       ],
     })
     assert.deepEqual(out.locked.total, [{ currency: 'USD', total: HOSTED_PLANS.hosted_pro.priceMonthlyUsd }])

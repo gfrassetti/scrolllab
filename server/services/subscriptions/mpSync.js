@@ -200,6 +200,8 @@ export async function handleAuthorizedPaymentEvent(
       sub.currentPeriodEnd = paidThrough
     }
     if (!sub.lastPaidAt || debit > new Date(sub.lastPaidAt)) sub.lastPaidAt = debit
+    // El primer cobro (el único que se puede devolver por arrepentimiento).
+    if (!sub.firstPaidAt) sub.firstPaidAt = debit
     // Lo pagado en este período: base para cobrar la diferencia si sube.
     sub.paidPlan = sub.plan
     sub.paidCycle = sub.cycle
@@ -336,6 +338,7 @@ export async function activateMockSubscription(sub, config) {
     sub.currentPeriodEnd = new Date(first)
   } else {
     sub.lastPaidAt = now
+    if (!sub.firstPaidAt) sub.firstPaidAt = now
     sub.paidPlan = sub.plan
     sub.paidCycle = sub.cycle
     sub.currentPeriodEnd = addBillingCycle(now, sub.cycle)
