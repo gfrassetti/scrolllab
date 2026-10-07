@@ -2,7 +2,7 @@
  * StoryArt — the art for the second half of the comic: the three wide shots
  * that zoom out (pens, sheds, aerial), the three home cards (porch, bedroom,
  * bath), the dark chapter (brick wall, farmhouse, dinner table), the closing
- * postcard and the pencil animals of the tally. Original vector art, same
+ * postcard and the pencil animals of the tally. (Chapter 4 lives in WallArt.) Original vector art, same
  * inked, cel-shaded look as the rest of the template.
  */
 
@@ -414,123 +414,6 @@ export function BathBg({ className = '' }) {
       </g>
       <path d="M0 420 L1600 420 L1600 560 L0 560Z" fill="#c86a6a" />
       <rect width="1600" height="560" fill="url(#ba-dots)" opacity="0.06" />
-    </svg>
-  )
-}
-
-/* ── Chapter: the dark side ────────────────────────────────────────────── */
-
-export function BrickBg({ className = '' }) {
-  const bricks = []
-  for (let r = 0; r < 12; r += 1) {
-    for (let c = 0; c < 18; c += 1) {
-      bricks.push({ x: c * 100 - (r % 2) * 50, y: r * 50, tone: (r * 7 + c * 3) % 5 })
-    }
-  }
-  return (
-    <svg viewBox="0 0 1600 560" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <radialGradient id="br-light" cx="0.55" cy="0.4" r="0.7">
-          <stop offset="0" stopColor="#ff5a8a" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#1a0a1a" stopOpacity="0.7" />
-        </radialGradient>
-      </defs>
-      <rect width="1600" height="560" fill="#5a1a3a" />
-      {bricks.map((b, i) => (
-        <rect key={i} x={b.x + 3} y={b.y + 3} width="94" height="44" rx="3" fill={['#a8304e', '#c23c5a', '#8e2848', '#b8365a', '#9a2c50'][b.tone]} />
-      ))}
-      <path d="M0 470 L1600 470 L1600 560 L0 560Z" fill="#3a1028" />
-      <path d="M1200 500 l180 -40 10 20 -180 40Z" fill="#7a4a2a" stroke={INK} strokeWidth="2" />
-      <rect width="1600" height="560" fill="url(#br-light)" />
-    </svg>
-  )
-}
-
-export function FarmhouseBg({ className = '' }) {
-  return (
-    <svg viewBox="0 0 1600 560" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="fh-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3a2a6a" />
-          <stop offset="0.6" stopColor="#c8406a" />
-          <stop offset="1" stopColor="#ff8a6a" />
-        </linearGradient>
-        <Dots id="fh-dots" />
-      </defs>
-      <rect width="1600" height="560" fill="url(#fh-sky)" />
-      <path d="M0 360 C300 300 600 340 900 320 C1200 300 1400 330 1600 320 L1600 560 L0 560Z" fill="#6a2a6a" />
-      <g stroke={INK} strokeWidth="3" strokeLinejoin="round">
-        <path d="M520 470 L520 250 L760 120 L1000 250 L1000 470Z" fill="#c4284a" />
-        <path d="M760 120 L1000 250 L1240 260 L1240 470 L1000 470 L1000 250Z" fill="#2e2a6e" />
-        <path d="M490 262 L760 108 L1030 262" fill="none" stroke="#f4b0b8" strokeWidth="7" />
-        <rect x="700" y="330" width="120" height="140" fill="#2a0a18" />
-        <path d="M740 170 l40 0 0 40 -40 0Z" fill="#ffe08a" />
-        <g fill="#ffe08a">
-          <rect x="1040" y="320" width="26" height="20" />
-          <rect x="1100" y="320" width="26" height="20" />
-          <rect x="1160" y="320" width="26" height="20" />
-        </g>
-      </g>
-      <g fill="#2a2a4a" stroke={INK} strokeWidth="2.5">
-        <path d="M420 500 c0-24 20-36 50-36 h70 c20 0 34 12 40 30 v14 h-160Z" />
-        <circle cx="450" cy="508" r="14" />
-        <circle cx="560" cy="508" r="14" />
-      </g>
-      <path d="M0 500 L1600 500 L1600 560 L0 560Z" fill="#3a1a3a" />
-      <rect width="1600" height="560" fill="url(#fh-dots)" opacity="0.08" />
-    </svg>
-  )
-}
-
-export function DinnerBg({ className = '' }) {
-  return (
-    <svg viewBox="0 0 1600 560" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="dn-wall" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#2a8a6a" />
-          <stop offset="1" stopColor="#e8d86a" />
-        </linearGradient>
-        <Dots id="dn-dots" />
-      </defs>
-      <rect width="1600" height="560" fill="url(#dn-wall)" />
-      <g stroke="#ffffff" strokeOpacity="0.35" strokeWidth="4">
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-          <path key={i} d={`M${i * 220} 0 V400`} />
-        ))}
-        {[0, 1, 2].map((i) => (
-          <path key={`h${i}`} d={`M0 ${i * 130} H1600`} />
-        ))}
-      </g>
-      {/* the table and the plates */}
-      <path d="M0 440 L1600 440 L1600 560 L0 560Z" fill="#7a3a2a" stroke={INK} strokeWidth="3" />
-      <g stroke={INK} strokeWidth="3" strokeLinejoin="round">
-        <ellipse cx="760" cy="452" rx="300" ry="34" fill="#e8f0e8" />
-        <path d="M600 444 C620 400 700 392 760 404 C800 412 840 426 860 444Z" fill="#a8542a" />
-        <path d="M640 430 C660 418 690 414 720 418" fill="none" stroke="#e08a4a" strokeWidth="5" />
-        <circle cx="900" cy="438" r="20" fill="#5aa860" />
-        <circle cx="934" cy="444" r="16" fill="#6ac070" />
-        <circle cx="560" cy="440" r="18" fill="#e8b84a" />
-        <path d="M1050 400 L1050 452 L1100 452 L1100 400Z" fill="#e8a05a" />
-        <path d="M1100 412 c22 0 22 30 0 30" fill="none" />
-      </g>
-      <g stroke="#e8c84a" strokeWidth="5" strokeLinecap="round" fill="none">
-        <path d="M80 440 c-6-50 6-90 30-120M120 440 c0-40 14-70 40-90M160 440 c6-30 20-50 44-62" />
-      </g>
-      <rect width="1600" height="560" fill="url(#dn-dots)" opacity="0.06" />
-    </svg>
-  )
-}
-
-/** A hand with a knife, reaching in from the right. */
-export function KnifeHand({ className = '' }) {
-  return (
-    <svg viewBox="0 0 600 200" className={className} aria-hidden="true">
-      <g stroke={INK} strokeWidth="4" strokeLinejoin="round">
-        <path d="M600 80 L480 90 L470 150 L600 160Z" fill="#e8e2d4" />
-        <path d="M480 90 C440 84 400 92 380 108 C370 120 372 140 390 150 C420 158 450 156 470 150Z" fill="#f2a888" />
-        <path d="M390 116 L60 40 L50 54 L384 136Z" fill="#c8d8e0" />
-        <path d="M60 40 L384 116" stroke="#ffffff" strokeWidth="3" />
-      </g>
     </svg>
   )
 }
