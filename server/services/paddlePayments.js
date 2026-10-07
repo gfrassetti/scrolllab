@@ -1,4 +1,6 @@
 import { db } from '../db.js'
+import { noteRefund } from './refundLedger.js'
+import { handleLabRefund } from './subscriptions/labRefund.js'
 import { HttpError } from '../errors.js'
 import {
   verifyPaddleSignature,
@@ -161,7 +163,25 @@ export async function reversePaddleAdjustment({ adjustment: adj, config }) {
   const order = adj.transaction_id
     ? await db.findOrderByPaddleTransaction(adj.transaction_id)
     : null
-  await recordPaddleRefund({ adj, order, reason, amount, currency })
+  // Cobro de LAB: libro + mail + (primer cobro o contracargo) baja inmediata.
+  const labSub =
+    !order && adj.subscription_id
+      ? await db.findSubscriptionByPaddle({ subscriptionId: adj.subscription_id })
+      : null
+  if (labSub) {
+    return handleLabRefund({
+      sub: labSub,
+      provider: 'paddle',
+      externalId: `paddle-${adj.id}`,
+      chargeId: adj.transaction_id || null,
+      amount: Number.isFinite(amount) ? amount / 100 : 0,
+      currency,
+      partial: adj.type === 'partial',
+      reason,
+      config,
+    })
+  }
+  await recordPaddleRefund({ adj, order, reason, amount, currency, config })
 
   if (!order) {
     alertAdmin({
@@ -232,26 +252,31 @@ const SUBSCRIPTION_EVENTS = new Set([
  * o parcial, contracargo), de una orden o de LAB, con quién y cuánto. Una fila
  * por ajuste. Nunca corta el webhook.
  */
-async function recordPaddleRefund({ adj, order, reason, amount, currency }) {
+async function recordPaddleRefund({ adj, order, reason, amount, currency, config }) {
   try {
     const sub = !order && adj.subscription_id
       ? await db.findSubscriptionByPaddle({ subscriptionId: adj.subscription_id })
       : null
     const userId = order?.userId || sub?.userId || null
     const user = userId ? await db.findUserById(String(userId)).catch(() => null) : null
-    await db.recordRefund({
-      externalId: `paddle-${adj.id}`,
-      provider: 'paddle',
-      kind: order ? 'order' : 'lab',
-      orderId: order ? String(db.uid(order) || order.id) : null,
-      subscriptionId: sub ? String(db.uid(sub) || sub.id) : null,
-      userId: userId ? String(userId) : null,
-      email: user?.email || null,
-      amount: Number.isFinite(amount) ? amount / 100 : 0,
-      currency,
-      partial: adj.type === 'partial',
-      reason,
-      refundedAt: new Date(adj.updated_at || Date.now()),
+    await noteRefund({
+      order,
+      sub,
+      config,
+      data: {
+        externalId: `paddle-${adj.id}`,
+        provider: 'paddle',
+        kind: order ? 'order' : 'lab',
+        orderId: order ? String(db.uid(order) || order.id) : null,
+        subscriptionId: sub ? String(db.uid(sub) || sub.id) : null,
+        userId: userId ? String(userId) : null,
+        email: user?.email || null,
+        amount: Number.isFinite(amount) ? amount / 100 : 0,
+        currency,
+        partial: adj.type === 'partial',
+        reason,
+        refundedAt: new Date(adj.updated_at || Date.now()),
+      },
     })
   } catch (err) {
     console.error(`refunds: no se pudo anotar el ajuste Paddle ${adj?.id}`, err?.message)

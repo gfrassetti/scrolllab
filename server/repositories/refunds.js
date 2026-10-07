@@ -25,6 +25,10 @@ export const refundsRepo = {
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
   },
+  async findRefund(externalId) {
+    if (isFileMode()) return fileDb.findRefund(externalId);
+    return MongoRefund.findOne({ externalId }).lean();
+  },
   async listRefunds() {
     if (isFileMode()) return fileDb.listRefunds();
     return MongoRefund.find({}).sort({ refundedAt: -1 }).limit(500).lean();

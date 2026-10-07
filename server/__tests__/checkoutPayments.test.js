@@ -253,6 +253,14 @@ describe('Pagos de templates (MP simulado)', () => {
     assert.equal(row.email, 'refund@test.com')
     assert.equal(row.amount, payment.transaction_amount)
     assert.deepEqual([row.provider, row.kind, row.orderId, row.partial], ['mercadopago', 'order', orderId, false])
+    // Al cliente: «Te devolvimos el dinero», una sola vez aunque el webhook se repita.
+    await webhook('payment', payment.id)
+    const refundMail = () => mp.mailsTo('refund@test.com').filter((m) => /devolvimos el dinero/.test(m.body.subject))
+    await waitFor(() => refundMail().length === 1, 'el mail de devolución')
+    await new Promise((r) => setTimeout(r, 80))
+    assert.equal(new Set(refundMail().map((m) => m.idempotencyKey)).size, 1)
+    assert.match(refundMail()[0].body.text, /Mercado Pago/)
+    assert.match(refundMail()[0].body.text, /licencia y las descargas/)
   })
 
   it('reembolso parcial: la orden sigue paga y descargable, y avisa una sola vez', async () => {
@@ -265,6 +273,10 @@ describe('Pagos de templates (MP simulado)', () => {
     const ledger = (await fileDb.listRefunds()).filter((r) => r.externalId === `mp-${payment.id}`)
     assert.equal(ledger.length, 1)
     assert.deepEqual([ledger[0].email, ledger[0].amount, ledger[0].partial], ['partial@test.com', 1000, true])
+    await waitFor(
+      () => mp.mailsTo('partial@test.com').some((m) => /parte de tu compra/.test(m.body.subject) && /sigue activa/.test(m.body.text)),
+      'el mail de devolución parcial',
+    )
     // Resend descarta el repetido por la clave de idempotencia: cuenta una sola clave.
     const mine = () => alerts('REEMBOLSO PARCIAL').filter((m) => m.body.text.includes(String(payment.id)))
     await waitFor(() => mine().length >= 1, 'el aviso del parcial')
@@ -279,6 +291,8 @@ describe('Pagos de templates (MP simulado)', () => {
     assert.equal((await webhook('payment', payment.id)).status, 200)
     assert.equal((await fileDb.findOrderById(orderId)).status, 'refunded')
     await waitFor(() => alerts('CONTRACARGO').length === 1, 'el aviso de contracargo')
+    // Un contracargo no lo inició nadie de este lado: sin mail de devolución al cliente.
+    assert.equal(mp.mailsTo('chargeback@test.com').filter((m) => /devolvimos/.test(m.body.subject)).length, 0)
   })
 
   it('reembolsar el pago duplicado no toca la orden: sigue paga y descargable', async () => {

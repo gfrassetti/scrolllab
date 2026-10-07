@@ -14,6 +14,10 @@ import {
   buildSubscriptionCharge,
   buildSubscriptionPaymentFailed,
   buildWithdrawalReceived,
+  buildRefundIssued,
+  buildWithdrawalConfirm,
+  buildSubscriptionSuspended,
+  buildSubscriptionPlanChanged,
 } from './emailTemplatesBilling.js'
 
 // Los mails se arman en emailTemplates.js; quien los necesita sin enviar
@@ -29,6 +33,73 @@ export {
   buildSubscriptionCharge,
   buildSubscriptionPaymentFailed,
   buildWithdrawalReceived,
+}
+
+/**
+ * Manda un mail transaccional armado (asunto, html, texto). `key` es la clave
+ * de idempotencia de Resend: el mismo evento no sale dos veces.
+ * @param {{ to: string, message: { subject: string, html: string, text: string }, tag: string, key: string, config: any, client?: any }} args
+ */
+async function sendTransactional({ to, message, tag, key, config, client }) {
+  if (!config.email.enabled) return { skipped: 'disabled' }
+  const resend = client || new Resend(config.email.apiKey)
+  const response = await resend.emails.send(
+    {
+      from: config.email.from,
+      to: [to],
+      replyTo: config.email.replyTo || undefined,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      tags: [{ name: 'type', value: tag }],
+    },
+    { idempotencyKey: key },
+  )
+  if (response.error) throw new Error(response.error.message || 'Resend rechazó el correo')
+  return { sent: true, id: response.data?.id || null }
+}
+
+const logoOf = (config) => config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
+
+/**
+ * «Te devolvimos el dinero». `ref` identifica la devolución (pago de MP o
+ * ajuste de Paddle) y el monto: un parcial que después se completa manda otro.
+ * @param {{ to: string, ref: string, name: string, locale?: string, amount: number, currency: string, provider: string, what: string, kind: 'order' | 'lab', partial?: boolean, config: any, client?: any }} args
+ */
+export function sendRefundIssued({ to, ref, config, client, kind, ...rest }) {
+  const accountUrl = new URL(kind === 'lab' ? '/lab' : '/account', config.clientUrl).toString()
+  const message = buildRefundIssued({ ...rest, kind, accountUrl, logoUrl: logoOf(config) })
+  return sendTransactional({ to, message, tag: 'refund_issued', key: `scrolllab-refund-${ref}-${rest.amount}`, config, client })
+}
+
+/**
+ * Link para confirmar una devolución pedida sin sesión.
+ * @param {{ to: string, code: string, name: string, locale?: string, what: string, amount: number, currency: string, kind: 'order' | 'lab', token: string, config: any, client?: any }} args
+ */
+export function sendWithdrawalConfirm({ to, token, config, client, ...rest }) {
+  const confirmUrl = `${new URL('/arrepentimiento', config.clientUrl).toString()}?confirmar=${encodeURIComponent(token)}`
+  const message = buildWithdrawalConfirm({ ...rest, confirmUrl, logoUrl: logoOf(config) })
+  return sendTransactional({ to, message, tag: 'withdrawal_confirm', key: `scrolllab-withdrawal-confirm-${rest.code}`, config, client })
+}
+
+/**
+ * «Tu plan se suspendió» (uno por período: `ref` es el fin del período).
+ * @param {{ subscription: any, user: any, ref: string, config: any, client?: any }} args
+ */
+export function sendSubscriptionSuspended({ subscription, user, ref, config, client }) {
+  const accountUrl = new URL('/lab', config.clientUrl).toString()
+  const message = buildSubscriptionSuspended({ subscription, user, accountUrl, logoUrl: logoOf(config) })
+  return sendTransactional({ to: user.email, message, tag: 'subscription_suspended', key: `scrolllab-sub-suspended-${ref}`, config, client })
+}
+
+/**
+ * «Cambiaste a <plan>» (uno por cambio: `ref` = suscripción + plan + momento).
+ * @param {{ subscription: any, user: any, ref: string, change: { from: string, charged?: number | null }, config: any, client?: any }} args
+ */
+export function sendSubscriptionPlanChanged({ subscription, user, ref, change, config, client }) {
+  const accountUrl = new URL('/lab', config.clientUrl).toString()
+  const message = buildSubscriptionPlanChanged({ subscription, user, accountUrl, logoUrl: logoOf(config), change })
+  return sendTransactional({ to: user.email, message, tag: 'subscription_plan_changed', key: `scrolllab-sub-plan-${ref}`, config, client })
 }
 
 /**

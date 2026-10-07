@@ -1,5 +1,6 @@
 import { HttpError } from '../errors.js'
 import { verifyMpWebhookSignature, fetchPayment } from './mercadoPago.js'
+import { handleLabRefund, findLabSubscriptionForMpPayment } from './subscriptions/labRefund.js'
 import {
   applyUpgradePayment,
   isUpgradeReference,
@@ -98,7 +99,25 @@ export async function handleMercadoPagoNotification({
     if (isUpgradeReference(payment.external_reference)) {
       await applyUpgradePayment({ payment, config })
     } else if (REVERSED_PAYMENT_STATUSES.has(payment.status)) {
-      await reverseOrderPayment({ payment, config })
+      const out = await reverseOrderPayment({ payment, config })
+      // No era de una orden: puede ser una cuota de LAB.
+      if (out?.skipped === 'sin orden' || out?.skipped === 'sin referencia') {
+        const sub = await findLabSubscriptionForMpPayment(payment)
+        if (sub) {
+          const refunded = Number(payment.transaction_amount_refunded) || 0
+          await handleLabRefund({
+            sub,
+            provider: 'mercadopago',
+            externalId: `mp-${payment.id}`,
+            chargeId: String(payment.id),
+            amount: refunded > 0 ? refunded : Number(payment.transaction_amount),
+            currency: payment.currency_id || sub.currency_id || 'ARS',
+            partial: false,
+            reason: payment.status === 'charged_back' ? 'charged_back' : 'refunded',
+            config,
+          })
+        }
+      }
     } else if (payment.status === 'rejected') {
       // El comprador puede reintentar en MP; el mail sale una vez por orden.
       await notifyOrderPaymentFailed({ orderId: String(payment.external_reference || ''), config })
@@ -108,7 +127,7 @@ export async function handleMercadoPagoNotification({
       // La compra sigue paga (como en Paddle); solo se avisa, una vez por monto.
       const refunded = Number(payment.transaction_amount_refunded) || 0
       if (refunded > 0) {
-        await recordMpRefund({ payment, partial: true })
+        await recordMpRefund({ payment, partial: true, config })
         alertAdmin({
           kind: 'reversed',
           key: `mp-partial-${payment.id}-${refunded}`,

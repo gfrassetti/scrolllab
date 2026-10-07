@@ -637,3 +637,256 @@ export function buildSubscriptionTrialReminderEn({ subscription, user, accountUr
     footer: 'This is a heads-up before your first charge. Need help? Just reply.',
   })
 }
+
+// ——— Devoluciones, confirmación del arrepentimiento y avisos de LAB ———
+
+const GATEWAY = {
+  es: { mercadopago: 'Mercado Pago', paddle: 'tu tarjeta (Paddle)' },
+  en: { mercadopago: 'Mercado Pago', paddle: 'your card (Paddle)' },
+}
+
+const REFUND_COPY = {
+  es: {
+    subject: (partial) => (partial ? 'Te devolvimos parte de tu compra en SCROLLLAB' : 'Te devolvimos el dinero de tu compra en SCROLLLAB'),
+    preheader: 'La devolución ya está hecha. Te contamos cuándo la ves.',
+    eyebrow: 'Devolución hecha',
+    title: (name) => `Listo, ${name}: te devolvimos el dinero.`,
+    intro: (gateway) =>
+      `Hicimos la devolución a ${gateway}, el mismo medio con el que pagaste. Según tu banco o tu tarjeta, puede tardar unos días en verse en tu resumen.`,
+    noticeOrder: 'La licencia y las descargas de esa compra quedan sin efecto.',
+    noticeLab: 'Tu suscripción a LAB quedó dada de baja y no se te va a cobrar más.',
+    noticePartial: 'Fue una devolución parcial: tu compra sigue activa.',
+    what: 'Compra',
+    amount: 'Monto devuelto',
+    date: 'Fecha',
+    cta: 'Ver mi cuenta',
+    footer: 'Si en unos días no lo ves en tu resumen, respondé a este email y lo revisamos.',
+  },
+  en: {
+    subject: (partial) => (partial ? 'We refunded part of your SCROLLLAB purchase' : 'We refunded your SCROLLLAB purchase'),
+    preheader: 'Your refund is done. Here’s when you’ll see it.',
+    eyebrow: 'Refund issued',
+    title: (name) => `All set, ${name}: we refunded you.`,
+    intro: (gateway) =>
+      `We sent the refund to ${gateway}, the same method you paid with. Depending on your bank or card, it can take a few days to show on your statement.`,
+    noticeOrder: 'The license and downloads for that purchase are no longer valid.',
+    noticeLab: 'Your LAB subscription has been canceled and you won’t be charged again.',
+    noticePartial: 'It was a partial refund: your purchase is still active.',
+    what: 'Purchase',
+    amount: 'Amount refunded',
+    date: 'Date',
+    cta: 'Go to my account',
+    footer: 'If you don’t see it on your statement in a few days, reply to this email and we’ll look into it.',
+  },
+}
+
+/**
+ * «Te devolvimos el dinero»: sale cuando la pasarela confirma una devolución
+ * (automática por el Botón de arrepentimiento o hecha a mano en el panel).
+ * @param {{ name: string, locale?: string, amount: number, currency: string, provider: string, what: string, kind: 'order' | 'lab', partial?: boolean, accountUrl: string, logoUrl: string }} args
+ */
+export function buildRefundIssued({ name, locale, amount, currency, provider, what, kind, partial = false, accountUrl, logoUrl }) {
+  const lang = langOf(locale)
+  const c = REFUND_COPY[lang]
+  const gateway = GATEWAY[lang][provider === 'paddle' ? 'paddle' : 'mercadopago']
+  return render({
+    lang,
+    logoUrl,
+    subject: c.subject(partial),
+    preheader: c.preheader,
+    eyebrow: c.eyebrow,
+    title: c.title(name),
+    intro: c.intro(gateway),
+    notice: partial ? c.noticePartial : kind === 'lab' ? c.noticeLab : c.noticeOrder,
+    rows: [
+      [c.what, what],
+      [c.amount, money(amount, currency, lang)],
+      [c.date, dateLong(new Date(), lang)],
+    ],
+    cta: { href: accountUrl, label: c.cta },
+    footer: c.footer,
+  })
+}
+
+const WITHDRAWAL_CONFIRM_COPY = {
+  es: {
+    subject: (code) => `Confirmá la devolución de tu compra · ${code}`,
+    preheader: 'Un click y te devolvemos el dinero.',
+    eyebrow: 'Arrepentimiento',
+    title: (name) => `${name}, confirmá la devolución.`,
+    intro: 'Pediste arrepentirte de esta compra y corresponde la devolución total. Para que nadie pueda pedirla por vos, confirmala con el botón: te devolvemos el dinero en el momento.',
+    notice: (kind) =>
+      kind === 'lab'
+        ? 'Al confirmar, tu suscripción a LAB se da de baja en el momento.'
+        : 'Al confirmar, la licencia y las descargas de esta compra quedan sin efecto.',
+    what: 'Compra',
+    amount: 'A devolver',
+    code: 'Código',
+    cta: 'Confirmar la devolución',
+    after: 'El link vale 48 horas. Si no lo pediste vos, ignorá este mail: no pasa nada.',
+    footer: 'Si tenés dudas, respondé a este email citando el código.',
+  },
+  en: {
+    subject: (code) => `Confirm the refund of your purchase · ${code}`,
+    preheader: 'One click and we refund you.',
+    eyebrow: 'Withdrawal request',
+    title: (name) => `${name}, confirm your refund.`,
+    intro: 'You asked to withdraw from this purchase and it qualifies for a full refund. So nobody can request it for you, confirm it with the button: we refund you right away.',
+    notice: (kind) =>
+      kind === 'lab'
+        ? 'Once confirmed, your LAB subscription ends right away.'
+        : 'Once confirmed, the license and downloads for this purchase are no longer valid.',
+    what: 'Purchase',
+    amount: 'To refund',
+    code: 'Code',
+    cta: 'Confirm the refund',
+    after: 'The link is valid for 48 hours. If you didn’t request this, just ignore this email.',
+    footer: 'Questions? Reply to this email quoting the code.',
+  },
+}
+
+/**
+ * Confirmación del arrepentimiento pedido sin sesión: un link firmado al mail
+ * de la compra, para que nadie que sepa el mail ajeno pueda pedir la devolución.
+ * @param {{ code: string, name: string, locale?: string, what: string, amount: number, currency: string, kind: 'order' | 'lab', confirmUrl: string, logoUrl: string }} args
+ */
+export function buildWithdrawalConfirm({ code, name, locale, what, amount, currency, kind, confirmUrl, logoUrl }) {
+  const lang = langOf(locale)
+  const c = WITHDRAWAL_CONFIRM_COPY[lang]
+  return render({
+    lang,
+    logoUrl,
+    subject: c.subject(code),
+    preheader: c.preheader,
+    eyebrow: c.eyebrow,
+    eyebrowTone: 'muted',
+    title: c.title(name),
+    intro: c.intro,
+    notice: c.notice(kind),
+    rows: [
+      [c.what, what],
+      [c.amount, money(amount, currency, lang)],
+      [c.code, code],
+    ],
+    cta: { href: confirmUrl, label: c.cta },
+    after: c.after,
+    footer: c.footer,
+  })
+}
+
+const SUSPENDED_COPY = {
+  es: {
+    subject: (tier) => `Tu plan ${tier} de ScrollLab LAB se suspendió`,
+    preheader: 'No pudimos cobrar la renovación. Así lo reactivás.',
+    eyebrow: 'Plan suspendido',
+    title: (name) => `${name}, tu plan se suspendió.`,
+    intro: (tier) =>
+      `No pudimos cobrar la renovación de tu plan ${tier} y terminó el período de gracia, así que pasó al plan gratis: las secciones por encima del tope gratis dejaron de mostrarse.`,
+    notice: (provider) =>
+      provider === 'paddle'
+        ? 'Actualizá tu tarjeta y, si Paddle logra el cobro, el plan vuelve solo con tus secciones.'
+        : 'Si Mercado Pago logra el cobro, el plan vuelve solo con tus secciones. También podés volver a suscribirte desde LAB.',
+    plan: 'Plan',
+    since: 'Suspendido el',
+    cta: 'Ir a LAB',
+    footer: 'Si ya no querés seguir, cancelá la suscripción desde LAB y no se reintenta más.',
+  },
+  en: {
+    subject: (tier) => `Your ScrollLab LAB ${tier} plan was suspended`,
+    preheader: 'We couldn’t charge the renewal. Here’s how to get it back.',
+    eyebrow: 'Plan suspended',
+    title: (name) => `${name}, your plan was suspended.`,
+    intro: (tier) =>
+      `We couldn’t charge the renewal of your ${tier} plan and the grace period ended, so it moved to the free plan: sections above the free limit stopped showing.`,
+    notice: (provider) =>
+      provider === 'paddle'
+        ? 'Update your card and, if Paddle gets the charge through, the plan comes back with your sections.'
+        : 'If Mercado Pago gets the charge through, the plan comes back with your sections. You can also subscribe again from LAB.',
+    plan: 'Plan',
+    since: 'Suspended on',
+    cta: 'Go to LAB',
+    footer: 'If you don’t want to continue, cancel the subscription from LAB and it won’t be retried.',
+  },
+}
+
+/** «Tu plan se suspendió»: terminó la gracia sin cobro (una vez por período). */
+export function buildSubscriptionSuspended({ subscription, user, accountUrl, logoUrl }) {
+  const lang = langOf(subscription.locale)
+  const c = SUSPENDED_COPY[lang]
+  const t = subscriptionTerms(subscription, lang)
+  return render({
+    lang,
+    logoUrl,
+    subject: c.subject(t.tier),
+    preheader: c.preheader,
+    eyebrow: c.eyebrow,
+    eyebrowTone: 'danger',
+    title: c.title(nameOf(user)),
+    intro: c.intro(t.tier),
+    notice: c.notice(subscription.provider),
+    rows: [
+      [c.plan, `${t.tier} · ${t.cycle}`],
+      [c.since, dateLong(new Date(), lang)],
+    ],
+    cta: { href: accountUrl, label: c.cta },
+    footer: c.footer,
+  })
+}
+
+const PLAN_CHANGED_COPY = {
+  es: {
+    subject: (tier) => `Cambiaste a ${tier} en ScrollLab LAB`,
+    preheader: 'Tu nuevo plan ya está activo.',
+    eyebrow: 'Cambio de plan',
+    title: (name, tier) => `${name}, ya estás en ${tier}.`,
+    intro: (from, tier) => `Pasaste de ${from} a ${tier}. El cambio ya rige: tu cupo de secciones es el del plan nuevo.`,
+    plan: 'Plan nuevo',
+    charged: 'Cobrado hoy (diferencia)',
+    next: 'Desde el próximo cobro',
+    on: 'Próximo cobro',
+    cta: 'Ir a LAB',
+    footer: 'Podés cambiar de plan o cancelar cuando quieras desde LAB.',
+  },
+  en: {
+    subject: (tier) => `You switched to ${tier} on ScrollLab LAB`,
+    preheader: 'Your new plan is active.',
+    eyebrow: 'Plan change',
+    title: (name, tier) => `${name}, you’re on ${tier} now.`,
+    intro: (from, tier) => `You moved from ${from} to ${tier}. The change is live: your section limit is the new plan’s.`,
+    plan: 'New plan',
+    charged: 'Charged today (difference)',
+    next: 'From your next charge',
+    on: 'Next charge',
+    cta: 'Go to LAB',
+    footer: 'You can switch plans or cancel anytime from LAB.',
+  },
+}
+
+/**
+ * «Cambiaste a <plan>»: desde cuándo y a qué precio; si hubo cobro de la
+ * diferencia, el monto. Uno por cambio.
+ * @param {{ subscription: any, user: any, accountUrl: string, logoUrl: string, change: { from: string, charged?: number | null } }} args
+ */
+export function buildSubscriptionPlanChanged({ subscription, user, accountUrl, logoUrl, change }) {
+  const lang = langOf(subscription.locale)
+  const c = PLAN_CHANGED_COPY[lang]
+  const t = subscriptionTerms(subscription, lang)
+  const from = subscriptionTerms({ ...subscription, plan: change.from }, lang).tier
+  return render({
+    lang,
+    logoUrl,
+    subject: c.subject(t.tier),
+    preheader: c.preheader,
+    eyebrow: c.eyebrow,
+    title: c.title(nameOf(user), t.tier),
+    intro: c.intro(from, t.tier),
+    rows: [
+      [c.plan, `${t.tier} · ${t.cycle}`],
+      change.charged ? [c.charged, money(change.charged, t.currency, lang)] : null,
+      [c.next, t.priceLabel],
+      subscription.currentPeriodEnd ? [c.on, dateLong(subscription.currentPeriodEnd, lang)] : null,
+    ],
+    cta: { href: accountUrl, label: c.cta },
+    footer: c.footer,
+  })
+}

@@ -438,6 +438,10 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       assert.equal(rows[0].email, 'reembolso@test.com')
       assert.equal(rows[0].amount, Number(txn.details.totals.grand_total) / 100)
       assert.deepEqual([rows[0].provider, rows[0].kind, rows[0].currency, rows[0].partial], ['paddle', 'order', 'USD', false])
+      await waitFor(
+        () => mp.mailsTo('reembolso@test.com').some((m) => /devolvimos el dinero/.test(m.body.subject) && /tarjeta \(Paddle\)/.test(m.body.text)),
+        'el mail de devolución al cliente',
+      )
     })
 
     it('contracargo: refunded con motivo charged_back', async () => {

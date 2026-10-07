@@ -361,6 +361,9 @@ export const fileDb = {
     write('refunds', rows)
     return row
   },
+  async findRefund(externalId) {
+    return read('refunds').find((r) => r.externalId === externalId) || null
+  },
   async listRefunds() {
     return read('refunds').sort(
       (a, b) => new Date(b.refundedAt).getTime() - new Date(a.refundedAt).getTime(),

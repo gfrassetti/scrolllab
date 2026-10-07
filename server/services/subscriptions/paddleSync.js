@@ -367,6 +367,7 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   // diferencia de una subida de plan no cuenta como cobro de período.
   if (!sub.firstPaidAt && txn.origin !== 'subscription_update' && txn.origin !== 'subscription_charge') {
     sub.firstPaidAt = paidAt
+    sub.firstChargeId = String(txn.id)
   }
   // Un cobro termina la prueba aunque faltaran días (Paddle la activó antes):
   // sin esto la app seguía mostrando «en prueba» sobre un mes ya cobrado.

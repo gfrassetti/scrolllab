@@ -177,6 +177,10 @@ const subscriptionSchema = new mongoose.Schema(
     lastPaidAt: Date,
     // Primer cobro de período: el único que se puede devolver (src/domain/policy.js).
     firstPaidAt: Date,
+    // El cobro que se puede devolver: pago de MP o transacción de Paddle.
+    firstChargeId: String,
+    // Cuándo se devolvió el primer cobro (baja inmediata).
+    refundedAt: Date,
     // Con qué plan y ciclo está pago el período en curso (cobro de MP, o la
     // diferencia al subir). Base para cotizar la próxima subida; bajar de plan
     // no lo cambia. En una re-suscripción arranca con lo de la vieja.
@@ -370,6 +374,8 @@ const refundSchema = new mongoose.Schema(
     partial: { type: Boolean, default: false },
     reason: { type: String, default: "refunded" },
     refundedAt: { type: Date, default: Date.now },
+    // Hasta qué monto ya se le avisó al cliente (un parcial que se completa avisa de nuevo).
+    notifiedAmount: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

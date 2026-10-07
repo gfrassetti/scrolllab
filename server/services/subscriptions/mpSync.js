@@ -201,7 +201,10 @@ export async function handleAuthorizedPaymentEvent(
     }
     if (!sub.lastPaidAt || debit > new Date(sub.lastPaidAt)) sub.lastPaidAt = debit
     // El primer cobro (el único que se puede devolver por arrepentimiento).
-    if (!sub.firstPaidAt) sub.firstPaidAt = debit
+    if (!sub.firstPaidAt) {
+      sub.firstPaidAt = debit
+      sub.firstChargeId = ap.payment?.id != null ? String(ap.payment.id) : undefined
+    }
     // Lo pagado en este período: base para cobrar la diferencia si sube.
     sub.paidPlan = sub.plan
     sub.paidCycle = sub.cycle
