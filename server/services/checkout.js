@@ -3,7 +3,7 @@ import { HttpError } from '../errors.js'
 import { validateCheckoutItems } from '../validation.js'
 import { pendingExpiresAt } from '../orderRetention.js'
 import { createCheckoutPreference } from './mercadoPago.js'
-import { discountedArsFromUsd, PRODUCTS } from '../catalog.js'
+import { arsFromUsd, discountedArsFromUsd, PRODUCTS } from '../catalog.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import { getUsdArsRate } from '../fx.js'
 import { resolveCouponForCheckout, autoWelcomeCoupon } from './coupons.js'
@@ -117,7 +117,11 @@ export async function createCheckoutOrder({
 
   const orderId = db.uid(order) || order.id
 
-  if (paddle) return startPaddleCheckout({ order, orderId, lines, user, config })
+  // Lo que ve el comprador en la pantalla de la pasarela: el descuento con nombre
+  // (el precio ya viene descontado; el título dice por qué).
+  const shown = coupon ? lines.map((l) => labelDiscount(l, coupon.percent, { paddle, lang, rate: fx?.rate })) : lines
+
+  if (paddle) return startPaddleCheckout({ order, orderId, lines: shown, user, config })
 
   if (config.mpMock) {
     return {
@@ -129,7 +133,7 @@ export async function createCheckoutOrder({
 
   const result = await createCheckoutPreference({
     accessToken: config.mpAccessToken,
-    items: lines,
+    items: shown,
     orderId,
     userId: db.uid(user),
     clientUrl: config.clientUrl,
@@ -145,6 +149,34 @@ export async function createCheckoutOrder({
   return {
     init_point: result.init_point,
     orderId,
+  }
+}
+
+/**
+ * Título y descripción de un ítem con el descuento de primera compra a la vista,
+ * para la pantalla de Mercado Pago o de Paddle (el monto ya viene descontado).
+ * @param {any} line
+ * @param {number} percent
+ * @param {{ paddle: boolean, lang?: string, rate?: number }} opts
+ */
+export function labelDiscount(line, percent, { paddle, lang, rate }) {
+  if (paddle) {
+    const en = lang === 'en'
+    return {
+      ...line,
+      title: `${line.title} (${percent}% off, ${en ? 'first purchase' : 'primera compra'})`,
+      description: en
+        ? `List price US$${line.unit_price_usd} — ${percent}% first-purchase discount applied.`
+        : `Precio de lista US$ ${line.unit_price_usd} — ${percent}% de descuento de primera compra.`,
+    }
+  }
+  const list = rate ? arsFromUsd(line.unit_price_usd, rate) : null
+  return {
+    ...line,
+    title: `${line.title} · ${percent}% off primera compra`,
+    description: list
+      ? `Precio de lista $ ${list.toLocaleString('es-AR')} — ${percent}% de descuento de primera compra.`
+      : `${percent}% de descuento de primera compra.`,
   }
 }
 

@@ -34,7 +34,8 @@ import {
   cancelPreapprovalConfirmed,
   upgradeReference,
 } from '../server/services/subscriptions.js'
-import { hostedPlanPrice, BUILDER_HIDDEN_SKUS } from '../server/catalog.js'
+import { hostedPlanPrice, BUILDER_HIDDEN_SKUS, arsFromUsd, discountedArsFromUsd } from '../server/catalog.js'
+import { labelDiscount } from '../server/services/checkout.js'
 import { validateCheckoutItems } from '../server/validation.js'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
 
@@ -279,6 +280,30 @@ async function main() {
     payer: { email: payerEmail, name: 'Comprador Test Sandbox' },
   })
   check('compra: MP acepta la preference de dos templates', !!order.id && !!order.init_point)
+
+  // 7b. Primera compra: el 10% ya descontado y nombrado en el ítem (lo que ve el comprador en MP).
+  const rate = 1560
+  const firstLine = labelDiscount(
+    { sku: 'chapters', title: 'CHAPTERS — template [check sandbox]', unit_price_usd: 149, unit_price: discountedArsFromUsd(149, rate, 10), currency_id: 'ARS' },
+    10,
+    { paddle: false, rate },
+  )
+  const first = await createCheckoutPreference({
+    accessToken: token,
+    items: [firstLine],
+    orderId: 'f'.repeat(24),
+    userId: 'check-sandbox',
+    clientUrl: 'https://www.scrolllab.com.ar',
+    apiPublicUrl: 'https://api.scrolllab.com.ar',
+    payer: { email: payerEmail, name: 'Comprador Test Sandbox' },
+  })
+  const firstStored = await mp('GET', `/checkout/preferences/${first.id}`)
+  const fi = firstStored.json.items?.[0] || {}
+  check(
+    'primera compra: MP acepta el ítem con el 10% descontado y nombrado',
+    !!first.id && Number(fi.unit_price) === discountedArsFromUsd(149, rate, 10) && /10% off primera compra/.test(fi.title || ''),
+    `${fi.title} · $ ${fi.unit_price} (lista $ ${arsFromUsd(149, rate)})`,
+  )
   const saved = (await mp('GET', `/checkout/preferences/${order.id}`)).json
   const ticketDays = (Date.parse(saved.date_of_expiration) - Date.now()) / DAY
   check(

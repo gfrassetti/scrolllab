@@ -73,18 +73,18 @@ describe('región de pago', () => {
 
   it('los precios se formatean en la moneda pedida (y aceptan el idioma de antes)', () => {
     const RATE = 1500
-    assert.equal(formatPriceFromUsd(149, 'USD', RATE), '$149')
+    assert.equal(formatPriceFromUsd(149, 'USD', RATE), 'US$149')
     assert.match(formatPriceFromUsd(149, 'ARS', RATE), /224\.000/)
-    assert.equal(formatPriceFromUsd(149, 'en', RATE), '$149')
+    assert.equal(formatPriceFromUsd(149, 'en', RATE), 'US$149')
     assert.equal(formatPriceFromUsd(149, 'es', RATE), formatPriceFromUsd(149, 'ARS', RATE))
-    assert.equal(formatNextSectionPrice(8, false, 'USD', RATE), '$15')
+    assert.equal(formatNextSectionPrice(8, false, 'USD', RATE), 'US$15')
     assert.match(formatNextSectionPrice(8, false, 'ARS', RATE), /\$\s?\d/)
   })
 
   it('USD: centavos solo si los hay, igual que lo que cobra Paddle con el cupón', () => {
-    assert.equal(formatUsd(149), '$149')
+    assert.equal(formatUsd(149), 'US$149')
     const discounted = couponLinePrice({ usd: 149, rate: 1500, percent: 10, currency: 'USD' })
     assert.equal(discounted, 134.1)
-    assert.equal(formatUsd(discounted), '$134.10')
+    assert.equal(formatUsd(discounted), 'US$134.10')
   })
 })

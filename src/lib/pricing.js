@@ -97,13 +97,14 @@ export function formatAmount(amount, locale) {
 
 export function formatUsd(amount) {
   // Centavos solo si los hay (un cupón los deja): es lo que cobra Paddle.
+  // «US$» siempre: al lado de precios en pesos, un «$» solo se lee como pesos.
   const cents = !Number.isInteger(Number(amount))
-  return new Intl.NumberFormat('en-US', {
+  return `US${new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: cents ? 2 : 0,
     maximumFractionDigits: cents ? 2 : 0,
-  }).format(amount)
+  }).format(amount)}`
 }
 
 /**

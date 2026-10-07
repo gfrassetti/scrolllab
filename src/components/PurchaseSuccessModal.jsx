@@ -3,6 +3,7 @@ import ProductThumbnail from './ProductThumbnail'
 import OrderStatus from './OrderStatus'
 import { itemPreviewHref } from '../lib/orderPreview'
 import { formatAmount } from '../lib/pricing'
+import { orderPriceSummary } from '../domain/orderSummary'
 import { useI18n } from '../i18n'
 
 /**
@@ -30,6 +31,9 @@ export default function PurchaseSuccessModal({
 
   const items = order.items || []
   const canDownload = order.status === 'paid' && typeof onDownload === 'function'
+
+  const priceSummary = order ? order.summary || orderPriceSummary(order) : null
+  const listPrice = (index) => Number(priceSummary?.items?.[index]?.list) || 0
 
   return (
     <div
@@ -91,7 +95,11 @@ export default function PurchaseSuccessModal({
                 <div className="min-w-0">
                   <p className="truncate font-medium">{item.title}</p>
                   {item.unit_price != null && (
-                    <p className="mt-1 text-sm text-ink/60">
+                    <p className="mt-1 text-sm text-ink/60 tabular-nums">
+                      {/* Con el 10% de primera compra: el de lista tachado, como en el carrito. */}
+                      {listPrice(index) > Number(item.unit_price) && (
+                        <s className="mr-1.5 text-ink/40">{formatAmount(listPrice(index), numberLocale)}</s>
+                      )}
                       {formatAmount(item.unit_price, numberLocale)}{' '}
                       {item.currency_id || order.currency_id || 'ARS'}
                     </p>
@@ -112,15 +120,31 @@ export default function PurchaseSuccessModal({
           })}
         </ul>
 
-        {order.total != null && (
-          <p className="mt-4 text-sm">
-            {t('common.estimatedTotal')}:{' '}
-            <strong>
-              {formatAmount(order.total, numberLocale)}{' '}
-              {order.currency_id || 'ARS'}
-            </strong>
-          </p>
-        )}
+        {order.total != null && (() => {
+          const s = order.summary || orderPriceSummary(order)
+          const cur = order.currency_id || 'ARS'
+          const fmt = (n) => `${formatAmount(n, numberLocale)} ${cur}`
+          return (
+            <dl className="mt-4 text-sm tabular-nums">
+              {s.discount > 0 && (
+                <>
+                  <div className="flex justify-between gap-6 py-0.5 text-ink/60">
+                    <dt>{t('cart.couponSubtotal')}</dt>
+                    <dd>{fmt(s.subtotal)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-6 py-0.5 text-accent-ink">
+                    <dt>{t('cart.couponDiscount', { percent: s.discountPct })}</dt>
+                    <dd>−{fmt(s.discount)}</dd>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between gap-6 py-0.5">
+                <dt>{t('common.estimatedTotal')}</dt>
+                <dd className="font-semibold">{fmt(order.total)}</dd>
+              </div>
+            </dl>
+          )
+        })()}
 
         <div className="mt-8 flex flex-col gap-3">
           {canDownload && (

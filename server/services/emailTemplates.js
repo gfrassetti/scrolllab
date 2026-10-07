@@ -1,4 +1,5 @@
 import { db } from '../db.js'
+import { orderPriceSummary } from '../../src/domain/orderSummary.js'
 import { HOSTED_PLANS, hostedPlanPriceIn } from '../catalog.js'
 import {
   buildOrderReceiptEn,
@@ -60,19 +61,28 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
   // Paddle es el vendedor legal (merchant of record): la factura la manda él.
   const invoiceNote = order.provider === 'paddle' ? ` ${paddleInvoiceNote('es')}` : ''
   const buyerName = user.name || user.email
-  const itemRows = (order.items || [])
-    .map(
-      (item) => `
+  // Con descuento de primera compra: ítems a precio de lista, la línea del
+  // descuento y el total cobrado. Sin descuento, igual que siempre.
+  const summary = orderPriceSummary(order)
+  const cur = order.currency_id
+  const cell = 'padding:14px 0;border-bottom:1px solid #dedad2;color:#161412;font-size:15px;'
+  const itemRows =
+    summary.items
+      .map(
+        (item) => `
         <tr>
-          <td style="padding:14px 0;border-bottom:1px solid #dedad2;color:#161412;font-size:15px;">
-            ${escapeHtml(item.title || item.sku)}
-          </td>
-          <td style="padding:14px 0;border-bottom:1px solid #dedad2;color:#161412;font-size:15px;text-align:right;white-space:nowrap;">
-            ${escapeHtml(formatMoney(item.unit_price, item.currency_id || order.currency_id))}
-          </td>
+          <td style="${cell}">${escapeHtml(item.title)}</td>
+          <td style="${cell}text-align:right;white-space:nowrap;">${escapeHtml(formatMoney(item.list, cur))}</td>
         </tr>`,
-    )
-    .join('')
+      )
+      .join('') +
+    (summary.discount > 0
+      ? `
+        <tr>
+          <td style="${cell}color:#b8410c;">Descuento de primera compra (${summary.discountPct}%)</td>
+          <td style="${cell}color:#b8410c;text-align:right;white-space:nowrap;">−${escapeHtml(formatMoney(summary.discount, cur))}</td>
+        </tr>`
+      : '')
 
   const html = `<!doctype html>
 <html lang="es">
@@ -148,15 +158,11 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
 Gracias por tu compra, ${buyerName}.
 
 Orden: ${orderId}
-${(order.items || [])
-  .map(
-    (item) =>
-      `- ${item.title || item.sku}: ${formatMoney(
-        item.unit_price,
-        item.currency_id || order.currency_id,
-      )}`,
-  )
-  .join('\n')}
+${summary.items.map((item) => `- ${item.title}: ${formatMoney(item.list, cur)}`).join('\n')}${
+    summary.discount > 0
+      ? `\nDescuento de primera compra (${summary.discountPct}%): −${formatMoney(summary.discount, cur)}`
+      : ''
+  }
 Total: ${formatMoney(order.total, order.currency_id)}
 
 Ingresá y descargá tu ZIP desde:

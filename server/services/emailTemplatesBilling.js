@@ -1,4 +1,5 @@
 import { db } from '../db.js'
+import { orderPriceSummary } from '../../src/domain/orderSummary.js'
 import { HOSTED_PLANS, hostedPlanPriceIn } from '../catalog.js'
 
 /**
@@ -239,6 +240,7 @@ export function paddleInvoiceNote(locale) {
  */
 export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   const id = orderIdOf(order)
+  const summary = orderPriceSummary(order)
   const footer =
     order.provider === 'paddle'
       ? `This email is your purchase summary, not a tax invoice. ${PADDLE_INVOICE_NOTE.en} Need help? Just reply.`
@@ -254,10 +256,10 @@ export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
       'Your order is confirmed and the source code is ready. Sign in to your account to download the ZIP.',
     rows: [
       ['Order', id],
-      ...(order.items || []).map((i) => [
-        i.title || i.sku,
-        money(i.unit_price, i.currency_id || order.currency_id, 'en'),
-      ]),
+      ...summary.items.map((i) => [i.title, money(i.list, order.currency_id, 'en')]),
+      summary.discount > 0
+        ? [`First-purchase discount (${summary.discountPct}%)`, `−${money(summary.discount, order.currency_id, 'en')}`]
+        : null,
       ['Total', money(order.total, order.currency_id, 'en')],
     ],
     cta: { href: accountUrl, label: 'Sign in and download' },

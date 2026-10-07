@@ -229,6 +229,14 @@ export default function AccountPage() {
                         {order.total != null && formatAmount(order.total, dateLocale)}{' '}
                         {order.currency_id} · <OrderStatus status={order.status} />
                       </p>
+                      {order.summary?.discount > 0 && (
+                        <p className="mt-1 text-xs text-accent-ink">
+                          {t('account.discountApplied', {
+                            percent: order.summary.discountPct,
+                            amount: `${formatAmount(order.summary.discount, dateLocale)} ${order.currency_id}`,
+                          })}
+                        </p>
+                      )}
                       {order.status === 'pending' && (
                         <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
                           {t('account.pendingHint')}

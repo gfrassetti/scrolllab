@@ -129,7 +129,8 @@ describe('Pagos de templates (MP simulado)', () => {
     assert.equal(order.total, discountedArsFromUsd(usd, order.fxRate, 10))
     assert.equal(pref.items.length, 1)
     assert.equal(pref.items[0].unit_price, order.total)
-    assert.equal(pref.items[0].title, PRODUCTS.custom.title)
+    // Primera compra: MP muestra el descuento en el nombre del ítem.
+    assert.equal(pref.items[0].title, `${PRODUCTS.custom.title} · 10% off primera compra`)
     assert.equal(pref.items[0].category_id, 'virtual_goods')
     assert.match(pref.items[0].id, /^custom:chapters\/NavMinimal\+meridian\/Hero/)
 

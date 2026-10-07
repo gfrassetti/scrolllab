@@ -373,6 +373,27 @@ async function scenarioApproved() {
   check('compra aprobada: el ZIP se puede descargar', dl.status === 200 && !!(dl.body.url || dl.body.downloadUrl), `HTTP ${dl.status}`)
   state.okOrder = order
   state.okTxn = txn
+
+  // La segunda compra del mismo comprador ya no tiene el 10% (ni automático).
+  const again = await buyer.call('POST', '/api/checkout', { items: [{ sku: 'chapters' }], provider: 'paddle' })
+  const txn2 = await pd('GET', `/transactions/${again.body.transactionId}`)
+  check(
+    'descuento: la segunda compra del mismo comprador va a precio de lista',
+    again.status === 200 && txn2.items[0].price.unit_price.amount === String(TEMPLATE_PRICES_USD.chapters * 100) && !/off/.test(txn2.items[0].price.name),
+    `${txn2.items[0].price.name} · ${txn2.items[0].price.unit_price.amount} centavos`,
+  )
+  await pd('PATCH', `/transactions/${txn2.id}`, { status: 'canceled' }).catch(() => {})
+
+  // Primera compra por un «Comprar» rápido (sin carrito ni código): el servidor aplica el 10%.
+  const quick = await newBuyer('quick')
+  const first = await quick.call('POST', '/api/checkout', { items: [{ sku: 'chapters' }], provider: 'paddle' })
+  const txn3 = await pd('GET', `/transactions/${first.body.transactionId}`)
+  check(
+    'descuento: primera compra sin código (Comprar rápido) → Paddle cobra el 10% menos y lo nombra',
+    first.status === 200 && txn3.items[0].price.unit_price.amount === String(Math.round(expected * 100)) && /10% off/.test(txn3.items[0].price.name),
+    `${txn3.items[0].price.name} · ${txn3.items[0].price.unit_price.amount} centavos`,
+  )
+  await pd('PATCH', `/transactions/${txn3.id}`, { status: 'canceled' }).catch(() => {})
 }
 
 async function scenarioDeclined() {

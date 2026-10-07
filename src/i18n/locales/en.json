@@ -978,13 +978,14 @@
     "clearAll": "Clear all",
     "couponUntil": "valid until {{date}}",
     "couponSubtotal": "Subtotal",
-    "couponDiscount": "Welcome coupon {{percent}}%",
+    "couponDiscount": "First-purchase discount ({{percent}}%)",
     "couponErrUsed": "That coupon was already used.",
     "couponErrExpired": "That coupon has expired.",
     "couponErrFirst": "The coupon only works on a first purchase.",
     "couponErrGeneric": "We couldn’t apply the coupon. Please try again.",
     "refundNote": "Full refund within {{days}} days if you haven’t downloaded the ZIP.",
-    "refundLink": "See the policy"
+    "refundLink": "See the policy",
+    "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically."
   },
   "login": {
     "eyebrow": "Account",
@@ -1060,7 +1061,8 @@
       "subLapsed": "Your {{plan}} plan is suspended: we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. Update your card, or cancel it and it won’t be retried.",
       "subLapsedPaused": "Your {{plan}} plan is paused in Paddle and no longer covers your sections.",
       "subSync": "Sync with Paddle"
-    }
+    },
+    "discountApplied": "Includes the {{percent}}% first-purchase discount (−{{amount}})"
   },
   "preview": {
     "backToAccount": "← Back to My purchases",
