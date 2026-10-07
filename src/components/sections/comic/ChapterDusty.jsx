@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { calmReveal } from '../../../lib/motion'
+import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import ComicPanel from './ComicPanel'
 import PaperFrame from './PaperFrame'
@@ -111,7 +111,9 @@ function PigPanel() {
       {/* the pig is clipped only at the bottom: its head rises over the top of the frame */}
       <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
         <div data-pig className="absolute bottom-0 left-[14%] w-[40%] will-change-transform max-md:left-[8%] max-md:w-[62%]">
-          <BigPig className="block h-auto w-full" />
+          <div data-pig-hover>
+            <BigPig className="block h-auto w-full" />
+          </div>
         </div>
       </div>
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
@@ -140,7 +142,9 @@ function DogPanel({ line }) {
       </div>
       <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
         <div data-dog className="absolute bottom-0 left-[8%] w-[37%] will-change-transform max-md:left-[2%] max-md:w-[64%]">
-          <DogBack className="block h-auto w-full" />
+          <div data-dog-hover>
+            <DogBack className="block h-auto w-full" />
+          </div>
         </div>
       </div>
       {/* the speech bubble */}
@@ -478,7 +482,7 @@ export default function ChapterDusty({
       gsap.set(gatePair, { y: 70 })
       gsap.set(curtain2, { yPercent: 106 })
       gsap.set([pigPanel, dogPanel], { y: () => pin.clientHeight * 1.1 })
-      gsap.set(pig, { yPercent: 70 })
+      gsap.set(pig, { yPercent: 30 })
       gsap.set(hands, { yPercent: -45 })
       gsap.set(tailWrap, { xPercent: 160 })
       gsap.set(bubbleEl, { opacity: 0, scale: 0.6, y: 30, transformOrigin: '50% 80%' })
@@ -501,9 +505,10 @@ export default function ChapterDusty({
       tl.to(curtain2, { yPercent: 0, duration: 1.4, ease: 'power2.out' }, P)
       tl.to(ink[2], { opacity: 0, y: -16, duration: 0.5 }, P + 0.5)
       tl.to(pigPanel, { y: 0, duration: 1.3, ease: 'power3.out' }, P + 0.8)
-      // the pig shoots up past its rest, over the top of the frame, and settles back
-      tl.to(pig, { yPercent: -9, duration: 0.7, ease: 'power3.out' }, P + 1.2)
-      tl.to(pig, { yPercent: 0, duration: 0.6, ease: 'sine.inOut' }, P + 1.9)
+      // the pig comes in standing out over its frame; then the pig holds its place
+      // on the page while its square keeps rising around it, so it sinks in
+      tl.to(pig, { yPercent: 0, duration: 1.1, ease: 'power3.out' }, P + 0.8)
+      const RISE = () => pin.clientHeight * 0.1
       tl.to(hands, { yPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.4)
       tl.to(tailWrap, { xPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.5)
       tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
@@ -524,7 +529,9 @@ export default function ChapterDusty({
       gsap.set(lookout, { transformOrigin: '72% 62%', yPercent: 10 })
       gsap.set(strip2, { opacity: 0 })
       tl.fromTo(pigBg, { yPercent: -4 }, { yPercent: 4, duration: LAND - (P + 0.8), ease: 'none' }, P + 0.8)
-      tl.to(dogPanel, { y: 0, duration: LAND - D, ease: 'power2.out' }, D)
+      tl.to(pigPanel, { y: () => -RISE(), duration: LAND - (P + 2.1), ease: 'none' }, P + 2.1)
+      tl.to(pig, { y: RISE, duration: LAND - (P + 2.1), ease: 'none' }, P + 2.1)
+      tl.to(dogPanel, { y: () => -RISE(), duration: LAND - D, ease: 'power2.out' }, D)
       tl.to(pig, { yPercent: 45, duration: LAND - D, ease: 'power1.in' }, D)
       tl.to(dog, { scale: 1, duration: LAND - D, ease: 'power1.out' }, D)
       tl.to(lookout, { yPercent: 0, duration: LAND - D, ease: 'power1.out' }, D)
@@ -566,6 +573,36 @@ export default function ChapterDusty({
         },
         P,
       )
+
+      // The two cards answer the pointer (the finger on a phone): the scene and
+      // the animals shift by different amounts, so the picture has depth.
+      const pointer = trackPointer()
+      const layers = [
+        ['[data-pig-bg]', -14],
+        ['[data-pig-hover]', 16],
+        ['[data-hands]', 24],
+        ['[data-tail-wrap]', 20],
+        ['[data-lookout]', -16],
+        ['[data-dog-hover]', 14],
+      ].map(([sel, depth]) => {
+        const el = root.current.querySelector(sel)
+        return {
+          depth,
+          x: gsap.quickTo(el, 'x', { duration: 0.8, ease: 'power3.out' }),
+          y: gsap.quickTo(el, 'y', { duration: 0.8, ease: 'power3.out' }),
+        }
+      })
+      const hover = () => {
+        layers.forEach((l) => {
+          l.x(pointer.x * l.depth)
+          l.y(pointer.y * l.depth * 0.6)
+        })
+      }
+      gsap.ticker.add(hover)
+      return () => {
+        gsap.ticker.remove(hover)
+        pointer.dispose?.()
+      }
     },
     { scope: root, dependencies: [reduced] },
   )
