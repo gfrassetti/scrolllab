@@ -124,6 +124,19 @@ export default function PurchaseSuccessModal({
 
         <div className="mt-8 flex flex-col gap-3">
           {canDownload && (
+            <p className="text-xs leading-relaxed text-ink/55">
+              {t('account.downloadRefundNote')}{' '}
+              <a
+                href="/legal/refunds"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 transition-colors hover:text-ink"
+              >
+                {t('account.refundPolicyLink')}
+              </a>
+            </p>
+          )}
+          {canDownload && (
             <button
               type="button"
               disabled={downloading}

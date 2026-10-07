@@ -985,7 +985,7 @@
     "couponErrExpired": "That coupon has expired.",
     "couponErrFirst": "The coupon only works on a first purchase.",
     "couponErrGeneric": "We couldn’t apply the coupon. Please try again.",
-    "refundNote": "Full refund within {{days}} days.",
+    "refundNote": "Full refund within {{days}} days if you haven’t downloaded the ZIP.",
     "refundLink": "See the policy"
   },
   "login": {
@@ -1013,6 +1013,8 @@
     "pending": "Confirming payment…",
     "failed": "Failed",
     "download": "Download ZIP",
+    "downloadRefundNote": "Once you download the ZIP you can no longer ask for a change-of-mind refund.",
+    "refundPolicyLink": "Refund policy",
     "license": "License",
     "downloadsCount": "Downloads: {{count}}",
     "preview": "See preview",
@@ -1192,7 +1194,7 @@
       },
       {
         "title": "Refunds",
-        "body": "You can ask for a full refund within {{days}} calendar days of each purchase or charge, for any reason. Scope, what is returned and how to ask are in the Refund policy. After that period a refund is only available if the file cannot be delivered, has a substantial technical defect, or applicable law requires it. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked.",
+        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: full refund of each charge within {{days}} days, no conditions. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked.",
         "link": {
           "to": "/legal/refunds",
           "label": "See the Refund policy →"
@@ -1239,11 +1241,18 @@
     "eyebrow": "Legal",
     "title": "Refund policy",
     "effectiveDate": "Effective October 7, 2026",
-    "intro": "If what you bought isn’t what you expected, we’ll give your money back. This policy covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}, whether you pay with Mercado Pago or by card (Paddle).",
+    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}, whether you pay with Mercado Pago or by card (Paddle).",
     "sections": [
       {
         "title": "Refund period",
-        "body": "You can ask for a full refund within {{days}} calendar days of purchase, for any reason and without explaining it. For LAB subscriptions the period runs from each charge: the first one after the free trial and every renewal."
+        "items": [
+          "Templates, bundle and builder: full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP.",
+          "LAB: full refund of each charge within {{days}} calendar days, no conditions. The period runs from each charge: the first one after the free trial and every renewal."
+        ]
+      },
+      {
+        "title": "If you already downloaded the ZIP",
+        "body": "Once downloaded, the code is in your hands and there is no change-of-mind refund. We do give your money back, within the same period, if the file can’t be opened or delivered, has a substantial technical defect or isn’t what was described: write to us and we’ll fix it or refund you. Anything applicable law requires also applies. We warn you before you download, in My purchases."
       },
       {
         "title": "What you get back",
@@ -1266,7 +1275,7 @@
       },
       {
         "title": "After the period",
-        "body": "Once the period has passed there is no change-of-mind refund. We still review any case where the file can’t be delivered, has a substantial technical defect, or applicable law requires otherwise: write to us."
+        "body": "Once the period has passed there is no change-of-mind refund, on any product. We still review any case where the file can’t be delivered, has a substantial technical defect, or applicable law requires otherwise: write to us."
       },
       {
         "title": "Free trial and cancellation (LAB)",

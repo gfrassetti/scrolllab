@@ -252,6 +252,18 @@ export default function AccountPage() {
                           · {t('account.downloadsCount', { count: order.downloadCount || 0 })}
                         </p>
                       )}
+                      {/* Descargar cierra el reembolso por arrepentimiento: se avisa antes. */}
+                      {order.status === 'paid' && !(order.downloadCount > 0) && (
+                        <p className="mt-2 max-w-[44ch] text-xs leading-relaxed text-ink/55">
+                          {t('account.downloadRefundNote')}{' '}
+                          <Link
+                            to="/legal/refunds"
+                            className="underline underline-offset-2 transition-colors hover:text-ink"
+                          >
+                            {t('account.refundPolicyLink')}
+                          </Link>
+                        </p>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       {previews.map(({ item, index, href }) => (
