@@ -475,13 +475,9 @@ export default function ChapterDusty({
       gsap.set(tailWrap, { xPercent: 160 })
       gsap.set(bubbleEl, { opacity: 0, scale: 0.6, y: 30, transformOrigin: '50% 80%' })
       gsap.set(ink[2], { color: '#fff' })
-      gsap.to(root.current.querySelector('[data-dog-tail]'), {
-        rotate: 14,
-        duration: 0.36,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-      })
+      const dogTail = root.current.querySelector('[data-dog-tail]')
+      const handL = root.current.querySelector('[data-hand="left"]')
+      const handR = root.current.querySelector('[data-hand="right"]')
 
       const G = END + 0.2
       tl.to(gate, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, G)
@@ -504,16 +500,24 @@ export default function ChapterDusty({
 
       // Act 7 — straight on: the next panel comes up and pushes the pig away. The
       // dog holds still while the farm pans behind it; the bubble pops up.
+      // Act 7 — straight on, the dog's card slides up over the pig's card, like one
+      // card laid on another, until it covers it.
+      // The dog holds still while the farm behind it zooms in, fast.
       const D = P + 3.6
-      tl.to(pigPanel, { y: () => -pin.clientHeight * 1.1, duration: 1.5, ease: 'power2.inOut' }, D)
-      tl.to(dogPanel, { y: 0, duration: 1.5, ease: 'power2.inOut' }, D)
+      tl.to(dogPanel, { y: 0, duration: 1.8, ease: 'power2.out' }, D)
+      // the pig ducks back into its frame as the dog's card covers it
+      tl.to(pig, { yPercent: 70, duration: 0.9, ease: 'power2.in' }, D + 0.5)
       tl.to(ink[3], { opacity: 0, y: -16, duration: 0.5 }, D)
-      tl.fromTo(lookout, { xPercent: 0 }, { xPercent: -9, duration: 4.2, ease: 'none' }, D)
+      gsap.set(lookout, { transformOrigin: '72% 62%' })
+      tl.fromTo(lookout, { scale: 1 }, { scale: 1.55, duration: 2.0, ease: 'power2.out' }, D + 0.3)
+      tl.to(lookout, { scale: 1.7, duration: 2.1, ease: 'none' }, D + 2.3)
       tl.to(ink[4], { opacity: 1, y: 0, duration: 0.7 }, D + 1.3)
       tl.to(bubbleEl, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'back.out(1.8)' }, D + 1.9)
       const FIN = D + 4.4
 
-      // the paper cut "boils": the outline swaps shape as you scroll
+      // Driven by the scroll, all the way to the end: the paper cut "boils" (the
+      // outline swaps shape), and the farmer's hands and the dog's tail swing back
+      // and forth — scroll on and they move, stop and they stop.
       const boil = { f: 0 }
       tl.fromTo(
         boil,
@@ -525,6 +529,10 @@ export default function ChapterDusty({
           onUpdate: () => {
             const d = BOIL[Math.floor(boil.f) % BOIL.length]
             boils.forEach((path) => path.setAttribute('d', d))
+            const a = boil.f * 0.9
+            handL.setAttribute('transform', `rotate(${(Math.sin(a) * 7).toFixed(2)} 225 -40) translate(0 ${(Math.sin(a) * 14).toFixed(1)})`)
+            handR.setAttribute('transform', `rotate(${(-Math.sin(a + 1.1) * 6).toFixed(2)} 960 -40) translate(0 ${(Math.sin(a + 1.1) * 12).toFixed(1)})`)
+            gsap.set(dogTail, { rotate: Math.sin(a * 1.4) * 20 })
           },
         },
         P,
