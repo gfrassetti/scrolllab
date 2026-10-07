@@ -211,6 +211,12 @@ export default function HomeFooter({ t, templates }) {
             >
               {t('home.footerTerms')}
             </Link>
+            <Link
+              to="/legal/refunds"
+              className="transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerRefunds')}
+            </Link>
           </nav>
           <a
             href="#top"

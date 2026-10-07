@@ -192,7 +192,9 @@
       "changePay": "Cobrar {{amount}} y cambiar",
       "returnPending": "Todavía no vemos la confirmación de Paddle. Si ya pagaste, se refleja en unos segundos.",
       "updateCard": "Actualizar tarjeta"
-    }
+    },
+    "refundNote": "Cancelás cuando quieras y podés pedir el reembolso de cada cobro dentro de {{days}} días.",
+    "refundLink": "Política de reembolsos"
   },
   "common": {
     "loading": "Cargando…",
@@ -329,6 +331,7 @@
     "footerLicense": "Licencia",
     "footerPrivacy": "Privacidad",
     "footerTerms": "Términos",
+    "footerRefunds": "Reembolsos",
     "footerHow": "Cómo funciona",
     "footerAccount": "Mis compras",
     "backTop": "Volver arriba",
@@ -981,7 +984,9 @@
     "couponErrUsed": "Ese cupón ya se usó.",
     "couponErrExpired": "Ese cupón venció.",
     "couponErrFirst": "El cupón vale solo para la primera compra.",
-    "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo."
+    "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo.",
+    "refundNote": "Reembolso total dentro de {{days}} días.",
+    "refundLink": "Ver la política"
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -1187,7 +1192,11 @@
       },
       {
         "title": "Reembolsos",
-        "body": "Por tratarse de productos digitales de acceso inmediato, las compras acreditadas no son reembolsables salvo que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario. Contactanos para evaluar el caso. Un reembolso aprobado se devuelve al mismo medio de pago, a través de Mercado Pago o de Paddle según cómo hayas pagado, y la licencia y las descargas de esa orden quedan sin efecto."
+        "body": "Podés pedir el reembolso total dentro de los {{days}} días corridos de cada compra o cobro, por cualquier motivo. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Pasado ese plazo solo hay reembolso si el archivo no puede entregarse, tiene un defecto técnico sustancial o la normativa aplicable lo dispone. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Paddle) y la licencia y las descargas de esa orden quedan sin efecto.",
+        "link": {
+          "to": "/legal/refunds",
+          "label": "Ver la Política de reembolsos →"
+        }
       },
       {
         "title": "Uso permitido",
@@ -1216,12 +1225,60 @@
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
           "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago en pesos o, si pagás desde otro país, mediante Paddle.com en dólares, como revendedor autorizado; se renueva automáticamente al final de cada período hasta que la des de baja.",
-          "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
+          "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Cada cobro se puede reembolsar dentro de los {{days}} días según la Política de reembolsos; pasado ese plazo, los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
           "Hacemos esfuerzos razonables por mantener el servicio disponible, pero no garantizamos disponibilidad ininterrumpida y no respondemos por pérdidas derivadas de caídas, latencia o cambios en el servicio.",
           "Uso aceptable: no podés usar el embed para contenido ilegal, engañoso o que infrinja derechos de terceros, ni cargar el servicio de forma abusiva. Podemos suspender o revocar una instancia que incumpla."
         ]
+      }
+    ],
+    "contact": "Consultas sobre estos términos:"
+  },
+  "refunds": {
+    "eyebrow": "Legal",
+    "title": "Política de reembolsos",
+    "effectiveDate": "Vigente desde el 7 de octubre de 2026",
+    "intro": "Si lo que compraste no es lo que esperabas, te devolvemos el dinero. Esta política vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}, pagues con Mercado Pago o con tarjeta (Paddle).",
+    "sections": [
+      {
+        "title": "Plazo",
+        "body": "Podés pedir el reembolso total dentro de los {{days}} días corridos desde la compra, por cualquier motivo y sin tener que explicarlo. En las suscripciones LAB el plazo corre desde cada cobro: el primero después de la prueba gratis y cada renovación."
+      },
+      {
+        "title": "Qué se devuelve",
+        "body": "El importe que efectivamente pagaste, con el descuento o el cupón que hayas usado y los impuestos que se te cobraron. Se devuelve al mismo medio de pago. Los tiempos de acreditación dependen de Mercado Pago, de tu tarjeta o de tu banco."
+      },
+      {
+        "title": "Qué pasa con lo que compraste",
+        "items": [
+          "Templates, bundle y builder: al aprobarse el reembolso, la licencia y las descargas de esa orden quedan sin efecto, y tenés que dejar de usar y borrar el código.",
+          "LAB: la suscripción se da de baja y el plan vuelve al gratis; las secciones publicadas por encima del tope gratis dejan de mostrarse."
+        ]
+      },
+      {
+        "title": "Cómo pedirlo",
+        "items": [
+          "Si pagaste con tarjeta (Paddle): podés pedírselo directamente a Paddle, nuestro revendedor autorizado, en paddle.net, o escribirnos.",
+          "Si pagaste con Mercado Pago: escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página).",
+          "Lo revisamos y respondemos lo antes posible."
+        ]
+      },
+      {
+        "title": "Pasado el plazo",
+        "body": "Vencido el plazo no hay reembolso por arrepentimiento. Igual revisamos cada caso en que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario: escribinos."
+      },
+      {
+        "title": "Prueba gratis y cancelación (LAB)",
+        "body": "La primera suscripción tiene una prueba sin cargo: si cancelás antes de que termine, no pagás nada. Podés cancelar cuando quieras desde Mi cuenta; la cancelación detiene las renovaciones y conservás el acceso hasta el final del período ya pagado."
+      },
+      {
+        "title": "Estudio (trabajo a medida)",
+        "body": "Los trabajos a medida y las adaptaciones del Estudio no se cobran por el checkout del sitio: se rigen por lo acordado en la cotización."
+      },
+      {
+        "title": "Cobros que no reconocés",
+        "body": "Si ves un cobro que no reconocés o tenés un problema con tu compra, escribinos antes de pedirlo a tu banco: lo resolvemos rápido."
       }
     ],
     "contact": "Consultas sobre estos términos:"

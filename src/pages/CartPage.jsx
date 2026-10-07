@@ -15,6 +15,7 @@ import ProductThumbnail from '../components/ProductThumbnail'
 import PaymentMethodPicker from '../components/PaymentMethodPicker'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { useCurrency } from '../lib/currency'
+import { REFUND_DAYS } from '../lib/site'
 
 /**
  * Cuando el servidor rechaza el cupón al pagar: status de la API → texto (el
@@ -256,6 +257,15 @@ export default function CartPage() {
                     {t('pay.intlTaxNote')}
                   </span>
                 )}
+                <span className="mt-1 block max-w-prose text-xs text-ink/55">
+                  {t('cart.refundNote', { days: REFUND_DAYS })}{' '}
+                  <Link
+                    to="/legal/refunds"
+                    className="underline underline-offset-2 transition-colors hover:text-ink"
+                  >
+                    {t('cart.refundLink')}
+                  </Link>
+                </span>
               </p>
               </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">

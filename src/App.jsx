@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import TemplatesIndex from './pages/TemplatesIndex'
 import LicensePage from './pages/LicensePage'
-import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
+import { PrivacyPage, TermsPage, RefundsPage } from './pages/LegalDocumentPage'
 import { usePayRegion } from './lib/payRegion'
 import { AuthProvider } from './lib/auth'
 import { PlanProvider } from './lib/plan'
@@ -190,6 +190,7 @@ export default function App() {
                   <Route path="/legal/license" element={<LicensePage />} />
                   <Route path="/legal/privacy" element={<PrivacyPage />} />
                   <Route path="/legal/terms" element={<TermsPage />} />
+                  <Route path="/legal/refunds" element={<RefundsPage />} />
                   <Route
                     path="/license"
                     element={<Navigate to="/legal/license" replace />}

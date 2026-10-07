@@ -91,6 +91,22 @@ un monto del cliente.
 - Alta abandonada: la transacción `ready` se cancela (`PATCH status: canceled`)
   antes de abrir otra, así un checkout viejo no puede cobrar dos veces.
 
+## Reembolsos (lo que exige Paddle para aprobar el dominio)
+
+Paddle pide, publicadas en el sitio, Términos, Privacidad y una **Política de
+reembolsos con un plazo de entre 14 y 90 días** (sin «todas las ventas son
+finales»). Está en `/legal/refunds` (es/en), enlazada desde el pie del home, el
+carrito, LAB y los Términos. El plazo es una sola constante: `REFUND_DAYS` en
+`src/lib/site.js` (14, el mínimo); los textos usan `{{days}}`. Alcance: templates,
+bundle, builder y **cada cobro** de LAB, con Mercado Pago o con Paddle; el
+Estudio queda afuera (cotización aparte). Cómo se opera:
+- Paddle: el comprador lo pide en paddle.net o a nosotros; se reembolsa desde el
+  panel de Paddle. Una orden reembolsada se corta sola (webhook `adjustment.*`).
+- Mercado Pago: se reembolsa desde el panel de MP; el webhook corta la orden.
+- LAB: el webhook solo te **avisa** por mail del reembolso; dar de baja la
+  suscripción y bajar el plan es un paso manual hasta que se automatice.
+- Cambiar el plazo: `REFUND_DAYS` + revisar con tu abogado / contador.
+
 ## Mails
 
 | Evento | Market / builder | LAB |
