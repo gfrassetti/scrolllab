@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
-import { DARK_PAPER, SpeechBubble, TORN_TOP, TornCard, WOOD, boilTo, hoverDepth } from './comicKit'
+import { DARK_PAPER, SpeechBubble, TORN_TOP, TornCard, boilTo, hoverDepth } from './comicKit'
 import { BrickBg, DinnerBg, DogHead, FarmhouseBg, KnifeHand, PigHead } from './StoryArt'
 
 const DEFAULT_FACTS = [
@@ -161,17 +161,15 @@ export default function ChapterWorlds({
       const [wall, farm, dinner] = q('[data-dark-card]')
       const caps = q('[data-dark-caption]')
       const sfxEl = root.current.querySelector('[data-sfx]')
-      const wood = root.current.querySelector('[data-curtain-wood]')
       const H = () => pin.clientHeight
 
       gsap.set([farm, dinner], { y: () => H() * 1.1, transformOrigin: '50% 50%' })
-      // the wall is already on its way up when the page arrives (no empty paper)
-      gsap.set(wall, { y: () => H() * 0.55, transformOrigin: '50% 50%' })
+      // the wall rides up with the torn dark paper
+      gsap.set(wall, { transformOrigin: '50% 50%' })
       q('[data-char]').forEach((c) => gsap.set(c, { y: () => -H() * 0.07 }))
       gsap.set(caps, { opacity: 0, y: 20 })
       gsap.set(sfxEl, { scale: 0.4, opacity: 0, transformOrigin: '50% 50%' })
       gsap.set(root.current.querySelector('[data-bubble]'), { scale: 0.5, opacity: 0, transformOrigin: '50% 80%' })
-      gsap.set(wood, { yPercent: 106 })
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
@@ -193,7 +191,8 @@ export default function ChapterWorlds({
         tl.fromTo(card.querySelector('[data-card-bg]'), { scale: 1.1 }, { scale: 1, duration: 2.4, ease: 'power1.out' }, at)
       }
 
-      land(wall, 0, 1.2)
+      tl.to(wall.querySelector('[data-char]'), { y: 0, duration: 1.2, ease: 'power2.out' }, 0)
+      tl.fromTo(wall.querySelector('[data-card-bg]'), { scale: 1.1 }, { scale: 1, duration: 2, ease: 'power1.out' }, 0)
       tl.to(caps[0], { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(2)' }, 0.6)
       tl.to(root.current.querySelector('[data-bubble]'), { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.8)' }, 1.4)
       // a beat to stop and open the notes
@@ -210,7 +209,6 @@ export default function ChapterWorlds({
       tl.fromTo(dinner.querySelector('[data-prop]'), { xPercent: 40 }, { xPercent: 0, duration: 1.8, ease: 'power2.out' }, 7.2)
       tl.to(caps[2], { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(2)' }, 7.8)
       tl.to(caps[2], { opacity: 0, duration: 0.5 }, 9.6)
-      tl.to(wood, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, 9.6)
 
       const boil = { f: 0 }
       tl.fromTo(boil, { f: 0 }, { f: 80, duration: 11.2, ease: 'none', onUpdate: () => boilTo(scene, boil.f) }, 0)
@@ -242,7 +240,7 @@ export default function ChapterWorlds({
   }
 
   return (
-    <section id="chapter-worlds" ref={root} className="relative -mt-[100svh] h-[720vh]" style={DARK_PAPER}>
+    <section id="chapter-worlds" ref={root} className="relative -mt-[100svh] h-[720vh]" style={{ ...DARK_PAPER, clipPath: TORN_TOP }}>
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="pointer-events-none absolute inset-x-0 top-[10%] z-40 flex justify-center px-6 md:top-[9%]">
           <div className="relative h-20 w-full max-w-3xl text-center">
@@ -271,14 +269,6 @@ export default function ChapterWorlds({
           <div data-dark-card className="will-change-transform">
             <DinnerCard />
           </div>
-        </div>
-        <div
-          data-curtain-wood
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -top-9 -bottom-2 z-50 will-change-transform"
-          style={{ filter: 'drop-shadow(0 -8px 14px rgba(0,0,0,0.5))' }}
-        >
-          <div className="h-full w-full" style={{ ...WOOD, clipPath: TORN_TOP }} />
         </div>
       </div>
     </section>

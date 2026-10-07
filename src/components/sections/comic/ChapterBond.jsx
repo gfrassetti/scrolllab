@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
-import { DARK_PAPER, PAPER, SpeechBubble, TORN_TOP, TornCard, boilTo, hoverDepth } from './comicKit'
+import { PAPER, SpeechBubble, TORN_TOP, TornCard, boilTo, hoverDepth } from './comicKit'
 import { BathBg, BedroomBg, DogHead, PettingHand, PorchBg } from './StoryArt'
 
 const DIALOGUES = ['Dialogue 2 — replace.', 'Dialogue 3 — replace.', 'Dialogue 4 — replace.']
@@ -100,16 +100,14 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
       const pin = root.current.querySelector('[data-pin]')
       const cards = q('[data-home-card]')
       const leadEl = root.current.querySelector('[data-bond-lead]')
-      const dark = root.current.querySelector('[data-curtain-dark]')
 
       // the first card is already on its way up when the page arrives (no empty paper)
-      gsap.set(cards, { y: (i) => pin.clientHeight * (i ? 1.1 : 0.55), transformOrigin: '50% 50%' })
+      gsap.set(cards, { y: (i) => (i ? pin.clientHeight * 1.1 : 0), transformOrigin: '50% 50%' })
       cards.forEach((card) => {
         gsap.set(card.querySelector('[data-char]'), { y: () => -pin.clientHeight * 0.07 })
         gsap.set(card.querySelector('[data-bubble]'), { scale: 0.5, opacity: 0, transformOrigin: '50% 80%' })
       })
       gsap.set(leadEl, { opacity: 0, y: 20 })
-      gsap.set(dark, { yPercent: 106 })
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
@@ -139,7 +137,6 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
       })
       const END = (cards.length - 1) * 2.6 - 1 + 2.6
       tl.to(leadEl, { opacity: 0, duration: 0.5 }, END)
-      tl.to(dark, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, END)
 
       // the paper cuts and bubbles boil all the way, the dogs bob with the scroll
       const boil = { f: 0 }
@@ -180,7 +177,7 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
   }
 
   return (
-    <section id="chapter-bond" ref={root} className="relative -mt-[100svh] h-[660vh]" style={PAPER}>
+    <section id="chapter-bond" ref={root} className="relative -mt-[100svh] h-[660vh]" style={{ ...PAPER, clipPath: TORN_TOP }}>
       <div data-pin className="relative h-svh overflow-hidden">
         <p
           data-bond-lead
@@ -200,14 +197,6 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
             </div>
           </div>
         ))}
-        <div
-          data-curtain-dark
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -top-9 -bottom-2 z-50 will-change-transform"
-          style={{ filter: 'drop-shadow(0 -8px 14px rgba(0,0,0,0.5))' }}
-        >
-          <div className="h-full w-full" style={{ ...DARK_PAPER, clipPath: TORN_TOP }} />
-        </div>
       </div>
     </section>
   )

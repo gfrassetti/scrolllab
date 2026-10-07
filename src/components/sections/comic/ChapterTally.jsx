@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
-import { WOOD } from './comicKit'
+import { TORN_TOP, WOOD } from './comicKit'
 import { AnimalSketch, DogHead, PigHead, Postcard } from './StoryArt'
 
 // per-second rates are placeholders: swap in your own figures (and source them)
@@ -93,8 +93,8 @@ export default function ChapterTally({
   )
 
   return (
-    <section id="chapter-tally" ref={root} className="relative -mt-[100svh] overflow-hidden px-5 pt-[45svh] pb-24 text-white md:px-10 md:pt-[52svh]" style={WOOD}>
-      <div data-postcard data-tally-reveal className="absolute top-[38svh] right-[3%] w-[min(22vw,250px)] rotate-[8deg] drop-shadow-[0_18px_30px_rgba(0,0,0,0.4)] max-md:relative max-md:top-auto max-md:right-auto max-md:mx-auto max-md:mb-10 max-md:w-[60vw]">
+    <section id="chapter-tally" ref={root} className="relative -mt-[100svh] overflow-hidden px-5 pt-28 pb-24 text-white md:px-10 md:pt-36" style={{ ...WOOD, clipPath: TORN_TOP }}>
+      <div data-postcard data-tally-reveal className="absolute top-10 right-[3%] w-[min(22vw,250px)] rotate-[8deg] drop-shadow-[0_18px_30px_rgba(0,0,0,0.4)] max-md:relative max-md:top-auto max-md:right-auto max-md:mx-auto max-md:mb-10 max-md:w-[60vw]">
         <Postcard title={postcard} className="block h-auto w-full" />
       </div>
 
