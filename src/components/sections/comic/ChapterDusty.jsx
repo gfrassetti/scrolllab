@@ -542,6 +542,9 @@ export default function ChapterDusty({
         P,
       )
 
+      // the next chapter overlaps this one's last screen: hold the picture while it slides over
+      tl.to({}, { duration: 2.1 }, tl.duration())
+
       // The two cards answer the pointer (the finger on a phone): the scene and
       // the animals shift by different amounts, so the picture has depth.
       const pointer = trackPointer()
@@ -639,7 +642,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[1400vh] bg-[#1a1512] text-white"
+      className="relative h-[1500vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">

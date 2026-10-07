@@ -58,6 +58,9 @@ export default function ChapterFork({ captions = ['Caption 8 — replace with st
       tl.to(caption, { opacity: 0, y: -14, duration: 0.5 }, t - 0.4)
       tl.to(curtain, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, t)
       tl.to(shots[2], { yPercent: -10, duration: 1.6, ease: 'power2.out' }, t)
+
+      // the next chapter overlaps this one's last screen: hold the picture while it slides over
+      tl.to({}, { duration: 1.95 }, tl.duration())
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -80,7 +83,7 @@ export default function ChapterFork({ captions = ['Caption 8 — replace with st
   }
 
   return (
-    <section id="chapter-fork" ref={root} className="relative h-[520vh] bg-[#1a1512]">
+    <section id="chapter-fork" ref={root} className="relative -mt-[100svh] h-[620vh] bg-[#1a1512]">
       <div data-pin className="relative h-svh overflow-hidden">
         {SHOTS.map(({ Scene }, i) => (
           <div key={i} data-shot aria-hidden="true" className="absolute inset-0 will-change-transform">

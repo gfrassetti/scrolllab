@@ -159,6 +159,8 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
         0,
       )
 
+      tl.to({}, { duration: 1.83 }, tl.duration())
+
       return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 20]], { gsap, trackPointer })
     },
     { scope: root, dependencies: [reduced] },
@@ -178,7 +180,7 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
   }
 
   return (
-    <section id="chapter-bond" ref={root} className="relative h-[560vh]" style={PAPER}>
+    <section id="chapter-bond" ref={root} className="relative -mt-[100svh] h-[660vh]" style={PAPER}>
       <div data-pin className="relative h-svh overflow-hidden">
         <p
           data-bond-lead

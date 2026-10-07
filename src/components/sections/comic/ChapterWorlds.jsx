@@ -215,6 +215,8 @@ export default function ChapterWorlds({
       const boil = { f: 0 }
       tl.fromTo(boil, { f: 0 }, { f: 80, duration: 11.2, ease: 'none', onUpdate: () => boilTo(scene, boil.f) }, 0)
 
+      tl.to({}, { duration: 2.15 }, tl.duration())
+
       return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 18]], { gsap, trackPointer })
     },
     { scope: root, dependencies: [reduced] },
@@ -240,7 +242,7 @@ export default function ChapterWorlds({
   }
 
   return (
-    <section id="chapter-worlds" ref={root} className="relative h-[620vh]" style={DARK_PAPER}>
+    <section id="chapter-worlds" ref={root} className="relative -mt-[100svh] h-[720vh]" style={DARK_PAPER}>
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="pointer-events-none absolute inset-x-0 top-[10%] z-40 flex justify-center px-6 md:top-[9%]">
           <div className="relative h-20 w-full max-w-3xl text-center">
