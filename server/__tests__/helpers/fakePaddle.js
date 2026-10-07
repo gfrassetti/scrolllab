@@ -77,7 +77,9 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
     }
   }
 
-  function newTransaction({ items, custom_data, origin = 'api', subscription_id = null, status = 'ready', tax = 0 }) {
+  // Como Paddle real (verificado en sandbox): sin comprador ni dirección la
+  // transacción nace `draft`; el checkout le pide los datos y cobra.
+  function newTransaction({ items, custom_data, origin = 'api', subscription_id = null, status = 'draft', tax = 0 }) {
     const id = `txn_${String(++pd.seq).padStart(6, '0')}`
     const priced = items.map((i) => ({
       quantity: i.quantity || 1,
@@ -219,7 +221,7 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
   pd.pay = (txnId, { tax = 0 } = {}) => {
     const txn = pd.transactions.get(txnId)
     if (!txn) throw new Error(`fake Paddle: no existe ${txnId}`)
-    if (txn.status !== 'ready') throw new Error(`fake Paddle: ${txnId} está ${txn.status}`)
+    if (!['draft', 'ready'].includes(txn.status)) throw new Error(`fake Paddle: ${txnId} está ${txn.status}`)
     const now = nowIso()
     const customer = `ctm_${++pd.seq}`
     txn.customer_id = customer
@@ -270,7 +272,7 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
     return { txn, sub }
   }
 
-  /** La tarjeta se rechaza en el checkout: la transacción sigue `ready`. */
+  /** La tarjeta se rechaza en el checkout: la transacción sigue abierta. */
   pd.decline = (txnId) => {
     const txn = pd.transactions.get(txnId)
     txn.payments = [...(txn.payments || []), { status: 'error', error_code: 'declined', created_at: nowIso() }]

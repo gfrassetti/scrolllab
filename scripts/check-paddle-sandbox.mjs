@@ -107,10 +107,12 @@ async function main() {
     'template: custom_data vuelve intacto (orderId + kind)',
     chapters.saved.custom_data?.orderId === orderId && chapters.saved.custom_data?.kind === 'order',
   )
+  // Sin comprador ni dirección queda `draft`: el overlay le pide email y país
+  // (con ellos Paddle calcula el impuesto) y recién ahí se cobra.
   check(
-    'template: la transacción queda lista para pagar (ready) con su link de checkout',
-    chapters.saved.status === 'ready' && Boolean(chapters.saved.checkout?.url),
-    chapters.saved.checkout?.url || 'sin checkout.url: falta el default payment link en el panel',
+    'template: la transacción queda abierta para el checkout, con su link',
+    ['draft', 'ready'].includes(chapters.saved.status) && Boolean(chapters.saved.checkout?.url),
+    `${chapters.saved.status} · ${chapters.saved.checkout?.url || 'sin checkout.url: falta el default payment link en el panel'}`,
   )
   const tax = Number(chapters.saved.details?.totals?.tax ?? 0)
   check('template: Paddle calcula totales (impuestos según el país del comprador)', Number.isFinite(tax))
