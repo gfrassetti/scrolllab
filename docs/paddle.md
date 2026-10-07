@@ -168,16 +168,33 @@ el entorno (una key de sandbox en producción no arranca).
 
 ## Tests
 
+Tres redes, de la más rápida a la más real:
+
 - `npm test` corre todo contra un **Paddle simulado** en memoria
-  (`server/__tests__/helpers/fakePaddle.js`): transacciones, checkout pagado o
-  rechazado, suscripciones con prueba, renovación, cobro fallido, baja, cambio de
-  plan con prorrateo, reembolsos y webhooks firmados como los firma Paddle.
-- `npm run check:paddle-sandbox` habla con el **sandbox real** (solo con
-  `PADDLE_API_KEY` de sandbox): arma una transacción de template, una de builder
-  y una recurrente de LAB como lo hace la app, verifica montos, moneda,
-  `custom_data` y prueba, y las cancela. Imprime los pasos para el pago manual
-  con las tarjetas de prueba de Paddle (`4242 4242 4242 4242` aprobada; la de
-  rechazo y la de 3-D Secure están en la tabla «Test cards» de sus docs).
+  (`server/__tests__/helpers/fakePaddle.js`): compras, LAB con reloj simulado
+  (renovación, cuota rechazada, gracia, prorrateo al subir), firmas, rechazos y
+  reembolsos.
+- `npm run check:paddle-sandbox` arma transacciones contra el **sandbox real**
+  (template, cupón con centavos, composición de 30 secciones, alta de LAB con
+  prueba) y verifica montos, moneda, `custom_data` y cancelación.
+- `npm run check:paddle-e2e` es el recorrido completo en un **Chromium real**
+  contra el sandbox real, con la ventana de pago de Paddle y la tarjeta de
+  prueba (`4242 4242 4242 4242`): compra aprobada, tarjeta rechazada
+  (`4000 0000 0000 0002`) y reintento, compra cumplida solo por webhook, firma
+  falsa, reembolso, alta de LAB con 7 días de prueba, cambio de plan en las dos
+  direcciones, link de tarjeta, baja programada, baja hecha desde Paddle, y los
+  eventos repetidos (idempotencia). Los webhooks se prueban con la entidad
+  real que devuelve la API de Paddle (el `data` de un evento es esa misma
+  entidad) firmada con un secreto de prueba. `--only=lab,webhook` corre solo
+  algunos escenarios; `--headed` muestra el navegador.
+
+No se puede probar en sandbox (se confirma con la primera venta real):
+- la entrega HTTP de Paddle a una URL pública (mirar «Notifications» en el panel);
+- una renovación real o una cuota rechazada real (el sandbox no adelanta el
+  reloj); eso lo cubre la suite con el Paddle simulado;
+- que Paddle apruebe un reembolso: en sandbox queda `pending_approval` (lo
+  aprueba Paddle aparte), así que el chequeo usa ese payload real con la
+  aprobación simulada.
 
 ## Go-live
 

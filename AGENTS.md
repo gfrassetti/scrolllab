@@ -222,6 +222,7 @@ npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:paddle-sandbox # transacciones (template, cupón, builder, LAB con prueba) contra el sandbox real de Paddle
+npm run check:paddle-e2e # Paddle de punta a punta: Chromium + ventana de pago real del sandbox (compra, rechazo, webhook, reembolso, LAB, cambio de plan, baja)
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 npm run check:mobile   # cada sección de los 10 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
 npm run check:motion   # emulador de teléfono: gestos táctiles reales, CPU ×4, 10 templates + home, normal / reduce / forced (huecos, trabas, texto oculto)

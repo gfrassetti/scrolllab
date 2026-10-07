@@ -29,6 +29,7 @@
     "check:lab": "node scripts/check-lab.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
     "check:paddle-sandbox": "node scripts/check-paddle-sandbox.mjs",
+    "check:paddle-e2e": "node scripts/check-paddle-e2e.mjs",
     "analyze:ref": "node scripts/analyze-reference.mjs",
     "gen:brand": "node scripts/gen-brand-assets.mjs",
     "gen:og": "node scripts/gen-og-images.mjs",

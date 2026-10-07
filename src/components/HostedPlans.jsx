@@ -59,10 +59,11 @@ const planPrice = (p, cycle, currency) =>
       ? p.priceYearly
       : p.priceMonthly
 
-// Paddle tarda un instante en crear la suscripción después del pago: el sync
-// se reintenta unas veces antes de decir «todavía no la vemos».
-const PADDLE_SYNC_TRIES = 5
-const PADDLE_SYNC_WAIT_MS = 1500
+// Paddle tarda en crear la suscripción después del pago (unos segundos, a veces
+// más): el sync se reintenta ~30 s antes de decir «todavía no la vemos». Aunque
+// se agote, el webhook la activa igual.
+const PADDLE_SYNC_TRIES = 12
+const PADDLE_SYNC_WAIT_MS = 2500
 
 // El server manda `null` para "sin tope" (Infinity no es JSON) — ver
 // `quotaForWire` en server/app.js.
