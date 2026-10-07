@@ -9,10 +9,6 @@ import { useCart } from '../lib/cart'
 import { startCheckout } from '../lib/startCheckout'
 import { useAuth } from '../lib/auth'
 import {
-  CUSTOM_BASE_PRICE_USD,
-  CUSTOM_BASE_SECTIONS,
-  formatPriceFromUsd,
-  isComingSoonSku,
   templatePriceUsd,
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
@@ -86,13 +82,6 @@ export default function TemplatesIndex() {
     [t],
   )
 
-  const minTemplateUsd = useMemo(() => {
-    const prices = TEMPLATE_META.filter((m) => !isComingSoonSku(m.sku))
-      .map((m) => templatePriceUsd(m.sku))
-      .filter((n) => n != null)
-    return prices.length ? Math.min(...prices) : null
-  }, [])
-
   // Comparación de las 3 formas de usarlo. Copy hardcodeada en ES por ahora
   // (los locale files están en edición por otra sesión); mover a i18n después.
   const ways = [
@@ -105,10 +94,6 @@ export default function TemplatesIndex() {
         ['Te llevás', 'El código, en un ZIP'],
         ['Editás', 'Vos, el código'],
       ],
-      price:
-        minTemplateUsd != null
-          ? `desde ${formatPriceFromUsd(minTemplateUsd, currency, rate)}`
-          : '—',
       to: '#templates',
       cta: 'Ver templates',
     },
@@ -121,11 +106,6 @@ export default function TemplatesIndex() {
         ['Te llevás', 'El código, en un ZIP'],
         ['Editás', 'Vos, el código'],
       ],
-      price: `desde ${formatPriceFromUsd(
-        CUSTOM_BASE_PRICE_USD,
-        currency,
-        rate,
-      )} · ${CUSTOM_BASE_SECTIONS} incl.`,
       to: '/builder',
       cta: 'Abrir el builder',
     },
@@ -138,7 +118,6 @@ export default function TemplatesIndex() {
         ['Te llevás', 'Un <script>, sin bajar código'],
         ['Editás', 'Un panel, sin tocar código'],
       ],
-      price: 'Suscripción · 7 días gratis',
       to: '/lab',
       cta: 'Ver LAB',
     },

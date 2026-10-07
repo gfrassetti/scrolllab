@@ -1,55 +1,58 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import crypto from 'node:crypto'
-import { fileURLToPath } from 'node:url'
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Sin escritura atómica, dos procesos sobre el mismo JSON se pisan: cada suite
 // de tests que use STORE=file necesita su propio directorio.
 const DATA_DIR = path.resolve(
-  process.env.FILE_DB_DIR || path.join(__dirname, '..', 'storage', 'db'),
-)
+  process.env.FILE_DB_DIR || path.join(__dirname, "..", "storage", "db"),
+);
 
 function ensure() {
-  fs.mkdirSync(DATA_DIR, { recursive: true })
+  fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
 function read(name) {
-  ensure()
-  const p = path.join(DATA_DIR, `${name}.json`)
-  if (!fs.existsSync(p)) return []
-  return JSON.parse(fs.readFileSync(p, 'utf8'))
+  ensure();
+  const p = path.join(DATA_DIR, `${name}.json`);
+  if (!fs.existsSync(p)) return [];
+  return JSON.parse(fs.readFileSync(p, "utf8"));
 }
 
 function write(name, rows) {
-  ensure()
-  fs.writeFileSync(path.join(DATA_DIR, `${name}.json`), JSON.stringify(rows, null, 2))
+  ensure();
+  fs.writeFileSync(
+    path.join(DATA_DIR, `${name}.json`),
+    JSON.stringify(rows, null, 2),
+  );
 }
 
 function nid() {
-  return crypto.randomBytes(12).toString('hex')
+  return crypto.randomBytes(12).toString("hex");
 }
 
 /** Envuelve un row con `.save()` que reescribe su fila en `<name>.json`. */
 function withSaveDoc(name, row) {
-  if (!row) return null
-  const doc = { ...row }
+  if (!row) return null;
+  const doc = { ...row };
   doc.save = async function save() {
-    const rows = read(name)
-    const idx = rows.findIndex((o) => o.id === doc.id)
-    const { save: _ignored, ...rest } = doc
-    const next = { ...rest, updatedAt: new Date().toISOString() }
-    if (idx >= 0) rows[idx] = next
-    else rows.push(next)
-    write(name, rows)
-    Object.assign(doc, next)
-    return doc
-  }
-  return doc
+    const rows = read(name);
+    const idx = rows.findIndex((o) => o.id === doc.id);
+    const { save: _ignored, ...rest } = doc;
+    const next = { ...rest, updatedAt: new Date().toISOString() };
+    if (idx >= 0) rows[idx] = next;
+    else rows.push(next);
+    write(name, rows);
+    Object.assign(doc, next);
+    return doc;
+  };
+  return doc;
 }
 
 function withSave(order) {
-  return withSaveDoc('orders', order)
+  return withSaveDoc("orders", order);
 }
 
 /**
@@ -57,46 +60,47 @@ function withSave(order) {
  * Compartido por el listado y por el claim del mail (en Mongo es el filtro).
  */
 export function trialReminderDue(sub, nowMs, withinMs) {
-  if (!sub || sub.status !== 'authorized' || sub.canceledAt) return false
+  if (!sub || sub.status !== "authorized" || sub.canceledAt) return false;
   // `lastPaidAt`: ya se le cobró algo, así que no está en la prueba (mismo
   // criterio que el mail de bienvenida).
-  if (sub.trialReminderEmailSentAt || sub.lastPaidAt || !sub.trialEndsAt) return false
-  const end = new Date(sub.trialEndsAt).getTime()
-  return end > nowMs && end <= nowMs + withinMs
+  if (sub.trialReminderEmailSentAt || sub.lastPaidAt || !sub.trialEndsAt)
+    return false;
+  const end = new Date(sub.trialEndsAt).getTime();
+  return end > nowMs && end <= nowMs + withinMs;
 }
 
 export const fileDb = {
   async findUser(query) {
     return (
-      read('users').find((u) => {
-        if (query.email) return u.email === query.email
-        if (query.googleId) return u.googleId === query.googleId
-        return false
+      read("users").find((u) => {
+        if (query.email) return u.email === query.email;
+        if (query.googleId) return u.googleId === query.googleId;
+        return false;
       }) || null
-    )
+    );
   },
   async findUserById(id) {
-    return read('users').find((u) => u.id === String(id)) || null
+    return read("users").find((u) => u.id === String(id)) || null;
   },
   async createUser(data) {
-    const rows = read('users')
-    const user = { id: nid(), ...data, createdAt: new Date().toISOString() }
-    rows.push(user)
-    write('users', rows)
-    return user
+    const rows = read("users");
+    const user = { id: nid(), ...data, createdAt: new Date().toISOString() };
+    rows.push(user);
+    write("users", rows);
+    return user;
   },
   async updateUser(user) {
-    const rows = read('users')
-    const idx = rows.findIndex((u) => u.id === user.id)
+    const rows = read("users");
+    const idx = rows.findIndex((u) => u.id === user.id);
     if (idx >= 0) {
-      rows[idx] = { ...rows[idx], ...user }
-      write('users', rows)
-      return rows[idx]
+      rows[idx] = { ...rows[idx], ...user };
+      write("users", rows);
+      return rows[idx];
     }
-    return user
+    return user;
   },
   async createOrder(data) {
-    const rows = read('orders')
+    const rows = read("orders");
     const order = {
       id: nid(),
       ...data,
@@ -105,272 +109,293 @@ export const fileDb = {
       downloads: data.downloads || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }
-    rows.push(order)
-    write('orders', rows)
-    return withSave(order)
+    };
+    rows.push(order);
+    write("orders", rows);
+    return withSave(order);
   },
   async findOrderById(id) {
-    return withSave(read('orders').find((o) => o.id === String(id)) || null)
+    return withSave(read("orders").find((o) => o.id === String(id)) || null);
   },
   async findOrderByPaddleTransaction(transactionId) {
     return withSave(
-      read('orders').find((o) => o.paddleTransactionId === String(transactionId)) ||
-        null,
-    )
+      read("orders").find(
+        (o) => o.paddleTransactionId === String(transactionId),
+      ) || null,
+    );
   },
   async deletePendingOrder(orderId) {
-    const rows = read('orders')
-    const idx = rows.findIndex((o) => o.id === String(orderId) && o.status === 'pending')
-    if (idx < 0) return false
-    rows.splice(idx, 1)
-    write('orders', rows)
-    return true
+    const rows = read("orders");
+    const idx = rows.findIndex(
+      (o) => o.id === String(orderId) && o.status === "pending",
+    );
+    if (idx < 0) return false;
+    rows.splice(idx, 1);
+    write("orders", rows);
+    return true;
   },
   async listFailedOrdersDue({ before }) {
-    const cut = new Date(before).getTime()
-    return read('orders')
+    const cut = new Date(before).getTime();
+    return read("orders")
       .filter(
         (o) =>
-          o.status === 'pending' &&
+          o.status === "pending" &&
           o.paymentFailedAt &&
           new Date(o.paymentFailedAt).getTime() <= cut &&
           !o.failedEmailSentAt,
       )
-      .map(withSave)
+      .map(withSave);
   },
   async findOrdersByUser(userId) {
-    return read('orders')
+    return read("orders")
       .filter((o) => String(o.userId) === String(userId))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .map(withSave)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .map(withSave);
   },
 
   async createHostedInstance(data) {
-    const rows = read('hosted')
-    const now = new Date().toISOString()
+    const rows = read("hosted");
+    const now = new Date().toISOString();
     const inst = {
       id: nid(),
-      status: 'draft',
+      status: "draft",
       domains: [],
       ...data,
       userId: String(data.userId),
       createdAt: now,
       updatedAt: now,
-    }
-    rows.push(inst)
-    write('hosted', rows)
-    return withSaveDoc('hosted', inst)
+    };
+    rows.push(inst);
+    write("hosted", rows);
+    return withSaveDoc("hosted", inst);
   },
   async findHostedInstanceById(id) {
     return withSaveDoc(
-      'hosted',
-      read('hosted').find((h) => h.id === String(id)) || null,
-    )
+      "hosted",
+      read("hosted").find((h) => h.id === String(id)) || null,
+    );
   },
   async findHostedInstanceByKey(key) {
     return withSaveDoc(
-      'hosted',
-      read('hosted').find((h) => h.key === String(key)) || null,
-    )
+      "hosted",
+      read("hosted").find((h) => h.key === String(key)) || null,
+    );
   },
   async findHostedInstancesByUser(userId) {
-    return read('hosted')
+    return read("hosted")
       .filter((h) => String(h.userId) === String(userId))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .map((h) => withSaveDoc('hosted', h))
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .map((h) => withSaveDoc("hosted", h));
   },
   async deleteHostedInstance(id) {
-    const rows = read('hosted')
-    const idx = rows.findIndex((h) => h.id === String(id))
-    if (idx < 0) return false
-    rows.splice(idx, 1)
-    write('hosted', rows)
-    return true
+    const rows = read("hosted");
+    const idx = rows.findIndex((h) => h.id === String(id));
+    if (idx < 0) return false;
+    rows.splice(idx, 1);
+    write("hosted", rows);
+    return true;
   },
   async countPublishedHosted(userId, exceptId) {
-    return read('hosted').filter(
+    return read("hosted").filter(
       (h) =>
         String(h.userId) === String(userId) &&
-        h.status === 'published' &&
+        h.status === "published" &&
         h.id !== String(exceptId),
-    ).length
+    ).length;
   },
   async countPublishedHostedCreatedBefore(userId, createdAt, exceptId) {
-    const t = new Date(createdAt).getTime()
-    const eid = String(exceptId)
+    const t = new Date(createdAt).getTime();
+    const eid = String(exceptId);
     // Desempate por id cuando el createdAt coincide al ms — así el orden es
     // total y determinista (si no, dos instancias del mismo ms no se cuentan
     // entre sí y ambas quedarían "dentro de cuota").
-    return read('hosted').filter((h) => {
-      if (String(h.userId) !== String(userId)) return false
-      if (h.status !== 'published') return false
-      if (h.id === eid) return false
-      const ht = new Date(h.createdAt).getTime()
-      return ht < t || (ht === t && String(h.id) < eid)
-    }).length
+    return read("hosted").filter((h) => {
+      if (String(h.userId) !== String(userId)) return false;
+      if (h.status !== "published") return false;
+      if (h.id === eid) return false;
+      const ht = new Date(h.createdAt).getTime();
+      return ht < t || (ht === t && String(h.id) < eid);
+    }).length;
   },
 
   async createSubscription(data) {
-    const rows = read('subscriptions')
-    const now = new Date().toISOString()
+    const rows = read("subscriptions");
+    const now = new Date().toISOString();
     const sub = {
       id: nid(),
-      status: 'pending',
+      status: "pending",
       ...data,
       userId: String(data.userId),
       createdAt: now,
       updatedAt: now,
-    }
-    rows.push(sub)
-    write('subscriptions', rows)
-    return withSaveDoc('subscriptions', sub)
+    };
+    rows.push(sub);
+    write("subscriptions", rows);
+    return withSaveDoc("subscriptions", sub);
   },
   async findSubscriptionById(id) {
     return withSaveDoc(
-      'subscriptions',
-      read('subscriptions').find((s) => s.id === String(id)) || null,
-    )
+      "subscriptions",
+      read("subscriptions").find((s) => s.id === String(id)) || null,
+    );
   },
   async findSubscriptionByPreapproval(preapprovalId) {
     return withSaveDoc(
-      'subscriptions',
-      read('subscriptions').find(
+      "subscriptions",
+      read("subscriptions").find(
         (s) => s.mpPreapprovalId === String(preapprovalId),
       ) || null,
-    )
+    );
   },
   async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
-    const rows = read('subscriptions')
+    const rows = read("subscriptions");
     const row =
       (subscriptionId &&
         rows.find((s) => s.paddleSubscriptionId === String(subscriptionId))) ||
       (transactionId &&
         rows.find((s) => s.paddleTransactionId === String(transactionId))) ||
-      null
-    return withSaveDoc('subscriptions', row)
+      null;
+    return withSaveDoc("subscriptions", row);
   },
   async findActiveSubscriptionByUser(userId) {
     return (
-      read('subscriptions')
+      read("subscriptions")
         .filter(
           (s) =>
             String(s.userId) === String(userId) &&
-            (s.status === 'authorized' || s.status === 'paused'),
+            (s.status === "authorized" || s.status === "paused"),
         )
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .map((s) => withSaveDoc('subscriptions', s))[0] || null
-    )
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .map((s) => withSaveDoc("subscriptions", s))[0] || null
+    );
   },
   async findSubscriptionsByUser(userId) {
-    return read('subscriptions')
+    return read("subscriptions")
       .filter((s) => String(s.userId) === String(userId))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .map((s) => withSaveDoc('subscriptions', s))
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .map((s) => withSaveDoc("subscriptions", s));
   },
   async listCheckoutFailuresDue({ before }) {
-    const cut = new Date(before).getTime()
-    return read('subscriptions')
+    const cut = new Date(before).getTime();
+    return read("subscriptions")
       .filter(
         (s) =>
-          s.status === 'pending' &&
+          s.status === "pending" &&
           !s.abandonedAt &&
           s.paymentFailedAt &&
           new Date(s.paymentFailedAt).getTime() <= cut &&
           !s.paymentFailedEmailSentAt,
       )
-      .map((s) => withSaveDoc('subscriptions', s))
+      .map((s) => withSaveDoc("subscriptions", s));
   },
   async listTrialReminderCandidates({ now, withinMs }) {
-    return read('subscriptions')
+    return read("subscriptions")
       .filter((s) => trialReminderDue(s, now.getTime(), withinMs))
-      .map((s) => withSaveDoc('subscriptions', s))
+      .map((s) => withSaveDoc("subscriptions", s));
   },
   async deleteSubscription(id) {
-    const rows = read('subscriptions')
-    const idx = rows.findIndex((s) => s.id === String(id))
-    if (idx < 0) return false
-    rows.splice(idx, 1)
-    write('subscriptions', rows)
-    return true
+    const rows = read("subscriptions");
+    const idx = rows.findIndex((s) => s.id === String(id));
+    if (idx < 0) return false;
+    rows.splice(idx, 1);
+    write("subscriptions", rows);
+    return true;
   },
 
   // Analítica propia: un evento por línea (NDJSON), solo se agrega al final.
   async addEvents(rows) {
-    if (!rows.length) return
-    ensure()
+    if (!rows.length) return;
+    ensure();
     fs.appendFileSync(
-      path.join(DATA_DIR, 'events.ndjson'),
-      rows.map((r) => JSON.stringify(r)).join('\n') + '\n',
-    )
+      path.join(DATA_DIR, "events.ndjson"),
+      rows.map((r) => JSON.stringify(r)).join("\n") + "\n",
+    );
   },
   /** @param {{ since?: Date | string | number }} [options] */
   async listEvents({ since } = {}) {
-    const p = path.join(DATA_DIR, 'events.ndjson')
-    if (!fs.existsSync(p)) return []
-    const t = since ? new Date(since).getTime() : 0
+    const p = path.join(DATA_DIR, "events.ndjson");
+    if (!fs.existsSync(p)) return [];
+    const t = since ? new Date(since).getTime() : 0;
     return fs
-      .readFileSync(p, 'utf8')
-      .split('\n')
+      .readFileSync(p, "utf8")
+      .split("\n")
       .filter(Boolean)
       .map((line) => {
         try {
-          return JSON.parse(line)
+          return JSON.parse(line);
         } catch {
-          return null
+          return null;
         }
       })
-      .filter((e) => e && new Date(e.createdAt).getTime() >= t)
+      .filter((e) => e && new Date(e.createdAt).getTime() >= t);
   },
   async listUsers() {
-    return read('users')
+    return read("users");
   },
   async listOrders() {
-    return read('orders')
+    return read("orders");
   },
 
   // Leads (cupón de bienvenida). Alta idempotente por email.
   async upsertLead(data) {
-    const rows = read('leads')
-    const email = String(data.email).toLowerCase()
-    const found = rows.find((l) => l.email === email)
-    if (found) return { lead: withSaveDoc('leads', found), created: false }
-    const now = new Date().toISOString()
+    const rows = read("leads");
+    const email = String(data.email).toLowerCase();
+    const found = rows.find((l) => l.email === email);
+    if (found) return { lead: withSaveDoc("leads", found), created: false };
+    const now = new Date().toISOString();
     const lead = {
       id: nid(),
-      source: 'home',
-      locale: 'es',
+      source: "home",
+      locale: "es",
       ...data,
       email,
       consentAt: now,
       createdAt: now,
       updatedAt: now,
-    }
-    rows.push(lead)
-    write('leads', rows)
-    return { lead: withSaveDoc('leads', lead), created: true }
+    };
+    rows.push(lead);
+    write("leads", rows);
+    return { lead: withSaveDoc("leads", lead), created: true };
   },
   async listLeads({ unsyncedOnly = false } = {}) {
-    return read('leads')
+    return read("leads")
       .filter((l) => !unsyncedOnly || !l.crmSyncedAt)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-      .map((l) => withSaveDoc('leads', l))
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      )
+      .map((l) => withSaveDoc("leads", l));
   },
   async findLeadByCoupon(code) {
-    return withSaveDoc('leads', read('leads').find((l) => l.couponCode === code) || null)
+    return withSaveDoc(
+      "leads",
+      read("leads").find((l) => l.couponCode === code) || null,
+    );
   },
   // Canje en una sola escritura: gana el primero; repetir con la misma orden es ok.
   async redeemCoupon({ code, orderId }) {
-    const rows = read('leads')
-    const lead = rows.find((l) => l.couponCode === code)
-    if (!lead) return { redeemed: false }
+    const rows = read("leads");
+    const lead = rows.find((l) => l.couponCode === code);
+    if (!lead) return { redeemed: false };
     if (lead.couponRedeemedAt) {
-      return { redeemed: String(lead.couponOrderId) === String(orderId) }
+      return { redeemed: String(lead.couponOrderId) === String(orderId) };
     }
-    lead.couponRedeemedAt = new Date().toISOString()
-    lead.couponOrderId = String(orderId)
-    lead.updatedAt = lead.couponRedeemedAt
-    write('leads', rows)
-    return { redeemed: true }
+    lead.couponRedeemedAt = new Date().toISOString();
+    lead.couponOrderId = String(orderId);
+    lead.updatedAt = lead.couponRedeemedAt;
+    write("leads", rows);
+    return { redeemed: true };
   },
-}
+};

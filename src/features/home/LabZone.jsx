@@ -109,9 +109,6 @@ export default function LabZone({ t, ways }) {
                     </div>
                   ))}
                 </dl>
-                <p className="mt-5 inline-flex w-fit items-center border border-accent/40 bg-accent/10 px-3 py-1.5 text-body-sm font-medium tracking-[-0.02em] text-accent">
-                  {w.price}
-                </p>
               </>
             )
             return isHash ? (
