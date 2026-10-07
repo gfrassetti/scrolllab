@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
@@ -174,6 +174,25 @@ export default function ChapterDusty({
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
+  // The timeline is built from measurements (where the squares sit, where the
+  // truck's hood meets them, the farm road). When the width changes — a phone
+  // turning, a window resized — rebuild it. Height alone (a phone's toolbar
+  // hiding) doesn't count.
+  const [width, setWidth] = useState(() => (typeof window === 'undefined' ? 0 : window.innerWidth))
+  useEffect(() => {
+    let timer = 0
+    const onResize = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        setWidth((w) => (Math.abs(window.innerWidth - w) > 40 ? window.innerWidth : w))
+      }, 250)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
 
   useGSAP(
     () => {
@@ -618,7 +637,7 @@ export default function ChapterDusty({
         pointer.dispose?.()
       }
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, width], revertOnUpdate: true },
   )
 
   if (reduced) {
