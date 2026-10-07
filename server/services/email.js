@@ -9,6 +9,11 @@ import {
   buildSubscriptionTrialReminder,
   buildCouponEmail,
 } from './emailTemplates.js'
+import {
+  buildOrderPaymentFailed,
+  buildSubscriptionCharge,
+  buildSubscriptionPaymentFailed,
+} from './emailTemplatesBilling.js'
 
 // Los mails se arman en emailTemplates.js; quien los necesita sin enviar
 // (tests, vista previa) los sigue importando de acá.
@@ -19,6 +24,9 @@ export {
   buildSubscriptionCanceled,
   buildSubscriptionTrialReminder,
   buildCouponEmail,
+  buildOrderPaymentFailed,
+  buildSubscriptionCharge,
+  buildSubscriptionPaymentFailed,
 }
 
 /**
@@ -71,6 +79,55 @@ export async function sendOrderReceiptOnce({ order, user, config, client }) {
   }
 }
 
+/**
+ * «Pago rechazado» de una compra (Mercado Pago o Paddle): uno por orden, y
+ * solo si la orden sigue pendiente (un reintento que pagó ya no lo manda). El
+ * botón lleva al carrito, que sigue armado.
+ * @param {{ order: any, config: any, client?: any }} args
+ */
+export async function sendOrderPaymentFailedOnce({ order, config, client }) {
+  if (!config.email.enabled) return { skipped: 'disabled' }
+
+  const orderId = String(db.uid(order) || order.id)
+  const claimed = await db.claimFailedEmail(orderId)
+  if (!claimed) return { skipped: 'already-sent-or-not-pending' }
+
+  const user = await db.findUserById(String(claimed.userId))
+  if (!user?.email) {
+    await db.releaseFailedEmail(orderId, 'usuario sin email')
+    return { skipped: 'no-user-email' }
+  }
+
+  const retryUrl = new URL('/cart', config.clientUrl).toString()
+  const logoUrl =
+    config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
+  const message = buildOrderPaymentFailed({ order: claimed, user, retryUrl, logoUrl })
+  const resend = client || new Resend(config.email.apiKey)
+
+  try {
+    const response = await resend.emails.send(
+      {
+        from: config.email.from,
+        to: [user.email],
+        replyTo: config.email.replyTo || undefined,
+        subject: message.subject,
+        html: message.html,
+        text: message.text,
+        tags: [{ name: 'type', value: 'order_payment_failed' }],
+      },
+      { idempotencyKey: `scrolllab-order-failed-${orderId}` },
+    )
+    if (response.error) {
+      throw new Error(response.error.message || 'Resend rechazó el correo')
+    }
+    await db.completeFailedEmail(orderId, response.data?.id || null)
+    return { sent: true, id: response.data?.id || null }
+  } catch (err) {
+    await db.releaseFailedEmail(orderId, err.message)
+    throw err
+  }
+}
+
 const SUB_EMAIL = {
   welcome: {
     build: buildSubscriptionWelcome,
@@ -87,6 +144,17 @@ const SUB_EMAIL = {
     tag: 'subscription_trial_reminder',
     idPrefix: 'scrolllab-sub-trial-reminder',
   },
+  // Por evento (uno por cobro): el `ref` entra en la clave de idempotencia.
+  charge: {
+    build: buildSubscriptionCharge,
+    tag: 'subscription_charge',
+    idPrefix: 'scrolllab-sub-charge',
+  },
+  paymentFailed: {
+    build: buildSubscriptionPaymentFailed,
+    tag: 'subscription_payment_failed',
+    idPrefix: 'scrolllab-sub-payment-failed',
+  },
 }
 
 /**
@@ -95,7 +163,9 @@ const SUB_EMAIL = {
  * claim en DB + Idempotency-Key de Resend. Fire-and-forget desde los paths que
  * disparan (webhook / sync / cancel route); el aviso sale del barrido de
  * services/trialReminders.js, que pasa `withinMs` (el plazo) y `now`.
- * @param {{ kind: string, subscription: any, config: any, client?: any, withinMs?: number, now?: Date }} args
+ * `charge` / `paymentFailed` son uno por cobro: `ref` identifica el cobro y
+ * `extra` lleva sus datos al armado del mail.
+ * @param {{ kind: string, subscription: any, config: any, client?: any, withinMs?: number, now?: Date, ref?: string, extra?: Record<string, any> }} args
  */
 async function sendSubscriptionEmailOnce({
   kind,
@@ -104,12 +174,14 @@ async function sendSubscriptionEmailOnce({
   client,
   withinMs,
   now,
+  ref,
+  extra = {},
 }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
   const spec = SUB_EMAIL[kind]
 
   const subId = String(db.uid(subscription) || subscription.id)
-  const claimed = await db.claimSubscriptionEmail(subId, kind, { withinMs, now })
+  const claimed = await db.claimSubscriptionEmail(subId, kind, { withinMs, now, ref })
   if (!claimed) return { skipped: 'already-sent-or-not-applicable' }
 
   const user = await db.findUserById(String(claimed.userId))
@@ -121,7 +193,7 @@ async function sendSubscriptionEmailOnce({
   const accountUrl = new URL('/lab', config.clientUrl).toString()
   const logoUrl =
     config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
-  const message = spec.build({ subscription: claimed, user, accountUrl, logoUrl })
+  const message = spec.build({ subscription: claimed, user, accountUrl, logoUrl, ...extra })
 
   const resend = client || new Resend(config.email.apiKey)
   try {
@@ -135,7 +207,7 @@ async function sendSubscriptionEmailOnce({
         text: message.text,
         tags: [{ name: 'type', value: spec.tag }],
       },
-      { idempotencyKey: `${spec.idPrefix}-${subId}` },
+      { idempotencyKey: ref ? `${spec.idPrefix}-${subId}-${ref}` : `${spec.idPrefix}-${subId}` },
     )
     if (response.error) {
       throw new Error(response.error.message || 'Resend rechazó el correo')
@@ -185,6 +257,44 @@ export function sendSubscriptionTrialReminderOnce({
     client,
     withinMs,
     now,
+  })
+}
+
+/**
+ * Cuota de LAB cobrada (MP o Paddle). Una por cobro (`ref`).
+ * @param {{ subscription: any, config: any, ref: string, charge?: { amount?: number | null, currency?: string, paidAt?: any, periodEnd?: any }, client?: any }} args
+ */
+export function sendSubscriptionChargeOnce({ subscription, config, ref, charge, client }) {
+  return sendSubscriptionEmailOnce({
+    kind: 'charge',
+    subscription,
+    config,
+    client,
+    ref,
+    extra: { charge },
+  })
+}
+
+/**
+ * Cobro de LAB rechazado (MP o Paddle). Uno por cobro (`ref`).
+ * @param {{ subscription: any, config: any, ref: string, stage?: 'renewal' | 'checkout', updateUrl?: string | null, graceEndsAt?: any, client?: any }} args
+ */
+export function sendSubscriptionPaymentFailedOnce({
+  subscription,
+  config,
+  ref,
+  stage = 'renewal',
+  updateUrl = null,
+  graceEndsAt = null,
+  client,
+}) {
+  return sendSubscriptionEmailOnce({
+    kind: 'paymentFailed',
+    subscription,
+    config,
+    client,
+    ref,
+    extra: { stage, updateUrl, graceEndsAt },
   })
 }
 

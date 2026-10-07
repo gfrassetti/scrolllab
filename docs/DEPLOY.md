@@ -146,6 +146,26 @@ En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
 
 Sin `MP_WEBHOOK_SECRET` + token de prod, el boot en producción **falla** a propósito.
 
+## Paddle — cobro internacional (USD)
+
+Afuera de Argentina cobra Paddle, en USD y como merchant of record (factura y
+liquida el IVA / sales tax de cada país). Setup del panel, eventos del webhook,
+flujos y tests en [`paddle.md`](paddle.md). En Railway:
+
+```
+PADDLE_ENV=production
+PADDLE_API_KEY=pdl_live_apikey_...
+PADDLE_CLIENT_TOKEN=live_...
+PADDLE_WEBHOOK_SECRET=...      # notification destination → /api/webhooks/paddle
+```
+
+Sin `PADDLE_API_KEY` Paddle queda apagado (todo por Mercado Pago). Con la key
+puesta, el boot de producción **falla** si falta el token o el secreto, si
+`PADDLE_ENV` no es `production` o si la key / el token son de sandbox. El
+default payment link del panel es `https://www.scrolllab.com.ar/checkout/pay`.
+Antes de prender producción: `npm run check:paddle-sandbox` con la key de
+sandbox, y una compra real chica + su reembolso desde el panel.
+
 ## Precios en USD, cobro en pesos
 
 Mercado Pago Argentina **siempre procesa en moneda local**. Mandar

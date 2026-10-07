@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import ProductThumbnail from './ProductThumbnail'
 import OrderStatus from './OrderStatus'
 import { itemPreviewHref } from '../lib/orderPreview'
+import { formatAmount } from '../lib/pricing'
 import { useI18n } from '../i18n'
 
 /**
@@ -91,7 +92,7 @@ export default function PurchaseSuccessModal({
                   <p className="truncate font-medium">{item.title}</p>
                   {item.unit_price != null && (
                     <p className="mt-1 text-sm text-ink/60">
-                      {Number(item.unit_price).toLocaleString(numberLocale)}{' '}
+                      {formatAmount(item.unit_price, numberLocale)}{' '}
                       {item.currency_id || order.currency_id || 'ARS'}
                     </p>
                   )}
@@ -115,7 +116,7 @@ export default function PurchaseSuccessModal({
           <p className="mt-4 text-sm">
             {t('common.estimatedTotal')}:{' '}
             <strong>
-              {Number(order.total).toLocaleString(numberLocale)}{' '}
+              {formatAmount(order.total, numberLocale)}{' '}
               {order.currency_id || 'ARS'}
             </strong>
           </p>

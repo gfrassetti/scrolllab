@@ -1,5 +1,12 @@
 import { db } from '../db.js'
-import { HOSTED_PLANS, hostedPlanPrice } from '../catalog.js'
+import { HOSTED_PLANS, hostedPlanPriceIn } from '../catalog.js'
+import {
+  buildOrderReceiptEn,
+  buildSubscriptionWelcomeEn,
+  buildSubscriptionCanceledEn,
+  buildSubscriptionTrialReminderEn,
+  paddleInvoiceNote,
+} from './emailTemplatesBilling.js'
 
 /**
  * Contenido de los mails (asunto, HTML y texto): funciones puras de datos →
@@ -17,11 +24,22 @@ export function escapeHtml(value) {
 }
 
 export function formatMoney(value, currency = 'ARS') {
+  const n = Number(value || 0)
+  // USD (Paddle) puede traer centavos de un cupón; ARS se redondea al peso.
+  const usd = currency === 'USD'
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency,
-    maximumFractionDigits: 0,
-  }).format(Number(value || 0))
+    minimumFractionDigits: usd && !Number.isInteger(n) ? 2 : 0,
+    maximumFractionDigits: usd ? 2 : 0,
+  }).format(n)
+}
+
+/** Precio del plan de una suscripción, en su moneda (ARS en MP, USD en Paddle). */
+function subscriptionPriceLabel(subscription) {
+  const currency = subscription.currency_id || 'ARS'
+  const price = hostedPlanPriceIn(subscription.plan, subscription.cycle, currency)
+  return price != null ? formatMoney(price, currency) : null
 }
 
 export function formatDateTime(value) {
@@ -35,7 +53,12 @@ export function formatDateTime(value) {
 }
 
 export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
+  if (order.locale === 'en') {
+    return buildOrderReceiptEn({ order, user, accountUrl, logoUrl })
+  }
   const orderId = String(db.uid(order) || order.id)
+  // Paddle es el vendedor legal (merchant of record): la factura la manda él.
+  const invoiceNote = order.provider === 'paddle' ? ` ${paddleInvoiceNote('es')}` : ''
   const buyerName = user.name || user.email
   const itemRows = (order.items || [])
     .map(
@@ -109,7 +132,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
             </tr>
             <tr>
               <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
-                Este correo es el detalle de tu compra y no reemplaza una factura fiscal.
+                Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${escapeHtml(invoiceNote)}
                 Si necesitás ayuda, respondé a este email.
               </td>
             </tr>
@@ -139,7 +162,7 @@ Total: ${formatMoney(order.total, order.currency_id)}
 Ingresá y descargá tu ZIP desde:
 ${accountUrl}
 
-Este correo es el detalle de tu compra y no reemplaza una factura fiscal.`
+Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${invoiceNote}`
 
   return {
     subject: `Tu compra en SCROLLLAB · Orden ${orderId.slice(-8)}`,
@@ -270,11 +293,13 @@ export function buildSubscriptionWelcome({
   accountUrl,
   logoUrl,
 }) {
+  if (subscription.locale === 'en') {
+    return buildSubscriptionWelcomeEn({ subscription, user, accountUrl, logoUrl })
+  }
   const plan = HOSTED_PLANS[subscription.plan] || {}
   const tier = TIER_LABEL[plan.tier] || subscription.plan
   const cycle = subscription.cycle === 'yearly' ? 'anual' : 'mensual'
-  const price = hostedPlanPrice(subscription.plan, subscription.cycle)
-  const priceLabel = price != null ? formatMoney(price, 'ARS') : null
+  const priceLabel = subscriptionPriceLabel(subscription)
   const quota = Number.isFinite(plan.instanceQuota)
     ? `${plan.instanceQuota} secciones publicadas`
     : 'secciones publicadas sin tope'
@@ -389,6 +414,9 @@ export function buildSubscriptionCanceled({
   accountUrl,
   logoUrl,
 }) {
+  if (subscription.locale === 'en') {
+    return buildSubscriptionCanceledEn({ subscription, user, accountUrl, logoUrl })
+  }
   const plan = HOSTED_PLANS[subscription.plan] || {}
   const tier = TIER_LABEL[plan.tier] || subscription.plan
   // `cancelled` en el acto = no quedaban días pagos (p. ej. una renovación
@@ -507,12 +535,14 @@ export function buildSubscriptionTrialReminder({
   accountUrl,
   logoUrl,
 }) {
+  if (subscription.locale === 'en') {
+    return buildSubscriptionTrialReminderEn({ subscription, user, accountUrl, logoUrl })
+  }
   const plan = HOSTED_PLANS[subscription.plan] || {}
   const tier = TIER_LABEL[plan.tier] || subscription.plan
   const cycle = subscription.cycle === 'yearly' ? 'anual' : 'mensual'
   const per = cycle === 'anual' ? 'año' : 'mes'
-  const price = hostedPlanPrice(subscription.plan, subscription.cycle)
-  const priceLabel = price != null ? formatMoney(price, 'ARS') : null
+  const priceLabel = subscriptionPriceLabel(subscription)
   const chargeDate = formatDateOnly(subscription.trialEndsAt)
   const when = chargeDate ? `el ${chargeDate}` : 'pronto'
   const amount = priceLabel ? `el primer pago de ${priceLabel}` : 'el primer pago'

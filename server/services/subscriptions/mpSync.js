@@ -12,6 +12,8 @@ import {
   isMock,
   fireWelcome,
   fireCanceled,
+  fireCharge,
+  firePaymentFailed,
   addBillingCycle,
 } from './billing.js'
 
@@ -37,7 +39,7 @@ function mapMpStatus(mpStatus) {
   }
 }
 
-function markActivated(sub) {
+export function markActivated(sub) {
   sub.status = 'authorized'
   if (!sub.activatedAt) sub.activatedAt = new Date()
   if (sub.abandonedAt) sub.abandonedAt = undefined
@@ -48,7 +50,7 @@ function markActivated(sub) {
  * vigentes por días ya pagados (canceladas) se cierran: la nueva cubre ese
  * período (el primer cobro es cuando terminaba la vieja).
  */
-async function closeSupersededSubscriptions(sub) {
+export async function closeSupersededSubscriptions(sub) {
   const id = subId(sub)
   const created = toMs(sub.createdAt) ?? Date.now()
   for (const other of await db.findSubscriptionsByUser(sub.userId)) {
@@ -61,13 +63,13 @@ async function closeSupersededSubscriptions(sub) {
     } else {
       console.error(
         `subs DOBLE SUSCRIPCIÓN user=${sub.userId} nueva=${id} previa=${subId(other)} ` +
-          `preapproval=${other.mpPreapprovalId || '-'} — revisar y dar de baja una`,
+          `ref=${other.mpPreapprovalId || other.paddleSubscriptionId || '-'} — revisar y dar de baja una`,
       )
     }
   }
 }
 
-async function hasOtherActiveSubscription(sub) {
+export async function hasOtherActiveSubscription(sub) {
   const other = await db.findActiveSubscriptionByUser(sub.userId)
   return !!other && subId(other) !== subId(sub)
 }
@@ -218,6 +220,7 @@ export async function handleAuthorizedPaymentEvent(
       payStatus === 'rejected' ||
       payStatus === 'cancelled')
   let activated = false
+  const firstCharge = !sub.lastPaidAt
 
   if (approved) {
     warnIfSuspiciousAmount(ap, sub)
@@ -259,6 +262,18 @@ export async function handleAuthorizedPaymentEvent(
   if (approved || failed) await sub.save()
   if (activated) await closeSupersededSubscriptions(sub)
   fireWelcome(sub, config)
+  if (approved) {
+    const amount = Number(ap?.payment?.transaction_amount ?? ap?.transaction_amount)
+    fireCharge(sub, config, {
+      ref: `mp-${authorizedPaymentId}`,
+      firstCharge,
+      amount: Number.isFinite(amount) ? amount : null,
+      currency: sub.currency_id || 'ARS',
+      paidAt: ap.debit_date || new Date(),
+    })
+  } else if (failed) {
+    firePaymentFailed(sub, config, { ref: `mp-${authorizedPaymentId}` })
+  }
   return {
     status: sub.status,
     currentPeriodEnd: sub.currentPeriodEnd || null,

@@ -12,6 +12,8 @@ import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
+import PaymentRegionPicker from '../components/PaymentRegionPicker'
+import { usePayRegion, providerForRegion } from '../lib/payRegion'
 
 /**
  * Cuando el servidor rechaza el cupón al pagar: status de la API → texto (el
@@ -38,7 +40,19 @@ export default function CartPage() {
   const navigate = useNavigate()
   const { rate } = useFxRate()
   const { t, locale } = useI18n()
-  const showUsd = locale === 'en'
+  // Con Paddle, la moneda la decide desde dónde paga (Argentina → pesos con
+  // MP; otro país → USD con Paddle). Sin Paddle, como siempre: USD de
+  // referencia en inglés y el cobro en pesos.
+  const region = usePayRegion((s) => s.region)
+  const setRegion = usePayRegion((s) => s.setRegion)
+  const paddleEnabled = usePayRegion((s) => s.paddleEnabled)
+  const regionStatus = usePayRegion((s) => s.status)
+  const loadRegion = usePayRegion((s) => s.load)
+  useEffect(() => {
+    loadRegion()
+  }, [loadRegion])
+  const intl = paddleEnabled && region === 'intl'
+  const showUsd = paddleEnabled ? intl : locale === 'en'
 
   // Cupón de bienvenida: se aplica solo si hay sesión (lo pide WelcomeCouponSync al
   // entrar). Antes de retomar un pago pendiente esperamos su respuesta: si no, el
@@ -81,9 +95,12 @@ export default function CartPage() {
         user,
         navigate,
         couponCode: coupon?.code,
+        provider: paddleEnabled ? providerForRegion(region) : 'mercadopago',
+        locale,
       })
-      // redirect a MP: dejamos busy. login: liberamos por si vuelve con atrás.
-      if (result !== 'redirect') setBusy(false)
+      // redirect a MP o pago completo en Paddle: dejamos busy. login o overlay
+      // cerrado sin pagar: liberamos para que pueda reintentar.
+      if (result !== 'redirect' && result !== 'paid') setBusy(false)
     } catch (err) {
       if (coupon && (COUPON_ERRORS[err.status] || err.code === COUPON_OTHER_ACCOUNT || err.status === 404)) {
         // El cupón dejó de valer (lo usó en otra pestaña, venció…): se saca y se avisa.
@@ -94,16 +111,28 @@ export default function CartPage() {
       }
       setBusy(false)
     }
-  }, [items, navigate, user, coupon, dropWelcome, t])
+  }, [items, navigate, user, coupon, dropWelcome, t, paddleEnabled, region, locale])
 
-  // Volvió del login con el pago ya pedido: sigue derecho a Mercado Pago.
+  // Volvió del login con el pago ya pedido: sigue derecho al pago (cuando ya se
+  // sabe por dónde paga, para no abrir Mercado Pago a quien eligió USD).
   const resumed = useRef(false)
+  const regionReady = regionStatus === 'ready'
   useEffect(() => {
-    if (resumed.current || !user || items.length === 0 || !couponReady) return
+    if (resumed.current || !user || items.length === 0 || !couponReady || !regionReady) return
     if (!takeCheckoutIntent()) return
     resumed.current = true
     checkout()
-  }, [user, items.length, checkout, couponReady])
+  }, [user, items.length, checkout, couponReady, regionReady])
+
+  const payLabel = !looksLoggedIn
+    ? t('cart.payLoggedOut')
+    : busy
+      ? t('cart.redirecting')
+      : !paddleEnabled
+        ? t('cart.payLoggedIn')
+        : intl
+          ? t('pay.payIntl')
+          : t('pay.payAr')
 
   return (
     <div className="min-h-svh bg-bone text-ink">
@@ -191,8 +220,17 @@ export default function CartPage() {
               })}
             </ul>
 
+            {paddleEnabled && (
+              <PaymentRegionPicker
+                region={region}
+                onChange={setRegion}
+                disabled={busy}
+                className="mt-8"
+              />
+            )}
+
             <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
-              <p className="text-sm">
+              <p className="min-w-0 text-sm">
                 {coupon && discount > 0 ? (
                   <>
                     <span className="block text-ink/60">
@@ -209,16 +247,21 @@ export default function CartPage() {
                 ) : null}
                 {t('common.estimatedTotal')}:{' '}
                 <strong>{formatLine(payable)}</strong>
-                <span className="mt-2 block text-xs text-ink/55">
-                  {t('cart.trustNote')}
+                <span className="mt-2 block max-w-prose text-xs text-ink/55">
+                  {intl ? t('pay.trustIntl') : t('cart.trustNote')}
                 </span>
+                {intl && (
+                  <span className="mt-1 block max-w-prose text-xs text-ink/55">
+                    {t('pay.intlTaxNote')}
+                  </span>
+                )}
               </p>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => clearCart()}
-                  className="min-h-11 border border-ink/30 px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink/70 transition-colors hover:border-ink hover:text-ink disabled:opacity-40"
+                  className="min-h-11 whitespace-nowrap border border-ink/30 px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink/70 transition-colors hover:border-ink hover:text-ink disabled:opacity-40"
                 >
                   {t('cart.clearAll')}
                 </button>
@@ -226,13 +269,9 @@ export default function CartPage() {
                   type="button"
                   disabled={busy || authLoading}
                   onClick={checkout}
-                  className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
+                  className="whitespace-nowrap border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
                 >
-                  {looksLoggedIn
-                    ? busy
-                      ? t('cart.redirecting')
-                      : t('cart.payLoggedIn')
-                    : t('cart.payLoggedOut')}
+                  {payLabel}
                 </button>
               </div>
             </div>

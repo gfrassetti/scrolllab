@@ -113,6 +113,32 @@ export const fileDb = {
   async findOrderById(id) {
     return withSave(read('orders').find((o) => o.id === String(id)) || null)
   },
+  async findOrderByPaddleTransaction(transactionId) {
+    return withSave(
+      read('orders').find((o) => o.paddleTransactionId === String(transactionId)) ||
+        null,
+    )
+  },
+  async deletePendingOrder(orderId) {
+    const rows = read('orders')
+    const idx = rows.findIndex((o) => o.id === String(orderId) && o.status === 'pending')
+    if (idx < 0) return false
+    rows.splice(idx, 1)
+    write('orders', rows)
+    return true
+  },
+  async listFailedOrdersDue({ before }) {
+    const cut = new Date(before).getTime()
+    return read('orders')
+      .filter(
+        (o) =>
+          o.status === 'pending' &&
+          o.paymentFailedAt &&
+          new Date(o.paymentFailedAt).getTime() <= cut &&
+          !o.failedEmailSentAt,
+      )
+      .map(withSave)
+  },
   async findOrdersByUser(userId) {
     return read('orders')
       .filter((o) => String(o.userId) === String(userId))
@@ -214,6 +240,16 @@ export const fileDb = {
       ) || null,
     )
   },
+  async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
+    const rows = read('subscriptions')
+    const row =
+      (subscriptionId &&
+        rows.find((s) => s.paddleSubscriptionId === String(subscriptionId))) ||
+      (transactionId &&
+        rows.find((s) => s.paddleTransactionId === String(transactionId))) ||
+      null
+    return withSaveDoc('subscriptions', row)
+  },
   async findActiveSubscriptionByUser(userId) {
     return (
       read('subscriptions')
@@ -230,6 +266,19 @@ export const fileDb = {
     return read('subscriptions')
       .filter((s) => String(s.userId) === String(userId))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map((s) => withSaveDoc('subscriptions', s))
+  },
+  async listCheckoutFailuresDue({ before }) {
+    const cut = new Date(before).getTime()
+    return read('subscriptions')
+      .filter(
+        (s) =>
+          s.status === 'pending' &&
+          !s.abandonedAt &&
+          s.paymentFailedAt &&
+          new Date(s.paymentFailedAt).getTime() <= cut &&
+          !s.paymentFailedEmailSentAt,
+      )
       .map((s) => withSaveDoc('subscriptions', s))
   },
   async listTrialReminderCandidates({ now, withinMs }) {

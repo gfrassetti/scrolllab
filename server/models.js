@@ -48,8 +48,26 @@ const orderSchema = new mongoose.Schema(
     couponCode: String,
     discountPct: Number,
     currency_id: { type: String, default: "ARS" },
+    // Pasarela que cobra la orden: Mercado Pago (ARS) o Paddle (USD, ver
+    // docs/paddle.md). En Paddle `total` y los `unit_price` están en USD.
+    provider: {
+      type: String,
+      enum: ["mercadopago", "paddle"],
+      default: "mercadopago",
+    },
+    // Idioma de los mails de la orden (el del sitio al comprar).
+    locale: { type: String, enum: ["es", "en"], default: "es" },
     mpPreferenceId: String,
     mpPaymentId: { type: String, sparse: true, unique: true },
+    // Transacción de Paddle que armamos al abrir el checkout: solo esa la paga.
+    paddleTransactionId: { type: String, sparse: true, unique: true },
+    // Último pago rechazado (la orden sigue pending: se puede reintentar).
+    paymentFailedAt: Date,
+    // Mail «pago rechazado»: uno por orden, mismo claim que el recibo.
+    failedEmailSendingAt: Date,
+    failedEmailSentAt: Date,
+    failedEmailId: String,
+    failedEmailError: String,
     refundedAt: Date,
     // Estado del pago en MP que la dio vuelta: refunded | charged_back.
     refundReason: String,
@@ -185,9 +203,21 @@ const subscriptionSchema = new mongoose.Schema(
       ],
       default: undefined,
     },
-    // MP no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
+    // MP / Paddle no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
     paymentFailedAt: Date,
     mpPreapprovalId: { type: String, sparse: true },
+    // Pasarela de la suscripción. Paddle cobra en USD (docs/paddle.md).
+    provider: {
+      type: String,
+      enum: ["mercadopago", "paddle"],
+      default: "mercadopago",
+    },
+    currency_id: { type: String, default: "ARS" },
+    locale: { type: String, enum: ["es", "en"], default: "es" },
+    // Transacción del alta (checkout) y suscripción que Paddle crea al pagarla.
+    paddleTransactionId: { type: String, sparse: true },
+    paddleSubscriptionId: { type: String, sparse: true, index: true },
+    paddleCustomerId: String,
     // Mails de suscripción (una vez cada uno). Mismo patrón claim/complete/
     // release que el recibo de orden. `welcome` al pasar a `authorized`,
     // `canceled` al setear `canceledAt`, `trialReminder` unos días antes del
@@ -204,6 +234,18 @@ const subscriptionSchema = new mongoose.Schema(
     trialReminderEmailSentAt: Date,
     trialReminderEmailId: String,
     trialReminderEmailError: String,
+    // Mails por evento (uno por cobro): `Ref` es el cobro del último mail
+    // reclamado o enviado (authorized_payment de MP / transacción de Paddle).
+    chargeEmailRef: String,
+    chargeEmailSendingAt: Date,
+    chargeEmailSentAt: Date,
+    chargeEmailId: String,
+    chargeEmailError: String,
+    paymentFailedEmailRef: String,
+    paymentFailedEmailSendingAt: Date,
+    paymentFailedEmailSentAt: Date,
+    paymentFailedEmailId: String,
+    paymentFailedEmailError: String,
   },
   { timestamps: true },
 );

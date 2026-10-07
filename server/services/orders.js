@@ -103,9 +103,11 @@ export async function ensureOrderZip(order, user, config) {
 /**
  * Marca la orden como paga de forma atómica e idempotente.
  * Devuelve { order, created: boolean } donde created=false si ya estaba paga.
+ * Mercado Pago pasa `mpPaymentId`; Paddle, `paddleTransactionId`.
+ * @param {{ orderId: string, mpPaymentId?: string, paddleTransactionId?: string }} args
  */
-export async function markOrderPaid({ orderId, mpPaymentId }) {
-  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId })
+export async function markOrderPaid({ orderId, mpPaymentId, paddleTransactionId }) {
+  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId, paddleTransactionId })
   // Canjear el cupón es contabilidad: si falla no puede frenar lo ya pagado.
   if (result.created && result.order?.couponCode) {
     try {
@@ -132,7 +134,7 @@ const payerOf = (payment) => payment.payer?.email || 'mail desconocido'
  * Pago que pide acción a mano: log greppable + mail al admin (una vez por
  * evento). Nunca tira: el webhook tiene que responder igual.
  */
-function alertAdmin({ kind, key, title, lines, config }) {
+export function alertAdmin({ kind, key, title, lines, config }) {
   console.error(`checkout ${title} ${lines.join(' · ')}`)
   sendAdminAlert({ kind, key, subject: title, lines: [title, '', ...lines], config }).catch(
     (err) => console.error('checkout alert email', err?.message),
@@ -242,42 +244,70 @@ export async function fulfillApprovedPayment({
     })
   }
 
-  let user = null
-  if (paid.status === 'paid') {
-    try {
-      user = await db.findUserById(paid.userId)
-    } catch (userErr) {
-      console.error('Order user lookup failed', userErr)
-    }
-  }
-  if (user) {
-    try {
-      await ensureOrderZip(paid, user, config)
-    } catch (packErr) {
-      console.error('ZIP pack failed after payment', packErr)
-    }
-    try {
-      const result = await sendOrderReceiptOnce({ order: paid, user, config })
-      if (result.sent) {
-        console.log(`Order receipt sent order=${db.uid(paid) || paid.id}`)
-      }
-    } catch (emailErr) {
-      console.error('Order receipt email failed', emailErr)
-    }
-    try {
-      const result = await sendOrderAdminNotifyOnce({ order: paid, user, config })
-      if (result.sent) {
-        console.log(`Order admin notify sent order=${db.uid(paid) || paid.id}`)
-      }
-    } catch (emailErr) {
-      console.error('Order admin notify failed', emailErr)
-    }
-  }
+  await deliverPaidOrder(paid, config)
 
   return {
     order: paid,
     orderId: db.uid(paid) || paid.id || orderId,
     alreadyFulfilled: !created,
+  }
+}
+
+/**
+ * Lo que sigue a cobrar una orden, sea cual sea la pasarela: el ZIP, el recibo
+ * al comprador y el aviso al dueño. Idempotente (lock del ZIP + claims de los
+ * mails) y nunca tira: el pago ya está registrado.
+ */
+export async function deliverPaidOrder(paid, config) {
+  if (paid?.status !== 'paid') return
+  let user = null
+  try {
+    user = await db.findUserById(paid.userId)
+  } catch (userErr) {
+    console.error('Order user lookup failed', userErr)
+  }
+  if (!user) return
+  try {
+    await ensureOrderZip(paid, user, config)
+  } catch (packErr) {
+    console.error('ZIP pack failed after payment', packErr)
+  }
+  try {
+    const result = await sendOrderReceiptOnce({ order: paid, user, config })
+    if (result.sent) {
+      console.log(`Order receipt sent order=${db.uid(paid) || paid.id}`)
+    }
+  } catch (emailErr) {
+    console.error('Order receipt email failed', emailErr)
+  }
+  try {
+    const result = await sendOrderAdminNotifyOnce({ order: paid, user, config })
+    if (result.sent) {
+      console.log(`Order admin notify sent order=${db.uid(paid) || paid.id}`)
+    }
+  } catch (emailErr) {
+    console.error('Order admin notify failed', emailErr)
+  }
+}
+
+/**
+ * Un pago de una orden fue rechazado (MP `rejected`, Paddle
+ * `transaction.payment_failed`): se anota y la orden sigue pendiente. El mail
+ * no sale acá: el comprador suele reintentar en el mismo checkout, así que lo
+ * manda el barrido (services/paymentFailedSweep.js) un rato después y solo si
+ * la orden sigue sin pagarse. Nunca tira.
+ * @param {{ orderId: string, config?: any }} args
+ */
+export async function notifyOrderPaymentFailed({ orderId }) {
+  if (!/^[a-f0-9]{24}$/i.test(String(orderId || ''))) return { skipped: 'sin orden' }
+  try {
+    const order = await db.markOrderPaymentFailed(orderId)
+    if (!order) return { skipped: 'orden no pendiente' }
+    console.warn(`checkout pago rechazado order=${orderId}`)
+    return { marked: true }
+  } catch (err) {
+    console.error('Order payment-failed mark failed', err?.message || err)
+    return { skipped: 'error' }
   }
 }
 

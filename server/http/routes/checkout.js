@@ -13,12 +13,27 @@ import {
   sendOrderAdminNotifyOnce,
 } from '../../services/email.js'
 import { createCheckoutOrder } from '../../services/checkout.js'
+import { confirmPaddleCheckout } from '../../services/paddlePayments.js'
+import { paddleClientInfo } from '../../services/paddle.js'
+
+/** País del request según el proxy (Vercel / Cloudflare), en mayúsculas o null. */
+export function requestCountry(req) {
+  const raw =
+    req.headers['x-vercel-ip-country'] ||
+    req.headers['cf-ipcountry'] ||
+    req.headers['x-country-code'] ||
+    ''
+  const code = String(raw).trim().toUpperCase()
+  return /^[A-Z]{2}$/.test(code) && code !== 'XX' ? code : null
+}
 
 /**
  * Compra de templates y composiciones del builder: crear la orden con los
- * precios del servidor (y el cupón, si viene) y la preferencia de Checkout
- * Pro; confirmar el pago al volver de MP (en test MP no manda webhooks); y el
- * pago mock de desarrollo. El webhook de MP vive en webhooks.js.
+ * precios del servidor (y el cupón, si viene) y el checkout de la pasarela
+ * (Checkout Pro de MP en ARS, o Paddle en USD); confirmar el pago al volver
+ * (en test MP no manda webhooks; Paddle sí, pero el confirm no lo espera); qué
+ * pasarelas hay y desde qué país viene el request; y el pago mock de
+ * desarrollo. Los webhooks viven en webhooks.js.
  */
 export function createCheckoutRouter({ config, limits }) {
   const router = express.Router()
@@ -87,6 +102,28 @@ export function createCheckoutRouter({ config, limits }) {
     }),
   )
 
+  // Qué pasarelas hay y desde dónde se conecta: el carrito preselecciona
+  // «Argentina» (MP) o «internacional» (Paddle). Es solo el default: el
+  // comprador elige. Sin sesión (se muestra antes de loguearse).
+  router.get('/api/checkout/methods', (req, res) => {
+    const country = requestCountry(req)
+    const paddleOn = Boolean(config.paddle?.enabled)
+    res.set('Cache-Control', 'private, no-store')
+    res.json({
+      country,
+      suggested: paddleOn && country && country !== 'AR' ? 'paddle' : 'mercadopago',
+      providers: {
+        mercadopago: { enabled: true, mock: Boolean(config.mpMock), currency: 'ARS' },
+        paddle: {
+          enabled: paddleOn,
+          mock: Boolean(config.paddle?.mock),
+          currency: 'USD',
+          ...(paddleOn && !config.paddle.mock ? paddleClientInfo(config) : {}),
+        },
+      },
+    })
+  })
+
   router.post(
     '/api/checkout',
     requireAuth,
@@ -97,9 +134,47 @@ export function createCheckoutRouter({ config, limits }) {
           user: req.user,
           items: req.body?.items,
           couponCode: req.body?.couponCode,
+          provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
+          locale: req.body?.locale,
           config,
         }),
       )
+    }),
+  )
+
+  /**
+   * Cierre del overlay de Paddle: trae la transacción de Paddle y cumple la
+   * orden sin esperar al webhook. 409 mientras Paddle la sigue procesando
+   * (el front reintenta).
+   */
+  router.post(
+    '/api/checkout/paddle/confirm',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (!config.paddle?.apiKey || config.paddle.mock) {
+        throw new HttpError(400, 'Confirmación de Paddle no disponible')
+      }
+      const { order, orderId, alreadyFulfilled } = await confirmPaddleCheckout({
+        transactionId: String(req.body?.transactionId || '').trim(),
+        userId: db.uid(req.user),
+        config,
+      })
+      res.json({
+        ok: true,
+        orderId,
+        alreadyFulfilled,
+        status: order?.status || 'paid',
+        order: order
+          ? {
+              id: orderId,
+              status: order.status,
+              items: order.items,
+              total: order.total,
+              currency_id: order.currency_id,
+            }
+          : null,
+      })
     }),
   )
 
@@ -108,7 +183,7 @@ export function createCheckoutRouter({ config, limits }) {
     requireAuth,
     limits.checkout,
     asyncHandler(async (req, res) => {
-      if (!config.mpMock && !config.authDev) {
+      if (!config.mpMock && !config.paddle?.mock && !config.authDev) {
         throw new HttpError(403, 'Mock pay deshabilitado')
       }
       const orderId = String(req.body?.orderId || '')

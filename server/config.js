@@ -84,6 +84,72 @@ function assertProdAuthHosts(clientUrl, apiPublicUrl, googleCallback) {
   }
 }
 
+const PADDLE_API = {
+  sandbox: "https://sandbox-api.paddle.com",
+  production: "https://api.paddle.com",
+};
+
+/**
+ * Paddle (cobro internacional en USD, ver docs/paddle.md). Apagado sin
+ * `PADDLE_API_KEY` (salvo el mock de dev). Con la key puesta, el entorno, la
+ * key y el client token tienen que ser del mismo lado: una key de sandbox en
+ * producción, o al revés, no arranca.
+ */
+export function loadPaddleConfig(env = process.env, prod = isProd) {
+  const environment = (env.PADDLE_ENV || "sandbox").toLowerCase();
+  if (!PADDLE_API[environment]) {
+    throw new Error("PADDLE_ENV inválido (sandbox|production)");
+  }
+  const apiKey = env.PADDLE_API_KEY || "";
+  const clientToken = env.PADDLE_CLIENT_TOKEN || "";
+  const webhookSecret = env.PADDLE_WEBHOOK_SECRET || "";
+  const mockRaw = env.PADDLE_MOCK_ENABLED;
+  const mock =
+    !prod && !apiKey && (mockRaw === "true" || mockRaw === "1");
+
+  if (apiKey) {
+    const live = environment === "production";
+    const keyLive = apiKey.startsWith("pdl_live_");
+    const keySandbox = apiKey.startsWith("pdl_sdbx_");
+    if ((live && !keyLive) || (!live && !keySandbox)) {
+      throw new Error(
+        `PADDLE_API_KEY no es de ${environment} (pdl_${live ? "live" : "sdbx"}_…)`,
+      );
+    }
+    if (clientToken) {
+      const tokenLive = clientToken.startsWith("live_");
+      const tokenTest = clientToken.startsWith("test_");
+      if ((live && !tokenLive) || (!live && !tokenTest)) {
+        throw new Error(
+          `PADDLE_CLIENT_TOKEN no es de ${environment} (${live ? "live" : "test"}_…)`,
+        );
+      }
+    }
+    if (prod) {
+      if (!live) throw new Error("PADDLE_ENV=production es obligatorio en producción");
+      if (!clientToken) throw new Error("Falta la variable de entorno PADDLE_CLIENT_TOKEN");
+      if (!webhookSecret) throw new Error("Falta la variable de entorno PADDLE_WEBHOOK_SECRET");
+    }
+  }
+  if (prod && (mockRaw === "true" || mockRaw === "1")) {
+    throw new Error("PADDLE_MOCK_ENABLED no puede estar activo en producción");
+  }
+
+  return {
+    enabled: Boolean(apiKey) || mock,
+    mock,
+    environment,
+    apiBase: (env.PADDLE_API_BASE || PADDLE_API[environment]).replace(/\/$/, ""),
+    apiKey,
+    clientToken,
+    webhookSecret,
+    taxCategory: {
+      template: env.PADDLE_TAX_CATEGORY_TEMPLATE || "standard",
+      lab: env.PADDLE_TAX_CATEGORY_LAB || "saas",
+    },
+  };
+}
+
 /**
  * Parseo y validación central de env.
  * En producción falla el boot si faltan secretos, Mongo o flags inseguros.
@@ -177,6 +243,8 @@ export function loadConfig() {
     );
   }
 
+  const paddle = loadPaddleConfig();
+
   const emailEnabled = bool(
     "EMAIL_ENABLED",
     Boolean(process.env.RESEND_API_KEY),
@@ -206,6 +274,7 @@ export function loadConfig() {
     mpMock: isProd ? false : mpMock,
     mpAccessToken,
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET || "",
+    paddle,
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",

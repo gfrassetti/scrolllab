@@ -179,7 +179,19 @@
     "previewTablet": "Tablet",
     "previewMobile": "Mobile",
     "previewNote": "This is the same embed that goes on your site, with your unsaved edits. Links don't navigate here.",
-    "domainsDropped": "Not domains, not saved: {{list}}"
+    "domainsDropped": "Not domains, not saved: {{list}}",
+    "paddle": {
+      "planPausedNote": "paused in Paddle · won’t renew",
+      "planPastDue": "We’re confirming the charge with Paddle. If it doesn’t go through, the plan is suspended on {{date}}.",
+      "planPaymentFailed": "We couldn’t charge your plan. Paddle will retry; if it isn’t resolved, it’s suspended on {{date}}. Update your card so the next attempt goes through.",
+      "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
+      "planChangeHint": "You switch plans without canceling. Moving up, Paddle charges your card only the difference for the rest of your period; moving down costs nothing. The new price applies from your next charge.",
+      "changeConfirmPaid": "You move to {{plan}} now. Paddle charges {{amount}} to your card for the rest of your period ({{days}}); from {{date}}, {{price}} {{per}}.",
+      "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Paddle charges {{price}} {{per}}.",
+      "changePay": "Charge {{amount}} and switch",
+      "returnPending": "We don’t see Paddle’s confirmation yet. If you already paid, it shows up in a few seconds.",
+      "updateCard": "Update card"
+    }
   },
   "common": {
     "loading": "Loading…",
@@ -1222,5 +1234,21 @@
   },
   "motionToggle": {
     "label": "Show demos with animations"
+  },
+  "pay": {
+    "legend": "Where are you paying from",
+    "arTitle": "Argentina",
+    "arDetail": "Mercado Pago · in pesos",
+    "intlTitle": "Another country",
+    "intlDetail": "Card · in US dollars",
+    "payAr": "Pay with Mercado Pago →",
+    "payIntl": "Pay by card (USD) →",
+    "trustIntl": "Card payment via Paddle · license included",
+    "intlTaxNote": "Paddle processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
+    "confirming": "Confirming your payment…",
+    "opening": "Opening the payment…",
+    "invalidLink": "That payment link isn’t valid. If you got it by email, write to us and we’ll send a new one.",
+    "openError": "We couldn’t open the payment. Try again in a few minutes or write to us.",
+    "closed": "You closed the payment without finishing it: you haven’t been charged."
   }
 }

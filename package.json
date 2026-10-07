@@ -28,6 +28,7 @@
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
+    "check:paddle-sandbox": "node scripts/check-paddle-sandbox.mjs",
     "analyze:ref": "node scripts/analyze-reference.mjs",
     "gen:brand": "node scripts/gen-brand-assets.mjs",
     "gen:og": "node scripts/gen-og-images.mjs",

@@ -93,6 +93,9 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
     // Con qué plan está pago el período en curso (null en la prueba). La UI no
     // ofrece re-suscribirse más arriba sobre días pagos con uno más barato.
     paidPlan: paidWindow(sub, now)?.plan || null,
+    // Pasarela y moneda: la UI cotiza y cambia de plan en la misma.
+    provider: sub.provider || 'mercadopago',
+    currency_id: sub.currency_id || 'ARS',
   }
 }
 

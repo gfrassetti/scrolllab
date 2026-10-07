@@ -46,7 +46,16 @@ export async function createApp(config) {
   app.use(createCors(config))
   app.use(createLogger(config))
   app.use(cookieParser())
-  app.use(express.json({ limit: '64kb' }))
+  app.use(
+    express.json({
+      limit: '64kb',
+      // La firma de Paddle se calcula sobre los bytes exactos del body: se
+      // guardan solo para su webhook (al resto no le hace falta).
+      verify(req, _res, buf) {
+        if (req.originalUrl?.startsWith('/api/webhooks/paddle')) req.rawBody = buf
+      },
+    }),
+  )
   app.use(requireSameOrigin(config))
 
   // Servir el embed (loader + frame) desde la propia API, si `embed-dist/` está

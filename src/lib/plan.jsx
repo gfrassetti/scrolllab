@@ -24,6 +24,10 @@ const EMPTY = {
   lapsedPlan: null,
   // Plan con el que está pago el período en curso (null en la prueba).
   paidPlan: null,
+  // Pasarela y moneda de la suscripción vigente ('mercadopago' / ARS o
+  // 'paddle' / USD); null sin suscripción.
+  provider: null,
+  currency_id: null,
   loading: true,
 }
 
@@ -66,6 +70,8 @@ export function PlanProvider({ children }) {
         paymentFailed: d.paymentFailed ?? false,
         lapsedPlan: d.lapsedPlan ?? null,
         paidPlan: d.paidPlan ?? null,
+        provider: d.provider ?? null,
+        currency_id: d.currency_id ?? null,
         loading: false,
       })
     } catch {

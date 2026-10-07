@@ -46,6 +46,9 @@ const CheckoutFailurePage = lazy(() =>
 const CheckoutMockPage = lazy(() =>
   import('./pages/CheckoutPages').then((m) => ({ default: m.CheckoutMockPage })),
 )
+const CheckoutPayPage = lazy(() =>
+  import('./pages/CheckoutPages').then((m) => ({ default: m.CheckoutPayPage })),
+)
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 // Diagnóstico para mirar en un teléfono real (`?motion-debug`): carga diferida,
 // solo existe si se lo pide. Dura la pestaña (`?motion-debug=0` lo apaga).
@@ -183,6 +186,7 @@ export default function App() {
                   <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
                   <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
                   <Route path="/checkout/mock" element={<CheckoutMockPage />} />
+                  <Route path="/checkout/pay" element={<CheckoutPayPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Suspense>
