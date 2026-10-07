@@ -6,6 +6,7 @@ import ChapterDusty from '../components/sections/comic/ChapterDusty'
 import ChapterBond from '../components/sections/comic/ChapterBond'
 import ChapterFork from '../components/sections/comic/ChapterFork'
 import ChapterWorlds from '../components/sections/comic/ChapterWorlds'
+import ChapterTally from '../components/sections/comic/ChapterTally'
 import FooterComic from '../components/sections/comic/FooterComic'
 
 /**
@@ -23,9 +24,10 @@ export default function ComicPage() {
 
         <main>
           <ChapterDusty />
-          <ChapterBond />
           <ChapterFork />
+          <ChapterBond />
           <ChapterWorlds />
+          <ChapterTally />
         </main>
 
         <FooterComic />

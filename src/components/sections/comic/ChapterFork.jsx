@@ -3,169 +3,103 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import PaperFrame from './PaperFrame'
-import { driveSunset, closedYards, variants } from './assets/images'
-import { imgAttrs } from '../../../lib/responsiveImage'
+import { PAPER, TORN_TOP } from './comicKit'
+import { AerialScene, PensScene, ShedsScene } from './StoryArt'
+
+const SHOTS = [
+  { Scene: PensScene, from: 2.0, to: 1.7 },
+  { Scene: ShedsScene, from: 2.8, to: 1 },
+  { Scene: AerialScene, from: 1.5, to: 1 },
+]
 
 /**
- * ChapterFork — pinned split: two futures tear apart on scroll.
- *
- * Calma: a diferencia de Dusty/Bond, las dos cards ya son columnas de una
- * grilla (`md:grid-cols-2`), no capas `absolute` superpuestas — sin pin no
- * se tapan entre sí, solo sobra el alto de pin (`h-svh overflow-hidden`,
- * `calm:` lo saca) y la entrada se reemplaza por un fundido simple.
+ * ChapterFork — three wide shots in a row. The previous chapter zooms into the
+ * barn; here each shot comes in already blown up and pulls back until it fits
+ * the screen (measured on the reference: ×2.0→1.7, ×2.8→1, ×1.5→1), the next
+ * one cutting in over it. A torn grey paper rises at the end and becomes the
+ * page the next chapter is drawn on.
  */
-export default function ChapterFork({
-  label = 'Chapter 3',
-  prompt = 'Prompt 1 — replace with the fork question.',
-  left = {
-    title: 'Headline 1',
-    body: 'Body 1 — replace with path copy.',
-  },
-  right = {
-    title: 'Headline 2',
-    body: 'Body 2 — replace with path copy.',
-  },
-}) {
+export default function ChapterFork({ captions = ['Caption 8 — replace with story beat.'] }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
 
   useGSAP(
     () => {
       if (reduced) return calmReveal('[data-comic-reveal]')
+      const q = (sel) => gsap.utils.toArray(sel, root.current)
+      const shots = q('[data-shot]')
+      const curtain = root.current.querySelector('[data-curtain]')
+      const caption = root.current.querySelector('[data-fork-caption]')
 
-      const pin = root.current.querySelector('[data-fork-pin]')
+      shots.forEach((shot, i) => gsap.set(shot, { scale: SHOTS[i].from, opacity: i ? 0 : 1, transformOrigin: '50% 50%' }))
+      gsap.set(curtain, { yPercent: 106 })
+      gsap.set(caption, { opacity: 0, y: 20 })
+
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.45,
-          pin,
+          scrub: 0.4,
+          pin: root.current.querySelector('[data-pin]'),
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       })
 
-      gsap.set('[data-path-left]', { xPercent: -8, rotate: -6, scale: 0.92 })
-      gsap.set('[data-path-right]', { xPercent: 8, rotate: 6, scale: 0.92 })
-
-      tl.fromTo(
-        '[data-fork-prompt]',
-        { opacity: 0, y: 28, scale: 0.96 },
-        { opacity: 1, y: 0, scale: 1, duration: 1.1 },
-        0,
-      )
-      tl.to('[data-path-left]', { xPercent: 0, rotate: -1.5, scale: 1, duration: 2 }, 0.5)
-      tl.to('[data-path-right]', { xPercent: 0, rotate: 1.5, scale: 1, duration: 2 }, 0.5)
-      tl.fromTo('[data-split-line]', { scaleY: 0 }, { scaleY: 1, duration: 1.4 }, 0.8)
-      tl.to('[data-path-left]', { xPercent: -14, rotate: -4, duration: 2 }, 2.8)
-      tl.to('[data-path-right]', { xPercent: 14, rotate: 4, duration: 2 }, 2.8)
-      tl.to('[data-fork-prompt]', { opacity: 0.35, duration: 1.2 }, 2.8)
-      tl.to('[data-crack]', { scaleX: 1, opacity: 1, duration: 1.6 }, 3)
+      let t = 0
+      shots.forEach((shot, i) => {
+        if (i) tl.to(shot, { opacity: 1, duration: 0.25 }, t)
+        tl.to(shot, { scale: SHOTS[i].to, duration: 2.4, ease: 'power2.out' }, t)
+        t += 2.2
+      })
+      tl.to(caption, { opacity: 1, y: 0, duration: 0.6 }, 2.4)
+      tl.to(caption, { opacity: 0, y: -14, duration: 0.5 }, t - 0.4)
+      tl.to(curtain, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, t)
+      tl.to(shots[2], { yPercent: -10, duration: 1.6, ease: 'power2.out' }, t)
     },
     { scope: root, dependencies: [reduced] },
   )
 
-  return (
-    <section
-      id="chapter-fork"
-      ref={root}
-      className="relative h-[420vh] bg-[#1f1c19] text-white calm:h-auto"
-    >
-      <div
-        data-fork-pin
-        className="relative flex h-svh items-center justify-center overflow-hidden px-4 calm:static calm:block calm:h-auto calm:overflow-visible calm:py-20 md:px-8 md:calm:py-28"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 40%, rgba(232,90,36,0.18), transparent 55%), #1f1c19',
-          }}
-        />
-
-        <div className="relative z-10 w-full max-w-6xl">
-          <p className="mb-3 text-center text-[11px] tracking-[0.28em] text-comic-flare uppercase">
-            {label}
-          </p>
-          <p
-            data-fork-prompt
-            data-comic-reveal
-            className="mx-auto mb-6 max-w-2xl text-center font-brico text-[clamp(1.5rem,3.6vw,2.5rem)] leading-snug font-bold tracking-[-0.02em] md:mb-10"
-          >
-            {prompt}
-          </p>
-
-          <div className="relative grid gap-5 md:grid-cols-2 md:gap-8">
-            <span
-              data-split-line
-              aria-hidden="true"
-              className="absolute top-[6%] bottom-[6%] left-1/2 hidden w-px origin-top bg-white/30 md:block"
-            />
-            <span
-              data-crack
-              aria-hidden="true"
-              className="absolute top-1/2 left-1/2 z-20 hidden h-1 w-24 -translate-x-1/2 -translate-y-1/2 origin-center scale-x-0 bg-comic-flare md:block"
-              style={{ opacity: 0 }}
-            />
-
-            <div data-path-left data-comic-reveal className="will-change-transform">
-              <PaperFrame className="calm:w-full">
-                <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
-                  <img
-                    {...imgAttrs(driveSunset, variants)}
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    loading="lazy"
-                    decoding="async"
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                  <div className="relative z-10 flex h-full min-h-[min(18rem,32svh)] flex-col justify-end p-7 md:min-h-85 md:p-9">
-                    <p className="mb-3 text-[11px] tracking-[0.25em] text-white/55 uppercase">
-                      Path 1
-                    </p>
-                    <h2 className="mb-3 font-brico text-2xl font-bold tracking-[-0.03em] md:text-3xl">
-                      {left.title}
-                    </h2>
-                    <p className="max-w-sm text-sm leading-relaxed text-white/80">
-                      {left.body}
-                    </p>
-                  </div>
-                </div>
-              </PaperFrame>
-            </div>
-
-            <div data-path-right data-comic-reveal className="will-change-transform">
-              <PaperFrame className="calm:w-full">
-                <div className="relative min-h-[min(18rem,32svh)] overflow-hidden md:min-h-85">
-                  <img
-                    {...imgAttrs(closedYards, variants)}
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    loading="lazy"
-                    decoding="async"
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                  <div className="relative z-10 flex h-full min-h-[min(18rem,32svh)] flex-col justify-end p-7 md:min-h-85 md:p-9">
-                    <p className="mb-3 text-[11px] tracking-[0.25em] text-white/55 uppercase">
-                      Path 2
-                    </p>
-                    <h2 className="mb-3 font-brico text-2xl font-bold tracking-[-0.03em] md:text-3xl">
-                      {right.title}
-                    </h2>
-                    <p className="max-w-sm text-sm leading-relaxed text-white/80">
-                      {right.body}
-                    </p>
-                  </div>
-                </div>
-              </PaperFrame>
-            </div>
+  if (reduced) {
+    return (
+      <section id="chapter-fork" ref={root} className="bg-[#1a1512] py-16 md:py-24">
+        {SHOTS.map(({ Scene }, i) => (
+          <div key={i} data-comic-reveal className="mx-auto mb-6 max-w-4xl px-5 md:px-10">
+            <PaperFrame className="h-full !w-full">
+              <div className="relative aspect-[16/9] overflow-hidden">
+                <Scene className="absolute inset-0 h-full w-full" />
+              </div>
+            </PaperFrame>
           </div>
+        ))}
+        <p data-comic-reveal className="px-6 text-center text-white">{captions[0]}</p>
+      </section>
+    )
+  }
+
+  return (
+    <section id="chapter-fork" ref={root} className="relative h-[520vh] bg-[#1a1512]">
+      <div data-pin className="relative h-svh overflow-hidden">
+        {SHOTS.map(({ Scene }, i) => (
+          <div key={i} data-shot aria-hidden="true" className="absolute inset-0 will-change-transform">
+            <Scene className="absolute inset-0 h-full w-full" />
+          </div>
+        ))}
+        <p
+          data-fork-caption
+          className="pointer-events-none absolute inset-x-0 top-[12%] z-20 px-6 text-center text-[15px] font-semibold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] md:text-lg"
+        >
+          {captions[0]}
+        </p>
+        <div
+          data-curtain
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 -top-9 -bottom-2 z-30 will-change-transform"
+          style={{ filter: 'drop-shadow(0 -8px 14px rgba(20,12,8,0.4))' }}
+        >
+          <div className="h-full w-full" style={{ ...PAPER, clipPath: TORN_TOP }} />
         </div>
       </div>
     </section>

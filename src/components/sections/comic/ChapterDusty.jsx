@@ -8,6 +8,7 @@ import RoadHero from './RoadHero'
 import SideTruck from './SideTruck'
 import { CanyonScene, FarmScene, FenceScene } from './Vignettes'
 import { BigPig, DogBack, DogTail, FarmerHands, GateScene, LookoutBg, PigPanelBg } from './ArrivalArt'
+import { BOIL, BUBBLE, BoilOutline, PANEL_CLIP, PAPER, TORN_TOP } from './comicKit'
 import { closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -30,74 +31,6 @@ const CAPTIONS = [
  * verían las tres pisándose. En calma son tres viñetas en fila, cada una un
  * bloque normal del documento (ComicPanel), con fundido al entrar.
  */
-/** A ragged top edge for the paper curtain: x in %, y in px, the same every render. */
-const TORN_TOP = (() => {
-  let a = 7
-  const rand = () => {
-    a = (a * 16807) % 2147483647
-    return a / 2147483647
-  }
-  const pts = Array.from({ length: 41 }, (_, i) => `${((i / 40) * 100).toFixed(2)}% ${(4 + rand() * 30).toFixed(1)}px`)
-  return `polygon(${pts.join(', ')}, 100% 100%, 0 100%)`
-})()
-
-// crumpled grey paper: flat colour under a soft fractal-noise shading
-const PAPER = {
-  backgroundColor: '#c3c1bd',
-  backgroundImage:
-    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.011 0.02' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.42  0 0 0 0 0.41  0 0 0 0.9 -0.18'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-}
-
-/**
- * A ragged white outline drawn around a panel, a little outside its picture.
- * Three versions: the timeline swaps them as you scroll, so the paper cut
- * "boils" like hand-drawn animation.
- */
-const BOIL = [11, 23, 37].map((seed) => {
-  let a = seed
-  const rand = () => {
-    a = (a * 16807) % 2147483647
-    return a / 2147483647
-  }
-  const pts = []
-  const jag = (base) => base + (rand() - 0.5) * 2.6
-  for (let i = 0; i <= 12; i += 1) pts.push([-3 + i * (106 / 12), jag(-4)])
-  for (let i = 1; i <= 4; i += 1) pts.push([jag(103), -4 + i * (108 / 4)])
-  for (let i = 11; i >= 0; i -= 1) pts.push([-3 + i * (106 / 12), jag(104)])
-  for (let i = 3; i >= 1; i -= 1) pts.push([jag(-3), -4 + i * (108 / 4)])
-  return `M${pts.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(' L')} Z`
-})
-
-// the speech bubble's blob, in three hand-drawn takes (it boils too)
-const BUBBLE = [
-  'M70 50 C120 10 250 0 320 30 C380 56 400 120 380 170 C356 226 270 244 190 236 C110 228 30 200 14 140 C2 100 30 72 70 50Z',
-  'M64 56 C118 14 246 6 324 36 C384 62 396 124 374 176 C348 228 264 240 186 232 C104 224 26 196 12 134 C4 96 28 76 64 56Z',
-  'M76 46 C126 8 256 2 316 26 C374 52 402 116 384 166 C362 222 276 246 194 238 C114 230 36 204 18 144 C4 104 34 68 76 46Z',
-]
-
-// the picture itself is cut a little crooked, like a clipping
-const PANEL_CLIP = 'polygon(0.4% 1.6%, 99.6% 0%, 100% 98.6%, 0% 100%)'
-
-function BoilOutline() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-    >
-      <path
-        data-boil
-        d={BOIL[0]}
-        fill="none"
-        stroke="rgba(255,255,255,0.95)"
-        strokeWidth="2"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  )
-}
-
 /** The pig is lifted out of its panel: night behind, the farmer's hands, the dog's tail. */
 function PigPanel() {
   return (

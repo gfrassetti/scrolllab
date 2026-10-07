@@ -1,11 +1,9 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import { calmReveal } from '../../../lib/motion'
+import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
-import PaperFrame from './PaperFrame'
-import { usePinnedScrub } from './usePinnedScrub'
-import { heroRoad, closedYards, variants } from './assets/images'
-import { imgAttrs } from '../../../lib/responsiveImage'
+import { DARK_PAPER, SpeechBubble, TORN_TOP, TornCard, WOOD, boilTo, hoverDepth } from './comicKit'
+import { BrickBg, DinnerBg, DogHead, FarmhouseBg, KnifeHand, PigHead } from './StoryArt'
 
 const DEFAULT_FACTS = [
   {
@@ -22,245 +20,263 @@ const DEFAULT_FACTS = [
   },
 ]
 
+const CAPTIONS = [
+  'Caption 10 — replace with story beat.',
+  'Caption 11 — replace with story beat.',
+  'Caption 12 — replace with story beat.',
+]
+
+function Arrow({ flip }) {
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#1d1311] transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 20 20" className={`h-4 w-4 ${flip ? 'rotate-180' : ''}`} aria-hidden="true">
+        <path d="M12 4 L6 10 L12 16" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  )
+}
+
+/** The pig against the brick wall, with two doors to learn more. */
+function WallCard({ line, facts, open, setOpen }) {
+  return (
+    <TornCard
+      aspect="aspect-[2.4/1]"
+      back={
+        <div data-card-bg className="absolute -inset-[5%] will-change-transform">
+          <BrickBg className="absolute inset-0 h-full w-full" />
+        </div>
+      }
+    >
+      <div className="absolute inset-x-0 -top-[30%] bottom-0 overflow-hidden">
+        <div data-char className="absolute bottom-0 left-[40%] w-[24%] will-change-transform">
+          <div data-char-hover>
+            <PigHead mood="sad" className="block h-auto w-full" />
+          </div>
+        </div>
+      </div>
+      <SpeechBubble line={line} className="absolute top-[16%] right-[8%] w-[22%] max-md:w-[34%]" />
+      {facts.slice(0, 2).map((fact, i) => (
+        <button
+          key={fact.id}
+          type="button"
+          onClick={() => setOpen(open === i ? -1 : i)}
+          aria-expanded={open === i}
+          className={`group tpl-hit pointer-events-auto absolute bottom-[6%] flex items-center gap-3 text-left text-[13px] font-semibold text-white drop-shadow md:text-sm ${
+            i ? 'right-[3%] flex-row-reverse text-right' : 'left-[3%]'
+          }`}
+        >
+          <Arrow flip={i === 1} />
+          <span className="max-w-[16ch]">{fact.title}</span>
+        </button>
+      ))}
+      {open >= 0 && (
+        <div className="pointer-events-auto absolute inset-x-[18%] top-[12%] z-10 rounded-sm bg-[#f7f4ee] p-5 text-[#2a2622] shadow-[0_20px_60px_rgba(0,0,0,0.45)] md:p-7">
+          <p className="font-hand text-2xl font-black tracking-[0.02em] uppercase md:text-3xl">{facts[open].title}</p>
+          <p className="mt-2 text-sm leading-relaxed">{facts[open].blurb}</p>
+          <p className="mt-2 text-sm leading-relaxed text-[#2a2622]/70">{facts[open].concern}</p>
+          <button
+            type="button"
+            onClick={() => setOpen(-1)}
+            className="tpl-hit tpl-link relative mt-3 text-[12px] font-semibold tracking-[0.18em] uppercase"
+          >
+            Close
+          </button>
+        </div>
+      )}
+    </TornCard>
+  )
+}
+
+function FarmhouseCard({ sfx }) {
+  return (
+    <TornCard
+      size="w-[min(70vw,1150px)] max-md:w-[92vw]"
+      aspect="aspect-[2.3/1]"
+      back={
+        <div data-card-bg className="absolute -inset-[5%] will-change-transform">
+          <FarmhouseBg className="absolute inset-0 h-full w-full" />
+        </div>
+      }
+    >
+      <div
+        data-sfx
+        className="pointer-events-none absolute top-[18%] left-[48%] font-hand text-[clamp(2.4rem,7vw,7rem)] leading-none font-black tracking-[0.04em] text-white"
+        style={{ WebkitTextStroke: '3px #1d1311', paintOrder: 'stroke', transform: 'rotate(18deg)' }}
+      >
+        {sfx}
+      </div>
+    </TornCard>
+  )
+}
+
+function DinnerCard() {
+  return (
+    <TornCard
+      size="w-[min(70vw,1150px)] max-md:w-[92vw]"
+      aspect="aspect-[2.6/1]"
+      back={
+        <div data-card-bg className="absolute -inset-[5%] will-change-transform">
+          <DinnerBg className="absolute inset-0 h-full w-full" />
+        </div>
+      }
+    >
+      <div className="absolute inset-x-0 -top-[30%] bottom-0 overflow-hidden">
+        <div data-char className="absolute bottom-[8%] left-[14%] w-[26%] will-change-transform">
+          <div data-char-hover>
+            <DogHead mood="alert" className="block h-auto w-full" />
+          </div>
+        </div>
+      </div>
+      <div className="absolute inset-0 overflow-hidden">
+        <div data-prop className="absolute top-[40%] -right-[2%] w-[44%] will-change-transform">
+          <KnifeHand className="block h-auto w-full" />
+        </div>
+      </div>
+    </TornCard>
+  )
+}
+
 /**
- * ChapterWorlds — pinned collide reel.
- *
- * Título, stage y fact cards son hijos de una columna flex (no tres bloques
- * `absolute` anclados cada uno desde un borde distinto): eso es lo que hacía
- * que, en una pantalla baja, las fact cards (ancladas abajo) se superpusieran
- * con las fotos del stage (ancladas al 28% desde arriba). Con flex, uno
- * empuja al siguiente — no se pisan en ningún alto de viewport, con o sin
- * movimiento. En calma, `usePinnedScrub` no arma el pin (controla su propio
- * `prefers-reduced-motion`): el fundido de entrada corre aparte, con `calmReveal`.
+ * ChapterWorlds — the dark chapter, drawn on black paper. The pig against a
+ * brick wall (with two buttons that open a note each), then a farmhouse at
+ * dusk with a sound that swells and fades, then the dinner table rising over
+ * it. A torn red-wood board rises at the end: the closing chapter.
  */
 export default function ChapterWorlds({
-  label = 'Chapter 4',
-  headline = 'Headline 1',
   facts = DEFAULT_FACTS,
-  sceneOpen = 'Scene 1',
-  sceneClosed = 'Scene 2',
-  hotspotOpen = 'Hotspot 1',
-  hotspotClosed = 'Hotspot 2',
+  captions = CAPTIONS,
+  dialogue = 'Dialogue 5 — replace.',
+  sfx = 'SQUEEE',
 }) {
   const root = useRef(null)
-  const [openId, setOpenId] = useState(null)
   const reduced = useReducedMotion()
+  const [open, setOpen] = useState(-1)
 
   useGSAP(
     () => {
       if (reduced) return calmReveal('[data-comic-reveal]')
+      const scene = root.current
+      const q = (sel) => gsap.utils.toArray(sel, scene)
+      const pin = root.current.querySelector('[data-pin]')
+      const [wall, farm, dinner] = q('[data-dark-card]')
+      const caps = q('[data-dark-caption]')
+      const sfxEl = root.current.querySelector('[data-sfx]')
+      const wood = root.current.querySelector('[data-curtain-wood]')
+      const H = () => pin.clientHeight
+
+      gsap.set([farm, dinner], { y: () => H() * 1.1, transformOrigin: '50% 50%' })
+      // the wall is already on its way up when the page arrives (no empty paper)
+      gsap.set(wall, { y: () => H() * 0.55, transformOrigin: '50% 50%' })
+      q('[data-char]').forEach((c) => gsap.set(c, { y: () => -H() * 0.07 }))
+      gsap.set(caps, { opacity: 0, y: 20 })
+      gsap.set(sfxEl, { scale: 0.4, opacity: 0, transformOrigin: '50% 50%' })
+      gsap.set(root.current.querySelector('[data-bubble]'), { scale: 0.5, opacity: 0, transformOrigin: '50% 80%' })
+      gsap.set(wood, { yPercent: 106 })
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.4,
+          pin,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      })
+
+      const land = (card, at, dur = 1.8) => {
+        tl.to(card, { y: 0, duration: dur, ease: 'power2.out' }, at)
+        const ch = card.querySelector('[data-char]')
+        if (ch) tl.to(ch, { y: 0, duration: 1.8, ease: 'power2.out' }, at)
+        tl.fromTo(card.querySelector('[data-card-bg]'), { scale: 1.1 }, { scale: 1, duration: 2.4, ease: 'power1.out' }, at)
+      }
+
+      land(wall, 0, 1.2)
+      tl.to(caps[0], { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(2)' }, 0.6)
+      tl.to(root.current.querySelector('[data-bubble]'), { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.8)' }, 1.4)
+      // a beat to stop and open the notes
+      tl.to(caps[0], { opacity: 0, y: -14, duration: 0.5 }, 3.6)
+      tl.to(wall, { y: () => -H() * 1.1, duration: 1.8, ease: 'power2.in' }, 3.6)
+      land(farm, 3.8)
+      tl.to(caps[1], { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(2)' }, 4.8)
+      // the sound swells across the barn and fades
+      tl.to(sfxEl, { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(2)' }, 5.0)
+      tl.to(sfxEl, { scale: 1.5, opacity: 0.2, duration: 1.4, ease: 'power1.in' }, 5.7)
+      tl.to(caps[1], { opacity: 0, y: -14, duration: 0.5 }, 6.8)
+      land(dinner, 6.8)
+      tl.to(farm, { scale: 0.8, y: () => -H() * 0.18, duration: 1.8, ease: 'power1.out' }, 6.8)
+      tl.fromTo(dinner.querySelector('[data-prop]'), { xPercent: 40 }, { xPercent: 0, duration: 1.8, ease: 'power2.out' }, 7.2)
+      tl.to(caps[2], { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(2)' }, 7.8)
+      tl.to(caps[2], { opacity: 0, duration: 0.5 }, 9.6)
+      tl.to(wood, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, 9.6)
+
+      const boil = { f: 0 }
+      tl.fromTo(boil, { f: 0 }, { f: 80, duration: 11.2, ease: 'none', onUpdate: () => boilTo(scene, boil.f) }, 0)
+
+      return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 18]], { gsap, trackPointer })
     },
     { scope: root, dependencies: [reduced] },
   )
 
-  usePinnedScrub(root, {
-    scrub: 0.4,
-    build: ({ root: el, tl }) => {
-      const head = el.querySelector('[data-worlds-head]')
-      const stage = el.querySelector('[data-stage-worlds]')
-      const openWorld = el.querySelector('[data-world="open"]')
-      const closedWorld = el.querySelector('[data-world="closed"]')
-      const openImg = el.querySelector('[data-world-img="open"]')
-      const closedImg = el.querySelector('[data-world-img="closed"]')
-      const crack = el.querySelector('[data-crack]')
-      const hotspots = gsap.utils.toArray(el.querySelectorAll('[data-hotspot]'))
-      const cards = gsap.utils.toArray(el.querySelectorAll('[data-fact]'))
-      const pulse = gsap.utils.toArray(el.querySelectorAll('[data-pulse]'))
-
-      // Entrada suave — siempre algo visible (nunca ±55% fuera del overflow)
-      gsap.set(openWorld, { xPercent: -18, rotate: -2, opacity: 0.55 })
-      gsap.set(closedWorld, { xPercent: 18, rotate: 2, opacity: 0.55 })
-      gsap.set(hotspots, { scale: 0.5, opacity: 0 })
-      gsap.set(cards, { y: 48, opacity: 0 })
-      gsap.set(crack, { scaleY: 0, opacity: 0 })
-      gsap.set(pulse, { scale: 0.7, opacity: 0 })
-      gsap.set(stage, { opacity: 1 })
-
-      tl.fromTo(
-        head,
-        { opacity: 0, y: 28 },
-        { opacity: 1, y: 0, duration: 1 },
-        0,
-      )
-
-      tl.to(
-        openWorld,
-        { xPercent: 0, rotate: -0.6, opacity: 1, duration: 2.2 },
-        0.6,
-      )
-      tl.to(
-        closedWorld,
-        { xPercent: 0, rotate: 0.6, opacity: 1, duration: 2.2 },
-        0.6,
-      )
-      tl.fromTo(
-        openImg,
-        { scale: 1.14, xPercent: -4 },
-        { scale: 1.04, xPercent: 0, duration: 2.2 },
-        0.6,
-      )
-      tl.fromTo(
-        closedImg,
-        { scale: 1.14, xPercent: 4 },
-        { scale: 1.04, xPercent: 0, duration: 2.2 },
-        0.6,
-      )
-      tl.to(crack, { scaleY: 1, opacity: 1, duration: 1.2 }, 2)
-
-      tl.to(hotspots, { scale: 1, opacity: 1, stagger: 0.18, duration: 0.8 }, 2.8)
-      tl.to(pulse, { scale: 1.7, opacity: 0, stagger: 0.18, duration: 1.2 }, 3)
-      tl.to(pulse, { scale: 0.85, opacity: 0.5, duration: 0.01 }, 4.2)
-      tl.to(pulse, { scale: 1.9, opacity: 0, stagger: 0.12, duration: 1.3 }, 4.25)
-
-      tl.to(openImg, { scale: 1.1, xPercent: 2, duration: 2.2 }, 3.8)
-      tl.to(closedImg, { scale: 1.1, xPercent: -2, duration: 2.2 }, 3.8)
-      tl.to(head, { opacity: 0.4, y: -8, duration: 1 }, 4)
-
-      // Cards suben SIN empujar los mundos fuera del viewport
-      tl.to(cards, { y: 0, opacity: 1, stagger: 0.2, duration: 1.2 }, 5.2)
-      tl.to(stage, { yPercent: -6, scale: 0.94, duration: 1.4 }, 5.2)
-    },
-  })
+  if (reduced) {
+    return (
+      <section id="chapter-worlds" ref={root} className="flex flex-col items-center gap-20 px-4 py-24 text-white" style={DARK_PAPER}>
+        <p data-comic-reveal className="max-w-2xl text-center font-semibold">{captions[0]}</p>
+        <div data-comic-reveal>
+          <WallCard line={dialogue} facts={facts} open={open} setOpen={setOpen} />
+        </div>
+        <p data-comic-reveal className="max-w-2xl text-center font-semibold">{captions[1]}</p>
+        <div data-comic-reveal>
+          <FarmhouseCard sfx={sfx} />
+        </div>
+        <p data-comic-reveal className="max-w-2xl text-center font-semibold">{captions[2]}</p>
+        <div data-comic-reveal>
+          <DinnerCard />
+        </div>
+      </section>
+    )
+  }
 
   return (
-    <section
-      id="chapter-worlds"
-      ref={root}
-      className="relative h-[620vh] bg-[#1a1512] text-white calm:h-auto"
-    >
-      <div
-        data-pin
-        className="relative flex h-svh flex-col justify-center gap-4 overflow-hidden px-4 py-6 calm:h-auto calm:overflow-visible calm:py-16 md:gap-6 md:px-8 md:py-8 md:calm:py-24"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 30%, rgba(232,90,36,0.16), transparent 55%), #1a1512',
-          }}
-        />
-
-        {/* Headline */}
-        <div data-worlds-head data-comic-reveal className="relative z-30 shrink-0 text-center">
-          <p className="mb-2 text-[11px] tracking-[0.28em] text-comic-flare uppercase">
-            {label}
-          </p>
-          <h2 className="mx-auto max-w-3xl font-brico text-[clamp(1.7rem,4vw,3rem)] leading-[0.95] font-extrabold tracking-[-0.03em]">
-            {headline}
-          </h2>
-        </div>
-
-        {/* Stage */}
-        <div
-          data-stage-worlds
-          data-comic-reveal
-          className="relative z-20 mx-auto grid w-full max-w-4xl shrink-0 gap-4 md:grid-cols-2 md:gap-6"
-        >
-          <span
-            data-crack
-            aria-hidden="true"
-            className="absolute top-[6%] bottom-[6%] left-1/2 z-20 hidden w-px origin-top bg-comic-flare md:block"
-          />
-
-          <div data-world="open" className="relative will-change-transform">
-            <PaperFrame className="!w-full" shadow>
-              <div className="relative h-[min(32vh,240px)] overflow-hidden sm:h-[min(36vh,280px)] md:h-[min(38vh,320px)]">
-                <img
-                  data-world-img="open"
-                  {...imgAttrs(heroRoad, variants)}
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover will-change-transform"
-                  draggable={false}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
-                <p className="absolute top-3 left-3 text-[11px] tracking-[0.25em] text-white/85 uppercase">
-                  {sceneOpen}
-                </p>
-                <span
-                  data-pulse
-                  aria-hidden="true"
-                  className="absolute top-[48%] left-[32%] h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-comic-flare/80"
-                />
-                <button
-                  type="button"
-                  data-hotspot
-                  onClick={() => setOpenId(openId === 'lab' ? null : 'lab')}
-                  className="tpl-hit absolute top-[48%] left-[32%] z-10 max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3"
-                >
-                  {hotspotOpen}
-                </button>
-              </div>
-            </PaperFrame>
-          </div>
-
-          <div data-world="closed" className="relative will-change-transform">
-            <PaperFrame className="!w-full" shadow>
-              <div className="relative h-[min(32vh,240px)] overflow-hidden sm:h-[min(36vh,280px)] md:h-[min(38vh,320px)]">
-                <img
-                  data-world-img="closed"
-                  {...imgAttrs(closedYards, variants)}
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover will-change-transform"
-                  draggable={false}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/25" />
-                <p className="absolute top-3 left-3 text-[11px] tracking-[0.25em] text-white/85 uppercase">
-                  {sceneClosed}
-                </p>
-                <span
-                  data-pulse
-                  aria-hidden="true"
-                  className="absolute top-[44%] right-[20%] h-14 w-14 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-comic-flare/80"
-                />
-                <button
-                  type="button"
-                  data-hotspot
-                  onClick={() => setOpenId(openId === 'yard' ? null : 'yard')}
-                  className="tpl-hit absolute top-[44%] right-[20%] z-10 max-w-[9.5rem] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3"
-                >
-                  {hotspotClosed}
-                </button>
-              </div>
-            </PaperFrame>
-          </div>
-        </div>
-
-        {/* Fact cards — mismo ancho que el stage, debajo en la columna flex. */}
-        <div
-          data-comic-reveal
-          className="relative z-30 mx-auto grid w-full max-w-4xl shrink-0 gap-3 md:grid-cols-2 md:gap-4"
-        >
-          {facts.map((fact) => {
-            const active = openId === fact.id
-            return (
-              <article
-                key={fact.id}
-                data-fact
-                className={`border border-white/15 bg-[#f7f4ee] p-4 text-[#2a2622] transition-shadow duration-300 md:p-5 ${
-                  active
-                    ? 'ring-2 ring-comic-flare shadow-[0_12px_40px_rgba(232,90,36,0.25)]'
-                    : ''
-                }`}
+    <section id="chapter-worlds" ref={root} className="relative h-[620vh]" style={DARK_PAPER}>
+      <div data-pin className="relative h-svh overflow-hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-[10%] z-40 flex justify-center px-6 md:top-[9%]">
+          <div className="relative h-20 w-full max-w-3xl text-center">
+            {captions.map((text) => (
+              <p
+                key={text}
+                data-dark-caption
+                className="absolute inset-x-0 text-[15px] font-semibold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] md:text-lg"
               >
-                <h3 className="mb-1 font-brico text-lg font-bold tracking-[-0.02em] md:text-xl">
-                  {fact.title}
-                </h3>
-                <p className="mb-2 text-xs leading-relaxed text-[#2a2622]/75 md:text-sm">
-                  {fact.blurb}
-                </p>
-                  <p className="text-xs leading-relaxed md:text-sm">
-                    {fact.concern}
-                  </p>
-              </article>
-            )
-          })}
+                {text}
+              </p>
+            ))}
+          </div>
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 top-[28%] z-10 flex justify-center">
+          <div data-dark-card className="will-change-transform">
+            <WallCard line={dialogue} facts={facts} open={open} setOpen={setOpen} />
+          </div>
+        </div>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[30%] z-20 flex justify-center">
+          <div data-dark-card className="will-change-transform">
+            <FarmhouseCard sfx={sfx} />
+          </div>
+        </div>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[44%] z-30 flex justify-center">
+          <div data-dark-card className="will-change-transform">
+            <DinnerCard />
+          </div>
+        </div>
+        <div
+          data-curtain-wood
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 -top-9 -bottom-2 z-50 will-change-transform"
+          style={{ filter: 'drop-shadow(0 -8px 14px rgba(0,0,0,0.5))' }}
+        >
+          <div className="h-full w-full" style={{ ...WOOD, clipPath: TORN_TOP }} />
         </div>
       </div>
     </section>

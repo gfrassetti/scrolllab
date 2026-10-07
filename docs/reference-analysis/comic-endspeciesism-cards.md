@@ -77,3 +77,26 @@ siguiente.
 Rayitas horizontales sobre una línea vertical, con un cuadradito en cada capítulo;
 el activo muestra su nombre y el cuadradito naranja. Cambia de «An Unexpected Bond»
 a «A Fork in the Road» cuando entra la tarjeta del cerdo.
+
+## Lo que sigue (6600 → final), leído igual
+
+1. **Zoom al granero → tres planos encadenados** (6600–9600). Cada plano entra
+   ya agrandado y se aleja hasta encajar en pantalla: interior de los corrales
+   (×2,0 → ×1,7), el complejo de galpones al atardecer (×2,8 → ×1), la vista
+   aérea de los galpones (×1,5 → ×1). Sube papel gris rasgado y tapa la aérea.
+2. **«Two Worlds Collide» — tres tarjetas apiladas** (9350–11850), sobre papel
+   gris, texto negro arriba: porche (perro atrapando algo, globo a la derecha),
+   dormitorio (una mano lo acaricia, globo a la izquierda), baño (toallas,
+   champú, globo a la derecha). Cada tarjeta nueva sube desde abajo y la
+   anterior se achica a ~0,8; se alternan corridas a la izquierda y a la
+   derecha (x 137 → 308 → 137).
+3. **Papel negro rasgado** sube (11850). Pared de ladrillo con el cerdo triste,
+   globo y dos botones a los costados («What's going on at…») que abren una
+   ficha. Después, tarjeta del galpón al atardecer con la onomatopeya que crece
+   y se desvanece; debajo sube la tarjeta del perro a la mesa (plato, una mano
+   con cuchillo). Texto blanco arriba en cada una.
+4. **Madera roja** (15600 →): postal inclinada «the tale of two tails» (mitad
+   perro, mitad cerdo), texto y un contador «desde que abriste la página» con
+   una grilla de tarjetas de animales dibujados a lápiz y números que suben.
+   Cierre: titular grande + dos tarjetas («Reach out», «Support us — coming
+   soon»), links del pie.
