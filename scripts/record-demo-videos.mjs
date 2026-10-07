@@ -103,7 +103,7 @@ const locales = {
 const COPY = {
   es: {
     brand: 'Scroll Lab',
-    hookKicker: 'Scrollytelling',
+    hookKicker: 'Templates storytelling',
     hook: 'Webs que cuentan una historia mientras scrolleás',
     what: 'Un modelo listo para usar, con el código incluido',
     endTitle: 'Llevate el código y usalo en tu proyecto',
@@ -111,7 +111,7 @@ const COPY = {
   },
   en: {
     brand: 'Scroll Lab',
-    hookKicker: 'Scrollytelling',
+    hookKicker: 'Storytelling templates',
     hook: 'Websites that tell a story as you scroll',
     what: 'A ready-to-use template, source code included',
     endTitle: 'Get the code and use it in your project',
