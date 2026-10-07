@@ -12,7 +12,11 @@ const EMAIL_PREFIX = {
   welcome: "welcomeEmail",
   canceled: "canceledEmail",
   trialReminder: "trialReminderEmail",
+  charge: "chargeEmail",
+  paymentFailed: "paymentFailedEmail",
 };
+// Mails por evento: uno por cobro (`ref`), no uno por suscripción.
+const PER_EVENT = new Set(["charge", "paymentFailed"]);
 function emailPrefix(kind) {
   const p = EMAIL_PREFIX[kind];
   if (!p) throw new Error(`Mail de suscripción desconocido: ${kind}`);
@@ -24,7 +28,40 @@ function subscriptionEmailGate(kind, sub, at, withinMs) {
   if (kind === "trialReminder") {
     return trialReminderDue(sub, at.getTime(), withinMs);
   }
+  if (PER_EVENT.has(kind)) return true;
   return sub.status === "authorized";
+}
+
+async function claimPerEventEmail(subId, p, ref) {
+  const now = new Date();
+  const staleBefore = new Date(now.getTime() - 10 * 60 * 1000);
+  if (isFileMode()) {
+    const sub = await fileDb.findSubscriptionById(subId);
+    if (!sub || sub[`${p}Ref`] === ref) return null;
+    if (sub[`${p}SendingAt`] && new Date(sub[`${p}SendingAt`]) >= staleBefore) {
+      return null;
+    }
+    sub[`${p}Ref`] = ref;
+    sub[`${p}SendingAt`] = now.toISOString();
+    delete sub[`${p}Error`];
+    await sub.save();
+    return sub;
+  }
+  return MongoSubscription.findOneAndUpdate(
+    {
+      _id: subId,
+      [`${p}Ref`]: { $ne: ref },
+      $or: [
+        { [`${p}SendingAt`]: null },
+        { [`${p}SendingAt`]: { $lt: staleBefore } },
+      ],
+    },
+    {
+      $set: { [`${p}Ref`]: ref, [`${p}SendingAt`]: now },
+      $unset: { [`${p}Error`]: 1 },
+    },
+    { new: true },
+  );
 }
 
 export const subscriptionsRepo = {
@@ -43,6 +80,28 @@ export const subscriptionsRepo = {
     return MongoSubscription.findOne({ mpPreapprovalId: String(preapprovalId) });
   },
   // Vigente = `authorized` o `paused` (una pausa respeta lo ya pagado).
+  /**
+   * Suscripción de Paddle por el id de la suscripción o, antes de que exista,
+   * por la transacción del alta.
+   * @param {{ subscriptionId?: string | null, transactionId?: string | null }} ids
+   */
+  async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
+    if (isFileMode()) {
+      return fileDb.findSubscriptionByPaddle({ subscriptionId, transactionId });
+    }
+    if (subscriptionId) {
+      const bySub = await MongoSubscription.findOne({
+        paddleSubscriptionId: String(subscriptionId),
+      });
+      if (bySub) return bySub;
+    }
+    if (transactionId) {
+      return MongoSubscription.findOne({
+        paddleTransactionId: String(transactionId),
+      });
+    }
+    return null;
+  },
   async findActiveSubscriptionByUser(userId) {
     if (isFileMode()) return fileDb.findActiveSubscriptionByUser(userId);
     return MongoSubscription.findOne({
@@ -66,15 +125,21 @@ export const subscriptionsRepo = {
   // `kind` (y su gate): 'welcome' (status authorized) | 'canceled' (canceledAt) |
   // 'trialReminder' (prueba sin cancelar que termina dentro de `withinMs`).
   // `now` solo lo inyectan los tests para mover el reloj de la prueba.
+  // 'charge' | 'paymentFailed' son por evento: `ref` (el cobro) es obligatorio
+  // y el claim pasa mientras el último mail reclamado sea de otro cobro.
   /**
    * @param {string} subId
    * @param {string} kind
-   * @param {{ withinMs?: number, now?: Date | string | number }} [options]
+   * @param {{ withinMs?: number, now?: Date | string | number, ref?: string }} [options]
    */
-  async claimSubscriptionEmail(subId, kind, { withinMs, now: at } = {}) {
+  async claimSubscriptionEmail(subId, kind, { withinMs, now: at, ref } = {}) {
     const p = emailPrefix(kind);
     if (kind === "trialReminder" && !(/** @type {number} */ (withinMs) > 0)) {
       return null;
+    }
+    if (PER_EVENT.has(kind)) {
+      if (!ref) return null;
+      return claimPerEventEmail(subId, p, String(ref));
     }
     const now = new Date();
     const trialNow = at ? new Date(at) : now;
@@ -143,19 +208,41 @@ export const subscriptionsRepo = {
   async releaseSubscriptionEmail(subId, kind, message) {
     const p = emailPrefix(kind);
     const safe = String(message || "Error de email").slice(0, 500);
+    // Por evento: soltar también el `Ref`, así un reintento del mismo cobro
+    // vuelve a intentar el mail.
+    const perEvent = PER_EVENT.has(kind);
     if (isFileMode()) {
       const sub = await fileDb.findSubscriptionById(subId);
       if (!sub) return null;
       sub[`${p}Error`] = safe;
       delete sub[`${p}SendingAt`];
+      if (perEvent) delete sub[`${p}Ref`];
       await sub.save();
       return sub;
     }
     return MongoSubscription.findByIdAndUpdate(
       subId,
-      { $set: { [`${p}Error`]: safe }, $unset: { [`${p}SendingAt`]: 1 } },
+      {
+        $set: { [`${p}Error`]: safe },
+        $unset: {
+          [`${p}SendingAt`]: 1,
+          ...(perEvent ? { [`${p}Ref`]: 1 } : {}),
+        },
+      },
       { new: true },
     );
+  },
+
+  // Altas de LAB cuyo pago se rechazó hace más de un rato (`before`) y siguen
+  // sin activarse ni avisarse (barrido de rechazos, services/paymentFailedSweep.js).
+  async listCheckoutFailuresDue({ before }) {
+    if (isFileMode()) return fileDb.listCheckoutFailuresDue({ before });
+    return MongoSubscription.find({
+      status: "pending",
+      abandonedAt: null,
+      paymentFailedAt: { $ne: null, $lte: before },
+      paymentFailedEmailSentAt: null,
+    }).limit(200);
   },
 
   // Pruebas de LAB que terminan dentro de `withinMs` y todavía no recibieron el

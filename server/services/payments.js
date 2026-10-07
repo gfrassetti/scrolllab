@@ -9,6 +9,7 @@ import {
 import {
   fulfillApprovedPayment,
   reverseOrderPayment,
+  notifyOrderPaymentFailed,
   REVERSED_PAYMENT_STATUSES,
 } from './orders.js'
 
@@ -96,6 +97,9 @@ export async function handleMercadoPagoNotification({
       await applyUpgradePayment({ payment, config })
     } else if (REVERSED_PAYMENT_STATUSES.has(payment.status)) {
       await reverseOrderPayment({ payment, config })
+    } else if (payment.status === 'rejected') {
+      // El comprador puede reintentar en MP; el mail sale una vez por orden.
+      await notifyOrderPaymentFailed({ orderId: String(payment.external_reference || ''), config })
     } else {
       await fulfillApprovedPayment({ payment, config })
     }

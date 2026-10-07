@@ -5,6 +5,7 @@ import { leadsRepo } from "./repositories/leads.js";
 import { ordersRepo } from "./repositories/orders.js";
 import { hostedRepo } from "./repositories/hosted.js";
 import { subscriptionsRepo } from "./repositories/subscriptions.js";
+import { eventsRepo } from "./repositories/events.js";
 
 /**
  * Conecta a Mongo o usa file store.
@@ -65,6 +66,7 @@ export const db = {
   ...ordersRepo,
   ...hostedRepo,
   ...subscriptionsRepo,
+  ...eventsRepo,
 
   async isReady() {
     if (getMode() === "file") return true;

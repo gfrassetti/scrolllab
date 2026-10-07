@@ -7,6 +7,7 @@ import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatCouponDate } from '../lib/coupon'
+import { formatAmount } from '../lib/pricing'
 import { orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
@@ -229,7 +230,7 @@ export default function AccountPage() {
                         {order.items.map((i) => i.title).join(', ')}
                       </p>
                       <p className="mt-1 text-sm text-ink/60">
-                        {order.total?.toLocaleString(dateLocale)}{' '}
+                        {order.total != null && formatAmount(order.total, dateLocale)}{' '}
                         {order.currency_id} · <OrderStatus status={order.status} />
                       </p>
                       {order.status === 'pending' && (

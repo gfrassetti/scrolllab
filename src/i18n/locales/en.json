@@ -179,7 +179,19 @@
     "previewTablet": "Tablet",
     "previewMobile": "Mobile",
     "previewNote": "This is the same embed that goes on your site, with your unsaved edits. Links don't navigate here.",
-    "domainsDropped": "Not domains, not saved: {{list}}"
+    "domainsDropped": "Not domains, not saved: {{list}}",
+    "paddle": {
+      "planPausedNote": "paused in Paddle · won’t renew",
+      "planPastDue": "We’re confirming the charge with Paddle. If it doesn’t go through, the plan is suspended on {{date}}.",
+      "planPaymentFailed": "We couldn’t charge your plan. Paddle will retry; if it isn’t resolved, it’s suspended on {{date}}. Update your card so the next attempt goes through.",
+      "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
+      "planChangeHint": "You switch plans without canceling. Moving up, Paddle charges your card only the difference for the rest of your period; moving down costs nothing. The new price applies from your next charge.",
+      "changeConfirmPaid": "You move to {{plan}} now. Paddle charges {{amount}} to your card for the rest of your period ({{days}}); from {{date}}, {{price}} {{per}}.",
+      "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Paddle charges {{price}} {{per}}.",
+      "changePay": "Charge {{amount}} and switch",
+      "returnPending": "We don’t see Paddle’s confirmation yet. If you already paid, it shows up in a few seconds.",
+      "updateCard": "Update card"
+    }
   },
   "common": {
     "loading": "Loading…",
@@ -1150,7 +1162,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective September 28, 2026",
+    "effectiveDate": "Effective October 7, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -1163,7 +1175,7 @@
       },
       {
         "title": "Prices and payments",
-        "body": "Current prices are shown in the catalog and builder. The purchase total is the one shown when you pay with Mercado Pago, subject to their approval. An order is considered paid when Mercado Pago confirms the payment."
+        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Paddle.com, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Paddle confirms the payment, and the purchase is also governed by Paddle’s checkout buyer terms (paddle.com/legal/checkout-buyer-terms)."
       },
       {
         "title": "Delivery and downloads",
@@ -1171,7 +1183,7 @@
       },
       {
         "title": "Refunds",
-        "body": "Because products are digital and available immediately, confirmed purchases are non-refundable unless the file cannot be delivered, has a substantial technical defect, or applicable law requires otherwise. Contact us so we can review the case."
+        "body": "Because products are digital and available immediately, confirmed purchases are non-refundable unless the file cannot be delivered, has a substantial technical defect, or applicable law requires otherwise. Contact us so we can review the case. An approved refund goes back to the original payment method, through Mercado Pago or Paddle depending on how you paid, and the license and downloads for that order are revoked."
       },
       {
         "title": "Permitted use",
@@ -1199,7 +1211,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly) through Mercado Pago and renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos or, if you pay from another country, through Paddle.com in US dollars as our authorized reseller; it renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1222,5 +1234,20 @@
   },
   "motionToggle": {
     "label": "Show demos with animations"
+  },
+  "pay": {
+    "payAr": "Pay with Mercado Pago →",
+    "payIntl": "Pay by card (USD) →",
+    "switchToIntlLead": "Paying from outside Argentina?",
+    "switchToIntl": "Pay in US dollars by card",
+    "switchToArLead": "Paying from Argentina?",
+    "switchToAr": "Pay in pesos with Mercado Pago",
+    "trustIntl": "Card payment via Paddle · license included",
+    "intlTaxNote": "Paddle processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
+    "confirming": "Confirming your payment…",
+    "opening": "Opening the payment…",
+    "invalidLink": "That payment link isn’t valid. If you got it by email, write to us and we’ll send a new one.",
+    "openError": "We couldn’t open the payment. Try again in a few minutes or write to us.",
+    "closed": "You closed the payment without finishing it: you haven’t been charged."
   }
 }

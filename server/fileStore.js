@@ -113,6 +113,32 @@ export const fileDb = {
   async findOrderById(id) {
     return withSave(read('orders').find((o) => o.id === String(id)) || null)
   },
+  async findOrderByPaddleTransaction(transactionId) {
+    return withSave(
+      read('orders').find((o) => o.paddleTransactionId === String(transactionId)) ||
+        null,
+    )
+  },
+  async deletePendingOrder(orderId) {
+    const rows = read('orders')
+    const idx = rows.findIndex((o) => o.id === String(orderId) && o.status === 'pending')
+    if (idx < 0) return false
+    rows.splice(idx, 1)
+    write('orders', rows)
+    return true
+  },
+  async listFailedOrdersDue({ before }) {
+    const cut = new Date(before).getTime()
+    return read('orders')
+      .filter(
+        (o) =>
+          o.status === 'pending' &&
+          o.paymentFailedAt &&
+          new Date(o.paymentFailedAt).getTime() <= cut &&
+          !o.failedEmailSentAt,
+      )
+      .map(withSave)
+  },
   async findOrdersByUser(userId) {
     return read('orders')
       .filter((o) => String(o.userId) === String(userId))
@@ -214,6 +240,16 @@ export const fileDb = {
       ) || null,
     )
   },
+  async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
+    const rows = read('subscriptions')
+    const row =
+      (subscriptionId &&
+        rows.find((s) => s.paddleSubscriptionId === String(subscriptionId))) ||
+      (transactionId &&
+        rows.find((s) => s.paddleTransactionId === String(transactionId))) ||
+      null
+    return withSaveDoc('subscriptions', row)
+  },
   async findActiveSubscriptionByUser(userId) {
     return (
       read('subscriptions')
@@ -232,6 +268,19 @@ export const fileDb = {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .map((s) => withSaveDoc('subscriptions', s))
   },
+  async listCheckoutFailuresDue({ before }) {
+    const cut = new Date(before).getTime()
+    return read('subscriptions')
+      .filter(
+        (s) =>
+          s.status === 'pending' &&
+          !s.abandonedAt &&
+          s.paymentFailedAt &&
+          new Date(s.paymentFailedAt).getTime() <= cut &&
+          !s.paymentFailedEmailSentAt,
+      )
+      .map((s) => withSaveDoc('subscriptions', s))
+  },
   async listTrialReminderCandidates({ now, withinMs }) {
     return read('subscriptions')
       .filter((s) => trialReminderDue(s, now.getTime(), withinMs))
@@ -244,6 +293,39 @@ export const fileDb = {
     rows.splice(idx, 1)
     write('subscriptions', rows)
     return true
+  },
+
+  // Analítica propia: un evento por línea (NDJSON), solo se agrega al final.
+  async addEvents(rows) {
+    if (!rows.length) return
+    ensure()
+    fs.appendFileSync(
+      path.join(DATA_DIR, 'events.ndjson'),
+      rows.map((r) => JSON.stringify(r)).join('\n') + '\n',
+    )
+  },
+  async listEvents({ since } = {}) {
+    const p = path.join(DATA_DIR, 'events.ndjson')
+    if (!fs.existsSync(p)) return []
+    const t = since ? new Date(since).getTime() : 0
+    return fs
+      .readFileSync(p, 'utf8')
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => {
+        try {
+          return JSON.parse(line)
+        } catch {
+          return null
+        }
+      })
+      .filter((e) => e && new Date(e.createdAt).getTime() >= t)
+  },
+  async listUsers() {
+    return read('users')
+  },
+  async listOrders() {
+    return read('orders')
   },
 
   // Leads (cupón de bienvenida). Alta idempotente por email.

@@ -80,11 +80,29 @@ export function formatArs(amount) {
   }).format(amount)
 }
 
+/**
+ * Monto de una orden sin símbolo (la UI pone el código de moneda al lado): con
+ * centavos solo si los hay, siempre dos (134,10, no 134,1).
+ * @param {number} amount
+ * @param {string} [locale]
+ */
+export function formatAmount(amount, locale) {
+  const n = Number(amount)
+  const cents = !Number.isInteger(n)
+  return n.toLocaleString(locale, {
+    minimumFractionDigits: cents ? 2 : 0,
+    maximumFractionDigits: cents ? 2 : 0,
+  })
+}
+
 export function formatUsd(amount) {
+  // Centavos solo si los hay (un cupón los deja): es lo que cobra Paddle.
+  const cents = !Number.isInteger(Number(amount))
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    maximumFractionDigits: 0,
+    minimumFractionDigits: cents ? 2 : 0,
+    maximumFractionDigits: cents ? 2 : 0,
   }).format(amount)
 }
 

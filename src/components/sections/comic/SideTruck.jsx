@@ -37,8 +37,6 @@ export default function SideTruck({ className = '' }) {
         </pattern>
       </defs>
 
-      <ellipse cx="450" cy="424" rx="410" ry="20" fill="#120b09" opacity="0.4" />
-
       {/* chassis */}
       <path d="M110 330 L810 330 L810 372 L110 372Z" fill="#161211" stroke={INK} strokeWidth="3" />
 

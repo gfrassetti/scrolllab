@@ -200,6 +200,20 @@ export function arsFromUsdOrNull(usd, rate) {
 }
 
 /**
+ * Precio en USD con cupón (lo que cobra Paddle afuera de Argentina): descuenta
+ * en centavos enteros, igual que el precio en pesos. `null` si la entrada o el
+ * porcentaje no sirven.
+ * @param {number} usd
+ * @param {number} percent descuento, 0 a menos de 100
+ * @returns {number | null} USD con hasta dos decimales
+ */
+export function discountedUsdOrNull(usd, percent) {
+  if (!Number.isFinite(usd)) return null
+  if (!Number.isFinite(percent) || percent < 0 || percent >= 100) return null
+  return Math.round(usd * (100 - percent)) / 100
+}
+
+/**
  * Precio en pesos con cupón: descuenta en USD (en centavos enteros) y redondea
  * igual que `arsFromUsdOrNull`, así el total de la orden es la suma de sus
  * líneas. `null` si la entrada o el porcentaje no sirven.

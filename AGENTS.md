@@ -1,6 +1,6 @@
 # AGENTS.md — SCROLLLAB (storytelling-pages-templates)
 
-Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro. Auth: Google (o login de desarrollo).
+Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro (Argentina, ARS) y Paddle (resto del mundo, USD, merchant of record — [`docs/paddle.md`](docs/paddle.md)); la pasarela sale sola por ubicación (un solo botón de pago). Auth: Google (o login de desarrollo).
 
 **Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. Brand: `src/lib/site.js` → `SCROLLLAB`.
 
@@ -221,6 +221,7 @@ npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bund
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
+npm run check:paddle-sandbox # transacciones (template, cupón, builder, LAB con prueba) contra el sandbox real de Paddle
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 npm run check:mobile   # cada sección de los 10 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
 npm run check:motion   # emulador de teléfono: gestos táctiles reales, CPU ×4, 10 templates + home, normal / reduce / forced (huecos, trabas, texto oculto)
@@ -340,9 +341,12 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 
 1. User logs in (`/login`) → session cookie.
 2. Adds SKU to cart (Zustand) or buys builder recipe (`custom:` + recipe array).
-3. `POST /api/checkout` creates Order + MP preference (or mock URL).
-4. Webhook / mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE.
-5. `/account` → signed download token → `GET /api/download/:token` (TTL + max 10 downloads).
+3. La pasarela sale sola por ubicación (país del request o zona horaria): Argentina → Mercado Pago en ARS; otro país → Paddle en USD. Un solo botón de pago; una línea discreta permite cambiar si la ubicación engaña (`PayRegionSwitch`).
+4. `POST /api/checkout` (`provider`) creates Order + MP preference, o la transacción de Paddle (overlay), o mock URL.
+5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/paddle`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en; un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
+6. `/account` → signed download token → `GET /api/download/:token` (TTL + max 10 downloads).
+
+LAB (suscripciones) usa la misma detección: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
 
 ## Architecture (extra)
 

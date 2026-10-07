@@ -49,6 +49,7 @@ export default function TemplatesZone({ t, templates, locale, rate, addItem, buy
               <article
                 key={template.id}
                 data-template-step
+                data-track-sku={template.sku}
                 aria-disabled={soon || undefined}
                 className={`flex min-h-[82svh] flex-col justify-center border-b border-ink/15 py-14 first:border-t md:min-h-svh md:py-20 ${
                     soon ? 'select-none' : ''

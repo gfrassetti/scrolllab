@@ -51,10 +51,23 @@ export const api = {
   },
   orders: () => request('/api/orders'),
   // El cupón viaja como código: el descuento lo calcula el servidor.
-  checkout: (items, couponCode) =>
+  // `provider`: 'mercadopago' (ARS) o 'paddle' (USD, cobro internacional).
+  checkout: (items, couponCode, { provider, locale } = {}) =>
     request('/api/checkout', {
       method: 'POST',
-      body: JSON.stringify(couponCode ? { items, couponCode } : { items }),
+      body: JSON.stringify({
+        items,
+        ...(couponCode ? { couponCode } : {}),
+        ...(provider ? { provider } : {}),
+        ...(locale ? { locale } : {}),
+      }),
+    }),
+  // Qué pasarelas hay y desde qué país viene el request (default del selector).
+  checkoutMethods: () => request('/api/checkout/methods'),
+  confirmPaddleCheckout: (transactionId) =>
+    request('/api/checkout/paddle/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ transactionId }),
     }),
   // Cupón de bienvenida de quien tiene sesión: lo crea la primera vez (y manda el mail).
   welcomeCoupon: (body) =>
@@ -94,11 +107,18 @@ export const api = {
 
   subscriptionPlans: () => request('/api/subscriptions/plans'),
   subscriptionMe: () => request('/api/subscriptions/me'),
-  subscribe: (plan, cycle) =>
+  subscribe: (plan, cycle, { provider, locale } = {}) =>
     request('/api/subscriptions', {
       method: 'POST',
-      body: JSON.stringify({ plan, cycle }),
+      body: JSON.stringify({
+        plan,
+        cycle,
+        ...(provider ? { provider } : {}),
+        ...(locale ? { locale } : {}),
+      }),
     }),
+  // Link de Paddle para cambiar la tarjeta de la suscripción.
+  subscriptionPaymentMethod: () => request('/api/subscriptions/payment-method'),
   subscriptionMockActivate: (url) => request(url, { method: 'POST' }),
   subscriptionSync: () =>
     request('/api/subscriptions/sync', { method: 'POST' }),

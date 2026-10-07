@@ -3,6 +3,8 @@ import { HOSTED_PLANS } from '../../catalog.js'
 import {
   sendSubscriptionWelcomeOnce,
   sendSubscriptionCanceledOnce,
+  sendSubscriptionChargeOnce,
+  sendSubscriptionPaymentFailedOnce,
 } from '../email.js'
 
 /**
@@ -20,6 +22,8 @@ export const FIRST_CHARGE_GRACE_DAYS = 1
 // Subir de plan: por debajo de esto la diferencia no se cobra (últimas horas
 // del período). ARS.
 export const MIN_UPGRADE_CHARGE = 1000
+// Lo mismo en USD (suscripciones de Paddle).
+export const MIN_UPGRADE_CHARGE_USD = 1
 
 // El checkout de la diferencia vence rápido: el monto depende de los días que
 // quedan. Nunca después del fin del período.
@@ -48,6 +52,49 @@ export function fireCanceled(sub, config) {
   )
 }
 
+/**
+ * Mail «cobro realizado» de una cuota (fire-and-forget, uno por cobro). El
+ * primer cobro de un alta sin prueba ya lo cuenta la bienvenida; con la prueba
+ * (o días pagos de una baja) el primer cobro sí avisa: la bienvenida no tenía
+ * monto cobrado.
+ * @param {any} sub
+ * @param {any} config
+ * @param {{ ref: string, firstCharge: boolean, amount?: number | null, currency?: string, paidAt?: any }} charge
+ */
+export function fireCharge(sub, config, { ref, firstCharge, amount, currency, paidAt }) {
+  if (firstCharge && !sub.trialEndsAt && !sub.firstChargeAt) return
+  sendSubscriptionChargeOnce({
+    subscription: sub,
+    config,
+    ref,
+    charge: { amount, currency, paidAt, periodEnd: sub.currentPeriodEnd },
+  }).catch((err) => console.error('subs charge email', err?.message))
+}
+
+/**
+ * Mail «pago rechazado» de LAB (fire-and-forget, uno por cobro). En una
+ * renovación dice hasta cuándo dura la gracia.
+ * @param {any} sub
+ * @param {any} config
+ * @param {{ ref: string, stage?: 'renewal' | 'checkout', updateUrl?: string | null }} failure
+ */
+export function firePaymentFailed(sub, config, { ref, stage = 'renewal', updateUrl = null }) {
+  const end = toMs(sub.currentPeriodEnd)
+  const days = Math.max(0, Number(config.hostedGraceDays) || 0)
+  const graceEndsAt =
+    stage === 'renewal' && end != null
+      ? new Date(Math.max(end, Date.now()) + (sub.lastPaidAt ? days : Math.min(days, FIRST_CHARGE_GRACE_DAYS)) * DAY_MS)
+      : null
+  sendSubscriptionPaymentFailedOnce({
+    subscription: sub,
+    config,
+    ref,
+    stage,
+    updateUrl,
+    graceEndsAt,
+  }).catch((err) => console.error('subs payment-failed email', err?.message))
+}
+
 export const FREE = (config, extra = {}) => ({
   plan: 'free',
   cycle: null,
@@ -64,6 +111,8 @@ export const FREE = (config, extra = {}) => ({
   paymentFailed: false,
   lapsedPlan: null,
   paidPlan: null,
+  provider: null,
+  currency_id: null,
   ...extra,
 })
 

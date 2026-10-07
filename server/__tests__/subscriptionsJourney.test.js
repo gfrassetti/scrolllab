@@ -129,14 +129,20 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal(me.trialing, false)
     assert.equal(me.pastDue, false)
     assert.equal(iso(me.currentPeriodEnd), '2026-11-08T15:00:00.000Z')
+    // Fin de la prueba: la bienvenida no tenía monto, el primer cobro avisa.
+    await waitFor(() => c.mails().length === 2, 'el mail del primer cobro')
+    assert.match(c.mails()[1].body.subject, /Recibimos tu pago/)
+    assert.match(c.mails()[1].body.text, /\$\s?99\.900/)
 
-    // Un mes después: renueva sola.
+    // Un mes después: renueva sola (y avisa el cobro, una vez).
     await c.goTo(38, 1)
     await mpCharges(pre)
     me = await c.me()
     assert.equal(iso(me.currentPeriodEnd), '2026-12-08T15:00:00.000Z')
     assert.equal(mp.charges(pre.id).length, 2)
     assert.ok(mp.charges(pre.id).every((a) => a.transaction_amount === 99900))
+    await waitFor(() => c.mails().length === 3, 'el mail de la renovación')
+    assert.match(c.mails()[2].body.subject, /Recibimos tu pago/)
 
     // Día 50: cancela. Sigue con acceso hasta lo pagado (8/12).
     await c.goTo(50)
@@ -148,9 +154,9 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     me = await c.me()
     assert.equal(me.plan, 'hosted_pro')
     assert.ok(me.canceledAt)
-    await waitFor(() => c.mails().length === 2, 'el mail de baja')
-    assert.match(c.mails()[1].body.text, /hasta el 8 de diciembre de 2026/)
-    assert.match(c.mails()[1].body.text, /No se te va a cobrar de nuevo/)
+    await waitFor(() => c.mails().length === 4, 'el mail de baja')
+    assert.match(c.mails()[3].body.text, /hasta el 8 de diciembre de 2026/)
+    assert.match(c.mails()[3].body.text, /No se te va a cobrar de nuevo/)
 
     await c.goTo(67)
     assert.equal((await c.me()).plan, 'hosted_pro')

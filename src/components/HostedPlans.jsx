@@ -6,6 +6,9 @@ import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
 import { gsap, useGSAP } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
+import { usePayRegion, providerForRegion } from '../lib/payRegion'
+import { openPaddleCheckout } from '../lib/paddleCheckout'
+import PayRegionSwitch from './PayRegionSwitch'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
 const tierIndex = (planId) => TIER_ORDER.indexOf(String(planId).replace('hosted_', ''))
@@ -34,6 +37,33 @@ function fmtArs(n, locale) {
   }).format(n)
 }
 
+/** Precio en la moneda de la pasarela: ARS (MP) o USD con centavos si los hay (Paddle). */
+function fmtMoney(n, currency, locale) {
+  if (currency !== 'USD') return fmtArs(n, locale)
+  const cents = !Number.isInteger(Number(n))
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'es-AR', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: cents ? 2 : 0,
+    maximumFractionDigits: cents ? 2 : 0,
+  }).format(n)
+}
+
+/** Precio de un plan en una moneda (los planes traen ARS y USD). */
+const planPrice = (p, cycle, currency) =>
+  currency === 'USD'
+    ? cycle === 'yearly'
+      ? p.priceYearlyUsd
+      : p.priceMonthlyUsd
+    : cycle === 'yearly'
+      ? p.priceYearly
+      : p.priceMonthly
+
+// Paddle tarda un instante en crear la suscripción después del pago: el sync
+// se reintenta unas veces antes de decir «todavía no la vemos».
+const PADDLE_SYNC_TRIES = 5
+const PADDLE_SYNC_WAIT_MS = 1500
+
 // El server manda `null` para "sin tope" (Infinity no es JSON) — ver
 // `quotaForWire` en server/app.js.
 const displayQuota = (n) => (Number.isFinite(n) ? n : '∞')
@@ -57,9 +87,23 @@ export default function HostedPlans() {
     paymentFailed,
     lapsedPlan,
     paidPlan,
+    provider: planProvider,
+    currency_id: planCurrency,
     refresh: refreshPlan,
   } = usePlan()
   const { t, locale } = useI18n()
+  // Desde dónde paga (Argentina → MP en pesos; otro país → Paddle en USD).
+  const region = usePayRegion((s) => s.region)
+  const setRegion = usePayRegion((s) => s.setRegion)
+  const paddleEnabled = usePayRegion((s) => s.paddleEnabled)
+  const loadRegion = usePayRegion((s) => s.load)
+  useEffect(() => {
+    loadRegion()
+  }, [loadRegion])
+  const intl = paddleEnabled && region === 'intl'
+  const paddleSub = planProvider === 'paddle'
+  // Textos que nombran a la pasarela: con una suscripción de Paddle, su variante.
+  const tp = (key, vars) => t(paddleSub ? `lab.paddle.${key}` : `lab.${key}`, vars)
   const root = useRef(null)
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -202,13 +246,47 @@ export default function HostedPlans() {
       .finally(() => refreshPlan())
   }, [upgradeReturn, searchParams, setSearchParams, refreshPlan, t])
 
-  const subscribe = async (planId, planCycle = cycle) => {
+  /** Después del overlay de Paddle: baja el estado sin esperar al webhook. */
+  const syncAfterPaddle = async () => {
+    for (let i = 0; i < PADDLE_SYNC_TRIES; i += 1) {
+      try {
+        const out = await api.subscriptionSync()
+        if (out?.status === 'authorized') {
+          setNotice(t('lab.returnSynced'))
+          return
+        }
+      } catch {
+        /* reintenta */
+      }
+      await new Promise((r) => setTimeout(r, PADDLE_SYNC_WAIT_MS))
+    }
+    setNotice(t('lab.paddle.returnPending'))
+  }
+
+  // `via`: la pasarela del alta. Reactivar mantiene la de la suscripción; un
+  // alta nueva usa la región elegida.
+  const subscribe = async (planId, planCycle = cycle, via) => {
     if (busy) return
     setBusy(planId)
     setError('')
     setNotice('')
+    const provider = via || (paddleEnabled ? providerForRegion(region) : 'mercadopago')
     try {
-      const res = await api.subscribe(planId, planCycle)
+      const res = await api.subscribe(planId, planCycle, { provider, locale })
+      if (res.provider === 'paddle' && res.transactionId) {
+        const result = await openPaddleCheckout({
+          environment: res.paddle?.environment,
+          clientToken: res.paddle?.clientToken,
+          transactionId: res.transactionId,
+          email: res.customerEmail,
+          locale,
+        })
+        if (result.status === 'completed') {
+          await syncAfterPaddle()
+          await refreshPlan()
+        }
+        return
+      }
       if (res.init_point) {
         window.location.href = res.init_point
         return
@@ -220,6 +298,20 @@ export default function HostedPlans() {
     } catch (err) {
       setError(err.message)
     } finally {
+      setBusy('')
+    }
+  }
+
+  // Cuota rechazada en Paddle: el link firmado para cambiar la tarjeta.
+  const updateCard = async () => {
+    if (busy) return
+    setBusy('card')
+    setError('')
+    try {
+      const { url } = await api.subscriptionPaymentMethod()
+      window.location.href = url
+    } catch (err) {
+      setError(err.message)
       setBusy('')
     }
   }
@@ -299,6 +391,12 @@ export default function HostedPlans() {
   // posible. Con plan pago: colapsada por default, el toggle la despliega.
   const comparisonVisible = !activePlan || showComparison
   const currentPlanMeta = plans.find((p) => p.id === activePlan)
+  // Moneda de la suscripción vigente, y la de la grilla: cambiar de plan sigue
+  // en la moneda de la suscripción; un alta nueva, en la de la región elegida.
+  const subCurrency = planCurrency || 'ARS'
+  const choosing = !activePlan || canResubscribe
+  const gridCurrency = choosing ? (intl ? 'USD' : 'ARS') : subCurrency
+  const reactivateVia = planProvider || undefined
 
   useGSAP(
     () => {
@@ -379,12 +477,7 @@ export default function HostedPlans() {
               {currentPlanMeta && (
                 <>
                   {' · '}
-                  {fmtArs(
-                    billingCycle === 'yearly'
-                      ? currentPlanMeta.priceYearly
-                      : currentPlanMeta.priceMonthly,
-                    locale,
-                  )}
+                  {fmtMoney(planPrice(currentPlanMeta, billingCycle, subCurrency), subCurrency, locale)}
                   {' '}
                   {t(billingCycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
                 </>
@@ -408,14 +501,24 @@ export default function HostedPlans() {
                     : 'border-accent/40 bg-accent/10'
                 }`}
               >
-                {t(paymentFailed ? 'lab.planPaymentFailed' : 'lab.planPastDue', {
+                {tp(paymentFailed ? 'planPaymentFailed' : 'planPastDue', {
                   date: fmtDate(graceEndsAt),
                 })}
               </p>
             )}
+            {paymentFailed && paddleSub && !canceledAt && (
+              <button
+                type="button"
+                onClick={updateCard}
+                disabled={!!busy}
+                className="btn mt-3 border-ink bg-ink text-bone hover:opacity-90 disabled:opacity-40"
+              >
+                {busy === 'card' ? '…' : t('lab.paddle.updateCard')}
+              </button>
+            )}
             {subscriptionStatus === 'paused' && !canceledAt && (
               <p className="mt-1 text-body-sm text-ink/50">
-                {t('lab.planPausedNote')}
+                {tp('planPausedNote')}
               </p>
             )}
             {canceledAt ? (
@@ -425,7 +528,7 @@ export default function HostedPlans() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => subscribe(plan, billingCycle)}
+                  onClick={() => subscribe(plan, billingCycle, reactivateVia)}
                   disabled={!!busy}
                   className="btn mt-3 border-accent bg-accent text-ink hover:opacity-85 disabled:opacity-40"
                 >
@@ -482,12 +585,9 @@ export default function HostedPlans() {
           <>
             {lapsedPlan && (
               <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm">
-                {t(
-                  subscriptionStatus === 'paused'
-                    ? 'lab.planLapsedPaused'
-                    : 'lab.planLapsed',
-                  { plan: tierName(lapsedPlan) },
-                )}
+                {subscriptionStatus === 'paused'
+                  ? t('lab.planLapsedPaused', { plan: tierName(lapsedPlan) })
+                  : tp('planLapsed', { plan: tierName(lapsedPlan) })}
               </p>
             )}
             <p className="mt-4 text-body-sm text-ink/55">
@@ -512,7 +612,7 @@ export default function HostedPlans() {
           {activePlan && !canResubscribe && (
             <>
               <p className="mt-6 text-body-sm text-ink/55">
-                {t(trialing ? 'lab.planChangeHintTrial' : 'lab.planChangeHint')}
+                {trialing ? t('lab.planChangeHintTrial') : tp('planChangeHint')}
               </p>
               <p className="mt-2 text-body-sm text-ink/50">
                 {t('lab.planCycleHint')}
@@ -538,9 +638,12 @@ export default function HostedPlans() {
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {plans.map((p) => {
-              const price = cycle === 'yearly' ? p.priceYearly : p.priceMonthly
+              const price = planPrice(p, cycle, gridCurrency)
               const saving = Math.round(
-                100 - (p.priceYearly / (p.priceMonthly * 12)) * 100,
+                100 -
+                  (planPrice(p, 'yearly', gridCurrency) /
+                    (planPrice(p, 'monthly', gridCurrency) * 12)) *
+                    100,
               )
               // Cancelada: el mismo plan en otro ciclo es una suscripción nueva.
               const isCurrent =
@@ -569,7 +672,7 @@ export default function HostedPlans() {
                     {t(`lab.tier.${p.tier}`)}
                   </p>
                   <p className="mt-3 text-title-sm font-medium tracking-[-0.02em]">
-                    {fmtArs(price, locale)}
+                    {fmtMoney(price, gridCurrency, locale)}
                     <span className="ml-1 text-body-sm font-normal text-ink/50">
                       {t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
                     </span>
@@ -601,7 +704,7 @@ export default function HostedPlans() {
                   ) : isCurrent && canResubscribe ? (
                     <button
                       type="button"
-                      onClick={() => subscribe(p.id)}
+                      onClick={() => subscribe(p.id, cycle, reactivateVia)}
                       disabled={!!busy}
                       className={`btn mt-5 w-full disabled:opacity-40 ${
                         featured
@@ -618,24 +721,25 @@ export default function HostedPlans() {
                   ) : activePlan && !canResubscribe && changeQuote?.plan === p.id ? (
                     <div className="mt-5 border-t border-ink/15 pt-4" role="group" aria-live="polite">
                       <p className="text-body-sm text-ink/75">
-                        {t(
-                          changeQuote.amount > 0
-                            ? 'lab.changeConfirmPaid'
-                            : changeQuote.trialing
-                              ? 'lab.changeConfirmTrial'
-                              : 'lab.changeConfirmFree',
-                          {
+                        {(() => {
+                          const qc = changeQuote.currency_id || subCurrency
+                          const vars = {
                             plan: tierName(p.id),
-                            amount: fmtArs(changeQuote.amount, locale),
+                            amount: fmtMoney(changeQuote.amount, qc, locale),
                             days:
                               changeQuote.days === 1
                                 ? t('lab.daysOne')
                                 : t('lab.daysMany', { n: changeQuote.days }),
-                            price: fmtArs(changeQuote.newPrice, locale),
+                            price: fmtMoney(changeQuote.newPrice, qc, locale),
                             per: t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth'),
                             date: fmtDate(changeQuote.priceEffectiveAt),
-                          },
-                        )}
+                          }
+                          return changeQuote.amount > 0
+                            ? tp('changeConfirmPaid', vars)
+                            : changeQuote.trialing
+                              ? t('lab.changeConfirmTrial', vars)
+                              : tp('changeConfirmFree', vars)
+                        })()}
                       </p>
                       <button
                         type="button"
@@ -646,7 +750,13 @@ export default function HostedPlans() {
                         {busy === p.id
                           ? '…'
                           : changeQuote.amount > 0
-                            ? t('lab.changePay', { amount: fmtArs(changeQuote.amount, locale) })
+                            ? tp('changePay', {
+                                amount: fmtMoney(
+                                  changeQuote.amount,
+                                  changeQuote.currency_id || subCurrency,
+                                  locale,
+                                ),
+                              })
                             : t('lab.changeYes', { plan: tierName(p.id) })}
                       </button>
                       <button
@@ -699,6 +809,14 @@ export default function HostedPlans() {
               )
             })}
           </div>
+          {paddleEnabled && choosing && user && (
+            <PayRegionSwitch
+              region={region}
+              onChange={setRegion}
+              disabled={!!busy}
+              className="mt-4"
+            />
+          )}
         </>
       )}
     </section>

@@ -4,14 +4,15 @@
  * descuento real lo calcula siempre POST /api/checkout; acá solo se muestra.
  */
 import { discountedArsFromUsd } from './pricing.js'
+import { discountedUsdOrNull } from '../domain/catalog.js'
 
 /**
  * Precio de una línea con el cupón: pesos (mismo redondeo que el servidor) o
- * USD en la UI en inglés. null si falta el precio de lista.
+ * USD (cobro internacional, Paddle). null si falta el precio de lista.
  */
 export function couponLinePrice({ usd, rate, percent, currency }) {
   if (usd == null) return null
-  if (currency === 'USD') return Math.round(usd * (100 - percent)) / 100
+  if (currency === 'USD') return discountedUsdOrNull(usd, percent)
   return discountedArsFromUsd(usd, rate, percent)
 }
 

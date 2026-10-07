@@ -5,8 +5,14 @@ import {
   HOSTED_PLANS,
   hostedPlanQuota,
   hostedPlanPrice,
+  hostedPlanPriceIn,
   isHostedPlanId,
 } from '../../catalog.js'
+import {
+  isPaddleSub,
+  changePaddlePlan,
+  previewPaddlePlanChange,
+} from './paddleSync.js'
 import {
   updatePreapprovalAmount,
   createUpgradePreference,
@@ -14,6 +20,7 @@ import {
 import {
   DAY_MS,
   MIN_UPGRADE_CHARGE,
+  MIN_UPGRADE_CHARGE_USD,
   UPGRADE_QUOTE_TTL_MS,
   UPGRADE_REF_PREFIX,
   toMs,
@@ -46,17 +53,19 @@ const planReason = (plan, cycle) =>
  * - Menos de `MIN_UPGRADE_CHARGE`: 0 (no vale un cobro por los últimos días).
  */
 export function quoteUpgrade(sub, targetPlan, now = Date.now()) {
-  const base = { amount: 0, newPrice: hostedPlanPrice(targetPlan, sub.cycle) }
+  // En la moneda de la suscripción: ARS (MP) o USD con centavos (Paddle).
+  const usd = sub.currency_id === 'USD'
+  const priceOf = (plan, cycle) => hostedPlanPriceIn(plan, cycle, usd ? 'USD' : 'ARS')
+  const base = { amount: 0, newPrice: priceOf(targetPlan, sub.cycle) }
   const w = paidWindow(sub, now)
   if (!w) return { ...base, reason: 'unpaid' }
   const periodEnd = new Date(w.end)
   const days = Math.ceil((w.end - now) / DAY_MS)
-  const diff =
-    hostedPlanPrice(targetPlan, w.cycle) - hostedPlanPrice(w.plan, w.cycle)
+  const diff = priceOf(targetPlan, w.cycle) - priceOf(w.plan, w.cycle)
   if (diff <= 0) return { ...base, reason: 'covered', periodEnd, days }
   const fraction = Math.min(1, Math.max(0, (w.end - now) / (w.end - w.start)))
-  const amount = Math.ceil(diff * fraction)
-  if (amount < MIN_UPGRADE_CHARGE) {
+  const amount = usd ? Math.ceil(diff * fraction * 100) / 100 : Math.ceil(diff * fraction)
+  if (amount < (usd ? MIN_UPGRADE_CHARGE_USD : MIN_UPGRADE_CHARGE)) {
     return { ...base, reason: 'minimal', periodEnd, days }
   }
   return { ...base, amount, reason: 'prorated', periodEnd, days }
@@ -138,6 +147,8 @@ function changeSummary(sub, targetPlan, quote) {
     currentPlan: sub.plan,
     cycle: sub.cycle,
     direction: isHigherPlan(targetPlan, sub.plan) ? 'upgrade' : 'downgrade',
+    provider: sub.provider || 'mercadopago',
+    currency_id: sub.currency_id || 'ARS',
     amount: quote.amount,
     days: quote.days ?? null,
     newPrice: quote.newPrice,
@@ -147,10 +158,20 @@ function changeSummary(sub, targetPlan, quote) {
   }
 }
 
-/** Qué pasaría al cambiar a `plan`, sin tocar nada (la UI lo muestra antes). */
-export async function previewPlanChange({ userId, plan: targetPlan }) {
+/**
+ * Qué pasaría al cambiar a `plan`, sin tocar nada (la UI lo muestra antes). En
+ * Paddle el monto de la subida lo cotiza Paddle (prorrateo e impuestos suyos);
+ * si no responde, queda la cuenta local.
+ */
+export async function previewPlanChange({ userId, plan: targetPlan, config }, deps = {}) {
   const { sub } = await loadChangeableSubscription(userId, targetPlan)
-  return changeSummary(sub, targetPlan, quoteUpgrade(sub, targetPlan))
+  const quote = quoteUpgrade(sub, targetPlan)
+  const summary = changeSummary(sub, targetPlan, quote)
+  if (isPaddleSub(sub) && quote.amount > 0 && config) {
+    const amount = await previewPaddlePlanChange({ sub, targetPlan, config }, deps)
+    if (amount != null) summary.amount = amount
+  }
+  return summary
 }
 
 /**
@@ -169,6 +190,9 @@ export async function changeSubscriptionPlan(
 ) {
   const { sub, targetQuota } = await loadChangeableSubscription(userId, targetPlan)
   const quote = quoteUpgrade(sub, targetPlan)
+  if (isPaddleSub(sub)) {
+    return changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
+  }
   if (quote.amount > 0) {
     return startUpgradePayment({ sub, targetPlan, quote, config }, deps)
   }
@@ -218,6 +242,45 @@ export async function changeSubscriptionPlan(
     quota: targetQuota,
     cycle: sub.cycle,
     // El monto nuevo lo cobra MP recién en el próximo ciclo.
+    priceEffectiveAt: sub.currentPeriodEnd || null,
+  }
+}
+
+/**
+ * Paddle prorratea solo: subir con días pagos cobra la diferencia a la tarjeta
+ * guardada en el mismo pedido (sin checkout) y, si la rechaza, no cambia nada.
+ * El plan nuevo rige apenas Paddle acepta el cambio.
+ */
+async function changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
+  const bill = quote.amount > 0
+  await changePaddlePlan({ sub, targetPlan, bill, config }, deps)
+  const previousPlan = sub.plan
+  const window = paidWindow(sub)
+  if (window && !sub.paidPlan) {
+    sub.paidPlan = window.plan
+    sub.paidCycle = window.cycle
+  }
+  // Pagó la diferencia (o era mínima y se regala): el período ya es del plan nuevo.
+  if (bill || quote.reason === 'minimal') sub.paidPlan = targetPlan
+  sub.plan = targetPlan
+  try {
+    await sub.save()
+  } catch (err) {
+    console.error(
+      `subs change RECONCILE: Paddle en ${targetPlan} pero local sigue en ` +
+        `${previousPlan} sub=${subId(sub)} paddle=${sub.paddleSubscriptionId}`,
+      err?.message,
+    )
+    throw err
+  }
+  return {
+    requiresPayment: false,
+    charged: bill,
+    plan: sub.plan,
+    previousPlan,
+    quota: targetQuota,
+    cycle: sub.cycle,
+    currency_id: sub.currency_id || 'USD',
     priceEffectiveAt: sub.currentPeriodEnd || null,
   }
 }

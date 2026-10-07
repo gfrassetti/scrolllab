@@ -13,10 +13,12 @@ import { routeInventory, shadowedRoutes } from './helpers/routes.js'
  */
 const EXPECTED = [
   'DELETE /api/hosted/:id',
+  'GET /api/admin/analytics',
   'GET /api/auth/google',
   'GET /api/auth/google/callback',
   'GET /api/auth/me',
   'GET /api/catalog',
+  'GET /api/checkout/methods',
   'GET /api/download/:token',
   'GET /api/embed/:key/config',
   'GET /api/embed/loader',
@@ -29,12 +31,14 @@ const EXPECTED = [
   'GET /api/ready',
   'GET /api/subscriptions/change/quote',
   'GET /api/subscriptions/me',
+  'GET /api/subscriptions/payment-method',
   'GET /api/subscriptions/plans',
   'POST /api/auth/dev-login',
   'POST /api/auth/logout',
   'POST /api/checkout',
   'POST /api/checkout/confirm',
   'POST /api/checkout/mock-pay',
+  'POST /api/checkout/paddle/confirm',
   'POST /api/coupons/check',
   'POST /api/coupons/welcome',
   'POST /api/hosted',
@@ -47,7 +51,9 @@ const EXPECTED = [
   'POST /api/subscriptions/sync',
   'POST /api/subscriptions/upgrade/confirm',
   'POST /api/subscriptions/upgrade/mock-pay',
+  'POST /api/track',
   'POST /api/webhooks/mercadopago',
+  'POST /api/webhooks/paddle',
   'PUT /api/hosted/:id',
 ]
 

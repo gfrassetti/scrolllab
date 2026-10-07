@@ -11,6 +11,7 @@ import { createHostedRouter } from './http/routes/hosted.js'
 import { createSubscriptionsRouter } from './http/routes/subscriptions.js'
 import { createCheckoutRouter } from './http/routes/checkout.js'
 import { createWebhooksRouter } from './http/routes/webhooks.js'
+import { createAnalyticsRouter } from './http/routes/analytics.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { connectDb, storeMode } from './db.js'
@@ -46,7 +47,16 @@ export async function createApp(config) {
   app.use(createCors(config))
   app.use(createLogger(config))
   app.use(cookieParser())
-  app.use(express.json({ limit: '64kb' }))
+  app.use(
+    express.json({
+      limit: '64kb',
+      // La firma de Paddle se calcula sobre los bytes exactos del body: se
+      // guardan solo para su webhook (al resto no le hace falta).
+      verify(req, _res, buf) {
+        if (req.originalUrl?.startsWith('/api/webhooks/paddle')) req.rawBody = buf
+      },
+    }),
+  )
   app.use(requireSameOrigin(config))
 
   // Servir el embed (loader + frame) desde la propia API, si `embed-dist/` está
@@ -127,6 +137,8 @@ export async function createApp(config) {
   app.use(createSubscriptionsRouter({ config, limits }))
 
   app.use(createCouponsRouter({ config, limits }))
+
+  app.use(createAnalyticsRouter({ config, limits }))
 
   app.use(notFound)
   app.use(errorHandler(config))

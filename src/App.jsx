@@ -6,6 +6,7 @@ import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
 import { AuthProvider } from './lib/auth'
 import { PlanProvider } from './lib/plan'
 import { captureUtmFromUrl } from './lib/utm'
+import { installTracker } from './lib/track'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
@@ -20,6 +21,7 @@ const ChaptersPage = lazy(() => import('./pages/ChaptersPage'))
 const NocturnePage = lazy(() => import('./pages/NocturnePage'))
 const MonolithPage = lazy(() => import('./pages/MonolithPage'))
 const FizzPage = lazy(() => import('./pages/FizzPage'))
+const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'))
 const VelocityPage = lazy(() => import('./pages/VelocityPage'))
 const AtelierPage = lazy(() => import('./pages/AtelierPage'))
 const ComicPage = lazy(() => import('./pages/ComicPage'))
@@ -45,6 +47,9 @@ const CheckoutFailurePage = lazy(() =>
 )
 const CheckoutMockPage = lazy(() =>
   import('./pages/CheckoutPages').then((m) => ({ default: m.CheckoutMockPage })),
+)
+const CheckoutPayPage = lazy(() =>
+  import('./pages/CheckoutPages').then((m) => ({ default: m.CheckoutPayPage })),
 )
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 // Diagnóstico para mirar en un teléfono real (`?motion-debug`): carga diferida,
@@ -96,6 +101,8 @@ export default function App() {
   // (viajan con el cupón de bienvenida cuando alguien entra).
   useEffect(() => {
     captureUtmFromUrl()
+    // Analítica propia: acá y no en main.jsx, porque main.jsx viaja en el ZIP.
+    installTracker()
   }, [])
 
   return (
@@ -118,6 +125,12 @@ export default function App() {
               <Suspense fallback={<Loader />}>
                 <Routes>
                   <Route path="/" element={<TemplatesIndex />} />
+                  {/* Panel de métricas: solo con `npm run dev` (en producción redirige
+                      a la home y el endpoint ni existe). */}
+                  <Route
+                    path="/admin"
+                    element={import.meta.env.DEV ? <AdminAnalytics /> : <Navigate to="/" replace />}
+                  />
                   <Route path="/templates/chapters" element={<ChaptersPage />} />
                   <Route path="/templates/nocturne" element={<NocturnePage />} />
                   <Route path="/templates/monolith" element={<MonolithPage />} />
@@ -183,6 +196,7 @@ export default function App() {
                   <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
                   <Route path="/checkout/failure" element={<CheckoutFailurePage />} />
                   <Route path="/checkout/mock" element={<CheckoutMockPage />} />
+                  <Route path="/checkout/pay" element={<CheckoutPayPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Suspense>

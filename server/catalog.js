@@ -123,6 +123,10 @@ export const PRODUCTS = {
  * 12×). `instanceQuota` es definitivo (5 / 15 / sin tope). `yearly` = 10×
  * `monthly` (2 meses gratis) y siempre por debajo de 12× (el "ahorro").
  * Cambiar un precio es una acción explícita; nunca automática.
+ *
+ * `priceMonthlyUsd` / `priceYearlyUsd`: lo que cobra Paddle afuera de
+ * Argentina (docs/paddle.md). Fijados por el owner (2026-10-06): 19 / 79 / 229
+ * por mes (misma escalera ~4× / ~12×), anual = 10×.
  */
 export const HOSTED_PLANS = Object.freeze({
   hosted_starter: {
@@ -130,6 +134,8 @@ export const HOSTED_PLANS = Object.freeze({
     tier: 'starter',
     priceMonthly: 24900,
     priceYearly: 249000,
+    priceMonthlyUsd: 19,
+    priceYearlyUsd: 190,
     instanceQuota: 5,
     currency_id: 'ARS',
   },
@@ -138,6 +144,8 @@ export const HOSTED_PLANS = Object.freeze({
     tier: 'pro',
     priceMonthly: 99900,
     priceYearly: 999000,
+    priceMonthlyUsd: 79,
+    priceYearlyUsd: 790,
     instanceQuota: 15,
     currency_id: 'ARS',
   },
@@ -146,6 +154,8 @@ export const HOSTED_PLANS = Object.freeze({
     tier: 'studio',
     priceMonthly: 299900,
     priceYearly: 2999000,
+    priceMonthlyUsd: 229,
+    priceYearlyUsd: 2290,
     // Sin tope: Infinity vive acá adentro (las comparaciones `used >= quota`
     // dan siempre false). Se serializa a `null` en el borde HTTP — ver
     // `quotaForWire` en app.js — y el cliente lo lee como "ilimitado".
@@ -164,6 +174,20 @@ export function hostedPlanPrice(planId, cycle) {
   const plan = HOSTED_PLANS[planId]
   if (!plan) return null
   return cycle === 'yearly' ? plan.priceYearly : plan.priceMonthly
+}
+
+/**
+ * Precio de un plan en la moneda de la suscripción: ARS (Mercado Pago) o USD
+ * (Paddle).
+ * @param {string} planId
+ * @param {'monthly' | 'yearly' | string} cycle
+ * @param {'ARS' | 'USD' | string} [currency]
+ */
+export function hostedPlanPriceIn(planId, cycle, currency = 'ARS') {
+  if (currency !== 'USD') return hostedPlanPrice(planId, cycle)
+  const plan = HOSTED_PLANS[planId]
+  if (!plan) return null
+  return cycle === 'yearly' ? plan.priceYearlyUsd : plan.priceMonthlyUsd
 }
 
 export function hostedPlanQuota(planId) {
