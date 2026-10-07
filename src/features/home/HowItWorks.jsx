@@ -69,33 +69,29 @@ export default function HowItWorks({ t, howPanels }) {
                 className="hidden h-12 w-32 object-contain dark:block"
               />
             </a>
-            <div
-              className="flex h-16 items-center gap-3 rounded-sm border border-ink/15 bg-bone px-4"
-              role="group"
-              aria-label={t('home.paymentsCardLabel')}
+            <a
+              href="https://www.paddle.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 items-center gap-2.5 rounded-sm border border-ink/15 bg-bone px-4 transition-colors hover:border-ink/40"
+              aria-label="Paddle"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="size-7 shrink-0 text-ink"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <img
+                src="/payment/paddle.svg"
+                alt=""
                 aria-hidden="true"
-              >
-                <rect x="2.5" y="5" width="19" height="14" rx="2" />
-                <path d="M2.5 10h19M6.5 15h4" />
-              </svg>
-              <span className="text-left leading-tight">
-                <span className="block text-sm font-medium text-ink">
-                  {t('home.paymentsCardTitle')}
-                </span>
-                <span className="block text-[11px] text-ink/55">
-                  {t('home.paymentsCardNote')}
-                </span>
+                className="h-7 w-7 object-contain dark:hidden"
+              />
+              <img
+                src="/payment/paddle-white.svg"
+                alt=""
+                aria-hidden="true"
+                className="hidden h-7 w-7 object-contain dark:block"
+              />
+              <span className="text-xl font-semibold tracking-tight text-ink">
+                Paddle
               </span>
-            </div>
+            </a>
           </div>
         </div>
 
