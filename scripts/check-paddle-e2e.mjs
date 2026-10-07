@@ -651,7 +651,10 @@ async function scenarioLab() {
     me.provider === 'paddle' && me.currency_id === 'USD' && me.trialing === true,
     `${me.plan} · ${me.provider}/${me.currency_id} · prueba hasta ${me.trialEndsAt}`,
   )
-  const row = JSON.parse(fs.readFileSync(path.join(dbDir, 'subscriptions.json'), 'utf8')).find((s) => s.paddleSubscriptionId)
+  // La más nueva: la de reembolsos (que corre antes) es otra suscripción.
+  const row = JSON.parse(fs.readFileSync(path.join(dbDir, 'subscriptions.json'), 'utf8'))
+    .filter((s) => s.paddleSubscriptionId)
+    .at(-1)
   const ps = await pd('GET', `/subscriptions/${row.paddleSubscriptionId}`)
   check(
     'LAB: Paddle tiene la suscripción en prueba por USD 79/mes',
