@@ -304,6 +304,7 @@ export const fileDb = {
       rows.map((r) => JSON.stringify(r)).join('\n') + '\n',
     )
   },
+  /** @param {{ since?: Date | string | number }} [options] */
   async listEvents({ since } = {}) {
     const p = path.join(DATA_DIR, 'events.ndjson')
     if (!fs.existsSync(p)) return []
