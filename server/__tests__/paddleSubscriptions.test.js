@@ -264,7 +264,7 @@ describe('LAB con Paddle (reloj simulado)', () => {
     assert.equal(me.currency_id, 'USD')
   })
 
-  it('subir con días pagos: Paddle prorratea y cobra; la cotización sale de Paddle', async () => {
+  it('subir con días pagos: la misma diferencia que MP, cobrada como cargo único', async () => {
     const c = await customer('sube-paddle@test.com')
     const out = await openCheckout(c, 'hosted_starter')
     const { psub } = await payCheckout(out.transactionId)
@@ -278,14 +278,24 @@ describe('LAB con Paddle (reloj simulado)', () => {
     assert.equal(quote.body.currency_id, 'USD')
     assert.equal(quote.body.provider, 'paddle')
     assert.ok(quote.body.amount > 0 && quote.body.amount < usd('hosted_pro'), String(quote.body.amount))
+    // Cobrado el día 7, cambia el día 17: quedan (período − 10) días → (79 − 19) × fracción.
+    const period = (Date.parse(psub.current_billing_period.ends_at) - Date.parse(psub.current_billing_period.starts_at)) / DAY
+    const expected = Math.ceil((usd('hosted_pro') - usd('hosted_starter')) * ((period - 10) / period) * 100) / 100
+    assert.equal(quote.body.amount, expected)
 
     const res = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
     assert.equal(res.status, 200, JSON.stringify(res.body))
     assert.equal(res.body.requiresPayment, false)
     assert.equal(res.body.charged, true)
+    // Lo que cotizó es lo que se cobra: cargo único, nuestra cuenta, al instante.
+    const charge = pd.lastCall('POST /subscriptions/:id/charge').body
+    assert.equal(charge.effective_from, 'immediately')
+    assert.equal(charge.on_payment_failure, 'prevent_change')
+    assert.equal(charge.items[0].price.unit_price.amount, String(Math.round(expected * 100)))
+    assert.equal(charge.items[0].price.product.tax_category, 'saas')
+    // El precio recurrente pasa al nuevo sin que Paddle prorratee por su cuenta.
     const patch = pd.lastCall('PATCH /subscriptions/:id').body
-    assert.equal(patch.proration_billing_mode, 'prorated_immediately')
-    assert.equal(patch.on_payment_failure, 'prevent_change')
+    assert.equal(patch.proration_billing_mode, 'do_not_bill')
     assert.equal(patch.items[0].price.unit_price.amount, String(usd('hosted_pro') * 100))
     const me = await c.me()
     assert.equal(me.plan, 'hosted_pro')
@@ -295,6 +305,53 @@ describe('LAB con Paddle (reloj simulado)', () => {
     const before = (await c.me()).currentPeriodEnd
     await paddleWebhook('transaction.completed', pd.lastUpgradeTransaction)
     assert.equal(iso((await c.me()).currentPeriodEnd), iso(before))
+    assert.equal((await c.me()).plan, 'hosted_pro')
+  })
+
+  it('bajó y vuelve a subir en el mismo período: paga solo lo que no había pagado (como MP)', async () => {
+    const c = await customer('baja-y-sube@test.com')
+    const out = await openCheckout(c, 'hosted_pro')
+    const { psub } = await payCheckout(out.transactionId)
+    await c.goTo(7)
+    await renews(psub) // pagó Pro el día 7
+    await c.goTo(10)
+    const down = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })
+    assert.equal(down.status, 200)
+    assert.equal(down.body.charged, false)
+    // Volver a Pro: ya está pago. Sin cobro.
+    const back = await c.agent.get('/api/subscriptions/change/quote?plan=hosted_pro')
+    assert.equal(back.body.amount, 0)
+    // Subir a Studio: Studio − Pro (lo pagado), no Studio − Starter (el plan de ahora).
+    await c.goTo(17)
+    const before = pd.calls.filter((x) => x.route === 'POST /subscriptions/:id/charge').length
+    const up = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_studio' })
+    assert.equal(up.status, 200, JSON.stringify(up.body))
+    const period = (Date.parse(psub.current_billing_period.ends_at) - Date.parse(psub.current_billing_period.starts_at)) / DAY
+    const expected = Math.ceil((usd('hosted_studio') - usd('hosted_pro')) * ((period - 10) / period) * 100) / 100
+    assert.equal(pd.calls.filter((x) => x.route === 'POST /subscriptions/:id/charge').length, before + 1)
+    assert.equal(pd.lastCall('POST /subscriptions/:id/charge').body.items[0].price.unit_price.amount, String(Math.round(expected * 100)))
+    assert.equal((await c.me()).plan, 'hosted_studio')
+  })
+
+  it('cobró la diferencia pero Paddle no cambió el precio: igual sube y avisa para corregir', async () => {
+    const c = await customer('sube-sin-patch@test.com')
+    const out = await openCheckout(c, 'hosted_starter')
+    const { psub } = await payCheckout(out.transactionId)
+    await c.goTo(7)
+    await renews(psub)
+    await c.goTo(12)
+    pd.failPlanPatch = true
+    try {
+      const res = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
+      assert.equal(res.status, 200, JSON.stringify(res.body))
+      assert.equal((await c.me()).plan, 'hosted_pro')
+      await waitFor(
+        () => alerts('PAGÓ LA SUBIDA PERO PADDLE NO CAMBIÓ EL PRECIO').some((m) => m.body.text.includes(psub.id)),
+        'el aviso para corregir el precio en Paddle',
+      )
+    } finally {
+      pd.failPlanPatch = false
+    }
   })
 
   it('subir con la tarjeta rechazada: 402 y no cambia nada', async () => {

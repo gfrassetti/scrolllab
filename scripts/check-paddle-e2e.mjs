@@ -18,6 +18,9 @@
  *  5. LAB: alta con 7 días de prueba, plan activo en USD, cambio de plan
  *     (Paddle acepta el PATCH) y baja programada.
  *  6. LAB sin sync del navegador: la activan los eventos reales de Paddle.
+ *  6b. LAB ciclo: primera cuota, subir con la diferencia (misma cuenta que MP,
+ *     cargo único), bajar y volver a subir sin pagar dos veces, pausa,
+ *     reanudación con cobro y baja.
  *  7. Todo evento real repetido (idempotencia): nada cambia ni se duplica.
  *
  * Los webhooks se prueban con la entidad REAL que devuelve la API de Paddle (el
@@ -695,6 +698,118 @@ async function scenarioLab() {
   check('LAB: tras la baja sigue con acceso hasta el fin y figura cancelada', !!meCancel.canceledAt && meCancel.plan === 'hosted_starter', `${meCancel.plan} · canceledAt ${meCancel.canceledAt}`)
 }
 
+/** Las transacciones cobradas de una suscripción de Paddle, de la más nueva a la más vieja. */
+async function chargesOf(subId) {
+  const list = await pd('GET', `/transactions?subscription_id=${subId}&status=completed,paid`)
+  return list.filter((t) => Number(t.details?.totals?.grand_total) > 0)
+}
+
+/**
+ * El ciclo de una suscripción de LAB contra Paddle real: primer cobro (fin de la
+ * prueba: el mismo camino que una renovación), subir de plan con la diferencia
+ * calculada como en Mercado Pago y cobrada como cargo único, bajar y volver a
+ * subir sin pagar dos veces, pausa y reanudación desde Paddle (con cobro) y la
+ * baja al fin del período.
+ */
+async function scenarioLabCycle() {
+  const buyer = await newBuyer('labcycle')
+  await labSubscribe(buyer) // Pro con prueba
+  await waitFor(async () => (await buyer.call('GET', '/api/subscriptions/me')).body.plan === 'hosted_pro', 'el plan Pro', 90_000)
+  const row = await waitFor(
+    async () => JSON.parse(fs.readFileSync(path.join(dbDir, 'subscriptions.json'), 'utf8')).filter((r) => r.paddleSubscriptionId).at(-1),
+    'la suscripción en Paddle',
+  )
+  const subId = row.paddleSubscriptionId
+  const me = async () => (await buyer.call('GET', '/api/subscriptions/me')).body
+
+  // 1. Fin de la prueba: Paddle cobra la primera cuota.
+  await pd('POST', `/subscriptions/${subId}/activate`)
+  const first = await waitFor(async () => (await chargesOf(subId))[0] || null, 'el primer cobro', 300_000)
+  await replay([['subscription.activated', await pd('GET', `/subscriptions/${subId}`)], ['transaction.completed', first]])
+  const m1 = await me()
+  check(
+    'LAB ciclo: primera cuota cobrada (USD 79), la prueba termina y el período corre hasta el próximo cobro',
+    Number(first.details.totals.grand_total) === HOSTED_PLANS.hosted_pro.priceMonthlyUsd * 100 &&
+      m1.plan === 'hosted_pro' && !m1.trialing &&
+      new Date(m1.currentPeriodEnd).toISOString() === new Date(first.billing_period.ends_at).toISOString(),
+    `${first.details.totals.grand_total} centavos · trialing ${m1.trialing} · hasta ${m1.currentPeriodEnd}`,
+  )
+
+  // 2. Subir a Studio con días pagos: la misma cuenta que MP, cobrada como cargo único.
+  const quote = (await buyer.call('GET', '/api/subscriptions/change/quote?plan=hosted_studio')).body
+  const up = await buyer.call('POST', '/api/subscriptions/change', { plan: 'hosted_studio' })
+  const diff = await waitFor(
+    async () => (await chargesOf(subId)).find((t) => t.origin === 'subscription_charge') || null,
+    'el cobro de la diferencia',
+    120_000,
+  )
+  check(
+    'LAB ciclo: subir cobra exactamente la diferencia cotizada (precio nuevo − lo pagado, por los días que quedan)',
+    up.status === 200 && up.body.charged === true && Number(diff.details.totals.subtotal) === Math.round(quote.amount * 100),
+    `cotizado US$ ${quote.amount} (${quote.days} días) · Paddle cobró ${diff.details.totals.grand_total} centavos (${diff.origin})`,
+  )
+  const ps2 = await pd('GET', `/subscriptions/${subId}`)
+  check(
+    'LAB ciclo: la próxima cuota sale con el precio de Studio, en la misma fecha',
+    Number(ps2.items[0].price.unit_price.amount) === HOSTED_PLANS.hosted_studio.priceMonthlyUsd * 100 &&
+      new Date(ps2.next_billed_at).toISOString() === new Date(first.billing_period.ends_at).toISOString(),
+    `${ps2.items[0].price.unit_price.amount} centavos · próximo cobro ${ps2.next_billed_at}`,
+  )
+  const before = (await me()).currentPeriodEnd
+  await replay([['transaction.completed', diff], ['subscription.updated', ps2]])
+  const m2 = await me()
+  check('LAB ciclo: la app queda en Studio y el cobro de la diferencia no corre el período', m2.plan === 'hosted_studio' && m2.currentPeriodEnd === before, `${m2.plan} · hasta ${m2.currentPeriodEnd}`)
+
+  // 3. Bajar a Pro y volver a Studio en el mismo período: sin cobros (ya estaba pago).
+  const chargesBefore = (await chargesOf(subId)).length
+  const down = await buyer.call('POST', '/api/subscriptions/change', { plan: 'hosted_pro' })
+  const backQuote = (await buyer.call('GET', '/api/subscriptions/change/quote?plan=hosted_studio')).body
+  const back = await buyer.call('POST', '/api/subscriptions/change', { plan: 'hosted_studio' })
+  await sleep(8000)
+  const ps3 = await pd('GET', `/subscriptions/${subId}`)
+  check(
+    'LAB ciclo: bajar y volver a subir en el mismo período no cobra de nuevo (como MP)',
+    down.status === 200 && back.status === 200 && backQuote.amount === 0 && (await chargesOf(subId)).length === chargesBefore &&
+      Number(ps3.items[0].price.unit_price.amount) === HOSTED_PLANS.hosted_studio.priceMonthlyUsd * 100,
+    `bajar ${down.status} · volver ${back.status} (cotización ${backQuote.amount}) · cobros ${(await chargesOf(subId)).length}/${chargesBefore}`,
+  )
+
+  // 4. Pausa desde Paddle: sigue con acceso a lo ya pagado.
+  await pd('POST', `/subscriptions/${subId}/pause`, { effective_from: 'immediately' })
+  const paused = await pd('GET', `/subscriptions/${subId}`)
+  await replay([['subscription.paused', paused]])
+  const m4 = await me()
+  check('LAB ciclo: pausada en Paddle → la app la muestra en pausa y conserva el acceso pago', paused.status === 'paused' && m4.subscriptionStatus === 'paused' && m4.plan === 'hosted_studio', `${paused.status} · app ${m4.subscriptionStatus} · ${m4.plan}`)
+
+  // 5. Reanudación desde Paddle: arranca un período nuevo y lo cobra (como una renovación).
+  const chargesPaused = (await chargesOf(subId)).length
+  await pd('POST', `/subscriptions/${subId}/resume`, { effective_from: 'immediately' })
+  const renewal = await waitFor(async () => {
+    const list = await chargesOf(subId)
+    return list.length > chargesPaused ? list[0] : null
+  }, 'el cobro de la reanudación', 300_000)
+  const resumed = await pd('GET', `/subscriptions/${subId}`)
+  await replay([['subscription.resumed', resumed], ['transaction.completed', renewal]])
+  const m5 = await me()
+  check(
+    'LAB ciclo: reanudada → cobra Studio (US$ 229) y la app vuelve a activa con el período nuevo',
+    Number(renewal.details.totals.subtotal) === HOSTED_PLANS.hosted_studio.priceMonthlyUsd * 100 &&
+      m5.subscriptionStatus === 'authorized' && m5.plan === 'hosted_studio' &&
+      new Date(m5.currentPeriodEnd).toISOString() === new Date(renewal.billing_period.ends_at).toISOString(),
+    `${renewal.details.totals.grand_total} centavos · app ${m5.subscriptionStatus} · hasta ${m5.currentPeriodEnd}`,
+  )
+
+  // 6. Baja desde la app: al fin del período, con acceso hasta ahí.
+  const cancel = await buyer.call('POST', '/api/subscriptions/cancel')
+  const ps6 = await pd('GET', `/subscriptions/${subId}`)
+  const m6 = await me()
+  check(
+    'LAB ciclo: la baja queda programada al fin del período y conserva el acceso',
+    cancel.status === 200 && ps6.scheduled_change?.action === 'cancel' && !!m6.canceledAt && m6.plan === 'hosted_studio',
+    `${ps6.scheduled_change?.action} el ${ps6.scheduled_change?.effective_at} · ${m6.plan}`,
+  )
+}
+
 async function scenarioLabWebhookOnly() {
   const buyer = await newBuyer('labwh')
   await labSubscribe(buyer, { block: true })
@@ -761,6 +876,7 @@ try {
   await run('reembolsos', scenarioRefunds)
   await run('LAB', scenarioLab)
   await run('LAB webhook', scenarioLabWebhookOnly)
+  await run('LAB ciclo', scenarioLabCycle)
 } finally {
   // Limpieza: las suscripciones de prueba se cancelan ya (no cobran nunca).
   try {

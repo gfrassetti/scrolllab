@@ -199,6 +199,18 @@ async function main() {
     const chargedAfter = (apsAfter.json.results || []).filter((a) => a.payment?.status === 'approved')
     check('cambio de plan: no se cobró nada', chargedAfter.length === 0, `${chargedAfter.length} cobros`)
 
+    // 4b. Pausa y reanudación (las hace el cliente desde MP; la app las lee del preapproval).
+    const pause = await mp('PUT', `/preapproval/${pre.id}`, { status: 'paused' })
+    const paused = await fetchPreapproval(token, pre.id)
+    check('pausa: MP la deja en pausa (la app la lee como paused)', pause.status === 200 && paused.status === 'paused', `HTTP ${pause.status} · status ${paused.status}`)
+    const resume = await mp('PUT', `/preapproval/${pre.id}`, { status: 'authorized' })
+    const resumed = await fetchPreapproval(token, pre.id)
+    check(
+      'reanudación: vuelve a autorizada, con el monto nuevo y sin cobrar en el acto',
+      resume.status === 200 && resumed.status === 'authorized' && Number(resumed.auto_recurring?.transaction_amount) === Number(changed.auto_recurring?.transaction_amount),
+      `status ${resumed.status} · monto ${resumed.auto_recurring?.transaction_amount} · próximo cobro ${resumed.next_payment_date}`,
+    )
+
     // 5. Baja con la función de la app, y una segunda baja (MP devuelve 400).
     await cancelPreapproval(token, pre.id)
     const after = await fetchPreapproval(token, pre.id)

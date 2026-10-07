@@ -84,10 +84,15 @@ un monto del cliente.
   link para actualizar la tarjeta. La gracia (`HOSTED_GRACE_DAYS`) es la misma.
 - Baja: `POST /subscriptions/{id}/cancel { effective_from: 'next_billing_period' }`.
   Se confirma igual que en MP: si Paddle no la hizo, 502 y no se marca nada.
-- Cambio de plan: `PATCH /subscriptions/{id}` con el precio nuevo. Subir con días
-  pagos → `prorated_immediately` (Paddle cobra la diferencia a la tarjeta
-  guardada; si la rechaza, `prevent_change` y 402). Bajar o en prueba →
-  `do_not_bill`. La cotización sale de `PATCH /subscriptions/{id}/preview`.
+- Cambio de plan: **la misma cuenta que Mercado Pago** (`quoteUpgrade`: precio
+  nuevo − lo ya pagado del período, por los días que quedan). Subir con días
+  pagos → cargo único `POST /subscriptions/{id}/charge` (`immediately`,
+  `prevent_change`: si la tarjeta lo rechaza, 402 y no cambia nada) y después
+  `PATCH /subscriptions/{id}` con el precio nuevo en `do_not_bill`. Paddle no
+  prorratea por su cuenta: con su cuenta, quien bajaba y volvía a subir en el
+  mismo período pagaba dos veces. Bajar, en prueba o volver a un plan ya pago →
+  sin cobro. Lo cotizado es lo que se cobra. Si el cargo sale y el PATCH falla,
+  igual sube y avisa al dueño para corregir el precio en Paddle.
 - Alta abandonada: la transacción `ready` se cancela (`PATCH status: canceled`)
   antes de abrir otra, así un checkout viejo no puede cobrar dos veces.
 
@@ -237,9 +242,11 @@ Tres redes, de la más rápida a la más real:
   contra el sandbox real, con la ventana de pago de Paddle y la tarjeta de
   prueba (`4242 4242 4242 4242`): compra aprobada, tarjeta rechazada
   (`4000 0000 0000 0002`) y reintento, compra cumplida solo por webhook, firma
-  falsa, reembolso, alta de LAB con 7 días de prueba, cambio de plan en las dos
-  direcciones, link de tarjeta, baja programada, baja hecha desde Paddle, y los
-  eventos repetidos (idempotencia). Los webhooks se prueban con la entidad
+  falsa, reembolsos (aprobación real de Paddle), alta de LAB con 7 días de
+  prueba, cambio de plan en las dos direcciones, link de tarjeta, baja
+  programada, baja hecha desde Paddle, el ciclo de LAB (`--only=ciclo`: primera
+  cuota, subir cobrando la diferencia, bajar y volver a subir sin doble cobro,
+  pausa, reanudación con cobro, baja) y los eventos repetidos (idempotencia). Los webhooks se prueban con la entidad
   real que devuelve la API de Paddle (el `data` de un evento es esa misma
   entidad) firmada con un secreto de prueba. `--only=lab,webhook` corre solo
   algunos escenarios; `--headed` muestra el navegador.

@@ -381,7 +381,6 @@ export function createSubscriptionsRouter({ config, limits }) {
       const out = await previewPlanChange({
         userId: db.uid(req.user),
         plan: String(req.query?.plan || ''),
-        config,
       })
       res.set('Cache-Control', 'no-store')
       res.json({ ok: true, ...out })

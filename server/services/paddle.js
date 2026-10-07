@@ -105,6 +105,10 @@ export const updateSubscription = (config, id, body) =>
 export const previewSubscriptionUpdate = (config, id, body) =>
   paddleRequest(config, 'PATCH', `/subscriptions/${encodeURIComponent(id)}/preview`, body)
 
+/** Cargo único sobre una suscripción (la diferencia de una subida de plan). */
+export const chargeSubscription = (config, id, body) =>
+  paddleRequest(config, 'POST', `/subscriptions/${encodeURIComponent(id)}/charge`, body)
+
 /**
  * Verifica `Paddle-Signature: ts=…;h1=…` (HMAC-SHA256 de `ts:body crudo` con el
  * secreto del destination). Acepta cualquiera de los `h1` (rotación de
@@ -212,6 +216,30 @@ export function labPrice({ tier, cycle, amountUsd, taxCategory, trialDays = 0 })
       name: `ScrollLab LAB ${tierName}`,
       tax_category: taxCategory,
       description: 'Live scrollytelling sections embedded on your own site.',
+    },
+  }
+}
+
+/**
+ * Precio único (non-catalog) de la diferencia al subir de plan: lo que queda
+ * del período, calculado por nosotros igual que en Mercado Pago.
+ * @param {{ tier: string, amountUsd: number, days?: number | null, taxCategory: string }} args
+ */
+export function labUpgradeChargeItem({ tier, amountUsd, days, taxCategory }) {
+  const tierName = LAB_TIER_NAME[tier] || tier
+  const rest = days ? ` — ${days} ${days === 1 ? 'day' : 'days'} left in the period` : ''
+  return {
+    quantity: 1,
+    price: {
+      name: `Upgrade to LAB ${tierName}`,
+      description: `ScrollLab LAB: upgrade to ${tierName}${rest}`,
+      unit_price: { amount: String(usdCents(amountUsd)), currency_code: PADDLE_CURRENCY },
+      quantity: { minimum: 1, maximum: 1 },
+      product: {
+        name: `ScrollLab LAB ${tierName} — upgrade`,
+        tax_category: taxCategory,
+        description: 'Prorated difference for the rest of the current billing period.',
+      },
     },
   }
 }

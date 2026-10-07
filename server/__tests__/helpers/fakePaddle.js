@@ -175,6 +175,28 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
       sub.updated_at = nowIso()
       return ok(sub)
     }
+    // Cargo único sobre la suscripción (la diferencia de una subida de plan).
+    if (route === 'POST /subscriptions/:id/charge') {
+      const sub = pd.subscriptions.get(parts[1])
+      if (!sub) return err(404, 'not_found', 'subscription not found')
+      if (sub.status === 'past_due') return err(400, 'subscription_is_past_due', 'past_due')
+      const bad = validateItems(body?.items)
+      if (bad) return err(400, 'bad_request', bad)
+      if (body.items.some((i) => i.price.billing_cycle)) return err(400, 'bad_request', 'un cargo único no lleva billing_cycle')
+      if (body.effective_from !== 'immediately') return err(400, 'bad_request', 'effective_from')
+      if (pd.declineUpgrades) return err(400, 'subscription_payment_declined', 'card declined')
+      const txn = newTransaction({
+        items: body.items,
+        custom_data: sub.custom_data,
+        origin: 'subscription_charge',
+        subscription_id: sub.id,
+        status: 'completed',
+      })
+      txn.billed_at = nowIso()
+      txn.billing_period = { ...sub.current_billing_period }
+      pd.lastUpgradeTransaction = txn
+      return ok(sub, 201)
+    }
     if (route === 'PATCH /subscriptions/:id' || route === 'PATCH /subscriptions/:id/preview') {
       const sub = pd.subscriptions.get(parts[1])
       if (!sub) return err(404, 'not_found', 'subscription not found')
@@ -198,6 +220,7 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
       if (bill && diff > 0 && pd.declineUpgrades) {
         return err(400, 'subscription_payment_declined', 'card declined')
       }
+      if (pd.failPlanPatch && !preview) return err(500, 'internal_error', 'fake Paddle error')
       sub.items = body.items.map((i) => ({ quantity: i.quantity || 1, price: { id: `pri_${++pd.seq}`, ...i.price } }))
       sub.updated_at = nowIso()
       if (bill && diff > 0) {

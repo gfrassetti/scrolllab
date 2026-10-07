@@ -8,9 +8,10 @@ import {
   getSubscription,
   cancelSubscription,
   updateSubscription,
-  previewSubscriptionUpdate,
+  chargeSubscription,
   buildSubscriptionTransactionBody,
   labPrice,
+  labUpgradeChargeItem,
   daysUntil,
   centsToUsd,
   PADDLE_PAID_STATUSES,
@@ -70,7 +71,7 @@ const api = (deps) => ({
   getSubscription: deps.getSubscription || getSubscription,
   cancelSubscription: deps.cancelSubscription || cancelSubscription,
   updateSubscription: deps.updateSubscription || updateSubscription,
-  previewSubscriptionUpdate: deps.previewSubscriptionUpdate || previewSubscriptionUpdate,
+  chargeSubscription: deps.chargeSubscription || chargeSubscription,
 })
 
 /** Estado de Paddle → nuestro enum. `past_due` sigue viva: corre la gracia. */
@@ -294,6 +295,7 @@ function warnIfSuspiciousUsd(txn, sub) {
   const expected = hostedPlanPriceIn(sub.plan, sub.cycle, 'USD')
   if (
     txn?.origin !== 'subscription_update' &&
+    txn?.origin !== 'subscription_charge' &&
     Number.isFinite(sub_cents) &&
     Number.isFinite(expected) &&
     expected > 0 &&
@@ -367,7 +369,7 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   sub.paidPlan = sub.plan
   sub.paidCycle = sub.cycle
   sub.paymentFailedAt = undefined
-  if (sub.canceledAt && txn.origin !== 'subscription_update') {
+  if (sub.canceledAt && txn.origin !== 'subscription_update' && txn.origin !== 'subscription_charge') {
     console.error(
       `subs paddle COBRO SOBRE BAJA sub=${subId(sub)} txn=${txn.id} — revisar y reembolsar`,
     )
@@ -555,57 +557,86 @@ export async function retirePendingPaddle(sub, config, deps = {}) {
 }
 
 /**
- * Cambio de plan en Paddle (mismo ciclo). Subir con días pagos: Paddle cobra
- * la diferencia prorrateada a la tarjeta guardada y, si la rechaza, no aplica
- * nada (`prevent_change` → 402). Bajar, en la prueba o por una diferencia
- * mínima: sin cobro, la próxima cuota sale con el precio nuevo.
- * @param {{ sub: any, targetPlan: string, bill: boolean, config: any }} args
+ * Cambio de plan en Paddle (mismo ciclo), con la MISMA cuenta que Mercado Pago:
+ * la diferencia por los días que quedan del período la calculamos nosotros
+ * (`quoteUpgrade`: precio nuevo − lo ya pagado del período, no el plan de
+ * ahora) y se cobra como cargo único a la tarjeta guardada. Paddle no
+ * prorratea por su cuenta: con su cuenta, quien bajó y vuelve a subir en el
+ * mismo período pagaba dos veces lo mismo.
+ * - Subir con días pagos: cargo único inmediato; si la tarjeta lo rechaza, no
+ *   cambia nada (`prevent_change` → 402).
+ * - Bajar, en la prueba o por una diferencia mínima: sin cobro.
+ * En todos los casos el precio recurrente pasa al del plan nuevo sin
+ * prorrateo (`do_not_bill`): la próxima cuota sale con el precio nuevo.
+ * @param {{ sub: any, targetPlan: string, amountUsd?: number, days?: number | null, config: any }} args
  */
-export async function changePaddlePlan({ sub, targetPlan, bill, config }, deps = {}) {
+export async function changePaddlePlan({ sub, targetPlan, amountUsd = 0, days = null, config }, deps = {}) {
+  const bill = amountUsd > 0
   if (isPaddleMock(config) || !sub.paddleSubscriptionId) return { charged: bill }
+  const p = api(deps)
+  if (bill) {
+    try {
+      await p.chargeSubscription(config, sub.paddleSubscriptionId, {
+        effective_from: 'immediately',
+        on_payment_failure: 'prevent_change',
+        items: [
+          labUpgradeChargeItem({
+            tier: planTier(targetPlan),
+            amountUsd,
+            days,
+            taxCategory: config.paddle.taxCategory.lab,
+          }),
+        ],
+      })
+    } catch (err) {
+      console.error(
+        `subs paddle cobro de la diferencia FALLÓ sub=${subId(sub)} paddle=${sub.paddleSubscriptionId} plan=${targetPlan}`,
+        err?.message || err,
+      )
+      if (err instanceof PaddleError && err.status < 500) {
+        throw new HttpError(
+          402,
+          'Tu tarjeta rechazó el cobro de la diferencia. Actualizá el medio de pago y probá de nuevo.',
+          { expose: true },
+        )
+      }
+      throw new HttpError(
+        502,
+        'Paddle no respondió al cambiar de plan. Probá de nuevo en unos minutos.',
+        { expose: true },
+      )
+    }
+  }
   try {
-    await api(deps).updateSubscription(config, sub.paddleSubscriptionId, {
+    await p.updateSubscription(config, sub.paddleSubscriptionId, {
       items: [labItem(targetPlan, sub.cycle, config)],
-      proration_billing_mode: bill ? 'prorated_immediately' : 'do_not_bill',
-      on_payment_failure: 'prevent_change',
+      proration_billing_mode: 'do_not_bill',
     })
-    return { charged: bill }
   } catch (err) {
     console.error(
       `subs paddle cambio de plan FALLÓ sub=${subId(sub)} paddle=${sub.paddleSubscriptionId} plan=${targetPlan}`,
       err?.message || err,
     )
-    if (err instanceof PaddleError && err.status < 500) {
+    if (!bill) {
       throw new HttpError(
-        402,
-        'Tu tarjeta rechazó el cobro de la diferencia. Actualizá el medio de pago y probá de nuevo.',
+        502,
+        'Paddle no respondió al cambiar de plan. Probá de nuevo en unos minutos.',
         { expose: true },
       )
     }
-    throw new HttpError(
-      502,
-      'Paddle no respondió al cambiar de plan. Probá de nuevo en unos minutos.',
-      { expose: true },
-    )
-  }
-}
-
-/**
- * Lo que Paddle cobraría hoy por subir a `targetPlan` (con impuestos, USD).
- * `null` si no se pudo cotizar: la UI usa la cuenta local.
- */
-export async function previewPaddlePlanChange({ sub, targetPlan, config }, deps = {}) {
-  if (isPaddleMock(config) || !sub.paddleSubscriptionId) return null
-  try {
-    const preview = await api(deps).previewSubscriptionUpdate(config, sub.paddleSubscriptionId, {
-      items: [labItem(targetPlan, sub.cycle, config)],
-      proration_billing_mode: 'prorated_immediately',
+    // Ya pagó la diferencia: el plan nuevo se le da igual y el precio de la
+    // próxima cuota se arregla a mano en Paddle (si no, cobraría el viejo).
+    alertAdmin({
+      kind: 'lab-reconcile',
+      key: `paddle-upgrade-${sub.paddleSubscriptionId}-${targetPlan}`,
+      title: 'LAB: PAGÓ LA SUBIDA PERO PADDLE NO CAMBIÓ EL PRECIO — corregir en Paddle',
+      lines: [
+        `suscripción Paddle ${sub.paddleSubscriptionId} · fila ${subId(sub)}`,
+        `cobrado USD ${amountUsd} por pasar a ${targetPlan}; la próxima cuota tiene que ser USD ${hostedPlanPriceIn(targetPlan, sub.cycle, 'USD')}`,
+      ],
+      config,
     })
-    const cents = Number(preview?.immediate_transaction?.details?.totals?.grand_total)
-    return Number.isFinite(cents) ? centsToUsd(cents) : 0
-  } catch (err) {
-    console.error(`subs paddle preview sub=${subId(sub)}`, err?.message)
-    return null
   }
+  return { charged: bill }
 }
 

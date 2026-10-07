@@ -8,11 +8,7 @@ import {
   hostedPlanPriceIn,
   isHostedPlanId,
 } from '../../catalog.js'
-import {
-  isPaddleSub,
-  changePaddlePlan,
-  previewPaddlePlanChange,
-} from './paddleSync.js'
+import { isPaddleSub, changePaddlePlan } from './paddleSync.js'
 import {
   updatePreapprovalAmount,
   createUpgradePreference,
@@ -160,19 +156,12 @@ function changeSummary(sub, targetPlan, quote) {
 }
 
 /**
- * Qué pasaría al cambiar a `plan`, sin tocar nada (la UI lo muestra antes). En
- * Paddle el monto de la subida lo cotiza Paddle (prorrateo e impuestos suyos);
- * si no responde, queda la cuenta local.
+ * Qué pasaría al cambiar a `plan`, sin tocar nada (la UI lo muestra antes). La
+ * misma cuenta en las dos pasarelas: es exactamente lo que se cobra.
  */
-export async function previewPlanChange({ userId, plan: targetPlan, config }, deps = {}) {
+export async function previewPlanChange({ userId, plan: targetPlan }) {
   const { sub } = await loadChangeableSubscription(userId, targetPlan)
-  const quote = quoteUpgrade(sub, targetPlan)
-  const summary = changeSummary(sub, targetPlan, quote)
-  if (isPaddleSub(sub) && quote.amount > 0 && config) {
-    const amount = await previewPaddlePlanChange({ sub, targetPlan, config }, deps)
-    if (amount != null) summary.amount = amount
-  }
-  return summary
+  return changeSummary(sub, targetPlan, quoteUpgrade(sub, targetPlan))
 }
 
 /**
@@ -248,13 +237,16 @@ export async function changeSubscriptionPlan(
 }
 
 /**
- * Paddle prorratea solo: subir con días pagos cobra la diferencia a la tarjeta
- * guardada en el mismo pedido (sin checkout) y, si la rechaza, no cambia nada.
- * El plan nuevo rige apenas Paddle acepta el cambio.
+ * Paddle: la misma diferencia que Mercado Pago, pero se cobra a la tarjeta
+ * guardada al instante (cargo único, sin checkout); si la rechaza, no cambia
+ * nada. El plan nuevo rige apenas Paddle cobra.
  */
 async function changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
   const bill = quote.amount > 0
-  await changePaddlePlan({ sub, targetPlan, bill, config }, deps)
+  await changePaddlePlan(
+    { sub, targetPlan, amountUsd: quote.amount, days: quote.days ?? null, config },
+    deps,
+  )
   const previousPlan = sub.plan
   const window = paidWindow(sub)
   if (window && !sub.paidPlan) {
