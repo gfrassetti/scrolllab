@@ -163,6 +163,15 @@ export default function HomeFooter({ t, templates }) {
                   {t('home.footerAccount')}
                 </Link>
               </li>
+              {/* Botón de arrepentimiento (Res. 424/2020): a la vista desde el home. */}
+              <li>
+                <Link
+                  to="/arrepentimiento"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerWithdrawal')}
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
