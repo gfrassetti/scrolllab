@@ -348,6 +348,33 @@ export const fileDb = {
     return read("orders");
   },
 
+  // Libro de reembolsos (upsert por externalId).
+  async recordRefund(data) {
+    const rows = read('refunds')
+    const now = new Date().toISOString()
+    const i = rows.findIndex((r) => r.externalId === data.externalId)
+    const row = i >= 0
+      ? { ...rows[i], ...data, updatedAt: now }
+      : { id: nid(), partial: false, reason: 'refunded', refundedAt: now, ...data, createdAt: now, updatedAt: now }
+    if (i >= 0) rows[i] = row
+    else rows.push(row)
+    write('refunds', rows)
+    return row
+  },
+  async listRefunds() {
+    return read('refunds').sort(
+      (a, b) => new Date(b.refundedAt).getTime() - new Date(a.refundedAt).getTime(),
+    )
+  },
+  async listWithdrawals() {
+    return read('withdrawals').sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+  },
+  async listSubscriptions() {
+    return read('subscriptions')
+  },
+
   // Solicitudes del botón de arrepentimiento.
   async createWithdrawal(data) {
     const rows = read('withdrawals')

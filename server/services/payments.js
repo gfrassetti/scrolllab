@@ -12,6 +12,7 @@ import {
   notifyOrderPaymentFailed,
   REVERSED_PAYMENT_STATUSES,
   alertAdmin,
+  recordMpRefund,
 } from './orders.js'
 
 /**
@@ -107,6 +108,7 @@ export async function handleMercadoPagoNotification({
       // La compra sigue paga (como en Paddle); solo se avisa, una vez por monto.
       const refunded = Number(payment.transaction_amount_refunded) || 0
       if (refunded > 0) {
+        await recordMpRefund({ payment, partial: true })
         alertAdmin({
           kind: 'reversed',
           key: `mp-partial-${payment.id}-${refunded}`,

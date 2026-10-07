@@ -156,10 +156,12 @@ export async function reversePaddleAdjustment({ adjustment: adj, config }) {
   }
   const reason = adj.action === 'chargeback' ? 'charged_back' : 'refunded'
   const amount = Number(adj.totals?.total)
-  const label = `${Number.isFinite(amount) ? amount / 100 : '—'} ${adj.currency_code || adj.totals?.currency_code || PADDLE_CURRENCY}`
+  const currency = adj.currency_code || adj.totals?.currency_code || PADDLE_CURRENCY
+  const label = `${Number.isFinite(amount) ? amount / 100 : '—'} ${currency}`
   const order = adj.transaction_id
     ? await db.findOrderByPaddleTransaction(adj.transaction_id)
     : null
+  await recordPaddleRefund({ adj, order, reason, amount, currency })
 
   if (!order) {
     alertAdmin({
@@ -224,6 +226,37 @@ const SUBSCRIPTION_EVENTS = new Set([
   'subscription.resumed',
   'subscription.canceled',
 ])
+
+/**
+ * Anota en el libro de reembolsos un ajuste de Paddle aprobado (reembolso total
+ * o parcial, contracargo), de una orden o de LAB, con quién y cuánto. Una fila
+ * por ajuste. Nunca corta el webhook.
+ */
+async function recordPaddleRefund({ adj, order, reason, amount, currency }) {
+  try {
+    const sub = !order && adj.subscription_id
+      ? await db.findSubscriptionByPaddle({ subscriptionId: adj.subscription_id })
+      : null
+    const userId = order?.userId || sub?.userId || null
+    const user = userId ? await db.findUserById(String(userId)).catch(() => null) : null
+    await db.recordRefund({
+      externalId: `paddle-${adj.id}`,
+      provider: 'paddle',
+      kind: order ? 'order' : 'lab',
+      orderId: order ? String(db.uid(order) || order.id) : null,
+      subscriptionId: sub ? String(db.uid(sub) || sub.id) : null,
+      userId: userId ? String(userId) : null,
+      email: user?.email || null,
+      amount: Number.isFinite(amount) ? amount / 100 : 0,
+      currency,
+      partial: adj.type === 'partial',
+      reason,
+      refundedAt: new Date(adj.updated_at || Date.now()),
+    })
+  } catch (err) {
+    console.error(`refunds: no se pudo anotar el ajuste Paddle ${adj?.id}`, err?.message)
+  }
+}
 
 /**
  * Webhook de Paddle (una URL para todo). La firma se verifica sobre el body

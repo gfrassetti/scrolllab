@@ -422,6 +422,12 @@ describe('Compras con Paddle (Paddle simulado)', () => {
         () => mp.mailsTo(OWNER).some((m) => m.body.subject.includes('ORDEN REEMBOLSADA')),
         'el aviso de reembolso',
       )
+      // Queda en el libro de reembolsos (lo muestra el panel): quién y cuánto.
+      const rows = (await fileDb.listRefunds()).filter((r) => r.orderId === orderId)
+      assert.equal(rows.length, 1)
+      assert.equal(rows[0].email, 'reembolso@test.com')
+      assert.equal(rows[0].amount, Number(txn.details.totals.grand_total) / 100)
+      assert.deepEqual([rows[0].provider, rows[0].kind, rows[0].currency, rows[0].partial], ['paddle', 'order', 'USD', false])
     })
 
     it('contracargo: refunded con motivo charged_back', async () => {
@@ -434,8 +440,13 @@ describe('Compras con Paddle (Paddle simulado)', () => {
 
     it('reembolso parcial: la orden sigue paga y el dueño revisa', async () => {
       const { orderId, txn } = await paidOrder('parcial@test.com')
-      await paddleWebhook('adjustment.created', pd.adjust(txn.id, { type: 'partial' }))
+      const adj = pd.adjust(txn.id, { type: 'partial' })
+      await paddleWebhook('adjustment.created', adj)
+      await paddleWebhook('adjustment.created', adj) // repetido: una sola fila
       assert.equal((await orderRow(orderId)).status, 'paid')
+      const rows = (await fileDb.listRefunds()).filter((r) => r.orderId === orderId)
+      assert.equal(rows.length, 1)
+      assert.deepEqual([rows[0].email, rows[0].amount, rows[0].partial], ['parcial@test.com', 1, true])
       await waitFor(
         () => mp.mailsTo(OWNER).some((m) => m.body.subject.includes('REEMBOLSO PARCIAL')),
         'el aviso de reembolso parcial',

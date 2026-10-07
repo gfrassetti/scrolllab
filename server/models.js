@@ -350,6 +350,31 @@ const withdrawalSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+/**
+ * Libro de reembolsos: una fila por pago de MP o ajuste de Paddle devuelto (o
+ * contracargo), con quién y cuánto. Lo escriben los webhooks; lo lee el panel.
+ */
+const refundSchema = new mongoose.Schema(
+  {
+    externalId: { type: String, required: true, unique: true },
+    provider: { type: String, enum: ["mercadopago", "paddle"], required: true },
+    kind: { type: String, enum: ["order", "lab"], required: true },
+    orderId: { type: String, default: null },
+    subscriptionId: { type: String, default: null },
+    userId: { type: String, default: null },
+    email: { type: String, default: null },
+    amount: { type: Number, required: true },
+    currency: { type: String, required: true },
+    partial: { type: Boolean, default: false },
+    reason: { type: String, default: "refunded" },
+    refundedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true },
+);
+
+/** @type {AnyModel} */
+export const Refund = mongoose.models.Refund || mongoose.model("Refund", refundSchema);
+
 /** @type {AnyModel} */
 export const Withdrawal =
   mongoose.models.Withdrawal || mongoose.model("Withdrawal", withdrawalSchema);

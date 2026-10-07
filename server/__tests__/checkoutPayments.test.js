@@ -245,6 +245,11 @@ describe('Pagos de templates (MP simulado)', () => {
     const list = await agent.get('/api/orders')
     assert.equal(list.body.orders.find((o) => o.id === orderId).status, 'refunded')
     await waitFor(() => alerts('ORDEN REEMBOLSADA').length === 1, 'el aviso de reembolso')
+    // Queda en el libro de reembolsos (lo muestra el panel): quién y cuánto.
+    const [row] = (await fileDb.listRefunds()).filter((r) => r.externalId === `mp-${payment.id}`)
+    assert.equal(row.email, 'refund@test.com')
+    assert.equal(row.amount, payment.transaction_amount)
+    assert.deepEqual([row.provider, row.kind, row.orderId, row.partial], ['mercadopago', 'order', orderId, false])
   })
 
   it('reembolso parcial: la orden sigue paga y descargable, y avisa una sola vez', async () => {
@@ -254,6 +259,9 @@ describe('Pagos de templates (MP simulado)', () => {
     assert.equal((await webhook('payment', payment.id)).status, 200)
     assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
     assert.equal((await agent.get(`/api/orders/${orderId}/download`)).status, 200)
+    const ledger = (await fileDb.listRefunds()).filter((r) => r.externalId === `mp-${payment.id}`)
+    assert.equal(ledger.length, 1)
+    assert.deepEqual([ledger[0].email, ledger[0].amount, ledger[0].partial], ['partial@test.com', 1000, true])
     // Resend descarta el repetido por la clave de idempotencia: cuenta una sola clave.
     const mine = () => alerts('REEMBOLSO PARCIAL').filter((m) => m.body.text.includes(String(payment.id)))
     await waitFor(() => mine().length >= 1, 'el aviso del parcial')
