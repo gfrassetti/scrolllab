@@ -255,10 +255,8 @@ export default function ChapterDusty({
       // The truck is placed by its own wrapper (centered, bottom edge on the pin's
       // bottom); x / y / scale carry it from the lower-left corner onto the road.
       const truckW = () => sideTruck.offsetWidth
-      // it starts below the bottom edge (out of sight) and left of center, so it
-      // comes up out of the lower-left corner on a diagonal
-      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.18)
-      const START_Y = () => truckW() * 0.8
+      // it starts just outside the left edge, a little below its final level
+      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.7)
       // the farm's road, in the pin: the scene is cropped with `slice`
       const roadY = () => {
         const W = pin.clientWidth
@@ -268,7 +266,7 @@ export default function ChapterDusty({
       }
       // y that puts the wheels on that road (they sit 10 % of the truck's height above its bottom edge)
       const END_Y = () => roadY() + 0.102 * ((truckW() * 470) / 900) - pin.clientHeight
-      gsap.set(sideTruck, { x: START_X, y: START_Y, scale: 1.4, transformOrigin: '50% 100%' })
+      gsap.set(sideTruck, { x: START_X, y: () => END_Y() + pin.clientHeight * 0.14, scale: 1.4, transformOrigin: '50% 100%' })
       gsap.set([buddies, trio], { opacity: 0 })
 
       tl.to(curtain, { yPercent: 0, duration: 1.7, ease: 'power2.out' }, 5.0)
@@ -295,10 +293,11 @@ export default function ChapterDusty({
       const touch = rectIn(tiles[0]).left - hood - pin.clientWidth / 2
       const u = Math.min(0.8, Math.max(0.3, 1 - touch / START_X()))
       const HIT = TRUCK_AT + TRUCK_FOR * u
+      // x, y and scale move together, in a straight line, up to the first square;
+      // from there it only keeps rolling to the middle
       tl.to(sideTruck, { x: 0, duration: TRUCK_FOR, ease: 'none' }, TRUCK_AT)
-      // climbs to the road level by the time the hood touches the first square — one way, never back
-      tl.to(sideTruck, { y: END_Y, duration: HIT - TRUCK_AT, ease: 'power1.out' }, TRUCK_AT)
-      tl.to(sideTruck, { scale: 1, duration: HIT - TRUCK_AT, ease: 'power1.out' }, TRUCK_AT)
+      tl.to(sideTruck, { y: END_Y, duration: HIT - TRUCK_AT, ease: 'none' }, TRUCK_AT)
+      tl.to(sideTruck, { scale: 1, duration: HIT - TRUCK_AT, ease: 'none' }, TRUCK_AT)
       tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: TRUCK_FOR - (HIT - TRUCK_AT), ease: 'power1.inOut' }, HIT)
       tl.to(farmScene, { scale: 1, duration: TRUCK_FOR - (HIT - TRUCK_AT), ease: 'power1.inOut' }, HIT)
       tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, HIT + 0.4)
