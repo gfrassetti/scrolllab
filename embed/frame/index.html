@@ -14,6 +14,14 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src https: http://localhost:*; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'"
     />
+    <!--
+      Chrome 154+: opt-in del documento embebido a `frame-sizing: content-height`
+      del lado del host (embed/loader/loader.js). Tiene que estar en el HTML
+      estático — no sirve inyectado por JS después del load. Progressive
+      enhancement puro: ver el comentario junto a SUPPORTS_FRAME_SIZING en
+      loader.js y docs/hosted-component-plan.md.
+    -->
+    <meta name="responsive-embedded-sizing" content="allow-origins=*" />
     <title>ScrollLab embed</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -166,6 +166,13 @@ function post(msg) {
 }
 
 function postHeight() {
+  // Único punto donde todos los triggers de alto confluyen (decide(), el
+  // reveal y el ResizeObserver de abajo) — el loader ya opta por
+  // `frame-sizing: content-height` del lado del host cuando el navegador lo
+  // soporta (embed/loader/loader.js), pero eso es "one-shot" al `load` del
+  // frame, no algo re-pedible desde JS: la spec lista una API de relayout
+  // como "Future extensions", no como algo que exista hoy. Este postMessage
+  // sigue siendo la única forma real de avisar un cambio de alto posterior.
   post({ type: 'scrolllab:height', px: Math.ceil(document.documentElement.scrollHeight) })
 }
 
