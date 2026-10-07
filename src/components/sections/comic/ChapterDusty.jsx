@@ -291,25 +291,37 @@ export default function ChapterDusty({
       const LINEAR_FOR = 6.6 // the straight run, if it never sped up
       const RUSH_FOR = 1.7 // the last stretch, when both speed up
       const tw = truckW()
-      const hood = 0.44 * tw // front of the hood, from the truck's center, at scale 1
       const centerX = pin.clientWidth / 2
       const first = rectIn(tiles[0])
       const x0 = START_X()
-      const xTouch = first.left - hood - centerX // the hood touches the first square
-      const xPast = first.left + first.w - hood - centerX // the hood reaches its far edge
-      const along = (x) => Math.min(0.9, Math.max(0.15, (x0 - x) / x0)) // share of the straight run
-      const HIT = TRUCK_AT + LINEAR_FOR * along(xTouch)
-      const PAST = TRUCK_AT + LINEAR_FOR * Math.max(along(xPast), along(xTouch) + 0.08)
+      const pace = -x0 / LINEAR_FOR // px per unit along the straight run
+      // The truck shrinks (and climbs) all the way until its hood is past the first
+      // square, i.e. entering the next one. Where that happens depends on the size
+      // it has on the way, so find it by walking the path.
+      const SCALE_FROM = 1.4
+      const frontAt = (t, end) => {
+        const size = SCALE_FROM - (SCALE_FROM - 1) * Math.min(1, (t - TRUCK_AT) / (end - TRUCK_AT))
+        return centerX + x0 + pace * (t - TRUCK_AT) + 0.44 * tw * size
+      }
+      const reach = (target, end) => {
+        for (let t = TRUCK_AT; t < TRUCK_AT + LINEAR_FOR; t += 0.01) {
+          if (frontAt(t, end) >= target) return t
+        }
+        return TRUCK_AT + LINEAR_FOR * 0.9
+      }
+      let PAST = TRUCK_AT + LINEAR_FOR * 0.6
+      for (let i = 0; i < 8; i += 1) PAST = reach(first.left + first.w, PAST)
+      const HIT = reach(first.left, PAST) // the hood touches the first square
       const END = PAST + RUSH_FOR
       // a speed-up that carries on from the straight run: `lead` is the share of
       // the stretch already covered at the start's pace (0 = from a standstill)
       const rush = (lead) => (t) => lead * t + (1 - lead) * t * t
 
-      // x, y and scale move together in a straight line up to the first square
-      tl.to(sideTruck, { y: END_Y, duration: HIT - TRUCK_AT, ease: 'none' }, TRUCK_AT)
-      tl.to(sideTruck, { scale: 1, duration: HIT - TRUCK_AT, ease: 'none' }, TRUCK_AT)
+      // x, y and scale move together in a straight line, and the last two only stop
+      // once the hood is entering the second square
+      tl.to(sideTruck, { y: END_Y, duration: PAST - TRUCK_AT, ease: 'none' }, TRUCK_AT)
+      tl.to(sideTruck, { scale: 1, duration: PAST - TRUCK_AT, ease: 'none' }, TRUCK_AT)
       // x keeps the same pace across the first square, then speeds up into the farm
-      const pace = (xTouch - x0) / (HIT - TRUCK_AT) // px per unit
       const xAt = (t) => x0 + pace * (t - TRUCK_AT)
       tl.to(sideTruck, { x: xAt(PAST), duration: PAST - TRUCK_AT, ease: 'none' }, TRUCK_AT)
       const lead = Math.min(1, Math.max(0.1, (pace * RUSH_FOR) / (0 - xAt(PAST))))
