@@ -29,7 +29,7 @@ import {
   markActivated,
   closeSupersededSubscriptions,
   hasOtherActiveSubscription,
-} from './mpSync.js'
+} from './lifecycle.js'
 import { alertAdmin } from '../orders.js'
 
 /**
