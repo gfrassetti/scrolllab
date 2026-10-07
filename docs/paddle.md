@@ -120,6 +120,23 @@ Cómo se opera:
   suscripción y bajar el plan es un paso manual hasta que se automatice.
 - Cambiar el plazo: `REFUND_DAYS` + revisar con tu abogado / contador.
 
+### De dónde sale la plata de un reembolso
+
+- **Paddle**: no se retira a pedido; paga una vez por mes (el 1°, enviado
+  antes del 15) si el saldo supera el umbral (mín. USD 100, configurable hasta
+  100.000). El reembolso lo procesa Paddle (es el vendedor ante el cliente) al
+  medio de pago original y lo descuenta de tu saldo. En live se aprueba solo si
+  es ≤ USD 400 **y no supera tu saldo**; si no, queda en revisión de Paddle. En
+  sandbox los aprueba solo cada ~10 minutos. No hay retención por venta: dejar
+  saldo suficiente es lo que hace que salgan al toque.
+- **Mercado Pago**: el reembolso **no puede superar el saldo disponible** de la
+  cuenta (si ya retiraste, falla). El plazo de acreditación de cada venta se
+  elige en Tu negocio → Costos: a 14 días o más, la plata de una venta queda
+  retenida justo durante el plazo de reembolso (y la comisión es menor).
+- Probado contra los sandbox reales: `npm run check:paddle-e2e -- --only=reembolsos`
+  (aprobación real de Paddle, ~15 min) y `npm run check:mp-refund-sandbox`
+  (credenciales de PRUEBA de MP).
+
 ## Mails
 
 | Evento | Market / builder | LAB |

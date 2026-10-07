@@ -247,6 +247,21 @@ describe('Pagos de templates (MP simulado)', () => {
     await waitFor(() => alerts('ORDEN REEMBOLSADA').length === 1, 'el aviso de reembolso')
   })
 
+  it('reembolso parcial: la orden sigue paga y descargable, y avisa una sola vez', async () => {
+    const { agent, orderId, payment } = await paidOrder('partial@test.com')
+    Object.assign(mp.payments.get(String(payment.id)), { transaction_amount_refunded: 1000 })
+    assert.equal((await webhook('payment', payment.id)).status, 200)
+    assert.equal((await webhook('payment', payment.id)).status, 200)
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
+    assert.equal((await agent.get(`/api/orders/${orderId}/download`)).status, 200)
+    // Resend descarta el repetido por la clave de idempotencia: cuenta una sola clave.
+    const mine = () => alerts('REEMBOLSO PARCIAL').filter((m) => m.body.text.includes(String(payment.id)))
+    await waitFor(() => mine().length >= 1, 'el aviso del parcial')
+    await new Promise((r) => setTimeout(r, 100))
+    assert.equal(new Set(mine().map((m) => m.idempotencyKey)).size, 1)
+    assert.match(mine()[0].body.text, /devuelto 1000 de/)
+  })
+
   it('contracargo: igual que el reembolso, con su propio aviso', async () => {
     const { orderId, payment } = await paidOrder('chargeback@test.com')
     mp.payments.get(String(payment.id)).status = 'charged_back'

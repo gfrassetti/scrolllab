@@ -119,6 +119,21 @@ describe('LAB con Paddle (reloj simulado)', () => {
     assert.equal(row.paddleTransactionId, out.transactionId)
   })
 
+  it('si Paddle cobra antes de que venza la prueba, la prueba termina ahí', async () => {
+    const c = await customer('activa-antes@test.com')
+    const out = await openCheckout(c, 'hosted_pro')
+    const { psub } = await payCheckout(out.transactionId)
+    assert.equal((await c.me()).trialing, true)
+    // Día 2: se activa antes de tiempo (soporte o el propio Paddle) y cobra el mes.
+    await c.goTo(2)
+    const charge = await renews(psub)
+    const me = await c.me()
+    assert.equal(me.trialing, false)
+    assert.equal(me.plan, 'hosted_pro')
+    assert.equal(iso(me.trialEndsAt), iso(charge.billed_at))
+    assert.equal(iso(me.currentPeriodEnd), charge.billing_period.ends_at)
+  })
+
   it('recorrido completo: prueba → primer cobro → renovación → baja → acceso hasta el fin', async () => {
     const c = await customer('recorrido-paddle@test.com')
     const out = await openCheckout(c, 'hosted_pro', { locale: 'en' })

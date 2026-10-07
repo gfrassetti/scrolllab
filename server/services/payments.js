@@ -11,6 +11,7 @@ import {
   reverseOrderPayment,
   notifyOrderPaymentFailed,
   REVERSED_PAYMENT_STATUSES,
+  alertAdmin,
 } from './orders.js'
 
 /**
@@ -102,6 +103,21 @@ export async function handleMercadoPagoNotification({
       await notifyOrderPaymentFailed({ orderId: String(payment.external_reference || ''), config })
     } else {
       await fulfillApprovedPayment({ payment, config })
+      // Reembolso parcial: MP deja el pago «approved» con la devolución adentro.
+      // La compra sigue paga (como en Paddle); solo se avisa, una vez por monto.
+      const refunded = Number(payment.transaction_amount_refunded) || 0
+      if (refunded > 0) {
+        alertAdmin({
+          kind: 'reversed',
+          key: `mp-partial-${payment.id}-${refunded}`,
+          title: 'REEMBOLSO PARCIAL — la orden sigue paga',
+          lines: [
+            `pago MP ${payment.id} · devuelto ${refunded} de ${payment.transaction_amount} ${payment.currency_id}`,
+            `orden ${payment.external_reference || '-'}`,
+          ],
+          config,
+        })
+      }
     }
   } catch (err) {
     if (err instanceof HttpError && err.status < 500) {

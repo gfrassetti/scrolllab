@@ -12,7 +12,9 @@
  *  2. Tarjeta rechazada: la orden sigue pendiente; se reintenta con otra y paga.
  *  3. Compra donde el navegador nunca confirma (se cierra la pestaña): la
  *     cumple el WEBHOOK, con el payload real que Paddle emitió.
- *  4. Reembolso total desde Paddle: llega `adjustment.*` y la orden se corta.
+ *  4. Reembolsos con la aprobación REAL de Paddle: total sin descargar (Botón de
+ *     arrepentimiento → orden cortada), parcial de una compra descargada (sigue
+ *     paga), cobro de LAB; monto exacto devuelto y sin doble reembolso.
  *  5. LAB: alta con 7 días de prueba, plan activo en USD, cambio de plan
  *     (Paddle acepta el PATCH) y baja programada.
  *  6. LAB sin sync del navegador: la activan los eventos reales de Paddle.
@@ -430,62 +432,202 @@ async function scenarioWebhookOnly() {
   check('webhook: una firma falsa se rechaza (401)', forged.status === 401, `HTTP ${forged.status}`)
 }
 
-async function scenarioRefund() {
-  const order = state.okOrder
-  if (!order) return skip('reembolso', 'no hubo compra aprobada')
-  // Paddle solo reembolsa transacciones ya completadas (pasan de «paid» a «completed» al rato).
-  const txn = await waitFor(async () => {
-    const t = await pd('GET', `/transactions/${state.okTxn.id}`)
-    return t.status === 'completed' ? t : null
-  }, 'que Paddle complete la transacción', 240_000).catch(() => null)
-  if (!txn) return skip('reembolso', 'Paddle tardó en pasar la transacción a «completed»')
-  let adj
-  try {
-    adj = await pd('POST', '/adjustments', {
-      action: 'refund',
-      type: 'full',
-      reason: 'error',
-      transaction_id: txn.id,
-    })
-  } catch (err) {
-    return skip('reembolso', `Paddle no dejó crearlo desde la API: ${err.message}`)
-  }
-  // Paddle aprueba los reembolsos aparte (a mano): en sandbox suele quedar «pending_approval».
-  const settled = await waitFor(async () => {
-    const list = await pd('GET', `/adjustments?id=${adj.id}`)
-    const a = list[0]
-    return a && a.status !== 'pending_approval' ? a : null
-  }, 'que Paddle apruebe el reembolso', 45_000).catch(() => null)
-  const real = settled || (await pd('GET', `/adjustments?id=${adj.id}`))[0] || adj
-  const approvedByPaddle = real.status === 'approved'
+/** Baja el ZIP de verdad (link firmado + archivo): recién ahí cuenta como descargado. */
+async function downloadZip(buyer, orderId) {
+  const link = await buyer.call('GET', `/api/orders/${orderId}/download`)
+  if (link.status !== 200) return link.status
+  const file = await buyer.ctx.request.fetch(new URL(link.body.url, BASE).toString(), { headers: { Origin: BASE } })
+  await file.body()
+  return file.status()
+}
 
-  // 1) Con el ajuste REAL todavía pendiente, la orden no se corta antes de tiempo.
-  if (!approvedByPaddle) {
-    const pendingCodes = await replay([['adjustment.created', real]])
-    const [stillPaid] = await myOrders(state.ok)
-    const dl0 = await state.ok.call('GET', `/api/orders/${stillPaid.id}/download`)
+/** Lo que el servidor le avisó al dueño (sin mails, los avisos quedan en el log de la API). */
+function ownerAlerts(needle) {
+  return fs.readFileSync(apiLog, 'utf8').split('\n').filter((l) => l.includes(needle))
+}
+
+async function buyChapters(label) {
+  const buyer = await newBuyer(label)
+  await openCartAndPay(buyer)
+  await payInOverlay(buyer.page, GOOD_CARD)
+  await buyer.page.waitForURL(/\/account\?purchase=1/, { timeout: 90_000 })
+  const [order] = await myOrders(buyer)
+  return { buyer, order }
+}
+
+const completed = (txnId) =>
+  waitFor(async () => {
+    const t = await pd('GET', `/transactions/${txnId}`)
+    return t.status === 'completed' ? t : null
+  }, `que Paddle complete ${txnId}`, 300_000)
+
+/**
+ * Reembolsos de punta a punta contra el sandbox real: la política (14 días, ZIP
+ * sin descargar), el Botón de arrepentimiento, el reembolso hecho en Paddle con
+ * su aprobación REAL (el sandbox aprueba solo cada ~10 min), que el monto que
+ * vuelve sea exactamente lo cobrado, que no se pueda reembolsar dos veces y qué
+ * hace la app con cada caso: total → orden cortada; parcial → sigue paga y
+ * avisa; cobro de LAB → avisa (la baja es aparte).
+ */
+async function scenarioRefunds() {
+  // ——— A: compra sin descargar → elegible → reembolso total ———
+  const A = await buyChapters('refund-a')
+  check(
+    'reembolso A: recién comprada, sin descargar, «Mis compras» la da por elegible',
+    A.order.refund?.eligible === true && A.order.refund.reason === 'ok',
+    `${A.order.refund?.reason} · hasta ${A.order.refund?.deadline?.slice(0, 10)}`,
+  )
+  const wA = await A.buyer.call('POST', '/api/withdrawals', {
+    name: 'E2E Buyer',
+    email: A.buyer.email,
+    order: A.order.id.slice(-8),
+    message: 'changed my mind',
+    locale: 'en',
+  })
+  check('reembolso A: el Botón de arrepentimiento da un código', wA.status === 201 && /^ARR-/.test(wA.body.code || ''), `HTTP ${wA.status} ${wA.body.code || wA.body.error || ''}`)
+  await sleep(500)
+  const alertA = ownerAlerts(wA.body.code).join(' ')
+  check('reembolso A: al dueño le llega «ELEGIBLE — reembolsar» con la orden', /ELEGIBLE — reembolsar/.test(alertA) && alertA.includes(A.order.id), alertA.slice(0, 160))
+
+  // ——— B: compra descargada → no elegible por arrepentimiento ———
+  const B = await buyChapters('refund-b')
+  const dlB = await downloadZip(B.buyer, B.order.id)
+  const [B2] = await myOrders(B.buyer)
+  check(
+    'reembolso B: tras bajar el ZIP ya no es elegible',
+    dlB === 200 && B2.refund?.eligible === false && B2.refund.reason === 'downloaded',
+    `archivo HTTP ${dlB} · ${B2.refund?.reason} · ${B2.downloadCount} descarga(s)`,
+  )
+  const wB = await B.buyer.call('POST', '/api/withdrawals', { name: 'E2E Buyer', email: B.buyer.email, order: B.order.id })
+  await sleep(500)
+  const alertB = ownerAlerts(wB.body.code).join(' ')
+  check('reembolso B: el aviso al dueño dice NO elegible (se descargó)', /NO elegible por arrepentimiento/.test(alertB), alertB.slice(0, 160))
+
+  // ——— C: un cobro de LAB (se termina la prueba ya para que haya cobro) ———
+  let C = null
+  try {
+    const buyer = await newBuyer('refund-lab')
+    await labSubscribe(buyer)
+    await waitFor(async () => (await buyer.call('GET', '/api/subscriptions/me')).body.plan === 'hosted_pro', 'el plan Pro', 90_000)
+    // Corre antes que los escenarios de LAB: es la única suscripción de Paddle hasta acá.
+    const row = await waitFor(
+      async () => JSON.parse(fs.readFileSync(path.join(dbDir, 'subscriptions.json'), 'utf8')).filter((r) => r.paddleSubscriptionId).at(-1),
+      'la suscripción en Paddle',
+    )
+    await pd('POST', `/subscriptions/${row.paddleSubscriptionId}/activate`)
+    const charge = await waitFor(async () => {
+      const list = await pd('GET', `/transactions?subscription_id=${row.paddleSubscriptionId}&status=completed`)
+      return list.find((t) => Number(t.details?.totals?.grand_total) > 0) || null
+    }, 'el primer cobro de LAB', 300_000)
+    const sub = await pd('GET', `/subscriptions/${row.paddleSubscriptionId}`)
+    const codes = await replay([['subscription.activated', sub], ['transaction.completed', charge]])
+    const me = (await buyer.call('GET', '/api/subscriptions/me')).body
     check(
-      'reembolso: pendiente de aprobación, la orden sigue paga y se descarga',
-      pendingCodes[0] === 200 && stillPaid.status === 'paid' && dl0.status === 200,
-      `${real.status} → orden ${stillPaid.status}, descarga HTTP ${dl0.status}`,
+      'reembolso C: LAB cobró USD 79 (fin de la prueba) y la app lo registra',
+      codes.every((c) => c === 200) && Number(charge.details.totals.grand_total) === HOSTED_PLANS.hosted_pro.priceMonthlyUsd * 100 && me.plan === 'hosted_pro' && !me.trialing,
+      `${charge.details.totals.grand_total} centavos · ${me.plan} · trialing ${me.trialing} · ${codes.join(',')}`,
+    )
+    C = { buyer, charge, subId: row.paddleSubscriptionId }
+  } catch (err) {
+    skip('reembolso C (LAB)', err.message)
+  }
+
+  // ——— Paddle: pedir los reembolsos (solo sobre transacciones completadas) ———
+  const txA = await completed(A.order.paddleTransactionId)
+  const txB = await completed(B.order.paddleTransactionId)
+  const adjA = await pd('POST', '/adjustments', { action: 'refund', type: 'full', reason: 'withdrawal request (e2e)', transaction_id: txA.id })
+  const lineB = txB.details.line_items[0]
+  const adjB = await pd('POST', '/adjustments', {
+    action: 'refund',
+    type: 'partial',
+    reason: 'goodwill (e2e)',
+    transaction_id: txB.id,
+    items: [{ item_id: lineB.id, type: 'partial', amount: '500' }],
+  })
+  const adjC = C
+    ? await pd('POST', '/adjustments', { action: 'refund', type: 'full', reason: 'lab refund (e2e)', transaction_id: C.charge.id }).catch((err) => {
+        skip('reembolso C (LAB)', `Paddle no dejó crearlo: ${err.message}`)
+        return null
+      })
+    : null
+
+  // Pendiente de aprobación: la orden todavía no se corta.
+  const pendingCodes = await replay([['adjustment.created', adjA]])
+  const [stillPaid] = await myOrders(A.buyer)
+  check(
+    'reembolso A: pendiente de aprobación, la orden sigue paga',
+    adjA.status === 'pending_approval' ? pendingCodes[0] === 200 && stillPaid.status === 'paid' : true,
+    `${adjA.status} → ${stillPaid.status}`,
+  )
+
+  // ——— la aprobación REAL de Paddle (sandbox: ~cada 10 minutos) ———
+  const ids = [adjA, adjB, adjC].filter(Boolean).map((a) => a.id)
+  console.log(`   esperando que Paddle apruebe ${ids.length} reembolsos (hasta 16 min)…`)
+  const approved = await waitFor(async () => {
+    const list = await pd('GET', `/adjustments?id=${ids.join(',')}`)
+    return list.length === ids.length && list.every((a) => a.status !== 'pending_approval') ? list : null
+  }, 'la aprobación de Paddle', 16 * 60_000)
+  const byId = Object.fromEntries(approved.map((a) => [a.id, a]))
+  const rA = byId[adjA.id]
+  const rB = byId[adjB.id]
+  const rC = adjC ? byId[adjC.id] : null
+
+  // El dinero: vuelve exactamente lo cobrado, en la misma moneda.
+  check(
+    'reembolso A: Paddle lo aprobó y devuelve exactamente lo cobrado (impuestos incluidos)',
+    rA.status === 'approved' && rA.totals.total === txA.details.totals.grand_total && rA.currency_code === txA.currency_code,
+    `${rA.status} · devuelve ${rA.totals.total} de ${txA.details.totals.grand_total} ${rA.currency_code} · a tu saldo ${rA.totals.earnings}`,
+  )
+  check(
+    'reembolso B: el parcial de USD 5 quedó aprobado por USD 5',
+    rB.status === 'approved' && Number(rB.totals.total) === 500,
+    `${rB.status} · ${rB.totals.total} ${rB.currency_code}`,
+  )
+  if (rC) {
+    check(
+      'reembolso C: el cobro de LAB se devuelve completo',
+      rC.status === 'approved' && rC.totals.total === C.charge.details.totals.grand_total,
+      `${rC.status} · ${rC.totals.total} de ${C.charge.details.totals.grand_total}`,
     )
   }
-  // 2) Aprobado (el de Paddle, o su payload real con la aprobación simulada).
-  const approved = approvedByPaddle ? real : { ...real, status: 'approved' }
-  const codes = await replay([['adjustment.updated', approved]])
-  check(
-    `reembolso: adjustment.updated aprobado responde 200${approvedByPaddle ? '' : ' (aprobación simulada sobre el payload real)'}`,
-    codes[0] === 200,
-    `${real.action} ${real.type} → ${codes.join(',')}`,
+
+  // No se puede devolver dos veces la misma compra.
+  const twice = await pd('POST', '/adjustments', { action: 'refund', type: 'full', reason: 'double (e2e)', transaction_id: txA.id }).then(
+    (a) => ({ ok: true, a }),
+    (err) => ({ ok: false, err }),
   )
-  const [refunded] = await myOrders(state.ok)
-  check('reembolso: la orden pasa a refunded', refunded.status === 'refunded', refunded.status)
-  const dl = await state.ok.call('GET', `/api/orders/${refunded.id}/download`)
-  check('reembolso: la descarga queda cortada', dl.status >= 400, `HTTP ${dl.status}`)
-  // Los eventos repetidos no reabren nada.
-  await replay([['adjustment.updated', approved]])
-  const [again] = await myOrders(state.ok)
-  check('reembolso: repetir el evento es inocuo', again.status === 'refunded', again.status)
+  check('reembolso A: Paddle rechaza un segundo reembolso de la misma compra', !twice.ok, twice.ok ? `creó ${twice.a.id}` : twice.err.message.slice(0, 120))
+
+  // ——— la app con los eventos reales ———
+  const codes = await replay([['adjustment.updated', rA], ['adjustment.updated', rB], ...(rC ? [['adjustment.updated', rC]] : [])])
+  check('reembolsos: los adjustment.updated reales responden 200', codes.every((c) => c === 200), codes.join(','))
+
+  const [refA] = await myOrders(A.buyer)
+  const dlA = await A.buyer.call('GET', `/api/orders/${refA.id}/download`)
+  check(
+    'reembolso A: la orden queda reembolsada y la descarga cortada',
+    refA.status === 'refunded' && refA.refund?.reason === 'refunded' && dlA.status === 403,
+    `${refA.status} · ${refA.refund?.reason} · descarga HTTP ${dlA.status}`,
+  )
+  const [refB] = await myOrders(B.buyer)
+  check(
+    'reembolso B: el parcial no corta la compra (sigue paga y descargable) y avisa',
+    refB.status === 'paid' && (await downloadZip(B.buyer, refB.id)) === 200 && ownerAlerts('REEMBOLSO PARCIAL').some((l) => l.includes(rB.id)),
+    refB.status,
+  )
+  if (rC) {
+    const me = (await C.buyer.call('GET', '/api/subscriptions/me')).body
+    check(
+      'reembolso C: LAB avisa al dueño para revisar el acceso (la baja la decide el cliente)',
+      ownerAlerts('REEMBOLSO EN PADDLE').some((l) => l.includes(rC.id) && /LAB/.test(l)),
+      `plan ${me.plan}`,
+    )
+  }
+  // Repetir los eventos no cambia nada.
+  await replay([['adjustment.updated', rA], ['adjustment.updated', rB]])
+  const [againA] = await myOrders(A.buyer)
+  const [againB] = await myOrders(B.buyer)
+  check('reembolsos: repetir los eventos es inocuo', againA.status === 'refunded' && againB.status === 'paid')
 }
 
 async function labSubscribe(buyer, { block = false } = {}) {
@@ -613,7 +755,7 @@ try {
   await run('compra aprobada', scenarioApproved)
   await run('tarjeta rechazada', scenarioDeclined)
   await run('webhook', scenarioWebhookOnly)
-  await run('reembolso', scenarioRefund)
+  await run('reembolsos', scenarioRefunds)
   await run('LAB', scenarioLab)
   await run('LAB webhook', scenarioLabWebhookOnly)
 } finally {

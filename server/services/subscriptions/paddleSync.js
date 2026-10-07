@@ -305,6 +305,9 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   }
   const paidAt = new Date(txn.billed_at || txn.updated_at || Date.now())
   if (!sub.lastPaidAt || paidAt > new Date(sub.lastPaidAt)) sub.lastPaidAt = paidAt
+  // Un cobro termina la prueba aunque faltaran días (Paddle la activó antes):
+  // sin esto la app seguía mostrando «en prueba» sobre un mes ya cobrado.
+  if (sub.trialEndsAt && paidAt < new Date(sub.trialEndsAt)) sub.trialEndsAt = paidAt
   sub.paidPlan = sub.plan
   sub.paidCycle = sub.cycle
   sub.paymentFailedAt = undefined
