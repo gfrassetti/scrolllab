@@ -169,6 +169,13 @@ export function rateLimits() {
       keyGenerator: (req) => String(req.user?.id ?? req.user?._id ?? 'sin-sesion'),
       message: { error: 'Demasiados intentos, probá más tarde' },
     }),
+    // Botón de arrepentimiento: público y sin cuenta (lo exige la ley), así que
+    // se corta por IP; holgado porque varias personas pueden compartir una.
+    withdrawal: mk({
+      windowMs: 60 * 60 * 1000,
+      max: 30,
+      message: { error: 'Demasiados pedidos, probá más tarde' },
+    }),
     // Chequeo público de cupones: frena a quien prueba códigos a ciegas.
     coupons: mk({
       windowMs: 60 * 60 * 1000,

@@ -363,7 +363,8 @@
     "labBodyAfter": ".",
     "labEyebrow": "Sin descargar nada",
     "labTitleBefore": "Tu componente en una",
-    "labTitleEm": "línea"
+    "labTitleEm": "línea",
+    "footerWithdrawal": "Botón de arrepentimiento"
   },
   "templates": {
     "chapters": {
@@ -1014,6 +1015,8 @@
     "failed": "Fallida",
     "download": "Descargar ZIP",
     "downloadRefundNote": "Al descargar el ZIP ya no podés pedir el reembolso por arrepentimiento.",
+    "refundUntil": "Reembolso disponible hasta el {{date}}.",
+    "requestRefund": "Pedir reembolso",
     "refundPolicyLink": "Política de reembolsos",
     "license": "Licencia",
     "downloadsCount": "Descargas: {{count}}",
@@ -1194,7 +1197,7 @@
       },
       {
         "title": "Reembolsos",
-        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: reembolso total de cada cobro dentro de los {{days}} días, sin condiciones. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Paddle) y la licencia y las descargas de esa orden quedan sin efecto.",
+        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: reembolso total de cada cobro dentro de los {{days}} días, sin condiciones. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Paddle) y la licencia y las descargas de esa orden quedan sin efecto. Para pedirlo usá el Botón de arrepentimiento, al pie del home.",
         "link": {
           "to": "/legal/refunds",
           "label": "Ver la Política de reembolsos →"
@@ -1268,10 +1271,14 @@
       {
         "title": "Cómo pedirlo",
         "items": [
-          "Si pagaste con tarjeta (Paddle): podés pedírselo directamente a Paddle, nuestro revendedor autorizado, en paddle.net, o escribirnos.",
-          "Si pagaste con Mercado Pago: escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página).",
-          "Lo revisamos y respondemos lo antes posible."
-        ]
+          "Desde el Botón de arrepentimiento (al pie del home): sin cuenta, con un código de seguimiento al instante. Vale para cualquier medio de pago.",
+          "Si pagaste con tarjeta (Paddle), también podés pedírselo directamente a Paddle, nuestro revendedor autorizado, en paddle.net.",
+          "O escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página). Lo revisamos y respondemos lo antes posible."
+        ],
+        "link": {
+          "to": "/arrepentimiento",
+          "label": "Botón de arrepentimiento"
+        }
       },
       {
         "title": "Pasado el plazo",
@@ -1291,6 +1298,24 @@
       }
     ],
     "contact": "Consultas sobre estos términos:"
+  },
+  "withdrawal": {
+    "eyebrow": "Arrepentimiento",
+    "title": "Botón de arrepentimiento",
+    "intro": "Si te arrepentiste de una compra, pedilo acá. No hace falta cuenta. Te damos un código de seguimiento al instante y te lo mandamos por mail. Revisamos cada pedido según la Política de reembolsos:",
+    "ruleZip": "Templates, bundle y builder: reembolso total dentro de los {{days}} días de la compra si no descargaste el ZIP. Si ya lo descargaste, solo por un defecto técnico o si no es lo descripto.",
+    "ruleLab": "LAB: reembolso total de cada cobro dentro de los {{days}} días, sin condiciones. Para que no se te cobre de nuevo, cancelá también la suscripción desde LAB.",
+    "name": "Nombre y apellido",
+    "email": "Mail de la compra",
+    "order": "Número de orden (opcional)",
+    "orderHint": "Lo ves en Mis compras, al lado de «Orden». Sirve para encontrar la compra más rápido; sin él también lo buscamos con tu mail.",
+    "message": "Contanos qué pasó (opcional)",
+    "submit": "Enviar solicitud",
+    "sending": "Enviando…",
+    "error": "No pudimos enviar la solicitud. Probá de nuevo o escribinos.",
+    "doneEyebrow": "Solicitud recibida · tu código",
+    "doneBody": "Te mandamos este código a {{email}}. Revisamos el pedido y te respondemos a ese mail. Si el reembolso procede, el dinero vuelve al mismo medio de pago.",
+    "contact": "¿Dudas? Escribinos:"
   },
   "theme": {
     "toLight": "Cambiar a tema claro",

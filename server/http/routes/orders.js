@@ -11,6 +11,7 @@ import {
   assertPathInsideStorage,
 } from '../../services/orders.js'
 import { signDownloadToken, verifyDownloadToken } from '../../downloadToken.js'
+import { refundEligibility } from '../../../src/domain/policy.js'
 
 /**
  * Mis compras y la entrega del ZIP: la orden paga pide un link firmado (TTL +
@@ -35,6 +36,8 @@ export function createOrdersRouter({ config, limits }) {
           currency_id: o.currency_id,
           createdAt: o.createdAt,
           downloadCount: o.downloadCount || 0,
+          // ¿Todavía hay reembolso por arrepentimiento? (plazo + ZIP sin descargar)
+          refund: refundEligibility(o),
           purchaseCode: purchaseCode(db.uid(o) || o.id, config.downloadSecret),
         })),
       })

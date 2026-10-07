@@ -267,6 +267,68 @@ export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   })
 }
 
+// ——— Botón de arrepentimiento ———
+
+const WITHDRAWAL_COPY = {
+  es: {
+    subject: (code) => `Recibimos tu solicitud de arrepentimiento · ${code}`,
+    preheader: 'Tu código de seguimiento está adentro.',
+    eyebrow: 'Arrepentimiento',
+    title: (name) => `Recibimos tu solicitud, ${name}.`,
+    intro:
+      'Guardá el código de abajo: es el seguimiento de tu pedido. Lo revisamos y te respondemos por este mismo mail.',
+    code: 'Código',
+    order: 'Compra',
+    date: 'Fecha',
+    cta: 'Ver la política de reembolsos',
+    footer:
+      'Si no hiciste este pedido, ignorá este mail o respondelo. Podés escribirnos citando el código.',
+  },
+  en: {
+    subject: (code) => `We received your withdrawal request · ${code}`,
+    preheader: 'Your tracking code is inside.',
+    eyebrow: 'Withdrawal request',
+    title: (name) => `We received your request, ${name}.`,
+    intro:
+      'Keep the code below: it tracks your request. We’ll review it and reply to you by this same email.',
+    code: 'Code',
+    order: 'Purchase',
+    date: 'Date',
+    cta: 'See the refund policy',
+    footer:
+      'If you didn’t make this request, ignore this email or reply to it. You can write to us quoting the code.',
+  },
+}
+
+/**
+ * Confirmación del botón de arrepentimiento: el código de seguimiento (la ley
+ * pide darlo al instante). No dice si procede el reembolso: eso lo decide la
+ * revisión, y la política está a un click.
+ * @param {{ code: string, name: string, locale?: string, order?: any, refundsUrl: string, logoUrl: string }} args
+ */
+export function buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl }) {
+  const lang = langOf(locale)
+  const c = WITHDRAWAL_COPY[lang]
+  const orderTitle = (order?.items || []).map((i) => i.title || i.sku).join(', ')
+  return render({
+    lang,
+    logoUrl,
+    subject: c.subject(code),
+    preheader: c.preheader,
+    eyebrow: c.eyebrow,
+    eyebrowTone: 'muted',
+    title: c.title(name),
+    intro: c.intro,
+    rows: [
+      [c.code, code],
+      orderTitle ? [c.order, orderTitle] : null,
+      [c.date, dateLong(new Date(), lang)],
+    ],
+    cta: { href: refundsUrl, label: c.cta },
+    footer: c.footer,
+  })
+}
+
 // ——— LAB ———
 
 const TIER_LABEL = { starter: 'Starter', pro: 'Pro', studio: 'Studio' }

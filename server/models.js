@@ -58,6 +58,8 @@ const orderSchema = new mongoose.Schema(
     // Idioma de los mails de la orden (el del sitio al comprar).
     locale: { type: String, enum: ["es", "en"], default: "es" },
     mpPreferenceId: String,
+    // Cuándo se cobró: desde acá corre el plazo de reembolso (lib/site REFUND_DAYS).
+    paidAt: Date,
     mpPaymentId: { type: String, sparse: true, unique: true },
     // Transacción de Paddle que armamos al abrir el checkout: solo esa la paga.
     paddleTransactionId: { type: String, sparse: true, unique: true },
@@ -327,6 +329,30 @@ export const HostedInstance =
 export const Subscription =
   mongoose.models.Subscription ||
   mongoose.model("Subscription", subscriptionSchema);
+/**
+ * Solicitud del botón de arrepentimiento (Resolución 424/2020): pedido público,
+ * sin cuenta, con su código de seguimiento. `orderId` es la orden asociada por
+ * mail + número (si se encontró); `eligibility` es la foto del reembolso al
+ * momento del pedido, para que el dueño decida rápido.
+ */
+const withdrawalSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, unique: true },
+    email: { type: String, required: true, lowercase: true, trim: true, index: true },
+    name: { type: String, required: true },
+    orderRef: String,
+    orderId: { type: String, default: null },
+    message: String,
+    locale: { type: String, enum: ["es", "en"], default: "es" },
+    eligibility: mongoose.Schema.Types.Mixed,
+    status: { type: String, enum: ["received", "resolved"], default: "received" },
+  },
+  { timestamps: true },
+);
+
+/** @type {AnyModel} */
+export const Withdrawal =
+  mongoose.models.Withdrawal || mongoose.model("Withdrawal", withdrawalSchema);
 /** @type {AnyModel} */
 export const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
 /** @type {AnyModel} */

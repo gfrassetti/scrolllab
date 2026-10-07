@@ -363,7 +363,8 @@
     "labBodyAfter": ".",
     "labEyebrow": "No download",
     "labTitleBefore": "Your component in one",
-    "labTitleEm": "line"
+    "labTitleEm": "line",
+    "footerWithdrawal": "Withdrawal request"
   },
   "templates": {
     "chapters": {
@@ -1014,6 +1015,8 @@
     "failed": "Failed",
     "download": "Download ZIP",
     "downloadRefundNote": "Once you download the ZIP you can no longer ask for a change-of-mind refund.",
+    "refundUntil": "Refund available until {{date}}.",
+    "requestRefund": "Request a refund",
     "refundPolicyLink": "Refund policy",
     "license": "License",
     "downloadsCount": "Downloads: {{count}}",
@@ -1194,7 +1197,7 @@
       },
       {
         "title": "Refunds",
-        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: full refund of each charge within {{days}} days, no conditions. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked.",
+        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: full refund of each charge within {{days}} days, no conditions. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
         "link": {
           "to": "/legal/refunds",
           "label": "See the Refund policy →"
@@ -1268,10 +1271,14 @@
       {
         "title": "How to request it",
         "items": [
-          "If you paid by card (Paddle): you can ask Paddle, our online reseller, directly at paddle.net, or write to us.",
-          "If you paid with Mercado Pago: write to us with your purchase email and order number (contact details are at the bottom of this page).",
-          "We review it and reply as soon as we can."
-        ]
+          "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
+          "If you paid by card (Paddle), you can also ask Paddle, our authorized reseller, directly at paddle.net.",
+          "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
+        ],
+        "link": {
+          "to": "/arrepentimiento",
+          "label": "Withdrawal request"
+        }
       },
       {
         "title": "After the period",
@@ -1291,6 +1298,24 @@
       }
     ],
     "contact": "Questions about these terms:"
+  },
+  "withdrawal": {
+    "eyebrow": "Withdrawal",
+    "title": "Withdrawal request",
+    "intro": "Changed your mind about a purchase? Ask here. No account needed. You get a tracking code right away and by email. We review every request under the Refund policy:",
+    "ruleZip": "Templates, bundle and builder: full refund within {{days}} days of purchase if you haven’t downloaded the ZIP. If you already did, only for a technical defect or if it isn’t as described.",
+    "ruleLab": "LAB: full refund of each charge within {{days}} days, no conditions. To avoid being charged again, also cancel the subscription from LAB.",
+    "name": "Full name",
+    "email": "Purchase email",
+    "order": "Order number (optional)",
+    "orderHint": "You’ll find it in My purchases, next to “Order”. It helps us find the purchase faster; without it we look it up by your email.",
+    "message": "Tell us what happened (optional)",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "error": "We couldn’t send the request. Try again or write to us.",
+    "doneEyebrow": "Request received · your code",
+    "doneBody": "We sent this code to {{email}}. We’ll review the request and reply to that email. If the refund applies, the money goes back to the original payment method.",
+    "contact": "Questions? Write to us:"
   },
   "theme": {
     "toLight": "Switch to light theme",

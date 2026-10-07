@@ -348,6 +348,37 @@ export const fileDb = {
     return read("orders");
   },
 
+  // Solicitudes del botón de arrepentimiento.
+  async createWithdrawal(data) {
+    const rows = read('withdrawals')
+    const now = new Date().toISOString()
+    const row = {
+      id: nid(),
+      status: 'received',
+      orderId: null,
+      ...data,
+      email: String(data.email).toLowerCase(),
+      createdAt: now,
+      updatedAt: now,
+    }
+    rows.push(row)
+    write('withdrawals', rows)
+    return row
+  },
+  async findRecentWithdrawal({ email, orderId, since }) {
+    const cut = new Date(since).getTime()
+    return (
+      read('withdrawals')
+        .filter(
+          (w) =>
+            w.email === String(email).toLowerCase() &&
+            (w.orderId || null) === (orderId || null) &&
+            new Date(w.createdAt).getTime() >= cut,
+        )
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] || null
+    )
+  },
+
   // Leads (cupón de bienvenida). Alta idempotente por email.
   async upsertLead(data) {
     const rows = read("leads");

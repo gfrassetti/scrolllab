@@ -7,6 +7,7 @@ import { createHealthRouter } from './http/routes/health.js'
 import { createAuthRouter } from './http/routes/auth.js'
 import { createOrdersRouter } from './http/routes/orders.js'
 import { createCouponsRouter } from './http/routes/coupons.js'
+import { createWithdrawalsRouter } from './http/routes/withdrawals.js'
 import { createHostedRouter } from './http/routes/hosted.js'
 import { createSubscriptionsRouter } from './http/routes/subscriptions.js'
 import { createCheckoutRouter } from './http/routes/checkout.js'
@@ -137,6 +138,8 @@ export async function createApp(config) {
   app.use(createSubscriptionsRouter({ config, limits }))
 
   app.use(createCouponsRouter({ config, limits }))
+
+  app.use(createWithdrawalsRouter({ config, limits }))
 
   app.use(createAnalyticsRouter({ config, limits }))
 

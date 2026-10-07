@@ -5,12 +5,10 @@ export const SITE_TAGLINE = 'Webs que se mueven.'
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 
 /**
- * Plazo (días corridos) para pedir el reembolso total por arrepentimiento, en
- * templates, bundle, builder y en cada cobro de LAB. Paddle exige entre 14 y 90
- * para aprobar el dominio: no bajar de 14. Lo usan la Política de reembolsos, los
- * Términos, el carrito y LAB (`{{days}}`). Ver docs/paddle.md.
+ * Plazo de reembolso por arrepentimiento (días): vive en el dominio, lo usan el
+ * servidor y los textos legales (`{{days}}`). Ver src/domain/policy.js.
  */
-export const REFUND_DAYS = 14
+export { REFUND_DAYS } from '../domain/policy.js'
 
 export const INSTAGRAM_HANDLE = '@scrolllab_ar'
 export const INSTAGRAM_URL = 'https://www.instagram.com/scrolllab_ar/'

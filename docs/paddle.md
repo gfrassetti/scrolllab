@@ -97,9 +97,22 @@ Paddle pide, publicadas en el sitio, Términos, Privacidad y una **Política de
 reembolsos con un plazo de entre 14 y 90 días** (sin «todas las ventas son
 finales»). Está en `/legal/refunds` (es/en), enlazada desde el pie del home, el
 carrito, LAB y los Términos. El plazo es una sola constante: `REFUND_DAYS` en
-`src/lib/site.js` (14, el mínimo); los textos usan `{{days}}`. Alcance: templates,
-bundle, builder y **cada cobro** de LAB, con Mercado Pago o con Paddle; el
-Estudio queda afuera (cotización aparte). Cómo se opera:
+`src/domain/policy.js` (14, el mínimo); los textos usan `{{days}}`. Alcance:
+templates, bundle y builder **solo si no se descargó el ZIP** (después, solo por
+defecto técnico o no ser lo descripto), y **cada cobro** de LAB sin condiciones,
+con Mercado Pago o con Paddle; el Estudio queda afuera (cotización aparte).
+
+- Elegibilidad: `refundEligibility(order)` (mismo archivo). Cuenta desde
+  `paidAt` y mira `downloadCount`, que sube cuando el **archivo** se baja (no al
+  pedir el link). `/api/orders` la devuelve como `refund`; «Mis compras» muestra
+  la fecha límite y avisa que descargar cierra el reembolso.
+- **Botón de arrepentimiento** (Res. 424/2020, link en el pie del home):
+  `/arrepentimiento` → `POST /api/withdrawals`. Público, sin cuenta: guarda la
+  solicitud (`Withdrawal`), devuelve un código `ARR-XXXXXX`, se lo manda por mail
+  al cliente y te avisa a vos con el veredicto (ELEGIBLE / NO elegible y por qué /
+  SIN ORDEN). La orden se asocia solo si el mail coincide con la cuenta.
+
+Cómo se opera:
 - Paddle: el comprador lo pide en paddle.net o a nosotros; se reembolsa desde el
   panel de Paddle. Una orden reembolsada se corta sola (webhook `adjustment.*`).
 - Mercado Pago: se reembolsa desde el panel de MP; el webhook corta la orden.

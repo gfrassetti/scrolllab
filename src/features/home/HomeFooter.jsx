@@ -217,6 +217,12 @@ export default function HomeFooter({ t, templates }) {
             >
               {t('home.footerRefunds')}
             </Link>
+            <Link
+              to="/arrepentimiento"
+              className="text-ink transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerWithdrawal')}
+            </Link>
           </nav>
           <a
             href="#top"

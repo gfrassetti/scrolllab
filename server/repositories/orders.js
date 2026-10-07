@@ -72,6 +72,7 @@ export const ordersRepo = {
         return { order, created: false };
       }
       order.status = "paid";
+      order.paidAt = new Date().toISOString();
       if (!paddle) order.mpPaymentId = String(mpPaymentId);
       delete order.expiresAt;
       await order.save();
@@ -91,6 +92,7 @@ export const ordersRepo = {
       {
         $set: {
           status: "paid",
+          paidAt: new Date(),
           ...(paddle ? {} : paidBy),
         },
         // Una orden paga no caduca: sacarle el TTL es parte de cobrarla.

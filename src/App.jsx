@@ -35,6 +35,7 @@ const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
+const WithdrawalPage = lazy(() => import('./pages/WithdrawalPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -191,6 +192,12 @@ export default function App() {
                   <Route path="/legal/privacy" element={<PrivacyPage />} />
                   <Route path="/legal/terms" element={<TermsPage />} />
                   <Route path="/legal/refunds" element={<RefundsPage />} />
+                  {/* Botón de arrepentimiento (Res. 424/2020), enlazado desde el home. */}
+                  <Route path="/arrepentimiento" element={<WithdrawalPage />} />
+                  <Route
+                    path="/withdrawal"
+                    element={<Navigate to="/arrepentimiento" replace />}
+                  />
                   <Route
                     path="/license"
                     element={<Navigate to="/legal/license" replace />}

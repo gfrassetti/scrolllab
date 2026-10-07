@@ -252,15 +252,19 @@ export default function AccountPage() {
                           · {t('account.downloadsCount', { count: order.downloadCount || 0 })}
                         </p>
                       )}
-                      {/* Descargar cierra el reembolso por arrepentimiento: se avisa antes. */}
-                      {order.status === 'paid' && !(order.downloadCount > 0) && (
-                        <p className="mt-2 max-w-[44ch] text-xs leading-relaxed text-ink/55">
+                      {/* Descargar cierra el reembolso por arrepentimiento: se avisa antes,
+                          con la fecha límite que calcula el servidor. */}
+                      {order.refund?.eligible && (
+                        <p className="mt-2 max-w-[48ch] text-xs leading-relaxed text-ink/55">
+                          {t('account.refundUntil', {
+                            date: new Date(order.refund.deadline).toLocaleDateString(dateLocale),
+                          })}{' '}
                           {t('account.downloadRefundNote')}{' '}
                           <Link
-                            to="/legal/refunds"
+                            to={`/arrepentimiento?order=${String(order.id).slice(-8).toUpperCase()}`}
                             className="underline underline-offset-2 transition-colors hover:text-ink"
                           >
-                            {t('account.refundPolicyLink')}
+                            {t('account.requestRefund')}
                           </Link>
                         </p>
                       )}

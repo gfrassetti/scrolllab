@@ -13,6 +13,7 @@ import {
   buildOrderPaymentFailed,
   buildSubscriptionCharge,
   buildSubscriptionPaymentFailed,
+  buildWithdrawalReceived,
 } from './emailTemplatesBilling.js'
 
 // Los mails se arman en emailTemplates.js; quien los necesita sin enviar
@@ -27,6 +28,37 @@ export {
   buildOrderPaymentFailed,
   buildSubscriptionCharge,
   buildSubscriptionPaymentFailed,
+  buildWithdrawalReceived,
+}
+
+/**
+ * Confirmación del botón de arrepentimiento, con el código de seguimiento.
+ * Idempotente por código (clave de Resend): un reintento no repite el mail.
+ * @param {{ code: string, email: string, name: string, locale?: string, order?: any, config: any, client?: any }} args
+ */
+export async function sendWithdrawalReceived({ code, email, name, locale, order, config, client }) {
+  if (!config.email.enabled) return { skipped: 'disabled' }
+  const refundsUrl = new URL('/legal/refunds', config.clientUrl).toString()
+  const logoUrl =
+    config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
+  const message = buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl })
+  const resend = client || new Resend(config.email.apiKey)
+  const response = await resend.emails.send(
+    {
+      from: config.email.from,
+      to: [email],
+      replyTo: config.email.replyTo || undefined,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      tags: [{ name: 'type', value: 'withdrawal_received' }],
+    },
+    { idempotencyKey: `scrolllab-withdrawal-${code}` },
+  )
+  if (response.error) {
+    throw new Error(response.error.message || 'Resend rechazó el correo')
+  }
+  return { sent: true, id: response.data?.id || null }
 }
 
 /**
