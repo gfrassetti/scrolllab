@@ -132,11 +132,11 @@ export function buildDashboard({ events = [], users = [], orders = [], leads = [
   const usersPerDay = new Map(span.map((d) => [d, 0]))
   for (const u of users) {
     const k = u.createdAt ? dayKey(u.createdAt) : null
-    if (k && usersPerDay.has(k)) usersPerDay.set(k, usersPerDay.get(k) + 1)
+    if (k && usersPerDay.has(k)) usersPerDay.set(k, (usersPerDay.get(k) || 0) + 1)
   }
   const newer = (u, n) => u.createdAt && new Date(u.createdAt).getTime() >= now.getTime() - n * 86400000
   const recentUsers = [...users]
-    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
     .slice(0, 10)
     .map((u) => ({ name: u.name || '', email: u.email || '', createdAt: u.createdAt || null }))
 
@@ -147,7 +147,7 @@ export function buildDashboard({ events = [], users = [], orders = [], leads = [
     revenue.set(cur, (revenue.get(cur) || 0) + (Number(o.total) || 0))
   }
   const recentOrders = [...orders]
-    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
     .slice(0, 10)
     .map((o) => ({
       status: o.status,

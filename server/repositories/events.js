@@ -12,6 +12,7 @@ export const eventsRepo = {
     if (isFileMode()) return fileDb.addEvents(rows);
     await MongoEvent.insertMany(rows, { ordered: false });
   },
+  /** @param {{ since?: Date | string | number }} [options] */
   async listEvents({ since } = {}) {
     if (isFileMode()) return fileDb.listEvents({ since });
     return MongoEvent.find(since ? { createdAt: { $gte: new Date(since) } } : {})
