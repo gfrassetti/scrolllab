@@ -9,6 +9,7 @@ import {
   isHostedPlanId,
 } from '../../catalog.js'
 import { isPaddleSub, changePaddlePlan } from './paddleSync.js'
+import { sendSubscriptionPlanChanged } from '../email.js'
 import {
   updatePreapprovalAmount,
   createUpgradePreference,
@@ -34,6 +35,23 @@ import {
 /** Plan más caro que otro (el orden de los tiers es el de su precio). */
 export function isHigherPlan(a, b) {
   return hostedPlanPrice(a, 'monthly') > hostedPlanPrice(b, 'monthly')
+}
+
+/**
+ * Mail «Cambiaste a <plan>» (uno por cambio). No frena el cambio si falla.
+ * @param {any} sub
+ * @param {any} config
+ * @param {{ from: string, charged?: number | null, ref: string }} change
+ */
+function firePlanChanged(sub, config, { from, charged = null, ref }) {
+  if (!config?.email?.enabled || from === sub.plan) return
+  db.findUserById(String(sub.userId))
+    .then((user) =>
+      user?.email
+        ? sendSubscriptionPlanChanged({ subscription: sub, user, ref, change: { from, charged }, config })
+        : null,
+    )
+    .catch((err) => console.error('subs plan changed email', err?.message))
 }
 
 const planReason = (plan, cycle) =>
@@ -224,6 +242,7 @@ export async function changeSubscriptionPlan(
     }
     throw err
   }
+  firePlanChanged(sub, config, { from: previousPlan, ref: `${subId(sub)}-${previousPlan}-${sub.plan}-${Date.now()}` })
 
   return {
     requiresPayment: false,
@@ -266,6 +285,11 @@ async function changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quot
     )
     throw err
   }
+  firePlanChanged(sub, config, {
+    from: previousPlan,
+    charged: bill ? quote.amount : null,
+    ref: `${subId(sub)}-${previousPlan}-${sub.plan}-${Date.now()}`,
+  })
   return {
     requiresPayment: false,
     charged: bill,
@@ -449,12 +473,18 @@ export async function applyUpgradePayment(
   }
 
   const window = paidWindow(sub)
+  const fromPlan = sub.plan
   sub.paidCycle = sub.paidCycle || window?.cycle || sub.cycle
   sub.paidPlan = ref.plan
   sub.plan = ref.plan
   if (sub.pendingUpgrade?.plan === ref.plan) sub.pendingUpgrade = undefined
   record('applied')
   await sub.save()
+  firePlanChanged(sub, config, {
+    from: fromPlan,
+    charged: Number(payment.transaction_amount) || null,
+    ref: `${subId(sub)}-${payment.id}`,
+  })
   return { plan: sub.plan, alreadyApplied: false }
 }
 

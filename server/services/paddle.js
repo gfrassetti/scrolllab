@@ -105,6 +105,9 @@ export const updateSubscription = (config, id, body) =>
 export const previewSubscriptionUpdate = (config, id, body) =>
   paddleRequest(config, 'PATCH', `/subscriptions/${encodeURIComponent(id)}/preview`, body)
 
+/** Reembolso o crédito sobre una transacción (POST /adjustments). */
+export const createAdjustment = (config, body) => paddleRequest(config, 'POST', '/adjustments', body)
+
 /** Cargo único sobre una suscripción (la diferencia de una subida de plan). */
 export const chargeSubscription = (config, id, body) =>
   paddleRequest(config, 'POST', `/subscriptions/${encodeURIComponent(id)}/charge`, body)

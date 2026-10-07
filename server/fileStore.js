@@ -395,7 +395,7 @@ export const fileDb = {
     write('withdrawals', rows)
     return row
   },
-  async findRecentWithdrawal({ email, orderId, since }) {
+  async findRecentWithdrawal({ email, orderId, subscriptionId = null, since }) {
     const cut = new Date(since).getTime()
     return (
       read('withdrawals')
@@ -403,10 +403,31 @@ export const fileDb = {
           (w) =>
             w.email === String(email).toLowerCase() &&
             (w.orderId || null) === (orderId || null) &&
+            (w.subscriptionId || null) === (subscriptionId || null) &&
             new Date(w.createdAt).getTime() >= cut,
         )
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] || null
     )
+  },
+
+  async findWithdrawalByCode(code) {
+    return read('withdrawals').find((w) => w.code === String(code)) || null
+  },
+  async updateWithdrawal(code, patch) {
+    const rows = read('withdrawals')
+    const row = rows.find((w) => w.code === String(code))
+    if (!row) return null
+    Object.assign(row, patch, { updatedAt: new Date().toISOString() })
+    write('withdrawals', rows)
+    return row
+  },
+  async claimWithdrawal(code, from, to) {
+    const rows = read('withdrawals')
+    const row = rows.find((w) => w.code === String(code) && w.status === from)
+    if (!row) return null
+    Object.assign(row, { status: to, confirmedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+    write('withdrawals', rows)
+    return row
   },
 
   // Leads (cupón de bienvenida). Alta idempotente por email.

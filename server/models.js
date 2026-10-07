@@ -179,6 +179,8 @@ const subscriptionSchema = new mongoose.Schema(
     firstPaidAt: Date,
     // El cobro que se puede devolver: pago de MP o transacción de Paddle.
     firstChargeId: String,
+    // Fin de período por el que ya salió el mail «Tu plan se suspendió».
+    suspendedEmailFor: String,
     // Cuándo se devolvió el primer cobro (baja inmediata).
     refundedAt: Date,
     // Con qué plan y ciclo está pago el período en curso (cobro de MP, o la
@@ -348,10 +350,24 @@ const withdrawalSchema = new mongoose.Schema(
     name: { type: String, required: true },
     orderRef: String,
     orderId: { type: String, default: null },
+    // Arrepentimiento de LAB: la suscripción del mail (si no era una compra).
+    subscriptionId: { type: String, default: null },
+    kind: { type: String, enum: ["order", "lab", null], default: null },
     message: String,
     locale: { type: String, enum: ["es", "en"], default: "es" },
     eligibility: mongoose.Schema.Types.Mixed,
-    status: { type: String, enum: ["received", "resolved"], default: "received" },
+    // received (lo revisa el dueño) · awaiting_confirmation (link por mail) ·
+    // executing · refunded · canceled (LAB en prueba) · refund_pending (Paddle
+    // en revisión) · refund_retry (Paddle completando) · manual (no salió solo) · resolved
+    status: {
+      type: String,
+      enum: ["received", "awaiting_confirmation", "executing", "refunded", "canceled", "refund_pending", "refund_retry", "manual", "resolved"],
+      default: "received",
+    },
+    note: String,
+    attempts: { type: Number, default: 0 },
+    confirmedAt: Date,
+    executedAt: Date,
   },
   { timestamps: true },
 );

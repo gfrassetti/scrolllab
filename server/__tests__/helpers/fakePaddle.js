@@ -20,6 +20,10 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
   const pd = {
     apiKey: 'pdl_sdbx_apikey_fake_test_key',
     transactions: new Map(),
+    // Reembolsos pedidos por la app y lo ya devuelto por transacción.
+    adjustmentsCreated: [],
+    refunded: new Map(),
+    adjustmentStatus: 'approved',
     subscriptions: new Map(),
     calls: [],
     // `pd.failNext['POST /transactions'] = 500` → el próximo POST falla.
@@ -174,6 +178,23 @@ export function createFakePaddle(nextFetch = globalThis.fetch) {
       }
       sub.updated_at = nowIso()
       return ok(sub)
+    }
+    // Reembolso pedido por la app (POST /adjustments): como Paddle, solo sobre
+    // una transacción completada y sin pasarse de lo cobrado. `pd.adjustmentStatus`
+    // fija si sale aprobado al instante o queda pendiente de Paddle.
+    if (route === 'POST /adjustments') {
+      const txn = pd.transactions.get(body?.transaction_id)
+      if (!txn) return err(404, 'not_found', 'transaction not found')
+      if (txn.status !== 'completed') return err(400, 'transaction_not_completed', `transaction ${txn.status}`)
+      const done = (pd.refunded.get(txn.id) || 0)
+      const total = Number(txn.details.totals.grand_total)
+      if (body.type === 'full' && done >= total) {
+        return err(400, 'adjustment_total_amount_above_remaining_allowed', 'already refunded')
+      }
+      pd.refunded.set(txn.id, total)
+      const adj = { ...pd.adjust(txn.id, { status: pd.adjustmentStatus || 'approved' }), reason: body.reason }
+      pd.adjustmentsCreated.push(adj)
+      return ok(adj, 201)
     }
     // Cargo único sobre la suscripción (la diferencia de una subida de plan).
     if (route === 'POST /subscriptions/:id/charge') {

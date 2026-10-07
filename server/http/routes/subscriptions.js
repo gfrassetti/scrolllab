@@ -11,17 +11,12 @@ import {
   applyMockUpgrade,
   syncSubscriptionForUser,
   trialEligible,
-  cancelPreapprovalConfirmed,
   activateMockSubscription,
   startSubscription,
 } from '../../services/subscriptions.js'
-import { sendSubscriptionCanceledOnce } from '../../services/email.js'
+import { cancelAtPeriodEnd } from '../../services/subscriptions/cancel.js'
 import { HOSTED_PLANS } from '../../catalog.js'
-import {
-  isPaddleSub,
-  syncPaddleForUser,
-  cancelPaddleConfirmed,
-} from '../../services/subscriptions/paddleSync.js'
+import { isPaddleSub, syncPaddleForUser } from '../../services/subscriptions/paddleSync.js'
 import { getSubscription } from '../../services/paddle.js'
 
 /**
@@ -173,30 +168,9 @@ export function createSubscriptionsRouter({ config, limits }) {
       if (!sub || sub.canceledAt) {
         throw new HttpError(404, 'No tenés una suscripción activa')
       }
-      // Si la pasarela no confirma la baja, 502 y no se marca nada: una baja
-      // local que no hizo seguiría cobrando.
-      if (isPaddleSub(sub)) {
-        await cancelPaddleConfirmed(sub, config)
-      } else if (!subsMock() && sub.mpPreapprovalId) {
-        await cancelPreapprovalConfirmed(sub, config)
-      }
-      // No la matamos ya: sigue con acceso hasta `currentPeriodEnd`. MP no
-      // renueva. Sin días pagos por delante (sin fecha, o renovación que no se
-      // cobró) se cierra en el acto.
-      sub.canceledAt = new Date()
-      const end = sub.currentPeriodEnd
-        ? new Date(sub.currentPeriodEnd).getTime()
-        : null
-      if (end == null || end <= Date.now()) sub.status = 'cancelled'
-      await sub.save()
-      sendSubscriptionCanceledOnce({ subscription: sub, config }).catch((err) =>
-        console.error('subs canceled email', err?.message),
-      )
-      res.json({
-        ok: true,
-        endsAt: sub.status === 'cancelled' ? null : sub.currentPeriodEnd,
-        status: sub.status,
-      })
+      // Sigue con acceso hasta `currentPeriodEnd`; la pasarela deja de cobrar.
+      const out = await cancelAtPeriodEnd(sub, config)
+      res.json({ ok: true, ...out })
     }),
   )
 

@@ -111,9 +111,34 @@ describe('buildMoneyStatus', () => {
         ['ARR-AAAAAA', 'ELEGIBLE — reembolsar', true],
         ['ARR-BBBBBB', 'descargó: solo por defecto', true],
         ['ARR-CCCCCC', 'reembolsada', false],
-        ['ARR-DDDDDD', 'revisar a mano', true],
+        ['ARR-DDDDDD', 'revisar a mano (sin compra)', true],
       ],
     )
     assert.equal(out.withdrawals.open, 3)
+  })
+
+  it('arrepentimiento: lo que se resolvió solo y LAB', () => {
+    const out = buildMoneyStatus({
+      now,
+      users,
+      orders: [{ _id: 'o1', userId: 'u1', status: 'refunded', total: 149, currency_id: 'USD', items: [{ title: 'CHAPTERS' }] }],
+      subscriptions: [
+        { _id: 's1', userId: 'u2', status: 'authorized', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', activatedAt: ago(40), firstPaidAt: ago(33), lastPaidAt: ago(3) },
+      ],
+      withdrawals: [
+        { code: 'ARR-AUTO01', email: 'ana@test.com', orderId: 'o1', status: 'refunded', createdAt: ago(0) },
+        { code: 'ARR-LAB001', email: 'beto@test.com', subscriptionId: 's1', status: 'received', createdAt: ago(0) },
+        { code: 'ARR-MAN001', email: 'ana@test.com', orderId: 'o1', status: 'manual', createdAt: ago(0) },
+      ],
+    })
+    assert.deepEqual(
+      out.withdrawals.rows.map((w) => [w.code, w.verdict, w.open]),
+      [
+        ['ARR-AUTO01', 'devuelto automáticamente', false],
+        ['ARR-LAB001', 'LAB renovación: no se devuelve', true],
+        ['ARR-MAN001', 'NO SALIÓ SOLO — devolver a mano', false],
+      ],
+    )
+    assert.equal(out.withdrawals.rows[1].amount, 79)
   })
 })

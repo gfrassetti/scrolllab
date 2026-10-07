@@ -161,3 +161,86 @@ describe('LAB con Paddle: devolución de cuotas', () => {
     assert.equal(refundMails(mp.outbox, 'pd-contracargo@test.com').length, 0)
   })
 })
+
+describe('Botón de arrepentimiento con Paddle: devolución automática', () => {
+  let pd
+  let mp
+  let loginAs
+  let paddleWebhook
+  let cleanup
+  let fileDb
+  let config
+
+  before(async () => {
+    process.env.EMAIL_NOTIFY_TO = OWNER
+    ;({ pd, mp, loginAs, paddleWebhook, cleanup, fileDb, config } = await startAppAgainstFakePaddle({ HOSTED_TRIAL_DAYS: '7' }))
+  })
+  after(() => cleanup())
+
+  async function paidOrder(email) {
+    const agent = await loginAs(email)
+    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'paddle' })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    const { txn } = pd.pay(res.body.transactionId)
+    await paddleWebhook('transaction.completed', txn)
+    return { agent, orderId: res.body.orderId, txn }
+  }
+
+  it('compra sin descargar, pedida desde su cuenta: Paddle aprueba y la orden se corta al instante', async () => {
+    const { agent, orderId, txn } = await paidOrder('pd-arr@test.com')
+    const res = await agent.post('/api/withdrawals').send({ email: 'pd-arr@test.com', name: 'Ana', order: orderId })
+    assert.equal(res.body.outcome, 'refunded')
+    const adj = pd.adjustmentsCreated.at(-1)
+    assert.deepEqual([adj.transaction_id, adj.type, adj.action], [txn.id, 'full', 'refund'])
+    assert.match(adj.reason, new RegExp(res.body.code))
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'refunded')
+    await waitFor(() => refundMails(mp.outbox, 'pd-arr@test.com').length === 1, 'el mail de devolución')
+    // El webhook de Paddle llega después: no repite nada.
+    await paddleWebhook('adjustment.updated', adj)
+    await new Promise((r) => setTimeout(r, 80))
+    assert.equal(refundMails(mp.outbox, 'pd-arr@test.com').length, 1)
+  })
+
+  it('si Paddle la deja en revisión, queda pendiente y se aplica con su webhook', async () => {
+    const { agent, orderId } = await paidOrder('pd-rev@test.com')
+    pd.adjustmentStatus = 'pending_approval'
+    try {
+      const res = await agent.post('/api/withdrawals').send({ email: 'pd-rev@test.com', name: 'Ana', order: orderId })
+      assert.equal(res.body.outcome, 'pending')
+      assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
+      const adj = pd.adjustmentsCreated.at(-1)
+      await paddleWebhook('adjustment.updated', { ...adj, status: 'approved' })
+      assert.equal((await fileDb.findOrderById(orderId)).status, 'refunded')
+    } finally {
+      pd.adjustmentStatus = 'approved'
+    }
+  })
+
+  it('si Paddle todavía no completó el cobro, el barrido reintenta y devuelve', async () => {
+    const { agent, orderId, txn } = await paidOrder('pd-retry@test.com')
+    pd.transactions.get(txn.id).status = 'paid'
+    const res = await agent.post('/api/withdrawals').send({ email: 'pd-retry@test.com', name: 'Ana', order: orderId })
+    assert.equal(res.body.outcome, 'pending')
+    assert.equal((await fileDb.findWithdrawalByCode(res.body.code)).status, 'refund_retry')
+    pd.transactions.get(txn.id).status = 'completed'
+    const { retryPendingWithdrawals } = await import('../services/autoRefund.js')
+    await retryPendingWithdrawals(config)
+    assert.equal((await fileDb.findWithdrawalByCode(res.body.code)).status, 'refunded')
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'refunded')
+  })
+
+  it('LAB con el primer cobro en plazo: se devuelve y se da de baja en Paddle', async () => {
+    const agent = await loginAs('pd-lab-arr@test.com')
+    const out = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'paddle' })
+    const { txn, sub } = pd.pay(out.body.transactionId)
+    await paddleWebhook('transaction.completed', txn)
+    await paddleWebhook('subscription.created', sub)
+    const first = pd.renew(sub.id)
+    await paddleWebhook('transaction.completed', first)
+    const res = await agent.post('/api/withdrawals').send({ email: 'pd-lab-arr@test.com', name: 'Lab' })
+    assert.equal(res.body.outcome, 'refunded')
+    assert.equal(pd.adjustmentsCreated.at(-1).transaction_id, first.id)
+    assert.equal(pd.subscriptions.get(sub.id).status, 'canceled')
+    assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'free')
+  })
+})

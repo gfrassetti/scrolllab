@@ -147,72 +147,165 @@ describe('Botón de arrepentimiento (MP simulado)', () => {
     assert.equal(after.downloadCount, 1)
   })
 
-  it('el pedido público devuelve solo el código y avisa al dueño: ELEGIBLE si no descargó', async () => {
-    const { orderId } = await paidOrder('cliente@test.com')
+  const confirmMails = (email) => mp.mailsTo(email).filter((m) => /Confirmá la devolución|Confirm the refund/.test(m.body.subject))
+  const refundMails = (email) => mp.mailsTo(email).filter((m) => /devolvimos/.test(m.body.subject))
+  const tokenFrom = (mail) => decodeURIComponent(mail.body.text.match(/confirmar=([^\s]+)/)[1])
+  const confirm = (token) => request(app).post('/api/withdrawals/confirm').send({ token })
+
+  it('sin sesión: no filtra nada, manda el link de confirmación y al confirmar se devuelve solo', async () => {
+    const { agent, orderId } = await paidOrder('cliente@test.com')
     const res = await withdraw({ email: 'Cliente@Test.com', name: 'Ana Pérez', order: orderId.slice(-8), message: 'No era lo que esperaba' })
     assert.equal(res.status, 201)
     assert.match(res.body.code, /^ARR-[A-Z2-9]{6}$/)
-    // Nada de la orden en la respuesta pública.
-    assert.deepEqual(Object.keys(res.body).sort(), ['code', 'ok'])
+    assert.deepEqual(res.body, { ok: true, code: res.body.code, outcome: 'check_email' })
 
-    await waitFor(() => alerts(res.body.code).length === 1, 'el aviso al dueño')
-    const text = alerts(res.body.code)[0].body.text
-    assert.match(text, /ELEGIBLE — reembolsar/)
-    assert.match(text, /cliente@test\.com/)
+    await waitFor(() => alerts(res.body.code).length >= 1, 'el aviso al dueño')
+    const text = alerts(`solicitud ${res.body.code}`)[0].body.text
+    assert.match(text, /ELEGIBLE — se devuelve solo/)
+    assert.match(text, /link para confirmar/)
     assert.match(text, new RegExp(`orden ${orderId}`))
     assert.match(text, /No era lo que esperaba/)
 
-    await waitFor(() => confirmations('cliente@test.com').length === 1, 'el mail al cliente')
-    const mail = confirmations('cliente@test.com')[0].body
-    assert.match(mail.subject, new RegExp(`arrepentimiento · ${res.body.code}`))
-    assert.match(mail.text, new RegExp(res.body.code))
-    assert.match(mail.text, /CHAPTERS/)
+    await waitFor(() => confirmMails('cliente@test.com').length === 1, 'el link de confirmación')
+    const mail = confirmMails('cliente@test.com')[0]
+    assert.match(mail.body.text, /CHAPTERS/)
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'paid') // todavía no
+
+    const ok = await confirm(tokenFrom(mail))
+    assert.deepEqual(ok.body, { ok: true, code: res.body.code, outcome: 'refunded' })
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'refunded')
+    assert.equal((await agent.get(`/api/orders/${orderId}/download`)).status, 403)
+    assert.equal(mp.refundCalls.filter((c) => c.key === `scrolllab-withdrawal-${res.body.code}`).length, 1)
+    await waitFor(() => refundMails('cliente@test.com').length === 1, 'el mail «Te devolvimos el dinero»')
+    await waitFor(() => alerts('DEVUELTO AUTOMÁTICAMENTE').some((m) => m.body.subject.includes(res.body.code)), 'el aviso de la devolución')
+
+    // Tocar el link otra vez no devuelve dos veces.
+    const again = await confirm(tokenFrom(mail))
+    assert.equal(again.body.outcome, 'refunded')
+    assert.equal(mp.refundCalls.filter((c) => c.key === `scrolllab-withdrawal-${res.body.code}`).length, 1)
   })
 
-  it('con el ZIP descargado el aviso dice NO elegible y por qué', async () => {
+  it('un link adulterado o vencido no devuelve nada', async () => {
+    const { orderId } = await paidOrder('adulterado@test.com')
+    const res = await withdraw({ email: 'adulterado@test.com', name: 'Ana', order: orderId })
+    await waitFor(() => confirmMails('adulterado@test.com').length === 1, 'el link')
+    const token = tokenFrom(confirmMails('adulterado@test.com')[0])
+    const bad = await confirm(token.slice(0, -2) + (token.endsWith('A') ? 'BB' : 'AA'))
+    assert.equal(bad.status, 400)
+    assert.equal((await confirm('basura')).status, 400)
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
+    assert.ok(res.body.code)
+  })
+
+  it('con la sesión de la cuenta de la compra: se devuelve al instante, sin link', async () => {
+    const { agent, orderId } = await paidOrder('sesion@test.com')
+    const res = await agent.post('/api/withdrawals').send({ email: 'sesion@test.com', name: 'Ses', order: orderId })
+    assert.equal(res.body.outcome, 'refunded')
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'refunded')
+    assert.equal(confirmMails('sesion@test.com').length, 0)
+    await waitFor(() => refundMails('sesion@test.com').length === 1, 'el mail de devolución')
+  })
+
+  it('si Mercado Pago no puede devolver (saldo), queda para el dueño y se lo avisa', async () => {
+    const { agent, orderId } = await paidOrder('sinsaldo@test.com')
+    mp.refundFails = 'Insufficient balance'
+    try {
+      const res = await agent.post('/api/withdrawals').send({ email: 'sinsaldo@test.com', name: 'Sin', order: orderId })
+      assert.equal(res.body.outcome, 'review')
+      assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
+      await waitFor(() => alerts('NO SE PUDO DEVOLVER SOLO').some((m) => m.body.text.includes('Insufficient balance')), 'el aviso')
+    } finally {
+      mp.refundFails = null
+    }
+  })
+
+  it('con el ZIP descargado no se devuelve solo: lo revisa el dueño (NO elegible y por qué)', async () => {
     const { agent, orderId } = await paidOrder('bajo@test.com')
     await download(agent, orderId)
-    const res = await withdraw({ email: 'bajo@test.com', name: 'Beto', order: orderId })
+    const res = await agent.post('/api/withdrawals').send({ email: 'bajo@test.com', name: 'Beto', order: orderId })
+    assert.equal(res.body.outcome, 'review')
     await waitFor(() => alerts(res.body.code).length === 1, 'el aviso al dueño')
     const text = alerts(res.body.code)[0].body.text
     assert.match(text, /NO elegible por arrepentimiento: el ZIP se descargó 1 vez/)
-    assert.match(text, /defecto técnico/)
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
+    await waitFor(() => confirmations('bajo@test.com').some((m) => /Recibimos tu solicitud/.test(m.body.subject)), 'el código por mail')
   })
 
-  it('pedirlo dos veces el mismo día devuelve el mismo código y manda un solo mail', async () => {
+  it('pedirlo dos veces el mismo día devuelve el mismo código y manda un solo link', async () => {
     const { orderId } = await paidOrder('doble@test.com')
     const a = await withdraw({ email: 'doble@test.com', name: 'Doble', order: orderId.slice(-8) })
     const b = await withdraw({ email: 'doble@test.com', name: 'Doble', order: orderId.slice(-8) })
     assert.equal(a.status, 201)
     assert.equal(b.status, 200)
     assert.equal(b.body.code, a.body.code)
-    await waitFor(() => confirmations('doble@test.com').length >= 1, 'el mail')
+    await waitFor(() => confirmMails('doble@test.com').length >= 1, 'el link')
     await new Promise((r) => setTimeout(r, 100))
-    assert.equal(confirmations('doble@test.com').length, 1)
-    assert.equal(alerts(a.body.code).length, 1)
+    assert.equal(confirmMails('doble@test.com').length, 1)
   })
 
-  it('un mail que no es el de la compra no asocia la orden (y no filtra si existe)', async () => {
+  it('un mail que no es el de la compra no asocia nada y la respuesta es la misma (no filtra)', async () => {
     const { orderId } = await paidOrder('dueno@test.com')
     const res = await withdraw({ email: 'otro@test.com', name: 'Otro', order: orderId })
-    assert.equal(res.status, 201)
+    assert.deepEqual(Object.keys(res.body).sort(), ['code', 'ok', 'outcome'])
+    assert.equal(res.body.outcome, 'check_email')
     await waitFor(() => alerts(res.body.code).length === 1, 'el aviso')
-    assert.match(alerts(res.body.code)[0].body.text, /SIN ORDEN/)
-    // Un número sin ninguna compra que lo respalde responde igual que uno válido.
+    assert.match(alerts(res.body.code)[0].body.text, /SIN COMPRA/)
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
     const ghost = await withdraw({ email: 'dueno@test.com', name: 'Dueño', order: 'ffffffff' })
-    assert.equal(ghost.status, 201)
-    assert.deepEqual(Object.keys(ghost.body).sort(), ['code', 'ok'])
+    assert.equal(ghost.body.outcome, 'check_email')
   })
 
-  it('sin número de orden también se registra (LAB u otro caso a mano) y en inglés el mail sale en inglés', async () => {
-    const res = await withdraw({ email: 'lab@test.com', name: 'Lab User', locale: 'en', message: 'LAB subscription' })
+  it('sin compra ni suscripción: lo revisa el dueño, el código sale por mail (en inglés si corresponde)', async () => {
+    const res = await withdraw({ email: 'nadie@test.com', name: 'Lab User', locale: 'en', message: 'LAB subscription' })
     assert.equal(res.status, 201)
-    await waitFor(() => confirmations('lab@test.com').length === 1, 'el mail')
-    const mail = confirmations('lab@test.com')[0].body
+    await waitFor(() => confirmations('nadie@test.com').length === 1, 'el mail')
+    const mail = confirmations('nadie@test.com')[0].body
     assert.match(mail.subject, /We received your withdrawal request/)
     assert.match(mail.text, new RegExp(res.body.code))
     await waitFor(() => alerts(res.body.code).length === 1, 'el aviso')
-    assert.match(alerts(res.body.code)[0].body.text, /SIN ORDEN/)
+    assert.match(alerts(res.body.code)[0].body.text, /SIN COMPRA/)
+  })
+
+  describe('LAB', () => {
+    async function subscribed(email) {
+      const agent = await loginAs(email)
+      const res = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly' })
+      assert.equal(res.status, 200, JSON.stringify(res.body))
+      const pre = mp.lastPreapproval()
+      mp.authorize(pre.id)
+      await agent.post('/api/subscriptions/sync')
+      return { agent, pre, subscriptionId: res.body.subscriptionId }
+    }
+
+    it('en la prueba gratis: arrepentirse da de baja la suscripción (no hay nada que devolver)', async () => {
+      const { agent, pre, subscriptionId } = await subscribed('lab-prueba@test.com')
+      const res = await agent.post('/api/withdrawals').send({ email: 'lab-prueba@test.com', name: 'Lab' })
+      assert.equal(res.body.outcome, 'canceled')
+      assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
+      assert.ok((await fileDb.findSubscriptionById(subscriptionId)).canceledAt)
+      assert.equal(refundMails('lab-prueba@test.com').length, 0)
+    })
+
+    it('con el primer cobro en plazo: se devuelve ese cobro y la suscripción se da de baja ya', async () => {
+      const { agent, pre, subscriptionId } = await subscribed('lab-cobro@test.com')
+      const ap = mp.bill(pre.id)
+      assert.equal((await webhook('subscription_authorized_payment', ap.id)).status, 200)
+      // El pago de la cuota, como lo devuelve MP.
+      mp.payments.set(String(ap.payment.id), {
+        id: ap.payment.id,
+        status: 'approved',
+        operation_type: 'recurring_payment',
+        transaction_amount: ap.transaction_amount,
+        currency_id: ap.currency_id,
+        external_reference: pre.external_reference,
+      })
+      const res = await agent.post('/api/withdrawals').send({ email: 'lab-cobro@test.com', name: 'Lab' })
+      assert.equal(res.body.outcome, 'refunded')
+      assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
+      assert.equal((await fileDb.findSubscriptionById(subscriptionId)).status, 'cancelled')
+      assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'free')
+      await waitFor(() => refundMails('lab-cobro@test.com').length === 1, 'el mail de devolución')
+    })
   })
 
   it('valida lo mínimo: mail válido y nombre', async () => {

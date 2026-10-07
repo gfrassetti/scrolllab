@@ -56,6 +56,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ name, email, order, message, locale }),
     }),
+  // El link «Confirmar la devolución» del mail.
+  confirmWithdrawal: (token) =>
+    request('/api/withdrawals/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }),
   // El cupón viaja como código: el descuento lo calcula el servidor.
   // `provider`: 'mercadopago' (ARS) o 'paddle' (USD, cobro internacional).
   checkout: (items, couponCode, { provider, locale } = {}) =>

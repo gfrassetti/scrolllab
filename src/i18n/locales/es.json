@@ -1313,20 +1313,48 @@
   "withdrawal": {
     "eyebrow": "Arrepentimiento",
     "title": "Botón de arrepentimiento",
-    "intro": "Si te arrepentiste de una compra, pedilo acá. No hace falta cuenta. Te damos un código de seguimiento al instante y te lo mandamos por mail. Revisamos cada pedido según la Política de reembolsos:",
+    "intro": "Si te arrepentiste de una compra, pedilo acá. No hace falta cuenta. Si corresponde según la Política de reembolsos, te devolvemos el dinero en el momento, al mismo medio de pago:",
     "ruleZip": "Templates, bundle y builder: reembolso total dentro de los {{days}} días de la compra si no descargaste el ZIP. Si ya lo descargaste, solo por un defecto técnico o si no es lo descripto.",
     "ruleLab": "LAB: en la prueba gratis no se cobra nada, así que alcanza con cancelar. Después, podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribiste (la prueba cuenta adentro): al devolverlo, la suscripción se da de baja en el momento. Las renovaciones no se devuelven: cancelás y no se te cobra más.",
     "name": "Nombre y apellido",
     "email": "Mail de la compra",
     "order": "Número de orden (opcional)",
-    "orderHint": "Lo ves en Mis compras, al lado de «Orden». Sirve para encontrar la compra más rápido; sin él también lo buscamos con tu mail.",
+    "orderHint": "Lo ves en Mis compras, al lado de «Orden». Si tenés más de una compra, ponelo para elegir cuál; sin él tomamos tu suscripción de LAB o tu última compra.",
     "message": "Contanos qué pasó (opcional)",
     "submit": "Enviar solicitud",
     "sending": "Enviando…",
     "error": "No pudimos enviar la solicitud. Probá de nuevo o escribinos.",
-    "doneEyebrow": "Solicitud recibida · tu código",
-    "doneBody": "Te mandamos este código a {{email}}. Revisamos el pedido y te respondemos a ese mail. Si el reembolso procede, el dinero vuelve al mismo medio de pago.",
-    "contact": "¿Dudas? Escribinos:"
+    "contact": "¿Dudas? Escribinos:",
+    "confirming": "Confirmando la devolución…",
+    "again": "Volver a pedirla",
+    "codeLabel": "Tu código:",
+    "outcome": {
+      "refunded": {
+        "eyebrow": "Devolución hecha",
+        "title": "Listo: te devolvimos el dinero.",
+        "body": "La devolución ya está hecha al mismo medio con el que pagaste; según tu banco o tu tarjeta, puede tardar unos días en verse. Te mandamos el detalle a {{email}}."
+      },
+      "canceled": {
+        "eyebrow": "Suscripción cancelada",
+        "title": "Listo: cancelamos tu suscripción.",
+        "body": "Estabas en la prueba gratis, así que no se te cobró nada ni se te va a cobrar. Te mandamos la confirmación a {{email}}."
+      },
+      "pending": {
+        "eyebrow": "Devolución en proceso",
+        "title": "Pedimos la devolución.",
+        "body": "El procesador de pagos la está terminando. Cuando esté hecha te avisamos a {{email}}; no tenés que hacer nada más."
+      },
+      "check_email": {
+        "eyebrow": "Revisá tu mail",
+        "title": "Te mandamos un mail.",
+        "body": "Si los datos coinciden con una compra que se puede devolver, en el mail confirmás la devolución con un click. Si no, lo revisamos y te respondemos."
+      },
+      "review": {
+        "eyebrow": "Solicitud recibida",
+        "title": "Recibimos tu pedido.",
+        "body": "Lo revisamos y te respondemos a {{email}}. Si el reembolso procede, el dinero vuelve al mismo medio de pago."
+      }
+    }
   },
   "theme": {
     "toLight": "Cambiar a tema claro",

@@ -27,9 +27,34 @@ export default function WithdrawalPage() {
     order: params.get('order') || '',
     message: '',
   })
-  const [status, setStatus] = useState('idle')
+  const confirmToken = params.get('confirmar') || ''
+  const [status, setStatus] = useState(confirmToken ? 'confirming' : 'idle')
   const [error, setError] = useState('')
   const [code, setCode] = useState('')
+  // refunded · canceled · pending · check_email · review
+  const [outcome, setOutcome] = useState('review')
+
+  // Vino del link del mail: confirma la devolución (una sola vez, del lado del servidor).
+  useEffect(() => {
+    if (!confirmToken) return undefined
+    let cancelled = false
+    api
+      .confirmWithdrawal(confirmToken)
+      .then((res) => {
+        if (cancelled) return
+        setCode(res.code)
+        setOutcome(res.outcome)
+        setStatus('done')
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err.message || t('withdrawal.error'))
+        setStatus('confirm_error')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [confirmToken, t])
 
   // Con sesión, nombre y mail ya están: es el mail con el que se compró.
   useEffect(() => {
@@ -51,6 +76,7 @@ export default function WithdrawalPage() {
     try {
       const res = await api.requestWithdrawal({ ...form, locale })
       setCode(res.code)
+      setOutcome(res.outcome || 'review')
       setStatus('done')
     } catch (err) {
       setError(err.message || t('withdrawal.error'))
@@ -92,15 +118,36 @@ export default function WithdrawalPage() {
           </Link>
         </p>
 
-        {status === 'done' ? (
+        {status === 'confirming' ? (
+          <p role="status" className="mt-12 text-sm text-ink/60">
+            {t('withdrawal.confirming')}
+          </p>
+        ) : status === 'confirm_error' ? (
+          <section role="alert" className="mt-12 border-2 border-danger/50 bg-danger/10 p-6 md:p-8">
+            <p className="text-sm leading-relaxed md:text-base">{error}</p>
+            <Link
+              to="/arrepentimiento"
+              className="mt-4 inline-block text-sm underline underline-offset-4 transition-colors hover:text-accent"
+            >
+              {t('withdrawal.again')}
+            </Link>
+          </section>
+        ) : status === 'done' ? (
           <section
             className="mt-12 border-2 border-ink p-6 md:p-8"
             aria-live="polite"
+            data-withdrawal-outcome={outcome}
           >
-            <p className={label}>{t('withdrawal.doneEyebrow')}</p>
-            <p className="font-mono text-3xl tracking-[0.08em] md:text-4xl">{code}</p>
+            <p className={label}>{t(`withdrawal.outcome.${outcome}.eyebrow`)}</p>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] font-medium leading-tight tracking-[-0.02em]">
+              {t(`withdrawal.outcome.${outcome}.title`)}
+            </h2>
             <p className="mt-4 text-sm leading-relaxed text-ink/70 md:text-base">
-              {t('withdrawal.doneBody', { email: form.email })}
+              {t(`withdrawal.outcome.${outcome}.body`, { email: form.email })}
+            </p>
+            <p className="mt-6 text-[11px] uppercase tracking-[0.25em] text-ink/50">
+              {t('withdrawal.codeLabel')}{' '}
+              <span className="font-mono text-sm normal-case tracking-[0.08em] text-ink">{code}</span>
             </p>
           </section>
         ) : (

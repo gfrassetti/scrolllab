@@ -18,6 +18,10 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
     authorizedPayments: new Map(),
     preferences: new Map(),
     payments: new Map(),
+    // Devoluciones pedidas por la app (POST /v1/payments/:id/refunds).
+    refundCalls: [],
+    // `mp.refundFails = 'Insufficient balance'` → la próxima devolución falla.
+    refundFails: null,
     calls: [],
     // `mp.failNext['PUT /preapproval'] = 400` → el próximo PUT falla.
     failNext: {},
@@ -106,6 +110,17 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
       }
       mp.preferences.set(pref.id, pref)
       return json(201, pref)
+    }
+    if (resource === 'payments' && id && parts[2] === 'refunds' && method === 'POST') {
+      const pay = mp.payments.get(id)
+      if (!pay) return json(404, { message: 'not found', status: 404 })
+      if (mp.refundFails) return json(400, { message: mp.refundFails, status: 400 })
+      if (pay.status === 'refunded') return json(400, { message: 'Payment already refunded', status: 400 })
+      const key = new Headers(init.headers).get('x-idempotency-key')
+      mp.refundCalls.push({ id, key })
+      pay.status = 'refunded'
+      pay.transaction_amount_refunded = pay.transaction_amount
+      return json(201, { id: ++mp.seq, payment_id: Number(id), amount: pay.transaction_amount, status: 'approved' })
     }
     if (resource === 'payments' && id) {
       const pay = mp.payments.get(id)

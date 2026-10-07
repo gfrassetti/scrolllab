@@ -259,6 +259,13 @@ describe('LAB con Paddle (reloj simulado)', () => {
     const me = await c.me()
     assert.equal(me.plan, 'free')
     assert.equal(me.lapsedPlan, 'hosted_starter')
+    // Un solo mail «Tu plan se suspendió», con el camino de Paddle (actualizar la tarjeta).
+    const { sendDueSuspendedEmails } = await import('../services/paymentFailedSweep.js')
+    await sendDueSuspendedEmails({ config })
+    await sendDueSuspendedEmails({ config })
+    const suspended = c.mails().filter((m) => /se suspendió/.test(m.body.subject))
+    assert.equal(suspended.length, 1)
+    assert.match(suspended[0].body.text, /Actualizá tu tarjeta/)
     // Vencido sigue siendo de Paddle (USD): «Mi cuenta» ofrece actualizar la tarjeta.
     assert.equal(me.provider, 'paddle')
     assert.equal(me.currency_id, 'USD')
@@ -306,6 +313,11 @@ describe('LAB con Paddle (reloj simulado)', () => {
     await paddleWebhook('transaction.completed', pd.lastUpgradeTransaction)
     assert.equal(iso((await c.me()).currentPeriodEnd), iso(before))
     assert.equal((await c.me()).plan, 'hosted_pro')
+    // «Cambiaste a Pro» con lo cobrado hoy y el precio desde el próximo cobro.
+    await waitFor(() => c.mails().some((m) => /Cambiaste a/.test(m.body.subject)), 'el mail del cambio de plan')
+    const mail = c.mails().find((m) => /Cambiaste a/.test(m.body.subject)).body.text
+    assert.match(mail, /Cobrado hoy \(diferencia\)/)
+    assert.match(mail, /Desde el próximo cobro/)
   })
 
   it('bajó y vuelve a subir en el mismo período: paga solo lo que no había pagado (como MP)', async () => {

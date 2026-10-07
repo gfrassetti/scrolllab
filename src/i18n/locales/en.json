@@ -1313,20 +1313,48 @@
   "withdrawal": {
     "eyebrow": "Withdrawal",
     "title": "Withdrawal request",
-    "intro": "Changed your mind about a purchase? Ask here. No account needed. You get a tracking code right away and by email. We review every request under the Refund policy:",
+    "intro": "Changed your mind about a purchase? Ask here. No account needed. If it qualifies under the Refund policy, we refund you right away, to the same payment method:",
     "ruleZip": "Templates, bundle and builder: full refund within {{days}} days of purchase if you haven’t downloaded the ZIP. If you already did, only for a technical defect or if it isn’t as described.",
     "ruleLab": "LAB: nothing is charged during the free trial, so canceling is enough. After that, you can ask for a refund of the first charge within {{days}} days of subscribing (the trial counts toward it): once refunded, the subscription ends right away. Renewals aren’t refunded: cancel and you won’t be charged again.",
     "name": "Full name",
     "email": "Purchase email",
     "order": "Order number (optional)",
-    "orderHint": "You’ll find it in My purchases, next to “Order”. It helps us find the purchase faster; without it we look it up by your email.",
+    "orderHint": "You’ll find it in My purchases, next to “Order”. If you have more than one purchase, add it to choose which; without it we take your LAB subscription or your latest purchase.",
     "message": "Tell us what happened (optional)",
     "submit": "Send request",
     "sending": "Sending…",
     "error": "We couldn’t send the request. Try again or write to us.",
-    "doneEyebrow": "Request received · your code",
-    "doneBody": "We sent this code to {{email}}. We’ll review the request and reply to that email. If the refund applies, the money goes back to the original payment method.",
-    "contact": "Questions? Write to us:"
+    "contact": "Questions? Write to us:",
+    "confirming": "Confirming the refund…",
+    "again": "Request it again",
+    "codeLabel": "Your code:",
+    "outcome": {
+      "refunded": {
+        "eyebrow": "Refund issued",
+        "title": "Done: we refunded you.",
+        "body": "The refund went to the same method you paid with; depending on your bank or card, it can take a few days to show. We sent the details to {{email}}."
+      },
+      "canceled": {
+        "eyebrow": "Subscription canceled",
+        "title": "Done: we canceled your subscription.",
+        "body": "You were on the free trial, so you weren’t charged and won’t be. We sent the confirmation to {{email}}."
+      },
+      "pending": {
+        "eyebrow": "Refund in progress",
+        "title": "We requested the refund.",
+        "body": "The payment processor is finishing it. We’ll email {{email}} when it’s done; nothing else to do."
+      },
+      "check_email": {
+        "eyebrow": "Check your email",
+        "title": "We sent you an email.",
+        "body": "If the details match a purchase that qualifies, you confirm the refund in that email with one click. If not, we’ll review it and get back to you."
+      },
+      "review": {
+        "eyebrow": "Request received",
+        "title": "We got your request.",
+        "body": "We’ll review it and reply to {{email}}. If the refund applies, the money goes back to the original payment method."
+      }
+    }
   },
   "theme": {
     "toLight": "Switch to light theme",

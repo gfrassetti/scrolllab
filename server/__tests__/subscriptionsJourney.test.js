@@ -28,10 +28,11 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
   let webhook
   let cleanup
   let fileDb
+  let config
 
   before(async () => {
     mock.timers.enable({ apis: ['Date'], now: T0 })
-    ;({ app, loginAs, webhook, cleanup, fileDb } = await startAppAgainstFakeMp(mp))
+    ;({ app, loginAs, webhook, cleanup, fileDb, config } = await startAppAgainstFakeMp(mp))
   })
 
   after(() => {
@@ -242,6 +243,14 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal(me.plan, 'free')
     assert.equal(me.lapsedPlan, 'hosted_pro')
     assert.deepEqual(await Promise.all(keys.map(embedStatus)), [200, 402])
+
+    // El barrido le avisa una sola vez que el plan se suspendió.
+    const { sendDueSuspendedEmails } = await import('../services/paymentFailedSweep.js')
+    const suspended = () => c.mails().filter((m) => /se suspendió/.test(m.body.subject))
+    await sendDueSuspendedEmails({ config })
+    await sendDueSuspendedEmails({ config })
+    assert.equal(suspended().length, 1)
+    assert.match(suspended()[0].body.text, /Mercado Pago logra el cobro/)
 
     // MP reintenta (hasta 4 veces en 10 días) y esta vez entra.
     await c.goTo(10)
@@ -466,6 +475,10 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     // A Studio sí: la diferencia con Pro (lo pagado), 26 de 31 días.
     const studio = await c.agent.get('/api/subscriptions/change/quote?plan=hosted_studio')
     assert.equal(studio.body.amount, 167742)
+    // Un mail por cambio: «Cambiaste a Starter» y «Cambiaste a Pro», sin cobro.
+    const changed = c.mails().filter((m) => /Cambiaste a/.test(m.body.subject)).map((m) => m.body.subject)
+    assert.equal(changed.length, 2)
+    assert.ok(changed.every((s) => !/Cobrado/.test(s)))
   })
 
   it('cancelado con días pagos: no se re-suscribe a un plan más caro sin pagar la diferencia; reactiva y sube pagándola', async () => {

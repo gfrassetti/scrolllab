@@ -133,31 +133,66 @@ export function buildMoneyStatus({
   }
   locked.sort((a, b) => new Date(a.until || 0).getTime() - new Date(b.until || 0).getTime());
 
-  // Arrepentimiento: pendientes (la orden no se reembolsó todavía) primero.
+  // Arrepentimiento: qué pasó con cada solicitud (la mayoría se resuelve sola)
+  // y qué hacer con las que quedan para el dueño.
+  const subsById = new Map(subscriptions.map((s) => [idOf(s), s]));
+  const AUTO = {
+    refunded: "devuelto automáticamente",
+    canceled: "baja en la prueba (sin cobro)",
+    refund_pending: "pedido a Paddle (en revisión)",
+    refund_retry: "esperando a Paddle (reintenta solo)",
+    awaiting_confirmation: "esperando que confirme por mail",
+    executing: "procesando",
+    manual: "NO SALIÓ SOLO — devolver a mano",
+  };
   const requests = withdrawals.map((w) => {
     const order = w.orderId ? ordersById.get(String(w.orderId)) : null;
-    const now_ = order ? refundEligibility(order, { now: t }) : null;
+    const sub = !order && w.subscriptionId ? subsById.get(String(w.subscriptionId)) : null;
+    const e = order ? refundEligibility(order, { now: t }) : sub ? labRefundEligibility(sub, { now: t }) : null;
+    const plan = sub ? sub.paidPlan || sub.plan : null;
+    const labPrice =
+      sub && HOSTED_PLANS[plan]
+        ? hostedPlanPriceIn(plan, sub.paidCycle || sub.cycle, sub.currency_id === "USD" ? "USD" : "ARS")
+        : null;
+    const verdict = AUTO[w.status]
+      ? AUTO[w.status]
+      : !order && !sub
+        ? "revisar a mano (sin compra)"
+        : e?.reason === "refunded"
+          ? "reembolsada"
+          : e?.eligible
+            ? "ELEGIBLE — reembolsar"
+            : e?.reason === "downloaded"
+              ? "descargó: solo por defecto"
+              : e?.reason === "renewal"
+                ? "LAB renovación: no se devuelve"
+                : e?.reason === "trial"
+                  ? "LAB en prueba: alcanza con cancelar"
+                  : e?.reason === "expired"
+                    ? "fuera de plazo"
+                    : e?.reason || "—";
+    const closed =
+      ["refunded", "canceled", "resolved"].includes(w.status) ||
+      (order && order.status === "refunded") ||
+      (sub && !!sub.refundedAt);
     return {
       code: w.code,
       when: w.createdAt || null,
       name: w.name || "",
       email: w.email || "",
-      what: order ? itemsLabel(order) : w.orderRef ? `orden ${w.orderRef} (no encontrada)` : "sin orden (¿LAB?)",
-      amount: order ? Number(order.total) || 0 : null,
-      currency: order?.currency_id || null,
-      provider: order?.provider || null,
-      verdict: !order
-        ? "revisar a mano"
-        : now_?.reason === "refunded"
-          ? "reembolsada"
-          : now_?.eligible
-            ? "ELEGIBLE — reembolsar"
-            : now_?.reason === "downloaded"
-              ? "descargó: solo por defecto"
-              : now_?.reason === "expired"
-                ? "fuera de plazo"
-                : now_?.reason || "—",
-      open: !(order && order.status === "refunded"),
+      what: order
+        ? itemsLabel(order)
+        : sub
+          ? `LAB ${HOSTED_PLANS[plan]?.tier || ""}`.trim()
+          : w.orderRef
+            ? `orden ${w.orderRef} (no encontrada)`
+            : "sin compra",
+      amount: order ? Number(order.total) || 0 : labPrice,
+      currency: order?.currency_id || (sub ? (sub.currency_id === "USD" ? "USD" : "ARS") : null),
+      provider: order?.provider || sub?.provider || null,
+      verdict,
+      status: w.status || "received",
+      open: !closed,
       message: w.message || "",
     };
   });

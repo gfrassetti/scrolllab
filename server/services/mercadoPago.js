@@ -362,6 +362,36 @@ export async function fetchPayment(accessToken, paymentId) {
 }
 
 /**
+ * Devuelve el total de un pago (POST /v1/payments/:id/refunds). La clave de
+ * idempotencia hace que un reintento no devuelva dos veces. Tira un HttpError
+ * con el mensaje de MP si no puede (p. ej. saldo insuficiente en la cuenta).
+ * @param {string} accessToken
+ * @param {string | number} paymentId
+ * @param {{ idempotencyKey: string }} opts
+ */
+export async function refundPayment(accessToken, paymentId, { idempotencyKey }) {
+  const res = await fetch(
+    `https://api.mercadopago.com/v1/payments/${encodeURIComponent(String(paymentId))}/refunds`,
+    {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        'content-type': 'application/json',
+        'x-idempotency-key': idempotencyKey,
+      },
+      body: JSON.stringify({}),
+    },
+  )
+  /** @type {any} */
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    console.error(`MP refund FALLÓ payment=${paymentId} status=${res.status} ${json?.message || ''}`)
+    throw new HttpError(res.status >= 500 ? 502 : 400, `Mercado Pago no hizo la devolución: ${json?.message || res.status}`)
+  }
+  return json
+}
+
+/**
  * Comprueba que el pago aprobado coincide con la orden local.
  */
 export function assertPaymentMatchesOrder(payment, order) {
