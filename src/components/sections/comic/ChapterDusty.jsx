@@ -109,8 +109,8 @@ function PigPanel() {
         </div>
       </div>
       {/* the pig is clipped only at the bottom: its head rises over the top of the frame */}
-      <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
-        <div data-pig className="absolute bottom-0 left-[14%] w-[40%] will-change-transform max-md:left-[8%] max-md:w-[62%]">
+      <div className="absolute inset-x-0 -top-[90%] bottom-0 overflow-hidden">
+        <div data-pig className="absolute bottom-0 left-[11%] w-[47%] will-change-transform max-md:left-[2%] max-md:w-[72%]">
           <div data-pig-hover>
             <BigPig className="block h-auto w-full" />
           </div>
@@ -140,8 +140,8 @@ function DogPanel({ line }) {
           <LookoutBg className="absolute inset-0 h-full w-full" />
         </div>
       </div>
-      <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
-        <div data-dog className="absolute bottom-0 left-[8%] w-[37%] will-change-transform max-md:left-[2%] max-md:w-[64%]">
+      <div className="absolute inset-x-0 -top-[90%] bottom-0 overflow-hidden">
+        <div data-dog className="absolute bottom-0 left-[6%] w-[42%] will-change-transform max-md:left-[0%] max-md:w-[74%]">
           <div data-dog-hover>
             <DogBack className="block h-auto w-full" />
           </div>
@@ -512,6 +512,7 @@ export default function ChapterDusty({
       tl.to(hands, { yPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.4)
       tl.to(tailWrap, { xPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.5)
       tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
+      tl.to('[data-ink-strip]', { opacity: 1, duration: 0.5 }, P + 1.7)
 
       // Act 7 — straight on, the dog's card slides up over the pig's card, like one
       // card laid on another, until it covers it. The pig sinks as it is covered.
@@ -529,8 +530,20 @@ export default function ChapterDusty({
       gsap.set(lookout, { transformOrigin: '72% 62%', yPercent: 10 })
       gsap.set(strip2, { opacity: 0 })
       tl.fromTo(pigBg, { yPercent: -4 }, { yPercent: 4, duration: LAND - (P + 0.8), ease: 'none' }, P + 0.8)
-      tl.to(pigPanel, { y: () => -RISE(), duration: LAND - (P + 2.1), ease: 'none' }, P + 2.1)
-      tl.to(pig, { y: RISE, duration: LAND - (P + 2.1), ease: 'none' }, P + 2.1)
+      // every layer of the pig's card keeps its own pace while you scroll: the
+      // square rises, the pig rises less (so it sinks in), the night drifts and
+      // settles, the hands and the tail slide on their own
+      const PIG_LIFE = LAND - (P + 2.1)
+      tl.to(pigPanel, { y: () => -RISE(), duration: PIG_LIFE, ease: 'none' }, P + 2.1)
+      tl.to(pig, { y: () => RISE() * 0.7, scale: 1.05, transformOrigin: '50% 100%', duration: PIG_LIFE, ease: 'none' }, P + 2.1)
+      tl.fromTo(pigBg, { scale: 1.1 }, { scale: 1, duration: PIG_LIFE + 1.3, ease: 'none' }, P + 0.8)
+      // (percent moves: x / y belong to the pointer)
+      tl.to(hands, { yPercent: 7, duration: LAND - (P + 2.4), ease: 'none' }, P + 2.4)
+      tl.to(tailWrap, { yPercent: -12, duration: PIG_LIFE, ease: 'none' }, P + 2.1)
+      // as the dog's card takes the stage, the pig's card backs away a little,
+      // its paper cut with it
+      gsap.set(pigPanel, { transformOrigin: '50% 0%' })
+      tl.to(pigPanel, { scale: 0.93, duration: LAND - D, ease: 'power1.out' }, D)
       tl.to(dogPanel, { y: () => -RISE(), duration: LAND - D, ease: 'power2.out' }, D)
       tl.to(pig, { yPercent: 45, duration: LAND - D, ease: 'power1.in' }, D)
       tl.to(dog, { scale: 1, duration: LAND - D, ease: 'power1.out' }, D)
@@ -538,7 +551,6 @@ export default function ChapterDusty({
       tl.to(dog, { yPercent: 3, duration: ZOOM_AT - LAND, ease: 'sine.out' }, LAND)
       tl.to(ink[3], { opacity: 0, y: -16, duration: 0.5 }, D)
       // the line arrives with a little bounce and a soft blur behind it
-      tl.to(strip2, { opacity: 1, duration: 0.5 }, LAND - 0.3)
       tl.fromTo(
         ink[4],
         { opacity: 0, y: 26, scale: 0.94 },
@@ -787,12 +799,12 @@ export default function ChapterDusty({
             <div className="h-full w-full" style={{ ...PAPER, clipPath: TORN_TOP }} />
           </div>
 
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[30%] z-[49] flex justify-center">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[34%] z-[49] flex justify-center">
             <div data-panel-pig className="will-change-transform">
               <PigPanel />
             </div>
           </div>
-          <div className="pointer-events-none absolute inset-x-0 top-[30%] z-[50] flex justify-center">
+          <div className="pointer-events-none absolute inset-x-0 top-[34%] z-[50] flex justify-center">
             <div data-panel-dog className="will-change-transform">
               <DogPanel line={bubble} />
             </div>
