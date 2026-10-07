@@ -109,7 +109,7 @@ function PigPanel() {
         </div>
       </div>
       {/* the pig is clipped only at the bottom: its head rises over the top of the frame */}
-      <div className="absolute inset-x-0 -top-[90%] bottom-0 overflow-hidden">
+      <div className="absolute inset-x-0 -top-[55%] bottom-0 overflow-hidden">
         <div data-pig className="absolute bottom-0 left-[11%] w-[47%] will-change-transform max-md:left-[2%] max-md:w-[72%]">
           <div data-pig-hover>
             <BigPig className="block h-auto w-full" />
@@ -140,7 +140,7 @@ function DogPanel({ line }) {
           <LookoutBg className="absolute inset-0 h-full w-full" />
         </div>
       </div>
-      <div className="absolute inset-x-0 -top-[90%] bottom-0 overflow-hidden">
+      <div className="absolute inset-x-0 -top-[55%] bottom-0 overflow-hidden">
         <div data-dog className="absolute bottom-0 left-[6%] w-[42%] will-change-transform max-md:left-[0%] max-md:w-[74%]">
           <div data-dog-hover>
             <DogBack className="block h-auto w-full" />
@@ -472,7 +472,6 @@ export default function ChapterDusty({
       const pigPanel = root.current.querySelector('[data-panel-pig]')
       const dogPanel = root.current.querySelector('[data-panel-dog]')
       const pig = root.current.querySelector('[data-pig]')
-      const hands = root.current.querySelector('[data-hands]')
       const tailWrap = root.current.querySelector('[data-tail-wrap]')
       const lookout = root.current.querySelector('[data-lookout]')
       const bubbleEl = root.current.querySelector('[data-bubble]')
@@ -482,9 +481,10 @@ export default function ChapterDusty({
       gsap.set(gatePair, { y: 70 })
       gsap.set(curtain2, { yPercent: 106 })
       gsap.set([pigPanel, dogPanel], { y: () => pin.clientHeight * 1.1 })
-      gsap.set(pig, { yPercent: 30 })
-      gsap.set(hands, { yPercent: -45 })
-      gsap.set(tailWrap, { xPercent: 160 })
+      // the pig and the dog lag behind their cards (measured on the reference:
+      // they travel ~0.8 and ~0.65 of what their card does), so they start ahead
+      gsap.set(pig, { y: () => -pin.clientHeight * 0.12 })
+      gsap.set(tailWrap, { xPercent: -420 })
       gsap.set(bubbleEl, { opacity: 0, scale: 0.6, y: 30, transformOrigin: '50% 80%' })
       gsap.set(ink[2], { color: '#fff' })
       const dogTail = root.current.querySelector('[data-dog-tail]')
@@ -499,68 +499,62 @@ export default function ChapterDusty({
       tl.to(ink[1], { opacity: 0, duration: 0.4 }, G)
       tl.to(ink[2], { opacity: 1, y: 0, duration: 0.7 }, G + 1.2)
 
-      // Act 6 — paper rises again; the pig is pulled up out of its panel, faster
-      // than the panel itself, the hands come down and the dog's tail swings in.
+      // Acts 6 and 7 follow a frame-by-frame reading of the reference
+      // (docs/reference-analysis/comic-endspeciesism-cards.md): what moves, how
+      // far and in what order, per layer.
+
+      // Act 6 — paper rises again and the pig's card comes up, slowing down as it
+      // settles. Its layers keep their own pace: the night and the hands travel
+      // with the card, the pig a little less (so it sinks into its square) and
+      // the dog's tail slides across from the middle to the right edge.
       const P = G + 2.8
+      const ENTER = 2.6
       tl.to(curtain2, { yPercent: 0, duration: 1.4, ease: 'power2.out' }, P)
       tl.to(ink[2], { opacity: 0, y: -16, duration: 0.5 }, P + 0.5)
-      tl.to(pigPanel, { y: 0, duration: 1.3, ease: 'power3.out' }, P + 0.8)
-      // the pig comes in standing out over its frame; then the pig holds its place
-      // on the page while its square keeps rising around it, so it sinks in
-      tl.to(pig, { yPercent: 0, duration: 1.1, ease: 'power3.out' }, P + 0.8)
-      const RISE = () => pin.clientHeight * 0.1
-      tl.to(hands, { yPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.4)
-      tl.to(tailWrap, { xPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.5)
-      tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
+      tl.to(pigPanel, { y: 0, duration: ENTER, ease: 'power2.out' }, P + 0.6)
+      tl.to(pig, { y: 0, duration: ENTER, ease: 'power2.out' }, P + 0.6)
+      tl.to(tailWrap, { xPercent: 0, duration: ENTER, ease: 'power1.out' }, P + 0.6)
       tl.to('[data-ink-strip]', { opacity: 1, duration: 0.5 }, P + 1.7)
+      tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
 
-      // Act 7 — straight on, the dog's card slides up over the pig's card, like one
-      // card laid on another, until it covers it. The pig sinks as it is covered.
-      // The dog starts a little big and eases down to size against its farm
-      // (parallax); once the card has landed the dog drops a hair, and only then
-      // the farm zooms in, accelerating, while the bubble pops up and drifts.
-      const D = P + 3.6
-      const LAND = D + 1.8
-      const ZOOM_AT = LAND + 0.6
+      // Act 7 — the dog's card comes up faster than the scroll and lands on the
+      // pig's card, which backs away (shrinks to ~0.8 around its center, paper cut
+      // and all). The dog starts ~20 % big and lags behind its card; once it has
+      // landed, the farm behind it zooms toward the barn, faster and faster; the
+      // bubble pops up small, grows and drifts right; late in the zoom the dog
+      // shrinks a bit more and drops a hair.
+      const D = P + 0.6 + ENTER + 0.6
+      const LAND = D + 1.75
+      const ZOOM_FOR = 2.6
       const dog = root.current.querySelector('[data-dog]')
       const pigBg = root.current.querySelector('[data-pig-bg]')
       const bubbleShape = root.current.querySelector('[data-bubble-shape]')
       const strip2 = root.current.querySelector('[data-ink-strip]')
-      gsap.set(dog, { scale: 1.16, transformOrigin: '50% 100%' })
-      gsap.set(lookout, { transformOrigin: '72% 62%', yPercent: 10 })
+      gsap.set(dog, { scale: 1.2, transformOrigin: '50% 100%', y: () => -pin.clientHeight * 0.15 })
+      gsap.set(lookout, { transformOrigin: '75% 50%' })
       gsap.set(strip2, { opacity: 0 })
-      tl.fromTo(pigBg, { yPercent: -4 }, { yPercent: 4, duration: LAND - (P + 0.8), ease: 'none' }, P + 0.8)
-      // every layer of the pig's card keeps its own pace while you scroll: the
-      // square rises, the pig rises less (so it sinks in), the night drifts and
-      // settles, the hands and the tail slide on their own
-      const PIG_LIFE = LAND - (P + 2.1)
-      tl.to(pigPanel, { y: () => -RISE(), duration: PIG_LIFE, ease: 'none' }, P + 2.1)
-      tl.to(pig, { y: () => RISE() * 0.7, scale: 1.05, transformOrigin: '50% 100%', duration: PIG_LIFE, ease: 'none' }, P + 2.1)
-      tl.fromTo(pigBg, { scale: 1.1 }, { scale: 1, duration: PIG_LIFE + 1.3, ease: 'none' }, P + 0.8)
-      // (percent moves: x / y belong to the pointer)
-      tl.to(hands, { yPercent: 7, duration: LAND - (P + 2.4), ease: 'none' }, P + 2.4)
-      tl.to(tailWrap, { yPercent: -12, duration: PIG_LIFE, ease: 'none' }, P + 2.1)
-      // as the dog's card takes the stage, the pig's card backs away a little,
-      // its paper cut with it
-      gsap.set(pigPanel, { transformOrigin: '50% 0%' })
-      tl.to(pigPanel, { scale: 0.93, duration: LAND - D, ease: 'power1.out' }, D)
-      tl.to(dogPanel, { y: () => -RISE(), duration: LAND - D, ease: 'power2.out' }, D)
-      tl.to(pig, { yPercent: 45, duration: LAND - D, ease: 'power1.in' }, D)
-      tl.to(dog, { scale: 1, duration: LAND - D, ease: 'power1.out' }, D)
-      tl.to(lookout, { yPercent: 0, duration: LAND - D, ease: 'power1.out' }, D)
-      tl.to(dog, { yPercent: 3, duration: ZOOM_AT - LAND, ease: 'sine.out' }, LAND)
+      gsap.set(pigPanel, { transformOrigin: '50% 50%' })
+      tl.fromTo(pigBg, { yPercent: -4, scale: 1.08 }, { yPercent: 3, scale: 1, duration: ENTER + 0.6, ease: 'power1.out' }, P + 0.6)
+      tl.to(pigPanel, { scale: 0.8, duration: LAND - D, ease: 'power1.out' }, D)
+      // its pig ducks into the frame as it is covered (our dog's card is shorter
+      // than the reference's, which simply hides it)
+      tl.to(pig, { y: () => pin.clientHeight * 0.22, duration: LAND - D, ease: 'power1.in' }, D)
+      tl.to(dogPanel, { y: 0, duration: LAND - D, ease: 'power2.out' }, D)
+      tl.to(dog, { y: 0, scale: 1, duration: LAND - D, ease: 'power2.out' }, D)
       tl.to(ink[3], { opacity: 0, y: -16, duration: 0.5 }, D)
       // the line arrives with a little bounce and a soft blur behind it
       tl.fromTo(
         ink[4],
         { opacity: 0, y: 26, scale: 0.94 },
         { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'back.out(2.4)' },
-        LAND - 0.2,
+        LAND - 0.3,
       )
-      tl.fromTo(lookout, { scale: 1 }, { scale: 1.6, duration: 1.8, ease: 'power2.in' }, ZOOM_AT)
-      tl.to(bubbleEl, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.8)' }, ZOOM_AT)
-      tl.to(bubbleEl, { xPercent: -10, yPercent: -12, duration: 2.0, ease: 'none' }, ZOOM_AT + 0.6)
-      const FIN = ZOOM_AT + 2.6
+      tl.fromTo(lookout, { scale: 1 }, { scale: 3.4, duration: ZOOM_FOR, ease: 'expo.in' }, LAND)
+      tl.fromTo(bubbleEl, { opacity: 0, scale: 0.47, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.9, ease: 'power2.out' }, LAND - 0.1)
+      tl.to(bubbleEl, { xPercent: 45, yPercent: 20, duration: ZOOM_FOR, ease: 'power1.inOut' }, LAND + 0.4)
+      tl.to(bubbleEl, { scale: 0.88, duration: 0.8, ease: 'none' }, LAND + ZOOM_FOR - 0.8)
+      tl.to(dog, { scale: 0.82, yPercent: 7, duration: ZOOM_FOR * 0.55, ease: 'power1.inOut' }, LAND + ZOOM_FOR * 0.45)
+      const FIN = LAND + ZOOM_FOR + 0.4
 
       // Driven by the scroll, all the way to the end: the paper cut "boils" (the
       // outline swaps shape), and the farmer's hands and the dog's tail swing back
