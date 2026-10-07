@@ -1,23 +1,31 @@
 /**
- * Reembolsos de Mercado Pago de punta a punta contra el SANDBOX REAL (sin plata):
- * la app con el token de PRUEBA, pagos reales de test y los reembolsos que hace
- * MP, para confirmar que la política y la app hacen lo que dicen:
+ * Reembolsos de Mercado Pago de punta a punta contra el SANDBOX REAL (sin plata),
+ * con una compra de Checkout Pro como la hace un cliente: la app con las
+ * credenciales del VENDEDOR de prueba arma la preference real, el script imprime
+ * el link y vos lo pagás una vez en el navegador como el COMPRADOR de prueba con
+ * la tarjeta de prueba. Desde ahí sigue solo:
  *
- *  A. Compra sin descargar: elegible, Botón de arrepentimiento → «ELEGIBLE»,
- *     reembolso total en MP → vuelve exactamente lo cobrado, la orden se corta
- *     (sin descarga) y MP no deja devolverla dos veces.
- *  B. Compra descargada: ya no es elegible y el aviso lo dice; un reembolso
- *     parcial (gesto comercial) deja la compra paga y avisa al dueño.
+ *  1. Pagada y sin descargar: «Mis compras» la da por elegible; el Botón de
+ *     arrepentimiento le avisa al dueño «ELEGIBLE».
+ *  2. Reembolso parcial en MP: el pago sigue aprobado, la compra sigue paga y
+ *     descargable, y al dueño le llega «REEMBOLSO PARCIAL».
+ *  3. Se baja el ZIP: ya no es elegible por arrepentimiento.
+ *  4. Reembolso del resto en MP: vuelve exactamente lo cobrado (parcial + resto),
+ *     el pago queda reembolsado, la orden se corta y la descarga también.
+ *  5. MP no deja devolver de más; repetir el webhook no cambia nada.
  *
- * Los pagos se crean con la API de pagos de MP (tarjeta de test «APRO») con la
- * orden como referencia, igual que los que llegan desde Checkout Pro; el webhook
- * se firma como lo firma MP (el secreto es de esta corrida), así se prueba el
- * parseo contra lo que MP devuelve de verdad sin exponer un túnel.
+ * (Las apps de Checkout Pro no aceptan crear el pago por API con tarjeta: por eso
+ * el pago lo hacés vos en la pantalla de MP, como un cliente de verdad.)
  *
- * Requiere credenciales de PRUEBA (aborta si el token no es de un usuario de
- * test): MP_TEST_ACCESS_TOKEN, MP_TEST_PUBLIC_KEY, MP_TEST_PAYER_EMAIL.
+ * El webhook se firma como lo firma MP (el secreto es de esta corrida) con el id
+ * del pago real, así se prueba el parseo contra lo que MP devuelve de verdad sin
+ * exponer un túnel.
  *
- * Uso: npm run check:mp-refund-sandbox
+ * Requiere credenciales del VENDEDOR de prueba (aborta si el token no es de un
+ * usuario de test): MP_TEST_ACCESS_TOKEN, MP_TEST_PUBLIC_KEY, MP_TEST_PAYER_EMAIL
+ * (el mail del COMPRADOR de prueba).
+ *
+ * Uso: npm run check:mp-refund-sandbox   (espera el pago hasta 15 minutos)
  */
 import '../server/loadEnv.js'
 import crypto from 'node:crypto'
@@ -43,6 +51,7 @@ if (!token || !publicKey || !payerEmail) {
 const WEBHOOK_SECRET = `mp_refund_e2e_${crypto.randomBytes(8).toString('hex')}`
 const SITE = 'https://www.scrolllab.com.ar'
 const RUN = Date.now().toString(36)
+const PAY_WAIT_MS = 15 * 60_000
 
 const results = []
 function check(name, ok, detail = '') {
@@ -52,47 +61,39 @@ function check(name, ok, detail = '') {
 
 // ——— Mercado Pago (API real de sandbox) ————————————————————————————————
 
-async function mp(method, pathname, body, { auth = true } = {}) {
+async function mp(method, pathname, body) {
   const res = await fetch(`https://api.mercadopago.com${pathname}`, {
     method,
     headers: {
       'content-type': 'application/json',
       'x-idempotency-key': crypto.randomUUID(),
-      ...(auth ? { authorization: `Bearer ${token}` } : {}),
+      authorization: `Bearer ${token}`,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   return { status: res.status, json: await res.json().catch(() => ({})) }
 }
 
-async function payOrder(orderId, amount) {
-  const tok = await mp(
-    'POST',
-    `/v1/card_tokens?public_key=${encodeURIComponent(publicKey)}`,
-    {
-      card_number: '5031755734530604',
-      expiration_month: 11,
-      expiration_year: new Date().getFullYear() + 4,
-      security_code: '123',
-      cardholder: { name: 'APRO', identification: { type: 'DNI', number: '12345678' } },
-    },
-    { auth: false },
-  )
-  if (tok.status !== 201) throw new Error(`tarjeta de test: HTTP ${tok.status} ${JSON.stringify(tok.json).slice(0, 200)}`)
-  const pay = await mp('POST', '/v1/payments', {
-    transaction_amount: amount,
-    token: tok.json.id,
-    description: `SCROLLLAB e2e ${RUN}`,
-    installments: 1,
-    payment_method_id: 'master',
-    payer: { email: payerEmail },
-    external_reference: orderId,
-  })
-  if (pay.status !== 201) throw new Error(`pago de test: HTTP ${pay.status} ${JSON.stringify(pay.json).slice(0, 300)}`)
-  return pay.json
+/** El pago aprobado de una orden (el que hizo el comprador en Checkout Pro). */
+async function waitForPayment(orderId) {
+  const started = Date.now()
+  let lastStatus = ''
+  while (Date.now() - started < PAY_WAIT_MS) {
+    const r = await mp('GET', `/v1/payments/search?external_reference=${encodeURIComponent(orderId)}&sort=date_created&criteria=desc`)
+    const list = r.json.results || []
+    const approved = list.find((p) => p.status === 'approved')
+    if (approved) return approved
+    const now = list.map((p) => `${p.status}/${p.status_detail}`).join(', ')
+    if (now && now !== lastStatus) {
+      console.log(`   MP: ${now} (si fue rechazado, probá de nuevo con la misma tarjeta)`)
+      lastStatus = now
+    }
+    await sleep(5000)
+  }
+  throw new Error('no llegó el pago en 15 minutos')
 }
 
-// ——— la app (store temporal, token de PRUEBA, sin mails) ——————————————————
+// ——— la app (store temporal, credenciales de PRUEBA, sin mails) ———————————
 
 function freePort() {
   return new Promise((resolve, reject) => {
@@ -127,7 +128,8 @@ const apiProc = spawn(process.execPath, ['server/index.js'], {
     PADDLE_API_KEY: '',
     EMAIL_ENABLED: 'false',
     RATE_LIMIT_DISABLED: 'true',
-    // MP pide URLs públicas en la preference; los pagos de esta corrida no la usan.
+    // MP pide URLs públicas en la preference. Al pagar, MP vuelve al sitio real:
+    // esa página no conoce este pago y no importa (se cierra).
     CLIENT_URL: SITE,
     API_PUBLIC_URL: SITE,
   },
@@ -146,7 +148,7 @@ function killTree(child) {
 
 /** Un comprador con sesión (cookie) que habla con la API como el navegador. */
 async function buyer(label) {
-  const email = `mp-refund-${label}-${RUN}@test.com`
+  const email = payerEmail.toLowerCase()
   let cookie = ''
   const call = async (method, pathname, body) => {
     const res = await fetch(`${API}${pathname}`, {
@@ -160,7 +162,7 @@ async function buyer(label) {
     const type = res.headers.get('content-type') || ''
     return { status: res.status, body: type.includes('json') ? await res.json() : await res.arrayBuffer() }
   }
-  await call('POST', '/api/auth/dev-login', { email, name: 'MP Buyer' })
+  await call('POST', '/api/auth/dev-login', { email, name: `MP Buyer ${label}` })
   return { email, call }
 }
 
@@ -185,17 +187,6 @@ async function downloadZip(b, orderId) {
   return (await b.call('GET', link.body.url)).status
 }
 
-/** Carrito → preference REAL de MP → pago de test con la orden como referencia → webhook. */
-async function paidOrder(label) {
-  const b = await buyer(label)
-  const co = await b.call('POST', '/api/checkout', { items: [{ sku: 'chapters' }] })
-  if (co.status !== 200) throw new Error(`checkout: HTTP ${co.status} ${JSON.stringify(co.body).slice(0, 200)}`)
-  const order = orderRow(co.body.orderId)
-  const payment = await payOrder(order.id, Number(order.total))
-  const code = await webhook(payment.id)
-  return { b, order, payment, code }
-}
-
 async function main() {
   const me = await mp('GET', '/users/me')
   if (me.status !== 200 || !(me.json.tags || []).includes('test_user')) {
@@ -211,67 +202,83 @@ async function main() {
   }
   console.log(`Vendedor de test ${me.json.id} (${me.json.site_id}) · API ${API}\n`)
 
-  // ——— A: sin descargar → reembolso total ———
-  const A = await paidOrder('a')
-  const paidA = await myOrder(A.b, A.order.id)
-  check(
-    'A: pago de test aprobado por el total en ARS → la orden queda paga',
-    A.payment.status === 'approved' && A.code === 200 && paidA.status === 'paid' && A.payment.transaction_amount === Number(A.order.total),
-    `${A.payment.status} · ${A.payment.transaction_amount} ${A.payment.currency_id} · orden ${paidA.status}`,
-  )
-  check('A: sin descargar, es elegible', paidA.refund?.eligible === true, `${paidA.refund?.reason} · hasta ${paidA.refund?.deadline?.slice(0, 10)}`)
-  const wA = await A.b.call('POST', '/api/withdrawals', { name: 'MP Buyer', email: A.b.email, order: A.order.id.slice(-8) })
-  await sleep(300)
-  check('A: Botón de arrepentimiento → al dueño le llega «ELEGIBLE»', wA.status === 201 && ownerAlerts(wA.body.code).some((l) => /ELEGIBLE — reembolsar/.test(l)), wA.body.code)
+  // ——— la compra real en Checkout Pro ———
+  const b = await buyer(RUN)
+  const co = await b.call('POST', '/api/checkout', { items: [{ sku: 'chapters' }] })
+  if (co.status !== 200 || !co.body.init_point) {
+    throw new Error(`checkout: HTTP ${co.status} ${JSON.stringify(co.body).slice(0, 200)}`)
+  }
+  const order = orderRow(co.body.orderId)
+  console.log('══════════════════════════════════════════════════════════════════')
+  console.log(' PAGÁ ESTA COMPRA (ventana de incógnito, logueado como el COMPRADOR de prueba):')
+  console.log(`   ${co.body.init_point}`)
+  console.log(`   Monto: ${order.total} ${order.currency_id} (plata de mentira)`)
+  console.log('   Tarjeta de prueba: Mastercard 5031 7557 3453 0604 · venc. 11/30 · CVV 123')
+  console.log('   Titular: APRO · DNI 12345678')
+  console.log('   Al terminar, MP te lleva a scrolllab.com.ar: ignorá esa página y cerrala.')
+  console.log('══════════════════════════════════════════════════════════════════')
+  const payment = await waitForPayment(order.id)
+  console.log('')
 
-  const refA = await mp('POST', `/v1/payments/${A.payment.id}/refunds`, {})
+  const code = await webhook(payment.id)
+  const paid = await myOrder(b, order.id)
   check(
-    'A: MP acepta el reembolso total y devuelve exactamente lo cobrado',
-    refA.status === 201 && refA.json.status === 'approved' && Number(refA.json.amount) === A.payment.transaction_amount,
-    `HTTP ${refA.status} · ${refA.json.status || refA.json.message || ''} · ${refA.json.amount ?? '-'} de ${A.payment.transaction_amount}`,
+    'pago real de Checkout Pro aprobado por el total → la orden queda paga',
+    code === 200 && paid.status === 'paid' && Number(payment.transaction_amount) === Number(order.total),
+    `${payment.status} · ${payment.transaction_amount} ${payment.currency_id} · ${payment.payment_method_id} · orden ${paid.status}`,
   )
-  const afterA = (await mp('GET', `/v1/payments/${A.payment.id}`)).json
-  check(
-    'A: el pago figura reembolsado en MP por el total',
-    afterA.status === 'refunded' && Number(afterA.transaction_amount_refunded) === A.payment.transaction_amount,
-    `${afterA.status} / ${afterA.status_detail} · devuelto ${afterA.transaction_amount_refunded}`,
-  )
-  await webhook(A.payment.id)
-  const cutA = await myOrder(A.b, A.order.id)
-  const dlA = await A.b.call('GET', `/api/orders/${A.order.id}/download`)
-  check('A: la orden queda reembolsada y la descarga cortada', cutA.status === 'refunded' && dlA.status === 403, `${cutA.status} · descarga HTTP ${dlA.status}`)
-  check('A: al dueño le llega «ORDEN REEMBOLSADA»', ownerAlerts('ORDEN REEMBOLSADA').some((l) => l.includes(A.order.id)))
-  const twice = await mp('POST', `/v1/payments/${A.payment.id}/refunds`, {})
-  check('A: MP rechaza un segundo reembolso del mismo pago', twice.status >= 400, `HTTP ${twice.status} ${twice.json.message || ''}`)
-  await webhook(A.payment.id)
-  check('A: repetir el webhook es inocuo', (await myOrder(A.b, A.order.id)).status === 'refunded')
 
-  // ——— B: descargada → no elegible; parcial → sigue paga ———
-  const B = await paidOrder('b')
-  const dl = await downloadZip(B.b, B.order.id)
-  const paidB = await myOrder(B.b, B.order.id)
-  check('B: tras bajar el ZIP ya no es elegible', dl === 200 && paidB.refund?.reason === 'downloaded', `archivo HTTP ${dl} · ${paidB.refund?.reason}`)
-  const wB = await B.b.call('POST', '/api/withdrawals', { name: 'MP Buyer', email: B.b.email, order: B.order.id })
+  // 1. Sin descargar: elegible.
+  check('sin descargar, «Mis compras» la da por elegible', paid.refund?.eligible === true, `${paid.refund?.reason} · hasta ${paid.refund?.deadline?.slice(0, 10)}`)
+  const w = await b.call('POST', '/api/withdrawals', { name: 'MP Buyer', email: b.email, order: order.id.slice(-8) })
   await sleep(300)
-  check('B: el aviso al dueño dice NO elegible', ownerAlerts(wB.body.code).some((l) => /NO elegible por arrepentimiento/.test(l)), wB.body.code)
+  check('Botón de arrepentimiento → al dueño le llega «ELEGIBLE»', w.status === 201 && ownerAlerts(w.body.code).some((l) => /ELEGIBLE — reembolsar/.test(l)), w.body.code)
 
-  const partial = Math.min(1000, Math.floor(B.payment.transaction_amount / 2))
-  const refB = await mp('POST', `/v1/payments/${B.payment.id}/refunds`, { amount: partial })
-  check('B: MP acepta un reembolso parcial', refB.status === 201 && Number(refB.json.amount) === partial, `HTTP ${refB.status} · ${refB.json.amount ?? refB.json.message}`)
-  const afterB = (await mp('GET', `/v1/payments/${B.payment.id}`)).json
+  // 2. Reembolso parcial.
+  const total = Number(payment.transaction_amount)
+  const partial = Math.min(1000, Math.floor(total / 2))
+  const part = await mp('POST', `/v1/payments/${payment.id}/refunds`, { amount: partial })
+  check('MP acepta un reembolso parcial', part.status === 201 && Number(part.json.amount) === partial, `HTTP ${part.status} · ${part.json.amount ?? part.json.message}`)
+  const afterPart = (await mp('GET', `/v1/payments/${payment.id}`)).json
   check(
-    'B: el pago sigue aprobado en MP con el parcial adentro',
-    afterB.status === 'approved' && Number(afterB.transaction_amount_refunded) === partial,
-    `${afterB.status} / ${afterB.status_detail} · devuelto ${afterB.transaction_amount_refunded}`,
+    'el pago sigue aprobado en MP con el parcial adentro',
+    afterPart.status === 'approved' && Number(afterPart.transaction_amount_refunded) === partial,
+    `${afterPart.status} / ${afterPart.status_detail} · devuelto ${afterPart.transaction_amount_refunded}`,
   )
-  await webhook(B.payment.id)
+  await webhook(payment.id)
   await sleep(300)
-  const stillB = await myOrder(B.b, B.order.id)
+  const stillPaid = await myOrder(b, order.id)
   check(
-    'B: la compra sigue paga y descargable, y al dueño le llega «REEMBOLSO PARCIAL»',
-    stillB.status === 'paid' && (await downloadZip(B.b, B.order.id)) === 200 && ownerAlerts('REEMBOLSO PARCIAL').some((l) => l.includes(String(B.payment.id))),
-    stillB.status,
+    'la compra sigue paga y descargable, y al dueño le llega «REEMBOLSO PARCIAL»',
+    stillPaid.status === 'paid' && ownerAlerts('REEMBOLSO PARCIAL').some((l) => l.includes(String(payment.id))),
+    stillPaid.status,
   )
+
+  // 3. Se baja el ZIP.
+  const dl = await downloadZip(b, order.id)
+  const downloaded = await myOrder(b, order.id)
+  check('tras bajar el ZIP ya no es elegible por arrepentimiento', dl === 200 && downloaded.refund?.reason === 'downloaded', `archivo HTTP ${dl} · ${downloaded.refund?.reason}`)
+
+  // 4. Reembolso del resto.
+  const rest = await mp('POST', `/v1/payments/${payment.id}/refunds`, {})
+  check('MP acepta el reembolso del resto', rest.status === 201 && rest.json.status === 'approved', `HTTP ${rest.status} · ${rest.json.status || rest.json.message || ''} · ${rest.json.amount ?? '-'}`)
+  const refunded = (await mp('GET', `/v1/payments/${payment.id}`)).json
+  check(
+    'el pago queda reembolsado en MP por exactamente lo cobrado',
+    refunded.status === 'refunded' && Number(refunded.transaction_amount_refunded) === total,
+    `${refunded.status} / ${refunded.status_detail} · devuelto ${refunded.transaction_amount_refunded} de ${total}`,
+  )
+  await webhook(payment.id)
+  const cut = await myOrder(b, order.id)
+  const dlCut = await b.call('GET', `/api/orders/${order.id}/download`)
+  check('la orden queda reembolsada y la descarga cortada', cut.status === 'refunded' && dlCut.status === 403, `${cut.status} · descarga HTTP ${dlCut.status}`)
+  check('al dueño le llega «ORDEN REEMBOLSADA»', ownerAlerts('ORDEN REEMBOLSADA').some((l) => l.includes(order.id)))
+
+  // 5. No se devuelve de más; el webhook repetido es inocuo.
+  const more = await mp('POST', `/v1/payments/${payment.id}/refunds`, {})
+  check('MP rechaza devolver de más', more.status >= 400, `HTTP ${more.status} ${more.json.message || ''}`)
+  await webhook(payment.id)
+  check('repetir el webhook es inocuo', (await myOrder(b, order.id)).status === 'refunded')
 }
 
 try {
