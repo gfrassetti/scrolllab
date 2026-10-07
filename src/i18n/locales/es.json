@@ -1162,7 +1162,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 28 de septiembre de 2026",
+    "effectiveDate": "Vigentes desde el 7 de octubre de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
       {
@@ -1175,7 +1175,7 @@
       },
       {
         "title": "Precios y pagos",
-        "body": "Los precios vigentes se muestran en el catálogo y el builder. El total de la compra es el que figura al pagar con Mercado Pago, sujeto a su aprobación. Una orden se considera pagada cuando Mercado Pago confirma el pago."
+        "body": "Los precios vigentes se muestran en el catálogo y el builder. Si pagás desde Argentina, el pago lo procesa Mercado Pago en pesos: el total es el que figura al pagar, sujeto a su aprobación, y la orden se considera pagada cuando Mercado Pago confirma el pago. Si pagás desde otro país, el proceso de compra lo realiza nuestro revendedor autorizado Paddle.com, que es el vendedor oficial (Merchant of Record) de esas órdenes: cobra en dólares estadounidenses, emite la factura, aplica los impuestos que correspondan según tu país y atiende las consultas sobre el cobro. En ese caso la orden se considera pagada cuando Paddle confirma el pago, y la compra se rige también por los términos de compra de Paddle (paddle.com/legal/checkout-buyer-terms)."
       },
       {
         "title": "Entrega y descargas",
@@ -1183,7 +1183,7 @@
       },
       {
         "title": "Reembolsos",
-        "body": "Por tratarse de productos digitales de acceso inmediato, las compras acreditadas no son reembolsables salvo que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario. Contactanos para evaluar el caso."
+        "body": "Por tratarse de productos digitales de acceso inmediato, las compras acreditadas no son reembolsables salvo que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario. Contactanos para evaluar el caso. Un reembolso aprobado se devuelve al mismo medio de pago, a través de Mercado Pago o de Paddle según cómo hayas pagado, y la licencia y las descargas de esa orden quedan sin efecto."
       },
       {
         "title": "Uso permitido",
@@ -1211,7 +1211,7 @@
         "items": [
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
-          "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago y se renueva automáticamente al final de cada período hasta que la des de baja.",
+          "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago en pesos o, si pagás desde otro país, mediante Paddle.com en dólares, como revendedor autorizado; se renueva automáticamente al final de cada período hasta que la des de baja.",
           "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",

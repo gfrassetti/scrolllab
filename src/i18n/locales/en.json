@@ -1162,7 +1162,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective September 28, 2026",
+    "effectiveDate": "Effective October 7, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -1175,7 +1175,7 @@
       },
       {
         "title": "Prices and payments",
-        "body": "Current prices are shown in the catalog and builder. The purchase total is the one shown when you pay with Mercado Pago, subject to their approval. An order is considered paid when Mercado Pago confirms the payment."
+        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Paddle.com, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Paddle confirms the payment, and the purchase is also governed by Paddle’s checkout buyer terms (paddle.com/legal/checkout-buyer-terms)."
       },
       {
         "title": "Delivery and downloads",
@@ -1183,7 +1183,7 @@
       },
       {
         "title": "Refunds",
-        "body": "Because products are digital and available immediately, confirmed purchases are non-refundable unless the file cannot be delivered, has a substantial technical defect, or applicable law requires otherwise. Contact us so we can review the case."
+        "body": "Because products are digital and available immediately, confirmed purchases are non-refundable unless the file cannot be delivered, has a substantial technical defect, or applicable law requires otherwise. Contact us so we can review the case. An approved refund goes back to the original payment method, through Mercado Pago or Paddle depending on how you paid, and the license and downloads for that order are revoked."
       },
       {
         "title": "Permitted use",
@@ -1211,7 +1211,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly) through Mercado Pago and renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos or, if you pay from another country, through Paddle.com in US dollars as our authorized reseller; it renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
