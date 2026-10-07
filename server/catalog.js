@@ -125,8 +125,8 @@ export const PRODUCTS = {
  * Cambiar un precio es una acción explícita; nunca automática.
  *
  * `priceMonthlyUsd` / `priceYearlyUsd`: lo que cobra Paddle afuera de
- * Argentina (docs/paddle.md). PROPUESTA pendiente de confirmar por el owner:
- * 19 / 79 / 229 por mes (misma escalera ~4× / ~12×), anual = 10×.
+ * Argentina (docs/paddle.md). Fijados por el owner (2026-10-06): 19 / 79 / 229
+ * por mes (misma escalera ~4× / ~12×), anual = 10×.
  */
 export const HOSTED_PLANS = Object.freeze({
   hosted_starter: {

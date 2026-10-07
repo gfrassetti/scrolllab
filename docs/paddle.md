@@ -112,7 +112,7 @@ un monto del cliente.
 
 ## Precios de LAB en USD
 
-`HOSTED_PLANS` (`server/catalog.js`): **propuesta pendiente de confirmar** —
+`HOSTED_PLANS` (`server/catalog.js`), fijados por el owner (2026-10-06):
 Starter 19, Pro 79, Studio 229 por mes (la misma escalera ~4× / ~12× que en
 pesos), anual = 10×. Cambiarlos es editar `priceMonthlyUsd` /
 `priceYearlyUsd`; las transacciones se arman con esos valores (non-catalog), no
