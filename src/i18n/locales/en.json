@@ -1052,7 +1052,7 @@
     "subSync": "Sync with Mercado Pago",
     "subSyncHint": "Subscribed just now and it's not showing?",
     "subSyncDone": "Status updated",
-    "welcomeCoupon": "You get {{percent}}% off your first purchase until {{date}}. It applies automatically at checkout.",
+    "welcomeCoupon": "You get {{percent}}% off your first purchase. It’s applied automatically at checkout.",
     "paddle": {
       "subPaused": "Paused in Paddle · you keep access until {{date}}",
       "subRenewing": "Confirming the charge with Paddle · if it doesn’t go through, the plan is suspended on {{date}}",

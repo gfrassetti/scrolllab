@@ -201,11 +201,9 @@ export function arsFromUsd(usd, rate) {
 }
 
 /**
- * Cupón de bienvenida: un solo uso por mail y solo en la primera compra. El
- * porcentaje es el que muestra la home, espejado en src/lib/pricing.js
- * (`npm run check` falla si se despegan).
+ * Cupón de bienvenida: un solo uso por mail, solo en la primera compra y sin
+ * vencimiento (vale hasta que compra). El porcentaje vive en src/domain/catalog.js.
  */
-export const WELCOME_COUPON_DAYS = 14
 /**
  * El cupón es personal: solo lo canjea quien compra con la cuenta de Google de
  * ese mail. En `false` es un código al portador y lo usa el primero que pague.

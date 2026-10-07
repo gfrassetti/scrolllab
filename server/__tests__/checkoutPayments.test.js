@@ -10,7 +10,7 @@ import {
 } from './helpers/fakeMercadoPago.js'
 import { readZip } from './helpers/zip.js'
 import {
-  arsFromUsd,
+  discountedArsFromUsd,
   CUSTOM_BASE_SECTIONS,
   CUSTOM_EXTRA_SECTION_USD,
   COMMERCE_PACK_SURCHARGE_USD,
@@ -124,7 +124,9 @@ describe('Pagos de templates (MP simulado)', () => {
       COMMERCE_PACK_SURCHARGE_USD
     const order = await fileDb.findOrderById(res.body.orderId)
     assert.equal(order.items[0].unit_price_usd, usd)
-    assert.equal(order.total, arsFromUsd(usd, order.fxRate))
+    // Primera compra: el 10% se aplica solo (el precio de lista sale de los tramos del servidor).
+    assert.equal(order.discountPct, 10)
+    assert.equal(order.total, discountedArsFromUsd(usd, order.fxRate, 10))
     assert.equal(pref.items.length, 1)
     assert.equal(pref.items[0].unit_price, order.total)
     assert.equal(pref.items[0].title, PRODUCTS.custom.title)

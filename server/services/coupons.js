@@ -1,7 +1,10 @@
 /**
- * Cupón de bienvenida: 10% en la primera compra, uno por mail y de un solo uso.
- * Se le da a quien entra con su cuenta de Google y todavía no compró (ver
- * `claimWelcomeCoupon`): no hay formulario, el mail sale una sola vez al crearlo.
+ * Cupón de bienvenida: 10% en la primera compra, uno por mail y de un solo uso,
+ * sin vencimiento. Se le da a quien entra con su cuenta de Google y todavía no
+ * compró (ver `claimWelcomeCoupon`): no hay formulario, el mail sale una sola
+ * vez al crearlo. Al pagar lo aplica el servidor aunque el front no lo mande
+ * (los «Comprar» rápidos no pasan por el carrito): `autoWelcomeCoupon`.
+ * «Primera compra» = ninguna orden pagada ni reembolsada (`hasPurchased`).
  * Vive en el lead (couponCode / couponPercent / couponExpiresAt / couponRedeemedAt).
  * El cliente solo manda el código: el descuento lo calcula el servidor sobre el
  * precio de lista (ver POST /api/checkout) y nunca sale de un monto del cliente.
@@ -10,18 +13,22 @@ import crypto from 'node:crypto'
 import { db } from '../db.js'
 import { HttpError } from '../errors.js'
 import { cleanUtm, normalizeLeadEmail } from '../validation.js'
-import {
-  WELCOME_COUPON_BOUND_TO_EMAIL,
-  WELCOME_COUPON_DAYS,
-  WELCOME_COUPON_PERCENT,
-} from '../catalog.js'
+import { WELCOME_COUPON_BOUND_TO_EMAIL, WELCOME_COUPON_PERCENT } from '../catalog.js'
 import { sendCouponEmail } from './email.js'
 
 // Sin 0/O/1/I/L: el código se dicta y se tipea a mano.
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODE_LENGTH = 6
 export const COUPON_CODE_RE = new RegExp(`^SL-[${ALPHABET}]{${CODE_LENGTH}}$`)
-const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * ¿Ya compró? Una orden pagada, o una que se pagó y después se reembolsó: la
+ * primera compra fue esa. Las pendientes o vencidas no cuentan.
+ * @param {Array<{ status?: string }>} orders
+ */
+export function hasPurchased(orders) {
+  return (orders || []).some((o) => o.status === 'paid' || o.status === 'refunded')
+}
 
 export function generateCouponCode() {
   let code = 'SL-'
@@ -62,11 +69,13 @@ export function maskEmail(email) {
   return `${local.slice(0, 1)}***@${domain}`
 }
 
-/** 'none' | 'active' | 'redeemed' | 'expired' */
-export function couponStatus(lead, now = new Date()) {
+/**
+ * 'none' | 'active' | 'redeemed'. Sin vencimiento: vale hasta la primera compra
+ * (los cupones viejos con fecha también vuelven a valer).
+ */
+export function couponStatus(lead) {
   if (!lead?.couponCode) return 'none'
   if (lead.couponRedeemedAt) return 'redeemed'
-  if (new Date(lead.couponExpiresAt).getTime() <= now.getTime()) return 'expired'
   return 'active'
 }
 
@@ -74,20 +83,19 @@ export function publicCoupon(lead) {
   return {
     code: lead.couponCode,
     percent: lead.couponPercent,
-    expiresAt: new Date(lead.couponExpiresAt).toISOString(),
+    expiresAt: null,
     emailHint: maskEmail(lead.email),
   }
 }
 
 /** Le da su cupón al lead si todavía no tiene: uno por mail, para siempre. */
-export async function ensureCoupon(lead, now = new Date()) {
+export async function ensureCoupon(lead) {
   if (lead.couponCode) return lead
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const code = generateCouponCode()
     if (await db.findLeadByCoupon(code)) continue
     lead.couponCode = code
     lead.couponPercent = WELCOME_COUPON_PERCENT
-    lead.couponExpiresAt = new Date(now.getTime() + WELCOME_COUPON_DAYS * DAY_MS)
     try {
       await lead.save()
       return lead
@@ -114,15 +122,12 @@ export async function resolveCouponForCheckout({
   userId = null,
   userEmail = null,
   bound = WELCOME_COUPON_BOUND_TO_EMAIL,
-  now = new Date(),
 }) {
   const canonical = normalizeCouponCode(code)
   const lead = canonical ? await db.findLeadByCoupon(canonical) : null
   if (!lead) throw new HttpError(404, 'Ese cupón no existe.')
 
-  const status = couponStatus(lead, now)
-  if (status === 'redeemed') throw new HttpError(409, 'Ese cupón ya se usó.')
-  if (status === 'expired') throw new HttpError(410, 'Ese cupón venció.')
+  if (couponStatus(lead) === 'redeemed') throw new HttpError(409, 'Ese cupón ya se usó.')
 
   if (bound && userEmail && canonicalEmail(userEmail) !== canonicalEmail(lead.email)) {
     const emailHint = maskEmail(lead.email)
@@ -133,13 +138,29 @@ export async function resolveCouponForCheckout({
     )
   }
 
-  if (userId) {
-    const orders = await db.findOrdersByUser(userId)
-    if (orders.some((order) => order.status === 'paid')) {
-      throw new HttpError(422, 'El cupón vale solo para la primera compra.')
-    }
+  if (userId && hasPurchased(await db.findOrdersByUser(userId))) {
+    throw new HttpError(422, 'El cupón vale solo para la primera compra.')
   }
   return { lead, code: canonical, percent: lead.couponPercent }
+}
+
+/**
+ * El 10% de la primera compra, aunque el front no mande el código (los botones
+ * «Comprar» rápidos no pasan por el carrito). Si ya compró o ya lo usó, nada.
+ * Si todavía no tenía cupón (no llegó a pedirlo), se le crea acá sin mail.
+ * @param {{ user: any }} args
+ * @returns {Promise<{ lead: any, code: string, percent: number } | null>}
+ */
+export async function autoWelcomeCoupon({ user }) {
+  if (!user?.email) return null
+  if (hasPurchased(await db.findOrdersByUser(db.uid(user)))) return null
+  const { lead } = await db.upsertLead({
+    email: normalizeLeadEmail(user.email),
+    source: 'account',
+  })
+  await ensureCoupon(lead)
+  if (couponStatus(lead) !== 'active') return null
+  return { lead, code: lead.couponCode, percent: lead.couponPercent }
 }
 
 /**
@@ -160,8 +181,7 @@ export async function claimWelcomeCoupon({
   now = new Date(),
   sendEmail = sendCouponEmailSafely,
 }) {
-  const orders = await db.findOrdersByUser(db.uid(user))
-  if (orders.some((order) => order.status === 'paid')) {
+  if (hasPurchased(await db.findOrdersByUser(db.uid(user)))) {
     return { eligible: false, coupon: null, couponStatus: 'none', created: false, emailed: false }
   }
 
@@ -171,11 +191,11 @@ export async function claimWelcomeCoupon({
     locale: locale === 'en' ? 'en' : 'es',
     ...cleanUtm(utm),
   })
-  await ensureCoupon(lead, now)
+  await ensureCoupon(lead)
   // El mail sale solo al crear el cupón: entrar cien veces no llena la casilla.
   const emailed = created ? await sendEmail({ lead, config }) : false
 
-  const status = couponStatus(lead, now)
+  const status = couponStatus(lead)
   return {
     eligible: true,
     coupon: status === 'active' ? publicCoupon(lead) : null,

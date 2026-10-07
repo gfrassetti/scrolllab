@@ -6,7 +6,6 @@ import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { formatCouponDate } from '../lib/coupon'
 import { formatAmount } from '../lib/pricing'
 import { orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
@@ -164,15 +163,12 @@ export default function AccountPage() {
           </Link>
         </p>
 
-        {welcome && !orders.some((o) => o.status === 'paid') ? (
+        {welcome && !orders.some((o) => o.status === 'paid' || o.status === 'refunded') ? (
           <p
             data-welcome-coupon
             className="mt-4 max-w-[52ch] text-sm leading-relaxed text-accent-ink"
           >
-            {t('account.welcomeCoupon', {
-              percent: welcome.percent,
-              date: formatCouponDate(welcome.expiresAt, locale),
-            })}{' '}
+            {t('account.welcomeCoupon', { percent: welcome.percent })}{' '}
             <Link
               to="/#templates"
               className="underline decoration-current/40 underline-offset-2 hover:text-accent"

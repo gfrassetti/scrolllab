@@ -6,7 +6,7 @@ import { createCheckoutPreference } from './mercadoPago.js'
 import { discountedArsFromUsd, PRODUCTS } from '../catalog.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import { getUsdArsRate } from '../fx.js'
-import { resolveCouponForCheckout } from './coupons.js'
+import { resolveCouponForCheckout, autoWelcomeCoupon } from './coupons.js'
 import {
   createTransaction,
   buildOrderTransactionBody,
@@ -60,13 +60,15 @@ export async function createCheckoutOrder({
 
   // Cupón de bienvenida: el cliente manda solo el código; el descuento lo
   // calcula el servidor sobre el precio de lista, nunca sale de un monto suyo.
+  // Sin código (un «Comprar» rápido), el servidor aplica igual el 10% si es su
+  // primera compra: nunca depende de que el front lo mande.
   const coupon = couponCode
     ? await resolveCouponForCheckout({
         code: couponCode,
         userId: db.uid(user),
         userEmail: user.email,
       })
-    : null
+    : await autoWelcomeCoupon({ user })
 
   // Paddle cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {

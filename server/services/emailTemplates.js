@@ -639,7 +639,7 @@ const COUPON_COPY = {
     eyebrow: 'Cupón de bienvenida',
     title: (percent) => `${percent}% menos en tu primera compra.`,
     body: (date, email) =>
-      `Ya está en tu cuenta: cuando pagues con ${email}, el descuento se aplica solo en el carrito. Sirve para cualquier modelo, para tu composición del builder o para el bundle. Vale hasta el ${date} y se usa una sola vez.`,
+      `Ya está en tu cuenta: cuando pagues con ${email}, el descuento se aplica solo. Sirve para cualquier modelo, para tu composición del builder o para el bundle. Vale para tu primera compra, sin fecha de vencimiento.`,
     cta: 'Elegir mi modelo',
     foot: (code) =>
       `Recibís este mail porque entraste a scrolllab.com.ar con tu cuenta de Google. Es el único mail promocional que te mandamos: no enviamos newsletters. Código de referencia: ${code}.`,
@@ -650,7 +650,7 @@ const COUPON_COPY = {
     eyebrow: 'Welcome coupon',
     title: (percent) => `${percent}% off your first purchase.`,
     body: (date, email) =>
-      `It’s already in your account: when you pay with ${email}, the discount is applied automatically in the cart. It works for any model, your builder composition, or the bundle. It’s valid until ${date} and can be used once.`,
+      `It’s already in your account: when you pay with ${email}, the discount is applied automatically. It works for any model, your builder composition, or the bundle. It’s valid for your first purchase, with no expiry date.`,
     cta: 'Pick my model',
     foot: (code) =>
       `You’re getting this email because you signed in to scrolllab.com.ar with your Google account. It’s the only promotional email we send you: no newsletters. Reference code: ${code}.`,
@@ -672,10 +672,8 @@ export function buildCouponEmail({
 }) {
   const lang = locale === 'en' ? 'en' : 'es'
   const c = COUPON_COPY[lang]
-  const date = new Intl.DateTimeFormat(lang === 'en' ? 'en-US' : 'es-AR', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    dateStyle: 'long',
-  }).format(new Date(expiresAt))
+  // Sin vencimiento: `expiresAt` queda por compatibilidad y no se muestra.
+  const date = expiresAt ? String(expiresAt) : ''
   const link = `${String(shopUrl).replace(/\/$/, '')}/#templates`
 
   const html = `<!doctype html>

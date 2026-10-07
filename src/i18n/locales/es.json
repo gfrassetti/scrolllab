@@ -1052,7 +1052,7 @@
     "subSync": "Sincronizar con Mercado Pago",
     "subSyncHint": "¿Te suscribiste recién y no se refleja?",
     "subSyncDone": "Estado actualizado",
-    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra hasta el {{date}}. Se aplica solo al pagar.",
+    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra. Se aplica solo al pagar.",
     "paddle": {
       "subPaused": "En pausa en Paddle · seguís con acceso hasta el {{date}}",
       "subRenewing": "Confirmando el cobro con Paddle · si no se acredita, el plan se suspende el {{date}}",

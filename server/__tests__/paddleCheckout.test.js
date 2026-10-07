@@ -52,6 +52,15 @@ describe('Compras con Paddle (Paddle simulado)', () => {
     return { ...res.body, txn: pd.transactions.get(res.body.transactionId) }
   }
 
+  /** Cliente que ya compró antes: sin el 10% de primera compra, precio de lista. */
+  async function returning(agent) {
+    const me = await agent.get('/api/auth/me')
+    await fileDb.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'paddle', items: [{ sku: 'nocturne' }], total: 1, currency_id: 'USD' })
+    return agent
+  }
+  /** Primera compra: 10% sobre el precio de lista, en centavos. */
+  const firstPurchase = (usd) => Math.round(usd * 90) / 100
+
   async function paidOrder(email, items = [{ sku: 'chapters' }], extra = {}) {
     const agent = await loginAs(email)
     const out = await paddleCheckout(agent, items, extra)
@@ -84,7 +93,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
 
   describe('checkout', () => {
     it('la transacción lleva el precio de lista en USD (centavos), la orden queda en USD', async () => {
-      const agent = await loginAs('lista@test.com')
+      const agent = await returning(await loginAs('lista@test.com'))
       const out = await paddleCheckout(agent, [{ sku: 'chapters' }, { sku: 'nocturne' }])
       assert.equal(out.provider, 'paddle')
       assert.match(out.transactionId, /^txn_/)
@@ -114,7 +123,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
     })
 
     it('el builder cobra la receta por tramos en USD', async () => {
-      const agent = await loginAs('builder@test.com')
+      const agent = await returning(await loginAs('builder@test.com'))
       const recipe = Array.from({ length: CUSTOM_BASE_SECTIONS + 2 }, () => 'chapters/HeroKinetic')
       const out = await paddleCheckout(agent, [{ sku: 'custom', recipe }])
       const expected = CUSTOM_BASE_PRICE_USD + 2 * CUSTOM_EXTRA_SECTION_USD
@@ -173,7 +182,8 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await waitFor(() => mp.mailsTo('paga@test.com').length === 1, 'el recibo')
       const receipt = mp.mailsTo('paga@test.com')[0].body
       assert.match(receipt.subject, /Tu compra en SCROLLLAB/)
-      assert.match(receipt.text, /US\$\s?149/)
+      // Primera compra: el recibo dice lo que pagó, con el 10%.
+      assert.match(receipt.text, /US\$\s?134[.,]10/)
       assert.match(receipt.text, /Paddle\.com/)
       await waitFor(() => mp.mailsTo(OWNER).length >= 1, 'el aviso al dueño')
     })
@@ -195,7 +205,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await waitFor(() => mp.mailsTo('english@test.com').length === 1, 'el recibo')
       const mail = mp.mailsTo('english@test.com')[0].body
       assert.match(mail.subject, /Your SCROLLLAB purchase/)
-      assert.match(mail.text, /\$149/)
+      assert.match(mail.text, /\$134\.10/)
     })
 
     it('confirm del front: 409 mientras Paddle procesa, después cumple; idempotente; otra cuenta 403', async () => {
@@ -461,7 +471,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
     const order = (res.body.orders || res.body).find((o) => (o.id || o._id) === orderId)
     assert.ok(order, JSON.stringify(res.body).slice(0, 300))
     assert.equal(order.currency_id, 'USD')
-    assert.equal(order.total, TEMPLATE_PRICES_USD.chapters)
+    assert.equal(order.total, firstPurchase(TEMPLATE_PRICES_USD.chapters))
     assert.ok(path.isAbsolute((await orderRow(orderId)).zipPath))
   })
 })
