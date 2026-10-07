@@ -483,7 +483,7 @@ export default function ChapterDusty({
       gsap.set([pigPanel, dogPanel], { y: () => pin.clientHeight * 1.1 })
       // the pig and the dog lag behind their cards (measured on the reference:
       // they travel ~0.8 and ~0.65 of what their card does), so they start ahead
-      gsap.set(pig, { y: () => -pin.clientHeight * 0.12 })
+      gsap.set(pig, { y: () => -pin.clientHeight * 0.06 })
       gsap.set(tailWrap, { xPercent: -420 })
       gsap.set(bubbleEl, { opacity: 0, scale: 0.6, y: 30, transformOrigin: '50% 80%' })
       gsap.set(ink[2], { color: '#fff' })
@@ -508,12 +508,16 @@ export default function ChapterDusty({
       // with the card, the pig a little less (so it sinks into its square) and
       // the dog's tail slides across from the middle to the right edge.
       const P = G + 2.8
-      const ENTER = 2.6
+      const ENTER = 2.3
       tl.to(curtain2, { yPercent: 0, duration: 1.4, ease: 'power2.out' }, P)
       tl.to(ink[2], { opacity: 0, y: -16, duration: 0.5 }, P + 0.5)
-      tl.to(pigPanel, { y: 0, duration: ENTER, ease: 'power2.out' }, P + 0.6)
-      tl.to(pig, { y: 0, duration: ENTER, ease: 'power2.out' }, P + 0.6)
+      tl.to(pigPanel, { y: 0, duration: ENTER, ease: 'power1.out' }, P + 0.6)
+      tl.to(pig, { y: 0, duration: ENTER, ease: 'power1.out' }, P + 0.6)
       tl.to(tailWrap, { xPercent: 0, duration: ENTER, ease: 'power1.out' }, P + 0.6)
+      // the arms close in as the card arrives: the big one slides right, the
+      // other one a little left (applied with the swing, below)
+      const armIn = { v: 0 }
+      tl.to(armIn, { v: 1, duration: ENTER, ease: 'power1.out' }, P + 0.6)
       tl.to('[data-ink-strip]', { opacity: 1, duration: 0.5 }, P + 1.7)
       tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
 
@@ -549,12 +553,15 @@ export default function ChapterDusty({
         { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'back.out(2.4)' },
         LAND - 0.3,
       )
-      tl.fromTo(lookout, { scale: 1 }, { scale: 3.4, duration: ZOOM_FOR, ease: 'expo.in' }, LAND)
-      tl.fromTo(bubbleEl, { opacity: 0, scale: 0.47, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.9, ease: 'power2.out' }, LAND - 0.1)
-      tl.to(bubbleEl, { xPercent: 45, yPercent: 20, duration: ZOOM_FOR, ease: 'power1.inOut' }, LAND + 0.4)
+      tl.fromTo(lookout, { scale: 1 }, { scale: 3.4, duration: ZOOM_FOR, ease: 'expo.in' }, LAND + 0.3)
+      // the bubble rides in with the card, small, grows as it lands and once
+      // the zoom starts, and drifts right
+      tl.fromTo(bubbleEl, { opacity: 0, scale: 0.47, y: 0 }, { opacity: 1, scale: 0.76, duration: LAND - (D + 0.3), ease: 'power1.out' }, D + 0.3)
+      tl.to(bubbleEl, { scale: 1, duration: 0.9, ease: 'power2.out' }, LAND)
+      tl.to(bubbleEl, { xPercent: 45, yPercent: 20, duration: ZOOM_FOR, ease: 'power1.inOut' }, LAND + 0.3)
       tl.to(bubbleEl, { scale: 0.88, duration: 0.8, ease: 'none' }, LAND + ZOOM_FOR - 0.8)
-      tl.to(dog, { scale: 0.82, yPercent: 7, duration: ZOOM_FOR * 0.55, ease: 'power1.inOut' }, LAND + ZOOM_FOR * 0.45)
-      const FIN = LAND + ZOOM_FOR + 0.4
+      tl.to(dog, { scale: 0.82, yPercent: 7, duration: ZOOM_FOR * 0.55, ease: 'power1.inOut' }, LAND + 0.3 + ZOOM_FOR * 0.45)
+      const FIN = LAND + 0.3 + ZOOM_FOR + 0.4
 
       // Driven by the scroll, all the way to the end: the paper cut "boils" (the
       // outline swaps shape), and the farmer's hands and the dog's tail swing back
@@ -572,8 +579,9 @@ export default function ChapterDusty({
             boils.forEach((path) => path.setAttribute('d', d))
             bubbleShape.setAttribute('d', BUBBLE[Math.floor(boil.f * 0.8) % BUBBLE.length])
             const a = boil.f * 0.9
-            handL.setAttribute('transform', `rotate(${(Math.sin(a) * 7).toFixed(2)} 225 -40) translate(0 ${(Math.sin(a) * 14).toFixed(1)})`)
-            handR.setAttribute('transform', `rotate(${(-Math.sin(a + 1.1) * 6).toFixed(2)} 960 -40) translate(0 ${(Math.sin(a + 1.1) * 12).toFixed(1)})`)
+            const k = 1 - armIn.v
+            handL.setAttribute('transform', `translate(${(-440 * k).toFixed(1)} 0) rotate(${(Math.sin(a) * 7).toFixed(2)} 225 -40) translate(0 ${(Math.sin(a) * 14).toFixed(1)})`)
+            handR.setAttribute('transform', `translate(${(160 * k).toFixed(1)} 0) rotate(${(-Math.sin(a + 1.1) * 6).toFixed(2)} 960 -40) translate(0 ${(Math.sin(a + 1.1) * 12).toFixed(1)})`)
             gsap.set(dogTail, { rotate: Math.sin(a * 1.4) * 20 })
           },
         },
