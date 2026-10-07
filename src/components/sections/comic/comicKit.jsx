@@ -117,8 +117,21 @@ export function boilTo(root, f) {
  * by `depth` px toward the pointer, so the card reads in layers. Uses x / y, so
  * the timeline should move these layers with percents or a wrapper.
  */
-export function hoverDepth(root, layers, { gsap, trackPointer }) {
+export function hoverDepth(root, layers, { gsap, trackPointer, tilt = [] }) {
   const pointer = trackPointer()
+  // whole cards lean toward the pointer, like a card held in the hand
+  const tilts = tilt
+    .map(([sel, deg]) =>
+      [...root.querySelectorAll(sel)].map((el) => {
+        gsap.set(el, { transformPerspective: 1400 })
+        return {
+          deg,
+          ry: gsap.quickTo(el, 'rotationY', { duration: 0.9, ease: 'power3.out' }),
+          rx: gsap.quickTo(el, 'rotationX', { duration: 0.9, ease: 'power3.out' }),
+        }
+      }),
+    )
+    .flat()
   const setters = layers
     .map(([sel, depth]) => {
       const els = root.querySelectorAll(sel)
@@ -129,10 +142,16 @@ export function hoverDepth(root, layers, { gsap, trackPointer }) {
       }))
     })
     .flat()
-  const tick = () => setters.forEach((l) => {
-    l.x(pointer.x * l.depth)
-    l.y(pointer.y * l.depth * 0.6)
-  })
+  const tick = () => {
+    setters.forEach((l) => {
+      l.x(pointer.x * l.depth)
+      l.y(pointer.y * l.depth * 0.6)
+    })
+    tilts.forEach((t) => {
+      t.ry(pointer.x * t.deg)
+      t.rx(-pointer.y * t.deg * 0.6)
+    })
+  }
   gsap.ticker.add(tick)
   return () => {
     gsap.ticker.remove(tick)

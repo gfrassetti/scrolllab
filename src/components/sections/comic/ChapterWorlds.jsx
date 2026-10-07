@@ -215,7 +215,7 @@ export default function ChapterWorlds({
 
       tl.to({}, { duration: 2.15 }, tl.duration())
 
-      return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 18]], { gsap, trackPointer })
+      return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 18]], { gsap, trackPointer, tilt: [['[data-dark-card]', 6]] })
     },
     { scope: root, dependencies: [reduced] },
   )

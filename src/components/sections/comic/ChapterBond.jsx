@@ -8,7 +8,7 @@ import { BathBg, BedroomBg, DogHead, PettingHand, PorchBg } from './StoryArt'
 const DIALOGUES = ['Dialogue 2 — replace.', 'Dialogue 3 — replace.', 'Dialogue 4 — replace.']
 
 // the three cards alternate left / right, like the reference (x 137 → 308 → 137 of 1280)
-const SHIFT = ['-6vw', '7vw', '-6vw']
+const SHIFT = ['-4vw', '5vw', '-4vw']
 
 function Bone() {
   return (
@@ -32,7 +32,7 @@ function HomeCard({ index, line }) {
   ][index]
   return (
     <TornCard
-      size="w-[min(66vw,1100px)] max-md:w-[90vw]"
+      size="w-[min(80vw,1450px)] max-md:w-[92vw]"
       aspect="aspect-[2.27/1]"
       back={
         <div data-card-bg className="absolute -inset-[5%] will-change-transform">
@@ -43,30 +43,30 @@ function HomeCard({ index, line }) {
       <div className="absolute inset-x-0 -top-[45%] bottom-0 overflow-hidden">
         {index === 0 && (
           <>
-            <div data-char className="absolute bottom-0 left-[16%] w-[36%] will-change-transform">
+            <div data-char className="absolute -bottom-[9%] left-[14%] w-[46%] will-change-transform">
               <div data-char-hover>
                 <DogHead mood="alert" className="block h-auto w-full" />
               </div>
             </div>
-            <div data-prop className="absolute top-[18%] left-[38%] w-[14%] will-change-transform">
+            <div data-prop className="absolute top-[40%] left-[54%] w-[14%] will-change-transform">
               <Bone />
             </div>
           </>
         )}
         {index === 1 && (
           <>
-            <div data-char className="absolute bottom-0 left-[46%] w-[34%] will-change-transform">
+            <div data-char className="absolute -bottom-[9%] left-[40%] w-[46%] will-change-transform">
               <div data-char-hover>
                 <DogHead mood="happy" className="block h-auto w-full" />
               </div>
             </div>
-            <div data-prop className="absolute top-[40%] right-0 w-[44%] will-change-transform">
+            <div data-prop className="absolute top-[14%] -right-[2%] w-[56%] will-change-transform">
               <PettingHand className="block h-auto w-full" />
             </div>
           </>
         )}
         {index === 2 && (
-          <div data-char className="absolute bottom-0 left-[6%] w-[36%] will-change-transform">
+          <div data-char className="absolute -bottom-[9%] left-[4%] w-[46%] will-change-transform">
             <div data-char-hover>
               <DogHead mood="bliss" className="block h-auto w-full" />
             </div>
@@ -75,7 +75,7 @@ function HomeCard({ index, line }) {
       </div>
       <SpeechBubble
         line={line}
-        className={`absolute top-[26%] w-[26%] max-md:w-[38%] ${index === 1 ? '-left-[16%]' : '-right-[14%]'}`}
+        className={`absolute top-[22%] z-10 w-[30%] max-md:w-[40%] ${index === 1 ? '-left-[12%]' : '-right-[10%]'}`}
       />
     </TornCard>
   )
@@ -158,7 +158,7 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
 
       tl.to({}, { duration: 1.83 }, tl.duration())
 
-      return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 20]], { gsap, trackPointer })
+      return hoverDepth(root.current, [['[data-card-bg]', -12], ['[data-char-hover]', 14], ['[data-prop]', 20]], { gsap, trackPointer, tilt: [['[data-home-card]', 7]] })
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -189,7 +189,7 @@ export default function ChapterBond({ lead = 'Caption 9 — replace with story b
           <div
             key={i}
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-[30%] flex justify-center"
+            className="pointer-events-none absolute inset-x-0 top-[22%] flex justify-center"
             style={{ zIndex: 10 + i, transform: `translateX(${SHIFT[i]})` }}
           >
             <div data-home-card className="will-change-transform">

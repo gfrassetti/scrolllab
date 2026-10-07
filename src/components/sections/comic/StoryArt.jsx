@@ -30,73 +30,139 @@ function Dots({ id, opacity = 0.08 }) {
 
 /** The border collie, from the front. `mood`: 'happy' | 'bliss' | 'alert'. */
 export function DogHead({ mood = 'happy', className = '' }) {
+  const id = `dh-${mood}`
   const eyes =
     mood === 'bliss' ? (
-      <g fill="none" stroke={INK} strokeWidth="5" strokeLinecap="round">
-        <path d="M-46 -112 C-38 -100 -22 -100 -14 -112" />
-        <path d="M14 -112 C22 -100 38 -100 46 -112" />
+      <g fill="none" stroke={INK} strokeWidth="5.5" strokeLinecap="round">
+        <path d="M-48 -110 C-40 -97 -22 -97 -13 -110" />
+        <path d="M13 -110 C22 -97 40 -97 48 -110" />
+        <path d="M-50 -122 C-42 -130 -28 -132 -18 -126" strokeWidth="3.5" opacity="0.7" />
+        <path d="M18 -126 C28 -132 42 -130 50 -122" strokeWidth="3.5" opacity="0.7" />
       </g>
     ) : (
       <g>
-        <ellipse cx="-30" cy="-110" rx="13" ry="15" fill="#fff" stroke={INK} strokeWidth="3" />
-        <ellipse cx="30" cy="-110" rx="13" ry="15" fill="#fff" stroke={INK} strokeWidth="3" />
-        <circle cx={mood === 'alert' ? -30 : -26} cy={mood === 'alert' ? -116 : -110} r="8" fill="#1a1412" />
-        <circle cx={mood === 'alert' ? 30 : 34} cy={mood === 'alert' ? -116 : -110} r="8" fill="#1a1412" />
-        <circle cx="-24" cy="-114" r="2.6" fill="#fff" />
-        <circle cx="36" cy="-114" r="2.6" fill="#fff" />
+        <ellipse cx="-30" cy="-110" rx="14" ry="16" fill="#fff" stroke={INK} strokeWidth="3.5" />
+        <ellipse cx="30" cy="-110" rx="14" ry="16" fill="#fff" stroke={INK} strokeWidth="3.5" />
+        <circle cx={mood === 'alert' ? -30 : -26} cy={mood === 'alert' ? -116 : -109} r="9" fill="#3a2418" />
+        <circle cx={mood === 'alert' ? 30 : 34} cy={mood === 'alert' ? -116 : -109} r="9" fill="#3a2418" />
+        <circle cx={mood === 'alert' ? -30 : -26} cy={mood === 'alert' ? -116 : -109} r="5" fill="#120b08" />
+        <circle cx={mood === 'alert' ? 30 : 34} cy={mood === 'alert' ? -116 : -109} r="5" fill="#120b08" />
+        <circle cx="-23" cy="-115" r="3.2" fill="#fff" />
+        <circle cx="37" cy="-115" r="3.2" fill="#fff" />
+        {/* lids: a bit of attitude */}
+        <path d="M-45 -118 C-38 -128 -22 -128 -15 -120" fill="none" stroke={INK} strokeWidth="4" strokeLinecap="round" />
+        <path d="M15 -120 C22 -128 38 -128 45 -118" fill="none" stroke={INK} strokeWidth="4" strokeLinecap="round" />
       </g>
     )
   return (
-    <svg viewBox="-130 -210 260 260" className={className} aria-hidden="true">
+    <svg viewBox="-140 -220 280 280" className={className} aria-hidden="true">
+      <defs>
+        <radialGradient id={`${id}-fur`} cx="0.35" cy="0.25" r="0.8">
+          <stop offset="0" stopColor="#4a3c36" />
+          <stop offset="0.55" stopColor="#2a2220" />
+          <stop offset="1" stopColor="#17110f" />
+        </radialGradient>
+        <linearGradient id={`${id}-white`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.6" stopColor="#f6efe2" />
+          <stop offset="1" stopColor="#ddd1bd" />
+        </linearGradient>
+        <pattern id={`${id}-dots`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+          <circle cx="3.5" cy="3.5" r="1.3" fill="#120b09" />
+        </pattern>
+      </defs>
       <g stroke={INK} strokeWidth="3.5" strokeLinejoin="round">
-        <path d="M-70 50 C-80 -6 -58 -34 -38 -44 L38 -44 C58 -34 80 -6 70 50Z" fill="#fbf5ea" />
-        <path d="M-64 -92 C-68 -142 -34 -170 0 -170 C34 -170 68 -142 64 -92 C62 -60 34 -40 0 -40 C-34 -40 -62 -60 -64 -92Z" fill="#2a2220" />
-        <path d="M-54 -152 C-90 -186 -120 -154 -116 -112 C-114 -94 -98 -86 -82 -90 C-66 -104 -56 -130 -54 -152Z" fill="#2a2220" />
-        <path d="M48 -158 C78 -192 116 -168 114 -124 C114 -106 98 -96 82 -102 C64 -116 52 -138 48 -158Z" fill="#2a2220" />
-        <path d="M-8 -168 L8 -168 C16 -130 22 -106 38 -84 C42 -62 24 -44 0 -44 C-24 -44 -42 -62 -38 -84 C-22 -106 -16 -130 -8 -168Z" fill="#fbf5ea" />
-        <ellipse cx="0" cy="-70" rx="16" ry="12" fill="#1a1412" />
-        {mood === 'alert' ? (
-          <path d="M-12 -52 C-4 -46 4 -46 12 -52" fill="none" />
-        ) : (
-          <>
-            <path d="M-22 -54 C-12 -44 -4 -44 0 -52 C4 -44 12 -44 22 -54" fill="none" strokeLinecap="round" />
-            <path d="M-9 -48 C-10 -24 10 -24 9 -48Z" fill="#ef7487" />
-          </>
-        )}
+        {/* chest ruff, with fur tufts at the edge */}
+        <path
+          d="M-78 60 C-86 10 -70 -24 -46 -40 L46 -40 C70 -24 86 10 78 60 L56 48 L40 60 L22 46 L4 60 L-16 46 L-34 60 L-52 46Z"
+          fill={`url(#${id}-white)`}
+        />
+        <path d="M30 -30 C52 -16 60 10 62 40" fill="none" stroke="#c9bca6" strokeWidth="6" strokeLinecap="round" />
+        {/* head */}
+        <path d="M-66 -92 C-70 -144 -36 -174 0 -174 C36 -174 70 -144 66 -92 C64 -58 36 -38 0 -38 C-36 -38 -64 -58 -66 -92Z" fill={`url(#${id}-fur)`} />
+        {/* cheek tufts */}
+        <path d="M-64 -84 L-80 -76 L-66 -70 L-80 -60 L-62 -58 C-60 -60 -62 -70 -64 -84Z" fill="#2a2220" />
+        <path d="M64 -84 L80 -76 L66 -70 L80 -60 L62 -58 C60 -60 62 -70 64 -84Z" fill="#2a2220" />
+        {/* ears, with a lit inner fold */}
+        <path d="M-56 -156 C-94 -192 -126 -158 -122 -114 C-120 -96 -102 -86 -86 -92 C-70 -106 -58 -132 -56 -156Z" fill="#241c1a" />
+        <path d="M-66 -150 C-90 -168 -110 -148 -108 -120 C-106 -108 -98 -102 -90 -104 C-80 -116 -70 -132 -66 -150Z" fill="#4a3a36" stroke="none" />
+        <path d="M50 -162 C82 -198 122 -172 120 -126 C120 -108 102 -96 86 -104 C66 -118 54 -140 50 -162Z" fill="#241c1a" />
+        <path d="M60 -156 C84 -178 108 -160 106 -130 C104 -118 96 -110 88 -114 C76 -124 64 -140 60 -156Z" fill="#4a3a36" stroke="none" />
+        {/* white blaze and muzzle */}
+        <path d="M-8 -172 L8 -172 C16 -132 24 -108 42 -84 C46 -60 26 -42 0 -42 C-26 -42 -46 -60 -42 -84 C-24 -108 -16 -132 -8 -172Z" fill={`url(#${id}-white)`} />
+        <path d="M14 -110 C22 -96 32 -88 40 -82 C42 -66 30 -52 14 -46 C24 -60 26 -80 14 -110Z" fill="#d9ccb6" stroke="none" />
+        {/* nose with a shine */}
+        <path d="M-17 -74 C-17 -84 17 -84 17 -74 C17 -64 6 -58 0 -58 C-6 -58 -17 -64 -17 -74Z" fill="#17110f" />
+        <ellipse cx="-5" cy="-77" rx="6" ry="3" fill="#8a7a72" stroke="none" />
       </g>
+      {/* mouth */}
+      {mood === 'alert' ? (
+        <path d="M-14 -50 C-6 -44 6 -44 14 -50" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+      ) : (
+        <g stroke={INK} strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round">
+          <path d="M-26 -54 C-14 -40 -4 -40 0 -52 C4 -40 14 -40 26 -54" fill="none" />
+          <path d="M-11 -46 C-12 -18 12 -18 11 -46Z" fill="#ef6f84" />
+          <path d="M0 -44 L0 -28" stroke="#b03a52" strokeWidth="2.5" />
+          <path d="M-8 -40 C-6 -30 -2 -26 0 -26" fill="none" stroke="#ffb0bc" strokeWidth="2" />
+        </g>
+      )}
       {eyes}
-      <path d="M-90 -138 C-96 -122 -92 -108 -84 -104" fill="none" stroke="#5a4a44" strokeWidth="4" strokeLinecap="round" />
+      {/* fur strokes and shadow screen */}
+      <g fill="none" stroke="#5a4a44" strokeWidth="3" strokeLinecap="round" opacity="0.8">
+        <path d="M-40 -158 C-34 -150 -30 -146 -24 -144M40 -158 C34 -150 30 -146 24 -144M-48 -70 C-42 -64 -36 -62 -30 -62" />
+      </g>
+      <path d="M-66 -92 C-64 -58 -36 -38 0 -38 C-30 -50 -54 -70 -60 -100Z" fill={`url(#${id}-dots)`} opacity="0.22" />
+      <path d="M30 -30 C52 -16 60 10 62 40 L78 60 C86 10 70 -24 46 -40Z" fill={`url(#${id}-dots)`} opacity="0.2" />
     </svg>
   )
 }
 
 /** The pig, from the front. `mood`: 'sad' | 'calm'. */
 export function PigHead({ mood = 'sad', className = '' }) {
+  const id = `ph-${mood}`
   return (
-    <svg viewBox="-130 -210 260 260" className={className} aria-hidden="true">
+    <svg viewBox="-140 -220 280 280" className={className} aria-hidden="true">
+      <defs>
+        <radialGradient id={`${id}-skin`} cx="0.38" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#ffd2da" />
+          <stop offset="0.5" stopColor="#f4a2b2" />
+          <stop offset="1" stopColor="#d86e86" />
+        </radialGradient>
+        <pattern id={`${id}-dots`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+          <circle cx="3.5" cy="3.5" r="1.3" fill="#120b09" />
+        </pattern>
+      </defs>
       <g stroke={INK} strokeWidth="3.5" strokeLinejoin="round">
-        <path d="M-74 50 C-84 -4 -62 -30 -42 -40 L42 -40 C62 -30 84 -4 74 50Z" fill="#f2a1b0" />
-        <path d="M-48 -134 C-70 -176 -108 -170 -112 -128 C-112 -108 -92 -100 -74 -106 C-58 -112 -50 -122 -48 -134Z" fill="#ec8da0" />
-        <path d="M48 -134 C70 -176 108 -170 112 -128 C112 -108 92 -100 74 -106 C58 -112 50 -122 48 -134Z" fill="#ec8da0" />
-        <path d="M-84 -92 C-86 -146 -44 -170 0 -170 C44 -170 86 -146 84 -92 C82 -56 44 -36 0 -36 C-44 -36 -82 -56 -84 -92Z" fill="#f4a9b8" />
-        <ellipse cx="0" cy="-70" rx="38" ry="28" fill="#ec8da0" />
-        <ellipse cx="-13" cy="-70" rx="6" ry="9" fill="#8a2f4a" />
-        <ellipse cx="13" cy="-70" rx="6" ry="9" fill="#8a2f4a" />
-        <ellipse cx="-34" cy="-116" rx="9" ry="11" fill="#fff" />
-        <ellipse cx="34" cy="-116" rx="9" ry="11" fill="#fff" />
+        <path d="M-78 60 C-88 0 -64 -28 -42 -38 L42 -38 C64 -28 88 0 78 60Z" fill={`url(#${id}-skin)`} />
+        <path d="M-50 -134 C-72 -178 -112 -172 -116 -128 C-116 -106 -94 -98 -76 -104 C-60 -110 -52 -122 -50 -134Z" fill="#e98aa0" />
+        <path d="M-60 -136 C-76 -162 -100 -158 -104 -132 C-102 -118 -90 -112 -78 -116Z" fill="#c45a76" stroke="none" />
+        <path d="M50 -134 C72 -178 112 -172 116 -128 C116 -106 94 -98 76 -104 C60 -110 52 -122 50 -134Z" fill="#e98aa0" />
+        <path d="M60 -136 C76 -162 100 -158 104 -132 C102 -118 90 -112 78 -116Z" fill="#c45a76" stroke="none" />
+        <path d="M-86 -92 C-88 -148 -46 -174 0 -174 C46 -174 88 -148 86 -92 C84 -54 46 -34 0 -34 C-46 -34 -84 -54 -86 -92Z" fill={`url(#${id}-skin)`} />
+        <ellipse cx="0" cy="-70" rx="40" ry="30" fill="#ee8aa0" />
+        <ellipse cx="-14" cy="-70" rx="7" ry="10" fill="#7a2440" />
+        <ellipse cx="14" cy="-70" rx="7" ry="10" fill="#7a2440" />
+        <ellipse cx="-34" cy="-116" rx="10" ry="12" fill="#fff" />
+        <ellipse cx="34" cy="-116" rx="10" ry="12" fill="#fff" />
       </g>
-      <circle cx="-34" cy="-112" r="5.5" fill="#1a1412" />
-      <circle cx="34" cy="-112" r="5.5" fill="#1a1412" />
+      <path d="M-30 -88 C-22 -96 -8 -98 2 -94" fill="none" stroke="#ffd8e0" strokeWidth="5" strokeLinecap="round" />
+      <circle cx="-34" cy="-112" r="6" fill="#1a1412" />
+      <circle cx="34" cy="-112" r="6" fill="#1a1412" />
+      <circle cx="-32" cy="-115" r="2.2" fill="#fff" />
+      <circle cx="36" cy="-115" r="2.2" fill="#fff" />
       {mood === 'sad' ? (
         <g fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round">
-          <path d="M-52 -138 C-44 -132 -32 -132 -22 -138" />
-          <path d="M22 -138 C32 -132 44 -132 52 -138" />
-          <path d="M-14 -40 C-6 -46 6 -46 14 -40" />
-          <path d="M-40 -100 C-42 -88 -36 -80 -34 -80" stroke="#8ac4ff" strokeWidth="4" />
+          <path d="M-54 -138 C-46 -132 -32 -132 -22 -140" />
+          <path d="M22 -140 C32 -132 46 -132 54 -138" />
+          <path d="M-14 -38 C-6 -44 6 -44 14 -38" />
+          <path d="M-42 -100 C-44 -86 -38 -78 -36 -78" stroke="#8ac4ff" strokeWidth="4.5" />
         </g>
-      ) : null}
-      <ellipse cx="-58" cy="-78" rx="15" ry="9" fill="#e9758c" opacity="0.6" />
-      <ellipse cx="58" cy="-78" rx="15" ry="9" fill="#e9758c" opacity="0.6" />
+      ) : (
+        <path d="M-14 -40 C-6 -34 6 -34 14 -40" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+      )}
+      <ellipse cx="-60" cy="-78" rx="16" ry="10" fill="#e2607e" opacity="0.55" />
+      <ellipse cx="60" cy="-78" rx="16" ry="10" fill="#e2607e" opacity="0.55" />
+      <path d="M86 -92 C84 -54 46 -34 0 -34 C40 -46 70 -66 78 -110Z" fill={`url(#${id}-dots)`} opacity="0.2" />
     </svg>
   )
 }

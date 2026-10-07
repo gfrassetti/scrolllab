@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { gsap, useGSAP } from '../../../lib/gsap'
+import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { prefersReducedMotion } from '../../../lib/motion'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
@@ -32,28 +32,37 @@ export default function NavComic({
   const brandRef = useRef(null)
 
   // The brand and the links ride up and out as the story starts, one piece
-  // after another, and come back when you return to the top (the CTA and the
-  // menu button stay).
+  // after another. Scrolling back up (anywhere on the page) brings them back the
+  // same way, in reverse order; scrolling down sends them away again. The CTA and
+  // the menu button stay.
   useGSAP(
     () => {
       const list = linksRef.current
       const brand = brandRef.current
       if (!list || !brand || prefersReducedMotion()) return
       const pieces = [...brand.children, ...list.children]
-      gsap.to(pieces, {
-        yPercent: -240,
-        opacity: 0,
-        stagger: 0.1,
-        ease: 'power2.in',
-        scrollTrigger: {
-          start: 0,
-          end: '+=150',
-          scrub: 0.3,
-          onUpdate: (self) => {
-            const gone = self.progress > 0.35 ? 'none' : ''
-            list.style.pointerEvents = gone
-            brand.style.pointerEvents = gone
-          },
+      let shown = true
+      const show = (on) => {
+        if (on === shown) return
+        shown = on
+        gsap.to(on ? [...pieces].reverse() : pieces, {
+          yPercent: on ? 0 : -240,
+          opacity: on ? 1 : 0,
+          stagger: 0.06,
+          duration: on ? 0.55 : 0.4,
+          ease: on ? 'power3.out' : 'power2.in',
+          overwrite: true,
+        })
+        const events = on ? '' : 'none'
+        list.style.pointerEvents = events
+        brand.style.pointerEvents = events
+      }
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          if (self.scroll() < 80) show(true)
+          else show(self.direction < 0)
         },
       })
     },
