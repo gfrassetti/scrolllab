@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import TemplatesIndex from './pages/TemplatesIndex'
 import LicensePage from './pages/LicensePage'
 import { PrivacyPage, TermsPage } from './pages/LegalDocumentPage'
+import { usePayRegion } from './lib/payRegion'
 import { AuthProvider } from './lib/auth'
 import { PlanProvider } from './lib/plan'
 import { captureUtmFromUrl } from './lib/utm'
@@ -103,6 +104,9 @@ export default function App() {
     captureUtmFromUrl()
     // Analítica propia: acá y no en main.jsx, porque main.jsx viaja en el ZIP.
     installTracker()
+    // Medio de pago por ubicación: cargado de entrada para que los «Comprar»
+    // rápidos (que no pasan por el carrito) ya sepan por dónde cobrar.
+    usePayRegion.getState().load()
   }, [])
 
   return (

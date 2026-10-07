@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
@@ -8,6 +8,7 @@ import RoadHero from './RoadHero'
 import SideTruck from './SideTruck'
 import { CanyonScene, FarmScene, FenceScene } from './Vignettes'
 import { BigPig, DogBack, DogTail, FarmerHands, GateScene, LookoutBg, PigPanelBg } from './ArrivalArt'
+import { BOIL, BUBBLE, BoilOutline, PANEL_CLIP, PAPER, TORN_TOP } from './comicKit'
 import { closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -30,78 +31,10 @@ const CAPTIONS = [
  * verían las tres pisándose. En calma son tres viñetas en fila, cada una un
  * bloque normal del documento (ComicPanel), con fundido al entrar.
  */
-/** A ragged top edge for the paper curtain: x in %, y in px, the same every render. */
-const TORN_TOP = (() => {
-  let a = 7
-  const rand = () => {
-    a = (a * 16807) % 2147483647
-    return a / 2147483647
-  }
-  const pts = Array.from({ length: 41 }, (_, i) => `${((i / 40) * 100).toFixed(2)}% ${(4 + rand() * 30).toFixed(1)}px`)
-  return `polygon(${pts.join(', ')}, 100% 100%, 0 100%)`
-})()
-
-// crumpled grey paper: flat colour under a soft fractal-noise shading
-const PAPER = {
-  backgroundColor: '#c3c1bd',
-  backgroundImage:
-    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.011 0.02' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.42  0 0 0 0 0.41  0 0 0 0.9 -0.18'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-}
-
-/**
- * A ragged white outline drawn around a panel, a little outside its picture.
- * Three versions: the timeline swaps them as you scroll, so the paper cut
- * "boils" like hand-drawn animation.
- */
-const BOIL = [11, 23, 37].map((seed) => {
-  let a = seed
-  const rand = () => {
-    a = (a * 16807) % 2147483647
-    return a / 2147483647
-  }
-  const pts = []
-  const jag = (base) => base + (rand() - 0.5) * 2.6
-  for (let i = 0; i <= 12; i += 1) pts.push([-3 + i * (106 / 12), jag(-4)])
-  for (let i = 1; i <= 4; i += 1) pts.push([jag(103), -4 + i * (108 / 4)])
-  for (let i = 11; i >= 0; i -= 1) pts.push([-3 + i * (106 / 12), jag(104)])
-  for (let i = 3; i >= 1; i -= 1) pts.push([jag(-3), -4 + i * (108 / 4)])
-  return `M${pts.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(' L')} Z`
-})
-
-// the speech bubble's blob, in three hand-drawn takes (it boils too)
-const BUBBLE = [
-  'M70 50 C120 10 250 0 320 30 C380 56 400 120 380 170 C356 226 270 244 190 236 C110 228 30 200 14 140 C2 100 30 72 70 50Z',
-  'M64 56 C118 14 246 6 324 36 C384 62 396 124 374 176 C348 228 264 240 186 232 C104 224 26 196 12 134 C4 96 28 76 64 56Z',
-  'M76 46 C126 8 256 2 316 26 C374 52 402 116 384 166 C362 222 276 246 194 238 C114 230 36 204 18 144 C4 104 34 68 76 46Z',
-]
-
-// the picture itself is cut a little crooked, like a clipping
-const PANEL_CLIP = 'polygon(0.4% 1.6%, 99.6% 0%, 100% 98.6%, 0% 100%)'
-
-function BoilOutline() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-    >
-      <path
-        data-boil
-        d={BOIL[0]}
-        fill="none"
-        stroke="rgba(255,255,255,0.95)"
-        strokeWidth="2"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  )
-}
-
 /** The pig is lifted out of its panel: night behind, the farmer's hands, the dog's tail. */
 function PigPanel() {
   return (
-    <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:aspect-[1.45/1] max-md:w-[92vw]">
+    <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:w-[94vw]">
       <BoilOutline />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
         <div data-pig-bg className="absolute -inset-[6%] will-change-transform">
@@ -110,7 +43,7 @@ function PigPanel() {
       </div>
       {/* the pig is clipped only at the bottom: its head rises over the top of the frame */}
       <div className="absolute inset-x-0 -top-[55%] bottom-0 overflow-hidden">
-        <div data-pig className="absolute bottom-0 left-[11%] w-[47%] will-change-transform max-md:left-[2%] max-md:w-[72%]">
+        <div data-pig className="absolute bottom-0 left-[11%] w-[47%] will-change-transform">
           <div data-pig-hover>
             <BigPig className="block h-auto w-full" />
           </div>
@@ -120,7 +53,7 @@ function PigPanel() {
         <div data-hands className="absolute inset-0 will-change-transform">
           <FarmerHands className="absolute inset-0 h-full w-full" />
         </div>
-        <div data-tail-wrap className="absolute right-[5%] -bottom-[6%] w-[10%] will-change-transform max-md:w-[16%]">
+        <div data-tail-wrap className="absolute right-[5%] -bottom-[6%] w-[10%] will-change-transform">
           <div data-dog-tail className="origin-bottom">
             <DogTail className="block h-auto w-full" />
           </div>
@@ -133,7 +66,7 @@ function PigPanel() {
 /** The dog watches the farmer walk the pig to the barn. The dog stays still; the farm pans. */
 function DogPanel({ line }) {
   return (
-    <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:aspect-[1.45/1] max-md:w-[92vw]">
+    <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:w-[94vw]">
       <BoilOutline />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
         <div data-lookout className="absolute inset-y-0 -left-[2%] w-[112%] will-change-transform">
@@ -141,18 +74,18 @@ function DogPanel({ line }) {
         </div>
       </div>
       <div className="absolute inset-x-0 -top-[55%] bottom-0 overflow-hidden">
-        <div data-dog className="absolute bottom-0 left-[6%] w-[42%] will-change-transform max-md:left-[0%] max-md:w-[74%]">
+        <div data-dog className="absolute bottom-0 left-[6%] w-[42%] will-change-transform">
           <div data-dog-hover>
             <DogBack className="block h-auto w-full" />
           </div>
         </div>
       </div>
       {/* the speech bubble */}
-      <div data-bubble className="absolute -bottom-[16%] left-[48%] w-[25%] will-change-transform max-md:left-[46%] max-md:w-[50%]">
+      <div data-bubble className="absolute -bottom-[16%] left-[48%] w-[25%] will-change-transform max-md:left-[44%] max-md:w-[36%]">
         <svg viewBox="0 0 400 240" className="block h-auto w-full drop-shadow-[0_10px_24px_rgba(30,20,20,0.25)]" aria-hidden="true">
           <path data-bubble-shape d={BUBBLE[0]} fill="#fbfaf7" />
         </svg>
-        <p className="absolute inset-0 flex items-center justify-center px-[14%] text-center font-brico text-[clamp(13px,1.5vw,22px)] leading-tight font-bold text-[#1d1a18]">
+        <p className="absolute inset-0 flex items-center justify-center px-[14%] text-center font-brico text-[clamp(11px,1.5vw,22px)] leading-tight font-bold text-[#1d1a18]">
           {line}
         </p>
       </div>
@@ -174,6 +107,25 @@ export default function ChapterDusty({
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
+  // The timeline is built from measurements (where the squares sit, where the
+  // truck's hood meets them, the farm road). When the width changes — a phone
+  // turning, a window resized — rebuild it. Height alone (a phone's toolbar
+  // hiding) doesn't count.
+  const [width, setWidth] = useState(() => (typeof window === 'undefined' ? 0 : window.innerWidth))
+  useEffect(() => {
+    let timer = 0
+    const onResize = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        setWidth((w) => (Math.abs(window.innerWidth - w) > 40 ? window.innerWidth : w))
+      }, 250)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
 
   useGSAP(
     () => {
@@ -373,7 +325,9 @@ export default function ChapterDusty({
       // bottom); x / y / scale carry it from the lower-left corner onto the road.
       const truckW = () => sideTruck.offsetWidth
       // it starts just outside the left edge, a little below its final level
-      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.72)
+      // (on a phone the squares are small and high up: the truck starts further
+      // out so it shows up when the farm is already opening, like the reference)
+      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.72 + (narrow ? pin.clientWidth * 0.6 : 0))
       // the farm's road, in the pin: the scene is cropped with `slice`
       const roadY = () => {
         const W = pin.clientWidth
@@ -588,6 +542,9 @@ export default function ChapterDusty({
         P,
       )
 
+      // the next chapter overlaps this one's last screen: hold the picture while it slides over
+      tl.to({}, { duration: 2.1 }, tl.duration())
+
       // The two cards answer the pointer (the finger on a phone): the scene and
       // the animals shift by different amounts, so the picture has depth.
       const pointer = trackPointer()
@@ -618,7 +575,7 @@ export default function ChapterDusty({
         pointer.dispose?.()
       }
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, width], revertOnUpdate: true },
   )
 
   if (reduced) {
@@ -685,7 +642,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[1400vh] bg-[#1a1512] text-white"
+      className="relative h-[1500vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
@@ -779,7 +736,7 @@ export default function ChapterDusty({
 
           {/* and the truck that drives into it */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-center">
-            <div data-side-truck className="w-[min(46vw,96svh)] will-change-transform max-md:w-[82vw]">
+            <div data-side-truck className="w-[min(46vw,96svh)] will-change-transform max-md:w-[56vw]">
               <SideTruck className="block h-auto w-full" />
             </div>
           </div>

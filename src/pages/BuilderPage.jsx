@@ -17,6 +17,7 @@ import { useCart } from '../lib/cart'
 import { startCheckout } from '../lib/startCheckout'
 import { useAuth } from '../lib/auth'
 import { useI18n } from '../i18n'
+import { useCurrency } from '../lib/currency'
 import { prefersReducedMotion } from '../lib/motion'
 import { kindLabelKeys } from '../features/builder/sectionCopy.js'
 import BuilderHeader from '../features/builder/BuilderHeader.jsx'
@@ -36,7 +37,8 @@ const DND_MIME = 'text/plain'
  * + src/lib/composition.js (persistencia, receta, chrome único).
  */
 export default function BuilderPage() {
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
+  const { currency } = useCurrency()
   const addToCart = useCart((s) => s.addItem)
   const { user, loading: authLoading, hadSession } = useAuth()
   const looksLoggedIn = user ? true : authLoading ? hadSession : false
@@ -93,7 +95,7 @@ export default function BuilderPage() {
   }
   const commerceSurcharge = formatPriceFromUsd(
     COMMERCE_PACK_SURCHARGE_USD,
-    locale,
+    currency,
     rate,
   )
   // Por qué el total es ese: qué incluye la base, cuánto llevás, cuánto suma
@@ -102,7 +104,7 @@ export default function BuilderPage() {
     const next = formatNextSectionPrice(
       sectionCount,
       hasCommerce,
-      locale,
+      currency,
       rate,
     )
     const included = CUSTOM_BASE_SECTIONS
@@ -262,7 +264,7 @@ export default function BuilderPage() {
       <BuilderPriceStrip
         t={t}
         estimatedPriceUsd={estimatedPriceUsd}
-        locale={locale}
+        currency={currency}
         rate={rate}
         priceHint={priceHint}
       />
@@ -308,7 +310,7 @@ export default function BuilderPage() {
             hasDuplicateChrome={hasDuplicateChrome}
             t={t}
             estimatedPriceUsd={estimatedPriceUsd}
-            locale={locale}
+            currency={currency}
             rate={rate}
             atMaxSections={atMaxSections}
             priceHint={priceHint}
@@ -328,7 +330,7 @@ export default function BuilderPage() {
         items={items}
         t={t}
         estimatedPriceUsd={estimatedPriceUsd}
-        locale={locale}
+        currency={currency}
         rate={rate}
         goToCanvas={goToCanvas}
       />

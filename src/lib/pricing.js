@@ -107,12 +107,22 @@ export function formatUsd(amount) {
 }
 
 /**
- * Precio de lista para UI: EN muestra USD; ES convierte a ARS con la
- * cotización del catálogo. El checkout sigue cobrando en pesos.
+ * `'USD'` (o `'en'`, la regla vieja por idioma) muestra el precio de lista en
+ * dólares; cualquier otra cosa, pesos. La moneda la decide lib/currency.js.
  */
-export function formatPriceFromUsd(usd, locale, rate) {
+const isUsd = (currency) => currency === 'USD' || currency === 'en'
+
+/**
+ * Precio de lista para UI en la moneda vigente: USD tal cual, o ARS con la
+ * cotización del catálogo. El checkout cobra en esa moneda (Paddle en USD,
+ * Mercado Pago en pesos).
+ * @param {number} usd
+ * @param {'USD' | 'ARS' | string} currency
+ * @param {number} rate
+ */
+export function formatPriceFromUsd(usd, currency, rate) {
   if (!Number.isFinite(usd)) return null
-  if (locale === 'en') return formatUsd(usd)
+  if (isUsd(currency)) return formatUsd(usd)
   const ars = arsFromUsd(usd, rate)
   return ars == null ? null : formatArs(ars)
 }
@@ -125,9 +135,9 @@ export function nextSectionUsd(sectionCount, hasCommerce) {
   )
 }
 
-/** Próxima sección formateada: USD en EN, delta ARS redondeado en ES. */
-export function formatNextSectionPrice(sectionCount, hasCommerce, locale, rate) {
-  if (locale === 'en') return formatUsd(nextSectionUsd(sectionCount, hasCommerce))
+/** Próxima sección formateada: USD tal cual, o el delta en ARS redondeado. */
+export function formatNextSectionPrice(sectionCount, hasCommerce, currency, rate) {
+  if (isUsd(currency)) return formatUsd(nextSectionUsd(sectionCount, hasCommerce))
   const ars = nextSectionArs(sectionCount, hasCommerce, rate)
   return ars == null ? null : formatArs(ars)
 }

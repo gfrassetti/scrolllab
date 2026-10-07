@@ -8,7 +8,7 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { openPaddleCheckout } from '../lib/paddleCheckout'
-import PayRegionSwitch from './PayRegionSwitch'
+import PaymentMethodPicker from './PaymentMethodPicker'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
 const tierIndex = (planId) => TIER_ORDER.indexOf(String(planId).replace('hosted_', ''))
@@ -59,10 +59,11 @@ const planPrice = (p, cycle, currency) =>
       ? p.priceYearly
       : p.priceMonthly
 
-// Paddle tarda un instante en crear la suscripción después del pago: el sync
-// se reintenta unas veces antes de decir «todavía no la vemos».
-const PADDLE_SYNC_TRIES = 5
-const PADDLE_SYNC_WAIT_MS = 1500
+// Paddle tarda en crear la suscripción después del pago (unos segundos, a veces
+// más): el sync se reintenta ~30 s antes de decir «todavía no la vemos». Aunque
+// se agote, el webhook la activa igual.
+const PADDLE_SYNC_TRIES = 12
+const PADDLE_SYNC_WAIT_MS = 2500
 
 // El server manda `null` para "sin tope" (Infinity no es JSON) — ver
 // `quotaForWire` en server/app.js.
@@ -636,6 +637,16 @@ export default function HostedPlans() {
             </ul>
           </div>
 
+          {paddleEnabled && choosing && (
+            <PaymentMethodPicker
+              region={region}
+              onChange={setRegion}
+              disabled={!!busy}
+              name="lab-pay-method"
+              className="mt-6"
+            />
+          )}
+
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {plans.map((p) => {
               const price = planPrice(p, cycle, gridCurrency)
@@ -809,14 +820,6 @@ export default function HostedPlans() {
               )
             })}
           </div>
-          {paddleEnabled && choosing && user && (
-            <PayRegionSwitch
-              region={region}
-              onChange={setRegion}
-              disabled={!!busy}
-              className="mt-4"
-            />
-          )}
         </>
       )}
     </section>

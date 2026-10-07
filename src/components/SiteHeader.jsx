@@ -15,6 +15,7 @@ import ScrollProgress from './ScrollProgress'
 import ThemeToggle from './ThemeToggle'
 import MotionToggle from './MotionToggle'
 import LanguageSelector from './LanguageSelector'
+import CurrencySelector from './CurrencySelector'
 import { prefersReducedMotion } from '../lib/motion'
 
 /**
@@ -231,6 +232,7 @@ export default function SiteHeader({ solid = true }) {
             </Link>
           )}
           <LanguageSelector />
+          <CurrencySelector />
           <MotionToggle />
           <ThemeToggle />
         </div>
@@ -370,7 +372,10 @@ export default function SiteHeader({ solid = true }) {
             )}
           </ul>
           <div className="mt-4 flex items-center justify-between border-t border-ink/10 pt-4">
-            <LanguageSelector />
+            <div className="flex items-center gap-2">
+              <LanguageSelector />
+              <CurrencySelector />
+            </div>
             <div className="flex items-center">
               <MotionToggle />
               <ThemeToggle />

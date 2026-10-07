@@ -6,6 +6,7 @@ import { startCheckout } from '../lib/startCheckout'
 import { useFxRate } from '../lib/fx'
 import { formatPriceFromUsd, templatePriceUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
+import { useCurrency } from '../lib/currency'
 
 const POSTERS = {
   chapters: '/catalog/chapters.webp',
@@ -26,7 +27,8 @@ const POSTERS = {
  * Idle chico; solo crece un poco en hover.
  */
 export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
+  const { currency } = useCurrency()
   const { rate } = useFxRate()
   const { user, loading: authLoading } = useAuth()
   const addItem = useCart((s) => s.addItem)
@@ -34,7 +36,7 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
   const [busy, setBusy] = useState(false)
 
   const priceUsd = templatePriceUsd(sku)
-  const priceLabel = formatPriceFromUsd(priceUsd, locale, rate)
+  const priceLabel = formatPriceFromUsd(priceUsd, currency, rate)
   const poster = POSTERS[sku]
 
   const buy = async () => {

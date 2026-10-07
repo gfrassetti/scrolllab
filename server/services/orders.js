@@ -215,10 +215,29 @@ export async function fulfillApprovedPayment({
     )
   }
 
-  assertPaymentMatchesOrder(payment, {
-    ...(typeof order.toObject === 'function' ? order.toObject() : order),
-    id: db.uid(order) || order.id,
-  })
+  try {
+    assertPaymentMatchesOrder(payment, {
+      ...(typeof order.toObject === 'function' ? order.toObject() : order),
+      id: db.uid(order) || order.id,
+    })
+  } catch (err) {
+    // Alguien pagó y la orden NO se entrega: sin este aviso el webhook lo
+    // anotaba en el log y respondía 200, y nadie se enteraba.
+    if (err instanceof HttpError && err.status === 400) {
+      alertAdmin({
+        kind: 'mismatch',
+        key: `mp-${payment.id}`,
+        title: 'PAGO NO COINCIDE CON LA ORDEN — revisar o reembolsar',
+        lines: [
+          `pago MP ${payment.id} · ${money(payment)} · ${payerOf(payment)}`,
+          `orden ${db.uid(order) || order.id} espera ${order.total} ${order.currency_id}`,
+          `motivo: ${err.message}`,
+        ],
+        config,
+      })
+    }
+    throw err
+  }
 
   const { order: updated, created } = await markOrderPaid({
     orderId: db.uid(order) || order.id,

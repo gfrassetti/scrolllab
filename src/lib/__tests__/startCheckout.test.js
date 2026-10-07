@@ -109,7 +109,7 @@ describe('startCheckout', () => {
     },
   }
 
-  async function paddleCheckout(event) {
+  async function paddleCheckout(event, overrides = {}) {
     const calls = []
     const realFetch = globalThis.fetch
     next.event = event
@@ -137,6 +137,7 @@ describe('startCheckout', () => {
         navigate: (to) => navigated.push(to),
         provider: 'paddle',
         locale: 'en',
+        ...overrides,
       })
       return { result, calls, navigated }
     } finally {
@@ -161,6 +162,28 @@ describe('startCheckout', () => {
     assert.equal(seen.closed, 1)
     assert.deepEqual(navigated, ['/checkout/success?provider=paddle&txn=txn_abc'])
     assert.equal(seen.token, 'test_tok')
+  })
+
+  it('el «Comprar» rápido (sin carrito) hereda el medio de pago detectado o elegido', async () => {
+    const { usePayRegion } = await import('../payRegion.js')
+    try {
+      // Sin Paddle configurado o sin cargar: Mercado Pago, sin campo de más.
+      usePayRegion.setState({ paddleEnabled: false, region: 'intl' })
+      let out = await checkoutWithSession({})
+      assert.equal('provider' in out.calls[0].body, false)
+
+      // Paddle activo y ubicación fuera de Argentina: el pedido va por Paddle.
+      usePayRegion.setState({ paddleEnabled: true, region: 'intl' })
+      out = await paddleCheckout({ name: 'checkout.closed', data: {} }, { provider: undefined })
+      assert.equal(out.calls[0].body.provider, 'paddle')
+
+      // Un argentino que eligió Mercado Pago sigue en Mercado Pago.
+      usePayRegion.setState({ paddleEnabled: true, region: 'ar' })
+      out = await checkoutWithSession({})
+      assert.equal('provider' in out.calls[0].body, false)
+    } finally {
+      usePayRegion.setState({ paddleEnabled: false, region: 'ar' })
+    }
   })
 
   it('Paddle: si cierra el overlay sin pagar, vuelve al carrito sin navegar', async () => {

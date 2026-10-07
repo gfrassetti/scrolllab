@@ -160,9 +160,12 @@ PADDLE_WEBHOOK_SECRET=...      # notification destination → /api/webhooks/padd
 ```
 
 Sin `PADDLE_API_KEY` Paddle queda apagado (todo por Mercado Pago). Con la key
-puesta, el boot de producción **falla** si falta el token o el secreto, si
-`PADDLE_ENV` no es `production` o si la key / el token son de sandbox. El
-default payment link del panel es `https://www.scrolllab.com.ar/checkout/pay`.
+puesta, producción exige el token y el secreto, `PADDLE_ENV=production` y que la
+key y el token sean Live (no de sandbox). **Si algo de eso está mal, el deploy
+NO falla**: Paddle queda apagado, la API y Mercado Pago arrancan igual, el
+motivo sale en el log del arranque (`PADDLE DESACTIVADO (configuración
+inválida): …`) y `GET /api/ready` informa `paddle: "misconfigured"` (`on` / `off`
+en los otros casos). Corregí las variables y redeployá. El default payment link del panel es `https://www.scrolllab.com.ar/checkout/pay`.
 Antes de prender producción: `npm run check:paddle-sandbox` con la key de
 sandbox, y una compra real chica + su reembolso desde el panel.
 

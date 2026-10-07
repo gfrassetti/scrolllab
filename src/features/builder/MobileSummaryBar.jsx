@@ -3,7 +3,7 @@ import { formatPriceFromUsd } from '../../lib/pricing'
 /**
  * Barra fija de mobile: resumen de la composición y atajo al panel.
  */
-export default function MobileSummaryBar({ hasItems, summaryInView, items, t, estimatedPriceUsd, locale, rate, goToCanvas }) {
+export default function MobileSummaryBar({ hasItems, summaryInView, items, t, estimatedPriceUsd, currency, rate, goToCanvas }) {
   return (
     <>
       {hasItems && (
@@ -22,7 +22,7 @@ export default function MobileSummaryBar({ hasItems, summaryInView, items, t, es
                   : t('builder.sectionCountMany')}
               </p>
               <p className="text-title-sm font-medium tracking-[-0.02em]">
-                {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
+                {formatPriceFromUsd(estimatedPriceUsd, currency, rate)}
               </p>
             </div>
             <button

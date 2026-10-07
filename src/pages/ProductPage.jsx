@@ -7,6 +7,7 @@ import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { useFxRate } from '../lib/fx'
 import { formatPriceFromUsd } from '../lib/pricing'
+import { useCurrency } from '../lib/currency'
 import { isProductSku, productPageData } from '../lib/productPages'
 import { startCheckout } from '../lib/startCheckout'
 import { useT } from '../i18n'
@@ -75,7 +76,8 @@ function BuyActions({ data }) {
 function ProductView({ data }) {
   const c = data.copy
   const { rate } = useFxRate()
-  const priceArs = formatPriceFromUsd(data.priceUsd, 'es', rate)
+  const { currency } = useCurrency()
+  const priceLabel = formatPriceFromUsd(data.priceUsd, currency, rate)
 
   // El cuerpo está en español aunque el navegador esté en otro idioma.
   useEffect(() => {
@@ -123,7 +125,7 @@ function ProductView({ data }) {
             ) : null}
 
             <p className="mt-8 text-title-sm font-medium tracking-[-0.02em]">
-              {priceArs ?? c.priceLabel(data.priceUsd)}
+              {priceLabel ?? c.priceLabel(data.priceUsd)}
             </p>
             <p className="mt-2 max-w-[52ch] text-body-sm text-ink/55">{data.priceLine}</p>
 

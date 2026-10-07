@@ -85,22 +85,38 @@ export async function fulfillPaddleTransaction({ transaction: txn, config, expec
       { expose: true },
     )
   }
+  // Alguien pagó y la orden NO se entrega: el webhook lo anotaba en el log y
+  // respondía 200, y nadie se enteraba. Ahora llega un mail (uno por motivo).
+  const mismatch = (reason) => {
+    alertAdmin({
+      kind: 'mismatch',
+      key: `paddle-${txn.id}-${reason.replace(/\W+/g, '-').toLowerCase()}`,
+      title: 'PAGO NO COINCIDE CON LA ORDEN — revisar o reembolsar',
+      lines: [
+        `transacción Paddle ${txn.id} · ${money(txn)} · ${payerOf(txn)}`,
+        `orden ${orderId} espera ${order.total} ${order.currency_id} (${order.provider})`,
+        `motivo: ${reason}`,
+      ],
+      config,
+    })
+    return new HttpError(400, reason)
+  }
   const customOrderId = txn.custom_data?.orderId
   if (customOrderId && String(customOrderId) !== orderId) {
-    throw new HttpError(400, 'Referencia de orden no coincide')
+    throw mismatch('Referencia de orden no coincide')
   }
   if (order.provider !== 'paddle' || order.currency_id !== PADDLE_CURRENCY) {
-    throw new HttpError(400, 'La orden no se cobra con Paddle')
+    throw mismatch('La orden no se cobra con Paddle')
   }
   if (txn.currency_code !== PADDLE_CURRENCY) {
-    throw new HttpError(400, 'Moneda del pago no coincide')
+    throw mismatch('Moneda del pago no coincide')
   }
   if (transactionItemsCents(txn) !== usdCents(order.total)) {
     console.error(
       `checkout paddle MONTO NO COINCIDE order=${orderId} txn=${txn.id} ` +
         `items=${transactionItemsCents(txn)} esperado=${usdCents(order.total)} (centavos)`,
     )
-    throw new HttpError(400, 'Monto del pago no coincide')
+    throw mismatch('Monto del pago no coincide')
   }
 
   const { order: updated, created } = await markOrderPaid({

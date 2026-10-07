@@ -1,11 +1,9 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import { calmReveal } from '../../../lib/motion'
+import { calmReveal, trackPointer } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
-import PaperFrame from './PaperFrame'
-import { usePinnedScrub } from './usePinnedScrub'
-import { heroRoad, closedYards, variants } from './assets/images'
-import { imgAttrs } from '../../../lib/responsiveImage'
+import { BoilOutline, SpeechBubble, TORN_TOP, boilTo, hoverDepth } from './comicKit'
+import { LabScene, PigSitting, WallScene, YardScene } from './WallArt'
 
 const DEFAULT_FACTS = [
   {
@@ -22,246 +20,196 @@ const DEFAULT_FACTS = [
   },
 ]
 
+function Arrow({ flip }) {
+  return (
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#1d1311] shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-95">
+      <svg viewBox="0 0 20 20" className={`h-5 w-5 ${flip ? 'rotate-180' : ''}`} aria-hidden="true">
+        <path d="M12 4 L6 10 L12 16" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  )
+}
+
+/** A paper note with a boiling outline and a stamp, for the side slides. */
+function Note({ fact, stamp }) {
+  return (
+    <div data-note className="relative w-[min(30vw,440px)] max-md:w-[78vw]">
+      <BoilOutline />
+      <div className="relative bg-[#d8d6d0] p-6 text-[#1d1a18] md:p-8" style={{ clipPath: 'polygon(0.6% 1%, 99.4% 0%, 100% 99%, 0% 100%)' }}>
+        <p className="font-hand text-[clamp(1.8rem,3vw,3rem)] leading-[0.9] font-black tracking-[0.01em] uppercase">{fact.title}</p>
+        <hr className="my-4 border-[#1d1a18]/30" />
+        <p className="text-sm leading-relaxed md:text-[15px]">{fact.blurb}</p>
+        <p className="mt-3 text-sm leading-relaxed text-[#1d1a18]/75 md:text-[15px]">{fact.concern}</p>
+        <p className="mt-6 ml-auto w-fit -rotate-6 border-4 border-double border-[#2a2622]/70 px-3 py-1 font-hand text-xl font-black tracking-[0.18em] text-[#2a2622]/70 uppercase">
+          {stamp}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 /**
- * ChapterWorlds — pinned collide reel.
- *
- * Título, stage y fact cards son hijos de una columna flex (no tres bloques
- * `absolute` anclados cada uno desde un borde distinto): eso es lo que hacía
- * que, en una pantalla baja, las fact cards (ancladas abajo) se superpusieran
- * con las fotos del stage (ancladas al 28% desde arriba). Con flex, uno
- * empuja al siguiente — no se pisan en ningún alto de viewport, con o sin
- * movimiento. En calma, `usePinnedScrub` no arma el pin (controla su propio
- * `prefers-reduced-motion`): el fundido de entrada corre aparte, con `calmReveal`.
+ * ChapterWorlds — full width, after the reference: a three-slide carousel
+ * (the lab ← the wall → the yard), with the pig on the middle slide. The scene
+ * drifts with the scroll (parallax) and with the pointer; on the wall the pig
+ * holds still while the bricks move behind it. Two arrows walk the slides; the
+ * side ones carry a note.
  */
 export default function ChapterWorlds({
-  label = 'Chapter 4',
-  headline = 'Headline 1',
   facts = DEFAULT_FACTS,
-  sceneOpen = 'Scene 1',
-  sceneClosed = 'Scene 2',
-  hotspotOpen = 'Hotspot 1',
-  hotspotClosed = 'Hotspot 2',
+  captions = ['Caption 10 — replace with story beat.'],
+  dialogue = 'Dialogue 5 — replace.',
+  stamp = 'Stamp',
+  back = 'Back',
 }) {
   const root = useRef(null)
-  const [openId, setOpenId] = useState(null)
   const reduced = useReducedMotion()
+  const [active, setActive] = useState(1)
+
+  // the slides travel side by side; the active one sits at 0
+  useGSAP(
+    () => {
+      const slides = gsap.utils.toArray('[data-slide]', root.current)
+      gsap.to(slides, {
+        xPercent: (i) => (i - active) * 100,
+        duration: reduced ? 0 : 0.9,
+        ease: 'power3.inOut',
+        overwrite: 'auto',
+      })
+      gsap.fromTo(
+        root.current.querySelectorAll(`[data-slide="${active}"] [data-note]`),
+        { y: 60, rotate: 5, opacity: 0 },
+        { y: 0, rotate: 0, opacity: 1, duration: 0.8, delay: reduced ? 0 : 0.45, ease: 'back.out(1.6)' },
+      )
+    },
+    { scope: root, dependencies: [active, reduced] },
+  )
 
   useGSAP(
     () => {
       if (reduced) return calmReveal('[data-comic-reveal]')
+      const scene = root.current
+      const pin = scene.querySelector('[data-pin]')
+      const caption = scene.querySelector('[data-worlds-caption]')
+      gsap.set(caption, { opacity: 0, y: 20 })
+      gsap.set(scene.querySelector('[data-bubble]'), { scale: 0.5, opacity: 0, transformOrigin: '50% 80%' })
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: scene,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.4,
+          pin,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      })
+      // parallax: the far scene drifts more than the pig
+      tl.fromTo('[data-slide-bg]', { yPercent: 5 }, { yPercent: -5, duration: 4 }, 0)
+      tl.fromTo('[data-pig]', { yPercent: 6 }, { yPercent: -2, duration: 4 }, 0)
+      tl.to(caption, { opacity: 1, y: 0, duration: 0.6, ease: 'back.out(2)' }, 0.3)
+      tl.to(scene.querySelector('[data-bubble]'), { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.8)' }, 0.9)
+      // the next chapter overlaps this one's last screen: hold the picture
+      tl.to({}, { duration: 1.2 }, 4)
+
+      const boil = { f: 0 }
+      tl.fromTo(boil, { f: 0 }, { f: 40, duration: 5.2, ease: 'none', onUpdate: () => boilTo(scene, boil.f) }, 0)
+
+      // pointer: the bricks move, the pig stays; on the side slides the note floats
+      return hoverDepth(scene, [['[data-slide-bg]', -26], ['[data-note]', 10]], { gsap, trackPointer })
     },
     { scope: root, dependencies: [reduced] },
   )
 
-  usePinnedScrub(root, {
-    scrub: 0.4,
-    build: ({ root: el, tl }) => {
-      const head = el.querySelector('[data-worlds-head]')
-      const stage = el.querySelector('[data-stage-worlds]')
-      const openWorld = el.querySelector('[data-world="open"]')
-      const closedWorld = el.querySelector('[data-world="closed"]')
-      const openImg = el.querySelector('[data-world-img="open"]')
-      const closedImg = el.querySelector('[data-world-img="closed"]')
-      const crack = el.querySelector('[data-crack]')
-      const hotspots = gsap.utils.toArray(el.querySelectorAll('[data-hotspot]'))
-      const cards = gsap.utils.toArray(el.querySelectorAll('[data-fact]'))
-      const pulse = gsap.utils.toArray(el.querySelectorAll('[data-pulse]'))
+  const go = (i) => setActive(Math.max(0, Math.min(2, i)))
+  const left = active === 1 ? facts[0].title : active === 2 ? back : null
+  const right = active === 1 ? facts[1].title : active === 0 ? back : null
 
-      // Entrada suave — siempre algo visible (nunca ±55% fuera del overflow)
-      gsap.set(openWorld, { xPercent: -18, rotate: -2, opacity: 0.55 })
-      gsap.set(closedWorld, { xPercent: 18, rotate: 2, opacity: 0.55 })
-      gsap.set(hotspots, { scale: 0.5, opacity: 0 })
-      gsap.set(cards, { y: 48, opacity: 0 })
-      gsap.set(crack, { scaleY: 0, opacity: 0 })
-      gsap.set(pulse, { scale: 0.7, opacity: 0 })
-      gsap.set(stage, { opacity: 1 })
+  const slides = (
+    <>
+      <div data-slide="0" className="absolute inset-0 overflow-hidden will-change-transform" aria-hidden={active !== 0}>
+        <div data-slide-bg className="absolute -inset-[7%]">
+          <LabScene className="absolute inset-0 h-full w-full" />
+        </div>
+        <div className="absolute inset-y-0 right-[6%] flex items-center max-md:inset-x-0 max-md:right-auto max-md:justify-center">
+          <Note fact={facts[0]} stamp={stamp} />
+        </div>
+      </div>
+      <div data-slide="1" className="absolute inset-0 overflow-hidden will-change-transform" aria-hidden={active !== 1}>
+        <div data-slide-bg className="absolute -inset-[7%]">
+          <WallScene className="absolute inset-0 h-full w-full" />
+        </div>
+        <div data-pig className="absolute bottom-[6%] left-1/2 w-[min(32vw,470px)] -translate-x-1/2 max-md:w-[62vw]">
+          <PigSitting className="block h-auto w-full" />
+        </div>
+        <SpeechBubble line={dialogue} className="absolute top-[24%] right-[16%] w-[min(20vw,300px)] max-md:right-[6%] max-md:w-[42vw]" />
+      </div>
+      <div data-slide="2" className="absolute inset-0 overflow-hidden will-change-transform" aria-hidden={active !== 2}>
+        <div data-slide-bg className="absolute -inset-[7%]">
+          <YardScene className="absolute inset-0 h-full w-full" />
+        </div>
+        <div className="absolute inset-y-0 left-[6%] flex items-center max-md:inset-x-0 max-md:left-auto max-md:justify-center">
+          <Note fact={facts[1]} stamp={stamp} />
+        </div>
+      </div>
+    </>
+  )
 
-      tl.fromTo(
-        head,
-        { opacity: 0, y: 28 },
-        { opacity: 1, y: 0, duration: 1 },
-        0,
-      )
+  const arrows = (
+    <>
+      {left && (
+        <button
+          type="button"
+          onClick={() => go(active - 1)}
+          className="group tpl-hit absolute bottom-[6%] left-[3%] z-20 flex items-center gap-3 text-left text-[14px] font-semibold text-white drop-shadow md:text-lg"
+        >
+          <Arrow />
+          <span>{left}</span>
+        </button>
+      )}
+      {right && (
+        <button
+          type="button"
+          onClick={() => go(active + 1)}
+          className="group tpl-hit absolute right-[3%] bottom-[6%] z-20 flex items-center gap-3 text-right text-[14px] font-semibold text-white drop-shadow md:text-lg"
+        >
+          <span>{right}</span>
+          <Arrow flip />
+        </button>
+      )}
+    </>
+  )
 
-      tl.to(
-        openWorld,
-        { xPercent: 0, rotate: -0.6, opacity: 1, duration: 2.2 },
-        0.6,
-      )
-      tl.to(
-        closedWorld,
-        { xPercent: 0, rotate: 0.6, opacity: 1, duration: 2.2 },
-        0.6,
-      )
-      tl.fromTo(
-        openImg,
-        { scale: 1.14, xPercent: -4 },
-        { scale: 1.04, xPercent: 0, duration: 2.2 },
-        0.6,
-      )
-      tl.fromTo(
-        closedImg,
-        { scale: 1.14, xPercent: 4 },
-        { scale: 1.04, xPercent: 0, duration: 2.2 },
-        0.6,
-      )
-      tl.to(crack, { scaleY: 1, opacity: 1, duration: 1.2 }, 2)
-
-      tl.to(hotspots, { scale: 1, opacity: 1, stagger: 0.18, duration: 0.8 }, 2.8)
-      tl.to(pulse, { scale: 1.7, opacity: 0, stagger: 0.18, duration: 1.2 }, 3)
-      tl.to(pulse, { scale: 0.85, opacity: 0.5, duration: 0.01 }, 4.2)
-      tl.to(pulse, { scale: 1.9, opacity: 0, stagger: 0.12, duration: 1.3 }, 4.25)
-
-      tl.to(openImg, { scale: 1.1, xPercent: 2, duration: 2.2 }, 3.8)
-      tl.to(closedImg, { scale: 1.1, xPercent: -2, duration: 2.2 }, 3.8)
-      tl.to(head, { opacity: 0.4, y: -8, duration: 1 }, 4)
-
-      // Cards suben SIN empujar los mundos fuera del viewport
-      tl.to(cards, { y: 0, opacity: 1, stagger: 0.2, duration: 1.2 }, 5.2)
-      tl.to(stage, { yPercent: -6, scale: 0.94, duration: 1.4 }, 5.2)
-    },
-  })
+  if (reduced) {
+    return (
+      <section id="chapter-worlds" ref={root} className="relative bg-[#1a0614] text-white">
+        <p data-comic-reveal className="px-6 pt-16 text-center font-semibold">{captions[0]}</p>
+        <div data-comic-reveal className="relative mt-8 h-[80svh] overflow-hidden">
+          {slides}
+          {arrows}
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
       id="chapter-worlds"
       ref={root}
-      className="relative h-[620vh] bg-[#1a1512] text-white calm:h-auto"
+      className="relative -mt-[100svh] h-[320vh] bg-[#1a0614] text-white"
+      style={{ clipPath: TORN_TOP }}
     >
-      <div
-        data-pin
-        className="relative flex h-svh flex-col justify-center gap-4 overflow-hidden px-4 py-6 calm:h-auto calm:overflow-visible calm:py-16 md:gap-6 md:px-8 md:py-8 md:calm:py-24"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 30%, rgba(232,90,36,0.16), transparent 55%), #1a1512',
-          }}
-        />
-
-        {/* Headline */}
-        <div data-worlds-head data-comic-reveal className="relative z-30 shrink-0 text-center">
-          <p className="mb-2 text-[11px] tracking-[0.28em] text-comic-flare uppercase">
-            {label}
-          </p>
-          <h2 className="mx-auto max-w-3xl font-brico text-[clamp(1.7rem,4vw,3rem)] leading-[0.95] font-extrabold tracking-[-0.03em]">
-            {headline}
-          </h2>
-        </div>
-
-        {/* Stage */}
-        <div
-          data-stage-worlds
-          data-comic-reveal
-          className="relative z-20 mx-auto grid w-full max-w-4xl shrink-0 gap-4 md:grid-cols-2 md:gap-6"
+      <div data-pin className="relative h-svh overflow-hidden">
+        {slides}
+        <p
+          data-worlds-caption
+          className="pointer-events-none absolute inset-x-0 top-[12%] z-20 px-6 text-center text-[15px] font-semibold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] md:text-lg"
         >
-          <span
-            data-crack
-            aria-hidden="true"
-            className="absolute top-[6%] bottom-[6%] left-1/2 z-20 hidden w-px origin-top bg-comic-flare md:block"
-          />
-
-          <div data-world="open" className="relative will-change-transform">
-            <PaperFrame className="!w-full" shadow>
-              <div className="relative h-[min(32vh,240px)] overflow-hidden sm:h-[min(36vh,280px)] md:h-[min(38vh,320px)]">
-                <img
-                  data-world-img="open"
-                  {...imgAttrs(heroRoad, variants)}
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover will-change-transform"
-                  draggable={false}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
-                <p className="absolute top-3 left-3 text-[11px] tracking-[0.25em] text-white/85 uppercase">
-                  {sceneOpen}
-                </p>
-                <span
-                  data-pulse
-                  aria-hidden="true"
-                  className="absolute top-[48%] left-[32%] h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-comic-flare/80"
-                />
-                <button
-                  type="button"
-                  data-hotspot
-                  onClick={() => setOpenId(openId === 'lab' ? null : 'lab')}
-                  className="tpl-hit absolute top-[48%] left-[32%] z-10 max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3"
-                >
-                  {hotspotOpen}
-                </button>
-              </div>
-            </PaperFrame>
-          </div>
-
-          <div data-world="closed" className="relative will-change-transform">
-            <PaperFrame className="!w-full" shadow>
-              <div className="relative h-[min(32vh,240px)] overflow-hidden sm:h-[min(36vh,280px)] md:h-[min(38vh,320px)]">
-                <img
-                  data-world-img="closed"
-                  {...imgAttrs(closedYards, variants)}
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover will-change-transform"
-                  draggable={false}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/25" />
-                <p className="absolute top-3 left-3 text-[11px] tracking-[0.25em] text-white/85 uppercase">
-                  {sceneClosed}
-                </p>
-                <span
-                  data-pulse
-                  aria-hidden="true"
-                  className="absolute top-[44%] right-[20%] h-14 w-14 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-comic-flare/80"
-                />
-                <button
-                  type="button"
-                  data-hotspot
-                  onClick={() => setOpenId(openId === 'yard' ? null : 'yard')}
-                  className="tpl-hit absolute top-[44%] right-[20%] z-10 max-w-[9.5rem] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-comic-flare px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.06em] text-white uppercase shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:max-w-none sm:px-3"
-                >
-                  {hotspotClosed}
-                </button>
-              </div>
-            </PaperFrame>
-          </div>
-        </div>
-
-        {/* Fact cards — mismo ancho que el stage, debajo en la columna flex. */}
-        <div
-          data-comic-reveal
-          className="relative z-30 mx-auto grid w-full max-w-4xl shrink-0 gap-3 md:grid-cols-2 md:gap-4"
-        >
-          {facts.map((fact) => {
-            const active = openId === fact.id
-            return (
-              <article
-                key={fact.id}
-                data-fact
-                className={`border border-white/15 bg-[#f7f4ee] p-4 text-[#2a2622] transition-shadow duration-300 md:p-5 ${
-                  active
-                    ? 'ring-2 ring-comic-flare shadow-[0_12px_40px_rgba(232,90,36,0.25)]'
-                    : ''
-                }`}
-              >
-                <h3 className="mb-1 font-brico text-lg font-bold tracking-[-0.02em] md:text-xl">
-                  {fact.title}
-                </h3>
-                <p className="mb-2 text-xs leading-relaxed text-[#2a2622]/75 md:text-sm">
-                  {fact.blurb}
-                </p>
-                  <p className="text-xs leading-relaxed md:text-sm">
-                    {fact.concern}
-                  </p>
-              </article>
-            )
-          })}
-        </div>
+          {captions[0]}
+        </p>
+        {arrows}
       </div>
     </section>
   )

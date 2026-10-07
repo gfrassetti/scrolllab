@@ -9,14 +9,11 @@ import { useCart } from '../lib/cart'
 import { startCheckout } from '../lib/startCheckout'
 import { useAuth } from '../lib/auth'
 import {
-  CUSTOM_BASE_PRICE_USD,
-  CUSTOM_BASE_SECTIONS,
-  formatPriceFromUsd,
-  isComingSoonSku,
   templatePriceUsd,
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
+import { useCurrency } from '../lib/currency'
 import { fullMotionQuery, prefersReducedMotion } from '../lib/motion'
 import { TEMPLATE_META } from '../features/home/templateMeta.js'
 import HomeHero from '../features/home/HomeHero.jsx'
@@ -43,6 +40,7 @@ export default function TemplatesIndex() {
   const { hash } = useLocation()
   const navigate = useNavigate()
   const { t, locale } = useI18n()
+  const { currency } = useCurrency()
   const { rate } = useFxRate()
   const [introReady, setIntroReady] = useState(false)
   const [buyingSku, setBuyingSku] = useState(null)
@@ -84,13 +82,6 @@ export default function TemplatesIndex() {
     [t],
   )
 
-  const minTemplateUsd = useMemo(() => {
-    const prices = TEMPLATE_META.filter((m) => !isComingSoonSku(m.sku))
-      .map((m) => templatePriceUsd(m.sku))
-      .filter((n) => n != null)
-    return prices.length ? Math.min(...prices) : null
-  }, [])
-
   // Comparación de las 3 formas de usarlo. Copy hardcodeada en ES por ahora
   // (los locale files están en edición por otra sesión); mover a i18n después.
   const ways = [
@@ -103,10 +94,6 @@ export default function TemplatesIndex() {
         ['Te llevás', 'El código, en un ZIP'],
         ['Editás', 'Vos, el código'],
       ],
-      price:
-        minTemplateUsd != null
-          ? `desde ${formatPriceFromUsd(minTemplateUsd, locale, rate)}`
-          : '—',
       to: '#templates',
       cta: 'Ver templates',
     },
@@ -119,11 +106,6 @@ export default function TemplatesIndex() {
         ['Te llevás', 'El código, en un ZIP'],
         ['Editás', 'Vos, el código'],
       ],
-      price: `desde ${formatPriceFromUsd(
-        CUSTOM_BASE_PRICE_USD,
-        locale,
-        rate,
-      )} · ${CUSTOM_BASE_SECTIONS} incl.`,
       to: '/builder',
       cta: 'Abrir el builder',
     },
@@ -136,7 +118,6 @@ export default function TemplatesIndex() {
         ['Te llevás', 'Un <script>, sin bajar código'],
         ['Editás', 'Un panel, sin tocar código'],
       ],
-      price: 'Suscripción · 7 días gratis',
       to: '/lab',
       cta: 'Ver LAB',
     },
@@ -636,7 +617,7 @@ export default function TemplatesIndex() {
         <TemplatesZone
           t={t}
           templates={templates}
-          locale={locale}
+          currency={currency}
           rate={rate}
           addItem={addItem}
           buyingSku={buyingSku}
@@ -647,6 +628,7 @@ export default function TemplatesIndex() {
         <BuilderZone
           t={t}
           locale={locale}
+          currency={currency}
           rate={rate}
           addItem={addItem}
           buyingSku={buyingSku}

@@ -7,7 +7,7 @@ import { formatPriceFromUsd, CUSTOM_BASE_PRICE_USD, CUSTOM_BASE_SECTIONS, format
 /**
  * Zona 02 · Builder: la demo, el CTA para armar la propia y el bundle.
  */
-export default function BuilderZone({ t, locale, rate, addItem, buyingSku, authLoading, buyNow }) {
+export default function BuilderZone({ t, locale, currency, rate, addItem, buyingSku, authLoading, buyNow }) {
   return (
     <>
       {/* Ya viste el catálogo: ahora el otro camino — armar la tuya en vez
@@ -24,7 +24,7 @@ export default function BuilderZone({ t, locale, rate, addItem, buyingSku, authL
           {t('home.builderDemoBody')}
         </p>
         <div className="mt-8">
-          <BuilderDemo key={locale} />
+          <BuilderDemo key={`${locale}-${currency}`} />
         </div>
       </div>
 
@@ -90,12 +90,12 @@ export default function BuilderZone({ t, locale, rate, addItem, buyingSku, authL
             className="mt-4 text-eyebrow uppercase text-bone/50"
           >
             {t('home.builderPrices', {
-              base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, locale, rate),
+              base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, currency, rate),
               included: CUSTOM_BASE_SECTIONS,
               extra: formatNextSectionPrice(
                 CUSTOM_BASE_SECTIONS,
                 false,
-                locale,
+                currency,
                 rate,
               ),
             })}
@@ -139,7 +139,7 @@ export default function BuilderZone({ t, locale, rate, addItem, buyingSku, authL
             className="mt-4 text-eyebrow uppercase text-ink/50"
           >
             {t('home.bundleSaving', {
-              list: formatPriceFromUsd(bundleListPriceUsd(), locale, rate),
+              list: formatPriceFromUsd(bundleListPriceUsd(), currency, rate),
               off: String(bundleDiscountPct()),
             })}
           </p>
@@ -177,7 +177,7 @@ export default function BuilderZone({ t, locale, rate, addItem, buyingSku, authL
           data-cta-bit
           className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
         >
-          {formatPriceFromUsd(BUNDLE_PRICE_USD, locale, rate)}
+          {formatPriceFromUsd(BUNDLE_PRICE_USD, currency, rate)}
         </p>
       </section>
     </>

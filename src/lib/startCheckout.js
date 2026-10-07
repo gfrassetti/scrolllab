@@ -2,6 +2,24 @@ import { api } from './api.js'
 import { markCheckoutIntent } from './cart.js'
 import { trackBeginCheckout } from './gtm.js'
 import { openPaddleCheckout } from './paddleCheckout.js'
+import { usePayRegion, providerForRegion } from './payRegion.js'
+
+/**
+ * Medio de pago vigente (el detectado por ubicación o el que eligió el
+ * comprador en el carrito). Los botones de «Comprar» rápido (ficha del
+ * template, home, builder) saltan el carrito y no tienen selector: heredan
+ * esto. Sin cargar todavía, Mercado Pago (el comportamiento de siempre).
+ */
+function currentProvider() {
+  const { paddleEnabled, region } = usePayRegion.getState()
+  return paddleEnabled ? providerForRegion(region) : 'mercadopago'
+}
+
+/** Idioma del sitio (para los mails de la orden), sin depender del contexto de React. */
+function currentLocale() {
+  if (typeof document === 'undefined') return undefined
+  return document.documentElement.lang?.toLowerCase().startsWith('en') ? 'en' : 'es'
+}
 
 /**
  * Arma el payload que acepta POST /api/checkout (sin precios del cliente).
@@ -38,8 +56,8 @@ export async function startCheckout({
   navigate,
   loginNext = '/cart',
   couponCode,
-  provider = 'mercadopago',
-  locale,
+  provider = currentProvider(),
+  locale = currentLocale(),
 }) {
   const payload = checkoutPayloadFromItems(items)
   if (payload.length === 0) {

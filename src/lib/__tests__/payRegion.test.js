@@ -2,11 +2,12 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   pickRegion,
+  resolveCurrency,
   regionFromCountry,
   regionFromTimeZone,
   providerForRegion,
 } from '../payRegion.js'
-import { formatUsd } from '../pricing.js'
+import { formatUsd, formatPriceFromUsd, formatNextSectionPrice } from '../pricing.js'
 import { couponLinePrice } from '../coupon.js'
 
 /**
@@ -59,6 +60,25 @@ describe('región de pago', () => {
   it('cada región tiene su pasarela', () => {
     assert.equal(providerForRegion('ar'), 'mercadopago')
     assert.equal(providerForRegion('intl'), 'paddle')
+  })
+
+  it('moneda: con Paddle sigue al medio de pago, no al idioma; sin Paddle, la regla de siempre', () => {
+    // Un español (sitio en español) que elige tarjeta ve dólares; un argentino con el sitio en inglés ve pesos.
+    assert.equal(resolveCurrency({ paddleEnabled: true, region: 'intl', locale: 'es' }), 'USD')
+    assert.equal(resolveCurrency({ paddleEnabled: true, region: 'ar', locale: 'en' }), 'ARS')
+    // Sin Paddle no hay cómo cobrar en dólares: EN muestra USD de referencia, ES pesos.
+    assert.equal(resolveCurrency({ paddleEnabled: false, region: 'intl', locale: 'es' }), 'ARS')
+    assert.equal(resolveCurrency({ paddleEnabled: false, region: 'ar', locale: 'en' }), 'USD')
+  })
+
+  it('los precios se formatean en la moneda pedida (y aceptan el idioma de antes)', () => {
+    const RATE = 1500
+    assert.equal(formatPriceFromUsd(149, 'USD', RATE), '$149')
+    assert.match(formatPriceFromUsd(149, 'ARS', RATE), /224\.000/)
+    assert.equal(formatPriceFromUsd(149, 'en', RATE), '$149')
+    assert.equal(formatPriceFromUsd(149, 'es', RATE), formatPriceFromUsd(149, 'ARS', RATE))
+    assert.equal(formatNextSectionPrice(8, false, 'USD', RATE), '$15')
+    assert.match(formatNextSectionPrice(8, false, 'ARS', RATE), /\$\s?\d/)
   })
 
   it('USD: centavos solo si los hay, igual que lo que cobra Paddle con el cupón', () => {

@@ -13,8 +13,7 @@ export default function HowItWorks({ t, howPanels }) {
         className="mt-16 scroll-mt-20 -mx-5 md:mt-24 md:-mx-10"
       >
         <HorizontalPanels
-          chapter="01"
-          total="04"
+          chapter={null}
           label={t('nav.howItWorks')}
           headingBefore={t('home.howTitleBefore')}
           headingEm={t('home.howTitleZip')}

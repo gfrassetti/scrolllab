@@ -3,7 +3,7 @@ import { formatPriceFromUsd } from '../../lib/pricing'
 /**
  * Franja de precio: el estimado de la composición antes de bajar a las columnas.
  */
-export default function BuilderPriceStrip({ t, estimatedPriceUsd, locale, rate, priceHint }) {
+export default function BuilderPriceStrip({ t, estimatedPriceUsd, currency, rate, priceHint }) {
   return (
     <>
       {/* Franja de precio: visible antes de bajar a las columnas, no solo al
@@ -15,7 +15,7 @@ export default function BuilderPriceStrip({ t, estimatedPriceUsd, locale, rate, 
             {t('builder.estimatedPrice')}
           </p>
           <p className="mt-1 text-title-sm font-medium tracking-[-0.02em]">
-            {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
+            {formatPriceFromUsd(estimatedPriceUsd, currency, rate)}
           </p>
           <p className="mt-1 max-w-[42ch] text-body-sm text-ink/55">
             {priceHint}

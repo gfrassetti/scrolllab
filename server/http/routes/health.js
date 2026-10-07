@@ -49,6 +49,13 @@ export function createHealthRouter({ config }) {
         mongo: mongoOk,
         storage: storageOk,
         mpMock: config.mpMock,
+        // Estado de Paddle (sin detalles): `misconfigured` = variables PADDLE_*
+        // inválidas en producción, Paddle quedó apagado (el motivo está en el log).
+        paddle: config.paddle?.error
+          ? 'misconfigured'
+          : config.paddle?.enabled
+            ? 'on'
+            : 'off',
         auth: authDiagnostics(config),
       })
     }),

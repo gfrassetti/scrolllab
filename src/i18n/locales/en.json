@@ -19,6 +19,7 @@
     "langEs": "ES",
     "langEn": "EN",
     "langLabel": "Language",
+    "currencyLabel": "Currency",
     "plan": "Plan"
   },
   "lab": {
@@ -271,13 +272,13 @@
     "step2Title": "Pick or build",
     "step2Body": "A ready-made model or a page you build yourself.",
     "step3Title": "Pay",
-    "step3Body": "Pay with Mercado Pago. Your order shows up under My purchases.",
+    "step3Body": "Pay with Mercado Pago (pesos) or by card (US dollars). Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
     "howHostedNote": "Just need a single section, not a whole page? Some are served hosted with a <script>: edit them online, on a subscription.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
-    "paymentsBody": "You pay with Mercado Pago. We never see or store your card details.",
+    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Paddle. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
     "zip1": "The full editable project",
     "zip2": "Sections from the model or what you built",
@@ -1104,14 +1105,14 @@
   "privacy": {
     "eyebrow": "Legal",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective September 28, 2026",
+    "effectiveDate": "Effective October 7, 2026",
     "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, download a product, or write to us about a Studio project.",
     "sections": [
       {
         "title": "Data we collect",
         "items": [
           "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
-          "Purchase and order data: products, amount, currency, payment status, Mercado Pago identifiers, and download count.",
+          "Purchase and order data: products, amount, currency, payment status, Mercado Pago or Paddle identifiers (depending on how you pay), and download count.",
           "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies.",
           "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it.",
           "If you write to us through the contact or Studio form: your name, email, message, and the project type you selected."
@@ -1130,7 +1131,7 @@
       },
       {
         "title": "Third-party services",
-        "body": "We use Google for authentication, Mercado Pago to process payments, Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Paddle.com, our online reseller (Merchant of Record), for payments from other countries in US dollars: Paddle receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (paddle.com/legal/privacy), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
       },
       {
         "title": "Cookies and local storage",
@@ -1238,10 +1239,11 @@
   "pay": {
     "payAr": "Pay with Mercado Pago →",
     "payIntl": "Pay by card (USD) →",
-    "switchToIntlLead": "Paying from outside Argentina?",
-    "switchToIntl": "Pay in US dollars by card",
-    "switchToArLead": "Paying from Argentina?",
-    "switchToAr": "Pay in pesos with Mercado Pago",
+    "methodLegend": "Payment method",
+    "methodMp": "Mercado Pago",
+    "methodMpNote": "in Argentine pesos",
+    "methodCard": "Card",
+    "methodCardNote": "in US dollars · via Paddle",
     "trustIntl": "Card payment via Paddle · license included",
     "intlTaxNote": "Paddle processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
     "confirming": "Confirming your payment…",

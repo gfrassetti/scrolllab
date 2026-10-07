@@ -25,7 +25,7 @@ export const TEMPLATE_PRICES_USD = Object.freeze({
   velocity: 149,
   fizz: 189,
   atelier: 229,
-  comic: 149,
+  comic: 189,
   unity: 189,
   ratio: 269,
   atrium: 189,

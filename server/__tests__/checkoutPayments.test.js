@@ -175,6 +175,19 @@ describe('Pagos de templates (MP simulado)', () => {
     )
   })
 
+  it('un pago aprobado por otro monto que la orden: no se entrega y le avisa al dueño (antes solo quedaba en el log)', async () => {
+    const agent = await loginAs('monto-mp@test.com')
+    const { orderId, pref } = await checkout(agent, [{ sku: 'chapters' }])
+    const payment = mp.pay(pref.id, { amount: 1000 })
+    assert.equal((await webhook('payment', payment.id)).status, 200)
+    await waitFor(() => alerts('NO COINCIDE').some((m) => m.body.text.includes(`pago MP ${payment.id}`)), 'el aviso de monto distinto')
+    const mail = alerts('NO COINCIDE').find((m) => m.body.text.includes(`pago MP ${payment.id}`))
+    assert.match(mail.body.text, /Monto del pago no coincide/)
+    assert.match(mail.body.text, new RegExp(`orden ${orderId} espera`))
+    assert.match(mail.body.text, /monto-mp@test\.com/)
+    assert.equal((await fileDb.findOrderById(orderId)).status, 'pending')
+  })
+
   it('un pago cuya orden ya no existe avisa con el pago, el monto y el mail para entregar o reembolsar', async () => {
     const agent = await loginAs('late-cash@test.com')
     const { orderId, pref } = await checkout(agent, [{ sku: 'fizz' }])

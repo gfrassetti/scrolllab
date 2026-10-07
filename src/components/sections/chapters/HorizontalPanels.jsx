@@ -305,9 +305,11 @@ export default function HorizontalPanels({
       {/* Pinneada, la sección queda en el tope del viewport: el rótulo baja
           lo que mide la nav fija para no pisarse con ella. */}
       <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0 calm:md:static calm:md:mx-0 calm:md:px-10">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
-          Chapter {chapter} / {total}
-        </p>
+        {chapter != null && (
+          <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
+            Chapter {chapter} / {total}
+          </p>
+        )}
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
 

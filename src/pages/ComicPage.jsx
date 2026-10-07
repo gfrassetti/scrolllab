@@ -23,8 +23,8 @@ export default function ComicPage() {
 
         <main>
           <ChapterDusty />
-          <ChapterBond />
           <ChapterFork />
+          <ChapterBond />
           <ChapterWorlds />
         </main>
 
