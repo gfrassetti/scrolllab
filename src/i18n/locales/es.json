@@ -1236,13 +1236,12 @@
     "label": "Ver las demos con animaciones"
   },
   "pay": {
-    "legend": "Desde dónde pagás",
-    "arTitle": "Argentina",
-    "arDetail": "Mercado Pago · en pesos",
-    "intlTitle": "Otro país",
-    "intlDetail": "Tarjeta · en dólares (USD)",
     "payAr": "Pagar con Mercado Pago →",
     "payIntl": "Pagar con tarjeta (USD) →",
+    "switchToIntlLead": "¿Pagás desde otro país?",
+    "switchToIntl": "Pagá en dólares con tarjeta",
+    "switchToArLead": "¿Pagás desde Argentina?",
+    "switchToAr": "Pagá en pesos con Mercado Pago",
     "trustIntl": "Pago con tarjeta vía Paddle · licencia incluida",
     "intlTaxNote": "Paddle procesa el pago en USD y, antes de pagar, te muestra los impuestos de tu país (IVA o sales tax) si corresponden.",
     "confirming": "Confirmando el pago…",

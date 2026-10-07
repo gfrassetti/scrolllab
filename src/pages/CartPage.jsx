@@ -12,7 +12,7 @@ import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
-import PaymentRegionPicker from '../components/PaymentRegionPicker'
+import PayRegionSwitch from '../components/PayRegionSwitch'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 
 /**
@@ -220,17 +220,9 @@ export default function CartPage() {
               })}
             </ul>
 
-            {paddleEnabled && (
-              <PaymentRegionPicker
-                region={region}
-                onChange={setRegion}
-                disabled={busy}
-                className="mt-8"
-              />
-            )}
-
             <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
-              <p className="min-w-0 text-sm">
+              <div className="min-w-0">
+              <p className="text-sm">
                 {coupon && discount > 0 ? (
                   <>
                     <span className="block text-ink/60">
@@ -256,6 +248,15 @@ export default function CartPage() {
                   </span>
                 )}
               </p>
+              {paddleEnabled && (
+                <PayRegionSwitch
+                  region={region}
+                  onChange={setRegion}
+                  disabled={busy}
+                  className="mt-3"
+                />
+              )}
+              </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
                 <button
                   type="button"

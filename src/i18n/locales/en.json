@@ -1236,13 +1236,12 @@
     "label": "Show demos with animations"
   },
   "pay": {
-    "legend": "Where are you paying from",
-    "arTitle": "Argentina",
-    "arDetail": "Mercado Pago · in pesos",
-    "intlTitle": "Another country",
-    "intlDetail": "Card · in US dollars",
     "payAr": "Pay with Mercado Pago →",
     "payIntl": "Pay by card (USD) →",
+    "switchToIntlLead": "Paying from outside Argentina?",
+    "switchToIntl": "Pay in US dollars by card",
+    "switchToArLead": "Paying from Argentina?",
+    "switchToAr": "Pay in pesos with Mercado Pago",
     "trustIntl": "Card payment via Paddle · license included",
     "intlTaxNote": "Paddle processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
     "confirming": "Confirming your payment…",

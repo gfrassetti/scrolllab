@@ -8,7 +8,7 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { openPaddleCheckout } from '../lib/paddleCheckout'
-import PaymentRegionPicker from './PaymentRegionPicker'
+import PayRegionSwitch from './PayRegionSwitch'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
 const tierIndex = (planId) => TIER_ORDER.indexOf(String(planId).replace('hosted_', ''))
@@ -609,15 +609,6 @@ export default function HostedPlans() {
               {t('lab.planResubscribeHint', { date: fmtDate(currentPeriodEnd) })}
             </p>
           )}
-          {paddleEnabled && choosing && (
-            <PaymentRegionPicker
-              region={region}
-              onChange={setRegion}
-              disabled={!!busy}
-              name="lab-pay-region"
-              className="mt-6"
-            />
-          )}
           {activePlan && !canResubscribe && (
             <>
               <p className="mt-6 text-body-sm text-ink/55">
@@ -818,6 +809,14 @@ export default function HostedPlans() {
               )
             })}
           </div>
+          {paddleEnabled && choosing && user && (
+            <PayRegionSwitch
+              region={region}
+              onChange={setRegion}
+              disabled={!!busy}
+              className="mt-4"
+            />
+          )}
         </>
       )}
     </section>

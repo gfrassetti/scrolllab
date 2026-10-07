@@ -8,28 +8,29 @@ Managed Payments, más caro y con menos países).
 
 ## Cuándo se usa cada una
 
-Un selector en el carrito y en los planes de LAB, no un modal ni un cambio
-silencioso:
+**Sola, por ubicación.** El comprador no elige: toca «Pagar» y listo.
 
-| Opción | Pasarela | Moneda | Precios que se ven |
+| Ubicación detectada | Pasarela | Moneda | Precios que se ven |
 |---|---|---|---|
-| **Pago desde Argentina** | Mercado Pago | ARS (cotización del día) | ARS |
-| **Pago internacional** | Paddle | USD | USD de lista |
+| Argentina | Mercado Pago | ARS (cotización del día) | ARS |
+| Cualquier otro país (Latinoamérica incluida: el MP argentino no cobra con medios de Chile o México) | Paddle | USD | USD de lista |
 
-- **Preselección**: `GET /api/checkout/methods` devuelve el país del request
-  (`x-vercel-ip-country` / `cf-ipcountry`) y qué pasarelas están activas. Sin
-  país, el cliente mira la zona horaria (`America/Argentina/*` → Argentina).
-  Todo lo que no es Argentina (incluida Latinoamérica: el MP argentino no cobra
-  con medios de Chile o México) preselecciona **internacional**.
-- **El comprador decide**: un clic cambia la opción y queda guardada
-  (`localStorage` `scrolllab-pay-region`). La detección solo elige el default.
-- **Un solo botón de pago** cuyo texto dice adónde va.
-- Sin Paddle configurado el selector no aparece y todo sigue como hoy.
+- **Detección**: `GET /api/checkout/methods` devuelve el país del request
+  (`x-vercel-ip-country` / `cf-ipcountry`); sin país, la zona horaria del
+  navegador (`America/Argentina/*` → Argentina).
+- **Un solo botón** que dice adónde va («Pagar con Mercado Pago →» / «Pagar con
+  tarjeta (USD) →»). Sin modal: preguntar justo antes de pagar es fricción.
+- **Salida discreta** (`PayRegionSwitch`): una línea de texto bajo el total —
+  «¿Pagás desde otro país? Pagá en dólares con tarjeta» (o al revés) — para los
+  casos en que la ubicación engaña: un extranjero en Argentina (MP suele
+  rechazar su tarjeta) o alguien con VPN. Si la usa, queda guardado
+  (`localStorage` `scrolllab-pay-region`). Igual en los planes de LAB.
+- Sin Paddle configurado no aparece nada y todo sigue por Mercado Pago.
 
 ## Flujo — compra del market y del builder
 
 ```
-Carrito (región intl)
+Carrito (ubicación fuera de Argentina)
   └─ POST /api/checkout { items, couponCode, provider: 'paddle', locale }
        ├─ precios del servidor en USD (cupón descontado en centavos)
        ├─ Order { provider: 'paddle', currency_id: 'USD', total (USD) }
