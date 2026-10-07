@@ -142,6 +142,20 @@ describe('LAB con Paddle: devolución de cuotas', () => {
     await waitFor(() => alerts('DEVOLUCIÓN DEL PRIMER COBRO').length >= 1, 'el aviso al dueño')
   })
 
+  it('si Paddle activa la prueba antes de tiempo (origin subscription_update), ese es el primer cobro', async () => {
+    const agent = await loginAs('pd-activa@test.com')
+    const out = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'paddle' })
+    const { txn, sub } = pd.pay(out.body.transactionId)
+    await paddleWebhook('transaction.completed', txn)
+    await paddleWebhook('subscription.created', sub)
+    const early = pd.renew(sub.id)
+    early.origin = 'subscription_update'
+    await paddleWebhook('transaction.completed', early)
+    assert.equal((await fileDb.findSubscriptionById(out.body.subscriptionId)).firstChargeId, early.id)
+    await paddleWebhook('adjustment.updated', pd.adjust(early.id))
+    assert.equal(pd.subscriptions.get(sub.id).status, 'canceled')
+  })
+
   it('devolver una renovación: la suscripción sigue', async () => {
     const { agent, psub, charge } = await subscribedAndCharged('pd-renov@test.com')
     const second = await charge()

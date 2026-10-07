@@ -346,6 +346,12 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 4. `POST /api/checkout` (`provider`) creates Order + MP preference, o la transacción de Paddle (overlay), o mock URL.
 5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/paddle`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en; un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
 6. `/account` → signed download token → `GET /api/download/:token` (TTL + max 10 downloads).
+7. Reembolsos y Botón de arrepentimiento (`/arrepentimiento`): lo que cumple la política
+   (`src/domain/policy.js`: compra sin descargar en 14 días; LAB, 14 días desde el alta con la
+   prueba adentro, solo el primer cobro) se devuelve solo por la API de la pasarela
+   (`server/services/autoRefund.js`; sin sesión, con un link de confirmación por mail). El webhook
+   corta la orden o da de baja LAB, lo anota en el libro (`/admin`) y manda «Te devolvimos el
+   dinero». Runbook en [`docs/paddle.md`](docs/paddle.md).
 
 LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
 

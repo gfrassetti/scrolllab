@@ -102,28 +102,51 @@ Paddle pide, publicadas en el sitio, Términos, Privacidad y una **Política de
 reembolsos con un plazo de entre 14 y 90 días** (sin «todas las ventas son
 finales»). Está en `/legal/refunds` (es/en), enlazada desde el pie del home, el
 carrito, LAB y los Términos. El plazo es una sola constante: `REFUND_DAYS` en
-`src/domain/policy.js` (14, el mínimo); los textos usan `{{days}}`. Alcance:
-templates, bundle y builder **solo si no se descargó el ZIP** (después, solo por
-defecto técnico o no ser lo descripto), y **cada cobro** de LAB sin condiciones,
-con Mercado Pago o con Paddle; el Estudio queda afuera (cotización aparte).
+`src/domain/policy.js` (14, el mínimo); los textos usan `{{days}}`. Igual en
+Mercado Pago y en Paddle; el Estudio queda afuera (cotización aparte).
 
-- Elegibilidad: `refundEligibility(order)` (mismo archivo). Cuenta desde
-  `paidAt` y mira `downloadCount`, que sube cuando el **archivo** se baja (no al
-  pedir el link). `/api/orders` la devuelve como `refund`; «Mis compras» muestra
-  la fecha límite y avisa que descargar cierra el reembolso.
-- **Botón de arrepentimiento** (Res. 424/2020, link en el pie del home):
-  `/arrepentimiento` → `POST /api/withdrawals`. Público, sin cuenta: guarda la
-  solicitud (`Withdrawal`), devuelve un código `ARR-XXXXXX`, se lo manda por mail
-  al cliente y te avisa a vos con el veredicto (ELEGIBLE / NO elegible y por qué /
-  SIN ORDEN). La orden se asocia solo si el mail coincide con la cuenta.
+- **Templates, bundle y builder**: 14 días desde la compra **si no se descargó
+  el ZIP** (`refundEligibility`: cuenta desde `paidAt` y mira `downloadCount`,
+  que sube cuando el archivo se baja, no al pedir el link). Descargado: solo por
+  defecto técnico o no ser lo descripto (lo decide el dueño).
+- **LAB** (decisión del dueño, 2026-10-07): 14 días **desde que se suscribe, con
+  la prueba gratis adentro** (`labRefundEligibility`). Días 1–7 gratis
+  (arrepentirse = cancelar, no hay cobro); día 8 el primer cobro; hasta el día
+  14 se puede devolver **ese** cobro (`firstChargeId`) y la suscripción se da de
+  baja en el momento. Las renovaciones no se devuelven: cancelar frena los
+  próximos cobros y conserva el acceso hasta fin del período.
 
-Cómo se opera:
-- Paddle: el comprador lo pide en paddle.net o a nosotros; se reembolsa desde el
-  panel de Paddle. Una orden reembolsada se corta sola (webhook `adjustment.*`).
-- Mercado Pago: se reembolsa desde el panel de MP; el webhook corta la orden.
-- LAB: el webhook solo te **avisa** por mail del reembolso; dar de baja la
-  suscripción y bajar el plan es un paso manual hasta que se automatice.
-- Cambiar el plazo: `REFUND_DAYS` + revisar con tu abogado / contador.
+### Botón de arrepentimiento (Res. 424/2020) — cómo se devuelve
+
+`/arrepentimiento` (link en el pie del home) → `POST /api/withdrawals`
+(`server/services/refunds.js`). Público y sin cuenta. Busca la compra del mail
+(orden por número; sin número, la suscripción de LAB o la última compra) y:
+
+1. **Corresponde** (compra sin descargar en plazo; LAB en la prueba o con el
+   primer cobro en plazo):
+   - pedido con la **sesión de la cuenta dueña** → se ejecuta ya
+     (`server/services/autoRefund.js`): Mercado Pago `POST /v1/payments/:id/refunds`,
+     Paddle `POST /adjustments`; LAB en la prueba → baja sin cobro.
+   - **sin sesión** → mail al dueño de la compra con un link firmado de 48 h
+     («Confirmar la devolución»); al tocarlo se ejecuta una sola vez. Nadie que
+     sepa un mail ajeno puede pedir la devolución.
+2. **No corresponde** (descargó, fuera de plazo, renovación de LAB, sin compra) →
+   te llega el aviso con el veredicto y lo decidís vos; el cliente recibe su
+   código `ARR-XXXXXX` por mail.
+
+Después de la devolución (automática o la que hagas a mano en el panel) todo
+sigue solo por el webhook: la orden se corta (sin descargas) o LAB se da de baja,
+queda en el libro de reembolsos (`/admin` → «Reembolsos») y al cliente le llega
+«Te devolvimos el dinero». Si la API no puede (p. ej. saldo insuficiente en MP),
+la solicitud queda `manual` y te avisa: la devolvés vos. Si Paddle todavía no
+completó el cobro, el barrido de 5 min reintenta hasta 48 h.
+
+**A mano** (casos que no corresponden solos, o un defecto técnico):
+- Mercado Pago: Actividad → la venta → «Devolver dinero».
+- Paddle: Transactions → la transacción → «Refund».
+El resto (corte, baja, libro, mail) pasa igual.
+
+Cambiar el plazo: `REFUND_DAYS` + revisar los textos legales.
 
 ### De dónde sale la plata de un reembolso
 
@@ -139,8 +162,17 @@ Cómo se opera:
   elige en Tu negocio → Costos: a 14 días o más, la plata de una venta queda
   retenida justo durante el plazo de reembolso (y la comisión es menor).
 - Probado contra los sandbox reales: `npm run check:paddle-e2e -- --only=reembolsos`
-  (aprobación real de Paddle, ~15 min) y `npm run check:mp-refund-sandbox`
-  (credenciales de PRUEBA de MP).
+  y `--only=arrepentimiento` (aprobación real de Paddle, ~15 min cada uno);
+  Mercado Pago: `npm run check:mp-sandbox` (suscripciones, pausa, preferences) y,
+  opcional, `npm run check:mp-refund-sandbox` (pide pagar un link a mano).
+
+### Mails al cliente
+
+Compra (recibo con el descuento de primera compra), pago rechazado (diferido 10
+min), devolución hecha, arrepentimiento (código / link de confirmación), LAB
+(bienvenida, fin de prueba, cobro, cuota rechazada, plan suspendido al terminar
+la gracia, cambio de plan, baja). Cada uno en es/en y una sola vez por evento;
+`server/__tests__/mailMatrix.test.js` verifica que salgan bien escritos.
 
 ## Mails
 

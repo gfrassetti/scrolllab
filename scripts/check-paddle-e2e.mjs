@@ -18,6 +18,8 @@
  *  5. LAB: alta con 7 días de prueba, plan activo en USD, cambio de plan
  *     (Paddle acepta el PATCH) y baja programada.
  *  6. LAB sin sync del navegador: la activan los eventos reales de Paddle.
+ *  6c. Arrepentimiento: el botón devuelve solo (template con sesión, builder con
+ *     el link del mail, primer cobro de LAB con baja), con la aprobación real.
  *  6b. LAB ciclo: primera cuota, subir con la diferencia (misma cuenta que MP,
  *     cargo único), bajar y volver a subir sin pagar dos veces, pausa,
  *     reanudación con cobro y baja.
@@ -331,8 +333,8 @@ async function snap(page, name) {
 
 // ——— escenarios —————————————————————————————————————————————————————
 
-async function openCartAndPay(buyer) {
-  await fillCart(buyer.page, [{ sku: 'chapters', title: 'CHAPTERS' }])
+async function openCartAndPay(buyer, items = [{ sku: 'chapters', title: 'CHAPTERS' }]) {
+  await fillCart(buyer.page, items)
   await buyer.page.goto(`${BASE}/cart`)
   await buyer.page.getByRole('button', { name: /pay by card/i }).click()
 }
@@ -470,9 +472,9 @@ function ownerAlerts(needle) {
   return fs.readFileSync(apiLog, 'utf8').split('\n').filter((l) => l.includes(needle))
 }
 
-async function buyChapters(label) {
+async function buyChapters(label, items) {
   const buyer = await newBuyer(label)
-  await openCartAndPay(buyer)
+  await openCartAndPay(buyer, items)
   await payInOverlay(buyer.page, GOOD_CARD)
   await buyer.page.waitForURL(/\/account\?purchase=1/, { timeout: 90_000 })
   const [order] = await myOrders(buyer)
@@ -831,6 +833,112 @@ async function scenarioLabCycle() {
   )
 }
 
+/**
+ * El Botón de arrepentimiento contra Paddle real: lo que cumple la política se
+ * devuelve SOLO (la app le pide el reembolso a Paddle por la API).
+ * - Template comprado y sin descargar, pedido desde su cuenta: Paddle lo
+ *   recibe y, cuando lo aprueba, la orden se corta y le llega el mail.
+ * - Builder pedido sin sesión: link firmado por mail → confirmar → devolución.
+ * - LAB con el primer cobro en plazo: devolución de ese cobro y baja inmediata.
+ * El sandbox aprueba los reembolsos solo cada ~10 min: se espera la aprobación
+ * real y se pasa su webhook.
+ */
+async function scenarioWithdrawal() {
+  // ——— template, desde su cuenta ———
+  const T = await buyChapters('arr-tpl')
+  const txT = await completed(T.order.paddleTransactionId)
+  const resT = await T.buyer.call('POST', '/api/withdrawals', { email: T.buyer.email, name: 'E2E Buyer', order: T.order.id })
+  const rowT = () => JSON.parse(fs.readFileSync(path.join(dbDir, 'withdrawals.json'), 'utf8')).find((w) => w.code === resT.body.code)
+  check(
+    'arrepentimiento: template sin descargar, desde su cuenta → la app le pide el reembolso a Paddle sola',
+    resT.status === 201 && ['refunded', 'pending'].includes(resT.body.outcome) && /ajuste Paddle adj_/.test(rowT()?.note || ''),
+    `${resT.body.outcome} · ${rowT()?.status} · ${rowT()?.note}`,
+  )
+  const adjT = (rowT()?.note || '').match(/adj_\w+/)?.[0]
+
+  // ——— builder, sin sesión: link por mail y confirmar ———
+  const recipe = ['chapters/HeroKinetic', 'nocturne/StickyWordCycle', 'chapters/BigNumbers']
+  const B = await buyChapters('arr-builder', [{ sku: 'custom', title: 'Composición', recipe }])
+  check('arrepentimiento: compra de builder paga en USD', B.order?.status === 'paid' && B.order.currency_id === 'USD', `${B.order?.status} · ${B.order?.total} ${B.order?.currency_id}`)
+  await completed(B.order.paddleTransactionId)
+  const resB = await fetch(`${API}/api/withdrawals`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email: B.buyer.email, name: 'E2E Buyer', order: B.order.id.slice(-8) }),
+  }).then((r) => r.json())
+  check('arrepentimiento: sin sesión no se devuelve nada todavía (pide confirmar por mail)', resB.outcome === 'check_email' && (await myOrders(B.buyer))[0].status === 'paid', resB.outcome)
+  // El link del mail (los mails están apagados en esta corrida: se firma igual que el servidor).
+  const { signWithdrawalToken } = await import('../server/services/autoRefund.js')
+  const secret = process.env.DOWNLOAD_SECRET
+  const confirmB = secret
+    ? await fetch(`${API}/api/withdrawals/confirm`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ token: signWithdrawalToken(resB.code, secret) }),
+      }).then((r) => r.json())
+    : null
+  const rowB = JSON.parse(fs.readFileSync(path.join(dbDir, 'withdrawals.json'), 'utf8')).find((w) => w.code === resB.code)
+  check(
+    'arrepentimiento: al confirmar el link, la app le pide a Paddle el reembolso del builder',
+    !!confirmB && ['refunded', 'pending'].includes(confirmB.outcome) && /adj_/.test(rowB?.note || ''),
+    `${confirmB?.outcome} · ${rowB?.note}`,
+  )
+  const adjB = (rowB?.note || '').match(/adj_\w+/)?.[0]
+
+  // ——— LAB: primer cobro en plazo ———
+  const L = await newBuyer('arr-lab')
+  await labSubscribe(L)
+  await waitFor(async () => (await L.call('GET', '/api/subscriptions/me')).body.plan === 'hosted_pro', 'el plan Pro', 90_000)
+  const subRow = await waitFor(
+    async () => JSON.parse(fs.readFileSync(path.join(dbDir, 'subscriptions.json'), 'utf8')).filter((r) => r.paddleSubscriptionId).at(-1),
+    'la suscripción',
+  )
+  await pd('POST', `/subscriptions/${subRow.paddleSubscriptionId}/activate`)
+  const firstCharge = await waitFor(async () => (await chargesOf(subRow.paddleSubscriptionId))[0] || null, 'el primer cobro', 300_000)
+  await replay([['transaction.completed', firstCharge]])
+  await completed(firstCharge.id)
+  const resL = await L.call('POST', '/api/withdrawals', { email: L.email, name: 'E2E Buyer' })
+  const rowL = JSON.parse(fs.readFileSync(path.join(dbDir, 'withdrawals.json'), 'utf8')).find((w) => w.code === resL.body.code)
+  check(
+    'arrepentimiento: LAB con el primer cobro en plazo → la app pide el reembolso de ese cobro',
+    ['refunded', 'pending'].includes(resL.body.outcome) && /adj_/.test(rowL?.note || ''),
+    `${resL.body.outcome} · ${rowL?.note}`,
+  )
+  const adjL = (rowL?.note || '').match(/adj_\w+/)?.[0]
+
+  // ——— la aprobación REAL de Paddle y su webhook ———
+  const ids = [adjT, adjB, adjL].filter(Boolean)
+  console.log(`   esperando que Paddle apruebe ${ids.length} reembolsos del botón (hasta 16 min)…`)
+  const approved = await waitFor(async () => {
+    const list = await pd('GET', `/adjustments?id=${ids.join(',')}`)
+    return list.length === ids.length && list.every((a) => a.status !== 'pending_approval') ? list : null
+  }, 'la aprobación de Paddle', 16 * 60_000)
+  const byId = Object.fromEntries(approved.map((a) => [a.id, a]))
+  await replay(approved.map((a) => ['adjustment.updated', a]))
+
+  const [tAfter] = await myOrders(T.buyer)
+  check(
+    'arrepentimiento: template devuelto completo (impuestos incluidos) y orden cortada',
+    byId[adjT]?.status === 'approved' && byId[adjT].totals.total === txT.details.totals.grand_total && tAfter.status === 'refunded',
+    `${byId[adjT]?.status} · ${byId[adjT]?.totals.total} de ${txT.details.totals.grand_total} · ${tAfter.status}`,
+  )
+  const [bAfter] = await myOrders(B.buyer)
+  check('arrepentimiento: builder devuelto y orden cortada', byId[adjB]?.status === 'approved' && bAfter.status === 'refunded', `${byId[adjB]?.status} · ${bAfter.status}`)
+  const ps = await pd('GET', `/subscriptions/${subRow.paddleSubscriptionId}`)
+  const meL = (await L.call('GET', '/api/subscriptions/me')).body
+  check(
+    'arrepentimiento: LAB devuelto, dado de baja en Paddle y en la app',
+    byId[adjL]?.status === 'approved' && byId[adjL].totals.total === firstCharge.details.totals.grand_total && ps.status === 'canceled' && meL.plan === 'free',
+    `${byId[adjL]?.status} · ${byId[adjL]?.totals.total} · Paddle ${ps.status} · app ${meL.plan}`,
+  )
+  check(
+    'arrepentimiento: el libro de reembolsos tiene las tres devoluciones',
+    ['order', 'order', 'lab'].every((k, i) =>
+      JSON.parse(fs.readFileSync(path.join(dbDir, 'refunds.json'), 'utf8')).some((r) => r.externalId === `paddle-${ids[i]}` && r.kind === k),
+    ),
+  )
+}
+
 async function scenarioLabWebhookOnly() {
   const buyer = await newBuyer('labwh')
   await labSubscribe(buyer, { block: true })
@@ -898,6 +1006,7 @@ try {
   await run('LAB', scenarioLab)
   await run('LAB webhook', scenarioLabWebhookOnly)
   await run('LAB ciclo', scenarioLabCycle)
+  await run('arrepentimiento', scenarioWithdrawal)
 } finally {
   // Limpieza: las suscripciones de prueba se cancelan ya (no cobran nunca).
   try {

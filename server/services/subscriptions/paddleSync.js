@@ -363,9 +363,12 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   }
   const paidAt = new Date(txn.billed_at || txn.updated_at || Date.now())
   if (!sub.lastPaidAt || paidAt > new Date(sub.lastPaidAt)) sub.lastPaidAt = paidAt
-  // El primer cobro (el único que se puede devolver por arrepentimiento). La
-  // diferencia de una subida de plan no cuenta como cobro de período.
-  if (!sub.firstPaidAt && txn.origin !== 'subscription_update' && txn.origin !== 'subscription_charge') {
+  // El primer cobro (el único que se puede devolver por arrepentimiento): el
+  // primero con monto de una suscripción sin pagos. Puede venir con cualquier
+  // `origin` (fin de la prueba = `subscription_recurring`; activada antes de
+  // tiempo = `subscription_update`); la diferencia de un cambio de plan nunca es
+  // el primero, porque solo existe con un período ya pago.
+  if (firstCharge && !sub.firstPaidAt) {
     sub.firstPaidAt = paidAt
     sub.firstChargeId = String(txn.id)
   }
