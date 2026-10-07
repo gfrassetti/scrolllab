@@ -345,7 +345,7 @@ export function LookoutBg({ className = '' }) {
 /** The dog from behind, watching them go. It never moves. */
 export function DogBack({ className = '' }) {
   return (
-    <svg viewBox="0 0 520 620" className={className} aria-hidden="true">
+    <svg viewBox="0 -24 520 644" className={className} aria-hidden="true">
       <defs>
         <Dots id="db-dots" />
       </defs>

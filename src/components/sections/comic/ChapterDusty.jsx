@@ -138,8 +138,8 @@ function DogPanel({ line }) {
           <LookoutBg className="absolute inset-0 h-full w-full" />
         </div>
       </div>
-      <div className="absolute inset-x-0 -top-[40%] bottom-0 overflow-hidden">
-        <div data-dog className="absolute bottom-0 left-[10%] w-[27%] will-change-transform max-md:left-[4%] max-md:w-[44%]">
+      <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
+        <div data-dog className="absolute bottom-0 left-[8%] w-[37%] will-change-transform max-md:left-[2%] max-md:w-[64%]">
           <DogBack className="block h-auto w-full" />
         </div>
       </div>
