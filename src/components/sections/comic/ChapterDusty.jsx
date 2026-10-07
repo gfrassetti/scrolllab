@@ -256,7 +256,7 @@ export default function ChapterDusty({
       // bottom); x / y / scale carry it from the lower-left corner onto the road.
       const truckW = () => sideTruck.offsetWidth
       // it starts just outside the left edge, a little below its final level
-      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.7)
+      const START_X = () => -(pin.clientWidth / 2 + truckW() * 0.72)
       // the farm's road, in the pin: the scene is cropped with `slice`
       const roadY = () => {
         const W = pin.clientWidth
@@ -266,7 +266,7 @@ export default function ChapterDusty({
       }
       // y that puts the wheels on that road (they sit 10 % of the truck's height above its bottom edge)
       const END_Y = () => roadY() + 0.102 * ((truckW() * 470) / 900) - pin.clientHeight
-      gsap.set(sideTruck, { x: START_X, y: () => END_Y() + pin.clientHeight * 0.14, scale: 1.4, transformOrigin: '50% 100%' })
+      gsap.set(sideTruck, { x: START_X, y: () => END_Y() + pin.clientHeight * 0.24, scale: 1.4, transformOrigin: '50% 100%' })
       gsap.set([buddies, trio], { opacity: 0 })
 
       tl.to(curtain, { yPercent: 0, duration: 1.7, ease: 'power2.out' }, 5.0)
@@ -288,24 +288,54 @@ export default function ChapterDusty({
       // and always moving toward the road. The instant its hood touches the first square the last
       // scene starts to grow, and both finish together: the truck on the farm road.
       const TRUCK_AT = 9.8
-      const TRUCK_FOR = 6.6
-      const hood = 0.44 * truckW() // front of the hood, from the truck's center, at scale 1
-      const touch = rectIn(tiles[0]).left - hood - pin.clientWidth / 2
-      const u = Math.min(0.8, Math.max(0.3, 1 - touch / START_X()))
-      const HIT = TRUCK_AT + TRUCK_FOR * u
-      // x, y and scale move together, in a straight line, up to the first square;
-      // from there it only keeps rolling to the middle
-      tl.to(sideTruck, { x: 0, duration: TRUCK_FOR, ease: 'none' }, TRUCK_AT)
+      const LINEAR_FOR = 6.6 // the straight run, if it never sped up
+      const RUSH_FOR = 1.7 // the last stretch, when both speed up
+      const tw = truckW()
+      const hood = 0.44 * tw // front of the hood, from the truck's center, at scale 1
+      const centerX = pin.clientWidth / 2
+      const first = rectIn(tiles[0])
+      const x0 = START_X()
+      const xTouch = first.left - hood - centerX // the hood touches the first square
+      const xPast = first.left + first.w - hood - centerX // the hood reaches its far edge
+      const along = (x) => Math.min(0.9, Math.max(0.15, (x0 - x) / x0)) // share of the straight run
+      const HIT = TRUCK_AT + LINEAR_FOR * along(xTouch)
+      const PAST = TRUCK_AT + LINEAR_FOR * Math.max(along(xPast), along(xTouch) + 0.08)
+      const END = PAST + RUSH_FOR
+      // a speed-up that carries on from the straight run: `lead` is the share of
+      // the stretch already covered at the start's pace (0 = from a standstill)
+      const rush = (lead) => (t) => lead * t + (1 - lead) * t * t
+
+      // x, y and scale move together in a straight line up to the first square
       tl.to(sideTruck, { y: END_Y, duration: HIT - TRUCK_AT, ease: 'none' }, TRUCK_AT)
       tl.to(sideTruck, { scale: 1, duration: HIT - TRUCK_AT, ease: 'none' }, TRUCK_AT)
-      tl.to(farm, { clipPath: 'inset(0px 0px 0px 0px)', duration: TRUCK_FOR - (HIT - TRUCK_AT), ease: 'power1.inOut' }, HIT)
-      tl.to(farmScene, { scale: 1, duration: TRUCK_FOR - (HIT - TRUCK_AT), ease: 'power1.inOut' }, HIT)
-      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: 2.2, ease: 'power2.in' }, HIT + 0.4)
-      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: 1.8 }, HIT + 0.4)
-      tl.to(ink[1], { color: '#fff', duration: 1.0 }, HIT + 2.6)
-      tl.to(curtain, { opacity: 0, duration: 0.6 }, TRUCK_AT + TRUCK_FOR + 0.4)
+      // x keeps the same pace across the first square, then speeds up into the farm
+      const pace = (xTouch - x0) / (HIT - TRUCK_AT) // px per unit
+      const xAt = (t) => x0 + pace * (t - TRUCK_AT)
+      tl.to(sideTruck, { x: xAt(PAST), duration: PAST - TRUCK_AT, ease: 'none' }, TRUCK_AT)
+      const lead = Math.min(1, Math.max(0.1, (pace * RUSH_FOR) / (0 - xAt(PAST))))
+      tl.to(sideTruck, { x: 0, duration: RUSH_FOR, ease: rush(lead) }, PAST)
+
+      // the farm starts to grow as the hood touches the first square, slowly, and
+      // takes off together with the truck
+      const farmP = { v: 0 }
+      const applyFarm = () => {
+        const r = slotRect()
+        const W = pin.clientWidth
+        const H = pin.clientHeight
+        const k = 1 - farmP.v
+        farm.style.clipPath = `inset(${r.top * k}px ${(W - r.left - r.w) * k}px ${(H - r.top - r.h) * k}px ${r.left * k}px)`
+        gsap.set(farmScene, { scale: 0.7 + 0.3 * farmP.v })
+      }
+      const SLOW = 0.18
+      tl.to(farmP, { v: SLOW, duration: PAST - HIT, ease: 'none', onUpdate: applyFarm }, HIT)
+      const farmLead = Math.min(1, Math.max(0.05, ((SLOW / (PAST - HIT)) * RUSH_FOR) / (1 - SLOW)))
+      tl.to(farmP, { v: 1, duration: RUSH_FOR, ease: rush(farmLead), onUpdate: applyFarm }, PAST)
+      tl.to(tiles.slice(0, 2), { opacity: 0, x: (i) => (i ? 60 : -90), duration: RUSH_FOR + 0.6, ease: 'power2.in' }, PAST - 0.2)
+      tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: RUSH_FOR + 0.4 }, PAST - 0.2)
+      tl.to(ink[1], { color: '#fff', duration: 0.9 }, END - 0.9)
+      tl.to(curtain, { opacity: 0, duration: 0.6 }, END + 0.3)
       // a beat to look at the finished scene
-      tl.to({}, { duration: 1.6 }, TRUCK_AT + TRUCK_FOR + 0.8)
+      tl.to({}, { duration: 1.6 }, END + 0.6)
     },
     { scope: root, dependencies: [reduced] },
   )
