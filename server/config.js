@@ -151,6 +151,32 @@ export function loadPaddleConfig(env = process.env, prod = isProd) {
 }
 
 /**
+ * La config de Paddle para el arranque. En desarrollo un error de configuración
+ * tira (se ve y se arregla en el momento). En **producción** Paddle es una
+ * integración opcional: una variable mal puesta (clave de sandbox, falta el
+ * secreto…) NO puede tumbar la API entera y, con ella, los pagos por Mercado
+ * Pago. Entonces Paddle queda apagado, el motivo sale fuerte en el log del
+ * arranque y en `GET /api/ready` (`paddle: "misconfigured"`), y el resto
+ * arranca igual.
+ * @param {NodeJS.ProcessEnv} [env]
+ * @param {boolean} [prod]
+ * @param {(msg: string) => void} [log]
+ */
+export function loadPaddleConfigSafe(env = process.env, prod = isProd, log = console.error) {
+  try {
+    return loadPaddleConfig(env, prod);
+  } catch (err) {
+    if (!prod) throw err;
+    const reason = err instanceof Error ? err.message : String(err);
+    log(
+      `PADDLE DESACTIVADO (configuración inválida): ${reason}. ` +
+        "El resto de la API arranca; corregí las variables PADDLE_* en Railway y redeployá.",
+    );
+    return { ...loadPaddleConfig({}, prod), error: reason };
+  }
+}
+
+/**
  * Parseo y validación central de env.
  * En producción falla el boot si faltan secretos, Mongo o flags inseguros.
  */
@@ -243,7 +269,7 @@ export function loadConfig() {
     );
   }
 
-  const paddle = loadPaddleConfig();
+  const paddle = loadPaddleConfigSafe();
 
   const emailEnabled = bool(
     "EMAIL_ENABLED",

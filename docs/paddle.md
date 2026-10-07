@@ -146,7 +146,11 @@ hay que tocar nada en el panel de Paddle.
 
 En producción, con `PADDLE_API_KEY` puesta: exige client token y secreto,
 `PADDLE_ENV=production`, y que los prefijos de la key y del token coincidan con
-el entorno (una key de sandbox en producción no arranca).
+el entorno. Si algo no cumple (p. ej. una key de sandbox en producción), **Paddle
+queda apagado pero la API arranca igual** — un error de configuración de una
+integración opcional no puede tumbar los pagos por Mercado Pago—: el motivo sale
+en el log (`PADDLE DESACTIVADO (configuración inválida): …`) y `/api/ready`
+responde `paddle: "misconfigured"`. En desarrollo el mismo error sí tira.
 
 ### En el panel de Paddle (sandbox primero)
 

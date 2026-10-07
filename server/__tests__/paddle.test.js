@@ -1,6 +1,7 @@
 import { describe, it, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
+import { spawnSync } from 'node:child_process'
 import {
   verifyPaddleSignature,
   buildOrderTransactionBody,
@@ -13,7 +14,7 @@ import {
   paddleRequest,
   PaddleError,
 } from '../services/paddle.js'
-import { loadPaddleConfig } from '../config.js'
+import { loadPaddleConfig, loadPaddleConfigSafe } from '../config.js'
 import { requestCountry } from '../http/routes/checkout.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import {
@@ -235,6 +236,122 @@ describe('loadPaddleConfig', () => {
     assert.equal(loadPaddleConfig(live, true).apiBase, 'https://api.paddle.com')
     assert.throws(() => loadPaddleConfig({ ...live, PADDLE_WEBHOOK_SECRET: '' }, true), /WEBHOOK/)
     assert.throws(() => loadPaddleConfig({ ...live, PADDLE_CLIENT_TOKEN: '' }, true), /CLIENT_TOKEN/)
+  })
+})
+
+describe('loadPaddleConfigSafe (el arranque nunca cae por Paddle)', () => {
+  const sandbox = {
+    PADDLE_API_KEY: 'pdl_sdbx_apikey_x',
+    PADDLE_CLIENT_TOKEN: 'test_x',
+    PADDLE_WEBHOOK_SECRET: 'whsec',
+  }
+  const live = {
+    PADDLE_ENV: 'production',
+    PADDLE_API_KEY: 'pdl_live_apikey_x',
+    PADDLE_CLIENT_TOKEN: 'live_x',
+    PADDLE_WEBHOOK_SECRET: 'whsec',
+  }
+
+  it('producción con claves de sandbox: Paddle apagado, motivo en el log, sin tirar', () => {
+    const logs = []
+    const c = loadPaddleConfigSafe(sandbox, true, (m) => logs.push(m))
+    assert.equal(c.enabled, false)
+    assert.equal(c.mock, false)
+    assert.match(c.error, /production/)
+    assert.equal(logs.length, 1)
+    assert.match(logs[0], /PADDLE DESACTIVADO/)
+    assert.match(logs[0], /PADDLE_ENV=production es obligatorio/)
+  })
+
+  it('producción: cualquier variable mal puesta apaga Paddle (key/token de otro entorno, falta el secreto, mock)', () => {
+    const cases = [
+      { ...live, PADDLE_API_KEY: 'pdl_sdbx_apikey_x' },
+      { ...live, PADDLE_CLIENT_TOKEN: 'test_x' },
+      { ...live, PADDLE_WEBHOOK_SECRET: '' },
+      { ...live, PADDLE_CLIENT_TOKEN: '' },
+      { ...live, PADDLE_ENV: 'staging' },
+      { PADDLE_MOCK_ENABLED: 'true' },
+    ]
+    for (const env of cases) {
+      const c = loadPaddleConfigSafe(env, true, () => {})
+      assert.equal(c.enabled, false, JSON.stringify(env))
+      assert.ok(c.error, JSON.stringify(env))
+    }
+  })
+
+  it('producción bien configurada: Paddle prendido y sin error; sin variables: apagado sin error', () => {
+    const logs = []
+    const on = loadPaddleConfigSafe(live, true, (m) => logs.push(m))
+    assert.equal(on.enabled, true)
+    assert.equal(on.error, undefined)
+    assert.equal(on.apiBase, 'https://api.paddle.com')
+    const off = loadPaddleConfigSafe({}, true, (m) => logs.push(m))
+    assert.equal(off.enabled, false)
+    assert.equal(off.error, undefined)
+    assert.deepEqual(logs, [])
+  })
+
+  it('en desarrollo un error de configuración sí tira (se arregla en el momento)', () => {
+    assert.throws(() => loadPaddleConfigSafe({ ...sandbox, PADDLE_API_KEY: 'pdl_live_apikey_x' }, false, () => {}), /sandbox/)
+  })
+})
+
+describe('arranque en producción con Paddle mal configurado (el fallo de Railway)', () => {
+  // El deploy falló porque quedaron claves de sandbox en Railway: la config tiraba
+  // y el healthcheck nunca pasaba. Ahora el proceso levanta igual, sin Paddle.
+  const prodEnv = {
+    NODE_ENV: 'production',
+    MONGODB_URI: 'mongodb://127.0.0.1:27017/x',
+    MP_ACCESS_TOKEN: 'APP_USR-fake',
+    MP_WEBHOOK_SECRET: 'whsec_mp',
+    GOOGLE_CLIENT_ID: 'id',
+    GOOGLE_CLIENT_SECRET: 'secret',
+    GOOGLE_CALLBACK_URL: 'https://www.example.com/api/auth/google/callback',
+    CLIENT_URL: 'https://www.example.com',
+    API_PUBLIC_URL: 'https://www.example.com',
+    STORAGE_DIR: '/tmp/orders',
+    SESSION_SECRET: 'prod-session-secret-with-more-than-24-chars',
+    DOWNLOAD_SECRET: 'prod-download-secret-with-more-than-24-chars',
+  }
+  const boot = (extra) => {
+    const res = spawnSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        "const { loadConfig } = await import('./server/config.js'); const c = loadConfig(); console.log(JSON.stringify({ enabled: c.paddle.enabled, error: c.paddle.error || null, mp: !!c.mpAccessToken }))",
+      ],
+      { env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, ...prodEnv, ...extra }, encoding: 'utf8' },
+    )
+    return { status: res.status, out: res.stdout.trim().split(String.fromCharCode(10)).at(-1), err: res.stderr }
+  }
+
+  it('claves de sandbox en producción: la API arranca, Paddle queda apagado y el log dice por qué', () => {
+    const r = boot({
+      PADDLE_API_KEY: 'pdl_sdbx_apikey_xxxxxxxxxxxxxxxx',
+      PADDLE_CLIENT_TOKEN: 'test_xxxxxxxxxxxxxxxx',
+    })
+    assert.equal(r.status, 0, r.err)
+    assert.deepEqual(JSON.parse(r.out), { enabled: false, error: 'PADDLE_ENV=production es obligatorio en producción', mp: true })
+    assert.match(r.err, /PADDLE DESACTIVADO/)
+  })
+
+  it('sin variables de Paddle: arranca, apagado y sin ruido', () => {
+    const r = boot({})
+    assert.equal(r.status, 0, r.err)
+    assert.deepEqual(JSON.parse(r.out), { enabled: false, error: null, mp: true })
+    assert.doesNotMatch(r.err, /PADDLE/)
+  })
+
+  it('claves Live completas: Paddle prendido', () => {
+    const r = boot({
+      PADDLE_ENV: 'production',
+      PADDLE_API_KEY: 'pdl_live_apikey_xxxxxxxxxxxxxxxx',
+      PADDLE_CLIENT_TOKEN: 'live_xxxxxxxxxxxxxxxx',
+      PADDLE_WEBHOOK_SECRET: 'pdl_ntfset_xxxxxxxx',
+    })
+    assert.equal(r.status, 0, r.err)
+    assert.deepEqual(JSON.parse(r.out), { enabled: true, error: null, mp: true })
   })
 })
 
