@@ -6,7 +6,6 @@ const DEFAULT_CHAPTERS = [
   { id: 'fork', label: 'Chapter 2' },
   { id: 'bond', label: 'Chapter 3' },
   { id: 'worlds', label: 'Chapter 4' },
-  { id: 'tally', label: 'Chapter 5' },
 ]
 
 /**
