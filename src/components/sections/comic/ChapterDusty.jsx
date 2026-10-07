@@ -7,6 +7,7 @@ import PaperFrame from './PaperFrame'
 import RoadHero from './RoadHero'
 import SideTruck from './SideTruck'
 import { CanyonScene, FarmScene, FenceScene } from './Vignettes'
+import { BigPig, DogBack, DogTail, FarmerHands, GateScene, LookoutBg, PigPanelBg } from './ArrivalArt'
 import { closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -15,6 +16,9 @@ const CAPTIONS = [
   'Caption 2 — replace with story beat.',
   'Caption 3 — replace with story beat.',
   'Caption 4 — replace with story beat.',
+  'Caption 5 — replace with story beat.',
+  'Caption 6 — replace with story beat.',
+  'Caption 7 — replace with story beat.',
 ]
 
 /**
@@ -44,6 +48,106 @@ const PAPER = {
     "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.011 0.02' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.42  0 0 0 0 0.41  0 0 0 0.9 -0.18'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
 }
 
+/**
+ * A ragged white outline drawn around a panel, a little outside its picture.
+ * Three versions: the timeline swaps them as you scroll, so the paper cut
+ * "boils" like hand-drawn animation.
+ */
+const BOIL = [11, 23, 37].map((seed) => {
+  let a = seed
+  const rand = () => {
+    a = (a * 16807) % 2147483647
+    return a / 2147483647
+  }
+  const pts = []
+  const jag = (base) => base + (rand() - 0.5) * 2.6
+  for (let i = 0; i <= 12; i += 1) pts.push([-3 + i * (106 / 12), jag(-4)])
+  for (let i = 1; i <= 4; i += 1) pts.push([jag(103), -4 + i * (108 / 4)])
+  for (let i = 11; i >= 0; i -= 1) pts.push([-3 + i * (106 / 12), jag(104)])
+  for (let i = 3; i >= 1; i -= 1) pts.push([jag(-3), -4 + i * (108 / 4)])
+  return `M${pts.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(' L')} Z`
+})
+
+// the picture itself is cut a little crooked, like a clipping
+const PANEL_CLIP = 'polygon(0.4% 1.6%, 99.6% 0%, 100% 98.6%, 0% 100%)'
+
+function BoilOutline() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+    >
+      <path
+        data-boil
+        d={BOIL[0]}
+        fill="none"
+        stroke="rgba(255,255,255,0.95)"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  )
+}
+
+/** The pig is lifted out of its panel: night behind, the farmer's hands, the dog's tail. */
+function PigPanel() {
+  return (
+    <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:aspect-[1.45/1] max-md:w-[92vw]">
+      <BoilOutline />
+      <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
+        <PigPanelBg className="absolute inset-0 h-full w-full" />
+      </div>
+      {/* the pig is clipped only at the bottom: its head rises over the top of the frame */}
+      <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
+        <div data-pig className="absolute bottom-0 left-[14%] w-[40%] will-change-transform max-md:left-[8%] max-md:w-[62%]">
+          <BigPig className="block h-auto w-full" />
+        </div>
+      </div>
+      <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
+        <div data-hands className="absolute inset-0 will-change-transform">
+          <FarmerHands className="absolute inset-0 h-full w-full" />
+        </div>
+        <div data-tail-wrap className="absolute right-[5%] -bottom-[6%] w-[10%] will-change-transform max-md:w-[16%]">
+          <div data-dog-tail className="origin-bottom">
+            <DogTail className="block h-auto w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** The dog watches the farmer walk the pig to the barn. The dog stays still; the farm pans. */
+function DogPanel({ line }) {
+  return (
+    <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:aspect-[1.45/1] max-md:w-[92vw]">
+      <BoilOutline />
+      <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
+        <div data-lookout className="absolute inset-y-0 -left-[2%] w-[112%] will-change-transform">
+          <LookoutBg className="absolute inset-0 h-full w-full" />
+        </div>
+      </div>
+      <div className="absolute bottom-0 left-[10%] w-[27%] max-md:left-[4%] max-md:w-[44%]">
+        <DogBack className="block h-auto w-full" />
+      </div>
+      {/* the speech bubble */}
+      <div data-bubble className="absolute -bottom-[16%] left-[48%] w-[25%] will-change-transform max-md:left-[46%] max-md:w-[50%]">
+        <svg viewBox="0 0 400 240" className="block h-auto w-full drop-shadow-[0_10px_24px_rgba(30,20,20,0.25)]" aria-hidden="true">
+          <path
+            d="M70 50 C120 10 250 0 320 30 C380 56 400 120 380 170 C356 226 270 244 190 236 C110 228 30 200 14 140 C2 100 30 72 70 50Z"
+            fill="#fbfaf7"
+          />
+        </svg>
+        <p className="absolute inset-0 flex items-center justify-center px-[14%] text-center font-brico text-[clamp(13px,1.5vw,22px)] leading-tight font-bold text-[#1d1a18]">
+          {line}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 const LAYER_ZOOM = { sky: 1.04, far: 1.08, peak: 1.12, hills: 1.22, road: 1.34, shrubs: 1.55, fore: 1.7 }
 
 /** Small connective words ("a", "of") are set small, like a hand-lettered cover. */
@@ -53,6 +157,7 @@ export default function ChapterDusty({
   eyebrow = 'Eyebrow 1',
   title = 'A TALE OF ROAD AND DUST',
   onomatopoeia = 'VROOM',
+  bubble = 'Dialogue 1 — replace.',
   captions = CAPTIONS,
 }) {
   const root = useRef(null)
@@ -346,8 +451,84 @@ export default function ChapterDusty({
       tl.to(root.current.querySelector('[data-trio-frame]'), { opacity: 0, duration: RUSH_FOR + 0.4 }, PAST - 0.2)
       tl.to(ink[1], { color: '#fff', duration: 0.9 }, END - 0.9)
       tl.to(curtain, { opacity: 0, duration: 0.6 }, END + 0.3)
-      // a beat to look at the finished scene
-      tl.to({}, { duration: 1.6 }, END + 0.6)
+      // Act 5 — the arrival. The moment the truck stops, the gate scene rises over
+      // the farm (the farm drifts up behind it, slower), and its line comes in.
+      const gate = root.current.querySelector('[data-gate]')
+      const gateScene = root.current.querySelector('[data-gate-scene]')
+      const gatePair = root.current.querySelector('[data-gate-pair]')
+      const curtain2 = root.current.querySelector('[data-curtain-2]')
+      const pigPanel = root.current.querySelector('[data-panel-pig]')
+      const dogPanel = root.current.querySelector('[data-panel-dog]')
+      const pig = root.current.querySelector('[data-pig]')
+      const hands = root.current.querySelector('[data-hands]')
+      const tailWrap = root.current.querySelector('[data-tail-wrap]')
+      const lookout = root.current.querySelector('[data-lookout]')
+      const bubbleEl = root.current.querySelector('[data-bubble]')
+      const boils = q('[data-boil]')
+      gsap.set(gate, { yPercent: 100 })
+      gsap.set(gateScene, { yPercent: -30 })
+      gsap.set(gatePair, { y: 70 })
+      gsap.set(curtain2, { yPercent: 106 })
+      gsap.set([pigPanel, dogPanel], { y: () => pin.clientHeight * 1.1 })
+      gsap.set(pig, { yPercent: 70 })
+      gsap.set(hands, { yPercent: -45 })
+      gsap.set(tailWrap, { xPercent: 160 })
+      gsap.set(bubbleEl, { opacity: 0, scale: 0.6, y: 30, transformOrigin: '50% 80%' })
+      gsap.set(ink[2], { color: '#fff' })
+      gsap.to(root.current.querySelector('[data-dog-tail]'), {
+        rotate: 14,
+        duration: 0.36,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+      })
+
+      const G = END + 0.2
+      tl.to(gate, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, G)
+      tl.to(gateScene, { yPercent: 0, duration: 1.6, ease: 'power2.out' }, G)
+      tl.to(gatePair, { y: 0, duration: 2.2, ease: 'power2.out' }, G + 0.2)
+      tl.to([farm, sideTruck.parentElement], { yPercent: -14, duration: 1.6, ease: 'power2.out' }, G)
+      tl.to(ink[1], { opacity: 0, duration: 0.4 }, G)
+      tl.to(ink[2], { opacity: 1, y: 0, duration: 0.7 }, G + 1.2)
+
+      // Act 6 — paper rises again; the pig is pulled up out of its panel, faster
+      // than the panel itself, the hands come down and the dog's tail swings in.
+      const P = G + 2.8
+      tl.to(curtain2, { yPercent: 0, duration: 1.4, ease: 'power2.out' }, P)
+      tl.to(ink[2], { opacity: 0, y: -16, duration: 0.5 }, P + 0.5)
+      tl.to(pigPanel, { y: 0, duration: 1.3, ease: 'power3.out' }, P + 0.8)
+      tl.to(pig, { yPercent: 0, duration: 0.9, ease: 'power3.out' }, P + 1.2)
+      tl.to(hands, { yPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.4)
+      tl.to(tailWrap, { xPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.5)
+      tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
+
+      // Act 7 — straight on: the next panel comes up and pushes the pig away. The
+      // dog holds still while the farm pans behind it; the bubble pops up.
+      const D = P + 3.6
+      tl.to(pigPanel, { y: () => -pin.clientHeight * 1.1, duration: 1.5, ease: 'power2.inOut' }, D)
+      tl.to(dogPanel, { y: 0, duration: 1.5, ease: 'power2.inOut' }, D)
+      tl.to(ink[3], { opacity: 0, y: -16, duration: 0.5 }, D)
+      tl.fromTo(lookout, { xPercent: 0 }, { xPercent: -9, duration: 4.2, ease: 'none' }, D)
+      tl.to(ink[4], { opacity: 1, y: 0, duration: 0.7 }, D + 1.3)
+      tl.to(bubbleEl, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'back.out(1.8)' }, D + 1.9)
+      const FIN = D + 4.4
+
+      // the paper cut "boils": the outline swaps shape as you scroll
+      const boil = { f: 0 }
+      tl.fromTo(
+        boil,
+        { f: 0 },
+        {
+          f: (FIN - P) * 7,
+          duration: FIN - P,
+          ease: 'none',
+          onUpdate: () => {
+            const d = BOIL[Math.floor(boil.f) % BOIL.length]
+            boils.forEach((path) => path.setAttribute('d', d))
+          },
+        },
+        P,
+      )
     },
     { scope: root, dependencies: [reduced] },
   )
@@ -394,6 +575,20 @@ export default function ChapterDusty({
             lines={[captions[3]]}
           />
         </div>
+        <div data-comic-reveal className="mx-auto mt-6 max-w-4xl px-5 md:px-10">
+          <PaperFrame className="h-full !w-full">
+            <div className="relative aspect-[16/9] overflow-hidden">
+              <GateScene className="absolute inset-0 h-full w-full" />
+            </div>
+            <p className="bg-[#f7f4ee] p-6 text-sm leading-relaxed text-[#2a2622]/75 md:p-8">{captions[4]}</p>
+          </PaperFrame>
+        </div>
+        <div data-comic-reveal className="mt-20 flex flex-col items-center gap-24 bg-[#c3c1bd] px-4 py-24" style={PAPER}>
+          <p className="max-w-2xl text-center font-semibold text-[#1b1a18]">{captions[5]}</p>
+          <PigPanel />
+          <p className="mt-6 max-w-2xl text-center font-semibold text-[#1b1a18]">{captions[6]}</p>
+          <DogPanel line={bubble} />
+        </div>
       </section>
     )
   }
@@ -402,7 +597,7 @@ export default function ChapterDusty({
     <section
       id="chapter-dusty"
       ref={root}
-      className="relative h-[960vh] bg-[#1a1512] text-white"
+      className="relative h-[1400vh] bg-[#1a1512] text-white"
     >
       <div data-pin className="relative h-svh overflow-hidden">
         <div className="absolute inset-0">
@@ -501,10 +696,38 @@ export default function ChapterDusty({
             </div>
           </div>
 
+          {/* the arrival: the gate scene rises over the farm */}
+          <div data-gate aria-hidden="true" className="pointer-events-none absolute inset-0 z-[47] overflow-hidden will-change-transform">
+            <div data-gate-scene className="absolute inset-0 will-change-transform">
+              <GateScene className="absolute inset-0 h-full w-full" />
+            </div>
+          </div>
+
+          {/* a second torn paper curtain, for the two panels */}
+          <div
+            data-curtain-2
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -top-9 -bottom-2 z-[48] will-change-transform"
+            style={{ filter: 'drop-shadow(0 -8px 14px rgba(20,12,8,0.4))' }}
+          >
+            <div className="h-full w-full" style={{ ...PAPER, clipPath: TORN_TOP }} />
+          </div>
+
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[30%] z-[49] flex justify-center">
+            <div data-panel-pig className="will-change-transform">
+              <PigPanel />
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 top-[30%] z-[50] flex justify-center">
+            <div data-panel-dog className="will-change-transform">
+              <DogPanel line={bubble} />
+            </div>
+          </div>
+
           {/* black ink on the paper: later it turns white over the farm */}
-          <div className="pointer-events-none absolute inset-x-0 top-[10%] z-[45] flex justify-center px-6 md:top-[9%]">
+          <div className="pointer-events-none absolute inset-x-0 top-[10%] z-[60] flex justify-center px-6 md:top-[9%]">
             <div className="relative h-24 w-full max-w-3xl text-center md:h-20">
-              {captions.slice(2, 4).map((text) => (
+              {captions.slice(2, 7).map((text) => (
                 <p
                   key={text}
                   data-ink
