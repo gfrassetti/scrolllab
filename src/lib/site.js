@@ -43,9 +43,14 @@ export const SITE_URL = 'https://www.scrolllab.com.ar'
  * y, en español, "plantillas web scroll / parallax". Se calcó ese vocabulario
  * ("plantillas web con scroll animado", "parallax", "scroll suave") sin nombrar
  * librerías ni usar "scrollytelling" afuera de `keywords`.
+ * Título (2026-10-07, el dueño no quedó conforme con "con scroll animado"):
+ * vuelve "storytelling" al título — ya era el término plain-language elegido
+ * el 2026-09-28 (ver arriba) para reemplazar "scrollytelling", solo que no
+ * había llegado al título. La descripción y `keywords` (vocabulario de
+ * competencia) no cambian, solo el título.
  */
 export const SITE_SEO = {
-  title: 'Scroll Lab — Plantillas web con scroll animado | Estudio web',
+  title: 'Scroll Lab — Plantillas web storytelling | Estudio web',
   description:
     'Plantillas web con scroll animado, parallax y scroll suave, con el código fuente. Armá la tuya en el builder o pedinos un sitio a medida.',
   keywords:

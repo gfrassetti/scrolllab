@@ -753,6 +753,79 @@ viewports) + `npm run check`.
 
 ---
 
+## `frame-sizing: content-height` nativo (2026-10) — implementado, parcial a propósito
+
+Chrome 154 (shippeó ~2026-09) puede autodimensionar un iframe sin postMessage.
+Implementado como progressive enhancement puro — **el puente por postMessage
+sigue siendo quien manda en el 100% de los casos**, nunca se lo reemplazó:
+
+- `embed/frame/index.html` — `<meta name="responsive-embedded-sizing"
+  content="allow-origins=*">` en el `<head>` (tiene que ser HTML estático).
+- `embed/loader/loader.js` — `SUPPORTS_FRAME_SIZING` via
+  `CSS.supports('frame-sizing', 'content-height')`, calculado una vez. Con
+  soporte: el iframe arranca sin `height:0` explícito (el trap: un height
+  explícito, aunque sea 0, siempre le gana al sizing nativo) y con
+  `frame-sizing:content-height` en su lugar. Sin soporte: cero cambios, el
+  string es byte a byte el de antes.
+- `embed/frame/main.jsx` — **sin cambios funcionales**, solo un comentario en
+  `postHeight()`. Ver el porqué abajo.
+
+### Por qué no se llama a ningún `requestResize()`
+
+El brief original (de una sesión anterior, sin Chrome 154 para verificar)
+daba por hecho un `window.requestResize()` para recalcular después del
+`load`. **Releyendo el explainer primario completo** (no un resumen — el
+`.md` crudo, `w3c/csswg-drafts` → `css-sizing-4/responsive-iframes-explainer.md`)
+esa API **no existe hoy**: figura textual bajo "Future extensions" — *"A
+JavaScript API **could be added in the future**..."* — no como algo
+implementado. Agregar una llamada guardada (`typeof window.requestResize ===
+'function'`) habría sido código muerto hoy, siempre `false`, para una función
+que ni siquiera tiene nombre confirmado en la spec todavía.
+
+### La implicancia real: el sizing nativo es "one-shot" al `load`
+
+El explainer lo dice explícito: *"The 'one-shot' (only at load time) sizing
+... Subsequent changes to content, styling or layout of the embedded
+document do not affect the iframe sizing."* Sin una API de recálculo, el
+alto nativo se fija en el `load` del documento del frame y nunca más.
+
+`embed/frame/index.html` carga `main.jsx` como módulo, y `main()` ahí es
+async: hace `fetch` a `/api/embed/:key/config` y **recién con la respuesta**
+renderea la sección (`render(h(Section, config.props), root)`). El `load`
+del frame puede (y en la práctica, bastante seguido, va a) disparar con
+`#root` todavía vacío — el sizing nativo mediría ~0, no el alto real.
+Cuando eso pasa, el puente por postMessage lo corrige igual que siempre
+(`scrolllab:height` → `iframe.style.height`, que gana sobre el sizing
+nativo). Si el fetch de la config le gana a las fuentes de Google (que sí
+frenan el `load`), el iframe puede arrancar ya en su alto final — beneficio
+condicional, nunca negativo. Sacarle más jugo a esto en serio (ej.: inyectar
+la config server-side en el HTML del frame para que el render sea síncrono
+antes del `load`) es un cambio de arquitectura bastante más grande que esta
+tarea — no se tocó, queda anotado por si se quiere perseguir después.
+
+### Verificado / no verificado
+
+Este sandbox también tiene Chromium 141 (`chrome://version`) — **tampoco acá
+se pudo ver el comportamiento real en un navegador con soporte**. Lo que sí
+se verificó:
+
+- `CSS.supports('frame-sizing', 'content-height')` devuelve `false` acá
+  (confirma que la rama sin soporte es la que corre, y que la detección en sí
+  no tira error en un navegador sin el feature).
+- `npm run verify` (lint + typecheck + 748 tests + `check`) limpio.
+- `npm run build` y `npm run build:embed` limpios.
+- `npm run test:e2e` (103 tests, con `PLAYWRIGHT_CHROMIUM_PATH` apuntando al
+  Chromium del sandbox): 103/103 en 2 de 3 corridas; la corrida con 1 fallo
+  fue en `lab-live.e2e.mjs` (publicar/despublicar contra Mongo real) y no se
+  reprodujo en las otras dos — parece flake de timing, no algo causado por
+  este cambio (no toca esa lógica).
+
+**Pendiente real:** confirmar en una máquina con Chrome 154+ real que el
+flash inicial se nota mejor. Si alguien lo prueba y no ve diferencia, es
+coherente con el "one-shot" de arriba — no necesariamente un bug.
+
+---
+
 ## No se toca
 
 - Builder → template/sección ZIP, pago único, Checkout Pro.

@@ -45,6 +45,35 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       return s ? s.src : ''
     })()
 
+  // Chrome 154+: el host puede autodimensionar el iframe a su alto natural,
+  // sin JS, en el `load` del documento embebido (spec: w3c/csswg-drafts,
+  // css-sizing-4/responsive-iframes-explainer.md). El otro opt-in es el
+  // <meta name="responsive-embedded-sizing"> en embed/frame/index.html.
+  //
+  // Progressive enhancement puro, nunca un reemplazo del puente por
+  // postMessage de más abajo (scrolllab:height / iframe.style.height), que
+  // sigue corriendo igual en el 100% de los casos:
+  //  - Es "one-shot": la spec dice explícito que el sizing nativo se toma UNA
+  //    sola vez, al `load`, y que cambios posteriores de contenido NO lo
+  //    actualizan. No hay (todavía) una API tipo `requestResize()` para
+  //    pedir un recálculo — eso figura en la spec como "Future extensions",
+  //    no como algo que exista hoy.
+  //  - Nuestro contenido llega después del `load`: `main()` en main.jsx hace
+  //    `fetch` a la config y recién ahí renderea, así que el `load` del
+  //    frame puede pasar con el `#root` todavía vacío. Cuando eso pasa, el
+  //    sizing nativo no ayuda — pero tampoco rompe nada: el puente llega
+  //    unos instantes después y fija el alto real igual que siempre (un
+  //    height explícito vía postMessage siempre gana sobre el sizing
+  //    natural, por diseño de la spec).
+  //  - Si la config llega rápido (cache tibia, misma red) puede ganarle a
+  //    las fuentes de Google (que sí frenan el `load`) y entonces el iframe
+  //    ya arranca en su alto final, sin el salto. Beneficio condicional,
+  //    nunca negativo.
+  var SUPPORTS_FRAME_SIZING =
+    typeof CSS !== 'undefined' &&
+    typeof CSS.supports === 'function' &&
+    CSS.supports('frame-sizing', 'content-height')
+
   // ── API pública ──────────────────────────────────────────────────────
   if (!window.ScrollLab) window.ScrollLab = {}
   window.ScrollLab.render = render
@@ -155,9 +184,15 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox',
     )
     iframe.setAttribute('data-scrolllab-frame', key)
-    iframe.style.cssText =
-      'display:block;width:100%;border:0;overflow:hidden;height:0;' +
-      'transition:height .18s ease;background:transparent'
+    // Modo FLOW inicial (el único que pinta acá — enterPinMode() reescribe
+    // esto entero más abajo si la sección se pinea). Con soporte nativo,
+    // dejamos el `height` sin fijar (en vez de 0) para que `frame-sizing`
+    // pueda autodimensionar al `load` del frame; sin soporte, cero cambios.
+    iframe.style.cssText = SUPPORTS_FRAME_SIZING
+      ? 'display:block;width:100%;border:0;overflow:hidden;' +
+        'frame-sizing:content-height;transition:height .18s ease;background:transparent'
+      : 'display:block;width:100%;border:0;overflow:hidden;height:0;' +
+        'transition:height .18s ease;background:transparent'
 
     o.parent.insertBefore(iframe, o.before || null)
 
