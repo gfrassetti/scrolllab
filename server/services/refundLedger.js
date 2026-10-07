@@ -16,7 +16,10 @@ const tierName = (plan) => {
   return tier ? `LAB ${tier.replace(/^./, (c) => c.toUpperCase())}` : 'LAB'
 }
 
-/** Qué se devolvió, como lo lee el cliente. */
+/**
+ * Qué se devolvió, como lo lee el cliente.
+ * @param {{ order?: any, sub?: any }} args
+ */
 export function refundWhat({ order, sub }) {
   if (order) {
     return (order.items || [])
