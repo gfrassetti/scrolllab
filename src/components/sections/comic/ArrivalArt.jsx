@@ -178,7 +178,7 @@ export function PigPanelBg({ className = '' }) {
         <path d="M820 0 C900 80 1060 140 1600 170" />
         <path d="M980 110 L1060 40M1120 140 L1180 60M1300 160 L1350 90M1440 168 L1500 120" strokeWidth="4" />
       </g>
-      <path d="M0 400 C200 380 420 420 600 470 L600 560 L0 560Z" fill="#5a2244" />
+      <path d="M0 400 C200 380 420 420 560 470 C620 494 660 530 690 560 L0 560Z" fill="#5a2244" />
       <g stroke="#7a2a46" strokeWidth="3" strokeLinecap="round">
         <path d="M60 470 l20 -50M110 480 l10 -60M150 476 l24 -46" />
       </g>

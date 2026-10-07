@@ -68,6 +68,13 @@ const BOIL = [11, 23, 37].map((seed) => {
   return `M${pts.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(' L')} Z`
 })
 
+// the speech bubble's blob, in three hand-drawn takes (it boils too)
+const BUBBLE = [
+  'M70 50 C120 10 250 0 320 30 C380 56 400 120 380 170 C356 226 270 244 190 236 C110 228 30 200 14 140 C2 100 30 72 70 50Z',
+  'M64 56 C118 14 246 6 324 36 C384 62 396 124 374 176 C348 228 264 240 186 232 C104 224 26 196 12 134 C4 96 28 76 64 56Z',
+  'M76 46 C126 8 256 2 316 26 C374 52 402 116 384 166 C362 222 276 246 194 238 C114 230 36 204 18 144 C4 104 34 68 76 46Z',
+]
+
 // the picture itself is cut a little crooked, like a clipping
 const PANEL_CLIP = 'polygon(0.4% 1.6%, 99.6% 0%, 100% 98.6%, 0% 100%)'
 
@@ -97,7 +104,9 @@ function PigPanel() {
     <div className="relative aspect-[2.8/1] w-[min(88vw,1500px)] max-md:aspect-[1.45/1] max-md:w-[92vw]">
       <BoilOutline />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: PANEL_CLIP }}>
-        <PigPanelBg className="absolute inset-0 h-full w-full" />
+        <div data-pig-bg className="absolute -inset-[6%] will-change-transform">
+          <PigPanelBg className="absolute inset-0 h-full w-full" />
+        </div>
       </div>
       {/* the pig is clipped only at the bottom: its head rises over the top of the frame */}
       <div className="absolute inset-x-0 -top-[60%] bottom-0 overflow-hidden">
@@ -129,16 +138,15 @@ function DogPanel({ line }) {
           <LookoutBg className="absolute inset-0 h-full w-full" />
         </div>
       </div>
-      <div className="absolute bottom-0 left-[10%] w-[27%] max-md:left-[4%] max-md:w-[44%]">
-        <DogBack className="block h-auto w-full" />
+      <div className="absolute inset-x-0 -top-[40%] bottom-0 overflow-hidden">
+        <div data-dog className="absolute bottom-0 left-[10%] w-[27%] will-change-transform max-md:left-[4%] max-md:w-[44%]">
+          <DogBack className="block h-auto w-full" />
+        </div>
       </div>
       {/* the speech bubble */}
       <div data-bubble className="absolute -bottom-[16%] left-[48%] w-[25%] will-change-transform max-md:left-[46%] max-md:w-[50%]">
         <svg viewBox="0 0 400 240" className="block h-auto w-full drop-shadow-[0_10px_24px_rgba(30,20,20,0.25)]" aria-hidden="true">
-          <path
-            d="M70 50 C120 10 250 0 320 30 C380 56 400 120 380 170 C356 226 270 244 190 236 C110 228 30 200 14 140 C2 100 30 72 70 50Z"
-            fill="#fbfaf7"
-          />
+          <path data-bubble-shape d={BUBBLE[0]} fill="#fbfaf7" />
         </svg>
         <p className="absolute inset-0 flex items-center justify-center px-[14%] text-center font-brico text-[clamp(13px,1.5vw,22px)] leading-tight font-bold text-[#1d1a18]">
           {line}
@@ -493,27 +501,47 @@ export default function ChapterDusty({
       tl.to(curtain2, { yPercent: 0, duration: 1.4, ease: 'power2.out' }, P)
       tl.to(ink[2], { opacity: 0, y: -16, duration: 0.5 }, P + 0.5)
       tl.to(pigPanel, { y: 0, duration: 1.3, ease: 'power3.out' }, P + 0.8)
-      tl.to(pig, { yPercent: 0, duration: 0.9, ease: 'power3.out' }, P + 1.2)
+      // the pig shoots up past its rest, over the top of the frame, and settles back
+      tl.to(pig, { yPercent: -9, duration: 0.7, ease: 'power3.out' }, P + 1.2)
+      tl.to(pig, { yPercent: 0, duration: 0.6, ease: 'sine.inOut' }, P + 1.9)
       tl.to(hands, { yPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.4)
       tl.to(tailWrap, { xPercent: 0, duration: 1.0, ease: 'power2.out' }, P + 1.5)
       tl.to(ink[3], { opacity: 1, y: 0, duration: 0.7 }, P + 1.8)
 
-      // Act 7 — straight on: the next panel comes up and pushes the pig away. The
-      // dog holds still while the farm pans behind it; the bubble pops up.
       // Act 7 — straight on, the dog's card slides up over the pig's card, like one
-      // card laid on another, until it covers it.
-      // The dog holds still while the farm behind it zooms in, fast.
+      // card laid on another, until it covers it. The pig sinks as it is covered.
+      // The dog starts a little big and eases down to size against its farm
+      // (parallax); once the card has landed the dog drops a hair, and only then
+      // the farm zooms in, accelerating, while the bubble pops up and drifts.
       const D = P + 3.6
-      tl.to(dogPanel, { y: 0, duration: 1.8, ease: 'power2.out' }, D)
-      // the pig ducks back into its frame as the dog's card covers it
-      tl.to(pig, { yPercent: 70, duration: 0.9, ease: 'power2.in' }, D + 0.5)
+      const LAND = D + 1.8
+      const ZOOM_AT = LAND + 0.6
+      const dog = root.current.querySelector('[data-dog]')
+      const pigBg = root.current.querySelector('[data-pig-bg]')
+      const bubbleShape = root.current.querySelector('[data-bubble-shape]')
+      const strip2 = root.current.querySelector('[data-ink-strip]')
+      gsap.set(dog, { scale: 1.16, transformOrigin: '50% 100%' })
+      gsap.set(lookout, { transformOrigin: '72% 62%', yPercent: 10 })
+      gsap.set(strip2, { opacity: 0 })
+      tl.fromTo(pigBg, { yPercent: -4 }, { yPercent: 4, duration: LAND - (P + 0.8), ease: 'none' }, P + 0.8)
+      tl.to(dogPanel, { y: 0, duration: LAND - D, ease: 'power2.out' }, D)
+      tl.to(pig, { yPercent: 45, duration: LAND - D, ease: 'power1.in' }, D)
+      tl.to(dog, { scale: 1, duration: LAND - D, ease: 'power1.out' }, D)
+      tl.to(lookout, { yPercent: 0, duration: LAND - D, ease: 'power1.out' }, D)
+      tl.to(dog, { yPercent: 3, duration: ZOOM_AT - LAND, ease: 'sine.out' }, LAND)
       tl.to(ink[3], { opacity: 0, y: -16, duration: 0.5 }, D)
-      gsap.set(lookout, { transformOrigin: '72% 62%' })
-      tl.fromTo(lookout, { scale: 1 }, { scale: 1.55, duration: 2.0, ease: 'power2.out' }, D + 0.3)
-      tl.to(lookout, { scale: 1.7, duration: 2.1, ease: 'none' }, D + 2.3)
-      tl.to(ink[4], { opacity: 1, y: 0, duration: 0.7 }, D + 1.3)
-      tl.to(bubbleEl, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'back.out(1.8)' }, D + 1.9)
-      const FIN = D + 4.4
+      // the line arrives with a little bounce and a soft blur behind it
+      tl.to(strip2, { opacity: 1, duration: 0.5 }, LAND - 0.3)
+      tl.fromTo(
+        ink[4],
+        { opacity: 0, y: 26, scale: 0.94 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'back.out(2.4)' },
+        LAND - 0.2,
+      )
+      tl.fromTo(lookout, { scale: 1 }, { scale: 1.6, duration: 1.8, ease: 'power2.in' }, ZOOM_AT)
+      tl.to(bubbleEl, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.8)' }, ZOOM_AT)
+      tl.to(bubbleEl, { xPercent: -10, yPercent: -12, duration: 2.0, ease: 'none' }, ZOOM_AT + 0.6)
+      const FIN = ZOOM_AT + 2.6
 
       // Driven by the scroll, all the way to the end: the paper cut "boils" (the
       // outline swaps shape), and the farmer's hands and the dog's tail swing back
@@ -529,6 +557,7 @@ export default function ChapterDusty({
           onUpdate: () => {
             const d = BOIL[Math.floor(boil.f) % BOIL.length]
             boils.forEach((path) => path.setAttribute('d', d))
+            bubbleShape.setAttribute('d', BUBBLE[Math.floor(boil.f * 0.8) % BUBBLE.length])
             const a = boil.f * 0.9
             handL.setAttribute('transform', `rotate(${(Math.sin(a) * 7).toFixed(2)} 225 -40) translate(0 ${(Math.sin(a) * 14).toFixed(1)})`)
             handR.setAttribute('transform', `rotate(${(-Math.sin(a + 1.1) * 6).toFixed(2)} 960 -40) translate(0 ${(Math.sin(a + 1.1) * 12).toFixed(1)})`)
@@ -735,6 +764,16 @@ export default function ChapterDusty({
           {/* black ink on the paper: later it turns white over the farm */}
           <div className="pointer-events-none absolute inset-x-0 top-[10%] z-[60] flex justify-center px-6 md:top-[9%]">
             <div className="relative h-24 w-full max-w-3xl text-center md:h-20">
+              <div
+                data-ink-strip
+                aria-hidden="true"
+                className="absolute -inset-x-[10%] -inset-y-6 backdrop-blur-[6px]"
+                style={{
+                  background: 'rgba(205,203,199,0.35)',
+                  WebkitMaskImage: 'radial-gradient(closest-side, #000 40%, transparent 100%)',
+                  maskImage: 'radial-gradient(closest-side, #000 40%, transparent 100%)',
+                }}
+              />
               {captions.slice(2, 7).map((text) => (
                 <p
                   key={text}
