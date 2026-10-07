@@ -19,6 +19,7 @@
     "langEs": "ES",
     "langEn": "EN",
     "langLabel": "Language",
+    "currencyLabel": "Currency",
     "plan": "Plan"
   },
   "lab": {

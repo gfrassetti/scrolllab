@@ -38,6 +38,24 @@ export function pickRegion({ stored, country, timeZone, paddleEnabled }) {
   return regionFromCountry(country) || regionFromTimeZone(timeZone) || 'ar'
 }
 
+/**
+ * Moneda en que se muestran (y se cobran) los precios. Solo hay dos, las que
+ * cobramos: ARS (Mercado Pago) y USD (Paddle, ver docs/paddle.md).
+ *
+ * Con Paddle activo la moneda **sigue al medio de pago** elegido o detectado
+ * por ubicación, no al idioma: un español que lee el sitio en español puede ver
+ * y pagar en dólares, y un argentino con el sitio en inglés ve pesos. Sin
+ * Paddle (todavía no hay cómo cobrar en dólares) queda la regla de siempre: EN
+ * muestra USD de referencia, ES pesos.
+ *
+ * @param {{ paddleEnabled: boolean, region: 'ar' | 'intl', locale: string }} args
+ * @returns {'ARS' | 'USD'}
+ */
+export function resolveCurrency({ paddleEnabled, region, locale }) {
+  if (paddleEnabled) return region === 'intl' ? 'USD' : 'ARS'
+  return locale === 'en' ? 'USD' : 'ARS'
+}
+
 export const providerForRegion = (region) =>
   region === 'intl' ? 'paddle' : 'mercadopago'
 

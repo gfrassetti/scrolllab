@@ -29,7 +29,17 @@ con Mercado Pago tienen que poder hacerlo.
 - **«Comprar» rápido** (ficha del template, home, builder: saltan el carrito y
   no tienen selector) hereda el medio vigente: el detectado o el que se eligió
   antes (`startCheckout`). Para cambiarlo, se elige en el carrito.
-- Sin Paddle configurado no aparece nada y todo sigue por Mercado Pago.
+- **Selector de moneda ARS | USD en el header**, al lado del de idioma
+  (`CurrencySelector`). Es la **misma elección** que el «Medio de pago»: USD →
+  tarjeta con Paddle, ARS → Mercado Pago. Cambia la moneda de todos los precios
+  del sitio (home, catálogo, fichas, builder, carrito y planes de LAB).
+- **La moneda sigue al medio de pago, no al idioma** (`resolveCurrency`,
+  `src/lib/payRegion.js`; hook `useCurrency`): un español que lee en español
+  puede ver y pagar en dólares; un argentino con el sitio en inglés ve pesos.
+  Solo hay dos monedas porque son las dos en que se cobra (Paddle podría cobrar
+  en EUR u otras, pero no hay precios cargados).
+- Sin Paddle configurado no aparece nada y todo sigue como antes: Mercado Pago,
+  con el idioma decidiendo si el precio de referencia va en USD (EN) o pesos (ES).
 
 ## Flujo — compra del market y del builder
 

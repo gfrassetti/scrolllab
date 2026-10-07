@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import CartPopover from '../../components/CartPopover'
 import LanguageSelector from '../../components/LanguageSelector'
+import CurrencySelector from '../../components/CurrencySelector'
 import ThemeToggle from '../../components/ThemeToggle'
 
 /**
@@ -60,6 +61,7 @@ export default function BuilderHeader({ t, clearItems, items, openPreview, looks
           )}
           <CartPopover />
           <LanguageSelector />
+          <CurrencySelector />
           <ThemeToggle />
         </div>
       </header>

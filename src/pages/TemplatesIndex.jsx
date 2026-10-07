@@ -17,6 +17,7 @@ import {
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
 import { useI18n } from '../i18n'
+import { useCurrency } from '../lib/currency'
 import { fullMotionQuery, prefersReducedMotion } from '../lib/motion'
 import { TEMPLATE_META } from '../features/home/templateMeta.js'
 import HomeHero from '../features/home/HomeHero.jsx'
@@ -43,6 +44,7 @@ export default function TemplatesIndex() {
   const { hash } = useLocation()
   const navigate = useNavigate()
   const { t, locale } = useI18n()
+  const { currency } = useCurrency()
   const { rate } = useFxRate()
   const [introReady, setIntroReady] = useState(false)
   const [buyingSku, setBuyingSku] = useState(null)
@@ -105,7 +107,7 @@ export default function TemplatesIndex() {
       ],
       price:
         minTemplateUsd != null
-          ? `desde ${formatPriceFromUsd(minTemplateUsd, locale, rate)}`
+          ? `desde ${formatPriceFromUsd(minTemplateUsd, currency, rate)}`
           : '—',
       to: '#templates',
       cta: 'Ver templates',
@@ -121,7 +123,7 @@ export default function TemplatesIndex() {
       ],
       price: `desde ${formatPriceFromUsd(
         CUSTOM_BASE_PRICE_USD,
-        locale,
+        currency,
         rate,
       )} · ${CUSTOM_BASE_SECTIONS} incl.`,
       to: '/builder',
@@ -636,7 +638,7 @@ export default function TemplatesIndex() {
         <TemplatesZone
           t={t}
           templates={templates}
-          locale={locale}
+          currency={currency}
           rate={rate}
           addItem={addItem}
           buyingSku={buyingSku}
@@ -647,6 +649,7 @@ export default function TemplatesIndex() {
         <BuilderZone
           t={t}
           locale={locale}
+          currency={currency}
           rate={rate}
           addItem={addItem}
           buyingSku={buyingSku}

@@ -6,6 +6,7 @@ import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
+import { useCurrency } from '../lib/currency'
 import ProductThumbnail from './ProductThumbnail'
 
 /**
@@ -16,9 +17,9 @@ export default function CartPopover() {
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
   const clearCart = useCart((s) => s.clear)
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
   const { rate } = useFxRate()
-  const showUsd = locale === 'en'
+  const { showUsd } = useCurrency()
   const [open, setOpen] = useState(false)
   const [panelIn, setPanelIn] = useState(false)
   const [catalog, setCatalog] = useState(null)

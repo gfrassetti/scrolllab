@@ -14,6 +14,7 @@ import { useI18n } from '../i18n'
 import ProductThumbnail from '../components/ProductThumbnail'
 import PaymentMethodPicker from '../components/PaymentMethodPicker'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
+import { useCurrency } from '../lib/currency'
 
 /**
  * Cuando el servidor rechaza el cupón al pagar: status de la API → texto (el
@@ -52,7 +53,7 @@ export default function CartPage() {
     loadRegion()
   }, [loadRegion])
   const intl = paddleEnabled && region === 'intl'
-  const showUsd = paddleEnabled ? intl : locale === 'en'
+  const { showUsd } = useCurrency()
 
   // Cupón de bienvenida: se aplica solo si hay sesión (lo pide WelcomeCouponSync al
   // entrar). Antes de retomar un pago pendiente esperamos su respuesta: si no, el

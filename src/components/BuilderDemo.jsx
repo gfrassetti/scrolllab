@@ -3,13 +3,14 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { LD_STAGE_CLASS_HERO, LD_CURSOR_STYLE } from './labDemoKit'
 import { formatArs, formatUsd, arsFromUsd, FALLBACK_USD_ARS } from '../lib/pricing'
 import { useI18n } from '../i18n'
+import { useCurrency } from '../lib/currency'
 import { prefersReducedMotion } from '../lib/motion'
 
 /**
  * BuilderDemo — demo animado del Builder (pago único). Elegís secciones del
  * catálogo → el lienzo se arma → el precio sube → comprás → te llevás el ZIP.
  * Réplica chata de la UI real de /builder. Sigue el tema (`--ld-*`) y el
- * idioma del sitio (COPY): en ES el precio va en pesos, en EN en dólares.
+ * idioma del sitio (COPY); el precio sigue a la moneda vigente (pesos o dólares).
  *
  * Una `gsap.timeline({ repeat: -1 })`, puntero falso, respeta
  * `prefers-reduced-motion` y solo corre en pantalla (IntersectionObserver).
@@ -85,7 +86,16 @@ const COPY = {
 export default function BuilderDemo() {
   const root = useRef(null)
   const { locale } = useI18n()
-  const c = COPY[locale === 'en' ? 'en' : 'es']
+  const { showUsd, canChoose } = useCurrency()
+  const base = COPY[locale === 'en' ? 'en' : 'es']
+  // La moneda no depende del idioma: el precio y la pasarela que se nombran
+  // siguen a la moneda vigente. El demo se remonta al cambiarla (key en BuilderZone).
+  const c = {
+    ...base,
+    price: showUsd ? (usd) => formatUsd(usd) : (usd) => formatArs(arsFromUsd(usd, FALLBACK_USD_ARS) ?? 0),
+    // Paddle solo se nombra si existe: sin él, USD es una referencia y se cobra en Mercado Pago.
+    paid: base.paid.replace('Mercado Pago', showUsd && canChoose ? 'Paddle' : 'Mercado Pago'),
+  }
 
   useGSAP(
     () => {

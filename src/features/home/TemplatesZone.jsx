@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 /**
  * Zona 01 · Templates: la lista de modelos con su arte, precio y compra.
  */
-export default function TemplatesZone({ t, templates, locale, rate, addItem, buyingSku, authLoading, buyNow }) {
+export default function TemplatesZone({ t, templates, currency, rate, addItem, buyingSku, authLoading, buyNow }) {
   return (
     <>
       <ZoneHeadline index="01" label={t('nav.templates')} zone="templates" />
@@ -168,7 +168,7 @@ export default function TemplatesZone({ t, templates, locale, rate, addItem, buy
                       <p className="mt-6 text-title-sm font-medium tracking-[-0.02em]">
                         {formatPriceFromUsd(
                           templatePriceUsd(template.sku),
-                          locale,
+                          currency,
                           rate,
                         )}
                       </p>

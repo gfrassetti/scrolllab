@@ -3,7 +3,7 @@ import { formatPriceFromUsd } from '../../lib/pricing'
 /**
  * Cierre de la composición: precio, avisos (chrome duplicado, tope, commerce) y comprar / al carrito / vista previa.
  */
-export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, locale, rate, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn }) {
+export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, currency, rate, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn }) {
   return (
     <>
       {items.length > 0 && (
@@ -23,7 +23,7 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
                 {t('builder.estimatedPrice')}
               </p>
               <p className="mt-1 text-title font-medium tracking-[-0.02em]">
-                {formatPriceFromUsd(estimatedPriceUsd, locale, rate)}
+                {formatPriceFromUsd(estimatedPriceUsd, currency, rate)}
               </p>
               <p
                 className={`mt-1 max-w-[46ch] text-body-sm ${
