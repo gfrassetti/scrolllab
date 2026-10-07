@@ -8,23 +8,27 @@ Managed Payments, más caro y con menos países).
 
 ## Cuándo se usa cada una
 
-**Sola, por ubicación.** El comprador no elige: toca «Pagar» y listo.
+**Viene marcada sola por ubicación, pero el comprador siempre puede elegir.**
+Un argentino en el exterior, alguien con VPN o un extranjero que quiere pagar
+con Mercado Pago tienen que poder hacerlo.
 
-| Ubicación detectada | Pasarela | Moneda | Precios que se ven |
+| Ubicación detectada | Marcado por defecto | Moneda | Precios que se ven |
 |---|---|---|---|
 | Argentina | Mercado Pago | ARS (cotización del día) | ARS |
-| Cualquier otro país (Latinoamérica incluida: el MP argentino no cobra con medios de Chile o México) | Paddle | USD | USD de lista |
+| Cualquier otro país (Latinoamérica incluida: el MP argentino no cobra con medios de Chile o México) | Tarjeta (Paddle) | USD | USD de lista |
 
 - **Detección**: `GET /api/checkout/methods` devuelve el país del request
   (`x-vercel-ip-country` / `cf-ipcountry`); sin país, la zona horaria del
   navegador (`America/Argentina/*` → Argentina).
-- **Un solo botón** que dice adónde va («Pagar con Mercado Pago →» / «Pagar con
-  tarjeta (USD) →»). Sin modal: preguntar justo antes de pagar es fricción.
-- **Salida discreta** (`PayRegionSwitch`): una línea de texto bajo el total —
-  «¿Pagás desde otro país? Pagá en dólares con tarjeta» (o al revés) — para los
-  casos en que la ubicación engaña: un extranjero en Argentina (MP suele
-  rechazar su tarjeta) o alguien con VPN. Si la usa, queda guardado
-  (`localStorage` `scrolllab-pay-region`). Igual en los planes de LAB.
+- **Selector «Medio de pago»** (`PaymentMethodPicker`, carrito y planes de LAB):
+  dos opciones compactas, «Mercado Pago · en pesos argentinos» y «Tarjeta · en
+  dólares · vía Paddle». Al cambiar, los precios cambian de moneda. La elección
+  queda guardada (`localStorage` `scrolllab-pay-region`).
+- **Un solo botón de pago**, que dice adónde va («Pagar con Mercado Pago →» /
+  «Pagar con tarjeta (USD) →»). Sin modal.
+- **«Comprar» rápido** (ficha del template, home, builder: saltan el carrito y
+  no tienen selector) hereda el medio vigente: el detectado o el que se eligió
+  antes (`startCheckout`). Para cambiarlo, se elige en el carrito.
 - Sin Paddle configurado no aparece nada y todo sigue por Mercado Pago.
 
 ## Flujo — compra del market y del builder

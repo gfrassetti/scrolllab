@@ -2,7 +2,7 @@
 
 > Estudio digital y plantillas web con scroll cinematográfico. Vendemos templates completos con el código fuente incluido, un builder para armar tu propia página, secciones alojadas (LAB) que se insertan en cualquier sitio con un script, y hacemos trabajo a medida.
 
-Scroll Lab es un proyecto argentino. Los precios de lista están en dólares (USD) y se cobran en pesos a la cotización vigente, con Mercado Pago. Cada compra de un template o del builder es un pago único y trae una licencia de uso (usable en proyectos propios o de clientes; no se puede revender). El sitio está en español.
+Scroll Lab es un proyecto argentino. Los precios de lista están en dólares (USD). Desde Argentina se cobran en pesos a la cotización vigente, con Mercado Pago; desde otros países se pagan en dólares con tarjeta, a través de Paddle. Cada compra de un template o del builder es un pago único y trae una licencia de uso (usable en proyectos propios o de clientes; no se puede revender). El sitio está en español.
 
 ## Qué ofrecemos
 

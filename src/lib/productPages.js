@@ -46,7 +46,7 @@ export const PRODUCT_COPY = {
   ],
   howTitle: 'Cómo funciona',
   how: [
-    'Elegís el template y pagás con Mercado Pago.',
+    'Elegís el template y pagás con Mercado Pago (pesos) o con tarjeta (dólares).',
     'Descargás el ZIP desde tu cuenta.',
     'Lo abrís en tu editor, cambiás textos e imágenes y lo publicás donde quieras.',
   ],

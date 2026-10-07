@@ -8,7 +8,7 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { openPaddleCheckout } from '../lib/paddleCheckout'
-import PayRegionSwitch from './PayRegionSwitch'
+import PaymentMethodPicker from './PaymentMethodPicker'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
 const tierIndex = (planId) => TIER_ORDER.indexOf(String(planId).replace('hosted_', ''))
@@ -636,6 +636,16 @@ export default function HostedPlans() {
             </ul>
           </div>
 
+          {paddleEnabled && choosing && (
+            <PaymentMethodPicker
+              region={region}
+              onChange={setRegion}
+              disabled={!!busy}
+              name="lab-pay-method"
+              className="mt-6"
+            />
+          )}
+
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {plans.map((p) => {
               const price = planPrice(p, cycle, gridCurrency)
@@ -809,14 +819,6 @@ export default function HostedPlans() {
               )
             })}
           </div>
-          {paddleEnabled && choosing && user && (
-            <PayRegionSwitch
-              region={region}
-              onChange={setRegion}
-              disabled={!!busy}
-              className="mt-4"
-            />
-          )}
         </>
       )}
     </section>

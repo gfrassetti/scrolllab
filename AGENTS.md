@@ -1,6 +1,6 @@
 # AGENTS.md — SCROLLLAB (storytelling-pages-templates)
 
-Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro (Argentina, ARS) y Paddle (resto del mundo, USD, merchant of record — [`docs/paddle.md`](docs/paddle.md)); la pasarela sale sola por ubicación (un solo botón de pago). Auth: Google (o login de desarrollo).
+Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro (Argentina, ARS) y Paddle (resto del mundo, USD, merchant of record — [`docs/paddle.md`](docs/paddle.md)); el medio de pago viene marcado por ubicación y el comprador puede cambiarlo (selector «Medio de pago», un solo botón de pago). Auth: Google (o login de desarrollo).
 
 **Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. Brand: `src/lib/site.js` → `SCROLLLAB`.
 
@@ -341,12 +341,12 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 
 1. User logs in (`/login`) → session cookie.
 2. Adds SKU to cart (Zustand) or buys builder recipe (`custom:` + recipe array).
-3. La pasarela sale sola por ubicación (país del request o zona horaria): Argentina → Mercado Pago en ARS; otro país → Paddle en USD. Un solo botón de pago; una línea discreta permite cambiar si la ubicación engaña (`PayRegionSwitch`).
+3. El medio de pago viene marcado por ubicación (país del request o zona horaria): Argentina → Mercado Pago en ARS; otro país → Paddle en USD. El comprador siempre puede cambiarlo con el selector «Medio de pago» (`PaymentMethodPicker`: argentino en el exterior, VPN, extranjero que quiere Mercado Pago). Un solo botón de pago; el «Comprar» rápido hereda el medio vigente.
 4. `POST /api/checkout` (`provider`) creates Order + MP preference, o la transacción de Paddle (overlay), o mock URL.
 5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/paddle`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en; un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
 6. `/account` → signed download token → `GET /api/download/:token` (TTL + max 10 downloads).
 
-LAB (suscripciones) usa la misma detección: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
+LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
 
 ## Architecture (extra)
 
