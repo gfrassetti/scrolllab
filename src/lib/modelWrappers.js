@@ -18,6 +18,8 @@ export const MODEL_WRAPPER_CLASS = {
   atrium: 'bg-[#f4f1ea] text-[#111111]',
   plum: 'bg-plum-void text-plum-mist',
   meridian: 'bg-[#dfd8cf] text-[#2a2622]',
+  // La fuente va en el wrapper: en una composición del builder no hay KinPage que la ponga.
+  kin: "bg-[#e1e2de] font-['Inter_Tight',_'Helvetica_Neue',_Arial,_sans-serif] text-[#141414]",
   signal: 'bg-signal-ink text-signal-paper',
   contact: '',
   commerce: '',

@@ -20,6 +20,7 @@ const POSTERS = {
   ratio: '/catalog/ratio.webp',
   atrium: '/catalog/atrium.webp',
   meridian: '/catalog/meridian.webp',
+  kin: '/catalog/kin.webp',
 }
 
 /**

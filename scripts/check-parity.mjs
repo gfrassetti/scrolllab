@@ -82,6 +82,7 @@ const TEMPLATE_PATHS = {
   unity: '/templates/unity',
   atrium: '/templates/atrium',
   meridian: '/templates/meridian',
+  kin: '/templates/kin',
 }
 const TEMPLATES = Object.keys(TEMPLATE_PATHS)
 

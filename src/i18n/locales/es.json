@@ -473,6 +473,16 @@
         "Hotspots en interiores"
       ],
       "description": "Arena cálida, serif editorial y un recorrido aéreo que se reproduce mientras scrolleás: hero de frames con el logo que se acopla al header, menú tipo drawer, slider de pantalla completa con transición de máscara, un mapa con pines que trazan rutas punteadas y fotos de interiores con hotspots que abren tooltips. Ideal para desarrollos inmobiliarios, complejos de cabañas, edificios o departamentos, desarrolladoras y constructoras que quieren destacar cada uno de sus complejos, o resorts."
+    },
+    "kin": {
+      "vibe": "Galería brutalista",
+      "tags": [
+        "Marca hecha de barras",
+        "Loader de tipos de imprenta",
+        "Puerta que se atraviesa",
+        "Colección apilada"
+      ],
+      "description": "Papel frío, negro y un solo rojo. La marca es una palabra hecha de barras iguales: caen como tipos de imprenta en el loader, se desarman en una puerta que la cámara atraviesa al scrollear hacia una sala oscura y vuelven a armarse en el footer. Colección fijada con un tríptico que se pliega en una pila de obras en profundidad, contador de barras y grano. Ideal para galerías de arte, de moda o de diseño, estudios y marcas de producto con identidad fuerte."
     }
   },
   "builder": {
@@ -963,6 +973,28 @@
         "ProductGrid": {
           "name": "Grilla de productos",
           "blurb": "Catálogo + shop; elegí el color del kit para que combine con el resto"
+        }
+      },
+      "kin": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Loader donde las barras caen como tipos y arman la palabra de la marca; con el scroll arman una puerta que se atraviesa hacia la sección oscura. Columna de nav, titular y lista numerada en grilla de 12."
+        },
+        "Intro": {
+          "name": "Intro",
+          "blurb": "Frase corta en mayúsculas anchas con tres notas numeradas escalonadas al costado; el texto se invierte sobre la puerta del hero."
+        },
+        "Rooms": {
+          "name": "Rooms",
+          "blurb": "Índice oscuro de salas en mayúsculas anchas; las filas suben, y al pasar el mouse el resto se atenúa y aparece una barra roja."
+        },
+        "Collection": {
+          "name": "Collection",
+          "blurb": "Tríptico a alto completo que se pliega en una pila fijada: las obras suben en profundidad, con contador de barras y marcador rojo. Trae obras de ejemplo en SVG."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "Footer oscuro a pantalla completa: invitación, columnas de contacto y la palabra de la marca rearmada con barras que entran desde los costados."
         }
       }
     }

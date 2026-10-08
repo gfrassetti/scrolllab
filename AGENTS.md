@@ -114,6 +114,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | Card hero / tableau / emblem Three.js | **WebGL mini motor** — [`docs/scrolllab-webgl.md`](docs/scrolllab-webgl.md) + `src/lib/webgl/` |
 | “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
+| Ref es Webflow + Lottie (`data-w-id`, `lottie-animation` con `data-src=*.json`) | Leer el Lottie y el IX2 solo para entender, reconstruir con código propio. Caso trabajado y método: [`docs/kin-template.md`](docs/kin-template.md) |
 | Template existente "no está al nivel de la ref" (handoff / review) | [`docs/rebuild-against-reference.md`](docs/rebuild-against-reference.md) — reconstruir contra beats, no contra el JSX actual |
 | Revisar o pulir un template contra el estándar award-level (white space, micro-interacciones, orden de entrada) | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) — checklist «Award-level vs. genérico» |
 

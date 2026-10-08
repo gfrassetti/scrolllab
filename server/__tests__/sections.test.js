@@ -103,6 +103,11 @@ const APPROVED = [
   'meridian/Masterplan',
   'meridian/Contact',
   'meridian/Footer',
+  'kin/Hero',
+  'kin/Intro',
+  'kin/Rooms',
+  'kin/Collection',
+  'kin/Footer',
   'contact/ContactForm',
   'commerce/ProductGrid',
 ]
