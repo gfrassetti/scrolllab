@@ -165,6 +165,17 @@ function post(msg) {
   parent.postMessage(msg, '*')
 }
 
+/**
+ * Alto del CONTENIDO (#root), no del documento: `documentElement.scrollHeight`
+ * nunca baja del alto actual del iframe (es al menos su viewport), así que si
+ * la sección se achica después de la primera medida — fuentes que cargan y
+ * reacomodan líneas, un acordeón que se cierra — el iframe quedaba más alto que
+ * el contenido para siempre, con una franja vacía del color del sitio abajo.
+ */
+function contentHeight() {
+  return Math.ceil(Math.max(root.scrollHeight, root.getBoundingClientRect().height))
+}
+
 function postHeight() {
   // Único punto donde todos los triggers de alto confluyen (decide(), el
   // reveal y el ResizeObserver de abajo) — el loader ya opta por
@@ -173,7 +184,7 @@ function postHeight() {
   // frame, no algo re-pedible desde JS: la spec lista una API de relayout
   // como "Future extensions", no como algo que exista hoy. Este postMessage
   // sigue siendo la única forma real de avisar un cambio de alto posterior.
-  post({ type: 'scrolllab:height', px: Math.ceil(document.documentElement.scrollHeight) })
+  post({ type: 'scrolllab:height', px: contentHeight() })
 }
 
 function reveal() {
@@ -254,11 +265,11 @@ function preview() {
   const sendHeight = () => {
     if (!editor) return
     parent.postMessage(
-      { type: 'scrolllab:height', px: Math.ceil(document.documentElement.scrollHeight) },
+      { type: 'scrolllab:height', px: contentHeight() },
       editor,
     )
   }
-  new ResizeObserver(sendHeight).observe(document.documentElement)
+  new ResizeObserver(sendHeight).observe(root)
   // Links: #ancla y relativos se le avisan al editor (que no navega); los
   // externos abren pestaña nueva, como en el sitio.
   routeLinks('')
@@ -360,7 +371,7 @@ async function main() {
   const ro = new ResizeObserver(() => {
     if (mode === 'flow') postHeight()
   })
-  ro.observe(document.documentElement)
+  ro.observe(root)
 
   if (document.fonts?.ready) {
     document.fonts.ready.then(() => ScrollTrigger.refresh())

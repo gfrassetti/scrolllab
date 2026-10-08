@@ -10,10 +10,11 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  * pulsing "+" hotspots absolutely positioned on the photo; clicking one
  * opens a small dark tooltip anchored to it.
  *
- * What the builder edits: the link labels (and each slide's photo). What it
- * deliberately does NOT edit: how many hotspots a slide has and where they
- * sit — they are placed on specific spots of a specific photo, so they live
- * in SLIDE_DATA below and change with the code, not with a form.
+ * What the builder edits: each link's label, photo and paragraph, the
+ * hotspots (`spots`: slide number, x/y in % of the photo, title, body) and
+ * the two colours. The demo hotspots in SLIDE_DATA are placed on the demo
+ * photos, so they only show while the links are the demo ones: custom photos
+ * get no hotspots until `spots` places them.
  *
  * Mobile is a different layout (verified on the reference): the paragraph
  * and the link list move ABOVE the slider, and the slider drops to a
@@ -56,6 +57,38 @@ const SLIDE_DATA = [
 ]
 
 const INK = '#2a2622'
+const SAND = '#dfd8cf'
+
+// x / y come from a text field: a number in % of the slide (a typo lands the
+// dot in the centre, where it is easy to spot and fix). The dot (44px) is
+// also clamped in px where it is drawn, so it never sits half outside.
+const pct = (v) => {
+  const n = Number.parseFloat(String(v ?? '').replace(',', '.'))
+  return Number.isFinite(n) ? Math.min(96, Math.max(4, n)) : 50
+}
+
+/** Copy + hotspots of each slide, from the props or the demo. */
+function slidesFor(list, custom, spots) {
+  const placed = Array.isArray(spots)
+    ? spots
+        .map((s) => ({
+          slide: Number.parseInt(s?.slide, 10),
+          x: pct(s?.x),
+          y: pct(s?.y),
+          title: s?.title || '',
+          body: s?.body || '',
+        }))
+        .filter((s) => s.title || s.body)
+    : []
+  return list.map((l, i) => ({
+    text: l.text ?? (custom ? '' : SLIDE_DATA[i]?.text || ''),
+    spots: placed.length
+      ? placed.filter((s) => (Number.isFinite(s.slide) ? s.slide : 1) === i + 1)
+      : custom
+        ? []
+        : SLIDE_DATA[i]?.spots || [],
+  }))
+}
 
 function Links({ links, index, onPick, tone }) {
   const dark = tone === 'dark'
@@ -80,10 +113,14 @@ function Links({ links, index, onPick, tone }) {
   )
 }
 
-export default function Interior({ links }) {
-  const valid = links?.filter((l) => l?.label || l?.img)
-  const list = (valid?.length ? valid : DEFAULT_LINKS).slice(0, SLIDE_DATA.length)
+export default function Interior({ links, spots, bg, fg }) {
+  const valid = links?.filter((l) => l?.label || l?.img || l?.text)
+  const custom = Boolean(valid?.length)
+  const list = (custom ? valid : DEFAULT_LINKS).slice(0, SLIDE_DATA.length)
   const n = list.length
+  const slides = slidesFor(list, custom, spots)
+  const paper = bg || SAND
+  const ink = fg || INK
 
   const stage = useRef(null)
   const boxes = useRef([])
@@ -154,12 +191,16 @@ export default function Interior({ links }) {
     return () => document.removeEventListener('pointerdown', close)
   }, [open])
 
-  const data = SLIDE_DATA[index]
+  const data = slides[Math.min(index, n - 1)] || { text: '', spots: [] }
   const tip = open != null ? data.spots[open] : null
   const flip = tip && tip.x > 55
 
   return (
-    <section id="interior" className="relative bg-[#dfd8cf] text-[#2a2622]">
+    <section
+      id="interior"
+      className="relative"
+      style={{ background: paper, color: ink, '--mer-int-ink': ink, '--mer-int-paper': paper }}
+    >
       <div className="flex flex-col md:block md:h-svh">
         {/* mobile: paragraph + links sit above the slider */}
         <div className="px-6 pt-10 pb-6 md:hidden">
@@ -186,25 +227,27 @@ export default function Interior({ links }) {
                 ref={(el) => (inners.current[i] = el)}
                 className="absolute inset-0 will-change-transform"
               >
-                <img
-                  src={l.img}
-                  alt=""
-                  draggable={false}
-                  loading={i < 2 ? 'eager' : 'lazy'}
-                  className="pointer-events-none h-full w-full object-cover"
-                />
+                {l.img && (
+                  <img
+                    src={l.img}
+                    alt=""
+                    draggable={false}
+                    loading={i < 2 ? 'eager' : 'lazy'}
+                    className="pointer-events-none h-full w-full object-cover"
+                  />
+                )}
               </div>
-              {SLIDE_DATA[i].spots.map((s, k) => (
+              {slides[i].spots.map((s, k) => (
                 <button
                   key={k}
                   type="button"
                   data-mer-spot
-                  aria-label={s.title}
+                  aria-label={s.title || 'Detail'}
                   aria-expanded={i === index && open === k}
                   tabIndex={i === index ? 0 : -1}
                   className="mer-spot absolute h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
                   data-open={i === index && open === k}
-                  style={{ left: `${s.x}%`, top: `${s.y}%` }}
+                  style={{ left: `clamp(22px, ${s.x}%, calc(100% - 22px))`, top: `clamp(22px, ${s.y}%, calc(100% - 22px))` }}
                   onClick={() => setOpen(open === k ? null : k)}
                 >
                   <span aria-hidden="true" className="mer-spot-ring" />
@@ -239,9 +282,11 @@ export default function Interior({ links }) {
               data-mer-tip
               role="dialog"
               aria-label={tip.title}
-              className="mer-tip absolute z-20 w-[250px] bg-[#2a2622] p-5 text-[#f0eae0] md:w-[300px] md:p-6"
+              className="mer-tip absolute z-20 w-[250px] p-5 md:w-[300px] md:p-6"
               style={{
                 top: `calc(${tip.y}% - 24px)`,
+                background: ink,
+                color: paper,
                 ...(flip
                   ? { right: `calc(${100 - tip.x}% + 34px)`, transformOrigin: 'right top' }
                   : { left: `calc(${tip.x}% + 34px)`, transformOrigin: 'left top' }),
@@ -249,8 +294,8 @@ export default function Interior({ links }) {
             >
               <span
                 aria-hidden="true"
-                className="absolute top-[18px] h-3.5 w-3.5 rotate-45 bg-[#2a2622]"
-                style={flip ? { right: '-7px' } : { left: '-7px' }}
+                className="absolute top-[18px] h-3.5 w-3.5 rotate-45"
+                style={{ background: ink, ...(flip ? { right: '-7px' } : { left: '-7px' }) }}
               />
               <h4
                 className="text-[1.5rem] leading-[1.1] md:text-[1.9rem]"
@@ -287,7 +332,7 @@ export default function Interior({ links }) {
         .mer-int-link { font-size: clamp(2rem, 3.6vw, 3.6rem); line-height: 1.05; padding: 0; background: none; border: 0; cursor: pointer; border-bottom: 1px solid transparent; transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease; }
         @media (max-width: 1023px) { .mer-int-link { padding-block: 5px; } }
         .mer-int-link[data-tone="light"] { color: #fff; }
-        .mer-int-link[data-tone="dark"] { color: ${INK}; font-size: 2rem; }
+        .mer-int-link[data-tone="dark"] { color: var(--mer-int-ink); font-size: 2rem; }
         .mer-int-link[data-active="false"] { opacity: 0.45; border-bottom-color: currentColor; }
         .mer-int-link[data-active="false"]:hover { opacity: 0.85; }
         .mer-int-link[data-active="true"] { opacity: 1; }

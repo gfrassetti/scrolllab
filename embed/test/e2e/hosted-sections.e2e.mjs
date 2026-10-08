@@ -199,9 +199,85 @@ const CASES = {
     props: { body: 'MKSCOP', bg: '#f4f1ea', fg: '#111111' },
     marker: 'MKSCOP',
   },
+  // Fase G — `checkFg`: además del fondo, el color de texto llega a la sección.
+  'meridian/Footer': {
+    props: {
+      wordmark: 'MKMFOO',
+      monogram: 'MK',
+      socials: [{ label: 'Instagram', href: 'https://instagram.com/x' }],
+      bg: '#0f2a24',
+      fg: '#f3e9d2',
+    },
+    marker: 'MKMFOO',
+    checkFg: true,
+  },
+  'meridian/Interior': {
+    props: {
+      links: [{ label: 'MKMINT', img: 'https://cdn.test/a.webp', text: 'texto' }],
+      spots: [{ slide: '1', x: '30', y: '40', title: 'Punto', body: 'cuerpo' }],
+      bg: '#1b1b1f',
+      fg: '#efe7da',
+    },
+    marker: 'MKMINT',
+    checkFg: true,
+  },
+  'meridian/Amenities': {
+    props: { title: 'MKMAME', label: 'x', items: [{ title: 'Pool', text: 'x' }], bg: '#20303f', fg: '#f2efe6' },
+    marker: 'MKMAME',
+    checkFg: true,
+  },
+  'meridian/Panorama': {
+    props: { title: 'MKMPAN', ctaLabel: 'x', ctaHref: '#x', bg: '#000000', fg: '#ffe9b8' },
+    marker: 'MKMPAN',
+    checkFg: true,
+  },
+  'kin/Rooms': {
+    props: { heading: 'x', rooms: [{ no: '01', title: 'MKKROO', dates: 'x', href: '#x' }], bg: '#f1ece2', fg: '#1d1a16', accent: '#2b3cff' },
+    marker: 'MKKROO',
+    checkFg: true,
+  },
+  'kin/Footer': {
+    props: {
+      line1: 'MKKFOO',
+      line2: 'x',
+      columns: [{ title: 'Visit', text: 'Calle 1' }],
+      links: [{ label: 'IG', href: 'https://instagram.com' }],
+      topLabel: 'MKTOP',
+      bg: '#16243a',
+      fg: '#f5f0e6',
+      accent: '#ffb000',
+    },
+    marker: 'MKKFOO',
+    checkFg: true,
+  },
+  'monolith/SpecSheet': {
+    props: { label: 'x', specs: [{ label: 'Dato', value: 'MKSPEC' }], bg: '#101010', fg: '#cdcbc4' },
+    marker: 'MKSPEC',
+    checkFg: true,
+  },
+  'unity/LastPortrait': {
+    props: { title: 'MKLAST', name: 'x', bg: '#f4efe6', fg: '#141210' },
+    marker: 'MKLAST',
+    checkFg: true,
+  },
+  'velocity/ParallaxRise': {
+    props: { eyebrow: 'x', title: 'MKRISE', ctaHref: '#x', bg: '#0b1f3a', fg: '#ffffff', accent: '#ff5a1f' },
+    marker: 'MKRISE',
+    checkFg: true,
+  },
+  'chapters/ParallaxEditorial': {
+    props: { label: 'MKPEDI', figures: [{ caption: 'x' }], bg: '#1a1714', fg: '#efe8dc' },
+    marker: 'MKPEDI',
+    checkFg: true,
+  },
 }
 
-// Responsive: las 23 HOSTABLE_SECTIONS, no solo una muestra — "cada una debe
+const rgb = (hex) => {
+  const n = Number.parseInt(hex.slice(1), 16)
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`
+}
+
+// Responsive: todas las HOSTABLE_SECTIONS, no solo una muestra — "cada una debe
 // verse bien" en mobile/tablet/desktop.
 const RESPONSIVE_SECTIONS = HOSTABLE_SECTIONS
 // `FooterAtrium`/`ManifestoType`/`ScopeSerif` usan `svh` para el aire. Antes
@@ -367,6 +443,15 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
           return el ? getComputedStyle(el).backgroundColor : ''
         })
         assert.ok(/\d/.test(bg), `${sectionId}: sección sin background computado`)
+        if (c.checkFg) {
+          const colors = await frame.evaluate(() => {
+            const el = document.querySelector('#root section, #root footer')
+            const cs = getComputedStyle(el)
+            return { bg: cs.backgroundColor, fg: cs.color }
+          })
+          assert.equal(colors.bg, rgb(c.props.bg), `${sectionId}: el fondo editado no llegó`)
+          assert.equal(colors.fg, rgb(c.props.fg), `${sectionId}: el color de texto editado no llegó`)
+        }
 
         let h = 0
         for (let i = 0; i < 20; i++) {
@@ -375,6 +460,21 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
           await sleep(400)
         }
         assert.ok(h > 50, `${sectionId}: alto del iframe = ${h}`)
+
+        if (sectionId === 'kin/Footer') {
+          // «Volver arriba» sube la página del cliente (embed/src/lenis.js → loader)
+          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+          await sleep(200)
+          assert.ok((await page.evaluate(() => window.scrollY)) > 100, 'el host no scrolleó para la prueba')
+          await frame.getByText('MKTOP').click()
+          let y = -1
+          for (let i = 0; i < 20; i++) {
+            y = await page.evaluate(() => window.scrollY)
+            if (y < 2) break
+            await sleep(150)
+          }
+          assert.ok(y < 2, `kin/Footer: «volver arriba» no subió la página del host (scrollY=${y})`)
+        }
       } finally {
         await context.close()
         await unseed(id)
@@ -429,6 +529,15 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
           assert.ok(
             Math.abs(later - iframeH) <= 16,
             `${sectionId} @${vp.name}: el alto no converge (${iframeH}px → ${later}px)`,
+          )
+          // Ni más alto que el contenido: el iframe medía el documento (que nunca
+          // baja de su propio viewport) y quedaba una franja vacía abajo.
+          await sleep(600)
+          const settled = await iframeLoc.evaluate((el) => el.getBoundingClientRect().height)
+          const rootH = await frame.evaluate(() => document.getElementById('root').getBoundingClientRect().height)
+          assert.ok(
+            settled - rootH <= 3,
+            `${sectionId} @${vp.name}: iframe (${settled}px) más alto que el contenido (${rootH}px)`,
           )
         } finally {
           await context.close()

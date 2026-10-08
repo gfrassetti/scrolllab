@@ -15,6 +15,9 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
  */
 const DISPLAY = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '125%', fontVariationSettings: "'wdth' 125" }
 
+// Hairlines in the text colour at 25%, so a custom fg keeps them.
+const HAIRLINE = 'color-mix(in srgb, currentColor 25%, transparent)'
+
 const ROOMS = [
   { no: '01', title: 'Headline 1', dates: 'Subheadline' },
   { no: '02', title: 'Headline 2', dates: 'Subheadline' },
@@ -23,8 +26,10 @@ const ROOMS = [
   { no: '05', title: 'Headline 5', dates: 'Subheadline' },
 ]
 
-export default function Rooms({ heading = 'Section title', rooms = ROOMS }) {
+export default function Rooms({ heading = 'Section title', rooms, bg, fg, accent }) {
   const rootRef = useRef(null)
+  const valid = rooms?.filter((r) => r?.title || r?.no || r?.dates)
+  const list = valid?.length ? valid : ROOMS
 
   useGSAP(
     () => {
@@ -43,7 +48,7 @@ export default function Rooms({ heading = 'Section title', rooms = ROOMS }) {
       })
       return undefined
     },
-    { scope: rootRef },
+    { scope: rootRef, dependencies: [list.length], revertOnUpdate: true },
   )
 
   return (
@@ -51,14 +56,15 @@ export default function Rooms({ heading = 'Section title', rooms = ROOMS }) {
       ref={rootRef}
       id="rooms"
       data-kin-dark
-      className="relative z-[45] min-h-svh bg-[#141414] px-[4.5vw] pt-[14svh] pb-[10svh] text-[#e1e2de] md:px-[1.25vw]"
+      className="relative z-[45] min-h-svh px-[4.5vw] pt-[14svh] pb-[10svh] md:px-[1.25vw]"
+      style={{ background: bg || '#141414', color: fg || '#e1e2de' }}
     >
-      <h2 className="text-[3.3vw] leading-none md:text-[0.82vw]">{heading}</h2>
-      <ul className="kin-room-list mt-[6svh] border-t border-[#e1e2de]/25">
-        {rooms.map((r) => (
-          <li key={r.no} data-kin-row className="kin-room-row border-b border-[#e1e2de]/25">
-            <a href="#" className="grid grid-cols-[auto_1fr] items-baseline gap-x-[3vw] py-[2.4vw] md:grid-cols-[8vw_1fr_auto] md:py-[1.1vw]">
-              <span className="text-[3.3vw] md:text-[0.82vw]">{r.no}</span>
+      <h2 className="text-[3.3vw] leading-none md:text-[max(11px,0.82vw)]">{heading}</h2>
+      <ul className="kin-room-list mt-[6svh] border-t" style={{ borderColor: HAIRLINE }}>
+        {list.map((r, i) => (
+          <li key={i} data-kin-row className="kin-room-row border-b" style={{ borderColor: HAIRLINE }}>
+            <a href={r.href || '#'} className="grid grid-cols-[auto_1fr] items-baseline gap-x-[3vw] py-[2.4vw] md:grid-cols-[8vw_1fr_auto] md:py-[1.1vw]">
+              <span className="text-[3.3vw] md:text-[max(11px,0.82vw)]">{r.no}</span>
               <span className="block overflow-hidden pb-[0.06em]">
                 <span
                   data-kin-row-text
@@ -66,12 +72,14 @@ export default function Rooms({ heading = 'Section title', rooms = ROOMS }) {
                   style={DISPLAY}
                 >
                   <span className="kin-room-title flex items-center">
-                    <span aria-hidden="true" className="kin-room-mark mr-[0.25em] inline-block h-[0.62em] w-[0.34em] shrink-0 bg-[#e1371f]" />
+                    <span aria-hidden="true" className="kin-room-mark mr-[0.25em] inline-block h-[0.62em] w-[0.34em] shrink-0"
+                      style={{ background: accent || '#e1371f' }}
+                    />
                     {r.title}
                   </span>
                 </span>
               </span>
-              <span className="col-start-2 text-[3.3vw] md:col-start-auto md:text-[0.82vw]">{r.dates}</span>
+              <span className="col-start-2 text-[3.3vw] md:col-start-auto md:text-[max(11px,0.82vw)]">{r.dates}</span>
             </a>
           </li>
         ))}

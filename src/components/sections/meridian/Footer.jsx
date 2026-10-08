@@ -12,14 +12,53 @@ import { useLang } from './lang'
  * legal row underneath. Everything reveals with a soft blur-up as it
  * enters.
  *
- * Labels come from the language dictionary (lang.jsx); the contact data
- * are props so the builder can set them.
+ * Labels come from the language dictionary (lang.jsx) unless a prop sets
+ * them (a prop always wins); contact data, links, socials and the two colours
+ * are props so the builder and LAB can set them.
  */
 
 const INK = '#2a2622'
 const SAND = '#dfd8cf'
 const MONO = { fontFamily: "'Space Mono', monospace" }
 const SERIF = { fontFamily: "'Fraunces', serif", fontWeight: 300 }
+
+const SOCIAL_ICONS = {
+  facebook: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M9.2 15V8.7h2.1l.3-2.5H9.2V4.7c0-.7.2-1.2 1.2-1.2h1.3V1.3C11.5 1.3 10.7 1.2 9.9 1.2 8 1.2 6.7 2.4 6.7 4.5v1.7H4.6v2.5h2.1V15h2.5z" />
+    </svg>
+  ),
+  instagram: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
+      <rect x="2" y="2" width="12" height="12" rx="3.4" />
+      <circle cx="8" cy="8" r="2.8" />
+      <circle cx="11.6" cy="4.4" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  whatsapp: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 1.3a6.7 6.7 0 0 0-5.7 10.2L1.3 14.7l3.3-1A6.7 6.7 0 1 0 8 1.3zm3.4 9.4c-.1.4-.8.8-1.1.8-.3 0-.6.1-2-.4-1.7-.7-2.8-2.4-2.9-2.5-.1-.1-.7-.9-.7-1.7s.4-1.2.6-1.4c.1-.2.3-.2.4-.2h.3c.1 0 .2 0 .3.3l.5 1.2c.1.1.1.2 0 .3l-.2.3-.2.2c-.1.1-.2.2-.1.4.1.2.6 1 1.3 1.6.9.8 1.6 1 1.8 1.1.2.1.3.1.4 0l.5-.6c.1-.2.2-.1.4-.1l1.2.6c.2.1.3.1.3.2 0 .2 0 .6-.1.9z" />
+    </svg>
+  ),
+}
+
+const DEFAULT_SOCIALS = [
+  { label: 'Facebook', href: '#' },
+  { label: 'Instagram', href: '#' },
+  { label: 'WhatsApp', href: '#' },
+]
+
+/** Icon for the networks we draw; any other label shows its initial. */
+function socialGlyph(label) {
+  const key = String(label || '').toLowerCase().replace(/[^a-z]/g, '')
+  return (
+    SOCIAL_ICONS[key] || (
+      <span aria-hidden="true" className="text-[13px] uppercase" style={MONO}>
+        {String(label || '?').trim().charAt(0)}
+      </span>
+    )
+  )
+}
 
 function Social({ label, href, children }) {
   return (
@@ -42,9 +81,28 @@ export default function Footer({
   mapHref = '#',
   studio = '[Studio]',
   studioHref = '#',
+  monogram = 'M',
+  contactLabel,
+  officeLabel,
+  mapLabel,
+  villasLabel,
+  villasHref = '#villas',
+  rightsLabel,
+  privacyLabel,
+  privacyHref = '#privacy',
+  termsLabel,
+  termsHref = '#terms',
+  madeByLabel,
+  socials,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const { t } = useLang()
+  const ink = bg || INK
+  const sand = fg || SAND
+  // 1–2 letters sit in the circle at their size; longer ones are squeezed in
+  const mark = String(monogram || '').trim() || 'M'
 
   useGSAP(
     () => {
@@ -67,12 +125,17 @@ export default function Footer({
       ref={root}
       id="footer"
       className="relative flex min-h-[80svh] flex-col justify-between px-6 pt-14 pb-6 md:px-16 md:pt-16"
-      style={{ background: INK, color: SAND }}
+      style={{
+        background: ink,
+        color: sand,
+        '--mer-ft-ink': ink,
+        '--mer-ft-sand': sand,
+      }}
     >
       <div className="flex flex-col justify-between gap-10 md:flex-row md:items-start">
         <p data-ft-reveal className="text-[12px] uppercase tracking-[0.08em]" style={MONO}>
-          {t('footerContact')}
-          <span className="block opacity-50">{t('salesOffice')}</span>
+          {contactLabel || t('footerContact')}
+          <span className="block opacity-50">{officeLabel || t('salesOffice')}</span>
         </p>
         <div data-ft-reveal className="md:text-right">
           <a
@@ -94,17 +157,18 @@ export default function Footer({
 
       <div data-ft-reveal className="flex flex-col items-center gap-5 py-12 md:py-8" aria-hidden="true">
         <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
-          <circle cx="75" cy="75" r="66" stroke={SAND} strokeWidth="2" />
+          <circle cx="75" cy="75" r="66" stroke={sand} strokeWidth="2" />
           <text
             x="75"
             y="96"
             textAnchor="middle"
             fontFamily="'Fraunces', serif"
             fontWeight="300"
-            fontSize="72"
-            fill={SAND}
+            fontSize={mark.length > 1 ? 56 : 72}
+            fill={sand}
+            {...(mark.length > 2 ? { textLength: 104, lengthAdjust: 'spacingAndGlyphs' } : {})}
           >
-            M
+            {mark}
           </text>
         </svg>
         <span className="text-[11px] uppercase tracking-[0.3em] opacity-50" style={MONO}>
@@ -125,55 +189,47 @@ export default function Footer({
                 style={MONO}
               >
                 <span aria-hidden="true" className="mer-ft-btn-fill absolute inset-0" />
-                <span className="relative">{t('seeOnMap')}</span>
+                <span className="relative">{mapLabel || t('seeOnMap')}</span>
               </a>
-              <Social label="Facebook" href="#">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                  <path d="M9.2 15V8.7h2.1l.3-2.5H9.2V4.7c0-.7.2-1.2 1.2-1.2h1.3V1.3C11.5 1.3 10.7 1.2 9.9 1.2 8 1.2 6.7 2.4 6.7 4.5v1.7H4.6v2.5h2.1V15h2.5z" />
-                </svg>
-              </Social>
-              <Social label="Instagram" href="#">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
-                  <rect x="2" y="2" width="12" height="12" rx="3.4" />
-                  <circle cx="8" cy="8" r="2.8" />
-                  <circle cx="11.6" cy="4.4" r="0.6" fill="currentColor" stroke="none" />
-                </svg>
-              </Social>
-              <Social label="WhatsApp" href="#">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                  <path d="M8 1.3a6.7 6.7 0 0 0-5.7 10.2L1.3 14.7l3.3-1A6.7 6.7 0 1 0 8 1.3zm3.4 9.4c-.1.4-.8.8-1.1.8-.3 0-.6.1-2-.4-1.7-.7-2.8-2.4-2.9-2.5-.1-.1-.7-.9-.7-1.7s.4-1.2.6-1.4c.1-.2.3-.2.4-.2h.3c.1 0 .2 0 .3.3l.5 1.2c.1.1.1.2 0 .3l-.2.3-.2.2c-.1.1-.2.2-.1.4.1.2.6 1 1.3 1.6.9.8 1.6 1 1.8 1.1.2.1.3.1.4 0l.5-.6c.1-.2.2-.1.4-.1l1.2.6c.2.1.3.1.3.2 0 .2 0 .6-.1.9z" />
-                </svg>
-              </Social>
+              {(socials?.length ? socials : DEFAULT_SOCIALS).map((so, i) => (
+                <Social key={i} label={so.label || 'Social'} href={so.href || '#'}>
+                  {socialGlyph(so.label)}
+                </Social>
+              ))}
             </div>
           </div>
           <a
             data-ft-reveal
-            href="#villas"
+            href={villasHref}
             className="mer-ft-link tpl-hit text-[12px] uppercase tracking-[0.12em] max-md:self-start"
             style={MONO}
           >
-            {t('selectVillas')}
+            {villasLabel || t('selectVillas')}
           </a>
         </div>
 
         <div
           className="mt-10 flex flex-col gap-3 border-t pt-5 text-[11px] uppercase tracking-[0.1em] md:flex-row md:items-center md:justify-between"
-          style={{ ...MONO, borderColor: 'rgba(223,216,207,0.16)', color: 'rgba(223,216,207,0.55)' }}
+          style={{
+            ...MONO,
+            borderColor: 'color-mix(in srgb, var(--mer-ft-sand) 16%, transparent)',
+            color: 'color-mix(in srgb, var(--mer-ft-sand) 55%, transparent)',
+          }}
         >
           <span>
-            © {wordmark} — {new Date().getFullYear()} {t('rights')}
+            © {wordmark} — {new Date().getFullYear()} {rightsLabel || t('rights')}
           </span>
           <span className="flex gap-5">
-            <a href="#privacy" className="mer-ft-link tpl-hit">
-              {t('privacy')}
+            <a href={privacyHref} className="mer-ft-link tpl-hit">
+              {privacyLabel || t('privacy')}
             </a>
-            <a href="#terms" className="mer-ft-link tpl-hit">
-              {t('terms')}
+            <a href={termsHref} className="mer-ft-link tpl-hit">
+              {termsLabel || t('terms')}
             </a>
           </span>
           <span>
-            {t('madeBy')}{' '}
-            <a href={studioHref} className="mer-ft-link tpl-hit" style={{ color: SAND }}>
+            {madeByLabel || t('madeBy')}{' '}
+            <a href={studioHref} className="mer-ft-link tpl-hit" style={{ color: sand }}>
               {studio}
             </a>
           </span>
@@ -189,14 +245,14 @@ export default function Footer({
         .mer-ft-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-ft-link:hover::after { transform: scaleX(1); transform-origin: left; }
 
-        .mer-ft-btn { background: ${SAND}; color: ${INK}; transition: color 0.4s ease; }
-        .mer-ft-btn-fill { background: ${INK}; transform: translateY(101%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-ft-btn { background: var(--mer-ft-sand); color: var(--mer-ft-ink); transition: color 0.4s ease; }
+        .mer-ft-btn-fill { background: var(--mer-ft-ink); transform: translateY(101%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-ft-btn:hover .mer-ft-btn-fill { transform: translateY(0); }
-        .mer-ft-btn:hover { color: ${SAND}; box-shadow: inset 0 0 0 1px ${SAND}; }
+        .mer-ft-btn:hover { color: var(--mer-ft-sand); box-shadow: inset 0 0 0 1px var(--mer-ft-sand); }
 
-        .mer-ft-social { color: ${SAND}; border: 1px solid rgba(223, 216, 207, 0.28); transition: color 0.4s ease, border-color 0.4s ease; }
-        .mer-ft-social-fill { background: ${SAND}; clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-        .mer-ft-social:hover { color: ${INK}; border-color: ${SAND}; }
+        .mer-ft-social { color: var(--mer-ft-sand); border: 1px solid color-mix(in srgb, var(--mer-ft-sand) 28%, transparent); transition: color 0.4s ease, border-color 0.4s ease; }
+        .mer-ft-social-fill { background: var(--mer-ft-sand); clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-ft-social:hover { color: var(--mer-ft-ink); border-color: var(--mer-ft-sand); }
         .mer-ft-social:hover .mer-ft-social-fill { clip-path: circle(75% at 50% 50%); }
       `}</style>
     </footer>

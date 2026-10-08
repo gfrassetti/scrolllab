@@ -38,11 +38,17 @@ const DEFAULT_ITEMS = [
 ].map((img, i) => ({ title: `Amenity ${i + 1}`, text: BODY, img }))
 
 const INK = '#2a2622'
+const SAND = '#dfd8cf'
+// hairlines / photo slot / pressed button: shades of the two colours, so a
+// custom bg + fg keeps the same contrast steps as the demo
+const mix = (pct) => `color-mix(in srgb, var(--mer-am-ink) ${pct}%, transparent)`
 
 export default function Amenities({
   title = 'A blend of [Feature One] and [Feature Two] designed to enhance daily life',
   label = 'Amenities',
   items,
+  bg,
+  fg,
 }) {
   const valid = items?.filter((it) => it?.title || it?.img)
   const list = (valid?.length ? valid : DEFAULT_ITEMS).slice(0, 10)
@@ -133,7 +139,13 @@ export default function Amenities({
     <section
       ref={root}
       id="amenities"
-      className="relative overflow-hidden bg-[#dfd8cf] py-28 text-[#2a2622] md:py-40"
+      className="relative overflow-hidden py-28 md:py-40"
+      style={{
+        background: bg || SAND,
+        color: fg || INK,
+        '--mer-am-ink': fg || INK,
+        '--mer-am-paper': bg || SAND,
+      }}
     >
       <div ref={titleWrap} className="px-6 text-center md:px-16">
         <h2
@@ -163,14 +175,15 @@ export default function Amenities({
           <span aria-hidden="true" className="h-px w-6 bg-current opacity-40" />
           {label}
         </p>
-        <div aria-hidden="true" className="relative h-px w-[110px] bg-[#2a2622]/15 md:w-[150px]">
-          <span ref={barRef} className="absolute inset-y-[-0.5px] left-0 h-[2px] bg-[#2a2622]" />
+        <div aria-hidden="true" className="relative h-px w-[110px] md:w-[150px]" style={{ background: mix(15) }}>
+          <span ref={barRef} className="absolute inset-y-[-0.5px] left-0 h-[2px] bg-current" />
         </div>
       </div>
 
       <div
         ref={trackRef}
-        className="mer-am-track flex cursor-grab overflow-x-auto border-t border-[#2a2622]/10 select-none"
+        className="mer-am-track flex cursor-grab overflow-x-auto border-t select-none"
+        style={{ borderColor: mix(10) }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -180,9 +193,10 @@ export default function Amenities({
           <article
             key={i}
             data-open={open === i}
-            className="mer-am-card w-[82vw] shrink-0 border-r border-[#2a2622]/10 p-5 md:w-[593px] md:p-8"
+            className="mer-am-card w-[82vw] shrink-0 border-r p-5 md:w-[593px] md:p-8"
+            style={{ borderColor: mix(10) }}
           >
-            <div className="relative aspect-[4/3] overflow-hidden bg-[#d9d3c7]">
+            <div className="relative aspect-[4/3] overflow-hidden" style={{ background: mix(6) }}>
               <p
                 className="absolute inset-0 overflow-auto p-6 text-[12px] leading-[1.5] uppercase"
                 style={{ fontFamily: "'Space Mono', monospace" }}
@@ -190,13 +204,15 @@ export default function Amenities({
                 {it.text || BODY}
               </p>
               <div className="mer-am-photo absolute inset-0">
-                <img
-                  src={it.img}
-                  alt=""
-                  draggable={false}
-                  loading="lazy"
-                  className="mer-am-img pointer-events-none absolute inset-x-0 -top-[8%] h-[116%] w-full object-cover"
-                />
+                {it.img && (
+                  <img
+                    src={it.img}
+                    alt=""
+                    draggable={false}
+                    loading="lazy"
+                    className="mer-am-img pointer-events-none absolute inset-x-0 -top-[8%] h-[116%] w-full object-cover"
+                  />
+                )}
               </div>
             </div>
             <div className="mt-5 flex items-center justify-between">
@@ -237,11 +253,11 @@ export default function Amenities({
         .mer-am-photo { clip-path: circle(150% at calc(100% - 24px) calc(100% - 24px)); transition: clip-path 1s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-am-card[data-open="true"] .mer-am-photo { clip-path: circle(0px at calc(100% - 24px) calc(100% - 24px)); }
 
-        .mer-am-btn { color: ${INK}; border: 1px solid rgba(42, 38, 34, 0.22); transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease; }
-        .mer-am-fill { background: rgba(42, 38, 34, 0.14); clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-am-btn { color: var(--mer-am-ink); border: 1px solid ${mix(22)}; transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease; }
+        .mer-am-fill { background: ${mix(14)}; clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-am-btn:hover .mer-am-fill { clip-path: circle(75% at 50% 50%); }
         .mer-am-plus { transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-        .mer-am-card[data-open="true"] .mer-am-btn { background: ${INK}; color: #f0eae0; border-color: ${INK}; }
+        .mer-am-card[data-open="true"] .mer-am-btn { background: var(--mer-am-ink); color: var(--mer-am-paper); border-color: var(--mer-am-ink); }
         .mer-am-card[data-open="true"] .mer-am-fill { background: transparent; }
         .mer-am-card[data-open="true"] .mer-am-plus { transform: rotate(45deg); }
       `}</style>

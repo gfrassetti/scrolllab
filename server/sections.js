@@ -77,6 +77,18 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   // el frame por FooterAtrium, cero cambios en embed/frame/.
   'atrium/ManifestoType',
   'atrium/ScopeSerif',
+  // Fase G — screening de 15 candidatas en el iframe real a 375/768/1280
+  // (docs/hosted-component-plan.md). Todo texto, link, foto y color editable.
+  'meridian/Footer',
+  'meridian/Interior',
+  'meridian/Amenities',
+  'meridian/Panorama',
+  'kin/Rooms',
+  'kin/Footer',
+  'monolith/SpecSheet',
+  'unity/LastPortrait',
+  'velocity/ParallaxRise',
+  'chapters/ParallaxEditorial',
   // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
   // scroll de window, boot que bloquea scroll): dentro del iframe del embed
   // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:

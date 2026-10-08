@@ -28,6 +28,23 @@ const stubMedia = {
   },
 }
 
+// Fotos demo que viven en `public/` del sitio (`'/meridian/gallery/01.webp'`):
+// dentro del iframe una ruta relativa apunta al origen del embed y da 404. Se
+// reescriben a URL completa del sitio, que ya las sirve. Solo los defaults del
+// código: lo que el cliente carga en LAB ya es https:// (el server lo exige).
+const SITE_ORIGIN = process.env.EMBED_SITE_ORIGIN || 'https://www.scrolllab.com.ar'
+const SITE_ASSET_DIRS = ['meridian']
+const siteAssets = {
+  name: 'embed-site-assets',
+  enforce: 'pre',
+  transform(code, id) {
+    if (!id.includes('/src/components/sections/')) return null
+    const re = new RegExp(`(['"\`])/(${SITE_ASSET_DIRS.join('|')})/`, 'g')
+    if (!re.test(code)) return null
+    return { code: code.replace(re, `$1${SITE_ORIGIN}/$2/`), map: null }
+  },
+}
+
 // `vh`/`svh` → viewport del sitio, no del iframe (ver hostViewportUnits.js).
 const hostViewport = {
   name: 'embed-host-viewport-units',
@@ -56,7 +73,7 @@ export default defineConfig({
   root: path.resolve(here, 'frame'),
   base: './', // se sirve desde /frame/ o /embed/v1/frame/ — rutas relativas
   publicDir: false,
-  plugins: [stubMedia, tailwindcss(), hostViewport],
+  plugins: [stubMedia, siteAssets, tailwindcss(), hostViewport],
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),
     // Sitios que pueden usar el frame como vista previa del editor de LAB
@@ -79,6 +96,11 @@ export default defineConfig({
       {
         find: '../../../lib/gsap',
         replacement: path.resolve(here, 'src/gsap.js'),
+      },
+      // Lenis → puente "volver arriba" al host (ver src/lenis.js)
+      {
+        find: '../../../hooks/useLenis',
+        replacement: path.resolve(here, 'src/lenis.js'),
       },
     ],
   },

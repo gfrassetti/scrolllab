@@ -826,6 +826,113 @@ coherente con el "one-shot" de arriba — no necesariamente un bug.
 
 ---
 
+## Fase G — 10 más de los templates nuevos, 33 hosteables en total (2026-10)
+
+`meridian/Footer` · `meridian/Interior` · `meridian/Amenities` ·
+`meridian/Panorama` · `kin/Rooms` · `kin/Footer` · `monolith/SpecSheet` ·
+`unity/LastPortrait` · `velocity/ParallaxRise` · `chapters/ParallaxEditorial`.
+
+### Cómo se eligieron: screening en el iframe real, no lectura de código
+
+15 candidatas de las 72 no hosteables, embebidas de verdad (loader → iframe
+cross-origin → frame) en un host plano a 375 / 768 / 1280, con capturas de la
+página entera. Entraron las que se ven completas en FLOW: entrada `once`, o
+scrub que con el viewport del frame igual al alto de la sección queda en su
+pose final (reveals `top 75%`) o en el punto medio de un parallax (no se nota).
+
+Quedaron afuera, con el motivo:
+
+| Sección | Por qué no |
+|---|---|
+| `contact/ContactForm`, `fizz/ContactSteps`, `meridian/Contact` | Formularios: el sandbox no trae `allow-forms` (el submit ni se dispara) y sin endpoint propio el modo demo se traga mensajes reales. ContactSteps además hace autofocus y le roba el foco a la página del cliente. Necesitan un backend de LAB que mande el mail al dueño. |
+| `commerce/ProductGrid` | Depende del router, el carrito y la página de producto del sitio. |
+| `fizz/FlavorWorlds` | Botella 3D + sticky. |
+| `atelier/HeroMeaning` | Se ve bien, pero mete Three.js en el bundle: el frame pasaba de ~69 KB a 229 KB gzip, y como el bundle es único a propósito lo pagaría **cada** embed. Antes hace falta un chunk aparte por sección pesada. |
+| `meridian/GallerySlider`, `chapters/StackingCards`, `nocturne/StickyWordCycle`, `kin/Intro` | Sticky / runway: en el iframe no hay scroll que los maneje. |
+| `atelier/ServicesStone` | Pineada (el modo PIN no está listo). |
+| `meridian/Masterplan` | Los puntos están dibujados sobre una foto aérea específica: con otra foto no significan nada. |
+| `fizz/PopManifesto`, `unity/LanguageBlock`, `meridian/Concept` | Reveal por scroll que en el frame queda a medias. |
+| `unity/StageLines` | El segundo titular queda atenuado al 67 %. |
+| `Nav*` | Por diseño no tienen sentido como sección suelta. |
+
+### Edición total
+
+Todo texto, link, foto y color visible es una prop, con default igual al de
+antes (el template no cambia). Lo nuevo por sección:
+
+- **meridian/Footer** — monograma, cada etiqueta (con fallback al diccionario
+  de idioma: la prop gana), links de "villas" / privacidad / términos, lista
+  `socials` (Facebook, Instagram y WhatsApp llevan su ícono por nombre; otra red
+  muestra su inicial), `bg`/`fg` vía variables CSS (`--mer-ft-*` + `color-mix`
+  para las líneas y los botones).
+- **meridian/Interior** — párrafo por slide (`links[].text`) y los puntos sobre
+  la foto como lista `spots` (slide, x %, y %, título, texto). Los puntos demo
+  están ubicados sobre las fotos demo: aparecen solo mientras los links son los
+  de ejemplo; con fotos propias no hay puntos hasta que `spots` los ubique. Una
+  coordenada mal tipeada pone el punto en el centro (se ve y se corrige) y el
+  punto nunca queda medio afuera de la foto. El tooltip usa los colores
+  invertidos.
+- **meridian/Amenities**, **meridian/Panorama**, **unity/LastPortrait** — `bg`/`fg`
+  (hairlines y estados en `color-mix` del color de texto). Sin foto, el hueco
+  queda en un tono del color de texto en vez de un `<img>` roto.
+- **kin/Rooms** — link por fila, `bg`/`fg`/`accent`.
+- **kin/Footer** — columnas de texto (`columns`: título + líneas) y columna de
+  links (`linksTitle` + `links`), `bg`/`fg`/`accent` (las barras de la palabra
+  usan el color de texto; la de acento, el acento).
+- **monolith/SpecSheet** — filas (`specs`: dato/valor), la etiqueta "Unit",
+  `bg`/`fg` (la inversión del hover usa los dos). Un valor larguísimo sin
+  espacios corta en vez de salirse de la celda.
+- **velocity/ParallaxRise** — foto de fondo, link del botón, `bg` (también el
+  color del velo), `fg`, `accent` (eyebrow y botón).
+- **chapters/ParallaxEditorial** — `figures` (foto + epígrafe, hasta 4: las
+  posiciones y velocidades son las del diseño, por orden), etiqueta de
+  capítulo, `bg`/`fg`.
+
+KIN de paso: las etiquetas en tablet (768) eran `0.82vw` ≈ 6 px; ahora
+`max(11px, 0.82vw)` en Rooms y Footer (en desktop no cambia).
+
+### Infra del frame que hizo falta
+
+- **El iframe quedaba más alto que el contenido.** `postHeight()` medía
+  `documentElement.scrollHeight`, que nunca baja del viewport del propio iframe:
+  si la sección se achicaba después de la primera medida (fuentes que cargan y
+  reacomodan líneas), quedaba una franja vacía abajo para siempre (SpecSheet a
+  375: iframe 775 px, contenido 730). Ahora se mide `#root` y los
+  ResizeObserver observan `#root`. El e2e lo fija para las 33: el iframe no
+  puede quedar más de 3 px más alto que el contenido.
+- **Fotos demo de MERIDIAN** (`/meridian/gallery/*.webp`, en `public/` del sitio):
+  dentro del iframe una ruta relativa apunta al origen del embed y da 404 (el
+  404 de Panorama en el screening). El build del embed las reescribe a URL
+  completa del sitio (`siteAssets` en `embed/vite.config.js`). Lo que carga el
+  cliente ya es `https://` (el servidor lo exige).
+- **"Volver arriba" de KIN**: `hooks/useLenis` tiene alias a
+  `embed/src/lenis.js`, que manda `scrolllab:anchor #top` al loader — sube la
+  página del cliente, igual que un link `#top`. De paso Lenis sale del bundle.
+- Fuentes nuevas en el frame: Oswald (`--font-oswald`), Fraunces, Space Mono,
+  Inter Tight, Archivo (ancho 62–125).
+
+Bundle del frame: 89 KB gzip (antes de la fase, ~69 KB).
+
+### Tests
+
+- `server/__tests__/hostedSections.test.js` — para **cada** sección de
+  `HOSTABLE_SECTIONS` (no solo las nuevas): cada campo declarado pasa igual por
+  el filtro del editor y por el del servidor (si no coinciden, el cliente edita
+  algo que nunca ve publicado); `javascript:` cae arriba y dentro de listas;
+  colores inválidos caen; imágenes relativas no se guardan en LAB; cada lista
+  respeta su tope. Más los casos propios de Fase G.
+- `embed/__tests__/frameAssets.test.js` — cada clase `font-*` y cada
+  `fontFamily` inline de cada hosteable existe en el frame, y el registro del
+  embed coincide con `HOSTABLE_SECTIONS` (ni falta una, ni carga una que el
+  servidor no deja hostear). Es la guarda del bug `.atrium-lead` de Fase F.
+- e2e: un caso por sección (`checkFg`: fondo y color de texto llegan a la
+  sección), el "volver arriba" de KIN sube el host, y el chequeo nuevo de alto.
+- `check:builder`: los mismos 12 problemas que `HEAD` (todos de fizz, previos);
+  ninguno nuevo. `meridian/Interior` suma excepciones con motivo en
+  `NOT_IN_DOM` (coordenadas, párrafos de otros slides, texto del tooltip).
+
+---
+
 ## No se toca
 
 - Builder → template/sección ZIP, pago único, Checkout Pro.

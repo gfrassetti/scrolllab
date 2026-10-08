@@ -43,6 +43,21 @@ import HelmetGrid from '../../src/components/sections/velocity/HelmetGrid.jsx'
 // altura tarda más pasadas en converger, no rompe). Atrium ya tokenizado.
 import ManifestoType from '../../src/components/sections/atrium/ManifestoType.jsx'
 import ScopeSerif from '../../src/components/sections/atrium/ScopeSerif.jsx'
+// Fase G — sin pin ni runway: reveals `once` o scrub que en FLOW queda en su
+// pose final (o en el punto medio de un parallax, que no se nota). Las fotos
+// demo de MERIDIAN viven en public/ del sitio: el build las pide con URL
+// completa (siteAssets en embed/vite.config.js). El "volver arriba" de KIN
+// sube la página del cliente (embed/src/lenis.js).
+import MeridianFooter from '../../src/components/sections/meridian/Footer.jsx'
+import MeridianInterior from '../../src/components/sections/meridian/Interior.jsx'
+import MeridianAmenities from '../../src/components/sections/meridian/Amenities.jsx'
+import MeridianPanorama from '../../src/components/sections/meridian/Panorama.jsx'
+import KinRooms from '../../src/components/sections/kin/Rooms.jsx'
+import KinFooter from '../../src/components/sections/kin/Footer.jsx'
+import SpecSheet from '../../src/components/sections/monolith/SpecSheet.jsx'
+import LastPortrait from '../../src/components/sections/unity/LastPortrait.jsx'
+import ParallaxRise from '../../src/components/sections/velocity/ParallaxRise.jsx'
+import ParallaxEditorial from '../../src/components/sections/chapters/ParallaxEditorial.jsx'
 import { MODEL_WRAPPER_CLASS } from '../../src/lib/modelWrappers.js'
 
 const SECTIONS = {
@@ -69,6 +84,16 @@ const SECTIONS = {
   'velocity/HelmetGrid': HelmetGrid,
   'atrium/ManifestoType': ManifestoType,
   'atrium/ScopeSerif': ScopeSerif,
+  'meridian/Footer': MeridianFooter,
+  'meridian/Interior': MeridianInterior,
+  'meridian/Amenities': MeridianAmenities,
+  'meridian/Panorama': MeridianPanorama,
+  'kin/Rooms': KinRooms,
+  'kin/Footer': KinFooter,
+  'monolith/SpecSheet': SpecSheet,
+  'unity/LastPortrait': LastPortrait,
+  'velocity/ParallaxRise': ParallaxRise,
+  'chapters/ParallaxEditorial': ParallaxEditorial,
 }
 
 /**

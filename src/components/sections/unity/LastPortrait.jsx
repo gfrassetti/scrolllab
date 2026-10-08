@@ -22,6 +22,8 @@ export default function LastPortrait({
   stat2Value = '00',
   stat3Label = 'STAT 3',
   stat3Value = '00',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -66,7 +68,8 @@ export default function LastPortrait({
     <section
       ref={root}
       id="last"
-      className="relative overflow-hidden bg-[#0a0a0a] px-5 py-24 text-[#e7e4dc] md:px-10 md:py-32"
+      className="relative overflow-hidden px-5 py-24 md:px-10 md:py-32"
+      style={{ background: bg || '#0a0a0a', color: fg || '#e7e4dc' }}
     >
       <h2
         data-last-rise
@@ -77,16 +80,21 @@ export default function LastPortrait({
 
       <div className="mt-12 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-5">
-          <div className="relative aspect-[4/5] overflow-hidden">
-            <img
-              data-last-img
-              {...imgAttrs(img, variants)}
-              sizes="(min-width: 1024px) 40vw, 100vw"
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-cover will-change-transform"
-            />
+          <div
+            className="relative aspect-[4/5] overflow-hidden"
+            style={{ background: 'color-mix(in srgb, currentColor 8%, transparent)' }}
+          >
+            {img && (
+              <img
+                data-last-img
+                {...imgAttrs(img, variants)}
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover will-change-transform"
+              />
+            )}
           </div>
         </div>
 
@@ -96,7 +104,7 @@ export default function LastPortrait({
           </p>
           <p
             data-last-rise
-            className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-[#e7e4dc]/75 md:text-base"
+            className="mt-5 max-w-[46ch] text-[15px] leading-relaxed opacity-75 md:text-base"
           >
             {body}
           </p>
@@ -107,20 +115,21 @@ export default function LastPortrait({
           >
             {question}
           </h3>
-          <p data-last-rise className="mt-3 max-w-[36ch] text-sm text-[#e7e4dc]/60">
+          <p data-last-rise className="mt-3 max-w-[36ch] text-sm opacity-60">
             {caption}
           </p>
 
           <dl
             data-last-rise
-            className="mt-12 grid grid-cols-3 gap-4 border-t border-white/15 pt-6"
+            className="mt-12 grid grid-cols-3 gap-4 border-t pt-6"
+            style={{ borderColor: 'color-mix(in srgb, currentColor 15%, transparent)' }}
           >
             {[
               [stat1Label, stat1Value],
               [stat2Label, stat2Value],
               [stat3Label, stat3Value],
-            ].map(([label, value]) => (
-              <div key={label}>
+            ].map(([label, value], i) => (
+              <div key={i} className="min-w-0 break-words">
                 <dt className="text-[11px] tracking-[0.22em] uppercase opacity-45">
                   {label}
                 </dt>

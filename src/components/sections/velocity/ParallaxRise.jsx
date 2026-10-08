@@ -14,8 +14,15 @@ export default function ParallaxRise({
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.',
   cta = 'CTA label',
   img = parallaxImg,
+  ctaHref = '#top',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
+  const base = bg || '#000000'
+  // the veils are the base colour at different strengths (black in the demo)
+  const veil = (pct) => `color-mix(in srgb, ${base} ${pct}%, transparent)`
 
   useGSAP(
     () => {
@@ -72,27 +79,37 @@ export default function ParallaxRise({
   return (
     <section
       ref={root}
-      className="relative min-h-[95svh] overflow-hidden border-t border-white/10 bg-black text-[#ece9e2]"
+      className="relative min-h-[95svh] overflow-hidden border-t"
+      style={{
+        background: base,
+        color: fg || '#ece9e2',
+        borderColor: 'color-mix(in srgb, currentColor 10%, transparent)',
+        '--rise-accent': accent || 'var(--color-acid, #d9ff3f)',
+      }}
     >
       <div className="absolute inset-0 overflow-hidden">
-        <img
-          data-rise-bg
-          {...imgAttrs(img, variants)}
-          sizes="(max-aspect-ratio: 3/2) 210vh, 100vw"
-          loading="lazy"
-          decoding="async"
-          alt=""
-          className="absolute inset-x-0 -top-[18%] h-[145%] w-full origin-center object-cover will-change-transform"
-        />
+        {img && (
+          <img
+            data-rise-bg
+            {...imgAttrs(img, variants)}
+            sizes="(max-aspect-ratio: 3/2) 210vh, 100vw"
+            loading="lazy"
+            decoding="async"
+            alt=""
+            className="absolute inset-x-0 -top-[18%] h-[145%] w-full origin-center object-cover will-change-transform"
+          />
+        )}
         <div
           data-rise-veil
-          className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/25"
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(to top, ${base}, ${veil(55)}, ${veil(25)})` }}
         />
         {/* Fijo, debajo del texto: el velo de arriba se anima y a mitad de
             camino la foto (el tablero) competía con el cuerpo en mobile. */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/35 to-transparent md:from-black/55"
+          className="rise-floor absolute inset-x-0 bottom-0 h-2/3"
+          style={{ '--rise-floor': veil(80), '--rise-floor-md': veil(55), '--rise-mid': veil(35) }}
         />
       </div>
 
@@ -100,22 +117,27 @@ export default function ParallaxRise({
         data-rise-copy
         className="relative z-10 flex min-h-[95svh] flex-col justify-end px-5 py-16 md:px-10 md:py-24"
       >
-        <p className="text-[11px] tracking-[0.25em] text-acid uppercase">
+        <p className="text-[11px] tracking-[0.25em] text-[var(--rise-accent)] uppercase">
           {eyebrow}
         </p>
         <h2 className="mt-3 max-w-[14ch] font-brico text-[clamp(2.4rem,7vw,5rem)] leading-[0.92] font-semibold tracking-[-0.04em]">
           {title}
         </h2>
-        <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-white/80 md:text-base">
+        <p className="mt-5 max-w-[42ch] text-sm leading-relaxed opacity-80 md:text-base">
           {body}
         </p>
         <a
-          href="#top"
-          className="ui-press tpl-hit relative mt-8 inline-flex w-fit border border-acid bg-acid px-5 py-2.5 text-[11px] font-medium tracking-[0.22em] text-black uppercase transition-opacity hover:opacity-90"
+          href={ctaHref}
+          className="ui-press tpl-hit relative mt-8 inline-flex w-fit border border-[var(--rise-accent)] bg-[var(--rise-accent)] px-5 py-2.5 text-[11px] font-medium tracking-[0.22em] uppercase transition-opacity hover:opacity-90"
+          style={{ color: base }}
         >
           {cta}
         </a>
       </div>
+      <style>{`
+        .rise-floor { background: linear-gradient(to top, var(--rise-floor), var(--rise-mid), transparent); }
+        @media (min-width: 768px) { .rise-floor { background: linear-gradient(to top, var(--rise-floor-md), var(--rise-mid), transparent); } }
+      `}</style>
     </section>
   )
 }

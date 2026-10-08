@@ -37,15 +37,25 @@ const defaultFigures = [
  * word floats behind the composition.
  *
  * Calma: cada figura queda en su lugar (sin deriva) y entra con un fundido.
+ *
+ * Editable: `figures` ({ caption, img }) — position and drift speed come
+ * from the four slots above, by order, so any photos keep the composition.
  */
 export default function ParallaxEditorial({
   chapter = '04',
   total = '06',
   label = 'Editorial drift',
   ghostWord = 'ARCHIVE',
-  figures = defaultFigures,
+  figures,
+  chapterLabel = 'Chapter',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  const valid = figures?.filter((f) => f?.img || f?.caption)
+  const list = valid?.length
+    ? valid.slice(0, defaultFigures.length).map((f, i) => ({ ...defaultFigures[i], caption: f.caption || '', img: f.img || '' }))
+    : defaultFigures
 
   useGSAP(
     () => {
@@ -66,14 +76,21 @@ export default function ParallaxEditorial({
         })
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [list.length], revertOnUpdate: true },
   )
 
   return (
-    <section ref={root} className="relative overflow-hidden px-5 py-28 md:px-10 md:py-44">
-      <div className="mb-14 flex items-baseline justify-between border-t border-ink/15 pt-4 md:mb-24">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
-          Chapter {chapter} / {total}
+    <section
+      ref={root}
+      className="relative overflow-hidden px-5 py-28 md:px-10 md:py-44"
+      style={{ background: bg || undefined, color: fg || undefined }}
+    >
+      <div
+        className="mb-14 flex items-baseline justify-between border-t pt-4 md:mb-24"
+        style={{ borderColor: 'color-mix(in srgb, currentColor 15%, transparent)' }}
+      >
+        <p className="text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs">
+          {chapterLabel} {chapter} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
@@ -81,27 +98,36 @@ export default function ParallaxEditorial({
       <span
         aria-hidden="true"
         data-parallax="1.05"
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-[24vw] leading-none font-medium tracking-[-0.02em] text-transparent uppercase [-webkit-text-stroke:1px_rgba(22,20,18,0.18)]"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-[24vw] leading-none font-medium tracking-[-0.02em] text-transparent uppercase"
+        style={{ WebkitTextStroke: '1px color-mix(in srgb, currentColor 18%, transparent)' }}
       >
         {ghostWord}
       </span>
 
       <div className="relative grid grid-cols-12 gap-4 md:gap-6">
-        {figures.map((figure) => (
+        {list.map((figure, i) => (
           <figure
-            key={figure.caption}
+            key={i}
             data-parallax={figure.speed}
             className={figure.className}
           >
-            <img
-              {...imgAttrs(figure.img, variants)}
-              sizes="(min-width: 768px) 34vw, 66vw"
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="w-full object-cover"
-            />
-            <figcaption className="mt-2 text-[11px] uppercase tracking-[0.25em] text-ink/60">
+            {figure.img ? (
+              <img
+                {...imgAttrs(figure.img, variants)}
+                sizes="(min-width: 768px) 34vw, 66vw"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="w-full object-cover"
+              />
+            ) : (
+              <div
+                aria-hidden="true"
+                className="aspect-[4/5] w-full"
+                style={{ background: 'color-mix(in srgb, currentColor 8%, transparent)' }}
+              />
+            )}
+            <figcaption className="mt-2 text-[11px] uppercase tracking-[0.25em] opacity-60">
               {figure.caption}
             </figcaption>
           </figure>

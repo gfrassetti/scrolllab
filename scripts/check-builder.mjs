@@ -63,6 +63,11 @@ const NOT_IN_DOM = {
   'contact/ContactForm.errorMessage': 'solo visible si falla el envío',
   'meridian/Masterplan.units.line1': 'tooltip: aparece al pasar el mouse por el punto',
   'meridian/Masterplan.units.line2': 'tooltip: aparece al pasar el mouse por el punto',
+  'meridian/Interior.links.text': 'párrafo del slide: se ve el del slide activo, los otros al elegirlos',
+  'meridian/Interior.spots.slide': 'número de slide: elige en qué foto va el punto, no es texto',
+  'meridian/Interior.spots.x': 'coordenada: posiciona el punto, no es texto',
+  'meridian/Interior.spots.y': 'coordenada: posiciona el punto, no es texto',
+  'meridian/Interior.spots.body': 'tooltip: aparece al tocar el punto (el título sí está, en su aria-label)',
 }
 
 const ROUTES = ['/', '/builder', '/cart', '/login']

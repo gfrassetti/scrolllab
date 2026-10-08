@@ -21,6 +21,8 @@ export default function Panorama({
   ctaLabel = 'Explore Panorama',
   ctaHref = '#',
   image = '/meridian/gallery/panorama.webp',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const imgRef = useRef(null)
@@ -29,15 +31,17 @@ export default function Panorama({
   useGSAP(
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-      gsap.fromTo(
-        imgRef.current,
-        { yPercent: -7 },
-        {
-          yPercent: 7,
-          ease: 'none',
-          scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: true },
-        },
-      )
+      if (imgRef.current) {
+        gsap.fromTo(
+          imgRef.current,
+          { yPercent: -7 },
+          {
+            yPercent: 7,
+            ease: 'none',
+            scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: true },
+          },
+        )
+      }
       const split = new SplitText(titleRef.current, { type: 'chars' })
       gsap.set(split.chars, { opacity: 0, yPercent: 30, filter: 'blur(6px)' })
       gsap.to(split.chars, {
@@ -50,22 +54,25 @@ export default function Panorama({
         scrollTrigger: { trigger: titleRef.current, start: 'top 88%', once: true },
       })
     },
-    { scope: root, dependencies: [title], revertOnUpdate: true },
+    { scope: root, dependencies: [title, image], revertOnUpdate: true },
   )
 
   return (
     <section
       ref={root}
       id="panorama"
-      className="relative h-[80svh] overflow-hidden bg-[#2a2622] text-white"
+      className="relative h-[80svh] overflow-hidden"
+      style={{ background: bg || '#2a2622', color: fg || '#ffffff' }}
     >
-      <img
-        ref={imgRef}
-        src={image}
-        alt=""
-        draggable={false}
-        className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover will-change-transform"
-      />
+      {image && (
+        <img
+          ref={imgRef}
+          src={image}
+          alt=""
+          draggable={false}
+          className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover will-change-transform"
+        />
+      )}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -109,10 +116,10 @@ export default function Panorama({
       </h2>
 
       <style>{`
-        .mer-pano-ring { position: absolute; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.4); animation: mer-pano-pulse 4.5s ease-in-out infinite; }
+        .mer-pano-ring { position: absolute; border-radius: 9999px; border: 1px solid color-mix(in srgb, currentColor 40%, transparent); animation: mer-pano-pulse 4.5s ease-in-out infinite; }
         .mer-pano-ring-1 { inset: 22%; }
-        .mer-pano-ring-2 { inset: 8%; animation-delay: 0.6s; border-color: rgba(255,255,255,0.28); }
-        .mer-pano-ring-3 { inset: -8%; animation-delay: 1.2s; border-color: rgba(255,255,255,0.16); }
+        .mer-pano-ring-2 { inset: 8%; animation-delay: 0.6s; border-color: color-mix(in srgb, currentColor 28%, transparent); }
+        .mer-pano-ring-3 { inset: -8%; animation-delay: 1.2s; border-color: color-mix(in srgb, currentColor 16%, transparent); }
         @keyframes mer-pano-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 0.5; } }
         .mer-pano-cta span:last-child { transition: letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-pano-cta:hover span:last-child { letter-spacing: 0.22em; }
