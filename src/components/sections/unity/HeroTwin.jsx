@@ -13,6 +13,8 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
 export default function HeroTwin({
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
   headline = 'HEADLINE 1.\nHEADLINE 2.',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -46,7 +48,11 @@ export default function HeroTwin({
     <section
       ref={root}
       id="start"
-      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#e7e4dc] px-5 pt-24 pb-20 text-[#0a0a0a] md:px-10"
+      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-(--sec-bg) px-5 pt-24 pb-20 text-current md:px-10"
+      style={{
+        '--sec-bg': bg || '#e7e4dc',
+        color: fg || '#0a0a0a',
+      }}
     >
       <div className="relative mx-auto w-full max-w-5xl text-center calm:flex calm:flex-col-reverse calm:items-center calm:gap-8">
         <p

@@ -37,7 +37,7 @@ const defaultScenes = [
  * calma no hay columna pegada: cada paso va con su foto en línea, en todos los
  * anchos, y entra con un fundido.
  */
-export default function ProcessPin({ label = 'Approach', scenes = defaultScenes }) {
+export default function ProcessPin({ label = 'Approach', scenes = defaultScenes , bg, fg }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
 
@@ -123,6 +123,14 @@ export default function ProcessPin({ label = 'Approach', scenes = defaultScenes 
       ref={root}
       id="approach"
       className="bg-atrium-paper px-5 pb-[18svh] text-atrium-ink md:px-10"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-atrium-paper': bg || undefined,
+        '--atrium-paper': bg || undefined,
+        '--color-atrium-ink': fg || undefined,
+        '--atrium-ink': fg || undefined,
+      }}
     >
       <p className="atrium-note pt-[10svh] pb-[6svh] font-display text-atrium-ink/65">{label}</p>
       <div className="grid gap-10 md:grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)] md:gap-20 calm:md:grid-cols-1">

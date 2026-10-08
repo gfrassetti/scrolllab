@@ -14,6 +14,8 @@ export default function HeroMassing({
   lineTwo = 'Architectural Bureau',
   hint = 'Index',
   img = heroField,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -46,7 +48,14 @@ export default function HeroMassing({
   )
 
   return (
-    <section ref={root} className="sticky top-0 z-0 h-svh overflow-hidden bg-atrium-ink">
+    <section
+      ref={root}
+      className="sticky top-0 z-0 h-svh overflow-hidden bg-atrium-ink"
+      style={{
+        color: fg || '#ffffff',
+        '--color-atrium-ink': bg || undefined,
+      }}
+    >
       <img
         data-hero-media
         {...imgAttrs(img, variants)}
@@ -59,12 +68,12 @@ export default function HeroMassing({
       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/20" />
 
       <div className="relative flex h-full items-end justify-between gap-8 px-5 pb-8 md:px-10 md:pb-10">
-        <p className="atrium-mid font-display text-white">
+        <p className="atrium-mid font-display text-current">
           <span className="block">{lineOne}</span>
           <span className="block pb-[0.08em] italic font-normal">{lineTwo}</span>
         </p>
         {hint ? (
-          <p className="atrium-note hidden shrink-0 pb-[0.6em] tracking-[0.22em] text-white/70 uppercase md:block">
+          <p className="atrium-note hidden shrink-0 pb-[0.6em] tracking-[0.22em] text-current/70 uppercase md:block">
             {hint}
           </p>
         ) : null}

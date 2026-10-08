@@ -25,6 +25,7 @@ import { ARTWORKS } from './artworks'
  * visible, nothing hidden.
  */
 
+const INK = '#141414'
 const ACCENT = '#e1371f'
 const DISPLAY = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '125%', fontVariationSettings: "'wdth' 125" }
 const pad = (n) => String(n).padStart(2, '0')
@@ -45,7 +46,21 @@ export default function Collection({
   items = ARTWORKS,
   ctaLabel = 'Learn more',
   ctaHref = '#',
+  bg,
+  fg,
+  accent: accentProp,
 }) {
+  // Papel (bg), tinta (fg) y acento editables. Las clases leen --kin-*; lo
+  // que anima GSAP usa los valores resueltos.
+  const inkColor = fg || INK
+  const accentColor = accentProp || ACCENT
+  const kinVars = {
+    background: bg || undefined,
+    color: inkColor,
+    '--kin-ink': inkColor,
+    '--kin-paper': bg || '#e1e2de',
+    '--kin-accent': accentColor,
+  }
   const rootRef = useRef(null)
   const pinRef = useRef(null)
   const frameRef = useRef(null)
@@ -173,7 +188,7 @@ export default function Collection({
       <ul>
         {items.map((it) => (
           <li key={it.name} data-kin-name data-on="false" className="kin-name flex items-center gap-[0.5em]">
-            <span aria-hidden="true" className="kin-name-mark inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: ACCENT }} />
+            <span aria-hidden="true" className="kin-name-mark inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: 'var(--kin-accent, #e1371f)' }} />
             {it.name}
           </li>
         ))}
@@ -183,7 +198,7 @@ export default function Collection({
 
   const cta = (
     <a data-kin-cl-late href={ctaHref} className="kin-more tpl-hit relative flex w-full max-w-[30em] items-center justify-between py-[0.6em]">
-      <span aria-hidden="true" className="kin-more-line absolute inset-x-0 top-0 h-px bg-[#141414]" />
+      <span aria-hidden="true" className="kin-more-line absolute inset-x-0 top-0 h-px bg-(--kin-ink)" />
       <span>{ctaLabel}</span>
       <span aria-hidden="true" className="relative inline-block h-[1em] w-[1.2em] overflow-hidden">
         <svg viewBox="0 0 14 12" className="kin-more-arrow absolute inset-0 h-full w-full" fill="none" stroke="currentColor" strokeWidth="1.3">
@@ -198,7 +213,12 @@ export default function Collection({
 
   if (calm) {
     return (
-      <section ref={rootRef} id="collection" className="relative z-[46] bg-[#e1e2de] px-[4.5vw] py-[14svh] text-[#141414] md:px-[1.25vw]">
+      <section
+        ref={rootRef}
+        id="collection"
+        className="relative z-[46] bg-(--kin-paper) px-[4.5vw] py-[14svh] text-(--kin-ink) md:px-[1.25vw]"
+        style={kinVars}
+      >
         <h2 className="text-[9vw] leading-[0.94] font-semibold uppercase md:text-[5.4vw]" style={DISPLAY}>
           {heading.map((l) => (
             <span key={l} className="block">
@@ -225,31 +245,36 @@ export default function Collection({
   }
 
   return (
-    <section ref={rootRef} id="collection" className="relative z-[46] bg-[#e1e2de] text-[#141414]">
+    <section
+      ref={rootRef}
+      id="collection"
+      className="relative z-[46] bg-(--kin-paper)"
+      style={kinVars}
+    >
       <div ref={pinRef} className="relative h-svh overflow-hidden">
         {/* Triptych side panels: the 2nd and 3rd works, full height. */}
         {[1, 2].map((k) => (
           <div
             key={k}
             data-kin-tri
-            className="kin-grain absolute top-0 h-full overflow-hidden bg-[#141414]"
+            className="kin-grain absolute top-0 h-full overflow-hidden bg-(--kin-ink)"
             style={{ left: `${(k * 100) / 3}%`, width: `${100 / 3 + 0.05}%` }}
           >
             <div className="h-full w-full">
               <Work item={items[k]} />
             </div>
-            <div data-kin-tri-shade className="pointer-events-none absolute inset-0 bg-[#141414] opacity-0" />
+            <div data-kin-tri-shade className="pointer-events-none absolute inset-0 bg-(--kin-ink) opacity-0" />
           </div>
         ))}
 
         {/* The stack: first third of the triptych, then the left column. */}
-        <div ref={frameRef} className="kin-grain absolute top-0 left-0 z-10 h-full w-[33.34%] overflow-hidden bg-[#141414]">
+        <div ref={frameRef} className="kin-grain absolute top-0 left-0 z-10 h-full w-[33.34%] overflow-hidden bg-(--kin-ink)">
           {items.map((it, i) => (
             <div key={it.name} data-kin-work className="absolute inset-0 overflow-hidden" style={{ zIndex: i }}>
               <div data-kin-work-inner className="h-full w-full">
                 <Work item={it} />
               </div>
-              <div data-kin-work-shade className="pointer-events-none absolute inset-0 bg-[#141414] opacity-0" />
+              <div data-kin-work-shade className="pointer-events-none absolute inset-0 bg-(--kin-ink) opacity-0" />
             </div>
           ))}
         </div>
@@ -310,7 +335,7 @@ const STYLES = `
   }
   .kin-tick { background: currentColor; opacity: 0.2; transform-origin: 50% 100%; transition: opacity 300ms ease, transform 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)), background-color 300ms ease; }
   .kin-tick[data-state='past'] { opacity: 1; }
-  .kin-tick[data-state='on'] { opacity: 1; background: ${ACCENT}; transform: scaleY(1.45); }
+  .kin-tick[data-state='on'] { opacity: 1; background: var(--kin-accent, #e1371f); transform: scaleY(1.45); }
   .kin-name { opacity: 0.32; transition: opacity 420ms ease; }
   .kin-name[data-on='true'] { opacity: 1; }
   .kin-name-mark { transform: scaleY(0); transform-origin: 50% 100%; transition: transform 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }

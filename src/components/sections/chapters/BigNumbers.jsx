@@ -69,7 +69,7 @@ export default function BigNumbers({ stats = defaultStats, bg, fg }) {
     <section
       ref={root}
       className="border-t border-ink/15 px-5 py-20 md:px-10 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined }}
     >
       <div className="grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-4">
         {rows.map((stat, i) => (

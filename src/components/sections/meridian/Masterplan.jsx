@@ -59,7 +59,10 @@ const DEFAULT_UNITS = OUTLINES.map((_, i) => ({
 const INK = '#2a2622'
 const SAND = '#dfd8cf'
 
-export default function Masterplan({ units }) {
+export default function Masterplan({ units, bg, fg }) {
+  // bg / fg: la tarjeta que se abre sobre cada punto (la foto aérea no cambia)
+  const ink = fg || INK
+  const sand = bg || SAND
   const valid = units?.filter((u) => u?.name || u?.line1)
   const list = (valid?.length ? valid : DEFAULT_UNITS).slice(0, OUTLINES.length)
 
@@ -156,7 +159,11 @@ export default function Masterplan({ units }) {
   const flip = tip && tip[0] / IMG_W > 0.6
 
   return (
-    <section id="masterplan" className="relative bg-[#2a2622]">
+    <section
+      id="masterplan"
+      className="relative bg-[#2a2622]"
+      style={{ '--mer-ink': ink, '--mer-sand': sand }}
+    >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-6 bottom-5 z-20 h-[2px] bg-white/35 min-[1000px]:hidden"
@@ -242,7 +249,7 @@ export default function Masterplan({ units }) {
                 <span aria-hidden="true" className="mer-mp-ring mer-mp-ring-2" />
                 <span
                   className="relative m-auto text-[12px]"
-                  style={{ fontFamily: "'Space Mono', monospace", color: INK }}
+                  style={{ fontFamily: "'Space Mono', monospace", color: ink }}
                 >
                   {i + 1}
                 </span>
@@ -259,8 +266,8 @@ export default function Masterplan({ units }) {
               className="mer-mp-tip pointer-events-none absolute z-10 flex h-[150px] w-[240px] flex-col justify-between p-5 md:h-[170px] md:w-[290px] md:p-6"
               style={{
                 top: `calc(${(tip[1] / IMG_H) * 100}% - 20px)`,
-                background: SAND,
-                color: INK,
+                background: sand,
+                color: ink,
                 ...(flip
                   ? { right: `calc(${100 - (tip[0] / IMG_W) * 100}% + 30px)`, transformOrigin: 'right top' }
                   : { left: `calc(${(tip[0] / IMG_W) * 100}% + 30px)`, transformOrigin: 'left top' }),
@@ -269,7 +276,7 @@ export default function Masterplan({ units }) {
               <span
                 aria-hidden="true"
                 className="absolute top-[14px] h-3.5 w-3.5 rotate-45"
-                style={{ background: SAND, ...(flip ? { right: '-7px' } : { left: '-7px' }) }}
+                style={{ background: sand, ...(flip ? { right: '-7px' } : { left: '-7px' }) }}
               />
               <p
                 className="text-[11px] leading-[1.5] uppercase md:text-[12px]"
@@ -290,7 +297,7 @@ export default function Masterplan({ units }) {
       </div>
 
       <style>{`
-        .mer-mp-arrow { color: #fff; background: rgba(42, 38, 34, 0.45); border: 1px solid rgba(255, 255, 255, 0.55); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .mer-mp-arrow { color: #fff; background: color-mix(in srgb, var(--mer-ink) 45%, transparent); border: 1px solid rgba(255, 255, 255, 0.55); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         .mer-mp-arrow[data-show="true"] { opacity: 1; pointer-events: auto; animation: mer-mp-nudge 2.2s ease-in-out infinite; }
         @keyframes mer-mp-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(calc(var(--dir) * 3px)); } }
         @media (prefers-reduced-motion: reduce) { :where(:root:not([data-motion='full'])) .mer-mp-arrow[data-show="true"] { animation: none; } }

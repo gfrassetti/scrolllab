@@ -377,3 +377,43 @@ describe('sanitizeHostedProps (LAB)', () => {
     })
   })
 })
+
+/**
+ * Builder: quien arma su página tiene que poder verla con su marca antes de
+ * comprar. Toda sección que se ofrece trae color de fondo y de texto
+ * editables; las que no, están acá con el motivo (y no se suman a escondidas).
+ */
+const NO_COLORS = {
+  'chapters/NavMinimal': 'mix-blend-difference: su color sale de lo que tiene detrás',
+  'unity/NavUnity': 'mix-blend-difference: su color sale de lo que tiene detrás',
+  'velocity/NavVelocity': 'transparente sobre el hero: toma el color de la página',
+  'atelier/NavAtelier': 'overlay de pantalla completa con estados propios (pendiente)',
+  'velocity/TrackMerge': 'el fondo oscuro → claro → negro es la coreografía del scroll',
+  'atelier/VisionShutter': 'la persiana cierra hacia el color de la sección siguiente',
+  'atrium/ClarityPair': 'la animación pasa de papel a tinta con colores fijos',
+  'fizz/HeroBubbles': 'la paleta la define el sabor (campo flavor)',
+  'kin/Intro': 'mix-blend-difference sobre la puerta del hero',
+  'contact/ContactForm': 'la paleta la define el tema (campo theme)',
+  'commerce/ProductGrid': 'la paleta la define el tema (campo theme)',
+}
+
+describe('Builder — colores editables', () => {
+  it('cada sección ofrecida tiene bg y fg, salvo las excepciones con motivo', async () => {
+    const { SECTION_IDS } = await import('../../domain/sections.js')
+    const { BUILDER_HIDDEN_SKUS } = await import('../../domain/catalog.js')
+    for (const id of SECTION_IDS) {
+      if (BUILDER_HIDDEN_SKUS.includes(id.split('/')[0])) continue
+      const fields = SECTION_FIELDS[id] || []
+      const keys = fields.map((f) => f.key)
+      // bg + fg, o un par propio (NavFizz: menuBg / menuInk)
+      const has =
+        (keys.includes('bg') && keys.includes('fg')) ||
+        fields.filter((f) => f.type === 'color').length >= 2
+      if (NO_COLORS[id]) {
+        assert.ok(!has, `${id} ya tiene colores: sacala de NO_COLORS`)
+      } else {
+        assert.ok(has, `${id}: falta bg/fg en sectionFields (o sumala a NO_COLORS con el motivo)`)
+      }
+    }
+  })
+})

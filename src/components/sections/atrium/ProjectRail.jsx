@@ -39,6 +39,8 @@ export default function ProjectRail({
   kicker = '(6)',
   title = 'Selected Projects',
   works = defaultWorks,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -91,6 +93,14 @@ export default function ProjectRail({
       ref={root}
       id="work"
       className="bg-atrium-paper px-5 pt-[8svh] pb-[24svh] text-atrium-ink md:px-10 md:pb-[30svh]"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-atrium-paper': bg || undefined,
+        '--atrium-paper': bg || undefined,
+        '--color-atrium-ink': fg || undefined,
+        '--atrium-ink': fg || undefined,
+      }}
     >
       <h2 data-work-head className="atrium-mid mb-[14svh] flex items-start gap-3">
         <span>{title}</span>

@@ -25,6 +25,8 @@ export default function StatField({
   kicker = 'Practice',
   stats = defaultStats,
   closer = 'Placeholder statement — swap this line for your own closing sentence.',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -113,6 +115,14 @@ export default function StatField({
     <section
       ref={root}
       className="bg-atrium-ink px-5 pt-[14svh] pb-[16svh] text-atrium-paper md:px-10"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-atrium-ink': bg || undefined,
+        '--atrium-ink': bg || undefined,
+        '--color-atrium-paper': fg || undefined,
+        '--atrium-paper': fg || undefined,
+      }}
     >
       {kicker ? (
         <p className="atrium-note font-display text-atrium-paper/65">{kicker}</p>

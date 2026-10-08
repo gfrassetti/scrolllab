@@ -19,6 +19,8 @@ export default function HeroMeaning({
   line2 = 'goes here.',
   hint = 'Scroll — the emblem reacts',
   meta = 'Placeholder meta — ©2026',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
@@ -185,7 +187,11 @@ export default function HeroMeaning({
   return (
     <section
       ref={root}
-      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-[#0b0c10] px-5 pt-24 pb-8 text-white md:px-10 md:pt-28"
+      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-(--sec-bg) px-5 pt-24 pb-8 text-current md:px-10 md:pt-28"
+      style={{
+        '--sec-bg': bg || '#0b0c10',
+        color: fg || '#ffffff',
+      }}
     >
       <ScrollFog density={0.7} />
       <canvas
@@ -196,7 +202,7 @@ export default function HeroMeaning({
 
       <p
         data-atelier-meta
-        className="relative z-10 max-w-[36ch] text-[11px] tracking-[0.22em] text-white/45 uppercase"
+        className="relative z-10 max-w-[36ch] text-[11px] tracking-[0.22em] text-current/45 uppercase"
       >
         {meta}
       </p>
@@ -212,17 +218,17 @@ export default function HeroMeaning({
         </h1>
       </div>
 
-      <div className="relative z-10 flex flex-col gap-3 border-t border-white/15 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+      <div className="relative z-10 flex flex-col gap-3 border-t border-current/15 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <p
           data-atelier-meta
-          className="max-w-[40ch] text-sm text-white/55"
+          className="max-w-[40ch] text-sm text-current/55"
         >
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Websites,
           products and systems built for clarity.
         </p>
         <p
           data-atelier-meta
-          className="shrink-0 text-[11px] tracking-[0.22em] text-white/50 uppercase"
+          className="shrink-0 text-[11px] tracking-[0.22em] text-current/50 uppercase"
         >
           {hint} ↓
         </p>

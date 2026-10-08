@@ -54,15 +54,23 @@ const defaultTiles = [
  * 0,7 y entra entero (`calm:scale-[0.7]`).
  */
 export default function OrbitRing({
-  tiles = defaultTiles,
+  tiles,
   lineOne = '0000',
   lineTwo = 'Placeholder year',
   left = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
   right = 'Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam.',
   turn = 290,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
+  // Del builder llegan como lista de { img }; desde código, URLs sueltas.
+  const urls = (tiles || []).map((t) => (typeof t === 'string' ? t : t?.img)).filter(Boolean)
+  // Con pocas fotos el anillo las repite hasta tener al menos 6 (si no, queda ralo).
+  const ring = urls.length
+    ? Array.from({ length: Math.max(urls.length, 6) }, (_, i) => urls[i % urls.length])
+    : defaultTiles
 
   useGSAP(
     () => {
@@ -102,19 +110,31 @@ export default function OrbitRing({
   )
 
   return (
-    <section ref={root} id="foundation" className="relative h-[340svh] bg-atrium-ink text-atrium-paper calm:h-auto">
+    <section
+      ref={root}
+      id="foundation"
+      className="relative h-[340svh] bg-atrium-ink text-atrium-paper calm:h-auto"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-atrium-ink': bg || undefined,
+        '--atrium-ink': bg || undefined,
+        '--color-atrium-paper': fg || undefined,
+        '--atrium-paper': fg || undefined,
+      }}
+    >
       <div data-orbit-pin className="sticky top-0 h-svh overflow-hidden calm:relative">
         <div
           data-orbit-ring
           className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-0 w-0 [--orbit-r:min(34vw,40vh)] will-change-transform calm:scale-[0.7] md:[--orbit-r:min(30vw,46vh)]"
         >
-          {tiles.map((src, i) => (
+          {ring.map((src, i) => (
             <div
               key={`${src}-${i}`}
               data-orbit-tile
               className="absolute top-0 left-0 h-[clamp(4.6rem,23vw,22rem)] w-[clamp(4rem,20vw,19rem)] overflow-hidden md:h-[clamp(8rem,23vw,22rem)] md:w-[clamp(7rem,20vw,19rem)]"
               style={{
-                transform: `rotate(${(360 / tiles.length) * i}deg) translateY(calc(-1 * var(--orbit-r))) translate(-50%, -50%)`,
+                transform: `rotate(${(360 / ring.length) * i}deg) translateY(calc(-1 * var(--orbit-r))) translate(-50%, -50%)`,
               }}
             >
               <img

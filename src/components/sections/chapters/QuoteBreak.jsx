@@ -14,6 +14,9 @@ export default function QuoteBreak({
   label = 'Interlude',
   quote = '“Nobody remembers the page. Everybody remembers how it moved.”',
   attribution = 'Placeholder attribution — someone, somewhere',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -67,6 +70,13 @@ export default function QuoteBreak({
 
   return (
     <section
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--market-ink': bg || undefined,
+        '--market-bone': fg || undefined,
+        '--color-accent': accent || undefined,
+      }}
       ref={root}
       className="flex min-h-svh flex-col justify-between bg-ink px-5 py-10 text-bone md:px-10"
     >

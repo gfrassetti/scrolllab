@@ -59,6 +59,8 @@ export default function MosaicSlider({
   img6,
   img7,
   img8,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -234,7 +236,12 @@ export default function MosaicSlider({
 
   if (reduced) {
     return (
-      <section ref={root} id="peace" className="relative bg-black py-20 text-white md:py-28">
+      <section
+        ref={root}
+        id="peace"
+        className="relative bg-black py-20 text-white md:py-28"
+        style={{ background: bg || undefined, color: fg || undefined }}
+      >
         <div data-calm-reveal className="px-5 text-center">
           <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-[#8fb3a6] uppercase md:text-xs">
             {eyebrow}
@@ -281,6 +288,7 @@ export default function MosaicSlider({
       ref={root}
       id="peace"
       className="relative h-[800vh] bg-black text-white md:h-[860vh]"
+      style={{ background: bg || undefined, color: fg || undefined }}
     >
       <div data-pin className="sticky top-0 h-svh overflow-hidden">
         <div data-track className="absolute inset-0 will-change-transform">

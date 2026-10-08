@@ -19,6 +19,9 @@ export default function ZoomPortal({
   ghostWord = 'CLOSER',
   endCaption = 'Placeholder caption — the scene you were squinting at.',
   img = 'https://picsum.photos/seed/noct-portal/1920/1200',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -56,7 +59,17 @@ export default function ZoomPortal({
   )
 
   return (
-    <section ref={root} className="relative h-[260vh] md:h-[300vh] calm:h-auto">
+    <section
+      ref={root}
+      className="relative h-[260vh] md:h-[300vh] calm:h-auto"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-noir': bg || undefined,
+        '--color-salt': fg || undefined,
+        '--color-acid': accent || undefined,
+      }}
+    >
       <div className="sticky top-0 flex h-svh items-center justify-center overflow-hidden">
         {/* Mientras la sección está pegada arriba, el rótulo baja lo que mide
             la nav fija para no pisarse con ella. */}

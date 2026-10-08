@@ -12,12 +12,22 @@ export default function NavBrutal({
   linksText,
   menuLabel = 'Menu',
   closeLabel = 'Close',
+  bg,
+  fg,
+  accent,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b-2 border-carbon bg-concrete text-carbon">
+    <header
+      className="fixed inset-x-0 top-0 z-50 border-b-2 border-carbon bg-concrete text-carbon"
+      style={{
+        '--color-concrete': bg || undefined,
+        '--color-carbon': fg || undefined,
+        '--color-klein': accent || undefined,
+      }}
+    >
       <nav className="flex items-stretch justify-between">
         <a
           href="#top"

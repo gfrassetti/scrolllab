@@ -319,7 +319,7 @@ export default function Preloader({
       aria-live="polite"
       aria-label="Loading"
       className="fixed inset-0 z-[100] h-svh w-full"
-      style={{ background: SAND, color: INK }}
+      style={{ background: `var(--mer-sand, ${SAND})`, color: `var(--mer-ink, ${INK})` }}
     >
       <svg
         ref={sketchRef}
@@ -328,7 +328,7 @@ export default function Preloader({
         preserveAspectRatio="xMidYMid slice"
         className="pointer-events-none absolute inset-0 hidden h-full w-full opacity-45 md:block"
         fill="none"
-        stroke={INK}
+        stroke={`var(--mer-ink, ${INK})`}
         strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -13,6 +13,8 @@ export default function BlueprintDraw({
   title = 'Plan before mass',
   body = 'Lines first. A courtyard holds the centre; rooms gather around light. Swap this drawing for your own plan. The motion stays.',
   caption = 'Courtyard house, 1:200',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -47,7 +49,18 @@ export default function BlueprintDraw({
   )
 
   return (
-    <section ref={root} className="relative h-[220svh] bg-atrium-ink text-atrium-paper calm:h-auto">
+    <section
+      ref={root}
+      className="relative h-[220svh] bg-atrium-ink text-atrium-paper calm:h-auto"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-atrium-ink': bg || undefined,
+        '--atrium-ink': bg || undefined,
+        '--color-atrium-paper': fg || undefined,
+        '--atrium-paper': fg || undefined,
+      }}
+    >
       <div
         data-plan-pin
         className="flex h-svh flex-col justify-between px-5 py-24 md:flex-row md:items-end md:px-10 md:py-16"

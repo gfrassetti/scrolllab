@@ -49,11 +49,17 @@ export const SECTION_FIELDS = {
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/ManifestoReveal': [
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/QuoteBreak': [
     { key: 'chapter', label: 'Chapter', type: 'text' },
@@ -61,6 +67,9 @@ export const SECTION_FIELDS = {
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'quote', label: 'Quote', type: 'textarea' },
     { key: 'attribution', label: 'Attribution', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/ParallaxEditorial': [
     { key: 'chapterLabel', label: 'Etiqueta de capítulo', type: 'text' },
@@ -104,6 +113,8 @@ export const SECTION_FIELDS = {
   'meridian/Concept': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'text', label: 'Statement', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'meridian/Contact': [
     { key: 'eyebrow', label: 'Eyebrow (vacío = según idioma)', type: 'text' },
@@ -111,6 +122,8 @@ export const SECTION_FIELDS = {
     { key: 'body', label: 'Texto (vacío = según idioma)', type: 'textarea' },
     { key: 'submitLabel', label: 'Botón (vacío = según idioma)', type: 'text' },
     { key: 'note', label: 'Nota (vacío = según idioma)', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'meridian/Footer': [
     { key: 'wordmark', label: 'Wordmark', type: 'text' },
@@ -157,6 +170,8 @@ export const SECTION_FIELDS = {
         { key: 'line2', label: 'Línea 2 (superficie)', type: 'text' },
       ],
     },
+    { key: 'bg', label: 'Tarjeta de cada punto — fondo', type: 'color' },
+    { key: 'fg', label: 'Tarjeta de cada punto — texto', type: 'color' },
   ],
   'meridian/Amenities': [
     { key: 'title', label: 'Title', type: 'text' },
@@ -228,6 +243,8 @@ export const SECTION_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'meridian/GallerySlider': [
     {
@@ -240,6 +257,8 @@ export const SECTION_FIELDS = {
         { key: 'alt', label: 'Texto alternativo', type: 'text' },
       ],
     },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'chapters/HorizontalPanels': [
     {
@@ -255,6 +274,9 @@ export const SECTION_FIELDS = {
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'heading', label: 'Heading', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/VelocityMarquee': [
     { key: 'text', label: 'Texto', type: 'text' },
@@ -285,6 +307,9 @@ export const SECTION_FIELDS = {
       label: 'Links (uno por línea, "Texto | #ancla")',
       type: 'textarea',
     },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'nocturne/HeroCinematic': [
     { key: 'titleTop', label: 'Title top', type: 'text' },
@@ -292,6 +317,9 @@ export const SECTION_FIELDS = {
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'nocturne/DiagonalMarquee': [
     { key: 'textA', label: 'Texto — cinta 1', type: 'text' },
@@ -367,6 +395,9 @@ export const SECTION_FIELDS = {
       label: 'Links (uno por línea, "Texto | #ancla")',
       type: 'textarea',
     },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'monolith/HeroThree': [
     { key: 'title', label: 'Title', type: 'text' },
@@ -375,6 +406,9 @@ export const SECTION_FIELDS = {
     { key: 'hint', label: 'Hint', type: 'text' },
     // El objeto 3D no se edita en el builder: queda el de la demo y se cambia
     // en el código (forma o GLB propio, ver el README del ZIP).
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'monolith/SkewScroller': [
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
@@ -549,6 +583,8 @@ export const SECTION_FIELDS = {
   'fizz/PopManifesto': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'text', label: 'Text', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'fizz/ContactSteps': [
     { key: 'nameTitle', label: 'Paso 1 — pregunta', type: 'text' },
@@ -604,6 +640,8 @@ export const SECTION_FIELDS = {
     { key: 'imgBack', label: 'Layer back (URL)', type: 'image' },
     { key: 'imgMid', label: 'Layer mid (URL)', type: 'image' },
     { key: 'imgFront', label: 'Layer front (URL)', type: 'image' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'velocity/HelmetGrid': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -664,6 +702,8 @@ export const SECTION_FIELDS = {
     { key: 'line2', label: 'Line 2', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/AboutClarity': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -684,6 +724,8 @@ export const SECTION_FIELDS = {
     { key: 'service3Body', label: 'Service 3 — body', type: 'textarea' },
     { key: 'service4Title', label: 'Service 4 — title', type: 'text' },
     { key: 'service4Body', label: 'Service 4 — body', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/VisionShutter': [
     { key: 'line1', label: 'Line 1', type: 'text' },
@@ -695,6 +737,8 @@ export const SECTION_FIELDS = {
   'atelier/SelectedWork': [
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/KeyFacts': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -768,6 +812,8 @@ export const SECTION_FIELDS = {
   'unity/HeroTwin': [
     { key: 'body', label: 'Body', type: 'textarea' },
     { key: 'headline', label: 'Headline', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'unity/MosaicSlider': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -780,6 +826,8 @@ export const SECTION_FIELDS = {
     { key: 'img6', label: 'Image 6', type: 'image' },
     { key: 'img7', label: 'Image 7', type: 'image' },
     { key: 'img8', label: 'Image 8', type: 'image' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'unity/UniversalLang': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -787,6 +835,8 @@ export const SECTION_FIELDS = {
     { key: 'body', label: 'Body', type: 'textarea' },
     { key: 'number', label: 'Number', type: 'text' },
     { key: 'numberLabel', label: 'Number label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'unity/LanguageBlock': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -824,6 +874,8 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow2', label: 'Eyebrow 2', type: 'text' },
     { key: 'line2', label: 'Line 2', type: 'text' },
     { key: 'img2', label: 'Image 2', type: 'image' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'unity/FooterTrophy': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -832,6 +884,8 @@ export const SECTION_FIELDS = {
     { key: 'metaLeft', label: 'Meta left', type: 'text' },
     { key: 'metaRight', label: 'Meta right', type: 'text' },
     { key: 'orbSrc', label: 'Orb photo', type: 'image' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'ratio/NavRatio': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -953,11 +1007,15 @@ export const SECTION_FIELDS = {
       type: 'textarea',
     },
     { key: 'menuLabel', label: 'Menu label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/HeroMassing': [
     { key: 'lineOne', label: 'Line 1', type: 'text' },
     { key: 'lineTwo', label: 'Line 2', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ManifestoType': [
     { key: 'lineOne', label: 'Line 1', type: 'text' },
@@ -983,20 +1041,46 @@ export const SECTION_FIELDS = {
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
     { key: 'caption', label: 'Caption', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ProjectRail': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
-  'atrium/ProcessPin': [{ key: 'label', label: 'Label', type: 'text' }],
+  'atrium/ProcessPin': [
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
   'atrium/PeopleScatter': [
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'title', label: 'Title', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
-  'atrium/OrbitRing': [],
+  'atrium/OrbitRing': [
+    { key: 'lineOne', label: 'Línea 1', type: 'text' },
+    { key: 'lineTwo', label: 'Línea 2', type: 'text' },
+    { key: 'left', label: 'Texto izquierdo', type: 'textarea' },
+    { key: 'right', label: 'Texto derecho', type: 'textarea' },
+    {
+      key: 'tiles',
+      label: 'Fotos del anillo (con pocas, se repiten)',
+      type: 'list',
+      max: 12,
+      item: [{ key: 'img', label: 'Imagen (URL)', type: 'image' }],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
   'atrium/StatField': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'closer', label: 'Closing statement', type: 'textarea' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'kin/Hero': [
     { key: 'word', label: 'Palabra de barras — ideales: A H I K L M N T V W X Y 1 7 (las demás letras y números se dibujan, pero pueden verse menos limpios)', type: 'text' },
@@ -1028,6 +1112,9 @@ export const SECTION_FIELDS = {
     },
     { key: 'scrollLabel', label: 'Scroll — texto', type: 'text' },
     { key: 'menuLabel', label: 'Teléfono — Menu', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'kin/Intro': [
     { key: 'line1', label: 'Frase — línea 1', type: 'text' },
@@ -1066,6 +1153,9 @@ export const SECTION_FIELDS = {
     { key: 'featuredLabel', label: 'Nombres — título', type: 'text' },
     { key: 'ctaLabel', label: 'CTA', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'kin/Footer': [
     { key: 'word', label: 'Palabra de barras — ideales: A H I K L M N T V W X Y 1 7 (las demás letras y números se dibujan, pero pueden verse menos limpios)', type: 'text' },
@@ -1126,6 +1216,8 @@ export const SECTION_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    { key: 'bg', label: 'Crema (máscara, header y menú)', type: 'color' },
+    { key: 'fg', label: 'Tinta (header y menú; el texto sobre las fotos queda blanco)', type: 'color' },
   ],
   'atrium/FooterAtrium': [
     { key: 'mark', label: 'Mark', type: 'text' },
@@ -1264,6 +1356,74 @@ export const SECTION_FIELDS = {
     },
     { key: 'checkoutSuccessTitle', label: 'Checkout · Éxito — título', type: 'text' },
     { key: 'checkoutSuccessBody', label: 'Checkout · Éxito — texto', type: 'textarea' },
+  ],
+  'chapters/StickyImageStory': [
+    { key: 'chapterLabel', label: 'Etiqueta de capítulo', type: 'text' },
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'scenes',
+      label: 'Escenas (una foto por escena; sin foto usa la de ejemplo)',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'kicker', label: 'Kicker', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'chapters/StackingCards': [
+    { key: 'chapterLabel', label: 'Etiqueta de capítulo', type: 'text' },
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'cards',
+      label: 'Cartas (el contraste alterna como en el ejemplo)',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'index', label: 'Número', type: 'text' },
+        { key: 'tag', label: 'Etiqueta', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'nocturne/ZoomPortal': [
+    { key: 'seq', label: 'Seq', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'ghostWord', label: 'Palabra de fondo', type: 'text' },
+    { key: 'endCaption', label: 'Pie de la foto', type: 'textarea' },
+    { key: 'img', label: 'Imagen (URL)', type: 'image' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'nocturne/StickyWordCycle': [
+    { key: 'seq', label: 'Seq', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'words',
+      label: 'Palabras',
+      type: 'list',
+      max: 8,
+      item: [{ key: 'word', label: 'Palabra', type: 'text' }],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
 }
 

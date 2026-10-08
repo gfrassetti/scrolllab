@@ -25,6 +25,8 @@ export default function UniversalLang({
   number = '99+',
   numberLabel = 'LABEL 1',
   stats = DEFAULT_STATS,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -74,7 +76,11 @@ export default function UniversalLang({
     <section
       ref={root}
       id="languages"
-      className="relative bg-[#e7e4dc] text-[#0a0a0a]"
+      className="relative bg-(--sec-bg) text-current"
+      style={{
+        '--sec-bg': bg || '#e7e4dc',
+        color: fg || '#0a0a0a',
+      }}
     >
       <div className="mx-auto max-w-5xl px-5 pt-24 md:px-10 md:pt-32">
         <p className="mb-4 text-[11px] tracking-[0.28em] uppercase opacity-55">
@@ -83,7 +89,7 @@ export default function UniversalLang({
         <h2 className="font-oswald text-[clamp(2.8rem,9vw,6.5rem)] leading-[0.9] font-semibold tracking-[-0.02em] uppercase">
           {title}
         </h2>
-        <p className="mt-6 max-w-[46ch] text-[15px] leading-relaxed text-[#0a0a0a]/70 md:text-base">
+        <p className="mt-6 max-w-[46ch] text-[15px] leading-relaxed text-current/70 md:text-base">
           {body}
         </p>
       </div>
@@ -114,7 +120,7 @@ export default function UniversalLang({
                 {Array.from({ length: 48 }, (_, i) => (
                   <span
                     key={i}
-                    className="flex-1 bg-[#0a0a0a]"
+                    className="flex-1 bg-current"
                     style={{ height: `${22 + ((i * 41) % 78)}%` }}
                   />
                 ))}

@@ -102,12 +102,12 @@ export function HeaderCta({ href, label }) {
       <style>{`
         .meridian-hdr-cta {
           background: #ffffff;
-          color: #2a2622;
+          color: var(--mer-ink, #2a2622);
           border: 1px solid #ffffff;
           transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .meridian-hdr-cta-fill {
-          background: #2a2622;
+          background: var(--mer-ink, #2a2622);
           transform: translateY(101%);
           transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -118,10 +118,10 @@ export function HeaderCta({ href, label }) {
         .meridian-hdr-cta-arrow { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
         .meridian-hdr-cta:hover .meridian-hdr-cta-arrow { transform: translate(2px, -2px); }
 
-        [data-solid="true"] .meridian-hdr-cta { background: #2a2622; color: #f0eae0; border-color: #2a2622; }
-        [data-solid="true"] .meridian-hdr-cta-fill { background: #efe8dd; }
+        [data-solid="true"] .meridian-hdr-cta { background: var(--mer-ink, #2a2622); color: var(--mer-cta-ink, #f0eae0); border-color: var(--mer-ink, #2a2622); }
+        [data-solid="true"] .meridian-hdr-cta-fill { background: var(--mer-menu, #efe8dd); }
         [data-solid="true"] .meridian-hdr-cta:hover,
-        [data-solid="true"] .meridian-hdr-cta:focus-visible { color: #2a2622; }
+        [data-solid="true"] .meridian-hdr-cta:focus-visible { color: var(--mer-ink, #2a2622); }
       `}</style>
     </a>
   )

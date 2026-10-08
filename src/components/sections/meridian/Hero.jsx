@@ -158,7 +158,13 @@ export default function Hero({
   inviteBody = '[Region], [Country]',
   inviteCta,
   menuLinks,
+  bg,
+  fg,
 }) {
+  // bg: la crema de la máscara, el header sólido y el menú; fg: la tinta de
+  // ese header y del menú. El texto sobre las fotos queda blanco a propósito.
+  const sand = bg || '#dfd8cf'
+  const ink = fg || '#2a2622'
   const { lang, t } = useLang()
   const menuText = menuLabel ?? t('menu')
   const floorPlansText = floorPlansLabel ?? t('floorPlans')
@@ -272,7 +278,7 @@ export default function Hero({
         if (fi < 0) return
         const img = images[fi]
         if (fi === shown && !dirty) return
-        ctx.fillStyle = '#dfd8cf'
+        ctx.fillStyle = sand
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         drawCover(img)
         shown = fi
@@ -316,7 +322,7 @@ export default function Hero({
         nav.dataset.solid = hdr === 'solid' ? 'true' : 'false'
         bg.style.transform = hdr === 'solid' ? 'translateY(0)' : 'translateY(-100%)'
         if (wm) {
-          wm.style.color = wmDocked && hdr === 'solid' ? '#2a2622' : ''
+          wm.style.color = wmDocked && hdr === 'solid' ? ink : ''
           // once the sticky stage starts scrolling away the docked
           // wordmark leaves with it — the header's own brand takes over
           wm.style.opacity = pastHero ? '0' : ''
@@ -639,11 +645,21 @@ export default function Hero({
         images.length = 0
       }
     },
-    { scope: track, revertOnUpdate: true, dependencies: [isMobile] },
+    { scope: track, revertOnUpdate: true, dependencies: [isMobile, sand, ink] },
   )
 
   return (
-    <section ref={track} className="relative" style={{ height: `${FRAME_COUNT * PX_PER_FRAME}px` }}>
+    <section
+      ref={track}
+      className="relative"
+      style={{
+        height: `${FRAME_COUNT * PX_PER_FRAME}px`,
+        '--mer-sand': sand,
+        '--mer-ink': ink,
+        '--mer-menu': bg || undefined,
+        '--mer-cta-ink': bg || undefined,
+      }}
+    >
       <Preloader
         wordmark={wordmark}
         getLoaded={() => loadedRef.current / PRELOAD_GATE}
@@ -654,7 +670,7 @@ export default function Hero({
       <div
         ref={stage}
         className="sticky top-0 z-30 h-svh overflow-hidden"
-        style={{ background: '#dfd8cf' }}
+        style={{ background: sand }}
       >
         <div ref={bgRef} className="absolute inset-0 z-0 will-change-transform">
           {/* poster: first frame, so the first paint is never blank */}
@@ -691,7 +707,7 @@ export default function Hero({
         <div
           ref={navBgRef}
           aria-hidden="true"
-          className="pointer-events-none fixed inset-x-0 top-0 z-[15] border-b border-[#2a2622]/10 bg-[#dfd8cf]"
+          className="pointer-events-none fixed inset-x-0 top-0 z-[15] border-b border-(--mer-ink)/10 bg-(--mer-sand)"
           style={{
             transform: 'translateY(-100%)',
             transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -700,9 +716,9 @@ export default function Hero({
         <div
           ref={navRef}
           data-solid="false"
-          className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex items-center justify-between px-6 py-6 text-white data-[solid=true]:text-[#2a2622] md:px-10"
+          className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex items-center justify-between px-6 py-6 text-white data-[solid=true]:text-(--mer-ink) md:px-10"
           style={{
-            color: menuOpen ? '#2a2622' : undefined,
+            color: menuOpen ? ink : undefined,
             transition:
               'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           }}

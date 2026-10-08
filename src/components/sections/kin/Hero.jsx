@@ -101,10 +101,10 @@ function BoxLines({ variant }) {
   const y = (side) => (hero ? { 'data-kin-rule-y': true, 'data-kin-bline': side } : { 'data-kin-sline': side })
   return (
     <>
-      <span aria-hidden="true" {...x('top')} className="absolute inset-x-0 top-0 h-px bg-[#141414]" />
-      <span aria-hidden="true" {...x('bottom')} className="absolute inset-x-0 bottom-0 h-px bg-[#141414]" />
-      <span aria-hidden="true" {...y('left')} className="absolute inset-y-0 left-0 w-px bg-[#141414]" />
-      <span aria-hidden="true" {...y('right')} className="absolute inset-y-0 right-0 w-px bg-[#141414]" />
+      <span aria-hidden="true" {...x('top')} className="absolute inset-x-0 top-0 h-px bg-(--kin-ink)" />
+      <span aria-hidden="true" {...x('bottom')} className="absolute inset-x-0 bottom-0 h-px bg-(--kin-ink)" />
+      <span aria-hidden="true" {...y('left')} className="absolute inset-y-0 left-0 w-px bg-(--kin-ink)" />
+      <span aria-hidden="true" {...y('right')} className="absolute inset-y-0 right-0 w-px bg-(--kin-ink)" />
     </>
   )
 }
@@ -130,8 +130,8 @@ function BarRow({ fade = false, brand, brandNote, links, visitLabel, visitHref, 
           </li>
         ))}
       </ul>
-      <a {...f} href={visitHref} className="kin-solid tpl-hit relative col-span-2 col-start-9 inline-flex w-fit items-center gap-[0.6em] bg-[#141414] px-[0.9em] py-[0.45em] text-[#e1e2de]">
-        <span aria-hidden="true" className="inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: ACCENT }} />
+      <a {...f} href={visitHref} className="kin-solid tpl-hit relative col-span-2 col-start-9 inline-flex w-fit items-center gap-[0.6em] bg-(--kin-ink) px-[0.9em] py-[0.45em] text-(--kin-paper)">
+        <span aria-hidden="true" className="inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: 'var(--kin-accent, #e1371f)' }} />
         {visitLabel}
       </a>
       <p {...f} className="col-span-2 col-start-11 text-right">
@@ -211,7 +211,7 @@ function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, close
       role="dialog"
       aria-modal="true"
       aria-label="Menu"
-      className="fixed inset-0 z-[70] hidden flex-col-reverse bg-[#e1e2de] px-[4.5vw] pt-[8vw] pb-[4.5vw] text-[3.3vw] text-[#141414] md:hidden"
+      className="fixed inset-0 z-[70] hidden flex-col-reverse bg-(--kin-paper) px-[4.5vw] pt-[8vw] pb-[4.5vw] text-[3.3vw] text-(--kin-ink) md:hidden"
     >
       <div className="flex items-baseline justify-between">
         <button ref={closeRef} type="button" onClick={onClose} className="tpl-hit relative">
@@ -221,10 +221,10 @@ function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, close
           <LocalTime place={place} />
         </p>
       </div>
-      <div className="mb-3 h-px bg-[#141414]" />
+      <div className="mb-3 h-px bg-(--kin-ink)" />
       <ul className="mb-auto">
         {links.map((l, i) => (
-          <li key={l.href} className="flex items-start gap-[4vw] border-b border-[#141414]/20 py-[2.5vw]">
+          <li key={l.href} className="flex items-start gap-[4vw] border-b border-(--kin-ink)/20 py-[2.5vw]">
             <span className="pt-[1.6vw] tabular-nums">{pad(i + 1)}</span>
             <span className="block overflow-hidden pb-[0.05em]">
               <a
@@ -243,9 +243,9 @@ function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, close
       <a
         href={visitHref}
         onClick={onClose}
-        className="mb-[6vw] inline-flex w-fit items-center gap-[0.6em] bg-[#141414] px-[0.9em] py-[0.7em] text-[#e1e2de]"
+        className="mb-[6vw] inline-flex w-fit items-center gap-[0.6em] bg-(--kin-ink) px-[0.9em] py-[0.7em] text-(--kin-paper)"
       >
-        <span aria-hidden="true" className="inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: ACCENT }} />
+        <span aria-hidden="true" className="inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: 'var(--kin-accent, #e1371f)' }} />
         {visitLabel}
       </a>
     </div>
@@ -269,7 +269,21 @@ export default function Hero({
   scrollLabel = 'Scroll to explore',
   menuLabel = 'Menu',
   closeLabel = 'Close',
+  bg,
+  fg,
+  accent: accentProp,
 }) {
+  // Papel (bg), tinta (fg) y acento editables. Las clases leen --kin-*; lo
+  // que anima GSAP usa los valores resueltos.
+  const inkColor = fg || INK
+  const accentColor = accentProp || ACCENT
+  const kinVars = {
+    background: bg || undefined,
+    color: inkColor,
+    '--kin-ink': inkColor,
+    '--kin-paper': bg || '#e1e2de',
+    '--kin-accent': accentColor,
+  }
   const rootRef = useRef(null)
   const bandRef = useRef(null)
   const layerRef = useRef(null)
@@ -423,7 +437,7 @@ export default function Hero({
         }
       }
       const bandClip = () => `inset(${geo.y}px 0px ${Math.max(0, geo.vh - geo.y - geo.h)}px 0px)`
-      const colorOf = (i) => (i === accent ? ACCENT : INK)
+      const colorOf = (i) => (i === accent ? accentColor : inkColor)
 
       const restWord = () => {
         bars.forEach((bar, i) =>
@@ -783,11 +797,16 @@ export default function Hero({
         follow?.kill()
       }
     },
-    { scope: rootRef, dependencies: [layout, accent] },
+    { scope: rootRef, dependencies: [layout, accent, accentColor, inkColor] },
   )
 
   return (
-    <section ref={rootRef} id="top" className="relative flex min-h-svh flex-col text-[#141414]">
+    <section
+      ref={rootRef}
+      id="top"
+      className="relative flex min-h-svh flex-col"
+      style={kinVars}
+    >
       {/* Phone: the menu bar sits at the foot of the screen (difference
           blend, so it reads on paper and on the dark room alike). */}
       <div className="fixed inset-x-0 bottom-0 z-[52] flex items-center justify-between px-[4.5vw] pb-[4.5vw] text-[3.3vw] text-white mix-blend-difference md:hidden">
@@ -802,7 +821,7 @@ export default function Hero({
       <MenuOverlay open={menuOpen} onClose={closeMenu} closeLabel={closeLabel} {...navProps} />
 
       {/* Fixed bar (desktop): takes over from the hero's nav box. */}
-      <div ref={stickyRef} className="invisible fixed inset-x-0 top-0 z-50 hidden bg-[#e1e2de] text-[0.82vw] md:block">
+      <div ref={stickyRef} className="invisible fixed inset-x-0 top-0 z-50 hidden bg-(--kin-paper) text-[0.82vw] md:block">
         <div className="relative mx-[1.25vw]">
           <BoxLines variant="bar" />
           <BarRow {...navProps} />
@@ -812,10 +831,10 @@ export default function Hero({
       {/* The bars (and the doorway's dark): fixed above the page, absolute in
           the calm version. */}
       <div ref={layerRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-30 overflow-hidden">
-        <div data-kin-void className="invisible absolute left-0 top-0 bg-[#141414]" />
+        <div data-kin-void className="invisible absolute left-0 top-0 bg-(--kin-ink)" />
         {layout.bars.map((b, i) =>
           i === accent ? null : (
-            <div key={i} data-kin-bar={i} className="absolute left-0 top-0 bg-[#141414] will-change-transform" />
+            <div key={i} data-kin-bar={i} className="absolute left-0 top-0 bg-(--kin-ink) will-change-transform" />
           ),
         )}
       </div>
@@ -825,7 +844,7 @@ export default function Hero({
         <div
           data-kin-bar={accent}
           className="absolute left-0 top-0 will-change-transform"
-          style={{ backgroundColor: ACCENT }}
+          style={{ backgroundColor: 'var(--kin-accent, #e1371f)' }}
         />
       </div>
 
@@ -839,13 +858,13 @@ export default function Hero({
       >
         <span className="sr-only">{word}</span>
         {/* The baseline the bars land on. */}
-        <div data-kin-ground className="absolute inset-x-0 bottom-0 h-px bg-[#141414]" />
+        <div data-kin-ground className="absolute inset-x-0 bottom-0 h-px bg-(--kin-ink)" />
       </div>
 
       {/* Plinths: a block under each letter, like a pedestal per piece. */}
       <div className="relative mx-[4.5vw] mt-[2vw] h-[2.6vw] max-md:order-3 md:mx-[1.25vw] md:mt-[1vw] md:h-[2.2vw]">
         {layout.ranges.map((r, li) => (
-          <div key={li} data-kin-plinth className="absolute inset-y-0 left-0 bg-[#141414]" />
+          <div key={li} data-kin-plinth className="absolute inset-y-0 left-0 bg-(--kin-ink)" />
         ))}
       </div>
       <div aria-hidden="true" className="h-[17vw] max-md:order-4 md:hidden" />
@@ -862,7 +881,7 @@ export default function Hero({
           {/* Scroll cue: a small box that fades away as the page moves. */}
           <div data-kin-fade className="hidden md:block">
             <div ref={cueRef} className="w-fit">
-              <a href="#about" className="kin-cue tpl-hit relative inline-flex items-center gap-[0.6em] border border-[#141414] bg-[#e1e2de] px-[0.9em] py-[0.6em] text-[0.82vw] leading-none">
+              <a href="#about" className="kin-cue tpl-hit relative inline-flex items-center gap-[0.6em] border border-(--kin-ink) bg-(--kin-paper) px-[0.9em] py-[0.6em] text-[0.82vw] leading-none">
                 {scrollLabel}
                 <svg aria-hidden="true" viewBox="0 0 11 12" className="kin-scroll-arrow h-[0.85em] w-[0.85em]" fill="currentColor">
                   <path d="M5.5 12 10.5 6.9V5.1L6.1 9.5V0H4.9v9.5L.5 5.1v1.8z" />
@@ -887,9 +906,9 @@ export default function Hero({
               <span>{listLabel}</span>
               <span className="tabular-nums">({pad(roomTexts.length)})</span>
             </p>
-            <ul className="kin-rooms border-t border-[#141414]">
+            <ul className="kin-rooms border-t border-(--kin-ink)">
               {roomTexts.map((r, i) => (
-                <li key={r} className="kin-room flex gap-[1.4em] border-b border-[#141414]/20 py-[0.45em]">
+                <li key={r} className="kin-room flex gap-[1.4em] border-b border-(--kin-ink)/20 py-[0.45em]">
                   <span className="kin-room-n tabular-nums">{pad(i + 1)}</span>
                   <span className="kin-room-t">{r}</span>
                 </li>
@@ -913,7 +932,7 @@ export default function Hero({
           .kin-cue:hover .kin-scroll-arrow { transform: translateY(0.25em); }
           .kin-rooms:hover .kin-room { opacity: 0.35; }
           .kin-rooms .kin-room:hover { opacity: 1; }
-          .kin-room:hover .kin-room-n { color: ${ACCENT}; }
+          .kin-room:hover .kin-room-n { color: var(--kin-accent, #e1371f); }
           .kin-room:hover .kin-room-t { transform: translateX(0.5em); }
         }
         @media (prefers-reduced-motion: reduce) {

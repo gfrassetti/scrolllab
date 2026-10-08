@@ -13,6 +13,8 @@ export default function FooterTrophy({
   metaLeft = 'META 2',
   metaRight = 'LINK 6',
   orbSrc = '',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -135,7 +137,8 @@ export default function FooterTrophy({
       id="winner"
       className="relative overflow-hidden px-3 pt-14 pb-5 text-[#f7f2e8] md:px-6 md:pt-16 md:pb-6"
       style={{
-        background: 'linear-gradient(180deg, #1c2a28 0%, #2c4a42 48%, #4a675c 100%)',
+        background: bg || 'linear-gradient(180deg, #1c2a28 0%, #2c4a42 48%, #4a675c 100%)',
+        color: fg || undefined,
       }}
     >
       <p className="relative z-30 text-center text-[11px] tracking-[0.32em] uppercase">
@@ -160,7 +163,7 @@ export default function FooterTrophy({
         </div>
       </div>
 
-      <div className="relative z-30 mt-2 flex items-end justify-between gap-4 border-t border-white/25 pt-4 text-[11px] tracking-[0.22em] uppercase md:mt-4">
+      <div className="relative z-30 mt-2 flex items-end justify-between gap-4 border-t border-current/25 pt-4 text-[11px] tracking-[0.22em] uppercase md:mt-4">
         <span>{metaLeft}</span>
         <a href="#top" className="tpl-link tpl-hit relative">
           {metaRight}

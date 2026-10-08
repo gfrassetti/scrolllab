@@ -58,7 +58,7 @@ export default function FooterCTA({
     <footer
       ref={root}
       className="px-5 pt-24 pb-6 md:px-10 md:pt-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined }}
     >
       <div className="mb-20 grid gap-12 md:mb-32 md:grid-cols-12">
         <p className="max-w-[28ch] text-sm leading-relaxed text-ink/70 md:col-span-5 md:text-base">

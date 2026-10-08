@@ -28,6 +28,8 @@ export default function HeroStrike({
   imgFront = heroFront,
   /** @deprecated kept for builder compat — maps to mid layer */
   img,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const midSrc = imgMid || img || heroMid
@@ -128,7 +130,11 @@ export default function HeroStrike({
   return (
     <section
       ref={root}
-      className="relative h-[280vh] bg-[#0a1a12] text-[#ece9e2] md:h-[320vh] calm:h-auto"
+      className="relative h-[280vh] bg-(--sec-bg) text-current md:h-[320vh] calm:h-auto"
+      style={{
+        '--sec-bg': bg || '#0a1a12',
+        color: fg || '#ece9e2',
+      }}
     >
       <div className="sticky top-0 h-svh overflow-hidden">
         <div
@@ -172,7 +178,7 @@ export default function HeroStrike({
             <div
               data-strike-veil
               aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-b from-[#0a1a12]/70 via-[#0a1a12]/35 to-[#0a1a12]"
+              className="absolute inset-0 bg-gradient-to-b from-(--sec-bg)/70 via-(--sec-bg)/35 to-(--sec-bg)"
             />
           </div>
 
@@ -187,13 +193,13 @@ export default function HeroStrike({
               className="space-y-1 text-right will-change-transform"
             >
               <p className="text-acid">{lineLeft}</p>
-              <p className="text-[#ece9e2]">{lineLeft2}</p>
+              <p className="text-current">{lineLeft2}</p>
             </div>
             <div
               data-strike-type-right
               className="space-y-1 text-left will-change-transform"
             >
-              <p className="text-[#ece9e2]">{lineRight}</p>
+              <p className="text-current">{lineRight}</p>
               <p className="text-acid">{lineRight2}</p>
             </div>
           </div>

@@ -46,6 +46,8 @@ export default function ServicesStone({
   service3Body,
   service4Title,
   service4Body,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
@@ -213,7 +215,11 @@ export default function ServicesStone({
     <section
       id="services"
       ref={root}
-      className="relative bg-[#0b0c10] text-white"
+      className="relative bg-(--sec-bg) text-current"
+      style={{
+        '--sec-bg': bg || '#0b0c10',
+        color: fg || '#ffffff',
+      }}
     >
       <div className={`relative overflow-hidden ${reducedMotion ? 'min-h-svh' : 'h-svh'}`}>
         <ScrollFog density={0.65} />
@@ -225,10 +231,10 @@ export default function ServicesStone({
 
         <div className="relative z-10 flex h-full flex-col px-5 pt-24 pb-8 md:px-10">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <p className="text-[11px] tracking-[0.25em] text-white/40 uppercase">
+            <p className="text-[11px] tracking-[0.25em] text-current/40 uppercase">
               {eyebrow}
             </p>
-            <p className="max-w-[36ch] text-right text-xs text-white/45 md:text-sm">
+            <p className="max-w-[36ch] text-right text-xs text-current/45 md:text-sm">
               Lorem ipsum dolor sit amet — placeholder support line for this
               section.
             </p>
@@ -256,20 +262,20 @@ export default function ServicesStone({
                 <h3 className="text-[clamp(1.25rem,2.4vw,1.85rem)] leading-tight font-medium tracking-[-0.02em]">
                   {service.title}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/55">
+                <p className="mt-3 text-sm leading-relaxed text-current/55">
                   {service.body}
                 </p>
               </article>
             ))}
           </div>
 
-          <div className="flex items-end justify-between gap-4 border-t border-white/10 pt-4">
-            <p className="text-[11px] tracking-[0.2em] text-white/40 uppercase">
+          <div className="flex items-end justify-between gap-4 border-t border-current/10 pt-4">
+            <p className="text-[11px] tracking-[0.2em] text-current/40 uppercase">
               ✦ {title}
             </p>
             <a
               href="#facts"
-              className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] text-white uppercase"
+              className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] text-current uppercase"
             >
               View services →
             </a>

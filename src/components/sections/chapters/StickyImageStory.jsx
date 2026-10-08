@@ -42,9 +42,19 @@ export default function StickyImageStory({
   chapter = '02',
   total = '06',
   label = 'Sticky story',
-  scenes = defaultScenes,
+  scenes,
+  chapterLabel = 'Chapter',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
+  // Escenas del builder: una fila sin foto toma la de ejemplo de su lugar, así
+  // la columna pegada nunca queda vacía.
+  const valid = scenes?.filter((s) => s?.title || s?.body || s?.kicker || s?.img)
+  const list = valid?.length
+    ? valid.map((s, i) => ({ ...s, img: s.img || defaultScenes[i % defaultScenes.length].img }))
+    : defaultScenes
 
   useGSAP(
     () => {
@@ -109,10 +119,20 @@ export default function StickyImageStory({
   )
 
   return (
-    <section ref={root} className="px-5 md:px-10">
+    <section
+      ref={root}
+      className="px-5 md:px-10"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--market-ink': fg || undefined,
+        '--market-bone': bg || undefined,
+        '--color-accent': accent || undefined,
+      }}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t border-ink/15 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
-          Chapter {chapter} / {total}
+          {chapterLabel} {chapter} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
@@ -122,9 +142,9 @@ export default function StickyImageStory({
         <div className="hidden md:block calm:md:hidden">
           <div className="sticky top-0 flex h-svh items-center py-10">
             <div className="relative aspect-3/4 w-full max-w-115 overflow-hidden">
-              {scenes.map((scene, i) => (
+              {list.map((scene, i) => (
                 <img
-                  key={scene.img}
+                  key={i}
                   data-scene-img
                   {...imgAttrs(scene.img, variants)}
                   sizes="(min-width: 768px) 460px, 100vw"
@@ -141,9 +161,9 @@ export default function StickyImageStory({
 
         {/* Narrative steps */}
         <div className="calm:md:mx-auto calm:md:w-full calm:md:max-w-3xl">
-          {scenes.map((scene, i) => (
+          {list.map((scene, i) => (
             <article
-              key={scene.title}
+              key={i}
               data-scene-step
               className="flex min-h-[70svh] flex-col justify-center gap-5 py-14 md:min-h-svh md:py-0 calm:md:min-h-0 calm:md:py-16"
             >

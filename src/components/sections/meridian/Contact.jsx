@@ -21,7 +21,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const INK = '#2a2622'
 const SAND = '#dfd8cf'
 
-export default function Contact({ eyebrow, title, body, submitLabel, note, endpoint = '' }) {
+export default function Contact({ eyebrow, title, body, submitLabel, note, endpoint = '', bg, fg }) {
+  const ink = fg || INK
+  const sand = bg || SAND
   const { t } = useLang()
   const root = useRef(null)
   const uid = useId()
@@ -95,7 +97,7 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
       ref={root}
       id="contact"
       className="relative px-6 py-24 md:px-16 md:py-36"
-      style={{ background: SAND, color: INK }}
+      style={{ background: sand, color: ink, '--mer-ink': ink, '--mer-sand': sand }}
     >
       <div className="mx-auto grid max-w-[80rem] gap-14 md:grid-cols-[1fr_1.1fr] md:gap-24">
         <div>
@@ -187,16 +189,16 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
         .mer-ct-field { position: relative; }
         .mer-ct-label { display: block; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; transition: opacity 0.3s ease; }
         .mer-ct-field:focus-within .mer-ct-label { opacity: 1; }
-        .mer-ct-input { display: block; width: 100%; margin-top: 6px; padding: 8px 0 12px; background: transparent; border: 0; outline: none; font-family: 'Fraunces', serif; font-weight: 300; font-size: 1.6rem; color: ${INK}; border-bottom: 1px solid rgba(42, 38, 34, 0.25); }
-        .mer-ct-line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: ${INK}; transform: scaleX(0); transform-origin: left; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); pointer-events: none; }
+        .mer-ct-input { display: block; width: 100%; margin-top: 6px; padding: 8px 0 12px; background: transparent; border: 0; outline: none; font-family: 'Fraunces', serif; font-weight: 300; font-size: 1.6rem; color: var(--mer-ink); border-bottom: 1px solid color-mix(in srgb, var(--mer-ink) 25%, transparent); }
+        .mer-ct-line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--mer-ink); transform: scaleX(0); transform-origin: left; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); pointer-events: none; }
         .mer-ct-field:focus-within .mer-ct-line { transform: scaleX(1); }
         .mer-ct-input[aria-invalid="true"] { border-bottom-color: #a94a2a; }
         .mer-ct-error { position: absolute; right: 0; top: 0; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #a94a2a; }
 
-        .mer-ct-btn { background: ${INK}; color: ${SAND}; border: 1px solid ${INK}; transition: color 0.4s ease; }
-        .mer-ct-btn-fill { background: ${SAND}; transform: translateY(101%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-ct-btn { background: var(--mer-ink); color: var(--mer-sand); border: 1px solid var(--mer-ink); transition: color 0.4s ease; }
+        .mer-ct-btn-fill { background: var(--mer-sand); transform: translateY(101%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-ct-btn:hover:not(:disabled) .mer-ct-btn-fill { transform: translateY(0); }
-        .mer-ct-btn:hover:not(:disabled) { color: ${INK}; }
+        .mer-ct-btn:hover:not(:disabled) { color: var(--mer-ink); }
       `}</style>
     </section>
   )

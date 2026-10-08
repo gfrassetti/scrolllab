@@ -25,8 +25,25 @@ export default function StickyWordCycle({
   accentClass = 'text-acid',
   barClass = 'bg-acid',
   phrase = false,
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
+  // `words` del builder llega como lista de { word }; desde código, strings.
+  const wordList = (words || [])
+    .map((w) => (typeof w === 'string' ? w : w?.word))
+    .filter(Boolean)
+  const list = wordList.length ? wordList : defaultWords
+  // Los tokens de NOCTURNE redefinidos en la sección: cada text-salt/40,
+  // bg-acid, etc. de adentro sigue a los colores editados.
+  const colors = {
+    background: bg || undefined,
+    color: fg || undefined,
+    '--color-noir': bg || undefined,
+    '--color-salt': fg || undefined,
+    '--color-acid': accent || undefined,
+  }
   const reduced = useReducedMotion()
   const wordType = phrase
     ? 'absolute max-w-[min(92vw,18ch)] px-4 text-center font-brico text-[clamp(1.75rem,7.5vw,5.5rem)] leading-[0.95] font-extrabold tracking-[-0.03em] uppercase select-none'
@@ -63,8 +80,8 @@ export default function StickyWordCycle({
         end: 'bottom bottom',
         onUpdate: (self) => {
           const index = Math.min(
-            words.length - 1,
-            Math.floor(self.progress * words.length),
+            list.length - 1,
+            Math.floor(self.progress * list.length),
           )
           if (index !== current) {
             current = index
@@ -84,7 +101,7 @@ export default function StickyWordCycle({
         },
       })
     },
-    { scope: root, dependencies: [words.length] },
+    { scope: root, dependencies: [list.length] },
   )
 
   // Calma: la fila que cruza la franja del medio de la pantalla es la activa.
@@ -100,11 +117,11 @@ export default function StickyWordCycle({
     )
     rows.current.forEach((el) => el && io.observe(el))
     return () => io.disconnect()
-  }, [reduced, words.length])
+  }, [reduced, list.length])
 
   if (reduced) {
     return (
-      <section className="px-5 py-24 md:px-10 md:py-36">
+      <section className="px-5 py-24 md:px-10 md:py-36" style={colors}>
         <div className="mb-6 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
             Seq. {seq} / {total}
@@ -112,9 +129,9 @@ export default function StickyWordCycle({
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>
         <ol className="m-0 list-none p-0">
-          {words.map((word, i) => (
+          {list.map((word, i) => (
             <li
-              key={word}
+              key={i}
               ref={(el) => {
                 rows.current[i] = el
               }}
@@ -151,7 +168,7 @@ export default function StickyWordCycle({
     <section
       ref={root}
       className="relative"
-      style={{ height: `${words.length * 100}vh` }}
+      style={{ ...colors, height: `${list.length * 100}vh` }}
     >
       <div className="sticky top-0 flex h-svh items-center justify-center overflow-hidden">
         {/* Mientras la sección está pegada arriba, el rótulo baja lo que mide
@@ -163,9 +180,9 @@ export default function StickyWordCycle({
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>
 
-        {words.map((word, i) => (
+        {list.map((word, i) => (
           <p
-            key={word}
+            key={i}
             data-cycle-word
             className={wordType}
             style={{ opacity: i === 0 ? 1 : 0 }}

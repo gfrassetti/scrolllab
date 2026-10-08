@@ -144,7 +144,11 @@ export default function Location({
   ctaHref = '#',
   location = '[Region], [Country]',
   places,
+  bg,
+  fg,
 }) {
+  const ink = fg || INK
+  const sand = bg || LAND
   const { t } = useLang()
   const valid = places?.filter((p) => p?.title || p?.img)
   const list = (valid?.length ? valid : DEFAULT_PLACES)
@@ -286,8 +290,15 @@ export default function Location({
     <section
       ref={root}
       id="location"
-      className="relative overflow-hidden bg-[#dfd8cf] text-[#2a2622]"
-      style={{ minHeight: 'calc(100svh + 9rem)' }}
+      className="relative overflow-hidden"
+      style={{
+        minHeight: 'calc(100svh + 9rem)',
+        background: sand,
+        color: ink,
+        '--mer-ink': ink,
+        '--mer-sand': sand,
+        '--mer-cta-ink': bg || undefined,
+      }}
     >
       {/* MAP — one parent: image + monogram + routes + pins share coordinates */}
       {/* `data-pan`: en el teléfono el mapa es más ancho que la pantalla y se
@@ -311,20 +322,20 @@ export default function Location({
             aria-hidden="true"
           >
             {DOTS.slice(0, list.length).map((dots, i) => (
-              <g key={i} ref={(el) => (dotGroups.current[i] = el)} fill={INK}>
+              <g key={i} ref={(el) => (dotGroups.current[i] = el)} fill={ink}>
                 {dots.map(([x, y], k) => (
                   <circle key={k} cx={x.toFixed(1)} cy={y.toFixed(1)} r="0" />
                 ))}
               </g>
             ))}
             <g transform={`translate(${HQ[0]} ${HQ[1]})`}>
-              <circle r="28" fill={LAND} fillOpacity="0.55" stroke={INK} strokeWidth="1.6" />
+              <circle r="28" fill={sand} fillOpacity="0.55" stroke={ink} strokeWidth="1.6" />
               <text
                 y="11"
                 textAnchor="middle"
                 fontFamily="'Fraunces', serif"
                 fontSize="32"
-                fill={INK}
+                fill={ink}
               >
                 M
               </text>
@@ -486,14 +497,14 @@ export default function Location({
         .mer-track { scrollbar-width: none; -ms-overflow-style: none; }
         .mer-track::-webkit-scrollbar { display: none; }
 
-        .mer-pin { color: ${INK}; background: rgba(42, 38, 34, 0.06); border: 1px solid rgba(42, 38, 34, 0.14); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-        .mer-pin-fill { background: ${INK}; clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-pin { color: var(--mer-ink); background: color-mix(in srgb, var(--mer-ink) 6%, transparent); border: 1px solid color-mix(in srgb, var(--mer-ink) 14%, transparent); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-pin-fill { background: var(--mer-ink); clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-pin svg { transition: color 0.35s ease 0.08s; }
         .mer-pin[data-active="true"] { transform: scale(1.1); }
         .mer-pin[data-active="true"] .mer-pin-fill { clip-path: circle(75% at 50% 50%); }
-        .mer-pin[data-active="true"] svg { color: ${LAND}; }
-        .mer-pin-label { position: absolute; left: 50%; top: 100%; margin-top: 4px; transform: translateX(-50%); white-space: nowrap; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(42, 38, 34, 0.62); pointer-events: none; transition: color 0.4s ease; }
-        .mer-pin[data-active="true"] .mer-pin-label { color: ${INK}; }
+        .mer-pin[data-active="true"] svg { color: var(--mer-sand); }
+        .mer-pin-label { position: absolute; left: 50%; top: 100%; margin-top: 4px; transform: translateX(-50%); white-space: nowrap; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--mer-ink) 62%, transparent); pointer-events: none; transition: color 0.4s ease; }
+        .mer-pin[data-active="true"] .mer-pin-label { color: var(--mer-ink); }
         @media (max-width: 767px) {
           .mer-pin-label { display: none; }
           .mer-pin[data-active="true"] .mer-pin-label { display: block; }
@@ -505,19 +516,19 @@ export default function Location({
         .mer-card-title, .mer-card-dist { transition: color 0.5s ease 0.1s; }
         .mer-card[data-active="true"] .mer-card-title,
         .mer-card[data-active="true"] .mer-card-dist { color: #fff; }
-        .mer-card-pin { position: relative; border: 1px solid rgba(42, 38, 34, 0.18); transition: background-color 0.5s ease 0.1s, color 0.5s ease 0.1s, border-color 0.5s ease 0.1s; }
-        .mer-card[data-active="true"] .mer-card-pin { background: #fff; color: ${INK}; border-color: #fff; }
+        .mer-card-pin { position: relative; border: 1px solid color-mix(in srgb, var(--mer-ink) 18%, transparent); transition: background-color 0.5s ease 0.1s, color 0.5s ease 0.1s, border-color 0.5s ease 0.1s; }
+        .mer-card[data-active="true"] .mer-card-pin { background: #fff; color: var(--mer-ink); border-color: #fff; }
         .mer-card-x { display: none; }
         @media (max-width: 767px) {
           .mer-card[data-active="true"] .mer-card-pin-icon { display: none; }
           .mer-card[data-active="true"] .mer-card-x { display: block; }
-          .mer-card[data-active="true"] .mer-card-pin { background: ${INK}; color: #fff; border-color: ${INK}; }
+          .mer-card[data-active="true"] .mer-card-pin { background: var(--mer-ink); color: #fff; border-color: var(--mer-ink); }
         }
 
-        .mer-cta { background: ${INK}; color: #f0eae0; transition: color 0.4s ease; }
-        .mer-cta-fill { background: #f0eae0; transform: translateY(101%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .mer-cta { background: var(--mer-ink); color: var(--mer-cta-ink, #f0eae0); transition: color 0.4s ease; }
+        .mer-cta-fill { background: var(--mer-cta-ink, #f0eae0); transform: translateY(101%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .mer-cta:hover .mer-cta-fill { transform: translateY(0); }
-        .mer-cta:hover { color: ${INK}; }
+        .mer-cta:hover { color: var(--mer-ink); }
       `}</style>
     </section>
   )

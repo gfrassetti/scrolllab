@@ -16,6 +16,9 @@ export default function ManifestoReveal({
   label = 'Manifesto',
   className = '',
   children,
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -42,6 +45,13 @@ export default function ManifestoReveal({
 
   return (
     <section
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--market-ink': fg || undefined,
+        '--market-bone': bg || undefined,
+        '--color-accent': accent || undefined,
+      }}
       ref={root}
       className={`px-5 py-28 md:px-10 md:py-44${className ? ` ${className}` : ''}`}
     >

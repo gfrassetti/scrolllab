@@ -16,6 +16,8 @@ import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
 export default function Concept({
   kicker = 'Concept',
   text = '[Describe your project in two or three sentences — where it is, the atmosphere, and what makes it different. Replace this copy with your own.]',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const textRef = useRef(null)
@@ -46,7 +48,11 @@ export default function Concept({
     <section
       ref={root}
       id="concept"
-      className="relative flex flex-col items-center justify-center gap-4 bg-[#dfd8cf] px-5 pt-32 pb-28 text-[#2a2622] md:py-64"
+      className="relative flex flex-col items-center justify-center gap-4 bg-(--sec-bg) px-5 pt-32 pb-28 text-current md:py-64"
+      style={{
+        '--sec-bg': bg || '#dfd8cf',
+        color: fg || '#2a2622',
+      }}
     >
       <p
         className="text-xs uppercase tracking-[0.12em]"
@@ -56,7 +62,7 @@ export default function Concept({
       </p>
       <div
         ref={textRef}
-        className="max-w-[58rem] text-center text-[clamp(1.75rem,3vw,2.75rem)] leading-[1.08] tracking-[-0.02em] text-[#2a2622]/85"
+        className="max-w-[58rem] text-center text-[clamp(1.75rem,3vw,2.75rem)] leading-[1.08] tracking-[-0.02em] text-current/85"
         style={{ fontFamily: "'Fraunces', serif", fontWeight: 300 }}
       >
         {text}

@@ -43,7 +43,7 @@ const DEFAULT_SLIDES = [1, 2, 3, 4, 5].map((n) => ({
 const RUNWAY_PER_STEP = 0.9
 const EASE = 0.1
 
-export default function GallerySlider({ slides }) {
+export default function GallerySlider({ slides, bg, fg }) {
   const valid = slides?.filter((s) => s?.img)
   const list = valid?.length ? valid : DEFAULT_SLIDES
   const n = list.length
@@ -156,8 +156,12 @@ export default function GallerySlider({ slides }) {
     <section
       ref={track}
       id="villas"
-      className="relative bg-[#dfd8cf] text-[#2a2622]"
-      style={{ height: `calc(100svh + ${(n - 1) * RUNWAY_PER_STEP * 100}svh)` }}
+      className="relative bg-(--sec-bg) text-current"
+      style={{
+        '--sec-bg': bg || '#dfd8cf',
+        color: fg || '#2a2622',
+        height: `calc(100svh + ${(n - 1) * RUNWAY_PER_STEP * 100}svh)`,
+      }}
     >
       <div className="sticky top-0 flex h-svh flex-col md:block">
         <div

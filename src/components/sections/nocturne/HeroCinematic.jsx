@@ -18,6 +18,9 @@ export default function HeroCinematic({
   meta = 'Placeholder Films — ©2026',
   hint = 'Scroll',
   img = 'https://picsum.photos/seed/noct-hero/1920/1200',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -70,7 +73,17 @@ export default function HeroCinematic({
   )
 
   return (
-    <section ref={root} className="relative h-svh overflow-hidden">
+    <section
+      ref={root}
+      className="relative h-svh overflow-hidden"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-noir': bg || undefined,
+        '--color-salt': fg || undefined,
+        '--color-acid': accent || undefined,
+      }}
+    >
       <img
         data-hero-img
         {...picsumAttrs(img)}

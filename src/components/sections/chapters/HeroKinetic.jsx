@@ -17,6 +17,9 @@ export default function HeroKinetic({
   kicker = 'A modular scrollytelling template',
   meta = '©2026 — Placeholder Studio',
   hint = 'Scroll to begin',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -74,6 +77,13 @@ export default function HeroKinetic({
 
   return (
     <section
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--market-ink': fg || undefined,
+        '--market-bone': bg || undefined,
+        '--color-accent': accent || undefined,
+      }}
       ref={root}
       className="relative flex h-svh flex-col justify-between overflow-hidden px-5 pt-24 pb-6 md:px-10 md:pb-10"
     >

@@ -23,13 +23,23 @@ export default function NavAtrium({
   linksText,
   menuLabel = 'Index',
   closeLabel = 'Close',
+  bg,
+  fg,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-[90] bg-atrium-ink/70 text-atrium-paper backdrop-blur-md">
+      <header
+        className="fixed inset-x-0 top-0 z-[90] bg-atrium-ink/70 text-atrium-paper backdrop-blur-md"
+        style={{
+          '--color-atrium-ink': bg || undefined,
+          '--atrium-ink': bg || undefined,
+          '--color-atrium-paper': fg || undefined,
+          '--atrium-paper': fg || undefined,
+        }}
+      >
         <nav className="flex items-start justify-between px-5 py-5 md:px-10 md:py-6">
           <a href="#top" className="tpl-hit relative text-[11px] leading-[1.25] tracking-[0.08em] md:text-xs">
             <span className="block">{lineOne}</span>

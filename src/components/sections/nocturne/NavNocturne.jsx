@@ -12,12 +12,23 @@ export default function NavNocturne({
   linksText,
   menuLabel = 'Menu',
   closeLabel = 'Close',
+  bg,
+  fg,
+  accent,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 text-salt">
+    <header
+      className="fixed inset-x-0 top-0 z-50 text-salt"
+      style={{
+        color: fg || undefined,
+        '--color-noir': bg || undefined,
+        '--color-salt': fg || undefined,
+        '--color-acid': accent || undefined,
+      }}
+    >
       <nav className="relative z-10 flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
         <a href="#top" className="tpl-hit relative text-sm font-medium uppercase tracking-[0.25em]">
           {brand}

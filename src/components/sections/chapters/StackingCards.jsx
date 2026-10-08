@@ -40,9 +40,19 @@ export default function StackingCards({
   chapter = '05',
   total = '06',
   label = 'The stack',
-  cards = defaultCards,
+  cards,
+  chapterLabel = 'Chapter',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
+  // Cartas del builder: el contraste de cada una (theme) sigue el ritmo de las
+  // de ejemplo según su lugar en la pila.
+  const valid = cards?.filter((c) => c?.title || c?.body || c?.index)
+  const list = valid?.length
+    ? valid.map((c, i) => ({ ...c, theme: defaultCards[i % defaultCards.length].theme }))
+    : defaultCards
 
   useGSAP(
     () => {
@@ -71,24 +81,34 @@ export default function StackingCards({
   )
 
   return (
-    <section ref={root} className="px-5 py-28 md:px-10 md:py-44">
+    <section
+      ref={root}
+      className="px-5 py-28 md:px-10 md:py-44"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--market-ink': fg || undefined,
+        '--market-bone': bg || undefined,
+        '--color-accent': accent || undefined,
+      }}
+    >
       <div className="mb-10 flex items-baseline justify-between border-t border-ink/15 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
-          Chapter {chapter} / {total}
+          {chapterLabel} {chapter} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
 
       <div>
-        {cards.map((card) => (
-          <div key={card.index} data-card-wrap className="h-svh">
+        {list.map((card, i) => (
+          <div key={i} data-card-wrap className="h-svh">
             <article
               data-card
               className={`sticky top-[10svh] flex h-[80svh] flex-col justify-between p-6 will-change-transform md:p-12 ${card.theme}`}
             >
               <div className="flex items-baseline justify-between text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs">
                 <span>{card.index}</span>
-                <span>Placeholder card</span>
+                <span>{card.tag ?? 'Placeholder card'}</span>
               </div>
 
               <div className="space-y-6">

@@ -39,6 +39,8 @@ export default function PeopleScatter({
   label = 'Section label',
   title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
   plates = defaultPlates,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -112,6 +114,14 @@ export default function PeopleScatter({
       ref={root}
       id="people"
       className="relative min-h-[200svh] overflow-hidden bg-atrium-ink px-5 pt-[13svh] pb-[10svh] text-atrium-paper md:min-h-[135svh] md:px-10"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-atrium-ink': bg || undefined,
+        '--atrium-ink': bg || undefined,
+        '--color-atrium-paper': fg || undefined,
+        '--atrium-paper': fg || undefined,
+      }}
     >
       {/* Caja angosta a proposito: el label parte en dos lineas como en la ref. */}
       <p className="atrium-note relative z-10 max-w-[8ch] font-display">{label}</p>

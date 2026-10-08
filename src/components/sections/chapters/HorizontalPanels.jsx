@@ -60,6 +60,9 @@ export default function HorizontalPanels({
   variant = 'media',
   /** Idle word opacity for type reveals (home needs readable steps). */
   idleOpacity = 0.12,
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
   const track = useRef(null)
@@ -301,7 +304,17 @@ export default function HorizontalPanels({
   )
 
   return (
-    <section ref={root} className="relative overflow-hidden md:h-svh calm:md:h-auto">
+    <section
+      ref={root}
+      className="relative overflow-hidden md:h-svh calm:md:h-auto"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--market-ink': fg || undefined,
+        '--market-bone': bg || undefined,
+        '--color-accent': accent || undefined,
+      }}
+    >
       {/* Pinneada, la sección queda en el tope del viewport: el rótulo baja
           lo que mide la nav fija para no pisarse con ella. */}
       <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0 calm:md:static calm:md:mx-0 calm:md:px-10">

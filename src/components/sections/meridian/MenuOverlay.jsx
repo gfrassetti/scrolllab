@@ -47,7 +47,7 @@ function MenuLink({ label, href }) {
   return (
     <a
       href={href}
-      className="meridian-menu-link relative block overflow-hidden text-left align-middle text-[2.1rem] tracking-[-0.02em] md:text-[clamp(2.4rem,5.4vw,4.6rem)] text-[#2a2622]"
+      className="meridian-menu-link relative block overflow-hidden text-left align-middle text-[2.1rem] tracking-[-0.02em] md:text-[clamp(2.4rem,5.4vw,4.6rem)] text-(--mer-ink,#2a2622)"
       style={{
         fontFamily: "'Fraunces', serif",
         lineHeight: 1.05,
@@ -74,7 +74,7 @@ function PillLink({ label, href }) {
   return (
     <a
       href={href}
-      className="group relative overflow-hidden rounded-full border border-[#2a2622]/40 px-6 py-3 text-xs uppercase tracking-[0.24em] text-[#2a2622] transition-colors duration-300 hover:border-[#2a2622] hover:bg-[#2a2622] hover:text-[#f0eae0]"
+      className="group relative overflow-hidden rounded-full border border-(--mer-ink,#2a2622)/40 px-6 py-3 text-xs uppercase tracking-[0.24em] text-(--mer-ink,#2a2622) transition-colors duration-300 hover:border-(--mer-ink,#2a2622) hover:bg-(--mer-ink,#2a2622) hover:text-[#f0eae0]"
       style={{ fontFamily: "'Space Mono', monospace" }}
     >
       {label}
@@ -127,7 +127,7 @@ export default function MenuOverlay({ open, onClose, links }) {
         // considered, weighted drop). Matched both here.
         transition: 'transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
         pointerEvents: open ? 'auto' : 'none',
-        background: '#efe8dd',
+        background: 'var(--mer-menu, #efe8dd)',
         // Static, not toggled by `open` — a shadow that flips on/off is an
         // extra paint on top of the transform animation; a constant one
         // just rides along for free once this layer is composited (it's
@@ -150,7 +150,7 @@ export default function MenuOverlay({ open, onClose, links }) {
         type="button"
         onClick={onClose}
         aria-label={t('close')}
-        className="meridian-menu-close pointer-events-auto absolute top-4 left-4 z-10 hidden items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.24em] text-[#2a2622] md:top-6 md:left-6 md:inline-flex"
+        className="meridian-menu-close pointer-events-auto absolute top-4 left-4 z-10 hidden items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.24em] text-(--mer-ink,#2a2622) md:top-6 md:left-6 md:inline-flex"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
         <span
@@ -181,12 +181,12 @@ export default function MenuOverlay({ open, onClose, links }) {
       {/* mobile-only utility row — the reference moves language / portal /
           plan links out of the header and into the drawer at this width */}
       <div
-        className="flex shrink-0 items-center justify-between border-y border-[#2a2622]/15 px-6 py-5 text-[11px] uppercase tracking-[0.2em] text-[#2a2622] md:hidden"
+        className="flex shrink-0 items-center justify-between border-y border-(--mer-ink,#2a2622)/15 px-6 py-5 text-[11px] uppercase tracking-[0.2em] text-(--mer-ink,#2a2622) md:hidden"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
         <span className="flex items-center gap-4">
           <LangSwitch />
-          <span aria-hidden="true" className="h-5 w-px bg-[#2a2622]/20" />
+          <span aria-hidden="true" className="h-5 w-px bg-(--mer-ink,#2a2622)/20" />
           <a href="#portal">{t('clientPortal')}</a>
         </span>
         <a href="#brochure">{t('brochure')}</a>
@@ -247,7 +247,7 @@ export default function MenuOverlay({ open, onClose, links }) {
                   {t('easierToChoose')}
                 </h3>
                 <span
-                  className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-colors duration-300 hover:bg-white hover:text-[#2a2622]"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-colors duration-300 hover:bg-white hover:text-(--mer-ink,#2a2622)"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
                   {t('selectOnGenplan')}
@@ -263,20 +263,20 @@ export default function MenuOverlay({ open, onClose, links }) {
 
       {/* footer strip */}
       <div
-        className="shrink-0 border-t border-[#2a2622]/15 px-6 py-6 text-xs uppercase tracking-[0.24em] text-[#2a2622]/70 md:px-10"
+        className="shrink-0 border-t border-(--mer-ink,#2a2622)/15 px-6 py-6 text-xs uppercase tracking-[0.24em] text-(--mer-ink,#2a2622)/70 md:px-10"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
         <div className="flex flex-col gap-6 md:flex-row md:flex-wrap md:items-baseline md:justify-between md:gap-4">
           <span>
-            <span className="mb-1 block text-[#2a2622]/40 md:hidden">{t('phone')}</span>
+            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{t('phone')}</span>
             +00 (000) 000-0000
           </span>
           <span>
-            <span className="mb-1 block text-[#2a2622]/40 md:hidden">{t('email')}</span>
+            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{t('email')}</span>
             info@example.com
           </span>
           <span>
-            <span className="mb-1 block text-[#2a2622]/40 md:hidden">{t('socials')}</span>
+            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{t('socials')}</span>
             Facebook · Instagram · Whatsapp
           </span>
         </div>

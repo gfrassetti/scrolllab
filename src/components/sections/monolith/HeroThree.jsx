@@ -88,6 +88,9 @@ export default function HeroThree({
   hint = 'Scroll',
   shape = 'icosahedron',
   modelUrl = '',
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
@@ -319,6 +322,13 @@ export default function HeroThree({
     <section
       ref={root}
       className="relative flex h-svh flex-col justify-between overflow-hidden border-b-2 border-carbon px-5 pt-24 pb-5 md:px-8"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+        '--color-concrete': bg || undefined,
+        '--color-carbon': fg || undefined,
+        '--color-klein': accent || undefined,
+      }}
     >
       <canvas
         ref={canvasRef}

@@ -46,6 +46,8 @@ const PROJECTS = [
 export default function SelectedWork({
   title = 'YOUR WORK TITLE',
   cta = 'Your CTA →',
+  bg,
+  fg,
 }) {
   const root = useRef(null)
 
@@ -123,14 +125,18 @@ export default function SelectedWork({
     <section
       id="work"
       ref={root}
-      className="relative overflow-hidden bg-[#e8e8e6] text-[#111214]"
+      className="relative overflow-hidden bg-(--sec-bg) text-current"
+      style={{
+        '--sec-bg': bg || '#e8e8e6',
+        color: fg || '#111214',
+      }}
     >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 flex justify-between px-5 md:px-10"
       >
         {Array.from({ length: 5 }).map((_, i) => (
-          <span key={i} className="h-full w-px bg-black/6" />
+          <span key={i} className="h-full w-px bg-current/6" />
         ))}
       </div>
 
@@ -182,7 +188,7 @@ export default function SelectedWork({
                     <h3 className="text-lg font-medium tracking-[-0.02em] md:text-xl">
                       {project.title}
                     </h3>
-                    <p className="mt-1.5 max-w-[36ch] text-sm leading-relaxed text-black/55">
+                    <p className="mt-1.5 max-w-[36ch] text-sm leading-relaxed text-current/55">
                       {project.body}
                     </p>
                   </div>

@@ -15,6 +15,8 @@ export default function StageLines({
   eyebrow2 = 'EYEBROW 8',
   line2 = 'HEADLINE 9 LOREM IPSUM',
   img2 = stageB,
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -70,7 +72,15 @@ export default function StageLines({
   ]
 
   return (
-    <section ref={root} id="stage" className="bg-black text-white">
+    <section
+      ref={root}
+      id="stage"
+      className="bg-black text-white"
+      style={{
+        background: bg || undefined,
+        color: fg || undefined,
+      }}
+    >
       {bands.map((band) => (
         <div
           key={band.eyebrow}
