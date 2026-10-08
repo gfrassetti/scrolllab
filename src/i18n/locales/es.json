@@ -203,13 +203,15 @@
     },
     "refundNote": "Cancelás cuando quieras. Podés pedir que te devolvamos el primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro); las renovaciones no se devuelven.",
     "refundLink": "Política de reembolsos",
-    "freeLineOne": "Empezá gratis: {{n}} widget publicado, sin tarjeta.",
-    "freeLineMany": "Empezá gratis: {{n}} widgets publicados, sin tarjeta.",
+    "freeLineOne": "{{n}} widget publicado, sin tarjeta.",
+    "freeLineMany": "{{n}} widgets publicados, sin tarjeta.",
     "howEyebrow": "Cómo funciona",
     "howTitle": "Elegís, la editás y la pegás en tu sitio. Listo.",
     "footnoteAfter": ": pago único, el código es tuyo.",
     "siteSplit": "¿Ya tenés sitio? Sumale widgets con LAB. ¿Vas a hacer uno nuevo? Para eso está el",
-    "siteSplitAfter": "."
+    "siteSplitAfter": ".",
+    "heroCtaFree": "Empezá gratis",
+    "heroCtaPlans": "Ver planes"
   },
   "common": {
     "loading": "Cargando…",

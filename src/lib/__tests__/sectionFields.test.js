@@ -387,7 +387,6 @@ const NO_COLORS = {
   'chapters/NavMinimal': 'mix-blend-difference: su color sale de lo que tiene detrás',
   'unity/NavUnity': 'mix-blend-difference: su color sale de lo que tiene detrás',
   'velocity/NavVelocity': 'transparente sobre el hero: toma el color de la página',
-  'atelier/NavAtelier': 'overlay de pantalla completa con estados propios (pendiente)',
   'velocity/TrackMerge': 'el fondo oscuro → claro → negro es la coreografía del scroll',
   'atelier/VisionShutter': 'la persiana cierra hacia el color de la sección siguiente',
   'atrium/ClarityPair': 'la animación pasa de papel a tinta con colores fijos',

@@ -76,7 +76,7 @@ export default function Intro({ lines = ['Headline 2—', 'Lorem ipsum', 'dolor 
           </span>
         ))}
       </h2>
-      <ol className="mt-[14svh] flex flex-col gap-[10svh] text-[3.6vw] leading-[1.25] md:col-span-3 md:col-start-10 md:mt-[22svh] md:gap-[16svh] md:text-[0.95vw]">
+      <ol className="mt-[14svh] flex flex-col gap-[10svh] text-[3.6vw] leading-[1.25] md:col-span-3 md:col-start-10 md:mt-[22svh] md:gap-[16svh] md:text-[max(13px,0.95vw)]">
         {noteTexts.map((n, i) => (
           <li key={n} data-kin-note data-kin-reveal className="border-t border-current pt-[0.8em]" style={{ marginLeft: `${i * 6}%` }}>
             <span className="tabular-nums">[{i + 1}]</span> {n}

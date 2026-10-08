@@ -232,13 +232,13 @@ export default function Collection({
               <div className="kin-grain relative aspect-[4/5] overflow-hidden">
                 <Work item={it} />
               </div>
-              <p className="mt-2 text-[3.3vw] md:text-[0.82vw]">
+              <p className="mt-2 text-[3.3vw] md:text-[max(11px,0.82vw)]">
                 {pad(i + 1)} {it.name}
               </p>
             </li>
           ))}
         </ul>
-        <div className="mt-[6svh] text-[3.3vw] md:w-[30em] md:text-[0.82vw]">{cta}</div>
+        <div className="mt-[6svh] text-[3.3vw] md:w-[30em] md:text-[max(11px,0.82vw)]">{cta}</div>
         <style>{STYLES}</style>
       </section>
     )
@@ -280,7 +280,7 @@ export default function Collection({
         </div>
 
         {/* The text: right of the column (phone: under it). */}
-        <div className="absolute inset-x-0 top-[55%] bottom-0 flex flex-col justify-between gap-3 px-[4.5vw] pt-3 pb-[4.5vw] text-[3.3vw] leading-[1.15] md:inset-y-0 md:right-0 md:left-1/2 md:gap-0 md:px-[1.6vw] md:pt-[4.4vw] md:pb-[1.25vw] md:text-[0.82vw]">
+        <div className="absolute inset-x-0 top-[55%] bottom-0 flex flex-col justify-between gap-3 px-[4.5vw] pt-3 pb-[4.5vw] text-[3.3vw] leading-[1.15] md:inset-y-0 md:right-0 md:left-1/2 md:gap-0 md:px-[1.6vw] md:pt-[4.4vw] md:pb-[1.25vw] md:text-[max(11px,0.82vw)]">
           <div data-kin-cl-late className="flex items-center justify-between">
             <p>
               {label} ({pad(total)})

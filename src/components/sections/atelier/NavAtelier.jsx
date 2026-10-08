@@ -18,6 +18,9 @@ export default function NavAtelier({
   /** Section the header flips to dark type over. */
   lightSection = '#work',
   bandHeight = 80,
+  /** Menú de pantalla completa: fondo y texto (la barra cambia sola sobre claro/oscuro). */
+  bg,
+  fg,
 }) {
   const root = useRef(null)
   const items = parseNavLinks(links, linksText)
@@ -108,12 +111,13 @@ export default function NavAtelier({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
+        style={{ background: bg || undefined, color: fg || undefined }}
         className={`fixed inset-0 z-40 bg-[#0b0c10] text-white transition-opacity duration-300 motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
         <div className="flex h-full flex-col justify-center px-5 md:px-10">
-          <p className="mb-10 text-[11px] tracking-[0.25em] text-white/40 uppercase">
+          <p className="mb-10 text-[11px] tracking-[0.25em] text-current/40 uppercase">
             {label}
           </p>
           <ul className="space-y-1">

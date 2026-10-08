@@ -24,6 +24,7 @@ export default function FooterSplash({
   legal = '©2026 Placeholder Brand — Template, not a promise',
   note = 'Placeholder closing note. Tell people where to go next — swap this text and the links for your own.',
   backToTop = 'Back to top ↑',
+  contactLabel = 'Contact',
 }) {
   const root = useRef(null)
   const bubblesRef = useRef(null)
@@ -61,8 +62,8 @@ export default function FooterSplash({
       <div className="relative grid gap-12 md:grid-cols-12">
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:col-span-8 md:grid-cols-3">
           {flatLinks.length > 0 ? (
-            <nav aria-label="Links" className="col-span-2 md:col-span-3">
-              <ul className="grid grid-cols-2 gap-x-8 md:grid-cols-3 lg:gap-y-2">
+            <nav aria-label="Links" className="col-span-2">
+              <ul className="grid grid-cols-2 gap-x-8 lg:gap-y-2">
                 {flatLinks.map((l, i) => (
                   <li key={i}>
                     <a
@@ -96,19 +97,20 @@ export default function FooterSplash({
                   </ul>
                 </nav>
               ))}
-              <div className="col-span-2 md:col-span-1">
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] opacity-55 md:text-xs lg:mb-5">
-                  Contact
-                </p>
-                <a
-                  href={cta}
-                  className="tpl-link tpl-hit relative inline-block py-3 text-sm [overflow-wrap:anywhere] uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
-                >
-                  {email}
-                </a>
-              </div>
             </>
           )}
+          {/* Contacto: también con links propios (antes desaparecía al editarlos). */}
+          <div className="col-span-2 md:col-span-1">
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] opacity-55 md:text-xs lg:mb-5">
+              {contactLabel}
+            </p>
+            <a
+              href={cta}
+              className="tpl-link tpl-hit relative inline-block py-3 text-sm [overflow-wrap:anywhere] uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
+            >
+              {email}
+            </a>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 md:col-span-4 md:items-end md:text-right">

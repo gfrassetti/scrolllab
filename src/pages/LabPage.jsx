@@ -261,11 +261,17 @@ export default function LabPage() {
           >
             {t('lab.body')}
           </p>
-          {freeQuota > 0 && (
-            <p data-lab-hero-meta className="mt-4 text-body-sm font-medium text-ink">
-              {t(freeQuota === 1 ? 'lab.freeLineOne' : 'lab.freeLineMany', { n: freeQuota })}
-            </p>
-          )}
+          {/* La acción primaria del hero: a los planes (ahí se entra y se elige). */}
+          <div data-lab-hero-meta className="mt-7 flex flex-col items-center gap-2">
+            <a href="#planes" onClick={goToPlanes} className="btn btn-primary">
+              {t(freeQuota > 0 ? 'lab.heroCtaFree' : 'lab.heroCtaPlans')}
+            </a>
+            {freeQuota > 0 && (
+              <p className="text-body-sm text-ink/60">
+                {t(freeQuota === 1 ? 'lab.freeLineOne' : 'lab.freeLineMany', { n: freeQuota })}
+              </p>
+            )}
+          </div>
           {/* LAB vs Builder en una línea: ¿ya tenés sitio o vas a hacer uno? */}
           <p data-lab-hero-meta className="mx-auto mt-3 max-w-[52ch] text-body-sm text-ink/60">
             {t('lab.siteSplit')}{' '}

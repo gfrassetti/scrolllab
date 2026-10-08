@@ -821,7 +821,7 @@ export default function Hero({
       <MenuOverlay open={menuOpen} onClose={closeMenu} closeLabel={closeLabel} {...navProps} />
 
       {/* Fixed bar (desktop): takes over from the hero's nav box. */}
-      <div ref={stickyRef} className="invisible fixed inset-x-0 top-0 z-50 hidden bg-(--kin-paper) text-[0.82vw] md:block">
+      <div ref={stickyRef} className="invisible fixed inset-x-0 top-0 z-50 hidden bg-(--kin-paper) text-[max(11px,0.82vw)] md:block">
         <div className="relative mx-[1.25vw]">
           <BoxLines variant="bar" />
           <BarRow {...navProps} />
@@ -870,7 +870,7 @@ export default function Hero({
       <div aria-hidden="true" className="h-[17vw] max-md:order-4 md:hidden" />
 
       {/* Desktop nav: a hairline box, laid out like the header it turns into. */}
-      <div ref={navRef} className="relative mx-[1.25vw] mt-[1.25vw] hidden text-[0.82vw] md:block">
+      <div ref={navRef} className="relative mx-[1.25vw] mt-[1.25vw] hidden text-[max(11px,0.82vw)] md:block">
         <BoxLines variant="hero" />
         <BarRow fade {...navProps} />
       </div>
@@ -881,7 +881,7 @@ export default function Hero({
           {/* Scroll cue: a small box that fades away as the page moves. */}
           <div data-kin-fade className="hidden md:block">
             <div ref={cueRef} className="w-fit">
-              <a href="#about" className="kin-cue tpl-hit relative inline-flex items-center gap-[0.6em] border border-(--kin-ink) bg-(--kin-paper) px-[0.9em] py-[0.6em] text-[0.82vw] leading-none">
+              <a href="#about" className="kin-cue tpl-hit relative inline-flex items-center gap-[0.6em] border border-(--kin-ink) bg-(--kin-paper) px-[0.9em] py-[0.6em] text-[max(11px,0.82vw)] leading-none">
                 {scrollLabel}
                 <svg aria-hidden="true" viewBox="0 0 11 12" className="kin-scroll-arrow h-[0.85em] w-[0.85em]" fill="currentColor">
                   <path d="M5.5 12 10.5 6.9V5.1L6.1 9.5V0H4.9v9.5L.5 5.1v1.8z" />
@@ -901,7 +901,7 @@ export default function Hero({
         </div>
 
         <div className="relative mt-[7vw] flex flex-col justify-end md:col-span-3 md:mt-0 md:pb-[1.25vw]">
-          <div data-kin-fade className="text-[3.3vw] leading-[1.15] md:text-[0.82vw]">
+          <div data-kin-fade className="text-[3.3vw] leading-[1.15] md:text-[max(11px,0.82vw)]">
             <p className="flex justify-between pb-[0.6em]">
               <span>{listLabel}</span>
               <span className="tabular-nums">({pad(roomTexts.length)})</span>

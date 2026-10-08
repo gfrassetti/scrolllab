@@ -203,13 +203,15 @@
     },
     "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
     "refundLink": "Refund policy",
-    "freeLineOne": "Start free: {{n}} published widget, no card.",
-    "freeLineMany": "Start free: {{n}} published widgets, no card.",
+    "freeLineOne": "{{n}} published widget, no card.",
+    "freeLineMany": "{{n}} published widgets, no card.",
     "howEyebrow": "How it works",
     "howTitle": "Pick it, edit it, paste it into your site. Done.",
     "footnoteAfter": ": one-time payment, the code is yours.",
     "siteSplit": "Already have a site? Add widgets with LAB. Building a new one? That is what the",
-    "siteSplitAfter": " is for."
+    "siteSplitAfter": " is for.",
+    "heroCtaFree": "Start free",
+    "heroCtaPlans": "See plans"
   },
   "common": {
     "loading": "Loading…",

@@ -621,6 +621,7 @@ export const SECTION_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    { key: 'contactLabel', label: 'Contacto — título', type: 'text' },
   ],
   'velocity/NavVelocity': [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -696,6 +697,8 @@ export const SECTION_FIELDS = {
       label: 'Links (uno por línea, "Texto | #ancla")',
       type: 'textarea',
     },
+    { key: 'bg', label: 'Menú — color de fondo', type: 'color' },
+    { key: 'fg', label: 'Menú — color de texto', type: 'color' },
   ],
   'atelier/HeroMeaning': [
     { key: 'line1', label: 'Line 1', type: 'text' },
