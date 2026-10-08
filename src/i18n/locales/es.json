@@ -23,8 +23,8 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "Secciones en vivo",
-    "body": "Configurá una sección y mostrala en cualquier sitio con una línea de <script>. El código nunca sale de nuestro lado: editás acá, se actualiza allá.",
+    "eyebrow": "Sin programar",
+    "body": "Sumale a tu sitio una sección de nivel premio, sin desarrollador. Funciona en WordPress, Webflow, Shopify o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualiza sola.",
     "yours": "Tus secciones",
     "publishedCount": "{{n}} de {{total}} publicadas",
     "new": "＋ Nueva",
@@ -51,7 +51,7 @@
     "draftHint": "Borrador — abrí el editor para configurarla y publicarla.",
     "frozenHint": "Tu plan ya no cubre esta sección: el embed no se está mostrando en tu sitio. Sigue guardada — reactivá tu suscripción o subí de plan y vuelve sola.",
     "stopsOn": "se apaga el {{date}}",
-    "footnote": "¿Querés una página entera en vez de una sección suelta? Eso va por el",
+    "footnote": "¿Sos desarrollador y preferís el código? Comprá un template o armá tu página en el",
     "back": "← Volver a LAB",
     "fields": "Contenido",
     "noFields": "Esta sección no tiene campos editables.",
@@ -70,12 +70,20 @@
     "guideTitle": "Cómo se instala",
     "guide1": "Configurá la sección en el editor y tocá Publicar.",
     "guide2": "Copiá el <script> que aparece en la card.",
-    "guide3": "Pegalo en el HTML de tu sitio, antes de </body>. La sección aparece donde pusiste el script.",
+    "guide3": "Pegalo en tu sitio, donde quieras que aparezca (en WordPress, Webflow o Shopify es un bloque de \"código HTML\").",
     "faqTitle": "Preguntas",
     "faq": [
       {
+        "q": "¿Necesito saber programar?",
+        "a": "No. Elegís la sección, completás los campos y pegás una línea en tu sitio. Si tu plataforma te deja agregar un bloque de código HTML, alcanza."
+      },
+      {
+        "q": "¿Por qué una cuota y no un pago único?",
+        "a": "Porque la sección vive en nuestros servidores: el hosting, las mejoras y los cambios que hacés desde el panel van incluidos. Si preferís el código fuente para alojarlo vos, comprá el template: pago único y es tuyo."
+      },
+      {
         "q": "¿Qué es una sección en vivo?",
-        "a": "Una sección del sitio que configurás acá y se muestra en cualquier página con una línea de código. A diferencia de bajar el ZIP, el código no sale de nuestro lado: lo editás desde LAB y se actualiza solo donde lo pegaste."
+        "a": "Una sección de nuestro catálogo que configurás acá y aparece en tu sitio con una línea de código. No necesitás saber programar: la editás desde LAB y el cambio se ve solo donde la pegaste."
       },
       {
         "q": "¿Puedo cambiar el contenido después?",
@@ -121,11 +129,11 @@
     "planQuota": "{{n}} secciones publicadas",
     "planFeaturesTitle": "Todos los planes incluyen",
     "planFeatures": [
-      "Editás y republicás cuando quieras",
-      "Corre aislada en un iframe",
-      "Dominios permitidos (allowlist)",
-      "Contador de vistas",
-      "Soporte por email"
+      "Cambiás textos, fotos y colores cuando quieras, sin programar",
+      "Hosting incluido: no instalás nada",
+      "Se ve bien en teléfono, tablet y computadora",
+      "Mejoras y secciones nuevas sin costo extra",
+      "Contador de vistas y soporte por email"
     ],
     "planFreeState": "Plan gratis — {{used}} / {{quota}} publicadas",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} publicadas",
@@ -194,7 +202,14 @@
       "updateCard": "Actualizar tarjeta"
     },
     "refundNote": "Cancelás cuando quieras. Podés pedir que te devolvamos el primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro); las renovaciones no se devuelven.",
-    "refundLink": "Política de reembolsos"
+    "refundLink": "Política de reembolsos",
+    "freeLineOne": "Empezá gratis: {{n}} sección publicada, sin tarjeta.",
+    "freeLineMany": "Empezá gratis: {{n}} secciones publicadas, sin tarjeta.",
+    "howEyebrow": "Cómo funciona",
+    "howTitle": "Elegís, la editás y la pegás en tu sitio. Listo.",
+    "saveMonthsOne": "1 mes gratis",
+    "saveMonths": "{{n}} meses gratis",
+    "footnoteAfter": ": pago único, el código es tuyo."
   },
   "common": {
     "loading": "Cargando…",
@@ -277,7 +292,7 @@
     "step3Body": "Pagás con Mercado Pago (pesos) o con tarjeta (dólares). La compra aparece en Mis compras.",
     "step4Title": "Descargá el ZIP",
     "step4Body": "Tu compra queda en Mis compras. Descargá el ZIP cuando quieras.",
-    "howHostedNote": "¿Solo necesitás una sección suelta, no una página entera? Algunas las servimos nosotros con un <script>: las editás online, por suscripción.",
+    "howHostedNote": "¿No programás? Con LAB sumás a tu sitio actual cualquiera de nuestras más de 30 secciones y la editás online.",
     "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
     "paymentsBody": "Pagás con Mercado Pago en pesos, o con tarjeta en dólares a través de Paddle. No vemos ni guardamos los datos de tu tarjeta.",

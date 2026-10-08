@@ -70,6 +70,20 @@ export default function LabPage() {
 
   const faq = t('lab.faq')
 
+  // Plan gratis publicable (HOSTED_FREE_QUOTA, 0 = LAB 100% de pago): el hero
+  // solo promete "empezá gratis" si de verdad existe.
+  const [freeQuota, setFreeQuota] = useState(0)
+  useEffect(() => {
+    let alive = true
+    api
+      .subscriptionPlans()
+      .then((p) => alive && setFreeQuota(Number(p.freeQuota) || 0))
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
+
   // LAB es de pago: un usuario free solo llega hasta `hostedFreeQuota`
   // instancias (0 = ninguna). Sobre eso, "＋ Nueva" queda bloqueada. Las que
   // ya tenía siguen guardadas (y se ven, congeladas). El server enforce esto.
@@ -247,16 +261,17 @@ export default function LabPage() {
           >
             {t('lab.body')}
           </p>
+          {freeQuota > 0 && (
+            <p data-lab-hero-meta className="mt-4 text-body-sm font-medium text-ink">
+              {t(freeQuota === 1 ? 'lab.freeLineOne' : 'lab.freeLineMany', { n: freeQuota })}
+            </p>
+          )}
         </div>
 
         {/* Cómo funciona — 3 pasos + un prototipo del cambio en vivo. */}
         <section className="mt-20 md:mt-28">
-          <p className="text-eyebrow uppercase text-ink/45">Cómo funciona</p>
-          <h2 className="mt-3 max-w-[22ch] text-title font-medium">
-            De una sección del catálogo a un{' '}
-            <code className="font-mono text-[0.8em]">&lt;script&gt;</code> en
-            cualquier sitio
-          </h2>
+          <p className="text-eyebrow uppercase text-ink/45">{t('lab.howEyebrow')}</p>
+          <h2 className="mt-3 max-w-[22ch] text-title font-medium">{t('lab.howTitle')}</h2>
 
           <div
             ref={demoPin}
@@ -477,7 +492,7 @@ export default function LabPage() {
           >
             {t('nav.builder')}
           </Link>
-          .
+          {t('lab.footnoteAfter')}
         </p>
       </main>
     </div>

@@ -23,8 +23,8 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "Live sections",
-    "body": "Configure a section and serve it on any site with one line of <script>. The code never leaves our side: you edit here, it updates there.",
+    "eyebrow": "No code",
+    "body": "Add an award-level section to your site, without a developer. Works on WordPress, Webflow, Shopify or any site where you can paste code. Change texts, photos and colors from here and it updates on its own.",
     "yours": "Your sections",
     "publishedCount": "{{n}} of {{total}} published",
     "new": "＋ New",
@@ -51,7 +51,7 @@
     "draftHint": "Draft — open the editor to configure and publish it.",
     "frozenHint": "Your plan no longer covers this section: the embed isn't showing on your site. It's still saved — reactivate your subscription or move up a plan and it comes back on its own.",
     "stopsOn": "stops on {{date}}",
-    "footnote": "Want a whole page instead of a single section? That goes through the",
+    "footnote": "A developer who prefers the code? Buy a template or build your page in the",
     "back": "← Back to LAB",
     "fields": "Content",
     "noFields": "This section has no editable fields.",
@@ -70,12 +70,20 @@
     "guideTitle": "How to install",
     "guide1": "Configure the section in the editor and hit Publish.",
     "guide2": "Copy the <script> shown on the card.",
-    "guide3": "Paste it into your site's HTML, before </body>. The section appears where you put the script.",
+    "guide3": "Paste it into your site, wherever you want it to appear (on WordPress, Webflow or Shopify it is an \"HTML code\" block).",
     "faqTitle": "FAQ",
     "faq": [
       {
+        "q": "Do I need to know how to code?",
+        "a": "No. Pick the section, fill in the fields and paste one line into your site. If your platform lets you add an HTML code block, that is enough."
+      },
+      {
+        "q": "Why a subscription and not a one-time payment?",
+        "a": "Because the section lives on our servers: hosting, improvements and the changes you make from the panel are included. If you prefer the source code to host it yourself, buy the template: one-time payment and it is yours."
+      },
+      {
         "q": "What is a live section?",
-        "a": "A section you configure here and show on any page with one line of code. Unlike downloading the ZIP, the code never leaves our side: you edit it from LAB and it updates on its own wherever you pasted it."
+        "a": "A section from our catalog that you configure here and that shows up on your site with one line of code. No coding needed: you edit it from LAB and the change shows up on its own wherever you pasted it."
       },
       {
         "q": "Can I change the content later?",
@@ -121,11 +129,11 @@
     "planQuota": "{{n}} published sections",
     "planFeaturesTitle": "All plans include",
     "planFeatures": [
-      "Edit and republish anytime",
-      "Runs isolated in an iframe",
-      "Allowed domains (allowlist)",
-      "View counter",
-      "Email support"
+      "Change texts, photos and colors anytime, no code",
+      "Hosting included: nothing to install",
+      "Looks right on phone, tablet and desktop",
+      "Improvements and new sections at no extra cost",
+      "View counter and email support"
     ],
     "planFreeState": "Free plan — {{used}} / {{quota}} published",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} published",
@@ -194,7 +202,14 @@
       "updateCard": "Update card"
     },
     "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
-    "refundLink": "Refund policy"
+    "refundLink": "Refund policy",
+    "freeLineOne": "Start free: {{n}} published section, no card.",
+    "freeLineMany": "Start free: {{n}} published sections, no card.",
+    "howEyebrow": "How it works",
+    "howTitle": "Pick it, edit it, paste it into your site. Done.",
+    "saveMonthsOne": "1 month free",
+    "saveMonths": "{{n}} months free",
+    "footnoteAfter": ": one-time payment, the code is yours."
   },
   "common": {
     "loading": "Loading…",
@@ -277,7 +292,7 @@
     "step3Body": "Pay with Mercado Pago (pesos) or by card (US dollars). Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
-    "howHostedNote": "Just need a single section, not a whole page? Some are served hosted with a <script>: edit them online, on a subscription.",
+    "howHostedNote": "Don't code? With LAB you add any of our 30+ sections to your current site and edit it online.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
     "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Paddle. We never see or store your card details.",
