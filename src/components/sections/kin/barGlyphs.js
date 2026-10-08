@@ -6,14 +6,22 @@
  * pixels or animation: Hero.jsx scales these numbers to the viewport and
  * GSAP moves the bars between the layouts below.
  *
- * Change WORD to your brand. Letters that can be built from equal bars:
- *   A H I K L M N T V W X Y  1 7  (and a space)
- * Anything else falls back to an I. Bars are too thick for E, F, Z, B…; that's
- * the constraint that gives the mark its look.
+ * Change WORD to your brand. The letters the mark was designed around — the
+ * ones that look best — are:
+ *   A H I K L M N T V W X Y  1 7
+ * Every other letter A–Z and digit 0–9 is drawn too, plus space . - !
+ * (accents are dropped: Á → A, Ñ → N; anything else is skipped), but with
+ * thin horizontal strokes and squared curves they can read less cleanly.
+ * Try your word in local first: /templates/kin?word=YOURWORD (npm run dev).
+ *
+ * The rule that gives the mark its look: verticals and diagonals are full,
+ * thick bars; horizontal strokes are thin bars (THIN of the width), so a
+ * letter with three of them (E, B, S, 8…) still fits in the band. Curves are
+ * squared off, like a stencil.
  *
  * Units: x grows right, y grows down, angles are degrees clockwise (CSS
- * `rotate`). `sy` stretches a bar's length (diagonals overshoot the band
- * and get cut flat by it, like a stencil).
+ * `rotate`). `sy` stretches a bar's length and `sx` its thickness
+ * (diagonals overshoot the band and get cut flat by it, like a stencil).
  */
 
 export const WORD = 'KIN'
@@ -27,6 +35,15 @@ const rad = (d) => (d * Math.PI) / 180
 const V = (x, sy = 1, cy = H / 2) => ({ cx: x, cy, r: 0, sy })
 const HZ = (cx, cy, len) => ({ cx, cy, r: 90, sy: len / H })
 
+// Thin horizontals and partial verticals (the full alphabet). Edges, not
+// centres: a vertical at x 0.5 spans 0–1; one at 2.3 spans 1.8–2.8.
+export const THIN = 0.3
+const TOP = THIN / 2
+const MID = H / 2
+const BOT = H - THIN / 2
+const th = (x0, x1, y) => ({ cx: (x0 + x1) / 2, cy: y, r: 90, sy: (x1 - x0) / H, sx: THIN })
+const seg = (x, y0, y1) => ({ cx: x, cy: (y0 + y1) / 2, r: 0, sy: (y1 - y0) / H })
+
 // A bar whose end sits on point (x, y) and that leans `deg` from vertical,
 // reaching `len` units away from that point.
 function arm(x, y, deg, len) {
@@ -35,12 +52,12 @@ function arm(x, y, deg, len) {
 }
 
 // Diagonal through two points (both get overshot by `over` units).
-function strut(x1, y1, x2, y2, over = 0.7) {
+function strut(x1, y1, x2, y2, over = 0.7, sx = 1) {
   const dx = x2 - x1
   const dy = y2 - y1
   const len = Math.hypot(dx, dy) + over * 2
   const deg = (Math.atan2(dx, -dy) * 180) / Math.PI
-  return { cx: (x1 + x2) / 2, cy: (y1 + y2) / 2, r: deg, sy: len / H }
+  return { cx: (x1 + x2) / 2, cy: (y1 + y2) / 2, r: deg, sy: len / H, ...(sx !== 1 && { sx }) }
 }
 
 const GLYPHS = {
@@ -64,12 +81,40 @@ const GLYPHS = {
   Y: () => [strut(0.4, -0.1, 1.4, H * 0.55, 0.4), strut(2.4, -0.1, 1.4, H * 0.55, 0.4), V(1.4, 0.5, H * 0.75)],
   1: () => [arm(0.55, 0.55, -60, 0.9), V(1.0)],
   7: () => [HZ(1.25, 0.5, 2.5), strut(2.2, 0.6, 1.0, H, 0.4)],
+
+  // Thick stems, thin horizontals, square curves. Wide letters run 0–3:
+  // left stem 0–1, right stem 2–3, a counter 1 wide in between.
+  B: () => [V(0.5), seg(2.3, 0, MID), seg(2.5, MID, H), th(0, 2.8, TOP), th(0, 3, MID), th(0, 3, BOT)],
+  C: () => [V(0.5), th(0, 2.9, TOP), th(0, 2.9, BOT)],
+  D: () => [V(0.5), th(0, 2.0, TOP), th(0, 2.0, BOT), seg(2.5, 0.5, H - 0.5), strut(1.85, TOP, 2.75, 0.62, 0.06, THIN), strut(1.85, BOT, 2.75, H - 0.62, 0.06, THIN)],
+  E: () => [V(0.5), th(0, 2.7, TOP), th(0, 2.3, MID), th(0, 2.7, BOT)],
+  F: () => [V(0.5), th(0, 2.7, TOP), th(0, 2.3, MID)],
+  G: () => [V(0.5), th(0, 2.9, TOP), th(0, 3, BOT), seg(2.5, MID, H), th(1.7, 3, MID)],
+  J: () => [V(2.2), th(0, 2.7, BOT), seg(0.5, H * 0.55, H)],
+  O: () => [V(0.5), V(2.5), th(0, 3, TOP), th(0, 3, BOT)],
+  P: () => [V(0.5), th(0, 3, TOP), th(0, 3, MID), seg(2.5, 0, MID)],
+  Q: () => [V(0.5), V(2.5), th(0, 3, TOP), th(0, 3, BOT), strut(1.8, H * 0.6, 3.1, H + 0.3, 0)],
+  R: () => [V(0.5), th(0, 3, TOP), th(0, 3, MID), seg(2.5, 0, MID), strut(1.4, MID, 2.6, H, 0.45)],
+  S: () => [th(0.6, 3, TOP), seg(0.5, 0, MID), th(0, 3, MID), seg(2.5, MID, H), th(0, 2.4, BOT)],
+  U: () => [V(0.5), V(2.5), th(0, 3, BOT)],
+  Z: () => [th(0, 2.8, TOP), th(0, 2.8, BOT), strut(2.3, TOP + 0.15, 0.5, BOT - 0.15, 0.05)],
+  0: () => [V(0.5), V(2.3), th(0, 2.8, TOP), th(0, 2.8, BOT), strut(1.95, 0.45, 0.85, H - 0.45, 0, THIN)],
+  2: () => [th(0, 3, TOP), seg(2.5, 0, MID), th(0, 3, MID), seg(0.5, MID, H), th(0, 3, BOT)],
+  3: () => [th(0, 3, TOP), th(0.8, 3, MID), th(0, 3, BOT), V(2.5)],
+  4: () => [seg(0.5, 0, MID + THIN / 2), th(0, 3, MID), V(2.2)],
+  5: () => [th(0, 3, TOP), seg(0.5, 0, MID), th(0, 3, MID), seg(2.5, MID, H), th(0, 3, BOT)],
+  6: () => [V(0.5), th(0, 3, TOP), th(0, 3, MID), seg(2.5, MID, H), th(0, 3, BOT)],
+  8: () => [V(0.5), V(2.5), th(0, 3, TOP), th(0, 3, MID), th(0, 3, BOT)],
+  9: () => [V(2.5), th(0, 3, TOP), th(0, 3, MID), th(0, 3, BOT), seg(0.5, 0, MID)],
+  '.': () => [seg(0.5, H - 0.62, H)],
+  '-': () => [th(0, 1.7, MID)],
+  '!': () => [seg(0.5, 0, H - 0.85), seg(0.5, H - 0.55, H)],
 }
 
 // Corners of a bar (centre, angle, length) in the same units.
-function corners({ cx, cy, r, sy }) {
+function corners({ cx, cy, r, sy, sx = 1 }) {
   const t = rad(r)
-  const hw = 0.5
+  const hw = 0.5 * sx
   const hh = (H * sy) / 2
   const ux = Math.sin(t)
   const uy = -Math.cos(t) // along the bar (towards its top)
@@ -110,7 +155,7 @@ function clippedXRange(bar) {
 
 /**
  * The word laid out on one line, starting at x = 0.
- * Returns { bars: [{ cx, cy, r, sy, letter, li }], width, height, letters }.
+ * Returns { bars: [{ cx, cy, r, sy, sx?, letter, li }], width, height, letters }.
  * `li` is the letter index: the hero uses it to spread the letters apart
  * when the band is wider than the word at the height it is allowed.
  */
@@ -119,12 +164,20 @@ export function layoutWord(word = WORD) {
   const ranges = [] // each letter's [x0, x1], for the plinths under the word
   let x = 0
   let li = 0
-  for (const ch of String(word).toUpperCase()) {
+  // Accents off (Á → A, Ñ → N), a few ligatures spelled out; anything
+  // without a glyph is skipped.
+  const chars = String(word)
+    .replace(/[ÆæŒœØø]/g, (c) => ({ Æ: 'AE', æ: 'ae', Œ: 'OE', œ: 'oe', Ø: 'O', ø: 'o' })[c])
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+  for (const ch of chars) {
     if (ch === ' ') {
       x += 1.2
       continue
     }
-    const glyph = (GLYPHS[ch] || GLYPHS.I)()
+    if (!GLYPHS[ch]) continue
+    const glyph = GLYPHS[ch]()
     let lo = Infinity
     let hi = -Infinity
     for (const b of glyph) {
@@ -138,6 +191,8 @@ export function layoutWord(word = WORD) {
     li += 1
     x += hi - lo + GAP
   }
+  // Nothing drawable (empty, or only symbols): fall back to the default word.
+  if (!bars.length && String(word).toUpperCase() !== WORD) return layoutWord(WORD)
   return { bars, ranges, width: Math.max(0, x - GAP), height: H, letters: li }
 }
 
@@ -189,8 +244,13 @@ export function doorSlots(n) {
 /** The bar that carries the accent colour: the one nearest the middle. */
 export function accentBar(layout) {
   const mid = layout.width / 2
-  return layout.bars.reduce(
-    (best, b, i) => (Math.abs(b.cx - mid) < Math.abs(layout.bars[best].cx - mid) ? i : best),
-    0,
+  // Prefer a full, thick, upright bar (a stem); a thin stroke or a stub
+  // would read as a red speck.
+  const stem = (b) => b.r === 0 && (b.sx ?? 1) === 1 && b.sy >= 0.9
+  const pool = layout.bars.map((b, i) => i).filter((i) => stem(layout.bars[i]))
+  const candidates = pool.length ? pool : layout.bars.map((b, i) => i)
+  if (!candidates.length) return 0
+  return candidates.reduce((best, i) =>
+    Math.abs(layout.bars[i].cx - mid) < Math.abs(layout.bars[best].cx - mid) ? i : best,
   )
 }

@@ -918,7 +918,7 @@ export const SECTION_FIELDS = {
     { key: 'closer', label: 'Closing statement', type: 'textarea' },
   ],
   'kin/Hero': [
-    { key: 'word', label: 'Palabra de barras (A H I K L M N T V W X Y 1 7)', type: 'text' },
+    { key: 'word', label: 'Palabra de barras — ideales: A H I K L M N T V W X Y 1 7 (las demás letras y números se dibujan, pero pueden verse menos limpios)', type: 'text' },
     { key: 'brand', label: 'Marca', type: 'text' },
     { key: 'brandNote', label: 'Bajada de la marca', type: 'text' },
     {
@@ -983,7 +983,7 @@ export const SECTION_FIELDS = {
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
   ],
   'kin/Footer': [
-    { key: 'word', label: 'Palabra de barras (A H I K L M N T V W X Y 1 7)', type: 'text' },
+    { key: 'word', label: 'Palabra de barras — ideales: A H I K L M N T V W X Y 1 7 (las demás letras y números se dibujan, pero pueden verse menos limpios)', type: 'text' },
     { key: 'line1', label: 'Titular — línea 1', type: 'text' },
     { key: 'line2', label: 'Titular — línea 2', type: 'text' },
     { key: 'ctaLabel', label: 'CTA', type: 'text' },

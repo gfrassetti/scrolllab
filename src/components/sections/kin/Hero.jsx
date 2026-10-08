@@ -418,7 +418,7 @@ export default function Hero({
           x: geo.x + (b.cx + b.li * geo.extra) * geo.s,
           y: geo.y + b.cy * geo.s,
           rotation: b.r,
-          scaleX: 1,
+          scaleX: b.sx ?? 1, // thin bars for the horizontal strokes
           scaleY: b.sy,
         }
       }
@@ -606,7 +606,7 @@ export default function Hero({
               x: gsap.utils.interpolate(from.x, to.x, 0.5) + side * vw * 0.05,
               y: gsap.utils.interpolate(from.y, to.y, 0.35) - vh * 0.06,
               rotation: gsap.utils.interpolate(from.rotation, to.rotation, 0.65),
-              scaleX: gsap.utils.interpolate(1, k, 0.5),
+              scaleX: gsap.utils.interpolate(from.scaleX, k, 0.5),
               scaleY: gsap.utils.interpolate(from.scaleY, to.scaleY, 0.5),
               duration: half,
               ease: 'power1.in',
@@ -687,6 +687,9 @@ export default function Hero({
       measure()
       const bandCy = geo.y + geo.h / 2
       const order = dropOrder(bars.length, accent)
+      // One bar every 0.22 s, but a long word shares about 2.4 s of drops so
+      // the loader takes the same time whatever the brand.
+      const step = Math.min(0.22, 2.4 / Math.max(1, bars.length))
 
       gsap.set(layer, { zIndex: 60, clipPath: 'none' })
       gsap.set(accentLayer, { zIndex: 61, clipPath: 'none' })
@@ -714,13 +717,13 @@ export default function Hero({
       // One bar at a time drops onto the baseline and lands with a small
       // squash, like a piece of type being struck.
       order.forEach((i, n) => {
-        const t = (0.75 + n * 0.22) * f
+        const t = (0.75 + n * step) * f
         const bar = bars[i]
         loader.to(bar, { y: bandCy, duration: 0.42 * f, ease: 'power3.in' }, t)
         loader.to(bar, { scaleY: 0.86, duration: 0.07, ease: 'power1.out' }, t + 0.42 * f)
         loader.to(bar, { scaleY: 1, duration: 0.35, ease: 'back.out(3)' }, t + 0.42 * f + 0.07)
       })
-      const leanAt = (0.75 + order.length * 0.22 + 0.45) * f
+      const leanAt = (0.75 + order.length * step + 0.45) * f
       // The diagonals lean into their letters, cut flat by the band.
       loader.set(bars, { transformOrigin: '50% 50%' }, leanAt - 0.01)
       loader.set(layers, { clipPath: bandClip() }, leanAt - 0.01)
@@ -730,6 +733,7 @@ export default function Hero({
           y: (i) => wordPose(i).y,
           rotation: (i) => wordPose(i).rotation,
           scaleY: (i) => wordPose(i).scaleY,
+          scaleX: (i) => wordPose(i).scaleX,
           duration: 0.75 * f,
           ease: 'power3.inOut',
           stagger: 0.04 * f,

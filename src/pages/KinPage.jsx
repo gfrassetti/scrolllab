@@ -17,6 +17,12 @@ import Footer from '../components/sections/kin/Footer'
  * a dark index, and a pinned collection where a triptych folds into a stack.
  */
 export default function KinPage() {
+  // Only with `npm run dev`: /templates/kin?word=STUDIO tries another bar word
+  // without touching the default (WORD in barGlyphs.js).
+  const devWord =
+    import.meta.env.DEV && typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('word') || undefined
+      : undefined
   return (
     <SmoothScrollProvider>
       <div
@@ -25,12 +31,12 @@ export default function KinPage() {
       >
         <ScrollRail trackClassName="bg-[#141414]/10" fillClassName="bg-[#141414]" />
         <main>
-          <Hero />
+          <Hero word={devWord} />
           <Intro />
           <Rooms />
           <Collection />
         </main>
-        <Footer />
+        <Footer word={devWord} />
       </div>
     </SmoothScrollProvider>
   )

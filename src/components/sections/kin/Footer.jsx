@@ -79,7 +79,7 @@ export default function Footer({
         const s = w / layout.width
         const pose = (i) => {
           const b = layout.bars[i]
-          return { x: b.cx * s, y: b.cy * s, rotation: b.r, scaleX: 1, scaleY: b.sy }
+          return { x: b.cx * s, y: b.cy * s, rotation: b.r, scaleX: b.sx ?? 1, scaleY: b.sy }
         }
         gsap.set(bars, { width: s, height: BAR_H * s, xPercent: -50, yPercent: -50 })
         bars.forEach((bar, i) => gsap.set(bar, pose(i)))

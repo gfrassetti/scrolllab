@@ -108,9 +108,15 @@ keyframes.
 
 3.1 La marca es DATA (argumento de venta para el comprador dev)
   - Alfabeto de barras (barGlyphs.js): cada letra es un set de barras
-    iguales (rectángulos de proporción fija) con x, y, rotación. Letras
-    construibles: A H I K L M N T V W X Y (+ 1 7). E, F, Z, B… no entran:
-    las barras son demasiado gruesas (probado y descartado: quedan bloques).
+    iguales (rectángulos de proporción fija) con x, y, rotación. Primero
+    solo entraban A H I K L M N T V W X Y (+ 1 7); desde 2026-10-07 entra
+    TODO el alfabeto y los números: verticales gruesas + horizontales finas
+    (THIN = 0.3), curvas cuadradas. Acentos fuera, ligaduras escritas, lo
+    demás se omite (y sin nada dibujable, vuelve la palabra por defecto).
+    Decisión del usuario: las letras IDEALES siguen siendo las originales
+    (A H I K L M N T V W X Y 1 7); las demás funcionan pero pueden verse
+    menos limpias, y así se avisa en el builder. El template queda con KIN.
+    Para probar una palabra en local: /templates/kin?word=… (solo en dev).
   - El comprador cambia una constante (`WORD`) y la palabra, el loader y
     el giro se recalculan solos. Ninguna posición está escrita a mano.
   - Palabra del demo: KIN (K = vertical + 2 diagonales, I, N = vertical +
