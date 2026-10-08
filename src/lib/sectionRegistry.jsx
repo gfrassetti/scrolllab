@@ -93,6 +93,11 @@ import MeridianAmenities from '../components/sections/meridian/Amenities'
 import MeridianMasterplan from '../components/sections/meridian/Masterplan'
 import MeridianContact from '../components/sections/meridian/Contact'
 import MeridianFooter from '../components/sections/meridian/Footer'
+import KinHero from '../components/sections/kin/Hero'
+import KinIntro from '../components/sections/kin/Intro'
+import KinRooms from '../components/sections/kin/Rooms'
+import KinCollection from '../components/sections/kin/Collection'
+import KinFooter from '../components/sections/kin/Footer'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import SelectedWorkIndex from '../components/sections/signal/SelectedWorkIndex'
@@ -290,6 +295,19 @@ const allModels = [
       { id: 'meridian/Masterplan', name: 'Masterplan', kind: 'section', component: MeridianMasterplan, blurb: 'Full-width aerial with pulsing numbered dots; hover one and the property outline is drawn with a tooltip (rooms, area, unit name).' },
       { id: 'meridian/Contact', name: 'Contact', kind: 'section', component: MeridianContact, blurb: 'Large serif headline beside an underline-field form with floating labels, inline validation and a filling submit button.' },
       { id: 'meridian/Footer', name: 'Footer', kind: 'footer', component: MeridianFooter, blurb: 'About 80% of the viewport: contact block, big phone and email, monogram, address with map button and socials, hairline legal row.' },
+    ],
+  },
+  {
+    id: 'kin',
+    name: 'KIN',
+    accent: '#e1371f',
+    wrapperClass: MODEL_WRAPPER_CLASS.kin,
+    sections: [
+      { id: 'kin/Hero', name: 'Hero', kind: 'hero', component: KinHero, blurb: 'Loader where identical bars drop like type and set the brand word; on scroll the bars build a doorway you walk through into the next dark section. Nav column, headline and numbered list on a 12-column grid.' },
+      { id: 'kin/Intro', name: 'Intro', kind: 'section', component: KinIntro, blurb: 'Short statement in wide capitals with three numbered notes stepping down beside it; text blends over the hero doorway.' },
+      { id: 'kin/Rooms', name: 'Rooms', kind: 'section', component: KinRooms, blurb: 'Dark index of rooms in wide capitals; rows rise in, hovering one dims the rest and sets a red bar in front of its title.' },
+      { id: 'kin/Collection', name: 'Collection', kind: 'section', component: KinCollection, blurb: 'Full-height triptych that folds into a pinned stack: works slide up in depth, a bar counter and a red marker follow the current piece. Ships with SVG placeholder works.' },
+      { id: 'kin/Footer', name: 'Footer', kind: 'footer', component: KinFooter, blurb: 'Full-screen dark footer: invitation, contact columns, and the brand word rebuilt from bars sliding in from both sides.' },
     ],
   },
   {

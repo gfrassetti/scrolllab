@@ -29,6 +29,7 @@ const THEME_PRESETS = new Set([
   'ratio',
   'atrium',
   'meridian',
+  'kin',
 ])
 
 /**

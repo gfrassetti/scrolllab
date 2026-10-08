@@ -93,4 +93,13 @@ export const TEMPLATE_META = [
     tagline: 'scroll the site',
     palette: ['#dfd8cf', '#2a2622', '#8f7a5e'],
   },
+  {
+    id: '11',
+    sku: 'kin',
+    name: 'KIN',
+    path: '/templates/kin',
+    category: 'GALLERY',
+    tagline: 'built from bars',
+    palette: ['#e1e2de', '#141414', '#e1371f'],
+  },
 ]

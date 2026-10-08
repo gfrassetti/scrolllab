@@ -30,6 +30,7 @@ export const THEMED_MODELS = [
   'ratio',
   'atrium',
   'meridian',
+  'kin',
 ]
 
 /** Secciones neutras cuyo prop `theme` se resuelve según el contexto. */

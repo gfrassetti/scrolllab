@@ -40,6 +40,8 @@ meshy_output/
 # Refs temporales de Loom / scrapes (no producto)
 docs/reference-analysis/loom*
 docs/reference-analysis/loom-frames/
+# Capturas de un sitio ajeno (KIN): sirven para trabajar en local, no van al repo.
+docs/reference-analysis/kin/
 
 # impeccable — efímero / por-dev (mantener config.json, design.json, critique/*.md)
 # impeccable-ignore-start

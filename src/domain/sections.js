@@ -126,6 +126,13 @@ const BY_MODEL = {
     Contact: 'section',
     Footer: 'footer',
   },
+  kin: {
+    Hero: 'hero',
+    Intro: 'section',
+    Rooms: 'section',
+    Collection: 'section',
+    Footer: 'footer',
+  },
   signal: {
     NavSignal: 'nav',
     HeroSignal: 'hero',

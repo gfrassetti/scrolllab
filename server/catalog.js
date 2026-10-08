@@ -100,6 +100,11 @@ export const PRODUCTS = {
     'MERIDIAN — template',
     'Modelo para desarrollos inmobiliarios, complejos de cabañas o departamentos, desarrolladoras y resorts: hero de flythrough aéreo scrubeado por scroll, menú drawer, sliders con efecto mask, mapa con pines interactivos e interiores con hotspots (código fuente).',
   ),
+  kin: template(
+    'kin',
+    'KIN — template',
+    'Modelo brutalista para galerías de arte, de moda o de diseño: la marca es una palabra hecha de barras que se arma en el loader, se desarma en una puerta que se atraviesa al scrollear y se rearma en el footer; colección fijada con obras apiladas en profundidad (código fuente).',
+  ),
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',

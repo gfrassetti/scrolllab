@@ -473,6 +473,16 @@
         "Interior hotspots"
       ],
       "description": "Warm sand, editorial serif, and an aerial flythrough that plays as you scroll: a frame-sequence hero whose logo docks into the header, a drawer menu, a full-screen slider with a mask transition, a map whose pins trace dotted routes, and interior photos with hotspots that open tooltips. Ideal for real estate developments, cabin complexes, apartment or condo buildings, developers and builders with several complexes to showcase, or resorts."
+    },
+    "kin": {
+      "vibe": "Brutalist gallery",
+      "tags": [
+        "Brand built from bars",
+        "Type-setting loader",
+        "Walk-through doorway",
+        "Stacked collection"
+      ],
+      "description": "Cool paper, ink and a single red. The brand is a word built from identical bars: they drop like type in the loader, come apart into a doorway the camera walks through into a dark room, and set themselves again in the footer. A pinned collection where a triptych folds into a stack of works in depth, with a bar counter and grain. Made for art, fashion or design galleries, studios and product brands with a strong identity."
     }
   },
   "builder": {
@@ -963,6 +973,28 @@
         "ProductGrid": {
           "name": "Product Grid",
           "blurb": "Catalog + shop; pick a kit color so it matches the rest of the page"
+        }
+      },
+      "kin": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Loader where identical bars drop like type and set the brand word; on scroll they build a doorway you walk through into the dark section. Nav column, headline and numbered list on a 12-column grid."
+        },
+        "Intro": {
+          "name": "Intro",
+          "blurb": "Short statement in wide capitals with three numbered notes stepping down beside it; the text inverts over the hero doorway."
+        },
+        "Rooms": {
+          "name": "Rooms",
+          "blurb": "Dark index of rooms in wide capitals; rows rise in, and hovering one dims the rest and sets a red bar."
+        },
+        "Collection": {
+          "name": "Collection",
+          "blurb": "Full-height triptych that folds into a pinned stack: works slide up in depth, with a bar counter and a red marker. Ships with SVG sample works."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "Full-screen dark footer: invitation, contact columns and the brand word rebuilt from bars sliding in from both sides."
         }
       }
     }

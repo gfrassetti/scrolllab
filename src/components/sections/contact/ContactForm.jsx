@@ -147,6 +147,18 @@ const THEMES = {
     note: 'text-[#2a2622]/45',
     radius: '',
   },
+  kin: {
+    surface: 'bg-[#e1e2de] text-[#141414]',
+    eyebrow: 'text-[#141414]/45',
+    title: 'font-semibold uppercase tracking-[-0.01em]',
+    body: 'text-[#141414]/70',
+    field:
+      'border-[#141414]/20 focus:border-[#141414] placeholder:text-[#141414]/35',
+    button:
+      'border border-[#141414] bg-[#141414] text-[#e1e2de] hover:bg-transparent hover:text-[#141414] disabled:opacity-40',
+    note: 'text-[#141414]/45',
+    radius: '',
+  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

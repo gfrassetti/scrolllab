@@ -1,0 +1,268 @@
+PLAN DE TEMPLATE NUEVO — KIN
+SCROLLLAB (storytelling-pages-templates)
+Generado: 2026-10-07
+Estado: fase 1 en obra — loader + hero + el "giro" de barras con el scroll
+(pedido explícito del usuario: "enfoquémonos en el hero, por ahora").
+Paso 0 (Gemini): resuelto como en MERIDIAN — la referencia visual ES el
+diseño. Sin Higgsfield (sin créditos, decisión del usuario 2026-10-07):
+este template no necesita fotos para el hero; todo es tipo + barras en código.
+
+================================================================
+0. METADATA
+================================================================
+SKU:              kin  (provisorio, se puede renombrar antes de vender)
+Título de venta:  KIN — template
+Rubro:            galería (arte / moda) o estudio de desarrollo web.
+                  Mundo del demo: galería independiente de "forma construida".
+Referencia:       https://aim.obys.agency/ (Obys Agency, Webflow + Lottie + Lenis)
+Artefactos:
+  - docs/reference-analysis/kin.md + kin/beats.json + kin/beats/*.jpg
+  - Obsidian: "KIN - analisis de referencia.md"
+  - Análisis a mano (este plan): Lottie del hero y del loader, IX2 de Webflow,
+    CSS. Los JSON/fuentes de la referencia se bajaron SOLO para estudiarlos
+    (scratchpad), no entran al repo ni al ZIP.
+
+Ruta: /templates/kin, solo con `npm run dev` (en producción redirige a la
+home, igual que /admin) hasta que esté terminado; recién ahí se registra en
+catálogo, builder, packaging y precio.
+
+================================================================
+1. CONSIGNA BASE — OBLIGATORIA (Lesson 9)
+================================================================
+"Yes, please build this for me while maintaining an award-winning,
+scroll-based, beautiful animation feeling throughout the entire sequence
+of events. Different sections need to have different scroll-based
+animations. Implement GSAP, GSAP, 3JS, and other beautiful scroll-based
+behaviors. Be very unique and make sure that we have visual breaks or
+some sort of clear separation between sections. We do not want any
+templated-like style, no typical SAS AI slop. We want an award-winning
+vibe. Something unique, something artsy, something beautiful, and
+something people don't usually do. Award-winning style."
+
+Aplicado a KIN: minimalista y brutalista (palabras del usuario). Papel
+cálido + negro, una sola familia tipográfica, cero decoración. El "efecto"
+no es un adorno: la marca misma (la palabra hecha de barras) es el objeto
+que cuenta la historia en toda la página (Detalle #11 / #12).
+
+================================================================
+2. QUÉ HACE LA REFERENCIA (desarmado, cuadro por cuadro)
+================================================================
+2.1 Tipografía
+  - KH Teka (KH Type) — la referencia usa la versión TRIAL. Es comercial:
+    NO se puede vender. Reemplazo libre más cercano (comparado lado a lado
+    en el mismo tamaño/peso/tracking): Inter Tight (Google Fonts, OFL).
+  - Todo en vw: body font-size 1vw. h2 = 5.69vw, 500, -0.03em, lh .914.
+    h3 (nav, listas, labels) = .95vw, 400, lh .93. Gutter .97vw.
+  - Colores: papel ~#e6e3de, negro #141414.
+
+2.2 Layout del hero (100vh, flex column, todo abajo)
+  - Arriba: la palabra gigante (capa fija, z alto) ocupa el ancho completo.
+    hero-top-wrapper con margin-top 24.9% del ancho = el alto de la palabra.
+  - Una barra negra gruesa (3.19vw) a todo el ancho, debajo de la palabra.
+  - Fila de nav (h3): marca · Index / Experiment / About · [Gallery] · ©.
+    Después del hero queda sticky arriba.
+  - Hairline.
+  - Abajo, dos columnas: izquierda 32.8% (lista "Modernists: E01…E05",
+    hairline vertical a la derecha); derecha 66.3% (h2 en 3 líneas
+    enmascaradas "AIM— / AI Modernism / Of Kharkiv" + "Scroll to Explore ↓").
+  - Logo chico arriba a la izquierda: la misma palabra en contorno (outline).
+
+2.3 Loader (Lottie de 235 cuadros a 60fps ≈ 3.9 s + IX2)
+  0.00 s  pantalla oscura; un cuadrado crema se arma de a bloques (3 piezas
+          que se apilan como píxeles).
+  1.00 s  el panel oscuro sube (-100%, 0.9 s, easeInOutCubic) y destapa el
+          papel; el cuadrado pasa a negro y sube a la banda de la palabra.
+  2.0 s   el cuadrado se parte en barras (1 → 2 → 4) que se separan.
+  3.2 s   las barras de los extremos giran ±56.8° y aparecen las diagonales:
+          queda la palabra.
+  3.0 s   crece la barra negra gruesa (alto 0 → 3.19vw, 0.8 s).
+  3.2 s   hairline horizontal 0 → 98% (1 s); logo chico fade in.
+  3.6/3.7/3.8 s  las 3 líneas del h2 suben de yPercent 110 → 0 (1 s,
+          easeOutCubic, stagger 0.1); nav, lista y "scroll" fade in;
+          hairline vertical 0 → 100%.
+
+2.4 El giro con el scroll (Lottie de 340 cuadros + IX2 SCROLLING_IN_VIEW
+    sobre el body, smoothing 70 — el lottie va con retardo suave)
+  Progreso de la PÁGINA → progreso del Lottie:
+    0–10% → 0–37%   las 7 barras sueltan el recorte, caen girando
+                    (rotaciones de ±56.8° a ±180°), bajan a escala 50% y
+                    forman una PIRÁMIDE escalonada en el centro.
+    10–17% → 37–61% la pirámide se pliega: las alas giran a vertical y todo
+                    se cierra en 3 barras chicas centradas.
+    17–22% → 61–99% las 3 barras crecen (50% → 207%) …
+    19–23%          … y el contenedor entero escala ×4 (easeInOutCubic):
+                    las barras tapan la pantalla.
+    34–35%          la capa se apaga (opacidad 0).
+  - La capa de barras es fixed; el hero scrollea por debajo normalmente.
+  - La pirámide aterriza sobre el párrafo de intro (texto grande h2 en
+    líneas que suben enmascaradas); el texto queda ARRIBA de las barras.
+  - Mobile (<480): misma idea con escala 1.6 y la capa que baja 15em.
+
+================================================================
+3. QUÉ HACE KIN (recreación propia, NO copia)
+================================================================
+No se usa Lottie ni los JSON de la referencia: la coreografía se escribe en
+código (GSAP) a partir de una geometría propia. Lo que se toma es la RECETA
+(palabra de barras → loader que la arma → giro con el scroll), no los
+keyframes.
+
+3.1 La marca es DATA (argumento de venta para el comprador dev)
+  - Alfabeto de barras (barGlyphs.js): cada letra es un set de barras
+    iguales (rectángulos de proporción fija) con x, y, rotación. Letras
+    construibles: A H I K L M N T V W X Y (+ 1 7). E, F, Z, B… no entran:
+    las barras son demasiado gruesas (probado y descartado: quedan bloques).
+  - El comprador cambia una constante (`WORD`) y la palabra, el loader y
+    el giro se recalculan solos. Ninguna posición está escrita a mano.
+  - Palabra del demo: KIN (K = vertical + 2 diagonales, I, N = vertical +
+    diagonal + vertical) → 7 barras. Placeholder; el usuario puede pedir otra.
+
+3.2 REDISEÑO 2026-10-07 (pedido del usuario: la primera versión "quedó
+  igual a la página modelo, roza lo ilegal"). Se cambiaron tres capas a la
+  vez — la composición del hero se mantuvo (decisión del usuario):
+  a) Coreografía: ya no hay cuadrado ni pirámide. La palabra se desarma y
+     las barras construyen una PUERTA (dos pilares de barras paradas
+     apiladas + un dintel de barras acostadas). El vano se oscurece desde
+     el piso y la vista atraviesa la puerta: lo oscuro de adentro es la
+     sala siguiente (Rooms, data-kin-dark). Historia: marca → entrada →
+     adentro de la galería. doorSlots() en barGlyphs.js la calcula para N.
+  b) Color: un acento constructivista (#e1371f), uno por pantalla. Es la
+     barra más cercana al centro de la palabra (la I de KIN), que después es
+     la clave del dintel; en Rooms, una barrita roja marca la sala en hover.
+     Va en su propia capa fija ARRIBA del texto de la intro (el difference
+     la volvía celeste).
+  c) Loader: sin pantalla oscura ni cuadrado. Se dibuja una línea de base
+     y las barras caen de a una desde arriba y se clavan como tipos de
+     imprenta (aplastón + rebote chico), la roja última; después las
+     diagonales se inclinan cortadas por la banda.
+  d) Tipografía: se probó Instrument Serif en titulares y el usuario la
+     descartó ("algo más minimalista, más brutalista, más parecido al
+     modelo"): todo en Inter Tight, titulares medium con tracking -0.035/
+     -0.04em.
+  e) Nav fija (pedido del usuario, como el modelo): aparece recién cuando
+     la nav del hero cruza el borde de arriba, baja suave (0.7 s,
+     power3.out) y queda visible en las dos direcciones; se esconde solo
+     si se vuelve a subir por encima de ese punto.
+
+  f) Más diferencias pedidas por el usuario (miedo a plagio): la barra gruesa
+     bajo la palabra pasa a ser PEDESTALES (un bloque bajo cada letra, se
+     colocan de a uno en el loader); la mitad de abajo del hero se invierte
+     (titular a la izquierda, lista a la derecha); el "©" pasa a ser un reloj
+     local; los separadores "/" de la nav, barritas; la lista, una mini tabla
+     numerada; "Scroll to explore" en una cajita flotante.
+
+3.5 Collection (galería, sección 4) — receta propia, no la de la referencia:
+  - Referencia: tres fotos emergen escalonadas; después la sección se pinea
+    y las fotos se apilan a la DERECHA en fila; título enorme que sube lento,
+    contador "4—6", lista de nombres que cambia, "Learn More" con línea y
+    flecha animadas, grano en las fotos.
+  - KIN: obras apiladas a la IZQUIERDA y en PROFUNDIDAD (cada una sube desde
+    el piso con un barrido y la anterior se achica y se oscurece), texto a la
+    derecha. Contador hecho de barritas (la activa en rojo y más alta) +
+    "01 / 06". Un marcador rojo salta al nombre activo. "Learn more": la
+    línea se retira y se vuelve a dibujar, la flecha sale por la derecha y
+    entra otra por la izquierda. Grano animado sobre las obras.
+  - Obras: sin Higgsfield, seis composiciones constructivistas en SVG
+    (artworks.jsx) con sombra de papel recortado; dos citan la marca (siete
+    barras con una roja, la puerta). Cada ítem acepta `src` para fotos reales.
+  - Teléfono: mismo pin y apilado, obra arriba y texto abajo. Calma: grilla
+    con todas las obras, sin pin.
+
+  - Antes de la colección, un TRÍPTICO: las tres primeras obras a un tercio
+    de ancho y alto completo, entrando escalonadas. Pineado, la del medio y
+    la de la derecha se deslizan a la izquierda y se meten detrás de la
+    primera, que se ensancha hasta la columna (42%; teléfono: arriba, 58%).
+    Recién ahí sube el titular. Las obras van siempre a alto completo,
+    pegadas a la línea de la nav fija.
+
+3.6 Footer (cierre, 100svh, sobre negro): titular de invitación + botón en
+  cajita, tres columnas (dirección, contacto, redes), y abajo las barras
+  VUELVEN: entran desde los dos costados girando y se rearman en la palabra
+  a todo el ancho (papel sobre negro, la barra roja llega última) — el
+  "reensamble en otra sección" del Detalle #12. Última fila: ©, hora local
+  y "Back to top" en cajita (sube con Lenis). Calma: la palabra ya armada.
+
+3.7 V2 (2026-10-07, "que no parezca una copia"): seis cambios a la vez,
+  manteniendo lo brutalista. Copia del estado anterior en el scratchpad de
+  la sesión (kin-backup-v1) por si el usuario quiere volver.
+  1. Sistema de medidas propio: se dejaron de usar los números del CSS de la
+     referencia (0.97vw, 0.95vw, 5.69vw, 3.19vw, 32.8%/66.3%). Grilla de 12
+     columnas, margen 1.25vw (teléfono 4.5vw), texto chico 0.82vw (3.3vw).
+  2. Titulares en Archivo al 125% de ancho, semibold, en mayúsculas; Inter
+     Tight queda para lo chico.
+  3. Hero recompuesto: la nav es una columna fina a la izquierda (marca,
+     links numerados uno debajo del otro, CTA sólido, hora); titular en 7
+     columnas, lista en 3. La barra fija usa la misma grilla, links
+     numerados y CTA sólido (sin corchetes ni barras "/").
+  4. Teléfono propio: titular y lista arriba, la palabra apoyada ABAJO con
+     sus pedestales, y "Menu" en una barra al pie; el menú sube desde abajo.
+  5. Intro: una frase corta en las mayúsculas anchas + tres notas numeradas
+     [1][2][3] en una columna angosta, cada una más abajo (cartelas de sala).
+  6. Papel más frío (#e1e2de); el rojo queda. La colección pasa a 50/50.
+
+3.8 Nav en caja (pedido del usuario, 2026-10-07): la columna vertical pasó
+  a una CAJA horizontal con borde fino debajo de los pedestales, armada
+  igual que el header (marca, links numerados, CTA sólido, hora). Cuando la
+  caja toca el borde de arriba, la barra fija la reemplaza en el mismo lugar
+  y sus líneas se transforman: la de arriba se recoge, los costados suben y
+  la de abajo se estira de borde a borde. Volviendo arriba, se redibuja.
+
+3.9 Catálogo (2026-10-07): en venta a USD 379 (igual que MERIDIAN; la base
+  del builder, 389, sigue arriba). Registrado en domain/catalog,
+  templateMeta (home), server/catalog (copy de Checkout Pro), packaging
+  (ZIP; check:visual kin OK), temas (contact/commerce/shop), i18n,
+  sitemap, llms.txt e ItemList. Builder: kin/Hero, Intro, Rooms,
+  Collection y Footer con campos editables (palabra de barras, titulares
+  línea por línea, links, listas). Si el hero no va primero en una
+  composición, no hay loader y la capa de barras viaja con el hero hasta
+  que llega arriba.
+
+3.3 Hero 50/50: la banda de la palabra nunca pasa de ~media pantalla; si
+  sobra ancho, las letras se separan para seguir de borde a borde.
+
+3.4 Texto sobre las barras: mix-blend-mode difference (blanco) → oscuro
+  sobre papel, claro sobre negro.
+
+================================================================
+4. VOCABULARIO DE MOTION (Detalle #5.2 — 3 tipos, nada más)
+================================================================
+  a) Barra: transform (x, y, rotación, escala) — el lenguaje de la marca.
+  b) Línea que sube enmascarada (yPercent 110 → 0, easeOutCubic, stagger
+     0.1) — todos los titulares.
+  c) Regla que se dibuja (scaleX/scaleY 0 → 1, easeInOutCubic) — hairlines
+     y la barra gruesa.
+  Orden de entrada (Detalle #5.3/5.5): marca → barra gruesa → hairline →
+  titular (línea a línea) → subtítulos/lista → "scroll". Pausa
+  --duration-reveal entre titular y lo secundario.
+
+================================================================
+5. MICRO-INTERACCIONES (Detalle #6, capa tpl-*)
+================================================================
+  - Links de la nav: subrayado que se dibuja (tpl-link / #3), hit ≥44px.
+  - "[Gallery]" y "Scroll to Explore": flecha que baja / corchetes que se
+    abren al hover (#9, dos señales en un hover).
+  - Lista del hero: el ítem en hover se corre 0.5em y el resto se atenúa
+    (#6, un foco por vez).
+  - ScrollRail propio (Detalle #5.4) con la paleta del template.
+
+================================================================
+6. REDUCIR MOVIMIENTO / MOBILE / PARIDAD
+================================================================
+  - Calma: loader corto (el cuadrado aparece y la palabra entra con un
+    fundido); sin giro: la palabra queda quieta en el hero y la capa fija
+    no existe; titulares con calmReveal. Nunca contenido oculto.
+  - Mobile: la palabra ocupa el ancho; posiciones de la pirámide y del
+    cuadrado se calculan con el viewport real (no hay coordenadas fijas),
+    así que el mismo beat corre en el teléfono. Se reconstruye al
+    redimensionar. Sin blur, solo transform/opacity (paridad, check:parity).
+  - Hero en svh.
+
+================================================================
+7. FASES
+================================================================
+  F1 (ahora): loader + hero + giro + intro (donde aterriza la pirámide) +
+     la sala oscura donde termina el cuadrado (placeholder mínimo).
+  F2: resto de la página (galería/exposiciones, experimento, about, footer
+     100svh) — cada sección con su propia animación, siguiendo el log de
+     la guía; se define con el usuario.
+  F3: catálogo (precio, server/catalog.js, packaging, builder, i18n),
+     check:visual / check:mobile / check:motion / check:parity.

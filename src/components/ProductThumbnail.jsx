@@ -59,6 +59,12 @@ const styles = {
     accent: '#8f7a5e',
     code: 'MR',
   },
+  kin: {
+    background: '#e1e2de',
+    color: '#141414',
+    accent: '#e1371f',
+    code: 'KN',
+  },
   ratio: {
     background: '#ffffff',
     color: '#111111',
