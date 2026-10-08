@@ -52,6 +52,15 @@ describe('Compras con Paddle (Paddle simulado)', () => {
     return { ...res.body, txn: pd.transactions.get(res.body.transactionId) }
   }
 
+  /** Cliente que ya compró antes: sin el 10% de primera compra, precio de lista. */
+  async function returning(agent) {
+    const me = await agent.get('/api/auth/me')
+    await fileDb.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'paddle', items: [{ sku: 'nocturne' }], total: 1, currency_id: 'USD' })
+    return agent
+  }
+  /** Primera compra: 10% sobre el precio de lista, en centavos. */
+  const firstPurchase = (usd) => Math.round(usd * 90) / 100
+
   async function paidOrder(email, items = [{ sku: 'chapters' }], extra = {}) {
     const agent = await loginAs(email)
     const out = await paddleCheckout(agent, items, extra)
@@ -84,7 +93,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
 
   describe('checkout', () => {
     it('la transacción lleva el precio de lista en USD (centavos), la orden queda en USD', async () => {
-      const agent = await loginAs('lista@test.com')
+      const agent = await returning(await loginAs('lista@test.com'))
       const out = await paddleCheckout(agent, [{ sku: 'chapters' }, { sku: 'nocturne' }])
       assert.equal(out.provider, 'paddle')
       assert.match(out.transactionId, /^txn_/)
@@ -114,7 +123,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
     })
 
     it('el builder cobra la receta por tramos en USD', async () => {
-      const agent = await loginAs('builder@test.com')
+      const agent = await returning(await loginAs('builder@test.com'))
       const recipe = Array.from({ length: CUSTOM_BASE_SECTIONS + 2 }, () => 'chapters/HeroKinetic')
       const out = await paddleCheckout(agent, [{ sku: 'custom', recipe }])
       const expected = CUSTOM_BASE_PRICE_USD + 2 * CUSTOM_EXTRA_SECTION_USD
@@ -173,7 +182,8 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await waitFor(() => mp.mailsTo('paga@test.com').length === 1, 'el recibo')
       const receipt = mp.mailsTo('paga@test.com')[0].body
       assert.match(receipt.subject, /Tu compra en SCROLLLAB/)
-      assert.match(receipt.text, /US\$\s?149/)
+      // Primera compra: el recibo dice lo que pagó, con el 10%.
+      assert.match(receipt.text, /US\$\s?134[.,]10/)
       assert.match(receipt.text, /Paddle\.com/)
       await waitFor(() => mp.mailsTo(OWNER).length >= 1, 'el aviso al dueño')
     })
@@ -195,7 +205,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await waitFor(() => mp.mailsTo('english@test.com').length === 1, 'el recibo')
       const mail = mp.mailsTo('english@test.com')[0].body
       assert.match(mail.subject, /Your SCROLLLAB purchase/)
-      assert.match(mail.text, /\$149/)
+      assert.match(mail.text, /\$134\.10/)
     })
 
     it('confirm del front: 409 mientras Paddle procesa, después cumple; idempotente; otra cuenta 403', async () => {
@@ -267,6 +277,68 @@ describe('Compras con Paddle (Paddle simulado)', () => {
         () => alerts('NO COINCIDE').some((m) => m.body.text.includes(txn.id) && /Referencia/.test(m.body.text)),
         'el aviso de referencia que no coincide',
       )
+    })
+
+    it('un descuento hecho en Paddle no entrega el ZIP y avisa', async () => {
+      const agent = await loginAs('descuento-paddle@test.com')
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      txn.discount_id = 'dsc_01'
+      txn.details.totals.discount = '1500'
+      assert.equal((await paddleWebhook('transaction.completed', txn)).status, 200)
+      assert.equal((await orderRow(out.orderId)).status, 'pending')
+      await waitFor(
+        () => alerts('NO COINCIDE').some((m) => m.body.text.includes(txn.id) && /descuento hecho en Paddle/.test(m.body.text)),
+        'el aviso del descuento',
+      )
+    })
+
+    it('custom_data no decide: un pago de template que dice ser de LAB no activa nada de LAB', async () => {
+      const agent = await loginAs('custom-lab@test.com')
+      const lab = await agent.post('/api/subscriptions').send({ plan: 'hosted_studio', cycle: 'yearly', provider: 'paddle' })
+      assert.equal(lab.status, 200, JSON.stringify(lab.body))
+      const me = (await agent.get('/api/auth/me')).body.user
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      const forged = {
+        ...structuredClone(txn),
+        custom_data: { kind: 'lab', subscriptionId: lab.body.subscriptionId, userId: me.id, plan: 'hosted_studio', cycle: 'yearly' },
+      }
+      assert.equal((await paddleWebhook('transaction.completed', forged)).status, 200)
+      // Pagó un template: recibe el template; el alta de LAB sigue pendiente.
+      assert.equal((await orderRow(out.orderId)).status, 'paid')
+      assert.equal((await fileDb.findSubscriptionById(lab.body.subscriptionId)).status, 'pending')
+      assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'free')
+    })
+
+    it('una transacción que nadie abrió (custom_data inventado) no activa nada y avisa', async () => {
+      const agent = await loginAs('nadie-la-abrio@test.com')
+      const lab = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'paddle' })
+      const me = (await agent.get('/api/auth/me')).body.user
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      const { txn } = pd.pay(out.transactionId)
+      const ghost = {
+        ...structuredClone(txn),
+        id: 'txn_ghost_000001',
+        custom_data: { kind: 'lab', subscriptionId: lab.body.subscriptionId, userId: me.id },
+      }
+      assert.equal((await paddleWebhook('transaction.completed', ghost)).status, 200)
+      assert.equal((await fileDb.findSubscriptionById(lab.body.subscriptionId)).status, 'pending')
+      await waitFor(
+        () => alerts('PAGO SIN ORDEN').some((m) => m.body.text.includes('txn_ghost_000001')),
+        'el aviso de pago sin dueño',
+      )
+    })
+
+    it('un error de la API de Paddle no llega crudo al navegador', async () => {
+      const agent = await loginAs('error-crudo@test.com')
+      const out = await paddleCheckout(agent, [{ sku: 'chapters' }])
+      pd.failNext['GET /transactions/:id'] = 404
+      const res = await agent.post('/api/checkout/paddle/confirm').send({ transactionId: out.transactionId })
+      assert.equal(res.status, 502)
+      assert.equal(res.body.code, 'payment_provider')
+      assert.match(res.body.error, /procesador de pagos/)
+      assert.ok(!/fake Paddle|internal_error|txn_/.test(res.body.error))
     })
 
     it('webhook sin firma, con otra firma o viejo: 401 y no toca nada', async () => {
@@ -360,6 +432,16 @@ describe('Compras con Paddle (Paddle simulado)', () => {
         () => mp.mailsTo(OWNER).some((m) => m.body.subject.includes('ORDEN REEMBOLSADA')),
         'el aviso de reembolso',
       )
+      // Queda en el libro de reembolsos (lo muestra el panel): quién y cuánto.
+      const rows = (await fileDb.listRefunds()).filter((r) => r.orderId === orderId)
+      assert.equal(rows.length, 1)
+      assert.equal(rows[0].email, 'reembolso@test.com')
+      assert.equal(rows[0].amount, Number(txn.details.totals.grand_total) / 100)
+      assert.deepEqual([rows[0].provider, rows[0].kind, rows[0].currency, rows[0].partial], ['paddle', 'order', 'USD', false])
+      await waitFor(
+        () => mp.mailsTo('reembolso@test.com').some((m) => /devolvimos el dinero/.test(m.body.subject) && /tarjeta \(Paddle\)/.test(m.body.text)),
+        'el mail de devolución al cliente',
+      )
     })
 
     it('contracargo: refunded con motivo charged_back', async () => {
@@ -372,8 +454,13 @@ describe('Compras con Paddle (Paddle simulado)', () => {
 
     it('reembolso parcial: la orden sigue paga y el dueño revisa', async () => {
       const { orderId, txn } = await paidOrder('parcial@test.com')
-      await paddleWebhook('adjustment.created', pd.adjust(txn.id, { type: 'partial' }))
+      const adj = pd.adjust(txn.id, { type: 'partial' })
+      await paddleWebhook('adjustment.created', adj)
+      await paddleWebhook('adjustment.created', adj) // repetido: una sola fila
       assert.equal((await orderRow(orderId)).status, 'paid')
+      const rows = (await fileDb.listRefunds()).filter((r) => r.orderId === orderId)
+      assert.equal(rows.length, 1)
+      assert.deepEqual([rows[0].email, rows[0].amount, rows[0].partial], ['parcial@test.com', 1, true])
       await waitFor(
         () => mp.mailsTo(OWNER).some((m) => m.body.subject.includes('REEMBOLSO PARCIAL')),
         'el aviso de reembolso parcial',
@@ -388,7 +475,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
     const order = (res.body.orders || res.body).find((o) => (o.id || o._id) === orderId)
     assert.ok(order, JSON.stringify(res.body).slice(0, 300))
     assert.equal(order.currency_id, 'USD')
-    assert.equal(order.total, TEMPLATE_PRICES_USD.chapters)
+    assert.equal(order.total, firstPurchase(TEMPLATE_PRICES_USD.chapters))
     assert.ok(path.isAbsolute((await orderRow(orderId)).zipPath))
   })
 })

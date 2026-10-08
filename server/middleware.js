@@ -117,10 +117,15 @@ export function rateLimits() {
       max: 30,
       message: { error: 'Demasiados intentos de login' },
     }),
+    // Checkout, confirmaciones y sync de LAB: siempre con sesión (va después de
+    // requireAuth), así que se cuenta por usuario. Por IP, detrás de
+    // Vercel → Railway todos podían compartir la misma y cortarse entre sí. El
+    // techo deja holgura para un alta de Paddle (el front sincroniza ~12 veces).
     checkout: mk({
       windowMs: 60 * 60 * 1000,
-      max: 20,
-      message: { error: 'Demasiados checkouts' },
+      max: 60,
+      keyGenerator: (req) => String(req.user?.id ?? req.user?._id ?? 'sin-sesion'),
+      message: { error: 'Demasiados intentos de pago, probá en un rato' },
     }),
     // Analítica propia: lotes chicos y frecuentes; generoso porque varios
     // visitantes pueden compartir IP.
@@ -169,6 +174,13 @@ export function rateLimits() {
       keyGenerator: (req) => String(req.user?.id ?? req.user?._id ?? 'sin-sesion'),
       message: { error: 'Demasiados intentos, probá más tarde' },
     }),
+    // Botón de arrepentimiento: público y sin cuenta (lo exige la ley), así que
+    // se corta por IP; holgado porque varias personas pueden compartir una.
+    withdrawal: mk({
+      windowMs: 60 * 60 * 1000,
+      max: 30,
+      message: { error: 'Demasiados pedidos, probá más tarde' },
+    }),
     // Chequeo público de cupones: frena a quien prueba códigos a ciegas.
     coupons: mk({
       windowMs: 60 * 60 * 1000,
@@ -184,8 +196,19 @@ export function notFound(_req, res) {
 
 export function errorHandler(config) {
   return (err, req, res, _next) => {
-    const status = err.status || err.statusCode || 500
     const requestId = req.requestId || null
+    // Un error de la API de Paddle trae ids y detalles internos: nunca llega
+    // crudo al navegador. El detalle va al log; el comprador, un 502 genérico.
+    if (err?.name === 'PaddleError') {
+      console.error(`[${requestId || '-'}] Paddle ${err.status} ${err.code}: ${err.message}`)
+      res.status(502).json({
+        error: 'No pudimos completar la operación con el procesador de pagos. Probá de nuevo en un momento.',
+        code: 'payment_provider',
+        requestId,
+      })
+      return
+    }
+    const status = err.status || err.statusCode || 500
     if (status >= 500) {
       console.error(`[${requestId || '-'}]`, err)
     }

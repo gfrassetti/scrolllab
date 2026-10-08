@@ -3,10 +3,10 @@ import { HttpError } from '../errors.js'
 import { validateCheckoutItems } from '../validation.js'
 import { pendingExpiresAt } from '../orderRetention.js'
 import { createCheckoutPreference } from './mercadoPago.js'
-import { discountedArsFromUsd, PRODUCTS } from '../catalog.js'
+import { arsFromUsd, discountedArsFromUsd, PRODUCTS } from '../catalog.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import { getUsdArsRate } from '../fx.js'
-import { resolveCouponForCheckout } from './coupons.js'
+import { resolveCouponForCheckout, autoWelcomeCoupon } from './coupons.js'
 import {
   createTransaction,
   buildOrderTransactionBody,
@@ -60,13 +60,15 @@ export async function createCheckoutOrder({
 
   // Cupón de bienvenida: el cliente manda solo el código; el descuento lo
   // calcula el servidor sobre el precio de lista, nunca sale de un monto suyo.
+  // Sin código (un «Comprar» rápido), el servidor aplica igual el 10% si es su
+  // primera compra: nunca depende de que el front lo mande.
   const coupon = couponCode
     ? await resolveCouponForCheckout({
         code: couponCode,
         userId: db.uid(user),
         userEmail: user.email,
       })
-    : null
+    : await autoWelcomeCoupon({ user })
 
   // Paddle cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {
@@ -80,6 +82,12 @@ export async function createCheckoutOrder({
       ? { ...i, unit_price: discountedArsFromUsd(i.unit_price_usd, fx?.rate, coupon.percent) }
       : i
   })
+
+  // Un cupón al 100 % (o un precio mal cargado) no se manda a Paddle: cobraría
+  // cero y entregaría el ZIP gratis.
+  if (paddle && lines.some((l) => !(Number(l.unit_price) > 0))) {
+    throw new HttpError(400, 'Ese precio no se puede cobrar con tarjeta', { expose: true })
+  }
 
   // En USD se suma en centavos: 0.1 + 0.2 no es 0.3.
   const total = paddle
@@ -109,7 +117,11 @@ export async function createCheckoutOrder({
 
   const orderId = db.uid(order) || order.id
 
-  if (paddle) return startPaddleCheckout({ order, orderId, lines, user, config })
+  // Lo que ve el comprador en la pantalla de la pasarela: el descuento con nombre
+  // (el precio ya viene descontado; el título dice por qué).
+  const shown = coupon ? lines.map((l) => labelDiscount(l, coupon.percent, { paddle, lang, rate: fx?.rate })) : lines
+
+  if (paddle) return startPaddleCheckout({ order, orderId, lines: shown, user, config })
 
   if (config.mpMock) {
     return {
@@ -121,7 +133,7 @@ export async function createCheckoutOrder({
 
   const result = await createCheckoutPreference({
     accessToken: config.mpAccessToken,
-    items: lines,
+    items: shown,
     orderId,
     userId: db.uid(user),
     clientUrl: config.clientUrl,
@@ -137,6 +149,34 @@ export async function createCheckoutOrder({
   return {
     init_point: result.init_point,
     orderId,
+  }
+}
+
+/**
+ * Título y descripción de un ítem con el descuento de primera compra a la vista,
+ * para la pantalla de Mercado Pago o de Paddle (el monto ya viene descontado).
+ * @param {any} line
+ * @param {number} percent
+ * @param {{ paddle: boolean, lang?: string, rate?: number }} opts
+ */
+export function labelDiscount(line, percent, { paddle, lang, rate }) {
+  if (paddle) {
+    const en = lang === 'en'
+    return {
+      ...line,
+      title: `${line.title} (${percent}% off, ${en ? 'first purchase' : 'primera compra'})`,
+      description: en
+        ? `List price US$${line.unit_price_usd} — ${percent}% first-purchase discount applied.`
+        : `Precio de lista US$ ${line.unit_price_usd} — ${percent}% de descuento de primera compra.`,
+    }
+  }
+  const list = rate ? arsFromUsd(line.unit_price_usd, rate) : null
+  return {
+    ...line,
+    title: `${line.title} · ${percent}% off primera compra`,
+    description: list
+      ? `Precio de lista $ ${list.toLocaleString('es-AR')} — ${percent}% de descuento de primera compra.`
+      : `${percent}% de descuento de primera compra.`,
   }
 }
 

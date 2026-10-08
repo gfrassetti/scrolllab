@@ -13,8 +13,16 @@ import { useCallback, useEffect, useState } from 'react'
 const RANGES = [7, 30, 90]
 const nf = new Intl.NumberFormat('es-AR')
 const pct = (a, b) => (b ? `${((a / b) * 100).toFixed(1).replace('.', ',')}%` : '—')
+// USD con centavos si los hay (Paddle cobra con centavos); pesos sin.
 const money = (n, cur) =>
-  new Intl.NumberFormat('es-AR', { style: 'currency', currency: cur === 'USD' ? 'USD' : 'ARS', maximumFractionDigits: 0 }).format(n)
+  new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: cur === 'USD' ? 'USD' : 'ARS',
+    maximumFractionDigits: cur === 'USD' && !Number.isInteger(Number(n)) ? 2 : 0,
+  }).format(n)
+const moneyList = (rows) => (rows?.length ? rows.map((r) => money(r.total, r.currency)).join(' + ') : '—')
+const gateway = (p) => (p === 'paddle' ? 'Paddle' : 'Mercado Pago')
+const day = (iso) => (iso ? new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }) : '—')
 const when = (iso) =>
   iso
     ? new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -172,8 +180,101 @@ export default function AdminAnalytics() {
       {error ? <p className="mx-auto mt-8 max-w-6xl border border-accent p-4 text-sm">{error}</p> : null}
       {loading && !data ? <p className="mx-auto mt-8 max-w-6xl text-sm text-ink/55">Cargando…</p> : null}
 
+      {data?.money?.refunds.last7Count ? (
+        <p role="alert" className="mx-auto mt-8 max-w-6xl border-2 border-danger bg-danger/10 p-4 text-sm font-medium">
+          {data.money.refunds.last7Count === 1 ? 'Hubo 1 reembolso' : `Hubo ${data.money.refunds.last7Count} reembolsos`} en los últimos 7 días:{' '}
+          {data.money.refunds.rows
+            .slice(0, data.money.refunds.last7Count)
+            .map((r) => `${r.email || 'sin mail'} · ${money(r.amount, r.currency)}${r.partial ? ' (parcial)' : ''}`)
+            .join(' · ')}
+          . El detalle está en «Reembolsos».
+        </p>
+      ) : null}
+      {data?.money?.withdrawals.open ? (
+        <p role="alert" className="mx-auto mt-4 max-w-6xl border-2 border-accent bg-accent/10 p-4 text-sm font-medium">
+          {data.money.withdrawals.open === 1
+            ? 'Hay 1 solicitud de arrepentimiento sin reembolsar.'
+            : `Hay ${data.money.withdrawals.open} solicitudes de arrepentimiento sin reembolsar.`}{' '}
+          Revisalas en «Arrepentimiento» y reembolsá desde el panel de la pasarela.
+        </p>
+      ) : null}
+
       {data ? (
         <div className="mx-auto mt-10 max-w-6xl space-y-12">
+          {data.money ? (
+            <>
+              <section aria-labelledby="h-plata">
+                <h2 id="h-plata" className="mb-4 text-xs tracking-[0.2em] uppercase">Plata: qué podés retirar</h2>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <Stat
+                    label="No tocar todavía"
+                    value={moneyList(data.money.locked.total)}
+                    hint={`se puede reembolsar: compras sin descargar y cobros de LAB de los últimos ${data.money.refundDays} días`}
+                  />
+                  <Stat
+                    label="Libre"
+                    value={moneyList(data.money.free)}
+                    hint="compras ya descargadas o fuera de plazo (de siempre, ya descontados los reembolsos)"
+                  />
+                  <Stat
+                    label="Reembolsado"
+                    value={moneyList(data.money.refunds.total)}
+                    hint={`de siempre · últimos 30 días: ${moneyList(data.money.refunds.last30)}`}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-ink/45">
+                  Montos brutos, antes de la comisión. Mercado Pago ya retiene cada venta 18 días; Paddle paga una vez por mes. Lo de «No tocar» es lo que tiene que quedar en la cuenta por si piden la devolución.
+                </p>
+                <div className="mt-4">
+                  <Table
+                    head={['Quién', 'Monto', 'Qué', 'Pasarela', 'No tocar hasta', 'Por qué']}
+                    rows={data.money.locked.rows.map((r) => [
+                      r.email || '—',
+                      <strong key="m" className="font-medium">{money(r.amount, r.currency)}</strong>,
+                      r.what || '—',
+                      gateway(r.provider),
+                      day(r.until),
+                      <span key="w" className="text-ink/60">{r.why}</span>,
+                    ])}
+                    empty="Nada en plazo de reembolso: todo lo cobrado se puede retirar."
+                  />
+                </div>
+              </section>
+
+              <section aria-labelledby="h-reemb">
+                <h2 id="h-reemb" className="mb-4 text-xs tracking-[0.2em] uppercase">Reembolsos</h2>
+                <Table
+                  head={['Fecha', 'Quién', 'Monto', 'Qué', 'Pasarela', 'Tipo']}
+                  rows={data.money.refunds.rows.map((r) => [
+                    when(r.when),
+                    r.email || '—',
+                    <strong key="m" className="font-medium">{money(r.amount, r.currency)}</strong>,
+                    r.what || '—',
+                    gateway(r.provider),
+                    r.reason === 'charged_back' ? 'contracargo' : r.partial ? 'parcial' : 'total',
+                  ])}
+                  empty="Ningún reembolso todavía."
+                />
+              </section>
+
+              <section aria-labelledby="h-arrep">
+                <h2 id="h-arrep" className="mb-4 text-xs tracking-[0.2em] uppercase">Arrepentimiento (botón)</h2>
+                <Table
+                  head={['Fecha', 'Código', 'Quién', 'Qué', 'Monto', 'Qué hacer']}
+                  rows={data.money.withdrawals.rows.map((w) => [
+                    when(w.when),
+                    <code key="c" className="font-mono text-xs">{w.code}</code>,
+                    <span key="q">{w.name ? `${w.name} · ` : ''}{w.email}</span>,
+                    w.what,
+                    w.amount != null ? money(w.amount, w.currency) : '—',
+                    <strong key="v" className={`font-medium ${w.open && /ELEGIBLE/.test(w.verdict) ? 'text-danger' : ''}`}>{w.verdict}</strong>,
+                  ])}
+                  empty="Ninguna solicitud todavía."
+                />
+              </section>
+            </>
+          ) : null}
+
           <section aria-labelledby="h-sitio">
             <h2 id="h-sitio" className="mb-4 text-xs tracking-[0.2em] uppercase">Tráfico y clics · últimos {data.days} días</h2>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

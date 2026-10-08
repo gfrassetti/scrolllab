@@ -2,7 +2,10 @@ import { db } from '../db.js'
 import {
   sendOrderPaymentFailedOnce,
   sendSubscriptionPaymentFailedOnce,
+  sendSubscriptionSuspended,
 } from './email.js'
+import { graceMs } from './subscriptions/entitlement.js'
+import { retryPendingWithdrawals } from './autoRefund.js'
 
 const MINUTE_MS = 60 * 1000
 
@@ -58,17 +61,57 @@ export async function sendDuePaymentFailedEmails({ config, client, now = new Dat
 }
 
 /**
- * Corre el barrido cada 5 minutos dentro del proceso de la API. No arranca con
- * el mail apagado. Devuelve `stop()` para el shutdown; los timers no mantienen
+ * «Tu plan se suspendió»: una suscripción viva que pasó el fin del período y la
+ * gracia sin cobro ya cayó al plan gratis (`resolveEntitlement`). Un mail por
+ * período: se anota el fin de período antes de mandar (dos instancias del
+ * server no lo duplican) y la clave de Resend cubre el reintento.
+ * @param {{ config: any, client?: any, now?: Date }} args
+ */
+export async function sendDueSuspendedEmails({ config, client, now = new Date() }) {
+  if (!config.email?.enabled) return { skipped: 'disabled', sent: 0 }
+  let sent = 0
+  for (const row of await db.listSubscriptions()) {
+    if (row.status !== 'authorized' || row.canceledAt || !row.currentPeriodEnd) continue
+    const end = new Date(row.currentPeriodEnd)
+    if (now.getTime() < end.getTime() + graceMs(row, config)) continue
+    if (row.suspendedEmailFor === end.toISOString()) continue
+    const sub = await db.findSubscriptionById(String(db.uid(row) || row.id))
+    if (!sub || sub.suspendedEmailFor === end.toISOString()) continue
+    sub.suspendedEmailFor = end.toISOString()
+    await sub.save()
+    try {
+      const user = await db.findUserById(String(sub.userId))
+      if (!user?.email) continue
+      await sendSubscriptionSuspended({ subscription: sub, user, ref: `${db.uid(sub) || sub.id}-${end.toISOString()}`, config, client })
+      sent += 1
+    } catch (err) {
+      console.error('subs suspended email', err?.message)
+    }
+  }
+  return { sent }
+}
+
+/**
+ * Todo lo que corre cada 5 minutos: mails diferidos y devoluciones a reintentar.
+ * @param {{ config: any, client?: any, now?: Date }} args
+ */
+export async function runSweeps({ config, client, now = new Date() }) {
+  await sendDuePaymentFailedEmails({ config, client, now })
+  await sendDueSuspendedEmails({ config, client, now })
+  await retryPendingWithdrawals(config)
+}
+
+/**
+ * Corre el barrido cada 5 minutos dentro del proceso de la API (los mails se
+ * saltean con el mail apagado; las devoluciones a reintentar corren igual). Devuelve `stop()` para el shutdown; los timers no mantienen
  * vivo el proceso.
  */
 export function startPaymentFailedSweep({
   config,
   intervalMs = 5 * MINUTE_MS,
   initialDelayMs = 45_000,
-  run = sendDuePaymentFailedEmails,
+  run = runSweeps,
 }) {
-  if (!config.email?.enabled) return () => {}
   let busy = false
   const tick = async () => {
     if (busy) return

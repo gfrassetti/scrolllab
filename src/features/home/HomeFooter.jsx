@@ -163,6 +163,15 @@ export default function HomeFooter({ t, templates }) {
                   {t('home.footerAccount')}
                 </Link>
               </li>
+              {/* Botón de arrepentimiento (Res. 424/2020): a la vista desde el home. */}
+              <li>
+                <Link
+                  to="/arrepentimiento"
+                  className="transition-colors duration-300 hover:text-accent"
+                >
+                  {t('home.footerWithdrawal')}
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
@@ -210,6 +219,18 @@ export default function HomeFooter({ t, templates }) {
               className="transition-colors duration-300 hover:text-accent"
             >
               {t('home.footerTerms')}
+            </Link>
+            <Link
+              to="/legal/refunds"
+              className="transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerRefunds')}
+            </Link>
+            <Link
+              to="/arrepentimiento"
+              className="text-ink transition-colors duration-300 hover:text-accent"
+            >
+              {t('home.footerWithdrawal')}
             </Link>
           </nav>
           <a

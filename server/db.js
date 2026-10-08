@@ -5,6 +5,8 @@ import { leadsRepo } from "./repositories/leads.js";
 import { ordersRepo } from "./repositories/orders.js";
 import { hostedRepo } from "./repositories/hosted.js";
 import { subscriptionsRepo } from "./repositories/subscriptions.js";
+import { withdrawalsRepo } from "./repositories/withdrawals.js";
+import { refundsRepo } from "./repositories/refunds.js";
 import { eventsRepo } from "./repositories/events.js";
 
 /**
@@ -66,6 +68,8 @@ export const db = {
   ...ordersRepo,
   ...hostedRepo,
   ...subscriptionsRepo,
+  ...withdrawalsRepo,
+  ...refundsRepo,
   ...eventsRepo,
 
   async isReady() {

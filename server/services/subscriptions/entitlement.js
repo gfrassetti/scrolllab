@@ -19,7 +19,7 @@ import {
  * Gracia tras `currentPeriodEnd` sin cobro confirmado. Solo para una
  * suscripción viva (ni cancelada ni en pausa: esas no se cobran solas).
  */
-function graceMs(sub, config) {
+export function graceMs(sub, config) {
   if (sub.status !== 'authorized' || sub.canceledAt) return 0
   const days = Math.max(0, Number(config.hostedGraceDays) || 0)
   return (
@@ -65,6 +65,8 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
         subscriptionId: subId(sub),
         paymentFailed,
         lapsedPlan: sub.plan,
+        provider: sub.provider || 'mercadopago',
+        currency_id: sub.currency_id || 'ARS',
       })
     }
     graceEndsAt = new Date(end + grace)

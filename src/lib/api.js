@@ -50,6 +50,18 @@ export const api = {
     return `${url}?${q}`
   },
   orders: () => request('/api/orders'),
+  // Botón de arrepentimiento: público, devuelve solo el código de seguimiento.
+  requestWithdrawal: ({ name, email, order, message, locale }) =>
+    request('/api/withdrawals', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, order, message, locale }),
+    }),
+  // El link «Confirmar la devolución» del mail.
+  confirmWithdrawal: (token) =>
+    request('/api/withdrawals/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }),
   // El cupón viaja como código: el descuento lo calcula el servidor.
   // `provider`: 'mercadopago' (ARS) o 'paddle' (USD, cobro internacional).
   checkout: (items, couponCode, { provider, locale } = {}) =>

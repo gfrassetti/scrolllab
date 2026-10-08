@@ -192,7 +192,9 @@
       "changePay": "Charge {{amount}} and switch",
       "returnPending": "We don’t see Paddle’s confirmation yet. If you already paid, it shows up in a few seconds.",
       "updateCard": "Update card"
-    }
+    },
+    "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
+    "refundLink": "Refund policy"
   },
   "common": {
     "loading": "Loading…",
@@ -326,6 +328,7 @@
     "footerLicense": "License",
     "footerPrivacy": "Privacy",
     "footerTerms": "Terms",
+    "footerRefunds": "Refunds",
     "footerHow": "How it works",
     "footerAccount": "My purchases",
     "backTop": "Back to top",
@@ -357,7 +360,8 @@
     "labBodyAfter": ".",
     "labEyebrow": "No download",
     "labTitleBefore": "Your component in one",
-    "labTitleEm": "line"
+    "labTitleEm": "line",
+    "footerWithdrawal": "Withdrawal request"
   },
   "templates": {
     "chapters": {
@@ -974,11 +978,14 @@
     "clearAll": "Clear all",
     "couponUntil": "valid until {{date}}",
     "couponSubtotal": "Subtotal",
-    "couponDiscount": "Welcome coupon {{percent}}%",
+    "couponDiscount": "First-purchase discount ({{percent}}%)",
     "couponErrUsed": "That coupon was already used.",
     "couponErrExpired": "That coupon has expired.",
     "couponErrFirst": "The coupon only works on a first purchase.",
-    "couponErrGeneric": "We couldn’t apply the coupon. Please try again."
+    "couponErrGeneric": "We couldn’t apply the coupon. Please try again.",
+    "refundNote": "Full refund within {{days}} days if you haven’t downloaded the ZIP.",
+    "refundLink": "See the policy",
+    "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically."
   },
   "login": {
     "eyebrow": "Account",
@@ -1005,6 +1012,10 @@
     "pending": "Confirming payment…",
     "failed": "Failed",
     "download": "Download ZIP",
+    "downloadRefundNote": "Once you download the ZIP you can no longer ask for a change-of-mind refund.",
+    "refundUntil": "Refund available until {{date}}.",
+    "requestRefund": "Request a refund",
+    "refundPolicyLink": "Refund policy",
     "license": "License",
     "downloadsCount": "Downloads: {{count}}",
     "preview": "See preview",
@@ -1042,7 +1053,16 @@
     "subSync": "Sync with Mercado Pago",
     "subSyncHint": "Subscribed just now and it's not showing?",
     "subSyncDone": "Status updated",
-    "welcomeCoupon": "You get {{percent}}% off your first purchase until {{date}}. It applies automatically at checkout."
+    "welcomeCoupon": "You get {{percent}}% off your first purchase. It’s applied automatically at checkout.",
+    "paddle": {
+      "subPaused": "Paused in Paddle · you keep access until {{date}}",
+      "subRenewing": "Confirming the charge with Paddle · if it doesn’t go through, the plan is suspended on {{date}}",
+      "subPaymentFailed": "We couldn’t charge the renewal. Paddle will retry; if it isn’t resolved, the plan is suspended on {{date}}. Update your card so the next attempt goes through.",
+      "subLapsed": "Your {{plan}} plan is suspended: we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. Update your card, or cancel it and it won’t be retried.",
+      "subLapsedPaused": "Your {{plan}} plan is paused in Paddle and no longer covers your sections.",
+      "subSync": "Sync with Paddle"
+    },
+    "discountApplied": "Includes the {{percent}}% first-purchase discount (−{{amount}})"
   },
   "preview": {
     "backToAccount": "← Back to My purchases",
@@ -1079,7 +1099,11 @@
     "mockDone": "Mock payment OK",
     "mockBusy": "Simulating payment…",
     "mockNeedLogin": "You must be logged in to simulate payment.",
-    "mockDownload": "Download in My purchases →"
+    "mockDownload": "Download in My purchases →",
+    "wrongAccountTitle": "That payment belongs to another account",
+    "wrongAccountBody": "Sign in with the account you bought with: you’ll find the purchase in My purchases.",
+    "reviewTitle": "We’re reviewing your payment",
+    "reviewBody": "Paddle recorded the payment, but we couldn’t match it to your purchase. We’ve been notified and will email you to deliver what you bought or refund you."
   },
   "license": {
     "eyebrow": "Regular License",
@@ -1184,7 +1208,11 @@
       },
       {
         "title": "Refunds",
-        "body": "Because products are digital and available immediately, confirmed purchases are non-refundable unless the file cannot be delivered, has a substantial technical defect, or applicable law requires otherwise. Contact us so we can review the case. An approved refund goes back to the original payment method, through Mercado Pago or Paddle depending on how you paid, and the license and downloads for that order are revoked."
+        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: you can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it), and the subscription ends right away; renewals aren’t refunded and canceling stops future charges. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
+        "link": {
+          "to": "/legal/refunds",
+          "label": "See the Refund policy →"
+        }
       },
       {
         "title": "Permitted use",
@@ -1213,7 +1241,7 @@
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
           "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos or, if you pay from another country, through Paddle.com in US dollars as our authorized reseller; it renews automatically at the end of each period until you cancel.",
-          "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Amounts already charged are non-refundable unless applicable law requires otherwise.",
+          "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
           "We make reasonable efforts to keep the service available, but we do not guarantee uninterrupted availability and are not liable for losses from downtime, latency, or changes to the service.",
@@ -1222,6 +1250,111 @@
       }
     ],
     "contact": "Questions about these terms:"
+  },
+  "refunds": {
+    "eyebrow": "Legal",
+    "title": "Refund policy",
+    "effectiveDate": "Effective October 7, 2026",
+    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}, whether you pay with Mercado Pago or by card (Paddle).",
+    "sections": [
+      {
+        "title": "Refund period",
+        "items": [
+          "Templates, bundle and builder: full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP.",
+          "LAB: the period is {{days}} calendar days from when you subscribe, free trial included. Nothing is charged during the trial (cancel and you pay nothing); within that period you can ask for a full refund of the first charge and the subscription ends right away. Renewals aren’t refunded."
+        ]
+      },
+      {
+        "title": "If you already downloaded the ZIP",
+        "body": "Once downloaded, the code is in your hands and there is no change-of-mind refund. We do give your money back, within the same period, if the file can’t be opened or delivered, has a substantial technical defect or isn’t what was described: write to us and we’ll fix it or refund you. Anything applicable law requires also applies. We warn you before you download, in My purchases."
+      },
+      {
+        "title": "What you get back",
+        "body": "The amount you actually paid, including any discount or coupon you used and the taxes you were charged. It goes back to the same payment method. Timing depends on Mercado Pago, your card or your bank."
+      },
+      {
+        "title": "What happens to what you bought",
+        "items": [
+          "Templates, bundle and builder: once the refund is approved, the license and downloads for that order are revoked, and you must stop using and delete the code.",
+          "LAB: when the first charge is refunded, the subscription ends right away and the plan goes back to free; sections published above the free limit stop showing."
+        ]
+      },
+      {
+        "title": "How to request it",
+        "items": [
+          "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
+          "If you paid by card (Paddle), you can also ask Paddle, our authorized reseller, directly at paddle.net.",
+          "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
+        ],
+        "link": {
+          "to": "/arrepentimiento",
+          "label": "Withdrawal request"
+        }
+      },
+      {
+        "title": "After the period",
+        "body": "Once the period has passed there is no change-of-mind refund, on any product. We still review any case where the file can’t be delivered, has a substantial technical defect, or applicable law requires otherwise: write to us."
+      },
+      {
+        "title": "Free trial and cancellation (LAB)",
+        "body": "Your first subscription comes with a free trial: cancel before it ends and you pay nothing. You can cancel anytime from My account or LAB: canceling stops renewals and you keep access until the end of the period already paid, with no refund for that period."
+      },
+      {
+        "title": "Studio (custom work)",
+        "body": "Custom work and Studio adaptations aren’t charged through the site checkout: they follow what’s agreed in the quote."
+      },
+      {
+        "title": "Charges you don’t recognize",
+        "body": "If you see a charge you don’t recognize or have a problem with your purchase, write to us before asking your bank: we’ll sort it out quickly."
+      }
+    ],
+    "contact": "Questions about these terms:"
+  },
+  "withdrawal": {
+    "eyebrow": "Withdrawal",
+    "title": "Withdrawal request",
+    "intro": "Changed your mind about a purchase? Ask here. No account needed. If it qualifies under the Refund policy, we refund you right away, to the same payment method:",
+    "ruleZip": "Templates, bundle and builder: full refund within {{days}} days of purchase if you haven’t downloaded the ZIP. If you already did, only for a technical defect or if it isn’t as described.",
+    "ruleLab": "LAB: nothing is charged during the free trial, so canceling is enough. After that, you can ask for a refund of the first charge within {{days}} days of subscribing (the trial counts toward it): once refunded, the subscription ends right away. Renewals aren’t refunded: cancel and you won’t be charged again.",
+    "name": "Full name",
+    "email": "Purchase email",
+    "order": "Order number (optional)",
+    "orderHint": "You’ll find it in My purchases, next to “Order”. If you have more than one purchase, add it to choose which; without it we take your LAB subscription or your latest purchase.",
+    "message": "Tell us what happened (optional)",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "error": "We couldn’t send the request. Try again or write to us.",
+    "contact": "Questions? Write to us:",
+    "confirming": "Confirming the refund…",
+    "again": "Request it again",
+    "codeLabel": "Your code:",
+    "outcome": {
+      "refunded": {
+        "eyebrow": "Refund issued",
+        "title": "Done: we refunded you.",
+        "body": "The refund went to the same method you paid with; depending on your bank or card, it can take a few days to show. We sent the details to {{email}}."
+      },
+      "canceled": {
+        "eyebrow": "Subscription canceled",
+        "title": "Done: we canceled your subscription.",
+        "body": "You were on the free trial, so you weren’t charged and won’t be. We sent the confirmation to {{email}}."
+      },
+      "pending": {
+        "eyebrow": "Refund in progress",
+        "title": "We requested the refund.",
+        "body": "The payment processor is finishing it. We’ll email {{email}} when it’s done; nothing else to do."
+      },
+      "check_email": {
+        "eyebrow": "Check your email",
+        "title": "We sent you an email.",
+        "body": "If the details match a purchase that qualifies, you confirm the refund in that email with one click. If not, we’ll review it and get back to you."
+      },
+      "review": {
+        "eyebrow": "Request received",
+        "title": "We got your request.",
+        "body": "We’ll review it and reply to {{email}}. If the refund applies, the money goes back to the original payment method."
+      }
+    }
   },
   "theme": {
     "toLight": "Switch to light theme",
@@ -1250,6 +1383,7 @@
     "opening": "Opening the payment…",
     "invalidLink": "That payment link isn’t valid. If you got it by email, write to us and we’ll send a new one.",
     "openError": "We couldn’t open the payment. Try again in a few minutes or write to us.",
-    "closed": "You closed the payment without finishing it: you haven’t been charged."
+    "closed": "You closed the payment without finishing it: you haven’t been charged.",
+    "retry": "Try again"
   }
 }

@@ -43,7 +43,17 @@ describe('createCheckoutOrder', () => {
     fs.rmSync(dir, { recursive: true, force: true })
   })
 
-  it('ignora el precio del cliente y cobra el de lista', async () => {
+  it('primera compra: el 10% se aplica solo, aunque no venga el código (Comprar rápido)', async () => {
+    const first = await db.createUser({ email: 'primera@test.com', name: 'Primera' })
+    const out = await createCheckoutOrder({ user: first, items: [{ sku: 'chapters' }], config })
+    const order = await db.findOrderById(out.orderId)
+    assert.equal(order.discountPct, 10)
+    assert.match(order.couponCode, /^SL-/)
+    assert.ok(order.total < arsFromUsd(TEMPLATE_PRICES_USD.chapters, 1560))
+  })
+
+  it('ignora el precio del cliente y cobra el de lista (cliente que ya compró)', async () => {
+    await db.createOrder({ userId: db.uid(user), status: 'paid', provider: 'mercadopago', items: [{ sku: 'nocturne' }], total: 1, currency_id: 'ARS' })
     const out = await createCheckoutOrder({
       user,
       items: [{ sku: 'chapters', unit_price: 1, unit_price_usd: 1 }],

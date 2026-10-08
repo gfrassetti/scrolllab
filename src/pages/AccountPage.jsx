@@ -6,7 +6,6 @@ import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { formatCouponDate } from '../lib/coupon'
 import { formatAmount } from '../lib/pricing'
 import { orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
@@ -164,15 +163,12 @@ export default function AccountPage() {
           </Link>
         </p>
 
-        {welcome && !orders.some((o) => o.status === 'paid') ? (
+        {welcome && !orders.some((o) => o.status === 'paid' || o.status === 'refunded') ? (
           <p
             data-welcome-coupon
             className="mt-4 max-w-[52ch] text-sm leading-relaxed text-accent-ink"
           >
-            {t('account.welcomeCoupon', {
-              percent: welcome.percent,
-              date: formatCouponDate(welcome.expiresAt, locale),
-            })}{' '}
+            {t('account.welcomeCoupon', { percent: welcome.percent })}{' '}
             <Link
               to="/#templates"
               className="underline decoration-current/40 underline-offset-2 hover:text-accent"
@@ -233,6 +229,14 @@ export default function AccountPage() {
                         {order.total != null && formatAmount(order.total, dateLocale)}{' '}
                         {order.currency_id} · <OrderStatus status={order.status} />
                       </p>
+                      {order.summary?.discount > 0 && (
+                        <p className="mt-1 text-xs text-accent-ink">
+                          {t('account.discountApplied', {
+                            percent: order.summary.discountPct,
+                            amount: `${formatAmount(order.summary.discount, dateLocale)} ${order.currency_id}`,
+                          })}
+                        </p>
+                      )}
                       {order.status === 'pending' && (
                         <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
                           {t('account.pendingHint')}
@@ -250,6 +254,22 @@ export default function AccountPage() {
                             {order.purchaseCode || order.id}
                           </span>{' '}
                           · {t('account.downloadsCount', { count: order.downloadCount || 0 })}
+                        </p>
+                      )}
+                      {/* Descargar cierra el reembolso por arrepentimiento: se avisa antes,
+                          con la fecha límite que calcula el servidor. */}
+                      {order.refund?.eligible && (
+                        <p className="mt-2 max-w-[48ch] text-xs leading-relaxed text-ink/55">
+                          {t('account.refundUntil', {
+                            date: new Date(order.refund.deadline).toLocaleDateString(dateLocale),
+                          })}{' '}
+                          {t('account.downloadRefundNote')}{' '}
+                          <Link
+                            to={`/arrepentimiento?order=${String(order.id).slice(-8).toUpperCase()}`}
+                            className="underline underline-offset-2 transition-colors hover:text-ink"
+                          >
+                            {t('account.requestRefund')}
+                          </Link>
                         </p>
                       )}
                     </div>

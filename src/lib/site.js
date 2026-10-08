@@ -4,6 +4,12 @@ export const SITE_TAGLINE = 'Webs que se mueven.'
 
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 
+/**
+ * Plazo de reembolso por arrepentimiento (días): vive en el dominio, lo usan el
+ * servidor y los textos legales (`{{days}}`). Ver src/domain/policy.js.
+ */
+export { REFUND_DAYS } from '../domain/policy.js'
+
 export const INSTAGRAM_HANDLE = '@scrolllab_ar'
 export const INSTAGRAM_URL = 'https://www.instagram.com/scrolllab_ar/'
 

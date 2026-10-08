@@ -8,11 +8,8 @@ import {
   hostedPlanPriceIn,
   isHostedPlanId,
 } from '../../catalog.js'
-import {
-  isPaddleSub,
-  changePaddlePlan,
-  previewPaddlePlanChange,
-} from './paddleSync.js'
+import { isPaddleSub, changePaddlePlan } from './paddleSync.js'
+import { sendSubscriptionPlanChanged } from '../email.js'
 import {
   updatePreapprovalAmount,
   createUpgradePreference,
@@ -38,6 +35,23 @@ import {
 /** Plan más caro que otro (el orden de los tiers es el de su precio). */
 export function isHigherPlan(a, b) {
   return hostedPlanPrice(a, 'monthly') > hostedPlanPrice(b, 'monthly')
+}
+
+/**
+ * Mail «Cambiaste a <plan>» (uno por cambio). No frena el cambio si falla.
+ * @param {any} sub
+ * @param {any} config
+ * @param {{ from: string, charged?: number | null, ref: string }} change
+ */
+function firePlanChanged(sub, config, { from, charged = null, ref }) {
+  if (!config?.email?.enabled || from === sub.plan) return
+  db.findUserById(String(sub.userId))
+    .then((user) =>
+      user?.email
+        ? sendSubscriptionPlanChanged({ subscription: sub, user, ref, change: { from, charged }, config })
+        : null,
+    )
+    .catch((err) => console.error('subs plan changed email', err?.message))
 }
 
 const planReason = (plan, cycle) =>
@@ -99,10 +113,11 @@ async function loadChangeableSubscription(userId, targetPlan) {
   if (!isHostedPlanId(targetPlan)) throw new HttpError(400, 'Plan inválido')
 
   const sub = await db.findActiveSubscriptionByUser(userId)
+  const gateway = sub?.provider === 'paddle' ? 'Paddle' : 'Mercado Pago'
   if (sub?.status === 'paused') {
     throw new HttpError(
       409,
-      'Tu suscripción está en pausa en Mercado Pago. Reactivala ahí o cancelala para suscribirte de nuevo.',
+      `Tu suscripción está en pausa en ${gateway}. Reactivala ahí o cancelala para suscribirte de nuevo.`,
       { expose: true },
     )
   }
@@ -121,7 +136,7 @@ async function loadChangeableSubscription(userId, targetPlan) {
     // En gracia: subir de plan acá regalaría la cuota nueva sin cobro.
     throw new HttpError(
       409,
-      'Tenés un cobro pendiente en Mercado Pago. Cuando se acredite, vas a poder cambiar de plan.',
+      `Tenés un cobro pendiente en ${gateway}. Cuando se acredite, vas a poder cambiar de plan.`,
       { expose: true },
     )
   }
@@ -159,19 +174,12 @@ function changeSummary(sub, targetPlan, quote) {
 }
 
 /**
- * Qué pasaría al cambiar a `plan`, sin tocar nada (la UI lo muestra antes). En
- * Paddle el monto de la subida lo cotiza Paddle (prorrateo e impuestos suyos);
- * si no responde, queda la cuenta local.
+ * Qué pasaría al cambiar a `plan`, sin tocar nada (la UI lo muestra antes). La
+ * misma cuenta en las dos pasarelas: es exactamente lo que se cobra.
  */
-export async function previewPlanChange({ userId, plan: targetPlan, config }, deps = {}) {
+export async function previewPlanChange({ userId, plan: targetPlan }) {
   const { sub } = await loadChangeableSubscription(userId, targetPlan)
-  const quote = quoteUpgrade(sub, targetPlan)
-  const summary = changeSummary(sub, targetPlan, quote)
-  if (isPaddleSub(sub) && quote.amount > 0 && config) {
-    const amount = await previewPaddlePlanChange({ sub, targetPlan, config }, deps)
-    if (amount != null) summary.amount = amount
-  }
-  return summary
+  return changeSummary(sub, targetPlan, quoteUpgrade(sub, targetPlan))
 }
 
 /**
@@ -234,6 +242,7 @@ export async function changeSubscriptionPlan(
     }
     throw err
   }
+  firePlanChanged(sub, config, { from: previousPlan, ref: `${subId(sub)}-${previousPlan}-${sub.plan}-${Date.now()}` })
 
   return {
     requiresPayment: false,
@@ -247,13 +256,16 @@ export async function changeSubscriptionPlan(
 }
 
 /**
- * Paddle prorratea solo: subir con días pagos cobra la diferencia a la tarjeta
- * guardada en el mismo pedido (sin checkout) y, si la rechaza, no cambia nada.
- * El plan nuevo rige apenas Paddle acepta el cambio.
+ * Paddle: la misma diferencia que Mercado Pago, pero se cobra a la tarjeta
+ * guardada al instante (cargo único, sin checkout); si la rechaza, no cambia
+ * nada. El plan nuevo rige apenas Paddle cobra.
  */
 async function changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
   const bill = quote.amount > 0
-  await changePaddlePlan({ sub, targetPlan, bill, config }, deps)
+  await changePaddlePlan(
+    { sub, targetPlan, amountUsd: quote.amount, days: quote.days ?? null, config },
+    deps,
+  )
   const previousPlan = sub.plan
   const window = paidWindow(sub)
   if (window && !sub.paidPlan) {
@@ -273,6 +285,11 @@ async function changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quot
     )
     throw err
   }
+  firePlanChanged(sub, config, {
+    from: previousPlan,
+    charged: bill ? quote.amount : null,
+    ref: `${subId(sub)}-${previousPlan}-${sub.plan}-${Date.now()}`,
+  })
   return {
     requiresPayment: false,
     charged: bill,
@@ -456,12 +473,18 @@ export async function applyUpgradePayment(
   }
 
   const window = paidWindow(sub)
+  const fromPlan = sub.plan
   sub.paidCycle = sub.paidCycle || window?.cycle || sub.cycle
   sub.paidPlan = ref.plan
   sub.plan = ref.plan
   if (sub.pendingUpgrade?.plan === ref.plan) sub.pendingUpgrade = undefined
   record('applied')
   await sub.save()
+  firePlanChanged(sub, config, {
+    from: fromPlan,
+    charged: Number(payment.transaction_amount) || null,
+    ref: `${subId(sub)}-${payment.id}`,
+  })
   return { plan: sub.plan, alreadyApplied: false }
 }
 

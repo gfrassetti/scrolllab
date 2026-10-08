@@ -58,6 +58,8 @@ const orderSchema = new mongoose.Schema(
     // Idioma de los mails de la orden (el del sitio al comprar).
     locale: { type: String, enum: ["es", "en"], default: "es" },
     mpPreferenceId: String,
+    // Cuándo se cobró: desde acá corre el plazo de reembolso (lib/site REFUND_DAYS).
+    paidAt: Date,
     mpPaymentId: { type: String, sparse: true, unique: true },
     // Transacción de Paddle que armamos al abrir el checkout: solo esa la paga.
     paddleTransactionId: { type: String, sparse: true, unique: true },
@@ -173,6 +175,14 @@ const subscriptionSchema = new mongoose.Schema(
     // Alta que nunca se completó y se dio de baja en MP (no quema la prueba).
     abandonedAt: Date,
     lastPaidAt: Date,
+    // Primer cobro de período: el único que se puede devolver (src/domain/policy.js).
+    firstPaidAt: Date,
+    // El cobro que se puede devolver: pago de MP o transacción de Paddle.
+    firstChargeId: String,
+    // Fin de período por el que ya salió el mail «Tu plan se suspendió».
+    suspendedEmailFor: String,
+    // Cuándo se devolvió el primer cobro (baja inmediata).
+    refundedAt: Date,
     // Con qué plan y ciclo está pago el período en curso (cobro de MP, o la
     // diferencia al subir). Base para cotizar la próxima subida; bajar de plan
     // no lo cambia. En una re-suscripción arranca con lo de la vieja.
@@ -327,6 +337,71 @@ export const HostedInstance =
 export const Subscription =
   mongoose.models.Subscription ||
   mongoose.model("Subscription", subscriptionSchema);
+/**
+ * Solicitud del botón de arrepentimiento (Resolución 424/2020): pedido público,
+ * sin cuenta, con su código de seguimiento. `orderId` es la orden asociada por
+ * mail + número (si se encontró); `eligibility` es la foto del reembolso al
+ * momento del pedido, para que el dueño decida rápido.
+ */
+const withdrawalSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, unique: true },
+    email: { type: String, required: true, lowercase: true, trim: true, index: true },
+    name: { type: String, required: true },
+    orderRef: String,
+    orderId: { type: String, default: null },
+    // Arrepentimiento de LAB: la suscripción del mail (si no era una compra).
+    subscriptionId: { type: String, default: null },
+    kind: { type: String, enum: ["order", "lab", null], default: null },
+    message: String,
+    locale: { type: String, enum: ["es", "en"], default: "es" },
+    eligibility: mongoose.Schema.Types.Mixed,
+    // received (lo revisa el dueño) · awaiting_confirmation (link por mail) ·
+    // executing · refunded · canceled (LAB en prueba) · refund_pending (Paddle
+    // en revisión) · refund_retry (Paddle completando) · manual (no salió solo) · resolved
+    status: {
+      type: String,
+      enum: ["received", "awaiting_confirmation", "executing", "refunded", "canceled", "refund_pending", "refund_retry", "manual", "resolved"],
+      default: "received",
+    },
+    note: String,
+    attempts: { type: Number, default: 0 },
+    confirmedAt: Date,
+    executedAt: Date,
+  },
+  { timestamps: true },
+);
+
+/**
+ * Libro de reembolsos: una fila por pago de MP o ajuste de Paddle devuelto (o
+ * contracargo), con quién y cuánto. Lo escriben los webhooks; lo lee el panel.
+ */
+const refundSchema = new mongoose.Schema(
+  {
+    externalId: { type: String, required: true, unique: true },
+    provider: { type: String, enum: ["mercadopago", "paddle"], required: true },
+    kind: { type: String, enum: ["order", "lab"], required: true },
+    orderId: { type: String, default: null },
+    subscriptionId: { type: String, default: null },
+    userId: { type: String, default: null },
+    email: { type: String, default: null },
+    amount: { type: Number, required: true },
+    currency: { type: String, required: true },
+    partial: { type: Boolean, default: false },
+    reason: { type: String, default: "refunded" },
+    refundedAt: { type: Date, default: Date.now },
+    // Hasta qué monto ya se le avisó al cliente (un parcial que se completa avisa de nuevo).
+    notifiedAmount: { type: Number, default: 0 },
+  },
+  { timestamps: true },
+);
+
+/** @type {AnyModel} */
+export const Refund = mongoose.models.Refund || mongoose.model("Refund", refundSchema);
+
+/** @type {AnyModel} */
+export const Withdrawal =
+  mongoose.models.Withdrawal || mongoose.model("Withdrawal", withdrawalSchema);
 /** @type {AnyModel} */
 export const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
 /** @type {AnyModel} */

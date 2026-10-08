@@ -49,7 +49,8 @@ export function createCouponsRouter({ config, limits }) {
         ok: true,
         code,
         percent,
-        expiresAt: new Date(lead.couponExpiresAt).toISOString(),
+        // Sin vencimiento: vale hasta la primera compra.
+        expiresAt: null,
         emailHint: maskEmail(lead.email),
       })
     }),

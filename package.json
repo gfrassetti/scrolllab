@@ -28,6 +28,7 @@
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
+    "check:mp-refund-sandbox": "node scripts/check-mp-refund-sandbox.mjs",
     "check:paddle-sandbox": "node scripts/check-paddle-sandbox.mjs",
     "check:paddle-e2e": "node scripts/check-paddle-e2e.mjs",
     "analyze:ref": "node scripts/analyze-reference.mjs",

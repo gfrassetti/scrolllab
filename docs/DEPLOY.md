@@ -338,6 +338,11 @@ newsletters: el único mail que sale es el cupón, una sola vez.
   mock. Canjear es contabilidad: si falla, no frena la entrega. Al confirmar el
   pago el front también borra el cupón guardado.
 - Aplica a modelos, bundle y composiciones del builder. No a LAB.
+- **Sin vencimiento, solo la primera compra**: vale hasta que compra. «Ya
+  compró» = una orden pagada o reembolsada (`hasPurchased`). Si el front no
+  manda el código (los «Comprar» rápidos no pasan por el carrito), el servidor lo
+  aplica igual en la primera compra (`autoWelcomeCoupon`): nunca depende del
+  front. Los cupones viejos con fecha volvieron a valer.
 - **Es personal**: el cupón se crea con el mail de la cuenta, así que solo vale
   pagando con esa cuenta (los puntos y la `+etiqueta` de Gmail cuentan como el
   mismo mail). Con otra cuenta el checkout responde 403 con
@@ -347,8 +352,8 @@ newsletters: el único mail que sale es el cupón, una sola vez.
   con la franja siguen valiendo: al entrar con esa cuenta se devuelve el mismo
   cupón, sin mail nuevo.
 
-**Ajustes**: constantes, no env. `WELCOME_COUPON_PERCENT`, `WELCOME_COUPON_DAYS` y
-`WELCOME_COUPON_BOUND_TO_EMAIL` en `server/catalog.js`; el porcentaje
+**Ajustes**: constantes, no env. `WELCOME_COUPON_BOUND_TO_EMAIL` en
+`server/catalog.js`; el porcentaje
 (`WELCOME_COUPON_PERCENT`) vive en `src/domain/catalog.js`, el mismo para la home y el checkout.
 
 **Medición**

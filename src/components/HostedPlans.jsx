@@ -7,6 +7,7 @@ import { useI18n } from '../i18n'
 import { gsap, useGSAP } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
+import { REFUND_DAYS } from '../lib/site'
 import { openPaddleCheckout } from '../lib/paddleCheckout'
 import PaymentMethodPicker from './PaymentMethodPicker'
 
@@ -820,6 +821,15 @@ export default function HostedPlans() {
               )
             })}
           </div>
+          <p className="mt-4 text-body-sm text-ink/55">
+            {t('lab.refundNote', { days: REFUND_DAYS })}{' '}
+            <Link
+              to="/legal/refunds"
+              className="underline underline-offset-2 transition-colors hover:text-ink"
+            >
+              {t('lab.refundLink')}
+            </Link>
+          </p>
         </>
       )}
     </section>

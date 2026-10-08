@@ -192,7 +192,9 @@
       "changePay": "Cobrar {{amount}} y cambiar",
       "returnPending": "Todavía no vemos la confirmación de Paddle. Si ya pagaste, se refleja en unos segundos.",
       "updateCard": "Actualizar tarjeta"
-    }
+    },
+    "refundNote": "Cancelás cuando quieras. Podés pedir que te devolvamos el primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro); las renovaciones no se devuelven.",
+    "refundLink": "Política de reembolsos"
   },
   "common": {
     "loading": "Cargando…",
@@ -326,6 +328,7 @@
     "footerLicense": "Licencia",
     "footerPrivacy": "Privacidad",
     "footerTerms": "Términos",
+    "footerRefunds": "Reembolsos",
     "footerHow": "Cómo funciona",
     "footerAccount": "Mis compras",
     "backTop": "Volver arriba",
@@ -357,7 +360,8 @@
     "labBodyAfter": ".",
     "labEyebrow": "Sin descargar nada",
     "labTitleBefore": "Tu componente en una",
-    "labTitleEm": "línea"
+    "labTitleEm": "línea",
+    "footerWithdrawal": "Botón de arrepentimiento"
   },
   "templates": {
     "chapters": {
@@ -974,11 +978,14 @@
     "clearAll": "Quitar todo",
     "couponUntil": "vence el {{date}}",
     "couponSubtotal": "Subtotal",
-    "couponDiscount": "Cupón de bienvenida {{percent}}%",
+    "couponDiscount": "Descuento de primera compra ({{percent}}%)",
     "couponErrUsed": "Ese cupón ya se usó.",
     "couponErrExpired": "Ese cupón venció.",
     "couponErrFirst": "El cupón vale solo para la primera compra.",
-    "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo."
+    "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo.",
+    "refundNote": "Reembolso total dentro de {{days}} días si no descargaste el ZIP.",
+    "refundLink": "Ver la política",
+    "couponNote": "Es tu primera compra: el {{percent}}% se aplica solo."
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -1005,6 +1012,10 @@
     "pending": "Confirmando pago…",
     "failed": "Fallida",
     "download": "Descargar ZIP",
+    "downloadRefundNote": "Al descargar el ZIP ya no podés pedir el reembolso por arrepentimiento.",
+    "refundUntil": "Reembolso disponible hasta el {{date}}.",
+    "requestRefund": "Pedir reembolso",
+    "refundPolicyLink": "Política de reembolsos",
     "license": "Licencia",
     "downloadsCount": "Descargas: {{count}}",
     "preview": "Ver preview",
@@ -1042,7 +1053,16 @@
     "subSync": "Sincronizar con Mercado Pago",
     "subSyncHint": "¿Te suscribiste recién y no se refleja?",
     "subSyncDone": "Estado actualizado",
-    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra hasta el {{date}}. Se aplica solo al pagar."
+    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra. Se aplica solo al pagar.",
+    "paddle": {
+      "subPaused": "En pausa en Paddle · seguís con acceso hasta el {{date}}",
+      "subRenewing": "Confirmando el cobro con Paddle · si no se acredita, el plan se suspende el {{date}}",
+      "subPaymentFailed": "No pudimos cobrar la renovación. Paddle lo reintenta; si no se resuelve, el plan se suspende el {{date}}. Actualizá tu tarjeta para que el próximo intento pase.",
+      "subLapsed": "Tu plan {{plan}} está suspendido: no pudimos cobrarlo. Si Paddle logra el cobro, vuelve solo. Actualizá tu tarjeta, o cancelalo y no se reintenta más.",
+      "subLapsedPaused": "Tu plan {{plan}} está en pausa en Paddle y ya no cubre tus secciones.",
+      "subSync": "Sincronizar con Paddle"
+    },
+    "discountApplied": "Incluye {{percent}}% de descuento de primera compra (−{{amount}})"
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",
@@ -1079,7 +1099,11 @@
     "mockDone": "Pago simulado OK",
     "mockBusy": "Simulando pago…",
     "mockNeedLogin": "Tenés que estar logueado para simular el pago.",
-    "mockDownload": "Descargar en Mis compras →"
+    "mockDownload": "Descargar en Mis compras →",
+    "wrongAccountTitle": "Ese pago es de otra cuenta",
+    "wrongAccountBody": "Entrá con la cuenta con la que compraste: ahí vas a ver la compra en Mis compras.",
+    "reviewTitle": "Estamos revisando tu pago",
+    "reviewBody": "Paddle registró el pago, pero no lo pudimos asociar a tu compra. Ya nos llegó el aviso: te escribimos para entregarte lo que compraste o devolverte el dinero."
   },
   "license": {
     "eyebrow": "Licencia Regular",
@@ -1184,7 +1208,11 @@
       },
       {
         "title": "Reembolsos",
-        "body": "Por tratarse de productos digitales de acceso inmediato, las compras acreditadas no son reembolsables salvo que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario. Contactanos para evaluar el caso. Un reembolso aprobado se devuelve al mismo medio de pago, a través de Mercado Pago o de Paddle según cómo hayas pagado, y la licencia y las descargas de esa orden quedan sin efecto."
+        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro), y la suscripción se da de baja en el momento; las renovaciones no se devuelven y cancelar detiene los próximos cobros. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Paddle) y la licencia y las descargas de esa orden quedan sin efecto. Para pedirlo usá el Botón de arrepentimiento, al pie del home.",
+        "link": {
+          "to": "/legal/refunds",
+          "label": "Ver la Política de reembolsos →"
+        }
       },
       {
         "title": "Uso permitido",
@@ -1213,7 +1241,7 @@
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
           "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago en pesos o, si pagás desde otro país, mediante Paddle.com en dólares, como revendedor autorizado; se renueva automáticamente al final de cada período hasta que la des de baja.",
-          "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
+          "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Cada cobro se puede reembolsar dentro de los {{days}} días según la Política de reembolsos; pasado ese plazo, los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
           "Hacemos esfuerzos razonables por mantener el servicio disponible, pero no garantizamos disponibilidad ininterrumpida y no respondemos por pérdidas derivadas de caídas, latencia o cambios en el servicio.",
@@ -1222,6 +1250,111 @@
       }
     ],
     "contact": "Consultas sobre estos términos:"
+  },
+  "refunds": {
+    "eyebrow": "Legal",
+    "title": "Política de reembolsos",
+    "effectiveDate": "Vigente desde el 7 de octubre de 2026",
+    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}, pagues con Mercado Pago o con tarjeta (Paddle).",
+    "sections": [
+      {
+        "title": "Plazo",
+        "items": [
+          "Templates, bundle y builder: reembolso total dentro de los {{days}} días corridos desde la compra, por cualquier motivo, siempre que no hayas descargado el ZIP.",
+          "LAB: el plazo son {{days}} días corridos desde que te suscribís, con la prueba gratis adentro. En la prueba no se cobra nada (si cancelás, no pagás); dentro de ese plazo podés pedir la devolución total del primer cobro y la suscripción se da de baja en el momento. Las renovaciones no se devuelven."
+        ]
+      },
+      {
+        "title": "Si ya descargaste el ZIP",
+        "body": "Una vez descargado, el código ya está en tu poder y no hay reembolso por arrepentimiento. Sí te devolvemos el dinero, dentro del mismo plazo, si el archivo no se puede abrir o entregar, tiene un defecto técnico sustancial o no es lo que se describía: escribinos, lo resolvemos o te devolvemos el importe. Vale también lo que disponga la normativa aplicable. Antes de descargar te lo avisamos en Mis compras."
+      },
+      {
+        "title": "Qué se devuelve",
+        "body": "El importe que efectivamente pagaste, con el descuento o el cupón que hayas usado y los impuestos que se te cobraron. Se devuelve al mismo medio de pago. Los tiempos de acreditación dependen de Mercado Pago, de tu tarjeta o de tu banco."
+      },
+      {
+        "title": "Qué pasa con lo que compraste",
+        "items": [
+          "Templates, bundle y builder: al aprobarse el reembolso, la licencia y las descargas de esa orden quedan sin efecto, y tenés que dejar de usar y borrar el código.",
+          "LAB: al devolverse el primer cobro, la suscripción se da de baja en el momento y el plan vuelve al gratis; las secciones publicadas por encima del tope gratis dejan de mostrarse."
+        ]
+      },
+      {
+        "title": "Cómo pedirlo",
+        "items": [
+          "Desde el Botón de arrepentimiento (al pie del home): sin cuenta, con un código de seguimiento al instante. Vale para cualquier medio de pago.",
+          "Si pagaste con tarjeta (Paddle), también podés pedírselo directamente a Paddle, nuestro revendedor autorizado, en paddle.net.",
+          "O escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página). Lo revisamos y respondemos lo antes posible."
+        ],
+        "link": {
+          "to": "/arrepentimiento",
+          "label": "Botón de arrepentimiento"
+        }
+      },
+      {
+        "title": "Pasado el plazo",
+        "body": "Vencido el plazo no hay reembolso por arrepentimiento, en ningún producto. Igual revisamos cada caso en que el archivo no pueda entregarse, tenga un defecto técnico sustancial o la normativa aplicable disponga lo contrario: escribinos."
+      },
+      {
+        "title": "Prueba gratis y cancelación (LAB)",
+        "body": "La primera suscripción tiene una prueba sin cargo: si cancelás antes de que termine, no pagás nada. Podés cancelar cuando quieras desde Mi cuenta o LAB: la cancelación detiene las renovaciones y conservás el acceso hasta el final del período ya pagado, sin devolución de ese período."
+      },
+      {
+        "title": "Estudio (trabajo a medida)",
+        "body": "Los trabajos a medida y las adaptaciones del Estudio no se cobran por el checkout del sitio: se rigen por lo acordado en la cotización."
+      },
+      {
+        "title": "Cobros que no reconocés",
+        "body": "Si ves un cobro que no reconocés o tenés un problema con tu compra, escribinos antes de pedirlo a tu banco: lo resolvemos rápido."
+      }
+    ],
+    "contact": "Consultas sobre estos términos:"
+  },
+  "withdrawal": {
+    "eyebrow": "Arrepentimiento",
+    "title": "Botón de arrepentimiento",
+    "intro": "Si te arrepentiste de una compra, pedilo acá. No hace falta cuenta. Si corresponde según la Política de reembolsos, te devolvemos el dinero en el momento, al mismo medio de pago:",
+    "ruleZip": "Templates, bundle y builder: reembolso total dentro de los {{days}} días de la compra si no descargaste el ZIP. Si ya lo descargaste, solo por un defecto técnico o si no es lo descripto.",
+    "ruleLab": "LAB: en la prueba gratis no se cobra nada, así que alcanza con cancelar. Después, podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribiste (la prueba cuenta adentro): al devolverlo, la suscripción se da de baja en el momento. Las renovaciones no se devuelven: cancelás y no se te cobra más.",
+    "name": "Nombre y apellido",
+    "email": "Mail de la compra",
+    "order": "Número de orden (opcional)",
+    "orderHint": "Lo ves en Mis compras, al lado de «Orden». Si tenés más de una compra, ponelo para elegir cuál; sin él tomamos tu suscripción de LAB o tu última compra.",
+    "message": "Contanos qué pasó (opcional)",
+    "submit": "Enviar solicitud",
+    "sending": "Enviando…",
+    "error": "No pudimos enviar la solicitud. Probá de nuevo o escribinos.",
+    "contact": "¿Dudas? Escribinos:",
+    "confirming": "Confirmando la devolución…",
+    "again": "Volver a pedirla",
+    "codeLabel": "Tu código:",
+    "outcome": {
+      "refunded": {
+        "eyebrow": "Devolución hecha",
+        "title": "Listo: te devolvimos el dinero.",
+        "body": "La devolución ya está hecha al mismo medio con el que pagaste; según tu banco o tu tarjeta, puede tardar unos días en verse. Te mandamos el detalle a {{email}}."
+      },
+      "canceled": {
+        "eyebrow": "Suscripción cancelada",
+        "title": "Listo: cancelamos tu suscripción.",
+        "body": "Estabas en la prueba gratis, así que no se te cobró nada ni se te va a cobrar. Te mandamos la confirmación a {{email}}."
+      },
+      "pending": {
+        "eyebrow": "Devolución en proceso",
+        "title": "Pedimos la devolución.",
+        "body": "El procesador de pagos la está terminando. Cuando esté hecha te avisamos a {{email}}; no tenés que hacer nada más."
+      },
+      "check_email": {
+        "eyebrow": "Revisá tu mail",
+        "title": "Te mandamos un mail.",
+        "body": "Si los datos coinciden con una compra que se puede devolver, en el mail confirmás la devolución con un click. Si no, lo revisamos y te respondemos."
+      },
+      "review": {
+        "eyebrow": "Solicitud recibida",
+        "title": "Recibimos tu pedido.",
+        "body": "Lo revisamos y te respondemos a {{email}}. Si el reembolso procede, el dinero vuelve al mismo medio de pago."
+      }
+    }
   },
   "theme": {
     "toLight": "Cambiar a tema claro",
@@ -1250,6 +1383,7 @@
     "opening": "Abriendo el pago…",
     "invalidLink": "Ese link de pago no es válido. Si te llegó por mail, escribinos y te mandamos uno nuevo.",
     "openError": "No pudimos abrir el pago. Probá de nuevo en unos minutos o escribinos.",
-    "closed": "Cerraste el pago sin completarlo: no se te cobró nada."
+    "closed": "Cerraste el pago sin completarlo: no se te cobró nada.",
+    "retry": "Probar de nuevo"
   }
 }

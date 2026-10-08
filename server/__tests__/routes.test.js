@@ -54,6 +54,8 @@ const EXPECTED = [
   'POST /api/track',
   'POST /api/webhooks/mercadopago',
   'POST /api/webhooks/paddle',
+  'POST /api/withdrawals',
+  'POST /api/withdrawals/confirm',
   'PUT /api/hosted/:id',
 ]
 

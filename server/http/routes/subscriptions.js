@@ -2,35 +2,22 @@ import express from 'express'
 import { db } from '../../db.js'
 import { requireAuth, asyncHandler, HttpError } from '../../middleware.js'
 import { assertObjectIdLike } from '../../validation.js'
-import {
-  fetchPayment,
-  createPreapproval,
-  billingFrequency,
-} from '../../services/mercadoPago.js'
+import { fetchPayment } from '../../services/mercadoPago.js'
 import {
   resolveEntitlement,
   changeSubscriptionPlan,
   previewPlanChange,
   applyUpgradePayment,
   applyMockUpgrade,
-  isHigherPlan,
   syncSubscriptionForUser,
   trialEligible,
-  retirePendingSubscription,
-  closeLapsedSubscription,
-  cancelPreapprovalConfirmed,
   activateMockSubscription,
+  startSubscription,
 } from '../../services/subscriptions.js'
-import { sendSubscriptionCanceledOnce } from '../../services/email.js'
-import { HOSTED_PLANS, isHostedPlanId } from '../../catalog.js'
-import {
-  isPaddleSub,
-  startPaddleSubscription,
-  syncPaddleForUser,
-  cancelPaddleConfirmed,
-  retirePendingPaddle,
-} from '../../services/subscriptions/paddleSync.js'
-import { getSubscription, paddleClientInfo } from '../../services/paddle.js'
+import { cancelAtPeriodEnd } from '../../services/subscriptions/cancel.js'
+import { HOSTED_PLANS } from '../../catalog.js'
+import { isPaddleSub, syncPaddleForUser } from '../../services/subscriptions/paddleSync.js'
+import { getSubscription } from '../../services/paddle.js'
 
 /**
  * Suscripciones de LAB (Fase 4) — Mercado Pago PreApproval: planes, mi
@@ -45,22 +32,6 @@ export function createSubscriptionsRouter({ config, limits }) {
   const paddleMock = () => Boolean(config.paddle?.mock)
   /** ¿Esta fila se maneja sin pasarela real (mock de MP o de Paddle)? */
   const rowMock = (sub) => (isPaddleSub(sub) ? paddleMock() : subsMock())
-
-  // Altas a medio hacer y renovaciones caídas, cada una con su pasarela.
-  const retirePending = (sub) =>
-    isPaddleSub(sub)
-      ? retirePendingPaddle(sub, config)
-      : retirePendingSubscription(sub, config)
-  async function closeLapsed(sub) {
-    if (isPaddleSub(sub)) {
-      await cancelPaddleConfirmed(sub, config, { immediately: true })
-      sub.canceledAt = new Date()
-      sub.status = 'cancelled'
-      await sub.save()
-      return
-    }
-    await closeLapsedSubscription(sub, config)
-  }
 
   // `instanceQuota` puede ser `Infinity` (plan sin tope) — JSON no tiene forma
   // de representar eso, y `JSON.stringify` lo pisa por `null` en silencio.
@@ -122,168 +93,21 @@ export function createSubscriptionsRouter({ config, limits }) {
     requireAuth,
     limits.checkout,
     asyncHandler(async (req, res) => {
-      const plan = String(req.body?.plan || '')
-      const cycle = req.body?.cycle === 'yearly' ? 'yearly' : 'monthly'
-      if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
-      const paddle = req.body?.provider === 'paddle'
-      if (paddle && !paddleOn()) {
-        throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
-      }
-      const locale = req.body?.locale === 'en' ? 'en' : 'es'
-
-      const userId = db.uid(req.user)
-      const now = Date.now()
-
-      // Una sola suscripción vigente. Si ya la canceló (le quedan días pagos)
-      // o la renovación se cayó, puede abrir otra: la nueva reemplaza.
-      const current = await db.findActiveSubscriptionByUser(userId)
-      const currentEnd = current?.currentPeriodEnd
-        ? new Date(current.currentPeriodEnd).getTime()
-        : null
-      const currentLapsed = currentEnd != null && currentEnd <= now
-      if (current && !current.canceledAt && !currentLapsed) {
-        throw new HttpError(409, 'Ya tenés una suscripción activa', {
-          expose: true,
-        })
-      }
-      // Re-suscripción con días pagos: el primer cobro de la nueva es cuando
-      // terminan, y lo pagado viaja a la nueva (con eso se cotiza una subida
-      // antes de ese cobro). Un plan MÁS CARO no puede arrancar sobre días
-      // pagados con uno más barato: sería la cuota nueva sin pagar la
-      // diferencia. Para subir ya: reactivar y cambiar de plan.
-      const carryOver =
-        current?.canceledAt && currentEnd != null && currentEnd > now
-          ? new Date(currentEnd)
-          : null
-      const carriedPaidPlan = carryOver
-        ? current.paidPlan || (current.lastPaidAt ? current.plan : null)
-        : null
-      if (carriedPaidPlan && isHigherPlan(plan, carriedPaidPlan)) {
-        throw new HttpError(
-          409,
-          'Tu plan actual está pago hasta el fin del período. Para subir ya, reactivalo y cambiá de plan: pagás solo la diferencia por los días que quedan.',
-          { expose: true },
-        )
-      }
-
-      // Altas a medio hacer: se dan de baja en MP antes de abrir otra (un
-      // checkout viejo abierto no puede terminar en un segundo cobro). Si una
-      // se había completado sin que nos enteráramos, se activa y listo.
-      const priorSubs = await db.findSubscriptionsByUser(userId)
-      for (const s of priorSubs) {
-        if (s.status !== 'pending' || s.abandonedAt) continue
-        if ((await retirePending(s)) === 'activated') {
-          throw new HttpError(409, 'Ya tenés una suscripción activa', {
-            expose: true,
-          })
-        }
-      }
-      if (current && !current.canceledAt && currentLapsed) {
-        await closeLapsed(current)
-      }
-
-      // Prueba gratis solo si nunca tuvo una suscripción activa (cancelar y
-      // volver NO la reabre). Los días ya pagados de una suscripción cancelada
-      // se respetan: el primer cobro de la nueva es cuando termina la vieja.
-      const trialDays = trialEligible(priorSubs) ? config.hostedTrialDays : 0
-      const trialEndsAt =
-        trialDays > 0 ? new Date(now + trialDays * 24 * 60 * 60 * 1000) : null
-      const firstChargeAt = trialEndsAt || carryOver
-
-      const sub = await db.createSubscription({
-        userId,
-        plan,
-        cycle,
-        status: 'pending',
-        provider: paddle ? 'paddle' : 'mercadopago',
-        currency_id: paddle ? 'USD' : 'ARS',
-        locale,
-        ...(trialEndsAt ? { trialEndsAt } : {}),
-        ...(firstChargeAt ? { firstChargeAt } : {}),
-        ...(carriedPaidPlan
-          ? {
-              paidPlan: carriedPaidPlan,
-              paidCycle: current.paidCycle || current.cycle,
-            }
-          : {}),
+      const out = await startSubscription({
+        user: req.user,
+        plan: String(req.body?.plan || ''),
+        cycle: req.body?.cycle === 'yearly' ? 'yearly' : 'monthly',
+        provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
+        locale: req.body?.locale === 'en' ? 'en' : 'es',
+        config,
       })
-      const subId = db.uid(sub) || sub.id
-      const out = {
-        subscriptionId: subId,
-        trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
-        firstChargeAt: firstChargeAt ? firstChargeAt.toISOString() : null,
-      }
-
-      if (paddle ? paddleMock() : subsMock()) {
-        return res.json({
-          ...out,
-          ...(paddle ? { provider: 'paddle' } : {}),
-          mock: true,
-          activateUrl: `/api/subscriptions/${subId}/mock-activate`,
-        })
-      }
-
-      if (paddle) {
-        let started
-        try {
-          started = await startPaddleSubscription({
-            sub,
-            user: req.user,
-            firstChargeAt,
-            config,
-          })
-        } catch (err) {
-          // Sin transacción en Paddle no hay nada que pagar: la fila no puede
-          // bloquear el próximo intento.
-          await db.deleteSubscription(subId)
-          console.error(`subs alta FALLÓ en Paddle user=${userId}`, err?.message || err)
-          throw new HttpError(
-            502,
-            'No pudimos iniciar la suscripción internacional. Probá de nuevo en unos minutos.',
-            { expose: true },
-          )
-        }
-        return res.json({
-          ...out,
-          provider: 'paddle',
-          transactionId: started.transactionId,
-          customerEmail: started.email,
-          paddle: paddleClientInfo(config),
-        })
-      }
-
-      const plof = HOSTED_PLANS[plan]
-      let pre
-      try {
-        pre = await createPreapproval({
-          accessToken: config.mpSubs.accessToken,
-          reason: `ScrollLab LAB — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
-          amount: cycle === 'yearly' ? plof.priceYearly : plof.priceMonthly,
-          currencyId: plof.currency_id,
-          ...billingFrequency(cycle),
-          payerEmail: req.user.email,
-          externalReference: subId,
-          // `?suscripcion=volver`: la UI sincroniza sola al volver de MP.
-          backUrl: `${config.clientUrl}/lab?suscripcion=volver`,
-          startDate: firstChargeAt,
-        })
-      } catch (err) {
-        // Sin preapproval en MP no hay nada que completar: la fila no puede
-        // bloquear el próximo intento.
-        await db.deleteSubscription(subId)
-        console.error(
-          `subs alta FALLÓ en MP user=${userId}`,
-          err?.message || JSON.stringify(err)?.slice(0, 300),
-        )
-        throw new HttpError(
-          502,
-          'No pudimos iniciar la suscripción en Mercado Pago. Probá de nuevo en unos minutos.',
-          { expose: true },
-        )
-      }
-      sub.mpPreapprovalId = String(pre.id)
-      await sub.save()
-      res.json({ ...out, init_point: pre.init_point })
+      // El atajo de dev lo activa un endpoint de este router: el servicio no
+      // conoce rutas HTTP.
+      res.json(
+        out.mock
+          ? { ...out, activateUrl: `/api/subscriptions/${out.subscriptionId}/mock-activate` }
+          : out,
+      )
     }),
   )
 
@@ -344,30 +168,9 @@ export function createSubscriptionsRouter({ config, limits }) {
       if (!sub || sub.canceledAt) {
         throw new HttpError(404, 'No tenés una suscripción activa')
       }
-      // Si la pasarela no confirma la baja, 502 y no se marca nada: una baja
-      // local que no hizo seguiría cobrando.
-      if (isPaddleSub(sub)) {
-        await cancelPaddleConfirmed(sub, config)
-      } else if (!subsMock() && sub.mpPreapprovalId) {
-        await cancelPreapprovalConfirmed(sub, config)
-      }
-      // No la matamos ya: sigue con acceso hasta `currentPeriodEnd`. MP no
-      // renueva. Sin días pagos por delante (sin fecha, o renovación que no se
-      // cobró) se cierra en el acto.
-      sub.canceledAt = new Date()
-      const end = sub.currentPeriodEnd
-        ? new Date(sub.currentPeriodEnd).getTime()
-        : null
-      if (end == null || end <= Date.now()) sub.status = 'cancelled'
-      await sub.save()
-      sendSubscriptionCanceledOnce({ subscription: sub, config }).catch((err) =>
-        console.error('subs canceled email', err?.message),
-      )
-      res.json({
-        ok: true,
-        endsAt: sub.status === 'cancelled' ? null : sub.currentPeriodEnd,
-        status: sub.status,
-      })
+      // Sigue con acceso hasta `currentPeriodEnd`; la pasarela deja de cobrar.
+      const out = await cancelAtPeriodEnd(sub, config)
+      res.json({ ok: true, ...out })
     }),
   )
 
@@ -381,7 +184,6 @@ export function createSubscriptionsRouter({ config, limits }) {
       const out = await previewPlanChange({
         userId: db.uid(req.user),
         plan: String(req.query?.plan || ''),
-        config,
       })
       res.set('Cache-Control', 'no-store')
       res.json({ ok: true, ...out })

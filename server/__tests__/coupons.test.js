@@ -7,7 +7,6 @@ import request from 'supertest'
 
 import {
   PRODUCTS,
-  WELCOME_COUPON_DAYS,
   WELCOME_COUPON_PERCENT,
   arsFromUsd,
   catalogWithArs,
@@ -83,7 +82,8 @@ describe('couponStatus', () => {
     assert.equal(couponStatus({}, now), 'none')
     assert.equal(couponStatus(base, now), 'active')
     assert.equal(couponStatus({ ...base, couponRedeemedAt: '2026-09-19T00:00:00Z' }, now), 'redeemed')
-    assert.equal(couponStatus({ ...base, couponExpiresAt: '2026-09-20T12:00:00Z' }, now), 'expired')
+    // Sin vencimiento: un cupón viejo con fecha pasada sigue valiendo hasta que compra.
+    assert.equal(couponStatus({ ...base, couponExpiresAt: '2020-01-01T00:00:00Z' }, now), 'active')
   })
 })
 
@@ -313,7 +313,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     }
   })
 
-  it('quien entra con su cuenta recibe un cupón del 10% que vence en 14 días, atado a su mail', async () => {
+  it('quien entra con su cuenta recibe un cupón del 10% sin vencimiento, atado a su mail', async () => {
     const res = await welcome(await login('alta@test.com'))
     assert.equal(res.status, 200)
     assert.equal(res.body.ok, true)
@@ -324,8 +324,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.equal(res.body.couponStatus, 'active')
     assert.equal(res.body.emailed, false) // en los tests el mail está apagado
 
-    const expected = Date.now() + WELCOME_COUPON_DAYS * 24 * 60 * 60 * 1000
-    assert.ok(Math.abs(Date.parse(res.body.coupon.expiresAt) - expected) < 60_000)
+    assert.equal(res.body.coupon.expiresAt, null)
     const row = rowFor('alta@test.com')
     assert.equal(row.couponCode, res.body.coupon.code)
     assert.equal(row.source, 'account')
@@ -379,7 +378,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.equal(sent, 1)
   })
 
-  it('un cliente que ya compró no recibe cupón: no se lo ofrece ni queda anotado', async () => {
+  it('un cliente que ya compró no recibe cupón: su primera compra ya se llevó el 10%', async () => {
     const agent = await login('cliente@ya.com')
     const first = await checkout(agent, { items: [{ sku: 'chapters' }] })
     await agent.post('/api/checkout/mock-pay').set('Origin', ORIGIN).send({ orderId: first.body.orderId })
@@ -389,7 +388,9 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.equal(res.body.eligible, false)
     assert.equal(res.body.coupon, null)
     assert.equal(res.body.couponStatus, 'none')
-    assert.equal(rowFor('cliente@ya.com'), undefined)
+    // Esa primera compra usó el cupón (se aplicó solo): queda canjeado.
+    assert.equal((await orderOf(first.body.orderId)).discountPct, 10)
+    assert.ok(rowFor('cliente@ya.com').couponRedeemedAt)
   })
 
   it('guarda de qué canal llegó (utm), saneado, y la primera visita gana', async () => {
@@ -426,7 +427,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.deepEqual([res.body.ok, res.body.code, res.body.percent], [true, code, 10])
   })
 
-  it('el chequeo distingue inexistente, mal formado y vencido', async () => {
+  it('el chequeo distingue inexistente y mal formado; un cupón con fecha vieja vuelve a valer', async () => {
     assert.equal((await check('SL-AAAAAA')).status, 404)
     assert.equal((await check('hola')).status, 404)
 
@@ -434,18 +435,19 @@ describe('cupón de bienvenida — API (file store)', () => {
     editLeads((rows) => {
       rows.find((l) => l.email === 'vencido@test.com').couponExpiresAt = '2020-01-01T00:00:00.000Z'
     })
-    assert.equal((await check(code)).status, 410)
+    assert.equal((await check(code)).status, 200)
     const again = await welcome(agent)
-    assert.equal(again.body.couponStatus, 'expired')
-    assert.equal(again.body.coupon, null)
+    assert.equal(again.body.couponStatus, 'active')
+    assert.equal(again.body.coupon.code, code)
   })
 
   it('el checkout con cupón descuenta en el servidor y guarda el cupón en la orden', async () => {
     const { code, agent } = await buyerWithCoupon('descuento@test.com')
 
-    const full = await checkout(agent, { items: [{ sku: 'chapters' }] })
-    assert.equal(full.status, 200)
-    assert.equal((await orderOf(full.body.orderId)).total, arsFromUsd(149, RATE))
+    // Sin código también: es su primera compra, el servidor lo aplica igual.
+    const auto = await checkout(agent, { items: [{ sku: 'chapters' }] })
+    assert.equal(auto.status, 200)
+    assert.equal((await orderOf(auto.body.orderId)).total, discountedArsFromUsd(149, RATE, 10))
 
     const res = await checkout(agent, { items: [{ sku: 'chapters' }], couponCode: code })
     assert.equal(res.status, 200)
@@ -546,10 +548,11 @@ describe('cupón de bienvenida — API (file store)', () => {
   })
 
   it('vale solo para la primera compra', async () => {
-    // Tiene su cupón, pero primero compra sin usarlo: después ya no es su primera compra.
+    // Tiene su cupón pero ya había comprado antes de tenerlo (una compra vieja):
+    // ya no es su primera compra.
     const { code, agent } = await buyerWithCoupon('recurrente@test.com')
-    const first = await checkout(agent, { items: [{ sku: 'chapters' }] })
-    await agent.post('/api/checkout/mock-pay').set('Origin', ORIGIN).send({ orderId: first.body.orderId })
+    const me = await agent.get('/api/auth/me').set('Origin', ORIGIN)
+    await db.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'mercadopago', items: [{ sku: 'chapters' }], total: 1, currency_id: 'ARS' })
 
     const res = await checkout(agent, { items: [{ sku: 'nocturne' }], couponCode: code })
     assert.equal(res.status, 422)
@@ -576,13 +579,44 @@ describe('cupón de bienvenida — API (file store)', () => {
     assert.equal(rowFor('doble@test.com').couponOrderId, body.orderId)
   })
 
-  it('el checkout sin cupón no cambia', async () => {
+  it('primera compra sin código (Comprar rápido): el servidor aplica igual el 10%', async () => {
     const agent = await login('sin-cupon@test.com')
     const res = await checkout(agent, { items: [{ sku: 'chapters' }, { sku: 'fizz' }] })
     assert.equal(res.status, 200)
     const order = await orderOf(res.body.orderId)
-    assert.equal(order.total, arsFromUsd(149, RATE) + arsFromUsd(189, RATE))
-    assert.equal(order.couponCode, undefined)
+    assert.equal(order.total, discountedArsFromUsd(149, RATE, 10) + discountedArsFromUsd(189, RATE, 10))
+    assert.match(order.couponCode, COUPON_CODE_RE)
+    assert.equal(order.discountPct, 10)
+    // Es su cupón de siempre: pedirlo después devuelve el mismo.
+    assert.equal((await welcome(agent)).body.coupon.code, order.couponCode)
+  })
+
+  it('después de la primera compra, sin descuento: ni automático ni con el código', async () => {
+    const agent = await login('segunda@test.com')
+    const first = await checkout(agent, { items: [{ sku: 'chapters' }] })
+    const firstOrder = await orderOf(first.body.orderId)
+    assert.equal(firstOrder.discountPct, 10)
+    await agent.post('/api/checkout/mock-pay').set('Origin', ORIGIN).send({ orderId: first.body.orderId })
+
+    const second = await checkout(agent, { items: [{ sku: 'fizz' }] })
+    assert.equal(second.status, 200)
+    const secondOrder = await orderOf(second.body.orderId)
+    assert.equal(secondOrder.total, arsFromUsd(189, RATE))
+    assert.equal(secondOrder.couponCode, undefined)
+    const withCode = await checkout(agent, { items: [{ sku: 'fizz' }], couponCode: firstOrder.couponCode })
+    assert.ok([409, 422].includes(withCode.status), String(withCode.status))
+  })
+
+  it('una primera compra reembolsada cuenta como compra: no vuelve a haber 10%', async () => {
+    const agent = await login('reembolsada@test.com')
+    const first = await checkout(agent, { items: [{ sku: 'chapters' }] })
+    const ordersFile = path.join(dbDir, 'orders.json')
+    const rows = JSON.parse(fs.readFileSync(ordersFile, 'utf8'))
+    Object.assign(rows.find((o) => o.id === first.body.orderId), { status: 'refunded' })
+    fs.writeFileSync(ordersFile, JSON.stringify(rows, null, 2))
+    const again = await checkout(agent, { items: [{ sku: 'chapters' }] })
+    assert.equal((await orderOf(again.body.orderId)).total, arsFromUsd(149, RATE))
+    assert.equal((await welcome(agent)).body.eligible, false)
   })
 
   describe('el cupón es personal (atado al mail de la cuenta)', () => {

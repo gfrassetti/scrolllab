@@ -2,7 +2,7 @@
  * Suscripciones de LAB (Fase 4) — Mercado Pago PreApproval. El código vive en
  * server/services/subscriptions/: billing (períodos y reglas base),
  * entitlement (qué puede usar el usuario), planChange (upgrade / downgrade) y
- * mpSync (eventos y estados de MP). Este archivo re-exporta la API pública:
+ * mpSync (eventos y estados de MP) y start (el alta). Este archivo re-exporta la API pública:
  * los imports existentes no cambian.
  */
 export {
@@ -36,3 +36,4 @@ export {
   retirePendingSubscription,
   activateMockSubscription,
 } from './subscriptions/mpSync.js'
+export { startSubscription } from './subscriptions/start.js'

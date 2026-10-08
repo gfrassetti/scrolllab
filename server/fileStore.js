@@ -348,6 +348,88 @@ export const fileDb = {
     return read("orders");
   },
 
+  // Libro de reembolsos (upsert por externalId).
+  async recordRefund(data) {
+    const rows = read('refunds')
+    const now = new Date().toISOString()
+    const i = rows.findIndex((r) => r.externalId === data.externalId)
+    const row = i >= 0
+      ? { ...rows[i], ...data, updatedAt: now }
+      : { id: nid(), partial: false, reason: 'refunded', refundedAt: now, ...data, createdAt: now, updatedAt: now }
+    if (i >= 0) rows[i] = row
+    else rows.push(row)
+    write('refunds', rows)
+    return row
+  },
+  async findRefund(externalId) {
+    return read('refunds').find((r) => r.externalId === externalId) || null
+  },
+  async listRefunds() {
+    return read('refunds').sort(
+      (a, b) => new Date(b.refundedAt).getTime() - new Date(a.refundedAt).getTime(),
+    )
+  },
+  async listWithdrawals() {
+    return read('withdrawals').sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+  },
+  async listSubscriptions() {
+    return read('subscriptions')
+  },
+
+  // Solicitudes del botón de arrepentimiento.
+  async createWithdrawal(data) {
+    const rows = read('withdrawals')
+    const now = new Date().toISOString()
+    const row = {
+      id: nid(),
+      status: 'received',
+      orderId: null,
+      ...data,
+      email: String(data.email).toLowerCase(),
+      createdAt: now,
+      updatedAt: now,
+    }
+    rows.push(row)
+    write('withdrawals', rows)
+    return row
+  },
+  async findRecentWithdrawal({ email, orderId, subscriptionId = null, since }) {
+    const cut = new Date(since).getTime()
+    return (
+      read('withdrawals')
+        .filter(
+          (w) =>
+            w.email === String(email).toLowerCase() &&
+            (w.orderId || null) === (orderId || null) &&
+            (w.subscriptionId || null) === (subscriptionId || null) &&
+            new Date(w.createdAt).getTime() >= cut,
+        )
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] || null
+    )
+  },
+
+  async findWithdrawalByCode(code) {
+    return read('withdrawals').find((w) => w.code === String(code)) || null
+  },
+  async updateWithdrawal(code, patch) {
+    const rows = read('withdrawals')
+    const row = rows.find((w) => w.code === String(code))
+    if (!row) return null
+    Object.assign(row, patch, { updatedAt: new Date().toISOString() })
+    write('withdrawals', rows)
+    return row
+  },
+  async claimWithdrawal(code, from, to) {
+    const rows = read('withdrawals')
+    const row = rows.find((w) => w.code === String(code) && w.status === from)
+    if (!row) return null
+    Object.assign(row, { status: to, confirmedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+    write('withdrawals', rows)
+    return row
+  },
+
   // Leads (cupón de bienvenida). Alta idempotente por email.
   async upsertLead(data) {
     const rows = read("leads");

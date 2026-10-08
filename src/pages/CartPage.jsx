@@ -4,7 +4,6 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
-import { formatCouponDate } from '../lib/coupon'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { startCheckout } from '../lib/startCheckout'
 import { cartItemPreviewHref } from '../lib/orderPreview'
@@ -15,6 +14,7 @@ import ProductThumbnail from '../components/ProductThumbnail'
 import PaymentMethodPicker from '../components/PaymentMethodPicker'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { useCurrency } from '../lib/currency'
+import { REFUND_DAYS } from '../lib/site'
 
 /**
  * Cuando el servidor rechaza el cupón al pagar: status de la API → texto (el
@@ -231,24 +231,35 @@ export default function CartPage() {
                   className="mb-4"
                 />
               )}
-              <p className="text-sm">
+              {/* Resumen como un recibo: subtotal a precio de lista, el 10% de la
+                  primera compra con nombre y el total que se cobra. */}
+              <dl className="w-full max-w-sm text-sm tabular-nums" data-cart-summary>
                 {coupon && discount > 0 ? (
                   <>
-                    <span className="block text-ink/60">
-                      {t('cart.couponSubtotal')}: {formatLine(total)}
-                    </span>
-                    <span data-coupon-discount className="mb-2 block text-accent-ink">
-                      {t('cart.couponDiscount', { percent: coupon.percent })}
-                      {coupon.expiresAt
-                        ? ` · ${t('cart.couponUntil', { date: formatCouponDate(coupon.expiresAt, locale) })}`
-                        : ''}
-                      : −{formatLine(discount)}
-                    </span>
+                    <div className="flex items-baseline justify-between gap-6 py-1 text-ink/60">
+                      <dt>{t('cart.couponSubtotal')}</dt>
+                      <dd>{formatLine(total)}</dd>
+                    </div>
+                    <div data-coupon-discount className="flex items-baseline justify-between gap-6 py-1 text-accent-ink">
+                      <dt>{t('cart.couponDiscount', { percent: coupon.percent })}</dt>
+                      <dd>−{formatLine(discount)}</dd>
+                    </div>
                   </>
                 ) : null}
-                {t('common.estimatedTotal')}:{' '}
-                <strong>{formatLine(payable)}</strong>
-                <span className="mt-2 block max-w-prose text-xs text-ink/55">
+                <div
+                  className={`flex items-baseline justify-between gap-6 py-1 ${
+                    coupon && discount > 0 ? 'mt-1 border-t border-ink/15 pt-2' : ''
+                  }`}
+                >
+                  <dt className="font-medium">{t('common.estimatedTotal')}</dt>
+                  <dd className="text-base font-semibold">{formatLine(payable)}</dd>
+                </div>
+              </dl>
+              {coupon && discount > 0 ? (
+                <p className="mt-1 text-xs text-accent-ink">{t('cart.couponNote', { percent: coupon.percent })}</p>
+              ) : null}
+              <p className="mt-3 text-sm">
+                <span className="block max-w-prose text-xs text-ink/55">
                   {intl ? t('pay.trustIntl') : t('cart.trustNote')}
                 </span>
                 {intl && (
@@ -256,6 +267,15 @@ export default function CartPage() {
                     {t('pay.intlTaxNote')}
                   </span>
                 )}
+                <span className="mt-1 block max-w-prose text-xs text-ink/55">
+                  {t('cart.refundNote', { days: REFUND_DAYS })}{' '}
+                  <Link
+                    to="/legal/refunds"
+                    className="underline underline-offset-2 transition-colors hover:text-ink"
+                  >
+                    {t('cart.refundLink')}
+                  </Link>
+                </span>
               </p>
               </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">

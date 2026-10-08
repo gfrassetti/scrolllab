@@ -5,6 +5,7 @@ import { BUNDLE_MODELS } from '../catalog.js'
 import { purchaseCode } from '../license.js'
 import { HttpError } from '../errors.js'
 import { db } from '../db.js'
+import { noteRefund } from './refundLedger.js'
 import { assertPaymentMatchesOrder } from './mercadoPago.js'
 import {
   sendOrderReceiptOnce,
@@ -368,6 +369,7 @@ export async function reverseOrderPayment({ payment, config }) {
     reason: payment.status,
   })
   if (!updated) return { skipped: `orden ${order.status}` }
+  await recordMpRefund({ payment, order, partial: false, config })
   alertAdmin({
     kind: 'reversed',
     key: `${payment.id}-${payment.status}`,
@@ -382,6 +384,43 @@ export async function reverseOrderPayment({ payment, config }) {
     config,
   })
   return { reversed: true, order: updated }
+}
+
+/**
+ * Anota en el libro de reembolsos un pago de MP devuelto (total, parcial o
+ * contracargo), con quién y cuánto: lo muestra el panel. Una fila por pago; un
+ * parcial que después se completa actualiza la misma. Nunca corta el webhook.
+ * @param {{ payment: any, order?: any, partial: boolean, config: any }} args
+ */
+export async function recordMpRefund({ payment, order = null, partial, config }) {
+  try {
+    let o = order
+    if (!o && payment.external_reference) {
+      o = await db.findOrderById(String(payment.external_reference)).catch(() => null)
+    }
+    const user = o?.userId ? await db.findUserById(String(o.userId)).catch(() => null) : null
+    const refunded = Number(payment.transaction_amount_refunded) || 0
+    await noteRefund({
+      order: o,
+      config,
+      data: {
+        externalId: `mp-${payment.id}`,
+        provider: 'mercadopago',
+        kind: 'order',
+        orderId: o ? String(db.uid(o) || o.id) : null,
+        userId: o?.userId ? String(o.userId) : null,
+        email: user?.email || payment.payer?.email || null,
+        // Lo devuelto hasta ahora; un contracargo no lo informa: es el pago entero.
+        amount: refunded > 0 ? refunded : Number(payment.transaction_amount),
+        currency: payment.currency_id || o?.currency_id || 'ARS',
+        partial,
+        reason: payment.status === 'charged_back' ? 'charged_back' : 'refunded',
+        refundedAt: new Date(),
+      },
+    })
+  } catch (err) {
+    console.error(`refunds: no se pudo anotar el reembolso MP ${payment?.id}`, err?.message)
+  }
 }
 
 /**

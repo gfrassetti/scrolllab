@@ -1,4 +1,6 @@
 import { db } from '../db.js'
+import { noteRefund } from './refundLedger.js'
+import { handleLabRefund } from './subscriptions/labRefund.js'
 import { HttpError } from '../errors.js'
 import {
   verifyPaddleSignature,
@@ -34,9 +36,21 @@ const money = (txn) => {
   return total == null ? '—' : `${total} ${txn.currency_code || PADDLE_CURRENCY}`
 }
 
-/** ¿La transacción es de LAB (alta, cuota o diferencia de plan)? */
-export function isLabTransaction(txn) {
-  return Boolean(txn?.subscription_id) || txn?.custom_data?.kind === 'lab'
+/**
+ * ¿De quién es esta transacción? Lo deciden los ids que guardó el servidor, no
+ * `custom_data` (viaja dentro de la transacción y no lo firmamos nosotros):
+ * - una orden con ese `paddleTransactionId` → compra;
+ * - `subscription_id` (lo pone Paddle) o un alta de LAB con ese
+ *   `paddleTransactionId` → LAB;
+ * - ninguna → nadie la reclama (se avisa si se cobró).
+ * @returns {Promise<'order' | 'lab' | 'none'>}
+ */
+export async function transactionOwner(txn) {
+  if (!txn?.id) return 'none'
+  if (await db.findOrderByPaddleTransaction(txn.id)) return 'order'
+  if (txn.subscription_id) return 'lab'
+  if (await db.findSubscriptionByPaddle({ transactionId: txn.id })) return 'lab'
+  return 'none'
 }
 
 /**
@@ -62,18 +76,17 @@ export async function fulfillPaddleTransaction({ transaction: txn, config, expec
 
   const order = await db.findOrderByPaddleTransaction(txn.id)
   if (!order) {
-    if (txn.custom_data?.kind === 'order') {
-      alertAdmin({
-        kind: 'orphan',
-        key: `paddle-${txn.id}`,
-        title: 'PAGO SIN ORDEN — entregar o reembolsar',
-        lines: [
-          `transacción Paddle ${txn.id} · ${money(txn)} · ${payerOf(txn)}`,
-          `orden ${txn.custom_data.orderId || '-'}: no existe (venció o se borró)`,
-        ],
-        config,
-      })
-    }
+    // Cobrada y sin dueño: ninguna orden ni alta de LAB guardó este id.
+    alertAdmin({
+      kind: 'orphan',
+      key: `paddle-${txn.id}`,
+      title: 'PAGO SIN ORDEN — entregar o reembolsar',
+      lines: [
+        `transacción Paddle ${txn.id} · ${money(txn)} · ${payerOf(txn)}`,
+        `ninguna orden ni suscripción la abrió (orden indicada: ${txn.custom_data?.orderId || '-'})`,
+      ],
+      config,
+    })
     throw new HttpError(404, 'No encontramos la orden de ese pago')
   }
   const orderId = String(db.uid(order) || order.id)
@@ -111,6 +124,11 @@ export async function fulfillPaddleTransaction({ transaction: txn, config, expec
   if (txn.currency_code !== PADDLE_CURRENCY) {
     throw mismatch('Moneda del pago no coincide')
   }
+  // Nuestros descuentos (cupón) ya vienen en el precio: uno hecho en Paddle
+  // (código en el checkout o desde el panel) cobraría menos de lo que vale.
+  if (txn.discount_id || Number(txn.details?.totals?.discount || 0) !== 0) {
+    throw mismatch('El pago trae un descuento hecho en Paddle')
+  }
   if (transactionItemsCents(txn) !== usdCents(order.total)) {
     console.error(
       `checkout paddle MONTO NO COINCIDE order=${orderId} txn=${txn.id} ` +
@@ -140,10 +158,30 @@ export async function reversePaddleAdjustment({ adjustment: adj, config }) {
   }
   const reason = adj.action === 'chargeback' ? 'charged_back' : 'refunded'
   const amount = Number(adj.totals?.total)
-  const label = `${Number.isFinite(amount) ? amount / 100 : '—'} ${adj.currency_code || adj.totals?.currency_code || PADDLE_CURRENCY}`
+  const currency = adj.currency_code || adj.totals?.currency_code || PADDLE_CURRENCY
+  const label = `${Number.isFinite(amount) ? amount / 100 : '—'} ${currency}`
   const order = adj.transaction_id
     ? await db.findOrderByPaddleTransaction(adj.transaction_id)
     : null
+  // Cobro de LAB: libro + mail + (primer cobro o contracargo) baja inmediata.
+  const labSub =
+    !order && adj.subscription_id
+      ? await db.findSubscriptionByPaddle({ subscriptionId: adj.subscription_id })
+      : null
+  if (labSub) {
+    return handleLabRefund({
+      sub: labSub,
+      provider: 'paddle',
+      externalId: `paddle-${adj.id}`,
+      chargeId: adj.transaction_id || null,
+      amount: Number.isFinite(amount) ? amount / 100 : 0,
+      currency,
+      partial: adj.type === 'partial',
+      reason,
+      config,
+    })
+  }
+  await recordPaddleRefund({ adj, order, reason, amount, currency, config })
 
   if (!order) {
     alertAdmin({
@@ -210,6 +248,42 @@ const SUBSCRIPTION_EVENTS = new Set([
 ])
 
 /**
+ * Anota en el libro de reembolsos un ajuste de Paddle aprobado (reembolso total
+ * o parcial, contracargo), de una orden o de LAB, con quién y cuánto. Una fila
+ * por ajuste. Nunca corta el webhook.
+ */
+async function recordPaddleRefund({ adj, order, reason, amount, currency, config }) {
+  try {
+    const sub = !order && adj.subscription_id
+      ? await db.findSubscriptionByPaddle({ subscriptionId: adj.subscription_id })
+      : null
+    const userId = order?.userId || sub?.userId || null
+    const user = userId ? await db.findUserById(String(userId)).catch(() => null) : null
+    await noteRefund({
+      order,
+      sub,
+      config,
+      data: {
+        externalId: `paddle-${adj.id}`,
+        provider: 'paddle',
+        kind: order ? 'order' : 'lab',
+        orderId: order ? String(db.uid(order) || order.id) : null,
+        subscriptionId: sub ? String(db.uid(sub) || sub.id) : null,
+        userId: userId ? String(userId) : null,
+        email: user?.email || null,
+        amount: Number.isFinite(amount) ? amount / 100 : 0,
+        currency,
+        partial: adj.type === 'partial',
+        reason,
+        refundedAt: new Date(adj.updated_at || Date.now()),
+      },
+    })
+  } catch (err) {
+    console.error(`refunds: no se pudo anotar el ajuste Paddle ${adj?.id}`, err?.message)
+  }
+}
+
+/**
  * Webhook de Paddle (una URL para todo). La firma se verifica sobre el body
  * crudo, siempre. Resuelve cuando el evento quedó atendido o no aplica (200);
  * tira cuando Paddle tiene que reintentar: firma inválida (401) o una falla
@@ -232,13 +306,13 @@ export async function handlePaddleNotification({ rawBody, signature, config }, d
 
   try {
     if (type === 'transaction.completed' || type === 'transaction.paid') {
-      if (isLabTransaction(data)) {
+      if ((await transactionOwner(data)) === 'lab') {
         return await handlePaddleLabTransaction({ transaction: data, config }, deps)
       }
       return await fulfillPaddleTransaction({ transaction: data, config })
     }
     if (type === 'transaction.payment_failed') {
-      if (isLabTransaction(data)) {
+      if ((await transactionOwner(data)) === 'lab') {
         return await handlePaddleLabPaymentFailed({ transaction: data, config }, deps)
       }
       const order = await db.findOrderByPaddleTransaction(data.id)

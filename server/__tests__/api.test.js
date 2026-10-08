@@ -304,6 +304,8 @@ describe('API HTTP (file store)', () => {
   })
 
   it('checkout custom válido crea orden pending (precio de servidor)', async () => {
+    // Ya compró antes: sin el 10% de primera compra, el precio es el de lista.
+    await seedPaidOrder('custom-ok@test.com')
     const agent = request.agent(app)
     await agent
       .post('/api/auth/dev-login')

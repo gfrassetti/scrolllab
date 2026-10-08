@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
-import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
+import { SITE_NAME, SUPPORT_EMAIL, REFUND_DAYS } from '../lib/site'
 import { useT } from '../i18n'
+
+/** Los textos legales mencionan el plazo de reembolso como `{{days}}`: una sola fuente (lib/site.js). */
+const fill = (text) => String(text ?? '').replaceAll('{{days}}', String(REFUND_DAYS))
 
 function LegalDocumentPage({ documentKey }) {
   const t = useT()
@@ -28,7 +31,7 @@ function LegalDocumentPage({ documentKey }) {
           {t(`${documentKey}.effectiveDate`)}
         </p>
         <p className="mt-8 text-sm leading-relaxed text-ink/70 md:text-base">
-          {t(`${documentKey}.intro`, { site: SITE_NAME })}
+          {fill(t(`${documentKey}.intro`, { site: SITE_NAME }))}
         </p>
 
         <div className="mt-10 space-y-8">
@@ -40,13 +43,23 @@ function LegalDocumentPage({ documentKey }) {
                 </h2>
                 {section.body && (
                   <p className="text-sm leading-relaxed text-ink/70 md:text-base">
-                    {section.body}
+                    {fill(section.body)}
+                  </p>
+                )}
+                {section.link && (
+                  <p className="text-sm md:text-base">
+                    <Link
+                      to={section.link.to}
+                      className="underline underline-offset-4 transition-colors hover:text-accent"
+                    >
+                      {section.link.label}
+                    </Link>
                   </p>
                 )}
                 {Array.isArray(section.items) && (
                   <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-ink/80 md:text-base">
                     {section.items.map((item, itemIndex) => (
-                      <li key={`${documentKey}-${index}-${itemIndex}`}>{item}</li>
+                      <li key={`${documentKey}-${index}-${itemIndex}`}>{fill(item)}</li>
                     ))}
                   </ul>
                 )}
@@ -71,4 +84,8 @@ export function PrivacyPage() {
 
 export function TermsPage() {
   return <LegalDocumentPage documentKey="terms" />
+}
+
+export function RefundsPage() {
+  return <LegalDocumentPage documentKey="refunds" />
 }

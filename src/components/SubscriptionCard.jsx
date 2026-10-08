@@ -26,9 +26,14 @@ export default function SubscriptionCard() {
     graceEndsAt,
     paymentFailed,
     lapsedPlan,
+    provider,
+    currency_id: currency,
     loading,
     refresh,
   } = usePlan()
+  // Los textos nombran la pasarela de ESTA suscripción (Paddle o Mercado Pago).
+  const paddle = provider === 'paddle'
+  const tk = (key) => (paddle ? `account.paddle.${key}` : `account.${key}`)
   const { t, locale } = useI18n()
   const dateLocale = locale === 'en' ? 'en-US' : 'es-AR'
 
@@ -51,7 +56,28 @@ export default function SubscriptionCard() {
 
   const fmtDate = (d) =>
     d ? new Date(d).toLocaleDateString(dateLocale, { dateStyle: 'long' }) : null
+  // «US$ 79» en español (un «$» solo se lee como pesos), «$79» en inglés.
+  const fmtUsd = (n) =>
+    new Intl.NumberFormat(dateLocale, {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2,
+    }).format(n)
   const tierName = (planId) => t(`lab.tier.${String(planId).replace('hosted_', '')}`)
+
+  // Paddle: el link firmado para cambiar la tarjeta (cuota rechazada o tarjeta vieja).
+  const updateCard = async () => {
+    if (busy) return
+    setBusy(true)
+    setError('')
+    try {
+      const { url } = await api.subscriptionPaymentMethod()
+      window.location.href = url
+    } catch (err) {
+      setError(err.message)
+      setBusy(false)
+    }
+  }
 
   const cancel = async () => {
     if (busy) return
@@ -85,6 +111,17 @@ export default function SubscriptionCard() {
     }
   }
 
+  const CardButton = () => (
+    <button
+      type="button"
+      onClick={updateCard}
+      disabled={busy}
+      className="text-[11px] uppercase tracking-[0.2em] text-ink/45 transition-colors hover:text-accent disabled:opacity-40"
+    >
+      {t('lab.paddle.updateCard')}
+    </button>
+  )
+
   const SyncButton = () =>
     mock ? null : (
       <button
@@ -93,7 +130,7 @@ export default function SubscriptionCard() {
         disabled={busy}
         className="text-[11px] uppercase tracking-[0.2em] text-ink/45 hover:text-accent disabled:opacity-40"
       >
-        {t('account.subSync')}
+        {t(tk('subSync'))}
       </button>
     )
 
@@ -154,9 +191,9 @@ export default function SubscriptionCard() {
   const statusLine = canceledAt
     ? t('account.subCanceled', { date: fmtDate(currentPeriodEnd) })
     : subscriptionStatus === 'paused'
-      ? t('account.subPaused', { date: fmtDate(currentPeriodEnd) })
+      ? t(tk('subPaused'), { date: fmtDate(currentPeriodEnd) })
       : pastDue
-        ? t(paymentFailed ? 'account.subPaymentFailed' : 'account.subRenewing', {
+        ? t(tk(paymentFailed ? 'subPaymentFailed' : 'subRenewing'), {
             date: fmtDate(graceEndsAt),
           })
         : trialing
@@ -177,12 +214,9 @@ export default function SubscriptionCard() {
           {/* Se cayó por falta de cobro (o pausa vencida): ya es free, pero
               sigue abierta en MP. Cancelar corta los reintentos. */}
           <p className="mt-3 border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
-            {t(
-              subscriptionStatus === 'paused'
-                ? 'account.subLapsedPaused'
-                : 'account.subLapsed',
-              { plan: tierName(lapsedPlan) },
-            )}
+            {t(tk(subscriptionStatus === 'paused' ? 'subLapsedPaused' : 'subLapsed'), {
+              plan: tierName(lapsedPlan),
+            })}
           </p>
           {messages}
           <div className="mt-5 flex flex-wrap items-center gap-4">
@@ -193,6 +227,7 @@ export default function SubscriptionCard() {
               {t('account.subSeePlans')}
             </Link>
             <SyncButton />
+            {paddle && <CardButton />}
             {cancelControl}
           </div>
         </>
@@ -223,11 +258,15 @@ export default function SubscriptionCard() {
             {(() => {
               const p = plans.find((x) => x.id === plan)
               if (!p) return null
-              const price =
-                cycle === 'yearly' ? p.priceYearly : p.priceMonthly
+              // En la moneda en que se cobra: USD con Paddle, pesos con MP.
+              const usd = currency === 'USD'
+              const price = usd
+                ? cycle === 'yearly' ? p.priceYearlyUsd : p.priceMonthlyUsd
+                : cycle === 'yearly' ? p.priceYearly : p.priceMonthly
+              if (price == null) return null
               return (
                 <span className="text-sm text-ink/55">
-                  {formatArs(price)}{' '}
+                  {usd ? fmtUsd(price) : formatArs(price)}{' '}
                   {t(cycle === 'yearly' ? 'lab.perYear' : 'lab.perMonth')}
                 </span>
               )
@@ -274,6 +313,8 @@ export default function SubscriptionCard() {
             </Link>
 
             <SyncButton />
+
+            {paddle && <CardButton />}
 
             {!canceledAt && cancelControl}
           </div>

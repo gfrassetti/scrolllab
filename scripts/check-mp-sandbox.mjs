@@ -34,7 +34,8 @@ import {
   cancelPreapprovalConfirmed,
   upgradeReference,
 } from '../server/services/subscriptions.js'
-import { hostedPlanPrice, BUILDER_HIDDEN_SKUS } from '../server/catalog.js'
+import { hostedPlanPrice, BUILDER_HIDDEN_SKUS, arsFromUsd, discountedArsFromUsd } from '../server/catalog.js'
+import { labelDiscount } from '../server/services/checkout.js'
 import { validateCheckoutItems } from '../server/validation.js'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
 
@@ -199,6 +200,18 @@ async function main() {
     const chargedAfter = (apsAfter.json.results || []).filter((a) => a.payment?.status === 'approved')
     check('cambio de plan: no se cobró nada', chargedAfter.length === 0, `${chargedAfter.length} cobros`)
 
+    // 4b. Pausa y reanudación (las hace el cliente desde MP; la app las lee del preapproval).
+    const pause = await mp('PUT', `/preapproval/${pre.id}`, { status: 'paused' })
+    const paused = await fetchPreapproval(token, pre.id)
+    check('pausa: MP la deja en pausa (la app la lee como paused)', pause.status === 200 && paused.status === 'paused', `HTTP ${pause.status} · status ${paused.status}`)
+    const resume = await mp('PUT', `/preapproval/${pre.id}`, { status: 'authorized' })
+    const resumed = await fetchPreapproval(token, pre.id)
+    check(
+      'reanudación: vuelve a autorizada, con el monto nuevo y sin cobrar en el acto',
+      resume.status === 200 && resumed.status === 'authorized' && Number(resumed.auto_recurring?.transaction_amount) === Number(changed.auto_recurring?.transaction_amount),
+      `status ${resumed.status} · monto ${resumed.auto_recurring?.transaction_amount} · próximo cobro ${resumed.next_payment_date}`,
+    )
+
     // 5. Baja con la función de la app, y una segunda baja (MP devuelve 400).
     await cancelPreapproval(token, pre.id)
     const after = await fetchPreapproval(token, pre.id)
@@ -267,6 +280,30 @@ async function main() {
     payer: { email: payerEmail, name: 'Comprador Test Sandbox' },
   })
   check('compra: MP acepta la preference de dos templates', !!order.id && !!order.init_point)
+
+  // 7b. Primera compra: el 10% ya descontado y nombrado en el ítem (lo que ve el comprador en MP).
+  const rate = 1560
+  const firstLine = labelDiscount(
+    { sku: 'chapters', title: 'CHAPTERS — template [check sandbox]', unit_price_usd: 149, unit_price: discountedArsFromUsd(149, rate, 10), currency_id: 'ARS' },
+    10,
+    { paddle: false, rate },
+  )
+  const first = await createCheckoutPreference({
+    accessToken: token,
+    items: [firstLine],
+    orderId: 'f'.repeat(24),
+    userId: 'check-sandbox',
+    clientUrl: 'https://www.scrolllab.com.ar',
+    apiPublicUrl: 'https://api.scrolllab.com.ar',
+    payer: { email: payerEmail, name: 'Comprador Test Sandbox' },
+  })
+  const firstStored = await mp('GET', `/checkout/preferences/${first.id}`)
+  const fi = firstStored.json.items?.[0] || {}
+  check(
+    'primera compra: MP acepta el ítem con el 10% descontado y nombrado',
+    !!first.id && Number(fi.unit_price) === discountedArsFromUsd(149, rate, 10) && /10% off primera compra/.test(fi.title || ''),
+    `${fi.title} · $ ${fi.unit_price} (lista $ ${arsFromUsd(149, rate)})`,
+  )
   const saved = (await mp('GET', `/checkout/preferences/${order.id}`)).json
   const ticketDays = (Date.parse(saved.date_of_expiration) - Date.now()) / DAY
   check(

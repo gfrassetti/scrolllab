@@ -117,6 +117,12 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
   async function newCode(email) {
     return (await buyerWithCoupon(email)).code
   }
+  /** Cliente que ya compró antes: sin el 10% de primera compra. */
+  async function returning(agent) {
+    const me = await agent.get('/api/auth/me').set('Origin', ORIGIN)
+    await db.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'mercadopago', items: [{ sku: 'nocturne' }], total: 1, currency_id: 'ARS' })
+    return agent
+  }
   async function pendingOrder(agent, body) {
     const res = await checkout(agent, body)
     assert.equal(res.status, 200, JSON.stringify(res.body))
@@ -210,8 +216,8 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       assert.ok(body.notification_url.endsWith('/api/webhooks/mercadopago'))
     })
 
-    it('sin cupón la preference lleva el precio de lista', async () => {
-      const agent = await login('buyer-mp2@test.com')
+    it('cliente que ya compró: la preference lleva el precio de lista', async () => {
+      const agent = await returning(await login('buyer-mp2@test.com'))
       const { order } = await pendingOrder(agent, { items: [{ sku: 'chapters' }] })
       assert.equal(mpPreferences[0].body.items[0].unit_price, arsFromUsd(149, RATE))
       assert.equal(order.total, arsFromUsd(149, RATE))
@@ -403,8 +409,8 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       assert.equal(mpPreferences.length, 0)
     })
 
-    it('un couponCode vacío o null se ignora: checkout normal a precio de lista', async () => {
-      const agent = await login('buyer-vacio@test.com')
+    it('un couponCode vacío o null se ignora: cliente que ya compró paga precio de lista', async () => {
+      const agent = await returning(await login('buyer-vacio@test.com'))
       for (const couponCode of ['', null]) {
         const { order } = await pendingOrder(agent, { items: [{ sku: 'chapters' }], couponCode })
         assert.equal(order.total, arsFromUsd(149, RATE))
@@ -480,7 +486,9 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       // Sí salió el comprobante de la compra; el del cupón, no.
       const couponMails = resendMails.filter((m) => (m.body.tags || []).some((tag) => tag.value === 'welcome_coupon'))
       assert.equal(couponMails.length, 0)
-      assert.equal(rowFor('cliente-viejo@test.com'), undefined)
+      // Su primera compra se llevó el 10% (aunque no mandó código) y el cupón quedó usado.
+      assert.equal(order.discountPct, 10)
+      assert.ok(rowFor('cliente-viejo@test.com').couponRedeemedAt)
     })
   })
 })
