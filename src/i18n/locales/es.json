@@ -23,18 +23,18 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "Sin programar",
-    "body": "Sumale a tu sitio una sección de nivel premio, sin desarrollador. Funciona en WordPress, Webflow, Shopify o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualiza sola.",
-    "yours": "Tus secciones",
-    "publishedCount": "{{n}} de {{total}} publicadas",
-    "new": "＋ Nueva",
-    "pickSection": "Elegí una sección",
-    "empty": "Todavía no tenés ninguna. Creá una para empezar.",
+    "eyebrow": "Widgets premium",
+    "body": "Para el sitio que ya tenés: secciones de nivel premio, sin desarrollador. Funcionan en WordPress, Webflow, Shopify o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
+    "yours": "Tus widgets",
+    "publishedCount": "{{n}} de {{total}} publicados",
+    "new": "＋ Nuevo",
+    "pickSection": "Elegí un widget",
+    "empty": "Todavía no tenés ninguno. Creá uno para empezar.",
     "lockedTip": "Suscribite a un plan para crear y publicar",
     "lockedMoreTrial": "Llegaste al tope del plan gratis. Para publicar más, empezá la prueba de {{n}} días — sin cargo hasta que termine.",
     "lockedMoreSub": "Llegaste al tope del plan gratis. Suscribite a un plan para publicar más.",
-    "lockedPaidTrial": "LAB es de pago. Empezá la prueba de {{n}} días gratis y publicá tu primera sección — sin cargo hasta que termine.",
-    "lockedPaidSub": "LAB es de pago. Suscribite a un plan para crear y publicar secciones.",
+    "lockedPaidTrial": "LAB es de pago. Empezá la prueba de {{n}} días gratis y publicá tu primer widget — sin cargo hasta que termine.",
+    "lockedPaidSub": "LAB es de pago. Suscribite a un plan para crear y publicar widgets.",
     "lockedSaved": "Lo que ya publicaste sigue guardado y vuelve al reactivar.",
     "status": {
       "draft": "Borrador",
@@ -49,7 +49,7 @@
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "draftHint": "Borrador — abrí el editor para configurarla y publicarla.",
-    "frozenHint": "Tu plan ya no cubre esta sección: el embed no se está mostrando en tu sitio. Sigue guardada — reactivá tu suscripción o subí de plan y vuelve sola.",
+    "frozenHint": "Tu plan ya no cubre este widget: no se está mostrando en tu sitio. Sigue guardado — reactivá tu suscripción o subí de plan y vuelve solo.",
     "stopsOn": "se apaga el {{date}}",
     "footnote": "¿Sos desarrollador y preferís el código? Comprá un template o armá tu página en el",
     "back": "← Volver a LAB",
@@ -68,22 +68,22 @@
     "published": "Publicado",
     "publishFirst": "El snippet funciona recién cuando publicás.",
     "guideTitle": "Cómo se instala",
-    "guide1": "Configurá la sección en el editor y tocá Publicar.",
+    "guide1": "Configurá el widget en el editor y tocá Publicar.",
     "guide2": "Copiá el <script> que aparece en la card.",
     "guide3": "Pegalo en tu sitio, donde quieras que aparezca (en WordPress, Webflow o Shopify es un bloque de \"código HTML\").",
     "faqTitle": "Preguntas",
     "faq": [
       {
         "q": "¿Necesito saber programar?",
-        "a": "No. Elegís la sección, completás los campos y pegás una línea en tu sitio. Si tu plataforma te deja agregar un bloque de código HTML, alcanza."
+        "a": "No. Elegís el widget, completás los campos y pegás una línea en tu sitio. Si tu plataforma te deja agregar un bloque de código HTML, alcanza."
       },
       {
         "q": "¿Por qué una cuota y no un pago único?",
-        "a": "Porque la sección vive en nuestros servidores: el hosting, las mejoras y los cambios que hacés desde el panel van incluidos. Si preferís el código fuente para alojarlo vos, comprá el template: pago único y es tuyo."
+        "a": "Porque el widget vive en nuestros servidores: el hosting, las mejoras y los cambios que hacés desde el panel van incluidos. Si preferís el código fuente para alojarlo vos, comprá el template: pago único y es tuyo."
       },
       {
-        "q": "¿Qué es una sección en vivo?",
-        "a": "Una sección de nuestro catálogo que configurás acá y aparece en tu sitio con una línea de código. No necesitás saber programar: la editás desde LAB y el cambio se ve solo donde la pegaste."
+        "q": "¿Qué es un widget de LAB?",
+        "a": "Una sección de nuestro catálogo que configurás acá y aparece en tu sitio con una línea de código, como cualquier widget. No necesitás saber programar: lo editás desde LAB y el cambio se ve solo donde lo pegaste."
       },
       {
         "q": "¿Puedo cambiar el contenido después?",
@@ -91,7 +91,7 @@
       },
       {
         "q": "¿Puede leer datos de mi página?",
-        "a": "No. La sección corre dentro de un iframe en nuestro dominio. El navegador lo aísla: no accede a tus cookies, formularios ni al resto de tu página."
+        "a": "No. El widget corre dentro de un iframe en nuestro dominio. El navegador lo aísla: no accede a tus cookies, formularios ni al resto de tu página."
       },
       {
         "q": "¿Funciona en Webflow, WordPress, etc.?",
@@ -103,15 +103,15 @@
       },
       {
         "q": "¿Para qué sirven los dominios permitidos?",
-        "a": "Si dejás la lista vacía, la sección se muestra en cualquier dominio. Si ponés dominios, solo funciona ahí — sirve para que nadie más reuse tu instancia."
+        "a": "Si dejás la lista vacía, el widget se muestra en cualquier dominio. Si ponés dominios, solo funciona ahí — sirve para que nadie más lo reuse."
       },
       {
         "q": "¿En qué se diferencia del Builder?",
-        "a": "El Builder arma una página entera y te da el código fuente para descargar: pago único, es tuyo. LAB sirve una sección suelta desde nuestra infraestructura: se actualiza sola."
+        "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros y se actualizan solos. ¿Vas a hacer uno nuevo? El Builder arma la página entera y te da el código fuente: pago único, es tuyo."
       }
     ],
     "views": "{{n}} vistas",
-    "loginPrompt": "Entrá para crear y gestionar tus secciones en vivo.",
+    "loginPrompt": "Entrá para crear y gestionar tus widgets.",
     "plansTitle": "Planes",
     "cycle": {
       "monthly": "Mensual",
@@ -126,13 +126,13 @@
     "perMonth": "/ mes",
     "perYear": "/ año",
     "save": "Ahorrás {{pct}}%",
-    "planQuota": "{{n}} secciones publicadas",
+    "planQuota": "{{n}} widgets publicados",
     "planFeaturesTitle": "Todos los planes incluyen",
     "planFeatures": [
       "Cambiás textos, fotos y colores cuando quieras, sin programar",
       "Hosting incluido: no instalás nada",
       "Se ve bien en teléfono, tablet y computadora",
-      "Mejoras y secciones nuevas sin costo extra",
+      "Mejoras y widgets nuevos sin costo extra",
       "Contador de vistas y soporte por email"
     ],
     "planFreeState": "Plan gratis — {{used}} / {{quota}} publicadas",
@@ -151,14 +151,14 @@
     "planPastDue": "Estamos confirmando el cobro con Mercado Pago. Si no se acredita, el plan se suspende el {{date}}.",
     "planPaymentFailed": "No pudimos cobrar tu plan. Mercado Pago lo reintenta; si no se resuelve, se suspende el {{date}}. Revisá tu medio de pago en Mercado Pago.",
     "planLapsed": "Tu plan {{plan}} está suspendido porque no pudimos cobrarlo. Si Mercado Pago logra el cobro, vuelve solo. Si te suscribís de nuevo, damos de baja el anterior: no hay doble cobro.",
-    "planLapsedPaused": "Tu plan {{plan}} está en pausa en Mercado Pago y ya no cubre tus secciones. Reactivalo ahí o suscribite de nuevo (damos de baja el anterior).",
+    "planLapsedPaused": "Tu plan {{plan}} está en pausa en Mercado Pago y ya no cubre tus widgets. Reactivalo ahí o suscribite de nuevo (damos de baja el anterior).",
     "returnSynced": "Listo: tu suscripción está activa.",
     "returnPending": "Todavía no vemos la confirmación de Mercado Pago. Si ya autorizaste, se refleja en unos segundos.",
     "viewOtherPlans": "Ver otros planes →",
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
     "planSubscribe": "Suscribirme",
-    "freeTierNote": "El plan gratis incluye {{n}} sección publicada, sin tarjeta ni vencimiento. Los planes suman más y sacan el tope.",
+    "freeTierNote": "El plan gratis incluye {{n}} widget publicado, sin tarjeta ni vencimiento. Los planes suman más y sacan el tope.",
     "planTrialCta": "Probar {{n}} días gratis",
     "planTrialNote": "Sin cargo los primeros {{n}} días.",
     "planTrialActive": "Prueba gratis — primer cobro el {{date}}",
@@ -203,11 +203,13 @@
     },
     "refundNote": "Cancelás cuando quieras. Podés pedir que te devolvamos el primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro); las renovaciones no se devuelven.",
     "refundLink": "Política de reembolsos",
-    "freeLineOne": "Empezá gratis: {{n}} sección publicada, sin tarjeta.",
-    "freeLineMany": "Empezá gratis: {{n}} secciones publicadas, sin tarjeta.",
+    "freeLineOne": "Empezá gratis: {{n}} widget publicado, sin tarjeta.",
+    "freeLineMany": "Empezá gratis: {{n}} widgets publicados, sin tarjeta.",
     "howEyebrow": "Cómo funciona",
     "howTitle": "Elegís, la editás y la pegás en tu sitio. Listo.",
-    "footnoteAfter": ": pago único, el código es tuyo."
+    "footnoteAfter": ": pago único, el código es tuyo.",
+    "siteSplit": "¿Ya tenés sitio? Sumale widgets con LAB. ¿Vas a hacer uno nuevo? Para eso está el",
+    "siteSplitAfter": "."
   },
   "common": {
     "loading": "Cargando…",
@@ -290,7 +292,7 @@
     "step3Body": "Pagás con Mercado Pago (pesos) o con tarjeta (dólares). La compra aparece en Mis compras.",
     "step4Title": "Descargá el ZIP",
     "step4Body": "Tu compra queda en Mis compras. Descargá el ZIP cuando quieras.",
-    "howHostedNote": "¿No programás? Con LAB sumás a tu sitio actual cualquiera de nuestras más de 30 secciones y la editás online.",
+    "howHostedNote": "¿Ya tenés sitio? Con LAB le sumás widgets premium — cualquiera de nuestras más de 30 secciones — y los editás online, sin programar.",
     "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
     "paymentsBody": "Pagás con Mercado Pago en pesos, o con tarjeta en dólares a través de Paddle. No vemos ni guardamos los datos de tu tarjeta.",
@@ -368,11 +370,11 @@
     "contactErrGeneric": "No se pudo enviar. Probá de nuevo.",
     "contactErrNetwork": "Sin conexión. Revisá tu red e intentá otra vez.",
     "contactErrConfig": "El formulario aún no está configurado. Escribinos por email.",
-    "labBodyBefore": "Configurás una sección en LAB y la mostrás en cualquier sitio con una etiqueta script — sin bajar nada, sin tocar tu código. La editás desde el ",
+    "labBodyBefore": "Configurás un widget en LAB y lo mostrás en el sitio que ya tenés con una línea de código — sin bajar nada, sin tocar tu sitio. Lo editás desde el ",
     "labBodyLink": "Lab",
     "labBodyAfter": ".",
     "labEyebrow": "Sin descargar nada",
-    "labTitleBefore": "Tu componente en una",
+    "labTitleBefore": "Tu widget en una",
     "labTitleEm": "línea",
     "footerWithdrawal": "Botón de arrepentimiento"
   },

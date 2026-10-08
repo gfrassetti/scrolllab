@@ -23,18 +23,18 @@
     "plan": "Plan"
   },
   "lab": {
-    "eyebrow": "No code",
-    "body": "Add an award-level section to your site, without a developer. Works on WordPress, Webflow, Shopify or any site where you can paste code. Change texts, photos and colors from here and it updates on its own.",
-    "yours": "Your sections",
+    "eyebrow": "Premium widgets",
+    "body": "For the site you already have: award-level sections, without a developer. They work on WordPress, Webflow, Shopify or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
+    "yours": "Your widgets",
     "publishedCount": "{{n}} of {{total}} published",
     "new": "＋ New",
-    "pickSection": "Pick a section",
+    "pickSection": "Pick a widget",
     "empty": "You don't have any yet. Create one to get started.",
     "lockedTip": "Subscribe to a plan to create and publish",
     "lockedMoreTrial": "You've hit the free plan's cap. To publish more, start the {{n}}-day trial — no charge until it ends.",
     "lockedMoreSub": "You've hit the free plan's cap. Subscribe to a plan to publish more.",
-    "lockedPaidTrial": "LAB is a paid feature. Start the {{n}}-day free trial and publish your first section — no charge until it ends.",
-    "lockedPaidSub": "LAB is a paid feature. Subscribe to a plan to create and publish sections.",
+    "lockedPaidTrial": "LAB is a paid feature. Start the {{n}}-day free trial and publish your first widget — no charge until it ends.",
+    "lockedPaidSub": "LAB is a paid feature. Subscribe to a plan to create and publish widgets.",
     "lockedSaved": "Anything you already published is still saved and comes back when you reactivate.",
     "status": {
       "draft": "Draft",
@@ -49,7 +49,7 @@
     "copy": "Copy",
     "copied": "Copied!",
     "draftHint": "Draft — open the editor to configure and publish it.",
-    "frozenHint": "Your plan no longer covers this section: the embed isn't showing on your site. It's still saved — reactivate your subscription or move up a plan and it comes back on its own.",
+    "frozenHint": "Your plan no longer covers this widget: it isn't showing on your site. It's still saved — reactivate your subscription or move up a plan and it comes back on its own.",
     "stopsOn": "stops on {{date}}",
     "footnote": "A developer who prefers the code? Buy a template or build your page in the",
     "back": "← Back to LAB",
@@ -68,22 +68,22 @@
     "published": "Published",
     "publishFirst": "The snippet only works once you publish.",
     "guideTitle": "How to install",
-    "guide1": "Configure the section in the editor and hit Publish.",
+    "guide1": "Configure the widget in the editor and hit Publish.",
     "guide2": "Copy the <script> shown on the card.",
     "guide3": "Paste it into your site, wherever you want it to appear (on WordPress, Webflow or Shopify it is an \"HTML code\" block).",
     "faqTitle": "FAQ",
     "faq": [
       {
         "q": "Do I need to know how to code?",
-        "a": "No. Pick the section, fill in the fields and paste one line into your site. If your platform lets you add an HTML code block, that is enough."
+        "a": "No. Pick the widget, fill in the fields and paste one line into your site. If your platform lets you add an HTML code block, that is enough."
       },
       {
         "q": "Why a subscription and not a one-time payment?",
-        "a": "Because the section lives on our servers: hosting, improvements and the changes you make from the panel are included. If you prefer the source code to host it yourself, buy the template: one-time payment and it is yours."
+        "a": "Because the widget lives on our servers: hosting, improvements and the changes you make from the panel are included. If you prefer the source code to host it yourself, buy the template: one-time payment and it is yours."
       },
       {
-        "q": "What is a live section?",
-        "a": "A section from our catalog that you configure here and that shows up on your site with one line of code. No coding needed: you edit it from LAB and the change shows up on its own wherever you pasted it."
+        "q": "What is a LAB widget?",
+        "a": "A section from our catalog that you configure here and that shows up on your site with one line of code, like any widget. No coding needed: you edit it from LAB and the change shows up on its own wherever you pasted it."
       },
       {
         "q": "Can I change the content later?",
@@ -91,7 +91,7 @@
       },
       {
         "q": "Can it read data from my page?",
-        "a": "No. The section runs inside an iframe on our domain. The browser isolates it: it can't reach your cookies, forms, or the rest of your page."
+        "a": "No. The widget runs inside an iframe on our domain. The browser isolates it: it can't reach your cookies, forms, or the rest of your page."
       },
       {
         "q": "Does it work on Webflow, WordPress, etc.?",
@@ -103,15 +103,15 @@
       },
       {
         "q": "What are allowed domains for?",
-        "a": "Leave the list empty and the section shows on any domain. Add domains and it only works there — so nobody else can reuse your instance."
+        "a": "Leave the list empty and the widget shows on any domain. Add domains and it only works there — so nobody else can reuse it."
       },
       {
         "q": "How is this different from the Builder?",
-        "a": "The Builder assembles a whole page and gives you the source code to download: one-time payment, it's yours. LAB serves a single section, hosted by us: it updates on its own."
+        "a": "It depends on whether you already have a site. Already have one? LAB adds widgets without touching it: we host them and they update on their own. Building a new one? The Builder assembles the whole page and gives you the source code: one-time payment, it is yours."
       }
     ],
     "views": "{{n}} views",
-    "loginPrompt": "Sign in to create and manage your live sections.",
+    "loginPrompt": "Sign in to create and manage your widgets.",
     "plansTitle": "Plans",
     "cycle": {
       "monthly": "Monthly",
@@ -126,13 +126,13 @@
     "perMonth": "/ mo",
     "perYear": "/ yr",
     "save": "Save {{pct}}%",
-    "planQuota": "{{n}} published sections",
+    "planQuota": "{{n}} published widgets",
     "planFeaturesTitle": "All plans include",
     "planFeatures": [
       "Change texts, photos and colors anytime, no code",
       "Hosting included: nothing to install",
       "Looks right on phone, tablet and desktop",
-      "Improvements and new sections at no extra cost",
+      "Improvements and new widgets at no extra cost",
       "View counter and email support"
     ],
     "planFreeState": "Free plan — {{used}} / {{quota}} published",
@@ -151,14 +151,14 @@
     "planPastDue": "We’re confirming the charge with Mercado Pago. If it doesn’t go through, the plan is suspended on {{date}}.",
     "planPaymentFailed": "We couldn’t charge your plan. Mercado Pago will retry; if it isn’t resolved, it’s suspended on {{date}}. Check your payment method in Mercado Pago.",
     "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Mercado Pago gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
-    "planLapsedPaused": "Your {{plan}} plan is paused in Mercado Pago and no longer covers your sections. Resume it there or subscribe again (we cancel the old one).",
+    "planLapsedPaused": "Your {{plan}} plan is paused in Mercado Pago and no longer covers your widgets. Resume it there or subscribe again (we cancel the old one).",
     "returnSynced": "Done: your subscription is active.",
     "returnPending": "We don’t see Mercado Pago’s confirmation yet. If you already authorized it, it shows up in a few seconds.",
     "viewOtherPlans": "View other plans →",
     "hideOtherPlans": "Hide other plans",
     "planCurrent": "Your plan",
     "planSubscribe": "Subscribe",
-    "freeTierNote": "The free plan includes {{n}} published hosted section, no card, no expiry. Plans add more and lift the cap.",
+    "freeTierNote": "The free plan includes {{n}} published widget, no card, no expiry. Plans add more and lift the cap.",
     "planTrialCta": "Start {{n}}-day free trial",
     "planTrialNote": "Free for the first {{n}} days.",
     "planTrialActive": "Free trial — first charge on {{date}}",
@@ -203,11 +203,13 @@
     },
     "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
     "refundLink": "Refund policy",
-    "freeLineOne": "Start free: {{n}} published section, no card.",
-    "freeLineMany": "Start free: {{n}} published sections, no card.",
+    "freeLineOne": "Start free: {{n}} published widget, no card.",
+    "freeLineMany": "Start free: {{n}} published widgets, no card.",
     "howEyebrow": "How it works",
     "howTitle": "Pick it, edit it, paste it into your site. Done.",
-    "footnoteAfter": ": one-time payment, the code is yours."
+    "footnoteAfter": ": one-time payment, the code is yours.",
+    "siteSplit": "Already have a site? Add widgets with LAB. Building a new one? That is what the",
+    "siteSplitAfter": " is for."
   },
   "common": {
     "loading": "Loading…",
@@ -290,7 +292,7 @@
     "step3Body": "Pay with Mercado Pago (pesos) or by card (US dollars). Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
-    "howHostedNote": "Don't code? With LAB you add any of our 30+ sections to your current site and edit it online.",
+    "howHostedNote": "Already have a site? With LAB you add premium widgets — any of our 30+ sections — and edit them online, no code.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
     "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Paddle. We never see or store your card details.",
@@ -368,11 +370,11 @@
     "contactErrGeneric": "Couldn’t send. Please try again.",
     "contactErrNetwork": "No connection. Check your network and try again.",
     "contactErrConfig": "The form isn’t configured yet. Email us instead.",
-    "labBodyBefore": "Configure a section in LAB and show it on any site with a script tag — no download, no touching your code. Edit it from the ",
+    "labBodyBefore": "Configure a widget in LAB and show it on the site you already have with one line of code — no download, no touching your site. Edit it from the ",
     "labBodyLink": "Lab",
     "labBodyAfter": ".",
     "labEyebrow": "No download",
-    "labTitleBefore": "Your component in one",
+    "labTitleBefore": "Your widget in one",
     "labTitleEm": "line",
     "footerWithdrawal": "Withdrawal request"
   },

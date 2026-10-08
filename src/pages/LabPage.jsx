@@ -266,6 +266,17 @@ export default function LabPage() {
               {t(freeQuota === 1 ? 'lab.freeLineOne' : 'lab.freeLineMany', { n: freeQuota })}
             </p>
           )}
+          {/* LAB vs Builder en una línea: ¿ya tenés sitio o vas a hacer uno? */}
+          <p data-lab-hero-meta className="mx-auto mt-3 max-w-[52ch] text-body-sm text-ink/60">
+            {t('lab.siteSplit')}{' '}
+            <Link
+              to="/builder"
+              className="underline decoration-ink/30 underline-offset-2 hover:text-accent"
+            >
+              {t('nav.builder')}
+            </Link>
+            {t('lab.siteSplitAfter')}
+          </p>
         </div>
 
         {/* Cómo funciona — 3 pasos + un prototipo del cambio en vivo. */}
