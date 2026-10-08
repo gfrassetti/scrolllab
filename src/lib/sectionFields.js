@@ -626,13 +626,6 @@ export const SECTION_FIELDS = {
       ],
     },
   ],
-  'atelier/WordStripe': [
-    { key: 'line1', label: 'Line 1', type: 'text' },
-    { key: 'line2', label: 'Line 2', type: 'text' },
-    { key: 'word1', label: 'Word 1', type: 'text' },
-    { key: 'word2', label: 'Word 2', type: 'text' },
-    { key: 'word3', label: 'Word 3', type: 'text' },
-  ],
   'atelier/StudioCards': [
     { key: 'note', label: 'Note', type: 'textarea' },
     { key: 'cta', label: 'CTA', type: 'text' },

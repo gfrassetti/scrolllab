@@ -50,7 +50,6 @@ import ServicesStone from '../components/sections/atelier/ServicesStone'
 import VisionShutter from '../components/sections/atelier/VisionShutter'
 import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
-import WordStripe from '../components/sections/atelier/WordStripe'
 import StudioCards from '../components/sections/atelier/StudioCards'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
 
@@ -208,7 +207,6 @@ const allModels = [
       { id: 'atelier/VisionShutter', name: 'Vision Shutter', kind: 'section', component: VisionShutter, blurb: 'Shutter bands and oversized scrubbing words' },
       { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Horizontal work slider — cards rise in with fade' },
       { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Big numbers with fog atmosphere' },
-      { id: 'atelier/WordStripe', name: 'Word Stripe', kind: 'section', component: WordStripe, blurb: 'Pinned shutter transition — same mechanic as Vision Shutter' },
       { id: 'atelier/StudioCards', name: 'Studio Cards', kind: 'section', component: StudioCards, blurb: 'Light 2×3 card grid that staggers in after the shutter wash' },
       { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Dark studio closer with lined brand mark + collaboration CTA' },
     ],

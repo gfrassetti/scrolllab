@@ -73,7 +73,6 @@ const BY_MODEL = {
     VisionShutter: 'section',
     SelectedWork: 'section',
     KeyFacts: 'section',
-    WordStripe: 'section',
     StudioCards: 'section',
     FooterAtelier: 'footer',
   },

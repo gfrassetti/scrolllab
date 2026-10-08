@@ -7,7 +7,6 @@ import ServicesStone from '../components/sections/atelier/ServicesStone'
 import VisionShutter from '../components/sections/atelier/VisionShutter'
 import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
-import WordStripe from '../components/sections/atelier/WordStripe'
 import StudioCards from '../components/sections/atelier/StudioCards'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
 import ContactForm from '../components/sections/contact/ContactForm'
@@ -31,7 +30,6 @@ export default function AtelierPage() {
           <VisionShutter />
           <SelectedWork />
           <KeyFacts />
-          <WordStripe />
           <StudioCards />
           <ContactForm theme="atelier" />
         </main>
