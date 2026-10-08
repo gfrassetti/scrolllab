@@ -377,6 +377,9 @@ export const fileDb = {
   async listSubscriptions() {
     return read('subscriptions')
   },
+  async listHostedInstances() {
+    return read('hosted')
+  },
 
   // Solicitudes del botón de arrepentimiento.
   async createWithdrawal(data) {

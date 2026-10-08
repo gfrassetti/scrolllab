@@ -345,6 +345,40 @@ export default function AdminAnalytics() {
             </div>
           </section>
 
+          {data.lab ? (
+            <section aria-labelledby="h-lab">
+              <h2 id="h-lab" className="mb-4 text-xs tracking-[0.2em] uppercase">LAB — de la visita al cobro</h2>
+              <Table
+                head={['Paso', 'Cuántos', 'Del paso anterior']}
+                rows={data.lab.funnel.map((f) => [
+                  f.step,
+                  `${nf.format(f.count)} ${f.count === 1 ? f.unit.replace(/s$/, '') : f.unit}`,
+                  f.pctOfPrev == null ? '—' : `${f.pctOfPrev}%`,
+                ])}
+              />
+              <p className="mt-2 text-xs text-ink/50">
+                En el rango elegido. Las visitas son anónimas (por navegador) y no se cruzan con las cuentas: el primer paso
+                es tráfico, no el denominador exacto del segundo.
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                <Stat label="En prueba ahora" value={nf.format(data.lab.subscriptions.inTrial)} hint={`${nf.format(data.lab.subscriptions.trialsEndingSoon)} terminan en 7 días`} />
+                <Stat label="Pagando ahora" value={nf.format(data.lab.subscriptions.paying)} />
+                <Stat label="Bajas" value={nf.format(data.lab.subscriptions.cancelledInWindow)} hint="en el rango" />
+                <Stat label="Widgets publicados" value={nf.format(data.lab.widgets.publishedNow)} hint={`${nf.format(data.lab.widgets.embedViews)} vistas de embed`} />
+              </div>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <Table
+                  head={['Plan pago', 'Suscripciones']}
+                  rows={Object.entries(data.lab.subscriptions.byPlan).map(([k, v]) => [k, nf.format(v)])}
+                />
+                <Table
+                  head={['Widget más publicado', 'Publicados']}
+                  rows={data.lab.widgets.topSections.map((r) => [r.sectionId, nf.format(r.count)])}
+                />
+              </div>
+            </section>
+          ) : null}
+
           <section aria-labelledby="h-ord">
             <h2 id="h-ord" className="mb-4 text-xs tracking-[0.2em] uppercase">Compras</h2>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

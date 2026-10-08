@@ -5,6 +5,7 @@ import { getMode } from '../../repositories/mode.js'
 import { asyncHandler } from '../../middleware.js'
 import { buildDashboard, sanitizeEvents } from '../../services/analytics.js'
 import { buildMoneyStatus } from '../../services/moneyStatus.js'
+import { buildLabFunnel } from '../../services/labFunnel.js'
 
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1'])
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
@@ -50,7 +51,7 @@ export function createAnalyticsRouter({ config, limits }) {
     asyncHandler(async (req, res) => {
       const days = Math.max(1, Math.min(365, Number.parseInt(req.query.days, 10) || 30))
       const since = new Date(Date.now() - days * 86400000)
-      const [events, users, orders, leads, refunds, withdrawals, subscriptions] = await Promise.all([
+      const [events, users, orders, leads, refunds, withdrawals, subscriptions, hosted] = await Promise.all([
         db.listEvents({ since }),
         db.listUsers(),
         db.listOrders(),
@@ -58,12 +59,15 @@ export function createAnalyticsRouter({ config, limits }) {
         db.listRefunds(),
         db.listWithdrawals(),
         db.listSubscriptions(),
+        db.listHostedInstances(),
       ])
       res.set('Cache-Control', 'no-store')
       res.json({
         ...buildDashboard({ events, users, orders, leads, days, store: getMode(), dbHost: getMode() === 'mongo' ? mongoose.connection.host || '' : '' }),
         // La plata: qué no tocar (en plazo de reembolso), reembolsos y arrepentimiento.
         money: buildMoneyStatus({ orders, users, refunds, withdrawals, subscriptions }),
+        // LAB: de la visita al cobro (server/services/labFunnel.js).
+        lab: buildLabFunnel({ events, hosted, subscriptions, since }),
       })
     }),
   )

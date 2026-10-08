@@ -25,6 +25,14 @@ export const hostedRepo = {
     if (isFileMode()) return fileDb.findHostedInstancesByUser(userId);
     return MongoHostedInstance.find({ userId }).sort({ createdAt: -1 });
   },
+  // Para el embudo de /admin: solo los campos que cuenta, sin props.
+  async listHostedInstances() {
+    if (isFileMode()) return fileDb.listHostedInstances();
+    return MongoHostedInstance.find(
+      {},
+      { userId: 1, sectionId: 1, status: 1, createdAt: 1, publishedAt: 1, views: 1 },
+    ).lean();
+  },
   async deleteHostedInstance(id) {
     if (isFileMode()) return fileDb.deleteHostedInstance(id);
     const res = await MongoHostedInstance.deleteOne({ _id: id });

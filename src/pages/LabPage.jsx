@@ -69,6 +69,7 @@ export default function LabPage() {
   const [busy, setBusy] = useState(false)
 
   const faq = t('lab.faq')
+  const platforms = t('lab.platforms')
 
   // Plan gratis publicable (HOSTED_FREE_QUOTA, 0 = LAB 100% de pago): el hero
   // solo promete "empezá gratis" si de verdad existe.
@@ -491,6 +492,15 @@ export default function LabPage() {
               )}
             </>
           )}
+        </section>
+
+        {/* Guías por plataforma: dónde se pega el mismo snippet en cada una. */}
+        <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">
+          <h2 className="text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
+          <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
+          <div className="mt-6 max-w-[68ch]">
+            <FaqAccordion items={Array.isArray(platforms) ? platforms : []} />
+          </div>
         </section>
 
         {/* FAQ. */}

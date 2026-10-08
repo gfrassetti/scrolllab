@@ -211,7 +211,31 @@
     "siteSplit": "Already have a site? Add widgets with LAB. Building a new one? That is what the",
     "siteSplitAfter": " is for.",
     "heroCtaFree": "Start free",
-    "heroCtaPlans": "See plans"
+    "heroCtaPlans": "See plans",
+    "platformsTitle": "How to paste it on your platform",
+    "platformsNote": "The code is the same everywhere: the one shown on the published widget card.",
+    "platforms": [
+      {
+        "q": "WordPress",
+        "a": "1. Open the page in the block editor.\n2. Add a «Custom HTML» block where you want the widget.\n3. Paste the code and update the page.\nIf you use a builder like Elementor, use its «HTML» widget."
+      },
+      {
+        "q": "Webflow",
+        "a": "1. In the Designer, drag a «Code Embed» element where you want the widget.\n2. Paste the code and save.\n3. Publish the site: the widget shows on the published site (it may not show in the Designer)."
+      },
+      {
+        "q": "Shopify",
+        "a": "1. Online Store → Themes → Customize.\n2. On the page you want, Add section → «Custom Liquid».\n3. Paste the code and save."
+      },
+      {
+        "q": "Squarespace",
+        "a": "1. Edit the page and add a «Code» block.\n2. Paste the code and save.\nIf the «Code» block is not available, your plan does not allow custom code."
+      },
+      {
+        "q": "Any other site or your own HTML",
+        "a": "Paste the code into the page HTML, where you want it to appear. If your platform has an «HTML code», «embed» or «custom code» block, it goes there."
+      }
+    ]
   },
   "common": {
     "loading": "Loading…",

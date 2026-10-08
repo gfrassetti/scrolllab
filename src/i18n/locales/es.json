@@ -211,7 +211,31 @@
     "siteSplit": "¿Ya tenés sitio? Sumale widgets con LAB. ¿Vas a hacer uno nuevo? Para eso está el",
     "siteSplitAfter": ".",
     "heroCtaFree": "Empezá gratis",
-    "heroCtaPlans": "Ver planes"
+    "heroCtaPlans": "Ver planes",
+    "platformsTitle": "Cómo pegarlo en tu plataforma",
+    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget publicado.",
+    "platforms": [
+      {
+        "q": "WordPress",
+        "a": "1. Abrí la página en el editor de bloques.\n2. Agregá un bloque «HTML personalizado» donde quieras el widget.\n3. Pegá el código y actualizá la página.\nSi usás un constructor como Elementor, usá su widget «HTML»."
+      },
+      {
+        "q": "Webflow",
+        "a": "1. En el Designer, arrastrá un elemento «Code Embed» donde quieras el widget.\n2. Pegá el código y guardá.\n3. Publicá el sitio: el widget se ve en el sitio publicado (en el Designer puede no aparecer)."
+      },
+      {
+        "q": "Shopify",
+        "a": "1. Tienda online → Temas → Personalizar.\n2. En la página que quieras, Agregar sección → «Liquid personalizado».\n3. Pegá el código y guardá."
+      },
+      {
+        "q": "Squarespace",
+        "a": "1. Editá la página y agregá un bloque «Código».\n2. Pegá el código y guardá.\nSi el bloque «Código» no aparece, tu plan no permite código propio."
+      },
+      {
+        "q": "Otro sitio o HTML propio",
+        "a": "Pegá el código en el HTML de la página, en el lugar donde quieras que aparezca. Si tu plataforma tiene un bloque de «código HTML», «embed» o «código personalizado», va ahí."
+      }
+    ]
   },
   "common": {
     "loading": "Cargando…",

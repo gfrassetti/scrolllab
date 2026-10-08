@@ -69,7 +69,7 @@ function FaqItem({ q, a }) {
       </button>
       {open && (
         <div ref={panelRef} className="overflow-hidden">
-          <p className="mt-2 pb-0.5 text-sm leading-relaxed text-ink/65">
+          <p className="mt-2 pb-0.5 text-sm leading-relaxed whitespace-pre-line text-ink/65">
             {a}
           </p>
         </div>
