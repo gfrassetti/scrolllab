@@ -124,18 +124,6 @@ export default function HostedPlans() {
     d
       ? new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-AR')
       : ''
-  // El anual se lee mejor en meses que en %: 190 vs 19 × 12 son "2 meses
-  // gratis". Si la cuenta no da meses enteros, vuelve al porcentaje.
-  const saveLabel = (p) => {
-    const monthly = planPrice(p, 'monthly', gridCurrency)
-    const free = 12 - planPrice(p, 'yearly', gridCurrency) / monthly
-    const months = Math.round(free)
-    if (monthly > 0 && months >= 1 && Math.abs(free - months) < 0.05) {
-      return months === 1 ? t('lab.saveMonthsOne') : t('lab.saveMonths', { n: months })
-    }
-    const pct = Math.round(100 - (planPrice(p, 'yearly', gridCurrency) / (monthly * 12)) * 100)
-    return t('lab.save', { pct })
-  }
   const tierName = (planId) => t(`lab.tier.${String(planId).replace('hosted_', '')}`)
   // Con un plan pago activo, la grilla de 3 arranca colapsada: la acción
   // principal es "ver mi plan", no comparar. Queda a un click de distancia.
@@ -703,7 +691,7 @@ export default function HostedPlans() {
                   </p>
                   {cycle === 'yearly' && saving > 0 && (
                     <p className="mt-1 text-eyebrow uppercase text-success">
-                      {saveLabel(p)}
+                      {t('lab.save', { pct: saving })}
                     </p>
                   )}
                   <p className="mt-4 text-body-sm text-ink/70">
