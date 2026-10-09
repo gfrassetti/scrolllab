@@ -258,7 +258,11 @@
     "inBundleCart": "Ya viene en el bundle de tu carrito",
     "bundleAbsorbed": "Agregado · reemplaza {{count}} modelo(s) que el bundle ya trae",
     "cartItemTitle": "{{name}} — modelo",
-    "buy": "Comprar →"
+    "buy": "Comprar →",
+    "firstPurchaseTag": "{{percent}}% off por ser tu primera compra",
+    "firstPurchaseShort": "−{{percent}}% 1ª compra",
+    "listPriceSr": "Precio de lista:",
+    "yourPriceSr": "Tu precio:"
   },
   "demoBuy": {
     "only": "solo",

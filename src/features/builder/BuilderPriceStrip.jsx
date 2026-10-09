@@ -1,9 +1,9 @@
-import { formatPriceFromUsd } from '../../lib/pricing'
+import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurchasePrice'
 
 /**
  * Franja de precio: el estimado de la composición antes de bajar a las columnas.
  */
-export default function BuilderPriceStrip({ t, estimatedPriceUsd, currency, rate, priceHint }) {
+export default function BuilderPriceStrip({ t, estimatedPriceUsd, priceHint }) {
   return (
     <>
       {/* Franja de precio: visible antes de bajar a las columnas, no solo al
@@ -15,8 +15,9 @@ export default function BuilderPriceStrip({ t, estimatedPriceUsd, currency, rate
             {t('builder.estimatedPrice')}
           </p>
           <p className="mt-1 text-title-sm font-medium tracking-[-0.02em]">
-            {formatPriceFromUsd(estimatedPriceUsd, currency, rate)}
+            <FirstPurchasePrice usd={estimatedPriceUsd} />
           </p>
+          <FirstPurchaseTag usd={estimatedPriceUsd} className="mt-0.5 block text-body-sm text-accent-ink" />
           <p className="mt-1 max-w-[42ch] text-body-sm text-ink/55">
             {priceHint}
           </p>

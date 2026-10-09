@@ -1,9 +1,9 @@
-import { formatPriceFromUsd } from '../../lib/pricing'
+import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurchasePrice'
 
 /**
  * Cierre de la composición: precio, avisos (chrome duplicado, tope, commerce) y comprar / al carrito / vista previa.
  */
-export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, currency, rate, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn }) {
+export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn }) {
   return (
     <>
       {items.length > 0 && (
@@ -23,8 +23,9 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
                 {t('builder.estimatedPrice')}
               </p>
               <p className="mt-1 text-title font-medium tracking-[-0.02em]">
-                {formatPriceFromUsd(estimatedPriceUsd, currency, rate)}
+                <FirstPurchasePrice usd={estimatedPriceUsd} />
               </p>
+              <FirstPurchaseTag usd={estimatedPriceUsd} className="mt-0.5 block text-body-sm text-accent-ink" />
               <p
                 className={`mt-1 max-w-[46ch] text-body-sm ${
                       atMaxSections ? 'text-accent' : 'text-ink/55'

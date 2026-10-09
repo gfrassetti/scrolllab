@@ -258,7 +258,11 @@
     "inBundleCart": "Already included in the bundle in your cart",
     "bundleAbsorbed": "Added · replaces {{count}} model(s) the bundle already includes",
     "cartItemTitle": "{{name}} — template",
-    "buy": "Buy →"
+    "buy": "Buy →",
+    "firstPurchaseTag": "{{percent}}% off — it’s your first purchase",
+    "firstPurchaseShort": "−{{percent}}% 1st buy",
+    "listPriceSr": "List price:",
+    "yourPriceSr": "Your price:"
   },
   "demoBuy": {
     "only": "only",

@@ -7,6 +7,7 @@ import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { useFxRate } from '../lib/fx'
 import { formatPriceFromUsd } from '../lib/pricing'
+import FirstPurchasePrice, { FirstPurchaseTag } from '../components/FirstPurchasePrice'
 import { useCurrency } from '../lib/currency'
 import { isProductSku, productPageData } from '../lib/productPages'
 import { startCheckout } from '../lib/startCheckout'
@@ -130,8 +131,9 @@ function ProductView({ data }) {
             ) : null}
 
             <p className="mt-8 text-title-sm font-medium tracking-[-0.02em]">
-              {priceLabel ?? c.priceLabel(data.priceUsd)}
+              {priceLabel ? <FirstPurchasePrice usd={data.priceUsd} /> : c.priceLabel(data.priceUsd)}
             </p>
+            <FirstPurchaseTag usd={data.priceUsd} className="mt-1 block text-body-sm text-accent-ink" />
             <p className="mt-2 max-w-[52ch] text-body-sm text-ink/55">{data.priceLine}</p>
 
             <BuyActions data={data} />

@@ -3,6 +3,7 @@ import BuilderDemo from '../../components/BuilderDemo'
 import { Link } from 'react-router-dom'
 import Logo from '../../components/Logo'
 import { formatPriceFromUsd, CUSTOM_BASE_PRICE_USD, CUSTOM_BASE_SECTIONS, formatNextSectionPrice, bundleListPriceUsd, bundleDiscountPct, BUNDLE_PRICE_USD } from '../../lib/pricing'
+import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurchasePrice'
 
 /**
  * Zona 02 · Builder: la demo, el CTA para armar la propia y el bundle.
@@ -177,7 +178,11 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
           data-cta-bit
           className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
         >
-          {formatPriceFromUsd(BUNDLE_PRICE_USD, currency, rate)}
+          <FirstPurchasePrice usd={BUNDLE_PRICE_USD} />
+          <FirstPurchaseTag
+            usd={BUNDLE_PRICE_USD}
+            className="mt-2 block text-body-sm font-normal tracking-normal text-accent-ink"
+          />
         </p>
       </section>
     </>

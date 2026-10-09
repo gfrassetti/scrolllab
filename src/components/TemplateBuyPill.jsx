@@ -7,6 +7,7 @@ import { useFxRate } from '../lib/fx'
 import { formatPriceFromUsd, templatePriceUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import { useCurrency } from '../lib/currency'
+import FirstPurchasePrice, { FirstPurchaseTag } from './FirstPurchasePrice'
 
 const POSTERS = {
   chapters: '/catalog/chapters.webp',
@@ -74,6 +75,12 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
         onClick={buy}
         className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98] disabled:opacity-60"
       >
+        {/* Solo si todavía no compró (ver FirstPurchasePrice). */}
+        <FirstPurchaseTag
+          usd={priceUsd}
+          short
+          className="pointer-events-none absolute -top-2.5 right-3 rounded-full bg-accent px-2 py-0.5 text-[11px] leading-none font-semibold whitespace-nowrap text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)]"
+        />
         <span className="relative h-8 w-11 shrink-0 overflow-hidden rounded-[10px] border border-white bg-white/10 sm:h-9 sm:w-12">
           {poster ? (
             <img
@@ -92,7 +99,11 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
             </span>
             <span className="truncate text-[10px] text-white/55">
               {t('demoBuy.only')}{' '}
-              <span className="text-white">{priceLabel || '—'}</span>
+              {priceLabel ? (
+                <FirstPurchasePrice usd={priceUsd} className="text-white" struckClassName="text-white/45" />
+              ) : (
+                <span className="text-white">—</span>
+              )}
             </span>
           </span>
 

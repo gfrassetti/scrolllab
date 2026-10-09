@@ -67,6 +67,9 @@ describe('10% de primera compra — Mercado Pago (pesos)', () => {
       await pay(first.pref)
       assert.equal((await fileDb.findOrderById(first.order.id)).status, 'paid')
       const code = first.order.couponCode
+      // El navegador ya no recibe el cupón: los «Comprar» rápidos muestran la lista.
+      const welcome = await agent.post('/api/coupons/welcome').send({})
+      assert.equal(welcome.body.coupon, null)
 
       // 2ª y 3ª: precio de lista; con el código, rechazado.
       for (const nth of ['2ª', '3ª']) {
@@ -92,6 +95,7 @@ describe('10% de primera compra — Mercado Pago (pesos)', () => {
   it('una compra que no se pagó no cuenta: la siguiente sigue siendo la primera', async () => {
     const agent = await loginAs('mp-abandona@test.com')
     await checkout(agent, [{ sku: 'chapters' }]) // nunca la paga
+    assert.equal((await agent.post('/api/coupons/welcome').send({})).body.coupon.percent, PCT)
     const second = await checkout(agent, [{ sku: 'fizz' }])
     assert.equal(second.order.discountPct, PCT)
   })
@@ -119,6 +123,7 @@ describe('10% de primera compra — Mercado Pago (pesos)', () => {
     mp.payments.get(String(payment.id)).status = 'refunded'
     await webhook('payment', payment.id)
     assert.equal((await fileDb.findOrderById(first.order.id)).status, 'refunded')
+    assert.equal((await agent.post('/api/coupons/welcome').send({})).body.coupon, null)
     const again = await checkout(agent, [{ sku: 'chapters' }])
     assert.equal(again.order.total, arsFromUsd(TEMPLATE_PRICES_USD.chapters, RATE))
   })
@@ -177,6 +182,7 @@ describe('10% de primera compra — Paddle (dólares)', () => {
       assert.match(first.body.items[0].price.name, /10% off/)
       await pay(first.txnId)
       const code = first.order.couponCode
+      assert.equal((await agent.post('/api/coupons/welcome').send({})).body.coupon, null)
 
       for (const nth of ['2ª', '3ª']) {
         const next = await checkout(agent, k.items)

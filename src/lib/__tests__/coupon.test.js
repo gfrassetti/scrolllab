@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { couponLinePrice, formatCouponDate } from '../coupon.js'
+import { couponLinePrice, firstPurchaseDeal, formatCouponDate } from '../coupon.js'
 
 describe('couponLinePrice', () => {
   it('en pesos usa el mismo redondeo que el servidor', () => {
@@ -26,5 +26,33 @@ describe('formatCouponDate', () => {
 
   it('una fecha inválida no rompe', () => {
     assert.equal(formatCouponDate('nunca', 'es'), '')
+  })
+})
+
+describe('firstPurchaseDeal (precio de los «Comprar» rápidos)', () => {
+  const COUPON = { code: 'SL-ABCDEF', percent: 10 }
+
+  it('con cupón vigente: lista tachada y precio con el 10%, en pesos', () => {
+    const deal = firstPurchaseDeal({ usd: 149, currency: 'ARS', rate: 1560, coupon: COUPON })
+    assert.equal(deal.percent, 10)
+    assert.match(deal.list.replace(/\s/g, ' '), /233\.000/)
+    assert.match(deal.price.replace(/\s/g, ' '), /210\.000/)
+  })
+
+  it('con cupón vigente, en dólares (Paddle): con centavos', () => {
+    const deal = firstPurchaseDeal({ usd: 149, currency: 'USD', coupon: COUPON })
+    assert.deepEqual(deal, { list: 'US$149', price: 'US$134.10', percent: 10 })
+  })
+
+  it('sin cupón (sin sesión, ya compró o ya lo usó): solo la lista', () => {
+    assert.deepEqual(firstPurchaseDeal({ usd: 149, currency: 'USD', coupon: null }), {
+      list: 'US$149',
+      price: null,
+      percent: null,
+    })
+  })
+
+  it('sin precio no muestra nada', () => {
+    assert.equal(firstPurchaseDeal({ usd: null, currency: 'USD', coupon: COUPON }), null)
   })
 })

@@ -1,12 +1,13 @@
 import ZoneHeadline from './ZoneHeadline.jsx'
 import TemplatePoster from './TemplatePoster.jsx'
-import { isCatalogComingSoon, isComingSoonSku, templatePriceUsd, formatPriceFromUsd } from '../../lib/pricing'
+import { isCatalogComingSoon, isComingSoonSku, templatePriceUsd } from '../../lib/pricing'
+import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurchasePrice'
 import { Link } from 'react-router-dom'
 
 /**
  * Zona 01 · Templates: la lista de modelos con su arte, precio y compra.
  */
-export default function TemplatesZone({ t, templates, currency, rate, addItem, buyingSku, authLoading, buyNow }) {
+export default function TemplatesZone({ t, templates, addItem, buyingSku, authLoading, buyNow }) {
   return (
     <>
       <ZoneHeadline index="01" label={t('nav.templates')} zone="templates" />
@@ -166,11 +167,11 @@ export default function TemplatesZone({ t, templates, currency, rate, addItem, b
                   <>
                     {sellable && templatePriceUsd(template.sku) != null && (
                       <p className="mt-6 text-title-sm font-medium tracking-[-0.02em]">
-                        {formatPriceFromUsd(
-                          templatePriceUsd(template.sku),
-                          currency,
-                          rate,
-                        )}
+                        <FirstPurchasePrice usd={templatePriceUsd(template.sku)} />
+                        <FirstPurchaseTag
+                          usd={templatePriceUsd(template.sku)}
+                          className="mt-1 block text-body-sm font-normal tracking-normal text-accent-ink"
+                        />
                       </p>
                     )}
 
