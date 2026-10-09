@@ -89,3 +89,10 @@ public/ads/
 # PLUM — raw generated clips/stills (build inputs; frames live in public/plum/seq/)
 media/
 .agents/skills/
+
+# FOLD — the full film reel (~320 MB, ~7,400 files) lives on Cloudflare, not in
+# git: `npm run fold:reel` builds it, `npm run fold:deploy` uploads it. The
+# light reel in public/fold/demo IS versioned (it ships in the ZIP). The source
+# clips and key frames (design/masters/fold) are build inputs: keep them out too.
+public/fold/film/
+design/masters/fold/

@@ -152,7 +152,9 @@ async function check(browser, name, packTo) {
   if (height < 1200) problems.push(`${name}: la página mide ${height}px, no hay scroll`)
   for (const error of errors) problems.push(`${name}: error en consola — ${error}`)
 
-  fs.rmSync(work, { recursive: true, force: true })
+  // Windows can hold a file for a moment after the browser closes (the FOLD
+  // reel is >1,000 files): retry instead of failing the whole run.
+  fs.rmSync(work, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
   return problems
 }
 

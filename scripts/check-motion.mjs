@@ -91,6 +91,7 @@ const TEMPLATE_PATHS = {
   atrium: '/templates/atrium',
   meridian: '/templates/meridian',
   kin: '/templates/kin',
+  fold: '/templates/fold',
 }
 const TEMPLATES = Object.keys(TEMPLATE_PATHS)
 
@@ -376,6 +377,9 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
       return
     }
     if (IGNORED_URLS.some((re) => re.test(url))) return
+    // A <video> asks for its file in ranges (206) and the browser cancels a
+    // range it no longer needs: ERR_ABORTED on a video is not a failure.
+    if (req.failure()?.errorText === 'net::ERR_ABORTED' && /\.(mp4|webm|mov)(\?|$)/i.test(url)) return
     errors.add(`requestfailed: ${url}`)
   })
 

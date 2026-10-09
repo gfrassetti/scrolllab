@@ -158,6 +158,23 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/kin',
   },
+  fold: {
+    page: 'src/pages/FoldPage.jsx',
+    sectionsDir: 'src/components/sections/fold',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/fold',
+    // The light reel (768 px, original frames only) so the film plays as
+    // soon as the buyer runs it, and the footer loop. The full reel of the
+    // live demo is built from clips with scripts/fold-reel.mjs.
+    publicAssets: [
+      ...publicDirAssets('fold/demo'),
+      ...publicDirAssets('fold/demo/768'),
+      'public/fold/footer-loop.mp4',
+      'public/fold/footer-loop.jpg',
+      // Builds a reel from your own clips (README: "The film").
+      'scripts/fold-reel.mjs',
+    ],
+  },
 }
 
 const SHARED = [
@@ -457,8 +474,59 @@ It is auto-centered, auto-scaled and re-materialized as a carbon wireframe to ke
 }
 `
 
+/** FOLD: cómo funciona la película y cómo armar la propia (su ZIP trae el carrete liviano y el script). */
+const FOLD_FILM_NOTE = `## The film
+
+> **The film in this demo is a sample.** The engine, the chapters, the menu and
+> the transitions are yours to keep; the pictures are meant to be replaced by
+> your own clips. Producing those clips is most of the work — the steps below
+> turn them into the film.
+
+\`Film.jsx\` paints a frame sequence on one canvas and the scroll picks the frame.
+Everything it does — which take plays when, the text cards, the grid, the
+chapters, the transitions — is data in \`src/components/sections/fold/score.js\`,
+written against one number: how far the reader has scrolled through the film
+(0 → 1). The reel's \`manifest.json\` says where each take starts and how much
+the picture moves on every frame, so the same scroll always buys the same
+amount of movement.
+
+This ZIP ships the **light reel** (\`public/fold/demo\`: 768 px, original
+frames). The engine takes the first reel that answers: \`VITE_FOLD_FILM_URL\`,
+then \`/fold/film\`, then \`/fold/demo\`.
+
+### Your own film
+
+1. Make the clips. A take is one continuous camera move: each clip starts on
+   the last frame of the one before (generate it with that frame as the start
+   image). A new take only begins under a transition.
+2. List them in \`DEFAULT_TAKES\` in \`scripts/fold-reel.mjs\` (or pass
+   \`--config takes.json\`).
+3. With [ffmpeg](https://ffmpeg.org) installed:
+
+   \`\`\`
+   node scripts/fold-reel.mjs --masters ./my-clips          # full reel → public/fold/film (768 + 1440, 3× frames)
+   node scripts/fold-reel.mjs --masters ./my-clips --demo   # light reel → public/fold/demo
+   node scripts/fold-reel.mjs loop ./my-clips/loop.mp4      # footer loop
+   \`\`\`
+
+   It cuts the still head and tail every video model leaves on a clip, blends
+   the joins, drops repeated frames, interpolates in-between frames and writes
+   the pace.
+4. In \`score.js\`, give each take its \`id\` and the stretch of scroll it plays
+   (\`from\` / \`to\`), then place the texts, chapters and transitions.
+
+The full reel weighs hundreds of MB: host it on a CDN (the script writes a
+\`_headers\` file with CORS for Cloudflare / Netlify) and set
+\`VITE_FOLD_FILM_URL\` to its URL. Phones load the 768 px frames and only the
+original pictures; the engine blends each frame into the next.
+
+With "reduce motion" on, the film becomes still plates: each text on its own
+frame of the film, with a short fade.
+`
+
 /** Notas del template completo (su ZIP trae los GLB de public/). */
 const MODEL_3D_NOTES = {
+  fold: FOLD_FILM_NOTE,
   fizz: `${fizzHero3dNote({ demoGlb: true })}\n${FIZZ_CANS_NOTE}`,
   monolith: monolith3dNote({ sampleGlb: true }),
 }

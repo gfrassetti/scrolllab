@@ -21,6 +21,7 @@ const POSTERS = {
   atrium: '/catalog/atrium.webp',
   meridian: '/catalog/meridian.webp',
   kin: '/catalog/kin.webp',
+  fold: '/catalog/fold.webp',
 }
 
 /**

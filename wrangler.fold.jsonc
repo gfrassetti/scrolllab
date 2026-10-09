@@ -1,0 +1,15 @@
+{
+  // FOLD — the full film reel (≈3,700 frames per tier, ≈320 MB) as static
+  // assets on Cloudflare's CDN. It does not live in git: build it with
+  // `npm run fold:reel` (→ public/fold/film/, gitignored) and upload it with
+  // `npm run fold:deploy`. Cloudflare only uploads the files that changed.
+  // The site reads it from VITE_FOLD_FILM_URL (Vercel env) = this worker's URL;
+  // without it, /templates/fold falls back to the light reel in public/fold/demo.
+  // `_headers` (written by the script) adds CORS for the manifest and a long
+  // cache for the frames.
+  "name": "scrolllab-fold",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./public/fold/film"
+  }
+}

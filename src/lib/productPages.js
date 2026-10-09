@@ -138,6 +138,8 @@ export function productPageData(sku, messages) {
     tags: [...meta.tags],
     pitch,
     idealFor,
+    // Optional warning before buying (FOLD: the demo film is a sample).
+    notice: meta.notice || '',
     sections: Object.entries(sections).map(([key, s]) => ({ key, name: s.name, blurb: s.blurb })),
     related: relatedSkus(sku).map((other) => ({
       sku: other,
@@ -225,6 +227,7 @@ export function productSnapshotHtml(data) {
     `<p>${e(data.vibe)}</p>`,
     `<p>${e(data.pitch)}</p>`,
     data.idealFor ? `<p>${e(c.idealForLabel)} ${e(data.idealFor)}</p>` : '',
+    data.notice ? `<p>${e(data.notice)}</p>` : '',
     `<p>${e(data.priceLine)}</p>`,
     `<p><a href="${e(data.demoPath)}">${e(c.demo)}</a></p>`,
     ...(data.sections.length

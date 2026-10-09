@@ -159,6 +159,18 @@ const THEMES = {
     note: 'text-[#141414]/45',
     radius: '',
   },
+  fold: {
+    surface: 'bg-[#e9e2d3] text-[#1b1a17]',
+    eyebrow: 'text-[#1b1a17]/45',
+    title: 'font-light tracking-[-0.02em]',
+    body: 'text-[#1b1a17]/70',
+    field:
+      'border-[#1b1a17]/20 focus:border-[#1b1a17] placeholder:text-[#1b1a17]/35',
+    button:
+      'rounded-[4px] border border-[#1b1a17] bg-[#1b1a17] text-[#f2efe6] hover:bg-transparent hover:text-[#1b1a17] disabled:opacity-40',
+    note: 'text-[#1b1a17]/45',
+    radius: '',
+  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

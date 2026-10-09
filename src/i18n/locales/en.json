@@ -524,6 +524,17 @@
         "Stacked collection"
       ],
       "description": "Cool paper, ink and a single red. The brand is a word built from identical bars: they drop like type in the loader, come apart into a doorway the camera walks through into a dark room, and set themselves again in the footer. A pinned collection where a triptych folds into a stack of works in depth, with a bar counter and grain. Made for art, fashion or design galleries, studios and product brands with a strong identity."
+    },
+    "fold": {
+      "vibe": "A film you scroll",
+      "tags": [
+        "Continuous canvas film",
+        "Chapter rail and menu",
+        "Dots and paper transitions",
+        "Looping footer"
+      ],
+      "description": "A paper world told as a film: thousands of frames on one canvas that move with every tick of the scroll, with no cuts and no still pictures. The camera circles a sphere under construction that opens like a flower, drops into a town at night, flies into the moon as it folds into a workshop and comes out at dawn. A hairline grid reframes every shot, text cards arrive on cue, dots and paper-tear transitions, a chapter rail with a full-screen menu and a looping footer. Ships with the script that builds the film from your own clips. Made for brands that tell a story: launches, products, studios.",
+      "notice": "The film in the demo is a sample: for your brand you will need to produce your own video clips (AI-generated or shot), and that is most of the work. The ZIP ships the engine, the script that turns your clips into the film and a step-by-step guide. If you would rather have us do it, our Studio adapts it to your brand."
     }
   },
   "builder": {

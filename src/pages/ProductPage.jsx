@@ -123,6 +123,11 @@ function ProductView({ data }) {
                 <span className="font-medium text-ink">{c.idealForLabel}</span> {data.idealFor}
               </p>
             ) : null}
+            {data.notice ? (
+              <p role="note" className="mt-6 max-w-[52ch] border-l-2 border-accent pl-4 text-body-sm text-ink/80">
+                {data.notice}
+              </p>
+            ) : null}
 
             <p className="mt-8 text-title-sm font-medium tracking-[-0.02em]">
               {priceLabel ?? c.priceLabel(data.priceUsd)}

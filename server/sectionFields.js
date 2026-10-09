@@ -30,6 +30,7 @@ const THEME_PRESETS = new Set([
   'atrium',
   'meridian',
   'kin',
+  'fold',
 ])
 
 /**

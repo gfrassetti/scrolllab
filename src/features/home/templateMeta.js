@@ -102,4 +102,13 @@ export const TEMPLATE_META = [
     tagline: 'built from bars',
     palette: ['#e1e2de', '#141414', '#e1371f'],
   },
+  {
+    id: '12',
+    sku: 'fold',
+    name: 'FOLD',
+    path: '/templates/fold',
+    category: 'BRAND FILM',
+    tagline: 'a film you scroll',
+    palette: ['#e9e2d3', '#1b1a17', '#c8742f'],
+  },
 ]

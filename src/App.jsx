@@ -33,6 +33,7 @@ const PlumPage = lazy(() => import('./pages/PlumPage'))
 const SignalPage = lazy(() => import('./pages/SignalPage'))
 const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const KinPage = lazy(() => import('./pages/KinPage'))
+const FoldPage = lazy(() => import('./pages/FoldPage'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
@@ -180,6 +181,7 @@ export default function App() {
                   />
                   <Route path="/templates/meridian" element={<MeridianPage />} />
                   <Route path="/templates/kin" element={<KinPage />} />
+                  <Route path="/templates/fold" element={<FoldPage />} />
                   {/* Páginas de producto para Google (src/lib/productPages.js). */}
                   <Route
                     path="/plantillas"

@@ -84,6 +84,7 @@ const TEMPLATES = [
   'atrium',
   'meridian',
   'kin',
+  'fold',
 ]
 
 const ALL_WIDTHS = [320, 360, 375, 390, 414, 430, 480, 600, 768, 834, 1024, 1280]

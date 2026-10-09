@@ -105,6 +105,11 @@ export const PRODUCTS = {
     'KIN — template',
     'Modelo brutalista para galerías de arte, de moda o de diseño: la marca es una palabra hecha de barras que se arma en el loader, se desarma en una puerta que se atraviesa al scrollear y se rearma en el footer; colección fijada con obras apiladas en profundidad (código fuente).',
   ),
+  fold: template(
+    'fold',
+    'FOLD — template',
+    'Modelo de película al scroll: un mundo de papel contado como un film continuo en canvas que avanza con cada tick del scroll, capítulos con riel y menú, transiciones de puntos y de papel picado, y un footer en loop. La película de la demo es de muestra: hay que producir clips propios; trae el script y la guía para armarla (código fuente).',
+  ),
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',

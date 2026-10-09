@@ -46,7 +46,9 @@
     "server": "node server/index.js",
     "start": "node server/index.js",
     "test:e2e": "npm run build:embed && node --test --test-concurrency=1 embed/test/e2e/embed.e2e.mjs embed/test/e2e/hosted-sections.e2e.mjs embed/test/e2e/lab-live.e2e.mjs",
-    "test": "node scripts/run-tests.mjs"
+    "test": "node scripts/run-tests.mjs",
+    "fold:reel": "node scripts/fold-reel.mjs",
+    "fold:deploy": "wrangler deploy --config wrangler.fold.jsonc"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

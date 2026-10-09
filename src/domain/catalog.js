@@ -31,6 +31,7 @@ export const TEMPLATE_PRICES_USD = Object.freeze({
   atrium: 189,
   meridian: 379,
   kin: 379,
+  fold: 229,
 })
 
 export const BUNDLE_PRICE_USD = 649

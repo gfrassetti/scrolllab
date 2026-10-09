@@ -65,6 +65,12 @@ const styles = {
     accent: '#e1371f',
     code: 'KN',
   },
+  fold: {
+    background: '#e9e2d3',
+    color: '#1b1a17',
+    accent: '#c8742f',
+    code: 'FD',
+  },
   ratio: {
     background: '#ffffff',
     color: '#111111',

@@ -24,6 +24,7 @@ Scroll Lab es un proyecto argentino. Los precios de lista están en dólares (US
 - [ATRIUM](https://www.scrolllab.com.ar/plantillas/atrium): estudio de arquitectura
 - [MERIDIAN](https://www.scrolllab.com.ar/plantillas/meridian): desarrollo inmobiliario
 - [KIN](https://www.scrolllab.com.ar/plantillas/kin): galería brutalista
+- [FOLD](https://www.scrolllab.com.ar/plantillas/fold): película al scroll
 
 ## Legal
 

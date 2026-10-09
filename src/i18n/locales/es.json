@@ -524,6 +524,17 @@
         "Colección apilada"
       ],
       "description": "Papel frío, negro y un solo rojo. La marca es una palabra hecha de barras iguales: caen como tipos de imprenta en el loader, se desarman en una puerta que la cámara atraviesa al scrollear hacia una sala oscura y vuelven a armarse en el footer. Colección fijada con un tríptico que se pliega en una pila de obras en profundidad, contador de barras y grano. Ideal para galerías de arte, de moda o de diseño, estudios y marcas de producto con identidad fuerte."
+    },
+    "fold": {
+      "vibe": "Película al scroll",
+      "tags": [
+        "Film continuo en canvas",
+        "Riel y menú de capítulos",
+        "Transiciones de puntos y papel",
+        "Footer en loop"
+      ],
+      "description": "Un mundo de papel contado como una película: miles de cuadros en un canvas que avanzan con cada tick del scroll, sin cortes ni imágenes quietas. La cámara recorre una esfera en obra que se abre como una flor, baja a un pueblo de noche, entra en la luna que se pliega en un taller y sale al amanecer. Grilla de líneas que reencuadra cada toma, tarjetas de texto a tiempo, transiciones de puntos y de papel picado, riel de capítulos con menú a pantalla completa y un footer en loop. Trae el script que arma la película con tus propios clips. Ideal para marcas que cuentan una historia: lanzamientos, productos, estudios.",
+      "notice": "La película de la demo es de muestra: para tu marca vas a tener que producir tus propios clips de video (generados con IA o filmados), y eso es la mayor parte del trabajo. El ZIP trae el motor, el script que convierte tus clips en la película y la guía paso a paso. Si preferís que la hagamos nosotros, la adaptamos a tu marca desde el Estudio."
     }
   },
   "builder": {

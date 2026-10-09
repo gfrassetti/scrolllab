@@ -93,6 +93,8 @@ export const IGNORED_CONSOLE = [
 export const IGNORED_URLS = [
   /\/api\//, // la API no corre durante la auditoría (AuthProvider pide /api/auth/me)
   /googletagmanager\.com|google-analytics\.com/,
+  // Etiquetas de anuncios que carga el GTM del market (no viajan en el ZIP).
+  /doubleclick\.net|googleadservices\.com|google\.com\/(rmkt|pagead|ccm)\//,
   /picsum\.photos/,
   /favicon/,
 ]
