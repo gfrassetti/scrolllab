@@ -645,7 +645,7 @@ const COUPON_COPY = {
     eyebrow: 'Cupón de bienvenida',
     title: (percent) => `${percent}% menos en tu primera compra.`,
     body: (date, email) =>
-      `Ya está en tu cuenta: cuando pagues con ${email}, el descuento se aplica solo. Sirve para cualquier modelo, para tu composición del builder o para el bundle. Vale para tu primera compra, sin fecha de vencimiento.`,
+      `Ya está en tu cuenta: cuando pagues con ${email}, el descuento se aplica solo. Sirve para cualquier modelo, para tu composición del builder o para el bundle. Vale para tu primera compra, sin fecha de vencimiento. No aplica a las suscripciones de LAB.`,
     cta: 'Elegir mi modelo',
     foot: (code) =>
       `Recibís este mail porque entraste a scrolllab.com.ar con tu cuenta de Google. Es el único mail promocional que te mandamos: no enviamos newsletters. Código de referencia: ${code}.`,
@@ -656,7 +656,7 @@ const COUPON_COPY = {
     eyebrow: 'Welcome coupon',
     title: (percent) => `${percent}% off your first purchase.`,
     body: (date, email) =>
-      `It’s already in your account: when you pay with ${email}, the discount is applied automatically. It works for any model, your builder composition, or the bundle. It’s valid for your first purchase, with no expiry date.`,
+      `It’s already in your account: when you pay with ${email}, the discount is applied automatically. It works for any model, your builder composition, or the bundle. It’s valid for your first purchase, with no expiry date. It doesn’t apply to LAB subscriptions.`,
     cta: 'Pick my model',
     foot: (code) =>
       `You’re getting this email because you signed in to scrolllab.com.ar with your Google account. It’s the only promotional email we send you: no newsletters. Reference code: ${code}.`,

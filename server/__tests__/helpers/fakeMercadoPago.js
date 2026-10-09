@@ -101,6 +101,13 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
       const ap = mp.authorizedPayments.get(id)
       return ap ? json(200, ap) : json(404, { message: 'not found', status: 404 })
     }
+    // Vencer una preference (PUT): como MP, después no se puede pagar.
+    if (resource === 'preferences' && id && method === 'PUT') {
+      const pref = mp.preferences.get(id)
+      if (!pref) return json(404, { message: 'not found', status: 404 })
+      Object.assign(pref, body)
+      return json(200, pref)
+    }
     if (resource === 'preferences' && method === 'POST') {
       const pref = {
         ...body,

@@ -8,6 +8,7 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { prefersReducedMotion } from '../lib/motion'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { REFUND_DAYS } from '../lib/site'
+import { WELCOME_COUPON_PERCENT } from '../domain/catalog'
 import { openPaddleCheckout } from '../lib/paddleCheckout'
 import PaymentMethodPicker from './PaymentMethodPicker'
 
@@ -830,6 +831,7 @@ export default function HostedPlans() {
               {t('lab.refundLink')}
             </Link>
           </p>
+          <p className="mt-1 text-body-sm text-ink/55">{t('lab.couponNote', { percent: WELCOME_COUPON_PERCENT })}</p>
         </>
       )}
     </section>

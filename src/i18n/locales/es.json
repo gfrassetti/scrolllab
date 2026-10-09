@@ -202,6 +202,7 @@
       "updateCard": "Actualizar tarjeta"
     },
     "refundNote": "Cancelás cuando quieras. Podés pedir que te devolvamos el primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro); las renovaciones no se devuelven.",
+    "couponNote": "El {{percent}}% de bienvenida es solo para tu primera compra de templates, bundle o builder: no aplica a las suscripciones de LAB.",
     "refundLink": "Política de reembolsos",
     "freeLineOne": "{{n}} widget publicado, sin tarjeta.",
     "freeLineMany": "{{n}} widgets publicados, sin tarjeta.",
@@ -1069,7 +1070,7 @@
     "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo.",
     "refundNote": "Reembolso total dentro de {{days}} días si no descargaste el ZIP.",
     "refundLink": "Ver la política",
-    "couponNote": "Es tu primera compra: el {{percent}}% se aplica solo."
+    "couponNote": "Es tu primera compra: el {{percent}}% se aplica solo. Vale una sola vez (solo la primera compra) y no aplica a LAB."
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -1137,7 +1138,7 @@
     "subSync": "Sincronizar con Mercado Pago",
     "subSyncHint": "¿Te suscribiste recién y no se refleja?",
     "subSyncDone": "Estado actualizado",
-    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra. Se aplica solo al pagar.",
+    "welcomeCoupon": "Tenés {{percent}}% menos en tu primera compra de templates, bundle o builder. Se aplica solo al pagar, una sola vez; no aplica a LAB.",
     "paddle": {
       "subPaused": "En pausa en Paddle · seguís con acceso hasta el {{date}}",
       "subRenewing": "Confirmando el cobro con Paddle · si no se acredita, el plan se suspende el {{date}}",
@@ -1284,7 +1285,7 @@
       },
       {
         "title": "Precios y pagos",
-        "body": "Los precios vigentes se muestran en el catálogo y el builder. Si pagás desde Argentina, el pago lo procesa Mercado Pago en pesos: el total es el que figura al pagar, sujeto a su aprobación, y la orden se considera pagada cuando Mercado Pago confirma el pago. Si pagás desde otro país, el proceso de compra lo realiza nuestro revendedor autorizado Paddle.com, que es el vendedor oficial (Merchant of Record) de esas órdenes: cobra en dólares estadounidenses, emite la factura, aplica los impuestos que correspondan según tu país y atiende las consultas sobre el cobro. En ese caso la orden se considera pagada cuando Paddle confirma el pago, y la compra se rige también por los términos de compra de Paddle (paddle.com/legal/checkout-buyer-terms)."
+        "body": "Los precios vigentes se muestran en el catálogo y el builder. Si pagás desde Argentina, el pago lo procesa Mercado Pago en pesos: el total es el que figura al pagar, sujeto a su aprobación, y la orden se considera pagada cuando Mercado Pago confirma el pago. Si pagás desde otro país, el proceso de compra lo realiza nuestro revendedor autorizado Paddle.com, que es el vendedor oficial (Merchant of Record) de esas órdenes: cobra en dólares estadounidenses, emite la factura, aplica los impuestos que correspondan según tu país y atiende las consultas sobre el cobro. En ese caso la orden se considera pagada cuando Paddle confirma el pago, y la compra se rige también por los términos de compra de Paddle (paddle.com/legal/checkout-buyer-terms). Cupón de bienvenida: quien crea su cuenta tiene un 10% de descuento en su primera compra de templates, bundle o composiciones del builder, una sola vez, con la cuenta de Google con la que se registró. Se aplica solo al pagar y no se acumula: la segunda compra y las siguientes van a precio de lista, y una compra reembolsada cuenta como compra. No aplica a las suscripciones de LAB."
       },
       {
         "title": "Entrega y descargas",

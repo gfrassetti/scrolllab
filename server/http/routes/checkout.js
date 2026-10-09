@@ -6,6 +6,7 @@ import { fetchPayment } from '../../services/mercadoPago.js'
 import {
   ensureOrderZip,
   markOrderPaid,
+  voidOtherCouponOrders,
   fulfillApprovedPayment,
 } from '../../services/orders.js'
 import {
@@ -195,8 +196,10 @@ export function createCheckoutRouter({ config, limits }) {
       const { order: paid } = await markOrderPaid({
         orderId,
         mpPaymentId: `mock-${Date.now()}`,
+        config,
       })
       const paidOrder = paid || order
+      await voidOtherCouponOrders(paidOrder, config)
       await ensureOrderZip(paidOrder, req.user, config)
       await sendReceiptSafely(paidOrder, req.user)
       res.json({ ok: true, orderId })

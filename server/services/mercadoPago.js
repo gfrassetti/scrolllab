@@ -362,6 +362,30 @@ export async function fetchPayment(accessToken, paymentId) {
 }
 
 /**
+ * Vence una preference de Checkout Pro ya mismo: MP no deja pagarla más. Se
+ * usa para anular una compra abierta que ya no corresponde (otra compra con el
+ * 10% de primera compra ya se pagó).
+ * @param {string} accessToken
+ * @param {string} preferenceId
+ */
+export async function expirePreference(accessToken, preferenceId) {
+  const now = new Date()
+  const res = await fetch(
+    `https://api.mercadopago.com/checkout/preferences/${encodeURIComponent(preferenceId)}`,
+    {
+      method: 'PUT',
+      headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        expires: true,
+        expiration_date_from: new Date(now.getTime() - 60_000).toISOString(),
+        expiration_date_to: now.toISOString(),
+      }),
+    },
+  )
+  if (!res.ok) throw new HttpError(502, `Mercado Pago no venció la preference ${preferenceId}: ${res.status}`)
+}
+
+/**
  * Devuelve el total de un pago (POST /v1/payments/:id/refunds). La clave de
  * idempotencia hace que un reintento no devuelva dos veces. Tira un HttpError
  * con el mensaje de MP si no puede (p. ej. saldo insuficiente en la cuenta).

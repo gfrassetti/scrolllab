@@ -202,6 +202,7 @@
       "updateCard": "Update card"
     },
     "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
+    "couponNote": "The {{percent}}% welcome discount is only for your first purchase of templates, the bundle or the builder: it doesn’t apply to LAB subscriptions.",
     "refundLink": "Refund policy",
     "freeLineOne": "{{n}} published widget, no card.",
     "freeLineMany": "{{n}} published widgets, no card.",
@@ -1069,7 +1070,7 @@
     "couponErrGeneric": "We couldn’t apply the coupon. Please try again.",
     "refundNote": "Full refund within {{days}} days if you haven’t downloaded the ZIP.",
     "refundLink": "See the policy",
-    "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically."
+    "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically. It’s valid once (first purchase only) and doesn’t apply to LAB."
   },
   "login": {
     "eyebrow": "Account",
@@ -1137,7 +1138,7 @@
     "subSync": "Sync with Mercado Pago",
     "subSyncHint": "Subscribed just now and it's not showing?",
     "subSyncDone": "Status updated",
-    "welcomeCoupon": "You get {{percent}}% off your first purchase. It’s applied automatically at checkout.",
+    "welcomeCoupon": "You get {{percent}}% off your first purchase of templates, the bundle or the builder. It’s applied automatically at checkout, once; it doesn’t apply to LAB.",
     "paddle": {
       "subPaused": "Paused in Paddle · you keep access until {{date}}",
       "subRenewing": "Confirming the charge with Paddle · if it doesn’t go through, the plan is suspended on {{date}}",
@@ -1284,7 +1285,7 @@
       },
       {
         "title": "Prices and payments",
-        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Paddle.com, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Paddle confirms the payment, and the purchase is also governed by Paddle’s checkout buyer terms (paddle.com/legal/checkout-buyer-terms)."
+        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Paddle.com, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Paddle confirms the payment, and the purchase is also governed by Paddle’s checkout buyer terms (paddle.com/legal/checkout-buyer-terms). Welcome coupon: new accounts get 10% off their first purchase of templates, the bundle or builder compositions, once, with the Google account they signed up with. It’s applied automatically at checkout and doesn’t stack: the second purchase and later ones are at list price, and a refunded purchase counts as a purchase. It doesn’t apply to LAB subscriptions."
       },
       {
         "title": "Delivery and downloads",

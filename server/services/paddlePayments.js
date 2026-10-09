@@ -140,6 +140,7 @@ export async function fulfillPaddleTransaction({ transaction: txn, config, expec
   const { order: updated, created } = await markOrderPaid({
     orderId,
     paddleTransactionId: txn.id,
+    config,
   })
   const paid = updated || order
   await deliverPaidOrder(paid, config)

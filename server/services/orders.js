@@ -6,7 +6,8 @@ import { purchaseCode } from '../license.js'
 import { HttpError } from '../errors.js'
 import { db } from '../db.js'
 import { noteRefund } from './refundLedger.js'
-import { assertPaymentMatchesOrder } from './mercadoPago.js'
+import { assertPaymentMatchesOrder, expirePreference } from './mercadoPago.js'
+import { cancelTransaction } from './paddle.js'
 import {
   sendOrderReceiptOnce,
   sendOrderAdminNotifyOnce,
@@ -105,20 +106,32 @@ export async function ensureOrderZip(order, user, config) {
  * Marca la orden como paga de forma atómica e idempotente.
  * Devuelve { order, created: boolean } donde created=false si ya estaba paga.
  * Mercado Pago pasa `mpPaymentId`; Paddle, `paddleTransactionId`.
- * @param {{ orderId: string, mpPaymentId?: string, paddleTransactionId?: string }} args
+ * @param {{ orderId: string, mpPaymentId?: string, paddleTransactionId?: string, config?: any }} args
  */
-export async function markOrderPaid({ orderId, mpPaymentId, paddleTransactionId }) {
+export async function markOrderPaid({ orderId, mpPaymentId, paddleTransactionId, config: alertConfig = null }) {
   const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId, paddleTransactionId })
   // Canjear el cupón es contabilidad: si falla no puede frenar lo ya pagado.
   if (result.created && result.order?.couponCode) {
     try {
       const { redeemed } = await redeemCouponForOrder(result.order)
       if (!redeemed) {
-        // Dos checkouts abiertos con el mismo cupón y pagados los dos: el
-        // segundo ya se cobró con descuento.
+        // Dos checkouts abiertos con el mismo cupón y pagados a la vez (las
+        // demás se anulan al pagar la primera: `voidOtherCouponOrders`). El
+        // segundo ya se cobró con descuento: avisa para cobrar la diferencia o
+        // aceptarlo.
         console.warn(
           `checkout CUPÓN USADO DOS VECES code=${result.order.couponCode} order=${orderId}`,
         )
+        alertAdmin({
+          kind: 'coupon-twice',
+          key: `coupon-twice-${orderId}`,
+          title: 'DESCUENTO DE PRIMERA COMPRA USADO DOS VECES — revisar',
+          lines: [
+            `orden ${orderId} · ${result.order.total} ${result.order.currency_id} · cupón ${result.order.couponCode}`,
+            'Se pagaron dos compras abiertas a la vez con el 10%: la segunda salió con descuento.',
+          ],
+          config: alertConfig,
+        })
       }
     } catch (err) {
       console.error('Coupon redeem failed', err)
@@ -243,6 +256,7 @@ export async function fulfillApprovedPayment({
   const { order: updated, created } = await markOrderPaid({
     orderId: db.uid(order) || order.id,
     mpPaymentId: payment.id,
+    config,
   })
 
   // El webhook puede haber cumplido la orden antes del confirm: confirmar de
@@ -280,6 +294,7 @@ export async function fulfillApprovedPayment({
  */
 export async function deliverPaidOrder(paid, config) {
   if (paid?.status !== 'paid') return
+  await voidOtherCouponOrders(paid, config)
   let user = null
   try {
     user = await db.findUserById(paid.userId)
@@ -420,6 +435,44 @@ export async function recordMpRefund({ payment, order = null, partial, config })
     })
   } catch (err) {
     console.error(`refunds: no se pudo anotar el reembolso MP ${payment?.id}`, err?.message)
+  }
+}
+
+/**
+ * El 10% es solo para la primera compra. Si el comprador dejó otras compras
+ * abiertas que se armaron con el descuento (dos pestañas, un checkout viejo),
+ * al pagar una las demás se anulan en la pasarela para que no se puedan pagar
+ * también con descuento: la preference de Mercado Pago vence y la transacción
+ * de Paddle se cancela. Si vuelve a comprar, paga precio de lista. Nunca frena
+ * la entrega de lo pagado.
+ */
+export async function voidOtherCouponOrders(paid, config) {
+  if (!paid?.couponCode || !paid.userId) return
+  let pending = []
+  try {
+    pending = (await db.findOrdersByUser(String(paid.userId))).filter(
+      (o) => o.status === 'pending' && o.couponCode && String(db.uid(o) || o.id) !== String(db.uid(paid) || paid.id),
+    )
+  } catch (err) {
+    console.error('coupon void lookup', err?.message)
+    return
+  }
+  for (const o of pending) {
+    const id = String(db.uid(o) || o.id)
+    try {
+      if (o.provider === 'paddle') {
+        if (o.paddleTransactionId && !config?.paddle?.mock) {
+          await cancelTransaction(config, o.paddleTransactionId)
+        }
+      } else if (o.mpPreferenceId && !config?.mpMock && config?.mpAccessToken) {
+        await expirePreference(config.mpAccessToken, o.mpPreferenceId)
+      }
+      await db.deletePendingOrder(id)
+      console.log(`checkout compra abierta con el 10% anulada order=${id} (ya pagó ${db.uid(paid) || paid.id})`)
+    } catch (err) {
+      // No se pudo anular en la pasarela: si igual la paga, markOrderPaid avisa.
+      console.error(`checkout no se pudo anular la compra abierta ${id}`, err?.message)
+    }
   }
 }
 
