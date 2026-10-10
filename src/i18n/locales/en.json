@@ -1595,5 +1595,17 @@
     "openError": "We couldn’t open the payment. Try again in a few minutes or write to us.",
     "closed": "You closed the payment without finishing it: you haven’t been charged.",
     "retry": "Try again"
+  },
+  "fields": {
+    "swatch": {
+      "original": "Original (the section’s)",
+      "black": "Black",
+      "graphite": "Graphite",
+      "gray": "Gray",
+      "bone": "Bone",
+      "white": "White",
+      "custom": "Other color",
+      "typed": "color code"
+    }
   }
 }

@@ -1595,5 +1595,17 @@
     "openError": "No pudimos abrir el pago. Probá de nuevo en unos minutos o escribinos.",
     "closed": "Cerraste el pago sin completarlo: no se te cobró nada.",
     "retry": "Probar de nuevo"
+  },
+  "fields": {
+    "swatch": {
+      "original": "Original (el de la sección)",
+      "black": "Negro",
+      "graphite": "Grafito",
+      "gray": "Gris",
+      "bone": "Hueso",
+      "white": "Blanco",
+      "custom": "Otro color",
+      "typed": "código del color"
+    }
   }
 }

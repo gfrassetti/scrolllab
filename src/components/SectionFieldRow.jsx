@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useI18n } from '../i18n'
+import ColorField from './ColorField'
 
 /**
  * Un campo editable de sección. Tipos: text · textarea · select · color · href
@@ -18,12 +19,6 @@ const inputCls =
   'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink'
 const selectCls =
   'mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink'
-
-function toPickerHex(v) {
-  if (/^#[0-9a-f]{3}$/i.test(v)) return '#' + [...v.slice(1)].map((c) => c + c).join('')
-  if (/^#[0-9a-f]{6,8}$/i.test(v)) return v.slice(0, 7)
-  return '#000000'
-}
 
 /** Tipos que el editor valida: lo tipeado puede no guardarse todavía. */
 const VALIDATED = new Set(['color', 'href', 'url', 'image', 'price'])
@@ -96,50 +91,8 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
   }
 
   if (field.type === 'color') {
-    // Vacío = el color de la sección. El picker nativo no tiene «ninguno» y
-    // mostraba negro, como si la sección fuera a quedar negra.
-    return (
-      <>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="relative h-9 w-12 shrink-0 border border-ink/20 text-ink/35">
-            {!value && (
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 bg-[linear-gradient(to_top_right,transparent_calc(50%-1px),currentColor_calc(50%-1px),currentColor_calc(50%+1px),transparent_calc(50%+1px))]"
-              />
-            )}
-            <input
-              type="color"
-              value={toPickerHex(value)}
-              onChange={(e) => edit(e.target.value)}
-              className={`absolute inset-0 h-full w-full cursor-pointer bg-transparent p-0 ${
-                value ? '' : 'opacity-0'
-              }`}
-              style={{ colorScheme: 'light' }}
-              aria-label={field.label}
-            />
-          </span>
-          <input
-            type="text"
-            value={draft}
-            placeholder="#0e0e11 · rgba(14,14,17,.9)"
-            onChange={(e) => edit(e.target.value)}
-            className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink"
-          />
-          {draft ? (
-            <button
-              type="button"
-              onClick={() => edit('')}
-              aria-label="reset"
-              className="shrink-0 px-2 py-2 text-[13px] text-ink/40 hover:text-danger"
-            >
-              ×
-            </button>
-          ) : null}
-        </div>
-        {warning}
-      </>
-    )
+    // Vacío = el color de la sección («Original»). Muestras + comodín + tipeado.
+    return <ColorField label={field.label} value={value} draft={draft} onChange={edit} warning={warning} />
   }
 
   if (field.type === 'href' || field.type === 'url' || field.type === 'price') {
