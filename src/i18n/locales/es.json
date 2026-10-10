@@ -112,16 +112,16 @@
         "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros, los editás desde acá y se actualizan solos. ¿Vas a hacer uno nuevo? El Builder arma la página entera con nuestras secciones y te da el código fuente para que lo programes y lo alojes vos: pago único, es tuyo."
       },
       {
-        "q": "¿Qué es una secuencia?",
-        "a": "Varios de tus widgets, uno debajo del otro, con un solo código. Elegís cuáles y en qué orden; cada widget se sigue editando en su editor y la secuencia se actualiza sola. Sirve para armar una parte entera de tu sitio —por ejemplo, la home— sin pegar un código por cada widget."
+        "q": "¿Qué es un pack?",
+        "a": "Varios de tus widgets, uno debajo del otro, con un solo código. Elegís cuáles y en qué orden; cada widget se sigue editando en su editor y el pack se actualiza solo. Sirve para armar una parte entera de tu sitio —por ejemplo, la home— sin pegar un código por cada widget. No es el bundle de templates: el bundle es una compra de código fuente; el pack vive en LAB."
       },
       {
-        "q": "¿Una secuencia es lo mismo que el Builder?",
-        "a": "No. Se parecen porque las dos juntan secciones, pero la secuencia vive en nuestros servidores y la pegás en el sitio que ya tenés, sin programar. El Builder te da el código fuente de una página nueva para que la programes y la alojes vos."
+        "q": "¿Un pack es lo mismo que el Builder?",
+        "a": "No. Se parecen porque los dos juntan secciones, pero el pack vive en nuestros servidores y lo pegás en el sitio que ya tenés, sin programar. El Builder te da el código fuente de una página nueva para que la programes y la alojes vos."
       },
       {
-        "q": "¿Una secuencia ocupa más cupo de mi plan?",
-        "a": "No. El cupo cuenta widgets publicados, y cada widget de la secuencia ya está contado. Podés poner el mismo widget en varias secuencias sin gastar más."
+        "q": "¿Un pack ocupa más cupo de mi plan?",
+        "a": "No. El cupo cuenta widgets publicados, y cada widget del pack ya está contado. Podés poner el mismo widget en varios packs sin gastar más."
       }
     ],
     "views": "{{n}} vistas",
@@ -229,7 +229,7 @@
     "heroCtaFree": "Empezá gratis",
     "heroCtaPlans": "Ver planes",
     "platformsTitle": "Cómo pegarlo en tu plataforma",
-    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget o de la secuencia publicada.",
+    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget o del pack publicado.",
     "platforms": [
       {
         "q": "WordPress",
@@ -253,16 +253,16 @@
       }
     ],
     "pack": {
-      "title": "Secuencias",
+      "title": "Packs",
       "intro": "Varios de tus widgets, uno debajo del otro, con un solo código. Elegís cuáles y en qué orden; cada uno se sigue editando en su editor. No suma cupo: cada widget ya cuenta en tu plan.",
-      "new": "＋ Nueva secuencia",
-      "empty": "Todavía no armaste ninguna secuencia.",
-      "needWidgets": "Una secuencia junta widgets que ya creaste: primero creá uno.",
-      "defaultName": "Secuencia sin nombre",
+      "new": "＋ Nuevo pack",
+      "empty": "Todavía no armaste ningún pack.",
+      "needWidgets": "Un pack junta widgets que ya creaste: primero creá uno.",
+      "defaultName": "Pack sin nombre",
       "countOne": "1 widget",
       "countMany": "{{n}} widgets",
       "countShown": "{{shown}} de {{total}} se muestran",
-      "nothingShown": "Ningún widget de la secuencia está publicado: el código todavía no muestra nada.",
+      "nothingShown": "Ningún widget del pack está publicado: el código todavía no muestra nada.",
       "name": "Nombre",
       "namePlaceholder": "Home, landing de verano…",
       "items": "Widgets, en el orden de la página",
@@ -279,18 +279,18 @@
         "frozen": "Congelado: tu plan no lo cubre, no se muestra",
         "suspended": "Suspendido: no se muestra"
       },
-      "domainsHint": "Si dejás la lista vacía, la secuencia se muestra en cualquier dominio. Cada widget además respeta sus propios dominios.",
+      "domainsHint": "Si dejás la lista vacía, el pack se muestra en cualquier dominio. Cada widget además respeta sus propios dominios.",
       "save": "Guardar",
       "saved": "Guardado",
       "unsaved": "Tenés cambios sin guardar: tu sitio sigue mostrando la versión anterior.",
-      "delete": "Borrar secuencia",
-      "deleteConfirm": "¿Borrar la secuencia? Su código deja de funcionar en tu sitio. Los widgets no se borran.",
+      "delete": "Borrar pack",
+      "deleteConfirm": "¿Borrar el pack? Su código deja de funcionar en tu sitio. Los widgets no se borran.",
       "deleteYes": "Sí, borrar",
       "cancel": "Cancelar",
-      "snippetNote": "Muestra solo los widgets publicados. Para cambiar el contenido de uno, abrilo en su editor: la secuencia se actualiza sola.",
+      "snippetNote": "Muestra solo los widgets publicados. Para cambiar el contenido de uno, abrilo en su editor: el pack se actualiza solo.",
       "npmNote": "Con React, Next.js o Vue: @scrolllab/embed 0.2 o más nuevo (npm i @scrolllab/embed@latest).",
       "preview": "Así se ve en tu sitio",
-      "previewEmpty": "Cuando sumes widgets publicados, acá ves la secuencia armada.",
+      "previewEmpty": "Cuando sumes widgets publicados, acá ves el pack armado.",
       "previewFailed": "La vista previa no cargó. El código funciona igual."
     },
     "compare": {
@@ -309,7 +309,7 @@
         },
         {
           "label": "Varias secciones juntas",
-          "lab": "Una secuencia: tus widgets uno debajo del otro, con un solo código.",
+          "lab": "Un pack: tus widgets uno debajo del otro, con un solo código.",
           "builder": "Una composición: la página entera, con su menú y su pie."
         },
         {

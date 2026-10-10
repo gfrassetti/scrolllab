@@ -338,7 +338,7 @@ export default function LabPage({ qa = false }) {
         </section>
 
         {/* LAB o Builder: las dos juntan nuestras secciones; la diferencia es
-            qué te llevás. Sin esto, «secuencia» y «composición» se confundían. */}
+            qué te llevás. Sin esto, «pack» y «composición» se confundían. */}
         <section className="mt-20 md:mt-28" aria-labelledby="lab-vs-builder">
           <h2 id="lab-vs-builder" className="text-title-sm font-medium">
             {t('lab.compare.title')}

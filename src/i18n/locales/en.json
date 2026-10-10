@@ -112,16 +112,16 @@
         "a": "It depends on whether you already have a site. Do you? LAB adds widgets to it without touching it: we host them, you edit them from here and they update on their own. Building a new one? The Builder assembles the whole page with our sections and gives you the source code to develop and host yourself: one-time payment, it's yours."
       },
       {
-        "q": "What is a sequence?",
-        "a": "Several of your widgets, one below the other, with a single code. You pick which ones and in what order; each widget is still edited in its own editor and the sequence updates on its own. Use it to build a whole part of your site —say, the home page— without pasting a code for each widget."
+        "q": "What is a pack?",
+        "a": "Several of your widgets, one below the other, with a single code. You pick which ones and in what order; each widget is still edited in its own editor and the pack updates on its own. Use it to build a whole part of your site —say, the home page— without pasting a code for each widget. It isn't the template bundle: the bundle is a source-code purchase; a pack lives in LAB."
       },
       {
-        "q": "Is a sequence the same as the Builder?",
-        "a": "No. They're alike in that both group sections, but a sequence lives on our servers and you paste it into the site you already have, no coding. The Builder gives you the source code of a new page to develop and host yourself."
+        "q": "Is a pack the same as the Builder?",
+        "a": "No. They're alike in that both group sections, but a pack lives on our servers and you paste it into the site you already have, no coding. The Builder gives you the source code of a new page to develop and host yourself."
       },
       {
-        "q": "Does a sequence use more of my plan?",
-        "a": "No. Your plan counts published widgets, and each widget in the sequence is already counted. You can put the same widget in several sequences without using more."
+        "q": "Does a pack use more of my plan?",
+        "a": "No. Your plan counts published widgets, and each widget in the pack is already counted. You can put the same widget in several packs without using more."
       }
     ],
     "views": "{{n}} views",
@@ -229,7 +229,7 @@
     "heroCtaFree": "Start free",
     "heroCtaPlans": "See plans",
     "platformsTitle": "How to paste it on your platform",
-    "platformsNote": "The code is the same everywhere: the one shown on the card of the published widget or sequence.",
+    "platformsNote": "The code is the same everywhere: the one shown on the card of the published widget or pack.",
     "platforms": [
       {
         "q": "WordPress",
@@ -253,16 +253,16 @@
       }
     ],
     "pack": {
-      "title": "Sequences",
+      "title": "Packs",
       "intro": "Several of your widgets, one below the other, with a single code. You pick which ones and in what order; each one is still edited in its own editor. It doesn't use up your plan: each widget already counts.",
-      "new": "＋ New sequence",
-      "empty": "You haven't built a sequence yet.",
-      "needWidgets": "A sequence groups widgets you already created: create one first.",
-      "defaultName": "Untitled sequence",
+      "new": "＋ New pack",
+      "empty": "You haven't built a pack yet.",
+      "needWidgets": "A pack groups widgets you already created: create one first.",
+      "defaultName": "Untitled pack",
       "countOne": "1 widget",
       "countMany": "{{n}} widgets",
       "countShown": "{{shown}} of {{total}} showing",
-      "nothingShown": "None of the sequence's widgets is published: the code doesn't show anything yet.",
+      "nothingShown": "None of the pack's widgets is published: the code doesn't show anything yet.",
       "name": "Name",
       "namePlaceholder": "Home, summer landing…",
       "items": "Widgets, in page order",
@@ -279,18 +279,18 @@
         "frozen": "Frozen: your plan doesn't cover it, hidden",
         "suspended": "Suspended: hidden"
       },
-      "domainsHint": "Leave the list empty and the sequence shows on any domain. Each widget also keeps its own domains.",
+      "domainsHint": "Leave the list empty and the pack shows on any domain. Each widget also keeps its own domains.",
       "save": "Save",
       "saved": "Saved",
       "unsaved": "You have unsaved changes: your site still shows the previous version.",
-      "delete": "Delete sequence",
-      "deleteConfirm": "Delete the sequence? Its code stops working on your site. The widgets are kept.",
+      "delete": "Delete pack",
+      "deleteConfirm": "Delete the pack? Its code stops working on your site. The widgets are kept.",
       "deleteYes": "Yes, delete",
       "cancel": "Cancel",
-      "snippetNote": "Only published widgets show. To change a widget's content, open it in its editor: the sequence updates on its own.",
+      "snippetNote": "Only published widgets show. To change a widget's content, open it in its editor: the pack updates on its own.",
       "npmNote": "With React, Next.js or Vue: @scrolllab/embed 0.2 or newer (npm i @scrolllab/embed@latest).",
       "preview": "How it looks on your site",
-      "previewEmpty": "Once you add published widgets, you'll see the assembled sequence here.",
+      "previewEmpty": "Once you add published widgets, you'll see the assembled pack here.",
       "previewFailed": "The preview didn't load. The code still works."
     },
     "compare": {
@@ -309,7 +309,7 @@
         },
         {
           "label": "Several sections together",
-          "lab": "A sequence: your widgets one below the other, with a single code.",
+          "lab": "A pack: your widgets one below the other, with a single code.",
           "builder": "A composition: the whole page, with its menu and footer."
         },
         {

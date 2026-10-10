@@ -33,10 +33,10 @@ import ScrollLabEmbed from '@scrolllab/embed/vue'
 </template>
 ```
 
-## Sequences (several sections, one tag)
+## Packs (several sections, one tag)
 
-A LAB sequence groups sections you already published, in order. Same
-component, `packKey` (the sequence's `pk_…` key) instead of `embedKey`:
+A LAB pack groups sections you already published, in order. Same component,
+`packKey` instead of `embedKey`:
 
 ```jsx
 <ScrollLabEmbed packKey="pk_xxxxxxxxxxxxxxxxxxxxxxxx" />
@@ -46,7 +46,7 @@ component, `packKey` (the sequence's `pk_…` key) instead of `embedKey`:
 <ScrollLabEmbed pack-key="pk_xxxxxxxxxxxxxxxxxxxxxxxx" />
 ```
 
-Each section renders in its own iframe, stacked in the sequence's order. Edit,
+Each section renders in its own iframe, stacked in the pack's order. Edit,
 reorder or unpublish sections from the LAB dashboard; the page picks it up on
 the next load.
 

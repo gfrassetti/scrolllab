@@ -359,7 +359,7 @@ Modo prueba (`QA_BUYER_EMAILS`, `src/domain/qa.js`): `/test`, `/builder-test` y 
 
 LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
 
-Secuencias de LAB (en el código y la API: *packs* — `/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. En la UI se llaman «Secuencias» para no confundirlas con el Builder (que entrega código fuente); /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB. El pack solo guarda el orden y sus dominios; cada widget se edita y publica en su editor y ya cuenta en el cupo, así que el pack no suma. El loader monta un iframe por widget servible (sin borradores ni congelados). Detalle en `embed/README.md`.
+Packs de LAB (`/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. No confundir con el bundle de templates (compra de código) ni con el Builder (código fuente): /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB.
 
 ## Architecture (extra)
 
