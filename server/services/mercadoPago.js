@@ -130,8 +130,10 @@ export function buildUpgradePreferenceBody({
   expiresAt,
   clientUrl,
   apiPublicUrl,
+  labPath = 'lab',
 }) {
-  const back = `${clientUrl}/lab?upgrade=volver`
+  // `labPath`: `lab-test` para una suscripción de prueba (src/domain/qa.js).
+  const back = `${clientUrl}/${labPath}?upgrade=volver`
   return {
     items: [
       {

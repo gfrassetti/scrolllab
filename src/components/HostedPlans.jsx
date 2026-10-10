@@ -75,7 +75,7 @@ const displayQuota = (n) => (Number.isFinite(n) ? n : '∞')
  * `qa`: los planes de prueba de /lab-test (src/domain/qa.js) — precio de prueba,
  * sin prueba gratis y solo Mercado Pago.
  */
-export default function HostedPlans({ qa = false }) {
+export default function HostedPlans({ qa: qaPage = false }) {
   const { user } = useAuth()
   const {
     plan,
@@ -96,8 +96,12 @@ export default function HostedPlans({ qa = false }) {
     paidPlan,
     provider: planProvider,
     currency_id: planCurrency,
+    qa: planIsQa,
     refresh: refreshPlan,
   } = usePlan()
+  // Modo prueba: en /lab-test, o con una suscripción de prueba en cualquier
+  // pantalla (sus precios son los de prueba; si no, /lab mostraba los reales).
+  const qa = qaPage || !!planIsQa
   const { t, locale } = useI18n()
   // Desde dónde paga (Argentina → MP en pesos; otro país → Paddle en USD).
   const region = usePayRegion((s) => s.region)

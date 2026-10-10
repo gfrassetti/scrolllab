@@ -227,6 +227,8 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal(change.body.requiresPayment, true, JSON.stringify(change.body))
     const pref = mp.lastPreference()
     assert.equal(pref.items[0].unit_price, quote.amount)
+    assert.match(pref.items[0].title, /PRUEBA/)
+    assert.match(pref.back_urls.success, /\/lab-test\?upgrade=volver$/, 'vuelve a /lab-test, no al /lab real')
     const upg = mp.pay(pref.id)
     assert.equal((await webhook('payment', upg.id, { source: 'lab' })).status, 200)
     assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'hosted_studio')

@@ -342,13 +342,14 @@ async function startUpgradePayment({ sub, targetPlan, quote, config }, deps) {
     const pref = await create({
       accessToken: config.mpSubs.accessToken,
       reference,
-      title: `ScrollLab LAB — pasar a ${HOSTED_PLANS[targetPlan].tier} (${quote.days} ${
+      title: `ScrollLab LAB${sub.qa ? ' PRUEBA' : ''} — pasar a ${HOSTED_PLANS[targetPlan].tier} (${quote.days} ${
         quote.days === 1 ? 'día' : 'días'
       })`,
       amount: quote.amount,
       expiresAt,
       clientUrl: config.clientUrl,
       apiPublicUrl: config.apiPublicUrl,
+      labPath: sub.qa ? 'lab-test' : 'lab',
     })
     pending.preferenceId = String(pref.id)
     pending.initPoint = pref.init_point
