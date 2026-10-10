@@ -3,9 +3,10 @@
  * circuito: compra, recibo, descarga, arrepentimiento con devolución, LAB (alta,
  * cobro, cambio de plan, baja) y cada mail. Solo existen para las cuentas de
  * `QA_BUYER_EMAILS`: para cualquier otra, el servidor los rechaza y las rutas
- * (/test, /builder-test, /lab-test) dan 404. Precios fijos en pesos, los más
- * bajos que acepta Mercado Pago; solo se cobran con Mercado Pago. Las órdenes y
- * suscripciones quedan marcadas `qa` y fuera de las métricas.
+ * (/test, /builder-test, /lab-test) dan 404. Todo cuesta $1 (lo mínimo, pedido
+ * del dueño 2026-10-10); si Mercado Pago rechaza ese monto, se sube acá. Solo se
+ * cobran con Mercado Pago. Las órdenes y suscripciones quedan marcadas `qa` y
+ * fuera de las métricas.
  */
 import { recipeHasCommerce, CUSTOM_BASE_SECTIONS } from './catalog.js'
 
@@ -13,16 +14,17 @@ import { recipeHasCommerce, CUSTOM_BASE_SECTIONS } from './catalog.js'
 export const QA_TEMPLATE_SKU = 'qa-template'
 /** El modelo que se empaqueta para el template de prueba. */
 export const QA_TEMPLATE_MODEL = 'chapters'
-export const QA_TEMPLATE_ARS = 100
+export const QA_TEMPLATE_ARS = 1
 
 /** SKU de la composición del builder de prueba en el pedido. */
 export const QA_CUSTOM_SKU = 'qa-custom'
-export const QA_BUILDER_BASE_ARS = 200
-export const QA_BUILDER_EXTRA_SECTION_ARS = 10
-export const QA_BUILDER_COMMERCE_ARS = 50
+// Cualquier composición cuesta $1: sin recargo por secciones extra ni commerce.
+export const QA_BUILDER_BASE_ARS = 1
+export const QA_BUILDER_EXTRA_SECTION_ARS = 0
+export const QA_BUILDER_COMMERCE_ARS = 0
 
 /** Los tres planes de LAB de prueba cuestan lo mismo, por mes o por año, y sin prueba gratis. */
-export const QA_LAB_PRICE_ARS = 1000
+export const QA_LAB_PRICE_ARS = 1
 
 /** @param {string} sku */
 export function isQaSku(sku) {

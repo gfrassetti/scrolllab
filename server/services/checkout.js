@@ -128,13 +128,18 @@ export async function createCheckoutOrder({
   // calcula el servidor sobre el precio de lista, nunca sale de un monto suyo.
   // Sin código (un «Comprar» rápido), el servidor aplica igual el 10% si es su
   // primera compra: nunca depende de que el front lo mande.
-  const coupon = couponCode
+  let coupon = couponCode
     ? await resolveCouponForCheckout({
         code: couponCode,
         userId: db.uid(user),
         userEmail: user.email,
       })
     : await autoWelcomeCoupon({ user })
+  // Prueba a $1: el 10% no baja el precio. No se aplica ni se gasta (y la
+  // pantalla de MP no dice «10% off» sin descuento).
+  if (qa && coupon && resolved.every((i) => qaDiscountedArs(i.list_ars, coupon.percent) >= i.list_ars)) {
+    coupon = null
+  }
 
   // Paddle cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {

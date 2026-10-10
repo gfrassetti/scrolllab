@@ -113,7 +113,9 @@ export default function BuilderPage({ qa = false }) {
   const qaPriceLabel = qa ? formatArs(qaCustomPriceArs(recipe)) : null
   const priceHint = (() => {
     if (qa) {
-      return `Prueba: ${formatArs(QA_BUILDER_BASE_ARS)} con ${CUSTOM_BASE_SECTIONS} secciones, ${formatArs(QA_BUILDER_EXTRA_SECTION_ARS)} por sección extra y ${formatArs(QA_BUILDER_COMMERCE_ARS)} con commerce.`
+      return QA_BUILDER_EXTRA_SECTION_ARS || QA_BUILDER_COMMERCE_ARS
+        ? `Prueba: ${formatArs(QA_BUILDER_BASE_ARS)} con ${CUSTOM_BASE_SECTIONS} secciones, ${formatArs(QA_BUILDER_EXTRA_SECTION_ARS)} por sección extra y ${formatArs(QA_BUILDER_COMMERCE_ARS)} con commerce.`
+        : `Prueba: cualquier composición cuesta ${formatArs(QA_BUILDER_BASE_ARS)}.`
     }
     const next = formatNextSectionPrice(
       sectionCount,

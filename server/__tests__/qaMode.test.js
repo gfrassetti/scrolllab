@@ -11,6 +11,7 @@ import {
   QA_BUILDER_COMMERCE_ARS,
   QA_LAB_PRICE_ARS,
   qaCustomPriceArs,
+  qaDiscountedArs,
 } from '../../src/domain/qa.js'
 import { orderPriceSummary } from '../../src/domain/orderSummary.js'
 
@@ -62,23 +63,25 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal((await agent.get('/api/auth/me')).body.user.qa, true)
   })
 
-  it('template de prueba: primera compra con el 10%, recibo, ZIP real, orden marcada y fuera de las métricas', async () => {
+  it('template de prueba: $1, recibo, ZIP real, orden marcada y fuera de las métricas', async () => {
     const agent = await loginAs(QA)
     const res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }] })
     assert.equal(res.status, 200, JSON.stringify(res.body))
     const pref = mp.lastPreference()
-    assert.equal(pref.items[0].unit_price, 90)
+    // A $1 el 10% no baja nada: ni se aplica ni se anuncia en la pantalla de MP.
+    assert.equal(pref.items[0].unit_price, QA_TEMPLATE_ARS)
     assert.equal(pref.items[0].currency_id, 'ARS')
     assert.match(pref.items[0].title, /PRUEBA/)
-    assert.match(pref.items[0].description, /\$ 100/)
+    assert.doesNotMatch(pref.items[0].title, /off/)
 
     const order = await fileDb.findOrderById(res.body.orderId)
     assert.equal(order.qa, true)
-    assert.equal(order.total, 90)
+    assert.equal(order.total, QA_TEMPLATE_ARS)
+    assert.equal(order.couponCode, undefined, 'el cupón no se gasta en una prueba sin descuento')
     assert.equal(order.items[0].sku, QA_TEMPLATE_MODEL)
     assert.equal(order.items[0].list_ars, QA_TEMPLATE_ARS)
     const summary = orderPriceSummary(order)
-    assert.deepEqual([summary.subtotal, summary.discount, summary.total], [100, 10, 90])
+    assert.deepEqual([summary.subtotal, summary.discount, summary.total], [QA_TEMPLATE_ARS, 0, QA_TEMPLATE_ARS])
 
     const payment = mp.pay(pref.id)
     assert.equal((await webhook('payment', payment.id)).status, 200)
@@ -91,9 +94,13 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     const list = (await agent.get('/api/orders')).body.orders
     assert.equal(list.find((o) => o.id === res.body.orderId).qa, true)
 
-    // Segunda compra de prueba: ya sin el 10%.
     await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }] })
     assert.equal(mp.lastPreference().items[0].unit_price, QA_TEMPLATE_ARS)
+  })
+
+  it('con un precio de prueba que sí baja con el 10%, la primera compra lo aplica', () => {
+    assert.equal(qaDiscountedArs(100, 10), 90)
+    assert.equal(qaDiscountedArs(1, 10), 1, 'a $1 el 10% no baja nada')
   })
 
   it('arrepentimiento de una compra de prueba: se devuelve solo y llega «Te devolvimos el dinero»', async () => {
@@ -113,7 +120,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     )
   })
 
-  it('builder de prueba: base, sección extra y commerce en pesos fijos', async () => {
+  it('builder de prueba: precio fijo en pesos (base, extras y commerce de src/domain/qa.js)', async () => {
     assert.equal(qaCustomPriceArs(RECIPE3), QA_BUILDER_BASE_ARS)
     const ten = Array.from({ length: 10 }, (_, i) => RECIPE3[i % 3])
     assert.equal(qaCustomPriceArs(ten), QA_BUILDER_BASE_ARS + 2 * QA_BUILDER_EXTRA_SECTION_ARS)
@@ -146,7 +153,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal(res.status, 400, 'la receta se valida igual que en el builder real')
   })
 
-  it('LAB de prueba: los tres planes a $1000, sin prueba gratis, cobra al suscribirse y vuelve a /lab-test', async () => {
+  it('LAB de prueba: los tres planes al precio de prueba, sin prueba gratis, cobra al suscribirse y vuelve a /lab-test', async () => {
     const agent = await loginAs(QA)
     const plans = (await agent.get('/api/subscriptions/plans?qa=1')).body
     assert.equal(plans.qa, true)

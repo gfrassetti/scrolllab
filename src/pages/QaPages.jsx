@@ -45,7 +45,7 @@ const FLOWS = [
   {
     title: 'Template',
     steps: [
-      `Comprar el template de prueba (${formatArs(QA_TEMPLATE_ARS)}; con el 10% de primera compra si todavía no compraste).`,
+      `Comprar el template de prueba (${formatArs(QA_TEMPLATE_ARS)}).`,
       'Llega «Tu compra en SCROLLLAB» y la orden aparece en Mis compras como «PRUEBA — …».',
       'Sin descargar: Mis compras → Pedir reembolso. Se devuelve solo y llega «Te devolvimos el dinero».',
       'Otra compra: descargar el ZIP y verificar que ya no ofrece el reembolso automático.',
@@ -54,7 +54,7 @@ const FLOWS = [
   {
     title: 'Builder',
     steps: [
-      `Armar una composición en /builder-test (${formatArs(QA_BUILDER_BASE_ARS)} con 8 secciones) y comprar.`,
+      `Armar una composición en /builder-test (${formatArs(QA_BUILDER_BASE_ARS)}, cualquiera) y comprar.`,
       'Recibo, ZIP con las secciones elegidas y su LICENSE con tu orden.',
       'Arrepentimiento desde /arrepentimiento sin sesión: llega el mail para confirmar y el link devuelve la plata.',
     ],

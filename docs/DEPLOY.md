@@ -381,9 +381,13 @@ arrepentimiento con devolución, LAB y cada mail) sin vender nada a precio de
 lista. Variable: `QA_BUYER_EMAILS=guidofrassetti@gmail.com` (lista separada por
 coma). Solo esas cuentas de Google ven:
 
-- `/test` — el template de prueba (ZIP real de CHAPTERS) a **$100** y el paso a paso.
-- `/builder-test` — el builder a **$200** con 8 secciones, $10 cada extra, $50 con commerce.
-- `/lab-test` — los tres planes de LAB a **$1000** por mes (o año), **sin prueba gratis**: cobra al suscribirse.
+- `/test` — el template de prueba (ZIP real de CHAPTERS) a **$1** y el paso a paso.
+- `/builder-test` — el builder: cualquier composición a **$1**.
+- `/lab-test` — los tres planes de LAB a **$1** por mes (o año), **sin prueba gratis**: cobra al suscribirse.
+
+Todo a $1, lo mínimo (si Mercado Pago rechaza un monto, se sube en
+`src/domain/qa.js`). Con $1 el 10% de primera compra no baja nada: no se
+aplica ni se gasta (si un precio de prueba sube, vuelve a aplicarse).
 
 Para cualquier otra cuenta (o sin sesión) esas rutas son la 404 y el servidor
 rechaza los productos de prueba. Se cobran solo con Mercado Pago, de a uno y sin
