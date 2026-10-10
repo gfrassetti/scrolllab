@@ -35,7 +35,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
   let config
 
   before(async () => {
-    process.env.QA_BUYER_EMAILS = ` ${QA.toUpperCase()} , otra@test.com, lab-a@test.com, lab-b@test.com, lab-c@test.com, lab-d@test.com`
+    process.env.QA_BUYER_EMAILS = ` ${QA.toUpperCase()} , otra@test.com, lab-a@test.com, lab-b@test.com, lab-c@test.com, lab-d@test.com, lab-e@test.com`
     ;({ app, loginAs, webhook, cleanup, fileDb, config } = await startAppAgainstFakeMp(mp))
   })
   after(() => {
@@ -313,6 +313,44 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal((await fileDb.findWithdrawalByCode(w.body.code)).status, 'refunded')
     assert.ok(mp.refundCalls.some((c) => c.id === String(ap.payment.id)))
     assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
+  })
+
+  it('cupo: bajar de plan con más publicados que el cupo nuevo se rechaza; dado de baja, queda solo el del plan gratis', async () => {
+    const { default: request } = await import('supertest')
+    const { agent } = await qaSubscribed('lab-e@test.com', 'hosted_pro')
+    const sections = ['chapters/FooterCTA', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'atrium/FooterAtrium', 'chapters/BigNumbers', 'velocity/HelmetGrid']
+    const keys = []
+    const ids = []
+    for (const sectionId of sections) {
+      const created = await agent.post('/api/hosted').send({ sectionId })
+      assert.equal(created.status, 201, JSON.stringify(created.body))
+      const pub = await agent.put(`/api/hosted/${created.body.instance.id}`).send({ publish: true })
+      assert.equal(pub.status, 200, JSON.stringify(pub.body))
+      ids.push(created.body.instance.id)
+      keys.push(created.body.instance.key)
+      await new Promise((r) => setTimeout(r, 5)) // createdAt distinto: queda el más viejo
+    }
+
+    // 6 publicados en Pro → Starter permite 5: no deja bajar y dice cuántos despublicar.
+    const quote = await agent.get('/api/subscriptions/change/quote?plan=hosted_starter')
+    assert.equal(quote.status, 402)
+    assert.match(quote.body.error, /Despublicá 1 antes de bajar de plan/)
+    assert.equal((await agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })).status, 402)
+
+    // Despublica uno (elige cuál) y ahí sí.
+    await agent.put(`/api/hosted/${ids[5]}`).send({ unpublish: true })
+    assert.equal((await agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })).status, 200)
+
+    // Se arrepiente: baja inmediata → plan gratis (1). Solo el más viejo sigue en los sitios.
+    const w = await agent.post('/api/withdrawals').send({ email: 'lab-e@test.com', name: 'Cliente E' })
+    assert.equal(w.body.outcome, 'refunded', JSON.stringify(w.body))
+    const served = []
+    for (const key of keys.slice(0, 5)) {
+      served.push((await request(app).get(`/api/embed/${key}/config`)).status)
+    }
+    assert.deepEqual(served, [200, 402, 402, 402, 402])
+    // Y no puede publicar otro.
+    assert.equal((await agent.put(`/api/hosted/${ids[5]}`).send({ publish: true })).status, 402)
   })
 
   it('las métricas del panel no cuentan las compras ni las suscripciones de prueba', async () => {
