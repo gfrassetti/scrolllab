@@ -1,7 +1,7 @@
 import { db } from '../../db.js'
 import { alertAdmin } from '../orders.js'
 import { noteRefund } from '../refundLedger.js'
-import { subId, isMock } from './billing.js'
+import { subId, isMock, fireCanceled } from './billing.js'
 import { cancelPreapprovalConfirmed } from './mpSync.js'
 import { cancelPaddleConfirmed, isPaddleSub } from './paddleSync.js'
 
@@ -134,6 +134,9 @@ async function endSubscriptionNow(sub, config, deps) {
   sub.currentPeriodEnd = now
   sub.refundedAt = now
   await sub.save()
+  // Nuestro mail de baja (además del de MP): «quedó dado de baja, no se te va a
+  // cobrar de nuevo; las secciones por encima del tope gratis dejan de verse».
+  fireCanceled(sub, config)
 }
 
 /**

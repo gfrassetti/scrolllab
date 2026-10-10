@@ -253,6 +253,13 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     const ledger = (await fileDb.listRefunds()).filter((r) => r.subscriptionId === subscriptionId)
     assert.deepEqual(ledger.map((r) => r.externalId).sort(), [`mp-${ap.payment.id}`, `mp-${upg.id}`].sort())
     await waitFor(() => refundMails('lab-a@test.com').length === 2, 'los dos mails de devolución')
+    // Y nuestro mail de baja (no solo el de MP).
+    await waitFor(
+      () => mp.mailsTo('lab-a@test.com').some((m) => /Cancelaste tu suscripción/.test(m.body.subject)),
+      'el mail de baja',
+    )
+    const row = await fileDb.findWithdrawalByCode(w.body.code)
+    assert.match(row.note, /primer cobro \+ diferencias de plan/)
 
     // Llega el webhook de MP de esa devolución: no repite nada.
     assert.equal((await webhook('payment', upg.id, { source: 'lab' })).status, 200)

@@ -137,6 +137,7 @@ async function refundLab(sub, row, config, deps) {
   // Diferencias de plan pagadas en el plazo: también vuelven (la baja es
   // inmediata, no se quedan con días que ya no usan). Antes que el primer
   // cobro: si una falla, no quedó nada a medias dado de baja.
+  const extraIds = []
   for (const extra of (sub.upgradePayments || []).filter((p) => p.outcome === 'applied' && p.paymentId && !p.refundedAt)) {
     await (deps.refundPayment || refundPayment)(token, extra.paymentId, {
       idempotencyKey: `scrolllab-withdrawal-${row.code}-upg-${extra.paymentId}`,
@@ -151,6 +152,7 @@ async function refundLab(sub, row, config, deps) {
       reason: 'refunded',
       config,
     })
+    extraIds.push(String(paid.id))
   }
   await (deps.refundPayment || refundPayment)(token, sub.firstChargeId, {
     idempotencyKey: `scrolllab-withdrawal-${row.code}`,
@@ -168,7 +170,11 @@ async function refundLab(sub, row, config, deps) {
     reason: 'refunded',
     config,
   })
-  return { status: 'refunded', note: `pago MP ${payment.id}` }
+  const ids = [String(payment.id), ...extraIds]
+  return {
+    status: 'refunded',
+    note: ids.length > 1 ? `pagos MP ${ids.join(', ')} (primer cobro + diferencias de plan)` : `pago MP ${payment.id}`,
+  }
 }
 
 /**
