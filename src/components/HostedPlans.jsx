@@ -127,6 +127,9 @@ export default function HostedPlans({ qa: qaPage = false }) {
   const [freeQuota, setFreeQuota] = useState(0)
   const [cycle, setCycle] = useState('monthly')
   const [busy, setBusy] = useState('')
+  // Publicadas por encima del cupo: congeladas (no se ven). «6 / 1» confundía.
+  const liveUsed = Number.isFinite(quota) ? Math.min(used || 0, quota) : used || 0
+  const frozenCount = Math.max(0, (used || 0) - liveUsed)
   const [error, setError] = useState('')
   // El error se muestra arriba de la sección y el botón que lo causó suele estar
   // más abajo (en la tarjeta del plan): sin traerlo a la vista, no se veía.
@@ -503,9 +506,10 @@ export default function HostedPlans({ qa: qaPage = false }) {
             <p className="mt-2 text-body-sm text-ink/70">
               {t('lab.planActiveState', {
                 plan: t(`lab.tier.${plan.replace('hosted_', '')}`),
-                used,
+                used: liveUsed,
                 quota: displayQuota(quota),
               })}
+              {frozenCount ? t('lab.planFrozenSuffix', { n: frozenCount }) : ''}
               {currentPlanMeta && (
                 <>
                   {' · '}
@@ -623,7 +627,8 @@ export default function HostedPlans({ qa: qaPage = false }) {
               </p>
             )}
             <p className="mt-4 text-body-sm text-ink/55">
-              {t('lab.planFreeState', { used, quota: displayQuota(quota) })}
+              {t('lab.planFreeState', { used: liveUsed, quota: displayQuota(quota) })}
+              {frozenCount ? t('lab.planFrozenSuffix', { n: frozenCount }) : ''}
             </p>
           </>
         )

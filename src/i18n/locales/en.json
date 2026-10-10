@@ -139,6 +139,7 @@
     ],
     "planFreeState": "Free plan — {{used}} / {{quota}} published",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} published",
+    "planFrozenSuffix": " · {{n}} frozen",
     "planActiveUntil": "Your plan is active until {{date}}.",
     "planCancel": "Cancel subscription",
     "planCancelConfirm": "Cancel? You keep access until {{date}} and won’t be charged again.",
