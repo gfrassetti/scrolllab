@@ -21,7 +21,26 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const INK = '#2a2622'
 const SAND = '#dfd8cf'
 
-export default function Contact({ eyebrow, title, body, submitLabel, note, endpoint = '', bg, fg }) {
+export default function Contact({
+  eyebrow,
+  title,
+  body,
+  submitLabel,
+  note,
+  // Vacíos = según el idioma (lang.jsx): rótulos, errores y estados del envío.
+  nameLabel,
+  emailLabel,
+  messageLabel,
+  requiredError,
+  emailError,
+  shortError,
+  sendingLabel,
+  sentMessage,
+  errorMessage,
+  endpoint = '',
+  bg,
+  fg,
+}) {
   const ink = fg || INK
   const sand = bg || SAND
   const { t } = useLang()
@@ -49,9 +68,9 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
 
   const validate = () => {
     const next = {}
-    if (!values.name.trim()) next.name = t('required')
-    if (!EMAIL_RE.test(values.email.trim())) next.email = t('invalidEmail')
-    if (values.message.trim().length < 10) next.message = t('tooShort')
+    if (!values.name.trim()) next.name = requiredError ?? t('required')
+    if (!EMAIL_RE.test(values.email.trim())) next.email = emailError ?? t('invalidEmail')
+    if (values.message.trim().length < 10) next.message = shortError ?? t('tooShort')
     return next
   }
 
@@ -87,8 +106,8 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
   }
 
   const fields = [
-    { key: 'name', label: t('name'), type: 'text', autoComplete: 'name' },
-    { key: 'email', label: t('emailLabel'), type: 'email', autoComplete: 'email' },
+    { key: 'name', label: nameLabel ?? t('name'), type: 'text', autoComplete: 'name' },
+    { key: 'email', label: emailLabel ?? t('emailLabel'), type: 'email', autoComplete: 'email' },
   ]
   const sending = status === 'sending'
 
@@ -150,7 +169,7 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
             </label>
           ))}
           <label htmlFor={`${uid}-message`} className="mer-ct-field block">
-            <span className="mer-ct-label">{t('message')}</span>
+            <span className="mer-ct-label">{messageLabel ?? t('message')}</span>
             <textarea
               id={`${uid}-message`}
               rows={4}
@@ -171,7 +190,7 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               <span aria-hidden="true" className="mer-ct-btn-fill absolute inset-0" />
-              <span className="relative">{sending ? t('sending') : (submitLabel ?? t('send'))}</span>
+              <span className="relative">{sending ? (sendingLabel ?? t('sending')) : (submitLabel ?? t('send'))}</span>
             </button>
             <p
               role="status"
@@ -179,7 +198,7 @@ export default function Contact({ eyebrow, title, body, submitLabel, note, endpo
               className="text-[11px] uppercase tracking-[0.06em] opacity-60"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {status === 'sent' ? t('sent') : status === 'error' ? t('error') : (note ?? t('note'))}
+              {status === 'sent' ? (sentMessage ?? t('sent')) : status === 'error' ? (errorMessage ?? t('error')) : (note ?? t('note'))}
             </p>
           </div>
         </form>

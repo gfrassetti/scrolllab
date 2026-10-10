@@ -17,12 +17,12 @@
  * glifo) va en ACCEPTED con el motivo. Animaciones y layout no son campos.
  *
  * Uso:
- *   npm run check:editable                 todas; falla en las fases cerradas
- *   npm run check:editable -- --all        lista también las pendientes
+ *   npm run check:editable                 todas; falla si alguna tiene algo fijo
+ *   npm run check:editable -- --all        lista también las que están al día
  *   npm run check:editable -- chapters/NavMinimal   una sola, con detalle
  *
- * Fases: `STRICT_KINDS` son los tipos ya llevados a paridad (fallan si algo
- * vuelve a quedar fijo); el resto se informa como pendiente.
+ * Desde 2026-10-10 las 86 secciones del builder están al 100%: una sección
+ * nueva entra al builder con todo en campos o con la excepción declarada.
  */
 import { spawnSync } from 'node:child_process'
 import { createServer } from 'vite'
@@ -35,8 +35,6 @@ if (major < 22 && !process.execArgv.includes('--experimental-detect-module')) {
   process.exit(rerun.status ?? 1)
 }
 
-/** Tipos de sección que ya tienen que estar 100% editables. */
-const STRICT_KINDS = ['nav', 'hero', 'footer']
 
 /**
  * Fijo a propósito, por sección: `texto` exacto (o RegExp) con el motivo.
@@ -48,6 +46,15 @@ const ACCEPTED = {
     // aria-label de un <nav>: nombra el landmark para el lector de pantalla,
     // no es copy de la página.
     [/^(primary|main|primary navigation|main navigation|links)$/i, 'nombre del landmark <nav>'],
+  ],
+  'commerce/ProductGrid': [
+    [/^\/product\//, 'ruta de la ficha del kit: la arma el id de cada producto'],
+  ],
+  'meridian/Location': [
+    [/^\/meridian\/map\//, 'el mapa lleva los pines dibujados en código sobre esa geografía (README del ZIP)'],
+  ],
+  'meridian/Masterplan': [
+    [/^\/meridian\/gallery\/masterplan/, 'los contornos de los lotes están dibujados en código sobre esa foto (README del ZIP)'],
   ],
   'meridian/Hero': [
     [/^(language|es|en)$/i, 'selector de idioma del template: los idiomas son los del diccionario (lang.jsx)'],
@@ -228,7 +235,11 @@ try {
     ]
     // tel: sale del campo de teléfono (el link se queda con los dígitos).
     const link = [
-      ...new Set(links.filter((u) => u && !isSentinel(u) && u !== '#' && u !== '#top' && !u.startsWith('tel:'))),
+      ...new Set(
+        links.filter(
+          (u) => u && !isSentinel(u) && u !== '#' && u !== '#top' && !u.startsWith('tel:') && !accepted(id, u),
+        ),
+      ),
     ]
     const colorFields = fields.filter((f) => f.type === 'color')
     const color = !colorFields.length
@@ -255,8 +266,6 @@ try {
     rows.push({ id, kind: sectionKindOf(id), fields: fields.length, text, image, link, color, issues, unseen })
   }
 
-  const strict = rows.filter((r) => STRICT_KINDS.includes(r.kind))
-  const pending = rows.filter((r) => !STRICT_KINDS.includes(r.kind))
   const line = (r) =>
     r.error
       ? `  ✖ ${r.id}: no renderiza (${r.error})`
@@ -269,26 +278,18 @@ try {
   const unseenLine = (r) =>
     r.unseen?.length ? `      (aviso) no se ve al cargar: ${r.unseen.join(', ')}` : null
 
-  console.log(`\nFases cerradas (${STRICT_KINDS.join(', ')}): tienen que estar 100% editables`)
-  for (const r of strict) {
+  console.log('')
+  for (const r of rows) {
+    const bad = r.issues || r.error
+    if (bad) failed = true
+    if (!bad && !showAll && !only) continue
     console.log(line(r))
-    if (r.issues || r.error) {
-      failed = true
-      detail(r)
-    }
+    if (bad) detail(r)
     const warn = unseenLine(r)
-    if (warn) console.log(warn)
+    if (warn && (showAll || only)) console.log(warn)
   }
-  const pendingBad = pending.filter((r) => r.issues || r.error)
-  console.log(`\nPendientes (resto): ${pending.length - pendingBad.length}/${pending.length} al día`)
-  if (showAll || only) {
-    for (const r of pending) {
-      console.log(line(r))
-      if (r.issues) detail(r)
-    }
-  }
-  const okStrict = strict.filter((r) => !r.issues && !r.error).length
-  console.log(`\n${failed ? '✖' : '✓'} ${okStrict}/${strict.length} navs/heroes/footers 100% editables`)
+  const ok = rows.filter((r) => !r.issues && !r.error).length
+  console.log(`\n${failed ? '✖' : '✓'} ${ok}/${rows.length} secciones del builder 100% editables`)
 } finally {
   await vite.close()
 }

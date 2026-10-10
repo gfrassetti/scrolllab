@@ -43,7 +43,15 @@ const DEFAULT_SLIDES = [1, 2, 3, 4, 5].map((n) => ({
 const RUNWAY_PER_STEP = 0.9
 const EASE = 0.1
 
-export default function GallerySlider({ slides, bg, fg }) {
+export default function GallerySlider({
+  slides,
+  // Lo que lee un lector de pantalla en el carrusel y sus flechas.
+  galleryLabel = 'Project gallery',
+  prevLabel = 'Previous slide',
+  nextLabel = 'Next slide',
+  bg,
+  fg,
+}) {
   const valid = slides?.filter((s) => s?.img)
   const list = valid?.length ? valid : DEFAULT_SLIDES
   const n = list.length
@@ -169,7 +177,7 @@ export default function GallerySlider({ slides, bg, fg }) {
           className="relative h-[62svh] overflow-hidden select-none md:h-full"
           role="region"
           aria-roledescription="carousel"
-          aria-label="Project gallery"
+          aria-label={galleryLabel}
         >
           {list.map((s, i) => (
             <div
@@ -223,7 +231,7 @@ export default function GallerySlider({ slides, bg, fg }) {
             <button
               type="button"
               className={`${btn} border-current`}
-              aria-label="Previous slide"
+              aria-label={prevLabel}
               disabled={index === 0}
               onClick={() => goTo(index - 1)}
             >
@@ -248,7 +256,7 @@ export default function GallerySlider({ slides, bg, fg }) {
             <button
               type="button"
               className={`${btn} border-current`}
-              aria-label="Next slide"
+              aria-label={nextLabel}
               disabled={index === n - 1}
               onClick={() => goTo(index + 1)}
             >

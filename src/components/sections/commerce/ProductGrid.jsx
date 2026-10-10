@@ -24,6 +24,8 @@ export default function ProductGrid({
   title = 'The drop',
   body = 'Placeholder products. Replace names, prices and images with yours.',
   products,
+  /** El botón de agregar rápido de cada producto. */
+  addLabel = 'Add',
 }) {
   const addItem = useShopCart((s) => s.addItem)
   const catalog = useShopCatalog()
@@ -82,7 +84,7 @@ export default function ProductGrid({
                 className="border border-[color:var(--shop-border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-fg)] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
                 style={{ borderRadius: 'var(--shop-radius)' }}
               >
-                Add
+                {addLabel}
               </button>
               {/* Quick-add takes the first option; the full picker lives on
                   the product page (not every product has one — see PDP). */}

@@ -221,7 +221,7 @@ npm run ssr:snapshot   # HTML renderizado en el servidor: la red de los refactor
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
-npm run check:editable # todo texto/imagen/link/color visible de cada sección es un campo (SSR); navs, heroes y footers ya al 100% (-- --all lista el resto)
+npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:paddle-sandbox # transacciones (template, cupón, builder, LAB con prueba) contra el sandbox real de Paddle

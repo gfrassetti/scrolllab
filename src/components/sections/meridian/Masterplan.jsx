@@ -59,7 +59,14 @@ const DEFAULT_UNITS = OUTLINES.map((_, i) => ({
 const INK = '#2a2622'
 const SAND = '#dfd8cf'
 
-export default function Masterplan({ units, bg, fg }) {
+export default function Masterplan({
+  units,
+  // Lo que lee un lector de pantalla en las dos flechas.
+  scrollLeftLabel = 'Scroll left',
+  scrollRightLabel = 'Scroll right',
+  bg,
+  fg,
+}) {
   // bg / fg: la tarjeta que se abre sobre cada punto (la foto aérea no cambia)
   const ink = fg || INK
   const sand = bg || SAND
@@ -174,7 +181,7 @@ export default function Masterplan({ units, bg, fg }) {
         <button
           key={dir}
           type="button"
-          aria-label={dir < 0 ? 'Scroll left' : 'Scroll right'}
+          aria-label={dir < 0 ? scrollLeftLabel : scrollRightLabel}
           onClick={() => nudge(dir)}
           className="mer-mp-arrow absolute top-1/2 z-20 -mt-[22px] flex h-11 w-11 items-center justify-center rounded-full min-[1000px]:hidden"
           data-show={dir < 0 ? edge.left : edge.right}

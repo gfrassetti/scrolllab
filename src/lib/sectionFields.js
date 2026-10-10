@@ -88,6 +88,20 @@ const CHAPTER_LABEL = { key: 'chapterLabel', label: 'Rótulo del capítulo («Ch
 /** @type {SectionField} */
 const SEQ_LABEL = { key: 'seqLabel', label: 'Rótulo de la secuencia («Seq.»)', type: 'text' }
 
+/**
+ * Formularios de contacto (FIZZ ContactSteps, MERIDIAN Contact): adónde se
+ * mandan los mensajes.
+ * @type {FieldHelp}
+ */
+const FORM_ENDPOINT_HELP = {
+  title: 'Cómo recibir los mensajes',
+  steps: [
+    'Vacío, el formulario funciona en modo demo: valida y muestra el «gracias», pero no manda nada.',
+    'Con una URL, envía un POST con JSON { name, email, message } y toma cualquier respuesta que no sea 2xx como error.',
+    'Sirve tu propia API, una función serverless o un servicio de formularios (Formspree, Basin, etc.).',
+  ],
+}
+
 /** El botón del menú en el teléfono: lo que dice cerrado y abierto. */
 /** @type {SectionField[]} */
 const MENU_BUTTON = [
@@ -216,6 +230,16 @@ export const SECTION_FIELDS = {
     { key: 'body', label: 'Texto (vacío = según idioma)', type: 'textarea' },
     { key: 'submitLabel', label: 'Botón (vacío = según idioma)', type: 'text' },
     { key: 'note', label: 'Nota (vacío = según idioma)', type: 'text' },
+    { key: 'nameLabel', label: 'Rótulo — nombre (vacío = según idioma)', type: 'text' },
+    { key: 'emailLabel', label: 'Rótulo — email (vacío = según idioma)', type: 'text' },
+    { key: 'messageLabel', label: 'Rótulo — mensaje (vacío = según idioma)', type: 'text' },
+    { key: 'requiredError', label: 'Error — campo vacío (vacío = según idioma)', type: 'text' },
+    { key: 'emailError', label: 'Error — email inválido (vacío = según idioma)', type: 'text' },
+    { key: 'shortError', label: 'Error — mensaje corto (vacío = según idioma)', type: 'text' },
+    { key: 'sendingLabel', label: 'Enviando (vacío = según idioma)', type: 'text' },
+    { key: 'sentMessage', label: 'Enviado (vacío = según idioma)', type: 'text' },
+    { key: 'errorMessage', label: 'Falla al enviar (vacío = según idioma)', type: 'text' },
+    { key: 'endpoint', label: 'Adónde se envía (URL)', type: 'url', help: FORM_ENDPOINT_HELP },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -264,6 +288,8 @@ export const SECTION_FIELDS = {
         { key: 'line2', label: 'Línea 2 (superficie)', type: 'text' },
       ],
     },
+    { key: 'scrollLeftLabel', label: 'Flecha izquierda — nombre para lectores de pantalla', type: 'text' },
+    { key: 'scrollRightLabel', label: 'Flecha derecha — nombre para lectores de pantalla', type: 'text' },
     { key: 'bg', label: 'Tarjeta de cada punto — fondo', type: 'color' },
     { key: 'fg', label: 'Tarjeta de cada punto — texto', type: 'color' },
   ],
@@ -281,6 +307,8 @@ export const SECTION_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'readLabel', label: 'Botón de cada tarjeta — «Leer sobre…» para lectores de pantalla', type: 'text' },
+    { key: 'closeLabel', label: 'Botón de cada tarjeta — «Cerrar…» para lectores de pantalla', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -337,6 +365,7 @@ export const SECTION_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'dragLabel', label: 'Cartel que sigue al mouse sobre las tarjetas', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -351,6 +380,9 @@ export const SECTION_FIELDS = {
         { key: 'alt', label: 'Texto alternativo', type: 'text' },
       ],
     },
+    { key: 'galleryLabel', label: 'Nombre del carrusel para lectores de pantalla', type: 'text' },
+    { key: 'prevLabel', label: 'Flecha anterior — nombre para lectores de pantalla', type: 'text' },
+    { key: 'nextLabel', label: 'Flecha siguiente — nombre para lectores de pantalla', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -761,19 +793,7 @@ export const SECTION_FIELDS = {
     { key: 'successBody', label: 'Éxito — texto', type: 'textarea' },
     { key: 'restartLabel', label: 'Éxito — escribir otro', type: 'text' },
     { key: 'failureMessage', label: 'Falla al enviar — texto', type: 'text' },
-    {
-      key: 'endpoint',
-      label: 'Adónde se envía (URL)',
-      type: 'url',
-      help: {
-        title: 'Cómo recibir los mensajes',
-        steps: [
-          'Vacío, el formulario funciona en modo demo: valida y muestra el «gracias», pero no manda nada.',
-          'Con una URL, envía un POST con JSON { name, email, message } y toma cualquier respuesta que no sea 2xx como error.',
-          'Sirve tu propia API, una función serverless o un servicio de formularios (Formspree, Basin, etc.).',
-        ],
-      },
-    },
+    { key: 'endpoint', label: 'Adónde se envía (URL)', type: 'url', help: FORM_ENDPOINT_HELP },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -1426,6 +1446,16 @@ export const SECTION_FIELDS = {
     { key: 'line2', label: 'Titular — línea 2', type: 'text' },
     { key: 'label', label: 'Etiqueta', type: 'text' },
     { key: 'featuredLabel', label: 'Nombres — título', type: 'text' },
+    {
+      key: 'items',
+      label: 'Obras (en orden)',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'src', label: 'Foto (vacío = el dibujo de la demo)', type: 'image' },
+      ],
+    },
     { key: 'ctaLabel', label: 'CTA', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
@@ -1599,6 +1629,7 @@ export const SECTION_FIELDS = {
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'addLabel', label: 'Botón de agregar rápido', type: 'text' },
     // El catálogo del kit: la grilla, la ficha, el carrito y el checkout usan
     // estos productos (src/lib/shop/catalog.js). Lo que una fila deja vacío
     // toma el valor del producto de ejemplo en esa posición.

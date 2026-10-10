@@ -43,13 +43,22 @@ export default function Collection({
   line2,
   label = 'Collection',
   featuredLabel = 'Featured:',
-  items = ARTWORKS,
+  items: itemsProp,
   ctaLabel = 'Learn more',
   ctaHref = '#',
   bg,
   fg,
   accent: accentProp,
 }) {
+  // Del builder llegan obras con nombre y foto; una sin foto conserva el
+  // dibujo de la demo en ese lugar.
+  const items =
+    Array.isArray(itemsProp) && itemsProp.length
+      ? itemsProp.map((it, i) => {
+          const d = ARTWORKS[i % ARTWORKS.length]
+          return { ...d, name: it?.name || d.name, ...(it?.src ? { src: it.src } : {}) }
+        })
+      : ARTWORKS
   // Papel (bg), tinta (fg) y acento editables. Las clases leen --kin-*; lo
   // que anima GSAP usa los valores resueltos.
   const inkColor = fg || INK
@@ -186,8 +195,8 @@ export default function Collection({
         [{pad(total)}] {featuredLabel}
       </p>
       <ul>
-        {items.map((it) => (
-          <li key={it.name} data-kin-name data-on="false" className="kin-name flex items-center gap-[0.5em]">
+        {items.map((it, i) => (
+          <li key={i} data-kin-name data-on="false" className="kin-name flex items-center gap-[0.5em]">
             <span aria-hidden="true" className="kin-name-mark inline-block h-[0.62em] w-[0.3em]" style={{ backgroundColor: 'var(--kin-accent, #e1371f)' }} />
             {it.name}
           </li>
@@ -228,7 +237,7 @@ export default function Collection({
         </h2>
         <ul className="mt-[8svh] grid grid-cols-2 gap-[4.5vw] md:grid-cols-3 md:gap-[1.25vw]">
           {items.map((it, i) => (
-            <li key={it.name}>
+            <li key={i}>
               <div className="kin-grain relative aspect-[4/5] overflow-hidden">
                 <Work item={it} />
               </div>
@@ -270,7 +279,7 @@ export default function Collection({
         {/* The stack: first third of the triptych, then the left column. */}
         <div ref={frameRef} className="kin-grain absolute top-0 left-0 z-10 h-full w-[33.34%] overflow-hidden bg-(--kin-ink)">
           {items.map((it, i) => (
-            <div key={it.name} data-kin-work className="absolute inset-0 overflow-hidden" style={{ zIndex: i }}>
+            <div key={i} data-kin-work className="absolute inset-0 overflow-hidden" style={{ zIndex: i }}>
               <div data-kin-work-inner className="h-full w-full">
                 <Work item={it} />
               </div>

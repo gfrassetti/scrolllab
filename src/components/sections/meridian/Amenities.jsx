@@ -47,6 +47,9 @@ export default function Amenities({
   title = 'A blend of [Feature One] and [Feature Two] designed to enhance daily life',
   label = 'Amenities',
   items,
+  // Lo que lee un lector de pantalla en el botón de cada tarjeta.
+  readLabel = 'Read about',
+  closeLabel = 'Close',
   bg,
   fg,
 }) {
@@ -224,7 +227,7 @@ export default function Amenities({
               </h3>
               <button
                 type="button"
-                aria-label={open === i ? `Close ${it.title}` : `Read about ${it.title}`}
+                aria-label={open === i ? `${closeLabel} ${it.title}` : `${readLabel} ${it.title}`}
                 aria-expanded={open === i}
                 className="mer-am-btn relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full"
                 onClick={() => setOpen(open === i ? null : i)}

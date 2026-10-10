@@ -144,6 +144,8 @@ export default function Location({
   ctaHref = '#',
   location = '[Region], [Country]',
   places,
+  /** El cartel que sigue al mouse sobre las tarjetas. */
+  dragLabel = 'drag',
   bg,
   fg,
 }) {
@@ -490,7 +492,7 @@ export default function Location({
         className="pointer-events-none fixed top-0 left-0 z-40 hidden text-[12px] uppercase tracking-[0.14em] opacity-0 transition-opacity duration-300 md:block"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
-        drag
+        {dragLabel}
       </span>
 
       <style>{`
