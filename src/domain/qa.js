@@ -24,11 +24,24 @@ export const QA_BUILDER_EXTRA_SECTION_ARS = 0
 export const QA_BUILDER_COMMERCE_ARS = 0
 
 /**
- * Los tres planes de LAB de prueba cuestan lo mismo, por mes o por año, y sin
- * prueba gratis. $15: el mínimo de Mercado Pago para suscripciones («Cannot pay
- * an amount lower than $ 15.00», visto en producción el 2026-10-10).
+ * LAB de prueba: escalonado para poder probar el cobro de la diferencia al
+ * subir de plan (y que bajar no cobra). $15 es el mínimo de Mercado Pago para
+ * suscripciones («Cannot pay an amount lower than $ 15.00», visto en producción
+ * el 2026-10-10). Mismo precio por mes o por año. Sin prueba gratis salvo que
+ * se pida (`qaTrial`, para probar la baja en la prueba).
  */
-export const QA_LAB_PRICE_ARS = 15
+export const QA_LAB_PRICES_ARS = Object.freeze({
+  hosted_starter: 15,
+  hosted_pro: 30,
+  hosted_studio: 60,
+})
+/** El más barato (el piso de MP). */
+export const QA_LAB_PRICE_ARS = QA_LAB_PRICES_ARS.hosted_starter
+/**
+ * La diferencia al subir de plan se cobra desde $1 (el piso de Checkout Pro).
+ * En los planes reales el mínimo es MIN_UPGRADE_CHARGE.
+ */
+export const QA_MIN_UPGRADE_CHARGE_ARS = 1
 
 /** @param {string} sku */
 export function isQaSku(sku) {

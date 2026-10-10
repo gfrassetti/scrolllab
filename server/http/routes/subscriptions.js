@@ -1,6 +1,6 @@
 import express from 'express'
 import { isQaBuyer } from '../../qa.js'
-import { QA_LAB_PRICE_ARS } from '../../../src/domain/qa.js'
+import { QA_LAB_PRICES_ARS } from '../../../src/domain/qa.js'
 import { db } from '../../db.js'
 import { requireAuth, asyncHandler, HttpError } from '../../middleware.js'
 import { assertObjectIdLike } from '../../validation.js'
@@ -40,13 +40,13 @@ export function createSubscriptionsRouter({ config, limits }) {
   // Lo hacemos explícito acá: el cliente lee `null`/no-finito como "ilimitado".
   const quotaForWire = (n) => (Number.isFinite(n) ? n : null)
 
-  /** `qa`: los planes de prueba (QA_LAB_PRICE_ARS los tres, src/domain/qa.js). */
+  /** `qa`: los planes de prueba (QA_LAB_PRICES_ARS, src/domain/qa.js). */
   function publicPlans({ qa = false } = {}) {
     return Object.values(HOSTED_PLANS).map((p) => ({
       id: p.id,
       tier: p.tier,
-      priceMonthly: qa ? QA_LAB_PRICE_ARS : p.priceMonthly,
-      priceYearly: qa ? QA_LAB_PRICE_ARS : p.priceYearly,
+      priceMonthly: qa ? QA_LAB_PRICES_ARS[p.id] : p.priceMonthly,
+      priceYearly: qa ? QA_LAB_PRICES_ARS[p.id] : p.priceYearly,
       // Cobro internacional (Paddle).
       priceMonthlyUsd: p.priceMonthlyUsd,
       priceYearlyUsd: p.priceYearlyUsd,
@@ -107,6 +107,7 @@ export function createSubscriptionsRouter({ config, limits }) {
         provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
         locale: req.body?.locale === 'en' ? 'en' : 'es',
         qa: req.body?.qa === true,
+        qaTrial: req.body?.qaTrial === true,
         config,
       })
       // El atajo de dev lo activa un endpoint de este router: el servicio no

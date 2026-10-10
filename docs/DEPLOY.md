@@ -383,11 +383,11 @@ coma). Solo esas cuentas de Google ven:
 
 - `/test` — el template de prueba (ZIP real de CHAPTERS) a **$1** y el paso a paso.
 - `/builder-test` — el builder: cualquier composición a **$1**.
-- `/lab-test` — los tres planes de LAB a **$15** por mes (o año), **sin prueba gratis**: cobra al suscribirse.
+- `/lab-test` — LAB escalonado: Starter **$15**, Pro **$30**, Studio **$60** por mes (o año), **sin prueba gratis** salvo que se tilde «prueba gratis» (para probar la baja en la prueba). Subir de plan cobra la diferencia desde $1 (en los planes reales, desde $1000); bajar no cobra.
 
-Todo al mínimo: $1 las compras y $15 LAB, que es el piso de Mercado Pago para
-suscripciones («Cannot pay an amount lower than $ 15.00»). Precios en
-`src/domain/qa.js`. Con $1 el 10% de primera compra no baja nada: no se
+Todo al mínimo: $1 las compras y $15 el plan más barato de LAB, que es el piso de
+Mercado Pago para suscripciones («Cannot pay an amount lower than $ 15.00»).
+Precios en `src/domain/qa.js`. Con $1 el 10% de primera compra no baja nada: no se
 aplica ni se gasta (si un precio de prueba sube, vuelve a aplicarse).
 
 Para cualquier otra cuenta (o sin sesión) esas rutas son la 404 y el servidor

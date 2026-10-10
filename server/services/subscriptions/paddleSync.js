@@ -371,6 +371,7 @@ export async function handlePaddleLabTransaction({ transaction: txn, config }, d
   if (firstCharge && !sub.firstPaidAt) {
     sub.firstPaidAt = paidAt
     sub.firstChargeId = String(txn.id)
+    if (charged > 0) sub.firstChargeAmount = charged / 100
   }
   // Un cobro termina la prueba aunque faltaran días (Paddle la activó antes):
   // sin esto la app seguía mostrando «en prueba» sobre un mes ya cobrado.

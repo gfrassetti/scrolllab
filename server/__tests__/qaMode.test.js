@@ -10,6 +10,7 @@ import {
   QA_BUILDER_EXTRA_SECTION_ARS,
   QA_BUILDER_COMMERCE_ARS,
   QA_LAB_PRICE_ARS,
+  QA_LAB_PRICES_ARS,
   qaCustomPriceArs,
   qaDiscountedArs,
 } from '../../src/domain/qa.js'
@@ -31,10 +32,11 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
   let webhook
   let cleanup
   let fileDb
+  let config
 
   before(async () => {
-    process.env.QA_BUYER_EMAILS = ` ${QA.toUpperCase()} , otra@test.com`
-    ;({ app, loginAs, webhook, cleanup, fileDb } = await startAppAgainstFakeMp(mp))
+    process.env.QA_BUYER_EMAILS = ` ${QA.toUpperCase()} , otra@test.com, lab-a@test.com, lab-b@test.com, lab-c@test.com, lab-d@test.com`
+    ;({ app, loginAs, webhook, cleanup, fileDb, config } = await startAppAgainstFakeMp(mp))
   })
   after(() => {
     delete process.env.QA_BUYER_EMAILS
@@ -163,39 +165,154 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal(res.status, 400, 'la receta se valida igual que en el builder real')
   })
 
-  it('LAB de prueba: los tres planes al precio de prueba, sin prueba gratis, cobra al suscribirse y vuelve a /lab-test', async () => {
+  /** Alta de prueba autorizada y con el primer cobro registrado (como MP). */
+  async function qaSubscribed(email, plan = 'hosted_pro') {
+    const agent = await loginAs(email)
+    const res = await agent.post('/api/subscriptions').send({ plan, cycle: 'monthly', qa: true })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    const pre = mp.lastPreapproval()
+    mp.authorize(pre.id)
+    await agent.post('/api/subscriptions/sync')
+    const ap = billAndRecord(pre)
+    assert.equal((await webhook('subscription_authorized_payment', ap.id)).status, 200)
+    return { agent, pre, ap, subscriptionId: res.body.subscriptionId }
+  }
+  /** MP cobra la cuota y guarda su pago: el arrepentimiento lo devuelve por su id. */
+  function billAndRecord(pre) {
+    const ap = mp.bill(pre.id)
+    mp.payments.set(String(ap.payment.id), {
+      id: ap.payment.id,
+      status: 'approved',
+      operation_type: 'recurring_payment',
+      transaction_amount: ap.transaction_amount,
+      currency_id: 'ARS',
+      external_reference: pre.external_reference,
+    })
+    return ap
+  }
+  const refundMails = (email) => mp.mailsTo(email).filter((m) => /devolvimos/i.test(m.body.subject))
+
+  it('LAB de prueba: escalonado, sin prueba gratis, cobra al suscribirse y vuelve a /lab-test', async () => {
     const agent = await loginAs(QA)
     const plans = (await agent.get('/api/subscriptions/plans?qa=1')).body
     assert.equal(plans.qa, true)
-    assert.ok(plans.plans.every((p) => p.priceMonthly === QA_LAB_PRICE_ARS && p.priceYearly === QA_LAB_PRICE_ARS))
+    for (const p of plans.plans) {
+      assert.equal(p.priceMonthly, QA_LAB_PRICES_ARS[p.id])
+      assert.equal(p.priceYearly, QA_LAB_PRICES_ARS[p.id])
+    }
+    assert.ok(Object.values(QA_LAB_PRICES_ARS).every((n) => n >= 15), 'el piso de MP para suscripciones')
 
-    const res = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly', qa: true })
-    assert.equal(res.status, 200, JSON.stringify(res.body))
-    assert.equal(res.body.trialEndsAt, null)
-    const pre = mp.lastPreapproval()
-    assert.equal(pre.auto_recurring.transaction_amount, QA_LAB_PRICE_ARS)
+    const { pre, subscriptionId } = await qaSubscribed(QA)
+    assert.equal(pre.auto_recurring.transaction_amount, QA_LAB_PRICES_ARS.hosted_pro)
     const sent = mp.calls.filter((c) => c.method === 'POST' && c.resource === 'preapproval').at(-1).body
     assert.match(sent.reason, /PRUEBA/)
     assert.match(sent.back_url, /\/lab-test\?suscripcion=volver$/)
     assert.equal(sent.auto_recurring.start_date, undefined, 'sin prueba gratis: cobra al suscribirse')
-    const sub = await fileDb.findSubscriptionById(res.body.subscriptionId)
+    const sub = await fileDb.findSubscriptionById(subscriptionId)
     assert.equal(sub.qa, true)
     assert.equal(sub.trialEndsAt, undefined)
-
-    mp.authorize(pre.id)
-    await agent.post('/api/subscriptions/sync')
-    const ap = mp.bill(pre.id)
-    assert.equal((await webhook('subscription_authorized_payment', ap.id)).status, 200)
+    assert.equal(sub.firstChargeAmount, QA_LAB_PRICES_ARS.hosted_pro)
     const me = (await agent.get('/api/subscriptions/me')).body
     assert.equal(me.plan, 'hosted_pro')
     assert.equal(me.qa, true)
+  })
 
-    // Cambio de plan: los tres cuestan lo mismo, no hay diferencia que cobrar.
+  it('subir de plan cobra la diferencia (desde $1); bajar no cobra; el arrepentimiento devuelve el primer cobro Y la diferencia', async () => {
+    const { agent, pre, ap, subscriptionId } = await qaSubscribed('lab-a@test.com')
+
+    // Subir a Studio: diferencia por los días que quedan (casi el mes entero).
     const quote = (await agent.get('/api/subscriptions/change/quote?plan=hosted_studio')).body
-    assert.equal(quote.amount, 0, JSON.stringify(quote))
+    assert.ok(quote.amount > 0 && quote.amount <= QA_LAB_PRICES_ARS.hosted_studio - QA_LAB_PRICES_ARS.hosted_pro)
     const change = await agent.post('/api/subscriptions/change').send({ plan: 'hosted_studio' })
-    assert.equal(change.status, 200, JSON.stringify(change.body))
-    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, QA_LAB_PRICE_ARS)
+    assert.equal(change.body.requiresPayment, true, JSON.stringify(change.body))
+    const pref = mp.lastPreference()
+    assert.equal(pref.items[0].unit_price, quote.amount)
+    const upg = mp.pay(pref.id)
+    assert.equal((await webhook('payment', upg.id, { source: 'lab' })).status, 200)
+    assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'hosted_studio')
+    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, QA_LAB_PRICES_ARS.hosted_studio)
+
+    // Bajar a Starter: nada que pagar, desde el próximo cobro el precio de Starter.
+    const down = (await agent.get('/api/subscriptions/change/quote?plan=hosted_starter')).body
+    assert.equal(down.amount, 0)
+    const downChange = await agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })
+    assert.equal(downChange.status, 200, JSON.stringify(downChange.body))
+    assert.notEqual(downChange.body.requiresPayment, true)
+    assert.equal(mp.preapprovals.get(pre.id).auto_recurring.transaction_amount, QA_LAB_PRICES_ARS.hosted_starter)
+
+    // Arrepentimiento dentro de los 14 días: vuelven el primer cobro y la diferencia.
+    const w = await agent.post('/api/withdrawals').send({ email: 'lab-a@test.com', name: 'Cliente A' })
+    assert.equal(w.body.outcome, 'refunded', JSON.stringify(w.body))
+    const refunded = mp.refundCalls.map((c) => c.id)
+    assert.ok(refunded.includes(String(ap.payment.id)), 'el primer cobro')
+    assert.ok(refunded.includes(String(upg.id)), 'la diferencia de plan')
+    assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
+    assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'free')
+    const ledger = (await fileDb.listRefunds()).filter((r) => r.subscriptionId === subscriptionId)
+    assert.deepEqual(ledger.map((r) => r.externalId).sort(), [`mp-${ap.payment.id}`, `mp-${upg.id}`].sort())
+    await waitFor(() => refundMails('lab-a@test.com').length === 2, 'los dos mails de devolución')
+
+    // Llega el webhook de MP de esa devolución: no repite nada.
+    assert.equal((await webhook('payment', upg.id, { source: 'lab' })).status, 200)
+    await new Promise((r) => setTimeout(r, 60))
+    assert.equal(refundMails('lab-a@test.com').length, 2)
+    assert.equal((await fileDb.listRefunds()).filter((r) => r.subscriptionId === subscriptionId).length, 2)
+  })
+
+  it('una diferencia de plan devuelta a mano desde MP queda en el libro y le avisa al cliente', async () => {
+    const { agent } = await qaSubscribed('lab-b@test.com', 'hosted_starter')
+    await agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
+    const upg = mp.pay(mp.lastPreference().id)
+    await webhook('payment', upg.id, { source: 'lab' })
+    // El dueño la devuelve desde el panel de MP.
+    const pay = mp.payments.get(String(upg.id))
+    pay.status = 'refunded'
+    pay.transaction_amount_refunded = pay.transaction_amount
+    assert.equal((await webhook('payment', upg.id, { source: 'lab' })).status, 200)
+    assert.ok((await fileDb.listRefunds()).some((r) => r.externalId === `mp-${upg.id}` && r.kind === 'lab'))
+    await waitFor(() => refundMails('lab-b@test.com').length === 1, 'el mail de devolución')
+    // La suscripción sigue (no era el primer cobro).
+    assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'hosted_pro')
+  })
+
+  it('con prueba gratis: el alta no cobra y arrepentirse en la prueba solo da de baja, sin devolver nada', async () => {
+    const agent = await loginAs('lab-c@test.com')
+    const res = await agent
+      .post('/api/subscriptions')
+      .send({ plan: 'hosted_starter', cycle: 'monthly', qa: true, qaTrial: true })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    assert.ok(res.body.trialEndsAt, 'tiene prueba')
+    const sent = mp.calls.filter((c) => c.method === 'POST' && c.resource === 'preapproval').at(-1).body
+    assert.ok(sent.auto_recurring.start_date, 'el primer cobro es al final de la prueba')
+    mp.authorize(mp.lastPreapproval().id)
+    await agent.post('/api/subscriptions/sync')
+    const before = mp.refundCalls.length
+    const w = await agent.post('/api/withdrawals').send({ email: 'lab-c@test.com', name: 'Cliente C' })
+    assert.equal(w.body.outcome, 'canceled', JSON.stringify(w.body))
+    assert.equal(mp.refundCalls.length, before, 'no hay nada que devolver')
+  })
+
+  it('arrepentirse antes de que llegue el primer cobro (alta sin prueba): no cancela sin devolver, reintenta', async () => {
+    // Cuenta sin suscripciones anteriores: sin días pagos que arrastrar, el alta cobra al autorizar.
+    const agent = await loginAs('lab-d@test.com')
+    const res = await agent.post('/api/subscriptions').send({ plan: 'hosted_starter', cycle: 'monthly', qa: true })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    const pre = mp.lastPreapproval()
+    mp.authorize(pre.id)
+    await agent.post('/api/subscriptions/sync') // autorizada, pero el aviso del cobro no llegó
+    const w = await agent.post('/api/withdrawals').send({ email: 'lab-d@test.com', name: 'Cliente D' })
+    assert.equal(w.body.outcome, 'pending', JSON.stringify(w.body))
+    assert.equal((await fileDb.findWithdrawalByCode(w.body.code)).status, 'refund_retry')
+    assert.equal(mp.preapprovals.get(pre.id).status, 'authorized', 'no la canceló a ciegas')
+
+    // Llega el cobro y el barrido termina el trabajo.
+    const ap = billAndRecord(pre)
+    await webhook('subscription_authorized_payment', ap.id)
+    const { retryPendingWithdrawals } = await import('../services/autoRefund.js')
+    await retryPendingWithdrawals(config)
+    assert.equal((await fileDb.findWithdrawalByCode(w.body.code)).status, 'refunded')
+    assert.ok(mp.refundCalls.some((c) => c.id === String(ap.payment.id)))
+    assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
   })
 
   it('las métricas del panel no cuentan las compras ni las suscripciones de prueba', async () => {

@@ -184,6 +184,8 @@ const subscriptionSchema = new mongoose.Schema(
     firstPaidAt: Date,
     // El cobro que se puede devolver: pago de MP o transacción de Paddle.
     firstChargeId: String,
+    // Cuánto fue ese cobro (en la moneda de la suscripción): lo que se devuelve.
+    firstChargeAmount: Number,
     // Fin de período por el que ya salió el mail «Tu plan se suspendió».
     suspendedEmailFor: String,
     // Cuándo se devolvió el primer cobro (baja inmediata).
@@ -214,6 +216,8 @@ const subscriptionSchema = new mongoose.Schema(
           amount: Number,
           at: Date,
           outcome: String,
+          // Se devolvió (arrepentimiento o a mano desde MP): ya está en el libro.
+          refundedAt: Date,
         },
       ],
       default: undefined,
@@ -228,7 +232,7 @@ const subscriptionSchema = new mongoose.Schema(
       default: "mercadopago",
     },
     currency_id: { type: String, default: "ARS" },
-    // Suscripción de prueba (src/domain/qa.js): QA_LAB_PRICE_ARS en los tres
+    // Suscripción de prueba (src/domain/qa.js): QA_LAB_PRICES_ARS en los tres
     // planes, sin prueba gratis, fuera de las métricas.
     qa: { type: Boolean, default: undefined },
     locale: { type: String, enum: ["es", "en"], default: "es" },

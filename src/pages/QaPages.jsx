@@ -8,7 +8,7 @@ import {
   QA_TEMPLATE_MODEL,
   QA_TEMPLATE_ARS,
   QA_BUILDER_BASE_ARS,
-  QA_LAB_PRICE_ARS,
+  QA_LAB_PRICES_ARS,
 } from '../domain/qa'
 import NotFoundPage from './NotFoundPage'
 import BuilderPage from './BuilderPage'
@@ -62,8 +62,10 @@ const FLOWS = [
   {
     title: 'LAB',
     steps: [
-      `Suscribirse en /lab-test (${formatArs(QA_LAB_PRICE_ARS)} cualquiera de los 3, sin prueba gratis): cobra al toque y llega la bienvenida y el cobro.`,
-      'Cambiar de plan: llega «Cambiaste a …» (sin diferencia: los tres cuestan lo mismo).',
+      `Suscribirse en /lab-test (Starter ${formatArs(QA_LAB_PRICES_ARS.hosted_starter)}, Pro ${formatArs(QA_LAB_PRICES_ARS.hosted_pro)}, Studio ${formatArs(QA_LAB_PRICES_ARS.hosted_studio)}; sin prueba gratis): cobra al toque y llega la bienvenida con el importe.`,
+      'Subir de plan: cobra la diferencia por los días que quedan (desde $1) y llega «Cambiaste a …». Bajar: no cobra nada.',
+      'Cupo: publicar hasta el tope del plan; el siguiente se rechaza. Al bajar o cancelar, los de más dejan de verse.',
+      'Con «prueba gratis» tildado: alta sin cobro; cancelar en la prueba no cobra nunca.',
       'Arrepentimiento dentro de los 14 días: devuelve el primer cobro, da de baja y llegan los dos mails.',
       'Otra alta: cancelar y verificar que mantiene el acceso hasta fin del período, sin devolución.',
     ],

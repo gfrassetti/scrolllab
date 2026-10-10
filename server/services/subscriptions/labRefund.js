@@ -65,6 +65,49 @@ export async function handleLabRefund(
 }
 
 /**
+ * Devolución (o contracargo) del pago de una diferencia de plan (subir de plan
+ * a mitad de período, Mercado Pago). No da de baja la suscripción: eso lo hace
+ * la del primer cobro cuando es un arrepentimiento. Libro de reembolsos + mail
+ * «Te devolvimos el dinero» (noteRefund, idempotente por pago) y aviso al dueño.
+ * @param {{ sub: any, paymentId: string, amount: number, currency: string, reason: 'refunded' | 'charged_back', config: any }} args
+ */
+export async function handleUpgradeRefund({ sub, paymentId, amount, currency, reason, config }) {
+  const externalId = `mp-${paymentId}`
+  await noteRefund({
+    sub,
+    config,
+    data: {
+      externalId,
+      provider: 'mercadopago',
+      kind: 'lab',
+      subscriptionId: subId(sub),
+      userId: sub.userId ? String(sub.userId) : null,
+      amount,
+      currency,
+      partial: false,
+      reason,
+      refundedAt: new Date(),
+    },
+  })
+  const paid = (sub.upgradePayments || []).find((p) => String(p.paymentId) === String(paymentId))
+  if (paid && !paid.refundedAt) {
+    paid.refundedAt = new Date()
+    if (typeof sub.markModified === 'function') sub.markModified('upgradePayments')
+    await sub.save()
+  }
+  alertAdmin({
+    kind: 'lab-refund',
+    key: externalId,
+    title: `LAB: ${reason === 'charged_back' ? 'CONTRACARGO' : 'DEVOLUCIÓN'} DE UNA DIFERENCIA DE PLAN`,
+    lines: [
+      `Mercado Pago ${externalId} · ${amount} ${currency}`,
+      `suscripción ${subId(sub)} · plan ${sub.plan} · ${sub.status}`,
+    ],
+    config,
+  })
+}
+
+/**
  * Baja YA: en la pasarela (no se le vuelve a cobrar) y acá (el acceso termina
  * ahora). Si la pasarela no confirma la baja, avisa al dueño y la deja marcada
  * igual de este lado: ya se le devolvió el cobro, no puede seguir con el plan.

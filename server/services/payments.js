@@ -1,6 +1,8 @@
 import { HttpError } from '../errors.js'
 import { verifyMpWebhookSignature, fetchPayment } from './mercadoPago.js'
-import { handleLabRefund, findLabSubscriptionForMpPayment } from './subscriptions/labRefund.js'
+import { handleLabRefund, handleUpgradeRefund, findLabSubscriptionForMpPayment } from './subscriptions/labRefund.js'
+import { parseUpgradeReference } from './subscriptions/planChange.js'
+import { db } from '../db.js'
 import {
   applyUpgradePayment,
   isUpgradeReference,
@@ -96,7 +98,23 @@ export async function handleMercadoPagoNotification({
   // repita el evento. Los 5xx (MP caído, Mongo) sí tienen que reintentarse.
   try {
     const payment = await fetchPayment(payToken, dataId)
-    if (isUpgradeReference(payment.external_reference)) {
+    if (isUpgradeReference(payment.external_reference) && REVERSED_PAYMENT_STATUSES.has(payment.status)) {
+      // Devolución (o contracargo) de una diferencia de plan: antes se tomaba
+      // como «pago no aprobado» y no quedaba en el libro ni avisaba a nadie.
+      const ref = parseUpgradeReference(payment.external_reference)
+      const sub = ref ? await db.findSubscriptionById(ref.subscriptionId).catch(() => null) : null
+      if (sub) {
+        const refunded = Number(payment.transaction_amount_refunded) || 0
+        await handleUpgradeRefund({
+          sub,
+          paymentId: String(payment.id),
+          amount: refunded > 0 ? refunded : Number(payment.transaction_amount),
+          currency: payment.currency_id || 'ARS',
+          reason: payment.status === 'charged_back' ? 'charged_back' : 'refunded',
+          config,
+        })
+      }
+    } else if (isUpgradeReference(payment.external_reference)) {
       await applyUpgradePayment({ payment, config })
     } else if (REVERSED_PAYMENT_STATUSES.has(payment.status)) {
       const out = await reverseOrderPayment({ payment, config })

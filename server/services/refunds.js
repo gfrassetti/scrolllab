@@ -209,6 +209,13 @@ function amountOf({ order, sub }) {
   const usd = sub?.currency_id === 'USD'
   const plan = sub?.paidPlan || sub?.plan
   const price = HOSTED_PLANS[plan] ? subscriptionPlanPrice(sub, plan, sub.paidCycle || sub.cycle, usd ? 'USD' : 'ARS') : 0
-  // En la prueba no hay cobro: se confirma la baja, monto 0.
-  return { amount: sub?.firstChargeId || sub?.lastPaidAt ? price : 0, currency: usd ? 'USD' : 'ARS' }
+  // En la prueba no hay cobro: se confirma la baja, monto 0. El primer cobro
+  // (lo cobrado de verdad; filas viejas: el precio del plan) más las
+  // diferencias de plan pagadas que también se devuelven.
+  if (!(sub?.firstChargeId || sub?.lastPaidAt)) return { amount: 0, currency: usd ? 'USD' : 'ARS' }
+  const extras = (sub.upgradePayments || [])
+    .filter((p) => p.outcome === 'applied' && !p.refundedAt)
+    .reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+  const first = Number(sub.firstChargeAmount) > 0 ? Number(sub.firstChargeAmount) : price
+  return { amount: first + extras, currency: usd ? 'USD' : 'ARS' }
 }

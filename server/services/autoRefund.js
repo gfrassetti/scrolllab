@@ -6,7 +6,7 @@ import { refundPayment, fetchPayment } from './mercadoPago.js'
 import { createAdjustment, getTransaction, PADDLE_PAID_STATUSES } from './paddle.js'
 import { reverseOrderPayment, alertAdmin, REVERSED_PAYMENT_STATUSES } from './orders.js'
 import { reversePaddleAdjustment } from './paddlePayments.js'
-import { handleLabRefund } from './subscriptions/labRefund.js'
+import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
 import { isPaddleSub } from './subscriptions/paddleSync.js'
 
@@ -112,6 +112,13 @@ async function refundPaddleTransaction(transactionId, row, config, deps) {
 async function refundLab(sub, row, config, deps) {
   if (!sub) return { status: 'manual', note: 'la suscripción ya no existe' }
   const e = labRefundEligibility(sub)
+  // Alta sin prueba gratis (cobra al autorizar): si el cobro todavía no llegó de
+  // la pasarela, NO es «prueba» — cancelar acá dejaría el cobro sin devolver.
+  // Se reintenta en el barrido hasta que aparezca (retryPendingWithdrawals).
+  const chargesAtSignup = !sub.trialEndsAt && !sub.firstChargeAt
+  if (e.reason === 'trial' && chargesAtSignup && sub.status === 'authorized' && !sub.canceledAt) {
+    return { status: 'refund_retry', note: 'el primer cobro todavía no llegó de la pasarela: se reintenta' }
+  }
   if (e.reason === 'trial') {
     if (sub.canceledAt || sub.status === 'cancelled') return { status: 'canceled', note: 'ya estaba dada de baja' }
     await cancelAtPeriodEnd(sub, config, deps)
@@ -127,6 +134,24 @@ async function refundLab(sub, row, config, deps) {
   }
   const token = config.mpSubs?.accessToken
   if (config.mpMock || !token) return { status: 'manual', note: 'Mercado Pago sin cuenta real (mock)' }
+  // Diferencias de plan pagadas en el plazo: también vuelven (la baja es
+  // inmediata, no se quedan con días que ya no usan). Antes que el primer
+  // cobro: si una falla, no quedó nada a medias dado de baja.
+  for (const extra of (sub.upgradePayments || []).filter((p) => p.outcome === 'applied' && p.paymentId && !p.refundedAt)) {
+    await (deps.refundPayment || refundPayment)(token, extra.paymentId, {
+      idempotencyKey: `scrolllab-withdrawal-${row.code}-upg-${extra.paymentId}`,
+    })
+    const paid = await (deps.fetchPayment || fetchPayment)(token, extra.paymentId)
+    const back = Number(paid.transaction_amount_refunded) || 0
+    await handleUpgradeRefund({
+      sub,
+      paymentId: String(paid.id),
+      amount: back > 0 ? back : Number(paid.transaction_amount) || Number(extra.amount) || 0,
+      currency: paid.currency_id || 'ARS',
+      reason: 'refunded',
+      config,
+    })
+  }
   await (deps.refundPayment || refundPayment)(token, sub.firstChargeId, {
     idempotencyKey: `scrolllab-withdrawal-${row.code}`,
   })
@@ -199,12 +224,12 @@ export async function retryPendingWithdrawals(config, deps = {}, now = Date.now(
   const rows = (await db.listWithdrawals()).filter((w) => w.status === 'refund_retry')
   for (const row of rows) {
     if (now - new Date(row.createdAt).getTime() > RETRY_WINDOW_MS) {
-      await db.updateWithdrawal(row.code, { status: 'manual', note: 'Paddle no completó la transacción en 48 h' })
+      await db.updateWithdrawal(row.code, { status: 'manual', note: 'la pasarela no completó el cobro en 48 h' })
       alertAdmin({
         kind: 'withdrawal-done',
         key: `${row.code}-manual-timeout`,
         title: `ARREPENTIMIENTO ${row.code} — NO SE PUDO DEVOLVER SOLO: hacelo a mano`,
-        lines: [`${row.email}`, 'Paddle no completó la transacción en 48 h.'],
+        lines: [`${row.email}`, 'La pasarela no completó el cobro en 48 h.'],
         config,
       })
       continue

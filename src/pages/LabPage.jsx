@@ -349,9 +349,12 @@ export default function LabPage({ qa = false }) {
                   {t('lab.yours')}
                   {instances.length > 0 && (
                     <span className="ml-3 normal-case tracking-normal text-ink/40">
-                      {t('lab.publishedCount', {
+                      {/* Publicados contra el cupo del plan (no contra los creados:
+                          «5 de 6» se leía como un cupo de 6). */}
+                      {t(Number.isFinite(quota) ? 'lab.publishedCount' : 'lab.publishedCountUnlimited', {
                         n: instances.filter((i) => i.status === 'published')
                           .length,
+                        quota,
                         total: instances.length,
                       })}
                     </span>

@@ -204,6 +204,8 @@ export async function handleAuthorizedPaymentEvent(
     if (!sub.firstPaidAt) {
       sub.firstPaidAt = debit
       sub.firstChargeId = ap.payment?.id != null ? String(ap.payment.id) : undefined
+      const charged = Number(ap?.payment?.transaction_amount ?? ap?.transaction_amount)
+      if (Number.isFinite(charged) && charged > 0) sub.firstChargeAmount = charged
     }
     // Lo pagado en este período: base para cobrar la diferencia si sube.
     sub.paidPlan = sub.plan

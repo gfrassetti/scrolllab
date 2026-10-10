@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { db } from '../../db.js'
 import { HttpError } from '../../errors.js'
+import { QA_MIN_UPGRADE_CHARGE_ARS } from '../../../src/domain/qa.js'
 import {
   HOSTED_PLANS,
   hostedPlanQuota,
@@ -79,7 +80,8 @@ export function quoteUpgrade(sub, targetPlan, now = Date.now()) {
   if (diff <= 0) return { ...base, reason: 'covered', periodEnd, days }
   const fraction = Math.min(1, Math.max(0, (w.end - now) / (w.end - w.start)))
   const amount = usd ? Math.ceil(diff * fraction * 100) / 100 : Math.ceil(diff * fraction)
-  if (amount < (usd ? MIN_UPGRADE_CHARGE_USD : MIN_UPGRADE_CHARGE)) {
+  const minimum = usd ? MIN_UPGRADE_CHARGE_USD : sub.qa ? QA_MIN_UPGRADE_CHARGE_ARS : MIN_UPGRADE_CHARGE
+  if (amount < minimum) {
     return { ...base, reason: 'minimal', periodEnd, days }
   }
   return { ...base, amount, reason: 'prorated', periodEnd, days }
