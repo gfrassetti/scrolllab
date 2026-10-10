@@ -128,6 +128,15 @@ export default function HostedPlans({ qa: qaPage = false }) {
   const [cycle, setCycle] = useState('monthly')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
+  // El error se muestra arriba de la sección y el botón que lo causó suele estar
+  // más abajo (en la tarjeta del plan): sin traerlo a la vista, no se veía.
+  const errorRef = useRef(null)
+  useEffect(() => {
+    if (!error || !errorRef.current) return
+    const r = errorRef.current.getBoundingClientRect()
+    if (r.top >= 0 && r.bottom <= window.innerHeight) return
+    errorRef.current.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+  }, [error])
   const [notice, setNotice] = useState('')
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   // Cambio de plan a confirmar: la cotización del server (monto a pagar ya,
@@ -468,7 +477,11 @@ export default function HostedPlans({ qa: qaPage = false }) {
       </div>
 
       {error && (
-        <p className="mt-4 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm">
+        <p
+          ref={errorRef}
+          role="alert"
+          className="mt-4 scroll-mt-24 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm"
+        >
           {error}
         </p>
       )}
