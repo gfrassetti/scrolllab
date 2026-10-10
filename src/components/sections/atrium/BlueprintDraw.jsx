@@ -13,6 +13,7 @@ export default function BlueprintDraw({
   title = 'Plan before mass',
   body = 'Lines first. A courtyard holds the centre; rooms gather around light. Swap this drawing for your own plan. The motion stays.',
   caption = 'Courtyard house, 1:200',
+  kicker = 'Drawing',
   bg,
   fg,
 }) {
@@ -67,7 +68,7 @@ export default function BlueprintDraw({
       >
         <div className="max-w-sm">
           <p className="text-[11px] tracking-[0.28em] text-atrium-paper/45 uppercase">
-            Drawing
+            {kicker}
           </p>
           <h2 className="mt-4 font-display text-[clamp(2.2rem,5vw,4.2rem)] leading-[0.92]">
             {title}

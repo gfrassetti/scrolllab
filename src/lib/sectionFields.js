@@ -1059,6 +1059,16 @@ export const SECTION_FIELDS = {
     { key: 'body', label: 'Body', type: 'textarea' },
     { key: 'number', label: 'Number', type: 'text' },
     { key: 'numberLabel', label: 'Number label', type: 'text' },
+    {
+      key: 'stats',
+      label: 'Datos que pasan',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'label', label: 'Rótulo', type: 'text' },
+        { key: 'value', label: 'Valor', type: 'text' },
+      ],
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -1259,6 +1269,7 @@ export const SECTION_FIELDS = {
     { key: 'bodyRight', label: 'Right body', type: 'textarea' },
   ],
   'atrium/BlueprintDraw': [
+    { key: 'kicker', label: 'Rótulo', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'body', label: 'Body', type: 'textarea' },
     { key: 'caption', label: 'Caption', type: 'text' },
@@ -1268,17 +1279,47 @@ export const SECTION_FIELDS = {
   'atrium/ProjectRail': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
+    {
+      key: 'works',
+      label: 'Proyectos',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'meta', label: 'Dato (m², año…)', type: 'text' },
+        { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
+      ],
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ProcessPin': [
     { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'scenes',
+      label: 'Etapas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'kicker', label: 'Número', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+        { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
+      ],
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/PeopleScatter': [
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'title', label: 'Title', type: 'textarea' },
+    {
+      key: 'plates',
+      label: 'Fotos dispersas (en orden)',
+      type: 'list',
+      max: 6,
+      item: [{ key: 'src', label: 'Foto (vacío = la de la demo)', type: 'image' }],
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -1299,6 +1340,17 @@ export const SECTION_FIELDS = {
   ],
   'atrium/StatField': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
+    {
+      key: 'stats',
+      label: 'Cifras',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'value', label: 'Número (cuenta hasta él; si no es número, queda fijo)', type: 'text' },
+        { key: 'suffix', label: 'Sufijo (+, K, %)', type: 'text' },
+        { key: 'label', label: 'Texto', type: 'text' },
+      ],
+    },
     { key: 'closer', label: 'Closing statement', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },

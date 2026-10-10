@@ -37,7 +37,12 @@ const defaultScenes = [
  * calma no hay columna pegada: cada paso va con su foto en línea, en todos los
  * anchos, y entra con un fundido.
  */
-export default function ProcessPin({ label = 'Approach', scenes = defaultScenes , bg, fg }) {
+export default function ProcessPin({ label = 'Approach', scenes: scenesProp, bg, fg }) {
+  // Del builder llegan etapas con texto y foto; lo vacío toma la de la demo.
+  const scenes =
+    Array.isArray(scenesProp) && scenesProp.length
+      ? scenesProp.map((s, i) => ({ ...defaultScenes[i % defaultScenes.length], ...s }))
+      : defaultScenes
   const root = useRef(null)
   const reduced = useReducedMotion()
 
@@ -140,7 +145,7 @@ export default function ProcessPin({ label = 'Approach', scenes = defaultScenes 
               <div data-process-media className="absolute -inset-[12%] will-change-transform">
                 {scenes.map((scene, i) => (
                   <img
-                    key={scene.title}
+                    key={i}
                     data-process-img
                     {...imgAttrs(scene.img, variants)}
                     sizes="100vw"
@@ -157,9 +162,9 @@ export default function ProcessPin({ label = 'Approach', scenes = defaultScenes 
         </div>
 
         <div className="calm:md:mx-auto calm:md:w-full calm:md:max-w-3xl">
-          {scenes.map((scene) => (
+          {scenes.map((scene, i) => (
             <article
-              key={scene.title}
+              key={i}
               data-process-step
               className="flex min-h-[76svh] flex-col justify-center gap-6 py-12 md:min-h-svh md:gap-8 md:py-0 calm:md:min-h-0 calm:md:py-16"
             >

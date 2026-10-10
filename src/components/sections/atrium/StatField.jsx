@@ -23,11 +23,15 @@ const defaultStats = [
  */
 export default function StatField({
   kicker = 'Practice',
-  stats = defaultStats,
+  stats: statsProp,
   closer = 'Placeholder statement — swap this line for your own closing sentence.',
   bg,
   fg,
 }) {
+  const stats =
+    Array.isArray(statsProp) && statsProp.length
+      ? statsProp.map((s, i) => ({ ...defaultStats[i % defaultStats.length], ...s }))
+      : defaultStats
   const root = useRef(null)
   const reduced = useReducedMotion()
 
@@ -74,6 +78,8 @@ export default function StatField({
 
       gsap.utils.toArray('[data-atrium-counter]').forEach((el) => {
         const target = parseFloat(el.dataset.atriumCounter)
+        // Un valor que no es número («10K», «Top») se muestra quieto.
+        if (!Number.isFinite(target)) return
         ScrollTrigger.create({
           trigger: el,
           start: 'top 85%',

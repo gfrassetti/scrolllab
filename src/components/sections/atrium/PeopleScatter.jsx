@@ -38,10 +38,16 @@ const defaultPlates = [
 export default function PeopleScatter({
   label = 'Section label',
   title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
-  plates = defaultPlates,
+  plates: platesProp,
   bg,
   fg,
 }) {
+  // Del builder llegan filas con texto y foto; la posición, la proporción y la
+  // velocidad de cada una siguen las de la demo en ese lugar.
+  const plates =
+    Array.isArray(platesProp) && platesProp.length
+      ? platesProp.map((p, i) => ({ ...defaultPlates[i % defaultPlates.length], ...p }))
+      : defaultPlates
   const root = useRef(null)
   const reduced = useReducedMotion()
 
@@ -138,9 +144,9 @@ export default function PeopleScatter({
         data-bleed
         className="pointer-events-none absolute inset-x-0 top-[62svh] h-[122svh] md:top-[24svh] md:h-[78svh]"
       >
-        {plates.map((plate) => (
+        {plates.map((plate, i) => (
           <figure
-            key={plate.src}
+            key={i}
             data-people-plate
             data-speed={plate.speed}
             style={{

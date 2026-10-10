@@ -58,6 +58,7 @@ const NOT_IN_DOM = {
   'fizz/HeroBubbles.canLabel': 'se imprime en la etiqueta de la botella, dentro del canvas WebGL: no llega al DOM',
   'fizz/HeroBubbles.canImage': 'es la etiqueta de la botella (textura WebGL), no un <img> del DOM',
   'unity/FooterTrophy.accentWord': 'resalta esa palabra dentro del título; sola no se ve',
+  'atrium/PeopleScatter.plates.src': 'foto: no es texto',
   'chapters/NavMinimal.closeLabel': 'el botón dice esto con el menú del teléfono abierto',
   'nocturne/NavNocturne.closeLabel': 'el botón dice esto con el menú del teléfono abierto',
   'monolith/NavBrutal.closeLabel': 'el botón dice esto con el menú del teléfono abierto',

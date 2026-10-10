@@ -38,10 +38,16 @@ const coverFactor = (ratio) => {
 export default function ProjectRail({
   kicker = '(6)',
   title = 'Selected Projects',
-  works = defaultWorks,
+  works: worksProp,
   bg,
   fg,
 }) {
+  // Del builder llegan filas con texto y foto; la posición, la proporción y la
+  // velocidad de cada una siguen las de la demo en ese lugar.
+  const works =
+    Array.isArray(worksProp) && worksProp.length
+      ? worksProp.map((w, i) => ({ ...defaultWorks[i % defaultWorks.length], ...w }))
+      : defaultWorks
   const root = useRef(null)
   const reduced = useReducedMotion()
 
@@ -110,9 +116,9 @@ export default function ProjectRail({
       </h2>
 
       <div>
-        {works.map((work) => (
+        {works.map((work, i) => (
           <figure
-            key={work.title}
+            key={i}
             data-work-item
             data-speed={work.speed}
             style={{
