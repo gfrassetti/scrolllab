@@ -2,14 +2,14 @@ import crypto from 'node:crypto'
 
 /**
  * Link de descarga firmado de una orden paga: payload base64url
- * ({ orderId, userId, exp }) + HMAC-SHA256 con DOWNLOAD_SECRET. Vence a los
- * `ttlSeconds`; la verificación compara en tiempo constante.
+ * ({ orderId, userId, exp, item? }) + HMAC-SHA256 con DOWNLOAD_SECRET. Vence a
+ * los `ttlSeconds`; la verificación compara en tiempo constante. `item` (índice)
+ * = el ZIP de un solo ítem de la orden; sin él, el de la orden entera.
  */
-export function signDownloadToken({ orderId, userId, secret, ttlSeconds }) {
+export function signDownloadToken({ orderId, userId, secret, ttlSeconds, item }) {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds
-  const payload = Buffer.from(JSON.stringify({ orderId, userId, exp })).toString(
-    'base64url',
-  )
+  const body = Number.isInteger(item) ? { orderId, userId, exp, item } : { orderId, userId, exp }
+  const payload = Buffer.from(JSON.stringify(body)).toString('base64url')
   const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url')
   return `${payload}.${sig}`
 }

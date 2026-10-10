@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import ProductThumbnail from './ProductThumbnail'
 import OrderStatus from './OrderStatus'
-import { itemPreviewHref } from '../lib/orderPreview'
+import { itemPreviewHref, orderItemTitle } from '../lib/orderPreview'
 import { formatAmount } from '../lib/pricing'
 import { orderPriceSummary } from '../domain/orderSummary'
 import { useI18n } from '../i18n'
@@ -84,7 +84,7 @@ export default function PurchaseSuccessModal({
             const previewHref = itemPreviewHref(order, item, index)
             return (
               <li
-                key={item.sku}
+                key={index}
                 className="flex items-center gap-4 border-b border-ink/15 py-4"
               >
                 <ProductThumbnail
@@ -93,7 +93,7 @@ export default function PurchaseSuccessModal({
                   className="h-16 w-20"
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{item.title}</p>
+                  <p className="truncate font-medium">{orderItemTitle(items, item, t)}</p>
                   {item.unit_price != null && (
                     <p className="mt-1 text-sm text-ink/60 tabular-nums">
                       {/* Con el 10% de primera compra: el de lista tachado, como en el carrito. */}
@@ -113,6 +113,16 @@ export default function PurchaseSuccessModal({
                     >
                       {t('account.preview')} ↗
                     </a>
+                  )}
+                  {/* Varias en la compra: cada una se baja en su propio ZIP. */}
+                  {canDownload && items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => onDownload(order.id, index)}
+                      className="tpl-hit relative mt-1 ml-3 inline-block text-[11px] uppercase tracking-[0.2em] text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+                    >
+                      {t('account.download')}
+                    </button>
                   )}
                 </div>
               </li>
@@ -169,7 +179,9 @@ export default function PurchaseSuccessModal({
             >
               {downloading
                 ? t('account.preparing')
-                : t('purchaseModal.download')}
+                : items.length > 1
+                  ? t('account.downloadAll')
+                  : t('purchaseModal.download')}
             </button>
           )}
           <button

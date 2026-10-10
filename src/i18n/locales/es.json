@@ -351,7 +351,8 @@
     "firstPurchaseTag": "{{percent}}% off por ser tu primera compra",
     "firstPurchaseShort": "−{{percent}}% 1ª compra",
     "listPriceSr": "Precio de lista:",
-    "yourPriceSr": "Tu precio:"
+    "yourPriceSr": "Tu precio:",
+    "compositionsFull": "Ya tenés 5 composiciones en el carrito: comprá o sacá una para sumar otra."
   },
   "demoBuy": {
     "only": "solo",
@@ -1146,7 +1147,9 @@
     },
     "labNote": "Te llevás el código fuente de la página para programarla y alojarla vos. ¿Ya tenés sitio y querés sumarle secciones sin código?",
     "labNoteLink": "Eso es LAB →",
-    "separateAnchor": "Comprar por separado {{models}}: {{price}}. Acá te llevás solo las secciones que elegiste, ya editadas."
+    "separateAnchor": "Comprar por separado {{models}}: {{price}}. Acá te llevás solo las secciones que elegiste, ya editadas.",
+    "inCartNote": "Esta composición está en el carrito: lo que edites acá se actualiza solo.",
+    "startAnother": "＋ Armar otra composición"
   },
   "cart": {
     "eyebrow": "Carrito",
@@ -1166,7 +1169,9 @@
     "couponErrGeneric": "No pudimos aplicar el cupón. Probá de nuevo.",
     "refundNote": "Reembolso total dentro de {{days}} días si no descargaste el ZIP.",
     "refundLink": "Ver la política",
-    "couponNote": "Es tu primera compra: el {{percent}}% se aplica solo. Vale una sola vez (solo la primera compra) y no aplica a LAB."
+    "couponNote": "Es tu primera compra: el {{percent}}% se aplica solo. Vale una sola vez (solo la primera compra) y no aplica a LAB.",
+    "compositionN": "Composición {{n}} · {{count}} secciones",
+    "compositionNOne": "Composición {{n}} · 1 sección"
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -1245,7 +1250,9 @@
       "subLapsedPaused": "Tu plan {{plan}} está en pausa en Paddle y ya no cubre tus secciones.",
       "subSync": "Sincronizar con Paddle"
     },
-    "discountApplied": "Incluye {{percent}}% de descuento de primera compra (−{{amount}})"
+    "discountApplied": "Incluye {{percent}}% de descuento de primera compra (−{{amount}})",
+    "downloadComposition": "Composición {{n}}",
+    "downloadAll": "Descargar todo (un ZIP)"
   },
   "preview": {
     "backToAccount": "← Volver a Mis compras",

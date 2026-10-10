@@ -84,7 +84,7 @@ function PreviewNotice({ message, to, cta }) {
  *
  * - sin query: composición en curso (localStorage)
  * - `?order=<id>&item=<n>`: compra en Mis compras
- * - `?cart=1`: composición que está en el carrito
+ * - `?cart=1&composition=<id>`: una composición del carrito (sin id, la primera)
  */
 export default function PreviewPage() {
   const [params] = useSearchParams()
@@ -99,9 +99,11 @@ export default function PreviewPage() {
     orderId || fromCart ? [] : loadComposition(),
   )
 
+  const compositionId = params.get('composition')
+  const cartCustoms = cartItems.filter((item) => item.sku === 'custom' || String(item.sku).startsWith('custom:'))
   const cartComposition = fromCart
     ? recipeToComposition(
-        cartItems.find((item) => item.sku === 'custom' || String(item.sku).startsWith('custom:'))
+        (cartCustoms.find((item) => compositionId && item.compositionId === compositionId) || cartCustoms[0])
           ?.recipe,
       )
     : []

@@ -45,6 +45,41 @@ export function normalizeCompositionItem(raw) {
 }
 
 /** Carga cruda (sin dedupe de nav/footer). */
+const COMPOSITION_ID_KEY = 'builder-composition-id'
+
+function newCompositionId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
+}
+
+/**
+ * Id de la composición que está abierta en el builder. El carrito la usa para
+ * saber cuál de sus composiciones sigue a la del builder (puede haber varias).
+ */
+export function currentCompositionId() {
+  try {
+    let id = localStorage.getItem(COMPOSITION_ID_KEY)
+    if (!id) {
+      id = newCompositionId()
+      localStorage.setItem(COMPOSITION_ID_KEY, id)
+    }
+    return id
+  } catch {
+    return 'current'
+  }
+}
+
+/** Empieza otra composición: la que quedó en el carrito ya no sigue al builder. */
+export function startNewComposition() {
+  const id = newCompositionId()
+  try {
+    localStorage.setItem(COMPOSITION_ID_KEY, id)
+  } catch {
+    /* sin storage: la composición nueva vive solo en esta pestaña */
+  }
+  return id
+}
+
 export function readCompositionItems() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   bootstrapComposition,
+  currentCompositionId,
+  startNewComposition,
   saveComposition,
   compositionToRecipe,
   recipeHasCommerce,
@@ -27,13 +29,18 @@ export function useBuilderComposition() {
   const [preview, setPreview] = useState(false)
   const [dragOver, setDragOver] = useState(null)
   const [limitNotice, setLimitNotice] = useState('')
+  // Qué composición del carrito es esta (puede haber varias en el carrito).
+  const [compositionId, setCompositionId] = useState(currentCompositionId)
+  const inCart = useCart((s) =>
+    s.items.some((i) => i.sku === 'custom' && (i.compositionId || 'current') === compositionId),
+  )
 
   useEffect(() => {
     saveComposition(items)
     // Si la composición ya está en el carrito, que no se quede con una foto
-    // vieja: se compra lo último que se editó.
-    useCart.getState().syncComposition(compositionToRecipe(items))
-  }, [items])
+    // vieja: se compra lo último que se editó. Solo esta, no las otras.
+    useCart.getState().syncComposition(compositionToRecipe(items), compositionId)
+  }, [items, compositionId])
 
   useEffect(() => {
     if (!limitNotice) return undefined
@@ -95,7 +102,12 @@ export function useBuilderComposition() {
     setItems((prev) => reorderCompositionItem(prev, uid, index))
   }, [])
 
-  const clearItems = useCallback(() => setItems([]), [])
+  // Vaciar empieza otra composición: la que ya estaba en el carrito queda
+  // como estaba (no se vacía con el lienzo).
+  const clearItems = useCallback(() => {
+    setCompositionId(startNewComposition())
+    setItems([])
+  }, [])
 
   const isKindBlocked = useCallback(
     (sectionId) => kindIsBlocked(sectionId, items),
@@ -113,6 +125,8 @@ export function useBuilderComposition() {
   }, [])
 
   return {
+    compositionId,
+    inCart,
     items,
     setItems,
     preview,

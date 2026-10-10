@@ -99,7 +99,9 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ paymentId, orderId }),
     }),
-  downloadLink: (orderId) => request(`/api/orders/${orderId}/download`),
+  // `item` (índice): el ZIP de ese ítem solo; sin él, el de la orden entera.
+  downloadLink: (orderId, item) =>
+    request(`/api/orders/${orderId}/download${Number.isInteger(item) ? `?item=${item}` : ''}`),
 
   // Hosted Components (LAB) — docs/hosted-component-plan.md
   embedLoader: () => request('/api/embed/loader'),

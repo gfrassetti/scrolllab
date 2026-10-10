@@ -157,6 +157,70 @@ describe('API HTTP (file store)', () => {
     assert.match(files.get('LICENSE.txt').toString('utf8'), /two-templates@test\.com/)
   })
 
+  it('dos composiciones del builder: cada una se cobra y se baja en su propio ZIP', async () => {
+    const agent = request.agent(app)
+    await agent
+      .post('/api/auth/dev-login')
+      .set('Origin', config.clientUrl)
+      .send({ email: 'two-compositions@test.com' })
+    const checkout = await agent
+      .post('/api/checkout')
+      .set('Origin', config.clientUrl)
+      .send({
+        items: [
+          { sku: 'custom', recipe: [{ id: 'chapters/HeroKinetic', props: { lineOne: 'PRIMERA' } }] },
+          { sku: 'custom', recipe: [{ id: 'nocturne/SplitReveals' }, { id: 'chapters/FooterCTA' }] },
+        ],
+      })
+    assert.equal(checkout.status, 200)
+    const { orderId } = checkout.body
+    await agent.post('/api/checkout/mock-pay').set('Origin', config.clientUrl).send({ orderId })
+
+    const orders = await agent.get('/api/orders').set('Origin', config.clientUrl)
+    const order = orders.body.orders.find((o) => o.id === orderId)
+    assert.equal(order.items.length, 2, 'dos líneas, una por composición')
+    assert.deepEqual(
+      order.items.map((i) => i.title),
+      ['Composición del builder 1 · 1 sección', 'Composición del builder 2 · 2 secciones'],
+    )
+
+    const bajar = async (query) => {
+      const link = await agent.get(`/api/orders/${orderId}/download${query}`).set('Origin', config.clientUrl)
+      assert.equal(link.status, 200, `link ${query}`)
+      const dl = await agent.get(link.body.url).buffer().parse(binaryParser)
+      assert.equal(dl.status, 200)
+      return { files: readZip(dl.body), name: dl.headers['content-disposition'] || '' }
+    }
+
+    // Cada composición, sola, en la raíz de su ZIP, con su licencia.
+    const first = await bajar('?item=0')
+    assert.match(first.name, new RegExp(`scrolllab-${orderId}-1\\.zip`))
+    assert.match(first.files.get('src/App.jsx').toString('utf8'), /PRIMERA/)
+    assert.ok(!first.files.get('src/App.jsx').toString('utf8').includes('SplitReveals'))
+    assert.match(first.files.get('LICENSE.txt').toString('utf8'), /two-compositions@test\.com/)
+    assert.deepEqual(brokenImports(first.files), [])
+
+    const second = await bajar('?item=1')
+    const app2 = second.files.get('src/App.jsx').toString('utf8')
+    assert.match(app2, /SplitReveals/)
+    assert.match(app2, /FooterCTA/)
+    assert.ok(!app2.includes('PRIMERA'))
+    assert.deepEqual(brokenImports(second.files), [])
+
+    // El ZIP de la orden sigue trayendo las dos, en carpetas.
+    const all = await bajar('')
+    assert.ok(all.files.has('custom/src/App.jsx'))
+    assert.ok(all.files.has('custom-2/src/App.jsx'))
+
+    // Un índice que no existe, o el ZIP suelto de otra cuenta: no.
+    const bad = await agent.get(`/api/orders/${orderId}/download?item=7`).set('Origin', config.clientUrl)
+    assert.equal(bad.status, 400)
+    const intruder = request.agent(app)
+    await intruder.post('/api/auth/dev-login').set('Origin', config.clientUrl).send({ email: 'intruso@test.com' })
+    const stolen = await intruder.get(`/api/orders/${orderId}/download?item=0`).set('Origin', config.clientUrl)
+    assert.equal(stolen.status, 404)
+  })
+
   it('el checkout rechaza pagar dos veces lo mismo', async () => {
     const agent = request.agent(app)
     await agent
@@ -174,11 +238,18 @@ describe('API HTTP (file store)', () => {
     assert.equal(inBundle.status, 400)
     assert.match(inBundle.body.error, /ya viene en el bundle/)
 
+    // Varias composiciones del builder sí (cada una es una página, con su
+    // precio); más de MAX_CART_COMPOSITIONS no.
     const twoCompositions = await post([
       { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
       { sku: 'custom', recipe: ['nocturne/SplitReveals'] },
     ])
-    assert.equal(twoCompositions.status, 400)
+    assert.equal(twoCompositions.status, 200)
+    const tooMany = await post(
+      Array.from({ length: 6 }, () => ({ sku: 'custom', recipe: ['chapters/HeroKinetic'] })),
+    )
+    assert.equal(tooMany.status, 400)
+    assert.match(tooMany.body.error, /Hasta 5 composiciones|Máximo 5 ítems/)
 
     // Un template y una composición sí van juntos.
     const mixed = await post([

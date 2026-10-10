@@ -7,7 +7,7 @@ import OrderStatus from '../components/OrderStatus'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatAmount } from '../lib/pricing'
-import { orderPreviews, previewName } from '../lib/orderPreview'
+import { orderItemTitle, orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { useI18n } from '../i18n'
@@ -114,12 +114,13 @@ export default function AccountPage() {
   if (!user) return <Navigate to="/login?next=/account" replace />
 
   // El link dura minutos: se pide recién acá, nunca al montar la lista.
-  const download = async (orderId) => {
-    setBusy(orderId)
+  // `item`: el ZIP de un ítem solo (varias composiciones en la misma compra).
+  const download = async (orderId, item) => {
+    setBusy(Number.isInteger(item) ? `${orderId}:${item}` : orderId)
     setError('')
     setNotice('')
     try {
-      const { url } = await api.downloadLink(orderId)
+      const { url } = await api.downloadLink(orderId, item)
       window.location.href = `${api.base}${url}`
     } catch (err) {
       setError(err.message)
@@ -225,7 +226,7 @@ export default function AccountPage() {
                         )}
                       </p>
                       <p className="mt-1 font-medium">
-                        {order.items.map((i) => i.title).join(', ')}
+                        {order.items.map((i) => orderItemTitle(order.items, i, t)).join(', ')}
                       </p>
                       <p className="mt-1 text-sm text-ink/60">
                         {order.total != null && formatAmount(order.total, dateLocale)}{' '}
@@ -288,10 +289,38 @@ export default function AccountPage() {
                             ? t('account.preview')
                             : t('account.previewOf', {
                                 name:
-                                  previewName(item) || t('account.previewCustom'),
+                                  previewName(item) ||
+                                  (order.items.filter((i) => String(i.sku).startsWith('custom')).length > 1
+                                    ? orderItemTitle(order.items, item, t)
+                                    : t('account.previewCustom')),
                               })}
                         </a>
                       ))}
+                      {order.status === 'paid' && order.items.length > 1
+                        ? order.items.map((item, index) => {
+                            // Cada composición (o template) de la compra, en su ZIP.
+                            const customs = order.items.filter((i) => String(i.sku).startsWith('custom'))
+                            const isCustom = String(item.sku).startsWith('custom')
+                            const label = isCustom
+                              ? t('account.downloadComposition', {
+                                  n: customs.indexOf(item) + 1,
+                                  count: item.recipe?.length || 0,
+                                })
+                              : item.title
+                            const key = `${order.id}:${index}`
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                disabled={busy === key}
+                                onClick={() => download(order.id, index)}
+                                className="border-2 border-ink/40 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors hover:border-ink hover:bg-ink hover:text-bone disabled:opacity-40"
+                              >
+                                {busy === key ? t('account.preparing') : `${t('account.download')} · ${label}`}
+                              </button>
+                            )
+                          })
+                        : null}
                       {order.status === 'paid' ? (
                         <button
                           type="button"
@@ -301,7 +330,9 @@ export default function AccountPage() {
                         >
                           {busy === order.id
                             ? t('account.preparing')
-                            : t('account.download')}
+                            : order.items.length > 1
+                              ? t('account.downloadAll')
+                              : t('account.download')}
                         </button>
                       ) : order.status === 'pending' && !rejected ? (
                         <span className="text-[11px] uppercase tracking-[0.25em] text-warning">

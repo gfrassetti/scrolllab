@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
+import { cartItemKey, cartLineTitle, priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { startCheckout } from '../lib/startCheckout'
 import { cartItemPreviewHref } from '../lib/orderPreview'
@@ -169,7 +169,7 @@ export default function CartPage() {
                 const previewHref = cartItemPreviewHref(line)
                 return (
                   <li
-                    key={line.sku}
+                    key={cartItemKey(line)}
                     className="flex flex-col gap-3 border-b border-ink/15 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
                     <div className="flex min-w-0 items-center gap-4">
@@ -179,7 +179,7 @@ export default function CartPage() {
                         className="h-16 w-20 sm:h-20 sm:w-24"
                       />
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{line.title}</p>
+                        <p className="truncate font-medium">{cartLineTitle(line, items, t)}</p>
                         <p className="truncate text-[11px] uppercase tracking-[0.2em] text-ink/40">
                           {line.sku}
                         </p>
@@ -211,7 +211,7 @@ export default function CartPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => removeItem(line.sku)}
+                      onClick={() => removeItem(cartItemKey(line))}
                       className="min-h-10 self-start border border-ink/30 px-4 py-2 text-xs hover:border-accent hover:bg-accent hover:text-bone sm:self-auto"
                     >
                       {t('common.remove')}

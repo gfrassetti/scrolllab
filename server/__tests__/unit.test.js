@@ -318,7 +318,7 @@ describe('validateCheckoutItems', () => {
     )
   })
 
-  it('rechaza pagar dos veces lo mismo: template repetido, dos composiciones o un modelo que ya trae el bundle', () => {
+  it('rechaza pagar dos veces lo mismo: template repetido o un modelo que ya trae el bundle (varias composiciones sí)', () => {
     const status = (items) => {
       try {
         validateCheckoutItems(items, opts)
@@ -330,12 +330,13 @@ describe('validateCheckoutItems', () => {
     assert.equal(status([{ sku: 'chapters' }, { sku: 'chapters' }]), 400)
     assert.equal(status([{ sku: 'bundle' }, { sku: 'unity' }]), 400)
     assert.equal(status([{ sku: 'unity' }, { sku: 'bundle' }]), 400)
+    // Dos composiciones del builder son dos páginas distintas: se cobran las dos.
     assert.equal(
       status([
         { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
         { sku: 'custom:b', recipe: ['nocturne/SplitReveals'] },
       ]),
-      400,
+      200,
     )
     assert.equal(status([{ sku: 'chapters' }, { sku: 'nocturne' }]), 200)
     assert.equal(status([{ sku: 'bundle' }, { sku: 'meridian' }]), 200)

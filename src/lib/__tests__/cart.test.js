@@ -12,6 +12,8 @@ const {
   markCheckoutIntent,
   takeCheckoutIntent,
   withoutBundleOverlap,
+  cartItemKey,
+  compositionNumber,
 } = await import('../cart.js')
 const { estimateCustomPriceUsd, arsFromUsd } = await import('../pricing.js')
 
@@ -151,6 +153,45 @@ describe('useCart', () => {
     useCart.getState().addItem({ sku: 'custom', title: 'Mía', recipe })
     useCart.getState().syncComposition([])
     assert.deepEqual(useCart.getState().items[0].recipe, recipe)
+  })
+
+  // Varias composiciones: cada una con su id, se cobra y se baja aparte.
+  it('composiciones con distinto id conviven; la misma se reemplaza', () => {
+    const add = (compositionId, id) =>
+      useCart.getState().addItem({ sku: 'custom', title: 'Comp', compositionId, recipe: [{ id }] })
+    add('a', 'chapters/HeroKinetic')
+    add('b', 'nocturne/SplitReveals')
+    assert.equal(useCart.getState().items.length, 2)
+    add('a', 'monolith/HeroThree')
+    const items = useCart.getState().items
+    assert.equal(items.length, 2)
+    assert.deepEqual(items.find((i) => i.compositionId === 'a').recipe, [{ id: 'monolith/HeroThree' }])
+    assert.equal(useCartNotice.getState().notice?.updated, true)
+    assert.equal(compositionNumber(items, items[1]), 2)
+    assert.equal(cartItemKey(items[0]), 'custom:a')
+  })
+
+  it('sincronizar toca solo la composición del builder abierta', () => {
+    useCart.getState().addItem({ sku: 'custom', title: 'A', compositionId: 'a', recipe: [{ id: 'chapters/HeroKinetic' }] })
+    useCart.getState().addItem({ sku: 'custom', title: 'B', compositionId: 'b', recipe: [{ id: 'nocturne/SplitReveals' }] })
+    useCart.getState().syncComposition([{ id: 'chapters/FooterCTA' }], 'b')
+    const items = useCart.getState().items
+    assert.deepEqual(items.find((i) => i.compositionId === 'a').recipe, [{ id: 'chapters/HeroKinetic' }])
+    assert.deepEqual(items.find((i) => i.compositionId === 'b').recipe, [{ id: 'chapters/FooterCTA' }])
+  })
+
+  it('quitar una composición deja las otras; tope de MAX_CART_COMPOSITIONS', () => {
+    for (const id of ['a', 'b', 'c', 'd', 'e']) {
+      assert.equal(
+        useCart.getState().addItem({ sku: 'custom', title: id, compositionId: id, recipe: [{ id: 'chapters/HeroKinetic' }] }),
+        true,
+      )
+    }
+    const sixth = useCart.getState().addItem({ sku: 'custom', title: 'f', compositionId: 'f', recipe: [{ id: 'chapters/HeroKinetic' }] })
+    assert.equal(sixth, false)
+    assert.equal(useCartNotice.getState().notice?.full, true)
+    useCart.getState().removeItem('custom:c')
+    assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['a', 'b', 'd', 'e'])
   })
 
   it('vacía todos los ítems de una', () => {

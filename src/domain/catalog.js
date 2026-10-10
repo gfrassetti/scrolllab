@@ -65,6 +65,12 @@ export const BUNDLE_MODELS = Object.freeze([
 export const CUSTOM_BASE_PRICE_USD = 690
 export const CUSTOM_BASE_SECTIONS = 8
 export const CUSTOM_EXTRA_SECTION_USD = 29
+/**
+ * Composiciones del builder en una misma compra: cada una se cobra aparte
+ * (su propio tramo) y se baja en su propio ZIP.
+ */
+export const MAX_CART_COMPOSITIONS = 5
+
 /** Tope de secciones de una receta (el builder lo muestra, el checkout lo aplica). */
 export const MAX_CUSTOM_SECTIONS = 30
 

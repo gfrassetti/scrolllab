@@ -9,7 +9,8 @@ export function isCustomSku(sku) {
 
 /**
  * Preview de un ítem del carrito (todavía no hay orden). Los templates fijos
- * van a su demo; la composición del builder, a /preview?cart=1.
+ * van a su demo; cada composición del builder, a /preview?cart=1 con su id
+ * (puede haber varias en el carrito).
  */
 export function cartItemPreviewHref(item) {
   const sku = String(item?.sku || '')
@@ -18,7 +19,22 @@ export function cartItemPreviewHref(item) {
   if (sku === 'bundle') return '/#templates'
   if (!isCustomSku(sku)) return null
   if (!Array.isArray(item?.recipe) || item.recipe.length === 0) return null
-  return '/preview?cart=1'
+  const id = item?.compositionId
+  return id ? `/preview?cart=1&composition=${encodeURIComponent(id)}` : '/preview?cart=1'
+}
+
+/**
+ * Título de un ítem comprado: con varias composiciones en la orden, cada una
+ * dice cuál es y cuántas secciones lleva («Composición 2 · 10 secciones»).
+ * @param {any[]} items los de la orden
+ * @param {any} item
+ * @param {(key: string, vars?: any) => string} t
+ */
+export function orderItemTitle(items, item, t) {
+  const customs = (items || []).filter((i) => isCustomSku(i?.sku))
+  if (!isCustomSku(item?.sku) || customs.length < 2) return item?.title
+  const count = item.recipe?.length || 0
+  return t(count === 1 ? 'cart.compositionNOne' : 'cart.compositionN', { n: customs.indexOf(item) + 1, count })
 }
 
 /**

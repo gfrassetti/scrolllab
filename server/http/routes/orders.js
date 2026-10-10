@@ -7,6 +7,9 @@ import { purchaseCode } from '../../license.js'
 import { visibleOrders } from '../../orderRetention.js'
 import {
   ensureOrderZip,
+  ensureOrderItemZip,
+  orderItemIndex,
+  orderItemZipPath,
   consumeDownload,
   assertPathInsideStorage,
 } from '../../services/orders.js'
@@ -17,6 +20,8 @@ import { orderPriceSummary } from '../../../src/domain/orderSummary.js'
 /**
  * Mis compras y la entrega del ZIP: la orden paga pide un link firmado (TTL +
  * tope de descargas) y el link baja el archivo, siempre dentro de STORAGE_DIR.
+ * Con `?item=N` el link es del ZIP de ese ítem solo (varias composiciones del
+ * builder en la misma compra se bajan por separado); sin él, de la orden.
  */
 export function createOrdersRouter({ config, limits }) {
   const router = express.Router()
@@ -76,13 +81,16 @@ export function createOrdersRouter({ config, limits }) {
         throw new HttpError(429, 'Límite de descargas alcanzado')
       }
 
-      await ensureOrderZip(order, req.user, config)
+      const item = req.query.item !== undefined ? orderItemIndex(order, req.query.item) : undefined
+      if (item === undefined) await ensureOrderZip(order, req.user, config)
+      else await ensureOrderItemZip(order, item, req.user, config)
       const orderId = db.uid(order) || order.id
       const token = signDownloadToken({
         orderId,
         userId: String(db.uid(req.user)),
         secret: config.downloadSecret,
         ttlSeconds: config.downloadTtl,
+        item,
       })
 
       res.json({ url: `/api/download/${token}`, expiresIn: config.downloadTtl })
@@ -119,16 +127,19 @@ export function createOrdersRouter({ config, limits }) {
       if (String(existing.userId) !== String(data.userId)) {
         throw new HttpError(403, 'Forbidden')
       }
-      if (!existing.zipPath) {
+      const single = Number.isInteger(data.item)
+      if (!single && !existing.zipPath) {
         throw new HttpError(404, 'ZIP no encontrado')
       }
-      const safePath = assertPathInsideStorage(existing.zipPath, config.storageDir)
+      const safePath = single
+        ? orderItemZipPath(data.orderId, orderItemIndex(existing, data.item), config.storageDir)
+        : assertPathInsideStorage(existing.zipPath, config.storageDir)
       if (!fs.existsSync(safePath)) {
         throw new HttpError(404, 'ZIP no encontrado')
       }
 
       await consumeDownload(data.orderId, config.maxDownloads, { ip: req.ip })
-      res.download(safePath, `scrolllab-${data.orderId}.zip`)
+      res.download(safePath, `scrolllab-${data.orderId}${single ? `-${data.item + 1}` : ''}.zip`)
     }),
   )
 

@@ -351,7 +351,8 @@
     "firstPurchaseTag": "{{percent}}% off — it’s your first purchase",
     "firstPurchaseShort": "−{{percent}}% 1st buy",
     "listPriceSr": "List price:",
-    "yourPriceSr": "Your price:"
+    "yourPriceSr": "Your price:",
+    "compositionsFull": "You already have 5 compositions in the cart: buy or remove one to add another."
   },
   "demoBuy": {
     "only": "only",
@@ -1146,7 +1147,9 @@
     },
     "labNote": "You get the page's source code to develop and host yourself. Already have a site and want to add sections without code?",
     "labNoteLink": "That's LAB →",
-    "separateAnchor": "Buying {{models}} separately: {{price}}. Here you take just the sections you picked, already edited."
+    "separateAnchor": "Buying {{models}} separately: {{price}}. Here you take just the sections you picked, already edited.",
+    "inCartNote": "This composition is in your cart: whatever you edit here updates it.",
+    "startAnother": "＋ Build another composition"
   },
   "cart": {
     "eyebrow": "Cart",
@@ -1166,7 +1169,9 @@
     "couponErrGeneric": "We couldn’t apply the coupon. Please try again.",
     "refundNote": "Full refund within {{days}} days if you haven’t downloaded the ZIP.",
     "refundLink": "See the policy",
-    "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically. It’s valid once (first purchase only) and doesn’t apply to LAB."
+    "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically. It’s valid once (first purchase only) and doesn’t apply to LAB.",
+    "compositionN": "Composition {{n}} · {{count}} sections",
+    "compositionNOne": "Composition {{n}} · 1 section"
   },
   "login": {
     "eyebrow": "Account",
@@ -1245,7 +1250,9 @@
       "subLapsedPaused": "Your {{plan}} plan is paused in Paddle and no longer covers your sections.",
       "subSync": "Sync with Paddle"
     },
-    "discountApplied": "Includes the {{percent}}% first-purchase discount (−{{amount}})"
+    "discountApplied": "Includes the {{percent}}% first-purchase discount (−{{amount}})",
+    "downloadComposition": "Composition {{n}}",
+    "downloadAll": "Download all (one ZIP)"
   },
   "preview": {
     "backToAccount": "← Back to My purchases",

@@ -3,7 +3,7 @@ import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurc
 /**
  * Cierre de la composición: precio, avisos (chrome duplicado, tope, commerce) y comprar / al carrito / vista previa.
  */
-export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn, fixedPriceLabel = null }) {
+export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn, inCart = false, startAnother = null, fixedPriceLabel = null }) {
   return (
     <>
       {items.length > 0 && (
@@ -72,6 +72,21 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
                 : t('builder.buyLoggedOut')}
             </button>
           </div>
+
+          {/* Ya en el carrito: lo que se edita acá lo sigue. Para armar otra
+              página, se empieza una composición nueva y esta queda como está. */}
+          {inCart && startAnother ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-ink/10 pt-3">
+              <p className="max-w-[40ch] text-body-sm text-ink/60">{t('builder.inCartNote')}</p>
+              <button
+                type="button"
+                onClick={startAnother}
+                className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
+              >
+                {t('builder.startAnother')}
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
     </>

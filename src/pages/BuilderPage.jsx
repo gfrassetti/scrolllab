@@ -56,6 +56,8 @@ export default function BuilderPage({ qa = false }) {
   const navigate = useNavigate()
 
   const {
+    compositionId,
+    inCart,
     items,
     preview,
     dragOver,
@@ -181,6 +183,7 @@ export default function BuilderPage({ qa = false }) {
   const compositionCartItem = () => ({
     sku: 'custom',
     title: t('builder.compositionTitle'),
+    compositionId,
     recipe,
   })
 
@@ -363,6 +366,8 @@ export default function BuilderPage({ qa = false }) {
             commerceSurcharge={commerceSurcharge}
             openPreview={openPreview}
             addCompositionToCart={qa ? null : addCompositionToCart}
+            inCart={!qa && inCart}
+            startAnother={clearItems}
             buyComposition={buyComposition}
             looksLoggedIn={looksLoggedIn}
           />

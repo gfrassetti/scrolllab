@@ -47,7 +47,9 @@ export default function CartToast() {
         />
         <div className="min-w-0 flex-1">
           <p className="text-[10px] uppercase tracking-[0.22em] text-ink/50">
-            {notice.inBundle
+            {notice.full
+              ? t('common.compositionsFull')
+              : notice.inBundle
               ? t('common.inBundleCart')
               : notice.already
                 ? t('common.alreadyInCart')

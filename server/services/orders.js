@@ -103,6 +103,77 @@ export async function ensureOrderZip(order, user, config) {
 }
 
 /**
+ * Índice válido de un ítem de la orden, o HttpError 400.
+ * @param {any} order
+ * @param {unknown} raw lo que vino en `?item=`
+ * @returns {number}
+ */
+export function orderItemIndex(order, raw) {
+  const index = Number(raw)
+  if (!Number.isInteger(index) || index < 0 || index >= (order.items?.length || 0)) {
+    throw new HttpError(400, 'Ítem de la orden inválido')
+  }
+  return index
+}
+
+/**
+ * Dónde vive el ZIP de un ítem suelto. Lleva PACK_VERSION en el nombre: un
+ * arreglo del empaquetador arma uno nuevo en vez de servir el viejo.
+ */
+export function orderItemZipPath(orderId, index, storageDir) {
+  return assertPathInsideStorage(
+    path.join(storageDir, `${orderId}-item${index}-v${PACK_VERSION}.zip`),
+    storageDir,
+  )
+}
+
+/**
+ * El ZIP de UN ítem de la orden: con varias composiciones del builder (o
+ * varios templates) en la misma compra, cada una se baja por separado. Misma
+ * licencia que el ZIP de la orden (fecha y código de compra): si la orden
+ * todavía no tiene fecha de licencia, se arma primero el ZIP completo, que la
+ * fija.
+ */
+export async function ensureOrderItemZip(order, index, user, config) {
+  const orderId = db.uid(order) || order.id
+  if (!order.licenseDate) await ensureOrderZip(order, user, config)
+  const dest = orderItemZipPath(orderId, index, config.storageDir)
+  if (fs.existsSync(dest)) return dest
+
+  const lockKey = `${orderId}:${index}`
+  if (packingLocks.has(lockKey)) return packingLocks.get(lockKey)
+
+  const work = (async () => {
+    const licenseMeta = {
+      orderId,
+      email: user.email,
+      date: order.licenseDate,
+      purchaseCode: purchaseCode(orderId, config.downloadSecret),
+    }
+    const tmp = `${dest}.${process.pid}-${Date.now()}.tmp`
+    try {
+      await packOrderTemplate({
+        items: [order.items[index]],
+        destPath: tmp,
+        licenseMeta,
+        bundleModels: BUNDLE_MODELS,
+      })
+      fs.renameSync(tmp, dest)
+    } finally {
+      fs.rmSync(tmp, { force: true })
+    }
+    return dest
+  })()
+
+  packingLocks.set(lockKey, work)
+  try {
+    return await work
+  } finally {
+    packingLocks.delete(lockKey)
+  }
+}
+
+/**
  * Marca la orden como paga de forma atómica e idempotente.
  * Devuelve { order, created: boolean } donde created=false si ya estaba paga.
  * Mercado Pago pasa `mpPaymentId`; Paddle, `paddleTransactionId`.

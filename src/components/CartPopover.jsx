@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
-import { cartLinePriceArs, cartLinePriceUsd, useCart } from '../lib/cart'
+import { cartItemKey, cartLinePriceArs, cartLinePriceUsd, cartLineTitle, useCart } from '../lib/cart'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
@@ -130,7 +130,7 @@ export default function CartPopover() {
                   const previewHref = cartItemPreviewHref(item)
                   return (
                     <li
-                      key={item.sku}
+                      key={cartItemKey(item)}
                       className="flex items-center gap-3 border-b border-ink/10 px-4 py-3"
                     >
                       <ProductThumbnail
@@ -140,7 +140,7 @@ export default function CartPopover() {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">
-                          {item.title}
+                          {cartLineTitle(item, items, t)}
                         </p>
                         <p className="mt-0.5 text-xs text-ink/60">
                           {formatLine(price)}
@@ -156,8 +156,8 @@ export default function CartPopover() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => removeItem(item.sku)}
-                        aria-label={`${t('common.remove')} ${item.title}`}
+                        onClick={() => removeItem(cartItemKey(item))}
+                        aria-label={`${t('common.remove')} ${cartLineTitle(item, items, t)}`}
                         className="min-h-11 shrink-0 px-2 text-xs text-ink/40 transition-colors hover:text-accent"
                       >
                         {t('common.remove')}

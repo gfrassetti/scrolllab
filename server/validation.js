@@ -8,6 +8,7 @@ import {
   BUNDLE_MODELS,
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
+import { MAX_CART_COMPOSITIONS } from '../src/domain/catalog.js'
 import { sanitizeSectionProps } from './sectionFields.js'
 import { HttpError } from './errors.js'
 
@@ -77,7 +78,7 @@ export function validateCheckoutItems(
 
   const resolved = []
   const skus = new Set()
-  let hasCustom = false
+  let customCount = 0
   for (const raw of rawItems) {
     if (!raw || typeof raw !== 'object') {
       throw new HttpError(400, 'Ítem inválido')
@@ -90,14 +91,15 @@ export function validateCheckoutItems(
     if (!line) throw new HttpError(400, `SKU inválido: ${raw.sku}`)
 
     // El mismo template dos veces se cobraría dos veces (el front no lo deja,
-    // pero el servidor no confía en el front).
+    // pero el servidor no confía en el front). Composiciones del builder sí
+    // puede haber varias: cada una es una página distinta, con su precio.
     if (line.sku === 'custom' || String(line.sku).startsWith('custom:')) {
-      if (hasCustom) {
-        throw new HttpError(400, 'Solo una composición del builder por compra', {
+      customCount += 1
+      if (customCount > MAX_CART_COMPOSITIONS) {
+        throw new HttpError(400, `Hasta ${MAX_CART_COMPOSITIONS} composiciones del builder por compra`, {
           expose: true,
         })
       }
-      hasCustom = true
     } else if (skus.has(line.sku)) {
       throw new HttpError(400, `${line.title} ya está en el carrito`, { expose: true })
     } else {
@@ -124,6 +126,18 @@ export function validateCheckoutItems(
       currency_id: line.currency_id,
       recipe: line.recipe,
     })
+  }
+
+  // Varias composiciones: cada línea dice cuál es (la pasarela, la orden, los
+  // mails y Mis compras muestran el título), no «Composición del builder» repetido.
+  if (customCount > 1) {
+    let n = 0
+    for (const line of resolved) {
+      if (!line.recipe) continue
+      n += 1
+      const count = line.recipe.length
+      line.title = `${PRODUCTS.custom.title} ${n} · ${count} ${count === 1 ? 'sección' : 'secciones'}`
+    }
   }
 
   // Un modelo suelto que ya viene en el bundle también se pagaría dos veces.
