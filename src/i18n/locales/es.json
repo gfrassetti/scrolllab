@@ -27,6 +27,7 @@
     "body": "Para el sitio que ya tenés: secciones de nivel premio, sin desarrollador. Funcionan en WordPress, Webflow, Shopify o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
     "yours": "Tus widgets",
     "publishedCount": "{{n}} de {{quota}} publicados en tu plan · {{total}} creados",
+    "publishedCountFrozen": "{{n}} de {{quota}} activos en tu plan · {{frozen}} congelados · {{total}} creados",
     "publishedCountUnlimited": "{{n}} publicados (sin tope) · {{total}} creados",
     "new": "＋ Nuevo",
     "pickSection": "Elegí un widget",

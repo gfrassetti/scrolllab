@@ -351,12 +351,20 @@ export default function LabPage({ qa = false }) {
                     <span className="ml-3 normal-case tracking-normal text-ink/40">
                       {/* Publicados contra el cupo del plan (no contra los creados:
                           «5 de 6» se leía como un cupo de 6). */}
-                      {t(Number.isFinite(quota) ? 'lab.publishedCount' : 'lab.publishedCountUnlimited', {
-                        n: instances.filter((i) => i.status === 'published')
-                          .length,
-                        quota,
-                        total: instances.length,
-                      })}
+                      {(() => {
+                        const published = instances.filter((i) => i.status === 'published').length
+                        if (!Number.isFinite(quota)) {
+                          return t('lab.publishedCountUnlimited', { n: published, total: instances.length })
+                        }
+                        // Las publicadas por encima del cupo están congeladas (no se ven en los sitios).
+                        const frozen = Math.max(0, published - quota)
+                        return t(frozen ? 'lab.publishedCountFrozen' : 'lab.publishedCount', {
+                          n: published - frozen,
+                          quota,
+                          frozen,
+                          total: instances.length,
+                        })
+                      })()}
                     </span>
                   )}
                 </h2>
