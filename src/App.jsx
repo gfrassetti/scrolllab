@@ -43,6 +43,7 @@ const QaBuilderPage = lazy(() => import('./pages/QaPages').then((m) => ({ defaul
 const QaLabPage = lazy(() => import('./pages/QaPages').then((m) => ({ default: m.QaLabPage })))
 const WithdrawalPage = lazy(() => import('./pages/WithdrawalPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
+const LabPackPage = lazy(() => import('./pages/LabPackPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
@@ -197,6 +198,7 @@ export default function App() {
                   <Route path="/test" element={<QaHubPage />} />
                   <Route path="/builder-test" element={<QaBuilderPage />} />
                   <Route path="/lab-test" element={<QaLabPage />} />
+                  <Route path="/lab/pack/:id" element={<LabPackPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />
                   <Route path="/preview" element={<PreviewPage />} />
                   <Route path="/legal/license" element={<LicensePage />} />

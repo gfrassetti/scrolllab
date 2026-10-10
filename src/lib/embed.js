@@ -3,6 +3,9 @@ const FALLBACK_LOADER_URL = 'https://embed.scrolllab.com.ar/v1/loader.js'
 /** Stacks para los que hay un snippet listo. `html` es el default. */
 export const EMBED_VARIANTS = ['html', 'react', 'next', 'vue']
 
+/** Un pack (`pk_…`, varias secciones bajo un tag) o una sección (`pub_…`). */
+const isPackKey = (key) => /^pk_/.test(String(key || ''))
+
 function loaderUrl(loader) {
   return loader?.url || FALLBACK_LOADER_URL
 }
@@ -14,7 +17,8 @@ function htmlSnippet(key, loader) {
     ? `\n  integrity="${loader.integrity}" crossorigin="anonymous"`
     : ''
   const apiAttr = loader?.api ? `\n  data-api="${loader.api}"` : ''
-  return `<script src="${url}"${sri}\n  data-scrolllab data-key="${key}"${apiAttr} async></script>`
+  const keyAttr = isPackKey(key) ? 'data-pack' : 'data-key'
+  return `<script src="${url}"${sri}\n  data-scrolllab ${keyAttr}="${key}"${apiAttr} async></script>`
 }
 
 /**
@@ -29,7 +33,7 @@ function htmlSnippet(key, loader) {
 function reactTag(key) {
   return `import ScrollLabEmbed from '@scrolllab/embed'
 
-<ScrollLabEmbed embedKey="${key}" />`
+<ScrollLabEmbed ${isPackKey(key) ? 'packKey' : 'embedKey'}="${key}" />`
 }
 
 function vueTag(key) {
@@ -38,7 +42,7 @@ import ScrollLabEmbed from '@scrolllab/embed/vue'
 </script>
 
 <template>
-  <ScrollLabEmbed embed-key="${key}" />
+  <ScrollLabEmbed ${isPackKey(key) ? 'pack-key' : 'embed-key'}="${key}" />
 </template>`
 }
 

@@ -16,6 +16,21 @@ export function isHostedKey(value) {
 }
 
 /**
+ * Clave pública de un pack de LAB (varias instancias bajo un solo script,
+ * `<script data-pack>`). Mismas reglas que la de una instancia: pública y
+ * revocable (borrar el pack la invalida).
+ */
+export function newPackKey() {
+  return `pk_${crypto.randomBytes(12).toString('hex')}`
+}
+
+export const PACK_KEY_RE = /^pk_[a-f0-9]{24}$/
+
+export function isPackKey(value) {
+  return typeof value === 'string' && PACK_KEY_RE.test(value)
+}
+
+/**
  * hostname del sitio donde está embebida la sección (para el domain-lock).
  *
  * El config lo pide el iframe, que corre en NUESTRO origen: su `Origin` es

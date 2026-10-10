@@ -531,6 +531,79 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     }
   })
 
+  // --- pack: un `<script data-pack>` monta un iframe por widget, en orden ---
+  it('pack — un solo script apila los widgets publicados en el orden del pack', async () => {
+    const a = await seed('chapters/FooterCTA', CASES['chapters/FooterCTA'].props)
+    const b = await seed('chapters/BigNumbers', CASES['chapters/BigNumbers'].props)
+    const draft = await fetch(`${API}/api/hosted`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ sectionId: 'atelier/KeyFacts' }),
+    }).then((r) => r.json())
+    const created = await fetch(`${API}/api/hosted-packs`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name: 'e2e', items: [b.id, draft.instance.id, a.id] }),
+    })
+    assert.equal(created.status, 201, 'crear pack')
+    const pack = (await created.json()).pack
+
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' })
+    const page = await context.newPage()
+    const url = 'http://localhost:4178/__pack-host.html'
+    await page.route(url, (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: `<!doctype html><html><body style="margin:0">
+          <p id="before">antes</p>
+          <script src="http://localhost:4178/embed-dist/v1/loader.js" data-scrolllab
+            data-pack="${pack.key}" data-frame="http://localhost:4179/embed-dist/v1"
+            data-api="${API}" async></script>
+          <p id="after">después</p>
+        </body></html>`,
+      }),
+    )
+    try {
+      await page.goto(url)
+      const frames = page.locator('[data-scrolllab-pack] iframe[data-scrolllab-frame]')
+      await frames.nth(1).waitFor({ state: 'attached', timeout: 15_000 })
+      await sleep(800)
+      assert.equal(await frames.count(), 2, 'el borrador no se monta')
+      const order = await frames.evaluateAll((els) => els.map((el) => el.getAttribute('data-scrolllab-frame')))
+      assert.deepEqual(order, [b.key, a.key], 'los iframes siguen el orden del pack')
+
+      // El contenedor queda donde estaba el <script>: entre los dos párrafos.
+      const between = await page.evaluate(() => {
+        const box = document.querySelector('[data-scrolllab-pack]')
+        return (
+          document.getElementById('before').compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING &&
+          box.compareDocumentPosition(document.getElementById('after')) & Node.DOCUMENT_POSITION_FOLLOWING
+        )
+      })
+      assert.ok(between, 'el pack se monta en el lugar del <script>')
+
+      // Cada frame pinta su widget (marcador de sus props).
+      for (const [key, marker] of [
+        [b.key, CASES['chapters/BigNumbers'].marker],
+        [a.key, CASES['chapters/FooterCTA'].marker],
+      ]) {
+        let text = ''
+        for (let i = 0; i < 30 && !text.includes(marker); i++) {
+          const fr = page.frames().find((f) => f.url().includes(encodeURIComponent(key)))
+          text = fr ? await fr.evaluate(() => document.getElementById('root')?.innerText || '').catch(() => '') : ''
+          if (!text.includes(marker)) await sleep(400)
+        }
+        assert.match(text, new RegExp(marker), `el frame de ${key} no pintó su widget`)
+      }
+    } finally {
+      await context.close()
+      await fetch(`${API}/api/hosted-packs/${pack.id}`, { method: 'DELETE', headers }).catch(() => {})
+      await unseed(a.id)
+      await unseed(b.id)
+      await unseed(draft.instance.id)
+    }
+  })
+
   // --- responsive: mobile / tablet / desktop sobre host plano ---
   for (const sectionId of RESPONSIVE_SECTIONS) {
     for (const vp of VIEWPORTS) {

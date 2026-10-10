@@ -239,7 +239,48 @@
         "q": "Any other site or your own HTML",
         "a": "Paste the code into the page HTML, where you want it to appear. If your platform has an «HTML code», «embed» or «custom code» block, it goes there."
       }
-    ]
+    ],
+    "pack": {
+      "title": "Packs",
+      "intro": "Put several widgets on one page: a single snippet shows them one below the other, in the order you choose. It doesn't use up your plan: each widget already counts.",
+      "new": "＋ New pack",
+      "empty": "You haven't built a pack yet.",
+      "needWidgets": "A pack groups widgets you already created: create one first.",
+      "defaultName": "Untitled pack",
+      "countOne": "1 widget",
+      "countMany": "{{n}} widgets",
+      "countShown": "{{shown}} of {{total}} showing",
+      "nothingShown": "None of the pack's widgets is published: the snippet doesn't show anything yet.",
+      "name": "Name",
+      "namePlaceholder": "Home, summer landing…",
+      "items": "Widgets, in page order",
+      "itemsEmpty": "Add widgets below. They stack in this order on your page.",
+      "addPick": "Pick a widget to add",
+      "add": "Add",
+      "allAdded": "You already added all your widgets.",
+      "up": "Move up",
+      "down": "Move down",
+      "remove": "Remove",
+      "openWidget": "Edit widget",
+      "hidden": {
+        "draft": "Draft: hidden until you publish it",
+        "frozen": "Frozen: your plan doesn't cover it, hidden",
+        "suspended": "Suspended: hidden"
+      },
+      "domainsHint": "Leave the list empty and the pack shows on any domain. Each widget also keeps its own domains.",
+      "save": "Save",
+      "saved": "Saved",
+      "unsaved": "You have unsaved changes: your site still shows the previous version.",
+      "delete": "Delete pack",
+      "deleteConfirm": "Delete the pack? The snippet stops working on your site. The widgets are kept.",
+      "deleteYes": "Yes, delete",
+      "cancel": "Cancel",
+      "snippetNote": "Only published widgets show. To change a widget's content, open it in its editor: the pack updates on its own.",
+      "npmNote": "With React, Next.js or Vue: @scrolllab/embed 0.2 or newer (npm i @scrolllab/embed@latest).",
+      "preview": "How the page looks",
+      "previewEmpty": "Once you add published widgets, you'll see the assembled page here.",
+      "previewFailed": "The preview didn't load. The snippet still works."
+    }
   },
   "common": {
     "loading": "Loading…",

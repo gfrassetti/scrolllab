@@ -46,7 +46,7 @@ export default function SnippetBox({ embedKey, loaderInfo }) {
               type="button"
               onClick={() => setVariant(v)}
               aria-pressed={variant === v}
-              className={`border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
+              className={`tpl-hit relative border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
                 variant === v
                   ? 'border-accent bg-accent text-ink'
                   : 'border-ink/25 text-ink/55 hover:border-ink/50'
@@ -66,7 +66,7 @@ export default function SnippetBox({ embedKey, loaderInfo }) {
         <button
           type="button"
           onClick={copy}
-          className="ui-press text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent"
+          className="ui-press tpl-hit relative text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent"
         >
           {copied ? t('lab.copied') : t('lab.copy')}
         </button>

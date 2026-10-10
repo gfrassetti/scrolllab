@@ -20,6 +20,10 @@
  *       window.ScrollLab.render(elemento, { key: 'pub_xxxxx', api, frame })
  *       window.ScrollLab.scan()   // re-escanea <script data-scrolllab> nuevos
  *
+ *  3. Pack — varias secciones con un solo tag: `data-pack="pk_xxxxx"` (o
+ *     `render(el, { pack })`). El loader pide la lista de keys a la API y
+ *     monta un iframe por sección, en orden, cada uno con su modo FLOW/PIN.
+ *
  * Modos de render (idénticos en las dos formas):
  *  - FLOW: el frame manda su alto (`scrolllab:height`) y el loader dimensiona
  *    el iframe. El loader avisa `inView` para la animación de entrada.
@@ -87,13 +91,29 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
   // Monta todo <script data-scrolllab data-key> que no se haya montado aún.
   function scan() {
     var nodes = document.querySelectorAll(
-      'script[data-scrolllab][data-key]:not([data-scrolllab-done])',
+      'script[data-scrolllab][data-key]:not([data-scrolllab-done]),' +
+        'script[data-scrolllab][data-pack]:not([data-scrolllab-done])',
     )
     for (var i = 0; i < nodes.length; i++) mountFromScript(nodes[i])
   }
 
   function mountFromScript(script) {
     script.setAttribute('data-scrolllab-done', '1')
+    var pack = script.getAttribute('data-pack')
+    if (pack) {
+      // Contenedor propio en el lugar del <script>: los iframes del pack se
+      // apilan adentro, en orden, aunque la lista llegue después.
+      var box = document.createElement('div')
+      box.setAttribute('data-scrolllab-pack', pack)
+      script.parentNode.insertBefore(box, script.nextSibling)
+      mountPack({
+        pack: pack,
+        apiUrl: script.getAttribute('data-api') || '',
+        frameBase: resolveFrameBase(script, FRAME_BASE_FALLBACK),
+        parent: box,
+      })
+      return
+    }
     var key = script.getAttribute('data-key')
     if (!key) {
       console.error('[scrolllab] <script> sin data-key')
@@ -120,8 +140,9 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       return
     }
     var key = opts.key || el.getAttribute('data-key') || ''
-    if (!key) {
-      console.error('[scrolllab] render: falta `key`')
+    var pack = opts.pack || el.getAttribute('data-pack') || ''
+    if (!key && !pack) {
+      console.error('[scrolllab] render: falta `key` (o `pack`)')
       return
     }
     if (el.getAttribute('data-scrolllab-done')) return // ya montado
@@ -134,6 +155,15 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
         return n === 'data-frame' ? opts.frame || null : null
       },
     }
+    if (!key) {
+      mountPack({
+        pack: pack,
+        apiUrl: opts.api || el.getAttribute('data-api') || '',
+        frameBase: resolveFrameBase(shim, FRAME_BASE_FALLBACK),
+        parent: el,
+      })
+      return
+    }
     mount({
       key: key,
       apiUrl: opts.api || el.getAttribute('data-api') || '',
@@ -141,6 +171,38 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       parent: el,
       before: null, // insertBefore(node, null) === appendChild
     })
+  }
+
+  // ── Pack: la lista de keys sale de la API, un iframe por sección ─────
+  function mountPack(o) {
+    if (!o.apiUrl) {
+      console.error('[scrolllab] pack sin data-api')
+      return
+    }
+    var url = o.apiUrl.replace(/\/$/, '') + '/api/embed/pack/' + encodeURIComponent(o.pack)
+    fetch(url, { credentials: 'omit' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status)
+        return res.json()
+      })
+      .then(function (data) {
+        // El framework pudo desmontar el contenedor mientras llegaba la lista.
+        if (!o.parent.isConnected) return
+        var keys = (data && data.keys) || []
+        for (var i = 0; i < keys.length; i++) {
+          mount({
+            key: keys[i],
+            apiUrl: o.apiUrl,
+            frameBase: o.frameBase,
+            parent: o.parent,
+            before: null,
+          })
+        }
+      })
+      .catch(function (err) {
+        // Sin pack no se pinta nada: en el sitio del cliente no se ve roto.
+        console.error('[scrolllab] el pack no se muestra:', err.message || err)
+      })
   }
 
   // ── Montaje real ─────────────────────────────────────────────────────

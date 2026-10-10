@@ -29,6 +29,16 @@ describe('embedSnippet', () => {
     }
   })
 
+  it('pack (pk_…): data-pack en HTML, packKey / pack-key en los frameworks', () => {
+    const PACK = 'pk_0123456789abcdef01234567'
+    const html = embedSnippet(PACK, LOADER, 'html')
+    assert.match(html, new RegExp(`data-pack="${PACK}"`))
+    assert.doesNotMatch(html, /data-key=/)
+    assert.match(html, /data-api="https:\/\/www\.scrolllab\.com\.ar"/)
+    assert.match(embedSnippet(PACK, LOADER, 'react'), new RegExp(`<ScrollLabEmbed packKey="${PACK}" />`))
+    assert.match(embedSnippet(PACK, LOADER, 'vue'), new RegExp(`<ScrollLabEmbed pack-key="${PACK}" />`))
+  })
+
   it('vue: el componente de @scrolllab/embed/vue con embed-key', () => {
     const s = embedSnippet(KEY, LOADER, 'vue')
     assert.match(s, /import ScrollLabEmbed from '@scrolllab\/embed\/vue'/)

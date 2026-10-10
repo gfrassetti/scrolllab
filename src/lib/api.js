@@ -118,6 +118,21 @@ export const api = {
     }),
   hostedDelete: (id) =>
     request(`/api/hosted/${id}`, { method: 'DELETE' }),
+  // Packs: varias secciones del usuario bajo un solo script.
+  packList: () => request('/api/hosted-packs'),
+  packGet: (id) => request(`/api/hosted-packs/${id}`),
+  packCreate: (body) =>
+    request('/api/hosted-packs', {
+      method: 'POST',
+      body: JSON.stringify(body || {}),
+    }),
+  packUpdate: (id, body) =>
+    request(`/api/hosted-packs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(body || {}),
+    }),
+  packDelete: (id) =>
+    request(`/api/hosted-packs/${id}`, { method: 'DELETE' }),
 
   // `qa`: los planes de prueba (solo cuentas de QA_BUYER_EMAILS, src/domain/qa.js).
   subscriptionPlans: ({ qa = false } = {}) =>

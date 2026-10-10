@@ -239,7 +239,48 @@
         "q": "Otro sitio o HTML propio",
         "a": "Pegá el código en el HTML de la página, en el lugar donde quieras que aparezca. Si tu plataforma tiene un bloque de «código HTML», «embed» o «código personalizado», va ahí."
       }
-    ]
+    ],
+    "pack": {
+      "title": "Packs",
+      "intro": "Juntá varios widgets en una sola página: un solo snippet los muestra uno debajo del otro, en el orden que elijas. No suma cupo: cada widget ya cuenta en tu plan.",
+      "new": "＋ Nuevo pack",
+      "empty": "Todavía no armaste ningún pack.",
+      "needWidgets": "Un pack junta widgets que ya creaste: primero creá uno.",
+      "defaultName": "Pack sin nombre",
+      "countOne": "1 widget",
+      "countMany": "{{n}} widgets",
+      "countShown": "{{shown}} de {{total}} se muestran",
+      "nothingShown": "Ningún widget del pack está publicado: el snippet todavía no muestra nada.",
+      "name": "Nombre",
+      "namePlaceholder": "Home, landing de verano…",
+      "items": "Widgets, en el orden de la página",
+      "itemsEmpty": "Sumá widgets abajo. Se apilan en este orden en tu página.",
+      "addPick": "Elegí un widget para sumar",
+      "add": "Sumar",
+      "allAdded": "Ya sumaste todos tus widgets.",
+      "up": "Subir",
+      "down": "Bajar",
+      "remove": "Quitar",
+      "openWidget": "Editar widget",
+      "hidden": {
+        "draft": "Borrador: no se muestra hasta que lo publiques",
+        "frozen": "Congelado: tu plan no lo cubre, no se muestra",
+        "suspended": "Suspendido: no se muestra"
+      },
+      "domainsHint": "Si dejás la lista vacía, el pack se muestra en cualquier dominio. Cada widget además respeta sus propios dominios.",
+      "save": "Guardar",
+      "saved": "Guardado",
+      "unsaved": "Tenés cambios sin guardar: el sitio sigue mostrando la versión anterior.",
+      "delete": "Borrar pack",
+      "deleteConfirm": "¿Borrar el pack? El snippet deja de funcionar en tu sitio. Los widgets no se borran.",
+      "deleteYes": "Sí, borrar",
+      "cancel": "Cancelar",
+      "snippetNote": "Muestra solo los widgets publicados. Para cambiar el contenido de uno, abrilo en su editor: el pack se actualiza solo.",
+      "npmNote": "Con React, Next.js o Vue: @scrolllab/embed 0.2 o más nuevo (npm i @scrolllab/embed@latest).",
+      "preview": "Así se ve la página",
+      "previewEmpty": "Cuando sumes widgets publicados, acá ves la página armada.",
+      "previewFailed": "La vista previa no cargó. El snippet funciona igual."
+    }
   },
   "common": {
     "loading": "Cargando…",

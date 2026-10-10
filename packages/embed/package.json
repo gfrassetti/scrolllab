@@ -1,7 +1,7 @@
 {
   "name": "@scrolllab/embed",
-  "version": "0.1.0",
-  "description": "Embed a ScrollLab hosted section with one tag. React, Next and Vue.",
+  "version": "0.2.0",
+  "description": "Embed a ScrollLab hosted section (or a pack of sections) with one tag. React, Next and Vue.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

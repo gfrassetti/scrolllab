@@ -211,6 +211,66 @@ export const fileDb = {
     write("hosted", rows);
     return true;
   },
+  async createHostedPack(data) {
+    const rows = read("hosted-packs");
+    const now = new Date().toISOString();
+    const pack = {
+      id: nid(),
+      name: "",
+      items: [],
+      domains: [],
+      ...data,
+      userId: String(data.userId),
+      createdAt: now,
+      updatedAt: now,
+    };
+    rows.push(pack);
+    write("hosted-packs", rows);
+    return withSaveDoc("hosted-packs", pack);
+  },
+  async findHostedPackById(id) {
+    return withSaveDoc(
+      "hosted-packs",
+      read("hosted-packs").find((p) => p.id === String(id)) || null,
+    );
+  },
+  async findHostedPackByKey(key) {
+    return withSaveDoc(
+      "hosted-packs",
+      read("hosted-packs").find((p) => p.key === String(key)) || null,
+    );
+  },
+  async findHostedPacksByUser(userId) {
+    return read("hosted-packs")
+      .filter((p) => String(p.userId) === String(userId))
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .map((p) => withSaveDoc("hosted-packs", p));
+  },
+  async deleteHostedPack(id) {
+    const rows = read("hosted-packs");
+    const idx = rows.findIndex((p) => p.id === String(id));
+    if (idx < 0) return false;
+    rows.splice(idx, 1);
+    write("hosted-packs", rows);
+    return true;
+  },
+  async removeInstanceFromPacks(userId, instanceId) {
+    const rows = read("hosted-packs");
+    let changed = false;
+    for (const p of rows) {
+      if (String(p.userId) !== String(userId)) continue;
+      const next = (p.items || []).filter((i) => i !== String(instanceId));
+      if (next.length !== (p.items || []).length) {
+        p.items = next;
+        p.updatedAt = new Date().toISOString();
+        changed = true;
+      }
+    }
+    if (changed) write("hosted-packs", rows);
+  },
   async countPublishedHosted(userId, exceptId) {
     return read("hosted").filter(
       (h) =>

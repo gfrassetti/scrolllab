@@ -33,6 +33,23 @@ import ScrollLabEmbed from '@scrolllab/embed/vue'
 </template>
 ```
 
+## Packs (several sections, one tag)
+
+A LAB pack groups sections you already published, in order. Same component,
+`packKey` instead of `embedKey`:
+
+```jsx
+<ScrollLabEmbed packKey="pk_xxxxxxxxxxxxxxxxxxxxxxxx" />
+```
+
+```vue
+<ScrollLabEmbed pack-key="pk_xxxxxxxxxxxxxxxxxxxxxxxx" />
+```
+
+Each section renders in its own iframe, stacked in the pack's order. Edit,
+reorder or unpublish sections from the LAB dashboard; the page picks it up on
+the next load.
+
 ## Plain HTML
 
 No package needed — paste the `<script>` tag ScrollLab gives you in the LAB

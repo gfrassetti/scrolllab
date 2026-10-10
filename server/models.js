@@ -141,6 +141,29 @@ const hostedInstanceSchema = new mongoose.Schema(
 );
 
 /**
+ * Pack de LAB: varias instancias del mismo usuario, en orden, servidas con un
+ * solo `<script data-pack>`. No guarda props: cada sección se edita y publica
+ * en su instancia (y ya cuenta en el cupo); el pack solo las agrupa.
+ */
+const hostedPackSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+    key: { type: String, required: true, unique: true, index: true },
+    name: { type: String, default: "" },
+    // ids de HostedInstance, en el orden en que se apilan en la página.
+    items: { type: [String], default: [] },
+    // Allowlist de dominios del pack. Vacío = sin restricción.
+    domains: { type: [String], default: [] },
+  },
+  { timestamps: true },
+);
+
+/**
  * Suscripción de Hosted Component (LAB) — MercadoPago PreApproval.
  * Una activa por usuario (la más nueva `authorized`). Ver
  * docs/hosted-component-plan.md Fase 4.
@@ -345,6 +368,9 @@ export const Order =
 export const HostedInstance =
   mongoose.models.HostedInstance ||
   mongoose.model("HostedInstance", hostedInstanceSchema);
+export const HostedPack =
+  mongoose.models.HostedPack ||
+  mongoose.model("HostedPack", hostedPackSchema);
 /** @type {AnyModel} */
 export const Subscription =
   mongoose.models.Subscription ||

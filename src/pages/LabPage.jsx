@@ -63,6 +63,7 @@ export default function LabPage({ qa = false }) {
     d ? new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-AR') : ''
 
   const [instances, setInstances] = useState([])
+  const [packs, setPacks] = useState([])
   const [sections, setSections] = useState([])
   const [picked, setPicked] = useState('')
   const [loaderInfo, setLoaderInfo] = useState(null)
@@ -97,12 +98,14 @@ export default function LabPage({ qa = false }) {
 
   const load = useCallback(async () => {
     try {
-      const [list, secs, loader] = await Promise.all([
+      const [list, secs, loader, packRes] = await Promise.all([
         api.hostedList(),
         api.hostedSections(),
         api.embedLoader().catch(() => null),
+        api.packList().catch(() => ({ packs: [] })),
       ])
       setInstances(list.instances || [])
+      setPacks(packRes.packs || [])
       const secList = secs.sections || []
       setSections(secList)
       setPicked((p) => p || secList[0] || '')
@@ -135,6 +138,25 @@ export default function LabPage({ qa = false }) {
   }
 
   const sectionLabel = (id) => getSection(id)?.name || id
+
+  const createPack = async () => {
+    if (busy || instances.length === 0) return
+    setBusy(true)
+    try {
+      const { pack } = await api.packCreate({})
+      navigate(`/lab/pack/${pack.id}`)
+    } catch (err) {
+      setError(err.message)
+      setBusy(false)
+    }
+  }
+
+  // Cuántos widgets de un pack se ven hoy en el sitio (publicados y cubiertos).
+  const packShown = (pack) =>
+    pack.items.filter((id) => {
+      const inst = instances.find((i) => i.id === id)
+      return inst && inst.status === 'published' && !inst.frozen
+    }).length
 
   const remove = async (id) => {
     if (busy) return
@@ -505,6 +527,67 @@ export default function LabPage({ qa = false }) {
             </>
           )}
         </section>
+
+        {/* Packs: varios widgets en una página, un solo snippet. */}
+        {user && (
+          <section className="mt-16 md:mt-20">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-eyebrow uppercase text-ink/50">{t('lab.pack.title')}</h2>
+              <button
+                type="button"
+                onClick={createPack}
+                disabled={busy || instances.length === 0}
+                title={instances.length === 0 ? t('lab.pack.needWidgets') : undefined}
+                className="btn btn-ghost disabled:opacity-40"
+              >
+                {t('lab.pack.new')}
+              </button>
+            </div>
+            <p className="mt-3 max-w-[64ch] text-body-sm text-ink/60">{t('lab.pack.intro')}</p>
+
+            {packs.length === 0 ? (
+              <p className="mt-6 text-body text-ink/55">
+                {instances.length === 0 ? t('lab.pack.needWidgets') : t('lab.pack.empty')}
+              </p>
+            ) : (
+              <ul className="mt-6 space-y-4">
+                {packs.map((pack) => {
+                  const shownCount = packShown(pack)
+                  const total = pack.items.length
+                  return (
+                    <li key={pack.id} className="border border-ink/15 p-4 md:p-5">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="text-body font-medium">
+                          {pack.name || t('lab.pack.defaultName')}
+                        </span>
+                        <span className="text-body-sm tabular-nums text-ink/50">
+                          {shownCount === total
+                            ? t(total === 1 ? 'lab.pack.countOne' : 'lab.pack.countMany', { n: total })
+                            : t('lab.pack.countShown', { shown: shownCount, total })}
+                        </span>
+                        <Link
+                          to={`/lab/pack/${pack.id}`}
+                          className="ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
+                        >
+                          {t('lab.edit')}
+                        </Link>
+                      </div>
+                      <div className="mt-4">
+                        {shownCount > 0 ? (
+                          <SnippetBox embedKey={pack.key} loaderInfo={loaderInfo} />
+                        ) : (
+                          <p className="text-body-sm text-ink/55">
+                            {total === 0 ? t('lab.pack.itemsEmpty') : t('lab.pack.nothingShown')}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
+        )}
 
         {/* Guías por plataforma: dónde se pega el mismo snippet en cada una. */}
         <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">

@@ -51,6 +51,15 @@ window.ScrollLab.render(elemento, { key: 'pub_xxxxx', api, frame }) // monta en 
 window.ScrollLab.scan()                                             // re-escanea <script> nuevos
 ```
 
+**Pack** — varias secciones del usuario con un solo tag: `data-pack="pk_…"` en
+lugar de `data-key` (o `render(el, { pack, api })`). El loader pide
+`GET /api/embed/pack/:key` (las keys que hoy se sirven, en orden: sin borradores
+ni congeladas; domain-lock del pack y de cada sección) y monta un iframe por
+key con el mismo `mount()`, dentro de un `<div data-scrolllab-pack>` puesto en
+el lugar del `<script>`. Cada iframe decide su FLOW/PIN como siempre. El pack no
+guarda props ni suma cupo: se arma en `/lab/pack/:id`. En React/Vue,
+`@scrolllab/embed` ≥ 0.2 (`packKey` / `pack-key`).
+
 `render()` es idempotente (`data-scrolllab-done`) y reusa el mismo `mount()` que
 el path HTML. Los snippets por stack los arma `src/lib/embed.js`
 (`embedSnippet(key, loader, variant)` — `html` | `react` | `next` | `vue`) y se
