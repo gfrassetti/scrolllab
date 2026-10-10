@@ -14,6 +14,8 @@ export default function VisionShutter({
   word1 = 'WORD ONE',
   word2 = 'WORD TWO',
   word3 = 'WORD THREE',
+  /** Nombre de la sección para lectores de pantalla. */
+  regionLabel = 'Vision transition',
 }) {
   const root = useRef(null)
   const words = [word1, word2, word3, word1, word2]
@@ -107,7 +109,7 @@ export default function VisionShutter({
   return (
     <section
       ref={root}
-      aria-label="Vision transition"
+      aria-label={regionLabel}
       className="relative bg-[#0b0c10] text-white"
     >
       <div className="relative h-svh overflow-hidden">

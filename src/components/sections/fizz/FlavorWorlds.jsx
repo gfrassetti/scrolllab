@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
@@ -39,6 +39,31 @@ const defaultWorlds = [
     liquid: '#7a5cff',
   },
 ]
+
+const HEX6 = /^#[0-9a-f]{6}$/i
+
+/**
+ * Del builder llegan sabores con campos vacíos: cada uno toma lo del sabor de
+ * la demo en esa posición. Los colores tienen que ser #rrggbb (el escenario
+ * los interpola en HSL); otro formato también cae al de la demo.
+ */
+function resolveWorlds(list) {
+  if (!Array.isArray(list) || !list.length) return defaultWorlds
+  return list.map((w, i) => {
+    const base = defaultWorlds[i % defaultWorlds.length]
+    const color = (key) => (HEX6.test(w?.[key] || '') ? w[key] : base[key])
+    return {
+      ...base,
+      ...w,
+      name: w?.name || base.name,
+      tagline: w?.tagline || base.tagline,
+      body: w?.body || base.body,
+      bg: color('bg'),
+      ink: color('ink'),
+      liquid: color('liquid'),
+    }
+  })
+}
 
 /** '#rrggbb' → { h, s, l } (h in degrees, s/l in percent). */
 function hexToHsl(hex) {
@@ -88,8 +113,12 @@ export default function FlavorWorlds({
   modelUrl = '',
   envUrl = '',
   dracoPath = '/fizz/draco/',
-  worlds = defaultWorlds,
+  worlds: worldsProp,
 }) {
+  // Estable mientras no cambie el contenido: es dependencia de la animación.
+  const worldsKey = JSON.stringify(worldsProp ?? null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const worlds = useMemo(() => resolveWorlds(worldsProp), [worldsKey])
   const root = useRef(null)
   const canvasRef = useRef(null)
   const reducedMotion = useReducedMotion()

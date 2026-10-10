@@ -40,15 +40,39 @@ const PROJECTS = [
 ]
 
 /**
+ * Proyectos del builder: lo vacío toma lo del proyecto de la demo en esa
+ * posición (foto incluida); el degradé de fondo sigue el de la demo.
+ */
+function resolveProjects(list) {
+  if (!Array.isArray(list) || !list.length) return PROJECTS
+  return list.map((p, i) => {
+    const d = PROJECTS[i % PROJECTS.length]
+    return {
+      ...d,
+      title: p?.title || d.title,
+      body: p?.body || d.body,
+      tag: p?.tag || d.tag,
+      overlay: p?.overlay || d.overlay,
+      img: p?.img || d.img,
+      href: p?.href || '#work',
+    }
+  })
+}
+
+/**
  * SelectedWork — horizontal work slider (vertical scroll drives x).
  * Each card rises from below with a fade and joins the track.
  */
 export default function SelectedWork({
   title = 'YOUR WORK TITLE',
   cta = 'Your CTA →',
+  ctaHref = '#facts',
+  projects: projectsProp,
+  exploreLabel = 'Explore →',
   bg,
   fg,
 }) {
+  const projects = resolveProjects(projectsProp)
   const root = useRef(null)
 
   useGSAP(
@@ -146,7 +170,7 @@ export default function SelectedWork({
             {title}
           </h2>
           <a
-            href="#facts"
+            href={ctaHref}
             className="tpl-hit relative shrink-0 text-[11px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-black/30 transition-[text-decoration-color] duration-300 hover:decoration-black"
           >
             {cta}
@@ -158,9 +182,9 @@ export default function SelectedWork({
             data-work-track
             className="flex h-full items-center gap-5 px-5 will-change-transform md:gap-7 md:px-10 calm:w-max"
           >
-            {PROJECTS.map((project) => (
+            {projects.map((project, i) => (
               <article
-                key={project.title}
+                key={i}
                 data-work-card
                 className="group relative w-[min(78vw,28rem)] shrink-0 will-change-transform md:w-[min(42vw,32rem)] calm:snap-start"
               >
@@ -193,10 +217,10 @@ export default function SelectedWork({
                     </p>
                   </div>
                   <a
-                    href="#work"
+                    href={project.href || '#work'}
                     className="tpl-hit relative shrink-0 pt-1 text-[11px] tracking-[0.18em] uppercase underline underline-offset-4 decoration-black/25 transition-[text-decoration-color] duration-300 hover:decoration-black"
                   >
-                    Explore →
+                    {exploreLabel}
                   </a>
                 </div>
               </article>

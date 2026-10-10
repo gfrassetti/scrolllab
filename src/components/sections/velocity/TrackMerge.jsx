@@ -74,16 +74,43 @@ const ROW_B = [
 ]
 
 /**
+ * Filas del builder: cada foto toma título y foto propios, y lo vacío cae a
+ * la de la demo en esa posición. El ancho de cada tarjeta es parte del ritmo
+ * de la fila: sigue el de la demo.
+ */
+function mergeRow(defaults, custom) {
+  if (!Array.isArray(custom) || !custom.length) return defaults
+  return custom.map((c, i) => {
+    const d = defaults[i % defaults.length]
+    return { ...d, label: c?.label || d.label, img: c?.img || d.img }
+  })
+}
+
+const ROW_A_PHOTOS = ROW_A.filter((item) => !item.quote)
+const ROW_A_QUOTE = ROW_A.find((item) => item.quote)
+
+/**
  * TrackMerge — dual-row gallery with aggressive speed differential, then
  * PATH 1 / PATH 2 panels converge and hold before release.
  */
 export default function TrackMerge({
+  trackLabel = 'Dual track',
+  quote = ROW_A_QUOTE.quote,
+  quoteCaption = '— Caption',
+  rowA,
+  rowB,
   pathLabelA = 'Path 1',
   pathLabelB = 'Path 2',
+  pathImgA = onTrack,
+  pathImgB = offTrack,
   mergeTitleA = 'TITLE',
   mergeTitleB = 'TITLE',
   mergeAccent = 'A',
 }) {
+  // La cita va segunda en la fila de arriba, como en la demo.
+  const photosA = mergeRow(ROW_A_PHOTOS, rowA)
+  const itemsA = [photosA[0], { ...ROW_A_QUOTE, quote }, ...photosA.slice(1)]
+  const itemsB = mergeRow(ROW_B, rowB)
   const root = useRef(null)
 
   useGSAP(
@@ -320,28 +347,28 @@ export default function TrackMerge({
             data-tm-path-tag
             className="pointer-events-none absolute top-[12%] left-5 z-20 text-[11px] tracking-[0.3em] text-acid uppercase opacity-0 md:left-10"
           >
-            Dual track
+            {trackLabel}
           </p>
 
           <div
             data-tm-row-a
             className="flex items-end gap-4 px-5 will-change-transform md:gap-6 md:px-10"
           >
-            {ROW_A.map((item) =>
+            {itemsA.map((item, i) =>
               item.quote ? (
                 <figure
-                  key={item.label}
+                  key={i}
                   className={`${item.w} shrink-0 pb-6 md:pb-10`}
                 >
                   <blockquote className="font-display text-[clamp(1.35rem,3.2vw,2.4rem)] leading-[1.1] italic text-[#ece9e2]">
                     {item.quote}
                   </blockquote>
                   <p className="mt-4 text-[11px] tracking-[0.25em] text-acid uppercase">
-                    — Caption
+                    {quoteCaption}
                   </p>
                 </figure>
               ) : (
-                <figure key={item.label} className={`${item.w} shrink-0`}>
+                <figure key={i} className={`${item.w} shrink-0`}>
                   <div className="aspect-3/4 overflow-hidden border border-white/15">
                     <img
                       {...imgAttrs(item.img, variants)}
@@ -364,8 +391,8 @@ export default function TrackMerge({
             data-tm-row-b
             className="flex items-start gap-4 px-5 will-change-transform md:gap-6 md:px-10"
           >
-            {ROW_B.map((item) => (
-              <figure key={item.label} className={`${item.w} shrink-0`}>
+            {itemsB.map((item, i) => (
+              <figure key={i} className={`${item.w} shrink-0`}>
                 <div className="aspect-square overflow-hidden border border-white/15">
                   <img
                     {...imgAttrs(item.img, variants)}
@@ -392,7 +419,7 @@ export default function TrackMerge({
             <div data-tm-on className="will-change-transform">
               <div className="mx-auto aspect-square w-[78%] overflow-hidden md:w-[70%]">
                 <img
-                  {...imgAttrs(onTrack, variants)}
+                  {...imgAttrs(pathImgA, variants)}
                   sizes="(min-width: 768px) 420px, 40vw"
                   alt=""
                   loading="lazy"
@@ -407,7 +434,7 @@ export default function TrackMerge({
             <div data-tm-off className="will-change-transform">
               <div className="mx-auto aspect-3/4 w-[70%] overflow-hidden md:w-[58%]">
                 <img
-                  {...imgAttrs(offTrack, variants)}
+                  {...imgAttrs(pathImgB, variants)}
                   sizes="(min-width: 768px) 420px, 40vw"
                   alt=""
                   loading="lazy"

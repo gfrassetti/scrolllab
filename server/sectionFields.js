@@ -61,6 +61,9 @@ export const ASSET_URL_KEYS = new Set([
   'cardImage',
   // GLB del objeto 3D de un hero (MONOLITH, FIZZ): URL https o ruta del sitio.
   'modelUrl',
+  // VELOCITY TrackMerge: las dos fotos del cruce final.
+  'pathImgA',
+  'pathImgB',
   // El form de contacto hace POST acá: una URL https o una ruta del sitio.
   'endpoint',
 ])

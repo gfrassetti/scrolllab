@@ -46,6 +46,9 @@ export default function ServicesStone({
   service3Body,
   service4Title,
   service4Body,
+  note = 'Lorem ipsum dolor sit amet — placeholder support line for this section.',
+  cta = 'View services →',
+  ctaHref = '#facts',
   bg,
   fg,
 }) {
@@ -235,8 +238,7 @@ export default function ServicesStone({
               {eyebrow}
             </p>
             <p className="max-w-[36ch] text-right text-xs text-current/45 md:text-sm">
-              Lorem ipsum dolor sit amet — placeholder support line for this
-              section.
+              {note}
             </p>
           </div>
 
@@ -274,10 +276,10 @@ export default function ServicesStone({
               ✦ {title}
             </p>
             <a
-              href="#facts"
+              href={ctaHref}
               className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] text-current uppercase"
             >
-              View services →
+              {cta}
             </a>
           </div>
         </div>
