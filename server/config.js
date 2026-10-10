@@ -25,6 +25,21 @@ function bool(name, fallback = false) {
   return raw === "true" || raw === "1";
 }
 
+/** Cómo firma la marca los mails (title case, no SCROLLLAB): lo que ve el cliente en la bandeja. */
+export const EMAIL_SENDER_NAME = "Scroll Lab";
+
+/**
+ * Remitente con el nombre de la marca, sea cual sea el que traiga EMAIL_FROM
+ * («SCROLLLAB <compras@…>» o la dirección sola): la dirección es la del env, el
+ * nombre lo pone el código para que no dependa de cómo quedó cargada la variable.
+ * @param {string} raw
+ */
+export function brandedFrom(raw) {
+  const value = String(raw || "").trim();
+  const address = (/<([^>]+)>/.exec(value)?.[1] || value).trim();
+  return `${EMAIL_SENDER_NAME} <${address}>`;
+}
+
 function requireEnv(name) {
   const value = process.env[name];
   if (!value) throw new Error(`Falta la variable de entorno ${name}`);
@@ -312,7 +327,7 @@ export function loadConfig() {
     email: {
       enabled: emailEnabled,
       apiKey: process.env.RESEND_API_KEY || "",
-      from: process.env.EMAIL_FROM || "SCROLLLAB <onboarding@resend.dev>",
+      from: brandedFrom(process.env.EMAIL_FROM || "onboarding@resend.dev"),
       replyTo: process.env.EMAIL_REPLY_TO || "",
       notifyTo: process.env.EMAIL_NOTIFY_TO || "",
       logoUrl: process.env.EMAIL_LOGO_URL || "",

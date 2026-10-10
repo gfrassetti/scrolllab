@@ -80,8 +80,8 @@ export function emailShell(m) {
               <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td><img src="${escapeHtml(m.logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
-                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                    <td><img src="${escapeHtml(m.logoUrl)}" width="32" height="32" alt="Scroll Lab" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">Scroll Lab</td>
                   </tr>
                 </table>
               </td>
@@ -123,7 +123,7 @@ export function emailShell(m) {
 /** Texto plano equivalente (los clientes sin HTML y los filtros de spam lo leen). */
 function plain({ eyebrow, title, intro, notice, rows, cta, after, footer }) {
   return [
-    `SCROLLLAB — ${eyebrow}`,
+    `Scroll Lab — ${eyebrow}`,
     '',
     title,
     '',
@@ -248,8 +248,8 @@ export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   return render({
     lang: 'en',
     logoUrl,
-    subject: `Your SCROLLLAB purchase · Order ${id.slice(-8)}`,
-    preheader: 'Your SCROLLLAB purchase is ready to download.',
+    subject: `Your Scroll Lab purchase · Order ${id.slice(-8)}`,
+    preheader: 'Your Scroll Lab purchase is ready to download.',
     eyebrow: 'Payment confirmed',
     title: `Thanks for your purchase, ${nameOf(user)}.`,
     intro:
@@ -654,7 +654,7 @@ const GATEWAY = {
 
 const REFUND_COPY = {
   es: {
-    subject: (partial) => (partial ? 'Te devolvimos parte de tu compra en SCROLLLAB' : 'Te devolvimos el dinero de tu compra en SCROLLLAB'),
+    subject: (partial) => (partial ? 'Te devolvimos parte de tu compra en Scroll Lab' : 'Te devolvimos el dinero de tu compra en Scroll Lab'),
     preheader: 'La devolución ya está hecha. Te contamos cuándo la ves.',
     eyebrow: 'Devolución hecha',
     title: (name) => `Listo, ${name}: te devolvimos el dinero.`,
@@ -670,7 +670,7 @@ const REFUND_COPY = {
     footer: 'Si en unos días no lo ves en tu resumen, respondé a este email y lo revisamos.',
   },
   en: {
-    subject: (partial) => (partial ? 'We refunded part of your SCROLLLAB purchase' : 'We refunded your SCROLLLAB purchase'),
+    subject: (partial) => (partial ? 'We refunded part of your Scroll Lab purchase' : 'We refunded your Scroll Lab purchase'),
     preheader: 'Your refund is done. Here’s when you’ll see it.',
     eyebrow: 'Refund issued',
     title: (name) => `All set, ${name}: we refunded you.`,

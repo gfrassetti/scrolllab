@@ -738,7 +738,7 @@ describe('order receipt email', () => {
       },
     })
 
-    assert.match(message.subject, /\[SCROLLLAB\] Venta/)
+    assert.match(message.subject, /\[Scroll Lab\] Venta/)
     assert.match(message.subject, /buyer@example.com/)
     assert.match(message.text, /custom:chapters/)
     assert.match(message.text, /User ID:/)

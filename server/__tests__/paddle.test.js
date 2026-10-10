@@ -458,13 +458,13 @@ describe('mails de cobro', () => {
 
   it('recibo: inglés con la nota de Paddle; español con la nota si cobró Paddle', () => {
     const en = buildOrderReceipt({ order, user, accountUrl: 'https://x/account', logoUrl: 'l' })
-    assert.match(en.subject, /Your SCROLLLAB purchase/)
+    assert.match(en.subject, /Your Scroll Lab purchase/)
     assert.match(en.text, /Paddle\.com/)
     assert.match(en.text, /\$134\.10/)
     assert.deepEqual(en, buildOrderReceiptEn({ order, user, accountUrl: 'https://x/account', logoUrl: 'l' }))
 
     const es = buildOrderReceipt({ order: { ...order, locale: 'es' }, user, accountUrl: 'a', logoUrl: 'l' })
-    assert.match(es.subject, /Tu compra en SCROLLLAB/)
+    assert.match(es.subject, /Tu compra en Scroll Lab/)
     assert.match(es.text, /Paddle\.com, nuestro revendedor autorizado/)
     assert.match(es.text, /US\$\s?134,10/)
 

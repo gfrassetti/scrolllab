@@ -181,7 +181,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
 
       await waitFor(() => mp.mailsTo('paga@test.com').length === 1, 'el recibo')
       const receipt = mp.mailsTo('paga@test.com')[0].body
-      assert.match(receipt.subject, /Tu compra en SCROLLLAB/)
+      assert.match(receipt.subject, /Tu compra en Scroll Lab/)
       // Primera compra: el recibo dice lo que pagó, con el 10%.
       assert.match(receipt.text, /US\$\s?134[.,]10/)
       assert.match(receipt.text, /Paddle\.com/)
@@ -204,7 +204,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await paidOrder('english@test.com', [{ sku: 'chapters' }], { locale: 'en' })
       await waitFor(() => mp.mailsTo('english@test.com').length === 1, 'el recibo')
       const mail = mp.mailsTo('english@test.com')[0].body
-      assert.match(mail.subject, /Your SCROLLLAB purchase/)
+      assert.match(mail.subject, /Your Scroll Lab purchase/)
       assert.match(mail.text, /\$134\.10/)
     })
 

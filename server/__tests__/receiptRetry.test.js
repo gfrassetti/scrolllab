@@ -21,7 +21,7 @@ describe('recibo que no salió al cobrar', () => {
   })
   after(() => cleanup())
 
-  const receipts = (email) => mp.mailsTo(email).filter((m) => /Tu compra en SCROLLLAB|Your SCROLLLAB purchase/.test(m.body.subject))
+  const receipts = (email) => mp.mailsTo(email).filter((m) => /Tu compra en Scroll Lab|Your Scroll Lab purchase/.test(m.body.subject))
   const minutes = (n) => new Date(Date.now() + n * 60_000)
 
   async function buyWhileResendIsDown(email) {

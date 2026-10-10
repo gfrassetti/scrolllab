@@ -88,7 +88,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
 <html lang="es">
   <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
     <div style="display:none;max-height:0;overflow:hidden;">
-      Tu compra en SCROLLLAB está lista para descargar.
+      Tu compra en Scroll Lab está lista para descargar.
     </div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ece9e2;">
       <tr>
@@ -99,9 +99,9 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td>
-                      <img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" />
+                      <img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="Scroll Lab" style="display:block;border:0;" />
                     </td>
-                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">Scroll Lab</td>
                   </tr>
                 </table>
               </td>
@@ -153,7 +153,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
   </body>
 </html>`
 
-  const text = `SCROLLLAB
+  const text = `Scroll Lab
 
 Gracias por tu compra, ${buyerName}.
 
@@ -171,7 +171,7 @@ ${accountUrl}
 Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${invoiceNote}`
 
   return {
-    subject: `Tu compra en SCROLLLAB · Orden ${orderId.slice(-8)}`,
+    subject: `Tu compra en Scroll Lab · Orden ${orderId.slice(-8)}`,
     html,
     text,
   }
@@ -253,7 +253,7 @@ export function buildOrderAdminNotify({ order, user }) {
   </body>
 </html>`
 
-  const text = `SCROLLLAB — nueva venta
+  const text = `Scroll Lab — nueva venta
 
 Comprador: ${buyerName} <${buyerEmail}>
 User ID: ${userId}
@@ -271,7 +271,7 @@ Total: ${formatMoney(order.total, order.currency_id)}`
     .join(', ')
 
   return {
-    subject: `[SCROLLLAB] Venta · ${itemSummary || 'orden'} · ${buyerEmail}`,
+    subject: `[Scroll Lab] Venta · ${itemSummary || 'orden'} · ${buyerEmail}`,
     html,
     text,
   }
@@ -340,8 +340,8 @@ export function buildSubscriptionWelcome({
               <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
-                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="Scroll Lab" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">Scroll Lab</td>
                   </tr>
                 </table>
               </td>
@@ -389,7 +389,7 @@ export function buildSubscriptionWelcome({
   </body>
 </html>`
 
-  const text = `SCROLLLAB — ${trialEnd ? 'Prueba gratis' : 'Suscripción activa'}
+  const text = `Scroll Lab — ${trialEnd ? 'Prueba gratis' : 'Suscripción activa'}
 
 Ya estás en LAB, ${name}.
 ${trialLine ? `\n${trialLine}\n` : ''}
@@ -472,8 +472,8 @@ export function buildSubscriptionCanceled({
               <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
-                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="Scroll Lab" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">Scroll Lab</td>
                   </tr>
                 </table>
               </td>
@@ -511,7 +511,7 @@ export function buildSubscriptionCanceled({
   </body>
 </html>`
 
-  const text = `SCROLLLAB — Suscripción cancelada
+  const text = `Scroll Lab — Suscripción cancelada
 
 Listo, ${name}.
 
@@ -568,8 +568,8 @@ export function buildSubscriptionTrialReminder({
               <td style="padding:28px 32px;border-bottom:1px solid #d6d1c8;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" /></td>
-                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">SCROLLLAB</td>
+                    <td><img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="Scroll Lab" style="display:block;border:0;" /></td>
+                    <td align="right" style="font-size:12px;letter-spacing:3px;font-weight:700;">Scroll Lab</td>
                   </tr>
                 </table>
               </td>
@@ -616,7 +616,7 @@ export function buildSubscriptionTrialReminder({
   </body>
 </html>`
 
-  const text = `SCROLLLAB — Prueba gratis
+  const text = `Scroll Lab — Prueba gratis
 
 Tu prueba de LAB termina ${when}, ${name}.
 
@@ -692,7 +692,7 @@ export function buildCouponEmail({
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#f2efe9;border:1px solid #d6d1c8;">
             <tr>
               <td style="padding:24px 32px;border-bottom:1px solid #d6d1c8;">
-                <img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="SCROLLLAB" style="display:block;border:0;" />
+                <img src="${escapeHtml(logoUrl)}" width="32" height="32" alt="Scroll Lab" style="display:block;border:0;" />
               </td>
             </tr>
             <tr>

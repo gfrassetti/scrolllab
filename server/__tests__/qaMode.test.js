@@ -43,7 +43,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     cleanup()
   })
 
-  const receipts = (email) => mp.mailsTo(email).filter((m) => /Tu compra en SCROLLLAB/.test(m.body.subject))
+  const receipts = (email) => mp.mailsTo(email).filter((m) => /Tu compra en Scroll Lab/.test(m.body.subject))
 
   it('para una cuenta común no existe: ni el template, ni el builder, ni LAB, ni el flag', async () => {
     const agent = await loginAs('cliente-comun@test.com')

@@ -455,7 +455,7 @@ export async function sendAdminAlert({ kind, key, subject, lines, config, client
     {
       from: config.email.from,
       to: [notifyTo],
-      subject: `[SCROLLLAB] ${subject}`,
+      subject: `[Scroll Lab] ${subject}`,
       html: `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">${lines
         .map((line) => escapeHtml(line))
         .join('<br>')}</div>`,
