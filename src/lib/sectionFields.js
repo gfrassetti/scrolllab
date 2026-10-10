@@ -707,6 +707,16 @@ export const SECTION_FIELDS = {
     { key: 'cta', label: 'CTA', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
     {
+      key: 'modelUrl',
+      label: 'Botella 3D — modelo propio (.glb)',
+      type: 'url',
+      help: model3dHelp([
+        'Una sola botella para toda la página: si antes de esta sección va el hero de FIZZ (Hero burbujas), la pone el hero. Cargá tu modelo ahí y este campo dejalo vacío. Este campo vale cuando Flavor Worlds va sin ese hero.',
+        'Para que tome los materiales de la demo, nombrá las partes (las mallas) en Blender: glass (el vidrio), liquid (la bebida, toma el color de cada sabor), label (la etiqueta), stopper / seal / wire (el tapón) o cap (tapa corona). Con otros nombres se ve con sus propios materiales.',
+        'Compresión Draco: sí, esta sección la lee (achica mucho el archivo).',
+      ]),
+    },
+    {
       key: 'worlds',
       label: 'Sabores (en orden)',
       type: 'list',
