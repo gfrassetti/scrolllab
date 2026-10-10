@@ -196,6 +196,26 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
   )
 }
 
+/** La guía del campo (`field.help`): cerrada no ocupa lugar; abierta, los pasos. */
+function FieldHelp({ help }) {
+  if (!help?.steps?.length) return null
+  return (
+    <details className="group mt-2 border border-ink/15 px-3 py-2">
+      <summary className="tpl-hit relative cursor-pointer list-none text-[11px] uppercase tracking-[0.18em] text-ink/60 marker:hidden hover:text-ink [&::-webkit-details-marker]:hidden">
+        <span aria-hidden="true" className="mr-1.5 inline-block transition-transform duration-200 group-open:rotate-90">
+          ›
+        </span>
+        {help.title}
+      </summary>
+      <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-xs leading-relaxed text-ink/75">
+        {help.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+    </details>
+  )
+}
+
 export default function SectionFieldRow({ field, value, onChange, hint, absoluteUrls = false }) {
   const { t } = useI18n()
 
@@ -291,21 +311,24 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
   }
 
   return (
-    <label className="block">
-      <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
-        {field.label}
-      </span>
-      <Scalar
-        field={field}
-        value={value ?? ''}
-        onChange={onChange}
-        absoluteUrls={absoluteUrls}
-      />
-      {field.type === 'href' || hint ? (
-        <span className="mt-1 block text-xs text-ink/45">
-          {hint || t('builder.hrefHint')}
+    <div className="block">
+      <label className="block">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+          {field.label}
         </span>
-      ) : null}
-    </label>
+        <Scalar
+          field={field}
+          value={value ?? ''}
+          onChange={onChange}
+          absoluteUrls={absoluteUrls}
+        />
+        {field.type === 'href' || hint ? (
+          <span className="mt-1 block text-xs text-ink/45">
+            {hint || t('builder.hrefHint')}
+          </span>
+        ) : null}
+      </label>
+      <FieldHelp help={field.help} />
+    </div>
   )
 }

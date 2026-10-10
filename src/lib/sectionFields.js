@@ -17,7 +17,50 @@
  * @property {SectionSubField[]} [item] Solo `list`: los campos de cada fila.
  * @property {boolean} [fromText] Solo `list`: antes era un textarea «Texto | #ancla»
  *   (`linksText`, o la misma prop como texto); sanitizeProps migra lo guardado.
+ * @property {FieldHelp} [help] Guía desplegable debajo del campo: qué poner y por qué.
+ *
+ * @typedef {Object} FieldHelp
+ * @property {string} title Lo que dice el desplegable cerrado («Cómo elegir…»).
+ * @property {string[]} steps Una idea por renglón, en el orden en que se hace.
  */
+
+/**
+ * La palabra de barras de KIN (hero y footer): no es una tipografía, cada letra
+ * está armada con la misma barra (ver docs/kin-template.md §3.1).
+ * @type {FieldHelp}
+ */
+const KIN_WORD_HELP = {
+  title: 'Cómo elegir la palabra',
+  steps: [
+    'No es una tipografía: cada letra se arma con la misma barra recta, como un stencil. Al cargar, las barras caen de a una y forman la palabra; al scrollear, giran y caen otra vez para armar la puerta (dos columnas y un dintel).',
+    'Las que mejor quedan: A H I K L M N T V W X Y 1 7. Son todas trazos rectos y gruesos —verticales y diagonales—, igual que KIN, la palabra de la demo.',
+    'Se pueden usar todas las letras A–Z y los números 0–9, pero las curvas (O C G S U Q B D P R J…) se dibujan cuadradas y con horizontales finas: se leen, aunque menos limpias que las rectas.',
+    'Mejor corta: 3 a 6 letras. La palabra ocupa siempre todo el ancho; cuantas más letras, más bajas y finas quedan las barras.',
+    'La barra roja es la vertical gruesa más cerca del centro: queda mejor si la letra del medio tiene un palo recto (la I de KIN, la H, la T).',
+    'Los acentos se sacan (Á → A, Ñ → N) y lo que no tiene dibujo se saltea. También valen el espacio y los signos . - !',
+    'Escribila y mirá la vista previa: si una letra se ve rara, probá otra palabra o una variante con letras rectas.',
+  ],
+}
+
+/**
+ * Modelo 3D propio en un hero (MONOLITH, FIZZ): formato, cómo exportarlo y
+ * dónde dejarlo. `extra` son los pasos propios de cada hero.
+ * @param {string[]} extra
+ * @returns {FieldHelp}
+ */
+const model3dHelp = (extra) => ({
+  title: 'Cómo usar tu propio modelo 3D',
+  steps: [
+    'Formato: GLB (glTF binario, todo en un solo archivo, con las texturas adentro). Un .gltf con archivos aparte o un .obj / .fbx no sirven: convertilos a GLB.',
+    'Desde Blender: Archivo → Exportar → glTF 2.0 → Formato «glTF Binary (.glb)», con «+Y Up» y «Apply Modifiers» activados. Exportá solo el objeto (Include → Selected Objects).',
+    'Tamaño y posición no importan: se centra y se escala solo. Que quede parado (el eje Y hacia arriba) y mirando al frente.',
+    'Peso: menos de 5 MB, así carga rápido en un teléfono.',
+    ...extra,
+    'Dónde ponerlo: pegá una URL https:// pública del archivo y lo ves en la vista previa. El servidor tiene que permitir CORS (tu propio sitio, un bucket S3 / Cloudflare R2 público o jsDelivr desde un repo de GitHub funcionan).',
+    'O escribí una ruta como /mi-modelo.glb y, después de bajar el ZIP, copiá el archivo en la carpeta public/ del proyecto. En la vista previa vas a seguir viendo el de la demo.',
+    'Si el archivo no carga, queda el objeto de la demo: el sitio no se rompe.',
+  ],
+})
 
 /**
  * Links del menú de un nav: texto + destino, en orden. Reemplaza al textarea
@@ -428,8 +471,27 @@ export const SECTION_FIELDS = {
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
-    // El objeto 3D no se edita en el builder: queda el de la demo y se cambia
-    // en el código (forma o GLB propio, ver el README del ZIP).
+    {
+      key: 'shape',
+      label: 'Objeto 3D — forma (si no ponés un modelo propio)',
+      type: 'select',
+      options: [
+        { value: 'icosahedron', label: 'Icosaedro (la de la demo)' },
+        { value: 'box', label: 'Cubo' },
+        { value: 'octahedron', label: 'Octaedro' },
+        { value: 'torus', label: 'Toroide' },
+        { value: 'sphere', label: 'Esfera' },
+      ],
+    },
+    {
+      key: 'modelUrl',
+      label: 'Objeto 3D — modelo propio (.glb)',
+      type: 'url',
+      help: model3dHelp([
+        'Este hero lo redibuja como líneas negras (wireframe): materiales y texturas no se ven, importa la forma. Mejor algo simple, hasta unos 20.000 triángulos; con más, las líneas se empastan en una mancha.',
+        'Sin compresión Draco: este hero no la lee (al exportar, dejá «Compression» apagado).',
+      ]),
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -559,7 +621,16 @@ export const SECTION_FIELDS = {
     { key: 'bg', label: 'Color de fondo (pisa el del sabor)', type: 'color' },
     { key: 'fg', label: 'Color de texto (pisa el del sabor)', type: 'color' },
     { key: 'accent', label: 'Color del líquido (pisa el del sabor)', type: 'color' },
-    // Sin modelo 3D propio en el builder: se pasa `modelUrl` en el código.
+    {
+      key: 'modelUrl',
+      label: 'Botella 3D — modelo propio (.glb)',
+      type: 'url',
+      help: model3dHelp([
+        'Para que tome los materiales de la demo, nombrá las partes (las mallas) en Blender: glass (el vidrio), liquid (la bebida, toma el color del sabor), label (la etiqueta), stopper / seal / wire (el tapón) o cap (tapa corona). Con otros nombres se ve con sus propios materiales.',
+        'La etiqueta (label) imprime «Marca en la etiqueta» o tu imagen de «Etiqueta (imagen propia)». Conserva el giro con el scroll, la flotación y las burbujas de adentro.',
+        'Compresión Draco: sí, este hero la lee (achica mucho el archivo).',
+      ]),
+    },
   ],
   'fizz/FlavorWorlds': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -1110,7 +1181,7 @@ export const SECTION_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'kin/Hero': [
-    { key: 'word', label: 'Palabra de barras — ideales: A H I K L M N T V W X Y 1 7 (las demás letras y números se dibujan, pero pueden verse menos limpios)', type: 'text' },
+    { key: 'word', label: 'Palabra de barras', type: 'text', help: KIN_WORD_HELP },
     { key: 'brand', label: 'Marca', type: 'text' },
     { key: 'brandNote', label: 'Bajada de la marca', type: 'text' },
     {
@@ -1187,7 +1258,7 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'kin/Footer': [
-    { key: 'word', label: 'Palabra de barras — ideales: A H I K L M N T V W X Y 1 7 (las demás letras y números se dibujan, pero pueden verse menos limpios)', type: 'text' },
+    { key: 'word', label: 'Palabra de barras', type: 'text', help: KIN_WORD_HELP },
     { key: 'line1', label: 'Titular — línea 1', type: 'text' },
     { key: 'line2', label: 'Titular — línea 2', type: 'text' },
     { key: 'ctaLabel', label: 'CTA', type: 'text' },

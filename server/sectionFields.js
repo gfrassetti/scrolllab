@@ -59,6 +59,8 @@ export const ASSET_URL_KEYS = new Set([
   'logoSrc',
   'orbSrc',
   'cardImage',
+  // GLB del objeto 3D de un hero (MONOLITH, FIZZ): URL https o ruta del sitio.
+  'modelUrl',
   // El form de contacto hace POST acá: una URL https o una ruta del sitio.
   'endpoint',
 ])
