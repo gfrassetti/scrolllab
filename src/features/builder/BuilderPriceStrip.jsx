@@ -3,7 +3,7 @@ import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurc
 /**
  * Franja de precio: el estimado de la composición antes de bajar a las columnas.
  */
-export default function BuilderPriceStrip({ t, estimatedPriceUsd, priceHint }) {
+export default function BuilderPriceStrip({ t, estimatedPriceUsd, priceHint, fixedPriceLabel = null }) {
   return (
     <>
       {/* Franja de precio: visible antes de bajar a las columnas, no solo al
@@ -15,9 +15,11 @@ export default function BuilderPriceStrip({ t, estimatedPriceUsd, priceHint }) {
             {t('builder.estimatedPrice')}
           </p>
           <p className="mt-1 text-title-sm font-medium tracking-[-0.02em]">
-            <FirstPurchasePrice usd={estimatedPriceUsd} />
+            {fixedPriceLabel ?? <FirstPurchasePrice usd={estimatedPriceUsd} />}
           </p>
-          <FirstPurchaseTag usd={estimatedPriceUsd} className="mt-0.5 block text-body-sm text-accent-ink" />
+          {fixedPriceLabel ? null : (
+            <FirstPurchaseTag usd={estimatedPriceUsd} className="mt-0.5 block text-body-sm text-accent-ink" />
+          )}
           <p className="mt-1 max-w-[42ch] text-body-sm text-ink/55">
             {priceHint}
           </p>

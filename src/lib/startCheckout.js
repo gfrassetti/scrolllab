@@ -1,6 +1,7 @@
 import { api } from './api.js'
 import { markCheckoutIntent } from './cart.js'
 import { trackBeginCheckout } from './gtm.js'
+import { isQaSku } from '../domain/qa.js'
 import { openPaddleCheckout } from './paddleCheckout.js'
 import { usePayRegion, providerForRegion } from './payRegion.js'
 
@@ -64,7 +65,8 @@ export async function startCheckout({
     throw new Error('Carrito vacío')
   }
 
-  trackBeginCheckout(items)
+  // Una compra de prueba (src/domain/qa.js) no es una conversión.
+  if (!(items || []).some((i) => isQaSku(i?.sku))) trackBeginCheckout(items)
 
   if (!user) {
     markCheckoutIntent()

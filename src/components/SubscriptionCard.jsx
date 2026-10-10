@@ -28,6 +28,7 @@ export default function SubscriptionCard() {
     lapsedPlan,
     provider,
     currency_id: currency,
+    qa,
     loading,
     refresh,
   } = usePlan()
@@ -46,13 +47,13 @@ export default function SubscriptionCard() {
 
   useEffect(() => {
     api
-      .subscriptionPlans()
+      .subscriptionPlans({ qa: !!qa })
       .then((d) => {
         setPlans(d.plans || [])
         setMock(!!d.mock)
       })
       .catch(() => {})
-  }, [])
+  }, [qa])
 
   const fmtDate = (d) =>
     d ? new Date(d).toLocaleDateString(dateLocale, { dateStyle: 'long' }) : null

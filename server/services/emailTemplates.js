@@ -1,6 +1,6 @@
 import { db } from '../db.js'
 import { orderPriceSummary } from '../../src/domain/orderSummary.js'
-import { HOSTED_PLANS, hostedPlanPriceIn } from '../catalog.js'
+import { HOSTED_PLANS, subscriptionPlanPrice } from '../catalog.js'
 import {
   buildOrderReceiptEn,
   buildSubscriptionWelcomeEn,
@@ -39,7 +39,7 @@ export function formatMoney(value, currency = 'ARS') {
 /** Precio del plan de una suscripción, en su moneda (ARS en MP, USD en Paddle). */
 function subscriptionPriceLabel(subscription) {
   const currency = subscription.currency_id || 'ARS'
-  const price = hostedPlanPriceIn(subscription.plan, subscription.cycle, currency)
+  const price = subscriptionPlanPrice(subscription, subscription.plan, subscription.cycle, currency)
   return price != null ? formatMoney(price, currency) : null
 }
 

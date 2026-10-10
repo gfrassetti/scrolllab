@@ -126,6 +126,8 @@ export function trackLead({ source } = {}) {
 
 /** Una sola vez por orden (StrictMode / modal + confirm no duplican). */
 export function trackPurchase(order) {
+  // Una compra de prueba (src/domain/qa.js) no es una conversión.
+  if (order?.qa || (order?.items || []).some((i) => i?.qa)) return false
   const id = purchaseId(order)
   if (alreadyTrackedPurchase(id)) return false
   const value = Number(order?.total)

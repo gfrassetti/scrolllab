@@ -3,7 +3,7 @@ import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurc
 /**
  * Cierre de la composición: precio, avisos (chrome duplicado, tope, commerce) y comprar / al carrito / vista previa.
  */
-export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn }) {
+export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn, fixedPriceLabel = null }) {
   return (
     <>
       {items.length > 0 && (
@@ -23,9 +23,11 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
                 {t('builder.estimatedPrice')}
               </p>
               <p className="mt-1 text-title font-medium tracking-[-0.02em]">
-                <FirstPurchasePrice usd={estimatedPriceUsd} />
+                {fixedPriceLabel ?? <FirstPurchasePrice usd={estimatedPriceUsd} />}
               </p>
-              <FirstPurchaseTag usd={estimatedPriceUsd} className="mt-0.5 block text-body-sm text-accent-ink" />
+              {fixedPriceLabel ? null : (
+                <FirstPurchaseTag usd={estimatedPriceUsd} className="mt-0.5 block text-body-sm text-accent-ink" />
+              )}
               <p
                 className={`mt-1 max-w-[46ch] text-body-sm ${
                       atMaxSections ? 'text-accent' : 'text-ink/55'
@@ -51,13 +53,15 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              onClick={addCompositionToCart}
-              className="btn btn-ghost sm:flex-1"
-            >
-              {t('common.addToCart')}
-            </button>
+            {addCompositionToCart ? (
+              <button
+                type="button"
+                onClick={addCompositionToCart}
+                className="btn btn-ghost sm:flex-1"
+              >
+                {t('common.addToCart')}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={buyComposition}

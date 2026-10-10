@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import { db } from '../db.js'
 import { HttpError } from '../errors.js'
 import { refundEligibility, labRefundEligibility, REFUND_DAYS } from '../../src/domain/policy.js'
-import { HOSTED_PLANS, hostedPlanPriceIn } from '../catalog.js'
+import { HOSTED_PLANS, subscriptionPlanPrice } from '../catalog.js'
 import { alertAdmin } from './orders.js'
 import { sendWithdrawalReceived, sendWithdrawalConfirm } from './email.js'
 import { executeWithdrawal, signWithdrawalToken, verifyWithdrawalToken } from './autoRefund.js'
@@ -208,7 +208,7 @@ function amountOf({ order, sub }) {
   if (order) return { amount: Number(order.total) || 0, currency: order.currency_id || 'ARS' }
   const usd = sub?.currency_id === 'USD'
   const plan = sub?.paidPlan || sub?.plan
-  const price = HOSTED_PLANS[plan] ? hostedPlanPriceIn(plan, sub.paidCycle || sub.cycle, usd ? 'USD' : 'ARS') : 0
+  const price = HOSTED_PLANS[plan] ? subscriptionPlanPrice(sub, plan, sub.paidCycle || sub.cycle, usd ? 'USD' : 'ARS') : 0
   // En la prueba no hay cobro: se confirma la baja, monto 0.
   return { amount: sub?.firstChargeId || sub?.lastPaidAt ? price : 0, currency: usd ? 'USD' : 'ARS' }
 }

@@ -374,6 +374,27 @@ newsletters: el único mail que sale es el cupón, una sola vez.
 pago simulado. Antes de promocionarlo, hacé una compra de prueba con cupón con
 credenciales de prueba de MP y mirá que el monto cobrado sea el descontado.
 
+## Modo prueba — probar todo con plata real (`QA_BUYER_EMAILS`)
+
+Para probar en producción el circuito completo (compra, recibo, descarga,
+arrepentimiento con devolución, LAB y cada mail) sin vender nada a precio de
+lista. Variable: `QA_BUYER_EMAILS=guidofrassetti@gmail.com` (lista separada por
+coma). Solo esas cuentas de Google ven:
+
+- `/test` — el template de prueba (ZIP real de CHAPTERS) a **$100** y el paso a paso.
+- `/builder-test` — el builder a **$200** con 8 secciones, $10 cada extra, $50 con commerce.
+- `/lab-test` — los tres planes de LAB a **$1000** por mes (o año), **sin prueba gratis**: cobra al suscribirse.
+
+Para cualquier otra cuenta (o sin sesión) esas rutas son la 404 y el servidor
+rechaza los productos de prueba. Se cobran solo con Mercado Pago, de a uno y sin
+mezclar con productos reales. El pago tiene que salir de **otra** cuenta de MP
+(la que cobra no puede pagarse a sí misma). Las órdenes y suscripciones quedan
+`qa: true`: fuera de las métricas del panel, con «PRUEBA — …» en los títulos y
+los reembolsos visibles en «La plata». Las conversiones de Google Ads no se
+disparan. Reglas y precios: `src/domain/qa.js`.
+
+Sin la variable (o vacía) el modo prueba no existe.
+
 ## Notas
 
 - Una sola réplica de API hasta tener storage compartido (S3/R2) — el volume de Railway no se comparte entre instancias.

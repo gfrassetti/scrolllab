@@ -13,6 +13,7 @@ import {
   CUSTOM_BASE_PRICE_USD,
   TEMPLATE_PRICES_USD,
 } from '../src/domain/catalog.js'
+import { QA_LAB_PRICE_ARS } from '../src/domain/qa.js'
 
 export {
   COMMERCE_PACK_SURCHARGE_USD,
@@ -198,6 +199,25 @@ export function hostedPlanPriceIn(planId, cycle, currency = 'ARS') {
   const plan = HOSTED_PLANS[planId]
   if (!plan) return null
   return cycle === 'yearly' ? plan.priceYearlyUsd : plan.priceMonthlyUsd
+}
+
+/**
+ * Precio de un plan para UNA suscripción: el de lista, salvo la de prueba
+ * (`sub.qa`, src/domain/qa.js), que cuesta QA_LAB_PRICE_ARS en los tres planes
+ * y en los dos ciclos. Toda cuenta de plata de una suscripción pasa por acá.
+ * @param {any} sub
+ * @param {string} [planId]
+ * @param {string} [cycle]
+ * @param {'ARS' | 'USD' | string} [currency]
+ */
+export function subscriptionPlanPrice(
+  sub,
+  planId = sub?.plan,
+  cycle = sub?.cycle,
+  currency = sub?.currency_id || 'ARS',
+) {
+  if (sub?.qa && currency !== 'USD') return isHostedPlanId(planId) ? QA_LAB_PRICE_ARS : null
+  return hostedPlanPriceIn(planId, cycle, currency)
 }
 
 export function hostedPlanQuota(planId) {

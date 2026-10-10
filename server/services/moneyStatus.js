@@ -1,5 +1,5 @@
 import { refundEligibility, labRefundEligibility, REFUND_DAYS } from "../../src/domain/policy.js";
-import { hostedPlanPriceIn, HOSTED_PLANS } from "../catalog.js";
+import { subscriptionPlanPrice, HOSTED_PLANS } from "../catalog.js";
 
 /**
  * La plata vista desde el panel local (/admin): qué se puede retirar y qué
@@ -117,7 +117,7 @@ export function buildMoneyStatus({
     const until = Date.parse(e.deadline || "");
     const usd = s.currency_id === "USD";
     const plan = s.paidPlan || s.plan;
-    const price = HOSTED_PLANS[plan] ? hostedPlanPriceIn(plan, s.paidCycle || s.cycle, usd ? "USD" : "ARS") : 0;
+    const price = HOSTED_PLANS[plan] ? subscriptionPlanPrice(s, plan, s.paidCycle || s.cycle, usd ? "USD" : "ARS") : 0;
     if (!price) continue;
     const currency = usd ? "USD" : "ARS";
     add(lockedTotal, currency, price);
@@ -152,7 +152,7 @@ export function buildMoneyStatus({
     const plan = sub ? sub.paidPlan || sub.plan : null;
     const labPrice =
       sub && HOSTED_PLANS[plan]
-        ? hostedPlanPriceIn(plan, sub.paidCycle || sub.cycle, sub.currency_id === "USD" ? "USD" : "ARS")
+        ? subscriptionPlanPrice(sub, plan, sub.paidCycle || sub.cycle, sub.currency_id === "USD" ? "USD" : "ARS")
         : null;
     const verdict = AUTO[w.status]
       ? AUTO[w.status]

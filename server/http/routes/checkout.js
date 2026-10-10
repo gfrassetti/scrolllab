@@ -97,6 +97,7 @@ export function createCheckoutRouter({ config, limits }) {
               items: order.items,
               total: order.total,
               currency_id: order.currency_id,
+              ...(order.qa ? { qa: true } : {}),
             }
           : null,
       })
@@ -173,6 +174,7 @@ export function createCheckoutRouter({ config, limits }) {
               items: order.items,
               total: order.total,
               currency_id: order.currency_id,
+              ...(order.qa ? { qa: true } : {}),
             }
           : null,
       })

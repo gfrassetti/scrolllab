@@ -37,6 +37,10 @@ const FoldPage = lazy(() => import('./pages/FoldPage'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
+// Modo prueba (src/domain/qa.js): solo cuentas de QA_BUYER_EMAILS; para el resto, 404.
+const QaHubPage = lazy(() => import('./pages/QaPages').then((m) => ({ default: m.QaHubPage })))
+const QaBuilderPage = lazy(() => import('./pages/QaPages').then((m) => ({ default: m.QaBuilderPage })))
+const QaLabPage = lazy(() => import('./pages/QaPages').then((m) => ({ default: m.QaLabPage })))
 const WithdrawalPage = lazy(() => import('./pages/WithdrawalPage'))
 const LabEditorPage = lazy(() => import('./pages/LabEditorPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
@@ -190,6 +194,9 @@ export default function App() {
                   <Route path="/plantillas/:sku" element={<ProductPage />} />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
+                  <Route path="/test" element={<QaHubPage />} />
+                  <Route path="/builder-test" element={<QaBuilderPage />} />
+                  <Route path="/lab-test" element={<QaLabPage />} />
                   <Route path="/lab/:id" element={<LabEditorPage />} />
                   <Route path="/preview" element={<PreviewPage />} />
                   <Route path="/legal/license" element={<LicensePage />} />

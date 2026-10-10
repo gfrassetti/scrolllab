@@ -17,6 +17,9 @@ const orderItemSchema = new mongoose.Schema(
     // unit_price es el cobrado (ARS); unit_price_usd es el precio de lista.
     unit_price: Number,
     unit_price_usd: Number,
+    // Producto de prueba (src/domain/qa.js): precio de lista fijo en pesos.
+    list_ars: Number,
+    qa: Boolean,
     currency_id: { type: String, default: "ARS" },
     // string[] legacy or [{ id, props? }, ...]
     recipe: { type: [mongoose.Schema.Types.Mixed], default: undefined },
@@ -47,6 +50,8 @@ const orderSchema = new mongoose.Schema(
     // Cupón de bienvenida: `total` y los `unit_price` ya vienen descontados.
     couponCode: String,
     discountPct: Number,
+    // Compra de prueba (src/domain/qa.js): plata real, fuera de las métricas.
+    qa: { type: Boolean, default: undefined },
     currency_id: { type: String, default: "ARS" },
     // Pasarela que cobra la orden: Mercado Pago (ARS) o Paddle (USD, ver
     // docs/paddle.md). En Paddle `total` y los `unit_price` están en USD.
@@ -223,6 +228,9 @@ const subscriptionSchema = new mongoose.Schema(
       default: "mercadopago",
     },
     currency_id: { type: String, default: "ARS" },
+    // Suscripción de prueba (src/domain/qa.js): QA_LAB_PRICE_ARS en los tres
+    // planes, sin prueba gratis, fuera de las métricas.
+    qa: { type: Boolean, default: undefined },
     locale: { type: String, enum: ["es", "en"], default: "es" },
     // Transacción del alta (checkout) y suscripción que Paddle crea al pagarla.
     paddleTransactionId: { type: String, sparse: true },

@@ -117,9 +117,11 @@ export const api = {
   hostedDelete: (id) =>
     request(`/api/hosted/${id}`, { method: 'DELETE' }),
 
-  subscriptionPlans: () => request('/api/subscriptions/plans'),
+  // `qa`: los planes de prueba (solo cuentas de QA_BUYER_EMAILS, src/domain/qa.js).
+  subscriptionPlans: ({ qa = false } = {}) =>
+    request(qa ? '/api/subscriptions/plans?qa=1' : '/api/subscriptions/plans'),
   subscriptionMe: () => request('/api/subscriptions/me'),
-  subscribe: (plan, cycle, { provider, locale } = {}) =>
+  subscribe: (plan, cycle, { provider, locale, qa = false } = {}) =>
     request('/api/subscriptions', {
       method: 'POST',
       body: JSON.stringify({
@@ -127,6 +129,7 @@ export const api = {
         cycle,
         ...(provider ? { provider } : {}),
         ...(locale ? { locale } : {}),
+        ...(qa ? { qa: true } : {}),
       }),
     }),
   // Link de Paddle para cambiar la tarjeta de la suscripción.

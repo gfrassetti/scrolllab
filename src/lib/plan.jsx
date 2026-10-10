@@ -4,6 +4,7 @@ import { useAuth } from './auth'
 
 const EMPTY = {
   plan: 'free',
+  qa: false,
   cycle: null,
   quota: 0,
   used: 0,
@@ -72,6 +73,8 @@ export function PlanProvider({ children }) {
         paidPlan: d.paidPlan ?? null,
         provider: d.provider ?? null,
         currency_id: d.currency_id ?? null,
+        // Suscripción de prueba (src/domain/qa.js): precios de prueba.
+        qa: d.qa === true,
         loading: false,
       })
     } catch {

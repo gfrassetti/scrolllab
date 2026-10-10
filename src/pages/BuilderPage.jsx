@@ -27,6 +27,14 @@ import CompositionHeader from '../features/builder/CompositionHeader.jsx'
 import CompositionList from '../features/builder/CompositionList.jsx'
 import CompositionCheckout from '../features/builder/CompositionCheckout.jsx'
 import MobileSummaryBar from '../features/builder/MobileSummaryBar.jsx'
+import { formatArs } from '../lib/pricing'
+import {
+  QA_CUSTOM_SKU,
+  QA_BUILDER_BASE_ARS,
+  QA_BUILDER_EXTRA_SECTION_ARS,
+  QA_BUILDER_COMMERCE_ARS,
+  qaCustomPriceArs,
+} from '../domain/qa'
 
 
 const DND_MIME = 'text/plain'
@@ -35,8 +43,10 @@ const DND_MIME = 'text/plain'
 /**
  * BuilderPage — UI del builder. La lógica vive en useBuilderComposition
  * + src/lib/composition.js (persistencia, receta, chrome único).
+ * `qa`: /builder-test (src/domain/qa.js) — precio de prueba en pesos y compra
+ * directa con Mercado Pago, sin carrito.
  */
-export default function BuilderPage() {
+export default function BuilderPage({ qa = false }) {
   const { t } = useI18n()
   const { currency } = useCurrency()
   const addToCart = useCart((s) => s.addItem)
@@ -100,7 +110,11 @@ export default function BuilderPage() {
   )
   // Por qué el total es ese: qué incluye la base, cuánto llevás, cuánto suma
   // la próxima. En el tope se explica el límite en vez de ofrecer un precio.
+  const qaPriceLabel = qa ? formatArs(qaCustomPriceArs(recipe)) : null
   const priceHint = (() => {
+    if (qa) {
+      return `Prueba: ${formatArs(QA_BUILDER_BASE_ARS)} con ${CUSTOM_BASE_SECTIONS} secciones, ${formatArs(QA_BUILDER_EXTRA_SECTION_ARS)} por sección extra y ${formatArs(QA_BUILDER_COMMERCE_ARS)} con commerce.`
+    }
     const next = formatNextSectionPrice(
       sectionCount,
       hasCommerce,
@@ -164,6 +178,21 @@ export default function BuilderPage() {
 
   const buyComposition = async () => {
     if (items.length === 0) return
+    if (qa) {
+      // Sin carrito: un producto de prueba se compra solo.
+      try {
+        await startCheckout({
+          items: [{ sku: QA_CUSTOM_SKU, title: 'PRUEBA — composición del builder', recipe }],
+          user,
+          navigate,
+          loginNext: '/builder-test',
+          provider: 'mercadopago',
+        })
+      } catch (err) {
+        setLimitNotice(err?.message || 'No se pudo iniciar el pago de prueba')
+      }
+      return
+    }
     const cartItem = compositionCartItem()
     addToCart(cartItem)
     try {
@@ -263,6 +292,7 @@ export default function BuilderPage() {
 
       <BuilderPriceStrip
         t={t}
+        fixedPriceLabel={qaPriceLabel}
         estimatedPriceUsd={estimatedPriceUsd}
         currency={currency}
         rate={rate}
@@ -305,6 +335,7 @@ export default function BuilderPage() {
           />
 
           <CompositionCheckout
+            fixedPriceLabel={qaPriceLabel}
             items={items}
             summaryRef={summaryRef}
             hasDuplicateChrome={hasDuplicateChrome}
@@ -317,7 +348,7 @@ export default function BuilderPage() {
             hasCommerce={hasCommerce}
             commerceSurcharge={commerceSurcharge}
             openPreview={openPreview}
-            addCompositionToCart={addCompositionToCart}
+            addCompositionToCart={qa ? null : addCompositionToCart}
             buyComposition={buyComposition}
             looksLoggedIn={looksLoggedIn}
           />
@@ -325,6 +356,7 @@ export default function BuilderPage() {
       </div>
 
       <MobileSummaryBar
+        fixedPriceLabel={qaPriceLabel}
         hasItems={hasItems}
         summaryInView={summaryInView}
         items={items}

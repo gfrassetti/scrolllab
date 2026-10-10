@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { MAX_CUSTOM_SECTIONS } from "../src/domain/catalog.js";
+import { parseQaEmails } from "../src/domain/qa.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -345,6 +346,8 @@ export function loadConfig() {
     // (`EMBED_SRI=true`) una vez confirmado el CORS.
     embedSri: process.env.EMBED_SRI === "true",
     adminToken: process.env.ADMIN_TOKEN || "",
+    // Cuentas que ven y compran los productos de prueba (src/domain/qa.js).
+    qaBuyerEmails: parseQaEmails(process.env.QA_BUYER_EMAILS),
     // Cuántas instancias hosteadas PUBLICADAS puede tener un usuario sin
     // suscripción. Default 1: el plan gratis incluye 1 sección hosteada real.
     // Crear/publicar una 2da → 402. 0 = LAB 100% de pago.

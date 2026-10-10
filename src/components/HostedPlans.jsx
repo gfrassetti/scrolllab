@@ -71,7 +71,11 @@ const PADDLE_SYNC_WAIT_MS = 2500
 // `quotaForWire` en server/app.js.
 const displayQuota = (n) => (Number.isFinite(n) ? n : '∞')
 
-export default function HostedPlans() {
+/**
+ * `qa`: los planes de prueba de /lab-test (src/domain/qa.js) — precio de prueba,
+ * sin prueba gratis y solo Mercado Pago.
+ */
+export default function HostedPlans({ qa = false }) {
   const { user } = useAuth()
   const {
     plan,
@@ -82,7 +86,7 @@ export default function HostedPlans() {
     cycle: billingCycle,
     trialing,
     trialEndsAt,
-    trialAvailable,
+    trialAvailable: trialAvailableForPlan,
     trialDays,
     subscriptionStatus,
     pastDue,
@@ -98,7 +102,10 @@ export default function HostedPlans() {
   // Desde dónde paga (Argentina → MP en pesos; otro país → Paddle en USD).
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)
-  const paddleEnabled = usePayRegion((s) => s.paddleEnabled)
+  const paddleForRegion = usePayRegion((s) => s.paddleEnabled)
+  // Prueba: sin prueba gratis y solo Mercado Pago.
+  const paddleEnabled = !qa && paddleForRegion
+  const trialAvailable = !qa && trialAvailableForPlan
   const loadRegion = usePayRegion((s) => s.load)
   useEffect(() => {
     loadRegion()
@@ -132,7 +139,7 @@ export default function HostedPlans() {
 
   const refresh = useCallback(async () => {
     try {
-      const p = await api.subscriptionPlans()
+      const p = await api.subscriptionPlans({ qa })
       setPlans(
         [...(p.plans || [])].sort(
           (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
@@ -142,7 +149,7 @@ export default function HostedPlans() {
     } catch (err) {
       setError(err.message)
     }
-  }, [])
+  }, [qa])
 
   useEffect(() => {
     refresh()
@@ -275,7 +282,7 @@ export default function HostedPlans() {
     setNotice('')
     const provider = via || (paddleEnabled ? providerForRegion(region) : 'mercadopago')
     try {
-      const res = await api.subscribe(planId, planCycle, { provider, locale })
+      const res = await api.subscribe(planId, planCycle, { provider, locale, qa })
       if (res.provider === 'paddle' && res.transactionId) {
         const result = await openPaddleCheckout({
           environment: res.paddle?.environment,

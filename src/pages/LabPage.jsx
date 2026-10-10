@@ -25,7 +25,8 @@ const STATUS_TONE = {
 // manda `frozen`). Naranja, no rojo — es reversible: vuelve al re-suscribirse.
 const FROZEN_TONE = 'text-accent border-accent/40 bg-accent/10'
 
-export default function LabPage() {
+/** `qa`: /lab-test — los planes de prueba (src/domain/qa.js). */
+export default function LabPage({ qa = false }) {
   const { user, loading } = useAuth()
   const {
     plan,
@@ -316,7 +317,7 @@ export default function LabPage() {
 
         {/* Planes — la decisión. Subido acá, antes de "tus secciones". */}
         <div className="mt-20 md:mt-28">
-          <HostedPlans />
+          <HostedPlans qa={qa} />
         </div>
 
         {error && (

@@ -42,6 +42,7 @@ export function createOrdersRouter({ config, limits }) {
           // Subtotal a precio de lista, descuento de primera compra y total.
           summary: orderPriceSummary(o),
           purchaseCode: purchaseCode(db.uid(o) || o.id, config.downloadSecret),
+          ...(o.qa ? { qa: true } : {}),
         })),
       })
     }),

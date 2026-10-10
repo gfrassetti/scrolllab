@@ -1,6 +1,6 @@
 import { db } from '../../db.js'
 import { HttpError } from '../../errors.js'
-import { hostedPlanPrice } from '../../catalog.js'
+import { subscriptionPlanPrice } from '../../catalog.js'
 import {
   fetchPreapproval,
   fetchAuthorizedPayment,
@@ -142,7 +142,7 @@ function warnIfSuspiciousAmount(ap, sub) {
   // plan. No bloqueamos (proración / promos de MP pueden diferir), pero un
   // desvío grande queda logueado para revisar una config equivocada.
   const charged = Number(ap?.payment?.transaction_amount ?? ap?.transaction_amount)
-  const expected = hostedPlanPrice(sub.plan, sub.cycle)
+  const expected = subscriptionPlanPrice(sub)
   if (
     Number.isFinite(charged) &&
     Number.isFinite(expected) &&

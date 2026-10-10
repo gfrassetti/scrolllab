@@ -68,13 +68,18 @@ export function createAnalyticsRouter({ config, limits }) {
         db.listSubscriptions(),
         db.listHostedInstances(),
       ])
+      // Las compras y suscripciones de prueba (src/domain/qa.js) no son ventas:
+      // fuera de las métricas. En «La plata» sí aparecen (sus reembolsos se
+      // ven en el libro, con el título «PRUEBA — …»).
+      const realOrders = orders.filter((o) => !o.qa)
+      const realSubs = subscriptions.filter((s) => !s.qa)
       res.set('Cache-Control', 'no-store')
       res.json({
-        ...buildDashboard({ events, users, orders, leads, days, store: getMode(), dbHost: getMode() === 'mongo' ? mongoose.connection.host || '' : '' }),
+        ...buildDashboard({ events, users, orders: realOrders, leads, days, store: getMode(), dbHost: getMode() === 'mongo' ? mongoose.connection.host || '' : '' }),
         // La plata: qué no tocar (en plazo de reembolso), reembolsos y arrepentimiento.
         money: buildMoneyStatus({ orders, users, refunds, withdrawals, subscriptions }),
         // LAB: de la visita al cobro (server/services/labFunnel.js).
-        lab: buildLabFunnel({ events, hosted, subscriptions, since }),
+        lab: buildLabFunnel({ events, hosted, subscriptions: realSubs, since }),
       })
     }),
   )

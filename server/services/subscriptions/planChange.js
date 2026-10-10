@@ -5,7 +5,7 @@ import {
   HOSTED_PLANS,
   hostedPlanQuota,
   hostedPlanPrice,
-  hostedPlanPriceIn,
+  subscriptionPlanPrice,
   isHostedPlanId,
 } from '../../catalog.js'
 import { isPaddleSub, changePaddlePlan } from './paddleSync.js'
@@ -69,7 +69,7 @@ const planReason = (plan, cycle) =>
 export function quoteUpgrade(sub, targetPlan, now = Date.now()) {
   // En la moneda de la suscripción: ARS (MP) o USD con centavos (Paddle).
   const usd = sub.currency_id === 'USD'
-  const priceOf = (plan, cycle) => hostedPlanPriceIn(plan, cycle, usd ? 'USD' : 'ARS')
+  const priceOf = (plan, cycle) => subscriptionPlanPrice(sub, plan, cycle, usd ? 'USD' : 'ARS')
   const base = { amount: 0, newPrice: priceOf(targetPlan, sub.cycle) }
   const w = paidWindow(sub, now)
   if (!w) return { ...base, reason: 'unpaid' }
@@ -210,7 +210,7 @@ export async function changeSubscriptionPlan(
   if (!isMock(config) && sub.mpPreapprovalId) {
     const update = deps.updateAmount || updatePreapprovalAmount
     await update(config.mpSubs.accessToken, sub.mpPreapprovalId, {
-      amount: hostedPlanPrice(targetPlan, sub.cycle),
+      amount: subscriptionPlanPrice(sub, targetPlan, sub.cycle, 'ARS'),
       currencyId: HOSTED_PLANS[targetPlan].currency_id,
       reason: planReason(targetPlan, sub.cycle),
     })
@@ -455,7 +455,7 @@ export async function applyUpgradePayment(
     const update = deps.updateAmount || updatePreapprovalAmount
     try {
       await update(config.mpSubs.accessToken, sub.mpPreapprovalId, {
-        amount: hostedPlanPrice(ref.plan, sub.cycle),
+        amount: subscriptionPlanPrice(sub, ref.plan, sub.cycle, 'ARS'),
         currencyId: HOSTED_PLANS[ref.plan].currency_id,
         reason: planReason(ref.plan, sub.cycle),
       })

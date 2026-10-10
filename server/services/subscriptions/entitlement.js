@@ -81,6 +81,8 @@ export async function resolveEntitlement(userId, config, { persist = true } = {}
     plan: sub.plan,
     cycle: sub.cycle,
     quota: hostedPlanQuota(sub.plan),
+    // Suscripción de prueba (src/domain/qa.js): la UI muestra su precio y la marca.
+    ...(sub.qa ? { qa: true } : {}),
     subscriptionStatus: sub.status,
     subscriptionId: subId(sub),
     currentPeriodEnd: sub.currentPeriodEnd || null,

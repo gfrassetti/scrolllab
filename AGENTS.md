@@ -355,6 +355,8 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
    corta la orden o da de baja LAB, lo anota en el libro (`/admin`) y manda «Te devolvimos el
    dinero». Runbook en [`docs/paddle.md`](docs/paddle.md).
 
+Modo prueba (`QA_BUYER_EMAILS`, `src/domain/qa.js`): `/test`, `/builder-test` y `/lab-test` venden a precio mínimo (template $100, builder $200, LAB $1000 sin prueba gratis) solo a esas cuentas, con plata real y fuera de las métricas — para probar en producción compra, mails y reembolsos. Detalle en `docs/DEPLOY.md`.
+
 LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
 
 ## Architecture (extra)

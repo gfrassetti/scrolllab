@@ -1,12 +1,22 @@
 import { db } from '../db.js'
 import { HttpError } from '../errors.js'
-import { validateCheckoutItems } from '../validation.js'
+import { validateCheckoutItems, validateRecipe } from '../validation.js'
 import { pendingExpiresAt } from '../orderRetention.js'
 import { createCheckoutPreference } from './mercadoPago.js'
 import { arsFromUsd, discountedArsFromUsd, PRODUCTS } from '../catalog.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import { getUsdArsRate } from '../fx.js'
 import { resolveCouponForCheckout, autoWelcomeCoupon } from './coupons.js'
+import { assertQaBuyer } from '../qa.js'
+import {
+  isQaSku,
+  QA_TEMPLATE_SKU,
+  QA_TEMPLATE_MODEL,
+  QA_TEMPLATE_ARS,
+  qaCustomPriceArs,
+  qaDiscountedArs,
+} from '../../src/domain/qa.js'
+import { recipeSectionId } from '../../src/domain/catalog.js'
 import {
   createTransaction,
   buildOrderTransactionBody,
@@ -16,6 +26,50 @@ import {
 
 /** Pasarelas que acepta POST /api/checkout. */
 export const CHECKOUT_PROVIDERS = Object.freeze(['mercadopago', 'paddle'])
+
+/**
+ * Ítems de prueba (src/domain/qa.js): uno solo por pedido y sin mezclar con
+ * productos reales. Precio fijo en pesos (`list_ars`), sin cotización. El
+ * template de prueba entrega el ZIP de QA_TEMPLATE_MODEL; la composición, el de
+ * su receta (validada igual que la del builder real).
+ * @param {any} rawItems
+ * @param {{ maxRecipeSections: number }} limits
+ */
+export function resolveQaItems(rawItems, { maxRecipeSections }) {
+  if (!Array.isArray(rawItems) || rawItems.length !== 1 || !isQaSku(rawItems[0]?.sku)) {
+    throw new HttpError(400, 'Un producto de prueba se compra solo', { expose: true })
+  }
+  const raw = rawItems[0]
+  if (raw.sku === QA_TEMPLATE_SKU) {
+    return [
+      {
+        sku: QA_TEMPLATE_MODEL,
+        title: `PRUEBA — ${QA_TEMPLATE_MODEL.toUpperCase()} (template)`,
+        description: 'Compra de prueba: entrega el ZIP real del modelo.',
+        unit_price: QA_TEMPLATE_ARS,
+        unit_price_usd: 0,
+        list_ars: QA_TEMPLATE_ARS,
+        currency_id: 'ARS',
+        qa: true,
+      },
+    ]
+  }
+  const recipe = validateRecipe(raw.recipe, maxRecipeSections)
+  const price = qaCustomPriceArs(recipe)
+  return [
+    {
+      sku: `custom:${recipe.map(recipeSectionId).join('+').slice(0, 80)}`,
+      title: 'PRUEBA — composición del builder',
+      description: 'Compra de prueba: ZIP de la receta armada en el builder.',
+      unit_price: price,
+      unit_price_usd: 0,
+      list_ars: price,
+      currency_id: 'ARS',
+      recipe,
+      qa: true,
+    },
+  ]
+}
 
 /**
  * Caso de uso: crear la orden de una compra (templates o composición del
@@ -49,14 +103,26 @@ export async function createCheckoutOrder({
   }
   const lang = locale === 'en' ? 'en' : 'es'
 
+  // Producto de prueba: solo para las cuentas de QA_BUYER_EMAILS y solo con
+  // Mercado Pago (src/domain/qa.js).
+  const qa = Array.isArray(items) && items.some((i) => isQaSku(i?.sku))
+  if (qa) {
+    assertQaBuyer(user, config)
+    if (paddle) {
+      throw new HttpError(400, 'Los productos de prueba se cobran solo con Mercado Pago', { expose: true })
+    }
+  }
+
   // Paddle cobra en USD: no depende de la cotización (la validación pide una
-  // tasa para el precio en pesos, que en Paddle no se usa).
-  const fx = paddle ? null : await getUsdArsRate()
-  const resolved = validateCheckoutItems(items, {
-    maxCartItems: config.maxCartItems,
-    maxRecipeSections: config.maxRecipeSections,
-    rate: fx ? fx.rate : 1,
-  })
+  // tasa para el precio en pesos, que en Paddle no se usa). Prueba: pesos fijos.
+  const fx = paddle || qa ? null : await getUsdArsRate()
+  const resolved = qa
+    ? resolveQaItems(items, { maxRecipeSections: config.maxRecipeSections })
+    : validateCheckoutItems(items, {
+        maxCartItems: config.maxCartItems,
+        maxRecipeSections: config.maxRecipeSections,
+        rate: fx ? fx.rate : 1,
+      })
 
   // Cupón de bienvenida: el cliente manda solo el código; el descuento lo
   // calcula el servidor sobre el precio de lista, nunca sale de un monto suyo.
@@ -72,6 +138,7 @@ export async function createCheckoutOrder({
 
   // Paddle cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {
+    if (qa) return coupon ? { ...i, unit_price: qaDiscountedArs(i.list_ars, coupon.percent) } : i
     if (paddle) {
       const usd = coupon
         ? discountedUsdOrNull(i.unit_price_usd, coupon.percent)
@@ -105,6 +172,7 @@ export async function createCheckoutOrder({
       unit_price_usd: i.unit_price_usd,
       currency_id: i.currency_id,
       recipe: i.recipe || undefined,
+      ...(qa ? { list_ars: i.list_ars, qa: true } : {}),
     })),
     total,
     totalUsd: resolved.reduce((sum, i) => sum + i.unit_price_usd, 0),
@@ -113,6 +181,7 @@ export async function createCheckoutOrder({
     discountPct: coupon?.percent,
     currency_id: paddle ? 'USD' : 'ARS',
     expiresAt: pendingExpiresAt(),
+    ...(qa ? { qa: true } : {}),
   })
 
   const orderId = db.uid(order) || order.id
@@ -170,7 +239,7 @@ export function labelDiscount(line, percent, { paddle, lang, rate }) {
         : `Precio de lista US$ ${line.unit_price_usd} — ${percent}% de descuento de primera compra.`,
     }
   }
-  const list = rate ? arsFromUsd(line.unit_price_usd, rate) : null
+  const list = line.list_ars ?? (rate ? arsFromUsd(line.unit_price_usd, rate) : null)
   return {
     ...line,
     title: `${line.title} · ${percent}% off primera compra`,

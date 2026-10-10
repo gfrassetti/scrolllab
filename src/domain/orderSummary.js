@@ -19,7 +19,10 @@ export function orderPriceSummary(order) {
   const items = (order?.items || []).map((i) => {
     const paid = Number(i.unit_price) || 0
     let list = paid
-    if (pct > 0 && Number.isFinite(Number(i.unit_price_usd))) {
+    // Producto de prueba: lista fija en pesos (src/domain/qa.js).
+    if (pct > 0 && Number.isFinite(Number(i.list_ars)) && Number(i.list_ars) >= paid) {
+      list = Number(i.list_ars)
+    } else if (pct > 0 && Number.isFinite(Number(i.unit_price_usd)) && Number(i.unit_price_usd) > 0) {
       const fromUsd = usd ? Number(i.unit_price_usd) : arsFromUsdOrNull(Number(i.unit_price_usd), Number(order.fxRate))
       if (fromUsd != null && fromUsd >= paid) list = fromUsd
     }

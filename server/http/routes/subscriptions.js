@@ -1,4 +1,6 @@
 import express from 'express'
+import { isQaBuyer } from '../../qa.js'
+import { QA_LAB_PRICE_ARS } from '../../../src/domain/qa.js'
 import { db } from '../../db.js'
 import { requireAuth, asyncHandler, HttpError } from '../../middleware.js'
 import { assertObjectIdLike } from '../../validation.js'
@@ -38,12 +40,13 @@ export function createSubscriptionsRouter({ config, limits }) {
   // Lo hacemos explícito acá: el cliente lee `null`/no-finito como "ilimitado".
   const quotaForWire = (n) => (Number.isFinite(n) ? n : null)
 
-  function publicPlans() {
+  /** `qa`: los planes de prueba (QA_LAB_PRICE_ARS los tres, src/domain/qa.js). */
+  function publicPlans({ qa = false } = {}) {
     return Object.values(HOSTED_PLANS).map((p) => ({
       id: p.id,
       tier: p.tier,
-      priceMonthly: p.priceMonthly,
-      priceYearly: p.priceYearly,
+      priceMonthly: qa ? QA_LAB_PRICE_ARS : p.priceMonthly,
+      priceYearly: qa ? QA_LAB_PRICE_ARS : p.priceYearly,
       // Cobro internacional (Paddle).
       priceMonthlyUsd: p.priceMonthlyUsd,
       priceYearlyUsd: p.priceYearlyUsd,
@@ -52,10 +55,14 @@ export function createSubscriptionsRouter({ config, limits }) {
     }))
   }
 
-  router.get('/api/subscriptions/plans', (_req, res) => {
-    res.set('Cache-Control', 'public, max-age=300')
+  router.get('/api/subscriptions/plans', (req, res) => {
+    // `?qa=1` solo cambia algo para una cuenta de QA_BUYER_EMAILS; esa respuesta
+    // es personal y no se cachea.
+    const qa = req.query.qa === '1' && isQaBuyer(req.user, config)
+    res.set('Cache-Control', qa ? 'private, no-store' : 'public, max-age=300')
     res.json({
-      plans: publicPlans(),
+      plans: publicPlans({ qa }),
+      ...(qa ? { qa: true, trialDays: 0 } : {}),
       mock: subsMock(),
       freeQuota: config.hostedFreeQuota,
       providers: {
@@ -99,6 +106,7 @@ export function createSubscriptionsRouter({ config, limits }) {
         cycle: req.body?.cycle === 'yearly' ? 'yearly' : 'monthly',
         provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
         locale: req.body?.locale === 'en' ? 'en' : 'es',
+        qa: req.body?.qa === true,
         config,
       })
       // El atajo de dev lo activa un endpoint de este router: el servicio no

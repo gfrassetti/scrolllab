@@ -1,6 +1,6 @@
 import { db } from '../db.js'
 import { orderPriceSummary } from '../../src/domain/orderSummary.js'
-import { HOSTED_PLANS, hostedPlanPriceIn } from '../catalog.js'
+import { HOSTED_PLANS, subscriptionPlanPrice } from '../catalog.js'
 
 /**
  * Mails de cobro en dos idiomas (es / en): pago rechazado de una compra, cuota
@@ -341,7 +341,7 @@ export function subscriptionTerms(subscription, lang = 'es') {
   const tier = TIER_LABEL[plan.tier] || subscription.plan
   const yearly = subscription.cycle === 'yearly'
   const currency = subscription.currency_id || 'ARS'
-  const price = hostedPlanPriceIn(subscription.plan, subscription.cycle, currency)
+  const price = subscriptionPlanPrice(subscription, subscription.plan, subscription.cycle, currency)
   return {
     tier,
     currency,

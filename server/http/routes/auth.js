@@ -1,4 +1,5 @@
 import express from 'express'
+import { isQaBuyer } from '../../qa.js'
 import passport from 'passport'
 import { db } from '../../db.js'
 import { asyncHandler, HttpError } from '../../middleware.js'
@@ -19,6 +20,9 @@ export function createAuthRouter({ config, limits }) {
       email: user.email,
       name: user.name,
       avatar: user.avatar,
+      // Solo para las cuentas de QA_BUYER_EMAILS: el front muestra /test,
+      // /builder-test y /lab-test (src/domain/qa.js).
+      ...(isQaBuyer(user, config) ? { qa: true } : {}),
     }
   }
 

@@ -1,6 +1,7 @@
 import { db } from '../../db.js'
 import { HttpError } from '../../errors.js'
-import { HOSTED_PLANS, isHostedPlanId } from '../../catalog.js'
+import { HOSTED_PLANS, isHostedPlanId, subscriptionPlanPrice } from '../../catalog.js'
+import { assertQaBuyer } from '../../qa.js'
 import { createPreapproval, billingFrequency } from '../mercadoPago.js'
 import { paddleClientInfo } from '../paddle.js'
 import { isMock, trialEligible } from './billing.js'
@@ -57,7 +58,9 @@ async function closeLapsed(sub, config) {
  *  - `mercadopago`: `{ subscriptionId, trialEndsAt, firstChargeAt, init_point }`.
  *  - `paddle`: `{ …, provider: 'paddle', transactionId, customerEmail, paddle }`.
  *  - mock de dev (de la pasarela elegida): `{ …, [provider], mock: true }`.
- * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'paddle', locale: 'es' | 'en', config: any }} args
+ * `qa`: la suscripción de prueba (src/domain/qa.js) — solo cuentas de
+ * QA_BUYER_EMAILS, solo Mercado Pago, sin prueba gratis y a QA_LAB_PRICE_ARS.
+ * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'paddle', locale: 'es' | 'en', qa?: boolean, config: any }} args
  * @returns {Promise<StartedSubscription>}
  */
 export async function startSubscription({
@@ -66,10 +69,17 @@ export async function startSubscription({
   cycle,
   provider = 'mercadopago',
   locale,
+  qa = false,
   config,
 }) {
   if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
   const paddle = provider === 'paddle'
+  if (qa) {
+    assertQaBuyer(user, config, 'Plan inválido')
+    if (paddle) {
+      throw new HttpError(400, 'La suscripción de prueba se cobra solo con Mercado Pago', { expose: true })
+    }
+  }
   if (paddle && !config.paddle?.enabled) {
     throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
   }
@@ -126,7 +136,7 @@ export async function startSubscription({
   // Prueba gratis solo si nunca tuvo una suscripción activa (cancelar y
   // volver NO la reabre). Los días ya pagados de una suscripción cancelada
   // se respetan: el primer cobro de la nueva es cuando termina la vieja.
-  const trialDays = trialEligible(priorSubs) ? config.hostedTrialDays : 0
+  const trialDays = !qa && trialEligible(priorSubs) ? config.hostedTrialDays : 0
   const trialEndsAt =
     trialDays > 0 ? new Date(now + trialDays * 24 * 60 * 60 * 1000) : null
   const firstChargeAt = trialEndsAt || carryOver
@@ -139,6 +149,7 @@ export async function startSubscription({
     provider: paddle ? 'paddle' : 'mercadopago',
     currency_id: paddle ? 'USD' : 'ARS',
     locale,
+    ...(qa ? { qa: true } : {}),
     ...(trialEndsAt ? { trialEndsAt } : {}),
     ...(firstChargeAt ? { firstChargeAt } : {}),
     ...(carriedPaidPlan
@@ -192,14 +203,14 @@ export async function startSubscription({
   try {
     pre = await createPreapproval({
       accessToken: config.mpSubs.accessToken,
-      reason: `ScrollLab LAB — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
-      amount: cycle === 'yearly' ? plof.priceYearly : plof.priceMonthly,
+      reason: `ScrollLab LAB${qa ? ' PRUEBA' : ''} — ${plof.tier} (${cycle === 'yearly' ? 'anual' : 'mensual'})`,
+      amount: subscriptionPlanPrice(sub, plan, cycle, 'ARS'),
       currencyId: plof.currency_id,
       ...billingFrequency(cycle),
       payerEmail: user.email,
       externalReference: subscriptionId,
       // `?suscripcion=volver`: la UI sincroniza sola al volver de MP.
-      backUrl: `${config.clientUrl}/lab?suscripcion=volver`,
+      backUrl: `${config.clientUrl}/${qa ? 'lab-test' : 'lab'}?suscripcion=volver`,
       startDate: firstChargeAt,
     })
   } catch (err) {

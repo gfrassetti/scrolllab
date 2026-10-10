@@ -3,7 +3,7 @@ import FirstPurchasePrice from '../../components/FirstPurchasePrice'
 /**
  * Barra fija de mobile: resumen de la composición y atajo al panel.
  */
-export default function MobileSummaryBar({ hasItems, summaryInView, items, t, estimatedPriceUsd, goToCanvas }) {
+export default function MobileSummaryBar({ hasItems, summaryInView, items, t, estimatedPriceUsd, goToCanvas, fixedPriceLabel = null }) {
   return (
     <>
       {hasItems && (
@@ -22,7 +22,7 @@ export default function MobileSummaryBar({ hasItems, summaryInView, items, t, es
                   : t('builder.sectionCountMany')}
               </p>
               <p className="text-title-sm font-medium tracking-[-0.02em]">
-                <FirstPurchasePrice usd={estimatedPriceUsd} />
+                {fixedPriceLabel ?? <FirstPurchasePrice usd={estimatedPriceUsd} />}
               </p>
             </div>
             <button
