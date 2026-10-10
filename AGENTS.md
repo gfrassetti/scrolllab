@@ -445,7 +445,10 @@ Si el efecto se scrubea con el scroll es GSAP. Motion y GSAP peleando por el
 `transform` del mismo nodo es un bug garantizado.
 
 **ZIP:** el empaquetador (`server/packaging.js`) copia `SHARED` + la carpeta de la
-sección y **no sigue imports relativos**. Una sección de un template a la venta
+sección y **no sigue imports relativos fuera de `sections/`**. En la composición del
+builder copia solo las secciones elegidas y lo que importan dentro de `sections/`
+(`sectionFileClosure`), no la carpeta entera del modelo: si no, una sección de cada
+modelo se llevaba casi el bundle por el precio del builder. Una sección de un template a la venta
 no puede importar `components/ui/*` ni `lib/utils` (no viajan, ni sus deps). PLUM
 sí los importa — ver el bloque "Bloqueante" en
 [`docs/motion-componentry.md`](docs/motion-componentry.md). PLUM y SIGNAL no se

@@ -723,6 +723,47 @@ export async function packBundleTemplate({ models, destPath, licenseMeta }) {
   return destPath
 }
 
+/** `import … from './x'`, `export … from './x'`, `import './x'` e `import('./x')`. */
+const RELATIVE_IMPORT_RE =
+  /(?:\bimport\s+(?:[^'"]*?\s+from\s+)?|\bexport\s+[^'"]*?\s+from\s+|\bimport\s*\(\s*)['"](\.{1,2}\/[^'"]+)['"]/g
+
+function resolveSectionImport(fromDir, specifier) {
+  const base = path.resolve(fromDir, specifier.split('?')[0])
+  for (const candidate of [base, `${base}.jsx`, `${base}.js`, path.join(base, 'index.jsx'), path.join(base, 'index.js')]) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate
+  }
+  return null
+}
+
+/**
+ * Los archivos que una sección necesita de verdad: ella, los componentes y
+ * helpers que importa (recursivo) y las fotos / assets que esos importan.
+ * Antes se copiaba la carpeta entera del modelo: con una sección de cada
+ * modelo, la composición del builder se llevaba casi todo el catálogo (el
+ * bundle) por el precio del builder. Lo de fuera de `sections/` (lib, hooks)
+ * viaja aparte (SHARED / WEBGL_FILES). Las rutas se copian verbatim.
+ * @param {string} entryAbs ruta absoluta de la sección
+ * @returns {Set<string>} rutas absolutas
+ */
+export function sectionFileClosure(entryAbs) {
+  const sectionsRoot = path.join(ROOT, 'src', 'components', 'sections')
+  const files = new Set()
+  const queue = [entryAbs]
+  while (queue.length) {
+    const abs = /** @type {string} */ (queue.pop())
+    if (files.has(abs)) continue
+    files.add(abs)
+    if (!/\.(jsx|js|mjs)$/.test(abs)) continue
+    const source = fs.readFileSync(abs, 'utf8')
+    for (const match of source.matchAll(RELATIVE_IMPORT_RE)) {
+      const resolved = resolveSectionImport(path.dirname(abs), match[1])
+      if (!resolved || !resolved.startsWith(sectionsRoot + path.sep)) continue
+      queue.push(resolved)
+    }
+  }
+  return files
+}
+
 /**
  * Appends one runnable custom composition (the builder recipe) under `prefix`.
  * Empty prefix: the root of a single-composition ZIP. Returns the recipe ids
@@ -779,6 +820,8 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const renderLines = []
   const seen = new Set()
   const packedModels = new Set()
+  // Archivos de secciones ya agregados (dos secciones comparten helpers / fotos).
+  const packedFiles = new Set()
   // Listas editadas en el builder: una constante por prop, arriba del App.
   const dataConsts = []
   // Nombre de la constante con los productos del ProductGrid, si se editaron.
@@ -811,30 +854,18 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
     if (!abs.startsWith(sectionsRoot)) return
     if (!fs.existsSync(abs)) return
 
-    // Pack every .jsx in the model folder once (helpers like ScrollFog).
+    // Solo lo que esta sección usa (ella + lo que importa, recursivo): no la
+    // carpeta entera del modelo. Ver sectionFileClosure.
+    for (const fileAbs of sectionFileClosure(abs)) {
+      if (packedFiles.has(fileAbs)) continue
+      packedFiles.add(fileAbs)
+      const rel = path.relative(ROOT, fileAbs).split(path.sep).join('/')
+      const body = fs.readFileSync(fileAbs)
+      if (/\.(jsx|js|mjs)$/.test(fileAbs)) sources.push(body.toString('utf8'))
+      archive.append(body, { name: `${prefix}${rel}` })
+    }
     if (!packedModels.has(model)) {
       packedModels.add(model)
-      const modelDir = path.join(ROOT, 'src', 'components', 'sections', model)
-      if (fs.existsSync(modelDir)) {
-        // Recursivo: las secciones importan sus fotos desde `assets/`, y sin
-        // ellas el ZIP del comprador ni siquiera compila.
-        const walk = (absDir, relBase) => {
-          for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
-            const abs = path.join(absDir, entry.name)
-            const rel = path.posix.join(relBase, entry.name)
-            if (entry.isDirectory()) {
-              walk(abs, rel)
-              continue
-            }
-            const body = fs.readFileSync(abs)
-            if (entry.name.endsWith('.jsx') || entry.name.endsWith('.js')) {
-              sources.push(body.toString('utf8'))
-            }
-            archive.append(body, { name: `${prefix}${rel}` })
-          }
-        }
-        walk(modelDir, path.posix.join('src/components/sections', model))
-      }
       // Lo que el modelo sirve desde public/ (los frames del hero de MERIDIAN,
       // su galería y su mapa): sin esto la composición compila, pero las
       // secciones piden archivos que no están y el hero rompe el canvas.

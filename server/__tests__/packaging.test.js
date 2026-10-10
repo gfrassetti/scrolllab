@@ -358,6 +358,24 @@ describe('ZIP del builder', () => {
     assert.match(app, /buyer@test\.com/, 'App.jsx custom sin el comprador embebido')
   })
 
+  it('trae solo las secciones elegidas y lo que importan, no la carpeta entera del modelo', async () => {
+    // Antes: una sección de cada modelo se llevaba el modelo entero (casi el
+    // bundle por el precio del builder).
+    const files = await pack('custom-solo', (destPath) =>
+      packCustomTemplate({ recipe: ['chapters/HeroKinetic', 'kin/Hero'], destPath, licenseMeta: LICENSE }),
+    )
+    const sections = [...files.keys()].filter((f) => f.startsWith('src/components/sections/')).sort()
+    assert.ok(sections.includes('src/components/sections/chapters/HeroKinetic.jsx'))
+    assert.ok(sections.includes('src/components/sections/kin/Hero.jsx'))
+    assert.ok(sections.includes('src/components/sections/kin/barGlyphs.js'), 'lo que importa la sección')
+    for (const notChosen of ['chapters/StackingCards.jsx', 'chapters/BigNumbers.jsx', 'kin/Collection.jsx', 'kin/Rooms.jsx']) {
+      assert.ok(!sections.includes(`src/components/sections/${notChosen}`), `no tiene que traer ${notChosen}`)
+    }
+    assertRunnableProject(files)
+    assertDepsCoverImports(files)
+    assert.deepEqual(brokenImports(files), [])
+  })
+
   it('resuelve el tema del contact form al de la sección de arriba', async () => {
     const files = await pack('custom-theme', (destPath) =>
       packCustomTemplate({ recipe, destPath, licenseMeta: LICENSE }),
