@@ -57,6 +57,8 @@ export const api = {
       body: JSON.stringify({ name, email, order, message, locale }),
     }),
   // El link «Confirmar la devolución» del mail.
+  // Con sesión: sus compras y su suscripción para elegir en el Botón de arrepentimiento.
+  withdrawalOptions: () => request('/api/withdrawals/options'),
   confirmWithdrawal: (token) =>
     request('/api/withdrawals/confirm', {
       method: 'POST',

@@ -35,7 +35,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
   let config
 
   before(async () => {
-    process.env.QA_BUYER_EMAILS = ` ${QA.toUpperCase()} , otra@test.com, lab-a@test.com, lab-b@test.com, lab-c@test.com, lab-d@test.com, lab-e@test.com`
+    process.env.QA_BUYER_EMAILS = ` ${QA.toUpperCase()} , otra@test.com, lab-a@test.com, lab-b@test.com, lab-c@test.com, lab-d@test.com, lab-e@test.com, lab-f@test.com`
     ;({ app, loginAs, webhook, cleanup, fileDb, config } = await startAppAgainstFakeMp(mp))
   })
   after(() => {
@@ -360,6 +360,56 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.deepEqual(served, [200, 402, 402, 402, 402])
     // Y no puede publicar otro.
     assert.equal((await agent.put(`/api/hosted/${ids[5]}`).send({ publish: true })).status, 402)
+  })
+
+  it('arrepentimiento con LAB y una compra: sin decir cuál no se adivina; con sesión se elige de la lista', async () => {
+    const { default: request } = await import('supertest')
+    const email = 'lab-f@test.com'
+    const { agent, pre } = await qaSubscribed(email, 'hosted_starter')
+    const order = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }] })
+    const pay = mp.pay(mp.lastPreference().id)
+    await webhook('payment', pay.id)
+    const refundsBefore = mp.refundCalls.length
+
+    // La lista: solo con sesión, con qué se devuelve solo.
+    assert.equal((await request(app).get('/api/withdrawals/options')).status, 401)
+    const options = (await agent.get('/api/withdrawals/options')).body.options
+    const lab = options.find((o) => o.kind === 'lab')
+    const tpl = options.find((o) => o.kind === 'order' && o.ref === order.body.orderId)
+    assert.ok(lab && tpl, JSON.stringify(options))
+    assert.equal(lab.ref, 'LAB')
+    assert.equal(lab.auto, true)
+    assert.equal(tpl.auto, true)
+    assert.equal(tpl.short, order.body.orderId.slice(-8).toUpperCase())
+
+    // Sin sesión y sin número: no se devuelve nada, la pantalla no revela nada,
+    // el mail (al dueño de la cuenta) le da el link para entrar y elegir.
+    const anon = await request(app).post('/api/withdrawals').send({ email, name: 'Cliente F' })
+    assert.equal(anon.body.outcome, 'check_email')
+    assert.equal(mp.refundCalls.length, refundsBefore, 'no devolvió nada')
+    assert.equal(mp.preapprovals.get(pre.id).status, 'authorized', 'LAB sigue')
+    assert.equal((await fileDb.findOrderById(order.body.orderId)).status, 'paid')
+    await waitFor(
+      () => mp.mailsTo(email).some((m) => /Entrar y elegir/.test(m.body.html || '') && /más de una compra/.test(m.body.text || '')),
+      'el mail para elegir',
+    )
+    assert.ok(mp.mailsTo(email).some((m) => /arrepentimiento/.test(m.body.text || '') && /login\?next=/.test(m.body.text || '')))
+
+    // Con sesión y sin elegir: la pantalla pide elegir (es el dueño).
+    const mine = await agent.post('/api/withdrawals').send({ email, name: 'Cliente F' })
+    assert.equal(mine.body.outcome, 'choose')
+    assert.equal(mp.refundCalls.length, refundsBefore)
+
+    // Eligiendo la compra: se devuelve esa, LAB intacto.
+    const pickOrder = await agent.post('/api/withdrawals').send({ email, name: 'Cliente F', order: tpl.ref })
+    assert.equal(pickOrder.body.outcome, 'refunded', JSON.stringify(pickOrder.body))
+    assert.equal((await fileDb.findOrderById(order.body.orderId)).status, 'refunded')
+    assert.equal(mp.preapprovals.get(pre.id).status, 'authorized', 'LAB sigue')
+
+    // «LAB»: la suscripción.
+    const pickLab = await agent.post('/api/withdrawals').send({ email, name: 'Cliente F', order: 'LAB' })
+    assert.equal(pickLab.body.outcome, 'refunded', JSON.stringify(pickLab.body))
+    assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
   })
 
   it('las métricas del panel no cuentan las compras ni las suscripciones de prueba', async () => {

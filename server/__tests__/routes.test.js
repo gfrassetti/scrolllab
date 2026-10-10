@@ -33,6 +33,7 @@ const EXPECTED = [
   'GET /api/subscriptions/me',
   'GET /api/subscriptions/payment-method',
   'GET /api/subscriptions/plans',
+  'GET /api/withdrawals/options',
   'POST /api/auth/dev-login',
   'POST /api/auth/logout',
   'POST /api/checkout',

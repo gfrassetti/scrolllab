@@ -283,6 +283,9 @@ const WITHDRAWAL_COPY = {
     order: 'Compra',
     date: 'Fecha',
     cta: 'Ver la política de reembolsos',
+    introChoose:
+      'Tenés más de una compra o suscripción con este mail y no nos dijiste de cuál te arrepentís, así que todavía no devolvimos nada. Entrá con tu cuenta y elegila: si corresponde, te devolvemos el dinero en el momento. Si preferís, respondé este mail diciéndonos cuál.',
+    ctaChoose: 'Entrar y elegir',
     footer:
       'Si no hiciste este pedido, ignorá este mail o respondelo. Podés escribirnos citando el código.',
   },
@@ -297,6 +300,9 @@ const WITHDRAWAL_COPY = {
     order: 'Purchase',
     date: 'Date',
     cta: 'See the refund policy',
+    introChoose:
+      'You have more than one purchase or subscription with this email and didn’t tell us which one, so nothing has been refunded yet. Sign in and pick it: if it qualifies, we refund it on the spot. Or reply to this email telling us which one.',
+    ctaChoose: 'Sign in and choose',
     footer:
       'If you didn’t make this request, ignore this email or reply to it. You can write to us quoting the code.',
   },
@@ -306,9 +312,10 @@ const WITHDRAWAL_COPY = {
  * Confirmación del botón de arrepentimiento: el código de seguimiento (la ley
  * pide darlo al instante). No dice si procede el reembolso: eso lo decide la
  * revisión, y la política está a un click.
- * @param {{ code: string, name: string, locale?: string, order?: any, refundsUrl: string, logoUrl: string }} args
+ * `chooseUrl`: tiene más de una compra y no dijo cuál — el mail le da el link para entrar y elegir.
+ * @param {{ code: string, name: string, locale?: string, order?: any, refundsUrl: string, logoUrl: string, chooseUrl?: string | null }} args
  */
-export function buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl }) {
+export function buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl, chooseUrl = null }) {
   const lang = langOf(locale)
   const c = WITHDRAWAL_COPY[lang]
   const orderTitle = (order?.items || []).map((i) => i.title || i.sku).join(', ')
@@ -320,13 +327,13 @@ export function buildWithdrawalReceived({ code, name, locale, order, refundsUrl,
     eyebrow: c.eyebrow,
     eyebrowTone: 'muted',
     title: c.title(name),
-    intro: c.intro,
+    intro: chooseUrl ? c.introChoose : c.intro,
     rows: [
       [c.code, code],
       orderTitle ? [c.order, orderTitle] : null,
       [c.date, dateLong(new Date(), lang)],
     ],
-    cta: { href: refundsUrl, label: c.cta },
+    cta: chooseUrl ? { href: chooseUrl, label: c.ctaChoose } : { href: refundsUrl, label: c.cta },
     footer: c.footer,
   })
 }

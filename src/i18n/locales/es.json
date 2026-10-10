@@ -1412,7 +1412,7 @@
     "name": "Nombre y apellido",
     "email": "Mail de la compra",
     "order": "Número de orden (opcional)",
-    "orderHint": "Lo ves en Mis compras, al lado de «Orden». Si tenés más de una compra, ponelo para elegir cuál; sin él tomamos tu suscripción de LAB o tu última compra.",
+    "orderHint": "Lo ves en Mis compras, al lado de «Orden». Para tu suscripción de LAB escribí LAB. Si tenés más de una compra y no lo ponés, no adivinamos: te pedimos que elijas.",
     "message": "Contanos qué pasó (opcional)",
     "submit": "Enviar solicitud",
     "sending": "Enviando…",
@@ -1446,7 +1446,27 @@
         "eyebrow": "Solicitud recibida",
         "title": "Recibimos tu pedido.",
         "body": "Lo revisamos y te respondemos a {{email}}. Si el reembolso procede, el dinero vuelve al mismo medio de pago."
+      },
+      "choose": {
+        "eyebrow": "Falta elegir",
+        "title": "Tenés más de una compra o suscripción",
+        "body": "No devolvimos nada todavía. Elegí de cuál te arrepentís y volvé a enviarlo."
       }
+    },
+    "pick": "¿De qué te arrepentís?",
+    "pickRequired": "Elegí de qué te arrepentís.",
+    "labLabel": "Suscripción de LAB",
+    "orderLabel": "Orden {{short}}",
+    "summary": "Vas a pedir: {{what}}.",
+    "opt": {
+      "auto": "Se devuelve solo, en el momento. La descarga se corta.",
+      "autoLab": "Se devuelve el primer cobro (y las diferencias de plan) y la suscripción se da de baja en el momento.",
+      "trial": "Estás en la prueba gratis: se da de baja, sin cobro.",
+      "downloaded": "Ya descargaste el ZIP: no se devuelve solo, lo revisamos.",
+      "expired": "Pasaron los {{days}} días: no se devuelve solo, lo revisamos.",
+      "renewal": "Las renovaciones no se devuelven: lo revisamos.",
+      "refunded": "Ya está devuelta.",
+      "review": "No se devuelve solo: lo revisamos."
     }
   },
   "theme": {

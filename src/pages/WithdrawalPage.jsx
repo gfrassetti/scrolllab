@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { REFUND_DAYS, SUPPORT_EMAIL } from '../lib/site'
 import { useAuth } from '../lib/auth'
 import { api } from '../lib/api'
 import { useI18n } from '../i18n'
+import { formatAmount } from '../lib/pricing'
 
 const fill = (text) => String(text ?? '').replaceAll('{{days}}', String(REFUND_DAYS))
 
@@ -66,11 +67,66 @@ export default function WithdrawalPage() {
     }))
   }, [user])
 
+  // Con sesión se elige de una lista (sus compras y su suscripción): sin esto
+  // había que escribir el número de orden, y sin número se tomaba LAB o la
+  // última compra — devolver otra cosa por error no tiene vuelta atrás.
+  const [options, setOptions] = useState(null)
+  useEffect(() => {
+    if (!user) {
+      setOptions(null)
+      return undefined
+    }
+    let cancelled = false
+    api
+      .withdrawalOptions()
+      .then((res) => {
+        if (cancelled) return
+        const list = res.options || []
+        setOptions(list)
+        // Venía de «Pedir reembolso» en Mis compras (?order=…), o hay una sola.
+        const wanted = String(params.get('order') || '').toUpperCase()
+        const pre =
+          list.find((o) => !o.refunded && wanted && (o.short === wanted || o.ref.toUpperCase().endsWith(wanted))) ||
+          (list.filter((o) => !o.refunded).length === 1 ? list.find((o) => !o.refunded) : null)
+        if (pre) setForm((f) => ({ ...f, order: pre.ref }))
+        else setForm((f) => ({ ...f, order: '' }))
+      })
+      .catch(() => {
+        if (!cancelled) setOptions([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, params])
+  const picking = !!user && Array.isArray(options) && options.length > 0
+  const picked = useMemo(
+    () => (picking ? options.find((o) => o.ref === form.order) || null : null),
+    [picking, options, form.order],
+  )
+  const dateLocale = locale === 'en' ? 'en-US' : 'es-AR'
+  const optionNote = (o) => {
+    if (o.refunded) return t('withdrawal.opt.refunded')
+    if (o.kind === 'lab') {
+      if (o.reason === 'trial') return t('withdrawal.opt.trial')
+      if (o.auto) return t('withdrawal.opt.autoLab')
+      if (o.reason === 'renewal') return t('withdrawal.opt.renewal')
+      return fill(t('withdrawal.opt.expired'))
+    }
+    if (o.auto) return t('withdrawal.opt.auto')
+    if (o.reason === 'downloaded') return t('withdrawal.opt.downloaded')
+    if (o.reason === 'expired') return fill(t('withdrawal.opt.expired'))
+    return t('withdrawal.opt.review')
+  }
+
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
   const submit = async (e) => {
     e.preventDefault()
     if (status === 'sending') return
+    if (picking && !picked) {
+      setError(t('withdrawal.pickRequired'))
+      return
+    }
     setStatus('sending')
     setError('')
     try {
@@ -183,23 +239,73 @@ export default function WithdrawalPage() {
                 />
               </div>
             </div>
-            <div>
-              <label htmlFor="wd-order" className={label}>
-                {t('withdrawal.order')}
-              </label>
-              <input
-                id="wd-order"
-                className={`${field} font-mono uppercase`}
-                value={form.order}
-                onChange={set('order')}
-                placeholder="DEBE7390"
-                maxLength={40}
-                aria-describedby="wd-order-hint"
-              />
-              <p id="wd-order-hint" className="mt-2 text-xs leading-relaxed text-ink/55">
-                {t('withdrawal.orderHint')}
-              </p>
-            </div>
+            {picking ? (
+              <fieldset>
+                <legend className={label}>{t('withdrawal.pick')}</legend>
+                <div className="space-y-2" role="radiogroup">
+                  {options.map((o) => {
+                    const selected = form.order === o.ref
+                    return (
+                      <label
+                        key={o.ref}
+                        data-withdrawal-option={o.short}
+                        className={`flex min-h-11 cursor-pointer items-start gap-3 border-2 px-4 py-3 transition-colors ${
+                          o.refunded
+                            ? 'cursor-not-allowed border-ink/10 opacity-50'
+                            : selected
+                              ? 'border-ink'
+                              : 'border-ink/20 hover:border-ink/50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="wd-target"
+                          value={o.ref}
+                          checked={selected}
+                          disabled={o.refunded}
+                          onChange={() => setForm((f) => ({ ...f, order: o.ref }))}
+                          className="mt-1 size-4 accent-accent"
+                        />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium md:text-base">{o.title}</span>
+                          <span className="mt-0.5 block text-xs text-ink/55">
+                            {o.kind === 'lab' ? t('withdrawal.labLabel') : t('withdrawal.orderLabel', { short: o.short })}
+                            {o.date ? ` · ${new Date(o.date).toLocaleDateString(dateLocale)}` : ''}
+                            {o.amount ? ` · ${formatAmount(o.amount, dateLocale)} ${o.currency}` : ''}
+                          </span>
+                          <span className={`mt-1 block text-xs ${o.auto ? 'text-success' : 'text-ink/60'}`}>
+                            {optionNote(o)}
+                          </span>
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+                {picked ? (
+                  <p className="mt-3 text-xs leading-relaxed text-ink/70" data-withdrawal-summary>
+                    {t('withdrawal.summary', { what: picked.title })} {optionNote(picked)}
+                  </p>
+                ) : null}
+              </fieldset>
+            ) : (
+              <div>
+                <label htmlFor="wd-order" className={label}>
+                  {t('withdrawal.order')}
+                </label>
+                <input
+                  id="wd-order"
+                  className={`${field} font-mono uppercase`}
+                  value={form.order}
+                  onChange={set('order')}
+                  placeholder="DEBE7390"
+                  maxLength={40}
+                  aria-describedby="wd-order-hint"
+                />
+                <p id="wd-order-hint" className="mt-2 text-xs leading-relaxed text-ink/55">
+                  {t('withdrawal.orderHint')}
+                </p>
+              </div>
+            )}
             <div>
               <label htmlFor="wd-message" className={label}>
                 {t('withdrawal.message')}

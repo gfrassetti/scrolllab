@@ -1,6 +1,6 @@
 import express from 'express'
-import { asyncHandler } from '../../middleware.js'
-import { requestWithdrawal, confirmWithdrawal } from '../../services/refunds.js'
+import { asyncHandler, requireAuth } from '../../middleware.js'
+import { requestWithdrawal, confirmWithdrawal, listWithdrawalOptions } from '../../services/refunds.js'
 
 /**
  * Botón de arrepentimiento (Resolución 424/2020): público y sin cuenta. Si el
@@ -25,6 +25,17 @@ export function createWithdrawalsRouter({ config, limits }) {
         config,
       })
       res.status(duplicate ? 200 : 201).json({ ok: true, code, outcome })
+    }),
+  )
+
+  // Con sesión: sus compras y su suscripción, para elegir de cuál se arrepiente
+  // (sin esto el servidor tenía que adivinar).
+  router.get(
+    '/api/withdrawals/options',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      res.set('Cache-Control', 'no-store')
+      res.json({ ok: true, options: await listWithdrawalOptions(req.user) })
     }),
   )
 

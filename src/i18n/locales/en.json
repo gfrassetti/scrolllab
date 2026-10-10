@@ -1412,7 +1412,7 @@
     "name": "Full name",
     "email": "Purchase email",
     "order": "Order number (optional)",
-    "orderHint": "You’ll find it in My purchases, next to “Order”. If you have more than one purchase, add it to choose which; without it we take your LAB subscription or your latest purchase.",
+    "orderHint": "You’ll find it in My purchases, next to “Order”. For your LAB subscription type LAB. If you have more than one purchase and leave it empty, we don’t guess: we’ll ask you to choose.",
     "message": "Tell us what happened (optional)",
     "submit": "Send request",
     "sending": "Sending…",
@@ -1446,7 +1446,27 @@
         "eyebrow": "Request received",
         "title": "We got your request.",
         "body": "We’ll review it and reply to {{email}}. If the refund applies, the money goes back to the original payment method."
+      },
+      "choose": {
+        "eyebrow": "Choose one",
+        "title": "You have more than one purchase or subscription",
+        "body": "Nothing has been refunded yet. Choose which one and send it again."
       }
+    },
+    "pick": "Which one do you want to withdraw from?",
+    "pickRequired": "Choose which one you want to withdraw from.",
+    "labLabel": "LAB subscription",
+    "orderLabel": "Order {{short}}",
+    "summary": "You’re requesting: {{what}}.",
+    "opt": {
+      "auto": "Refunded automatically, right away. The download stops working.",
+      "autoLab": "The first charge (and any plan upgrades) is refunded and the subscription ends right away.",
+      "trial": "You’re in the free trial: it’s cancelled, nothing charged.",
+      "downloaded": "You already downloaded the ZIP: not refunded automatically, we’ll review it.",
+      "expired": "The {{days}} days have passed: not refunded automatically, we’ll review it.",
+      "renewal": "Renewals aren’t refunded: we’ll review it.",
+      "refunded": "Already refunded.",
+      "review": "Not refunded automatically: we’ll review it."
     }
   },
   "theme": {

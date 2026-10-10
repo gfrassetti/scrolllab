@@ -39,31 +39,87 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const clean = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max)
 const uidOf = (row) => (row ? String(db.uid(row) || row.id) : null)
 
+/** Lo que se escribe en «número de orden» para pedir por la suscripción de LAB. */
+const LAB_REFS = new Set(['lab', 'suscripcion', 'suscripción', 'subscription'])
+
 /**
  * La compra del mail. Con número de orden (completo o los últimos caracteres,
- * como se ve en «Mis compras»): esa orden, y si no coincide no se adivina. Sin
- * número: la suscripción de LAB si tiene una, si no la última compra pagada.
- * Sin una cuenta con ese mail no hay nada: no se filtra si una compra existe.
+ * como se ve en «Mis compras»): esa orden, y si no coincide no se adivina. Con
+ * «LAB»: la suscripción. Sin nada: si hay una sola cosa (una compra paga o la
+ * suscripción), esa; si hay más de una, NO se adivina (`ambiguous`): devolver
+ * otra cosa por error (p. ej. dar de baja LAB queriendo devolver un template)
+ * no tiene vuelta atrás. Sin una cuenta con ese mail no hay nada: no se filtra
+ * si una compra existe.
  */
 async function findTarget(email, ref) {
-  const none = { user: null, order: null, sub: null }
+  /** @type {{ user: any, order: any, sub: any, ambiguous: boolean, paid: any[] | null }} */
+  const none = { user: null, order: null, sub: null, ambiguous: false, paid: null }
   const user = await db.findUser({ email })
   if (!user) return none
   const orders = await db.findOrdersByUser(db.uid(user))
   const wanted = clean(ref, 40).replace(/^#/, '').toLowerCase()
+  const sub = await db.findActiveSubscriptionByUser(db.uid(user)).catch(() => null)
+  if (LAB_REFS.has(wanted)) return sub ? { ...none, user, sub } : { ...none, user }
   if (wanted) {
     const order = orders.find((o) => {
       const id = String(db.uid(o) || o.id).toLowerCase()
       return wanted.length >= 6 && (id === wanted || id.endsWith(wanted))
     })
-    return order ? { user, order, sub: null } : { ...none, user }
+    return order ? { ...none, user, order } : { ...none, user }
   }
+  const paid = orders.filter((o) => o.status === 'paid')
+  if (paid.length + (sub ? 1 : 0) > 1) return { ...none, user, sub, paid, ambiguous: true }
+  if (sub) return { ...none, user, sub }
+  return { ...none, user, order: paid[0] || null }
+}
+
+/**
+ * Las compras y la suscripción de una cuenta, para elegir en el Botón de
+ * arrepentimiento con sesión: qué es, cuánto, y si se devuelve solo o lo
+ * revisamos (y por qué). Solo de la cuenta de la sesión.
+ * @param {any} user
+ */
+export async function listWithdrawalOptions(user) {
+  const orders = await db.findOrdersByUser(db.uid(user))
+  const options = orders
+    .filter((o) => o.status === 'paid' || o.status === 'refunded')
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+    .map((o) => {
+      const e = refundEligibility(o)
+      const id = String(db.uid(o) || o.id)
+      return {
+        kind: 'order',
+        ref: id,
+        short: id.slice(-8).toUpperCase(),
+        title: refundWhat({ order: o }),
+        amount: Number(o.total) || 0,
+        currency: o.currency_id || 'ARS',
+        date: o.paidAt || o.createdAt || null,
+        refunded: o.status === 'refunded',
+        auto: o.status === 'paid' && e.eligible,
+        reason: o.status === 'refunded' ? 'refunded' : e.reason,
+        deadline: e.deadline || null,
+      }
+    })
   const sub = await db.findActiveSubscriptionByUser(db.uid(user)).catch(() => null)
-  if (sub) return { user, order: null, sub }
-  const lastPaid = orders
-    .filter((o) => o.status === 'paid')
-    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0]
-  return { user, order: lastPaid || null, sub: null }
+  if (sub && sub.status !== 'pending') {
+    const e = labRefundEligibility(sub)
+    const { amount, currency } = amountOf({ order: null, sub })
+    options.unshift({
+      kind: 'lab',
+      ref: 'LAB',
+      short: 'LAB',
+      title: refundWhat({ sub }),
+      amount,
+      currency,
+      date: sub.activatedAt || sub.createdAt || null,
+      refunded: !!sub.refundedAt,
+      auto: !sub.refundedAt && (e.eligible || e.reason === 'trial'),
+      reason: sub.refundedAt ? 'refunded' : e.reason,
+      deadline: e.deadline || null,
+    })
+  }
+  return options
 }
 
 /** El veredicto para el dueño (aviso y panel). */
@@ -94,7 +150,7 @@ function verdictLine({ order, sub, e }) {
 
 /**
  * @param {{ email: string, name: string, orderRef?: string, message?: string, locale?: string, sessionUser?: any, config: any }} args
- * @returns {Promise<{ code: string, duplicate: boolean, outcome: 'refunded' | 'canceled' | 'pending' | 'review' | 'check_email' }>}
+ * @returns {Promise<{ code: string, duplicate: boolean, outcome: 'refunded' | 'canceled' | 'pending' | 'review' | 'check_email' | 'choose' }>}
  */
 export async function requestWithdrawal({ email, name, orderRef, message, locale, sessionUser = null, config }) {
   const mail = clean(email, 254).toLowerCase()
@@ -103,7 +159,11 @@ export async function requestWithdrawal({ email, name, orderRef, message, locale
   if (fullName.length < 2) throw new HttpError(400, 'Ingresá tu nombre', { expose: true })
   const lang = locale === 'en' ? 'en' : 'es'
 
-  const { order, sub } = await findTarget(mail, orderRef)
+  const { user: targetUser, order, sub: foundSub, ambiguous, paid } = await findTarget(mail, orderRef)
+  if (ambiguous) {
+    return requestAmbiguous({ mail, fullName, orderRef, message, lang, sessionUser, targetUser, sub: foundSub, paid, config })
+  }
+  const sub = foundSub
   const orderId = uidOf(order)
   const subscriptionId = sub ? uidOf(sub) : null
   const ownerId = order?.userId || sub?.userId || null
@@ -175,6 +235,57 @@ export async function requestWithdrawal({ email, name, orderRef, message, locale
     console.error('withdrawal confirmation email', err?.message),
   )
   return { code, duplicate: false, outcome: owner ? 'review' : 'check_email' }
+}
+
+/**
+ * Pedido sin decir de qué, con más de una compra o suscripción: no se ejecuta
+ * nada. Queda registrado (la ley pide el código) y al dueño le llega el aviso
+ * con la lista. Con la sesión de esa cuenta, la pantalla le pide elegir
+ * (`choose`); sin sesión no se revela nada en pantalla (`check_email`) y el
+ * mail —que solo le llega al dueño de la cuenta— le da el link para entrar y
+ * elegir.
+ * @returns {Promise<{ code: string, duplicate: boolean, outcome: 'choose' | 'check_email' }>}
+ */
+async function requestAmbiguous({ mail, fullName, orderRef, message, lang, sessionUser, targetUser, sub, paid, config }) {
+  const owner = !!sessionUser && String(db.uid(sessionUser)) === String(db.uid(targetUser))
+  const recent = await db.findRecentWithdrawal({ email: mail, orderId: null, subscriptionId: null, since: new Date(Date.now() - DAY_MS) })
+  if (recent && recent.status === 'received') {
+    return { code: recent.code, duplicate: true, outcome: owner ? 'choose' : 'check_email' }
+  }
+  const code = newWithdrawalCode()
+  await db.createWithdrawal({
+    code,
+    email: mail,
+    name: fullName,
+    orderRef: clean(orderRef, 40) || undefined,
+    orderId: null,
+    subscriptionId: null,
+    kind: null,
+    message: clean(message, 1000) || undefined,
+    locale: lang,
+    status: 'received',
+    note: 'no dijo cuál: tiene más de una compra o suscripción',
+  })
+  alertAdmin({
+    kind: 'withdrawal',
+    key: code,
+    title: `ARREPENTIMIENTO — solicitud ${code} (sin decir cuál)`,
+    lines: [
+      `${fullName} <${mail}>`,
+      'No eligió qué devolver y tiene más de una cosa: no se ejecutó nada.',
+      ...(sub ? [`suscripción ${uidOf(sub)} · ${refundWhat({ sub })} · ${sub.status}`] : []),
+      ...(paid || []).map((o) => `orden ${uidOf(o)} · ${refundWhat({ order: o })} · ${o.total} ${o.currency_id}`),
+      owner ? 'Pedido desde su cuenta: le pedimos que elija.' : 'Le mandamos el link para entrar y elegir.',
+      ...(message ? [`mensaje: ${clean(message, 300)}`] : []),
+    ],
+    config,
+  })
+  if (!owner) {
+    sendWithdrawalReceived({ code, email: mail, name: fullName, locale: lang, order: null, choose: true, config }).catch((err) =>
+      console.error('withdrawal choose email', err?.message),
+    )
+  }
+  return { code, duplicate: false, outcome: owner ? 'choose' : 'check_email' }
 }
 
 /**

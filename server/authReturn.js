@@ -6,6 +6,7 @@ const ALLOWED = new Set([
   '/lab',
   '/account',
   '/preview',
+  '/arrepentimiento',
 ])
 
 /** `/lab/<id>` (editor de una instancia hosteada). */

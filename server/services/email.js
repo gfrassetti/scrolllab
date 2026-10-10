@@ -105,14 +105,18 @@ export function sendSubscriptionPlanChanged({ subscription, user, ref, change, c
 /**
  * Confirmación del botón de arrepentimiento, con el código de seguimiento.
  * Idempotente por código (clave de Resend): un reintento no repite el mail.
- * @param {{ code: string, email: string, name: string, locale?: string, order?: any, config: any, client?: any }} args
+ * @param {{ code: string, email: string, name: string, locale?: string, order?: any, choose?: boolean, config: any, client?: any }} args
  */
-export async function sendWithdrawalReceived({ code, email, name, locale, order, config, client }) {
+export async function sendWithdrawalReceived({ code, email, name, locale, order, choose = false, config, client }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
   const refundsUrl = new URL('/legal/refunds', config.clientUrl).toString()
+  // «Elegí cuál»: al entrar vuelve al Botón de arrepentimiento con la lista.
+  const chooseUrl = choose
+    ? new URL(`/login?next=${encodeURIComponent('/arrepentimiento')}`, config.clientUrl).toString()
+    : null
   const logoUrl =
     config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
-  const message = buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl })
+  const message = buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl, chooseUrl })
   const resend = client || new Resend(config.email.apiKey)
   const response = await resend.emails.send(
     {
