@@ -109,7 +109,19 @@
       },
       {
         "q": "¿En qué se diferencia del Builder?",
-        "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros y se actualizan solos. ¿Vas a hacer uno nuevo? El Builder arma la página entera y te da el código fuente: pago único, es tuyo."
+        "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros, los editás desde acá y se actualizan solos. ¿Vas a hacer uno nuevo? El Builder arma la página entera con nuestras secciones y te da el código fuente para que lo programes y lo alojes vos: pago único, es tuyo."
+      },
+      {
+        "q": "¿Qué es una secuencia?",
+        "a": "Varios de tus widgets, uno debajo del otro, con un solo código. Elegís cuáles y en qué orden; cada widget se sigue editando en su editor y la secuencia se actualiza sola. Sirve para armar una parte entera de tu sitio —por ejemplo, la home— sin pegar un código por cada widget."
+      },
+      {
+        "q": "¿Una secuencia es lo mismo que el Builder?",
+        "a": "No. Se parecen porque las dos juntan secciones, pero la secuencia vive en nuestros servidores y la pegás en el sitio que ya tenés, sin programar. El Builder te da el código fuente de una página nueva para que la programes y la alojes vos."
+      },
+      {
+        "q": "¿Una secuencia ocupa más cupo de mi plan?",
+        "a": "No. El cupo cuenta widgets publicados, y cada widget de la secuencia ya está contado. Podés poner el mismo widget en varias secuencias sin gastar más."
       }
     ],
     "views": "{{n}} vistas",
@@ -217,7 +229,7 @@
     "heroCtaFree": "Empezá gratis",
     "heroCtaPlans": "Ver planes",
     "platformsTitle": "Cómo pegarlo en tu plataforma",
-    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget publicado.",
+    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget o de la secuencia publicada.",
     "platforms": [
       {
         "q": "WordPress",
@@ -241,20 +253,20 @@
       }
     ],
     "pack": {
-      "title": "Packs",
-      "intro": "Juntá varios widgets en una sola página: un solo snippet los muestra uno debajo del otro, en el orden que elijas. No suma cupo: cada widget ya cuenta en tu plan.",
-      "new": "＋ Nuevo pack",
-      "empty": "Todavía no armaste ningún pack.",
-      "needWidgets": "Un pack junta widgets que ya creaste: primero creá uno.",
-      "defaultName": "Pack sin nombre",
+      "title": "Secuencias",
+      "intro": "Varios de tus widgets, uno debajo del otro, con un solo código. Elegís cuáles y en qué orden; cada uno se sigue editando en su editor. No suma cupo: cada widget ya cuenta en tu plan.",
+      "new": "＋ Nueva secuencia",
+      "empty": "Todavía no armaste ninguna secuencia.",
+      "needWidgets": "Una secuencia junta widgets que ya creaste: primero creá uno.",
+      "defaultName": "Secuencia sin nombre",
       "countOne": "1 widget",
       "countMany": "{{n}} widgets",
       "countShown": "{{shown}} de {{total}} se muestran",
-      "nothingShown": "Ningún widget del pack está publicado: el snippet todavía no muestra nada.",
+      "nothingShown": "Ningún widget de la secuencia está publicado: el código todavía no muestra nada.",
       "name": "Nombre",
       "namePlaceholder": "Home, landing de verano…",
       "items": "Widgets, en el orden de la página",
-      "itemsEmpty": "Sumá widgets abajo. Se apilan en este orden en tu página.",
+      "itemsEmpty": "Sumá widgets abajo. Se apilan en este orden en tu sitio.",
       "addPick": "Elegí un widget para sumar",
       "add": "Sumar",
       "allAdded": "Ya sumaste todos tus widgets.",
@@ -267,19 +279,52 @@
         "frozen": "Congelado: tu plan no lo cubre, no se muestra",
         "suspended": "Suspendido: no se muestra"
       },
-      "domainsHint": "Si dejás la lista vacía, el pack se muestra en cualquier dominio. Cada widget además respeta sus propios dominios.",
+      "domainsHint": "Si dejás la lista vacía, la secuencia se muestra en cualquier dominio. Cada widget además respeta sus propios dominios.",
       "save": "Guardar",
       "saved": "Guardado",
-      "unsaved": "Tenés cambios sin guardar: el sitio sigue mostrando la versión anterior.",
-      "delete": "Borrar pack",
-      "deleteConfirm": "¿Borrar el pack? El snippet deja de funcionar en tu sitio. Los widgets no se borran.",
+      "unsaved": "Tenés cambios sin guardar: tu sitio sigue mostrando la versión anterior.",
+      "delete": "Borrar secuencia",
+      "deleteConfirm": "¿Borrar la secuencia? Su código deja de funcionar en tu sitio. Los widgets no se borran.",
       "deleteYes": "Sí, borrar",
       "cancel": "Cancelar",
-      "snippetNote": "Muestra solo los widgets publicados. Para cambiar el contenido de uno, abrilo en su editor: el pack se actualiza solo.",
+      "snippetNote": "Muestra solo los widgets publicados. Para cambiar el contenido de uno, abrilo en su editor: la secuencia se actualiza sola.",
       "npmNote": "Con React, Next.js o Vue: @scrolllab/embed 0.2 o más nuevo (npm i @scrolllab/embed@latest).",
-      "preview": "Así se ve la página",
-      "previewEmpty": "Cuando sumes widgets publicados, acá ves la página armada.",
-      "previewFailed": "La vista previa no cargó. El snippet funciona igual."
+      "preview": "Así se ve en tu sitio",
+      "previewEmpty": "Cuando sumes widgets publicados, acá ves la secuencia armada.",
+      "previewFailed": "La vista previa no cargó. El código funciona igual."
+    },
+    "compare": {
+      "title": "¿LAB o Builder?",
+      "lead": "Los dos usan las mismas secciones. Cambia qué te llevás y dónde vive.",
+      "rows": [
+        {
+          "label": "Para",
+          "lab": "El sitio que ya tenés: WordPress, Webflow, Shopify o el que sea.",
+          "builder": "Un sitio nuevo que vas a programar y alojar vos."
+        },
+        {
+          "label": "Qué te llevás",
+          "lab": "Un código para pegar. El widget vive en nuestros servidores.",
+          "builder": "El código fuente de la página (React + Vite) en un ZIP. Es tuyo."
+        },
+        {
+          "label": "Varias secciones juntas",
+          "lab": "Una secuencia: tus widgets uno debajo del otro, con un solo código.",
+          "builder": "Una composición: la página entera, con su menú y su pie."
+        },
+        {
+          "label": "Cambios",
+          "lab": "Desde el panel de LAB, sin tocar tu sitio.",
+          "builder": "En el código, como en cualquier proyecto."
+        },
+        {
+          "label": "Cómo se paga",
+          "lab": "Suscripción mensual o anual.",
+          "builder": "Pago único."
+        }
+      ],
+      "labCta": "Ver los planes",
+      "builderCta": "Abrir el Builder"
     }
   },
   "common": {
@@ -1098,7 +1143,9 @@
           "blurb": "Footer oscuro a pantalla completa: invitación, columnas de contacto y la palabra de la marca rearmada con barras que entran desde los costados."
         }
       }
-    }
+    },
+    "labNote": "Te llevás el código fuente de la página para programarla y alojarla vos. ¿Ya tenés sitio y querés sumarle secciones sin código?",
+    "labNoteLink": "Eso es LAB →"
   },
   "cart": {
     "eyebrow": "Carrito",

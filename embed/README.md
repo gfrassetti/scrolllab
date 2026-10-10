@@ -51,7 +51,7 @@ window.ScrollLab.render(elemento, { key: 'pub_xxxxx', api, frame }) // monta en 
 window.ScrollLab.scan()                                             // re-escanea <script> nuevos
 ```
 
-**Pack** — varias secciones del usuario con un solo tag: `data-pack="pk_…"` en
+**Pack** («Secuencia» en la UI de LAB) — varias secciones del usuario con un solo tag: `data-pack="pk_…"` en
 lugar de `data-key` (o `render(el, { pack, api })`). El loader pide
 `GET /api/embed/pack/:key` (las keys que hoy se sirven, en orden: sin borradores
 ni congeladas; domain-lock del pack y de cada sección) y monta un iframe por

@@ -337,6 +337,72 @@ export default function LabPage({ qa = false }) {
           </p>
         </section>
 
+        {/* LAB o Builder: las dos juntan nuestras secciones; la diferencia es
+            qué te llevás. Sin esto, «secuencia» y «composición» se confundían. */}
+        <section className="mt-20 md:mt-28" aria-labelledby="lab-vs-builder">
+          <h2 id="lab-vs-builder" className="text-title-sm font-medium">
+            {t('lab.compare.title')}
+          </h2>
+          <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.compare.lead')}</p>
+          <div role="table" aria-labelledby="lab-vs-builder" className="mt-8 max-w-5xl">
+            <div
+              role="row"
+              className="grid grid-cols-2 gap-x-6 pb-3 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
+            >
+              <span role="columnheader" className="sr-only md:not-sr-only" />
+              <span role="columnheader" className="text-body font-medium text-accent-ink">
+                LAB
+              </span>
+              <span role="columnheader" className="text-body font-medium">
+                {t('nav.builder')}
+              </span>
+            </div>
+            {(Array.isArray(t('lab.compare.rows')) ? t('lab.compare.rows') : []).map((row) => (
+              <div
+                key={row.label}
+                role="row"
+                className="grid grid-cols-2 gap-x-6 gap-y-2 border-t border-ink/15 py-4 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
+              >
+                <span
+                  role="rowheader"
+                  className="col-span-2 text-[11px] uppercase tracking-[0.2em] text-ink/50 md:col-span-1 md:pt-0.5"
+                >
+                  {row.label}
+                </span>
+                <span role="cell" className="text-body-sm text-ink/85">
+                  {row.lab}
+                </span>
+                <span role="cell" className="text-body-sm text-ink/60">
+                  {row.builder}
+                </span>
+              </div>
+            ))}
+            <div
+              role="row"
+              className="grid grid-cols-2 gap-x-6 border-t border-ink/15 pt-4 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
+            >
+              <span role="cell" className="hidden md:block" />
+              <span role="cell">
+                <a
+                  href="#planes"
+                  onClick={goToPlanes}
+                  className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
+                >
+                  {t('lab.compare.labCta')}
+                </a>
+              </span>
+              <span role="cell">
+                <Link
+                  to="/builder"
+                  className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
+                >
+                  {t('lab.compare.builderCta')}
+                </Link>
+              </span>
+            </div>
+          </div>
+        </section>
+
         {/* Planes — la decisión. Subido acá, antes de "tus secciones". */}
         <div className="mt-20 md:mt-28">
           <HostedPlans qa={qa} />

@@ -155,7 +155,7 @@ describe('LAB packs (file store)', () => {
 
     const bad = await owner.post('/api/hosted-packs').send({ items: [mine.id, theirs.id] })
     assert.equal(bad.status, 400)
-    assert.match(bad.body.error, /no es tuya/)
+    assert.match(bad.body.error, /no es tuyo/)
     assert.equal((await owner.post('/api/hosted-packs').send({ items: 'x' })).status, 400)
 
     const pack = (await owner.post('/api/hosted-packs').send({ items: [mine.id] })).body.pack

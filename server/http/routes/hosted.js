@@ -154,14 +154,14 @@ export function createHostedRouter({ config, limits }) {
     for (const id of raw) {
       const s = String(id)
       if (!owned.has(s)) {
-        throw new HttpError(400, 'Una de las secciones no es tuya o ya no existe', {
+        throw new HttpError(400, 'Uno de los widgets no es tuyo o ya no existe', {
           expose: true,
         })
       }
       if (!out.includes(s)) out.push(s)
     }
     if (out.length > PACK_MAX_ITEMS) {
-      throw new HttpError(400, `Un pack lleva hasta ${PACK_MAX_ITEMS} secciones`, {
+      throw new HttpError(400, `Una secuencia lleva hasta ${PACK_MAX_ITEMS} widgets`, {
         expose: true,
       })
     }
@@ -172,7 +172,7 @@ export function createHostedRouter({ config, limits }) {
     assertObjectIdLike(req.params.id)
     const pack = await db.findHostedPackById(req.params.id)
     if (!pack || String(pack.userId) !== String(db.uid(req.user))) {
-      throw new HttpError(404, 'Pack no encontrado')
+      throw new HttpError(404, 'Secuencia no encontrada')
     }
     return pack
   }
@@ -417,7 +417,7 @@ export function createHostedRouter({ config, limits }) {
     }),
   )
 
-  // ——— Packs: varias secciones del usuario bajo un solo script ———
+  // ——— Packs («Secuencias» en la UI): varias secciones bajo un solo script ———
   // No suman cupo: cada sección ya cuenta como instancia publicada.
   router.get(
     '/api/hosted-packs',
@@ -436,7 +436,7 @@ export function createHostedRouter({ config, limits }) {
       const userId = db.uid(req.user)
       const mine = await db.findHostedPacksByUser(userId)
       if (mine.length >= PACK_MAX_PER_USER) {
-        throw new HttpError(400, `Podés tener hasta ${PACK_MAX_PER_USER} packs`, {
+        throw new HttpError(400, `Podés tener hasta ${PACK_MAX_PER_USER} secuencias`, {
           expose: true,
         })
       }
