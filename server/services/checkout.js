@@ -137,8 +137,10 @@ export async function createCheckoutOrder({
     : await autoWelcomeCoupon({ user })
   // Prueba a $1: el 10% no baja el precio. No se aplica ni se gasta (y la
   // pantalla de MP no dice «10% off» sin descuento).
-  if (qa && coupon && resolved.every((i) => qaDiscountedArs(i.list_ars, coupon.percent) >= i.list_ars)) {
-    coupon = null
+  if (qa && coupon) {
+    const pct = coupon.percent
+    const listOf = (/** @type {any} */ i) => Number(i.list_ars)
+    if (resolved.every((i) => qaDiscountedArs(listOf(i), pct) >= listOf(i))) coupon = null
   }
 
   // Paddle cobra el precio de lista en USD; MP, en pesos.
