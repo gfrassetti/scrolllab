@@ -8,6 +8,7 @@ import {
   sanitizeColor,
   sanitizeHref,
   sanitizeProps,
+  SECTIONS_WITHOUT_COLOR,
 } from '../sectionFields.js'
 
 /**
@@ -421,16 +422,10 @@ describe('sanitizeProps — links de los navs (lista, con migración del texto)'
 /**
  * Builder: quien arma su página tiene que poder verla con su marca antes de
  * comprar. Toda sección que se ofrece trae color de fondo y de texto
- * editables; las que no, están acá con el motivo (y no se suman a escondidas).
+ * editables; las que no, están en SECTIONS_WITHOUT_COLOR con el motivo (y no
+ * se suman a escondidas). La misma lista la usa npm run check:editable.
  */
-const NO_COLORS = {
-  'velocity/TrackMerge': 'el fondo oscuro → claro → negro es la coreografía del scroll',
-  'atelier/VisionShutter': 'la persiana cierra hacia el color de la sección siguiente',
-  'atrium/ClarityPair': 'la animación pasa de papel a tinta con colores fijos',
-  'kin/Intro': 'mix-blend-difference sobre la puerta del hero',
-  'contact/ContactForm': 'la paleta la define el tema (campo theme)',
-  'commerce/ProductGrid': 'la paleta la define el tema (campo theme)',
-}
+const NO_COLORS = SECTIONS_WITHOUT_COLOR
 
 describe('Builder — colores editables', () => {
   it('cada sección ofrecida tiene bg y fg, salvo las excepciones con motivo', async () => {

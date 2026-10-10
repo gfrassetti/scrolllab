@@ -80,6 +80,14 @@ const navLinks = (max = 8) => ({
   ],
 })
 
+/** El rótulo «Chapter 01 / 06» de CHAPTERS: la palabra antes del número. */
+/** @type {SectionField} */
+const CHAPTER_LABEL = { key: 'chapterLabel', label: 'Rótulo del capítulo («Chapter»)', type: 'text' }
+
+/** El rótulo «Seq. 02 / 06» de NOCTURNE: la palabra antes del número. */
+/** @type {SectionField} */
+const SEQ_LABEL = { key: 'seqLabel', label: 'Rótulo de la secuencia («Seq.»)', type: 'text' }
+
 /** El botón del menú en el teléfono: lo que dice cerrado y abierto. */
 /** @type {SectionField[]} */
 const MENU_BUTTON = [
@@ -126,14 +134,28 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/ManifestoReveal': [
+    CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'text',
+      label: 'Texto del manifiesto',
+      type: 'textarea',
+      help: {
+        title: 'Cómo resaltar palabras',
+        steps: [
+          'Encerrá entre *asteriscos* las palabras que van en cursiva y en el color de acento: «A page is not a poster — it is *a film*».',
+          'Al scrollear, las palabras se van entintando de a una: un párrafo de 20 a 40 palabras se lee mejor que uno largo.',
+        ],
+      },
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/QuoteBreak': [
+    CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -144,7 +166,7 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/ParallaxEditorial': [
-    { key: 'chapterLabel', label: 'Etiqueta de capítulo', type: 'text' },
+    CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -342,10 +364,23 @@ export const SECTION_FIELDS = {
         { value: 'type', label: 'Type (títulos grandes)' },
       ],
     },
+    CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'heading', label: 'Heading', type: 'text' },
+    {
+      key: 'panels',
+      label: 'Paneles',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'index', label: 'Número', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'caption', label: 'Bajada', type: 'text' },
+        { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
+      ],
+    },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -398,7 +433,7 @@ export const SECTION_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'nocturne/SplitReveals': [
-    { key: 'seqLabel', label: 'Numeración — rótulo', type: 'text' },
+    SEQ_LABEL,
     { key: 'seq', label: 'Secuencia', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -418,7 +453,7 @@ export const SECTION_FIELDS = {
     },
   ],
   'nocturne/WorkIndex': [
-    { key: 'seqLabel', label: 'Numeración — rótulo', type: 'text' },
+    SEQ_LABEL,
     { key: 'seq', label: 'Secuencia', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -1490,7 +1525,7 @@ export const SECTION_FIELDS = {
     { key: 'checkoutSuccessBody', label: 'Checkout · Éxito — texto', type: 'textarea' },
   ],
   'chapters/StickyImageStory': [
-    { key: 'chapterLabel', label: 'Etiqueta de capítulo', type: 'text' },
+    CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -1511,7 +1546,7 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/StackingCards': [
-    { key: 'chapterLabel', label: 'Etiqueta de capítulo', type: 'text' },
+    CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -1532,6 +1567,7 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'nocturne/ZoomPortal': [
+    SEQ_LABEL,
     { key: 'seq', label: 'Seq', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -1543,6 +1579,7 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'nocturne/StickyWordCycle': [
+    SEQ_LABEL,
     { key: 'seq', label: 'Seq', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Label', type: 'text' },
@@ -1558,6 +1595,19 @@ export const SECTION_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
 }
+
+/**
+ * Secciones del builder SIN color editable, a propósito y con el motivo. Una
+ * sola lista: la leen el test de colores y npm run check:editable.
+ */
+export const SECTIONS_WITHOUT_COLOR = Object.freeze({
+  'velocity/TrackMerge': 'el fondo oscuro → claro → negro es la coreografía del scroll',
+  'atelier/VisionShutter': 'la persiana cierra hacia el color de la sección siguiente',
+  'atrium/ClarityPair': 'la animación pasa de papel a tinta con colores fijos',
+  'kin/Intro': 'mix-blend-difference sobre la puerta del hero',
+  'contact/ContactForm': 'la paleta la define el tema (campo theme)',
+  'commerce/ProductGrid': 'la paleta la define el tema (campo theme)',
+})
 
 export function getSectionFields(sectionId) {
   return SECTION_FIELDS[sectionId] || []

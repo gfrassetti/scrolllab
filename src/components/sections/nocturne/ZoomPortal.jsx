@@ -13,6 +13,7 @@ import { picsumAttrs } from './picsum'
  * foto y el pie entrando con un fundido.
  */
 export default function ZoomPortal({
+  seqLabel = 'Seq.',
   seq = '02',
   total = '06',
   label = 'The portal',
@@ -75,7 +76,7 @@ export default function ZoomPortal({
             la nav fija para no pisarse con ella. */}
         <div className="absolute top-16 inset-x-0 mx-5 flex items-baseline justify-between border-t border-salt/20 pt-4 md:top-20 md:mx-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
-            Seq. {seq} / {total}
+            {seqLabel} {seq} / {total}
           </p>
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>

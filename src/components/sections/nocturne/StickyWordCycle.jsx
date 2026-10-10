@@ -18,6 +18,7 @@ const defaultWords = ['CRAFT', 'MOTION', 'SILENCE', 'IMPACT']
  * elige el dedo con un scroll normal.
  */
 export default function StickyWordCycle({
+  seqLabel = 'Seq.',
   seq = '05',
   total = '06',
   label = 'The mantra',
@@ -124,7 +125,7 @@ export default function StickyWordCycle({
       <section className="px-5 py-24 md:px-10 md:py-36" style={colors}>
         <div className="mb-6 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
-            Seq. {seq} / {total}
+            {seqLabel} {seq} / {total}
           </p>
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>
@@ -175,7 +176,7 @@ export default function StickyWordCycle({
             la nav fija para no pisarse con ella. */}
         <div className="absolute top-16 inset-x-0 mx-5 flex items-baseline justify-between border-t border-salt/20 pt-4 md:top-20 md:mx-10">
           <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
-            Seq. {seq} / {total}
+            {seqLabel} {seq} / {total}
           </p>
           <p className="text-[11px] uppercase tracking-[0.3em] md:text-xs">{label}</p>
         </div>

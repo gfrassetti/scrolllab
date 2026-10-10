@@ -2,18 +2,30 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
+/** `*así*` → <em>así</em>: lo que va entre asteriscos sale en cursiva y color. */
+function withEmphasis(text) {
+  return String(text)
+    .split(/(\*[^*]+\*)/g)
+    .map((part, i) =>
+      /^\*[^*]+\*$/.test(part) ? <em key={i}>{part.slice(1, -1)}</em> : part,
+    )
+}
+
 /**
  * ManifestoReveal — oversized statement paragraph whose words fade
  * from faint to full ink as the user scrolls through it (scrubbed).
  * Pass custom JSX as children to override the default copy;
- * <em> spans inside are rendered as accent serif italics.
+ * <em> spans inside are rendered as accent serif italics. From the builder,
+ * `text` does the same: words between *asterisks* become the <em>.
  *
  * Calma: el párrafo entra entero con un fundido (sin las palabras que se entintan).
  */
 export default function ManifestoReveal({
+  chapterLabel = 'Chapter',
   chapter = '01',
   total = '06',
   label = 'Manifesto',
+  text,
   className = '',
   children,
   bg,
@@ -57,7 +69,7 @@ export default function ManifestoReveal({
     >
       <div className="mb-10 flex items-baseline justify-between border-t border-ink/15 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
-          Chapter {chapter} / {total}
+          {chapterLabel} {chapter} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
@@ -66,13 +78,13 @@ export default function ManifestoReveal({
         data-manifesto
         className="max-w-[18ch] text-[clamp(2.2rem,6.5vw,6rem)] leading-[1.02] font-medium tracking-[-0.02em] [&_em]:font-display [&_em]:font-normal [&_em]:text-accent"
       >
-        {children ?? (
+        {children ?? (text ? withEmphasis(text) : (
           <>
             A page is not a poster — it is <em>a film</em>. This placeholder
             copy holds the rhythm until your own words arrive to{' '}
             <em>carry the story</em>.
           </>
-        )}
+        ))}
       </p>
     </section>
   )

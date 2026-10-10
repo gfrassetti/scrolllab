@@ -49,6 +49,7 @@ const defaultPanels = [
  * quedan enteros.
  */
 export default function HorizontalPanels({
+  chapterLabel = 'Chapter',
   chapter = '03',
   total = '06',
   label = 'Horizontal drift',
@@ -56,7 +57,7 @@ export default function HorizontalPanels({
   headingBefore,
   headingEm,
   headingAfter,
-  panels = defaultPanels,
+  panels: panelsProp,
   variant = 'media',
   /** Idle word opacity for type reveals (home needs readable steps). */
   idleOpacity = 0.12,
@@ -64,6 +65,11 @@ export default function HorizontalPanels({
   fg,
   accent,
 }) {
+  // Del builder llegan filas sin foto: toman la de la demo en esa posición.
+  const panels =
+    Array.isArray(panelsProp) && panelsProp.length
+      ? panelsProp.map((p, i) => ({ ...p, img: p.img || defaultPanels[i % defaultPanels.length].img }))
+      : defaultPanels
   const root = useRef(null)
   const track = useRef(null)
   const typeOnly = variant === 'type'
@@ -320,7 +326,7 @@ export default function HorizontalPanels({
       <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0 calm:md:static calm:md:mx-0 calm:md:px-10">
         {chapter != null && (
           <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
-            Chapter {chapter} / {total}
+            {chapterLabel} {chapter} / {total}
           </p>
         )}
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
@@ -370,10 +376,10 @@ export default function HorizontalPanels({
           </h2>
         </div>
 
-        {panels.map((panel) =>
+        {panels.map((panel, i) =>
           typeOnly ? (
             <article
-              key={panel.index}
+              key={i}
               data-type-panel
               className="flex flex-col justify-center gap-5 px-5 pb-20 md:h-full md:w-[48vw] md:shrink-0 md:px-12 md:py-24 lg:w-[40vw] lg:px-16 calm:md:h-auto calm:md:w-auto calm:lg:w-auto calm:md:px-10 calm:lg:px-10 calm:md:py-10"
             >
@@ -402,7 +408,7 @@ export default function HorizontalPanels({
             </article>
           ) : (
             <figure
-              key={panel.index}
+              key={i}
               data-panel-fig
               className="flex flex-col justify-center gap-4 px-5 pb-16 md:h-full md:w-[52vw] md:shrink-0 md:px-8 md:py-24 lg:w-[36vw] calm:md:mx-auto calm:md:h-auto calm:md:w-full calm:md:max-w-xl calm:lg:w-full calm:md:px-5 calm:md:py-10"
             >

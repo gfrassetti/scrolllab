@@ -191,7 +191,7 @@ try {
   const { MemoryRouter } = await import('react-router-dom')
   const { I18nProvider } = await vite.ssrLoadModule('/src/i18n/index.jsx')
   const { getSection } = await vite.ssrLoadModule('/src/lib/sectionRegistry.jsx')
-  const { SECTION_FIELDS } = await vite.ssrLoadModule('/src/lib/sectionFields.js')
+  const { SECTION_FIELDS, SECTIONS_WITHOUT_COLOR } = await vite.ssrLoadModule('/src/lib/sectionFields.js')
   const { SECTION_IDS, sectionKindOf, sectionModelOf } = await vite.ssrLoadModule('/src/domain/sections.js')
   const { BUILDER_HIDDEN_SKUS } = await vite.ssrLoadModule('/src/domain/catalog.js')
   const h = React.createElement
@@ -232,7 +232,9 @@ try {
     ]
     const colorFields = fields.filter((f) => f.type === 'color')
     const color = !colorFields.length
-      ? ['sin campo de color']
+      ? SECTIONS_WITHOUT_COLOR[id]
+        ? []
+        : ['sin campo de color']
       : /#123456|rgb\(18,\s*52,\s*86\)/i.test(html)
         ? []
         : ['el color del campo no llega al HTML']

@@ -9,6 +9,7 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
  * Calma: la cita y su firma entran con un fundido, una después de la otra.
  */
 export default function QuoteBreak({
+  chapterLabel = 'Chapter',
   chapter = '06',
   total = '06',
   label = 'Interlude',
@@ -82,7 +83,7 @@ export default function QuoteBreak({
     >
       <div className="flex items-baseline justify-between border-t border-bone/20 pt-4">
         <p className="text-[11px] uppercase tracking-[0.25em] text-bone/50 md:text-xs">
-          Chapter {chapter} / {total}
+          {chapterLabel} {chapter} / {total}
         </p>
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
