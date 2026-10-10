@@ -191,8 +191,11 @@ export default function HostedPlans({ qa = false }) {
   }, [hashIntent, plans.length])
 
   // Volver del checkout de MP (`back_url` = /lab?suscripcion=volver): bajamos
-  // el estado real sin esperar al webhook. Una sola vez; se limpia la URL.
-  const returnedFromMp = !!user && searchParams.get('suscripcion') === 'volver'
+  // el estado real sin esperar al webhook. Una sola vez; se limpia la URL. MP
+  // le pega `?preapproval_id=…` con un segundo «?» (visto en producción), así
+  // que el valor llega como `volver?preapproval_id=…`.
+  const returnedFromMp =
+    !!user && String(searchParams.get('suscripcion') || '').startsWith('volver')
   const returnSynced = useRef(false)
   useEffect(() => {
     if (!returnedFromMp || returnSynced.current) return
