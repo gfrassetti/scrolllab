@@ -382,8 +382,11 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     await fetch(`${API}/api/hosted/${id}`, { method: 'DELETE', headers }).catch(() => {})
   }
 
-  async function openHost(key, { url = HOST_URL, viewport = { width: 1280, height: 900 } } = {}) {
-    const context = await browser.newContext({ viewport, reducedMotion: 'reduce' })
+  async function openHost(
+    key,
+    { url = HOST_URL, viewport = { width: 1280, height: 900 }, reducedMotion = 'reduce' } = {},
+  ) {
+    const context = await browser.newContext({ viewport, reducedMotion })
     const page = await context.newPage()
     await page.route(url, async (route) => {
       const res = await route.fetch()
@@ -481,6 +484,52 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
       }
     })
   }
+
+  // --- con movimiento: los reveals siguen el scroll del SITIO ---
+  // En FLOW el frame mide lo que la sección y no scrollea: sin el scrollerProxy
+  // de embed/frame/main.jsx, ScrollTrigger tomaba el frame entero como viewport
+  // y un reveal `top 70%` en el 30% de abajo no se disparaba nunca (filas de
+  // SplitReveals transparentes y con la foto recortada). Los casos de arriba
+  // corren con reduce (calmReveal), por eso no lo veían.
+  it('nocturne/SplitReveals — con movimiento, cada fila se revela al llegar con el scroll del host', async () => {
+    const beats = [1, 2, 3, 4, 5].map((n) => ({ kicker: `K${n}`, title: `MKROW${n}`, body: 'cuerpo' }))
+    const { id, key } = await seed('nocturne/SplitReveals', { seq: '01', total: '05', label: 'x', beats })
+    const { context, page } = await openHost(key, { url: PLAIN_URL, reducedMotion: 'no-preference' })
+    try {
+      const { frame } = await waitFrame(page)
+      const rows = () =>
+        frame.evaluate(() =>
+          [...document.querySelectorAll('[data-beat-img]')].map((img) => {
+            const row = img.parentElement
+            const copy = row.querySelector('[data-beat-copy]')
+            return {
+              clipped: /inset\([^)]*100%/.test(getComputedStyle(img).clipPath),
+              copyOpacity: copy ? Number(getComputedStyle(copy).opacity) : 1,
+            }
+          }),
+        )
+      await sleep(1200)
+      const before = await rows()
+      assert.equal(before.length, 5, 'SplitReveals: no están las 5 filas')
+      assert.ok(before[4].clipped, 'la última fila se reveló antes de llegar a ella')
+
+      // scroll del host hasta el final, de a poco (como alguien que lee)
+      const total = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)
+      for (let y = 0; y <= total + 200; y += 150) {
+        await page.evaluate((v) => window.scrollTo(0, v), y)
+        await sleep(60)
+      }
+      await sleep(1600)
+      const after = await rows()
+      after.forEach((r, i) => {
+        assert.ok(!r.clipped, `fila ${i + 1}: la foto sigue recortada`)
+        assert.ok(r.copyOpacity > 0.9, `fila ${i + 1}: el texto sigue transparente (${r.copyOpacity})`)
+      })
+    } finally {
+      await context.close()
+      await unseed(id)
+    }
+  })
 
   // --- responsive: mobile / tablet / desktop sobre host plano ---
   for (const sectionId of RESPONSIVE_SECTIONS) {

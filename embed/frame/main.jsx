@@ -143,6 +143,36 @@ let mode = null // null = todavía sin decidir
 let hostVh = 0
 
 /**
+ * En FLOW el iframe mide lo que la sección y nunca scrollea: para ScrollTrigger
+ * el "viewport" era el frame entero, así que un reveal `start: 'top 70%'` solo
+ * se disparaba si el elemento estaba en el 70% de arriba de la sección. Lo de
+ * abajo no aparecía nunca (la 3ª fila de SplitReveals quedaba transparente y
+ * con la foto recortada). El proxy le dice a ScrollTrigger dónde está el
+ * viewport DEL SITIO sobre el frame: scroll = cuánto del frame ya pasó por
+ * arriba (`-rectTop` del loader), alto = el del sitio. ScrollTrigger calcula
+ * `rect.top - viewport.top + scroll`; como el contenido del frame no se mueve,
+ * viewport.top = scroll deja la posición de cada trigger fija.
+ * En PIN (el frame scrollea de verdad) y antes de decidir, es transparente.
+ * Va antes del primer ScrollTrigger: los getters se resuelven al crearlo.
+ */
+let hostScroll = 0
+const hostViewport = () => mode === 'flow' && hostVh > 0
+ScrollTrigger.scrollerProxy(document.documentElement, {
+  scrollTop(value) {
+    if (arguments.length) {
+      if (!hostViewport()) window.scrollTo(0, value)
+      return undefined
+    }
+    return hostViewport() ? hostScroll : window.pageYOffset || document.documentElement.scrollTop || 0
+  },
+  getBoundingClientRect() {
+    return hostViewport()
+      ? { top: hostScroll, left: 0, width: window.innerWidth, height: hostVh }
+      : { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }
+  },
+})
+
+/**
  * `--sl-vh` = 1vh del SITIO del cliente. El build reescribe `vh`/`svh` de las
  * secciones a `calc(var(--sl-vh) * N)` (embed/hostViewportUnits.js): dentro
  * del iframe esas unidades medían el propio iframe, que en FLOW mide lo que su
@@ -222,11 +252,14 @@ function onMessage(e) {
       hostVh = m.viewportHeight
       setHostVh(m.viewportHeight)
     }
+    if (Number.isFinite(m.rectTop)) hostScroll = -m.rectTop
     if (mode === null) decide()
     if (mode === 'flow' && m.inView && !revealed) {
       reveal()
       ScrollTrigger.refresh()
       requestAnimationFrame(postHeight)
+    } else if (mode === 'flow') {
+      ScrollTrigger.update()
     }
     return
   }
