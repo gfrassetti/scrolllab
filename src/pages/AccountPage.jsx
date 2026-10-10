@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader'
 import SubscriptionCard from '../components/SubscriptionCard'
 import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
+import AccountProjects from '../features/builder/AccountProjects.jsx'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatAmount } from '../lib/pricing'
@@ -375,6 +376,8 @@ export default function AccountPage() {
             )}
           </>
         )}
+
+        <AccountProjects t={t} locale={locale} />
       </main>
     </div>
   )

@@ -194,6 +194,16 @@ describe('useCart', () => {
     assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['a', 'b', 'd', 'e'])
   })
 
+  // Guardar la composición como proyecto le cambia el id: sigue siendo la misma línea.
+  it('renombrar una composición conserva la línea y no toca las otras', () => {
+    useCart.getState().addItem({ sku: 'custom', title: 'A', compositionId: 'a', recipe: [{ id: 'chapters/HeroKinetic' }] })
+    useCart.getState().addItem({ sku: 'custom', title: 'B', compositionId: 'b', recipe: [{ id: 'nocturne/SplitReveals' }] })
+    useCart.getState().renameComposition('a', 'project-123')
+    assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['project-123', 'b'])
+    useCart.getState().renameComposition('nope', 'x')
+    assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['project-123', 'b'])
+  })
+
   it('vacía todos los ítems de una', () => {
     useCart.getState().addItem({ sku: 'chapters', title: 'CHAPTERS' })
     useCart.getState().addItem({ sku: 'fizz', title: 'FIZZ' })

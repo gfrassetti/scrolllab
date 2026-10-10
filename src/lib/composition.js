@@ -69,6 +69,43 @@ export function currentCompositionId() {
   }
 }
 
+/** Abre una composición con un id ya conocido (un proyecto guardado). */
+export function setCurrentCompositionId(id) {
+  try {
+    localStorage.setItem(COMPOSITION_ID_KEY, id)
+  } catch {
+    /* sin storage */
+  }
+  return id
+}
+
+/** Id de composición de un proyecto guardado: el carrito lo reconoce siempre igual. */
+export const projectCompositionId = (projectId) => `project-${projectId}`
+
+const PROJECT_KEY = 'builder-project-v1'
+
+/**
+ * El proyecto guardado que está abierto en el builder ({ id, name }), o null
+ * si la composición todavía no se guardó en la cuenta.
+ */
+export function readCurrentProject() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PROJECT_KEY) || 'null')
+    return raw && typeof raw.id === 'string' ? { id: raw.id, name: String(raw.name || '') } : null
+  } catch {
+    return null
+  }
+}
+
+export function writeCurrentProject(project) {
+  try {
+    if (project) localStorage.setItem(PROJECT_KEY, JSON.stringify({ id: project.id, name: project.name || '' }))
+    else localStorage.removeItem(PROJECT_KEY)
+  } catch {
+    /* sin storage */
+  }
+}
+
 /** Empieza otra composición: la que quedó en el carrito ya no sigue al builder. */
 export function startNewComposition() {
   const id = newCompositionId()

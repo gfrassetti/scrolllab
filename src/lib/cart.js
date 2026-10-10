@@ -237,6 +237,17 @@ export const useCart = create(
           items: items.map((i) => (cartItemKey(i) === key ? { ...i, recipe } : i)),
         })
       },
+      /**
+       * Una composición del carrito pasa a llamarse distinto (se guardó como
+       * proyecto): sigue siendo la misma línea, ahora con el id del proyecto.
+       */
+      renameComposition: (fromId, toId) => {
+        if (!fromId || !toId || fromId === toId) return
+        const from = cartItemKey({ sku: 'custom', compositionId: fromId })
+        set({
+          items: get().items.map((i) => (cartItemKey(i) === from ? { ...i, compositionId: toId } : i)),
+        })
+      },
       /** Por clave (`cartItemKey`): el sku de un template o una composición. */
       removeItem: (key) => {
         set({ items: get().items.filter((i) => cartItemKey(i) !== key && i.sku !== key) })

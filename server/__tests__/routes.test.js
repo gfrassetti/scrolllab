@@ -12,12 +12,15 @@ import { routeInventory, shadowedRoutes } from './helpers/routes.js'
  * parámetro registrada antes. Una ruta nueva se suma acá a propósito.
  */
 const EXPECTED = [
+  'DELETE /api/builder-projects/:id',
   'DELETE /api/hosted-packs/:id',
   'DELETE /api/hosted/:id',
   'GET /api/admin/analytics',
   'GET /api/auth/google',
   'GET /api/auth/google/callback',
   'GET /api/auth/me',
+  'GET /api/builder-projects',
+  'GET /api/builder-projects/:id',
   'GET /api/catalog',
   'GET /api/checkout/methods',
   'GET /api/download/:token',
@@ -40,6 +43,7 @@ const EXPECTED = [
   'GET /api/withdrawals/options',
   'POST /api/auth/dev-login',
   'POST /api/auth/logout',
+  'POST /api/builder-projects',
   'POST /api/checkout',
   'POST /api/checkout/confirm',
   'POST /api/checkout/mock-pay',
@@ -62,6 +66,7 @@ const EXPECTED = [
   'POST /api/webhooks/paddle',
   'POST /api/withdrawals',
   'POST /api/withdrawals/confirm',
+  'PUT /api/builder-projects/:id',
   'PUT /api/hosted-packs/:id',
   'PUT /api/hosted/:id',
 ]

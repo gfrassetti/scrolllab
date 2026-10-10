@@ -18,6 +18,11 @@ import {
   clearComposition,
   COMPOSITION_EVENT,
   STORAGE_KEY,
+  currentCompositionId,
+  setCurrentCompositionId,
+  projectCompositionId,
+  readCurrentProject,
+  writeCurrentProject,
 } from '../composition.js'
 
 /**
@@ -309,5 +314,46 @@ describe('readCompositionCount', () => {
     saveComposition([createCompositionItem('atelier/HeroMeaning')])
     clearComposition()
     assert.deepEqual(events, [1, 0])
+  })
+})
+
+/**
+ * Proyecto guardado abierto: el builder lo retoma al volver, y su composición
+ * usa un id fijo (`project-<id>`) para que el carrito la reconozca siempre.
+ */
+describe('proyecto abierto en el navegador', () => {
+  const store = new Map()
+
+  before(() => {
+    globalThis.localStorage = {
+      getItem: (k) => (store.has(k) ? store.get(k) : null),
+      setItem: (k, v) => store.set(k, String(v)),
+      removeItem: (k) => store.delete(k),
+    }
+  })
+
+  after(() => {
+    delete globalThis.localStorage
+  })
+
+  beforeEach(() => store.clear())
+
+  it('abrir un proyecto fija el id de la composición', () => {
+    const id = projectCompositionId('abc123')
+    assert.equal(id, 'project-abc123')
+    assert.equal(setCurrentCompositionId(id), id)
+    assert.equal(currentCompositionId(), id)
+  })
+
+  it('guarda y lee el proyecto; null lo olvida; basura no rompe', () => {
+    assert.equal(readCurrentProject(), null)
+    writeCurrentProject({ id: 'abc', name: 'Home' })
+    assert.deepEqual(readCurrentProject(), { id: 'abc', name: 'Home' })
+    writeCurrentProject(null)
+    assert.equal(readCurrentProject(), null)
+    store.set('builder-project-v1', '{roto')
+    assert.equal(readCurrentProject(), null)
+    store.set('builder-project-v1', JSON.stringify({ name: 'sin id' }))
+    assert.equal(readCurrentProject(), null)
   })
 })

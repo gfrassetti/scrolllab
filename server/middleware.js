@@ -165,6 +165,14 @@ export function rateLimits() {
       max: 40,
       message: { error: 'Demasiadas operaciones, probá en un momento' },
     }),
+    // Proyectos del builder: el guardado automático manda un PUT cada ~1 s
+    // mientras se edita. Por usuario (va después de requireAuth).
+    builderProjects: mk({
+      windowMs: 60 * 1000,
+      max: 120,
+      keyGenerator: (req) => String(req.user?.id ?? req.user?._id ?? 'sin-sesion'),
+      message: { error: 'Demasiados guardados seguidos, probá en un momento' },
+    }),
     // Cupón de bienvenida: lo pide el front al cargar cada página con sesión, así
     // que el techo es por usuario (va después de requireAuth) y no por IP: si se
     // cortara, el comprador perdería el descuento sin enterarse.

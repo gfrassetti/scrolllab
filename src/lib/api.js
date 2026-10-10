@@ -120,6 +120,15 @@ export const api = {
     }),
   hostedDelete: (id) =>
     request(`/api/hosted/${id}`, { method: 'DELETE' }),
+  // Proyectos del builder: composiciones guardadas en la cuenta.
+  builderProjects: () => request('/api/builder-projects'),
+  builderProject: (id) => request(`/api/builder-projects/${id}`),
+  builderProjectCreate: (body) =>
+    request('/api/builder-projects', { method: 'POST', body: JSON.stringify(body || {}) }),
+  // `keepalive`: el último guardado sale aunque se esté cerrando la pestaña.
+  builderProjectUpdate: (id, body, { keepalive = false } = {}) =>
+    request(`/api/builder-projects/${id}`, { method: 'PUT', body: JSON.stringify(body || {}), keepalive }),
+  builderProjectDelete: (id) => request(`/api/builder-projects/${id}`, { method: 'DELETE' }),
   // Packs: varias secciones del usuario bajo un solo script.
   packList: () => request('/api/hosted-packs'),
   packGet: (id) => request(`/api/hosted-packs/${id}`),

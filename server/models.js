@@ -164,6 +164,25 @@ const hostedPackSchema = new mongoose.Schema(
 );
 
 /**
+ * Proyecto del builder: una composición guardada en la cuenta (nombre +
+ * receta), para retomarla después o tener varias. La receta se valida con la
+ * misma regla que el checkout (server/services/builderProjects.js).
+ */
+const builderProjectSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+    name: { type: String, default: "" },
+    recipe: { type: mongoose.Schema.Types.Mixed, default: [] },
+  },
+  { timestamps: true },
+);
+
+/**
  * Suscripción de Hosted Component (LAB) — MercadoPago PreApproval.
  * Una activa por usuario (la más nueva `authorized`). Ver
  * docs/hosted-component-plan.md Fase 4.
@@ -371,6 +390,9 @@ export const HostedInstance =
 export const HostedPack =
   mongoose.models.HostedPack ||
   mongoose.model("HostedPack", hostedPackSchema);
+export const BuilderProject =
+  mongoose.models.BuilderProject ||
+  mongoose.model("BuilderProject", builderProjectSchema);
 /** @type {AnyModel} */
 export const Subscription =
   mongoose.models.Subscription ||

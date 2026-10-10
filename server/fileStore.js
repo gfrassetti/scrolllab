@@ -211,6 +211,45 @@ export const fileDb = {
     write("hosted", rows);
     return true;
   },
+  async createBuilderProject(data) {
+    const rows = read("builder-projects");
+    const now = new Date().toISOString();
+    const project = {
+      id: nid(),
+      name: "",
+      recipe: [],
+      ...data,
+      userId: String(data.userId),
+      createdAt: now,
+      updatedAt: now,
+    };
+    rows.push(project);
+    write("builder-projects", rows);
+    return withSaveDoc("builder-projects", project);
+  },
+  async findBuilderProjectById(id) {
+    return withSaveDoc(
+      "builder-projects",
+      read("builder-projects").find((p) => p.id === String(id)) || null,
+    );
+  },
+  async findBuilderProjectsByUser(userId) {
+    return read("builder-projects")
+      .filter((p) => String(p.userId) === String(userId))
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      )
+      .map((p) => withSaveDoc("builder-projects", p));
+  },
+  async deleteBuilderProject(id) {
+    const rows = read("builder-projects");
+    const idx = rows.findIndex((p) => p.id === String(id));
+    if (idx < 0) return false;
+    rows.splice(idx, 1);
+    write("builder-projects", rows);
+    return true;
+  },
   async createHostedPack(data) {
     const rows = read("hosted-packs");
     const now = new Date().toISOString();

@@ -5,6 +5,7 @@ import { leadsRepo } from "./repositories/leads.js";
 import { ordersRepo } from "./repositories/orders.js";
 import { hostedRepo } from "./repositories/hosted.js";
 import { hostedPacksRepo } from "./repositories/hostedPacks.js";
+import { builderProjectsRepo } from "./repositories/builderProjects.js";
 import { subscriptionsRepo } from "./repositories/subscriptions.js";
 import { withdrawalsRepo } from "./repositories/withdrawals.js";
 import { refundsRepo } from "./repositories/refunds.js";
@@ -69,6 +70,7 @@ export const db = {
   ...ordersRepo,
   ...hostedRepo,
   ...hostedPacksRepo,
+  ...builderProjectsRepo,
   ...subscriptionsRepo,
   ...withdrawalsRepo,
   ...refundsRepo,

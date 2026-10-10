@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getSection } from '../lib/sectionRegistry'
 import {
   formatPriceFromUsd,
@@ -10,6 +10,7 @@ import {
 } from '../lib/pricing'
 import { useFxRate } from '../lib/fx'
 import { useBuilderComposition } from '../hooks/useBuilderComposition'
+import { useBuilderProjects } from '../hooks/useBuilderProjects'
 import { sectionKind, recipeHasCommerce } from '../lib/composition'
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import BuilderPreview from '../components/BuilderPreview'
@@ -22,6 +23,7 @@ import { prefersReducedMotion } from '../lib/motion'
 import { kindLabelKeys } from '../features/builder/sectionCopy.js'
 import BuilderHeader from '../features/builder/BuilderHeader.jsx'
 import BuilderPriceStrip from '../features/builder/BuilderPriceStrip.jsx'
+import ProjectBar from '../features/builder/ProjectBar.jsx'
 import SectionPalette from '../features/builder/SectionPalette.jsx'
 import CompositionHeader from '../features/builder/CompositionHeader.jsx'
 import CompositionList from '../features/builder/CompositionList.jsx'
@@ -48,7 +50,7 @@ const DND_MIME = 'text/plain'
  * directa con Mercado Pago, sin carrito.
  */
 export default function BuilderPage({ qa = false }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { currency } = useCurrency()
   const addToCart = useCart((s) => s.addItem)
   const { user, loading: authLoading, hadSession } = useAuth()
@@ -58,6 +60,8 @@ export default function BuilderPage({ qa = false }) {
   const {
     compositionId,
     inCart,
+    switchComposition,
+    renameComposition,
     items,
     preview,
     dragOver,
@@ -81,6 +85,28 @@ export default function BuilderPage({ qa = false }) {
     openPreview,
     closePreview,
   } = useBuilderComposition()
+
+  // Proyectos guardados en la cuenta (solo con sesión; /builder-test no los usa).
+  const projects = useBuilderProjects({
+    enabled: Boolean(user) && !qa,
+    recipe,
+    compositionId,
+    switchComposition,
+    renameComposition,
+    startFresh: clearItems,
+  })
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openRequest = searchParams.get('project')
+  const clearOpenRequest = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('project')
+        return next
+      },
+      { replace: true },
+    )
+  }, [setSearchParams])
 
   const { rate } = useFxRate()
 
@@ -300,11 +326,24 @@ export default function BuilderPage({ qa = false }) {
     <div className="min-h-svh bg-bone px-5 pb-28 text-ink md:px-10 lg:pb-10">
       <BuilderHeader
         t={t}
-        clearItems={clearItems}
+        clearItems={projects.startNew}
         items={items}
         openPreview={openPreview}
         looksLoggedIn={looksLoggedIn}
       />
+
+      {qa ? null : (
+        <ProjectBar
+          t={t}
+          locale={locale}
+          loggedIn={Boolean(user)}
+          authPending={authLoading}
+          itemsCount={items.length}
+          projects={projects}
+          openRequest={openRequest}
+          onOpenRequestHandled={clearOpenRequest}
+        />
+      )}
 
       <BuilderPriceStrip
         t={t}
@@ -367,7 +406,7 @@ export default function BuilderPage({ qa = false }) {
             openPreview={openPreview}
             addCompositionToCart={qa ? null : addCompositionToCart}
             inCart={!qa && inCart}
-            startAnother={clearItems}
+            startAnother={projects.startNew}
             buyComposition={buyComposition}
             looksLoggedIn={looksLoggedIn}
           />

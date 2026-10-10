@@ -9,6 +9,7 @@ import { createOrdersRouter } from './http/routes/orders.js'
 import { createCouponsRouter } from './http/routes/coupons.js'
 import { createWithdrawalsRouter } from './http/routes/withdrawals.js'
 import { createHostedRouter } from './http/routes/hosted.js'
+import { createBuilderProjectsRouter } from './http/routes/builderProjects.js'
 import { createSubscriptionsRouter } from './http/routes/subscriptions.js'
 import { createCheckoutRouter } from './http/routes/checkout.js'
 import { createWebhooksRouter } from './http/routes/webhooks.js'
@@ -134,6 +135,8 @@ export async function createApp(config) {
   app.use(createWebhooksRouter({ config, limits }))
 
   app.use(createHostedRouter({ config, limits }))
+
+  app.use(createBuilderProjectsRouter({ config, limits }))
 
   app.use(createSubscriptionsRouter({ config, limits }))
 

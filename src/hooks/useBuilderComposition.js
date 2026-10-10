@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   bootstrapComposition,
   currentCompositionId,
+  setCurrentCompositionId,
   startNewComposition,
   saveComposition,
   compositionToRecipe,
@@ -109,6 +110,21 @@ export function useBuilderComposition() {
     setItems([])
   }, [])
 
+  /** Abre otra composición (un proyecto guardado) con su id y sus secciones. */
+  const switchComposition = useCallback((id, nextItems) => {
+    setCompositionId(setCurrentCompositionId(id))
+    setItems(dedupeUniqueKinds(nextItems || []))
+  }, [])
+
+  /** La composición abierta pasa a tener otro id (se guardó como proyecto). */
+  const renameComposition = useCallback(
+    (id) => {
+      useCart.getState().renameComposition(compositionId, id)
+      setCompositionId(setCurrentCompositionId(id))
+    },
+    [compositionId],
+  )
+
   const isKindBlocked = useCallback(
     (sectionId) => kindIsBlocked(sectionId, items),
     [items],
@@ -127,6 +143,8 @@ export function useBuilderComposition() {
   return {
     compositionId,
     inCart,
+    switchComposition,
+    renameComposition,
     items,
     setItems,
     preview,
