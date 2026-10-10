@@ -62,10 +62,10 @@ const FLOWS = [
   {
     title: 'LAB',
     steps: [
-      `Suscribirse en /lab-test (Starter ${formatArs(QA_LAB_PRICES_ARS.hosted_starter)}, Pro ${formatArs(QA_LAB_PRICES_ARS.hosted_pro)}, Studio ${formatArs(QA_LAB_PRICES_ARS.hosted_studio)}; sin prueba gratis): cobra al toque y llega la bienvenida con el importe.`,
+      `Suscribirse en /lab-test (Starter ${formatArs(QA_LAB_PRICES_ARS.hosted_starter)}, Pro ${formatArs(QA_LAB_PRICES_ARS.hosted_pro)}, Studio ${formatArs(QA_LAB_PRICES_ARS.hosted_studio)}). Como en LAB real: la primera suscripción de la cuenta tiene 7 días gratis; después cobra al suscribirse.`,
       'Subir de plan: cobra la diferencia por los días que quedan (desde $1) y llega «Cambiaste a …». Bajar: no cobra nada.',
       'Cupo: publicar hasta el tope del plan; el siguiente se rechaza. Al bajar o cancelar, los de más dejan de verse.',
-      'Con «prueba gratis» tildado: alta sin cobro; cancelar en la prueba no cobra nunca.',
+      'Con una cuenta que nunca se suscribió: alta sin cobro (7 días gratis); arrepentirse o cancelar en la prueba no cobra nunca.',
       'Arrepentimiento dentro de los 14 días: devuelve el primer cobro, da de baja y llegan los dos mails.',
       'Otra alta: cancelar y verificar que mantiene el acceso hasta fin del período, sin devolución.',
     ],

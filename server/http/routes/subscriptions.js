@@ -107,7 +107,6 @@ export function createSubscriptionsRouter({ config, limits }) {
         provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
         locale: req.body?.locale === 'en' ? 'en' : 'es',
         qa: req.body?.qa === true,
-        qaTrial: req.body?.qaTrial === true,
         config,
       })
       // El atajo de dev lo activa un endpoint de este router: el servicio no

@@ -383,7 +383,7 @@ coma). Solo esas cuentas de Google ven:
 
 - `/test` — el template de prueba (ZIP real de CHAPTERS) a **$1** y el paso a paso.
 - `/builder-test` — el builder: cualquier composición a **$1**.
-- `/lab-test` — LAB escalonado: Starter **$15**, Pro **$30**, Studio **$60** por mes (o año), **sin prueba gratis** salvo que se tilde «prueba gratis» (para probar la baja en la prueba). Subir de plan cobra la diferencia desde $1 (en los planes reales, desde $1000); bajar no cobra.
+- `/lab-test` — LAB escalonado: Starter **$15**, Pro **$30**, Studio **$60** por mes (o año). La prueba gratis sigue la regla de LAB real (7 días en la primera suscripción de la cuenta; volver a suscribirse cobra en el momento). Subir de plan cobra la diferencia desde $1 (en los planes reales, desde $1000); bajar no cobra.
 
 Todo al mínimo: $1 las compras y $15 el plan más barato de LAB, que es el piso de
 Mercado Pago para suscripciones («Cannot pay an amount lower than $ 15.00»).

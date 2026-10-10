@@ -192,7 +192,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
   }
   const refundMails = (email) => mp.mailsTo(email).filter((m) => /devolvimos/i.test(m.body.subject))
 
-  it('LAB de prueba: escalonado, sin prueba gratis, cobra al suscribirse y vuelve a /lab-test', async () => {
+  it('LAB de prueba: escalonado, prueba gratis como LAB real (primera suscripción) y vuelve a /lab-test', async () => {
     const agent = await loginAs(QA)
     const plans = (await agent.get('/api/subscriptions/plans?qa=1')).body
     assert.equal(plans.qa, true)
@@ -207,10 +207,11 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     const sent = mp.calls.filter((c) => c.method === 'POST' && c.resource === 'preapproval').at(-1).body
     assert.match(sent.reason, /PRUEBA/)
     assert.match(sent.back_url, /\/lab-test\?suscripcion=volver$/)
-    assert.equal(sent.auto_recurring.start_date, undefined, 'sin prueba gratis: cobra al suscribirse')
+    // Primera suscripción de la cuenta: 7 días gratis, sin elegir (como LAB real).
+    assert.ok(sent.auto_recurring.start_date, 'el primer cobro es al final de la prueba')
     const sub = await fileDb.findSubscriptionById(subscriptionId)
     assert.equal(sub.qa, true)
-    assert.equal(sub.trialEndsAt, undefined)
+    assert.ok(sub.trialEndsAt, 'tiene prueba gratis')
     assert.equal(sub.firstChargeAmount, QA_LAB_PRICES_ARS.hosted_pro)
     const me = (await agent.get('/api/subscriptions/me')).body
     assert.equal(me.plan, 'hosted_pro')
@@ -284,11 +285,11 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal((await agent.get('/api/subscriptions/me')).body.plan, 'hosted_pro')
   })
 
-  it('con prueba gratis: el alta no cobra y arrepentirse en la prueba solo da de baja, sin devolver nada', async () => {
+  it('prueba gratis (no se elige: la tiene la primera suscripción): el alta no cobra y arrepentirse en la prueba solo da de baja', async () => {
     const agent = await loginAs('lab-c@test.com')
     const res = await agent
       .post('/api/subscriptions')
-      .send({ plan: 'hosted_starter', cycle: 'monthly', qa: true, qaTrial: true })
+      .send({ plan: 'hosted_starter', cycle: 'monthly', qa: true })
     assert.equal(res.status, 200, JSON.stringify(res.body))
     assert.ok(res.body.trialEndsAt, 'tiene prueba')
     const sent = mp.calls.filter((c) => c.method === 'POST' && c.resource === 'preapproval').at(-1).body
@@ -302,10 +303,26 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
   })
 
   it('arrepentirse antes de que llegue el primer cobro (alta sin prueba): no cancela sin devolver, reintenta', async () => {
-    // Cuenta sin suscripciones anteriores: sin días pagos que arrastrar, el alta cobra al autorizar.
+    // Re-suscripción de una cuenta que ya tuvo LAB (sin prueba) y sin días pagos
+    // que arrastrar: el alta cobra al autorizar.
     const agent = await loginAs('lab-d@test.com')
+    const me = (await agent.get('/api/auth/me')).body.user
+    const past = new Date(Date.now() - 60 * 24 * 3600 * 1000)
+    await fileDb.createSubscription({
+      userId: me.id,
+      plan: 'hosted_starter',
+      cycle: 'monthly',
+      status: 'cancelled',
+      provider: 'mercadopago',
+      currency_id: 'ARS',
+      qa: true,
+      activatedAt: past,
+      canceledAt: past,
+      currentPeriodEnd: new Date(past.getTime() + 30 * 24 * 3600 * 1000),
+    })
     const res = await agent.post('/api/subscriptions').send({ plan: 'hosted_starter', cycle: 'monthly', qa: true })
     assert.equal(res.status, 200, JSON.stringify(res.body))
+    assert.equal(res.body.trialEndsAt, null, 'ya tuvo LAB: sin prueba')
     const pre = mp.lastPreapproval()
     mp.authorize(pre.id)
     await agent.post('/api/subscriptions/sync') // autorizada, pero el aviso del cobro no llegó

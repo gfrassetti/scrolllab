@@ -27,8 +27,8 @@ export const QA_BUILDER_COMMERCE_ARS = 0
  * LAB de prueba: escalonado para poder probar el cobro de la diferencia al
  * subir de plan (y que bajar no cobra). $15 es el mínimo de Mercado Pago para
  * suscripciones («Cannot pay an amount lower than $ 15.00», visto en producción
- * el 2026-10-10). Mismo precio por mes o por año. Sin prueba gratis salvo que
- * se pida (`qaTrial`, para probar la baja en la prueba).
+ * el 2026-10-10). Mismo precio por mes o por año. La prueba gratis sigue la
+ * regla de LAB real: 7 días en la primera suscripción de la cuenta, sin elegir.
  */
 export const QA_LAB_PRICES_ARS = Object.freeze({
   hosted_starter: 15,

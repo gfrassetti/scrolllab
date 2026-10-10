@@ -109,9 +109,9 @@ export default function HostedPlans({ qa: qaPage = false }) {
   const paddleForRegion = usePayRegion((s) => s.paddleEnabled)
   // Prueba: sin prueba gratis y solo Mercado Pago.
   const paddleEnabled = !qa && paddleForRegion
-  // Prueba: la prueba gratis se pide a mano (para probar la baja en la prueba).
-  const [qaTrial, setQaTrial] = useState(false)
-  const trialAvailable = qa ? qaTrial : trialAvailableForPlan
+  // La prueba gratis no se elige: la primera suscripción de la cuenta la tiene
+  // (también en /lab-test, misma regla que LAB real).
+  const trialAvailable = trialAvailableForPlan
   const loadRegion = usePayRegion((s) => s.load)
   useEffect(() => {
     loadRegion()
@@ -300,7 +300,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
     setNotice('')
     const provider = via || (paddleEnabled ? providerForRegion(region) : 'mercadopago')
     try {
-      const res = await api.subscribe(planId, planCycle, { provider, locale, qa, qaTrial })
+      const res = await api.subscribe(planId, planCycle, { provider, locale, qa })
       if (res.provider === 'paddle' && res.transactionId) {
         const result = await openPaddleCheckout({
           environment: res.paddle?.environment,
@@ -676,19 +676,6 @@ export default function HostedPlans({ qa: qaPage = false }) {
               name="lab-pay-method"
               className="mt-6"
             />
-          )}
-
-          {qa && choosing && (
-            <label className="mt-6 flex min-h-11 items-center gap-3 text-body-sm text-ink/75">
-              <input
-                type="checkbox"
-                checked={qaTrial}
-                onChange={(e) => setQaTrial(e.target.checked)}
-                disabled={!!busy}
-                className="size-4 accent-accent"
-              />
-              Prueba: alta con {trialDays || 7} días de prueba gratis (sin cobro hasta que termina)
-            </label>
           )}
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">

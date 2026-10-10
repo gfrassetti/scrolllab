@@ -59,9 +59,9 @@ async function closeLapsed(sub, config) {
  *  - `paddle`: `{ …, provider: 'paddle', transactionId, customerEmail, paddle }`.
  *  - mock de dev (de la pasarela elegida): `{ …, [provider], mock: true }`.
  * `qa`: la suscripción de prueba (src/domain/qa.js) — solo cuentas de
- * QA_BUYER_EMAILS, solo Mercado Pago y a QA_LAB_PRICES_ARS; sin prueba gratis
- * salvo `qaTrial` (para probar la baja en la prueba).
- * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'paddle', locale: 'es' | 'en', qa?: boolean, qaTrial?: boolean, config: any }} args
+ * QA_BUYER_EMAILS, solo Mercado Pago y a QA_LAB_PRICES_ARS. La prueba gratis
+ * sigue la misma regla que LAB real (la primera suscripción de la cuenta).
+ * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'paddle', locale: 'es' | 'en', qa?: boolean, config: any }} args
  * @returns {Promise<StartedSubscription>}
  */
 export async function startSubscription({
@@ -71,7 +71,6 @@ export async function startSubscription({
   provider = 'mercadopago',
   locale,
   qa = false,
-  qaTrial = false,
   config,
 }) {
   if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
@@ -138,9 +137,7 @@ export async function startSubscription({
   // Prueba gratis solo si nunca tuvo una suscripción activa (cancelar y
   // volver NO la reabre). Los días ya pagados de una suscripción cancelada
   // se respetan: el primer cobro de la nueva es cuando termina la vieja.
-  const trialDays = qa
-    ? qaTrial ? config.hostedTrialDays : 0
-    : trialEligible(priorSubs) ? config.hostedTrialDays : 0
+  const trialDays = trialEligible(priorSubs) ? config.hostedTrialDays : 0
   const trialEndsAt =
     trialDays > 0 ? new Date(now + trialDays * 24 * 60 * 60 * 1000) : null
   const firstChargeAt = trialEndsAt || carryOver

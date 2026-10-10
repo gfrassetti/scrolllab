@@ -123,7 +123,7 @@ export const api = {
   subscriptionPlans: ({ qa = false } = {}) =>
     request(qa ? '/api/subscriptions/plans?qa=1' : '/api/subscriptions/plans'),
   subscriptionMe: () => request('/api/subscriptions/me'),
-  subscribe: (plan, cycle, { provider, locale, qa = false, qaTrial = false } = {}) =>
+  subscribe: (plan, cycle, { provider, locale, qa = false } = {}) =>
     request('/api/subscriptions', {
       method: 'POST',
       body: JSON.stringify({
@@ -132,7 +132,6 @@ export const api = {
         ...(provider ? { provider } : {}),
         ...(locale ? { locale } : {}),
         ...(qa ? { qa: true } : {}),
-        ...(qa && qaTrial ? { qaTrial: true } : {}),
       }),
     }),
   // Link de Paddle para cambiar la tarjeta de la suscripción.
