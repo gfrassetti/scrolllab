@@ -178,6 +178,9 @@ describe('embed e2e (Chromium)', () => {
       const iframe = page.locator('iframe[data-scrolllab-frame]')
       await iframe.waitFor({ state: 'attached', timeout: 15_000 })
       assert.match((await iframe.getAttribute('sandbox')) || '', /allow-scripts/)
+      // Recién agregado (y `loading=lazy`), el iframe tiene el about:blank
+      // inicial, que es del origen del host: se chequea ya cargado el frame.
+      await waitFrameRoot(page)
       assert.equal(
         await iframe.evaluate((el) => el.contentDocument === null),
         true,
