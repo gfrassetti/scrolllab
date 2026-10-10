@@ -178,15 +178,24 @@ describe('HTTP: /api/track y el panel local', () => {
 
   it('en producción el panel no existe, ni desde localhost ni con Host local', async () => {
     const { localOnly } = await import('../http/routes/analytics.js')
-    const run = (config, remoteAddress, hostname) => {
+    const run = (config, remoteAddress, host) => {
       let status = 'next'
       const res = { status: (s) => ({ json: () => { status = s } }) }
-      localOnly(config)({ socket: { remoteAddress }, hostname }, res, () => {})
+      localOnly(config)({ socket: { remoteAddress }, headers: { host } }, res, () => {})
       return status
     }
-    assert.equal(run({ isProd: true }, '127.0.0.1', 'localhost'), 404)
+    assert.equal(run({ isProd: true }, '127.0.0.1', 'localhost:8787'), 404)
     assert.equal(run({ isProd: false }, '203.0.113.9', 'localhost'), 404)
     assert.equal(run({ isProd: false }, '127.0.0.1', 'scrolllab.com.ar'), 404)
-    assert.equal(run({ isProd: false }, '::1', 'localhost'), 'next')
+    assert.equal(run({ isProd: false }, '::1', 'localhost:8787'), 'next')
+    assert.equal(run({ isProd: false }, '::1', '[::1]:8787'), 'next')
+  })
+
+  it('X-Forwarded-Host no habilita el panel (DNS rebinding con un fetch del mismo origen)', async () => {
+    const res = await request(app)
+      .get('/api/admin/analytics')
+      .set('Host', 'evil.example')
+      .set('X-Forwarded-Host', 'localhost')
+    assert.equal(res.status, 404)
   })
 })

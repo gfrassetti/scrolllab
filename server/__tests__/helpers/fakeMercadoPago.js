@@ -28,6 +28,8 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
     seq: 0,
     // Mails que la app le mandó a Resend (no sale nada).
     outbox: [],
+    // `mp.mailFails = 1` → el próximo envío a Resend falla (Resend caído).
+    mailFails: 0,
   }
 
   const json = (status, body) =>
@@ -39,6 +41,10 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
   mp.fetch = async (url, init = {}) => {
     const u = new URL(String(url))
     if (u.hostname === 'api.resend.com') {
+      if (mp.mailFails > 0) {
+        mp.mailFails -= 1
+        return json(500, { name: 'internal_server_error', message: 'fake Resend caído' })
+      }
       mp.outbox.push({
         path: u.pathname,
         body: init.body ? JSON.parse(init.body) : null,

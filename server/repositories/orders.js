@@ -325,6 +325,21 @@ export const ordersRepo = {
       failedEmailSentAt: null,
     }).limit(200);
   },
+  /**
+   * Órdenes pagas entre `since` y `before` cuyo recibo no salió (Resend caído o
+   * rechazó en el momento): las que el barrido reintenta.
+   * @param {{ since: Date, before: Date }} args
+   */
+  async listPaidOrdersWithoutReceipt({ since, before }) {
+    if (isFileMode()) {
+      return fileDb.listPaidOrdersWithoutReceipt({ since, before });
+    }
+    return MongoOrder.find({
+      status: "paid",
+      receiptEmailSentAt: null,
+      paidAt: { $gte: since, $lte: before },
+    }).limit(200);
+  },
   /** Marca el último rechazo de una orden pendiente (la UI / soporte lo ven). */
   async markOrderPaymentFailed(orderId) {
     const at = new Date();

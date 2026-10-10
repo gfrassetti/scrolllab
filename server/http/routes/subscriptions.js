@@ -27,7 +27,7 @@ import { getSubscription } from '../../services/paddle.js'
 export function createSubscriptionsRouter({ config, limits }) {
   const router = express.Router()
 
-  const subsMock = () => config.mpMock || !config.mpSubs.accessToken
+  const subsMock = () => !config.isProd && (config.mpMock || !config.mpSubs.accessToken)
   const paddleOn = () => Boolean(config.paddle?.enabled)
   const paddleMock = () => Boolean(config.paddle?.mock)
   /** ¿Esta fila se maneja sin pasarela real (mock de MP o de Paddle)? */

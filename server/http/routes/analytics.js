@@ -10,18 +10,25 @@ import { buildLabFunnel } from '../../services/labFunnel.js'
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1'])
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
 
+/** El header Host tal cual llegó, sin puerto (`[::1]:8787` → `[::1]`). */
+function rawHost(req) {
+  return String(req.headers.host || '').toLowerCase().replace(/:\d+$/, '')
+}
+
 /**
  * Solo desde esta máquina: nunca en producción, y aun fuera de producción solo
  * si la conexión Y el Host son loopback (el Host frena el DNS rebinding). Detrás
  * de un proxy en el mismo servidor la IP sería local para todos: por eso en
- * producción el panel directamente no existe.
+ * producción el panel directamente no existe. El Host se lee crudo: con
+ * `trust proxy`, `req.hostname` toma X-Forwarded-Host, que una página con DNS
+ * rebinding puede mandar en un fetch de su mismo origen.
  */
 export function localOnly(config) {
   return (req, res, next) => {
     const local =
       !config.isProd &&
       LOOPBACK.has(req.socket.remoteAddress || '') &&
-      LOCAL_HOSTS.has(String(req.hostname || '').toLowerCase());
+      LOCAL_HOSTS.has(rawHost(req));
     if (!local) return res.status(404).json({ error: 'No encontrado' })
     next()
   }

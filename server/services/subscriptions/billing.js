@@ -35,7 +35,8 @@ export const toMs = (d) => (d ? new Date(d).getTime() : null)
 
 export const subId = (sub) => String(db.uid(sub) || sub.id)
 
-export const isMock = (config) => !config.mpSubs?.accessToken || !!config.mpMock
+// En producción nunca: sin token de MP falla al cobrar, no activa gratis.
+export const isMock = (config) => !config.isProd && (!config.mpSubs?.accessToken || !!config.mpMock)
 
 /** Mail de bienvenida al activarse — fire-and-forget, idempotente por el claim. */
 export function fireWelcome(sub, config) {

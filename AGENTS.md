@@ -346,8 +346,8 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 2. Adds SKU to cart (Zustand) or buys builder recipe (`custom:` + recipe array).
 3. El medio de pago viene marcado por ubicación (país del request o zona horaria): Argentina → Mercado Pago en ARS; otro país → Paddle en USD. El comprador siempre puede cambiarlo con el selector «Medio de pago» (`PaymentMethodPicker`: argentino en el exterior, VPN, extranjero que quiere Mercado Pago). Un solo botón de pago; el «Comprar» rápido hereda el medio vigente. El header tiene un selector ARS | USD (`CurrencySelector`) que es esa misma elección: **la moneda de los precios sigue al medio de pago, no al idioma** (`useCurrency`, `src/lib/currency.js`; los precios se formatean con `formatPriceFromUsd(usd, currency, rate)`).
 4. `POST /api/checkout` (`provider`) creates Order + MP preference, o la transacción de Paddle (overlay), o mock URL.
-5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/paddle`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en; un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
-6. `/account` → signed download token → `GET /api/download/:token` (TTL + max 10 downloads).
+5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/paddle`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en (si Resend falla, el barrido lo reintenta hasta 3 días); un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
+6. `/account` → signed download token → `GET /api/download/:token` (link de 15 min; descargas sin tope salvo `MAX_DOWNLOADS`, ver `docs/DEPLOY.md`).
 7. Reembolsos y Botón de arrepentimiento (`/arrepentimiento`): lo que cumple la política
    (`src/domain/policy.js`: compra sin descargar en 14 días; LAB, 14 días desde el alta con la
    prueba adentro, solo el primer cobro) se devuelve solo por la API de la pasarela

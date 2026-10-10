@@ -1,5 +1,6 @@
 import { db } from '../db.js'
 import {
+  sendOrderReceiptOnce,
   sendOrderPaymentFailedOnce,
   sendSubscriptionPaymentFailedOnce,
   sendSubscriptionSuspended,
@@ -91,14 +92,55 @@ export async function sendDueSuspendedEmails({ config, client, now = new Date() 
   return { sent }
 }
 
+/** El recibo se reintenta hasta 3 días después del pago. */
+export const RECEIPT_RETRY_WINDOW_MS = 3 * 24 * 60 * MINUTE_MS
+
 /**
- * Todo lo que corre cada 5 minutos: mails diferidos y devoluciones a reintentar.
+ * Recibos que no salieron: la entrega lo manda al cobrar, pero si Resend falla
+ * en ese momento el claim se libera y nada lo volvía a mandar (salvo otro
+ * webhook del mismo pago). Espera 5 minutos para no pisarse con la entrega en
+ * curso; el claim de la orden evita duplicados.
+ * @param {{ config: any, client?: any, now?: Date }} args
+ */
+export async function retryUnsentReceipts({ config, client, now = new Date() }) {
+  if (!config.email?.enabled) return { skipped: 'disabled', sent: 0, failed: 0 }
+  const since = new Date(now.getTime() - RECEIPT_RETRY_WINDOW_MS)
+  const before = new Date(now.getTime() - 5 * MINUTE_MS)
+  let sent = 0
+  let failed = 0
+  for (const order of await db.listPaidOrdersWithoutReceipt({ since, before })) {
+    try {
+      const user = await db.findUserById(String(order.userId))
+      if (!user?.email) continue
+      const out = await sendOrderReceiptOnce({ order, user, config, client })
+      if (out.sent) sent += 1
+    } catch (err) {
+      failed += 1
+      console.error('order receipt retry', err?.message)
+    }
+  }
+  return { sent, failed }
+}
+
+/**
+ * Todo lo que corre cada 5 minutos: mails diferidos, recibos que fallaron y
+ * devoluciones a reintentar. Un paso que falla no frena a los demás.
  * @param {{ config: any, client?: any, now?: Date }} args
  */
 export async function runSweeps({ config, client, now = new Date() }) {
-  await sendDuePaymentFailedEmails({ config, client, now })
-  await sendDueSuspendedEmails({ config, client, now })
-  await retryPendingWithdrawals(config)
+  const steps = [
+    { name: 'payment-failed', run: () => sendDuePaymentFailedEmails({ config, client, now }) },
+    { name: 'suspended', run: () => sendDueSuspendedEmails({ config, client, now }) },
+    { name: 'receipts', run: () => retryUnsentReceipts({ config, client, now }) },
+    { name: 'withdrawals', run: () => retryPendingWithdrawals(config) },
+  ]
+  for (const { name, run } of steps) {
+    try {
+      await run()
+    } catch (err) {
+      console.error(`sweep ${name}`, err?.message)
+    }
+  }
 }
 
 /**

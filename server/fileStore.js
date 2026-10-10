@@ -134,6 +134,16 @@ export const fileDb = {
     write("orders", rows);
     return true;
   },
+  async listPaidOrdersWithoutReceipt({ since, before }) {
+    const from = new Date(since).getTime();
+    const to = new Date(before).getTime();
+    return read("orders")
+      .filter((o) => {
+        const at = o.paidAt ? new Date(o.paidAt).getTime() : NaN;
+        return o.status === "paid" && !o.receiptEmailSentAt && at >= from && at <= to;
+      })
+      .map(withSave);
+  },
   async listFailedOrdersDue({ before }) {
     const cut = new Date(before).getTime();
     return read("orders")
