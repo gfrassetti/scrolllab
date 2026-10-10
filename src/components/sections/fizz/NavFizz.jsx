@@ -4,16 +4,22 @@ import { prefersReducedMotion } from '../../../lib/motion'
 import { getLenis } from '../../../hooks/useLenis'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 
-/** One link per line; `Label | #target` points it somewhere, else it stays put. */
+/**
+ * Links as `{ label, href }` rows (the builder list) or one per line, where
+ * `Label | #target` points it somewhere; without a target it stays put.
+ */
 function parseLinks(value, fallback) {
   const lines = Array.isArray(value)
-    ? value.map(String)
+    ? value
     : typeof value === 'string'
       ? value.split('\n')
       : []
   const links = lines
     .map((line) => {
-      const [label, href] = line.split('|').map((part) => part.trim())
+      if (line && typeof line === 'object') {
+        return { label: String(line.label ?? '').trim(), href: line.href || '#' }
+      }
+      const [label, href] = String(line).split('|').map((part) => part.trim())
       return { label, href: href || '#' }
     })
     .filter((link) => link.label)
@@ -74,8 +80,12 @@ export default function NavFizz({
   brand = 'BRAND*',
   links = 'Flavors\nOur story\nShop\nContact',
   cta = 'Your CTA',
+  ctaHref = '#',
   menuBg = '#fff3e2',
   menuInk = '#2c4bff',
+  /** Lo que lee un lector de pantalla en los botones de ícono. */
+  menuLabel = 'Menu',
+  closeLabel = 'Close menu',
 }) {
   const items = parseLinks(links, DEFAULT_LINKS)
   const { open, close, panelRef, panelProps, triggerProps } = useMobileMenu({
@@ -209,7 +219,7 @@ export default function NavFizz({
 
       <button
         {...triggerProps}
-        aria-label="Menu"
+        aria-label={menuLabel}
         className="ui-press fixed bottom-4 left-1/2 z-50 grid size-14 -translate-x-1/2 place-items-center rounded-[1.25rem] bg-foam transition-[border-radius,transform] duration-300 ease-out hover:rounded-full md:top-6 md:right-8 md:bottom-auto md:left-auto md:size-16 md:translate-x-0"
         style={{ color: menuInk }}
       >
@@ -218,7 +228,7 @@ export default function NavFizz({
 
       <div
         {...panelProps}
-        aria-label="Menu"
+        aria-label={menuLabel}
         data-shown="false"
         className="group/menu fixed inset-0 z-[100] will-change-transform"
         style={{
@@ -251,7 +261,7 @@ export default function NavFizz({
         <button
           type="button"
           onClick={close}
-          aria-label="Close menu"
+          aria-label={closeLabel}
           className={`ui-press group/close absolute top-4 right-4 z-[3] grid size-14 translate-y-1/4 place-items-center rounded-[1.25rem] opacity-0 transition-[opacity,transform,border-radius] duration-[400ms] ${QUICK} hover:rounded-full group-data-[shown=true]/menu:translate-y-0 group-data-[shown=true]/menu:opacity-100 md:top-6 md:right-8 md:size-16`}
           style={{ backgroundColor: menuInk, color: menuBg }}
         >
@@ -259,7 +269,7 @@ export default function NavFizz({
         </button>
 
         <nav
-          aria-label="Menu"
+          aria-label={menuLabel}
           className="relative z-[2] flex h-full flex-col items-center justify-center gap-[clamp(1.5rem,5svh,3rem)] px-5"
         >
           <ul className="flex flex-col items-center [@media(hover:hover)]:[&:has(a:hover)_a:not(:hover)]:opacity-30">
@@ -294,7 +304,7 @@ export default function NavFizz({
           </ul>
 
           <a
-            href="#"
+            href={ctaHref}
             onClick={close}
             className={`ui-press tpl-hit relative translate-y-full rounded-full border border-current px-7 py-4 text-xs font-semibold tracking-[0.2em] uppercase opacity-0 transition-[transform,opacity,background-color,color] duration-[600ms] ${QUICK} hover:bg-[var(--menu-ink)] hover:text-[var(--menu-bg)] group-data-[shown=true]/menu:translate-y-0 group-data-[shown=true]/menu:opacity-100`}
             style={{

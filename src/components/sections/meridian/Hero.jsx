@@ -157,7 +157,29 @@ export default function Hero({
   inviteTitle,
   inviteBody = '[Region], [Country]',
   inviteCta,
+  inviteCtaHref = '#villas',
   menuLinks,
+  floorPlansHref = '#floor-plans',
+  closeLabel,
+  loadingLabel,
+  scrollLabel,
+  // Menú: fila de utilidades, pastillas, tarjeta con foto y franja de contacto.
+  portalLabel,
+  portalHref = '#portal',
+  brochureLabel,
+  brochureHref = '#brochure',
+  menuPills,
+  cardKicker,
+  cardTitle,
+  cardCta,
+  cardHref = '#masterplan',
+  cardImage,
+  phoneLabel,
+  phone = '+00 (000) 000-0000',
+  emailLabel,
+  email = 'info@example.com',
+  socialsLabel,
+  socials = 'Facebook · Instagram · Whatsapp',
   bg,
   fg,
 }) {
@@ -662,6 +684,7 @@ export default function Hero({
     >
       <Preloader
         wordmark={wordmark}
+        label={loadingLabel}
         getLoaded={() => loadedRef.current / PRELOAD_GATE}
         bigPx={WORDMARK_BIG_PX}
         onFadeStart={handleLoaderDone}
@@ -732,8 +755,13 @@ export default function Hero({
             <span aria-hidden="true" />
           ) : (
             <div className="flex items-center gap-6">
-              <Hamburger open={menuOpen} label={menuText} onClick={() => setMenuOpen((o) => !o)} />
-              {!menuOpen && <HeaderCta href="#villas" label={ctaText} />}
+              <Hamburger
+                open={menuOpen}
+                label={menuText}
+                closeLabel={closeLabel}
+                onClick={() => setMenuOpen((o) => !o)}
+              />
+              {!menuOpen && <HeaderCta href={inviteCtaHref} label={ctaText} />}
             </div>
           )}
           <a
@@ -753,11 +781,34 @@ export default function Hero({
           <div className="flex items-center gap-7">
             <LangSwitch className="max-md:hidden" />
             {/* keyed by language: the intro SplitText replaces this node's DOM, so React needs a fresh node to change its text */}
-            <HeaderLink key={lang} href="#floor-plans" label={floorPlansText} introAttr />
+            <HeaderLink key={lang} href={floorPlansHref} label={floorPlansText} introAttr />
           </div>
         </div>
 
-        <MenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} links={menuLinks} />
+        <MenuOverlay
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          links={menuLinks}
+          copy={{
+            closeLabel,
+            portalLabel,
+            portalHref,
+            brochureLabel,
+            brochureHref,
+            pills: menuPills,
+            cardKicker,
+            cardTitle,
+            cardCta,
+            cardHref,
+            cardImage,
+            phoneLabel,
+            phone,
+            emailLabel,
+            email,
+            socialsLabel,
+            socials,
+          }}
+        />
 
         {/* the wordmark — starts giant/centered, scrubs into the nav's
             center slot as layoutWordmark() runs each tick */}
@@ -821,7 +872,7 @@ export default function Hero({
             )}
             {st.cta && (
               <a
-                href="#villas"
+                href={inviteCtaHref}
                 data-scrub-tail
                 className="group pointer-events-auto mt-8 inline-flex h-32 w-32 flex-col max-md:absolute max-md:right-[10%] max-md:bottom-[14%] max-md:mt-0 max-md:h-36 max-md:w-36 max-md:shadow-[0_0_0_10px_rgba(255,255,255,0.14),0_0_0_20px_rgba(255,255,255,0.07)] items-center justify-center gap-2 rounded-full border border-white/50 text-[11px] uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-white hover:text-[#2a2622] md:h-40 md:w-40"
                 style={{ fontFamily: "'Space Mono', monospace", opacity: 0 }}
@@ -858,7 +909,7 @@ export default function Hero({
           className="pointer-events-none absolute inset-x-0 bottom-8 z-20 text-center text-[11px] uppercase tracking-[0.3em] text-white/60"
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
-          {t('scrollDown')}
+          {scrollLabel ?? t('scrollDown')}
         </div>
       </div>
     </section>

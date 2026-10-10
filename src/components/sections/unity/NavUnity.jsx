@@ -12,6 +12,9 @@ export default function NavUnity({
   links = ['LINK 1', 'LINK 2', 'LINK 3'],
   linksText,
   menuLabel = 'MENU',
+  /** Menú móvil: fondo y texto. La barra se invierte sola (mix-blend). */
+  bg,
+  fg,
 }) {
   const items = parseNavLinks(links, linksText).slice(0, 3)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
@@ -83,6 +86,7 @@ export default function NavUnity({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
+        style={bg || fg ? { backgroundColor: bg, color: fg } : undefined}
         className={`fixed inset-0 bg-[#e7e4dc] text-[#0a0a0a] mix-blend-normal transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}

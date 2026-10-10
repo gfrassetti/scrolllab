@@ -82,13 +82,14 @@ function PillLink({ label, href }) {
   )
 }
 
-export default function MenuOverlay({ open, onClose, links }) {
-  // Builder-editable (list field, `meridian/Hero` → menuLinks): buyers
-  // rename/re-point these without touching code. Anything visual on the
-  // right pane (photo, headline, contact strip) stays code-only on
-  // purpose — see docs/template-plans/meridian.txt for the reasoning.
+export default function MenuOverlay({ open, onClose, links, copy = {} }) {
+  // Todo el menú se edita desde el builder (`meridian/Hero`): links, pastillas,
+  // la tarjeta con foto y la franja de contacto. Lo que queda vacío sale del
+  // diccionario del idioma (lang.jsx), así el selector EN / ES sigue andando.
   const { t } = useLang()
   const primaryLinks = links?.length ? links : defaultLinks(t)
+  const pills = copy.pills?.length ? copy.pills : defaultPills(t)
+  const closeText = copy.closeLabel ?? t('close')
   const rootRef = useRef(null)
 
   // Trap body scroll while open so wheeling inside the drawer doesn't
@@ -149,7 +150,7 @@ export default function MenuOverlay({ open, onClose, links }) {
       <button
         type="button"
         onClick={onClose}
-        aria-label={t('close')}
+        aria-label={closeText}
         className="meridian-menu-close pointer-events-auto absolute top-4 left-4 z-10 hidden items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.24em] text-(--mer-ink,#2a2622) md:top-6 md:left-6 md:inline-flex"
         style={{ fontFamily: "'Space Mono', monospace" }}
       >
@@ -172,7 +173,7 @@ export default function MenuOverlay({ open, onClose, links }) {
             }}
           />
         </span>
-        <span>{t('close')}</span>
+        <span>{closeText}</span>
       </button>
 
       {/* two-pane body — its own scroll in case content doesn't fit the
@@ -187,9 +188,9 @@ export default function MenuOverlay({ open, onClose, links }) {
         <span className="flex items-center gap-4">
           <LangSwitch />
           <span aria-hidden="true" className="h-5 w-px bg-(--mer-ink,#2a2622)/20" />
-          <a href="#portal">{t('clientPortal')}</a>
+          <a href={copy.portalHref || '#portal'}>{copy.portalLabel ?? t('clientPortal')}</a>
         </span>
-        <a href="#brochure">{t('brochure')}</a>
+        <a href={copy.brochureHref || '#brochure'}>{copy.brochureLabel ?? t('brochure')}</a>
       </div>
 
       <div className="flex shrink-0 flex-col md:h-full md:flex-1 md:shrink md:flex-row md:overflow-y-auto">
@@ -201,25 +202,25 @@ export default function MenuOverlay({ open, onClose, links }) {
             ))}
           </div>
           <div className="mt-10 flex flex-wrap gap-3">
-            {defaultPills(t).map((l) => (
-              <PillLink key={l.href} {...l} />
+            {pills.map((l, i) => (
+              <PillLink key={`${l.href}-${i}`} label={l.label} href={l.href || '#'} />
             ))}
           </div>
         </div>
 
         {/* RIGHT — feature card with photo + headline + CTA */}
         <div className="relative flex-1 overflow-hidden md:m-10 md:max-w-[46%] md:rounded-md">
-          <div
-            className="meridian-menu-card relative h-full min-h-[38vh] w-full cursor-pointer"
-            role="link"
-            tabIndex={0}
+          <a
+            href={copy.cardHref || '#masterplan'}
+            onClick={onClose}
+            className="meridian-menu-card relative block h-full min-h-[38vh] w-full cursor-pointer"
           >
             {/* uses a mid-flythrough frame so we don't add another asset */}
             <div
               aria-hidden="true"
               className="meridian-menu-card-photo absolute inset-0 h-full w-full"
               style={{
-                backgroundImage: "url('/meridian/hero/seq/0120.webp')",
+                backgroundImage: `url('${copy.cardImage || '/meridian/hero/seq/0120.webp'}')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -237,27 +238,27 @@ export default function MenuOverlay({ open, onClose, links }) {
                 className="text-[11px] uppercase tracking-[0.28em] text-white/85"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                {t('visualSelection')}
+                {copy.cardKicker ?? t('visualSelection')}
               </p>
               <div>
                 <h3
                   className="mb-8 max-w-[16ch] text-[clamp(1.6rem,3.4vw,2.6rem)] leading-[1.1] text-white"
                   style={{ fontFamily: "'Fraunces', serif" }}
                 >
-                  {t('easierToChoose')}
+                  {copy.cardTitle ?? t('easierToChoose')}
                 </h3>
                 <span
                   className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-colors duration-300 hover:bg-white hover:text-(--mer-ink,#2a2622)"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
-                  {t('selectOnGenplan')}
+                  {copy.cardCta ?? t('selectOnGenplan')}
                   <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
               </div>
             </div>
-          </div>
+          </a>
         </div>
       </div>
 
@@ -268,16 +269,16 @@ export default function MenuOverlay({ open, onClose, links }) {
       >
         <div className="flex flex-col gap-6 md:flex-row md:flex-wrap md:items-baseline md:justify-between md:gap-4">
           <span>
-            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{t('phone')}</span>
-            +00 (000) 000-0000
+            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.phoneLabel ?? t('phone')}</span>
+            {copy.phone ?? '+00 (000) 000-0000'}
           </span>
           <span>
-            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{t('email')}</span>
-            info@example.com
+            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.emailLabel ?? t('email')}</span>
+            {copy.email ?? 'info@example.com'}
           </span>
           <span>
-            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{t('socials')}</span>
-            Facebook · Instagram · Whatsapp
+            <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.socialsLabel ?? t('socials')}</span>
+            {copy.socials ?? 'Facebook · Instagram · Whatsapp'}
           </span>
         </div>
       </div>
@@ -307,13 +308,14 @@ export default function MenuOverlay({ open, onClose, links }) {
  * (drawn from left to right) on hover; open transforms the pair into a
  * cross. One shared transition curve so hover and open share a family.
  */
-export function Hamburger({ open, onClick, label, className = '', style }) {
+export function Hamburger({ open, onClick, label, closeLabel, className = '', style }) {
   const { t } = useLang()
+  const closeText = closeLabel ?? t('close')
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={open ? t('close') : t('menu')}
+      aria-label={open ? closeText : (label ?? t('menu'))}
       aria-expanded={open}
       data-open={open ? 'true' : 'false'}
       className={`meridian-hamburger tpl-hit group pointer-events-auto relative inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] ${className}`}
@@ -327,7 +329,7 @@ export function Hamburger({ open, onClick, label, className = '', style }) {
         <span className="fill fill-1" />
         <span className="fill fill-2" />
       </span>
-      <span className="lbl">{open ? t('close') : (label ?? t('menu'))}</span>
+      <span className="lbl">{open ? closeText : (label ?? t('menu'))}</span>
       <style>{`
         @media (max-width: 767px) {
           .meridian-hamburger .lbl { display: none; }

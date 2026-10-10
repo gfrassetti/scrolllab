@@ -81,6 +81,10 @@ export default function HeroBubbles({
   modelUrl = '',
   envUrl = '',
   dracoPath = '/fizz/draco/',
+  /** Pisan el sabor: fondo del escenario, tinta del texto y tinte del líquido. */
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
@@ -88,7 +92,11 @@ export default function HeroBubbles({
   const statementRef = useRef(null)
   const marqueeRef = useRef(null)
   const resolvedFlavor = flavor in FIZZ_FLAVORS ? flavor : 'cobalt'
-  const flavorCfg = FIZZ_FLAVORS[resolvedFlavor]
+  const preset = FIZZ_FLAVORS[resolvedFlavor]
+  const flavorCfg =
+    bg || fg || accent
+      ? { ...preset, ...(bg ? { bg } : {}), ...(fg ? { ink: fg } : {}), ...(accent ? { liquid: accent } : {}) }
+      : preset
 
   useGSAP(
     () => {
@@ -504,7 +512,7 @@ export default function HeroBubbles({
     },
     {
       scope: root,
-      dependencies: [resolvedFlavor, modelUrl, envUrl, dracoPath, canImage, canLabel, title, marquee],
+      dependencies: [resolvedFlavor, bg, fg, accent, modelUrl, envUrl, dracoPath, canImage, canLabel, title, marquee],
       revertOnUpdate: true,
     },
   )

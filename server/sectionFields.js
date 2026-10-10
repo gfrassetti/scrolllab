@@ -58,6 +58,7 @@ export const ASSET_URL_KEYS = new Set([
   'nextImg',
   'logoSrc',
   'orbSrc',
+  'cardImage',
   // El form de contacto hace POST acá: una URL https o una ruta del sitio.
   'endpoint',
 ])

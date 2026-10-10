@@ -178,6 +178,8 @@ export default function Preloader({
   onFadeStart,
   bigPx = 132,
   wordmark = 'Meridian',
+  /** «Loading...»; vacío = según el idioma. */
+  label,
 }) {
   const rootRef = useRef(null)
   const numRef = useRef(null)
@@ -317,7 +319,7 @@ export default function Preloader({
       ref={rootRef}
       role="status"
       aria-live="polite"
-      aria-label="Loading"
+      aria-label={label ?? t('loading')}
       className="fixed inset-0 z-[100] h-svh w-full"
       style={{ background: `var(--mer-sand, ${SAND})`, color: `var(--mer-ink, ${INK})` }}
     >
@@ -359,7 +361,7 @@ export default function Preloader({
           className="text-[11px] uppercase tracking-[0.24em]"
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
-          {t('loading')}
+          {label ?? t('loading')}
         </p>
         <p
           className="text-4xl leading-none md:text-5xl"

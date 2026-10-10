@@ -13,12 +13,19 @@ export default function NavVelocity({
   links = ['Hall', 'Gear', 'Contact'],
   linksText,
   menuLabel = 'Menu',
+  /** Texto de la barra y del menú, fondo del menú móvil y color del CTA. */
+  fg,
+  bg,
+  accent,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between gap-3 px-5 py-4 md:px-10">
+    <header
+      className="fixed inset-x-0 top-0 z-40 flex items-center justify-between gap-3 px-5 py-4 md:px-10"
+      style={fg ? { color: fg } : undefined}
+    >
       <a
         href="#top"
         className="tpl-hit relative z-10 text-[11px] font-medium tracking-[0.28em] uppercase md:text-xs"
@@ -42,6 +49,7 @@ export default function NavVelocity({
       <div className="relative z-10 flex items-center gap-2">
         <a
           href={ctaHref}
+          style={accent ? { backgroundColor: accent, borderColor: accent } : undefined}
           className="ui-press tpl-hit relative border border-acid bg-acid px-4 py-2 text-[11px] font-medium tracking-[0.22em] text-[#0a1a12] uppercase transition-opacity hover:opacity-90"
         >
           {cta}
@@ -70,6 +78,7 @@ export default function NavVelocity({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
+        style={bg ? { backgroundColor: bg } : undefined}
         className={`fixed inset-0 bg-[#0a1a12] transition-opacity duration-300 md:hidden motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
@@ -85,7 +94,10 @@ export default function NavVelocity({
                   open ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                 }`}
               >
-                <span className="text-[11px] tracking-[0.3em] text-acid">
+                <span
+                  className="text-[11px] tracking-[0.3em] text-acid"
+                  style={accent ? { color: accent } : undefined}
+                >
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="font-anton text-[clamp(2.25rem,13vw,4.5rem)] leading-[0.9] uppercase">

@@ -15,7 +15,34 @@
  * @property {SectionFieldOption[]} [options] Solo `select`.
  * @property {number} [max] Solo `list`: tope de filas.
  * @property {SectionSubField[]} [item] Solo `list`: los campos de cada fila.
+ * @property {boolean} [fromText] Solo `list`: antes era un textarea «Texto | #ancla»
+ *   (`linksText`, o la misma prop como texto); sanitizeProps migra lo guardado.
  */
+
+/**
+ * Links del menú de un nav: texto + destino, en orden. Reemplaza al textarea
+ * «Texto | #ancla» (`linksText`); sanitizeProps migra lo guardado así.
+ * @param {number} [max]
+ * @returns {SectionField}
+ */
+const navLinks = (max = 8) => ({
+  key: 'links',
+  label: 'Links del menú',
+  type: 'list',
+  max,
+  fromText: true,
+  item: [
+    { key: 'label', label: 'Texto', type: 'text' },
+    { key: 'href', label: 'Enlace (#sección, /ruta o https://…)', type: 'href' },
+  ],
+})
+
+/** El botón del menú en el teléfono: lo que dice cerrado y abierto. */
+/** @type {SectionField[]} */
+const MENU_BUTTON = [
+  { key: 'menuLabel', label: 'Botón de menú — texto', type: 'text' },
+  { key: 'closeLabel', label: 'Botón de menú — texto con el menú abierto', type: 'text' },
+]
 
 /**
  * Campos editables por sección (builder preview + LAB).
@@ -31,16 +58,18 @@
  * Este archivo lo importa Node: sin imports de React ni del browser.
  * Recetas Beat (pasos dx/dy) aún no son un campo: el motion vive en JSX/presets.
  * Ver docs/scrolllab-beat.md.
+ *
+ * Listón (npm run check:editable): todo texto visible, imagen, link y color de
+ * una sección es un campo — el mismo nivel que un widget de LAB.
  * @type {Record<string, SectionField[]>}
  */
 export const SECTION_FIELDS = {
   'chapters/NavMinimal': [
     { key: 'brand', label: 'Brand', type: 'text' },
-    {
-      key: 'linksText',
-      label: 'Links (uno por línea, "Texto | #ancla")',
-      type: 'textarea',
-    },
+    navLinks(),
+    ...MENU_BUTTON,
+    { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
+    { key: 'fg', label: 'Menú móvil — color de texto', type: 'color' },
   ],
   'chapters/HeroKinetic': [
     { key: 'lineOne', label: 'Linea 1', type: 'text' },
@@ -302,11 +331,8 @@ export const SECTION_FIELDS = {
   'nocturne/NavNocturne': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'marker', label: 'Marker', type: 'text' },
-    {
-      key: 'linksText',
-      label: 'Links (uno por línea, "Texto | #ancla")',
-      type: 'textarea',
-    },
+    navLinks(),
+    ...MENU_BUTTON,
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -317,6 +343,7 @@ export const SECTION_FIELDS = {
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'img', label: 'Foto de fondo', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -390,11 +417,8 @@ export const SECTION_FIELDS = {
   ],
   'monolith/NavBrutal': [
     { key: 'brand', label: 'Brand', type: 'text' },
-    {
-      key: 'linksText',
-      label: 'Links (uno por línea, "Texto | #ancla")',
-      type: 'textarea',
-    },
+    navLinks(),
+    ...MENU_BUTTON,
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -501,12 +525,11 @@ export const SECTION_FIELDS = {
   ],
   'fizz/NavFizz': [
     { key: 'brand', label: 'Brand', type: 'text' },
-    {
-      key: 'links',
-      label: 'Links del menú (uno por línea; «Texto | #sección» para apuntar)',
-      type: 'textarea',
-    },
+    navLinks(),
     { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'menuLabel', label: 'Botón de menú — nombre para lectores de pantalla', type: 'text' },
+    { key: 'closeLabel', label: 'Botón de cerrar — nombre para lectores de pantalla', type: 'text' },
     { key: 'menuBg', label: 'Menú — fondo', type: 'color' },
     { key: 'menuInk', label: 'Menú — texto y botón', type: 'color' },
   ],
@@ -533,6 +556,9 @@ export const SECTION_FIELDS = {
       ],
     },
     { key: 'canImage', label: 'Etiqueta (imagen propia)', type: 'image' },
+    { key: 'bg', label: 'Color de fondo (pisa el del sabor)', type: 'color' },
+    { key: 'fg', label: 'Color de texto (pisa el del sabor)', type: 'color' },
+    { key: 'accent', label: 'Color del líquido (pisa el del sabor)', type: 'color' },
     // Sin modelo 3D propio en el builder: se pasa `modelUrl` en el código.
   ],
   'fizz/FlavorWorlds': [
@@ -626,11 +652,12 @@ export const SECTION_FIELDS = {
   'velocity/NavVelocity': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
-    {
-      key: 'linksText',
-      label: 'Links (uno por línea, "Texto | #ancla")',
-      type: 'textarea',
-    },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    navLinks(),
+    { key: 'menuLabel', label: 'Botón de menú — nombre para lectores de pantalla', type: 'text' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
+    { key: 'accent', label: 'Color del CTA y de los números', type: 'color' },
   ],
   'velocity/HeroStrike': [
     { key: 'lineLeft', label: 'Line left', type: 'text' },
@@ -690,13 +717,10 @@ export const SECTION_FIELDS = {
   'atelier/NavAtelier': [
     { key: 'brand', label: 'Brand', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
     { key: 'label', label: 'Label', type: 'text' },
     { key: 'menuLabel', label: 'Menu label', type: 'text' },
-    {
-      key: 'linksText',
-      label: 'Links (uno por línea, "Texto | #ancla")',
-      type: 'textarea',
-    },
+    navLinks(),
     { key: 'bg', label: 'Menú — color de fondo', type: 'color' },
     { key: 'fg', label: 'Menú — color de texto', type: 'color' },
   ],
@@ -704,6 +728,7 @@ export const SECTION_FIELDS = {
     { key: 'line1', label: 'Line 1', type: 'text' },
     { key: 'line2', label: 'Line 2', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
+    { key: 'body', label: 'Texto de abajo', type: 'textarea' },
     { key: 'hint', label: 'Hint', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
@@ -809,8 +834,10 @@ export const SECTION_FIELDS = {
     { key: 'brand', label: 'Brand / phrase', type: 'text' },
     { key: 'logo', label: 'Logo text', type: 'text' },
     { key: 'logoSrc', label: 'Logo image', type: 'image' },
-    { key: 'linksText', label: 'Links (3)', type: 'textarea' },
+    navLinks(3),
     { key: 'menuLabel', label: 'Menu label', type: 'text' },
+    { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
+    { key: 'fg', label: 'Menú móvil — color de texto', type: 'color' },
   ],
   'unity/HeroTwin': [
     { key: 'body', label: 'Body', type: 'textarea' },
@@ -1004,12 +1031,8 @@ export const SECTION_FIELDS = {
   'atrium/NavAtrium': [
     { key: 'lineOne', label: 'Line 1', type: 'text' },
     { key: 'lineTwo', label: 'Line 2', type: 'text' },
-    {
-      key: 'linksText',
-      label: 'Links (uno por línea, "Texto | #ancla")',
-      type: 'textarea',
-    },
-    { key: 'menuLabel', label: 'Menu label', type: 'text' },
+    navLinks(),
+    ...MENU_BUTTON,
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -1017,6 +1040,7 @@ export const SECTION_FIELDS = {
     { key: 'lineOne', label: 'Line 1', type: 'text' },
     { key: 'lineTwo', label: 'Line 2', type: 'text' },
     { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'img', label: 'Foto de fondo', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -1114,7 +1138,9 @@ export const SECTION_FIELDS = {
       item: [{ key: 'text', label: 'Texto', type: 'text' }],
     },
     { key: 'scrollLabel', label: 'Scroll — texto', type: 'text' },
+    { key: 'scrollHref', label: 'Scroll — enlace', type: 'href' },
     { key: 'menuLabel', label: 'Teléfono — Menu', type: 'text' },
+    { key: 'closeLabel', label: 'Teléfono — Cerrar', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -1209,6 +1235,11 @@ export const SECTION_FIELDS = {
     },
     { key: 'inviteBody', label: 'Invite — location', type: 'text' },
     { key: 'inviteCta', label: 'Invite — CTA', type: 'text' },
+    { key: 'inviteCtaHref', label: 'Invite — CTA — enlace', type: 'href' },
+    { key: 'floorPlansHref', label: 'Nav — link — enlace', type: 'href' },
+    { key: 'closeLabel', label: 'Nav — Close label (vacío = según idioma)', type: 'text' },
+    { key: 'loadingLabel', label: 'Carga — texto (vacío = según idioma)', type: 'text' },
+    { key: 'scrollLabel', label: 'Scroll — texto (vacío = según idioma)', type: 'text' },
     {
       key: 'menuLinks',
       label: 'Menú — enlaces',
@@ -1219,6 +1250,31 @@ export const SECTION_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    {
+      key: 'menuPills',
+      label: 'Menú — enlaces chicos (pastillas)',
+      type: 'list',
+      max: 5,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+    { key: 'portalLabel', label: 'Menú (teléfono) — link 1 (vacío = según idioma)', type: 'text' },
+    { key: 'portalHref', label: 'Menú (teléfono) — link 1 — enlace', type: 'href' },
+    { key: 'brochureLabel', label: 'Menú (teléfono) — link 2 (vacío = según idioma)', type: 'text' },
+    { key: 'brochureHref', label: 'Menú (teléfono) — link 2 — enlace', type: 'href' },
+    { key: 'cardKicker', label: 'Menú — tarjeta — kicker (vacío = según idioma)', type: 'text' },
+    { key: 'cardTitle', label: 'Menú — tarjeta — titular (vacío = según idioma)', type: 'text' },
+    { key: 'cardCta', label: 'Menú — tarjeta — botón (vacío = según idioma)', type: 'text' },
+    { key: 'cardHref', label: 'Menú — tarjeta — enlace', type: 'href' },
+    { key: 'cardImage', label: 'Menú — tarjeta — foto', type: 'image' },
+    { key: 'phoneLabel', label: 'Menú — contacto — rótulo teléfono (vacío = según idioma)', type: 'text' },
+    { key: 'phone', label: 'Menú — contacto — teléfono', type: 'text' },
+    { key: 'emailLabel', label: 'Menú — contacto — rótulo email (vacío = según idioma)', type: 'text' },
+    { key: 'email', label: 'Menú — contacto — email', type: 'text' },
+    { key: 'socialsLabel', label: 'Menú — contacto — rótulo redes (vacío = según idioma)', type: 'text' },
+    { key: 'socials', label: 'Menú — contacto — redes', type: 'text' },
     { key: 'bg', label: 'Crema (máscara, header y menú)', type: 'color' },
     { key: 'fg', label: 'Tinta (header y menú; el texto sobre las fotos queda blanco)', type: 'color' },
   ],
@@ -1553,11 +1609,43 @@ function sanitizeList(field, value) {
   return out
 }
 
+/** «Texto | #ancla» por línea → filas `{ label, href }` (sin destino, solo label). */
+function parseLinkLines(text) {
+  return String(text)
+    .split('\n')
+    .map((line) => {
+      const [label, href] = line.split('|').map((part) => part.trim())
+      if (!label) return null
+      return href ? { label, href } : { label }
+    })
+    .filter(Boolean)
+}
+
+/**
+ * Lo guardado antes de que los links de los navs fueran una lista: el textarea
+ * `linksText` (o `links` como texto, en NavFizz). Sin esto, una composición
+ * vieja perdía sus links al pasar por el panel o por el checkout.
+ */
+function migrateLegacyProps(byKey, props) {
+  const field = byKey.get('links')
+  if (!field || field.type !== 'list' || !field.fromText) return props
+  const legacy =
+    typeof props.links === 'string'
+      ? props.links
+      : typeof props.linksText === 'string' && !Array.isArray(props.links)
+        ? props.linksText
+        : null
+  if (legacy === null) return props
+  const { linksText: _legacy, ...rest } = props
+  return { ...rest, links: parseLinkLines(legacy) }
+}
+
 export function sanitizeProps(sectionId, props) {
   if (!props || typeof props !== 'object') return undefined
   const fields = getSectionFields(sectionId)
   if (fields.length === 0) return undefined
   const byKey = new Map(fields.map((f) => [f.key, f]))
+  props = migrateLegacyProps(byKey, props)
   const cleaned = {}
   for (const [key, value] of Object.entries(props)) {
     const field = byKey.get(key)

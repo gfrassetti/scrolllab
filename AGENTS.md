@@ -221,6 +221,7 @@ npm run ssr:snapshot   # HTML renderizado en el servidor: la red de los refactor
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
+npm run check:editable # todo texto/imagen/link/color visible de cada sección es un campo (SSR); navs, heroes y footers ya al 100% (-- --all lista el resto)
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:paddle-sandbox # transacciones (template, cupón, builder, LAB con prueba) contra el sandbox real de Paddle
@@ -561,6 +562,18 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 - **ScrollLab** → `C:\Users\Guido\Documents\Obsidian\ScrollLab`
 - Entrada visual: `graph.canvas` o Graph view (`Ctrl+G`)
 - Ignorar bóvedas duplicadas `graphify` / `obsidian` salvo que el usuario diga lo contrario
+
+**Notas curadas (leer antes de actuar; el resto de la bóveda es el grafo de código autogenerado):**
+
+| Si vas a… | Leer en la bóveda |
+|---|---|
+| Elegir/replicar una referencia | `Template reference index` (SKU → URL → mapa; incluye en obra y descartados) |
+| Hacer una película al scroll o convertir video generado en secuencia de cuadros | `Película al scroll — del clip al carrete` · `FOLD — película al scroll` · `pear.no — película al scroll (cuadro por cuadro)` |
+| Generar imágenes o video con Higgsfield | `Higgsfield — costos, límites y trampas` (costos reales, 429, avisos de preset, subida de cuadros) |
+| Hacer tinta/estela por puntero o letras infladas en código | `Tinta en agua — fluido WebGL (receta)` (trae el código completo) |
+| Empezar un template que depende de media que el comprador tendría que producir | `Lecciones — templates con media propia` · `HOLLOW — descartado (qué se aprendió)` |
+| Medir una referencia o compararla con lo nuestro | `Analizar paginas modelo` (sección «Lo que analyze:ref no mide») |
+| Revisar el estándar del producto | `Storytelling pages — características canónicas` (canon v1 y v2) |
 
 Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre” Obsidian UI: lee los `.md` del vault cuando aportan contexto.
 

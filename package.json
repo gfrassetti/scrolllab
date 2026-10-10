@@ -25,6 +25,7 @@
     "check:parity": "node scripts/check-parity.mjs",
     "images": "node scripts/gen-image-variants.mjs",
     "check:builder": "node scripts/check-builder.mjs",
+    "check:editable": "node scripts/check-editable.mjs",
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",

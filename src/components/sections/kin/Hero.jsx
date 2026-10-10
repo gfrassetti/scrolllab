@@ -143,7 +143,7 @@ function BarRow({ fade = false, brand, brandNote, links, visitLabel, visitHref, 
 
 // Phone menu: a paper panel that drops over the page with the links set
 // big, one per line, each rising out of its mask.
-function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, closeLabel }) {
+function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, closeLabel, menuLabel }) {
   const ref = useRef(null)
   const closeRef = useRef(null)
   const wasOpen = useRef(false)
@@ -210,7 +210,7 @@ function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, close
       ref={ref}
       role="dialog"
       aria-modal="true"
-      aria-label="Menu"
+      aria-label={menuLabel}
       className="fixed inset-0 z-[70] hidden flex-col-reverse bg-(--kin-paper) px-[4.5vw] pt-[8vw] pb-[4.5vw] text-[3.3vw] text-(--kin-ink) md:hidden"
     >
       <div className="flex items-baseline justify-between">
@@ -267,6 +267,7 @@ export default function Hero({
   line2,
   line3,
   scrollLabel = 'Scroll to explore',
+  scrollHref = '#about',
   menuLabel = 'Menu',
   closeLabel = 'Close',
   bg,
@@ -818,7 +819,13 @@ export default function Hero({
           <LocalTime place={place} />
         </p>
       </div>
-      <MenuOverlay open={menuOpen} onClose={closeMenu} closeLabel={closeLabel} {...navProps} />
+      <MenuOverlay
+        open={menuOpen}
+        onClose={closeMenu}
+        closeLabel={closeLabel}
+        menuLabel={menuLabel}
+        {...navProps}
+      />
 
       {/* Fixed bar (desktop): takes over from the hero's nav box. */}
       <div ref={stickyRef} className="invisible fixed inset-x-0 top-0 z-50 hidden bg-(--kin-paper) text-[max(11px,0.82vw)] md:block">
@@ -881,7 +888,7 @@ export default function Hero({
           {/* Scroll cue: a small box that fades away as the page moves. */}
           <div data-kin-fade className="hidden md:block">
             <div ref={cueRef} className="w-fit">
-              <a href="#about" className="kin-cue tpl-hit relative inline-flex items-center gap-[0.6em] border border-(--kin-ink) bg-(--kin-paper) px-[0.9em] py-[0.6em] text-[max(11px,0.82vw)] leading-none">
+              <a href={scrollHref} className="kin-cue tpl-hit relative inline-flex items-center gap-[0.6em] border border-(--kin-ink) bg-(--kin-paper) px-[0.9em] py-[0.6em] text-[max(11px,0.82vw)] leading-none">
                 {scrollLabel}
                 <svg aria-hidden="true" viewBox="0 0 11 12" className="kin-scroll-arrow h-[0.85em] w-[0.85em]" fill="currentColor">
                   <path d="M5.5 12 10.5 6.9V5.1L6.1 9.5V0H4.9v9.5L.5 5.1v1.8z" />

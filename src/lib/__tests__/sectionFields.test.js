@@ -378,19 +378,55 @@ describe('sanitizeHostedProps (LAB)', () => {
   })
 })
 
+describe('sanitizeProps — links de los navs (lista, con migración del texto)', () => {
+  it('la lista texto + enlace sobrevive y valida el enlace', () => {
+    const clean = sanitizeProps('chapters/NavMinimal', {
+      links: [{ label: 'Work', href: '#work' }, { label: 'Mal', href: 'javascript:alert(1)' }],
+    })
+    assert.deepEqual(clean, { links: [{ label: 'Work', href: '#work' }, { label: 'Mal' }] })
+  })
+
+  it('una composición vieja con linksText («Texto | #ancla») pasa a la lista', () => {
+    const clean = sanitizeProps('nocturne/NavNocturne', {
+      brand: 'B',
+      linksText: 'Films | #films\nIndex\n\nContact | /contacto',
+    })
+    assert.deepEqual(clean, {
+      brand: 'B',
+      links: [{ label: 'Films', href: '#films' }, { label: 'Index' }, { label: 'Contact', href: '/contacto' }],
+    })
+  })
+
+  it('NavFizz: `links` como texto (su formato viejo) también migra', () => {
+    const clean = sanitizeProps('fizz/NavFizz', { links: 'Flavors | #flavors\nShop' })
+    assert.deepEqual(clean, { links: [{ label: 'Flavors', href: '#flavors' }, { label: 'Shop' }] })
+  })
+
+  it('si ya hay lista, un linksText viejo no la pisa', () => {
+    const clean = sanitizeProps('atelier/NavAtelier', {
+      links: [{ label: 'Nuevo', href: '#nuevo' }],
+      linksText: 'Viejo | #viejo',
+    })
+    assert.deepEqual(clean, { links: [{ label: 'Nuevo', href: '#nuevo' }] })
+  })
+
+  it('los navs ya no ofrecen el textarea', () => {
+    for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
+      if (id.startsWith('ratio/')) continue // RATIO sigue fuera del builder
+      assert.ok(!fields.some((f) => f.key === 'linksText'), `${id} todavía tiene linksText`)
+    }
+  })
+})
+
 /**
  * Builder: quien arma su página tiene que poder verla con su marca antes de
  * comprar. Toda sección que se ofrece trae color de fondo y de texto
  * editables; las que no, están acá con el motivo (y no se suman a escondidas).
  */
 const NO_COLORS = {
-  'chapters/NavMinimal': 'mix-blend-difference: su color sale de lo que tiene detrás',
-  'unity/NavUnity': 'mix-blend-difference: su color sale de lo que tiene detrás',
-  'velocity/NavVelocity': 'transparente sobre el hero: toma el color de la página',
   'velocity/TrackMerge': 'el fondo oscuro → claro → negro es la coreografía del scroll',
   'atelier/VisionShutter': 'la persiana cierra hacia el color de la sección siguiente',
   'atrium/ClarityPair': 'la animación pasa de papel a tinta con colores fijos',
-  'fizz/HeroBubbles': 'la paleta la define el sabor (campo flavor)',
   'kin/Intro': 'mix-blend-difference sobre la puerta del hero',
   'contact/ContactForm': 'la paleta la define el tema (campo theme)',
   'commerce/ProductGrid': 'la paleta la define el tema (campo theme)',

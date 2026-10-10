@@ -14,6 +14,9 @@ export default function NavMinimal({
   linksText,
   menuLabel = 'Menu',
   closeLabel = 'Close',
+  /** Menú móvil: fondo y texto. La barra se invierte sola (mix-blend). */
+  bg,
+  fg,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
@@ -55,6 +58,7 @@ export default function NavMinimal({
         {...panelProps}
         aria-label={menuLabel}
         inert={!open}
+        style={bg || fg ? { backgroundColor: bg, color: fg } : undefined}
         className={`fixed inset-0 z-40 bg-bone text-ink transition-opacity duration-500 md:hidden motion-reduce:transition-none ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}

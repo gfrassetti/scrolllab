@@ -19,6 +19,7 @@ export default function HeroMeaning({
   line2 = 'goes here.',
   hint = 'Scroll — the emblem reacts',
   meta = 'Placeholder meta — ©2026',
+  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Websites, products and systems built for clarity.',
   bg,
   fg,
 }) {
@@ -223,8 +224,7 @@ export default function HeroMeaning({
           data-atelier-meta
           className="max-w-[40ch] text-sm text-current/55"
         >
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Websites,
-          products and systems built for clarity.
+          {body}
         </p>
         <p
           data-atelier-meta
