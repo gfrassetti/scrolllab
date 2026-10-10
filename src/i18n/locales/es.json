@@ -1113,6 +1113,8 @@
     "preparing": "Preparando…",
     "waiting": "Confirmando pago…",
     "pendingHint": "Si acabás de pagar, puede tardar unos segundos. Refrescá la página si sigue así.",
+    "rejected": "Pago rechazado",
+    "rejectedHint": "Mercado Pago rechazó el pago y no se te cobró nada. Si querés, volvé a comprarlo.",
     "refunded": "Reembolsada",
     "refundedHint": "Se devolvió el pago, así que la descarga ya no está disponible.",
     "linkExpired": "El link de descarga venció: por seguridad dura solo unos minutos. Tocá Descargar de nuevo y listo.",

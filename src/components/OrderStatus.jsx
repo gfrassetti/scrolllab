@@ -4,6 +4,8 @@ const STATUS_CLASS = {
   paid: 'text-success',
   pending: 'text-warning',
   failed: 'text-danger',
+  // Pendiente con el pago rechazado (no se cobró nada).
+  rejected: 'text-danger',
   refunded: 'text-ink/50',
 }
 

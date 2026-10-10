@@ -72,7 +72,7 @@ function verdictLine({ order, sub, e }) {
     if (e.eligible) return `ELEGIBLE — se devuelve solo: pagada, dentro de ${REFUND_DAYS} días (hasta ${e.deadline?.slice(0, 10)}) y ZIP sin descargar.`
     return (
       {
-        downloaded: `NO elegible por arrepentimiento: el ZIP se descargó ${e.downloads} vez/veces. Solo corresponde si hay defecto técnico.`,
+        downloaded: `NO elegible por arrepentimiento: el ZIP se descargó ${e.downloads} ${e.downloads === 1 ? 'vez' : 'veces'}. Solo corresponde si hay defecto técnico.`,
         expired: `NO elegible: pasó el plazo de ${REFUND_DAYS} días (venció el ${e.deadline?.slice(0, 10)}).`,
         refunded: 'Ya está reembolsada.',
         not_paid: 'La orden no está pagada.',

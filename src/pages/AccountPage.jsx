@@ -207,6 +207,8 @@ export default function AccountPage() {
             <ul id="compras" className="mt-10 scroll-mt-24 border-t border-ink/15">
               {pageOrders.map((order) => {
                 const previews = orderPreviews(order)
+                // Pendiente con el pago rechazado: no está «confirmando».
+                const rejected = order.status === 'pending' && order.paymentFailed
                 return (
                   <li
                     key={order.id}
@@ -227,7 +229,7 @@ export default function AccountPage() {
                       </p>
                       <p className="mt-1 text-sm text-ink/60">
                         {order.total != null && formatAmount(order.total, dateLocale)}{' '}
-                        {order.currency_id} · <OrderStatus status={order.status} />
+                        {order.currency_id} · <OrderStatus status={rejected ? 'rejected' : order.status} />
                       </p>
                       {order.summary?.discount > 0 && (
                         <p className="mt-1 text-xs text-accent-ink">
@@ -239,7 +241,7 @@ export default function AccountPage() {
                       )}
                       {order.status === 'pending' && (
                         <p className="mt-2 max-w-[40ch] text-xs leading-relaxed text-ink/55">
-                          {t('account.pendingHint')}
+                          {t(rejected ? 'account.rejectedHint' : 'account.pendingHint')}
                         </p>
                       )}
                       {order.status === 'refunded' && (
@@ -301,7 +303,7 @@ export default function AccountPage() {
                             ? t('account.preparing')
                             : t('account.download')}
                         </button>
-                      ) : order.status === 'pending' ? (
+                      ) : order.status === 'pending' && !rejected ? (
                         <span className="text-[11px] uppercase tracking-[0.25em] text-warning">
                           {t('account.waiting')}
                         </span>

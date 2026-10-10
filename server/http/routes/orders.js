@@ -43,6 +43,8 @@ export function createOrdersRouter({ config, limits }) {
           summary: orderPriceSummary(o),
           purchaseCode: purchaseCode(db.uid(o) || o.id, config.downloadSecret),
           ...(o.qa ? { qa: true } : {}),
+          // Pendiente con un pago rechazado: no está «confirmando», se rechazó.
+          ...(o.status === 'pending' && o.paymentFailedAt ? { paymentFailed: true } : {}),
         })),
       })
     }),

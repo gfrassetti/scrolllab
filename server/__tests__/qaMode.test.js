@@ -98,6 +98,16 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal(mp.lastPreference().items[0].unit_price, QA_TEMPLATE_ARS)
   })
 
+  it('una orden con el pago rechazado se muestra como rechazada, no «confirmando»', async () => {
+    const agent = await loginAs(QA)
+    const res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }] })
+    const payment = mp.pay(mp.lastPreference().id, { approved: false })
+    assert.equal((await webhook('payment', payment.id)).status, 200)
+    const row = (await agent.get('/api/orders')).body.orders.find((o) => o.id === res.body.orderId)
+    assert.equal(row.status, 'pending')
+    assert.equal(row.paymentFailed, true)
+  })
+
   it('con un precio de prueba que sí baja con el 10%, la primera compra lo aplica', () => {
     assert.equal(qaDiscountedArs(100, 10), 90)
     assert.equal(qaDiscountedArs(1, 10), 1, 'a $1 el 10% no baja nada')

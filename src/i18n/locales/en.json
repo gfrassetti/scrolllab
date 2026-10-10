@@ -1113,6 +1113,8 @@
     "preparing": "Preparing…",
     "waiting": "Confirming payment…",
     "pendingHint": "If you just paid, this can take a few seconds. Refresh if it stays like this.",
+    "rejected": "Payment declined",
+    "rejectedHint": "The payment was declined and you weren’t charged. You can buy it again whenever you want.",
     "refunded": "Refunded",
     "refundedHint": "The payment was returned, so the download is no longer available.",
     "linkExpired": "That download link expired: for security it only lasts a few minutes. Just hit Download again.",
