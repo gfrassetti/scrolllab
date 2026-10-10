@@ -7,7 +7,7 @@ import {
   regionFromTimeZone,
   providerForRegion,
 } from '../payRegion.js'
-import { formatUsd, formatPriceFromUsd, formatNextSectionPrice } from '../pricing.js'
+import { formatUsd, formatPriceFromUsd, formatNextSectionPrice, CUSTOM_EXTRA_SECTION_USD } from '../pricing.js'
 import { couponLinePrice } from '../coupon.js'
 
 /**
@@ -77,7 +77,7 @@ describe('región de pago', () => {
     assert.match(formatPriceFromUsd(149, 'ARS', RATE), /224\.000/)
     assert.equal(formatPriceFromUsd(149, 'en', RATE), 'US$149')
     assert.equal(formatPriceFromUsd(149, 'es', RATE), formatPriceFromUsd(149, 'ARS', RATE))
-    assert.equal(formatNextSectionPrice(8, false, 'USD', RATE), 'US$15')
+    assert.equal(formatNextSectionPrice(8, false, 'USD', RATE), `US$${CUSTOM_EXTRA_SECTION_USD}`)
     assert.match(formatNextSectionPrice(8, false, 'ARS', RATE), /\$\s?\d/)
   })
 

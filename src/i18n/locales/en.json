@@ -1145,7 +1145,8 @@
       }
     },
     "labNote": "You get the page's source code to develop and host yourself. Already have a site and want to add sections without code?",
-    "labNoteLink": "That's LAB →"
+    "labNoteLink": "That's LAB →",
+    "separateAnchor": "Buying {{models}} separately: {{price}}. Here you take just the sections you picked, already edited."
   },
   "cart": {
     "eyebrow": "Cart",

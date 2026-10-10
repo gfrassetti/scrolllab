@@ -28,6 +28,7 @@ import CompositionList from '../features/builder/CompositionList.jsx'
 import CompositionCheckout from '../features/builder/CompositionCheckout.jsx'
 import MobileSummaryBar from '../features/builder/MobileSummaryBar.jsx'
 import { formatArs } from '../lib/pricing'
+import { separateModelsPriceUsd } from '../domain/catalog'
 import {
   QA_CUSTOM_SKU,
   QA_BUILDER_BASE_ARS,
@@ -108,6 +109,16 @@ export default function BuilderPage({ qa = false }) {
     currency,
     rate,
   )
+  // Ancla: lo que costarían por separado los templates de los que sacás
+  // secciones. Solo cuando mezclás modelos y el builder sale más barato.
+  const separate = useMemo(() => separateModelsPriceUsd(recipe), [recipe])
+  const anchor =
+    !qa && separate.models.length >= 2 && separate.usd > estimatedPriceUsd
+      ? t('builder.separateAnchor', {
+          models: separate.models.map((m) => m.toUpperCase()).join(' + '),
+          price: formatPriceFromUsd(separate.usd, currency, rate),
+        })
+      : null
   // Por qué el total es ese: qué incluye la base, cuánto llevás, cuánto suma
   // la próxima. En el tope se explica el límite en vez de ofrecer un precio.
   const qaPriceLabel = qa ? formatArs(qaCustomPriceArs(recipe)) : null
@@ -299,6 +310,7 @@ export default function BuilderPage({ qa = false }) {
         currency={currency}
         rate={rate}
         priceHint={priceHint}
+        anchor={anchor}
       />
 
       <div className="space-y-12 pt-10 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 lg:space-y-0">

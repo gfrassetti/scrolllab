@@ -17,6 +17,21 @@ import {
   nextSectionArs,
   nextSectionUsd,
 } from '../pricing.js'
+import { separateModelsPriceUsd } from '../../domain/catalog.js'
+
+describe('separateModelsPriceUsd — el ancla del builder', () => {
+  it('suma una vez cada template en venta del que salen secciones', () => {
+    const recipe = [{ id: 'kin/Hero' }, { id: 'meridian/Interior' }, { id: 'kin/Footer' }]
+    assert.deepEqual(separateModelsPriceUsd(recipe), {
+      models: ['kin', 'meridian'],
+      usd: TEMPLATE_PRICES_USD.kin + TEMPLATE_PRICES_USD.meridian,
+    })
+  })
+  it('commerce, el form de contacto y lo que no está en venta no cuentan', () => {
+    const recipe = [{ id: 'commerce/ProductGrid' }, { id: 'contact/ContactForm' }, 'ratio/HeroTools']
+    assert.deepEqual(separateModelsPriceUsd(recipe), { models: [], usd: 0 })
+  })
+})
 
 const RATE = 1560
 

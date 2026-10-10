@@ -52,16 +52,23 @@ export const BUNDLE_MODELS = Object.freeze([
  * Composición del builder: base por tramo + adicional por sección extra.
  * Cuenta cada entrada de la receta (nav, footer y repeticiones incluidas),
  * porque cada una es un componente renderizado en el App.jsx del ZIP. Una
- * composición del tamaño de un template (10 secciones) queda en 419 USD.
+ * composición del tamaño de un template (10 secciones) queda en 748 USD.
  * La base tiene que superar al template más caro EN VENTA (`npm run check`).
+ *
+ * 2026-10-10 (decisión del dueño): 389 / 15 / 39 → 690 / 29 / 79. Con 8
+ * secciones el builder costaba casi lo mismo que UN template caro (KIN o
+ * MERIDIAN, 379) y deja mezclar los mejores modelos, todo editable desde el
+ * panel. La base queda ~1,8× el template más caro y arriba del bundle.
+ * Los precios del Estudio tienen que quedar arriba del techo nuevo (USD 1.407
+ * con 30 secciones y commerce): ver docs/estudio-positioning.md.
  */
-export const CUSTOM_BASE_PRICE_USD = 389
+export const CUSTOM_BASE_PRICE_USD = 690
 export const CUSTOM_BASE_SECTIONS = 8
-export const CUSTOM_EXTRA_SECTION_USD = 15
+export const CUSTOM_EXTRA_SECTION_USD = 29
 /** Tope de secciones de una receta (el builder lo muestra, el checkout lo aplica). */
 export const MAX_CUSTOM_SECTIONS = 30
 
-export const COMMERCE_PACK_SURCHARGE_USD = 39
+export const COMMERCE_PACK_SURCHARGE_USD = 79
 
 /** Redondeo del monto en pesos: al millar de arriba, para no perder en el cambio. */
 export const ARS_ROUNDING = 1000
@@ -176,6 +183,24 @@ export function estimateCustomPriceUsd(sectionCount, hasCommerce) {
     customExtraSections(sectionCount) * CUSTOM_EXTRA_SECTION_USD +
     (hasCommerce ? COMMERCE_PACK_SURCHARGE_USD : 0)
   )
+}
+
+/**
+ * Lo que costaría comprar por separado los templates de los que la receta
+ * saca secciones (solo modelos en venta con precio de lista; commerce y el
+ * form de contacto no son templates). Es el ancla que muestra el builder.
+ * @param {RecipeEntry[] | null | undefined} recipe
+ * @returns {{ models: string[], usd: number }}
+ */
+export function separateModelsPriceUsd(recipe) {
+  const models = []
+  for (const entry of Array.isArray(recipe) ? recipe : []) {
+    const model = String(recipeSectionId(entry) || '').split('/')[0]
+    if (!model || models.includes(model)) continue
+    if (!(model in TEMPLATE_PRICES_USD) || isComingSoonSku(model)) continue
+    models.push(model)
+  }
+  return { models, usd: models.reduce((sum, m) => sum + TEMPLATE_PRICES_USD[m], 0) }
 }
 
 /** Precio de una receta del builder: el mismo cálculo en el carrito y en la orden. */

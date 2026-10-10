@@ -105,7 +105,7 @@ varios ítems y `npm run check:mp-sandbox` contra MP real.
 El comprador arma una página con secciones de varios modelos, la ve en vivo,
 edita textos y la compra. El ZIP es un proyecto Vite con esas secciones, en
 ese orden y con lo que editó. Precio por tramos, calculado por el servidor:
-base USD 389 con 8 secciones, USD 15 por cada sección extra (tope 30) y USD 39
+base USD 690 con 8 secciones, USD 29 por cada sección extra (tope 30) y USD 79
 si suma commerce.
 
 ### Qué se edita (y qué no)

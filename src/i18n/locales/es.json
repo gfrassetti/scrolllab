@@ -1145,7 +1145,8 @@
       }
     },
     "labNote": "Te llevás el código fuente de la página para programarla y alojarla vos. ¿Ya tenés sitio y querés sumarle secciones sin código?",
-    "labNoteLink": "Eso es LAB →"
+    "labNoteLink": "Eso es LAB →",
+    "separateAnchor": "Comprar por separado {{models}}: {{price}}. Acá te llevás solo las secciones que elegiste, ya editadas."
   },
   "cart": {
     "eyebrow": "Carrito",
