@@ -732,6 +732,8 @@ export default function HostedPlans({ qa: qaPage = false }) {
                   <p className="mt-4 text-body-sm text-ink/70">
                     {t('lab.planQuota', { n: displayQuota(p.instanceQuota) })}
                   </p>
+                  {/* Packs: en todos los pagos y sin tope (el free no tiene). */}
+                  <p className="mt-1 text-body-sm text-ink/70">{t('lab.planPacks')}</p>
                   <p className="mt-1 flex-1 text-body-sm text-ink/50">
                     {user && !activePlan && trialAvailable && trialDays > 0
                       ? t('lab.planTrialNote', { n: trialDays })

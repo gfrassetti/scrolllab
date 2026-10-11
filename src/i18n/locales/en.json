@@ -27,7 +27,7 @@
   },
   "lab": {
     "eyebrow": "Premium widgets",
-    "body": "For the site you already have: premium animated sections, without a developer. They work on WordPress, Webflow, Shopify or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
+    "body": "Premium animated sections for your site, no code. They work on WordPress, Webflow, Shopify, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
     "publishedCount": "{{n}} of {{quota}} published on your plan · {{total}} created",
     "publishedCountFrozen": "{{n}} of {{quota}} live on your plan · {{frozen}} frozen · {{total}} created",
@@ -116,7 +116,11 @@
       },
       {
         "q": "How is it different from the Builder?",
-        "a": "It depends on whether you already have a site. Do you? LAB adds widgets to it without touching it: we host them, you edit them from here and they update on their own. Building a new one? With the Builder you build the whole page with our sections and download it: one-time payment."
+        "a": "It depends on whether you code. LAB is no-code: you paste one line into your site (the one you have or a new one on WordPress, Webflow, Wix…), we host the widgets and you edit them from here. The Builder is for developers: you build the whole page with our sections and take the React code, for a one-time payment."
+      },
+      {
+        "q": "Can I build my whole site with widgets?",
+        "a": "You can, but what works best is building the base on your platform (menu, texts, forms) and using LAB for the sections that need to stand out. Search engines read your page’s text better than a widget’s, and the site loads faster."
       },
       {
         "q": "What is a pack?",
@@ -124,7 +128,7 @@
       },
       {
         "q": "Is a pack the same as the Builder?",
-        "a": "No. They're alike in that both group sections, but a pack lives on our servers and you paste it into the site you already have, no coding. With the Builder you build a new page with our sections and download it."
+        "a": "No. They're alike in that both group sections, but a pack lives on our servers and you paste it into your site, no coding. With the Builder you build a new page with our sections and take the code."
       },
       {
         "q": "Does a pack use more of my plan?",
@@ -152,7 +156,6 @@
     "planFeatures": [
       "Change texts, photos and colors anytime, no code",
       "Hosting included: nothing to install",
-      "Packs: group your widgets into one section with a single code",
       "Looks right on phone, tablet and desktop",
       "Improvements and new widgets at no extra cost",
       "View counter and email support"
@@ -232,8 +235,8 @@
     "howEyebrow": "How it works",
     "howTitle": "Pick it, edit it, paste it into your site. Done.",
     "footnoteAfter": ": one-time payment.",
-    "siteSplit": "Already have a site? Add widgets with LAB. Building a new one? That is what the",
-    "siteSplitAfter": " is for.",
+    "siteSplit": "Do you code, or work with someone who does? The full code is in the",
+    "siteSplitAfter": ".",
     "heroCtaFree": "Start free",
     "heroCtaPlans": "See plans",
     "platformsTitle": "How to paste it on your platform",
@@ -311,8 +314,8 @@
       "rows": [
         {
           "label": "For",
-          "lab": "The site you already have: WordPress, Webflow, Shopify or any other.",
-          "builder": "A new site."
+          "lab": "No-code: the site you already have, or a new one on your platform.",
+          "builder": "Developers: the code for a new site."
         },
         {
           "label": "How it works",
@@ -371,7 +374,8 @@
       "changePlan": "See plans",
       "help": "How to install?",
       "jumpToWidgets": "Go to my widgets ↓"
-    }
+    },
+    "planPacks": "Unlimited packs"
   },
   "common": {
     "loading": "Loading…",
@@ -459,7 +463,7 @@
     "step3Body": "Pay with Mercado Pago (pesos) or by card (US dollars). Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
-    "howHostedNote": "Already have a site? With LAB you add premium widgets — any of our 30+ sections — and edit them online, no code.",
+    "howHostedNote": "No code? With LAB you add premium widgets to your site — any of our 30+ sections — and edit them online.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
     "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Paddle. We never see or store your card details.",
@@ -537,7 +541,7 @@
     "contactErrGeneric": "Couldn’t send. Please try again.",
     "contactErrNetwork": "No connection. Check your network and try again.",
     "contactErrConfig": "The form isn’t configured yet. Email us instead.",
-    "labBodyBefore": "Configure a widget in LAB and show it on the site you already have with one line of code — no download, no touching your site. Edit it from the ",
+    "labBodyBefore": "Configure a widget in LAB and show it on your site with one line of code — no download, no touching your site. Edit it from the ",
     "labBodyLink": "Lab",
     "labBodyAfter": ".",
     "labEyebrow": "No download",
@@ -1203,7 +1207,7 @@
         }
       }
     },
-    "labNote": "You build the page with our sections and download it. Already have a site and want to add sections without code?",
+    "labNote": "You build the page with our sections and take the code. No code, just adding sections to your site?",
     "labNoteLink": "That's LAB →",
     "separateAnchor": "Buying {{models}} separately: {{price}}. Here you take just the sections you picked, already edited.",
     "inCartNote": "This composition is in your cart: whatever you edit here updates it.",

@@ -27,7 +27,7 @@
   },
   "lab": {
     "eyebrow": "Widgets premium",
-    "body": "Para el sitio que ya tenés: secciones animadas de nivel premium, sin desarrollador. Funcionan en WordPress, Webflow, Shopify o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
+    "body": "Secciones animadas de nivel premium para tu sitio, sin programar. Funcionan en WordPress, Webflow, Shopify, Wix o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
     "yours": "Tus widgets",
     "publishedCount": "{{n}} de {{quota}} publicados en tu plan · {{total}} creados",
     "publishedCountFrozen": "{{n}} de {{quota}} activos en tu plan · {{frozen}} congelados · {{total}} creados",
@@ -116,7 +116,11 @@
       },
       {
         "q": "¿En qué se diferencia del Builder?",
-        "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros, los editás desde acá y se actualizan solos. ¿Vas a hacer uno nuevo? Con el Builder armás la página entera con nuestras secciones y la descargás: pago único."
+        "a": "Depende de si programás. LAB es sin código: pegás una línea en tu sitio (el que ya tenés o uno nuevo en WordPress, Webflow, Wix…), los widgets los hosteamos nosotros y los editás desde acá. El Builder es para desarrolladores: armás la página entera con nuestras secciones y te llevás el código React, con pago único."
+      },
+      {
+        "q": "¿Puedo hacer todo mi sitio con widgets?",
+        "a": "Se puede, pero lo que mejor funciona es armar la base en tu plataforma (menú, textos, formularios) y usar LAB en las secciones que tienen que impactar. Los buscadores leen mejor el texto de tu página que el de un widget, y el sitio carga más rápido."
       },
       {
         "q": "¿Qué es un pack?",
@@ -124,7 +128,7 @@
       },
       {
         "q": "¿Un pack es lo mismo que el Builder?",
-        "a": "No. Se parecen porque los dos juntan secciones, pero el pack vive en nuestros servidores y lo pegás en el sitio que ya tenés, sin programar. Con el Builder armás una página nueva con nuestras secciones y la descargás."
+        "a": "No. Se parecen porque los dos juntan secciones, pero el pack vive en nuestros servidores y lo pegás en tu sitio, sin programar. Con el Builder armás una página nueva con nuestras secciones y te llevás el código."
       },
       {
         "q": "¿Un pack ocupa más cupo de mi plan?",
@@ -152,7 +156,6 @@
     "planFeatures": [
       "Cambiás textos, fotos y colores cuando quieras, sin programar",
       "Hosting incluido: no instalás nada",
-      "Packs: juntás tus widgets en una sección con un solo código",
       "Se ve bien en teléfono, tablet y computadora",
       "Mejoras y widgets nuevos sin costo extra",
       "Contador de vistas y soporte por email"
@@ -232,7 +235,7 @@
     "howEyebrow": "Cómo funciona",
     "howTitle": "Elegís, la editás y la pegás en tu sitio. Listo.",
     "footnoteAfter": ": pago único.",
-    "siteSplit": "¿Ya tenés sitio? LAB le suma widgets. ¿Vas a hacer uno nuevo? Para eso está el",
+    "siteSplit": "¿Programás o trabajás con alguien que programa? El código completo está en el",
     "siteSplitAfter": ".",
     "heroCtaFree": "Empezá gratis",
     "heroCtaPlans": "Ver planes",
@@ -311,8 +314,8 @@
       "rows": [
         {
           "label": "Para",
-          "lab": "El sitio que ya tenés: WordPress, Webflow, Shopify o el que sea.",
-          "builder": "Un sitio nuevo."
+          "lab": "Quien no programa: el sitio que ya tenés o uno nuevo en tu plataforma.",
+          "builder": "Desarrolladores: el código de un sitio nuevo."
         },
         {
           "label": "Cómo funciona",
@@ -371,7 +374,8 @@
       "changePlan": "Ver planes",
       "help": "¿Cómo se instala?",
       "jumpToWidgets": "Ir a mis widgets ↓"
-    }
+    },
+    "planPacks": "Packs sin límite"
   },
   "common": {
     "loading": "Cargando…",
@@ -459,7 +463,7 @@
     "step3Body": "Pagás con Mercado Pago (pesos) o con tarjeta (dólares). La compra aparece en Mis compras.",
     "step4Title": "Descargás el ZIP",
     "step4Body": "Tu compra queda en Mis compras y el ZIP se baja cuando quieras.",
-    "howHostedNote": "¿Ya tenés sitio? Con LAB le sumás widgets premium — cualquiera de nuestras más de 30 secciones — y los editás online, sin programar.",
+    "howHostedNote": "¿Sin programar? Con LAB le sumás a tu sitio widgets premium — cualquiera de nuestras más de 30 secciones — y los editás online.",
     "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
     "paymentsBody": "Pagás con Mercado Pago en pesos, o con tarjeta en dólares a través de Paddle. No vemos ni guardamos los datos de tu tarjeta.",
@@ -537,7 +541,7 @@
     "contactErrGeneric": "No se pudo enviar. Podés intentarlo de nuevo.",
     "contactErrNetwork": "Sin conexión: el mensaje sale cuando vuelva la red.",
     "contactErrConfig": "El formulario aún no está configurado. Mientras tanto, por email.",
-    "labBodyBefore": "Configurás un widget en LAB y lo mostrás en el sitio que ya tenés con una línea de código — sin bajar nada, sin tocar tu sitio. Lo editás desde el ",
+    "labBodyBefore": "Configurás un widget en LAB y lo mostrás en tu sitio con una línea de código — sin bajar nada, sin tocar tu sitio. Lo editás desde el ",
     "labBodyLink": "Lab",
     "labBodyAfter": ".",
     "labEyebrow": "Sin descargar nada",
@@ -1203,7 +1207,7 @@
         }
       }
     },
-    "labNote": "Armás la página con nuestras secciones y la descargás. ¿Ya tenés sitio y querés sumarle secciones sin código?",
+    "labNote": "Armás la página con nuestras secciones y te llevás el código. ¿Sin programar, para sumarle secciones a tu sitio?",
     "labNoteLink": "Eso es LAB →",
     "separateAnchor": "Comprar por separado {{models}}: {{price}}. Acá te llevás solo las secciones que elegiste, ya editadas.",
     "inCartNote": "Esta composición está en el carrito: lo que edites acá se actualiza solo.",
