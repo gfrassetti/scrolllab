@@ -36,6 +36,8 @@ export default function BubbleBenefits({
   benefits,
   bg = '#2c4bff',
   fg,
+  showBubbles = 'on',
+  bubbleColor,
 }) {
   const root = useRef(null)
   const bubblesRef = useRef(null)
@@ -75,6 +77,7 @@ export default function BubbleBenefits({
       })
 
       // Las burbujas de vidrio de siempre, más ralas: acompañan, no tapan las tarjetas.
+      if (showBubbles === 'off') return undefined
       return riseBubbles(bubblesRef.current, root.current, {
         size: [28, 90],
         every: 0.8,
@@ -82,14 +85,14 @@ export default function BubbleBenefits({
         pool: 12,
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [showBubbles], revertOnUpdate: true },
   )
 
   return (
     <section
       ref={root}
       className="relative z-[3] px-5 py-24 md:px-10 md:py-36"
-      style={{ backgroundColor: bg, color: fg || undefined }}
+      style={{ backgroundColor: bg, color: fg || undefined, ...(fg ? { '--color-foam': fg } : {}) }}
     >
       {/* Wavy top edge: this section rises over the flavors' canvas and hides the bottle. */}
       <svg
@@ -104,7 +107,8 @@ export default function BubbleBenefits({
       <div
         ref={bubblesRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden text-foam/45"
+        className={`pointer-events-none absolute inset-0 overflow-hidden ${bubbleColor ? '' : 'text-foam/45'}`}
+        style={bubbleColor ? { color: `color-mix(in srgb, ${bubbleColor} 45%, transparent)` } : undefined}
       />
 
       <div data-benefit-head>

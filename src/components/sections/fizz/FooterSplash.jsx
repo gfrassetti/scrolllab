@@ -25,6 +25,8 @@ export default function FooterSplash({
   note = 'Placeholder closing note. Tell people where to go next — swap this text and the links for your own.',
   backToTop = 'Back to top ↑',
   contactLabel = 'Contact',
+  showBubbles = 'on',
+  bubbleColor,
 }) {
   const root = useRef(null)
   const bubblesRef = useRef(null)
@@ -46,9 +48,10 @@ export default function FooterSplash({
       })
 
       // Las burbujas de vidrio, las mismas que en el resto de la página.
+      if (showBubbles === 'off') return undefined
       return riseBubbles(bubblesRef.current, root.current)
     },
-    { scope: root },
+    { scope: root, dependencies: [showBubbles], revertOnUpdate: true },
   )
 
   return (
@@ -57,7 +60,12 @@ export default function FooterSplash({
       className="relative flex min-h-svh flex-col overflow-hidden px-5 pt-24 pb-0 md:px-10 md:pt-28"
       style={{ backgroundColor: bg, color: fg }}
     >
-      <div ref={bubblesRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      <div
+        ref={bubblesRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={bubbleColor ? { color: bubbleColor } : undefined}
+      />
 
       <div className="relative grid gap-12 md:grid-cols-12">
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:col-span-8 md:grid-cols-3">

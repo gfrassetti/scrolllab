@@ -85,6 +85,12 @@ export default function HeroBubbles({
   bg,
   fg,
   accent,
+  /** Capas que se pueden sacar ('off') y colores de la botella y las burbujas. */
+  showBubbles = 'on',
+  showMarquee = 'on',
+  bubbleColor,
+  capColor,
+  printColor,
 }) {
   const root = useRef(null)
   const canvasRef = useRef(null)
@@ -114,7 +120,7 @@ export default function HeroBubbles({
         dracoPath,
       })
       // The hero sets the look of the stage (color, drink, print).
-      stage.configure({ flavor: flavorCfg, brand: canLabel, image: canImage })
+      stage.configure({ flavor: flavorCfg, brand: canLabel, image: canImage, capColor, printColor, bubbleColor })
       if (stage.canvas !== canvasRef.current) canvasRef.current.style.display = 'none'
       const { scene, camera, color: stageColor } = stage
       let { W, H, narrow, dpr } = stage.size()
@@ -186,6 +192,7 @@ export default function HeroBubbles({
       marqueeMesh.visible = false
       camera.add(marqueeMesh)
       let marqueeWidth = 0
+      const withMarquee = showMarquee !== 'off' && String(marquee || '').trim() !== ''
       const layoutMarquee = () => {
         marqueeMesh.material.uniforms.map.value?.dispose()
         const drawn = drawTitleLine(String(marquee).toUpperCase(), {
@@ -256,7 +263,7 @@ export default function HeroBubbles({
       const bubbleMesh = new THREE.InstancedMesh(
         new THREE.SphereGeometry(1, 32, 20),
         new THREE.ShaderMaterial({
-          uniforms: { uTint: { value: new THREE.Color(FOAM) } },
+          uniforms: { uTint: { value: new THREE.Color(bubbleColor || FOAM) } },
           vertexShader: BUBBLE_VERTEX,
           fragmentShader: BUBBLE_FRAGMENT,
           transparent: true,
@@ -265,6 +272,7 @@ export default function HeroBubbles({
         bubbleCount + burstCount,
       )
       bubbleMesh.frustumCulled = false
+      bubbleMesh.visible = showBubbles !== 'off'
       scene.add(bubbleMesh)
       const bubbleDummy = new THREE.Object3D()
       const spawnBubble = (b, scatter) => {
@@ -384,7 +392,7 @@ export default function HeroBubbles({
           boost += (1 + Math.min(speed * 0.06, 2.5) - boost) * 0.12
 
           stage.setPose('hero', heroPose(time, look), 1, 0)
-          marqueeMesh.visible = state.m > 0.001 && state.m < 0.999
+          marqueeMesh.visible = withMarquee && state.m > 0.001 && state.m < 0.999
           marqueeMesh.position.x = lerp(
             W / 2 + marqueeWidth / 2,
             -(W / 2 + marqueeWidth / 2),
@@ -512,7 +520,10 @@ export default function HeroBubbles({
     },
     {
       scope: root,
-      dependencies: [resolvedFlavor, bg, fg, accent, modelUrl, envUrl, dracoPath, canImage, canLabel, title, marquee],
+      dependencies: [
+        resolvedFlavor, bg, fg, accent, modelUrl, envUrl, dracoPath, canImage, canLabel, title, marquee,
+        showBubbles, showMarquee, bubbleColor, capColor, printColor,
+      ],
       revertOnUpdate: true,
     },
   )

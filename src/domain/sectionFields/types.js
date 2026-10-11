@@ -11,8 +11,8 @@
  * @typedef {Object} SectionField
  * @property {string} key
  * @property {string} label
- * @property {'text' | 'textarea' | 'select' | 'image' | 'url' | 'color' | 'href' | 'list'} type
- * @property {SectionFieldOption[]} [options] Solo `select`.
+ * @property {'text' | 'textarea' | 'select' | 'toggle' | 'image' | 'url' | 'color' | 'href' | 'list'} type
+ * @property {SectionFieldOption[]} [options] `select` y `toggle` (on/off).
  * @property {number} [max] Solo `list`: tope de filas.
  * @property {SectionSubField[]} [item] Solo `list`: los campos de cada fila.
  * @property {boolean} [fromText] Solo `list`: antes era un textarea «Texto | #ancla»

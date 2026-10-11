@@ -8,7 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { PRODUCTS } from '../server/catalog.js'
-import { ASSET_URL_KEYS, COLOR_PROP_KEYS, isHrefKey } from '../server/sectionFields.js'
+import { ASSET_URL_KEYS, COLOR_PROP_KEYS, isHrefKey, isToggleKey } from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
   CUSTOM_BASE_PRICE_USD,
@@ -129,6 +129,12 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
     const ref = `${id}.${field.key}`
     if (field.type === 'href' && !isHrefKey(field.key)) {
       fail('props', `'${ref}' es href pero el server lo valida como texto: renombrala a *Href o sumá la regla`)
+    }
+    if (field.type === 'toggle' && !isToggleKey(field.key)) {
+      fail('props', `'${ref}' es un interruptor pero el server no lo reconoce: el nombre tiene que empezar con show (showBubbles…)`)
+    }
+    if (field.type !== 'toggle' && isToggleKey(field.key)) {
+      fail('props', `'${ref}' se llama show… pero no es un interruptor: el server lo limitaría a on/off`)
     }
     if (field.type === 'color' && !COLOR_PROP_KEYS.has(field.key)) {
       fail('props', `'${ref}' es color pero el server lo valida como texto: usá bg/fg/accent o sumá la clave a COLOR_PROP_KEYS`)

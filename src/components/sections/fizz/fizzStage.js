@@ -7,8 +7,10 @@ import {
   createBottle,
   createStageShadow,
   disposeObject,
+  FOAM,
   loadBottleModel,
   loadHdrEnv,
+  PRINT_INK,
 } from './bottleKit'
 
 /**
@@ -372,13 +374,17 @@ function createStage({
     },
 
     /** Brand + stage colors from the section that sets the look (the hero). */
-    configure({ flavor: next, brand: nextBrand, image: nextImage = '' }) {
+    configure({ flavor: next, brand: nextBrand, image: nextImage = '', capColor, printColor, bubbleColor }) {
       if (next) {
         color.set(next.bg)
         bottle.colors.tint.set(next.liquid)
         bottle.colors.veil.set(next.bg).lerp(new THREE.Color(0xffffff), 0.6)
         bottle.colors.seal.set(next.bg).multiplyScalar(0.5)
       }
+      // Lo que el hero deja editar de la botella (vacío: el de la demo).
+      bottle.materials.cap.color.set(capColor || FOAM)
+      bottle.materials.label.color.set(printColor || PRINT_INK)
+      bottle.materials.fizz.color.set(bubbleColor || FOAM)
       if (nextBrand !== undefined) cfg.brand = nextBrand
       cfg.image = nextImage
       paintPrint()

@@ -1,4 +1,4 @@
-import { model3dHelp, navLinks, FORM_ENDPOINT_HELP } from '../helpers.js'
+import { model3dHelp, navLinks, FORM_ENDPOINT_HELP, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -16,7 +16,7 @@ export const FIZZ_FIELDS = {
     { key: 'menuLabel', label: 'Botón de menú — nombre para lectores de pantalla', type: 'text' },
     { key: 'closeLabel', label: 'Botón de cerrar — nombre para lectores de pantalla', type: 'text' },
     { key: 'menuBg', label: 'Menú — fondo', type: 'color' },
-    { key: 'menuInk', label: 'Menú — texto y botón', type: 'color' },
+    { key: 'menuInk', label: 'Menú — texto y botón (vacío: el color del hero)', type: 'color' },
   ],
   'fizz/HeroBubbles': [
     { key: 'title', label: 'Title', type: 'text' },
@@ -27,6 +27,9 @@ export const FIZZ_FIELDS = {
     { key: 'cta', label: 'CTA', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
     { key: 'marquee', label: 'Frase que cruza la pantalla', type: 'text' },
+    toggle('showMarquee', 'Frase que cruza la pantalla — mostrar'),
+    toggle('showBubbles', 'Burbujas'),
+    { key: 'bubbleColor', label: 'Burbujas — color', type: 'color' },
     { key: 'canLabel', label: 'Marca en la etiqueta', type: 'text' },
     {
       key: 'flavor',
@@ -44,6 +47,8 @@ export const FIZZ_FIELDS = {
     { key: 'bg', label: 'Color de fondo (pisa el del sabor)', type: 'color' },
     { key: 'fg', label: 'Color de texto (pisa el del sabor)', type: 'color' },
     { key: 'accent', label: 'Color del líquido (pisa el del sabor)', type: 'color' },
+    { key: 'capColor', label: 'Botella — color de la tapa', type: 'color' },
+    { key: 'printColor', label: 'Botella — color de la serigrafía', type: 'color' },
     {
       key: 'modelUrl',
       label: 'Botella 3D — modelo propio (.glb)',
@@ -57,8 +62,9 @@ export const FIZZ_FIELDS = {
   ],
   'fizz/FlavorWorlds': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'startBg', label: 'Color de entrada (el del final del hero)', type: 'color' },
-    { key: 'startInk', label: 'Texto sobre el color de entrada', type: 'color' },
+    { key: 'startBg', label: 'Color de entrada (vacío: el del hero)', type: 'color' },
+    { key: 'startInk', label: 'Texto sobre el color de entrada (vacío: el del hero)', type: 'color' },
+    { key: 'startLiquid', label: 'Bebida al entrar (vacío: la del hero)', type: 'color' },
     { key: 'brand', label: 'Marca en la serigrafía', type: 'text' },
     { key: 'cta', label: 'CTA', type: 'text' },
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
@@ -98,8 +104,8 @@ export const FIZZ_FIELDS = {
   'fizz/BubbleBenefits': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
-    { key: 'bg', label: 'Color de fondo', type: 'color' },
-    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'bg', label: 'Color de fondo (vacío: el del hero)', type: 'color' },
+    { key: 'fg', label: 'Color de texto (vacío: el del hero)', type: 'color' },
     {
       key: 'benefits',
       label: 'Beneficios',
@@ -111,6 +117,8 @@ export const FIZZ_FIELDS = {
         { key: 'color', label: 'Color del punto', type: 'color' },
       ],
     },
+    toggle('showBubbles', 'Burbujas'),
+    { key: 'bubbleColor', label: 'Burbujas — color', type: 'color' },
   ],
   'fizz/CanCarousel': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -131,12 +139,17 @@ export const FIZZ_FIELDS = {
         { key: 'image', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'cardInk', label: 'Texto sobre el color del sabor (al pasar el mouse)', type: 'color' },
+    { key: 'labelBg', label: 'Lata dibujada (filas sin foto) — etiqueta', type: 'color' },
+    { key: 'labelInk', label: 'Lata dibujada (filas sin foto) — texto', type: 'color' },
   ],
   'fizz/PopManifesto': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
     { key: 'text', label: 'Text', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de las palabras que se tiñen (vacío: los azules de la demo)', type: 'color' },
   ],
   'fizz/ContactSteps': [
     { key: 'nameTitle', label: 'Paso 1 — pregunta', type: 'text' },
@@ -162,6 +175,16 @@ export const FIZZ_FIELDS = {
     { key: 'endpoint', label: 'Adónde se envía (URL)', type: 'url', help: FORM_ENDPOINT_HELP },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'stepColors',
+      label: 'Colores de los pasos (en orden; vacío: los de la demo)',
+      type: 'list',
+      max: 6,
+      item: [{ key: 'color', label: 'Color', type: 'color' }],
+    },
+    { key: 'errorColor', label: 'Color de los errores', type: 'color' },
+    toggle('showBubbles', 'Burbujas'),
+    { key: 'bubbleColor', label: 'Burbujas — color', type: 'color' },
   ],
   'fizz/FooterSplash': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
@@ -170,8 +193,8 @@ export const FIZZ_FIELDS = {
     { key: 'legal', label: 'Legal', type: 'text' },
     { key: 'note', label: 'Nota de cierre', type: 'textarea' },
     { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
-    { key: 'bg', label: 'Color de fondo', type: 'color' },
-    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'bg', label: 'Color de fondo (vacío: el del hero)', type: 'color' },
+    { key: 'fg', label: 'Color de texto (vacío: el del hero)', type: 'color' },
     {
       key: 'links',
       label: 'Enlaces',
@@ -183,5 +206,7 @@ export const FIZZ_FIELDS = {
       ],
     },
     { key: 'contactLabel', label: 'Contacto — título', type: 'text' },
+    toggle('showBubbles', 'Burbujas'),
+    { key: 'bubbleColor', label: 'Burbujas — color (vacío: el del texto)', type: 'color' },
   ],
 }

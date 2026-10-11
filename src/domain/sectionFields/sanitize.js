@@ -184,7 +184,7 @@ export function sanitizeProps(sectionId, props) {
       continue
     }
     if (!trimmed) continue
-    if (field.type === 'select') {
+    if (field.type === 'select' || field.type === 'toggle') {
       const ok = (field.options || []).some((o) => o.value === trimmed)
       if (!ok) continue
     }

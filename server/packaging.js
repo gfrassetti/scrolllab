@@ -13,6 +13,7 @@ import { recipeSectionId } from './catalog.js'
 // Shared with the builder preview on purpose: if the two resolved `auto`
 // differently, the ZIP would not match what the user approved on screen.
 import { resolveSectionTheme } from '../src/domain/sectionTheme.js'
+import { linkedFizzProps } from '../src/domain/fizzPalette.js'
 import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
 import { checkoutPropsFromItems } from '../src/domain/checkoutProps.js'
 // El mismo fondo por modelo que pinta el preview del builder.
@@ -838,6 +839,9 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
 
   // Same order the preview used, so `auto` resolves to the same neighbour.
   const modelIds = entries.map((entry) => String(entry.id || '').split('/')[0])
+  // La paleta que FIZZ toma del hero (src/domain/fizzPalette.js): el mismo
+  // cálculo que el preview.
+  const paletteEntries = entries.map((entry) => ({ sectionId: entry.id, props: entry.props }))
 
   entries.forEach((entry, i) => {
     const sectionId = entry.id
@@ -882,10 +886,12 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
     const wrapper = modelWrapperClass(model)
     const Comp = `${component}_${model}`
     const theme = resolveSectionTheme(sectionId, entry.props, modelIds, i)
+    const linked = linkedFizzProps(sectionId, entry.props, paletteEntries)
+    const baseProps = Object.keys(linked).length ? { ...linked, ...(entry.props || {}) } : entry.props
     const ownProps =
       sectionId === 'commerce/ProductGrid'
-        ? stripCheckoutProps(entry.props)
-        : entry.props
+        ? stripCheckoutProps(baseProps)
+        : baseProps
     const hoist = hoistFor(component)
     const attrs = propsToJsx(theme ? { ...ownProps, theme } : ownProps, (key, list) => {
       const name = hoist(key, list)

@@ -343,8 +343,8 @@ describe('getSectionFields', () => {
         assert.ok(field.key, `${id}: campo sin key`)
         assert.ok(field.label, `${id}.${field.key}: campo sin label`)
         assert.ok(field.type, `${id}.${field.key}: campo sin type`)
-        if (field.type === 'select') {
-          assert.ok(field.options?.length, `${id}.${field.key}: select sin opciones`)
+        if (field.type === 'select' || field.type === 'toggle') {
+          assert.ok(field.options?.length, `${id}.${field.key}: ${field.type} sin opciones`)
         }
         if (field.type === 'list') {
           assert.ok(field.item?.length, `${id}.${field.key}: list sin sub-campos`)

@@ -8,6 +8,28 @@
  */
 
 /**
+ * Interruptor de una capa decorativa (burbujas, partículas, marquesina…): el
+ * comprador decide si la deja o la saca. Se guarda como texto `'on'`/`'off'`
+ * (como un select: así pasa igual por el editor, el servidor, LAB y el ZIP) y
+ * la clave empieza con `show` (el servidor la valida por nombre). La sección
+ * lee `showX !== 'off'`: sin valor, queda como en la demo.
+ * @param {string} key `show…`
+ * @param {string} label
+ * @param {FieldHelp} [help]
+ * @returns {SectionField}
+ */
+export const toggle = (key, label, help) => ({
+  key,
+  label,
+  type: 'toggle',
+  options: [
+    { value: 'on', label: 'Sí' },
+    { value: 'off', label: 'No' },
+  ],
+  ...(help ? { help } : {}),
+})
+
+/**
  * La palabra de barras de KIN (hero y footer): no es una tipografía, cada letra
  * está armada con la misma barra (ver docs/kin-template.md §3.1).
  * @type {FieldHelp}

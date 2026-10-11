@@ -29,7 +29,7 @@ const SAMPLE = {
 }
 
 function sampleFor(field) {
-  if (field.type === 'select') return field.options[0].value
+  if (field.type === 'select' || field.type === 'toggle') return field.options[0].value
   if (field.type === 'list') {
     const row = Object.fromEntries(field.item.map((sub) => [sub.key, SAMPLE[sub.type]]))
     return [row, row]

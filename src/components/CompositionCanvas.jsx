@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { getSection } from '../lib/sectionRegistry'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { withoutEmptyRows } from '../lib/sectionFields'
+import { linkedFizzProps } from '../domain/fizzPalette'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
 /**
@@ -16,9 +17,22 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue'
  */
 const REMOUNT_DELAY_MS = 350
 
+/**
+ * Lo que de verdad recibe cada sección: sus props, sin filas vacías, más lo que
+ * FIZZ toma del hero cuando el comprador lo dejó vacío (el mismo cálculo del
+ * empaquetador, para que el ZIP se parezca a esto). Entra en la firma de
+ * remontaje: cambiar el sabor del hero tiene que remontar también a las
+ * secciones que lo siguen.
+ */
+function effectiveProps(item, items) {
+  const own = withoutEmptyRows(item.props)
+  const linked = linkedFizzProps(item.sectionId, own, items)
+  return Object.keys(linked).length ? { ...linked, ...(own || {}) } : own
+}
+
 function signatures(items) {
   return JSON.stringify(
-    Object.fromEntries(items.map((item) => [item.uid, item.props || null])),
+    Object.fromEntries(items.map((item) => [item.uid, effectiveProps(item, items) || null])),
   )
 }
 
@@ -45,7 +59,7 @@ export default function CompositionCanvas({
         const Component = section.component
         // Lo mismo que manda la receta: una fila de lista recién agregada y
         // todavía vacía no se dibuja (tampoco viaja al ZIP).
-        const props = withoutEmptyRows(item.props)
+        const props = effectiveProps(item, list)
         const theme = resolveSectionTheme(
           item.sectionId,
           props,

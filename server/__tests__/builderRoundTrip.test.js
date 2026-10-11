@@ -103,7 +103,7 @@ PROBES.url = [...PROBES.asset, '/api/contact', 'https://formspree.io/f/abc', 'Mi
 PROBES.price = ['15000', '12.5', '12,50', ' 900 ', '15.000', '1e3', '-5', 'abc', '', '0', '1234567890']
 
 function probesFor(field) {
-  if (field.type === 'select') {
+  if (field.type === 'select' || field.type === 'toggle') {
     return [...(field.options || []).map((o) => o.value), 'nope', '']
   }
   if (field.type !== 'list') return PROBES[field.type] || PROBES.text
@@ -136,6 +136,7 @@ function validValue(field, tag) {
   const slug = tag.replace(/[^a-z0-9]+/gi, '-').toLowerCase()
   switch (field.type) {
     case 'select':
+    case 'toggle':
       return field.options[field.options.length - 1].value
     case 'color':
       return '#1a2b3c'

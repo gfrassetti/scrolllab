@@ -20,7 +20,7 @@ const defaultCans = [
 ]
 
 /** Fallback SVG if a bottle has no image override and no default asset. */
-function CanIllustration({ color, label }) {
+function CanIllustration({ color, label, labelBg = '#fff3e2', labelInk = '#241352' }) {
   // Label text must stay inside the label band whatever font loads, so size it
   // by length and pin the run length with textLength.
   const text = String(label || '')
@@ -32,9 +32,9 @@ function CanIllustration({ color, label }) {
   return (
     <svg viewBox="0 0 60 230" className="h-52 w-auto md:h-60" aria-hidden="true">
       <path d="M26 6 h8 v8 q0 3 -1 5 v9 q1 4 1 8 q8 14 10 30 v140 q0 12 -8 14 h-12 q-8 -2 -8 -14 v-140 q2 -16 10 -30 q0 -4 1 -8 v-9 q-1 -2 -1 -5 z" fill={color} opacity="0.85" />
-      <path d="M26 6 h8 v6 h-8 z" fill="#fff3e2" />
-      <rect x="14" y="112" width="32" height="62" fill="#fff3e2" opacity="0.95" />
-      <text x="30" y="143" textAnchor="middle" dominantBaseline="middle" fontFamily="Bricolage Grotesque, sans-serif" fontWeight="800" fontSize={fontSize} textLength={runLength} lengthAdjust="spacingAndGlyphs" fill="#241352">{text}</text>
+      <path d="M26 6 h8 v6 h-8 z" fill={labelBg} />
+      <rect x="14" y="112" width="32" height="62" fill={labelBg} opacity="0.95" />
+      <text x="30" y="143" textAnchor="middle" dominantBaseline="middle" fontFamily="Bricolage Grotesque, sans-serif" fontWeight="800" fontSize={fontSize} textLength={runLength} lengthAdjust="spacingAndGlyphs" fill={labelInk}>{text}</text>
     </svg>
   )
 }
@@ -57,6 +57,12 @@ export default function CanCarousel({
   cans,
   bg,
   fg,
+  /** La lata dibujada (filas sin foto): etiqueta y su texto. */
+  labelBg,
+  labelInk,
+  /** El botón de cada tarjeta y el texto sobre el color del sabor al pasar el mouse. */
+  ctaHref = '#',
+  cardInk,
 }) {
   const root = useRef(null)
 
@@ -90,7 +96,13 @@ export default function CanCarousel({
     <section
       ref={root}
       className="py-24 md:py-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{
+        backgroundColor: bg || undefined,
+        color: fg || undefined,
+        // Los tonos de la paleta (text-foam/60, bg-grape…) leen estas variables.
+        ...(fg ? { '--color-foam': fg } : {}),
+        ...(cardInk ? { '--color-grape': cardInk } : {}),
+      }}
     >
       <div className="mx-auto max-w-7xl px-5 text-center md:px-10">
         {eyebrow ? (
@@ -136,7 +148,7 @@ export default function CanCarousel({
                     className="max-h-60 w-auto max-w-[6rem] select-none object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]"
                   />
                 ) : (
-                  <CanIllustration color={can.color} label={canLabel} />
+                  <CanIllustration color={can.color} label={canLabel} labelBg={labelBg || undefined} labelInk={labelInk || undefined} />
                 )}
               </div>
               <h3 className="relative z-10 mt-7 font-brico text-lg font-extrabold uppercase tracking-tight text-foam transition-colors duration-500 group-hover:text-grape">
@@ -146,7 +158,7 @@ export default function CanCarousel({
                 {can.note}
               </p>
               <a
-                href="#"
+                href={ctaHref}
                 className="ui-press tpl-hit relative z-10 mt-6 rounded-full border border-transparent bg-foam/15 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-foam transition-[transform,background-color,color,border-color] duration-300 group-hover:scale-105 group-hover:border-grape/20 group-hover:bg-grape group-hover:text-foam"
               >
                 {cta}

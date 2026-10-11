@@ -100,6 +100,7 @@ function sentinelFor(field) {
     case 'price':
       return '123'
     case 'select':
+    case 'toggle':
       return field.options?.[0]?.value ?? ''
     case 'textarea':
       // Listas en texto («Texto | #ancla», uno por línea).

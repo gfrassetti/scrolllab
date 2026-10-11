@@ -11,6 +11,8 @@ import * as THREE from 'three'
  */
 
 export const FOAM = '#fff3e2'
+/** Tinta de la serigrafía de la botella (editable desde el hero: `printColor`). */
+export const PRINT_INK = '#f6f3ea'
 
 /** Small seeded PRNG: the same bottle in every canvas (wear, fizz) so a handoff has no seam. */
 export function seededRandom(seed) {
@@ -510,7 +512,7 @@ export function createBottle({ narrow = false, liquid, stage }) {
   // después del vidrio: si estuviera en la opaca, el vidrio la volvería a
   // refractar entre los trazos y se vería doble.
   const label = new THREE.MeshStandardMaterial({
-    color: 0xf6f3ea,
+    color: PRINT_INK,
     roughness: 0.38,
     envMapIntensity: 0.6,
     transparent: true,
@@ -521,13 +523,15 @@ export function createBottle({ narrow = false, liquid, stage }) {
 
   let labelFlipY = false
   let fizz = null
+  // Las burbujas de adentro: un material para todas, así el hero cambia su color.
+  const fizzMaterial = new THREE.MeshBasicMaterial({ color: FOAM, toneMapped: false, transparent: true, opacity: 0.85 })
 
   /** Hilos de burbujas que suben por dentro del líquido. */
   const buildFizz = (host, box) => {
     const count = narrow ? 50 : 90
     const mesh = new THREE.InstancedMesh(
       new THREE.SphereGeometry(1, 8, 6),
-      new THREE.MeshBasicMaterial({ color: FOAM, toneMapped: false, transparent: true, opacity: 0.85 }),
+      fizzMaterial,
       count,
     )
     const rnd = seededRandom(424242)
@@ -565,7 +569,7 @@ export function createBottle({ narrow = false, liquid, stage }) {
   }
 
   return {
-    materials: { glass, cap, stopper, seal, wire, label },
+    materials: { glass, cap, stopper, seal, wire, label, fizz: fizzMaterial },
     /** Live colors to tween when the flavor changes. */
     colors: {
       tint: liquidUniforms.uFizzTint.value,

@@ -211,8 +211,8 @@ export default function NavFizz({
       <a
         ref={brandRef}
         href="#top"
-        className="ui-press tpl-hit absolute top-5 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foam px-5 py-2 font-brico text-lg font-extrabold tracking-tight md:top-7"
-        style={{ color: menuInk }}
+        className="ui-press tpl-hit absolute top-5 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2 font-brico text-lg font-extrabold tracking-tight md:top-7"
+        style={{ color: menuInk, backgroundColor: menuBg }}
       >
         {brand}
       </a>
@@ -220,8 +220,8 @@ export default function NavFizz({
       <button
         {...triggerProps}
         aria-label={menuLabel}
-        className="ui-press fixed bottom-4 left-1/2 z-50 grid size-14 -translate-x-1/2 place-items-center rounded-[1.25rem] bg-foam transition-[border-radius,transform] duration-300 ease-out hover:rounded-full md:top-6 md:right-8 md:bottom-auto md:left-auto md:size-16 md:translate-x-0"
-        style={{ color: menuInk }}
+        className="ui-press fixed bottom-4 left-1/2 z-50 grid size-14 -translate-x-1/2 place-items-center rounded-[1.25rem] transition-[border-radius,transform] duration-300 ease-out hover:rounded-full md:top-6 md:right-8 md:bottom-auto md:left-auto md:size-16 md:translate-x-0"
+        style={{ color: menuInk, backgroundColor: menuBg }}
       >
         <MenuIcon />
       </button>

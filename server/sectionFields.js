@@ -95,9 +95,20 @@ export const COLOR_PROP_KEYS = new Set([
   'menuInk',
   'startBg',
   'startInk',
+  'startLiquid',
+  // Colores de capas y piezas que antes estaban fijos (regla: todo lo visible se edita).
+  'bubbleColor',
+  'capColor',
+  'printColor',
+  'labelBg',
+  'labelInk',
+  'cardInk',
+  'errorColor',
 ])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
+// Interruptor de una capa decorativa (campo `toggle`): `showBubbles`, `showGrain`…
+export const isToggleKey = (k) => /^show[A-Z]/.test(k)
 
 // Para el servidor un `textarea` es texto: solo color / href / image / price
 // tienen regla propia en sanitizeListValue.
@@ -208,6 +219,8 @@ export function sanitizeSectionProps(sectionId, props) {
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
+    // Interruptores de capas decorativas (`show…`): solo on / off.
+    if (isToggleKey(key) && trimmed !== 'on' && trimmed !== 'off') continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue
     cleaned[key] = trimmed
   }

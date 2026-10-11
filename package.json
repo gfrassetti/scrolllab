@@ -26,6 +26,8 @@
     "images": "node scripts/gen-image-variants.mjs",
     "check:builder": "node scripts/check-builder.mjs",
     "check:editable": "node scripts/check-editable.mjs",
+    "check:colors": "node scripts/check-colors.mjs",
+    "audit:editable": "node scripts/audit-editable.mjs",
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",
     "check:embed-stacks": "node scripts/check-embed-stacks.mjs",

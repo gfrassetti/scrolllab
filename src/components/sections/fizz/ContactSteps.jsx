@@ -22,13 +22,13 @@ const ARROW = (
 )
 
 /** Every other word of a heading takes a flavor color, rotating with the step. */
-function Colored({ text, shift }) {
+function Colored({ text, shift, palette = PALETTE }) {
   return String(text)
     .split(/\s+/)
     .filter(Boolean)
     .map((word, i, all) => (
       <Fragment key={`${word}-${i}`}>
-        <span style={i % 2 === 1 ? { color: PALETTE[(i + shift) % PALETTE.length] } : undefined}>
+        <span style={i % 2 === 1 ? { color: palette[(i + shift) % palette.length] } : undefined}>
           {word}
         </span>
         {i < all.length - 1 ? ' ' : null}
@@ -69,9 +69,17 @@ export default function ContactSteps({
   endpoint = '',
   bg = '#241352',
   fg = '#fff3e2',
+  /** Colores de los pasos (lista), del error y de las burbujas; burbujas on/off. */
+  stepColors,
+  errorColor,
+  showBubbles = 'on',
+  bubbleColor,
 }) {
   const root = useRef(null)
   const bubblesRef = useRef(null)
+  const ownSteps = Array.isArray(stepColors) ? stepColors.map((row) => row?.color).filter(Boolean) : []
+  const palette = ownSteps.length ? ownSteps : PALETTE
+  const errColor = errorColor || '#ff3ea5'
   const bodyRef = useRef(null)
   const fieldRef = useRef(null)
   const uid = useId()
@@ -96,7 +104,7 @@ export default function ContactSteps({
   // Ambient bubbles, the same glass ones as the footer.
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return undefined
+      if (prefersReducedMotion() || showBubbles === 'off') return undefined
       return riseBubbles(bubblesRef.current, root.current, {
         size: [28, 84],
         every: 1,
@@ -104,7 +112,7 @@ export default function ContactSteps({
         pool: 10,
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [showBubbles], revertOnUpdate: true },
   )
 
   // Each new question: the heading rises letter by letter, then the rest follows.
@@ -225,9 +233,14 @@ export default function ContactSteps({
       id="contact"
       ref={root}
       className="relative flex min-h-svh items-center justify-center overflow-hidden px-5 py-24 md:px-10"
-      style={{ backgroundColor: bg, color: fg }}
+      style={{ backgroundColor: bg, color: fg, '--color-foam': fg }}
     >
-      <div ref={bubblesRef} aria-hidden="true" className="pointer-events-none absolute inset-0 text-foam/35" />
+      <div
+        ref={bubblesRef}
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 ${bubbleColor ? '' : 'text-foam/35'}`}
+        style={bubbleColor ? { color: `color-mix(in srgb, ${bubbleColor} 35%, transparent)` } : undefined}
+      />
 
       <div ref={bodyRef} className="relative mx-auto w-full max-w-3xl text-center">
         {!done ? (
@@ -251,7 +264,7 @@ export default function ContactSteps({
           data-step-leave
           className="font-brico text-[clamp(2.4rem,7.5vw,6.5rem)] leading-[0.92] font-extrabold tracking-[-0.025em] uppercase"
         >
-          <Colored text={title} shift={done ? 0 : step} />
+          <Colored text={title} shift={done ? 0 : step} palette={palette} />
         </h2>
 
         {done ? (
@@ -330,7 +343,7 @@ export default function ContactSteps({
                 <span
                   aria-hidden="true"
                   className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-500 ease-out peer-focus:scale-x-100 motion-reduce:transition-none"
-                  style={{ backgroundColor: error ? '#ff3ea5' : PALETTE[step % PALETTE.length] }}
+                  style={{ backgroundColor: error ? errColor : palette[step % palette.length] }}
                 />
               </div>
 
@@ -359,7 +372,7 @@ export default function ContactSteps({
               ) : (
                 <span aria-hidden="true" />
               )}
-              <p id={`${uid}-error`} role="alert" className="text-right" style={{ color: '#ff3ea5' }}>
+              <p id={`${uid}-error`} role="alert" className="text-right" style={{ color: errColor }}>
                 {sending ? sendingLabel : error}
               </p>
             </div>

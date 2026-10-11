@@ -5,6 +5,21 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 // The hero's cobalt family, light enough to read on the dark grape stage.
 const WORD_COLORS = ['#9db8ff', '#6c86ff', '#c9d6ff', '#4f6bff']
 
+/** `#rrggbb` mezclado con blanco (t > 0) o negro (t < 0): la familia de un color. */
+function shade(hex, t) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim())
+  if (!m) return hex
+  const n = parseInt(m[1], 16)
+  const target = t > 0 ? 255 : 0
+  const k = Math.abs(t)
+  const ch = (v) => Math.round(v + (target - v) * k).toString(16).padStart(2, '0')
+  return `#${ch((n >> 16) & 255)}${ch((n >> 8) & 255)}${ch(n & 255)}`
+}
+
+/** Las 4 tintas de las palabras: las de la demo, o la familia del acento. */
+const wordColors = (accent) =>
+  accent ? [shade(accent, 0.45), shade(accent, 0.15), shade(accent, 0.7), accent] : WORD_COLORS
+
 /**
  * PopManifesto — a giant paragraph that inks in word by word as you
  * scroll, with every fourth-ish word landing in a cobalt tone.
@@ -14,8 +29,11 @@ export default function PopManifesto({
   text = 'Lorem ipsum, but honest: this manifesto is placeholder text. It inks in word by word as you scroll and some words land in flavor colors — replace it with your own story from the builder or straight in the code.',
   bg,
   fg,
+  /** Color de las palabras que se tiñen (vacío: la familia cobalto de la demo). */
+  accent,
 }) {
   const root = useRef(null)
+  const tints = wordColors(accent)
 
   useGSAP(
     () => {
@@ -27,7 +45,7 @@ export default function PopManifesto({
       // Every few words gets a flavor color once it has inked in.
       split.words.forEach((word, i) => {
         if (i % 4 === 2) {
-          word.dataset.popColor = WORD_COLORS[(i / 4) % WORD_COLORS.length | 0]
+          word.dataset.popColor = tints[(i / 4) % tints.length | 0]
         }
       })
 
@@ -64,6 +82,7 @@ export default function PopManifesto({
       style={{
         background: bg || undefined,
         color: fg || undefined,
+        ...(fg ? { '--color-foam': fg } : {}),
         '--color-grape': bg || undefined,
         '--color-foam': fg || undefined,
       }}

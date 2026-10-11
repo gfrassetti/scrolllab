@@ -58,6 +58,34 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
     </span>
   ) : null
 
+  if (field.type === 'toggle') {
+    // Interruptor de una capa decorativa: sin valor queda prendido (la demo).
+    const on = value !== 'off'
+    return (
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        onClick={() => edit(on ? 'off' : 'on')}
+        className="mt-2 inline-flex min-h-11 items-center gap-3 text-sm text-ink"
+      >
+        <span
+          aria-hidden="true"
+          className={`relative inline-block h-6 w-11 shrink-0 rounded-full border transition-colors duration-200 ease-out ${
+            on ? 'border-ink bg-ink' : 'border-ink/30 bg-transparent'
+          }`}
+        >
+          <span
+            className={`absolute top-[2px] left-[2px] size-[18px] rounded-full transition-transform duration-200 ease-out motion-reduce:transition-none ${
+              on ? 'translate-x-5 bg-bone' : 'translate-x-0 bg-ink/45'
+            }`}
+          />
+        </span>
+        {on ? field.options?.[0]?.label : field.options?.[1]?.label}
+      </button>
+    )
+  }
+
   if (field.type === 'select') {
     return (
       <select
