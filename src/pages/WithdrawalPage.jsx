@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { api } from '../lib/api'
 import { useI18n } from '../i18n'
 import { formatAmount } from '../lib/pricing'
+import ScrollProgress from '../components/ScrollProgress'
 
 const fill = (text) => String(text ?? '').replaceAll('{{days}}', String(REFUND_DAYS))
 
@@ -143,6 +144,7 @@ export default function WithdrawalPage() {
 
   return (
     <div className="min-h-svh bg-bone px-5 py-10 text-ink md:px-10">
+      <ScrollProgress />
       <header className="mb-12 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-ink/15 pb-4">
         <Link
           to="/"

@@ -123,7 +123,7 @@ export default function CartPopover() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="true"
-        className={`ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.25em] hover:text-accent md:px-0 md:text-xs ${
+        className={`ui-press min-h-11 px-1.5 text-[11px] uppercase tracking-[0.12em] hover:text-accent sm:px-2 sm:tracking-[0.25em] md:px-0 md:text-xs ${
           open ? 'text-accent' : ''
         }`}
       >

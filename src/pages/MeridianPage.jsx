@@ -10,6 +10,7 @@ import Masterplan from '../components/sections/meridian/Masterplan'
 import Contact from '../components/sections/meridian/Contact'
 import Footer from '../components/sections/meridian/Footer'
 import { LangProvider } from '../components/sections/meridian/lang'
+import ScrollRail from '../components/ScrollRail'
 
 /**
  * Template model — "MERIDIAN" (WIP, first pass — Hero only)
@@ -32,6 +33,7 @@ export default function MeridianPage() {
     <LangProvider>
     <SmoothScrollProvider>
       <div id="top" className="meridian-world bg-[#dfd8cf] text-[#2a2622]">
+        <ScrollRail trackClassName="bg-[#2a2622]/10" fillClassName="bg-[#2a2622]" />
         <main>
           <Hero preloader="on" />
           <Concept />

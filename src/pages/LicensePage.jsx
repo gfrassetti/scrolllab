@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { SITE_NAME, SUPPORT_EMAIL } from '../lib/site'
 import { useT } from '../i18n'
+import ScrollProgress from '../components/ScrollProgress'
 
 /**
  * Licencia Regular — estilo marketplace de templates.
@@ -10,6 +11,7 @@ export default function LicensePage() {
 
   return (
     <div className="min-h-svh bg-bone px-5 py-10 text-ink md:px-10">
+      <ScrollProgress />
       <header className="mb-12 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-ink/15 pb-4">
         <Link
           to="/"

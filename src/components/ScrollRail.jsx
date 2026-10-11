@@ -10,10 +10,12 @@ const FINE_POINTER = '(hover: hover) and (pointer: fine)'
  * `hide-native-scrollbar` en <html>, ver src/index.css) y la reemplaza por un
  * riel fino que se llena según el progreso de la página.
  *
- * - `interactive` (default): se puede clickear o arrastrar para ir a otra
- *   parte de la página, como una barra nativa, y se ensancha en hover.
- * - `touch` en false (default): solo con mouse o trackpad. En táctil la barra
- *   nativa ya es una capa que aparece al scrollear; ahí no se monta nada.
+ * - Se ve en todos los dispositivos (también en el teléfono: es parte del
+ *   sitio, no un adorno de escritorio).
+ * - `interactive` (default): con mouse o trackpad se puede clickear o arrastrar
+ *   para ir a otra parte de la página, como una barra nativa, y se ensancha en
+ *   hover. En táctil es solo indicador: una franja de 12 px en el borde que
+ *   tomara toques le robaría el scroll al dedo.
  *
  * Cada template la tiñe con su paleta:
  *   <ScrollRail trackClassName="bg-ink/10" fillClassName="bg-accent" />
@@ -21,25 +23,23 @@ const FINE_POINTER = '(hover: hover) and (pointer: fine)'
 export default function ScrollRail({
   trackClassName = 'bg-current/10',
   fillClassName = 'bg-current',
-  interactive = true,
-  touch = false,
+  interactive: wantsInteractive = true,
 }) {
-  const [enabled, setEnabled] = useState(() =>
-    touch ? true : typeof window !== 'undefined' && window.matchMedia(FINE_POINTER).matches,
+  const [finePointer, setFinePointer] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(FINE_POINTER).matches,
   )
+  const interactive = wantsInteractive && finePointer
   const railRef = useRef(null)
   const fillRef = useRef(null)
 
   useEffect(() => {
-    if (touch) return undefined
     const mq = window.matchMedia(FINE_POINTER)
-    const onChange = () => setEnabled(mq.matches)
+    const onChange = () => setFinePointer(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
-  }, [touch])
+  }, [])
 
   useEffect(() => {
-    if (!enabled) return undefined
     const root = document.documentElement
     root.classList.add('hide-native-scrollbar')
     const fill = fillRef.current
@@ -55,12 +55,12 @@ export default function ScrollRail({
       trigger.kill()
       root.classList.remove('hide-native-scrollbar')
     }
-  }, [enabled])
+  }, [])
 
   // Click o arrastre: la posición vertical en el riel es la de la página.
   useEffect(() => {
     const rail = railRef.current
-    if (!enabled || !interactive || !rail) return undefined
+    if (!interactive || !rail) return undefined
     let dragging = false
     const scrollToPointer = (e, immediate) => {
       const max = document.documentElement.scrollHeight - window.innerHeight
@@ -95,9 +95,7 @@ export default function ScrollRail({
       rail.removeEventListener('pointerup', onUp)
       rail.removeEventListener('pointercancel', onUp)
     }
-  }, [enabled, interactive])
-
-  if (!enabled) return null
+  }, [interactive])
 
   return (
     <div

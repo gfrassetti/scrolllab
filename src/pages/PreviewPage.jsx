@@ -17,6 +17,7 @@ import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import CompositionCanvas from '../components/CompositionCanvas'
 import CompositionShopShell from '../components/CompositionShopShell'
 import { useT } from '../i18n'
+import ScrollProgress from '../components/ScrollProgress'
 
 /**
  * Reconstruye la composición de una compra desde la receta que quedó guardada
@@ -173,6 +174,7 @@ export default function PreviewPage() {
 
   return (
     <>
+      <ScrollProgress />
       {hasCommerce ? (
         <CompositionShopShell
           font={font}
