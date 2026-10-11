@@ -38,9 +38,12 @@ const CUSTOM_RECIPE = [
 
 // La tienda (grilla + ficha + carrito + checkout) con lo que el builder deja
 // cambiar de ella: colores libres, moneda y textos de las otras pantallas.
+// Con tipografía global (`font` en cada entrada, src/domain/design.js): Fraunces
+// no viene en el <link> base, así que el ZIP tiene que sumarla.
 const SHOP_RECIPE = [
-  'chapters/NavMinimal',
+  { id: 'chapters/NavMinimal', font: 'fraunces' },
   {
+    font: 'fraunces',
     id: 'commerce/ProductGrid',
     props: {
       currency: 'USD',
@@ -52,7 +55,7 @@ const SHOP_RECIPE = [
       checkoutEmailLabel: 'Correo',
     },
   },
-  'chapters/FooterCTA',
+  { id: 'chapters/FooterCTA', font: 'fraunces' },
 ]
 
 const MIME = {
