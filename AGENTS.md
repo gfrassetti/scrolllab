@@ -223,6 +223,7 @@ npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bund
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
+npm run screen:lab     # ¿esta sección anda como widget de LAB? La embebe en un sitio ajeno con movimiento (1280 y 390), anota FLOW/PIN, alto, texto que nunca se ve y errores, y deja láminas en storage/lab-screen/
 npm run check:colors   # todo lo VISIBLE de cada sección sigue a sus campos de color (testigos en Chromium: texto, fondo, borde, SVG, contorno); lo de canvas va a mano
 npm run check:shop     # la tienda: grilla (etiqueta, agotado), ficha en sus 3 modelos (galería, muestras de color, cantidad, acordeón, ficha técnica, relacionados), carrito y checkout
 npm run check:forms    # los formularios de contacto (y cada tipo del general: presupuesto, newsletter, que te llamen, reserva, campos extra): errores, POST, éxito y error (endpoint simulado)
@@ -364,6 +365,12 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 Modo prueba (`QA_BUYER_EMAILS`, `src/domain/qa.js`): `/test`, `/builder-test` y `/lab-test` venden al mínimo ($1 template y builder; LAB $15/$30/$60 —el piso de MP para suscripciones es $15—, con la prueba gratis de LAB real: 7 días en la primera suscripción de la cuenta) solo a esas cuentas, con plata real y fuera de las métricas — para probar en producción compra, mails y reembolsos. Detalle en `docs/DEPLOY.md`.
 
 LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
+
+Widgets de LAB (`HOSTABLE_SECTIONS`, `server/sections.js` + `embed/src/registry.js`): entran también las pineadas y
+las de escenario sticky (el frame pasa a modo PIN: una pantalla pegada en el sitio que recorre su propio
+documento) y los formularios: en LAB mandan a `POST /api/embed/:key/form` y el mensaje le llega por mail al dueño
+del widget (`src/domain/labForms.js`, `server/services/hosted/forms.js`). Los `vh` (del CSS y de los `style` inline) miden la pantalla del sitio, no el
+iframe. Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
 Packs de LAB (`/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. No confundir con el bundle de templates (compra de código) ni con el Builder (código fuente): /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB.
 

@@ -22,6 +22,7 @@ import {
   deleteHostedInstance,
   setHostedSuspended,
 } from '../../services/hosted/instances.js'
+import { deliverLabForm } from '../../services/hosted/forms.js'
 import {
   PACK_MAX_ITEMS,
   PACK_MAX_PER_USER,
@@ -143,6 +144,22 @@ export function createHostedRouter({ config, limits }) {
 
       res.set('Cache-Control', PUBLIC_CACHE)
       res.json(body)
+    }),
+  )
+
+  // Público: un formulario de LAB (lo manda el frame del embed). El mensaje le
+  // llega por mail al dueño del widget; CORS abierto en createCors.
+  router.post(
+    '/api/embed/:key/form',
+    limits.labForm,
+    asyncHandler(async (req, res) => {
+      const result = await deliverLabForm({
+        key: String(req.params.key || ''),
+        host: requestHost(req),
+        body: req.body,
+        config,
+      })
+      res.json(result)
     }),
   )
 

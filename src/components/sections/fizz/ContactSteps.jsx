@@ -116,9 +116,11 @@ export default function ContactSteps({
   )
 
   // Each new question: the heading rises letter by letter, then the rest follows.
+  // The field takes focus only once the visitor is answering (not on page load:
+  // that would pull the keyboard and the page's focus to a section far below).
   useGSAP(
     () => {
-      const field = fieldRef.current
+      const field = step > 0 || status !== 'idle' ? fieldRef.current : null
       if (prefersReducedMotion()) {
         field?.focus?.({ preventScroll: true })
         return undefined

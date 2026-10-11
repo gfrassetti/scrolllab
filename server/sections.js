@@ -97,13 +97,57 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'kin/Programme',
   'kin/Press',
   'kin/Visit',
-  // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
-  // scroll de window, boot que bloquea scroll): dentro del iframe del embed
-  // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:
-  // `chapters/HorizontalPanels`. Necesitan una "embed edition" acotada primero
-  // (ver docs/hosted-component-plan.md).
-  // Tampoco secciones scrub sin pin (ManifestoReveal, QuoteBreak, StatField…):
-  // en FLOW el frame no scrollea, el scrub queda congelado en el estado inicial.
+  // Formularios (src/domain/labForms.js): en LAB el frame los apunta a
+  // /api/embed/:key/form y el mensaje le llega por mail al dueño del widget.
+  'contact/ContactForm',
+  'meridian/Contact',
+  'fizz/ContactSteps',
+  // Fase I — `npm run screen:lab` sobre las que quedaban (docs/hosted-component-plan.md).
+  // Scrub sin pin: siguen el scroll del sitio (scrollerProxy del frame).
+  // Pineadas y con escenario sticky: el frame entra en modo PIN (una pantalla
+  // pegada que recorre su propio documento), así que pin, sticky y scrub corren
+  // como en una página común. Portadas incluidas: un widget puede ir arriba de todo.
+  'chapters/HeroKinetic',
+  'chapters/ManifestoReveal',
+  'chapters/StickyImageStory',
+  'chapters/HorizontalPanels',
+  'chapters/StackingCards',
+  'chapters/QuoteBreak',
+  'nocturne/HeroCinematic',
+  'nocturne/ZoomPortal',
+  'nocturne/StickyWordCycle',
+  'fizz/PopManifesto',
+  'velocity/HeroStrike',
+  'velocity/TrackMerge',
+  'atelier/VisionShutter',
+  'atelier/SelectedWork',
+  'unity/HeroTwin',
+  'unity/MosaicSlider',
+  'unity/UniversalLang',
+  'unity/LanguageBlock',
+  'unity/StageLines',
+  'unity/FooterTrophy',
+  'atrium/HeroMassing',
+  'atrium/ClarityPair',
+  'atrium/BlueprintDraw',
+  'atrium/ProjectRail',
+  'atrium/ProcessPin',
+  'atrium/PeopleScatter',
+  'atrium/OrbitRing',
+  'atrium/StatField',
+  'meridian/Hero',
+  'meridian/Concept',
+  'meridian/GallerySlider',
+  'meridian/Location',
+  'kin/Intro',
+  'kin/Collection',
+  // Fuera, por diseño: los `Nav*` (un header fijo suelto no tiene sentido), lo
+  // que mete Three.js en el frame (FlavorWorlds, HeroBubbles, HeroMeaning,
+  // ServicesStone, HeroThree: el bundle es único y lo pagaría cada embed),
+  // `kin/Hero` (abre la página: su entrada toma el scroll y la barra de navegación
+  // fija se transforma; en un iframe solo quedan las barras),
+  // `meridian/Masterplan` (puntos dibujados sobre una foto aérea fija) y
+  // `commerce/ProductGrid` (router, carrito y checkout del sitio).
 ])
 
 export const HOSTABLE_SECTION_SET = new Set(HOSTABLE_SECTIONS)

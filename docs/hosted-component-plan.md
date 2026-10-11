@@ -984,3 +984,121 @@ sección más los tres viewports (los 12 casos nuevos pasan). Frame: 94 KB gzip
 
 Para publicar: `npm run build:embed` y desplegar el frame como siempre; el
 versionado del embed es el del frame, no hay migración de configs.
+
+---
+
+## Fase I — pineadas, sticky, formularios y fotos demo: 73 hosteables (2026-10-11)
+
+37 nuevos. Formularios: `contact/ContactForm` · `meridian/Contact` ·
+`fizz/ContactSteps`. Portadas: `chapters/HeroKinetic` · `nocturne/HeroCinematic` ·
+`velocity/HeroStrike` · `unity/HeroTwin` · `atrium/HeroMassing` · `meridian/Hero`.
+Secciones: `chapters/ManifestoReveal` · `chapters/StickyImageStory` ·
+`chapters/HorizontalPanels` · `chapters/StackingCards` · `chapters/QuoteBreak` ·
+`nocturne/ZoomPortal` · `nocturne/StickyWordCycle` · `fizz/PopManifesto` ·
+`velocity/TrackMerge` · `atelier/VisionShutter` · `atelier/SelectedWork` ·
+`unity/MosaicSlider` · `unity/UniversalLang` · `unity/LanguageBlock` ·
+`unity/StageLines` · `atrium/ClarityPair` · `atrium/BlueprintDraw` ·
+`atrium/ProjectRail` · `atrium/ProcessPin` · `atrium/PeopleScatter` ·
+`atrium/OrbitRing` · `atrium/StatField` · `meridian/Concept` ·
+`meridian/GallerySlider` · `meridian/Location` · `kin/Intro` · `kin/Collection`.
+Cierres: `unity/FooterTrophy`.
+
+Quedan afuera, con el motivo: los `Nav*`; lo que mete Three.js en el bundle único
+del frame (`fizz/FlavorWorlds`, `fizz/HeroBubbles`, `atelier/HeroMeaning`,
+`atelier/ServicesStone`, `monolith/HeroThree`); `kin/Hero` (abre la página: su
+entrada toma el scroll y la barra fija se transforma, en un iframe solo quedan
+las barras); `meridian/Masterplan` (puntos sobre una foto aérea fija) y
+`commerce/ProductGrid` (router, carrito y checkout del sitio). RATIO, PLUM y
+SIGNAL no están en venta.
+
+### Cómo se eligieron: `npm run screen:lab`
+
+`scripts/screen-lab.mjs` hace el screening de Fase G en un comando: publica cada
+sección (las que se pasan, o todas las de `HOSTABLE_SECTIONS`) con sus props
+por default, la embebe en un sitio ajeno con una pantalla de texto arriba y otra
+abajo, y la recorre con movimiento completo a 1280 y 390 px. Anota el modo
+(FLOW / PIN), el alto del iframe contra el del contenido, el scroll horizontal,
+los errores del frame y, por cada texto, la opacidad máxima que llegó a tener en
+pantalla (`texto-oculto` = un reveal que nunca termina). Saca 4 capturas por
+ancho mientras la sección cruza y las junta en `storage/lab-screen/<id>.png`.
+Para probar candidatas se suman un rato a `HOSTABLE_SECTIONS` y al registro del
+embed. Un tope de pasos y de tiempo por sección: una que crece sin fin queda
+marcada (`trabada`) en vez de colgar la corrida.
+
+### Lo que el screening destapó (y se arregló en la plataforma, no por sección)
+
+- **`vh` inline.** Además del recorrido de StickyWordCycle, `meridian/Location`
+  (`minHeight: 'calc(100svh + 9rem)'`) crecía hasta los 6000 px y los huecos en
+  `svh` de ProjectRail se estiraban. El frame reescribe a `--sl-vh` cada `style`
+  que escribe la sección (`hostViewportUnitsInline`, un MutationObserver), igual
+  que el build hace con el CSS.
+- **Lenis en el frame.** El stub de `useLenis` del embed suma `stop()` /
+  `start()` (sin efecto: el scroll es del sitio). `kin/Hero` rompía al llamarlos.
+
+- **El modo PIN no andaba.** Al entrar en PIN el loader mueve el iframe adentro
+  de un contenedor alto, y mover un iframe con `appendChild` lo **recarga**: el
+  frame recargado arrancaba sin saber el alto del sitio, nunca decidía su modo,
+  ignoraba el `progress` y la sección quedaba en blanco. Ahora el loader usa
+  `moveBefore` (mueve sin recargar, Chrome 133+) y en PIN manda también el
+  viewport en cada cuadro, así un frame recargado se ubica igual.
+- **Sticky = PIN.** Una sección con `position: sticky` más alta que la pantalla
+  (un escenario pegado mientras pasa un recorrido) en FLOW no pega nunca: el
+  frame no scrollea. Peor si el recorrido es un `style={{ height: '400vh' }}`
+  inline (el build reescribe `vh` solo en el CSS): medía el propio iframe y
+  crecía sin fin (StickyWordCycle llegó a 33 millones de px). `decide()` ahora
+  elige PIN también para esas: el iframe queda de una pantalla pegada y el frame
+  recorre su propio documento como una página común — el sticky, los
+  `ScrollTrigger` y el `vh` inline andan sin tocar la sección.
+- **Scrub sin pin ya no se congela.** Lo que esta doc decía de ManifestoReveal,
+  QuoteBreak, PopManifesto, StatField… quedó viejo desde el `scrollerProxy` de
+  Fase C: los scrub siguen el scroll del sitio.
+- **Fotos demo.** El embed stubeaba toda imagen importada a `''` (cada widget
+  sin foto hasta que el cliente cargaba la suya). Ahora las fotos salen como
+  archivos aparte del frame (`assetsInlineLimit: 0`): el widget se ve como la
+  demo, cada embed baja solo las de su sección y el JS no crece. Siguen
+  stubeados 3D y video.
+- **Vista previa del editor.** El preview de `/lab/:id` dimensionaba el iframe a
+  su contenido: una pineada quedaba congelada y una sticky crecía sin fin. Ahora
+  el frame del preview decide igual que en el sitio: si es pineada o sticky,
+  pide una pantalla del alto del dispositivo (`scroll: true`) y se recorre
+  scrolleando adentro, con el aviso «Scrolleá adentro para ver la animación».
+
+### Formularios en LAB
+
+`contact/ContactForm` (con sus tipos y campos extra), `meridian/Contact` y
+`fizz/ContactSteps`. El visitante del sitio del cliente manda el formulario y el
+mensaje le llega por mail al dueño del widget, con reply-to al visitante.
+
+- `src/domain/labForms.js`: qué secciones son formulario, `endpoint` oculto en
+  LAB (el editor no lo muestra y los dos filtros lo tiran) y
+  `cleanLabFormMessage` (etiquetas legibles es/en, campo trampa, topes de
+  tamaño).
+- El frame les pone `endpoint = {api}/api/embed/:key/form?host=…`.
+- `POST /api/embed/:key/form` (`services/hosted/forms.js`): solo un widget
+  publicado, que hoy se sirve en ese dominio (mismas reglas que la config) y que
+  es formulario. 6 envíos cada 10 min por IP (`limits.labForm`) y 100 por día
+  por widget. CORS abierto y sin cookie (`createCors`, `requireSameOrigin` lo
+  exime). Mail: `buildLabFormMessage` (`emailTemplatesLab.js`), un evento por
+  envío.
+- El sandbox del iframe suma `allow-forms` (sin eso el submit ni se dispara).
+- ContactSteps ya no toma el foco al cargar (le robaba el foco a la página del
+  cliente y, en el teléfono, abría el teclado): solo desde la segunda pregunta.
+
+### LAB: selector agrupado
+
+Con 73 widgets el «Nuevo» es un `<select>` con grupos (Portadas,
+Secciones, Formularios, Cierres) y cada opción dice su modelo.
+
+### Tests
+
+- `server/__tests__/labForms.test.js`: limpieza del mensaje, el mail (asunto por
+  tipo, reply-to, escape), la ruta (preflight, CORS, widget no formulario,
+  borrador, dominio, vacío, trampa) y el tope diario.
+- `hostedSections.test.js`: `endpoint` no se guarda; los selects e interruptores
+  dentro de listas entran a la muestra.
+- e2e: PIN (HorizontalPanels) y sticky→PIN (StackingCards) se pegan, siguen el
+  scroll del sitio y sueltan al final; un formulario mandado desde el sitio
+  ajeno llega a la API y muestra el éxito; el chequeo responsive entiende PIN.
+- Los e2e del embed corren con el dev server prendido:
+  `E2E_API_PORT=8797 npm run test:e2e` (`embed/test/e2e/ports.mjs` manda a ese
+  puerto lo que las páginas de prueba piden a :8787).

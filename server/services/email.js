@@ -19,6 +19,7 @@ import {
   buildSubscriptionSuspended,
   buildSubscriptionPlanChanged,
 } from './emailTemplatesBilling.js'
+import { buildLabFormMessage } from './emailTemplatesLab.js'
 
 // Los mails se arman en emailTemplates.js; quien los necesita sin enviar
 // (tests, vista previa) los sigue importando de acá.
@@ -38,16 +39,17 @@ export {
 /**
  * Manda un mail transaccional armado (asunto, html, texto). `key` es la clave
  * de idempotencia de Resend: el mismo evento no sale dos veces.
- * @param {{ to: string, message: { subject: string, html: string, text: string }, tag: string, key: string, config: any, client?: any }} args
+ * `replyTo` pisa el de la config (un formulario de LAB: responder le contesta al visitante).
+ * @param {{ to: string, message: { subject: string, html: string, text: string }, tag: string, key: string, config: any, client?: any, replyTo?: string | null }} args
  */
-async function sendTransactional({ to, message, tag, key, config, client }) {
+async function sendTransactional({ to, message, tag, key, config, client, replyTo }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
   const resend = client || new Resend(config.email.apiKey)
   const response = await resend.emails.send(
     {
       from: config.email.from,
       to: [to],
-      replyTo: config.email.replyTo || undefined,
+      replyTo: replyTo || config.email.replyTo || undefined,
       subject: message.subject,
       html: message.html,
       text: message.text,
@@ -437,6 +439,24 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
   }
 
   return { sent: true, id: response.data?.id || null }
+}
+
+/**
+ * Un formulario de LAB: lo que escribió el visitante, al dueño del widget.
+ * Cada envío es un evento propio (`id` único por envío): dos mensajes iguales
+ * seguidos son dos mails.
+ * @param {{ to: string, id: string, message: { formType: string, fields: Array<[string, string]>, replyTo: string | null }, host?: string | null, locale?: string, labUrl: string, config: any, client?: any }} args
+ */
+export function sendLabFormMessage({ to, id, message, host, locale, labUrl, config, client }) {
+  return sendTransactional({
+    to,
+    message: buildLabFormMessage({ message, host, locale, labUrl, logoUrl: logoOf(config) }),
+    tag: 'lab_form',
+    key: `scrolllab-lab-form-${id}`,
+    replyTo: message.replyTo,
+    config,
+    client,
+  })
 }
 
 /**

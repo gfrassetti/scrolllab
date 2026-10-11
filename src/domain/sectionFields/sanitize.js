@@ -1,4 +1,5 @@
 import { getSectionFields } from './fields.js'
+import { LAB_HIDDEN_FIELDS } from '../labForms.js'
 
 /**
  * Reglas de valores de los campos editables: colores, links, URLs de imagen,
@@ -212,6 +213,8 @@ const ABSOLUTE_ASSET_RE = /^https:\/\//i
 export function sanitizeHostedProps(sectionId, props) {
   const clean = sanitizeProps(sectionId, props)
   if (!clean) return clean
+  // En LAB el envío de los formularios lo pone el frame (src/domain/labForms.js).
+  for (const k of LAB_HIDDEN_FIELDS) delete clean[k]
   for (const field of getSectionFields(sectionId)) {
     const value = clean[field.key]
     if (field.type === 'image' || field.type === 'url') {

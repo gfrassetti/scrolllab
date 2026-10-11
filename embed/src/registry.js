@@ -6,9 +6,10 @@
  * `once`, sin pin, sin scrub, alto acotado) → FLOW puro en el iframe. Los
  * tokens/fuentes de cada modelo los trae `embed/frame/main.css` + `index.html`.
  *
- * NO va acá nada scrolljack pineado (`chapters/HorizontalPanels`) ni scrub sin
- * pin: dentro del iframe acotado renderizan rotas o congeladas. Ver
- * HOSTABLE_SECTIONS en server/sections.js y docs/hosted-component-plan.md.
+ * Pineadas y con escenario sticky también van: el frame entra en modo PIN
+ * (una pantalla pegada en el sitio que recorre su propio documento) y corren
+ * sin tocarlas. Lo que no va (Three.js, navs) está en HOSTABLE_SECTIONS,
+ * server/sections.js. Ver docs/hosted-component-plan.md.
  */
 import FooterCTA from '../../src/components/sections/chapters/FooterCTA.jsx'
 import OutroCTA from '../../src/components/sections/nocturne/OutroCTA.jsx'
@@ -63,6 +64,46 @@ import SpecSheet from '../../src/components/sections/monolith/SpecSheet.jsx'
 import LastPortrait from '../../src/components/sections/unity/LastPortrait.jsx'
 import ParallaxRise from '../../src/components/sections/velocity/ParallaxRise.jsx'
 import ParallaxEditorial from '../../src/components/sections/chapters/ParallaxEditorial.jsx'
+import ContactForm from '../../src/components/sections/contact/ContactForm.jsx'
+import MeridianContact from '../../src/components/sections/meridian/Contact.jsx'
+import ContactSteps from '../../src/components/sections/fizz/ContactSteps.jsx'
+// Fase I — `npm run screen:lab`: scrub sin pin (siguen el scroll del sitio),
+// pineadas y con escenario sticky (el frame entra en modo PIN y recorre su
+// propio documento) y portadas. Ver docs/hosted-component-plan.md, Fase I.
+import HeroKinetic from '../../src/components/sections/chapters/HeroKinetic.jsx'
+import ManifestoReveal from '../../src/components/sections/chapters/ManifestoReveal.jsx'
+import StickyImageStory from '../../src/components/sections/chapters/StickyImageStory.jsx'
+import HorizontalPanels from '../../src/components/sections/chapters/HorizontalPanels.jsx'
+import StackingCards from '../../src/components/sections/chapters/StackingCards.jsx'
+import QuoteBreak from '../../src/components/sections/chapters/QuoteBreak.jsx'
+import HeroCinematic from '../../src/components/sections/nocturne/HeroCinematic.jsx'
+import ZoomPortal from '../../src/components/sections/nocturne/ZoomPortal.jsx'
+import StickyWordCycle from '../../src/components/sections/nocturne/StickyWordCycle.jsx'
+import PopManifesto from '../../src/components/sections/fizz/PopManifesto.jsx'
+import HeroStrike from '../../src/components/sections/velocity/HeroStrike.jsx'
+import TrackMerge from '../../src/components/sections/velocity/TrackMerge.jsx'
+import VisionShutter from '../../src/components/sections/atelier/VisionShutter.jsx'
+import SelectedWork from '../../src/components/sections/atelier/SelectedWork.jsx'
+import HeroTwin from '../../src/components/sections/unity/HeroTwin.jsx'
+import MosaicSlider from '../../src/components/sections/unity/MosaicSlider.jsx'
+import UniversalLang from '../../src/components/sections/unity/UniversalLang.jsx'
+import LanguageBlock from '../../src/components/sections/unity/LanguageBlock.jsx'
+import StageLines from '../../src/components/sections/unity/StageLines.jsx'
+import FooterTrophy from '../../src/components/sections/unity/FooterTrophy.jsx'
+import HeroMassing from '../../src/components/sections/atrium/HeroMassing.jsx'
+import ClarityPair from '../../src/components/sections/atrium/ClarityPair.jsx'
+import BlueprintDraw from '../../src/components/sections/atrium/BlueprintDraw.jsx'
+import ProjectRail from '../../src/components/sections/atrium/ProjectRail.jsx'
+import ProcessPin from '../../src/components/sections/atrium/ProcessPin.jsx'
+import PeopleScatter from '../../src/components/sections/atrium/PeopleScatter.jsx'
+import OrbitRing from '../../src/components/sections/atrium/OrbitRing.jsx'
+import StatField from '../../src/components/sections/atrium/StatField.jsx'
+import MeridianHero from '../../src/components/sections/meridian/Hero.jsx'
+import MeridianConcept from '../../src/components/sections/meridian/Concept.jsx'
+import MeridianGallerySlider from '../../src/components/sections/meridian/GallerySlider.jsx'
+import MeridianLocation from '../../src/components/sections/meridian/Location.jsx'
+import KinIntro from '../../src/components/sections/kin/Intro.jsx'
+import KinCollection from '../../src/components/sections/kin/Collection.jsx'
 import { MODEL_WRAPPER_CLASS } from '../../src/lib/modelWrappers.js'
 import { createElement } from 'react'
 
@@ -115,6 +156,43 @@ const SECTIONS = {
   'unity/LastPortrait': LastPortrait,
   'velocity/ParallaxRise': ParallaxRise,
   'chapters/ParallaxEditorial': ParallaxEditorial,
+  'contact/ContactForm': ContactForm,
+  'meridian/Contact': MeridianContact,
+  'fizz/ContactSteps': ContactSteps,
+  'chapters/HeroKinetic': HeroKinetic,
+  'chapters/ManifestoReveal': ManifestoReveal,
+  'chapters/StickyImageStory': StickyImageStory,
+  'chapters/HorizontalPanels': HorizontalPanels,
+  'chapters/StackingCards': StackingCards,
+  'chapters/QuoteBreak': QuoteBreak,
+  'nocturne/HeroCinematic': HeroCinematic,
+  'nocturne/ZoomPortal': ZoomPortal,
+  'nocturne/StickyWordCycle': StickyWordCycle,
+  'fizz/PopManifesto': PopManifesto,
+  'velocity/HeroStrike': HeroStrike,
+  'velocity/TrackMerge': TrackMerge,
+  'atelier/VisionShutter': VisionShutter,
+  'atelier/SelectedWork': SelectedWork,
+  'unity/HeroTwin': HeroTwin,
+  'unity/MosaicSlider': MosaicSlider,
+  'unity/UniversalLang': UniversalLang,
+  'unity/LanguageBlock': LanguageBlock,
+  'unity/StageLines': StageLines,
+  'unity/FooterTrophy': FooterTrophy,
+  'atrium/HeroMassing': HeroMassing,
+  'atrium/ClarityPair': ClarityPair,
+  'atrium/BlueprintDraw': BlueprintDraw,
+  'atrium/ProjectRail': ProjectRail,
+  'atrium/ProcessPin': ProcessPin,
+  'atrium/PeopleScatter': PeopleScatter,
+  'atrium/OrbitRing': OrbitRing,
+  'atrium/StatField': StatField,
+  'meridian/Hero': MeridianHero,
+  'meridian/Concept': MeridianConcept,
+  'meridian/GallerySlider': MeridianGallerySlider,
+  'meridian/Location': MeridianLocation,
+  'kin/Intro': KinIntro,
+  'kin/Collection': KinCollection,
 }
 
 /**

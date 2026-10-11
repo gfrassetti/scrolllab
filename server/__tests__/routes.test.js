@@ -50,6 +50,7 @@ const EXPECTED = [
   'POST /api/checkout/paddle/confirm',
   'POST /api/coupons/check',
   'POST /api/coupons/welcome',
+  'POST /api/embed/:key/form',
   'POST /api/hosted',
   'POST /api/hosted-packs',
   'POST /api/hosted/:id/suspend',

@@ -128,7 +128,7 @@ describe('Hosted Component API (file store)', () => {
     const agent = await loginAgent()
     const res = await agent
       .post('/api/hosted')
-      .send({ sectionId: 'nocturne/HeroCinematic' })
+      .send({ sectionId: 'chapters/NavMinimal' })
     assert.equal(res.status, 400)
   })
 

@@ -7,6 +7,9 @@
  * @property {string} key
  * @property {string} label
  * @property {string} type
+ * @property {SectionFieldOption[]} [options] `select` y `toggle` dentro de la fila.
+ * @property {'on' | 'off'} [default] Solo `toggle`: cómo arranca sin valor.
+ * @property {FieldHelp} [help]
  *
  * @typedef {Object} SectionField
  * @property {string} key

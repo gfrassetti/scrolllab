@@ -30,6 +30,8 @@ const fontTokens = new Map(
 const NOT_A_FAMILY = new Set([
   'thin', 'extralight', 'light', 'normal', 'medium', 'semibold', 'bold', 'extrabold', 'black',
   'sans', 'serif', 'stretch', 'size', 'feature', 'variant', 'smoothing',
+  // propiedades de CSS dentro de un <style> de la sección (`font-family: …`)
+  'family', 'weight', 'style',
 ])
 const SYSTEM = /^(ui-|system-ui|sans-serif|serif|monospace|Georgia|SFMono)/
 
@@ -49,8 +51,10 @@ describe('frame del embed — fuentes de las secciones hosteables', () => {
         if (NOT_A_FAMILY.has(name)) continue
         assert.ok(fontTokens.has(name), `font-${name}: falta --font-${name} en embed/frame/main.css`)
       }
-      for (const [, list] of src.matchAll(/fontFamily[:=]\s*\{?\s*["'`]([^"'`]+)["'`]/g)) {
-        const first = list.split(',')[0].trim().replace(/^'|'$/g, '')
+      // fontFamily inline (JSX) y `font-family:` del CSS propio de la sección
+      for (const [, list] of src.matchAll(/(?:fontFamily[:=]\s*\{?\s*["'`]|font-family:\s*)([^;"`}{]+)/g)) {
+        const first = list.split(',')[0].trim().replace(/^['"]|['"]$/g, '')
+        if (first.startsWith('var(') || first === 'inherit') continue
         if (SYSTEM.test(first)) continue
         assert.ok(googleFamilies.has(first), `fontFamily "${first}" no está en embed/frame/index.html`)
       }

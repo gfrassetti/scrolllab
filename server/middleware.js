@@ -33,14 +33,21 @@ export function allowedOrigins(config) {
   return [...origins]
 }
 
+/** El envío de un formulario de LAB: lo manda el frame del embed, desde otro origen y sin cookies. */
+export const LAB_FORM_PATH_RE = /^\/api\/embed\/[^/]+\/form$/
+
 export function createCors(config) {
-  return cors({
+  // Público y sin credenciales: cualquier origen (el frame vive en el dominio
+  // del embed y el sitio del cliente puede ser cualquiera).
+  const publicForm = cors({ origin: '*', methods: ['POST'], allowedHeaders: ['content-type'], maxAge: 600 })
+  const site = cors({
     origin: allowedOrigins(config),
     credentials: true,
     // El front muestra el requestId para reportar un error; sin exponerlo,
     // fetch cross-origin no puede leer el header.
     exposedHeaders: ['x-request-id'],
   })
+  return (req, res, next) => (LAB_FORM_PATH_RE.test(req.path) ? publicForm : site)(req, res, next)
 }
 
 export function createHelmet() {
@@ -72,6 +79,8 @@ export function requireSameOrigin(config) {
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next()
     // Webhook de MP no usa cookie de sesión
     if (req.path.startsWith('/api/webhooks/')) return next()
+    // Formulario de LAB: público, sin cookie de sesión (no hay CSRF que frenar)
+    if (LAB_FORM_PATH_RE.test(req.path)) return next()
     // Rutas admin: protegidas por x-admin-token, no por cookie → sin CSRF
     if (/^\/api\/hosted\/[^/]+\/(un)?suspend$/.test(req.path)) return next()
 
@@ -157,6 +166,13 @@ export function rateLimits() {
       windowMs: 60 * 1000,
       max: 240,
       message: { error: 'Rate limit' },
+    }),
+    // Formularios de LAB: lo manda un visitante de un sitio ajeno. Pocos por IP
+    // (una persona manda uno o dos); el tope diario por widget va en el servicio.
+    labForm: mk({
+      windowMs: 10 * 60 * 1000,
+      max: 6,
+      message: { error: 'Demasiados envíos seguidos, probá en unos minutos' },
     }),
     // Mutaciones de LAB (crear/editar/borrar instancias hosteadas). Holgado
     // para editar de verdad, corta el scripteo de creación masiva de keys.

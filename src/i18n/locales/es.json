@@ -62,6 +62,14 @@
     "back": "← Volver a LAB",
     "fields": "Contenido",
     "noFields": "Esta sección no tiene campos editables.",
+    "formDelivery": "Los mensajes de este formulario llegan a {{email}}. Respondiendo el mail le contestás directo a quien escribió.",
+    "previewScroll": "Scrolleá adentro para ver la animación",
+    "group": {
+      "hero": "Portadas",
+      "section": "Secciones",
+      "form": "Formularios",
+      "footer": "Cierres"
+    },
     "domains": "Dominios permitidos (uno por línea)",
     "domainsHint": "Si dejás la lista vacía, la sección se muestra en cualquier dominio. Si ponés dominios, solo ahí (y en los subdominios www). Para probarla en tu máquina, sumá localhost.",
     "preview": "Vista previa",

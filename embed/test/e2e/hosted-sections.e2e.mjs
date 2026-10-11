@@ -24,10 +24,11 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { chromium } from 'playwright'
+import { API as E2E_API, redirectDefaultApi } from './ports.mjs'
 import { HOSTABLE_SECTIONS } from '../../../server/sections.js'
 
 const REPO = path.normalize(path.join(fileURLToPath(import.meta.url), '../../../..'))
-const API = 'http://localhost:8787'
+const API = E2E_API
 const HOST_URL = 'http://localhost:4178/embed/test/iframe-host.html'
 const PLAIN_URL = 'http://localhost:4178/embed/test/iframe-host-plain.html'
 const LAUNCH_ARGS = [
@@ -304,6 +305,158 @@ const CASES = {
     marker: 'MKPEDI',
     checkFg: true,
   },
+  // Fase I: formularios, pineadas / sticky (modo PIN), scrub y portadas.
+  'contact/ContactForm': {
+    props: { eyebrow: 'MKCFCO', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCFCO',
+  },
+  'meridian/Contact': {
+    props: { eyebrow: 'MKCME', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCME',
+  },
+  'fizz/ContactSteps': {
+    props: { nameTitle: 'MKCSFI', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCSFI',
+  },
+  'chapters/HeroKinetic': {
+    props: { lineOne: 'MKHKCH', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHKCH',
+  },
+  'chapters/ManifestoReveal': {
+    props: { chapterLabel: 'MKMRCH', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKMRCH',
+  },
+  'chapters/StickyImageStory': {
+    props: { chapterLabel: 'MKSISCH', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSISCH',
+  },
+  'chapters/HorizontalPanels': {
+    props: { chapterLabel: 'MKHPCH', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHPCH',
+  },
+  'chapters/StackingCards': {
+    props: { chapterLabel: 'MKSCCH', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSCCH',
+  },
+  'chapters/QuoteBreak': {
+    props: { chapterLabel: 'MKQBCH', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKQBCH',
+  },
+  'nocturne/HeroCinematic': {
+    props: { titleTop: 'MKHCNO', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHCNO',
+  },
+  'nocturne/ZoomPortal': {
+    props: { seqLabel: 'MKZPNO', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKZPNO',
+  },
+  'nocturne/StickyWordCycle': {
+    props: { seqLabel: 'MKSWCNO', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSWCNO',
+  },
+  'fizz/PopManifesto': {
+    props: { eyebrow: 'MKPMFI', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKPMFI',
+  },
+  'velocity/HeroStrike': {
+    props: { lineLeft: 'MKHSVE', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHSVE',
+  },
+  // En calma la galería no se muestra (queda el cruce): el marcador va en el título del cruce.
+  'velocity/TrackMerge': {
+    props: { mergeTitleA: 'MKTMVE', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKTMVE',
+  },
+  'atelier/VisionShutter': {
+    props: { line1: 'MKVSAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKVSAT',
+  },
+  'atelier/SelectedWork': {
+    props: { title: 'MKSWAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSWAT',
+  },
+  'unity/HeroTwin': {
+    props: { body: 'MKHTUN', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHTUN',
+  },
+  'unity/MosaicSlider': {
+    props: { eyebrow: 'MKMSUN', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKMSUN',
+  },
+  'unity/UniversalLang': {
+    props: { eyebrow: 'MKULUN', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKULUN',
+  },
+  'unity/LanguageBlock': {
+    props: { eyebrow: 'MKLBUN', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKLBUN',
+  },
+  'unity/StageLines': {
+    props: { eyebrow1: 'MKSLUN', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSLUN',
+  },
+  'unity/FooterTrophy': {
+    props: { eyebrow: 'MKFTUN', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKFTUN',
+  },
+  'atrium/HeroMassing': {
+    props: { lineOne: 'MKHMAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHMAT',
+  },
+  'atrium/ClarityPair': {
+    props: { kicker: 'MKCPAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCPAT',
+  },
+  'atrium/BlueprintDraw': {
+    props: { kicker: 'MKBDAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKBDAT',
+  },
+  'atrium/ProjectRail': {
+    props: { kicker: 'MKPRAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKPRAT',
+  },
+  'atrium/ProcessPin': {
+    props: { label: 'MKPPAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKPPAT',
+  },
+  'atrium/PeopleScatter': {
+    props: { label: 'MKPSAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKPSAT',
+  },
+  'atrium/OrbitRing': {
+    props: { lineOne: 'MKORAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKORAT',
+  },
+  'atrium/StatField': {
+    props: { kicker: 'MKSFAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSFAT',
+  },
+  'meridian/Hero': {
+    props: { wordmark: 'MKHME', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHME',
+  },
+  'meridian/Concept': {
+    props: { kicker: 'MKCME', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCME',
+  },
+  // Sin texto visible editable (solo fotos): el marcador va en el nombre accesible de la galería.
+  'meridian/GallerySlider': {
+    props: { galleryLabel: 'MKGSME', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKGSME',
+    ariaMarker: true,
+  },
+  'meridian/Location': {
+    props: { ctaLabel: 'MKLME', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKLME',
+  },
+  'kin/Intro': {
+    props: { line1: 'MKIKI', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKIKI',
+  },
+  'kin/Collection': {
+    props: { line1: 'MKCKI', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCKI',
+  },
 }
 
 const rgb = (hex) => {
@@ -380,11 +533,11 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     assert.ok(cookie, 'cookie de sesión')
     headers = { 'content-type': 'application/json', cookie }
 
-    browser = await chromium.launch({
+    browser = redirectDefaultApi(await chromium.launch({
       args: LAUNCH_ARGS,
       // Un Chromium del sistema (contenedores/CI sin `playwright install`).
       executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
-    })
+    }))
   })
 
   after(async () => {
@@ -459,7 +612,10 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
       const { context, page } = await openHost(key)
       try {
         const { frame, text } = await waitFrame(page)
-        assert.match(text, new RegExp(c.marker), `${sectionId}: no renderizó el marcador`)
+        const shown = c.ariaMarker
+          ? await frame.evaluate((m) => !!document.querySelector(`[aria-label="${m}"]`), c.marker)
+          : new RegExp(c.marker).test(text)
+        assert.ok(shown, `${sectionId}: no renderizó el marcador`)
 
         const iframe = page.locator('iframe[data-scrolllab-frame]')
         await iframe.waitFor({ state: 'attached', timeout: 15_000 })
@@ -565,6 +721,82 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     }
   })
 
+  // --- PIN: una sección pineada avanza con el scroll del sitio ---
+  // El loader mete el iframe en un contenedor alto (moverlo lo recargaba: el
+  // frame recargado no sabía el alto del sitio, ignoraba el progreso y la
+  // sección quedaba en blanco).
+  for (const [sectionId, props, marker] of [
+    ['chapters/HorizontalPanels', { chapterLabel: 'MKPIN', variant: 'type' }, 'MKPIN'],
+    ['chapters/StackingCards', { chapterLabel: 'MKSTACK' }, 'MKSTACK'],
+  ]) {
+    it(`${sectionId} — con movimiento, se pega y avanza con el scroll del sitio`, async () => {
+      const { id, key } = await seed(sectionId, props)
+      const { context, page } = await openHost(key, { url: PLAIN_URL, reducedMotion: 'no-preference' })
+      try {
+        const { frame } = await waitFrame(page)
+        const wrap = page.locator('[data-scrolllab-pin]')
+        await wrap.waitFor({ state: 'attached', timeout: 15_000 })
+        // El sitio sigue abajo del widget (el host plano termina en el embed).
+        await page.evaluate(() => {
+          const rest = document.createElement('div')
+          rest.style.height = '200vh'
+          document.body.append(rest)
+        })
+        const { top, height } = await wrap.evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, height: el.offsetHeight }))
+        const vh = await page.evaluate(() => innerHeight)
+        assert.ok(height > vh * 1.5, `${sectionId}: el recorrido es muy corto (${height}px)`)
+        // A mitad del recorrido: el iframe pegado arriba y el frame scrolleado a la mitad.
+        await page.evaluate((y) => window.scrollTo(0, y), top + (height - vh) / 2)
+        let state = null
+        for (let i = 0; i < 20; i++) {
+          await sleep(150)
+          const frameTop = await page.locator('iframe[data-scrolllab-frame]').evaluate((el) => el.getBoundingClientRect().top)
+          const f = await frame.evaluate(() => ({ y: scrollY, max: document.documentElement.scrollHeight - innerHeight }))
+          state = { frameTop, ...f }
+          if (Math.abs(f.y - f.max / 2) < f.max * 0.1) break
+        }
+        assert.ok(Math.abs(state.frameTop) <= 2, `${sectionId}: el iframe no quedó pegado (top ${state.frameTop})`)
+        assert.ok(Math.abs(state.y - state.max / 2) < state.max * 0.1, `${sectionId}: el frame no siguió al sitio (${state.y} de ${state.max})`)
+        assert.match(await frame.evaluate(() => document.getElementById('root').innerText), new RegExp(marker))
+        // Pasado el recorrido, el sitio sigue: el iframe se va con el contenedor.
+        await page.evaluate((y) => window.scrollTo(0, y), top + height + 50)
+        await sleep(300)
+        const after = await page.locator('iframe[data-scrolllab-frame]').evaluate((el) => el.getBoundingClientRect().bottom)
+        assert.ok(after <= 0, `${sectionId}: el iframe no suelta al terminar (bottom ${after})`)
+      } finally {
+        await context.close()
+        await unseed(id)
+      }
+    })
+  }
+
+  // --- formulario: el visitante manda y la API lo recibe (el mail va al dueño) ---
+  it('contact/ContactForm — se manda desde el sitio ajeno y muestra el éxito', async () => {
+    const props = { eyebrow: 'MKFORM', successMessage: 'MKSENT', errorMessage: 'MKFAIL' }
+    const { id, key } = await seed('contact/ContactForm', props)
+    const { context, page } = await openHost(key, { url: PLAIN_URL })
+    const posts = []
+    page.on('request', (req) => req.url().includes('/form') && req.method() === 'POST' && posts.push(req.postDataJSON()))
+    try {
+      const { frame } = await waitFrame(page)
+      await frame.locator('input[autocomplete="name"]').fill('Ana Prueba')
+      await frame.locator('input[type="email"]').fill('ana@example.com')
+      await frame.locator('textarea').fill('Hola, quiero un sitio para mi marca.')
+      await frame.locator('form button[type="submit"]').click()
+      let text = ''
+      for (let i = 0; i < 20 && !/MKSENT|MKFAIL/.test(text); i++) {
+        await sleep(250)
+        text = await frame.evaluate(() => document.getElementById('root').innerText)
+      }
+      assert.match(text, /MKSENT/, 'no aparece el mensaje de éxito')
+      assert.equal(posts.length, 1, 'no salió un POST al formulario de LAB')
+      assert.equal(posts[0].email, 'ana@example.com')
+    } finally {
+      await context.close()
+      await unseed(id)
+    }
+  })
+
   // --- pack: un `<script data-pack>` monta un iframe por widget, en orden ---
   it('pack — un solo script apila los widgets publicados en el orden del pack', async () => {
     const a = await seed('chapters/FooterCTA', CASES['chapters/FooterCTA'].props)
@@ -657,7 +889,10 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
         })
         try {
           const { frame, text } = await waitFrame(page)
-          assert.match(text, new RegExp(c.marker), `${sectionId} @${vp.name}: no renderizó`)
+          const shown = c.ariaMarker
+            ? await frame.evaluate((m) => !!document.querySelector(`[aria-label="${m}"]`), c.marker)
+            : new RegExp(c.marker).test(text)
+          assert.ok(shown, `${sectionId} @${vp.name}: no renderizó`)
 
           const m = await frame.evaluate(() => ({
             sw: document.documentElement.scrollWidth,
@@ -670,6 +905,27 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
           )
           assert.ok(m.cw <= vp.width + 1, `${sectionId} @${vp.name}: frame más ancho que el viewport`)
           assert.ok(m.rootH > 40, `${sectionId} @${vp.name}: #root muy bajo (${m.rootH}px)`)
+
+          // PIN (pineada, o con escenario sticky más alto que la pantalla): el
+          // iframe es una pantalla pegada y el contenedor reserva el recorrido
+          // entero del frame, como si la sección estuviera en la página.
+          await sleep(600)
+          if (await page.evaluate(() => !!document.querySelector('[data-scrolllab-pin]'))) {
+            let p = null
+            for (let i = 0; i < 15; i++) {
+              p = await page.evaluate(() => {
+                const w = document.querySelector('[data-scrolllab-pin]')
+                return { wrapH: w.offsetHeight, frameH: w.querySelector('iframe').offsetHeight, vh: innerHeight }
+              })
+              const docH = await frame.evaluate(() => document.documentElement.scrollHeight)
+              p.docH = docH
+              if (Math.abs(p.wrapH - docH) <= 4) break
+              await sleep(300)
+            }
+            assert.ok(Math.abs(p.frameH - p.vh) <= 2, `${sectionId} @${vp.name}: en PIN el iframe no mide la pantalla (${p.frameH} vs ${p.vh})`)
+            assert.ok(Math.abs(p.wrapH - p.docH) <= 4, `${sectionId} @${vp.name}: el recorrido (${p.wrapH}px) no es el del frame (${p.docH}px)`)
+            return
+          }
 
           // el puente de altura converge en un par de frames tras el reveal
           const iframeLoc = page.locator('iframe[data-scrolllab-frame]')

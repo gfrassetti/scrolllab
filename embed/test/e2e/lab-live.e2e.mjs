@@ -20,9 +20,10 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { chromium } from 'playwright'
+import { API as E2E_API, redirectDefaultApi } from './ports.mjs'
 
 const REPO = path.normalize(path.join(fileURLToPath(import.meta.url), '../../../..'))
-const API = 'http://localhost:8787'
+const API = E2E_API
 const FRAME_BASE = 'http://localhost:4179/embed-dist/v1'
 const LAUNCH_ARGS = [
   '--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessChecks,BlockInsecurePrivateNetworkRequests',
@@ -88,10 +89,10 @@ describe('LAB en vivo — el sitio del cliente refleja LAB', () => {
     assert.ok(login.ok, 'dev-login')
     const cookie = (login.headers.getSetCookie?.() || []).map((c) => c.split(';')[0]).join('; ')
     headers = { 'content-type': 'application/json', cookie }
-    browser = await chromium.launch({
+    browser = redirectDefaultApi(await chromium.launch({
       args: LAUNCH_ARGS,
       executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
-    })
+    }))
   })
 
   after(async () => {

@@ -18,6 +18,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { chromium } from 'playwright'
+import { API as E2E_API, redirectDefaultApi } from './ports.mjs'
 
 const REPO = path.normalize(
   path.join(fileURLToPath(import.meta.url), '../../../..'),
@@ -78,7 +79,7 @@ describe('embed e2e (Chromium)', () => {
 
   before(async () => {
     for (const child of await Promise.all([
-      serve(['embed/test/e2e-api.mjs'], 'http://localhost:8787/api/embed/loader'),
+      serve(['embed/test/e2e-api.mjs'], `${E2E_API}/api/embed/loader`),
       serve(['embed/test/static-server.mjs', '4178'], 'http://localhost:4178/'),
       serve(['embed/test/static-server.mjs', '4179'], 'http://localhost:4179/'),
     ])) {
@@ -86,13 +87,13 @@ describe('embed e2e (Chromium)', () => {
     }
 
     await Promise.all([
-      waitUp('http://localhost:8787/api/embed/loader'),
+      waitUp(`${E2E_API}/api/embed/loader`),
       waitUp('http://localhost:4178/'),
       waitUp('http://localhost:4179/'),
     ])
 
     // Seed: login dev → crear → publicar. Cookie de sesión a mano.
-    const api = 'http://localhost:8787'
+    const api = E2E_API
     const login = await fetch(`${api}/api/auth/dev-login`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -126,11 +127,11 @@ describe('embed e2e (Chromium)', () => {
     hostedKey = (await published.json()).instance.key
     assert.ok(hostedKey, 'key pública')
 
-    browser = await chromium.launch({
+    browser = redirectDefaultApi(await chromium.launch({
       args: LAUNCH_ARGS,
       // Un Chromium del sistema (contenedores/CI sin `playwright install`).
       executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
-    })
+    }))
   })
 
   after(async () => {

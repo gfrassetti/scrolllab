@@ -14,6 +14,7 @@ import {
   sanitizeHostedProps,
   withoutEmptyRows,
 } from '../lib/sectionFields'
+import { LAB_HIDDEN_FIELDS, isLabFormSection } from '../domain/labForms'
 
 const fieldClass =
   'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink'
@@ -96,10 +97,12 @@ export default function LabEditorPage() {
     if (user) load()
   }, [user, load])
 
+  // Sin `endpoint`: en LAB el formulario manda al mail del dueño (labForms.js).
   const fields = useMemo(
-    () => (inst ? getSectionFields(inst.sectionId) : []),
+    () => (inst ? getSectionFields(inst.sectionId).filter((f) => !LAB_HIDDEN_FIELDS.includes(f.key)) : []),
     [inst],
   )
+  const isForm = isLabFormSection(inst?.sectionId)
   const section = inst ? getSection(inst.sectionId) : null
   const Preview = section?.component
   // Canvas del modelo (fondo y color de texto), como en el frame del embed.
@@ -273,6 +276,11 @@ export default function LabEditorPage() {
                   {t('lab.fields')}
                 </h2>
                 <div className="mt-4 space-y-4">
+                  {isForm && (
+                    <p className="border-l-2 border-ink/30 pl-3 text-sm leading-relaxed text-ink/70">
+                      {t('lab.formDelivery', { email: user?.email || '' })}
+                    </p>
+                  )}
                   {fields.length === 0 && (
                     <p className="text-sm text-ink/50">{t('lab.noFields')}</p>
                   )}

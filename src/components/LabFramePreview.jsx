@@ -21,7 +21,7 @@ const PREVIEW_DEVICES = {
   mobile: { width: 390, viewportHeight: 844 },
 }
 
-const SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox'
+const SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox'
 const READY_TIMEOUT_MS = 8000
 
 export default function LabFramePreview({ frameSrc, sectionId, props, device = 'desktop', onFail }) {
@@ -37,6 +37,8 @@ export default function LabFramePreview({ frameSrc, sectionId, props, device = '
   const boxRef = useRef(null)
   const [ready, setReady] = useState(false)
   const [height, setHeight] = useState(0)
+  // Pineada / sticky: el frame pide una pantalla fija y se recorre scrolleando adentro.
+  const [scrollable, setScrollable] = useState(false)
   const [boxWidth, setBoxWidth] = useState(0)
   const origin = useMemo(() => {
     try {
@@ -73,6 +75,7 @@ export default function LabFramePreview({ frameSrc, sectionId, props, device = '
         setReady(true)
       } else if (m.type === 'scrolllab:height' && typeof m.px === 'number') {
         setHeight(Math.max(0, Math.round(m.px)))
+        setScrollable(m.scroll === true)
       }
     }
     window.addEventListener('message', onMessage)
@@ -111,12 +114,16 @@ export default function LabFramePreview({ frameSrc, sectionId, props, device = '
           {t('lab.previewLoading')}
         </p>
       )}
+      {ready && scrollable && (
+        <p className="pointer-events-none absolute right-3 bottom-3 z-10 bg-ink/85 px-2.5 py-1.5 text-[11px] text-bone">
+          {t('lab.previewScroll')}
+        </p>
+      )}
       <iframe
         ref={frameRef}
         src={frameSrc}
         title={t('lab.preview')}
         sandbox={SANDBOX}
-        scrolling="no"
         className="block border-0"
         style={{
           width,

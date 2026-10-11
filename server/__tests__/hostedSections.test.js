@@ -8,6 +8,7 @@ import {
   sanitizeHostedProps as clientHosted,
   sanitizeProps,
 } from '../../src/lib/sectionFields.js'
+import { LAB_HIDDEN_FIELDS } from '../../src/domain/labForms.js'
 
 /**
  * LAB: lo que el cliente edita en el panel tiene que llegar igual al iframe.
@@ -31,14 +32,19 @@ const SAMPLE = {
 function sampleFor(field) {
   if (field.type === 'select' || field.type === 'toggle') return field.options[0].value
   if (field.type === 'list') {
-    const row = Object.fromEntries(field.item.map((sub) => [sub.key, SAMPLE[sub.type]]))
+    const row = Object.fromEntries(
+      field.item.map((sub) => [sub.key, sub.options ? sub.options[0].value : SAMPLE[sub.type]]),
+    )
     return [row, row]
   }
   return SAMPLE[field.type]
 }
 
+/** Lo que el editor de LAB muestra: sin `endpoint` (el formulario manda al mail del dueño). */
 function sampleProps(id) {
-  return Object.fromEntries(SECTION_FIELDS[id].map((f) => [f.key, sampleFor(f)]))
+  return Object.fromEntries(
+    SECTION_FIELDS[id].filter((f) => !LAB_HIDDEN_FIELDS.includes(f.key)).map((f) => [f.key, sampleFor(f)]),
+  )
 }
 
 describe('LAB — cada campo de cada sección hosteable llega publicado', () => {
@@ -52,6 +58,16 @@ describe('LAB — cada campo de cada sección hosteable llega publicado', () => 
       assert.deepEqual(server, props, 'el servidor descartó algo')
     })
   }
+})
+
+describe('LAB — los formularios mandan al mail del dueño', () => {
+  it('un endpoint propio no se guarda (editor ni servidor)', () => {
+    for (const id of ['contact/ContactForm', 'meridian/Contact', 'fizz/ContactSteps']) {
+      const props = { endpoint: 'https://otro.com/form' }
+      assert.equal(clientHosted(id, props)?.endpoint, undefined, id)
+      assert.equal(serverHosted(id, props)?.endpoint, undefined, id)
+    }
+  })
 })
 
 describe('LAB — lo peligroso o inválido no pasa (editor y servidor)', () => {

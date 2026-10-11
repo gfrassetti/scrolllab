@@ -14,10 +14,21 @@ import Tabs, { TabPanel } from '../components/Tabs'
 import WidgetTable from '../features/lab/WidgetTable.jsx'
 import Skeleton, { SkeletonRows } from '../components/Skeleton'
 import { getSection } from '../lib/sectionRegistry'
+import { sectionKindOf } from '../domain/sections'
+import { isLabFormSection } from '../domain/labForms'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
 import { prefersReducedMotion } from '../lib/motion'
+
+const WIDGET_GROUPS = ['hero', 'section', 'form', 'footer']
+/** Portada, sección, formulario o cierre: el grupo del widget en el selector de «Nuevo». */
+function widgetGroupOf(id) {
+  if (isLabFormSection(id)) return 'form'
+  const kind = sectionKindOf(id)
+  return WIDGET_GROUPS.includes(kind) ? kind : 'section'
+}
+
 
 // Pista de la última visita: ¿la cuenta tenía plan pago? Decide qué página se
 // muestra mientras carga el plan (la guía o Mi LAB), para no cambiar de golpe.
@@ -225,6 +236,15 @@ export default function LabPage({ qa = false }) {
   }
 
   const sectionLabel = (id) => getSection(id)?.name || id
+  // El selector de «Nuevo», agrupado: con decenas de widgets una lista plana no se recorre.
+  const pickerGroups = WIDGET_GROUPS.map((group) => ({
+    group,
+    ids: sections.filter((id) => widgetGroupOf(id) === group),
+  })).filter((g) => g.ids.length)
+  const pickerLabel = (id) => {
+    const model = getSection(id)?.model?.name
+    return model ? `${sectionLabel(id)} · ${model}` : sectionLabel(id)
+  }
 
   const createPack = async () => {
     if (busy || instances.length === 0) return
@@ -609,10 +629,14 @@ export default function LabPage({ qa = false }) {
                       className="min-h-11 border border-ink/20 bg-[#f2efe9] px-3 text-body-sm uppercase tracking-[0.12em] text-[#1a1a1a] outline-none focus:border-ink disabled:opacity-40"
                       style={{ colorScheme: 'light' }}
                     >
-                      {sections.map((id) => (
-                        <option key={id} value={id}>
-                          {sectionLabel(id)}
-                        </option>
+                      {pickerGroups.map(({ group, ids }) => (
+                        <optgroup key={group} label={t(`lab.group.${group}`)}>
+                          {ids.map((id) => (
+                            <option key={id} value={id}>
+                              {pickerLabel(id)}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                     <button

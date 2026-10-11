@@ -21,3 +21,15 @@ export function hostViewportUnits(css) {
       `{${body.replace(HOST_VH_RE, (_m, pre, n) => `${pre}calc(var(--sl-vh,1vh)*${n})`)}}`,
   )
 }
+
+/**
+ * Lo mismo para un `style=""` inline (`minHeight: 'calc(100svh + 9rem)'`,
+ * `height: \`${n * 100}vh\``, `'--gap': '12svh'`): el build solo ve el CSS, y
+ * esos valores también medían el iframe. Lo usa el frame sobre cada `style`
+ * que escribe una sección. Sin fallback a `1vh` a propósito: así el resultado
+ * ya no tiene unidades de viewport y reescribirlo de nuevo no cambia nada (el
+ * frame siempre fija `--sl-vh` antes de montar la sección).
+ */
+export function hostViewportUnitsInline(style) {
+  return String(style).replace(HOST_VH_RE, (_m, pre, n) => `${pre}calc(var(--sl-vh)*${n})`)
+}

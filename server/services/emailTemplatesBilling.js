@@ -47,7 +47,9 @@ const ROW =
 
 /**
  * HTML del mail. Los campos `*Html` ya vienen escapados; el resto se escapa acá.
- * @param {{ lang: string, preheader: string, logoUrl: string, eyebrow: string, eyebrowTone?: 'accent' | 'muted' | 'danger', title: string, introHtml: string, noticeHtml?: string, rows?: Array<[string, string]>, cta?: { href: string, label: string }, afterCtaHtml?: string, footer: string }} m
+ * `blocks`: texto largo con su etiqueta arriba (el mensaje de un formulario),
+ * respetando los saltos de línea; va después de las filas.
+ * @param {{ lang: string, preheader: string, logoUrl: string, eyebrow: string, eyebrowTone?: 'accent' | 'muted' | 'danger', title: string, introHtml: string, noticeHtml?: string, rows?: Array<[string, string]>, blocks?: Array<[string, string]>, cta?: { href: string, label: string }, afterCtaHtml?: string, footer: string }} m
  */
 export function emailShell(m) {
   const tone = { accent: '#ff4b00', muted: '#77716a', danger: '#c0341d' }[m.eyebrowTone || 'accent']
@@ -66,6 +68,16 @@ export function emailShell(m) {
               </td>
             </tr>`
     : ''
+  const blocksHtml = (m.blocks || [])
+    .map(
+      ([k, v]) => `<tr>
+              <td style="padding:0 32px 24px;">
+                <p style="margin:0 0 6px;color:#77716a;font-size:12px;letter-spacing:2px;text-transform:uppercase;">${escapeHtml(k)}</p>
+                <p style="margin:0;font-size:15px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(v)}</p>
+              </td>
+            </tr>`,
+    )
+    .join('\n            ')
   return `<!doctype html>
 <html lang="${m.lang === 'en' ? 'en' : 'es'}">
   <body style="margin:0;background:#ece9e2;font-family:Arial,Helvetica,sans-serif;color:#161412;">
@@ -95,6 +107,7 @@ export function emailShell(m) {
               </td>
             </tr>
             ${rowsHtml}
+            ${blocksHtml}
             ${
               m.cta
                 ? `<tr>

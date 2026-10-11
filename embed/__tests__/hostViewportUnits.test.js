@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { hostViewportUnits } from '../hostViewportUnits.js'
+import { hostViewportUnits, hostViewportUnitsInline } from '../hostViewportUnits.js'
 
 const V = (n) => `calc(var(--sl-vh,1vh)*${n})`
 
@@ -22,5 +22,24 @@ describe('hostViewportUnits', () => {
       hostViewportUnits('.pt-\\[30svh\\]{padding-top:30svh}'),
       `.pt-\\[30svh\\]{padding-top:${V(30)}}`,
     )
+  })
+})
+
+describe('hostViewportUnitsInline', () => {
+  const I = (n) => `calc(var(--sl-vh)*${n})`
+  it('reescribe los vh de un style inline, también dentro de calc y de una variable', () => {
+    assert.equal(
+      hostViewportUnitsInline('min-height: calc(100svh + 9rem); background: #fff;'),
+      `min-height: calc(${I(100)} + 9rem); background: #fff;`,
+    )
+    assert.equal(hostViewportUnitsInline('height: 400vh;'), `height: ${I(400)};`)
+    assert.equal(hostViewportUnitsInline('--work-gap: 12svh;'), `--work-gap: ${I(12)};`)
+  })
+
+  it('es idempotente y no toca vw ni lo que no es unidad', () => {
+    const once = hostViewportUnitsInline('height: calc(100svh + 9rem); width: 50vw;')
+    assert.equal(hostViewportUnitsInline(once), once)
+    assert.ok(once.includes('50vw'))
+    assert.equal(hostViewportUnitsInline('background: url(a3vh.png)'), 'background: url(a3vh.png)')
   })
 })

@@ -2,6 +2,8 @@ import { h, render } from 'preact'
 import './main.css'
 import { loadSection, canvasFor } from '../src/registry'
 import { ScrollTrigger } from '../src/gsap'
+import { isLabFormSection } from '../../src/domain/labForms.js'
+import { hostViewportUnitsInline } from '../hostViewportUnits.js'
 
 const params = new URLSearchParams(location.hash.slice(1))
 const key = params.get('key')
@@ -230,6 +232,35 @@ function setHostVh(px, force = false) {
 let scrollMax = 0
 let revealed = false
 
+/**
+ * Los `vh` de los `style` inline también miden el sitio. El build reescribe
+ * solo el CSS; una sección con `minHeight: 'calc(100svh + 9rem)'` o un
+ * recorrido `height: ${n * 100}vh` medía el propio iframe, que en FLOW
+ * mide lo que su contenido: crecía sin fin (meridian/Location pasaba los 6000
+ * px) o se estiraba (los huecos en `svh` de ProjectRail). Cada `style` que
+ * escribe la sección se reescribe a `--sl-vh` antes de pintarse.
+ */
+function watchInlineViewportUnits(el) {
+  const fix = (node) => {
+    const style = node.getAttribute?.('style')
+    if (!style || !/vh/i.test(style)) return
+    const next = hostViewportUnitsInline(style)
+    if (next !== style) node.setAttribute('style', next)
+  }
+  new MutationObserver((records) => {
+    for (const r of records) {
+      if (r.type === 'attributes') fix(r.target)
+      else {
+        r.addedNodes.forEach((n) => {
+          if (n.nodeType !== 1) return
+          fix(n)
+          n.querySelectorAll('[style]').forEach(fix)
+        })
+      }
+    }
+  }).observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] })
+}
+
 function post(msg) {
   parent.postMessage(msg, '*')
 }
@@ -263,6 +294,15 @@ function reveal() {
   root.setAttribute('data-inview', '')
 }
 
+let stickyCache = null
+/** ¿La sección tiene algo `position: sticky`? Se mira una vez, ya montada. */
+function hasSticky() {
+  if (stickyCache === null && root.childElementCount) {
+    stickyCache = [...root.querySelectorAll('*')].some((el) => getComputedStyle(el).position === 'sticky')
+  }
+  return !!stickyCache
+}
+
 function decide() {
   if (!hostVh) return
   // PIN solo si la sección REALMENTE se pinea: ScrollTrigger inserta un
@@ -270,7 +310,11 @@ function decide() {
   // alta (FooterCTA, un hero largo) NO tiene pin-spacer → va en FLOW y el
   // iframe crece a su alto. (Antes: `scrollHeight > viewport` → cualquier
   // sección alta caía en PIN por error y se veía cortada.)
-  const pinned = !!document.querySelector('.pin-spacer')
+  // Lo mismo una sección con `position: sticky` más alta que la pantalla
+  // (un escenario pegado mientras pasa un recorrido: StickyWordCycle,
+  // StackingCards…). En FLOW el frame no scrollea y el sticky nunca pega; en
+  // PIN el frame recorre su propio documento como una página común.
+  const pinned = !!document.querySelector('.pin-spacer') || (hasSticky() && root.scrollHeight > hostVh + 8)
   const next = pinned ? 'pin' : 'flow'
   if (next !== mode) mode = next
 
@@ -335,12 +379,30 @@ function previewOriginAllowed(origin) {
 function preview() {
   let editor = ''
   let n = 0
+  // Una sección pineada o con escenario sticky no entra entera en la vista
+  // previa: se muestra en una pantalla del alto del dispositivo y se recorre
+  // scrolleando adentro (como el modo PIN del sitio). Las demás, a su alto.
+  let screen = 0
+  document.documentElement.style.overflowY = 'hidden'
+  watchInlineViewportUnits(root)
   const sendHeight = () => {
-    if (!editor) return
+    if (!editor || screen) return
     parent.postMessage(
       { type: 'scrolllab:height', px: contentHeight() },
       editor,
     )
+  }
+  const fit = (viewportHeight) => {
+    stickyCache = null
+    const pinLike =
+      !!document.querySelector('.pin-spacer') || (hasSticky() && root.scrollHeight > viewportHeight + 8)
+    screen = pinLike ? viewportHeight : 0
+    document.documentElement.style.overflowY = screen ? 'auto' : 'hidden'
+    if (screen) parent.postMessage({ type: 'scrolllab:height', px: screen, scroll: true }, editor)
+    else {
+      window.scrollTo(0, 0)
+      sendHeight()
+    }
   }
   new ResizeObserver(sendHeight).observe(root)
   // Links: #ancla y relativos se le avisan al editor (que no navega); los
@@ -363,7 +425,7 @@ function preview() {
     reveal()
     requestAnimationFrame(() => {
       ScrollTrigger.refresh()
-      sendHeight()
+      fit(Number(m.viewportHeight) || window.innerHeight)
     })
   })
   parent.postMessage({ type: 'scrolllab:preview-ready' }, '*')
@@ -384,7 +446,10 @@ async function main() {
   }
 
   // Embebido: las unidades de viewport miden el sitio desde el primer render.
-  if (window.parent !== window) setHostVh(params.get('vh'))
+  if (window.parent !== window) {
+    setHostVh(params.get('vh'))
+    watchInlineViewportUnits(root)
+  }
 
   const origin = hostOrigin()
   let config
@@ -413,7 +478,15 @@ async function main() {
   const canvas = canvasFor(config.sectionId)
   if (canvas) root.className = canvas
 
-  render(h(Section, config.props || {}), root)
+  // Formularios: en LAB mandan a la API, que le reenvía el mensaje por mail al
+  // dueño del widget (server/services/hosted/forms.js). El `host` va igual que
+  // en la config: el dominio autorizado del widget.
+  const props = { ...(config.props || {}) }
+  if (isLabFormSection(config.sectionId)) {
+    const host = hostName(origin)
+    props.endpoint = `${api}/api/embed/${encodeURIComponent(key)}/form${host ? `?host=${encodeURIComponent(host)}` : ''}`
+  }
+  render(h(Section, props), root)
   setBadge(config.badge || null)
 
   // Abierto directo (sin loader / fuera de un iframe): no va a llegar

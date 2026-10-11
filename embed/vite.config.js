@@ -7,17 +7,17 @@ import { hostViewportUnits } from './hostViewportUnits.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
-// Las secciones importan assets por default (import png from './assets/x.png').
-// En el embed las imágenes vienen SIEMPRE de la config (props con URLs), así que
-// los defaults se stubean a `''` para no arrastrar PNGs de MB al bundle. String
-// vacío = falsy: cada sección hosteable guarda su `<img>` con `src ? <img> :
-// fallback`, así que un default sin imagen cae al SVG/estado sin foto en vez de
-// mostrar un pixel roto.
+// Las fotos por default de las secciones (los WebP de `sections/<sku>/assets`)
+// salen como archivos aparte del frame (`assetsInlineLimit: 0`, abajo): el
+// widget se ve como la demo hasta que el cliente carga las suyas, y cada
+// embed baja solo las de su sección (el JS no crece).
+// Lo pesado que ninguna sección de LAB necesita (3D, video) se stubea a `''`:
+// falsy, cada sección cae a su estado sin media.
 const stubMedia = {
   name: 'embed-stub-media',
   enforce: 'pre',
   resolveId(id) {
-    if (/\.(png|jpe?g|webp|gif|avif|svg|glb|gltf|mp4|webm)(\?.*)?$/.test(id)) {
+    if (/\.(glb|gltf|mp4|webm)(\?.*)?$/.test(id)) {
       return '\0stub-media:empty'
     }
     return null
@@ -114,5 +114,7 @@ export default defineConfig({
     emptyOutDir: true,
     target: 'es2019',
     modulePreload: { polyfill: false },
+    // Fotos siempre como archivo: inline en base64 engordarían el JS que baja cada embed.
+    assetsInlineLimit: 0,
   },
 })

@@ -248,14 +248,16 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
     iframe.loading = 'lazy'
     iframe.setAttribute('scrolling', 'no')
     // allow-same-origin: el frame corre en NUESTRO origen (fetch a la config,
-    // fuentes). Sigue aislado del host porque es otro origen. Sin allow-forms
-    // ni allow-top-navigation: no puede navegar la página del cliente. Los
+    // fuentes). Sigue aislado del host porque es otro origen. allow-forms: los
+    // formularios de LAB (sin eso el submit ni se dispara; mandan por fetch a
+    // la API, no navegan). Sin allow-top-navigation: no puede navegar la
+    // página del cliente. Los
     // links abren en pestaña nueva (allow-popups) y esa pestaña es una página
     // normal, no un sandbox heredado donde el sitio de destino se rompe
     // (allow-popups-to-escape-sandbox).
     iframe.setAttribute(
       'sandbox',
-      'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox',
+      'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox',
     )
     iframe.setAttribute('data-scrolllab-frame', key)
     // Modo FLOW inicial (el único que pinta acá — enterPinMode() reescribe
@@ -291,7 +293,11 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       wrap.setAttribute('data-scrolllab-pin', key)
       wrap.style.cssText = 'position:relative;width:100%'
       iframe.parentNode.insertBefore(wrap, iframe)
-      wrap.appendChild(iframe)
+      // Mover un iframe con appendChild lo RECARGA: el frame vuelve a arrancar
+      // sin saber el alto del sitio. `moveBefore` (Chrome 133+) lo mueve sin
+      // recargar; donde no existe, push() le vuelve a mandar el viewport.
+      if (typeof wrap.moveBefore === 'function') wrap.moveBefore(iframe, null)
+      else wrap.appendChild(iframe)
       iframe.style.cssText =
         'display:block;width:100%;border:0;overflow:hidden;background:transparent;' +
         'position:sticky;position:-webkit-sticky;top:0;height:100vh'
@@ -335,6 +341,13 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       if (pinMode && wrap) {
         var wr = wrap.getBoundingClientRect()
         var progress = pinLen > 0 ? clamp(-wr.top / pinLen, 0, 1) : 0
+        // El alto del sitio también en PIN: un frame recargado (ver
+        // enterPinMode) decide su modo con este dato; sin él ignoraba el
+        // progreso y la sección quedaba en blanco.
+        w.postMessage(
+          { type: 'scrolllab:viewport', rectTop: 0, rectHeight: vh, viewportHeight: vh, inView: true },
+          frameOrigin || '*',
+        )
         w.postMessage(
           { type: 'scrolllab:progress', progress: progress },
           frameOrigin || '*',

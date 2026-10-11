@@ -9,6 +9,10 @@ const toHost = {
   scrollTo(y) {
     if (y === 0) window.parent.postMessage({ type: 'scrolllab:anchor', hash: '#top' }, '*')
   },
+  // Frenar / soltar el scroll (un menú abierto, la entrada de KIN): el scroll
+  // es del sitio del cliente, no del widget. No se toca.
+  stop() {},
+  start() {},
 }
 
 export function getLenis() {

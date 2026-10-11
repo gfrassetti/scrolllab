@@ -1,4 +1,5 @@
 import { SECTION_FIELDS } from '../src/domain/sectionFields/index.js'
+import { LAB_HIDDEN_FIELDS } from '../src/domain/labForms.js'
 
 /**
  * Allowlist server-side de props editables por sección. Sale de los campos del
@@ -278,6 +279,8 @@ const ABSOLUTE_ASSET_RE = /^https:\/\//i
 export function sanitizeHostedProps(sectionId, props) {
   const clean = sanitizeSectionProps(sectionId, props)
   if (!clean) return clean
+  // En LAB el envío de los formularios lo pone el frame (src/domain/labForms.js).
+  for (const k of LAB_HIDDEN_FIELDS) delete clean[k]
   const listSchemas = LIST_PROPS_BY_SECTION[sectionId] || {}
   for (const [key, value] of Object.entries(clean)) {
     if (ASSET_URL_KEYS.has(key) && typeof value === 'string') {
