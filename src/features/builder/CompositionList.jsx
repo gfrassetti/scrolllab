@@ -4,7 +4,7 @@ import { sectionCopyKey, kindLabelKeys } from './sectionCopy.js'
 /**
  * Lista de la composición: reordenar arrastrando o con flechas, quitar, y los destinos de drop.
  */
-export default function CompositionList({ items, allowDropAt, setDragOver, handleDrop, dragOver, t, startReorderDrag, commerceSurcharge, moveItem, removeItem, limitNotice }) {
+export default function CompositionList({ items, allowDropAt, setDragOver, handleDrop, dragOver, t, startReorderDrag, commerceSurcharge, moveItem, removeItem, limitNotice, emptyPriceLine = null }) {
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
@@ -20,6 +20,9 @@ export default function CompositionList({ items, allowDropAt, setDragOver, handl
             <p className="max-w-[36ch] text-body text-ink/55">
               {t('builder.emptyCanvas')}
             </p>
+            {emptyPriceLine ? (
+              <p className="mt-2 max-w-[40ch] text-body-sm text-ink/45">{emptyPriceLine}</p>
+            ) : null}
           </div>
         ) : (
           <div

@@ -3,7 +3,7 @@ import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurc
 /**
  * Cierre de la composición: precio, avisos (chrome duplicado, tope, commerce) y comprar / al carrito / vista previa.
  */
-export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn, inCart = false, startAnother = null, fixedPriceLabel = null }) {
+export default function CompositionCheckout({ items, summaryRef, hasDuplicateChrome, t, estimatedPriceUsd, atMaxSections, priceHint, hasCommerce, commerceSurcharge, openPreview, addCompositionToCart, buyComposition, looksLoggedIn, inCart = false, startAnother = null, fixedPriceLabel = null, anchor = null }) {
   return (
     <>
       {items.length > 0 && (
@@ -35,6 +35,11 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
               >
                 {priceHint}
               </p>
+              {anchor ? (
+                <p data-builder-anchor className="mt-1 max-w-[46ch] text-body-sm text-ink/75">
+                  {anchor}
+                </p>
+              ) : null}
               {hasCommerce && (
                 <p className="mt-0.5 text-body-sm text-ink/55">
                   {t('builder.commerceIncluded', {

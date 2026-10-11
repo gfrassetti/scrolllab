@@ -22,7 +22,6 @@ import { useCurrency } from '../lib/currency'
 import { prefersReducedMotion } from '../lib/motion'
 import { kindLabelKeys } from '../features/builder/sectionCopy.js'
 import BuilderHeader from '../features/builder/BuilderHeader.jsx'
-import BuilderPriceStrip from '../features/builder/BuilderPriceStrip.jsx'
 import ProjectBar from '../features/builder/ProjectBar.jsx'
 import SectionPalette from '../features/builder/SectionPalette.jsx'
 import CompositionHeader from '../features/builder/CompositionHeader.jsx'
@@ -126,11 +125,17 @@ export default function BuilderPage({ qa = false }) {
     return () => io.disconnect()
   }, [hasItems, preview])
 
+  // En el teléfono la paleta y tu página no entran una abajo de la otra (la
+  // página quedaba a ~8 pantallas): un selector «Secciones | Tu página».
+  const [mobileView, setMobileView] = useState('palette')
   const goToCanvas = () => {
+    setMobileView('page')
     const reduce = prefersReducedMotion()
-    document
-      .getElementById('builder-canvas')
-      ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+    requestAnimationFrame(() =>
+      document
+        .getElementById('builder-canvas')
+        ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }),
+    )
   }
   const commerceSurcharge = formatPriceFromUsd(
     COMMERCE_PACK_SURCHARGE_USD,
@@ -352,18 +357,34 @@ export default function BuilderPage({ qa = false }) {
         />
       )}
 
-      <BuilderPriceStrip
-        t={t}
-        fixedPriceLabel={qaPriceLabel}
-        estimatedPriceUsd={estimatedPriceUsd}
-        currency={currency}
-        rate={rate}
-        priceHint={priceHint}
-        anchor={anchor}
-      />
+      {/* Teléfono: una cosa a la vez. En desktop van las dos columnas. */}
+      <div
+        role="group"
+        aria-label={t('builder.mobileViewLabel')}
+        className="sticky top-0 z-20 -mx-5 mt-4 grid grid-cols-2 border-y border-ink/15 bg-bone/95 backdrop-blur-sm lg:hidden"
+        data-builder-mobile-switch
+      >
+        {[
+          { id: 'palette', label: t('builder.mobileViewPalette') },
+          { id: 'page', label: t('builder.mobileViewPage', { n: items.length }) },
+        ].map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            aria-pressed={mobileView === v.id}
+            onClick={() => setMobileView(v.id)}
+            className={`min-h-12 text-body-sm font-medium transition-colors ${
+              mobileView === v.id ? 'text-ink shadow-[inset_0_-2px_0_0_var(--color-accent)]' : 'text-ink/45'
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
 
-      <div className="space-y-12 pt-10 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 lg:space-y-0">
+      <div className="pt-6 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 lg:pt-10">
         <SectionPalette
+          className={mobileView === 'page' ? 'hidden lg:block' : ''}
           t={t}
           commerceSurcharge={commerceSurcharge}
           isKindBlocked={isKindBlocked}
@@ -379,7 +400,7 @@ export default function BuilderPage({ qa = false }) {
             El max-h deja aire bajo el header sticky y sobre el borde inferior. */}
         <div
           id="builder-canvas"
-          className="min-w-0 scroll-mt-4 lg:sticky lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start"
+          className={`min-w-0 scroll-mt-16 lg:sticky ${mobileView === 'palette' ? 'hidden' : ''} lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start`}
         >
           <CompositionHeader t={t} items={items} structure={structure} />
 
@@ -395,6 +416,14 @@ export default function BuilderPage({ qa = false }) {
             moveItem={moveItem}
             removeItem={removeItem}
             limitNotice={limitNotice}
+            emptyPriceLine={
+              qa
+                ? null
+                : t('builder.emptyPriceLine', {
+                    price: formatPriceFromUsd(estimatedPriceUsd, currency, rate),
+                    included: CUSTOM_BASE_SECTIONS,
+                  })
+            }
           />
 
           <CompositionCheckout
@@ -408,6 +437,7 @@ export default function BuilderPage({ qa = false }) {
             rate={rate}
             atMaxSections={atMaxSections}
             priceHint={priceHint}
+            anchor={anchor}
             hasCommerce={hasCommerce}
             commerceSurcharge={commerceSurcharge}
             openPreview={openPreview}

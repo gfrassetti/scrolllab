@@ -683,7 +683,7 @@
     "backToBuilder": "← Volver al builder",
     "buyLoggedIn": "Comprar composición",
     "buyLoggedOut": "Entrá para comprar",
-    "paletteTitle": "01 — Secciones (se arrastran al lienzo o con +)",
+    "paletteTitle": "01 — Secciones",
     "canvasTitle": "02 — Tu página",
     "sectionCountOne": "sección",
     "sectionCountMany": "secciones",
@@ -1248,6 +1248,25 @@
       "adding": "Sumando…",
       "inCart": "En el carrito",
       "emptyCantBuy": "Un proyecto vacío no se puede comprar"
+    },
+    "mobileViewLabel": "Ver",
+    "mobileViewPalette": "Secciones",
+    "mobileViewPage": "Tu página ({{n}})",
+    "emptyPriceLine": "Desde {{price}}, con {{included}} secciones incluidas.",
+    "palette": {
+      "search": "Buscar sección",
+      "kindLabel": "Tipo de sección",
+      "all": "Todas",
+      "kind": {
+        "nav": "Nav",
+        "hero": "Hero",
+        "section": "Secciones",
+        "footer": "Footer"
+      },
+      "results": "{{n}} secciones",
+      "resultsOne": "1 sección",
+      "noResults": "No hay secciones con esa búsqueda.",
+      "addedInModel": "{{n}} en tu página"
     }
   },
   "cart": {
