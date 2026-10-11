@@ -2,9 +2,9 @@
  * El catálogo del kit a partir de los productos editados en el builder (la
  * lista `products` del ProductGrid: nombre, precio, descripción y foto). Lo
  * que una fila deja vacío toma el valor del producto de ejemplo en esa
- * posición, así la grilla nunca queda sin foto o sin precio. Los productos
- * editados no traen variantes (talle, color): se suman en el código, con la
- * forma que muestra `products.js`. Sin productos editados queda `base`.
+ * posición, así la grilla nunca queda sin foto o sin precio. Las opciones
+ * (talle, color…) también: las escritas, las del ejemplo o ninguna («—»). Sin
+ * productos editados queda `base`.
  *
  * Puro (sin React ni imports de imágenes): lo usan el preview del builder y
  * el ZIP, a través de ShopCatalogProvider.
@@ -25,8 +25,25 @@ export function catalogFromEdits(rows, base, currency = '') {
       currency: sample.currency,
       blurb: row.blurb || sample.blurb,
       img: row.img || sample.img,
+      ...variantsFor(row, sample),
     }
   }))
+}
+
+/**
+ * Las opciones de un producto editado (talle, color…): «S, M, L» en
+ * `variantOptions` con su nombre en `variantLabel`. Vacío = las del producto de
+ * ejemplo en esa posición; «—» (o «-») = sin opciones.
+ */
+function variantsFor(row, sample) {
+  const raw = typeof row.variantOptions === 'string' ? row.variantOptions.trim() : ''
+  if (raw === '—' || raw === '-') return {}
+  const options = raw
+    ? raw.split(',').map((o) => o.trim()).filter(Boolean).slice(0, 12)
+    : sample.variants?.options || []
+  if (!options.length) return {}
+  const label = (typeof row.variantLabel === 'string' && row.variantLabel.trim()) || sample.variants?.label || 'Option'
+  return { variants: { label, options } }
 }
 
 /** «15000», «12.5», «12,50» o un número → número; cualquier otra cosa → null. */

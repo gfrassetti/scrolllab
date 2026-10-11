@@ -119,6 +119,8 @@ export default function Checkout({
   payLabel = 'Pay now',
   payingLabel = 'Processing…',
   trustText = 'Encrypted checkout\n30-day returns\nSupport in 24 hs',
+  /** Las garantías bajo el botón de pagar ('off' las saca). */
+  showTrust = 'on',
   successTitle = 'Order received',
   successBody = 'This is the demo response — no payment provider is connected yet. Wire createCheckout() in checkoutAdapter.js to charge for real.',
   successCta = 'Keep shopping',
@@ -466,17 +468,22 @@ export default function Checkout({
                   <ul className="mt-5 divide-y divide-[color:var(--shop-border)] border-y border-[color:var(--shop-border)]">
                     {lines.map((line) => (
                       <li key={line.id} className="flex gap-4 py-4">
-                        <img
-                          src={line.img}
-                          alt=""
-                          loading="lazy"
-                          className="size-16 shrink-0 border border-[color:var(--shop-border)] object-cover"
-                          style={{ borderRadius: 'var(--shop-radius)' }}
-                        />
+                        {/* La línea lleva a la ficha de su producto. */}
+                        <Link to={`/product/${line.productId}`} className="shrink-0" tabIndex={-1} aria-hidden="true">
+                          <img
+                            src={line.img}
+                            alt=""
+                            loading="lazy"
+                            className="size-16 border border-[color:var(--shop-border)] object-cover transition-opacity hover:opacity-80"
+                            style={{ borderRadius: 'var(--shop-radius)' }}
+                          />
+                        </Link>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline justify-between gap-3">
                             <p className="truncate text-sm font-medium">
-                              {line.name}
+                              <Link to={`/product/${line.productId}`} className="underline-offset-4 hover:underline">
+                                {line.name}
+                              </Link>
                               {line.variant ? (
                                 <span className="text-[color:var(--shop-muted)]">
                                   {' '}
@@ -611,7 +618,7 @@ export default function Checkout({
                   </p>
                 )}
 
-                {trust.length > 0 && (
+                {showTrust !== 'off' && trust.length > 0 && (
                   <ul className="mt-5 space-y-1.5 text-[11px] text-[color:var(--shop-muted)]">
                     {trust.map((item) => (
                       <li key={item}>— {item}</li>

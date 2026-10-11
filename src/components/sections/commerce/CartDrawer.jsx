@@ -108,14 +108,25 @@ export default function CartDrawer({
             <ul className="divide-y divide-[color:var(--shop-border)] border-y border-[color:var(--shop-border)]">
               {lines.map((line) => (
                 <li key={line.id} className="flex items-center gap-4 py-5">
-                  <img
-                    src={line.img}
-                    alt=""
-                    className="size-16 shrink-0 border border-[color:var(--shop-border)] object-cover"
-                  />
+                  {/* Foto y nombre llevan a la ficha del producto. */}
+                  <Link
+                    to={`/product/${line.productId}`}
+                    onClick={closeDrawer}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    className="shrink-0"
+                  >
+                    <img
+                      src={line.img}
+                      alt=""
+                      className="size-16 border border-[color:var(--shop-border)] object-cover transition-opacity hover:opacity-80"
+                    />
+                  </Link>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">
-                      {line.name}
+                      <Link to={`/product/${line.productId}`} onClick={closeDrawer} className="underline-offset-4 hover:underline">
+                        {line.name}
+                      </Link>
                       {line.variant ? (
                         <span className="text-[color:var(--shop-muted)]">
                           {' '}

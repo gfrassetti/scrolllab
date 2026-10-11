@@ -1,3 +1,5 @@
+import { toggle } from '../helpers.js'
+
 /** @typedef {import('../types.js').SectionField} SectionField */
 
 /**
@@ -65,6 +67,8 @@ export const COMMERCE_FIELDS = {
         { key: 'price', label: 'Precio (solo números)', type: 'price' },
         { key: 'blurb', label: 'Descripción', type: 'textarea' },
         { key: 'img', label: 'Foto (URL)', type: 'image' },
+        { key: 'variantLabel', label: 'Opciones — nombre (Talle, Color…; vacío = el del ejemplo)', type: 'text' },
+        { key: 'variantOptions', label: 'Opciones, separadas por coma (S, M, L). «—» = sin opciones', type: 'text' },
       ],
     },
     // El carrito lateral y la ficha de producto tampoco son secciones: sus
@@ -125,6 +129,7 @@ export const COMMERCE_FIELDS = {
       type: 'text',
     },
     { key: 'checkoutPayLabel', label: 'Checkout · Botón pagar', type: 'text' },
+    toggle('checkoutShowTrust', 'Checkout · Mostrar las garantías bajo el botón de pagar'),
     {
       key: 'checkoutTrustText',
       label: 'Checkout · Garantías (una por línea)',

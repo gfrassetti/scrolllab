@@ -88,7 +88,7 @@ export default function BuilderSidebar({
         data-builder-sidebar={collapsed ? 'collapsed' : 'open'}
       >
         <div className="flex h-full w-72 flex-col">
-          <div className="flex min-h-[3.75rem] items-center border-b border-ink/10 px-4">
+          <div className="flex h-[3.75rem] items-center border-b border-ink/10 px-4">
             <p className="text-eyebrow uppercase text-ink/50">{t('builder.sidebar.title')}</p>
           </div>
           {content}

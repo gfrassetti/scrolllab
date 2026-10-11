@@ -15,7 +15,7 @@ describe('catalogFromEdits', () => {
     assert.equal(catalogFromEdits([{}, null], BASE), BASE)
   })
 
-  it('los editados reemplazan al ejemplo, con ids por posición y sin variantes', () => {
+  it('los editados reemplazan al ejemplo, con ids por posición', () => {
     const catalog = catalogFromEdits(
       [
         { name: 'Mate', price: '15000', blurb: 'Calabaza', img: 'https://cdn.x/mate.jpg' },
@@ -26,11 +26,31 @@ describe('catalogFromEdits', () => {
       BASE,
     )
     assert.deepEqual(catalog, [
-      { id: 'p-01', name: 'Mate', price: 15000, currency: 'ARS', blurb: 'Calabaza', img: 'https://cdn.x/mate.jpg' },
-      // Lo que quedó vacío toma el producto de ejemplo en esa posición.
+      // Lo que quedó vacío toma el producto de ejemplo en esa posición (opciones incluidas).
+      { id: 'p-01', name: 'Mate', price: 15000, currency: 'ARS', blurb: 'Calabaza', img: 'https://cdn.x/mate.jpg', variants: { label: 'Size', options: ['S'] } },
       { id: 'p-02', name: 'Bombilla', price: 12.5, currency: 'ARS', blurb: 'Six-panel', img: '/cap.png' },
-      { id: 'p-03', name: 'Tee', price: 900, currency: 'ARS', blurb: 'Cotton', img: '/tee.png' },
+      { id: 'p-03', name: 'Tee', price: 900, currency: 'ARS', blurb: 'Cotton', img: '/tee.png', variants: { label: 'Size', options: ['S'] } },
     ])
+  })
+
+  it('las opciones se escriben separadas por coma; «—» las saca', () => {
+    const [own, none, labelOnly] = catalogFromEdits(
+      [
+        { name: 'Remera', variantLabel: 'Talle', variantOptions: ' S, M ,L,, XL ' },
+        { name: 'Taza', variantOptions: '—' },
+        { name: 'Gorra', variantLabel: 'Color', variantOptions: 'Negro, Arena' },
+      ],
+      BASE,
+    )
+    assert.deepEqual(own.variants, { label: 'Talle', options: ['S', 'M', 'L', 'XL'] })
+    assert.equal(none.variants, undefined)
+    assert.deepEqual(labelOnly.variants, { label: 'Color', options: ['Negro', 'Arena'] })
+  })
+
+  it('la moneda elegida vale para todo el catálogo', () => {
+    const catalog = catalogFromEdits([{ name: 'Mate' }], BASE, 'USD')
+    assert.equal(catalog[0].currency, 'USD')
+    assert.equal(catalogFromEdits(undefined, BASE, 'EUR')[1].currency, 'EUR')
   })
 })
 

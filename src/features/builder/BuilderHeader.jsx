@@ -14,7 +14,7 @@ import { SITE_NAME } from '../../lib/site'
  */
 export default function BuilderHeader({ t, items, openPreview, looksLoggedIn, onToggleSidebar = null, projectName = '' }) {
   return (
-    <header className="z-30 -mx-5 mb-6 flex items-center justify-between gap-3 border-b border-ink/15 bg-bone/95 px-5 py-3 backdrop-blur-sm md:-mx-10 md:px-10 lg:sticky lg:top-0">
+    <header className="z-30 -mx-5 mb-6 flex h-[3.75rem] items-center justify-between gap-3 border-b border-ink/10 bg-bone/95 px-5 backdrop-blur-sm md:-mx-10 md:px-10 lg:sticky lg:top-0">
       <nav className="flex min-w-0 items-center gap-3">
         {onToggleSidebar && (
           <button
