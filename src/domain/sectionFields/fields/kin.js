@@ -1,0 +1,213 @@
+import { KIN_WORD_HELP } from '../helpers.js'
+
+/** @typedef {import('../types.js').SectionField} SectionField */
+
+/**
+ * Campos editables de las secciones de KIN (builder + LAB).
+ * El ensamblado y la lista completa: ../fields.js.
+ * @type {Record<string, SectionField[]>}
+ */
+export const KIN_FIELDS = {
+  'kin/Hero': [
+    { key: 'word', label: 'Palabra de barras', type: 'text', help: KIN_WORD_HELP },
+    { key: 'brand', label: 'Marca', type: 'text' },
+    { key: 'brandNote', label: 'Bajada de la marca', type: 'text' },
+    {
+      key: 'links',
+      label: 'Nav — enlaces',
+      type: 'list',
+      max: 4,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+    { key: 'visitLabel', label: 'CTA', type: 'text' },
+    { key: 'visitHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'place', label: 'Ciudad (reloj)', type: 'text' },
+    { key: 'line1', label: 'Titular — línea 1', type: 'text' },
+    { key: 'line2', label: 'Titular — línea 2', type: 'text' },
+    { key: 'line3', label: 'Titular — línea 3', type: 'text' },
+    { key: 'listLabel', label: 'Lista — título', type: 'text' },
+    {
+      key: 'rooms',
+      label: 'Lista — filas',
+      type: 'list',
+      max: 6,
+      item: [{ key: 'text', label: 'Texto', type: 'text' }],
+    },
+    { key: 'scrollLabel', label: 'Scroll — texto', type: 'text' },
+    { key: 'scrollHref', label: 'Scroll — enlace', type: 'href' },
+    { key: 'menuLabel', label: 'Teléfono — Menu', type: 'text' },
+    { key: 'closeLabel', label: 'Teléfono — Cerrar', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'kin/Intro': [
+    { key: 'line1', label: 'Frase — línea 1', type: 'text' },
+    { key: 'line2', label: 'Frase — línea 2', type: 'text' },
+    { key: 'line3', label: 'Frase — línea 3', type: 'text' },
+    {
+      key: 'notes',
+      label: 'Notas',
+      type: 'list',
+      max: 4,
+      item: [{ key: 'text', label: 'Texto', type: 'textarea' }],
+    },
+  ],
+  'kin/Rooms': [
+    { key: 'heading', label: 'Título', type: 'text' },
+    {
+      key: 'rooms',
+      label: 'Salas',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'no', label: 'Número', type: 'text' },
+        { key: 'title', label: 'Titular', type: 'text' },
+        { key: 'dates', label: 'Bajada', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de la marca (hover)', type: 'color' },
+  ],
+  'kin/Collection': [
+    { key: 'line1', label: 'Titular — línea 1', type: 'text' },
+    { key: 'line2', label: 'Titular — línea 2', type: 'text' },
+    { key: 'label', label: 'Etiqueta', type: 'text' },
+    { key: 'featuredLabel', label: 'Nombres — título', type: 'text' },
+    {
+      key: 'items',
+      label: 'Obras (en orden)',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'src', label: 'Foto (vacío = el dibujo de la demo)', type: 'image' },
+      ],
+    },
+    { key: 'ctaLabel', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'kin/Programme': [
+    { key: 'line1', label: 'Titular — línea 1', type: 'text' },
+    { key: 'line2', label: 'Titular — línea 2', type: 'text' },
+    { key: 'year', label: 'Año', type: 'text' },
+    {
+      key: 'months',
+      label: 'Meses (12 letras separadas por espacios)',
+      type: 'text',
+      help: {
+        title: 'Cómo escribir los meses',
+        steps: [
+          'Una letra o sigla por mes, de enero a diciembre, separadas por espacios: J F M A M J J A S O N D.',
+          'Son doce, siempre: la regla se divide en doce columnas iguales y cada muestra ocupa desde su mes de inicio hasta su mes de cierre (los dos incluidos).',
+        ],
+      },
+    },
+    {
+      key: 'items',
+      label: 'Muestras (en orden)',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'no', label: 'Número', type: 'text' },
+        { key: 'title', label: 'Titular', type: 'text' },
+        { key: 'dates', label: 'Bajada (fechas)', type: 'text' },
+        { key: 'from', label: 'Mes de inicio (1–12)', type: 'text' },
+        { key: 'to', label: 'Mes de cierre (1–12)', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de la barra roja', type: 'color' },
+  ],
+  'kin/Press': [
+    {
+      key: 'quotes',
+      label: 'Voces (en orden)',
+      type: 'list',
+      max: 5,
+      item: [
+        { key: 'text', label: 'Cita', type: 'textarea' },
+        { key: 'source', label: 'Fuente', type: 'text' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'kin/Visit': [
+    { key: 'line1', label: 'Titular — línea 1', type: 'text' },
+    { key: 'line2', label: 'Titular — línea 2', type: 'text' },
+    {
+      key: 'rows',
+      label: 'Datos',
+      type: 'list',
+      max: 5,
+      item: [
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'text' },
+      ],
+    },
+    {
+      key: 'days',
+      label: 'Semana (lunes a domingo, en ese orden)',
+      type: 'list',
+      max: 7,
+      item: [
+        { key: 'label', label: 'Día', type: 'text' },
+        { key: 'open', label: 'Abre (vacío = cerrado)', type: 'text' },
+        { key: 'close', label: 'Cierra', type: 'text' },
+      ],
+    },
+    { key: 'todayLabel', label: 'Leyenda de hoy', type: 'text' },
+    { key: 'closedLabel', label: 'Texto de día cerrado', type: 'text' },
+    { key: 'ctaLabel', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de la barra de hoy', type: 'color' },
+  ],
+  'kin/Footer': [
+    { key: 'word', label: 'Palabra de barras', type: 'text', help: KIN_WORD_HELP },
+    { key: 'line1', label: 'Titular — línea 1', type: 'text' },
+    { key: 'line2', label: 'Titular — línea 2', type: 'text' },
+    { key: 'ctaLabel', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    {
+      key: 'columns',
+      label: 'Columnas de texto',
+      type: 'list',
+      max: 3,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'text', label: 'Líneas (una por renglón)', type: 'textarea' },
+      ],
+    },
+    { key: 'linksTitle', label: 'Columna de enlaces — título', type: 'text' },
+    {
+      key: 'links',
+      label: 'Columna de enlaces',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+    { key: 'credit', label: 'Crédito', type: 'text' },
+    { key: 'place', label: 'Ciudad (reloj)', type: 'text' },
+    { key: 'topLabel', label: 'Volver arriba', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto y de las barras', type: 'color' },
+    { key: 'accent', label: 'Color de la barra de acento', type: 'color' },
+  ],
+}

@@ -1,0 +1,194 @@
+import { navLinks, CHAPTER_LABEL, MENU_BUTTON } from '../helpers.js'
+
+/** @typedef {import('../types.js').SectionField} SectionField */
+
+/**
+ * Campos editables de las secciones de CHAPTERS (builder + LAB).
+ * El ensamblado y la lista completa: ../fields.js.
+ * @type {Record<string, SectionField[]>}
+ */
+export const CHAPTERS_FIELDS = {
+  'chapters/NavMinimal': [
+    { key: 'brand', label: 'Brand', type: 'text' },
+    navLinks(),
+    ...MENU_BUTTON,
+    { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
+    { key: 'fg', label: 'Menú móvil — color de texto', type: 'color' },
+  ],
+  'chapters/HeroKinetic': [
+    { key: 'lineOne', label: 'Linea 1', type: 'text' },
+    { key: 'lineTwo', label: 'Linea 2', type: 'text' },
+    { key: 'lineThree', label: 'Linea 3', type: 'text' },
+    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'meta', label: 'Meta', type: 'text' },
+    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'chapters/ManifestoReveal': [
+    CHAPTER_LABEL,
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'text',
+      label: 'Texto del manifiesto',
+      type: 'textarea',
+      help: {
+        title: 'Cómo resaltar palabras',
+        steps: [
+          'Encerrá entre *asteriscos* las palabras que van en cursiva y en el color de acento: «A page is not a poster — it is *a film*».',
+          'Al scrollear, las palabras se van entintando de a una: un párrafo de 20 a 40 palabras se lee mejor que uno largo.',
+        ],
+      },
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'chapters/QuoteBreak': [
+    CHAPTER_LABEL,
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'quote', label: 'Quote', type: 'textarea' },
+    { key: 'attribution', label: 'Attribution', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'chapters/ParallaxEditorial': [
+    CHAPTER_LABEL,
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'ghostWord', label: 'Palabra de fondo', type: 'text' },
+    {
+      key: 'figures',
+      label: 'Fotos (hasta 4, en el orden de la composición)',
+      type: 'list',
+      max: 4,
+      item: [
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+        { key: 'caption', label: 'Epígrafe', type: 'text' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'chapters/FooterCTA': [
+    { key: 'ctaWord', label: 'Marca gigante', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'ctaHref', label: 'Enlace del email (si no, usa el email)', type: 'href' },
+    { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'note', label: 'Nota de cierre', type: 'textarea' },
+    { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'links',
+      label: 'Enlaces',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+  ],
+  'chapters/HorizontalPanels': [
+    {
+      key: 'variant',
+      label: 'Variante',
+      type: 'select',
+      options: [
+        { value: 'media', label: 'Media (imágenes)' },
+        { value: 'type', label: 'Type (títulos grandes)' },
+      ],
+    },
+    CHAPTER_LABEL,
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'heading', label: 'Heading', type: 'text' },
+    {
+      key: 'panels',
+      label: 'Paneles',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'index', label: 'Número', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'caption', label: 'Bajada', type: 'text' },
+        { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'chapters/VelocityMarquee': [
+    { key: 'text', label: 'Texto', type: 'text' },
+    { key: 'separator', label: 'Separador', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'chapters/BigNumbers': [
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'stats',
+      label: 'Métricas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'value', label: 'Número', type: 'text' },
+        { key: 'suffix', label: 'Sufijo (+, %, …)', type: 'text' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+      ],
+    },
+  ],
+  'chapters/StickyImageStory': [
+    CHAPTER_LABEL,
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'scenes',
+      label: 'Escenas (una foto por escena; sin foto usa la de ejemplo)',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'kicker', label: 'Kicker', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+  'chapters/StackingCards': [
+    CHAPTER_LABEL,
+    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'total', label: 'Total', type: 'text' },
+    { key: 'label', label: 'Label', type: 'text' },
+    {
+      key: 'cards',
+      label: 'Cartas (el contraste alterna como en el ejemplo)',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'index', label: 'Número', type: 'text' },
+        { key: 'tag', label: 'Etiqueta', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Texto', type: 'textarea' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+  ],
+}

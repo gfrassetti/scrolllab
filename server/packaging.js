@@ -12,11 +12,11 @@ import { isAllowedSectionId } from './sections.js'
 import { recipeSectionId } from './catalog.js'
 // Shared with the builder preview on purpose: if the two resolved `auto`
 // differently, the ZIP would not match what the user approved on screen.
-import { resolveSectionTheme } from '../src/lib/sectionTheme.js'
+import { resolveSectionTheme } from '../src/domain/sectionTheme.js'
 import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
-import { checkoutPropsFromItems } from '../src/lib/shop/checkoutProps.js'
+import { checkoutPropsFromItems } from '../src/domain/checkoutProps.js'
 // El mismo fondo por modelo que pinta el preview del builder.
-import { modelWrapperClass } from '../src/lib/modelWrappers.js'
+import { modelWrapperClass } from '../src/domain/modelWrappers.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')

@@ -420,7 +420,7 @@ Register new sellable SKUs in `server/catalog.js` (copy de Checkout Pro) + su pr
 2. `src/lib/sectionRegistry.jsx` → componente, nombre y blurb (mismo id, mismo orden).
 3. `server/__tests__/sections.test.js` → sumar el id a `APPROVED` si se vende: la allowlist del servidor
    (`server/sections.js`) se deriva sola, el test la fija para que habilitarla sea a propósito.
-4. Campos editables **solo** en `src/lib/sectionFields.js`: el servidor deriva de ahí qué props acepta.
+4. Campos editables **solo** en `src/domain/sectionFields/fields/<modelo>.js` (un archivo por modelo; `src/lib/sectionFields.js` los re-exporta): el servidor deriva de ahí qué props acepta.
    Un campo `color` se llama `bg`/`fg`/`accent`… y uno `href` termina en `Href`: el servidor valida por
    nombre y `npm run check` lo exige. Después, i18n del builder y `HOSTABLE_SECTIONS` como siempre.
 

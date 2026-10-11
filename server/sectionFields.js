@@ -1,8 +1,8 @@
-import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
+import { SECTION_FIELDS } from '../src/domain/sectionFields/index.js'
 
 /**
  * Allowlist server-side de props editables por sección. Sale de los campos del
- * builder (src/lib/sectionFields.js, la fuente única): una prop es editable si
+ * builder (src/domain/sectionFields/, la fuente única): una prop es editable si
  * tiene campo. Lo que el servidor NO toma del cliente es cómo se valida cada
  * valor: eso lo deciden las reglas de abajo (por nombre de prop y por el schema
  * de listas), sin confiar en el `type` de la UI.

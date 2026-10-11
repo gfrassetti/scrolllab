@@ -1,0 +1,147 @@
+import { navLinks } from '../helpers.js'
+
+/** @typedef {import('../types.js').SectionField} SectionField */
+
+/**
+ * Campos editables de las secciones de ATELIER (builder + LAB).
+ * El ensamblado y la lista completa: ../fields.js.
+ * @type {Record<string, SectionField[]>}
+ */
+export const ATELIER_FIELDS = {
+  'atelier/NavAtelier': [
+    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'menuLabel', label: 'Menu label', type: 'text' },
+    navLinks(),
+    { key: 'bg', label: 'Menú — color de fondo', type: 'color' },
+    { key: 'fg', label: 'Menú — color de texto', type: 'color' },
+  ],
+  'atelier/HeroMeaning': [
+    { key: 'line1', label: 'Line 1', type: 'text' },
+    { key: 'line2', label: 'Line 2', type: 'text' },
+    { key: 'meta', label: 'Meta', type: 'text' },
+    { key: 'body', label: 'Texto de abajo', type: 'textarea' },
+    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'atelier/AboutClarity': [
+    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'title', label: 'Title', type: 'textarea' },
+    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'tags', label: 'Etiquetas (línea chica)', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'atelier/ServicesStone': [
+    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'service1Title', label: 'Service 1 — title', type: 'text' },
+    { key: 'service1Body', label: 'Service 1 — body', type: 'textarea' },
+    { key: 'service2Title', label: 'Service 2 — title', type: 'text' },
+    { key: 'service2Body', label: 'Service 2 — body', type: 'textarea' },
+    { key: 'service3Title', label: 'Service 3 — title', type: 'text' },
+    { key: 'service3Body', label: 'Service 3 — body', type: 'textarea' },
+    { key: 'service4Title', label: 'Service 4 — title', type: 'text' },
+    { key: 'service4Body', label: 'Service 4 — body', type: 'textarea' },
+    { key: 'note', label: 'Línea de apoyo (arriba a la derecha)', type: 'textarea' },
+    { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'atelier/VisionShutter': [
+    { key: 'line1', label: 'Line 1', type: 'text' },
+    { key: 'line2', label: 'Line 2', type: 'text' },
+    { key: 'word1', label: 'Word 1', type: 'text' },
+    { key: 'word2', label: 'Word 2', type: 'text' },
+    { key: 'word3', label: 'Word 3', type: 'text' },
+    { key: 'regionLabel', label: 'Nombre de la sección para lectores de pantalla', type: 'text' },
+  ],
+  'atelier/SelectedWork': [
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    {
+      key: 'projects',
+      label: 'Proyectos',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'body', label: 'Descripción', type: 'textarea' },
+        { key: 'tag', label: 'Etiqueta (sobre la foto)', type: 'text' },
+        { key: 'overlay', label: 'Texto grande (sobre la foto)', type: 'text' },
+        { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
+        { key: 'href', label: 'Enlace del proyecto', type: 'href' },
+      ],
+    },
+    { key: 'exploreLabel', label: 'Texto del enlace de cada proyecto', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+  ],
+  'atelier/KeyFacts': [
+    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'facts',
+      label: 'Datos',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'value', label: 'Cifra', type: 'text' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+      ],
+    },
+  ],
+  'atelier/StudioCards': [
+    { key: 'note', label: 'Note', type: 'textarea' },
+    { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'cards',
+      label: 'Tarjetas',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+        { key: 'img', label: 'Imagen (URL)', type: 'image' },
+      ],
+    },
+  ],
+  'atelier/FooterAtelier': [
+    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'line', label: 'Headline', type: 'text' },
+    { key: 'cta', label: 'CTA', type: 'text' },
+    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'brand', label: 'Brand mark', type: 'text' },
+    { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'phone', label: 'Phone', type: 'text' },
+    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'clockLabel', label: 'Hora local — rótulo', type: 'text' },
+    { key: 'enquiryLabel', label: 'Contacto — título', type: 'text' },
+    { key: 'emailLabel', label: 'Email — prefijo', type: 'text' },
+    { key: 'phoneLabel', label: 'Teléfono — prefijo', type: 'text' },
+    { key: 'socialLabel', label: 'Redes — título', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    {
+      key: 'social',
+      label: 'Redes',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'href', label: 'Enlace', type: 'href' },
+      ],
+    },
+  ],
+}

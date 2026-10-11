@@ -57,7 +57,8 @@ Se importa **solo hacia abajo**. Lo primero lo hace cumplir ESLint; el resto es 
 |---|---|
 | `src/domain/catalog.js` | **Única fuente** de precios, tramos del builder, bundle, cupón y qué SKUs se venden |
 | `src/domain/sections.js` | **Única fuente** de las secciones: id, tipo y orden de la paleta |
-| `src/lib/sectionFields.js` | **Única fuente** de los campos editables de cada sección (el servidor deriva de acá lo que acepta) |
+| `src/domain/sectionFields/` | **Única fuente** de los campos editables de cada sección (el servidor deriva de acá lo que acepta): `fields/<modelo>.js` (uno por modelo), `helpers.js` (navs, guías), `fields.js` (los junta), `sanitize.js` (las reglas de valores). `src/lib/sectionFields.js` lo re-exporta |
+| `src/domain/sectionTheme.js` · `modelWrappers.js` · `checkoutProps.js` | Tema de las secciones neutras, fondo de cada modelo y props del checkout: puros, los usan el preview y el empaquetador. (`src/lib/shop/theme.js` queda en `src/lib` a propósito: viaja en el ZIP) |
 | `src/pages/` | Una página por ruta: estado, datos y las animaciones de scroll |
 | `src/features/home/`, `src/features/builder/` | Los bloques de la home y del builder; la página los compone |
 | `src/components/sections/<modelo>/` | Las secciones de cada template. **Viajan al ZIP tal cual** |
@@ -77,7 +78,7 @@ Lo que se vende es el ZIP, no el repo. Por eso:
 |---|---|
 | Un precio o un tramo del builder | Solo `src/domain/catalog.js`. `npm run check` valida que la base supere al template más caro en venta |
 | Una sección nueva | `src/domain/sections.js` (id y tipo) → `src/lib/sectionRegistry.jsx` (componente, nombre, blurb) → sumar el id a `APPROVED` en `server/__tests__/sections.test.js` → campos editables en `src/lib/sectionFields.js` → i18n del builder. Ver el detalle en `AGENTS.md` |
-| Un campo editable | Solo `src/lib/sectionFields.js`. Un campo de color se llama `bg`/`fg`/`accent`… y uno de link termina en `Href`: el servidor valida por nombre y `check` lo exige |
+| Un campo editable | Solo `src/domain/sectionFields/fields/<modelo>.js`. Un campo de color se llama `bg`/`fg`/`accent`… y uno de link termina en `Href`: el servidor valida por nombre y `check` lo exige |
 | Una ruta de la API | Un servicio en `server/services/` y la ruta en el router de su dominio. Sumarla a `EXPECTED` en `server/__tests__/routes.test.js` |
 | Un mail | La plantilla en `emailTemplates.js` y el envío en `email.js` |
 | Una zona de la home o un bloque del builder | Un componente en `src/features/<feature>/`; la página lo monta |
