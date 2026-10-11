@@ -10,6 +10,9 @@ import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
 import ModelTryout from './ModelTryout'
+import FontPicker from './FontPicker'
+import Collapse from './Collapse'
+import { fontChoiceById } from '../domain/design'
 import { useLocalModel } from '../lib/localModel'
 import { useT } from '../i18n'
 
@@ -39,9 +42,11 @@ const CHIP_POSITION = {
  * Live composition preview with a side panel to edit text props per section.
  * When the recipe includes commerce/ProductGrid, shop routes run in a nested router.
  */
-export default function BuilderPreview({ items, onChangeProps, onExit }) {
+export default function BuilderPreview({ items, font = null, onChangeFont = null, onChangeProps, onExit }) {
   const t = useT()
   const [editingUid, setEditingUid] = useState(null)
+  const [fontOpen, setFontOpen] = useState(false)
+  const fontChoice = fontChoiceById(font)
   const editing = items.find((item) => item.uid === editingUid)
   const editingSection = editing ? getSection(editing.sectionId) : null
   const fields = editing ? getSectionFields(editing.sectionId) : []
@@ -76,12 +81,14 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
   const home = (
     <CompositionCanvas
       items={canvasItems}
+      font={font}
       renderChrome={(item, section) => {
         const active = item.uid === editingUid
         return (
           <>
             <button
               type="button"
+              data-sl-ui
               onClick={() =>
                 setEditingUid((uid) => (uid === item.uid ? null : item.uid))
               }
@@ -98,6 +105,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
             {active && (
               <div
                 aria-hidden="true"
+                data-sl-ui
                 className="pointer-events-none absolute inset-0 z-10 ring-2 ring-accent/70 ring-inset"
               />
             )}
@@ -114,6 +122,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}
+          items={items}
           products={shopProducts}
         />
       ) : (
@@ -199,6 +208,34 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
           </button>
         </aside>
       )}
+
+      {onChangeFont ? (
+        <div
+          data-native-cursor
+          data-sl-ui
+          className={`fixed left-3 z-9999 w-[min(34rem,calc(100vw-1.5rem))] ${
+            hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
+          } ${editing ? 'max-md:hidden' : ''}`}
+        >
+          <Collapse open={fontOpen} className="mb-2">
+            <div className="border border-ink/20 bg-bone p-3 text-ink shadow-xl">
+              <p className="mb-3 max-w-[48ch] text-xs leading-relaxed text-ink/60">{t('builder.fontHint')}</p>
+              <FontPicker value={font} onChange={onChangeFont} t={t} />
+            </div>
+          </Collapse>
+          <button
+            type="button"
+            aria-expanded={fontOpen}
+            onClick={() => setFontOpen((v) => !v)}
+            className="min-h-11 border-2 border-ink bg-bone px-4 py-2 text-left text-[11px] uppercase tracking-[0.2em] text-ink shadow-lg transition-colors hover:bg-ink hover:text-bone"
+          >
+            {t('builder.fontTitle')}
+            <span className="ml-2 normal-case tracking-normal opacity-70">
+              {fontChoice ? fontChoice.label : t('builder.fontOriginal')}
+            </span>
+          </button>
+        </div>
+      ) : null}
 
       <button
         type="button"

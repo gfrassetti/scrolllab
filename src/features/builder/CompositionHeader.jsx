@@ -1,9 +1,24 @@
+import { useState } from 'react'
+import Collapse from '../../components/Collapse'
+import FontPicker from '../../components/FontPicker'
+import { fontChoiceById } from '../../domain/design'
+
 
 
 /**
- * Cabecera del panel de composición: título y estructura (nav / hero / secciones / footer).
+ * Cabecera del panel de composición: título, estructura (nav / hero / secciones
+ * / footer) y la tipografía global de la página.
  */
-export default function CompositionHeader({ t, items, structure, onClear = null }) {
+export default function CompositionHeader({
+  t,
+  items,
+  structure,
+  onClear = null,
+  font = null,
+  onFontChange = null,
+}) {
+  const [fontOpen, setFontOpen] = useState(false)
+  const fontChoice = fontChoiceById(font)
   return (
     <>
       <div className="shrink-0">
@@ -55,6 +70,39 @@ export default function CompositionHeader({ t, items, structure, onClear = null 
             </li>
           ))}
         </ol>
+
+        {/* Tipografía global: una familia para todas las secciones. */}
+        {onFontChange && items.length > 0 ? (
+          <div className="mb-4 border-t border-ink/10 pt-3" data-builder-font>
+            <button
+              type="button"
+              aria-expanded={fontOpen}
+              onClick={() => setFontOpen((v) => !v)}
+              className="tpl-hit relative flex min-h-11 w-full items-center justify-between gap-3 text-left text-body-sm"
+            >
+              <span className="font-medium">{t('builder.fontTitle')}</span>
+              <span className="flex items-center gap-2 text-ink/55">
+                <span style={fontChoice ? { fontFamily: fontChoice.stack } : undefined}>
+                  {fontChoice ? fontChoice.label : t('builder.fontOriginal')}
+                </span>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 10 6"
+                  className={`h-1.5 w-2.5 transition-transform duration-200 ${fontOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                >
+                  <path d="M1 1l4 4 4-4" />
+                </svg>
+              </span>
+            </button>
+            <Collapse open={fontOpen}>
+              <p className="mt-1 mb-3 max-w-[56ch] text-body-sm text-ink/55">{t('builder.fontHint')}</p>
+              <FontPicker value={font} onChange={onFontChange} t={t} />
+            </Collapse>
+          </div>
+        ) : null}
       </div>
     </>
   )

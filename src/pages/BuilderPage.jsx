@@ -62,6 +62,8 @@ export default function BuilderPage({ qa = false }) {
     switchComposition,
     renameComposition,
     items,
+    font,
+    setFont,
     preview,
     dragOver,
     setDragOver,
@@ -367,6 +369,8 @@ export default function BuilderPage({ qa = false }) {
       <SmoothScrollProvider normalizeTouch={false}>
         <BuilderPreview
           items={items}
+          font={font}
+          onChangeFont={setFont}
           onChangeProps={updateItemProps}
           onExit={closePreview}
         />
@@ -447,7 +451,14 @@ export default function BuilderPage({ qa = false }) {
           id="builder-canvas"
           className={`min-w-0 scroll-mt-16 lg:sticky ${mobileView === 'palette' ? 'hidden' : ''} lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start`}
         >
-          <CompositionHeader t={t} items={items} structure={structure} onClear={projects.startNew} />
+          <CompositionHeader
+            t={t}
+            items={items}
+            structure={structure}
+            onClear={projects.startNew}
+            font={font}
+            onFontChange={setFont}
+          />
 
           <CompositionList
             items={items}

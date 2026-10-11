@@ -9,6 +9,7 @@ import {
 } from './catalog.js'
 import { isAllowedSectionId } from './sections.js'
 import { MAX_CART_COMPOSITIONS } from '../src/domain/catalog.js'
+import { normalizeFontId } from '../src/domain/design.js'
 import { sanitizeSectionProps } from './sectionFields.js'
 import { HttpError } from './errors.js'
 
@@ -183,7 +184,13 @@ export function validateRecipe(recipe, maxRecipeSections = 30) {
       entry && typeof entry === 'object' && !Array.isArray(entry)
         ? sanitizeSectionProps(id, entry.props)
         : undefined
-    cleaned.push(props ? { id, props } : { id })
+    // La tipografía global viaja en cada entrada (src/domain/design.js); solo
+    // pasa un id de la lista.
+    const font =
+      entry && typeof entry === 'object' && !Array.isArray(entry)
+        ? normalizeFontId(entry.font)
+        : null
+    cleaned.push({ id, ...(props ? { props } : {}), ...(font ? { font } : {}) })
   }
   return cleaned
 }

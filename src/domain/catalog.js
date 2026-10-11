@@ -14,7 +14,7 @@
 /**
  * Una sección de una receta del builder: su id (`'chapters/HeroKinetic'`) o
  * `{ id, props }` con los textos / listas editados.
- * @typedef {string | { id: string, props?: Record<string, unknown> }} RecipeEntry
+ * @typedef {string | { id: string, props?: Record<string, unknown>, font?: string }} RecipeEntry
  */
 
 /** Precio de lista por template. Incluye los que todavía no se venden (RATIO). */

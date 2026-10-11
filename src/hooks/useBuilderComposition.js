@@ -5,6 +5,7 @@ import {
   setCurrentCompositionId,
   startNewComposition,
   saveComposition,
+  saveFont,
   compositionToRecipe,
   recipeHasCommerce,
   dedupeUniqueKinds,
@@ -17,6 +18,7 @@ import {
   reorderCompositionItem,
 } from '../lib/composition'
 import { estimateCustomPriceUsd, MAX_CUSTOM_SECTIONS } from '../lib/pricing'
+import { normalizeFontId } from '../domain/design'
 import { useCart } from '../lib/cart'
 
 /**
@@ -27,6 +29,9 @@ import { useCart } from '../lib/cart'
 export function useBuilderComposition() {
   const [boot] = useState(bootstrapComposition)
   const [items, setItems] = useState(boot.items)
+  // Tipografía global de la página (null = la de cada sección). Viaja en la
+  // receta, ver src/domain/design.js.
+  const [font, setFontState] = useState(boot.font)
   const [preview, setPreview] = useState(false)
   const [dragOver, setDragOver] = useState(null)
   const [limitNotice, setLimitNotice] = useState('')
@@ -38,10 +43,11 @@ export function useBuilderComposition() {
 
   useEffect(() => {
     saveComposition(items)
+    saveFont(font)
     // Si la composición ya está en el carrito, que no se quede con una foto
     // vieja: se compra lo último que se editó. Solo esta, no las otras.
-    useCart.getState().syncComposition(compositionToRecipe(items), compositionId)
-  }, [items, compositionId])
+    useCart.getState().syncComposition(compositionToRecipe(items, font), compositionId)
+  }, [items, font, compositionId])
 
   useEffect(() => {
     if (!limitNotice) return undefined
@@ -59,7 +65,7 @@ export function useBuilderComposition() {
     })
   }, [duplicateChrome])
 
-  const recipe = useMemo(() => compositionToRecipe(items), [items])
+  const recipe = useMemo(() => compositionToRecipe(items, font), [items, font])
   const hasCommerce = useMemo(() => recipeHasCommerce(recipe), [recipe])
   const sectionCount = recipe.length
   const atMaxSections = sectionCount >= MAX_CUSTOM_SECTIONS
@@ -108,12 +114,16 @@ export function useBuilderComposition() {
   const clearItems = useCallback(() => {
     setCompositionId(startNewComposition())
     setItems([])
+    setFontState(null)
   }, [])
 
+  const setFont = useCallback((id) => setFontState(normalizeFontId(id)), [])
+
   /** Abre otra composición (un proyecto guardado) con su id y sus secciones. */
-  const switchComposition = useCallback((id, nextItems) => {
+  const switchComposition = useCallback((id, nextItems, nextFont = null) => {
     setCompositionId(setCurrentCompositionId(id))
     setItems(dedupeUniqueKinds(nextItems || []))
+    setFontState(normalizeFontId(nextFont))
   }, [])
 
   /** La composición abierta pasa a tener otro id (se guardó como proyecto). */
@@ -147,6 +157,8 @@ export function useBuilderComposition() {
     renameComposition,
     items,
     setItems,
+    font,
+    setFont,
     preview,
     dragOver,
     setDragOver,

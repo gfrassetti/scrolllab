@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
+  fontFromRecipe,
   loadComposition,
+  readFont,
   recipeHasCommerce,
   recipeToComposition,
 } from '../lib/composition'
@@ -25,25 +27,27 @@ function useOrderComposition(orderId, itemIndex) {
   const [state, setState] = useState({
     status: orderId ? 'loading' : 'idle',
     items: [],
+    font: null,
   })
 
   useEffect(() => {
     if (!orderId) {
-      setState({ status: 'idle', items: [] })
+      setState({ status: 'idle', items: [], font: null })
       return undefined
     }
     let cancelled = false
-    setState({ status: 'loading', items: [] })
+    setState({ status: 'loading', items: [], font: null })
     api
       .orders()
       .then((data) => {
         if (cancelled) return
         const order = (data.orders || []).find((o) => o.id === orderId)
-        const items = recipeToComposition(order?.items?.[itemIndex]?.recipe)
+        const recipe = order?.items?.[itemIndex]?.recipe
+        const items = recipeToComposition(recipe)
         setState(
           items.length
-            ? { status: 'ready', items }
-            : { status: 'missing', items: [] },
+            ? { status: 'ready', items, font: fontFromRecipe(recipe) }
+            : { status: 'missing', items: [], font: null },
         )
       })
       .catch((err) => {
@@ -51,6 +55,7 @@ function useOrderComposition(orderId, itemIndex) {
         setState({
           status: err?.status === 401 ? 'unauthorized' : 'missing',
           items: [],
+          font: null,
         })
       })
     return () => {
@@ -101,12 +106,12 @@ export default function PreviewPage() {
 
   const compositionId = params.get('composition')
   const cartCustoms = cartItems.filter((item) => item.sku === 'custom' || String(item.sku).startsWith('custom:'))
-  const cartComposition = fromCart
-    ? recipeToComposition(
-        (cartCustoms.find((item) => compositionId && item.compositionId === compositionId) || cartCustoms[0])
-          ?.recipe,
-      )
-    : []
+  const cartRecipe = fromCart
+    ? (cartCustoms.find((item) => compositionId && item.compositionId === compositionId) || cartCustoms[0])
+        ?.recipe
+    : undefined
+  const cartComposition = fromCart ? recipeToComposition(cartRecipe) : []
+  const [localFont] = useState(() => (orderId || fromCart ? null : readFont()))
 
   const fromOrder = Boolean(orderId)
   const items = fromOrder
@@ -114,6 +119,7 @@ export default function PreviewPage() {
     : fromCart
       ? cartComposition
       : localItems
+  const font = fromOrder ? order.font : fromCart ? fontFromRecipe(cartRecipe) : localFont
   const backTo = fromOrder ? '/account' : fromCart ? '/cart' : '/builder'
   const backLabel = fromOrder
     ? t('preview.backToAccount')
@@ -161,7 +167,7 @@ export default function PreviewPage() {
 
   const home = (
     <SmoothScrollProvider>
-      <CompositionCanvas items={items} />
+      <CompositionCanvas items={items} font={font} />
     </SmoothScrollProvider>
   )
 
@@ -172,6 +178,7 @@ export default function PreviewPage() {
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}
+          items={items}
           products={productsFromItems(items)}
         />
       ) : (

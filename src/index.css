@@ -226,6 +226,21 @@ html[data-surface='market'] body {
   font-family: var(--font-ui);
 }
 
+/* Tipografía global elegida en el builder: `data-user-font` + `--user-font`
+   (src/domain/design.js). Pisa la familia de cada sección, también la que
+   ponen en línea; solo lo marcado `data-sl-ui` (los botones de edición del
+   preview, que son del market) vuelve a --font-ui. En el ZIP el atributo va en
+   <html> (src/App.jsx): borrar esas dos líneas devuelve cada fuente. */
+[data-user-font],
+[data-user-font] * {
+  font-family: var(--user-font) !important;
+}
+/* Lo del market que vive dentro del lienzo (botones «Editar» del preview) no. */
+[data-user-font] [data-sl-ui],
+[data-user-font] [data-sl-ui] * {
+  font-family: var(--font-ui) !important;
+}
+
 /* Playfair italic: contraste alto vs Bricolage/Grotesk (recomendación Pro Max). */
 .font-display.italic {
   font-style: italic;

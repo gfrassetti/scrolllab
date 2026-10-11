@@ -18,6 +18,7 @@ import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
 import { checkoutPropsFromItems } from '../src/domain/checkoutProps.js'
 // El mismo fondo por modelo que pinta el preview del builder.
 import { modelWrapperClass } from '../src/domain/modelWrappers.js'
+import { fontChoiceById, fontFromRecipe, fontLinkParam } from '../src/domain/design.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -300,9 +301,11 @@ function ensureDir(dir) {
 /**
  * index.html limpio para los ZIP vendidos: sin el SEO, canonical ni
  * script de theme del marketplace — solo fuentes, viewport y root.
+ * @param {string} title
+ * @param {string | null} [fontId] tipografía global del builder (src/domain/design.js)
  */
-function buildTemplateIndexHtml(title) {
-  return `<!doctype html>
+function buildTemplateIndexHtml(title, fontId = null) {
+  const html = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -322,6 +325,9 @@ function buildTemplateIndexHtml(title) {
   </body>
 </html>
 `
+  // La tipografía global del builder: si su familia no viene en el <link>, se suma.
+  const extra = fontLinkParam(fontId, html)
+  return extra ? html.replace('&display=swap"', `${extra}&display=swap"`) : html
 }
 
 function read(rel) {
@@ -775,13 +781,15 @@ export function sectionFileClosure(entryAbs) {
  */
 function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const sources = [TEMPLATE_VITE_CONFIG]
+  // Tipografía global elegida en el builder (null = la de cada sección).
+  const fontId = fontFromRecipe(recipe)
 
   for (const rel of SHARED) {
     const abs = path.join(ROOT, rel)
     if (!fs.existsSync(abs)) continue
     let body = fs.readFileSync(abs)
     if (rel === 'index.html') {
-      body = Buffer.from(buildTemplateIndexHtml('Custom composition — SCROLLLAB'))
+      body = Buffer.from(buildTemplateIndexHtml('Custom composition — SCROLLLAB', fontId))
     } else if (rel === 'src/index.css') {
       body = Buffer.from(stampCss(body.toString('utf8'), licenseMeta))
     }
@@ -994,6 +1002,19 @@ ${renderLines.join('\n')}
 }
 `
   }
+  // Tipografía global: la regla vive en src/index.css (`[data-user-font]`) y se
+  // prende acá, en <html>, para que alcance también a las rutas de la tienda.
+  const globalFont = fontChoiceById(fontId)
+  if (globalFont) {
+    const snippet = `// Global font, chosen in the builder: every element on the page uses it (the
+// rule is \`[data-user-font]\` in src/index.css). Delete these two lines to give
+// each section back its own font.
+document.documentElement.setAttribute('data-user-font', '')
+document.documentElement.style.setProperty('--user-font', ${JSON.stringify(globalFont.stack)})
+
+`
+    appSrc = appSrc.replace('export default function App()', `${snippet}export default function App()`)
+  }
   appSrc = stampApp(appSrc, licenseMeta)
   sources.push(appSrc)
   archive.append(appSrc, { name: `${prefix}src/App.jsx` })
@@ -1011,6 +1032,9 @@ ${renderLines.join('\n')}
     readme += `\n${monolith3dNote({ sampleGlb: false })}`
   }
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
+  if (globalFont) {
+    readme += `\n## Font\n\nThe whole page uses ${globalFont.label} (chosen in the builder). It is set by the two \`data-user-font\` / \`--user-font\` lines in \`src/App.jsx\`; delete them and every section goes back to its own font.\n`
+  }
   if (needsShop) {
     const productsNote = shopProducts
       ? `Products: the ones you edited in the builder are \`${shopProducts}\` in \`src/App.jsx\`, passed to \`<ProductGrid products>\` and to \`<ShopCatalogProvider products>\` (the product page, cart and checkout read it from there).`

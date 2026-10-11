@@ -416,6 +416,55 @@ describe('ZIP del builder', () => {
     )
   })
 
+  it('con tipografía global: la prende en <html>, suma la familia al <link> y lo dice en el README', async () => {
+    const recipe = [
+      { id: 'chapters/HeroKinetic', font: 'geist' },
+      { id: 'chapters/FooterCTA', props: { ctaWord: 'Hola' }, font: 'geist' },
+    ]
+    const files = await pack('custom-font', (destPath) =>
+      packCustomTemplate({ recipe, destPath, licenseMeta: LICENSE }),
+    )
+    const app = files.get('src/App.jsx').toString('utf8')
+    assert.match(app, /setAttribute\('data-user-font', ''\)/)
+    assert.match(app, /setProperty\('--user-font', "'Geist', ui-sans-serif/)
+    // El módulo la prende antes de montar la app, y las props de la sección siguen.
+    assert.ok(app.indexOf('data-user-font') < app.indexOf('export default function App'))
+    assert.match(app, /ctaWord=\{"Hola"\}/)
+    // Geist no venía en el <link> del ZIP: se suma.
+    const html = files.get('index.html').toString('utf8')
+    assert.match(html, /family=Geist:wght@100\.\.900&display=swap/)
+    assert.match(files.get('README.md').toString('utf8'), /## Font[\s\S]*Geist/)
+    // La regla que la aplica viaja en el CSS del ZIP.
+    assert.match(files.get('src/index.css').toString('utf8'), /\[data-user-font\]/)
+    assert.deepEqual(brokenImports(files), [])
+  })
+
+  it('con una tipografía que el <link> ya trae no lo toca; sin tipografía el App queda como siempre', async () => {
+    const withArchivo = await pack('custom-font-archivo', (destPath) =>
+      packCustomTemplate({
+        recipe: [{ id: 'chapters/HeroKinetic', font: 'archivo' }],
+        destPath,
+        licenseMeta: LICENSE,
+      }),
+    )
+    const html = withArchivo.get('index.html').toString('utf8')
+    assert.equal(html.match(/family=Archivo/g)?.length, 1, 'Archivo ya estaba: no se repite')
+    const plain = await pack('custom-font-none', (destPath) =>
+      packCustomTemplate({ recipe: ['chapters/HeroKinetic'], destPath, licenseMeta: LICENSE }),
+    )
+    assert.doesNotMatch(plain.get('src/App.jsx').toString('utf8'), /data-user-font/)
+    assert.doesNotMatch(plain.get('README.md').toString('utf8'), /## Font/)
+  })
+
+  it('una fuente que no está en la lista nunca llega al ZIP (la receta se limpia antes)', async () => {
+    const clean = validateRecipe([{ id: 'chapters/HeroKinetic', font: "x'); alert(1)//" }], 30)
+    assert.deepEqual(clean, [{ id: 'chapters/HeroKinetic' }])
+    const files = await pack('custom-font-bad', (destPath) =>
+      packCustomTemplate({ recipe: clean, destPath, licenseMeta: LICENSE }),
+    )
+    assert.doesNotMatch(files.get('src/App.jsx').toString('utf8'), /data-user-font|alert\(1\)/)
+  })
+
   it('incluye el kit de commerce cuando la receta lo pide', async () => {
     const files = await pack('custom-shop', (destPath) =>
       packCustomTemplate({

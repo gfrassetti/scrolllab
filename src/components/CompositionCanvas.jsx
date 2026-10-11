@@ -4,6 +4,7 @@ import { resolveSectionTheme } from '../lib/sectionTheme'
 import { withoutEmptyRows } from '../lib/sectionFields'
 import { linkedFizzProps } from '../domain/fizzPalette'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import { fontChoiceById } from '../domain/design'
 
 /**
  * Renders a builder composition as stacked sections with each model's
@@ -40,7 +41,10 @@ export default function CompositionCanvas({
   items,
   id = 'top',
   renderChrome,
+  /** Tipografía global (src/domain/design.js); null = la de cada sección. */
+  font = null,
 }) {
+  const fontChoice = fontChoiceById(font)
   const list = useMemo(() => items || [], [items])
   const live = useMemo(() => signatures(list), [list])
   const settled = useDebouncedValue(live, REMOUNT_DELAY_MS)
@@ -52,7 +56,11 @@ export default function CompositionCanvas({
   const liveProps = useMemo(() => JSON.parse(live), [live])
 
   return (
-    <div id={id}>
+    <div
+      id={id}
+      {...(fontChoice ? { 'data-user-font': '' } : {})}
+      style={fontChoice ? { '--user-font': fontChoice.stack } : undefined}
+    >
       {list.map((item, index) => {
         const section = getSection(item.sectionId)
         if (!section) return null

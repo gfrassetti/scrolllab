@@ -3,6 +3,7 @@ import { api } from '../lib/api'
 import {
   projectCompositionId,
   readCurrentProject,
+  fontFromRecipe,
   recipeToComposition,
   writeCurrentProject,
 } from '../lib/composition'
@@ -133,7 +134,11 @@ export function useBuilderProjects({
         savedJson.current = remoteJson
         setStored({ id: remote.id, name: remote.name })
         if (remoteJson !== latest.current.recipeJson) {
-          switchComposition(projectCompositionId(remote.id), recipeToComposition(remote.recipe))
+          switchComposition(
+            projectCompositionId(remote.id),
+            recipeToComposition(remote.recipe),
+            fontFromRecipe(remote.recipe),
+          )
         }
         setSyncedId(remote.id)
         setStatus('saved')
@@ -200,7 +205,11 @@ export function useBuilderProjects({
       await save()
       const { project: remote } = await api.builderProject(id)
       savedJson.current = JSON.stringify(remote.recipe || [])
-      switchComposition(projectCompositionId(remote.id), recipeToComposition(remote.recipe))
+      switchComposition(
+            projectCompositionId(remote.id),
+            recipeToComposition(remote.recipe),
+            fontFromRecipe(remote.recipe),
+          )
       setStored({ id: remote.id, name: remote.name })
       setSyncedId(remote.id)
       setError('')

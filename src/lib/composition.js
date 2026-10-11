@@ -1,7 +1,35 @@
 import { sanitizeProps, isEphemeralAssetUrl, withoutEmptyRows } from './sectionFields.js'
 import { sectionKindOf, isKnownSection } from './sectionKinds.js'
+import { fontFromRecipe, normalizeFontId } from '../domain/design.js'
 
 export const STORAGE_KEY = 'builder-composition-v1'
+
+/**
+ * Tipografía global de la composición abierta (src/domain/design.js). Va aparte
+ * de las secciones en el navegador; en la receta viaja como `font` de cada
+ * entrada. `null` = cada sección con la suya.
+ */
+const FONT_STORAGE_KEY = 'builder-font-v1'
+
+export { fontFromRecipe }
+
+export function readFont() {
+  try {
+    return normalizeFontId(localStorage.getItem(FONT_STORAGE_KEY))
+  } catch {
+    return null
+  }
+}
+
+export function saveFont(fontId) {
+  try {
+    const id = normalizeFontId(fontId)
+    if (id) localStorage.setItem(FONT_STORAGE_KEY, id)
+    else localStorage.removeItem(FONT_STORAGE_KEY)
+  } catch {
+    /* sin storage */
+  }
+}
 
 /**
  * El `storage` event solo llega a las *otras* pestañas, así que el header no se
@@ -144,7 +172,7 @@ export function dedupeUniqueKinds(items) {
 export function bootstrapComposition() {
   const loaded = readCompositionItems()
   const items = dedupeUniqueKinds(loaded)
-  return { items, cleaned: items.length < loaded.length }
+  return { items, cleaned: items.length < loaded.length, font: readFont() }
 }
 
 export function loadComposition() {
@@ -202,22 +230,24 @@ export function readCompositionCount() {
 }
 
 /**
- * Receta para el checkout: [{ id, props? }, ...]. Es lo que se va a empaquetar,
+ * Receta para el checkout: [{ id, props?, font? }, ...]. Es lo que se va a empaquetar,
  * así que lleva lo mismo que dibuja el preview: sin filas de lista vacías (ver
  * withoutEmptyRows) y nunca blob:/data:.
  */
-export function compositionToRecipe(items) {
+export function compositionToRecipe(items, font = null) {
+  const fontId = normalizeFontId(font)
+  const withFont = (entry) => (fontId ? { ...entry, font: fontId } : entry)
   return (items || []).map((item) => {
     const props = withoutEmptyRows(sanitizeProps(item.sectionId, item.props))
-    if (!props) return { id: item.sectionId }
+    if (!props) return withFont({ id: item.sectionId })
     const exported = {}
     for (const [key, value] of Object.entries(props)) {
       if (isEphemeralAssetUrl(value)) continue
       exported[key] = value
     }
     return Object.keys(exported).length
-      ? { id: item.sectionId, props: exported }
-      : { id: item.sectionId }
+      ? withFont({ id: item.sectionId, props: exported })
+      : withFont({ id: item.sectionId })
   })
 }
 
