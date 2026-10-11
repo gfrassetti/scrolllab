@@ -59,8 +59,8 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
   ) : null
 
   if (field.type === 'toggle') {
-    // Interruptor de una capa decorativa: sin valor queda prendido (la demo).
-    const on = value !== 'off'
+    // Interruptor: sin valor queda como arranca el campo (prendido salvo `default: 'off'`).
+    const on = (value || field.default || 'on') !== 'off'
     return (
       <button
         type="button"

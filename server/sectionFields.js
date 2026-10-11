@@ -15,6 +15,8 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze(
 
 const FLAVOR_PRESETS = new Set(['cobalt', 'berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
+const DETAIL_LAYOUTS = new Set(['classic', 'gallery', 'centered'])
+const FORM_TYPES = new Set(['contact', 'quote', 'newsletter', 'callback', 'booking'])
 const CURRENCIES = new Set(['ARS', 'USD', 'EUR', 'MXN', 'CLP', 'COP', 'UYU', 'BRL', 'GBP'])
 
 const THEME_PRESETS = new Set([
@@ -131,7 +133,14 @@ export const isToggleKey = (k) => /^(?:(?:checkout|cart|detail)Show|show)[A-Z]/.
 
 // Para el servidor un `textarea` es texto: solo color / href / image / price
 // tienen regla propia en sanitizeListValue.
-const serverItemType = (type) => (type === 'textarea' ? 'text' : type)
+// Un select / interruptor dentro de una fila viaja como `select:a|b|c`: el
+// servidor solo deja pasar una de esas opciones.
+const serverItemType = (sub) =>
+  sub.type === 'textarea'
+    ? 'text'
+    : sub.type === 'select' || sub.type === 'toggle'
+      ? `select:${(sub.options || []).map((o) => o.value).join('|')}`
+      : sub.type
 
 export const LIST_PROPS_BY_SECTION = Object.freeze(
   Object.fromEntries(
@@ -146,7 +155,7 @@ export const LIST_PROPS_BY_SECTION = Object.freeze(
               {
                 max: field.max,
                 item: Object.fromEntries(
-                  (field.item || []).map((sub) => [sub.key, serverItemType(sub.type)]),
+                  (field.item || []).map((sub) => [sub.key, serverItemType(sub)]),
                 ),
               },
             ]),
@@ -190,6 +199,8 @@ function sanitizeListValue(schema, value) {
         if (ASSET_URL_RE.test(t)) item[k] = t
       } else if (type === 'price') {
         if (PRICE_RE.test(t.trim())) item[k] = t.trim()
+      } else if (type.startsWith('select:')) {
+        if (type.slice(7).split('|').includes(t)) item[k] = t
       } else if (t) {
         item[k] = t
       }
@@ -239,6 +250,8 @@ export function sanitizeSectionProps(sectionId, props) {
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
     if (key === 'currency' && !CURRENCIES.has(trimmed)) continue
+    if (key === 'detailLayout' && !DETAIL_LAYOUTS.has(trimmed)) continue
+    if (key === 'formType' && !FORM_TYPES.has(trimmed)) continue
     // Interruptores de capas decorativas (`show…`): solo on / off.
     if (isToggleKey(key) && trimmed !== 'on' && trimmed !== 'off') continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue

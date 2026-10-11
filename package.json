@@ -28,6 +28,7 @@
     "check:editable": "node scripts/check-editable.mjs",
     "check:colors": "node scripts/check-colors.mjs",
     "check:forms": "node scripts/check-forms.mjs",
+    "check:shop": "node scripts/check-shop.mjs",
     "audit:editable": "node scripts/audit-editable.mjs",
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",

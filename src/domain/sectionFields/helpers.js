@@ -13,12 +13,15 @@
  * (como un select: así pasa igual por el editor, el servidor, LAB y el ZIP) y
  * la clave empieza con `show` (el servidor la valida por nombre). La sección
  * lee `showX !== 'off'`: sin valor, queda como en la demo.
+ * Con `defaultValue: 'off'` arranca apagado (un producto «agotado», un campo
+ * «obligatorio»): la sección lee entonces `showX === 'on'`.
  * @param {string} key `show…`
  * @param {string} label
  * @param {FieldHelp} [help]
+ * @param {'on' | 'off'} [defaultValue]
  * @returns {SectionField}
  */
-export const toggle = (key, label, help) => ({
+export const toggle = (key, label, help, defaultValue = 'on') => ({
   key,
   label,
   type: 'toggle',
@@ -26,6 +29,7 @@ export const toggle = (key, label, help) => ({
     { value: 'on', label: 'Sí' },
     { value: 'off', label: 'No' },
   ],
+  ...(defaultValue === 'off' ? { default: 'off' } : {}),
   ...(help ? { help } : {}),
 })
 

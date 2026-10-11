@@ -114,6 +114,26 @@ const NOT_IN_DOM = {
   'contact/ContactForm.requiredError': 'mensaje de validación: aparece al enviar vacío (lo cubre check:forms)',
   'contact/ContactForm.emailError': 'mensaje de validación: aparece con un email inválido (lo cubre check:forms)',
   'contact/ContactForm.messageError': 'mensaje de validación: aparece con un mensaje corto (lo cubre check:forms)',
+  // Las etiquetas de los otros tipos de formulario (presupuesto, que te llamen,
+  // reserva) no se ven en el tipo por defecto: las cubre check:forms, tipo por tipo.
+  'contact/ContactForm.phoneLabel': 'tipos «que te llamen» (check:forms)',
+  'contact/ContactForm.companyLabel': 'tipo «presupuesto» (check:forms)',
+  'contact/ContactForm.budgetLabel': 'tipo «presupuesto» (check:forms)',
+  'contact/ContactForm.budgetOptions': 'tipo «presupuesto» (check:forms)',
+  'contact/ContactForm.timelineLabel': 'tipo «presupuesto» (check:forms)',
+  'contact/ContactForm.timeLabel': 'tipo «que te llamen» (check:forms)',
+  'contact/ContactForm.timeOptions': 'tipo «que te llamen» (check:forms)',
+  'contact/ContactForm.dateLabel': 'tipo «reserva» (check:forms)',
+  'contact/ContactForm.peopleLabel': 'tipo «reserva» (check:forms)',
+  'contact/ContactForm.selectPlaceholder': 'solo en campos con lista de opciones (check:forms)',
+  'contact/ContactForm.extraFields.options': 'solo si el tipo del campo extra es «Opciones» (check:forms)',
+  // La ficha de producto es otra ruta: la cubre check:shop.
+  'commerce/ProductGrid.soldOutLabel': 'solo en un producto agotado (check:shop)',
+  'commerce/ProductGrid.products.img2': 'galería de la ficha (check:shop)',
+  'commerce/ProductGrid.products.img3': 'galería de la ficha (check:shop)',
+  'commerce/ProductGrid.products.img4': 'galería de la ficha (check:shop)',
+  'commerce/ProductGrid.products.details': 'descripción larga de la ficha (check:shop)',
+  'commerce/ProductGrid.products.specs': 'ficha técnica (check:shop)',
 }
 
 const ROUTES = ['/', '/builder', '/cart', '/login']

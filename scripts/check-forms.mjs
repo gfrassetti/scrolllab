@@ -48,8 +48,56 @@ function startVite(port) {
   })
 }
 
+/** Completa cada campo visible del formulario según su tipo. */
+async function fillAll(page) {
+  const fields = page.locator('form input:not([tabindex="-1"]):not([type="hidden"]), form textarea, form select')
+  for (let i = 0; i < (await fields.count()); i += 1) {
+    const el = fields.nth(i)
+    const tag = await el.evaluate((n) => n.tagName)
+    const type = await el.getAttribute('type')
+    if (tag === 'SELECT') {
+      const values = await el.locator('option').evaluateAll((os) => os.map((o) => o.value).filter(Boolean))
+      await el.selectOption(values[0])
+    } else if (tag === 'TEXTAREA') await el.fill(MESSAGE)
+    else if (type === 'email') await el.fill('ana@example.com')
+    else if (type === 'tel') await el.fill('+54 11 5555 5555')
+    else if (type === 'number') await el.fill('2')
+    else if (type === 'date') await el.fill('2026-12-01')
+    else await el.fill('Ana Prueba')
+  }
+  await page.locator('form button[type="submit"]').first().click()
+}
+
+/** Los tipos del formulario general: lo que tiene que llegar en el POST. */
+const TYPED = [
+  { type: 'quote', keys: ['name', 'email', 'company', 'budget', 'timeline', 'message', 'Presupuesto aprobado'], extra: true },
+  { type: 'newsletter', keys: ['email'], empty: 'Email inválido' },
+  { type: 'callback', keys: ['name', 'phone', 'time', 'message'] },
+  { type: 'booking', keys: ['name', 'email', 'date', 'people', 'message'] },
+]
+
 /** Cada formulario: sus textos editados y cómo se completa. */
 const FORMS = [
+  ...TYPED.map(({ type, keys, extra, empty }) => ({
+    id: 'contact/ContactForm',
+    name: `contact/ContactForm (${type})`,
+    props: {
+      formType: type,
+      requiredError: 'Falta completar',
+      emailError: 'Email inválido',
+      successMessage: 'Listo, enviado',
+      errorMessage: 'No se pudo enviar',
+      budgetOptions: 'Hasta $1.000\nMás de $1.000',
+      ...(extra
+        ? { extraFields: [{ label: 'Presupuesto aprobado', kind: 'options', options: 'Sí, No', showRequired: 'on' }] }
+        : {}),
+    },
+    emptyErrors: [empty || 'Falta completar'],
+    ok: 'Listo, enviado',
+    fail: 'No se pudo enviar',
+    expectKeys: ['formType', ...keys],
+    fill: fillAll,
+  })),
   {
     id: 'contact/ContactForm',
     props: { requiredError: 'Falta tu nombre', emailError: 'Email inválido', messageError: 'Escribí un poco más', successMessage: 'Listo, enviado', errorMessage: 'No se pudo enviar' },
@@ -120,7 +168,9 @@ async function main() {
           ['builder-composition-v1', JSON.stringify([{ uid: 'f', sectionId: form.id, props: { endpoint: EP, ...form.props } }])],
         )
         await page.goto(`http://127.0.0.1:${port}/preview`, { waitUntil: 'domcontentloaded' })
-        await page.waitForTimeout(1800)
+        // Vite compila en frío la primera vez: se espera al formulario, no un tiempo fijo.
+        await page.locator('form button[type="submit"]').first().waitFor({ timeout: 60000 })
+        await page.waitForTimeout(600)
         // innerText aplica text-transform: se compara en minúsculas.
         const text = async () => (await page.locator('#top').innerText()).replace(/\s+/g, ' ').toLowerCase()
 
@@ -128,19 +178,23 @@ async function main() {
         await page.waitForTimeout(400)
         const afterEmpty = await text()
         for (const message of form.emptyErrors) {
-          if (!afterEmpty.includes(message.toLowerCase())) problems.push(`${form.id}: enviar vacío no muestra «${message}»`)
+          if (!afterEmpty.includes(message.toLowerCase())) problems.push(`${form.name || form.id}: enviar vacío no muestra «${message}»`)
         }
-        if (posts.length) problems.push(`${form.id}: enviar vacío llegó al servidor`)
+        if (posts.length) problems.push(`${form.name || form.id}: enviar vacío llegó al servidor`)
 
         await form.fill(page)
         await page.waitForTimeout(1500)
         const after = await text()
         const sent = posts[0]
-        if (!sent || sent.email !== 'ana@example.com' || sent.message !== MESSAGE || !sent.name) {
-          problems.push(`${form.id} (${status}): el POST no trae { name, email, message } (${JSON.stringify(sent)})`)
+        const label = form.name || form.id
+        if (form.expectKeys) {
+          const missing = form.expectKeys.filter((k) => !sent || !sent[k])
+          if (missing.length) problems.push(`${label} (${status}): al POST le falta ${missing.join(', ')} (${JSON.stringify(sent)})`)
+        } else if (!sent || sent.email !== 'ana@example.com' || sent.message !== MESSAGE || !sent.name) {
+          problems.push(`${label} (${status}): el POST no trae { name, email, message } (${JSON.stringify(sent)})`)
         }
         const expected = status === 200 ? form.ok : form.fail
-        if (!after.includes(expected.toLowerCase())) problems.push(`${form.id} (${status}): no aparece «${expected}»`)
+        if (!after.includes(expected.toLowerCase())) problems.push(`${form.name || form.id} (${status}): no aparece «${expected}»`)
         await ctx.close()
       }
     }
@@ -152,7 +206,7 @@ async function main() {
     console.error(`✖ ${problems.length} problemas:\n  - ${problems.join('\n  - ')}`)
     process.exit(1)
   }
-  console.log(`✓ ${FORMS.length} formularios: validan, envían y muestran éxito o error con sus textos`)
+  console.log(`✓ ${FORMS.length} formularios (y tipos): validan, envían lo pedido y muestran éxito o error con sus textos`)
 }
 
 main().catch((err) => {

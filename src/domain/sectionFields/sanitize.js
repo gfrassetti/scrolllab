@@ -104,6 +104,9 @@ function sanitizeListItem(subFields, raw) {
     } else if (f.type === 'price') {
       const price = sanitizePrice(t)
       if (price) item[k] = price
+    } else if (f.type === 'select' || f.type === 'toggle') {
+      // Dentro de una fila también: solo una de sus opciones.
+      if ((f.options || []).some((o) => o.value === t)) item[k] = t
     } else if (t) {
       item[k] = t
     }

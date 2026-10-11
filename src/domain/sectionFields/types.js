@@ -18,6 +18,7 @@
  * @property {boolean} [fromText] Solo `list`: antes era un textarea «Texto | #ancla»
  *   (`linksText`, o la misma prop como texto); sanitizeProps migra lo guardado.
  * @property {FieldHelp} [help] Guía desplegable debajo del campo: qué poner y por qué.
+ * @property {'on' | 'off'} [default] Solo `toggle`: cómo arranca sin valor (por defecto 'on').
  *
  * @typedef {Object} FieldHelp
  * @property {string} title Lo que dice el desplegable cerrado («Cómo elegir…»).

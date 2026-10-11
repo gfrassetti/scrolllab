@@ -224,7 +224,8 @@ npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run check:colors   # todo lo VISIBLE de cada sección sigue a sus campos de color (testigos en Chromium: texto, fondo, borde, SVG, contorno); lo de canvas va a mano
-npm run check:forms    # los 3 formularios de contacto: errores con sus textos, POST { name, email, message }, éxito y error (endpoint simulado)
+npm run check:shop     # la tienda: grilla (etiqueta, agotado), ficha en sus 3 modelos (galería, muestras de color, cantidad, acordeón, ficha técnica, relacionados), carrito y checkout
+npm run check:forms    # los formularios de contacto (y cada tipo del general: presupuesto, newsletter, que te llamen, reserva, campos extra): errores, POST, éxito y error (endpoint simulado)
 npm run audit:editable # lupa estática: colores fijos en el código, adornos sin interruptor, fotos sin campo (para canvas / WebGL)
 npm run check:embed-stacks # el embed instalado como un cliente: HTML, React (StrictMode), Next y Vue, con @scrolllab/embed desde packages/embed (antes de publicar en npm)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)

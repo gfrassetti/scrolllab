@@ -196,6 +196,29 @@ export default function ContactForm({
   errorMessage = 'Something went wrong. Please try again.',
   note = 'Replace with your reply time or privacy line.',
   endpoint = '',
+  /**
+   * Qué pide el formulario: `contact` (nombre, email, mensaje), `quote`
+   * (presupuesto: empresa, rango y plazo), `newsletter` (solo email, en una
+   * línea), `callback` (que te llamen: teléfono y horario) o `booking`
+   * (reserva: fecha y personas). Todo lo que se ve es una prop.
+   */
+  formType = 'contact',
+  phoneLabel = 'Phone',
+  companyLabel = 'Company',
+  budgetLabel = 'Budget',
+  budgetOptions = 'Up to $1,000\n$1,000 – $5,000\n$5,000 +',
+  timelineLabel = 'When do you need it?',
+  timeLabel = 'Best time to call',
+  timeOptions = 'Morning\nAfternoon\nEvening',
+  dateLabel = 'Date',
+  peopleLabel = 'People',
+  selectPlaceholder = 'Choose…',
+  /**
+   * Campos extra, después de los del tipo: `{ label, kind, options, showRequired }`.
+   * `kind`: text · email · tel · number · date · textarea · options (con
+   * `options` separadas por coma). Viajan en el POST con su etiqueta como clave.
+   */
+  extraFields,
   /** Los mensajes de validación. */
   requiredError = 'Required',
   emailError = 'Enter a valid email',
@@ -231,7 +254,53 @@ export default function ContactForm({
         }
       : undefined
 
-  const [values, setValues] = useState({ name: '', email: '', message: '' })
+  // Opciones de un select: una por línea (los montos llevan comas: «$1,000»).
+  const lines = (text) => String(text || '').split(/\r?\n/).map((o) => o.trim()).filter(Boolean)
+  // Opciones de un campo extra: separadas por coma, o una por línea.
+  const commaList = (text) => String(text || '').split(/\r?\n|,/).map((o) => o.trim()).filter(Boolean)
+  const TYPES = {
+    contact: ['name', 'email', 'message'],
+    quote: ['name', 'email', 'company', 'budget', 'timeline', 'message'],
+    newsletter: ['email'],
+    callback: ['name', 'phone', 'time', 'message?'],
+    booking: ['name', 'email', 'date', 'people', 'message?'],
+  }
+  const BASE = {
+    name: { label: nameLabel, kind: 'text', autoComplete: 'name', required: true },
+    email: { label: emailLabel, kind: 'email', autoComplete: 'email', required: true },
+    phone: { label: phoneLabel, kind: 'tel', autoComplete: 'tel', required: true },
+    company: { label: companyLabel, kind: 'text', autoComplete: 'organization' },
+    budget: { label: budgetLabel, kind: 'select', options: lines(budgetOptions) },
+    timeline: { label: timelineLabel, kind: 'text' },
+    time: { label: timeLabel, kind: 'select', options: lines(timeOptions) },
+    date: { label: dateLabel, kind: 'date', required: true },
+    people: { label: peopleLabel, kind: 'number', required: true },
+    message: { label: messageLabel, kind: 'textarea', required: true },
+  }
+  const KINDS = new Set(['text', 'email', 'tel', 'number', 'date', 'textarea'])
+  const kind = TYPES[formType] ? formType : 'contact'
+  const typeFields = TYPES[kind].map((id) => {
+    const optional = id.endsWith('?')
+    const key = optional ? id.slice(0, -1) : id
+    return { key, ...BASE[key], ...(optional ? { required: false } : {}) }
+  })
+  const extras = (Array.isArray(extraFields) ? extraFields : [])
+    .filter((row) => row && typeof row.label === 'string' && row.label.trim())
+    .slice(0, 6)
+    .map((row, i) => {
+      const options = commaList(row.options)
+      const k = row.kind === 'options' && options.length ? 'select' : KINDS.has(row.kind) ? row.kind : 'text'
+      return { key: `extra${i}`, label: row.label.trim(), kind: k, options, required: row.showRequired === 'on', extra: true }
+    })
+  // Los extra van antes del mensaje (el cierre natural del formulario).
+  const messageAt = typeFields.findIndex((f) => f.key === 'message')
+  const formFields =
+    messageAt === -1
+      ? [...typeFields, ...extras]
+      : [...typeFields.slice(0, messageAt), ...extras, ...typeFields.slice(messageAt)]
+  const empty = () => Object.fromEntries(formFields.map((f) => [f.key, '']))
+
+  const [values, setValues] = useState(empty)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
 
@@ -256,9 +325,13 @@ export default function ContactForm({
 
   const validate = () => {
     const next = {}
-    if (!values.name.trim()) next.name = requiredError
-    if (!EMAIL_RE.test(values.email.trim())) next.email = emailError
-    if (values.message.trim().length < 10) next.message = messageError
+    for (const f of formFields) {
+      const v = String(values[f.key] || '').trim()
+      // Un email vacío u mal escrito dice lo mismo: «email inválido».
+      if (f.kind === 'email' && (f.required || v) && !EMAIL_RE.test(v)) next[f.key] = emailError
+      else if (f.required && !v) next[f.key] = f.key === 'message' ? messageError : requiredError
+      else if (f.key === 'message' && f.required && v.length < 10) next[f.key] = messageError
+    }
     return next
   }
 
@@ -270,11 +343,19 @@ export default function ContactForm({
   const onSubmit = async (e) => {
     e.preventDefault()
     // Honeypot: bots fill hidden inputs, humans never see this one.
-    if (e.currentTarget.elements.company?.value) return
+    if (e.currentTarget.elements.website_hp?.value) return
 
     const found = validate()
     setErrors(found)
     if (Object.keys(found).length) return
+
+    // Lo que llega a tu endpoint: el tipo de formulario y cada campo (los extra
+    // con su etiqueta como clave).
+    const payload = { formType: kind }
+    for (const f of formFields) {
+      const v = String(values[f.key] || '').trim()
+      if (v) payload[f.extra ? f.label : f.key] = v
+    }
 
     setStatus('sending')
     try {
@@ -282,14 +363,14 @@ export default function ContactForm({
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values),
+          body: JSON.stringify(payload),
         })
         if (!res.ok) throw new Error(String(res.status))
       } else {
         await new Promise((resolve) => setTimeout(resolve, 700))
       }
       setStatus('sent')
-      setValues({ name: '', email: '', message: '' })
+      setValues(empty())
     } catch {
       setStatus('error')
     }
@@ -298,11 +379,6 @@ export default function ContactForm({
   const fieldBase = `mt-2 w-full border bg-transparent px-4 py-3 text-sm outline-none transition-colors ${skin.field}`
   const labelBase = 'text-[11px] uppercase tracking-[0.2em] opacity-60'
   const sending = status === 'sending'
-
-  const fields = [
-    { key: 'name', label: nameLabel, type: 'text', autoComplete: 'name' },
-    { key: 'email', label: emailLabel, type: 'email', autoComplete: 'email' },
-  ]
 
   return (
     <section
@@ -341,76 +417,76 @@ export default function ContactForm({
           </p>
         </div>
 
-        <form noValidate onSubmit={onSubmit} className="w-full">
+        <form noValidate onSubmit={onSubmit} className="w-full" data-form-type={kind}>
           <input
             type="text"
-            name="company"
+            name="website_hp"
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"
             className="absolute h-0 w-0 overflow-hidden opacity-0"
           />
 
-          {fields.map((field) => (
-            <div key={field.key} data-contact-reveal className="mb-5">
-              <label htmlFor={`${uid}-${field.key}`} className={labelBase}>
-                {field.label}
-              </label>
-              <input
-                id={`${uid}-${field.key}`}
-                type={field.type}
-                autoComplete={field.autoComplete}
-                value={values[field.key]}
-                onChange={onChange(field.key)}
-                disabled={sending}
-                aria-invalid={errors[field.key] ? 'true' : undefined}
-                aria-describedby={
-                  errors[field.key] ? `${uid}-${field.key}-error` : undefined
-                }
-                className={fieldBase}
-              />
-              {errors[field.key] && (
-                <p
-                  id={`${uid}-${field.key}-error`}
-                  className="mt-1.5 text-xs opacity-70"
-                >
-                  {errors[field.key]}
-                </p>
-              )}
-            </div>
-          ))}
-
-          <div data-contact-reveal className="mb-6">
-            <label htmlFor={`${uid}-message`} className={labelBase}>
-              {messageLabel}
-            </label>
-            <textarea
-              id={`${uid}-message`}
-              rows={5}
-              value={values.message}
-              onChange={onChange('message')}
-              disabled={sending}
-              aria-invalid={errors.message ? 'true' : undefined}
-              aria-describedby={
-                errors.message ? `${uid}-message-error` : undefined
+          <div className={kind === 'newsletter' ? 'flex flex-wrap items-end gap-3' : ''}>
+            {formFields.map((field) => {
+              const id = `${uid}-${field.key}`
+              const invalid = errors[field.key]
+              const common = {
+                id,
+                value: values[field.key] ?? '',
+                onChange: onChange(field.key),
+                disabled: sending,
+                required: field.required || undefined,
+                'aria-invalid': invalid ? 'true' : undefined,
+                'aria-describedby': invalid ? `${id}-error` : undefined,
               }
-              className={`${fieldBase} resize-y`}
-            />
-            {errors.message && (
-              <p id={`${uid}-message-error`} className="mt-1.5 text-xs opacity-70">
-                {errors.message}
-              </p>
-            )}
-          </div>
+              return (
+                <div
+                  key={field.key}
+                  data-contact-reveal
+                  className={kind === 'newsletter' ? 'min-w-[14rem] flex-1' : field.kind === 'textarea' ? 'mb-6' : 'mb-5'}
+                >
+                  <label htmlFor={id} className={labelBase}>
+                    {field.label}
+                  </label>
+                  {field.kind === 'textarea' ? (
+                    <textarea rows={5} {...common} className={`${fieldBase} resize-y`} />
+                  ) : field.kind === 'select' ? (
+                    <select {...common} className={`${fieldBase} appearance-none`}>
+                      <option value="">{selectPlaceholder}</option>
+                      {field.options.map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.kind}
+                      autoComplete={field.autoComplete}
+                      min={field.kind === 'number' ? 1 : undefined}
+                      {...common}
+                      className={fieldBase}
+                    />
+                  )}
+                  {invalid && (
+                    <p id={`${id}-error`} className="mt-1.5 text-xs opacity-70">
+                      {invalid}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
 
-          <button
-            data-contact-reveal
-            type="submit"
-            disabled={sending}
-            className={`px-7 py-3 text-[11px] font-medium uppercase tracking-[0.22em] transition-colors ${skin.radius} ${skin.button}`}
-          >
-            {sending ? sendingLabel : submitLabel}
-          </button>
+            <button
+              data-contact-reveal
+              type="submit"
+              disabled={sending}
+              className={`px-7 py-3 text-[11px] font-medium uppercase tracking-[0.22em] transition-colors ${skin.radius} ${skin.button}`}
+            >
+              {sending ? sendingLabel : submitLabel}
+            </button>
+          </div>
 
           <p aria-live="polite" className="mt-4 text-sm">
             {status === 'sent' && successMessage}

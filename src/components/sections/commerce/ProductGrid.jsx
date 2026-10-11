@@ -34,6 +34,8 @@ export default function ProductGrid({
   currency = '',
   /** La pista bajo «Add» en productos con talle / color: `{label}` es el nombre de la variante. */
   variantHint = 'pick {label} on the page',
+  /** El botón de un producto agotado. */
+  soldOutLabel = 'Sold out',
 }) {
   const addItem = useShopCart((s) => s.addItem)
   const catalog = useShopCatalog()
@@ -65,7 +67,15 @@ export default function ProductGrid({
               to={`/product/${product.id}`}
               className="group block w-full text-left transition-opacity hover:opacity-100"
             >
-              <div className="aspect-4/5 overflow-hidden border border-[color:var(--shop-border)] bg-[color:var(--shop-bg)]">
+              <div className="relative aspect-4/5 overflow-hidden border border-[color:var(--shop-border)] bg-[color:var(--shop-bg)]">
+                {product.badge || product.soldOut ? (
+                  <span
+                    className="absolute top-3 left-3 z-10 bg-[color:var(--shop-bg)] px-2 py-0.5 text-[11px] uppercase tracking-[0.15em] text-[color:var(--shop-fg)]"
+                    style={{ borderRadius: 'var(--shop-radius)' }}
+                  >
+                    {product.soldOut ? soldOutLabel : product.badge}
+                  </span>
+                ) : null}
                 <img
                   src={product.img}
                   alt=""
@@ -89,10 +99,11 @@ export default function ProductGrid({
               <button
                 type="button"
                 onClick={() => addItem(product, 1, defaultVariant(product))}
-                className="border border-[color:var(--shop-border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-fg)] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
+                disabled={product.soldOut}
+                className="border border-[color:var(--shop-border)] px-3 py-1.5 disabled:pointer-events-none disabled:opacity-40 text-[11px] uppercase tracking-[0.2em] text-[color:var(--shop-fg)] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
                 style={{ borderRadius: 'var(--shop-radius)' }}
               >
-                {addLabel}
+                {product.soldOut ? soldOutLabel : addLabel}
               </button>
               {/* Quick-add takes the first option; the full picker lives on
                   the product page (not every product has one — see PDP). */}
