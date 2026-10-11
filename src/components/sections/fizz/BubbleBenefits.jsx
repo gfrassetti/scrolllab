@@ -124,29 +124,30 @@ export default function BubbleBenefits({
 
       <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {rows.map((benefit, i) => (
-          <article
-            key={i}
-            data-benefit-card
-            className="group rounded-3xl border border-foam/20 p-6 transition-transform duration-300 hover:-rotate-2 hover:scale-[1.02] md:p-7"
-          >
-            <span
-              data-benefit-dot
-              aria-hidden="true"
-              className="relative block h-11 w-11 rounded-full border-2 transition-transform duration-300 group-hover:scale-125"
-              style={{ borderColor: benefit.color, backgroundColor: `${benefit.color}26` }}
-            >
-              <i
-                className="absolute top-[15%] left-[20%] h-[19%] w-[34%] -rotate-[35deg] rounded-full"
-                style={{ backgroundColor: benefit.color }}
-              />
-            </span>
-            <h3 className="mt-6 font-brico text-xl font-extrabold uppercase tracking-tight md:text-2xl">
-              {benefit.title}
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-foam/70">
-              {benefit.body}
-            </p>
-          </article>
+          // La entrada (GSAP) mueve el envoltorio y el hover (transición CSS) la
+          // tarjeta de adentro: en el mismo nodo pelean por `transform` y la
+          // entrada quedaba trabada en su pose de arranque (inclinada, al 82 %).
+          <div key={i} data-benefit-card>
+            <article className="group h-full rounded-3xl border border-foam/20 p-6 transition-transform duration-300 hover:-rotate-2 hover:scale-[1.02] md:p-7">
+              <span data-benefit-dot aria-hidden="true" className="block h-11 w-11">
+                <span
+                  className="relative block h-full w-full rounded-full border-2 transition-transform duration-300 group-hover:scale-125"
+                  style={{ borderColor: benefit.color, backgroundColor: `${benefit.color}26` }}
+                >
+                  <i
+                    className="absolute top-[15%] left-[20%] h-[19%] w-[34%] -rotate-[35deg] rounded-full"
+                    style={{ backgroundColor: benefit.color }}
+                  />
+                </span>
+              </span>
+              <h3 className="mt-6 font-brico text-xl font-extrabold uppercase tracking-tight md:text-2xl">
+                {benefit.title}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-foam/70">
+                {benefit.body}
+              </p>
+            </article>
+          </div>
         ))}
       </div>
     </section>
