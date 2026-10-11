@@ -55,7 +55,6 @@ export const SECTION_FIELDS = {
  * sola lista: la leen el test de colores y npm run check:editable.
  */
 export const SECTIONS_WITHOUT_COLOR = Object.freeze({
-  'contact/ContactForm': 'la paleta la define el tema (campo theme)',
 })
 
 export function getSectionFields(sectionId) {

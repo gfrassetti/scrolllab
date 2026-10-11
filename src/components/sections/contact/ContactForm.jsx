@@ -196,10 +196,40 @@ export default function ContactForm({
   errorMessage = 'Something went wrong. Please try again.',
   note = 'Replace with your reply time or privacy line.',
   endpoint = '',
+  /** Los mensajes de validación. */
+  requiredError = 'Required',
+  emailError = 'Enter a valid email',
+  messageError = 'Message is too short',
+  /** Colores libres: pisan los de la paleta `theme`. */
+  bg,
+  fg,
+  accent,
 }) {
   const root = useRef(null)
   const uid = useId()
-  const skin = THEMES[theme] || THEMES.auto
+  const preset = THEMES[theme] || THEMES.auto
+  // Con algún color propio, la piel hereda del fondo y el texto que se eligió
+  // (como `auto`) y el acento pinta el rótulo y el botón.
+  const skin =
+    bg || fg || accent
+      ? {
+          ...THEMES.auto,
+          title: preset.title,
+          radius: preset.radius,
+          eyebrow: accent ? 'text-(color:--cf-accent)' : THEMES.auto.eyebrow,
+          button: accent
+            ? 'border border-(--cf-accent) bg-(--cf-accent) text-(color:--cf-on-accent) hover:opacity-85 disabled:opacity-40'
+            : THEMES.auto.button,
+        }
+      : preset
+  const ownColors =
+    bg || fg || accent
+      ? {
+          ...(bg ? { backgroundColor: bg } : {}),
+          ...(fg ? { color: fg } : {}),
+          ...(accent ? { '--cf-accent': accent, '--cf-on-accent': bg || '#ffffff' } : {}),
+        }
+      : undefined
 
   const [values, setValues] = useState({ name: '', email: '', message: '' })
   const [errors, setErrors] = useState({})
@@ -226,9 +256,9 @@ export default function ContactForm({
 
   const validate = () => {
     const next = {}
-    if (!values.name.trim()) next.name = 'Required'
-    if (!EMAIL_RE.test(values.email.trim())) next.email = 'Enter a valid email'
-    if (values.message.trim().length < 10) next.message = 'Message is too short'
+    if (!values.name.trim()) next.name = requiredError
+    if (!EMAIL_RE.test(values.email.trim())) next.email = emailError
+    if (values.message.trim().length < 10) next.message = messageError
     return next
   }
 
@@ -279,6 +309,7 @@ export default function ContactForm({
       id="contact"
       ref={root}
       className={`px-5 py-20 md:px-10 md:py-28 ${skin.surface}`}
+      style={ownColors}
     >
       <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2 md:gap-16">
         <div>

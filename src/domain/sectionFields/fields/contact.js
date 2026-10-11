@@ -44,5 +44,11 @@ export const CONTACT_FIELDS = {
       label: 'Endpoint — https:// or /path (empty = demo)',
       type: 'url',
     },
+    { key: 'requiredError', label: 'Error — campo vacío', type: 'text' },
+    { key: 'emailError', label: 'Error — email inválido', type: 'text' },
+    { key: 'messageError', label: 'Error — mensaje corto', type: 'text' },
+    { key: 'bg', label: 'Color de fondo (pisa el de la paleta)', type: 'color' },
+    { key: 'fg', label: 'Color de texto (pisa el de la paleta)', type: 'color' },
+    { key: 'accent', label: 'Color de acento: rótulo y botón', type: 'color' },
   ],
 }

@@ -223,6 +223,9 @@ npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bund
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
+npm run check:colors   # todo lo VISIBLE de cada sección sigue a sus campos de color (testigos en Chromium: texto, fondo, borde, SVG, contorno); lo de canvas va a mano
+npm run check:forms    # los 3 formularios de contacto: errores con sus textos, POST { name, email, message }, éxito y error (endpoint simulado)
+npm run audit:editable # lupa estática: colores fijos en el código, adornos sin interruptor, fotos sin campo (para canvas / WebGL)
 npm run check:embed-stacks # el embed instalado como un cliente: HTML, React (StrictMode), Next y Vue, con @scrolllab/embed desde packages/embed (antes de publicar en npm)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
 npm run check:paddle-sandbox # transacciones (template, cupón, builder, LAB con prueba) contra el sandbox real de Paddle
@@ -423,6 +426,12 @@ Register new sellable SKUs in `server/catalog.js` (copy de Checkout Pro) + su pr
 4. Campos editables **solo** en `src/domain/sectionFields/fields/<modelo>.js` (un archivo por modelo; `src/lib/sectionFields.js` los re-exporta): el servidor deriva de ahí qué props acepta.
    Un campo `color` se llama `bg`/`fg`/`accent`… y uno `href` termina en `Href`: el servidor valida por
    nombre y `npm run check` lo exige. Después, i18n del builder y `HOSTABLE_SECTIONS` como siempre.
+
+**Todo lo visible se edita** (regla del dueño, 2026-10-11): cada fondo y color (también los tonos de la
+paleta del modelo —usá `themeVars` de `src/lib/themeVars.js`— y lo que se dibuja en canvas/WebGL), cada
+foto y link, y cada capa decorativa (burbujas, niebla, grano, palabras gigantes…) con un interruptor
+`toggle('showX', …)` (se guarda 'on'/'off'; la sección lee `showX !== 'off'`). `check:colors` y
+`check:editable` lo miden; ninguna sección queda «sin color».
 
 `src/lib/sectionKinds.js`, `ALLOWED_SECTIONS` y `ALLOWED_PROPS_BY_SECTION` / `LIST_PROPS_BY_SECTION`
 (`server/sectionFields.js`) ya **no se editan a mano** (no existe más `gen-section-kinds.mjs`). `npm run verify` avisa si algo quedó afuera.
