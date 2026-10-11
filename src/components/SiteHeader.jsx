@@ -195,6 +195,9 @@ export default function SiteHeader({ solid = true }) {
             className={`flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs ${zoneClass('lab')}`}
           >
             {t('nav.lab')}
+            <span data-lab-short aria-hidden="true" className="text-ink/40">
+              · {t('nav.labShort')}
+            </span>
             {showPlanBadge && (
               <span
                 title={planTitle}
@@ -300,7 +303,10 @@ export default function SiteHeader({ solid = true }) {
                 to="/lab"
                 className={`flex items-center justify-between py-3.5 hover:text-accent ${zoneClass('lab')}`}
               >
-                {t('nav.lab')}
+                <span>
+                  {t('nav.lab')}
+                  <span className="ml-2 text-ink/45">· {t('nav.labTag')}</span>
+                </span>
                 {showPlanBadge && (
                   <span
                     className={`rounded-sm border px-1.5 py-0.5 text-[10px] tracking-[0.14em] normal-case ${

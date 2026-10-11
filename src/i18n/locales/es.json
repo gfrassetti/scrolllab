@@ -23,10 +23,12 @@
     "plan": "Plan",
     "projects": "Mis proyectos",
     "myLab": "Mi LAB",
-    "myAccount": "Mi cuenta"
+    "myAccount": "Mi cuenta",
+    "labTag": "online widgets",
+    "labShort": "widgets"
   },
   "lab": {
-    "eyebrow": "Widgets premium",
+    "eyebrow": "Online widgets",
     "body": "Secciones animadas de nivel premium para tu sitio, sin programar. Funcionan en WordPress, Webflow, Shopify, Wix o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
     "yours": "Tus widgets",
     "publishedCount": "{{n}} de {{quota}} publicados en tu plan · {{total}} creados",

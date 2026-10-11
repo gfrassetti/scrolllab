@@ -23,10 +23,12 @@
     "plan": "Plan",
     "projects": "My projects",
     "myLab": "My LAB",
-    "myAccount": "My account"
+    "myAccount": "My account",
+    "labTag": "online widgets",
+    "labShort": "widgets"
   },
   "lab": {
-    "eyebrow": "Premium widgets",
+    "eyebrow": "Online widgets",
     "body": "Premium animated sections for your site, no code. They work on WordPress, Webflow, Shopify, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
     "publishedCount": "{{n}} of {{quota}} published on your plan · {{total}} created",

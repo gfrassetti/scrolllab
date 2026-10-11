@@ -13,7 +13,7 @@ export default function LabZone({ t, ways, locale }) {
   const steps = [t('lab.guide1'), t('lab.guide2'), t('lab.guide3')]
   return (
     <>
-      <ZoneHeadline index="03" label={t('nav.lab')} zone="lab" />
+      <ZoneHeadline index="03" label={t('nav.lab')} tag={t('nav.labTag')} zone="lab" />
 
       {/* LAB: el otro camino — no lo bajás, lo enchufás. */}
       <Link
