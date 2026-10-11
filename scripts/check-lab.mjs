@@ -17,7 +17,7 @@
  * El sitio del cliente (localhost) y el frame (127.0.0.1) quedan en orígenes
  * distintos, como en producción.
  *
- * Uso: npm run check:lab   (PLAYWRIGHT_CHROMIUM_PATH=… si no hay `playwright install`)
+ * Uso: npm run check:lab [-- modelo/Sección …]   (solo esas; PLAYWRIGHT_CHROMIUM_PATH=… si no hay `playwright install`)
  */
 import { spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -76,8 +76,17 @@ function rootText() {
 }
 
 /** El campo de texto que se edita en cada sección (o el primero de una lista). */
+/**
+ * El campo a editar cuando el primero no se ve en la versión calma (esta
+ * revisión corre con «reducir movimiento»). TrackMerge: en calma no muestra la
+ * galería (donde va su rótulo), queda el cruce.
+ */
+const EDIT_FIELD = { 'velocity/TrackMerge': 'mergeTitleA' }
+
 function editTarget(sectionId) {
   const fields = SECTION_FIELDS[sectionId] || []
+  const pinned = fields.find((f) => f.key === EDIT_FIELD[sectionId])
+  if (pinned) return { field: pinned }
   const top = fields.find((f) => f.type === 'text' || f.type === 'textarea')
   if (top) return { field: top }
   const list = fields.find(
@@ -250,9 +259,11 @@ try {
       .locator('input, textarea')
   }
 
-  console.log(`Editando, previsualizando y publicando ${HOSTABLE_SECTIONS.length} secciones…`)
+  const only = process.argv.slice(2).filter((a) => HOSTABLE_SECTIONS.includes(a))
+  const SECTIONS = only.length ? only : HOSTABLE_SECTIONS
+  console.log(`Editando, previsualizando y publicando ${SECTIONS.length} secciones…`)
   let n = 0
-  for (const sectionId of HOSTABLE_SECTIONS) {
+  for (const sectionId of SECTIONS) {
     n += 1
     const target = editTarget(sectionId)
     if (!target) {
@@ -310,6 +321,9 @@ try {
       fail(`excepción: ${err.message.split('\n')[0].slice(0, 160)}`)
     } finally {
       await page.close()
+      // Una por vez: con más widgets que el cupo gratis de la cuenta de prueba
+      // (HOSTED_FREE_QUOTA, 50) la siguiente ya no se podía crear (402).
+      await context.request.delete(`${BASE}/api/hosted/${instance.id}`).catch(() => {})
     }
   }
   console.log('  hecho')

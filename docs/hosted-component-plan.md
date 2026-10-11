@@ -1099,6 +1099,10 @@ Secciones, Formularios, Cierres) y cada opción dice su modelo.
 - e2e: PIN (HorizontalPanels) y sticky→PIN (StackingCards) se pegan, siguen el
   scroll del sitio y sueltan al final; un formulario mandado desde el sitio
   ajeno llega a la API y muestra el éxito; el chequeo responsive entiende PIN.
+- `check:lab` recorre los 73 en el editor (editar → vista previa → publicar →
+  se ve en un sitio ajeno) y borra cada widget al terminar (con más de 50 la
+  cuenta de prueba llegaba al cupo gratis: 402). Acepta ids para correr solo
+  esos: `npm run check:lab -- velocity/TrackMerge`.
 - Los e2e del embed corren con el dev server prendido:
   `E2E_API_PORT=8797 npm run test:e2e` (`embed/test/e2e/ports.mjs` manda a ese
   puerto lo que las páginas de prueba piden a :8787).
