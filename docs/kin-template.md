@@ -126,7 +126,7 @@ nada de la referencia: se reconstruye con código propio.
 - **En el builder**: si el hero no es la primera sección, no hay loader (saltaría al
   principio de la página) y la capa de barras viaja con el hero hasta que llega arriba.
 
-### 3.3 Intro, Rooms, Collection y Footer
+### 3.3 Intro, Rooms, Collection, Programme, Press, Visit y Footer
 
 - **Intro**: frase corta en Archivo ancho + tres notas numeradas escalonadas (cartelas
   de sala). Líneas que suben enmascaradas con scrub; notas que entran al llegar.
@@ -141,6 +141,30 @@ nada de la referencia: se reconstruye con código propio.
   nombre activo, actualizados en `onUpdate` sin re-render de React. Grano animado con
   `feTurbulence` en un `::after`. Las obras son SVG propios (`artworks.jsx`, dos citan
   la marca); cada ítem acepta `src` para fotos reales.
+- **Programme** (pin ~1,6 pantallas, papel): el año como regla. Doce columnas (meses),
+  una fila por muestra y, en cada una, una barra con el largo de su duración
+  (`from` / `to`, 1–12, ambos incluidos). Una barra roja —la de la marca— recorre la
+  regla de enero a diciembre; cada barra se llena cuando la roja la cruza y su título
+  pasa de 35 % a 100 %; la letra del mes bajo el marcador se pone roja. **Un solo
+  proxy** `{ m }` (en meses) con `scrub` lo maneja todo y escribe directo al DOM en
+  `onUpdate` (cero renders de React). La barra roja es una por fila (mismo x en todas),
+  no una línea continua: se lee como una peineta de barras idénticas y no se corta con
+  el titular en el teléfono. En el teléfono el título va arriba de cada barra; mismo
+  beat. Calma: sin pin, todas las barras llenas, sin marcador.
+- **Press** (fondo oscuro, `position: sticky`): una voz por vez. La sección es alta
+  (`100 + (n−1)·90 svh`) y el escenario es `sticky` (**sin pin de GSAP**: el builder
+  remonta la sección sin un spacer de por medio). El `scrub` pasa de una cita a la
+  siguiente: las palabras (cada una bajo su máscara, React las arma: no SplitText, así
+  el builder puede cambiar el texto) suben, se sostienen y salen hacia arriba; la barra
+  roja se achica y vuelve a crecer entre voces; el contador es una fila de barritas
+  (la actual roja y más alta, igual que el de Collection). Calma: las citas apiladas
+  con regla, todas legibles.
+- **Visit** (papel): datos para la visita en filas con regla y la semana dibujada como
+  siete barras tan altas como largo el día; la de hoy en rojo (se lee del reloj del
+  visitante **después de montar**, para que servidor y primer pintado coincidan); un día
+  sin horario es una línea fina. La lista `days` es siempre lunes → domingo: la
+  posición dice cuál es hoy. Las barras crecen desde la línea de base una sola vez al
+  llegar.
 - **Footer** (100 svh, negro): las barras **vuelven** — entran desde los dos costados
   girando y se rearman en la palabra, papel sobre negro, la roja última. Cierra la
   historia: marca → puerta → adentro → marca otra vez.
@@ -206,7 +230,7 @@ no hay página que la ponga.
 
 - `npm run verify` (lint, tipos, 930 tests, invariantes).
 - `npm run check:visual -- kin`: el ZIP suelto instala, compila y renderiza.
-- Composición del builder con las cinco secciones y textos editados (palabra cambiada
+- Composición del builder con las ocho secciones y textos editados (palabra cambiada
   a MINT): `validateRecipe` acepta todo, el ZIP compila y los 16 textos y las 10
   barras aparecen.
 - `npm run check:builder`: las secciones de KIN aplican los cambios del panel.

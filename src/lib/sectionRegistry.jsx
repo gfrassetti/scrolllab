@@ -96,6 +96,9 @@ import KinHero from '../components/sections/kin/Hero'
 import KinIntro from '../components/sections/kin/Intro'
 import KinRooms from '../components/sections/kin/Rooms'
 import KinCollection from '../components/sections/kin/Collection'
+import KinProgramme from '../components/sections/kin/Programme'
+import KinPress from '../components/sections/kin/Press'
+import KinVisit from '../components/sections/kin/Visit'
 import KinFooter from '../components/sections/kin/Footer'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
@@ -305,6 +308,9 @@ const allModels = [
       { id: 'kin/Intro', name: 'Intro', kind: 'section', component: KinIntro, blurb: 'Short statement in wide capitals with three numbered notes stepping down beside it; text blends over the hero doorway.' },
       { id: 'kin/Rooms', name: 'Rooms', kind: 'section', component: KinRooms, blurb: 'Dark index of rooms in wide capitals; rows rise in, hovering one dims the rest and sets a red bar in front of its title.' },
       { id: 'kin/Collection', name: 'Collection', kind: 'section', component: KinCollection, blurb: 'Full-height triptych that folds into a pinned stack: works slide up in depth, a bar counter and a red marker follow the current piece. Ships with SVG placeholder works.' },
+      { id: 'kin/Programme', name: 'Programme', kind: 'section', component: KinProgramme, blurb: 'The year as a ruler: twelve months across, one bar per show, and a red bar walks the ruler while the section is pinned, filling each show as it crosses.' },
+      { id: 'kin/Press', name: 'Press', kind: 'section', component: KinPress, blurb: 'Dark stage that hands over from one quote to the next in wide capitals: words rise out of masks, a red bar shrinks and grows between voices, a bar counter keeps count.' },
+      { id: 'kin/Visit', name: 'Visit', kind: 'section', component: KinVisit, blurb: 'Ruled visiting facts beside the week drawn as seven bars as tall as each day is long; today\'s bar is red and closed days are a hairline.' },
       { id: 'kin/Footer', name: 'Footer', kind: 'footer', component: KinFooter, blurb: 'Full-screen dark footer: invitation, contact columns, and the brand word rebuilt from bars sliding in from both sides.' },
     ],
   },

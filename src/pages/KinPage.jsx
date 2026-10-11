@@ -4,6 +4,9 @@ import Hero from '../components/sections/kin/Hero'
 import Intro from '../components/sections/kin/Intro'
 import Rooms from '../components/sections/kin/Rooms'
 import Collection from '../components/sections/kin/Collection'
+import Programme from '../components/sections/kin/Programme'
+import Press from '../components/sections/kin/Press'
+import Visit from '../components/sections/kin/Visit'
 import Footer from '../components/sections/kin/Footer'
 
 /**
@@ -14,7 +17,9 @@ import Footer from '../components/sections/kin/Footer'
  * word is built from identical bars that drop like type in the loader, come
  * apart into a doorway the camera walks through into the dark room, and set
  * themselves again in the footer. In between: a short statement with notes,
- * a dark index, and a pinned collection where a triptych folds into a stack.
+ * a dark index, a pinned collection where a triptych folds into a stack, the
+ * year as a ruler a red bar walks, one voice at a time on a dark stage, and the
+ * week drawn as seven bars.
  */
 export default function KinPage() {
   // Only with `npm run dev`: /templates/kin?word=STUDIO tries another bar word
@@ -35,6 +40,9 @@ export default function KinPage() {
           <Intro />
           <Rooms />
           <Collection />
+          <Programme />
+          <Press />
+          <Visit />
         </main>
         <Footer word={devWord} />
       </div>

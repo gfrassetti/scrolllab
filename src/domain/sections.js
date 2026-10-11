@@ -130,6 +130,9 @@ const BY_MODEL = {
     Intro: 'section',
     Rooms: 'section',
     Collection: 'section',
+    Programme: 'section',
+    Press: 'section',
+    Visit: 'section',
     Footer: 'footer',
   },
   signal: {

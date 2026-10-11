@@ -272,3 +272,28 @@ keyframes.
      la guía; se define con el usuario.
   F3: catálogo (precio, server/catalog.js, packaging, builder, i18n),
      check:visual / check:mobile / check:motion / check:parity.
+
+================================================================
+AMPLIACION 2026-10-11 — de 5 a 8 secciones (pedido del dueno: "se queda corto")
+================================================================
+Diagnostico: KIN tenia 5 secciones (hero, intro, rooms, collection, footer)
+contra 8 a 11 del resto del catalogo, y costaba lo mismo que MERIDIAN. Casi todo
+el peso estaba en el hero. Se suman tres, sin fotos ni video (0 creditos), todas
+con el vocabulario de siempre: barra, linea que sube enmascarada, regla que se
+dibuja. Orden: Hero, Intro, Rooms, Collection, Programme, Press, Visit, Footer
+(papel, papel, negro, papel, papel, NEGRO, papel, negro: cada fondo rompe al
+anterior).
+
+  Programme  El anio como regla. 12 columnas, una barra por muestra (from/to en
+             meses), y una barra roja recorre la regla con el pin; cada barra se
+             llena al cruzarla. Un proxy {m} con scrub, escrito al DOM.
+  Press      Escenario oscuro con position:sticky (sin pin de GSAP). Una voz por
+             vez: palabras que suben de su mascara, barra roja que se achica y
+             crece entre voces, contador de barritas.
+  Visit      Datos con regla + la semana en siete barras tan altas como el dia;
+             la de hoy en rojo (reloj del visitante, tras montar). Dia cerrado =
+             linea fina. `days` siempre lunes -> domingo.
+
+Calma: Programme sin pin y barras llenas; Press con las citas apiladas; Visit
+con las barras puestas. Precio: sin cambio (379); la base del builder (549)
+sigue arriba. Campos editables: 100 % (check:editable 89/89).
