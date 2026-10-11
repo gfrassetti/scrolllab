@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getSection } from '../lib/sectionRegistry'
 import { getSectionFields, sanitizeProps } from '../lib/sectionFields'
 import { recipeHasCommerce } from '../lib/composition'
@@ -9,6 +9,8 @@ import { productsFromItems } from '../lib/shop/catalog'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
+import ModelTryout from './ModelTryout'
+import { useLocalModel } from '../lib/localModel'
 import { useT } from '../i18n'
 
 /**
@@ -45,6 +47,20 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
   const fields = editing ? getSectionFields(editing.sectionId) : []
   // La ayuda de imágenes va una vez por panel, no repetida en cada campo.
   const firstAssetKey = fields.find((f) => f.type === 'image')?.key
+  // Un .glb de la computadora probado en el panel: solo cambia lo que se ve acá
+  // (no entra en las props de la composición ni viaja al carrito o al ZIP).
+  const localModels = useLocalModel((s) => s.byUid)
+  const clearLocalModels = useLocalModel((s) => s.clearAll)
+  useEffect(() => clearLocalModels, [clearLocalModels])
+  const canvasItems = useMemo(
+    () =>
+      items.map((item) =>
+        localModels[item.uid]
+          ? { ...item, props: { ...(item.props || {}), modelUrl: localModels[item.uid].url } }
+          : item,
+      ),
+    [items, localModels],
+  )
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
@@ -59,7 +75,7 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
 
   const home = (
     <CompositionCanvas
-      items={items}
+      items={canvasItems}
       renderChrome={(item, section) => {
         const active = item.uid === editingUid
         return (
@@ -146,18 +162,22 @@ export default function BuilderPreview({ items, onChangeProps, onExit }) {
               }
 
               return (
-                <SectionFieldRow
-                  key={field.key}
-                  field={field}
-                  value={value}
-                  onChange={onFieldChange}
-                  hint={
-                    FIELD_HINT_KEY[field.type] &&
-                    (field.type === 'list' || field.key === firstAssetKey)
-                      ? t(FIELD_HINT_KEY[field.type])
-                      : undefined
-                  }
-                />
+                <div key={field.key} className="space-y-2">
+                  <SectionFieldRow
+                    field={field}
+                    value={value}
+                    onChange={onFieldChange}
+                    hint={
+                      FIELD_HINT_KEY[field.type] &&
+                      (field.type === 'list' || field.key === firstAssetKey)
+                        ? t(FIELD_HINT_KEY[field.type])
+                        : undefined
+                    }
+                  />
+                  {field.key === 'modelUrl' && field.type === 'url' ? (
+                    <ModelTryout uid={editing.uid} value={value} onUseRoute={onFieldChange} />
+                  ) : null}
+                </div>
               )
             })}
           </div>

@@ -1308,7 +1308,22 @@
       "addFirst": "Sumá una sección para guardarlo",
       "loggedOutHint": "Con tu cuenta lo guardás como proyecto y lo seguís desde cualquier dispositivo."
     },
-    "homeLabel": "Scroll Lab — ir al inicio"
+    "homeLabel": "Scroll Lab — ir al inicio",
+    "model3d": {
+      "pick": "Probar un archivo .glb de mi computadora",
+      "pickHint": "Lo ves en la vista previa sin subirlo a ningún lado. En el ZIP no viaja: para llevártelo, copiás el archivo a public/.",
+      "trying": "Viendo «{{name}}» ({{size}}) solo en esta vista previa.",
+      "loading": "Cargando el modelo…",
+      "useRoute": "Usar {{route}} en el proyecto",
+      "zipNote": "El proyecto va a pedir {{route}}: después de bajar el ZIP, copiá tu archivo a {{file}}.",
+      "change": "Elegir otro archivo",
+      "stop": "Dejar de probar",
+      "notGlb": "Tiene que ser un archivo .glb (glTF binario).",
+      "tooLarge": "Pesa {{size}}: para probarlo acá el límite es 30 MB (y para producción conviene menos de 5 MB).",
+      "ok": "El modelo cargó.",
+      "failed": "No se pudo cargar el modelo: revisá la URL y que el servidor permita CORS. Mientras tanto se ve el de la demo.",
+      "pathOnly": "Es una ruta del proyecto: acá se ve el modelo de la demo y, en el ZIP, el tuyo si copiás el archivo a public/. Para verlo ahora, probalo desde tu computadora."
+    }
   },
   "cart": {
     "eyebrow": "Carrito",

@@ -11,6 +11,14 @@ import {
 
 // Cámara y escala de reposo. En PC (pantalla ancha) el objeto llena el alto; en vertical
 // la cámara se aleja hasta que entra en el ancho (ver `fitCameraDistance`).
+// Avisa si el modelo propio cargó: el panel del builder lo escucha para decirle
+// al comprador si su .glb se ve o quedó el de la demo. Sin oyente (el ZIP, el
+// embed) no hace nada.
+function notifyModel(url, ok) {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent('scrolllab:model3d', { detail: { url, ok } }))
+}
+
 const CAMERA_FOV = 42
 const CAMERA_Z = 9.2
 const REST_SCALE = 1.05
@@ -176,6 +184,7 @@ export default function HeroThree({
                   }
                 })
                 fitObjectToScene(customModel)
+                notifyModel(modelUrl, true)
                 group.remove(wireframe, points)
                 group.add(customModel)
                 const sphere = new THREE.Box3().setFromObject(customModel).getBoundingSphere(new THREE.Sphere())
@@ -186,6 +195,7 @@ export default function HeroThree({
               undefined,
               () => {
                 console.warn(`HeroThree: could not load model "${modelUrl}"`)
+                notifyModel(modelUrl, false)
               },
             )
           })

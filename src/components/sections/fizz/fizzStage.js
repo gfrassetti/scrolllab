@@ -27,6 +27,14 @@ import {
  */
 
 const lerp = (a, b, t) => a + (b - a) * t
+
+// Avisa si el modelo propio cargó: el panel del builder lo escucha para decirle
+// al comprador si su .glb se ve o quedó el de la demo. Sin oyente (el ZIP, el
+// embed) no hace nada.
+function notifyModel(url, ok) {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent('scrolllab:model3d', { detail: { url, ok } }))
+}
 const POSE_KEYS = ['x', 'y', 'scale', 'rotZ', 'rotX', 'spinY', 'shadow']
 const ANGLE_KEYS = new Set(['rotZ', 'spinY'])
 
@@ -236,9 +244,11 @@ function createStage({
       .then((object) => {
         if (disposed) return disposeObject(object)
         mountModel(object)
+        notifyModel(modelUrl, true)
       })
       .catch(() => {
         console.warn(`FIZZ: could not load model "${modelUrl}"`)
+        notifyModel(modelUrl, false)
         if (!disposed) mountModel(buildStandInBottle())
       })
   } else {
