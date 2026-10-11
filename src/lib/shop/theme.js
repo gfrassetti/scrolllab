@@ -179,8 +179,11 @@ function luminance(hex) {
  * Colores libres de la tienda (los que el comprador elige en el ProductGrid):
  * pisan los de la paleta. El texto atenuado y las líneas salen del color de
  * texto; el texto sobre el acento es el fondo o el texto, el que más contraste.
+ * @param {{ bg?: string, fg?: string, accent?: string }} [colors]
+ * @returns {Record<string, string>}
  */
 export function shopColorVars({ bg, fg, accent } = {}) {
+  /** @type {Record<string, string>} */
   const out = {}
   if (bg) out['--shop-bg'] = bg
   if (fg) {
@@ -191,10 +194,10 @@ export function shopColorVars({ bg, fg, accent } = {}) {
   if (accent) {
     out['--shop-accent'] = accent
     const la = luminance(accent)
-    const options = [bg, fg].filter((c) => luminance(c) != null)
+    const options = /** @type {string[]} */ ([bg, fg].filter((c) => luminance(c) != null))
     if (la != null && options.length) {
       const contrast = (c) => {
-        const lc = luminance(c)
+        const lc = luminance(c) ?? 0
         return (Math.max(la, lc) + 0.05) / (Math.min(la, lc) + 0.05)
       }
       out['--shop-accent-fg'] = options.sort((a, b) => contrast(b) - contrast(a))[0]
