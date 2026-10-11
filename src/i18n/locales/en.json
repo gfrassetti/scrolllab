@@ -369,7 +369,8 @@
       "title": "My LAB",
       "planLine": "{{plan}} plan.",
       "changePlan": "See plans",
-      "help": "How to install?"
+      "help": "How to install?",
+      "jumpToWidgets": "Go to my widgets ↓"
     }
   },
   "common": {

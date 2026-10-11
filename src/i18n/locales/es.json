@@ -369,7 +369,8 @@
       "title": "Mi LAB",
       "planLine": "Plan {{plan}}.",
       "changePlan": "Ver planes",
-      "help": "¿Cómo se instala?"
+      "help": "¿Cómo se instala?",
+      "jumpToWidgets": "Ir a mis widgets ↓"
     }
   },
   "common": {

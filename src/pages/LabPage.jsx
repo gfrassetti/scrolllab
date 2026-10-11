@@ -19,14 +19,20 @@ import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
 import { prefersReducedMotion } from '../lib/motion'
 
+// Pista de la última visita: ¿la cuenta tenía plan pago? Decide qué página se
+// muestra mientras carga el plan (la guía o Mi LAB), para no cambiar de golpe.
+const PAID_HINT_KEY = 'scrolllab-lab-paid'
+function readPaidHint() {
+  try {
+    return localStorage.getItem(PAID_HINT_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 /** `qa`: /lab-test — los planes de prueba (src/domain/qa.js). */
 export default function LabPage({ qa = false }) {
   const { user, loading, hadSession } = useAuth()
-  // Logueado, /lab es tu herramienta, no la página de venta: abre en tu zona de
-  // trabajo (Widgets | Packs | Plan), sin intro, hero ni demo arriba. Mientras
-  // se confirma la sesión, se decide con la pista de la última visita.
-  const appMode = user ? true : loading ? hadSession : false
   const {
     plan,
     quota,
@@ -39,6 +45,23 @@ export default function LabPage({ qa = false }) {
     loading: planLoading,
     refresh: refreshPlan,
   } = usePlan()
+  // Con un plan pago (o en la prueba), /lab es tu herramienta, no la página de
+  // venta: abre en tu zona de trabajo (Widgets | Packs | Plan), sin hero, demo
+  // ni cuadro. Sin plan (free o sin cuenta) se ve la guía completa: cómo
+  // funciona, las demos y los planes, y tus widgets debajo. Mientras se
+  // confirman la sesión y el plan, se decide con la pista de la última visita
+  // (así no salta de una página a la otra).
+  const [paidHint] = useState(readPaidHint)
+  const hasPlan = Boolean(user) && !planLoading && Boolean(plan) && plan !== 'free'
+  const appMode = user ? (planLoading ? paidHint : hasPlan) : loading ? hadSession && paidHint : false
+  useEffect(() => {
+    if (!user || planLoading) return
+    try {
+      localStorage.setItem(PAID_HINT_KEY, hasPlan ? '1' : '0')
+    } catch {
+      /* sin storage */
+    }
+  }, [user, planLoading, hasPlan])
   // Cuándo se apagan las publicadas por encima del tope free si el plan no
   // sigue: fin de lo pagado (baja) o fin de la gracia (cobro pendiente).
   const planStopsAt = canceledAt ? currentPeriodEnd : pastDue ? graceEndsAt : null
@@ -87,8 +110,13 @@ export default function LabPage({ qa = false }) {
     (typeof window !== 'undefined' && window.location.hash === '#planes') ||
     !!searchParams.get('suscripcion') ||
     !!searchParams.get('upgrade')
+  // Sin plan, los planes ya están en la página (#planes): no hay pestaña Plan.
   const tab =
-    tabParam === 'packs' || tabParam === 'plan' ? tabParam : wantsPlan && appMode ? 'plan' : 'widgets'
+    tabParam === 'packs' || (tabParam === 'plan' && appMode)
+      ? tabParam
+      : wantsPlan && appMode
+        ? 'plan'
+        : 'widgets'
   const setTab = (next) =>
     setSearchParams(
       (prev) => {
@@ -419,6 +447,17 @@ export default function LabPage({ qa = false }) {
               </Link>
               {t('lab.siteSplitAfter')}
             </p>
+            {/* Con cuenta y sin plan: la guía queda, pero tus widgets a un toque. */}
+            {user && (
+              <p data-lab-hero-meta className="mt-4 text-body-sm">
+                <a
+                  href="#tus-widgets"
+                  className="tpl-hit relative underline decoration-ink/30 underline-offset-2 hover:text-accent"
+                >
+                  {t('lab.app.jumpToWidgets')}
+                </a>
+              </p>
+            )}
           </div>
 
           {/* Cómo funciona — 3 pasos, cada uno con su demo animada. */}
@@ -543,7 +582,7 @@ export default function LabPage({ qa = false }) {
             )
           ) : (
             <>
-              <h2 className="sr-only">{t('lab.yours')}</h2>
+              <h2 className={appMode ? 'sr-only' : 'mb-6 text-title-sm font-medium'}>{t('lab.yours')}</h2>
               <Tabs
                 idBase="lab-ws"
                 label={t('lab.yours')}
@@ -552,7 +591,7 @@ export default function LabPage({ qa = false }) {
                 tabs={[
                   { id: 'widgets', label: t('lab.tabs.widgets'), count: listLoaded ? instances.length : undefined },
                   { id: 'packs', label: t('lab.tabs.packs'), count: listLoaded ? packs.length : undefined },
-                  { id: 'plan', label: t('lab.tabs.plan') },
+                  ...(appMode ? [{ id: 'plan', label: t('lab.tabs.plan') }] : []),
                 ]}
               />
 
@@ -709,9 +748,11 @@ export default function LabPage({ qa = false }) {
               </TabPanel>
 
               {/* El plan: los mismos planes de la página de venta, acá adentro. */}
-              <TabPanel idBase="lab-ws" id="plan" value={tab} className="pt-2">
-                <HostedPlans qa={qa} />
-              </TabPanel>
+              {appMode && (
+                <TabPanel idBase="lab-ws" id="plan" value={tab} className="pt-2">
+                  <HostedPlans qa={qa} />
+                </TabPanel>
+              )}
             </>
           )}
         </section>
