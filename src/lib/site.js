@@ -77,7 +77,7 @@ export const BUILDER_SEO = {
  * en el boot de index.html.
  */
 export const LAB_SEO = {
-  title: 'Scroll Lab — LAB | Secciones que insertás con un script',
+  title: 'Scroll Lab — LAB | Online widgets',
   description:
     'Una sección con nuestro nivel de diseño, lista para insertar en cualquier sitio con un script, sin bajar código. La editás desde un panel. Empezá gratis.',
 }
