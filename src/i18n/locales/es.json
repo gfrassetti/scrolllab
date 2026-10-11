@@ -300,8 +300,10 @@
       "preview": "Así se ve en tu sitio",
       "previewEmpty": "Cuando sumes widgets publicados, acá ves el pack armado.",
       "previewFailed": "La vista previa no cargó. El código funciona igual.",
-      "paidOnly": "Los packs vienen con los planes pagos: juntás tus widgets en una sección con un solo código.",
-      "pausedNote": "Pausado: con el plan gratis los packs no se muestran. Vuelve solo cuando tengas un plan."
+      "pausedNote": "Pausado: con el plan gratis los packs no se muestran. Vuelve solo cuando tengas un plan.",
+      "lockedTitle": "Tus widgets, juntos en una sola sección",
+      "lockedBody": "Con un pack ordenás varios widgets y los pegás en tu sitio con un solo código: armás una home entera de una vez. Los packs vienen incluidos en Starter, Pro y Studio; suscribite o mejorá tu plan para empezar a usarlos.",
+      "lockedCta": "Ver los planes"
     },
     "compare": {
       "title": "¿LAB o Builder?",
@@ -1281,7 +1283,21 @@
       "noResults": "No hay secciones con esa búsqueda.",
       "addedInModel": "{{n}} en tu página"
     },
-    "backShort": "Templates"
+    "backShort": "Templates",
+    "sidebar": {
+      "label": "Proyectos del builder",
+      "title": "Proyectos",
+      "toggle": "Mostrar u ocultar proyectos",
+      "expand": "Mostrar proyectos",
+      "collapse": "Plegar",
+      "current": "Proyecto abierto",
+      "open": "Abierto",
+      "draft": "Borrador",
+      "newProject": "Nuevo proyecto",
+      "moreFor": "Más acciones para {{name}}",
+      "addFirst": "Sumá una sección para guardarlo",
+      "loggedOutHint": "Con tu cuenta lo guardás como proyecto y lo seguís desde cualquier dispositivo."
+    }
   },
   "cart": {
     "eyebrow": "Carrito",

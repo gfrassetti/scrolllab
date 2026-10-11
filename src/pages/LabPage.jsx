@@ -653,9 +653,10 @@ export default function LabPage({ qa = false }) {
                   </div>
                 ) : (
                   <div className="border border-accent/40 bg-accent/[0.06] p-5 md:p-6" data-lab-packs-locked>
-                    <p className="max-w-[60ch] text-body text-ink/80">{t('lab.pack.paidOnly')}</p>
-                    <a href="#planes" onClick={goToPlanes} className="btn btn-primary mt-4">
-                      {t('lab.compare.labCta')}
+                    <p className="text-title-sm font-medium tracking-[-0.01em]">{t('lab.pack.lockedTitle')}</p>
+                    <p className="mt-2 max-w-[60ch] text-body text-ink/75">{t('lab.pack.lockedBody')}</p>
+                    <a href="#planes" onClick={goToPlanes} className="btn btn-primary mt-5">
+                      {t('lab.pack.lockedCta')}
                     </a>
                   </div>
                 )}

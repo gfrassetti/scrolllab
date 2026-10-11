@@ -155,6 +155,8 @@ const apiProc = spawn(process.execPath, ['server/index.js'], {
     AUTH_DEV_ENABLED: 'true',
     MP_MOCK_ENABLED: 'true',
     PADDLE_MOCK_ENABLED: 'false',
+    // Este chequeo prueba Paddle: aunque .env lo tenga apagado (PADDLE_HIDDEN).
+    PADDLE_HIDDEN: 'false',
     PADDLE_WEBHOOK_SECRET: WEBHOOK_SECRET,
     EMAIL_ENABLED: 'false',
     RATE_LIMIT_DISABLED: 'true',

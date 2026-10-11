@@ -151,9 +151,14 @@ export function loadPaddleConfig(env = process.env, prod = isProd) {
     throw new Error("PADDLE_MOCK_ENABLED no puede estar activo en producción");
   }
 
+  // Paddle apagado a propósito (todavía no aprobaron la cuenta): sin selector
+  // «Tarjeta», sin checkout ni LAB por Paddle, aunque haya credenciales.
+  const hidden = env.PADDLE_HIDDEN === "true" || env.PADDLE_HIDDEN === "1";
+
   return {
-    enabled: Boolean(apiKey) || mock,
-    mock,
+    enabled: !hidden && (Boolean(apiKey) || mock),
+    hidden,
+    mock: !hidden && mock,
     environment,
     apiBase: (env.PADDLE_API_BASE || PADDLE_API[environment]).replace(/\/$/, ""),
     apiKey,

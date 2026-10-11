@@ -300,8 +300,10 @@
       "preview": "How it looks on your site",
       "previewEmpty": "Once you add published widgets, you'll see the assembled pack here.",
       "previewFailed": "The preview didn't load. The code still works.",
-      "paidOnly": "Packs come with the paid plans: you group your widgets into one section with a single code.",
-      "pausedNote": "Paused: on the free plan packs aren’t shown. It comes back on its own when you have a plan."
+      "pausedNote": "Paused: on the free plan packs aren’t shown. It comes back on its own when you have a plan.",
+      "lockedTitle": "Your widgets, together in one section",
+      "lockedBody": "A pack lines up several widgets and you paste them into your site with a single code: a whole home page at once. Packs are included in Starter, Pro and Studio; subscribe or upgrade your plan to start using them.",
+      "lockedCta": "See plans"
     },
     "compare": {
       "title": "LAB or Builder?",
@@ -1281,7 +1283,21 @@
       "noResults": "No sections match that search.",
       "addedInModel": "{{n}} on your page"
     },
-    "backShort": "Templates"
+    "backShort": "Templates",
+    "sidebar": {
+      "label": "Builder projects",
+      "title": "Projects",
+      "toggle": "Show or hide projects",
+      "expand": "Show projects",
+      "collapse": "Collapse",
+      "current": "Open project",
+      "open": "Open",
+      "draft": "Draft",
+      "newProject": "New project",
+      "moreFor": "More actions for {{name}}",
+      "addFirst": "Add a section to save it",
+      "loggedOutHint": "With your account you save it as a project and continue from any device."
+    }
   },
   "cart": {
     "eyebrow": "Cart",

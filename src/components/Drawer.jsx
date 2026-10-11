@@ -7,7 +7,7 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 /**
- * Panel lateral (derecha) reutilizable: fondo que cierra, Escape, foco
+ * Panel lateral (derecha, o izquierda con `side="left"`) reutilizable: fondo que cierra, Escape, foco
  * atrapado adentro y devuelto al botón que lo abrió, scroll de la página
  * quieto mientras está abierto.
  *
@@ -22,6 +22,7 @@ export default function Drawer({
   children,
   footer = null,
   closeLabel = 'Cerrar',
+  side = 'right',
   className = '',
 }) {
   const [mounted, setMounted] = useState(open)
@@ -102,8 +103,12 @@ export default function Drawer({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`absolute inset-y-0 right-0 flex w-full flex-col border-l border-ink/15 bg-bone text-ink shadow-[0_0_60px_rgba(0,0,0,0.18)] outline-none transition-transform ease-drawer motion-reduce:transition-none sm:w-[min(30rem,100vw)] ${
-          shown ? 'translate-x-0' : 'translate-x-full motion-reduce:translate-x-0'
+        className={`absolute inset-y-0 flex w-full flex-col border-ink/15 bg-bone text-ink shadow-[0_0_60px_rgba(0,0,0,0.18)] outline-none transition-transform ease-drawer motion-reduce:transition-none sm:w-[min(30rem,100vw)] ${
+          side === 'left' ? 'left-0 border-r' : 'right-0 border-l'
+        } ${
+          shown
+            ? 'translate-x-0'
+            : `${side === 'left' ? '-translate-x-full' : 'translate-x-full'} motion-reduce:translate-x-0`
         } ${className}`}
         style={{ transitionDuration: `${duration}ms` }}
       >

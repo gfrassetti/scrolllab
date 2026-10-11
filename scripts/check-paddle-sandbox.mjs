@@ -48,7 +48,7 @@ const keep = process.argv.includes('--keep')
 
 let paddle
 try {
-  paddle = loadPaddleConfig(process.env, false)
+  paddle = loadPaddleConfig({ ...process.env, PADDLE_HIDDEN: 'false' }, false)
 } catch (err) {
   console.error(err.message)
   process.exit(2)

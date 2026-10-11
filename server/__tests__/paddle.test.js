@@ -540,3 +540,15 @@ describe('mails de cobro', () => {
     assert.match(checkout.html, /href="https:\/\/x\/lab"/)
   })
 })
+
+// Cuenta de Paddle sin aprobar: se apaga entero sin borrar las credenciales.
+describe('PADDLE_HIDDEN', () => {
+  it('con credenciales y PADDLE_HIDDEN=true, Paddle queda apagado (ni mock)', () => {
+    const env = { PADDLE_ENV: 'sandbox', PADDLE_API_KEY: 'pdl_sdbx_apikey_x', PADDLE_CLIENT_TOKEN: 'test_x' }
+    assert.equal(loadPaddleConfig(env, false).enabled, true)
+    const hidden = loadPaddleConfig({ ...env, PADDLE_HIDDEN: 'true' }, false)
+    assert.equal(hidden.enabled, false)
+    assert.equal(hidden.hidden, true)
+    assert.equal(loadPaddleConfig({ PADDLE_MOCK_ENABLED: 'true', PADDLE_HIDDEN: '1' }, false).mock, false)
+  })
+})

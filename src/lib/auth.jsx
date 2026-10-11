@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { api } from '../lib/api'
+import { api, SESSION_LOST_EVENT } from '../lib/api'
 
 const SESSION_HINT_KEY = 'scrolllab-had-session'
 
@@ -52,6 +52,13 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     refresh()
+  }, [])
+
+  // Un 401 en cualquier pedido: la sesión ya no está; se vuelve a consultar.
+  useEffect(() => {
+    const onLost = () => refresh()
+    window.addEventListener(SESSION_LOST_EVENT, onLost)
+    return () => window.removeEventListener(SESSION_LOST_EVENT, onLost)
   }, [])
 
   const logout = async () => {

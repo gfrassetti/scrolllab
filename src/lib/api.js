@@ -12,6 +12,8 @@ function resolveApiBase() {
 
 const API_BASE = resolveApiBase()
 
+export const SESSION_LOST_EVENT = 'scrolllab:session-lost'
+
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
@@ -23,6 +25,12 @@ async function request(path, options = {}) {
     ...options,
   })
   const data = await res.json().catch(() => ({}))
+  // La sesión se cerró del lado del servidor (venció, reinicio en dev) pero la
+  // pantalla todavía te muestra adentro: avisa para que AuthProvider la
+  // vuelva a pedir y la UI muestre «Entrá» en vez de errores sueltos.
+  if (res.status === 401 && path !== '/api/auth/me' && typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(SESSION_LOST_EVENT))
+  }
   if (!res.ok) {
     const error = new Error(data.error || `Error ${res.status}`)
     error.status = res.status

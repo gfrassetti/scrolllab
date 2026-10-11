@@ -22,7 +22,7 @@ import { useCurrency } from '../lib/currency'
 import { prefersReducedMotion } from '../lib/motion'
 import { kindLabelKeys } from '../features/builder/sectionCopy.js'
 import BuilderHeader from '../features/builder/BuilderHeader.jsx'
-import ProjectBar from '../features/builder/ProjectBar.jsx'
+import BuilderSidebar from '../features/builder/BuilderSidebar.jsx'
 import SectionPalette from '../features/builder/SectionPalette.jsx'
 import CompositionHeader from '../features/builder/CompositionHeader.jsx'
 import CompositionList from '../features/builder/CompositionList.jsx'
@@ -94,6 +94,46 @@ export default function BuilderPage({ qa = false }) {
     renameComposition,
     startFresh: clearItems,
   })
+  // Sidebar de proyectos: plegado o no (se recuerda; sin preferencia, plegado
+  // en pantallas medianas para dejarle aire a la paleta y la página) y, en el
+  // teléfono, como panel. Ctrl/⌘+B lo abre o lo pliega, como en shadcn.
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('builder-sidebar')
+      if (saved) return saved === 'collapsed'
+    } catch {
+      /* sin storage */
+    }
+    return typeof window !== 'undefined' && window.innerWidth < 1280
+  })
+  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false)
+  const setCollapsed = useCallback((value) => {
+    setSidebarCollapsed(value)
+    try {
+      localStorage.setItem('builder-sidebar', value ? 'collapsed' : 'open')
+    } catch {
+      /* sin storage */
+    }
+  }, [])
+  const expandSidebar = useCallback(() => {
+    if (window.matchMedia('(min-width: 1024px)').matches) setCollapsed(false)
+    else setSidebarMobileOpen(true)
+  }, [setCollapsed])
+  const toggleSidebar = useCallback(() => {
+    if (window.matchMedia('(min-width: 1024px)').matches) setCollapsed(!sidebarCollapsed)
+    else setSidebarMobileOpen((v) => !v)
+  }, [setCollapsed, sidebarCollapsed])
+  useEffect(() => {
+    if (qa) return undefined
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault()
+        toggleSidebar()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [qa, toggleSidebar])
   const [searchParams, setSearchParams] = useSearchParams()
   const openRequest = searchParams.get('project')
   const clearOpenRequest = useCallback(() => {
@@ -335,16 +375,9 @@ export default function BuilderPage({ qa = false }) {
   }
 
   return (
-    <div className="min-h-svh bg-bone px-5 pb-28 text-ink md:px-10 lg:pb-10">
-      <BuilderHeader
-        t={t}
-        items={items}
-        openPreview={openPreview}
-        looksLoggedIn={looksLoggedIn}
-      />
-
+    <div className="min-h-svh bg-bone text-ink lg:flex">
       {qa ? null : (
-        <ProjectBar
+        <BuilderSidebar
           t={t}
           locale={locale}
           loggedIn={Boolean(user)}
@@ -353,8 +386,22 @@ export default function BuilderPage({ qa = false }) {
           projects={projects}
           openRequest={openRequest}
           onOpenRequestHandled={clearOpenRequest}
+          collapsed={sidebarCollapsed}
+          onExpand={expandSidebar}
+          onCollapse={() => setCollapsed(true)}
+          mobileOpen={sidebarMobileOpen}
+          onMobileClose={() => setSidebarMobileOpen(false)}
         />
       )}
+      <div className="min-w-0 flex-1 px-5 pb-28 md:px-10 lg:pb-10">
+      <BuilderHeader
+        t={t}
+        items={items}
+        openPreview={openPreview}
+        looksLoggedIn={looksLoggedIn}
+        onToggleSidebar={qa ? null : toggleSidebar}
+        projectName={projects.project?.name || ''}
+      />
 
       {/* Teléfono: una cosa a la vez. En desktop van las dos columnas. */}
       <div
@@ -460,6 +507,7 @@ export default function BuilderPage({ qa = false }) {
         rate={rate}
         goToCanvas={goToCanvas}
       />
+      </div>
     </div>
   )
 }
