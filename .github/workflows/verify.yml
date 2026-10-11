@@ -1,0 +1,37 @@
+name: verify
+
+# El gate del repo (`npm run verify`): lint + typecheck + tests + invariantes.
+# Corre sobre el commit limpio que se subió, sin los archivos a medias de nadie,
+# así que cualquier rojo es del código que está en GitHub. No toca producción.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Un push nuevo a la misma rama no cancela al anterior en master (cada commit
+# queda chequeado); en un pull request sí, porque solo importa el último.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Los tests y el typecheck no necesitan navegador: no se baja Chromium.
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
+      - run: npm run verify
