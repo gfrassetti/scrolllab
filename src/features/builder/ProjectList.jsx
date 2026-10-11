@@ -79,7 +79,7 @@ export default function ProjectList({
               <div className="flex shrink-0 items-center gap-2">
               {onAddToCart ? (
                 inCartIds?.has(project.id) ? (
-                  <span className="text-[11px] uppercase tracking-[0.2em] text-accent-ink">
+                  <span className="text-body-sm font-medium text-accent-ink">
                     ✓ {t('builder.projects.inCart')}
                   </span>
                 ) : (
@@ -88,7 +88,7 @@ export default function ProjectList({
                     onClick={() => run(`cart:${project.id}`, () => onAddToCart(project))}
                     disabled={busy !== null || !project.sections}
                     title={!project.sections ? t('builder.projects.emptyCantBuy') : undefined}
-                    className="ui-press min-h-11 shrink-0 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent disabled:opacity-40"
+                    className="action shrink-0"
                   >
                     {busy === `cart:${project.id}` ? t('builder.projects.adding') : t('builder.projects.addToCart')}
                   </button>
@@ -99,7 +99,7 @@ export default function ProjectList({
                   type="button"
                   onClick={() => requestOpen(project)}
                   disabled={busy !== null}
-                  className="ui-press min-h-11 shrink-0 border border-ink/40 px-4 text-[11px] uppercase tracking-[0.2em] hover:border-ink hover:bg-ink hover:text-bone disabled:opacity-40"
+                  className="btn btn-sm btn-ghost shrink-0 disabled:opacity-40"
                 >
                   {busy === `open:${project.id}` ? t('builder.projects.opening') : t('builder.projects.open')}
                 </button>
@@ -108,13 +108,13 @@ export default function ProjectList({
             </div>
 
             {onDuplicate || onRemove ? (
-              <div className="mt-1 flex gap-4 text-[11px] uppercase tracking-[0.2em] text-ink/55">
+              <div className="mt-1 flex gap-5">
                 {onDuplicate ? (
                   <button
                     type="button"
                     disabled={busy !== null}
                     onClick={() => run(`dup:${project.id}`, () => onDuplicate(project))}
-                    className="tpl-hit relative min-h-8 hover:text-accent disabled:opacity-40"
+                    className="action"
                   >
                     {busy === `dup:${project.id}` ? t('builder.projects.duplicating') : t('builder.projects.duplicate')}
                   </button>
@@ -124,7 +124,7 @@ export default function ProjectList({
                     type="button"
                     disabled={busy !== null}
                     onClick={() => setConfirm({ id: project.id, kind: 'delete' })}
-                    className="tpl-hit relative min-h-8 hover:text-danger disabled:opacity-40"
+                    className="action action-danger"
                   >
                     {t('builder.projects.delete')}
                   </button>
@@ -151,16 +151,14 @@ export default function ProjectList({
                         ? run(`del:${project.id}`, () => onRemove(project.id))
                         : run(`open:${project.id}`, () => onOpen(project.id))
                     }
-                    className={`ui-press min-h-11 px-4 text-[11px] uppercase tracking-[0.2em] text-bone disabled:opacity-40 ${
-                      asking === 'delete' ? 'bg-danger' : 'bg-ink'
-                    }`}
+                    className={`btn btn-sm disabled:opacity-40 ${asking === 'delete' ? 'btn-danger' : 'btn-primary'}`}
                   >
                     {asking === 'delete' ? t('builder.projects.deleteYes') : t('builder.projects.openAnyway')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirm(null)}
-                    className="ui-press min-h-11 px-3 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
+                    className="action"
                   >
                     {t('builder.projects.cancel')}
                   </button>

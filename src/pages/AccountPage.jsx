@@ -317,7 +317,7 @@ export default function AccountPage() {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="border-2 border-ink/30 px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:border-ink hover:text-accent-ink"
+                          className="action"
                         >
                           {previews.length === 1
                             ? t('account.preview')
@@ -348,7 +348,7 @@ export default function AccountPage() {
                                 type="button"
                                 disabled={busy === key}
                                 onClick={() => download(order.id, index)}
-                                className="border-2 border-ink/40 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors hover:border-ink hover:bg-ink hover:text-bone disabled:opacity-40"
+                                className="btn btn-sm btn-ghost disabled:opacity-40"
                               >
                                 {busy === key ? t('account.preparing') : `${t('account.download')} · ${label}`}
                               </button>
@@ -360,7 +360,7 @@ export default function AccountPage() {
                           type="button"
                           disabled={busy === order.id}
                           onClick={() => download(order.id)}
-                          className="border-2 border-ink px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone disabled:opacity-40"
+                          className="btn btn-sm btn-primary disabled:opacity-40"
                         >
                           {busy === order.id
                             ? t('account.preparing')

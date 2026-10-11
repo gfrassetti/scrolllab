@@ -95,7 +95,7 @@ export default function ProjectBar({
           <span className="text-eyebrow uppercase text-ink/45">{t('builder.projects.eyebrow')}</span>
           <span className="text-body-sm text-ink/70">{t('builder.projects.draftLocal')}</span>
         </div>
-        <Link to={`/login?next=${encodeURIComponent(next)}`} className="btn btn-ghost">
+        <Link to={`/login?next=${encodeURIComponent(next)}`} className="btn btn-sm btn-ghost">
           {t('builder.projects.loginToSave')}
         </Link>
       </div>
@@ -129,7 +129,7 @@ export default function ProjectBar({
                 {status === 'missing' ? t('builder.projects.status.missing') : t('builder.projects.draftUnsaved')}
               </span>
               {itemsCount > 0 && status !== 'missing' ? (
-                <span className="text-body-sm text-ink/45">{t('builder.projects.draftHint')}</span>
+                <span className="hidden text-body-sm text-ink/45 sm:inline">{t('builder.projects.draftHint')}</span>
               ) : null}
             </>
           )}
@@ -147,7 +147,7 @@ export default function ProjectBar({
               onClick={() => setNaming(true)}
               disabled={itemsCount === 0 || atCap}
               title={atCap ? t('builder.projects.capNote', { max }) : undefined}
-              className="btn btn-primary disabled:opacity-30"
+              className="btn btn-sm btn-primary disabled:opacity-30"
             >
               {t('builder.projects.saveAs')}
             </button>
@@ -158,7 +158,7 @@ export default function ProjectBar({
               projects.refresh()
               setDrawer(true)
             }}
-            className="btn btn-ghost"
+            className="btn btn-sm btn-ghost"
             aria-haspopup="dialog"
           >
             {list?.length
@@ -166,7 +166,7 @@ export default function ProjectBar({
               : t('builder.projects.myProjects')}
           </button>
           {project ? (
-            <button type="button" onClick={() => projects.startNew()} className="btn btn-ghost">
+            <button type="button" onClick={() => projects.startNew()} className="btn btn-sm btn-ghost">
               {t('builder.projects.new')}
             </button>
           ) : null}
@@ -195,7 +195,7 @@ export default function ProjectBar({
                 <button type="button" data-autofocus onClick={startBlank} className="btn btn-primary">
                   {t('builder.projects.newBlankConfirm')}
                 </button>
-                <button type="button" onClick={() => setConfirmBlank(false)} className="btn btn-ghost">
+                <button type="button" onClick={() => setConfirmBlank(false)} className="btn btn-sm btn-ghost">
                   {t('builder.projects.cancel')}
                 </button>
               </div>
@@ -382,7 +382,7 @@ function SaveAsForm({ t, locale, onSave, onCancel }) {
       <button type="submit" disabled={saving || !name.trim()} className="btn btn-primary disabled:opacity-40">
         {saving ? t('builder.projects.status.saving') : t('builder.projects.save')}
       </button>
-      <button type="button" onClick={onCancel} className="btn btn-ghost">
+      <button type="button" onClick={onCancel} className="btn btn-sm btn-ghost">
         {t('builder.projects.cancel')}
       </button>
       {error ? (

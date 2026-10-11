@@ -22,7 +22,8 @@
     "currencyLabel": "Currency",
     "plan": "Plan",
     "projects": "My projects",
-    "myLab": "My LAB"
+    "myLab": "My LAB",
+    "myAccount": "My account"
   },
   "lab": {
     "eyebrow": "Premium widgets",
@@ -675,7 +676,7 @@
     }
   },
   "builder": {
-    "back": "← Templates",
+    "back": "Back to templates",
     "title": "Builder",
     "clear": "Clear",
     "preview": "Preview →",
@@ -1267,7 +1268,8 @@
       "resultsOne": "1 section",
       "noResults": "No sections match that search.",
       "addedInModel": "{{n}} on your page"
-    }
+    },
+    "backShort": "Templates"
   },
   "cart": {
     "eyebrow": "Cart",
@@ -1737,5 +1739,10 @@
       "custom": "Other color",
       "typed": "color code"
     }
+  },
+  "prefs": {
+    "label": "Language, currency and theme ({{current}})",
+    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Paddle).",
+    "theme": "Theme"
   }
 }

@@ -16,6 +16,7 @@ import ThemeToggle from './ThemeToggle'
 import MotionToggle from './MotionToggle'
 import LanguageSelector from './LanguageSelector'
 import CurrencySelector from './CurrencySelector'
+import PreferencesMenu from './PreferencesMenu'
 import { prefersReducedMotion } from '../lib/motion'
 
 /**
@@ -231,10 +232,8 @@ export default function SiteHeader({ solid = true }) {
               {t('nav.login')}
             </Link>
           )}
-          <LanguageSelector />
-          <CurrencySelector />
           <MotionToggle />
-          <ThemeToggle />
+          <PreferencesMenu />
         </div>
 
         {/* Mobile y tablet: carrito siempre a mano + hamburguesa */}

@@ -675,7 +675,7 @@ export default function LabPage({ qa = false }) {
                             </span>
                             <Link
                               to={`/lab/pack/${pack.id}`}
-                              className="tpl-hit relative ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
+                              className="action ml-auto"
                             >
                               {t('lab.edit')}
                             </Link>

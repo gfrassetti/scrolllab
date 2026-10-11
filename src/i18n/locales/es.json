@@ -22,7 +22,8 @@
     "currencyLabel": "Moneda",
     "plan": "Plan",
     "projects": "Mis proyectos",
-    "myLab": "Mi LAB"
+    "myLab": "Mi LAB",
+    "myAccount": "Mi cuenta"
   },
   "lab": {
     "eyebrow": "Widgets premium",
@@ -675,7 +676,7 @@
     }
   },
   "builder": {
-    "back": "← Templates",
+    "back": "Volver a los templates",
     "title": "Builder",
     "clear": "Vaciar",
     "preview": "Preview →",
@@ -1267,7 +1268,8 @@
       "resultsOne": "1 sección",
       "noResults": "No hay secciones con esa búsqueda.",
       "addedInModel": "{{n}} en tu página"
-    }
+    },
+    "backShort": "Templates"
   },
   "cart": {
     "eyebrow": "Carrito",
@@ -1737,5 +1739,10 @@
       "custom": "Otro color",
       "typed": "código del color"
     }
+  },
+  "prefs": {
+    "label": "Idioma, moneda y tema ({{current}})",
+    "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Paddle).",
+    "theme": "Tema"
   }
 }

@@ -109,6 +109,10 @@ html.dark {
   --color-signal-accent: #2fe0ff;
 
   --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  /* Cuerpo del market (home, LAB, builder, carrito, cuenta…): una grotesca
+     neutra de estudio. NO toca a los templates: ellos y el ZIP siguen en
+     --font-grotesk (ver html[data-surface='market'] abajo). */
+  --font-ui: "Geist", ui-sans-serif, system-ui, sans-serif;
   /* Display italic — UI/UX Pro Max: Playfair Display (editorial / storytelling). */
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
   /* Rupture On — calligraphic overlay (Google: Mr Bedfort). */
@@ -212,6 +216,14 @@ html {
 body {
   @apply bg-bone font-grotesk text-ink text-body antialiased;
   overflow-x: clip;
+}
+
+/* El market usa --font-ui; las páginas de /templates/* y el ZIP no tienen
+   data-surface y quedan en --font-grotesk. Las secciones que el builder y LAB
+   muestran dentro del market llevan font-grotesk en su wrapper
+   (src/lib/modelWrappers.js), así la vista previa es igual a lo que se baja. */
+html[data-surface='market'] body {
+  font-family: var(--font-ui);
 }
 
 /* Playfair italic: contraste alto vs Bricolage/Grotesk (recomendación Pro Max). */
@@ -457,6 +469,37 @@ body {
 
   .btn-ghost:hover:not(:disabled) {
     @apply border-ink bg-ink text-bone;
+  }
+
+  /* Compacto para filas de listas y tablas (mismo alto de toque). */
+  .btn-sm {
+    @apply px-4 py-2;
+  }
+
+  .btn-danger {
+    @apply border-danger bg-danger text-bone;
+  }
+
+  /* Acción de texto en pantallas de trabajo: 14px, minúscula, subrayado sutil.
+     Reemplaza los «EDITAR / BORRAR / VER PREVIEW» de 11px en mayúsculas
+     espaciadas, que se leían como epígrafes y no como acciones. */
+  .action {
+    @apply relative inline-flex min-h-11 items-center text-body-sm font-medium text-ink/70 underline decoration-ink/25 underline-offset-4;
+    transition:
+      color 180ms ease,
+      text-decoration-color 180ms ease;
+  }
+
+  .action:hover:not(:disabled) {
+    @apply text-accent decoration-accent;
+  }
+
+  .action-danger:hover:not(:disabled) {
+    @apply text-danger decoration-danger;
+  }
+
+  .action:disabled {
+    @apply opacity-40;
   }
 
   @media (prefers-reduced-motion: reduce) {

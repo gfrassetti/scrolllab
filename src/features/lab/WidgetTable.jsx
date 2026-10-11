@@ -156,9 +156,7 @@ export default function WidgetTable({
                 type="button"
                 onClick={() => run(confirm)}
                 disabled={busy}
-                className={`ui-press min-h-11 px-4 text-[11px] uppercase tracking-[0.2em] text-bone disabled:opacity-40 ${
-                  confirm === 'delete' ? 'bg-danger' : 'bg-ink'
-                }`}
+                className={`btn btn-sm disabled:opacity-40 ${confirm === 'delete' ? 'btn-danger' : 'btn-primary'}`}
               >
                 {busy
                   ? t('lab.table.working')
@@ -170,7 +168,7 @@ export default function WidgetTable({
                 type="button"
                 onClick={() => setConfirm(null)}
                 disabled={busy}
-                className="ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
+                className="action"
               >
                 {t('lab.cancel')}
               </button>
@@ -185,7 +183,7 @@ export default function WidgetTable({
                   type="button"
                   onClick={() => setConfirm('unpublish')}
                   disabled={busy}
-                  className="tpl-hit relative uppercase tracking-[0.14em] text-ink/70 hover:text-accent disabled:opacity-40"
+                  className="action"
                 >
                   {t('lab.table.unpublish')}
                 </button>
@@ -194,14 +192,14 @@ export default function WidgetTable({
                 type="button"
                 onClick={() => setConfirm('delete')}
                 disabled={busy}
-                className="tpl-hit relative uppercase tracking-[0.14em] text-ink/70 hover:text-danger disabled:opacity-40"
+                className="action action-danger"
               >
                 {t('lab.table.delete')}
               </button>
               <button
                 type="button"
                 onClick={clear}
-                className="tpl-hit relative ml-auto uppercase tracking-[0.14em] text-ink/45 hover:text-ink"
+                className="action ml-auto text-ink/50"
               >
                 {t('lab.table.clear')}
               </button>
@@ -298,18 +296,18 @@ export default function WidgetTable({
                     {inst.status === 'published' ? inst.views || 0 : '—'}
                   </td>
                   <td className="py-3 text-right">
-                    <span className="inline-flex items-center gap-4 text-body-sm uppercase tracking-[0.14em]">
+                    <span className="inline-flex items-center gap-4">
                       {inst.status === 'published' && (
                         <button
                           type="button"
                           aria-expanded={codeOpen}
                           onClick={() => setOpenCode(codeOpen ? null : inst.id)}
-                          className="tpl-hit relative uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
+                          className="action"
                         >
                           {codeOpen ? t('lab.table.hideCode') : t('lab.table.code')}
                         </button>
                       )}
-                      <Link to={`/lab/${inst.id}`} className="tpl-hit relative text-ink/60 hover:text-accent">
+                      <Link to={`/lab/${inst.id}`} className="action">
                         {t('lab.edit')}
                       </Link>
                     </span>

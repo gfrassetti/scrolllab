@@ -338,7 +338,6 @@ export default function BuilderPage({ qa = false }) {
     <div className="min-h-svh bg-bone px-5 pb-28 text-ink md:px-10 lg:pb-10">
       <BuilderHeader
         t={t}
-        clearItems={projects.startNew}
         items={items}
         openPreview={openPreview}
         looksLoggedIn={looksLoggedIn}
@@ -402,7 +401,7 @@ export default function BuilderPage({ qa = false }) {
           id="builder-canvas"
           className={`min-w-0 scroll-mt-16 lg:sticky ${mobileView === 'palette' ? 'hidden' : ''} lg:top-[4.75rem] lg:col-span-7 lg:flex lg:max-h-[calc(100svh-7.5rem)] lg:flex-col lg:self-start`}
         >
-          <CompositionHeader t={t} items={items} structure={structure} />
+          <CompositionHeader t={t} items={items} structure={structure} onClear={projects.startNew} />
 
           <CompositionList
             items={items}

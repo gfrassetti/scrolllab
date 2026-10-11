@@ -3,16 +3,28 @@
 /**
  * Cabecera del panel de composición: título y estructura (nav / hero / secciones / footer).
  */
-export default function CompositionHeader({ t, items, structure }) {
+export default function CompositionHeader({ t, items, structure, onClear = null }) {
   return (
     <>
       <div className="shrink-0">
-        <p className="mb-3 text-title-sm font-medium tracking-[-0.01em]">
-          {t('builder.canvasTitle')} ({items.length}{' '}
-          {items.length === 1
-            ? t('builder.sectionCountOne')
-            : t('builder.sectionCountMany')})
-        </p>
+        <div className="mb-3 flex items-baseline justify-between gap-4">
+          <p className="text-title-sm font-medium tracking-[-0.01em]">
+            {t('builder.canvasTitle')} ({items.length}{' '}
+            {items.length === 1
+              ? t('builder.sectionCountOne')
+              : t('builder.sectionCountMany')})
+          </p>
+          {/* Vaciar = empezar otra página: la de ahora queda en el carrito / su proyecto. */}
+          {onClear && items.length > 0 ? (
+            <button
+              type="button"
+              onClick={onClear}
+              className="tpl-hit relative shrink-0 text-body-sm text-ink/55 underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent"
+            >
+              {t('builder.clear')}
+            </button>
+          ) : null}
+        </div>
 
         <ol className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-eyebrow text-ink/45">
           {[
