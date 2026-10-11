@@ -1,4 +1,4 @@
-import { navLinks } from '../helpers.js'
+import { navLinks, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -29,6 +29,7 @@ export const VELOCITY_FIELDS = {
     { key: 'imgFront', label: 'Layer front (URL)', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de las líneas destacadas', type: 'color' },
   ],
   'velocity/HelmetGrid': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -47,6 +48,7 @@ export const VELOCITY_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'accent', label: 'Color de acento (rótulo, años y contorno activo)', type: 'color' },
   ],
   'velocity/TrackMerge': [
     { key: 'trackLabel', label: 'Rótulo de las filas', type: 'text' },
@@ -79,6 +81,13 @@ export const VELOCITY_FIELDS = {
     { key: 'mergeTitleA', label: 'Merge title A', type: 'text' },
     { key: 'mergeTitleB', label: 'Merge title B', type: 'text' },
     { key: 'mergeAccent', label: 'Merge accent', type: 'text' },
+    { key: 'bg', label: 'Fondo de la galería', type: 'color' },
+    { key: 'bg2', label: 'Fondo del cruce', type: 'color' },
+    { key: 'endBg', label: 'Fondo al salir (el de la sección siguiente)', type: 'color' },
+    { key: 'fg', label: 'Texto sobre la galería', type: 'color' },
+    { key: 'fg2', label: 'Texto sobre el fondo del cruce', type: 'color' },
+    { key: 'accent', label: 'Color de acento (rótulos y la letra destacada)', type: 'color' },
+    toggle('showTexture', 'Textura de anillos detrás de la galería'),
   ],
   'velocity/ParallaxRise': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -97,5 +106,6 @@ export const VELOCITY_FIELDS = {
     { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color del link «volver arriba»', type: 'color' },
   ],
 }

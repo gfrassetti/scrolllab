@@ -191,6 +191,8 @@ const SHARED = [
   'src/lib/responsiveImage.js',
   // Versión calma con «reducir movimiento» (las secciones la consultan).
   'src/lib/motion.js',
+  // Tonos de la paleta apuntados a los campos de color de cada sección.
+  'src/lib/themeVars.js',
   // Scroll táctil normalizado en teléfonos (lo prende useLenis).
   'src/lib/touchScroll.js',
   'src/hooks/useLenis.js',

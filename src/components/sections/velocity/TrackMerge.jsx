@@ -15,6 +15,7 @@ import {
   variants,
 } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { mixHex, themeVars } from '../../../lib/themeVars'
 
 const ROW_A = [
   {
@@ -106,7 +107,20 @@ export default function TrackMerge({
   mergeTitleA = 'TITLE',
   mergeTitleB = 'TITLE',
   mergeAccent = 'A',
+  /** Fondos de cada tramo (galería → cruce → salida) y sus textos. */
+  bg = '#0a1a12',
+  bg2 = '#e6e4dc',
+  endBg = '#000000',
+  fg = '#ece9e2',
+  fg2 = '#161412',
+  accent,
+  /** La textura de anillos detrás de la galería. */
+  showTexture = 'on',
 }) {
+  // Los dos verdes intermedios del lavado: los de la demo, o el fondo aclarado.
+  const demoBg = bg.toLowerCase() === '#0a1a12'
+  const wash1 = demoBg ? '#12261c' : mixHex(bg, '#ffffff', 0.045)
+  const wash2 = demoBg ? '#1a3328' : mixHex(bg, '#ffffff', 0.09)
   // La cita va segunda en la fila de arriba, como en la demo.
   const photosA = mergeRow(ROW_A_PHOTOS, rowA)
   const itemsA = [photosA[0], { ...ROW_A_QUOTE, quote }, ...photosA.slice(1)]
@@ -122,7 +136,7 @@ export default function TrackMerge({
       // claro; la galería es una pieza de movimiento y sin scroll no se lee.
       mm.add('(prefers-reduced-motion: reduce)', () => {
         gsap.set('[data-tm-gallery]', { display: 'none' })
-        gsap.set('[data-tm-bg]', { backgroundColor: '#e6e4dc' })
+        gsap.set('[data-tm-bg]', { backgroundColor: bg2 })
         gsap.set('[data-tm-merge]', { opacity: 1 })
         gsap.set('[data-tm-on]', { y: 0, x: 0 })
         gsap.set('[data-tm-off]', { y: 0, x: 0 })
@@ -165,13 +179,13 @@ export default function TrackMerge({
           // Continuous bg wash: forest → cream (merge) → black (HelmetGrid)
           tl.fromTo(
             '[data-tm-bg]',
-            { backgroundColor: '#0a1a12' },
-            { backgroundColor: '#12261c', ease: 'none', duration: 0.2 },
+            { backgroundColor: bg },
+            { backgroundColor: wash1, ease: 'none', duration: 0.2 },
             0,
           )
           tl.to(
             '[data-tm-bg]',
-            { backgroundColor: '#1a3328', ease: 'none', duration: 0.18 },
+            { backgroundColor: wash2, ease: 'none', duration: 0.18 },
             0.2,
           )
 
@@ -191,7 +205,7 @@ export default function TrackMerge({
           )
           tl.to(
             '[data-tm-bg]',
-            { backgroundColor: '#e6e4dc', ease: 'none', duration: 0.22 },
+            { backgroundColor: bg2, ease: 'none', duration: 0.22 },
             0.34,
           )
 
@@ -238,7 +252,7 @@ export default function TrackMerge({
           // Act 5 — release: wash to black to match HelmetGrid below
           tl.to(
             '[data-tm-bg]',
-            { backgroundColor: '#000000', ease: 'none', duration: 0.2 },
+            { backgroundColor: endBg, ease: 'none', duration: 0.2 },
             0.78,
           )
           tl.to(
@@ -282,13 +296,13 @@ export default function TrackMerge({
           )
           tl.fromTo(
             '[data-tm-bg]',
-            { backgroundColor: '#0a1a12' },
-            { backgroundColor: '#1a3328', ease: 'none', duration: 0.35 },
+            { backgroundColor: bg },
+            { backgroundColor: wash2, ease: 'none', duration: 0.35 },
             0,
           )
           tl.to(
             '[data-tm-bg]',
-            { backgroundColor: '#e6e4dc', ease: 'none', duration: 0.2 },
+            { backgroundColor: bg2, ease: 'none', duration: 0.2 },
             0.38,
           )
           tl.fromTo(
@@ -312,36 +326,43 @@ export default function TrackMerge({
           tl.to('[data-tm-merge]', { opacity: 1, duration: 0.18 }, 0.62)
           tl.to(
             '[data-tm-bg]',
-            { backgroundColor: '#000000', ease: 'none', duration: 0.18 },
+            { backgroundColor: endBg, ease: 'none', duration: 0.18 },
             0.78,
           )
           tl.to('[data-tm-merge]', { opacity: 0, y: -20 }, 0.84)
         },
       )
     },
-    { scope: root },
+    { scope: root, dependencies: [bg, bg2, endBg, wash1, wash2], revertOnUpdate: true },
   )
 
   return (
-    <section ref={root} className="relative bg-[#0a1a12] text-[#ece9e2]">
+    <section
+      ref={root}
+      className="relative"
+      style={{ backgroundColor: bg, color: fg, '--tm-ink2': fg2, ...themeVars({ salt: fg, acid: accent }) }}
+    >
       <div className="relative h-svh overflow-hidden">
         <div
           data-tm-bg
-          className="absolute inset-0 bg-[#0a1a12] transition-colors"
+          className="absolute inset-0 transition-colors"
+          style={{ backgroundColor: bg }}
         />
 
         <div
           data-tm-gallery
           className="absolute inset-0 z-10 flex flex-col justify-center gap-[4vh] overflow-hidden"
         >
+          {showTexture !== 'off' && (
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 opacity-20"
             style={{
               backgroundImage:
-                'repeating-radial-gradient(circle at 40% 40%, transparent 0 16px, rgba(236,233,226,0.08) 16px 17px)',
+                `repeating-radial-gradient(circle at 40% 40%, transparent 0 16px, color-mix(in srgb, ${fg} 8%, transparent) 16px 17px)`,
             }}
           />
+          )}
 
           <p
             data-tm-path-tag
@@ -360,7 +381,7 @@ export default function TrackMerge({
                   key={i}
                   className={`${item.w} shrink-0 pb-6 md:pb-10`}
                 >
-                  <blockquote className="font-display text-[clamp(1.35rem,3.2vw,2.4rem)] leading-[1.1] italic text-[#ece9e2]">
+                  <blockquote className="font-display text-[clamp(1.35rem,3.2vw,2.4rem)] leading-[1.1] italic text-salt">
                     {item.quote}
                   </blockquote>
                   <p className="mt-4 text-[11px] tracking-[0.25em] text-acid uppercase">
@@ -427,7 +448,7 @@ export default function TrackMerge({
                   className="h-full w-full object-cover"
                 />
               </div>
-              <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
+              <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-(color:--tm-ink2)/50 uppercase md:text-xs">
                 {pathLabelA}
               </p>
             </div>
@@ -442,7 +463,7 @@ export default function TrackMerge({
                   className="h-full w-full object-cover"
                 />
               </div>
-              <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-[#161412]/50 uppercase md:text-xs">
+              <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-(color:--tm-ink2)/50 uppercase md:text-xs">
                 {pathLabelB}
               </p>
             </div>
@@ -450,7 +471,7 @@ export default function TrackMerge({
 
           <h2
             data-tm-title
-            className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 text-center font-brico text-[clamp(2.2rem,9vw,6.5rem)] leading-[0.85] font-semibold tracking-[-0.04em] text-[#161412] uppercase"
+            className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 text-center font-brico text-[clamp(2.2rem,9vw,6.5rem)] leading-[0.85] font-semibold tracking-[-0.04em] text-(color:--tm-ink2) uppercase"
           >
             <span className="relative inline-block">
               <span className="absolute -top-2 left-0 font-display text-[0.55em] font-normal normal-case italic text-acid md:-top-3">
@@ -458,7 +479,7 @@ export default function TrackMerge({
               </span>
               {mergeTitleA}
             </span>{' '}
-            <span className="text-[#161412]/35">/</span> {mergeTitleB}
+            <span className="text-(color:--tm-ink2)/35">/</span> {mergeTitleB}
           </h2>
         </div>
       </div>

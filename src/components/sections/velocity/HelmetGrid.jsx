@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { helm1, helm2, helm3, helm4, helm5, helm6, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { themeVars } from '../../../lib/themeVars'
 
 /** Varied notch / irregular masks — storytelling “hall of fame” feel. */
 const MASKS = [
@@ -110,7 +111,7 @@ function NotchStroke({ active, maskIndex }) {
       <path
         ref={pathRef}
         d={STROKE_PATHS[maskIndex] || STROKE_PATHS[0]}
-        stroke={active ? 'var(--color-acid)' : 'rgba(236,233,226,0.28)'}
+        stroke={active ? 'var(--color-acid)' : 'color-mix(in srgb, var(--color-salt) 28%, transparent)'}
         strokeWidth="0.9"
         vectorEffect="non-scaling-stroke"
         className="transition-[stroke] duration-300"
@@ -155,7 +156,7 @@ function HelmCard({ item, isActive, onActivate }) {
             ) : (
               // Sin foto (un ítem nuevo, el embed de LAB): la máscara se lee
               // como un panel en vez de quedar solo el trazo sobre negro.
-              <div className="h-full w-full bg-gradient-to-br from-[#ece9e2]/[0.1] via-[#ece9e2]/[0.04] to-transparent" />
+              <div className="h-full w-full bg-gradient-to-br from-salt/[0.1] via-salt/[0.04] to-transparent" />
             )}
             <div
               className="absolute inset-0"
@@ -182,7 +183,7 @@ function HelmCard({ item, isActive, onActivate }) {
           <NotchStroke active={isActive} maskIndex={item.mask} />
           <p
             className={`absolute right-0 bottom-[2%] w-[42%] pl-2 text-[11px] leading-tight tracking-[0.18em] uppercase ${
-              isActive ? 'text-[#ece9e2]' : 'text-white/55'
+              isActive ? 'text-salt' : 'text-salt/55'
             }`}
           >
             {item.name} <span className="text-acid">{item.year}</span>
@@ -203,6 +204,7 @@ export default function HelmetGrid({
   items,
   bg,
   fg,
+  accent,
 }) {
   const root = useRef(null)
   const [active, setActive] = useState(0)
@@ -241,8 +243,8 @@ export default function HelmetGrid({
     <section
       id="hall"
       ref={root}
-      className="scroll-mt-20 bg-black px-5 py-24 text-[#ece9e2] md:px-10 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      className="scroll-mt-20 bg-black px-5 py-24 text-salt md:px-10 md:py-32"
+      style={{ backgroundColor: bg || undefined, ...themeVars({ salt: fg, acid: accent }) }}
     >
       <p className="text-[11px] tracking-[0.25em] text-acid uppercase">
         {eyebrow}

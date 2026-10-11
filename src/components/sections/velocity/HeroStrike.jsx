@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { heroBack, heroMid, heroFront, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { themeVars } from '../../../lib/themeVars'
 
 /**
  * HeroStrike — full-bleed multi-layer parallax hero.
@@ -30,6 +31,8 @@ export default function HeroStrike({
   img,
   bg,
   fg,
+  /** Las líneas destacadas (verde ácido en la demo). */
+  accent,
 }) {
   const root = useRef(null)
   const midSrc = imgMid || img || heroMid
@@ -134,6 +137,7 @@ export default function HeroStrike({
       style={{
         '--sec-bg': bg || '#0a1a12',
         color: fg || '#ece9e2',
+        ...themeVars({ acid: accent }),
       }}
     >
       <div className="sticky top-0 h-svh overflow-hidden">
