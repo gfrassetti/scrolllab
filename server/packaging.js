@@ -15,7 +15,14 @@ import { recipeSectionId } from './catalog.js'
 import { resolveSectionTheme } from '../src/domain/sectionTheme.js'
 import { linkedFizzProps } from '../src/domain/fizzPalette.js'
 import { commerceThemeFromItems } from '../src/lib/shop/theme.js'
-import { checkoutPropsFromItems } from '../src/domain/checkoutProps.js'
+import {
+  cartPropsFromItems,
+  checkoutPropsFromItems,
+  detailPropsFromItems,
+  SHOP_ROUTE_PREFIXES,
+  shopColorsFromItems,
+  shopCurrencyFromItems,
+} from '../src/domain/checkoutProps.js'
 // El mismo fondo por modelo que pinta el preview del builder.
 import { modelWrapperClass } from '../src/domain/modelWrappers.js'
 import { fontChoiceById, fontFromRecipe, fontLinkParam } from '../src/domain/design.js'
@@ -371,7 +378,8 @@ function stripCheckoutProps(props) {
   if (!props || typeof props !== 'object') return props
   const out = {}
   for (const [key, value] of Object.entries(props)) {
-    if (key.startsWith('checkout')) continue
+    // checkout* / detail* / cart* van a otras pantallas de la tienda.
+    if (SHOP_ROUTE_PREFIXES.some((prefix) => key.startsWith(prefix) && key.length > prefix.length)) continue
     out[key] = value
   }
   return out
@@ -927,6 +935,10 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
     : 'auto'
 
   const checkoutAttrs = needsShop ? propsToJsx(checkoutPropsFromItems(entries)) : ''
+  const cartAttrs = needsShop ? propsToJsx(cartPropsFromItems(entries)) : ''
+  const detailAttrs = needsShop ? propsToJsx(detailPropsFromItems(entries)) : ''
+  const shopColors = needsShop ? shopColorsFromItems(entries) : {}
+  const shopCurrency = needsShop ? shopCurrencyFromItems(entries) : ''
 
   const dataBlock = dataConsts.length ? `\n${dataConsts.join('\n\n')}\n` : ''
 
@@ -947,7 +959,7 @@ function Home() {
       <div id="top">
 ${renderLines.join('\n')}
       </div>
-      <ShopChrome />
+      <ShopChrome${cartAttrs} />
     </SmoothScrollProvider>
   )
 }
@@ -956,18 +968,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <ShopThemeProvider
-        theme="${shopTheme}"
+        theme="${shopTheme}"${Object.keys(shopColors).length ? `
+        colors={${JSON.stringify(shopColors)}}` : ''}
         className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]"
       >
-        <ShopCatalogProvider${shopProducts ? ` products={${shopProducts}}` : ''}>
+        <ShopCatalogProvider${shopProducts ? ` products={${shopProducts}}` : ''}${shopCurrency ? ` currency="${shopCurrency}"` : ''}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route
               path="/product/:productId"
               element={
                 <>
-                  <ProductDetail />
-                  <ShopChrome />
+                  <ProductDetail${detailAttrs} />
+                  <ShopChrome${cartAttrs} />
                 </>
               }
             />
@@ -976,7 +989,7 @@ export default function App() {
               element={
                 <>
                   <Checkout${checkoutAttrs} />
-                  <ShopChrome />
+                  <ShopChrome${cartAttrs} />
                 </>
               }
             />

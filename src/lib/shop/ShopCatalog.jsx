@@ -9,8 +9,8 @@ const ShopCatalogContext = createContext(DEMO_PRODUCTS)
  * `products` es el de ejemplo (products.js); con los productos editados en el
  * builder, esos (ver catalogFromEdits).
  */
-export function ShopCatalogProvider({ products, children }) {
-  const catalog = useMemo(() => catalogFromEdits(products, DEMO_PRODUCTS), [products])
+export function ShopCatalogProvider({ products, currency = '', children }) {
+  const catalog = useMemo(() => catalogFromEdits(products, DEMO_PRODUCTS, currency), [products, currency])
   return <ShopCatalogContext.Provider value={catalog}>{children}</ShopCatalogContext.Provider>
 }
 

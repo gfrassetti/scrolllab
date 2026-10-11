@@ -217,6 +217,13 @@ const COMMERCE_GRID_ID = 'commerce/ProductGrid'
 const checkoutProps = componentProps(
   path.join(ROOT, 'src/components/sections/commerce/Checkout.jsx'),
 )
+// El carrito lateral (ShopChrome + CartDrawer) y la ficha también reciben
+// textos del ProductGrid, con prefijo `cart` y `detail`.
+const commerceFile = (name) => path.join(ROOT, 'src/components/sections/commerce', `${name}.jsx`)
+const ROUTE_TARGETS = {
+  cart: new Set([...(componentProps(commerceFile('ShopChrome')) || []), ...(componentProps(commerceFile('CartDrawer')) || [])]),
+  detail: componentProps(commerceFile('ProductDetail')) || new Set(),
+}
 
 for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
   const [model, component] = id.split('/')
@@ -235,6 +242,15 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
       const [target] = Object.keys(forwarded)
       if (!target || !checkoutProps?.has(target)) {
         fail('props', `'${id}.${field.key}' es editable pero Checkout no recibe '${target}'`)
+      }
+      continue
+    }
+    const route = id === COMMERCE_GRID_ID && /^(cart|detail)[A-Z]/.exec(field.key)
+    if (route) {
+      const rest = field.key.slice(route[1].length)
+      const target = rest[0].toLowerCase() + rest.slice(1)
+      if (!ROUTE_TARGETS[route[1]].has(target)) {
+        fail('props', `'${id}.${field.key}' es editable pero ${route[1] === 'cart' ? 'el carrito' : 'la ficha'} no recibe '${target}'`)
       }
       continue
     }

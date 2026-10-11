@@ -4,9 +4,10 @@ import CartDrawer from './CartDrawer'
 
 /**
  * Floating cart control + drawer. Mounted on every shop route in packed ZIPs
- * and in the builder preview when the composition includes ProductGrid.
+ * and in the builder preview when the composition includes ProductGrid. The
+ * two button labels are props; the rest go to the drawer.
  */
-export default function ShopChrome() {
+export default function ShopChrome({ buttonLabel = 'Cart', checkoutLinkLabel = 'Checkout', ...drawer }) {
   const count = useShopCart((s) => s.count())
   const openDrawer = useShopCart((s) => s.openDrawer)
 
@@ -16,22 +17,24 @@ export default function ShopChrome() {
         {count > 0 && (
           <Link
             to="/checkout"
-            className="border-2 border-[color:var(--shop-fg)] bg-[color:var(--shop-bg)] px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[color:var(--shop-fg)] shadow-sm transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
+            className="border-2 border-[color:var(--shop-fg)] bg-[color:var(--shop-bg)] px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.2em] text-[color:var(--shop-fg)] shadow-sm transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
             style={{ borderRadius: 'var(--shop-radius)' }}
           >
-            Checkout
+            {checkoutLinkLabel}
           </Link>
         )}
         <button
           type="button"
           onClick={openDrawer}
-          className="border-2 border-[color:var(--shop-accent)] bg-[color:var(--shop-accent)] px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[color:var(--shop-accent-fg)] shadow-sm"
+          aria-haspopup="dialog"
+          className="ui-press border-2 border-[color:var(--shop-accent)] bg-[color:var(--shop-accent)] px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.2em] text-[color:var(--shop-accent-fg)] shadow-sm"
           style={{ borderRadius: 'var(--shop-radius)' }}
         >
-          Cart{count > 0 ? ` (${count})` : ''}
+          {buttonLabel}
+          {count > 0 ? ` (${count})` : ''}
         </button>
       </div>
-      <CartDrawer />
+      <CartDrawer {...drawer} />
     </>
   )
 }

@@ -11,8 +11,8 @@ export function useShopThemeId() {
  * Aplica las CSS vars del kit commerce a un wrapper. PDP / drawer / checkout
  * viven fuera del ProductGrid, así que el tema se propaga desde acá.
  */
-export function ShopThemeProvider({ theme = 'auto', className = '', children }) {
-  const style = useMemo(() => shopThemeVars(theme), [theme])
+export function ShopThemeProvider({ theme = 'auto', colors, className = '', children }) {
+  const style = useMemo(() => shopThemeVars(theme, colors), [theme, colors])
   return (
     <ShopThemeContext.Provider value={theme}>
       <div

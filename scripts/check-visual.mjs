@@ -36,6 +36,25 @@ const CUSTOM_RECIPE = [
   'atelier/FooterAtelier',
 ]
 
+// La tienda (grilla + ficha + carrito + checkout) con lo que el builder deja
+// cambiar de ella: colores libres, moneda y textos de las otras pantallas.
+const SHOP_RECIPE = [
+  'chapters/NavMinimal',
+  {
+    id: 'commerce/ProductGrid',
+    props: {
+      currency: 'USD',
+      bg: '#0f1720',
+      fg: '#f3efe6',
+      accent: '#ff5a1f',
+      cartTitle: 'Tu carrito',
+      detailCta: 'Agregar',
+      checkoutEmailLabel: 'Correo',
+    },
+  },
+  'chapters/FooterCTA',
+]
+
 const MIME = {
   '.html': 'text/html',
   '.js': 'text/javascript',
@@ -173,6 +192,11 @@ const targets = [
     name: 'custom',
     packTo: (destPath) =>
       packCustomTemplate({ recipe: CUSTOM_RECIPE, destPath, licenseMeta: LICENSE }),
+  },
+  {
+    name: 'custom-shop',
+    packTo: (destPath) =>
+      packCustomTemplate({ recipe: SHOP_RECIPE, destPath, licenseMeta: LICENSE }),
   },
 ].filter((t) => !only.length || only.includes(t.name))
 

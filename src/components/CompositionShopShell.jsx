@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   MemoryRouter,
   Navigate,
@@ -12,6 +13,12 @@ import Checkout from './sections/commerce/Checkout'
 import ShopChrome from './sections/commerce/ShopChrome'
 import { ShopThemeProvider } from '../lib/shop/ShopTheme'
 import { ShopCatalogProvider } from '../lib/shop/ShopCatalog'
+import {
+  cartPropsFromItems,
+  detailPropsFromItems,
+  shopColorsFromItems,
+  shopCurrencyFromItems,
+} from '../lib/shop/checkoutProps'
 
 /**
  * El shop del preview corre en su propio MemoryRouter, pero la app ya vive
@@ -41,12 +48,24 @@ export default function CompositionShopShell({
   theme = 'auto',
   checkoutProps,
   products,
+  items,
 }) {
+  // Lo que la tienda toma del ProductGrid: colores, moneda y los textos del
+  // carrito y de la ficha (el mismo cálculo que el App del ZIP).
+  const shop = useMemo(
+    () => ({
+      colors: shopColorsFromItems(items),
+      currency: shopCurrencyFromItems(items),
+      cart: cartPropsFromItems(items),
+      detail: detailPropsFromItems(items),
+    }),
+    [items],
+  )
   return (
     <IsolatedRouterBoundary>
-      <ShopThemeProvider theme={theme} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
+      <ShopThemeProvider theme={theme} colors={shop.colors} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
         {/* Los productos editados en el builder: grilla, ficha, carrito y checkout. */}
-        <ShopCatalogProvider products={products}>
+        <ShopCatalogProvider products={products} currency={shop.currency}>
           <MemoryRouter initialEntries={['/']}>
             <Routes>
               <Route
@@ -54,7 +73,7 @@ export default function CompositionShopShell({
                 element={
                   <>
                     {home}
-                    <ShopChrome />
+                    <ShopChrome {...shop.cart} />
                   </>
                 }
               />
@@ -62,8 +81,8 @@ export default function CompositionShopShell({
                 path="/product/:productId"
                 element={
                   <>
-                    <ProductDetail />
-                    <ShopChrome />
+                    <ProductDetail {...shop.detail} />
+                    <ShopChrome {...shop.cart} />
                   </>
                 }
               />
@@ -72,7 +91,7 @@ export default function CompositionShopShell({
                 element={
                   <>
                     <Checkout {...(checkoutProps || {})} />
-                    <ShopChrome />
+                    <ShopChrome {...shop.cart} />
                   </>
                 }
               />

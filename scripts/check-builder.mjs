@@ -109,6 +109,7 @@ const NOT_IN_DOM = {
   'meridian/Amenities.closeLabel': 'nombre del botón con la tarjeta abierta (aria-label): aparece al abrirla',
   'meridian/Location.dragLabel': 'cartel que sigue al mouse: aparece solo con el puntero sobre las tarjetas',
   'meridian/Interior.spots.body': 'tooltip: aparece al tocar el punto (el título sí está, en su aria-label)',
+  'commerce/ProductGrid.variantHint': 'solo en productos con talle o color: los que se editan en el builder no traen variantes',
 }
 
 const ROUTES = ['/', '/builder', '/cart', '/login']
@@ -182,7 +183,7 @@ function editsFor(sectionId) {
   let n = 0
   const valueFor = (kind) => (kind === 'text' ? marker(n++) : `https://zq.example/${marker(n++)}`)
   for (const field of SECTION_FIELDS[sectionId] || []) {
-    if (sectionId === 'commerce/ProductGrid' && field.key.startsWith('checkout')) continue
+    if (sectionId === 'commerce/ProductGrid' && /^(checkout|cart|detail)[A-Z]/.test(field.key)) continue
     const id = `${sectionId}.${field.key}`
     if (field.type === 'list') {
       const rows = [0, 1].map((row) => {

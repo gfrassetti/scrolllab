@@ -56,7 +56,6 @@ export const SECTION_FIELDS = {
  */
 export const SECTIONS_WITHOUT_COLOR = Object.freeze({
   'contact/ContactForm': 'la paleta la define el tema (campo theme)',
-  'commerce/ProductGrid': 'la paleta la define el tema (campo theme)',
 })
 
 export function getSectionFields(sectionId) {

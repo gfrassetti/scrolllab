@@ -15,6 +15,7 @@ export const ALLOWED_PROPS_BY_SECTION = Object.freeze(
 
 const FLAVOR_PRESETS = new Set(['cobalt', 'berry', 'citrus', 'tropical', 'mint'])
 const VARIANT_PRESETS = new Set(['media', 'type'])
+const CURRENCIES = new Set(['ARS', 'USD', 'EUR', 'MXN', 'CLP', 'COP', 'UYU', 'BRL', 'GBP'])
 
 const THEME_PRESETS = new Set([
   'auto',
@@ -236,6 +237,7 @@ export function sanitizeSectionProps(sectionId, props) {
     if (key === 'flavor' && !FLAVOR_PRESETS.has(trimmed)) continue
     if (key === 'theme' && !THEME_PRESETS.has(trimmed)) continue
     if (key === 'variant' && !VARIANT_PRESETS.has(trimmed)) continue
+    if (key === 'currency' && !CURRENCIES.has(trimmed)) continue
     // Interruptores de capas decorativas (`show…`): solo on / off.
     if (isToggleKey(key) && trimmed !== 'on' && trimmed !== 'off') continue
     if (ASSET_URL_KEYS.has(key) && !ASSET_URL_RE.test(trimmed)) continue

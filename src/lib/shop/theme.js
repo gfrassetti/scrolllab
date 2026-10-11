@@ -158,8 +158,51 @@ const THEMES = {
   },
 }
 
-export function shopThemeVars(theme) {
-  return THEMES[theme] || THEMES.auto
+export function shopThemeVars(theme, colors) {
+  const base = THEMES[theme] || THEMES.auto
+  return colors ? { ...base, ...shopColorVars(colors) } : base
+}
+
+/** Luminancia relativa de un `#rrggbb` (0 negro … 1 blanco); null si no es hex. */
+function luminance(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim())
+  if (!m) return null
+  const n = parseInt(m[1], 16)
+  const ch = (v) => {
+    const c = v / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  }
+  return 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255)
+}
+
+/**
+ * Colores libres de la tienda (los que el comprador elige en el ProductGrid):
+ * pisan los de la paleta. El texto atenuado y las líneas salen del color de
+ * texto; el texto sobre el acento es el fondo o el texto, el que más contraste.
+ */
+export function shopColorVars({ bg, fg, accent } = {}) {
+  const out = {}
+  if (bg) out['--shop-bg'] = bg
+  if (fg) {
+    out['--shop-fg'] = fg
+    out['--shop-muted'] = `color-mix(in oklab, ${fg} 55%, transparent)`
+    out['--shop-border'] = `color-mix(in oklab, ${fg} 15%, transparent)`
+  }
+  if (accent) {
+    out['--shop-accent'] = accent
+    const la = luminance(accent)
+    const options = [bg, fg].filter((c) => luminance(c) != null)
+    if (la != null && options.length) {
+      const contrast = (c) => {
+        const lc = luminance(c)
+        return (Math.max(la, lc) + 0.05) / (Math.min(la, lc) + 0.05)
+      }
+      out['--shop-accent-fg'] = options.sort((a, b) => contrast(b) - contrast(a))[0]
+    } else if (la != null) {
+      out['--shop-accent-fg'] = la > 0.45 ? '#111111' : '#ffffff'
+    }
+  }
+  return out
 }
 
 export function isShopThemeId(value) {

@@ -9,12 +9,14 @@
  * Puro (sin React ni imports de imágenes): lo usan el preview del builder y
  * el ZIP, a través de ShopCatalogProvider.
  */
-export function catalogFromEdits(rows, base) {
+export function catalogFromEdits(rows, base, currency = '') {
   const edited = Array.isArray(rows)
     ? rows.filter((row) => row && typeof row === 'object' && Object.keys(row).length)
     : []
-  if (!edited.length) return base
-  return edited.map((row, i) => {
+  // La moneda elegida en el builder vale para todo el catálogo.
+  const withCurrency = (list) => (currency ? list.map((p) => ({ ...p, currency })) : list)
+  if (!edited.length) return withCurrency(base)
+  return withCurrency(edited.map((row, i) => {
     const sample = base[i % base.length]
     return {
       id: `p-${String(i + 1).padStart(2, '0')}`,
@@ -24,7 +26,7 @@ export function catalogFromEdits(rows, base) {
       blurb: row.blurb || sample.blurb,
       img: row.img || sample.img,
     }
-  })
+  }))
 }
 
 /** «15000», «12.5», «12,50» o un número → número; cualquier otra cosa → null. */

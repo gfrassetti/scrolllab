@@ -26,18 +26,26 @@ export default function ProductGrid({
   products,
   /** El botón de agregar rápido de cada producto. */
   addLabel = 'Add',
+  /** Colores libres (pisan los de la paleta `theme`). */
+  bg,
+  fg,
+  accent,
+  /** Moneda de los precios (vacío: la del catálogo de ejemplo). */
+  currency = '',
+  /** La pista bajo «Add» en productos con talle / color: `{label}` es el nombre de la variante. */
+  variantHint = 'pick {label} on the page',
 }) {
   const addItem = useShopCart((s) => s.addItem)
   const catalog = useShopCatalog()
   const shelf = useMemo(
-    () => (products?.length ? catalogFromEdits(products, DEMO_PRODUCTS) : catalog),
-    [products, catalog],
+    () => (products?.length ? catalogFromEdits(products, DEMO_PRODUCTS, currency) : catalog),
+    [products, catalog, currency],
   )
 
   return (
     <section
       className="bg-[color:var(--shop-bg)] px-5 py-16 text-[color:var(--shop-fg)] md:px-10 md:py-24"
-      style={shopThemeVars(theme)}
+      style={shopThemeVars(theme, { bg, fg, accent })}
       data-shop-theme={theme}
     >
       <p className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--shop-muted)]">
@@ -90,7 +98,7 @@ export default function ProductGrid({
                   the product page (not every product has one — see PDP). */}
               {product.variants ? (
                 <span className="text-[11px] text-[color:var(--shop-muted)]">
-                  {defaultVariant(product)} · pick {product.variants.label.toLowerCase()} on the page
+                  {defaultVariant(product)} · {variantHint.replace('{label}', product.variants.label.toLowerCase())}
                 </span>
               ) : null}
             </div>

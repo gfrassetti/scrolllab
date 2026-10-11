@@ -326,7 +326,7 @@ describe('builder → ZIP: una composición con todo editado', () => {
       const theme = resolveSectionTheme(item.sectionId, item.props, modelIds, i)
       const expected = { ...(item.props || {}), ...(theme ? { theme } : {}) }
       if (item.sectionId === 'commerce/ProductGrid') {
-        for (const key of Object.keys(expected)) if (key.startsWith('checkout')) delete expected[key]
+        for (const key of Object.keys(expected)) if (/^(checkout|cart|detail)[A-Z]/.test(key)) delete expected[key]
       }
       assert.deepEqual(sections[i].props, expected, `${item.sectionId}: el ZIP no recibe lo editado`)
     }

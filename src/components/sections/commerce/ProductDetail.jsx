@@ -16,6 +16,8 @@ export default function ProductDetail({
   eyebrow = 'Product',
   fallbackTitle = 'Product not found',
   cta = 'Add to cart',
+  backLabel = '← Back',
+  catalogLabel = 'View catalog',
 }) {
   const { productId } = useParams()
   const addItem = useShopCart((s) => s.addItem)
@@ -35,7 +37,7 @@ export default function ProductDetail({
         to="/"
         className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--shop-muted)] transition-colors hover:text-[color:var(--shop-fg)]"
       >
-        ← Back
+        {backLabel}
       </Link>
 
       {!product ? (
@@ -48,7 +50,7 @@ export default function ProductDetail({
             className="mt-8 inline-block border-2 border-[color:var(--shop-fg)] px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] transition-colors hover:border-[color:var(--shop-accent)] hover:bg-[color:var(--shop-accent)] hover:text-[color:var(--shop-accent-fg)]"
             style={{ borderRadius: 'var(--shop-radius)' }}
           >
-            View catalog
+            {catalogLabel}
           </Link>
         </div>
       ) : (
