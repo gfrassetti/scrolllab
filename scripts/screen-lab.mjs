@@ -18,7 +18,7 @@
  * La sección tiene que estar en HOSTABLE_SECTIONS y en embed/src/registry.js
  * (para probar candidatas, sumarlas a los dos mientras dura el screening).
  *
- * Uso: npm run screen:lab -- [modelo/Sección …]
+ * Uso: npm run screen:lab -- [modelo/Sección …] [--reduce] [--no-build]
  */
 import { spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -36,6 +36,8 @@ fs.mkdirSync(OUT, { recursive: true })
 
 const { HOSTABLE_SECTIONS } = await import('../server/sections.js')
 const ids = process.argv.slice(2).filter((a) => !a.startsWith('-'))
+// --reduce: con «reducir movimiento» (la versión calma de cada sección).
+const REDUCE = process.argv.includes('--reduce')
 const SECTIONS = ids.length ? ids : HOSTABLE_SECTIONS
 const unknown = SECTIONS.filter((id) => !HOSTABLE_SECTIONS.includes(id))
 if (unknown.length) {
@@ -179,7 +181,7 @@ try {
         row.marks.push(`${vp.name}:sin-tiempo`)
         continue
       }
-      const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, reducedMotion: 'no-preference' })
+      const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, reducedMotion: REDUCE ? 'reduce' : 'no-preference' })
       const page = await context.newPage()
       const errors = []
       page.on('pageerror', (e) => errors.push(e.message))

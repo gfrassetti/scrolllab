@@ -64,6 +64,17 @@ async function waitUp(url, tries = 120) {
   throw new Error(`no levantó: ${url}`)
 }
 
+/**
+ * Lo que dice la sección: el texto visible más los nombres accesibles (una
+ * galería solo de fotos tiene como texto editable su `aria-label`).
+ */
+function rootText() {
+  const root = document.getElementById('root')
+  if (!root) return ''
+  const names = [...root.querySelectorAll('[aria-label]')].map((el) => el.getAttribute('aria-label'))
+  return [root.innerText, ...names].join('\n')
+}
+
 /** El campo de texto que se edita en cada sección (o el primero de una lista). */
 function editTarget(sectionId) {
   const fields = SECTION_FIELDS[sectionId] || []
@@ -164,9 +175,7 @@ try {
     for (let i = 0; i < 40 && !text; i++) {
       const frame = page.frames().find((f) => f.url().startsWith(FRAME_HOST))
       if (frame) {
-        text = await frame
-          .evaluate(() => document.getElementById('root')?.innerText || '')
-          .catch(() => '')
+        text = await frame.evaluate(rootText).catch(() => '')
       }
       if (!text) await sleep(250)
     }
@@ -214,7 +223,7 @@ try {
   async function previewText(page) {
     const frame = page.frames().find((f) => f.url().startsWith(FRAME_HOST))
     if (!frame) return ''
-    return frame.evaluate(() => document.getElementById('root')?.innerText || '').catch(() => '')
+    return frame.evaluate(rootText).catch(() => '')
   }
   async function waitPreview(page, marker) {
     for (let i = 0; i < 40; i++) {

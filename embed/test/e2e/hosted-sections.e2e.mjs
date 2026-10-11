@@ -909,7 +909,17 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
           // PIN (pineada, o con escenario sticky más alto que la pantalla): el
           // iframe es una pantalla pegada y el contenedor reserva el recorrido
           // entero del frame, como si la sección estuviera en la página.
-          await sleep(600)
+          // El frame decide su modo después de montar (fuentes, ScrollTrigger):
+          // se espera a que pase una de las dos cosas, no un tiempo fijo.
+          for (let i = 0; i < 30; i++) {
+            const settled = await page.evaluate(
+              () =>
+                !!document.querySelector('[data-scrolllab-pin]') ||
+                (document.querySelector('iframe[data-scrolllab-frame]')?.getBoundingClientRect().height || 0) > 50,
+            )
+            if (settled) break
+            await sleep(200)
+          }
           if (await page.evaluate(() => !!document.querySelector('[data-scrolllab-pin]'))) {
             let p = null
             for (let i = 0; i < 15; i++) {
