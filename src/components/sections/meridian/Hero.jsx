@@ -182,6 +182,14 @@ export default function Hero({
   socials = 'Facebook · Instagram · Whatsapp',
   bg,
   fg,
+  /**
+   * Pantalla de carga a pantalla completa (dibujo + contador) mientras bajan
+   * los primeros cuadros de la película. Es una decisión de toda la página:
+   * la página de MERIDIAN la pide ('on'); en una composición del builder el
+   * hero puede no ir primero, así que por defecto no la trae y el hero
+   * arranca con su primer cuadro y la entrada del wordmark.
+   */
+  preloader = 'off',
 }) {
   // bg: la crema de la máscara, el header sólido y el menú; fg: la tinta de
   // ese header y del menú. El texto sobre las fotos queda blanco a propósito.
@@ -208,7 +216,9 @@ export default function Hero({
   // Preloader ↔ hero handshake: frames report progress through a ref (no
   // re-render per frame); the hero's intro tweens wait on `introRef`.
   const loadedRef = useRef(0)
-  const loaderDoneRef = useRef(false)
+  const withPreloader = preloader === 'on'
+  // Sin pantalla de carga la entrada no espera a nadie.
+  const loaderDoneRef = useRef(!withPreloader)
   const introRef = useRef(null)
   const handleLoaderDone = () => {
     loaderDoneRef.current = true
@@ -682,14 +692,16 @@ export default function Hero({
         '--mer-cta-ink': bg || undefined,
       }}
     >
-      <Preloader
-        wordmark={wordmark}
-        label={loadingLabel}
-        getLoaded={() => loadedRef.current / PRELOAD_GATE}
-        bigPx={WORDMARK_BIG_PX}
-        onFadeStart={handleLoaderDone}
-        onDone={handleLoaderDone}
-      />
+      {withPreloader && (
+        <Preloader
+          wordmark={wordmark}
+          label={loadingLabel}
+          getLoaded={() => loadedRef.current / PRELOAD_GATE}
+          bigPx={WORDMARK_BIG_PX}
+          onFadeStart={handleLoaderDone}
+          onDone={handleLoaderDone}
+        />
+      )}
       <div
         ref={stage}
         className="sticky top-0 z-30 h-svh overflow-hidden"

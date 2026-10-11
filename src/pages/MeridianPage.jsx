@@ -33,7 +33,7 @@ export default function MeridianPage() {
     <SmoothScrollProvider>
       <div id="top" className="meridian-world bg-[#dfd8cf] text-[#2a2622]">
         <main>
-          <Hero />
+          <Hero preloader="on" />
           <Concept />
           <GallerySlider />
           <Location />
