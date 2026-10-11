@@ -16,8 +16,12 @@ export default function KeyFacts({
   facts,
   bg,
   fg,
+  /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
+  showFog = 'on',
 }) {
   const root = useRef(null)
+  const fogBg = bg || '#0b0c10'
+  const fogFg = fg || '#ffffff'
   const rows = Array.isArray(facts) && facts.length ? facts : defaultFacts
 
   useGSAP(
@@ -42,10 +46,10 @@ export default function KeyFacts({
     <section
       id="facts"
       ref={root}
-      className="relative overflow-hidden border-t border-white/10 bg-[#0b0c10] px-5 py-24 text-white md:px-10 md:py-32"
+      className="relative overflow-hidden border-t border-current/10 bg-[#0b0c10] px-5 py-24 text-white md:px-10 md:py-32"
       style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
-      <ScrollFog density={0.4} />
+      {showFog !== 'off' && <ScrollFog density={0.4} bg={fogBg} fg={fogFg} />}
       <div className="relative z-10">
         <p className="text-[11px] tracking-[0.25em] text-white/40 uppercase">
           {eyebrow}

@@ -29,6 +29,8 @@ export default function FooterAtelier({
   social,
   bg,
   fg,
+  /** El brillo que sube desde abajo. */
+  showGlow = 'on',
 }) {
   const [clock, setClock] = useState('')
   const socialLinks = (Array.isArray(social) && social.length ? social : defaultSocial).filter(
@@ -52,14 +54,16 @@ export default function FooterAtelier({
       className="relative overflow-hidden bg-[#0b0c10] px-5 pt-20 pb-0 text-white md:px-10 md:pt-28"
       style={{ backgroundColor: bg || undefined, color: fg || undefined }}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          backgroundImage:
-            'radial-gradient(ellipse 80% 50% at 50% 100%, rgba(180,190,210,0.12), transparent 55%)',
-        }}
-      />
+      {showGlow !== 'off' && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse 80% 50% at 50% 100%, color-mix(in srgb, currentColor 12%, transparent), transparent 55%)',
+          }}
+        />
+      )}
 
       <div className="relative z-10 mx-auto max-w-[1400px]">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">

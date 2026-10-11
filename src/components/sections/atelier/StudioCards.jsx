@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { card1, card2, card3, card4, card5, card6, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { cardTone } from './tone'
 
 const defaultCards = [
   {
@@ -113,7 +114,8 @@ export default function StudioCards({
           <li key={i} data-studio-card>
             <article className="group relative aspect-[16/11] overflow-hidden rounded-2xl bg-gradient-to-br shadow-[0_20px_50px_rgba(0,0,0,0.08)] md:rounded-3xl">
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${card.tone}`}
+                className={`absolute inset-0 bg-gradient-to-br ${card.color ? '' : card.tone}`}
+                style={card.color ? cardTone(card.color) : undefined}
               />
               {card.img ? (
                 <img

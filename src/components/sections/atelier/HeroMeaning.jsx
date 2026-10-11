@@ -22,8 +22,15 @@ export default function HeroMeaning({
   body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Websites, products and systems built for clarity.',
   bg,
   fg,
+  /** El emblema 3D: el bloque y el anillo. */
+  objectColor,
+  ringColor,
+  /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
+  showFog = 'on',
 }) {
   const root = useRef(null)
+  const fogBg = bg || '#0b0c10'
+  const fogFg = fg || '#ffffff'
   const canvasRef = useRef(null)
 
   useGSAP(
@@ -69,7 +76,7 @@ export default function HeroMeaning({
 
       const group = new THREE.Group()
       const mat = new THREE.MeshStandardMaterial({
-        color: 0x2a2d33,
+        color: objectColor || 0x2a2d33,
         roughness: 0.55,
         metalness: 0.35,
       })
@@ -77,7 +84,7 @@ export default function HeroMeaning({
       const ring = new THREE.Mesh(
         new THREE.TorusGeometry(1.35, 0.08, 12, 64),
         new THREE.MeshStandardMaterial({
-          color: 0xc8d0dc,
+          color: ringColor || 0xc8d0dc,
           roughness: 0.3,
           metalness: 0.7,
         }),
@@ -182,7 +189,7 @@ export default function HeroMeaning({
         split.revert()
       }
     },
-    { scope: root },
+    { scope: root, dependencies: [objectColor, ringColor], revertOnUpdate: true },
   )
 
   return (
@@ -194,7 +201,7 @@ export default function HeroMeaning({
         color: fg || '#ffffff',
       }}
     >
-      <ScrollFog density={0.7} />
+      {showFog !== 'off' && <ScrollFog density={0.7} bg={fogBg} fg={fogFg} />}
       <canvas
         ref={canvasRef}
         aria-hidden="true"

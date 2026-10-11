@@ -51,8 +51,16 @@ export default function ServicesStone({
   ctaHref = '#facts',
   bg,
   fg,
+  /** La piedra 3D: el bloque, la marca tallada y la luz de relleno. */
+  objectColor,
+  markColor,
+  lightColor,
+  /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
+  showFog = 'on',
 }) {
   const root = useRef(null)
+  const fogBg = bg || '#0b0c10'
+  const fogFg = fg || '#ffffff'
   const canvasRef = useRef(null)
 
   const overrides = [
@@ -89,7 +97,7 @@ export default function ServicesStone({
 
       const geo = new THREE.BoxGeometry(2.4, 2.4, 2.4)
       const mat = new THREE.MeshStandardMaterial({
-        color: 0x3a3f48,
+        color: objectColor || 0x3a3f48,
         roughness: 0.85,
         metalness: 0.15,
         flatShading: true,
@@ -98,7 +106,7 @@ export default function ServicesStone({
       // carved mark
       const mark = new THREE.Mesh(
         new THREE.BoxGeometry(0.55, 1.4, 0.2),
-        new THREE.MeshStandardMaterial({ color: 0x1a1c20, roughness: 0.6 }),
+        new THREE.MeshStandardMaterial({ color: markColor || 0x1a1c20, roughness: 0.6 }),
       )
       mark.position.z = 1.21
       stone.add(mark)
@@ -107,7 +115,7 @@ export default function ServicesStone({
       const key = new THREE.DirectionalLight(0xffffff, 1.2)
       key.position.set(4, 5, 6)
       scene.add(key)
-      const fill = new THREE.DirectionalLight(0x88a0ff, 0.35)
+      const fill = new THREE.DirectionalLight(lightColor || 0x88a0ff, 0.35)
       fill.position.set(-4, -2, 2)
       scene.add(fill)
 
@@ -211,7 +219,7 @@ export default function ServicesStone({
         mark.material.dispose()
       }
     },
-    { scope: root },
+    { scope: root, dependencies: [objectColor, markColor, lightColor], revertOnUpdate: true },
   )
 
   return (
@@ -225,7 +233,7 @@ export default function ServicesStone({
       }}
     >
       <div className={`relative overflow-hidden ${reducedMotion ? 'min-h-svh' : 'h-svh'}`}>
-        <ScrollFog density={0.65} />
+        {showFog !== 'off' && <ScrollFog density={0.65} bg={fogBg} fg={fogFg} />}
         <canvas
           ref={canvasRef}
           aria-hidden="true"

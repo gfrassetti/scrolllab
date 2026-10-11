@@ -16,6 +16,11 @@ export default function VisionShutter({
   word3 = 'WORD THREE',
   /** Nombre de la sección para lectores de pantalla. */
   regionLabel = 'Vision transition',
+  /** Fondo y texto; la persiana; y el color con que cierra (el de la sección siguiente). */
+  bg = '#0b0c10',
+  fg = '#ffffff',
+  bg2 = '#d9d9d6',
+  endBg = '#e8e8e6',
 }) {
   const root = useRef(null)
   const words = [word1, word2, word3, word1, word2]
@@ -99,18 +104,19 @@ export default function VisionShutter({
       )
       tl.to(
         bars,
-        { backgroundColor: '#e8e8e6', ease: 'none' },
+        { backgroundColor: endBg, ease: 'none' },
         0.72,
       )
     },
-    { scope: root },
+    { scope: root, dependencies: [endBg], revertOnUpdate: true },
   )
 
   return (
     <section
       ref={root}
       aria-label={regionLabel}
-      className="relative bg-[#0b0c10] text-white"
+      className="relative"
+      style={{ backgroundColor: bg, color: fg }}
     >
       <div className="relative h-svh overflow-hidden">
         {/* Soft 3D-ish pillars */}
@@ -122,7 +128,7 @@ export default function VisionShutter({
             <span
               key={i}
               data-shutter-pillar
-              className="w-[7vw] max-w-16 min-w-8 rounded-sm bg-gradient-to-b from-white/18 via-white/6 to-transparent"
+              className="w-[7vw] max-w-16 min-w-8 rounded-sm bg-gradient-to-b from-current/18 via-current/6 to-transparent"
               style={{ height: `${h * 42}vh`, opacity: 0.35 + i * 0.04 }}
             />
           ))}
@@ -145,7 +151,7 @@ export default function VisionShutter({
           <p
             data-shutter-words
             data-scrub-tail
-            className="flex whitespace-nowrap font-brico text-[clamp(4.5rem,14vw,11rem)] leading-none font-semibold tracking-[-0.04em] text-white will-change-transform"
+            className="flex whitespace-nowrap font-brico text-[clamp(4.5rem,14vw,11rem)] leading-none font-semibold tracking-[-0.04em] will-change-transform"
           >
             {words.map((word, i) => (
               <span key={i} className="px-[0.12em]">
@@ -164,8 +170,8 @@ export default function VisionShutter({
             <span
               key={i}
               data-shutter-bar
-              className="block h-[9vh] w-full origin-center bg-[#d9d9d6] will-change-transform"
-              style={{ opacity: 0.92 - (i % 3) * 0.04 }}
+              className="block h-[9vh] w-full origin-center will-change-transform"
+              style={{ opacity: 0.92 - (i % 3) * 0.04, backgroundColor: bg2 }}
             />
           ))}
         </div>
@@ -173,7 +179,8 @@ export default function VisionShutter({
         <div
           data-shutter-wash
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-40 bg-[#e8e8e6]"
+          className="pointer-events-none absolute inset-0 z-40"
+          style={{ backgroundColor: endBg }}
         />
       </div>
     </section>

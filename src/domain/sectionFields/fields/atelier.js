@@ -1,4 +1,4 @@
-import { navLinks } from '../helpers.js'
+import { navLinks, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -26,6 +26,9 @@ export const ATELIER_FIELDS = {
     { key: 'hint', label: 'Hint', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'objectColor', label: 'Emblema 3D — color del bloque', type: 'color' },
+    { key: 'ringColor', label: 'Emblema 3D — color del anillo', type: 'color' },
+    toggle('showFog', 'Niebla de fondo'),
   ],
   'atelier/AboutClarity': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -34,6 +37,7 @@ export const ATELIER_FIELDS = {
     { key: 'tags', label: 'Etiquetas (línea chica)', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    toggle('showFog', 'Niebla de fondo'),
   ],
   'atelier/ServicesStone': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -51,6 +55,10 @@ export const ATELIER_FIELDS = {
     { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'objectColor', label: 'Piedra 3D — color', type: 'color' },
+    { key: 'markColor', label: 'Piedra 3D — color de la marca tallada', type: 'color' },
+    { key: 'lightColor', label: 'Piedra 3D — luz de relleno', type: 'color' },
+    toggle('showFog', 'Niebla de fondo'),
   ],
   'atelier/VisionShutter': [
     { key: 'line1', label: 'Line 1', type: 'text' },
@@ -59,6 +67,10 @@ export const ATELIER_FIELDS = {
     { key: 'word2', label: 'Word 2', type: 'text' },
     { key: 'word3', label: 'Word 3', type: 'text' },
     { key: 'regionLabel', label: 'Nombre de la sección para lectores de pantalla', type: 'text' },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto y de los pilares', type: 'color' },
+    { key: 'bg2', label: 'Color de la persiana', type: 'color' },
+    { key: 'endBg', label: 'Color al cerrar (el de la sección siguiente)', type: 'color' },
   ],
   'atelier/SelectedWork': [
     { key: 'title', label: 'Title', type: 'text' },
@@ -76,11 +88,13 @@ export const ATELIER_FIELDS = {
         { key: 'overlay', label: 'Texto grande (sobre la foto)', type: 'text' },
         { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
         { key: 'href', label: 'Enlace del proyecto', type: 'href' },
+        { key: 'color', label: 'Color de la tarjeta (se ve sin foto)', type: 'color' },
       ],
     },
     { key: 'exploreLabel', label: 'Texto del enlace de cada proyecto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    toggle('showGuides', 'Líneas verticales de fondo'),
   ],
   'atelier/KeyFacts': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -97,6 +111,7 @@ export const ATELIER_FIELDS = {
         { key: 'label', label: 'Etiqueta', type: 'text' },
       ],
     },
+    toggle('showFog', 'Niebla de fondo'),
   ],
   'atelier/StudioCards': [
     { key: 'note', label: 'Note', type: 'textarea' },
@@ -113,6 +128,7 @@ export const ATELIER_FIELDS = {
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'label', label: 'Etiqueta', type: 'text' },
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
+        { key: 'color', label: 'Color de la tarjeta (se ve sin foto)', type: 'color' },
       ],
     },
   ],
@@ -143,5 +159,6 @@ export const ATELIER_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    toggle('showGlow', 'Brillo de fondo'),
   ],
 }

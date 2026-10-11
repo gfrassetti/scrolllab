@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { work1, work2, work3, work4, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { cardTone } from './tone'
 
 const PROJECTS = [
   {
@@ -55,6 +56,7 @@ function resolveProjects(list) {
       overlay: p?.overlay || d.overlay,
       img: p?.img || d.img,
       href: p?.href || '#work',
+      color: p?.color || '',
     }
   })
 }
@@ -71,6 +73,8 @@ export default function SelectedWork({
   exploreLabel = 'Explore →',
   bg,
   fg,
+  /** Las líneas verticales de fondo. */
+  showGuides = 'on',
 }) {
   const projects = resolveProjects(projectsProp)
   const root = useRef(null)
@@ -157,7 +161,7 @@ export default function SelectedWork({
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex justify-between px-5 md:px-10"
+        className={`pointer-events-none absolute inset-0 flex justify-between px-5 md:px-10 ${showGuides === 'off' ? 'hidden' : ''}`}
       >
         {Array.from({ length: 5 }).map((_, i) => (
           <span key={i} className="h-full w-px bg-current/6" />
@@ -189,7 +193,8 @@ export default function SelectedWork({
                 className="group relative w-[min(78vw,28rem)] shrink-0 will-change-transform md:w-[min(42vw,32rem)] calm:snap-start"
               >
                 <div
-                  className={`relative aspect-[16/10] overflow-hidden rounded-2xl bg-gradient-to-br ${project.tone}`}
+                  className={`relative aspect-[16/10] overflow-hidden rounded-2xl bg-gradient-to-br ${project.color ? '' : project.tone}`}
+                  style={project.color ? cardTone(project.color) : undefined}
                 >
                   <img
                     {...imgAttrs(project.img, variants)}

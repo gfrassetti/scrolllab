@@ -106,6 +106,11 @@ export const COLOR_PROP_KEYS = new Set([
   'errorColor',
   'endBg',
   'barColor',
+  // Objetos 3D (ATELIER): bloque, anillo, marca y luz.
+  'objectColor',
+  'ringColor',
+  'markColor',
+  'lightColor',
 ])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)

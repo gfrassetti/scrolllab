@@ -1,11 +1,22 @@
 import { useEffect, useRef } from 'react'
 import { ScrollTrigger } from '../../../lib/gsap'
+import { mixHex } from '../../../lib/themeVars'
+
+/** `#rrggbb` → «r,g,b» para armar un rgba() con la transparencia de cada capa. */
+const rgbOf = (hex) => {
+  const n = parseInt(String(hex).replace('#', ''), 16)
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`
+}
 
 /**
  * Full-bleed canvas fog/smoke that shifts with scroll progress.
  * Stand-in for Trionn-style reactive WebGL atmospheres (no video assets).
+ *
+ * Sus tonos salen del fondo y del texto de la sección que la usa: hacia los
+ * bordes funde al fondo, en el centro y en las manchas se acerca al texto.
+ * Con los colores de la demo queda como siempre.
  */
-export default function ScrollFog({ className = '', density = 0.55 }) {
+export default function ScrollFog({ className = '', density = 0.55, bg = '#0b0c10', fg = '#ffffff' }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -13,6 +24,11 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
     if (!canvas) return undefined
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return undefined
+
+    const light = rgbOf(mixHex(bg, fg, 0.45))
+    const mid = rgbOf(mixHex(bg, fg, 0.15))
+    const edge = rgbOf(bg)
+    const haze = rgbOf(mixHex(bg, fg, 0.7))
 
     let raf = 0
     let progress = 0
@@ -43,9 +59,9 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
         height * 0.55,
         Math.max(width, height) * 0.85,
       )
-      g.addColorStop(0, `rgba(120,130,150,${0.18 * density})`)
-      g.addColorStop(0.45, `rgba(40,45,55,${0.35 * density})`)
-      g.addColorStop(1, 'rgba(8,9,12,0.92)')
+      g.addColorStop(0, `rgba(${light},${0.18 * density})`)
+      g.addColorStop(0.45, `rgba(${mid},${0.35 * density})`)
+      g.addColorStop(1, `rgba(${edge},0.92)`)
       ctx.fillStyle = g
       ctx.fillRect(0, 0, width, height)
 
@@ -57,8 +73,8 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
           Math.sin(t * 0.4 + i) * 18
         const r = 90 + i * 28
         const blob = ctx.createRadialGradient(x, y, 10, x, y, r)
-        blob.addColorStop(0, `rgba(180,190,210,${0.07 * density})`)
-        blob.addColorStop(1, 'rgba(180,190,210,0)')
+        blob.addColorStop(0, `rgba(${haze},${0.07 * density})`)
+        blob.addColorStop(1, `rgba(${haze},0)`)
         ctx.fillStyle = blob
         ctx.beginPath()
         ctx.arc(x, y, r, 0, Math.PI * 2)
@@ -96,7 +112,7 @@ export default function ScrollFog({ className = '', density = 0.55 }) {
       window.removeEventListener('resize', resize)
       st.kill()
     }
-  }, [density])
+  }, [density, bg, fg])
 
   return (
     <canvas
