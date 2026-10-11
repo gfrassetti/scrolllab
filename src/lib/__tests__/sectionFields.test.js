@@ -351,7 +351,7 @@ describe('getSectionFields', () => {
           for (const sf of field.item) {
             assert.ok(sf.key && sf.label && sf.type, `${id}.${field.key}[]: sub-campo incompleto`)
             assert.ok(
-              ['text', 'textarea', 'href', 'color', 'image', 'price'].includes(sf.type),
+              ['text', 'textarea', 'href', 'color', 'image', 'price', 'select', 'toggle'].includes(sf.type),
               `${id}.${field.key}[].${sf.key}: tipo '${sf.type}' no permitido en list`,
             )
           }
