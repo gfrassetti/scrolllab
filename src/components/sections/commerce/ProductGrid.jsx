@@ -98,7 +98,7 @@ export default function ProductGrid({
                   the product page (not every product has one — see PDP). */}
               {product.variants ? (
                 <span className="text-[11px] text-[color:var(--shop-muted)]">
-                  {defaultVariant(product)} · {variantHint.replace('{label}', product.variants.label.toLowerCase())}
+                  {defaultVariant(product)} · {variantHint.replace('{label}', product.variants.label)}
                 </span>
               ) : null}
             </div>

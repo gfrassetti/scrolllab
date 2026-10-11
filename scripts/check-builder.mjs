@@ -110,6 +110,10 @@ const NOT_IN_DOM = {
   'meridian/Location.dragLabel': 'cartel que sigue al mouse: aparece solo con el puntero sobre las tarjetas',
   'meridian/Interior.spots.body': 'tooltip: aparece al tocar el punto (el título sí está, en su aria-label)',
   'commerce/ProductGrid.variantHint': 'solo en productos con talle o color: los que se editan en el builder no traen variantes',
+  'commerce/ProductGrid.products.variantLabel': 'se ve en la ficha del producto (en la grilla solo si la pista usa {label})',
+  'contact/ContactForm.requiredError': 'mensaje de validación: aparece al enviar vacío (lo cubre check:forms)',
+  'contact/ContactForm.emailError': 'mensaje de validación: aparece con un email inválido (lo cubre check:forms)',
+  'contact/ContactForm.messageError': 'mensaje de validación: aparece con un mensaje corto (lo cubre check:forms)',
 }
 
 const ROUTES = ['/', '/builder', '/cart', '/login']
