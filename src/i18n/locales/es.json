@@ -299,27 +299,17 @@
     },
     "compare": {
       "title": "¿LAB o Builder?",
-      "lead": "Los dos usan las mismas secciones. Cambia qué te llevás y dónde vive.",
+      "lead": "Las mismas secciones, dos formas de usarlas.",
       "rows": [
         {
           "label": "Para",
           "lab": "El sitio que ya tenés: WordPress, Webflow, Shopify o el que sea.",
-          "builder": "Un sitio nuevo que vas a programar y alojar vos."
+          "builder": "Un sitio nuevo."
         },
         {
-          "label": "Qué te llevás",
-          "lab": "Un código para pegar. El widget vive en nuestros servidores.",
-          "builder": "El código fuente de la página (React + Vite) en un ZIP. Es tuyo."
-        },
-        {
-          "label": "Varias secciones juntas",
-          "lab": "Un pack: tus widgets uno debajo del otro, con un solo código.",
-          "builder": "Una composición: la página entera, con su menú y su pie."
-        },
-        {
-          "label": "Cambios",
-          "lab": "Desde el panel de LAB, sin tocar tu sitio.",
-          "builder": "En el código, como en cualquier proyecto."
+          "label": "Cómo funciona",
+          "lab": "Pegás un código y los cambios los hacés desde acá.",
+          "builder": "Armás tu template con nuestras secciones y lo descargás."
         },
         {
           "label": "Cómo se paga",
@@ -329,7 +319,12 @@
       ],
       "labCta": "Ver los planes",
       "builderCta": "Abrir el Builder"
-    }
+    },
+    "deleteDrafts": "Borrar los {{n}} borradores",
+    "deleteDraftsConfirm": "¿Borrar los {{n}} borradores? No se puede deshacer. Los publicados no se tocan.",
+    "deleteDraftsYes": "Sí, borrarlos",
+    "deletingDrafts": "Borrando…",
+    "cancel": "Cancelar"
   },
   "common": {
     "loading": "Cargando…",

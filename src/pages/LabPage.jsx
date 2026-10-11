@@ -171,6 +171,25 @@ export default function LabPage({ qa = false }) {
     }
   }
 
+  // Borrar todos los borradores de una vez (con confirmación en el lugar): uno
+  // por uno eran decenas de clics para limpiar pruebas.
+  const [confirmDrafts, setConfirmDrafts] = useState(false)
+  const drafts = instances.filter((i) => i.status === 'draft')
+  const removeDrafts = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      for (const inst of drafts) await api.hostedDelete(inst.id)
+      setConfirmDrafts(false)
+      await Promise.all([load(), refreshPlan()])
+    } catch (err) {
+      setError(err.message)
+      await load()
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const steps = [t('lab.guide1'), t('lab.guide2'), t('lab.guide3')]
 
   useGSAP(
@@ -309,7 +328,7 @@ export default function LabPage({ qa = false }) {
           </p>
         </div>
 
-        {/* Cómo funciona — 3 pasos + un prototipo del cambio en vivo. */}
+        {/* Cómo funciona — 3 pasos, cada uno con su demo animada. */}
         <section className="mt-20 md:mt-28">
           <p className="text-eyebrow uppercase text-ink/45">{t('lab.howEyebrow')}</p>
           <h2 className="mt-3 max-w-[22ch] text-title font-medium">{t('lab.howTitle')}</h2>
@@ -332,13 +351,10 @@ export default function LabPage({ qa = false }) {
               ))}
             </ol>
           </div>
-          <p className="mt-8 max-w-[72ch] text-body-sm text-ink/60">
-            Prototipo. El flujo real vive más abajo.
-          </p>
         </section>
 
-        {/* LAB o Builder: las dos juntan nuestras secciones; la diferencia es
-            qué te llevás. Sin esto, «pack» y «composición» se confundían. */}
+        {/* LAB o Builder: las mismas secciones, dos formas de usarlas. Corto a
+            propósito: para qué sitio es, cómo se usa y cómo se paga. */}
         <section className="mt-20 md:mt-28" aria-labelledby="lab-vs-builder">
           <h2 id="lab-vs-builder" className="text-title-sm font-medium">
             {t('lab.compare.title')}
@@ -482,6 +498,44 @@ export default function LabPage({ qa = false }) {
                   </button>
                 </div>
               </div>
+
+              {drafts.length >= 2 && (
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm" data-lab-drafts>
+                  {confirmDrafts ? (
+                    <>
+                      <span role="alert" className="text-ink/75">
+                        {t('lab.deleteDraftsConfirm', { n: drafts.length })}
+                      </span>
+                      <button
+                        type="button"
+                        data-autofocus
+                        onClick={removeDrafts}
+                        disabled={busy}
+                        className="ui-press min-h-11 bg-danger px-4 text-[11px] uppercase tracking-[0.2em] text-bone disabled:opacity-40"
+                      >
+                        {busy ? t('lab.deletingDrafts') : t('lab.deleteDraftsYes')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDrafts(false)}
+                        disabled={busy}
+                        className="ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
+                      >
+                        {t('lab.cancel')}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDrafts(true)}
+                      disabled={busy}
+                      className="tpl-hit relative uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
+                    >
+                      {t('lab.deleteDrafts', { n: drafts.length })}
+                    </button>
+                  )}
+                </div>
+              )}
 
               {labLocked && (
                 <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5 md:p-6">

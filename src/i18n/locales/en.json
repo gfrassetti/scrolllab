@@ -299,27 +299,17 @@
     },
     "compare": {
       "title": "LAB or Builder?",
-      "lead": "Both use the same sections. What changes is what you take with you and where it lives.",
+      "lead": "The same sections, two ways to use them.",
       "rows": [
         {
           "label": "For",
           "lab": "The site you already have: WordPress, Webflow, Shopify or any other.",
-          "builder": "A new site you'll code and host yourself."
+          "builder": "A new site."
         },
         {
-          "label": "What you get",
-          "lab": "A code to paste. The widget lives on our servers.",
-          "builder": "The page's source code (React + Vite) in a ZIP. It's yours."
-        },
-        {
-          "label": "Several sections together",
-          "lab": "A pack: your widgets one below the other, with a single code.",
-          "builder": "A composition: the whole page, with its menu and footer."
-        },
-        {
-          "label": "Changes",
-          "lab": "From the LAB panel, without touching your site.",
-          "builder": "In the code, like any project."
+          "label": "How it works",
+          "lab": "You paste a code and make changes from here.",
+          "builder": "You build your template with our sections and download it."
         },
         {
           "label": "How you pay",
@@ -329,7 +319,12 @@
       ],
       "labCta": "See the plans",
       "builderCta": "Open the Builder"
-    }
+    },
+    "deleteDrafts": "Delete the {{n}} drafts",
+    "deleteDraftsConfirm": "Delete the {{n}} drafts? This can't be undone. Published ones stay.",
+    "deleteDraftsYes": "Yes, delete them",
+    "deletingDrafts": "Deleting…",
+    "cancel": "Cancel"
   },
   "common": {
     "loading": "Loading…",
