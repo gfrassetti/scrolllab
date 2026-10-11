@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { prefersReducedMotion } from '../../../lib/motion'
-import { ARTWORKS } from './artworks'
+import { ARTWORKS, PALETTE } from './artworks'
 
 /**
  * KIN — Collection
@@ -30,11 +30,11 @@ const ACCENT = '#e1371f'
 const DISPLAY = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '125%', fontVariationSettings: "'wdth' 125" }
 const pad = (n) => String(n).padStart(2, '0')
 
-function Work({ item }) {
+function Work({ item, palette }) {
   if (!item) return null
   if (item.src) return <img src={item.src} alt={item.alt || item.name} className="block h-full w-full object-cover" />
   const { Art } = item
-  return Art ? <Art /> : null
+  return Art ? <Art p={palette} /> : null
 }
 
 export default function Collection({
@@ -49,7 +49,24 @@ export default function Collection({
   bg,
   fg,
   accent: accentProp,
+  /** Los colores de las ilustraciones (las obras sin foto); el rojo es el acento. */
+  artPaper,
+  artInk,
+  artBlue,
+  artOchre,
+  artCream,
+  /** El grano animado sobre las obras. */
+  showGrain = 'on',
 }) {
+  const palette = {
+    ...PALETTE,
+    ...(artPaper ? { paper: artPaper } : {}),
+    ...(artInk ? { ink: artInk } : {}),
+    ...(accentProp ? { red: accentProp } : {}),
+    ...(artBlue ? { blue: artBlue } : {}),
+    ...(artOchre ? { ochre: artOchre } : {}),
+    ...(artCream ? { cream: artCream } : {}),
+  }
   // Del builder llegan obras con nombre y foto; una sin foto conserva el
   // dibujo de la demo en ese lugar.
   const items =
@@ -227,6 +244,7 @@ export default function Collection({
         id="collection"
         className="relative z-[46] bg-(--kin-paper) px-[4.5vw] py-[14svh] text-(--kin-ink) md:px-[1.25vw]"
         style={kinVars}
+        data-grain={showGrain === 'off' ? 'off' : undefined}
       >
         <h2 className="text-[9vw] leading-[0.94] font-semibold uppercase md:text-[5.4vw]" style={DISPLAY}>
           {heading.map((l) => (
@@ -239,7 +257,7 @@ export default function Collection({
           {items.map((it, i) => (
             <li key={i}>
               <div className="kin-grain relative aspect-[4/5] overflow-hidden">
-                <Work item={it} />
+                <Work item={it} palette={palette} />
               </div>
               <p className="mt-2 text-[3.3vw] md:text-[max(11px,0.82vw)]">
                 {pad(i + 1)} {it.name}
@@ -259,6 +277,7 @@ export default function Collection({
       id="collection"
       className="relative z-[46] bg-(--kin-paper)"
       style={kinVars}
+      data-grain={showGrain === 'off' ? 'off' : undefined}
     >
       <div ref={pinRef} className="relative h-svh overflow-hidden">
         {/* Triptych side panels: the 2nd and 3rd works, full height. */}
@@ -270,7 +289,7 @@ export default function Collection({
             style={{ left: `${(k * 100) / 3}%`, width: `${100 / 3 + 0.05}%` }}
           >
             <div className="h-full w-full">
-              <Work item={items[k]} />
+              <Work item={items[k]} palette={palette} />
             </div>
             <div data-kin-tri-shade className="pointer-events-none absolute inset-0 bg-(--kin-ink) opacity-0" />
           </div>
@@ -281,7 +300,7 @@ export default function Collection({
           {items.map((it, i) => (
             <div key={i} data-kin-work className="absolute inset-0 overflow-hidden" style={{ zIndex: i }}>
               <div data-kin-work-inner className="h-full w-full">
-                <Work item={it} />
+                <Work item={it} palette={palette} />
               </div>
               <div data-kin-work-shade className="pointer-events-none absolute inset-0 bg-(--kin-ink) opacity-0" />
             </div>
@@ -338,6 +357,7 @@ const STYLES = `
     opacity: 0.32; mix-blend-mode: multiply;
     animation: kin-grain 0.9s steps(5) infinite;
   }
+  [data-grain='off'] .kin-grain::after { display: none; }
   @keyframes kin-grain {
     0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); }
     60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); }

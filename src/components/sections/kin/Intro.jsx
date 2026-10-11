@@ -23,7 +23,16 @@ const NOTES = [
   'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.',
 ]
 
-export default function Intro({ lines = ['Headline 2—', 'Lorem ipsum', 'dolor sit amet'], line1, line2, line3, notes = NOTES }) {
+export default function Intro({
+  lines = ['Headline 2—', 'Lorem ipsum', 'dolor sit amet'],
+  line1,
+  line2,
+  line3,
+  notes = NOTES,
+  /** El texto se invierte sobre lo que tenga abajo (mix-blend); el fondo, vacío, deja ver la sección de arriba. */
+  bg,
+  fg,
+}) {
   const rootRef = useRef(null)
   // The builder edits the statement line by line and the notes as {text} rows.
   const statement = [line1, line2, line3].some(Boolean) ? [line1, line2, line3].filter(Boolean) : lines
@@ -66,6 +75,7 @@ export default function Intro({ lines = ['Headline 2—', 'Lorem ipsum', 'dolor 
       ref={rootRef}
       id="about"
       className="relative z-40 min-h-[190svh] px-[4.5vw] pt-[30svh] text-white mix-blend-difference md:grid md:grid-cols-12 md:gap-x-[1.25vw] md:px-[1.25vw] md:pt-[32svh]"
+      style={{ ...(fg ? { color: fg } : {}), ...(bg ? { backgroundColor: bg } : {}) }}
     >
       <h2 data-kin-reveal className="text-[9vw] leading-[0.94] font-semibold uppercase md:col-span-8 md:text-[6vw]" style={DISPLAY}>
         {statement.map((l) => (

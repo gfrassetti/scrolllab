@@ -148,6 +148,8 @@ export default function Location({
   dragLabel = 'drag',
   bg,
   fg,
+  /** El fondo de cada tarjeta de distancia. */
+  cardBg,
 }) {
   const ink = fg || INK
   const sand = bg || LAND
@@ -300,6 +302,7 @@ export default function Location({
         '--mer-ink': ink,
         '--mer-sand': sand,
         '--mer-cta-ink': bg || undefined,
+        '--mer-card': cardBg || '#d6d1c5',
       }}
     >
       {/* MAP — one parent: image + monogram + routes + pins share coordinates */}
@@ -422,7 +425,7 @@ export default function Location({
               key={i}
               ref={(el) => (cardEls.current[i] = el)}
               data-active={active === i}
-              className="mer-card relative w-[280px] shrink-0 overflow-hidden bg-[#d6d1c5] max-md:flex max-md:h-[76px] max-md:items-end max-md:justify-between max-md:p-4 max-md:data-[active=true]:h-[188px] md:h-[210px] md:w-[330px]"
+              className="mer-card relative w-[280px] shrink-0 overflow-hidden bg-(--mer-card) max-md:flex max-md:h-[76px] max-md:items-end max-md:justify-between max-md:p-4 max-md:data-[active=true]:h-[188px] md:h-[210px] md:w-[330px]"
               onMouseEnter={() => hoverIn(i, false)}
               onMouseLeave={hoverOut}
               onClick={() => tap(i, false)}

@@ -82,6 +82,7 @@ export const MERIDIAN_FIELDS = {
     { key: 'scrollRightLabel', label: 'Flecha derecha — nombre para lectores de pantalla', type: 'text' },
     { key: 'bg', label: 'Tarjeta de cada punto — fondo', type: 'color' },
     { key: 'fg', label: 'Tarjeta de cada punto — texto', type: 'color' },
+    { key: 'accent', label: 'Color de los lotes resaltados', type: 'color' },
   ],
   'meridian/Amenities': [
     { key: 'title', label: 'Title', type: 'text' },
@@ -158,6 +159,7 @@ export const MERIDIAN_FIELDS = {
     { key: 'dragLabel', label: 'Cartel que sigue al mouse sobre las tarjetas', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'cardBg', label: 'Fondo de las tarjetas', type: 'color' },
   ],
   'meridian/GallerySlider': [
     {

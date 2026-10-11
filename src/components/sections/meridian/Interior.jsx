@@ -260,7 +260,7 @@ export default function Interior({ links, spots, bg, fg }) {
                     fill="none"
                     aria-hidden="true"
                   >
-                    <path d="M8 2v12M2 8h12" stroke={INK} strokeWidth="1.2" strokeLinecap="round" />
+                    <path d="M8 2v12M2 8h12" stroke={ink} strokeWidth="1.2" strokeLinecap="round" />
                   </svg>
                 </button>
               ))}

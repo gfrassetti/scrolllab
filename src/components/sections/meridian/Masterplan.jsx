@@ -66,6 +66,8 @@ export default function Masterplan({
   scrollRightLabel = 'Scroll right',
   bg,
   fg,
+  /** Los lotes resaltados sobre la foto aérea. */
+  accent,
 }) {
   // bg / fg: la tarjeta que se abre sobre cada punto (la foto aérea no cambia)
   const ink = fg || INK
@@ -168,8 +170,8 @@ export default function Masterplan({
   return (
     <section
       id="masterplan"
-      className="relative bg-[#2a2622]"
-      style={{ '--mer-ink': ink, '--mer-sand': sand }}
+      className="relative"
+      style={{ '--mer-ink': ink, '--mer-sand': sand, backgroundColor: ink }}
     >
       <div
         aria-hidden="true"
@@ -228,8 +230,8 @@ export default function Masterplan({
                 key={i}
                 ref={(el) => (paths.current[i] = el)}
                 d={d}
-                fill="#fff"
-                stroke="#fff"
+                fill={accent || '#fff'}
+                stroke={accent || '#fff'}
                 strokeWidth="2.2"
                 strokeLinejoin="round"
               />

@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { themeVars } from '../../../lib/themeVars'
 
 /**
  * ManifestoType — the page H1 on paper. The paper slides over the pinned
@@ -59,7 +60,7 @@ export default function ManifestoType({
       ref={root}
       id="bureau"
       className="relative z-10 bg-atrium-paper px-5 pt-[30svh] pb-[26svh] text-atrium-ink md:px-10 md:pt-[34svh] md:pb-[30svh]"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ 'atrium-paper': bg, 'atrium-ink': fg }) }}
     >
       <h1
         data-manifesto-head

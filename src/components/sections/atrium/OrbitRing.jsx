@@ -155,7 +155,7 @@ export default function OrbitRing({
             el anillo tiene menos aire alrededor del centro. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(closest-side,rgba(17,17,17,0.7),transparent_72%)]"
+          className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-atrium-ink)_70%,transparent),transparent_72%)]"
         />
 
         <div

@@ -43,6 +43,8 @@ export const ATRIUM_FIELDS = {
     { key: 'right', label: 'Right headline', type: 'text' },
     { key: 'bodyLeft', label: 'Left body', type: 'textarea' },
     { key: 'bodyRight', label: 'Right body', type: 'textarea' },
+    { key: 'bg', label: 'Color claro (el fondo del principio)', type: 'color' },
+    { key: 'fg', label: 'Color oscuro (el fondo del final)', type: 'color' },
   ],
   'atrium/BlueprintDraw': [
     { key: 'kicker', label: 'Rótulo', type: 'text' },

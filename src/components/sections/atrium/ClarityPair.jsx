@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { themeVars } from '../../../lib/themeVars'
 
 const CX = 720
 const CY = 450
@@ -50,8 +51,12 @@ export default function ClarityPair({
   right = 'and a second one',
   bodyLeft = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
   bodyRight = 'Ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation.',
+  /** El papel (fondo del principio) y la tinta (fondo del final): la animación pasa de uno al otro. */
+  bg,
+  fg,
 }) {
   const root = useRef(null)
+  const colors = themeVars({ 'atrium-paper': bg, 'atrium-ink': fg })
   const reduced = useReducedMotion()
 
   useGSAP(
@@ -84,13 +89,13 @@ export default function ClarityPair({
       tl.to('[data-clarity-figure]', { rotate: 26, ease: 'none' }, 0)
 
       tl.to('[data-clarity-ink]', { opacity: 1, ease: 'none' }, 0.46)
-      tl.to(pin, { color: '#f4f1ea', ease: 'none' }, 0.46)
+      tl.to(pin, { color: bg || '#f4f1ea', ease: 'none' }, 0.46)
       tl.to('[data-clarity-a]', { autoAlpha: 0, ease: 'none' }, 0.46)
       tl.to('[data-clarity-b]', { autoAlpha: 1, ease: 'none' }, 0.58)
 
       tl.to('[data-clarity-body]', { autoAlpha: 1, y: 0, stagger: 0.06, ease: 'none' }, 0.66)
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, bg, fg], revertOnUpdate: true },
   )
 
   const figure = (
@@ -134,7 +139,7 @@ export default function ClarityPair({
 
   if (reduced) {
     return (
-      <section ref={root} id="practice" className="relative">
+      <section ref={root} id="practice" className="relative" style={colors}>
         <div className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-atrium-paper px-5 py-24 text-atrium-ink md:px-10">
           {figure}
           {kicker ? (
@@ -158,7 +163,7 @@ export default function ClarityPair({
   }
 
   return (
-    <section ref={root} id="practice" className="relative h-[300svh] bg-atrium-ink">
+    <section ref={root} id="practice" className="relative h-[300svh] bg-atrium-ink" style={colors}>
       <div
         data-clarity-pin
         className="sticky top-0 h-svh overflow-hidden text-atrium-ink"

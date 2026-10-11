@@ -115,6 +115,12 @@ export const COLOR_PROP_KEYS = new Set([
   'cardBg',
   'bandBg',
   'bandBg2',
+  // KIN: la paleta de las ilustraciones de la colección.
+  'artPaper',
+  'artInk',
+  'artBlue',
+  'artOchre',
+  'artCream',
 ])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)

@@ -1,4 +1,4 @@
-import { KIN_WORD_HELP } from '../helpers.js'
+import { KIN_WORD_HELP, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -55,6 +55,8 @@ export const KIN_FIELDS = {
       max: 4,
       item: [{ key: 'text', label: 'Texto', type: 'textarea' }],
     },
+    { key: 'fg', label: 'Color del texto (se invierte sobre lo que tenga abajo)', type: 'color' },
+    { key: 'bg', label: 'Color de fondo (vacío: transparente)', type: 'color' },
   ],
   'kin/Rooms': [
     { key: 'heading', label: 'Título', type: 'text' },
@@ -94,6 +96,12 @@ export const KIN_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
+    { key: 'artPaper', label: 'Ilustraciones (obras sin foto) — fondo', type: 'color' },
+    { key: 'artInk', label: 'Ilustraciones — negro', type: 'color' },
+    { key: 'artBlue', label: 'Ilustraciones — azul', type: 'color' },
+    { key: 'artOchre', label: 'Ilustraciones — ocre', type: 'color' },
+    { key: 'artCream', label: 'Ilustraciones — crema', type: 'color' },
+    toggle('showGrain', 'Grano animado sobre las obras'),
   ],
   'kin/Programme': [
     { key: 'line1', label: 'Titular — línea 1', type: 'text' },
