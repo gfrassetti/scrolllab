@@ -55,7 +55,6 @@ export const SECTION_FIELDS = {
  * sola lista: la leen el test de colores y npm run check:editable.
  */
 export const SECTIONS_WITHOUT_COLOR = Object.freeze({
-  'velocity/TrackMerge': 'el fondo oscuro → claro → negro es la coreografía del scroll',
   'atelier/VisionShutter': 'la persiana cierra hacia el color de la sección siguiente',
   'atrium/ClarityPair': 'la animación pasa de papel a tinta con colores fijos',
   'kin/Intro': 'mix-blend-difference sobre la puerta del hero',
