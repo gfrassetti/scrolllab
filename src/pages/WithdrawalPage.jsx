@@ -108,6 +108,7 @@ export default function WithdrawalPage() {
     if (o.refunded) return t('withdrawal.opt.refunded')
     if (o.kind === 'lab') {
       if (o.reason === 'trial') return t('withdrawal.opt.trial')
+      if (o.reason === 'charge_pending') return t('withdrawal.opt.chargePending')
       if (o.auto) return t('withdrawal.opt.autoLab')
       if (o.reason === 'renewal') return t('withdrawal.opt.renewal')
       return fill(t('withdrawal.opt.expired'))

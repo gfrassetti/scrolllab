@@ -226,6 +226,8 @@ const subscriptionSchema = new mongoose.Schema(
     firstPaidAt: Date,
     // El cobro que se puede devolver: pago de MP o transacción de Paddle.
     firstChargeId: String,
+    // Último pago de MP anotado (webhook payment / authorized_payment): no se anota dos veces.
+    lastChargeId: String,
     // Cuánto fue ese cobro (en la moneda de la suscripción): lo que se devuelve.
     firstChargeAmount: Number,
     // Fin de período por el que ya salió el mail «Tu plan se suspendió».

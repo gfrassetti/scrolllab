@@ -9,6 +9,7 @@ import {
   handlePreapprovalEvent,
   handleAuthorizedPaymentEvent,
 } from './subscriptions.js'
+import { recordLabMpPayment } from './subscriptions/mpSync.js'
 import {
   fulfillApprovedPayment,
   reverseOrderPayment,
@@ -98,6 +99,7 @@ export async function handleMercadoPagoNotification({
   // repita el evento. Los 5xx (MP caído, Mongo) sí tienen que reintentarse.
   try {
     const payment = await fetchPayment(payToken, dataId)
+    let labSub = null
     if (isUpgradeReference(payment.external_reference) && REVERSED_PAYMENT_STATUSES.has(payment.status)) {
       // Devolución (o contracargo) de una diferencia de plan: antes se tomaba
       // como «pago no aprobado» y no quedaba en el libro ni avisaba a nadie.
@@ -139,6 +141,10 @@ export async function handleMercadoPagoNotification({
     } else if (payment.status === 'rejected') {
       // El comprador puede reintentar en MP; el mail sale una vez por orden.
       await notifyOrderPaymentFailed({ orderId: String(payment.external_reference || ''), config })
+    } else if (payment.status === 'approved' && (labSub = await findLabSubscriptionForMpPayment(payment))) {
+      // Una cuota de LAB (su referencia es la suscripción, no una orden): se
+      // anota ya, sin esperar a `subscription_authorized_payment`.
+      await recordLabMpPayment({ payment, sub: labSub, config })
     } else {
       await fulfillApprovedPayment({ payment, config })
       // Reembolso parcial: MP deja el pago «approved» con la devolución adentro.

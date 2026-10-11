@@ -84,6 +84,51 @@ describe('LAB con Mercado Pago: devolución de cuotas', () => {
     assert.equal(refundMails(mp.outbox, 'mp-primer@test.com').length, 1)
   })
 
+  // MP manda el cobro por dos webhooks y el de la cuota puede tardar horas: con
+  // solo el de `payment`, la suscripción ya tiene su primer cobro (antes
+  // figuraba «sin cobro» y el arrepentimiento la tomaba por prueba gratis).
+  it('el cobro llega primero por el webhook payment: queda anotado y la cuota después no lo vuelve renovación', async () => {
+    const agent = await loginAs('mp-payment-first@test.com')
+    const res = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly' })
+    const pre = mp.lastPreapproval()
+    mp.authorize(pre.id)
+    await agent.post('/api/subscriptions/sync')
+    const ap = mp.bill(pre.id)
+    assert.equal((await webhook('payment', String(ap.payment.id))).status, 200)
+    let row = await fileDb.findSubscriptionById(res.body.subscriptionId)
+    assert.equal(row.firstChargeId, String(ap.payment.id))
+    assert.ok(row.firstPaidAt && row.lastPaidAt)
+    const { labRefundEligibility } = await import('../../src/domain/policy.js')
+    assert.equal(labRefundEligibility(row).reason, 'ok')
+
+    // Llega la cuota del mismo cobro (y MP repite el de payment): nada cambia.
+    assert.equal((await webhook('subscription_authorized_payment', ap.id)).status, 200)
+    assert.equal((await webhook('payment', String(ap.payment.id))).status, 200)
+    row = await fileDb.findSubscriptionById(res.body.subscriptionId)
+    assert.equal(labRefundEligibility(row).reason, 'ok', 'el mismo cobro no es una renovación')
+    assert.equal(row.firstChargeId, String(ap.payment.id))
+  })
+
+  it('arrepentimiento sin cobro anotado: se le pregunta a MP y el primer cobro se devuelve', async () => {
+    const agent = await loginAs('mp-arr-sync@test.com')
+    const res = await agent.post('/api/subscriptions').send({ plan: 'hosted_pro', cycle: 'monthly' })
+    const pre = mp.lastPreapproval()
+    mp.authorize(pre.id)
+    await agent.post('/api/subscriptions/sync')
+    const ap = mp.bill(pre.id) // MP cobró, pero no llegó ningún webhook del cobro
+
+    // El formulario ya no dice «prueba gratis»: muestra el cobro devolvible.
+    const opts = await agent.get('/api/withdrawals/options')
+    const lab = opts.body.options.find((o) => o.kind === 'lab')
+    assert.equal(lab.reason, 'ok', JSON.stringify(lab))
+
+    const out = await agent.post('/api/withdrawals').send({ email: 'mp-arr-sync@test.com', name: 'Lab', order: 'LAB' })
+    assert.equal(out.body.outcome, 'refunded', JSON.stringify(out.body))
+    assert.equal(mp.refundCalls.at(-1).id, String(ap.payment.id))
+    assert.equal(mp.preapprovals.get(pre.id).status, 'cancelled')
+    assert.equal((await fileDb.findSubscriptionById(res.body.subscriptionId)).firstChargeId, String(ap.payment.id))
+  })
+
   it('devolver una renovación (excepción a mano): se anota y avisa, la suscripción sigue', async () => {
     const { agent, pre, charge, subscriptionId } = await subscribedAndCharged('mp-renov@test.com')
     const second = await charge()

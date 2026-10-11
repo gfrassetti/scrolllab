@@ -124,6 +124,12 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
       mp.preferences.set(pref.id, pref)
       return json(201, pref)
     }
+    // Búsqueda por referencia (las cuotas de LAB llevan el id de la suscripción).
+    if (resource === 'payments' && id === 'search' && method === 'GET') {
+      const ref = u.searchParams.get('external_reference')
+      const results = [...mp.payments.values()].filter((p) => String(p.external_reference) === ref)
+      return json(200, { results, paging: { total: results.length } })
+    }
     if (resource === 'payments' && id && parts[2] === 'refunds' && method === 'POST') {
       const pay = mp.payments.get(id)
       if (!pay) return json(404, { message: 'not found', status: 404 })
@@ -187,6 +193,18 @@ export function createFakeMercadoPago(realFetch = globalThis.fetch) {
       status: approved ? 'approved' : 'rejected',
       transaction_amount: ap.transaction_amount,
     }
+    // Como MP: la cuota es también un pago, con la referencia del preapproval
+    // (llega por el webhook `payment` y aparece en /v1/payments/search).
+    mp.payments.set(String(ap.payment.id), {
+      id: ap.payment.id,
+      status: ap.payment.status,
+      operation_type: 'recurring_payment',
+      transaction_amount: ap.transaction_amount,
+      currency_id: ap.currency_id,
+      date_approved: approved ? ap.debit_date : null,
+      date_created: ap.debit_date,
+      external_reference: pre.external_reference,
+    })
     if (approved) pre.next_payment_date = nextCycle(ap.debit_date, pre.auto_recurring)
   }
 

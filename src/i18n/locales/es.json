@@ -1619,6 +1619,7 @@
       "auto": "Se devuelve solo, en el momento. La descarga se corta.",
       "autoLab": "Se devuelve el primer cobro (y las diferencias de plan) y la suscripción se da de baja en el momento.",
       "trial": "Estás en la prueba gratis: se da de baja, sin cobro.",
+      "chargePending": "El cobro del alta todavía no figura: se da de baja y, si se cobró, te lo devolvemos apenas llegue.",
       "downloaded": "Ya descargaste el ZIP: no se devuelve solo, lo revisamos.",
       "expired": "Pasaron los {{days}} días: no se devuelve solo, lo revisamos.",
       "renewal": "Las renovaciones no se devuelven: lo revisamos.",

@@ -7,6 +7,20 @@ import { alertAdmin } from './orders.js'
 import { sendWithdrawalReceived, sendWithdrawalConfirm } from './email.js'
 import { executeWithdrawal, signWithdrawalToken, verifyWithdrawalToken } from './autoRefund.js'
 import { refundWhat } from './refundLedger.js'
+import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
+import { isPaddleSub } from './subscriptions/paddleSync.js'
+
+/**
+ * Una suscripción de Mercado Pago sin cobro anotado: antes de decir «prueba
+ * gratis» se le pregunta a MP. El cobro del alta pudo no haber llegado por
+ * webhook (el de la cuota tarda) y no es lo mismo: ese se devuelve.
+ */
+async function withMpChargesSynced(sub, config) {
+  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && !isPaddleSub(sub)) {
+    await syncLabChargesFromMp(sub, config)
+  }
+  return sub
+}
 
 /**
  * Botón de arrepentimiento (Resolución 424/2020): un pedido público, sin
@@ -79,7 +93,7 @@ async function findTarget(email, ref) {
  * revisamos (y por qué). Solo de la cuenta de la sesión.
  * @param {any} user
  */
-export async function listWithdrawalOptions(user) {
+export async function listWithdrawalOptions(user, config = null) {
   const orders = await db.findOrdersByUser(db.uid(user))
   const options = orders
     .filter((o) => o.status === 'paid' || o.status === 'refunded')
@@ -101,7 +115,10 @@ export async function listWithdrawalOptions(user) {
         deadline: e.deadline || null,
       }
     })
-  const sub = await db.findActiveSubscriptionByUser(db.uid(user)).catch(() => null)
+  const sub = await withMpChargesSynced(
+    await db.findActiveSubscriptionByUser(db.uid(user)).catch(() => null),
+    config,
+  )
   if (sub && sub.status !== 'pending') {
     const e = labRefundEligibility(sub)
     const { amount, currency } = amountOf({ order: null, sub })
@@ -115,7 +132,13 @@ export async function listWithdrawalOptions(user) {
       date: sub.activatedAt || sub.createdAt || null,
       refunded: !!sub.refundedAt,
       auto: !sub.refundedAt && (e.eligible || e.reason === 'trial'),
-      reason: sub.refundedAt ? 'refunded' : e.reason,
+      // Sin prueba gratis y sin cobro a la vista: el del alta todavía no llegó de
+      // la pasarela (no es una prueba: si se cobró, se devuelve cuando llegue).
+      reason: sub.refundedAt
+        ? 'refunded'
+        : e.reason === 'trial' && !sub.trialEndsAt && !sub.firstChargeAt
+          ? 'charge_pending'
+          : e.reason,
       deadline: e.deadline || null,
     })
   }
@@ -163,7 +186,7 @@ export async function requestWithdrawal({ email, name, orderRef, message, locale
   if (ambiguous) {
     return requestAmbiguous({ mail, fullName, orderRef, message, lang, sessionUser, targetUser, sub: foundSub, paid, config })
   }
-  const sub = foundSub
+  const sub = order ? foundSub : await withMpChargesSynced(foundSub, config)
   const orderId = uidOf(order)
   const subscriptionId = sub ? uidOf(sub) : null
   const ownerId = order?.userId || sub?.userId || null

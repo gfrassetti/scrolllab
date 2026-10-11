@@ -5,6 +5,7 @@ import {
   fetchPreapproval,
   fetchAuthorizedPayment,
   cancelPreapproval,
+  searchPaymentsByReference,
 } from '../mercadoPago.js'
 import {
   toMs,
@@ -191,43 +192,16 @@ export async function handleAuthorizedPaymentEvent(
       payStatus === 'cancelled')
   let activated = false
   const firstCharge = !sub.lastPaidAt
+  const chargeId = ap?.payment?.id != null ? String(ap.payment.id) : null
 
   if (approved) {
     warnIfSuspiciousAmount(ap, sub)
-    const debit = ap.debit_date ? new Date(ap.debit_date) : new Date()
-    const paidThrough = addBillingCycle(debit, sub.cycle)
-    if (!sub.currentPeriodEnd || paidThrough > new Date(sub.currentPeriodEnd)) {
-      sub.currentPeriodEnd = paidThrough
-    }
-    if (!sub.lastPaidAt || debit > new Date(sub.lastPaidAt)) sub.lastPaidAt = debit
-    // El primer cobro (el único que se puede devolver por arrepentimiento).
-    if (!sub.firstPaidAt) {
-      sub.firstPaidAt = debit
-      sub.firstChargeId = ap.payment?.id != null ? String(ap.payment.id) : undefined
-      const charged = Number(ap?.payment?.transaction_amount ?? ap?.transaction_amount)
-      if (Number.isFinite(charged) && charged > 0) sub.firstChargeAmount = charged
-    }
-    // Lo pagado en este período: base para cobrar la diferencia si sube.
-    sub.paidPlan = sub.plan
-    sub.paidCycle = sub.cycle
-    sub.paymentFailedAt = undefined
-    if (sub.canceledAt) {
-      console.error(
-        `subs COBRO SOBRE BAJA sub=${subId(sub)} preapproval=${preapprovalId} ` +
-          `ap=${authorizedPaymentId} — MP cobró una suscripción dada de baja: revisar y reembolsar`,
-      )
-    }
-    if (sub.status !== 'authorized') {
-      if (sub.status === 'cancelled' && (await hasOtherActiveSubscription(sub))) {
-        console.error(
-          `subs COBRO SOBRE SUSCRIPCIÓN REEMPLAZADA sub=${subId(sub)} ` +
-            `preapproval=${preapprovalId} ap=${authorizedPaymentId} — revisar y reembolsar`,
-        )
-      } else {
-        markActivated(sub)
-        activated = true
-      }
-    }
+    ;({ activated } = await applyApprovedCharge(sub, {
+      debit: ap.debit_date ? new Date(ap.debit_date) : new Date(),
+      chargeId,
+      amount: Number(ap?.payment?.transaction_amount ?? ap?.transaction_amount),
+      where: `preapproval=${preapprovalId} ap=${authorizedPaymentId}`,
+    }))
   } else if (failed) {
     if (!sub.paymentFailedAt) sub.paymentFailedAt = new Date()
   } else if (ap?.status === 'processed' && !payStatus) {
@@ -242,7 +216,9 @@ export async function handleAuthorizedPaymentEvent(
   if (approved) {
     const amount = Number(ap?.payment?.transaction_amount ?? ap?.transaction_amount)
     fireCharge(sub, config, {
-      ref: `mp-${authorizedPaymentId}`,
+      // Por el pago (no por la cuota): el mismo cobro puede llegar también por
+      // el webhook `payment` o la consulta a MP, y el mail sale una sola vez.
+      ref: chargeRef(chargeId, authorizedPaymentId),
       firstCharge,
       amount: Number.isFinite(amount) ? amount : null,
       currency: sub.currency_id || 'ARS',
@@ -257,6 +233,121 @@ export async function handleAuthorizedPaymentEvent(
     approved,
     failed,
   }
+}
+
+/** Clave del mail «cuota cobrada»: el id del pago de MP (o de la cuota, si no vino). */
+function chargeRef(chargeId, authorizedPaymentId) {
+  return chargeId ? `mp-pay-${chargeId}` : `mp-${authorizedPaymentId}`
+}
+
+/**
+ * Anota un cobro aprobado de LAB en la suscripción (no guarda). Es el mismo
+ * cobro llegue por donde llegue: el webhook `subscription_authorized_payment`,
+ * el webhook `payment` (MP manda los dos, y el de la cuota puede tardar horas)
+ * o la consulta a MP antes de un arrepentimiento. Repetirlo no cambia nada: el
+ * período es absoluto (`debit + 1 ciclo`, máximo con el vigente) y un pago ya
+ * anotado como primer cobro no cuenta como renovación (si no, el
+ * arrepentimiento lo tomaba por renovación y no lo devolvía).
+ * @param {any} sub
+ * @param {{ debit: Date, chargeId: string | null, amount: number, where: string }} charge
+ */
+async function applyApprovedCharge(sub, { debit, chargeId, amount, where }) {
+  let activated = false
+  const paidThrough = addBillingCycle(debit, sub.cycle)
+  if (!sub.currentPeriodEnd || paidThrough > new Date(sub.currentPeriodEnd)) {
+    sub.currentPeriodEnd = paidThrough
+  }
+  const sameAsFirst = !!chargeId && !!sub.firstChargeId && String(sub.firstChargeId) === chargeId
+  if (!sameAsFirst && (!sub.lastPaidAt || debit > new Date(sub.lastPaidAt))) sub.lastPaidAt = debit
+  // El primer cobro (el único que se puede devolver por arrepentimiento).
+  if (!sub.firstPaidAt) {
+    sub.firstPaidAt = debit
+    sub.firstChargeId = chargeId || undefined
+    if (Number.isFinite(amount) && amount > 0) sub.firstChargeAmount = amount
+  }
+  if (chargeId) sub.lastChargeId = chargeId
+  // Lo pagado en este período: base para cobrar la diferencia si sube.
+  sub.paidPlan = sub.plan
+  sub.paidCycle = sub.cycle
+  sub.paymentFailedAt = undefined
+  if (sub.canceledAt) {
+    console.error(
+      `subs COBRO SOBRE BAJA sub=${subId(sub)} ${where} — MP cobró una suscripción dada de baja: revisar y reembolsar`,
+    )
+  }
+  if (sub.status !== 'authorized') {
+    if (sub.status === 'cancelled' && (await hasOtherActiveSubscription(sub))) {
+      console.error(
+        `subs COBRO SOBRE SUSCRIPCIÓN REEMPLAZADA sub=${subId(sub)} ${where} — revisar y reembolsar`,
+      )
+    } else {
+      markActivated(sub)
+      activated = true
+    }
+  }
+  return { activated }
+}
+
+/**
+ * Webhook `payment` de una cuota de LAB (no es de una orden): anota el cobro.
+ * Sin esto, hasta que llegaba `subscription_authorized_payment` (puede tardar
+ * horas) la suscripción figuraba sin cobro y el Botón de arrepentimiento la
+ * tomaba por «prueba gratis».
+ * @param {{ payment: any, sub: any, config: any }} args
+ */
+export async function recordLabMpPayment({ payment, sub, config }) {
+  if (payment?.status !== 'approved') return { skipped: `pago ${payment?.status}` }
+  const chargeId = String(payment.id)
+  if (String(sub.firstChargeId || '') === chargeId || String(sub.lastChargeId || '') === chargeId) {
+    return { skipped: 'cobro ya anotado' }
+  }
+  const firstCharge = !sub.lastPaidAt
+  const debit = new Date(payment.date_approved || payment.date_created || Date.now())
+  const amount = Number(payment.transaction_amount)
+  const { activated } = await applyApprovedCharge(sub, { debit, chargeId, amount, where: `pago=${chargeId}` })
+  await sub.save()
+  if (activated) await closeSupersededSubscriptions(sub)
+  fireWelcome(sub, config)
+  fireCharge(sub, config, {
+    ref: chargeRef(chargeId, null),
+    firstCharge,
+    amount: Number.isFinite(amount) ? amount : null,
+    currency: payment.currency_id || sub.currency_id || 'ARS',
+    paidAt: debit,
+  })
+  return { recorded: true, activated }
+}
+
+/**
+ * Consulta a MP los cobros aprobados de una suscripción (sus pagos llevan como
+ * referencia el id de la suscripción) y anota los que falten. Se usa antes de
+ * decidir un arrepentimiento de LAB sin cobro anotado: el cobro del alta pudo
+ * no haber llegado por webhook, y sin esto se tomaba por «prueba gratis».
+ * Si MP no responde, no cambia nada.
+ * @param {any} sub
+ * @param {any} config
+ * @param {{ searchPayments?: typeof searchPaymentsByReference }} [deps]
+ */
+export async function syncLabChargesFromMp(sub, config, deps = {}) {
+  const token = config.mpSubs?.accessToken
+  if (!sub || isMock(config) || !token || !sub.mpPreapprovalId) return { synced: 0 }
+  const search = deps.searchPayments || searchPaymentsByReference
+  let results = []
+  try {
+    results = await search(token, String(subId(sub)))
+  } catch (err) {
+    console.error(`subs sync de cobros MP falló sub=${subId(sub)}`, err?.message || err)
+    return { synced: 0 }
+  }
+  let synced = 0
+  const approved = (results || [])
+    .filter((p) => p?.status === 'approved')
+    .sort((a, b) => new Date(a.date_approved || 0).getTime() - new Date(b.date_approved || 0).getTime())
+  for (const payment of approved) {
+    const out = await recordLabMpPayment({ payment, sub, config })
+    if (out.recorded) synced += 1
+  }
+  return { synced }
 }
 
 /**

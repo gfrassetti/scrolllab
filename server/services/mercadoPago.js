@@ -320,6 +320,25 @@ export async function fetchAuthorizedPayment(accessToken, id) {
   return res.json()
 }
 
+/**
+ * Pagos de MP con un `external_reference` (las cuotas de una suscripción de LAB
+ * llevan el id de la suscripción). El SDK no expone la búsqueda: va por REST.
+ * @param {string} accessToken
+ * @param {string} externalReference
+ * @returns {Promise<any[]>}
+ */
+export async function searchPaymentsByReference(accessToken, externalReference) {
+  const url = new URL('https://api.mercadopago.com/v1/payments/search')
+  url.searchParams.set('external_reference', externalReference)
+  url.searchParams.set('sort', 'date_created')
+  url.searchParams.set('criteria', 'asc')
+  url.searchParams.set('limit', '50')
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+  if (!res.ok) throw mpPaymentError({ status: res.status }, externalReference)
+  const data = /** @type {any} */ (await res.json())
+  return Array.isArray(data?.results) ? data.results : []
+}
+
 export async function cancelPreapproval(accessToken, id) {
   const pa = new PreApproval(createMpClient(accessToken))
   try {

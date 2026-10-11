@@ -9,6 +9,7 @@ import { reversePaddleAdjustment } from './paddlePayments.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
 import { isPaddleSub } from './subscriptions/paddleSync.js'
+import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
 
 /**
  * Devolución automática del Botón de arrepentimiento. Solo corre sobre lo que
@@ -111,6 +112,11 @@ async function refundPaddleTransaction(transactionId, row, config, deps) {
 
 async function refundLab(sub, row, config, deps) {
   if (!sub) return { status: 'manual', note: 'la suscripción ya no existe' }
+  // Sin cobro anotado, se le pregunta a MP: el del alta pudo no haber llegado
+  // por webhook, y no es lo mismo que una prueba gratis.
+  if (!sub.firstPaidAt && !sub.lastPaidAt && !isPaddleSub(sub)) {
+    await syncLabChargesFromMp(sub, config, deps)
+  }
   const e = labRefundEligibility(sub)
   // Alta sin prueba gratis (cobra al autorizar): si el cobro todavía no llegó de
   // la pasarela, NO es «prueba» — cancelar acá dejaría el cobro sin devolver.

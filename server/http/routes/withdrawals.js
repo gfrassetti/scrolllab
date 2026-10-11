@@ -35,7 +35,7 @@ export function createWithdrawalsRouter({ config, limits }) {
     requireAuth,
     asyncHandler(async (req, res) => {
       res.set('Cache-Control', 'no-store')
-      res.json({ ok: true, options: await listWithdrawalOptions(req.user) })
+      res.json({ ok: true, options: await listWithdrawalOptions(req.user, config) })
     }),
   )
 
