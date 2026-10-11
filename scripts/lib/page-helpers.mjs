@@ -76,7 +76,7 @@ export function installBlockHelpers() {
 
 /**
  * Ruido del entorno de auditoría (no del template): GPU por software, el
- * proxy de fuentes, GTM/picsum sin red. Lo comparten check-mobile y
+ * proxy de fuentes, GTM sin red. Lo comparten check-mobile y
  * check-motion para no divergir en qué cuenta como error real.
  */
 export const IGNORED_CONSOLE = [
@@ -95,6 +95,5 @@ export const IGNORED_URLS = [
   /googletagmanager\.com|google-analytics\.com/,
   // Etiquetas de anuncios que carga el GTM del market (no viajan en el ZIP).
   /doubleclick\.net|googleadservices\.com|google\.com\/(rmkt|pagead|ccm)\//,
-  /picsum\.photos/,
   /favicon/,
 ]

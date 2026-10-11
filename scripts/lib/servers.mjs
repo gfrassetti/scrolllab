@@ -1,8 +1,8 @@
 /**
  * Servidor y navegador para los chequeos con Chromium (check:mobile,
  * check:motion): un puerto libre, el dev server de Vite o un build sin
- * minificar servido con `vite preview`, y el reemplazo de picsum cuando no
- * hay red (y, opcional, Google Fonts bajadas con curl).
+ * minificar servido con `vite preview` y, opcional, Google Fonts bajadas con
+ * curl cuando no hay red.
  */
 import { execFile, execFileSync, spawn } from 'node:child_process'
 import net from 'node:net'
@@ -88,18 +88,6 @@ export async function startPreview(port, dir) {
 }
 
 /**
- * picsum (fotos de ejemplo de NOCTURNE) puede no estar al alcance (proxy, CI
- * sin red): se sirve un SVG del mismo tamaño pedido, así el encuadre y la
- * resolución se miden igual. No cuenta en los bytes.
- */
-export function picsumPlaceholder(url) {
-  const m = url.match(/\/(\d+)\/(\d+)(?:[/?#]|$)/)
-  const w = m ? Number(m[1]) : 1200
-  const h = m ? Number(m[2]) : 800
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3f4a"/><stop offset="1" stop-color="#11131a"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><circle cx="${w * 0.62}" cy="${h * 0.4}" r="${Math.min(w, h) * 0.22}" fill="#6b7280" opacity=".5"/></svg>`
-}
-
-/**
  * Chromium con WebGL por software (SwiftShader) y los flags extra de
  * CHROMIUM_ARGS (p. ej. para confiar en el CA de un proxy corporativo; para las
  * fuentes de Google en un entorno con proxy ver FONTS_VIA_CURL). Sin
@@ -115,13 +103,6 @@ export function launchChromium() {
       ...(process.env.CHROMIUM_ARGS || '').split(/\s+/).filter(Boolean),
     ],
   })
-}
-
-/** Sirve el placeholder de picsum en un contexto de Playwright. */
-export function routePicsum(context) {
-  return context.route(/^https:\/\/picsum\.photos\//, (route) =>
-    route.fulfill({ status: 200, contentType: 'image/svg+xml', body: picsumPlaceholder(route.request().url()) }),
-  )
 }
 
 const execFileAsync = promisify(execFile)

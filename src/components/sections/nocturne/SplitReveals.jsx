@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
-import { picsumAttrs } from './picsum'
+import { imgAttrs } from '../../../lib/responsiveImage'
+import { beatDiner, beatRoad, beatRoof, variants } from './assets/images'
 import { themeVars } from '../../../lib/themeVars'
 
 const defaultBeats = [
@@ -9,19 +10,19 @@ const defaultBeats = [
     kicker: 'Beat 01',
     title: 'Placeholder frame',
     body: 'Generic copy for the first beat. The image wipes in from the side like a projector shutter opening.',
-    img: 'https://picsum.photos/seed/noct-a/1200/900',
+    img: beatDiner,
   },
   {
     kicker: 'Beat 02',
     title: 'Counter frame',
     body: 'Alternate rows flip direction to keep the eye moving. Replace image and words, keep the rhythm.',
-    img: 'https://picsum.photos/seed/noct-b/1200/900',
+    img: beatRoad,
   },
   {
     kicker: 'Beat 03',
     title: 'Closing frame',
     body: 'End the sequence on your strongest visual. Everything here is placeholder by design.',
-    img: 'https://picsum.photos/seed/noct-c/1200/900',
+    img: beatRoof,
   },
 ]
 
@@ -103,7 +104,7 @@ export default function SplitReveals({
           >
             <img
               data-beat-img
-              {...picsumAttrs(beat.img)}
+              {...imgAttrs(beat.img, variants)}
               sizes="(min-width: 768px) 50vw, 100vw"
               alt=""
               loading="lazy"

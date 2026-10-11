@@ -23,7 +23,7 @@
  */
 import { devices } from 'playwright'
 
-import { freePort, launchChromium, routePicsum, startVite } from './lib/servers.mjs'
+import { freePort, launchChromium, startVite } from './lib/servers.mjs'
 
 const NOTICE = 'aside[aria-label="Movimiento"]'
 const SHOW_FULL = 'Ver con animaciones'
@@ -69,7 +69,6 @@ async function newContext(browser, { reduce = true, phone = true, storageBlocked
   }, storageBlocked)
   // Google Fonts no responde en un contenedor sin red: no se espera.
   await context.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort())
-  await routePicsum(context)
   return context
 }
 

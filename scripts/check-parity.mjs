@@ -65,7 +65,7 @@ import sharp from 'sharp'
 import { devices } from 'playwright'
 
 import { installBlockHelpers } from './lib/page-helpers.mjs'
-import { freePort, launchChromium, routeGoogleFonts, routePicsum, startVite } from './lib/servers.mjs'
+import { freePort, launchChromium, routeGoogleFonts, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'parity-check')
@@ -385,7 +385,6 @@ async function runView(browser, base, { template, view, expect }) {
       /* ignore */
     }
   })
-  await routePicsum(context)
   await routeGoogleFonts(context)
   const page = await context.newPage()
   const errors = new Set()

@@ -65,7 +65,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { buildSnapshot, freePort, launchChromium, routeGoogleFonts, routePicsum, startPreview, startVite } from './lib/servers.mjs'
+import { buildSnapshot, freePort, launchChromium, routeGoogleFonts, startPreview, startVite } from './lib/servers.mjs'
 import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -699,7 +699,6 @@ async function auditJob(browser, base, job, opts) {
       /* ignore */
     }
   })
-  await routePicsum(context)
   await routeGoogleFonts(context)
 
   const page = await context.newPage()
@@ -726,7 +725,6 @@ async function auditJob(browser, base, job, opts) {
   })
   page.on('requestfinished', async (req) => {
     const url = req.url()
-    if (url.startsWith('https://picsum.photos/')) return
     const type = req.resourceType()
     const isModel = /\.(glb|gltf|hdr|ktx2|bin)(\?|$)/i.test(url)
     if (type !== 'image' && !isModel) return

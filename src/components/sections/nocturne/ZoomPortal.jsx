@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
-import { picsumAttrs } from './picsum'
+import { imgAttrs } from '../../../lib/responsiveImage'
+import { portal, variants } from './assets/images'
 
 /**
  * ZoomPortal — a small image window pinned at screen center grows
@@ -19,7 +20,7 @@ export default function ZoomPortal({
   label = 'The portal',
   ghostWord = 'CLOSER',
   endCaption = 'Placeholder caption — the scene you were squinting at.',
-  img = 'https://picsum.photos/seed/noct-portal/1920/1200',
+  img = portal,
   bg,
   fg,
   accent,
@@ -96,7 +97,7 @@ export default function ZoomPortal({
 
         <div data-portal className="absolute inset-0 will-change-transform">
           <img
-            {...picsumAttrs(img)}
+            {...imgAttrs(img, variants)}
             sizes="(max-aspect-ratio: 8/5) 160vh, 100vw"
             alt=""
             loading="lazy"

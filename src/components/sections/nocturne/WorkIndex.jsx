@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
-import { picsumAttrs } from './picsum'
+import { imgAttrs } from '../../../lib/responsiveImage'
+import { workCoat, workNeon, workSet, workTrails, variants } from './assets/images'
 import { themeVars } from '../../../lib/themeVars'
 
 const defaultWorks = [
@@ -10,28 +11,28 @@ const defaultWorks = [
     title: 'Placeholder film',
     category: 'Direction',
     year: '2026',
-    img: 'https://picsum.photos/seed/work-a/800/1000',
+    img: workSet,
   },
   {
     index: '002',
     title: 'Generic sequence',
     category: 'Editorial',
     year: '2025',
-    img: 'https://picsum.photos/seed/work-b/800/1000',
+    img: workCoat,
   },
   {
     index: '003',
     title: 'Untitled cut',
     category: 'Motion',
     year: '2025',
-    img: 'https://picsum.photos/seed/work-c/800/1000',
+    img: workTrails,
   },
   {
     index: '004',
     title: 'Working title',
     category: 'Photography',
     year: '2024',
-    img: 'https://picsum.photos/seed/work-d/800/1000',
+    img: workNeon,
   },
 ]
 
@@ -143,7 +144,7 @@ export default function WorkIndex({
 
               <span className="flex min-w-0 items-center gap-4">
                 <img
-                  {...picsumAttrs(work.img, [160])}
+                  {...imgAttrs(work.img, variants)}
                   sizes="44px"
                   alt=""
                   loading="lazy"

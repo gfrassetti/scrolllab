@@ -72,7 +72,7 @@ import sharp from 'sharp'
 import { devices } from 'playwright'
 
 import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
-import { freePort, launchChromium, routeGoogleFonts, routePicsum, startVite } from './lib/servers.mjs'
+import { freePort, launchChromium, routeGoogleFonts, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'motion-check')
@@ -354,7 +354,6 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
       /* ignore */
     }
   })
-  await routePicsum(context)
   await routeGoogleFonts(context)
 
   const page = await context.newPage()
@@ -627,7 +626,6 @@ async function loadAndMeasure(browser, base, { template, profile, reduce, forced
       /* ignore */
     }
   }, forced)
-  await routePicsum(context)
   await routeGoogleFonts(context)
   const page = await context.newPage()
   let fontsFailed = false

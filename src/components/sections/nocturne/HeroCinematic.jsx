@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
-import { picsumAttrs } from './picsum'
+import { imgAttrs } from '../../../lib/responsiveImage'
+import { hero as heroImg, variants } from './assets/images'
 
 /**
  * HeroCinematic — full-bleed photographic hero. The image settles
@@ -17,7 +18,7 @@ export default function HeroCinematic({
   kicker = 'A cinematic scrollytelling template',
   meta = 'Placeholder Films — ©2026',
   hint = 'Scroll',
-  img = 'https://picsum.photos/seed/noct-hero/1920/1200',
+  img = heroImg,
   bg,
   fg,
   accent,
@@ -86,7 +87,7 @@ export default function HeroCinematic({
     >
       <img
         data-hero-img
-        {...picsumAttrs(img)}
+        {...imgAttrs(img, variants)}
         sizes="(max-aspect-ratio: 8/5) 160vh, 100vw"
         fetchPriority="high"
         alt=""
