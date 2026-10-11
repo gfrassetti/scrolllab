@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   ALLOWED_SECTIONS,
+  HOSTABLE_SECTIONS,
   isAllowedSectionId,
 } from '../sections.js'
 import { SECTION_IDS } from '../../src/domain/sections.js'
@@ -126,6 +127,15 @@ describe('allowlist de secciones del servidor', () => {
     for (const id of left) {
       assert.ok(RETIRED_SKUS.includes(id.split('/')[0]), `${id} quedó afuera sin estar retirado`)
     }
+  })
+
+  // FOLD es una película al scroll cuadro por cuadro: la media la tendría que
+  // producir cada comprador. Se vende solo como template; no va al builder ni a
+  // LAB (decisión del dueño). Si alguien suma `fold/…` a la tabla, esto avisa.
+  it('FOLD no está en el builder ni en LAB', () => {
+    assert.equal(SECTION_IDS.some((id) => id.startsWith('fold/')), false)
+    assert.equal(ALLOWED_SECTIONS.some((id) => id.startsWith('fold/')), false)
+    assert.equal(HOSTABLE_SECTIONS.some((id) => id.startsWith('fold/')), false)
   })
 
   it('rechaza ids que no son de la tabla', () => {

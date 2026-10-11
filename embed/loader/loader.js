@@ -275,11 +275,47 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
     var pinMode = false
     var pinLen = 0
     var wrap = null
+    // Barra fija del sitio arriba de todo (un header `position: fixed/sticky`):
+    // la sección pineada se pega debajo de ella en vez de quedar tapada.
+    var topOffset = 0
+
+    /**
+     * Cuánto tapa arriba una barra fija o sticky del sitio: lo que hay en el
+     * borde de arriba de la pantalla, más ancho que la mitad y más bajo que un
+     * tercio. Se mide al entrar en PIN y en cada resize (no en cada cuadro: un
+     * cambio de alto del iframe obliga al frame a recalcular todo).
+     */
+    function measureTopOffset() {
+      if (!document.elementsFromPoint) return 0
+      var vw = window.innerWidth || document.documentElement.clientWidth
+      var vh = window.innerHeight || document.documentElement.clientHeight
+      var best = 0
+      var xs = [0.1, 0.5, 0.9]
+      for (var i = 0; i < xs.length; i++) {
+        var stack = document.elementsFromPoint(vw * xs[i], 1)
+        for (var j = 0; j < stack.length; j++) {
+          for (var n = stack[j]; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+            if (n === wrap || n === iframe) break
+            var pos = getComputedStyle(n).position
+            if (pos !== 'fixed' && pos !== 'sticky') continue
+            var r = n.getBoundingClientRect()
+            if (r.top <= 1 && r.bottom > 0 && r.height < vh * 0.35 && r.width >= vw * 0.5) {
+              best = Math.max(best, r.bottom)
+            }
+            break
+          }
+        }
+      }
+      return Math.round(best)
+    }
 
     function sizeWrap() {
       if (!wrap) return
       var vh = window.innerHeight || document.documentElement.clientHeight
-      wrap.style.height = vh + pinLen + 'px'
+      topOffset = measureTopOffset()
+      iframe.style.top = topOffset + 'px'
+      iframe.style.height = topOffset ? 'calc(100vh - ' + topOffset + 'px)' : '100vh'
+      wrap.style.height = vh - topOffset + pinLen + 'px'
     }
 
     function enterPinMode(px) {
@@ -340,12 +376,14 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
 
       if (pinMode && wrap) {
         var wr = wrap.getBoundingClientRect()
-        var progress = pinLen > 0 ? clamp(-wr.top / pinLen, 0, 1) : 0
+        var progress = pinLen > 0 ? clamp((topOffset - wr.top) / pinLen, 0, 1) : 0
         // El alto del sitio también en PIN: un frame recargado (ver
         // enterPinMode) decide su modo con este dato; sin él ignoraba el
-        // progreso y la sección quedaba en blanco.
+        // progreso y la sección quedaba en blanco. Es la pantalla que le toca
+        // (sin la barra fija del sitio): sus `vh` miden eso.
+        var screenH = vh - topOffset
         w.postMessage(
-          { type: 'scrolllab:viewport', rectTop: 0, rectHeight: vh, viewportHeight: vh, inView: true },
+          { type: 'scrolllab:viewport', rectTop: 0, rectHeight: screenH, viewportHeight: screenH, inView: true, pin: true },
           frameOrigin || '*',
         )
         w.postMessage(

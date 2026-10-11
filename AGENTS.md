@@ -223,7 +223,7 @@ npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bund
 npm run check:builder  # el editor del builder aplica los cambios (Chromium)
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
-npm run screen:lab     # ¿esta sección anda como widget de LAB? La embebe en un sitio ajeno con movimiento (1280 y 390), anota FLOW/PIN, alto, texto que nunca se ve y errores, y deja láminas en storage/lab-screen/
+npm run screen:lab     # ¿esta sección anda como widget de LAB? La embebe en un sitio ajeno y la recorre: FLOW/PIN, alto, texto oculto o cortado, fotos rotas, fuentes que no cargan, red, errores; láminas en storage/lab-screen/. --deep: 390 (toque) / 768 / 1280, con y sin movimiento; --header: sitio con barra fija
 npm run check:colors   # todo lo VISIBLE de cada sección sigue a sus campos de color (testigos en Chromium: texto, fondo, borde, SVG, contorno); lo de canvas va a mano
 npm run check:shop     # la tienda: grilla (etiqueta, agotado), ficha en sus 3 modelos (galería, muestras de color, cantidad, acordeón, ficha técnica, relacionados), carrito y checkout
 npm run check:forms    # los formularios de contacto (y cada tipo del general: presupuesto, newsletter, que te llamen, reserva, campos extra): errores, POST, éxito y error (endpoint simulado)
@@ -368,9 +368,11 @@ LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Pad
 
 Widgets de LAB (`HOSTABLE_SECTIONS`, `server/sections.js` + `embed/src/registry.js`): entran también las pineadas y
 las de escenario sticky (el frame pasa a modo PIN: una pantalla pegada en el sitio que recorre su propio
-documento) y los formularios: en LAB mandan a `POST /api/embed/:key/form` y el mensaje le llega por mail al dueño
+documento; si el sitio tiene una barra fija arriba, el widget se pega debajo de ella) y los formularios: en LAB mandan a `POST /api/embed/:key/form` y el mensaje le llega por mail al dueño
 del widget (`src/domain/labForms.js`, `server/services/hosted/forms.js`). Los `vh` (del CSS y de los `style` inline) miden la pantalla del sitio, no el
-iframe. Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
+iframe. Cada sección es un archivo aparte del frame (`embed/src/registry.js`, import dinámico): un
+widget baja el núcleo y su sección. Nada de FOLD ni de media que el cliente no pueda cambiar desde el
+editor (un vuelo de cuadros, un mapa con puntos fijos). Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
 Packs de LAB (`/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. No confundir con el bundle de templates (compra de código) ni con el Builder (código fuente): /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB.
 

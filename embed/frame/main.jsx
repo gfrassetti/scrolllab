@@ -333,8 +333,12 @@ function onMessage(e) {
 
   if (m.type === 'scrolllab:viewport') {
     if (m.viewportHeight) {
+      // En PIN la pantalla del widget puede ser menos que la del sitio (una
+      // barra fija arriba): cuando cambia, sus `vh` y el recorrido se recalculan.
+      const changed = Math.abs(m.viewportHeight - hostVh) > 1
       hostVh = m.viewportHeight
-      setHostVh(m.viewportHeight)
+      setHostVh(m.viewportHeight, m.pin && changed)
+      if (m.pin && changed && mode === 'pin') requestAnimationFrame(() => ScrollTrigger.refresh())
     }
     if (Number.isFinite(m.rectTop)) hostScroll = -m.rectTop
     if (mode === null) decide()

@@ -135,10 +135,8 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'atrium/PeopleScatter',
   'atrium/OrbitRing',
   'atrium/StatField',
-  'meridian/Hero',
   'meridian/Concept',
   'meridian/GallerySlider',
-  'meridian/Location',
   'kin/Intro',
   'kin/Collection',
   // Fuera, por diseño: los `Nav*` (un header fijo suelto no tiene sentido), lo
@@ -146,7 +144,11 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   // ServicesStone, HeroThree: el bundle es único y lo pagaría cada embed),
   // `kin/Hero` (abre la página: su entrada toma el scroll y la barra de navegación
   // fija se transforma; en un iframe solo quedan las barras),
-  // `meridian/Masterplan` (puntos dibujados sobre una foto aérea fija) y
+  // lo que trae media que el cliente no puede cambiar desde LAB (sin código no se
+  // reemplaza: sería la foto o el video de otro): `meridian/Hero` (el vuelo aéreo
+  // es una secuencia de cuadros), `meridian/Location` y `meridian/Masterplan`
+  // (puntos fijos sobre un mapa / una foto aérea), y FOLD entero (película al
+  // scroll: ni en LAB ni en el builder, ver sections.test.js),
   // `commerce/ProductGrid` (router, carrito y checkout del sitio).
 ])
 

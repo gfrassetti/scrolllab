@@ -431,10 +431,6 @@ const CASES = {
     props: { kicker: 'MKSFAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKSFAT',
   },
-  'meridian/Hero': {
-    props: { wordmark: 'MKHME', bg: '#141414', fg: '#f0f0f0' },
-    marker: 'MKHME',
-  },
   'meridian/Concept': {
     props: { kicker: 'MKCME', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKCME',
@@ -444,10 +440,6 @@ const CASES = {
     props: { galleryLabel: 'MKGSME', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKGSME',
     ariaMarker: true,
-  },
-  'meridian/Location': {
-    props: { ctaLabel: 'MKLME', bg: '#141414', fg: '#f0f0f0' },
-    marker: 'MKLME',
   },
   'kin/Intro': {
     props: { line1: 'MKIKI', bg: '#141414', fg: '#f0f0f0' },
@@ -769,6 +761,53 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
       }
     })
   }
+
+  // --- PIN con la barra fija del sitio: se pega debajo, no tapada ---
+  it('chapters/StackingCards — en un sitio con barra fija arriba, se pega debajo de la barra', async () => {
+    const { id, key } = await seed('chapters/StackingCards', { chapterLabel: 'MKHEAD' })
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'no-preference' })
+    const page = await context.newPage()
+    const url = 'http://localhost:4178/__header-host.html'
+    await page.route(url, (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: `<!doctype html><html><body style="margin:0">
+          <header style="position:fixed;top:0;left:0;right:0;height:64px;z-index:5;background:#111"></header>
+          <div style="height:100vh"></div>
+          <script src="http://localhost:4178/embed-dist/v1/loader.js" data-scrolllab data-key="${key}"
+            data-frame="http://localhost:4179/embed-dist/v1" data-api="${API}" async></script>
+          <div style="height:200vh"></div>
+        </body></html>`,
+      }),
+    )
+    try {
+      await page.goto(url)
+      const { frame } = await waitFrame(page)
+      const wrap = page.locator('[data-scrolllab-pin]')
+      await wrap.waitFor({ state: 'attached', timeout: 15_000 })
+      await sleep(800)
+      const { top, height } = await wrap.evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, height: el.offsetHeight }))
+      await page.evaluate((y) => window.scrollTo(0, y), top + (height - 900) / 2)
+      let state = null
+      for (let i = 0; i < 20; i++) {
+        await sleep(150)
+        state = await page.locator('iframe[data-scrolllab-frame]').evaluate((el) => {
+          const r = el.getBoundingClientRect()
+          return { top: Math.round(r.top), height: Math.round(r.height) }
+        })
+        const f = await frame.evaluate(() => ({ y: scrollY, max: document.documentElement.scrollHeight - innerHeight, ih: innerHeight }))
+        state = { ...state, ...f }
+        if (state.top === 64 && f.y > 0) break
+      }
+      assert.equal(state.top, 64, `el iframe no se pega debajo de la barra (top ${state.top})`)
+      assert.equal(state.height, 900 - 64, `el iframe no mide la pantalla menos la barra (${state.height})`)
+      assert.equal(state.ih, 900 - 64, 'el frame no ve su pantalla real')
+      assert.ok(Math.abs(state.y - state.max / 2) < state.max * 0.12, `el frame no sigue al sitio (${state.y} de ${state.max})`)
+    } finally {
+      await context.close()
+      await unseed(id)
+    }
+  })
 
   // --- formulario: el visitante manda y la API lo recibe (el mail va al dueño) ---
   it('contact/ContactForm — se manda desde el sitio ajeno y muestra el éxito', async () => {

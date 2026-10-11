@@ -987,11 +987,11 @@ versionado del embed es el del frame, no hay migración de configs.
 
 ---
 
-## Fase I — pineadas, sticky, formularios y fotos demo: 73 hosteables (2026-10-11)
+## Fase I — pineadas, sticky, formularios y fotos demo: 71 hosteables (2026-10-11)
 
-37 nuevos. Formularios: `contact/ContactForm` · `meridian/Contact` ·
+35 nuevos (37 en el screening; `meridian/Hero` y `meridian/Location` salieron después, ver Fase J). Formularios: `contact/ContactForm` · `meridian/Contact` ·
 `fizz/ContactSteps`. Portadas: `chapters/HeroKinetic` · `nocturne/HeroCinematic` ·
-`velocity/HeroStrike` · `unity/HeroTwin` · `atrium/HeroMassing` · `meridian/Hero`.
+`velocity/HeroStrike` · `unity/HeroTwin` · `atrium/HeroMassing`.
 Secciones: `chapters/ManifestoReveal` · `chapters/StickyImageStory` ·
 `chapters/HorizontalPanels` · `chapters/StackingCards` · `chapters/QuoteBreak` ·
 `nocturne/ZoomPortal` · `nocturne/StickyWordCycle` · `fizz/PopManifesto` ·
@@ -1000,7 +1000,7 @@ Secciones: `chapters/ManifestoReveal` · `chapters/StickyImageStory` ·
 `unity/StageLines` · `atrium/ClarityPair` · `atrium/BlueprintDraw` ·
 `atrium/ProjectRail` · `atrium/ProcessPin` · `atrium/PeopleScatter` ·
 `atrium/OrbitRing` · `atrium/StatField` · `meridian/Concept` ·
-`meridian/GallerySlider` · `meridian/Location` · `kin/Intro` · `kin/Collection`.
+`meridian/GallerySlider` · `kin/Intro` · `kin/Collection`.
 Cierres: `unity/FooterTrophy`.
 
 Quedan afuera, con el motivo: los `Nav*`; lo que mete Three.js en el bundle único
@@ -1086,7 +1086,7 @@ mensaje le llega por mail al dueño del widget, con reply-to al visitante.
 
 ### LAB: selector agrupado
 
-Con 73 widgets el «Nuevo» es un `<select>` con grupos (Portadas,
+Con 71 widgets el «Nuevo» es un `<select>` con grupos (Portadas,
 Secciones, Formularios, Cierres) y cada opción dice su modelo.
 
 ### Tests
@@ -1106,3 +1106,52 @@ Secciones, Formularios, Cierres) y cada opción dice su modelo.
 - Los e2e del embed corren con el dev server prendido:
   `E2E_API_PORT=8797 npm run test:e2e` (`embed/test/e2e/ports.mjs` manda a ese
   puerto lo que las páginas de prueba piden a :8787).
+
+---
+
+## Fase J — prueba a fondo: 71 widgets que se vean bien a toda costa (2026-10-11)
+
+Regla del dueño: en LAB solo entran widgets que se ven bien siempre. FOLD no
+entra ni a LAB ni al builder (`sections.test.js` lo fija).
+
+### Salieron
+
+- `meridian/Hero`: el vuelo aéreo es una secuencia de cuadros que el cliente no
+  puede cambiar desde el editor (sería el video de otro resort).
+- `meridian/Location`: puntos fijos sobre un mapa de una costa que no existe; las
+  posiciones no se editan (mismo motivo que `meridian/Masterplan`).
+
+### `npm run screen:lab -- --deep`
+
+Cada widget en 6 pasadas: 390 (teléfono con toque), 768 y 1280, con movimiento y
+con «reducir movimiento». Además de lo de Fase I mide: pedidos que fallan, fotos
+rotas, familias tipográficas que no cargaron, alto que no se queda quieto y texto
+que nunca se ve entero (cortado). `--header` corre el sitio con una barra fija
+arriba; `--jobs N` corre N widgets a la vez.
+
+Resultado sobre los 71 × 6: ninguna foto rota, ninguna fuente faltante, ningún
+error de JS, ningún scroll horizontal ni alto inestable. La única marca de red
+era una foto de picsum de NOCTURNE (ya reemplazada). Lo demás marcado es diseño
+(marquesinas y filas que se arrastran salen «cortadas»; etiquetas al 45 % y
+textos que entran al scrollear), revisado lámina por lámina.
+
+### Lo que encontró y se arregló
+
+- **FIZZ BubbleBenefits** (en el sitio, el builder, el ZIP y LAB): GSAP (entrada)
+  y la transición CSS del hover animaban el mismo `transform`; las tarjetas
+  quedaban inclinadas al 82 % y los puntos en escala 0. La entrada mueve un
+  envoltorio y el hover la tarjeta. Un barrido de todas las secciones del builder
+  (elementos con `_gsap` y transición de transform) no encontró otro caso que
+  trabe; de paso, tres botones declaraban `transition` sobre `transform` con
+  `hover/active:scale-*` (que en Tailwind v4 es la propiedad `scale`) y no
+  animaban.
+- **NOCTURNE** dejó picsum: 9 fotos propias (Higgsfield), con srcset.
+- **Barra fija del sitio**: una pineada se pegaba en `top: 0`, debajo del header
+  fijo de muchos sitios. El loader mide lo que tapa arriba (fixed/sticky, más
+  ancho que la mitad, más bajo que un tercio) al entrar en PIN y en cada resize,
+  pega el iframe debajo y le da al frame esa pantalla (sus `vh` miden eso). e2e:
+  «en un sitio con barra fija arriba, se pega debajo de la barra».
+- **Frame partido**: con 70 secciones el frame pesaba 149 KB gzip para cualquier
+  widget. Ahora cada sección es un archivo aparte (import dinámico): núcleo de
+  63 KB gzip, compartido y cacheado entre los widgets de una página, más 2–5 KB
+  de la sección.
