@@ -6,8 +6,32 @@ import os from 'node:os'
 import request from 'supertest'
 
 import { cleanLabFormMessage, LAB_FORM_SECTIONS } from '../../src/domain/labForms.js'
-import { buildLabFormMessage } from '../services/emailTemplatesLab.js'
 import { HOSTABLE_SECTIONS } from '../sections.js'
+
+// Los mails (y lo que importan: db.js) se cargan después de apuntar
+// STORE/FILE_DB_DIR a una carpeta temporal: un import de arriba abría la base
+// de desarrollo (storage/db) antes y los tests le escribían widgets.
+let buildLabFormMessage
+
+// Base y almacenamiento en una carpeta temporal ANTES de cualquier import que
+// abra db.js (los de arriba son puros; los demás van con import() más abajo).
+const storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lab-forms-'))
+Object.assign(process.env, {
+  NODE_ENV: 'development',
+  STORE: 'file',
+  AUTH_DEV_ENABLED: 'true',
+  MP_MOCK_ENABLED: 'true',
+  SESSION_SECRET: 'test-session-secret-min-24-chars',
+  DOWNLOAD_SECRET: 'test-download-secret-min-24-chars',
+  CLIENT_URL: 'http://localhost:5173',
+  API_PUBLIC_URL: 'http://localhost:8787',
+  FX_OFFLINE: 'true',
+  FX_FALLBACK_RATE: '1560',
+  HOSTED_FREE_QUOTA: '50',
+  RATE_LIMIT_DISABLED: 'true',
+  STORAGE_DIR: storageDir,
+  FILE_DB_DIR: path.join(storageDir, 'db'),
+})
 
 describe('cleanLabFormMessage', () => {
   it('etiqueta las claves fijas, deja las extra con su etiqueta y saca lo que no es respuesta', () => {
@@ -57,6 +81,10 @@ describe('cleanLabFormMessage', () => {
 })
 
 describe('buildLabFormMessage', () => {
+  before(async () => {
+    ;({ buildLabFormMessage } = await import('../services/emailTemplatesLab.js'))
+  })
+
   const message = {
     formType: 'quote',
     replyTo: 'ana@example.com',
@@ -92,25 +120,8 @@ describe('buildLabFormMessage', () => {
 describe('Formularios de LAB (API)', () => {
   let app
   let config
-  let storageDir
 
   before(async () => {
-    process.env.NODE_ENV = 'development'
-    process.env.STORE = 'file'
-    process.env.AUTH_DEV_ENABLED = 'true'
-    process.env.MP_MOCK_ENABLED = 'true'
-    process.env.SESSION_SECRET = 'test-session-secret-min-24-chars'
-    process.env.DOWNLOAD_SECRET = 'test-download-secret-min-24-chars'
-    process.env.CLIENT_URL = 'http://localhost:5173'
-    process.env.API_PUBLIC_URL = 'http://localhost:8787'
-    process.env.FX_OFFLINE = 'true'
-    process.env.FX_FALLBACK_RATE = '1560'
-    process.env.HOSTED_FREE_QUOTA = '50'
-    process.env.RATE_LIMIT_DISABLED = 'true'
-    storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lab-forms-'))
-    process.env.STORAGE_DIR = storageDir
-    process.env.FILE_DB_DIR = path.join(storageDir, 'db')
-
     const { loadConfig } = await import('../config.js')
     config = loadConfig()
     config.storageDir = storageDir
