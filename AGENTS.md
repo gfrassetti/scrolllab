@@ -2,7 +2,7 @@
 
 Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro (Argentina, ARS) y Paddle (resto del mundo, USD, merchant of record — [`docs/paddle.md`](docs/paddle.md)); el medio de pago viene marcado por ubicación y el comprador puede cambiarlo (selector «Medio de pago», un solo botón de pago). Auth: Google (o login de desarrollo).
 
-**Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. Brand: `src/lib/site.js` → `SCROLLLAB`.
+**Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template placeholder content stays in English. **Voz** (decisión del dueño, 2026-10-10): vos, pero sin mandar — imperativo solo en botones, links y CTA («Empezá gratis») y en pasos de instalación numerados; títulos, bajadas, avisos, estados vacíos y errores describen («Queda guardado y lo seguís cuando quieras», «Falta un email válido», «Podés intentarlo de nuevo»). Controles sin verbo conjugado: «Elegir widget». En inglés, imperativo normal. Brand: `src/lib/site.js` → `SCROLLLAB`.
 
 ## Qué vendemos (posicionamiento)
 
