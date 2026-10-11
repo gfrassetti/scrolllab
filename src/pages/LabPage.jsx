@@ -11,20 +11,13 @@ import HostedPlans from '../components/HostedPlans'
 import { api } from '../lib/api'
 import SnippetBox from '../components/SnippetBox'
 import Tabs, { TabPanel } from '../components/Tabs'
+import WidgetTable from '../features/lab/WidgetTable.jsx'
 import { getSection } from '../lib/sectionRegistry'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
 import { useI18n } from '../i18n'
 import { prefersReducedMotion } from '../lib/motion'
 
-const STATUS_TONE = {
-  published: 'text-success border-success/40 bg-success/10',
-  draft: 'text-ink/60 border-ink/25 bg-ink/5',
-  suspended: 'text-danger border-danger/40 bg-danger/10',
-}
-// Congelada por el plan: no es un estado guardado, es derivado (el server
-// manda `frozen`). Naranja, no rojo — es reversible: vuelve al re-suscribirse.
-const FROZEN_TONE = 'text-accent border-accent/40 bg-accent/10'
 
 /** `qa`: /lab-test — los planes de prueba (src/domain/qa.js). */
 export default function LabPage({ qa = false }) {
@@ -187,37 +180,25 @@ export default function LabPage({ qa = false }) {
       return inst && inst.status === 'published' && !inst.frozen
     }).length
 
-  const remove = async (id) => {
-    if (busy) return
+  // Acciones en bloque de la tabla de widgets (uno por uno en el servidor; si
+  // uno falla, se recarga igual para mostrar lo que sí se hizo).
+  const bulk = async (ids, action) => {
+    if (busy || ids.length === 0) return
     setBusy(true)
     try {
-      await api.hostedDelete(id)
-      await Promise.all([load(), refreshPlan()])
+      for (const id of ids) {
+        if (action === 'delete') await api.hostedDelete(id)
+        else await api.hostedUpdate(id, { unpublish: true })
+      }
     } catch (err) {
       setError(err.message)
     } finally {
+      await Promise.all([load(), refreshPlan()]).catch(() => {})
       setBusy(false)
     }
   }
-
-  // Borrar todos los borradores de una vez (con confirmación en el lugar): uno
-  // por uno eran decenas de clics para limpiar pruebas.
-  const [confirmDrafts, setConfirmDrafts] = useState(false)
-  const drafts = instances.filter((i) => i.status === 'draft')
-  const removeDrafts = async () => {
-    if (busy) return
-    setBusy(true)
-    try {
-      for (const inst of drafts) await api.hostedDelete(inst.id)
-      setConfirmDrafts(false)
-      await Promise.all([load(), refreshPlan()])
-    } catch (err) {
-      setError(err.message)
-      await load()
-    } finally {
-      setBusy(false)
-    }
-  }
+  const removeMany = (ids) => bulk(ids, 'delete')
+  const unpublishMany = (ids) => bulk(ids, 'unpublish')
 
   // Publicados contra el cupo del plan (no contra los creados: «5 de 6» se leía
   // como un cupo de 6). Las publicadas por encima del cupo están congeladas.
@@ -538,44 +519,6 @@ export default function LabPage({ qa = false }) {
                   </div>
                 </div>
 
-                {drafts.length >= 2 && (
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm" data-lab-drafts>
-                    {confirmDrafts ? (
-                      <>
-                        <span role="alert" className="text-ink/75">
-                          {t('lab.deleteDraftsConfirm', { n: drafts.length })}
-                        </span>
-                        <button
-                          type="button"
-                          data-autofocus
-                          onClick={removeDrafts}
-                          disabled={busy}
-                          className="ui-press min-h-11 bg-danger px-4 text-[11px] uppercase tracking-[0.2em] text-bone disabled:opacity-40"
-                        >
-                          {busy ? t('lab.deletingDrafts') : t('lab.deleteDraftsYes')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDrafts(false)}
-                          disabled={busy}
-                          className="ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
-                        >
-                          {t('lab.cancel')}
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDrafts(true)}
-                        disabled={busy}
-                        className="tpl-hit relative uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
-                      >
-                        {t('lab.deleteDrafts', { n: drafts.length })}
-                      </button>
-                    )}
-                  </div>
-                )}
-
                 {labLocked && (
                   <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5 md:p-6">
                     <p className="text-body text-ink/80">
@@ -608,60 +551,17 @@ export default function LabPage({ qa = false }) {
                     <p className="mt-6 text-body text-ink/55">{t('lab.empty')}</p>
                   )
                 ) : (
-                  <ul className="mt-6 space-y-3">
-                    {instances.map((inst) => (
-                      <li key={inst.id} className="border border-ink/15 p-4 md:p-5" data-lab-widget>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                          <span className="text-body font-medium">{sectionLabel(inst.sectionId)}</span>
-                          <span className="font-mono text-[11px] text-ink/40">{inst.sectionId}</span>
-                          <span
-                            className={`border px-2 py-0.5 text-eyebrow uppercase ${
-                              inst.frozen ? FROZEN_TONE : STATUS_TONE[inst.status] || STATUS_TONE.draft
-                            }`}
-                          >
-                            {inst.frozen ? t('lab.status.frozen') : t(`lab.status.${inst.status}`)}
-                          </span>
-                          {inst.status === 'published' && !inst.frozen && inst.views > 0 && (
-                            <span className="text-body-sm tabular-nums text-ink/45">
-                              {t('lab.views', { n: inst.views })}
-                            </span>
-                          )}
-                          {inst.status === 'published' && !inst.frozen && inst.stopsOnPlanEnd && planStopsAt && (
-                            <span className="text-body-sm uppercase tracking-[0.14em] text-accent/90">
-                              {t('lab.stopsOn', { date: fmtDate(planStopsAt) })}
-                            </span>
-                          )}
-                          <Link
-                            to={`/lab/${inst.id}`}
-                            className="tpl-hit relative ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
-                          >
-                            {t('lab.edit')}
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => remove(inst.id)}
-                            disabled={busy}
-                            className="tpl-hit relative text-body-sm uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
-                          >
-                            {t('lab.delete')}
-                          </button>
-                        </div>
-
-                        {inst.status === 'published' ? (
-                          <div className="mt-4">
-                            {inst.frozen && (
-                              <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-body-sm text-ink/75">
-                                {t('lab.frozenHint')}
-                              </p>
-                            )}
-                            <SnippetBox embedKey={inst.key} loaderInfo={loaderInfo} />
-                          </div>
-                        ) : (
-                          <p className="mt-2 text-body-sm text-ink/50">{t('lab.draftHint')}</p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  <WidgetTable
+                    t={t}
+                    instances={instances}
+                    sectionLabel={sectionLabel}
+                    loaderInfo={loaderInfo}
+                    busy={busy}
+                    planStopsAt={planStopsAt}
+                    fmtDate={fmtDate}
+                    onRemoveMany={removeMany}
+                    onUnpublishMany={unpublishMany}
+                  />
                 )}
               </TabPanel>
 
