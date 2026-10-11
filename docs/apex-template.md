@@ -91,3 +91,24 @@ checkout, en el código y en el README cuando el template se registre.
 - Elegir el archivo por `matchMedia` al montar es frágil con ventanas que cambian de ancho
   (un navegador integrado reportó 0 px al montar y quedó con el film de teléfono estirado):
   por eso se escucha el cambio de breakpoint.
+
+## 7. Builder y LAB (sección por sección)
+
+Regla del dueño: cada sección de APEX entra al **builder** y se evalúa para **LAB** al
+construirse, no al final.
+
+| Sección | Builder | LAB | Notas |
+|---|---|---|---|
+| `apex/Hero` | sí (paleta, grupo APEX) | sí (`HOSTABLE_SECTIONS`, FLOW) | 24 campos: texto, links, capítulos (lista, tope 8), film/póster (URL), grano on/off, 4 colores |
+
+- **Campos:** `src/domain/sectionFields/fields/apex.js`. El servidor valida por nombre:
+  `washColor` es color; `filmSrc`, `filmSrcMobile`, `poster`, `posterMobile` son URL de
+  assets (https o ruta del sitio).
+- **Fuente:** el wrapper del modelo trae Inter Tight (`modelWrappers.js`): una
+  composición no tiene `ApexPage`.
+- **ZIP:** `publicAssets` del modelo lleva `public/apex/*` y `scripts/apex-reel.mjs`.
+  Una composición con el hero se lleva el film de muestra y el script para rehacerlo.
+- **LAB:** ver `docs/hosted-component-plan.md` (Fase K). El menú del teléfono usa un
+  alias liviano en el embed; la entrada va al doble de velocidad en el widget.
+- **Check:** `check:builder` mira el atributo `poster` del video; el póster del teléfono
+  está exento (solo se aplica con el viewport angosto).

@@ -70,6 +70,11 @@ export const ASSET_URL_KEYS = new Set([
   'pathImgB',
   // El form de contacto hace POST acá: una URL https o una ruta del sitio.
   'endpoint',
+  // APEX: el film del hero y sus pósters (escritorio y teléfono).
+  'filmSrc',
+  'filmSrcMobile',
+  'poster',
+  'posterMobile',
 ])
 
 /**
@@ -119,6 +124,8 @@ export const COLOR_PROP_KEYS = new Set([
   'cardBg',
   'bandBg',
   'bandBg2',
+  // APEX: el lavado de color sobre el film.
+  'washColor',
   // KIN: la paleta de las ilustraciones de la colección.
   'artPaper',
   'artInk',

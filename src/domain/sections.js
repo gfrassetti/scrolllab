@@ -135,6 +135,9 @@ const BY_MODEL = {
     Visit: 'section',
     Footer: 'footer',
   },
+  apex: {
+    Hero: 'hero',
+  },
   signal: {
     NavSignal: 'nav',
     HeroSignal: 'hero',

@@ -33,7 +33,7 @@ const stubMedia = {
 // reescriben a URL completa del sitio, que ya las sirve. Solo los defaults del
 // código: lo que el cliente carga en LAB ya es https:// (el server lo exige).
 const SITE_ORIGIN = process.env.EMBED_SITE_ORIGIN || 'https://www.scrolllab.com.ar'
-const SITE_ASSET_DIRS = ['meridian']
+const SITE_ASSET_DIRS = ['meridian', 'apex']
 const siteAssets = {
   name: 'embed-site-assets',
   enforce: 'pre',
@@ -101,6 +101,11 @@ export default defineConfig({
       {
         find: '../../../hooks/useLenis',
         replacement: path.resolve(here, 'src/lenis.js'),
+      },
+      // Menú del teléfono sin Lenis ni scroll táctil normalizado (ver src/mobileMenu.js)
+      {
+        find: '../../../hooks/useMobileMenu',
+        replacement: path.resolve(here, 'src/mobileMenu.js'),
       },
     ],
   },

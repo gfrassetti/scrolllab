@@ -167,6 +167,15 @@ const MODEL_FILES = {
     pageName: 'App.jsx',
     importPrefix: './components/sections/kin',
   },
+  apex: {
+    page: 'src/pages/ApexPage.jsx',
+    sectionsDir: 'src/components/sections/apex',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/apex',
+    // The demo film is sample media: the buyer rebuilds it from their own five
+    // clips with scripts/apex-reel.mjs (docs/apex-template.md).
+    publicAssets: [...publicDirAssets('apex'), 'scripts/apex-reel.mjs'],
+  },
   fold: {
     page: 'src/pages/FoldPage.jsx',
     sectionsDir: 'src/components/sections/fold',

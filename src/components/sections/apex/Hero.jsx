@@ -24,9 +24,19 @@ import { useMobileMenu } from '../../../hooks/useMobileMenu'
  *  - Calm (reduce motion / data saver): the film is not played; the graded
  *    poster is the hero and the text fades in. Never a hole.
  *
+ * Builder / LAB: every text, link, colour and the film itself are fields; the
+ * grain is a toggle. `flow` (only LAB's iframe passes it) drops the scroll-out
+ * scrub: a hosted widget sits in someone else's page and must not go black as
+ * it leaves.
+ *
  * The footage in /public/apex is SAMPLE media: replace the five clips and run
  * `node scripts/apex-reel.mjs` (README: "The film").
  */
+
+// The demo film lives in the site's public/ folder. A buyer who points `filmSrc`
+// at their own file gets their own (and a phone falls back to the same file).
+const DEMO = { film: '/apex/hero.mp4', mobile: '/apex/hero-m.mp4', poster: '/apex/poster.jpg', posterMobile: '/apex/poster-m.jpg' }
+const DEFAULT_CHAPTERS = ['Approach', 'Silhouette', 'Detail', 'Cabin', 'Departure']
 
 const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif" }
 const LABEL = {
@@ -66,14 +76,20 @@ export default function Hero({
   discoverLabel = 'Discover the car',
   discoverHref = '#models',
   scrollLabel = 'Scroll',
-  filmSrc = '/apex/hero.mp4',
-  filmSrcMobile = '/apex/hero-m.mp4',
-  poster = '/apex/poster.jpg',
-  posterMobile = '/apex/poster-m.jpg',
-  manifestSrc = '/apex/manifest.json',
+  chapters,
+  chapterLabel = 'Chapter',
+  chaptersLabel = 'Film chapters',
+  filmSrc,
+  filmSrcMobile,
+  poster,
+  posterMobile,
+  manifestSrc,
+  showGrain = 'on',
+  flow = false,
   bg,
   fg,
   accent,
+  washColor,
 }) {
   const rootRef = useRef(null)
   const videoRef = useRef(null)
@@ -97,22 +113,37 @@ export default function Hero({
     return () => mql.removeEventListener('change', onChange)
   }, [])
   const [still] = useState(() => prefersReducedMotion() || filmShouldStay())
-  const [chapters, setChapters] = useState(null)
 
+  const film = filmSrc || DEMO.film
+  const demoFilm = film === DEMO.film
+  const filmPhone = filmSrcMobile || (demoFilm ? DEMO.mobile : film)
+  const posterDesktop = poster || (demoFilm ? DEMO.poster : undefined)
+  const posterPhone = posterMobile || poster || (demoFilm ? DEMO.posterMobile : undefined)
+  const manifestUrl = manifestSrc || film.replace(/[^/]*$/, 'manifest.json')
+
+  // Where each take starts on the loop's clock, written next to the film by
+  // scripts/apex-reel.mjs. Missing → the takes are taken as equal parts.
+  const [manifest, setManifest] = useState(null)
   useEffect(() => {
     let cancelled = false
-    fetch(manifestSrc)
+    setManifest(null)
+    fetch(manifestUrl)
       .then((r) => (r.ok ? r.json() : null))
       .then((m) => {
-        if (cancelled || !m?.shots?.length) return
-        shotsRef.current = m.shots
-        setChapters(m.shots.map((s) => s.label))
+        if (!cancelled && Array.isArray(m?.shots) && m.shots.length) setManifest(m.shots)
       })
       .catch(() => {})
     return () => {
       cancelled = true
     }
-  }, [manifestSrc])
+  }, [manifestUrl])
+
+  // The names come from the editor first, then the manifest, then the demo's.
+  const edited = Array.isArray(chapters) ? chapters.map((c) => String(c?.label || '').trim()).filter(Boolean) : []
+  const labels = edited.length ? edited : manifest ? manifest.map((s) => s.label) : DEFAULT_CHAPTERS
+  const labelsRef = useRef(labels)
+  labelsRef.current = labels
+  shotsRef.current = manifest || []
 
   // Play only while the hero is on screen; follow the film's clock for the chapters.
   useEffect(() => {
@@ -126,7 +157,14 @@ export default function Hero({
     const label = () => root.querySelector('[data-apex-chapter]')
 
     const paint = () => {
-      const shots = shotsRef.current
+      const names = labelsRef.current
+      const known = shotsRef.current
+      const dur = video.duration
+      let shots = []
+      if (known.length === names.length) shots = known
+      else if (Number.isFinite(dur) && dur > 0) {
+        shots = names.map((_, k) => ({ start: (dur * k) / names.length, end: (dur * (k + 1)) / names.length }))
+      }
       if (shots.length) {
         const t = video.currentTime
         let i = shots.findIndex((s) => t >= s.start && t < s.end)
@@ -140,7 +178,7 @@ export default function Hero({
             el.dataset.state = k < i ? 'past' : k === i ? 'on' : 'next'
           })
           const l = label()
-          if (l) l.textContent = `${pad(i + 1)} / ${pad(shots.length)} — ${s.label}`
+          if (l) l.textContent = `${pad(i + 1)} / ${pad(shots.length)} — ${names[i]}`
         }
         const fill = nodes[i]?.querySelector('[data-apex-fill]')
         if (fill) fill.style.transform = `scaleX(${p.toFixed(3)})`
@@ -173,7 +211,7 @@ export default function Hero({
       io.disconnect()
       cancelAnimationFrame(raf)
     }
-  }, [still, chapters])
+  }, [still, labels.length])
 
   useGSAP(
     () => {
@@ -183,14 +221,23 @@ export default function Hero({
         gsap.set('[data-apex-curtain]', { autoAlpha: 0 })
         return calmReveal('[data-apex-reveal]', { y: 10, stagger: 0.1 })
       }
-      const enter = gsap.timeline({ defaults: { ease: 'power3.out' } })
+      const enter = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+        scrollTrigger: { trigger: root, start: 'top 92%', once: true },
+      })
+      // On the page the hero is the hook, so it takes its time (headline → pause →
+      // sub copy → chrome). As a widget it is on screen only while someone scrolls
+      // past: the same order, in about half the time.
+      const k = flow ? 0.5 : 1
       enter
-        .to('[data-apex-curtain]', { autoAlpha: 0, duration: 1.2, ease: 'power2.inOut' }, 0)
-        .fromTo('[data-apex-line]', { yPercent: 112 }, { yPercent: 0, duration: 1.15, stagger: 0.12 }, 0.5)
-        .fromTo('[data-apex-sub]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.1 }, 2.15)
-        .fromTo('[data-apex-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, stagger: 0.06 }, 2.5)
+        .to('[data-apex-curtain]', { autoAlpha: 0, duration: 1.2 * k, ease: 'power2.inOut' }, 0)
+        .fromTo('[data-apex-line]', { yPercent: 112 }, { yPercent: 0, duration: 1.15 * k, stagger: 0.12 * k }, 0.5 * k)
+        .fromTo('[data-apex-sub]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8 * k, stagger: 0.1 * k }, 2.15 * k)
+        .fromTo('[data-apex-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7 * k, stagger: 0.06 * k }, 2.5 * k)
 
       // Handoff: the film comes a little closer and dips into the next black.
+      // Not in a hosted widget: it sits in someone else's page.
+      if (flow) return undefined
       const out = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: true },
@@ -201,7 +248,7 @@ export default function Hero({
         .to('[data-apex-copy]', { yPercent: -10, autoAlpha: 0 }, 0)
       return undefined
     },
-    { scope: rootRef, dependencies: [still] },
+    { scope: rootRef, dependencies: [still, flow] },
   )
 
   const jump = (i) => {
@@ -210,12 +257,12 @@ export default function Hero({
     if (video && s) video.currentTime = s.start + 0.04
   }
 
-  const names = chapters || ['', '', '', '', '']
+  const names = labels
   const vars = {
     '--apex-ink': bg || '#04070d',
     '--apex-fg': fg || '#e8edf6',
     '--apex-accent': accent || '#9cc3ff',
-    '--apex-wash': '#0b2a63',
+    '--apex-wash': washColor || '#0b2a63',
   }
 
   return (
@@ -230,8 +277,8 @@ export default function Hero({
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
-          src={phone ? filmSrcMobile : filmSrc}
-          poster={phone ? posterMobile : poster}
+          src={phone ? filmPhone : film}
+          poster={phone ? posterPhone : posterDesktop}
           muted
           loop
           playsInline
@@ -248,11 +295,13 @@ export default function Hero({
         <div aria-hidden="true" className="apex-wash pointer-events-none absolute inset-0" />
         <div aria-hidden="true" className="apex-shade pointer-events-none absolute inset-0" />
         <div aria-hidden="true" className="apex-vignette pointer-events-none absolute inset-0" />
-        <div
-          aria-hidden="true"
-          className="apex-grain pointer-events-none absolute inset-0 overflow-hidden"
-          style={{ '--apex-noise': `url("data:image/svg+xml;utf8,${NOISE}")` }}
-        />
+        {showGrain === 'off' ? null : (
+          <div
+            aria-hidden="true"
+            className="apex-grain pointer-events-none absolute inset-0 overflow-hidden"
+            style={{ '--apex-noise': `url("data:image/svg+xml;utf8,${NOISE}")` }}
+          />
+        )}
       </div>
       <div data-apex-dim aria-hidden="true" className="pointer-events-none absolute inset-0 z-[5] opacity-0" style={{ background: 'var(--apex-ink)' }} />
       <div data-apex-curtain aria-hidden="true" className="pointer-events-none absolute inset-0 z-40" style={{ background: 'var(--apex-ink)' }} />
@@ -260,7 +309,7 @@ export default function Hero({
       <div className="absolute inset-0 z-10 flex flex-col px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-[2.4vw]">
         {/* Top: mark, one sentence, links, one action. */}
         <header data-apex-chrome className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:text-[max(11px,0.74vw)]" style={LABEL}>
-          <a href="#top" className="tpl-hit relative text-[15px] font-bold tracking-[0.34em] md:text-[max(15px,1.05vw)]" aria-label={`${brand} — home`}>
+          <a href="#top" className="tpl-hit relative text-[15px] font-bold tracking-[0.34em] md:text-[max(15px,1.05vw)]" aria-label={brand}>
             {brand}
           </a>
           <p className="hidden max-w-[22ch] opacity-70 md:block md:absolute md:left-[28%]">{tagline}</p>
@@ -314,19 +363,19 @@ export default function Hero({
         <footer data-apex-chrome className="flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:text-[max(11px,0.74vw)]" style={LABEL}>
           <div className="min-w-0">
             <p data-apex-chapter className="mb-3 tabular-nums opacity-80" aria-live="off">
-              {chapters ? `01 / ${pad(chapters.length)} — ${chapters[0]}` : ''}
+              {`01 / ${pad(names.length)} — ${names[0]}`}
             </p>
-            <div className="flex items-center gap-[0.6vw]" role="group" aria-label="Film chapters">
+            <div className="flex items-center gap-[0.6vw]" role="group" aria-label={chaptersLabel}>
               {names.map((name, i) => (
                 <button
                   key={i}
                   type="button"
                   data-apex-seg
                   data-state={i === 0 ? 'on' : 'next'}
-                  aria-label={name ? `Chapter ${i + 1}: ${name}` : `Chapter ${i + 1}`}
+                  aria-label={`${chapterLabel} ${i + 1}: ${name}`}
                   onClick={() => jump(i)}
                   className="apex-seg tpl-hit relative block h-[2px] w-[clamp(28px,4.2vw,64px)]"
-                  disabled={!chapters || still}
+                  disabled={still}
                 >
                   <span data-apex-fill className="absolute inset-0 origin-left" style={{ background: 'var(--apex-accent)', transform: 'scaleX(0)' }} />
                 </button>

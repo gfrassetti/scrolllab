@@ -112,6 +112,7 @@ const APPROVED = [
   'kin/Press',
   'kin/Visit',
   'kin/Footer',
+  'apex/Hero',
   'contact/ContactForm',
   'commerce/ProductGrid',
 ]

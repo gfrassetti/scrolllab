@@ -9,6 +9,7 @@ import { UNITY_FIELDS } from './fields/unity.js'
 import { RATIO_FIELDS } from './fields/ratio.js'
 import { ATRIUM_FIELDS } from './fields/atrium.js'
 import { KIN_FIELDS } from './fields/kin.js'
+import { APEX_FIELDS } from './fields/apex.js'
 import { CONTACT_FIELDS } from './fields/contact.js'
 import { COMMERCE_FIELDS } from './fields/commerce.js'
 
@@ -46,6 +47,7 @@ export const SECTION_FIELDS = {
   ...RATIO_FIELDS,
   ...ATRIUM_FIELDS,
   ...KIN_FIELDS,
+  ...APEX_FIELDS,
   ...CONTACT_FIELDS,
   ...COMMERCE_FIELDS,
 }
