@@ -63,9 +63,15 @@ export const SITE_SEO = {
     'plantillas web con scroll animado, plantillas parallax, scroll suave, templates con animaciones, plantillas html, plantillas con código fuente, scroll animation website templates, parallax website templates, smooth scroll templates, scrollytelling templates, plantillas scrollytelling, landing page templates, estudio de diseño web',
 }
 
-/** Meta propia del builder (sí se indexa). Espejo en el boot de index.html. */
+/**
+ * Meta propia del builder (sí se indexa). Espejo en el boot de index.html.
+ * Título (2026-10-11, el dueño): «Sitio con scroll cinematográfico» no decía
+ * qué hace la página ni qué te llevás. Ahora nombra la acción (armar una
+ * página por secciones) y el entregable (código fuente), en la misma forma de
+ * frase nominal que LAB («Online widgets»).
+ */
 export const BUILDER_SEO = {
-  title: 'Scroll Lab — Builder | Sitio con scroll cinematográfico',
+  title: 'Scroll Lab — Builder | Armado de páginas con código fuente',
   description:
     'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente, editable.',
 }
