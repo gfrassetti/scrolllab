@@ -540,6 +540,13 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
       headers,
       body: JSON.stringify({ sectionId: 'atelier/KeyFacts' }),
     }).then((r) => r.json())
+    // Los packs son de los planes pagos: alta con el mock de MP.
+    const sub = await fetch(`${API}/api/subscriptions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ plan: 'hosted_studio', cycle: 'monthly' }),
+    }).then((r) => r.json())
+    await fetch(`${API}${sub.activateUrl}`, { method: 'POST', headers })
     const created = await fetch(`${API}/api/hosted-packs`, {
       method: 'POST',
       headers,

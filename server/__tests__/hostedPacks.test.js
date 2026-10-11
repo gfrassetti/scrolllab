@@ -28,6 +28,7 @@ describe('LAB packs (file store)', () => {
     process.env.FX_FALLBACK_RATE = '1560'
     process.env.FX_SPREAD_PCT = '0'
     process.env.HOSTED_FREE_QUOTA = '50'
+    process.env.RATE_LIMIT_DISABLED = 'true'
     storageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-packs-'))
     process.env.STORAGE_DIR = storageDir
     process.env.FILE_DB_DIR = path.join(storageDir, 'db')
@@ -51,9 +52,15 @@ describe('LAB packs (file store)', () => {
     }
   })
 
-  async function loginAgent(email) {
+  async function loginAgent(email, { plan = 'hosted_pro' } = {}) {
     const agent = request.agent(app)
     await agent.post('/api/auth/dev-login').send({ email, name: 'Packer' })
+    // Los packs son de los planes pagos (alta con el mock de MP).
+    if (plan) {
+      const sub = await agent.post('/api/subscriptions').send({ plan, cycle: 'monthly' })
+      assert.equal(sub.status, 200, JSON.stringify(sub.body))
+      await agent.post(sub.body.activateUrl)
+    }
     return agent
   }
 
@@ -111,18 +118,54 @@ describe('LAB packs (file store)', () => {
 
   it('una congelada por el plan no se sirve dentro del pack', async () => {
     const agent = await loginAgent('frozen-pack@test.com')
-    const older = await widget(agent, 'chapters/FooterCTA')
-    const newer = await widget(agent, 'chapters/BigNumbers')
-    const pack = (await agent.post('/api/hosted-packs').send({ items: [newer.id, older.id] })).body.pack
-
-    const before = config.hostedFreeQuota
-    config.hostedFreeQuota = 1 // el plan cubre solo la más vieja
-    try {
-      assert.deepEqual((await servedKeys(pack.key)).body.keys, [older.key])
-    } finally {
-      config.hostedFreeQuota = before
+    const widgets = []
+    for (const id of ['chapters/FooterCTA', 'chapters/BigNumbers', 'atelier/KeyFacts', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'monolith/FooterBrutal']) {
+      widgets.push(await widget(agent, id))
     }
-    assert.deepEqual((await servedKeys(pack.key)).body.keys, [newer.key, older.key])
+    const newest = widgets.at(-1)
+    const oldest = widgets[0]
+    const pack = (await agent.post('/api/hosted-packs').send({ items: [newest.id, oldest.id] })).body.pack
+    assert.deepEqual((await servedKeys(pack.key)).body.keys, [newest.key, oldest.key])
+
+    // Baja a Starter (5): la sexta, la más nueva, queda congelada.
+    const { fileDb } = await import('../fileStore.js')
+    const me = (await agent.get('/api/auth/me')).body.user
+    const sub = (await fileDb.findSubscriptionsByUser(me.id))[0]
+    sub.plan = 'hosted_starter'
+    await sub.save()
+    assert.deepEqual((await servedKeys(pack.key)).body.keys, [oldest.key])
+  })
+
+  // El plan gratis tiene 1 widget: un pack no junta nada, así que no hay packs.
+  it('plan gratis: no crea packs y los que tenía dejan de mostrarse hasta volver a un plan', async () => {
+    const free = await loginAgent('free-pack@test.com', { plan: null })
+    await widget(free, 'chapters/FooterCTA')
+    const denied = await free.post('/api/hosted-packs').send({ name: 'x' })
+    assert.equal(denied.status, 402)
+    assert.match(denied.body.error, /planes pagos/)
+    assert.equal((await free.get('/api/hosted-packs')).body.allowed, false)
+
+    // Con plan arma un pack; si después cae a gratis, el pack se apaga.
+    const paid = await loginAgent('lapsed-pack@test.com')
+    const a = await widget(paid, 'chapters/FooterCTA')
+    const pack = (await paid.post('/api/hosted-packs').send({ items: [a.id] })).body.pack
+    assert.equal((await paid.get('/api/hosted-packs')).body.allowed, true)
+    assert.deepEqual((await servedKeys(pack.key)).body.keys, [a.key])
+
+    const { fileDb } = await import('../fileStore.js')
+    const me = (await paid.get('/api/auth/me')).body.user
+    const sub = (await fileDb.findSubscriptionsByUser(me.id))[0]
+    const end = sub.currentPeriodEnd
+    sub.canceledAt = new Date().toISOString()
+    sub.currentPeriodEnd = new Date(Date.now() - 1000).toISOString()
+    await sub.save()
+    assert.equal((await servedKeys(pack.key)).status, 402)
+
+    sub.canceledAt = undefined
+    sub.status = 'authorized'
+    sub.currentPeriodEnd = end
+    await sub.save()
+    assert.deepEqual((await servedKeys(pack.key)).body.keys, [a.key], 'vuelve solo con el plan')
   })
 
   it('dominios: el pack y cada sección respetan su allowlist', async () => {

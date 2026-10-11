@@ -139,6 +139,13 @@ export function createHostedRouter({ config, limits }) {
 
   const notServable = async (inst, host) => (await servability(inst, host)).error
 
+  /** Los packs son de los planes pagos: con el plan gratis (1 widget) no juntan nada. */
+  const PACKS_PAID_ONLY = 'Los packs vienen con los planes pagos'
+  async function packsAllowed(userId) {
+    const ent = await resolveEntitlement(userId, config, { persist: false })
+    return ent.plan !== 'free'
+  }
+
   function publicPack(pack) {
     return {
       id: db.uid(pack) || pack.id,
@@ -263,6 +270,8 @@ export function createHostedRouter({ config, limits }) {
       if (!pack) throw new HttpError(404, 'No encontrado')
       const host = requestHost(req)
       if (!domainAllowed(pack.domains, host)) throw new HttpError(403, 'Dominio no autorizado')
+      // Bajó a gratis: el pack se apaga (sus widgets sueltos siguen sus reglas).
+      if (!(await packsAllowed(pack.userId))) throw new HttpError(402, PACKS_PAID_ONLY)
 
       const keys = []
       for (const id of pack.items || []) {
@@ -438,8 +447,14 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted-packs',
     requireAuth,
     asyncHandler(async (req, res) => {
-      const packs = await db.findHostedPacksByUser(db.uid(req.user))
-      res.json({ packs: packs.map(publicPack), maxItems: PACK_MAX_ITEMS })
+      const userId = db.uid(req.user)
+      const packs = await db.findHostedPacksByUser(userId)
+      res.json({
+        packs: packs.map(publicPack),
+        maxItems: PACK_MAX_ITEMS,
+        // Con el plan gratis no se crean ni se muestran (la UI lo explica).
+        allowed: await packsAllowed(userId),
+      })
     }),
   )
 
@@ -449,6 +464,7 @@ export function createHostedRouter({ config, limits }) {
     limits.hosted,
     asyncHandler(async (req, res) => {
       const userId = db.uid(req.user)
+      if (!(await packsAllowed(userId))) throw new HttpError(402, PACKS_PAID_ONLY, { expose: true })
       const mine = await db.findHostedPacksByUser(userId)
       if (mine.length >= PACK_MAX_PER_USER) {
         throw new HttpError(400, `Podés tener hasta ${PACK_MAX_PER_USER} packs`, {

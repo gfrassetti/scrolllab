@@ -336,6 +336,9 @@ try {
     return data
   }
   await call('POST', '/api/auth/dev-login', { email: 'embed-stacks@test.com' })
+  // Los packs son de los planes pagos: alta con el mock de MP.
+  const sub = await call('POST', '/api/subscriptions', { plan: 'hosted_studio', cycle: 'monthly' })
+  await call('POST', sub.activateUrl)
 
   const hostable = new Set(HOSTABLE_SECTIONS.map((s) => (typeof s === 'string' ? s : s.id)))
   const sections = WANTED.filter((id) => hostable.has(id) && editProps(id, 'x'))

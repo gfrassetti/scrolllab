@@ -65,6 +65,8 @@ export default function LabPage({ qa = false }) {
 
   const [instances, setInstances] = useState([])
   const [packs, setPacks] = useState([])
+  // Los packs son de los planes pagos (el servidor lo decide; la UI lo explica).
+  const [packsAllowed, setPacksAllowed] = useState(true)
   const [sections, setSections] = useState([])
   const [picked, setPicked] = useState('')
   // Widgets sueltos o packs: la pestaña vive en la URL (?tab=packs) para que
@@ -121,6 +123,7 @@ export default function LabPage({ qa = false }) {
       ])
       setInstances(list.instances || [])
       setPacks(packRes.packs || [])
+      setPacksAllowed(packRes.allowed !== false)
       const secList = secs.sections || []
       setSections(secList)
       setPicked((p) => p || secList[0] || '')
@@ -664,20 +667,29 @@ export default function LabPage({ qa = false }) {
 
               {/* Packs: varios widgets en una página, un solo snippet. */}
               <TabPanel idBase="lab-ws" id="packs" value={tab} className="pt-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <p className="max-w-[64ch] text-body-sm text-ink/60">{t('lab.pack.intro')}</p>
-                  <button
-                    type="button"
-                    onClick={createPack}
-                    disabled={busy || instances.length === 0}
-                    title={instances.length === 0 ? t('lab.pack.needWidgets') : undefined}
-                    className="btn btn-ghost disabled:opacity-40"
-                  >
-                    {t('lab.pack.new')}
-                  </button>
-                </div>
+                {packsAllowed ? (
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <p className="max-w-[64ch] text-body-sm text-ink/60">{t('lab.pack.intro')}</p>
+                    <button
+                      type="button"
+                      onClick={createPack}
+                      disabled={busy || instances.length === 0}
+                      title={instances.length === 0 ? t('lab.pack.needWidgets') : undefined}
+                      className="btn btn-ghost disabled:opacity-40"
+                    >
+                      {t('lab.pack.new')}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border border-accent/40 bg-accent/[0.06] p-5 md:p-6" data-lab-packs-locked>
+                    <p className="max-w-[60ch] text-body text-ink/80">{t('lab.pack.paidOnly')}</p>
+                    <a href="#planes" onClick={goToPlanes} className="btn btn-primary mt-4">
+                      {t('lab.compare.labCta')}
+                    </a>
+                  </div>
+                )}
 
-                {packs.length === 0 ? (
+                {!packsAllowed && packs.length === 0 ? null : packs.length === 0 ? (
                   <div className="mt-6 border border-dashed border-ink/20 px-5 py-8 text-center">
                     <p className="text-body text-ink/55">
                       {instances.length === 0 ? t('lab.pack.needWidgets') : t('lab.pack.empty')}
@@ -705,7 +717,9 @@ export default function LabPage({ qa = false }) {
                             </Link>
                           </div>
                           <div className="mt-4">
-                            {shownCount > 0 ? (
+                            {!packsAllowed ? (
+                              <p className="text-body-sm text-ink/55">{t('lab.pack.pausedNote')}</p>
+                            ) : shownCount > 0 ? (
                               <SnippetBox embedKey={pack.key} loaderInfo={loaderInfo} />
                             ) : (
                               <p className="text-body-sm text-ink/55">

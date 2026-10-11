@@ -121,11 +121,11 @@
       },
       {
         "q": "¿Un pack es lo mismo que el Builder?",
-        "a": "No. Se parecen porque los dos juntan secciones, pero el pack vive en nuestros servidores y lo pegás en el sitio que ya tenés, sin programar. El Builder te da el código fuente de una página nueva para que la programes y la alojes vos."
+        "a": "No. Se parecen porque los dos juntan secciones, pero el pack vive en nuestros servidores y lo pegás en el sitio que ya tenés, sin programar. Con el Builder armás una página nueva con nuestras secciones y la descargás."
       },
       {
         "q": "¿Un pack ocupa más cupo de mi plan?",
-        "a": "No. El cupo cuenta widgets publicados, y cada widget del pack ya está contado. Podés poner el mismo widget en varios packs sin gastar más."
+        "a": "No. El cupo cuenta widgets publicados, y cada widget del pack ya está contado. Podés poner el mismo widget en varios packs sin gastar más. Los packs vienen con los planes pagos (Starter, Pro y Studio)."
       }
     ],
     "views": "{{n}} vistas",
@@ -149,6 +149,7 @@
     "planFeatures": [
       "Cambiás textos, fotos y colores cuando quieras, sin programar",
       "Hosting incluido: no instalás nada",
+      "Packs: juntás tus widgets en una sección con un solo código",
       "Se ve bien en teléfono, tablet y computadora",
       "Mejoras y widgets nuevos sin costo extra",
       "Contador de vistas y soporte por email"
@@ -177,7 +178,7 @@
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
     "planSubscribe": "Suscribirme",
-    "freeTierNote": "El plan gratis incluye {{n}} widget publicado, sin tarjeta ni vencimiento, con un sello chico «Hecho con Scroll Lab» debajo del widget. Los planes suman más widgets, sacan el tope y sacan el sello.",
+    "freeTierNote": "El plan gratis incluye {{n}} widget publicado, sin tarjeta ni vencimiento, con un sello chico «Hecho con Scroll Lab» debajo del widget. Los planes suman más widgets y packs, y sacan el sello.",
     "planTrialCta": "Probar {{n}} días gratis",
     "planTrialNote": "Sin cargo los primeros {{n}} días.",
     "planTrialActive": "Prueba gratis — primer cobro el {{date}}",
@@ -295,7 +296,9 @@
       "npmNote": "Con React, Next.js o Vue: @scrolllab/embed 0.2 o más nuevo (npm i @scrolllab/embed@latest).",
       "preview": "Así se ve en tu sitio",
       "previewEmpty": "Cuando sumes widgets publicados, acá ves el pack armado.",
-      "previewFailed": "La vista previa no cargó. El código funciona igual."
+      "previewFailed": "La vista previa no cargó. El código funciona igual.",
+      "paidOnly": "Los packs vienen con los planes pagos: juntás tus widgets en una sección con un solo código.",
+      "pausedNote": "Pausado: con el plan gratis los packs no se muestran. Vuelve solo cuando tengas un plan."
     },
     "compare": {
       "title": "¿LAB o Builder?",
