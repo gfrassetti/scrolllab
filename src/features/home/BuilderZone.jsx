@@ -176,9 +176,12 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
         </div>
         <p
           data-cta-bit
-          className="mt-8 self-end text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
+          className="mt-8 self-end text-[clamp(2rem,4.5vw,3.5rem)] font-medium tracking-[-0.03em] md:col-span-4 md:mt-0 md:text-right"
         >
-          <FirstPurchasePrice usd={BUNDLE_PRICE_USD} />
+          <FirstPurchasePrice
+            usd={BUNDLE_PRICE_USD}
+            struckClassName="block text-[0.5em] text-ink/40"
+          />
           <FirstPurchaseTag
             usd={BUNDLE_PRICE_USD}
             className="mt-2 block text-body-sm font-normal tracking-normal text-accent-ink"

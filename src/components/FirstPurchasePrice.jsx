@@ -9,10 +9,13 @@ export default function FirstPurchasePrice({ usd, className = '', struckClassNam
   if (!deal.price) return <span className={className}>{deal.list}</span>
   return (
     <span className={className} data-first-purchase-price>
-      <s className={`mr-[0.3em] font-normal decoration-[0.07em] ${struckClassName}`}>
+      <s className={`font-normal decoration-[0.07em] ${struckClassName}`}>
         <span className="sr-only">{t('common.listPriceSr')} </span>
         {deal.list}
       </s>
+      {/* Un espacio de verdad (no un margen): es el único lugar donde la
+          lista tachada y el precio pueden partirse en dos renglones; con el
+          margen quedaban pegados y se salían de una columna angosta. */}{' '}
       <span className="sr-only">{t('common.yourPriceSr')} </span>
       {deal.price}
     </span>
