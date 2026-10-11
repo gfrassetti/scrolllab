@@ -96,3 +96,5 @@ media/
 # clips and key frames (design/masters/fold) are build inputs: keep them out too.
 public/fold/film/
 design/masters/fold/
+# Cars template: the generated clips and stills are build inputs, not source.
+design/masters/cars/
