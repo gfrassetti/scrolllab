@@ -119,6 +119,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
     <div className="relative">
       {hasCommerce ? (
         <CompositionShopShell
+          font={font}
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}

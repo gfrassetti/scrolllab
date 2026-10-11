@@ -13,6 +13,7 @@ import Checkout from './sections/commerce/Checkout'
 import ShopChrome from './sections/commerce/ShopChrome'
 import { ShopThemeProvider } from '../lib/shop/ShopTheme'
 import { ShopCatalogProvider } from '../lib/shop/ShopCatalog'
+import { fontChoiceById } from '../domain/design'
 import {
   cartPropsFromItems,
   detailPropsFromItems,
@@ -49,7 +50,10 @@ export default function CompositionShopShell({
   checkoutProps,
   products,
   items,
+  /** Tipografía global (src/domain/design.js): también la ficha, el carrito y el checkout. */
+  font = null,
 }) {
+  const fontChoice = fontChoiceById(font)
   // Lo que la tienda toma del ProductGrid: colores, moneda y los textos del
   // carrito y de la ficha (el mismo cálculo que el App del ZIP).
   const shop = useMemo(
@@ -63,43 +67,49 @@ export default function CompositionShopShell({
   )
   return (
     <IsolatedRouterBoundary>
-      <ShopThemeProvider theme={theme} colors={shop.colors} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
-        {/* Los productos editados en el builder: grilla, ficha, carrito y checkout. */}
-        <ShopCatalogProvider products={products} currency={shop.currency}>
-          <MemoryRouter initialEntries={['/']}>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <>
-                    {home}
-                    <ShopChrome {...shop.cart} />
-                  </>
-                }
-              />
-              <Route
-                path="/product/:productId"
-                element={
-                  <>
-                    <ProductDetail {...shop.detail} />
-                    <ShopChrome {...shop.cart} />
-                  </>
-                }
-              />
-              <Route
-                path="/checkout"
-                element={
-                  <>
-                    <Checkout {...(checkoutProps || {})} />
-                    <ShopChrome {...shop.cart} />
-                  </>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </MemoryRouter>
-        </ShopCatalogProvider>
-      </ShopThemeProvider>
+      {/* En el ZIP la fuente va en <html> y alcanza a toda la tienda; acá, a todo el shell. */}
+      <div
+        {...(fontChoice ? { 'data-user-font': '' } : {})}
+        style={fontChoice ? { '--user-font': fontChoice.stack } : undefined}
+      >
+        <ShopThemeProvider theme={theme} colors={shop.colors} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
+          {/* Los productos editados en el builder: grilla, ficha, carrito y checkout. */}
+          <ShopCatalogProvider products={products} currency={shop.currency}>
+            <MemoryRouter initialEntries={['/']}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      {home}
+                      <ShopChrome {...shop.cart} />
+                    </>
+                  }
+                />
+                <Route
+                  path="/product/:productId"
+                  element={
+                    <>
+                      <ProductDetail {...shop.detail} />
+                      <ShopChrome {...shop.cart} />
+                    </>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <>
+                      <Checkout {...(checkoutProps || {})} />
+                      <ShopChrome {...shop.cart} />
+                    </>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </MemoryRouter>
+          </ShopCatalogProvider>
+        </ShopThemeProvider>
+      </div>
     </IsolatedRouterBoundary>
   )
 }

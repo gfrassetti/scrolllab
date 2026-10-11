@@ -175,6 +175,7 @@ export default function PreviewPage() {
     <>
       {hasCommerce ? (
         <CompositionShopShell
+          font={font}
           home={home}
           theme={shopTheme}
           checkoutProps={checkoutProps}
