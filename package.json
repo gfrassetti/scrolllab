@@ -28,6 +28,7 @@
     "check:editable": "node scripts/check-editable.mjs",
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",
+    "check:embed-stacks": "node scripts/check-embed-stacks.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
     "check:mp-refund-sandbox": "node scripts/check-mp-refund-sandbox.mjs",
     "check:paddle-sandbox": "node scripts/check-paddle-sandbox.mjs",

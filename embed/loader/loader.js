@@ -80,6 +80,8 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
 
   // ── API pública ──────────────────────────────────────────────────────
   if (!window.ScrollLab) window.ScrollLab = {}
+  // Turnos de `render` (ver abajo): arranca antes del primer scan().
+  var renderTurn = 0
   window.ScrollLab.render = render
   window.ScrollLab.scan = scan
 
@@ -146,7 +148,13 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       return
     }
     if (el.getAttribute('data-scrolllab-done')) return // ya montado
-    el.setAttribute('data-scrolllab-done', '1')
+    // Turno de este montaje: el cleanup de los paquetes (React/Vue) borra el
+    // atributo y un montaje nuevo pone otro número. Así la lista de un pack
+    // que llega tarde no monta nada si ese turno ya no es el vigente (React
+    // StrictMode monta, desmonta y vuelve a montar en el mismo elemento: con
+    // solo `isConnected` quedaban los iframes del pack duplicados).
+    var turn = String(++renderTurn)
+    el.setAttribute('data-scrolllab-done', turn)
 
     // Shim con la forma que espera `resolveFrameBase` (getAttribute + src).
     var shim = {
@@ -161,6 +169,9 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
         apiUrl: opts.api || el.getAttribute('data-api') || '',
         frameBase: resolveFrameBase(shim, FRAME_BASE_FALLBACK),
         parent: el,
+        current: function () {
+          return el.getAttribute('data-scrolllab-done') === turn
+        },
       })
       return
     }
@@ -186,8 +197,9 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
         return res.json()
       })
       .then(function (data) {
-        // El framework pudo desmontar el contenedor mientras llegaba la lista.
-        if (!o.parent.isConnected) return
+        // El framework pudo desmontar el contenedor (o volver a montarlo)
+        // mientras llegaba la lista.
+        if (!o.parent.isConnected || (o.current && !o.current())) return
         var keys = (data && data.keys) || []
         for (var i = 0; i < keys.length; i++) {
           mount({
