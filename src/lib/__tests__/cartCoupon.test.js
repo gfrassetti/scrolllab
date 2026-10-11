@@ -12,6 +12,7 @@ installBrowserStorageMocks()
 const { priceCartLines } = await import('../cart.js')
 const { catalogWithArs, discountedArsFromUsd, WELCOME_COUPON_PERCENT } = await import('../../../server/catalog.js')
 const { validateCheckoutItems } = await import('../../../server/validation.js')
+const { TEMPLATE_PRICES_USD, discountedUsdOrNull } = await import('../../domain/catalog.js')
 const { ALLOWED_SECTIONS } = await import('../../../server/sections.js')
 
 const COUPON = { code: 'SL-ABC234', percent: WELCOME_COUPON_PERCENT }
@@ -121,8 +122,13 @@ describe('priceCartLines — otros casos', () => {
       showUsd: true,
       coupon: COUPON,
     })
-    assert.equal(ui.total, 149 + 189)
-    assert.equal(ui.payable, 134.1 + 170.1)
+    const { chapters, fizz } = TEMPLATE_PRICES_USD
+    assert.equal(ui.total, chapters + fizz)
+    assert.equal(
+      ui.payable,
+      discountedUsdOrNull(chapters, WELCOME_COUPON_PERCENT) +
+        discountedUsdOrNull(fizz, WELCOME_COUPON_PERCENT),
+    )
     assert.ok(ui.lines.every((l) => l.currency_id === 'USD'))
   })
 

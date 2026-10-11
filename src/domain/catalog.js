@@ -21,10 +21,10 @@
 export const TEMPLATE_PRICES_USD = Object.freeze({
   chapters: 149,
   nocturne: 149,
-  monolith: 189,
-  velocity: 149,
-  fizz: 189,
-  atelier: 229,
+  monolith: 239,
+  velocity: 199,
+  fizz: 239,
+  atelier: 279,
   comic: 189,
   unity: 149,
   ratio: 269,
@@ -34,7 +34,7 @@ export const TEMPLATE_PRICES_USD = Object.freeze({
   fold: 229,
 })
 
-export const BUNDLE_PRICE_USD = 649
+export const BUNDLE_PRICE_USD = 749
 
 /** Modelos que trae el SKU `bundle`. Orden = orden del ZIP. */
 export const BUNDLE_MODELS = Object.freeze([

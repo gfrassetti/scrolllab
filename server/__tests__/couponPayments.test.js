@@ -13,6 +13,7 @@ import os from 'node:os'
 import request from 'supertest'
 
 import { HOSTED_PLANS, arsFromUsd, discountedArsFromUsd } from '../catalog.js'
+import { BUNDLE_PRICE_USD } from '../../src/domain/catalog.js'
 
 // fileStore lee FILE_DB_DIR al cargarse: antes de importar nada que toque la base.
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-couponpay-'))
@@ -205,11 +206,11 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
         body.items.map((i) => [i.id, i.unit_price, i.quantity, i.currency_id]),
         [
           ['meridian', discountedArsFromUsd(379, RATE, 10), 1, 'ARS'],
-          ['bundle', discountedArsFromUsd(649, RATE, 10), 1, 'ARS'],
+          ['bundle', discountedArsFromUsd(BUNDLE_PRICE_USD, RATE, 10), 1, 'ARS'],
         ],
       )
       assert.equal(body.items[0].unit_price, 533000)
-      assert.equal(body.items[1].unit_price, 912000)
+      assert.equal(body.items[1].unit_price, 1052000) // 749 USD − 10% a 1560
       // Lo que cobra MP (la suma de los ítems) es lo que la orden espera cobrar.
       assert.equal(body.items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0), order.total)
       assert.equal(body.external_reference, db.uid(order))

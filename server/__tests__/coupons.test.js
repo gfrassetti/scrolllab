@@ -4,6 +4,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import os from 'node:os'
 import request from 'supertest'
+import { TEMPLATE_PRICES_USD } from '../../src/domain/catalog.js'
 
 import {
   PRODUCTS,
@@ -584,7 +585,11 @@ describe('cupón de bienvenida — API (file store)', () => {
     const res = await checkout(agent, { items: [{ sku: 'chapters' }, { sku: 'fizz' }] })
     assert.equal(res.status, 200)
     const order = await orderOf(res.body.orderId)
-    assert.equal(order.total, discountedArsFromUsd(149, RATE, 10) + discountedArsFromUsd(189, RATE, 10))
+    assert.equal(
+      order.total,
+      discountedArsFromUsd(TEMPLATE_PRICES_USD.chapters, RATE, 10) +
+        discountedArsFromUsd(TEMPLATE_PRICES_USD.fizz, RATE, 10),
+    )
     assert.match(order.couponCode, COUPON_CODE_RE)
     assert.equal(order.discountPct, 10)
     // Es su cupón de siempre: pedirlo después devuelve el mismo.
@@ -601,7 +606,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     const second = await checkout(agent, { items: [{ sku: 'fizz' }] })
     assert.equal(second.status, 200)
     const secondOrder = await orderOf(second.body.orderId)
-    assert.equal(secondOrder.total, arsFromUsd(189, RATE))
+    assert.equal(secondOrder.total, arsFromUsd(TEMPLATE_PRICES_USD.fizz, RATE))
     assert.equal(secondOrder.couponCode, undefined)
     const withCode = await checkout(agent, { items: [{ sku: 'fizz' }], couponCode: firstOrder.couponCode })
     assert.ok([409, 422].includes(withCode.status), String(withCode.status))
