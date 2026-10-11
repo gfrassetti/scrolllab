@@ -18,6 +18,10 @@ import { DISPLAY, HAIRLINE, clamp01, kinVars } from './shared'
  *
  * Calm (reduce motion): no pin — the whole year is drawn at once, every bar
  * full, no marker, nothing hidden.
+ *
+ * Flow (`flow`, only LAB's iframe passes it): the same section without the
+ * pin. A hosted widget can't own the visitor's scroll, so the red bar walks
+ * the ruler while the section crosses the screen instead.
  */
 
 const ITEMS = [
@@ -41,6 +45,7 @@ export default function Programme({
   year = '2026',
   months = MONTHS,
   items,
+  flow = false,
   bg,
   fg,
   accent,
@@ -103,23 +108,26 @@ export default function Programme({
         .fromTo(headLines, { yPercent: 105 }, { yPercent: 0, duration: 1, ease: 'power3.out', stagger: 0.12 })
         .fromTo([...axis, ...rows], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: 'power2.out', stagger: 0.05 }, 0.2)
 
-      // The year walks by while the section is pinned.
+      // The year walks by while the section is pinned (flow edition: while
+      // it crosses the screen, no pin).
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: pin,
-          start: 'top top',
-          end: () => `+=${Math.round(window.innerHeight * 1.6)}`,
-          pin: true,
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-        },
+        scrollTrigger: flow
+          ? { trigger: root, start: 'top 70%', end: 'bottom 35%', scrub: 0.8, invalidateOnRefresh: true }
+          : {
+              trigger: pin,
+              start: 'top top',
+              end: () => `+=${Math.round(window.innerHeight * 1.6)}`,
+              pin: true,
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
       })
       tl.to(p, { m: 12, duration: 1, onUpdate: apply }, 0.06)
       tl.to({}, { duration: 0.06 }, 1.06)
       return undefined
     },
-    { scope: rootRef, dependencies: [calm, list.length, spansKey, letters.length], revertOnUpdate: true },
+    { scope: rootRef, dependencies: [calm, flow, list.length, spansKey, letters.length], revertOnUpdate: true },
   )
 
   const trackGrid = {

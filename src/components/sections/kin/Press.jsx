@@ -16,6 +16,10 @@ import { DISPLAY, HAIRLINE, INK, MaskedWords, PAPER, kinVars, pad } from './shar
  *
  * Calm (reduce motion): no stage — the quotes are simply stacked, all
  * readable, ruled apart.
+ *
+ * Flow (`flow`, only LAB's iframe passes it): the same stack, but each voice
+ * rises into its place as it reaches the screen. A hosted widget has no scroll
+ * of its own for a sticky stage to use.
  */
 
 const QUOTES = [
@@ -29,7 +33,7 @@ const SLOT = 1.2
 const ENTER = 0.4
 const EXIT = 0.3
 
-export default function Press({ quotes, bg, fg, accent }) {
+export default function Press({ quotes, flow = false, bg, fg, accent }) {
   const rootRef = useRef(null)
   const countRef = useRef(null)
   const [calm] = useState(() => prefersReducedMotion())
@@ -42,6 +46,25 @@ export default function Press({ quotes, bg, fg, accent }) {
       const root = rootRef.current
       if (!root || calm) return undefined
       const q = (sel) => gsap.utils.toArray(sel, root)
+      if (flow) {
+        q('[data-kin-q]').forEach((fig) => {
+          const words = fig.querySelectorAll('[data-kin-w]')
+          const src = fig.querySelector('[data-kin-qsrc]')
+          const trigger = { trigger: fig, start: 'top 85%', once: true }
+          gsap.fromTo(
+            words,
+            { yPercent: 115 },
+            { yPercent: 0, duration: 0.9, stagger: Math.min(0.04, 0.4 / Math.max(1, words.length)), ease: 'power3.out', scrollTrigger: trigger },
+          )
+          gsap.fromTo(src, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, delay: 0.3, ease: 'power2.out', scrollTrigger: trigger })
+        })
+        gsap.fromTo(
+          q('[data-kin-qbar]'),
+          { scaleY: 0 },
+          { scaleY: 1, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: root, start: 'top 85%', once: true } },
+        )
+        return undefined
+      }
       const layers = q('[data-kin-q]')
       const ticks = q('[data-kin-ptick]')
       const bar = q('[data-kin-pbar]')[0]
@@ -93,25 +116,35 @@ export default function Press({ quotes, bg, fg, accent }) {
       tl.to({}, { duration: 0.01 }, n * SLOT)
       return undefined
     },
-    { scope: rootRef, dependencies: [calm, n], revertOnUpdate: true },
+    { scope: rootRef, dependencies: [calm, flow, n], revertOnUpdate: true },
   )
 
   const vars = kinVars({ bg, fg, accent }, { bg: INK, fg: PAPER })
 
-  if (calm) {
+  if (calm || flow) {
     return (
       <section ref={rootRef} id="press" className="relative z-[46] px-[4.5vw] py-[12svh] md:px-[1.25vw]" style={vars}>
         <ul>
           {list.map((r, i) => (
             <li key={i} className="border-t py-[6svh]" style={{ borderColor: HAIRLINE }}>
-              <figure>
+              <figure data-kin-q>
+                {flow && (
+                  <span
+                    data-kin-qbar
+                    aria-hidden="true"
+                    className="mb-[3svh] block h-[6svh] w-[1.6vw] origin-bottom md:w-[0.55vw]"
+                    style={{ background: 'var(--kin-accent)' }}
+                  />
+                )}
                 <blockquote
                   className="text-[7.2vw] leading-[0.98] font-semibold uppercase [overflow-wrap:anywhere] md:max-w-[88%] md:text-[min(4.6vw,11svh)]"
                   style={DISPLAY}
                 >
-                  {r.text}
+                  {calm ? r.text : <MaskedWords text={r.text} />}
                 </blockquote>
-                <figcaption className="mt-[3svh] text-[max(11px,3.3vw)] md:text-[max(11px,0.82vw)]">{r.source}</figcaption>
+                <figcaption data-kin-qsrc className="mt-[3svh] text-[max(11px,3.3vw)] md:text-[max(11px,0.82vw)]">
+                  {r.source}
+                </figcaption>
               </figure>
             </li>
           ))}

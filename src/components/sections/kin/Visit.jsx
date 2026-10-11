@@ -123,11 +123,11 @@ export default function Visit({
     <section
       ref={rootRef}
       id="visit"
-      className="relative z-[46] px-[4.5vw] pt-[16svh] pb-[14svh] md:grid md:grid-cols-12 md:gap-x-[1.25vw] md:px-[1.25vw] md:pt-[18svh]"
+      className="relative z-[46] px-[4.5vw] pt-[8.5rem] pb-[7.5rem] md:grid md:grid-cols-12 md:gap-x-[1.25vw] md:px-[1.25vw] md:pt-[10rem]"
       style={kinVars({ bg, fg, accent })}
     >
       <div className="md:col-span-6">
-        <h2 className="text-[8.4vw] leading-[0.94] font-semibold uppercase md:text-[min(4.2vw,10svh)]" style={DISPLAY}>
+        <h2 className="text-[8.4vw] leading-[0.94] font-semibold uppercase md:text-[4.2vw]" style={DISPLAY}>
           {heading.map((l) => (
             <span key={l} className="block overflow-hidden pb-[0.06em]">
               <span data-kin-vline className="block">
@@ -137,7 +137,7 @@ export default function Visit({
           ))}
         </h2>
 
-        <dl className="mt-[8svh] text-[max(13px,3.6vw)] leading-[1.25] md:mt-[10svh] md:text-[max(13px,0.95vw)]">
+        <dl className="mt-[4rem] text-[max(13px,3.6vw)] leading-[1.25] md:mt-[5.5rem] md:text-[max(13px,0.95vw)]">
           {facts.map((r, i) => (
             <div
               key={i}
@@ -151,13 +151,13 @@ export default function Visit({
           ))}
         </dl>
 
-        <div data-kin-vrow className="mt-[5svh] text-[max(13px,3.6vw)] md:text-[max(13px,0.95vw)]">
+        <div data-kin-vrow className="mt-[2.5rem] text-[max(13px,3.6vw)] md:text-[max(13px,0.95vw)]">
           <MoreLink href={ctaHref}>{ctaLabel}</MoreLink>
         </div>
       </div>
 
-      <div className="mt-[12svh] md:col-span-5 md:col-start-8 md:mt-0 md:self-end">
-        <div data-kin-chart className="flex items-stretch gap-[2.2vw] md:gap-[0.9vw]" style={{ height: 'clamp(200px, 36svh, 420px)' }}>
+      <div className="mt-[6rem] md:col-span-5 md:col-start-8 md:mt-0 md:self-end">
+        <div data-kin-chart className="flex items-stretch gap-[2.2vw] md:gap-[0.9vw]" style={{ height: 'clamp(220px, 30vw, 360px)' }}>
           {week.map((d, i) => {
             const span = spanOf(d)
             const has = Boolean(String(d.open || '').trim() || String(d.close || '').trim())
@@ -182,7 +182,7 @@ export default function Visit({
         </div>
         <p
           data-kin-vrow
-          className="mt-[3svh] flex items-center gap-[0.6em] border-t pt-[1.4svh] text-[max(11px,3vw)] md:text-[max(11px,0.82vw)]"
+          className="mt-[1.5rem] flex items-center gap-[0.6em] border-t pt-[0.75rem] text-[max(11px,3vw)] md:text-[max(11px,0.82vw)]"
           style={{ borderColor: HAIRLINE }}
         >
           <span aria-hidden="true" className="inline-block h-[0.9em] w-[0.34em]" style={{ background: 'var(--kin-accent)' }} />

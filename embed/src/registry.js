@@ -54,11 +54,29 @@ import MeridianAmenities from '../../src/components/sections/meridian/Amenities.
 import MeridianPanorama from '../../src/components/sections/meridian/Panorama.jsx'
 import KinRooms from '../../src/components/sections/kin/Rooms.jsx'
 import KinFooter from '../../src/components/sections/kin/Footer.jsx'
+// Fase H — Visit es FLOW puro; Programme y Press se pinean/stickean en el sitio
+// y acá corren en su edición `flow` (flowEdition les pasa la prop).
+import KinProgramme from '../../src/components/sections/kin/Programme.jsx'
+import KinPress from '../../src/components/sections/kin/Press.jsx'
+import KinVisit from '../../src/components/sections/kin/Visit.jsx'
 import SpecSheet from '../../src/components/sections/monolith/SpecSheet.jsx'
 import LastPortrait from '../../src/components/sections/unity/LastPortrait.jsx'
 import ParallaxRise from '../../src/components/sections/velocity/ParallaxRise.jsx'
 import ParallaxEditorial from '../../src/components/sections/chapters/ParallaxEditorial.jsx'
 import { MODEL_WRAPPER_CLASS } from '../../src/lib/modelWrappers.js'
+import { createElement } from 'react'
+
+/**
+ * Una sección que en el sitio se pinea o queda sticky no puede serlo en el
+ * iframe de LAB (el widget no es dueño del scroll del visitante). Su edición
+ * `flow` es la misma sección sin pin: la prop la pasa el registro, no el
+ * usuario (no es un campo del editor).
+ */
+function flowEdition(Component) {
+  return function FlowEdition(props) {
+    return createElement(Component, { ...props, flow: true })
+  }
+}
 
 const SECTIONS = {
   'chapters/FooterCTA': FooterCTA,
@@ -90,6 +108,9 @@ const SECTIONS = {
   'meridian/Panorama': MeridianPanorama,
   'kin/Rooms': KinRooms,
   'kin/Footer': KinFooter,
+  'kin/Programme': flowEdition(KinProgramme),
+  'kin/Press': flowEdition(KinPress),
+  'kin/Visit': KinVisit,
   'monolith/SpecSheet': SpecSheet,
   'unity/LastPortrait': LastPortrait,
   'velocity/ParallaxRise': ParallaxRise,

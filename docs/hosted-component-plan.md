@@ -948,3 +948,39 @@ Bundle del frame: 89 KB gzip (antes de la fase, ~69 KB).
 3. Recién con catálogo hosteable armado, Fases 3–4 (config, editor, billing).
 
 No construir billing ni panel antes de tener el embed andando en un sitio ajeno.
+
+---
+
+## Fase H — KIN: Programme, Press y Visit, 36 hosteables en total (2026-10-11)
+
+`kin/Visit` · `kin/Programme` · `kin/Press`.
+
+- **kin/Visit** es FLOW puro: entrada `once`, sin pin ni scrub. Lo único que
+  hizo falta fue sacarle el `svh`: el e2e mostró que a 375 px el alto no
+  convergía (963 → 1042 px, justo 10 svh de un viewport de 780), porque el
+  `--sl-vh` llega por mensaje después del primer pintado. Con rem / vw / px
+  converge a la primera. Regla práctica: **una sección nueva para LAB nace sin
+  unidades de alto de viewport**.
+- **kin/Programme** y **kin/Press** son pineada y sticky en el sitio, y por la
+  regla de arriba no entran tal cual. Entran en su **flow edition**: la misma
+  sección con la prop `flow`, que **pone el registro del embed**
+  (`flowEdition()` en `embed/src/registry.js`), no el usuario (no es un campo
+  del editor ni viaja en la config).
+  - *Programme (flow)*: sin pin. El `scrub` va de `top 70%` a `bottom 35%`, así
+    que la barra roja recorre la regla mientras la sección cruza la pantalla.
+    Funciona porque el frame ya le da a ScrollTrigger el scroll del host
+    (`scrollerProxy`, Fase C).
+  - *Press (flow)*: sin escenario sticky. Las citas quedan apiladas con regla y
+    cada una sube (palabras bajo su máscara) al llegar a la pantalla, una vez.
+    Lleva una barra roja por cita.
+  - En el sitio, el builder y el ZIP no cambia nada: `flow` nunca se pasa.
+- Con `prefers-reduced-motion` ambas caen en su versión calma (`calm` gana
+  sobre `flow`).
+
+Tests: `hostedSections.test.js` (colores editables, listas con tope, link malo
+cae), `frameAssets.test.js` (registro = HOSTABLE) y el e2e con un caso por
+sección más los tres viewports (los 12 casos nuevos pasan). Frame: 94 KB gzip
+(antes 89).
+
+Para publicar: `npm run build:embed` y desplegar el frame como siempre; el
+versionado del embed es el del frame, no hay migración de configs.

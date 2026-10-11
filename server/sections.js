@@ -89,6 +89,14 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'unity/LastPortrait',
   'velocity/ParallaxRise',
   'chapters/ParallaxEditorial',
+  // Fase H — KIN: Visit es FLOW puro (entrada `once`, sin pin ni scrub).
+  // Programme y Press SON pineada/sticky en el sitio; acá entran en su "flow
+  // edition" (el registro del embed les pasa `flow`): la barra roja recorre
+  // la regla mientras la sección cruza la pantalla, y las citas se apilan y
+  // suben al llegar. Ver docs/hosted-component-plan.md, Fase H.
+  'kin/Programme',
+  'kin/Press',
+  'kin/Visit',
   // NO agregar secciones scrolljack pineadas (pin + scrub, pan horizontal por
   // scroll de window, boot que bloquea scroll): dentro del iframe del embed
   // —alto acotado, sin scroll que las maneje— renderizan rotas. Ej:

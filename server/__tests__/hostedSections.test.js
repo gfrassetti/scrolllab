@@ -208,6 +208,41 @@ describe('Fase G — las 10 secciones nuevas de LAB', () => {
     assert.equal(clean.figures.length, 4)
   })
 
+  it('Fase H: kin/Programme, kin/Press y kin/Visit son hosteables y traen fondo, texto y acento', () => {
+    for (const id of ['kin/Programme', 'kin/Press', 'kin/Visit']) {
+      assert.ok(HOSTABLE_SECTIONS.includes(id), id)
+      const keys = SECTION_FIELDS[id].map((f) => f.key)
+      assert.ok(keys.includes('bg') && keys.includes('fg') && keys.includes('accent'), id + ': ' + keys.join(','))
+    }
+  })
+
+  it('kin/Programme: muestras con mes de inicio y cierre; el link malo cae, la fila queda', () => {
+    const clean = sanitizeSectionProps('kin/Programme', {
+      year: '2027',
+      items: [{ no: '01', title: 'Show', dates: 'Ene–Mar', from: '1', to: '3', href: 'javascript:alert(1)' }],
+    })
+    assert.equal(clean.year, '2027')
+    assert.deepEqual(clean.items, [{ no: '01', title: 'Show', dates: 'Ene–Mar', from: '1', to: '3' }])
+  })
+
+  it('kin/Visit: la semana es de hasta 7 días y el link del CTA se valida', () => {
+    const clean = sanitizeSectionProps('kin/Visit', {
+      days: Array.from({ length: 10 }, (_, i) => ({ label: 'D' + i, open: '10', close: '18' })),
+      ctaLabel: 'Entradas',
+      ctaHref: 'javascript:void(0)',
+    })
+    assert.equal(clean.days.length, 7)
+    assert.equal(clean.ctaHref, undefined)
+  })
+
+  it('kin/Press: hasta 5 voces con su fuente', () => {
+    const clean = sanitizeSectionProps('kin/Press', {
+      quotes: Array.from({ length: 8 }, (_, i) => ({ text: 'Voz ' + i, source: 'Diario' })),
+    })
+    assert.equal(clean.quotes.length, 5)
+    assert.equal(clean.quotes[0].source, 'Diario')
+  })
+
   it('monolith/SpecSheet: filas dato/valor', () => {
     const clean = sanitizeSectionProps('monolith/SpecSheet', {
       specs: [{ label: 'Material', value: 'Hormigón' }],
