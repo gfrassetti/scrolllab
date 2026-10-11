@@ -116,6 +116,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 | Ref es Webflow + Lottie (`data-w-id`, `lottie-animation` con `data-src=*.json`) | Leer el Lottie y el IX2 solo para entender, reconstruir con código propio. Caso trabajado y método: [`docs/kin-template.md`](docs/kin-template.md) |
 | Película al scroll con video (secuencia continua en canvas, tipo pear.no) | Tomas continuas + `scripts/fold-reel.mjs` (recorta colas quietas, interpola, ritmo por movimiento). Caso y método: [`docs/fold-template.md`](docs/fold-template.md) |
+| Hero con un film de video (generado con Higgsfield o filmado): empalme sin salto, grade horneado, dos archivos, calma | `scripts/apex-reel.mjs` + [`docs/apex-template.md`](docs/apex-template.md) |
 | Template existente "no está al nivel de la ref" (handoff / review) | [`docs/rebuild-against-reference.md`](docs/rebuild-against-reference.md) — reconstruir contra beats, no contra el JSX actual |
 | Revisar o pulir un template contra el estándar award-level (white space, micro-interacciones, orden de entrada) | [`docs/award-winning-web-developer.md`](docs/award-winning-web-developer.md) — checklist «Award-level vs. genérico» |
 

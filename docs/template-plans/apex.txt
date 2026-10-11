@@ -1,0 +1,151 @@
+PLAN DE TEMPLATE NUEVO — APEX
+SCROLLLAB (storytelling-pages-templates)
+Generado: 2026-10-11
+Estado: fase 1 en obra — SOLO EL HERO (pedido del dueño: "empecemos por el hero").
+El resto de la página queda planificado abajo y se construye después.
+
+================================================================
+0. METADATA
+================================================================
+SKU:              apex  (provisorio, se puede renombrar antes de vender)
+Título de venta:  APEX — template
+Rubro:            automotriz de nivel alto (marca de autos, taller a medida,
+                  concesionaria de autos premium). El demo es un grand tourer
+                  eléctrico GENÉRICO (sin marca, sin logos, sin patente).
+Referencia:       https://www.esrbespoke.au/ (ESR Bespoke, Next.js + Lenis, un
+                  film de marca en Vimeo/HLS como hero). Es el listón, no el
+                  destino: copy, tipografía, estructura, nombre y media propios.
+Artefactos:
+  - docs/reference-analysis/apex.md + apex/beats.json + apex/beats/*.jpg
+  - Obsidian: "Apex - analisis de referencia.md"
+  - Media propia: 5 tomas generadas con Higgsfield (MiniMax H3, 2K, 8 s cada
+    una) a partir de stills de un mismo auto genérico; originales en
+    design/masters/cars/ (gitignored). Ver scripts/apex-reel.mjs.
+
+Ruta: /templates/apex, solo con `npm run dev` hasta que esté terminado; recién
+ahí se registra en catálogo, packaging, precio, tarjeta y listas de checks.
+
+================================================================
+1. CONSIGNA BASE — OBLIGATORIA (Lesson 9)
+================================================================
+"Yes, please build this for me while maintaining an award-winning,
+scroll-based, beautiful animation feeling throughout the entire sequence
+of events. Different sections need to have different scroll-based
+animations. Implement GSAP, GSAP, 3JS, and other beautiful scroll-based
+behaviors. Be very unique and make sure that we have visual breaks or
+some sort of clear separation between sections. We do not want any
+templated-like style, no typical SAS AI slop. We want an award-winning
+vibe. Something unique, something artsy, something beautiful, and
+something people don't usually do. Award-winning style."
+
+Aplicado a APEX: el film es el objeto que cuenta la historia (un auto, cinco
+tomas, una sola respiración); la tipografía chica y precisa le deja el
+protagonismo; el grade horneado + overlay unifican las tomas en una misma luz.
+
+================================================================
+2. DESIGN READ (taste-skill, una línea)
+================================================================
+"Noche de estudio: un auto azul medianoche que solo existe en sus reflejos;
+tipografía mínima y exacta, el film manda, el rojo del faro trasero es la
+única señal de color."
+
+Anti-defaults que se evitan: mesh violeta, Inter+slate, tarjetas genéricas,
+hero con foto + headline centrado, "nav en caja".
+
+================================================================
+3. LO QUE HACE LA REFERENCIA (desarmado)
+================================================================
+- Hero a pantalla completa con un film de marca (video HLS, con sonido y
+  botón UNMUTE), cortes duros entre tomas, auto en movimiento (gran angular,
+  motion blur real). En teléfono, OTRO recorte (vertical, el auto de costado).
+- Tipografía: un grotesk geométrico para el titular (62 px a 1920), etiquetas
+  en mayúsculas anchas de 11–12 px. Todo en blanco sobre el film.
+- Composición: marca arriba a la izquierda, "AUTOMOTIVE GROUP" en el 26 %,
+  links apilados en el 66 %, hamburguesa a la derecha; titular abajo a la
+  izquierda; bajada chica a la derecha; "UNMUTE" y "OUR STORY" en el pie.
+- Lenis para el scroll; nav fija; el resto de la página en secciones oscuras.
+
+Qué se toma: film a sangre como protagonista, tipografía chica y exacta,
+recorte propio para teléfono, scroll suave. Qué NO: el film ni su música, los
+links apilados, el copy, la tipografía paga, el nombre.
+
+================================================================
+4. HERO — DECISIONES (esta fase)
+================================================================
+4.1 El film (Detalle #1 del curso + canon 11/17/18)
+  - 5 tomas continuas (aproximación, silueta, detalle de llanta, cabina,
+    despedida) encadenadas con 0,5 s de fundido; la última funde dentro de la
+    primera: el loop NO salta (se verificó SSIM del empalme contra vecinos).
+  - Cada toma es UN movimiento de cámara sin cortes; ningún clip tiene cola
+    congelada (medido: diferencia entre cuadros > 0 en todo el recorrido).
+  - Grade horneado en el encode (curva S suave, saturación 0,92, sombras
+    frías): toda la película en la misma luz y barato de mantener.
+  - Escritorio 1080p 16:9 (~1,8 Mbps, 8,6 MB) y teléfono 720×1280 con un
+    recorte vertical POR TOMA con su propio foco (3,5 MB): un teléfono no baja
+    píxeles que no va a mostrar.
+  - Poster = primer cuadro del film (nunca un hueco, también para calma).
+  - manifest.json: dónde empieza cada toma en el reloj del loop.
+  - Aviso (canon 18): el film es MEDIA DE MUESTRA; el comprador produce el
+    suyo (scripts/apex-reel.mjs reconstruye todo desde sus 5 clips).
+
+4.2 Overlay / grade en CSS (lo que el comprador puede girar)
+  - Capa de lavado de color (soft-light), sombras superior/inferior/izquierda
+    para que el texto siempre se lea, viñeta, grano animado en pasos
+    (feTurbulence, ya probado en KIN). Todo con variables CSS.
+  - Sin filter: blur ni backdrop-filter sobre el video (costo de GPU en
+    teléfono; regla de AGENTS).
+
+4.3 Composición (desktop 100svh / teléfono 100svh)
+  - Arriba: marca (wordmark en Archivo ancho) a la izquierda; a la derecha 3
+    links y UN CTA (una sola acción primaria). Teléfono: marca + CTA + menú.
+  - Titular abajo a la izquierda, dos líneas, enmascarado (línea que sube).
+  - Bajada chica + link «Discover» abajo a la derecha.
+  - Indicador de capítulos: 5 segmentos finos con el nombre de la toma;
+    el activo se llena con el reloj del video; tocar un segmento salta.
+  - "Scroll" abajo a la derecha con una línea que respira.
+  - Nada compite: un foco, aire alrededor del titular (Detalle #1: el hero
+    evoca antes de leerse — abrirlo en silencio y verificar que se siente algo).
+
+4.4 Motion (vocabulario chico, Detalle #5): línea que sube enmascarada, fundido
+  corto, regla que se dibuja. Orden de entrada: cortina → titular → pausa
+  (--duration-reveal) → bajada → chrome. Salida al scrollear: el film se
+  acerca un 8 % y se apaga hacia el negro de la sección siguiente (P2/P13).
+
+4.5 Micro-interacciones (capa tpl-*): tpl-link en links, tpl-hit en controles,
+  CTA que se rellena, segmentos del indicador con foco y hover.
+
+4.6 Reducir movimiento (versión calma, nunca rota): el film NO se reproduce,
+  queda el poster con el grade; el texto entra con fundidos cortos; el grano
+  queda quieto; también con ahorro de datos (saveData). Nunca un hueco.
+
+4.7 Peso/rendimiento: <video muted playsinline loop autoplay preload=auto>;
+  se pausa fuera de pantalla (IntersectionObserver) y en pestaña oculta;
+  una sola fuente por viewport (matchMedia → src), no ambas.
+
+================================================================
+5. RESTO DE LA PÁGINA (planificado, NO se construye en esta fase)
+================================================================
+Blueprint de 5 beats (Detalle #8), una composición distinta por sección:
+  1. HOOK        Hero (esta fase).
+  2. INTRODUCE   Declaración en mayúsculas anchas + tres cifras que salen de
+                 los datos del comprador (canon 17), líneas que suben.
+  3. OFFER       Modelos: pin + scrub; el auto "se arma" sección a sección
+                 (aprovechar las tomas), índice con hover y vista previa.
+  4. EXPLAIN     Proceso / taller: horizontal en pin con paneles anchos.
+  5. INVITE      Footer a 100svh: un CTA, columnas de contacto, loop del film.
+Todas con su versión calma, teléfono deliberado y campos editables en el
+builder cuando se registre (texto, links, colores, fuente del film).
+
+================================================================
+6. CHECKLIST DE CIERRE (award-level vs. genérico, Lesson 1)
+================================================================
+[ ] Paleta acotada: tinta azul-negra, blanco hielo, un acento frío.
+[ ] Jerarquía de 3 niveles (titular / bajada / etiquetas).
+[ ] Un foco por viewport y un solo CTA primario.
+[ ] El hero evoca antes de leer (probado en silencio).
+[ ] Nav mínima; no compite con el film.
+[ ] Motion con vocabulario chico y entrada en orden.
+[ ] Micro-interacciones del catálogo en cada link/botón.
+[ ] Scrollbar propio (ScrollRail) en tinta/hielo.
+[ ] Versión calma y teléfono verificados (check:motion / check:mobile).
+[ ] Aviso de media de muestra en ficha, checkout, código y README.

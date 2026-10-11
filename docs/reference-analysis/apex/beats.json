@@ -1,0 +1,3536 @@
+{
+  "url": "https://www.esrbespoke.au/",
+  "sku": "apex",
+  "name": "Apex",
+  "maxScroll": 6870,
+  "libs": [
+    "lenis",
+    "next"
+  ],
+  "beats": [
+    {
+      "index": 0,
+      "progress": 0,
+      "y": 0,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 0.8,
+          "transform": null,
+          "area": 1296000,
+          "src": "blob:https://www.esrbespoke.au/c2cebffc-33db-4cd1-98b1-ce2c0618867e"
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": "blob:https://www.esrbespoke.au/8d673677-bab2-43ce-8731-995469240fc5"
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Exceptional is our standard",
+          "text": "Exceptional is our standard",
+          "size": "62px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "beat inicial"
+      ],
+      "shot": "beat-00.jpg"
+    },
+    {
+      "index": 1,
+      "progress": 0.031,
+      "y": 215,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 64.5)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 0.8,
+          "transform": null,
+          "area": 1296000,
+          "src": "blob:https://www.esrbespoke.au/c2cebffc-33db-4cd1-98b1-ce2c0618867e"
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": "blob:https://www.esrbespoke.au/8d673677-bab2-43ce-8731-995469240fc5"
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Exceptional is our standard",
+          "text": "Exceptional is our standard",
+          "size": "62px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Porsche Certified",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "Collision Centre",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 64.5)",
+        "figura mueve: video opacity 1→0.8",
+        "texto aparece: “Porsche Certified”",
+        "texto aparece: “Collision Centre”"
+      ],
+      "shot": "beat-01.jpg"
+    },
+    {
+      "index": 2,
+      "progress": 0.063,
+      "y": 429,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 128.7)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 0.8,
+          "transform": null,
+          "area": 1295999.912109375,
+          "src": "blob:https://www.esrbespoke.au/c2cebffc-33db-4cd1-98b1-ce2c0618867e"
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 1,
+          "transform": null,
+          "area": 1295999.912109375,
+          "src": "blob:https://www.esrbespoke.au/8d673677-bab2-43ce-8731-995469240fc5"
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Exceptional is our standard",
+          "text": "Exceptional is our standard",
+          "size": "62px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Porsche Certified",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "Collision Centre",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 128.7)",
+        "figura mueve: video opacity 1→0.8"
+      ],
+      "shot": "beat-02.jpg"
+    },
+    {
+      "index": 3,
+      "progress": 0.094,
+      "y": 644,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 193.2)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 0.8,
+          "transform": null,
+          "area": 1295999.912109375,
+          "src": "blob:https://www.esrbespoke.au/c2cebffc-33db-4cd1-98b1-ce2c0618867e"
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 1,
+          "transform": null,
+          "area": 1295999.912109375,
+          "src": "blob:https://www.esrbespoke.au/8d673677-bab2-43ce-8731-995469240fc5"
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Porsche Certified",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "Collision Centre",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 193.2)",
+        "figura mueve: video opacity 1→0.8",
+        "texto sale: “Exceptional is our standard”"
+      ],
+      "shot": "beat-03.jpg"
+    },
+    {
+      "index": 4,
+      "progress": 0.125,
+      "y": 859,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 257.7)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1295999.912109375,
+          "src": null
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 0.8,
+          "transform": null,
+          "area": 1295999.912109375,
+          "src": "blob:https://www.esrbespoke.au/c2cebffc-33db-4cd1-98b1-ce2c0618867e"
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 1,
+          "transform": null,
+          "area": 1295999.912109375,
+          "src": "blob:https://www.esrbespoke.au/8d673677-bab2-43ce-8731-995469240fc5"
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Porsche Certified",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "Collision Centre",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: canvas (canvas)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 257.7)",
+        "figura mueve: video opacity 1→0.8"
+      ],
+      "shot": "beat-04.jpg"
+    },
+    {
+      "index": 5,
+      "progress": 0.156,
+      "y": 1073,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 321.9)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 0.8,
+          "transform": null,
+          "area": 1296000,
+          "src": "blob:https://www.esrbespoke.au/c2cebffc-33db-4cd1-98b1-ce2c0618867e"
+        },
+        {
+          "name": "video",
+          "tag": "video",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": "blob:https://www.esrbespoke.au/8d673677-bab2-43ce-8731-995469240fc5"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 321.9)",
+        "figura mueve: video opacity 1→0.8",
+        "texto sale: “Porsche Certified”",
+        "texto sale: “Collision Centre”"
+      ],
+      "shot": "beat-05.jpg"
+    },
+    {
+      "index": 6,
+      "progress": 0.188,
+      "y": 1288,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-06.jpg"
+    },
+    {
+      "index": 7,
+      "progress": 0.25,
+      "y": 1718,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 60480,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "ESR specialise exclusively with the world’s most prestigious marques.",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: div (div)",
+        "texto aparece: “ESR specialise exclusively with the world’s most p”"
+      ],
+      "shot": "beat-07.jpg"
+    },
+    {
+      "index": 8,
+      "progress": 0.313,
+      "y": 2147,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 60480,
+          "src": null
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/e1dd08ad224401a841c6c217fd72b7ca4d123823-1080x1080.png/4.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/a998190a1b1f1e721570842b15724b3d25cd235b-1080x1080.png/5.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/3257583715fcbf287897bb08369a6e5a598876a1-1080x1080.png/6.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/14473a1abd23b98f403a7c538d95c748473ecaa5-1080x1080.png/7.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/175e10d0f6a6c96843731c2232c4f43b87463af5-1080x1080.png/8.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/df6b563b1adf1d0844e01fb3f12378ee25b11b21-1080x1080.png/9.png?w=320&h=320&auto=format"
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "ESR specialise exclusively with the world’s most prestigious marques.",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "figura entra: img (img)",
+        "figura entra: img (img)"
+      ],
+      "shot": "beat-08.jpg"
+    },
+    {
+      "index": 9,
+      "progress": 0.375,
+      "y": 2576,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "MARQUESESR specialise exclusively with the world"
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 60480,
+          "src": null
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/e1dd08ad224401a841c6c217fd72b7ca4d123823-1080x1080.png/4.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/a998190a1b1f1e721570842b15724b3d25cd235b-1080x1080.png/5.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/3257583715fcbf287897bb08369a6e5a598876a1-1080x1080.png/6.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/14473a1abd23b98f403a7c538d95c748473ecaa5-1080x1080.png/7.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/175e10d0f6a6c96843731c2232c4f43b87463af5-1080x1080.png/8.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/df6b563b1adf1d0844e01fb3f12378ee25b11b21-1080x1080.png/9.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "ESR specialise exclusively with the world’s most prestigious marques.",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-09.jpg"
+    },
+    {
+      "index": 10,
+      "progress": 0.531,
+      "y": 3650,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/e1dd08ad224401a841c6c217fd72b7ca4d123823-1080x1080.png/4.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/a998190a1b1f1e721570842b15724b3d25cd235b-1080x1080.png/5.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/3257583715fcbf287897bb08369a6e5a598876a1-1080x1080.png/6.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/14473a1abd23b98f403a7c538d95c748473ecaa5-1080x1080.png/7.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/175e10d0f6a6c96843731c2232c4f43b87463af5-1080x1080.png/8.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/df6b563b1adf1d0844e01fb3f12378ee25b11b21-1080x1080.png/9.png?w=320&h=320&auto=format"
+        },
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": null
+        },
+        {
+          "name": "img",
+          "tag": "img",
+          "opacity": 1,
+          "transform": null,
+          "area": 46656,
+          "src": "https://cdn.sanity.io/images/ms481rgs/production/12597d3a5d2b56b408858eafceb1a9d2c4059a3a-1080x1080.png/10.png?w=320&h=320&auto=format"
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto sale: “ESR specialise exclusively with the world’s most p”"
+      ],
+      "shot": "beat-10.jpg"
+    },
+    {
+      "index": 11,
+      "progress": 0.594,
+      "y": 4079,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura entra: g (g)",
+        "figura entra: g (g)",
+        "figura entra: g (g)"
+      ],
+      "shot": "beat-11.jpg"
+    },
+    {
+      "index": 12,
+      "progress": 0.656,
+      "y": 4508,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Insurance Repairs",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “Insurance Repairs”"
+      ],
+      "shot": "beat-12.jpg"
+    },
+    {
+      "index": 13,
+      "progress": 0.688,
+      "y": 4723,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Insurance Repairs",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Claims Management",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Privately Commissioned Repairs",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "High-end Detailing, Ceramic Coating, Paint Protection Film Packages",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “Claims Management”",
+        "texto aparece: “Privately Commissioned Repairs”",
+        "texto aparece: “High-end Detailing, Ceramic Coating, Paint Protect”"
+      ],
+      "shot": "beat-13.jpg"
+    },
+    {
+      "index": 14,
+      "progress": 0.719,
+      "y": 4938,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Insurance Repairs",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Claims Management",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Privately Commissioned Repairs",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "High-end Detailing, Ceramic Coating, Paint Protection Film Packages",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Vehicle Transport & Collection",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Prestige Courtesy Vehicle Program",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “Vehicle Transport & Collection”",
+        "texto aparece: “Prestige Courtesy Vehicle Program”"
+      ],
+      "shot": "beat-14.jpg"
+    },
+    {
+      "index": 15,
+      "progress": 0.781,
+      "y": 5367,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.05590945482,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 170)",
+          "area": 38488.051575779915,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Claims Management",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Privately Commissioned Repairs",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "High-end Detailing, Ceramic Coating, Paint Protection Film Packages",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Vehicle Transport & Collection",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Prestige Courtesy Vehicle Program",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto sale: “Insurance Repairs”"
+      ],
+      "shot": "beat-15.jpg"
+    },
+    {
+      "index": 16,
+      "progress": 0.813,
+      "y": 5582,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "Open menu",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "Contact"
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -18.6542)",
+          "area": 38488.09077691287,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 28.1977)",
+          "area": 38488.04763823096,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 99.8777)",
+          "area": 38488.04330455698,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "Vehicle Transport & Collection",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "p",
+          "text": "Prestige Courtesy Vehicle Program",
+          "size": "20px",
+          "color": "rgb(255, 255, 255)",
+          "weight": "500",
+          "font": "__bodyFont_0f148b"
+        },
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -18.6542)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, 28.1977)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, 99.8777)",
+        "texto sale: “Claims Management”",
+        "texto sale: “Privately Commissioned Repairs”",
+        "texto sale: “High-end Detailing, Ceramic Coating, Paint Protect”"
+      ],
+      "shot": "beat-16.jpg"
+    },
+    {
+      "index": 17,
+      "progress": 0.844,
+      "y": 5797,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -94.6929)",
+          "area": 38488.09077691287,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -75.1424)",
+          "area": 38488.051575779915,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -87.0098)",
+          "area": 38488.04763823096,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "sticky sale: Open menu",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -94.6929)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -75.1424)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -87.0098)",
+        "texto sale: “Vehicle Transport & Collection”",
+        "texto sale: “Prestige Courtesy Vehicle Program”"
+      ],
+      "shot": "beat-17.jpg"
+    },
+    {
+      "index": 18,
+      "progress": 0.875,
+      "y": 5970,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -105.102)",
+          "area": 38488.09491252899,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -104.185)",
+          "area": 38488.04763823096,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -102.509)",
+          "area": 38488.039168945514,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -105.102)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -104.185)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -102.509)"
+      ],
+      "shot": "beat-18.jpg"
+    },
+    {
+      "index": 19,
+      "progress": 0.906,
+      "y": 5970,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -105.975)",
+          "area": 38488.086641296744,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -105.921)",
+          "area": 38488.04763823096,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -105.808)",
+          "area": 38488.04330455698,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -105.975)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -105.921)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -105.808)"
+      ],
+      "shot": "beat-19.jpg"
+    },
+    {
+      "index": 20,
+      "progress": 0.938,
+      "y": 5970,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -106)",
+          "area": 38488.09077691287,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -106)",
+          "area": 38488.05177384289,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -106)",
+          "area": 38488.04744016845,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -106)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -106)",
+        "figura mueve: g opacity 1→1 t=matrix(1, 0, 0, 1, 0, -106)"
+      ],
+      "shot": "beat-20.jpg"
+    },
+    {
+      "index": 21,
+      "progress": 1,
+      "y": 5970,
+      "bodyBg": "rgb(255, 255, 255)",
+      "sticky": [
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "ESR BespokeAutomotive Group. Sydney, Australia. "
+        },
+        {
+          "name": "curtain",
+          "pos": "fixed",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -106)",
+          "area": 38488.09077691287,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -106)",
+          "area": 38488.05177384289,
+          "src": null
+        },
+        {
+          "name": "g",
+          "tag": "g",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -106)",
+          "area": 38488.04744016845,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "Contact",
+          "text": "Contact",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "(02) 9735 1111enquiries@esrbespoke.au8am – 5pm Monday to Friday",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR HQ",
+          "text": "ESR HQ",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "419-431 Canterbury Road, Campsie NSW 2194Hq@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "ESR Bespoke Studio",
+          "text": "ESR Bespoke Studio",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        },
+        {
+          "name": "p",
+          "text": "16-20 Birmingham Street, Alexandria NSW 2015Studio@esrbespoke.au",
+          "size": "14px",
+          "color": "rgb(0, 0, 0)",
+          "weight": "300",
+          "font": "__headingFont_a39ca7"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-21.jpg"
+    }
+  ]
+}
