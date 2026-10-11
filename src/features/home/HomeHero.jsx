@@ -89,6 +89,18 @@ export default function HomeHero({ t, locale }) {
               {t('home.heroCtaBuilder')} →
             </Link>
           </div>
+          {/* LAB no se explica solo: una línea con el nombre y lo que hace,
+              debajo de los accesos (sin interrumpir la entrada). */}
+          <p data-hero-meta className="mt-2 max-w-[60ch] text-body-sm text-ink/65">
+            <Link
+              to="/lab"
+              className="group tpl-hit relative transition-colors hover:text-accent"
+            >
+              <span>{t('home.heroLabBefore')}</span>
+              <span className="font-medium text-ink group-hover:text-accent">{t('home.heroLabName')}</span>
+              <span>{t('home.heroLabAfter')} →</span>
+            </Link>
+          </p>
         </div>
       </section>
     </>

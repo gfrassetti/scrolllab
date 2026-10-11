@@ -473,23 +473,6 @@ export default function TemplatesIndex() {
 
         const labBand = root.current?.querySelector('[data-cta-demo="lab"]')
         if (labBand) {
-          const code = labBand.querySelector('[data-cta-code]')
-          if (code) {
-            gsap.fromTo(
-              code,
-              { clipPath: 'inset(0 100% 0 0)' },
-              {
-                clipPath: 'inset(0 0% 0 0)',
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: labBand,
-                  start: 'top 80%',
-                  end: 'top 46%',
-                  scrub: 0.6,
-                },
-              },
-            )
-          }
           const labMark = labBand.querySelector('[data-cta-labmark]')
           if (labMark) {
             gsap.from(labMark, {
@@ -636,7 +619,7 @@ export default function TemplatesIndex() {
           buyNow={buyNow}
         />
 
-        <LabZone t={t} ways={ways} />
+        <LabZone t={t} ways={ways} locale={locale} />
 
         <HowItWorks t={t} howPanels={howPanels} />
 

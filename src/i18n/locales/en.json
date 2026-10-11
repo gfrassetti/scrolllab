@@ -547,7 +547,10 @@
     "labEyebrow": "No download",
     "labTitleBefore": "Your widget in one",
     "labTitleEm": "line",
-    "footerWithdrawal": "Withdrawal request"
+    "footerWithdrawal": "Withdrawal request",
+    "heroLabBefore": "Already have a site? Add animated sections with ",
+    "heroLabName": "LAB",
+    "heroLabAfter": ", no code"
   },
   "templates": {
     "chapters": {

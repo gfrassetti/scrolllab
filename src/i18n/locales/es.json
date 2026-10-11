@@ -547,7 +547,10 @@
     "labEyebrow": "Sin descargar nada",
     "labTitleBefore": "Tu widget en una",
     "labTitleEm": "línea",
-    "footerWithdrawal": "Botón de arrepentimiento"
+    "footerWithdrawal": "Botón de arrepentimiento",
+    "heroLabBefore": "¿Ya tenés un sitio? Sumale secciones animadas con ",
+    "heroLabName": "LAB",
+    "heroLabAfter": ", sin programar"
   },
   "templates": {
     "chapters": {

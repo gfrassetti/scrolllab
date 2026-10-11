@@ -12,7 +12,7 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
   return (
     <>
       {/* Ya viste el catálogo: ahora el otro camino — armar la tuya en vez
-          de un modelo fijo. El demo de LAB vive en /lab, no se repite acá. */}
+          de un modelo fijo. Las demos de LAB van en su zona (03). */}
       <ZoneHeadline index="02" label={t('nav.builder')} zone="builder" />
       <div className="mx-auto mb-16 max-w-[1300px] md:mb-24">
         <p className="text-center text-eyebrow uppercase text-accent">

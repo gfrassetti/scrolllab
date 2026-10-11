@@ -1,11 +1,16 @@
 import ZoneHeadline from './ZoneHeadline.jsx'
 import { Link } from 'react-router-dom'
 import LabMark from '../../components/LabMark'
+import LabDemo from '../../components/LabDemo'
+import LabDemoCopy from '../../components/LabDemoCopy'
+import LabDemoPaste from '../../components/LabDemoPaste'
 
 /**
- * Zona 03 · LAB: la sección en vivo por suscripción y la comparación de las tres formas.
+ * Zona 03 · LAB: la sección en vivo por suscripción, cómo funciona en tres
+ * demos animadas (las mismas de /lab) y la comparación de las tres formas.
  */
-export default function LabZone({ t, ways }) {
+export default function LabZone({ t, ways, locale }) {
+  const steps = [t('lab.guide1'), t('lab.guide2'), t('lab.guide3')]
   return (
     <>
       <ZoneHeadline index="03" label={t('nav.lab')} zone="lab" />
@@ -63,15 +68,28 @@ export default function LabZone({ t, ways }) {
             <span className="text-accent">{t('home.labBodyLink')}</span>
             {t('home.labBodyAfter')}
           </p>
-          <code
-            data-cta-code
-            className="mt-5 block overflow-x-auto whitespace-nowrap font-mono text-body-sm text-ink/40 group-hover:text-bone/45"
-          >
-            &lt;script src=&quot;.../embed/v1/loader.js&quot; data-key=&quot;pub_…&quot;
-            async&gt;&lt;/script&gt;
-          </code>
         </div>
       </Link>
+
+      {/* Cómo funciona: verlo explica LAB mejor que leerlo. Fuera del Link
+          a propósito (la card invierte colores al hover y las demos siguen el
+          tema). En teléfono y tablet se desliza; desde lg, tres columnas. */}
+      <section data-cta-card aria-labelledby="home-lab-how" className="mt-10 md:mt-14">
+        <h3 id="home-lab-how" className="sr-only">
+          {t('lab.howEyebrow')}
+        </h3>
+        <ol className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:-mx-10 md:px-10 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:overflow-visible lg:px-0 lg:pb-0">
+          {[LabDemo, LabDemoCopy, LabDemoPaste].map((Demo, i) => (
+            <li key={i} className="w-[82%] shrink-0 snap-start border-t border-ink/20 pt-4 md:w-[46%] lg:w-auto">
+              <span className="font-mono text-body-sm text-accent">{String(i + 1).padStart(2, '0')}</span>
+              <p className="mt-2 text-body text-ink/80">{steps[i]}</p>
+              <div className="mt-6">
+                <Demo key={locale} />
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       {/* Comparación de las 3 formas — resumen de decisión al final del bloque
           de ofertas. Convive con las bandas de arriba a propósito: el eyebrow
