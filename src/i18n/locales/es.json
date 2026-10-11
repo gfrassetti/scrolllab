@@ -113,7 +113,7 @@
       },
       {
         "q": "¿En qué se diferencia del Builder?",
-        "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros, los editás desde acá y se actualizan solos. ¿Vas a hacer uno nuevo? El Builder arma la página entera con nuestras secciones y te da el código fuente para que lo programes y lo alojes vos: pago único, es tuyo."
+        "a": "Depende de si ya tenés sitio. ¿Ya lo tenés? LAB le suma widgets sin tocarlo: los hosteamos nosotros, los editás desde acá y se actualizan solos. ¿Vas a hacer uno nuevo? Con el Builder armás la página entera con nuestras secciones y la descargás: pago único."
       },
       {
         "q": "¿Qué es un pack?",
@@ -324,7 +324,11 @@
     "deleteDraftsConfirm": "¿Borrar los {{n}} borradores? No se puede deshacer. Los publicados no se tocan.",
     "deleteDraftsYes": "Sí, borrarlos",
     "deletingDrafts": "Borrando…",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "tabs": {
+      "widgets": "Widgets",
+      "packs": "Packs"
+    }
   },
   "common": {
     "loading": "Cargando…",
@@ -1144,7 +1148,7 @@
         }
       }
     },
-    "labNote": "Te llevás el código fuente de la página para programarla y alojarla vos. ¿Ya tenés sitio y querés sumarle secciones sin código?",
+    "labNote": "Armás la página con nuestras secciones y la descargás. ¿Ya tenés sitio y querés sumarle secciones sin código?",
     "labNoteLink": "Eso es LAB →",
     "separateAnchor": "Comprar por separado {{models}}: {{price}}. Acá te llevás solo las secciones que elegiste, ya editadas.",
     "inCartNote": "Esta composición está en el carrito: lo que edites acá se actualiza solo.",
@@ -1200,7 +1204,11 @@
       "justNow": "recién",
       "capNote": "Llegaste al tope de {{max}} proyectos: para guardar otro, primero se borra uno.",
       "errorOpen": "No se pudo abrir el proyecto.",
-      "errorGeneric": "Algo falló. Podés intentarlo de nuevo."
+      "errorGeneric": "Algo falló. Podés intentarlo de nuevo.",
+      "addToCart": "Al carrito",
+      "adding": "Sumando…",
+      "inCart": "En el carrito",
+      "emptyCantBuy": "Un proyecto vacío no se puede comprar"
     }
   },
   "cart": {
@@ -1223,7 +1231,9 @@
     "refundLink": "Ver la política",
     "couponNote": "Es tu primera compra: el {{percent}}% se aplica solo. Vale una sola vez (solo la primera compra) y no aplica a LAB.",
     "compositionN": "Composición {{n}} · {{count}} secciones",
-    "compositionNOne": "Composición {{n}} · 1 sección"
+    "compositionNOne": "Composición {{n}} · 1 sección",
+    "projectLine": "{{name}} · {{count}} secciones",
+    "projectLineOne": "{{name}} · 1 sección"
   },
   "login": {
     "eyebrow": "Cuenta",

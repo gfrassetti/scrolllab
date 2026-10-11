@@ -210,8 +210,15 @@ export default function BuilderPage({ qa = false }) {
     sku: 'custom',
     title: t('builder.compositionTitle'),
     compositionId,
+    projectName: projects.project?.name || undefined,
     recipe,
   })
+
+  // Renombrar el proyecto abierto renombra su línea del carrito.
+  const projectName = projects.project?.name || ''
+  useEffect(() => {
+    if (projectName) useCart.getState().setCompositionName(compositionId, projectName)
+  }, [projectName, compositionId])
 
   const addCompositionToCart = () => {
     if (items.length === 0) return

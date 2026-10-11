@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Drawer from '../../components/Drawer'
 import ProjectList from './ProjectList.jsx'
+import { addProjectToCart, useProjectsInCart } from './projectCart.js'
 
 /**
  * Barra de proyecto del builder: qué composición está abierta, si está
@@ -28,6 +29,7 @@ export default function ProjectBar({
   const [confirmBlank, setConfirmBlank] = useState(false)
   const [notice, setNotice] = useState('')
   const draftCount = project ? 0 : itemsCount
+  const inCartIds = useProjectsInCart()
   const atCap = Boolean(max && list && list.length >= max)
 
   // Abrir un proyecto pedido por URL: si pisaría un borrador sin guardar, se
@@ -63,6 +65,13 @@ export default function ProjectBar({
 
   const duplicateProject = (source) =>
     projects.duplicate(source.id, t('builder.projects.copyName', { name: source.name || t('builder.projects.untitled') }))
+
+  // Al carrito sin abrirlo. Si es el abierto, primero sale lo que estaba en la
+  // pausa del guardado: el carrito se lleva lo último.
+  const addToCart = async (target) => {
+    if (target.id === project?.id) await projects.retry()
+    await addProjectToCart(target, t('builder.compositionTitle'))
+  }
 
   const startBlank = async () => {
     await projects.startNew()
@@ -242,6 +251,8 @@ export default function ProjectBar({
             onOpen={openProject}
             onDuplicate={atCap ? null : duplicateProject}
             onRemove={projects.remove}
+            onAddToCart={addToCart}
+            inCartIds={inCartIds}
           />
         )}
       </Drawer>

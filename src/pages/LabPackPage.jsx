@@ -156,7 +156,7 @@ export default function LabPackPage() {
     setError('')
     try {
       await api.packDelete(id)
-      navigate('/lab')
+      navigate('/lab?tab=packs')
     } catch (err) {
       setError(err.message)
       setBusy(false)
@@ -170,7 +170,7 @@ export default function LabPackPage() {
       <SiteHeader />
       <main className="px-5 py-10 md:px-10">
         <Link
-          to="/lab"
+          to="/lab?tab=packs"
           className="text-[11px] uppercase tracking-[0.25em] text-ink/50 hover:text-accent"
         >
           {t('lab.back')}

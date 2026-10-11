@@ -81,7 +81,7 @@
       },
       {
         "q": "Why a subscription and not a one-time payment?",
-        "a": "Because the widget lives on our servers: hosting, improvements and the changes you make from the panel are included. If you prefer the source code to host it yourself, buy the template: one-time payment and it is yours."
+        "a": "Because the widget lives on our servers: hosting, improvements and the changes you make from the panel are included. If you prefer the source code to host it yourself, there's the template: one-time payment."
       },
       {
         "q": "What is a LAB widget?",
@@ -113,7 +113,7 @@
       },
       {
         "q": "How is it different from the Builder?",
-        "a": "It depends on whether you already have a site. Do you? LAB adds widgets to it without touching it: we host them, you edit them from here and they update on their own. Building a new one? The Builder assembles the whole page with our sections and gives you the source code to develop and host yourself: one-time payment, it's yours."
+        "a": "It depends on whether you already have a site. Do you? LAB adds widgets to it without touching it: we host them, you edit them from here and they update on their own. Building a new one? With the Builder you build the whole page with our sections and download it: one-time payment."
       },
       {
         "q": "What is a pack?",
@@ -227,7 +227,7 @@
     "freeLineMany": "{{n}} published widgets, no card.",
     "howEyebrow": "How it works",
     "howTitle": "Pick it, edit it, paste it into your site. Done.",
-    "footnoteAfter": ": one-time payment, the code is yours.",
+    "footnoteAfter": ": one-time payment.",
     "siteSplit": "Already have a site? Add widgets with LAB. Building a new one? That is what the",
     "siteSplitAfter": " is for.",
     "heroCtaFree": "Start free",
@@ -324,7 +324,11 @@
     "deleteDraftsConfirm": "Delete the {{n}} drafts? This can't be undone. Published ones stay.",
     "deleteDraftsYes": "Yes, delete them",
     "deletingDrafts": "Deleting…",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "tabs": {
+      "widgets": "Widgets",
+      "packs": "Packs"
+    }
   },
   "common": {
     "loading": "Loading…",
@@ -1144,7 +1148,7 @@
         }
       }
     },
-    "labNote": "You get the page's source code to develop and host yourself. Already have a site and want to add sections without code?",
+    "labNote": "You build the page with our sections and download it. Already have a site and want to add sections without code?",
     "labNoteLink": "That's LAB →",
     "separateAnchor": "Buying {{models}} separately: {{price}}. Here you take just the sections you picked, already edited.",
     "inCartNote": "This composition is in your cart: whatever you edit here updates it.",
@@ -1200,7 +1204,11 @@
       "justNow": "just now",
       "capNote": "You reached the limit of {{max}} projects: delete one to save another.",
       "errorOpen": "Couldn't open the project.",
-      "errorGeneric": "Something went wrong. Try again."
+      "errorGeneric": "Something went wrong. Try again.",
+      "addToCart": "Add to cart",
+      "adding": "Adding…",
+      "inCart": "In cart",
+      "emptyCantBuy": "An empty project can't be bought"
     }
   },
   "cart": {
@@ -1223,7 +1231,9 @@
     "refundLink": "See the policy",
     "couponNote": "It’s your first purchase: the {{percent}}% is applied automatically. It’s valid once (first purchase only) and doesn’t apply to LAB.",
     "compositionN": "Composition {{n}} · {{count}} sections",
-    "compositionNOne": "Composition {{n}} · 1 section"
+    "compositionNOne": "Composition {{n}} · 1 section",
+    "projectLine": "{{name}} · {{count}} sections",
+    "projectLineOne": "{{name}} · 1 section"
   },
   "login": {
     "eyebrow": "Account",

@@ -35,8 +35,12 @@ export function cartItemKey(item) {
  * @param {(key: string, vars?: any) => string} t
  */
 export function cartLineTitle(item, items, t) {
-  const n = compositionNumber(items, item)
   const count = item.recipe?.length || 0
+  // Un proyecto guardado se reconoce por su nombre, no por un número.
+  if (item?.projectName) {
+    return t(count === 1 ? 'cart.projectLineOne' : 'cart.projectLine', { name: item.projectName, count })
+  }
+  const n = compositionNumber(items, item)
   return n ? t(count === 1 ? 'cart.compositionNOne' : 'cart.compositionN', { n, count }) : item?.title
 }
 
@@ -226,6 +230,15 @@ export const useCart = create(
        * composición en el carrito no agrega nada, y un builder vacío no borra
        * la que ya estaba.
        */
+      /** El nombre del proyecto de una composición del carrito (se renombró). */
+      setCompositionName: (compositionId, projectName) => {
+        const key = cartItemKey({ sku: 'custom', compositionId })
+        set({
+          items: get().items.map((i) =>
+            cartItemKey(i) === key ? { ...i, projectName: projectName || undefined } : i,
+          ),
+        })
+      },
       syncComposition: (recipe, compositionId) => {
         if (!Array.isArray(recipe) || recipe.length === 0) return
         const items = get().items

@@ -8,7 +8,8 @@ import { formatRelativeTime } from '../../lib/relativeTime'
  *
  * `draftCount`: secciones del borrador sin guardar que hay en el lienzo; si es
  * más de 0, abrir otro proyecto avisa que lo reemplaza. `askOpenId`: ese
- * aviso ya abierto en una fila.
+ * aviso ya abierto en una fila. `onAddToCart` + `inCartIds`: mandar un
+ * proyecto al carrito sin abrirlo (o mostrar que ya está).
  */
 export default function ProjectList({
   t,
@@ -20,6 +21,8 @@ export default function ProjectList({
   onOpen,
   onDuplicate = null,
   onRemove = null,
+  onAddToCart = null,
+  inCartIds = null,
 }) {
   // Un proyecto pedido desde afuera (la URL) que pisaría el borrador: ya pregunta.
   const [confirm, setConfirm] = useState(askOpenId ? { id: askOpenId, kind: 'open' } : null)
@@ -73,6 +76,24 @@ export default function ProjectList({
                   })}
                 </p>
               </div>
+              <div className="flex shrink-0 items-center gap-2">
+              {onAddToCart ? (
+                inCartIds?.has(project.id) ? (
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-accent-ink">
+                    ✓ {t('builder.projects.inCart')}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => run(`cart:${project.id}`, () => onAddToCart(project))}
+                    disabled={busy !== null || !project.sections}
+                    title={!project.sections ? t('builder.projects.emptyCantBuy') : undefined}
+                    className="ui-press min-h-11 shrink-0 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-accent disabled:opacity-40"
+                  >
+                    {busy === `cart:${project.id}` ? t('builder.projects.adding') : t('builder.projects.addToCart')}
+                  </button>
+                )
+              ) : null}
               {isCurrent ? null : (
                 <button
                   type="button"
@@ -83,6 +104,7 @@ export default function ProjectList({
                   {busy === `open:${project.id}` ? t('builder.projects.opening') : t('builder.projects.open')}
                 </button>
               )}
+              </div>
             </div>
 
             {onDuplicate || onRemove ? (

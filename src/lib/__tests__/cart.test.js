@@ -14,6 +14,7 @@ const {
   withoutBundleOverlap,
   cartItemKey,
   compositionNumber,
+  cartLineTitle,
 } = await import('../cart.js')
 const { estimateCustomPriceUsd, arsFromUsd } = await import('../pricing.js')
 
@@ -202,6 +203,19 @@ describe('useCart', () => {
     assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['project-123', 'b'])
     useCart.getState().renameComposition('nope', 'x')
     assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['project-123', 'b'])
+  })
+
+  // Un proyecto guardado se reconoce por su nombre; renombrarlo renombra la línea.
+  it('una composición de un proyecto se titula con su nombre', () => {
+    const t = (key, vars) => `${key}:${vars.name || vars.n}:${vars.count}`
+    useCart.getState().addItem({ sku: 'custom', title: 'C', compositionId: 'project-1', projectName: 'Home', recipe: [{ id: 'chapters/HeroKinetic' }, { id: 'chapters/FooterCTA' }] })
+    useCart.getState().addItem({ sku: 'custom', title: 'C', compositionId: 'b', recipe: [{ id: 'chapters/HeroKinetic' }] })
+    let [proj, other] = useCart.getState().items
+    assert.equal(cartLineTitle(proj, useCart.getState().items, t), 'cart.projectLine:Home:2')
+    assert.equal(cartLineTitle(other, useCart.getState().items, t), 'cart.compositionNOne:2:1')
+    useCart.getState().setCompositionName('project-1', 'Home v2')
+    ;[proj] = useCart.getState().items
+    assert.equal(cartLineTitle(proj, useCart.getState().items, t), 'cart.projectLine:Home v2:2')
   })
 
   it('vacía todos los ítems de una', () => {

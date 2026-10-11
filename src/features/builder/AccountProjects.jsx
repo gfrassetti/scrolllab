@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
 import ProjectList from './ProjectList.jsx'
+import { addProjectToCart, useProjectsInCart } from './projectCart.js'
 
 /**
  * «Proyectos del builder» en Mi cuenta: la misma lista del panel del builder,
@@ -11,6 +12,7 @@ import ProjectList from './ProjectList.jsx'
 export default function AccountProjects({ t, locale }) {
   const [projects, setProjects] = useState(null)
   const navigate = useNavigate()
+  const inCartIds = useProjectsInCart()
 
   useEffect(() => {
     let cancelled = false
@@ -49,6 +51,8 @@ export default function AccountProjects({ t, locale }) {
           locale={locale}
           projects={projects}
           onOpen={(id) => navigate(`/builder?project=${encodeURIComponent(id)}`)}
+          onAddToCart={(project) => addProjectToCart(project, t('builder.compositionTitle'))}
+          inCartIds={inCartIds}
           onRemove={async (id) => {
             await api.builderProjectDelete(id)
             setProjects((list) => list.filter((p) => p.id !== id))

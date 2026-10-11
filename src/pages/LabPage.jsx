@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { gsap, useGSAP, SplitText } from '../lib/gsap'
 import SiteHeader from '../components/SiteHeader'
 import LabSplash from '../components/LabSplash'
@@ -10,6 +10,7 @@ import FaqAccordion from '../components/FaqAccordion'
 import HostedPlans from '../components/HostedPlans'
 import { api } from '../lib/api'
 import SnippetBox from '../components/SnippetBox'
+import Tabs, { TabPanel } from '../components/Tabs'
 import { getSection } from '../lib/sectionRegistry'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
@@ -66,6 +67,20 @@ export default function LabPage({ qa = false }) {
   const [packs, setPacks] = useState([])
   const [sections, setSections] = useState([])
   const [picked, setPicked] = useState('')
+  // Widgets sueltos o packs: la pestaña vive en la URL (?tab=packs) para que
+  // volver del editor de un pack deje en Packs.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = searchParams.get('tab') === 'packs' ? 'packs' : 'widgets'
+  const setTab = (next) =>
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev)
+        if (next === 'packs') p.set('tab', 'packs')
+        else p.delete('tab')
+        return p
+      },
+      { replace: true },
+    )
   const [loaderInfo, setLoaderInfo] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -116,8 +131,19 @@ export default function LabPage({ qa = false }) {
     }
   }, [])
 
+  // Volver del editor de un pack (/lab?tab=packs): directo a la zona de
+  // trabajo, no al hero. Una vez, cuando ya cargó la lista.
+  const jumpedToWorkspace = useRef(false)
   useEffect(() => {
-    if (user) load()
+    if (user) {
+      load().then(() => {
+        if (jumpedToWorkspace.current || !new URLSearchParams(window.location.search).get('tab')) return
+        jumpedToWorkspace.current = true
+        requestAnimationFrame(() =>
+          document.getElementById('tus-widgets')?.scrollIntoView({ block: 'start' }),
+        )
+      })
+    }
   }, [user, load])
 
   const create = async () => {
@@ -189,6 +215,23 @@ export default function LabPage({ qa = false }) {
       setBusy(false)
     }
   }
+
+  // Publicados contra el cupo del plan (no contra los creados: «5 de 6» se leía
+  // como un cupo de 6). Las publicadas por encima del cupo están congeladas.
+  const widgetsCountLine = (() => {
+    if (instances.length === 0) return null
+    const published = instances.filter((i) => i.status === 'published').length
+    if (!Number.isFinite(quota)) {
+      return t('lab.publishedCountUnlimited', { n: published, total: instances.length })
+    }
+    const frozen = Math.max(0, published - quota)
+    return t(frozen ? 'lab.publishedCountFrozen' : 'lab.publishedCount', {
+      n: published - frozen,
+      quota,
+      frozen,
+      total: instances.length,
+    })
+  })()
 
   const steps = [t('lab.guide1'), t('lab.guide2'), t('lab.guide3')]
 
@@ -430,8 +473,8 @@ export default function LabPage({ qa = false }) {
           </p>
         )}
 
-        {/* Tus secciones / login. */}
-        <section className="mt-20 md:mt-28">
+        {/* Tu espacio de LAB: widgets sueltos y packs, en dos pestañas. */}
+        <section id="tus-widgets" className="mt-20 scroll-mt-24 md:mt-28">
           {!user ? (
             loading ? null : (
               <div className="border border-ink/15 p-6 md:p-8">
@@ -448,266 +491,237 @@ export default function LabPage({ qa = false }) {
             )
           ) : (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-eyebrow uppercase text-ink/50">
-                  {t('lab.yours')}
-                  {instances.length > 0 && (
-                    <span className="ml-3 normal-case tracking-normal text-ink/40">
-                      {/* Publicados contra el cupo del plan (no contra los creados:
-                          «5 de 6» se leía como un cupo de 6). */}
-                      {(() => {
-                        const published = instances.filter((i) => i.status === 'published').length
-                        if (!Number.isFinite(quota)) {
-                          return t('lab.publishedCountUnlimited', { n: published, total: instances.length })
-                        }
-                        // Las publicadas por encima del cupo están congeladas (no se ven en los sitios).
-                        const frozen = Math.max(0, published - quota)
-                        return t(frozen ? 'lab.publishedCountFrozen' : 'lab.publishedCount', {
-                          n: published - frozen,
-                          quota,
-                          frozen,
-                          total: instances.length,
-                        })
-                      })()}
-                    </span>
-                  )}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <select
-                    value={picked}
-                    onChange={(e) => setPicked(e.target.value)}
-                    disabled={sections.length === 0 || labLocked}
-                    aria-label={t('lab.pickSection')}
-                    className="min-h-11 border border-ink/20 bg-[#f2efe9] px-3 text-body-sm uppercase tracking-[0.12em] text-[#1a1a1a] outline-none focus:border-ink disabled:opacity-40"
-                    style={{ colorScheme: 'light' }}
-                  >
-                    {sections.map((id) => (
-                      <option key={id} value={id}>
-                        {sectionLabel(id)}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={create}
-                    disabled={busy || sections.length === 0 || labLocked}
-                    title={labLocked ? t('lab.lockedTip') : undefined}
-                    className="btn btn-ghost disabled:opacity-40"
-                  >
-                    {t('lab.new')}
-                  </button>
-                </div>
-              </div>
+              <h2 className="sr-only">{t('lab.yours')}</h2>
+              <Tabs
+                idBase="lab-ws"
+                label={t('lab.yours')}
+                value={tab}
+                onChange={setTab}
+                tabs={[
+                  { id: 'widgets', label: t('lab.tabs.widgets'), count: instances.length },
+                  { id: 'packs', label: t('lab.tabs.packs'), count: packs.length },
+                ]}
+              />
 
-              {drafts.length >= 2 && (
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm" data-lab-drafts>
-                  {confirmDrafts ? (
-                    <>
-                      <span role="alert" className="text-ink/75">
-                        {t('lab.deleteDraftsConfirm', { n: drafts.length })}
-                      </span>
-                      <button
-                        type="button"
-                        data-autofocus
-                        onClick={removeDrafts}
-                        disabled={busy}
-                        className="ui-press min-h-11 bg-danger px-4 text-[11px] uppercase tracking-[0.2em] text-bone disabled:opacity-40"
-                      >
-                        {busy ? t('lab.deletingDrafts') : t('lab.deleteDraftsYes')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDrafts(false)}
-                        disabled={busy}
-                        className="ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
-                      >
-                        {t('lab.cancel')}
-                      </button>
-                    </>
-                  ) : (
+              <TabPanel idBase="lab-ws" id="widgets" value={tab} className="pt-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-body-sm text-ink/55" data-lab-count>
+                    {widgetsCountLine}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={picked}
+                      onChange={(e) => setPicked(e.target.value)}
+                      disabled={sections.length === 0 || labLocked}
+                      aria-label={t('lab.pickSection')}
+                      className="min-h-11 border border-ink/20 bg-[#f2efe9] px-3 text-body-sm uppercase tracking-[0.12em] text-[#1a1a1a] outline-none focus:border-ink disabled:opacity-40"
+                      style={{ colorScheme: 'light' }}
+                    >
+                      {sections.map((id) => (
+                        <option key={id} value={id}>
+                          {sectionLabel(id)}
+                        </option>
+                      ))}
+                    </select>
                     <button
                       type="button"
-                      onClick={() => setConfirmDrafts(true)}
-                      disabled={busy}
-                      className="tpl-hit relative uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
+                      onClick={create}
+                      disabled={busy || sections.length === 0 || labLocked}
+                      title={labLocked ? t('lab.lockedTip') : undefined}
+                      className="btn btn-ghost disabled:opacity-40"
                     >
-                      {t('lab.deleteDrafts', { n: drafts.length })}
+                      {t('lab.new')}
                     </button>
-                  )}
+                  </div>
                 </div>
-              )}
 
-              {labLocked && (
-                <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5 md:p-6">
-                  <p className="text-body text-ink/80">
-                    {trialAvailable
-                      ? t(
-                          quota > 0
-                            ? 'lab.lockedMoreTrial'
-                            : 'lab.lockedPaidTrial',
-                          { n: trialDays || 7 },
-                        )
-                      : t(
-                          quota > 0 ? 'lab.lockedMoreSub' : 'lab.lockedPaidSub',
-                        )}
-                    {instances.length > 0 && ` ${t('lab.lockedSaved')}`}
-                  </p>
-                  <a
-                    href="#planes"
-                    onClick={goToPlanes}
-                    className="btn btn-primary mt-4"
-                  >
-                    {trialAvailable
-                      ? t('lab.planTrialCta', { n: trialDays || 7 })
-                      : t('lab.viewOtherPlans')}
-                  </a>
-                </div>
-              )}
-
-              {instances.length === 0 ? (
-                labLocked ? null : (
-                  <p className="mt-6 text-body text-ink/55">{t('lab.empty')}</p>
-                )
-              ) : (
-                <ul className="mt-6 space-y-4">
-                  {instances.map((inst) => (
-                    <li
-                      key={inst.id}
-                      className="border border-ink/15 p-4 md:p-5"
-                    >
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="font-mono text-body-sm">
-                          {inst.sectionId}
+                {drafts.length >= 2 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm" data-lab-drafts>
+                    {confirmDrafts ? (
+                      <>
+                        <span role="alert" className="text-ink/75">
+                          {t('lab.deleteDraftsConfirm', { n: drafts.length })}
                         </span>
-                        <span
-                          className={`border px-2 py-0.5 text-eyebrow uppercase ${
-                            inst.frozen
-                              ? FROZEN_TONE
-                              : STATUS_TONE[inst.status] || STATUS_TONE.draft
-                          }`}
+                        <button
+                          type="button"
+                          data-autofocus
+                          onClick={removeDrafts}
+                          disabled={busy}
+                          className="ui-press min-h-11 bg-danger px-4 text-[11px] uppercase tracking-[0.2em] text-bone disabled:opacity-40"
                         >
-                          {inst.frozen
-                            ? t('lab.status.frozen')
-                            : t(`lab.status.${inst.status}`)}
-                        </span>
-                        {inst.status === 'published' &&
-                          !inst.frozen &&
-                          inst.views > 0 && (
+                          {busy ? t('lab.deletingDrafts') : t('lab.deleteDraftsYes')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDrafts(false)}
+                          disabled={busy}
+                          className="ui-press min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
+                        >
+                          {t('lab.cancel')}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDrafts(true)}
+                        disabled={busy}
+                        className="tpl-hit relative uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
+                      >
+                        {t('lab.deleteDrafts', { n: drafts.length })}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {labLocked && (
+                  <div className="mt-6 border border-accent/40 bg-accent/[0.06] p-5 md:p-6">
+                    <p className="text-body text-ink/80">
+                      {trialAvailable
+                        ? t(
+                            quota > 0
+                              ? 'lab.lockedMoreTrial'
+                              : 'lab.lockedPaidTrial',
+                            { n: trialDays || 7 },
+                          )
+                        : t(
+                            quota > 0 ? 'lab.lockedMoreSub' : 'lab.lockedPaidSub',
+                          )}
+                      {instances.length > 0 && ` ${t('lab.lockedSaved')}`}
+                    </p>
+                    <a
+                      href="#planes"
+                      onClick={goToPlanes}
+                      className="btn btn-primary mt-4"
+                    >
+                      {trialAvailable
+                        ? t('lab.planTrialCta', { n: trialDays || 7 })
+                        : t('lab.viewOtherPlans')}
+                    </a>
+                  </div>
+                )}
+
+                {instances.length === 0 ? (
+                  labLocked ? null : (
+                    <p className="mt-6 text-body text-ink/55">{t('lab.empty')}</p>
+                  )
+                ) : (
+                  <ul className="mt-6 space-y-3">
+                    {instances.map((inst) => (
+                      <li key={inst.id} className="border border-ink/15 p-4 md:p-5" data-lab-widget>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          <span className="text-body font-medium">{sectionLabel(inst.sectionId)}</span>
+                          <span className="font-mono text-[11px] text-ink/40">{inst.sectionId}</span>
+                          <span
+                            className={`border px-2 py-0.5 text-eyebrow uppercase ${
+                              inst.frozen ? FROZEN_TONE : STATUS_TONE[inst.status] || STATUS_TONE.draft
+                            }`}
+                          >
+                            {inst.frozen ? t('lab.status.frozen') : t(`lab.status.${inst.status}`)}
+                          </span>
+                          {inst.status === 'published' && !inst.frozen && inst.views > 0 && (
                             <span className="text-body-sm tabular-nums text-ink/45">
                               {t('lab.views', { n: inst.views })}
                             </span>
                           )}
-                        {inst.status === 'published' &&
-                          !inst.frozen &&
-                          inst.stopsOnPlanEnd &&
-                          planStopsAt && (
+                          {inst.status === 'published' && !inst.frozen && inst.stopsOnPlanEnd && planStopsAt && (
                             <span className="text-body-sm uppercase tracking-[0.14em] text-accent/90">
-                              {t('lab.stopsOn', {
-                                date: fmtDate(planStopsAt),
-                              })}
+                              {t('lab.stopsOn', { date: fmtDate(planStopsAt) })}
                             </span>
                           )}
-                        <Link
-                          to={`/lab/${inst.id}`}
-                          className="ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
-                        >
-                          {t('lab.edit')}
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => remove(inst.id)}
-                          disabled={busy}
-                          className="text-body-sm uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
-                        >
-                          {t('lab.delete')}
-                        </button>
-                      </div>
-
-                      {inst.status === 'published' ? (
-                        <div className="mt-4">
-                          {inst.frozen && (
-                            <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-body-sm text-ink/75">
-                              {t('lab.frozenHint')}
-                            </p>
-                          )}
-                          <SnippetBox
-                            embedKey={inst.key}
-                            loaderInfo={loaderInfo}
-                          />
+                          <Link
+                            to={`/lab/${inst.id}`}
+                            className="tpl-hit relative ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
+                          >
+                            {t('lab.edit')}
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => remove(inst.id)}
+                            disabled={busy}
+                            className="tpl-hit relative text-body-sm uppercase tracking-[0.14em] text-ink/45 hover:text-danger disabled:opacity-40"
+                          >
+                            {t('lab.delete')}
+                          </button>
                         </div>
-                      ) : (
-                        <p className="mt-4 text-body-sm text-ink/55">
-                          {t('lab.draftHint')}
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+
+                        {inst.status === 'published' ? (
+                          <div className="mt-4">
+                            {inst.frozen && (
+                              <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-body-sm text-ink/75">
+                                {t('lab.frozenHint')}
+                              </p>
+                            )}
+                            <SnippetBox embedKey={inst.key} loaderInfo={loaderInfo} />
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-body-sm text-ink/50">{t('lab.draftHint')}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </TabPanel>
+
+              {/* Packs: varios widgets en una página, un solo snippet. */}
+              <TabPanel idBase="lab-ws" id="packs" value={tab} className="pt-6">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <p className="max-w-[64ch] text-body-sm text-ink/60">{t('lab.pack.intro')}</p>
+                  <button
+                    type="button"
+                    onClick={createPack}
+                    disabled={busy || instances.length === 0}
+                    title={instances.length === 0 ? t('lab.pack.needWidgets') : undefined}
+                    className="btn btn-ghost disabled:opacity-40"
+                  >
+                    {t('lab.pack.new')}
+                  </button>
+                </div>
+
+                {packs.length === 0 ? (
+                  <div className="mt-6 border border-dashed border-ink/20 px-5 py-8 text-center">
+                    <p className="text-body text-ink/55">
+                      {instances.length === 0 ? t('lab.pack.needWidgets') : t('lab.pack.empty')}
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="mt-6 space-y-3">
+                    {packs.map((pack) => {
+                      const shownCount = packShown(pack)
+                      const total = pack.items.length
+                      return (
+                        <li key={pack.id} className="border border-ink/15 p-4 md:p-5" data-lab-pack>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-body font-medium">{pack.name || t('lab.pack.defaultName')}</span>
+                            <span className="text-body-sm tabular-nums text-ink/50">
+                              {shownCount === total
+                                ? t(total === 1 ? 'lab.pack.countOne' : 'lab.pack.countMany', { n: total })
+                                : t('lab.pack.countShown', { shown: shownCount, total })}
+                            </span>
+                            <Link
+                              to={`/lab/pack/${pack.id}`}
+                              className="tpl-hit relative ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
+                            >
+                              {t('lab.edit')}
+                            </Link>
+                          </div>
+                          <div className="mt-4">
+                            {shownCount > 0 ? (
+                              <SnippetBox embedKey={pack.key} loaderInfo={loaderInfo} />
+                            ) : (
+                              <p className="text-body-sm text-ink/55">
+                                {total === 0 ? t('lab.pack.itemsEmpty') : t('lab.pack.nothingShown')}
+                              </p>
+                            )}
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </TabPanel>
             </>
           )}
         </section>
-
-        {/* Packs: varios widgets en una página, un solo snippet. */}
-        {user && (
-          <section className="mt-16 md:mt-20">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-eyebrow uppercase text-ink/50">{t('lab.pack.title')}</h2>
-              <button
-                type="button"
-                onClick={createPack}
-                disabled={busy || instances.length === 0}
-                title={instances.length === 0 ? t('lab.pack.needWidgets') : undefined}
-                className="btn btn-ghost disabled:opacity-40"
-              >
-                {t('lab.pack.new')}
-              </button>
-            </div>
-            <p className="mt-3 max-w-[64ch] text-body-sm text-ink/60">{t('lab.pack.intro')}</p>
-
-            {packs.length === 0 ? (
-              <p className="mt-6 text-body text-ink/55">
-                {instances.length === 0 ? t('lab.pack.needWidgets') : t('lab.pack.empty')}
-              </p>
-            ) : (
-              <ul className="mt-6 space-y-4">
-                {packs.map((pack) => {
-                  const shownCount = packShown(pack)
-                  const total = pack.items.length
-                  return (
-                    <li key={pack.id} className="border border-ink/15 p-4 md:p-5">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-body font-medium">
-                          {pack.name || t('lab.pack.defaultName')}
-                        </span>
-                        <span className="text-body-sm tabular-nums text-ink/50">
-                          {shownCount === total
-                            ? t(total === 1 ? 'lab.pack.countOne' : 'lab.pack.countMany', { n: total })
-                            : t('lab.pack.countShown', { shown: shownCount, total })}
-                        </span>
-                        <Link
-                          to={`/lab/pack/${pack.id}`}
-                          className="ml-auto text-body-sm uppercase tracking-[0.14em] text-ink/60 hover:text-accent"
-                        >
-                          {t('lab.edit')}
-                        </Link>
-                      </div>
-                      <div className="mt-4">
-                        {shownCount > 0 ? (
-                          <SnippetBox embedKey={pack.key} loaderInfo={loaderInfo} />
-                        ) : (
-                          <p className="text-body-sm text-ink/55">
-                            {total === 0 ? t('lab.pack.itemsEmpty') : t('lab.pack.nothingShown')}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </section>
-        )}
 
         {/* Guías por plataforma: dónde se pega el mismo snippet en cada una. */}
         <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">
