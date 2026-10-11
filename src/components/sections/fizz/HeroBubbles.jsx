@@ -587,7 +587,7 @@ export default function HeroBubbles({
             <a
               data-fizz-cta
               href={ctaHref}
-              className="tpl-hit relative mt-10 inline-flex items-center rounded-full border border-current px-7 py-4 text-xs font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-300 ease-out hover:bg-[var(--fizz-ink)] hover:text-[var(--fizz-bg)] active:scale-[0.97] md:mt-14"
+              className="tpl-hit relative mt-10 inline-flex items-center rounded-full border border-current px-7 py-4 text-xs font-semibold uppercase tracking-[0.2em] transition-[background-color,color,scale] duration-300 ease-out hover:bg-[var(--fizz-ink)] hover:text-[var(--fizz-bg)] active:scale-[0.97] md:mt-14"
             >
               {cta}
             </a>

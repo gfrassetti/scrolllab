@@ -73,7 +73,7 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
         type="button"
         disabled={busy || authLoading}
         onClick={buy}
-        className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98] disabled:opacity-60"
+        className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[scale,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98] disabled:opacity-60"
       >
         {/* Solo si todavía no compró (ver FirstPurchasePrice). */}
         <FirstPurchaseTag

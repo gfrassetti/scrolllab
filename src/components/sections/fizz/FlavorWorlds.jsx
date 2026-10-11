@@ -551,7 +551,7 @@ function WorldCopy({ world, index, total, cta, ctaHref }) {
       <span data-world-line className="mt-6 block md:mt-8">
         <a
           href={ctaHref}
-          className="tpl-hit relative inline-flex items-center rounded-full border border-current px-7 py-4 text-xs font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-300 ease-out hover:bg-[var(--world-ink)] hover:text-[var(--world-bg)] active:scale-[0.97]"
+          className="tpl-hit relative inline-flex items-center rounded-full border border-current px-7 py-4 text-xs font-semibold uppercase tracking-[0.2em] transition-[background-color,color,scale] duration-300 ease-out hover:bg-[var(--world-ink)] hover:text-[var(--world-bg)] active:scale-[0.97]"
           style={{ '--world-ink': world.ink, '--world-bg': world.bg }}
         >
           {cta}
