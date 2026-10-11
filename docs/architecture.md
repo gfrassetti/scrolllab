@@ -43,6 +43,7 @@ Se importa **solo hacia abajo**. Lo primero lo hace cumplir ESLint; el resto es 
 | `server/services/payments.js` | `handleMercadoPagoNotification`: el webhook (pago, reembolso, upgrade de LAB, suscripción) |
 | `server/services/paddle.js` · `paddlePayments.js` | Paddle: el adaptador de la API y la firma del webhook (`paddle.js`, como `mercadoPago.js`) y sus casos de uso: cumplir una orden, reembolsos y el webhook (`paddlePayments.js`). Ver [`paddle.md`](paddle.md) |
 | `server/services/subscriptions/` | `billing` (períodos y reglas base), `entitlement` (qué puede usar el usuario), `planChange`, `start` (`startSubscription`: el alta, con la pasarela elegida), `lifecycle` (activar y reemplazar, igual en toda pasarela), `mpSync` (Mercado Pago) y `paddleSync` (Paddle) |
+| `server/services/hosted/` | LAB: `serving` (qué se sirve al embed, packs permitidos, flags del panel), `instances` (crear, editar, publicar con cupo, suspender) y `packs`. El router `hosted.js` solo traduce HTTP |
 | `server/services/email.js` · `emailTemplates.js` | El envío (Resend, idempotencia) y el contenido de los mails (puro) |
 | `server/repositories/` | `users`, `leads`, `orders`, `hosted`, `subscriptions` y `mode` (archivos o Mongo) |
 | `server/db.js` | Conexión y ciclo de vida; compone el facade `db` |

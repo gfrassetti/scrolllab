@@ -6,36 +6,39 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import { db } from '../../db.js'
 import { requireAuth, asyncHandler, HttpError } from '../../middleware.js'
-import { assertObjectIdLike } from '../../validation.js'
-import { isHostableSectionId, HOSTABLE_SECTIONS } from '../../sections.js'
-import { sanitizeHostedProps } from '../../sectionFields.js'
+import { HOSTABLE_SECTIONS } from '../../sections.js'
+import { requestHost } from '../../hostedKey.js'
 import {
-  newHostedKey,
-  isHostedKey,
-  newPackKey,
-  isPackKey,
-  requestHost,
-  cleanDomains,
-  domainAllowed,
-} from '../../hostedKey.js'
-import { resolveEntitlement, assertCanPublish } from '../../services/subscriptions.js'
+  resolveEmbedConfig,
+  resolveEmbedPack,
+  listHostedWithFlags,
+  packsAllowed,
+  badgeHref,
+} from '../../services/hosted/serving.js'
+import {
+  getOwnedHostedInstance,
+  createHostedInstance,
+  updateHostedInstance,
+  deleteHostedInstance,
+  setHostedSuspended,
+} from '../../services/hosted/instances.js'
+import {
+  PACK_MAX_ITEMS,
+  PACK_MAX_PER_USER,
+  getOwnedHostedPack,
+  createHostedPack,
+  updateHostedPack,
+  deleteHostedPack,
+} from '../../services/hosted/packs.js'
 
 /**
  * Hosted Component / LAB (docs/hosted-component-plan.md, Fase 3): el config
  * público que lee el embed desde sitios de terceros, el loader con SRI, y el
- * CRUD de instancias del suscriptor (borrador, publicar, dominios). Suspender
- * / reactivar una key solo con ADMIN_TOKEN.
+ * CRUD de instancias y packs del suscriptor. Solo traduce HTTP: las reglas
+ * (qué se sirve, cupo, publicar, packs) están en services/hosted/. Suspender /
+ * reactivar una key solo con ADMIN_TOKEN.
  */
-/** Tope de secciones por pack y de packs por usuario (abuso / tamaño de página). */
-export const PACK_MAX_ITEMS = 30
-export const PACK_MAX_PER_USER = 20
-const PACK_NAME_MAX = 60
-
-/** A dónde lleva el sello del plan gratis (con UTM: se mide en el panel). */
-export function badgeHref(config) {
-  const base = String(config.clientUrl || '').replace(/\/$/, '')
-  return `${base}/lab?utm_source=lab-embed&utm_medium=badge&utm_campaign=free-plan`
-}
+export { PACK_MAX_ITEMS, PACK_MAX_PER_USER, badgeHref }
 
 export function createHostedRouter({ config, limits }) {
   const router = express.Router()
@@ -100,52 +103,6 @@ export function createHostedRouter({ config, limits }) {
     return loaderInfoCache
   }
 
-  /**
-   * Por qué una instancia NO se sirve en `host` (HttpError), o null si se sirve.
-   * Lo comparten el config de una sección y el de un pack: mismas reglas.
-   */
-  /**
-   * Si la instancia se sirve hoy en ese host. Devuelve `{ error }` (por qué
-   * no) y el `ent` (plan efectivo del dueño) que ya hubo que calcular: el
-   * config lo usa para el sello del plan gratis sin otra consulta.
-   */
-  async function servability(inst, host) {
-    if (!inst) return { error: new HttpError(404, 'No encontrado') }
-    if (inst.status === 'suspended') return { error: new HttpError(402, 'Instancia suspendida') }
-    if (inst.status !== 'published') {
-      return { error: new HttpError(409, 'La instancia todavía no se publicó') }
-    }
-    if (!domainAllowed(inst.domains, host)) return { error: new HttpError(403, 'Dominio no autorizado') }
-
-    // Suscripción caída o bajada de plan: las publicadas por encima del tope
-    // dejan de servir. Chequeo perezoso, sin tocar `inst.status` — si el
-    // dueño vuelve a suscribirse, reviven solas. Orden estable por
-    // `createdAt`: quedan cubiertas las más viejas. `persist:false` para NO
-    // escribir la fila de suscripción desde este path anónimo/caliente — el
-    // barrido de vencimiento lo hace `/api/subscriptions/me` o el publish.
-    const ent = await resolveEntitlement(inst.userId, config, { persist: false })
-    if (Number.isFinite(ent.quota)) {
-      const olderPublished = await db.countPublishedHostedCreatedBefore(
-        inst.userId,
-        inst.createdAt,
-        db.uid(inst) || inst.id,
-      )
-      if (olderPublished >= ent.quota) {
-        return { error: new HttpError(402, 'Sección por encima del límite del plan'), ent }
-      }
-    }
-    return { error: null, ent }
-  }
-
-  const notServable = async (inst, host) => (await servability(inst, host)).error
-
-  /** Los packs son de los planes pagos: con el plan gratis (1 widget) no juntan nada. */
-  const PACKS_PAID_ONLY = 'Los packs vienen con los planes pagos'
-  async function packsAllowed(userId) {
-    const ent = await resolveEntitlement(userId, config, { persist: false })
-    return ent.plan !== 'free'
-  }
-
   function publicPack(pack) {
     return {
       id: db.uid(pack) || pack.id,
@@ -156,45 +113,6 @@ export function createHostedRouter({ config, limits }) {
       createdAt: pack.createdAt,
       updatedAt: pack.updatedAt,
     }
-  }
-
-  function cleanPackName(raw) {
-    return String(raw ?? '').replace(/\s+/g, ' ').trim().slice(0, PACK_NAME_MAX)
-  }
-
-  /** Ids de instancias del usuario, sin repetir, en el orden pedido. */
-  async function cleanPackItems(userId, raw) {
-    if (!Array.isArray(raw)) {
-      throw new HttpError(400, 'items tiene que ser una lista', { expose: true })
-    }
-    const owned = new Set(
-      (await db.findHostedInstancesByUser(userId)).map((i) => String(db.uid(i) || i.id)),
-    )
-    const out = []
-    for (const id of raw) {
-      const s = String(id)
-      if (!owned.has(s)) {
-        throw new HttpError(400, 'Uno de los widgets no es tuyo o ya no existe', {
-          expose: true,
-        })
-      }
-      if (!out.includes(s)) out.push(s)
-    }
-    if (out.length > PACK_MAX_ITEMS) {
-      throw new HttpError(400, `Un pack lleva hasta ${PACK_MAX_ITEMS} widgets`, {
-        expose: true,
-      })
-    }
-    return out
-  }
-
-  async function loadOwnedPack(req) {
-    assertObjectIdLike(req.params.id)
-    const pack = await db.findHostedPackById(req.params.id)
-    if (!pack || String(pack.userId) !== String(db.uid(req.user))) {
-      throw new HttpError(404, 'Pack no encontrado')
-    }
-    return pack
   }
 
   function publicCors(res) {
@@ -210,15 +128,6 @@ export function createHostedRouter({ config, limits }) {
   // barato). `s-maxage` deja un margen para un cache compartido/CDN futuro.
   const PUBLIC_CACHE = 'public, max-age=0, s-maxage=5, must-revalidate'
 
-  async function loadOwnedHosted(req) {
-    assertObjectIdLike(req.params.id)
-    const inst = await db.findHostedInstanceById(req.params.id)
-    if (!inst || String(inst.userId) !== String(db.uid(req.user))) {
-      throw new HttpError(404, 'Instancia no encontrada')
-    }
-    return inst
-  }
-
   // Público: lo consume el `<script>` del embed desde sitios de terceros.
   router.get(
     '/api/embed/:key/config',
@@ -226,25 +135,14 @@ export function createHostedRouter({ config, limits }) {
     asyncHandler(async (req, res) => {
       publicCors(res)
 
-      const key = String(req.params.key || '')
-      if (!isHostedKey(key)) throw new HttpError(404, 'No encontrado')
-
-      const inst = await db.findHostedInstanceByKey(key)
-      const { error: why, ent } = await servability(inst, requestHost(req))
-      if (why) throw why
-
-      // Señal de uso, best-effort: no bloquea la respuesta.
-      db.incHostedViews(key).catch(() => {})
+      const body = await resolveEmbedConfig({
+        key: String(req.params.key || ''),
+        host: requestHost(req),
+        config,
+      })
 
       res.set('Cache-Control', PUBLIC_CACHE)
-      res.json({
-        sectionId: inst.sectionId,
-        // Otra pasada al servir: instancias publicadas antes de que LAB exigiera
-        // URL completa en las imágenes (una /ruta ahí sale rota).
-        props: sanitizeHostedProps(inst.sectionId, inst.publishedProps) || {},
-        // Plan gratis: el frame muestra «Hecho con Scroll Lab» (los pagos lo sacan).
-        ...(ent?.plan === 'free' ? { badge: { href: badgeHref(config) } } : {}),
-      })
+      res.json(body)
     }),
   )
 
@@ -264,22 +162,11 @@ export function createHostedRouter({ config, limits }) {
     limits.embedConfig,
     asyncHandler(async (req, res) => {
       publicCors(res)
-      const key = String(req.params.key || '')
-      if (!isPackKey(key)) throw new HttpError(404, 'No encontrado')
-      const pack = await db.findHostedPackByKey(key)
-      if (!pack) throw new HttpError(404, 'No encontrado')
-      const host = requestHost(req)
-      if (!domainAllowed(pack.domains, host)) throw new HttpError(403, 'Dominio no autorizado')
-      // Bajó a gratis: el pack se apaga (sus widgets sueltos siguen sus reglas).
-      if (!(await packsAllowed(pack.userId))) throw new HttpError(402, PACKS_PAID_ONLY)
-
-      const keys = []
-      for (const id of pack.items || []) {
-        const inst = await db.findHostedInstanceById(id)
-        if (!inst || String(inst.userId) !== String(pack.userId)) continue
-        if (await notServable(inst, host)) continue
-        keys.push(inst.key)
-      }
+      const { keys } = await resolveEmbedPack({
+        key: String(req.params.key || ''),
+        host: requestHost(req),
+        config,
+      })
       res.set('Cache-Control', PUBLIC_CACHE)
       res.json({ keys })
     }),
@@ -297,35 +184,14 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted',
     requireAuth,
     asyncHandler(async (req, res) => {
-      const userId = db.uid(req.user)
-      const rows = await db.findHostedInstancesByUser(userId)
-      // Flags derivados, NO se persisten — mismas reglas de orden por
-      // `createdAt` que `/api/embed/:key/config`:
-      //  - `frozen`: el plan YA no la cubre → hoy responde 402. LAB muestra
-      //    "Congelada" en vez de "Publicada".
-      //  - `stopsOnPlanEnd`: hoy se sirve, pero caería fuera de la cuota
-      //    free → si la suscripción no se reactiva, se apaga al fin de
-      //    período. LAB avisa "se apaga el <fecha>".
-      // Al re-suscribirse ambos se apagan solos (no hubo cambio de estado).
-      const ent = await resolveEntitlement(userId, config, { persist: false })
-      const freeQuota = config.hostedFreeQuota
-      const instances = await Promise.all(
-        rows.map(async (r) => {
-          let frozen = false
-          let stopsOnPlanEnd = false
-          if (r.status === 'published') {
-            const older = await db.countPublishedHostedCreatedBefore(
-              userId,
-              r.createdAt,
-              db.uid(r) || r.id,
-            )
-            frozen = Number.isFinite(ent.quota) && older >= ent.quota
-            stopsOnPlanEnd = !frozen && older >= freeQuota
-          }
-          return { ...publicHosted(r), frozen, stopsOnPlanEnd }
-        }),
-      )
-      res.json({ instances })
+      const rows = await listHostedWithFlags({ userId: db.uid(req.user), config })
+      res.json({
+        instances: rows.map(({ inst, frozen, stopsOnPlanEnd }) => ({
+          ...publicHosted(inst),
+          frozen,
+          stopsOnPlanEnd,
+        })),
+      })
     }),
   )
 
@@ -334,36 +200,10 @@ export function createHostedRouter({ config, limits }) {
     requireAuth,
     limits.hosted,
     asyncHandler(async (req, res) => {
-      const sectionId = String(req.body?.sectionId || '')
-      if (!isHostableSectionId(sectionId)) {
-        throw new HttpError(400, 'Sección no hosteable')
-      }
-      // LAB es de pago: un usuario free solo puede tener hasta
-      // `hostedFreeQuota` instancias (0 = ninguna). Con plan/prueba activa
-      // el tope lo pone `assertCanPublish` al publicar, no acá.
-      const userId = db.uid(req.user)
-      const ent = await resolveEntitlement(userId, config, { persist: false })
-      if (ent.plan === 'free') {
-        const mine = await db.findHostedInstancesByUser(userId)
-        if (mine.length >= config.hostedFreeQuota) {
-          throw new HttpError(
-            402,
-            config.hostedFreeQuota > 0
-              ? 'Llegaste al límite gratis. Suscribite o empezá tu prueba para crear más.'
-              : 'Suscribite o empezá tu prueba gratis para crear secciones en LAB.',
-            { expose: true },
-          )
-        }
-      }
-      const draftProps =
-        sanitizeHostedProps(sectionId, req.body?.draftProps) || {}
-      const inst = await db.createHostedInstance({
-        userId,
-        key: newHostedKey(),
-        sectionId,
-        status: 'draft',
-        domains: [],
-        draftProps,
+      const inst = await createHostedInstance({
+        userId: db.uid(req.user),
+        body: req.body,
+        config,
       })
       res.status(201).json({ instance: publicHosted(inst) })
     }),
@@ -373,7 +213,7 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted/:id',
     requireAuth,
     asyncHandler(async (req, res) => {
-      const inst = await loadOwnedHosted(req)
+      const inst = await getOwnedHostedInstance(db.uid(req.user), req.params.id)
       res.json({ instance: publicHosted(inst) })
     }),
   )
@@ -383,48 +223,9 @@ export function createHostedRouter({ config, limits }) {
     requireAuth,
     limits.hosted,
     asyncHandler(async (req, res) => {
-      const inst = await loadOwnedHosted(req)
-      // `draftProps` / `publishedProps` son Mixed en Mongo: reasignarlos no
-      // siempre queda marcado como modificado y `save()` no los persiste.
-      const touch = (p) => {
-        if (typeof inst.markModified === 'function') inst.markModified(p)
-      }
-
-      if (req.body?.draftProps !== undefined) {
-        inst.draftProps =
-          sanitizeHostedProps(inst.sectionId, req.body.draftProps) || {}
-        touch('draftProps')
-      }
-      if (req.body?.domains !== undefined) {
-        inst.domains = cleanDomains(req.body.domains)
-      }
-      if (req.body?.publish === true) {
-        // Una sección puede haber salido de HOSTABLE_SECTIONS después de crearse
-        // la instancia (ej: scrolljack que rompe en el embed). No re-publicar.
-        if (!isHostableSectionId(inst.sectionId)) {
-          throw new HttpError(
-            409,
-            'Esta sección ya no se puede hostear. Borrá la instancia.',
-            { expose: true },
-          )
-        }
-        // Cuota: publicar de nuevo una ya publicada no cuenta (se excluye).
-        if (inst.status !== 'published') {
-          await assertCanPublish({
-            userId: db.uid(req.user),
-            instanceId: db.uid(inst) || inst.id,
-            config,
-          })
-        }
-        inst.publishedProps = inst.draftProps || {}
-        touch('publishedProps')
-        inst.status = 'published'
-        inst.publishedAt = new Date()
-      } else if (req.body?.unpublish === true && inst.status === 'published') {
-        inst.status = 'draft'
-      }
-
-      await inst.save()
+      const userId = db.uid(req.user)
+      const found = await getOwnedHostedInstance(userId, req.params.id)
+      const inst = await updateHostedInstance({ inst: found, userId, body: req.body, config })
       res.json({ instance: publicHosted(inst) })
     }),
   )
@@ -434,9 +235,9 @@ export function createHostedRouter({ config, limits }) {
     requireAuth,
     limits.hosted,
     asyncHandler(async (req, res) => {
-      const inst = await loadOwnedHosted(req)
-      await db.deleteHostedInstance(db.uid(inst) || inst.id)
-      await db.removeInstanceFromPacks(db.uid(req.user), db.uid(inst) || inst.id)
+      const userId = db.uid(req.user)
+      const inst = await getOwnedHostedInstance(userId, req.params.id)
+      await deleteHostedInstance({ inst, userId })
       res.json({ ok: true })
     }),
   )
@@ -453,7 +254,7 @@ export function createHostedRouter({ config, limits }) {
         packs: packs.map(publicPack),
         maxItems: PACK_MAX_ITEMS,
         // Con el plan gratis no se crean ni se muestran (la UI lo explica).
-        allowed: await packsAllowed(userId),
+        allowed: await packsAllowed(userId, config),
       })
     }),
   )
@@ -463,23 +264,7 @@ export function createHostedRouter({ config, limits }) {
     requireAuth,
     limits.hosted,
     asyncHandler(async (req, res) => {
-      const userId = db.uid(req.user)
-      if (!(await packsAllowed(userId))) throw new HttpError(402, PACKS_PAID_ONLY, { expose: true })
-      const mine = await db.findHostedPacksByUser(userId)
-      if (mine.length >= PACK_MAX_PER_USER) {
-        throw new HttpError(400, `Podés tener hasta ${PACK_MAX_PER_USER} packs`, {
-          expose: true,
-        })
-      }
-      const items =
-        req.body?.items !== undefined ? await cleanPackItems(userId, req.body.items) : []
-      const pack = await db.createHostedPack({
-        userId,
-        key: newPackKey(),
-        name: cleanPackName(req.body?.name),
-        items,
-        domains: [],
-      })
+      const pack = await createHostedPack({ userId: db.uid(req.user), body: req.body, config })
       res.status(201).json({ pack: publicPack(pack) })
     }),
   )
@@ -488,7 +273,7 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted-packs/:id',
     requireAuth,
     asyncHandler(async (req, res) => {
-      const pack = await loadOwnedPack(req)
+      const pack = await getOwnedHostedPack(db.uid(req.user), req.params.id)
       res.json({ pack: publicPack(pack), maxItems: PACK_MAX_ITEMS })
     }),
   )
@@ -498,14 +283,9 @@ export function createHostedRouter({ config, limits }) {
     requireAuth,
     limits.hosted,
     asyncHandler(async (req, res) => {
-      const pack = await loadOwnedPack(req)
-      if (req.body?.name !== undefined) pack.name = cleanPackName(req.body.name)
-      if (req.body?.items !== undefined) {
-        pack.items = await cleanPackItems(db.uid(req.user), req.body.items)
-        if (typeof pack.markModified === 'function') pack.markModified('items')
-      }
-      if (req.body?.domains !== undefined) pack.domains = cleanDomains(req.body.domains)
-      await pack.save()
+      const userId = db.uid(req.user)
+      const found = await getOwnedHostedPack(userId, req.params.id)
+      const pack = await updateHostedPack({ pack: found, userId, body: req.body })
       res.json({ pack: publicPack(pack) })
     }),
   )
@@ -515,8 +295,8 @@ export function createHostedRouter({ config, limits }) {
     requireAuth,
     limits.hosted,
     asyncHandler(async (req, res) => {
-      const pack = await loadOwnedPack(req)
-      await db.deleteHostedPack(db.uid(pack) || pack.id)
+      const pack = await getOwnedHostedPack(db.uid(req.user), req.params.id)
+      await deleteHostedPack({ pack })
       res.json({ ok: true })
     }),
   )
@@ -527,11 +307,7 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted/:id/suspend',
     asyncHandler(async (req, res) => {
       requireAdmin(req)
-      assertObjectIdLike(req.params.id)
-      const inst = await db.findHostedInstanceById(req.params.id)
-      if (!inst) throw new HttpError(404, 'Instancia no encontrada')
-      inst.status = 'suspended'
-      await inst.save()
+      const inst = await setHostedSuspended({ id: req.params.id, suspended: true })
       res.json({ instance: publicHosted(inst) })
     }),
   )
@@ -540,11 +316,7 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted/:id/unsuspend',
     asyncHandler(async (req, res) => {
       requireAdmin(req)
-      assertObjectIdLike(req.params.id)
-      const inst = await db.findHostedInstanceById(req.params.id)
-      if (!inst) throw new HttpError(404, 'Instancia no encontrada')
-      inst.status = inst.publishedProps ? 'published' : 'draft'
-      await inst.save()
+      const inst = await setHostedSuspended({ id: req.params.id, suspended: false })
       res.json({ instance: publicHosted(inst) })
     }),
   )
