@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import RisingOrb from './RisingOrb'
+import { mixHex } from '../../../lib/themeVars'
 
 /**
  * FooterTrophy — sky closer. Super-size type behind a rising
@@ -15,6 +16,8 @@ export default function FooterTrophy({
   orbSrc = '',
   bg,
   fg,
+  /** La palabra destacada; sin fondo propio, también arma el degradé. */
+  accent: accentColor,
 }) {
   const root = useRef(null)
 
@@ -120,7 +123,7 @@ export default function FooterTrophy({
       <span key={key} className="inline-block whitespace-nowrap">
         {parts.map((part, i) =>
           part.toLowerCase() === accent.toLowerCase() ? (
-            <span key={i} className="text-[#2c4a42]">
+            <span key={i} style={{ color: accentColor || '#2c4a42' }}>
               {part}
             </span>
           ) : (
@@ -137,7 +140,11 @@ export default function FooterTrophy({
       id="winner"
       className="relative overflow-hidden px-3 pt-14 pb-5 text-[#f7f2e8] md:px-6 md:pt-16 md:pb-6"
       style={{
-        background: bg || 'linear-gradient(180deg, #1c2a28 0%, #2c4a42 48%, #4a675c 100%)',
+        background:
+          bg ||
+          (accentColor
+            ? `linear-gradient(180deg, ${mixHex(accentColor, '#000000', 0.37)} 0%, ${accentColor} 48%, ${mixHex(accentColor, '#ffffff', 0.15)} 100%)`
+            : 'linear-gradient(180deg, #1c2a28 0%, #2c4a42 48%, #4a675c 100%)'),
         color: fg || undefined,
       }}
     >

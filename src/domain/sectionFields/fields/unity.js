@@ -22,6 +22,7 @@ export const UNITY_FIELDS = {
     { key: 'headline', label: 'Headline', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color del titular que cruza la foto', type: 'color' },
   ],
   'unity/MosaicSlider': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -36,6 +37,9 @@ export const UNITY_FIELDS = {
     { key: 'img8', label: 'Image 8', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color del rótulo (arriba)', type: 'color' },
+    { key: 'accent2', label: 'Color del rótulo (sobre la foto)', type: 'color' },
+    { key: 'cardBg', label: 'Fondo de las fotos mientras cargan', type: 'color' },
   ],
   'unity/UniversalLang': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -94,6 +98,8 @@ export const UNITY_FIELDS = {
     { key: 'img2', label: 'Image 2', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'bandBg', label: 'Fondo de la franja 1 (detrás de la foto)', type: 'color' },
+    { key: 'bandBg2', label: 'Fondo de la franja 2 (detrás de la foto)', type: 'color' },
   ],
   'unity/FooterTrophy': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -104,5 +110,6 @@ export const UNITY_FIELDS = {
     { key: 'orbSrc', label: 'Orb photo', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de la palabra destacada (y del degradé si no hay fondo propio)', type: 'color' },
   ],
 }

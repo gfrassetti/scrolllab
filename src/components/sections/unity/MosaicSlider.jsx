@@ -61,6 +61,10 @@ export default function MosaicSlider({
   img8,
   bg,
   fg,
+  /** Los rótulos (arriba y sobre la foto) y el fondo de las fotos mientras cargan. */
+  accent,
+  accent2,
+  cardBg,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -240,10 +244,16 @@ export default function MosaicSlider({
         ref={root}
         id="peace"
         className="relative bg-black py-20 text-white md:py-28"
-        style={{ background: bg || undefined, color: fg || undefined }}
+        style={{
+          background: bg || undefined,
+          color: fg || undefined,
+          '--ut-accent': accent || '#8fb3a6',
+          '--ut-accent2': accent2 || '#2c4a42',
+          '--ut-card': cardBg || '#1a1a1a',
+        }}
       >
         <div data-calm-reveal className="px-5 text-center">
-          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-[#8fb3a6] uppercase md:text-xs">
+          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-(color:--ut-accent) uppercase md:text-xs">
             {eyebrow}
           </p>
           <h2 className="font-display text-[clamp(2.4rem,7vw,6rem)] leading-[0.95] tracking-[-0.02em] uppercase">
@@ -266,7 +276,7 @@ export default function MosaicSlider({
           {sources.map((src, i) => (
             <div
               key={`${src}-${i}`}
-              className="aspect-[4/5] w-[min(82vw,34rem)] shrink-0 snap-start overflow-hidden bg-[#1a1a1a]"
+              className="aspect-[4/5] w-[min(82vw,34rem)] shrink-0 snap-start overflow-hidden bg-(--ut-card)"
             >
               <img
                 {...imgAttrs(src, variants)}
@@ -296,7 +306,7 @@ export default function MosaicSlider({
             <div
               key={`${src}-${i}`}
               data-panel
-              className="overflow-hidden bg-[#1a1a1a] will-change-transform"
+              className="overflow-hidden bg-(--ut-card) will-change-transform"
               style={{ zIndex: MOSAIC[i]?.z || 1 }}
             >
               <img
@@ -315,7 +325,7 @@ export default function MosaicSlider({
           data-sticky-text
           className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center px-5 text-center will-change-transform"
         >
-          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-[#2c4a42] uppercase md:text-xs">
+          <p className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-(color:--ut-accent2) uppercase md:text-xs">
             {eyebrow}
           </p>
           <h2 className="font-display text-[clamp(2.4rem,7vw,6rem)] leading-[0.95] tracking-[-0.02em] uppercase">

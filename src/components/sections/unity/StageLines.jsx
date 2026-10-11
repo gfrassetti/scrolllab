@@ -17,6 +17,9 @@ export default function StageLines({
   img2 = stageB,
   bg,
   fg,
+  /** El fondo de cada franja (se ve detrás de la foto). */
+  bandBg,
+  bandBg2,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -67,8 +70,8 @@ export default function StageLines({
   )
 
   const bands = [
-    { eyebrow: eyebrow1, line: line1, img: img1, bg: '#1a1a1a' },
-    { eyebrow: eyebrow2, line: line2, img: img2, bg: '#0a0a0a' },
+    { eyebrow: eyebrow1, line: line1, img: img1, bg: bandBg || '#1a1a1a' },
+    { eyebrow: eyebrow2, line: line2, img: img2, bg: bandBg2 || '#0a0a0a' },
   ]
 
   return (

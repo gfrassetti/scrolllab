@@ -15,6 +15,8 @@ export default function HeroTwin({
   headline = 'HEADLINE 1.\nHEADLINE 2.',
   bg,
   fg,
+  /** El titular que cruza la foto. */
+  accent,
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -51,6 +53,7 @@ export default function HeroTwin({
       className="relative flex min-h-svh items-center justify-center overflow-hidden bg-(--sec-bg) px-5 pt-24 pb-20 text-current md:px-10"
       style={{
         '--sec-bg': bg || '#e7e4dc',
+        '--ut-accent': accent || '#2c4a42',
         color: fg || '#0a0a0a',
       }}
     >
@@ -64,7 +67,7 @@ export default function HeroTwin({
 
         <h1
           data-twin-head
-          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 font-anton text-[clamp(2.6rem,9vw,6.5rem)] leading-[0.9] font-normal tracking-[-0.03em] text-[#2c4a42] uppercase will-change-transform calm:static calm:translate-y-0"
+          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 font-anton text-[clamp(2.6rem,9vw,6.5rem)] leading-[0.9] font-normal tracking-[-0.03em] text-(color:--ut-accent) uppercase will-change-transform calm:static calm:translate-y-0"
         >
           {lines.map((line) => (
             <span key={line} className="block">
