@@ -586,6 +586,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 | Empezar un template que depende de media que el comprador tendría que producir | `Lecciones — templates con media propia` · `HOLLOW — descartado (qué se aprendió)` |
 | Medir una referencia o compararla con lo nuestro | `Analizar paginas modelo` (sección «Lo que analyze:ref no mide») |
 | Revisar el estándar del producto | `Storytelling pages — características canónicas` (canon v1 y v2) |
+| Tocar la tipografía global del builder o probar el builder en el Chrome del usuario | `Builder — tipografía global (cómo está hecha y cómo se probó)` (la fuente viaja en la receta; trampas de la extensión de Chrome) |
 
 Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre” Obsidian UI: lee los `.md` del vault cuando aportan contexto.
 
