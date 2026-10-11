@@ -1,4 +1,4 @@
-import { model3dHelp, navLinks, MENU_BUTTON } from '../helpers.js'
+import { model3dHelp, navLinks, MENU_BUTTON, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -60,6 +60,7 @@ export const MONOLITH_FIELDS = {
       max: 8,
       item: [{ key: 'word', label: 'Palabra', type: 'text' }],
     },
+    { key: 'accent', label: 'Color de acento (palabras resaltadas)', type: 'color' },
   ],
   'monolith/SpecSheet': [
     { key: 'unitLabel', label: 'Etiqueta de unidad', type: 'text' },
@@ -97,6 +98,7 @@ export const MONOLITH_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'accent', label: 'Color de acento (códigos)', type: 'color' },
   ],
   'monolith/TypeAccordion': [
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
@@ -113,8 +115,11 @@ export const MONOLITH_FIELDS = {
       item: [
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'body', label: 'Texto', type: 'textarea' },
+        { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
       ],
     },
+    { key: 'accent', label: 'Color de acento (títulos)', type: 'color' },
+    toggle('showImages', 'Fotos de los cajones'),
   ],
   'monolith/FooterBrutal': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
@@ -134,5 +139,6 @@ export const MONOLITH_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    { key: 'accent', label: 'Color de las líneas', type: 'color' },
   ],
 }

@@ -23,6 +23,8 @@ export default function ZoomPortal({
   bg,
   fg,
   accent,
+  /** La palabra gigante en contorno detrás del portal. */
+  showGhost = 'on',
 }) {
   const root = useRef(null)
 
@@ -84,7 +86,10 @@ export default function ZoomPortal({
         <span
           data-portal-ghost
           aria-hidden="true"
-          className="pointer-events-none absolute font-brico text-[26vw] leading-none font-extrabold tracking-[-0.02em] text-transparent uppercase select-none [-webkit-text-stroke:1px_rgba(236,233,226,0.25)]"
+          className={`pointer-events-none absolute font-brico text-[26vw] leading-none font-extrabold tracking-[-0.02em] text-transparent uppercase select-none ${
+            showGhost === 'off' ? 'hidden' : ''
+          }`}
+          style={{ WebkitTextStroke: '1px color-mix(in srgb, currentColor 25%, transparent)' }}
         >
           {ghostWord}
         </span>

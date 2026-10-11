@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { themeVars } from '../../../lib/themeVars'
 
 /**
  * DiagonalMarquee — two tilted ribbons crossing the screen in
@@ -11,6 +12,7 @@ export default function DiagonalMarquee({
   repeat = 6,
   bg,
   fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -46,7 +48,7 @@ export default function DiagonalMarquee({
       ref={root}
       aria-hidden="true"
       className="relative overflow-hidden py-24 md:py-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >
       <div className="rotate-[-2.5deg]">
         <div className="-mx-[5vw] bg-acid py-3 md:py-4">
@@ -64,7 +66,7 @@ export default function DiagonalMarquee({
         <div className="-mx-[5vw] border-y border-salt/20 py-3 md:py-4">
           <div
             data-ribbon-b
-            className="flex w-max font-brico text-[7vw] leading-none font-extrabold whitespace-nowrap text-transparent uppercase will-change-transform [-webkit-text-stroke:1px_rgba(236,233,226,0.4)] md:text-[4vw]"
+            className="flex w-max font-brico text-[7vw] leading-none font-extrabold whitespace-nowrap text-transparent uppercase will-change-transform [-webkit-text-stroke:1px_color-mix(in_srgb,currentColor_40%,transparent)] md:text-[4vw]"
           >
             <div>{items(textB)}</div>
             <div>{items(textB)}</div>

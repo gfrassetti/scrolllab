@@ -1,4 +1,4 @@
-import { navLinks, CHAPTER_LABEL, MENU_BUTTON } from '../helpers.js'
+import { navLinks, CHAPTER_LABEL, MENU_BUTTON, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -14,6 +14,7 @@ export const CHAPTERS_FIELDS = {
     ...MENU_BUTTON,
     { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
     { key: 'fg', label: 'Menú móvil — color de texto', type: 'color' },
+    { key: 'barColor', label: 'Barra — color (se invierte sobre lo que tenga abajo)', type: 'color' },
   ],
   'chapters/HeroKinetic': [
     { key: 'lineOne', label: 'Linea 1', type: 'text' },
@@ -76,6 +77,7 @@ export const CHAPTERS_FIELDS = {
     },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    toggle('showGhost', 'Palabra gigante de fondo'),
   ],
   'chapters/FooterCTA': [
     { key: 'ctaWord', label: 'Marca gigante', type: 'text' },
@@ -133,6 +135,7 @@ export const CHAPTERS_FIELDS = {
     { key: 'separator', label: 'Separador', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color del separador', type: 'color' },
   ],
   'chapters/BigNumbers': [
     { key: 'bg', label: 'Color de fondo', type: 'color' },
@@ -148,6 +151,7 @@ export const CHAPTERS_FIELDS = {
         { key: 'label', label: 'Etiqueta', type: 'text' },
       ],
     },
+    { key: 'accent', label: 'Color de acento (los signos de las cifras)', type: 'color' },
   ],
   'chapters/StickyImageStory': [
     CHAPTER_LABEL,

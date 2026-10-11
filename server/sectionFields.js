@@ -105,6 +105,7 @@ export const COLOR_PROP_KEYS = new Set([
   'cardInk',
   'errorColor',
   'endBg',
+  'barColor',
 ])
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)

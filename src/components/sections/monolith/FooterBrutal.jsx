@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultLinks = ['System', 'Units', 'Archive', 'Instagram', 'Contact']
 
@@ -15,6 +16,7 @@ export default function FooterBrutal({
   links = defaultLinks,
   bg,
   fg,
+  accent,
   legal = '©2026 Placeholder Systems — Template, not a promise',
   backToTop = 'Back to top ↑',
 }) {
@@ -52,7 +54,7 @@ export default function FooterBrutal({
     <footer
       ref={root}
       className="border-t-2 border-carbon bg-klein text-concrete"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ klein: bg, concrete: fg, carbon: accent }) }}
     >
       <div className="px-5 pt-16 md:px-8 md:pt-24">
         <a href={cta} className="group tpl-hit relative block" aria-label={email}>

@@ -17,13 +17,18 @@ export default function NavMinimal({
   /** Menú móvil: fondo y texto. La barra se invierte sola (mix-blend). */
   bg,
   fg,
+  /** La barra: se invierte sola sobre lo que tenga abajo (mix-blend). */
+  barColor,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 text-bone mix-blend-difference">
+      <header
+        className="fixed inset-x-0 top-0 z-50 text-bone mix-blend-difference"
+        style={barColor ? { color: barColor } : undefined}
+      >
         <nav className="flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
           <a
             href="#top"

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultWords = ['RAW', 'CONCRETE', 'SYSTEM', 'GRID', 'FORCE', 'MASS']
 
@@ -16,6 +17,7 @@ export default function SkewScroller({
   words,
   bg,
   fg,
+  accent,
 }) {
   const root = useRef(null)
   const track = useRef(null)
@@ -67,7 +69,7 @@ export default function SkewScroller({
     <section
       ref={root}
       className="overflow-hidden px-5 py-20 md:px-8 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ carbon: fg, klein: accent, concrete: bg }) }}
     >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>

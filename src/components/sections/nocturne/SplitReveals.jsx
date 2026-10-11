@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { picsumAttrs } from './picsum'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultBeats = [
   {
@@ -38,6 +39,7 @@ export default function SplitReveals({
   beats,
   bg,
   fg,
+  accent,
 }) {
   const root = useRef(null)
   // `beats` editable trae solo kicker/title/body (la imagen del embed viene
@@ -83,7 +85,7 @@ export default function SplitReveals({
     <section
       ref={root}
       className="px-5 py-24 md:px-10 md:py-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >
       <div className="mb-14 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-24">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">

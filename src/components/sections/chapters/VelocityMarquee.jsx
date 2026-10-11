@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { themeVars } from '../../../lib/themeVars'
 
 /**
  * VelocityMarquee — infinite text ribbon that accelerates with
@@ -11,6 +12,7 @@ export default function VelocityMarquee({
   repeat = 6,
   bg,
   fg,
+  accent,
 }) {
   const root = useRef(null)
 
@@ -60,7 +62,7 @@ export default function VelocityMarquee({
       ref={root}
       aria-hidden="true"
       className="overflow-hidden border-y border-ink/15 py-4 md:py-6"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined, ...themeVars({ accent }) }}
     >
       <div data-track className="flex w-max whitespace-nowrap will-change-transform">
         <div className="text-[9vw] leading-none font-medium uppercase tracking-[-0.02em] md:text-[5vw]">

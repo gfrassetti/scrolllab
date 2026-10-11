@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmCount, calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultStats = [
   { value: 128, suffix: '+', label: 'Placeholder metric' },
@@ -18,7 +19,7 @@ const defaultStats = [
  * contenido que cambia, no movimiento): en el teléfono con «reducir movimiento»
  * los números quedaban quietos.
  */
-export default function BigNumbers({ stats = defaultStats, bg, fg }) {
+export default function BigNumbers({ stats = defaultStats, bg, fg, accent }) {
   const root = useRef(null)
   const rows = Array.isArray(stats) && stats.length ? stats : defaultStats
 
@@ -69,7 +70,7 @@ export default function BigNumbers({ stats = defaultStats, bg, fg }) {
     <section
       ref={root}
       className="border-t border-ink/15 px-5 py-20 md:px-10 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined, ...themeVars({ accent }) }}
     >
       <div className="grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-4">
         {rows.map((stat, i) => (

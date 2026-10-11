@@ -202,12 +202,12 @@ describe('sanitizeProps — Fase C (BigNumbers / KeyFacts / TypeAccordion)', () 
     })
     assert.equal(clean.facts.length, 6)
   })
-  it('TypeAccordion: items list con title/body, ignora props fuera de schema', () => {
+  it('TypeAccordion: items list con title/body/img, ignora props fuera de schema', () => {
     const clean = sanitizeProps('monolith/TypeAccordion', {
-      items: [{ title: 'Uno', body: 'Texto', img: '/hack.png' }],
+      items: [{ title: 'Uno', body: 'Texto', img: '/foto.png', otra: 'x' }],
       hacker: 'x',
     })
-    assert.deepEqual(clean.items[0], { title: 'Uno', body: 'Texto' })
+    assert.deepEqual(clean.items[0], { title: 'Uno', body: 'Texto', img: '/foto.png' })
     assert.equal(clean.hacker, undefined)
   })
 })

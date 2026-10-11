@@ -115,9 +115,10 @@ describe('sanitizeSectionProps — color / href / list', () => {
     assert.equal(kf.facts.length, 6)
 
     const ta = sanitizeSectionProps('monolith/TypeAccordion', {
-      items: [{ title: 'Uno', body: 'Texto', img: '/x.png' }],
+      items: [{ title: 'Uno', body: 'Texto', img: '/x.png', otra: 'x' }],
     })
-    assert.deepEqual(ta.items[0], { title: 'Uno', body: 'Texto' })
+    // La foto de cada cajón se edita (antes era fija); lo que no es del schema cae.
+    assert.deepEqual(ta.items[0], { title: 'Uno', body: 'Texto', img: '/x.png' })
   })
 
   it('Fase D: SplitReveals/WorkIndex/SkewScroller/ExhibitGrid/BubbleBenefits', () => {

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultColumns = [
   { heading: 'Reel', items: ['Films', 'Index', 'Stills', 'About'] },
@@ -21,6 +22,7 @@ export default function OutroCTA({
   links,
   bg,
   fg,
+  accent,
   legal = '©2026 Placeholder Films — Template, not a promise',
   note = 'Placeholder closing note. The lights come up, the room is quiet — tell the audience where to go next.',
   backToTop = 'Back to top ↑',
@@ -56,7 +58,7 @@ export default function OutroCTA({
     <footer
       ref={root}
       className="px-5 pt-24 pb-6 md:px-10 md:pt-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >
       <div className="mb-20 grid gap-12 border-t border-salt/20 pt-10 md:mb-28 md:grid-cols-12">
         <p className="max-w-[30ch] text-sm leading-relaxed text-salt/60 md:col-span-5 md:text-base">

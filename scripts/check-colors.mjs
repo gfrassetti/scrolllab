@@ -207,6 +207,8 @@ function scanInPage(sentinels) {
     for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
       if (parseFloat(cs[`border${side}Width`]) > 0 && cs[`border${side}Style`] !== 'none') flag(el, 'borde', cs[`border${side}Color`])
     }
+    // Texto en contorno (las palabras gigantes «fantasma»).
+    if (parseFloat(cs.webkitTextStrokeWidth) > 0) flag(el, 'contorno', cs.webkitTextStrokeColor)
     if (SHAPES.has(el.tagName.toLowerCase())) {
       if (cs.fill && !/^url/.test(cs.fill)) flag(el, 'relleno SVG', cs.fill)
       if (cs.stroke && cs.stroke !== 'none' && parseFloat(cs.strokeWidth) > 0) flag(el, 'trazo SVG', cs.stroke)

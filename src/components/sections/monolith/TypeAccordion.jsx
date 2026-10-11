@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { ScrollTrigger } from '../../../lib/gsap'
 import { accA, accB, accC, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultItems = [
   {
@@ -35,10 +36,17 @@ export default function TypeAccordion({
   items = defaultItems,
   bg,
   fg,
+  accent,
+  /** Las fotos de los cajones. */
+  showImages = 'on',
 }) {
   const root = useRef(null)
   const [open, setOpen] = useState(0)
-  const rows = Array.isArray(items) && items.length ? items : defaultItems
+  // Una fila sin foto propia conserva la de la demo en su lugar.
+  const given = Array.isArray(items) && items.length
+    ? items.map((row, i) => ({ ...row, img: row.img || defaultItems[i]?.img }))
+    : defaultItems
+  const rows = showImages === 'off' ? given.map((row) => ({ ...row, img: null })) : given
 
   const toggle = (index) => {
     setOpen((current) => (current === index ? -1 : index))
@@ -49,7 +57,7 @@ export default function TypeAccordion({
     <section
       ref={root}
       className="px-5 py-20 md:px-8 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ carbon: fg, klein: accent, concrete: bg }) }}
     >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>

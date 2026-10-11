@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { ex01, ex02, ex03, ex04, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultExhibits = [
   { code: 'EX-01', caption: 'Placeholder exhibit', img: ex01 },
@@ -23,6 +24,7 @@ export default function ExhibitGrid({
   exhibits,
   bg,
   fg,
+  accent,
 }) {
   const root = useRef(null)
   const rows =
@@ -53,7 +55,7 @@ export default function ExhibitGrid({
     <section
       ref={root}
       className="px-5 py-20 md:px-8 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ carbon: fg, klein: accent, concrete: bg }) }}
     >
       <div className="mb-10 flex items-baseline justify-between border-t-2 border-carbon pt-2 font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
         <p>

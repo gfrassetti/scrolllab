@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { picsumAttrs } from './picsum'
+import { themeVars } from '../../../lib/themeVars'
 
 const defaultWorks = [
   {
@@ -51,6 +52,9 @@ export default function WorkIndex({
   works,
   bg,
   fg,
+  accent,
+  /** La foto que sigue al mouse sobre la lista (solo en PC). */
+  showHoverImage = 'on',
 }) {
   const root = useRef(null)
   // `works` editable trae index/title/category/year; la imagen (stubeada en el
@@ -79,6 +83,7 @@ export default function WorkIndex({
         scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
       })
 
+      if (!floatImg.current) return
       quick.current.x = gsap.quickTo(floatImg.current, 'x', {
         duration: 0.45,
         ease: 'power3',
@@ -88,7 +93,7 @@ export default function WorkIndex({
         ease: 'power3',
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [showHoverImage], revertOnUpdate: true },
   )
 
   const handleMove = (e) => {
@@ -111,7 +116,7 @@ export default function WorkIndex({
     <section
       ref={root}
       className="px-5 py-24 md:px-10 md:py-36"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >
       <div className="mb-10 flex items-baseline justify-between border-t border-salt/20 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.3em] text-salt/40 md:text-xs">
@@ -169,6 +174,7 @@ export default function WorkIndex({
       </ul>
 
       {/* Cursor-trailing preview — desktop only */}
+      {showHoverImage !== 'off' && (
       <img
         ref={floatImg}
         src={rows[0]?.img}
@@ -177,6 +183,7 @@ export default function WorkIndex({
         aria-hidden="true"
         className="pointer-events-none fixed top-0 left-0 z-40 hidden w-56 -translate-x-1/2 -translate-y-1/2 scale-90 object-cover opacity-0 invisible md:block lg:w-64"
       />
+      )}
     </section>
   )
 }

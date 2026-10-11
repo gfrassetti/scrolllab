@@ -50,6 +50,8 @@ export default function ParallaxEditorial({
   chapterLabel = 'Chapter',
   bg,
   fg,
+  /** La palabra gigante en contorno detrás de las fotos. */
+  showGhost = 'on',
 }) {
   const root = useRef(null)
   const valid = figures?.filter((f) => f?.img || f?.caption)
@@ -98,7 +100,9 @@ export default function ParallaxEditorial({
       <span
         aria-hidden="true"
         data-parallax="1.05"
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-[24vw] leading-none font-medium tracking-[-0.02em] text-transparent uppercase"
+        className={`pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-[24vw] leading-none font-medium tracking-[-0.02em] text-transparent uppercase ${
+          showGhost === 'off' ? 'hidden' : ''
+        }`}
         style={{ WebkitTextStroke: '1px color-mix(in srgb, currentColor 18%, transparent)' }}
       >
         {ghostWord}

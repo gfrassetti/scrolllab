@@ -1,4 +1,4 @@
-import { navLinks, SEQ_LABEL, MENU_BUTTON } from '../helpers.js'
+import { navLinks, SEQ_LABEL, MENU_BUTTON, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -33,6 +33,7 @@ export const NOCTURNE_FIELDS = {
     { key: 'textB', label: 'Texto — cinta 2', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'accent', label: 'Color de la cinta', type: 'color' },
   ],
   'nocturne/SplitReveals': [
     SEQ_LABEL,
@@ -53,6 +54,7 @@ export const NOCTURNE_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'accent', label: 'Color de acento (rótulos)', type: 'color' },
   ],
   'nocturne/WorkIndex': [
     SEQ_LABEL,
@@ -74,6 +76,8 @@ export const NOCTURNE_FIELDS = {
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
       ],
     },
+    { key: 'accent', label: 'Color de acento', type: 'color' },
+    toggle('showHoverImage', 'Foto que sigue al mouse (PC)'),
   ],
   'nocturne/OutroCTA': [
     { key: 'ctaWord', label: 'CTA', type: 'text' },
@@ -94,6 +98,7 @@ export const NOCTURNE_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    { key: 'accent', label: 'Color de acento (el punto final)', type: 'color' },
   ],
   'nocturne/ZoomPortal': [
     SEQ_LABEL,
@@ -106,6 +111,7 @@ export const NOCTURNE_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
+    toggle('showGhost', 'Palabra gigante de fondo'),
   ],
   'nocturne/StickyWordCycle': [
     SEQ_LABEL,
