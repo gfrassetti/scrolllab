@@ -388,7 +388,6 @@ export default function BuilderPage({ qa = false }) {
           onOpenRequestHandled={clearOpenRequest}
           collapsed={sidebarCollapsed}
           onExpand={expandSidebar}
-          onCollapse={() => setCollapsed(true)}
           mobileOpen={sidebarMobileOpen}
           onMobileClose={() => setSidebarMobileOpen(false)}
         />

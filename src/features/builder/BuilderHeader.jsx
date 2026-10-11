@@ -3,6 +3,8 @@ import CartPopover from '../../components/CartPopover'
 import PreferencesMenu from '../../components/PreferencesMenu'
 import MotionToggle from '../../components/MotionToggle'
 import { PanelIcon } from './BuilderSidebar.jsx'
+import Logo from '../../components/Logo'
+import { SITE_NAME } from '../../lib/site'
 
 /**
  * Header del builder en una fila: volver y dónde estás a la izquierda; la
@@ -25,15 +27,19 @@ export default function BuilderHeader({ t, items, openPreview, looksLoggedIn, on
             <PanelIcon />
           </button>
         )}
+        {/* La marca vuelve al inicio, como en el resto del sitio. */}
         <Link
           to="/"
-          aria-label={t('builder.back')}
-          className="tpl-hit relative text-eyebrow uppercase text-ink/50 transition-colors duration-300 hover:text-accent"
+          aria-label={t('builder.homeLabel')}
+          className="tpl-hit relative flex shrink-0 items-center gap-2 text-ink transition-colors hover:text-accent"
         >
-          <span aria-hidden="true">←</span>
-          <span className="hidden sm:inline"> {t('builder.backShort')}</span>
+          <Logo className="size-5 shrink-0" />
+          <span className="hidden text-[11px] font-medium uppercase tracking-[0.25em] sm:inline">{SITE_NAME}</span>
         </Link>
-        <p aria-current="page" className="hidden truncate text-body-sm font-medium uppercase tracking-[0.15em] text-ink sm:block">
+        <span aria-hidden="true" className="hidden text-ink/25 sm:inline">
+          /
+        </span>
+        <p aria-current="page" className="truncate text-body-sm font-medium uppercase tracking-[0.15em] text-ink">
           {t('builder.title')}
         </p>
         {projectName ? (

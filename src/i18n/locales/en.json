@@ -663,7 +663,7 @@
         "Walk-through doorway",
         "Stacked collection"
       ],
-      "description": "Cool paper, ink and a single red. The brand is a word built from identical bars: they drop like type in the loader, come apart into a doorway the camera walks through into a dark room, and set themselves again in the footer. A pinned collection where a triptych folds into a stack of works in depth, with a bar counter and grain. Made for art, fashion or design galleries, studios and product brands with a strong identity."
+      "description": "Cool paper, ink and a single red. The brand is a word built from identical bars: they drop like type in the loader, come apart into a doorway the camera walks through into a dark room, and set themselves again in the footer. A pinned collection where a triptych folds into a stack of works in depth, with a bar counter and grain. Then the year as a ruler a red bar walks, one quote at a time on a dark stage, and the visiting week drawn as seven bars. Made for art, fashion or design galleries, studios and product brands with a strong identity."
     },
     "fold": {
       "vibe": "A film you scroll",
@@ -1297,7 +1297,8 @@
       "moreFor": "More actions for {{name}}",
       "addFirst": "Add a section to save it",
       "loggedOutHint": "With your account you save it as a project and continue from any device."
-    }
+    },
+    "homeLabel": "Scroll Lab — go home"
   },
   "cart": {
     "eyebrow": "Cart",

@@ -663,7 +663,7 @@
         "Puerta que se atraviesa",
         "Colección apilada"
       ],
-      "description": "Papel frío, negro y un solo rojo. La marca es una palabra hecha de barras iguales: caen como tipos de imprenta en el loader, se desarman en una puerta que la cámara atraviesa al scrollear hacia una sala oscura y vuelven a armarse en el footer. Colección fijada con un tríptico que se pliega en una pila de obras en profundidad, contador de barras y grano. Ideal para galerías de arte, de moda o de diseño, estudios y marcas de producto con identidad fuerte."
+      "description": "Papel frío, negro y un solo rojo. La marca es una palabra hecha de barras iguales: caen como tipos de imprenta en el loader, se desarman en una puerta que la cámara atraviesa al scrollear hacia una sala oscura y vuelven a armarse en el footer. Colección fijada con un tríptico que se pliega en una pila de obras en profundidad, contador de barras y grano. Después, el año como una regla que una barra roja recorre, una cita por vez sobre un escenario oscuro y la semana de visita dibujada en siete barras. Ideal para galerías de arte, de moda o de diseño, estudios y marcas de producto con identidad fuerte."
     },
     "fold": {
       "vibe": "Película al scroll",
@@ -1297,7 +1297,8 @@
       "moreFor": "Más acciones para {{name}}",
       "addFirst": "Sumá una sección para guardarlo",
       "loggedOutHint": "Con tu cuenta lo guardás como proyecto y lo seguís desde cualquier dispositivo."
-    }
+    },
+    "homeLabel": "Scroll Lab — ir al inicio"
   },
   "cart": {
     "eyebrow": "Carrito",

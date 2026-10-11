@@ -31,11 +31,10 @@ export default function BuilderSidebar({
   onOpenRequestHandled,
   collapsed,
   onExpand,
-  onCollapse,
   mobileOpen,
   onMobileClose,
 }) {
-  const { project, status, projects: list } = projects
+  const { project } = projects
   const draftCount = project ? 0 : itemsCount
   const [askOpenId, setAskOpenId] = useState(null)
   const [notice, setNotice] = useState('')
@@ -78,51 +77,22 @@ export default function BuilderSidebar({
 
   return (
     <>
-      {/* Desktop */}
+      {/* Desktop: se pliega del todo (como el sidebar «offcanvas» de shadcn);
+          un solo botón para abrirlo y cerrarlo, en el header. */}
       <aside
         aria-label={t('builder.sidebar.label')}
-        className={`sticky top-0 hidden h-svh shrink-0 flex-col border-r border-ink/15 bg-bone transition-[width] duration-200 ease-out-strong motion-reduce:transition-none lg:flex ${
-          collapsed ? 'w-14' : 'w-72'
+        inert={collapsed || undefined}
+        className={`sticky top-0 hidden h-svh shrink-0 overflow-hidden border-ink/15 bg-bone transition-[width] duration-200 ease-out-strong motion-reduce:transition-none lg:block ${
+          collapsed ? 'w-0' : 'w-72 border-r'
         }`}
         data-builder-sidebar={collapsed ? 'collapsed' : 'open'}
       >
-        {collapsed ? (
-          <div className="ui-fade-in flex flex-col items-center gap-2 py-3">
-            <IconButton label={t('builder.sidebar.expand')} onClick={onExpand}>
-              <PanelIcon />
-            </IconButton>
-            {project && (
-              <span
-                title={t(`builder.projects.status.${status === 'idle' ? 'saved' : status}`)}
-                className="mt-2 grid size-11 place-items-center text-ink/60"
-              >
-                {status === 'saving' ? (
-                  <Spinner />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className={`size-2 rounded-full ${status === 'error' ? 'bg-danger' : status === 'pending' ? 'bg-ink/30' : 'bg-success'}`}
-                  />
-                )}
-              </span>
-            )}
-            {loggedIn && list?.length ? (
-              <span className="mt-auto text-[11px] tabular-nums text-ink/40" title={t('builder.projects.myProjects')}>
-                {list.length}
-              </span>
-            ) : null}
+        <div className="flex h-full w-72 flex-col">
+          <div className="flex min-h-[3.75rem] items-center border-b border-ink/10 px-4">
+            <p className="text-eyebrow uppercase text-ink/50">{t('builder.sidebar.title')}</p>
           </div>
-        ) : (
-          <div className="ui-fade-in flex min-h-0 flex-1 flex-col">
-            <div className="flex items-center justify-between gap-2 border-b border-ink/10 px-4 py-2">
-              <p className="text-eyebrow uppercase text-ink/50">{t('builder.sidebar.title')}</p>
-              <IconButton label={t('builder.sidebar.collapse')} onClick={onCollapse}>
-                <PanelIcon />
-              </IconButton>
-            </div>
-            {content}
-          </div>
-        )}
+          {content}
+        </div>
       </aside>
 
       {/* Teléfono y tablet */}
@@ -496,20 +466,6 @@ function SidebarProjectList({ t, locale, list, currentId, draftCount, askOpenId,
         )
       })}
     </ul>
-  )
-}
-
-function IconButton({ label, onClick, children }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="ui-press grid size-11 place-items-center text-ink/60 transition-colors hover:text-accent"
-    >
-      {children}
-    </button>
   )
 }
 
