@@ -1332,7 +1332,15 @@
     "compositionN": "Composition {{n}} · {{count}} sections",
     "compositionNOne": "Composition {{n}} · 1 section",
     "projectLine": "{{name}} · {{count}} sections",
-    "projectLineOne": "{{name}} · 1 section"
+    "projectLineOne": "{{name}} · 1 section",
+    "summary": "Summary",
+    "emptyHint": "You can take a complete template or build your own page, section by section.",
+    "emptyTemplates": "Browse templates",
+    "emptyBuilder": "Build in the builder",
+    "clearConfirm": "Remove everything from the cart?",
+    "clearYes": "Yes, remove all",
+    "clearKeep": "Keep them",
+    "couponIncluded": "Includes the {{percent}}% first-purchase discount"
   },
   "login": {
     "eyebrow": "Account",

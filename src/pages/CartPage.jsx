@@ -4,7 +4,11 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import Skeleton from '../components/Skeleton'
-import { cartItemKey, cartLineTitle, priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
+import Spinner from '../components/Spinner'
+import Collapse from '../components/Collapse'
+import ClearCartControl from '../components/ClearCartControl'
+import { useExitingRemoval } from '../hooks/useExitingRemoval'
+import { cartItemKey, cartLineTitle, isCustomSku, priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { startCheckout } from '../lib/startCheckout'
 import { cartItemPreviewHref } from '../lib/orderPreview'
@@ -37,6 +41,8 @@ export default function CartPage() {
   const removeItem = useCart((s) => s.removeItem)
   const clearCart = useCart((s) => s.clear)
   const [catalog, setCatalog] = useState({})
+  // Hasta la primera respuesta del catálogo: skeleton en los montos, no «—».
+  const [catalogLoaded, setCatalogLoaded] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const navigate = useNavigate()
@@ -74,18 +80,22 @@ export default function CartPage() {
         setCatalog(map)
       })
       .catch(() => {})
+      .finally(() => setCatalogLoaded(true))
   }, [])
 
-  const { lines, total, payable, discount } = priceCartLines({
-    items,
-    catalog,
-    rate,
-    showUsd,
-    coupon,
-  })
+  // Una fila que se está quitando se cierra con animación: sus montos ya no
+  // cuentan en el resumen (el total acompaña al cierre, no llega después).
+  const { leaving, remove: removeLine } = useExitingRemoval(removeItem)
+  const { lines } = priceCartLines({ items, catalog, rate, showUsd, coupon })
+  const live = lines.filter((line) => !leaving.has(cartItemKey(line)))
+  const total = live.reduce((sum, l) => sum + (l.unit_price || 0), 0)
+  const payable = live.reduce((sum, l) => sum + ((l.discounted_price ?? l.unit_price) || 0), 0)
+  const discount = total - payable
   const formatLine = (amount) => {
     // Mientras llegan los precios del servidor: skeleton, no un guion.
-    if (amount == null) return catalog ? '—' : <Skeleton className="inline-block h-[0.9em] w-16 align-middle" />
+    if (amount == null) {
+      return catalogLoaded ? '—' : <Skeleton className="inline-block h-[0.9em] w-16 align-middle" />
+    }
     return showUsd ? formatUsd(amount) : formatArs(amount)
   }
 
@@ -141,135 +151,157 @@ export default function CartPage() {
     <div className="min-h-svh bg-bone text-ink">
       <SiteHeader />
       <main className="px-5 py-12 md:px-10">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-          {t('cart.eyebrow')}
-        </p>
+        <p className="text-eyebrow uppercase text-ink/50">{t('cart.eyebrow')}</p>
         <h1 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.02em]">
           {t('cart.title')}
         </h1>
 
         {error && (
-          <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
+          <p role="alert" className="ui-fade-in mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm">
             {error}
           </p>
         )}
 
         {items.length === 0 ? (
-          <div className="mt-12 border-2 border-dashed border-ink/20 p-10 text-center">
-            <p className="text-sm text-ink/50">{t('common.cartEmpty')}</p>
-            <Link
-              to="/#templates"
-              className="mt-4 inline-block text-xs uppercase tracking-[0.25em] hover:text-accent"
-            >
-              {t('common.seeTemplates')}
-            </Link>
+          <div className="ui-fade-in mt-12 border border-ink/15 px-6 py-14 text-center md:py-20">
+            <p className="text-title-sm font-medium tracking-[-0.01em]">{t('common.cartEmpty')}</p>
+            <p className="mx-auto mt-2 max-w-[44ch] text-body-sm text-ink/60">{t('cart.emptyHint')}</p>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <Link to="/#templates" className="btn btn-primary">
+                {t('cart.emptyTemplates')}
+              </Link>
+              <Link to="/builder" className="btn btn-ghost">
+                {t('cart.emptyBuilder')}
+              </Link>
+            </div>
           </div>
         ) : (
-          <>
-            <ul className="mt-10 border-t border-ink/15">
-              {lines.map((line) => {
-                const previewHref = cartItemPreviewHref(line)
-                return (
-                  <li
-                    key={cartItemKey(line)}
-                    className="flex flex-col gap-3 border-b border-ink/15 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                  >
-                    <div className="flex min-w-0 items-center gap-4">
-                      <ProductThumbnail
-                        sku={line.sku}
-                        title={line.title}
-                        className="h-16 w-20 sm:h-20 sm:w-24"
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate font-medium">{cartLineTitle(line, items, t)}</p>
-                        <p className="truncate text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                          {line.sku}
-                        </p>
-                        {line.unit_price != null && (
-                          <p className="mt-1 text-sm text-ink/70">
-                            {line.discounted_price != null ? (
-                              <>
-                                <span className="text-ink/40 line-through">
-                                  {formatLine(line.unit_price)}
-                                </span>{' '}
-                                <span className="text-ink">
-                                  {formatLine(line.discounted_price)}
-                                </span>
-                              </>
-                            ) : (
-                              formatLine(line.unit_price)
-                            )}
-                          </p>
-                        )}
-                        {previewHref && (
-                          <Link
-                            to={previewHref}
-                            className="mt-1 inline-block text-[11px] uppercase tracking-[0.2em] text-accent-ink underline-offset-4 hover:underline"
-                          >
-                            {t('cart.preview')} ↗
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(cartItemKey(line))}
-                      className="min-h-10 self-start border border-ink/30 px-4 py-2 text-xs hover:border-accent hover:bg-accent hover:text-bone sm:self-auto"
-                    >
-                      {t('common.remove')}
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+          <div className="mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-14">
+            <section aria-label={t('cart.title')} className="min-w-0">
+              <ul className="border-t border-ink/15">
+                {lines.map((line) => {
+                  const key = cartItemKey(line)
+                  const previewHref = cartItemPreviewHref(line)
+                  const title = cartLineTitle(line, items, t)
+                  return (
+                    <li key={key}>
+                      <Collapse open={!leaving.has(key)}>
+                        <div className="flex gap-4 border-b border-ink/15 py-5">
+                          <ProductThumbnail
+                            sku={line.sku}
+                            title={line.title}
+                            className="h-16 w-20 shrink-0 sm:h-20 sm:w-24"
+                          />
+                          <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                            <div className="min-w-0">
+                              <p className="truncate font-medium">{title}</p>
+                              {!isCustomSku(line.sku) && (
+                                <p className="truncate text-body-sm text-ink/55">{line.sku}</p>
+                              )}
+                              <p className="mt-2 text-body-sm tabular-nums sm:hidden">
+                                {line.discounted_price != null ? (
+                                  <>
+                                    <span className="text-ink/45 line-through">{formatLine(line.unit_price)}</span>{' '}
+                                    <span className="font-medium">{formatLine(line.discounted_price)}</span>
+                                  </>
+                                ) : (
+                                  formatLine(line.unit_price)
+                                )}
+                              </p>
+                              <div className="mt-1 flex flex-wrap items-center gap-x-5">
+                                {previewHref && (
+                                  <Link to={previewHref} className="action">
+                                    {t('cart.preview')} ↗
+                                  </Link>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => removeLine(key)}
+                                  aria-label={`${t('common.remove')} ${title}`}
+                                  className="action action-danger"
+                                >
+                                  {t('common.remove')}
+                                </button>
+                              </div>
+                            </div>
+                            <p className="hidden shrink-0 text-right tabular-nums sm:block">
+                              {line.discounted_price != null ? (
+                                <>
+                                  <span className="block text-body-sm text-ink/45 line-through">
+                                    {formatLine(line.unit_price)}
+                                  </span>
+                                  <span className="block font-medium">{formatLine(line.discounted_price)}</span>
+                                </>
+                              ) : (
+                                <span className="font-medium">{formatLine(line.unit_price)}</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </Collapse>
+                    </li>
+                  )
+                })}
+              </ul>
+              <ClearCartControl className="mt-3" disabled={busy} onClear={() => clearCart()} />
+            </section>
 
-            <div className="mt-8 flex flex-col gap-4 border border-ink/15 p-6 md:flex-row md:items-center md:justify-between">
-              <div className="min-w-0">
+            {/* Resumen: medio de pago, recibo y el botón de pagar. En escritorio
+                queda a la vista mientras se recorre la lista. */}
+            <aside
+              aria-label={t('cart.summary')}
+              className="mt-10 border border-ink/15 p-6 lg:sticky lg:top-24 lg:mt-0"
+            >
               {paddleEnabled && (
                 <PaymentMethodPicker
                   region={region}
                   onChange={setRegion}
                   disabled={busy}
-                  className="mb-4"
+                  className="mb-6"
                 />
               )}
-              {/* Resumen como un recibo: subtotal a precio de lista, el 10% de la
-                  primera compra con nombre y el total que se cobra. */}
-              <dl className="w-full max-w-sm text-sm tabular-nums" data-cart-summary>
+              {/* Como un recibo: subtotal a precio de lista, el 10% de la primera
+                  compra con nombre y el total que se cobra. */}
+              <dl className="text-body-sm tabular-nums" data-cart-summary>
                 {coupon && discount > 0 ? (
                   <>
                     <div className="flex items-baseline justify-between gap-6 py-1 text-ink/60">
                       <dt>{t('cart.couponSubtotal')}</dt>
-                      <dd>{formatLine(total)}</dd>
+                      <dd className="whitespace-nowrap">{formatLine(catalogLoaded ? total : null)}</dd>
                     </div>
                     <div data-coupon-discount className="flex items-baseline justify-between gap-6 py-1 text-accent-ink">
                       <dt>{t('cart.couponDiscount', { percent: coupon.percent })}</dt>
-                      <dd>−{formatLine(discount)}</dd>
+                      <dd className="whitespace-nowrap">−{formatLine(catalogLoaded ? discount : null)}</dd>
                     </div>
                   </>
                 ) : null}
                 <div
                   className={`flex items-baseline justify-between gap-6 py-1 ${
-                    coupon && discount > 0 ? 'mt-1 border-t border-ink/15 pt-2' : ''
+                    coupon && discount > 0 ? 'mt-1 border-t border-ink/15 pt-3' : ''
                   }`}
                 >
                   <dt className="font-medium">{t('common.estimatedTotal')}</dt>
-                  <dd className="text-base font-semibold">{formatLine(payable)}</dd>
+                  <dd className="whitespace-nowrap text-title-sm font-semibold">{formatLine(catalogLoaded ? payable : null)}</dd>
                 </div>
               </dl>
               {coupon && discount > 0 ? (
-                <p className="mt-1 text-xs text-accent-ink">{t('cart.couponNote', { percent: coupon.percent })}</p>
+                <p className="mt-2 text-body-sm text-accent-ink">{t('cart.couponNote', { percent: coupon.percent })}</p>
               ) : null}
-              <p className="mt-3 text-sm">
-                <span className="block max-w-prose text-xs text-ink/55">
-                  {intl ? t('pay.trustIntl') : t('cart.trustNote')}
-                </span>
-                {intl && (
-                  <span className="mt-1 block max-w-prose text-xs text-ink/55">
-                    {t('pay.intlTaxNote')}
-                  </span>
-                )}
-                <span className="mt-1 block max-w-prose text-xs text-ink/55">
+
+              <button
+                type="button"
+                disabled={busy || authLoading || live.length === 0}
+                onClick={checkout}
+                className="btn btn-primary mt-6 w-full disabled:opacity-40"
+              >
+                {busy && <Spinner />}
+                {payLabel}
+              </button>
+
+              <div className="mt-5 space-y-1.5 text-body-sm text-ink/60">
+                <p>{intl ? t('pay.trustIntl') : t('cart.trustNote')}</p>
+                {intl && <p>{t('pay.intlTaxNote')}</p>}
+                <p>
                   {t('cart.refundNote', { days: REFUND_DAYS })}{' '}
                   <Link
                     to="/legal/refunds"
@@ -277,29 +309,10 @@ export default function CartPage() {
                   >
                     {t('cart.refundLink')}
                   </Link>
-                </span>
-              </p>
+                </p>
               </div>
-              <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => clearCart()}
-                  className="min-h-11 whitespace-nowrap border border-ink/30 px-5 py-3 text-[11px] uppercase tracking-[0.25em] text-ink/70 transition-colors hover:border-ink hover:text-ink disabled:opacity-40"
-                >
-                  {t('cart.clearAll')}
-                </button>
-                <button
-                  type="button"
-                  disabled={busy || authLoading}
-                  onClick={checkout}
-                  className="whitespace-nowrap border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
-                >
-                  {payLabel}
-                </button>
-              </div>
-            </div>
-          </>
+            </aside>
+          </div>
         )}
       </main>
     </div>

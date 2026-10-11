@@ -1,46 +1,71 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
-import { cartItemKey, cartLinePriceArs, cartLinePriceUsd, cartLineTitle, useCart } from '../lib/cart'
+import { useAuth } from '../lib/auth'
+import { cartItemKey, cartLineTitle, priceCartLines, useCart } from '../lib/cart'
 import { cartItemPreviewHref } from '../lib/orderPreview'
 import { useFxRate } from '../lib/fx'
 import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import { useCurrency } from '../lib/currency'
+import { useWelcomeCoupon } from '../lib/welcomeCoupon'
+import { useExitingRemoval } from '../hooks/useExitingRemoval'
 import ProductThumbnail from './ProductThumbnail'
 import Skeleton from './Skeleton'
+import Collapse from './Collapse'
+import ClearCartControl from './ClearCartControl'
+
+/** Lo que dura el cierre del panel (un poco menos que la entrada). */
+const CLOSE_MS = 160
 
 /**
  * Botón "Carrito (n)" del header con popup desplegable.
- * Muestra los items, permite quitarlos y linkea a /cart para pagar.
+ * Muestra los items, permite quitarlos y linkea a /cart para pagar. Los montos
+ * son los mismos que en /cart (con el cupón de primera compra si hay).
  */
 export default function CartPopover() {
   const items = useCart((s) => s.items)
   const removeItem = useCart((s) => s.removeItem)
   const clearCart = useCart((s) => s.clear)
+  const { user } = useAuth()
+  const welcome = useWelcomeCoupon((s) => s.coupon)
+  const coupon = user ? welcome : null
   const { t } = useI18n()
   const { rate } = useFxRate()
   const { showUsd } = useCurrency()
   const [open, setOpen] = useState(false)
+  // El panel sigue montado mientras se cierra: nada desaparece de golpe.
+  const [mounted, setMounted] = useState(false)
   const [panelIn, setPanelIn] = useState(false)
   const [catalog, setCatalog] = useState(null)
   const rootRef = useRef(null)
+  const panelRef = useRef(null)
   const location = useLocation()
+  const { leaving, remove: removeLine } = useExitingRemoval(removeItem)
 
   // Cierra al navegar a otra página.
   useEffect(() => {
     setOpen(false)
   }, [location.pathname])
 
-  // Enter animation (Emil: popover scale from trigger, ease-drawer ~200ms).
+  // Entrada y salida (Emil: popover desde el botón, ease-drawer ~200ms). La
+  // entrada se fuerza con un reflow para no depender de requestAnimationFrame.
   useEffect(() => {
-    if (!open) {
-      setPanelIn(false)
+    if (open) {
+      setMounted(true)
       return undefined
     }
-    const id = requestAnimationFrame(() => setPanelIn(true))
-    return () => cancelAnimationFrame(id)
+    setPanelIn(false)
+    const id = window.setTimeout(() => setMounted(false), CLOSE_MS)
+    return () => window.clearTimeout(id)
   }, [open])
+
+  useLayoutEffect(() => {
+    if (open && mounted && !panelIn) {
+      panelRef.current?.getBoundingClientRect()
+      setPanelIn(true)
+    }
+  }, [open, mounted, panelIn])
 
   // Cierra con click afuera o Escape.
   useEffect(() => {
@@ -79,20 +104,17 @@ export default function CartPopover() {
     }
   }, [open])
 
-  const priceFor = (item) => {
-    if (!catalog) return null
-    return showUsd
-      ? cartLinePriceUsd(item, catalog)
-      : cartLinePriceArs(item, catalog, rate)
-  }
+  const { lines } = priceCartLines({ items, catalog: catalog || {}, rate, showUsd, coupon })
+  const live = lines.filter((line) => !leaving.has(cartItemKey(line)))
+  const total = live.reduce((sum, l) => sum + (l.unit_price || 0), 0)
+  const payable = live.reduce((sum, l) => sum + ((l.discounted_price ?? l.unit_price) || 0), 0)
+  const discount = total - payable
 
   const formatLine = (amount) => {
     // Mientras llegan los precios del servidor: skeleton, no un guion.
     if (amount == null) return catalog ? '—' : <Skeleton className="inline-block h-[0.9em] w-16 align-middle" />
     return showUsd ? formatUsd(amount) : formatArs(amount)
   }
-
-  const total = items.reduce((sum, item) => sum + (priceFor(item) || 0), 0)
 
   return (
     <div ref={rootRef} className="relative">
@@ -109,83 +131,87 @@ export default function CartPopover() {
         {items.length > 0 ? ` (${items.length})` : ''}
       </button>
 
-      {open && (
+      {mounted && (
         <div
-          className={`fixed inset-x-5 top-16 z-50 border border-ink/15 bg-bone shadow-[0_16px_40px_rgba(0,0,0,0.12)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[min(20rem,calc(100vw-2.5rem))] ui-enter ${
+          ref={panelRef}
+          className={`fixed inset-x-5 top-16 z-50 border border-ink/15 bg-bone shadow-[0_16px_40px_rgba(0,0,0,0.12)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[min(22rem,calc(100vw-2.5rem))] ui-enter ${
             panelIn ? 'ui-enter-to' : 'ui-enter-from'
           }`}
-        >          {items.length === 0 ? (
+        >
+          {items.length === 0 ? (
             <div className="p-6 text-center">
-              <p className="text-sm text-ink/50">{t('common.cartEmpty')}</p>
-              <Link
-                to="/#templates"
-                className="mt-3 inline-block text-[11px] uppercase tracking-[0.25em] hover:text-accent"
-              >
-                {t('common.seeTemplates')}
+              <p className="text-body-sm text-ink/60">{t('common.cartEmpty')}</p>
+              <Link to="/#templates" className="btn btn-ghost btn-sm mt-4">
+                {t('cart.emptyTemplates')}
               </Link>
             </div>
           ) : (
             <>
               <ul className="max-h-72 overflow-y-auto">
-                {items.map((item) => {
-                  const price = priceFor(item)
-                  const previewHref = cartItemPreviewHref(item)
+                {lines.map((line) => {
+                  const key = cartItemKey(line)
+                  const previewHref = cartItemPreviewHref(line)
+                  const title = cartLineTitle(line, items, t)
                   return (
-                    <li
-                      key={cartItemKey(item)}
-                      className="flex items-center gap-3 border-b border-ink/10 px-4 py-3"
-                    >
-                      <ProductThumbnail
-                        sku={item.sku}
-                        title={item.title}
-                        className="h-12 w-14"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {cartLineTitle(item, items, t)}
-                        </p>
-                        <p className="mt-0.5 text-xs text-ink/60">
-                          {formatLine(price)}
-                        </p>
-                        {previewHref && (
-                          <Link
-                            to={previewHref}
-                            className="mt-0.5 inline-block text-[10px] uppercase tracking-[0.18em] text-accent-ink underline-offset-4 hover:underline"
+                    <li key={key}>
+                      <Collapse open={!leaving.has(key)}>
+                        <div className="flex items-center gap-3 border-b border-ink/10 px-4 py-3">
+                          <ProductThumbnail sku={line.sku} title={line.title} className="h-12 w-14 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-body-sm font-medium">{title}</p>
+                            <p className="mt-0.5 text-body-sm tabular-nums text-ink/70">
+                              {line.discounted_price != null ? (
+                                <>
+                                  <span className="text-ink/40 line-through">{formatLine(line.unit_price)}</span>{' '}
+                                  <span className="text-ink">{formatLine(line.discounted_price)}</span>
+                                </>
+                              ) : (
+                                formatLine(line.unit_price)
+                              )}
+                            </p>
+                            {previewHref && (
+                              <Link
+                                to={previewHref}
+                                className="mt-0.5 inline-block text-xs text-accent-ink underline underline-offset-4 hover:text-accent"
+                              >
+                                {t('cart.preview')} ↗
+                              </Link>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeLine(key)}
+                            aria-label={`${t('common.remove')} ${title}`}
+                            className="action action-danger shrink-0 px-1"
                           >
-                            {t('cart.preview')} ↗
-                          </Link>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(cartItemKey(item))}
-                        aria-label={`${t('common.remove')} ${cartLineTitle(item, items, t)}`}
-                        className="min-h-11 shrink-0 px-2 text-xs text-ink/40 transition-colors hover:text-accent"
-                      >
-                        {t('common.remove')}
-                      </button>
+                            {t('common.remove')}
+                          </button>
+                        </div>
+                      </Collapse>
                     </li>
                   )
                 })}
               </ul>
-              <div className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="text-ink/60">{t('common.estimatedTotal')}</span>
-                <strong>{formatLine(total)}</strong>
+              <div className="px-4 py-3">
+                <div className="flex items-baseline justify-between gap-4 text-body-sm">
+                  <span className="text-ink/60">{t('common.estimatedTotal')}</span>
+                  <strong className="text-body tabular-nums">{formatLine(catalog ? payable : null)}</strong>
+                </div>
+                {coupon && discount > 0 ? (
+                  <p className="mt-1 text-xs text-accent-ink">
+                    {t('cart.couponIncluded', { percent: coupon.percent })}
+                  </p>
+                ) : null}
               </div>
-              <div className="flex flex-col gap-2 p-3 pt-0">
-                <Link
-                  to="/cart"
-                  className="block border-2 border-ink bg-ink px-4 py-3 text-center text-[11px] uppercase tracking-[0.25em] text-bone ui-press hover:border-accent hover:bg-accent"
-                >
+              <div className="flex flex-col gap-1 px-3 pb-3">
+                <Link to="/cart" className="btn btn-primary w-full">
                   {t('common.goToCart')}
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => clearCart()}
-                  className="min-h-11 px-4 py-2 text-center text-[11px] uppercase tracking-[0.25em] text-ink/55 transition-colors hover:text-ink"
-                >
-                  {t('common.clearCart')}
-                </button>
+                <ClearCartControl
+                  className="px-1"
+                  onClear={() => clearCart()}
+                  label={t('common.clearCart')}
+                />
               </div>
             </>
           )}

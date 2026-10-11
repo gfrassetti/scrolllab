@@ -1332,7 +1332,15 @@
     "compositionN": "Composición {{n}} · {{count}} secciones",
     "compositionNOne": "Composición {{n}} · 1 sección",
     "projectLine": "{{name}} · {{count}} secciones",
-    "projectLineOne": "{{name}} · 1 sección"
+    "projectLineOne": "{{name}} · 1 sección",
+    "summary": "Resumen",
+    "emptyHint": "Podés llevarte un modelo completo o armar tu propia página sección por sección.",
+    "emptyTemplates": "Ver templates",
+    "emptyBuilder": "Armar en el builder",
+    "clearConfirm": "¿Quitar todo lo que hay en el carrito?",
+    "clearYes": "Sí, quitar todo",
+    "clearKeep": "Mejor no",
+    "couponIncluded": "Incluye el {{percent}}% de primera compra"
   },
   "login": {
     "eyebrow": "Cuenta",
