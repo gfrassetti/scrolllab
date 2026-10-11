@@ -20,6 +20,7 @@
  * Uso: npm run check:lab   (PLAYWRIGHT_CHROMIUM_PATH=… si no hay `playwright install`)
  */
 import { spawn, spawnSync } from 'node:child_process'
+import fs from 'node:fs'
 import net from 'node:net'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -173,6 +174,42 @@ try {
     return text
   }
 
+  /**
+   * El sello del plan gratis en el sitio del cliente: { text, href, visible }
+   * o null si no está. `shot`: ruta para una captura (revisión a ojo).
+   */
+  async function siteBadge(key, shot = '') {
+    const page = await context.newPage()
+    await page.route(`${SITE}/__host.html`, (route) =>
+      route.fulfill({ contentType: 'text/html', body: hostPage(key) }),
+    )
+    await page.goto(`${SITE}/__host.html`)
+    let badge = null
+    for (let i = 0; i < 40; i++) {
+      const frame = page.frames().find((f) => f.url().startsWith(FRAME_HOST))
+      const ready = frame
+        ? await frame.evaluate(() => (document.getElementById('root')?.innerText || '').length > 0).catch(() => false)
+        : false
+      if (ready) {
+        badge = await frame.evaluate(() => {
+          const el = document.querySelector('.sl-badge')
+          if (!el) return null
+          const r = el.getBoundingClientRect()
+          return { text: el.textContent.trim(), href: el.getAttribute('href') || '', visible: r.width > 0 && r.height > 0 }
+        })
+        break
+      }
+      await sleep(250)
+    }
+    if (shot) {
+      await page.locator('iframe').first().scrollIntoViewIfNeeded().catch(() => {})
+      await sleep(400)
+      await page.screenshot({ path: shot }).catch(() => {})
+    }
+    await page.close()
+    return badge
+  }
+
   /** Texto de la vista previa (el frame real adentro del editor). */
   async function previewText(page) {
     const frame = page.frames().find((f) => f.url().startsWith(FRAME_HOST))
@@ -315,6 +352,22 @@ try {
     problems.push(...consoleHits.map((h) => `consola del editor: ${h}`))
     await page.close()
   }
+  console.log('Sello «Hecho con Scroll Lab» del plan gratis…')
+  {
+    const created = await context.request.post(`${BASE}/api/hosted`, {
+      data: { sectionId: 'chapters/FooterCTA' },
+    })
+    const { instance } = await created.json()
+    await context.request.put(`${BASE}/api/hosted/${instance.id}`, { data: { publish: true } })
+    fs.mkdirSync(path.join(REPO, 'storage'), { recursive: true })
+    const badge = await siteBadge(instance.key, path.join(REPO, 'storage', 'check-lab-badge.png'))
+    if (!badge) problems.push('plan gratis: el sitio del cliente no muestra el sello')
+    else {
+      if (!badge.visible) problems.push('plan gratis: el sello está pero no se ve')
+      if (badge.text !== 'Hecho con Scroll Lab') problems.push(`plan gratis: el sello dice «${badge.text}»`)
+      if (!/\/lab\?utm_source=lab-embed/.test(badge.href)) problems.push(`plan gratis: el sello linkea a ${badge.href || '(nada)'}`)
+    }
+  }
   console.log('Tope del plan: Starter publica 5 y la 6ª avisa…')
   {
     // Otro usuario (otra cookie): Starter por el mock de Mercado Pago.
@@ -343,6 +396,9 @@ try {
       const res = await planCtx.request.put(`${BASE}/api/hosted/${id}`, { data: { publish: true } })
       if (!res.ok()) problems.push(`Starter: la publicación ${ids.indexOf(id) + 1} de 5 dio HTTP ${res.status()}`)
     }
+    // Plan pago: sin sello.
+    const firstKey = (await (await planCtx.request.get(`${BASE}/api/hosted/${ids[0]}`)).json()).instance.key
+    if (await siteBadge(firstKey)) problems.push('Starter: el sitio del cliente muestra el sello del plan gratis')
     const page = await planCtx.newPage()
     await page.goto(`${BASE}/lab/${ids[5]}`)
     await page.locator('[data-lab-preview]').waitFor({ timeout: 15000 })

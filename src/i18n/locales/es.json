@@ -104,6 +104,10 @@
         "a": "El embed deja de renderizar: donde estaba el script no se muestra nada. Volver a publicar lo reactiva."
       },
       {
+        "q": "¿El plan gratis muestra la marca de Scroll Lab?",
+        "a": "Sí: un sello chico «Hecho con Scroll Lab» en una tira finita debajo del widget, a la derecha, con un link a LAB. No tapa nada del widget. Con cualquier plan pago no aparece, y se va solo apenas te suscribís (también en la prueba gratis)."
+      },
+      {
         "q": "¿Para qué sirven los dominios permitidos?",
         "a": "Si dejás la lista vacía, el widget se muestra en cualquier dominio. Si ponés dominios, solo funciona ahí — sirve para que nadie más lo reuse."
       },
@@ -173,7 +177,7 @@
     "hideOtherPlans": "Ocultar otros planes",
     "planCurrent": "Tu plan",
     "planSubscribe": "Suscribirme",
-    "freeTierNote": "El plan gratis incluye {{n}} widget publicado, sin tarjeta ni vencimiento. Los planes suman más y sacan el tope.",
+    "freeTierNote": "El plan gratis incluye {{n}} widget publicado, sin tarjeta ni vencimiento, con un sello chico «Hecho con Scroll Lab» debajo del widget. Los planes suman más widgets, sacan el tope y sacan el sello.",
     "planTrialCta": "Probar {{n}} días gratis",
     "planTrialNote": "Sin cargo los primeros {{n}} días.",
     "planTrialActive": "Prueba gratis — primer cobro el {{date}}",

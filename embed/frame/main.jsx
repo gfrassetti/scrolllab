@@ -126,6 +126,45 @@ const WHY = {
 
 const root = document.getElementById('root')
 
+/**
+ * Sello del plan gratis: «Hecho con Scroll Lab» en una tira propia DEBAJO de
+ * la sección, alineado a la derecha y sobre fondo transparente (se ve el
+ * sitio del cliente). No se superpone: fijo en una esquina tapaba contenido
+ * (el «Back to top» de un footer). Va fuera de #root y su alto se suma al que
+ * se mide (contentHeight). Los planes pagos no lo traen en la config. `href`
+ * sale del servidor; si no es http(s), queda sin link.
+ */
+let badgeRow = null
+function setBadge(badge) {
+  if (!badge) {
+    badgeRow?.remove()
+    badgeRow = null
+    return
+  }
+  if (!badgeRow) {
+    badgeRow = document.createElement('div')
+    badgeRow.className = 'sl-badge-row'
+    const link = document.createElement('a')
+    link.className = 'sl-badge'
+    link.target = '_blank'
+    link.rel = 'noopener'
+    const es = /^es(-|$)/i.test(navigator.language || '')
+    link.innerHTML = `<span class="sl-badge-mark" aria-hidden="true"></span>${es ? 'Hecho con' : 'Made with'} <b>Scroll Lab</b>`
+    badgeRow.appendChild(link)
+    root.after(badgeRow)
+  }
+  const link = badgeRow.firstElementChild
+  let href = ''
+  try {
+    const url = new URL(String(badge.href || ''), location.href)
+    if (url.protocol === 'https:' || url.protocol === 'http:') href = url.href
+  } catch {
+    /* sin link */
+  }
+  if (href) link.href = href
+  else link.removeAttribute('href')
+}
+
 /*
  * Dos modos:
  *  - FLOW: la sección mide su alto natural. El loader dimensiona el iframe a eso
@@ -203,7 +242,8 @@ function post(msg) {
  * el contenido para siempre, con una franja vacía del color del sitio abajo.
  */
 function contentHeight() {
-  return Math.ceil(Math.max(root.scrollHeight, root.getBoundingClientRect().height))
+  const badge = badgeRow ? badgeRow.offsetHeight : 0
+  return Math.ceil(Math.max(root.scrollHeight, root.getBoundingClientRect().height) + badge)
 }
 
 function postHeight() {
@@ -318,6 +358,8 @@ function preview() {
     // Key nueva = remonta: SplitText/GSAP corren una vez al montar.
     n += 1
     render(h(Section, { ...(m.props || {}), key: n }), root)
+    // El editor avisa si el plan es gratis: el preview muestra el sello como el sitio.
+    setBadge(m.badge || null)
     reveal()
     requestAnimationFrame(() => {
       ScrollTrigger.refresh()
@@ -372,6 +414,7 @@ async function main() {
   if (canvas) root.className = canvas
 
   render(h(Section, config.props || {}), root)
+  setBadge(config.badge || null)
 
   // Abierto directo (sin loader / fuera de un iframe): no va a llegar
   // `scrolllab:viewport`, así que nos revelamos solos para que la URL del

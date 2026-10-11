@@ -656,7 +656,12 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
           // baja de su propio viewport) y quedaba una franja vacía abajo.
           await sleep(600)
           const settled = await iframeLoc.evaluate((el) => el.getBoundingClientRect().height)
-          const rootH = await frame.evaluate(() => document.getElementById('root').getBoundingClientRect().height)
+          // Contenido = la sección + la tira del sello del plan gratis (los usuarios del e2e son free).
+          const rootH = await frame.evaluate(
+            () =>
+              document.getElementById('root').getBoundingClientRect().height +
+              (document.querySelector('.sl-badge-row')?.getBoundingClientRect().height || 0),
+          )
           assert.ok(
             settled - rootH <= 3,
             `${sectionId} @${vp.name}: iframe (${settled}px) más alto que el contenido (${rootH}px)`,

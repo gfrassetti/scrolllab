@@ -86,6 +86,11 @@ describe('Hosted Component API (file store)', () => {
     assert.equal(pub.body.sectionId, 'chapters/FooterCTA')
     assert.equal(pub.body.props.ctaWord, 'HABLEMOS')
     assert.equal(pub.body.props.email, 'hola@demo.com')
+    // Plan gratis: el frame muestra el sello «Hecho con Scroll Lab» con link a LAB.
+    assert.equal(
+      pub.body.badge?.href,
+      'http://localhost:5173/lab?utm_source=lab-embed&utm_medium=badge&utm_campaign=free-plan',
+    )
   })
 
   // La sección corre en un iframe en OTRO dominio: una /ruta apunta al embed,

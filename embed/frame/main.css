@@ -118,3 +118,65 @@ body {
 #root[data-inview] {
   opacity: 1;
 }
+
+/*
+ * Sello del plan gratis (ver setBadge en main.jsx): tira propia debajo de la
+ * sección, transparente; el sello es chico, neutro y legible sobre cualquier
+ * fondo del sitio. Aparece junto con la sección.
+ */
+.sl-badge-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#root[data-inview] + .sl-badge-row {
+  opacity: 1;
+}
+.sl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(22, 20, 18, 0.86);
+  color: #f2efe9;
+  font: 500 11px/1 "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+/* Zona de toque de 44px aunque el dibujo mida 28. */
+.sl-badge {
+  position: relative;
+}
+.sl-badge::after {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+.sl-badge b {
+  font-weight: 700;
+}
+.sl-badge-mark {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #ff4b00;
+}
+.sl-badge[href]:hover {
+  background: rgba(22, 20, 18, 1);
+}
+.sl-badge[href]:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-badge-row,
+  .sl-badge {
+    transition: none;
+  }
+}

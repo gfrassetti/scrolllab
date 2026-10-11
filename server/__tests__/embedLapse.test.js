@@ -89,9 +89,11 @@ describe('Embed: se apaga cuando cae la suscripción (HOSTED_FREE_QUOTA=0)', () 
     const keyA = await publish(agent)
     const keyB = await publish(agent)
 
-    // Con plan activo, las dos sirven.
+    // Con plan activo, las dos sirven, y sin el sello del plan gratis.
     assert.equal(await configStatus(keyA), 200)
     assert.equal(await configStatus(keyB), 200)
+    const paid = await request(app).get(`/api/embed/${keyA}/config`)
+    assert.equal(paid.body.badge, undefined)
 
     // Cancela: MP no renueva, pero pagó el período → sigue viéndose.
     const cancel = await agent.post('/api/subscriptions/cancel')

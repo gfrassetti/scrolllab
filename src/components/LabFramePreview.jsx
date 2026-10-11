@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from '../i18n'
+import { usePlan } from '../lib/plan'
 
 /**
  * Vista previa del editor de LAB con el frame REAL del embed (el mismo que va
  * al sitio del cliente), no la sección de React del sitio: mismas fuentes,
  * mismo CSS, las imágenes por defecto sin foto como en el embed, y `vw` /
  * breakpoints según el ancho elegido. Los props (lo que está sin guardar) van
- * por postMessage; el frame solo los acepta de este sitio.
+ * por postMessage; el frame solo los acepta de este sitio. Con el plan gratis
+ * también el sello «Hecho con Scroll Lab», igual que en el sitio del cliente.
  *
  * El ancho de desktop es de verdad 1280px: si la columna es más angosta se
  * escala entero, como un dispositivo en miniatura. Si el frame no contesta
@@ -24,6 +26,13 @@ const READY_TIMEOUT_MS = 8000
 
 export default function LabFramePreview({ frameSrc, sectionId, props, device = 'desktop', onFail }) {
   const { t } = useI18n()
+  // Plan gratis: el sitio muestra el sello «Hecho con Scroll Lab»; el preview también.
+  const { plan, loading: planLoading } = usePlan()
+  const showBadge = !planLoading && plan === 'free'
+  const badge = useMemo(
+    () => (showBadge ? { href: `${window.location.origin}/lab` } : null),
+    [showBadge],
+  )
   const frameRef = useRef(null)
   const boxRef = useRef(null)
   const [ready, setReady] = useState(false)
@@ -82,12 +91,12 @@ export default function LabFramePreview({ frameSrc, sectionId, props, device = '
     if (!ready) return undefined
     const timer = setTimeout(() => {
       frameRef.current?.contentWindow?.postMessage(
-        { type: 'scrolllab:preview', sectionId, props, viewportHeight },
+        { type: 'scrolllab:preview', sectionId, props, viewportHeight, badge },
         origin,
       )
     }, 250)
     return () => clearTimeout(timer)
-  }, [ready, sectionId, props, viewportHeight, origin])
+  }, [ready, sectionId, props, viewportHeight, origin, badge])
 
   const frameHeight = height || 320
   return (

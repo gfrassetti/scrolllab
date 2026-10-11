@@ -31,6 +31,12 @@ export const PACK_MAX_ITEMS = 30
 export const PACK_MAX_PER_USER = 20
 const PACK_NAME_MAX = 60
 
+/** A dónde lleva el sello del plan gratis (con UTM: se mide en el panel). */
+export function badgeHref(config) {
+  const base = String(config.clientUrl || '').replace(/\/$/, '')
+  return `${base}/lab?utm_source=lab-embed&utm_medium=badge&utm_campaign=free-plan`
+}
+
 export function createHostedRouter({ config, limits }) {
   const router = express.Router()
 
@@ -98,13 +104,18 @@ export function createHostedRouter({ config, limits }) {
    * Por qué una instancia NO se sirve en `host` (HttpError), o null si se sirve.
    * Lo comparten el config de una sección y el de un pack: mismas reglas.
    */
-  async function notServable(inst, host) {
-    if (!inst) return new HttpError(404, 'No encontrado')
-    if (inst.status === 'suspended') return new HttpError(402, 'Instancia suspendida')
+  /**
+   * Si la instancia se sirve hoy en ese host. Devuelve `{ error }` (por qué
+   * no) y el `ent` (plan efectivo del dueño) que ya hubo que calcular: el
+   * config lo usa para el sello del plan gratis sin otra consulta.
+   */
+  async function servability(inst, host) {
+    if (!inst) return { error: new HttpError(404, 'No encontrado') }
+    if (inst.status === 'suspended') return { error: new HttpError(402, 'Instancia suspendida') }
     if (inst.status !== 'published') {
-      return new HttpError(409, 'La instancia todavía no se publicó')
+      return { error: new HttpError(409, 'La instancia todavía no se publicó') }
     }
-    if (!domainAllowed(inst.domains, host)) return new HttpError(403, 'Dominio no autorizado')
+    if (!domainAllowed(inst.domains, host)) return { error: new HttpError(403, 'Dominio no autorizado') }
 
     // Suscripción caída o bajada de plan: las publicadas por encima del tope
     // dejan de servir. Chequeo perezoso, sin tocar `inst.status` — si el
@@ -120,11 +131,13 @@ export function createHostedRouter({ config, limits }) {
         db.uid(inst) || inst.id,
       )
       if (olderPublished >= ent.quota) {
-        return new HttpError(402, 'Sección por encima del límite del plan')
+        return { error: new HttpError(402, 'Sección por encima del límite del plan'), ent }
       }
     }
-    return null
+    return { error: null, ent }
   }
+
+  const notServable = async (inst, host) => (await servability(inst, host)).error
 
   function publicPack(pack) {
     return {
@@ -210,7 +223,7 @@ export function createHostedRouter({ config, limits }) {
       if (!isHostedKey(key)) throw new HttpError(404, 'No encontrado')
 
       const inst = await db.findHostedInstanceByKey(key)
-      const why = await notServable(inst, requestHost(req))
+      const { error: why, ent } = await servability(inst, requestHost(req))
       if (why) throw why
 
       // Señal de uso, best-effort: no bloquea la respuesta.
@@ -222,6 +235,8 @@ export function createHostedRouter({ config, limits }) {
         // Otra pasada al servir: instancias publicadas antes de que LAB exigiera
         // URL completa en las imágenes (una /ruta ahí sale rota).
         props: sanitizeHostedProps(inst.sectionId, inst.publishedProps) || {},
+        // Plan gratis: el frame muestra «Hecho con Scroll Lab» (los pagos lo sacan).
+        ...(ent?.plan === 'free' ? { badge: { href: badgeHref(config) } } : {}),
       })
     }),
   )

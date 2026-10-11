@@ -104,6 +104,10 @@
         "a": "The embed stops rendering: nothing shows where the script was. Publishing again brings it back."
       },
       {
+        "q": "Does the free plan show Scroll Lab branding?",
+        "a": "Yes: a small «Made with Scroll Lab» badge in a thin strip below the widget, on the right, linking to LAB. It doesn't cover anything in the widget. Any paid plan removes it, and it goes away as soon as you subscribe (free trial included)."
+      },
+      {
         "q": "What are allowed domains for?",
         "a": "Leave the list empty and the widget shows on any domain. Add domains and it only works there — so nobody else can reuse it."
       },
@@ -173,7 +177,7 @@
     "hideOtherPlans": "Hide other plans",
     "planCurrent": "Your plan",
     "planSubscribe": "Subscribe",
-    "freeTierNote": "The free plan includes {{n}} published widget, no card, no expiry. Plans add more and lift the cap.",
+    "freeTierNote": "The free plan includes {{n}} published widget, no card, no expiry, with a small «Made with Scroll Lab» badge below the widget. Plans add more widgets, lift the cap and remove the badge.",
     "planTrialCta": "Start {{n}}-day free trial",
     "planTrialNote": "Free for the first {{n}} days.",
     "planTrialActive": "Free trial — first charge on {{date}}",
