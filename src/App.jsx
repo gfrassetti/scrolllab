@@ -88,6 +88,17 @@ function ScrollToTop() {
   return null
 }
 
+// Qué fuente de cuerpo corresponde: el market usa --font-ui; las demos de
+// /templates/* conservan la del template (y la del ZIP). Ver index.css.
+function SurfaceMarker() {
+  const { pathname } = useLocation()
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.dataset.surface = pathname.startsWith('/templates/') ? 'template' : 'market'
+  }, [pathname])
+  return null
+}
+
 function HomeCursor() {
   const { pathname } = useLocation()
   if (pathname !== '/') return null
@@ -122,6 +133,7 @@ export default function App() {
       <AuthProvider>
         <PlanProvider>
           <BrowserRouter>
+            <SurfaceMarker />
             <HomeCursor />
             <DocumentHead />
             <WelcomeCouponSync />

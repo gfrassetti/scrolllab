@@ -70,7 +70,7 @@ export default function MotionNotice() {
   return (
     <aside
       aria-label={t('motionNotice.label')}
-      className={`fixed left-5 right-5 z-[60] border border-ink/20 bg-bone p-4 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-opacity sm:right-auto sm:w-[min(24rem,calc(100vw-2.5rem))] ${bottom} ${
+      className={`fixed left-5 right-5 z-[60] font-ui border border-ink/20 bg-bone p-4 text-ink shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-opacity sm:right-auto sm:w-[min(24rem,calc(100vw-2.5rem))] ${bottom} ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       style={{
