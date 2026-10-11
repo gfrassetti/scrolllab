@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
 import ProjectList from './ProjectList.jsx'
+import { SkeletonRows } from '../../components/Skeleton'
 import { addProjectToCart, useProjectsInCart } from './projectCart.js'
 
 /**
@@ -29,7 +30,9 @@ export default function AccountProjects({ t, locale, showEmpty = false }) {
     }
   }, [])
 
-  if (projects === null) return null
+  if (projects === null) {
+    return showEmpty ? <SkeletonRows rows={3} label={t('common.loading')} /> : null
+  }
   if (!projects.length) {
     if (!showEmpty) return null
     return (

@@ -12,6 +12,7 @@ import { api } from '../lib/api'
 import SnippetBox from '../components/SnippetBox'
 import Tabs, { TabPanel } from '../components/Tabs'
 import WidgetTable from '../features/lab/WidgetTable.jsx'
+import Skeleton, { SkeletonRows } from '../components/Skeleton'
 import { getSection } from '../lib/sectionRegistry'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
@@ -68,6 +69,8 @@ export default function LabPage({ qa = false }) {
     d ? new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-AR') : ''
 
   const [instances, setInstances] = useState([])
+  // Hasta la primera respuesta: skeleton, no «todavía no tenés ninguno».
+  const [listLoaded, setListLoaded] = useState(false)
   const [packs, setPacks] = useState([])
   // Los packs son de los planes pagos (el servidor lo decide; la UI lo explica).
   const [packsAllowed, setPacksAllowed] = useState(true)
@@ -156,6 +159,8 @@ export default function LabPage({ qa = false }) {
       setError('')
     } catch (err) {
       setError(err.message)
+    } finally {
+      setListLoaded(true)
     }
   }, [])
 
@@ -545,8 +550,8 @@ export default function LabPage({ qa = false }) {
                 value={tab}
                 onChange={setTab}
                 tabs={[
-                  { id: 'widgets', label: t('lab.tabs.widgets'), count: instances.length },
-                  { id: 'packs', label: t('lab.tabs.packs'), count: packs.length },
+                  { id: 'widgets', label: t('lab.tabs.widgets'), count: listLoaded ? instances.length : undefined },
+                  { id: 'packs', label: t('lab.tabs.packs'), count: listLoaded ? packs.length : undefined },
                   { id: 'plan', label: t('lab.tabs.plan') },
                 ]}
               />
@@ -554,7 +559,7 @@ export default function LabPage({ qa = false }) {
               <TabPanel idBase="lab-ws" id="widgets" value={tab} className="pt-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-body-sm text-ink/55" data-lab-count>
-                    {widgetsCountLine}
+                    {listLoaded ? widgetsCountLine : <Skeleton className="h-4 w-48" />}
                   </p>
                   <div className="flex items-center gap-2">
                     <select
@@ -610,9 +615,11 @@ export default function LabPage({ qa = false }) {
                   </div>
                 )}
 
-                {instances.length === 0 ? (
+                {!listLoaded ? (
+                  <SkeletonRows rows={4} label={t('common.loading')} className="mt-6" />
+                ) : instances.length === 0 ? (
                   labLocked ? null : (
-                    <p className="mt-6 text-body text-ink/55">{t('lab.empty')}</p>
+                    <p className="ui-fade-in mt-6 text-body text-ink/55">{t('lab.empty')}</p>
                   )
                 ) : (
                   <WidgetTable
@@ -653,7 +660,9 @@ export default function LabPage({ qa = false }) {
                   </div>
                 )}
 
-                {!packsAllowed && packs.length === 0 ? null : packs.length === 0 ? (
+                {!listLoaded ? (
+                  <SkeletonRows rows={2} label={t('common.loading')} className="mt-6" />
+                ) : !packsAllowed && packs.length === 0 ? null : packs.length === 0 ? (
                   <div className="mt-6 border border-dashed border-ink/20 px-5 py-8 text-center">
                     <p className="text-body text-ink/55">
                       {instances.length === 0 ? t('lab.pack.needWidgets') : t('lab.pack.empty')}

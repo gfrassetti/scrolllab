@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { models } from '../../lib/sectionRegistry'
 import { sectionCopyKey, kindLabelKeys } from './sectionCopy.js'
 import { MAX_CUSTOM_SECTIONS } from '../../lib/pricing'
+import Collapse from '../../components/Collapse'
 
 const KINDS = ['nav', 'hero', 'section', 'footer']
 
@@ -148,7 +149,7 @@ export default function SectionPalette({
                 )}
               </button>
 
-              {isOpen && (
+              <Collapse open={isOpen}>
                 <div id={panelId} className="pb-4">
                   {model.id === 'commerce' && (
                     <p className="mb-3 text-body-sm text-ink/55">
@@ -227,7 +228,7 @@ export default function SectionPalette({
                     })}
                   </ul>
                 </div>
-              )}
+              </Collapse>
             </div>
           )
         })}

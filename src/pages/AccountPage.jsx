@@ -6,6 +6,8 @@ import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import AccountProjects from '../features/builder/AccountProjects.jsx'
 import Tabs, { TabPanel } from '../components/Tabs'
+import Spinner from '../components/Spinner'
+import { SkeletonRows } from '../components/Skeleton'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatAmount } from '../lib/pricing'
@@ -20,6 +22,8 @@ export default function AccountPage() {
   const { user, loading } = useAuth()
   const welcome = useWelcomeCoupon((s) => s.coupon)
   const [orders, setOrders] = useState([])
+  // Hasta la primera respuesta: skeleton, no «todavía no compraste nada».
+  const [ordersLoaded, setOrdersLoaded] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(null)
@@ -51,6 +55,7 @@ export default function AccountPage() {
       .orders()
       .then((data) => setOrders(data.orders || []))
       .catch((err) => setError(err.message))
+      .finally(() => setOrdersLoaded(true))
   }, [user])
 
   // `ScrollToTop` (App.jsx) fuerza scroll(0,0) en cada cambio de pathname —
@@ -227,7 +232,9 @@ export default function AccountPage() {
           </p>
         )}
 
-        {orders.length === 0 ? (
+        {!ordersLoaded ? (
+          <SkeletonRows rows={3} label={t('common.loading')} className="mt-6" />
+        ) : orders.length === 0 ? (
           <div className="mt-12 border-2 border-dashed border-ink/20 p-10 text-center">
             <p className="text-sm text-ink/50">{t('account.empty')}</p>
             <Link
@@ -350,7 +357,13 @@ export default function AccountPage() {
                                 onClick={() => download(order.id, index)}
                                 className="btn btn-sm btn-ghost disabled:opacity-40"
                               >
-                                {busy === key ? t('account.preparing') : `${t('account.download')} · ${label}`}
+                                {busy === key ? (
+                                  <>
+                                    <Spinner /> {t('account.preparing')}
+                                  </>
+                                ) : (
+                                  `${t('account.download')} · ${label}`
+                                )}
                               </button>
                             )
                           })
@@ -362,9 +375,11 @@ export default function AccountPage() {
                           onClick={() => download(order.id)}
                           className="btn btn-sm btn-primary disabled:opacity-40"
                         >
-                          {busy === order.id
-                            ? t('account.preparing')
-                            : order.items.length > 1
+                          {busy === order.id ? (
+                            <>
+                              <Spinner /> {t('account.preparing')}
+                            </>
+                          ) : order.items.length > 1
                               ? t('account.downloadAll')
                               : t('account.download')}
                         </button>

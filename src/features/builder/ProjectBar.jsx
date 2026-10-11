@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Drawer from '../../components/Drawer'
 import ProjectList from './ProjectList.jsx'
+import Spinner from '../../components/Spinner'
+import { SkeletonRows } from '../../components/Skeleton'
 import { addProjectToCart, useProjectsInCart } from './projectCart.js'
 
 /**
@@ -234,7 +236,7 @@ export default function ProjectBar({
         {atCap ? <p className="mb-4 text-body-sm text-ink/60">{t('builder.projects.capNote', { max })}</p> : null}
 
         {list === null ? (
-          <p className="py-6 text-body-sm text-ink/50">{t('builder.projects.loading')}</p>
+          <SkeletonRows rows={3} label={t('builder.projects.loading')} />
         ) : list.length === 0 ? (
           <div className="border border-dashed border-ink/25 px-5 py-8 text-center">
             <p className="text-body-sm text-ink/60">{t('builder.projects.empty')}</p>
@@ -310,7 +312,12 @@ function ProjectNameInput({ t, project, onRename }) {
 function SaveStatus({ t, status, error, onRetry }) {
   if (status === 'idle') return null
   return (
-    <span aria-live="polite" className="flex items-center gap-2 text-body-sm text-ink/55" data-save-status={status}>
+    <span
+      key={status}
+      aria-live="polite"
+      className="ui-fade-in flex items-center gap-2 text-body-sm text-ink/55"
+      data-save-status={status}
+    >
       {status === 'saved' ? (
         <>
           <span aria-hidden="true" className="text-accent">
@@ -326,6 +333,10 @@ function SaveStatus({ t, status, error, onRetry }) {
           <button type="button" onClick={onRetry} className="tpl-hit relative underline underline-offset-4 hover:text-accent">
             {t('builder.projects.retry')}
           </button>
+        </>
+      ) : status === 'saving' ? (
+        <>
+          <Spinner /> {t('builder.projects.status.saving')}
         </>
       ) : (
         t(`builder.projects.status.${status}`)
@@ -352,7 +363,7 @@ function SaveAsForm({ t, locale, onSave, onCancel }) {
 
   return (
     <form
-      className="flex min-w-0 flex-wrap items-center gap-2"
+      className="ui-fade-in flex min-w-0 flex-wrap items-center gap-2"
       onSubmit={async (e) => {
         e.preventDefault()
         setSaving(true)
@@ -380,7 +391,13 @@ function SaveAsForm({ t, locale, onSave, onCancel }) {
         />
       </label>
       <button type="submit" disabled={saving || !name.trim()} className="btn btn-primary disabled:opacity-40">
-        {saving ? t('builder.projects.status.saving') : t('builder.projects.save')}
+        {saving ? (
+          <>
+            <Spinner /> {t('builder.projects.status.saving')}
+          </>
+        ) : (
+          t('builder.projects.save')
+        )}
       </button>
       <button type="button" onClick={onCancel} className="btn btn-sm btn-ghost">
         {t('builder.projects.cancel')}

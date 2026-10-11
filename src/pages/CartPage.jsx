@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import Skeleton from '../components/Skeleton'
 import { cartItemKey, cartLineTitle, priceCartLines, takeCheckoutIntent, useCart } from '../lib/cart'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { startCheckout } from '../lib/startCheckout'
@@ -83,7 +84,8 @@ export default function CartPage() {
     coupon,
   })
   const formatLine = (amount) => {
-    if (amount == null) return '—'
+    // Mientras llegan los precios del servidor: skeleton, no un guion.
+    if (amount == null) return catalog ? '—' : <Skeleton className="inline-block h-[0.9em] w-16 align-middle" />
     return showUsd ? formatUsd(amount) : formatArs(amount)
   }
 

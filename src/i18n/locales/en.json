@@ -162,8 +162,8 @@
     "planFrozenSuffix": " · {{n}} frozen",
     "planActiveUntil": "Your plan is active until {{date}}.",
     "planCancel": "Cancel subscription",
-    "planCancelConfirm": "Cancel? You keep access until {{date}} and won’t be charged again.",
-    "planCancelConfirmNow": "Cancel? The plan ends now.",
+    "planCancelConfirm": "Cancel? You keep everything until {{date}} and won’t be charged again. Then you move to the free plan: your oldest widget stays visible; the rest and your packs are paused. Nothing is deleted: if you subscribe again, they come back on their own.",
+    "planCancelConfirmNow": "Cancel? The plan ends now and you move to the free plan: your oldest widget stays visible; the rest and your packs are paused. Nothing is deleted.",
     "planCancelYes": "Yes, cancel",
     "planCancelKeep": "No, keep it",
     "planCanceledNote": "canceled · won’t renew",
@@ -186,7 +186,7 @@
     "planTrialNote": "Free for the first {{n}} days.",
     "planTrialActive": "Free trial — first charge on {{date}}",
     "planChangeTo": "Switch to this plan",
-    "planChangeHint": "You switch plans without canceling. Moving up, you pay only the difference for the rest of your period; moving down costs nothing. From your next charge, Mercado Pago bills the new price.",
+    "planChangeHint": "You switch plans without canceling. Moving up, you pay only the difference for the rest of your period; moving down costs nothing. From your next charge, Mercado Pago bills the new price. If the new plan covers fewer widgets, the newest ones are paused (not deleted) and your packs show only the ones that fit.",
     "planCycleHint": "Moving between monthly and yearly requires canceling and subscribing again. What you already paid is kept: the first new charge happens when it ends.",
     "planChangeHintTrial": "You’re on the free trial: switching plans is free, and the first charge already uses the price of the plan you pick.",
     "planUpgradeAfterReactivate": "You have {{plan}} paid until the end of the period. To move up now, reactivate it and switch plans: you pay only the difference for the days left.",
@@ -217,7 +217,7 @@
       "planPastDue": "We’re confirming the charge with Paddle. If it doesn’t go through, the plan is suspended on {{date}}.",
       "planPaymentFailed": "We couldn’t charge your plan. Paddle will retry; if it isn’t resolved, it’s suspended on {{date}}. Update your card so the next attempt goes through.",
       "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
-      "planChangeHint": "You switch plans without canceling. Moving up, Paddle charges your card only the difference for the rest of your period; moving down costs nothing. The new price applies from your next charge.",
+      "planChangeHint": "You switch plans without canceling. Moving up, Paddle charges your card only the difference for the rest of your period; moving down costs nothing. The new price applies from your next charge. If the new plan covers fewer widgets, the newest ones are paused (not deleted) and your packs show only the ones that fit.",
       "changeConfirmPaid": "You move to {{plan}} now. Paddle charges {{amount}} to your card for the rest of your period ({{days}}); from {{date}}, {{price}} {{per}}.",
       "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Paddle charges {{price}} {{per}}.",
       "changePay": "Charge {{amount}} and switch",
@@ -1182,6 +1182,18 @@
           "name": "Collection",
           "blurb": "Full-height triptych that folds into a pinned stack: works slide up in depth, with a bar counter and a red marker. Ships with SVG sample works."
         },
+        "Programme": {
+          "name": "Programme",
+          "blurb": "The year as a ruler: twelve months across, one bar per show, and a red bar walks the ruler while the section is pinned, filling each show as it crosses."
+        },
+        "Press": {
+          "name": "Press",
+          "blurb": "Dark stage that hands over from one quote to the next in wide capitals: words rise out of masks, a red bar shrinks and grows between voices, a bar counter keeps count."
+        },
+        "Visit": {
+          "name": "Visit",
+          "blurb": "Ruled visiting facts beside the week drawn as seven bars as tall as each day is long; today’s bar is red and closed days are a hairline."
+        },
         "Footer": {
           "name": "Footer",
           "blurb": "Full-screen dark footer: invitation, contact columns and the brand word rebuilt from bars sliding in from both sides."
@@ -1357,7 +1369,7 @@
     "subUnlimited": "unlimited",
     "subCancel": "Cancel subscription",
     "subCancelConfirm": "Cancel?",
-    "subCancelConfirmUntil": "Cancel? You keep access until {{date}}.",
+    "subCancelConfirmUntil": "Cancel? You keep everything until {{date}}. Then you’re on the free plan: your oldest widget stays visible; the rest and your packs are paused, not deleted.",
     "subCancelYes": "Yes, cancel",
     "subCancelDone": "Subscription canceled",
     "subSync": "Sync with Mercado Pago",

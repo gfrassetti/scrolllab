@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import Collapse from '../../components/Collapse'
+import Spinner from '../../components/Spinner'
 import { formatRelativeTime } from '../../lib/relativeTime'
 
 /**
@@ -28,6 +30,9 @@ export default function ProjectList({
   const [confirm, setConfirm] = useState(askOpenId ? { id: askOpenId, kind: 'open' } : null)
   const [busy, setBusy] = useState(null)
   const [failed, setFailed] = useState(null)
+  // Lo último que se preguntó: el aviso sigue legible mientras se cierra.
+  const lastConfirm = useRef(confirm)
+  if (confirm) lastConfirm.current = confirm
 
   const run = async (key, fn) => {
     setBusy(key)
@@ -53,6 +58,7 @@ export default function ProjectList({
         const isCurrent = project.id === currentId
         const name = project.name || t('builder.projects.untitled')
         const asking = confirm?.id === project.id ? confirm.kind : null
+        const shownAsk = asking || (lastConfirm.current?.id === project.id ? lastConfirm.current.kind : null)
         const error = failed?.key?.endsWith(`:${project.id}`) ? failed.message : ''
         return (
           <li key={project.id} className="border-b border-ink/10 py-4" data-project-id={project.id}>
@@ -90,7 +96,13 @@ export default function ProjectList({
                     title={!project.sections ? t('builder.projects.emptyCantBuy') : undefined}
                     className="action shrink-0"
                   >
-                    {busy === `cart:${project.id}` ? t('builder.projects.adding') : t('builder.projects.addToCart')}
+                    {busy === `cart:${project.id}` ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner /> {t('builder.projects.adding')}
+                      </span>
+                    ) : (
+                      t('builder.projects.addToCart')
+                    )}
                   </button>
                 )
               ) : null}
@@ -101,7 +113,13 @@ export default function ProjectList({
                   disabled={busy !== null}
                   className="btn btn-sm btn-ghost shrink-0 disabled:opacity-40"
                 >
-                  {busy === `open:${project.id}` ? t('builder.projects.opening') : t('builder.projects.open')}
+                  {busy === `open:${project.id}` ? (
+                    <>
+                      <Spinner /> {t('builder.projects.opening')}
+                    </>
+                  ) : (
+                    t('builder.projects.open')
+                  )}
                 </button>
               )}
               </div>
@@ -116,7 +134,13 @@ export default function ProjectList({
                     onClick={() => run(`dup:${project.id}`, () => onDuplicate(project))}
                     className="action"
                   >
-                    {busy === `dup:${project.id}` ? t('builder.projects.duplicating') : t('builder.projects.duplicate')}
+                    {busy === `dup:${project.id}` ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner /> {t('builder.projects.duplicating')}
+                      </span>
+                    ) : (
+                      t('builder.projects.duplicate')
+                    )}
                   </button>
                 ) : null}
                 {onRemove ? (
@@ -132,10 +156,10 @@ export default function ProjectList({
               </div>
             ) : null}
 
-            {asking ? (
+            <Collapse open={!!asking}>
               <div role="alert" className="mt-3 border border-ink/15 bg-ink/[0.03] px-3 py-3 text-body-sm">
                 <p>
-                  {asking === 'delete'
+                  {shownAsk === 'delete'
                     ? t('builder.projects.deleteConfirm', { name })
                     : draftCount === 1
                       ? t('builder.projects.replaceDraftOne')
@@ -147,13 +171,14 @@ export default function ProjectList({
                     data-autofocus
                     disabled={busy !== null}
                     onClick={() =>
-                      asking === 'delete'
+                      shownAsk === 'delete'
                         ? run(`del:${project.id}`, () => onRemove(project.id))
                         : run(`open:${project.id}`, () => onOpen(project.id))
                     }
-                    className={`btn btn-sm disabled:opacity-40 ${asking === 'delete' ? 'btn-danger' : 'btn-primary'}`}
+                    className={`btn btn-sm disabled:opacity-40 ${shownAsk === 'delete' ? 'btn-danger' : 'btn-primary'}`}
                   >
-                    {asking === 'delete' ? t('builder.projects.deleteYes') : t('builder.projects.openAnyway')}
+                    {busy === `del:${project.id}` || busy === `open:${project.id}` ? <Spinner /> : null}
+                    {shownAsk === 'delete' ? t('builder.projects.deleteYes') : t('builder.projects.openAnyway')}
                   </button>
                   <button
                     type="button"
@@ -164,10 +189,10 @@ export default function ProjectList({
                   </button>
                 </div>
               </div>
-            ) : null}
+            </Collapse>
 
             {error ? (
-              <p role="alert" className="mt-2 text-body-sm text-danger">
+              <p role="alert" className="ui-fade-in mt-2 text-body-sm text-danger">
                 {error}
               </p>
             ) : null}

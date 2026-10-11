@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SnippetBox from '../../components/SnippetBox'
+import Collapse from '../../components/Collapse'
+import Spinner from '../../components/Spinner'
+import { SkeletonRows } from '../../components/Skeleton'
 
 const PAGE_SIZE = 10
 
@@ -34,6 +37,7 @@ export default function WidgetTable({
   fmtDate,
   onRemoveMany,
   onUnpublishMany,
+  loading = false,
 }) {
   const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(0)
@@ -70,6 +74,11 @@ export default function WidgetTable({
   const ids = useMemo(() => new Set(instances.map((i) => i.id)), [instances])
   const chosen = [...selected].filter((id) => ids.has(id))
   const chosenPublished = chosen.filter((id) => instances.find((i) => i.id === id)?.status === 'published')
+
+  // Mientras la barra se cierra sigue mostrando el último número (no «0»).
+  const lastChosen = useRef(0)
+  if (chosen.length > 0) lastChosen.current = chosen.length
+  const shownCount = chosen.length || lastChosen.current
 
   const pageIds = pageRows.map((r) => r.id)
   const pageAll = pageIds.length > 0 && pageIds.every((id) => selected.has(id))
@@ -136,9 +145,10 @@ export default function WidgetTable({
       </div>
 
       {/* Barra de selección: acciones en bloque */}
-      {chosen.length > 0 && (
+      <Collapse open={chosen.length > 0}>
         <div
-          className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-ink/20 bg-ink/[0.04] px-4 py-3 text-body-sm"
+          key={confirm || 'selection'}
+          className="ui-fade-in mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-ink/20 bg-ink/[0.04] px-4 py-3 text-body-sm"
           data-lab-bulk
         >
           {confirm ? (
@@ -158,11 +168,15 @@ export default function WidgetTable({
                 disabled={busy}
                 className={`btn btn-sm disabled:opacity-40 ${confirm === 'delete' ? 'btn-danger' : 'btn-primary'}`}
               >
-                {busy
-                  ? t('lab.table.working')
-                  : confirm === 'delete'
-                    ? t('lab.table.yesDelete')
-                    : t('lab.table.yesUnpublish')}
+                {busy ? (
+                  <>
+                    <Spinner /> {t('lab.table.working')}
+                  </>
+                ) : confirm === 'delete' ? (
+                  t('lab.table.yesDelete')
+                ) : (
+                  t('lab.table.yesUnpublish')
+                )}
               </button>
               <button
                 type="button"
@@ -175,8 +189,8 @@ export default function WidgetTable({
             </>
           ) : (
             <>
-              <span className="font-medium">
-                {t(chosen.length === 1 ? 'lab.table.selectedOne' : 'lab.table.selected', { n: chosen.length })}
+              <span key={shownCount} className="ui-fade-in inline-block font-medium tabular-nums">
+                {t(shownCount === 1 ? 'lab.table.selectedOne' : 'lab.table.selected', { n: shownCount })}
               </span>
               {chosenPublished.length > 0 && (
                 <button
@@ -206,11 +220,11 @@ export default function WidgetTable({
             </>
           )}
         </div>
-      )}
+      </Collapse>
 
       {/* Toda la página elegida: ofrecer todo el filtro (como un mail). */}
-      {pageAll && rows.length > pageRows.length && chosen.length < rows.length && !confirm && (
-        <p className="mt-2 text-body-sm text-ink/60">
+      <Collapse open={pageAll && rows.length > pageRows.length && chosen.length < rows.length && !confirm}>
+        <p className="pt-2 text-body-sm text-ink/60">
           {t('lab.table.pageSelected', { n: pageRows.length })}{' '}
           <button
             type="button"
@@ -220,10 +234,12 @@ export default function WidgetTable({
             {t('lab.table.selectAllFiltered', { n: rows.length })}
           </button>
         </p>
-      )}
+      </Collapse>
 
-      {rows.length === 0 ? (
-        <p className="mt-6 text-body text-ink/55">{t('lab.table.emptyFilter')}</p>
+      {loading ? (
+        <SkeletonRows rows={5} label={t('common.loading')} className="mt-4" />
+      ) : rows.length === 0 ? (
+        <p className="ui-fade-in mt-6 text-body text-ink/55">{t('lab.table.emptyFilter')}</p>
       ) : (
         <table className="mt-4 w-full border-collapse text-left">
           <thead>
@@ -250,7 +266,7 @@ export default function WidgetTable({
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={`${filter}:${safePage}`} className="ui-fade-in">
             {pageRows.map((inst) => {
               const name = sectionLabel(inst.sectionId)
               const status = statusOf(inst)
@@ -313,15 +329,19 @@ export default function WidgetTable({
                     </span>
                   </td>
                 </tr>,
-                codeOpen ? (
-                  <tr key={`${inst.id}-code`} className="border-b border-ink/10">
-                    <td colSpan={5} className="pb-5 pt-1">
-                      {status === 'frozen' && (
-                        <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-body-sm text-ink/75">
-                          {t('lab.frozenHint')}
-                        </p>
-                      )}
-                      <SnippetBox embedKey={inst.key} loaderInfo={loaderInfo} />
+                inst.status === 'published' ? (
+                  <tr key={`${inst.id}-code`}>
+                    <td colSpan={5} className="p-0">
+                      <Collapse open={codeOpen}>
+                        <div className="border-b border-ink/10 pb-5 pt-1">
+                          {status === 'frozen' && (
+                            <p className="mb-3 border border-accent/40 bg-accent/10 px-3 py-2 text-body-sm text-ink/75">
+                              {t('lab.frozenHint')}
+                            </p>
+                          )}
+                          <SnippetBox embedKey={inst.key} loaderInfo={loaderInfo} />
+                        </div>
+                      </Collapse>
                     </td>
                   </tr>
                 ) : null,

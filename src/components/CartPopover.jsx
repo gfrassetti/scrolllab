@@ -8,6 +8,7 @@ import { formatArs, formatUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
 import { useCurrency } from '../lib/currency'
 import ProductThumbnail from './ProductThumbnail'
+import Skeleton from './Skeleton'
 
 /**
  * Botón "Carrito (n)" del header con popup desplegable.
@@ -86,7 +87,8 @@ export default function CartPopover() {
   }
 
   const formatLine = (amount) => {
-    if (amount == null) return '—'
+    // Mientras llegan los precios del servidor: skeleton, no un guion.
+    if (amount == null) return catalog ? '—' : <Skeleton className="inline-block h-[0.9em] w-16 align-middle" />
     return showUsd ? formatUsd(amount) : formatArs(amount)
   }
 

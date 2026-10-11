@@ -69,7 +69,9 @@ export default function Tabs({ tabs, value, onChange, idBase, label, className =
           >
             {tab.label}
             {Number.isFinite(tab.count) ? (
-              <span className="font-mono text-body-sm font-normal tabular-nums text-ink/45">{tab.count}</span>
+              <span key={tab.count} className="ui-fade-in font-mono text-body-sm font-normal tabular-nums text-ink/45">
+                {tab.count}
+              </span>
             ) : null}
           </button>
         )
@@ -94,7 +96,7 @@ export function TabPanel({ id, idBase, value, children, className = '' }) {
       id={`${idBase}-panel-${id}`}
       aria-labelledby={`${idBase}-tab-${id}`}
       tabIndex={0}
-      className={`outline-none ${className}`}
+      className={`ui-fade-in outline-none ${className}`}
     >
       {children}
     </div>
