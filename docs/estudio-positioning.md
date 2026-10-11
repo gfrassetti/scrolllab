@@ -61,7 +61,7 @@ vaya a parar a `es.json`/`en.json`.
 Techo real del negocio de productos (`src/domain/catalog.js`, revisar si cambia):
 template más caro en venta = `meridian` / `kin`, USD 379 (no `ratio`, que está en
 `COMING_SOON_SKUS`); bundle = USD 649; techo teórico del builder con
-30 secciones + commerce = USD 1.407 (desde 2026-10-10; antes USD 758) (`CUSTOM_BASE_PRICE_USD + 22×CUSTOM_EXTRA_SECTION_USD + COMMERCE_PACK_SURCHARGE_USD`).
+30 secciones + commerce = USD 1.158 (desde 2026-10-10, opción moderada; antes USD 758) (`CUSTOM_BASE_PRICE_USD + 22×CUSTOM_EXTRA_SECTION_USD + COMMERCE_PACK_SURCHARGE_USD`).
 
 Las tres anclas de Estudio (las 2 públicas + mantenimiento) quedan claramente
 arriba de eso — si no, un proyecto a medida se lee como "una composición

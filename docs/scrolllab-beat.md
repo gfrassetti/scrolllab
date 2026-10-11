@@ -119,7 +119,7 @@ El panel edita **copy** (`word1`, etc.). **No** hay un campo de recetas JSON en 
 
 Precio: RATIO lista USD 269 pero sigue en `COMING_SOON_SKUS` (no cuenta para
 el piso del builder — ver `scripts/check-consistency.mjs`). La base del
-builder (USD 690) tiene que quedar arriba del template más caro que SÍ se
+builder (USD 549) tiene que quedar arriba del template más caro que SÍ se
 vende (hoy MERIDIAN, USD 379). Si RATIO sale de `COMING_SOON_SKUS` la base ya
 le queda arriba (USD 269).
 

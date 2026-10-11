@@ -52,19 +52,20 @@ export const BUNDLE_MODELS = Object.freeze([
  * Composición del builder: base por tramo + adicional por sección extra.
  * Cuenta cada entrada de la receta (nav, footer y repeticiones incluidas),
  * porque cada una es un componente renderizado en el App.jsx del ZIP. Una
- * composición del tamaño de un template (10 secciones) queda en 748 USD.
+ * composición del tamaño de un template (10 secciones) queda en 599 USD.
  * La base tiene que superar al template más caro EN VENTA (`npm run check`).
  *
  * 2026-10-10 (decisión del dueño): 389 / 15 / 39 → 690 / 29 / 79. Con 8
  * secciones el builder costaba casi lo mismo que UN template caro (KIN o
  * MERIDIAN, 379) y deja mezclar los mejores modelos, todo editable desde el
- * panel. La base queda ~1,8× el template más caro y arriba del bundle.
- * Los precios del Estudio tienen que quedar arriba del techo nuevo (USD 1.407
- * con 30 secciones y commerce): ver docs/estudio-positioning.md.
+ * panel. El mismo día, a la vista ($ 1.063.000 en pesos) quedó muy caro: se
+ * bajó a la opción moderada, 549 / 25 / 59 (~1,45× el template más caro).
+ * Los precios del Estudio tienen que quedar arriba del techo (USD 1.158 con
+ * 30 secciones y commerce): ver docs/estudio-positioning.md.
  */
-export const CUSTOM_BASE_PRICE_USD = 690
+export const CUSTOM_BASE_PRICE_USD = 549
 export const CUSTOM_BASE_SECTIONS = 8
-export const CUSTOM_EXTRA_SECTION_USD = 29
+export const CUSTOM_EXTRA_SECTION_USD = 25
 /**
  * Composiciones del builder en una misma compra: cada una se cobra aparte
  * (su propio tramo) y se baja en su propio ZIP.
@@ -74,7 +75,7 @@ export const MAX_CART_COMPOSITIONS = 5
 /** Tope de secciones de una receta (el builder lo muestra, el checkout lo aplica). */
 export const MAX_CUSTOM_SECTIONS = 30
 
-export const COMMERCE_PACK_SURCHARGE_USD = 79
+export const COMMERCE_PACK_SURCHARGE_USD = 59
 
 /** Redondeo del monto en pesos: al millar de arriba, para no perder en el cambio. */
 export const ARS_ROUNDING = 1000

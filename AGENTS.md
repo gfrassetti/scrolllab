@@ -390,8 +390,9 @@ compararla después (ver [ADR 0005](docs/adr/0005-refactors-con-foto.md)). Con o
 árbol, nunca `git stash`/`checkout`/`add -A`: para comparar contra `HEAD` limpio, una copia con `git archive`.
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
-tramos**: base de USD 690 con 8 secciones incluidas, USD 29 por cada sección
-extra hasta 30, más USD 79 si la receta trae commerce (2026-10-10; antes 389 / 15 / 39).
+tramos**: base de USD 549 con 8 secciones incluidas, USD 25 por cada sección
+extra hasta 30, más USD 59 si la receta trae commerce (2026-10-10: 389 / 15 / 39 → 690 / 29 / 79, el
+mismo día bajado a esta opción moderada porque 690 quedó muy caro).
 El builder muestra el ancla «comprar por separado los modelos que usás» (`separateModelsPriceUsd`). Cuenta cada entrada de la
 receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
 sigue en `COMING_SOON_SKUS` (no cuenta para el piso); la base del builder tiene
@@ -509,7 +510,7 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 - RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379 (el más caro hoy).
 - RATIO lista **USD 269** (Beat). Catálogo en venta: entry 149 / mid 189 / top 229 / MERIDIAN 379.
-- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 690) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
+- La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 549) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 
 ### Readymag (cuando la ref lo usa) — cómo se aprendió
 
