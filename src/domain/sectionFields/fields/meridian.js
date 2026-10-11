@@ -178,16 +178,6 @@ export const MERIDIAN_FIELDS = {
   ],
   'meridian/Hero': [
     { key: 'wordmark', label: 'Wordmark', type: 'text' },
-    {
-      key: 'preloader',
-      label: 'Pantalla de carga',
-      type: 'select',
-      options: [
-        { value: 'off', label: 'Sin pantalla de carga (el hero arranca directo)' },
-        { value: 'on', label: 'Con pantalla de carga (dibujo y contador, como la demo)' },
-      ],
-    },
-    { key: 'loadingLabel', label: 'Pantalla de carga — texto (si está activada; vacío = según idioma)', type: 'text' },
     { key: 'menuLabel', label: 'Nav — Menu label', type: 'text' },
     { key: 'floorPlansLabel', label: 'Nav — link label', type: 'text' },
     { key: 'welcomeText', label: 'Welcome copy', type: 'textarea' },

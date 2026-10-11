@@ -184,10 +184,11 @@ export default function Hero({
   fg,
   /**
    * Pantalla de carga a pantalla completa (dibujo + contador) mientras bajan
-   * los primeros cuadros de la película. Es una decisión de toda la página:
-   * la página de MERIDIAN la pide ('on'); en una composición del builder el
-   * hero puede no ir primero, así que por defecto no la trae y el hero
-   * arranca con su primer cuadro y la entrada del wordmark.
+   * los primeros cuadros de la película. Solo la pide la página de MERIDIAN
+   * ('on'). El builder no la ofrece: dibuja un croquis fijo de un loteo que
+   * el comprador no puede editar, así que el hero arranca con su primer
+   * cuadro y la entrada del wordmark. Regla del dueño (2026-10-11): ningún
+   * loader en el builder salvo que sea 100% editable.
    */
   preloader = 'off',
 }) {
