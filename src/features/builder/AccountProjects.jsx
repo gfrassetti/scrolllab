@@ -9,7 +9,7 @@ import { addProjectToCart, useProjectsInCart } from './projectCart.js'
  * con abrir (lleva al builder con ese proyecto) y borrar. Sin proyectos no se
  * muestra: la cuenta no suma una sección vacía para quien nunca usó el builder.
  */
-export default function AccountProjects({ t, locale }) {
+export default function AccountProjects({ t, locale, showEmpty = false }) {
   const [projects, setProjects] = useState(null)
   const navigate = useNavigate()
   const inCartIds = useProjectsInCart()
@@ -29,10 +29,21 @@ export default function AccountProjects({ t, locale }) {
     }
   }, [])
 
-  if (!projects?.length) return null
+  if (projects === null) return null
+  if (!projects.length) {
+    if (!showEmpty) return null
+    return (
+      <div className="border border-dashed border-ink/20 px-6 py-10 text-center" data-account-projects>
+        <p className="mx-auto max-w-[48ch] text-body text-ink/60">{t('builder.projects.empty')}</p>
+        <Link to="/builder" className="btn btn-ghost mt-5">
+          {t('account.projectsNew')}
+        </Link>
+      </div>
+    )
+  }
 
   return (
-    <section id="proyectos" className="mt-16 scroll-mt-24" data-account-projects>
+    <section id="proyectos" className={`scroll-mt-24 ${showEmpty ? '' : 'mt-16'}`} data-account-projects>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-title-sm font-medium tracking-[-0.01em]">{t('account.projectsTitle')}</h2>

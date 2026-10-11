@@ -20,7 +20,9 @@
     "langEn": "EN",
     "langLabel": "Language",
     "currencyLabel": "Currency",
-    "plan": "Plan"
+    "plan": "Plan",
+    "projects": "My projects",
+    "myLab": "My LAB"
   },
   "lab": {
     "eyebrow": "Premium widgets",
@@ -326,7 +328,8 @@
     "cancel": "Cancel",
     "tabs": {
       "widgets": "Widgets",
-      "packs": "Packs"
+      "packs": "Packs",
+      "plan": "Plan"
     },
     "table": {
       "filterLabel": "Filter by status",
@@ -358,6 +361,12 @@
       "hideCode": "Hide code",
       "pagination": "Widget pages",
       "emptyFilter": "No widgets match this filter."
+    },
+    "app": {
+      "title": "My LAB",
+      "planLine": "{{plan}} plan.",
+      "changePlan": "See plans",
+      "help": "How to install?"
     }
   },
   "common": {
@@ -1281,7 +1290,7 @@
     "inAppCopied": "Copied! Paste it in Chrome or Safari"
   },
   "account": {
-    "eyebrow": "My purchases",
+    "eyebrow": "My account",
     "hello": "Hi, {{name}}",
     "body": "Your purchases live here, always. Each one is a ZIP ready to open on your machine — download it as many times as you want, no limit.",
     "empty": "You haven't bought anything yet.",
@@ -1347,7 +1356,13 @@
     "downloadAll": "Download all (one ZIP)",
     "projectsTitle": "Builder projects",
     "projectsBody": "Your saved compositions. Open one to keep editing where you left off.",
-    "projectsNew": "Open the builder"
+    "projectsNew": "Open the builder",
+    "tabs": {
+      "orders": "Purchases",
+      "projects": "Projects",
+      "plan": "LAB plan"
+    },
+    "goToLab": "Go to My LAB →"
   },
   "preview": {
     "backToAccount": "← Back to My purchases",

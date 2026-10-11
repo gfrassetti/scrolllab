@@ -5,6 +5,7 @@ import SubscriptionCard from '../components/SubscriptionCard'
 import PurchaseSuccessModal from '../components/PurchaseSuccessModal'
 import OrderStatus from '../components/OrderStatus'
 import AccountProjects from '../features/builder/AccountProjects.jsx'
+import Tabs, { TabPanel } from '../components/Tabs'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatAmount } from '../lib/pricing'
@@ -12,7 +13,6 @@ import { orderItemTitle, orderPreviews, previewName } from '../lib/orderPreview'
 import { trackPurchase } from '../lib/gtm'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { useI18n } from '../i18n'
-import { prefersReducedMotion } from '../lib/motion'
 
 const PAGE_SIZE = 20
 
@@ -27,9 +27,23 @@ export default function AccountPage() {
   const [successOrder, setSuccessOrder] = useState(null)
   const { t, locale } = useI18n()
   const dateLocale = locale === 'en' ? 'en-US' : 'es-AR'
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
   const location = useLocation()
   const navigate = useNavigate()
+  // Mi cuenta en tres pestañas: Compras · Proyectos · Plan LAB (en la URL).
+  const HASH_TAB = { '#compras': 'compras', '#proyectos': 'proyectos', '#suscripcion': 'plan' }
+  const tabParam = params.get('tab')
+  const tab = ['proyectos', 'plan'].includes(tabParam) ? tabParam : HASH_TAB[location.hash] || 'compras'
+  const setTab = (next) =>
+    setParams(
+      (prev) => {
+        const p = new URLSearchParams(prev)
+        if (next === 'compras') p.delete('tab')
+        else p.set('tab', next)
+        return p
+      },
+      { replace: true },
+    )
 
   useEffect(() => {
     if (!user) return
@@ -44,17 +58,12 @@ export default function AccountPage() {
   // el mismo lugar (el tope). Reenganchamos el scroll acá después de ese
   // reset. #compras vive en un <ul> que solo existe una vez que llegan las
   // órdenes, por eso depende de `orders`.
+  // Los links viejos (#compras, #suscripcion) eligen su pestaña; arriba de todo.
   useEffect(() => {
     if (!location.hash) return undefined
-    const id = location.hash.slice(1)
-    const reduce = prefersReducedMotion()
-    const raf = requestAnimationFrame(() => {
-      document
-        .getElementById(id)
-        ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
-    })
+    const raf = requestAnimationFrame(() => window.scrollTo({ top: 0 }))
     return () => cancelAnimationFrame(raf)
-  }, [location.hash, orders])
+  }, [location.hash])
 
   // Modal post-compra: ?purchase=1&orderId=… (state opcional desde confirm)
   useEffect(() => {
@@ -148,14 +157,40 @@ export default function AccountPage() {
         />
       )}
       <main className="px-5 py-12 md:px-10">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
-          {t('account.eyebrow')}
-        </p>
-        <h1 className="mt-2 break-words text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.02em]">
+        <p className="text-eyebrow uppercase text-ink/45">{t('account.eyebrow')}</p>
+        <h1 className="mt-2 break-words text-title font-medium">
           {t('account.hello', { name: user.name || user.email })}
         </h1>
-        <p className="mt-2 text-sm text-ink/60">{user.email}</p>
-        <p className="mt-4 max-w-[52ch] text-sm leading-relaxed text-ink/70">
+        <p className="mt-1 text-body-sm text-ink/55">{user.email}</p>
+
+        <Tabs
+          idBase="account"
+          label={t('account.eyebrow')}
+          value={tab}
+          onChange={setTab}
+          className="mt-8"
+          tabs={[
+            { id: 'compras', label: t('account.tabs.orders'), count: orders.length },
+            { id: 'proyectos', label: t('account.tabs.projects') },
+            { id: 'plan', label: t('account.tabs.plan') },
+          ]}
+        />
+
+        <TabPanel idBase="account" id="plan" value={tab} className="pt-2">
+          <SubscriptionCard />
+          <p className="mt-4 text-body-sm text-ink/60">
+            <Link to="/lab" className="underline decoration-ink/30 underline-offset-2 hover:text-accent">
+              {t('account.goToLab')}
+            </Link>
+          </p>
+        </TabPanel>
+
+        <TabPanel idBase="account" id="proyectos" value={tab} className="pt-6">
+          <AccountProjects t={t} locale={locale} showEmpty />
+        </TabPanel>
+
+        <TabPanel idBase="account" id="compras" value={tab} className="pt-6">
+        <p className="max-w-[60ch] text-body-sm text-ink/60">
           {t('account.body')}{' '}
           <Link
             to="/#como-funciona"
@@ -179,8 +214,6 @@ export default function AccountPage() {
             </Link>
           </p>
         ) : null}
-
-        <SubscriptionCard />
 
         {error && (
           <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
@@ -206,7 +239,7 @@ export default function AccountPage() {
           </div>
         ) : (
           <>
-            <ul id="compras" className="mt-10 scroll-mt-24 border-t border-ink/15">
+            <ul id="compras" className="mt-6 scroll-mt-24 border-t border-ink/15">
               {pageOrders.map((order) => {
                 const previews = orderPreviews(order)
                 // Pendiente con el pago rechazado: no está «confirmando».
@@ -377,7 +410,7 @@ export default function AccountPage() {
           </>
         )}
 
-        <AccountProjects t={t} locale={locale} />
+        </TabPanel>
       </main>
     </div>
   )

@@ -336,19 +336,18 @@ export default function SiteHeader({ solid = true }) {
             {showAccount ? (
               <>
                 <li>
-                  <Link
-                    to="/account#compras"
-                    className="block py-3.5 hover:text-accent"
-                  >
+                  <Link to="/account" className="block py-3.5 hover:text-accent">
                     {t('nav.account')}
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/account#suscripcion"
-                    className="block py-3.5 hover:text-accent"
-                  >
-                    {t('nav.plan')}
+                  <Link to="/account?tab=proyectos" className="block py-3.5 hover:text-accent">
+                    {t('nav.projects')}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/lab" className="block py-3.5 hover:text-accent">
+                    {t('nav.myLab')}
                   </Link>
                 </li>
                 <li>

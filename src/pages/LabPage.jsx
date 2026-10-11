@@ -21,7 +21,11 @@ import { prefersReducedMotion } from '../lib/motion'
 
 /** `qa`: /lab-test — los planes de prueba (src/domain/qa.js). */
 export default function LabPage({ qa = false }) {
-  const { user, loading } = useAuth()
+  const { user, loading, hadSession } = useAuth()
+  // Logueado, /lab es tu herramienta, no la página de venta: abre en tu zona de
+  // trabajo (Widgets | Packs | Plan), sin intro, hero ni demo arriba. Mientras
+  // se confirma la sesión, se decide con la pista de la última visita.
+  const appMode = user ? true : loading ? hadSession : false
   const {
     plan,
     quota,
@@ -44,6 +48,13 @@ export default function LabPage({ qa = false }) {
 
   const goToPlanes = (e) => {
     e?.preventDefault?.()
+    if (appMode) {
+      setTab('plan')
+      requestAnimationFrame(() =>
+        document.getElementById('tus-widgets')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      )
+      return
+    }
     if (window.location.hash !== '#planes') {
       window.location.hash = 'planes'
     } else {
@@ -65,17 +76,38 @@ export default function LabPage({ qa = false }) {
   // Widgets sueltos o packs: la pestaña vive en la URL (?tab=packs) para que
   // volver del editor de un pack deje en Packs.
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab = searchParams.get('tab') === 'packs' ? 'packs' : 'widgets'
+  const tabParam = searchParams.get('tab')
+  // Llegar por los planes (/lab#planes, links viejos y mails) o volver de una
+  // pasarela (?suscripcion=volver, ?upgrade=volver) abre la pestaña Plan: ahí
+  // vive el componente que termina ese flujo.
+  const wantsPlan =
+    (typeof window !== 'undefined' && window.location.hash === '#planes') ||
+    !!searchParams.get('suscripcion') ||
+    !!searchParams.get('upgrade')
+  const tab =
+    tabParam === 'packs' || tabParam === 'plan' ? tabParam : wantsPlan && appMode ? 'plan' : 'widgets'
   const setTab = (next) =>
     setSearchParams(
       (prev) => {
         const p = new URLSearchParams(prev)
-        if (next === 'packs') p.set('tab', 'packs')
-        else p.delete('tab')
+        if (next === 'widgets') p.delete('tab')
+        else p.set('tab', next)
         return p
       },
       { replace: true },
     )
+  useEffect(() => {
+    if (appMode && wantsPlan && tabParam !== 'plan') {
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev)
+          p.set('tab', 'plan')
+          return p
+        },
+        { replace: true },
+      )
+    }
+  }, [appMode, wantsPlan, tabParam, setSearchParams])
   const [loaderInfo, setLoaderInfo] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -221,7 +253,7 @@ export default function LabPage({ qa = false }) {
 
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return
+      if (prefersReducedMotion() || !root.current?.querySelector('[data-lab-title]')) return
 
       // Mismo lenguaje que el wordmark del home: máscara + chars, LAB es la
       // marca de este producto puntual.
@@ -302,154 +334,185 @@ export default function LabPage({ qa = false }) {
         split.revert()
       }
     },
-    { scope: root, dependencies: [locale], revertOnUpdate: true },
+    { scope: root, dependencies: [locale, appMode], revertOnUpdate: true },
   )
 
   return (
     <div ref={root} className="min-h-svh bg-bone text-ink">
-      <LabSplash />
+      {appMode ? null : <LabSplash />}
       <SiteHeader />
-      <main className="px-5 py-16 md:px-10 md:py-24">
-        {/* Hero — bloque centrado (el "momento"). Todo lo de abajo va alineado
-            a la izquierda dentro del mismo contenedor. */}
-        <div className="mx-auto max-w-2xl text-center">
-          <p
-            data-lab-hero-meta
-            className="text-eyebrow uppercase text-ink/45"
-          >
-            {t('lab.eyebrow')}
-          </p>
-          <h1
-            data-lab-title
-            className="mt-3 font-brico text-display font-semibold text-accent-ink"
-          >
-            LAB
-          </h1>
-          <p
-            data-lab-hero-meta
-            className="mx-auto mt-5 max-w-[52ch] text-body-lg text-ink/80"
-          >
-            {t('lab.body')}
-          </p>
-          {/* La acción primaria del hero: a los planes (ahí se entra y se elige). */}
-          <div data-lab-hero-meta className="mt-7 flex flex-col items-center gap-2">
-            <a href="#planes" onClick={goToPlanes} className="btn btn-primary">
-              {t(freeQuota > 0 ? 'lab.heroCtaFree' : 'lab.heroCtaPlans')}
-            </a>
-            {freeQuota > 0 && (
-              <p className="text-body-sm text-ink/60">
-                {t(freeQuota === 1 ? 'lab.freeLineOne' : 'lab.freeLineMany', { n: freeQuota })}
-              </p>
-            )}
-          </div>
-          {/* LAB vs Builder en una línea: ¿ya tenés sitio o vas a hacer uno? */}
-          <p data-lab-hero-meta className="mx-auto mt-3 max-w-[52ch] text-body-sm text-ink/60">
-            {t('lab.siteSplit')}{' '}
-            <Link
-              to="/builder"
-              className="underline decoration-ink/30 underline-offset-2 hover:text-accent"
-            >
-              {t('nav.builder')}
-            </Link>
-            {t('lab.siteSplitAfter')}
-          </p>
-        </div>
-
-        {/* Cómo funciona — 3 pasos, cada uno con su demo animada. */}
-        <section className="mt-20 md:mt-28">
-          <p className="text-eyebrow uppercase text-ink/45">{t('lab.howEyebrow')}</p>
-          <h2 className="mt-3 max-w-[22ch] text-title font-medium">{t('lab.howTitle')}</h2>
-
-          <div
-            ref={demoPin}
-            className="relative mt-10 md:flex md:h-svh md:items-center"
-          >
-            <ol className="grid w-full gap-10 sm:grid-cols-3 sm:gap-8">
-              {[LabDemo, LabDemoCopy, LabDemoPaste].map((Demo, i) => (
-                <li key={i} className="border-t border-ink/20 pt-4">
-                  <span className="font-mono text-body-sm text-accent">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <p className="mt-2 text-body text-ink/80">{steps[i]}</p>
-                  <div data-demo-col className="mt-6">
-                    <Demo key={locale} />
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* LAB o Builder: las mismas secciones, dos formas de usarlas. Corto a
-            propósito: para qué sitio es, cómo se usa y cómo se paga. */}
-        <section className="mt-20 md:mt-28" aria-labelledby="lab-vs-builder">
-          <h2 id="lab-vs-builder" className="text-title-sm font-medium">
-            {t('lab.compare.title')}
-          </h2>
-          <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.compare.lead')}</p>
-          <div role="table" aria-labelledby="lab-vs-builder" className="mt-8 max-w-5xl">
-            <div
-              role="row"
-              className="grid grid-cols-2 gap-x-6 pb-3 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
-            >
-              <span role="columnheader" className="sr-only md:not-sr-only" />
-              <span role="columnheader" className="text-body font-medium text-accent-ink">
-                LAB
-              </span>
-              <span role="columnheader" className="text-body font-medium">
-                {t('nav.builder')}
-              </span>
+      <main className={`px-5 md:px-10 ${appMode ? 'py-10 md:py-14' : 'py-16 md:py-24'}`}>
+        {appMode ? (
+          // Cabecera de la herramienta: dónde estás y con qué plan; la ayuda,
+          // abajo. La venta (hero, demo, cuadro) no se repite en cada visita.
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div>
+              <p className="text-eyebrow uppercase text-ink/45">LAB</p>
+              <h1 className="mt-2 text-title font-medium">{t('lab.app.title')}</h1>
+              {!planLoading && (
+                <p className="mt-2 text-body-sm text-ink/60" data-lab-plan-line>
+                  {t('lab.app.planLine', { plan: t(`lab.tier.${String(plan || 'free').replace('hosted_', '')}`) })}{' '}
+                  <button
+                    type="button"
+                    onClick={goToPlanes}
+                    className="tpl-hit relative underline decoration-ink/30 underline-offset-2 hover:text-accent"
+                  >
+                    {t('lab.app.changePlan')}
+                  </button>
+                </p>
+              )}
             </div>
-            {(Array.isArray(t('lab.compare.rows')) ? t('lab.compare.rows') : []).map((row) => (
-              <div
-                key={row.label}
-                role="row"
-                className="grid grid-cols-2 gap-x-6 gap-y-2 border-t border-ink/15 py-4 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
+            <a
+              href="#ayuda"
+              className="tpl-hit relative text-body-sm text-ink/60 underline decoration-ink/30 underline-offset-2 hover:text-accent"
+            >
+              {t('lab.app.help')}
+            </a>
+          </div>
+        ) : (
+          <>
+          {/* Hero — bloque centrado (el "momento"). Todo lo de abajo va alineado
+              a la izquierda dentro del mismo contenedor. */}
+          <div className="mx-auto max-w-2xl text-center">
+            <p
+              data-lab-hero-meta
+              className="text-eyebrow uppercase text-ink/45"
+            >
+              {t('lab.eyebrow')}
+            </p>
+            <h1
+              data-lab-title
+              className="mt-3 font-brico text-display font-semibold text-accent-ink"
+            >
+              LAB
+            </h1>
+            <p
+              data-lab-hero-meta
+              className="mx-auto mt-5 max-w-[52ch] text-body-lg text-ink/80"
+            >
+              {t('lab.body')}
+            </p>
+            {/* La acción primaria del hero: a los planes (ahí se entra y se elige). */}
+            <div data-lab-hero-meta className="mt-7 flex flex-col items-center gap-2">
+              <a href="#planes" onClick={goToPlanes} className="btn btn-primary">
+                {t(freeQuota > 0 ? 'lab.heroCtaFree' : 'lab.heroCtaPlans')}
+              </a>
+              {freeQuota > 0 && (
+                <p className="text-body-sm text-ink/60">
+                  {t(freeQuota === 1 ? 'lab.freeLineOne' : 'lab.freeLineMany', { n: freeQuota })}
+                </p>
+              )}
+            </div>
+            {/* LAB vs Builder en una línea: ¿ya tenés sitio o vas a hacer uno? */}
+            <p data-lab-hero-meta className="mx-auto mt-3 max-w-[52ch] text-body-sm text-ink/60">
+              {t('lab.siteSplit')}{' '}
+              <Link
+                to="/builder"
+                className="underline decoration-ink/30 underline-offset-2 hover:text-accent"
               >
-                <span
-                  role="rowheader"
-                  className="col-span-2 text-[11px] uppercase tracking-[0.2em] text-ink/50 md:col-span-1 md:pt-0.5"
-                >
-                  {row.label}
+                {t('nav.builder')}
+              </Link>
+              {t('lab.siteSplitAfter')}
+            </p>
+          </div>
+
+          {/* Cómo funciona — 3 pasos, cada uno con su demo animada. */}
+          <section className="mt-20 md:mt-28">
+            <p className="text-eyebrow uppercase text-ink/45">{t('lab.howEyebrow')}</p>
+            <h2 className="mt-3 max-w-[22ch] text-title font-medium">{t('lab.howTitle')}</h2>
+
+            <div
+              ref={demoPin}
+              className="relative mt-10 md:flex md:h-svh md:items-center"
+            >
+              <ol className="grid w-full gap-10 sm:grid-cols-3 sm:gap-8">
+                {[LabDemo, LabDemoCopy, LabDemoPaste].map((Demo, i) => (
+                  <li key={i} className="border-t border-ink/20 pt-4">
+                    <span className="font-mono text-body-sm text-accent">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <p className="mt-2 text-body text-ink/80">{steps[i]}</p>
+                    <div data-demo-col className="mt-6">
+                      <Demo key={locale} />
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          {/* LAB o Builder: las mismas secciones, dos formas de usarlas. Corto a
+              propósito: para qué sitio es, cómo se usa y cómo se paga. */}
+          <section className="mt-20 md:mt-28" aria-labelledby="lab-vs-builder">
+            <h2 id="lab-vs-builder" className="text-title-sm font-medium">
+              {t('lab.compare.title')}
+            </h2>
+            <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.compare.lead')}</p>
+            <div role="table" aria-labelledby="lab-vs-builder" className="mt-8 max-w-5xl">
+              <div
+                role="row"
+                className="grid grid-cols-2 gap-x-6 pb-3 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
+              >
+                <span role="columnheader" className="sr-only md:not-sr-only" />
+                <span role="columnheader" className="text-body font-medium text-accent-ink">
+                  LAB
                 </span>
-                <span role="cell" className="text-body-sm text-ink/85">
-                  {row.lab}
-                </span>
-                <span role="cell" className="text-body-sm text-ink/60">
-                  {row.builder}
+                <span role="columnheader" className="text-body font-medium">
+                  {t('nav.builder')}
                 </span>
               </div>
-            ))}
-            <div
-              role="row"
-              className="grid grid-cols-2 gap-x-6 border-t border-ink/15 pt-4 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
-            >
-              <span role="cell" className="hidden md:block" />
-              <span role="cell">
-                <a
-                  href="#planes"
-                  onClick={goToPlanes}
-                  className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
+              {(Array.isArray(t('lab.compare.rows')) ? t('lab.compare.rows') : []).map((row) => (
+                <div
+                  key={row.label}
+                  role="row"
+                  className="grid grid-cols-2 gap-x-6 gap-y-2 border-t border-ink/15 py-4 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
                 >
-                  {t('lab.compare.labCta')}
-                </a>
-              </span>
-              <span role="cell">
-                <Link
-                  to="/builder"
-                  className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
-                >
-                  {t('lab.compare.builderCta')}
-                </Link>
-              </span>
+                  <span
+                    role="rowheader"
+                    className="col-span-2 text-[11px] uppercase tracking-[0.2em] text-ink/50 md:col-span-1 md:pt-0.5"
+                  >
+                    {row.label}
+                  </span>
+                  <span role="cell" className="text-body-sm text-ink/85">
+                    {row.lab}
+                  </span>
+                  <span role="cell" className="text-body-sm text-ink/60">
+                    {row.builder}
+                  </span>
+                </div>
+              ))}
+              <div
+                role="row"
+                className="grid grid-cols-2 gap-x-6 border-t border-ink/15 pt-4 md:grid-cols-[minmax(0,13rem)_1fr_1fr]"
+              >
+                <span role="cell" className="hidden md:block" />
+                <span role="cell">
+                  <a
+                    href="#planes"
+                    onClick={goToPlanes}
+                    className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
+                  >
+                    {t('lab.compare.labCta')}
+                  </a>
+                </span>
+                <span role="cell">
+                  <Link
+                    to="/builder"
+                    className="tpl-hit relative text-body-sm underline decoration-ink/30 underline-offset-2 hover:text-accent"
+                  >
+                    {t('lab.compare.builderCta')}
+                  </Link>
+                </span>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Planes — la decisión. Subido acá, antes de "tus secciones". */}
-        <div className="mt-20 md:mt-28">
-          <HostedPlans qa={qa} />
-        </div>
+          {/* Planes — la decisión. Subido acá, antes de "tus secciones". */}
+          <div className="mt-20 md:mt-28">
+            <HostedPlans qa={qa} />
+          </div>
+          </>
+        )}
 
         {error && (
           <p className="mt-6 border border-danger/40 bg-danger/10 px-4 py-3 text-body-sm">
@@ -458,7 +521,7 @@ export default function LabPage({ qa = false }) {
         )}
 
         {/* Tu espacio de LAB: widgets sueltos y packs, en dos pestañas. */}
-        <section id="tus-widgets" className="mt-20 scroll-mt-24 md:mt-28">
+        <section id="tus-widgets" className={`scroll-mt-24 ${appMode ? 'mt-10' : 'mt-20 md:mt-28'}`}>
           {!user ? (
             loading ? null : (
               <div className="border border-ink/15 p-6 md:p-8">
@@ -484,6 +547,7 @@ export default function LabPage({ qa = false }) {
                 tabs={[
                   { id: 'widgets', label: t('lab.tabs.widgets'), count: instances.length },
                   { id: 'packs', label: t('lab.tabs.packs'), count: packs.length },
+                  { id: 'plan', label: t('lab.tabs.plan') },
                 ]}
               />
 
@@ -633,12 +697,17 @@ export default function LabPage({ qa = false }) {
                   </ul>
                 )}
               </TabPanel>
+
+              {/* El plan: los mismos planes de la página de venta, acá adentro. */}
+              <TabPanel idBase="lab-ws" id="plan" value={tab} className="pt-2">
+                <HostedPlans qa={qa} />
+              </TabPanel>
             </>
           )}
         </section>
 
         {/* Guías por plataforma: dónde se pega el mismo snippet en cada una. */}
-        <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">
+        <section id="ayuda" className="mt-20 scroll-mt-24 border-t border-ink/15 pt-12 md:mt-28">
           <h2 className="text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
           <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
           <div className="mt-6 max-w-[68ch]">
@@ -654,7 +723,7 @@ export default function LabPage({ qa = false }) {
           </div>
         </section>
 
-        <p className="mt-16 max-w-[56ch] text-body-sm text-ink/60">
+        <p className={`mt-16 max-w-[56ch] text-body-sm text-ink/60 ${appMode ? 'hidden' : ''}`}>
           {t('lab.footnote')}{' '}
           <Link
             to="/builder"

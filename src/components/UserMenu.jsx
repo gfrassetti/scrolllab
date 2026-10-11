@@ -76,15 +76,15 @@ export default function UserMenu({ user, onLogout, loggingOut }) {
             panelIn ? 'ui-enter-to' : 'ui-enter-from'
           }`}
         >
-          <Link to="/account#compras" role="menuitem" className={itemClass}>
+          {/* Tu lugar: lo comprado, lo que estás armando y tu LAB. */}
+          <Link to="/account" role="menuitem" className={itemClass}>
             {t('nav.account')}
           </Link>
-          <Link
-            to="/account#suscripcion"
-            role="menuitem"
-            className={`${itemClass} border-t border-ink/10`}
-          >
-            {t('nav.plan')}
+          <Link to="/account?tab=proyectos" role="menuitem" className={`${itemClass} border-t border-ink/10`}>
+            {t('nav.projects')}
+          </Link>
+          <Link to="/lab" role="menuitem" className={`${itemClass} border-t border-ink/10`}>
+            {t('nav.myLab')}
             {hasPlan && (
               <span className="ml-2 text-accent normal-case tracking-normal">
                 {planLabel}
