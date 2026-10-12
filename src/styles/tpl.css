@@ -32,7 +32,7 @@
 
 /*
  * `motion-reduce:` de Tailwind compila a un @media pelado que no pasa por el
- * reemplazo de matchMedia del botón «Ver con animaciones»: con el botón puesto
+ * reemplazo de matchMedia del market (movimiento completo por defecto): con el modo completo puesto
  * los menús a pantalla completa seguían apareciendo sin transición. Mismo
  * significado que `calm:`.
  */

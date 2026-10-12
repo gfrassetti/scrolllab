@@ -1845,14 +1845,11 @@
     "toLight": "Cambiar a tema claro",
     "toDark": "Cambiar a tema oscuro"
   },
-  "motionNotice": {
-    "label": "Movimiento",
-    "body": "Tu dispositivo tiene activado «reducir movimiento», así que las demos van con menos animaciones. Podés verlas completas sin cambiar ese ajuste.",
-    "showFull": "Ver con animaciones",
-    "keepCalm": "Dejarlo así"
-  },
   "motionToggle": {
-    "label": "Ver las demos con animaciones"
+    "label": "Ver las demos con animaciones",
+    "row": "Animaciones",
+    "full": "Sí",
+    "reduced": "No"
   },
   "pay": {
     "payAr": "Pagar con Mercado Pago →",
@@ -1886,6 +1883,7 @@
   "prefs": {
     "label": "Idioma, moneda y tema ({{current}})",
     "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Paddle).",
-    "theme": "Tema"
+    "theme": "Tema",
+    "labelShort": "Preferencias ({{current}})"
   }
 }

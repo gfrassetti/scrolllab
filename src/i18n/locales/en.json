@@ -1845,14 +1845,11 @@
     "toLight": "Switch to light theme",
     "toDark": "Switch to dark theme"
   },
-  "motionNotice": {
-    "label": "Motion",
-    "body": "Your device has “reduce motion” turned on, so the demos run with fewer animations. You can see them in full without changing that setting.",
-    "showFull": "Show animations",
-    "keepCalm": "Keep it as is"
-  },
   "motionToggle": {
-    "label": "Show demos with animations"
+    "label": "Show demos with animations",
+    "row": "Animations",
+    "full": "On",
+    "reduced": "Off"
   },
   "pay": {
     "payAr": "Pay with Mercado Pago →",
@@ -1886,6 +1883,7 @@
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
     "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Paddle).",
-    "theme": "Theme"
+    "theme": "Theme",
+    "labelShort": "Preferences ({{current}})"
   }
 }

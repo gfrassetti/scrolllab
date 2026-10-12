@@ -346,15 +346,16 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
   })
   await context.addInitScript(installBlockHelpers)
   await context.addInitScript(installMotionHelpers)
-  await context.addInitScript(() => {
+  await context.addInitScript((calm) => {
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
-      // El aviso «Ver con animaciones» (MotionNotice) tapa controles y capturas.
-      localStorage.setItem('scrolllab-motion-notice', '1')
+      // El market muestra todo con movimiento por defecto, también con «reducir
+      // movimiento» en el dispositivo: la versión calma se pide a mano.
+      if (calm) localStorage.setItem('scrolllab-motion', 'calm')
     } catch {
       /* ignore */
     }
-  })
+  }, mode === 'reduce')
   await routeGoogleFonts(context)
 
   const page = await context.newPage()
@@ -621,8 +622,9 @@ async function loadAndMeasure(browser, base, { template, profile, reduce, forced
   await context.addInitScript((override) => {
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
-      localStorage.setItem('scrolllab-motion-notice', '1')
-      if (override) localStorage.setItem('scrolllab-motion', 'full')
+      // `forced`: el botón puesto (full). Sin él y con «reducir» emulado, la calma
+      // se pide a mano: por defecto el market ya muestra todo con movimiento.
+      localStorage.setItem('scrolllab-motion', override ? 'full' : 'calm')
     } catch {
       /* ignore */
     }

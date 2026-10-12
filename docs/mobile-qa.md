@@ -33,24 +33,28 @@ Regla: la calma **nunca** deja un contenedor alto vacío ni contenido oculto. C�
 escribe: variante `calm:` de Tailwind (`src/styles/tpl.css`), `src/lib/motion.js`
 (`calmReveal`, `calmCount`, `prefersReducedMotion()`) y `useReducedMotion()`.
 
-## «Ver con animaciones»
+## Movimiento completo por defecto
 
-Es chrome del market (no viaja en el ZIP): `MotionNotice` + `MotionToggle`.
+Decisión del dueño (2026-10-12): quien entra al market, en el celular o en la PC, ve
+las demos con todo su movimiento, aunque tenga «reducir movimiento» prendido en el
+dispositivo. Es chrome del market (no viaja en el ZIP): `src/lib/motionOverride.js` +
+`MotionToggle`.
 
-- Se pregunta **una sola vez, en total**, y solo si el dispositivo pide reducir el
-  movimiento. La respuesta y el «ya te lo mostré» viven en `localStorage`
-  (`scrolllab-motion`, `scrolllab-motion-notice`): no vuelve por pestaña, por
-  template, al navegar ni al recargar, aunque se lo ignore.
+- No se pregunta nada: el modo completo es el default. Un visitante que necesita menos
+  movimiento lo pide en la fila «Animaciones · Sí / No» del menú de preferencias del
+  header (`ES ▼`) o del menú del teléfono (visible solo con reduce): guarda
+  `scrolllab-motion=calm` en `localStorage` y recarga.
 - No cambia ningún ajuste del dispositivo: guarda una preferencia de ScrollLab en
-  ese navegador.
-- Para cambiar de idea: `MotionToggle`, en el header (visible solo con reduce).
-- Con `full`, `src/lib/motionOverride.js` marca `<html data-motion="full">` y
+  ese navegador. El ZIP y los widgets de LAB siguen el ajuste del visitante.
+- Con `full` (el default), `motionOverride` marca `<html data-motion="full">` y
   reescribe `window.matchMedia`: `prefers-reduced-motion` da «sin preferencia» para
   todo lo que corre en el market (las secciones que leen el ajuste directo y
   `gsap.matchMedia`). El CSS no pasa por `matchMedia`: las reglas
   `@media (prefers-reduced-motion: reduce)` escritas a mano llevan
   `:where(:root:not([data-motion='full']))` adelante.
 - Para saber qué pide el dispositivo de verdad: `deviceWantsLessMotion()`.
+- Para probar la calma en el market hay que emular «reducir movimiento» **y** guardar
+  `scrolllab-motion=calm` (los `check:*` ya lo hacen).
 
 ## Cómo se verifica
 
@@ -58,7 +62,7 @@ Es chrome del market (no viaja en el ZIP): `MotionNotice` + `MotionToggle`.
 |---|---|
 | `npm run check:motion` | Emulador de teléfono: gestos táctiles reales (CDP), CPU ×4, Pixel 7 / iPhone 13 / iPad Mini. Por sección: scroll trabado, huecos (`frozen`), texto oculto, pantalla que se ensancha, salto por la barra del navegador, carruseles que no responden |
 | `MOTION=forced npm run check:motion` | Con «reducir movimiento» + el botón, cada página queda **igual que sin reducir** (alto del documento y `ScrollTrigger` vivos). Una sección que ignora el botón sale como `override-ignored` |
-| `npm run check:motion-notice` | El aviso en un navegador real: una sola vez, «Dejarlo así» sin recargar, «Ver con animaciones» en todo ScrollLab, el toggle, storage bloqueado |
+| `npm run check:motion-notice` | El movimiento completo por defecto en un navegador real (también con «reducir» en el dispositivo): sin pregunta, la fila «Animaciones · Sí / No», el tema a la vista, storage bloqueado |
 | `npm run check:mobile` | Layout por sección de 320 a 1280 px, normal y reduce: desbordes, texto, toque, imágenes |
 | `npm run check:parity` | PC ↔ teléfono ↔ tablet con el movimiento completo: ScrollTriggers y tamaño del efecto por pieza, canvas, listeners de puntero, peso del blur animado (ver «Paridad PC ↔ teléfono») |
 

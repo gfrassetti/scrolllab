@@ -63,50 +63,37 @@ describe('rewriteMotionQuery', () => {
   })
 })
 
-describe('respuesta guardada (una sola vez, para siempre)', () => {
+describe('movimiento completo por defecto; «menos movimiento» es una elección', () => {
   beforeEach(() => {
     useStorage(createMemoryStorage())
     reloads = 0
     globalThis.document.documentElement.dataset = {}
   })
 
-  it('al principio no hay respuesta y el aviso no se mostró', () => {
-    assert.equal(m.getMotion(), null)
-    assert.equal(m.noticeSeen(), false)
-  })
-
-  it('mostrar el aviso lo marca como visto aunque no responda', () => {
-    m.markNoticeSeen()
-    assert.equal(m.noticeSeen(), true)
+  it('al principio no hay elección guardada (= completo)', () => {
     assert.equal(m.getMotion(), null)
   })
 
-  it('«Dejarlo así» estando en calma: guarda, no recarga y no vuelve a preguntar', () => {
+  it('elegir «No» (calma) estando en completo: guarda y recarga una vez', () => {
+    globalThis.document.documentElement.dataset.motion = 'full'
     assert.equal(m.setMotion('calm'), true)
     assert.equal(m.getMotion(), 'calm')
-    assert.equal(m.noticeSeen(), true)
-    assert.equal(reloads, 0)
+    assert.equal(reloads, 1)
   })
 
-  it('«Ver con animaciones»: guarda y recarga una vez', () => {
+  it('elegir «Sí» estando en calma: guarda y recarga una vez', () => {
     assert.equal(m.setMotion('full'), true)
     assert.equal(m.getMotion(), 'full')
-    assert.equal(m.noticeSeen(), true)
     assert.equal(reloads, 1)
   })
 
-  it('con las animaciones puestas: volver a calma recarga, repetir full no', () => {
-    m.setMotion('full')
+  it('elegir lo que ya se ve no recarga', () => {
     globalThis.document.documentElement.dataset.motion = 'full'
-    reloads = 0
     m.setMotion('full')
     assert.equal(reloads, 0)
-    m.setMotion('calm')
-    assert.equal(reloads, 1)
-    assert.equal(m.getMotion(), 'calm')
   })
 
-  it('un valor raro en el storage cuenta como sin respuesta', () => {
+  it('un valor raro en el storage cuenta como sin elección', () => {
     localStorage.setItem('scrolllab-motion', 'quizas')
     assert.equal(m.getMotion(), null)
   })
@@ -118,10 +105,8 @@ describe('storage bloqueado', () => {
     reloads = 0
     assert.equal(m.canRemember(), false)
     assert.equal(m.getMotion(), null)
-    assert.equal(m.noticeSeen(), false)
-    assert.equal(m.setMotion('full'), false)
+    assert.equal(m.setMotion('calm'), false)
     assert.equal(reloads, 0)
-    assert.doesNotThrow(() => m.markNoticeSeen())
   })
 
   it('con storage común sí se puede recordar', () => {
@@ -130,7 +115,7 @@ describe('storage bloqueado', () => {
   })
 })
 
-describe('matchMedia con las animaciones pedidas', () => {
+describe('matchMedia: completo para todos, salvo quien eligió menos', () => {
   it('el ajuste real del dispositivo se lee con la consulta original', () => {
     asked.length = 0
     deviceReduces = true
@@ -141,17 +126,21 @@ describe('matchMedia con las animaciones pedidas', () => {
     deviceReduces = true
   })
 
-  it('sin respuesta guardada no se reemplaza nada', () => {
+  // Va antes que los demás: el reemplazo de matchMedia, una vez hecho, queda.
+  it('con `calm` elegido: no se marca <html> ni se reemplaza nada (manda el dispositivo)', () => {
     useStorage(createMemoryStorage())
+    localStorage.setItem('scrolllab-motion', 'calm')
+    globalThis.document.documentElement.dataset = {}
     const before = globalThis.window.matchMedia
     m.bootMotionOverride()
     assert.equal(globalThis.window.matchMedia, before)
     assert.equal(globalThis.document.documentElement.dataset.motion, undefined)
   })
 
-  it('con `full`: marca <html>, reescribe las consultas de movimiento y deja pasar el resto', () => {
+  it('sin elección guardada (visita nueva): completo, también con el dispositivo en «reducir»', () => {
     useStorage(createMemoryStorage())
-    localStorage.setItem('scrolllab-motion', 'full')
+    globalThis.document.documentElement.dataset = {}
+    deviceReduces = true
     m.bootMotionOverride()
     assert.equal(globalThis.document.documentElement.dataset.motion, 'full')
 
@@ -165,9 +154,16 @@ describe('matchMedia con las animaciones pedidas', () => {
       '(min-width: 768px)',
     ])
 
-    // y el aviso/toggle siguen viendo lo que pide el dispositivo de verdad
+    // y el toggle sigue viendo lo que pide el dispositivo de verdad
     asked.length = 0
     assert.equal(m.deviceWantsLessMotion(), true)
     assert.deepEqual(asked, ['(prefers-reduced-motion: reduce)'])
+  })
+
+  it('con el storage bloqueado también es completo (el default no necesita memoria)', () => {
+    useStorage(throwing())
+    globalThis.document.documentElement.dataset = {}
+    m.bootMotionOverride()
+    assert.equal(globalThis.document.documentElement.dataset.motion, 'full')
   })
 })

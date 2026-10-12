@@ -11,7 +11,6 @@ import { installTracker } from './lib/track'
 import { I18nProvider, useT } from './i18n'
 import CustomCursor from './components/CustomCursor'
 import CartToast from './components/CartToast'
-import MotionNotice from './components/MotionNotice'
 import { bootMotionOverride } from './lib/motionOverride'
 import DocumentHead from './components/DocumentHead'
 import WelcomeCouponSync from './components/WelcomeCouponSync'
@@ -77,9 +76,9 @@ const SHOW_MOTION_DEBUG = (() => {
   }
 })()
 
-// «Ver con animaciones» (MotionNotice / MotionToggle) queda guardado en el
-// navegador y vale para todo ScrollLab: se aplica antes del primer render para
-// que las secciones arranquen ya con ese modo.
+// Movimiento completo para todo el que entra (src/lib/motionOverride.js), salvo
+// quien eligió «Animaciones: No» (MotionToggle): se aplica antes del primer
+// render para que las secciones arranquen ya con ese modo.
 bootMotionOverride()
 
 function ScrollToTop() {
@@ -141,7 +140,6 @@ export default function App() {
             <WelcomeCouponSync />
             <ScrollToTop />
             <CartToast />
-            <MotionNotice />
             {SHOW_MOTION_DEBUG ? (
               <Suspense fallback={null}>
                 <MotionDebug />

@@ -163,7 +163,8 @@ async function main() {
         await page.addInitScript(
           ([k, v]) => {
             localStorage.setItem(k, v)
-            localStorage.setItem('scrolllab-motion-notice', '1')
+            // El market muestra todo con movimiento por defecto: acá se pide la calma.
+            localStorage.setItem('scrolllab-motion', 'calm')
           },
           ['builder-composition-v1', JSON.stringify([{ uid: 'f', sectionId: form.id, props: { endpoint: EP, ...form.props } }])],
         )

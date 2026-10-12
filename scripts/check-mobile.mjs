@@ -693,15 +693,16 @@ async function auditJob(browser, base, job, opts) {
   })
   await context.addInitScript(installBlockHelpers)
   await context.addInitScript(installPageHelpers)
-  await context.addInitScript(() => {
+  await context.addInitScript((calm) => {
     try {
       sessionStorage.setItem('scrolllab-splash-seen', '1')
-      // El aviso «Ver con animaciones» (MotionNotice) tapa controles y capturas.
-      localStorage.setItem('scrolllab-motion-notice', '1')
+      // El market muestra todo con movimiento por defecto, también con «reducir
+      // movimiento» en el dispositivo: la versión calma se pide a mano.
+      if (calm) localStorage.setItem('scrolllab-motion', 'calm')
     } catch {
       /* ignore */
     }
-  })
+  }, reduced)
   await routeGoogleFonts(context)
 
   const page = await context.newPage()

@@ -239,7 +239,7 @@ npm run check:paddle-e2e # Paddle de punta a punta: Chromium + ventana de pago r
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 npm run check:mobile   # cada sección de los 10 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
 npm run check:motion   # emulador de teléfono: gestos táctiles reales, CPU ×4, 10 templates + home, normal / reduce / forced (huecos, trabas, texto oculto)
-npm run check:motion-notice # el aviso «Ver con animaciones»: una sola vez, el botón anda, el toggle del header (Chromium)
+npm run check:motion-notice # movimiento completo por defecto (también con «reducir» en el dispositivo): sin pregunta, la fila «Animaciones», el tema a la vista, storage bloqueado (Chromium)
 npm run check:parity   # PC ↔ teléfono ↔ tablet por sección: ScrollTriggers, tamaño del efecto, canvas, listeners de puntero, blur pesado (dev server, Chromium)
 npm run images         # WebP + srcset de las fotos de los templates desde design/masters/<sku>/
 ```
@@ -283,29 +283,41 @@ con la variante `calm:` (`h-[400vh] calm:h-auto`), y el JS tiene una rama calma
 (`calmReveal` / `calmCount`) en vez de un `return` temprano. `npm run check:motion`
 lo mide (huecos, trabas, texto oculto) con gestos táctiles reales.
 
-«Ver con animaciones» (`MotionNotice` / `MotionToggle`, solo market, no viaja en el
-ZIP) deja ver la demo completa **sin tocar el ajuste del dispositivo** (la web solo
-lo lee):
+**Movimiento completo para todo el que entra al market** (decisión del dueño,
+2026-10-12: «el usuario sea el que sea, apenas entre con el celular o la PC, debe ver
+todo con movimiento»). Con «reducir movimiento» prendido en el dispositivo (en Android
+suele venir del ahorro de batería) el market igual corre la demo completa; la versión
+calma de arriba queda para quien la pide y para el ZIP y los widgets de LAB, donde
+manda el ajuste del visitante. No se pregunta nada al entrar. Solo market (no viaja
+en el ZIP); **no cambia ningún ajuste del dispositivo** (la web solo lo lee):
 
-- Se pregunta **una sola vez, en total**. La respuesta (`scrolllab-motion`) y el «ya
-  te lo mostré» (`scrolllab-motion-notice`) viven en `localStorage`; después se
-  cambia desde el header (`MotionToggle`, visible solo si el dispositivo pide reducir).
-  No lo vuelvas a preguntar por pestaña, por template ni al navegar.
-- Con `full`, `src/lib/motionOverride.js` pone `<html data-motion="full">` y reescribe
-  `window.matchMedia`: `prefers-reduced-motion` da «sin preferencia» para TODO lo que
-  corre en el market, incluidas las secciones que leen el ajuste directo y
-  `gsap.matchMedia`. Por eso una sección nueva puede leer
-  `matchMedia('(prefers-reduced-motion: reduce)')` sin romper el botón.
+- `src/lib/motionOverride.js` es `full` por defecto: pone `<html data-motion="full">`
+  y reescribe `window.matchMedia`, de modo que `prefers-reduced-motion` da «sin
+  preferencia» para TODO lo que corre en el market, incluidas las secciones que leen
+  el ajuste directo y `gsap.matchMedia`. Una sección nueva puede leer
+  `matchMedia('(prefers-reduced-motion: reduce)')` sin romper esto.
+- La salida para quien necesita menos movimiento: `MotionToggle`, fila «Animaciones ·
+  Sí / No» (con texto) en el menú de preferencias del header y en el menú del teléfono;
+  solo aparece si el dispositivo pide reducir. «No» guarda `scrolllab-motion=calm` en
+  `localStorage`, recarga y desde ahí manda el ajuste del dispositivo. El tema, en
+  cambio, va siempre a la vista en el header (`ThemeToggle`).
 - **CSS**: una regla `@media (prefers-reduced-motion: reduce)` escrita a mano tiene que
   llevar `:where(:root:not([data-motion='full']))` adelante (o usar `calm:`), porque
   el CSS no pasa por `matchMedia`. En el ZIP y en el embed `data-motion` no existe y
   queda igual que siempre.
-- Para saber qué pide el dispositivo de verdad (aviso, toggle) usá
-  `deviceWantsLessMotion()`, no `matchMedia`: con el botón puesto esta última miente
+- Para saber qué pide el dispositivo de verdad (mostrar el toggle) usá
+  `deviceWantsLessMotion()`, no `matchMedia`: con el modo completo esta última miente
   a propósito.
-- `MOTION=forced npm run check:motion` verifica que, con «reducir movimiento» + el
-  botón, cada página quede **igual que sin reducir** (alto y ScrollTrigger vivos);
-  una sección que ignore el botón sale como `override-ignored`.
+- Probar la versión calma en el market: guardar `scrolllab-motion=calm` además de
+  emular «reducir movimiento» (los chequeos `check:*` ya lo hacen). Sin esa clave
+  el market corre completo.
+- `MOTION=forced npm run check:motion` verifica que, con «reducir movimiento» en el
+  dispositivo y sin tocar nada, cada página quede **igual que sin reducir** (alto y
+  ScrollTrigger vivos); una sección que ignore el override sale como
+  `override-ignored`. `npm run check:motion-notice` cubre el default, la fila y el
+  storage bloqueado.
+- Lo único que queda por conexión, no por preferencia: APEX no baja el film de 10 MB
+  con Ahorro de datos activo o en 2G (`filmShouldStay`, Hero de APEX).
 
 ### Paridad con PC — lo que anima el mouse, lo anima el dedo
 

@@ -236,8 +236,9 @@ async function main() {
       await page.addInitScript(
         ([k, v]) => {
           localStorage.setItem(k, v)
-          // Sin el aviso de «Ver con animaciones»: tapa la sección.
-          localStorage.setItem('scrolllab-motion-notice', '1')
+          // El market muestra todo con movimiento por defecto: acá se pide la
+          // versión calma (texto plano, sin SplitText) a mano.
+          localStorage.setItem('scrolllab-motion', 'calm')
         },
         [STORAGE_KEY, JSON.stringify([{ uid: 'c1', sectionId: id, props }])],
       )

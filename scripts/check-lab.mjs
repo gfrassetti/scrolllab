@@ -165,6 +165,14 @@ try {
     reducedMotion: 'reduce', // texto plano: sin SplitText
     locale: 'es-AR',
   })
+  // El market muestra todo con movimiento por defecto: la calma se pide a mano.
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('scrolllab-motion', 'calm')
+    } catch {
+      /* ignore */
+    }
+  })
   const login = await context.request.post(`${BASE}/api/auth/dev-login`, {
     data: { email: 'check-lab@test.com' },
   })

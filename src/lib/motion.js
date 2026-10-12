@@ -7,7 +7,7 @@
  * que cuentan; carruseles que se deslizan con el dedo; y nunca un contenedor
  * alto vacío. Las secciones preguntan acá en vez de leer el media query
  * directo, porque la página puede pedir el movimiento completo con
- * `<html data-motion="full">` (el botón «Ver con animaciones» de las demos).
+ * `<html data-motion="full">` (el modo completo del market, por defecto: src/lib/motionOverride.js).
  *
  * En CSS, la variante `calm:` (src/styles/tpl.css) sigue la misma regla:
  *
