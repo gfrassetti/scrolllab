@@ -594,12 +594,24 @@ poster is the hero.
 
 \`Showroom.jsx\` loads \`public/apex/showroom/showroom.glb\` (the room, light baked into
 its textures) and one GLB per car (\`car-1.glb\` …), Draco-compressed (decoder in
-\`public/apex/draco/\`). To use your own cars: a real-size model (4–6 m), standing on the
-floor (origin at the bottom centre), front toward −Z, exported with Draco and 2048 px
-WebP textures; pass its URL in \`cars[].modelUrl\`. The room's source is
-\`design/blender/apex-showroom.blend\`: change it, bake (Cycles → Bake → Combined, no
-glossy) and export \`showroom.glb\` the same way. With "reduce motion" or no WebGL the
-section shows \`cars[].image\` (a side shot) with the spec cards.
+\`public/apex/draco/\`). Each plinth takes any GLB (\`cars[].modelUrl\`): a car, a
+motorbike, a chair, a product. \`fitToPlinth\` lays its long side along the plinth,
+centres it and stands it on the floor; a model that is not car-sized (3.5–6.2 m) is
+scaled to fill the plinth. A real-size car (metres, front toward −Z) is left as it is.
+Export with Draco and 2048 px WebP textures.
+
+The room can be any GLB (\`sceneUrl\`): a gallery, a garage, a landscape, a studio.
+The section measures it (centre, size and floor from its walls: meshes taller than
+half a metre) and lays the camera's walk over it: in from the +Z side, a stop at each
+station, out again. To choose where the objects stand, add three empties named
+\`Spot_1\`, \`Spot_2\`, \`Spot_3\` at floor (or plinth) height; without them they stand on
+a circle around the centre, scaled to the room (in a room under ~16 m everything
+shrinks with it). A room with baked light (materials named \`*_baked\`, like the demo's
+\`design/blender/apex-showroom.blend\`) is drawn as baked and reflected in the objects;
+any other room gets real lights and studio reflections. \`showRoom: 'off'\` loads no
+room at all (a neutral stage in the section's colours); \`showCars: 'off'\` walks the
+room alone. With "reduce motion" or no WebGL the section shows \`poster\` and
+\`cars[].image\` (side shots) with the spec cards.
 
 The gallery and the model list read their pictures from
 \`src/components/sections/apex/assets/\` (or any \`image\` prop).

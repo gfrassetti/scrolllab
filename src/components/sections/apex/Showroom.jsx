@@ -18,7 +18,14 @@ import { showroom1, showroom2, showroom3, showroomEntry, variants } from './asse
  *
  *  - Assets: `sceneUrl` (the room) and one GLB per car (`modelUrl`), Draco
  *    compressed; the decoder is in /public/apex/draco/.
- *  - The cars stand on the three plinths in order; up to three.
+ *  - The cars stand on the three plinths in order; up to three. Any object
+ *    works (a motorbike, a chair, a product): `fitToPlinth` lays its long
+ *    side along the plinth, stands it on the floor and scales whatever is
+ *    not car-sized to fill the plinth.
+ *  - The room can be any GLB (`sceneUrl`): `readLayout` measures it and the
+ *    camera's walk is laid over it (empties named Spot_1…3 say where the
+ *    objects stand). `showRoom` off: a neutral stage instead of a room;
+ *    `showCars` off: the room alone.
  *  - Calm (reduce motion) or no WebGL: the same story as stills (rendered in
  *    Blender) with the spec cards. Never a hole.
  *  - The scene loads only when the section is a screen and a half away.
@@ -39,11 +46,111 @@ const HOLD = 1.1
 const TRAVEL = 0.9
 const EXIT = 1.5
 
-// The room (metres, three.js axes, the door on +Z). Stations: angle around
-// the centre measured from +Z toward +X, all on a 5 m circle.
+// The demo room (metres, three.js axes, the door on +Z): 10.5 m radius, three
+// plinths 5 m out. Stations: angle around the centre measured from +Z toward +X.
+const DEMO_ROOM_R = 10.5
 const STATION_PHI = [Math.PI, (-60 * Math.PI) / 180, (60 * Math.PI) / 180]
 const STATION_R = 5
 const PLINTH_TOP = 0.14
+// What the camera frames at a plinth: a car (3.5–6.2 m long) is left at its
+// real size; anything else is scaled to FIT_LENGTH, and nothing gets taller
+// than FIT_HEIGHT (the light panel hangs above). In a smaller room all of it
+// shrinks with the room (layout.s).
+const CAR_LENGTH = [3.5, 6.2]
+const FIT_LENGTH = 4.8
+const FIT_HEIGHT = 2.6
+const FRAME_WIDTH = 5.8
+
+/**
+ * Where things stand, read from whatever room was loaded:
+ *  - our room (or one edited from its .blend: it still has SR_Walls) → the
+ *    demo plan, exactly;
+ *  - no room (showRoom off) → the demo plan on a neutral stage;
+ *  - any other room → measured: centre and radius from its walls (meshes taller
+ *    than half a metre), floor at their foot, and the plinths either where the
+ *    model says (empties named Spot_1, Spot_2, Spot_3) or on the demo's three
+ *    angles, scaled to the room.
+ * `s` scales what is car-sized (≤ 1: a big hall keeps real-size cars), `sr`
+ * scales the walk in and out (the room's own size).
+ */
+function readLayout(THREE, room) {
+  const demo = (y) => ({
+    cx: 0,
+    cz: 0,
+    floor: 0,
+    r: DEMO_ROOM_R,
+    s: 1,
+    sr: 1,
+    stations: STATION_PHI.map((phi) => ({ phi, r: STATION_R, y })),
+  })
+  if (!room) return demo(PLINTH_TOP)
+  let ours = false
+  const spots = []
+  room.updateMatrixWorld(true)
+  room.traverse((node) => {
+    if (node.name === 'SR_Walls') ours = true
+    const m = /^spot[\s_.-]*(\d+)/i.exec(node.name)
+    if (m) spots.push({ n: Number(m[1]), p: node.getWorldPosition(new THREE.Vector3()) })
+  })
+  if (ours && !spots.length) return demo(PLINTH_TOP)
+
+  const walls = new THREE.Box3()
+  const part = new THREE.Box3()
+  const size = new THREE.Vector3()
+  room.traverse((node) => {
+    if (!node.isMesh) return
+    part.setFromObject(node)
+    part.getSize(size)
+    if (size.y > 0.5) walls.union(part)
+  })
+  if (walls.isEmpty()) walls.setFromObject(room)
+  const centre = walls.getCenter(new THREE.Vector3())
+  walls.getSize(size)
+  const r = Math.max(0.5, Math.min(size.x, size.z) / 2)
+  // Cars keep their real size down to a ~16 m room; below that, everything shrinks with it.
+  const s = Math.min(1, Math.max(0.05, (1.3 * r) / DEMO_ROOM_R))
+  const floor = walls.min.y
+  const fromSpots = spots
+    .sort((a, b) => a.n - b.n)
+    .slice(0, 3)
+    .map(({ p }) => ({ phi: Math.atan2(p.x - centre.x, p.z - centre.z), r: Math.hypot(p.x - centre.x, p.z - centre.z), y: p.y }))
+  // Always three stations: the model's spots first, the demo's angles after.
+  const stations = [0, 1, 2].map((k) => fromSpots[k] || { phi: STATION_PHI[k], r: STATION_R * Math.min(1, r / DEMO_ROOM_R), y: floor })
+  return { cx: centre.x, cz: centre.z, floor, r, s, sr: r / DEMO_ROOM_R, stations }
+}
+
+/**
+ * Puts any model on a plinth: long side along Z (the plinth's length), centred,
+ * standing on the floor, at a size the camera can frame.
+ */
+function fitToPlinth(THREE, object, s = 1) {
+  const box = new THREE.Box3()
+  const size = new THREE.Vector3()
+  const measure = () => {
+    object.updateMatrixWorld(true)
+    box.setFromObject(object)
+    box.getSize(size)
+  }
+  measure()
+  if (size.x > size.z * 1.15) {
+    object.rotation.y += Math.PI / 2
+    measure()
+  }
+  const length = Math.max(size.x, size.z)
+  if (!(length > 0)) return
+  // A real-size car keeps its size (shrunk with a small room, all by the same
+  // factor); anything else is scaled to a car's length.
+  let k = length >= CAR_LENGTH[0] && length <= CAR_LENGTH[1] ? s : (FIT_LENGTH * s) / length
+  if (size.y * k > FIT_HEIGHT * s) k = (FIT_HEIGHT * s) / size.y
+  if (k !== 1) {
+    object.scale.multiplyScalar(k)
+    measure()
+  }
+  const centre = box.getCenter(new THREE.Vector3())
+  object.position.x -= centre.x
+  object.position.z -= centre.z
+  object.position.y -= box.min.y
+}
 
 const specRows = (text) =>
   String(text || '')
@@ -52,29 +159,46 @@ const specRows = (text) =>
     .filter((r) => r[0])
     .map(([label, value = '']) => ({ label, value }))
 
-/** Camera keyframes in polar form around the room centre: { s (screens), cam: [phi, r, y], look: [phi, r, y] }. */
-function buildKeys(count, camR = 1.4) {
-  const deg = (d) => (d * Math.PI) / 180
+/** Scroll length of the tour, in screens. */
+const tourLength = (count) => APPROACH + count * HOLD + Math.max(0, count - 1) * TRAVEL + EXIT
+
+/**
+ * Camera keyframes in polar form around the room centre:
+ * { s (screens), cam: [phi, r, y], look: [phi, r, y] } — y is absolute.
+ * In from +Z (the door), a stop beside each station looking across the room
+ * at it (`need`: how far back the camera has to be for a car-wide frame),
+ * then back to the wall, round to the door and out.
+ */
+function buildKeys(L, count, need = 7.5) {
+  const TAU = Math.PI * 2
+  const { s: k, sr, floor } = L
   const keys = []
-  const look = (k) => [deg(180 + 120 * k), STATION_R, 0.78]
-  const cam = (k) => [deg(360 + 120 * k), camR, 1.3]
-  keys.push({ s: 0, cam: [deg(360), 30, 9], look: [deg(180), 1.5, 1.4] })
-  keys.push({ s: APPROACH * 0.55, cam: [deg(360), 11.2, 1.7], look: [deg(180), 2.5, 1.1] })
+  keys.push({ s: 0, cam: [TAU, 30 * sr, floor + 9 * sr], look: [Math.PI, 1.5 * sr, floor + 1.4 * sr] })
+  keys.push({ s: APPROACH * 0.55, cam: [TAU, 11.2 * sr, floor + 1.7 * sr], look: [Math.PI, 2.5 * sr, floor + 1.1 * sr] })
   let s = APPROACH
-  for (let k = 0; k < count; k += 1) {
-    if (k > 0) s += TRAVEL
-    keys.push({ s, cam: cam(k), look: look(k) })
+  let camPhi = TAU
+  for (let i = 0; i < count; i += 1) {
+    const st = L.stations[i]
+    // The camera stands across the centre from the station; its angle only
+    // ever grows, so it turns round the room one way.
+    const raw = st.phi + Math.PI
+    camPhi = i === 0 ? raw + TAU * Math.round((TAU - raw) / TAU) : camPhi + ((((raw - camPhi) % TAU) + TAU) % TAU)
+    const camR = Math.min(4.6 * k, Math.max(1.4 * k, need - st.r))
+    const cam = [camPhi, camR, st.y + 1.16 * k]
+    const look = [camPhi - Math.PI, st.r, st.y + 0.64 * k]
+    if (i > 0) s += TRAVEL
+    keys.push({ s, cam, look })
     s += HOLD
-    keys.push({ s, cam: cam(k), look: look(k) })
+    keys.push({ s, cam, look })
   }
-  // Leaving: step back to the wall and look over all the cars, follow the
-  // wall round to the door with the eyes on the room, then back out of it.
-  const lastCam = 360 + 120 * (count - 1)
-  const door = Math.max(lastCam + 60, Math.ceil((lastCam + 1) / 360) * 360)
-  keys.push({ s: s + EXIT * 0.3, cam: [deg(lastCam), 7.6, 2.5], look: [deg(lastCam + 180), 0, 1.0] })
-  keys.push({ s: s + EXIT * 0.65, cam: [deg(door), 8.8, 2.1], look: [deg(door + 180), 0, 0.9] })
-  keys.push({ s: s + EXIT, cam: [deg(door), 24, 7], look: [deg(door + 180), 0, 1.2] })
-  return { keys, total: s + EXIT }
+  // Leaving: step back to the wall and look over the room, follow the wall
+  // round to the door with the eyes on the room, then back out of it.
+  const last = count ? camPhi : TAU
+  const door = Math.max(last + Math.PI / 3, Math.ceil((last + 1e-3) / TAU) * TAU)
+  keys.push({ s: s + EXIT * 0.3, cam: [last, 7.6 * sr, floor + 2.5 * sr], look: [last + Math.PI, 0, floor + 1.0 * sr] })
+  keys.push({ s: s + EXIT * 0.65, cam: [door, 8.8 * sr, floor + 2.1 * sr], look: [door + Math.PI, 0, floor + 0.9 * sr] })
+  keys.push({ s: s + EXIT, cam: [door, 24 * sr, floor + 7 * sr], look: [door + Math.PI, 0, floor + 1.2 * sr] })
+  return keys
 }
 
 const smooth = (t) => t * t * (3 - 2 * t)
@@ -91,14 +215,16 @@ function poseAt(keys, s) {
   }
   return keys[keys.length - 1]
 }
-const polar = ([phi, r, y], out) => out.set(Math.sin(phi) * r, y, Math.cos(phi) * r)
+const polar = ([phi, r, y], L, out) => out.set(L.cx + Math.sin(phi) * r, y, L.cz + Math.cos(phi) * r)
 
 export default function Showroom({
   eyebrow = 'Section label',
   title = 'Headline 1',
   intro = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   cars,
-  sceneUrl = '/apex/showroom/showroom.glb',
+  sceneUrl,
+  showRoom = 'on',
+  showCars = 'on',
   poster,
   dracoPath = '/apex/draco/',
   dragLabel = 'Drag',
@@ -114,7 +240,7 @@ export default function Showroom({
   const stickyRef = useRef(null)
   const canvasRef = useRef(null)
   const cursorRef = useRef(null)
-  const stateRef = useRef({ progress: 0, inspecting: false, active: -1, camR: 1.4 })
+  const stateRef = useRef({ progress: 0, inspecting: false, active: -1 })
   const [calm] = useState(() => typeof window !== 'undefined' && prefersReducedMotion())
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -133,12 +259,15 @@ export default function Showroom({
         }))
         .filter((c) => c.modelUrl)
     : []
-  const list = edited.length ? edited : DEFAULT_CARS
-  const { keys, total } = buildKeys(list.length, stateRef.current.camR)
+  // Off: only the room, the camera still walks past the three stations.
+  const list = showCars === 'off' ? [] : edited.length ? edited : DEFAULT_CARS
+  const stops = list.length || 3
+  const total = tourLength(stops)
+  // Off: no room, a neutral stage (floor, three plinths, studio reflections).
+  const roomUrl = showRoom === 'off' ? '' : sceneUrl || '/apex/showroom/showroom.glb'
   const posterSrc = poster || showroomEntry
   const still = calm || failed
-  const keysRef = useRef(keys)
-  keysRef.current = keys
+  const keysRef = useRef([])
   const carsKey = list.map((c) => c.modelUrl).join('|')
 
   // Scroll → progress (0..1 over the pinned stretch).
@@ -166,11 +295,12 @@ export default function Showroom({
 
     const boot = async () => {
       const THREE = await import('three')
-      const [{ GLTFLoader }, { DRACOLoader }, { Reflector }, { RectAreaLightUniformsLib }] = await Promise.all([
+      const [{ GLTFLoader }, { DRACOLoader }, { Reflector }, { RectAreaLightUniformsLib }, { RoomEnvironment }] = await Promise.all([
         import('three/examples/jsm/loaders/GLTFLoader.js'),
         import('three/examples/jsm/loaders/DRACOLoader.js'),
         import('three/examples/jsm/objects/Reflector.js'),
         import('three/examples/jsm/lights/RectAreaLightUniformsLib.js'),
+        import('three/examples/jsm/environments/RoomEnvironment.js'),
       ])
       RectAreaLightUniformsLib.init()
       if (disposed) return
@@ -182,46 +312,106 @@ export default function Showroom({
       renderer.outputColorSpace = THREE.SRGBColorSpace
       renderer.toneMapping = THREE.AgXToneMapping
       renderer.toneMappingExposure = 1.3
+      const ink = new THREE.Color(bg || '#020306')
       const scene = new THREE.Scene()
-      scene.background = new THREE.Color('#020306')
-      scene.fog = new THREE.Fog('#020306', 18, 46)
+      scene.background = ink
       const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 120)
 
       const draco = new DRACOLoader().setDecoderPath(dracoPath)
       const loader = new GLTFLoader().setDRACOLoader(draco)
       const load = (url) => new Promise((resolve, reject) => loader.load(url, (g) => resolve(g.scene), undefined, reject))
 
-      const [room, ...carScenes] = await Promise.all([load(sceneUrl), ...list.map((c) => load(c.modelUrl))])
+      // A model that does not load (a wrong URL) leaves its plinth empty; only
+      // a room that does not load drops the section to its still version.
+      const [room, ...carScenes] = await Promise.all([
+        roomUrl ? load(roomUrl) : null,
+        ...list.map((c) => load(c.modelUrl).catch(() => new THREE.Group())),
+      ])
       draco.dispose()
       if (disposed) return
 
-      // Baked parts are drawn as they came out of Blender (light already in the texture).
-      let floor = null
-      room.traverse((node) => {
-        if (!node.isMesh) return
-        const m = node.material
-        const name = `${m?.name || ''} ${node.name}`
-        if (/_baked/.test(name)) {
-          const map = m.map || m.emissiveMap
-          node.material = new THREE.MeshBasicMaterial({ map, toneMapped: false })
-          if (/SR_Floor/.test(name)) floor = node
-        } else if (/Glass/i.test(name)) {
-          node.material = new THREE.MeshBasicMaterial({ color: '#0b1220', transparent: true, opacity: 0.18, depthWrite: false })
-        } else if (m?.emissive) {
-          m.emissiveIntensity = 2.2
-        }
-      })
-      scene.add(room)
+      const L = readLayout(THREE, room)
+      scene.fog = new THREE.Fog(ink, 18 * L.sr, 46 * Math.max(1, L.sr))
+      camera.near = 0.05 * L.s
+      camera.far = 120 * Math.max(1, L.sr)
 
-      // Reflections in the paint: the room itself, rendered once into an environment map.
+      // The room. Baked parts are drawn as they came out of Blender (light
+      // already in the texture); a room without baked light gets real lights.
+      let floor = null
+      let baked = 0
+      if (room) {
+        room.traverse((node) => {
+          if (!node.isMesh) return
+          const m = node.material
+          const name = `${m?.name || ''} ${node.name}`
+          if (/_baked/.test(name)) {
+            baked += 1
+            const map = m.map || m.emissiveMap
+            node.material = new THREE.MeshBasicMaterial({ map, toneMapped: false })
+            if (/SR_Floor/.test(name)) floor = node
+          } else if (/Glass/i.test(name)) {
+            node.material = new THREE.MeshBasicMaterial({ color: '#0b1220', transparent: true, opacity: 0.18, depthWrite: false })
+          } else if (m?.emissive) {
+            m.emissiveIntensity = 2.2
+          }
+        })
+        // A room without baked light: the studio reflections are for the
+        // objects; on the room's own surfaces they would wash it out.
+        if (!baked) {
+          room.traverse((node) => {
+            if (node.isMesh && node.material && 'envMapIntensity' in node.material) node.material.envMapIntensity = 0.35
+          })
+        }
+        scene.add(room)
+      } else {
+        // No room: a floor and three plinths with a line of light, in the
+        // section's colours. Matte (Lambert): the area lights over the plinths
+        // would paint a grey sheen over a glossy floor; the mirror gives the gloss.
+        const stageFloor = new THREE.Mesh(
+          new THREE.CircleGeometry(L.r, 96),
+          new THREE.MeshLambertMaterial({ color: ink.clone().offsetHSL(0, 0, 0.02) }),
+        )
+        stageFloor.rotation.x = -Math.PI / 2
+        scene.add(stageFloor)
+        floor = stageFloor
+        const plinthMat = new THREE.MeshLambertMaterial({ color: ink.clone().offsetHSL(0, 0, 0.05) })
+        const lineMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(fg || '#e8edf6'), toneMapped: false })
+        L.stations.forEach((st) => {
+          const x = L.cx + Math.sin(st.phi) * st.r
+          const z = L.cz + Math.cos(st.phi) * st.r
+          const plinth = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, PLINTH_TOP, 96), plinthMat)
+          plinth.position.set(x, PLINTH_TOP / 2, z)
+          const line = new THREE.Mesh(new THREE.TorusGeometry(3.005, 0.012, 8, 160), lineMat)
+          line.rotation.x = Math.PI / 2
+          line.position.set(x, PLINTH_TOP - 0.02, z)
+          scene.add(plinth, line)
+        })
+      }
+
+      // Reflections in the paint: our room, rendered once into an environment
+      // map (its light rings show in the cars); any other room or none, a
+      // neutral studio.
       const pmrem = new THREE.PMREMGenerator(renderer)
-      const envScene = new THREE.Scene()
-      envScene.add(room.clone())
-      const env = pmrem.fromScene(envScene, 0.03).texture
+      let env
+      if (room && baked) {
+        const envScene = new THREE.Scene()
+        envScene.add(room.clone())
+        env = pmrem.fromScene(envScene, 0.03).texture
+      } else {
+        const studio = new RoomEnvironment()
+        env = pmrem.fromScene(studio, 0.04).texture
+        studio.traverse((n) => n.geometry?.dispose?.())
+      }
       scene.environment = env
       pmrem.dispose()
+      if (room && !baked) {
+        scene.add(new THREE.HemisphereLight('#ffffff', '#30343c', 0.55))
+        const sun = new THREE.DirectionalLight('#ffffff', 0.9)
+        sun.position.set(L.cx + 4 * L.sr, L.floor + 9 * L.sr, L.cz + 6 * L.sr)
+        scene.add(sun)
+      }
 
-      // Glossy floor: a mirror under the baked floor (desktop only).
+      // Glossy floor: a mirror under the floor (desktop only).
       let mirror = null
       if (!phone && showReflections !== 'off' && floor) {
         mirror = new Reflector(new THREE.CircleGeometry(10, 96), {
@@ -236,13 +426,18 @@ export default function Showroom({
         floor.material.opacity = 0.86
       }
 
-      // Cars on their plinths, side on to the centre (length tangent to the circle).
+      // The objects on their stations, side on to the centre (length tangent to the circle).
       const turn = []
+      let longest = 0
+      const measured = new THREE.Box3()
       carScenes.forEach((car, k) => {
+        const st = L.stations[k]
         const holder = new THREE.Group()
-        const phi = STATION_PHI[k]
-        holder.position.set(Math.sin(phi) * STATION_R, PLINTH_TOP, Math.cos(phi) * STATION_R)
-        holder.rotation.y = phi + Math.PI / 2
+        holder.position.set(L.cx + Math.sin(st.phi) * st.r, st.y, L.cz + Math.cos(st.phi) * st.r)
+        holder.rotation.y = st.phi + Math.PI / 2
+        fitToPlinth(THREE, car, L.s)
+        const fitted = measured.setFromObject(car).getSize(new THREE.Vector3())
+        longest = Math.max(longest, fitted.x, fitted.z)
         car.traverse((node) => {
           if (!node.isMesh || !node.material) return
           const m = node.material
@@ -264,21 +459,21 @@ export default function Showroom({
         turn.push({ holder, base: holder.rotation.y, offset: 0, target: 0, vel: 0 })
       })
 
-      // A soft light panel over each plinth (the area lights of the Blender
+      // A soft light panel over each station (the area lights of the Blender
       // scene): it lights the paint and draws a long highlight on the roof.
       scene.add(new THREE.HemisphereLight('#9fb8ff', '#05070a', 0.25))
-      STATION_PHI.slice(0, carScenes.length).forEach((phi, k) => {
-        const x = Math.sin(phi) * STATION_R
-        const z = Math.cos(phi) * STATION_R
-        const panel = new THREE.RectAreaLight('#eef3ff', 7, 5.6, 2.4)
-        panel.position.set(x, 4.1, z)
-        panel.lookAt(x, 0, z)
-        panel.rotation.z = phi + Math.PI / 2 - (k === 0 ? 0 : 0)
+      L.stations.slice(0, carScenes.length).forEach((st) => {
+        const x = L.cx + Math.sin(st.phi) * st.r
+        const z = L.cz + Math.cos(st.phi) * st.r
+        const panel = new THREE.RectAreaLight('#eef3ff', 7, 5.6 * L.s, 2.4 * L.s)
+        panel.position.set(x, st.y + 3.96 * L.s, z)
+        panel.lookAt(x, st.y, z)
+        panel.rotation.z = st.phi + Math.PI / 2
         scene.add(panel)
         // a low rim from the room centre so the flank facing the camera reads
-        const rim = new THREE.RectAreaLight('#dfe8ff', 2.2, 4.5, 1.2)
-        rim.position.set(x * 0.35, 1.4, z * 0.35)
-        rim.lookAt(x, 0.8, z)
+        const rim = new THREE.RectAreaLight('#dfe8ff', 2.2, 4.5 * L.s, 1.2 * L.s)
+        rim.position.set(L.cx + (x - L.cx) * 0.35, st.y + 1.26 * L.s, L.cz + (z - L.cz) * 0.35)
+        rim.lookAt(x, st.y + 0.66 * L.s, z)
         scene.add(rim)
       })
 
@@ -292,10 +487,9 @@ export default function Showroom({
         camera.fov = camera.aspect < 0.8 ? 60 : camera.aspect < 1.2 ? 52 : 42
         camera.updateProjectionMatrix()
         const half = Math.atan(Math.tan((camera.fov * Math.PI) / 360) * camera.aspect)
-        const need = (5.8 / 2) / Math.tan(half)
-        const camR = Math.min(4.6, Math.max(1.4, need - STATION_R))
-        stateRef.current.camR = camR
-        keysRef.current = buildKeys(list.length, camR).keys
+        // The frame holds the longest object on show (a car-wide frame at least).
+        const need = Math.max(FRAME_WIDTH * L.s, longest * 1.04) / 2 / Math.tan(half)
+        keysRef.current = buildKeys(L, stops, need)
         if (camera.aspect < 0.8) camera.setViewOffset(w, h, 0, Math.round(h * 0.17), w, h)
         else camera.clearViewOffset()
       }
@@ -319,8 +513,8 @@ export default function Showroom({
         const st = stateRef.current
         const s = st.progress * keysRef.current.reduce((m, k) => Math.max(m, k.s), 0)
         const pose = poseAt(keysRef.current, s)
-        polar(pose.cam, wantPos)
-        polar(pose.look, wantLook)
+        polar(pose.cam, L, wantPos)
+        polar(pose.look, L, wantLook)
         if (first) {
           camPos.copy(wantPos)
           camLook.copy(wantLook)
@@ -431,7 +625,7 @@ export default function Showroom({
       near.disconnect()
       cleanup()
     }
-  }, [still, sceneUrl, dracoPath, carsKey, showReflections]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [still, roomUrl, dracoPath, carsKey, stops, showReflections, bg, fg]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Which car the camera is standing at (drives the card, the cursor and Close).
   useEffect(() => {
@@ -478,6 +672,7 @@ export default function Showroom({
             <h2 className="mt-3 text-[1.6rem] md:text-[clamp(2rem,5vw,4.5rem)] leading-[0.98] font-medium tracking-[-0.035em]" style={DISPLAY}>{title}</h2>
           </div>
         </div>
+        {intro ? <p className="max-w-[40ch] px-[5vw] pt-8 text-[14px] leading-[1.5] opacity-80 md:px-[2.4vw] md:text-[max(14px,1vw)]">{intro}</p> : null}
         {list.map((c, i) => (
           <article key={i} className="grid gap-6 px-[5vw] py-10 md:grid-cols-12 md:px-[2.4vw]">
             <img {...imgAttrs(c.image, variants)} sizes="(min-width: 768px) 66vw, 100vw" alt={c.name} loading="lazy" className="aspect-[16/9] w-full object-cover md:col-span-8" />

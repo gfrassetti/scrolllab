@@ -64,6 +64,7 @@ const NOT_IN_DOM = {
   'apex/Hero.posterMobile': 'el póster del teléfono solo se pone en el video con el viewport angosto',
   'apex/Showroom.loadingLabel': 'estado: se ve solo mientras baja la sala 3D',
   'apex/Showroom.cars.image': 'la foto de costado solo se usa sin WebGL o con «reducir movimiento»',
+  'apex/Showroom.cars.modelUrl': 'el modelo 3D se dibuja en el canvas: no queda como texto ni como atributo',
   'apex/Gallery.slides.caption': 'cada imagen tiene su texto y solo se ve el de la imagen activa',
   'apex/Footer.sendingLabel': 'estado del newsletter: aparece al enviar',
   'apex/Footer.successMessage': 'estado del newsletter: aparece al enviar',

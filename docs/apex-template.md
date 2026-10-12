@@ -241,8 +241,32 @@ lados alternados. Hosteable en LAB (FLOW).
    siguiente; subir, al anterior.
 7. **Calma / sin WebGL:** fotos de costado renderizadas en Blender con las mismas fichas.
 8. **Builder sí, LAB no** (decisión del dueño): 10–20 MB de escena y un scroll fijado no van en
-   el sitio de un cliente. Campos: autos (nombre, GLB, foto, ficha), sala (GLB), póster, textos,
-   reflejo on/off, colores; ayuda con cómo exportar desde Blender.
+   el sitio de un cliente. Campos: primero la sala (GLB, «reemplaza el salón entero») y su póster,
+   después las plataformas (nombre, GLB, foto, ficha), textos, reflejo on/off, colores.
+
+   **La sala puede ser cualquier .glb** (`readLayout`):
+   - Nuestra sala, o una editada desde su `.blend` (todavía tiene `SR_Walls`), usa el plano
+     de la demo exacto.
+   - Cualquier otra se mide: centro, radio y piso salen de sus paredes (mallas de más de
+     0,5 m de alto). El recorrido de la cámara se arma sobre esa medida (sus coordenadas
+     polares se escalan con la sala). Las plataformas van donde digan tres vacíos
+     `Spot_1…3`; sin ellos, en círculo con los ángulos de la demo.
+   - En una sala de menos de ~16 m los objetos se achican todos por el mismo factor.
+   - Una sala sin luz horneada recibe luces reales y reflejos de estudio
+     (`RoomEnvironment`); en sus propias superficies el reflejo va al 0,35 para no lavarla.
+   - `showRoom` apagado: no se carga sala. Queda un escenario neutro (piso mate, tres
+     plataformas con línea de luz, en los colores `bg`/`fg`) con el espejo de piso.
+   - `showCars` apagado: la cámara recorre solo la sala.
+   - Un modelo que no carga (URL mala) deja su plataforma vacía; solo una sala que no
+     carga pasa la sección a la versión quieta.
+   - Se probó con una galería rectangular de 18 × 12 m fuera del origen, la misma con
+     `Spot_*`, un diorama de 2 m, sin sala, sin objetos y con una URL rota
+     (`room-harness`: monta la sección sola con props y sirve los GLB por `page.route`).
+
+   **En las plataformas entra cualquier objeto** (`fitToPlinth`): lo acuesta a lo largo
+   de la plataforma, lo centra y lo apoya en el piso. Si no tiene tamaño de auto
+   (3,5–6,2 m), lo escala a 4,8 m de largo, con 2,6 m de alto como tope. Un auto a escala
+   real queda tal cual. La cámara encuadra el objeto más largo.
 
 ## 7. Builder y LAB (sección por sección)
 

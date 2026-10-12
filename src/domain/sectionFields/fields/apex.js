@@ -13,12 +13,23 @@ const FILM_HELP = {
 }
 
 const SHOWROOM_HELP = {
-  title: 'Cómo cambiar los autos y la sala',
+  title: 'Cómo cambiar lo que va en las plataformas',
   steps: [
-    'Cada auto es un .glb: largo real (4–6 m), apoyado en el piso (origen abajo al centro) y con el frente hacia −Z (en Blender, hacia +Y antes de exportar). Exportalo con compresión Draco y texturas WebP de 2048 px.',
-    'Subí los archivos a tu sitio o a un CDN y pegá la URL https:// (o /ruta) en «Modelo 3D». Entran hasta tres autos: uno por plataforma.',
-    'La sala está en design/blender/apex-showroom.blend: cambiá luces o materiales, horneá (Bake → Combined) y exportá showroom.glb igual que los autos.',
-    'La foto de cada auto es la que se ve con «reducir movimiento» o sin WebGL: una toma de costado.',
+    'Cada plataforma lleva un .glb: un auto, una moto, un mueble, un producto. La sección lo acuesta a lo largo de la plataforma, lo apoya en el piso y, si no tiene tamaño de auto (3,5–6 m), lo escala para que la llene. En una sala chica, todo se achica con ella.',
+    'Exportalo con compresión Draco y texturas WebP de 2048 px. Un auto a escala real (en metros) queda tal cual; el frente, hacia −Z (en Blender, hacia +Y antes de exportar).',
+    'Subí el archivo a tu sitio o a un CDN y pegá la URL https:// (o /ruta) en «Modelo 3D». Entran hasta tres: uno por plataforma.',
+    'La foto es la que se ve con «reducir movimiento» o sin WebGL: una toma de costado.',
+  ],
+}
+
+const ROOM_HELP = {
+  title: 'Cómo reemplazar la sala',
+  steps: [
+    'La sala puede ser cualquier .glb: una galería, un garage, un paisaje, un estudio. La sección la mide (centro, tamaño y piso a partir de sus paredes) y arma el recorrido de la cámara sobre ella: entra desde el lado +Z, se para frente a cada plataforma y sale.',
+    'Para decidir dónde va cada objeto, poné en el modelo tres vacíos (Empty en Blender) llamados Spot_1, Spot_2 y Spot_3, a la altura del piso o de la plataforma. Sin ellos, los objetos se ubican en círculo alrededor del centro, a escala de la sala.',
+    'Si la sala trae la luz horneada (materiales que terminan en _baked), se dibuja tal cual y se refleja en los autos; si no, la sección le pone luces y reflejos de estudio. Las piezas con «Glass» en el nombre se dibujan como vidrio.',
+    'Con «Sala 3D» apagada no se carga ninguna: queda un escenario neutro (piso y tres plataformas en los colores de la sección). Con «Objetos en las plataformas» apagado, la cámara recorre solo la sala.',
+    'Exportá con compresión Draco y texturas WebP. La foto de la sala es la que se ve mientras carga y con «reducir movimiento».',
   ],
 }
 
@@ -32,9 +43,12 @@ export const APEX_FIELDS = {
     { key: 'eyebrow', label: 'Rótulo', type: 'text' },
     { key: 'title', label: 'Titular', type: 'text' },
     { key: 'intro', label: 'Texto de entrada', type: 'textarea' },
+    { key: 'sceneUrl', label: 'Sala (.glb) — reemplaza el salón entero', type: 'url', help: ROOM_HELP },
+    toggle('showRoom', 'Sala 3D (apagada: escenario neutro)'),
+    { key: 'poster', label: 'Foto de la sala (mientras carga y sin 3D)', type: 'image' },
     {
       key: 'cars',
-      label: 'Autos (hasta 3, uno por plataforma)',
+      label: 'Plataformas: autos u objetos (hasta 3)',
       type: 'list',
       max: 3,
       item: [
@@ -44,8 +58,7 @@ export const APEX_FIELDS = {
         { key: 'specs', label: 'Ficha (una fila por línea: Dato | Valor)', type: 'textarea' },
       ],
     },
-    { key: 'sceneUrl', label: 'Sala (.glb)', type: 'url', help: SHOWROOM_HELP },
-    { key: 'poster', label: 'Foto de la sala (mientras carga y sin 3D)', type: 'image' },
+    toggle('showCars', 'Objetos en las plataformas (apagado: solo la sala)'),
     { key: 'dragLabel', label: 'Cursor — girar', type: 'text' },
     { key: 'closeLabel', label: 'Botón cerrar', type: 'text' },
     { key: 'loadingLabel', label: 'Texto mientras carga', type: 'text' },
