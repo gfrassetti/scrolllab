@@ -244,6 +244,13 @@ export const fileDb = {
       read("hosted").find((h) => h.key === String(key)) || null,
     );
   },
+  async findHostedInstanceByEditTokenHash(hash) {
+    if (!hash) return null;
+    return withSaveDoc(
+      "hosted",
+      read("hosted").find((h) => h.editTokenHash === String(hash)) || null,
+    );
+  },
   async findHostedInstancesByUser(userId) {
     return read("hosted")
       .filter((h) => String(h.userId) === String(userId))

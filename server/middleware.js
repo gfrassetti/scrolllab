@@ -181,6 +181,13 @@ export function rateLimits() {
       max: 40,
       message: { error: 'Demasiadas operaciones, probá en un momento' },
     }),
+    // Link de edición del cliente (sin cuenta): el token es de 192 bits, así que
+    // adivinarlo no es el riesgo; esto corta el scripteo y el guardado en bucle.
+    sharedEdit: mk({
+      windowMs: 60 * 1000,
+      max: 60,
+      message: { error: 'Demasiadas operaciones, probá en un momento' },
+    }),
     // Proyectos del builder: el guardado automático manda un PUT cada ~1 s
     // mientras se edita. Por usuario (va después de requireAuth).
     builderProjects: mk({

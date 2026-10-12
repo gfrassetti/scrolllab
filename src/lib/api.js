@@ -128,6 +128,15 @@ export const api = {
     }),
   hostedDelete: (id) =>
     request(`/api/hosted/${id}`, { method: 'DELETE' }),
+  // Link de edición para el cliente del dueño (docs/hosted-component-plan.md, Fase J)
+  hostedEditLinkCreate: (id) => request(`/api/hosted/${id}/edit-link`, { method: 'POST' }),
+  hostedEditLinkRevoke: (id) => request(`/api/hosted/${id}/edit-link`, { method: 'DELETE' }),
+  sharedEditGet: (token) => request(`/api/hosted-edit/${encodeURIComponent(token)}`),
+  sharedEditUpdate: (token, body) =>
+    request(`/api/hosted-edit/${encodeURIComponent(token)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body || {}),
+    }),
   // Proyectos del builder: composiciones guardadas en la cuenta.
   builderProjects: () => request('/api/builder-projects'),
   builderProject: (id) => request(`/api/builder-projects/${id}`),

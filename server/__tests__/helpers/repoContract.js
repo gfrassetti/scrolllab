@@ -423,6 +423,28 @@ export function defineRepoContract(ctx) {
       await db.incHostedViews('pub_inexistente') // no tira
     })
 
+    it('findHostedInstanceByEditTokenHash: por hash, null si no hay o si se quitó', async () => {
+      const user = await newUser()
+      const a = await db.createHostedInstance(inst(user))
+      const b = await db.createHostedInstance(inst(user))
+      assert.equal(await db.findHostedInstanceByEditTokenHash(''), null)
+      assert.equal(await db.findHostedInstanceByEditTokenHash('a'.repeat(64)), null)
+
+      const found = await db.findHostedInstanceById(id(a))
+      found.editTokenHash = 'b'.repeat(64)
+      await found.save()
+      assert.equal(String(id(await db.findHostedInstanceByEditTokenHash('b'.repeat(64)))), String(id(a)))
+      assert.equal(await db.findHostedInstanceByEditTokenHash('c'.repeat(64)), null)
+
+      // quitar el link: el hash deja de encontrar la instancia
+      const again = await db.findHostedInstanceByEditTokenHash('b'.repeat(64))
+      again.editTokenHash = undefined
+      again.markModified?.('editTokenHash')
+      await again.save()
+      assert.equal(await db.findHostedInstanceByEditTokenHash('b'.repeat(64)), null)
+      assert.equal(String(id(await db.findHostedInstanceById(id(b)))), String(id(b)))
+    })
+
     it('countPublishedHosted: solo publicadas, sin la excluida', async () => {
       const user = await newUser()
       const a = await db.createHostedInstance(inst(user))

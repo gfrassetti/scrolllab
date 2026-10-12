@@ -375,6 +375,8 @@ iframe. Cada sección es un archivo aparte del frame (`embed/src/registry.js`, i
 widget baja el núcleo y su sección. Nada de FOLD ni de media que el cliente no pueda cambiar desde el
 editor (un vuelo de cuadros, un mapa con puntos fijos). Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
+Link de edición (`/lab/editar/:token`, `server/services/hosted/editLink.js`): el dueño de un widget le da a su cliente un link secreto para editar contenido sin cuenta; puede republicar solo lo ya publicado, no ve plan ni dominios. El token se guarda hasheado y se muestra una vez. Detalle: `docs/hosted-component-plan.md`, Fase J.
+
 Packs de LAB (`/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. No confundir con el bundle de templates (compra de código) ni con el Builder (código fuente): /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB.
 
 ## Architecture (extra)

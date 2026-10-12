@@ -9,6 +9,26 @@ export function newHostedKey() {
   return `pub_${crypto.randomBytes(12).toString('hex')}`
 }
 
+/**
+ * Token del link de edición: lo tiene quien edita el widget sin cuenta (el
+ * cliente del dueño). A diferencia de la key (pública, viaja en el HTML del
+ * sitio), este es SECRETO: en la base queda solo su hash, y se muestra una
+ * vez al crearlo.
+ */
+export function newEditToken() {
+  return `ed_${crypto.randomBytes(24).toString('hex')}`
+}
+
+export const EDIT_TOKEN_RE = /^ed_[a-f0-9]{48}$/
+
+export function isEditToken(value) {
+  return typeof value === 'string' && EDIT_TOKEN_RE.test(value)
+}
+
+export function hashEditToken(token) {
+  return crypto.createHash('sha256').update(String(token)).digest('hex')
+}
+
 export const HOSTED_KEY_RE = /^pub_[a-f0-9]{24}$/
 
 export function isHostedKey(value) {

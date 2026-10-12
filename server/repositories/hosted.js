@@ -21,6 +21,11 @@ export const hostedRepo = {
     if (isFileMode()) return fileDb.findHostedInstanceByKey(key);
     return MongoHostedInstance.findOne({ key: String(key) });
   },
+  async findHostedInstanceByEditTokenHash(hash) {
+    if (isFileMode()) return fileDb.findHostedInstanceByEditTokenHash(hash);
+    if (!hash) return null;
+    return MongoHostedInstance.findOne({ editTokenHash: String(hash) });
+  },
   async findHostedInstancesByUser(userId) {
     if (isFileMode()) return fileDb.findHostedInstancesByUser(userId);
     return MongoHostedInstance.find({ userId }).sort({ createdAt: -1 });

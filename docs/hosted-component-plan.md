@@ -933,6 +933,47 @@ Bundle del frame: 89 KB gzip (antes de la fase, ~69 KB).
 
 ---
 
+## Fase J — link de edición para el cliente del dueño (2026-10)
+
+El dueño de un widget le da a su cliente un link secreto (`/lab/editar/:token`)
+para que cambie textos, fotos y colores **sin cuenta** y sin ver la facturación.
+Es el «CMS por widget, sin montar un CMS»: pensado para el freelancer o la
+agencia que entrega un sitio y no quiere que el cliente lo llame por cada cambio.
+
+**Qué puede quien tiene el link — y solo eso**
+- Leer y guardar el borrador (mismos filtros que el dueño: `sanitizeHostedProps`).
+- Republicar un widget que **ya está publicado** (no consume cupo). La primera
+  publicación y despublicar son del dueño: sin eso, un cliente podría gastar el
+  cupo de widgets del plan de otro. Con el widget en borrador, publicar da 409 y
+  el borrador igual queda guardado.
+- No ve dominios, plan, cuenta, mail del dueño ni la key. No borra. Un widget
+  suspendido no se edita (403).
+
+**Seguridad**
+- Token `ed_` + 24 bytes aleatorios (192 bits). En la base queda solo el SHA-256
+  (`editTokenHash`); el token se muestra **una vez**, al crearlo. Si se pierde, se
+  genera otro y el anterior deja de andar (un solo link activo por widget).
+- Un token mal formado o inexistente es 404 igual (no se filtra nada). Rate limit
+  propio (`limits.sharedEdit`, 60/min por IP). `Cache-Control: no-store`.
+- La página va `noindex, nofollow, noarchive` y su canónico no lleva el token
+  (`seoForPath`, con test). Sin `SiteHeader`: el cliente no tiene sesión.
+- Borrar el widget o quitar el link lo corta.
+
+**Dónde está**
+- Servidor: `server/services/hosted/editLink.js`, rutas en
+  `server/http/routes/hosted.js` (`POST/DELETE /api/hosted/:id/edit-link`,
+  `GET/PUT /api/hosted-edit/:token`), `findHostedInstanceByEditTokenHash` en el
+  repo (archivos y Mongo, con caso en `repoContract`).
+- Front: `src/components/LabEditLink.jsx` (en el editor del dueño) y
+  `src/pages/LabSharedEditPage.jsx` (la del cliente). El sello «Hecho con Scroll
+  Lab» del preview del cliente sigue el plan del dueño (`freeBadge`).
+- Tests: `server/__tests__/hostedEditLink.test.js` (11 casos de borde).
+
+**Pendiente a propósito:** que el link tenga vencimiento, que haya varios por
+widget (uno por cliente) o que el dueño vea quién editó y cuándo. Se suman si
+los datos de `/admin` muestran que se usa.
+
+
 ## No se toca
 
 - Builder → template/sección ZIP, pago único, Checkout Pro.
