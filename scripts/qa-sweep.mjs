@@ -22,6 +22,7 @@
  *   npm run qa:sweep -- --all            todos los modelos (lento: horas)
  *   npm run qa:sweep -- --fast           solo los pasos rápidos de check:sections
  *   npm run qa:sweep -- --queue [N]      hallazgos abiertos para el fixer (JSON)
+ *   npm run qa:status                    el tablero: Obsidian «QA — tablero» + resumen en la terminal
  *   npm run qa:sweep -- --mark <id> --ok|--fail --note "…"   el fixer anota un intento
  */
 import { execFileSync, spawn } from 'node:child_process'
@@ -33,7 +34,8 @@ import { fileURLToPath } from 'node:url'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
 import { BUILDER_HIDDEN_SKUS } from '../src/domain/catalog.js'
 import { sectionModelOf } from '../src/domain/sections.js'
-import { cleanVerify, removeCopy } from './lib/clean-verify.mjs'
+import { cleanVerify, copyEnv, removeCopy } from './lib/clean-verify.mjs'
+import { renderDashboard, statusLine } from './lib/qa/dashboard.js'
 import { fixQueue, modelsToCheck, nextInRotation, parseFailures, reconcile, recordAttempt } from './lib/qa/plan.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -41,7 +43,10 @@ const QA = path.join(REPO, 'storage', 'qa')
 const LEDGER = path.join(QA, 'findings.json')
 const STATE = path.join(QA, 'state.json')
 const LOCK = path.join(QA, '.lock')
-const VAULT_NOTE = path.join(os.homedir(), 'Documents', 'Obsidian', 'ScrollLab', 'QA — bitácora de pruebas.md')
+const VAULT = path.join(os.homedir(), 'Documents', 'Obsidian', 'ScrollLab')
+const VAULT_NOTE = path.join(VAULT, 'QA — bitácora de pruebas.md')
+const DASHBOARD_NOTE = path.join(VAULT, 'QA — tablero.md')
+const OBSERVATIONS = path.join(QA, 'observations.md')
 fs.mkdirSync(QA, { recursive: true })
 
 const argv = process.argv.slice(2)
@@ -60,6 +65,38 @@ const writeJson = (file, data) => {
 }
 const now = () => new Date().toISOString()
 
+// --- el tablero (Obsidian «QA — tablero» + qa:status) ---------------------------
+
+function writeDashboard() {
+  let observations = ''
+  try {
+    observations = fs.readFileSync(OBSERVATIONS, 'utf8')
+  } catch {
+    /* todavía no hay */
+  }
+  const md = renderDashboard(readJson(LEDGER, {}), readJson(STATE, {}), { now: now(), observations })
+  fs.writeFileSync(path.join(QA, 'dashboard.md'), md)
+  try {
+    if (fs.existsSync(VAULT)) fs.writeFileSync(DASHBOARD_NOTE, md)
+  } catch {
+    /* sin bóveda en esta máquina */
+  }
+  return md
+}
+
+if (has('--status')) {
+  const md = writeDashboard()
+  const ledger = readJson(LEDGER, {})
+  const state = readJson(STATE, {})
+  console.log(`QA — ${statusLine(ledger)} · último barrido ${state.lastRun || '—'}`)
+  for (const f of Object.values(ledger).filter((x) => x.status !== 'fixed')) {
+    console.log(`  ${f.status === 'needs-person' ? '🟠' : '🟡'} ${f.model} · ${f.step} — ${f.detail}`)
+  }
+  console.log(`
+Tablero: Obsidian «QA — tablero» · ${path.relative(REPO, path.join(QA, 'dashboard.md'))} (${md.length} caracteres)`)
+  process.exit(0)
+}
+
 // --- el fixer: cola e intentos -------------------------------------------------
 
 if (has('--queue')) {
@@ -76,6 +113,7 @@ if (has('--mark')) {
   }
   const ledger = recordAttempt(readJson(LEDGER, {}), id, { ok, note: valueOf('--note') || '', now: now() })
   writeJson(LEDGER, ledger)
+  writeDashboard()
   console.log(`${id}: ${ledger[id].status} (intentos: ${ledger[id].attempts || 0})`)
   process.exit(0)
 }
@@ -134,9 +172,9 @@ console.log(`qa:sweep @ ${head.slice(0, 7)} — ${models.join(', ') || '(nada)'}
 
 function run(cwd, args, logFile) {
   return new Promise((resolve) => {
-    // VITE_CACHE_DIR propio: la copia usa el node_modules real por un link y, con
-    // el caché de Vite compartido, chocaba con el Vite de quien está trabajando.
-    const env = { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1', VITE_CACHE_DIR: path.join(cwd, 'storage', '.vite-cache') }
+    // copyEnv: el caché de Vite propio de la copia (usa el node_modules real por un
+    // link y, compartido, chocaba con el Vite de quien está trabajando).
+    const env = { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1', ...copyEnv(cwd) }
     const child = spawn(process.execPath, args, { cwd, env })
     const out = fs.createWriteStream(logFile)
     child.stdout.pipe(out, { end: false })
@@ -244,4 +282,5 @@ try {
 
 console.log(`\nnuevos ${opened.length + reopened.length} · abiertos ${open.length} · necesitan persona ${person.length} · arreglados ${closed.length}`)
 console.log(`Informe: ${path.relative(REPO, path.join(QA, 'report.md'))}`)
+writeDashboard()
 process.exitCode = open.length || person.length ? 1 : 0

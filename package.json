@@ -36,6 +36,7 @@
     "check:sections": "node scripts/check-sections.mjs",
     "check:builder-save": "node scripts/check-builder-save.mjs",
     "qa:sweep": "node scripts/qa-sweep.mjs",
+    "qa:status": "node scripts/qa-sweep.mjs --status",
     "check:embed-stacks": "node scripts/check-embed-stacks.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
     "check:mp-refund-sandbox": "node scripts/check-mp-refund-sandbox.mjs",
