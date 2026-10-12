@@ -100,6 +100,7 @@ import KinProgramme from '../components/sections/kin/Programme'
 import KinPress from '../components/sections/kin/Press'
 import KinVisit from '../components/sections/kin/Visit'
 import KinFooter from '../components/sections/kin/Footer'
+import ApexHero from '../components/sections/apex/Hero'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import SelectedWorkIndex from '../components/sections/signal/SelectedWorkIndex'
@@ -313,6 +314,16 @@ const allModels = [
       { id: 'kin/Visit', name: 'Visit', kind: 'section', component: KinVisit, blurb: 'Ruled visiting facts beside the week drawn as seven bars as tall as each day is long; today\'s bar is red and closed days are a hairline.' },
       { id: 'kin/Footer', name: 'Footer', kind: 'footer', component: KinFooter, blurb: 'Full-screen dark footer: invitation, contact columns, and the brand word rebuilt from bars sliding in from both sides.' },
     ],
+  },
+  {
+    id: 'apex',
+    name: 'APEX',
+    accent: '#9cc3ff',
+    wrapperClass: MODEL_WRAPPER_CLASS.apex,
+    sections: [
+      { id: 'apex/Hero', name: 'Hero', kind: 'hero', component: ApexHero, blurb: 'Full-screen film of five takes that loops without a jump, graded and overlaid in CSS; chapters follow the video, its own phone menu and a text entrance that lifts a curtain.' },
+    ],
+    sectionsDir: 'src/components/sections/apex',
   },
   {
     id: 'signal',

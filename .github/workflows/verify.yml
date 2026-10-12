@@ -21,6 +21,19 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Un Mongo real para el contrato de los repositorios (server/__tests__/
+    # repoContract.mongo.test.js): las consultas, los índices únicos y las
+    # transiciones atómicas de producción no se pueden probar contra archivos.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - uses: actions/checkout@v4
 
@@ -34,4 +47,8 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
+      # REQUIRE_MONGO: sin Mongo el contrato se saltearía y el CI pasaría en falso.
       - run: npm run verify
+        env:
+          MONGODB_TEST_URI: mongodb://localhost:27017
+          REQUIRE_MONGO: '1'

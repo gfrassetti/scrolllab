@@ -102,6 +102,7 @@ const SECTIONS = {
   'meridian/GallerySlider': () => import('../../src/components/sections/meridian/GallerySlider.jsx'),
   'kin/Intro': () => import('../../src/components/sections/kin/Intro.jsx'),
   'kin/Collection': () => import('../../src/components/sections/kin/Collection.jsx'),
+  'apex/Hero': () => import('../../src/components/sections/apex/Hero.jsx').then((m) => flowEdition(m.default)),
 }
 
 /**

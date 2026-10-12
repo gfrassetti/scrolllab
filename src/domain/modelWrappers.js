@@ -23,6 +23,7 @@ export const MODEL_WRAPPER_CLASS = {
   meridian: 'bg-[#dfd8cf] font-grotesk text-[#2a2622]',
   // La fuente va en el wrapper: en una composición del builder no hay KinPage que la ponga.
   kin: "bg-[#e1e2de] font-['Inter_Tight',_'Helvetica_Neue',_Arial,_sans-serif] text-[#141414]",
+  apex: "bg-[#04070d] font-['Inter_Tight',_'Helvetica_Neue',_Arial,_sans-serif] text-[#e8edf6]",
   signal: 'bg-signal-ink font-grotesk text-signal-paper',
   // Pintan su propio tema, pero la fuente es la del body del template.
   contact: 'font-grotesk',

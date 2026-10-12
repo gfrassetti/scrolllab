@@ -139,6 +139,10 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'meridian/GallerySlider',
   'kin/Intro',
   'kin/Collection',
+  // Fase K — APEX: la portada con un film de cinco tomas. El film y los pósters son
+  // campos (URL https del cliente); `flow` (lo pone el registro del embed) quita el
+  // apagado hacia el negro al scrollear: un widget no va a abrir ni cerrar la página.
+  'apex/Hero',
   // Fuera, por diseño: los `Nav*` (un header fijo suelto no tiene sentido), lo
   // que mete Three.js en el frame (FlavorWorlds, HeroBubbles, HeroMeaning,
   // ServicesStone, HeroThree: el bundle es único y lo pagaría cada embed),

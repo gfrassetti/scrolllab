@@ -1155,3 +1155,34 @@ textos que entran al scrollear), revisado lámina por lámina.
   widget. Ahora cada sección es un archivo aparte (import dinámico): núcleo de
   63 KB gzip, compartido y cacheado entre los widgets de una página, más 2–5 KB
   de la sección.
+
+## Fase K — APEX Hero, un film de fondo en un sitio ajeno: 72 hosteables (2026-10-11)
+
+Cada sección de APEX entra al builder **y** a LAB cuando se construye (pedido del
+dueño); el hero abre la fase.
+
+- **Qué es distinto:** el widget lleva un `<video>` (film de 8,6 MB escritorio /
+  3,5 MB teléfono). Autoplay mudo en loop, pausa fuera de pantalla, y calma =
+  póster quieto (también con ahorro de datos / 2G): en un sitio ajeno el film
+  nunca se baja si el dispositivo pide menos.
+- **FLOW, no PIN:** la entrada (cortina → titular → pausa → bajada) corre a la
+  mitad de duración con `flow` (un widget en el medio de una página no puede
+  hacer esperar 2 s a un lector que ya llegó); el scrub de salida y el zoom del
+  film no existen en el frame.
+- **Menú del teléfono:** `useMobileMenu` del sitio arrastra Lenis, el bloqueo de
+  scroll táctil y una segunda copia de GSAP. El embed lo reemplaza con un alias
+  (`embed/src/mobileMenu.js`, misma API: abrir/cerrar, Escape, foco). Mismo
+  mecanismo que el alias de `useLenis`.
+- **El film de la demo:** las rutas `/apex/…` se reescriben al `SITE_ORIGIN`
+  (`SITE_ASSET_DIRS = ['meridian', 'apex']`); funcionan cuando `public/apex` está
+  desplegado. Un cliente de LAB pega sus propias URL (`filmSrc`, `filmSrcMobile`,
+  `poster`, `posterMobile`; https o ruta del sitio, validadas como URL de assets).
+- **Campos nuevos del servidor:** `washColor` (color) y las cuatro URL de media
+  en `COLOR_PROP_KEYS` / `ASSET_URL_KEYS`.
+- **Screening** (`npm run screen:lab -- apex/Hero --header`): alto estable en
+  escritorio (844) y teléfono (824); lo marcado es `red`/`errores` por el film
+  (404 mientras `public/apex` no está en producción; el Chromium de Playwright no
+  trae H.264) y es esperado.
+- **Tests:** `hostedSections.test.js` (media https/ruta, `javascript:`/`data:`
+  caen, capítulos con tope 8, color por la regla) y el caso e2e `apex/Hero`
+  (marcador, bg/fg, 3 viewports sin overflow).

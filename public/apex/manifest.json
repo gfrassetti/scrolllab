@@ -1,0 +1,31 @@
+{
+  "duration": 37.5,
+  "fps": 24,
+  "shots": [
+    {
+      "label": "Approach",
+      "start": 0,
+      "end": 7.25
+    },
+    {
+      "label": "Silhouette",
+      "start": 7.25,
+      "end": 14.75
+    },
+    {
+      "label": "Detail",
+      "start": 14.75,
+      "end": 22.25
+    },
+    {
+      "label": "Cabin",
+      "start": 22.25,
+      "end": 29.75
+    },
+    {
+      "label": "Departure",
+      "start": 29.75,
+      "end": 37.25
+    }
+  ]
+}

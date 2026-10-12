@@ -259,6 +259,27 @@ describe('Fase G — las 10 secciones nuevas de LAB', () => {
     assert.equal(clean.quotes[0].source, 'Diario')
   })
 
+  it('apex/Hero: el film y los pósters aceptan https o ruta del sitio, los capítulos tienen tope y el color pasa por la regla', () => {
+    const clean = sanitizeSectionProps('apex/Hero', {
+      filmSrc: 'https://cdn.test/film.mp4',
+      filmSrcMobile: 'javascript:alert(1)',
+      poster: '/media/p.jpg',
+      posterMobile: 'data:image/png;base64,AAAA',
+      washColor: '#203060',
+      ctaHref: 'javascript:void(0)',
+      chapters: Array.from({ length: 12 }, (_, i) => ({ label: 'Toma ' + i })),
+    })
+    assert.equal(clean.filmSrc, 'https://cdn.test/film.mp4')
+    assert.equal(clean.poster, '/media/p.jpg')
+    assert.equal(clean.filmSrcMobile, undefined, 'javascript: cae')
+    assert.equal(clean.posterMobile, undefined, 'data: cae')
+    assert.equal(clean.washColor, '#203060')
+    assert.equal(clean.ctaHref, undefined)
+    assert.equal(clean.chapters.length, 8)
+    const bad = sanitizeSectionProps('apex/Hero', { washColor: 'red; background:url(//evil)' })
+    assert.equal(bad?.washColor, undefined)
+  })
+
   it('monolith/SpecSheet: filas dato/valor', () => {
     const clean = sanitizeSectionProps('monolith/SpecSheet', {
       specs: [{ label: 'Material', value: 'Hormigón' }],

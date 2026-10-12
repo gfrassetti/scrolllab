@@ -1221,6 +1221,12 @@
           "name": "Footer",
           "blurb": "Full-screen dark footer: invitation, contact columns and the brand word rebuilt from bars sliding in from both sides."
         }
+      },
+      "apex": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Full-screen film of five takes that loops without a jump, with an editable grade and overlay; chapters that follow the video, its own phone menu and an entrance that lifts a curtain."
+        }
       }
     },
     "labNote": "You build the page with our sections and take the code. No code, just adding sections to your site?",

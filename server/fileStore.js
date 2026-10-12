@@ -33,6 +33,32 @@ function nid() {
   return crypto.randomBytes(12).toString("hex");
 }
 
+/** Orden de los listados: lo más nuevo primero (`createdAt` descendente). */
+function newestFirst(a, b) {
+  return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+}
+
+/**
+ * El error que da Mongo al violar un índice único (código 11000): el store de
+ * archivos lo replica para que un duplicado falle igual en desarrollo.
+ */
+function duplicateKey(index) {
+  return Object.assign(
+    new Error(`E11000 duplicate key error: ${index} ya existe`),
+    { code: 11000 },
+  );
+}
+
+/**
+ * Índices únicos sparse de server/models.js que el store de archivos replica al
+ * guardar: un duplicado falla con el mismo error (11000) que en Mongo.
+ */
+const UNIQUE_FIELDS = {
+  orders: ["mpPaymentId", "paddleTransactionId"],
+  leads: ["couponCode"],
+  withdrawals: ["code"],
+};
+
 /** Envuelve un row con `.save()` que reescribe su fila en `<name>.json`. */
 function withSaveDoc(name, row) {
   if (!row) return null;
@@ -40,6 +66,12 @@ function withSaveDoc(name, row) {
   doc.save = async function save() {
     const rows = read(name);
     const idx = rows.findIndex((o) => o.id === doc.id);
+    for (const field of UNIQUE_FIELDS[name] || []) {
+      const value = doc[field];
+      if (value != null && rows.some((o) => o.id !== doc.id && o[field] === value)) {
+        throw duplicateKey(field);
+      }
+    }
     const { save: _ignored, ...rest } = doc;
     const next = { ...rest, updatedAt: new Date().toISOString() };
     if (idx >= 0) rows[idx] = next;
@@ -101,6 +133,14 @@ export const fileDb = {
   },
   async createOrder(data) {
     const rows = read("orders");
+    // Índices únicos sparse del esquema (server/models.js): un pago de MP o una
+    // transacción de Paddle pertenece a una sola orden.
+    for (const field of ["mpPaymentId", "paddleTransactionId"]) {
+      const value = data[field];
+      if (value != null && rows.some((o) => o[field] === String(value))) {
+        throw duplicateKey(field);
+      }
+    }
     const order = {
       id: nid(),
       ...data,
@@ -116,6 +156,15 @@ export const fileDb = {
   },
   async findOrderById(id) {
     return withSave(read("orders").find((o) => o.id === String(id)) || null);
+  },
+  /** La orden ya paga con ese pago de MP o esa transacción de Paddle, o null. */
+  async findPaidOrderByPayment({ mpPaymentId, paddleTransactionId }) {
+    const field = paddleTransactionId != null ? "paddleTransactionId" : "mpPaymentId";
+    const value = String(paddleTransactionId ?? mpPaymentId);
+    return withSave(
+      read("orders").find((o) => o[field] === value && o.status === "paid") ||
+        null,
+    );
   },
   async findOrderByPaddleTransaction(transactionId) {
     return withSave(
@@ -175,7 +224,8 @@ export const fileDb = {
       domains: [],
       ...data,
       userId: String(data.userId),
-      createdAt: now,
+      // Como Mongoose (timestamps): un createdAt explícito se respeta.
+      createdAt: data.createdAt ? new Date(data.createdAt).toISOString() : now,
       updatedAt: now,
     };
     rows.push(inst);
@@ -451,10 +501,10 @@ export const fileDb = {
       .filter((e) => e && new Date(e.createdAt).getTime() >= t);
   },
   async listUsers() {
-    return read("users");
+    return read("users").sort(newestFirst);
   },
   async listOrders() {
-    return read("orders");
+    return read("orders").sort(newestFirst);
   },
 
   // Libro de reembolsos (upsert por externalId).
@@ -493,6 +543,7 @@ export const fileDb = {
   // Solicitudes del botón de arrepentimiento.
   async createWithdrawal(data) {
     const rows = read('withdrawals')
+    if (rows.some((r) => r.code === data.code)) throw duplicateKey('code')
     const now = new Date().toISOString()
     const row = {
       id: nid(),

@@ -60,6 +60,8 @@ const NOT_IN_DOM = {
   'unity/FooterTrophy.accentWord': 'resalta esa palabra dentro del título; sola no se ve',
   'atrium/PeopleScatter.plates.src': 'foto: no es texto',
   'kin/Collection.items.src': 'foto: no es texto',
+  'apex/Hero.closeLabel': 'el botón dice esto con el menú del teléfono abierto',
+  'apex/Hero.posterMobile': 'el póster del teléfono solo se pone en el video con el viewport angosto',
   'kin/Programme.items.from': 'mes de inicio de la barra: fija su posición en la regla, no es texto',
   'kin/Programme.items.to': 'mes de cierre de la barra: fija su largo en la regla, no es texto',
   'kin/Visit.closedLabel': 'solo se ve en un día sin horario (abre y cierra vacíos)',
@@ -250,7 +252,7 @@ async function checkSectionRendersProps(page, sectionId) {
   // placeholder, una imagen en src o en un background) en vez de ser texto.
   const haystack = squash(
     await page.evaluate(() => {
-      const attrs = ['href', 'src', 'aria-label', 'alt', 'title', 'placeholder', 'value', 'id', 'style']
+      const attrs = ['href', 'src', 'poster', 'aria-label', 'alt', 'title', 'placeholder', 'value', 'id', 'style']
       const values = [...document.querySelectorAll('*')].flatMap((el) =>
         attrs.map((name) => el.getAttribute(name)).filter(Boolean),
       )

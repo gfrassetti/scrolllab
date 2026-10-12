@@ -1221,6 +1221,12 @@
           "name": "Footer",
           "blurb": "Footer oscuro a pantalla completa: invitación, columnas de contacto y la palabra de la marca rearmada con barras que entran desde los costados."
         }
+      },
+      "apex": {
+        "Hero": {
+          "name": "Hero",
+          "blurb": "Film a pantalla completa de cinco tomas que cierra en loop sin salto, con grade y overlay editables; capítulos que siguen al video, menú propio en el teléfono y una entrada que levanta la cortina."
+        }
       }
     },
     "labNote": "Armás la página con nuestras secciones y te llevás el código. ¿Sin programar, para sumarle secciones a tu sitio?",
