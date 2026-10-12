@@ -98,3 +98,5 @@ public/fold/film/
 design/masters/fold/
 # Cars template: the generated clips and stills are build inputs, not source.
 design/masters/cars/
+# APEX 3D: raw generated GLBs, the full .blend with 4K textures (the light room .blend lives in design/blender/)
+design/masters/apex-3d/

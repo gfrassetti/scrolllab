@@ -84,6 +84,7 @@ const TEMPLATE_PATHS = {
   meridian: '/templates/meridian',
   kin: '/templates/kin',
   fold: '/templates/fold',
+  apex: '/templates/apex',
 }
 const TEMPLATES = Object.keys(TEMPLATE_PATHS)
 
@@ -110,7 +111,12 @@ const TOUCH_EVENTS = /^(touchstart|touchmove|pointerdown|deviceorientation|devic
  * por una, con el motivo, para que la lista no se vuelva un lugar donde esconder
  * brechas.
  */
-const ACCEPTED = {}
+const ACCEPTED = {
+  // El grano de película es una capa `mix-blend-mode: overlay` sobre un video a pantalla
+  // completa que se re-compone en cada paso: en un teléfono real cuesta GPU y no aporta
+  // (la regla de «paridad» manda el mismo beat con otro medio, no el mismo adorno).
+  'apex/Hero/css-quieto': 'el grano de película se apaga en el teléfono (blend sobre video = GPU)',
+}
 
 /** Las `ACCEPTED` que se usaron en esta corrida: una que ya no se marca sobra. */
 const usedAccepted = new Set()

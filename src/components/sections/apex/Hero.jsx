@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { gsap, useGSAP } from '../../../lib/gsap'
+import { gsap, ScrollTrigger, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
+import { getLenis } from '../../../hooks/useLenis'
+import HeroMenu, { Burger } from './HeroMenu'
 
 /**
  * APEX — Hero
@@ -19,8 +21,9 @@ import { useMobileMenu } from '../../../hooks/useMobileMenu'
  *    the indicator follows the video's own time (no React renders) and a tap
  *    jumps to a take.
  *  - Entrance, in order: curtain lifts → headline lines rise out of their
- *    masks → pause → sub copy → chrome. On scroll the film drifts toward the
- *    camera and goes down to the next section's black.
+ *    masks → pause → sub copy → chrome. On scroll: parallax in three speeds
+ *    (film lags and closes in, sub copy, headline ahead) and then the film
+ *    goes down to the next section's black.
  *  - Calm (reduce motion / data saver): the film is not played; the graded
  *    poster is the hero and the text fades in. Never a hole.
  *
@@ -36,7 +39,7 @@ import { useMobileMenu } from '../../../hooks/useMobileMenu'
 // The demo film lives in the site's public/ folder. A buyer who points `filmSrc`
 // at their own file gets their own (and a phone falls back to the same file).
 const DEMO = { film: '/apex/hero.mp4', mobile: '/apex/hero-m.mp4', poster: '/apex/poster.jpg', posterMobile: '/apex/poster-m.jpg' }
-const DEFAULT_CHAPTERS = ['Approach', 'Silhouette', 'Detail', 'Cabin', 'Departure']
+const DEFAULT_CHAPTERS = ['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4', 'Chapter 5']
 
 const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif" }
 const LABEL = {
@@ -51,6 +54,10 @@ const NOISE = encodeURIComponent(
 
 const pad = (n) => String(n).padStart(2, '0')
 
+// The loader plays once per page load: a remount (the builder re-mounts the
+// section on every edit, an SPA route comes back) must not replay it.
+let loaderPlayed = false
+
 /** The device asks for less: no autoplay, no data spent on a film. */
 function filmShouldStay() {
   if (typeof navigator === 'undefined') return false
@@ -59,21 +66,22 @@ function filmShouldStay() {
 }
 
 export default function Hero({
-  brand = 'APEX',
-  tagline = 'Electric grand touring',
+  brand = 'Brand name',
+  tagline = 'Tagline',
   links = [
-    { label: 'Models', href: '#models' },
-    { label: 'Studio', href: '#studio' },
-    { label: 'Journal', href: '#journal' },
+    { label: 'Link 1', href: '#models' },
+    { label: 'Link 2', href: '#atelier' },
+    { label: 'Link 3', href: '#statement' },
+    { label: 'Link 4', href: '#contact' },
   ],
-  ctaLabel = 'Reserve',
-  ctaHref = '#reserve',
+  ctaLabel = 'Call to action',
+  ctaHref = '#contact',
   menuLabel = 'Menu',
   closeLabel = 'Close',
-  line1 = 'Power,',
-  line2 = 'without the noise.',
-  blurb = 'A grand tourer shaped by light and silence: every surface drawn to be felt before it is seen.',
-  discoverLabel = 'Discover the car',
+  line1 = 'Headline 1,',
+  line2 = 'lorem ipsum dolor.',
+  blurb = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
+  discoverLabel = 'Link label',
   discoverHref = '#models',
   scrollLabel = 'Scroll',
   chapters,
@@ -85,6 +93,15 @@ export default function Hero({
   posterMobile,
   manifestSrc,
   showGrain = 'on',
+  showMenuFilm = 'on',
+  menuMeta = 'Address line\nhello@yourbrand.com',
+  showLoader = 'on',
+  loaderTop = 'Brand name',
+  loaderSub = 'Tagline',
+  loaderWord = 'APEX',
+  loaderLabel = 'Loading',
+  loaderBg,
+  loaderFg,
   flow = false,
   bg,
   fg,
@@ -95,7 +112,7 @@ export default function Hero({
   const videoRef = useRef(null)
   const shotsRef = useRef([])
   const activeRef = useRef(-1)
-  const menu = useMobileMenu()
+  const menu = useMobileMenu({ breakpoint: null })
 
   // Decided once, before the first render: which film the device downloads and
   // whether it plays at all.
@@ -113,6 +130,61 @@ export default function Hero({
     return () => mql.removeEventListener('change', onChange)
   }, [])
   const [still] = useState(() => prefersReducedMotion() || filmShouldStay())
+  // The loader needs the hero at the top of the page, motion on and a page
+  // (not a hosted widget): otherwise it would cover something nobody is looking at.
+  const [loaderOpen, setLoaderOpen] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      showLoader !== 'off' &&
+      !flow &&
+      !loaderPlayed &&
+      !prefersReducedMotion() &&
+      !filmShouldStay() &&
+      window.scrollY < window.innerHeight * 0.5,
+  )
+  const enterRef = useRef(null)
+
+  // Lazy film: the poster (the film's first picture) paints with the page; the
+  // 10 MB file is attached only once the page has finished loading AND the hero
+  // is within a screen of the viewport, so it never competes with fonts, the
+  // poster or the rest of the page. In a composition whose hero is far down it
+  // is not fetched at all until the visitor gets near.
+  const [armed, setArmed] = useState(false)
+  useEffect(() => {
+    const root = rootRef.current
+    if (still || !root) return undefined
+    let near = false
+    let loaded = false
+    let done = false
+    const go = () => {
+      if (done || !near || !loaded) return
+      done = true
+      setArmed(true)
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        near = entry.isIntersecting
+        go()
+      },
+      { rootMargin: '100% 0px' },
+    )
+    io.observe(root)
+    const ready = () => {
+      loaded = true
+      go()
+    }
+    let timer = 0
+    if (document.readyState === 'complete') ready()
+    else {
+      window.addEventListener('load', ready, { once: true })
+      timer = window.setTimeout(ready, 2500) // a stalled third-party must not hold the film back
+    }
+    return () => {
+      io.disconnect()
+      window.removeEventListener('load', ready)
+      window.clearTimeout(timer)
+    }
+  }, [still])
 
   const film = filmSrc || DEMO.film
   const demoFilm = film === DEMO.film
@@ -153,10 +225,17 @@ export default function Hero({
 
     let raf = 0
     let visible = true
+    let lastT = -1
     const segs = () => root.querySelectorAll('[data-apex-seg]')
     const label = () => root.querySelector('[data-apex-chapter]')
 
     const paint = () => {
+      // Same picture as last frame (paused, buffering, 60 Hz screen on a 30 fps film): nothing to repaint.
+      if (video.currentTime === lastT) {
+        raf = requestAnimationFrame(paint)
+        return
+      }
+      lastT = video.currentTime
       const names = labelsRef.current
       const known = shotsRef.current
       const dur = video.duration
@@ -211,7 +290,7 @@ export default function Hero({
       io.disconnect()
       cancelAnimationFrame(raf)
     }
-  }, [still, labels.length])
+  }, [still, armed, labels.length])
 
   useGSAP(
     () => {
@@ -221,34 +300,130 @@ export default function Hero({
         gsap.set('[data-apex-curtain]', { autoAlpha: 0 })
         return calmReveal('[data-apex-reveal]', { y: 10, stagger: 0.1 })
       }
+      // With the loader, the entrance waits for the cover to finish (it is
+      // played from there); the old curtain is not needed.
       const enter = gsap.timeline({
         defaults: { ease: 'power3.out' },
-        scrollTrigger: { trigger: root, start: 'top 92%', once: true },
+        paused: true,
       })
+      enterRef.current = enter
+      if (loaderOpen) gsap.set('[data-apex-curtain]', { autoAlpha: 0 })
+      else {
+        ScrollTrigger.create({ trigger: root, start: 'top 92%', once: true, onEnter: () => enter.play() })
+      }
       // On the page the hero is the hook, so it takes its time (headline → pause →
       // sub copy → chrome). As a widget it is on screen only while someone scrolls
       // past: the same order, in about half the time.
       const k = flow ? 0.5 : 1
       enter
-        .to('[data-apex-curtain]', { autoAlpha: 0, duration: 1.2 * k, ease: 'power2.inOut' }, 0)
+        .to('[data-apex-curtain]', { autoAlpha: 0, duration: loaderOpen ? 0.01 : 1.2 * k, ease: 'power2.inOut' }, 0)
         .fromTo('[data-apex-line]', { yPercent: 112 }, { yPercent: 0, duration: 1.15 * k, stagger: 0.12 * k }, 0.5 * k)
         .fromTo('[data-apex-sub]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8 * k, stagger: 0.1 * k }, 2.15 * k)
         .fromTo('[data-apex-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7 * k, stagger: 0.06 * k }, 2.5 * k)
 
-      // Handoff: the film comes a little closer and dips into the next black.
+      // Handoff, three speeds (parallax): the film lags behind the page and
+      // comes a little closer; the headline runs ahead of it, the sub copy in
+      // between, so the type seems to float in front of the picture. At the
+      // end everything dips into the next section's black.
       // Not in a hosted widget: it sits in someone else's page.
       if (flow) return undefined
+      const vh = () => window.innerHeight
       const out = gsap.timeline({
         defaults: { ease: 'none' },
-        scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: true },
+        scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: true, invalidateOnRefresh: true },
       })
       out
-        .to('[data-apex-film]', { scale: 1.08 }, 0)
+        .to('[data-apex-film]', { scale: 1.08, yPercent: 12 }, 0)
         .to('[data-apex-dim]', { autoAlpha: 1 }, 0.1)
-        .to('[data-apex-copy]', { yPercent: -10, autoAlpha: 0 }, 0)
+        .to('[data-apex-par="h1"]', { y: () => -vh() * 0.36 }, 0)
+        .to('[data-apex-par="sub"]', { y: () => -vh() * 0.18 }, 0)
+        .to('[data-apex-copy]', { autoAlpha: 0, duration: 0.3 }, 0.2)
       return undefined
     },
     { scope: rootRef, dependencies: [still, flow] },
+  )
+
+  // The loader: black, the wordmark and a counter; when the film is ready the
+  // hero covers it from the bottom up (the same clip, the same easing as the
+  // menu's curtain). The page is held still until the cover is done.
+  useGSAP(
+    () => {
+      const root = rootRef.current
+      if (!loaderOpen || !root) return undefined
+      const stage = root.querySelector('[data-apex-stage]')
+      const count = root.querySelector('[data-apex-loader-count]')
+      const content = root.querySelector('[data-apex-loader-content]')
+      const video = videoRef.current
+      if (!stage) return undefined
+
+      const lenis = getLenis()
+      lenis?.stop()
+      const prevOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      const release = () => {
+        document.body.style.overflow = prevOverflow
+        lenis?.start()
+      }
+
+      const proxy = { n: 0 }
+      const paint = () => {
+        if (count) count.textContent = String(Math.round(proxy.n)).padStart(3, '0')
+      }
+      gsap.set(stage, { clipPath: 'inset(100% 0% 0% 0%)' })
+      gsap.fromTo('[data-apex-loader-word]', { yPercent: 108 }, { yPercent: 0, duration: 1.1, ease: 'power3.out', delay: 0.1 })
+      gsap.fromTo('[data-apex-loader-meta]', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, stagger: 0.08, delay: 0.3 })
+
+      let minDone = false
+      let ready = false
+      let finished = false
+      const finish = () => {
+        if (finished) return
+        finished = true
+        gsap
+          .timeline({
+            onComplete: () => {
+              loaderPlayed = true
+              release()
+              setLoaderOpen(false)
+              gsap.set(stage, { clearProps: 'clipPath' })
+              enterRef.current?.play()
+            },
+          })
+          .to(proxy, { n: 100, duration: 0.5, ease: 'power1.out', onUpdate: paint })
+          .to(content, { yPercent: -7, duration: 1.15, ease: 'power3.inOut' }, '>0.15')
+          .to(stage, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.15, ease: 'power3.inOut' }, '<')
+          .fromTo('[data-apex-film] video', { scale: 1.16 }, { scale: 1, duration: 1.6, ease: 'power3.out' }, '<')
+      }
+      const tryFinish = () => {
+        if (minDone && ready) finish()
+      }
+      gsap.to(proxy, {
+        n: 88,
+        duration: 1.7,
+        ease: 'power2.out',
+        onUpdate: paint,
+        onComplete: () => {
+          minDone = true
+          tryFinish()
+        },
+      })
+      const onReady = () => {
+        ready = true
+        tryFinish()
+      }
+      // The film (or its absence) decides when the page is ready; a stalled
+      // file must not hold the page back for more than a few seconds.
+      if (video?.readyState >= 2) onReady()
+      else video?.addEventListener('loadeddata', onReady, { once: true })
+      const cap = window.setTimeout(onReady, 4500)
+
+      return () => {
+        window.clearTimeout(cap)
+        video?.removeEventListener('loadeddata', onReady)
+        if (!finished) release()
+      }
+    },
+    { scope: rootRef, dependencies: [] },
   )
 
   const jump = (i) => {
@@ -263,6 +438,8 @@ export default function Hero({
     '--apex-fg': fg || '#e8edf6',
     '--apex-accent': accent || '#9cc3ff',
     '--apex-wash': washColor || '#0b2a63',
+    '--apex-loader-bg': loaderBg || bg || '#04070d',
+    '--apex-loader-fg': loaderFg || fg || '#e8edf6',
   }
 
   return (
@@ -272,17 +449,51 @@ export default function Hero({
       className="apex-hero relative isolate h-svh min-h-[34rem] overflow-hidden"
       style={{ ...vars, background: 'var(--apex-ink)', color: 'var(--apex-fg)' }}
     >
+      {loaderOpen ? (
+        <div
+          data-apex-loader
+          aria-hidden="true"
+          className="absolute inset-0 z-0 flex flex-col justify-between overflow-hidden px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-[2.4vw]"
+          style={{ background: 'var(--apex-loader-bg)', color: 'var(--apex-loader-fg)' }}
+        >
+          <div data-apex-loader-content className="flex h-full flex-col justify-between">
+            <div className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
+              <span data-apex-loader-meta>{loaderTop}</span>
+              <span data-apex-loader-meta className="hidden lg:absolute lg:left-[16%] lg:block">
+                {loaderSub}
+              </span>
+              <span data-apex-loader-meta className="tabular-nums">
+                <span data-apex-loader-count>000</span>
+                <span className="opacity-60"> / 100 — {loaderLabel}</span>
+              </span>
+            </div>
+            <span className="block overflow-hidden pb-[0.04em]">
+              <span
+                data-apex-loader-word
+                className="block text-[clamp(5.5rem,24vw,30rem)] leading-[0.8] font-extrabold tracking-[-0.045em]"
+                style={{ ...LABEL, fontWeight: 800, fontVariationSettings: "'wdth' 125", fontStretch: '125%' }}
+              >
+                {loaderWord}
+              </span>
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      <div data-apex-stage className="absolute inset-0 z-[1]" style={loaderOpen ? { clipPath: 'inset(100% 0% 0% 0%)' } : undefined}>
       {/* The film and everything graded over it. */}
-      <div data-apex-film className="tpl-gpu absolute inset-0">
+      {/* Taller than the hero: its top edge hides above the fold so the film can lag behind the page. */}
+      <div data-apex-film className="tpl-gpu absolute inset-x-0 bottom-0 -top-[16%]">
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
-          src={phone ? filmPhone : film}
+          src={still || armed ? (phone ? filmPhone : film) : undefined}
           poster={phone ? posterPhone : posterDesktop}
           muted
           loop
           playsInline
-          preload={still ? 'none' : 'auto'}
+          preload={still || !armed ? 'none' : 'auto'}
+          disableRemotePlayback
           onLoadedMetadata={(e) => {
             if (resumeAt.current > 0) {
               e.currentTarget.currentTime = resumeAt.current % (e.currentTarget.duration || 1)
@@ -308,27 +519,27 @@ export default function Hero({
 
       <div className="absolute inset-0 z-10 flex flex-col px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-[2.4vw]">
         {/* Top: mark, one sentence, links, one action. */}
-        <header data-apex-chrome className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:text-[max(11px,0.74vw)]" style={LABEL}>
-          <a href="#top" className="tpl-hit relative text-[15px] font-bold tracking-[0.34em] md:text-[max(15px,1.05vw)]" aria-label={brand}>
+        <header data-apex-chrome className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
+          <a href="#top" className="apex-brand tpl-hit relative text-[12px] font-bold tracking-[0.2em] whitespace-nowrap md:text-[max(15px,1.05vw)] md:tracking-[0.34em]" aria-label={brand}>
             {brand}
           </a>
-          <p className="hidden max-w-[22ch] opacity-70 md:block md:absolute md:left-[28%]">{tagline}</p>
+          <p className="hidden max-w-[18ch] opacity-70 lg:absolute lg:left-[16%] lg:block">{tagline}</p>
           <nav className="hidden items-center gap-[2.2vw] md:flex" aria-label="Primary">
             {links.map((l) => (
               <a key={l.label} href={l.href} className="tpl-link tpl-hit relative py-1">
                 {l.label}
               </a>
             ))}
-            <a href={ctaHref} className="apex-cta tpl-hit relative border border-current px-[1.1em] py-[0.7em]">
+            <a href={ctaHref} className="apex-cta tpl-hit relative border border-current px-[1.1em] py-[0.62em]">
               {ctaLabel}
             </a>
           </nav>
-          <div className="flex items-center gap-2 md:hidden">
-            <a href={ctaHref} className="apex-cta tpl-hit relative border border-current px-[1em] py-[0.7em]">
+          <div className="flex items-center gap-3">
+            <a href={ctaHref} className="apex-cta tpl-hit relative border border-current px-[0.8em] py-[0.5em] tracking-[0.1em] whitespace-nowrap md:hidden">
               {ctaLabel}
             </a>
-            <button {...menu.triggerProps} className="tpl-hit relative border border-current px-[1em] py-[0.7em] uppercase">
-              {menuLabel}
+            <button {...menu.triggerProps} className="apex-burger-btn tpl-hit relative md:ml-[1.6vw]" aria-label={menuLabel}>
+              <Burger />
             </button>
           </div>
         </header>
@@ -337,7 +548,8 @@ export default function Hero({
         <div data-apex-copy className="mt-auto mb-[clamp(2rem,9svh,6rem)] grid items-end gap-8 md:grid-cols-12 md:gap-[1.6vw]">
           <h1
             data-apex-reveal
-            className="text-[clamp(2.75rem,6vw,6.25rem)] leading-[0.95] font-medium tracking-[-0.035em] md:col-span-8"
+            data-apex-par="h1"
+            className="text-[2.15rem] md:text-[clamp(2.75rem,6vw,6.25rem)] leading-[0.95] font-medium tracking-[-0.035em] md:col-span-8"
             style={DISPLAY}
           >
             {[line1, line2].filter(Boolean).map((l) => (
@@ -348,7 +560,7 @@ export default function Hero({
               </span>
             ))}
           </h1>
-          <div className="flex max-w-[34ch] flex-col gap-5 text-[13px] leading-[1.45] md:col-span-3 md:col-start-10 md:text-[max(13px,0.95vw)]">
+          <div data-apex-par="sub" className="flex max-w-[34ch] flex-col gap-5 text-[14px] leading-[1.45] md:col-span-3 md:col-start-10 md:text-[max(13px,0.95vw)]">
             <p data-apex-sub data-apex-reveal className="opacity-80">
               {blurb}
             </p>
@@ -360,7 +572,7 @@ export default function Hero({
         </div>
 
         {/* Chapters follow the film; a tap jumps to a take. */}
-        <footer data-apex-chrome className="flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:text-[max(11px,0.74vw)]" style={LABEL}>
+        <footer data-apex-chrome className="flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
           <div className="min-w-0">
             <p data-apex-chapter className="mb-3 tabular-nums opacity-80" aria-live="off">
               {`01 / ${pad(names.length)} — ${names[0]}`}
@@ -389,27 +601,22 @@ export default function Hero({
         </footer>
       </div>
 
-      {/* Phone menu: its own sheet, in the same black. */}
-      {menu.open ? (
-        <div {...menu.panelProps} className="apex-sheet fixed inset-0 z-50 flex flex-col justify-between px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.5rem,env(safe-area-inset-bottom))]" style={{ background: 'var(--apex-ink)', color: 'var(--apex-fg)' }} aria-label={menuLabel}>
-          <div className="flex items-start justify-between text-[11px] tracking-[0.16em] uppercase" style={LABEL}>
-            <span className="text-[15px] font-bold tracking-[0.34em]">{brand}</span>
-            <button type="button" onClick={menu.close} className="tpl-hit relative border border-current px-[1em] py-[0.7em]">
-              {closeLabel}
-            </button>
-          </div>
-          <ul className="flex flex-col gap-3" style={DISPLAY}>
-            {links.map((l) => (
-              <li key={l.label}>
-                <a href={l.href} onClick={menu.close} className="block py-1 text-[clamp(2.4rem,11vw,3.5rem)] leading-[1.02] font-medium tracking-[-0.03em]">
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <p className="max-w-[26ch] text-[13px] opacity-70">{tagline}</p>
-        </div>
-      ) : null}
+      </div>
+
+      {/* The menu: a curtain that drops from the top and goes back up. */}
+      <HeroMenu
+        menu={menu}
+        brand={brand}
+        links={links}
+        ctaLabel={ctaLabel}
+        ctaHref={ctaHref}
+        menuLabel={menuLabel}
+        closeLabel={closeLabel}
+        meta={menuMeta}
+        showFilm={showMenuFilm !== 'off'}
+        filmSrc={filmPhone}
+        poster={posterPhone}
+      />
 
       <style>{`
         .apex-wash { background: var(--apex-wash); mix-blend-mode: soft-light; opacity: 0.32; }
@@ -435,9 +642,44 @@ export default function Hero({
         .apex-more-arrow { transform-origin: left center; transition: transform 520ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
         .apex-scroll-line { animation: apex-breathe 2.4s var(--ease-in-out, ease-in-out) infinite; }
         @keyframes apex-breathe { 0%, 100% { transform: scaleX(0.35); } 50% { transform: scaleX(1); } }
-        .apex-sheet { animation: apex-sheet 380ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both; }
-        @keyframes apex-sheet { from { opacity: 0; } to { opacity: 1; } }
+        .apex-brand { transition: letter-spacing 600ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
+        .apex-burger { position: relative; display: block; width: 26px; height: 11px; }
+        .apex-burger i { position: absolute; left: 0; right: 0; height: 1.5px; background: currentColor; transition: transform 520ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
+        .apex-burger i:nth-child(1) { top: 0; }
+        .apex-burger i:nth-child(2) { bottom: 0; }
+        .apex-burger[data-x] i { top: 50%; bottom: auto; margin-top: -0.75px; }
+        .apex-burger[data-x] i:nth-child(1) { transform: rotate(45deg); }
+        .apex-burger[data-x] i:nth-child(2) { transform: rotate(-45deg); }
+        /* The menu: a curtain from the top edge; closing retracts the same edge upward. */
+        .apex-sheet {
+          clip-path: inset(0 0 100% 0); visibility: hidden;
+          transition: clip-path 800ms var(--ease-in-out, cubic-bezier(0.77, 0, 0.175, 1)), visibility 0s linear 800ms;
+        }
+        .apex-sheet[data-open='true'] {
+          clip-path: inset(0 0 0 0); visibility: visible;
+          transition: clip-path 800ms var(--ease-in-out, cubic-bezier(0.77, 0, 0.175, 1)), visibility 0s;
+        }
+        .apex-menu-link {
+          transform: translateY(108%);
+          transition: transform 620ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)), opacity 320ms var(--ease-out, ease);
+        }
+        .apex-sheet[data-open='true'] .apex-menu-link {
+          transform: translateY(0);
+          transition: transform 900ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) calc(260ms + var(--i, 0) * 80ms), opacity 320ms var(--ease-out, ease);
+        }
+        .apex-menu-film { clip-path: inset(100% 0 0 0); transition: clip-path 600ms var(--ease-in-out, ease-in-out); }
+        .apex-sheet[data-open='true'] .apex-menu-film { clip-path: inset(0 0 0 0); transition: clip-path 1000ms var(--ease-in-out, ease-in-out) 380ms; }
+        .apex-menu-meta { opacity: 0; transition: opacity 300ms var(--ease-out, ease); }
+        .apex-sheet[data-open='true'] .apex-menu-meta { opacity: 0.7; transition: opacity 700ms var(--ease-out, ease) 700ms; }
+        @media (max-width: 767px) {
+          .apex-wash { mix-blend-mode: normal; opacity: 0.14; }
+          .apex-grain { display: none; }
+        }
         @media (hover: hover) {
+          .apex-brand:hover { letter-spacing: 0.46em; }
+          .apex-burger-btn:hover .apex-burger:not([data-x]) i:nth-child(1) { transform: translateY(4.5px); }
+          .apex-burger-btn:hover .apex-burger:not([data-x]) i:nth-child(2) { transform: translateY(-4.5px); }
+          .apex-menu-list:hover .apex-menu-link:not(:hover) { opacity: 0.24; }
           .apex-cta:hover { background-color: var(--apex-fg); color: var(--apex-ink); }
           .apex-more:hover .apex-more-arrow { transform: scaleX(1.7); }
           .apex-seg:not(:disabled):hover { background: color-mix(in srgb, currentColor 60%, transparent); }
@@ -446,6 +688,12 @@ export default function Hero({
           :where(:root:not([data-motion='full'])) .apex-grain::after,
           :where(:root:not([data-motion='full'])) .apex-scroll-line,
           :where(:root:not([data-motion='full'])) .apex-sheet { animation: none; }
+          :where(:root:not([data-motion='full'])) .apex-sheet,
+          :where(:root:not([data-motion='full'])) .apex-menu-link,
+          :where(:root:not([data-motion='full'])) .apex-menu-film,
+          :where(:root:not([data-motion='full'])) .apex-menu-meta,
+          :where(:root:not([data-motion='full'])) .apex-burger i,
+          :where(:root:not([data-motion='full'])) .apex-brand,
           :where(:root:not([data-motion='full'])) .apex-cta,
           :where(:root:not([data-motion='full'])) .apex-more-arrow,
           :where(:root:not([data-motion='full'])) .apex-seg { transition: none; }

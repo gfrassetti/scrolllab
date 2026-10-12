@@ -143,6 +143,14 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   // campos (URL https del cliente); `flow` (lo pone el registro del embed) quita el
   // apagado hacia el negro al scrollear: un widget no va a abrir ni cerrar la página.
   'apex/Hero',
+  // APEX Statement (palabras que se encienden con el scroll + cifras) y Gallery
+  // (carrusel de pantalla completa; el puntero lleva la miniatura de la siguiente).
+  'apex/Statement',
+  'apex/Story',
+  'apex/Gallery',
+  // APEX Models: la gama como lista con foto al lado (hover / tramo central en el teléfono).
+  // El Footer a pantalla completa queda fuera: es el cierre de una página, no un widget.
+  'apex/Models',
   // Three.js (Fase L): con el frame partido por sección, three es un archivo
   // aparte que bajan solo estos widgets (antes lo pagaba cada embed).
   'fizz/HeroBubbles',

@@ -712,6 +712,17 @@
       ],
       "description": "A paper world told as a film: thousands of frames on one canvas that move with every tick of the scroll, with no cuts and no still pictures. The camera circles a sphere under construction that opens like a flower, drops into a town at night, flies into the moon as it folds into a workshop and comes out at dawn. A hairline grid reframes every shot, text cards arrive on cue, dots and paper-tear transitions, a chapter rail with a full-screen menu and a looping footer. Ships with the script that builds the film from your own clips. Made for brands that tell a story: launches, products, studios.",
       "notice": "The film in the demo is a sample: for your brand you will need to produce your own video clips (AI-generated or shot), and that is most of the work. The ZIP ships the engine, the script that turns your clips into the film and a step-by-step guide. If you would rather have us do it, our Studio adapts it to your brand."
+    },
+    "apex": {
+      "vibe": "Automotive film",
+      "tags": [
+        "Five-take looping film",
+        "Curtain menu and loader",
+        "Carousel with a pointer thumbnail",
+        "Full-height footer"
+      ],
+      "description": "A night studio and one electric grand tourer that only exists in its reflections. The hero is a five-take film that loops without a jump, with a baked grade and an editable overlay, chapters that follow the video and parallax between the picture and the type. A menu that drops like a curtain and goes back up, a loader the hero covers from the bottom up, a statement that lights up word by word with the scroll, a full-screen carousel with the next picture as a thumbnail on the pointer, the range as a list with a preview and a full-height footer. Everything editable from the builder. Ideal for car brands, bespoke workshops, premium dealerships and product design studios.",
+      "notice": "The film and the photos in the demo are samples: for your brand you will need to produce your own clips (AI-generated or shot) and your own photos, and that is most of the work. The ZIP ships the script that turns five clips into the film (60 fps, a loop with no jump, a phone version) and the step-by-step guide. If you would rather we do it, we adapt it to your brand from the Studio."
     }
   },
   "builder": {
@@ -1245,6 +1256,30 @@
         "Hero": {
           "name": "Hero",
           "blurb": "Full-screen film of five takes that loops without a jump, with an editable grade and overlay; chapters that follow the video, its own phone menu and an entrance that lifts a curtain."
+        },
+        "Statement": {
+          "name": "Statement",
+          "blurb": "A declaration at poster scale whose words come on with the scroll, three figures that count up and one link; on the hero's own ink, no wall of white."
+        },
+        "Story": {
+          "name": "Story",
+          "blurb": "Mission and vision: up to three chapters of text with one picture each, parallax in three depths (a giant word far behind, the picture sliding in its frame, the text still) and alternating sides."
+        },
+        "Gallery": {
+          "name": "Gallery",
+          "blurb": "Full-screen carousel: the pointer carries the next picture, a click opens it out of the thumbnail with a zoom, the left quarter goes back."
+        },
+        "Models": {
+          "name": "Models",
+          "blurb": "The range as one list of names at poster scale: the one under the pointer is at full strength and its picture sits in a square beside it (on a phone, the one crossing the middle of the screen). A light panel between two dark ones."
+        },
+        "Showroom": {
+          "name": "Showroom 3D",
+          "blurb": "A round night showroom in 3D (Blender, baked light): the scroll walks the camera in through the door and stops beside each car; drag turns the car, Close brings the spec card back, scrolling on leaves the room."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "Full-height closer: brand and plain lines, the menu and a working newsletter field, contact blocks bottom right and the wordmark set huge bottom left."
         }
       }
     },

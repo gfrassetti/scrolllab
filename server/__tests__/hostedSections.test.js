@@ -280,6 +280,46 @@ describe('Fase G — las 10 secciones nuevas de LAB', () => {
     assert.equal(bad?.washColor, undefined)
   })
 
+  it('apex/Statement y apex/Gallery: listas con tope, imágenes https o ruta y colores por la regla', () => {
+    const st = sanitizeSectionProps('apex/Statement', {
+      statement: 'We build *quieter* cars.',
+      stats: Array.from({ length: 9 }, (_, i) => ({ value: String(i), label: 'l' + i })),
+      linkHref: 'javascript:alert(1)',
+      accent: '#ffb000',
+    })
+    assert.equal(st.stats.length, 4)
+    assert.equal(st.linkHref, undefined)
+    assert.equal(st.accent, '#ffb000')
+    const ga = sanitizeSectionProps('apex/Gallery', {
+      slides: [
+        { image: 'https://cdn.test/a.jpg', title: 'A', caption: 'a' },
+        { image: 'javascript:alert(1)', title: 'B', caption: 'b' },
+        ...Array.from({ length: 20 }, () => ({ image: '/x.jpg', title: 't', caption: 'c' })),
+      ],
+      showCursorThumb: 'off',
+    })
+    assert.equal(ga.slides.length, 12)
+    assert.equal(ga.slides[0].image, 'https://cdn.test/a.jpg')
+    assert.equal(ga.slides[1].image, undefined)
+    assert.equal(ga.showCursorThumb, 'off')
+  })
+
+  it('apex/Hero: el loader y el menú aceptan sus campos (colores por la regla, interruptor on/off)', () => {
+    const clean = sanitizeSectionProps('apex/Hero', {
+      showLoader: 'off',
+      loaderWord: 'APEX',
+      loaderBg: '#101820',
+      loaderFg: 'red; background:url(//evil)',
+      menuMeta: 'Calle 1' + String.fromCharCode(10) + 'hola@x.co',
+      showMenuFilm: 'off',
+    })
+    assert.equal(clean.showLoader, 'off')
+    assert.equal(clean.loaderBg, '#101820')
+    assert.equal(clean.loaderFg, undefined)
+    assert.equal(clean.menuMeta, 'Calle 1' + String.fromCharCode(10) + 'hola@x.co')
+    assert.equal(clean.showMenuFilm, 'off')
+  })
+
   it('monolith/SpecSheet: filas dato/valor', () => {
     const clean = sanitizeSectionProps('monolith/SpecSheet', {
       specs: [{ label: 'Material', value: 'Hormigón' }],

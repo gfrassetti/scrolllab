@@ -113,6 +113,12 @@ const APPROVED = [
   'kin/Visit',
   'kin/Footer',
   'apex/Hero',
+  'apex/Statement',
+  'apex/Story',
+  'apex/Gallery',
+  'apex/Models',
+  'apex/Showroom',
+  'apex/Footer',
   'contact/ContactForm',
   'commerce/ProductGrid',
 ]

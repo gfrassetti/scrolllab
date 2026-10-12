@@ -171,6 +171,18 @@ const THEMES = {
     note: 'text-[#1b1a17]/45',
     radius: '',
   },
+  apex: {
+    surface: 'bg-[#04070d] text-[#e8edf6]',
+    eyebrow: 'text-[#9cc3ff]',
+    title: 'font-medium tracking-[-0.035em]',
+    body: 'text-[#e8edf6]/65',
+    field:
+      'border-[#e8edf6]/20 focus:border-[#9cc3ff] placeholder:text-[#e8edf6]/30',
+    button:
+      'border border-[#e8edf6] hover:bg-[#e8edf6] hover:text-[#04070d] disabled:opacity-40',
+    note: 'text-[#e8edf6]/40',
+    radius: '',
+  },
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

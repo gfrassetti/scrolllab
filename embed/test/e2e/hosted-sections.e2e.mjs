@@ -319,6 +319,64 @@ const CASES = {
     marker: 'MKAPEXH',
     checkFg: true,
   },
+  'apex/Statement': {
+    props: {
+      eyebrow: 'MKAPEXS',
+      statement: 'We build *quieter* cars.',
+      stats: [{ value: '620', label: 'km' }, { value: '14', label: 'coats' }],
+      linkLabel: 'Read',
+      linkHref: '#x',
+      bg: '#101820',
+      fg: '#eef2f7',
+      accent: '#ffb000',
+    },
+    marker: 'MKAPEXS',
+    checkFg: true,
+  },
+  'apex/Story': {
+    props: {
+      blocks: [
+        { label: 'MKAPEXY', title: 'Title one', text: 'x', image: 'https://zq.test/a.jpg', word: 'One' },
+        { label: 'Two', title: 'Title two', text: 'y', image: 'https://zq.test/b.jpg', word: 'Two' },
+      ],
+      bg: '#101820',
+      fg: '#eef2f7',
+      accent: '#ffb000',
+    },
+    marker: 'MKAPEXY',
+    checkFg: true,
+  },
+  'apex/Gallery': {
+    props: {
+      eyebrow: 'MKAPEXG',
+      slides: [
+        { image: 'https://zq.test/a.jpg', title: 'One', caption: 'x' },
+        { image: 'https://zq.test/b.jpg', title: 'Two', caption: 'y' },
+      ],
+      nextLabel: 'Next',
+      prevLabel: 'Back',
+      bg: '#101820',
+      fg: '#eef2f7',
+      accent: '#ffb000',
+    },
+    marker: 'MKAPEXG',
+    checkFg: true,
+  },
+  'apex/Models': {
+    props: {
+      eyebrow: 'MKAPEXM',
+      caption: 'x',
+      items: [
+        { name: 'Alpha', image: 'https://zq.test/a.jpg', href: '#a' },
+        { name: 'Beta', image: 'https://zq.test/b.jpg', href: '#b' },
+      ],
+      bg: '#101820',
+      fg: '#eef2f7',
+      accent: '#ffb000',
+    },
+    marker: 'MKAPEXM',
+    checkFg: true,
+  },
   'chapters/ParallaxEditorial': {
     props: { label: 'MKPEDI', figures: [{ caption: 'x' }], bg: '#1a1714', fg: '#efe8dc' },
     marker: 'MKPEDI',

@@ -1224,6 +1224,12 @@ dueño); el hero abre la fase.
   escritorio (844) y teléfono (824); lo marcado es `red`/`errores` por el film
   (404 mientras `public/apex` no está en producción; el Chromium de Playwright no
   trae H.264) y es esperado.
+- **APEX Statement y Gallery** entran en la misma fase (74 hosteables): FLOW, sin pin.
+  Statement enciende las palabras con el scroll del sitio (el `scrollerProxy` lo mapea) y
+  cuenta las cifras al aparecer; Gallery trae el cursor con miniatura (solo mouse), el
+  swipe y las zonas táctiles dentro del iframe. En el screening salen `texto-oculto`
+  (palabras fantasma y filas que suben al scrollear: diseño, ver el criterio de la Fase I).
+  El loader del hero **no** corre en LAB (un widget no puede tapar la página del cliente).
 - **Tests:** `hostedSections.test.js` (media https/ruta, `javascript:`/`data:`
   caen, capítulos con tope 8, color por la regla) y el caso e2e `apex/Hero`
   (marcador, bg/fg, 3 viewports sin overflow).

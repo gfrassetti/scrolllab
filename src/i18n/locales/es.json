@@ -712,6 +712,17 @@
       ],
       "description": "Un mundo de papel contado como una película: miles de cuadros en un canvas que avanzan con cada tick del scroll, sin cortes ni imágenes quietas. La cámara recorre una esfera en obra que se abre como una flor, baja a un pueblo de noche, entra en la luna que se pliega en un taller y sale al amanecer. Grilla de líneas que reencuadra cada toma, tarjetas de texto a tiempo, transiciones de puntos y de papel picado, riel de capítulos con menú a pantalla completa y un footer en loop. Trae el script que arma la película con tus propios clips. Ideal para marcas que cuentan una historia: lanzamientos, productos, estudios.",
       "notice": "La película de la demo es de muestra: para tu marca vas a tener que producir tus propios clips de video (generados con IA o filmados), y eso es la mayor parte del trabajo. El ZIP trae el motor, el script que convierte tus clips en la película y la guía paso a paso. Si preferís que la hagamos nosotros, la adaptamos a tu marca desde el Estudio."
+    },
+    "apex": {
+      "vibe": "Film automotriz",
+      "tags": [
+        "Film de cinco tomas en loop",
+        "Menú-cortina y loader",
+        "Carrusel con miniatura en el cursor",
+        "Footer a pantalla completa"
+      ],
+      "description": "Una noche de estudio y un grand tourer eléctrico que solo existe en sus reflejos. El hero es un film de cinco tomas que cierra en loop sin salto, con grade horneado y overlay editable, capítulos que siguen al video y parallax entre la imagen y el texto. Menú que baja como una cortina y vuelve a subir, loader que el hero tapa de abajo hacia arriba, una declaración que se enciende palabra por palabra con el scroll, un carrusel a pantalla completa con la siguiente imagen en miniatura sobre el cursor, la gama como lista con vista previa y un footer a pantalla completa. Todo editable desde el builder. Ideal para marcas de autos, talleres a medida, concesionarias premium y estudios de diseño de producto.",
+      "notice": "El film y las fotos de la demo son de muestra: para tu marca vas a tener que producir tus propios clips (generados con IA o filmados) y tus fotos, y eso es la mayor parte del trabajo. El ZIP trae el script que convierte cinco clips en el film (60 fps, loop sin salto, versión para teléfono) y la guía paso a paso. Si preferís que lo hagamos nosotros, lo adaptamos a tu marca desde el Estudio."
     }
   },
   "builder": {
@@ -1245,6 +1256,30 @@
         "Hero": {
           "name": "Hero",
           "blurb": "Film a pantalla completa de cinco tomas que cierra en loop sin salto, con grade y overlay editables; capítulos que siguen al video, menú propio en el teléfono y una entrada que levanta la cortina."
+        },
+        "Statement": {
+          "name": "Statement",
+          "blurb": "Declaración a escala de afiche cuyas palabras se encienden con el scroll, tres cifras que cuentan y un enlace; sobre la misma tinta del hero, sin pared blanca."
+        },
+        "Story": {
+          "name": "Story",
+          "blurb": "Misión y visión: hasta tres capítulos de texto con una imagen cada uno, parallax en tres profundidades (una palabra gigante al fondo, la imagen que se desliza en su marco y el texto quieto) y lados que se alternan."
+        },
+        "Gallery": {
+          "name": "Gallery",
+          "blurb": "Carrusel a pantalla completa: el puntero lleva la miniatura de la siguiente, un clic la abre desde la miniatura con un zoom y el cuarto izquierdo vuelve atrás."
+        },
+        "Models": {
+          "name": "Models",
+          "blurb": "La gama como una lista de nombres a escala de afiche: el que está bajo el puntero queda a pleno y su foto aparece en el cuadrado de al lado (en el teléfono, el que cruza el medio de la pantalla). Un panel claro entre dos oscuros."
+        },
+        "Showroom": {
+          "name": "Showroom 3D",
+          "blurb": "Sala de exhibición en 3D (Blender, luz horneada): el scroll lleva la cámara por la puerta y la detiene al costado de cada auto; arrastrando se gira el auto, «Close» vuelve a la ficha y seguir bajando sale de la sala."
+        },
+        "Footer": {
+          "name": "Footer",
+          "blurb": "Cierre a pantalla completa: marca y líneas simples, el menú y un campo de newsletter que funciona, bloques de contacto abajo a la derecha y la palabra enorme abajo a la izquierda."
         }
       }
     },

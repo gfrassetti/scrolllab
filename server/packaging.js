@@ -174,7 +174,14 @@ const MODEL_FILES = {
     importPrefix: './components/sections/apex',
     // The demo film is sample media: the buyer rebuilds it from their own five
     // clips with scripts/apex-reel.mjs (docs/apex-template.md).
-    publicAssets: [...publicDirAssets('apex'), 'scripts/apex-reel.mjs'],
+    // + the 3D showroom (room and cars, Draco) with its decoder, and the room's Blender source.
+    publicAssets: [
+      ...publicDirAssets('apex'),
+      ...publicDirAssets('apex/showroom'),
+      ...publicDirAssets('apex/draco'),
+      'scripts/apex-reel.mjs',
+      'design/blender/apex-showroom.blend',
+    ],
   },
   fold: {
     page: 'src/pages/FoldPage.jsx',
@@ -550,8 +557,57 @@ With "reduce motion" on, the film becomes still plates: each text on its own
 frame of the film, with a short fade.
 `
 
+/** APEX: el film de la demo es de muestra; cómo rehacerlo con clips propios. */
+const APEX_FILM_NOTE = `## The film and the photos
+
+> **The film and the photos in this demo are samples.** The hero, the menu, the
+> loader and every other section are yours to keep; the pictures are meant to be
+> replaced by your own footage. Producing it is most of the work — the steps
+> below turn your clips into the film.
+
+The hero plays \`public/apex/hero.mp4\` (desktop, 1080p) and \`hero-m.mp4\`
+(phones, 720×1280 — one portrait crop per take). \`manifest.json\` says where
+each take starts on the loop (the chapter indicator reads it).
+
+### Your own film
+
+1. Five 16:9 clips of at least 4 s, each one continuous camera move. Put them
+   in \`design/masters/cars/\` as \`shot-1.mp4 … shot-5.mp4\`.
+2. With [ffmpeg](https://ffmpeg.org) installed:
+
+   \`\`\`
+   node scripts/apex-reel.mjs
+   \`\`\`
+
+   It interpolates every clip to 60 fps, restores frames a generator dropped,
+   chains the takes with a 0.5 s crossfade (the last one dissolves into the
+   first, so the loop never jumps), bakes a restrained grade and writes the two
+   films, the posters and the manifest into \`public/apex/\`.
+3. Edit \`SHOTS\` in the script for the file names and where each phone crop is
+   centred.
+
+The overlay (wash, shade, vignette, grain) is CSS in \`Hero.jsx\`: the colours
+are props. With "reduce motion" or data saver the film does not play: the graded
+poster is the hero.
+
+### The showroom (3D)
+
+\`Showroom.jsx\` loads \`public/apex/showroom/showroom.glb\` (the room, light baked into
+its textures) and one GLB per car (\`car-1.glb\` …), Draco-compressed (decoder in
+\`public/apex/draco/\`). To use your own cars: a real-size model (4–6 m), standing on the
+floor (origin at the bottom centre), front toward −Z, exported with Draco and 2048 px
+WebP textures; pass its URL in \`cars[].modelUrl\`. The room's source is
+\`design/blender/apex-showroom.blend\`: change it, bake (Cycles → Bake → Combined, no
+glossy) and export \`showroom.glb\` the same way. With "reduce motion" or no WebGL the
+section shows \`cars[].image\` (a side shot) with the spec cards.
+
+The gallery and the model list read their pictures from
+\`src/components/sections/apex/assets/\` (or any \`image\` prop).
+`
+
 /** Notas del template completo (su ZIP trae los GLB de public/). */
 const MODEL_3D_NOTES = {
+  apex: APEX_FILM_NOTE,
   fold: FOLD_FILM_NOTE,
   fizz: `${fizzHero3dNote({ demoGlb: true })}\n${FIZZ_CANS_NOTE}`,
   monolith: monolith3dNote({ sampleGlb: true }),

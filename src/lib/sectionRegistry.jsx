@@ -101,6 +101,12 @@ import KinPress from '../components/sections/kin/Press'
 import KinVisit from '../components/sections/kin/Visit'
 import KinFooter from '../components/sections/kin/Footer'
 import ApexHero from '../components/sections/apex/Hero'
+import ApexStatement from '../components/sections/apex/Statement'
+import ApexStory from '../components/sections/apex/Story'
+import ApexGallery from '../components/sections/apex/Gallery'
+import ApexModels from '../components/sections/apex/Models'
+import ApexShowroom from '../components/sections/apex/Showroom'
+import ApexFooter from '../components/sections/apex/Footer'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import SelectedWorkIndex from '../components/sections/signal/SelectedWorkIndex'
@@ -322,6 +328,12 @@ const allModels = [
     wrapperClass: MODEL_WRAPPER_CLASS.apex,
     sections: [
       { id: 'apex/Hero', name: 'Hero', kind: 'hero', component: ApexHero, blurb: 'Full-screen film of five takes that loops without a jump, graded and overlaid in CSS; chapters follow the video, its own phone menu and a text entrance that lifts a curtain.' },
+      { id: 'apex/Statement', name: 'Statement', kind: 'section', component: ApexStatement, blurb: 'A declaration at poster scale whose words come on with the scroll, three figures that count up and one link; on the hero\'s own ink, no wall of white.' },
+      { id: 'apex/Story', name: 'Story', kind: 'section', component: ApexStory, blurb: 'Mission and vision: up to three chapters of text with one picture each, parallax in three depths (a giant word far behind, the picture sliding in its frame, the text still) and alternating sides.' },
+      { id: 'apex/Gallery', name: 'Gallery', kind: 'section', component: ApexGallery, blurb: 'Full-screen carousel: the pointer carries the next picture, a click opens it out of the thumbnail with a zoom, the left quarter goes back.' },
+      { id: 'apex/Models', name: 'Models', kind: 'section', component: ApexModels, blurb: 'The range as one list of names at poster scale: the one under the pointer is at full strength and its picture sits in a square beside it (on a phone, the one crossing the middle of the screen). A light panel between two dark ones.' },
+      { id: 'apex/Showroom', name: 'Showroom 3D', kind: 'section', component: ApexShowroom, blurb: 'A round night showroom in 3D (Blender, baked light): the scroll walks the camera in through the door and stops beside each car; drag turns the car, Close brings the spec card back, scrolling on leaves the room.' },
+      { id: 'apex/Footer', name: 'Footer', kind: 'footer', component: ApexFooter, blurb: 'Full-height closer: brand and plain lines, the menu and a working newsletter field, contact blocks bottom right and the wordmark set huge bottom left.' },
     ],
     sectionsDir: 'src/components/sections/apex',
   },

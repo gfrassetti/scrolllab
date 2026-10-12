@@ -111,6 +111,11 @@ export const PRODUCTS = {
     'FOLD — template',
     'Modelo de película al scroll: un mundo de papel contado como un film continuo en canvas que avanza con cada tick del scroll, capítulos con riel y menú, transiciones de puntos y de papel picado, y un footer en loop. La película de la demo es de muestra: hay que producir clips propios; trae el script y la guía para armarla (código fuente).',
   ),
+  apex: template(
+    'apex',
+    'APEX — template',
+    'Modelo automotriz a pantalla completa: un film de cinco tomas que cierra en loop sin salto, menú-cortina, loader que el hero tapa de abajo hacia arriba, declaración que se enciende con el scroll, carrusel con miniatura en el cursor, lista de modelos con vista previa y footer a pantalla completa. El film y las fotos de la demo son de muestra: hay que producir los propios; trae el script que arma el film con tus clips (código fuente).',
+  ),
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',

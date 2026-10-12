@@ -111,4 +111,13 @@ export const TEMPLATE_META = [
     tagline: 'a film you scroll',
     palette: ['#e9e2d3', '#1b1a17', '#c8742f'],
   },
+  {
+    id: '13',
+    sku: 'apex',
+    name: 'APEX',
+    path: '/templates/apex',
+    category: 'AUTOMOTIVE',
+    tagline: 'a film you drive',
+    palette: ['#04070d', '#e8edf6', '#9cc3ff'],
+  },
 ]
