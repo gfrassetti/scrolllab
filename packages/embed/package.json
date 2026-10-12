@@ -5,13 +5,27 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
+  "types": "./react.d.ts",
+  "typesVersions": {
+    "*": {
+      "vue": ["./vue.d.ts"]
+    }
+  },
   "exports": {
-    ".": "./react.js",
-    "./vue": "./vue.js"
+    ".": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    }
   },
   "files": [
     "react.js",
+    "react.d.ts",
     "vue.js",
+    "vue.d.ts",
     "loader-client.js",
     "README.md"
   ],

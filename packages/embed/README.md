@@ -55,6 +55,11 @@ the next load.
 No package needed — paste the `<script>` tag ScrollLab gives you in the LAB
 dashboard.
 
+## TypeScript
+
+Types are included (`ScrollLabEmbedProps`: `embedKey?` and `packKey?`). Nothing to
+install besides `@types/react` for React or `vue` for Vue.
+
 ## Notes
 
 - The loader is injected once per page and shared across every `<ScrollLabEmbed>`.
