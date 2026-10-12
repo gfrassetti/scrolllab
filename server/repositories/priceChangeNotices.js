@@ -150,6 +150,121 @@ export const priceChangeNoticesRepo = {
   },
 
   /**
+   * Reclama el RECORDATORIO (plan anual: un segundo mail cerca del cobro con el
+   * precio nuevo). Una sola llamada gana. Solo si el aviso ya salió, si el
+   * recordatorio no salió, y si el aviso no está aplicado ni descartado.
+   * @param {string} noticeId
+   */
+  async claimPriceChangeReminder(noticeId) {
+    const now = new Date();
+    const staleBefore = new Date(now.getTime() - CLAIM_STALE_MS);
+    if (isFileMode()) {
+      return fileDb.updatePriceChangeNoticeIf(
+        noticeId,
+        (row) =>
+          !!row.emailSentAt &&
+          !row.reminderSentAt &&
+          !row.appliedAt &&
+          !row.skippedAt &&
+          !(row.reminderSendingAt && new Date(row.reminderSendingAt) >= staleBefore),
+        (row) => {
+          row.reminderSendingAt = now.toISOString();
+          delete row.reminderError;
+        },
+      );
+    }
+    return MongoNotice.findOneAndUpdate(
+      {
+        _id: noticeId,
+        emailSentAt: { $ne: null },
+        reminderSentAt: null,
+        appliedAt: null,
+        skippedAt: null,
+        $or: [{ reminderSendingAt: null }, { reminderSendingAt: { $lt: staleBefore } }],
+      },
+      { $set: { reminderSendingAt: now }, $unset: { reminderError: 1 } },
+      { new: true },
+    );
+  },
+  async completePriceChangeReminder(noticeId, emailId) {
+    const now = new Date();
+    if (isFileMode()) {
+      return fileDb.updatePriceChangeNoticeIf(
+        noticeId,
+        () => true,
+        (row) => {
+          row.reminderSentAt = now.toISOString();
+          row.reminderEmailId = emailId;
+          delete row.reminderSendingAt;
+          delete row.reminderError;
+        },
+      );
+    }
+    return MongoNotice.findByIdAndUpdate(
+      noticeId,
+      {
+        $set: { reminderSentAt: now, reminderEmailId: emailId },
+        $unset: { reminderSendingAt: 1, reminderError: 1 },
+      },
+      { new: true },
+    );
+  },
+  async releasePriceChangeReminder(noticeId, message) {
+    const safe = String(message || "Error de email").slice(0, 500);
+    if (isFileMode()) {
+      return fileDb.updatePriceChangeNoticeIf(
+        noticeId,
+        () => true,
+        (row) => {
+          row.reminderError = safe;
+          delete row.reminderSendingAt;
+        },
+      );
+    }
+    return MongoNotice.findByIdAndUpdate(
+      noticeId,
+      { $set: { reminderError: safe }, $unset: { reminderSendingAt: 1 } },
+      { new: true },
+    );
+  },
+  /**
+   * Avisados, sin recordatorio (y que nadie esté mandando), sin aplicar ni
+   * descartar, con fecha efectiva antes de `before`. La más próxima primero.
+   * Qué avisos llevan recordatorio (anuales, subas) lo decide el servicio.
+   * @param {{ before: Date | string | number, limit?: number }} args
+   */
+  async listPriceChangeRemindersDue({ before, limit = 200 }) {
+    const cap = Math.min(Math.max(Number(limit) || 0, 1), MAX_LIST);
+    const limitDate = new Date(before);
+    const staleBefore = new Date(Date.now() - CLAIM_STALE_MS);
+    if (isFileMode()) {
+      return (await fileDb.listPriceChangeNotices())
+        .filter(
+          (n) =>
+            n.emailSentAt &&
+            !n.reminderSentAt &&
+            !n.appliedAt &&
+            !n.skippedAt &&
+            n.effectiveAt &&
+            new Date(n.effectiveAt) <= limitDate &&
+            (!n.reminderSendingAt || new Date(n.reminderSendingAt) < staleBefore),
+        )
+        .sort((a, b) => new Date(a.effectiveAt).getTime() - new Date(b.effectiveAt).getTime())
+        .slice(0, cap);
+    }
+    return MongoNotice.find({
+      emailSentAt: { $ne: null },
+      reminderSentAt: null,
+      appliedAt: null,
+      skippedAt: null,
+      effectiveAt: { $ne: null, $lte: limitDate },
+      $or: [{ reminderSendingAt: null }, { reminderSendingAt: { $lt: staleBefore } }],
+    })
+      .sort({ effectiveAt: 1 })
+      .limit(cap);
+  },
+
+  /**
    * Avisos cuyo mail todavía no salió (y que nadie está mandando ahora): los
    * que el barrido reintenta. Del más viejo al más nuevo.
    * @param {{ limit?: number }} [options]

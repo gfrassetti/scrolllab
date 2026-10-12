@@ -918,6 +918,100 @@ export function defineRepoContract(ctx) {
       assert.equal(out.filter(Boolean).length, 1)
     })
 
+    // ——— Recordatorio del plan anual: un segundo mail, cerca del cobro nuevo ———
+    it('recordatorio: solo con el aviso enviado; una vez, soltable y con claim vencido que se retoma', async () => {
+      const sub = await newSub(await newUser())
+      const n = await newNotice(sub)
+      assert.equal(await db.claimPriceChangeReminder(id(n)), null, 'sin aviso enviado no hay recordatorio')
+
+      assert.ok(await db.claimPriceChangeEmail(id(n), { effectiveAt: new Date(Date.now() + 30 * DAY) }))
+      assert.equal(await db.claimPriceChangeReminder(id(n)), null, 'aviso reclamado pero todavía no enviado')
+      await db.completePriceChangeEmail(id(n), uniq('em'))
+
+      const claimed = await db.claimPriceChangeReminder(id(n))
+      assert.ok(claimed?.reminderSendingAt)
+      assert.equal(await db.claimPriceChangeReminder(id(n)), null, 'ya lo está mandando otro')
+
+      await db.releasePriceChangeReminder(id(n), 'Resend caído')
+      const released = await db.findPriceChangeNoticeById(id(n))
+      assert.equal(released.reminderError, 'Resend caído')
+      assert.equal(released.reminderSendingAt ?? null, null)
+      assert.ok(released.emailSentAt, 'soltar el recordatorio no toca el aviso')
+      assert.ok(released.effectiveAt, 'ni la fecha efectiva')
+
+      const again = await db.claimPriceChangeReminder(id(n))
+      assert.ok(again, 'se puede reintentar')
+      assert.equal(again.reminderError ?? null, null)
+
+      const done = await db.completePriceChangeReminder(id(n), 'rem_1')
+      assert.ok(done.reminderSentAt)
+      assert.equal(done.reminderEmailId, 'rem_1')
+      assert.equal(done.reminderSendingAt ?? null, null)
+      assert.equal(await db.claimPriceChangeReminder(id(n)), null, 'ya salió')
+
+      // Un claim de hace 11 minutos (el proceso murió) se retoma.
+      const stale = await mailedNotice(sub, new Date(Date.now() + 30 * DAY))
+      await db.claimPriceChangeReminder(id(stale))
+      await ctx.setRaw('priceChangeNotice', id(stale), { reminderSendingAt: new Date(Date.now() - 11 * 60_000) })
+      assert.ok(await db.claimPriceChangeReminder(id(stale)))
+    })
+
+    it('recordatorio: un aviso aplicado o descartado no lo reclama', async () => {
+      const sub = await newSub(await newUser())
+      const applied = await mailedNotice(sub, new Date(Date.now() + DAY))
+      await db.markPriceChangeApplied(id(applied))
+      assert.equal(await db.claimPriceChangeReminder(id(applied)), null)
+
+      const skipped = await mailedNotice(sub, new Date(Date.now() + DAY))
+      await db.skipPriceChangeNotice(id(skipped), 'cambió de plan')
+      assert.equal(await db.claimPriceChangeReminder(id(skipped)), null)
+    })
+
+    it('recordatorio: claim a la vez, gana uno solo', async () => {
+      const sub = await newSub(await newUser())
+      const n = await mailedNotice(sub, new Date(Date.now() + 30 * DAY))
+      const out = await Promise.all(Array.from({ length: 4 }, () => db.claimPriceChangeReminder(id(n))))
+      assert.equal(out.filter(Boolean).length, 1)
+    })
+
+    it('recordatorios «a mandar»: avisados, sin recordatorio, sin aplicar ni descartar, dentro de la ventana', async () => {
+      const sub = await newSub(await newUser())
+      const now = Date.now()
+      const near = await mailedNotice(sub, new Date(now + 20 * DAY))
+      const nearer = await mailedNotice(sub, new Date(now + 5 * DAY))
+      const far = await mailedNotice(sub, new Date(now + 90 * DAY))
+      const unmailed = await newNotice(sub)
+      const reminded = await mailedNotice(sub, new Date(now + 10 * DAY))
+      await db.claimPriceChangeReminder(id(reminded))
+      await db.completePriceChangeReminder(id(reminded), 'rem_x')
+      const applied = await mailedNotice(sub, new Date(now + 10 * DAY))
+      await db.markPriceChangeApplied(id(applied))
+      const skipped = await mailedNotice(sub, new Date(now + 10 * DAY))
+      await db.skipPriceChangeNotice(id(skipped), 'baja')
+      const sending = await mailedNotice(sub, new Date(now + 10 * DAY))
+      await db.claimPriceChangeReminder(id(sending))
+      const stale = await mailedNotice(sub, new Date(now + 10 * DAY))
+      await db.claimPriceChangeReminder(id(stale))
+      await ctx.setRaw('priceChangeNotice', id(stale), { reminderSendingAt: new Date(now - 11 * 60_000) })
+
+      const due = await db.listPriceChangeRemindersDue({ before: new Date(now + 40 * DAY), limit: 500 })
+      const ids = due.map((x) => String(id(x)))
+      assert.ok(ids.includes(String(id(near))) && ids.includes(String(id(nearer))))
+      assert.ok(ids.indexOf(String(id(nearer))) < ids.indexOf(String(id(near))), 'la fecha más próxima primero')
+      assert.ok(ids.includes(String(id(stale))), 'el claim vencido vuelve a la cola')
+      for (const out of [far, unmailed, reminded, applied, skipped, sending]) {
+        assert.ok(!ids.includes(String(id(out))))
+      }
+    })
+
+    it('el recordatorio y el aviso son independientes: aplicar no necesita recordatorio', async () => {
+      const sub = await newSub(await newUser())
+      const n = await mailedNotice(sub, new Date(Date.now() + DAY))
+      const applied = await db.markPriceChangeApplied(id(n))
+      assert.ok(applied?.appliedAt)
+      assert.equal(applied.reminderSentAt ?? null, null)
+    })
+
     it('claim a la vez: gana uno solo (dos barridos no mandan el mismo mail)', async () => {
       const sub = await newSub(await newUser())
       const n = await newNotice(sub)

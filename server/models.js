@@ -491,6 +491,12 @@ const priceChangeNoticeSchema = new mongoose.Schema(
     appliedAt: Date,
     skippedAt: Date,
     skipReason: String,
+    // Recordatorio (plan anual): un segundo mail, cerca del cobro con el precio
+    // nuevo. Mismo claim / complete / release que el aviso.
+    reminderSendingAt: Date,
+    reminderSentAt: Date,
+    reminderEmailId: String,
+    reminderError: String,
   },
   { timestamps: true },
 );
