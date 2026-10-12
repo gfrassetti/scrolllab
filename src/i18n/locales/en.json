@@ -1708,6 +1708,7 @@
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
           "We make reasonable efforts to keep the service available, but we do not guarantee uninterrupted availability and are not liable for losses from downtime, latency, or changes to the service.",
+          "Views: no plan limits how many views your widgets get. Reasonable use means the traffic of a site with real visitors: load tests, mass automated crawling and any use that degrades the service for other customers are not. If a widget’s traffic stays well above what a typical site generates, we will contact you to agree on a solution before limiting anything; only if the service is at risk may we temporarily limit delivery of that widget.",
           "Acceptable use: you may not use the embed for illegal or deceptive content, content that infringes third-party rights, or to load the service abusively. We may suspend or revoke a non-compliant instance."
         ]
       }

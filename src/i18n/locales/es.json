@@ -1708,6 +1708,7 @@
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
           "Hacemos esfuerzos razonables por mantener el servicio disponible, pero no garantizamos disponibilidad ininterrumpida y no respondemos por pérdidas derivadas de caídas, latencia o cambios en el servicio.",
+          "Vistas: ningún plan limita la cantidad de vistas de tus widgets. El uso razonable es el de un sitio con visitantes reales: no lo son las pruebas de carga, el rastreo automatizado masivo ni cualquier uso que degrade el servicio para otros clientes. Si el tráfico de un widget supera de forma sostenida lo que genera un sitio común, te escribimos para acordar una solución antes de limitar nada; solo si pone en riesgo el servicio, podemos limitar temporalmente la entrega de ese widget.",
           "Uso aceptable: no podés usar el embed para contenido ilegal, engañoso o que infrinja derechos de terceros, ni cargar el servicio de forma abusiva. Podemos suspender o revocar una instancia que incumpla."
         ]
       }
