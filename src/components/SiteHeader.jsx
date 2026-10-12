@@ -112,7 +112,7 @@ export default function SiteHeader({ solid = true }) {
   }, [menuOpen])
 
   const linkClass =
-    'text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs'
+    'whitespace-nowrap text-[11px] uppercase tracking-[0.18em] transition-colors ease-out-strong hover:text-accent md:text-xs xl:tracking-[0.25em]'
 
   // Recarga dura al home: `navigate('/')` desde la home no remonta la página,
   // así que el splash no se vería, y el reload deja el estado en memoria limpio.
@@ -165,12 +165,12 @@ export default function SiteHeader({ solid = true }) {
           solid ? 'bg-bone/90 backdrop-blur-sm' : ''
         }`}
       >
-      <nav className="flex items-center justify-between gap-3 px-5 py-3 md:px-10 md:py-5">
+      <nav className="flex items-center justify-between gap-3 px-5 py-3 md:px-10 md:py-5 lg:px-8 xl:px-10">
         <Link
           to="/"
           ref={logoHostRef}
           onClick={() => playLogoAssembly(logoHostRef.current)}
-          className="flex min-w-0 items-center gap-2.5 text-sm font-medium uppercase tracking-[0.2em] transition-colors hover:text-accent md:tracking-[0.25em]"
+          className="flex min-w-0 items-center gap-2.5 text-sm font-medium uppercase tracking-[0.2em] transition-colors hover:text-accent md:tracking-[0.25em] lg:tracking-[0.18em] xl:tracking-[0.25em]"
         >
           <Logo className="size-5 shrink-0" />
           <span className="truncate">{SITE_NAME}</span>
@@ -178,7 +178,7 @@ export default function SiteHeader({ solid = true }) {
 
         {/* Escritorio: de 1024 para arriba. En tablet vertical (768–1023) el menú en
             español no entra y ensanchaba el documento: ahí va la hamburguesa. */}
-        <div className="hidden items-center gap-6 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex xl:gap-6">
           <Link to="/#templates" className={`${linkClass} ${zoneClass('templates')}`}>
             {t('nav.templates')}
           </Link>
@@ -192,10 +192,10 @@ export default function SiteHeader({ solid = true }) {
           </Link>
           <Link
             to="/lab"
-            className={`flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] transition-colors ease-out-strong hover:text-accent md:text-xs ${zoneClass('lab')}`}
+            className={`flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.18em] transition-colors ease-out-strong hover:text-accent md:text-xs xl:tracking-[0.25em] ${zoneClass('lab')}`}
           >
             {t('nav.lab')}
-            <span data-lab-short aria-hidden="true" className="text-ink/40">
+            <span data-lab-short aria-hidden="true" className="hidden text-ink/40 min-[1100px]:inline">
               · {t('nav.labShort')}
             </span>
             {showPlanBadge && (
