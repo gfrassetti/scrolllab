@@ -19,6 +19,7 @@ reactiva quedaría sin acceso.
    - inscribe a cada suscripción que paga otro monto **según Mercado Pago** (no según la lista);
    - le manda el mail (`buildSubscriptionPriceChange`): suba con **15 días** de aviso desde que sale el mail; baja
      desde el próximo cobro, con un mail corto;
+   - plan anual: además, un recordatorio cuando faltan 40 días o menos para el cobro con el precio nuevo;
    - después del último cobro a precio viejo, cambia el monto en Mercado Pago y lo anota (una vez).
 3. **Simulación por defecto**: sin `PRICE_CHANGES_LIVE=1` solo cuenta a quién avisaría y te manda el resumen.
    Probalo así en producción antes de prenderlo.
@@ -30,6 +31,5 @@ no hace nada.
 ## Pendiente
 
 - Paso (0) y Paddle (después de la aprobación de Paddle).
-- Recordatorio del plan anual a 40 días del cobro: falta el claim en el repo (pedido a Arquitectura).
 - Probar en el sandbox de Mercado Pago que cambiar el monto no le manda nada raro al suscriptor.
 - Lo legal (cuántos días de aviso, derecho a cancelar): lo confirma el dueño con quien lo asesore.

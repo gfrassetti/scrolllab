@@ -144,6 +144,31 @@ describe('cambio de precio de LAB — servicio', () => {
     assert.ok(s.skipped['paddle-pendiente'] >= 1)
   })
 
+  it('anual: aviso al anunciar y un solo recordatorio cerca del cobro con el precio nuevo', async () => {
+    const yearly = { ...up, id: 'pro-y-ars-1', cycle: 'yearly', from: 999000, to: 1299000 }
+    const sub = await newSub({ mpPreapprovalId: 'pa-year', cycle: 'yearly' })
+    const nextCharge = new Date(Date.now() + 300 * DAY).toISOString()
+    const mp = fakeMp({ 'pa-year': { amount: 999000, next: nextCharge } })
+    const sent = []
+    const send = async (m) => {
+      sent.push(m)
+      return { sent: true, id: `y-${sent.length}` }
+    }
+    const changes = [yearly]
+    await runPriceChanges({ config: config(), changes, deps: { ...mp, send } })
+    const mine = () => sent.filter((m) => m.subscription.mpPreapprovalId === 'pa-year').map((m) => m.notice.kind)
+    assert.deepEqual(mine(), ['increase'])
+    // Lejos del cobro: nada más.
+    await runPriceChanges({ config: config(), changes, now: new Date(Date.now() + 100 * DAY), deps: { ...mp, send } })
+    assert.deepEqual(mine(), ['increase'])
+    // A 30 días del cobro: el recordatorio, una sola vez.
+    const near = new Date(Date.parse(nextCharge) - 30 * DAY)
+    await runPriceChanges({ config: config(), changes, now: near, deps: { ...mp, send } })
+    await runPriceChanges({ config: config(), changes, now: near, deps: { ...mp, send } })
+    assert.deepEqual(mine(), ['increase', 'reminder'])
+    assert.ok((await db.findPriceChangeNotice(String(db.uid(sub)), yearly.id)).reminderSentAt)
+  })
+
   it('si el mail no sale (falla o está apagado), no hay fecha ni precio nuevo; la próxima corrida reintenta', async () => {
     const sub = await newSub({ mpPreapprovalId: 'pa-fail' })
     const mp = fakeMp({ 'pa-fail': { amount: 99900, next: '2026-12-20T12:00:00Z' } })

@@ -2,8 +2,10 @@ import { db } from '../../db.js'
 import {
   HOSTED_PRICE_CHANGES,
   PRICE_NOTICE_DAYS,
+  YEARLY_REMINDER_DAYS,
   affectedBy,
   applyDecision,
+  needsYearlyReminder,
   priceChangeKind,
 } from '../../../src/domain/priceChanges.js'
 import { sendSubscriptionPriceChange } from '../email.js'
@@ -36,7 +38,8 @@ import { addBillingCycle, isMock, subId } from './billing.js'
  *   hasta que se apruebe la revisión de Paddle no se toca su flujo; tampoco
  *   está el monto recurrente guardado en la fila, el paso (0) del plan).
  * - Un resumen al dueño cuando algo pasó (alertAdmin, una vez por corrida).
- * Pendiente: el recordatorio del anual (falta el claim en el repo).
+ * - Anual: un recordatorio cuando faltan YEARLY_REMINDER_DAYS o menos para el
+ *   cobro con el precio nuevo (claimPriceChangeReminder: una sola vez).
  */
 
 const DAY = 86400000
@@ -97,7 +100,7 @@ export async function runPriceChanges({
   maxEmails = 50,
 }) {
   const live = isLive(config)
-  const summary = { mode: live ? 'live' : 'simulación', enrolled: 0, announced: 0, applied: 0, waiting: 0, skipped: {}, errors: 0 }
+  const summary = { mode: live ? 'live' : 'simulación', enrolled: 0, announced: 0, reminded: 0, applied: 0, waiting: 0, skipped: {}, errors: 0 }
   const active = currentChanges(changes)
   if (!active.length) return summary
   const byId = new Map(changes.map((c) => [c.id, c]))
@@ -196,6 +199,56 @@ export async function runPriceChanges({
     }
   }
 
+  // 2b. Recordatorio del anual: con la fecha del cobro con el precio nuevo que
+  // ya dice el aviso (no hace falta preguntarle al proveedor).
+  const remindBefore = new Date(now.getTime() + YEARLY_REMINDER_DAYS * DAY)
+  for (const notice of await db.listPriceChangeRemindersDue({ before: remindBefore })) {
+    if (sent >= maxEmails) break
+    const change = byId.get(notice.changeId)
+    if (!change) continue
+    const reminder = needsYearlyReminder({
+      change,
+      emailSentAt: notice.emailSentAt,
+      reminderSentAt: notice.reminderSentAt,
+      nextChargeAt: notice.effectiveAt,
+      now,
+    })
+    if (!reminder) continue
+    const sub = await db.findSubscriptionById(notice.subscriptionId).catch(() => null)
+    if (!sub || sub.canceledAt) continue
+    try {
+      if (!(await db.claimPriceChangeReminder(notice.id))) continue
+      const user = await db.findUserById(String(sub.userId))
+      if (!user?.email) {
+        await db.releasePriceChangeReminder(notice.id, 'el usuario no tiene email')
+        continue
+      }
+      try {
+        const out = await (deps.send || sendSubscriptionPriceChange)({
+          subscription: sub,
+          user,
+          ref: notice.id,
+          notice: { kind: 'reminder', from: notice.from, to: notice.to, effectiveAt: notice.effectiveAt },
+          config,
+          client,
+        })
+        if (out?.skipped) {
+          await db.releasePriceChangeReminder(notice.id, `mail ${out.skipped}`)
+          continue
+        }
+        await db.completePriceChangeReminder(notice.id, out?.id || null)
+        summary.reminded += 1
+        sent += 1
+      } catch (err) {
+        await db.releasePriceChangeReminder(notice.id, String(err?.message || err).slice(0, 200))
+        summary.errors += 1
+      }
+    } catch (err) {
+      summary.errors += 1
+      console.error('price-change reminder', notice.id, err?.message)
+    }
+  }
+
   // 3. Aplicar.
   const before = new Date(now.getTime() + PRICE_APPLY_WINDOW_DAYS * DAY)
   for (const notice of await db.listPriceChangeNoticesDue({ before })) {
@@ -232,17 +285,17 @@ export async function runPriceChanges({
 
 /** Un resumen al dueño cuando algo pasó (una vez por corrida y por contenido). */
 function report(summary, config) {
-  const happened = summary.enrolled || summary.announced || summary.applied || summary.errors
+  const happened = summary.enrolled || summary.announced || summary.reminded || summary.applied || summary.errors
   if (happened) {
     const lines = [
       `Modo: ${summary.mode}`,
-      `Inscriptas: ${summary.enrolled} · avisadas: ${summary.announced} · aplicadas: ${summary.applied} · esperando: ${summary.waiting} · errores: ${summary.errors}`,
+      `Inscriptas: ${summary.enrolled} · avisadas: ${summary.announced} · recordatorios: ${summary.reminded} · aplicadas: ${summary.applied} · esperando: ${summary.waiting} · errores: ${summary.errors}`,
       `Salteadas: ${Object.entries(summary.skipped).map(([k, v]) => `${k} ${v}`).join(', ') || '—'}`,
     ]
     try {
       alertAdmin({
         kind: 'price-change',
-        key: `price-change-${summary.mode}-${summary.enrolled}-${summary.announced}-${summary.applied}-${summary.errors}`,
+        key: `price-change-${summary.mode}-${summary.enrolled}-${summary.announced}-${summary.reminded}-${summary.applied}-${summary.errors}`,
         title: `LAB — cambio de precio (${summary.mode})`,
         lines,
         config,
