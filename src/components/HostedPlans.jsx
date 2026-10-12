@@ -64,6 +64,44 @@ const planPrice = (p, cycle, currency) =>
 // Paddle tarda en crear la suscripción después del pago (unos segundos, a veces
 // más): el sync se reintenta ~30 s antes de decir «todavía no la vemos». Aunque
 // se agote, el webhook la activa igual.
+/** Términos de cada pasarela: el aviso de renovación los enlaza junto a los nuestros. */
+const GATEWAY_TERMS = {
+  mercadopago: { name: 'Mercado Pago', href: 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194' },
+  paddle: { name: 'Paddle', href: 'https://www.paddle.com/legal/checkout-buyer-terms' },
+}
+
+/**
+ * Aviso de renovación automática al lado del botón de pago (lo piden las
+ * pasarelas y la ley de defensa del consumidor): nombra el botón que se toca,
+ * cada cuánto se renueva y con qué pasarela se cobra.
+ */
+function AutoRenewNotice({ t, button, trialDays, cycle, provider }) {
+  const gateway = GATEWAY_TERMS[provider] || GATEWAY_TERMS.mercadopago
+  const vars = {
+    button,
+    n: trialDays,
+    period: t(cycle === 'yearly' ? 'lab.periodYear' : 'lab.periodMonth'),
+    gateway: gateway.name,
+  }
+  return (
+    <p data-lab-autorenew className="mt-5 max-w-[72ch] text-body-sm text-ink/55">
+      {t(trialDays > 0 ? 'lab.autoRenewTrial' : 'lab.autoRenew', vars)}{' '}
+      <Link to="/legal/terms" className="underline underline-offset-2 transition-colors hover:text-ink">
+        {t('lab.autoRenewOurTerms')}
+      </Link>
+      {' · '}
+      <a
+        href={gateway.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline underline-offset-2 transition-colors hover:text-ink"
+      >
+        {t('lab.autoRenewGatewayTerms', { gateway: gateway.name })}
+      </a>
+    </p>
+  )
+}
+
 const PADDLE_SYNC_TRIES = 12
 const PADDLE_SYNC_WAIT_MS = 2500
 
@@ -858,6 +896,21 @@ export default function HostedPlans({ qa: qaPage = false }) {
               )
             })}
           </div>
+          {user && (!activePlan || canResubscribe) && (
+            <AutoRenewNotice
+              t={t}
+              button={
+                canResubscribe
+                  ? t('lab.autoRenewOr', { a: t('lab.planSubscribe'), b: t('lab.planReactivate') })
+                  : trialAvailable && trialDays > 0
+                    ? t('lab.planTrialCta', { n: trialDays })
+                    : t('lab.planSubscribe')
+              }
+              trialDays={!activePlan && trialAvailable ? trialDays : 0}
+              cycle={cycle}
+              provider={paddleEnabled ? providerForRegion(region) : 'mercadopago'}
+            />
+          )}
           <p className="mt-4 text-body-sm text-ink/55">
             {t('lab.refundNote', { days: REFUND_DAYS })}{' '}
             <Link
