@@ -548,10 +548,61 @@ then \`/fold/film\`, then \`/fold/demo\`.
 4. In \`score.js\`, give each take its \`id\` and the stretch of scroll it plays
    (\`from\` / \`to\`), then place the texts, chapters and transitions.
 
-The full reel weighs hundreds of MB: host it on a CDN (the script writes a
-\`_headers\` file with CORS for Cloudflare / Netlify) and set
-\`VITE_FOLD_FILM_URL\` to its URL. Phones load the 768 px frames and only the
-original pictures; the engine blends each frame into the next.
+### Hosting the full reel
+
+The light reel (about 30 MB) ships with the template and works anywhere. The
+full reel that \`fold-reel.mjs\` builds is hundreds of MB (the demo's is about
+3,700 frames per size, 320 MB): it does not belong in git. Put it on a static
+host and point the engine at it. Nothing in this ZIP depends on the demo's own
+CDN: the reel you build is yours and lives wherever you put it.
+
+1. Build it: \`node scripts/fold-reel.mjs --masters ./my-clips\`. It writes
+   \`public/fold/film/\` — two sizes (768 and 1440), \`manifest.json\` and a
+   \`_headers\` file (CORS and a long cache for the frames).
+2. Upload that folder to a static host. Two things have to be true: that
+   \`<url>/manifest.json\` and \`<url>/768/f_0001.webp\` open in a browser, and
+   that both answer with \`Access-Control-Allow-Origin: *\` (the page and the
+   frames are on different origins). The \`_headers\` file does it on
+   Cloudflare and Netlify.
+
+   **Cloudflare** (Workers static assets). Next to \`package.json\`, a
+   \`wrangler.jsonc\`:
+
+   \`\`\`
+   {
+     "name": "my-film",
+     "compatibility_date": "2025-01-01",
+     "assets": { "directory": "./public/fold/film" }
+   }
+   \`\`\`
+
+   \`\`\`
+   npx wrangler login
+   npx wrangler deploy      # prints https://my-film.<you>.workers.dev
+   \`\`\`
+
+   (Current wrangler needs Node 22 or newer. Only the files that changed are
+   uploaded on the next deploy.)
+
+   **Netlify.** \`npx netlify-cli deploy --dir public/fold/film --prod\` (it
+   creates the site the first time).
+
+   **Any other static host** works if it serves the folder with the CORS header
+   above. **Same site as the page:** if your host takes hundreds of MB, just leave
+   the folder in \`public/fold/film\`; the engine finds it by itself and no
+   variable is needed.
+3. Set \`VITE_FOLD_FILM_URL=https://…\` (no trailing slash) — in a \`.env\` file
+   for your machine and in your host's environment variables for production —
+   and build again: Vite bakes it in at build time.
+4. Check it: open the page, DevTools → Network, filter "webp": the frames come
+   from that URL.
+
+The frames are cached for a year (\`immutable\`). If you rebuild the film,
+publish it under a new URL (a new worker name, or a path such as \`/v2\`) and
+update the variable; otherwise returning visitors keep the old pictures.
+
+Phones load the 768 px frames and only the original pictures; the engine blends
+each frame into the next.
 
 With "reduce motion" on, the film becomes still plates: each text on its own
 frame of the film, with a short fade.
