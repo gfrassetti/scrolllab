@@ -246,6 +246,13 @@ El mail **solo se envía cuando la orden pasa a `paid`**. Si quedó `pending`
 6. Redeploy del API. Comprá un ítem de prueba (o mock en staging) y verificá
    que llegue el mail a Mis compras / inbox.
 
+**Alternativa: enviar desde una cuenta de Gmail (SMTP).** Con `SMTP_USER` y
+`SMTP_PASS` (contraseña de aplicación de esa cuenta, con verificación en dos
+pasos) los mails salen por Gmail en vez de Resend: el remitente es esa cuenta y
+Gmail muestra su foto de perfil como logo. Sin esas dos variables sigue Resend.
+Límites: ~500 mails por día, sin clave de idempotencia (el servidor recuerda un
+día las claves en memoria), y se pierde la firma del dominio propio.
+
 Después de confirmar el pago y generar el ZIP, el backend envía un detalle
 de orden con CTA a `/account`. La orden guarda el estado del envío y Resend
 recibe una `Idempotency-Key`, por lo que los reintentos no duplican el correo.
