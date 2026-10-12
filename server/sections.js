@@ -143,9 +143,14 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   // campos (URL https del cliente); `flow` (lo pone el registro del embed) quita el
   // apagado hacia el negro al scrollear: un widget no va a abrir ni cerrar la página.
   'apex/Hero',
-  // Fuera, por diseño: los `Nav*` (un header fijo suelto no tiene sentido), lo
-  // que mete Three.js en el frame (FlavorWorlds, HeroBubbles, HeroMeaning,
-  // ServicesStone, HeroThree: el bundle es único y lo pagaría cada embed),
+  // Three.js (Fase L): con el frame partido por sección, three es un archivo
+  // aparte que bajan solo estos widgets (antes lo pagaba cada embed).
+  'fizz/HeroBubbles',
+  'fizz/FlavorWorlds',
+  'monolith/HeroThree',
+  'atelier/HeroMeaning',
+  'atelier/ServicesStone',
+  // Fuera, por diseño: los `Nav*` (un header fijo suelto no tiene sentido),
   // `kin/Hero` (abre la página: su entrada toma el scroll y la barra de navegación
   // fija se transforma; en un iframe solo quedan las barras),
   // lo que trae media que el cliente no puede cambiar desde LAB (sin código no se

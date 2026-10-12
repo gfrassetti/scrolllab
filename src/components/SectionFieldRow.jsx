@@ -177,9 +177,13 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
   )
 }
 
-/** La guía del campo (`field.help`): cerrada no ocupa lugar; abierta, los pasos. */
-function FieldHelp({ help }) {
-  if (!help?.steps?.length) return null
+/**
+ * La guía del campo (`field.help`): cerrada no ocupa lugar; abierta, los pasos.
+ * En LAB (`absoluteUrls`) sin los que hablan del ZIP.
+ */
+function FieldHelp({ help, absoluteUrls = false }) {
+  const steps = [...(help?.steps || []), ...(absoluteUrls ? [] : help?.zipSteps || [])]
+  if (!steps.length) return null
   return (
     <details className="group mt-2 border border-ink/15 px-3 py-2">
       <summary className="tpl-hit relative cursor-pointer list-none text-[11px] uppercase tracking-[0.18em] text-ink/60 marker:hidden hover:text-ink [&::-webkit-details-marker]:hidden">
@@ -189,7 +193,7 @@ function FieldHelp({ help }) {
         {help.title}
       </summary>
       <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-xs leading-relaxed text-ink/75">
-        {help.steps.map((step) => (
+        {steps.map((step) => (
           <li key={step}>{step}</li>
         ))}
       </ol>
@@ -309,7 +313,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
           </span>
         ) : null}
       </label>
-      <FieldHelp help={field.help} />
+      <FieldHelp help={field.help} absoluteUrls={absoluteUrls} />
     </div>
   )
 }

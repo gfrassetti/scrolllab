@@ -372,7 +372,9 @@ las de escenario sticky (el frame pasa a modo PIN: una pantalla pegada en el sit
 documento; si el sitio tiene una barra fija arriba, el widget se pega debajo de ella) y los formularios: en LAB mandan a `POST /api/embed/:key/form` y el mensaje le llega por mail al dueño
 del widget (`src/domain/labForms.js`, `server/services/hosted/forms.js`). Los `vh` (del CSS y de los `style` inline) miden la pantalla del sitio, no el
 iframe. Cada sección es un archivo aparte del frame (`embed/src/registry.js`, import dinámico): un
-widget baja el núcleo y su sección. Nada de FOLD ni de media que el cliente no pueda cambiar desde el
+widget baja el núcleo y su sección (los 3D, además, three en su propio archivo). Una capa `fixed` a
+pantalla completa (el canvas de FIZZ) cuenta como escenario → PIN. El reloj de GSAP del frame queda en
+pausa hasta que el widget entra en pantalla: la entrada se ve cuando el visitante llega, no al abrir el sitio. Nada de FOLD ni de media que el cliente no pueda cambiar desde el
 editor (un vuelo de cuadros, un mapa con puntos fijos). Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
 Packs de LAB (`/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. No confundir con el bundle de templates (compra de código) ni con el Builder (código fuente): /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB.
