@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import SnippetBox from '../components/SnippetBox'
 import SectionFieldRow from '../components/SectionFieldRow'
+import LabEditLink from '../components/LabEditLink'
 import LabFramePreview from '../components/LabFramePreview'
 import { useAuth } from '../lib/auth'
 import { usePlan } from '../lib/plan'
@@ -363,6 +364,8 @@ export default function LabEditorPage() {
                     {t('lab.unpublished')}
                   </p>
                 )}
+
+                <LabEditLink inst={inst} onChange={setInst} />
 
                 <div className="mt-8">
                   <SnippetBox embedKey={inst.key} loaderInfo={loaderInfo} />

@@ -1,7 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { createFakeMercadoPago, startAppAgainstFakeMp } from './helpers/fakeMercadoPago.js'
-import { retryUnsentReceipts, runSweeps } from '../services/paymentFailedSweep.js'
 
 /**
  * El recibo de una compra paga sale una vez. Si Resend falla justo al cobrar,
@@ -15,9 +14,15 @@ describe('recibo que no salió al cobrar', () => {
   let cleanup
   let config
   let fileDb
+  // Se importa DESPUÉS de armar la app de prueba: fileStore lee FILE_DB_DIR al
+  // cargarse, y con un import estático de arriba escribía en `storage/` real
+  // (la segunda corrida local fallaba con las órdenes de la primera).
+  let retryUnsentReceipts
+  let runSweeps
 
   before(async () => {
     ;({ loginAs, webhook, cleanup, config, fileDb } = await startAppAgainstFakeMp(mp))
+    ;({ retryUnsentReceipts, runSweeps } = await import('../services/paymentFailedSweep.js'))
   })
   after(() => cleanup())
 

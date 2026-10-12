@@ -24,11 +24,12 @@ const PREVIEW_DEVICES = {
 const SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox'
 const READY_TIMEOUT_MS = 8000
 
-export default function LabFramePreview({ frameSrc, sectionId, props, device = 'desktop', onFail }) {
+export default function LabFramePreview({ frameSrc, sectionId, props, device = 'desktop', freeBadge, onFail }) {
   const { t } = useI18n()
   // Plan gratis: el sitio muestra el sello «Hecho con Scroll Lab»; el preview también.
   const { plan, loading: planLoading } = usePlan()
-  const showBadge = !planLoading && plan === 'free'
+  // `freeBadge` lo manda quien edita sin cuenta (link de edición): el plan es el del dueño.
+  const showBadge = freeBadge !== undefined ? freeBadge : !planLoading && plan === 'free'
   const badge = useMemo(
     () => (showBadge ? { href: `${window.location.origin}/lab` } : null),
     [showBadge],

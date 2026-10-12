@@ -34,4 +34,12 @@ describe('seoForPath', () => {
     assert.match(seo.robots, /noai, noimageai/)
     assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/')
   })
+
+  it('el link de edición de un widget (token secreto en la URL) no se indexa ni se archiva', () => {
+    const seo = seoForPath('/lab/editar/ed_' + 'a'.repeat(48))
+    assert.match(seo.robots, /^noindex, nofollow, noarchive/)
+    // el canónico no puede llevar el token
+    assert.equal(seo.canonical, 'https://www.scrolllab.com.ar/lab')
+    assert.doesNotMatch(JSON.stringify(seo), /ed_a{10}/)
+  })
 })
