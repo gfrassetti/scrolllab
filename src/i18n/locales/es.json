@@ -1530,7 +1530,7 @@
     "eyebrow": "Legal",
     "title": "Política de Privacidad",
     "effectiveDate": "Vigente desde el 7 de octubre de 2026",
-    "intro": "Esta Política de Privacidad explica cómo {{site}} recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra, descargás un producto o nos escribís por un proyecto de Estudio.",
+    "intro": "Esta Política de Privacidad explica cómo {{seller}} ({{site}}) recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra, descargás un producto o nos escribís por un proyecto de Estudio.",
     "sections": [
       {
         "title": "Datos que recopilamos",
@@ -1587,9 +1587,13 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 7 de octubre de 2026",
+    "effectiveDate": "Vigentes desde el 12 de octubre de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
+      {
+        "title": "Quién vende",
+        "body": "El sitio, los productos y los servicios los ofrece {{seller}}, un estudio de diseño y desarrollo web de Argentina. Para cualquier consulta sobre estos Términos, una compra o un reembolso, nos escribís al email que figura al final. Las compras desde fuera de Argentina las procesa Paddle.com como revendedor (ver «Precios y pagos»)."
+      },
       {
         "title": "Cuenta y acceso",
         "body": "Sos responsable de mantener la seguridad de tu cuenta y de la actividad realizada desde ella. Debés proporcionar información verdadera y no compartir tus credenciales ni links de descarga."

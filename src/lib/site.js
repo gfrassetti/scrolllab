@@ -5,6 +5,13 @@ export const SITE_TAGLINE = 'Webs que se mueven.'
 export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 
 /**
+ * Quién vende, como figura en los Términos y la Política de Privacidad
+ * (`{{seller}}`). Paddle lo exige para aprobar el dominio: el nombre del
+ * vendedor tiene que estar en los Términos (decisión del dueño, 2026-10-12).
+ */
+export const SELLER_NAME = 'Scroll Lab - Web Design'
+
+/**
  * Plazo de reembolso por arrepentimiento (días): vive en el dominio, lo usan el
  * servidor y los textos legales (`{{days}}`). Ver src/domain/policy.js.
  */

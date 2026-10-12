@@ -1530,7 +1530,7 @@
     "eyebrow": "Legal",
     "title": "Privacy Policy",
     "effectiveDate": "Effective October 7, 2026",
-    "intro": "This Privacy Policy explains how {{site}} collects, uses, and protects your data when you visit the site, sign in, make a purchase, download a product, or write to us about a Studio project.",
+    "intro": "This Privacy Policy explains how {{seller}} ({{site}}) collects, uses, and protects your data when you visit the site, sign in, make a purchase, download a product, or write to us about a Studio project.",
     "sections": [
       {
         "title": "Data we collect",
@@ -1587,9 +1587,13 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective October 7, 2026",
+    "effectiveDate": "Effective October 12, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
+      {
+        "title": "Who sells",
+        "body": "The site, products, and services are offered by {{seller}}, a web design and development studio based in Argentina. For any question about these Terms, a purchase, or a refund, write to us at the email at the end of this page. Purchases from outside Argentina are processed by Paddle.com as reseller (see «Prices and payments»)."
+      },
       {
         "title": "Account and access",
         "body": "You are responsible for maintaining the security of your account and for activity performed through it. You must provide accurate information and must not share your credentials or download links."
