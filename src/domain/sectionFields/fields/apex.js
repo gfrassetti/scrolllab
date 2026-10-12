@@ -128,6 +128,8 @@ export const APEX_FIELDS = {
     { key: 'socialHref', label: 'Red social — enlace', type: 'href' },
     { key: 'privacyLabel', label: 'Privacidad — texto', type: 'text' },
     { key: 'privacyHref', label: 'Privacidad — enlace', type: 'href' },
+    { key: 'termsLabel', label: 'Términos — texto', type: 'text' },
+    { key: 'termsHref', label: 'Términos — enlace', type: 'href' },
     { key: 'wordmark', label: 'Palabra grande', type: 'text' },
     toggle('showWordmark', 'Palabra grande'),
     { key: 'bg', label: 'Color de fondo', type: 'color' },

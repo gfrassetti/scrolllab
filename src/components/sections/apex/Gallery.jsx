@@ -135,7 +135,8 @@ export default function Gallery({
     }
 
     // The new picture opens from the thumbnail's rectangle (or a stand-in for
-    // keys / touch) to the whole screen.
+    // keys / touch) to the whole screen — once it is decoded (at most 1.2 s), so
+    // a slow network never opens an empty frame.
     const r = root.getBoundingClientRect()
     const p = pointer.current && dir > 0 === (pointer.current.x >= r.width * 0.25)
       ? pointer.current
@@ -146,6 +147,7 @@ export default function Gallery({
     const l = Math.max(0, p.x - hw)
     const rr = Math.max(0, r.width - (p.x + hw))
     const b = Math.max(0, r.height - (p.y + hh))
+    const open = () => {
     gsap.set(inc, { autoAlpha: 1, zIndex: 3, clipPath: `inset(${t}px ${rr}px ${b}px ${l}px)` })
     if (incImg) gsap.set(incImg, { scale: 1.45 })
     gsap
@@ -153,6 +155,24 @@ export default function Gallery({
       .to(inc, { clipPath: 'inset(0px 0px 0px 0px)', duration: 1.25, ease: 'power3.inOut' }, 0)
       .to(incImg, { scale: 1, duration: 1.7, ease: 'power3.out' }, 0)
       .to(outImg, { scale: 1.12, duration: 1.25, ease: 'power2.inOut' }, 0)
+    }
+    const ready = incImg && !incImg.complete && incImg.decode ? incImg.decode().catch(() => {}) : Promise.resolve()
+    Promise.race([ready, new Promise((r) => setTimeout(r, 1200))]).then(open)
+  }
+
+  // A picture that fails is asked for once more (without the srcset); if it
+  // fails again it is hidden, so the frame shows the section colour instead of
+  // a broken-image icon.
+  const onImgError = (e) => {
+    const img = e.currentTarget
+    if (img.dataset.retried) {
+      img.style.visibility = 'hidden'
+      return
+    }
+    img.dataset.retried = '1'
+    const src = img.getAttribute('src')
+    img.removeAttribute('srcset')
+    img.src = `${src}${src.includes('?') ? '&' : '?'}retry=1`
   }
 
   const onKeyDown = (e) => {
@@ -214,6 +234,7 @@ export default function Gallery({
                 decoding="async"
                 loading={i === 0 ? 'eager' : 'lazy'}
                 draggable={false}
+                onError={onImgError}
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : null}

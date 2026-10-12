@@ -246,6 +246,14 @@ export default function Showroom({
         car.traverse((node) => {
           if (!node.isMesh || !node.material) return
           const m = node.material
+          // LED strips (emissive strength > 1 in the GLB): flat light, outside tone
+          // mapping, or AgX washes the red tail lights out to pink. Both faces: the
+          // strips are thin ribbons laid on the body, their winding is not reliable.
+          if (m.emissiveIntensity > 1) {
+            node.material = new THREE.MeshBasicMaterial({ color: m.emissive.clone(), toneMapped: false, side: THREE.DoubleSide })
+            m.dispose()
+            return
+          }
           m.envMapIntensity = 1.6
           // Blender exports a 2× specular for Principled defaults: back to physical.
           if (m.specularColor) m.specularColor.setScalar(1)

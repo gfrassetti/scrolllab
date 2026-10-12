@@ -220,6 +220,22 @@ lados alternados. Hosteable en LAB (FLOW).
    cubiertas → rugosidad 0,9. Autos a 300k caras y color/relieve en 4K: ~2,6–2,9 MB cada uno.
    En la web, paneles `RectAreaLight` sobre cada plataforma (como las luces de área de Blender) y
    `specularColor` a 1 (Blender exporta ×2).
+5c. **Detalles (3ª pasada, en Blender, sin créditos):** un auto recién generado no trae logo ni
+   luces. Piezas hijas de cada auto, apoyadas sobre la carrocería por raycast (en espacio del
+   objeto):
+   - **Emblema inventado** (anillo + chevrón cromado, sin marca real) adelante y atrás.
+   - **LED blancos adelante:** cinta que sigue los texeles claros y poco saturados del frente
+     (donde el generador pintó los faros).
+   - **Barra roja atrás** a todo el ancho. En la camioneta, solo los impactos a menos de 10 cm
+     del portón; si no, la cinta se va por las barandas de la caja.
+   - **Camioneta:** catadióptricos en el paragolpe.
+   - **Cupé:** dos franjas negras de capot a alerón. Se cortan en los vidrios, porque el color
+     del parabrisas se parece a la pintura gris y la máscara no alcanza: se recorta por largo.
+
+   Se exportan con el auto (seleccionar el auto y sus hijos, el auto en el origen sin
+   rotación). En three, todo material con `emissiveIntensity > 1` pasa a `MeshBasicMaterial`
+   sin tone mapping y de dos caras. Sin eso, AgX lava el rojo a rosa y las cintas se cullean
+   según el sentido de las caras.
 6. **Interacción:** en cada auto, «← Drag →» en el cursor; arrastrar gira el auto (también con el
    dedo: `touch-action: pan-y`); «Close» lo devuelve y muestra la ficha. Seguir bajando pasa al
    siguiente; subir, al anterior.

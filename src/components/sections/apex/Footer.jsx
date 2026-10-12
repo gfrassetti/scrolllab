@@ -43,6 +43,8 @@ export default function Footer({
   socialHref = '#',
   privacyLabel = 'Privacy',
   privacyHref = '#',
+  termsLabel = 'Terms',
+  termsHref = '#',
   wordmark = 'APEX',
   showWordmark = 'on',
   bg,
@@ -201,9 +203,14 @@ export default function Footer({
         <a href={socialHref} className="tpl-link tpl-hit relative md:col-span-3">
           {social}
         </a>
-        <a href={privacyHref} className="tpl-link tpl-hit relative md:col-span-3 md:col-start-5">
-          {privacyLabel}
-        </a>
+        <div className="flex items-end gap-6 md:col-span-6 md:col-start-5 md:gap-[2.4vw]">
+          <a href={privacyHref} className="tpl-link tpl-hit relative">
+            {privacyLabel}
+          </a>
+          <a href={termsHref} className="tpl-link tpl-hit relative">
+            {termsLabel}
+          </a>
+        </div>
       </div>
     </footer>
   )

@@ -226,15 +226,46 @@ export default function Hero({
     let raf = 0
     let visible = true
     let lastT = -1
+    let movedAt = performance.now()
+    let kickedAt = 0
     const segs = () => root.querySelectorAll('[data-apex-seg]')
     const label = () => root.querySelector('[data-apex-chapter]')
 
-    const paint = () => {
+    // The film must never sit still on screen. Browsers pause a muted video on
+    // their own (power saving, a tab coming back, a dropped request on a busy
+    // server) and do not always resume it: if it is on screen and has not moved
+    // for a while, play it again; if it is stuck waiting for data, reload it
+    // from where it was.
+    const keepAlive = (now) => {
+      if (!visible || document.hidden || !video.currentSrc || now - kickedAt < 1200) return
+      const idle = now - movedAt
+      if (video.paused && !video.seeking) {
+        kickedAt = now
+        video.play().catch(() => {})
+      } else if (idle > 4000 && video.readyState < 3) {
+        kickedAt = now
+        movedAt = now
+        const at = video.currentTime
+        video.load()
+        video.addEventListener(
+          'loadedmetadata',
+          () => {
+            video.currentTime = at
+            video.play().catch(() => {})
+          },
+          { once: true },
+        )
+      }
+    }
+
+    const paint = (now = performance.now()) => {
       // Same picture as last frame (paused, buffering, 60 Hz screen on a 30 fps film): nothing to repaint.
       if (video.currentTime === lastT) {
+        keepAlive(now)
         raf = requestAnimationFrame(paint)
         return
       }
+      movedAt = now
       lastT = video.currentTime
       const names = labelsRef.current
       const known = shotsRef.current
@@ -285,12 +316,17 @@ export default function Hero({
       { threshold: 0.05 },
     )
     io.observe(root)
+    const onVisibility = () => {
+      if (!document.hidden) start()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
     start()
     return () => {
       io.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
       cancelAnimationFrame(raf)
     }
-  }, [still, armed, labels.length])
+  }, [still, armed, phone, labels.length])
 
   useGSAP(
     () => {
@@ -520,10 +556,17 @@ export default function Hero({
       <div className="absolute inset-0 z-10 flex flex-col px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-[2.4vw]">
         {/* Top: mark, one sentence, links, one action. */}
         <header data-apex-chrome className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
-          <a href="#top" className="apex-brand tpl-hit relative text-[12px] font-bold tracking-[0.2em] whitespace-nowrap md:text-[max(15px,1.05vw)] md:tracking-[0.34em]" aria-label={brand}>
-            {brand}
-          </a>
-          <p className="hidden max-w-[18ch] opacity-70 lg:absolute lg:left-[16%] lg:block">{tagline}</p>
+          <div className="flex min-w-0 items-start gap-[2.4vw]">
+            {/* The wordmark opens up on hover. A hidden copy already set at the
+                open spacing holds the width, so nothing beside it moves. */}
+            <a href="#top" className="apex-brand tpl-hit relative inline-grid text-[12px] font-bold whitespace-nowrap md:text-[max(15px,1.05vw)]" aria-label={brand}>
+              <span aria-hidden="true" className="invisible col-start-1 row-start-1 tracking-[0.2em] md:tracking-[0.46em]">
+                {brand}
+              </span>
+              <span className="apex-brand-text col-start-1 row-start-1 tracking-[0.2em] md:tracking-[0.34em]">{brand}</span>
+            </a>
+            <p className="hidden max-w-[18ch] opacity-70 lg:block">{tagline}</p>
+          </div>
           <nav className="hidden items-center gap-[2.2vw] md:flex" aria-label="Primary">
             {links.map((l) => (
               <a key={l.label} href={l.href} className="tpl-link tpl-hit relative py-1">
@@ -642,7 +685,7 @@ export default function Hero({
         .apex-more-arrow { transform-origin: left center; transition: transform 520ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
         .apex-scroll-line { animation: apex-breathe 2.4s var(--ease-in-out, ease-in-out) infinite; }
         @keyframes apex-breathe { 0%, 100% { transform: scaleX(0.35); } 50% { transform: scaleX(1); } }
-        .apex-brand { transition: letter-spacing 600ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
+        .apex-brand-text { transition: letter-spacing 600ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
         .apex-burger { position: relative; display: block; width: 26px; height: 11px; }
         .apex-burger i { position: absolute; left: 0; right: 0; height: 1.5px; background: currentColor; transition: transform 520ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
         .apex-burger i:nth-child(1) { top: 0; }
@@ -676,7 +719,7 @@ export default function Hero({
           .apex-grain { display: none; }
         }
         @media (hover: hover) {
-          .apex-brand:hover { letter-spacing: 0.46em; }
+          .apex-brand:hover .apex-brand-text { letter-spacing: 0.46em; }
           .apex-burger-btn:hover .apex-burger:not([data-x]) i:nth-child(1) { transform: translateY(4.5px); }
           .apex-burger-btn:hover .apex-burger:not([data-x]) i:nth-child(2) { transform: translateY(-4.5px); }
           .apex-menu-list:hover .apex-menu-link:not(:hover) { opacity: 0.24; }
@@ -693,7 +736,7 @@ export default function Hero({
           :where(:root:not([data-motion='full'])) .apex-menu-film,
           :where(:root:not([data-motion='full'])) .apex-menu-meta,
           :where(:root:not([data-motion='full'])) .apex-burger i,
-          :where(:root:not([data-motion='full'])) .apex-brand,
+          :where(:root:not([data-motion='full'])) .apex-brand-text,
           :where(:root:not([data-motion='full'])) .apex-cta,
           :where(:root:not([data-motion='full'])) .apex-more-arrow,
           :where(:root:not([data-motion='full'])) .apex-seg { transition: none; }
