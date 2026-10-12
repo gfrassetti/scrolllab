@@ -7,6 +7,7 @@ import {
 } from './email.js'
 import { graceMs } from './subscriptions/entitlement.js'
 import { retryPendingWithdrawals } from './autoRefund.js'
+import { runPriceChanges } from './subscriptions/priceChange.js'
 
 const MINUTE_MS = 60 * 1000
 
@@ -133,6 +134,8 @@ export async function runSweeps({ config, client, now = new Date() }) {
     { name: 'suspended', run: () => sendDueSuspendedEmails({ config, client, now }) },
     { name: 'receipts', run: () => retryUnsentReceipts({ config, client, now }) },
     { name: 'withdrawals', run: () => retryPendingWithdrawals(config) },
+    // Cambios de precio de LAB declarados (src/domain/priceChanges.js): simulación salvo PRICE_CHANGES_LIVE=1.
+    { name: 'price-changes', run: () => runPriceChanges({ config, client, now }) },
   ]
   for (const { name, run } of steps) {
     try {

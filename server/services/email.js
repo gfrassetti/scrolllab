@@ -18,6 +18,7 @@ import {
   buildWithdrawalConfirm,
   buildSubscriptionSuspended,
   buildSubscriptionPlanChanged,
+  buildSubscriptionPriceChange,
 } from './emailTemplatesBilling.js'
 import { buildLabFormMessage } from './emailTemplatesLab.js'
 
@@ -102,6 +103,17 @@ export function sendSubscriptionPlanChanged({ subscription, user, ref, change, c
   const accountUrl = new URL('/lab', config.clientUrl).toString()
   const message = buildSubscriptionPlanChanged({ subscription, user, accountUrl, logoUrl: logoOf(config), change })
   return sendTransactional({ to: user.email, message, tag: 'subscription_plan_changed', key: `scrolllab-sub-plan-${ref}`, config, client })
+}
+
+/**
+ * Aviso de cambio de precio de LAB (suba, recordatorio del anual o baja). Uno por
+ * aviso y tipo: `ref` = id del aviso (priceChangeNotices) + tipo.
+ * @param {{ subscription: any, user: any, ref: string, notice: { kind: 'increase' | 'reminder' | 'decrease', from: number, to: number, effectiveAt?: Date | string | null }, config: any, client?: any }} args
+ */
+export function sendSubscriptionPriceChange({ subscription, user, ref, notice, config, client }) {
+  const accountUrl = new URL('/lab', config.clientUrl).toString()
+  const message = buildSubscriptionPriceChange({ subscription, user, accountUrl, logoUrl: logoOf(config), notice })
+  return sendTransactional({ to: user.email, message, tag: 'subscription_price_change', key: `scrolllab-sub-price-${ref}-${notice.kind}`, config, client })
 }
 
 /**
