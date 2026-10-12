@@ -254,6 +254,8 @@ function createReel({ base, count, pad, tier, want = () => true }) {
       decodePump()
     },
     get: drawable,
+    // The compressed frame is here (fetched), decoded or not.
+    have: (i) => Boolean(frames[i]),
     // Also keep a second playhead fed (the take leaving under a transition):
     // its frames are drawn as they are (an <img> decodes on its own).
     keep(i) {
@@ -715,9 +717,11 @@ export default function Film({ score = SCORE }) {
     let lastChapter = -1
     let fxDirty = false
     // A machine that cannot decode every in-between frame as fast as the
-    // reader scrolls (the exact frame is missing most of the time) drops to
-    // the original ones, mixed into each other — what a phone does from the
-    // start. Judged over the renders where the picture moves.
+    // reader scrolls drops to the original ones, mixed into each other — what
+    // a phone does from the start. Judged only over renders whose frame has
+    // already arrived but is not decoded yet: a frame still on the network is
+    // a connection problem, not a slow decoder, and must not cost the picture
+    // its in-between frames for good.
     let moved = 0
     let exact = 0
     let lastShown = -1
@@ -737,8 +741,10 @@ export default function Film({ score = SCORE }) {
         }
         const img = reel.near(idx)
         if (STEP === 1 && interp > 1 && idx !== lastShown) {
-          moved += 1
-          if (img && img === reel.get(idx)) exact += 1
+          if (reel.have(idx)) {
+            moved += 1
+            if (reel.get(idx)) exact += 1
+          }
           if (moved >= 150) {
             if (exact / moved < 0.6) STEP = interp
             moved = 0
