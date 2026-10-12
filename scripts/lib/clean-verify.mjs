@@ -48,7 +48,9 @@ export function normalizePaths(paths, repo = REPO) {
   const out = []
   for (const raw of paths || []) {
     if (typeof raw !== 'string' || !raw.trim()) throw new Error('Ruta vacía')
-    const abs = path.resolve(repo, raw)
+    // `\` es un separador en Windows pero un carácter más en POSIX: se unifica
+    // antes de resolver para que `server\app.js` sea lo mismo en los dos.
+    const abs = path.resolve(repo, raw.replace(/\\/g, '/'))
     const rel = path.relative(repo, abs)
     if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) {
       throw new Error(`La ruta sale del repositorio: ${raw}`)
