@@ -70,6 +70,22 @@ const PASSES = flag('--deep')
   : [DESKTOP, PHONE].map((vp) => ({ vp, reduce: flag('--reduce') }))
 const HEADER = flag('--header')
 
+/**
+ * Texto tenue A PROPÓSITO, que «texto-oculto» (opacidad < 0.5) marcaría cada
+ * vez: [sección, el comienzo del texto (números como #), motivo]. Uno por uno y
+ * con el porqué, como ALLOW en check-mobile: no es un lugar para esconder bugs
+ * (ADR 0007: aceptar algo lo decide una persona y queda acá, en el código).
+ */
+const ACCEPTED_DIM = [
+  ['meridian/Interior', 'Category #', 'rótulo de cada ambiente al 45 %: jerarquía bajo el título, se lee'],
+  ['unity/LastPortrait', 'STAT #', 'rótulo de cada cifra al 45 %: la cifra va a pleno, el rótulo acompaña'],
+  ['unity/UniversalLang', 'STAT #', 'rótulo de cada cifra al 45 %: la cifra va a pleno, el rótulo acompaña'],
+  ['apex/Models', 'Model #', 'la gama: el nombre activo (puntero o el del medio en el teléfono) a pleno, el resto al 20 %'],
+  ['apex/Gallery', 'Next →', 'la miniatura que sigue al mouse: solo existe con puntero fino'],
+]
+const isAcceptedDim = (sectionId, entry) =>
+  ACCEPTED_DIM.some(([id, text]) => id === sectionId && entry.startsWith(text) && !/nunca en pantalla/.test(entry))
+
 const LAUNCH_ARGS = [
   '--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessChecks,BlockInsecurePrivateNetworkRequests',
 ]
@@ -243,7 +259,7 @@ async function finalChecks() {
 }
 
 /** Una pasada: un ancho, un modo. Devuelve la vista y las capturas. */
-async function runPass(browser, key, { vp, reduce }) {
+async function runPass(browser, key, { vp, reduce }, sectionId) {
   const { name, width, height, ...device } = vp
   const context = await browser.newContext({ viewport: { width, height }, ...device, reducedMotion: reduce ? 'reduce' : 'no-preference' })
   const page = await context.newPage()
@@ -312,7 +328,9 @@ async function runPass(browser, key, { vp, reduce }) {
     await sleep(1500)
     const later = await capped(iframe.evaluate((el) => el.getBoundingClientRect().height), 0)
     const { broken, fonts } = await capped(frame.evaluate(finalChecks), { broken: [], fonts: [] })
-    const { hidden, cut } = await capped(frame.evaluate(collectText), { hidden: [], cut: [] })
+    const text = await capped(frame.evaluate(collectText), { hidden: [], cut: [] })
+    const hidden = text.hidden.filter((h) => !isAcceptedDim(sectionId, h))
+    const { cut } = text
     Object.assign(view, {
       mode: pinned ? 'pin' : 'flow',
       iframeH: Math.round(iframeH),
@@ -349,7 +367,7 @@ async function screen(browser, sectionId) {
   const strips = []
   try {
     for (const pass of PASSES) {
-      const { view, shots } = await runPass(browser, key, pass)
+      const { view, shots } = await runPass(browser, key, pass, sectionId)
       row.views.push(view)
       strips.push({ view, shots, width: pass.vp.width })
     }
