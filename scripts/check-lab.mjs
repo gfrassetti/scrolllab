@@ -277,7 +277,17 @@ try {
     }
     const { instance } = await created.json()
     const page = await context.newPage()
-    const fail = (msg) => problems.push(`${sectionId}: ${msg}`)
+    // Cada falla deja una captura del editor en ese momento (para la persona o
+    // el agente que la tenga que entender): storage/lab-check/<modelo>-<Sección>-<n>.png.
+    let shots = 0
+    const fail = (msg) => {
+      problems.push(`${sectionId}: ${msg}`)
+      const dir = path.join(REPO, 'storage', 'lab-check')
+      fs.mkdirSync(dir, { recursive: true })
+      page
+        .screenshot({ path: path.join(dir, `${sectionId.replace('/', '-')}-${++shots}.png`), fullPage: true })
+        .catch(() => {})
+    }
     try {
       await page.goto(`${BASE}/lab/${instance.id}`)
       const box = page.locator('[data-lab-preview]')
@@ -308,6 +318,10 @@ try {
             .first()
             .locator('input, textarea')
         : await fieldInput(page, target)
+      // El editor cargó lo publicado (el campo lo muestra) antes de escribir: con
+      // la máquina cargada, escribir antes medía la carrera de la prueba, no el editor.
+      for (let i = 0; i < 40 && (await again.inputValue().catch(() => '')) !== one; i++) await sleep(250)
+      if ((await again.inputValue().catch(() => '')) !== one) fail('al volver al editor, el campo no muestra lo publicado')
       await again.fill(two)
       if (!(await waitPreview(page, two))) fail('la vista previa no toma el segundo cambio')
       if (!(await page.getByText('Hay cambios sin publicar').isVisible())) {

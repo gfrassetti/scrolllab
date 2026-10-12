@@ -281,7 +281,7 @@ construirse, no al final.
 | `apex/Models` | sí | sí (FLOW) | rótulo, número, texto, modelos (lista, tope 10: nombre/imagen/enlace), 3 colores |
 | `apex/Story` | sí | sí (FLOW) | bloques (lista, tope 3: rótulo/titular/texto/imagen/palabra), palabra on/off, línea on/off, 3 colores |
 | `apex/Showroom` | sí | no (3D pesado + scroll fijado) | rótulo, titular, intro, autos (lista, tope 3: nombre/GLB/foto/ficha), sala GLB, póster, 4 textos, reflejo on/off, 3 colores |
-| `apex/Footer` | sí | no (cierre de página) | marca, líneas, menú (lista), newsletter (6 textos + endpoint), bloques de contacto (lista), red social, privacidad, palabra grande on/off, 3 colores |
+| `apex/Footer` | sí | sí (2026-10-12: el newsletter manda por mail al dueño del widget, `labForms.js`) | marca, líneas, menú (lista), newsletter (6 textos + endpoint), bloques de contacto (lista), red social, privacidad, palabra grande on/off, 3 colores |
 
 - **Campos:** `src/domain/sectionFields/fields/apex.js`. El servidor valida por nombre:
   `washColor` es color; `filmSrc`, `filmSrcMobile`, `poster`, `posterMobile` son URL de

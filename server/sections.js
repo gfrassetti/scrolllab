@@ -149,8 +149,10 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'apex/Story',
   'apex/Gallery',
   // APEX Models: la gama como lista con foto al lado (hover / tramo central en el teléfono).
-  // El Footer a pantalla completa queda fuera: es el cierre de una página, no un widget.
   'apex/Models',
+  // APEX Footer: cierre a pantalla completa con newsletter. En LAB el newsletter
+  // manda por mail al dueño del widget, como los otros formularios (labForms.js).
+  'apex/Footer',
   // Three.js (Fase L): con el frame partido por sección, three es un archivo
   // aparte que bajan solo estos widgets (antes lo pagaba cada embed).
   'fizz/HeroBubbles',
@@ -166,7 +168,9 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   // es una secuencia de cuadros), `meridian/Location` y `meridian/Masterplan`
   // (puntos fijos sobre un mapa / una foto aérea), y FOLD entero (película al
   // scroll: ni en LAB ni en el builder, ver sections.test.js),
-  // `commerce/ProductGrid` (router, carrito y checkout del sitio).
+  // `commerce/ProductGrid` (router, carrito y checkout del sitio),
+  // `apex/Showroom` (decisión del dueño: «Builder sí, LAB no»; ~8–9 MB de 3D y
+  // ~9 pantallas pegadas en el sitio del cliente).
 ])
 
 export const HOSTABLE_SECTION_SET = new Set(HOSTABLE_SECTIONS)

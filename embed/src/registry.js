@@ -108,6 +108,7 @@ const SECTIONS = {
   'apex/Story': () => import('../../src/components/sections/apex/Story.jsx').then((m) => flowEdition(m.default)),
   'apex/Gallery': () => import('../../src/components/sections/apex/Gallery.jsx').then((m) => flowEdition(m.default)),
   'apex/Models': () => import('../../src/components/sections/apex/Models.jsx').then((m) => flowEdition(m.default)),
+  'apex/Footer': () => import('../../src/components/sections/apex/Footer.jsx'),
   // Three.js: un archivo aparte como cualquier sección; three viaja en su propio
   // chunk compartido y lo bajan solo estos widgets.
   'fizz/HeroBubbles': () => import('../../src/components/sections/fizz/HeroBubbles.jsx'),

@@ -8,7 +8,7 @@
  */
 
 /** Las secciones de formulario que LAB sirve con su propio envío por mail. */
-export const LAB_FORM_SECTIONS = Object.freeze(['contact/ContactForm', 'meridian/Contact', 'fizz/ContactSteps'])
+export const LAB_FORM_SECTIONS = Object.freeze(['contact/ContactForm', 'meridian/Contact', 'fizz/ContactSteps', 'apex/Footer'])
 
 /** @param {string} sectionId */
 export function isLabFormSection(sectionId) {

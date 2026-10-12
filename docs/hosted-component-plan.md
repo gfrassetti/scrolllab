@@ -1281,3 +1281,16 @@ las pasadas a 768/1280 salen `trabada` (WebGL por software, tres a la vez); de a
 uno no. `fizz/HeroBubbles` marca `texto-oculto` en el teléfono: la bajada chica
 aparece ~3 s después de llegar y el screening ya pasó (la entrada es la del
 sitio, a propósito).
+
+## Fase M — APEX Footer con newsletter; la sala 3D queda fuera (2026-10-12)
+
+- **`apex/Footer` entra** como widget de formulario (`LAB_FORM_SECTIONS`): su newsletter manda
+  `{ formType: 'newsletter', email }` a `/api/embed/:key/form` y el mail le llega al dueño del widget, como
+  los otros formularios. e2e: «el newsletter manda a LAB desde el sitio ajeno» exige el POST (sin endpoint el
+  Footer muestra el éxito en modo demo sin mandar nada). `check:sections -- apex/Footer` en verde.
+- **`apex/Showroom` no entra**: decisión del dueño al construirlo («Builder sí, LAB no»): ~8–9 MB de 3D y un
+  recorrido de ~9 pantallas pegado en el sitio del cliente. La revisión de widgets lo confirmó (46 errores por
+  pasada).
+- **`check:lab`**: al volver al editor espera a que el campo muestre lo publicado antes de escribir (con la
+  máquina cargada la prueba escribía antes y medía su propia carrera), y cada falla deja una captura en
+  `storage/lab-check/`.

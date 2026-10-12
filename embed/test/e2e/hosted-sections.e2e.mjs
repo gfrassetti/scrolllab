@@ -452,6 +452,11 @@ const CASES = {
     props: { title: 'MKSWAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKSWAT',
   },
+  // Footer con newsletter: en LAB manda por mail (labForms.js).
+  'apex/Footer': {
+    props: { descriptor: 'MKAPEXF', bg: '#04070d', fg: '#e8edf6' },
+    marker: 'MKAPEXF',
+  },
   // Three.js (Fase L): el canvas va aparte; el marcador es texto del DOM.
   'fizz/HeroBubbles': {
     props: { tagline: 'MKHBFZ', bg: '#2b4bff', fg: '#fff4e0' },
@@ -929,6 +934,33 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
       }
       assert.match(text, /MKSENT/, 'no aparece el mensaje de éxito')
       assert.equal(posts.length, 1, 'no salió un POST al formulario de LAB')
+      assert.equal(posts[0].email, 'ana@example.com')
+    } finally {
+      await context.close()
+      await unseed(id)
+    }
+  })
+
+  // El newsletter del Footer de APEX: sin endpoint muestra el éxito en modo demo
+  // sin mandar nada, así que lo que prueba que llega al dueño es el POST a LAB.
+  it('apex/Footer — el newsletter manda a LAB desde el sitio ajeno', async () => {
+    const props = { descriptor: 'MKAPEXF', successMessage: 'MKSUBS', errorMessage: 'MKFAIL' }
+    const { id, key } = await seed('apex/Footer', props)
+    const { context, page } = await openHost(key, { url: PLAIN_URL })
+    const posts = []
+    page.on('request', (req) => req.url().includes('/form') && req.method() === 'POST' && posts.push(req.postDataJSON()))
+    try {
+      const { frame } = await waitFrame(page)
+      await frame.locator('form input[type="email"]').fill('ana@example.com')
+      await frame.locator('form button[type="submit"]').click()
+      let text = ''
+      for (let i = 0; i < 20 && !/MKSUBS|MKFAIL/.test(text); i++) {
+        await sleep(250)
+        text = await frame.evaluate(() => document.getElementById('root').innerText)
+      }
+      assert.match(text, /MKSUBS/, 'no aparece el mensaje de éxito')
+      assert.equal(posts.length, 1, 'no salió un POST al formulario de LAB (¿quedó en modo demo?)')
+      assert.equal(posts[0].formType, 'newsletter')
       assert.equal(posts[0].email, 'ana@example.com')
     } finally {
       await context.close()
