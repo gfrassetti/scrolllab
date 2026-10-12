@@ -91,7 +91,7 @@ Lo que se vende es el ZIP, no el repo. Por eso:
 |---|---|
 | `npm run lint` | Reglas de React y de Node; el dominio sin dependencias de UI; `crypto` explícito en el servidor |
 | `npm run typecheck` | Tipos JSDoc sobre `src/domain/` y `server/` (ver [ADR 0004](adr/0004-tipos-jsdoc.md)) |
-| `npm test` | Unitarios, API con el Mercado Pago simulado, empaquetado de cada modelo |
+| `npm test` | Unitarios, API con el Mercado Pago simulado, el ZIP de cada template y de cada sección del builder (sola y con su modelo) |
 | `npm run check` | Invariantes que ningún test cubre: precios, secciones, props editables, i18n, rutas |
 | `npm run check:builder` | El editor del builder cambia lo que se ve (Chromium) |
 | `npm run check:lab` | LAB de punta a punta: editar, previsualizar, publicar, verlo en un sitio ajeno |
@@ -99,7 +99,17 @@ Lo que se vende es el ZIP, no el repo. Por eso:
 | `npm run check:mp-sandbox` | Suscripciones contra el sandbox real de Mercado Pago (pide credenciales de prueba) |
 | `npm run ssr:snapshot` | El HTML que React renderiza en el servidor: la red de los refactors de UI |
 
-Ninguna de estas redes reemplaza mirar en pantalla un cambio visual.
+Las secciones del builder y los widgets de LAB tienen además su procedimiento y su barrido nocturno
+([ADR 0007](adr/0007-pruebas-continuas-de-secciones.md), [`docs/testing-sections.md`](testing-sections.md)):
+
+| Red | Qué cubre |
+|---|---|
+| `npm run check:sections -- <modelo>` | Todo de una sección o un template: ZIP, campos, builder, guardado, colores, ZIP compilado, teléfono, movimiento, paridad y, si es widget, LAB |
+| `npm run check:builder-save` | Lo editado se guarda solo, se retoma en otro navegador y llega al ZIP comprado |
+| `npm run qa:sweep` | De noche, en una copia limpia de HEAD: lo que cambió + un modelo en rotación; registra los hallazgos en `storage/qa/` |
+
+Ninguna de estas redes reemplaza mirar en pantalla un cambio visual: eso lo hace el agente `section-tester` sobre las
+láminas, y lo subjetivo lo decide el dueño.
 
 ## Refactorizar sin romper
 

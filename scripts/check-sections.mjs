@@ -10,11 +10,13 @@
  *   npm run check:sections -- apex/Hero         una sección (o varias)
  *   npm run check:sections -- apex --fast       solo lo rápido (sin navegador pesado)
  *   npm run check:sections -- apex --skip=parity,motion
+ *   npm run check:sections -- apex --only=mobile     un paso (el fixer reproduce y re-verifica con esto)
  *
  * Pasos (cada uno es un comando que también se puede correr suelto):
  *   zip        node --test packagingEverySection (cada sección sola y su modelo junto)
  *   editable   check:editable por sección (todo lo visible es un campo)
  *   builder    check:builder (lo editado aparece en la vista previa)
+ *   builder-save check:builder-save (se guarda solo, se retoma en otro navegador, llega al ZIP comprado)
  *   colors     check:colors (todo lo visible sigue a sus colores)
  *   visual     check:visual (npm install + vite build + Chromium del ZIP del
  *              template y de la composición del builder con esas secciones)
@@ -50,9 +52,16 @@ const SKIP = new Set(
     .flatMap((a) => a.slice('--skip='.length).split(','))
     .filter(Boolean),
 )
+// --only=paso[,paso]: solo esos (el fixer reproduce y re-verifica el paso que falló).
+const ONLY = new Set(
+  argv
+    .filter((a) => a.startsWith('--only='))
+    .flatMap((a) => a.slice('--only='.length).split(','))
+    .filter(Boolean),
+)
 const targets = argv.filter((a) => !a.startsWith('-'))
 if (!targets.length) {
-  console.error('Uso: npm run check:sections -- <modelo | modelo/Sección …> [--fast] [--skip=paso,paso]')
+  console.error('Uso: npm run check:sections -- <modelo | modelo/Sección …> [--fast] [--skip=paso,paso] [--only=paso,paso]')
   process.exit(1)
 }
 
@@ -92,6 +101,7 @@ const STEPS = [
   ],
   ['editable', 'todo texto, foto, link y color visible es un campo', ids.map((id) => npm('check:editable', id)), true],
   ['builder', 'lo editado en el panel aparece en la vista previa', [npm('check:builder', ...ids)], false],
+  ['builder-save', 'se guarda solo, se retoma en otro navegador y llega al ZIP comprado', [npm('check:builder-save', ...targets)], false],
   // check:colors toma un objetivo por vez (un modelo o una sección).
   ['colors', 'todo lo visible sigue a sus campos de color', targets.map((t) => npm('check:colors', t)), false],
   [
@@ -138,7 +148,7 @@ console.log(`  modelos con template: ${templateModels.join(', ') || '—'} · wi
 
 const results = []
 for (const [name, what, commands, fast] of STEPS) {
-  if (SKIP.has(name) || (FAST && !fast)) {
+  if (SKIP.has(name) || (ONLY.size && !ONLY.has(name)) || (FAST && !fast && !ONLY.has(name))) {
     results.push({ name, what, status: 'salteado' })
     continue
   }

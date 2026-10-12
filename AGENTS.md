@@ -220,7 +220,9 @@ npm run verify         # lint + typecheck + test + check: el gate antes de cada 
 npm run typecheck      # tsc sobre src/domain y server (tipos JSDoc, gradual; ver docs/adr/0004)
 npm run ssr:snapshot   # HTML renderizado en el servidor: la red de los refactors de UI
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
-npm run check:sections # EL procedimiento de prueba de un template o sección: ZIP de cada sección, campos, builder, colores, ZIP compilado, teléfono, movimiento, paridad y, si es widget, LAB (`-- apex`, `-- apex/Hero`, `--fast`). Ver docs/testing-sections.md
+npm run check:sections # EL procedimiento de prueba de un template o sección: ZIP de cada sección, campos, builder, guardado, colores, ZIP compilado, teléfono, movimiento, paridad y, si es widget, LAB (`-- apex`, `-- apex/Hero`, `--fast`, `--only=paso`). Ver docs/testing-sections.md
+npm run check:builder-save # con sesión: editar → se guarda solo → otro navegador lo abre igual → comprar (simulado) → el ZIP trae lo editado
+npm run qa:sweep       # el barrido nocturno (ADR 0007): copia limpia de HEAD, lo que cambió + uno en rotación; hallazgos en storage/qa/ (--queue / --mark para el agente section-fixer)
 npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, los que se venden sueltos y el custom (lento); `-- custom:apex` = la composición del builder con todas las secciones de ese modelo
 npm run check:builder  # el editor del builder aplica los cambios (Chromium); `-- apex` = solo ese modelo
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
@@ -241,6 +243,21 @@ npm run check:motion-notice # el aviso «Ver con animaciones»: una sola vez, el
 npm run check:parity   # PC ↔ teléfono ↔ tablet por sección: ScrollTriggers, tamaño del efecto, canvas, listeners de puntero, blur pesado (dev server, Chromium)
 npm run images         # WebP + srcset de las fotos de los templates desde design/masters/<sku>/
 ```
+
+### Pruebas de secciones — siempre, con registro y agentes (ADR 0007)
+
+Lo que se vende es cada sección (ZIP del builder y widget de LAB): tiene que **descargarse bien** y **verse bien**.
+Procedimiento y arquitectura (cuándo, dónde, cómo): [`docs/testing-sections.md`](docs/testing-sections.md).
+
+- Al tocar o sumar una sección: `npm run check:sections -- <modelo/Sección>` (o `-- <modelo>`); si es widget, los pasos
+  de LAB corren siempre. Todas las noches: `npm run qa:sweep` (copia limpia de HEAD) con los hallazgos en `storage/qa/`.
+- Agentes de proyecto con Sonnet (`.claude/agents/`): `section-tester` prueba y **mira** las láminas (lo subjetivo va a
+  `storage/qa/observations.md` para el dueño); `section-fixer` arregla lo objetivo **solo dentro de la sección**
+  (`src/components/sections/<modelo>/**`, sus campos y su caso e2e), re-verifica con `scripts/lib/clean-verify.mjs` y
+  commitea en master sin push. Lo compartido y las propias pruebas (umbrales, `ALLOW`, `ACCEPTED`, `NOT_IN_DOM`) no los
+  toca: escala. Dos intentos por hallazgo y pasa a «necesita persona».
+- Un error de una prueba no se pasa por alto: queda en el registro con su salida. Que algo es así a propósito se
+  declara en la lista de excepciones de esa prueba, con el motivo, y lo decide una persona.
 
 ### Responsive — 3 tiers (mobile / tablet / desktop)
 

@@ -17,6 +17,8 @@ const TEST_DIRS = [
   'src/lib/__tests__',
   'embed/loader/__tests__',
   'embed/__tests__',
+  // Las decisiones del barrido de QA (qué probar, ids de hallazgos): docs/adr/0007.
+  'scripts/lib/qa/__tests__',
 ]
 
 const files = TEST_DIRS.flatMap((dir) =>

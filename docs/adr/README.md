@@ -12,5 +12,6 @@ Consecuencias*. Si una decisión cambia, no se reescribe: se agrega un ADR nuevo
 | [0004](0004-tipos-jsdoc.md) | Tipos con JSDoc y `tsc`, en vez de migrar a TypeScript |
 | [0005](0005-refactors-con-foto.md) | Los refactors se verifican con una foto antes y después |
 | [0006](0006-contrato-de-repositorios.md) | Los repositorios tienen un contrato que corre contra Mongo real y contra archivos |
+| [0007](0007-pruebas-continuas-de-secciones.md) | Las secciones y los widgets se prueban todo el tiempo; lo que falla se registra y se arregla con límites |
 
 Panorama general: [`docs/architecture.md`](../architecture.md).

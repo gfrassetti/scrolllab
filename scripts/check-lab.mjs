@@ -317,6 +317,11 @@ try {
       await page.getByText('Guardado', { exact: true }).waitFor({ timeout: 5000 })
       const live = await siteText(instance.key)
       if (live.includes(two) || !live.includes(one)) fail('un borrador salió en vivo')
+
+      // El borrador guardado sigue ahí al volver al editor (otra visita).
+      await page.goto(`${BASE}/lab/${instance.id}`)
+      await box.waitFor({ timeout: 15000 })
+      if (!(await waitPreview(page, two))) fail('al volver al editor, el borrador guardado no está')
     } catch (err) {
       fail(`excepción: ${err.message.split('\n')[0].slice(0, 160)}`)
     } finally {

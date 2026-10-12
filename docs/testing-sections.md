@@ -27,14 +27,53 @@ Corre los pasos en orden, sigue aunque uno falle y deja un informe en
 | zip | `node --test server/__tests__/packagingEverySection.test.js` | El ZIP de cada sección **sola**, de todas las del modelo juntas y del template suelto: archivos de arranque, imports, dependencias, archivos de `public/`, licencia |
 | editable | `npm run check:editable -- <sección>` | Todo texto, foto, link y color visible es un campo |
 | builder | `npm run check:builder -- <modelo>` | Lo editado en el panel aparece en la vista previa (también dentro de listas) y no hay errores de consola |
+| builder-save | `npm run check:builder-save -- <modelo>` | Con sesión: editar → se guarda solo en el servidor → otro navegador abre el proyecto con lo editado → comprar (pago simulado) → el ZIP trae lo editado. Capturas de las fallas en `storage/builder-save/` |
 | colors | `npm run check:colors -- <modelo>` | Todo lo visible sigue a sus campos de color (lo de canvas/WebGL va a mano) |
 | visual | `npm run check:visual -- <modelo> custom:<modelo>` | Lo que hace el comprador: `npm install` + `vite build` + Chromium, del ZIP del template y de la composición del builder con todas sus secciones. Capturas en `storage/visual-check/` |
 | mobile | `npm run check:mobile -- <modelo> --quick` | 320/390/768/1280 + «reducir movimiento»: desbordes, texto cortado o chico, zonas de toque, imágenes |
 | motion | `npm run check:motion -- <modelo> --quick` | Teléfono emulado (gestos táctiles, CPU ×4): huecos, trabas, texto que nunca aparece |
 | parity | `npm run check:parity -- <modelo>` | Lo que anima en PC anima en el teléfono y la tablet |
 | lab-screen | `npm run screen:lab -- <ids> --deep --jobs 1` | Solo los widgets de LAB: embebidos en un sitio ajeno, FLOW/PIN, alto estable, texto oculto o cortado, fotos rotas, fuentes, red. Láminas en `storage/lab-screen/` |
-| lab-flow | `npm run check:lab -- <ids>` | Editar → vista previa con el embed real → publicar → verse en un sitio ajeno |
+| lab-flow | `npm run check:lab -- <ids>` | Editar → vista previa con el embed real → publicar → verse en un sitio ajeno; un borrador guardado no sale en vivo y sigue ahí al volver al editor |
 | lab-e2e | `test:e2e` filtrado a esos ids | El embed real a 375/768/1280 con sus props |
+
+## Arquitectura: cuándo, dónde, cómo
+
+Decisión completa y porqué: [ADR 0007](adr/0007-pruebas-continuas-de-secciones.md).
+
+| Nivel | Cuándo | Dónde | Cómo |
+|---|---|---|---|
+| verify | cada commit | CI de GitHub y local | `npm run verify`: el ZIP de cada sección y template, la guarda de casos de LAB, los tests del barrido |
+| check:sections | al tocar o sumar una sección | esta PC | a mano o con el agente `section-tester` |
+| qa:sweep | todas las noches | esta PC, copia limpia de HEAD | tarea programada de la app → `section-tester` (prueba y mira) → `section-fixer` (arregla lo objetivo dentro de la sección) |
+
+```
+qa:sweep ──► copia limpia de HEAD (clean-verify)
+   │            └─ check:sections -- <modelo>   (lo que cambió + uno en rotación)
+   ▼
+storage/qa/findings.json  ── abierto / arreglado / necesita persona
+storage/qa/report.md      ── el informe de la noche
+storage/qa/runs/<fecha>/  ── salidas, láminas de LAB, capturas del ZIP
+Obsidian «QA — bitácora de pruebas» ── una línea por noche
+   │
+   ├─► section-tester (Sonnet): mira las láminas → storage/qa/observations.md (lo subjetivo, para el dueño)
+   └─► section-fixer  (Sonnet): hasta 5 abiertos → reproduce (--only=paso) → arregla en la sección
+                                 → re-verifica + clean-verify → commit en master (sin push) → --mark
+```
+
+Comandos del barrido:
+
+```bash
+npm run qa:sweep                         # lo que cambió + uno en rotación
+npm run qa:sweep -- --models apex,kin    # esos
+npm run qa:sweep -- --all                # todos (horas)
+npm run qa:sweep -- --queue 5            # lo que el fixer toma (JSON)
+npm run qa:sweep -- --mark <id> --ok|--fail --note "…"
+```
+
+**Si algo falla:** queda en el registro con su salida (`storage/qa/runs/<fecha>/<modelo>.<paso>.log`) y no se pierde:
+el fixer lo toma, o pasa a «necesita persona» al segundo intento. Que algo es así a propósito no se marca en el registro:
+se declara en la lista de excepciones de la prueba, con el motivo, y lo decide una persona.
 
 ## Cuándo
 
