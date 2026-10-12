@@ -297,7 +297,9 @@ async function runPass(browser, key, { vp, reduce }, sectionId) {
     const fractions = reduce ? [0.3, 0.7] : [0.25, 0.45, 0.65, 0.85]
     const shotAt = fractions.map((f) => start + height * 0.5 + (end - start - height * 0.5) * f)
     // Una sección muy alta no puede trabar el screening: a lo sumo ~160 pasos.
-    const step = Math.max(80, Math.ceil((end - start) / 160))
+    // De a 40 px como mínimo: alguien que lee. Con 80 era arrastrar la página y un
+    // reveal con `scrub` (que va atrasado a propósito) no llegaba a encenderse.
+    const step = Math.max(40, Math.ceil((end - start) / 160))
     const deadline = Date.now() + 150_000
     for (let y = start; y <= end + 40; y += step) {
       if (Date.now() > deadline) {
