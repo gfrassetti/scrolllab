@@ -248,7 +248,7 @@ export default function Gallery({
       <button type="button" tabIndex={-1} aria-hidden="true" data-zone="next" onClick={zoneClick(1)} className="apex-ga-zone absolute inset-y-0 right-0 z-10 w-3/4" />
 
       {/* Chrome */}
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-[5vw] pt-[max(1.1rem,2.4svh)] text-[11px] tracking-[0.16em] uppercase md:px-[2.4vw] lg:text-[max(10px,0.6vw)]" style={LABEL}>
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-[5vw] pt-[max(1.1rem,2.4svh)] text-[11px] tracking-[0.16em] uppercase md:px-[2.4vw] lg:text-[max(11px,0.6vw)]" style={LABEL}>
         <p className="flex items-baseline gap-4">
           <span className="tabular-nums opacity-50">({index})</span>
           <span>{eyebrow}</span>
@@ -263,7 +263,7 @@ export default function Gallery({
           <p className="mt-3 max-w-[38ch] text-[14px] leading-[1.45] opacity-80 md:text-[max(13px,0.95vw)]">{active.caption}</p>
         </div>
         <div
-          className="pointer-events-auto flex shrink-0 items-center justify-between gap-5 border-t border-current/20 pt-3 text-[11px] tracking-[0.16em] uppercase md:justify-start md:border-0 md:pt-0 lg:text-[max(10px,0.6vw)]"
+          className="pointer-events-auto flex shrink-0 items-center justify-between gap-5 border-t border-current/20 pt-3 text-[11px] tracking-[0.16em] uppercase md:justify-start md:border-0 md:pt-0 lg:text-[max(11px,0.6vw)]"
           style={LABEL}
           onPointerEnter={() => cursorRef.current && (cursorRef.current.dataset.shown = 'false')}
         >

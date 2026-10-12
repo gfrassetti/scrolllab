@@ -33,6 +33,7 @@
     "ssr:snapshot": "node scripts/ssr-snapshot.mjs",
     "check:lab": "node scripts/check-lab.mjs",
     "screen:lab": "node scripts/screen-lab.mjs",
+    "check:sections": "node scripts/check-sections.mjs",
     "check:embed-stacks": "node scripts/check-embed-stacks.mjs",
     "check:mp-sandbox": "node scripts/check-mp-sandbox.mjs",
     "check:mp-refund-sandbox": "node scripts/check-mp-refund-sandbox.mjs",

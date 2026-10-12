@@ -102,11 +102,11 @@ export default function Models({
       style={{ ...vars, background: 'var(--md-bg)', color: 'var(--md-fg)' }}
     >
       <div className="grid gap-y-10 md:grid-cols-12 md:gap-x-[1.6vw]">
-        <p data-apex-rise className="flex items-baseline gap-4 text-[11px] tracking-[0.16em] uppercase md:col-span-3 lg:text-[max(10px,0.6vw)]" style={LABEL}>
+        <p data-apex-rise className="flex items-baseline gap-4 text-[11px] tracking-[0.16em] uppercase md:col-span-3 lg:text-[max(11px,0.6vw)]" style={LABEL}>
           <span className="tabular-nums opacity-50">({index})</span>
           <span>{eyebrow}</span>
         </p>
-        <p data-apex-rise className="max-w-[34ch] text-[11px] leading-[1.5] tracking-[0.12em] uppercase opacity-70 md:col-span-4 md:col-start-9 lg:text-[max(10px,0.6vw)]" style={LABEL}>
+        <p data-apex-rise className="max-w-[34ch] text-[11px] leading-[1.5] tracking-[0.12em] uppercase opacity-70 md:col-span-4 md:col-start-9 lg:text-[max(11px,0.6vw)]" style={LABEL}>
           {caption}
         </p>
 

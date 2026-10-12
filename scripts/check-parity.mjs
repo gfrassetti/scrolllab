@@ -64,7 +64,7 @@ import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { devices } from 'playwright'
 
-import { installBlockHelpers } from './lib/page-helpers.mjs'
+import { installBlockHelpers, waitForPageLoaders } from './lib/page-helpers.mjs'
 import { freePort, launchChromium, routeGoogleFonts, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -399,11 +399,7 @@ async function runView(browser, base, { template, view, expect }) {
   await page.goto(`${base}${TEMPLATE_PATHS[template]}`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.evaluate(() => document.fonts?.ready).catch(() => {})
   // MERIDIAN abre con una pantalla de carga (la ruta es lazy: respiro y recién ahí esperar).
-  await page.waitForTimeout(1200)
-  await page
-    .waitForFunction(() => !document.querySelector('[role="status"][aria-label="Loading"]'), null, { timeout: 25000 })
-    .catch(() => {})
-  await page.waitForTimeout(1800)
+  await waitForPageLoaders(page)
 
   const inv = await page.evaluate(inventoryInPage, { thresholds: { ...VISIBLE, bigArea: BIG_AREA }, expect })
   const listeners = await page.evaluate(() => window.__listeners)

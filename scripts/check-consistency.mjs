@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { PRODUCTS } from '../server/catalog.js'
+import { HOSTABLE_SECTIONS } from '../server/sections.js'
 import { ASSET_URL_KEYS, COLOR_PROP_KEYS, isHrefKey, isToggleKey } from '../server/sectionFields.js'
 import {
   TEMPLATE_PRICES_USD,
@@ -429,6 +430,16 @@ if (!sitemapSrc.includes('/plantillas/')) {
 }
 if (!sitemapSrc.includes('https://www.scrolllab.com.ar/builder')) {
   fail('seo', 'sitemap.xml debe incluir /builder')
+}
+
+// Cada widget de LAB tiene su caso en el e2e del embed (props + marcador). Sin
+// él la suite larga falla recién cuando alguien la corre; acá salta en verify.
+// Procedimiento completo: docs/testing-sections.md (`npm run check:sections`).
+const e2eSrc = read('embed/test/e2e/hosted-sections.e2e.mjs')
+for (const id of HOSTABLE_SECTIONS) {
+  if (!e2eSrc.includes(`'${id}': {`)) {
+    fail('lab', `${id} es widget de LAB y no tiene caso en CASES (embed/test/e2e/hosted-sections.e2e.mjs)`)
+  }
 }
 
 if (problems.length) {

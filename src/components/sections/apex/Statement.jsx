@@ -122,7 +122,7 @@ export default function Statement({
       {lines ? <span data-apex-line aria-hidden="true" className="absolute inset-x-[5vw] top-0 h-px origin-left bg-current opacity-25 md:inset-x-[2.4vw]" /> : null}
 
       <div className="grid gap-y-12 md:grid-cols-12 md:gap-x-[1.6vw]">
-        <p data-apex-rise className="flex items-baseline gap-4 text-[11px] tracking-[0.16em] uppercase md:col-span-3 lg:text-[max(10px,0.6vw)]" style={LABEL}>
+        <p data-apex-rise className="flex items-baseline gap-4 text-[11px] tracking-[0.16em] uppercase md:col-span-3 lg:text-[max(11px,0.6vw)]" style={LABEL}>
           <span className="tabular-nums opacity-50">({index})</span>
           <span>{eyebrow}</span>
         </p>
@@ -165,7 +165,7 @@ export default function Statement({
                     String(s?.value ?? '')
                   )}
                 </dd>
-                <dt className="order-2 max-w-[18ch] text-right text-[11px] leading-[1.4] tracking-[0.1em] uppercase opacity-70 md:mt-3 md:max-w-[22ch] md:text-left md:tracking-[0.12em] lg:text-[max(10px,0.6vw)]" style={LABEL}>
+                <dt className="order-2 max-w-[18ch] text-right text-[11px] leading-[1.4] tracking-[0.1em] uppercase opacity-70 md:mt-3 md:max-w-[22ch] md:text-left md:tracking-[0.12em] lg:text-[max(11px,0.6vw)]" style={LABEL}>
                   {s?.label}
                 </dt>
               </div>

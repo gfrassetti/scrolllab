@@ -66,7 +66,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { buildSnapshot, freePort, launchChromium, routeGoogleFonts, startPreview, startVite } from './lib/servers.mjs'
-import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
+import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers, waitForPageLoaders } from './lib/page-helpers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'storage', 'responsive-check', 'mobile')
@@ -761,13 +761,7 @@ async function auditJob(browser, base, job, opts) {
     // MERIDIAN abre con una pantalla de carga a pantalla completa (8 s la primera
     // vez): mientras está, tapa el hero y las zonas de toque no se pueden medir.
     // La ruta es lazy: se le da un respiro para que monte antes de esperar que se vaya.
-    await page.waitForTimeout(1200)
-    await page
-      .waitForFunction(() => !document.querySelector('[role="status"][aria-label="Loading"]'), null, {
-        timeout: 25000,
-      })
-      .catch(() => {})
-    await page.waitForTimeout(1800)
+    await waitForPageLoaders(page)
     loaded = true
 
     const meta = await page.evaluate(() => window.__mc.blockMeta())
@@ -784,8 +778,17 @@ async function auditJob(browser, base, job, opts) {
     let n = 0
     const shoot = async (name, label) => {
       const file = `${String(n++).padStart(2, '0')}-${slugOf(name)}-${label}.jpg`
-      await page.screenshot({ path: path.join(shotDir, file), type: 'jpeg', quality: 62, scale: 'css', timeout: 60000 })
-      shots.push({ name, label, file: path.relative(OUT, path.join(shotDir, file)) })
+      try {
+        await page.screenshot({ path: path.join(shotDir, file), type: 'jpeg', quality: 62, scale: 'css', timeout: 60000 })
+        shots.push({ name, label, file: path.relative(OUT, path.join(shotDir, file)) })
+      } catch (err) {
+        if (!/Timeout/i.test(String(err))) throw err
+        // Una escena WebGL pesada (la sala 3D de APEX a 1280 × DPR 2) con el GL por
+        // software de Chromium tarda más de un minuto en dibujar un cuadro: no es
+        // el teléfono, es el emulador. Queda como aviso y la auditoría sigue
+        // midiendo (antes cortaba la página entera como «error»).
+        issues.push({ check: 'captura-lenta', block: name, detail: `sin captura (${label}): el cuadro tardó más de 60 s`, where: label })
+      }
     }
     const auditHere = async (where, scopeSel) => {
       const found = await page.evaluate(

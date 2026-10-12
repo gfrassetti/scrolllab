@@ -12,7 +12,8 @@
  *
  * Corre en dev (no en build) a propósito, para que React reporte sus warnings.
  *
- * Uso: npm run check:builder
+ * Uso: npm run check:builder                 todas las secciones del builder
+ *      npm run check:builder -- apex         un modelo (o una sección: apex/Hero)
  */
 import { spawn } from 'node:child_process'
 import net from 'node:net'
@@ -25,6 +26,9 @@ import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { BUILDER_HIDDEN_SKUS } from '../src/lib/pricing.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+/** Modelos (`apex`) o secciones (`apex/Hero`) a revisar; sin argumentos, todas. */
+const ONLY = process.argv.slice(2).filter((a) => !a.startsWith('-'))
+const wanted = (id) => !ONLY.length || ONLY.some((o) => (o.includes('/') ? o === id : id.split('/')[0] === o))
 const STORAGE_KEY = 'builder-composition-v1'
 
 /** Puerto efímero: un vite zombi de una corrida anterior no rompe esta. */
@@ -373,9 +377,11 @@ try {
   const sectionIds = Object.keys(SECTION_FIELDS).filter(
     (id) =>
       editsFor(id).expect.length > 0 &&
-      !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0]),
+      !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0]) &&
+      wanted(id),
   )
   const total = sectionIds.reduce((sum, id) => sum + editsFor(id).expect.length, 0)
+  if (ONLY.length && !sectionIds.length) throw new Error(`ninguna sección del builder coincide con: ${ONLY.join(' ')}`)
 
   console.log(`Revisando ${total} valores editados en ${sectionIds.length} secciones…`)
   const checkOnce = async (sectionId) => {

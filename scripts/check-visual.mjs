@@ -11,6 +11,9 @@
  * a propósito, por eso vive fuera de `npm test`.
  *
  * Uso: npm run check:visual [-- modelo1 modelo2]
+ *      npm run check:visual -- custom:apex   la composición del builder con
+ *                                            todas las secciones de ese modelo
+ *                                            (lo que baja quien arma con ellas)
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -24,6 +27,10 @@ import { chromium } from 'playwright'
 import { BUNDLE_MODELS, COMING_SOON_SKUS, PRODUCTS } from '../server/catalog.js'
 import { packCustomTemplate, packFixedTemplate } from '../server/packaging.js'
 import { readZip } from '../server/__tests__/helpers/zip.js'
+import { ALLOWED_SECTIONS } from '../server/sections.js'
+import { validateRecipe } from '../server/validation.js'
+import { BUILDER_HIDDEN_SKUS } from '../src/domain/catalog.js'
+import { sectionModelOf } from '../src/domain/sections.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SHOTS = path.join(REPO, 'storage', 'visual-check')
@@ -207,6 +214,21 @@ const targets = [
       packCustomTemplate({ recipe: SHOP_RECIPE, destPath, licenseMeta: LICENSE }),
   },
 ].filter((t) => !only.length || only.includes(t.name))
+
+// `custom:<modelo>`: todas las secciones del builder de ese modelo en una
+// composición (validada como la del checkout), compilada y fotografiada.
+for (const arg of only.filter((a) => a.startsWith('custom:'))) {
+  const model = arg.slice('custom:'.length)
+  const ids = ALLOWED_SECTIONS.filter((id) => sectionModelOf(id) === model)
+  if (!ids.length || BUILDER_HIDDEN_SKUS.includes(model)) {
+    console.error(`✖ ${arg}: el builder no tiene secciones de '${model}'`)
+    process.exit(1)
+  }
+  targets.push({
+    name: arg.replace(':', '-'),
+    packTo: (destPath) => packCustomTemplate({ recipe: validateRecipe(ids), destPath, licenseMeta: LICENSE }),
+  })
+}
 
 fs.mkdirSync(SHOTS, { recursive: true })
 

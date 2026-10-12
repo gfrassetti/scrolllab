@@ -220,8 +220,9 @@ npm run verify         # lint + typecheck + test + check: el gate antes de cada 
 npm run typecheck      # tsc sobre src/domain y server (tipos JSDoc, gradual; ver docs/adr/0004)
 npm run ssr:snapshot   # HTML renderizado en el servidor: la red de los refactors de UI
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
-npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, ATRIUM, MERIDIAN y el custom (lento, ~3 min)
-npm run check:builder  # el editor del builder aplica los cambios (Chromium)
+npm run check:sections # EL procedimiento de prueba de un template o sección: ZIP de cada sección, campos, builder, colores, ZIP compilado, teléfono, movimiento, paridad y, si es widget, LAB (`-- apex`, `-- apex/Hero`, `--fast`). Ver docs/testing-sections.md
+npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, los que se venden sueltos y el custom (lento); `-- custom:apex` = la composición del builder con todas las secciones de ese modelo
+npm run check:builder  # el editor del builder aplica los cambios (Chromium); `-- apex` = solo ese modelo
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo
 npm run check:lab      # LAB: editar → preview (el embed real) → publicar → se ve en un sitio ajeno (Chromium)
 npm run screen:lab     # ¿esta sección anda como widget de LAB? La embebe en un sitio ajeno y la recorre: FLOW/PIN, alto, texto oculto o cortado, fotos rotas, fuentes que no cargan, red, errores; láminas en storage/lab-screen/. --deep: 390 (toque) / 768 / 1280, con y sin movimiento; --header: sitio con barra fija
@@ -376,7 +377,7 @@ widget baja el núcleo y su sección (los 3D, además, three en su propio archiv
 pantalla completa (el canvas de FIZZ) cuenta como escenario → PIN. No tocar el reloj de GSAP del frame
 (pausar `gsap.globalTimeline` o mudar las animaciones a una línea de tiempo en pausa): ScrollTrigger lo
 usa por dentro y los pines se miden mal de a ratos (Fase L del plan). Nada de FOLD ni de media que el cliente no pueda cambiar desde el
-editor (un vuelo de cuadros, un mapa con puntos fijos). Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
+editor (un vuelo de cuadros, un mapa con puntos fijos). Cada vez que se suma o se cambia un widget, `npm run screen:lab -- <id> --deep` (regla del dueño: corre siempre; lo hace `npm run check:sections`). Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
 Link de edición (`/lab/editar/:token`, `server/services/hosted/editLink.js`): el dueño de un widget le da a su cliente un link secreto para editar contenido sin cuenta; puede republicar solo lo ya publicado, no ve plan ni dominios. El token se guarda hasheado y se muestra una vez. Detalle: `docs/hosted-component-plan.md`, Fase J.
 
@@ -442,6 +443,9 @@ Register new sellable SKUs in `server/catalog.js` (copy de Checkout Pro) + su pr
 4. Campos editables **solo** en `src/domain/sectionFields/fields/<modelo>.js` (un archivo por modelo; `src/lib/sectionFields.js` los re-exporta): el servidor deriva de ahí qué props acepta.
    Un campo `color` se llama `bg`/`fg`/`accent`… y uno `href` termina en `Href`: el servidor valida por
    nombre y `npm run check` lo exige. Después, i18n del builder y `HOSTABLE_SECTIONS` como siempre.
+5. Si entra a LAB: su caso en `CASES` (`embed/test/e2e/hosted-sections.e2e.mjs`; `npm run check` lo exige).
+6. Antes del commit: `npm run check:sections -- <modelo/Sección>` (o `-- <modelo>` si es un template nuevo) y
+   mirar las láminas y capturas que deja. Procedimiento: [`docs/testing-sections.md`](docs/testing-sections.md).
 
 **Todo lo visible se edita** (regla del dueño, 2026-10-11): cada fondo y color (también los tonos de la
 paleta del modelo —usá `themeVars` de `src/lib/themeVars.js`— y lo que se dibuja en canvas/WebGL), cada
@@ -602,6 +606,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 | Empezar un template que depende de media que el comprador tendría que producir | `Lecciones — templates con media propia` · `HOLLOW — descartado (qué se aprendió)` |
 | Medir una referencia o compararla con lo nuestro | `Analizar paginas modelo` (sección «Lo que analyze:ref no mide») |
 | Revisar el estándar del producto | `Storytelling pages — características canónicas` (canon v1 y v2) |
+| Probar un template o una sección (builder y LAB) | `Probar secciones — builder y LAB (procedimiento)` (el comando, qué corre solo, las trampas que encontró APEX) |
 | Tocar la tipografía global del builder o probar el builder en el Chrome del usuario | `Builder — tipografía global (cómo está hecha y cómo se probó)` (la fuente viaja en la receta; trampas de la extensión de Chrome) |
 
 Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre” Obsidian UI: lee los `.md` del vault cuando aportan contexto.

@@ -120,7 +120,7 @@ export default function Footer({
       <span aria-hidden="true" className="absolute inset-x-[5vw] top-0 h-px bg-current opacity-20 md:inset-x-[2.4vw]" />
 
       {/* Top: brand, the plain lines, the menu and the newsletter. */}
-      <div className="grid gap-y-8 pt-3 text-[11px] tracking-[0.16em] uppercase md:grid-cols-12 md:gap-x-[1.6vw] lg:text-[max(10px,0.6vw)]" style={LABEL}>
+      <div className="grid gap-y-8 pt-3 text-[11px] tracking-[0.16em] uppercase md:grid-cols-12 md:gap-x-[1.6vw] lg:text-[max(11px,0.6vw)]" style={LABEL}>
         <p data-apex-rise className="font-bold md:col-span-3">
           {brand}
         </p>
@@ -155,14 +155,14 @@ export default function Footer({
                   if (status !== 'idle') setStatus('idle')
                 }}
                 aria-invalid={status === 'invalid' || undefined}
-                className="min-w-0 flex-1 bg-transparent py-1 text-[11px] tracking-[0.16em] uppercase outline-none placeholder:text-current/40 lg:text-[max(10px,0.6vw)]"
+                className="min-w-0 flex-1 bg-transparent py-1 text-[11px] tracking-[0.16em] uppercase outline-none placeholder:text-current/40 lg:text-[max(11px,0.6vw)]"
               />
               <input type="text" name="website_hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
               <button type="submit" disabled={status === 'sending'} className="tpl-link tpl-hit relative shrink-0 uppercase disabled:opacity-40">
                 {status === 'sending' ? sendingLabel : signupLabel}
               </button>
             </div>
-            <p role="status" aria-live="polite" className="mt-2 min-h-[1.2em] text-[11px] tracking-[0.12em] opacity-70 normal-case lg:text-[max(10px,0.6vw)]">
+            <p role="status" aria-live="polite" className="mt-2 min-h-[1.2em] text-[11px] tracking-[0.12em] opacity-70 normal-case lg:text-[max(11px,0.6vw)]">
               {note}
             </p>
           </form>
@@ -187,7 +187,7 @@ export default function Footer({
         ) : (
           <span className="order-2 md:order-1 md:col-span-8" />
         )}
-        <div className="order-1 flex flex-col gap-7 text-[11px] leading-[1.55] tracking-[0.12em] uppercase md:order-2 md:col-span-3 md:col-start-10 lg:text-[max(10px,0.6vw)]" style={LABEL}>
+        <div className="order-1 flex flex-col gap-7 text-[11px] leading-[1.55] tracking-[0.12em] uppercase md:order-2 md:col-span-3 md:col-start-10 lg:text-[max(11px,0.6vw)]" style={LABEL}>
           {infoBlocks.map((b, i) => (
             <div key={`${b.heading}-${i}`} data-apex-rise>
               <p className="mb-2 opacity-50">{b.heading}</p>
@@ -199,7 +199,7 @@ export default function Footer({
         </div>
       </div>
 
-      <div className="mt-10 flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:grid md:grid-cols-12 md:gap-x-[1.6vw] lg:text-[max(10px,0.6vw)]" style={LABEL}>
+      <div className="mt-10 flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:grid md:grid-cols-12 md:gap-x-[1.6vw] lg:text-[max(11px,0.6vw)]" style={LABEL}>
         <a href={socialHref} className="tpl-link tpl-hit relative md:col-span-3">
           {social}
         </a>

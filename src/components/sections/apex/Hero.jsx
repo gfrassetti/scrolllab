@@ -488,12 +488,14 @@ export default function Hero({
       {loaderOpen ? (
         <div
           data-apex-loader
+          // Marca para las auditorías del repo (check:mobile/motion/parity): esperan a que se vaya.
+          data-page-loader
           aria-hidden="true"
           className="absolute inset-0 z-0 flex flex-col justify-between overflow-hidden px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-[2.4vw]"
           style={{ background: 'var(--apex-loader-bg)', color: 'var(--apex-loader-fg)' }}
         >
           <div data-apex-loader-content className="flex h-full flex-col justify-between">
-            <div className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
+            <div className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(11px,0.6vw)]" style={LABEL}>
               <span data-apex-loader-meta>{loaderTop}</span>
               <span data-apex-loader-meta className="hidden lg:absolute lg:left-[16%] lg:block">
                 {loaderSub}
@@ -555,7 +557,7 @@ export default function Hero({
 
       <div className="absolute inset-0 z-10 flex flex-col px-[5vw] pt-[max(1.1rem,2.4svh)] pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-[2.4vw]">
         {/* Top: mark, one sentence, links, one action. */}
-        <header data-apex-chrome className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
+        <header data-apex-chrome className="flex items-start justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(11px,0.6vw)]" style={LABEL}>
           <div className="flex min-w-0 items-start gap-[2.4vw]">
             {/* The wordmark opens up on hover. A hidden copy already set at the
                 open spacing holds the width, so nothing beside it moves. */}
@@ -615,7 +617,7 @@ export default function Hero({
         </div>
 
         {/* Chapters follow the film; a tap jumps to a take. */}
-        <footer data-apex-chrome className="flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
+        <footer data-apex-chrome className="flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase lg:text-[max(11px,0.6vw)]" style={LABEL}>
           <div className="min-w-0">
             <p data-apex-chapter className="mb-3 tabular-nums opacity-80" aria-live="off">
               {`01 / ${pad(names.length)} — ${names[0]}`}

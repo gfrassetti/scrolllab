@@ -71,7 +71,7 @@ import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { devices } from 'playwright'
 
-import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers } from './lib/page-helpers.mjs'
+import { IGNORED_CONSOLE, IGNORED_URLS, installBlockHelpers, waitForPageLoaders } from './lib/page-helpers.mjs'
 import { freePort, launchChromium, routeGoogleFonts, startVite } from './lib/servers.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -388,7 +388,7 @@ async function runJob(browser, base, { template, profile, mode, opts, jobDir }) 
 
   await page.goto(`${base}${TEMPLATE_PATHS[template]}`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.evaluate(() => document.fonts?.ready).catch(() => {})
-  await page.waitForTimeout(1100)
+  await waitForPageLoaders(page)
 
   const vp = page.viewportSize()
   const blocks = await page.evaluate(() => window.__mc.cacheBlocks())
@@ -635,7 +635,7 @@ async function loadAndMeasure(browser, base, { template, profile, reduce, forced
   })
   await page.goto(`${base}${TEMPLATE_PATHS[template]}`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.evaluate(() => document.fonts?.ready).catch(() => {})
-  await page.waitForTimeout(2200)
+  await waitForPageLoaders(page)
   const measured = await page.evaluate(async () => {
     const { ScrollTrigger } = await import('/src/lib/gsap.js')
     return {

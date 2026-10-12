@@ -711,7 +711,7 @@ export default function Showroom({
 
         {/* Intro, while the camera comes in. */}
         <div className="apex-sr-intro pointer-events-none absolute inset-x-0 bottom-0 px-[5vw] pb-[max(2rem,6svh)] md:px-[2.4vw]" data-on={intro0 ? 'true' : 'false'}>
-          <p className="text-[11px] tracking-[0.16em] uppercase opacity-70 lg:text-[max(10px,0.6vw)]" style={LABEL}>{eyebrow}</p>
+          <p className="text-[11px] tracking-[0.16em] uppercase opacity-70 lg:text-[max(11px,0.6vw)]" style={LABEL}>{eyebrow}</p>
           <h2 className="mt-3 max-w-[18ch] text-[1.75rem] md:text-[clamp(2.2rem,6vw,6rem)] leading-[0.95] font-medium tracking-[-0.04em]" style={DISPLAY}>{title}</h2>
           <p className="mt-4 max-w-[40ch] text-[14px] leading-[1.5] opacity-80 md:text-[max(14px,1vw)]">{intro}</p>
           {!ready ? (
@@ -734,7 +734,7 @@ export default function Showroom({
         <button
           type="button"
           onClick={close}
-          className="apex-sr-close tpl-hit absolute top-[max(1.25rem,3svh)] right-[5vw] border border-current px-[1em] py-[0.62em] text-[11px] tracking-[0.16em] uppercase md:right-[2.4vw] lg:text-[max(10px,0.6vw)]"
+          className="apex-sr-close tpl-hit absolute top-[max(1.25rem,3svh)] right-[5vw] border border-current px-[1em] py-[0.62em] text-[11px] tracking-[0.16em] uppercase md:right-[2.4vw] lg:text-[max(11px,0.6vw)]"
           style={LABEL}
           data-on={inspecting ? 'true' : 'false'}
           tabIndex={inspecting ? 0 : -1}
@@ -788,13 +788,13 @@ function SpecCard({ car, index, count }) {
   const rows = specRows(car.specs)
   return (
     <div className="apex-sr-spec border border-current/40 p-3.5 md:col-span-4 md:p-5" style={{ background: 'color-mix(in srgb, var(--sr-bg) 72%, transparent)' }}>
-      <p className="text-[11px] tracking-[0.16em] tabular-nums uppercase opacity-60 lg:text-[max(10px,0.6vw)]" style={LABEL}>
+      <p className="text-[11px] tracking-[0.16em] tabular-nums uppercase opacity-60 lg:text-[max(11px,0.6vw)]" style={LABEL}>
         {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
       </p>
       <p className="mt-1.5 text-[1.05rem] md:text-[clamp(1.2rem,2vw,1.8rem)] leading-[1.05] font-medium tracking-[-0.02em]" style={DISPLAY}>
         {car.name}
       </p>
-      <dl className="mt-2.5 grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 md:mt-4 md:gap-y-1.5 text-[11px] tracking-[0.12em] uppercase lg:text-[max(10px,0.6vw)]" style={LABEL}>
+      <dl className="mt-2.5 grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 md:mt-4 md:gap-y-1.5 text-[11px] tracking-[0.12em] uppercase lg:text-[max(11px,0.6vw)]" style={LABEL}>
         {rows.map((r, i) => (
           <div key={i} className="contents">
             <dt style={{ color: 'var(--sr-accent)' }}>{r.label}</dt>

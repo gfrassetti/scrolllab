@@ -42,14 +42,16 @@ export default function Story({ blocks, showWord = 'on', showLines = 'on', bg, f
 
   const edited = Array.isArray(blocks)
     ? blocks
+        // Un bloque cuenta en cuanto tiene algo escrito, también solo el rótulo:
+        // si no, el que edita el rótulo primero no veía ningún cambio.
+        .filter((b) => b && (b.label || b.title || b.text || b.word || b.image))
         .map((b, i) => ({
-          label: b?.label || '',
-          title: b?.title || '',
-          text: b?.text || '',
-          image: b?.image || DEFAULT_BLOCKS[i % DEFAULT_BLOCKS.length].image,
-          word: b?.word || '',
+          label: b.label || '',
+          title: b.title || '',
+          text: b.text || '',
+          image: b.image || DEFAULT_BLOCKS[i % DEFAULT_BLOCKS.length].image,
+          word: b.word || '',
         }))
-        .filter((b) => b.title || b.text)
     : []
   const list = edited.length ? edited : DEFAULT_BLOCKS
 
@@ -109,7 +111,7 @@ export default function Story({ blocks, showWord = 'on', showLines = 'on', bg, f
             ) : null}
 
             <div className="grid gap-y-10 md:grid-cols-12 md:gap-x-[1.6vw]">
-              <p data-story-rise className="flex items-baseline gap-3 text-[11px] tracking-[0.16em] uppercase md:col-span-4 lg:text-[max(10px,0.6vw)]" style={{ ...LABEL, color: 'var(--sy-accent)' }}>
+              <p data-story-rise className="flex items-baseline gap-3 text-[11px] tracking-[0.16em] uppercase md:col-span-4 lg:text-[max(11px,0.6vw)]" style={{ ...LABEL, color: 'var(--sy-accent)' }}>
                 <span aria-hidden="true">/</span>
                 <span>{b.label}</span>
                 <span aria-hidden="true">/</span>

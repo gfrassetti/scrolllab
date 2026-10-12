@@ -31,7 +31,10 @@ export function installBlockHelpers() {
 
   /** Secciones del template en orden: hijos de #top y de <main>, sin pin-spacers ni wrappers. */
   mc.blocks = () => {
-    const root = document.getElementById('top') || document.body
+    // `#top` suele envolver la página; en APEX es el hero mismo (el ancla de
+    // «volver arriba»): ahí se recorre <main>, si no solo se veía el hero.
+    const top = document.getElementById('top')
+    const root = top && !top.matches('section, footer') ? top : document.querySelector('main') || document.body
     const out = []
     const push = (el) => {
       if (el.classList.contains('pin-spacer') && el.firstElementChild) el = el.firstElementChild
@@ -97,3 +100,19 @@ export const IGNORED_URLS = [
   /doubleclick\.net|googleadservices\.com|google\.com\/(rmkt|pagead|ccm)\//,
   /favicon/,
 ]
+
+/**
+ * Pantallas de carga de un template: MERIDIAN (`role="status"` «Loading») y las
+ * que llevan `data-page-loader` (APEX y las que vengan). Mientras están, tapan el
+ * hero y bloquean el scroll: una auditoría que no las espera mide la pantalla de
+ * carga (APEX salía con «2 secciones, 0 ScrollTriggers» y el titular «recortado»).
+ * La ruta es lazy: primero un respiro para que monte. Si hubo loader, se espera
+ * además la entrada que arranca cuando se va (titular → bajada → chrome).
+ */
+export async function waitForPageLoaders(page, { timeout = 25000 } = {}) {
+  const LOADERS = '[role="status"][aria-label="Loading"], [data-page-loader]'
+  await page.waitForTimeout(1200)
+  const had = await page.evaluate((sel) => !!document.querySelector(sel), LOADERS).catch(() => false)
+  await page.waitForFunction((sel) => !document.querySelector(sel), LOADERS, { timeout }).catch(() => {})
+  await page.waitForTimeout(had ? 3500 : 1800)
+}
