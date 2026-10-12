@@ -377,6 +377,8 @@ pantalla completa (el canvas de FIZZ) cuenta como escenario → PIN. El reloj de
 pausa hasta que el widget entra en pantalla: la entrada se ve cuando el visitante llega, no al abrir el sitio. Nada de FOLD ni de media que el cliente no pueda cambiar desde el
 editor (un vuelo de cuadros, un mapa con puntos fijos). Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
+Link de edición (`/lab/editar/:token`, `server/services/hosted/editLink.js`): el dueño de un widget le da a su cliente un link secreto para editar contenido sin cuenta; puede republicar solo lo ya publicado, no ve plan ni dominios. El token se guarda hasheado y se muestra una vez. Detalle: `docs/hosted-component-plan.md`, Fase J.
+
 Packs de LAB (`/lab/pack/:id`, `<script data-pack="pk_…">`): varios widgets del usuario uno debajo del otro con un solo snippet. No confundir con el bundle de templates (compra de código) ni con el Builder (código fuente): /lab tiene la tabla «¿LAB o Builder?» y el Builder una línea que manda a LAB.
 
 ## Architecture (extra)
@@ -530,7 +532,7 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 #### Precio
 
-- RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta (2026-10-11): 149 (CHAPTERS, NOCTURNE, UNITY) · 189 (COMIC, ATRIUM) · 199 VELOCITY · 229 FOLD · 239 (MONOLITH, FIZZ) · 279 ATELIER · 379 (MERIDIAN, KIN: el más caro hoy). Bundle de 8: USD 749.
+- RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta (2026-10-12): 169 (CHAPTERS, NOCTURNE, UNITY) · 229 FOLD · 239 (MONOLITH, FIZZ) · 279 ATELIER · 307 (VELOCITY, COMIC, ATRIUM) · 379 (MERIDIAN, KIN: el más caro hoy). Bundle de 8: USD 879 (mismo ~53% off sobre la lista nueva).
 - RATIO lista **USD 269** (Beat). Los precios vigentes están en el punto de arriba y en `src/domain/catalog.js` (fuente única).
 - La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 549) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 

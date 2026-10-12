@@ -385,7 +385,26 @@
       "help": "How to install?",
       "jumpToWidgets": "Go to my widgets ↓"
     },
-    "planPacks": "Unlimited packs"
+    "planPacks": "Unlimited packs",
+    "share": {
+      "title": "Edit link for your client",
+      "body": "Anyone with the link can change this widget's texts, photos and colors, and republish it if it is already published. They do not see your account or plans, and cannot change domains or delete it.",
+      "create": "Create edit link",
+      "once": "It is shown only once. If it gets lost, a new one is generated and the old one stops working.",
+      "active": "There is an active link, created on {{date}}. For security it is not shown again.",
+      "rotate": "Generate a new one",
+      "rotateConfirm": "Generate a new one? The old one stops working.",
+      "revoke": "Remove link",
+      "revokeConfirm": "Remove the link? It stops working for anyone who has it.",
+      "yes": "Yes, continue",
+      "no": "Cancel",
+      "editing": "This widget is edited with an edit link. Changes show on the site once published.",
+      "notPublished": "It is not published yet: whoever created it publishes it. Your changes are saved as a draft.",
+      "publish": "Publish changes",
+      "invalid": "This link is not valid or is no longer active. You can ask whoever shared it for a new one.",
+      "suspended": "This widget is suspended and cannot be edited for now.",
+      "formNote": "Messages from this form are emailed to whoever created the widget."
+    }
   },
   "common": {
     "loading": "Loading…",

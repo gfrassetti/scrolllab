@@ -24,6 +24,14 @@ import {
 } from '../../services/hosted/instances.js'
 import { deliverLabForm } from '../../services/hosted/forms.js'
 import {
+  createEditLink,
+  revokeEditLink,
+  findByEditToken,
+  sharedView,
+  updateViaEditLink,
+} from '../../services/hosted/editLink.js'
+import { resolveEntitlement } from '../../services/subscriptions.js'
+import {
   PACK_MAX_ITEMS,
   PACK_MAX_PER_USER,
   getOwnedHostedPack,
@@ -57,6 +65,9 @@ export function createHostedRouter({ config, limits }) {
       views: inst.views || 0,
       createdAt: inst.createdAt,
       updatedAt: inst.updatedAt,
+      // El link de edición del cliente: si hay, y desde cuándo (nunca el hash).
+      hasEditLink: Boolean(inst.editTokenHash),
+      editLinkCreatedAt: inst.editTokenCreatedAt || null,
     }
   }
 
@@ -244,6 +255,57 @@ export function createHostedRouter({ config, limits }) {
       const found = await getOwnedHostedInstance(userId, req.params.id)
       const inst = await updateHostedInstance({ inst: found, userId, body: req.body, config })
       res.json({ instance: publicHosted(inst) })
+    }),
+  )
+
+  // ——— Link de edición para el cliente del dueño (sin cuenta) ———
+
+  async function ownerOnFreePlan(inst) {
+    const ent = await resolveEntitlement(String(inst.userId), config, { persist: false })
+    return ent.plan === 'free'
+  }
+
+  router.post(
+    '/api/hosted/:id/edit-link',
+    requireAuth,
+    limits.hosted,
+    asyncHandler(async (req, res) => {
+      const inst = await getOwnedHostedInstance(db.uid(req.user), req.params.id)
+      const token = await createEditLink({ inst })
+      // El token viaja una sola vez: después solo queda su hash.
+      res.status(201).json({ token, instance: publicHosted(inst) })
+    }),
+  )
+
+  router.delete(
+    '/api/hosted/:id/edit-link',
+    requireAuth,
+    limits.hosted,
+    asyncHandler(async (req, res) => {
+      const inst = await getOwnedHostedInstance(db.uid(req.user), req.params.id)
+      await revokeEditLink({ inst })
+      res.json({ instance: publicHosted(inst) })
+    }),
+  )
+
+  router.get(
+    '/api/hosted-edit/:token',
+    limits.sharedEdit,
+    asyncHandler(async (req, res) => {
+      const inst = await findByEditToken(req.params.token)
+      res.set('Cache-Control', 'no-store')
+      res.json({ instance: sharedView(inst, { freeBadge: await ownerOnFreePlan(inst) }) })
+    }),
+  )
+
+  router.put(
+    '/api/hosted-edit/:token',
+    limits.sharedEdit,
+    asyncHandler(async (req, res) => {
+      const found = await findByEditToken(req.params.token)
+      const inst = await updateViaEditLink({ inst: found, body: req.body })
+      res.set('Cache-Control', 'no-store')
+      res.json({ instance: sharedView(inst, { freeBadge: await ownerOnFreePlan(inst) }) })
     }),
   )
 

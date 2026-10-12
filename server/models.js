@@ -136,6 +136,10 @@ const hostedInstanceSchema = new mongoose.Schema(
     // Señal de uso / abuso. Cuenta hits al endpoint público de config (con
     // el cache de 30s el número es aproximado, alcanza para eso).
     views: { type: Number, default: 0 },
+    // Link de edición para el cliente del dueño: solo el hash del token (ver
+    // hostedKey.js). Sin el campo = no hay link.
+    editTokenHash: { type: String, index: true, sparse: true },
+    editTokenCreatedAt: Date,
   },
   { timestamps: true },
 );

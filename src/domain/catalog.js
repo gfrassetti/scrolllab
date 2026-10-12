@@ -18,23 +18,29 @@
  */
 
 /** Precio de lista por template. Incluye los que todavía no se venden (RATIO). */
+/**
+ * 2026-10-12 (decisión del dueño): chapters/nocturne/unity 149→169; velocity,
+ * comic y atrium igualados a 307 (antes 199/189/189). fold, monolith y fizz
+ * quedan iguales por ahora. El bundle (BUNDLE_PRICE_USD) sube en la misma
+ * proporción para mantener el ~53% off sobre el nuevo precio de lista.
+ */
 export const TEMPLATE_PRICES_USD = Object.freeze({
-  chapters: 149,
-  nocturne: 149,
+  chapters: 169,
+  nocturne: 169,
   monolith: 239,
-  velocity: 199,
+  velocity: 307,
   fizz: 239,
   atelier: 279,
-  comic: 189,
-  unity: 149,
+  comic: 307,
+  unity: 169,
   ratio: 269,
-  atrium: 189,
+  atrium: 307,
   meridian: 379,
   kin: 379,
   fold: 229,
 })
 
-export const BUNDLE_PRICE_USD = 749
+export const BUNDLE_PRICE_USD = 879
 
 /** Modelos que trae el SKU `bundle`. Orden = orden del ZIP. */
 export const BUNDLE_MODELS = Object.freeze([

@@ -116,6 +116,15 @@ export function seoForPath(pathname) {
       canonical: `${SITE_URL}/`,
     }
   }
+  if (path.startsWith('/lab/editar/')) {
+    // El token va en la URL y es secreto: ni indexarla ni darla como canónica.
+    return {
+      title: LAB_SEO.title,
+      description: LAB_SEO.description,
+      robots: 'noindex, nofollow, noarchive, noai, noimageai',
+      canonical: `${SITE_URL}/lab`,
+    }
+  }
   if (path === '/builder') {
     return {
       title: BUILDER_SEO.title,

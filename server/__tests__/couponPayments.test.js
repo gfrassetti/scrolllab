@@ -210,7 +210,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
         ],
       )
       assert.equal(body.items[0].unit_price, 533000)
-      assert.equal(body.items[1].unit_price, 1052000) // 749 USD − 10% a 1560
+      assert.equal(body.items[1].unit_price, 1235000) // 879 USD − 10% a 1560
       // Lo que cobra MP (la suma de los ítems) es lo que la orden espera cobrar.
       assert.equal(body.items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0), order.total)
       assert.equal(body.external_reference, db.uid(order))
@@ -220,8 +220,8 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
     it('cliente que ya compró: la preference lleva el precio de lista', async () => {
       const agent = await returning(await login('buyer-mp2@test.com'))
       const { order } = await pendingOrder(agent, { items: [{ sku: 'chapters' }] })
-      assert.equal(mpPreferences[0].body.items[0].unit_price, arsFromUsd(149, RATE))
-      assert.equal(order.total, arsFromUsd(149, RATE))
+      assert.equal(mpPreferences[0].body.items[0].unit_price, arsFromUsd(169, RATE))
+      assert.equal(order.total, arsFromUsd(169, RATE))
       assert.equal(order.couponCode, undefined)
     })
 
@@ -233,7 +233,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
         discountPct: 99,
         total: 1,
       })
-      assert.equal(mpPreferences[0].body.items[0].unit_price, 210000)
+      assert.equal(mpPreferences[0].body.items[0].unit_price, 238000)
     })
   })
 
@@ -241,7 +241,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
     it('un pago aprobado por el monto descontado deja la orden paga y canjea el cupón', async () => {
       const { code, agent } = await buyerWithCoupon('cobro1@test.com')
       const { order, orderId } = await pendingOrder(agent, { items: [{ sku: 'chapters' }], couponCode: code })
-      assert.equal(order.total, 210000)
+      assert.equal(order.total, 238000)
 
       const payment = approved(order)
       const res = await webhook(payment)
@@ -273,7 +273,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       const { code, agent } = await buyerWithCoupon('cobro3@test.com')
       const { order, orderId } = await pendingOrder(agent, { items: [{ sku: 'chapters' }], couponCode: code })
 
-      const res = await webhook(approved(order, { transaction_amount: arsFromUsd(149, RATE) }))
+      const res = await webhook(approved(order, { transaction_amount: arsFromUsd(169, RATE) }))
       assert.equal(res.status, 200) // MP no reintenta un 4xx: se corta con 200 y no se cumple
 
       assert.equal((await db.findOrderById(orderId)).status, 'pending')
@@ -308,7 +308,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       const first = await agent.post('/api/checkout/confirm').set('Origin', ORIGIN).send({ paymentId: payment.id })
       assert.equal(first.status, 200)
       assert.equal(first.body.alreadyFulfilled, false)
-      assert.equal(first.body.order.total, 210000)
+      assert.equal(first.body.order.total, 238000)
       assert.equal(rowFor('confirm1@test.com').couponOrderId, orderId)
 
       const again = await agent.post('/api/checkout/confirm').set('Origin', ORIGIN).send({ paymentId: payment.id })
@@ -414,7 +414,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
       const agent = await returning(await login('buyer-vacio@test.com'))
       for (const couponCode of ['', null]) {
         const { order } = await pendingOrder(agent, { items: [{ sku: 'chapters' }], couponCode })
-        assert.equal(order.total, arsFromUsd(149, RATE))
+        assert.equal(order.total, arsFromUsd(169, RATE))
       }
     })
 

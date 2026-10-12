@@ -385,7 +385,26 @@
       "help": "¿Cómo se instala?",
       "jumpToWidgets": "Ir a mis widgets ↓"
     },
-    "planPacks": "Packs sin límite"
+    "planPacks": "Packs sin límite",
+    "share": {
+      "title": "Link de edición para tu cliente",
+      "body": "Quien tenga el link puede cambiar textos, fotos y colores de este widget, y republicarlo si ya está publicado. No ve tu cuenta ni tus planes, y no puede cambiar dominios ni borrarlo.",
+      "create": "Crear link de edición",
+      "once": "Se muestra una sola vez. Si se pierde, se genera uno nuevo y el anterior deja de andar.",
+      "active": "Hay un link activo, creado el {{date}}. Por seguridad no se vuelve a mostrar.",
+      "rotate": "Generar uno nuevo",
+      "rotateConfirm": "¿Generar uno nuevo? El anterior deja de andar.",
+      "revoke": "Quitar link",
+      "revokeConfirm": "¿Quitar el link? Deja de andar para quien lo tenga.",
+      "yes": "Sí, continuar",
+      "no": "Cancelar",
+      "editing": "Este widget se edita con un link de edición. Los cambios se ven en el sitio cuando se publican.",
+      "notPublished": "Todavía no está publicado: lo publica quien lo creó. Los cambios quedan guardados como borrador.",
+      "publish": "Publicar cambios",
+      "invalid": "Este link no es válido o ya no está activo. Se puede pedir uno nuevo a quien lo compartió.",
+      "suspended": "Este widget está suspendido y por ahora no se puede editar.",
+      "formNote": "Los mensajes de este formulario le llegan por mail a quien creó el widget."
+    }
   },
   "common": {
     "loading": "Cargando…",
