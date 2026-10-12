@@ -235,8 +235,8 @@ export default function SiteHeader({ solid = true }) {
               {t('nav.login')}
             </Link>
           )}
-          <ThemeToggle />
-          <PreferencesMenu withTheme={false} />
+          <MotionToggle />
+          <PreferencesMenu />
         </div>
 
         {/* Mobile y tablet: carrito siempre a mano + hamburguesa */}
@@ -380,9 +380,11 @@ export default function SiteHeader({ solid = true }) {
               <LanguageSelector />
               <CurrencySelector />
             </div>
-            <ThemeToggle />
+            <div className="flex items-center">
+              <MotionToggle />
+              <ThemeToggle />
+            </div>
           </div>
-          <MotionToggle className="border-t border-ink/10 pt-2" />
         </div>
       )}
       </header>

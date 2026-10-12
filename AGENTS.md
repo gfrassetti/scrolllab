@@ -289,7 +289,7 @@ lo lee):
 
 - Se pregunta **una sola vez, en total**. La respuesta (`scrolllab-motion`) y el «ya
   te lo mostré» (`scrolllab-motion-notice`) viven en `localStorage`; después se
-  cambia desde el menú de preferencias del header y desde el menú del teléfono (`MotionToggle`: fila «Animaciones · Sí / No», con texto; visible solo si el dispositivo pide reducir). El tema, en cambio, va siempre a la vista en el header (`ThemeToggle`).
+  cambia desde el header (`MotionToggle`, visible solo si el dispositivo pide reducir).
   No lo vuelvas a preguntar por pestaña, por template ni al navegar.
 - Con `full`, `src/lib/motionOverride.js` pone `<html data-motion="full">` y reescribe
   `window.matchMedia`: `prefers-reduced-motion` da «sin preferencia» para TODO lo que

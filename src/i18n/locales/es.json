@@ -1851,10 +1851,7 @@
     "keepCalm": "Dejarlo así"
   },
   "motionToggle": {
-    "label": "Ver las demos con animaciones",
-    "row": "Animaciones",
-    "full": "Sí",
-    "reduced": "No"
+    "label": "Ver las demos con animaciones"
   },
   "pay": {
     "payAr": "Pagar con Mercado Pago →",
@@ -1888,7 +1885,6 @@
   "prefs": {
     "label": "Idioma, moneda y tema ({{current}})",
     "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Paddle).",
-    "theme": "Tema",
-    "labelShort": "Preferencias ({{current}})"
+    "theme": "Tema"
   }
 }

@@ -1851,10 +1851,7 @@
     "keepCalm": "Keep it as is"
   },
   "motionToggle": {
-    "label": "Show demos with animations",
-    "row": "Animations",
-    "full": "On",
-    "reduced": "Off"
+    "label": "Show demos with animations"
   },
   "pay": {
     "payAr": "Pay with Mercado Pago →",
@@ -1888,7 +1885,6 @@
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
     "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Paddle).",
-    "theme": "Theme",
-    "labelShort": "Preferences ({{current}})"
+    "theme": "Theme"
   }
 }

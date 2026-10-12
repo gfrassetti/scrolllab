@@ -5,20 +5,16 @@ import { useCurrency } from '../lib/currency'
 import LanguageSelector from './LanguageSelector'
 import CurrencySelector from './CurrencySelector'
 import ThemeToggle from './ThemeToggle'
-import MotionToggle from './MotionToggle'
 
 /**
- * Idioma, moneda, tema y animaciones en un solo lugar del header. Antes eran
+ * Idioma, moneda y tema en un solo lugar del header. Antes eran cuatro
  * controles sueltos (ES EN · ARS USD · ◐) que competían con la navegación. El
- * botón muestra lo elegido («ES · ARS»); adentro se cambia cada cosa. El
- * header del market saca el tema afuera (`withTheme={false}`, ThemeToggle junto
- * a este botón): escondido acá no lo encontraba nadie. Las animaciones solo
- * aparecen si el dispositivo pide reducir el movimiento (MotionToggle).
+ * botón muestra lo elegido («ES · ARS»); adentro se cambia cada cosa.
  *
  * Mismo comportamiento que el popover del carrito: abre con ease-drawer,
  * cierra con click afuera, Escape o al navegar.
  */
-export default function PreferencesMenu({ align = 'right', withTheme = true }) {
+export default function PreferencesMenu({ align = 'right' }) {
   const { t, locale } = useI18n()
   const { currency, canChoose } = useCurrency()
   const [open, setOpen] = useState(false)
@@ -64,7 +60,7 @@ export default function PreferencesMenu({ align = 'right', withTheme = true }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="true"
-        aria-label={t(withTheme ? 'prefs.label' : 'prefs.labelShort', { current: summary })}
+        aria-label={t('prefs.label', { current: summary })}
         className={`ui-press flex min-h-11 items-center gap-1.5 px-2 text-[11px] uppercase tracking-[0.2em] hover:text-accent md:text-xs ${
           open ? 'text-accent' : 'text-ink/70'
         }`}
@@ -94,13 +90,10 @@ export default function PreferencesMenu({ align = 'right', withTheme = true }) {
               <p className="text-[12px] leading-snug text-ink/50">{t('prefs.currencyNote')}</p>
             </div>
           )}
-          {withTheme && (
-            <div className="mt-2 flex items-center justify-between gap-3 border-t border-ink/10 pt-2">
-              <span className="text-body-sm text-ink/60">{t('prefs.theme')}</span>
-              <ThemeToggle />
-            </div>
-          )}
-          <MotionToggle className="mt-2 border-t border-ink/10 pt-2" />
+          <div className="mt-2 flex items-center justify-between gap-3 border-t border-ink/10 pt-2">
+            <span className="text-body-sm text-ink/60">{t('prefs.theme')}</span>
+            <ThemeToggle />
+          </div>
         </div>
       )}
     </div>
