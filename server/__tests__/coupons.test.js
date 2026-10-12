@@ -448,14 +448,14 @@ describe('cupón de bienvenida — API (file store)', () => {
     // Sin código también: es su primera compra, el servidor lo aplica igual.
     const auto = await checkout(agent, { items: [{ sku: 'chapters' }] })
     assert.equal(auto.status, 200)
-    assert.equal((await orderOf(auto.body.orderId)).total, discountedArsFromUsd(149, RATE, 10))
+    assert.equal((await orderOf(auto.body.orderId)).total, discountedArsFromUsd(169, RATE, 10))
 
     const res = await checkout(agent, { items: [{ sku: 'chapters' }], couponCode: code })
     assert.equal(res.status, 200)
     const order = await orderOf(res.body.orderId)
-    assert.equal(order.total, 210000)
-    assert.equal(order.items[0].unit_price, 210000)
-    assert.equal(order.items[0].unit_price_usd, 149)
+    assert.equal(order.total, 238000)
+    assert.equal(order.items[0].unit_price, 238000)
+    assert.equal(order.items[0].unit_price_usd, 169)
     assert.equal(order.couponCode, code)
     assert.equal(order.discountPct, 10)
   })
@@ -470,7 +470,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     })
     assert.equal(res.status, 200)
     const order = await orderOf(res.body.orderId)
-    assert.equal(order.total, 210000)
+    assert.equal(order.total, 238000)
     assert.equal(order.discountPct, 10)
   })
 
@@ -620,7 +620,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     Object.assign(rows.find((o) => o.id === first.body.orderId), { status: 'refunded' })
     fs.writeFileSync(ordersFile, JSON.stringify(rows, null, 2))
     const again = await checkout(agent, { items: [{ sku: 'chapters' }] })
-    assert.equal((await orderOf(again.body.orderId)).total, arsFromUsd(149, RATE))
+    assert.equal((await orderOf(again.body.orderId)).total, arsFromUsd(169, RATE))
     assert.equal((await welcome(agent)).body.eligible, false)
   })
 
@@ -640,7 +640,7 @@ describe('cupón de bienvenida — API (file store)', () => {
       const owner = await login('dueno@test.com')
       const ok = await checkout(owner, { items: [{ sku: 'chapters' }], couponCode: code })
       assert.equal(ok.status, 200)
-      assert.equal((await orderOf(ok.body.orderId)).total, 210000)
+      assert.equal((await orderOf(ok.body.orderId)).total, 238000)
     })
 
     it('un cupón reenviado a muchas cuentas no le sirve a ninguna de ellas', async () => {
@@ -676,7 +676,7 @@ describe('cupón de bienvenida — API (file store)', () => {
       const agent = await login('anaperez@gmail.com')
       const res = await checkout(agent, { items: [{ sku: 'chapters' }], couponCode: code })
       assert.equal(res.status, 200)
-      assert.equal((await orderOf(res.body.orderId)).total, 210000)
+      assert.equal((await orderOf(res.body.orderId)).total, 238000)
     })
 
     it('el mismo usuario en otro dominio no cuenta como el dueño', async () => {

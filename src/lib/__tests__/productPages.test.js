@@ -188,7 +188,7 @@ describe('renderProductPage', () => {
     assert.equal(scripts.length, ldScripts(indexHtml).length + 1)
     const product = JSON.parse(scripts.at(-1))
     assert.equal(product['@type'], 'Product')
-    assert.equal(product.offers.price, '149.00')
+    assert.equal(product.offers.price, '169.00')
     assert.ok(JSON.parse(scripts[0])['@graph'], 'se perdió el bloque de Organization/WebSite')
   })
 

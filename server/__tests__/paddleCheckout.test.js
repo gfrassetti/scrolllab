@@ -183,7 +183,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       const receipt = mp.mailsTo('paga@test.com')[0].body
       assert.match(receipt.subject, /Tu compra en Scroll Lab/)
       // Primera compra: el recibo dice lo que pagó, con el 10%.
-      assert.match(receipt.text, /US\$\s?134[.,]10/)
+      assert.match(receipt.text, /US\$\s?152[.,]10/)
       assert.match(receipt.text, /Paddle\.com/)
       await waitFor(() => mp.mailsTo(OWNER).length >= 1, 'el aviso al dueño')
     })
@@ -205,7 +205,7 @@ describe('Compras con Paddle (Paddle simulado)', () => {
       await waitFor(() => mp.mailsTo('english@test.com').length === 1, 'el recibo')
       const mail = mp.mailsTo('english@test.com')[0].body
       assert.match(mail.subject, /Your Scroll Lab purchase/)
-      assert.match(mail.text, /\$134\.10/)
+      assert.match(mail.text, /\$152\.10/)
     })
 
     it('confirm del front: 409 mientras Paddle procesa, después cumple; idempotente; otra cuenta 403', async () => {
