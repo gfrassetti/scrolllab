@@ -251,7 +251,7 @@ de alto acotado esas se rompen). Detalle técnico en [`embed/README.md`](embed/R
 - **Next:** el snippet ya no pide `'use client'`: el paquete lo trae y entra en
   un Server Component.
 - **Limitador por plan:** la regla ya estaba bien y cubierta por tests
-  (Starter 5, Pro 15, Studio sin tope, 402 en la N+1, congeladas cuando el plan
+  (Starter 8, Pro 30, Studio sin tope —eran 5 / 15 hasta el 2026-10-12—, 402 en la N+1, congeladas cuando el plan
   baja o se cae). Lo roto era el aviso: al pasarse del tope, el error salía
   arriba de todo, fuera de pantalla, y parecía que «Publicar» no hacía nada.
   Ahora aparece al lado de los botones.

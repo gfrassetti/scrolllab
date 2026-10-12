@@ -4,6 +4,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import os from 'node:os'
 import request from 'supertest'
+import { HOSTED_PLANS } from '../catalog.js'
 
 /**
  * Packs de LAB: varias instancias bajo un solo `<script data-pack>`. El pack
@@ -119,15 +120,17 @@ describe('LAB packs (file store)', () => {
   it('una congelada por el plan no se sirve dentro del pack', async () => {
     const agent = await loginAgent('frozen-pack@test.com')
     const widgets = []
-    for (const id of ['chapters/FooterCTA', 'chapters/BigNumbers', 'atelier/KeyFacts', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'monolith/FooterBrutal']) {
-      widgets.push(await widget(agent, id))
+    // Una más que el cupo de Starter, para que la más nueva quede congelada al bajar.
+    const sections = ['chapters/FooterCTA', 'chapters/BigNumbers', 'atelier/KeyFacts', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'monolith/FooterBrutal']
+    for (let i = 0; i < HOSTED_PLANS.hosted_starter.instanceQuota + 1; i++) {
+      widgets.push(await widget(agent, sections[i % sections.length]))
     }
     const newest = widgets.at(-1)
     const oldest = widgets[0]
     const pack = (await agent.post('/api/hosted-packs').send({ items: [newest.id, oldest.id] })).body.pack
     assert.deepEqual((await servedKeys(pack.key)).body.keys, [newest.key, oldest.key])
 
-    // Baja a Starter (5): la sexta, la más nueva, queda congelada.
+    // Baja a Starter: la que pasa del cupo, la más nueva, queda congelada.
     const { fileDb } = await import('../fileStore.js')
     const me = (await agent.get('/api/auth/me')).body.user
     const sub = (await fileDb.findSubscriptionsByUser(me.id))[0]

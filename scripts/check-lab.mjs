@@ -9,7 +9,7 @@
  *
  * Una vez: el ancho Mobile del preview mide 390px de verdad, una imagen con
  * ruta relativa avisa y no se guarda (en LAB va URL completa), la consola
- * del editor queda limpia, y con Starter (5) la 6ª publicación avisa el tope
+ * del editor queda limpia, y con Starter (su cupo) la publicación de más avisa el tope
  * al lado del botón y queda en borrador.
  *
  * Levanta la API (store de archivo temporal, login dev, MP mock), el embed
@@ -27,6 +27,8 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 
 import { chromium } from 'playwright'
+
+import { HOSTED_PLANS } from '../server/catalog.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 process.chdir(REPO)
@@ -410,7 +412,8 @@ try {
       if (!/\/lab\?utm_source=lab-embed/.test(badge.href)) problems.push(`plan gratis: el sello linkea a ${badge.href || '(nada)'}`)
     }
   }
-  console.log('Tope del plan: Starter publica 5 y la 6ª avisa…')
+  const STARTER = HOSTED_PLANS.hosted_starter.instanceQuota
+  console.log(`Tope del plan: Starter publica ${STARTER} y la siguiente avisa…`)
   {
     // Otro usuario (otra cookie): Starter por el mock de Mercado Pago.
     const planCtx = await browser.newContext({
@@ -428,21 +431,22 @@ try {
     ).json()
     await planCtx.request.post(`${BASE}${sub.activateUrl}`)
     const ids = []
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < STARTER + 1; i++) {
       const res = await planCtx.request.post(`${BASE}/api/hosted`, {
         data: { sectionId: 'chapters/FooterCTA' },
       })
       ids.push((await res.json()).instance.id)
     }
-    for (const id of ids.slice(0, 5)) {
+    for (const id of ids.slice(0, STARTER)) {
       const res = await planCtx.request.put(`${BASE}/api/hosted/${id}`, { data: { publish: true } })
-      if (!res.ok()) problems.push(`Starter: la publicación ${ids.indexOf(id) + 1} de 5 dio HTTP ${res.status()}`)
+      if (!res.ok()) problems.push(`Starter: la publicación ${ids.indexOf(id) + 1} de ${STARTER} dio HTTP ${res.status()}`)
     }
     // Plan pago: sin sello.
     const firstKey = (await (await planCtx.request.get(`${BASE}/api/hosted/${ids[0]}`)).json()).instance.key
     if (await siteBadge(firstKey)) problems.push('Starter: el sitio del cliente muestra el sello del plan gratis')
     const page = await planCtx.newPage()
-    await page.goto(`${BASE}/lab/${ids[5]}`)
+    const over = ids[STARTER]
+    await page.goto(`${BASE}/lab/${over}`)
     await page.locator('[data-lab-preview]').waitFor({ timeout: 15000 })
     await page.getByRole('button', { name: 'Publicar', exact: true }).click()
     const alert = page.getByRole('alert').filter({ hasText: 'límite de tu plan' })
@@ -455,11 +459,11 @@ try {
         problems.push('Starter: el aviso del tope queda fuera de pantalla al tocar Publicar')
       }
     } catch {
-      problems.push('Starter: publicar la 6ª no muestra el aviso del tope')
+      problems.push('Starter: publicar una de más no muestra el aviso del tope')
     }
-    if (!page.url().endsWith(`/lab/${ids[5]}`)) problems.push('Starter: con el tope, el editor igual navegó')
-    const sixth = await (await planCtx.request.get(`${BASE}/api/hosted/${ids[5]}`)).json()
-    if (sixth.instance.status !== 'draft') problems.push('Starter: la 6ª quedó publicada')
+    if (!page.url().endsWith(`/lab/${over}`)) problems.push('Starter: con el tope, el editor igual navegó')
+    const extra = await (await planCtx.request.get(`${BASE}/api/hosted/${over}`)).json()
+    if (extra.instance.status !== 'draft') problems.push('Starter: la de más quedó publicada')
     await planCtx.close()
   }
 } catch (err) {

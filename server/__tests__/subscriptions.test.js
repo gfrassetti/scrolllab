@@ -4,6 +4,11 @@ import path from 'node:path'
 import fs from 'node:fs'
 import os from 'node:os'
 import request from 'supertest'
+import { HOSTED_PLANS } from '../catalog.js'
+
+// Los cupos salen del catálogo: cambiarlos no rompe estos tests (2026-10-12: 8 / 30).
+const STARTER_QUOTA = HOSTED_PLANS.hosted_starter.instanceQuota
+const PRO_QUOTA = HOSTED_PLANS.hosted_pro.instanceQuota
 
 describe('Subscriptions + cuota (file store, mock MP)', () => {
   let app
@@ -139,7 +144,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
 
     me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'hosted_pro')
-    assert.equal(me.body.quota, 15) // entitlement plena durante la prueba
+    assert.equal(me.body.quota, PRO_QUOTA) // entitlement plena durante la prueba
     assert.equal(me.body.trialing, true)
     assert.equal(me.body.trialAvailable, false) // ya no
     assert.ok(me.body.trialEndsAt)
@@ -280,7 +285,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
 
     const me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'hosted_pro')
-    assert.equal(me.body.quota, 15)
+    assert.equal(me.body.quota, PRO_QUOTA)
 
     const third = await publish(agent)
     assert.equal(third.status, 200)
@@ -307,8 +312,8 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
       .then((r) => r.status)
 
   for (const [plan, quota] of [
-    ['hosted_starter', 5],
-    ['hosted_pro', 15],
+    ['hosted_starter', STARTER_QUOTA],
+    ['hosted_pro', PRO_QUOTA],
   ]) {
     it(`${plan}: publica exactamente ${quota}, las ${quota} se sirven y la ${quota + 1}ª da 402`, async () => {
       const { agent, published } = await fillPlan(`exact-${plan}@test.com`, plan, quota)
@@ -348,7 +353,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
   })
 
   it('aunque se cuele una publicada de más (p. ej. dos publish simultáneos), solo se sirven las N del plan', async () => {
-    const { agent, published } = await fillPlan('race@test.com', 'hosted_starter', 5)
+    const { agent, published } = await fillPlan('race@test.com', 'hosted_starter', STARTER_QUOTA)
     const draft = await agent.post('/api/hosted').send({ sectionId: 'chapters/FooterCTA' })
     const { fileDb } = await import('../fileStore.js')
     const sixth = await fileDb.findHostedInstanceById(draft.body.instance.id)
@@ -458,23 +463,23 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(change.status, 200)
     assert.equal(change.body.plan, 'hosted_pro')
     assert.equal(change.body.previousPlan, 'hosted_starter')
-    assert.equal(change.body.quota, 15)
+    assert.equal(change.body.quota, PRO_QUOTA)
 
     const me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'hosted_pro')
-    assert.equal(me.body.quota, 15)
+    assert.equal(me.body.quota, PRO_QUOTA)
     assert.equal(me.body.subscriptionId, sub.body.subscriptionId) // no se dio de baja
     assert.equal(me.body.canceledAt, null)
   })
 
   it('bajar de plan se bloquea si ya publicaste más de lo que el nuevo permite', async () => {
-    // Studio (sin tope) → publicamos 6 → intentar bajar a Starter (tope 5) → 402.
+    // Studio (sin tope) → publicamos una más que el tope de Starter → intentar bajar → 402.
     const agent = await loginAs('downgrade@test.com')
     const sub = await agent
       .post('/api/subscriptions')
       .send({ plan: 'hosted_studio', cycle: 'monthly' })
     await agent.post(sub.body.activateUrl)
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < STARTER_QUOTA + 1; i++) {
       const p = await publish(agent)
       assert.equal(p.status, 200)
     }
@@ -551,7 +556,7 @@ describe('Subscriptions + cuota (file store, mock MP)', () => {
     assert.equal(paid.body.plan, 'hosted_pro')
     const me = await agent.get('/api/subscriptions/me')
     assert.equal(me.body.plan, 'hosted_pro')
-    assert.equal(me.body.quota, 15)
+    assert.equal(me.body.quota, PRO_QUOTA)
     // Ya no queda checkout abierto.
     assert.equal((await agent.post('/api/subscriptions/upgrade/mock-pay')).status, 404)
     // La confirmación contra MP no existe en mock.

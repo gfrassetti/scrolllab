@@ -136,7 +136,10 @@ export const PRODUCTS = {
  * Planes de suscripción de LAB (secciones en vivo). A diferencia de los
  * one-time, el precio es ARS fijo (no pasa por fx). Precios fijados por el
  * owner: ladder marcado 24.900 / 99.900 / 299.900 (Pro 4× Starter, Studio
- * 12×). `instanceQuota` es definitivo (5 / 15 / sin tope). `yearly` = 10×
+ * 12×). `instanceQuota`: 8 / 30 / sin tope (2026-10-12, decisión del dueño: antes
+ * 5 / 15; una landing son 6 a 10 secciones, así que Starter cubre «una página
+ * completa» —las 8 que incluye la base del builder— y el precio por widget de
+ * Pro baja en vez de subir). Subir un cupo nunca congela nada. `yearly` = 10×
  * `monthly` (2 meses gratis) y siempre por debajo de 12× (el "ahorro").
  * Cambiar un precio es una acción explícita; nunca automática.
  *
@@ -152,7 +155,7 @@ export const HOSTED_PLANS = Object.freeze({
     priceYearly: 249000,
     priceMonthlyUsd: 19,
     priceYearlyUsd: 190,
-    instanceQuota: 5,
+    instanceQuota: 8,
     currency_id: 'ARS',
   },
   hosted_pro: {
@@ -162,7 +165,7 @@ export const HOSTED_PLANS = Object.freeze({
     priceYearly: 999000,
     priceMonthlyUsd: 79,
     priceYearlyUsd: 790,
-    instanceQuota: 15,
+    instanceQuota: 30,
     currency_id: 'ARS',
   },
   hosted_studio: {

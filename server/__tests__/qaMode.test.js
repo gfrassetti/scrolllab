@@ -344,7 +344,11 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
   it('cupo: bajar de plan con más publicados que el cupo nuevo se rechaza; dado de baja, queda solo el del plan gratis', async () => {
     const { default: request } = await import('supertest')
     const { agent } = await qaSubscribed('lab-e@test.com', 'hosted_pro')
-    const sections = ['chapters/FooterCTA', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'atrium/FooterAtrium', 'chapters/BigNumbers', 'velocity/HelmetGrid']
+    const { HOSTED_PLANS } = await import('../catalog.js')
+    const STARTER = HOSTED_PLANS.hosted_starter.instanceQuota
+    const pool = ['chapters/FooterCTA', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'atrium/FooterAtrium', 'chapters/BigNumbers', 'velocity/HelmetGrid']
+    // Una más que el cupo de Starter, con Pro (cupo mayor) todas se publican.
+    const sections = Array.from({ length: STARTER + 1 }, (_, i) => pool[i % pool.length])
     const keys = []
     const ids = []
     for (const sectionId of sections) {
@@ -357,26 +361,26 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
       await new Promise((r) => setTimeout(r, 5)) // createdAt distinto: queda el más viejo
     }
 
-    // 6 publicados en Pro → Starter permite 5: no deja bajar y dice cuántos despublicar.
+    // Una más que el cupo de Starter publicada en Pro: no deja bajar y dice cuántos despublicar.
     const quote = await agent.get('/api/subscriptions/change/quote?plan=hosted_starter')
     assert.equal(quote.status, 402)
     assert.match(quote.body.error, /Despublicá 1 antes de bajar de plan/)
     assert.equal((await agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })).status, 402)
 
     // Despublica uno (elige cuál) y ahí sí.
-    await agent.put(`/api/hosted/${ids[5]}`).send({ unpublish: true })
+    await agent.put(`/api/hosted/${ids[STARTER]}`).send({ unpublish: true })
     assert.equal((await agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })).status, 200)
 
     // Se arrepiente: baja inmediata → plan gratis (1). Solo el más viejo sigue en los sitios.
     const w = await agent.post('/api/withdrawals').send({ email: 'lab-e@test.com', name: 'Cliente E' })
     assert.equal(w.body.outcome, 'refunded', JSON.stringify(w.body))
     const served = []
-    for (const key of keys.slice(0, 5)) {
+    for (const key of keys.slice(0, STARTER)) {
       served.push((await request(app).get(`/api/embed/${key}/config`)).status)
     }
-    assert.deepEqual(served, [200, 402, 402, 402, 402])
+    assert.deepEqual(served, [200, ...Array(STARTER - 1).fill(402)])
     // Y no puede publicar otro.
-    assert.equal((await agent.put(`/api/hosted/${ids[5]}`).send({ publish: true })).status, 402)
+    assert.equal((await agent.put(`/api/hosted/${ids[STARTER]}`).send({ publish: true })).status, 402)
   })
 
   it('arrepentimiento con LAB y una compra: sin decir cuál no se adivina; con sesión se elige de la lista', async () => {

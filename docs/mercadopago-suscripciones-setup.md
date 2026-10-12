@@ -81,7 +81,7 @@ App SCROLL LAB → **Webhooks / Notificaciones**:
 
 `server/catalog.js` → `HOSTED_PLANS`. Ahí viven los tres tiers
 (`hosted_starter` / `hosted_pro` / `hosted_studio`) con `priceMonthly`,
-`priceYearly` e `instanceQuota`. Cuotas fijas (5 / 15 / sin tope).
+`priceYearly` e `instanceQuota`. Cuotas fijas (8 / 30 / sin tope; hasta el 2026-10-12 eran 5 / 15).
 
 Precios vigentes (ARS/mes · año, fijados por el owner 2026-09):
 - Starter 24.900 · 249.000

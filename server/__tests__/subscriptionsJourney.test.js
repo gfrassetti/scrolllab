@@ -1,11 +1,16 @@
 import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import request from 'supertest'
+import { HOSTED_PLANS } from '../catalog.js'
 import {
   createFakeMercadoPago,
   startAppAgainstFakeMp,
   waitFor,
 } from './helpers/fakeMercadoPago.js'
+
+// Los cupos salen del catálogo: cambiarlos no rompe estos tests (2026-10-12: 8 / 30).
+const STARTER_QUOTA = HOSTED_PLANS.hosted_starter.instanceQuota
+const PRO_QUOTA = HOSTED_PLANS.hosted_pro.instanceQuota
 
 /**
  * Recorridos completos de un cliente de LAB con el reloj simulado: alta con
@@ -107,7 +112,7 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     let me = await c.me()
     assert.equal(me.plan, 'hosted_pro')
     assert.equal(me.trialing, true)
-    assert.equal(me.quota, 15)
+    assert.equal(me.quota, PRO_QUOTA)
     assert.equal(iso(me.currentPeriodEnd), at(7))
     assert.equal(mp.charges(pre.id).length, 0)
     await waitFor(() => c.mails().length === 1, 'el mail de bienvenida')
@@ -333,7 +338,7 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     await c.goTo(7, 1)
     await mpCharges(pre) // pagó Starter del 8/10 al 8/11
 
-    for (let i = 0; i < 5; i++) assert.equal((await publish(c)).status, 200)
+    for (let i = 0; i < STARTER_QUOTA; i++) assert.equal((await publish(c)).status, 200)
     assert.equal((await publish(c)).status, 402)
 
     // 21/10: quedan 18 de los 31 días pagos → (99.900 − 24.900) × 18/31.
@@ -362,7 +367,7 @@ describe('Recorridos de suscripción (reloj simulado)', () => {
     assert.equal((await webhook('payment', payment.id, { source: 'lab' })).status, 200)
     const me = await c.me()
     assert.equal(me.plan, 'hosted_pro')
-    assert.equal(me.quota, 15)
+    assert.equal(me.quota, PRO_QUOTA)
     assert.equal((await publish(c)).status, 200)
     // Cambia el monto de la MISMA suscripción: no hay otra que cobre Starter aparte.
     assert.equal(mp.preapprovals.size, preapprovalsBefore)

@@ -28,6 +28,7 @@ import {
   CUSTOM_BASE_SECTIONS,
   CUSTOM_EXTRA_SECTION_USD,
   BUNDLE_MODELS,
+  HOSTED_PLANS,
   arsFromUsd,
   priceCustomRecipeUsd,
 } from '../catalog.js'
@@ -763,7 +764,7 @@ describe('order receipt email', () => {
     assert.match(message.subject, /suscripción a ScrollLab LAB/)
     assert.match(message.subject, /Pro/)
     assert.match(message.text, /Pro · mensual/)
-    assert.match(message.text, /15 secciones publicadas/)
+    assert.match(message.text, new RegExp(`${HOSTED_PLANS.hosted_pro.instanceQuota} secciones publicadas`))
     assert.match(message.text, /Próximo pago: /)
     assert.match(message.html, /Ir a LAB/)
     assert.match(message.html, /www\.scrolllab\.com\.ar\/lab/)
