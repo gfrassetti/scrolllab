@@ -53,10 +53,12 @@ function duplicateKey(index) {
  * Índices únicos sparse de server/models.js que el store de archivos replica al
  * guardar: un duplicado falla con el mismo error (11000) que en Mongo.
  */
+// Un elemento puede ser una clave compuesta (array de campos): único el conjunto.
 const UNIQUE_FIELDS = {
   orders: ["mpPaymentId", "paddleTransactionId"],
   leads: ["couponCode"],
   withdrawals: ["code"],
+  "price-change-notices": [["subscriptionId", "changeId"]],
 };
 
 /** Envuelve un row con `.save()` que reescribe su fila en `<name>.json`. */
@@ -66,10 +68,12 @@ function withSaveDoc(name, row) {
   doc.save = async function save() {
     const rows = read(name);
     const idx = rows.findIndex((o) => o.id === doc.id);
-    for (const field of UNIQUE_FIELDS[name] || []) {
-      const value = doc[field];
-      if (value != null && rows.some((o) => o.id !== doc.id && o[field] === value)) {
-        throw duplicateKey(field);
+    for (const key of UNIQUE_FIELDS[name] || []) {
+      const fields = Array.isArray(key) ? key : [key];
+      // Como un índice sparse: sin valor en algún campo, no choca.
+      if (fields.some((f) => doc[f] == null)) continue;
+      if (rows.some((o) => o.id !== doc.id && fields.every((f) => o[f] === doc[f]))) {
+        throw duplicateKey(fields.join("+"));
       }
     }
     const { save: _ignored, ...rest } = doc;
@@ -649,5 +653,68 @@ export const fileDb = {
     lead.updatedAt = lead.couponRedeemedAt;
     write("leads", rows);
     return { redeemed: true };
+  },
+
+  // Avisos de cambio de precio de LAB: una fila por (suscripción, cambio).
+  async ensurePriceChangeNotice(data) {
+    const rows = read("price-change-notices");
+    const subscriptionId = String(data.subscriptionId);
+    const changeId = String(data.changeId);
+    const found = rows.find(
+      (n) => n.subscriptionId === subscriptionId && n.changeId === changeId,
+    );
+    if (found) {
+      return { notice: withSaveDoc("price-change-notices", found), created: false };
+    }
+    const now = new Date().toISOString();
+    const notice = {
+      id: nid(),
+      ...data,
+      subscriptionId,
+      changeId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    rows.push(notice);
+    write("price-change-notices", rows);
+    return { notice: withSaveDoc("price-change-notices", notice), created: true };
+  },
+  async findPriceChangeNoticeById(id) {
+    return withSaveDoc(
+      "price-change-notices",
+      read("price-change-notices").find((n) => n.id === String(id)) || null,
+    );
+  },
+  async findPriceChangeNotice(subscriptionId, changeId) {
+    return withSaveDoc(
+      "price-change-notices",
+      read("price-change-notices").find(
+        (n) => n.subscriptionId === String(subscriptionId) && n.changeId === String(changeId),
+      ) || null,
+    );
+  },
+  async findPriceChangeNoticesBySubscription(subscriptionId) {
+    return read("price-change-notices")
+      .filter((n) => n.subscriptionId === String(subscriptionId))
+      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)))
+      .map((n) => withSaveDoc("price-change-notices", n));
+  },
+  async listPriceChangeNotices() {
+    return read("price-change-notices").map((n) => withSaveDoc("price-change-notices", n));
+  },
+  /**
+   * Transición atómica: si `condition(row)`, aplica `patch(row)` y guarda; si
+   * no, devuelve null. Leer, comprobar y escribir van sin ningún `await` en el
+   * medio, así que dos llamadas a la vez no pueden ganar las dos (en Mongo es el
+   * filtro del findOneAndUpdate).
+   */
+  async updatePriceChangeNoticeIf(id, condition, patch) {
+    const rows = read("price-change-notices");
+    const row = rows.find((n) => n.id === String(id));
+    if (!row || !condition(row)) return null;
+    patch(row);
+    row.updatedAt = new Date().toISOString();
+    write("price-change-notices", rows);
+    return withSaveDoc("price-change-notices", row);
   },
 };

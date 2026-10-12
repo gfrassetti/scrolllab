@@ -20,6 +20,7 @@ const { fileDb } = await import('../fileStore.js')
 const finders = {
   order: (id) => fileDb.findOrderById(id),
   subscription: (id) => fileDb.findSubscriptionById(id),
+  priceChangeNotice: (id) => fileDb.findPriceChangeNoticeById(id),
 }
 
 describe('contrato de repositorios — archivos', () => {

@@ -45,7 +45,7 @@ Se importa **solo hacia abajo**. Lo primero lo hace cumplir ESLint; el resto es 
 | `server/services/subscriptions/` | `billing` (períodos y reglas base), `entitlement` (qué puede usar el usuario), `planChange`, `start` (`startSubscription`: el alta, con la pasarela elegida), `lifecycle` (activar y reemplazar, igual en toda pasarela), `mpSync` (Mercado Pago) y `paddleSync` (Paddle) |
 | `server/services/hosted/` | LAB: `serving` (qué se sirve al embed, packs permitidos, flags del panel), `instances` (crear, editar, publicar con cupo, suspender) y `packs`. El router `hosted.js` solo traduce HTTP |
 | `server/services/email.js` · `emailTemplates.js` | El envío (Resend, idempotencia) y el contenido de los mails (puro) |
-| `server/repositories/` | `users`, `leads`, `orders`, `hosted`, `subscriptions` y `mode` (archivos o Mongo) |
+| `server/repositories/` | `users`, `leads`, `orders`, `hosted`, `hostedPacks`, `subscriptions`, `builderProjects`, `withdrawals`, `refunds`, `events`, `priceChangeNotices` y `mode` (archivos o Mongo). Todos están en el contrato ([ADR 0006](adr/0006-contrato-de-repositorios.md)) |
 | `server/db.js` | Conexión y ciclo de vida; compone el facade `db` |
 | `server/packaging.js` | Arma el ZIP. La marca de agua está en `licenseWatermark.js` y el link firmado en `downloadToken.js` |
 | `server/sections.js` · `sectionFields.js` · `catalog.js` | Derivan del dominio qué secciones y props acepta el servidor y el copy de cada producto |

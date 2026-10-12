@@ -34,7 +34,9 @@ export const ALL_STEPS = Object.freeze(['lint', 'typecheck', 'test', 'check'])
 
 /** Lo que no se puede poner encima de la copia. */
 const FORBIDDEN_ROOTS = new Set(['.git', 'node_modules', 'storage'])
-const LOG_MAX = 200_000
+// El log de `test` pasa el megabyte y el test que falló suele estar a la mitad:
+// un tope corto (con la cola) lo dejaba afuera y el resumen mostraba puro ruido.
+const LOG_MAX = 8_000_000
 const DEFAULT_TIMEOUT_MS = 15 * 60_000
 
 /**

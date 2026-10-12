@@ -719,4 +719,228 @@ export function defineRepoContract(ctx) {
     })
   })
 
+
+  // ———————————— Avisos de cambio de precio de LAB ————————————
+  describe('avisos de cambio de precio', () => {
+    const HOUR = 3_600_000
+    const DAY = 24 * HOUR
+
+    async function newNotice(sub, extra = {}) {
+      const { notice } = await db.ensurePriceChangeNotice({
+        subscriptionId: id(sub),
+        changeId: uniq('chg'),
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        currency: 'ARS',
+        from: 15000,
+        to: 18000,
+        ...extra,
+      })
+      return notice
+    }
+
+    /** Un aviso ya mandado con fecha efectiva, listo para aplicar. */
+    async function mailedNotice(sub, effectiveAt) {
+      const n = await newNotice(sub)
+      assert.ok(await db.claimPriceChangeEmail(id(n), { effectiveAt }))
+      await db.completePriceChangeEmail(id(n), uniq('em'))
+      return n
+    }
+
+    it('el alta es idempotente por (suscripción, cambio) y guarda lo anunciado', async () => {
+      const sub = await newSub(await newUser())
+      const changeId = uniq('chg')
+      const first = await db.ensurePriceChangeNotice({
+        subscriptionId: id(sub),
+        changeId,
+        plan: 'hosted_pro',
+        cycle: 'monthly',
+        currency: 'ARS',
+        from: 15000,
+        to: 18000,
+      })
+      assert.equal(first.created, true)
+      assert.equal(first.notice.changeId, changeId)
+      assert.equal(first.notice.from, 15000)
+      assert.equal(first.notice.to, 18000)
+      assert.equal(first.notice.currency, 'ARS')
+      assert.equal(first.notice.emailSentAt ?? null, null)
+      assert.equal(first.notice.appliedAt ?? null, null)
+
+      const again = await db.ensurePriceChangeNotice({ subscriptionId: id(sub), changeId, from: 1, to: 2 })
+      assert.equal(again.created, false)
+      assert.equal(String(id(again.notice)), String(id(first.notice)))
+      assert.equal(again.notice.from, 15000, 'repetir no pisa lo anunciado')
+
+      // Otro cambio de la misma suscripción, y el mismo cambio en otra: filas distintas.
+      const other = await db.ensurePriceChangeNotice({ subscriptionId: id(sub), changeId: uniq('chg') })
+      assert.equal(other.created, true)
+      const otherSub = await newSub(await newUser())
+      const sameChange = await db.ensurePriceChangeNotice({ subscriptionId: id(otherSub), changeId })
+      assert.equal(sameChange.created, true)
+    })
+
+    it('dos altas a la vez del mismo cambio: crea una sola fila', async () => {
+      const sub = await newSub(await newUser())
+      const changeId = uniq('chg')
+      const results = await Promise.all(
+        Array.from({ length: 4 }, () => db.ensurePriceChangeNotice({ subscriptionId: id(sub), changeId })),
+      )
+      assert.equal(results.filter((r) => r.created).length, 1)
+      assert.equal(new Set(results.map((r) => String(id(r.notice)))).size, 1)
+      assert.equal((await db.findPriceChangeNoticesBySubscription(id(sub))).length, 1)
+    })
+
+    it('se busca por id y por (suscripción, cambio); las de una suscripción salen de la más vieja a la más nueva', async () => {
+      const sub = await newSub(await newUser())
+      const a = await newNotice(sub)
+      await sleep(15)
+      const b = await newNotice(sub)
+      assert.equal(String(id(await db.findPriceChangeNoticeById(id(a)))), String(id(a)))
+      assert.equal(String(id(await db.findPriceChangeNotice(id(sub), a.changeId))), String(id(a)))
+      assert.equal(await db.findPriceChangeNotice(id(sub), uniq('nada')), null)
+      assert.equal(await db.findPriceChangeNoticeById('f'.repeat(24)), null)
+      const all = await db.findPriceChangeNoticesBySubscription(id(sub))
+      assert.deepEqual(all.map((n) => String(id(n))), [String(id(a)), String(id(b))])
+    })
+
+    it('el mail: claim una sola vez, fija la fecha, release la suelta y complete lo cierra', async () => {
+      const sub = await newSub(await newUser())
+      const n = await newNotice(sub)
+      const eff = new Date(Date.now() + 30 * DAY)
+
+      const claimed = await db.claimPriceChangeEmail(id(n), { effectiveAt: eff })
+      assert.ok(claimed?.emailSendingAt)
+      assert.equal(new Date(claimed.effectiveAt).getTime(), eff.getTime())
+      assert.equal(await db.claimPriceChangeEmail(id(n), { effectiveAt: eff }), null, 'ya lo está mandando otro')
+
+      await db.releasePriceChangeEmail(id(n), 'Resend caído')
+      const released = await db.findPriceChangeNoticeById(id(n))
+      assert.equal(released.emailError, 'Resend caído')
+      assert.equal(released.emailSendingAt ?? null, null)
+      assert.equal(released.effectiveAt ?? null, null, 'sin mail no hay fecha')
+
+      const later = new Date(Date.now() + 33 * DAY)
+      const again = await db.claimPriceChangeEmail(id(n), { effectiveAt: later })
+      assert.ok(again, 'se puede reintentar')
+      assert.equal(new Date(again.effectiveAt).getTime(), later.getTime(), 'la fecha se recalcula al reintentar')
+      assert.equal(again.emailError ?? null, null)
+
+      const done = await db.completePriceChangeEmail(id(n), 'em_1')
+      assert.ok(done.emailSentAt)
+      assert.equal(done.emailId, 'em_1')
+      assert.equal(done.emailSendingAt ?? null, null)
+      assert.equal(await db.claimPriceChangeEmail(id(n), { effectiveAt: later }), null, 'ya salió')
+    })
+
+    it('un claim de hace 11 minutos (el proceso murió) se retoma', async () => {
+      const sub = await newSub(await newUser())
+      const n = await newNotice(sub)
+      assert.ok(await db.claimPriceChangeEmail(id(n)))
+      await ctx.setRaw('priceChangeNotice', id(n), { emailSendingAt: new Date(Date.now() - 11 * 60_000) })
+      assert.ok(await db.claimPriceChangeEmail(id(n)))
+    })
+
+    it('un aviso aplicado o descartado no se reclama', async () => {
+      const sub = await newSub(await newUser())
+      const skipped = await newNotice(sub)
+      await db.skipPriceChangeNotice(id(skipped), 'ya paga el precio nuevo')
+      assert.equal(await db.claimPriceChangeEmail(id(skipped)), null)
+
+      const applied = await mailedNotice(sub, new Date(Date.now() + DAY))
+      await db.markPriceChangeApplied(id(applied))
+      assert.equal(await db.claimPriceChangeEmail(id(applied)), null)
+    })
+
+    it('«por avisar»: sin mail, sin descartar y sin nadie mandándolo', async () => {
+      const sub = await newSub(await newUser())
+      const pending = await newNotice(sub)
+      const sending = await newNotice(sub)
+      const sent = await mailedNotice(sub, new Date(Date.now() + DAY))
+      const skipped = await newNotice(sub)
+      await db.claimPriceChangeEmail(id(sending))
+      await db.skipPriceChangeNotice(id(skipped), 'baja')
+      const stale = await newNotice(sub)
+      await db.claimPriceChangeEmail(id(stale))
+      await ctx.setRaw('priceChangeNotice', id(stale), { emailSendingAt: new Date(Date.now() - 11 * 60_000) })
+
+      const ids = (await db.listPriceChangeNoticesToAnnounce({ limit: 500 })).map((x) => String(id(x)))
+      assert.ok(ids.includes(String(id(pending))))
+      assert.ok(ids.includes(String(id(stale))), 'el claim vencido vuelve a la cola')
+      for (const out of [sending, sent, skipped]) assert.ok(!ids.includes(String(id(out))))
+    })
+
+    it('«a aplicar»: avisados, con fecha dentro del margen, sin aplicar ni descartar, la más próxima primero', async () => {
+      const sub = await newSub(await newUser())
+      const now = Date.now()
+      const soon = await mailedNotice(sub, new Date(now + 1 * DAY))
+      const sooner = await mailedNotice(sub, new Date(now + 12 * HOUR))
+      const far = await mailedNotice(sub, new Date(now + 20 * DAY))
+      const notMailed = await newNotice(sub)
+      // Reclamado (ya tiene fecha) pero el mail todavía no salió: no se aplica.
+      const sending = await newNotice(sub)
+      await db.claimPriceChangeEmail(id(sending), { effectiveAt: new Date(now + 12 * HOUR) })
+      const applied = await mailedNotice(sub, new Date(now + DAY))
+      await db.markPriceChangeApplied(id(applied))
+      const skipped = await mailedNotice(sub, new Date(now + DAY))
+      await db.skipPriceChangeNotice(id(skipped), 'cambió de plan')
+
+      const due = await db.listPriceChangeNoticesDue({ before: new Date(now + 2 * DAY), limit: 500 })
+      const ids = due.map((x) => String(id(x)))
+      assert.ok(ids.indexOf(String(id(sooner))) !== -1 && ids.indexOf(String(id(soon))) !== -1)
+      assert.ok(ids.indexOf(String(id(sooner))) < ids.indexOf(String(id(soon))), 'la fecha más próxima primero')
+      for (const out of [far, notMailed, sending, applied, skipped]) {
+        assert.ok(!ids.includes(String(id(out))))
+      }
+    })
+
+    it('markApplied: una sola vez, y NUNCA sin que el mail haya salido', async () => {
+      const sub = await newSub(await newUser())
+      const unmailed = await newNotice(sub)
+      assert.equal(await db.markPriceChangeApplied(id(unmailed)), null, 'sin mail no hay cobro nuevo')
+      assert.equal((await db.findPriceChangeNoticeById(id(unmailed))).appliedAt ?? null, null)
+
+      // Reclamado pero todavía no enviado tampoco cuenta.
+      await db.claimPriceChangeEmail(id(unmailed), { effectiveAt: new Date(Date.now() + DAY) })
+      assert.equal(await db.markPriceChangeApplied(id(unmailed)), null)
+
+      const n = await mailedNotice(sub, new Date(Date.now() + DAY))
+      const first = await db.markPriceChangeApplied(id(n))
+      assert.ok(first?.appliedAt)
+      assert.equal(await db.markPriceChangeApplied(id(n)), null, 'ya estaba aplicado')
+      assert.equal(await db.markPriceChangeApplied('f'.repeat(24)), null)
+    })
+
+    it('markApplied a la vez: gana uno solo', async () => {
+      const sub = await newSub(await newUser())
+      const n = await mailedNotice(sub, new Date(Date.now() + DAY))
+      const out = await Promise.all(Array.from({ length: 4 }, () => db.markPriceChangeApplied(id(n))))
+      assert.equal(out.filter(Boolean).length, 1)
+    })
+
+    it('claim a la vez: gana uno solo (dos barridos no mandan el mismo mail)', async () => {
+      const sub = await newSub(await newUser())
+      const n = await newNotice(sub)
+      const eff = new Date(Date.now() + 30 * DAY)
+      const out = await Promise.all(
+        Array.from({ length: 4 }, () => db.claimPriceChangeEmail(id(n), { effectiveAt: eff })),
+      )
+      assert.equal(out.filter(Boolean).length, 1)
+    })
+
+    it('descartar: una sola vez, con el motivo, y no si ya se aplicó', async () => {
+      const sub = await newSub(await newUser())
+      const n = await newNotice(sub)
+      const first = await db.skipPriceChangeNotice(id(n), 'se dio de baja')
+      assert.ok(first.skippedAt)
+      assert.equal(first.skipReason, 'se dio de baja')
+      assert.equal(await db.skipPriceChangeNotice(id(n), 'otra vez'), null)
+      assert.equal(await db.markPriceChangeApplied(id(n)), null, 'un descartado no se aplica')
+
+      const applied = await mailedNotice(sub, new Date(Date.now() + DAY))
+      await db.markPriceChangeApplied(id(applied))
+      assert.equal(await db.skipPriceChangeNotice(id(applied), 'tarde'), null)
+    })
+  })
+
 }

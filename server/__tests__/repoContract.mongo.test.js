@@ -23,7 +23,11 @@ if (mongo) process.env.MONGODB_URI = mongo.uri
 const { db, connectDb } = await import('../db.js')
 const models = await import('../models.js')
 
-const modelOf = { order: models.Order, subscription: models.Subscription }
+const modelOf = {
+  order: models.Order,
+  subscription: models.Subscription,
+  priceChangeNotice: models.PriceChangeNotice,
+}
 
 describe('contrato de repositorios — Mongo', { skip: mongo ? false : 'sin Mongo: definí MONGODB_TEST_URI o MONGOD_BIN' }, () => {
   before(async () => {

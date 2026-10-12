@@ -465,6 +465,42 @@ const refundSchema = new mongoose.Schema(
 /** @type {AnyModel} */
 export const Refund = mongoose.models.Refund || mongoose.model("Refund", refundSchema);
 
+/**
+ * Aviso de cambio de precio de LAB: una fila por (suscripción, cambio) con lo
+ * anunciado, el mail (claim / complete / release) y si ya se aplicó en la
+ * pasarela. El índice compuesto hace idempotente el anuncio (ver
+ * server/repositories/priceChangeNotices.js).
+ */
+const priceChangeNoticeSchema = new mongoose.Schema(
+  {
+    subscriptionId: { type: String, required: true },
+    // Id del cambio en la lista declarativa (src/domain/priceChanges.js).
+    changeId: { type: String, required: true },
+    plan: String,
+    cycle: String,
+    currency: String,
+    // Lo que paga hoy esta suscripción y lo que va a pagar (en `currency`).
+    from: Number,
+    to: Number,
+    // Desde cuándo rige: se fija cuando el mail SALE, no antes.
+    effectiveAt: Date,
+    emailSendingAt: Date,
+    emailSentAt: Date,
+    emailId: String,
+    emailError: String,
+    appliedAt: Date,
+    skippedAt: Date,
+    skipReason: String,
+  },
+  { timestamps: true },
+);
+priceChangeNoticeSchema.index({ subscriptionId: 1, changeId: 1 }, { unique: true });
+
+/** @type {AnyModel} */
+export const PriceChangeNotice =
+  mongoose.models.PriceChangeNotice ||
+  mongoose.model("PriceChangeNotice", priceChangeNoticeSchema);
+
 /** @type {AnyModel} */
 export const Withdrawal =
   mongoose.models.Withdrawal || mongoose.model("Withdrawal", withdrawalSchema);
