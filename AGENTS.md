@@ -373,8 +373,9 @@ documento; si el sitio tiene una barra fija arriba, el widget se pega debajo de 
 del widget (`src/domain/labForms.js`, `server/services/hosted/forms.js`). Los `vh` (del CSS y de los `style` inline) miden la pantalla del sitio, no el
 iframe. Cada sección es un archivo aparte del frame (`embed/src/registry.js`, import dinámico): un
 widget baja el núcleo y su sección (los 3D, además, three en su propio archivo). Una capa `fixed` a
-pantalla completa (el canvas de FIZZ) cuenta como escenario → PIN. El reloj de GSAP del frame queda en
-pausa hasta que el widget entra en pantalla: la entrada se ve cuando el visitante llega, no al abrir el sitio. Nada de FOLD ni de media que el cliente no pueda cambiar desde el
+pantalla completa (el canvas de FIZZ) cuenta como escenario → PIN. No tocar el reloj de GSAP del frame
+(pausar `gsap.globalTimeline` o mudar las animaciones a una línea de tiempo en pausa): ScrollTrigger lo
+usa por dentro y los pines se miden mal de a ratos (Fase L del plan). Nada de FOLD ni de media que el cliente no pueda cambiar desde el
 editor (un vuelo de cuadros, un mapa con puntos fijos). Antes de sumar una sección, `npm run screen:lab -- <id>`. Detalle: [`docs/hosted-component-plan.md`](docs/hosted-component-plan.md), Fase I.
 
 Link de edición (`/lab/editar/:token`, `server/services/hosted/editLink.js`): el dueño de un widget le da a su cliente un link secreto para editar contenido sin cuenta; puede republicar solo lo ya publicado, no ve plan ni dominios. El token se guarda hasheado y se muestra una vez. Detalle: `docs/hosted-component-plan.md`, Fase J.

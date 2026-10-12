@@ -1,7 +1,7 @@
 import { h, render } from 'preact'
 import './main.css'
 import { loadSection, canvasFor } from '../src/registry'
-import { gsap, ScrollTrigger } from '../src/gsap'
+import { ScrollTrigger } from '../src/gsap'
 import { isLabFormSection } from '../../src/domain/labForms.js'
 import { hostViewportUnitsInline } from '../hostViewportUnits.js'
 
@@ -338,31 +338,11 @@ function decide() {
   }
 }
 
-/*
- * La entrada se ve cuando llegás. Las secciones arrancan su entrada con
- * tiempo (letras, fundidos, la botella de FIZZ) al montarse; en el sitio eso
- * es al abrir la página, pero un widget suele estar más abajo y la entrada
- * terminaba antes de que alguien llegara. El reloj de GSAP queda en pausa
- * hasta que el widget entra en pantalla por primera vez: todo lo creado antes
- * (tweens, delayedCall, la entrada de SplitText) corre desde ahí. El scroll
- * (ScrollTrigger) y los render loops del ticker no dependen de ese reloj.
- */
-let motionStarted = false
-function holdMotion() {
-  gsap.globalTimeline.pause()
-}
-function startMotion() {
-  if (motionStarted) return
-  motionStarted = true
-  gsap.globalTimeline.resume()
-}
-
 function onMessage(e) {
   const m = e.data
   if (!m || typeof m !== 'object') return
 
   if (m.type === 'scrolllab:viewport') {
-    if (m.inView) startMotion()
     if (m.viewportHeight) {
       // En PIN la pantalla del widget puede ser menos que la del sitio (una
       // barra fija arriba): cuando cambia, sus `vh` y el recorrido se recalculan.
@@ -521,15 +501,13 @@ async function main() {
     const host = hostName(origin)
     props.endpoint = `${api}/api/embed/${encodeURIComponent(key)}/form${host ? `?host=${encodeURIComponent(host)}` : ''}`
   }
-  const direct = window.parent === window
-  if (!direct) holdMotion()
   render(h(Section, props), root)
   setBadge(config.badge || null)
 
   // Abierto directo (sin loader / fuera de un iframe): no va a llegar
   // `scrolllab:viewport`, así que nos revelamos solos para que la URL del
   // frame sirva de preview. Dentro del embed real `parent !== window`.
-  if (direct) {
+  if (window.parent === window) {
     hostVh = window.innerHeight
     reveal()
     requestAnimationFrame(() => {

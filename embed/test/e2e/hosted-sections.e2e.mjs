@@ -452,6 +452,29 @@ const CASES = {
     props: { title: 'MKSWAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKSWAT',
   },
+  // Three.js (Fase L): el canvas va aparte; el marcador es texto del DOM.
+  'fizz/HeroBubbles': {
+    props: { tagline: 'MKHBFZ', bg: '#2b4bff', fg: '#fff4e0' },
+    marker: 'MKHBFZ',
+  },
+  'fizz/FlavorWorlds': {
+    // Sin `bg`: el fondo es el color de cada sabor (startBg y los de la lista).
+    props: { eyebrow: 'MKFWFZ', startBg: '#2b4bff' },
+    marker: 'MKFWFZ',
+  },
+  'monolith/HeroThree': {
+    props: { subtitle: 'MKH3MO', bg: '#d6d2c8', fg: '#111111' },
+    marker: 'MKH3MO',
+  },
+  'atelier/HeroMeaning': {
+    // El titular entra letra por letra (oculto hasta la entrada): el marcador va en la bajada.
+    props: { body: 'MKHMAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKHMAT',
+  },
+  'atelier/ServicesStone': {
+    props: { title: 'MKSSAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKSSAT',
+  },
   'unity/HeroTwin': {
     props: { body: 'MKHTUN', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKHTUN',

@@ -1258,15 +1258,18 @@ sigue en ~64 KB.
   `sticky`, un `fixed` de media pantalla para arriba → PIN, y ahí el frame
   recorre su propio documento como una página. Un `fixed` chico (la foto que
   sigue al cursor en `nocturne/WorkIndex`) no cuenta.
-- **La entrada se ve cuando llegás.** Las secciones arrancan su entrada con
-  tiempo al montarse (letras, fundidos, la botella). En el sitio es al abrir la
-  página; un widget suele estar más abajo y la entrada terminaba antes de que
-  alguien llegara. El frame pausa el reloj de GSAP (`gsap.globalTimeline`) hasta
-  que el widget entra en pantalla por primera vez, y todo lo creado antes corre
-  desde ahí. ScrollTrigger y los render loops del ticker no dependen de ese
-  reloj. En PIN el loader ahora manda `inView` de verdad (antes siempre `true`);
-  un loader viejo cacheado sigue mandando `true` y queda como antes. La vista
-  previa del editor no pausa.
+- **Probado y descartado: que la entrada espere al visitante.** Las secciones
+  arrancan su entrada con tiempo al montarse (letras, fundidos, la botella), y un
+  widget más abajo en la página la termina antes de que alguien llegue. Se probó
+  retenerla hasta que el widget entrara en pantalla, primero pausando
+  `gsap.globalTimeline` y después mudando a una línea de tiempo en pausa solo lo
+  que creaba la sección. Las dos versiones hicieron intermitentes los pines en
+  `npm run test:e2e` (VisionShutter y kin/Intro con alto 0, SplitReveals sin
+  revelar): ScrollTrigger usa el reloj de GSAP por dentro (el recálculo al
+  cambiar de tamaño, el fin del arranque, el `update` tras un refresh). Se volvió
+  atrás; la entrada corre al cargar el sitio, como siempre. Si se retoma, el
+  camino es montar la sección cuando el widget se acerca a la pantalla, no tocar
+  el reloj.
 - **La ayuda del modelo 3D en LAB.** `FieldHelp.zipSteps`: los renglones que solo
   valen con el código («escribí /mi-modelo.glb y copialo en public/») no se
   muestran en el editor de LAB, donde solo sirve una URL https.

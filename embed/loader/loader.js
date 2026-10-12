@@ -382,11 +382,8 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
         // progreso y la sección quedaba en blanco. Es la pantalla que le toca
         // (sin la barra fija del sitio): sus `vh` miden eso.
         var screenH = vh - topOffset
-        // En pantalla = algo del recorrido se ve (el frame arranca su entrada
-        // recién ahí, ver startMotion en frame/main.jsx).
-        var pinInView = wr.top < vh && wr.bottom > topOffset
         w.postMessage(
-          { type: 'scrolllab:viewport', rectTop: 0, rectHeight: screenH, viewportHeight: screenH, inView: pinInView, pin: true },
+          { type: 'scrolllab:viewport', rectTop: 0, rectHeight: screenH, viewportHeight: screenH, inView: true, pin: true },
           frameOrigin || '*',
         )
         w.postMessage(
