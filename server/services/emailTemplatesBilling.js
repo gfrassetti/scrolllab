@@ -910,3 +910,112 @@ export function buildSubscriptionPlanChanged({ subscription, user, accountUrl, l
     footer: c.footer,
   })
 }
+
+// ——— LAB: cambio de precio (src/domain/priceChanges.js) ———
+
+const PRICE_CHANGE_COPY = {
+  es: {
+    increase: {
+      subject: (tier) => `Tu plan ${tier} de LAB cambia de precio`,
+      preheader: (to, per, date) => `Desde el cobro del ${date}: ${to} por ${per}.`,
+      eyebrow: 'Cambio de precio',
+      title: (name) => `${name}, el precio de tu plan cambia.`,
+      intro: (tier, cycle, from, to, per, date) =>
+        `Tu plan ${tier} ${cycle} pasa de ${from} a ${to} por ${per}. El precio nuevo rige desde el cobro del ${date}; hasta ese día pagás lo mismo que ahora.`,
+    },
+    reminder: {
+      subject: (tier, to) => `Recordatorio: tu plan ${tier} anual se renueva a ${to}`,
+      preheader: (to, per, date) => `El ${date} se renueva a ${to} por ${per}.`,
+      eyebrow: 'Recordatorio de precio',
+      title: (name) => `${name}, se acerca la renovación de tu plan.`,
+      intro: (tier, _cycle, from, to, per, date) =>
+        `Como te avisamos, tu plan ${tier} anual se renueva el ${date} a ${to} por ${per} (hasta ahora ${from}).`,
+    },
+    decrease: {
+      subject: (tier) => `Tu plan ${tier} de LAB baja de precio`,
+      preheader: (to, per) => `Desde el próximo cobro: ${to} por ${per}.`,
+      eyebrow: 'Baja de precio',
+      title: (name) => `${name}, tu plan pasa a costar menos.`,
+      intro: (tier, cycle, from, to, per, date) =>
+        `Tu plan ${tier} ${cycle} pasa de ${from} a ${to} por ${per} desde el próximo cobro${date ? ` (${date})` : ''}. No hace falta que hagas nada.`,
+    },
+    cancel: (date) =>
+      `Si no querés seguir con el precio nuevo, la cancelás desde Mi LAB antes del ${date} y no se te cobra nada más: seguís con acceso hasta el fin del período que ya pagaste.`,
+    plan: 'Plan',
+    now: 'Precio actual',
+    next: 'Precio nuevo',
+    from: 'Desde el cobro del',
+    cta: 'Ir a Mi LAB',
+    footer: 'Este aviso le llega a cada suscripción a la que le cambia el precio. Si tenés dudas, podés responder este email.',
+  },
+  en: {
+    increase: {
+      subject: (tier) => `The price of your LAB ${tier} plan is changing`,
+      preheader: (to, per, date) => `From the ${date} charge: ${to} per ${per}.`,
+      eyebrow: 'Price change',
+      title: (name) => `${name}, your plan’s price is changing.`,
+      intro: (tier, cycle, from, to, per, date) =>
+        `Your ${cycle} ${tier} plan goes from ${from} to ${to} per ${per}. The new price applies from the ${date} charge; until then you pay the same as now.`,
+    },
+    reminder: {
+      subject: (tier, to) => `Reminder: your yearly ${tier} plan renews at ${to}`,
+      preheader: (to, per, date) => `It renews on ${date} at ${to} per ${per}.`,
+      eyebrow: 'Price reminder',
+      title: (name) => `${name}, your plan renews soon.`,
+      intro: (tier, _cycle, from, to, per, date) =>
+        `As we let you know, your yearly ${tier} plan renews on ${date} at ${to} per ${per} (${from} so far).`,
+    },
+    decrease: {
+      subject: (tier) => `Your LAB ${tier} plan now costs less`,
+      preheader: (to, per) => `From your next charge: ${to} per ${per}.`,
+      eyebrow: 'Price drop',
+      title: (name) => `${name}, your plan now costs less.`,
+      intro: (tier, cycle, from, to, per, date) =>
+        `Your ${cycle} ${tier} plan goes from ${from} to ${to} per ${per} from your next charge${date ? ` (${date})` : ''}. You don’t need to do anything.`,
+    },
+    cancel: (date) =>
+      `If you’d rather not continue at the new price, cancel from My LAB before ${date} and you won’t be charged again: you keep access until the end of the period you already paid for.`,
+    plan: 'Plan',
+    now: 'Current price',
+    next: 'New price',
+    from: 'From the charge on',
+    cta: 'Go to My LAB',
+    footer: 'Every subscription whose price changes gets this notice. If you have questions, you can reply to this email.',
+  },
+}
+
+/**
+ * Aviso de cambio de precio de LAB: suba (con 15 días), recordatorio del anual o
+ * baja. `from`/`to` en la moneda de la suscripción; `effectiveAt` = la fecha del
+ * primer cobro con el precio nuevo (en una baja puede faltar: «el próximo cobro»).
+ * @param {{ subscription: any, user: any, accountUrl: string, logoUrl: string,
+ *   notice: { kind: 'increase' | 'reminder' | 'decrease', from: number, to: number, effectiveAt?: Date | string | null } }} args
+ */
+export function buildSubscriptionPriceChange({ subscription, user, accountUrl, logoUrl, notice }) {
+  const lang = langOf(subscription.locale)
+  const c = PRICE_CHANGE_COPY[lang]
+  const k = c[notice.kind] || c.increase
+  const t = subscriptionTerms(subscription, lang)
+  const from = money(notice.from, t.currency, lang)
+  const to = money(notice.to, t.currency, lang)
+  const date = notice.effectiveAt ? dateLong(notice.effectiveAt, lang) : ''
+  const raising = notice.kind !== 'decrease'
+  return render({
+    lang,
+    logoUrl,
+    subject: k.subject(t.tier, to),
+    preheader: k.preheader(to, t.per, date),
+    eyebrow: k.eyebrow,
+    title: k.title(nameOf(user)),
+    intro: k.intro(t.tier, t.cycle, from, to, t.per, date),
+    notice: raising && date ? c.cancel(date) : null,
+    rows: [
+      [c.plan, `${t.tier} · ${t.cycle}`],
+      [c.now, `${from} / ${t.per}`],
+      [c.next, `${to} / ${t.per}`],
+      date ? [c.from, date] : null,
+    ],
+    cta: { href: accountUrl, label: c.cta },
+    footer: c.footer,
+  })
+}
