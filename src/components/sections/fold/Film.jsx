@@ -102,8 +102,17 @@ async function findReel(bases) {
 }
 
 // ---- frame reel: load around the playhead, never blank ---------------------
+//
+// Two stores. The compressed frames (a few tens of KB each) are fetched far
+// around the playhead and kept. The decoded ones — what the canvas actually
+// draws — are a small window right around it, made by createImageBitmap off
+// the main thread. Drawing a frame that is not decoded yet makes the browser
+// decode it on the spot, in the middle of the paint (up to ~30 ms per frame
+// on a laptop): that was the stutter. The canvas only ever draws decoded
+// bitmaps; when the exact one is not ready it draws the nearest that is.
+const BITMAPS = typeof createImageBitmap === 'function'
 function createReel({ base, count, pad, tier, want = () => true }) {
-  const frames = new Array(count).fill(null)
+  const frames = new Array(count).fill(null) // compressed: Blob (or a decoded <img> without ImageBitmap)
   const pending = new Set()
   let queue = []
   let inflight = 0
@@ -111,19 +120,46 @@ function createReel({ base, count, pad, tier, want = () => true }) {
   const NEAR = 10
   const AHEAD = 360
   const BEHIND = 90
+  // Decoded window, in frames of the reel (the device's step applies inside).
+  const DEC_AHEAD = 30
+  const DEC_BEHIND = 9
+  const DEC_MAX = 4
+  // How many decoded frames are held (~4.7 MB each at 1440, ~1.3 MB at 768).
+  const DEC_KEEP = 44
+  const decoded = new Map()
+  const decoding = new Set()
+  const sideCache = new Map()
+  const sideBusy = new Set()
+  let center = 0
+  let dir = 1
   const url = (i) => `${base}/${tier}/f_${String(i + 1).padStart(pad, '0')}.webp`
+  // Distance from the playhead as the reader moves: frames behind count triple.
+  const cost = (i) => {
+    const d = (i - center) * dir
+    return d >= 0 ? d : -3 * d
+  }
   const load = (i) => {
     if (frames[i] || pending.has(i)) return
     pending.add(i)
     inflight += 1
-    const img = new Image()
-    img.decoding = 'async'
-    img.src = url(i)
     const done = () => {
       pending.delete(i)
       inflight -= 1
       pump()
+      decodePump()
     }
+    if (BITMAPS) {
+      fetch(url(i))
+        .then((r) => (r.ok ? r.blob() : null))
+        .then((blob) => {
+          if (blob) frames[i] = blob
+          done()
+        }, done)
+      return
+    }
+    const img = new Image()
+    img.decoding = 'async'
+    img.src = url(i)
     const ready = img.decode ? img.decode() : new Promise((r, j) => ((img.onload = r), (img.onerror = j)))
     ready.then(() => {
       frames[i] = img
@@ -133,12 +169,67 @@ function createReel({ base, count, pad, tier, want = () => true }) {
   function pump() {
     while (inflight < MAX && queue.length) load(queue.shift())
   }
+  // The decode order inside the window: the playhead, then every 3rd frame
+  // ahead (a fast scroll skips the in-between ones anyway), then the rest,
+  // then a little behind.
+  const decodeOrder = () => {
+    const out = []
+    const seen = new Set()
+    const add = (i) => {
+      if (i >= 0 && i < count && !seen.has(i) && want(i)) {
+        seen.add(i)
+        out.push(i)
+      }
+    }
+    for (let d = 0; d <= 2; d += 1) add(center + dir * d)
+    for (let d = 3; d <= DEC_AHEAD; d += 3) add(center + dir * d)
+    for (let d = 1; d <= DEC_AHEAD; d += 1) add(center + dir * d)
+    for (let d = 1; d <= DEC_BEHIND; d += 1) add(center - dir * d)
+    return out
+  }
+  function decodePump() {
+    if (!BITMAPS) return
+    // Over the budget, drop the frames farthest from where the reader is
+    // going — never by a fixed window: when the scroll runs ahead of the
+    // decoder, the nearest old frame is still better than nothing.
+    if (decoded.size > DEC_KEEP) {
+      const far = [...decoded.keys()].sort((a, b) => cost(b) - cost(a))
+      for (const i of far.slice(0, decoded.size - DEC_KEEP)) {
+        decoded.get(i).close()
+        decoded.delete(i)
+      }
+    }
+    if (decoding.size >= DEC_MAX) return
+    for (const i of decodeOrder()) {
+      if (decoding.size >= DEC_MAX) break
+      const blob = frames[i]
+      if (!blob || decoded.has(i) || decoding.has(i)) continue
+      decoding.add(i)
+      createImageBitmap(blob)
+        .then(
+          (bm) => {
+            if (!decoded.has(i)) decoded.set(i, bm)
+            else bm.close()
+          },
+          () => {},
+        )
+        .finally(() => {
+          decoding.delete(i)
+          decodePump()
+        })
+    }
+  }
+  // What the canvas may draw: a decoded bitmap (or, without ImageBitmap, the
+  // decoded <img>).
+  const drawable = (i) => (BITMAPS ? decoded.get(i) : frames[i]) || null
   return {
     // Coarse to fine, ahead of the playhead first (that is where the reader
     // is going): the next few frames one by one, then every 8th frame far
     // ahead, then every 4th, 2nd, and the rest. A fast scroll always finds a
     // frame one or two away from the exact one instead of a gap.
-    aim(center, dir = 1) {
+    aim(at, towards = 1) {
+      center = at
+      dir = towards
       const seen = new Set()
       const order = []
       const push = (i) => {
@@ -147,32 +238,89 @@ function createReel({ base, count, pad, tier, want = () => true }) {
           order.push(i)
         }
       }
-      for (let d = 0; d <= NEAR; d += 1) push(center + dir * d)
+      for (let d = 0; d <= NEAR; d += 1) push(at + towards * d)
       // Bands of distance; inside each band every 3rd frame first (the
       // original picture — the two in between are interpolated), then the rest.
       let from = 0
       for (const to of [72, 180, AHEAD]) {
         for (const s of [3, 1]) {
-          for (let d = from; d <= to; d += 1) if (d % s === 0) push(center + dir * d)
-          for (let d = from; d <= Math.min(to, BEHIND); d += 1) if (d % s === 0) push(center - dir * d)
+          for (let d = from; d <= to; d += 1) if (d % s === 0) push(at + towards * d)
+          for (let d = from; d <= Math.min(to, BEHIND); d += 1) if (d % s === 0) push(at - towards * d)
         }
         from = to + 1
       }
       queue = order.filter((i) => !frames[i] && !pending.has(i))
       pump()
+      decodePump()
     },
-    get: (i) => frames[i],
-    // Also keep a second playhead fed (the take leaving under a transition).
+    get: drawable,
+    // Also keep a second playhead fed (the take leaving under a transition):
+    // its frames are drawn as they are (an <img> decodes on its own).
     keep(i) {
       for (let k = i, n = 0; k < count && n < 4; k += 1) if (want(k)) (load(k), (n += 1))
     },
+    // The decoded frame nearest to i (the exact one when it is ready).
     near(i) {
-      if (frames[i]) return frames[i]
+      const exact = drawable(i)
+      if (exact) return exact
+      if (BITMAPS) {
+        let best = null
+        let gap = Infinity
+        for (const [k, bm] of decoded) {
+          const d = Math.abs(k - i)
+          if (d < gap) {
+            gap = d
+            best = bm
+          }
+        }
+        return best
+      }
       for (let d = 1; d < count; d += 1) {
         if (frames[i - d]) return frames[i - d]
         if (frames[i + d]) return frames[i + d]
       }
       return null
+    },
+    // A frame for the second playhead (a transition's leaving take, outside the
+    // decoded window): decoded on its own, once, and kept while it is in use.
+    side(i) {
+      if (!BITMAPS) return frames[i] || null
+      const hit = decoded.get(i) || sideCache.get(i)
+      if (hit) return hit
+      const blob = frames[i]
+      if (blob && !sideBusy.has(i)) {
+        sideBusy.add(i)
+        createImageBitmap(blob).then(
+          (bm) => {
+            sideCache.set(i, bm)
+            sideBusy.delete(i)
+            for (const [k, old] of sideCache) {
+              if (sideCache.size <= 6) break
+              if (k !== i) {
+                old.close()
+                sideCache.delete(k)
+              }
+            }
+          },
+          () => sideBusy.delete(i),
+        )
+      }
+      let best = null
+      let gap = Infinity
+      for (const [k, bm] of sideCache) {
+        if (Math.abs(k - i) < gap) {
+          gap = Math.abs(k - i)
+          best = bm
+        }
+      }
+      return best
+    },
+    dispose() {
+      for (const bm of decoded.values()) bm.close()
+      for (const bm of sideCache.values()) bm.close()
+      decoded.clear()
+      sideCache.clear()
+      queue = []
     },
   }
 }
@@ -337,6 +485,7 @@ export default function Film({ score = SCORE }) {
     const small = window.innerWidth <= 820
     const sharp = !small && window.innerWidth * Math.min(2, window.devicePixelRatio || 1) > 1100
     let STEP = 1
+    let interp = 1
     // The frame to show and the next one, on this device's step.
     const snap = (scene, at) => {
       const end = scene.start + scene.count - 1
@@ -353,7 +502,8 @@ export default function Film({ score = SCORE }) {
         .map(Number)
         .sort((a, b) => a - b)
       const tier = sharp ? sizes[sizes.length - 1] : sizes.find((w) => w >= 768) || sizes[0]
-      STEP = small ? m.interp || 1 : 1
+      interp = m.interp || 1
+      STEP = small ? interp : 1
       const shots = Object.fromEntries(m.scenes.map((s) => [s.id, s]))
       scenes = score.scenes.filter((s) => shots[s.id]).map((s) => ({ ...s, ...shots[s.id], from: s.from, to: s.to }))
       const takes = m.scenes
@@ -376,7 +526,11 @@ export default function Film({ score = SCORE }) {
     let H = 0
     let dpr = 1
     const resize = () => {
-      dpr = Math.min(2, window.devicePixelRatio || 1)
+      // No more canvas pixels than the frames have: the sharpest tier is 1440
+      // wide (768 on phones), so a retina screen at 2× only paints a frame
+      // twice as large, blurred, and costs four times the fill.
+      const most = (small ? 900 : 1920) / Math.max(1, canvas.clientWidth)
+      dpr = Math.min(2, window.devicePixelRatio || 1, Math.max(1, most))
       W = Math.round(canvas.clientWidth * dpr)
       H = Math.round(canvas.clientHeight * dpr)
       canvas.width = W
@@ -471,8 +625,8 @@ export default function Film({ score = SCORE }) {
     }
     // Where a frame lands on the canvas (cover, with the camera on top).
     const rect = (img, scene, c) => {
-      const iw = img.naturalWidth
-      const ih = img.naturalHeight
+      const iw = img.naturalWidth || img.width
+      const ih = img.naturalHeight || img.height
       const k = Math.max(W / iw, H / ih) * c.s
       const dw = iw * k
       const dh = ih * k
@@ -513,12 +667,12 @@ export default function Film({ score = SCORE }) {
       if (!leaving) return
       const { k0: idx } = snap(leaving, shotIn(leaving, p).at)
       reel.keep(idx)
-      const img = reel.near(idx)
+      const img = reel.side(idx)
       if (!img) return
       if (!flakes) buildFlakes()
       const r = rect(img, leaving, cam || camera(p))
-      const sx = img.naturalWidth / r.dw
-      const sy = img.naturalHeight / r.dh
+      const sx = (img.naturalWidth || img.width) / r.dw
+      const sy = (img.naturalHeight || img.height) / r.dh
       const cw = W / flakes.cols
       const ch = H / flakes.rows
       for (const f of flakes.list) {
@@ -560,6 +714,13 @@ export default function Film({ score = SCORE }) {
     let lastIdx = -1
     let lastChapter = -1
     let fxDirty = false
+    // A machine that cannot decode every in-between frame as fast as the
+    // reader scrolls (the exact frame is missing most of the time) drops to
+    // the original ones, mixed into each other — what a phone does from the
+    // start. Judged over the renders where the picture moves.
+    let moved = 0
+    let exact = 0
+    let lastShown = -1
 
     const render = () => {
       // The film follows the scroll directly: Lenis already smooths the wheel,
@@ -575,6 +736,16 @@ export default function Film({ score = SCORE }) {
           lastIdx = idx
         }
         const img = reel.near(idx)
+        if (STEP === 1 && interp > 1 && idx !== lastShown) {
+          moved += 1
+          if (img && img === reel.get(idx)) exact += 1
+          if (moved >= 150) {
+            if (exact / moved < 0.6) STEP = interp
+            moved = 0
+            exact = 0
+          }
+        }
+        lastShown = idx
         cam = camera(p)
         if (img) {
           const r = rect(img, scene, cam)
@@ -640,6 +811,7 @@ export default function Film({ score = SCORE }) {
     window.addEventListener('resize', resize)
     return () => {
       alive = false
+      reel?.dispose()
       gsap.ticker.remove(render)
       window.removeEventListener('resize', resize)
       st.kill()

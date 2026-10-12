@@ -63,6 +63,21 @@ faltantes y ~40 MB para toda la película (en vez de 91).
 
 - Canvas + carga alrededor del cabezal, de lo cercano a lo lejano por franjas,
   primero los cuadros originales; nunca en blanco (cuadro más cercano).
+- **El canvas dibuja solo cuadros ya decodificados** (2026-10-12). Hay dos depósitos:
+  - Comprimidos: `Blob`, lejos alrededor del cabezal.
+  - Decodificados: `createImageBitmap`, fuera del hilo principal. Se mantienen 44,
+    descartando los más lejanos hacia donde va el lector.
+
+  Antes se dibujaba un `<img>` y Chrome decodificaba el WebP en medio del pintado,
+  porque el `img.decode()` previo no le sirve al canvas. Con la CPU ×4 eran 661
+  decodificaciones en 6 s, de hasta 28 ms cada una, y 14 fps con tareas de 100 ms.
+  Ahora: 71 fps y 90 % de cuadros exactos a ritmo de lectura.
+- **Paso adaptativo:** si el equipo no llega a decodificar los cuadros interpolados
+  (el exacto falta en más del 40 % de 150 renders con movimiento), pasa a los
+  originales mezclados entre sí, como el teléfono desde el arranque.
+- **Canvas a la resolución de los cuadros:** el tier más nítido mide 1440 de ancho, así
+  que el lienzo no pasa de 1920 px (900 en teléfono). En una pantalla 2× pintar al
+  doble solo agrandaba el cuadro y cuadruplicaba el relleno.
 - Sin doble suavizado: Lenis ya suaviza la rueda; el film lee el progreso directo.
 - Transiciones: `dots` (campo de color que sube por celdas, se sostiene y se
   levanta) y `paper` (la toma que sale se rompe en papel picado hacia arriba con
@@ -119,6 +134,12 @@ Imágenes `gpt_image_2_5`; video `minimax_h3` 2K (2 créditos/s).
 ## 7. Cómo se verificó
 
 - Tick por tick de rueda (PC): 0 ticks sin movimiento.
+- Fluidez (2026-10-12): rueda a ritmo fijo con intervalos de `requestAnimationFrame`,
+  long tasks y una traza (`GpuImageDecodeCache::DecodeImage` era el costo) a CPU ×1 y
+  ×4, PC y teléfono emulado.
+  - Antes: 14 fps a ×4.
+  - Después: 66–71 fps, sin long tasks.
+  - Cuadro exacto: 99,8 % a ×1 y 90 % a ×4 leyendo.
 - Teléfono emulado (390×844, CPU ×4, 10/20 Mbps, gestos de dedo): 0 cuadros faltantes.
 - `npm run verify`, `check:visual -- fold` (el ZIP instala, compila y reproduce
   el carrete liviano), `check:mobile fold`, `check:motion fold`, `check:parity fold`.
