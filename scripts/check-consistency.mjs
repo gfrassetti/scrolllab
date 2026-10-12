@@ -7,7 +7,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { PRODUCTS } from '../server/catalog.js'
+import { HOSTED_PLANS, PRODUCTS, hostedPlanPriceIn } from '../server/catalog.js'
+import { HOSTED_PRICE_CHANGES, validatePriceChanges } from '../src/domain/priceChanges.js'
 import { HOSTABLE_SECTIONS } from '../server/sections.js'
 import { ASSET_URL_KEYS, COLOR_PROP_KEYS, isHrefKey, isToggleKey } from '../server/sectionFields.js'
 import {
@@ -430,6 +431,15 @@ if (!sitemapSrc.includes('/plantillas/')) {
 }
 if (!sitemapSrc.includes('https://www.scrolllab.com.ar/builder')) {
   fail('seo', 'sitemap.xml debe incluir /builder')
+}
+
+// Cambios de precio de LAB declarados (src/domain/priceChanges.js): ids únicos,
+// cada cadena plan/ciclo/moneda coherente y el último `to` = el precio de lista
+// vigente. Un precio tocado en server/catalog.js sin declarar no avisa a nadie.
+for (const p of validatePriceChanges(HOSTED_PRICE_CHANGES, (plan, cycle, currency) =>
+  HOSTED_PLANS[plan] ? hostedPlanPriceIn(plan, cycle, currency) : null,
+)) {
+  fail('precios LAB', p)
 }
 
 // Cada widget de LAB tiene su caso en el e2e del embed (props + marcador). Sin
