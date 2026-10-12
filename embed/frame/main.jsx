@@ -207,9 +207,16 @@ ScrollTrigger.scrollerProxy(document.documentElement, {
     return hostViewport() ? hostScroll : window.pageYOffset || document.documentElement.scrollTop || 0
   },
   getBoundingClientRect() {
-    return hostViewport()
-      ? { top: hostScroll, left: 0, width: window.innerWidth, height: hostVh }
-      : { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }
+    if (hostViewport()) return { top: hostScroll, left: 0, width: window.innerWidth, height: hostVh }
+    // PIN todavía sin confirmar: el iframe sigue siendo el de FLOW (mide su
+    // contenido, 0 antes de la primera medida) hasta que el loader lo pasa a
+    // la pantalla. Medir contra ese `innerHeight` achicaba a 0 cada `end:
+    // '+=280%'` → recorrido 0 → el loader no entraba en PIN y el widget
+    // quedaba en 0px. Con la tira del plan gratis (~30px) el documento
+    // pasaba el umbral de `pinlength` por casualidad; en un plan pago, no.
+    // En PIN confirmado `innerHeight` ya es la pantalla (igual a `hostVh`).
+    const h = window.innerHeight
+    return { top: 0, left: 0, width: window.innerWidth, height: hostVh > h ? hostVh : h }
   },
 })
 

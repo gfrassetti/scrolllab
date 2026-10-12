@@ -914,6 +914,62 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     }
   })
 
+  // --- PIN en un plan pago: sin la tira del plan gratis ---
+  // Regresión: el frame medía `end: '+=280%'` contra un iframe en 0px y el
+  // recorrido quedaba en 0; con la tira «Hecho con Scroll Lab» (~30px) el
+  // umbral de `pinlength` pasaba por casualidad, sin ella el widget no
+  // entraba en PIN y el iframe quedaba en 0px.
+  it('atelier/VisionShutter — en un plan pago (sin sello) entra en PIN con su recorrido', async () => {
+    const login = await fetch(`${API}/api/auth/dev-login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'paid-pin-e2e@test.com' }),
+    })
+    assert.ok(login.ok, 'dev-login del usuario pago')
+    const paid = {
+      'content-type': 'application/json',
+      cookie: (login.headers.getSetCookie?.() || []).map((c) => c.split(';')[0]).join('; '),
+    }
+    const sub = await fetch(`${API}/api/subscriptions`, {
+      method: 'POST',
+      headers: paid,
+      body: JSON.stringify({ plan: 'hosted_studio', cycle: 'monthly' }),
+    }).then((r) => r.json())
+    await fetch(`${API}${sub.activateUrl}`, { method: 'POST', headers: paid })
+
+    const created = await fetch(`${API}/api/hosted`, {
+      method: 'POST',
+      headers: paid,
+      body: JSON.stringify({ sectionId: 'atelier/VisionShutter' }),
+    })
+    assert.ok(created.ok, `crear (${created.status})`)
+    const id = (await created.json()).instance.id
+    const pub = await fetch(`${API}/api/hosted/${id}`, {
+      method: 'PUT',
+      headers: paid,
+      body: JSON.stringify({ draftProps: CASES['atelier/VisionShutter'].props, domains: [], publish: true }),
+    })
+    assert.ok(pub.ok, `publicar (${pub.status})`)
+    const key = (await pub.json()).instance.key
+
+    const { context, page } = await openHost(key, { url: PLAIN_URL, viewport: { width: 1280, height: 900 } })
+    try {
+      await waitFrame(page)
+      const config = await fetch(`${API}/api/embed/${key}/config?host=localhost`).then((r) => r.json())
+      assert.equal(config.badge, undefined, 'el plan pago no trae el sello')
+      await page.locator('[data-scrolllab-pin]').waitFor({ state: 'attached', timeout: 10_000 })
+      const { wrapH, frameH, vh } = await page.evaluate(() => {
+        const w = document.querySelector('[data-scrolllab-pin]')
+        return { wrapH: w.offsetHeight, frameH: w.querySelector('iframe').offsetHeight, vh: innerHeight }
+      })
+      assert.ok(Math.abs(frameH - vh) <= 2, `en PIN el iframe no mide la pantalla (${frameH} vs ${vh})`)
+      assert.ok(wrapH > vh * 2, `el recorrido es muy corto (${wrapH}px para una pantalla de ${vh}px)`)
+    } finally {
+      await context.close()
+      await fetch(`${API}/api/hosted/${id}`, { method: 'DELETE', headers: paid }).catch(() => {})
+    }
+  })
+
   // --- formulario: el visitante manda y la API lo recibe (el mail va al dueño) ---
   it('contact/ContactForm — se manda desde el sitio ajeno y muestra el éxito', async () => {
     const props = { eyebrow: 'MKFORM', successMessage: 'MKSENT', errorMessage: 'MKFAIL' }
