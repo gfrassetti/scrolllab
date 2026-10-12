@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import {
   applyOverlay,
   cleanVerify,
+  copyEnv,
   failureExcerpt,
   normalizePaths,
   removeCopy,
@@ -88,6 +89,19 @@ describe('applyOverlay', () => {
 
   it('no escribe fuera de la copia', () => {
     assert.throws(() => applyOverlay({ repo, dir, paths: ['../escapa.js'] }), /sale de la copia/)
+  })
+})
+
+describe('copyEnv', () => {
+  it('cada copia tiene su propia caché de Vite, dentro de la copia (se borra con ella)', () => {
+    const a = path.join(REPO, 'storage', 'clean-verify', 'copia-a')
+    const b = path.join(REPO, 'storage', 'clean-verify', 'copia-b')
+    const envA = copyEnv(a)
+    assert.equal(envA.VITE_CACHE_DIR, path.join(a, 'storage', '.vite-cache'))
+    assert.ok(envA.VITE_CACHE_DIR.startsWith(a + path.sep), 'adentro de la copia')
+    assert.notEqual(envA.VITE_CACHE_DIR, copyEnv(b).VITE_CACHE_DIR)
+    // Nunca la caché del repo real (la que comparte el junction de node_modules).
+    assert.ok(!envA.VITE_CACHE_DIR.includes(path.join('node_modules', '.vite')))
   })
 })
 

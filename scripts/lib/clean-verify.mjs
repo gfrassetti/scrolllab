@@ -108,6 +108,19 @@ function extractHead(repo, dir) {
   return execFileSync('git', ['-C', repo, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
 }
 
+/**
+ * Variables de entorno para TODO lo que corra dentro de una copia. El
+ * node_modules de la copia es un junction al del repo, así que comparte también
+ * node_modules/.vite: dos Vite a la vez (uno en la copia, otro en el árbol real)
+ * se borran la caché entre sí (EPERM / ENOTEMPTY, o 504 en .vite/deps). Cada
+ * copia usa su propia caché, que se borra con ella.
+ * @param {string} dir carpeta de la copia
+ * @returns {Record<string, string>}
+ */
+export function copyEnv(dir) {
+  return { VITE_CACHE_DIR: path.join(dir, 'storage', '.vite-cache') }
+}
+
 function linkNodeModules(repo, dir) {
   fs.symlinkSync(
     path.join(repo, 'node_modules'),
@@ -167,7 +180,7 @@ function runStep(step, { dir, timeoutMs }) {
     const child = spawn('npm', ['run', step], {
       cwd: dir,
       shell: true,
-      env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' },
+      env: { ...process.env, ...copyEnv(dir), FORCE_COLOR: '0', NO_COLOR: '1' },
     })
     const take = (chunk) => {
       log += chunk.toString('utf8')
