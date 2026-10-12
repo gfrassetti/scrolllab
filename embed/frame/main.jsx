@@ -1,7 +1,7 @@
 import { h, render } from 'preact'
 import './main.css'
 import { loadSection, canvasFor } from '../src/registry'
-import { ScrollTrigger } from '../src/gsap'
+import { gsap, ScrollTrigger } from '../src/gsap'
 import { isLabFormSection } from '../../src/domain/labForms.js'
 import { hostViewportUnitsInline } from '../hostViewportUnits.js'
 
@@ -295,10 +295,21 @@ function reveal() {
 }
 
 let stickyCache = null
-/** ¿La sección tiene algo `position: sticky`? Se mira una vez, ya montada. */
+/**
+ * ¿La sección tiene un escenario que se queda en pantalla? Algo `position:
+ * sticky`, o una capa `fixed` de media pantalla para arriba (el canvas 3D de
+ * FIZZ cubre la pantalla y las secciones pasan por encima). En FLOW el frame
+ * no scrollea: el sticky no pega y el `fixed` queda clavado arriba del
+ * iframe. Un `fixed` chico (la foto que sigue al cursor en WorkIndex) no
+ * cuenta. Se mira una vez, ya montada.
+ */
 function hasSticky() {
   if (stickyCache === null && root.childElementCount) {
-    stickyCache = [...root.querySelectorAll('*')].some((el) => getComputedStyle(el).position === 'sticky')
+    const floor = (hostVh || window.innerHeight) * 0.5
+    stickyCache = [...root.querySelectorAll('*')].some((el) => {
+      const { position } = getComputedStyle(el)
+      return position === 'sticky' || (position === 'fixed' && el.getBoundingClientRect().height >= floor)
+    })
   }
   return !!stickyCache
 }
@@ -327,11 +338,31 @@ function decide() {
   }
 }
 
+/*
+ * La entrada se ve cuando llegás. Las secciones arrancan su entrada con
+ * tiempo (letras, fundidos, la botella de FIZZ) al montarse; en el sitio eso
+ * es al abrir la página, pero un widget suele estar más abajo y la entrada
+ * terminaba antes de que alguien llegara. El reloj de GSAP queda en pausa
+ * hasta que el widget entra en pantalla por primera vez: todo lo creado antes
+ * (tweens, delayedCall, la entrada de SplitText) corre desde ahí. El scroll
+ * (ScrollTrigger) y los render loops del ticker no dependen de ese reloj.
+ */
+let motionStarted = false
+function holdMotion() {
+  gsap.globalTimeline.pause()
+}
+function startMotion() {
+  if (motionStarted) return
+  motionStarted = true
+  gsap.globalTimeline.resume()
+}
+
 function onMessage(e) {
   const m = e.data
   if (!m || typeof m !== 'object') return
 
   if (m.type === 'scrolllab:viewport') {
+    if (m.inView) startMotion()
     if (m.viewportHeight) {
       // En PIN la pantalla del widget puede ser menos que la del sitio (una
       // barra fija arriba): cuando cambia, sus `vh` y el recorrido se recalculan.
@@ -490,13 +521,15 @@ async function main() {
     const host = hostName(origin)
     props.endpoint = `${api}/api/embed/${encodeURIComponent(key)}/form${host ? `?host=${encodeURIComponent(host)}` : ''}`
   }
+  const direct = window.parent === window
+  if (!direct) holdMotion()
   render(h(Section, props), root)
   setBadge(config.badge || null)
 
   // Abierto directo (sin loader / fuera de un iframe): no va a llegar
   // `scrolllab:viewport`, así que nos revelamos solos para que la URL del
   // frame sirva de preview. Dentro del embed real `parent !== window`.
-  if (window.parent === window) {
+  if (direct) {
     hostVh = window.innerHeight
     reveal()
     requestAnimationFrame(() => {

@@ -28,6 +28,7 @@ export const CONTACT_FIELDS = {
         { value: 'meridian', label: 'Meridian' },
         { value: 'kin', label: 'Kin' },
         { value: 'fold', label: 'Fold' },
+        { value: 'apex', label: 'Apex' },
       ],
     },
     {

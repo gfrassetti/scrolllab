@@ -1,6 +1,12 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import ScrollRail from '../components/ScrollRail'
 import Hero from '../components/sections/apex/Hero'
+import Statement from '../components/sections/apex/Statement'
+import Story from '../components/sections/apex/Story'
+import Gallery from '../components/sections/apex/Gallery'
+import Models from '../components/sections/apex/Models'
+import Showroom from '../components/sections/apex/Showroom'
+import Footer from '../components/sections/apex/Footer'
 
 /**
  * Template model — "APEX"
@@ -10,8 +16,8 @@ import Hero from '../components/sections/apex/Hero'
  * everything else stays small, exact and out of its way. Plan, decisions and
  * the five beats still to build: docs/template-plans/apex.txt.
  *
- * Phase 1 — hero only. The block under it is a placeholder so the scroll
- * handoff (film → black) can be seen.
+ * The home: hero (film, curtain menu, loader) → statement → gallery → models
+ * → full-height footer. One page, every menu link is a section of it.
  */
 export default function ApexPage() {
   return (
@@ -20,11 +26,12 @@ export default function ApexPage() {
         <ScrollRail trackClassName="bg-[#e8edf6]/10" fillClassName="bg-[#9cc3ff]" />
         <main>
           <Hero />
-          <section className="grid min-h-svh place-items-center px-[5vw] text-center">
-            <p className="max-w-[40ch] text-[11px] tracking-[0.16em] uppercase opacity-50" style={{ fontFamily: "'Archivo', sans-serif" }}>
-              Next sections in progress — introduce · models · craft · invite
-            </p>
-          </section>
+          <Statement />
+          <Story />
+          <Gallery />
+          <Models />
+          <Showroom />
+          <Footer />
         </main>
       </div>
     </SmoothScrollProvider>

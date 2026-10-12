@@ -10,8 +10,21 @@ import { sanitizeAuthReturn } from '../../authReturn.js'
  * adonde estaba), login de desarrollo y logout. La estrategia de Google y la
  * serialización de la sesión están en server/auth/passport.js.
  */
+// Después de cerrar sesión, el próximo «Entrar con Google» muestra el selector de
+// cuentas de Google. Cerrar sesión acá no cierra la de Google: sin esto, Google
+// devuelve la misma cuenta en silencio y no se puede cambiar. Se saca al volver.
+const PICK_ACCOUNT_COOKIE = 'scrolllab_pick_account'
+const PICK_ACCOUNT_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
+
 export function createAuthRouter({ config, limits }) {
   const router = express.Router()
+
+  const pickAccountCookieOptions = () => ({
+    path: '/',
+    sameSite: config.cookie.sameSite,
+    secure: config.cookie.secure,
+    httpOnly: true,
+  })
 
   function publicUser(user) {
     if (!user) return null
@@ -44,9 +57,15 @@ export function createAuthRouter({ config, limits }) {
 
     req.session.save((err) => {
       if (err) return next(err)
+      // Solo después de un logout (cookie) o si el link lo pide
+      // (`?prompt=select_account`, «Usar otra cuenta»). El login normal
+      // sigue siendo de un clic.
+      const pickAccount =
+        req.cookies?.[PICK_ACCOUNT_COOKIE] === '1' || req.query.prompt === 'select_account'
       // El `state` anti-CSRF lo pone la estrategia (auth/passport.js).
       passport.authenticate('google', {
         scope: ['profile', 'email'],
+        ...(pickAccount ? { prompt: 'select_account' } : {}),
       })(req, res, next)
     })
   })
@@ -65,6 +84,8 @@ export function createAuthRouter({ config, limits }) {
       delete req.session.authNext
       req.session.save((err) => {
         if (err) return next(err)
+        // Ya eligió cuenta: el próximo login vuelve a ser de un clic.
+        res.clearCookie(PICK_ACCOUNT_COOKIE, pickAccountCookieOptions())
         res.redirect(`${config.clientUrl}${nextPath}`)
       })
     },
@@ -105,6 +126,10 @@ export function createAuthRouter({ config, limits }) {
           sameSite: config.cookie.sameSite,
           secure: config.cookie.secure,
           httpOnly: config.cookie.httpOnly,
+        })
+        res.cookie(PICK_ACCOUNT_COOKIE, '1', {
+          ...pickAccountCookieOptions(),
+          maxAge: PICK_ACCOUNT_MAX_AGE_MS,
         })
         res.json({ ok: true })
       })

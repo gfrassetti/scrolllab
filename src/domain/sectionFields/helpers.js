@@ -66,8 +66,10 @@ export const model3dHelp = (extra) => ({
     'Peso: menos de 5 MB, así carga rápido en un teléfono.',
     ...extra,
     'Dónde ponerlo: pegá una URL https:// pública del archivo y lo ves en la vista previa. El servidor tiene que permitir CORS (tu propio sitio, un bucket S3 / Cloudflare R2 público o jsDelivr desde un repo de GitHub funcionan).',
-    'O escribí una ruta como /mi-modelo.glb y, después de bajar el ZIP, copiá el archivo en la carpeta public/ del proyecto. En la vista previa vas a seguir viendo el de la demo.',
     'Si el archivo no carga, queda el objeto de la demo: el sitio no se rompe.',
+  ],
+  zipSteps: [
+    'O escribí una ruta como /mi-modelo.glb y, después de bajar el ZIP, copiá el archivo en la carpeta public/ del proyecto. En la vista previa vas a seguir viendo el de la demo.',
   ],
 })
 

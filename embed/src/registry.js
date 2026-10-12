@@ -11,9 +11,10 @@
  *
  * Pineadas y con escenario sticky también van: el frame entra en modo PIN
  * (una pantalla pegada en el sitio que recorre su propio documento) y corren
- * sin tocarlas. Lo que no va (Three.js, navs, media que el cliente no puede
- * cambiar) está en HOSTABLE_SECTIONS, server/sections.js. Las fases y el
- * porqué de cada una: docs/hosted-component-plan.md.
+ * sin tocarlas. Three.js también: es un archivo aparte que bajan solo los
+ * widgets 3D. Lo que no va (navs, media que el cliente no puede cambiar)
+ * está en HOSTABLE_SECTIONS, server/sections.js. Las fases y el porqué de
+ * cada una: docs/hosted-component-plan.md.
  */
 import { MODEL_WRAPPER_CLASS } from '../../src/lib/modelWrappers.js'
 import { createElement } from 'react'
@@ -103,6 +104,17 @@ const SECTIONS = {
   'kin/Intro': () => import('../../src/components/sections/kin/Intro.jsx'),
   'kin/Collection': () => import('../../src/components/sections/kin/Collection.jsx'),
   'apex/Hero': () => import('../../src/components/sections/apex/Hero.jsx').then((m) => flowEdition(m.default)),
+  'apex/Statement': () => import('../../src/components/sections/apex/Statement.jsx').then((m) => flowEdition(m.default)),
+  'apex/Story': () => import('../../src/components/sections/apex/Story.jsx').then((m) => flowEdition(m.default)),
+  'apex/Gallery': () => import('../../src/components/sections/apex/Gallery.jsx').then((m) => flowEdition(m.default)),
+  'apex/Models': () => import('../../src/components/sections/apex/Models.jsx').then((m) => flowEdition(m.default)),
+  // Three.js: un archivo aparte como cualquier sección; three viaja en su propio
+  // chunk compartido y lo bajan solo estos widgets.
+  'fizz/HeroBubbles': () => import('../../src/components/sections/fizz/HeroBubbles.jsx'),
+  'fizz/FlavorWorlds': () => import('../../src/components/sections/fizz/FlavorWorlds.jsx'),
+  'monolith/HeroThree': () => import('../../src/components/sections/monolith/HeroThree.jsx'),
+  'atelier/HeroMeaning': () => import('../../src/components/sections/atelier/HeroMeaning.jsx'),
+  'atelier/ServicesStone': () => import('../../src/components/sections/atelier/ServicesStone.jsx'),
 }
 
 /**

@@ -1,31 +1,31 @@
 {
-  "duration": 37.5,
-  "fps": 24,
+  "duration": 37.083,
+  "fps": 60,
   "shots": [
     {
-      "label": "Approach",
+      "label": "Chapter 1",
       "start": 0,
-      "end": 7.25
+      "end": 7.167
     },
     {
-      "label": "Silhouette",
-      "start": 7.25,
-      "end": 14.75
+      "label": "Chapter 2",
+      "start": 7.167,
+      "end": 14.583
     },
     {
-      "label": "Detail",
-      "start": 14.75,
-      "end": 22.25
+      "label": "Chapter 3",
+      "start": 14.583,
+      "end": 22
     },
     {
-      "label": "Cabin",
-      "start": 22.25,
-      "end": 29.75
+      "label": "Chapter 4",
+      "start": 22,
+      "end": 29.417
     },
     {
-      "label": "Departure",
-      "start": 29.75,
-      "end": 37.25
+      "label": "Chapter 5",
+      "start": 29.417,
+      "end": 36.833
     }
   ]
 }

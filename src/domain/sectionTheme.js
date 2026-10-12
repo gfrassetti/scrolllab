@@ -32,6 +32,7 @@ export const THEMED_MODELS = [
   'meridian',
   'kin',
   'fold',
+  'apex',
 ]
 
 /** Secciones neutras cuyo prop `theme` se resuelve según el contexto. */

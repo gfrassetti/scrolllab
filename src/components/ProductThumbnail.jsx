@@ -71,6 +71,12 @@ const styles = {
     accent: '#c8742f',
     code: 'FD',
   },
+  apex: {
+    background: '#04070d',
+    color: '#e8edf6',
+    accent: '#9cc3ff',
+    code: 'AX',
+  },
   ratio: {
     background: '#ffffff',
     color: '#111111',

@@ -1224,6 +1224,57 @@ dueño); el hero abre la fase.
   escritorio (844) y teléfono (824); lo marcado es `red`/`errores` por el film
   (404 mientras `public/apex` no está en producción; el Chromium de Playwright no
   trae H.264) y es esperado.
+- **APEX Statement y Gallery** entran en la misma fase (74 hosteables): FLOW, sin pin.
+  Statement enciende las palabras con el scroll del sitio (el `scrollerProxy` lo mapea) y
+  cuenta las cifras al aparecer; Gallery trae el cursor con miniatura (solo mouse), el
+  swipe y las zonas táctiles dentro del iframe. En el screening salen `texto-oculto`
+  (palabras fantasma y filas que suben al scrollear: diseño, ver el criterio de la Fase I).
+  El loader del hero **no** corre en LAB (un widget no puede tapar la página del cliente).
 - **Tests:** `hostedSections.test.js` (media https/ruta, `javascript:`/`data:`
   caen, capítulos con tope 8, color por la regla) y el caso e2e `apex/Hero`
   (marcador, bg/fg, 3 viewports sin overflow).
+
+## Fase L — Three.js en LAB: los cinco 3D del catálogo (2026-10-12)
+
+Quedaban fuera «porque el bundle es único y three lo pagaría cada embed». Con el
+frame partido por sección (Fase J) ya no: three viaja en su propio archivo
+(`three.module-*.js`, ~144 KB gzip) y lo bajan solo estos widgets; el núcleo
+sigue en ~64 KB.
+
+| Widget | Modo | Qué se ve |
+|---|---|---|
+| `fizz/HeroBubbles` | PIN | burbujas → titular letra por letra → botella; la línea «too much fizz» cruza |
+| `fizz/FlavorWorlds` | PIN | la botella gira y cambia de sabor (color de fondo, numeral gigante) |
+| `monolith/HeroThree` | FLOW | el objeto (o el .glb del cliente) gira con el puntero o el dedo |
+| `atelier/HeroMeaning` | FLOW | el emblema y el aro sobre la niebla |
+| `atelier/ServicesStone` | PIN | la piedra rota mientras pasan los servicios |
+
+### Lo que hubo que arreglar en la plataforma
+
+- **Una capa `fixed` a pantalla completa es un escenario.** El canvas de FIZZ es
+  `position: fixed` (las secciones pasan por encima). En FLOW el iframe mide 3800
+  px y el `fixed` quedaba clavado arriba del iframe: la mitad del recorrido era
+  azul liso. `hasSticky()` (`embed/frame/main.jsx`) ahora cuenta, además de
+  `sticky`, un `fixed` de media pantalla para arriba → PIN, y ahí el frame
+  recorre su propio documento como una página. Un `fixed` chico (la foto que
+  sigue al cursor en `nocturne/WorkIndex`) no cuenta.
+- **La entrada se ve cuando llegás.** Las secciones arrancan su entrada con
+  tiempo al montarse (letras, fundidos, la botella). En el sitio es al abrir la
+  página; un widget suele estar más abajo y la entrada terminaba antes de que
+  alguien llegara. El frame pausa el reloj de GSAP (`gsap.globalTimeline`) hasta
+  que el widget entra en pantalla por primera vez, y todo lo creado antes corre
+  desde ahí. ScrollTrigger y los render loops del ticker no dependen de ese
+  reloj. En PIN el loader ahora manda `inView` de verdad (antes siempre `true`);
+  un loader viejo cacheado sigue mandando `true` y queda como antes. La vista
+  previa del editor no pausa.
+- **La ayuda del modelo 3D en LAB.** `FieldHelp.zipSteps`: los renglones que solo
+  valen con el código («escribí /mi-modelo.glb y copialo en public/») no se
+  muestran en el editor de LAB, donde solo sirve una URL https.
+
+### Screening
+
+`npm run screen:lab -- <los cinco> --deep`: los cinco limpios. Con `--jobs 3`
+las pasadas a 768/1280 salen `trabada` (WebGL por software, tres a la vez); de a
+uno no. `fizz/HeroBubbles` marca `texto-oculto` en el teléfono: la bajada chica
+aparece ~3 s después de llegar y el screening ya pasó (la entrada es la del
+sitio, a propósito).

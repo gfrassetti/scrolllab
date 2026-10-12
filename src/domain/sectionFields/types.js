@@ -26,6 +26,8 @@
  * @typedef {Object} FieldHelp
  * @property {string} title Lo que dice el desplegable cerrado («Cómo elegir…»).
  * @property {string[]} steps Una idea por renglón, en el orden en que se hace.
+ * @property {string[]} [zipSteps] Renglones que solo valen con el código (builder, ZIP):
+ *   van al final de `steps` y LAB no los muestra (ahí no hay carpeta `public/`).
  */
 
 // Solo tipos (JSDoc): se importan con import('./types.js').X.

@@ -28,6 +28,7 @@ export const COMMERCE_FIELDS = {
         { value: 'meridian', label: 'Meridian · #8f7a5e' },
         { value: 'kin', label: 'Kin · #e1371f' },
         { value: 'fold', label: 'Fold · #c8742f' },
+        { value: 'apex', label: 'Apex · #9cc3ff' },
       ],
     },
     { key: 'bg', label: 'Color de fondo (pisa el de la paleta)', type: 'color' },

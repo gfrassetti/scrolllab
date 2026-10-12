@@ -1,10 +1,14 @@
 import { Link } from 'react-router-dom'
-import { SITE_NAME, SUPPORT_EMAIL, REFUND_DAYS } from '../lib/site'
+import { SITE_NAME, SELLER_NAME, SUPPORT_EMAIL, REFUND_DAYS } from '../lib/site'
 import { useT } from '../i18n'
 import ScrollProgress from '../components/ScrollProgress'
 
-/** Los textos legales mencionan el plazo de reembolso como `{{days}}`: una sola fuente (lib/site.js). */
-const fill = (text) => String(text ?? '').replaceAll('{{days}}', String(REFUND_DAYS))
+/**
+ * Los textos legales mencionan el plazo de reembolso (`{{days}}`) y quién vende
+ * (`{{seller}}`): una sola fuente (lib/site.js).
+ */
+const fill = (text) =>
+  String(text ?? '').replaceAll('{{days}}', String(REFUND_DAYS)).replaceAll('{{seller}}', SELLER_NAME)
 
 function LegalDocumentPage({ documentKey }) {
   const t = useT()
@@ -33,7 +37,7 @@ function LegalDocumentPage({ documentKey }) {
           {t(`${documentKey}.effectiveDate`)}
         </p>
         <p className="mt-8 text-sm leading-relaxed text-ink/70 md:text-base">
-          {fill(t(`${documentKey}.intro`, { site: SITE_NAME }))}
+          {fill(t(`${documentKey}.intro`, { site: SITE_NAME, seller: SELLER_NAME }))}
         </p>
 
         <div className="mt-10 space-y-8">

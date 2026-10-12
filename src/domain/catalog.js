@@ -38,6 +38,7 @@ export const TEMPLATE_PRICES_USD = Object.freeze({
   meridian: 379,
   kin: 379,
   fold: 229,
+  apex: 239,
 })
 
 export const BUNDLE_PRICE_USD = 879

@@ -137,6 +137,12 @@ const BY_MODEL = {
   },
   apex: {
     Hero: 'hero',
+    Statement: 'section',
+    Story: 'section',
+    Gallery: 'section',
+    Models: 'section',
+    Showroom: 'section',
+    Footer: 'footer',
   },
   signal: {
     NavSignal: 'nav',

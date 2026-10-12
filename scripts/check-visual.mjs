@@ -176,7 +176,12 @@ async function check(browser, name, packTo) {
 
   // Windows can hold a file for a moment after the browser closes (the FOLD
   // reel is >1,000 files): retry instead of failing the whole run.
-  fs.rmSync(work, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
+  try {
+    fs.rmSync(work, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
+  } catch {
+    // Chromium can keep a video from the build open a little longer (APEX ships
+    // two MP4s): the temp folder is only cleanup, never a reason to fail the check.
+  }
   return problems
 }
 

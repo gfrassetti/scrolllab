@@ -19,6 +19,7 @@ const POSTERS = {
   meridian: '/catalog/meridian.webp',
   kin: '/catalog/kin.webp',
   fold: '/catalog/fold.webp',
+  apex: '/catalog/apex.webp',
 }
 
 /**

@@ -201,11 +201,7 @@ export default function App() {
                   <Route path="/templates/meridian" element={<MeridianPage />} />
                   <Route path="/templates/kin" element={<KinPage />} />
                   <Route path="/templates/fold" element={<FoldPage />} />
-                  {/* En obra (fase 1: el hero): solo con `npm run dev`. */}
-                  <Route
-                    path="/templates/apex"
-                    element={import.meta.env.DEV ? <ApexPage /> : <Navigate to="/" replace />}
-                  />
+                  <Route path="/templates/apex" element={<ApexPage />} />
                   {/* Páginas de producto para Google (src/lib/productPages.js). */}
                   <Route
                     path="/plantillas"
