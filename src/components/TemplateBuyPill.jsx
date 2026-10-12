@@ -1,8 +1,4 @@
-﻿import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../lib/auth'
-import { useCart } from '../lib/cart'
-import { startCheckout } from '../lib/startCheckout'
+﻿import { useCart } from '../lib/cart'
 import { useFxRate } from '../lib/fx'
 import { formatPriceFromUsd, templatePriceUsd } from '../lib/pricing'
 import { useI18n } from '../i18n'
@@ -28,37 +24,23 @@ const POSTERS = {
 
 /**
  * Pill flotante compacto estilo Orionix.
- * Idle chico; solo crece un poco en hover.
+ * Idle chico; solo crece un poco en hover. Solo agrega al carrito — no
+ * dispara el checkout (el comprador decide cuándo pagar desde /cart).
  */
 export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
   const { t } = useI18n()
   const { currency } = useCurrency()
   const { rate } = useFxRate()
-  const { user, loading: authLoading } = useAuth()
   const addItem = useCart((s) => s.addItem)
-  const navigate = useNavigate()
-  const [busy, setBusy] = useState(false)
 
   const priceUsd = templatePriceUsd(sku)
   const priceLabel = formatPriceFromUsd(priceUsd, currency, rate)
   const poster = POSTERS[sku]
 
-  const buy = async () => {
-    if (busy || authLoading || !priceUsd) return
+  const add = () => {
+    if (!priceUsd) return
     const title = t('common.cartItemTitle', { name })
     addItem({ sku, title })
-    setBusy(true)
-    try {
-      const result = await startCheckout({
-        items: useCart.getState().items,
-        user,
-        navigate,
-      })
-      if (result !== 'redirect') setBusy(false)
-    } catch {
-      navigate('/cart')
-      setBusy(false)
-    }
   }
 
   const place =
@@ -72,9 +54,8 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
     >
       <button
         type="button"
-        disabled={busy || authLoading}
-        onClick={buy}
-        className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[scale,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98] disabled:opacity-60"
+        onClick={add}
+        className="group pointer-events-auto relative flex origin-bottom-right scale-100 items-center gap-2 rounded-full border border-white/10 bg-[#0a0a0a] py-1.5 pr-3.5 pl-1.5 text-left text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)] transition-[scale,box-shadow] duration-200 ease-[var(--ease-out)] hover:scale-[1.03] hover:shadow-[0_14px_36px_rgba(0,0,0,0.42)] active:scale-[0.98]"
       >
         {/* Solo si todavía no compró (ver FirstPurchasePrice). */}
         <FirstPurchaseTag
@@ -109,8 +90,7 @@ export default function TemplateBuyPill({ sku, name, placement = 'end' }) {
           </span>
 
           <span className="pointer-events-none absolute inset-0 flex items-center gap-1 text-[11px] font-semibold tracking-tight opacity-0 transition-all duration-300 ease-[var(--ease-drawer)] translate-y-1 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
-            {busy ? t('cart.redirecting') : t('demoBuy.getTemplate')}
-            {!busy && <span aria-hidden="true">â†’</span>}
+            {t('common.addToCart')}
           </span>
         </span>
       </button>

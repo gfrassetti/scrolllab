@@ -434,9 +434,7 @@
     "compositionsFull": "Ya tenés 5 composiciones en el carrito: para sumar otra, comprá o sacá una."
   },
   "demoBuy": {
-    "only": "solo",
-    "getTemplate": "Get Template",
-    "aria": "Comprar {{name}}"
+    "only": "solo"
   },
   "playableHeadline": {
     "aria": "Título editable: se puede jugar con el texto"
