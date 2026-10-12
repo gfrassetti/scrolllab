@@ -139,7 +139,11 @@ export default function Programme({
     <section ref={rootRef} id="programme" className="relative z-[46]" style={kinVars({ bg, fg, accent })}>
       <div
         ref={pinRef}
-        className={`relative flex flex-col px-[4.5vw] md:px-[1.25vw] ${
+        // overflow-x-clip: la marca recorre la barra corriendo una capa del ancho de
+        // la barra hasta el 100 %, y al final esa capa queda fuera del borde: en el
+        // teléfono ensanchaba la página entera. Solo a los costados (la marca
+        // sobresale arriba y abajo de la barra a propósito).
+        className={`relative flex flex-col overflow-x-clip px-[4.5vw] md:px-[1.25vw] ${
           calm ? 'min-h-svh py-[12svh]' : 'h-svh pt-[9svh] pb-[5svh] md:pt-[10svh] md:pb-[4svh]'
         }`}
       >

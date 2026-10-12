@@ -115,6 +115,7 @@ const ACCEPTED = {
   // El grano de película es una capa `mix-blend-mode: overlay` sobre un video a pantalla
   // completa que se re-compone en cada paso: en un teléfono real cuesta GPU y no aporta
   // (la regla de «paridad» manda el mismo beat con otro medio, no el mismo adorno).
+  'kin/Hero/css-quieto': 'la señal «Scroll» que flota (kin-cue) solo existe en PC (hidden md:block): en el teléfono el scroll se descubre con el dedo',
   'apex/Hero/css-quieto': 'el grano de película se apaga en el teléfono (blend sobre video = GPU)',
 }
 

@@ -120,6 +120,8 @@ const ALLOW = {
     'las líneas de la cita entran con una máscara de SplitText atada al scroll: la auditoría frena a mitad del reveal (BigNumbers:top, con la cita asomando abajo) y el recorte medido es la máscara en movimiento; en QuoteBreak:top las líneas están enteras (transform identidad)',
   'comic/ChapterBond:clipped':
     'cada página sube desde abajo del escenario (yPercent 108 → 0 con scrub): en `mid` la que entra todavía está cortada por el borde del escenario; en reposo el texto entra con 48 px o más de margen, de 320 a 834 de ancho (sonda de reposo)',
+  'kin/Hero:clipped':
+    'las líneas del titular suben desde su máscara (yPercent) en los primeros segundos y la auditoría las mide en movimiento; en reposo sobresale solo la caja de la tipografía (2 px a 390, 5 px a 1280), no las letras (sonda 2026-10-12)',
   'meridian/Location:clipped':
     'el mapa es más ancho que la pantalla y se desplaza al tocar una tarjeta o un pin (`data-pan`): lo que queda junto al borde del recuadro se corta por diseño',
   'meridian/Location:target':

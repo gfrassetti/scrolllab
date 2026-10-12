@@ -211,7 +211,7 @@ function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, close
       role="dialog"
       aria-modal="true"
       aria-label={menuLabel}
-      className="fixed inset-0 z-[70] hidden flex-col-reverse bg-(--kin-paper) px-[4.5vw] pt-[8vw] pb-[4.5vw] text-[3.3vw] text-(--kin-ink) md:hidden"
+      className="fixed inset-0 z-[70] hidden flex-col-reverse bg-(--kin-paper) px-[4.5vw] pt-[8vw] pb-[4.5vw] text-[max(11px,3.3vw)] text-(--kin-ink) md:hidden"
     >
       <div className="flex items-baseline justify-between">
         <button ref={closeRef} type="button" onClick={onClose} className="tpl-hit relative">
@@ -810,7 +810,7 @@ export default function Hero({
     >
       {/* Phone: the menu bar sits at the foot of the screen (difference
           blend, so it reads on paper and on the dark room alike). */}
-      <div className="fixed inset-x-0 bottom-0 z-[52] flex items-center justify-between px-[4.5vw] pb-[4.5vw] text-[3.3vw] text-white mix-blend-difference md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-[52] flex items-center justify-between px-[4.5vw] pb-[4.5vw] text-[max(11px,3.3vw)] text-white mix-blend-difference md:hidden">
         <button data-kin-fade type="button" onClick={() => setMenuOpen(true)} aria-expanded={menuOpen} className="tpl-hit relative inline-flex items-center gap-[0.6em]">
           <span aria-hidden="true" className="inline-block h-[0.62em] w-[0.3em] bg-current" />
           {menuLabel}
@@ -908,7 +908,7 @@ export default function Hero({
         </div>
 
         <div className="relative mt-[7vw] flex flex-col justify-end md:col-span-3 md:mt-0 md:pb-[1.25vw]">
-          <div data-kin-fade className="text-[3.3vw] leading-[1.15] md:text-[max(11px,0.82vw)]">
+          <div data-kin-fade className="text-[max(11px,3.3vw)] leading-[1.15] md:text-[max(11px,0.82vw)]">
             <p className="flex justify-between pb-[0.6em]">
               <span>{listLabel}</span>
               <span className="tabular-nums">({pad(roomTexts.length)})</span>

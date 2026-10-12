@@ -134,7 +134,10 @@ console.log(`qa:sweep @ ${head.slice(0, 7)} — ${models.join(', ') || '(nada)'}
 
 function run(cwd, args, logFile) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, args, { cwd, env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' } })
+    // VITE_CACHE_DIR propio: la copia usa el node_modules real por un link y, con
+    // el caché de Vite compartido, chocaba con el Vite de quien está trabajando.
+    const env = { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1', VITE_CACHE_DIR: path.join(cwd, 'storage', '.vite-cache') }
+    const child = spawn(process.execPath, args, { cwd, env })
     const out = fs.createWriteStream(logFile)
     child.stdout.pipe(out, { end: false })
     child.stderr.pipe(out, { end: false })

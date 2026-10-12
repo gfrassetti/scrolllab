@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => {
   const apiTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:8787'
 
   return {
+    // El caché de dependencias, configurable: el barrido de QA corre en una copia
+    // limpia del repo que usa el node_modules real por un link, y dos Vite con el
+    // mismo `node_modules/.vite` se borran el caché entre sí (EPERM / ENOTEMPTY /
+    // 504 en /node_modules/.vite/deps). Cada copia le pasa el suyo (ADR 0007).
+    ...(process.env.VITE_CACHE_DIR ? { cacheDir: process.env.VITE_CACHE_DIR } : {}),
     plugins: [react(), tailwindcss(), skipLocalOnlyAssets],
     resolve: {
       // Alias `@/` → src/. Lo pide el CLI/MCP de shadcn (componentry.dev).
