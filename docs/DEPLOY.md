@@ -253,6 +253,12 @@ Gmail muestra su foto de perfil como logo. Sin esas dos variables sigue Resend.
 Límites: ~500 mails por día, sin clave de idempotencia (el servidor recuerda un
 día las claves en memoria), y se pierde la firma del dominio propio.
 
+**En Railway no anda con los planes Trial, Free ni Hobby**: bloquean las conexiones
+SMTP salientes y todo envío termina en `Connection timeout` (visto el 2026-10-12, con
+el recibo y el aviso interno de la compra de prueba). Solo sirve donde el puerto 465
+esté abierto (plan Pro de Railway u otro hosting); en un plan sin SMTP dejá
+`SMTP_USER` y `SMTP_PASS` sin cargar y los mails siguen por Resend.
+
 Después de confirmar el pago y generar el ZIP, el backend envía un detalle
 de orden con CTA a `/account`. La orden guarda el estado del envío y Resend
 recibe una `Idempotency-Key`, por lo que los reintentos no duplican el correo.
