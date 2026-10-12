@@ -196,8 +196,9 @@ const MODEL_FILES = {
       ...publicDirAssets('fold/demo/768'),
       'public/fold/footer-loop.mp4',
       'public/fold/footer-loop.jpg',
-      // Builds a reel from your own clips (README: "The film").
+      // Builds a reel from your own clips (README: "The film") and its phone tier.
       'scripts/fold-reel.mjs',
+      'scripts/fold-phone-tier.mjs',
     ],
   },
 }
@@ -602,7 +603,27 @@ publish it under a new URL (a new worker name, or a path such as \`/v2\`) and
 update the variable; otherwise returning visitors keep the old pictures.
 
 Phones load the 768 px frames and only the original pictures; the engine blends
-each frame into the next.
+each frame into the next. On a phone the connection, not the drawing, is what runs
+out when someone flicks, so the engine also shows a loader with a percentage until
+the first stretch of the film is in, and waits under the colour field (or before the
+paper tears) at each new chapter until that take's first frames are in. On a fast
+connection none of it shows. Its text is \`loader.label\` in \`score.js\`.
+
+### The phone tier (optional, about 2.3x fewer bytes)
+
+A phone held upright shows about a quarter of a 16:9 frame: three quarters of every
+picture it downloads is never drawn. After building the reel:
+
+\`\`\`
+npm i -D sharp
+node scripts/fold-phone-tier.mjs            # reads public/fold/film and score.js
+\`\`\`
+
+It cuts a band around each take's \`focus\` (\`scenes[].focus\`, else \`portraitFocus\`)
+out of the 768 px frames, only the original pictures, into \`public/fold/film/phone/\`
+and adds a \`phone\` entry to \`manifest.json\`. Publish the folder with the rest of the
+reel. The engine uses it on a portrait screen and falls back to the 768 px tier on a
+wide one (a rotated phone); without the folder nothing changes.
 
 With "reduce motion" on, the film becomes still plates: each text on its own
 frame of the film, with a short fade.

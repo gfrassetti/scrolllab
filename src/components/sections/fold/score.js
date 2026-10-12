@@ -30,6 +30,11 @@ export const SCORE = {
     pad: 4,
   },
 
+  // Phones only: the text of the loader that holds the page, with a percentage,
+  // until the first stretch of the film is in, and again before each new take
+  // when its frames are not in yet (it only shows if the wait lasts a moment).
+  loader: { label: 'Loading the film' },
+
   // Height of the film section, in screens of scroll. A swipe on a phone
   // travels much further than a wheel tick, so phones get a shorter scroll.
   screens: 46,
