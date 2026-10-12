@@ -434,9 +434,7 @@
     "compositionsFull": "You already have 5 compositions in the cart: buy or remove one to add another."
   },
   "demoBuy": {
-    "only": "only",
-    "getTemplate": "Get Template",
-    "aria": "Buy {{name}}"
+    "only": "only"
   },
   "playableHeadline": {
     "aria": "Editable title — play with the text"
