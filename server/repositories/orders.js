@@ -63,6 +63,13 @@ export const ordersRepo = {
   async markOrderPaidAtomic({ orderId, mpPaymentId, paddleTransactionId }) {
     const paddle = paddleTransactionId != null;
     if (isFileMode()) {
+      // Igual que en Mongo: un pago ya aplicado a una orden no paga otra, y se
+      // devuelve la que ya pagó.
+      const existing = await fileDb.findPaidOrderByPayment({
+        mpPaymentId,
+        paddleTransactionId,
+      });
+      if (existing) return { order: existing, created: false };
       const order = await fileDb.findOrderById(orderId);
       if (!order) return { order: null, created: false };
       if (order.status === "paid") {

@@ -118,11 +118,10 @@ El método con el que se hizo esta reorganización ([ADR 0005](adr/0005-refactor
 - **`strict` completo**: `strictNullChecks` ya está prendido (los 21 errores iniciales se revisaron de a uno: ninguno era un
   bug, todos eran un chequeo que el código ya hacía y TypeScript no veía). Falta `noImplicitAny` y el resto de `strict`, y
   sumar carpetas a `include` (`src/lib`, `src/features`).
-- **Mongo en los tests**: no hay. Las ramas de Mongo de `server/repositories/` se probaron contra un `mongod` descartable
-  con una foto de 105 pasos, pero esa foto no vive en el repo. Sumar `mongodb-memory-server` o un `mongod` en CI la
-  volvería permanente.
-- **El almacén de archivos (solo desarrollo) no replica a Mongo**: acepta duplicados y un pago ya usado en otra orden
-  (Mongo los rechaza con sus índices únicos). En producción no importa; en desarrollo puede esconder un error.
+- **Contrato de repositorios** ([ADR 0006](adr/0006-contrato-de-repositorios.md)): `server/__tests__/helpers/repoContract.js`
+  corre los mismos casos contra el almacén de archivos y contra un Mongo real (órdenes, suscripciones, widgets y packs,
+  reembolsos y arrepentimiento, proyectos del builder, leads y cupón, eventos, usuarios). Cubre lo de dinero y LAB. Ningún
+  servicio ni ruta consulta Mongo por fuera de los repositorios (solo un script de mantenimiento). Sin Mongo local, el test de Mongo se saltea; en el CI es obligatorio (`REQUIRE_MONGO=1`).
 - **Cuatro campos de color de FIZZ** (`NavFizz.menuBg/menuInk`, `FlavorWorlds.startBg/startInk`) se validan en el servidor
   como texto libre: no se llaman como las claves de color que reconoce. Están listados en `scripts/check-consistency.mjs`.
 - **Componentes sueltos de `src/components/`** (carrito, LAB, cuenta…) siguen en una sola carpeta. Moverlos por feature
