@@ -159,9 +159,13 @@ const capped = (promise, fallback) => Promise.race([promise, sleep(8000).then(()
 /**
  * En el frame, en cada paso del scroll: por cada texto que está en la pantalla
  * del sitio, la opacidad máxima que tuvo y si alguna vez se vio entero de
- * costado a costado.
+ * costado a costado. El estado vive en el frame y se identifica por ELEMENTO
+ * (antes era por la posición en la lista de textos, que cambia cuando la
+ * sección agrega o saca nodos —contadores, SplitText, máscaras— y el mismo
+ * texto quedaba dos veces: la copia vieja salía «nunca en pantalla»).
  */
-function sampleText([iframeTop, vh, seen]) {
+function sampleText([iframeTop, vh]) {
+  const state = (window.__slScreen = window.__slScreen || { rows: new Map() })
   const effective = (el) => {
     let o = 1
     for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
@@ -172,30 +176,49 @@ function sampleText([iframeTop, vh, seen]) {
     }
     return o
   }
-  const out = seen || {}
-  // Texto que se ve: no el CSS de un <style> de la sección ni un <script>.
+  // Texto que se ve: no el CSS de un <style> ni un <script>, y no lo que la
+  // sección marca como oculto a propósito (un menú cerrado `inert`, una copia
+  // decorativa `aria-hidden`).
   const leaves = [...document.querySelectorAll('#root *')].filter(
     (el) =>
       !/^(STYLE|SCRIPT|TEMPLATE|NOSCRIPT)$/.test(el.tagName) &&
+      !el.closest('[inert], [aria-hidden="true"]') &&
       [...el.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim().length > 1),
   )
   const width = document.documentElement.clientWidth
-  leaves.forEach((el, i) => {
-    // Los números van como # (un contador que cuenta cambia su texto cuadro a cuadro).
-    const key = `${i}:${el.textContent.trim().replace(/\d+/g, '#').slice(0, 40)}`
-    const row = out[key] || (out[key] = { o: -1, whole: false, drawn: false })
+  for (const el of leaves) {
+    let row = state.rows.get(el)
+    if (!row) {
+      // Los números van como # (un contador que cuenta cambia su texto cuadro a cuadro).
+      row = { text: el.textContent.trim().replace(/\d+/g, '#').slice(0, 40), o: -1, whole: false, drawn: false }
+      state.rows.set(el, row)
+    }
     const r = el.getBoundingClientRect()
     // Lo que no se dibuja en este ancho (`md:hidden`, `hidden md:block`) no cuenta.
-    if (!r.width || !r.height) return
+    if (!r.width || !r.height) continue
     row.drawn = true
+    // Dónde está dentro del widget (px desde arriba): para encontrarlo en la lámina.
+    if (row.y == null) row.y = Math.round(r.top + window.scrollY)
     const top = r.top + iframeTop
     const bottom = r.bottom + iframeTop
-    if (bottom < 0 || top > vh) return
+    if (bottom < 0 || top > vh) continue
     const o = effective(el)
     row.o = Math.max(row.o, o)
     if (o >= 0.5 && r.left >= -2 && r.right <= width + 2) row.whole = true
-  })
-  return out
+  }
+}
+
+/** En el frame, al final: los textos que siguen en la página (lo reemplazado por la sección no cuenta). */
+function collectText() {
+  const rows = [...(window.__slScreen?.rows || new Map()).entries()]
+    .filter(([el]) => el.isConnected)
+    .map(([, row]) => row)
+  return {
+    hidden: rows
+      .filter((r) => r.drawn && r.o < 0.5)
+      .map((r) => `${r.text}${r.o < 0 ? ' (nunca en pantalla)' : ` (${r.o.toFixed(2)})`} @${r.y ?? '?'}px`),
+    cut: rows.filter((r) => r.o >= 0.5 && !r.whole).map((r) => r.text),
+  }
 }
 
 /** En el frame, al final: fotos rotas y familias tipográficas que no cargaron. */
@@ -255,7 +278,6 @@ async function runPass(browser, key, { vp, reduce }) {
     })
     const start = Math.max(0, top - height)
     const end = top + range
-    let seen = {}
     const fractions = reduce ? [0.3, 0.7] : [0.25, 0.45, 0.65, 0.85]
     const shotAt = fractions.map((f) => start + height * 0.5 + (end - start - height * 0.5) * f)
     // Una sección muy alta no puede trabar el screening: a lo sumo ~160 pasos.
@@ -269,7 +291,7 @@ async function runPass(browser, key, { vp, reduce }) {
       await page.evaluate((v) => window.scrollTo(0, v), y)
       await sleep(70)
       const iframeTop = await capped(iframe.evaluate((el) => el.getBoundingClientRect().top), 0)
-      seen = await capped(frame.evaluate(sampleText, [iframeTop, height, seen]).catch(() => seen), seen)
+      await capped(frame.evaluate(sampleText, [iframeTop, height]).catch(() => {}), null)
       if (shotAt.length && y >= shotAt[0]) {
         shotAt.shift()
         await sleep(450)
@@ -290,10 +312,7 @@ async function runPass(browser, key, { vp, reduce }) {
     await sleep(1500)
     const later = await capped(iframe.evaluate((el) => el.getBoundingClientRect().height), 0)
     const { broken, fonts } = await capped(frame.evaluate(finalChecks), { broken: [], fonts: [] })
-    const entries = Object.entries(seen)
-    const label = ([k]) => k.split(':').slice(1).join(':')
-    const hidden = entries.filter(([, r]) => r.drawn && r.o < 0.5).map((e) => `${label(e)}${e[1].o < 0 ? ' (nunca en pantalla)' : ` (${e[1].o.toFixed(2)})`}`)
-    const cut = entries.filter(([, r]) => r.o >= 0.5 && !r.whole).map(label)
+    const { hidden, cut } = await capped(frame.evaluate(collectText), { hidden: [], cut: [] })
     Object.assign(view, {
       mode: pinned ? 'pin' : 'flow',
       iframeH: Math.round(iframeH),

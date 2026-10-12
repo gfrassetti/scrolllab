@@ -64,16 +64,25 @@ export default function StatField({
             },
           },
         )
-        gsap.to(el, {
-          autoAlpha: 0.14,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: el,
-            start: 'bottom 52%',
-            end: 'bottom 8%',
-            scrub: 0.5,
+        // La salida parte de 1, explícito, y no se dibuja antes de su tramo: un
+        // `to` tomaba como punto de partida lo que hubiera al inicializarse (el
+        // 0.12 de la entrada, si arrancaba antes, como en el iframe de LAB) y
+        // la cifra quedaba apagada todo el recorrido.
+        gsap.fromTo(
+          el,
+          { autoAlpha: 1 },
+          {
+            autoAlpha: 0.14,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: el,
+              start: 'bottom 52%',
+              end: 'bottom 8%',
+              scrub: 0.5,
+            },
           },
-        })
+        )
       })
 
       gsap.utils.toArray('[data-atrium-counter]').forEach((el) => {
