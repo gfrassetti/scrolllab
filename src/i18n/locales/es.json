@@ -168,7 +168,7 @@
       "Hosting incluido: no instalás nada",
       "Se ve bien en teléfono, tablet y computadora",
       "Mejoras y widgets nuevos sin costo extra",
-      "Contador de vistas y soporte por email"
+      "Vistas sin límite (con contador) y soporte por email"
     ],
     "planFreeState": "Plan gratis — {{used}} / {{quota}} publicadas",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} publicadas",
@@ -1851,7 +1851,10 @@
     "keepCalm": "Dejarlo así"
   },
   "motionToggle": {
-    "label": "Ver las demos con animaciones"
+    "label": "Ver las demos con animaciones",
+    "row": "Animaciones",
+    "full": "Sí",
+    "reduced": "No"
   },
   "pay": {
     "payAr": "Pagar con Mercado Pago →",
@@ -1885,6 +1888,7 @@
   "prefs": {
     "label": "Idioma, moneda y tema ({{current}})",
     "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Paddle).",
-    "theme": "Tema"
+    "theme": "Tema",
+    "labelShort": "Preferencias ({{current}})"
   }
 }

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import CartPopover from '../../components/CartPopover'
 import PreferencesMenu from '../../components/PreferencesMenu'
-import MotionToggle from '../../components/MotionToggle'
 import { PanelIcon } from './BuilderSidebar.jsx'
 import Logo from '../../components/Logo'
 import { SITE_NAME } from '../../lib/site'
@@ -70,7 +69,6 @@ export default function BuilderHeader({ t, items, openPreview, looksLoggedIn, on
               {t('nav.myAccount')}
             </Link>
           )}
-          <MotionToggle />
           <PreferencesMenu />
         </div>
       </header>

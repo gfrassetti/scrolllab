@@ -11,8 +11,9 @@
  *   el movimiento completo: `<html data-motion="full">` y `matchMedia` ya no
  *   avisa «reducir» (es lo que hace andar a las ~70 secciones que leen el
  *   ajuste directo: antes solo andaba en las ya migradas);
- * - el toggle del header cambia de idea después, y solo se ve si el
- *   dispositivo pide reducir;
+ * - la fila «Animaciones: Sí / No» (menú de preferencias del header y menú del
+ *   teléfono) cambia de idea después, con texto, y solo se ve si el dispositivo
+ *   pide reducir; el tema, en cambio, está siempre a la vista;
  * - sin «reducir movimiento» nada de esto aparece; con el storage bloqueado la
  *   página no se rompe y no se pregunta (no habría dónde recordar la respuesta).
  *
@@ -178,20 +179,35 @@ async function main() {
       await ctx.close()
     }
 
-    console.log('\nToggle del header (escritorio)')
+    console.log('\nFila «Animaciones» del menú de preferencias (escritorio)')
     {
       const ctx = await newContext(browser, { phone: false })
       const page = await open(ctx, base, '/')
       await page.getByRole('button', { name: KEEP_CALM }).click()
-      const toggle = page.getByRole('button', { name: 'Ver las demos con animaciones' })
-      check('con «reducir movimiento» el toggle se ve', await toggle.isVisible())
-      check('arranca apagado (aria-pressed=false)', (await toggle.getAttribute('aria-pressed')) === 'false')
-      await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), toggle.click()])
+      const prefs = page.locator('[data-preferences] > button')
+      const group = page.getByRole('group', { name: 'Ver las demos con animaciones' })
+      const yes = group.getByRole('button', { name: 'Sí', exact: true })
+      const no = group.getByRole('button', { name: 'No', exact: true })
+      check(
+        'el tema se ve en el header sin abrir ningún menú',
+        await page.getByRole('button', { name: /Cambiar a tema/ }).first().isVisible(),
+      )
+      await prefs.click()
+      check('con «reducir movimiento» la fila se ve', await group.isVisible())
+      check('y dice qué es: «Animaciones»', (await group.innerText()).includes('Animaciones'))
+      check(
+        'arranca en «No» (menos movimiento)',
+        (await no.getAttribute('aria-pressed')) === 'true' && (await yes.getAttribute('aria-pressed')) === 'false',
+      )
+      await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), yes.click()])
       await page.waitForTimeout(1200)
-      const on = page.getByRole('button', { name: 'Ver las demos con animaciones' })
-      check('prende: recarga con data-motion=full y aria-pressed=true', (await dataMotion(page)) === 'full' && (await on.getAttribute('aria-pressed')) === 'true')
+      await prefs.click()
+      check(
+        'prende: recarga con data-motion=full y «Sí» marcado',
+        (await dataMotion(page)) === 'full' && (await yes.getAttribute('aria-pressed')) === 'true',
+      )
       check('sigue sin preguntar', !(await noticeVisible(page)))
-      await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), on.click()])
+      await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), no.click()])
       await page.waitForTimeout(1200)
       check('apaga: vuelve a la versión con menos movimiento', (await dataMotion(page)) === null && (await stored(page, 'scrolllab-motion')) === 'calm')
       await ctx.close()
@@ -202,7 +218,11 @@ async function main() {
       const ctx = await newContext(browser, { reduce: false, phone: false })
       const page = await open(ctx, base, '/')
       check('no hay aviso', !(await noticeVisible(page)))
-      check('ni toggle', (await page.getByRole('button', { name: 'Ver las demos con animaciones' }).count()) === 0)
+      await page.locator('[data-preferences] > button').click()
+      check(
+        'ni fila de animaciones',
+        (await page.getByRole('group', { name: 'Ver las demos con animaciones' }).count()) === 0,
+      )
       check('nada guardado', (await stored(page, 'scrolllab-motion-notice')) === null)
       await ctx.close()
     }

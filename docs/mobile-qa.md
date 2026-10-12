@@ -43,7 +43,7 @@ Es chrome del market (no viaja en el ZIP): `MotionNotice` + `MotionToggle`.
   template, al navegar ni al recargar, aunque se lo ignore.
 - No cambia ningún ajuste del dispositivo: guarda una preferencia de ScrollLab en
   ese navegador.
-- Para cambiar de idea: `MotionToggle`, en el header (visible solo con reduce).
+- Para cambiar de idea: `MotionToggle`, fila «Animaciones · Sí / No» del menú de preferencias del header (`ES ▼`) y del menú del teléfono (visible solo con reduce).
 - Con `full`, `src/lib/motionOverride.js` marca `<html data-motion="full">` y
   reescribe `window.matchMedia`: `prefers-reduced-motion` da «sin preferencia» para
   todo lo que corre en el market (las secciones que leen el ajuste directo y

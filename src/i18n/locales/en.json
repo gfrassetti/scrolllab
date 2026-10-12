@@ -168,7 +168,7 @@
       "Hosting included: nothing to install",
       "Looks right on phone, tablet and desktop",
       "Improvements and new widgets at no extra cost",
-      "View counter and email support"
+      "Unlimited views (with a counter) and email support"
     ],
     "planFreeState": "Free plan — {{used}} / {{quota}} published",
     "planActiveState": "{{plan}} — {{used}} / {{quota}} published",
@@ -1851,7 +1851,10 @@
     "keepCalm": "Keep it as is"
   },
   "motionToggle": {
-    "label": "Show demos with animations"
+    "label": "Show demos with animations",
+    "row": "Animations",
+    "full": "On",
+    "reduced": "Off"
   },
   "pay": {
     "payAr": "Pay with Mercado Pago →",
@@ -1885,6 +1888,7 @@
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
     "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Paddle).",
-    "theme": "Theme"
+    "theme": "Theme",
+    "labelShort": "Preferences ({{current}})"
   }
 }
