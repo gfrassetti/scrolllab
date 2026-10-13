@@ -3,42 +3,43 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { card1, card2, card3, card4, card5, card6, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import { externalProps } from '../../../lib/contactLinks'
 import { cardTone } from './tone'
 
 const defaultCards = [
   {
-    title: 'Card 01',
-    label: 'Label one',
+    title: 'The desk',
+    label: 'Sketches',
     tone: 'from-[#f4f0ea] via-[#e8d5c4] to-[#c45a1a]',
     img: card1,
   },
   {
-    title: 'Card 02',
-    label: 'Label two',
+    title: 'Samples',
+    label: 'Materials',
     tone: 'from-[#d8d0c4] via-[#b8a898] to-[#6a5a4a]',
     img: card2,
   },
   {
-    title: 'Card 03',
-    label: 'Label three',
+    title: 'Back room',
+    label: 'Light study',
     tone: 'from-[#1a1410] via-[#3a2a22] to-[#0c0a08]',
     img: card3,
   },
   {
-    title: 'Card 04',
-    label: 'Label four',
+    title: 'Plaster',
+    label: 'Model making',
     tone: 'from-[#2a2a2a] via-[#4a4540] to-[#1a1816]',
     img: card4,
   },
   {
-    title: 'Card 05',
-    label: 'Label five',
+    title: 'Massing',
+    label: 'Architecture',
     tone: 'from-[#ece8e0] via-[#ddd6cc] to-[#b8b0a4]',
     img: card5,
   },
   {
-    title: 'Card 06',
-    label: 'Label six',
+    title: 'Drawings',
+    label: 'Archive',
     tone: 'from-[#e8d4d8] via-[#c8a0a8] to-[#8a6070]',
     img: card6,
   },
@@ -49,9 +50,9 @@ const defaultCards = [
  * that stagger in on scroll (Trionn explore / Dribbble grid pattern).
  */
 export default function StudioCards({
-  note = 'Concepts, explorations, and interface experiments shared openly as part of our creative process.',
-  cta = 'View collection →',
-  ctaHref = '#top',
+  note = 'Sketches, samples and models from the studio table, shared as we go.',
+  cta = 'Follow on Instagram →',
+  ctaHref = 'https://www.instagram.com/',
   cards,
   bg,
   fg,
@@ -150,6 +151,7 @@ export default function StudioCards({
         </p>
         <a
           href={ctaHref}
+          {...externalProps(ctaHref)}
           className="tpl-hit relative shrink-0 self-start text-[11px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-black/30 transition-[text-decoration-color] duration-300 hover:decoration-black md:self-auto"
         >
           {cta}

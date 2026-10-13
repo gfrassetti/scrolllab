@@ -7,23 +7,23 @@ import ScrollFog from './ScrollFog'
 
 const SERVICES = [
   {
-    title: 'Service 01',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder service copy.',
+    title: 'Interiors',
+    body: 'Homes, hotels and restaurants, from the first layout to the last detail on site.',
     side: 'left',
   },
   {
-    title: 'Service 02',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder service copy.',
+    title: 'Furniture',
+    body: 'Pieces designed for one room and made by hand in our workshop in Brianza.',
     side: 'right',
   },
   {
-    title: 'Service 03',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder service copy.',
+    title: 'Materials',
+    body: 'A library of stone, timber and textile, chosen again for every project.',
     side: 'left',
   },
   {
-    title: 'Service 04',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder service copy.',
+    title: 'Identity',
+    body: 'Names, signage and print for the places we design, so the door matches the room.',
     side: 'right',
   },
 ]
@@ -36,8 +36,8 @@ const SERVICES = [
  * service1Title / service1Body … service4Body.
  */
 export default function ServicesStone({
-  eyebrow = 'Section eyebrow',
-  title = 'Placeholder services statement.',
+  eyebrow = 'Services',
+  title = 'Four things, done properly.',
   service1Title,
   service1Body,
   service2Title,
@@ -46,9 +46,9 @@ export default function ServicesStone({
   service3Body,
   service4Title,
   service4Body,
-  note = 'Lorem ipsum dolor sit amet — placeholder support line for this section.',
-  cta = 'View services →',
-  ctaHref = '#facts',
+  note = 'Every project keeps one lead designer, from the first meeting to the day we hand over the keys.',
+  cta = 'See selected work →',
+  ctaHref = '#work',
   bg,
   fg,
   /** La piedra 3D: el bloque, la marca tallada y la luz de relleno. */

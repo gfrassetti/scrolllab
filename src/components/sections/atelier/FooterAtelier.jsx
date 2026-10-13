@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react'
+import { contactHref, externalProps } from '../../../lib/contactLinks'
 
 /**
  * FooterAtelier — dark studio closer (Trionn-style layout, generic copy):
  * CTA block + enquiry/social columns + oversized lined brand mark.
  */
 const defaultSocial = [
-  { label: 'Link one', href: '#' },
-  { label: 'Link two', href: '#' },
-  { label: 'Link three', href: '#' },
-  { label: 'Link four', href: '#' },
+  { label: 'Instagram', href: 'https://www.instagram.com/' },
+  { label: 'Pinterest', href: 'https://www.pinterest.com/' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/' },
+  { label: 'Behance', href: 'https://www.behance.net/' },
 ]
 
 export default function FooterAtelier({
-  eyebrow = "Let's build work that inspires.",
-  line = 'Ready to build something bold?',
-  cta = 'Start a collaboration →',
+  eyebrow = 'Have a room in mind?',
+  line = 'Tell us about the place.',
+  cta = 'Start a project →',
   ctaHref = '#contact',
-  brand = 'BRAND',
-  legal = '©2026 Placeholder Brand',
-  email = 'hello@placeholder.studio',
-  phone = '+00 000 000 0000',
+  brand = 'NOVE',
+  legal = '©2026 Atelier Nove S.r.l. — Milan',
+  email = 'studio@ateliernove.it',
+  phone = '+39 02 555 0187',
   hint = 'Hover the lines.',
-  clockLabel = 'Local →',
-  enquiryLabel = 'Business enquiry',
+  clockLabel = 'Milan →',
+  enquiryLabel = 'New projects',
   emailLabel = 'E.',
   phoneLabel = 'P.',
   socialLabel = 'Social',
@@ -106,9 +107,12 @@ export default function FooterAtelier({
                 >
                   {emailLabel} {email}
                 </a>
-                <p className="mt-1 text-sm text-white/70">
+                <a
+                  href={contactHref(phone) || undefined}
+                  className="tpl-link mt-1 block w-fit text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto"
+                >
                   {phoneLabel} {phone}
-                </p>
+                </a>
               </div>
               <div>
                 <p className="text-[11px] tracking-[0.22em] text-white/35 uppercase">
@@ -117,7 +121,7 @@ export default function FooterAtelier({
                 <ul className="mt-3 text-sm text-white/70 lg:space-y-1.5">
                   {socialLinks.map((l, i) => (
                     <li key={i}>
-                      <a href={l.href || '#'} className="tpl-link tpl-hit relative inline-block py-3 transition-colors duration-300 hover:text-white lg:py-0.5">
+                      <a href={l.href || '#top'} {...externalProps(l.href)} className="tpl-link tpl-hit relative inline-block py-3 transition-colors duration-300 hover:text-white lg:py-0.5">
                         {l.label}
                       </a>
                     </li>

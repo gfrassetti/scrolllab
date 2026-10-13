@@ -8,11 +8,11 @@ import { parseNavLinks } from '../../../lib/navLinks'
  * stay floating top-right (Trionn-style chrome, generic copy).
  */
 export default function NavAtelier({
-  brand = 'BRAND',
-  cta = 'Your CTA',
-  ctaHref = '#services',
-  label = 'Placeholder label',
-  links = ['Work | #work', 'Services | #services', 'Facts | #facts'],
+  brand = 'NOVE',
+  cta = 'Start a project',
+  ctaHref = '#contact',
+  label = 'Interiors · Objects · Identity',
+  links = ['Work | #work', 'Services | #services', 'Studio | #facts', 'Contact | #contact'],
   linksText,
   menuLabel = 'Menu',
   /** Section the header flips to dark type over. */

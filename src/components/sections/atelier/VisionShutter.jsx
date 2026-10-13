@@ -9,11 +9,11 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  * The three marquee words are editable from the builder (word1–word3).
  */
 export default function VisionShutter({
-  line1 = 'Placeholder line one.',
-  line2 = 'Placeholder line two.',
-  word1 = 'WORD ONE',
-  word2 = 'WORD TWO',
-  word3 = 'WORD THREE',
+  line1 = 'Less, but better.',
+  line2 = 'Made to be lived in.',
+  word1 = 'MATERIAL',
+  word2 = 'LIGHT',
+  word3 = 'TIME',
   /** Nombre de la sección para lectores de pantalla. */
   regionLabel = 'Vision transition',
   /** Fondo y texto; la persiana; y el color con que cierra (el de la sección siguiente). */
