@@ -1,75 +1,121 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
-import { prefersReducedMotion } from '../../lib/motion'
-import { createCapsuleScene } from './capsuleScene'
-import { MONO, DISPLAY, BODY, C, openStatus } from './brand'
+import { createDioramaScene } from './dioramaScene'
+import { C, DISPLAY, MONO, BODY } from './brand'
 
 /**
  * cāpsula33 — Hero.
  *
- * La fachada del local, flotando: una cápsula naranja que se gira con el
- * dedo. Sus ventanas son el menú del sitio: el ojo de buey «ā33» es un túnel
- * infinito y lleva a la experiencia; las ventanas pastilla muestran la barra,
- * la colección y el mapa, y tocarlas mete la cámara por el vidrio hasta esa
- * sección. Todo lo demás (texto, HUD) es DOM encima del canvas.
+ * El local en miniatura, flotando, con la luz de Cycles horneada. Detrás, el
+ * titular enorme (el diorama lo tapa en parte). Cada zona del local es una
+ * puerta: al pasar el puntero se nombra, al tocarla la cámara entra ahí y la
+ * página aterriza en esa sección; el scroll lleva a los mismos lugares.
+ *
+ * Coordenadas de Blender (x hacia el fondo, y hacia la pared de la barra, z arriba).
  */
 
-const WINDOWS = [
-  { id: 'experiencia', kind: 'round', x: -1.42, width: 0.86, label: 'La cápsula', note: 'Entrar' },
-  { id: 'menu', kind: 'pill', x: -0.38, width: 0.5, height: 1.12, image: '/studio/capsula33/bar-neon-800.webp', label: 'Elegidos', note: 'El menú' },
-  { id: 'coleccion', kind: 'pill', x: 0.3, width: 0.5, height: 1.12, image: '/studio/capsula33/droids-800.webp', label: 'La colección', note: 'Cine en vitrinas' },
-  { id: 'mapa', kind: 'pill', x: 1.32, width: 0.5, height: 1.12, image: '/studio/capsula33/map-7lagos-800.webp', label: 'Base 7-Lagos', note: 'Cómo llegar' },
+const MANIFEST = {
+  model: 'room.glb',
+  atlases: { shell: 'bake-shell.webp', props: 'bake-props.webp' },
+  target: [-1, 0, 2.4], // por encima del local: lo baja en la pantalla y deja aire al titular
+  viewDir: [-1, -1, 1],
+  radius: 8.2,
+  distance: 46,
+  headlineLift: 4.6,
+}
+
+// El plano del local: entrando, a la izquierda la pared de figuras y la barra
+// (punta redonda hacia la puerta); a la derecha el jardín en su caja blanca y
+// después el salón; al fondo la pared naranja con arcos.
+const ZONES = [
+  { id: 'menu', label: 'La barra', note: 'El menú', min: [-1.0, 0.15, 0], max: [3.2, 3, 3.1] },
+  { id: 'coleccion', label: 'Las vitrinas', note: 'La colección', min: [-8, 2.2, 0], max: [-2.05, 3, 3] },
+  { id: 'experiencia', label: 'El salón', note: 'La cápsula', min: [-4.3, -3, 0], max: [6, 0.4, 2.9] },
+  { id: 'jardin', label: 'El pulmón', note: 'El jardín', min: [-8, -3, 0], max: [-4.4, -1, 3.2] },
+  { id: 'mapa', label: 'La entrada', note: 'Cómo llegar', min: [-8.5, -0.9, 0], max: [-7.4, 2.2, 2.6] },
 ]
 
-export default function Hero() {
+const PRICES = [
+  ['ESPRESSO', '3200'],
+  ['FLAT WHITE', '4500'],
+  ['CAPUCCINO', '4800'],
+  ['LATTE', '4800'],
+  ['CHOCOLATE', '5200'],
+  ['TÉ EN HEBRAS', '3600'],
+  ['MEDIALUNA', '1400'],
+  ['TOSTÓN', '9800'],
+]
+
+export default function Hero({ boarded, onProgress, onReady, calm }) {
   const rootRef = useRef(null)
+  const mountRef = useRef(null)
   const canvasRef = useRef(null)
   const sceneRef = useRef(null)
   const veilRef = useRef(null)
   const [hover, setHover] = useState(null)
-  const [ready, setReady] = useState(false)
-  const [status, setStatus] = useState(() => openStatus())
+  const [failed, setFailed] = useState(false)
 
-  useEffect(() => {
-    const id = window.setInterval(() => setStatus(openStatus()), 60_000)
-    return () => window.clearInterval(id)
-  }, [])
-
-  // La escena: espera la tipografía del nombre (se dibuja en un canvas).
   useEffect(() => {
     const canvas = canvasRef.current
-    const mount = rootRef.current
+    const mount = mountRef.current
     if (!canvas || !mount) return undefined
-    let disposed = false
     let scene = null
-    const calm = prefersReducedMotion()
-    Promise.race([document.fonts.load(`300 64px ${MONO.fontFamily}`), new Promise((r) => setTimeout(r, 1500))]).then(() => {
+    let disposed = false
+    const fontsReady = Promise.race([
+      Promise.all([document.fonts.load(`700 64px 'Chakra Petch'`), document.fonts.load(`500 32px 'Roboto Mono'`)]),
+      new Promise((r) => setTimeout(r, 2000)),
+    ])
+    fontsReady.then(() => {
       if (disposed) return
-      scene = createCapsuleScene({
-        canvas,
-        mount,
-        windows: WINDOWS,
-        wordmark: 'cāpsula33',
-        badge: 'ā33',
-        fonts: { mono: MONO.fontFamily },
-        calm,
-        onHover: (win, screen) => setHover(win ? { win, screen } : null),
-        onReady: () => setReady(true),
-      })
-      sceneRef.current = scene
+      try {
+        scene = createDioramaScene({
+          canvas,
+          mount,
+          manifest: MANIFEST,
+          zones: ZONES,
+          prices: PRICES,
+          calm,
+          fonts: { display: `'Chakra Petch', sans-serif` },
+          headline: [
+            ['CAFÉ, CINE', C.cream],
+            ['Y ALGO MÁS.', C.orange],
+          ],
+          onProgress,
+          onHover: (zone, screen) => setHover(zone ? { zone, screen } : null),
+        })
+        sceneRef.current = scene
+        scene.load.then(() => !disposed && onReady()).catch((err) => {
+          console.error('[capsula33] el diorama no cargó', err)
+          setFailed(true)
+          onReady()
+        })
+      } catch (err) {
+        console.error('[capsula33] sin WebGL', err)
+        setFailed(true)
+        onReady()
+      }
     })
     return () => {
       disposed = true
       scene?.dispose()
       sceneRef.current = null
     }
+    // La escena se arma una vez; los callbacks son estables en la página.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Al salir del hero la cápsula sube y gira (scrub).
+  // Al abordar: la cámara baja sobre el local y entra el texto.
+  useEffect(() => {
+    if (!boarded) return
+    sceneRef.current?.intro()
+    gsap.fromTo('[data-c33-in]', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, delay: calm ? 0 : 1.2 })
+  }, [boarded, calm])
+
+  // Al salir del hero el local sube y se aleja (scrub).
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return undefined
+      if (calm) return undefined
       const st = ScrollTrigger.create({
         trigger: rootRef.current,
         start: 'top top',
@@ -77,14 +123,13 @@ export default function Hero() {
         scrub: true,
         onUpdate: (self) => sceneRef.current?.setProgress(self.progress),
       })
-      gsap.from('[data-c33-in]', { autoAlpha: 0, y: 18, duration: 1, ease: 'power3.out', stagger: 0.08, delay: 0.35 })
       return () => st.kill()
     },
     { scope: rootRef },
   )
 
-  // Tocar una ventana: la cámara entra por el vidrio, el velo se cierra y la
-  // página ya está en esa sección cuando se vuelve a abrir.
+  // Tocar una zona: la cámara entra, el velo se cierra y la página ya está en
+  // esa sección cuando se vuelve a abrir.
   const go = (id) => {
     const target = document.getElementById(id)
     const scene = sceneRef.current
@@ -94,113 +139,93 @@ export default function Hero() {
       if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
       else target.scrollIntoView()
       scene?.reset()
-      gsap.to(veilRef.current, { autoAlpha: 0, duration: 0.6, ease: 'power2.out', delay: 0.05 })
+      gsap.to(veilRef.current, { autoAlpha: 0, duration: 0.7, ease: 'power2.out', delay: 0.05 })
     }
-    if (!scene || prefersReducedMotion()) {
+    if (!scene || calm) {
       land()
       return
     }
-    gsap.fromTo(veilRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.45, delay: 0.62, ease: 'power2.in' })
-    scene.enter(id, land)
+    gsap.fromTo(veilRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, delay: 1.0, ease: 'power2.inOut' })
+    scene.dive(id, () => window.setTimeout(land, 150))
   }
 
   const onClick = (e) => {
-    const hit = sceneRef.current?.pick(e)
-    if (hit) go(hit.win.id)
+    const zone = sceneRef.current?.pick(e)
+    if (zone) go(zone.id === 'jardin' ? 'experiencia' : zone.id)
   }
 
   return (
-    <section
-      ref={rootRef}
-      id="top"
-      className="relative h-svh min-h-[36rem] overflow-hidden"
-      style={{ background: C.void, color: C.cream }}
-    >
-      <canvas
-        ref={canvasRef}
-        onClick={onClick}
-        aria-label="La cápsula de cāpsula33: arrastrala para girarla y tocá una ventana para entrar"
-        className={`absolute inset-0 h-full w-full touch-pan-y transition-opacity duration-1000 ${ready ? 'opacity-100' : 'opacity-0'}`}
-        style={{ cursor: 'grab' }}
-      />
-
-      {/* HUD: esquinas y códigos, como sus piezas gráficas. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-4 md:inset-6">
-        {['top-0 left-0 border-t border-l', 'top-0 right-0 border-t border-r', 'bottom-0 left-0 border-b border-l', 'bottom-0 right-0 border-b border-r'].map((c) => (
-          <span key={c} className={`absolute h-5 w-5 ${c}`} style={{ borderColor: C.orange }} />
-        ))}
+    <section ref={rootRef} id="top" className="relative h-svh min-h-[36rem] overflow-hidden" style={{ background: C.void, color: C.cream }}>
+      <div ref={mountRef} className="absolute inset-0">
+        <canvas
+          ref={canvasRef}
+          onClick={onClick}
+          aria-label="El local de cāpsula33 en miniatura: tocá una zona para entrar"
+          className={`absolute inset-0 h-full w-full touch-pan-y ${failed ? 'invisible' : ''}`}
+        />
       </div>
 
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-6 pt-6 pb-7 md:px-10 md:pt-8 md:pb-9">
-        <header data-c33-in className="pointer-events-auto flex items-start justify-between gap-6">
-          <a href="#top" className="tpl-hit relative text-[20px] md:text-[24px]" style={{ ...MONO, fontWeight: 300 }}>
-            cāpsula33
-          </a>
-          <nav className="hidden items-center gap-8 text-[13px] tracking-[0.12em] uppercase md:flex" style={DISPLAY} aria-label="Secciones">
-            {[
-              ['Menú', '#menu'],
-              ['Colección', '#coleccion'],
-              ['Base 7-Lagos', '#mapa'],
-              ['Visitanos', '#visita'],
-            ].map(([label, href]) => (
-              <a key={href} href={href} className="tpl-link tpl-hit relative">
-                {label}
-              </a>
-            ))}
-          </nav>
-          <p className="flex items-center gap-2 text-[11px] tracking-[0.14em] uppercase md:text-[12px]" style={DISPLAY}>
-            <span
-              aria-hidden="true"
-              className="inline-block h-2 w-2 rounded-full"
-              style={{ background: status.open ? '#7dffa8' : C.orange, boxShadow: status.open ? '0 0 10px #7dffa8' : 'none' }}
-            />
-            {status.label}
-          </p>
-        </header>
+      <h1 className="sr-only">cāpsula33 — café, cine y algo más. San Martín de los Andes.</h1>
 
-        <div className="grid items-end gap-6 md:grid-cols-12">
-          <div className="md:col-span-7">
-            <h1 data-c33-in className="text-[clamp(2.6rem,7vw,6rem)] leading-[0.92] font-semibold tracking-[-0.02em] uppercase" style={DISPLAY}>
-              Café, cine
-              <br />
-              <span style={{ color: C.orange }}>y algo más.</span>
-            </h1>
-            <p data-c33-in className="mt-5 max-w-[34ch] text-[15px] leading-[1.5] opacity-80" style={BODY}>
-              No somos lo que razonamos, somos lo que imaginamos. Una cápsula para reunirnos, a cuadras del lago Lácar.
-            </p>
+      {failed ? (
+        <p className="absolute inset-x-6 top-1/3 text-center text-[clamp(2.6rem,8vw,6rem)] leading-[0.9] font-semibold uppercase" style={DISPLAY}>
+          Café, cine <span style={{ color: C.orange }}>y algo más.</span>
+        </p>
+      ) : null}
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 grid items-end gap-6 px-6 pb-7 md:grid-cols-12 md:px-10 md:pb-9">
+        <div className="md:col-span-6">
+          <p data-c33-in className="max-w-[36ch] text-[15px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.8)' }}>
+            Una cápsula para reunirnos, a cuadras del lago Lácar. Café de especialidad, cocina de estación y la colección del dueño en vitrinas.
+          </p>
+          <div data-c33-in className="pointer-events-auto mt-5 flex flex-wrap gap-3 opacity-0">
+            <button
+              type="button"
+              onClick={() => go('experiencia')}
+              className="group relative h-11 overflow-hidden rounded-full px-6 text-[12px] font-semibold tracking-[0.18em] uppercase active:scale-[0.97]"
+              style={{ ...DISPLAY, background: C.orange, color: C.void }}
+            >
+              Conocé el local
+            </button>
+            <button
+              type="button"
+              onClick={() => go('menu')}
+              className="relative h-11 rounded-full border px-6 text-[12px] font-semibold tracking-[0.18em] uppercase transition-colors duration-300 hover:border-[#e4601d] active:scale-[0.97]"
+              style={{ ...DISPLAY, borderColor: 'rgba(242,233,220,0.3)' }}
+            >
+              Ver el menú
+            </button>
           </div>
-          <div data-c33-in className="flex flex-col items-start gap-2 text-[11px] tracking-[0.16em] uppercase md:col-span-4 md:col-start-9 md:items-end md:text-right" style={DISPLAY}>
-            <span className="flex items-center gap-3" style={{ color: C.orange }}>
-              <span aria-hidden="true" className="inline-block h-px w-8" style={{ background: C.orange }} />
-              Arrastrá la cápsula · tocá una ventana
-            </span>
-            <span className="opacity-55">C33.02 · San Martín de los Andes · 40°09′S 71°21′O</span>
-          </div>
+        </div>
+        <div data-c33-in className="flex flex-col items-start gap-2 text-[11px] tracking-[0.16em] uppercase opacity-0 md:col-span-4 md:col-start-9 md:items-end md:text-right" style={DISPLAY}>
+          <span className="flex items-center gap-3" style={{ color: C.orange }}>
+            <span aria-hidden="true" className="inline-block h-px w-8" style={{ background: C.orange }} />
+            Tocá una zona del local
+          </span>
+          <span className="opacity-55">C33.02 · Av. Gral. Roca 1120 · 40°09′S 71°21′O</span>
         </div>
       </div>
 
-      {/* La etiqueta de la ventana bajo el puntero. */}
       {hover?.screen ? (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed z-20 -translate-x-1/2 -translate-y-[calc(100%+3.25rem)] rounded-full border px-5 py-2 text-center"
+          className="pointer-events-none fixed z-20 -translate-x-1/2 -translate-y-[calc(100%+1.25rem)] rounded-full border px-5 py-2 text-center"
           style={{ left: hover.screen.x, top: hover.screen.y, background: 'rgba(7,7,8,0.88)', borderColor: C.orange }}
         >
-          <p className="text-[18px] font-semibold tracking-[0.06em] uppercase" style={{ ...DISPLAY, color: C.cream }}>
-            {hover.win.label}
+          <p className="text-[16px] font-semibold tracking-[0.06em] uppercase" style={{ ...DISPLAY, color: C.cream }}>
+            {hover.zone.label}
           </p>
-          <p className="text-[11px] tracking-[0.18em] uppercase" style={{ ...DISPLAY, color: C.orange }}>
-            {hover.win.note} →
+          <p className="text-[11px] tracking-[0.18em] uppercase" style={{ ...MONO, color: C.neon }}>
+            {hover.zone.note} →
           </p>
         </div>
       ) : null}
 
-      {/* Accesible sin 3D: las mismas cuatro puertas. */}
       <ul className="sr-only">
-        {WINDOWS.map((w) => (
-          <li key={w.id}>
-            <a href={`#${w.id}`}>
-              {w.label}: {w.note}
+        {ZONES.map((z) => (
+          <li key={z.id}>
+            <a href={`#${z.id === 'jardin' ? 'experiencia' : z.id}`}>
+              {z.label}: {z.note}
             </a>
           </li>
         ))}

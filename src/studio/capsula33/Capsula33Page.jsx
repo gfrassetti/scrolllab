@@ -1,19 +1,26 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
+import { prefersReducedMotion } from '../../lib/motion'
+import { getLenis } from '../../hooks/useLenis'
 import Hero from './Hero'
+import Loader from './Loader'
+import Header from './Header'
 import { BODY, C, DISPLAY, FONTS_HREF, HOURS, MONO } from './brand'
 
 /*
-THESIS: el sitio es la cápsula misma — se entra por sus ventanas; rechaza el
-  "hero foto + menú en PDF" de toda cafetería.
+THESIS: el sitio es un viaje a bordo del local — se aborda (loader), se ve la
+  nave entera (el diorama) y se entra a cada zona; rechaza el "hero foto +
+  menú en PDF" de toda cafetería.
 OWN-WORLD: negro espacio, naranja de fachada, neón naranja; mono liviana
-  minúscula (logo) + cuadrada técnica (sus impresos) + Barlow; ventanas
-  pastilla y ojo de buey como único contenedor; HUD de esquinas y códigos C33.
-STORY: el visitante gira la fachada, entiende "café, cine y algo más", elige
-  una ventana (menú, colección, mapa) y sale sabiendo si está abierto y cómo llegar.
-FIRST VIEWPORT: la cápsula 3D al centro a ~80% del ancho; título abajo a la
-  izquierda; estado abierto/cerrado arriba a la derecha; las ventanas son la acción.
-FORM: brief fijado por el dueño (cápsula con ojos de buey), sin tirada.
+  minúscula (logo) + cuadrada técnica (sus impresos) + Barlow; el local en
+  miniatura con la luz de Cycles horneada; HUD de esquinas y códigos C33.
+STORY: el visitante aborda, ve el local, entiende "café, cine y algo más",
+  toca una zona (barra, vitrinas, salón, entrada) y sale sabiendo si está
+  abierto y cómo llegar.
+FIRST VIEWPORT: el diorama al centro con el titular enorme detrás; texto y
+  dos acciones abajo a la izquierda; las zonas del local son la acción.
+FORM: brief fijado por el dueño (diorama del local real, loader de abordaje,
+  menú a pantalla completa), sin tirada.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the
   finish review, the verdict, and DESIGN.md
 */
@@ -66,10 +73,26 @@ export default function Capsula33Page() {
     }
   }, [])
 
+  const [calm] = useState(() => prefersReducedMotion())
+  const [progress, setProgress] = useState(0)
+  const [ready, setReady] = useState(false)
+  const [boarded, setBoarded] = useState(false)
+  const onProgress = useCallback((p) => setProgress(p), [])
+  const onReady = useCallback(() => setReady(true), [])
+
+  // Hasta abordar la página no se mueve (el loader la tapa entera).
+  useEffect(() => {
+    const lenis = getLenis()
+    if (boarded) lenis?.start()
+    else lenis?.stop()
+  }, [boarded])
+
   return (
     <SmoothScrollProvider>
       <div className="min-h-svh" style={{ background: C.void, color: C.cream, ...BODY }}>
-        <Hero />
+        <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
+        <Header visible={boarded} />
+        <Hero boarded={boarded} calm={calm} onProgress={onProgress} onReady={onReady} />
 
         {/* La pared del local, palabra por palabra. */}
         <section id="experiencia" className="px-6 py-28 md:px-10 md:py-40">
