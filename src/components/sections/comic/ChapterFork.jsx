@@ -18,7 +18,7 @@ const SHOTS = [
  * one cutting in over it. The next chapter's torn grey paper rises over the
  * last shot (it overlaps this chapter's last screen).
  */
-export default function ChapterFork({ captions = ['Caption 8 — replace with story beat.'] }) {
+export default function ChapterFork({ captions = ['Inside, row after row of pens. Every one of them had a number, and nobody used a name.'] }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
 

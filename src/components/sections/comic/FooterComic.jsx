@@ -3,12 +3,51 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { PAPER, TORN_TOP } from './comicKit'
 import { DogHead, PigHead } from './StoryArt'
+import { parseNavLinks } from '../../../lib/navLinks'
+import { externalProps, legalDocs } from '../../../lib/contactLinks'
+import LegalSheet from '../../LegalSheet'
 
 const DEFAULT_COLUMNS = [
-  { heading: 'Chapters', items: ['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4'] },
-  { heading: 'Navigation', items: ['Link 1', 'Link 2', 'Link 3', 'Link 4'] },
-  { heading: 'Legal', items: ['Legal 1', 'Legal 2'] },
+  {
+    heading: 'The story',
+    items: [
+      { label: 'The road', href: '#chapter-dusty' },
+      { label: 'The farm', href: '#chapter-fork' },
+      { label: 'Home', href: '#chapter-bond' },
+      { label: 'Two worlds', href: '#chapter-worlds' },
+    ],
+  },
+  {
+    heading: 'Get involved',
+    items: [
+      { label: 'Sponsor a pig', href: 'mailto:sponsor@haven-sanctuary.org?subject=Sponsor%20a%20pig' },
+      { label: 'Volunteer', href: 'mailto:hello@haven-sanctuary.org?subject=Volunteering' },
+      { label: 'Open days', href: 'mailto:hello@haven-sanctuary.org?subject=Open%20day' },
+      { label: 'Instagram', href: 'https://www.instagram.com/' },
+    ],
+  },
+  {
+    heading: 'Legal',
+    items: [
+      { label: 'Privacy', href: '#privacy' },
+      { label: 'Charity details', href: '#charity' },
+    ],
+  },
 ]
+
+const PRIVACY = `Last updated: 1 April 2026
+
+Haven Farm Sanctuary is responsible for the personal data you share on this site.
+
+We keep what you send us when you write, sponsor an animal or book an open day: your name, your email and your message. We use it to answer you, send sponsor updates you asked for and organise visits.
+
+We never sell or swap your data. You can ask to see, correct or delete it at any time at hello@haven-sanctuary.org.`
+
+const CHARITY = `Haven Farm Sanctuary is a small charity looking after rescued farm animals on thirty acres in Somerset, England.
+
+Sponsorships pay for food, bedding and vet care. Every sponsor receives a photo update of their animal each season.
+
+Dusty and Pip are characters in our story; the animals you meet on an open day are real, and every one of them has a name.`
 
 /**
  * FooterComic — the back cover. A torn sheet of the comic's grey paper rises
@@ -17,14 +56,19 @@ const DEFAULT_COLUMNS = [
  * pig peeking over it.
  */
 export default function FooterComic({
-  brand = 'COMIC',
-  headline = 'Headline 2 — your closing line.',
-  cta = 'CTA',
-  ctaHref = '#top',
+  brand = 'HAVEN',
+  headline = 'Every animal here has a name. Help us give one more.',
+  cta = 'Sponsor a pig',
+  ctaHref = 'mailto:sponsor@haven-sanctuary.org?subject=Sponsor%20a%20pig',
   columns = DEFAULT_COLUMNS,
-  email = 'hello@placeholder.studio',
-  credit = '©2026 Placeholder — template, not a promise',
+  email = 'hello@haven-sanctuary.org',
+  credit = '©2026 Haven Farm Sanctuary — Somerset, England',
   backToTop = 'Back to top ↑',
+  legalDocsList = [
+    { href: '#privacy', title: 'Privacy', body: PRIVACY },
+    { href: '#charity', title: 'Charity details', body: CHARITY },
+  ],
+  legalCloseLabel = 'Close',
 }) {
   const root = useRef(null)
 
@@ -59,10 +103,10 @@ export default function FooterComic({
   )
 
   const links = (column) =>
-    column.items.map((label) => (
-      <li key={label}>
-        <a href="#top" className="tpl-link tpl-hit relative inline-block py-1 text-[15px] font-semibold md:text-base">
-          {label}
+    parseNavLinks(column.items).map((item) => (
+      <li key={item.label}>
+        <a href={item.href} {...externalProps(item.href)} className="tpl-link tpl-hit relative inline-block py-1 text-[15px] font-semibold md:text-base">
+          {item.label}
         </a>
       </li>
     ))
@@ -133,6 +177,8 @@ export default function FooterComic({
           ))}
         </p>
       </div>
+
+      <LegalSheet docs={legalDocs(legalDocsList)} closeLabel={legalCloseLabel} bg="#efe9dc" fg="#1d1a18" />
     </footer>
   )
 }

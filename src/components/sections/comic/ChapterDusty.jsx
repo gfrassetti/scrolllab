@@ -13,13 +13,13 @@ import { closeupBuddies, driveSunset, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
 const CAPTIONS = [
-  'Caption 1 — replace with story beat.',
-  'Caption 2 — replace with story beat.',
-  'Caption 3 — replace with story beat.',
-  'Caption 4 — replace with story beat.',
-  'Caption 5 — replace with story beat.',
-  'Caption 6 — replace with story beat.',
-  'Caption 7 — replace with story beat.',
+  'Dusty rode in the back of the truck, like every Saturday.',
+  'That morning there was someone else on board: a small pink pig.',
+  'The farmer had lifted her out of her pen before sunrise.',
+  'Dusty watched from the yard. Nobody told him where she was going.',
+  'The truck took the long road, past fields he had never smelled.',
+  'At the end of it stood a barn bigger than any house he knew.',
+  'He pressed his nose to the window and waited.',
 ]
 
 /**
@@ -99,10 +99,10 @@ const LAYER_ZOOM = { sky: 1.04, far: 1.08, peak: 1.12, hills: 1.22, road: 1.34, 
 const isSmall = (word) => word.replace(/[^a-z]/gi, '').length <= 2
 
 export default function ChapterDusty({
-  eyebrow = 'Eyebrow 1',
+  eyebrow = 'Chapter one',
   title = 'A TALE OF ROAD AND DUST',
   onomatopoeia = 'VROOM',
-  bubble = 'Dialogue 1 — replace.',
+  bubble = 'Where are they taking her?',
   captions = CAPTIONS,
 }) {
   const root = useRef(null)
