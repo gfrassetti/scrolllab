@@ -5,6 +5,7 @@ import { getLenis } from '../../hooks/useLenis'
 import Loader from './Loader'
 import ShipHero from './ShipHero'
 import ScrollRail from './ScrollRail'
+import MapSection from './MapSection'
 import { BODY, C, FONTS_HREF } from './brand'
 
 const LOADER_MIN_MS = 5200
@@ -45,12 +46,17 @@ export default function Capsula33Page() {
   }, [])
 
   const [calm] = useState(() => prefersReducedMotion())
-  const [loaded, setLoaded] = useState(0)
-  const [assetsReady, setAssetsReady] = useState(false)
+  // Dos cargas: el pasillo (hero) y el local en miniatura (mapa).
+  const [loadedHero, setLoadedHero] = useState(0)
+  const [loadedMap, setLoadedMap] = useState(0)
+  const [heroReady, setHeroReady] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [boarded, setBoarded] = useState(false)
-  const onProgress = useCallback((p) => setLoaded(p), [])
-  const onReady = useCallback(() => setAssetsReady(true), [])
+  const onProgress = useCallback((p) => setLoadedHero(p), [])
+  const onReady = useCallback(() => setHeroReady(true), [])
+  const onMapProgress = useCallback((p) => setLoadedMap(p), [])
+  const onMapReady = useCallback(() => setMapReady(true), [])
 
   // La secuencia de abordaje dura lo que tiene que durar, aunque la descarga sea instantánea
   // (pedido del dueño): el progreso que se ve es el menor entre la descarga y el reloj.
@@ -65,8 +71,8 @@ export default function Capsula33Page() {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [])
-  const progress = Math.min(loaded, elapsed)
-  const ready = assetsReady && elapsed >= 1
+  const progress = Math.min((loadedHero + loadedMap) / 2, elapsed)
+  const ready = heroReady && mapReady && elapsed >= 1
 
   // Hasta abordar la página no se mueve (el loader la tapa entera).
   useEffect(() => {
@@ -80,6 +86,7 @@ export default function Capsula33Page() {
       <div className="min-h-svh" style={{ background: '#05070d', color: C.cream, ...BODY }}>
         <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
         <ShipHero boarded={boarded} onProgress={onProgress} onReady={onReady} />
+        <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <ScrollRail visible={boarded} />
       </div>
     </SmoothScrollProvider>

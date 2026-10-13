@@ -73,10 +73,14 @@ Cap. 3 — La pantalla (menú) · otra animación: la pantalla LED de la barra e
   matriz de puntos (canvas), con los precios reales; las filas se escriben al
   scrollear como un tablero de partidas. Fondo negro, una sola tipografía LED.
 
-Cap. 4 — El plano (3D) · Three.js: el diorama del local dibujado como el plano
-  técnico de su revista ("CAPSULA Declassified"): líneas crema/rojo sobre azul
-  plano, cuadrícula; el scroll lo gira y marca cada zona (entrada, jardín,
-  vitrinas, barra, salón) con etiquetas de plano.
+Cap. 4 — El mapa del local (3D) · a la manera de Townhouse (nominado en Awwwards,
+  referencia del dueño, 2026-10-13). YA HECHO como capítulo 2 (MapSection.jsx,
+  justo después del hero): titular grande a la izquierda («Así es por dentro.»),
+  el diorama de Blender en isométrico (cámara ortográfica de esquina, sobre una
+  losa con borde naranja) a la derecha, etiquetas sobre cada zona (Entrada,
+  Jardín, Vitrinas, Pantalla, Barra, Salón). Puntero: la zona se enciende;
+  tocar abre su ficha (la Pantalla trae los precios reales). Scroll propio: el
+  local llega como plano visto desde arriba y se levanta hasta el isométrico.
 
 Cap. 5 — Visitanos (footer 100svh, regla del curso): dirección, horarios,
   abierto/cerrado, "Cómo llegar", @capsulas33. Cierre grácil.

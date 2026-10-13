@@ -228,7 +228,7 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         </div>
 
         {/* La tripulante tomando café, en primer plano. */}
-        <div ref={set('girlScroll')} className="pointer-events-none absolute right-[-7vw] bottom-0 h-[44svh] sm:right-[-3vw] sm:h-[66svh]" style={{ transformOrigin: '70% 100%' }}>
+        <div ref={set('girlScroll')} className="pointer-events-none absolute right-[4vw] bottom-0 h-[44svh] sm:right-[13vw] sm:h-[68svh]" style={{ transformOrigin: '70% 100%' }}>
           <div ref={set('girlWrap')} className="h-full will-change-transform">
             <div ref={set('girlIn')} className="relative h-full opacity-0">
               <img
