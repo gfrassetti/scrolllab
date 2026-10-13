@@ -1,0 +1,101 @@
+CĀPSULA33 — PLAN DE LA PÁGINA (demo privado del Estudio)
+=========================================================
+Formato .txt por el flujo obligatorio del curso "The Award-Winning Web Developer"
+(docs/award-winning-web-developer.md). Fecha: 2026-10-13.
+
+0. CONSIGNA BASE (Lesson 9, obligatoria)
+----------------------------------------
+"Award-winning, scroll-based, beautiful animation feeling throughout the entire
+sequence of events. Different sections need to have different scroll-based
+animations. GSAP + Three.js. Unique, with visual breaks or clear separation
+between sections. No templated-like style, no SaaS AI slop. Something unique,
+artsy, beautiful, that people don't usually do."
+
+1. QUÉ ES EL LUGAR (fuente: fotos reales que pasó el dueño)
+-----------------------------------------------------------
+- NO es una cápsula suelta. La entrada es un PORTAL NARANJA de bordes muy
+  redondeados (como el frente de un vagón/módulo), adosado a un edificio oscuro
+  de vidrio y acero, en una vereda de baldosas.
+- En el portal: arriba, el cartel "cāpsula33" en letras crema iluminadas
+  (mono liviana minúscula); a la izquierda, un OJO DE BUEY con una pantalla
+  "c̄33"; al medio, la PUERTA con dos ventanas angostas de punta redonda; a la
+  derecha, un VENTANAL con listones. De noche: luz cálida naranja adentro, el
+  borde superior iluminado, vereda mojada que refleja. Mesas y sillas negras
+  afuera, a la derecha.
+- Adentro (foto del pasillo): a la izquierda pared blanca con vitrinas bajas de
+  vidrio y ojos de buey; a la derecha la barra alta con banquetas azul oscuro
+  contra el jardín (ventanas en arco con plantas); arriba la bandeja de neón
+  naranja; al fondo la barra naranja plisada con la vitrina de pastelería y el
+  cartel colgante "cāpsula33". Techo de hormigón, vigas negras, aire
+  acondicionado blanco.
+- Gráfica propia: tarjeta de mesa negra estilo HUD con la chica cyberpunk de pelo
+  rosa y auriculares tomando café; revista "CAPSULA — Declassified", estilo
+  plano técnico azul con rojo y crema, "Bienvenidos exploradores de universos",
+  "Only 15¢".
+- Pantalla LED de la barra (precios reales): CAFETERÍA · CALIENTES: Americano
+  4800, Lágrima 4500, Flat white 5500, Capuccino 6000, Latte 5500, Chocolate 6500,
+  Golden milk 6500 · FRÍOS: Americano 5500, Latte 6000, Affogato 6500.
+
+2. DESIGN READ (taste-skill, una línea)
+---------------------------------------
+Noche patagónica + portal naranja + gráfica de plano técnico: un sitio que se
+CAMINA (se cruza la puerta), no que se lee; nada de cards, nada de hero foto +
+botón.
+
+3. LA HISTORIA EN CAPÍTULOS (cada uno con su propia animación de scroll)
+----------------------------------------------------------------------
+Cap. 0 — Loader: el de ahora (estrellas + salto). Sin sonidos de más.
+
+Cap. 1 — La entrada (hero) · multicapa como el de NEON (pedido del dueño, 2026-10-13).
+  - El café es un MÓDULO de una nave: el ventanal negro del edificio real es el
+    espacio (canvas de estrellas en 3 profundidades + un planeta en sombra) y
+    la entrada naranja fiel a las fotos está acoplada en la cubierta mojada de
+    un hangar. Capas: espacio · hangar · interior (por el hueco) · módulo ·
+    marco de escotilla · titular.
+  - Titular flotante «Café de especialidad, a bordo.»: respira, se inclina con
+    el puntero y las letras cercanas se levantan y encienden en naranja (en el
+    teléfono, una pasada de luz). Al scrollear se desarma hacia arriba.
+  - Scroll: el titular se va, las hojas se esconden en la pared (soplido), nos
+    acercamos y entramos al pasillo. «Bienvenidos, exploradores de universos».
+  - Hover: el cartel titila, el ojo de buey late, la puerta se entreabre.
+  - Un solo CTA: «Scroll para entrar». Archivo: ShipHero.jsx.
+  - (El video scrubeado del Detalle #1 queda descartado para el hero.)
+
+Cap. 2 — "Bienvenidos, exploradores de universos" (frase real de su revista).
+  - El último cuadro del video (el pasillo) queda de fondo; entra la chica
+    cyberpunk de pelo rosa en capas (parallax de 3–4 capas: fondo, palabra
+    grande en contorno, la chica, vapor y neón adelante).
+  - Orden de entrada del curso: titular → bajada → imagen, con pausa.
+
+Cap. 3 — La pantalla (menú) · otra animación: la pantalla LED de la barra en
+  matriz de puntos (canvas), con los precios reales; las filas se escriben al
+  scrollear como un tablero de partidas. Fondo negro, una sola tipografía LED.
+
+Cap. 4 — El plano (3D) · Three.js: el diorama del local dibujado como el plano
+  técnico de su revista ("CAPSULA Declassified"): líneas crema/rojo sobre azul
+  plano, cuadrícula; el scroll lo gira y marca cada zona (entrada, jardín,
+  vitrinas, barra, salón) con etiquetas de plano.
+
+Cap. 5 — Visitanos (footer 100svh, regla del curso): dirección, horarios,
+  abierto/cerrado, "Cómo llegar", @capsulas33. Cierre grácil.
+
+4. VOCABULARIO DE MOTION (Detalle #5: chico y repetido)
+------------------------------------------------------
+- Scrub (video y 3D), reveal por máscara de línea (titulares), parallax por capas.
+- Ease: power3/expo out; nada rebota; pausas deliberadas entre titular e imagen.
+- Sonido: solo el salto del loader y un roce suave al abrir la puerta. Nada de
+  pitidos en hovers (pedido del dueño).
+
+5. MICRO-INTERACCIONES (Detalle #6)
+-----------------------------------
+- CTA: subrayado/relleno que entra desde la izquierda; press scale 0.97.
+- Cartel: titilar de neón; ojo de buey: pantalla que late; puerta: entreabrir.
+- Riel de scroll propio (progreso), nativo oculto.
+
+6. ASSETS
+---------
+- Higgsfield: portal de frente fiel (start frame), pasillo fiel (end frame),
+  clip de entrada (MiniMax H3, 2K, 6 s, start+end).
+- Ya generada: la chica de pelo rosa (alta, recortada).
+- Blender: diorama existente (para el plano 3D, con material de líneas).
+- Fotos del dueño: SOLO como referencia para generar; nunca se publican.

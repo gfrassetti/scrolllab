@@ -3,21 +3,24 @@ import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { prefersReducedMotion } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
 import Loader from './Loader'
-import FacadeHero from './FacadeHero'
+import ShipHero from './ShipHero'
 import ScrollRail from './ScrollRail'
 import { BODY, C, FONTS_HREF } from './brand'
 
 /*
-THESIS: el sitio es llegar a la cápsula y entrar — se aborda (loader con salto
-  al hiperespacio), aparece la fachada naranja en la calle de noche con la
-  cordillera atrás, las puertas se abren con el scroll y se entra al café.
-OWN-WORLD: la cápsula naranja de su fachada, la noche patagónica, el neón
-  naranja de adentro; mono liviana minúscula (logo) + cuadrada técnica.
-STORY: fachada → las puertas se abren → acercarse → adentro.
-FIRST VIEWPORT: la cápsula en la calle, entre sus plantas, con el cartel; el
-  titular abajo a la izquierda y «Scroll para entrar».
-FORM: brief fijado por el dueño (hero multicapa con imágenes, puertas que se
-  abren al scrollear, parallax y efectos al pasar el puntero), sin tirada.
+THESIS: el café es un módulo acoplado a una nave — se aborda (loader con salto
+  al hiperespacio), del otro lado está el hangar con el espacio detrás del
+  ventanal, y la entrada naranja real del local espera en la cubierta. El
+  scroll cruza la puerta y deja adentro, en el pasillo.
+OWN-WORLD: la entrada real (cartel crema, ojo de buey «c̄33», puerta de
+  ventanas en pastilla, ventanal con listones), el ventanal negro del edificio
+  convertido en espacio, piso mojado; mono liviana minúscula (logo) + grotesca
+  ancha para el titular.
+STORY: hangar → el titular se desarma → la puerta se abre → entramos.
+FIRST VIEWPORT: el módulo en el centro de la cubierta, el titular flotando
+  sobre las estrellas, «Scroll para entrar».
+FORM: brief del dueño (hero multicapa como el de NEON, fondo de nave espacial,
+  titular flotante con parallax y efecto al pasar, se desvanece al scrollear).
 */
 
 /**
@@ -57,7 +60,7 @@ export default function Capsula33Page() {
     <SmoothScrollProvider>
       <div className="min-h-svh" style={{ background: '#05070d', color: C.cream, ...BODY }}>
         <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
-        <FacadeHero boarded={boarded} onProgress={onProgress} onReady={onReady} />
+        <ShipHero boarded={boarded} onProgress={onProgress} onReady={onReady} />
         <ScrollRail visible={boarded} />
       </div>
     </SmoothScrollProvider>

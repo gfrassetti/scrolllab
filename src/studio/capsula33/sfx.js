@@ -2,7 +2,8 @@
  * cāpsula33 — sonidos de la interfaz, sintetizados (Web Audio, sin archivos).
  *
  * El navegador no deja sonar nada hasta que la persona toca algo: `unlock()` se
- * llama en «Abordar». Se puede apagar desde el header; la elección se recuerda.
+ * llama en «Abordar». Solo dos sonidos: el salto del loader y la puerta (pedido
+ * del dueño: nada de pitidos en hovers). La elección de apagarlo se recuerda.
  */
 
 const KEY = 'c33-sound'
@@ -101,76 +102,15 @@ function noise({ dur = 0.3, from = 400, to = 4000, gain = 0.4, delay = 0, type =
   src.stop(t + dur + 0.02)
 }
 
-let lastTick = 0
 export const sfx = {
-  /** Pasar sobre un ítem del menú. */
-  hover() {
-    tone({ freq: 1400, to: 2100, dur: 0.06, type: 'triangle', gain: 0.35 })
-    tone({ freq: 2800, dur: 0.03, type: 'square', gain: 0.05, delay: 0.02 })
-  },
-  /** Cada letra que se acomoda (con tope de frecuencia, que no sature). */
-  tick() {
-    if (!ready()) return
-    const now = ctx.currentTime
-    if (now - lastTick < 0.028) return
-    lastTick = now
-    tone({ freq: 3200 + Math.random() * 1600, dur: 0.012, type: 'square', gain: 0.045 })
-  },
-  open() {
-    noise({ dur: 0.35, from: 300, to: 3200, gain: 0.25 })
-    tone({ freq: 220, to: 880, dur: 0.28, type: 'sawtooth', gain: 0.08, q: 6 })
-  },
-  close() {
-    noise({ dur: 0.3, from: 3000, to: 250, gain: 0.22 })
-    tone({ freq: 880, to: 200, dur: 0.24, type: 'sawtooth', gain: 0.07, q: 6 })
-  },
-  /** La mira se fija sobre una zona del local. */
-  lock() {
-    tone({ freq: 900, dur: 0.05, type: 'sine', gain: 0.25 })
-    tone({ freq: 1350, dur: 0.07, type: 'sine', gain: 0.22, delay: 0.055 })
-  },
-  select() {
-    tone({ freq: 660, to: 990, dur: 0.12, type: 'triangle', gain: 0.35 })
-    tone({ freq: 1980, dur: 0.06, type: 'sine', gain: 0.12, delay: 0.08 })
-  },
   /** Salto al hiperespacio (al abordar). */
   warp() {
     noise({ dur: 1.4, from: 120, to: 6000, gain: 0.5, type: 'lowpass' })
     tone({ freq: 60, to: 420, dur: 1.2, type: 'sawtooth', gain: 0.12, q: 3 })
     tone({ freq: 1200, to: 80, dur: 0.9, type: 'sine', gain: 0.18, delay: 1.1 })
   },
-  /** Llegar a una estación del recorrido. */
-  page() {
-    tone({ freq: 520, to: 780, dur: 0.09, type: 'triangle', gain: 0.18 })
-    tone({ freq: 1040, dur: 0.05, type: 'sine', gain: 0.08, delay: 0.07 })
-  },
-  /** El riel de la derecha: un clic grave y seco, distinto al del menú. */
-  railHover() {
-    tone({ freq: 340, to: 300, dur: 0.035, type: 'square', gain: 0.07, q: 4 })
-  },
-  railSelect() {
-    tone({ freq: 300, to: 600, dur: 0.1, type: 'square', gain: 0.1, q: 5 })
-  },
-  /** Botones (Iniciar recorrido, Cómo llegar): un pulso suave. */
-  buttonHover() {
-    tone({ freq: 760, dur: 0.05, type: 'sine', gain: 0.12 })
-  },
-  /** Zoom: sube al acercar, baja al alejar. */
-  zoom(closer) {
-    tone({ freq: closer ? 500 : 900, to: closer ? 900 : 500, dur: 0.12, type: 'sine', gain: 0.14 })
-  },
-  /** Agarrar el local para girarlo. */
-  grab() {
-    noise({ dur: 0.08, from: 1800, to: 900, gain: 0.12 })
-  },
-  /** El panel de una estación se despliega. */
-  panel() {
-    noise({ dur: 0.22, from: 600, to: 2400, gain: 0.08 })
-  },
-  /** Prender el sonido. */
-  soundOn() {
-    tone({ freq: 440, dur: 0.06, type: 'triangle', gain: 0.2 })
-    tone({ freq: 660, dur: 0.06, type: 'triangle', gain: 0.2, delay: 0.06 })
-    tone({ freq: 880, dur: 0.09, type: 'triangle', gain: 0.2, delay: 0.12 })
+  /** La puerta del módulo se abre: un soplido de presión, grave y corto. */
+  open() {
+    noise({ dur: 0.7, from: 2400, to: 260, gain: 0.16, type: 'lowpass' })
   },
 }

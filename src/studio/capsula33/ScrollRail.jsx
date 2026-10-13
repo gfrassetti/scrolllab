@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { getLenis } from '../../hooks/useLenis'
-import { sfx } from './sfx'
 import { C, MONO } from './brand'
 
 /**
@@ -75,11 +74,7 @@ export default function ScrollRail({ visible }) {
             <button
               key={m.id}
               type="button"
-              onClick={() => {
-                sfx.railSelect()
-                getLenis()?.scrollTo(`#${m.id}`, { duration: 1.8 })
-              }}
-              onMouseEnter={() => sfx.railHover()}
+              onClick={() => getLenis()?.scrollTo(`#${m.id}`, { duration: 1.8 })}
               aria-label={m.label}
               aria-current={active === i ? 'location' : undefined}
               className="group absolute left-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
