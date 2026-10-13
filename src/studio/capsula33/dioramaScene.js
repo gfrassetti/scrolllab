@@ -161,12 +161,16 @@ export function createDioramaScene({
   const pivot = new THREE.Group() // gira con el puntero; el titular queda afuera (parallax)
   scene.add(pivot)
 
-  // Encuadre de reposo: la vista isométrica, desde la esquina de la entrada.
+  // Encuadre de reposo. TARGET es el centro del local (el pivote del giro); la
+  // cámara mira un poco más arriba o más abajo según la pantalla. En una
+  // pantalla ancha, la vista isométrica desde la esquina de la entrada; en una
+  // vertical (teléfono), mirando el local a lo largo desde la puerta, que así
+  // ocupa el alto en vez de quedar como una tira angosta.
   const TARGET = b2t(manifest.target)
-  const VIEW_DIR = b2t(manifest.viewDir).normalize()
-  const RADIUS = manifest.radius
+  const VIEW_DIR = new THREE.Vector3()
   const rest = { pos: new THREE.Vector3(), look: TARGET.clone() }
   const look = TARGET.clone()
+  let layout = manifest
 
   let headlineMesh = null
   if (headline) {
@@ -190,17 +194,24 @@ export function createDioramaScene({
   })
 
   function frameRest() {
-    const dist = fitCameraDistance({ fov: camera.fov, aspect: camera.aspect, radius: RADIUS, base: manifest.distance, fill: 0.92 })
-    rest.pos.copy(TARGET).addScaledVector(VIEW_DIR, dist)
+    layout = camera.aspect < 0.8 && manifest.tall ? { ...manifest, ...manifest.tall } : manifest
+    VIEW_DIR.copy(b2t(layout.viewDir)).normalize()
+    rest.look.copy(TARGET)
+    rest.look.y += layout.lookLift ?? 0
+    const dist = fitCameraDistance({ fov: camera.fov, aspect: camera.aspect, radius: layout.radius, base: layout.distance, fill: 0.92 })
+    rest.pos.copy(rest.look).addScaledVector(VIEW_DIR, dist)
     if (headlineMesh) {
       // Detrás del local, de frente a la cámara, más ancho que el diorama.
-      headlineMesh.position.copy(TARGET).addScaledVector(VIEW_DIR, -9)
-      headlineMesh.position.y += manifest.headlineLift ?? 1.4
+      headlineMesh.position.copy(rest.look).addScaledVector(VIEW_DIR, -9)
+      headlineMesh.position.y += layout.headlineLift ?? 1.4
       headlineMesh.lookAt(rest.pos)
       // Que entre siempre de borde a borde, con aire a los costados.
       const depth = rest.pos.distanceTo(headlineMesh.position)
-      const visibleW = 2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect
-      const w = visibleW * (camera.aspect > 1 ? 0.9 : 0.94)
+      const visibleH = 2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+      const visibleW = visibleH * camera.aspect
+      // Ancho de borde a borde, pero sin pasar del 42 % del alto (pantallas anchas y bajas).
+      const ratio = headlineMesh.geometry.parameters.height // alto / ancho del cartel
+      const w = Math.min(visibleW * (camera.aspect > 1 ? 0.9 : 0.94), (visibleH * 0.42) / ratio)
       headlineMesh.scale.set(w, w, 1)
     }
   }
@@ -353,7 +364,7 @@ export function createDioramaScene({
     const from = rest.pos.clone().addScaledVector(VIEW_DIR, 18)
     from.y += 14
     cam.pos.copy(from)
-    cam.look.copy(TARGET).add(new THREE.Vector3(0, -2, 0))
+    cam.look.copy(rest.look).add(new THREE.Vector3(0, -2, 0))
   }
 
   function intro() {
@@ -362,9 +373,9 @@ export function createDioramaScene({
     placeIntroStart()
     gsap.to(cam.pos, { x: rest.pos.x, y: rest.pos.y, z: rest.pos.z, duration: 2.6, ease: 'expo.out' })
     gsap.to(cam.look, {
-      x: TARGET.x,
-      y: TARGET.y,
-      z: TARGET.z,
+      x: rest.look.x,
+      y: rest.look.y,
+      z: rest.look.z,
       duration: 2.6,
       ease: 'expo.out',
       onComplete: () => {
@@ -398,7 +409,7 @@ export function createDioramaScene({
   function reset() {
     state.mode = 'rest'
     camera.position.copy(rest.pos)
-    look.copy(TARGET)
+    look.copy(rest.look)
   }
 
   // --- bucle ----------------------------------------------------------------
@@ -418,7 +429,7 @@ export function createDioramaScene({
       const p = state.progress
       camera.position.copy(rest.pos)
       camera.position.y += p * 3
-      look.copy(TARGET)
+      look.copy(rest.look)
       look.y += p * 2.4
       if (!calm) {
         pivot.rotation.y += (pointer.x * 0.16 - pivot.rotation.y) * 0.05

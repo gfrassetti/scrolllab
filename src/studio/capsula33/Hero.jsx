@@ -18,11 +18,16 @@ import { C, DISPLAY, MONO, BODY } from './brand'
 const MANIFEST = {
   model: 'room.glb',
   atlases: { shell: 'bake-shell.webp', props: 'bake-props.webp' },
-  target: [-1, 0, 2.4], // por encima del local: lo baja en la pantalla y deja aire al titular
+  target: [-1, 0, 1.2], // el centro del local
+  // Pantalla ancha: isométrica desde la esquina de la entrada. La cámara mira
+  // por encima del local, que así baja en la pantalla y deja aire al titular.
   viewDir: [-1, -1, 1],
+  lookLift: 1.2,
   radius: 8.2,
   distance: 46,
   headlineLift: 4.6,
+  // Teléfono en vertical: mirando el local a lo largo desde la puerta.
+  tall: { viewDir: [-1.55, -0.5, 1.35], lookLift: 1.6, radius: 5.4, distance: 34, headlineLift: 7.2 },
 }
 
 // El plano del local: entrando, a la izquierda la pared de figuras y la barra
@@ -173,16 +178,23 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
         </p>
       ) : null}
 
+      {/* Para que el texto de abajo se lea sobre el local. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] md:h-[30%]"
+        style={{ background: `linear-gradient(to top, ${C.void} 18%, rgba(7,7,8,0.75) 55%, transparent)` }}
+      />
+
       <div className="pointer-events-none absolute inset-x-0 bottom-0 grid items-end gap-6 px-6 pb-7 md:grid-cols-12 md:px-10 md:pb-9">
         <div className="md:col-span-6">
-          <p data-c33-in className="max-w-[36ch] text-[15px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.8)' }}>
+          <p data-c33-in className="max-w-[36ch] text-[14px] leading-[1.5] opacity-0 md:text-[15px]" style={{ ...BODY, color: 'rgba(242,233,220,0.8)' }}>
             Una cápsula para reunirnos, a cuadras del lago Lácar. Café de especialidad, cocina de estación y la colección del dueño en vitrinas.
           </p>
-          <div data-c33-in className="pointer-events-auto mt-5 flex flex-wrap gap-3 opacity-0">
+          <div data-c33-in className="pointer-events-auto mt-4 flex gap-3 opacity-0 md:mt-5">
             <button
               type="button"
               onClick={() => go('experiencia')}
-              className="group relative h-11 overflow-hidden rounded-full px-6 text-[12px] font-semibold tracking-[0.18em] uppercase active:scale-[0.97]"
+              className="group relative h-11 overflow-hidden rounded-full px-5 text-[12px] whitespace-nowrap md:px-6 font-semibold tracking-[0.18em] uppercase active:scale-[0.97]"
               style={{ ...DISPLAY, background: C.orange, color: C.void }}
             >
               Conocé el local
@@ -190,7 +202,7 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
             <button
               type="button"
               onClick={() => go('menu')}
-              className="relative h-11 rounded-full border px-6 text-[12px] font-semibold tracking-[0.18em] uppercase transition-colors duration-300 hover:border-[#e4601d] active:scale-[0.97]"
+              className="relative h-11 rounded-full border px-5 text-[12px] whitespace-nowrap md:px-6 font-semibold tracking-[0.18em] uppercase transition-colors duration-300 hover:border-[#e4601d] active:scale-[0.97]"
               style={{ ...DISPLAY, borderColor: 'rgba(242,233,220,0.3)' }}
             >
               Ver el menú
@@ -202,7 +214,7 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
             <span aria-hidden="true" className="inline-block h-px w-8" style={{ background: C.orange }} />
             Tocá una zona del local
           </span>
-          <span className="opacity-55">C33.02 · Av. Gral. Roca 1120 · 40°09′S 71°21′O</span>
+          <span className="hidden opacity-55 md:inline">C33.02 · Av. Gral. Roca 1120 · 40°09′S 71°21′O</span>
         </div>
       </div>
 
