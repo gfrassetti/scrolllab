@@ -704,6 +704,20 @@ const MODEL_3D_NOTES = {
 /** Section folders shared across models — packed when a page imports them. */
 const CROSS_MODEL_DIRS = ['contact']
 
+/**
+ * El copy de la demo es de un negocio inventado (docs/template-copy.md): el
+ * README le dice al comprador de dónde sale, cómo andan los links y que los
+ * textos legales son de muestra.
+ */
+const DEMO_COPY_NOTE = `## Demo copy and links
+
+The text in this template belongs to an invented business, written so the demo reads like a finished site. Every text is a prop of its section: replace it with yours.
+
+- Menu, buttons and footer links point to sections of the page by \`id\` (\`#models\` → \`<section id="models">\`). With smooth scroll on, the page glides there; from the phone menu it closes the menu first.
+- Emails and phone numbers in contact blocks become \`mailto:\` / \`tel:\` links (\`src/lib/contactLinks.js\`).
+- Where the footer has Privacy / Terms, they open their text in a panel over the page (\`src/components/LegalSheet.jsx\`) while they point at \`#privacy\` / \`#terms\`; point them at your own page (\`/privacy\`, \`https://…\`) to use that instead. **The legal texts are samples for the invented business: replace them with yours and have them reviewed.**
+`
+
 const CONTACT_FORM_NOTE = `## Contact form
 
 The form ships in **demo** mode: it validates, shows the sending / success states
@@ -820,7 +834,7 @@ function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
     stampReadme(
       `# ${model.toUpperCase()} — SCROLLLAB\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n\n${licenseNote}\n${
         MODEL_3D_NOTES[model] ? `\n${MODEL_3D_NOTES[model]}` : ''
-      }${sectionDirs.includes('contact') ? `\n${CONTACT_FORM_NOTE}` : ''}`,
+      }${sectionDirs.includes('contact') ? `\n${CONTACT_FORM_NOTE}` : ''}\n${DEMO_COPY_NOTE}`,
       licenseMeta,
     ),
     { name: `${prefix}README.md` },
@@ -1198,6 +1212,7 @@ document.documentElement.style.setProperty('--user-font', ${JSON.stringify(globa
     readme += `\n${monolith3dNote({ sampleGlb: false })}`
   }
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
+  readme += `\n${DEMO_COPY_NOTE}`
   if (globalFont) {
     readme += `\n## Font\n\nThe whole page uses ${globalFont.label} (chosen in the builder). It is set by the two \`data-user-font\` / \`--user-font\` lines in \`src/App.jsx\`; delete them and every section goes back to its own font.\n`
   }
