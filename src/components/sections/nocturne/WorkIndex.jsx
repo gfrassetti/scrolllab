@@ -4,34 +4,39 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { imgAttrs } from '../../../lib/responsiveImage'
 import { workCoat, workNeon, workSet, workTrails, variants } from './assets/images'
 import { themeVars } from '../../../lib/themeVars'
+import { externalProps } from '../../../lib/contactLinks'
 
 const defaultWorks = [
   {
     index: '001',
-    title: 'Placeholder film',
-    category: 'Direction',
+    title: 'Rain on Glass',
+    category: 'Commercial',
     year: '2026',
+    href: '#contact',
     img: workSet,
   },
   {
     index: '002',
-    title: 'Generic sequence',
-    category: 'Editorial',
+    title: 'The Long Coat',
+    category: 'Short film',
     year: '2025',
+    href: '#contact',
     img: workCoat,
   },
   {
     index: '003',
-    title: 'Untitled cut',
-    category: 'Motion',
+    title: 'Red Lines',
+    category: 'Music video',
     year: '2025',
+    href: '#contact',
     img: workTrails,
   },
   {
     index: '004',
-    title: 'Working title',
+    title: 'Neon Tide',
     category: 'Photography',
     year: '2024',
+    href: '#contact',
     img: workNeon,
   },
 ]
@@ -51,6 +56,8 @@ export default function WorkIndex({
   label = 'The index',
   seqLabel = 'Seq.',
   works,
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'films',
   bg,
   fg,
   accent,
@@ -116,6 +123,7 @@ export default function WorkIndex({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-24 md:px-10 md:py-36"
       style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >
@@ -134,7 +142,8 @@ export default function WorkIndex({
             className="border-b border-salt/15 first:border-t"
           >
             <a
-              href="#"
+              href={work.href || '#contact'}
+              {...externalProps(work.href)}
               onMouseEnter={() => showPreview(work.img)}
               className="group grid grid-cols-[auto_1fr] items-center gap-4 py-6 md:grid-cols-[6rem_1fr_auto_6rem] md:gap-8 md:py-8"
             >

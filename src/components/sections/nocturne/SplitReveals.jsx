@@ -8,20 +8,20 @@ import { themeVars } from '../../../lib/themeVars'
 const defaultBeats = [
   {
     kicker: 'Beat 01',
-    title: 'Placeholder frame',
-    body: 'Generic copy for the first beat. The image wipes in from the side like a projector shutter opening.',
+    title: 'Last order',
+    body: 'A diner at 3 a.m., one waitress, one customer. One take, with the street lights as our only key.',
     img: beatDiner,
   },
   {
     kicker: 'Beat 02',
-    title: 'Counter frame',
-    body: 'Alternate rows flip direction to keep the eye moving. Replace image and words, keep the rhythm.',
+    title: 'The coast road',
+    body: 'Forty kilometres of wet asphalt, a camera car and a city that never quite goes dark.',
     img: beatRoad,
   },
   {
     kicker: 'Beat 03',
-    title: 'Closing frame',
-    body: 'End the sequence on your strongest visual. Everything here is placeholder by design.',
+    title: 'Rooftop, blue hour',
+    body: 'Twelve minutes of usable light between sunset and night. We had one chance, and we took it.',
     img: beatRoof,
   },
 ]
@@ -38,6 +38,8 @@ export default function SplitReveals({
   label = 'The frames',
   seqLabel = 'Seq.',
   beats,
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'frames',
   bg,
   fg,
   accent,
@@ -85,6 +87,7 @@ export default function SplitReveals({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-24 md:px-10 md:py-36"
       style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >

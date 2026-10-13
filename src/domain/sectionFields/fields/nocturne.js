@@ -74,6 +74,7 @@ export const NOCTURNE_FIELDS = {
         { key: 'category', label: 'Categoría', type: 'text' },
         { key: 'year', label: 'Año', type: 'text' },
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
+        { key: 'href', label: 'Enlace (#sección, /ruta o https://…; vacío = #contact)', type: 'href' },
       ],
     },
     { key: 'accent', label: 'Color de acento', type: 'color' },

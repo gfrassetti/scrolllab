@@ -15,8 +15,8 @@ import { hero as heroImg, variants } from './assets/images'
 export default function HeroCinematic({
   titleTop = 'NIGHT',
   titleBottom = 'SHIFT',
-  kicker = 'A cinematic scrollytelling template',
-  meta = 'Placeholder Films — ©2026',
+  kicker = 'A production company that only shoots after dark',
+  meta = 'Nocturne Pictures — Rotterdam',
   hint = 'Scroll',
   img = heroImg,
   bg,
