@@ -30,6 +30,7 @@ const RatioPage = lazy(() => import('./pages/RatioPage'))
 const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
 const SignalPage = lazy(() => import('./pages/SignalPage'))
+const NeonPage = lazy(() => import('./pages/NeonPage'))
 const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const KinPage = lazy(() => import('./pages/KinPage'))
 const FoldPage = lazy(() => import('./pages/FoldPage'))
@@ -195,6 +196,11 @@ export default function App() {
                         <Navigate to="/" replace />
                       )
                     }
+                  />
+                  {/* NEON: prototipo, solo en local. */}
+                  <Route
+                    path="/templates/neon"
+                    element={import.meta.env.DEV ? <NeonPage /> : <Navigate to="/" replace />}
                   />
                   <Route path="/templates/meridian" element={<MeridianPage />} />
                   <Route path="/templates/kin" element={<KinPage />} />
