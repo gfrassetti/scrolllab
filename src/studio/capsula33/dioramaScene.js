@@ -274,9 +274,10 @@ export function createDioramaScene({
     rest.pos.copy(rest.look).addScaledVector(VIEW_DIR, dist)
     rest.azimuth = Math.atan2(VIEW_DIR.x, VIEW_DIR.z)
     rest.elevation = Math.asin(VIEW_DIR.y)
-    // La cámara no sale del cuadrante de las paredes abiertas (−90°…0°): así
-    // nunca ve el dorso de la pared de la barra ni el de la pared del fondo.
-    LIM.yaw = [-1.42 - rest.azimuth, -0.14 - rest.azimuth]
+    // La cámara gira entre la entrada (−75°, se ve la fachada con la puerta) y
+    // apenas pasado el frente: nunca ve el dorso de la pared del fondo ni el
+    // de la pared de la barra.
+    LIM.yaw = [-1.3 - rest.azimuth, 0.12 - rest.azimuth]
     // Salida: se aleja y levanta la vista; el local baja y queda atrás.
     exit.pos.copy(rest.look).addScaledVector(VIEW_DIR, dist * 2.2)
     exit.look.copy(rest.look).add(new THREE.Vector3(0, dist * 1.25, 0))
@@ -555,11 +556,9 @@ export function createDioramaScene({
       look.copy(tmpB)
     }
 
-    // Un balanceo chico con el puntero y la flotación.
-    const sway = !calm && !away && !press.dragging
-    pivot.rotation.y += ((sway ? pointer.x * 0.05 : 0) - pivot.rotation.y) * 0.05
-    pivot.rotation.x += ((sway ? pointer.y * 0.02 : 0) - pivot.rotation.x) * 0.05
-    pivot.position.y = TARGET.y + (calm ? 0 : Math.sin(t * 0.7) * 0.08)
+    // Siempre derecho: sin balanceo, solo una flotación muy leve.
+    pivot.rotation.set(0, 0, 0)
+    pivot.position.y = TARGET.y + (calm ? 0 : Math.sin(t * 0.7) * 0.05)
 
     ring.rotation.y = t * 0.04
     nebula.rotation.z = t * 0.01

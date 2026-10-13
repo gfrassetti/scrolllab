@@ -3,21 +3,21 @@
  * camina desde la puerta. Cada una tiene su zona (para el puntero), su toma de
  * cámara y lo que se cuenta. Todo es del local real; nada inventado.
  *
- * Coordenadas de Blender: x va de la entrada (−8) a la pared naranja del fondo
+ * Coordenadas de Blender: x va de la entrada (−9,6) a la pared naranja del fondo
  * (6); y del lado del salón (−3) a la pared de la barra (3); z hacia arriba.
  */
 
 export const MANIFEST = {
   model: 'room.glb',
   atlases: { shell: 'bake-shell.webp', props: 'bake-props.webp' },
-  target: [-1, 0, 1.2], // el centro del local (el pivote del giro)
-  // Pantalla ancha: isométrica desde la esquina de la entrada.
-  viewDir: [-1, -1, 1],
+  target: [-1.8, 0, 1.2], // el centro del local (el pivote del giro)
+  // Pantalla ancha: de frente y derecho (el largo del local en horizontal).
+  viewDir: [0, -1, 0.85],
   lookLift: 0.2,
-  radius: 10.5,
+  radius: 10.2,
   distance: 58,
-  // Teléfono en vertical: el local a lo largo, desde la puerta.
-  tall: { viewDir: [-1.55, -0.5, 1.35], lookLift: 0.4, radius: 5.4, distance: 32 },
+  // Teléfono en vertical: desde arriba, a lo largo, con la entrada abajo.
+  tall: { viewDir: [-0.9, -0.25, 1.9], lookLift: 0.2, radius: 4.6, distance: 34 },
 }
 
 export const STATIONS = [
@@ -25,10 +25,10 @@ export const STATIONS = [
     id: 'entrada',
     page: '001',
     label: 'La entrada',
-    zone: { min: [-8.6, -0.9, 0], max: [-7.3, 2.2, 2.8] },
-    cam: { pos: [-13.5, -2.2, 3.4], look: [-4.5, 0.6, 1.0] },
+    zone: { min: [-10, -3, 0], max: [-8.05, 3, 3.2] },
+    cam: { pos: [-14.6, -4.2, 2.4], look: [-9.6, 0.2, 1.3] },
     kicker: 'Av. Gral. Roca 1120',
-    text: 'A cuadras del lago Lácar, en San Martín de los Andes. A la derecha, el pulmón; a la izquierda, la colección.',
+    text: 'A cuadras del lago Lácar, en San Martín de los Andes. Pasando la puerta, la mesa naranja; después, el pulmón a la derecha y la colección a la izquierda.',
     hours: true,
     link: { label: 'Cómo llegar', href: 'https://www.google.com/maps/search/?api=1&query=Gral.+Roca+1120,+San+Mart%C3%ADn+de+los+Andes' },
   },
@@ -45,7 +45,7 @@ export const STATIONS = [
     id: 'vitrinas',
     page: '003',
     label: 'Las vitrinas',
-    zone: { min: [-8, 2.2, 0], max: [-2.05, 3, 3] },
+    zone: { min: [-9.6, 2.2, 0], max: [-2.05, 3, 3] },
     cam: { pos: [-0.6, -3.4, 2.9], look: [-5.0, 3, 1.4] },
     kicker: 'La colección',
     text: 'Las figuras de cine del dueño, en vitrinas de ojo de buey. Algunas, a la altura de los más chicos.',
