@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { prefersReducedMotion } from '../../../lib/motion'
+import { contactHref } from '../../../lib/contactLinks'
 
 const SERIF = "'Fraunces', 'Times New Roman', serif"
 const MONO = "'JetBrains Mono', ui-monospace, monospace"
@@ -16,11 +17,11 @@ const MONO = "'JetBrains Mono', ui-monospace, monospace"
 export default function Footer({
   video = '/fold/footer-loop.mp4',
   poster = '/fold/footer-loop.jpg',
-  kicker = 'Closing line',
+  kicker = 'Workshops every Saturday',
   title = 'Fold it, light it, let it go.',
-  cta = 'Call to action',
-  ctaHref = '#',
-  meta = ['Brand Studio', 'City, Country', 'hello@example.com'],
+  cta = 'Book a workshop',
+  ctaHref = 'mailto:hello@foldpaper.studio?subject=Saturday%20workshop',
+  meta = ['Fold Paper Studio', 'Rua das Flores 42, Porto', 'hello@foldpaper.studio'],
 }) {
   const videoRef = useRef(null)
 
@@ -36,7 +37,7 @@ export default function Footer({
   }, [])
 
   return (
-    <footer className="relative h-svh overflow-hidden bg-[#e9e2d3] text-[#1b1a17]">
+    <footer id="contact" className="relative h-svh overflow-hidden bg-[#e9e2d3] text-[#1b1a17]">
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
@@ -77,9 +78,21 @@ export default function Footer({
         className="absolute inset-x-0 bottom-0 flex flex-wrap justify-between gap-x-6 gap-y-2 px-[4vw] pb-6 text-[11px] tracking-[0.18em] uppercase md:px-[2.65%]"
         style={{ fontFamily: MONO }}
       >
-        {meta.map((m, i) => (
-          <li key={i}>{typeof m === 'string' ? m : m?.text}</li>
-        ))}
+        {meta.map((m, i) => {
+          const text = typeof m === 'string' ? m : m?.text
+          const href = contactHref(text)
+          return (
+            <li key={i}>
+              {href ? (
+                <a href={href} className="tpl-link tpl-hit relative">
+                  {text}
+                </a>
+              ) : (
+                text
+              )}
+            </li>
+          )
+        })}
       </ul>
     </footer>
   )

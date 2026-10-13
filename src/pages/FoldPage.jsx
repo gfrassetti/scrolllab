@@ -19,22 +19,22 @@ const MONO = "'JetBrains Mono', monospace"
 export default function FoldPage() {
   return (
     <SmoothScrollProvider>
-      <div className="fold-world tpl-world bg-[#e9e2d3] text-[#1b1a17]" style={{ fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif" }}>
+      <div id="top" className="fold-world tpl-world bg-[#e9e2d3] text-[#1b1a17]" style={{ fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif" }}>
         {/* Amber reads on the day scenes and on the night ones. */}
         <ScrollRail trackClassName="bg-[#c8742f]/20" fillClassName="bg-[#c8742f]" />
         <header className="pointer-events-none fixed inset-x-0 top-0 z-20 h-[5.3vw] min-h-14" style={{ transition: 'opacity 380ms cubic-bezier(0.22,1,0.36,1)' }}>
           {/* Mark: a folded sheet, drawn in. */}
-          <a href="#" aria-label="Brand — home" className="fold-mark-link tpl-hit pointer-events-auto absolute top-1/2 left-[2.65%] block -translate-x-1/2 -translate-y-1/2 max-[820px]:left-[24px]">
+          <a href="#top" aria-label="Fold Paper Studio — home" className="fold-mark-link tpl-hit pointer-events-auto absolute top-1/2 left-[2.65%] block -translate-x-1/2 -translate-y-1/2 max-[820px]:left-[24px]">
             <svg viewBox="0 0 28 28" className="fold-mark h-[clamp(20px,2.05vw,30px)] w-auto" fill="none" stroke="currentColor" strokeWidth="1.4">
               <path pathLength="1" d="M4 24V4h20v20H4ZM4 4l20 20M14 4v10" />
             </svg>
           </a>
           <a
-            href="#"
+            href="mailto:hello@foldpaper.studio?subject=Saturday%20workshop"
             className="fold-hide-on-nav tpl-hit group pointer-events-auto absolute top-1/2 right-[2%] inline-flex -translate-y-1/2 items-center gap-3 rounded-[4px] bg-[#1b1a17] py-1 pr-1 pl-3 text-[11px] tracking-[0.16em] text-[#f2efe6] uppercase"
             style={{ fontFamily: MONO }}
           >
-            Call to action
+            Book a workshop
             <span aria-hidden="true" className="grid aspect-square w-7 place-items-center rounded-[3px] border border-[#f2efe6]/30 transition-colors duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[#f2efe6]/15">
               →
             </span>
