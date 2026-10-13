@@ -46,20 +46,22 @@ botón.
 ----------------------------------------------------------------------
 Cap. 0 — Loader: el de ahora (estrellas + salto). Sin sonidos de más.
 
-Cap. 1 — La entrada (hero) · multicapa como el de NEON (pedido del dueño, 2026-10-13).
-  - El café es un MÓDULO de una nave: el ventanal negro del edificio real es el
-    espacio (canvas de estrellas en 3 profundidades + un planeta en sombra) y
-    la entrada naranja fiel a las fotos está acoplada en la cubierta mojada de
-    un hangar. Capas: espacio · hangar · interior (por el hueco) · módulo ·
-    marco de escotilla · titular.
+Cap. 1 — La entrada (hero) · pasillo de nave caminable (pedido del dueño, 2026-10-13).
+  - El café es un MÓDULO de la nave: un pasillo gris de costillas octogonales
+    con luces en pastilla y, empotrada en la pared del fondo, la entrada real
+    (cartel crema, ojo de buey «c̄33», puerta de ventanas en pastilla, ventanal
+    con listones), apoyada en el piso que la refleja. Nada flota, sin planeta.
+  - 3D por proyección de cámara (corridorScene.js): la imagen generada se
+    proyecta sobre un túnel; el puntero mueve la cámara con parallax real.
   - Titular flotante «Café de especialidad, a bordo.»: respira, se inclina con
-    el puntero y las letras cercanas se levantan y encienden en naranja (en el
-    teléfono, una pasada de luz). Al scrollear se desarma hacia arriba.
-  - Scroll: el titular se va, las hojas se esconden en la pared (soplido), nos
-    acercamos y entramos al pasillo. «Bienvenidos, exploradores de universos».
+    el puntero, las letras cercanas se encienden (en el teléfono, una pasada de
+    luz). Al scrollear se desarma.
+  - Scroll: caminamos hasta la puerta, se abre (soplido), cruzamos; adentro la
+    imagen pasa a DOM en alta y se abre hasta verse entera. «Bienvenidos,
+    exploradores de universos».
   - Hover: el cartel titila, el ojo de buey late, la puerta se entreabre.
-  - Un solo CTA: «Scroll para entrar». Archivo: ShipHero.jsx.
-  - (El video scrubeado del Detalle #1 queda descartado para el hero.)
+  - Teléfono: la toma extendida arriba y abajo (textura cuadrada) + lente más
+    angular, para que entre la entrada entera con el pasillo.
 
 Cap. 2 — "Bienvenidos, exploradores de universos" (frase real de su revista).
   - El último cuadro del video (el pasillo) queda de fondo; entra la chica
