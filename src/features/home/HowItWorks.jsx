@@ -14,6 +14,7 @@ export default function HowItWorks({ t, howPanels }) {
       >
         <HorizontalPanels
           chapter={null}
+          id={null}
           label={t('nav.howItWorks')}
           headingBefore={t('home.howTitleBefore')}
           headingEm={t('home.howTitleZip')}

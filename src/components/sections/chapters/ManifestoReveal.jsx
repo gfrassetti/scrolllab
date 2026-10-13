@@ -26,6 +26,8 @@ export default function ManifestoReveal({
   total = '06',
   label = 'Manifesto',
   text,
+  /** Ancla de la sección, si un link apunta acá. */
+  id = 'manifesto',
   className = '',
   children,
   bg,
@@ -57,6 +59,7 @@ export default function ManifestoReveal({
 
   return (
     <section
+      id={id}
       style={{
         background: bg || undefined,
         color: fg || undefined,
@@ -80,9 +83,9 @@ export default function ManifestoReveal({
       >
         {children ?? (text ? withEmphasis(text) : (
           <>
-            A page is not a poster — it is <em>a film</em>. This placeholder
-            copy holds the rhythm until your own words arrive to{' '}
-            <em>carry the story</em>.
+            We print <em>four issues a year</em>, each one a single story told
+            by the people who lived it. No feeds, no ads, nothing to{' '}
+            <em>scroll past</em>.
           </>
         ))}
       </p>

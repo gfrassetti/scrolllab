@@ -7,7 +7,7 @@ import { themeVars } from '../../../lib/themeVars'
  * scroll velocity, framed by thin editorial rule lines.
  */
 export default function VelocityMarquee({
-  text = 'Placeholder ribbon',
+  text = 'Issue 97 out now — The Quiet Issue',
   separator = '✺',
   repeat = 6,
   bg,

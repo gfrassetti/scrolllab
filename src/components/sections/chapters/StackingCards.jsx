@@ -5,26 +5,26 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 const defaultCards = [
   {
     index: '01',
-    title: 'Placeholder principle',
-    body: 'Each card is one idea. As the next one arrives, this one settles back into the stack — scale, not clutter.',
+    title: 'One story per issue',
+    body: 'Each issue follows a single story from beginning to end. If it needs ninety pages, it gets ninety pages.',
     theme: 'bg-ink text-bone',
   },
   {
     index: '02',
-    title: 'Another principle',
-    body: 'Generic copy waiting for a real voice. The stacking rhythm keeps long lists readable and cinematic.',
+    title: 'Paid for the time it takes',
+    body: 'Our writers are paid for the months a story takes, not for how many people share it.',
     theme: 'bg-accent text-ink',
   },
   {
     index: '03',
-    title: 'Third principle',
-    body: 'Swap themes per card to alternate contrast. Everything is a Tailwind class away.',
+    title: 'Printed close to home',
+    body: 'Paper from a mill in Fife, printed in Leith, posted from our office. Every copy starts its trip within 80 km.',
     theme: 'bg-bone text-ink border border-ink/20',
   },
   {
     index: '04',
-    title: 'Final principle',
-    body: 'The last card stays on top. End the chapter with your strongest statement.',
+    title: 'No ads, ever',
+    body: 'Readers pay for the magazine, so the magazine answers to them. That is the whole business model.',
     theme: 'bg-ink text-bone',
   },
 ]
@@ -39,8 +39,10 @@ const defaultCards = [
 export default function StackingCards({
   chapter = '05',
   total = '06',
-  label = 'The stack',
+  label = 'How we work',
   cards,
+  /** Ancla de la sección: el footer apunta acá. */
+  id = 'how-we-work',
   chapterLabel = 'Chapter',
   bg,
   fg,
@@ -83,6 +85,7 @@ export default function StackingCards({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-28 md:px-10 md:py-44"
       style={{
         background: bg || undefined,

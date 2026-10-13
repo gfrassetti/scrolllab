@@ -26,7 +26,7 @@ export default function ChaptersPage() {
 
         <main>
           <HeroKinetic />
-          <VelocityMarquee text="A story told in scroll" />
+          <VelocityMarquee />
           <ManifestoReveal chapter="01" />
           <StickyImageStory chapter="02" />
           <HorizontalPanels chapter="03" />

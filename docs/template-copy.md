@@ -42,3 +42,4 @@ Así que cada template de SCROLLLAB es el sitio de un negocio que inventamos par
 |---|---|---|---|
 | APEX | **Apex Automobili** — gran turismo eléctrico hecho a mano (Saloon, Coupé, Terra) | Turín | 620 km, 11 semanas por auto, 240 autos al año |
 | FOLD | **Fold Paper Studio** — taller de faroles de papel, encargos y talleres los sábados | Porto | el CTA y el footer abren un mail (cruzar 46 pantallas de film hasta el footer no tiene sentido) |
+| CHAPTERS | **Chapters Quarterly** — revista trimestral impresa de historias largas | Edimburgo | Issue 97, 24 años, 96 números, sin publicidad |

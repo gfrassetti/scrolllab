@@ -10,7 +10,12 @@ import { parseNavLinks } from '../../../lib/navLinks'
  */
 export default function NavMinimal({
   brand = 'CHAPTERS®',
-  links = ['Story', 'Index', 'Contact'],
+  links = [
+    { label: 'This issue', href: '#this-issue' },
+    { label: 'Inside', href: '#inside' },
+    { label: 'Archive', href: '#archive' },
+    { label: 'Subscribe', href: '#subscribe' },
+  ],
   linksText,
   menuLabel = 'Menu',
   closeLabel = 'Close',

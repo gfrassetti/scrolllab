@@ -6,21 +6,21 @@ import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultScenes = [
   {
-    kicker: 'Scene A',
-    title: 'Placeholder scene one',
-    body: 'Generic supporting copy. Each block of text swaps the pinned image beside it as it scrolls into view.',
+    kicker: 'Feature',
+    title: 'The last newspaper reader on Rose Street',
+    body: 'Every morning at seven, Tom Ellery reads the paper cover to cover at the same café table. We sat with him for a year.',
     img: sceneA,
   },
   {
-    kicker: 'Scene B',
-    title: 'Placeholder scene two',
-    body: 'Swap this text for your own narrative beat. The image column stays fixed while the story flows past it.',
+    kicker: 'Craft',
+    title: 'Set by hand, one letter at a time',
+    body: 'This cover was printed on a 1952 letterpress in Leith. Each headline took an afternoon to set, and one to put away.',
     img: sceneB,
   },
   {
-    kicker: 'Scene C',
-    title: 'Placeholder scene three',
-    body: 'The final beat of this chapter. On small screens each scene simply carries its own inline image.',
+    kicker: 'Essay',
+    title: 'The walk home at golden hour',
+    body: 'Twenty minutes between the office and the front door, and why they might be the best part of the day.',
     img: sceneC,
   },
 ]
@@ -41,8 +41,10 @@ const defaultScenes = [
 export default function StickyImageStory({
   chapter = '02',
   total = '06',
-  label = 'Sticky story',
+  label = 'This issue',
   scenes,
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'this-issue',
   chapterLabel = 'Chapter',
   bg,
   fg,
@@ -121,6 +123,7 @@ export default function StickyImageStory({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 md:px-10"
       style={{
         background: bg || undefined,
