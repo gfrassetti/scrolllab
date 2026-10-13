@@ -19,14 +19,14 @@ const DISPLAY = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretc
 const HAIRLINE = 'color-mix(in srgb, currentColor 25%, transparent)'
 
 const ROOMS = [
-  { no: '01', title: 'Headline 1', dates: 'Subheadline' },
-  { no: '02', title: 'Headline 2', dates: 'Subheadline' },
-  { no: '03', title: 'Headline 3', dates: 'Subheadline' },
-  { no: '04', title: 'Headline 4', dates: 'Subheadline' },
-  { no: '05', title: 'Headline 5', dates: 'Subheadline' },
+  { no: '01', title: 'Red, Ochre and Blue', dates: '12 Feb — 24 May 2026' },
+  { no: '02', title: 'The Long Table', dates: '6 Mar — 30 Aug 2026' },
+  { no: '03', title: 'Kinship: Portraits', dates: '20 Mar — 11 Oct 2026' },
+  { no: '04', title: 'Paper Rooms', dates: '2 May — 6 Sep 2026' },
+  { no: '05', title: 'Harbour Sounds', dates: 'Ongoing, in the garden' },
 ]
 
-export default function Rooms({ heading = 'Section title', rooms, bg, fg, accent }) {
+export default function Rooms({ heading = 'Now on view', rooms, bg, fg, accent }) {
   const rootRef = useRef(null)
   const valid = rooms?.filter((r) => r?.title || r?.no || r?.dates)
   const list = valid?.length ? valid : ROOMS
@@ -63,7 +63,7 @@ export default function Rooms({ heading = 'Section title', rooms, bg, fg, accent
       <ul className="kin-room-list mt-[6svh] border-t" style={{ borderColor: HAIRLINE }}>
         {list.map((r, i) => (
           <li key={i} data-kin-row className="kin-room-row border-b" style={{ borderColor: HAIRLINE }}>
-            <a href={r.href || '#'} className="grid grid-cols-[auto_1fr] items-baseline gap-x-[3vw] py-[2.4vw] md:grid-cols-[8vw_1fr_auto] md:py-[1.1vw]">
+            <a href={r.href || '#programme'} className="grid grid-cols-[auto_1fr] items-baseline gap-x-[3vw] py-[2.4vw] md:grid-cols-[8vw_1fr_auto] md:py-[1.1vw]">
               <span className="text-[3.3vw] md:text-[max(11px,0.82vw)]">{r.no}</span>
               <span className="block overflow-hidden pb-[0.06em]">
                 <span

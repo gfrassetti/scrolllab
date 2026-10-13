@@ -34,17 +34,17 @@ const ACCENT = '#e1371f'
 const SEEN_KEY = 'kin-loader-seen'
 
 const NAV = [
-  { label: 'Link 1', href: '#top' },
-  { label: 'Link 2', href: '#rooms' },
-  { label: 'Link 3', href: '#about' },
+  { label: 'Exhibitions', href: '#rooms' },
+  { label: 'Collection', href: '#collection' },
+  { label: 'About', href: '#about' },
 ]
 
 const ROOMS = [
-  'Lorem ipsum dolor',
-  'Sit amet consectetur',
-  'Adipiscing elit sed',
-  'Do eiusmod tempor',
-  'Incididunt ut labore',
+  'Red, Ochre and Blue',
+  'The Long Table',
+  'Kinship: Portraits',
+  'Paper Rooms',
+  'Harbour Sounds',
 ]
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -254,15 +254,15 @@ function MenuOverlay({ open, onClose, links, visitLabel, visitHref, place, close
 
 export default function Hero({
   word = WORD,
-  brand = 'Brand name',
-  brandNote = 'Tagline',
+  brand = 'Kin Kunsthal',
+  brandNote = 'Free, every day',
   links = NAV,
-  visitLabel = 'Call to action',
+  visitLabel = 'Plan your visit',
   visitHref = '#visit',
-  place = 'City',
-  listLabel = 'List title',
+  place = 'Oslo',
+  listLabel = 'Now on view',
   rooms = ROOMS,
-  lines = ['Headline 1—', 'Lorem ipsum', 'dolor sit amet'],
+  lines = ['Art for—', 'the people', 'you came with'],
   line1,
   line2,
   line3,

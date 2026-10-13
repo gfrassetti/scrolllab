@@ -20,9 +20,9 @@ import { DISPLAY, HAIRLINE, MORE_CSS, MoreLink, kinVars } from './shared'
  */
 
 const ROWS = [
-  { label: 'Admission', text: 'Free entry' },
+  { label: 'Admission', text: 'Free entry, always' },
   { label: 'Access', text: 'Step-free, all floors' },
-  { label: 'Getting here', text: 'Line 1, stop name' },
+  { label: 'Getting here', text: 'Tram 12, Rope Walk stop' },
 ]
 const DAYS = [
   { label: 'Mon', open: '', close: '' },
@@ -45,15 +45,15 @@ const spanOf = (d) => {
 }
 
 export default function Visit({
-  lines = ['Headline 6—', 'Lorem ipsum'],
+  lines = ['Plan your—', 'visit'],
   line1,
   line2,
   rows,
   days,
   todayLabel = 'Today',
   closedLabel = 'Closed',
-  ctaLabel = 'Learn more',
-  ctaHref = '#',
+  ctaLabel = 'Book a group visit',
+  ctaHref = 'mailto:groups@kinkunsthal.no?subject=Group%20visit',
   bg,
   fg,
   accent,

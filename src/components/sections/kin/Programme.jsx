@@ -25,11 +25,11 @@ import { DISPLAY, HAIRLINE, clamp01, kinVars } from './shared'
  */
 
 const ITEMS = [
-  { no: '01', title: 'Headline 1', dates: 'Subheadline', from: '1', to: '3' },
-  { no: '02', title: 'Headline 2', dates: 'Subheadline', from: '3', to: '5' },
-  { no: '03', title: 'Headline 3', dates: 'Subheadline', from: '5', to: '8' },
-  { no: '04', title: 'Headline 4', dates: 'Subheadline', from: '8', to: '10' },
-  { no: '05', title: 'Headline 5', dates: 'Subheadline', from: '10', to: '12' },
+  { no: '01', title: 'Red, Ochre and Blue', dates: '12 Feb — 24 May', from: '2', to: '5' },
+  { no: '02', title: 'The Long Table', dates: '6 Mar — 30 Aug', from: '3', to: '8' },
+  { no: '03', title: 'Kinship: Portraits', dates: '20 Mar — 11 Oct', from: '3', to: '10' },
+  { no: '04', title: 'Paper Rooms', dates: '2 May — 6 Sep', from: '5', to: '9' },
+  { no: '05', title: 'Winter Light', dates: '14 Nov — 28 Feb', from: '11', to: '12' },
 ]
 const MONTHS = 'J F M A M J J A S O N D'
 
@@ -39,7 +39,7 @@ const toMonth = (v, fallback) => {
 }
 
 export default function Programme({
-  lines = ['Headline 5—', 'Lorem ipsum'],
+  lines = ['The year—', 'ahead'],
   line1,
   line2,
   year = '2026',
@@ -184,7 +184,7 @@ export default function Programme({
                     <span className="tabular-nums">{r.no}</span>
                     <div className="flex min-w-0 flex-1 items-baseline justify-between gap-[2.5vw] md:block">
                       <a
-                        href={r.href || '#'}
+                        href={r.href || '#visit'}
                         className="tpl-link tpl-hit relative block min-w-0 text-[4.6vw] leading-[0.98] font-semibold uppercase [overflow-wrap:anywhere] md:text-[max(14px,1.45vw)]"
                         style={DISPLAY}
                       >

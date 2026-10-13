@@ -18,13 +18,13 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 const DISPLAY = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '125%', fontVariationSettings: "'wdth' 125" }
 
 const NOTES = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
-  'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
-  'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.',
+  'Kin opened in 2014 in a former rope factory on the harbour. Five rooms, one garden, no tickets.',
+  'We show living artists next to the works that shaped them, and change one room every season.',
+  'Bring the people you love. Most of what we show is meant to be seen together.',
 ]
 
 export default function Intro({
-  lines = ['Headline 2—', 'Lorem ipsum', 'dolor sit amet'],
+  lines = ['A house—', 'for art', 'and company'],
   line1,
   line2,
   line3,

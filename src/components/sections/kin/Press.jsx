@@ -23,9 +23,9 @@ import { DISPLAY, HAIRLINE, INK, MaskedWords, PAPER, kinVars, pad } from './shar
  */
 
 const QUOTES = [
-  { text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor.', source: 'Publication, 2026' },
-  { text: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.', source: 'Publication, 2026' },
-  { text: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.', source: 'Publication, 2025' },
+  { text: 'The most generous museum in the north: free, quiet, and full of surprises.', source: 'Nordic Art Review, 2026' },
+  { text: 'A small house with very big rooms. Go on a weekday morning and stay for lunch.', source: 'The Weekend Paper, 2026' },
+  { text: 'Kin shows how a museum can feel like home without losing its nerve.', source: 'Design Quarterly, 2025' },
 ]
 
 // One slot of scroll per quote: words in, hold, words out.
