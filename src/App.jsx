@@ -31,6 +31,9 @@ const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
 const SignalPage = lazy(() => import('./pages/SignalPage'))
 const NeonPage = lazy(() => import('./pages/NeonPage'))
+// cāpsula33: demo privado del Estudio (sitio a medida). Solo en local: en producción
+// el import no existe, así que ni el código ni las fotos del local viajan al build.
+const Capsula33Page = import.meta.env.DEV ? lazy(() => import('./studio/capsula33/Capsula33Page')) : null
 const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const KinPage = lazy(() => import('./pages/KinPage'))
 const FoldPage = lazy(() => import('./pages/FoldPage'))
@@ -196,6 +199,10 @@ export default function App() {
                         <Navigate to="/" replace />
                       )
                     }
+                  />
+                  <Route
+                    path="/estudio/capsula33"
+                    element={Capsula33Page ? <Capsula33Page /> : <Navigate to="/" replace />}
                   />
                   {/* NEON: prototipo, solo en local. */}
                   <Route
