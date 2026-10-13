@@ -9,12 +9,8 @@ import { C, MONO } from './brand'
  * a la barra del navegador mientras está la página.
  */
 
-const MARKS = [
-  { id: 'top', label: 'C33' },
-  { id: 'capsula', label: 'La cápsula' },
-  { id: 'local', label: 'El local' },
-  { id: 'visita', label: 'Visitanos' },
-]
+// Por ahora la página es una sola escena: el riel muestra solo el avance.
+const MARKS = []
 
 export default function ScrollRail({ visible }) {
   const thumbRef = useRef(null)
