@@ -2,11 +2,39 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { riseBubbles } from './riseBubbles'
+import { parseNavLinks } from '../../../lib/navLinks'
+import { externalProps, legalDocs } from '../../../lib/contactLinks'
+import LegalSheet from '../../LegalSheet'
 
 const defaultColumns = [
-  { heading: 'Navigation', items: ['Flavors', 'Our story', 'Shop', 'Press'] },
-  { heading: 'Legal', items: ['Legal notice', 'Privacy', 'Cookies'] },
+  {
+    heading: 'Navigation',
+    items: [
+      { label: 'Flavors', href: '#flavors' },
+      { label: 'Why Fizz', href: '#benefits' },
+      { label: 'Our story', href: '#story' },
+      { label: 'Instagram', href: 'https://www.instagram.com/' },
+    ],
+  },
 ]
+
+const PRIVACY = `Last updated: 1 February 2026
+
+Fizz Drinks Co., S.L. (Carrer de Cádiz 31, 46006 Valencia) is responsible for the personal data you share on this site.
+
+We keep what you send us through the contact form: your name, your email and your message. We use it only to answer you, and we delete it after a year without contact.
+
+We do not sell your data or share it with advertisers. Our email provider processes it on our behalf, inside the European Union.
+
+You can ask to see, correct or delete your data at any time at privacy@fizzdrinks.co.`
+
+const TERMS = `Last updated: 1 February 2026
+
+This site is run by Fizz Drinks Co., S.L. The flavors, ingredients and nutrition facts shown here are the ones printed on our bottles; if they ever differ, the bottle is right.
+
+Fizz is sold through stockists. Prices, availability and deposits on returnable glass are set by each shop.
+
+Photographs and text on this site belong to Fizz Drinks Co. and may not be reused without written permission.`
 
 /**
  * FooterSplash — the closing screen: one full viewport of flat color, the link
@@ -14,17 +42,25 @@ const defaultColumns = [
  * bubbles rising out of it (only while the footer is on screen).
  */
 export default function FooterSplash({
-  ctaWord = 'BRAND*',
-  email = 'hello@placeholder.studio',
+  ctaWord = 'FIZZ*',
+  email = 'hello@fizzdrinks.co',
   ctaHref,
   columns = defaultColumns,
   links,
   bg = '#2c4bff',
   fg = '#fff3e2',
-  legal = '©2026 Placeholder Brand — Template, not a promise',
-  note = 'Placeholder closing note. Tell people where to go next — swap this text and the links for your own.',
+  legal = '©2026 Fizz Drinks Co. — Valencia',
+  note = 'Stocked in 400 shops across Spain and Portugal. Write to us if you want Fizz in yours.',
   backToTop = 'Back to top ↑',
   contactLabel = 'Contact',
+  legalHeading = 'Legal',
+  privacyLabel = 'Privacy',
+  privacyHref = '#privacy',
+  privacyText = PRIVACY,
+  termsLabel = 'Terms',
+  termsHref = '#terms',
+  termsText = TERMS,
+  legalCloseLabel = 'Close',
   showBubbles = 'on',
   bubbleColor,
 }) {
@@ -75,7 +111,8 @@ export default function FooterSplash({
                 {flatLinks.map((l, i) => (
                   <li key={i}>
                     <a
-                      href={l.href || '#'}
+                      href={l.href || '#top'}
+                      {...externalProps(l.href)}
                       className="tpl-link tpl-hit relative inline-block py-3 text-sm uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
                     >
                       {l.label}
@@ -92,19 +129,43 @@ export default function FooterSplash({
                     {column.heading}
                   </p>
                   <ul className="lg:space-y-1">
-                    {column.items.map((item) => (
-                      <li key={item}>
+                    {parseNavLinks(column.items).map((item) => (
+                      <li key={item.label}>
                         <a
-                          href="#"
+                          href={item.href}
+                          {...externalProps(item.href)}
                           className="tpl-link tpl-hit relative inline-block py-3 text-sm uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
                         >
-                          {item}
+                          {item.label}
                         </a>
                       </li>
                     ))}
                   </ul>
                 </nav>
               ))}
+              <nav aria-label={legalHeading}>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] opacity-55 md:text-xs lg:mb-5">
+                  {legalHeading}
+                </p>
+                <ul className="lg:space-y-1">
+                  {[
+                    { label: privacyLabel, href: privacyHref },
+                    { label: termsLabel, href: termsHref },
+                  ]
+                    .filter((l) => l.label)
+                    .map((l) => (
+                      <li key={l.label}>
+                        <a
+                          href={l.href}
+                          {...externalProps(l.href)}
+                          className="tpl-link tpl-hit relative inline-block py-3 text-sm uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
+                        >
+                          {l.label}
+                        </a>
+                      </li>
+                    ))}
+                </ul>
+              </nav>
             </>
           )}
           {/* Contacto: también con links propios (antes desaparecía al editarlos). */}
@@ -147,6 +208,16 @@ export default function FooterSplash({
           {ctaWord}
         </span>
       </p>
+
+      <LegalSheet
+        docs={legalDocs([
+          { href: privacyHref, title: privacyLabel, body: privacyText },
+          { href: termsHref, title: termsLabel, body: termsText },
+        ])}
+        closeLabel={legalCloseLabel}
+        bg={fg || '#fff3e2'}
+        fg="#241352"
+      />
     </footer>
   )
 }

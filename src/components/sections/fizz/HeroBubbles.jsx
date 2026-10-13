@@ -67,16 +67,16 @@ const BUBBLE_FRAGMENT = /* glsl */ `
  * replaces the drawn print.
  */
 export default function HeroBubbles({
-  title = 'YOUR BIG TITLE',
-  tagline = 'Placeholder tagline — every text, the flavor and the 3D bottle are replaceable.',
-  meta = 'Placeholder meta — ©2026',
+  title = 'REAL FRUIT FIZZ',
+  tagline = 'Pressed fruit, a little sugar and a lot of bubbles. Made in Valencia since 2019.',
+  meta = 'Fizz Drinks Co. — Valencia',
   hint = 'Scroll',
-  statement = 'Placeholder statement — two or three short lines about the drink, set big.',
-  cta = 'Placeholder CTA',
-  ctaHref = '#',
+  statement = 'Five flavors, real fruit and 40% less sugar than the usual stuff. Still the loudest drink in the fridge.',
+  cta = 'Find your flavor',
+  ctaHref = '#flavors',
   marquee = 'SOOO MUCH FIZZ',
   flavor = 'cobalt',
-  canLabel = 'BRAND*',
+  canLabel = 'FIZZ*',
   canImage = '',
   modelUrl = '',
   envUrl = '',

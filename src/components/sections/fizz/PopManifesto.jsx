@@ -26,7 +26,9 @@ const wordColors = (accent) =>
  */
 export default function PopManifesto({
   eyebrow = '',
-  text = 'Lorem ipsum, but honest: this manifesto is placeholder text. It inks in word by word as you scroll and some words land in flavor colors — replace it with your own story from the builder or straight in the code.',
+  text = 'We started Fizz in a Valencia kitchen because every soda tasted the same: too sweet, too fake and too loud about it. So we pressed real fruit, cut the sugar and kept the bubbles. Five flavors later, it is still made by twelve people who drink far too much of it.',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'story',
   bg,
   fg,
   /** Color de las palabras que se tiñen (vacío: la familia cobalto de la demo). */
@@ -78,6 +80,7 @@ export default function PopManifesto({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-24 md:px-10 md:py-40"
       style={{
         background: bg || undefined,

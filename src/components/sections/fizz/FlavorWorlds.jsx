@@ -7,33 +7,33 @@ import { acquireFizzStage } from './fizzStage'
 
 const defaultWorlds = [
   {
-    name: 'FLAVOR 01',
-    tagline: 'Placeholder tagline one',
-    body: 'Placeholder flavor copy. The bottle turns, the drink takes this color and the whole stage follows it.',
+    name: 'BLOOD ORANGE',
+    tagline: 'Sharp, sunny, a little wild',
+    body: 'Sicilian blood oranges and a pinch of fresh ginger. Bright enough to wake up a Monday.',
     bg: '#ffb02e',
     ink: '#241352',
     liquid: '#ff9a1f',
   },
   {
-    name: 'FLAVOR 02',
-    tagline: 'Placeholder tagline two',
-    body: 'Swap this text for your own flavor story — the color change is the show, the words are yours.',
+    name: 'RASPBERRY',
+    tagline: 'Pink, tart and proud of it',
+    body: 'Whole raspberries pressed with a drop of rose. Tastes like the first warm weekend of the year.',
     bg: '#ff3ea5',
     ink: '#241352',
     liquid: '#ff2d8a',
   },
   {
-    name: 'FLAVOR 03',
-    tagline: 'Placeholder tagline three',
-    body: 'One bottle, every flavor: the print on the glass changes while its back is turned.',
+    name: 'LIME MINT',
+    tagline: 'Cold, clean, garden-fresh',
+    body: 'Persian lime and mint picked the same morning. The one people reach for after a long run.',
     bg: '#3ddc97',
     ink: '#241352',
     liquid: '#1fbf78',
   },
   {
-    name: 'FLAVOR 04',
-    tagline: 'Placeholder tagline four',
-    body: 'A darker flavor to close the ride. Hold the beat, then release into the benefits below.',
+    name: 'CASSIS',
+    tagline: 'Dark, deep, after dark',
+    body: 'Blackcurrant and a whisper of lavender. The slow one, for the end of the night.',
     bg: '#241352',
     ink: '#fff3e2',
     liquid: '#7a5cff',
@@ -107,9 +107,11 @@ export default function FlavorWorlds({
   startBg = '#2c4bff',
   startInk = '#fff3e2',
   startLiquid = '#9db8ff',
-  brand = 'BRAND*',
-  cta = 'Placeholder CTA',
-  ctaHref = '#',
+  brand = 'FIZZ*',
+  cta = 'Find a stockist',
+  ctaHref = '#contact',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'flavors',
   modelUrl = '',
   envUrl = '',
   dracoPath = '/fizz/draco/',
@@ -468,7 +470,7 @@ export default function FlavorWorlds({
   // cada uno con su color.
   if (reducedMotion) {
     return (
-      <section ref={root} className="relative">
+      <section ref={root} id={id} className="relative">
         {worlds.map((world, i) => (
           <div
             key={world.name}
@@ -490,7 +492,7 @@ export default function FlavorWorlds({
   }
 
   return (
-    <section ref={root} className="relative" style={{ backgroundColor: startBg, color: startInk }}>
+    <section ref={root} id={id} className="relative" style={{ backgroundColor: startBg, color: startInk }}>
       {/* The FIZZ stage canvas — only used when no hero before this section made one. */}
       <canvas ref={canvasRef} aria-hidden="true" />
 

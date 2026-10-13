@@ -45,3 +45,4 @@ Así que cada template de SCROLLLAB es el sitio de un negocio que inventamos par
 | CHAPTERS | **Chapters Quarterly** — revista trimestral impresa de historias largas | Edimburgo | Issue 97, 24 años, 96 números, sin publicidad |
 | NOCTURNE | **Nocturne Pictures** — productora que solo filma de noche (publicidad, cortos, videoclips) | Rotterdam | los trabajos del índice llevan a #contact (no hay páginas de caso) |
 | MONOLITH | **Monolith Works** — estudio que funde objetos, muebles y espacios en hormigón y acero | Amberes | el formulario de contacto lleva el copy de la página (ContactForm es compartido) |
+| FIZZ | **Fizz Drinks Co.** — gaseosas de fruta exprimida, 40% menos azúcar (Blood Orange, Raspberry, Lime Mint, Mango, Cassis) | Valencia | footer con Privacidad/Términos en LegalSheet |

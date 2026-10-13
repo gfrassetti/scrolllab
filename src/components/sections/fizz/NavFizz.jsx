@@ -27,10 +27,10 @@ function parseLinks(value, fallback) {
 }
 
 const DEFAULT_LINKS = [
-  { label: 'Flavors', href: '#' },
-  { label: 'Our story', href: '#' },
-  { label: 'Shop', href: '#' },
-  { label: 'Contact', href: '#' },
+  { label: 'Flavors', href: '#flavors' },
+  { label: 'Why Fizz', href: '#benefits' },
+  { label: 'Our story', href: '#story' },
+  { label: 'Contact', href: '#contact' },
 ]
 
 // One wave tile (seamless left to right); three of them loop under the panel's top edge.
@@ -77,10 +77,10 @@ function CloseIcon({ className = '' }) {
  * Hovering a link rolls it to its light-weight twin and dims the rest.
  */
 export default function NavFizz({
-  brand = 'BRAND*',
-  links = 'Flavors\nOur story\nShop\nContact',
-  cta = 'Your CTA',
-  ctaHref = '#',
+  brand = 'FIZZ*',
+  links = DEFAULT_LINKS,
+  cta = 'Find a stockist',
+  ctaHref = '#contact',
   menuBg = '#fff3e2',
   menuInk = '#2c4bff',
   /** Lo que lee un lector de pantalla en los botones de ícono. */
