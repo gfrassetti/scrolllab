@@ -2,36 +2,34 @@ import { useCallback, useEffect, useState } from 'react'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { prefersReducedMotion } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
-import Hero from './Hero'
 import Loader from './Loader'
-import Header from './Header'
-import Cursor from './Cursor'
-import ScrollRail from './ScrollRail'
+import C33Hero from './C33Hero'
+import CapsulaScene from './CapsulaScene'
+import Hero from './Hero'
 import Visit from './Visit'
+import ScrollRail from './ScrollRail'
 import { BODY, C, FONTS_HREF } from './brand'
 
 /*
-THESIS: el sitio es un viaje a bordo del local — se aborda (loader con salto
-  al hiperespacio), se ve la nave entera (el diorama flotando en el espacio) y
-  se recorre estación por estación; rechaza el "hero foto + menú en PDF" de
-  toda cafetería.
-OWN-WORLD: negro espacio con estrellas, naranja de fachada, neón naranja; mono
-  liviana minúscula (logo) + cuadrada técnica (sus impresos) + Barlow; el local
-  en miniatura con la luz de Cycles horneada; HUD (mira, PAGE 00N, riel).
-  Sin fotos: todo es el modelo.
-STORY: el visitante aborda, ve el local, lo gira, y el scroll lo lleva por la
-  entrada, el pulmón, las vitrinas, la barra y el salón; sale sabiendo dónde
-  queda y si está abierto.
-FIRST VIEWPORT: el local flotando sobre su anillo, la frase de la pared abajo a
-  la izquierda (chica), «Iniciar recorrido».
-FORM: brief fijado por el dueño (diorama del local real, loader espacial, menú
-  estilo kprverse con sonido, cursor y scroll propios), sin tirada.
+THESIS: el sitio cuenta la llegada a la cápsula — se aborda (loader con salto
+  al hiperespacio), aparece «C33» armado con barras, se desarma en la puerta
+  de la cápsula, se entra y adentro está la tripulante con su café; después,
+  el local en miniatura y cómo llegar.
+OWN-WORLD: papel crema, tinta negra y naranja de fachada; Archivo ancha (el
+  C33 y los títulos) + mono técnica + Barlow; la tripulante cyberpunk de su
+  tarjeta (generada, original), las espirales de neón del salón.
+STORY: C33 → puerta → «A bordo» (capas en parallax) → el local (diorama) →
+  te esperamos (dirección, horarios).
+FIRST VIEWPORT: «C33» gigante, la barra de navegación con borde, el titular
+  con la frase de la pared y «Scroll para entrar».
+FORM: brief fijado por el dueño (hero estilo KIN con C33, la chica en
+  parallax, el local abajo), sin tirada.
 */
 
 /**
  * cāpsula33 — demo privado del Estudio (sitio a medida para el café de San
  * Martín de los Andes). Solo en local: la ruta no existe en producción y el
- * modelo no viaja al repo (public/studio está en .gitignore).
+ * modelo y las imágenes no viajan al repo (public/studio está en .gitignore).
  */
 export default function Capsula33Page() {
   useEffect(() => {
@@ -63,13 +61,16 @@ export default function Capsula33Page() {
 
   return (
     <SmoothScrollProvider>
-      <div className="min-h-svh" style={{ background: '#050506', color: C.cream, ...BODY }}>
+      <div className="min-h-svh" style={{ background: '#111113', color: C.cream, ...BODY }}>
         <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
-        <Header visible={boarded} />
+        {/* El hero de C33 arma su palabra al montarse: entra después del salto. */}
+        {boarded ? <C33Hero /> : <div className="h-svh" />}
+        {/* El tramo en papel donde C33 se desarma y arma la puerta de la cápsula. */}
+        <div aria-hidden="true" className="h-[210svh]" style={{ background: '#efe6d8' }} />
+        <CapsulaScene />
         <Hero boarded={boarded} calm={calm} onProgress={onProgress} onReady={onReady} />
         <Visit />
         <ScrollRail visible={boarded} />
-        <Cursor />
       </div>
     </SmoothScrollProvider>
   )

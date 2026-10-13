@@ -94,10 +94,23 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // El local llega (la cámara baja sobre él) cuando la sección entra en pantalla.
   useEffect(() => {
-    if (!boarded) return
-    sceneRef.current?.intro()
-    gsap.fromTo('[data-c33-in]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, delay: calm ? 0 : 1.6 })
+    if (!boarded) return undefined
+    const st = ScrollTrigger.create({
+      trigger: rootRef.current,
+      start: 'top 65%',
+      once: true,
+      onEnter: () => {
+        sceneRef.current?.intro()
+        gsap.fromTo(
+          rootRef.current.querySelectorAll('[data-c33-in]'),
+          { autoAlpha: 0, y: 14 },
+          { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, delay: calm ? 0 : 1.2 },
+        )
+      },
+    })
+    return () => st.kill()
   }, [boarded, calm])
 
   // El recorrido: el hero queda fijo y el scroll mueve la cámara.
@@ -137,7 +150,7 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
   const station = page > 0 ? STATIONS[page - 1] : null
 
   return (
-    <section ref={rootRef} id="top" className="relative" style={{ height: `${(N + 2) * 100}svh`, background: '#050506', color: C.cream }}>
+    <section ref={rootRef} id="local" className="relative" style={{ height: `${(N + 2) * 100}svh`, background: '#050506', color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={mountRef} className="absolute inset-0">
           <canvas
@@ -165,13 +178,13 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
         <div ref={overviewRef} className="pointer-events-none absolute inset-x-0 bottom-0 grid items-end gap-6 px-6 pb-8 md:grid-cols-12 md:px-12 md:pb-12">
           <div className="md:col-span-5">
             <p data-c33-in className="text-[11px] tracking-[0.2em] uppercase opacity-0" style={{ ...MONO, color: C.neon }}>
-              Cāpsula33 · San Martín de los Andes
+              El local · en miniatura
             </p>
-            <h1 data-c33-in className="mt-4 max-w-[19ch] text-[clamp(1.5rem,2.6vw,2.35rem)] leading-[1.12] font-semibold opacity-0" style={DISPLAY}>
-              No somos lo que razonamos, somos lo que imaginamos.
-            </h1>
+            <h2 data-c33-in className="mt-4 max-w-[19ch] text-[clamp(1.5rem,2.6vw,2.35rem)] leading-[1.12] font-semibold opacity-0" style={DISPLAY}>
+              Así es la cápsula por dentro.
+            </h2>
             <p data-c33-in className="mt-3 text-[12px] tracking-[0.14em] uppercase opacity-0" style={{ ...DISPLAY, color: 'rgba(242,233,220,0.55)' }}>
-              — La pared del local
+              Av. Gral. Roca 1120
             </p>
             <div data-c33-in className="pointer-events-auto mt-6 flex items-center gap-4 opacity-0">
               <button
@@ -204,7 +217,7 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
 
         {failed ? (
           <p className="absolute inset-x-6 top-1/3 text-center text-[clamp(1.6rem,4vw,2.6rem)] font-semibold" style={DISPLAY}>
-            No somos lo que razonamos, somos lo que imaginamos.
+            Así es la cápsula por dentro.
           </p>
         ) : null}
       </div>
