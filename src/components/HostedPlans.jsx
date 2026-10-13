@@ -506,7 +506,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                 onClick={() => setCycle(c)}
                 className={`px-3 py-1.5 transition-colors ${
                   cycle === c
-                    ? 'bg-accent text-ink'
+                    ? 'bg-accent text-on-accent'
                     : 'text-ink/60 hover:text-ink'
                 }`}
               >
@@ -604,7 +604,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                   type="button"
                   onClick={() => subscribe(plan, billingCycle, reactivateVia)}
                   disabled={!!busy}
-                  className="btn mt-3 border-accent bg-accent text-ink hover:opacity-85 disabled:opacity-40"
+                  className="btn mt-3 border-accent bg-accent text-on-accent hover:opacity-85 disabled:opacity-40"
                 >
                   {busy === plan ? '…' : t('lab.planReactivate')}
                 </button>
@@ -782,7 +782,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                       to="/login?next=/lab"
                       className={`btn mt-5 w-full ${
                         featured
-                          ? 'border-accent bg-accent text-ink hover:opacity-85'
+                          ? 'border-accent bg-accent text-on-accent hover:opacity-85'
                           : 'btn-ghost'
                       }`}
                     >
@@ -795,7 +795,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                       disabled={!!busy}
                       className={`btn mt-5 w-full disabled:opacity-40 ${
                         featured
-                          ? 'border-accent bg-accent text-ink hover:opacity-85'
+                          ? 'border-accent bg-accent text-on-accent hover:opacity-85'
                           : 'border-ink bg-ink text-bone hover:opacity-90'
                       }`}
                     >
@@ -832,7 +832,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                         type="button"
                         onClick={confirmChange}
                         disabled={!!busy}
-                        className="btn mt-3 w-full border-accent bg-accent text-ink hover:opacity-85 disabled:opacity-40"
+                        className="btn mt-3 w-full border-accent bg-accent text-on-accent hover:opacity-85 disabled:opacity-40"
                       >
                         {busy === p.id
                           ? '…'
@@ -862,7 +862,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                       disabled={!!busy}
                       className={`btn mt-5 w-full disabled:opacity-40 ${
                         featured
-                          ? 'border-accent bg-accent text-ink hover:opacity-85'
+                          ? 'border-accent bg-accent text-on-accent hover:opacity-85'
                           : 'border-ink bg-ink text-bone hover:opacity-90'
                       }`}
                     >
@@ -881,7 +881,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
                       disabled={!!busy}
                       className={`btn mt-5 w-full disabled:opacity-40 ${
                         featured
-                          ? 'border-accent bg-accent text-ink hover:opacity-85'
+                          ? 'border-accent bg-accent text-on-accent hover:opacity-85'
                           : 'border-ink bg-ink text-bone hover:opacity-90'
                       }`}
                     >

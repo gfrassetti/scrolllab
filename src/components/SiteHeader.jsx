@@ -170,7 +170,7 @@ export default function SiteHeader({ solid = true }) {
           to="/"
           ref={logoHostRef}
           onClick={() => playLogoAssembly(logoHostRef.current)}
-          className="flex min-w-0 items-center gap-2.5 text-sm font-medium uppercase tracking-[0.2em] transition-colors hover:text-accent md:tracking-[0.25em] lg:tracking-[0.18em] xl:tracking-[0.25em]"
+          className="flex min-w-0 items-center gap-2.5 font-brico text-sm font-bold uppercase tracking-[0.14em] transition-colors hover:text-accent"
         >
           <Logo className="size-5 shrink-0" />
           <span className="truncate">{SITE_NAME}</span>

@@ -330,7 +330,7 @@ export default function WithdrawalPage() {
             <button
               type="submit"
               disabled={status === 'sending'}
-              className="min-h-11 w-full border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-[background-color,border-color,transform] duration-150 ease-[var(--ease-out)] hover:border-accent hover:bg-accent active:scale-[0.98] disabled:opacity-40 sm:w-auto"
+              className="min-h-11 w-full border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-[background-color,border-color,transform] duration-150 ease-[var(--ease-out)] hover:border-accent hover:bg-accent hover:text-on-accent active:scale-[0.98] disabled:opacity-40 sm:w-auto"
             >
               {status === 'sending' ? t('withdrawal.sending') : t('withdrawal.submit')}
             </button>

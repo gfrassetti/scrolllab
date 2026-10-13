@@ -30,7 +30,7 @@ export default function HomeHero({ t, locale }) {
             <p
               data-hero-brand
               aria-hidden="true"
-              className="min-w-0 select-none font-brico text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] uppercase sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
+              className="min-w-0 select-none voice text-[clamp(2.35rem,1.1rem+9vw,3.4rem)] leading-[0.9] tracking-[-0.04em] sm:text-[clamp(2.75rem,1rem+8vw,4.25rem)] md:text-[clamp(4rem,2rem+7vw,8rem)] xl:text-[clamp(7rem,6rem+4vw,14rem)]"
             >
               {SITE_NAME}
             </p>

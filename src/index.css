@@ -61,6 +61,9 @@ html.dark {
 @theme {
   /* ——— Model 01 "CHAPTERS": kinetic editorial ——— */
   --color-accent: #ff4b00;
+  /* Texto sobre el naranja de marca. No flipea con el tema (ink/bone sí): tinta fija
+     sobre naranja = 5,5:1 en claro y en oscuro. */
+  --color-on-accent: #161412;
 
   /* ——— Model 02 "NOCTURNE": cinematic noir ——— */
   --color-noir: #0e0e11;
@@ -456,6 +459,14 @@ html[data-surface='market'] body {
    botón primario se viera igual que un epígrafe. `.btn` fija alto de touch
    (44px), tamaño 14px legible y peso; el color lo pone la variante. */
 @layer components {
+  /* Voz alta de la marca (DESIGN.md): Bricolage Grotesque 600 en mayúsculas.
+     Tamaño, interlineado y tracking se declaran en cada uso. */
+  .voice {
+    font-family: var(--font-brico);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
   .btn {
     @apply inline-flex min-h-11 items-center justify-center gap-2 border
       px-5 py-3 text-body-sm font-medium;
@@ -475,7 +486,7 @@ html[data-surface='market'] body {
   }
 
   .btn-primary:hover:not(:disabled) {
-    @apply border-accent bg-accent;
+    @apply border-accent bg-accent text-on-accent;
   }
 
   .btn-ghost {

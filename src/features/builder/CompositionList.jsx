@@ -111,7 +111,7 @@ export default function CompositionList({ items, allowDropAt, setDragOver, handl
                         type="button"
                         onClick={() => removeItem(item.uid)}
                         aria-label={t('builder.remove')}
-                        className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-bone"
+                        className="grid size-10 place-items-center border border-ink/30 text-xs transition-colors duration-200 hover:border-accent hover:bg-accent hover:text-on-accent"
                       >
                         ✕
                       </button>

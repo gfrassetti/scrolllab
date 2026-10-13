@@ -443,7 +443,7 @@ export function CheckoutPayPage() {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent"
+                className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent hover:text-on-accent"
               >
                 {t('pay.retry')}
               </button>

@@ -36,7 +36,7 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
         to="/builder"
         data-cta-card
         data-cta-demo="builder"
-        className="group relative mt-16 -mx-5 block overflow-hidden border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-bone md:mt-20 md:-mx-10 md:px-10 md:py-20"
+        className="group relative mt-16 -mx-5 block overflow-hidden border-y border-ink bg-ink px-5 py-14 text-bone transition-colors duration-300 hover:bg-accent hover:text-on-accent md:mt-20 md:-mx-10 md:px-10 md:py-20"
       >
         {/* Identidad de fondo: el logo de la marca es literalmente
             "secciones apiladas" — la misma metáfora que arma el builder.
@@ -55,7 +55,7 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
         <div className="relative z-10">
           <p
             data-cta-bit
-            className="mb-4 text-eyebrow uppercase text-bone/55"
+            className="mb-4 text-eyebrow uppercase text-bone/55 group-hover:text-on-accent/70"
           >
             {t('home.builderEyebrow')}
           </p>
@@ -67,7 +67,7 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
               {t('home.builderTitleBefore')}{' '}
               <em
                 data-cta-accent
-                className="inline-block font-display font-normal italic text-accent group-hover:text-bone"
+                className="inline-block font-display font-normal italic text-accent group-hover:text-on-accent"
               >
                 {t('home.builderTitleEm')}
               </em>
@@ -82,13 +82,13 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
           </p>
           <p
             data-cta-bit
-            className="mt-5 max-w-[48ch] text-body leading-relaxed text-bone/70"
+            className="mt-5 max-w-[48ch] text-body leading-relaxed text-bone/70 group-hover:text-on-accent/80"
           >
             {t('home.builderBody')}
           </p>
           <p
             data-cta-bit
-            className="mt-4 text-eyebrow uppercase text-bone/50"
+            className="mt-4 text-eyebrow uppercase text-bone/50 group-hover:text-on-accent/70"
           >
             {t('home.builderPrices', {
               base: formatPriceFromUsd(CUSTOM_BASE_PRICE_USD, currency, rate),

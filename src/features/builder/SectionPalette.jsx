@@ -217,7 +217,7 @@ export default function SectionPalette({
                             aria-label={added ? t('builder.addedAria', { name, count }) : t('builder.addAria', { name })}
                             className={`min-h-11 shrink-0 border px-3 py-2 text-body-sm transition-colors duration-200 disabled:opacity-40 ${
                               added
-                                ? 'border-accent/60 text-accent not-disabled:hover:border-accent not-disabled:hover:bg-accent not-disabled:hover:text-ink'
+                                ? 'border-accent/60 text-accent not-disabled:hover:border-accent not-disabled:hover:bg-accent not-disabled:hover:text-on-accent'
                                 : 'border-ink/30 not-disabled:hover:border-ink not-disabled:hover:bg-ink not-disabled:hover:text-bone'
                             }`}
                           >

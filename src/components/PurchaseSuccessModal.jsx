@@ -175,7 +175,7 @@ export default function PurchaseSuccessModal({
               type="button"
               disabled={downloading}
               onClick={() => onDownload(order.id)}
-              className="w-full border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent disabled:opacity-40"
+              className="w-full border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent hover:text-on-accent disabled:opacity-40"
             >
               {downloading
                 ? t('account.preparing')
@@ -188,7 +188,7 @@ export default function PurchaseSuccessModal({
             type="button"
             onClick={onClose}
             className={`w-full border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone ${
-              canDownload ? '' : 'bg-ink text-bone hover:border-accent hover:bg-accent'
+              canDownload ? '' : 'bg-ink text-bone hover:border-accent hover:bg-accent hover:text-on-accent'
             }`}
           >
             {t('purchaseModal.cta')}
