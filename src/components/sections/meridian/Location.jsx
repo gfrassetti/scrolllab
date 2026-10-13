@@ -63,18 +63,18 @@ const frame = (n) => `/meridian/hero/seq/${String(n).padStart(4, '0')}.webp`
 
 // unitKey resolves through the language dictionary at render time
 const DEFAULT_PLACES = [
-  ['5', 'minDrive', 'Location 1', 8],
-  ['10', 'minDrive', 'Location 2', 28],
-  ['12', 'minDrive', 'Location 3', 48],
-  ['15', 'minDrive', 'Location 4', 68],
-  ['20', 'minDrive', 'Location 5', 88],
-  ['25', 'minDrive', 'Location 6', 108],
-  ['30', 'minDrive', 'Location 7', 128],
-  ['35', 'minDrive', 'Location 8', 148],
-  ['40', 'minDrive', 'Location 9', 168],
-  ['45', 'minDrive', 'Location 10', 188],
-  ['1', 'hourDrive', 'Location 11', 208],
-  ['70', 'minDrive', 'Location 12', 228],
+  ['5', 'minDrive', 'Beach club', 8],
+  ['10', 'minDrive', 'Golf course', 28],
+  ['12', 'minDrive', 'Marina', 48],
+  ['15', 'minDrive', 'Old town', 68],
+  ['20', 'minDrive', 'School', 88],
+  ['25', 'minDrive', 'Hospital', 108],
+  ['30', 'minDrive', 'Tennis club', 128],
+  ['35', 'minDrive', 'Market', 148],
+  ['40', 'minDrive', 'Nature reserve', 168],
+  ['45', 'minDrive', 'Villages', 188],
+  ['1', 'hourDrive', 'Airport', 208],
+  ['70', 'minDrive', 'Ronda', 228],
 ].map(([distance, unitKey, title, f]) => ({ distance, unitKey, title, img: frame(f) }))
 
 const SMALL_WORDS = new Set([
@@ -139,10 +139,10 @@ function CloseIcon() {
 }
 
 export default function Location({
-  title = 'Prime location between [Area One], [Area Two], and [Area Three] on the picturesque coastline of [Country]',
+  title = 'Prime location between the sea, the golf valley and the old town, on the sunniest coastline of Spain',
   ctaLabel,
-  ctaHref = '#',
-  location = '[Region], [Country]',
+  ctaHref = '#masterplan',
+  location = 'Costa del Sol, Spain',
   places,
   /** El cartel que sigue al mouse sobre las tarjetas. */
   dragLabel = 'drag',

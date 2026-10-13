@@ -36,7 +36,7 @@ const pad = (n) => String(n).padStart(2, '0')
 // them with your own high-resolution photos — or use the `slides` prop.
 const DEFAULT_SLIDES = [1, 2, 3, 4, 5].map((n) => ({
   img: `/meridian/gallery/0${n}.webp`,
-  alt: `Project view ${n}`,
+  alt: `Meridian villa, view ${n}`,
 }))
 
 // Scroll distance (in viewport heights) each slide-to-slide step gets.

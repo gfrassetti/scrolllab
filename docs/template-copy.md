@@ -50,3 +50,4 @@ Así que cada template de SCROLLLAB es el sitio de un negocio que inventamos par
 | ATELIER | **Atelier Nove** — estudio de interiores, muebles e identidad (marca NOVE) | Milán | redes del footer abren en otra pestaña; el teléfono es tel: |
 | UNITY | **Unity Cup** — torneo de fútbol amateur: 32 clubes comunitarios de 19 países, nueve días | Bristol | la final el 14 de junio; el capitán es inventado (Daniel Mensah, Harbourside FC) |
 | ATRIUM | **Atrium Architekten AG** — estudio de arquitectura de 22 personas, casas, cultura y vivienda alrededor de un patio | Zúrich | «Legal documents» abre LegalSheet (`#legal`) |
+| MERIDIAN | **Meridian Villas** — 24 villas cerradas sobre la ladera, frente al mar | Costa del Sol | el menú apuntaba a secciones que no existían (#residences, #about, #portal): ahora a #interior, #concept, #masterplan; folleto por mail |

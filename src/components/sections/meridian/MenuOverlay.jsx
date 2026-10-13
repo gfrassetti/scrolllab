@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { useLang } from './lang'
 import { LangSwitch } from './NavBits'
+import { contactHref } from '../../../lib/contactLinks'
+
+const PHONE = '+34 952 555 018'
+const EMAIL = 'sales@meridianvillas.com'
 
 /**
  * MERIDIAN — Menu overlay
@@ -26,17 +30,17 @@ import { LangSwitch } from './NavBits'
 const defaultLinks = (t) => [
   { label: t('home'), href: '#top' },
   { label: t('villas'), href: '#villas' },
-  { label: t('residences'), href: '#residences' },
-  { label: t('about'), href: '#about' },
+  { label: t('residences'), href: '#interior' },
+  { label: t('about'), href: '#concept' },
   { label: t('contact'), href: '#contact' },
 ]
 
 // Small pills (secondary) — the reference groups these under the primary
 // list with pill outlines instead of the roll-up type treatment.
 const defaultPills = (t) => [
-  { label: t('investment'), href: '#investment' },
-  { label: t('team'), href: '#team' },
-  { label: t('partners'), href: '#partners' },
+  { label: t('location'), href: '#location' },
+  { label: t('amenities'), href: '#amenities' },
+  { label: t('masterplan'), href: '#masterplan' },
 ]
 
 function MenuLink({ label, href }) {
@@ -188,9 +192,9 @@ export default function MenuOverlay({ open, onClose, links, copy = {} }) {
         <span className="flex items-center gap-4">
           <LangSwitch />
           <span aria-hidden="true" className="h-5 w-px bg-(--mer-ink,#2a2622)/20" />
-          <a href={copy.portalHref || '#portal'}>{copy.portalLabel ?? t('clientPortal')}</a>
+          <a href={copy.portalHref || '#masterplan'}>{copy.portalLabel ?? t('floorPlans')}</a>
         </span>
-        <a href={copy.brochureHref || '#brochure'}>{copy.brochureLabel ?? t('brochure')}</a>
+        <a href={copy.brochureHref || '#contact'}>{copy.brochureLabel ?? t('brochure')}</a>
       </div>
 
       <div className="flex shrink-0 flex-col md:h-full md:flex-1 md:shrink md:flex-row md:overflow-y-auto">
@@ -203,7 +207,7 @@ export default function MenuOverlay({ open, onClose, links, copy = {} }) {
           </div>
           <div className="mt-10 flex flex-wrap gap-3">
             {pills.map((l, i) => (
-              <PillLink key={`${l.href}-${i}`} label={l.label} href={l.href || '#'} />
+              <PillLink key={`${l.href}-${i}`} label={l.label} href={l.href || '#top'} />
             ))}
           </div>
         </div>
@@ -270,11 +274,15 @@ export default function MenuOverlay({ open, onClose, links, copy = {} }) {
         <div className="flex flex-col gap-6 md:flex-row md:flex-wrap md:items-baseline md:justify-between md:gap-4">
           <span>
             <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.phoneLabel ?? t('phone')}</span>
-            {copy.phone ?? '+00 (000) 000-0000'}
+            <a href={contactHref(copy.phone ?? PHONE) || undefined} className="tpl-link relative">
+              {copy.phone ?? PHONE}
+            </a>
           </span>
           <span>
             <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.emailLabel ?? t('email')}</span>
-            {copy.email ?? 'info@example.com'}
+            <a href={contactHref(copy.email ?? EMAIL) || undefined} className="tpl-link relative">
+              {copy.email ?? EMAIL}
+            </a>
           </span>
           <span>
             <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.socialsLabel ?? t('socials')}</span>

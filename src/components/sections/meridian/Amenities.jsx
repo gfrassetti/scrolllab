@@ -24,18 +24,16 @@ import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
  */
 
 const SMALL_WORDS = new Set(['of', 'the', 'and', 'in', 'on', 'at', 'to', 'from', 'a', 'with'])
-const BODY = '[Short description of this amenity — replace with your own copy.]'
-
 const DEFAULT_ITEMS = [
-  '/meridian/gallery/03.webp',
-  '/meridian/gallery/05.webp',
-  '/meridian/gallery/06.webp',
-  '/meridian/gallery/panorama.webp',
-  '/meridian/gallery/01.webp',
-  '/meridian/gallery/02.webp',
-  '/meridian/gallery/04.webp',
-  '/meridian/gallery/03.webp',
-].map((img, i) => ({ title: `Amenity ${i + 1}`, text: BODY, img }))
+  ['Concierge', 'A team at the clubhouse from 8 a.m. to 10 p.m.: deliveries, bookings, a car to the airport.', '/meridian/gallery/03.webp'],
+  ['Spa and gym', 'Indoor pool, sauna and a gym with the sea in front of the treadmills.', '/meridian/gallery/05.webp'],
+  ['Beach shuttle', 'An electric shuttle down to the beach club every twenty minutes, all summer.', '/meridian/gallery/06.webp'],
+  ['Clubhouse', 'A restaurant and lounge for residents and their guests, open all year.', '/meridian/gallery/panorama.webp'],
+  ['Private gardens', 'Every plot is planted and looked after by the community gardeners.', '/meridian/gallery/01.webp'],
+  ['Tennis and padel', 'Two courts with lights, and a coach on weekday mornings.', '/meridian/gallery/02.webp'],
+  ['Kids club', 'Supervised games, a pool and a garden for children aged four to twelve.', '/meridian/gallery/04.webp'],
+  ['Security', 'A staffed gate, cameras on the perimeter and patrols at night.', '/meridian/gallery/03.webp'],
+].map(([title, text, img]) => ({ title, text, img }))
 
 const INK = '#2a2622'
 const SAND = '#dfd8cf'
@@ -44,7 +42,7 @@ const SAND = '#dfd8cf'
 const mix = (pct) => `color-mix(in srgb, var(--mer-am-ink) ${pct}%, transparent)`
 
 export default function Amenities({
-  title = 'A blend of [Feature One] and [Feature Two] designed to enhance daily life',
+  title = 'A blend of resort service and private calm, designed for everyday life',
   label = 'Amenities',
   items,
   // Lo que lee un lector de pantalla en el botón de cada tarjeta.
@@ -204,7 +202,7 @@ export default function Amenities({
                 className="absolute inset-0 overflow-auto p-6 text-[12px] leading-[1.5] uppercase"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                {it.text || BODY}
+                {it.text}
               </p>
               <div className="mer-am-photo absolute inset-0">
                 {it.img && (

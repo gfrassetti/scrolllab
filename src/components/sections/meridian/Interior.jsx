@@ -25,35 +25,62 @@ import { gsap, useGSAP } from '../../../lib/gsap'
  */
 
 const DEFAULT_LINKS = [
-  { label: 'Category 1', img: '/meridian/gallery/01.webp' },
-  { label: 'Category 2', img: '/meridian/gallery/02.webp' },
-  { label: 'Category 3', img: '/meridian/gallery/03.webp' },
-  { label: 'Category 4', img: '/meridian/gallery/04.webp' },
-  { label: 'Category 5', img: '/meridian/gallery/05.webp' },
-  { label: 'Category 6', img: '/meridian/gallery/06.webp' },
+  { label: 'Facade', img: '/meridian/gallery/01.webp' },
+  { label: 'Terrace', img: '/meridian/gallery/02.webp' },
+  { label: 'Dusk', img: '/meridian/gallery/03.webp' },
+  { label: 'Garden', img: '/meridian/gallery/04.webp' },
+  { label: 'Pool deck', img: '/meridian/gallery/05.webp' },
+  { label: 'From above', img: '/meridian/gallery/06.webp' },
 ]
 
-const BODY = '[Short description of this feature — replace with your own copy.]'
-const spot = (x, y, n) => ({ x, y, title: `Feature ${n}`, body: BODY })
+const spot = (x, y, title, body) => ({ x, y, title, body })
 
 // Per-slide copy + hotspot positions (% of the slide). Intentionally uneven:
 // 3, 4, 1, 2, 3, 2 hotspots; some slides have a paragraph, some don't.
 const SLIDE_DATA = [
   {
-    text: '[Short paragraph about this category. Replace with your own copy.]',
-    spots: [spot(8, 12, 1), spot(80, 12, 2), spot(78, 78, 3)],
+    text: 'Stone on the street side, glass on the sea side: every villa opens to the south.',
+    spots: [
+      spot(8, 12, 'Sliding glass walls', 'Six-metre panels that slide into the wall and open the living room to the terrace.'),
+      spot(80, 12, 'Brise-soleil', 'Fixed aluminium louvres that shade the bedrooms in summer and let the low winter sun in.'),
+      spot(78, 78, 'Pool terrace', 'A travertine deck with an outdoor shower and storage for the loungers.'),
+    ],
   },
-  { text: '', spots: [spot(22, 30, 1), spot(58, 22, 2), spot(72, 54, 3), spot(34, 72, 4)] },
   {
-    text: '[Short paragraph about this category. Replace with your own copy.]',
-    spots: [spot(50, 46, 1)],
+    text: '',
+    spots: [
+      spot(22, 30, 'Roof terrace', 'A private deck above the bedrooms, with the sea over the treetops.'),
+      spot(58, 22, 'Mountain view', 'The sierra on the north side, framed by the stair window.'),
+      spot(72, 54, 'Bougainvillea', 'Planted along every wall, in flower from May to November.'),
+      spot(34, 72, 'Outdoor kitchen', 'Grill, sink and fridge under the pergola, a few steps from the pool.'),
+    ],
   },
-  { text: '', spots: [spot(30, 40, 1), spot(70, 66, 2)] },
   {
-    text: '[Short paragraph about this category. Replace with your own copy.]',
-    spots: [spot(15, 62, 1), spot(48, 30, 2), spot(82, 42, 3)],
+    text: 'At dusk the house turns inward: warm light, low walls, the mountain behind.',
+    spots: [spot(50, 46, 'Evening lighting', 'Warm, low light on the facade and the garden, controlled from your phone.')],
   },
-  { text: '', spots: [spot(62, 26, 1), spot(26, 70, 2)] },
+  {
+    text: '',
+    spots: [
+      spot(30, 40, 'Lawn', 'Drought-tolerant grass, watered from the community rain tank.'),
+      spot(70, 66, 'Pool', 'Twelve by four metres, heated, with an automatic cover.'),
+    ],
+  },
+  {
+    text: 'Each pool runs to the edge of the plot, so the water meets the horizon.',
+    spots: [
+      spot(15, 62, 'Infinity edge', 'The far edge sits level with the water line, so the pool meets the sea.'),
+      spot(48, 30, 'Day beds', 'Built-in loungers in teak, with storage underneath.'),
+      spot(82, 42, 'Pergola', 'A timber pergola with a retractable canvas, for the long lunches.'),
+    ],
+  },
+  {
+    text: '',
+    spots: [
+      spot(62, 26, 'Coastline', 'Two kilometres of beach, a ten-minute walk downhill.'),
+      spot(26, 70, 'Community', 'Twenty-four villas, gated, with the clubhouse at the entrance.'),
+    ],
+  },
 ]
 
 const INK = '#2a2622'

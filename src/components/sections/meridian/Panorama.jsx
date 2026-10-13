@@ -18,8 +18,8 @@ const SMALL_WORDS = new Set(['of', 'the', 'and', 'in', 'on', 'at', 'to', 'from',
 
 export default function Panorama({
   title = 'View of the Panorama',
-  ctaLabel = 'Explore Panorama',
-  ctaHref = '#',
+  ctaLabel = 'Explore the villas',
+  ctaHref = '#villas',
   image = '/meridian/gallery/panorama.webp',
   bg,
   fg,
