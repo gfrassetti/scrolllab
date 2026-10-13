@@ -44,7 +44,15 @@ export default function AtriumPage() {
           <PeopleScatter />
           <OrbitRing />
           <StatField />
-          <ContactForm theme="atrium" />
+          <ContactForm
+            theme="atrium"
+            eyebrow="Commissions"
+            title="Tell us about the site"
+            body="Where it is, what you would like to build and when. We answer every enquiry within a week, and visit the site before we quote."
+            submitLabel="Send enquiry"
+            successMessage="Thank you. We will write back within a week."
+            note="We reply within five working days. Your details are only used to answer you."
+          />
         </main>
         <FooterAtrium />
       </div>

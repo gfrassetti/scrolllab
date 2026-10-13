@@ -11,12 +11,12 @@ import { imgAttrs } from '../../../lib/responsiveImage'
  * `gap` en svh, y `speed` gradua el parallax de cada foto.
  */
 const defaultWorks = [
-  { title: 'Placeholder Project 01', meta: '000 m²', img: civic, x: 54, w: 46, ratio: '16 / 7', gap: 0, speed: 1 },
-  { title: 'Placeholder Project 02', meta: '000 m²', img: tower, x: 34, w: 38, ratio: '4 / 3', gap: 6, speed: 1.35 },
-  { title: 'Placeholder Project 03', meta: '000 m²', img: courtyard, x: 0, w: 25, ratio: '3 / 4', gap: -14, speed: 0.75 },
-  { title: 'Placeholder Project 04', meta: '000 m²', img: gallery, x: 46, w: 54, ratio: '16 / 9', gap: 4, speed: 1.15 },
-  { title: 'Placeholder Project 05', meta: '000 m²', img: heroHouse, x: 8, w: 32, ratio: '5 / 4', gap: -10, speed: 0.9 },
-  { title: 'Placeholder Project 06', meta: '000 m²', img: interior, x: 52, w: 44, ratio: '4 / 3', gap: 2, speed: 1.3 },
+  { title: 'Lakeside Civic Centre', meta: '4,800 m²', img: civic, x: 54, w: 46, ratio: '16 / 7', gap: 0, speed: 1 },
+  { title: 'Hofmatt Tower', meta: '12,600 m²', img: tower, x: 34, w: 38, ratio: '4 / 3', gap: 6, speed: 1.35 },
+  { title: 'Olive Courtyard House', meta: '420 m²', img: courtyard, x: 0, w: 25, ratio: '3 / 4', gap: -14, speed: 0.75 },
+  { title: 'Kunsthalle Annex', meta: '2,100 m²', img: gallery, x: 46, w: 54, ratio: '16 / 9', gap: 4, speed: 1.15 },
+  { title: 'House in the Pines', meta: '380 m²', img: heroHouse, x: 8, w: 32, ratio: '5 / 4', gap: -10, speed: 0.9 },
+  { title: 'Alpine Apartment', meta: '160 m²', img: interior, x: 52, w: 44, ratio: '4 / 3', gap: 2, speed: 1.3 },
 ]
 
 /**

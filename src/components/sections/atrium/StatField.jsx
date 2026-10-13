@@ -4,10 +4,10 @@ import { calmCount, calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const defaultStats = [
-  { value: 10, suffix: '+', label: 'Placeholder metric' },
-  { value: 100, suffix: '+', label: 'Placeholder metric' },
-  { value: 25, suffix: '+', label: 'Placeholder metric' },
-  { value: 50, suffix: 'K', label: 'Placeholder metric' },
+  { value: 22, suffix: '', label: 'Architects and makers' },
+  { value: 64, suffix: '', label: 'Buildings completed' },
+  { value: 18, suffix: '', label: 'Competitions won' },
+  { value: 140, suffix: 'K', label: 'Square metres built' },
 ]
 
 /**
@@ -24,7 +24,7 @@ const defaultStats = [
 export default function StatField({
   kicker = 'Practice',
   stats: statsProp,
-  closer = 'Placeholder statement — swap this line for your own closing sentence.',
+  closer = 'We take on six new projects a year, so each one gets the time it needs.',
   bg,
   fg,
 }) {

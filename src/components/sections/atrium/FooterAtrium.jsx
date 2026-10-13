@@ -1,15 +1,32 @@
+import { contactHref, externalProps, legalDocs } from '../../../lib/contactLinks'
+import LegalSheet from '../../LegalSheet'
+
+const LEGAL = `Last updated: 1 January 2026
+
+Atrium Architekten AG, Seefeldstrasse 88, 8008 Zurich, runs this site.
+
+Privacy. We keep what you send us through the enquiry form (your name, your email and your message) only to answer you, and delete it after two years without contact. We do not use advertising trackers.
+
+Content. Drawings, photographs and texts on this site belong to Atrium Architekten AG or to the photographers credited in each project. Please ask before you reuse them.
+
+To see, correct or delete your data, write to bureau@atrium-architects.ch.`
+
 /**
  * FooterAtrium — the wordmark closes the page at screen width and is allowed
  * to run out of the frame; `overflow-hidden` does the cropping. The legal row
- * stays at note size underneath.
+ * stays at note size underneath; its last link opens the legal text in a
+ * panel over the page (LegalSheet).
  */
 export default function FooterAtrium({
   mark = 'ATRIUM',
   reserved = 'All rights reserved',
-  license = 'License Number AA-00-00000 BB-00-00000',
-  design = 'Visual Design Placeholder',
-  development = 'Development Placeholder',
+  license = 'Atrium Architekten AG',
+  design = 'Seefeldstrasse 88, 8008 Zurich',
+  development = 'bureau@atrium-architects.ch',
   legal = 'Legal documents',
+  legalHref = '#legal',
+  legalText = LEGAL,
+  legalCloseLabel = 'Close',
   year = '© 2026',
   bg,
   fg,
@@ -26,10 +43,29 @@ export default function FooterAtrium({
         <p>{reserved}</p>
         <p>{license}</p>
         <p>{design}</p>
-        <p>{development}</p>
-        <p>{legal}</p>
+        <p>
+          {contactHref(development) ? (
+            <a href={contactHref(development)} className="tpl-link relative">
+              {development}
+            </a>
+          ) : (
+            development
+          )}
+        </p>
+        <p>
+          <a href={legalHref} {...externalProps(legalHref)} className="tpl-link tpl-hit relative">
+            {legal}
+          </a>
+        </p>
         <p>{year}</p>
       </div>
+
+      <LegalSheet
+        docs={legalDocs([{ href: legalHref, title: legal, body: legalText }])}
+        closeLabel={legalCloseLabel}
+        bg={fg || '#f2f0eb'}
+        fg={bg || '#111111'}
+      />
     </footer>
   )
 }

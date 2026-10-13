@@ -1,4 +1,4 @@
-import { navLinks, MENU_BUTTON } from '../helpers.js'
+import { navLinks, MENU_BUTTON, LEGAL_HELP } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -136,10 +136,13 @@ export const ATRIUM_FIELDS = {
   'atrium/FooterAtrium': [
     { key: 'mark', label: 'Mark', type: 'text' },
     { key: 'reserved', label: 'Reserved', type: 'text' },
-    { key: 'license', label: 'License', type: 'text' },
-    { key: 'design', label: 'Design credit', type: 'text' },
-    { key: 'development', label: 'Development credit', type: 'text' },
-    { key: 'legal', label: 'Legal', type: 'text' },
+    { key: 'license', label: 'Razón social', type: 'text' },
+    { key: 'design', label: 'Dirección', type: 'text' },
+    { key: 'development', label: 'Email (se vuelve link)', type: 'text' },
+    { key: 'legal', label: 'Legal — texto del link', type: 'text' },
+    { key: 'legalHref', label: 'Legal — enlace (#legal abre el panel)', type: 'href', help: LEGAL_HELP },
+    { key: 'legalText', label: 'Legal — contenido del panel', type: 'textarea' },
+    { key: 'legalCloseLabel', label: 'Panel legal — botón cerrar', type: 'text' },
     { key: 'year', label: 'Year', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },

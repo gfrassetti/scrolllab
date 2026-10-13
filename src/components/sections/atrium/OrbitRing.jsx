@@ -55,10 +55,10 @@ const defaultTiles = [
  */
 export default function OrbitRing({
   tiles,
-  lineOne = '0000',
-  lineTwo = 'Placeholder year',
-  left = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
-  right = 'Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam.',
+  lineOne = '2004',
+  lineTwo = 'Founded in Zurich',
+  left = 'Atrium began with two architects, one competition win and a borrowed office.',
+  right = 'Twenty years on, 64 buildings later, we still enter competitions every spring.',
   turn = 290,
   bg,
   fg,

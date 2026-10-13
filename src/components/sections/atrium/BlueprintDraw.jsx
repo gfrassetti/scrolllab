@@ -11,7 +11,7 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
  */
 export default function BlueprintDraw({
   title = 'Plan before mass',
-  body = 'Lines first. A courtyard holds the centre; rooms gather around light. Swap this drawing for your own plan. The motion stays.',
+  body = 'Lines first. A courtyard holds the centre and the rooms gather around its light, long before a wall goes up.',
   caption = 'Courtyard house, 1:200',
   kicker = 'Drawing',
   bg,
