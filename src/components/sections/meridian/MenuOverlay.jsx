@@ -4,7 +4,7 @@ import { LangSwitch } from './NavBits'
 import { contactHref } from '../../../lib/contactLinks'
 
 const PHONE = '+34 952 555 018'
-const EMAIL = 'sales@meridianvillas.com'
+const EMAIL = 'sales@meridian.es'
 
 /**
  * MERIDIAN — Menu overlay
@@ -274,13 +274,13 @@ export default function MenuOverlay({ open, onClose, links, copy = {} }) {
         <div className="flex flex-col gap-6 md:flex-row md:flex-wrap md:items-baseline md:justify-between md:gap-4">
           <span>
             <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.phoneLabel ?? t('phone')}</span>
-            <a href={contactHref(copy.phone ?? PHONE) || undefined} className="tpl-link relative">
+            <a href={contactHref(copy.phone ?? PHONE) || undefined} className="tpl-link tpl-hit relative z-[1] inline-block -my-[15px] py-[15px] md:my-0 md:py-0">
               {copy.phone ?? PHONE}
             </a>
           </span>
           <span>
             <span className="mb-1 block text-(--mer-ink,#2a2622)/40 md:hidden">{copy.emailLabel ?? t('email')}</span>
-            <a href={contactHref(copy.email ?? EMAIL) || undefined} className="tpl-link relative">
+            <a href={contactHref(copy.email ?? EMAIL) || undefined} className="tpl-link tpl-hit relative z-[1] inline-block -my-[15px] py-[15px] md:my-0 md:py-0">
               {copy.email ?? EMAIL}
             </a>
           </span>

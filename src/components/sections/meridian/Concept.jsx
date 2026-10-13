@@ -15,7 +15,7 @@ import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../../lib/gsap'
  */
 export default function Concept({
   kicker = 'Concept',
-  text = 'Meridian is a gated community of twenty-four villas on a south-facing slope above the Mediterranean, ten minutes from the beach and the old town. Every house faces the sea, is built in white stone and glass, and is finished to order.',
+  text = 'Meridian is a gated community of 24 villas on a south-facing slope above the Mediterranean, ten minutes from the beach and the old town. Every house faces the sea, is built in white stone and glass, and is finished to order.',
   bg,
   fg,
 }) {

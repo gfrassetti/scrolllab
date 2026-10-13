@@ -11,7 +11,7 @@ We keep what you send us through the contact form or by phone: your name, email,
 
 We do not sell your data. Our email and CRM providers process it on our behalf, inside the European Union. We delete enquiries after two years without contact.
 
-You can ask to see, correct or delete your data at any time at privacy@meridianvillas.com.`
+You can ask to see, correct or delete your data at any time at privacy@meridian.es.`
 
 const TERMS = `Last updated: 1 March 2026
 
@@ -96,7 +96,7 @@ function Social({ label, href, children }) {
 export default function Footer({
   wordmark = 'Meridian',
   phone = '+34 952 555 018',
-  email = 'sales@meridianvillas.com',
+  email = 'sales@meridian.es',
   location = 'Costa del Sol, Spain',
   mapHref = '#location',
   studio = 'Meridian Villas S.L.',
@@ -232,7 +232,7 @@ export default function Footer({
         </div>
 
         <div
-          className="mt-10 flex flex-col gap-3 border-t pt-5 text-[11px] uppercase tracking-[0.1em] md:flex-row md:items-center md:justify-between"
+          className="mt-10 flex flex-col gap-7 border-t pt-5 md:gap-3 text-[11px] uppercase tracking-[0.1em] md:flex-row md:items-center md:justify-between"
           style={{
             ...MONO,
             borderColor: 'color-mix(in srgb, var(--mer-ft-sand) 16%, transparent)',

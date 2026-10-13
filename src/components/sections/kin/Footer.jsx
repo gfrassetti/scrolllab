@@ -197,7 +197,7 @@ export default function Footer({
               {c.lines?.map((l, li) => (
                 <p key={li}>
                   {contactHref(l) ? (
-                    <a href={contactHref(l)} className="tpl-link relative">
+                    <a href={contactHref(l)} className="tpl-link tpl-hit relative">
                       {l}
                     </a>
                   ) : (

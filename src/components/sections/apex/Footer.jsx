@@ -224,7 +224,7 @@ export default function Footer({
                 return (
                   <p key={l}>
                     {href ? (
-                      <a href={href} className="tpl-link relative">
+                      <a href={href} className="tpl-link tpl-hit relative">
                         {l}
                       </a>
                     ) : (

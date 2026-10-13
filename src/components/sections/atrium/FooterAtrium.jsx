@@ -45,7 +45,7 @@ export default function FooterAtrium({
         <p>{design}</p>
         <p>
           {contactHref(development) ? (
-            <a href={contactHref(development)} className="tpl-link relative">
+            <a href={contactHref(development)} className="tpl-link tpl-hit relative z-[1] inline-block -my-[15px] py-[15px] md:my-0 md:py-0">
               {development}
             </a>
           ) : (
@@ -53,7 +53,7 @@ export default function FooterAtrium({
           )}
         </p>
         <p>
-          <a href={legalHref} {...externalProps(legalHref)} className="tpl-link tpl-hit relative">
+          <a href={legalHref} {...externalProps(legalHref)} className="tpl-link tpl-hit relative z-[1] inline-block -my-[15px] py-[15px] md:my-0 md:py-0">
             {legal}
           </a>
         </p>

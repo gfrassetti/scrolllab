@@ -67,7 +67,7 @@ function resolveProjects(list) {
  */
 export default function SelectedWork({
   title = 'SELECTED WORK',
-  cta = 'The studio in numbers →',
+  cta = 'Studio facts →',
   ctaHref = '#facts',
   projects: projectsProp,
   exploreLabel = 'Explore →',

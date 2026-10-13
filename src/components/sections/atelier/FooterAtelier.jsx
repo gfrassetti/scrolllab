@@ -109,7 +109,7 @@ export default function FooterAtelier({
                 </a>
                 <a
                   href={contactHref(phone) || undefined}
-                  className="tpl-link mt-1 block w-fit text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto"
+                  className="tpl-link tpl-hit relative block w-fit py-3 text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto lg:py-0.5"
                 >
                   {phoneLabel} {phone}
                 </a>

@@ -421,9 +421,9 @@ function Card({ tx, live = false }) {
       >
         {tx.title}
       </h2>
-      {tx.body ? <p className="mt-4 max-w-[28rem] text-[15px] leading-[1.45] md:text-[1.05vw]">{tx.body}</p> : null}
+      {tx.body ? <p className="mt-4 max-w-[28rem] text-[15px] leading-[1.45] md:text-[max(14px,1.05vw)]">{tx.body}</p> : null}
       {tx.list ? (
-        <ul className="mt-6 max-w-[30rem] text-[15px] leading-[1.45] md:text-[1.05vw]">
+        <ul className="mt-6 max-w-[30rem] text-[15px] leading-[1.45] md:text-[max(14px,1.05vw)]">
           {tx.list.map((li) => (
             <li key={li} className="fold-li py-3">
               {li}

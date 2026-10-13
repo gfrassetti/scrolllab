@@ -5,7 +5,7 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { PAPER, SpeechBubble, TORN_TOP, TornCard, boilTo, hoverDepth } from './comicKit'
 import { BathBg, BedroomBg, DogHead, PettingHand, PorchBg } from './StoryArt'
 
-const DIALOGUES = ['A bone? For me?', 'Right there. Yes. Right there.', 'Best. Day. Ever.']
+const DIALOGUES = ['A bone? For me?', 'Right there. Yes!', 'Best. Day. Ever.']
 
 // the three cards alternate left / right, like the reference (x 137 → 308 → 137 of 1280)
 const SHIFT = ['-4vw', '5vw', '-4vw']

@@ -102,7 +102,7 @@ export default function ChapterDusty({
   eyebrow = 'Chapter one',
   title = 'A TALE OF ROAD AND DUST',
   onomatopoeia = 'VROOM',
-  bubble = 'Where are they taking her?',
+  bubble = 'Where is she going?',
   captions = CAPTIONS,
 }) {
   const root = useRef(null)
