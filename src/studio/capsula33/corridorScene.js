@@ -54,7 +54,9 @@ const rectAt = ({ x0, y0, x1, y1 }, z = D) => {
 const Z_MODULE = -D + 0.02
 const Z_LEAVES = -D + 0.01
 const Z_INSIDE = -D - 1.6 // cerca de la puerta: así el plano tapa todo lo que se ve por ella
+const Z_START = -1.8 // arranca cerca: la entrada manda, poco pasillo (pedido del dueño)
 const Z_WALKED = -(D - 3.4) // frente a la entrada
+const Z_SIGN = Z_MODULE + 0.32 // el cartel flota delante de la pared
 const Z_INSIDE_CAM = -(D + 0.2) // ya cruzamos la puerta
 const INSIDE_H = 4.6 // alto del plano del interior
 const ENTER_STOP = 0.85 // la cámara llega antes; el resto lo hace la imagen en DOM (ver insideCover)
@@ -169,7 +171,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     ),
   )
 
-  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false }
+  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9 }
   const parts = {}
   let built = false
 
@@ -234,9 +236,100 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     scene.add(module)
     parts.module = module
 
-    parts.rects = { door, sign: rectAt(PARTS.sign, D), port: rectAt(PARTS.port, D) }
+    // 5. El cartel, aparte: letras de luz que flotan delante de la entrada.
+    const signRect = rectAt(PARTS.sign, D)
+    makeSign(signRect)
+
+    // 6. Polvo en el aire del pasillo: profundidad mientras caminamos.
+    parts.dust = makeDust()
+    scene.add(parts.dust)
+
+    parts.rects = { door, sign: signRect, port: rectAt(PARTS.port, D) }
     built = true
     fitInside()
+  }
+
+  /** Cartel «cāpsula33» en canvas (nítido de cerca) y su sombra difusa sobre la pared. */
+  const makeSign = async (rect) => {
+    try {
+      await document.fonts?.load('400 120px "Roboto Mono"')
+    } catch {
+      /* sin la fuente, la de reemplazo */
+    }
+    const W = 2048
+    const H = Math.round((W * (rect.y1 - rect.y0)) / (rect.x1 - rect.x0))
+    const draw = (shadow) => {
+      const c = document.createElement('canvas')
+      c.width = W
+      c.height = H
+      const g = c.getContext('2d')
+      let size = H * 0.7
+      g.font = `400 ${size}px "Roboto Mono", ui-monospace, monospace`
+      size *= (W * 0.86) / g.measureText('cāpsula33').width
+      g.font = `400 ${size}px "Roboto Mono", ui-monospace, monospace`
+      g.textAlign = 'center'
+      g.textBaseline = 'middle'
+      if (shadow) {
+        g.filter = 'blur(40px)'
+        g.fillStyle = 'rgba(0,0,0,0.6)'
+        g.fillText('cāpsula33', W / 2, H * 0.55)
+      } else {
+        g.shadowColor = 'rgba(255,140,60,0.95)'
+        g.shadowBlur = 60
+        g.fillStyle = '#ffe9cc'
+        g.fillText('cāpsula33', W / 2, H * 0.55)
+        g.shadowBlur = 18
+        g.shadowColor = 'rgba(255,220,180,0.9)'
+        g.fillStyle = '#fff7ec'
+        g.fillText('cāpsula33', W / 2, H * 0.55)
+      }
+      const t = new THREE.CanvasTexture(c)
+      t.colorSpace = THREE.NoColorSpace
+      t.anisotropy = renderer.capabilities.getMaxAnisotropy()
+      return t
+    }
+    const sign = plane(rect, Z_SIGN, flat(draw(false), { transparent: true }))
+    const shadow = plane(rect, Z_MODULE + 0.004, flat(draw(true), { transparent: true }))
+    shadow.position.x += 0.03
+    sign.renderOrder = 4
+    shadow.renderOrder = 3
+    scene.add(shadow, sign)
+    parts.sign = sign
+    parts.signShadow = shadow
+    parts.signY = sign.position.y
+  }
+
+  const makeDust = () => {
+    const N = 520
+    const pos = new Float32Array(N * 3)
+    const { a, b, c } = TUN
+    for (let i = 0; i < N; i += 1) {
+      pos[i * 3] = (Math.random() * 2 - 1) * a * 0.9
+      pos[i * 3 + 1] = -b + Math.random() * (b + c)
+      pos[i * 3 + 2] = -1 - Math.random() * (D - 1.4)
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    const dot = document.createElement('canvas')
+    dot.width = dot.height = 64
+    const g = dot.getContext('2d')
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32)
+    grad.addColorStop(0, 'rgba(255,255,255,1)')
+    grad.addColorStop(0.35, 'rgba(255,255,255,0.35)')
+    grad.addColorStop(1, 'rgba(255,255,255,0)')
+    g.fillStyle = grad
+    g.fillRect(0, 0, 64, 64)
+    const mat = new THREE.PointsMaterial({
+      size: 0.035,
+      map: new THREE.CanvasTexture(dot),
+      color: 0xdfe6ff,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    })
+    return new THREE.Points(geo, mat)
   }
 
   ready.then(() => {
@@ -283,7 +376,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     last = now
     const walk = smooth(state.walk)
     const enter = smooth(Math.min(1, state.enter / ENTER_STOP))
-    const z = Z_WALKED * walk + (Z_INSIDE_CAM - Z_WALKED) * enter
+    const z = Z_START + (Z_WALKED - Z_START) * walk + (Z_INSIDE_CAM - Z_WALKED) * enter
     const still = 1 - Math.min(1, walk * 1.4 + enter)
     // Paso: un vaivén mínimo mientras se camina.
     const bob = Math.sin(-z * 2.4) * 0.018 * Math.sin(Math.PI * state.walk)
@@ -295,6 +388,23 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
       parts.leafR.mesh.position.x = parts.leafR.x + parts.leafR.w * (state.open + peek * 0.1)
       parts.module.material.uniforms.uGlow.value = state.glow * 0.12
       parts.proj.uniforms.uDim.value = 1 - 0.25 * enter
+      // El cartel flota: respira despacio y su sombra en la pared lo acompaña.
+      if (parts.sign) {
+        const t = now * 0.001
+        parts.sign.position.y = parts.signY + Math.sin(t * 1.1) * 0.03
+        parts.sign.rotation.z = Math.sin(t * 0.7) * 0.006
+        parts.signShadow.position.y = parts.signY - 0.035 + Math.sin(t * 1.1) * 0.01
+        // Al pasar el puntero, titila como un neón que se reacomoda.
+        const f = now - state.flickerAt
+        const flick = f >= 0 && f < 1100 ? [1, 0.25, 1, 0.4, 0.9, 0.15, 1, 1, 0.75, 1, 1][Math.floor(f / 100)] : 1
+        parts.sign.material.uniforms.uOpacity.value = flick
+        // La sombra se nota de lejos y se borra al acercarse (de cerca se leía como un doble).
+        parts.signShadow.material.uniforms.uOpacity.value = 0.32 * flick * (1 - walk)
+      }
+      if (parts.dust) {
+        parts.dust.position.y = Math.sin(now * 0.00025) * 0.06
+        parts.dust.rotation.z = Math.sin(now * 0.0001) * 0.02
+      }
     }
     renderer.render(scene, camera)
     if (built) onFrame(camera)
@@ -341,9 +451,20 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     return camera.aspect <= imgAspect ? half / (t * dist) : (half * imgAspect) / (t * camera.aspect * dist)
   }
 
+  /** Un punto del pasillo en pantalla (px CSS) y a qué distancia está de la cámara. */
+  const projectPoint = (x, y, z) => {
+    v.set(x, y, z).project(camera)
+    return {
+      x: (v.x * 0.5 + 0.5) * canvas.clientWidth,
+      y: (1 - (v.y * 0.5 + 0.5)) * canvas.clientHeight,
+      depth: camera.position.z - z,
+    }
+  }
+
   return {
     state,
     screenRect,
+    projectPoint,
     insideCover,
     ENTER_STOP,
     dispose() {

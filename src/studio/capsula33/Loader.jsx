@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
-import { sfx, unlock } from './sfx'
 import { C, DISPLAY, MONO } from './brand'
 
 /**
@@ -8,8 +7,8 @@ import { C, DISPLAY, MONO } from './brand'
  *
  * Atrás, un campo de estrellas que acelera con la descarga real (el modelo y
  * su luz horneada). «Abordar» salta al hiperespacio: las estrellas se estiran
- * en líneas, un destello, y del otro lado está el local. Ese clic es también
- * el gesto que el navegador pide para dejar sonar audio.
+ * en líneas, un destello, y del otro lado está el local. Sin sonido (pedido
+ * del dueño).
  */
 
 const CHECKS = [
@@ -124,14 +123,12 @@ export default function Loader({ progress, ready, calm, onBoard }) {
   }, [ready])
 
   const board = () => {
-    unlock()
     const root = rootRef.current
     if (!root) return
     if (calm) {
       gsap.to(root, { autoAlpha: 0, duration: 0.4, ease: 'power2.out', onComplete: onBoard })
       return
     }
-    sfx.warp()
     const field = fieldRef.current.state
     const tl = gsap.timeline()
     tl.to(contentRef.current, { autoAlpha: 0, scale: 0.96, duration: 0.45, ease: 'power2.in' })
@@ -161,56 +158,64 @@ export default function Loader({ progress, ready, calm, onBoard }) {
           <span className="hidden opacity-55 sm:inline">40°09′S 71°21′O</span>
         </header>
 
-        <div className="mx-auto w-full max-w-[26rem]">
-          <p className="text-[clamp(3rem,9vw,5rem)] leading-none font-light" style={MONO}>
-            cāpsula<span style={{ color: C.orange }}>33</span>
-          </p>
-          <ul className="mt-10 grid gap-2 text-[12px] tracking-[0.14em] uppercase" style={MONO} aria-live="polite">
-            {CHECKS.map(([label, value], i) => {
-              const done = progress >= (i + 1) / CHECKS.length || ready
-              return (
-                <li
-                  key={label}
-                  className="flex items-baseline gap-3 transition-opacity duration-500"
-                  style={{ opacity: progress >= i / CHECKS.length || ready ? 1 : 0.25 }}
-                >
-                  <span className="opacity-70">{label}</span>
-                  <span aria-hidden="true" className="flex-1 translate-y-[-3px] border-b border-dotted opacity-30" />
-                  <span style={{ color: done ? C.neon : 'inherit' }}>{done ? value : '···'}</span>
-                </li>
-              )
-            })}
-          </ul>
-          <div className="mt-8 flex items-center gap-4">
-            <span className="relative h-px flex-1 overflow-hidden" style={{ background: '#2a2a2e' }}>
-              <span className="absolute inset-y-0 left-0 transition-[width] duration-300 ease-out" style={{ width: `${pct}%`, background: C.orange }} />
-            </span>
-            <span className="w-[4ch] text-right text-[12px] tabular-nums" style={MONO}>
-              {String(pct).padStart(3, '0')}
-            </span>
-          </div>
-          <div className="mt-10 h-14">
-            <button
-              ref={buttonRef}
-              type="button"
-              onClick={board}
-              disabled={!ready}
-              className="group relative h-14 w-full overflow-hidden rounded-full border text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none"
-              style={{ ...DISPLAY, borderColor: C.orange, color: C.cream, opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(8px)', background: 'rgba(5,5,6,0.6)' }}
-            >
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
-                style={{ background: C.orange }}
-              />
-              <span className="relative transition-colors duration-300 group-hover:text-[#070708] group-focus-visible:text-[#070708]">Abordar</span>
-            </button>
+        <div className="flex flex-1 items-center justify-end">
+          <div className="w-full max-w-[22rem]">
+            <ul className="grid gap-2 text-[12px] tracking-[0.14em] uppercase" style={MONO} aria-live="polite">
+              {CHECKS.map(([label, value], i) => {
+                const done = progress >= (i + 1) / CHECKS.length || ready
+                return (
+                  <li
+                    key={label}
+                    className="flex items-baseline gap-3 transition-opacity duration-500"
+                    style={{ opacity: progress >= i / CHECKS.length || ready ? 1 : 0.25 }}
+                  >
+                    <span className="opacity-70">{label}</span>
+                    <span aria-hidden="true" className="flex-1 translate-y-[-3px] border-b border-dotted opacity-30" />
+                    <span style={{ color: done ? C.neon : 'inherit' }}>{done ? value : '···'}</span>
+                  </li>
+                )
+              })}
+            </ul>
+            <div className="mt-8 h-14">
+              <button
+                ref={buttonRef}
+                type="button"
+                onClick={board}
+                disabled={!ready}
+                className="group relative h-14 w-full overflow-hidden rounded-full border text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none"
+                style={{ ...DISPLAY, borderColor: C.orange, color: C.cream, opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(8px)', background: 'rgba(5,5,6,0.6)' }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                  style={{ background: C.orange }}
+                />
+                <span className="relative transition-colors duration-300 group-hover:text-[#070708] group-focus-visible:text-[#070708]">Abordar</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <footer className="flex items-end justify-between gap-4 text-[11px] tracking-[0.18em] uppercase opacity-55" style={DISPLAY}>
-          <span>Café de especialidad</span>
-          <span>San Martín de los Andes</span>
+        {/* La marca, a todo el ancho: el contorno se llena de luz con la carga. */}
+        <footer>
+          <div className="mb-3 flex items-end justify-between gap-4 text-[11px] tracking-[0.18em] uppercase" style={DISPLAY}>
+            <span className="opacity-55">Café de especialidad · San Martín de los Andes</span>
+            <span className="text-[12px] tabular-nums" style={{ ...MONO, color: C.neon }}>
+              {String(pct).padStart(3, '0')}
+            </span>
+          </div>
+          <p className="relative leading-[0.82] font-light whitespace-nowrap select-none" style={{ ...MONO, fontSize: 'min(17.6vw, 40svh)', letterSpacing: '-0.04em' }} aria-label="cāpsula33">
+            <span aria-hidden="true" style={{ color: 'transparent', WebkitTextStroke: '1px rgba(242,233,220,0.28)' }}>
+              cāpsula33
+            </span>
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 transition-[clip-path] duration-500 ease-out"
+              style={{ clipPath: `inset(0 ${100 - pct}% 0 0)`, color: C.cream, textShadow: '0 0 40px rgba(255,122,26,0.35)' }}
+            >
+              cāpsula<span style={{ color: C.orange }}>33</span>
+            </span>
+          </p>
         </footer>
       </div>
     </div>

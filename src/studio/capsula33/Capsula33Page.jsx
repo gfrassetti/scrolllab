@@ -7,6 +7,8 @@ import ShipHero from './ShipHero'
 import ScrollRail from './ScrollRail'
 import { BODY, C, FONTS_HREF } from './brand'
 
+const LOADER_MIN_MS = 5200
+
 /*
 THESIS: el café es un módulo acoplado a una nave — se aborda (loader con salto
   al hiperespacio), del otro lado está el hangar con el espacio detrás del
@@ -43,11 +45,28 @@ export default function Capsula33Page() {
   }, [])
 
   const [calm] = useState(() => prefersReducedMotion())
-  const [progress, setProgress] = useState(0)
-  const [ready, setReady] = useState(false)
+  const [loaded, setLoaded] = useState(0)
+  const [assetsReady, setAssetsReady] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
   const [boarded, setBoarded] = useState(false)
-  const onProgress = useCallback((p) => setProgress(p), [])
-  const onReady = useCallback(() => setReady(true), [])
+  const onProgress = useCallback((p) => setLoaded(p), [])
+  const onReady = useCallback(() => setAssetsReady(true), [])
+
+  // La secuencia de abordaje dura lo que tiene que durar, aunque la descarga sea instantánea
+  // (pedido del dueño): el progreso que se ve es el menor entre la descarga y el reloj.
+  useEffect(() => {
+    let raf = 0
+    const t0 = performance.now()
+    const tick = (now) => {
+      const t = Math.min(1, (now - t0) / LOADER_MIN_MS)
+      setElapsed(t)
+      if (t < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+  const progress = Math.min(loaded, elapsed)
+  const ready = assetsReady && elapsed >= 1
 
   // Hasta abordar la página no se mueve (el loader la tapa entera).
   useEffect(() => {
