@@ -21,11 +21,11 @@ export const DEMO_PRODUCTS = [
     img: tee,
     badge: 'New',
     variants: { label: 'Size', options: ['S', 'M', 'L', 'XL'] },
-    details: 'Placeholder long description. Cut from heavyweight cotton with a boxy fit and one tonal accent stitch on the hem — replace it with your own story.',
+    details: 'Cut from 240 gsm heavyweight cotton with a boxy fit, dropped shoulders and one tonal accent stitch on the hem. Pre-washed, so it keeps its shape wash after wash.',
     specs: [
       ['Material', '100% cotton, 240 gsm'],
       ['Fit', 'Boxy, dropped shoulder'],
-      ['Made in', 'Placeholder country'],
+      ['Made in', 'Portugal'],
     ],
   },
   {
@@ -37,7 +37,7 @@ export const DEMO_PRODUCTS = [
     img: cap,
     // Colour options carry a swatch: «Black:#151515» in the builder.
     variants: { label: 'Colour', options: ['Black', 'Stone'], swatches: { Black: '#151515', Stone: '#cfc6b6' } },
-    details: 'Placeholder long description. An unstructured six-panel with a tonal embroidered mark and an adjustable strap.',
+    details: 'An unstructured six-panel in washed cotton twill, with a tonal embroidered mark on the front and an adjustable brass buckle at the back.',
     specs: [
       ['Material', 'Washed cotton twill'],
       ['Closure', 'Adjustable strap'],
@@ -51,7 +51,7 @@ export const DEMO_PRODUCTS = [
     blurb: 'Canvas body, reinforced handles. One size.',
     img: tote,
     // No `variants` — one size fits all, no picker renders.
-    details: 'Placeholder long description. Heavy canvas body, reinforced handles and an inside pocket.',
+    details: 'A heavy canvas body with reinforced handles, an inside pocket for your keys and room for a laptop and the week\'s groceries.',
   },
 ]
 

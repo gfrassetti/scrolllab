@@ -5,24 +5,28 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 const defaultCards = [
   {
     index: '01',
+    tag: 'Editorial',
     title: 'One story per issue',
     body: 'Each issue follows a single story from beginning to end. If it needs ninety pages, it gets ninety pages.',
     theme: 'bg-ink text-bone',
   },
   {
     index: '02',
+    tag: 'Writers',
     title: 'Paid for the time it takes',
     body: 'Our writers are paid for the months a story takes, not for how many people share it.',
     theme: 'bg-accent text-ink',
   },
   {
     index: '03',
+    tag: 'Print',
     title: 'Printed close to home',
     body: 'Paper from a mill in Fife, printed in Leith, posted from our office. Every copy starts its trip within 80 km.',
     theme: 'bg-bone text-ink border border-ink/20',
   },
   {
     index: '04',
+    tag: 'Business',
     title: 'No ads, ever',
     body: 'Readers pay for the magazine, so the magazine answers to them. That is the whole business model.',
     theme: 'bg-ink text-bone',
@@ -111,7 +115,7 @@ export default function StackingCards({
             >
               <div className="flex items-baseline justify-between text-[11px] uppercase tracking-[0.25em] opacity-60 md:text-xs">
                 <span>{card.index}</span>
-                <span>{card.tag ?? 'Placeholder card'}</span>
+                <span>{card.tag}</span>
               </div>
 
               <div className="space-y-6">
