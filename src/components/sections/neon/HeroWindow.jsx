@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 import { imgAttrs } from '../../../lib/responsiveImage'
-import { city, fore, room, sky, variants } from './assets/images'
+import { city, fore, room, ship1, ship2, ship3, ship4, ship5, ship6, sky, variants } from './assets/images'
 
 /**
  * Depth of each layer: how far it drifts when you "move your head" (pointer,
@@ -12,17 +12,44 @@ import { city, fore, room, sky, variants } from './assets/images'
  */
 const LAYERS = [
   { id: 'sky', src: sky, drift: 70, lift: 26, scale: 1.16 },
-  { id: 'city', src: city, drift: 48, lift: 18, scale: 1.12 },
+  { id: 'city', src: city, drift: 50, lift: 18, scale: 1.12 },
+  { id: 'ships', drift: 34, lift: 12, scale: 1.1 },
   { id: 'room', src: room, drift: 12, lift: 6, scale: 1.04 },
   { id: 'fore', src: fore, drift: -10, lift: -4, scale: 1.06 },
 ]
 
+// The painting is 2688 × 1520; every layer is laid on the same frame so the
+// cut-outs stay aligned.
+const ART_W = 2688
+const ART_H = 1520
+const FRAME = {
+  position: 'absolute',
+  left: '50%',
+  top: '50%',
+  width: `max(100%, calc(100svh * ${ART_W / ART_H}))`,
+  height: `max(100%, calc(100vw * ${ART_H / ART_W}))`,
+  transform: 'translate(-50%, -50%)',
+}
+
+// Each ship, cut out from the ships layer. The cut-outs were generated large;
+// here each gets its own size in the painting (`w`, % of its width) and its
+// height in the sky (`top`, %): the near ones bigger, lower and faster. They
+// all fly left.
+const SHIPS = [
+  { src: ship1, w: 15, top: 34, speed: 1.5, start: 0.15 },
+  { src: ship2, w: 12, top: 22, speed: 1.15, start: 0.55 },
+  { src: ship3, w: 9, top: 14, speed: 0.9, start: 0.8 },
+  { src: ship4, w: 7, top: 41, speed: 0.7, start: 0.35 },
+  { src: ship5, w: 5.5, top: 28, speed: 0.55, start: 0.05 },
+  { src: ship6, w: 4.5, top: 9, speed: 0.45, start: 0.65 },
+]
+
 /**
- * HeroWindow — a cozy room at night, looking out at a neon megacity, painted
+ * HeroWindow — a cozy capsule home at night, looking out at a neon megacity, painted
  * in layers. Move the pointer (or a finger, or the arrow keys) and the view
  * shifts like a person turning their head: the city slides behind the window
- * frame, the room stays put. Scrolling walks you through the glass into the
- * city.
+ * frame, the room stays put, and the flying cars cross on their own. Scrolling
+ * walks you through the glass into the city.
  */
 export default function HeroWindow({
   eyebrow = 'Eyebrow 1',
@@ -65,7 +92,7 @@ export default function HeroWindow({
       // of the scene fits: the head also pans across it, so the room, the cat
       // and the plants come into view. On a wide screen there's nothing to pan.
       const pin = scene.querySelector('[data-pin]')
-      const panRoom = () => Math.max(0, (pin.clientHeight * (16 / 9) - pin.clientWidth) / 2) * 0.9
+      const panRoom = () => Math.max(0, (pin.clientHeight * (ART_W / ART_H) - pin.clientWidth) / 2) * 0.9
       // a slow idle sway so the scene breathes even when nobody moves (wider on a phone)
       const tick = (time) => {
         const wide = panRoom() > 0
@@ -82,8 +109,25 @@ export default function HeroWindow({
       }
       gsap.ticker.add(tick)
 
+      // the ships cross the city on their own, each at its pace, and come round
+      // again from the right; a slow bob keeps them afloat
+      const flights = gsap.utils.toArray('[data-ship]', scene).map((el, i) => {
+        const ship = SHIPS[i]
+        const from = 103 // % of the frame: just past the right edge
+        const to = -ship.w * 1.6
+        const flight = gsap.fromTo(
+          el,
+          { left: `${from}%` },
+          { left: `${to}%`, duration: 40 / ship.speed, ease: 'none', repeat: -1 },
+        )
+        // each one starts somewhere along its route
+        flight.progress(ship.start)
+        const bob = gsap.to(el, { yPercent: 18, duration: 2.4 + i * 0.4, ease: 'sine.inOut', yoyo: true, repeat: -1 })
+        return [flight, bob]
+      })
+
       // entrance: the room light comes up, then the city wakes behind the glass
-      gsap.from('[data-layer="sky"], [data-layer="city"]', { opacity: 0, duration: 1.6, ease: 'power2.out', stagger: 0.25 })
+      gsap.from('[data-layer="sky"], [data-layer="city"], [data-layer="ships"]', { opacity: 0, duration: 1.6, ease: 'power2.out', stagger: 0.25 })
       gsap.from('[data-layer="room"]', { opacity: 0, filter: 'brightness(0.3)', duration: 1.4, ease: 'power2.out' })
       gsap.from('[data-layer="fore"]', { opacity: 0, x: -30, duration: 1.4, delay: 0.5, ease: 'power3.out' })
       gsap.from('[data-neon-copy] > *', { y: 24, opacity: 0, duration: 0.9, delay: 0.9, stagger: 0.12, ease: 'power3.out' })
@@ -106,11 +150,13 @@ export default function HeroWindow({
       tl.to('[data-dolly="room"]', { scale: 2.6, duration: 1, ease: 'power2.in' }, 0.05)
       tl.to('[data-dolly="room"]', { opacity: 0, duration: 0.3 }, 0.75)
       tl.to('[data-dolly="city"]', { scale: 1.35, duration: 1 }, 0.05)
+      tl.to('[data-dolly="ships"]', { scale: 1.6, duration: 1 }, 0.05)
       tl.to('[data-dolly="sky"]', { scale: 1.12, duration: 1 }, 0.05)
 
       return () => {
         window.removeEventListener('keydown', onKey)
         gsap.ticker.remove(tick)
+        flights.flat().forEach((t) => t.kill())
         pointer.dispose?.()
       }
     },
@@ -127,17 +173,34 @@ export default function HeroWindow({
             data-dolly={l.id}
             className="absolute inset-0 will-change-transform"
             // the room dollies toward the middle of the window
-            style={{ transformOrigin: l.id === 'room' ? '50% 42%' : '50% 50%' }}
+            style={{ transformOrigin: l.id === 'room' ? '62% 40%' : '50% 50%' }}
           >
             <div data-layer={l.id} className="absolute inset-0 will-change-transform" style={{ transform: `scale(${l.scale})` }}>
-              <img
-                {...imgAttrs(l.src, variants)}
-                sizes="100vw"
-                alt=""
-                draggable={false}
-                fetchPriority={l.id === 'sky' || l.id === 'room' ? 'high' : undefined}
-                className="absolute top-0 left-1/2 h-full w-auto max-w-none min-w-full -translate-x-1/2 object-cover"
-              />
+              <div style={FRAME}>
+                {l.src ? (
+                  <img
+                    {...imgAttrs(l.src, variants)}
+                    sizes="100vw"
+                    alt=""
+                    draggable={false}
+                    fetchPriority={l.id === 'sky' || l.id === 'room' ? 'high' : undefined}
+                    className="absolute inset-0 h-full w-full"
+                  />
+                ) : (
+                  SHIPS.map((ship) => (
+                    <img
+                      key={ship.top}
+                      data-ship
+                      {...imgAttrs(ship.src, variants)}
+                      sizes="15vw"
+                      alt=""
+                      draggable={false}
+                      className="absolute will-change-transform"
+                      style={{ top: `${ship.top}%`, width: `${ship.w}%`, height: 'auto' }}
+                    />
+                  ))
+                )}
+              </div>
             </div>
           </div>
         ))}
