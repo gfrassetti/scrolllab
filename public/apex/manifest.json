@@ -3,27 +3,27 @@
   "fps": 60,
   "shots": [
     {
-      "label": "Chapter 1",
+      "label": "Arrival",
       "start": 0,
       "end": 7.167
     },
     {
-      "label": "Chapter 2",
+      "label": "Profile",
       "start": 7.167,
       "end": 14.583
     },
     {
-      "label": "Chapter 3",
+      "label": "Wheel",
       "start": 14.583,
       "end": 22
     },
     {
-      "label": "Chapter 4",
+      "label": "Cabin",
       "start": 22,
       "end": 29.417
     },
     {
-      "label": "Chapter 5",
+      "label": "Tail light",
       "start": 29.417,
       "end": 36.833
     }

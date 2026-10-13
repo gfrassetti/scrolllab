@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { prefersReducedMotion } from '../../../lib/motion'
 import { imgAttrs } from '../../../lib/responsiveImage'
-import { lab, lounge, paint, road, studio, wheel, variants } from './assets/images'
+import { lab, lounge, paint, showroom2, showroom3, studio, variants } from './assets/images'
 
 /**
  * APEX — Models
@@ -18,18 +18,18 @@ const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-seri
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 
 const DEFAULT_ITEMS = [
-  { name: 'Model 1', image: studio, href: '#contact' },
-  { name: 'Model 2', image: wheel, href: '#contact' },
-  { name: 'Model 3', image: road, href: '#contact' },
-  { name: 'Model 4', image: lounge, href: '#contact' },
-  { name: 'Model 5', image: lab, href: '#contact' },
-  { name: 'Model 6', image: paint, href: '#contact' },
+  { name: 'Saloon', image: studio, href: '#showroom' },
+  { name: 'Coupé', image: showroom2, href: '#showroom' },
+  { name: 'Terra', image: showroom3, href: '#showroom' },
+  { name: 'Bespoke', image: paint, href: '#contact' },
+  { name: 'Ownership', image: lounge, href: '#contact' },
+  { name: 'Renewal', image: lab, href: '#contact' },
 ]
 
 export default function Models({
-  eyebrow = 'Section label',
+  eyebrow = 'The range',
   index = '03',
-  caption = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+  caption = 'One platform, built three ways and finished to order: a saloon, a coupé and a pickup. Paint, trim and battery care are specified with you, at the atelier.',
   items,
   bg,
   fg,

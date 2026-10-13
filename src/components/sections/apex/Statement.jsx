@@ -19,9 +19,9 @@ const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-seri
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 
 const DEFAULT_STATS = [
-  { value: '24', label: 'Lorem ipsum dolor sit' },
-  { value: '480', label: 'Consectetur adipiscing elit' },
-  { value: '1,200', label: 'Sed do eiusmod tempor' },
+  { value: '11', label: 'Weeks to build each car' },
+  { value: '620 km', label: 'On a single charge' },
+  { value: '240', label: 'Cars a year, never more' },
 ]
 
 /** "1,100 km" → { prefix: '', num: 1100, suffix: ' km', text: '1,100' }; no digits → null. */
@@ -35,11 +35,11 @@ function parseValue(v) {
 }
 
 export default function Statement({
-  eyebrow = 'Section label',
+  eyebrow = 'Philosophy',
   index = '01',
-  statement = 'Headline 1 — lorem ipsum dolor sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  statement = 'We build one car, and we build it slowly: *eleven weeks* from bare chassis to first drive, every panel fitted and signed by the hand that made it.',
   stats = DEFAULT_STATS,
-  linkLabel = 'Link label',
+  linkLabel = 'See the range',
   linkHref = '#models',
   showLines = 'on',
   bg,

@@ -1,6 +1,8 @@
 import { useId, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { prefersReducedMotion } from '../../../lib/motion'
+import { contactHref, externalProps, legalDocs } from '../../../lib/contactLinks'
+import LegalSheet from '../../LegalSheet'
 
 /**
  * APEX — Footer (full height)
@@ -10,41 +12,67 @@ import { prefersReducedMotion } from '../../../lib/motion'
  * wordmark set huge on the bottom left. The newsletter works: without an
  * `endpoint` it runs in demo mode (simulated success); with one it POSTs
  * `{ formType: 'newsletter', email }` as JSON, like the contact form.
+ * Emails and phone numbers in the contact blocks are links; Privacy and Terms
+ * open their text in a panel over the page (LegalSheet) while they point at a
+ * hash, and go to the buyer's own page once they point at one.
  */
 
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 const DEFAULT_LINKS = [
-  { label: 'Link 1', href: '#models' },
-  { label: 'Link 2', href: '#atelier' },
-  { label: 'Link 3', href: '#statement' },
-  { label: 'Link 4', href: '#contact' },
+  { label: 'Philosophy', href: '#statement' },
+  { label: 'Atelier', href: '#atelier' },
+  { label: 'Models', href: '#models' },
+  { label: 'Showroom', href: '#showroom' },
 ]
 const DEFAULT_BLOCKS = [
-  { heading: 'Label 1', lines: '+00 000 000 000\nhello@yourbrand.com\nOpening hours' },
-  { heading: 'Label 2', lines: 'Address line\nCity 0000\nemail@yourbrand.com' },
-  { heading: 'Label 3', lines: 'Address line\nCity 0000\nemail@yourbrand.com' },
+  { heading: 'Atelier', lines: 'Via Lagrange 18\n10123 Turin, Italy\nMon–Sat, 9:00–19:00' },
+  { heading: 'Sales', lines: '+39 011 555 0142\nsales@apexautomobili.com' },
+  { heading: 'Press', lines: 'press@apexautomobili.com\nMedia kit on request' },
 ]
 
+const PRIVACY = `Last updated: 1 March 2026
+
+Apex Automobili S.r.l., Via Lagrange 18, 10123 Turin, is responsible for the personal data you share on this site.
+
+We keep what you send us: your name and email when you book a drive or join the letter from the atelier, and whatever you write in a message. We use it to answer you, arrange the drive and send the letters you asked for. Nothing else.
+
+We do not sell your data or share it with advertisers. Our email and hosting providers process it on our behalf, inside the European Union.
+
+You can ask to see, correct or delete your data at any time at privacy@apexautomobili.com. Every letter has a one-click unsubscribe.`
+
+const TERMS = `Last updated: 1 March 2026
+
+This site is run by Apex Automobili S.r.l. Specifications, range figures and prices are given for information and can change before a car is ordered: the order confirmation is what binds us.
+
+Range is measured on the WLTP cycle. Real range depends on speed, temperature and how the car is driven.
+
+Test drives are booked in advance and need a valid driving licence. Photographs may show options that are not available in every market.
+
+The text, photographs and films on this site belong to Apex Automobili S.r.l. and may not be reused without written permission.`
+
 export default function Footer({
-  brand = 'Brand name',
-  descriptor = 'Tagline\nCity, Country\n© 2026 Brand name. All rights reserved.',
+  brand = 'Apex',
+  descriptor = 'Electric grand tourers, built to order\nTurin, Italy\n© 2026 Apex Automobili S.r.l.',
   links = DEFAULT_LINKS,
-  emailPlaceholder = 'Enter your email',
-  signupLabel = 'Sign up',
+  emailPlaceholder = 'Your email',
+  signupLabel = 'Subscribe',
   sendingLabel = 'Sending…',
-  successMessage = 'Thank you. You are on the list.',
-  errorMessage = 'Something went wrong. Please try again.',
-  emailError = 'Enter a valid email',
+  successMessage = 'Thank you. The next letter from the atelier is yours.',
+  errorMessage = 'That did not go through. Please try again.',
+  emailError = 'That email does not look complete',
   endpoint = '',
   blocks = DEFAULT_BLOCKS,
-  social = '@yourbrand',
-  socialHref = '#',
+  social = 'Instagram',
+  socialHref = 'https://www.instagram.com/',
   privacyLabel = 'Privacy',
-  privacyHref = '#',
+  privacyHref = '#privacy',
+  privacyText = PRIVACY,
   termsLabel = 'Terms',
-  termsHref = '#',
+  termsHref = '#terms',
+  termsText = TERMS,
+  legalCloseLabel = 'Close',
   wordmark = 'APEX',
   showWordmark = 'on',
   bg,
@@ -191,27 +219,48 @@ export default function Footer({
           {infoBlocks.map((b, i) => (
             <div key={`${b.heading}-${i}`} data-apex-rise>
               <p className="mb-2 opacity-50">{b.heading}</p>
-              {lines(b.lines).map((l) => (
-                <p key={l}>{l}</p>
-              ))}
+              {lines(b.lines).map((l) => {
+                const href = contactHref(l)
+                return (
+                  <p key={l}>
+                    {href ? (
+                      <a href={href} className="tpl-link relative">
+                        {l}
+                      </a>
+                    ) : (
+                      l
+                    )}
+                  </p>
+                )
+              })}
             </div>
           ))}
         </div>
       </div>
 
       <div className="mt-10 flex items-end justify-between gap-6 text-[11px] tracking-[0.16em] uppercase md:grid md:grid-cols-12 md:gap-x-[1.6vw] lg:text-[max(11px,0.6vw)]" style={LABEL}>
-        <a href={socialHref} className="tpl-link tpl-hit relative md:col-span-3">
+        <a href={socialHref} {...externalProps(socialHref)} className="tpl-link tpl-hit relative md:col-span-3">
           {social}
         </a>
         <div className="flex items-end gap-6 md:col-span-6 md:col-start-5 md:gap-[2.4vw]">
-          <a href={privacyHref} className="tpl-link tpl-hit relative">
+          <a href={privacyHref} {...externalProps(privacyHref)} className="tpl-link tpl-hit relative">
             {privacyLabel}
           </a>
-          <a href={termsHref} className="tpl-link tpl-hit relative">
+          <a href={termsHref} {...externalProps(termsHref)} className="tpl-link tpl-hit relative">
             {termsLabel}
           </a>
         </div>
       </div>
+
+      <LegalSheet
+        docs={legalDocs([
+          { href: privacyHref, title: privacyLabel, body: privacyText },
+          { href: termsHref, title: termsLabel, body: termsText },
+        ])}
+        closeLabel={legalCloseLabel}
+        bg={fg || '#e8edf6'}
+        fg={bg || '#04070d'}
+      />
     </footer>
   )
 }

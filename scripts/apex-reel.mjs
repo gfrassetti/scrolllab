@@ -45,11 +45,11 @@ const CRF = Number(opt('crf', '25'))
 
 /** One entry per clip, in film order. `focus` = where the phone crop is centred (0 left … 1 right). */
 const SHOTS = [
-  { file: 'shot-1.mp4', label: 'Chapter 1', focus: 0.5 },
-  { file: 'shot-2.mp4', label: 'Chapter 2', focus: 0.62 },
-  { file: 'shot-3.mp4', label: 'Chapter 3', focus: 0.46 },
-  { file: 'shot-4.mp4', label: 'Chapter 4', focus: 0.4 },
-  { file: 'shot-5.mp4', label: 'Chapter 5', focus: 0.5 },
+  { file: 'shot-1.mp4', label: 'Arrival', focus: 0.5 },
+  { file: 'shot-2.mp4', label: 'Profile', focus: 0.62 },
+  { file: 'shot-3.mp4', label: 'Wheel', focus: 0.46 },
+  { file: 'shot-4.mp4', label: 'Cabin', focus: 0.4 },
+  { file: 'shot-5.mp4', label: 'Tail light', focus: 0.5 },
 ]
 const FPS = Number(opt('fps', '60'))
 const FADE = 0.5 // seconds of crossfade at each join

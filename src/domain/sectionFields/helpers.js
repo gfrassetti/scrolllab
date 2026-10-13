@@ -113,6 +113,36 @@ export const FORM_ENDPOINT_HELP = {
   ],
 }
 
+/**
+ * Privacidad y Términos de un footer. Con el enlace en `#privacy` / `#terms`
+ * el texto se abre en un panel sobre la página (src/components/LegalSheet.jsx);
+ * con una ruta o una URL, el enlace va ahí y el texto no se usa.
+ * @type {FieldHelp}
+ */
+export const LEGAL_HELP = {
+  title: 'Cómo funcionan Privacidad y Términos',
+  steps: [
+    'En la demo, los dos enlaces abren su texto en un panel sobre la misma página: el sitio es una sola página y no tiene adónde ir.',
+    'El texto de la demo es de la marca inventada del template: reemplazalo por el tuyo y hacelo revisar por quien te asesore. Una línea en blanco empieza un párrafo nuevo.',
+    'Si ya tenés tus páginas legales, poné su ruta (/privacidad) o su URL https:// en el enlace: va ahí y el panel deja de usarse.',
+  ],
+}
+
+/**
+ * Los campos de Privacidad y Términos de un footer (texto, enlace y contenido)
+ * y el botón que cierra el panel.
+ * @returns {SectionField[]}
+ */
+export const legalFields = () => [
+  { key: 'privacyLabel', label: 'Privacidad — texto', type: 'text' },
+  { key: 'privacyHref', label: 'Privacidad — enlace (#privacy abre el panel)', type: 'href', help: LEGAL_HELP },
+  { key: 'privacyText', label: 'Privacidad — contenido del panel', type: 'textarea' },
+  { key: 'termsLabel', label: 'Términos — texto', type: 'text' },
+  { key: 'termsHref', label: 'Términos — enlace (#terms abre el panel)', type: 'href' },
+  { key: 'termsText', label: 'Términos — contenido del panel', type: 'textarea' },
+  { key: 'legalCloseLabel', label: 'Panel legal — botón cerrar', type: 'text' },
+]
+
 /** El botón del menú en el teléfono: lo que dice cerrado y abierto. */
 /** @type {SectionField[]} */
 export const MENU_BUTTON = [

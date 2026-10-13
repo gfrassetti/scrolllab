@@ -212,6 +212,8 @@ const SHARED = [
   // `three` como dependencia hasta en un ZIP 100% 2D (chapters, nocturne...).
   // Ver WEBGL_FILES + needsWebgl más abajo.
   'src/lib/navLinks.js',
+  // Líneas de contacto que se vuelven mailto:/tel: y links externos en otra pestaña.
+  'src/lib/contactLinks.js',
   // srcset de las fotos de ejemplo (assets/images.js de cada modelo).
   'src/lib/responsiveImage.js',
   // Versión calma con «reducir movimiento» (las secciones la consultan).
@@ -226,6 +228,8 @@ const SHARED = [
   'src/components/SmoothScrollProvider.jsx',
   // Barra de scroll propia de cada template (la monta la página).
   'src/components/ScrollRail.jsx',
+  // Privacidad / términos como panel sobre la página (lo montan los footers).
+  'src/components/LegalSheet.jsx',
   'src/index.css',
   // Micro-interacciones comunes (tpl-*), las importa index.css.
   'src/styles/tpl.css',

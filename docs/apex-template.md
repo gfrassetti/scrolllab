@@ -181,9 +181,11 @@ abajo a la izquierda (interruptor). No es hosteable en LAB: es el cierre de una 
 
 ## 6d. Story (misión / visión) y Showroom 3D
 
-**Texto de la demo:** todo es placeholder (convención del catálogo: «Brand name», «Headline 1»,
-«Lorem ipsum…», «Link 1», «Model 1», «Section label»), para que el comprador lo reemplace sin
-borrar copy de otra marca. Los capítulos del film se llaman «Chapter 1…5» (manifest y script).
+**Texto de la demo:** el de una marca inventada, **Apex Automobili** (Turín): gran turismo
+eléctrico hecho a mano, tres autos (Saloon, Coupé y la pickup Terra), «620 km», «once semanas por
+auto». Cada link lleva a una sección de la página; Privacidad y Términos abren su texto en un panel
+(`LegalSheet`). Los capítulos del film son Arrival, Profile, Wheel, Cabin y Tail light (manifest y
+script). Convención del catálogo: [`template-copy.md`](template-copy.md).
 
 **Story (`apex/Story`).** Inspirado en «Our mission / Our vision» de klausen.com: hasta tres
 bloques (rótulo, titular, texto, imagen, palabra de fondo) con parallax en tres profundidades
