@@ -196,17 +196,17 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
  */
 export default function ContactForm({
   theme = 'auto',
-  eyebrow = 'Section label',
-  title = 'Title 1',
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
+  eyebrow = 'Contact',
+  title = 'Start a conversation',
+  body = 'Tell us what you have in mind, when you need it and roughly what it should cost. We answer every message within two working days.',
   nameLabel = 'Name',
   emailLabel = 'Email',
   messageLabel = 'Message',
-  submitLabel = 'CTA label',
+  submitLabel = 'Send message',
   sendingLabel = 'Sending…',
-  successMessage = 'Message sent.',
+  successMessage = 'Message sent. We will be in touch within two working days.',
   errorMessage = 'Something went wrong. Please try again.',
-  note = 'Replace with your reply time or privacy line.',
+  note = 'We reply within two working days. Your details are only used to answer you.',
   endpoint = '',
   /**
    * Qué pide el formulario: `contact` (nombre, email, mensaje), `quote`

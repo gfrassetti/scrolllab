@@ -91,8 +91,8 @@ function disposeObject(obj) {
  */
 export default function HeroThree({
   title = 'MONOLITH',
-  subtitle = 'A brutalist storytelling template — placeholder object, real motion',
-  meta = 'System v1.0 — ©2026',
+  subtitle = 'Objects, furniture and rooms, cast in concrete and steel',
+  meta = 'Monolith Works — Antwerp — since 2014',
   hint = 'Scroll',
   shape = 'icosahedron',
   modelUrl = '',

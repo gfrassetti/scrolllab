@@ -6,10 +6,10 @@ import { imgAttrs } from '../../../lib/responsiveImage'
 import { themeVars } from '../../../lib/themeVars'
 
 const defaultExhibits = [
-  { code: 'EX-01', caption: 'Placeholder exhibit', img: ex01 },
-  { code: 'EX-02', caption: 'Generic artifact', img: ex02 },
-  { code: 'EX-03', caption: 'Untitled block', img: ex03 },
-  { code: 'EX-04', caption: 'Working sample', img: ex04 },
+  { code: 'EX-01', caption: 'Plinth with a Klein interior', img: ex01 },
+  { code: 'EX-02', caption: 'Plate stack, raw steel', img: ex02 },
+  { code: 'EX-03', caption: 'Column, cast in one pour', img: ex03 },
+  { code: 'EX-04', caption: 'Frame, anodised aluminium', img: ex04 },
 ]
 
 /**
@@ -19,9 +19,11 @@ const defaultExhibits = [
 export default function ExhibitGrid({
   unit = '03',
   total = '05',
-  label = 'The exhibits',
+  label = 'Selected works',
   unitLabel = 'Unit',
   exhibits,
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'works',
   bg,
   fg,
   accent,
@@ -54,6 +56,7 @@ export default function ExhibitGrid({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-20 md:px-8 md:py-32"
       style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ carbon: fg, klein: accent, concrete: bg }) }}
     >

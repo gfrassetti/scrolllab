@@ -8,7 +8,11 @@ import { parseNavLinks } from '../../../lib/navLinks'
  */
 export default function NavBrutal({
   brand = 'MONOLITH™',
-  links = ['System', 'Units', 'Contact'],
+  links = [
+    { label: 'Works', href: '#works' },
+    { label: 'Studio', href: '#studio' },
+    { label: 'Contact', href: '#contact' },
+  ],
   linksText,
   menuLabel = 'Menu',
   closeLabel = 'Close',

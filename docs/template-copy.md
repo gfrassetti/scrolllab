@@ -44,3 +44,4 @@ Así que cada template de SCROLLLAB es el sitio de un negocio que inventamos par
 | FOLD | **Fold Paper Studio** — taller de faroles de papel, encargos y talleres los sábados | Porto | el CTA y el footer abren un mail (cruzar 46 pantallas de film hasta el footer no tiene sentido) |
 | CHAPTERS | **Chapters Quarterly** — revista trimestral impresa de historias largas | Edimburgo | Issue 97, 24 años, 96 números, sin publicidad |
 | NOCTURNE | **Nocturne Pictures** — productora que solo filma de noche (publicidad, cortos, videoclips) | Rotterdam | los trabajos del índice llevan a #contact (no hay páginas de caso) |
+| MONOLITH | **Monolith Works** — estudio que funde objetos, muebles y espacios en hormigón y acero | Amberes | el formulario de contacto lleva el copy de la página (ContactForm es compartido) |

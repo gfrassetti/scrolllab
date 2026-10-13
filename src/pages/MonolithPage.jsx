@@ -27,7 +27,15 @@ export default function MonolithPage() {
           <SpecSheet unit="02" />
           <ExhibitGrid unit="03" />
           <TypeAccordion unit="04" />
-          <ContactForm theme="monolith" />
+          <ContactForm
+            theme="monolith"
+            eyebrow="Commissions"
+            title="Tell us what it should weigh"
+            body="Describe the piece or the space, where it goes and when you need it. We reply with a first sketch and a price range within a week."
+            submitLabel="Send the brief"
+            successMessage="Brief received. A first sketch is on its way within a week."
+            note="We answer within five working days. Your details are only used to reply."
+          />
         </main>
 
         <FooterBrutal />
