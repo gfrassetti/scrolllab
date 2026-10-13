@@ -23,6 +23,8 @@ import { C, MONO, BODY, openStatus } from './brand'
  */
 
 const BASE = '/studio/capsula33/ship/'
+// Lo que dice la tripulante al primer movimiento del scroll (la primera frase es la de su revista).
+const LINE = 'Bienvenidos, exploradores de universos. El café está del otro lado de esa puerta.'
 
 function sources() {
   const big = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1600
@@ -50,6 +52,8 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
   const rootRef = useRef(null)
   const R = useRef({ notes: [] })
   const [hover, setHover] = useState(null)
+  const [talk, setTalk] = useState(false)
+  const [typed, setTyped] = useState(0)
   const [status] = useState(() => openStatus())
   const [notes] = useState(() => notesFor(status))
   const scroll = useRef({ p: 0 })
@@ -102,6 +106,12 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         gsap.set(r.chrome, { autoAlpha: 1 - Math.min(1, p * 9) })
         // La tripulante: la pasamos (se corre a la derecha, crece) y desaparece.
         const g = Math.min(1, cam.walk / 0.42)
+        // El cuadro de diálogo: aparece con el primer movimiento del scroll y se va antes de que ella se vaya.
+        const show = p > 0.004 && p < 0.1
+        if (show !== r.talk) {
+          r.talk = show
+          setTalk(show)
+        }
         gsap.set(r.girlScroll, { xPercent: 80 * g * g, scale: 1 + 0.35 * g, autoAlpha: 1 - Math.max(0, (g - 0.55) / 0.45) })
         // Cruzada la puerta, el interior pasa al DOM (en alta) y se abre hasta verse entero.
         const stop = r.scene.ENTER_STOP
@@ -122,9 +132,10 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         },
         onUpdate: apply,
       })
-      tl.to(cam, { walk: 1, duration: 0.52, ease: 'none' }, 0)
-      tl.to(cam, { open: 1, duration: 0.16, ease: 'power2.inOut' }, 0.44)
-      tl.to(cam, { enter: 1, duration: 0.38, ease: 'none' }, 0.56)
+      // Un primer tramo quieto: la tripulante habla y recién después caminamos.
+      tl.to(cam, { walk: 1, duration: 0.5, ease: 'none' }, 0.09)
+      tl.to(cam, { open: 1, duration: 0.15, ease: 'power2.inOut' }, 0.5)
+      tl.to(cam, { enter: 1, duration: 0.36, ease: 'none' }, 0.61)
       tl.progress(tl.scrollTrigger?.progress ?? 0)
       apply()
       return () => {
@@ -188,6 +199,13 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
     }
   }, [])
 
+  // La frase se escribe letra por letra la primera vez que aparece.
+  useEffect(() => {
+    if (!talk || typed >= LINE.length) return undefined
+    const id = setInterval(() => setTyped((n) => Math.min(LINE.length, n + 1)), 24)
+    return () => clearInterval(id)
+  }, [talk, typed])
+
   const enter = () => {
     const root = rootRef.current
     getLenis()?.scrollTo(root.offsetTop + root.offsetHeight - window.innerHeight, { duration: 3.6 })
@@ -229,7 +247,21 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
 
         {/* La tripulante tomando café, en primer plano. */}
         <div ref={set('girlScroll')} className="pointer-events-none absolute right-[4vw] bottom-0 h-[44svh] sm:right-[13vw] sm:h-[68svh]" style={{ transformOrigin: '70% 100%' }}>
-          <div ref={set('girlWrap')} className="h-full will-change-transform">
+          <div ref={set('girlWrap')} className="relative h-full will-change-transform">
+            {/* Su cuadro de diálogo. */}
+            <div role="status" aria-live="polite" className={`c33-talk absolute right-0 bottom-[100%] w-[min(260px,72vw)] sm:top-[9%] sm:right-[88%] sm:bottom-auto sm:w-[300px] ${talk ? 'is-on' : ''}`}>
+              <div className="relative rounded-lg border px-4 pt-3 pb-3.5" style={{ background: 'rgba(8,9,12,0.92)', borderColor: 'rgba(228,96,29,0.75)', boxShadow: '0 18px 50px rgba(0,0,0,0.55)' }}>
+                <p className="text-[10px] tracking-[0.22em] uppercase" style={{ ...MONO, color: C.neon }}>
+                  Tripulante · C33
+                </p>
+                <p className="mt-1.5 min-h-[3em] text-[15px] leading-[1.45]" style={{ ...BODY, color: C.cream }}>
+                  {LINE.slice(0, typed)}
+                  <span aria-hidden="true" className="c33-caret ml-0.5 inline-block h-[0.9em] w-[0.45em] translate-y-[0.12em]" style={{ background: C.neon }} />
+                </p>
+                {/* La colita, hacia ella: abajo en el teléfono, a la derecha en pantallas anchas. */}
+                <span aria-hidden="true" className="absolute right-10 -bottom-[6px] h-3 w-3 rotate-45 border-r border-b sm:top-8 sm:-right-[6px] sm:bottom-auto sm:border-t sm:border-b-0" style={{ background: 'rgb(8,9,12)', borderColor: 'rgba(228,96,29,0.75)' }} />
+              </div>
+            </div>
             <div ref={set('girlIn')} className="relative h-full opacity-0">
               <img
                 src="/studio/capsula33/girl-1360.webp"
@@ -318,6 +350,11 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         </div>
       </div>
       <style>{`
+        .c33-talk { opacity: 0; transform: translateY(6px) scale(0.96); transform-origin: 100% 100%; pointer-events: none; transition: opacity 160ms ease-out, transform 160ms ease-out; }
+        .c33-talk.is-on { opacity: 1; transform: none; transition: opacity 240ms cubic-bezier(0.22,1,0.36,1), transform 240ms cubic-bezier(0.22,1,0.36,1); }
+        @media (min-width: 640px) { .c33-talk { transform-origin: 100% 30%; } }
+        @keyframes c33-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+        .c33-caret { animation: c33-caret 1s steps(1, end) infinite; }
         @keyframes c33-pulse { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
         @keyframes c33-steam { 0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; } 25% { opacity: 0.5; } 100% { transform: translate(-50%, -140%) scale(1.5) rotate(8deg); opacity: 0; } }
         .c33-steam { position: absolute; width: 7%; height: 9%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), transparent 70%); filter: blur(6px); animation: c33-steam 3.6s ease-out infinite; opacity: 0; }
