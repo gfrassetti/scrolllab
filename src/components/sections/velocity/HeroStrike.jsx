@@ -19,11 +19,11 @@ import { themeVars } from '../../../lib/themeVars'
  * entrando con un fundido (`calm:h-auto` saca el alto de scrub).
  */
 export default function HeroStrike({
-  lineLeft = 'TITLE 1',
-  lineRight = 'TITLE 2',
-  lineLeft2 = 'TITLE 3',
-  lineRight2 = 'TITLE 4',
-  caption = 'Caption 1 — scroll',
+  lineLeft = 'RIDE',
+  lineRight = 'COME',
+  lineLeft2 = 'HARDER',
+  lineRight2 = 'HOME',
+  caption = 'Helmets for track and trail — scroll',
   imgBack = heroBack,
   imgMid = heroMid,
   imgFront = heroFront,

@@ -27,7 +27,7 @@ const STROKE_PATHS = [
 const defaultItems = [
   {
     id: 'item-1',
-    name: 'Title 1',
+    name: 'Shadow',
     year: '01',
     img: helm1,
     hover: helm1,
@@ -36,7 +36,7 @@ const defaultItems = [
   },
   {
     id: 'item-2',
-    name: 'Title 2',
+    name: 'Ghost',
     year: '02',
     img: helm2,
     hover: helm2,
@@ -45,7 +45,7 @@ const defaultItems = [
   },
   {
     id: 'item-3',
-    name: 'Title 3',
+    name: 'Graphite',
     year: '03',
     img: helm3,
     hover: helm3,
@@ -54,7 +54,7 @@ const defaultItems = [
   },
   {
     id: 'item-4',
-    name: 'Title 4',
+    name: 'Volt',
     year: '04',
     img: helm4,
     hover: helm4,
@@ -63,7 +63,7 @@ const defaultItems = [
   },
   {
     id: 'item-5',
-    name: 'Title 5',
+    name: 'Carbon',
     year: '05',
     img: helm5,
     hover: helm5,
@@ -72,7 +72,7 @@ const defaultItems = [
   },
   {
     id: 'item-6',
-    name: 'Title 6',
+    name: 'Heritage',
     year: '06',
     img: helm6,
     hover: helm6,
@@ -198,9 +198,9 @@ function HelmCard({ item, isActive, onActivate }) {
  * HelmetGrid — irregular clip masks + hover photo reveal (ellipse wipe).
  */
 export default function HelmetGrid({
-  eyebrow = 'Section label',
-  title = 'Title grid',
-  body = 'Body 1 — replace with hall copy.',
+  eyebrow = 'The hall',
+  title = 'Six helmets, one shell',
+  body = 'Every Velocity helmet shares the same carbon-composite shell, laid up by hand in Barcelona and certified to ECE 22.06. What changes is the finish and the fit.',
   items,
   bg,
   fg,

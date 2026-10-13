@@ -19,28 +19,28 @@ import { mixHex, themeVars } from '../../../lib/themeVars'
 
 const ROW_A = [
   {
-    label: 'Title 1',
+    label: 'Pit bench',
     img: trackA1,
     w: 'w-[42vw] md:w-[18vw]',
   },
   {
     label: 'Quote',
     quote:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.',
+      '“I have crashed in three of their helmets and walked away from all three. That is my whole review.”',
     w: 'w-[70vw] md:w-[28vw]',
   },
   {
-    label: 'Title 2',
+    label: 'Burnout',
     img: trackA2,
     w: 'w-[36vw] md:w-[14vw]',
   },
   {
-    label: 'Title 3',
+    label: 'Dusk, Aragón',
     img: trackA3,
     w: 'w-[48vw] md:w-[20vw]',
   },
   {
-    label: 'Title 8',
+    label: 'Wet kerb',
     img: trackA4,
     w: 'w-[40vw] md:w-[16vw]',
   },
@@ -48,27 +48,27 @@ const ROW_A = [
 
 const ROW_B = [
   {
-    label: 'Title 4',
+    label: 'Race boots',
     img: trackB1,
     w: 'w-[44vw] md:w-[17vw]',
   },
   {
-    label: 'Title 5',
+    label: 'Pass road',
     img: trackB2,
     w: 'w-[56vw] md:w-[24vw]',
   },
   {
-    label: 'Title 6',
+    label: 'Carbon shop',
     img: trackB3,
     w: 'w-[44vw] md:w-[17vw]',
   },
   {
-    label: 'Title 7',
+    label: 'Grip',
     img: trackB4,
     w: 'w-[40vw] md:w-[16vw]',
   },
   {
-    label: 'Title 9',
+    label: 'Lights out',
     img: trackB5,
     w: 'w-[46vw] md:w-[19vw]',
   },
@@ -95,18 +95,18 @@ const ROW_A_QUOTE = ROW_A.find((item) => item.quote)
  * PATH 1 / PATH 2 panels converge and hold before release.
  */
 export default function TrackMerge({
-  trackLabel = 'Dual track',
+  trackLabel = 'Track & trail',
   quote = ROW_A_QUOTE.quote,
-  quoteCaption = '— Caption',
+  quoteCaption = '— Marta Vidal, endurance racer',
   rowA,
   rowB,
-  pathLabelA = 'Path 1',
-  pathLabelB = 'Path 2',
+  pathLabelA = 'On track',
+  pathLabelB = 'Off road',
   pathImgA = onTrack,
   pathImgB = offTrack,
-  mergeTitleA = 'TITLE',
-  mergeTitleB = 'TITLE',
-  mergeAccent = 'A',
+  mergeTitleA = 'TRACK',
+  mergeTitleB = 'TRAIL',
+  mergeAccent = 'one shell,',
   /** Fondos de cada tramo (galería → cruce → salida) y sus textos. */
   bg = '#0a1a12',
   bg2 = '#e6e4dc',
@@ -116,6 +116,8 @@ export default function TrackMerge({
   accent,
   /** La textura de anillos detrás de la galería. */
   showTexture = 'on',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'track',
 }) {
   // Los dos verdes intermedios del lavado: los de la demo, o el fondo aclarado.
   const demoBg = bg.toLowerCase() === '#0a1a12'
@@ -339,6 +341,7 @@ export default function TrackMerge({
   return (
     <section
       ref={root}
+      id={id}
       className="relative"
       style={{ backgroundColor: bg, color: fg, '--tm-ink2': fg2, ...themeVars({ salt: fg, acid: accent }) }}
     >

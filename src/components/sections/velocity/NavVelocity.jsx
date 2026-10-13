@@ -7,10 +7,14 @@ import { parseNavLinks } from '../../../lib/navLinks'
  * overlay so the CTA never loses its slot.
  */
 export default function NavVelocity({
-  brand = 'BRAND',
-  cta = 'CTA',
+  brand = 'VELOCITY',
+  cta = 'Shop helmets',
   ctaHref = '#hall',
-  links = ['Hall', 'Gear', 'Contact'],
+  links = [
+    { label: 'Helmets', href: '#hall' },
+    { label: 'Track & trail', href: '#track' },
+    { label: 'Contact', href: '#contact' },
+  ],
   linksText,
   menuLabel = 'Menu',
   /** Texto de la barra y del menú, fondo del menú móvil y color del CTA. */

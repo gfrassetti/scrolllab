@@ -9,12 +9,12 @@ import { imgAttrs } from '../../../lib/responsiveImage'
  * as you scroll (slower than the page).
  */
 export default function ParallaxRise({
-  eyebrow = 'Eyebrow',
-  title = 'Title 1',
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.',
-  cta = 'CTA label',
+  eyebrow = 'Ride with us',
+  title = 'Sunday run, 7 a.m.',
+  body = 'Once a month we leave the workshop before sunrise and ride the pass road to Montserrat. Any bike, any helmet, coffee at the top.',
+  cta = 'Join the next ride',
   img = parallaxImg,
-  ctaHref = '#top',
+  ctaHref = 'mailto:rides@velocitymoto.es?subject=Sunday%20run',
   bg,
   fg,
   accent,
