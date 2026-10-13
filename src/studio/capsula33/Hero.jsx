@@ -2,44 +2,21 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
 import { createDioramaScene } from './dioramaScene'
-import { C, DISPLAY, MONO, BODY } from './brand'
+import { MANIFEST, STATIONS } from './stations'
+import { tour } from './tour'
+import { cursor } from './cursorBus'
+import { sfx } from './sfx'
+import HackyText from './HackyText'
+import { C, DISPLAY, MONO, BODY, HOURS, openStatus } from './brand'
 
 /**
- * cāpsula33 — Hero.
+ * cāpsula33 — Hero: el local en miniatura, flotando en el espacio.
  *
- * El local en miniatura, flotando, con la luz de Cycles horneada. Detrás, el
- * titular enorme (el diorama lo tapa en parte). Cada zona del local es una
- * puerta: al pasar el puntero se nombra, al tocarla la cámara entra ahí y la
- * página aterriza en esa sección; el scroll lleva a los mismos lugares.
- *
- * Coordenadas de Blender (x hacia el fondo, y hacia la pared de la barra, z arriba).
+ * Vista general: se arrastra para girarlo y cada zona se elige con el puntero.
+ * El scroll es el recorrido: la cámara entra a cada estación (PAGE 001–005) y
+ * un panel cuenta lo que hay ahí. Tocar una zona, el menú o la barra de scroll
+ * llevan a la misma página: el scroll hace el viaje.
  */
-
-const MANIFEST = {
-  model: 'room.glb',
-  atlases: { shell: 'bake-shell.webp', props: 'bake-props.webp' },
-  target: [-1, 0, 1.2], // el centro del local
-  // Pantalla ancha: isométrica desde la esquina de la entrada. La cámara mira
-  // por encima del local, que así baja en la pantalla y deja aire al titular.
-  viewDir: [-1, -1, 1],
-  lookLift: 1.2,
-  radius: 8.2,
-  distance: 46,
-  headlineLift: 4.6,
-  // Teléfono en vertical: mirando el local a lo largo desde la puerta.
-  tall: { viewDir: [-1.55, -0.5, 1.35], lookLift: 1.6, radius: 5.4, distance: 34, headlineLift: 7.2 },
-}
-
-// El plano del local: entrando, a la izquierda la pared de figuras y la barra
-// (punta redonda hacia la puerta); a la derecha el jardín en su caja blanca y
-// después el salón; al fondo la pared naranja con arcos.
-const ZONES = [
-  { id: 'menu', label: 'La barra', note: 'El menú', min: [-1.0, 0.15, 0], max: [3.2, 3, 3.1] },
-  { id: 'coleccion', label: 'Las vitrinas', note: 'La colección', min: [-8, 2.2, 0], max: [-2.05, 3, 3] },
-  { id: 'experiencia', label: 'El salón', note: 'La cápsula', min: [-4.3, -3, 0], max: [6, 0.4, 2.9] },
-  { id: 'jardin', label: 'El pulmón', note: 'El jardín', min: [-8, -3, 0], max: [-4.4, -1, 3.2] },
-  { id: 'mapa', label: 'La entrada', note: 'Cómo llegar', min: [-8.5, -0.9, 0], max: [-7.4, 2.2, 2.6] },
-]
 
 const PRICES = [
   ['ESPRESSO', '3200'],
@@ -52,14 +29,20 @@ const PRICES = [
   ['TOSTÓN', '9800'],
 ]
 
+const DAY = { 1: 'Lun', 2: 'Mar', 3: 'Mié', 4: 'Jue', 5: 'Vie', 6: 'Sáb' }
+const N = STATIONS.length
+
 export default function Hero({ boarded, onProgress, onReady, calm }) {
   const rootRef = useRef(null)
   const mountRef = useRef(null)
   const canvasRef = useRef(null)
   const sceneRef = useRef(null)
-  const veilRef = useRef(null)
-  const [hover, setHover] = useState(null)
+  const overviewRef = useRef(null)
+  const [page, setPage] = useState(0)
   const [failed, setFailed] = useState(false)
+  const [status] = useState(() => openStatus())
+
+  useEffect(() => tour.onPage(setPage), [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -67,31 +50,30 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
     if (!canvas || !mount) return undefined
     let scene = null
     let disposed = false
-    const fontsReady = Promise.race([
-      Promise.all([document.fonts.load(`700 64px 'Chakra Petch'`), document.fonts.load(`500 32px 'Roboto Mono'`)]),
-      new Promise((r) => setTimeout(r, 2000)),
-    ])
-    fontsReady.then(() => {
+    Promise.race([document.fonts.load(`600 32px 'Chakra Petch'`), new Promise((r) => setTimeout(r, 1500))]).then(() => {
       if (disposed) return
       try {
         scene = createDioramaScene({
           canvas,
           mount,
           manifest: MANIFEST,
-          zones: ZONES,
+          stations: STATIONS,
           prices: PRICES,
           calm,
-          fonts: { display: `'Chakra Petch', sans-serif` },
-          headline: [
-            ['CAFÉ, CINE', C.cream],
-            ['Y ALGO MÁS.', C.orange],
-          ],
           onProgress,
-          onHover: (zone, screen) => setHover(zone ? { zone, screen } : null),
+          onHover: (station) => {
+            cursor.set(station ? 'lock' : 'idle', station ? `${station.page} · ${station.label}` : '')
+            if (station) sfx.lock()
+          },
+          onDrag: (on) => cursor.set(on ? 'drag' : 'idle'),
+          onPick: (index) => {
+            sfx.select()
+            tour.goTo(index)
+          },
         })
         sceneRef.current = scene
         scene.load.then(() => !disposed && onReady()).catch((err) => {
-          console.error('[capsula33] el diorama no cargó', err)
+          console.error('[capsula33] el local no cargó', err)
           setFailed(true)
           onReady()
         })
@@ -110,140 +92,204 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Al abordar: la cámara baja sobre el local y entra el texto.
   useEffect(() => {
     if (!boarded) return
     sceneRef.current?.intro()
-    gsap.fromTo('[data-c33-in]', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, delay: calm ? 0 : 1.2 })
+    gsap.fromTo('[data-c33-in]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, delay: calm ? 0 : 1.6 })
   }, [boarded, calm])
 
-  // Al salir del hero el local sube y se aleja (scrub).
+  // El recorrido: el hero queda fijo y el scroll mueve la cámara.
   useGSAP(
     () => {
-      if (calm) return undefined
       const st = ScrollTrigger.create({
         trigger: rootRef.current,
         start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-        onUpdate: (self) => sceneRef.current?.setProgress(self.progress),
+        end: 'bottom bottom',
+        scrub: calm ? true : 0.6,
+        onUpdate: (self) => {
+          const p = self.progress
+          sceneRef.current?.setProgress(p)
+          // En una estación (cerca de un entero) o viajando entre dos (−1).
+          const T = p * N
+          const near = Math.round(T)
+          const next = Math.abs(T - near) < 0.2 ? near : -1
+          if (next !== tour.page) {
+            if (next > 0) sfx.page()
+            tour.setPage(next)
+          }
+          gsap.set(overviewRef.current, { autoAlpha: Math.max(0, 1 - p * N * 4) })
+        },
+      })
+      tour.register((i, { immediate = false } = {}) => {
+        const top = st.start
+        const y = top + ((st.end - st.start) * i) / N
+        const lenis = getLenis()
+        if (lenis) lenis.scrollTo(y, { immediate, duration: immediate ? 0 : 1.6 + Math.abs(i - Math.max(0, tour.page)) * 0.35, force: true })
+        else window.scrollTo({ top: y, behavior: immediate ? 'auto' : 'smooth' })
       })
       return () => st.kill()
     },
     { scope: rootRef },
   )
 
-  // Tocar una zona: la cámara entra, el velo se cierra y la página ya está en
-  // esa sección cuando se vuelve a abrir.
-  const go = (id) => {
-    const target = document.getElementById(id)
-    const scene = sceneRef.current
-    if (!target) return
-    const land = () => {
-      const lenis = getLenis()
-      if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
-      else target.scrollIntoView()
-      scene?.reset()
-      gsap.to(veilRef.current, { autoAlpha: 0, duration: 0.7, ease: 'power2.out', delay: 0.05 })
-    }
-    if (!scene || calm) {
-      land()
-      return
-    }
-    gsap.fromTo(veilRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, delay: 1.0, ease: 'power2.inOut' })
-    scene.dive(id, () => window.setTimeout(land, 150))
-  }
-
-  const onClick = (e) => {
-    const zone = sceneRef.current?.pick(e)
-    if (zone) go(zone.id === 'jardin' ? 'experiencia' : zone.id)
-  }
+  const station = page > 0 ? STATIONS[page - 1] : null
 
   return (
-    <section ref={rootRef} id="top" className="relative h-svh min-h-[36rem] overflow-hidden" style={{ background: C.void, color: C.cream }}>
-      <div ref={mountRef} className="absolute inset-0">
-        <canvas
-          ref={canvasRef}
-          onClick={onClick}
-          aria-label="El local de cāpsula33 en miniatura: tocá una zona para entrar"
-          className={`absolute inset-0 h-full w-full touch-pan-y ${failed ? 'invisible' : ''}`}
-        />
-      </div>
-
-      <h1 className="sr-only">cāpsula33 — café, cine y algo más. San Martín de los Andes.</h1>
-
-      {failed ? (
-        <p className="absolute inset-x-6 top-1/3 text-center text-[clamp(2.6rem,8vw,6rem)] leading-[0.9] font-semibold uppercase" style={DISPLAY}>
-          Café, cine <span style={{ color: C.orange }}>y algo más.</span>
-        </p>
-      ) : null}
-
-      {/* Para que el texto de abajo se lea sobre el local. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] md:h-[30%]"
-        style={{ background: `linear-gradient(to top, ${C.void} 18%, rgba(7,7,8,0.75) 55%, transparent)` }}
-      />
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 grid items-end gap-6 px-6 pb-7 md:grid-cols-12 md:px-10 md:pb-9">
-        <div className="md:col-span-6">
-          <p data-c33-in className="max-w-[36ch] text-[14px] leading-[1.5] opacity-0 md:text-[15px]" style={{ ...BODY, color: 'rgba(242,233,220,0.8)' }}>
-            Una cápsula para reunirnos, a cuadras del lago Lácar. Café de especialidad, cocina de estación y la colección del dueño en vitrinas.
-          </p>
-          <div data-c33-in className="pointer-events-auto mt-4 flex gap-3 opacity-0 md:mt-5">
-            <button
-              type="button"
-              onClick={() => go('experiencia')}
-              className="group relative h-11 overflow-hidden rounded-full px-5 text-[12px] whitespace-nowrap md:px-6 font-semibold tracking-[0.18em] uppercase active:scale-[0.97]"
-              style={{ ...DISPLAY, background: C.orange, color: C.void }}
-            >
-              Conocé el local
-            </button>
-            <button
-              type="button"
-              onClick={() => go('menu')}
-              className="relative h-11 rounded-full border px-5 text-[12px] whitespace-nowrap md:px-6 font-semibold tracking-[0.18em] uppercase transition-colors duration-300 hover:border-[#e4601d] active:scale-[0.97]"
-              style={{ ...DISPLAY, borderColor: 'rgba(242,233,220,0.3)' }}
-            >
-              Ver el menú
-            </button>
-          </div>
+    <section ref={rootRef} id="top" className="relative" style={{ height: `${(N + 1) * 100}svh`, background: '#050506', color: C.cream }}>
+      <div className="sticky top-0 h-svh overflow-hidden">
+        <div ref={mountRef} className="absolute inset-0">
+          <canvas
+            ref={canvasRef}
+            aria-label="El local de cāpsula33 en miniatura: arrastralo para girarlo y tocá una zona para entrar"
+            className={`absolute inset-0 h-full w-full touch-pan-y ${failed ? 'invisible' : ''}`}
+          />
         </div>
-        <div data-c33-in className="flex flex-col items-start gap-2 text-[11px] tracking-[0.16em] uppercase opacity-0 md:col-span-4 md:col-start-9 md:items-end md:text-right" style={DISPLAY}>
-          <span className="flex items-center gap-3" style={{ color: C.orange }}>
-            <span aria-hidden="true" className="inline-block h-px w-8" style={{ background: C.orange }} />
-            Tocá una zona del local
-          </span>
-          <span className="hidden opacity-55 md:inline">C33.02 · Av. Gral. Roca 1120 · 40°09′S 71°21′O</span>
-        </div>
-      </div>
 
-      {hover?.screen ? (
+        {/* HUD: esquinas. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-4 md:inset-6">
+          {['top-0 left-0 border-t border-l', 'top-0 right-0 border-t border-r', 'bottom-0 left-0 border-b border-l', 'bottom-0 right-0 border-b border-r'].map((c) => (
+            <span key={c} className={`absolute h-4 w-4 ${c}`} style={{ borderColor: 'rgba(228,96,29,0.7)' }} />
+          ))}
+        </div>
+
+        {/* Sombra en la esquina del texto, para leerlo sobre el local. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed z-20 -translate-x-1/2 -translate-y-[calc(100%+1.25rem)] rounded-full border px-5 py-2 text-center"
-          style={{ left: hover.screen.x, top: hover.screen.y, background: 'rgba(7,7,8,0.88)', borderColor: C.orange }}
-        >
-          <p className="text-[16px] font-semibold tracking-[0.06em] uppercase" style={{ ...DISPLAY, color: C.cream }}>
-            {hover.zone.label}
-          </p>
-          <p className="text-[11px] tracking-[0.18em] uppercase" style={{ ...MONO, color: C.neon }}>
-            {hover.zone.note} →
-          </p>
-        </div>
-      ) : null}
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 70% 55% at 0% 100%, rgba(5,5,6,0.88), rgba(5,5,6,0) 70%)' }}
+        />
 
-      <ul className="sr-only">
-        {ZONES.map((z) => (
-          <li key={z.id}>
-            <a href={`#${z.id === 'jardin' ? 'experiencia' : z.id}`}>
-              {z.label}: {z.note}
-            </a>
+        {/* Vista general: la frase de la pared del local. */}
+        <div ref={overviewRef} className="pointer-events-none absolute inset-x-0 bottom-0 grid items-end gap-6 px-6 pb-8 md:grid-cols-12 md:px-12 md:pb-12">
+          <div className="md:col-span-5">
+            <p data-c33-in className="text-[11px] tracking-[0.2em] uppercase opacity-0" style={{ ...MONO, color: C.neon }}>
+              Cāpsula33 · San Martín de los Andes
+            </p>
+            <h1 data-c33-in className="mt-4 max-w-[19ch] text-[clamp(1.5rem,2.6vw,2.35rem)] leading-[1.12] font-semibold opacity-0" style={DISPLAY}>
+              No somos lo que razonamos, somos lo que imaginamos.
+            </h1>
+            <p data-c33-in className="mt-3 text-[12px] tracking-[0.14em] uppercase opacity-0" style={{ ...DISPLAY, color: 'rgba(242,233,220,0.55)' }}>
+              — La pared del local
+            </p>
+            <div data-c33-in className="pointer-events-auto mt-6 flex items-center gap-4 opacity-0">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.select()
+                  tour.goTo(1)
+                }}
+                className="group relative h-11 overflow-hidden rounded-full px-6 text-[12px] font-semibold tracking-[0.18em] whitespace-nowrap uppercase active:scale-[0.97]"
+                style={{ ...DISPLAY, background: C.orange, color: '#070708' }}
+              >
+                Iniciar recorrido
+              </button>
+              <span className="text-[11px] tracking-[0.16em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}>
+                {String(N).padStart(2, '0')} estaciones
+              </span>
+            </div>
+          </div>
+          <div data-c33-in className="hidden flex-col items-end gap-1 text-right text-[11px] tracking-[0.16em] uppercase opacity-0 md:col-span-4 md:col-start-9 md:flex" style={MONO}>
+            <span style={{ color: C.neon }}>Arrastrá para girar · tocá una zona</span>
+            <span className="opacity-50">Módulo SMA-01 · 40°09′S 71°21′O</span>
+          </div>
+        </div>
+
+        {/* El panel de cada estación. */}
+        <StationPanel station={station} status={status} />
+
+        {failed ? (
+          <p className="absolute inset-x-6 top-1/3 text-center text-[clamp(1.6rem,4vw,2.6rem)] font-semibold" style={DISPLAY}>
+            No somos lo que razonamos, somos lo que imaginamos.
+          </p>
+        ) : null}
+      </div>
+
+      {/* Las páginas, para quien no ve el 3D. */}
+      <ol className="sr-only">
+        {STATIONS.map((s, i) => (
+          <li key={s.id}>
+            <button type="button" onClick={() => tour.goTo(i + 1)}>
+              {s.page} {s.label}: {s.text}
+            </button>
           </li>
         ))}
-      </ul>
-
-      <div ref={veilRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-30 opacity-0" style={{ background: C.void, visibility: 'hidden' }} />
+      </ol>
     </section>
+  )
+}
+
+function StationPanel({ station, status }) {
+  const ref = useRef(null)
+  const [shown, setShown] = useState(station)
+  const [run, setRun] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (station) {
+      setShown(station)
+      setRun((r) => r + 1)
+      gsap.fromTo(el, { autoAlpha: 0, x: 24 }, { autoAlpha: 1, x: 0, duration: 0.7, ease: 'expo.out' })
+    } else {
+      gsap.to(el, { autoAlpha: 0, x: 16, duration: 0.35, ease: 'power2.out' })
+    }
+  }, [station])
+
+  const s = shown
+  return (
+    <aside
+      ref={ref}
+      aria-live="polite"
+      className="invisible absolute right-4 bottom-6 left-4 border p-6 opacity-0 md:top-1/2 md:right-12 md:bottom-auto md:left-auto md:w-[24rem] md:-translate-y-1/2 md:p-7"
+      style={{ background: 'rgba(5,5,6,0.78)', borderColor: 'rgba(228,96,29,0.45)', backdropFilter: 'blur(10px)', clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%)' }}
+    >
+      {s ? (
+        <>
+          <p className="flex items-center justify-between text-[11px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
+            <span>Page {s.page}</span>
+            <span className="opacity-60">{s.kicker}</span>
+          </p>
+          <h2 className="mt-4 text-[clamp(1.8rem,3vw,2.6rem)] leading-[0.95] font-bold tracking-[-0.02em] uppercase" style={DISPLAY}>
+            <HackyText text={s.label} run={run} onTick={sfx.tick} />
+          </h2>
+          <p className="mt-4 text-[15px] leading-[1.55]" style={{ ...BODY, color: 'rgba(242,233,220,0.82)' }}>
+            {s.text}
+          </p>
+          {s.list ? (
+            <ul className="mt-5 grid gap-1.5 border-t pt-4 text-[13px] tracking-[0.06em] uppercase" style={{ ...MONO, borderColor: 'rgba(242,233,220,0.12)' }}>
+              {s.list.map((it, i) => (
+                <li key={it} className="flex gap-3">
+                  <span style={{ color: C.neon }}>{String(i + 1).padStart(2, '0')}</span>
+                  {it}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {s.hours ? (
+            <div className="mt-5 border-t pt-4 text-[12px] tracking-[0.08em] uppercase" style={{ ...MONO, borderColor: 'rgba(242,233,220,0.12)' }}>
+              <p className="mb-2 flex items-center gap-2" style={{ color: status.open ? '#7dffa8' : C.neon }}>
+                <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: 'currentColor' }} />
+                {status.label}
+              </p>
+              <p className="opacity-70">
+                {HOURS.map((h) => `${DAY[h.day]} ${h.open}–${h.close}`).join(' · ')} · Dom cerrado
+              </p>
+            </div>
+          ) : null}
+          {s.link ? (
+            <a
+              href={s.link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sfx.select()}
+              className="mt-6 inline-flex h-11 items-center gap-3 rounded-full px-6 text-[12px] font-semibold tracking-[0.18em] uppercase active:scale-[0.97]"
+              style={{ ...DISPLAY, background: C.orange, color: '#070708' }}
+            >
+              {s.link.label}
+            </a>
+          ) : null}
+        </>
+      ) : null}
+    </aside>
   )
 }

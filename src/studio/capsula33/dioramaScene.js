@@ -9,21 +9,24 @@ import { gsap } from '../../lib/gsap'
 import { createFrameBudget, fitCameraDistance, trackPointer } from '../../lib/motion'
 
 /**
- * cāpsula33 — el diorama del local.
+ * cāpsula33 — el local en miniatura, flotando en el espacio.
  *
  * El modelo sale de Blender con la luz de Cycles horneada en texturas (sombras,
  * rebotes, reflejos): acá se dibuja sin luces, con MeshBasicMaterial, así que
- * se ve como el render y corre en un teléfono. Lo que tiene que vivir (la
- * pantalla de precios) se dibuja en un canvas. El bloom suma el resplandor
- * del neón, que el horneado no trae.
+ * se ve como el render y corre en un teléfono. La pantalla de precios de la
+ * barra es un canvas vivo; el bloom suma el resplandor del neón.
  *
- * Coordenadas: las zonas se escriben en las de Blender (x, y, z con z arriba),
- * que es donde se diseñó el local; `b2t` las pasa a las de three (y arriba).
+ * - Arrastrar gira el local (con inercia); tocar una zona la elige.
+ * - `setProgress(p)` lleva la cámara por las estaciones del recorrido: 0 es la
+ *   vista general, 1 la última estación. La página lo maneja con el scroll.
+ *
+ * Coordenadas de Blender (z arriba); `b2t` las pasa a three (y arriba).
  */
 
 const BASE = '/studio/capsula33/'
-
 const b2t = ([x, y, z]) => new THREE.Vector3(x, z, -y)
+const clamp01 = (v) => Math.min(1, Math.max(0, v))
+const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10)
 
 /** Baja un archivo contando bytes, para que el loader muestre un progreso real. */
 async function fetchBytes(url, onBytes) {
@@ -84,7 +87,7 @@ function createPriceScreen({ items, width, height }) {
     ctx.fillStyle = '#04070d'
     ctx.fillRect(0, 0, W, H)
     ctx.fillStyle = '#0f2a44'
-    for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1) // líneas de barrido
+    for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1)
     ctx.font = `600 ${Math.round(rowH * 0.62)}px 'Chakra Petch', monospace`
     ctx.fillStyle = '#ff7a1a'
     ctx.fillText('ELEGIDOS', 24, rowH * 0.95)
@@ -112,42 +115,101 @@ function createPriceScreen({ items, width, height }) {
   return { tex, draw }
 }
 
-/** El titular, como un cartel enorme detrás del diorama (el modelo lo tapa en parte). */
-function createHeadline(lines, { fonts }) {
-  const W = 2048
-  const H = 760
-  const canvas = document.createElement('canvas')
-  canvas.width = W
-  canvas.height = H
-  const ctx = canvas.getContext('2d')
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'alphabetic'
-  ctx.font = `700 330px ${fonts.display}`
-  lines.forEach(([text, color], i) => {
-    ctx.fillStyle = color
-    ctx.fillText(text, W / 2, 330 + i * 330)
-  })
-  const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace
-  tex.anisotropy = 4
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false })
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, H / W), mat)
-  mesh.renderOrder = -1
-  return mesh
+/** Campo de estrellas en capas, alrededor del local. */
+function createStars(center) {
+  const group = new THREE.Group()
+  const layers = [
+    { count: 1800, rMin: 60, rMax: 140, size: 0.32, opacity: 0.85 },
+    { count: 500, rMin: 30, rMax: 60, size: 0.22, opacity: 0.6 },
+  ]
+  for (const L of layers) {
+    const pos = new Float32Array(L.count * 3)
+    const col = new Float32Array(L.count * 3)
+    for (let i = 0; i < L.count; i += 1) {
+      const u = Math.random() * 2 - 1
+      const th = Math.random() * Math.PI * 2
+      const r = L.rMin + Math.random() * (L.rMax - L.rMin)
+      const s = Math.sqrt(1 - u * u)
+      pos.set([center.x + r * s * Math.cos(th), center.y + r * u, center.z + r * s * Math.sin(th)], i * 3)
+      const warm = Math.random()
+      const c = warm > 0.85 ? [1, 0.72, 0.5] : warm < 0.15 ? [0.65, 0.8, 1] : [1, 1, 1]
+      col.set(c, i * 3)
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
+    const mat = new THREE.PointsMaterial({ size: L.size, vertexColors: true, transparent: true, opacity: L.opacity, depthWrite: false })
+    group.add(new THREE.Points(geo, mat))
+  }
+  return group
+}
+
+/** Nebulosas: dos manchas de luz muy suaves, lejos (naranja de la marca y un azul frío). */
+function createNebula(center, viewDir) {
+  const make = (rgb) => {
+    const c = document.createElement('canvas')
+    c.width = c.height = 256
+    const g = c.getContext('2d')
+    const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128)
+    grad.addColorStop(0, `rgba(${rgb},0.35)`)
+    grad.addColorStop(0.4, `rgba(${rgb},0.08)`)
+    grad.addColorStop(1, `rgba(${rgb},0)`)
+    g.fillStyle = grad
+    g.fillRect(0, 0, 256, 256)
+    const tex = new THREE.CanvasTexture(c)
+    tex.colorSpace = THREE.SRGBColorSpace
+    return new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.4 }))
+  }
+  const group = new THREE.Group()
+  const back = center.clone().addScaledVector(viewDir, -110)
+  const a = make('228,96,29')
+  a.position.copy(back).add(new THREE.Vector3(-34, 18, 10))
+  a.scale.setScalar(60)
+  const b = make('61,100,140')
+  b.position.copy(back).add(new THREE.Vector3(38, -14, -16))
+  b.scale.setScalar(70)
+  group.add(a, b)
+  return group
+}
+
+/** La plataforma: un anillo holográfico con marcas, debajo del local. */
+function createRing(center) {
+  const group = new THREE.Group()
+  const mat = new THREE.LineBasicMaterial({ color: 0xff7a1a, transparent: true, opacity: 0.55 })
+  const circle = (r, seg = 256) => {
+    const pts = []
+    for (let i = 0; i <= seg; i += 1) {
+      const a = (i / seg) * Math.PI * 2
+      pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r))
+    }
+    return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat)
+  }
+  group.add(circle(8.9), circle(9.8))
+  const ticks = []
+  for (let i = 0; i < 144; i += 1) {
+    const a = (i / 144) * Math.PI * 2
+    const long = i % 12 === 0
+    const r0 = 8.9
+    const r1 = long ? 9.8 : 9.25
+    ticks.push(new THREE.Vector3(Math.cos(a) * r0, 0, Math.sin(a) * r0), new THREE.Vector3(Math.cos(a) * r1, 0, Math.sin(a) * r1))
+  }
+  const tickMat = new THREE.LineBasicMaterial({ color: 0xff7a1a, transparent: true, opacity: 0.35 })
+  group.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ticks), tickMat))
+  group.position.set(center.x, -1.1, center.z)
+  return group
 }
 
 export function createDioramaScene({
   canvas,
   mount,
   manifest,
-  zones,
-  headline,
+  stations,
   prices,
-  fonts,
   calm = false,
   onProgress = () => {},
-  onReady = () => {},
   onHover = () => {},
+  onDrag = () => {},
+  onPick = () => {},
 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' })
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -156,33 +218,26 @@ export function createDioramaScene({
   renderer.toneMapping = THREE.NoToneMapping
 
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x070708) // pasa por la gestión de color (el clear color no)
-  const camera = new THREE.PerspectiveCamera(20, 1, 0.5, 200)
-  const pivot = new THREE.Group() // gira con el puntero; el titular queda afuera (parallax)
+  scene.background = new THREE.Color(0x050506) // pasa por la gestión de color (el clear color no)
+  const camera = new THREE.PerspectiveCamera(20, 1, 0.5, 400)
+  const pivot = new THREE.Group() // gira con el arrastre y respira con el puntero
   scene.add(pivot)
 
-  // Encuadre de reposo. TARGET es el centro del local (el pivote del giro); la
-  // cámara mira un poco más arriba o más abajo según la pantalla. En una
-  // pantalla ancha, la vista isométrica desde la esquina de la entrada; en una
-  // vertical (teléfono), mirando el local a lo largo desde la puerta, que así
-  // ocupa el alto en vez de quedar como una tira angosta.
   const TARGET = b2t(manifest.target)
   const VIEW_DIR = new THREE.Vector3()
   const rest = { pos: new THREE.Vector3(), look: TARGET.clone() }
   const look = TARGET.clone()
-  let layout = manifest
 
-  let headlineMesh = null
-  if (headline) {
-    headlineMesh = createHeadline(headline, { fonts })
-    scene.add(headlineMesh)
-  }
+  scene.add(createStars(TARGET))
+  const nebula = createNebula(TARGET, b2t(manifest.viewDir).normalize())
+  scene.add(nebula)
+  const ring = createRing(TARGET)
+  scene.add(ring)
 
   const composer = new EffectComposer(renderer)
   composer.addPass(new RenderPass(scene, camera))
   // Solo el neón y lo que ya está al blanco: radio corto para no lavar el negro.
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.25, 0.94)
-  composer.addPass(bloom)
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 0.45, 0.3, 0.92))
   composer.addPass(new OutputPass())
 
   const budget = createFrameBudget({
@@ -193,27 +248,26 @@ export function createDioramaScene({
     },
   })
 
+  // Estaciones: la vista general (0) y una toma por zona.
+  const poses = [rest, ...stations.map((s) => ({ pos: b2t(s.cam.pos), look: b2t(s.cam.look) }))]
+  const zoneBoxes = stations.map((s, i) => {
+    const a = b2t(s.zone.min)
+    const b = b2t(s.zone.max)
+    return { index: i + 1, station: s, box: new THREE.Box3(a.clone().min(b), a.clone().max(b)) }
+  })
+  const zonesBySize = [...zoneBoxes].sort((a, b) => {
+    const va = a.box.getSize(new THREE.Vector3())
+    const vb = b.box.getSize(new THREE.Vector3())
+    return va.x * va.y * va.z - vb.x * vb.y * vb.z
+  })
+
   function frameRest() {
-    layout = camera.aspect < 0.8 && manifest.tall ? { ...manifest, ...manifest.tall } : manifest
+    const layout = camera.aspect < 0.8 && manifest.tall ? { ...manifest, ...manifest.tall } : manifest
     VIEW_DIR.copy(b2t(layout.viewDir)).normalize()
     rest.look.copy(TARGET)
     rest.look.y += layout.lookLift ?? 0
     const dist = fitCameraDistance({ fov: camera.fov, aspect: camera.aspect, radius: layout.radius, base: layout.distance, fill: 0.92 })
     rest.pos.copy(rest.look).addScaledVector(VIEW_DIR, dist)
-    if (headlineMesh) {
-      // Detrás del local, de frente a la cámara, más ancho que el diorama.
-      headlineMesh.position.copy(rest.look).addScaledVector(VIEW_DIR, -9)
-      headlineMesh.position.y += layout.headlineLift ?? 1.4
-      headlineMesh.lookAt(rest.pos)
-      // Que entre siempre de borde a borde, con aire a los costados.
-      const depth = rest.pos.distanceTo(headlineMesh.position)
-      const visibleH = 2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
-      const visibleW = visibleH * camera.aspect
-      // Ancho de borde a borde, pero sin pasar del 42 % del alto (pantallas anchas y bajas).
-      const ratio = headlineMesh.geometry.parameters.height // alto / ancho del cartel
-      const w = Math.min(visibleW * (camera.aspect > 1 ? 0.9 : 0.94), (visibleH * 0.42) / ratio)
-      headlineMesh.scale.set(w, w, 1)
-    }
   }
 
   function resize() {
@@ -224,20 +278,15 @@ export function createDioramaScene({
     camera.aspect = w / h
     camera.updateProjectionMatrix()
     frameRest()
-    if (state.mode === 'rest') camera.position.copy(rest.pos)
   }
 
-  const state = { mode: 'intro', hover: null, progress: 0, dive: 0 }
-  const zoneBoxes = zones.map((z) => {
-    const a = b2t(z.min)
-    const b = b2t(z.max)
-    return { zone: z, box: new THREE.Box3(a.clone().min(b), a.clone().max(b)) }
-  })
+  const state = { mode: 'intro', progress: 0, hover: null, ready: false }
 
   // --- carga ---------------------------------------------------------------
   let screen = null
+  const pickable = []
   const files = [manifest.model, ...Object.values(manifest.atlases)]
-  const loaded = new Map()
+  const loaded = new Map(files.map((f) => [f, { got: 0, total: 0 }]))
   const report = () => {
     let got = 0
     let total = 0
@@ -247,7 +296,6 @@ export function createDioramaScene({
     }
     onProgress(total ? Math.min(1, got / total) : 0)
   }
-  files.forEach((f) => loaded.set(f, { got: 0, total: 0 }))
 
   const draco = new DRACOLoader().setDecoderPath(`${BASE}draco/`)
   const gltfLoader = new GLTFLoader().setDRACOLoader(draco)
@@ -265,7 +313,7 @@ export function createDioramaScene({
     await Promise.all(atlasNames.map(async (name, i) => (atlases[name] = await textureFrom(atlasBufs[i]))))
     const gltf = await gltfLoader.parseAsync(modelBuf, BASE)
     const root = gltf.scene
-    const glass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.05, transmission: 0, transparent: true, opacity: 0.16, depthWrite: false })
+    const glass = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1, depthWrite: false })
     root.traverse((o) => {
       if (!o.isMesh) return
       // Una malla con varios materiales llega como grupo: los datos van en el padre.
@@ -297,86 +345,113 @@ export function createDioramaScene({
     pivot.position.copy(TARGET)
     root.position.sub(TARGET)
     resize()
+    state.ready = true
     state.mode = calm ? 'rest' : 'intro'
-    if (calm) camera.position.copy(rest.pos)
-    else placeIntroStart() // detrás de las compuertas ya está en el punto de partida
-    onReady()
+    placeIntroStart()
   })
 
-  // --- interacción ---------------------------------------------------------
+  // --- puntero: arrastrar gira, tocar elige ---------------------------------
   const pointer = trackPointer()
   const ndc = new THREE.Vector2()
   const ray = new THREE.Raycaster()
-  const tmp = new THREE.Vector3()
+  const spin = { y: 0, x: 0, vy: 0, vx: 0 }
+  const press = { down: false, id: null, x: 0, y: 0, lastX: 0, lastY: 0, dragging: false }
 
-  // El puntero toca el modelo (no el aire): se busca el punto exacto y la zona
-  // que lo contiene, de la más chica a la más grande. El follaje no cuenta.
-  const pickable = []
-  const bySize = () => [...zoneBoxes].sort((a, b) => volume(a.box) - volume(b.box))
-  const volume = (b) => {
-    const s = b.getSize(tmp)
-    return s.x * s.y * s.z
-  }
-  let ordered = null
+  const overview = () => state.mode === 'rest' && state.progress < 0.02
+
   function zoneAt(clientX, clientY) {
+    if (!pickable.length) return null
     const r = canvas.getBoundingClientRect()
     ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1)
     ray.setFromCamera(ndc, camera)
     const hit = ray.intersectObjects(pickable, false)[0]
     if (!hit) return null
-    // Las zonas están escritas con el local quieto: se deshace el giro del puntero.
+    // Las zonas están escritas con el local quieto: se deshace el giro.
     const p = pivot.worldToLocal(hit.point.clone()).add(TARGET)
-    ordered = ordered || bySize()
-    return ordered.find((z) => z.box.containsPoint(p)) || null
+    return zonesBySize.find((z) => z.box.containsPoint(p)) || null
   }
 
-  function screenOf(z) {
-    const c = z.box.getCenter(new THREE.Vector3()).sub(TARGET)
-    c.y = z.box.max.y - TARGET.y
-    c.applyMatrix4(pivot.matrixWorld)
-    c.project(camera)
-    const r = canvas.getBoundingClientRect()
-    return { x: r.left + ((c.x + 1) / 2) * r.width, y: r.top + ((1 - c.y) / 2) * r.height }
+  const setHover = (z) => {
+    if (z?.index === state.hover?.index) return
+    state.hover = z
+    onHover(z ? z.station : null)
   }
 
+  const onDown = (e) => {
+    if (!overview()) return
+    press.down = true
+    press.id = e.pointerId
+    press.x = press.lastX = e.clientX
+    press.y = press.lastY = e.clientY
+    press.dragging = false
+  }
   const onMove = (e) => {
-    if (state.mode !== 'rest' || e.pointerType === 'touch') return
-    const z = zoneAt(e.clientX, e.clientY)
-    if (z?.zone.id !== state.hover?.zone.id) {
-      state.hover = z
-      canvas.style.cursor = z ? 'pointer' : ''
+    if (press.down && e.pointerId === press.id) {
+      const dx = e.clientX - press.lastX
+      const dy = e.clientY - press.lastY
+      if (!press.dragging && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 6) {
+        press.dragging = true
+        canvas.setPointerCapture?.(e.pointerId)
+        onDrag(true)
+        setHover(null)
+      }
+      if (press.dragging) {
+        spin.vy = dx * 0.0065
+        spin.vx = dy * 0.0025
+        spin.y += spin.vy
+        spin.x = Math.max(-0.22, Math.min(0.32, spin.x + spin.vx))
+      }
+      press.lastX = e.clientX
+      press.lastY = e.clientY
+      return
     }
-    onHover(z ? z.zone : null, z ? screenOf(z) : null)
+    if (e.pointerType === 'touch' || !overview()) return
+    setHover(zoneAt(e.clientX, e.clientY))
   }
-  const onLeave = () => {
-    state.hover = null
-    canvas.style.cursor = ''
-    onHover(null, null)
+  const onUp = (e) => {
+    if (!press.down || e.pointerId !== press.id) return
+    const wasDrag = press.dragging
+    press.down = false
+    press.dragging = false
+    if (wasDrag) {
+      onDrag(false)
+      return
+    }
+    const z = zoneAt(e.clientX, e.clientY)
+    if (z) onPick(z.index)
   }
-  canvas.addEventListener('pointermove', onMove)
+  const onLeave = () => setHover(null)
+  canvas.addEventListener('pointerdown', onDown)
+  window.addEventListener('pointermove', onMove)
+  window.addEventListener('pointerup', onUp)
+  window.addEventListener('pointercancel', onUp)
   canvas.addEventListener('pointerleave', onLeave)
 
-  // --- intro y vuelos -------------------------------------------------------
+  // --- intro ----------------------------------------------------------------
   const cam = { pos: new THREE.Vector3(), look: new THREE.Vector3() }
 
-  // Llega desde arriba y lejos, como una nave que baja sobre el local.
+  // Llega desde lejos y arriba, como una nave que se acerca al módulo.
   function placeIntroStart() {
-    const from = rest.pos.clone().addScaledVector(VIEW_DIR, 18)
-    from.y += 14
-    cam.pos.copy(from)
-    cam.look.copy(rest.look).add(new THREE.Vector3(0, -2, 0))
+    cam.pos.copy(rest.pos).addScaledVector(VIEW_DIR, 60)
+    cam.pos.y += 18
+    cam.look.copy(rest.look).add(new THREE.Vector3(0, -3, 0))
   }
 
   function intro() {
-    if (calm) return
+    if (calm || !state.ready) {
+      state.mode = 'rest'
+      return
+    }
     state.mode = 'intro'
     placeIntroStart()
-    gsap.to(cam.pos, { x: rest.pos.x, y: rest.pos.y, z: rest.pos.z, duration: 2.6, ease: 'expo.out' })
+    spin.y = -0.9 // entra girando y se acomoda
+    gsap.to(spin, { y: 0, duration: 3.2, ease: 'expo.out' })
+    gsap.to(cam.pos, { x: rest.pos.x, y: rest.pos.y, z: rest.pos.z, duration: 3.2, ease: 'expo.out' })
     gsap.to(cam.look, {
       x: rest.look.x,
       y: rest.look.y,
       z: rest.look.z,
-      duration: 2.6,
+      duration: 3.2,
       ease: 'expo.out',
       onComplete: () => {
         state.mode = 'rest'
@@ -384,35 +459,9 @@ export function createDioramaScene({
     })
   }
 
-  /** Vuela a una zona (el mismo lugar al que lleva el scroll) y avisa al llegar. */
-  function dive(id, done) {
-    const z = zoneBoxes.find((x) => x.zone.id === id)
-    if (!z || calm) {
-      done?.()
-      return
-    }
-    state.mode = 'dive'
-    state.hover = null
-    onHover(null, null)
-    const center = z.box.getCenter(new THREE.Vector3())
-    const station = z.zone.station
-    const toLook = station ? b2t(station.look) : center
-    const toPos = station ? b2t(station.pos) : center.clone().addScaledVector(VIEW_DIR, 6)
-    cam.pos.copy(camera.position)
-    cam.look.copy(look)
-    const tl = gsap.timeline({ onComplete: () => done?.() })
-    tl.to(pivot.rotation, { x: 0, y: 0, duration: 0.6, ease: 'power2.out' }, 0)
-    tl.to(cam.look, { x: toLook.x, y: toLook.y, z: toLook.z, duration: 1.5, ease: 'power3.inOut' }, 0)
-    tl.to(cam.pos, { x: toPos.x, y: toPos.y, z: toPos.z, duration: 1.5, ease: 'power3.inOut' }, 0)
-  }
-
-  function reset() {
-    state.mode = 'rest'
-    camera.position.copy(rest.pos)
-    look.copy(rest.look)
-  }
-
   // --- bucle ----------------------------------------------------------------
+  const tmpA = new THREE.Vector3()
+  const tmpB = new THREE.Vector3()
   let raf = 0
   let last = performance.now()
   const clock = new THREE.Clock()
@@ -421,23 +470,58 @@ export function createDioramaScene({
     const dt = now - last
     last = now
     const t = clock.getElapsedTime()
-    if (state.mode === 'intro' || state.mode === 'dive') {
+
+    if (state.mode === 'intro') {
       camera.position.copy(cam.pos)
       look.copy(cam.look)
-    } else if (state.mode === 'rest') {
-      // Respira y sigue al puntero; al salir del hero sube y se aleja.
-      const p = state.progress
-      camera.position.copy(rest.pos)
-      camera.position.y += p * 3
-      look.copy(rest.look)
-      look.y += p * 2.4
-      if (!calm) {
-        pivot.rotation.y += (pointer.x * 0.16 - pivot.rotation.y) * 0.05
-        pivot.rotation.x += (pointer.y * 0.04 - pivot.rotation.x) * 0.05
-        pivot.position.y = TARGET.y + Math.sin(t * 0.7) * 0.08
-      }
+    } else {
+      // El recorrido: t = 0 la vista general; cada entero, una estación. Entre
+      // dos estaciones la cámara se queda un rato y después viaja.
+      const T = state.progress * (poses.length - 1)
+      const i = Math.min(poses.length - 2, Math.floor(T))
+      const f = T - i
+      const e = smoother(clamp01((f - 0.18) / 0.64))
+      tmpA.lerpVectors(poses[i].pos, poses[i + 1].pos, e)
+      tmpB.lerpVectors(poses[i].look, poses[i + 1].look, e)
+      camera.position.copy(tmpA)
+      look.copy(tmpB)
     }
+
+    // Giro: inercia del arrastre; fuera de la vista general vuelve a cero.
+    if (!press.dragging) {
+      spin.vy *= 0.94
+      spin.y += spin.vy
+      spin.vx *= 0.9
+    }
+    // Es un corte (dos paredes abiertas): no se lo deja dar vuelta del todo.
+    const LIMIT = 1.15
+    if (Math.abs(spin.y) > LIMIT) {
+      spin.y = Math.sign(spin.y) * (LIMIT + (Math.abs(spin.y) - LIMIT) * 0.85)
+      spin.vy *= 0.5
+    }
+    const away = state.progress > 0.02
+    if (away || calm) {
+      spin.y += (0 - spin.y) * 0.08
+      spin.x += (0 - spin.x) * 0.08
+    }
+    const lean = !calm && !away ? pointer.x * 0.06 : 0
+    pivot.rotation.y = spin.y + lean
+    pivot.rotation.x = spin.x + (!calm && !away ? pointer.y * 0.025 : 0)
+    pivot.position.y = TARGET.y + (calm ? 0 : Math.sin(t * 0.7) * 0.08)
+
+    ring.rotation.y = t * 0.04
+    nebula.rotation.z = t * 0.01
     camera.lookAt(look)
+    // En pantalla ancha el cuadro se corre: en la vista general el local va a la
+    // derecha (la frase está a la izquierda); en las estaciones, a la izquierda
+    // (el panel está a la derecha).
+    if (camera.aspect > 1.1) {
+      const w = mount.clientWidth
+      const h = mount.clientHeight
+      const k = smoother(clamp01(state.progress * (poses.length - 1) * 2.5))
+      const shift = (-0.1 + k * 0.24) * w
+      camera.setViewOffset(w, h, shift, 0, w, h)
+    } else if (camera.view) camera.clearViewOffset()
     screen?.draw(now)
     composer.render()
     budget.tick(dt)
@@ -451,21 +535,18 @@ export function createDioramaScene({
   return {
     load,
     intro,
-    dive,
-    reset,
-    pick(e) {
-      if (state.mode !== 'rest') return null
-      const z = zoneAt(e.clientX, e.clientY)
-      return z ? z.zone : null
-    },
     setProgress(p) {
       state.progress = p
+      if (p > 0.02) setHover(null)
     },
     dispose() {
       cancelAnimationFrame(raf)
       ro.disconnect()
       pointer.dispose()
-      canvas.removeEventListener('pointermove', onMove)
+      canvas.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
       canvas.removeEventListener('pointerleave', onLeave)
       draco.dispose()
       scene.traverse((o) => {
