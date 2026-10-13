@@ -88,6 +88,54 @@ faltantes y ~40 MB para toda la película (en vez de 91).
 - **Reducir movimiento:** láminas fijas — cada tarjeta sobre su cuadro de la
   película, con un fundido corto (`calmReveal`). Se decide antes del primer render.
 
+### 4b. Teléfono: la conexión, no el dibujo (2026-10-12)
+
+El dueño: «en mobile se traba mucho al scrollear rápido; pear.no anda parecido pero no
+tan mal». Medido en Chromium con perfil de teléfono (Pixel 7, CPU ×4–6, red 4 / 12 / 30
+Mbps) con toques reales (`touchStart → touchMove → touchEnd`, la inercia la pone el
+navegador): el dibujo no era el problema (p95 de 14 ms en todas); lo era la red. Un
+deslizamiento recorre ~16 px por cuadro: a 60 cuadros por segundo hacen falta ~1,7 MB/s,
+más de lo que da una red de 12 Mbps.
+
+pear.no en el teléfono no usa una secuencia larga: baja un video (`signal.mp4`) con un
+loader «THE FILM IS LOADING n %» que traba el scroll hasta `canplaythrough` (tope de 4 s),
+usa el tier 768 y pasos de 2–3 cuadros en sus secuencias cortas, y deja el scroll nativo
+en táctil. Lo adaptado:
+
+- **Loader con porcentaje** (solo ≤ 820 px, `score.loader.label`): el scroll queda
+  trabado hasta que entra el primer tramo (120 cuadros originales ≈ 2,5 pantallas), con
+  tope de 6 s. Aparece solo si la espera pasa de 250 ms. Ya está arriba antes de que
+  llegue el manifest.
+- **Pausa en cada capítulo nuevo:** antes de que empiece una toma (la `dots` mientras el
+  campo se cierra; la `paper` antes de que rompa) el scroll espera a que entren sus
+  primeros 120 cuadros (tope de 5 s), con una píldora «Loading the film n %». Con buena
+  red no se ve.
+- **Prefetch hondo, pero que no compite con el pulgar:** 1.500 índices hacia adelante
+  (≈ 9 pantallas) con 10 conexiones, y mientras el scroll se mueve solo los 420 próximos
+  con 8 conexiones. Cada fetch cuesta al hilo principal una solicitud, la lectura del
+  cuerpo y una decodificación: con CPU ×6 el prefetch hondo durante el movimiento
+  empeoró el scroll (16 % de tiempo trabado contra 7 %), y a la espera se resuelve.
+- **`aim()` sobre la lista de cuadros que existen** (búsqueda binaria + los más
+  cercanos): el barrido por franjas costaba miles de pasos por cuadro nuevo.
+- **Tier `phone`** (`scripts/fold-phone-tier.mjs`, `npm run fold:phone`): un teléfono
+  vertical muestra ~25 % del ancho del cuadro; el resto se bajaba y no se dibujaba. Corta
+  una banda de ±22 % alrededor del `focus` de cada toma (de `score.js`), solo los
+  originales, a 338×432 y calidad 55: **15 MB en vez de 33,5**, la imagen en pantalla
+  igual (PSNR ~33 dB; diferencia media de 3–5 niveles sobre 255 en capturas lado a
+  lado). El manifest lleva `phone: { step, half, crop }` (fuera de `tiers`: un motor
+  viejo lo ignora). Solo en pantallas verticales (aspecto ≤ 0.58–0.62, con histéresis);
+  al girar el teléfono el motor cambia al 768.
+
+Resultado (mismo escenario de 12 deslizamientos, ~10.000 px):
+
+| | Producción antes | Con todo |
+|---|---|---|
+| 12 Mbps, CPU ×4 | 9 % del tiempo quieto, 25 imágenes/s | **4–6 %**, 27–29 imágenes/s |
+| 30 Mbps, CPU ×6 | 6 % | 7 % (igual) |
+| 4 Mbps, CPU ×4 | 38 %, 4 imágenes/s | 43 %, **15 imágenes/s** (la red sigue siendo el techo) |
+
+Lo que no mide un emulador: la GPU de un teléfono real ni Safari.
+
 ## 5. Fuera del builder y de LAB — y el aviso
 
 FOLD es una página entera hecha a medida: la película no tiene sentido como

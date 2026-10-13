@@ -3,11 +3,11 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 
 const defaultSpecs = [
-  { key: 'Form', value: 'Vertical scroll monument' },
-  { key: 'System', value: 'Wireframe · pin scrub · hard edge' },
-  { key: 'Modules', value: '07 locked units' },
-  { key: 'Face', value: 'Anton condensed · JetBrains Mono' },
-  { key: 'Signal', value: 'Klein blue on concrete grey' },
+  { key: 'Material', value: 'Fibre concrete · raw steel' },
+  { key: 'Finish', value: 'Sanded and sealed, never painted' },
+  { key: 'Lead time', value: '06 to 10 weeks per piece' },
+  { key: 'Foundry', value: '1,400 m² on the Antwerp docks' },
+  { key: 'Signal', value: 'Klein blue, one surface per piece' },
 ]
 
 /**
@@ -19,8 +19,10 @@ const defaultSpecs = [
 export default function SpecSheet({
   unit = '02',
   total = '05',
-  label = 'Spec sheet',
+  label = 'The studio',
   specs,
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'studio',
   unitLabel = 'Unit',
   bg,
   fg,
@@ -48,6 +50,7 @@ export default function SpecSheet({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-20 md:px-8 md:py-32"
       style={{
         background: bg || undefined,

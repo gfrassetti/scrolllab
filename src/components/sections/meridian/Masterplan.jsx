@@ -50,11 +50,16 @@ const DOTS = [
   [150, 280],
 ]
 
-const DEFAULT_UNITS = OUTLINES.map((_, i) => ({
-  name: `Unit ${i + 1}`,
-  line1: '[N] bedrooms, [N] bathrooms',
-  line2: '[000.00] m²',
-}))
+const DEFAULT_UNITS = [
+  ['4 bedrooms, 4 bathrooms', '412.50 m²'],
+  ['5 bedrooms, 5 bathrooms', '486.20 m²'],
+  ['4 bedrooms, 3 bathrooms', '368.00 m²'],
+  ['6 bedrooms, 6 bathrooms', '540.75 m²'],
+  ['3 bedrooms, 3 bathrooms', '298.40 m²'],
+  ['4 bedrooms, 4 bathrooms', '405.10 m²'],
+  ['5 bedrooms, 5 bathrooms', '472.60 m²'],
+  ['3 bedrooms, 2 bathrooms', '276.90 m²'],
+].map(([line1, line2], i) => ({ name: `Villa ${String(i + 1).padStart(2, '0')}`, line1, line2 }))
 
 const INK = '#2a2622'
 const SAND = '#dfd8cf'

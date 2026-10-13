@@ -1,4 +1,4 @@
-import { model3dHelp, navLinks, FORM_ENDPOINT_HELP, toggle } from '../helpers.js'
+import { legalFields, model3dHelp, navLinks, FORM_ENDPOINT_HELP, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -206,6 +206,8 @@ export const FIZZ_FIELDS = {
       ],
     },
     { key: 'contactLabel', label: 'Contacto — título', type: 'text' },
+    { key: 'legalHeading', label: 'Legal — título de la columna', type: 'text' },
+    ...legalFields(),
     toggle('showBubbles', 'Burbujas'),
     { key: 'bubbleColor', label: 'Burbujas — color (vacío: el del texto)', type: 'color' },
   ],

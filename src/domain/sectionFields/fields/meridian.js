@@ -1,4 +1,4 @@
-import { FORM_ENDPOINT_HELP } from '../helpers.js'
+import { FORM_ENDPOINT_HELP, LEGAL_HELP } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -51,7 +51,10 @@ export const MERIDIAN_FIELDS = {
     { key: 'privacyLabel', label: 'Privacidad — texto (vacío = según idioma)', type: 'text' },
     { key: 'privacyHref', label: 'Privacidad — enlace', type: 'href' },
     { key: 'termsLabel', label: 'Términos — texto (vacío = según idioma)', type: 'text' },
-    { key: 'termsHref', label: 'Términos — enlace', type: 'href' },
+    { key: 'termsHref', label: 'Términos — enlace (#terms abre el panel)', type: 'href' },
+    { key: 'privacyText', label: 'Privacidad — contenido del panel', type: 'textarea', help: LEGAL_HELP },
+    { key: 'termsText', label: 'Términos — contenido del panel', type: 'textarea' },
+    { key: 'legalCloseLabel', label: 'Panel legal — botón cerrar', type: 'text' },
     { key: 'madeByLabel', label: '"Hecho por" (vacío = según idioma)', type: 'text' },
     {
       key: 'socials',

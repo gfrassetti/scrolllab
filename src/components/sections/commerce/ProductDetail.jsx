@@ -105,7 +105,7 @@ export default function ProductDetail({
   descriptionTitle = 'Description',
   specsTitle = 'Details',
   shippingTitle = 'Shipping & returns',
-  shippingText = 'Placeholder shipping copy — delivery times, costs and how returns work.',
+  shippingText = 'Ships within two working days. Free returns within 30 days, unworn and with the tags on.',
   careTitle = 'Care',
   careText = '',
   relatedTitle = 'You may also like',

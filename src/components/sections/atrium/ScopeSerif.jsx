@@ -8,7 +8,7 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
  * headline size. Left column, first line indented, air on all sides.
  */
 export default function ScopeSerif({
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  body = 'Houses, museums, schools and housing across Switzerland and northern Italy, from the first site visit to the last site meeting.',
   bg,
   fg,
 }) {

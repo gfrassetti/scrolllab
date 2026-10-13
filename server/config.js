@@ -292,13 +292,24 @@ export function loadConfig() {
 
   const paddle = loadPaddleConfigSafe();
 
+  // SMTP (p. ej. Gmail con contraseña de aplicación): si está SMTP_USER + SMTP_PASS,
+  // los mails salen por ahí en vez de Resend y el remitente es esa cuenta.
+  const smtp = {
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 465,
+    user: (process.env.SMTP_USER || "").trim(),
+    // Gmail muestra la contraseña de aplicación en grupos de 4 con espacios.
+    pass: (process.env.SMTP_PASS || "").replace(/\s+/g, ""),
+  };
+  const usesSmtp = Boolean(smtp.user && smtp.pass);
+
   const emailEnabled = bool(
     "EMAIL_ENABLED",
-    Boolean(process.env.RESEND_API_KEY),
+    Boolean(process.env.RESEND_API_KEY) || usesSmtp,
   );
   if (emailEnabled) {
-    requireEnv("RESEND_API_KEY");
-    requireEnv("EMAIL_FROM");
+    if (!usesSmtp) requireEnv("RESEND_API_KEY");
+    if (!usesSmtp) requireEnv("EMAIL_FROM");
   }
 
   return {
@@ -332,7 +343,11 @@ export function loadConfig() {
     email: {
       enabled: emailEnabled,
       apiKey: process.env.RESEND_API_KEY || "",
-      from: brandedFrom(process.env.EMAIL_FROM || "onboarding@resend.dev"),
+      // Por SMTP el remitente tiene que ser la cuenta que envía.
+      smtp: usesSmtp ? smtp : null,
+      from: brandedFrom(
+        usesSmtp ? smtp.user : process.env.EMAIL_FROM || "onboarding@resend.dev",
+      ),
       replyTo: process.env.EMAIL_REPLY_TO || "",
       notifyTo: process.env.EMAIL_NOTIFY_TO || "",
       logoUrl: process.env.EMAIL_LOGO_URL || "",

@@ -35,9 +35,9 @@ const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-seri
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 
 const DEFAULT_CARS = [
-  { name: 'Model 1', modelUrl: '/apex/showroom/car-1.glb', image: showroom1, specs: 'Year | 2026\nPower | 000 kW\nRange | 000 km\nTop speed | 000 km/h\nWeight | 0,000 kg' },
-  { name: 'Model 2', modelUrl: '/apex/showroom/car-2.glb', image: showroom2, specs: 'Year | 2026\nPower | 000 kW\nRange | 000 km\nTop speed | 000 km/h\nWeight | 0,000 kg' },
-  { name: 'Model 3', modelUrl: '/apex/showroom/car-3.glb', image: showroom3, specs: 'Year | 2026\nPower | 000 kW\nRange | 000 km\nTop speed | 000 km/h\nWeight | 0,000 kg' },
+  { name: 'Apex Saloon', modelUrl: '/apex/showroom/car-1.glb', image: showroom1, specs: 'Year | 2026\nPower | 580 kW\nRange | 620 km\nTop speed | 250 km/h\nWeight | 2,140 kg' },
+  { name: 'Apex Coupé', modelUrl: '/apex/showroom/car-2.glb', image: showroom2, specs: 'Year | 2027\nPower | 720 kW\nRange | 540 km\nTop speed | 290 km/h\nWeight | 1,960 kg' },
+  { name: 'Apex Terra', modelUrl: '/apex/showroom/car-3.glb', image: showroom3, specs: 'Year | 2026\nPower | 610 kW\nRange | 560 km\nTop speed | 210 km/h\nWeight | 2,690 kg' },
 ]
 
 // Scroll budget, in screens.
@@ -218,9 +218,9 @@ function poseAt(keys, s) {
 const polar = ([phi, r, y], L, out) => out.set(L.cx + Math.sin(phi) * r, y, L.cz + Math.cos(phi) * r)
 
 export default function Showroom({
-  eyebrow = 'Section label',
-  title = 'Headline 1',
-  intro = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+  eyebrow = 'Showroom',
+  title = 'Three cars, one room',
+  intro = 'The whole range on the floor tonight. Walk around each one and read its sheet.',
   cars,
   sceneUrl,
   showRoom = 'on',

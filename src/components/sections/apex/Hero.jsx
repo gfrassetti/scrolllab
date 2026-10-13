@@ -39,7 +39,7 @@ import HeroMenu, { Burger } from './HeroMenu'
 // The demo film lives in the site's public/ folder. A buyer who points `filmSrc`
 // at their own file gets their own (and a phone falls back to the same file).
 const DEMO = { film: '/apex/hero.mp4', mobile: '/apex/hero-m.mp4', poster: '/apex/poster.jpg', posterMobile: '/apex/poster-m.jpg' }
-const DEFAULT_CHAPTERS = ['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4', 'Chapter 5']
+const DEFAULT_CHAPTERS = ['Arrival', 'Profile', 'Wheel', 'Cabin', 'Tail light']
 
 const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif" }
 const LABEL = {
@@ -66,22 +66,22 @@ function filmShouldStay() {
 }
 
 export default function Hero({
-  brand = 'Brand name',
-  tagline = 'Tagline',
+  brand = 'Apex',
+  tagline = 'Electric grand tourers',
   links = [
-    { label: 'Link 1', href: '#models' },
-    { label: 'Link 2', href: '#atelier' },
-    { label: 'Link 3', href: '#statement' },
-    { label: 'Link 4', href: '#contact' },
+    { label: 'Models', href: '#models' },
+    { label: 'Atelier', href: '#atelier' },
+    { label: 'Showroom', href: '#showroom' },
+    { label: 'Contact', href: '#contact' },
   ],
-  ctaLabel = 'Call to action',
+  ctaLabel = 'Book a drive',
   ctaHref = '#contact',
   menuLabel = 'Menu',
   closeLabel = 'Close',
-  line1 = 'Headline 1,',
-  line2 = 'lorem ipsum dolor.',
-  blurb = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
-  discoverLabel = 'Link label',
+  line1 = 'Built for the long way,',
+  line2 = 'driven in silence.',
+  blurb = 'A four-seat electric grand tourer, built by hand in small numbers. 620 km on a charge, and not a sound you did not choose.',
+  discoverLabel = 'Discover the range',
   discoverHref = '#models',
   scrollLabel = 'Scroll',
   chapters,
@@ -94,10 +94,10 @@ export default function Hero({
   manifestSrc,
   showGrain = 'on',
   showMenuFilm = 'on',
-  menuMeta = 'Address line\nhello@yourbrand.com',
+  menuMeta = 'Via Lagrange 18, Turin\nsales@apexautomobili.com',
   showLoader = 'on',
-  loaderTop = 'Brand name',
-  loaderSub = 'Tagline',
+  loaderTop = 'Apex',
+  loaderSub = 'Electric grand tourers',
   loaderWord = 'APEX',
   loaderLabel = 'Loading',
   loaderBg,

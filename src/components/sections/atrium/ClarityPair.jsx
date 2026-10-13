@@ -46,11 +46,11 @@ const SPOKES = Array.from({ length: 8 }, (_, i) => {
  * en una banda más baja los números quedaban en 9–11 px.
  */
 export default function ClarityPair({
-  kicker = 'Section label',
-  left = 'Placeholder statement',
-  right = 'and a second one',
-  bodyLeft = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
-  bodyRight = 'Ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation.',
+  kicker = 'Practice',
+  left = 'Clear plans',
+  right = 'and honest materials',
+  bodyLeft = 'A plan should explain itself: where you come in, where the light falls, where you rest.',
+  bodyRight = 'Stone that looks like stone, timber that ages like timber, concrete left as it was poured.',
   /** El papel (fondo del principio) y la tinta (fondo del final): la animación pasa de uno al otro. */
   bg,
   fg,

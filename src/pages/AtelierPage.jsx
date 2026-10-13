@@ -31,7 +31,15 @@ export default function AtelierPage() {
           <SelectedWork />
           <KeyFacts />
           <StudioCards />
-          <ContactForm theme="atelier" />
+          <ContactForm
+            theme="atelier"
+            eyebrow="New projects"
+            title="Tell us about the place"
+            body="Where it is, what it is for and when you would like to move in. We reply within a week with a date for a first conversation."
+            submitLabel="Send"
+            successMessage="Thank you. We will write back within a week."
+            note="We reply within a week. Your details are only used to answer you."
+          />
         </main>
         <FooterAtelier />
       </div>

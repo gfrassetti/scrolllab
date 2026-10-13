@@ -64,13 +64,16 @@ function RadioCard({ name, value, checked, onChange, title, note, price }) {
  * Checkout — page at /checkout (not a scroll section).
  * Left: contact / shipping / delivery / payment. Right: sticky order summary
  * with thumbnails. Every label is a prop so the builder can rewrite the screen.
+ *
+ * The kit ships frontend-only: wire createCheckout() in checkoutAdapter.js to
+ * your payment provider (Mercado Pago, Stripe…) before going live.
  */
 export default function Checkout({
   backLabel = 'Back to shop',
   stepsText = 'Cart\nInformation\nPayment',
   eyebrow = 'Checkout',
   title = 'Almost there',
-  body = 'Placeholder checkout. This kit ships frontend-only — wire createCheckout() in checkoutAdapter.js to Mercado Pago or Stripe (ask an AI assistant to do it from their docs, it is a quick job).',
+  body = 'Review your order and pay securely. A confirmation with the tracking number arrives by email.',
   contactTitle = 'Contact',
   emailLabel = 'Email',
   emailPlaceholder = 'you@example.com',

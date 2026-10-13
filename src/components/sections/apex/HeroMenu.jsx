@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { contactHref } from '../../../lib/contactLinks'
 
 /**
  * APEX — the hero's menu sheet.
@@ -126,9 +127,20 @@ export default function HeroMenu({
 
         {lines.length ? (
           <div className="apex-menu-meta flex flex-wrap items-end justify-between gap-x-10 gap-y-1 text-[11px] tracking-[0.04em] opacity-60 md:uppercase md:tracking-[0.16em] lg:text-[max(11px,0.6vw)]" style={LABEL}>
-            {lines.map((l) => (
-              <p key={l}>{l}</p>
-            ))}
+            {lines.map((l) => {
+              const href = contactHref(l)
+              return (
+                <p key={l}>
+                  {href ? (
+                    <a href={href} className="tpl-link relative">
+                      {l}
+                    </a>
+                  ) : (
+                    l
+                  )}
+                </p>
+              )
+            })}
           </div>
         ) : null}
       </div>

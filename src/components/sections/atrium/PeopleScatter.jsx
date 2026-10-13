@@ -36,8 +36,8 @@ const defaultPlates = [
  * per breakpoint, so the scrub is not fighting twelve nodes.
  */
 export default function PeopleScatter({
-  label = 'Section label',
-  title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
+  label = 'People',
+  title = 'Twenty-two architects, model makers and engineers around one long table, in a former print works.',
   plates: platesProp,
   bg,
   fg,

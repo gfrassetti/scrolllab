@@ -22,20 +22,20 @@ const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-seri
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 
 const DEFAULT_SLIDES = [
-  { image: studio, title: 'Title 1', caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-  { image: lab, title: 'Title 2', caption: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
-  { image: paint, title: 'Title 3', caption: 'Ut enim ad minim veniam, quis nostrud exercitation.' },
-  { image: craft, title: 'Title 4', caption: 'Duis aute irure dolor in reprehenderit in voluptate.' },
-  { image: wheel, title: 'Title 5', caption: 'Excepteur sint occaecat cupidatat non proident.' },
-  { image: lounge, title: 'Title 6', caption: 'Sunt in culpa qui officia deserunt mollit anim.' },
-  { image: road, title: 'Title 7', caption: 'Lorem ipsum dolor sit amet.' },
+  { image: studio, title: 'The studio', caption: 'Where every finished car is first seen in full light.' },
+  { image: lab, title: 'Battery lab', caption: 'Every cell is tested on its own before it goes in.' },
+  { image: paint, title: 'Paint shop', caption: 'Seven coats, polished by hand between each one.' },
+  { image: craft, title: 'Trim bench', caption: 'Leather cut and stitched for one car at a time.' },
+  { image: wheel, title: 'Wheels', caption: 'Forged in one piece, balanced by hand.' },
+  { image: lounge, title: 'Owners’ lounge', caption: 'Where the car is handed over, never delivered.' },
+  { image: road, title: 'First drive', caption: 'Two hundred kilometres before it is yours.' },
 ]
 
 const THUMB = { w: 176, h: 224 }
 const pad = (n) => String(n).padStart(2, '0')
 
 export default function Gallery({
-  eyebrow = 'Section label',
+  eyebrow = 'The atelier',
   index = '02',
   slides,
   nextLabel = 'Next',

@@ -30,6 +30,11 @@ export const SCORE = {
     pad: 4,
   },
 
+  // Phones only: the text of the loader that holds the page, with a percentage,
+  // until the first stretch of the film is in, and again before each new take
+  // when its frames are not in yet (it only shows if the wait lasts a moment).
+  loader: { label: 'Loading the film' },
+
   // Height of the film section, in screens of scroll. A swipe on a phone
   // travels much further than a wheel tick, so phones get a shorter scroll.
   screens: 46,
@@ -93,7 +98,7 @@ export const SCORE = {
 
   // Chapters: the rail on the left and the menu. `at` is where each starts.
   chapters: [
-    { at: 0, title: 'The Build' },
+    { at: 0, title: 'The Workshop' },
     { at: 0.29, title: 'The Town' },
     { at: 0.62, title: 'The Process' },
     { at: 0.86, title: 'Questions' },
@@ -105,33 +110,33 @@ export const SCORE = {
       from: 0.008,
       to: 0.055,
       place: 'left',
-      kicker: 'Kicker 01',
-      title: 'Headline 1 — lorem ipsum dolor.',
-      body: 'Subheadline — consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
+      kicker: '01 — The workshop',
+      title: 'Every lantern starts as one sheet.',
+      body: 'Mulberry paper, cut and scored by hand in our Porto workshop. No glue, no wire: only folds.',
     },
     {
       from: 0.085,
       to: 0.14,
       place: 'left',
-      kicker: 'Kicker 02',
-      title: 'Headline 2 — sit amet, built by hand.',
-      body: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
+      kicker: '02 — By hand',
+      title: 'Four hundred folds, one evening.',
+      body: 'Each piece is folded by one pair of hands from the first crease to the last, then signed on the inside seam.',
     },
     {
       from: 0.165,
       to: 0.215,
       place: 'left',
-      kicker: 'Kicker 03',
-      title: 'Headline 3 — then it opens.',
+      kicker: '03 — The bloom',
+      title: 'Then, one evening, it opens.',
       body: '',
     },
     {
       from: 0.232,
       to: 0.262,
       place: 'right',
-      kicker: 'Kicker 04',
-      title: 'Headline 4 — the whole valley, one table.',
-      body: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.',
+      kicker: '04 — Commissions',
+      title: 'A whole valley, on one table.',
+      body: 'Our largest commission: a paper landscape for a hotel lobby, 2.4 metres across, folded from 312 sheets.',
     },
     {
       from: 0.282,
@@ -147,17 +152,17 @@ export const SCORE = {
       to: 0.39,
       place: 'right',
       tone: 'light',
-      kicker: 'Kicker 05',
-      title: 'Headline 5 — lights on, everyone home.',
-      body: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt.',
+      kicker: '05 — Night market',
+      title: 'Lights on, everyone home.',
+      body: 'Every October we hang six hundred lanterns over the old town. Half the street helps fold them.',
     },
     {
       from: 0.43,
       to: 0.5,
       place: 'left',
       tone: 'light',
-      kicker: 'Kicker 06',
-      title: 'Headline 6 — let it rise.',
+      kicker: '06 — The lamp',
+      title: 'A moon, a lamp, a sheet of paper.',
       body: '',
     },
     {
@@ -165,8 +170,8 @@ export const SCORE = {
       to: 0.6,
       place: 'left',
       tone: 'light',
-      kicker: 'Kicker 07',
-      title: 'Headline 7 — every light starts on a table.',
+      kicker: '07 — The table',
+      title: 'Every light starts on a table.',
       body: '',
     },
     {
@@ -176,7 +181,7 @@ export const SCORE = {
       tone: 'light',
       kicker: 'The Process',
       title: 'Three steps — fold, light, release.',
-      list: ['01 — Lorem ipsum dolor sit amet.', '02 — Consectetur adipiscing elit.', '03 — Sed do eiusmod tempor.'],
+      list: ['01 — Fold: two hours, paper included.', '02 — Light: a warm LED, never a flame.', '03 — Release: hang it at home, or with ours.'],
     },
     {
       from: 0.895,
@@ -184,7 +189,7 @@ export const SCORE = {
       place: 'left',
       kicker: 'Questions',
       title: 'Asked before.',
-      list: ['What does it take? — Lorem ipsum dolor.', 'How long? — Sit amet, consectetur.', 'Who is it for? — Adipiscing elit.'],
+      list: ['Do I need origami? — None at all.', 'How long does one last? — Years.', 'Groups? — Up to twelve, on Saturdays.'],
     },
   ],
 

@@ -7,34 +7,34 @@ import { cardTone } from './tone'
 
 const PROJECTS = [
   {
-    title: 'Project 01',
-    body: 'Lorem ipsum dolor sit amet — placeholder project description.',
-    tag: 'Placeholder tag',
-    overlay: 'Overlay text.',
+    title: 'Casa Brera',
+    body: 'A 1930s apartment in Milan, opened back up to the light.',
+    tag: 'Interior · 2025',
+    overlay: 'Opened to the light.',
     tone: 'from-[#1a2330] via-[#3d5168] to-[#c5b8a5]',
     img: work1,
   },
   {
-    title: 'Project 02',
-    body: 'Lorem ipsum dolor sit amet — placeholder project description.',
-    tag: 'Placeholder tag',
-    overlay: 'Overlay text.',
+    title: 'Onda chair',
+    body: 'A walnut lounge chair carved from a single block.',
+    tag: 'Furniture · 2024',
+    overlay: 'One block, one curve.',
     tone: 'from-[#2a2118] via-[#6b5344] to-[#e8d5c4]',
     img: work2,
   },
   {
-    title: 'Project 03',
-    body: 'Lorem ipsum dolor sit amet — placeholder project description.',
-    tag: 'Placeholder tag',
-    overlay: 'Overlay text.',
+    title: 'Forno Ottavio',
+    body: 'Name, identity and stationery for a family bakery.',
+    tag: 'Identity · 2024',
+    overlay: 'Bread, in print.',
     tone: 'from-[#121816] via-[#2f4a3c] to-[#b8d4c4]',
     img: work3,
   },
   {
-    title: 'Project 04',
-    body: 'Lorem ipsum dolor sit amet — placeholder project description.',
-    tag: 'Placeholder tag',
-    overlay: 'Overlay text.',
+    title: 'Veil',
+    body: 'A hanging linen installation for a hotel lobby.',
+    tag: 'Installation · 2023',
+    overlay: 'Light through linen.',
     tone: 'from-[#1c1524] via-[#4a3a5c] to-[#d4c8e0]',
     img: work4,
   },
@@ -55,7 +55,7 @@ function resolveProjects(list) {
       tag: p?.tag || d.tag,
       overlay: p?.overlay || d.overlay,
       img: p?.img || d.img,
-      href: p?.href || '#work',
+      href: p?.href || '#contact',
       color: p?.color || '',
     }
   })
@@ -66,8 +66,8 @@ function resolveProjects(list) {
  * Each card rises from below with a fade and joins the track.
  */
 export default function SelectedWork({
-  title = 'YOUR WORK TITLE',
-  cta = 'Your CTA →',
+  title = 'SELECTED WORK',
+  cta = 'The studio in numbers →',
   ctaHref = '#facts',
   projects: projectsProp,
   exploreLabel = 'Explore →',
@@ -222,7 +222,7 @@ export default function SelectedWork({
                     </p>
                   </div>
                   <a
-                    href={project.href || '#work'}
+                    href={project.href || '#contact'}
                     className="tpl-hit relative shrink-0 pt-1 text-[11px] tracking-[0.18em] uppercase underline underline-offset-4 decoration-black/25 transition-[text-decoration-color] duration-300 hover:decoration-black"
                   >
                     {exploreLabel}

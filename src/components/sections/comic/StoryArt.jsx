@@ -421,7 +421,7 @@ export function BathBg({ className = '' }) {
 /* ── Closing ───────────────────────────────────────────────────────────── */
 
 /** The postcard: half dog, half pig. */
-export function Postcard({ title = 'Title 1', className = '' }) {
+export function Postcard({ title = 'Greetings from Haven', className = '' }) {
   return (
     <svg viewBox="0 0 400 300" className={className} aria-hidden="true">
       <rect x="6" y="6" width="388" height="288" fill="#f4d8d8" stroke="#fff" strokeWidth="10" />

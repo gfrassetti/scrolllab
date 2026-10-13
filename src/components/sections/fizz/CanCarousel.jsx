@@ -12,11 +12,11 @@ import {
 import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultCans = [
-  { name: 'FLAVOR 01', note: 'Ingredient + ingredient', color: '#ffb02e', image: bottle01 },
-  { name: 'FLAVOR 02', note: 'Ingredient + ingredient', color: '#ff3ea5', image: bottle02 },
-  { name: 'FLAVOR 03', note: 'Ingredient + ingredient', color: '#3ddc97', image: bottle03 },
-  { name: 'FLAVOR 04', note: 'Ingredient + ingredient', color: '#ff6b35', image: bottle04 },
-  { name: 'FLAVOR 05', note: 'Ingredient + ingredient', color: '#5b3df0', image: bottle05 },
+  { name: 'BLOOD ORANGE', note: 'Blood orange + ginger', color: '#ffb02e', image: bottle01 },
+  { name: 'RASPBERRY', note: 'Raspberry + rose', color: '#ff3ea5', image: bottle02 },
+  { name: 'LIME MINT', note: 'Lime + garden mint', color: '#3ddc97', image: bottle03 },
+  { name: 'MANGO', note: 'Mango + passion fruit', color: '#ff6b35', image: bottle04 },
+  { name: 'CASSIS', note: 'Blackcurrant + lavender', color: '#5b3df0', image: bottle05 },
 ]
 
 /** Fallback SVG if a bottle has no image override and no default asset. */
@@ -51,9 +51,9 @@ function CanIllustration({ color, label, labelBg = '#fff3e2', labelInk = '#24135
  */
 export default function CanCarousel({
   eyebrow = '',
-  title = 'YOUR LINEUP TITLE',
-  cta = 'Your CTA',
-  canLabel = 'BRAND*',
+  title = 'THE FULL LINEUP',
+  cta = 'Find a stockist',
+  canLabel = 'FIZZ*',
   cans,
   bg,
   fg,
@@ -61,8 +61,10 @@ export default function CanCarousel({
   labelBg,
   labelInk,
   /** El botón de cada tarjeta y el texto sobre el color del sabor al pasar el mouse. */
-  ctaHref = '#',
+  ctaHref = '#contact',
   cardInk,
+  /** Ancla de la sección, si un link apunta acá. */
+  id = 'lineup',
 }) {
   const root = useRef(null)
 
@@ -95,6 +97,7 @@ export default function CanCarousel({
   return (
     <section
       ref={root}
+      id={id}
       className="py-24 md:py-36"
       style={{
         backgroundColor: bg || undefined,

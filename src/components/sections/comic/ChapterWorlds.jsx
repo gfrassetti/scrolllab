@@ -8,15 +8,15 @@ import { LabScene, PigSitting, WallScene, YardScene } from './WallArt'
 const DEFAULT_FACTS = [
   {
     id: 'lab',
-    title: 'Card title 1',
-    blurb: 'Card body 1 — replace with your copy.',
-    concern: 'Note 1 — replace with sourced text.',
+    title: 'The name',
+    blurb: 'Dusty learned his name in a week and has answered to it ever since.',
+    concern: 'Pip learned hers just as fast. At Haven, every animal is called by name.',
   },
   {
     id: 'yard',
-    title: 'Card title 2',
-    blurb: 'Card body 2 — replace with your copy.',
-    concern: 'Note 2 — replace with sourced text.',
+    title: 'The yard',
+    blurb: 'Dusty has a garden, a daily walk and a vet when he needs one.',
+    concern: 'Pip has the same here: thirty acres, a mud bath and a vet on call.',
   },
 ]
 
@@ -57,9 +57,9 @@ function Note({ fact, stamp }) {
  */
 export default function ChapterWorlds({
   facts = DEFAULT_FACTS,
-  captions = ['Caption 10 — replace with story beat.'],
-  dialogue = 'Dialogue 5 — replace.',
-  stamp = 'Stamp',
+  captions = ['On the other side of the wall, Pip is waiting for a porch of her own.'],
+  dialogue = 'Is there room for one more?',
+  stamp = 'Haven',
   back = 'Back',
 }) {
   const root = useRef(null)

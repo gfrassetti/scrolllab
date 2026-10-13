@@ -6,10 +6,14 @@ import { parseNavLinks } from '../../../lib/navLinks'
  * Mobile: phrase + burger; links in full-screen overlay.
  */
 export default function NavUnity({
-  brand = 'HEADLINE 1',
-  logo = '01',
+  brand = 'UNITY CUP',
+  logo = '26',
   logoSrc = '',
-  links = ['LINK 1', 'LINK 2', 'LINK 3'],
+  links = [
+    { label: 'THE GAME', href: '#peace' },
+    { label: 'THE CLUBS', href: '#languages' },
+    { label: 'THE FINAL', href: '#winner' },
+  ],
   linksText,
   menuLabel = 'MENU',
   /** Menú móvil: fondo y texto. La barra se invierte sola (mix-blend). */

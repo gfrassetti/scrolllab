@@ -12,7 +12,7 @@ import { craft, lounge, variants } from './assets/images'
  * picture slides inside its frame, the text sits still in front. The blocks
  * alternate sides so the page does not read as a column of cards.
  *
- * Every word is a placeholder meant to be replaced (builder fields).
+ * The demo copy is the invented brand's; every word is a builder field.
  * Calm: no scrub — the same layout, still.
  */
 
@@ -21,16 +21,16 @@ const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch:
 
 const DEFAULT_BLOCKS = [
   {
-    label: 'Section label',
-    title: 'Headline 1 — lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
-    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    label: 'Our mission',
+    title: 'Make the long drive the best part of the trip, not the price of getting there.',
+    text: 'Every Apex starts with one question: how does it feel after six hours? Seats are shaped on real drives, the cabin is tuned for silence and the leather is stitched by one trimmer, start to finish.',
     image: craft,
     word: 'Mission',
   },
   {
-    label: 'Section label',
-    title: 'Headline 2 — duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.',
-    text: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    label: 'Our vision',
+    title: 'Fewer cars, kept for longer, looked after by the people who built them.',
+    text: 'We take back every battery we fit and rebuild it for a second life. Owners keep the same technician from the first key to the last service, and the lounge is open to them every day.',
     image: lounge,
     word: 'Vision',
   },

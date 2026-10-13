@@ -196,8 +196,9 @@ const MODEL_FILES = {
       ...publicDirAssets('fold/demo/768'),
       'public/fold/footer-loop.mp4',
       'public/fold/footer-loop.jpg',
-      // Builds a reel from your own clips (README: "The film").
+      // Builds a reel from your own clips (README: "The film") and its phone tier.
       'scripts/fold-reel.mjs',
+      'scripts/fold-phone-tier.mjs',
     ],
   },
 }
@@ -211,6 +212,8 @@ const SHARED = [
   // `three` como dependencia hasta en un ZIP 100% 2D (chapters, nocturne...).
   // Ver WEBGL_FILES + needsWebgl más abajo.
   'src/lib/navLinks.js',
+  // Líneas de contacto que se vuelven mailto:/tel: y links externos en otra pestaña.
+  'src/lib/contactLinks.js',
   // srcset de las fotos de ejemplo (assets/images.js de cada modelo).
   'src/lib/responsiveImage.js',
   // Versión calma con «reducir movimiento» (las secciones la consultan).
@@ -225,6 +228,8 @@ const SHARED = [
   'src/components/SmoothScrollProvider.jsx',
   // Barra de scroll propia de cada template (la monta la página).
   'src/components/ScrollRail.jsx',
+  // Privacidad / términos como panel sobre la página (lo montan los footers).
+  'src/components/LegalSheet.jsx',
   'src/index.css',
   // Micro-interacciones comunes (tpl-*), las importa index.css.
   'src/styles/tpl.css',
@@ -602,7 +607,27 @@ publish it under a new URL (a new worker name, or a path such as \`/v2\`) and
 update the variable; otherwise returning visitors keep the old pictures.
 
 Phones load the 768 px frames and only the original pictures; the engine blends
-each frame into the next.
+each frame into the next. On a phone the connection, not the drawing, is what runs
+out when someone flicks, so the engine also shows a loader with a percentage until
+the first stretch of the film is in, and waits under the colour field (or before the
+paper tears) at each new chapter until that take's first frames are in. On a fast
+connection none of it shows. Its text is \`loader.label\` in \`score.js\`.
+
+### The phone tier (optional, about 2.3x fewer bytes)
+
+A phone held upright shows about a quarter of a 16:9 frame: three quarters of every
+picture it downloads is never drawn. After building the reel:
+
+\`\`\`
+npm i -D sharp
+node scripts/fold-phone-tier.mjs            # reads public/fold/film and score.js
+\`\`\`
+
+It cuts a band around each take's \`focus\` (\`scenes[].focus\`, else \`portraitFocus\`)
+out of the 768 px frames, only the original pictures, into \`public/fold/film/phone/\`
+and adds a \`phone\` entry to \`manifest.json\`. Publish the folder with the rest of the
+reel. The engine uses it on a portrait screen and falls back to the 768 px tier on a
+wide one (a rotated phone); without the folder nothing changes.
 
 With "reduce motion" on, the film becomes still plates: each text on its own
 frame of the film, with a short fade.
@@ -678,6 +703,20 @@ const MODEL_3D_NOTES = {
 
 /** Section folders shared across models — packed when a page imports them. */
 const CROSS_MODEL_DIRS = ['contact']
+
+/**
+ * El copy de la demo es de un negocio inventado (docs/template-copy.md): el
+ * README le dice al comprador de dónde sale, cómo andan los links y que los
+ * textos legales son de muestra.
+ */
+const DEMO_COPY_NOTE = `## Demo copy and links
+
+The text in this template belongs to an invented business, written so the demo reads like a finished site. Every text is a prop of its section: replace it with yours.
+
+- Menu, buttons and footer links point to sections of the page by \`id\` (\`#models\` → \`<section id="models">\`). With smooth scroll on, the page glides there; from the phone menu it closes the menu first.
+- Emails and phone numbers in contact blocks become \`mailto:\` / \`tel:\` links (\`src/lib/contactLinks.js\`).
+- Where the footer has Privacy / Terms, they open their text in a panel over the page (\`src/components/LegalSheet.jsx\`) while they point at \`#privacy\` / \`#terms\`; point them at your own page (\`/privacy\`, \`https://…\`) to use that instead. **The legal texts are samples for the invented business: replace them with yours and have them reviewed.**
+`
 
 const CONTACT_FORM_NOTE = `## Contact form
 
@@ -795,7 +834,7 @@ function appendModelProject(archive, model, prefix = '', licenseMeta = null) {
     stampReadme(
       `# ${model.toUpperCase()} — SCROLLLAB\n\n\`\`\`\nnpm install\nnpm run dev\n\`\`\`\n\n${licenseNote}\n${
         MODEL_3D_NOTES[model] ? `\n${MODEL_3D_NOTES[model]}` : ''
-      }${sectionDirs.includes('contact') ? `\n${CONTACT_FORM_NOTE}` : ''}`,
+      }${sectionDirs.includes('contact') ? `\n${CONTACT_FORM_NOTE}` : ''}\n${DEMO_COPY_NOTE}`,
       licenseMeta,
     ),
     { name: `${prefix}README.md` },
@@ -1173,6 +1212,7 @@ document.documentElement.style.setProperty('--user-font', ${JSON.stringify(globa
     readme += `\n${monolith3dNote({ sampleGlb: false })}`
   }
   if (idList.includes('contact/ContactForm')) readme += `\n${CONTACT_FORM_NOTE}`
+  readme += `\n${DEMO_COPY_NOTE}`
   if (globalFont) {
     readme += `\n## Font\n\nThe whole page uses ${globalFont.label} (chosen in the builder). It is set by the two \`data-user-font\` / \`--user-font\` lines in \`src/App.jsx\`; delete them and every section goes back to its own font.\n`
   }

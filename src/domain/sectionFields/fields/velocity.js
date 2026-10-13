@@ -102,6 +102,7 @@ export const VELOCITY_FIELDS = {
   ],
   'velocity/FooterVelocity': [
     { key: 'line', label: 'Line', type: 'text' },
+    { key: 'email', label: 'Email de contacto (vacío: no se muestra)', type: 'text' },
     { key: 'legal', label: 'Legal', type: 'text' },
     { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },

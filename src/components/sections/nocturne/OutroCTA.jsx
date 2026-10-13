@@ -2,10 +2,26 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { themeVars } from '../../../lib/themeVars'
+import { parseNavLinks } from '../../../lib/navLinks'
+import { externalProps } from '../../../lib/contactLinks'
 
 const defaultColumns = [
-  { heading: 'Reel', items: ['Films', 'Index', 'Stills', 'About'] },
-  { heading: 'Signal', items: ['Instagram', 'Vimeo', 'Are.na'] },
+  {
+    heading: 'Reel',
+    items: [
+      { label: 'Films', href: '#films' },
+      { label: 'Frames', href: '#frames' },
+      { label: 'Screening room', href: '#screening-room' },
+    ],
+  },
+  {
+    heading: 'Signal',
+    items: [
+      { label: 'Instagram', href: 'https://www.instagram.com/' },
+      { label: 'Vimeo', href: 'https://vimeo.com/' },
+      { label: 'Representation', href: 'mailto:agents@nocturnepictures.com' },
+    ],
+  },
 ]
 
 /**
@@ -16,16 +32,18 @@ const defaultColumns = [
  */
 export default function OutroCTA({
   ctaWord = 'ROLL CREDITS',
-  email = 'hello@placeholder.films',
+  email = 'night@nocturnepictures.com',
   ctaHref,
   columns = defaultColumns,
   links,
   bg,
   fg,
   accent,
-  legal = '©2026 Placeholder Films — Template, not a promise',
-  note = 'Placeholder closing note. The lights come up, the room is quiet — tell the audience where to go next.',
+  legal = '©2026 Nocturne Pictures B.V. — Rotterdam',
+  note = 'Booking for autumn and winter shoots now. Tell us the story, the city and the hour: we will tell you if the night can carry it.',
   backToTop = 'Back to top ↑',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'contact',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -57,6 +75,7 @@ export default function OutroCTA({
   return (
     <footer
       ref={root}
+      id={id}
       className="px-5 pt-24 pb-6 md:px-10 md:pt-36"
       style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ salt: fg, acid: accent, noir: bg }) }}
     >
@@ -71,7 +90,8 @@ export default function OutroCTA({
                 {flatLinks.map((l, i) => (
                   <li key={i}>
                     <a
-                      href={l.href || '#'}
+                      href={l.href || '#top'}
+                      {...externalProps(l.href)}
                       className="tpl-link tpl-hit relative inline-block py-3 text-sm transition-colors duration-300 hover:text-acid md:text-base lg:py-0"
                     >
                       {l.label}
@@ -87,13 +107,14 @@ export default function OutroCTA({
                   {column.heading}
                 </p>
                 <ul className="lg:space-y-2">
-                  {column.items.map((item) => (
-                    <li key={item}>
+                  {parseNavLinks(column.items).map((item) => (
+                    <li key={item.label}>
                       <a
-                        href="#"
+                        href={item.href}
+                        {...externalProps(item.href)}
                         className="tpl-link tpl-hit relative inline-block py-3 text-sm transition-colors duration-300 hover:text-acid md:text-base lg:py-0"
                       >
-                        {item}
+                        {item.label}
                       </a>
                     </li>
                   ))}

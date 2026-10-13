@@ -38,11 +38,11 @@ export default function UnityPage() {
           <MosaicSlider />
           <UniversalLang />
           <LanguageBlock
-            eyebrow="EYEBROW 3"
-            line1="LINE 1"
-            line2="LINE 2"
-            line3="LINE 3"
-            note="NOTE 1"
+            eyebrow="JOY"
+            line1="SCORE"
+            line2="SHOUT"
+            line3="SHARE"
+            note="Nobody celebrates alone."
             bg="#c9b896"
             fg="#0a0a0a"
             img1={joyA}
@@ -51,11 +51,11 @@ export default function UnityPage() {
             anchor="lang-a"
           />
           <LanguageBlock
-            eyebrow="EYEBROW 4"
-            line1="LINE 4"
-            line2="LINE 5"
-            line3="LINE 6"
-            note="NOTE 2"
+            eyebrow="HOPE"
+            line1="TRAIN"
+            line2="LOSE"
+            line3="RETURN"
+            note="Half our clubs lost their first match. Every one came back."
             bg="#3d5c54"
             fg="#e7e4dc"
             img1={hopeA}
@@ -64,11 +64,11 @@ export default function UnityPage() {
             anchor="lang-b"
           />
           <LanguageBlock
-            eyebrow="EYEBROW 5"
-            line1="LINE 7"
-            line2="LINE 8"
-            line3="LINE 9"
-            note="NOTE 3"
+            eyebrow="HEAT"
+            line1="TACKLE"
+            line2="FALL"
+            line3="RISE"
+            note="Fair-play cards outnumbered yellow ones three to one."
             bg="#a34b32"
             fg="#e7e4dc"
             img1={heatA}

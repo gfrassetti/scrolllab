@@ -10,10 +10,10 @@ import { themeVars } from '../../../lib/themeVars'
  * visible behind the first line. Service columns sit far below it.
  */
 export default function ManifestoType({
-  lineOne = 'Your headline',
-  lineTwo = 'goes right here',
-  left = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
-  right = 'Ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
+  lineOne = 'Buildings that',
+  lineTwo = 'gather light',
+  left = 'We are an architectural bureau of twenty-two in Zurich, designing houses, cultural buildings and housing.',
+  right = 'Every project starts with a courtyard or an atrium: the one room everything else is arranged around.',
   bg,
   fg,
 }) {

@@ -48,8 +48,8 @@ const MOSAIC = [
  * dedo (scroll-snap): mismas fotos, mismo orden, sin altura de scrub.
  */
 export default function MosaicSlider({
-  eyebrow = 'EYEBROW 1',
-  title = 'HEADLINE 3.\nHEADLINE 4.',
+  eyebrow = 'THE GAME',
+  title = 'NINE DAYS.\n32 CLUBS.',
   slides = DEFAULT_SLIDES,
   img1,
   img2,

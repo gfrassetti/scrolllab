@@ -3,7 +3,7 @@ import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { themeVars } from '../../../lib/themeVars'
 
-const defaultWords = ['RAW', 'CONCRETE', 'SYSTEM', 'GRID', 'FORCE', 'MASS']
+const defaultWords = ['RAW', 'CONCRETE', 'STEEL', 'GRID', 'WEIGHT', 'MASS']
 
 /**
  * SkewScroller — a stack of giant condensed words that shears

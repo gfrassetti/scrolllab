@@ -1,10 +1,27 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { parseNavLinks } from '../../../lib/navLinks'
+import { externalProps } from '../../../lib/contactLinks'
 
 const defaultColumns = [
-  { heading: 'Sitemap', items: ['Story', 'Index', 'About', 'Contact'] },
-  { heading: 'Elsewhere', items: ['Instagram', 'Twitter / X', 'LinkedIn'] },
+  {
+    heading: 'The magazine',
+    items: [
+      { label: 'This issue', href: '#this-issue' },
+      { label: 'Inside', href: '#inside' },
+      { label: 'Archive', href: '#archive' },
+      { label: 'How we work', href: '#how-we-work' },
+    ],
+  },
+  {
+    heading: 'Elsewhere',
+    items: [
+      { label: 'Instagram', href: 'https://www.instagram.com/' },
+      { label: 'Letters to the editor', href: 'mailto:letters@chaptersquarterly.com' },
+      { label: 'Stockists', href: 'mailto:stockists@chaptersquarterly.com' },
+    ],
+  },
 ]
 
 /**
@@ -15,16 +32,18 @@ const defaultColumns = [
  * Calma: la palabra entra con un fundido, sin la máscara por letra.
  */
 export default function FooterCTA({
-  ctaWord = 'SAY HELLO',
-  email = 'hello@placeholder.studio',
+  ctaWord = 'SUBSCRIBE',
+  email = 'subscribe@chaptersquarterly.com',
   ctaHref,
   columns = defaultColumns,
   links,
   bg,
   fg,
-  legal = '©2026 Placeholder Studio — Template, not a promise',
-  note = 'Placeholder closing note. Tell the reader what happens after the story ends — a form, a call, a door left open.',
+  legal = '©2026 Chapters Quarterly Ltd. — Edinburgh',
+  note = 'Four issues a year, posted to your door in a paper sleeve. £48 a year, and you can stop whenever you like.',
   backToTop = 'Back to top ↑',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'subscribe',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -57,6 +76,7 @@ export default function FooterCTA({
   return (
     <footer
       ref={root}
+      id={id}
       className="px-5 pt-24 pb-6 md:px-10 md:pt-36"
       style={{ backgroundColor: bg || undefined, color: fg || undefined, '--market-ink': fg || undefined, '--market-bone': bg || undefined }}
     >
@@ -71,7 +91,8 @@ export default function FooterCTA({
                 {flatLinks.map((l, i) => (
                   <li key={i}>
                     <a
-                      href={l.href || '#'}
+                      href={l.href || '#top'}
+                      {...externalProps(l.href)}
                       className="tpl-link tpl-hit relative inline-block py-3 text-sm md:text-base lg:py-0"
                     >
                       {l.label}
@@ -87,13 +108,14 @@ export default function FooterCTA({
                   {column.heading}
                 </p>
                 <ul className="lg:space-y-2">
-                  {column.items.map((item) => (
-                    <li key={item}>
+                  {parseNavLinks(column.items).map((item) => (
+                    <li key={item.label}>
                       <a
-                        href="#"
+                        href={item.href}
+                        {...externalProps(item.href)}
                         className="tpl-link tpl-hit relative inline-block py-3 text-sm md:text-base lg:py-0"
                       >
-                        {item}
+                        {item.label}
                       </a>
                     </li>
                   ))}

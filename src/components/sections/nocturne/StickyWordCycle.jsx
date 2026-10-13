@@ -3,7 +3,7 @@ import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { prefersReducedMotion } from '../../../lib/motion'
 
-const defaultWords = ['CRAFT', 'MOTION', 'SILENCE', 'IMPACT']
+const defaultWords = ['DUSK', 'NIGHT', 'RAIN', 'DAWN']
 
 /**
  * StickyWordCycle — the viewport pins while scroll steps through a

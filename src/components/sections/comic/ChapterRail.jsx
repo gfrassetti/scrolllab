@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { ScrollTrigger } from '../../../lib/gsap'
 
 const DEFAULT_CHAPTERS = [
-  { id: 'dusty', label: 'Chapter 1' },
-  { id: 'fork', label: 'Chapter 2' },
-  { id: 'bond', label: 'Chapter 3' },
-  { id: 'worlds', label: 'Chapter 4' },
+  { id: 'dusty', label: 'The road' },
+  { id: 'fork', label: 'The farm' },
+  { id: 'bond', label: 'Home' },
+  { id: 'worlds', label: 'Two worlds' },
 ]
 
 /**

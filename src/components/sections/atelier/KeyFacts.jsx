@@ -4,15 +4,15 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 const defaultFacts = [
-  { value: '00+', label: 'Placeholder metric' },
-  { value: '0K+', label: 'Placeholder metric' },
-  { value: '00+', label: 'Placeholder metric' },
-  { value: '00%', label: 'Placeholder metric' },
+  { value: '15', label: 'Years in practice' },
+  { value: '120+', label: 'Projects completed' },
+  { value: '11', label: 'People in the studio' },
+  { value: '09', label: 'Countries we have built in' },
 ]
 
 export default function KeyFacts({
-  eyebrow = 'Section eyebrow',
-  title = 'YOUR FACTS TITLE',
+  eyebrow = 'The studio',
+  title = 'IN NUMBERS',
   facts,
   bg,
   fg,

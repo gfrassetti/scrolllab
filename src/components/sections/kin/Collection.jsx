@@ -38,14 +38,14 @@ function Work({ item, palette }) {
 }
 
 export default function Collection({
-  lines = ['Headline 3—', 'Lorem ipsum'],
+  lines = ['From the—', 'collection'],
   line1,
   line2,
   label = 'Collection',
   featuredLabel = 'Featured:',
   items: itemsProp,
-  ctaLabel = 'Learn more',
-  ctaHref = '#',
+  ctaLabel = 'See what is on',
+  ctaHref = '#programme',
   bg,
   fg,
   accent: accentProp,

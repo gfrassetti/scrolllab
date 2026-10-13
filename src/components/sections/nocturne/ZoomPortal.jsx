@@ -17,9 +17,11 @@ export default function ZoomPortal({
   seqLabel = 'Seq.',
   seq = '02',
   total = '06',
-  label = 'The portal',
+  label = 'The screening room',
   ghostWord = 'CLOSER',
-  endCaption = 'Placeholder caption — the scene you were squinting at.',
+  endCaption = 'Our screening room in Katendrecht: forty seats, one projector, a new cut every Thursday.',
+  /** Ancla de la sección, si un link apunta acá. */
+  id = 'screening-room',
   img = portal,
   bg,
   fg,
@@ -65,6 +67,7 @@ export default function ZoomPortal({
   return (
     <section
       ref={root}
+      id={id}
       className="relative h-[260vh] md:h-[300vh] calm:h-auto"
       style={{
         background: bg || undefined,

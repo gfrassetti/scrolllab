@@ -1,6 +1,25 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { useLang } from './lang'
+import { externalProps, legalDocs } from '../../../lib/contactLinks'
+import LegalSheet from '../../LegalSheet'
+const PRIVACY = `Last updated: 1 March 2026
+
+Meridian Villas S.L., Avenida del Mar 12, 29602 Marbella, is responsible for the personal data you share on this site.
+
+We keep what you send us through the contact form or by phone: your name, email, phone number and the villa you are interested in. We use it to answer you, send the brochure and arrange visits. Nothing else.
+
+We do not sell your data. Our email and CRM providers process it on our behalf, inside the European Union. We delete enquiries after two years without contact.
+
+You can ask to see, correct or delete your data at any time at privacy@meridianvillas.com.`
+
+const TERMS = `Last updated: 1 March 2026
+
+This site is run by Meridian Villas S.L. Plans, surfaces, finishes and renderings are shown for information: they can change during construction, and the sale contract is what binds us.
+
+Prices are given on request and do not include taxes or notary fees. Availability changes daily; the sales office confirms it before any reservation.
+
+Images on this site are computer renderings. Texts, plans and images belong to Meridian Villas S.L. and may not be reused without written permission.`
 
 /**
  * MERIDIAN — Footer (~80% of the viewport)
@@ -43,9 +62,9 @@ const SOCIAL_ICONS = {
 }
 
 const DEFAULT_SOCIALS = [
-  { label: 'Facebook', href: '#' },
-  { label: 'Instagram', href: '#' },
-  { label: 'WhatsApp', href: '#' },
+  { label: 'Facebook', href: 'https://www.facebook.com/' },
+  { label: 'Instagram', href: 'https://www.instagram.com/' },
+  { label: 'WhatsApp', href: 'https://www.whatsapp.com/' },
 ]
 
 /** Icon for the networks we draw; any other label shows its initial. */
@@ -64,6 +83,7 @@ function Social({ label, href, children }) {
   return (
     <a
       href={href}
+      {...externalProps(href)}
       aria-label={label}
       className="mer-ft-social relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full"
     >
@@ -75,12 +95,12 @@ function Social({ label, href, children }) {
 
 export default function Footer({
   wordmark = 'Meridian',
-  phone = '+00 (000) 000-0000',
-  email = 'info@example.com',
-  location = '[Region], [Country]',
-  mapHref = '#',
-  studio = '[Studio]',
-  studioHref = '#',
+  phone = '+34 952 555 018',
+  email = 'sales@meridianvillas.com',
+  location = 'Costa del Sol, Spain',
+  mapHref = '#location',
+  studio = 'Meridian Villas S.L.',
+  studioHref = '#top',
   monogram = 'M',
   contactLabel,
   officeLabel,
@@ -92,6 +112,9 @@ export default function Footer({
   privacyHref = '#privacy',
   termsLabel,
   termsHref = '#terms',
+  privacyText = PRIVACY,
+  termsText = TERMS,
+  legalCloseLabel = 'Close',
   madeByLabel,
   socials,
   bg,
@@ -192,7 +215,7 @@ export default function Footer({
                 <span className="relative">{mapLabel || t('seeOnMap')}</span>
               </a>
               {(socials?.length ? socials : DEFAULT_SOCIALS).map((so, i) => (
-                <Social key={i} label={so.label || 'Social'} href={so.href || '#'}>
+                <Social key={i} label={so.label || 'Social'} href={so.href || '#top'}>
                   {socialGlyph(so.label)}
                 </Social>
               ))}
@@ -235,6 +258,16 @@ export default function Footer({
           </span>
         </div>
       </div>
+
+      <LegalSheet
+        docs={legalDocs([
+          { href: privacyHref, title: privacyLabel || t('privacy'), body: privacyText },
+          { href: termsHref, title: termsLabel || t('terms'), body: termsText },
+        ])}
+        closeLabel={legalCloseLabel}
+        bg={sand}
+        fg={ink}
+      />
 
       <style>{`
         /* Sin transition de opacity: GSAP anima la opacity de estos links (data-ft-reveal)

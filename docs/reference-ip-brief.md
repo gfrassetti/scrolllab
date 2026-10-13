@@ -46,8 +46,11 @@ lo reconstruís con **primitivos y código propios del repo**
   *receta* (keyframes de posición/escala sobre un riel con seek al scroll) con
   nuestro motor, no el archivo.
 - **Su copy.** Titulares, párrafos, nombres de personajes, URLs de "protocolo",
-  microcopy. Todo se reemplaza por texto genérico en inglés (Headline N / lorem
-  corto / placeholder).
+  microcopy. Todo se reemplaza por copy **propio** en inglés: el de un negocio
+  inventado por nosotros para el template (nombre, voz, cifras creíbles), como
+  si fuera un sitio real. Nunca «Headline 1» ni lorem ipsum (decisión del dueño,
+  2026-10-13: Framer y Webflow rechazan el placeholder y los templates que más
+  venden traen un sitio terminado). Detalle: [`template-copy.md`](template-copy.md).
 - **Su identidad** — nombre, marca, logo, paleta-como-firma si es reconocible.
 - **Su arte** — personajes, ilustraciones, world-building. Se genera un set
   **original** (Higgsfield / Meshy / encargo) inspirado en el *estilo general*
@@ -77,7 +80,7 @@ lo reconstruís con **primitivos y código propios del repo**
 1. analyze:ref  → comportamiento + medidas + beats (docs/reference-analysis/<sku>/)
 2. mapa         → beat → primitivo (motion-cookbook / beat / webgl) → archivo propio
 3. código       → componentes nuevos en src/components/sections/<sku>/, motor del repo
-4. arte         → set original generado o encargado; copy genérico en inglés
+4. arte         → set original generado o encargado; copy propio de un negocio inventado, en inglés
 5. verificación → capturas propias a 1440×900 vs los beats de la ref
 ```
 
@@ -103,7 +106,7 @@ Lo que no se acepta: pegar sus `.js`, sus imágenes, su `ae.json`, y pedir
 ## 7. Checklist de IP al cerrar un template contra ref
 
 - [ ] Cero archivos de la ref en el repo (JS, imágenes, video, audio, fuentes, JSON de motion).
-- [ ] Copy 100% genérico/placeholder — ningún titular ni nombre propio de la ref.
+- [ ] Copy 100% propio (el negocio inventado del template) — ningún titular ni nombre propio de la ref.
 - [ ] Arte propio (generado/encargado), no composiciones calcadas de la ref.
 - [ ] El motion usa primitivos del repo, no una timeline portada.
 - [ ] Nombre/marca/logo del template son propios, no evocan la identidad de la ref.

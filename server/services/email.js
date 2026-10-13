@@ -1,4 +1,4 @@
-import { Resend } from 'resend'
+import { createMailClient } from './mailClient.js'
 import { db } from '../db.js'
 import {
   escapeHtml,
@@ -45,7 +45,7 @@ export {
  */
 async function sendTransactional({ to, message, tag, key, config, client, replyTo }) {
   if (!config.email.enabled) return { skipped: 'disabled' }
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
   const response = await resend.emails.send(
     {
       from: config.email.from,
@@ -131,7 +131,7 @@ export async function sendWithdrawalReceived({ code, email, name, locale, order,
   const logoUrl =
     config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
   const message = buildWithdrawalReceived({ code, name, locale, order, refundsUrl, logoUrl, chooseUrl })
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
   const response = await resend.emails.send(
     {
       from: config.email.from,
@@ -172,7 +172,7 @@ export async function sendOrderReceiptOnce({ order, user, config, client }) {
     logoUrl,
   })
 
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
 
   try {
     const response = await resend.emails.send(
@@ -223,7 +223,7 @@ export async function sendOrderPaymentFailedOnce({ order, config, client }) {
   const logoUrl =
     config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
   const message = buildOrderPaymentFailed({ order: claimed, user, retryUrl, logoUrl })
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
 
   try {
     const response = await resend.emails.send(
@@ -316,7 +316,7 @@ async function sendSubscriptionEmailOnce({
     config.email.logoUrl || new URL('/logo.svg', config.clientUrl).toString()
   const message = spec.build({ subscription: claimed, user, accountUrl, logoUrl, ...extra })
 
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
   try {
     const response = await resend.emails.send(
       {
@@ -431,7 +431,7 @@ export async function sendOrderAdminNotifyOnce({ order, user, config, client }) 
 
   const orderId = String(db.uid(order) || order.id)
   const message = buildOrderAdminNotify({ order, user })
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
 
   const response = await resend.emails.send(
     {
@@ -481,7 +481,7 @@ export async function sendAdminAlert({ kind, key, subject, lines, config, client
   if (!config?.email?.enabled) return { skipped: 'disabled' }
   const notifyTo = config.email.notifyTo
   if (!notifyTo) return { skipped: 'no-notify-to' }
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
   const text = lines.join('\n')
   const response = await resend.emails.send(
     {
@@ -522,7 +522,7 @@ export async function sendCouponEmail({ lead, config, client }) {
     shopUrl: config.clientUrl,
     logoUrl,
   })
-  const resend = client || new Resend(config.email.apiKey)
+  const resend = client || createMailClient(config)
 
   const response = await resend.emails.send(
     {

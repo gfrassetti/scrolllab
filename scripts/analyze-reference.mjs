@@ -520,7 +520,7 @@ ${aiNotes ? `## Anotación IA (Gemini)\n\n${aiNotes}\n` : '## Anotación IA\n\n_
 
 1. Smooth scroll → \`SmoothScrollProvider\` (Lenis)
 2. Cada beat → primitivo del cookbook (\`docs/motion-cookbook.md\`) + sección en \`src/components/sections/${sku}/\`
-3. Copy genérico (Headline N / Link N / lorem)
+3. Copy de un negocio inventado (nunca el de la ref ni lorem; cada link a una sección) — \`docs/template-copy.md\`
 4. Actualizar [[Template reference index]] + mapa del SKU
 
 ## Gaps (llenar a mano tras mirar)

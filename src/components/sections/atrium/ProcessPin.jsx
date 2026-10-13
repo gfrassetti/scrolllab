@@ -8,20 +8,20 @@ import { imgAttrs } from '../../../lib/responsiveImage'
 const defaultScenes = [
   {
     kicker: '01',
-    title: 'Placeholder stage one',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
+    title: 'Model first',
+    body: 'Every scheme is built in card before it is drawn. If it does not work at 1:200, it will not work at 1:1.',
     img: model,
   },
   {
     kicker: '02',
-    title: 'Placeholder stage two',
-    body: 'Et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.',
+    title: 'Choose by hand',
+    body: 'Stone, timber and render are tested on site, in the light they will live in, before anything is ordered.',
     img: material,
   },
   {
     kicker: '03',
-    title: 'Placeholder stage three',
-    body: 'Ut aliquip ex ea commodo consequat, duis aute irure dolor in reprehenderit in voluptate velit.',
+    title: 'Build it straight',
+    body: 'We stay on site to the end: weekly meetings, open drawings and one architect who answers the phone.',
     img: orbitSite,
   },
 ]

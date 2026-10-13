@@ -22,7 +22,7 @@ export default function ProductGrid({
   theme = 'auto',
   eyebrow = 'Shop',
   title = 'The drop',
-  body = 'Placeholder products. Replace names, prices and images with yours.',
+  body = 'Small runs, made to last. Every piece is made in batches of a hundred and restocked by season.',
   products,
   /** El botón de agregar rápido de cada producto. */
   addLabel = 'Add',

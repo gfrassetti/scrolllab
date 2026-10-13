@@ -6,25 +6,25 @@ import { imgAttrs } from '../../../lib/responsiveImage'
 
 const defaultFigures = [
   {
-    caption: 'Fig. 01 — Placeholder',
+    caption: 'Fig. 01 — The typewriter, Issue 3',
     img: editA,
     speed: 0.85,
     className: 'col-span-7 md:col-span-4 md:col-start-1',
   },
   {
-    caption: 'Fig. 02 — Placeholder',
+    caption: 'Fig. 02 — Stairwell, Issue 11',
     img: editB,
     speed: 1.2,
     className: 'col-span-5 col-start-8 mt-24 md:col-span-3 md:col-start-6 md:mt-48',
   },
   {
-    caption: 'Fig. 03 — Placeholder',
+    caption: 'Fig. 03 — Portrait, Issue 17',
     img: editC,
     speed: 0.7,
     className: 'col-span-6 col-start-4 mt-16 md:col-span-4 md:col-start-9 md:-mt-16',
   },
   {
-    caption: 'Fig. 04 — Placeholder',
+    caption: 'Fig. 04 — Field kit, Issue 20',
     img: editD,
     speed: 1.1,
     className: 'col-span-8 col-start-2 mt-20 md:col-span-4 md:col-start-3 md:mt-40',
@@ -44,8 +44,10 @@ const defaultFigures = [
 export default function ParallaxEditorial({
   chapter = '04',
   total = '06',
-  label = 'Editorial drift',
+  label = 'From the archive',
   ghostWord = 'ARCHIVE',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'archive',
   figures,
   chapterLabel = 'Chapter',
   bg,
@@ -84,6 +86,7 @@ export default function ParallaxEditorial({
   return (
     <section
       ref={root}
+      id={id}
       className="relative overflow-hidden px-5 py-28 md:px-10 md:py-44"
       style={{ background: bg || undefined, color: fg || undefined }}
     >

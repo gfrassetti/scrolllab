@@ -2,30 +2,37 @@ import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { themeVars } from '../../../lib/themeVars'
+import { parseNavLinks } from '../../../lib/navLinks'
+import { externalProps } from '../../../lib/contactLinks'
 
-const defaultLinks = ['System', 'Units', 'Archive', 'Instagram', 'Contact']
+const defaultLinks = [
+  { label: 'Works', href: '#works' },
+  { label: 'Studio', href: '#studio' },
+  { label: 'What we do', href: '#services' },
+  { label: 'Instagram', href: 'https://www.instagram.com/' },
+  { label: 'Contact', href: '#contact' },
+]
 
 /**
  * FooterBrutal — klein-blue closing block with a giant condensed
  * CTA word and a single mono link strip.
  */
 export default function FooterBrutal({
-  ctaWord = 'GET THE KIT',
-  email = 'hello@placeholder.systems',
+  ctaWord = 'COMMISSION',
+  email = 'studio@monolithworks.com',
   ctaHref,
   links = defaultLinks,
   bg,
   fg,
   accent,
-  legal = '©2026 Placeholder Systems — Template, not a promise',
+  legal = '©2026 Monolith Works BV — Antwerp',
   backToTop = 'Back to top ↑',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
   // `links` puede ser string[] (default) o {label, href}[] (editor).
-  const linkItems = (Array.isArray(links) ? links : defaultLinks)
-    .map((l) => (typeof l === 'string' ? { label: l, href: '#' } : l))
-    .filter((l) => l && l.label)
+  // `links` puede ser string[] («Works» → #works) o {label, href}[] (editor).
+  const linkItems = parseNavLinks(Array.isArray(links) ? links : defaultLinks)
 
   useGSAP(
     () => {
@@ -71,7 +78,8 @@ export default function FooterBrutal({
         {linkItems.map((link, i) => (
           <li key={i} className="border-r-2 border-carbon">
             <a
-              href={link.href || '#'}
+              href={link.href}
+              {...externalProps(link.href)}
               className="block px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors duration-200 hover:bg-carbon md:px-8 md:text-xs lg:py-3"
             >
               {link.label}

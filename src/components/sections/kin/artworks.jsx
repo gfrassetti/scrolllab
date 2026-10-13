@@ -99,10 +99,10 @@ const ArtSix = ({ p = PALETTE }) => (
 )
 
 export const ARTWORKS = [
-  { name: 'Lorem', Art: ArtOne },
-  { name: 'Ipsum', Art: ArtTwo },
-  { name: 'Dolor', Art: ArtThree },
-  { name: 'Sit amet', Art: ArtFour },
-  { name: 'Consectetur', Art: ArtFive },
-  { name: 'Adipiscing', Art: ArtSix },
+  { name: 'Red Field', Art: ArtOne },
+  { name: 'Two Figures', Art: ArtTwo },
+  { name: 'Blue Hour', Art: ArtThree },
+  { name: 'Ochre Study', Art: ArtFour },
+  { name: 'Signal', Art: ArtFive },
+  { name: 'Threshold', Art: ArtSix },
 ]

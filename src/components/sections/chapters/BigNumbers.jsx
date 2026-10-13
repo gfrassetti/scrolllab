@@ -4,10 +4,10 @@ import { calmCount, calmReveal, prefersReducedMotion } from '../../../lib/motion
 import { themeVars } from '../../../lib/themeVars'
 
 const defaultStats = [
-  { value: 128, suffix: '+', label: 'Placeholder metric' },
-  { value: 97, suffix: '%', label: 'Generic percentage' },
-  { value: 24, suffix: '', label: 'Chapters shipped' },
-  { value: 12, suffix: '', label: 'Awards imagined' },
+  { value: 24, suffix: '', label: 'Years in print' },
+  { value: 18, suffix: 'k', label: 'Readers in 41 countries' },
+  { value: 96, suffix: '', label: 'Back issues, all in print' },
+  { value: 0, suffix: '', label: 'Pages of advertising' },
 ]
 
 /**

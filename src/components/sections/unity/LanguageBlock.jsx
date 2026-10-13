@@ -15,11 +15,11 @@ import { imgAttrs } from '../../../lib/responsiveImage'
  * calma la foto ocupa la ventana (`calm:inset-0 calm:h-full`).
  */
 export default function LanguageBlock({
-  eyebrow = 'EYEBROW 3',
-  line1 = 'LINE 1',
-  line2 = 'LINE 2',
-  line3 = 'LINE 3',
-  note = 'NOTE 1',
+  eyebrow = 'JOY',
+  line1 = 'SCORE',
+  line2 = 'SHOUT',
+  line3 = 'SHARE',
+  note = 'Nobody celebrates alone.',
   bg = '#c9b896',
   fg = '#0a0a0a',
   img1 = joyA,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { getLenis } from './useLenis'
+import { getLenis, scrollToSection } from './useLenis'
 import { pauseTouchScroll } from '../lib/touchScroll'
 
 /**
@@ -15,6 +15,19 @@ export function useMobileMenu({ breakpoint = '(min-width: 768px)' } = {}) {
   const panelId = useId()
   const triggerRef = useRef(null)
   const panelRef = useRef(null)
+  // A link to a section of the page, clicked inside the open panel: the page is
+  // locked at that moment, so the browser's jump would go nowhere. The click is
+  // held, the panel closes, and the page goes there once it is free again.
+  const pendingRef = useRef(null)
+
+  const onClickCapture = useCallback((event) => {
+    const link = event.target.closest?.('a[href^="#"]')
+    const id = link ? decodeURIComponent(link.getAttribute('href').slice(1)) : ''
+    if (!id || !document.getElementById(id)) return
+    event.preventDefault()
+    pendingRef.current = id
+    setOpen(false)
+  }, [])
 
   const close = useCallback(() => setOpen(false), [])
   const toggle = useCallback(() => setOpen((value) => !value), [])
@@ -50,6 +63,9 @@ export function useMobileMenu({ breakpoint = '(min-width: 768px)' } = {}) {
       body.style.paddingRight = previousPadding
       resumeTouchScroll()
       lenis?.start()
+      const id = pendingRef.current
+      pendingRef.current = null
+      if (id) requestAnimationFrame(() => scrollToSection(id))
     }
   }, [open])
 
@@ -94,6 +110,7 @@ export function useMobileMenu({ breakpoint = '(min-width: 768px)' } = {}) {
       role: 'dialog',
       'aria-modal': true,
       tabIndex: -1,
+      onClickCapture,
     },
   }
 }

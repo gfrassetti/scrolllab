@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../../lib/gsap'
 import { getLenis } from '../../../hooks/useLenis'
 import { prefersReducedMotion } from '../../../lib/motion'
 import { BAR_H, WORD, accentBar, layoutWord } from './barGlyphs'
+import { contactHref, externalProps } from '../../../lib/contactLinks'
 
 /**
  * KIN — Footer
@@ -27,13 +28,13 @@ const INK = '#141414'
 // Two text columns (one line per row) + a column of links. Editable as
 // `columns` ({ title, text }) and `links` ({ label, href }) + `linksTitle`.
 const TEXT_COLUMNS = [
-  { title: 'Address', text: 'Lorem ipsum 1234\nCity, Country' },
-  { title: 'Contact', text: 'hello@brand.com\n+00 000 000 000' },
+  { title: 'Address', text: 'Reperbanen 4\n0150 Oslo, Norway' },
+  { title: 'Contact', text: 'hello@kinkunsthal.no\n+47 22 55 01 40' },
 ]
 const LINKS = [
-  { label: 'Link 1', href: '#' },
-  { label: 'Link 2', href: '#' },
-  { label: 'Link 3', href: '#' },
+  { label: 'Instagram', href: 'https://www.instagram.com/' },
+  { label: 'Facebook', href: 'https://www.facebook.com/' },
+  { label: 'Newsletter', href: 'mailto:hello@kinkunsthal.no?subject=Newsletter' },
 ]
 
 function LocalTime({ place }) {
@@ -54,16 +55,16 @@ function LocalTime({ place }) {
 
 export default function Footer({
   word = WORD,
-  lines = ['Headline 4—', 'Lorem ipsum dolor'],
+  lines = ['Come—', 'as you are'],
   line1,
   line2,
-  ctaLabel = 'Call to action',
-  ctaHref = 'mailto:hello@brand.com',
+  ctaLabel = 'Write to us',
+  ctaHref = 'mailto:hello@kinkunsthal.no',
   columns,
   linksTitle = 'Follow',
   links,
-  credit = '© Brand 2026',
-  place = 'City',
+  credit = '© Kin Kunsthal 2026',
+  place = 'Oslo',
   topLabel = 'Back to top',
   bg,
   fg,
@@ -164,7 +165,7 @@ export default function Footer({
   return (
     <footer
       ref={rootRef}
-      id="visit"
+      id="contact"
       className="relative z-[46] flex min-h-svh flex-col overflow-hidden px-[4.5vw] pt-[16vw] pb-[4.5vw] text-[3.3vw] leading-[1.2] md:px-[1.25vw] md:pt-[6vw] md:pb-[1.25vw] md:text-[max(11px,0.82vw)]"
       style={{ background: ink, color: paper, '--kin-ft-paper': paper, '--kin-ft-ink': ink }}
     >
@@ -194,13 +195,21 @@ export default function Footer({
             <div key={ci} className="min-w-0 break-words">
               <p className="mb-[0.8em] opacity-50">{c.title}</p>
               {c.lines?.map((l, li) => (
-                <p key={li}>{l}</p>
+                <p key={li}>
+                  {contactHref(l) ? (
+                    <a href={contactHref(l)} className="tpl-link relative">
+                      {l}
+                    </a>
+                  ) : (
+                    l
+                  )}
+                </p>
               ))}
               {c.links && (
                 <ul>
                   {c.links.map((l, li) => (
                     <li key={li}>
-                      <a href={l.href || '#'} className="tpl-link tpl-hit relative">
+                      <a href={l.href || '#top'} {...externalProps(l.href)} className="tpl-link tpl-hit relative">
                         {l.label}
                       </a>
                     </li>

@@ -7,26 +7,26 @@ import { imgAttrs } from '../../../lib/responsiveImage'
 const defaultPanels = [
   {
     index: '3.1',
-    title: 'Placeholder panel',
-    caption: 'Generic caption — swap freely',
+    title: 'The reading list',
+    caption: 'Twelve books our editors could not put down',
     img: panelA,
   },
   {
     index: '3.2',
-    title: 'Another placeholder',
-    caption: 'Each panel is one narrative beat',
+    title: 'Under the arches',
+    caption: 'An architect who designs only for walking',
     img: panelB,
   },
   {
     index: '3.3',
-    title: 'Keeps on going',
-    caption: 'The scroll is vertical, the motion horizontal',
+    title: 'The notebook',
+    caption: 'How a story is planned, page by page',
     img: panelC,
   },
   {
     index: '3.4',
-    title: 'Last frame',
-    caption: 'On mobile the panels stack vertically',
+    title: 'The back room',
+    caption: 'Ninety-six issues, every one still in print',
     img: panelD,
   },
 ]
@@ -52,8 +52,10 @@ export default function HorizontalPanels({
   chapterLabel = 'Chapter',
   chapter = '03',
   total = '06',
-  label = 'Horizontal drift',
-  heading = 'Sideways is a direction too',
+  label = 'Inside',
+  heading = 'Four stories, one season',
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'inside',
   headingBefore,
   headingEm,
   headingAfter,
@@ -312,6 +314,7 @@ export default function HorizontalPanels({
   return (
     <section
       ref={root}
+      id={id || undefined}
       className="relative overflow-hidden md:h-svh calm:md:h-auto"
       style={{
         background: bg || undefined,

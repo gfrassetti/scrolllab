@@ -7,8 +7,8 @@ import { themeVars } from '../../../lib/themeVars'
  * opposite directions: one solid acid, one outlined ghost text.
  */
 export default function DiagonalMarquee({
-  textA = 'Placeholder ribbon',
-  textB = 'Generic subtitle strip',
+  textA = 'Shot after dark',
+  textB = 'Commercials — Short films — Music videos',
   repeat = 6,
   bg,
   fg,

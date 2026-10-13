@@ -111,14 +111,14 @@ async function findReel(bases) {
 // on a laptop): that was the stutter. The canvas only ever draws decoded
 // bitmaps; when the exact one is not ready it draws the nearest that is.
 const BITMAPS = typeof createImageBitmap === 'function'
-function createReel({ base, count, pad, tier, want = () => true }) {
+function createReel({ base, count, pad, tier, want = () => true, ahead = 360, max = 8, sparse = false }) {
   const frames = new Array(count).fill(null) // compressed: Blob (or a decoded <img> without ImageBitmap)
   const pending = new Set()
   let queue = []
   let inflight = 0
-  const MAX = 8
+  const MAX = max
   const NEAR = 10
-  const AHEAD = 360
+  const AHEAD = ahead
   const BEHIND = 90
   // Decoded window, in frames of the reel (the device's step applies inside).
   const DEC_AHEAD = 30
@@ -128,6 +128,7 @@ function createReel({ base, count, pad, tier, want = () => true }) {
   const DEC_KEEP = 44
   const decoded = new Map()
   const decoding = new Set()
+  let wantedList = null
   const sideCache = new Map()
   const sideBusy = new Set()
   let center = 0
@@ -166,8 +167,19 @@ function createReel({ base, count, pad, tier, want = () => true }) {
       done()
     }, done)
   }
+  // While a thumb is moving the main thread is the scarce thing: every fetch
+  // costs it a request, a body read and a decode. So the far-ahead prefetch
+  // waits for the scroll to settle (the pauses where people read) and, while it
+  // moves, only the frames right ahead of the playhead are fetched.
+  let busy = false
+  const BUSY_AHEAD = 420
+  const BUSY_MAX = 8
   function pump() {
-    while (inflight < MAX && queue.length) load(queue.shift())
+    const cap = busy ? Math.min(MAX, BUSY_MAX) : MAX
+    while (inflight < cap && queue.length) {
+      if (busy && Math.abs(queue[0] - center) > BUSY_AHEAD) break
+      load(queue.shift())
+    }
   }
   // The decode order inside the window: the playhead, then every 3rd frame
   // ahead (a fast scroll skips the in-between ones anyway), then the rest,
@@ -230,6 +242,45 @@ function createReel({ base, count, pad, tier, want = () => true }) {
     aim(at, towards = 1) {
       center = at
       dir = towards
+      if (sparse) {
+        // Only every Nth frame exists for this device: walk the list of the
+        // ones that do, nearest first (four ahead for one behind). The band
+        // scan below costs thousands of steps per call, and on a phone that
+        // runs on every new frame while the thumb is moving.
+        if (!wantedList) {
+          wantedList = []
+          for (let i = 0; i < count; i += 1) if (want(i)) wantedList.push(i)
+        }
+        let lo = 0
+        let hi = wantedList.length
+        while (lo < hi) {
+          const mid = (lo + hi) >> 1
+          if (wantedList[mid] < at) lo = mid + 1
+          else hi = mid
+        }
+        let f = towards > 0 ? lo : lo - 1
+        let b = towards > 0 ? lo - 1 : lo
+        const order = []
+        let n = 0
+        while ((f >= 0 && f < wantedList.length && Math.abs(wantedList[f] - at) <= AHEAD) || (b >= 0 && b < wantedList.length && Math.abs(wantedList[b] - at) <= BEHIND)) {
+          const takeBehind = n >= NEAR && n % 5 === 4
+          if (!takeBehind && f >= 0 && f < wantedList.length && Math.abs(wantedList[f] - at) <= AHEAD) {
+            order.push(wantedList[f])
+            f += towards
+          } else if (b >= 0 && b < wantedList.length && Math.abs(wantedList[b] - at) <= BEHIND) {
+            order.push(wantedList[b])
+            b -= towards
+          } else if (f >= 0 && f < wantedList.length && Math.abs(wantedList[f] - at) <= AHEAD) {
+            order.push(wantedList[f])
+            f += towards
+          } else break
+          n += 1
+        }
+        queue = order.filter((i) => !frames[i] && !pending.has(i))
+        pump()
+        decodePump()
+        return
+      }
       const seen = new Set()
       const order = []
       const push = (i) => {
@@ -254,8 +305,21 @@ function createReel({ base, count, pad, tier, want = () => true }) {
       decodePump()
     },
     get: drawable,
+    // The playhead is moving (true) or has settled (false).
+    setBusy(v) {
+      if (busy === v) return
+      busy = v
+      if (!v) pump()
+    },
     // The compressed frame is here (fetched), decoded or not.
     have: (i) => Boolean(frames[i]),
+    // Put these frames at the front of the queue (a chapter is about to start).
+    ensure(indices) {
+      const missing = indices.filter((i) => !frames[i] && !pending.has(i))
+      const set = new Set(missing)
+      queue = [...missing, ...queue.filter((i) => !set.has(i))]
+      pump()
+    },
     // Also keep a second playhead fed (the take leaving under a transition):
     // its frames are drawn as they are (an <img> decodes on its own).
     keep(i) {
@@ -449,6 +513,7 @@ export default function Film({ score = SCORE }) {
   const rootRef = useRef(null)
   const canvasRef = useRef(null)
   const fxRef = useRef(null)
+  const bootRef = useRef(null)
   const gridRef = useRef(null)
   const stRef = useRef(null)
   const menuBtnRef = useRef(null)
@@ -459,6 +524,7 @@ export default function Film({ score = SCORE }) {
   // layout after mount would tear the tree React is holding).
   const [calm] = useState(() => prefersReducedMotion())
   const [inView, setInView] = useState(false)
+  const [phone] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 820)
 
   // The menu button and the veil are fixed: in a page made of several
   // sections they only belong to the film while it is on screen.
@@ -497,6 +563,93 @@ export default function Film({ score = SCORE }) {
     }
     let reel = null
     let scenes = null
+    let phoneActive = false
+    let retier = null
+
+    // ---- phones: a loader at the start and a pause at each new chapter ----
+    // Frames arrive over a mobile connection slower than a thumb scrolls: the
+    // picture then sits on the nearest frame it has and jumps. So on a phone the
+    // film does not start until its first stretch is in (with a percentage, like
+    // pear's «the film is loading»), and before each new take begins the scroll
+    // waits — under the colour field or the tearing paper — until that take's
+    // first frames are in. On a fast connection none of it shows: the overlay
+    // only appears if the wait lasts more than a moment.
+    const boot = small && !calm ? bootRef.current : null
+    const pctEl = boot?.querySelector('[data-fold-boot-pct]') ?? null
+    const labelEl = boot?.querySelector('[data-fold-boot-label]') ?? null
+    const barEl = boot?.querySelector('[data-fold-boot-bar]') ?? null
+    let finishWait = null
+    let holding = false
+    const lockScroll = () => {
+      const html = document.documentElement
+      const prev = html.style.overflow
+      html.style.overflow = 'hidden'
+      getLenis()?.stop()
+      return () => {
+        html.style.overflow = prev
+        getLenis()?.start()
+      }
+    }
+    // Waits for the frames `getIndices()` returns to be fetched (at most
+    // `capMs`), the scroll locked. `getIndices` may return null while the reel
+    // itself is still being found: that counts as 0%.
+    const waitFor = (getIndices, mode, capMs, onDone) => {
+      if (!boot || finishWait) return
+      const unlock = lockScroll()
+      const t0 = performance.now()
+      let shown = false
+      let done = false
+      const ratio = () => {
+        const list = getIndices()
+        if (!list || !reel) return 0
+        return list.length ? list.filter((i) => reel.have(i)).length / list.length : 1
+      }
+      const finish = () => {
+        if (done) return
+        done = true
+        gsap.ticker.remove(tick)
+        unlock()
+        if (shown) {
+          boot.dataset.on = 'false'
+          // Keep the text until the fade is over, then leave no trace in the page.
+          window.setTimeout(() => {
+            if (boot.dataset.on === 'false') {
+              if (labelEl) labelEl.textContent = ''
+              if (pctEl) pctEl.textContent = ''
+            }
+          }, 400)
+        }
+        finishWait = null
+        onDone?.()
+      }
+      function tick() {
+        const r = ratio()
+        const elapsed = performance.now() - t0
+        if (!shown && elapsed > 250 && r < 1) {
+          shown = true
+          boot.dataset.mode = mode
+          if (labelEl) labelEl.textContent = boot.dataset.label || ''
+          if (pctEl) pctEl.textContent = '0%'
+          boot.dataset.on = 'true'
+        }
+        if (shown) {
+          const pct = Math.round(r * 100)
+          if (pctEl && pctEl.textContent !== `${pct}%`) pctEl.textContent = `${pct}%`
+          barEl?.style.setProperty('--p', r.toFixed(3))
+        }
+        if (r >= 1 || elapsed > capMs) finish()
+      }
+      finishWait = finish
+      gsap.ticker.add(tick)
+      tick()
+    }
+    // Chapter holds: where each new take begins and which frames it needs.
+    let holds = []
+    // The first stretch the reader needs before the film starts (known once the
+    // reel is found); the loader is already up while that is being fetched.
+    let bootNeed = null
+    if (boot && root.getBoundingClientRect().top < window.innerHeight) waitFor(() => bootNeed, 'boot', 6000)
+
     findReel(score.film.bases).then((found) => {
       if (!alive || !found) return
       const { base, m } = found
@@ -513,14 +666,60 @@ export default function Film({ score = SCORE }) {
         const t = takes.find((x) => i >= x.start && i < x.start + x.count)
         return !t || (i - t.start) % STEP === 0 || i === t.start + t.count - 1
       }
-      reel = createReel({
-        ...score.film,
-        base,
-        count: m.tiers[tier].count,
-        tier,
-        want,
-      })
-      reel.aim(shotAt(scenes, st.progress).idx)
+      // The phone tier: bands cut around each take's focus out of the 768
+      // frames (scripts/fold-phone-tier.mjs), ~2.3× fewer bytes for the same
+      // picture on an upright phone. Only while the screen is portrait: a
+      // landscape phone shows the whole frame and takes the 768 tier.
+      const phoneMeta = small && m.phone && m.phone.step === interp ? m.phone : null
+      const portraitNow = (strict) => {
+        const a = canvas.clientWidth / Math.max(1, canvas.clientHeight)
+        return a <= (strict ? 0.58 : 0.62)
+      }
+      const count = m.tiers[tier].count
+      const buildReel = (usePhone) => {
+        reel?.dispose()
+        phoneActive = usePhone
+        for (const sc of scenes) sc.crop = usePhone ? phoneMeta.crop[sc.id] || null : null
+        reel = createReel({
+          ...score.film,
+          base,
+          count,
+          tier: usePhone ? 'phone' : tier,
+          want,
+          // Phones fetch about nine screens ahead (only the original pictures):
+          // the whole point is that the network, not the draw, is what runs
+          // out when someone flicks.
+          ...(small ? { ahead: 1500, max: 10, sparse: true } : {}),
+        })
+        lastIdx = -1
+        reel.aim(shotAt(scenes, st.progress).idx)
+      }
+      retier = () => {
+        if (!phoneMeta || !reel) return
+        const should = portraitNow(!phoneActive)
+        if (should !== phoneActive) buildReel(should)
+      }
+      buildReel(Boolean(phoneMeta) && portraitNow(true))
+      const center = shotAt(scenes, st.progress).idx
+
+      if (boot) {
+        const first = []
+        for (let i = center; i < Math.min(count, center + 360); i += 1) if (want(i)) first.push(i)
+        bootNeed = first
+
+        // A pause before each new take: it starts where the transition does
+        // (dots: while the field is closing; paper: before the sheet tears).
+        holds = score.transitions
+          .map((tr) => {
+            const next = scenes.find((s) => s.from >= tr.from - 0.002 && s.from <= tr.to)
+            if (!next) return null
+            const need = []
+            for (let i = next.start; i < next.start + Math.min(next.count, 120); i += 1) if (want(i)) need.push(i)
+            const at = tr.type === 'paper' ? tr.from - 0.004 : tr.from + (tr.full - tr.from) * 0.6
+            return { at, end: tr.to, need, done: false }
+          })
+          .filter(Boolean)
+      }
     })
 
     // Canvas sizes follow the screen.
@@ -537,6 +736,7 @@ export default function Film({ score = SCORE }) {
       H = Math.round(canvas.clientHeight * dpr)
       canvas.width = W
       canvas.height = H
+      retier?.()
       fx.width = W
       fx.height = H
       mask = null
@@ -627,14 +827,19 @@ export default function Film({ score = SCORE }) {
     }
     // Where a frame lands on the canvas (cover, with the camera on top).
     const rect = (img, scene, c) => {
-      const iw = img.naturalWidth || img.width
+      // A phone-tier picture is a band [x0, x1] of the whole frame: scale as if
+      // it were the whole frame and place it at its band.
+      const crop = phoneActive ? scene.crop : null
+      const cropW = crop ? crop[1] - crop[0] : 1
+      const iw = (img.naturalWidth || img.width) / cropW
       const ih = img.naturalHeight || img.height
       const k = Math.max(W / iw, H / ih) * c.s
-      const dw = iw * k
+      const dwFull = iw * k
       const dh = ih * k
       // Tall screens crop the wide frame: hold the shot's portrait focus.
       const fx0 = H > W ? (scene.focus ?? score.portraitFocus ?? 0.5) + c.dx : c.x
-      return { x: fx0 * W - fx0 * dw, y: c.y * H - c.y * dh, dw, dh, k }
+      const xFull = fx0 * W - fx0 * dwFull
+      return { x: xFull + (crop ? crop[0] : 0) * dwFull, y: c.y * H - c.y * dh, dw: dwFull * cropW, dh, k }
     }
 
     // ---- paper transition: the leaving take tears into flakes of paper that
@@ -714,6 +919,7 @@ export default function Film({ score = SCORE }) {
     const texts = gsap.utils.toArray('[data-fold-text]', root)
 
     let lastIdx = -1
+    let movedAt = 0
     let lastChapter = -1
     let fxDirty = false
     // A machine that cannot decode every in-between frame as fast as the
@@ -731,6 +937,22 @@ export default function Film({ score = SCORE }) {
       // a second ease on top made the picture arrive late.
       const p = st.progress
 
+      // Phones: wait for the next take's first frames at each chapter change.
+      if (holds.length && !holding && !finishWait) {
+        for (const h of holds) {
+          if (p < h.at - 0.04) h.done = false
+          if (h.done || p < h.at || p >= h.end) continue
+          h.done = true
+          if (h.need.every((i) => reel.have(i))) continue
+          holding = true
+          reel.ensure(h.need)
+          waitFor(() => h.need, 'hold', 5000, () => {
+            holding = false
+          })
+          break
+        }
+      }
+
       // Frame + camera.
       if (reel && scenes.length) {
         const { scene, at } = shotAt(scenes, p)
@@ -738,7 +960,9 @@ export default function Film({ score = SCORE }) {
         if (idx !== lastIdx) {
           reel.aim(idx, idx >= lastIdx ? 1 : -1)
           lastIdx = idx
+          movedAt = performance.now()
         }
+        if (small) reel.setBusy(performance.now() - movedAt < 180)
         const img = reel.near(idx)
         if (STEP === 1 && interp > 1 && idx !== lastShown) {
           if (reel.have(idx)) {
@@ -817,6 +1041,7 @@ export default function Film({ score = SCORE }) {
     window.addEventListener('resize', resize)
     return () => {
       alive = false
+      finishWait?.()
       reel?.dispose()
       gsap.ticker.remove(render)
       window.removeEventListener('resize', resize)
@@ -934,6 +1159,27 @@ export default function Film({ score = SCORE }) {
           {score.texts.map((tx, i) => (
             <Card key={i} tx={tx} live />
           ))}
+
+          {/* Phones: the film is loading (at the start, and before each new
+              chapter when its frames are not in yet). Only shown if it takes. */}
+          {phone ? (
+            <div
+              ref={bootRef}
+              className="fold-boot"
+              data-on="false"
+              data-mode="boot"
+              data-label={score.loader?.label ?? 'Loading the film'}
+              role="status"
+              aria-live="polite"
+            >
+              {/* Empty until it shows: a hidden loader leaves no text in the page. */}
+              <span className="fold-boot-label" data-fold-boot-label style={{ fontFamily: MONO }} />
+              <b data-fold-boot-pct style={{ fontFamily: MONO }} />
+              <i className="fold-boot-bar" aria-hidden="true">
+                <u data-fold-boot-bar />
+              </i>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -1050,6 +1296,18 @@ export default function Film({ score = SCORE }) {
         .fold-text[data-tone='light'] { color: ${PAPER}; text-shadow: 0 0 22px rgba(20, 19, 17, 0.75), 0 0 6px rgba(20, 19, 17, 0.6); }
         .fold-center { transform: translateY(calc(-50% + 24px)); }
         .fold-center[data-on='true'] { transform: translateY(-50%); }
+        .fold-boot { position: fixed; z-index: 45; display: flex; align-items: baseline; gap: 14px; color: ${INK}; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 320ms var(--ease), visibility 0s 320ms; }
+        .fold-boot[data-on='true'] { opacity: 1; visibility: visible; transition: opacity 320ms var(--ease); }
+        .fold-boot-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; }
+        .fold-boot b { font-size: 11px; font-weight: 400; letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
+        .fold-boot-bar { position: absolute; left: 0; right: 0; bottom: -10px; height: 1px; background: color-mix(in srgb, currentColor 22%, transparent); }
+        .fold-boot-bar u { position: absolute; inset: 0; background: currentColor; transform-origin: 0 50%; transform: scaleX(var(--p, 0)); transition: transform 240ms linear; }
+        /* At the start: the whole screen is the loader (paper, centred), and the page is held. */
+        .fold-boot[data-mode='boot'] { inset: 0; justify-content: center; align-items: center; background: #e9e2d3; pointer-events: auto; }
+        .fold-boot[data-mode='boot'] .fold-boot-bar { left: 22%; right: 22%; bottom: 50%; margin-bottom: -34px; }
+        /* Between chapters: a small pill at the bottom, over the colour field. */
+        .fold-boot[data-mode='hold'] { left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); padding: 12px 18px; background: ${PAPER}; border: 1px solid color-mix(in srgb, ${INK} 18%, transparent); }
+        .fold-boot[data-mode='hold'] .fold-boot-bar { left: 18px; right: 18px; bottom: 5px; }
         .fold-li { border-top: 1px solid currentColor; border-color: color-mix(in srgb, currentColor 28%, transparent); }
 
         @media (prefers-reduced-motion: reduce) {

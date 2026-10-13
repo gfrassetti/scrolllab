@@ -5,23 +5,23 @@ import { riseBubbles } from './riseBubbles'
 
 const defaultBenefits = [
   {
-    title: 'Benefit 01',
-    body: 'Placeholder benefit copy — swap in your first selling point.',
+    title: 'Real fruit',
+    body: 'Every bottle starts with pressed fruit. Never syrup, never flavouring.',
     color: '#ffb02e',
   },
   {
-    title: 'Benefit 02',
-    body: 'Placeholder benefit copy — ingredients, story, whatever fizzes.',
+    title: '40% less sugar',
+    body: 'Sweet enough to be fun, not so sweet you need a nap after.',
     color: '#ff3ea5',
   },
   {
-    title: 'Benefit 03',
-    body: 'Placeholder benefit copy — keep it short, let the bubbles talk.',
+    title: 'Nothing artificial',
+    body: 'No colours, no sweeteners, no preservatives. Fruit, water, bubbles.',
     color: '#3ddc97',
   },
   {
-    title: 'Benefit 04',
-    body: 'Placeholder benefit copy — values, certifications, the fine print.',
+    title: 'Glass, returned',
+    body: 'Bring the bottles back to any stockist: we wash them and fill them again.',
     color: '#ff6b35',
   },
 ]
@@ -32,8 +32,10 @@ const defaultBenefits = [
  */
 export default function BubbleBenefits({
   eyebrow = '',
-  title = 'YOUR SECTION TITLE',
+  title = 'WHY IT TASTES BETTER',
   benefits,
+  /** Ancla de la sección: el nav apunta acá. */
+  id = 'benefits',
   bg = '#2c4bff',
   fg,
   showBubbles = 'on',
@@ -91,6 +93,7 @@ export default function BubbleBenefits({
   return (
     <section
       ref={root}
+      id={id}
       className="relative z-[3] px-5 py-24 md:px-10 md:py-36"
       style={{ backgroundColor: bg, color: fg || undefined, ...(fg ? { '--color-foam': fg } : {}) }}
     >

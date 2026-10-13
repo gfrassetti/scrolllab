@@ -1,4 +1,4 @@
-import { toggle } from '../helpers.js'
+import { legalFields, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -139,10 +139,7 @@ export const APEX_FIELDS = {
     },
     { key: 'social', label: 'Red social — texto', type: 'text' },
     { key: 'socialHref', label: 'Red social — enlace', type: 'href' },
-    { key: 'privacyLabel', label: 'Privacidad — texto', type: 'text' },
-    { key: 'privacyHref', label: 'Privacidad — enlace', type: 'href' },
-    { key: 'termsLabel', label: 'Términos — texto', type: 'text' },
-    { key: 'termsHref', label: 'Términos — enlace', type: 'href' },
+    ...legalFields(),
     { key: 'wordmark', label: 'Palabra grande', type: 'text' },
     toggle('showWordmark', 'Palabra grande'),
     { key: 'bg', label: 'Color de fondo', type: 'color' },

@@ -5,7 +5,7 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { PAPER, SpeechBubble, TORN_TOP, TornCard, boilTo, hoverDepth } from './comicKit'
 import { BathBg, BedroomBg, DogHead, PettingHand, PorchBg } from './StoryArt'
 
-const DIALOGUES = ['Dialogue 2 — replace.', 'Dialogue 3 — replace.', 'Dialogue 4 — replace.']
+const DIALOGUES = ['A bone? For me?', 'Right there. Yes. Right there.', 'Best. Day. Ever.']
 
 // the three cards alternate left / right, like the reference (x 137 → 308 → 137 of 1280)
 const SHIFT = ['-4vw', '5vw', '-4vw']
@@ -88,7 +88,7 @@ function HomeCard({ index, line }) {
  * (parallax), the bubble and the paper cut boil as you scroll. At the end a
  * torn dark paper rises: the page of the next chapter.
  */
-export default function ChapterBond({ lead = 'Caption 9 — replace with story beat.', dialogues = DIALOGUES }) {
+export default function ChapterBond({ lead = 'Back home, Dusty has a porch, a bed and a bath every Sunday.', dialogues = DIALOGUES }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
 

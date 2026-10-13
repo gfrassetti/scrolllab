@@ -5,22 +5,27 @@ import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
 
 /**
- * NavComic — placeholder chrome for the comic template.
+ * NavComic — the comic's chrome: the brand, the four chapters and one CTA.
  */
 export default function NavComic({
-  brand = 'COMIC',
-  tagline = 'Tagline 1',
-  links = ['Link 1', 'Link 2', 'Link 3', 'Link 4'],
+  brand = 'HAVEN',
+  tagline = 'A farm sanctuary in Somerset',
+  links = [
+    { label: 'The road', href: '#chapter-dusty' },
+    { label: 'The farm', href: '#chapter-fork' },
+    { label: 'Home', href: '#chapter-bond' },
+    { label: 'Two worlds', href: '#chapter-worlds' },
+  ],
   linksText,
-  cta = 'CTA',
+  cta = 'Sponsor Pip',
   menuLabel = 'Menu',
   closeLabel = 'Close',
 }) {
   const defaults = [
-    { label: 'Link 1', href: '#chapter-dusty' },
-    { label: 'Link 2', href: '#chapter-bond' },
-    { label: 'Link 3', href: '#chapter-fork' },
-    { label: 'Link 4', href: '#chapter-worlds' },
+    { label: 'The road', href: '#chapter-dusty' },
+    { label: 'The farm', href: '#chapter-fork' },
+    { label: 'Home', href: '#chapter-bond' },
+    { label: 'Two worlds', href: '#chapter-worlds' },
   ]
   const parsed = parseNavLinks(links, linksText)
   const items =

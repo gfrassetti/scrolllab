@@ -15,11 +15,11 @@ const EMBLEM_RADIUS = 1.45
  * that drifts with pointer and scrubs apart on scroll.
  */
 export default function HeroMeaning({
-  line1 = 'Your headline',
-  line2 = 'goes here.',
-  hint = 'Scroll — the emblem reacts',
-  meta = 'Placeholder meta — ©2026',
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Websites, products and systems built for clarity.',
+  line1 = 'Quiet rooms,',
+  line2 = 'made to last.',
+  hint = 'Scroll to enter',
+  meta = 'Atelier Nove — Milan — since 2011',
+  body = 'An interior and object studio. Homes and hotels, and the furniture, materials and names that go in them.',
   bg,
   fg,
   /** El emblema 3D: el bloque y el anillo. */

@@ -7,8 +7,12 @@ import { parseNavLinks } from '../../../lib/navLinks'
  */
 export default function NavNocturne({
   brand = 'NOCTURNE™',
-  marker = 'Reel 02 — placeholder cut',
-  links = ['Films', 'Index', 'Contact'],
+  marker = 'Showreel 2026 — now playing',
+  links = [
+    { label: 'Films', href: '#films' },
+    { label: 'Frames', href: '#frames' },
+    { label: 'Contact', href: '#contact' },
+  ],
   linksText,
   menuLabel = 'Menu',
   closeLabel = 'Close',

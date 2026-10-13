@@ -11,12 +11,14 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
  * sin máscara ni deriva al scrollear.
  */
 export default function HeroKinetic({
-  lineOne = 'EVERY',
-  lineTwo = 'story',
-  lineThree = 'SCROLLS',
-  kicker = 'A modular scrollytelling template',
-  meta = '©2026 — Placeholder Studio',
+  lineOne = 'SLOW',
+  lineTwo = 'stories,',
+  lineThree = 'PRINTED',
+  kicker = 'Chapters — a quarterly of long-form stories',
+  meta = 'Issue 97 — Spring 2026',
   hint = 'Scroll to begin',
+  /** Ancla de la sección, si un link apunta acá. */
+  id,
   bg,
   fg,
   accent,
@@ -85,6 +87,7 @@ export default function HeroKinetic({
         '--color-accent': accent || undefined,
       }}
       ref={root}
+      id={id}
       className="relative flex h-svh flex-col justify-between overflow-hidden px-5 pt-24 pb-6 md:px-10 md:pb-10"
     >
       <div

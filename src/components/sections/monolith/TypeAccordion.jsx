@@ -6,18 +6,18 @@ import { themeVars } from '../../../lib/themeVars'
 
 const defaultItems = [
   {
-    title: 'First unit',
-    body: 'Placeholder answer. Click rows to expand them — the grid-rows trick animates height with pure CSS.',
+    title: 'Commissions',
+    body: 'We design and cast pieces for architects, galleries and private homes. Every commission starts with a model at 1:20.',
     img: accA,
   },
   {
-    title: 'Second unit',
-    body: 'Generic copy for the second drawer. Swap freely, the accordion keeps the rhythm.',
+    title: 'Moulds',
+    body: 'Moulds are milled in-house from aluminium, so any piece can be cast again, identical, years later.',
     img: accB,
   },
   {
-    title: 'Third unit',
-    body: 'One idea per drawer. Close it and the page snaps back to pure typography.',
+    title: 'Spaces',
+    body: 'From a single bench to a whole courtyard: we also pour floors, walls and stairs on site.',
     img: accC,
   },
 ]
@@ -31,8 +31,10 @@ const defaultItems = [
 export default function TypeAccordion({
   unit = '04',
   total = '05',
-  label = 'The drawers',
+  label = 'What we do',
   unitLabel = 'Unit',
+  /** Ancla de la sección, si un link apunta acá. */
+  id = 'services',
   items = defaultItems,
   bg,
   fg,
@@ -56,6 +58,7 @@ export default function TypeAccordion({
   return (
     <section
       ref={root}
+      id={id}
       className="px-5 py-20 md:px-8 md:py-32"
       style={{ backgroundColor: bg || undefined, color: fg || undefined, ...themeVars({ carbon: fg, klein: accent, concrete: bg }) }}
     >

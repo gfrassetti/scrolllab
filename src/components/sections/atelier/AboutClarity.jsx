@@ -4,10 +4,10 @@ import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
 
 export default function AboutClarity({
-  eyebrow = 'Section eyebrow',
-  title = 'Placeholder statement — swap this line with the sentence that defines your studio.',
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Placeholder body copy: replace it with your own story from the builder or the code.',
-  tags = 'Placeholder label · Placeholder label',
+  eyebrow = 'About',
+  title = 'We design rooms people want to stay in, and the objects that make them theirs.',
+  body = 'Atelier Nove is eleven architects, makers and designers. We take a project from the first sketch to the last cushion: plan, materials, furniture, light and the name on the door.',
+  tags = 'Interiors · Furniture · Identity',
   bg,
   fg,
   /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
