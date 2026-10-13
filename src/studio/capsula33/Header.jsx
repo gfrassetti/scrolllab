@@ -94,7 +94,7 @@ export default function Header({ visible }) {
   const toggleSound = () => {
     unlock()
     setSound(!sound)
-    if (!sound) window.setTimeout(() => sfx.select(), 30)
+    if (!sound) window.setTimeout(() => sfx.soundOn(), 30)
   }
 
   return (
@@ -248,9 +248,11 @@ function MenuItem({ station, index, active, open, itemRef, onSelect }) {
       <span className="relative" style={{ color: lit ? '#050506' : C.orange, transition: 'color 150ms' }}>
         <HackyText text={station.label} run={run} onTick={sfx.tick} className="whitespace-nowrap" />
       </span>
+      {/* PAGE 00N: aparece solo al pasar el puntero. */}
       <span
-        className="absolute top-[0.12em] left-full ml-3 text-[11px] leading-[1.2] tracking-[0.08em] whitespace-nowrap md:ml-4 md:text-[12px]"
-        style={{ ...MONO, color: active ? C.neon : lit ? C.cream : 'rgba(242,233,220,0.45)', letterSpacing: '0.08em' }}
+        aria-hidden="true"
+        className="absolute top-[0.12em] left-full ml-3 text-[11px] leading-[1.2] tracking-[0.08em] whitespace-nowrap transition-opacity duration-200 md:ml-4 md:text-[12px]"
+        style={{ ...MONO, color: active ? C.neon : C.cream, opacity: hover ? 1 : 0, letterSpacing: '0.08em' }}
       >
         PAGE
         <br />

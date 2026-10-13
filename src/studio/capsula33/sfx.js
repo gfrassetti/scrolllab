@@ -139,8 +139,38 @@ export const sfx = {
     tone({ freq: 60, to: 420, dur: 1.2, type: 'sawtooth', gain: 0.12, q: 3 })
     tone({ freq: 1200, to: 80, dur: 0.9, type: 'sine', gain: 0.18, delay: 1.1 })
   },
-  /** Pasar de una página del recorrido a otra. */
+  /** Llegar a una estación del recorrido. */
   page() {
     tone({ freq: 520, to: 780, dur: 0.09, type: 'triangle', gain: 0.18 })
+    tone({ freq: 1040, dur: 0.05, type: 'sine', gain: 0.08, delay: 0.07 })
+  },
+  /** El riel de la derecha: un clic grave y seco, distinto al del menú. */
+  railHover() {
+    tone({ freq: 340, to: 300, dur: 0.035, type: 'square', gain: 0.07, q: 4 })
+  },
+  railSelect() {
+    tone({ freq: 300, to: 600, dur: 0.1, type: 'square', gain: 0.1, q: 5 })
+  },
+  /** Botones (Iniciar recorrido, Cómo llegar): un pulso suave. */
+  buttonHover() {
+    tone({ freq: 760, dur: 0.05, type: 'sine', gain: 0.12 })
+  },
+  /** Zoom: sube al acercar, baja al alejar. */
+  zoom(closer) {
+    tone({ freq: closer ? 500 : 900, to: closer ? 900 : 500, dur: 0.12, type: 'sine', gain: 0.14 })
+  },
+  /** Agarrar el local para girarlo. */
+  grab() {
+    noise({ dur: 0.08, from: 1800, to: 900, gain: 0.12 })
+  },
+  /** El panel de una estación se despliega. */
+  panel() {
+    noise({ dur: 0.22, from: 600, to: 2400, gain: 0.08 })
+  },
+  /** Prender el sonido. */
+  soundOn() {
+    tone({ freq: 440, dur: 0.06, type: 'triangle', gain: 0.2 })
+    tone({ freq: 660, dur: 0.06, type: 'triangle', gain: 0.2, delay: 0.06 })
+    tone({ freq: 880, dur: 0.09, type: 'triangle', gain: 0.2, delay: 0.12 })
   },
 }

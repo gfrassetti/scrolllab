@@ -6,7 +6,6 @@ import { MANIFEST, STATIONS } from './stations'
 import { tour } from './tour'
 import { cursor } from './cursorBus'
 import { sfx } from './sfx'
-import HackyText from './HackyText'
 import { C, DISPLAY, MONO, BODY, HOURS, openStatus } from './brand'
 
 /**
@@ -62,10 +61,13 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
           calm,
           onProgress,
           onHover: (station) => {
-            cursor.set(station ? 'lock' : 'idle', station ? `${station.page} · ${station.label}` : '')
+            cursor.set(station ? 'lock' : 'idle', station ? station.label : '')
             if (station) sfx.lock()
           },
-          onDrag: (on) => cursor.set(on ? 'drag' : 'idle'),
+          onDrag: (on) => {
+            cursor.set(on ? 'drag' : 'idle')
+            if (on) sfx.grab()
+          },
           onPick: (index) => {
             sfx.select()
             tour.goTo(index)
@@ -109,20 +111,20 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
         onUpdate: (self) => {
           const p = self.progress
           sceneRef.current?.setProgress(p)
-          // En una estación (cerca de un entero) o viajando entre dos (−1).
-          const T = p * N
+          // En una estación (cerca de un entero), viajando entre dos o saliendo (−1).
+          const T = p * (N + 1)
           const near = Math.round(T)
-          const next = Math.abs(T - near) < 0.2 ? near : -1
+          const next = Math.abs(T - near) < 0.2 && near <= N ? near : -1
           if (next !== tour.page) {
             if (next > 0) sfx.page()
             tour.setPage(next)
           }
-          gsap.set(overviewRef.current, { autoAlpha: Math.max(0, 1 - p * N * 4) })
+          gsap.set(overviewRef.current, { autoAlpha: Math.max(0, 1 - p * (N + 1) * 4) })
         },
       })
       tour.register((i, { immediate = false } = {}) => {
         const top = st.start
-        const y = top + ((st.end - st.start) * i) / N
+        const y = top + ((st.end - st.start) * i) / (N + 1)
         const lenis = getLenis()
         if (lenis) lenis.scrollTo(y, { immediate, duration: immediate ? 0 : 1.6 + Math.abs(i - Math.max(0, tour.page)) * 0.35, force: true })
         else window.scrollTo({ top: y, behavior: immediate ? 'auto' : 'smooth' })
@@ -135,7 +137,7 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
   const station = page > 0 ? STATIONS[page - 1] : null
 
   return (
-    <section ref={rootRef} id="top" className="relative" style={{ height: `${(N + 1) * 100}svh`, background: '#050506', color: C.cream }}>
+    <section ref={rootRef} id="top" className="relative" style={{ height: `${(N + 2) * 100}svh`, background: '#050506', color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={mountRef} className="absolute inset-0">
           <canvas
@@ -178,6 +180,7 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
                   sfx.select()
                   tour.goTo(1)
                 }}
+                onMouseEnter={() => sfx.buttonHover()}
                 className="group relative h-11 overflow-hidden rounded-full px-6 text-[12px] font-semibold tracking-[0.18em] whitespace-nowrap uppercase active:scale-[0.97]"
                 style={{ ...DISPLAY, background: C.orange, color: '#070708' }}
               >
@@ -188,9 +191,11 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
               </span>
             </div>
           </div>
-          <div data-c33-in className="hidden flex-col items-end gap-1 text-right text-[11px] tracking-[0.16em] uppercase opacity-0 md:col-span-4 md:col-start-9 md:flex" style={MONO}>
-            <span style={{ color: C.neon }}>Arrastrá para girar · tocá una zona</span>
-            <span className="opacity-50">Módulo SMA-01 · 40°09′S 71°21′O</span>
+          <div data-c33-in className="pointer-events-auto flex flex-col items-start gap-3 opacity-0 md:col-span-4 md:col-start-9 md:items-end">
+            <ZoomControls sceneRef={sceneRef} />
+            <span className="hidden text-right text-[11px] tracking-[0.16em] uppercase md:block" style={{ ...MONO, color: C.neon }}>
+              Arrastrá para girar · pellizcá o Ctrl + rueda para acercar
+            </span>
           </div>
         </div>
 
@@ -221,14 +226,13 @@ export default function Hero({ boarded, onProgress, onReady, calm }) {
 function StationPanel({ station, status }) {
   const ref = useRef(null)
   const [shown, setShown] = useState(station)
-  const [run, setRun] = useState(0)
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
     if (station) {
       setShown(station)
-      setRun((r) => r + 1)
+      sfx.panel()
       gsap.fromTo(el, { autoAlpha: 0, x: 24 }, { autoAlpha: 1, x: 0, duration: 0.7, ease: 'expo.out' })
     } else {
       gsap.to(el, { autoAlpha: 0, x: 16, duration: 0.35, ease: 'power2.out' })
@@ -246,11 +250,10 @@ function StationPanel({ station, status }) {
       {s ? (
         <>
           <p className="flex items-center justify-between text-[11px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
-            <span>Page {s.page}</span>
-            <span className="opacity-60">{s.kicker}</span>
+            <span>{s.kicker}</span>
           </p>
           <h2 className="mt-4 text-[clamp(1.8rem,3vw,2.6rem)] leading-[0.95] font-bold tracking-[-0.02em] uppercase" style={DISPLAY}>
-            <HackyText text={s.label} run={run} onTick={sfx.tick} />
+            {s.label}
           </h2>
           <p className="mt-4 text-[15px] leading-[1.55]" style={{ ...BODY, color: 'rgba(242,233,220,0.82)' }}>
             {s.text}
@@ -282,6 +285,7 @@ function StationPanel({ station, status }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => sfx.select()}
+              onMouseEnter={() => sfx.buttonHover()}
               className="mt-6 inline-flex h-11 items-center gap-3 rounded-full px-6 text-[12px] font-semibold tracking-[0.18em] uppercase active:scale-[0.97]"
               style={{ ...DISPLAY, background: C.orange, color: '#070708' }}
             >
@@ -291,5 +295,55 @@ function StationPanel({ station, status }) {
         </>
       ) : null}
     </aside>
+  )
+}
+
+/** Acercar, alejar y volver al encuadre (en la vista general). */
+function ZoomControls({ sceneRef }) {
+  const btn =
+    'flex h-10 w-10 items-center justify-center rounded-full border text-[16px] transition-colors duration-300 hover:border-[#e4601d] active:scale-[0.94]'
+  const style = { ...MONO, borderColor: 'rgba(242,233,220,0.25)', background: 'rgba(5,5,6,0.55)', color: C.cream }
+  return (
+    <div className="flex items-center gap-2" role="group" aria-label="Zoom del local">
+      <button
+        type="button"
+        aria-label="Alejar"
+        className={btn}
+        style={style}
+        onMouseEnter={() => sfx.railHover()}
+        onClick={() => {
+          sfx.zoom(false)
+          sceneRef.current?.zoomBy(1.25)
+        }}
+      >
+        −
+      </button>
+      <button
+        type="button"
+        aria-label="Volver al encuadre"
+        className={btn}
+        style={style}
+        onMouseEnter={() => sfx.railHover()}
+        onClick={() => {
+          sfx.select()
+          sceneRef.current?.resetView()
+        }}
+      >
+        ⟲
+      </button>
+      <button
+        type="button"
+        aria-label="Acercar"
+        className={btn}
+        style={style}
+        onMouseEnter={() => sfx.railHover()}
+        onClick={() => {
+          sfx.zoom(true)
+          sceneRef.current?.zoomBy(0.8)
+        }}
+      >
+        +
+      </button>
+    </div>
   )
 }

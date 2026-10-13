@@ -7,6 +7,7 @@ import Loader from './Loader'
 import Header from './Header'
 import Cursor from './Cursor'
 import ScrollRail from './ScrollRail'
+import Visit from './Visit'
 import { BODY, C, FONTS_HREF } from './brand'
 
 /*
@@ -66,6 +67,7 @@ export default function Capsula33Page() {
         <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
         <Header visible={boarded} />
         <Hero boarded={boarded} calm={calm} onProgress={onProgress} onReady={onReady} />
+        <Visit />
         <ScrollRail visible={boarded} />
         <Cursor />
       </div>

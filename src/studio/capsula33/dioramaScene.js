@@ -248,8 +248,11 @@ export function createDioramaScene({
     },
   })
 
-  // Estaciones: la vista general (0) y una toma por zona.
-  const poses = [rest, ...stations.map((s) => ({ pos: b2t(s.cam.pos), look: b2t(s.cam.look) }))]
+  // Estaciones: la vista general (0, con la órbita de la persona), una toma
+  // por zona y la salida (la cámara se aleja y mira al espacio).
+  const view = { pos: new THREE.Vector3(), look: new THREE.Vector3() }
+  const exit = { pos: new THREE.Vector3(), look: new THREE.Vector3() }
+  const poses = [view, ...stations.map((s) => ({ pos: b2t(s.cam.pos), look: b2t(s.cam.look) })), exit]
   const zoneBoxes = stations.map((s, i) => {
     const a = b2t(s.zone.min)
     const b = b2t(s.zone.max)
@@ -267,7 +270,29 @@ export function createDioramaScene({
     rest.look.copy(TARGET)
     rest.look.y += layout.lookLift ?? 0
     const dist = fitCameraDistance({ fov: camera.fov, aspect: camera.aspect, radius: layout.radius, base: layout.distance, fill: 0.92 })
+    rest.dist = dist
     rest.pos.copy(rest.look).addScaledVector(VIEW_DIR, dist)
+    rest.azimuth = Math.atan2(VIEW_DIR.x, VIEW_DIR.z)
+    rest.elevation = Math.asin(VIEW_DIR.y)
+    // La cámara no sale del cuadrante de las paredes abiertas (−90°…0°): así
+    // nunca ve el dorso de la pared de la barra ni el de la pared del fondo.
+    LIM.yaw = [-1.42 - rest.azimuth, -0.14 - rest.azimuth]
+    // Salida: se aleja y levanta la vista; el local baja y queda atrás.
+    exit.pos.copy(rest.look).addScaledVector(VIEW_DIR, dist * 2.2)
+    exit.look.copy(rest.look).add(new THREE.Vector3(0, dist * 1.25, 0))
+  }
+
+  // Órbita de la vista general, con topes: es un corte (dos paredes abiertas),
+  // así que nunca se ve de atrás; el zoom acerca hasta la mitad, no más.
+  const LIM = { yaw: [-0.6, 0.6], elev: [0.3, 1.25], zoom: [0.5, 1.15] }
+  const orbit = { yaw: 0, elev: 0, zoom: 1, tYaw: 0, tElev: 0, tZoom: 1 }
+  const clampTo = (v, [a, b]) => Math.min(b, Math.max(a, v))
+  function orbitPose(out) {
+    const az = rest.azimuth + orbit.yaw
+    const el = clampTo(rest.elevation + orbit.elev, LIM.elev)
+    const d = rest.dist * orbit.zoom
+    out.look.copy(rest.look)
+    out.pos.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(d).add(rest.look)
   }
 
   function resize() {
@@ -350,12 +375,12 @@ export function createDioramaScene({
     placeIntroStart()
   })
 
-  // --- puntero: arrastrar gira, tocar elige ---------------------------------
+  // --- puntero: arrastrar orbita, pellizcar acerca, tocar elige --------------
   const pointer = trackPointer()
   const ndc = new THREE.Vector2()
   const ray = new THREE.Raycaster()
-  const spin = { y: 0, x: 0, vy: 0, vx: 0 }
   const press = { down: false, id: null, x: 0, y: 0, lastX: 0, lastY: 0, dragging: false }
+  const pinch = { on: false, d0: 0, z0: 1 }
 
   const overview = () => state.mode === 'rest' && state.progress < 0.02
 
@@ -366,7 +391,7 @@ export function createDioramaScene({
     ray.setFromCamera(ndc, camera)
     const hit = ray.intersectObjects(pickable, false)[0]
     if (!hit) return null
-    // Las zonas están escritas con el local quieto: se deshace el giro.
+    // Las zonas están escritas con el local quieto: se deshace el balanceo.
     const p = pivot.worldToLocal(hit.point.clone()).add(TARGET)
     return zonesBySize.find((z) => z.box.containsPoint(p)) || null
   }
@@ -377,8 +402,12 @@ export function createDioramaScene({
     onHover(z ? z.station : null)
   }
 
+  const zoomTo = (z) => {
+    orbit.tZoom = clampTo(z, LIM.zoom)
+  }
+
   const onDown = (e) => {
-    if (!overview()) return
+    if (!overview() || pinch.on) return
     press.down = true
     press.id = e.pointerId
     press.x = press.lastX = e.clientX
@@ -386,7 +415,7 @@ export function createDioramaScene({
     press.dragging = false
   }
   const onMove = (e) => {
-    if (press.down && e.pointerId === press.id) {
+    if (press.down && e.pointerId === press.id && !pinch.on) {
       const dx = e.clientX - press.lastX
       const dy = e.clientY - press.lastY
       if (!press.dragging && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 6) {
@@ -396,10 +425,8 @@ export function createDioramaScene({
         setHover(null)
       }
       if (press.dragging) {
-        spin.vy = dx * 0.0065
-        spin.vx = dy * 0.0025
-        spin.y += spin.vy
-        spin.x = Math.max(-0.22, Math.min(0.32, spin.x + spin.vx))
+        orbit.tYaw = clampTo(orbit.tYaw - dx * 0.006, LIM.yaw)
+        orbit.tElev = clampTo(rest.elevation + orbit.tElev + dy * 0.004, LIM.elev) - rest.elevation
       }
       press.lastX = e.clientX
       press.lastY = e.clientY
@@ -421,11 +448,41 @@ export function createDioramaScene({
     if (z) onPick(z.index)
   }
   const onLeave = () => setHover(null)
+  // Ctrl + rueda (y el pellizco del trackpad, que llega así): zoom. La rueda
+  // sola sigue siendo el scroll del recorrido.
+  const onWheel = (e) => {
+    if (!e.ctrlKey || !overview()) return
+    e.preventDefault()
+    zoomTo(orbit.tZoom * Math.exp(e.deltaY * 0.004))
+  }
+  // Dos dedos: zoom (uno solo sigue scrolleando la página).
+  const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+  const onTouchStart = (e) => {
+    if (e.touches.length === 2 && overview()) {
+      pinch.on = true
+      pinch.d0 = touchDist(e.touches)
+      pinch.z0 = orbit.tZoom
+      press.down = false
+      press.dragging = false
+    }
+  }
+  const onTouchMove = (e) => {
+    if (!pinch.on || e.touches.length < 2) return
+    e.preventDefault()
+    zoomTo(pinch.z0 * (pinch.d0 / Math.max(1, touchDist(e.touches))))
+  }
+  const onTouchEnd = (e) => {
+    if (e.touches.length < 2) pinch.on = false
+  }
   canvas.addEventListener('pointerdown', onDown)
   window.addEventListener('pointermove', onMove)
   window.addEventListener('pointerup', onUp)
   window.addEventListener('pointercancel', onUp)
   canvas.addEventListener('pointerleave', onLeave)
+  canvas.addEventListener('wheel', onWheel, { passive: false })
+  canvas.addEventListener('touchstart', onTouchStart, { passive: true })
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false })
+  canvas.addEventListener('touchend', onTouchEnd, { passive: true })
 
   // --- intro ----------------------------------------------------------------
   const cam = { pos: new THREE.Vector3(), look: new THREE.Vector3() }
@@ -444,8 +501,6 @@ export function createDioramaScene({
     }
     state.mode = 'intro'
     placeIntroStart()
-    spin.y = -0.9 // entra girando y se acomoda
-    gsap.to(spin, { y: 0, duration: 3.2, ease: 'expo.out' })
     gsap.to(cam.pos, { x: rest.pos.x, y: rest.pos.y, z: rest.pos.z, duration: 3.2, ease: 'expo.out' })
     gsap.to(cam.look, {
       x: rest.look.x,
@@ -471,12 +526,25 @@ export function createDioramaScene({
     last = now
     const t = clock.getElapsedTime()
 
+    // La órbita sigue a su objetivo con suavidad; fuera de la vista general
+    // vuelve sola al encuadre de siempre.
+    const away = state.progress > 0.02
+    if (away || calm) {
+      orbit.tYaw = 0
+      orbit.tElev = 0
+      orbit.tZoom = 1
+    }
+    orbit.yaw += (orbit.tYaw - orbit.yaw) * 0.1
+    orbit.elev += (orbit.tElev - orbit.elev) * 0.1
+    orbit.zoom += (orbit.tZoom - orbit.zoom) * 0.1
+    orbitPose(view)
+
     if (state.mode === 'intro') {
       camera.position.copy(cam.pos)
       look.copy(cam.look)
     } else {
-      // El recorrido: t = 0 la vista general; cada entero, una estación. Entre
-      // dos estaciones la cámara se queda un rato y después viaja.
+      // El recorrido: 0 la vista general; cada entero, una estación; el último,
+      // la salida. Entre dos estaciones la cámara se queda un rato y viaja.
       const T = state.progress * (poses.length - 1)
       const i = Math.min(poses.length - 2, Math.floor(T))
       const f = T - i
@@ -487,26 +555,10 @@ export function createDioramaScene({
       look.copy(tmpB)
     }
 
-    // Giro: inercia del arrastre; fuera de la vista general vuelve a cero.
-    if (!press.dragging) {
-      spin.vy *= 0.94
-      spin.y += spin.vy
-      spin.vx *= 0.9
-    }
-    // Es un corte (dos paredes abiertas): no se lo deja dar vuelta del todo.
-    const LIMIT = 1.15
-    if (Math.abs(spin.y) > LIMIT) {
-      spin.y = Math.sign(spin.y) * (LIMIT + (Math.abs(spin.y) - LIMIT) * 0.85)
-      spin.vy *= 0.5
-    }
-    const away = state.progress > 0.02
-    if (away || calm) {
-      spin.y += (0 - spin.y) * 0.08
-      spin.x += (0 - spin.x) * 0.08
-    }
-    const lean = !calm && !away ? pointer.x * 0.06 : 0
-    pivot.rotation.y = spin.y + lean
-    pivot.rotation.x = spin.x + (!calm && !away ? pointer.y * 0.025 : 0)
+    // Un balanceo chico con el puntero y la flotación.
+    const sway = !calm && !away && !press.dragging
+    pivot.rotation.y += ((sway ? pointer.x * 0.05 : 0) - pivot.rotation.y) * 0.05
+    pivot.rotation.x += ((sway ? pointer.y * 0.02 : 0) - pivot.rotation.x) * 0.05
     pivot.position.y = TARGET.y + (calm ? 0 : Math.sin(t * 0.7) * 0.08)
 
     ring.rotation.y = t * 0.04
@@ -539,6 +591,15 @@ export function createDioramaScene({
       state.progress = p
       if (p > 0.02) setHover(null)
     },
+    /** Botones de zoom: factor relativo (0.8 acerca, 1.25 aleja). */
+    zoomBy(f) {
+      if (overview()) zoomTo(orbit.tZoom * f)
+    },
+    resetView() {
+      orbit.tYaw = 0
+      orbit.tElev = 0
+      orbit.tZoom = 1
+    },
     dispose() {
       cancelAnimationFrame(raf)
       ro.disconnect()
@@ -548,6 +609,10 @@ export function createDioramaScene({
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
       canvas.removeEventListener('pointerleave', onLeave)
+      canvas.removeEventListener('wheel', onWheel)
+      canvas.removeEventListener('touchstart', onTouchStart)
+      canvas.removeEventListener('touchmove', onTouchMove)
+      canvas.removeEventListener('touchend', onTouchEnd)
       draco.dispose()
       scene.traverse((o) => {
         o.geometry?.dispose()
