@@ -4,10 +4,10 @@ import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const DEFAULT_STATS = [
-  { label: 'STAT 1', value: 'Value 1' },
-  { label: 'STAT 2', value: 'Value 2' },
-  { label: 'STAT 3', value: 'Value 3' },
-  { label: 'STAT 4', value: 'Value 4' },
+  { label: 'COUNTRIES', value: '19' },
+  { label: 'CLUBS', value: '32' },
+  { label: 'MATCHES', value: '63' },
+  { label: 'VOLUNTEERS', value: '210' },
 ]
 
 /**
@@ -19,11 +19,11 @@ const DEFAULT_STATS = [
  * stats. En calma el alto de scrub se va y el bloque queda en el flujo.
  */
 export default function UniversalLang({
-  eyebrow = 'EYEBROW 2',
-  title = 'HEADLINE 5',
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.',
-  number = '99+',
-  numberLabel = 'LABEL 1',
+  eyebrow = 'THE CLUBS',
+  title = 'A UNIVERSAL LANGUAGE',
+  body = 'Players arrive speaking 23 languages. By the second match they share one: a pass, a shout, a hand to get someone back up.',
+  number = '640',
+  numberLabel = 'PLAYERS',
   stats = DEFAULT_STATS,
   bg,
   fg,

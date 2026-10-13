@@ -9,11 +9,11 @@ import { imgAttrs } from '../../../lib/responsiveImage'
  * StageLines — two typographic beats over drifting media.
  */
 export default function StageLines({
-  eyebrow1 = 'EYEBROW 7',
-  line1 = 'HEADLINE 8 LOREM IPSUM',
+  eyebrow1 = 'THE OPENING',
+  line1 = 'FRIDAY NIGHT, UNDER THE LIGHTS',
   img1 = stageA,
-  eyebrow2 = 'EYEBROW 8',
-  line2 = 'HEADLINE 9 LOREM IPSUM',
+  eyebrow2 = 'THE FINAL',
+  line2 = 'SUNDAY, THROUGH THE TUNNEL',
   img2 = stageB,
   bg,
   fg,

@@ -48,3 +48,4 @@ Así que cada template de SCROLLLAB es el sitio de un negocio que inventamos par
 | FIZZ | **Fizz Drinks Co.** — gaseosas de fruta exprimida, 40% menos azúcar (Blood Orange, Raspberry, Lime Mint, Mango, Cassis) | Valencia | footer con Privacidad/Términos en LegalSheet |
 | VELOCITY | **Velocity Moto** — cascos y equipo para pista y tierra, un casco de carbono en seis terminaciones | Barcelona | «Ride harder, come home»; el CTA de la salida del domingo abre un mail |
 | ATELIER | **Atelier Nove** — estudio de interiores, muebles e identidad (marca NOVE) | Milán | redes del footer abren en otra pestaña; el teléfono es tel: |
+| UNITY | **Unity Cup** — torneo de fútbol amateur: 32 clubes comunitarios de 19 países, nueve días | Bristol | la final el 14 de junio; el capitán es inventado (Daniel Mensah, Harbourside FC) |

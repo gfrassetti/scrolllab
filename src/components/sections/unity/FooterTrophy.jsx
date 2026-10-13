@@ -8,11 +8,11 @@ import { mixHex } from '../../../lib/themeVars'
  * transparent PNG cutout.
  */
 export default function FooterTrophy({
-  eyebrow = 'EYEBROW 6',
-  title = 'BUT ONLY ONE LINE\nWILL LIFT THE MARK',
-  accentWord = 'ONE LINE',
-  metaLeft = 'META 2',
-  metaRight = 'LINK 6',
+  eyebrow = 'THE FINAL — 14 JUNE 2026',
+  title = '32 CLUBS WILL PLAY,\nBUT ONLY ONE LIFTS IT',
+  accentWord = 'ONLY ONE',
+  metaLeft = 'UNITY CUP — BRISTOL 2026',
+  metaRight = 'BACK TO TOP ↑',
   orbSrc = '',
   bg,
   fg,

@@ -11,8 +11,8 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
  * titular va arriba del párrafo, en fila.
  */
 export default function HeroTwin({
-  body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
-  headline = 'HEADLINE 1.\nHEADLINE 2.',
+  body = 'The Unity Cup brings 32 community clubs from 19 countries to Bristol for nine days of football. No sponsors on the shirts, no tickets to buy: just the game everyone already speaks.',
+  headline = 'ONE BALL.\nEVERY LANGUAGE.',
   bg,
   fg,
   /** El titular que cruza la foto. */
