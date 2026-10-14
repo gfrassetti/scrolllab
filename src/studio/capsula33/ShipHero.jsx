@@ -40,7 +40,6 @@ function sources() {
     corridor: `${BASE}corridor-${s}.webp`,
     module: `${BASE}module-${s}.webp`,
     interior: `${BASE}interior-${s}.webp`,
-    table: `${BASE}table-${s === 2688 ? 1400 : 800}.webp`,
     doorL: `${BASE}door-l-285.webp`,
     doorR: `${BASE}door-r-289.webp`,
   }

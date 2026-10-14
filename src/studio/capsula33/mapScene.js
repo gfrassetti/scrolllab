@@ -347,8 +347,16 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
   const v = new THREE.Vector3()
   let raf = 0
   let last = performance.now()
+  // Fuera de pantalla no se dibuja.
+  let onScreen = false
+  const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting))
+  io.observe(canvas)
   const frame = (now) => {
     raf = requestAnimationFrame(frame)
+    if (!onScreen) {
+      last = now
+      return
+    }
     budget.tick(now - last)
     last = now
     if (built) {
@@ -403,6 +411,7 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     zoneIds: () => parts.zones.map((z) => z.zone.id),
     dispose() {
       cancelAnimationFrame(raf)
+      io.disconnect()
       ro.disconnect()
       canvas.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointermove', onMove)

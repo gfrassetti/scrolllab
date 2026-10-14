@@ -61,30 +61,22 @@ const Z_SIGN = Z_MODULE + 0.32 // el cartel flota delante de la pared
 const Z_INSIDE_CAM = -(D + 0.2) // ya cruzamos la puerta
 const ENTER_STOP = 1
 
-// El salón, del otro lado de la puerta: la foto se proyecta desde su cámara (la final del
-// recorrido) sobre una caja con su piso, sus paredes, el techo y el fondo, medidos en la foto.
-// Así el piso es piso de verdad y las mesas se apoyan en él desde cualquier punto de vista.
+// El salón, del otro lado de la puerta: la foto se proyecta desde su cámara sobre una caja con
+// su piso, sus paredes, el techo y el fondo, medidos en la foto. Así el piso es piso de verdad
+// y lo que hay en la foto (vitrinas, banquetas, columnas) se corre con su profundidad.
+// La toma (el pasillo real, de la puerta a la barra) tiene el punto de fuga corrido a la
+// izquierda y arriba del centro: `vx` y `horizon` lo ubican (2688 × 1520, 60° vertical).
 const ROOM = {
   eye: 1.71, // altura de la cámara sobre el piso (la misma que en el pasillo)
-  horizon: 760, // fila del horizonte en la foto (2688 × 1520, 60° vertical)
-  back: { left: 894, right: 1371, floor: 1001, top: 632 }, // el fondo (la barra), en píxeles
-  near: { left: 402, right: 2265 }, // donde las paredes tocan el piso en el borde de abajo
+  vx: 940,
+  horizon: 616,
+  back: { left: 870, right: 1290, floor: 873, top: 400 }, // el fondo (la barra); `top` alto: el techo no puede quedar por debajo del marco de la puerta
+  near: { left: 694, right: 2171 }, // donde las paredes tocan el piso en el borde de abajo
 }
-// Las mesas: un juego (mesa y dos sillas) parado sobre el piso del salón, en varios lugares.
-// [x respecto de la pared (+ desde la izquierda, − desde la derecha), profundidad, espejado]
-const TABLES = [
-  [1.15, 3.9, false],
-  [-1.05, 4.7, true],
-  [1.2, 6.2, true],
-  [-1.1, 7.4, false],
-]
 // La foto se proyecta desde un poco antes de la puerta (no desde la cámara final): así su cono
 // cubre también el piso y el techo que se ven al acercarse; al final del recorrido se ve un
 // poco recortada, nada más.
-const PHOTO_BACK = 1.6
-const TABLE_W = 1.7 // ancho del juego (mesa + dos sillas)
-const TABLE_ASPECT = 1160 / 1840 // alto / ancho del recorte
-const TABLE_FLOOR = 0.94 // fila del recorte donde apoyan las patas (desde arriba)
+const PHOTO_BACK = 1.2
 
 const PROJECT_VERT = /* glsl */ `
   uniform mat4 uProj0;
@@ -370,29 +362,36 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     // Un punto del piso visto en la foto (px, py) → mundo.
     const onFloor = (px, py) => {
       const d = (ROOM.eye * F1) / (py - ROOM.horizon)
-      return { x: ((px - IMG.w / 2) * d) / F1, d }
+      return { x: ((px - ROOM.vx) * d) / F1, d }
     }
     const db = (ROOM.eye * F1) / (ROOM.back.floor - ROOM.horizon)
     const top = ((ROOM.horizon - ROOM.back.top) * db) / F1
     const yF = -ROOM.eye
-    const bl = { x: ((ROOM.back.left - IMG.w / 2) * db) / F1, d: db }
-    const br = { x: ((ROOM.back.right - IMG.w / 2) * db) / F1, d: db }
+    const bl = { x: ((ROOM.back.left - ROOM.vx) * db) / F1, d: db }
+    const br = { x: ((ROOM.back.right - ROOM.vx) * db) / F1, d: db }
     const nl = onFloor(ROOM.near.left, IMG.h)
     const nr = onFloor(ROOM.near.right, IMG.h)
     // Las paredes siguen hasta casi la puerta (más cerca de lo que muestra la foto).
     const ext = (a, b, d) => ({ x: a.x + ((b.x - a.x) * (d - a.d)) / (b.d - a.d), d })
     const fl = ext(nl, bl, dDoor)
     const fr = ext(nr, br, dDoor)
-    parts.wallX = (side, d) => (side < 0 ? ext(nl, bl, d).x : ext(nr, br, d).x)
-    const P = (q, y) => [q.x, y, z0 - q.d]
+    // La foto se sacó pegada a la pared de las vitrinas; la puerta del módulo está centrada.
+    // El salón (y la cámara de la foto, para que la proyección no cambie) se corre de costado
+    // hasta que el pasillo quede centrado en la puerta: así siempre cubre todo el hueco.
+    const doorRect = rectAt(PARTS.door)
+    const shift = (doorRect.x0 + doorRect.x1) / 2 - (fl.x + fr.x) / 2
+    const P = (q, y) => [q.x + shift, y, z0 - q.d]
     const quad = (a, b, c, d) => {
       const g = new THREE.BufferGeometry()
       g.setAttribute('position', new THREE.Float32BufferAttribute([...a, ...b, ...c, ...a, ...c, ...d], 3))
       return g
     }
     const cam1 = new THREE.PerspectiveCamera(FOV, IMG.w / IMG.h, 0.01, 100)
-    cam1.position.set(0, 0, z0)
+    cam1.position.set(shift, 0, z0)
     cam1.updateMatrixWorld()
+    // El punto de fuga de la foto no está en el centro: se corre el centro óptico de la proyección.
+    cam1.projectionMatrix.elements[8] = (IMG.w / 2 - ROOM.vx) / (IMG.w / 2)
+    cam1.projectionMatrix.elements[9] = -(IMG.h / 2 - ROOM.horizon) / (IMG.h / 2)
     const proj1 = new THREE.Matrix4().multiplyMatrices(cam1.projectionMatrix, cam1.matrixWorldInverse)
     const mat = new THREE.ShaderMaterial({
       uniforms: { uMap: { value: tex.interior }, uProj0: { value: proj1 }, uHole: { value: new THREE.Vector4(2, 2, 2, 2) }, uDim: { value: 1 }, uShade: { value: 0 } },
@@ -411,17 +410,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     scene.add(room)
     parts.roomMat = mat
 
-    // Las mesas: el mismo juego en varios lugares, con las patas en el piso.
-    const h = TABLE_W * TABLE_ASPECT
-    const geo = new THREE.PlaneGeometry(TABLE_W, h)
-    TABLES.forEach(([dx, d, mirror]) => {
-      const x = dx > 0 ? parts.wallX(-1, d) + dx : parts.wallX(1, d) + dx
-      const m = new THREE.Mesh(geo, flat(tex.table, { transparent: true }))
-      m.position.set(x, yF + h * (TABLE_FLOOR - 0.5), z0 - d)
-      if (mirror) m.scale.x = -1
-      m.renderOrder = 1
-      scene.add(m)
-    })
   }
 
   const resize = () => {
@@ -445,8 +433,16 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
   const smooth = (t) => t * t * (3 - 2 * t)
   let raf = 0
   let last = performance.now()
+  // Fuera de pantalla no se dibuja (el hero queda arriba de todo el resto de la página).
+  let onScreen = true
+  const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting))
+  io.observe(canvas)
   const frame = (now) => {
     raf = requestAnimationFrame(frame)
+    if (!onScreen) {
+      last = now
+      return
+    }
     budget.tick(now - last)
     last = now
     const walk = smooth(state.walk)
@@ -536,6 +532,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     projectPoint,
     dispose() {
       cancelAnimationFrame(raf)
+      io.disconnect()
       window.removeEventListener('resize', resize)
       scene.traverse((o) => {
         if (o.isMesh) {
