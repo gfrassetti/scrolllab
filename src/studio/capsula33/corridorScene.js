@@ -61,22 +61,10 @@ const Z_SIGN = Z_MODULE + 0.32 // el cartel flota delante de la pared
 const Z_INSIDE_CAM = -(D + 0.2) // ya cruzamos la puerta
 const ENTER_STOP = 1
 
-// El salón, del otro lado de la puerta: la foto se proyecta desde su cámara sobre una caja con
-// su piso, sus paredes, el techo y el fondo, medidos en la foto. Así el piso es piso de verdad
-// y lo que hay en la foto (vitrinas, banquetas, columnas) se corre con su profundidad.
-// La toma (el pasillo real, de la puerta a la barra) tiene el punto de fuga corrido a la
-// izquierda y arriba del centro: `vx` y `horizon` lo ubican (2688 × 1520, 60° vertical).
-const ROOM = {
-  eye: 1.71, // altura de la cámara sobre el piso (la misma que en el pasillo)
-  vx: 940,
-  horizon: 616,
-  back: { left: 870, right: 1290, floor: 873, top: 400 }, // el fondo (la barra); `top` alto: el techo no puede quedar por debajo del marco de la puerta
-  near: { left: 694, right: 2171 }, // donde las paredes tocan el piso en el borde de abajo
-}
-// La foto se proyecta desde un poco antes de la puerta (no desde la cámara final): así su cono
-// cubre también el piso y el techo que se ven al acercarse; al final del recorrido se ve un
-// poco recortada, nada más.
-const PHOTO_BACK = 1.2
+// El salón, del otro lado de la puerta: la foto del pasillo real, entera y sin deformar, en un
+// plano lejano detrás de la puerta. Al cruzar, llena la pantalla tal cual es la imagen (una caja
+// con la foto proyectada la estiraba en cuanto la cámara no estaba donde se sacó).
+const INSIDE_DIST = 8 // del plano a la cámara final
 
 const PROJECT_VERT = /* glsl */ `
   uniform mat4 uProj0;
@@ -230,8 +218,12 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     scene.add(floor, ceil, left, right, end)
     parts.proj = projMat
 
-    // 2. El salón: la caja con la foto proyectada y las mesas paradas sobre su piso.
-    buildRoom()
+    // 2. El salón: la foto entera, en un plano lejano detrás de la puerta.
+    const inside = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), flat(tex.interior))
+    inside.position.set(0, 0, Z_INSIDE_CAM - INSIDE_DIST)
+    scene.add(inside)
+    parts.inside = inside
+    fitInside()
 
     // 3. Las hojas de la puerta.
     const door = rectAt(PARTS.door)
@@ -355,61 +347,15 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     onReady()
   })
 
-  const buildRoom = () => {
-    const F1 = IMG.h / 2 / Math.tan(((FOV / 2) * Math.PI) / 180)
-    const z0 = Z_INSIDE_CAM + PHOTO_BACK // la cámara de la foto está acá
-    const dDoor = z0 - Z_LEAVES + 0.03 // la caja empieza justo detrás de la puerta (nunca delante de la fachada)
-    // Un punto del piso visto en la foto (px, py) → mundo.
-    const onFloor = (px, py) => {
-      const d = (ROOM.eye * F1) / (py - ROOM.horizon)
-      return { x: ((px - ROOM.vx) * d) / F1, d }
-    }
-    const db = (ROOM.eye * F1) / (ROOM.back.floor - ROOM.horizon)
-    const top = ((ROOM.horizon - ROOM.back.top) * db) / F1
-    const yF = -ROOM.eye
-    const bl = { x: ((ROOM.back.left - ROOM.vx) * db) / F1, d: db }
-    const br = { x: ((ROOM.back.right - ROOM.vx) * db) / F1, d: db }
-    const nl = onFloor(ROOM.near.left, IMG.h)
-    const nr = onFloor(ROOM.near.right, IMG.h)
-    // Las paredes siguen hasta casi la puerta (más cerca de lo que muestra la foto).
-    const ext = (a, b, d) => ({ x: a.x + ((b.x - a.x) * (d - a.d)) / (b.d - a.d), d })
-    const fl = ext(nl, bl, dDoor)
-    const fr = ext(nr, br, dDoor)
-    // La foto se sacó pegada a la pared de las vitrinas; la puerta del módulo está centrada.
-    // El salón (y la cámara de la foto, para que la proyección no cambie) se corre de costado
-    // hasta que el pasillo quede centrado en la puerta: así siempre cubre todo el hueco.
-    const doorRect = rectAt(PARTS.door)
-    const shift = (doorRect.x0 + doorRect.x1) / 2 - (fl.x + fr.x) / 2
-    const P = (q, y) => [q.x + shift, y, z0 - q.d]
-    const quad = (a, b, c, d) => {
-      const g = new THREE.BufferGeometry()
-      g.setAttribute('position', new THREE.Float32BufferAttribute([...a, ...b, ...c, ...a, ...c, ...d], 3))
-      return g
-    }
-    const cam1 = new THREE.PerspectiveCamera(FOV, IMG.w / IMG.h, 0.01, 100)
-    cam1.position.set(shift, 0, z0)
-    cam1.updateMatrixWorld()
-    // El punto de fuga de la foto no está en el centro: se corre el centro óptico de la proyección.
-    cam1.projectionMatrix.elements[8] = (IMG.w / 2 - ROOM.vx) / (IMG.w / 2)
-    cam1.projectionMatrix.elements[9] = -(IMG.h / 2 - ROOM.horizon) / (IMG.h / 2)
-    const proj1 = new THREE.Matrix4().multiplyMatrices(cam1.projectionMatrix, cam1.matrixWorldInverse)
-    const mat = new THREE.ShaderMaterial({
-      uniforms: { uMap: { value: tex.interior }, uProj0: { value: proj1 }, uHole: { value: new THREE.Vector4(2, 2, 2, 2) }, uDim: { value: 1 }, uShade: { value: 0 } },
-      vertexShader: PROJECT_VERT,
-      fragmentShader: PROJECT_FRAG,
-      side: THREE.DoubleSide,
-    })
-    const room = new THREE.Group()
-    room.add(
-      new THREE.Mesh(quad(P(fl, yF), P(fr, yF), P(br, yF), P(bl, yF)), mat), // piso
-      new THREE.Mesh(quad(P(fl, top), P(bl, top), P(br, top), P(fr, top)), mat), // techo
-      new THREE.Mesh(quad(P(fl, yF), P(bl, yF), P(bl, top), P(fl, top)), mat), // pared izquierda
-      new THREE.Mesh(quad(P(fr, yF), P(fr, top), P(br, top), P(br, yF)), mat), // pared derecha
-      new THREE.Mesh(quad(P(bl, yF), P(br, yF), P(br, top), P(bl, top)), mat), // el fondo
-    )
-    scene.add(room)
-    parts.roomMat = mat
-
+  // El plano del salón cubre la pantalla desde la cámara final (con margen para el puntero).
+  const fitInside = () => {
+    if (!parts.inside) return
+    const tanV = Math.tan(((camera.fov / 2) * Math.PI) / 180)
+    const h = 2 * INSIDE_DIST * tanV
+    const w = h * camera.aspect
+    const a = IMG.w / IMG.h
+    const cover = w / h > a ? [w, w / a] : [h * a, h]
+    parts.inside.scale.set(cover[0] * 1.1, cover[1] * 1.1, 1)
   }
 
   const resize = () => {
@@ -426,6 +372,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     camera.updateProjectionMatrix()
     state.portrait = aspect < 0.9
     state.yaw = 0
+    fitInside()
   }
   resize()
   window.addEventListener('resize', resize)
