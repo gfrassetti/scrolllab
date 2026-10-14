@@ -17,7 +17,7 @@ export const C = {
 }
 
 export const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Roboto+Mono:wght@300;400&family=Barlow:wght@400;500&display=swap'
+  'https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;600;700&family=Barlow:wght@400;500&display=swap'
 
 export const MONO = { fontFamily: "'Roboto Mono', ui-monospace, monospace" }
 export const DISPLAY = { fontFamily: "'Chakra Petch', 'Barlow', sans-serif" }
