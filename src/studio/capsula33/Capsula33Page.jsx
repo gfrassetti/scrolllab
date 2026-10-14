@@ -6,6 +6,10 @@ import Loader from './Loader'
 import ShipHero from './ShipHero'
 import ScrollRail from './ScrollRail'
 import MapSection from './MapSection'
+import Nav from './Nav'
+import NosotrosSection from './NosotrosSection'
+import MenuSection from './MenuSection'
+import ContactSection from './ContactSection'
 import { BODY, C, FONTS_HREF } from './brand'
 
 const LOADER_MIN_MS = 5200
@@ -86,7 +90,11 @@ export default function Capsula33Page() {
       <div className="min-h-svh" style={{ background: '#05070d', color: C.cream, ...BODY }}>
         <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
         <ShipHero boarded={boarded} onProgress={onProgress} onReady={onReady} />
+        <NosotrosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
+        <MenuSection />
+        <ContactSection />
+        <Nav visible={boarded} />
         <ScrollRail visible={boarded} />
       </div>
     </SmoothScrollProvider>

@@ -105,3 +105,13 @@ Cap. 5 — Visitanos (footer 100svh, regla del curso): dirección, horarios,
 - Ya generada: la chica de pelo rosa (alta, recortada).
 - Blender: diorama existente (para el plano 3D, con material de líneas).
 - Fotos del dueño: SOLO como referencia para generar; nunca se publican.
+
+7. NAVEGACION Y CAPITULOS DE CIERRE (2026-10-14)
+------------------------------------------------
+- Barra fija (Nav.jsx): La cápsula · Nosotros · El local · Menú · Contacto + estado
+  abierto/cerrado. Se esconde al bajar y vuelve al subir; en el teléfono, panel.
+- Nosotros (NosotrosSection.jsx): frase grande que se enciende palabra por palabra.
+- Menú (MenuSection.jsx): pantalla LED en matriz de puntos con los precios reales,
+  que se escribe con el scroll (dos columnas; una en el teléfono).
+- Contacto (ContactSection.jsx): cierre a 100svh, naranja, dirección, horarios,
+  cómo llegar e Instagram, marca a todo el ancho.

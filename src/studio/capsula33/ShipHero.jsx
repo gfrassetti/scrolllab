@@ -475,26 +475,7 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         />
 
         {/* La interfaz de la nave: marca, estado y la llamada. */}
-        <div ref={set('chrome')} className="pointer-events-none absolute inset-0 flex flex-col justify-between px-6 pt-6 pb-8 md:px-10 md:pt-8 md:pb-10">
-          <header className="flex items-start justify-between gap-4">
-            <p data-in className="text-[20px] font-light opacity-0 md:text-[22px]" style={MONO}>
-              cāpsula<span style={{ color: C.orange }}>33</span>
-            </p>
-            <p data-in className="flex items-center gap-2 text-[11px] tracking-[0.16em] uppercase opacity-0" style={MONO}>
-              <span
-                aria-hidden="true"
-                className="inline-block h-1.5 w-1.5 rounded-full"
-                style={{
-                  background: status.open ? '#7dffa8' : C.orange,
-                  boxShadow: status.open ? '0 0 10px #7dffa8' : 'none',
-                }}
-              />
-              <span>
-                {status.label.split(' · ')[0]}
-                {status.label.includes(' · ') ? <span className="hidden sm:inline"> · {status.label.split(' · ').slice(1).join(' · ')}</span> : null}
-              </span>
-            </p>
-          </header>
+        <div ref={set('chrome')} className="pointer-events-none absolute inset-0 flex flex-col justify-end px-6 pt-6 pb-8 md:px-10 md:pt-8 md:pb-10">
           <div className="flex justify-center">
             <button
               type="button"
