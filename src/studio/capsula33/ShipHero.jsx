@@ -234,7 +234,13 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
     if (!boarded) return
     const r = R.current
     gsap.fromTo(r.canvas, { autoAlpha: 0, scale: 1.04 }, { autoAlpha: 1, scale: 1, duration: 2.2, ease: 'expo.out' })
-    gsap.fromTo(r.ledeIn, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 1.3, ease: 'expo.out', delay: 0.9 })
+    // El titular entra después de que la marca llega al cartel (≈ 2 s): primero las
+    // coordenadas y la ciudad, después el titular palabra por palabra.
+    gsap.set(r.ledeIn, { autoAlpha: 1 })
+    const ledeLines = r.ledeIn.querySelectorAll(':scope > p:not([data-headline])')
+    const words = r.ledeIn.querySelectorAll('[data-hw]')
+    gsap.fromTo(ledeLines, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12, delay: 2.4 })
+    gsap.fromTo(words, { autoAlpha: 0, yPercent: 60 }, { autoAlpha: 1, yPercent: 0, duration: 1, ease: 'expo.out', stagger: 0.035, delay: 2.75, clearProps: 'transform' })
     gsap.fromTo(
       r.girlIn,
       { autoAlpha: 0, yPercent: 12 },
@@ -420,6 +426,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
             </p>
             <p
               ref={set('headline')}
+              data-headline
               className="mt-4 text-[1.45rem] leading-[1.05] font-semibold tracking-[-0.01em] uppercase sm:text-[clamp(1.5rem,2.3vw,2.4rem)]"
               style={{
                 ...DISPLAY,
