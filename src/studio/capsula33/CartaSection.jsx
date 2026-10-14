@@ -236,7 +236,9 @@ export default function CartaSection() {
           r.nav.forEach((el, i) => el && (el.dataset.on = i === cur ? '1' : i < cur ? 'done' : '0'))
           r.sector.textContent = cur < 0 ? 'Carta take-away · 6 rubros' : `Rubro 0${cur + 1} / 0${N} · ${CATEGORIES[cur].title}`
           r.coord.textContent =
-            cur < 0 ? 'S 40°09′15″ · O 71°20′51″' : `Rumbo ${String(20 + cur * 47).padStart(3, '0')}° · ${CATEGORIES[cur].rows.filter((x) => x[0] !== 'tag').length} productos`
+            cur < 0
+              ? 'S 40°09′15″ · O 71°20′51″'
+              : `Rumbo ${String(20 + cur * 47).padStart(3, '0')}° · ${CATEGORIES[cur].rows.filter((x) => x[0] !== 'tag').length} productos`
         }
         const out = clamp01((p - INTRO * 0.5) / (INTRO * 0.45))
         r.intro.style.opacity = String(1 - out)
@@ -301,15 +303,29 @@ export default function CartaSection() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(rgba(127,212,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(127,212,255,0.05) 1px, transparent 1px)',
+            backgroundImage:
+              'linear-gradient(rgba(127,212,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(127,212,255,0.05) 1px, transparent 1px)',
             backgroundSize: '64px 64px',
           }}
         />
 
         {/* El mapa: la ruta, los planetas y sus productos. */}
         <div ref={set('world')} className="absolute top-0 left-0 will-change-transform" style={{ transformOrigin: '0 0' }}>
-          <svg className="absolute overflow-visible" style={{ left: 0, top: 0, width: 1, height: 1 }} aria-hidden="true">
-            <path ref={set('route')} d={routeD} fill="none" stroke="rgba(127,212,255,0.35)" strokeWidth="2" strokeDasharray="4 10" vectorEffect="non-scaling-stroke" />
+          {/* La ruta entre planetas: solo en pantalla ancha (en el teléfono cruzaba los títulos y las listas). */}
+          <svg
+            className="absolute overflow-visible"
+            style={{ left: 0, top: 0, width: 1, height: 1, visibility: L.wide ? 'visible' : 'hidden' }}
+            aria-hidden="true"
+          >
+            <path
+              ref={set('route')}
+              d={routeD}
+              fill="none"
+              stroke="rgba(127,212,255,0.35)"
+              strokeWidth="2"
+              strokeDasharray="4 10"
+              vectorEffect="non-scaling-stroke"
+            />
             <path ref={set('routeDone')} d={routeD} fill="none" stroke={C.neon} strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
             <g ref={set('ship')}>
               <path d="M14 0 L-9 -8 L-4 0 L-9 8 Z" fill={C.neon} />
@@ -324,7 +340,15 @@ export default function CartaSection() {
               <div key={cat.id} ref={(el) => (R.current.sys[i] = el)} className="c33-sys absolute" style={{ left: s.x, top: s.y, width: 0, height: 0 }}>
                 {/* Órbitas y líneas a cada producto. */}
                 <svg className="absolute overflow-visible" style={{ left: 0, top: 0, width: 1, height: 1 }} aria-hidden="true">
-                  <ellipse cx={s.px} cy={s.py} rx={s.R * 1.7} ry={s.R * 0.42} fill="none" stroke="rgba(127,212,255,0.25)" transform={`rotate(-14 ${s.px} ${s.py})`} />
+                  <ellipse
+                    cx={s.px}
+                    cy={s.py}
+                    rx={s.R * 1.7}
+                    ry={s.R * 0.42}
+                    fill="none"
+                    stroke="rgba(127,212,255,0.25)"
+                    transform={`rotate(-14 ${s.px} ${s.py})`}
+                  />
                   <circle cx={s.px} cy={s.py} r={s.R * 2.3} fill="none" stroke="rgba(127,212,255,0.12)" strokeDasharray="2 6" />
                   {L.wide
                     ? s.items.map((it, j) =>
@@ -366,7 +390,11 @@ export default function CartaSection() {
                 {/* El nombre del sistema. */}
                 <div
                   className="absolute"
-                  style={{ left: L.wide ? s.px - s.R : -dims.W * 0.42, top: L.wide ? s.py - s.R - 124 : s.py - s.R - 102, width: L.wide ? s.R * 3.6 : dims.W * 0.84 }}
+                  style={{
+                    left: L.wide ? s.px - s.R : -dims.W * 0.42,
+                    top: L.wide ? s.py - s.R - 124 : s.py - s.R - 102,
+                    width: L.wide ? s.R * 3.6 : dims.W * 0.84,
+                  }}
                 >
                   <p className="text-[11px] tracking-[0.24em] uppercase" style={{ ...MONO, color: C.neon }}>
                     Rubro 0{i + 1}
@@ -390,7 +418,10 @@ export default function CartaSection() {
                       style={{ left: it.x, top: it.y, transform: 'translateY(-50%)', width: L.wide ? dims.W * 0.3 : dims.W * 0.84, opacity: 0 }}
                     >
                       {tag ? (
-                        <span className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.18em] uppercase" style={{ ...MONO, background: 'rgba(127,212,255,0.16)', color: '#a9d6ff' }}>
+                        <span
+                          className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.18em] uppercase"
+                          style={{ ...MONO, background: 'rgba(127,212,255,0.16)', color: '#a9d6ff' }}
+                        >
                           {price}
                         </span>
                       ) : (
@@ -405,12 +436,19 @@ export default function CartaSection() {
                               <span className="text-[15px] leading-tight font-medium lg:text-[16px]" style={BODY}>
                                 {name}
                                 {vg ? (
-                                  <span className="ml-1.5 rounded-[2px] border px-1 align-middle text-[9px] font-bold" style={{ ...MONO, borderColor: 'rgba(242,233,220,0.4)' }}>
+                                  <span
+                                    className="ml-1.5 rounded-[2px] border px-1 align-middle text-[9px] font-bold"
+                                    style={{ ...MONO, borderColor: 'rgba(242,233,220,0.4)' }}
+                                  >
                                     VG
                                   </span>
                                 ) : null}
                               </span>
-                              <span aria-hidden="true" className="mb-[0.3em] min-w-4 flex-1 border-b border-dotted" style={{ borderColor: 'rgba(242,233,220,0.25)' }} />
+                              <span
+                                aria-hidden="true"
+                                className="mb-[0.3em] min-w-4 flex-1 border-b border-dotted"
+                                style={{ borderColor: 'rgba(242,233,220,0.25)' }}
+                              />
                               {price ? (
                                 <span className="text-[14px] font-semibold tabular-nums" style={{ ...MONO, color: C.neon }}>
                                   {price}
@@ -434,13 +472,27 @@ export default function CartaSection() {
         </div>
 
         {/* La consola: viñeta, barrido, esquinas, lecturas y el selector de sistemas. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(130% 100% at 50% 50%, transparent 55%, rgba(0,0,0,0.75) 100%)' }} />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(130% 100% at 50% 50%, transparent 55%, rgba(0,0,0,0.75) 100%)' }}
+        />
         <div aria-hidden="true" className="c33-scan pointer-events-none absolute inset-0" />
-        {['top-4 left-4 border-t-2 border-l-2', 'top-4 right-4 border-t-2 border-r-2', 'bottom-4 left-4 border-b-2 border-l-2', 'right-4 bottom-4 border-r-2 border-b-2'].map((c) => (
-          <span key={c} aria-hidden="true" className={`pointer-events-none absolute h-7 w-7 md:h-10 md:w-10 ${c}`} style={{ borderColor: 'rgba(127,212,255,0.5)' }} />
+        {[
+          'top-4 left-4 border-t-2 border-l-2',
+          'top-4 right-4 border-t-2 border-r-2',
+          'bottom-4 left-4 border-b-2 border-l-2',
+          'right-4 bottom-4 border-r-2 border-b-2',
+        ].map((c) => (
+          <span
+            key={c}
+            aria-hidden="true"
+            className={`pointer-events-none absolute h-7 w-7 md:h-10 md:w-10 ${c}`}
+            style={{ borderColor: 'rgba(127,212,255,0.5)' }}
+          />
         ))}
         <div className="pointer-events-none absolute inset-x-0 top-20 flex items-center justify-between gap-6 px-6 md:top-8 md:px-14 lg:top-10">
-          <p className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.7)' }}>
+          <p className="hidden items-center gap-3 text-[11px] tracking-[0.22em] uppercase md:flex" style={{ ...MONO, color: 'rgba(242,233,220,0.7)' }}>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.neon, boxShadow: `0 0 8px ${C.neon}` }} />
             <span ref={set('sector')}>Carta take-away · 6 rubros</span>
           </p>

@@ -183,7 +183,7 @@ export default function GaleriaSection() {
       <div className="relative flex min-h-svh flex-col px-6 pt-24 pb-16 md:px-10 lg:h-svh lg:flex-row lg:items-stretch lg:px-0 lg:py-0">
         <div
           ref={(el) => (R.current.track = el)}
-          className="flex flex-col gap-14 lg:h-full lg:flex-row lg:items-center lg:gap-[5.5vw] lg:pr-[10vw] lg:pl-[5vw]"
+          className="flex flex-col gap-24 sm:gap-28 lg:h-full lg:flex-row lg:items-center lg:gap-[5.5vw] lg:pr-[10vw] lg:pl-[5vw]"
         >
           {/* La entrada: el título, letra por letra. */}
           <div className="shrink-0 lg:w-[38vw]">

@@ -324,6 +324,10 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     const a = IMG.w / IMG.h
     const cover = w / h > a ? [w, w / a] : [h * a, h]
     parts.inside.scale.set(cover[0] * 1.1, cover[1] * 1.1, 1)
+    // En vertical se ve una franja del salón: se centra en la barra y el cartel (no en el medio
+    // de la foto), sin dejar ver el borde.
+    const spare = (cover[0] * 1.1 - w) / 2
+    parts.inside.position.x = w / h < 1 ? Math.min(spare, (0.5 - 0.42) * cover[0] * 1.1) : 0
   }
 
   const resize = () => {

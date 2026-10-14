@@ -218,8 +218,9 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         // prendido, el texto de bienvenida.
         const boot = cam.boot
         const inside = Math.max(0, Math.min(1, (cam.enter - 0.85) / 0.15))
-        const done = Math.max(0, Math.min(1, (boot - 0.9) / 0.1))
-        gsap.set(r.bootHud, { autoAlpha: inside * (1 - Math.max(0, Math.min(1, (boot - 0.92) / 0.06))) })
+        // El texto de bienvenida entra recién cuando la consola ya se fue (comparten el mismo lugar).
+        const done = Math.max(0, Math.min(1, (boot - 0.95) / 0.05))
+        gsap.set(r.bootHud, { autoAlpha: inside * (1 - Math.max(0, Math.min(1, (boot - 0.89) / 0.05))) })
         BOOT_STEPS.forEach(([, a, b], i) => {
           const el = r.bootLines[i]
           if (!el) return
