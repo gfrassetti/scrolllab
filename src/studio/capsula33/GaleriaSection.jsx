@@ -104,9 +104,23 @@ export default function GaleriaSection() {
       mm.add('(min-width: 1024px)', () => {
         const track = r.track
         const dist = () => Math.max(0, track.scrollWidth - window.innerWidth)
+        // Se pinta con el tween (sigue al scrub): con el onUpdate del scroll quedaban fotos a medio destapar.
         gsap.to(track, {
           x: () => -dist(),
           ease: 'none',
+          onUpdate: () => {
+            const W = window.innerWidth
+            r.figs.forEach((fig, i) => {
+              const b = fig.parentElement.getBoundingClientRect()
+              // 0 cuando el borde de la foto asoma por la derecha; 1 cuando ya entró un tercio de pantalla
+              // (así la última también termina de destaparse, pegada al borde).
+              const vis = clamp01((W - b.left) / (W * 0.32))
+              paintPanel(i, vis)
+              // El número grande va más lento que la foto (paralaje).
+              const t = (b.left + b.width / 2 - W / 2) / W
+              r.nums[i].style.transform = `translate3d(${t * -90}px, 0, 0)`
+            })
+          },
           scrollTrigger: {
             trigger: root,
             start: 'top top',
@@ -115,18 +129,6 @@ export default function GaleriaSection() {
             scrub: 0.7,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            onUpdate: () => {
-              const W = window.innerWidth
-              r.figs.forEach((fig, i) => {
-                const b = fig.parentElement.getBoundingClientRect()
-                // 0 cuando el borde de la foto asoma por la derecha; 1 cuando ya cruzó el 55% de la pantalla.
-                const vis = clamp01((W * 0.98 - b.left) / (W * 0.43))
-                paintPanel(i, vis)
-                // El número grande va más lento que la foto (paralaje).
-                const t = (b.left + b.width / 2 - W / 2) / W
-                r.nums[i].style.transform = `translate3d(${t * -90}px, 0, 0)`
-              })
-            },
           },
         })
         return () => {
@@ -237,9 +239,10 @@ export default function GaleriaSection() {
                     alt={p.caption}
                     loading="lazy"
                     decoding="async"
+                    onLoad={() => ScrollTrigger.refresh()}
                     width="1080"
                     height="1350"
-                    className="block aspect-[4/5] w-full object-cover lg:aspect-auto lg:h-[min(64svh,44vw)] lg:w-auto"
+                    className="block aspect-[4/5] w-full object-cover lg:h-[min(64svh,44vw)] lg:w-auto"
                     style={{ filter: 'saturate(1.05) contrast(1.03)' }}
                   />
                 </span>
@@ -285,7 +288,7 @@ export default function GaleriaSection() {
                 className="fixed inset-0 z-[90] flex flex-col items-center justify-center p-5 md:p-10"
                 style={{
                   background: 'rgba(5,6,10,0.94)',
-              color: C.cream,
+                  color: C.cream,
                   backdropFilter: 'blur(10px)',
                   opacity: panel ? 1 : 0,
                   visibility: panel ? 'visible' : 'hidden',

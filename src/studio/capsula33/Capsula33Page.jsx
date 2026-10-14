@@ -46,9 +46,36 @@ export default function Capsula33Page() {
     link.href = FONTS_HREF
     document.head.appendChild(link)
     const prevTitle = document.title
-    document.title = 'cāpsula33 · San Martín de los Andes'
+    document.title = 'cāpsula33 · Café de especialidad en San Martín de los Andes'
+    // Lo que muestran los buscadores y los datos del local (horario, dirección, ubicación).
+    const meta = document.createElement('meta')
+    meta.name = 'description'
+    meta.content =
+      'Cafetería de especialidad en Av. Gral. Roca 1120, San Martín de los Andes: espresso, laminados, brunch y figuras de colección en una cápsula naranja. Martes a sábado de 9 a 21, lunes de 9 a 15.'
+    const prevMeta = document.querySelector('meta[name="description"]')
+    if (prevMeta) prevMeta.remove()
+    document.head.appendChild(meta)
+    const ld = document.createElement('script')
+    ld.type = 'application/ld+json'
+    ld.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CafeOrCoffeeShop',
+      name: 'cāpsula33',
+      servesCuisine: ['Café de especialidad', 'Pastelería', 'Brunch'],
+      address: { '@type': 'PostalAddress', streetAddress: 'Av. Gral. Roca 1120', addressLocality: 'San Martín de los Andes', addressRegion: 'Neuquén', addressCountry: 'AR' },
+      geo: { '@type': 'GeoCoordinates', latitude: -40.1542728, longitude: -71.347478 },
+      openingHoursSpecification: [
+        { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '09:00', closes: '21:00' },
+        { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Monday', opens: '09:00', closes: '15:00' },
+      ],
+      sameAs: ['https://www.instagram.com/capsulas33/'],
+    })
+    document.head.appendChild(ld)
     return () => {
       link.remove()
+      meta.remove()
+      if (prevMeta) document.head.appendChild(prevMeta)
+      ld.remove()
       document.title = prevTitle
     }
   }, [])

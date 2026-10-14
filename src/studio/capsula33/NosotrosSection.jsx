@@ -9,14 +9,14 @@ import { MAP_BG } from './mapScene'
  * Una sola frase grande que se enciende palabra por palabra con el scroll
  * (como el manifiesto de APEX o los capítulos de CHAPTERS). Todo sale de lo que
  * el local ya dice de sí mismo: la cápsula naranja, el café de especialidad, la
- * frase de la pared y la colección del dueño en vitrinas. Cuando la frase termina
+ * colección de figuras en vitrinas. Cuando la frase termina
  * de encenderse entra una foto del salón (se destapa de abajo hacia arriba).
  * Abajo, tres datos.
  * `*` marca el tramo en naranja.
  */
 
 const STATEMENT =
-  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes. En la pared lo dice: «No somos lo que razonamos, somos lo que *imaginamos*». Un lugar para reunirnos, con la colección de cine del dueño en vitrinas.'
+  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección* de cine y series en vitrinas de ojo de buey. Un lugar para reunirnos.'
 
 const WORDS = (() => {
   let accent = false

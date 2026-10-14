@@ -51,7 +51,8 @@ function sources() {
 
 // El titular grande, debajo de las coordenadas: se apaga palabra por palabra con el scroll
 // (como el manifiesto de APEX o los capítulos de CHAPTERS). `*` marca el tramo en naranja.
-const HEADLINE = 'Una cápsula naranja en medio de la ciudad: *café de especialidad*, la colección de cine del dueño y un lugar para reunirse.'
+// La frase de la pared del local, junto al ojo de buey (texto real del dueño).
+const HEADLINE = 'No somos lo que razonamos, *somos lo que imaginamos.*'
 const HEADLINE_WORDS = (() => {
   let accent = false
   return HEADLINE.split(' ').map((raw) => {
@@ -78,9 +79,8 @@ function notesFor(status) {
       at: [-1.55, -0.55, -6.4],
       atPhone: [-1.1, -0.85, -6.4],
       side: 'left',
-      kicker: 'En la pared del local',
-      text: '«No somos lo que razonamos, somos lo que imaginamos.»',
-      quote: true,
+      kicker: 'La colección',
+      text: 'Figuras de cine y series',
     },
     {
       at: [1.6, 0.55, -7.4],
@@ -386,8 +386,6 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
 
   return (
     <section ref={rootRef} id="top" className="relative h-[680svh]" style={{ background: '#05060a', color: C.cream }}>
-      <h1 className="sr-only">cāpsula33 — café de especialidad en San Martín de los Andes</h1>
-      <p className="sr-only">{HEADLINE.replace(/\*/g, '')}</p>
       <div className="sticky top-0 h-svh overflow-hidden">
         <canvas
           ref={set('canvas')}
@@ -434,7 +432,6 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         {/* Las coordenadas y el titular grande, que se apaga palabra por palabra con el scroll. */}
         <div
           ref={set('lede')}
-          aria-hidden="true"
           className="pointer-events-none absolute top-[13svh] left-6 z-10 w-[min(88vw,420px)] sm:top-auto sm:bottom-[15svh] sm:left-10 sm:w-[min(46vw,700px)]"
         >
           {/* Un poco de noche detrás, para que se lea sobre los reflejos del piso. */}
@@ -448,13 +445,14 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
               <span className="h-px w-6" style={{ background: C.neon }} />
               40°09′S · 71°21′O
             </p>
-            <p className="mt-1.5 text-[12px] tracking-[0.18em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.8)' }}>
-              San Martín de los Andes
-            </p>
+            {/* El título de la página (lo que se busca): qué es y dónde. La frase grande es la marca. */}
+            <h1 className="mt-1.5 text-[12px] font-normal tracking-[0.18em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.8)' }}>
+              Café de especialidad en San Martín de los Andes
+            </h1>
             <p
               ref={set('headline')}
               data-headline
-              className="mt-4 text-[1.45rem] leading-[1.05] font-semibold tracking-[-0.01em] uppercase sm:text-[clamp(1.5rem,2.3vw,2.4rem)]"
+              className="mt-4 text-[1.9rem] leading-[1.02] font-semibold tracking-[-0.01em] uppercase sm:text-[clamp(2rem,3.4vw,3.6rem)]"
               style={{
                 ...DISPLAY,
                 color: C.cream,
@@ -651,7 +649,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
             Bienvenidos, exploradores de universos
           </p>
           <p className="mt-3 max-w-[40ch] text-[16px] leading-[1.55]" style={{ ...BODY, color: 'rgba(242,233,220,0.85)' }}>
-            Café de especialidad y la colección del dueño en vitrinas, en el centro de San Martín de los Andes.
+            Café de especialidad, laminados de todos los días y figuras de colección en vitrinas, en el centro de San Martín de los Andes.
           </p>
         </div>
       </div>
