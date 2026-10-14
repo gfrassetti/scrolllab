@@ -6,8 +6,8 @@ import { C, MONO, DISPLAY, openStatus } from './brand'
  * cāpsula33 — barra de navegación.
  *
  * Fija arriba: la marca, las secciones de la página y si está abierto. Se
- * esconde al bajar y vuelve al subir (como en los sitios de referencia), y
- * siempre está a la vista al principio de la página. En el teléfono, un botón
+ * esconde al bajar y vuelve al subir (como en los sitios de referencia); al
+ * entrar al hero no se muestra. En el teléfono, un botón
  * abre un panel con las mismas secciones en grande.
  */
 
@@ -34,7 +34,7 @@ const SPY = [
 ]
 
 export default function Nav({ visible }) {
-  const [hidden, setHidden] = useState(false)
+  const [hidden, setHidden] = useState(true)
   const [solid, setSolid] = useState(false)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState('top')
@@ -51,7 +51,10 @@ export default function Nav({ visible }) {
       const y = window.scrollY
       const dy = y - lastY
       setSolid(y > 24)
-      if (y < 120 || openRef.current) setHidden(false)
+      // Al entrar al hero no está: la entrada a la cápsula se ve limpia. Aparece si se scrollea
+      // para arriba (en el hero y en el resto) y se va al bajar.
+      if (openRef.current) setHidden(false)
+      else if (y < 120) setHidden(true)
       else if (Math.abs(dy) > 5) setHidden(dy > 0)
       if (Math.abs(dy) > 5) lastY = y
       // La sección activa: la que cruza el 40 % de la pantalla.

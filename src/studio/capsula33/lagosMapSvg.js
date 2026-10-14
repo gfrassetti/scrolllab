@@ -10,7 +10,15 @@
 export const MAP_W = 1272
 export const MAP_H = 1966
 
-const C = {
+// Dos paletas: el papel del local y el holograma (la pantalla de la nave). El dibujo es el mismo.
+const PAPER_C = {
+  steel: '#909ca1',
+  dome: '#a4adb1',
+  win: '#2e5277',
+  arch: '#5f7fa6',
+  inset: '#d7dbc8',
+  light: '#ffffff',
+  shade: '#000000',
   paper: '#3f7e96',
   paperDk: '#356f87',
   sage: '#cfd6bd',
@@ -28,6 +36,35 @@ const C = {
   mountDk: '#5f6b78',
   ink: '#28324a',
 }
+// Holograma: todo en cian, rellenos casi transparentes, líneas que brillan. Los rótulos rojos del
+// papel pasan a cajas cian más llenas; el naranja queda para la ruta.
+const HOLO_C = {
+  steel: 'rgba(95,230,255,0.10)',
+  dome: 'rgba(95,230,255,0.08)',
+  win: 'rgba(95,230,255,0.35)',
+  arch: '#7ff0ff',
+  inset: 'rgba(95,230,255,0.06)',
+  light: '#7ff0ff',
+  shade: '#7ff0ff',
+  paper: 'rgba(0,0,0,0)',
+  paperDk: 'rgba(0,0,0,0)',
+  sage: 'rgba(95,230,255,0.06)',
+  sageDk: 'rgba(95,230,255,0.05)',
+  sageGray: 'rgba(95,230,255,0.12)',
+  cream: '#8cf3ff',
+  creamLt: '#d8fbff',
+  beige: 'rgba(95,230,255,0.2)',
+  red: 'rgba(40,190,230,0.42)',
+  redDk: '#5fe6ff',
+  navy: '#3fd2f2',
+  road: '#2aa9cc',
+  purple: 'rgba(0,0,0,0)',
+  mount: 'rgba(95,230,255,0.05)',
+  mountDk: 'rgba(95,230,255,0.28)',
+  ink: '#bff7ff',
+}
+let C = PAPER_C
+let HOLO = false
 const MONO = "'Roboto Mono', ui-monospace, monospace"
 const DISP = "'Chakra Petch', 'Roboto Mono', sans-serif"
 
@@ -43,7 +80,12 @@ export const ROUTE_D =
 /** Polígono redondeado (esquinas en chaflán), como las regiones del mapa. */
 const poly = (pts) => 'M' + pts.map((p) => p.join(' ')).join(' L') + ' Z'
 
-const region = (pts, fill = C.sageDk) => `
+// Las funciones leen C al dibujar (la paleta se elige antes de armar el mapa).
+const region = (pts, fill = C.sageDk) =>
+  HOLO
+    ? `<path d="${poly(pts)}" fill="${fill}" stroke="${C.navy}" stroke-opacity="0.35" stroke-width="9" stroke-linejoin="round"/>
+  <path d="${poly(pts)}" fill="none" stroke="${C.creamLt}" stroke-width="2.5" stroke-linejoin="round"/>`
+    : `
   <path d="${poly(pts)}" fill="${fill}" stroke="${C.navy}" stroke-width="22" stroke-linejoin="round"/>
   <path d="${poly(pts)}" fill="${fill}" stroke="${C.cream}" stroke-width="13" stroke-linejoin="round"/>`
 
@@ -139,9 +181,9 @@ function domeSection() {
   s += `<path d="M104 1704 l4 7 h-8 z" fill="${C.creamLt}" stroke="${C.ink}"/>` + lines(118, 1712, ['Otros', 'Multiuniversos'], { size: 11.5, lh: 14 })
   s += `<path d="M104 1738 l6 6 l-6 6 l-6 -6 z" fill="${C.red}"/>` + text(118, 1749, 'Capsula33', { size: 11.5 })
   // Base del corte.
-  s += `<rect x="95" y="1838" width="1145" height="22" fill="#909ca1" stroke="${C.navy}" stroke-width="2"/>`
+  s += `<rect x="95" y="1838" width="1145" height="22" fill="${C.steel}" stroke="${C.navy}" stroke-width="2"/>`
   // La cúpula chica de la izquierda, con su antena.
-  s += `<path d="M165 1840 C165 1735 230 1688 292 1688 C340 1688 370 1712 392 1748 L392 1840 Z" fill="#a4adb1" stroke="${C.navy}" stroke-width="2.5"/>`
+  s += `<path d="M165 1840 C165 1735 230 1688 292 1688 C340 1688 370 1712 392 1748 L392 1840 Z" fill="${C.dome}" stroke="${C.navy}" stroke-width="2.5"/>`
   for (let i = 0; i < 4; i++) s += `<rect x="${252 + i * 22}" y="1716" width="14" height="22" rx="3" fill="${C.creamLt}" stroke="${C.navy}" stroke-width="2"/>`
   s += `<line x1="336" y1="1606" x2="336" y2="1690" stroke="${C.navy}" stroke-width="3"/><line x1="324" y1="1640" x2="348" y2="1640" stroke="${C.navy}" stroke-width="3"/><circle cx="336" cy="1602" r="11" fill="${C.purple}"/>`
   s += `<rect x="314" y="1660" width="10" height="34" rx="5" fill="${C.creamLt}" stroke="${C.navy}" stroke-width="2"/><rect x="330" y="1660" width="10" height="34" rx="5" fill="${C.creamLt}" stroke="${C.navy}" stroke-width="2"/>`
@@ -152,13 +194,13 @@ function domeSection() {
     for (let x = 415; x < 1000; x += 57) {
       if (y === 1670 && x > 620) continue
       const k = `${x},${y}`
-      s += `<rect x="${x}" y="${y}" width="44" height="46" fill="${dark.has(k) ? '#2e5277' : 'none'}" stroke="${C.navy}" stroke-width="2"/>`
+      s += `<rect x="${x}" y="${y}" width="44" height="46" fill="${dark.has(k) ? C.win : 'none'}" stroke="${C.navy}" stroke-width="2"/>`
     }
   // La gran bóveda.
   s += `<path d="M300 1840 C330 1660 470 1572 705 1572 C935 1572 1070 1690 1118 1905" fill="none" stroke="${C.road}" stroke-width="26" stroke-linecap="round"/>`
-  s += `<path d="M300 1840 C330 1660 470 1572 705 1572 C935 1572 1070 1690 1118 1905" fill="none" stroke="#5f7fa6" stroke-width="10" stroke-linecap="round"/>`
+  s += `<path d="M300 1840 C330 1660 470 1572 705 1572 C935 1572 1070 1690 1118 1905" fill="none" stroke="${C.arch}" stroke-width="10" stroke-linecap="round"/>`
   // Tanques y la cúpula azul de la derecha.
-  s += `<path d="M935 1745 A32 32 0 0 1 999 1745 Z" fill="#2e5277" stroke="${C.navy}" stroke-width="2"/>`
+  s += `<path d="M935 1745 A32 32 0 0 1 999 1745 Z" fill="${C.win}" stroke="${C.navy}" stroke-width="2"/>`
   s += `<rect x="1092" y="1770" width="40" height="120" rx="20" fill="${C.creamLt}" stroke="${C.navy}" stroke-width="2.5"/>`
   s += `<rect x="1142" y="1820" width="24" height="70" rx="12" fill="${C.creamLt}" stroke="${C.navy}" stroke-width="2.5"/>`
   // Escala.
@@ -203,7 +245,7 @@ function restrictedInner() {
       [925, 1595],
       [925, 1335],
     ],
-    '#d7dbc8',
+    C.inset,
   )
   for (let r = 40; r <= 160; r += 40) s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${C.navy}" stroke-opacity="0.28" stroke-width="1.2"/>`
   for (let a = 0; a < 180; a += 30) {
@@ -465,25 +507,22 @@ function rightEdge() {
 }
 
 /** El mapa entero (sin el `<svg>`): para usar dentro de un `<svg viewBox="0 0 1272 1966">`. */
-// El papel (azul y cuadrícula), aparte: la sección lo dibuja con su propio fundido ancho.
-export const PAPER_COLOR = C.paper
-const PAPER_BG = `<rect width="${MAP_W}" height="${MAP_H}" fill="${C.paper}"/><rect width="${MAP_W}" height="${MAP_H}" fill="url(#c33m-grid)"/>`
-/** La hoja sin el papel de fondo (solo el dibujo). */
-export const MAP_CONTENT_ONLY = () => MAP_SVG.replace(PAPER_BG, '')
-
-const MOUNTAINS = flipped(mountains)
-const NETWORK = flipped(network)
-
-export const MAP_SVG = `
+function compose(palette, holo) {
+  C = palette
+  HOLO = holo
+  const MOUNTAINS = flipped(mountains)
+  const NETWORK = flipped(network)
+  const out = `
   <defs>
     <pattern id="c33m-grid" width="24" height="24" patternUnits="userSpaceOnUse">
-      <path d="M24 0H0V24" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+      <path d="M24 0H0V24" fill="none" stroke="${C.light}" stroke-opacity="${holo ? 0.1 : 0.06}" stroke-width="1"/>
     </pattern>
     <pattern id="c33m-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
       <line x1="0" y1="0" x2="0" y2="10" stroke="${C.mountDk}" stroke-width="2"/>
     </pattern>
   </defs>
-  ${PAPER_BG}
+  <rect width="${MAP_W}" height="${MAP_H}" fill="${C.paper}"/>
+  <rect width="${MAP_W}" height="${MAP_H}" fill="url(#c33m-grid)"/>
   ${MOUNTAINS.shapes}
   ${NETWORK.shapes}
   ${routeBase()}
@@ -493,11 +532,22 @@ export const MAP_SVG = `
   ${restricted()}
   ${domeSection()}
   ${rightEdge()}
-  <line x1="636" y1="0" x2="636" y2="${MAP_H}" stroke="#ffffff" stroke-opacity="0.16" stroke-width="2"/>
-  <line x1="638" y1="0" x2="638" y2="${MAP_H}" stroke="#000000" stroke-opacity="0.12" stroke-width="2"/>
-  <line x1="0" y1="958" x2="${MAP_W}" y2="958" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
-  <line x1="0" y1="960" x2="${MAP_W}" y2="960" stroke="#000000" stroke-opacity="0.1" stroke-width="2"/>
+  <line x1="636" y1="0" x2="636" y2="${MAP_H}" stroke="${C.light}" stroke-opacity="${holo ? 0.18 : 0.16}" stroke-width="2"/>
+  <line x1="638" y1="0" x2="638" y2="${MAP_H}" stroke="${C.shade}" stroke-opacity="${holo ? 0 : 0.12}" stroke-width="2"/>
+  <line x1="0" y1="958" x2="${MAP_W}" y2="958" stroke="${C.light}" stroke-opacity="${holo ? 0.18 : 0.12}" stroke-width="2"/>
+  <line x1="0" y1="960" x2="${MAP_W}" y2="960" stroke="${C.shade}" stroke-opacity="${holo ? 0 : 0.1}" stroke-width="2"/>
 `
+  C = PAPER_C
+  HOLO = false
+  // En el holograma los rellenos claros del papel (edificio, columnas, cajas) serían bloques
+  // macizos: pasan a un cian transparente (el texto conserva su color).
+  return holo ? out.replace(/<(rect|path|circle|ellipse)([^>]*?)fill="(#d8fbff|#8cf3ff|#5fe6ff)"/g, '<$1$2fill="rgba(95,230,255,0.13)"') : out
+}
+
+/** El mapa entero (sin el `<svg>`): para usar dentro de un `<svg viewBox="0 0 1272 1966">`. */
+export const MAP_SVG = compose(PAPER_C, false)
+/** El mismo mapa como holograma de la nave (cian, sin papel). */
+export const HOLO_SVG = compose(HOLO_C, true)
 
 /**
  * Las escalas, en el orden de la ruta (del Lácar, arriba, al lago mayor, abajo):

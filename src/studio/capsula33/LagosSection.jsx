@@ -2,16 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../lib/gsap'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { MAP_BG } from './mapScene'
-import { MAP_SVG, MAP_W, MAP_H, ROUTE_D, STOPS, RESTRICTED_D } from './lagosMapSvg'
+import { HOLO_SVG, MAP_W, MAP_H, ROUTE_D, STOPS, RESTRICTED_D } from './lagosMapSvg'
 
 /**
  * cāpsula33 — «La ruta»: el mapa «Base 7-Lagos» que el local tiene en la mesa,
  * redibujado en vector (mismos paneles, lagos, domo en corte y textos), con el norte
  * arriba como el mapa real: el Lácar arriba, el Nahuel Huapi abajo.
  *
- * La hoja queda quieta, al centro, sobre la mesa negra con su cuadrícula y con los bordes
- * apenas fundidos. Lo único que se enciende es la ruta (en neón); cada lago se enciende
- * cuando la ruta llega, y abajo a la izquierda se lee la escala actual.
+ * El mapa es un holograma de la nave: el mismo dibujo de la hoja en cian, proyectado desde
+ * una base sobre la mesa negra con su cuadrícula. Al llegar a la sección la pantalla se
+ * enciende (una línea de luz que se abre, un barrido de arriba abajo y el dibujo que
+ * titila hasta quedar firme). Lo único que se enciende con el scroll es la ruta (en neón
+ * naranja); cada lago se enciende cuando la ruta llega, y abajo a la izquierda se lee la
+ * escala actual.
  */
 
 const PAD = 12
@@ -55,7 +58,6 @@ export default function LagosSection() {
       const SPAN = 0.8
       const paint = (p) => {
         // El plano: entra apenas atenuado y queda entero.
-        r.map.style.opacity = String(0.8 + 0.2 * clamp01(p / 0.06))
         // La ruta, de un trazo, con su resplandor.
         const draw = clamp01((p - START) / SPAN)
         for (const el of [r.progress, r.core, r.glow]) el.style.strokeDashoffset = String(1 - draw)
@@ -119,6 +121,19 @@ export default function LagosSection() {
         .to(lines, { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12 }, 0.1)
         .to(lede, { autoAlpha: 1, duration: 0.6, ease: 'power2.out' }, 0.5)
       if (split) tl.to(split.words, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.035 }, 0.6)
+      // La pantalla se enciende al llegar: una línea de luz que se abre, el barrido y el dibujo que
+      // titila hasta quedar firme.
+      const holo = r.holo
+      gsap.set(holo, { opacity: 0, scaleY: 0.004, scaleX: 0.25 })
+      gsap.set(r.map, { opacity: 0 })
+      const boot = gsap.timeline({ paused: true })
+      boot
+        .to(holo, { opacity: 1, scaleX: 1, duration: 0.35, ease: 'expo.out' })
+        .to(holo, { scaleY: 1, duration: 0.75, ease: 'expo.inOut' }, 0.25)
+        .fromTo(r.sweep, { top: '-14%', opacity: 1 }, { top: '100%', opacity: 0.2, duration: 1.1, ease: 'power2.inOut' }, 0.55)
+        .to(r.map, { keyframes: { opacity: [0, 0.6, 0.15, 0.85, 0.35, 1] }, duration: 0.9, ease: 'none' }, 0.75)
+      // También si se llega desde abajo (un salto del menú a una sección posterior y vuelta).
+      ScrollTrigger.create({ trigger: rootRef.current, start: 'top 70%', end: 'bottom top', onEnter: () => boot.play(), onEnterBack: () => boot.play() })
       paint(0)
       ScrollTrigger.create({
         trigger: rootRef.current,
@@ -148,41 +163,64 @@ export default function LagosSection() {
           }}
         />
 
-        {/* El mapa entero, quieto: lo que se enciende es la ruta. */}
-        <svg
-          viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-10.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[4svh] lg:left-[57%] lg:h-[92svh] lg:w-auto lg:-translate-x-1/2"
-          style={{
-            aspectRatio: `${MAP_W} / ${MAP_H}`,
-          }}
-          role="img"
-          aria-label="Mapa «Base 7-Lagos»: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi"
+        {/* La pantalla de la nave: el mapa de los siete lagos como holograma. */}
+        <div
+          className="absolute top-[max(18svh,9.5rem)] left-1/2 h-[calc(100svh-max(18svh,9.5rem)-12.5rem)] max-w-[calc(100%-1.5rem)] -translate-x-1/2 sm:top-[17svh] sm:h-[55svh] lg:top-[5svh] lg:left-[57%] lg:h-[86svh]"
+          style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}
         >
-          <defs>
-            {/* La hoja se disuelve en el mapa: una máscara de bordes suaves por los cuatro lados (más en
-                las esquinas), sin borde recto ni sombra. */}
-            <filter id="c33-paper-soft" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="28" />
-            </filter>
-            <mask id="c33-paper-fade" maskUnits="userSpaceOnUse" x="0" y="0" width={MAP_W} height={MAP_H}>
-              <rect x="40" y="34" width={MAP_W - 80} height={MAP_H - 68} rx="90" fill="#fff" filter="url(#c33-paper-soft)" />
-            </mask>
-            <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="14" />
-            </filter>
-            <filter id="c33-lake-glow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <g mask="url(#c33-paper-fade)">
-            <g>
-              <g ref={set('map')} style={{ opacity: 0.55 }} dangerouslySetInnerHTML={{ __html: MAP_SVG }} />
-
+          {/* El proyector: la base sobre la mesa y el haz que sube. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-[4.5%] left-[4%] h-[3.2%] w-[92%] rounded-[50%]"
+            style={{
+              background: 'radial-gradient(50% 50% at 50% 50%, rgba(120,235,255,0.75), rgba(60,200,255,0.18) 55%, transparent 75%)',
+              filter: 'blur(3px)',
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-[5.5%] left-[10%] h-[2%] w-[80%] rounded-[3px]"
+            style={{ background: 'linear-gradient(180deg, #1c2a33, #0a1117)', boxShadow: '0 0 0 1px rgba(95,230,255,0.35), 0 -2px 18px rgba(95,230,255,0.45)' }}
+          />
+          <div ref={set('holo')} className="c33-holo absolute inset-0" style={{ transformOrigin: '50% 100%', opacity: 0 }}>
+            {/* El vidrio: un marco que brilla, un velo cian y el haz de abajo hacia arriba. */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-[10px] border"
+              style={{
+                borderColor: 'rgba(95,230,255,0.45)',
+                background: 'linear-gradient(0deg, rgba(40,170,220,0.2), rgba(10,40,60,0.28) 45%, rgba(10,40,60,0.18))',
+                boxShadow: 'inset 0 0 50px rgba(60,200,255,0.16), 0 0 40px rgba(60,200,255,0.18)',
+              }}
+            />
+            <svg
+              viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+              preserveAspectRatio="xMidYMid meet"
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full"
+              style={{ filter: 'drop-shadow(0 0 3px rgba(95,230,255,0.55))' }}
+            >
+              <g ref={set('map')} dangerouslySetInnerHTML={{ __html: HOLO_SVG }} />
+            </svg>
+            <svg
+              viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+              preserveAspectRatio="xMidYMid meet"
+              className="absolute inset-0 h-full w-full"
+              role="img"
+              aria-label="Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi"
+            >
+              <defs>
+                <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="14" />
+                </filter>
+                <filter id="c33-lake-glow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
               {/* Los lagos que se encienden al pasar la ruta. */}
               {STOPS.map(([name, , [x, y, w, h]], i) => (
                 <rect
@@ -255,9 +293,32 @@ export default function LagosSection() {
                 strokeLinejoin="round"
                 style={{ opacity: 0 }}
               />
-            </g>
-          </g>
-        </svg>
+            </svg>
+            {/* Líneas de barrido, el barrido del encendido y las esquinas de la pantalla. */}
+            <div aria-hidden="true" className="c33-holo-scan pointer-events-none absolute inset-0 rounded-[10px]" />
+            <div
+              ref={set('sweep')}
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-[14%] opacity-0"
+              style={{ background: 'linear-gradient(180deg, transparent, rgba(160,245,255,0.35) 60%, rgba(220,252,255,0.8) 92%, transparent)' }}
+            />
+            {[
+              '-top-2 -left-2 border-t-2 border-l-2',
+              '-top-2 -right-2 border-t-2 border-r-2',
+              '-bottom-2 -left-2 border-b-2 border-l-2',
+              '-right-2 -bottom-2 border-r-2 border-b-2',
+            ].map((c) => (
+              <span key={c} aria-hidden="true" className={`pointer-events-none absolute h-6 w-6 ${c}`} style={{ borderColor: '#7ff0ff' }} />
+            ))}
+            <p
+              aria-hidden="true"
+              className="absolute -top-6 left-0 hidden text-[10px] tracking-[0.24em] uppercase sm:block"
+              style={{ ...MONO, color: 'rgba(127,240,255,0.75)' }}
+            >
+              Holo · C-33 / Navegación
+            </p>
+          </div>
+        </div>
 
         {/* Arriba a la izquierda: el título (letra por letra al entrar). */}
         <div ref={set('head')} className="absolute top-20 left-6 max-w-[min(88vw,30rem)] md:left-10 lg:top-24 lg:left-[5vw] lg:max-w-[min(30rem,32vw)]">
@@ -341,6 +402,12 @@ export default function LagosSection() {
           </p>
         </div>
       </div>
+      <style>{`
+        .c33-holo-scan { background: repeating-linear-gradient(0deg, rgba(127,240,255,0.06) 0 1px, transparent 1px 4px); animation: c33-holo-scan 6s linear infinite; mix-blend-mode: screen; }
+        @keyframes c33-holo-scan { from { background-position: 0 0; } to { background-position: 0 120px; } }
+        .c33-holo { animation: c33-holo-flicker 7s steps(1, end) infinite; }
+        @keyframes c33-holo-flicker { 0%, 96%, 98%, 100% { filter: none; } 97% { filter: brightness(1.25); } 99% { filter: brightness(0.85); } }
+      `}</style>
     </section>
   )
 }
