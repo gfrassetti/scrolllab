@@ -69,6 +69,32 @@ export default function FooterSplash({
   const cta = ctaHref || `mailto:${email}`
   const flatLinks = Array.isArray(links) ? links.filter((l) => l && l.label) : []
 
+  const legalNav = (
+    <nav aria-label={legalHeading}>
+      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] opacity-55 md:text-xs lg:mb-5">
+        {legalHeading}
+      </p>
+      <ul className="lg:space-y-1">
+        {[
+          { label: privacyLabel, href: privacyHref },
+          { label: termsLabel, href: termsHref },
+        ]
+          .filter((l) => l.label)
+          .map((l) => (
+            <li key={l.label}>
+              <a
+                href={l.href}
+                {...externalProps(l.href)}
+                className="tpl-link tpl-hit relative inline-block py-3 text-sm uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+      </ul>
+    </nav>
+  )
+
   useGSAP(
     () => {
       // Calma: la marca entra con un fundido; las burbujas que suben no se prenden.
@@ -143,31 +169,10 @@ export default function FooterSplash({
                   </ul>
                 </nav>
               ))}
-              <nav aria-label={legalHeading}>
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] opacity-55 md:text-xs lg:mb-5">
-                  {legalHeading}
-                </p>
-                <ul className="lg:space-y-1">
-                  {[
-                    { label: privacyLabel, href: privacyHref },
-                    { label: termsLabel, href: termsHref },
-                  ]
-                    .filter((l) => l.label)
-                    .map((l) => (
-                      <li key={l.label}>
-                        <a
-                          href={l.href}
-                          {...externalProps(l.href)}
-                          className="tpl-link tpl-hit relative inline-block py-3 text-sm uppercase transition-opacity duration-300 hover:opacity-70 md:text-base lg:py-0"
-                        >
-                          {l.label}
-                        </a>
-                      </li>
-                    ))}
-                </ul>
-              </nav>
             </>
           )}
+          {/* Legal: también con links propios (antes desaparecía al editarlos). */}
+          {legalNav}
           {/* Contacto: también con links propios (antes desaparecía al editarlos). */}
           <div className="col-span-2 md:col-span-1">
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] opacity-55 md:text-xs lg:mb-5">
@@ -216,7 +221,7 @@ export default function FooterSplash({
         ])}
         closeLabel={legalCloseLabel}
         bg={fg || '#fff3e2'}
-        fg="#241352"
+        fg={bg || '#2c4bff'}
       />
     </footer>
   )
