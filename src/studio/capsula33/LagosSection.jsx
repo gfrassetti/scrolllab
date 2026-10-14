@@ -15,8 +15,11 @@ import { MAP_BG } from './mapScene'
  */
 
 const VB = { w: 600, h: 840 }
-// Los lagos, de la puerta del domo hacia el norte: [nombre, x, y, ancho, alto, texto].
-const LAKES = [
+// El recorte que se ve (el domo asoma por arriba del plano).
+const VIEW = '-30 -95 660 955'
+// Los lagos, de la puerta del domo hacia abajo: [nombre, x, y, ancho, alto, texto].
+// Se escribieron de abajo hacia arriba; `flip` los da vuelta (la ruta baja con el scroll).
+const LAKES_UP = [
   ['Lago Lácar', 60, 610, 170, 120, 'Puerto de partida. Es el espejo de navegación: sirve para orientarse antes de salir.'],
   ['Lago Machónico', 300, 560, 110, 70, 'Primer salto de la ruta: una escala corta entre el bosque.'],
   ['Lago Falkner', 380, 430, 130, 80, 'Agua profunda y quieta; la ruta lo bordea por la costa.'],
@@ -26,12 +29,12 @@ const LAKES = [
   ['Lago Espejo', 360, 150, 120, 70, 'La última escala antes del lago mayor. El agua devuelve el cielo.'],
   ['Lago Nahuel Huapi', 150, 40, 300, 80, 'Bonus: el lago mayor del sistema. Acá termina el mapa conocido.'],
 ]
+const LAKES = LAKES_UP.map(([n, x, y, w, h, t]) => [n, x, VB.h - y - h, w, h, t])
 const centers = LAKES.map(([, x, y, w, h]) => [x + w / 2, y + h / 2])
 // La ruta pasa por el centro de cada lago, en tramos rectos como un circuito.
-const ROUTE = 'M145 800 V670 H250 V595 H445 V470 H330 V440 H230 V380 H345 V320 H265 V245 H185 H300 V185 H420 V120 H300 V80'
+const ROUTE = 'M145 40 V170 H250 V245 H445 V370 H330 V400 H230 V460 H345 V520 H265 V595 H185 H300 V655 H420 V720 H300 V760'
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
-const smooth = (t) => t * t * (3 - 2 * t)
 
 export default function LagosSection() {
   const rootRef = useRef(null)
@@ -68,7 +71,7 @@ export default function LagosSection() {
       const SPAN = 0.78
       const paint = (p) => {
         // Marco y cuadrícula.
-        r.frame.style.opacity = String(clamp01(p / 0.06))
+        r.frame.style.opacity = String(0.35 + 0.65 * clamp01(p / 0.06))
         // La puerta del domo.
         const dome = clamp01((p - 0.03) / 0.07)
         r.dome.style.opacity = String(dome)
@@ -101,29 +104,13 @@ export default function LagosSection() {
         const stamp = clamp01((p - 0.9) / 0.08)
         r.stamp.style.opacity = String(stamp)
         r.stamp.style.transform = `scale(${1.25 - 0.25 * stamp}) rotate(${-12 + 12 * stamp}deg)`
-        // El sector de partida: se ve al principio y se va cuando la cámara arranca.
-        const sma = clamp01((p - 0.03) / 0.06) * (1 - clamp01((p - 0.2) / 0.06))
+        // El sector de partida: se ve al principio y se va cuando arranca el camino.
+        const sma = clamp01((p - 0.03) / 0.06) * (1 - clamp01((p - 0.22) / 0.06))
         r.sma.style.opacity = String(sma)
         r.sma.style.transform = `translate3d(0, ${(1 - sma) * 12}px, 0)`
-
-        // La cámara: el plano entero al principio; después sigue la cabeza de la ruta de cerca
-        // (corrida a la derecha: a la izquierda va el texto) y al final se aleja para mostrar
-        // la ruta completa con el sello.
-        const stage = r.stage.getBoundingClientRect()
-        const aspect = stage.width / Math.max(1, stage.height)
-        const phone = stage.width < 700
-        const zoomIn = smooth(clamp01((p - 0.07) / 0.1)) * (1 - smooth(clamp01((p - 0.88) / 0.08)))
-        const pt = r.total ? r.route.getPointAtLength(draw * r.total) : { x: 300, y: 800 }
-        const fullH = phone ? 980 : 900
-        const nearH = phone ? 460 : 400
-        const vh = fullH + (nearH - fullH) * zoomIn
-        const vw = vh * aspect
-        const shift = phone ? 0 : -0.16 * vw // la cabeza queda a la derecha del centro
-        const fx = VB.w / 2 + (phone ? 0 : -0.12 * fullH * aspect)
-        const fy = VB.h / 2
-        const cx = fx + (pt.x + shift - fx) * zoomIn
-        const cy = fy + (pt.y + (phone ? 90 : 0) - fy) * zoomIn
-        r.svg.setAttribute('viewBox', `${(cx - vw / 2).toFixed(1)} ${(cy - vh / 2).toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`)
+        // El resplandor del camino sigue al trazo; al completarse, todo el camino queda encendido.
+        r.glow.style.strokeDashoffset = String(1 - draw)
+        r.glow.style.opacity = String(0.55 + 0.35 * clamp01((p - (START + SPAN)) / 0.05))
         // El lago actual, grande: entra con cada cambio.
         r.now.style.opacity = String(draw > 0.01 && p < 0.97 ? 1 : 0)
       }
@@ -144,37 +131,44 @@ export default function LagosSection() {
 
   return (
     <section ref={rootRef} id="ruta" className="relative h-[520svh]" style={{ background: MAP_BG, color: C.cream }}>
-      <div ref={set('stage')} className="sticky top-0 h-svh overflow-hidden">
-        {/* El plano, a toda la pantalla: la cámara es el viewBox. */}
-        <svg ref={set('svg')} viewBox={`0 0 ${VB.w} ${VB.h}`} preserveAspectRatio="xMidYMid meet" className="absolute inset-0 h-full w-full" role="img" aria-label="Plano de la ruta de los siete lagos, dibujado como una estación espacial: la ruta sale del domo C-33 y pasa por ocho lagos hasta el Nahuel Huapi">
+      <div className="sticky top-0 h-svh overflow-hidden">
+        {/* La mesa de planos, de fondo. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(169,214,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(169,214,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        {/* El plano entero, centrado; no se mueve: el que se enciende es el camino. */}
+        <svg viewBox={VIEW} preserveAspectRatio="xMidYMid meet" className="absolute inset-x-0 top-[23svh] h-[47svh] w-full sm:top-[8svh] sm:h-[87svh]" role="img" aria-label="Plano de la ruta de los siete lagos, dibujado como una estación espacial: la ruta sale del domo C-33 y pasa por ocho lagos hasta el Nahuel Huapi">
           <defs>
             <pattern id="c33-lag-grid" width="30" height="30" patternUnits="userSpaceOnUse">
               <path d="M30 0H0V30" fill="none" stroke="#a9d6ff" strokeOpacity="0.1" strokeWidth="1" />
             </pattern>
           </defs>
-          {/* La cuadrícula sigue más allá del plano: no hay bordes al moverse la cámara. */}
-          <rect x="-3000" y="-3000" width="6600" height="6840" fill="#0d1d27" />
-          <rect x="-3000" y="-3000" width="6600" height="6840" fill="url(#c33-lag-grid)" />
-          <g ref={set('frame')} style={{ opacity: 0 }}>
-            <rect x="2" y="2" width={VB.w - 4} height={VB.h - 4} rx="22" fill="none" stroke="#a9d6ff" strokeOpacity="0.35" strokeWidth="2" strokeDasharray="6 8" />
+          <defs>
+            <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="7" />
+            </filter>
+          </defs>
+          <g ref={set('frame')} style={{ opacity: 0.35 }}>
+            <rect x="2" y="2" width={VB.w - 4} height={VB.h - 4} rx="22" fill="#0d1d27" stroke="#a9d6ff" strokeOpacity="0.4" strokeWidth="2" />
+            <rect x="2" y="2" width={VB.w - 4} height={VB.h - 4} rx="22" fill="url(#c33-lag-grid)" />
             {[0, 1, 2, 3, 4].map((k) => (
-              <path key={k} d={`M${-400} ${120 + k * 150} C ${150} ${60 + k * 150}, ${300} ${200 + k * 150}, ${VB.w + 400} ${110 + k * 150}`} fill="none" stroke="#a9d6ff" strokeOpacity="0.12" strokeWidth="1.2" />
+              <path key={k} d={`M2 ${120 + k * 150} C 150 ${60 + k * 150}, 300 ${200 + k * 150}, ${VB.w - 2} ${110 + k * 150}`} fill="none" stroke="#a9d6ff" strokeOpacity="0.12" strokeWidth="1.2" />
             ))}
-            <path d="M470 520 L520 440 L570 520 Z" fill="none" stroke="#f2e9dc" strokeOpacity="0.4" strokeWidth="1.5" />
-            <text x="520" y="540" textAnchor="middle" fill="#f2e9dc" fillOpacity="0.5" fontSize="9" fontFamily="'Roboto Mono', monospace" letterSpacing="1.5">CHAPELCO</text>
-            <path d="M30 330 L80 250 L130 330 Z" fill="none" stroke="#f2e9dc" strokeOpacity="0.4" strokeWidth="1.5" />
-            <text x="80" y="350" textAnchor="middle" fill="#f2e9dc" fillOpacity="0.5" fontSize="9" fontFamily="'Roboto Mono', monospace" letterSpacing="1.5">LANÍN</text>
+            <path d="M470 400 L520 320 L570 400 Z" fill="none" stroke="#f2e9dc" strokeOpacity="0.4" strokeWidth="1.5" />
+            <text x="520" y="420" textAnchor="middle" fill="#f2e9dc" fillOpacity="0.5" fontSize="9" fontFamily="'Roboto Mono', monospace" letterSpacing="1.5">CHAPELCO</text>
+            <path d="M30 590 L80 510 L130 590 Z" fill="none" stroke="#f2e9dc" strokeOpacity="0.4" strokeWidth="1.5" />
+            <text x="80" y="610" textAnchor="middle" fill="#f2e9dc" fillOpacity="0.5" fontSize="9" fontFamily="'Roboto Mono', monospace" letterSpacing="1.5">LANÍN</text>
           </g>
 
           <g ref={set('dome')} style={{ opacity: 0 }}>
-            <path d="M70 820 A75 75 0 0 1 220 820 Z" fill="#17323f" stroke="#f2e9dc" strokeWidth="2" />
-            <path d="M95 820 A50 50 0 0 1 195 820" fill="none" stroke="#a9d6ff" strokeOpacity="0.6" />
-            <rect x="136" y="796" width="18" height="24" rx="8" fill={C.orange} />
-            <text x="145" y="835" textAnchor="middle" fill="#f2e9dc" fontSize="10" fontFamily="'Roboto Mono', monospace" letterSpacing="2">C-33 · DOMO 1</text>
+            <path d="M70 40 A75 75 0 0 1 220 40 Z" fill="#17323f" stroke="#f2e9dc" strokeWidth="2" />
+            <path d="M95 40 A50 50 0 0 1 195 40" fill="none" stroke="#a9d6ff" strokeOpacity="0.6" />
+            <rect x="136" y="16" width="18" height="24" rx="8" fill={C.orange} />
+            <text x="145" y="-48" textAnchor="middle" fill="#f2e9dc" fontSize="10" fontFamily="'Roboto Mono', monospace" letterSpacing="2">C-33 · DOMO 1</text>
           </g>
 
           <path ref={set('route')} d={ROUTE} fill="none" stroke="#a9d6ff" strokeOpacity="0.22" strokeWidth="12" strokeLinejoin="round" strokeLinecap="round" />
           <path d={ROUTE} fill="none" stroke="#a9d6ff" strokeOpacity="0.5" strokeWidth="1.5" strokeDasharray="3 7" strokeLinejoin="round" />
+          {/* El camino que se ilumina: un resplandor ancho y el trazo encima. */}
+          <path ref={set('glow')} d={ROUTE} pathLength="1" fill="none" stroke={C.neon} strokeWidth="16" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="1" strokeDashoffset="1" filter="url(#c33-route-glow)" style={{ opacity: 0.55 }} />
           <path ref={set('progress')} d={ROUTE} pathLength="1" fill="none" stroke={C.orange} strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="1" strokeDashoffset="1" style={{ filter: 'drop-shadow(0 0 5px rgba(255,122,26,0.7))' }} />
 
           {LAKES.map(([name, x, y, w, h], i) => (
@@ -194,24 +188,24 @@ export default function LagosSection() {
           <circle ref={set('head')} r="7" fill="#fff" style={{ opacity: 0, filter: 'drop-shadow(0 0 8px #fff)' }} cx="145" cy="800" />
 
           <g ref={set('stamp')} style={{ opacity: 0, transformBox: 'fill-box', transformOrigin: 'center' }}>
-            <circle cx="505" cy="745" r="52" fill="none" stroke={C.orange} strokeWidth="2.5" />
-            <circle cx="505" cy="745" r="42" fill="none" stroke={C.orange} strokeOpacity="0.6" strokeDasharray="4 5" />
-            <text x="505" y="740" textAnchor="middle" fill={C.orange} fontSize="11" fontFamily="'Chakra Petch', sans-serif" fontWeight="700" letterSpacing="1.5">ÁREA</text>
-            <text x="505" y="756" textAnchor="middle" fill={C.orange} fontSize="11" fontFamily="'Chakra Petch', sans-serif" fontWeight="700" letterSpacing="1.5">RESTRINGIDA</text>
+            <circle cx="510" cy="790" r="44" fill="none" stroke={C.orange} strokeWidth="2.5" />
+            <circle cx="510" cy="790" r="35" fill="none" stroke={C.orange} strokeOpacity="0.6" strokeDasharray="4 5" />
+            <text x="510" y="786" textAnchor="middle" fill={C.orange} fontSize="10" fontFamily="'Chakra Petch', sans-serif" fontWeight="700" letterSpacing="1.5">ÁREA</text>
+            <text x="510" y="800" textAnchor="middle" fill={C.orange} fontSize="10" fontFamily="'Chakra Petch', sans-serif" fontWeight="700" letterSpacing="1.5">RESTRINGIDA</text>
           </g>
         </svg>
 
-        {/* Velo: el texto siempre se lee sobre el plano. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(11,12,15,0.9) 0%, rgba(11,12,15,0.55) 30%, rgba(11,12,15,0) 55%), linear-gradient(0deg, rgba(11,12,15,0.85) 0%, rgba(11,12,15,0) 30%)' }} />
+        {/* Velo suave a la izquierda: el texto flota sobre el plano y se lee igual. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(11,12,15,0.75) 0%, rgba(11,12,15,0) 34%)' }} />
 
         {/* Arriba a la izquierda: el título y el sector de partida. */}
-        <div className="absolute top-20 left-6 max-w-[min(88vw,30rem)] md:left-10 lg:top-24 lg:left-[5vw]">
+        <div className="absolute top-20 left-6 max-w-[min(88vw,26rem)] md:left-10 lg:top-24 lg:left-[5vw]">
           <p className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
             <span className="h-px w-8" style={{ background: C.neon }} />
             La ruta
           </p>
           <h2 className="mt-3 text-[clamp(1.9rem,4.4vw,4.6rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
-            Base <span style={{ color: C.neon }}>7-Lagos.</span>
+            Base <span className="whitespace-nowrap" style={{ color: C.neon }}>7-Lagos.</span>
           </h2>
           <div ref={set('sma')} className="mt-4 rounded-md border p-3.5 opacity-0" style={{ borderColor: 'rgba(169,214,255,0.28)', background: 'rgba(13,29,39,0.75)', backdropFilter: 'blur(6px)' }}>
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase" style={{ ...MONO, color: '#a9d6ff' }}>
@@ -224,7 +218,7 @@ export default function LagosSection() {
         </div>
 
         {/* Abajo a la izquierda: el lago actual, grande, y la ruta como una regla de pasos. */}
-        <div className="absolute right-6 bottom-6 left-6 md:right-auto md:left-10 md:max-w-[34rem] lg:bottom-10 lg:left-[5vw]">
+        <div className="absolute right-6 bottom-6 left-6 md:right-auto md:left-10 md:max-w-[26rem] lg:bottom-10 lg:left-[5vw]">
           <div ref={set('now')} className="transition-opacity duration-500" style={{ opacity: 0 }} aria-live="polite">
             <p className="text-[11px] tracking-[0.22em] uppercase tabular-nums" style={{ ...MONO, color: C.neon }}>
               {cur ? (active === LAKES.length - 1 ? 'Bonus' : `Escala 0${active + 1} / 07`) : ''}

@@ -1,8 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { C, MONO, DISPLAY } from './brand'
 import { MAP_BG } from './mapScene'
-import { createMirrorTunnel } from './mirrorTunnel'
 
 /**
  * cāpsula33 — «Nosotros».
@@ -39,23 +38,9 @@ export default function NosotrosSection() {
   const rootRef = useRef(null)
   const R = useRef({})
 
-  // El fondo: el espejo infinito del ojo de buey, que avanza con el scroll.
-  useEffect(() => {
-    const t = createMirrorTunnel(R.current.tunnel)
-    R.current.tunnelState = t.state
-    return () => t.dispose()
-  }, [])
-
   useGSAP(
     () => {
       const r = R.current
-      // El túnel corre con toda la sección (desde que entra hasta que sale).
-      ScrollTrigger.create({
-        trigger: rootRef.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        onUpdate: (self) => r.tunnelState && (r.tunnelState.p = self.progress),
-      })
       const words = [...r.text.querySelectorAll('[data-w]')]
       const n = words.length
       const paint = (p) => {
@@ -88,9 +73,6 @@ export default function NosotrosSection() {
   return (
     <section ref={rootRef} id="nosotros" className="relative h-[250svh]" style={{ background: MAP_BG, color: C.cream }}>
       <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden px-6 md:px-10 lg:px-[5vw]">
-        <canvas ref={set('tunnel')} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" />
-        {/* Velo a la izquierda: el texto se lee siempre, el túnel vive a la derecha. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(11,12,15,0.85) 0%, rgba(11,12,15,0.55) 38%, rgba(11,12,15,0) 65%)' }} />
         <p className="relative flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
           <span className="h-px w-8" style={{ background: C.neon }} />
           Nosotros
