@@ -75,7 +75,7 @@ const ISO = new THREE.Vector3(-0.62, 0.92, 1).normalize() // de la esquina de la
 const TOP = new THREE.Vector3(0, 1, 0.0001)
 // Topes del giro (absolutos): de la fachada de la entrada (-74°) a apenas pasado el frente; de
 // casi a ras del piso a casi desde arriba.
-const LIMIT = { az: [-1.3, 0.25], el: [0.28, 1.3], zoom: [1, 1.8] }
+const LIMIT = { az: [-1.85, 0.25], el: [0.2, 1.3], zoom: [1, 1.8] } // hasta ver la fachada de frente (−90°) y un poco más
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const smooth = (t) => t * t * (3 - 2 * t)
 
@@ -124,6 +124,23 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     const bounds = new THREE.Box3().setFromObject(r.root)
     parts.bounds = bounds
     parts.center = bounds.getCenter(new THREE.Vector3())
+
+    // La fachada real sobre la pared de la entrada (la misma del pasillo: cartel, ojo de buey,
+    // puerta de ventanas en pastilla y ventanal con listones). Va dentro del modelo, así se
+    // levanta con él.
+    new THREE.TextureLoader().load('/studio/capsula33/facade-front-1400.webp', (t) => {
+      t.colorSpace = THREE.SRGBColorSpace
+      t.anisotropy = renderer.capabilities.getMaxAnisotropy()
+      const aspect = 2418 / 1105
+      const span = bounds.max.z - bounds.min.z
+      const wallH = bounds.max.y - bounds.min.y
+      const h = Math.min(wallH * 0.98, (span * 0.98) / aspect)
+      const w = h * aspect
+      const facade = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.02 }))
+      facade.rotation.y = -Math.PI / 2 // mira hacia afuera (−x), como la entrada
+      facade.position.set(bounds.min.x - 0.03, bounds.min.y + h / 2, (bounds.min.z + bounds.max.z) / 2)
+      r.root.add(facade)
+    })
 
     // La losa: el local apoyado sobre un bloque oscuro con el borde de luz naranja.
     const size = bounds.getSize(new THREE.Vector3())
@@ -195,7 +212,8 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
       maxY = Math.max(maxY, v.y)
     }
     const A = area()
-    const k = Math.max((maxX - minX) / A.w, (maxY - minY) / A.h) // unidades por px
+    // Unidades por px; el zoom de la persona acerca alrededor del centro del área (no de la pantalla).
+    const k = Math.max((maxX - minX) / A.w, (maxY - minY) / A.h) / state.zoom
     const cx = (minX + maxX) / 2
     const cy = (minY + maxY) / 2
     const acx = A.x + A.w / 2
@@ -204,7 +222,6 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     camera.right = camera.left + w * k
     camera.top = cy + acy * k
     camera.bottom = camera.top - h * k
-    camera.zoom = state.zoom
     camera.updateProjectionMatrix()
     // Ahora sí, el giro de la persona (y un poco el puntero) sobre la vista base, con topes:
     // es un corte con dos paredes abiertas, nunca se ve de atrás.
@@ -374,6 +391,11 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     state,
     /** Hubo arrastre recién (el click que lo termina no tiene que elegir zona). */
     dragged: () => press.justDragged || press.drag,
+    /** Botones de zoom: factor relativo. */
+    zoomBy(f) {
+      state.tZoom *= f
+      clampT()
+    },
     resetView() {
       state.tYaw = 0
       state.tElev = 0

@@ -283,6 +283,24 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
             <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange, boxShadow: status.open ? '0 0 10px #7dffa8' : 'none' }} />
             {status.label}. {touch ? 'El local gira deslizando de costado; cada zona se abre al tocar su etiqueta.' : 'El local gira al arrastrarlo y cada zona se abre al tocarla.'}
           </p>
+          {/* Acercar y alejar (también Ctrl + rueda o el pellizco). */}
+          <span className="pointer-events-auto flex overflow-hidden rounded-full border" style={{ background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(242,233,220,0.12)' }}>
+            {[
+              ['−', 'Alejar el local', 1 / 1.25],
+              ['+', 'Acercar el local', 1.25],
+            ].map(([sign, label, f]) => (
+              <button
+                key={sign}
+                type="button"
+                aria-label={label}
+                onClick={() => R.current.scene?.zoomBy(f)}
+                className="grid h-9 w-10 place-items-center text-[18px] leading-none transition-colors hover:bg-white/10 active:scale-[0.95]"
+                style={{ ...MONO, color: C.cream }}
+              >
+                {sign}
+              </button>
+            ))}
+          </span>
           <button
             type="button"
             onClick={() => R.current.scene?.resetView()}
