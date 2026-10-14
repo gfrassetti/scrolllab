@@ -53,6 +53,9 @@ export default function NosotrosSection() {
         const facts = Math.max(0, Math.min(1, (p - 0.78) / 0.2))
         r.facts.style.opacity = String(facts)
         r.facts.style.transform = `translate3d(0, ${(1 - facts) * 22}px, 0)`
+        const poem = Math.max(0, Math.min(1, (p - 0.62) / 0.18))
+        r.poem.style.opacity = String(poem)
+        r.poem.style.transform = `translate3d(0, ${(1 - poem) * 16}px, 0)`
       }
       paint(0)
       ScrollTrigger.create({
@@ -87,7 +90,17 @@ export default function NosotrosSection() {
           ))}
         </p>
 
-        <ul ref={set('facts')} className="mt-10 grid max-w-[60rem] grid-cols-1 gap-x-10 gap-y-6 border-t pt-6 opacity-0 sm:grid-cols-3" style={{ borderColor: 'rgba(242,233,220,0.16)' }}>
+        {/* Lo que dice la pared, junto al ojo de buey (texto del local). */}
+        <figure ref={set('poem')} className="mt-8 max-w-[44rem] border-l-2 pl-5 opacity-0" style={{ borderColor: C.neon }}>
+          <blockquote className="text-[13px] leading-[1.75] md:text-[14px]" style={{ ...MONO, color: 'rgba(242,233,220,0.78)' }}>
+            El ser humano es la única fuerza en el universo que habita las historias que cuenta sobre sí mismo. Este espacio es una cápsula de preservación de mitos de nuestra especie, un lugar para reunirnos y compartir lo que queremos ser, para no morir de realidad.
+          </blockquote>
+          <figcaption className="mt-2 text-[11px] tracking-[0.18em] uppercase" style={{ ...MONO, color: C.neon }}>
+            En la pared, junto al ojo de buey
+          </figcaption>
+        </figure>
+
+        <ul ref={set('facts')} className="mt-8 grid max-w-[60rem] grid-cols-1 gap-x-10 gap-y-6 border-t pt-6 opacity-0 sm:grid-cols-3" style={{ borderColor: 'rgba(242,233,220,0.16)' }}>
           {FACTS.map(([big, small]) => (
             <li key={big}>
               <p className="text-[clamp(2rem,3.2vw,3.2rem)] leading-none font-semibold tabular-nums" style={DISPLAY}>

@@ -8,6 +8,7 @@ import ScrollRail from './ScrollRail'
 import MapSection from './MapSection'
 import Nav from './Nav'
 import NosotrosSection from './NosotrosSection'
+import LagosSection from './LagosSection'
 import MenuSection from './MenuSection'
 import ContactSection from './ContactSection'
 import { BODY, C, FONTS_HREF } from './brand'
@@ -93,6 +94,7 @@ export default function Capsula33Page() {
         <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onBoard={() => setBoarded(true)} />
         <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
         <NosotrosSection />
+        <LagosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <MenuSection />
         <ContactSection />

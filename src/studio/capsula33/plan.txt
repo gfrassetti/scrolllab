@@ -115,3 +115,17 @@ Cap. 5 — Visitanos (footer 100svh, regla del curso): dirección, horarios,
   que se escribe con el scroll (dos columnas; una en el teléfono).
 - Contacto (ContactSection.jsx): cierre a 100svh, naranja, dirección, horarios,
   cómo llegar e Instagram, marca a todo el ancho.
+
+8. RONDA DE REFERENCIAS DEL DUEÑO (2026-10-14)
+----------------------------------------------
+- Tripulante: parpadea (párpados con la piel de la propia imagen) en cada tramo
+  del scroll y de a ratos solos; el vapor de la taza sube más mientras habla.
+- Ojo de buey = ESPEJO INFINITO: túnel de aros que se alejan, con «c̄33» abajo.
+- Más capas entre nosotros y la puerta: paneles de nave (termómetro, radar,
+  presión, acceso) a cuatro profundidades.
+- Nosotros: sumó el poema de la pared (texto real del local).
+- Precios: la ficha de la pantalla imita la pantalla LED real (negra, blanca).
+- La ruta (LagosSection.jsx): plano «Base 7-Lagos» redibujado, se traza y se
+  pinta con el scroll; ver referencias en design/masters/capsula33/refs/.
+- PENDIENTE: cambiar la chica hacia la de la tarjeta de mesa (necesita créditos
+  de Higgsfield); personaje de cuernos original; revista «CAPSULA» como cierre.

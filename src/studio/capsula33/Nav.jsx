@@ -14,6 +14,7 @@ import { C, MONO, DISPLAY, openStatus } from './brand'
 const NAV_ITEMS = [
   { id: 'top', label: 'La cápsula' },
   { id: 'nosotros', label: 'Nosotros' },
+  { id: 'ruta', label: 'La ruta' },
   { id: 'mapa', label: 'El local' },
   { id: 'menu', label: 'Menú' },
   { id: 'contacto', label: 'Contacto' },

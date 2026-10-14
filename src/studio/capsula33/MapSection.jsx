@@ -251,20 +251,25 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                 {zone.text}
               </p>
               {zone.prices ? (
-                <div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-1 text-[12px]" style={MONO}>
+                // La pantalla LED de la barra: negra, de aeropuerto, texto blanco y naranja.
+                <div className="mt-4 rounded-md border-2 p-3.5" style={{ background: '#06070a', borderColor: '#23262d', boxShadow: 'inset 0 0 22px rgba(0,0,0,0.9)' }}>
+                  <p className="flex items-center justify-between text-[13px] font-bold tracking-[0.2em] uppercase" style={{ ...MONO, color: '#fff' }}>
+                    Cafetería
+                    <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ background: C.orange, boxShadow: `0 0 8px ${C.orange}` }} />
+                  </p>
                   {[
                     ['Calientes', PRICES.calientes],
                     ['Fríos', PRICES.frios],
                   ].map(([title, rows]) => (
-                    <div key={title}>
-                      <p className="mb-1.5 text-[10px] tracking-[0.18em] uppercase" style={{ color: C.neon }}>
+                    <div key={title} className="mt-3">
+                      <p className="mb-1 text-[10.5px] font-bold tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
                         {title}
                       </p>
                       {rows.map(([name, price]) => (
-                        <p key={name} className="flex items-baseline gap-2 leading-[1.7]">
+                        <p key={name} className="flex items-baseline gap-2 text-[12.5px] leading-[1.75] uppercase" style={{ ...MONO, color: '#f4f4f1' }}>
                           <span className="whitespace-nowrap">{name}</span>
                           <span aria-hidden="true" className="flex-1 translate-y-[-3px] border-b border-dotted opacity-25" />
-                          <span className="tabular-nums" style={{ color: '#9fdcff' }}>
+                          <span className="tabular-nums" style={{ color: '#fff' }}>
                             {price}
                           </span>
                         </p>

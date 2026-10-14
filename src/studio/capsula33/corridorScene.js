@@ -271,6 +271,11 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     parts.dust = makeDust()
     scene.add(parts.dust)
 
+    // 7. Paneles de la nave a distintas profundidades (capas entre nosotros y la puerta): pasan
+    // por los costados mientras caminamos y se corren distinto que el fondo con el puntero.
+    parts.huds = makeHuds()
+    parts.huds.forEach((h) => scene.add(h.mesh))
+
     parts.rects = { door, sign: signRect, port: rectAt(PARTS.port, D) }
     built = true
   }
@@ -323,6 +328,153 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     parts.sign = sign
     parts.signShadow = shadow
     parts.signY = sign.position.y
+  }
+
+  /** Un panel de interfaz de nave dibujado en canvas: marco, esquinas y un instrumento. */
+  const hudTexture = (kind) => {
+    const W = 640
+    const H = 400
+    const c = document.createElement('canvas')
+    c.width = W
+    c.height = H
+    const g = c.getContext('2d')
+    const CREAM = '#f2e9dc'
+    const ICE = '#a9d6ff'
+    const ORANGE = '#ff7a1a'
+    const mono = (px, w = 500) => `${w} ${px}px 'Roboto Mono', ui-monospace, monospace`
+    // Vidrio y marco.
+    g.fillStyle = 'rgba(40,70,100,0.16)'
+    g.fillRect(0, 0, W, H)
+    g.strokeStyle = 'rgba(169,214,255,0.55)'
+    g.lineWidth = 2
+    g.strokeRect(10, 10, W - 20, H - 20)
+    g.strokeStyle = CREAM
+    g.lineWidth = 4
+    for (const [x, y, dx, dy] of [[10, 10, 1, 1], [W - 10, 10, -1, 1], [10, H - 10, 1, -1], [W - 10, H - 10, -1, -1]]) {
+      g.beginPath()
+      g.moveTo(x, y + dy * 38)
+      g.lineTo(x, y)
+      g.lineTo(x + dx * 38, y)
+      g.stroke()
+    }
+    g.fillStyle = ICE
+    g.font = mono(22, 600)
+    const title = { gauge: 'CAFETERA · GRUPO', radar: 'SECTOR SMA · C-33', bars: 'PRESIÓN DE CABINA', arrow: 'ACCESO · CAFÉ' }[kind]
+    g.fillText(title, 34, 52)
+    g.fillStyle = 'rgba(169,214,255,0.4)'
+    g.fillRect(34, 66, W - 68, 2)
+    if (kind === 'gauge') {
+      const cx = W / 2
+      const cy = 262
+      g.lineWidth = 16
+      g.lineCap = 'round'
+      g.strokeStyle = 'rgba(169,214,255,0.22)'
+      g.beginPath()
+      g.arc(cx, cy, 118, Math.PI * 0.85, Math.PI * 2.15)
+      g.stroke()
+      g.strokeStyle = ORANGE
+      g.beginPath()
+      g.arc(cx, cy, 118, Math.PI * 0.85, Math.PI * 0.85 + Math.PI * 1.3 * 0.93)
+      g.stroke()
+      g.fillStyle = CREAM
+      g.font = mono(78, 600)
+      g.textAlign = 'center'
+      g.fillText('93°', cx, cy + 22)
+      g.font = mono(20, 500)
+      g.fillStyle = ICE
+      g.fillText('ESPRESSO · LISTO', cx, cy + 58)
+      g.textAlign = 'left'
+    } else if (kind === 'radar') {
+      const cx = W / 2
+      const cy = 240
+      g.lineWidth = 2
+      g.strokeStyle = 'rgba(169,214,255,0.5)'
+      for (const r of [40, 80, 120]) {
+        g.beginPath()
+        g.arc(cx, cy, r, 0, Math.PI * 2)
+        g.stroke()
+      }
+      g.beginPath()
+      g.moveTo(cx - 135, cy)
+      g.lineTo(cx + 135, cy)
+      g.moveTo(cx, cy - 135)
+      g.lineTo(cx, cy + 135)
+      g.stroke()
+      const sweep = g.createConicGradient(-0.6, cx, cy)
+      sweep.addColorStop(0, 'rgba(255,122,26,0.55)')
+      sweep.addColorStop(0.18, 'rgba(255,122,26,0)')
+      sweep.addColorStop(1, 'rgba(255,122,26,0)')
+      g.fillStyle = sweep
+      g.beginPath()
+      g.arc(cx, cy, 120, 0, Math.PI * 2)
+      g.fill()
+      g.fillStyle = CREAM
+      for (const [x, y] of [[cx + 52, cy - 34], [cx - 70, cy + 28], [cx + 18, cy + 74], [cx - 24, cy - 92]]) {
+        g.beginPath()
+        g.arc(x, y, 5, 0, Math.PI * 2)
+        g.fill()
+      }
+      g.font = mono(18, 500)
+      g.fillStyle = ICE
+      g.fillText('LÁCAR · CHAPELCO · LANÍN', 34, H - 30)
+    } else if (kind === 'bars') {
+      const heights = [0.5, 0.74, 0.62, 0.88, 0.7, 0.56, 0.8, 0.66, 0.92, 0.6, 0.72, 0.5]
+      heights.forEach((v, i) => {
+        const h = v * 200
+        g.fillStyle = i % 5 === 3 ? ORANGE : ICE
+        g.fillRect(48 + i * 46, 330 - h, 28, h)
+      })
+      g.fillStyle = CREAM
+      g.font = mono(46, 600)
+      g.fillText('1,0 ATM', 34, 118)
+      g.font = mono(18, 500)
+      g.fillStyle = ICE
+      g.fillText('ESTABLE', 330, 118)
+    } else {
+      g.fillStyle = CREAM
+      g.font = mono(72, 700)
+      g.fillText('CAFÉ', 34, 190)
+      g.fillStyle = ORANGE
+      for (let i = 0; i < 4; i++) {
+        const x = 330 + i * 64
+        g.beginPath()
+        g.moveTo(x, 130)
+        g.lineTo(x + 40, 170)
+        g.lineTo(x, 210)
+        g.lineTo(x + 18, 210)
+        g.lineTo(x + 58, 170)
+        g.lineTo(x + 18, 130)
+        g.closePath()
+        g.globalAlpha = 0.35 + i * 0.22
+        g.fill()
+        g.globalAlpha = 1
+      }
+      g.fillStyle = ICE
+      g.font = mono(20, 500)
+      g.fillText('AV. GRAL. ROCA 1120', 34, 262)
+      g.fillText('DOMO 1 · PUERTA PRINCIPAL', 34, 296)
+    }
+    const t = new THREE.CanvasTexture(c)
+    t.colorSpace = THREE.NoColorSpace
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy()
+    return t
+  }
+
+  const makeHuds = () => {
+    const defs = [
+      { kind: 'gauge', x: -2.55, y: 0.55, z: -4.7, ry: 0.5, s: 0.95 },
+      { kind: 'radar', x: 2.65, y: -0.05, z: -5.7, ry: -0.5, s: 0.95 },
+      { kind: 'bars', x: -2.5, y: -0.5, z: -6.6, ry: 0.45, s: 0.85 },
+      { kind: 'arrow', x: 2.55, y: 0.6, z: -7.4, ry: -0.45, s: 0.85 },
+    ]
+    return defs.map((d) => {
+      const mat = new THREE.MeshBasicMaterial({ map: hudTexture(d.kind), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(d.s * 1.0, d.s * 0.625), mat)
+      mesh.position.set(d.x, d.y, d.z)
+      mesh.rotation.y = d.ry
+      mesh.renderOrder = 5
+      return { mesh, mat, d, phase: Math.random() * 6 }
+    })
   }
 
   const makeDust = () => {
@@ -481,6 +633,18 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
         parts.sign.material.uniforms.uOpacity.value = flick * state.signOn
         // La sombra se nota de lejos y se borra al acercarse (de cerca se leía como un doble).
         parts.signShadow.material.uniforms.uOpacity.value = 0.32 * flick * (1 - walk) * state.signOn
+      }
+      // Los paneles: aparecen de lejos, flotan, y se van al pasar a nuestro lado.
+      if (parts.huds) {
+        const base = Math.min(1, state.signOn) * (1 - Math.min(1, state.enter * 4))
+        for (const h of parts.huds) {
+          const dist = camera.position.z - h.d.z // > 0: todavía delante nuestro
+          const near = Math.min(1, Math.max(0, (dist - 0.5) / 1.1))
+          const far = 1 - Math.min(1, Math.max(0, (dist - 4.2) / 2.2))
+          h.mat.opacity = 0.9 * near * far * base
+          h.mesh.position.y = h.d.y + Math.sin(now * 0.0009 + h.phase) * 0.025
+          h.mesh.visible = h.mat.opacity > 0.01
+        }
       }
       if (parts.dust) {
         parts.dust.position.y = Math.sin(now * 0.00025) * 0.06

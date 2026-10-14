@@ -23,6 +23,14 @@ import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
  */
 
 const BASE = '/studio/capsula33/ship/'
+// Dónde parpadea la tripulante al scrollear (fracción del recorrido del hero).
+const BLINK_MARKS = [0.012, 0.045, 0.085, 0.13, 0.17]
+// Los ojos en la imagen de la tripulante (1360 × 2048) y cuánto más abajo está la piel que los tapa.
+const EYES = [
+  { cx: 580, cy: 533, rx: 52, ry: 26, rot: 4 },
+  { cx: 770, cy: 516, rx: 54, ry: 26, rot: -6 },
+]
+const EYE_SKIN_DROP = 50
 // Lo que dice la tripulante al primer movimiento del scroll (la primera frase es la de su revista).
 const LINE = 'Bienvenidos, exploradores de universos. El café está del otro lado de esa puerta.'
 
@@ -88,6 +96,8 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
   const [status] = useState(() => openStatus())
   const [notes] = useState(() => notesFor(status))
   const scroll = useRef({ p: 0 })
+  // Párpados (los refs los llena el marcado) y las marcas del scroll donde parpadea.
+  if (!R.current.lids) R.current.lids = []
 
   // El pasillo: carga las imágenes (alimenta el loader) y ubica cada cuadro lo que depende de la cámara.
   // De layout: el recorrido de abajo (useGSAP, también de layout) ya necesita la escena.
@@ -139,7 +149,10 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           scene.state.flickerAt = performance.now()
         }, 550)
       }
-      bridge.current.show = () => (scene.state.signOn = 1)
+      bridge.current.show = () => {
+        scene.state.signOn = 1
+        scene.state.landedAt = performance.now()
+      }
     }
     return () => scene.dispose()
     // El loader llama una vez; los callbacks son estables.
@@ -170,6 +183,16 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           })
         }
         // El cuadro de diálogo: aparece con el primer movimiento del scroll y se va antes de que ella se vaya.
+        // Parpadea cada vez que el scroll cruza una de estas marcas (en cualquier dirección),
+        // y el vapor sube mientras ella habla.
+        const last = r.lastP ?? 0
+        for (const m of BLINK_MARKS) if ((last < m) !== (p < m)) r.blink?.()
+        r.lastP = p
+        const steamTarget = p > 0.004 && p < 0.19 ? 1 : 0.55
+        if (steamTarget !== r.steamTarget) {
+          r.steamTarget = steamTarget
+          gsap.to(r.girlIn, { '--steam': steamTarget, duration: 0.8, ease: 'power2.out', overwrite: 'auto' })
+        }
         const show = p > 0.004 && p < 0.19 // unos cinco movimientos de la rueda
         if (show !== r.talk) {
           r.talk = show
@@ -247,6 +270,37 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
       },
     )
   }, [boarded])
+
+  // Parpadeo: cierra rápido, abre un poco más lento; a veces doble. Además de los del scroll,
+  // uno suelto cada tanto (si no, queda de estatua entre un movimiento y otro).
+  useEffect(() => {
+    const r = R.current
+    const b = { v: 0 }
+    const paint = () => r.lids.forEach((el) => el && (el.style.transform = `scaleY(${b.v})`))
+    let alive = true
+    let timer = 0
+    const blink = (double = false) => {
+      if (!alive) return
+      r.blinkTl?.kill()
+      const tl = gsap.timeline({ onUpdate: paint })
+      r.blinkTl = tl
+      tl.to(b, { v: 1, duration: 0.07, ease: 'power2.in' }).to(b, { v: 0, duration: 0.15, ease: 'power2.out' }, '+=0.04')
+      if (double) tl.to(b, { v: 1, duration: 0.06, ease: 'power2.in' }, '+=0.12').to(b, { v: 0, duration: 0.14, ease: 'power2.out' }, '+=0.03')
+    }
+    r.blink = () => blink(Math.random() < 0.18)
+    const idle = () => {
+      timer = window.setTimeout(() => {
+        if (scroll.current.p < 0.2) blink()
+        idle()
+      }, 3400 + Math.random() * 3200)
+    }
+    idle()
+    return () => {
+      alive = false
+      window.clearTimeout(timer)
+      r.blink = null
+    }
+  }, [])
 
   // Un solo loop: la cámara y la tripulante siguen al puntero; las zonas vivas por geometría.
   useEffect(() => {
@@ -450,10 +504,57 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                 className="h-full w-auto max-w-none"
                 style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.55))' }}
               />
-              {/* Vapor de la taza. */}
-              <span aria-hidden="true" className="c33-steam" style={{ left: '46%', top: '30%' }} />
-              <span aria-hidden="true" className="c33-steam" style={{ left: '52%', top: '31%', animationDelay: '1.3s' }} />
-              <span aria-hidden="true" className="c33-steam" style={{ left: '49%', top: '30.5%', animationDelay: '2.4s' }} />
+              {/* Párpados: se cierran sobre los ojos de la imagen. Cada uno es la piel de la propia
+                  imagen (la de abajo del ojo, corrida hacia arriba), así calza con su luz y su textura. */}
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+                {EYES.map((e, i) => (
+                  <div
+                    key={i}
+                    className="absolute"
+                    style={{
+                      left: `${((e.cx - e.rx) / 1360) * 100}%`,
+                      top: `${((e.cy - e.ry) / 2048) * 100}%`,
+                      width: `${((e.rx * 2) / 1360) * 100}%`,
+                      height: `${((e.ry * 2) / 2048) * 100}%`,
+                      transform: `rotate(${e.rot}deg)`,
+                    }}
+                  >
+                    <div className="c33-lid absolute inset-0" ref={(el) => (R.current.lids[i] = el)}>
+                      <div
+                        className="absolute inset-0 overflow-hidden"
+                        style={{
+                          borderRadius: '50%',
+                          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, #000 62%, transparent 100%)',
+                          maskImage: 'radial-gradient(ellipse at 50% 50%, #000 62%, transparent 100%)',
+                        }}
+                      >
+                        <img
+                          src="/studio/capsula33/girl-1360.webp"
+                          alt=""
+                          className="absolute max-w-none"
+                          style={{
+                            width: `${(1360 / (e.rx * 2)) * 100}%`,
+                            left: `${(-(e.cx - e.rx) / (e.rx * 2)) * 100}%`,
+                            top: `${(-(e.cy - e.ry + EYE_SKIN_DROP) / (e.ry * 2)) * 100}%`,
+                          }}
+                        />
+                      </div>
+                      {/* La línea de las pestañas, en el borde de abajo. */}
+                      <span className="absolute right-[6%] bottom-[8%] left-[4%] h-[34%] border-b-[1.5px]" style={{ borderColor: '#2a1713', borderRadius: '0 0 55% 55% / 0 0 100% 100%' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Vapor de la taza: sale del borde (≈ 38 % del alto de la imagen) y sube por delante de la cara. */}
+              {[
+                { left: 46, delay: 0, w: 9.5 },
+                { left: 50.5, delay: 0.8, w: 11.5 },
+                { left: 54.5, delay: 1.6, w: 9 },
+                { left: 48.5, delay: 2.4, w: 8 },
+                { left: 52.5, delay: 3.1, w: 10.5 },
+              ].map((w, i) => (
+                <span key={i} aria-hidden="true" className="c33-steam" style={{ left: `${w.left}%`, top: '38.5%', width: `${w.w}%`, animationDelay: `${w.delay}s` }} />
+              ))}
             </div>
           </div>
         </div>
@@ -463,13 +564,22 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           <span
             ref={set('port')}
             aria-hidden="true"
-            className="absolute top-0 left-0 rounded-full transition-[box-shadow,background] duration-700"
+            className={`c33-port absolute top-0 left-0 rounded-full transition-[box-shadow,background] duration-700 ${hover === 'port' ? 'is-hover' : ''}`}
             style={{
               background: hover === 'port' ? 'radial-gradient(circle, rgba(255,214,160,0.4), transparent 66%)' : 'transparent',
               boxShadow: hover === 'port' ? '0 0 60px 10px rgba(255,140,60,0.4)' : 'none',
               animation: hover === 'port' ? 'c33-pulse 1.4s ease-in-out infinite' : 'none',
             }}
-          />
+          >
+            {/* El ojo de buey es un espejo infinito: un túnel de aros que se alejan, con «c̄33» debajo. */}
+            <span className="c33-mirror">
+              {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                <i key={i} style={{ '--i': i }} />
+              ))}
+              <b className="c33-mirror-core" />
+            </span>
+            <span className="c33-mirror-label">c̄33</span>
+          </span>
           <button
             ref={set('door')}
             type="button"
@@ -537,8 +647,24 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         @keyframes c33-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
         .c33-caret { animation: c33-caret 1s steps(1, end) infinite; }
         @keyframes c33-pulse { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
-        @keyframes c33-steam { 0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; } 25% { opacity: 0.5; } 100% { transform: translate(-50%, -140%) scale(1.5) rotate(8deg); opacity: 0; } }
-        .c33-steam { position: absolute; width: 7%; height: 9%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), transparent 70%); filter: blur(6px); animation: c33-steam 3.6s ease-out infinite; opacity: 0; }
+        /* Vapor: columnas blandas que suben y se abren; --steam (0–1) sube mientras ella habla. */
+        @keyframes c33-steam {
+          0% { transform: translate(-50%, 0) scale(0.5, 0.55); opacity: 0; }
+          16% { opacity: calc(0.85 * var(--steam, 0.55)); }
+          55% { transform: translate(-42%, -85%) scale(0.95, 1.1); opacity: calc(0.6 * var(--steam, 0.55)); }
+          100% { transform: translate(-60%, -200%) scale(1.55, 1.75); opacity: 0; }
+        }
+        .c33-steam { position: absolute; aspect-ratio: 1 / 1.5; border-radius: 50%; background: radial-gradient(ellipse at 50% 60%, rgba(255,252,247,0.95), rgba(255,240,226,0.5) 42%, transparent 72%); filter: blur(4px); animation: c33-steam 4s ease-out infinite; opacity: 0; will-change: transform, opacity; }
+        /* Espejo infinito del ojo de buey. */
+        .c33-port { container-type: inline-size; }
+        .c33-mirror { position: absolute; inset: 15%; border-radius: 50%; overflow: hidden; background: radial-gradient(circle at 50% 50%, #fff 0, #e3edff 5%, #8aa6d6 13%, #1d2538 36%, #07080c 100%); box-shadow: inset 0 0 14px 4px rgba(0,0,0,0.9); }
+        .c33-mirror i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(255,255,255,0.92); box-shadow: 0 0 7px rgba(170,205,255,0.75), inset 0 0 6px rgba(170,205,255,0.45); transform: scale(1.3); opacity: 0; animation: c33-tunnel 3.4s cubic-bezier(0.45, 0, 0.85, 0.55) infinite; animation-delay: calc(var(--i) * -0.4857s); }
+        .c33-mirror i:nth-child(even) { border-color: rgba(255,178,110,0.9); box-shadow: 0 0 7px rgba(255,140,60,0.7), inset 0 0 6px rgba(255,140,60,0.4); }
+        .c33-mirror-core { position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #fff, rgba(255,255,255,0) 70%); }
+        .c33-mirror-label { position: absolute; left: 0; right: 0; bottom: 21%; text-align: center; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 13cqw; line-height: 1; color: #f2e9dc; text-shadow: 0 0 6px rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.8); }
+        .c33-port.is-hover .c33-mirror i { animation-duration: 1.5s; }
+        @keyframes c33-tunnel { 0% { transform: scale(1.3); opacity: 0; } 10% { opacity: 0.95; } 100% { transform: scale(0.03); opacity: 0; } }
+        .c33-lid { transform-origin: 50% 0%; transform: scaleY(0); }
         @keyframes c33-cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
         .c33-scrollcue { animation: c33-cue 1.8s cubic-bezier(0.22,1,0.36,1) infinite; }
         .c33-cta { transition: border-color 300ms cubic-bezier(0.22,1,0.36,1), color 300ms, transform 160ms ease-out; }
