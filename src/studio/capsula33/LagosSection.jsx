@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../lib/gsap'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { MAP_BG } from './mapScene'
-import { MAP_SVG, MAP_W, MAP_H, ROUTE_D, STOPS, RESTRICTED_D } from './lagosMapSvg'
+import { MAP_CONTENT_ONLY, PAPER_COLOR, MAP_W, MAP_H, ROUTE_D, STOPS, RESTRICTED_D } from './lagosMapSvg'
 import { GEO } from './lagosGeo'
 
 /**
@@ -10,18 +10,20 @@ import { GEO } from './lagosGeo'
  * redibujado en vector (mismos paneles, lagos, domo en corte y textos), con el norte
  * arriba como el mapa real: el Lácar arriba, el Nahuel Huapi abajo.
  *
- * Detrás, la geografía de verdad (lagos y rutas de OpenStreetMap, a escala), gris y
- * oscura: la RN 40 baja de San Martín de los Andes a Villa La Angostura y, a medida
- * que la ruta de la hoja se enciende, el fondo acompaña (se desplaza y la RN 40 se
- * enciende hasta la misma altura). La hoja queda quieta, al centro, con sus bordes
- * fundidos en el fondo. Cada lago se enciende cuando la ruta llega, y abajo a la
+ * Detrás, la geografía de verdad (lagos y rutas de OpenStreetMap, a escala), fija y
+ * dibujada con la paleta de la hoja (azul plano, cuadrícula, rutas crema) pero
+ * oscura: la hoja no está «encima» del mapa, se disuelve en él (bordes con fundido
+ * doble, sin sombra, y un halo del mismo azul alrededor). Lo único que se enciende es
+ * la ruta de la hoja; cada lago se enciende cuando la ruta llega, y abajo a la
  * izquierda se lee la escala actual.
  */
 
 const PAD = 12
 const NEON = '#ff8a1f'
-const SMA_Y = GEO.towns[0].at[1]
-const VLA_Y = GEO.towns[1].at[1]
+// El punto del mapa real que queda detrás del centro de la hoja: entre San Martín y Villa La Angostura.
+const MID = [(GEO.towns[0].at[0] + GEO.towns[1].at[0]) / 2, (GEO.towns[0].at[1] + GEO.towns[1].at[1]) / 2]
+const INK = '#0c1d25'
+const MAP_CONTENT = MAP_CONTENT_ONLY()
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
@@ -72,21 +74,6 @@ export default function LagosSection() {
           r.dot.setAttribute('cx', pt.x)
           r.dot.setAttribute('cy', pt.y)
         }
-        // El mapa real de fondo: la RN 40 se enciende hasta la misma altura y el mapa se corre para
-        // que ese punto quede a media pantalla.
-        const W = r.stage.clientWidth
-        const H = r.stage.clientHeight
-        const k = Math.max((1.3 * W) / GEO.w, (1.3 * H) / GEO.h)
-        const gw = GEO.w * k
-        const gh = GEO.h * k
-        const wipe = SMA_Y + (VLA_Y - SMA_Y) * draw
-        // La ruta real queda detrás de la hoja (centrada en ella) y asoma a los costados.
-        const tx = Math.min(0, Math.max(W - gw, W * (W >= 1024 ? 0.57 : 0.5) - GEO.w * 0.5 * k))
-        const ty = Math.min(0, Math.max(H - gh, H * 0.5 - wipe * k))
-        r.geo.style.width = `${gw}px`
-        r.geo.style.height = `${gh}px`
-        r.geo.style.transform = `translate3d(${tx}px, ${ty}px, 0)`
-        r.wipe.setAttribute('height', String(Math.max(0, wipe - SMA_Y + 30)))
         // Cada lago se enciende cuando la ruta llega.
         let cur = -1
         r.times.forEach((t, i) => {
@@ -125,7 +112,6 @@ export default function LagosSection() {
         }
         // El área restringida: el sello final.
         r.stamp.style.opacity = String(clamp01((p - 0.9) / 0.07))
-        r.geoLit.style.opacity = String(draw > 0 ? 1 : 0)
         r.now.style.opacity = String(draw > 0.005 ? 1 : 0)
       }
       // El título entra línea por línea (las letras suben desde una máscara) y la bajada se escribe palabra por palabra.
@@ -141,6 +127,24 @@ export default function LagosSection() {
         .to(lines, { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12 }, 0.1)
         .to(lede, { autoAlpha: 1, duration: 0.6, ease: 'power2.out' }, 0.5)
       if (split) tl.to(split.words, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.035 }, 0.6)
+      r.cleanup = () => ro.disconnect()
+      // El mapa real de fondo: fijo (no acompaña el scroll), cubre la pantalla y deja el tramo
+      // San Martín – Villa La Angostura detrás de la hoja. Solo se reacomoda si cambia el tamaño.
+      const placeGeo = () => {
+        const W = r.stage.clientWidth
+        const H = r.stage.clientHeight
+        const k = Math.max(W / GEO.w, H / GEO.h) * 1.12
+        const gw = GEO.w * k
+        const gh = GEO.h * k
+        const tx = Math.min(0, Math.max(W - gw, W * (W >= 1024 ? 0.57 : 0.5) - MID[0] * k))
+        const ty = Math.min(0, Math.max(H - gh, H * 0.5 - MID[1] * k))
+        r.geo.style.width = `${gw}px`
+        r.geo.style.height = `${gh}px`
+        r.geo.style.transform = `translate3d(${tx}px, ${ty}px, 0)`
+      }
+      placeGeo()
+      const ro = new ResizeObserver(placeGeo)
+      ro.observe(r.stage)
       paint(0)
       ScrollTrigger.create({
         trigger: rootRef.current,
@@ -152,6 +156,7 @@ export default function LagosSection() {
     },
     { scope: rootRef },
   )
+  useEffect(() => () => R.current.cleanup?.(), [])
 
   const set = (k) => (el) => (R.current[k] = el)
   const cur = active >= 0 ? STOPS[active] : null
@@ -159,69 +164,66 @@ export default function LagosSection() {
   return (
     <section ref={rootRef} id="ruta" className="relative h-[520svh]" style={{ background: MAP_BG, color: C.cream }}>
       <div ref={set('stage')} className="sticky top-0 h-svh overflow-hidden">
-        {/* El mapa real, de fondo: gris, oscuro, a escala, norte arriba. */}
+        {/* El mapa real, de fondo: fijo, a escala, norte arriba, en la paleta de la hoja pero oscuro. */}
         <svg
           ref={set('geo')}
           aria-hidden="true"
           viewBox={`0 0 ${GEO.w} ${GEO.h}`}
-          className="pointer-events-none absolute top-0 left-0 will-change-transform"
+          className="pointer-events-none absolute top-0 left-0"
           style={{ width: '100%', height: 'auto' }}
         >
-          <defs>
-            <clipPath id="c33-geo-wipe">
-              <rect ref={set('wipe')} x="0" y={SMA_Y - 30} width={GEO.w} height="0" />
-            </clipPath>
-            <filter id="c33-geo-glow" x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur stdDeviation="14" />
-            </filter>
-          </defs>
-          <rect width={GEO.w} height={GEO.h} fill="#14171b" />
-          <path d={GEO.lakes} fill="#344654" fillRule="evenodd" />
-          <path d={GEO.islands} fill="#14171b" />
-          <path d={GEO.roads.minor} fill="none" stroke="#2a2f35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
-          <path d={GEO.roads.main} fill="none" stroke="#353b42" strokeWidth="8" strokeLinejoin="round" strokeLinecap="round" />
-          <path d={GEO.roads.r231} fill="none" stroke="#454c55" strokeWidth="10" strokeLinejoin="round" strokeLinecap="round" />
-          <path d={GEO.roads.r40} fill="none" stroke="#5d6672" strokeWidth="11" strokeLinejoin="round" strokeLinecap="round" />
-          <g ref={set('geoLit')} clipPath="url(#c33-geo-wipe)" style={{ opacity: 0 }}>
-            <path d={GEO.roads.r40} fill="none" stroke={NEON} strokeWidth="34" strokeOpacity="0.35" filter="url(#c33-geo-glow)" />
-            <path d={GEO.roads.r40} fill="none" stroke={NEON} strokeWidth="10" strokeLinejoin="round" strokeLinecap="round" />
+          <rect width={GEO.w} height={GEO.h} fill={INK} />
+          <path d={GEO.lakes} fill="#1d4556" fillRule="evenodd" />
+          <path d={GEO.lakes} fill="none" stroke="#2f6478" strokeWidth="3" />
+          <path d={GEO.islands} fill={INK} />
+          <g fill="none" strokeLinejoin="round" strokeLinecap="round">
+            <path d={GEO.roads.minor} stroke="rgba(243,226,176,0.1)" strokeWidth="4" />
+            <path d={GEO.roads.main} stroke="rgba(243,226,176,0.16)" strokeWidth="6" />
+            <path d={GEO.roads.r231} stroke="rgba(243,226,176,0.24)" strokeWidth="7" strokeDasharray="22 12" />
+            <path d={GEO.roads.r40} stroke="rgba(243,226,176,0.32)" strokeWidth="8" />
           </g>
-          <g fill="rgba(242,233,220,0.42)" fontFamily="'Roboto Mono', monospace" fontSize="22" letterSpacing="3" style={{ textTransform: 'uppercase' }}>
+          <g
+            fill="rgba(243,226,176,0.34)"
+            fontFamily="'Roboto Mono', monospace"
+            fontSize="22"
+            fontWeight="600"
+            letterSpacing="4"
+            style={{ textTransform: 'uppercase' }}
+          >
             {GEO.labels.map((l) => (
               <text key={l.n} x={l.at[0]} y={l.at[1]} textAnchor="middle">
                 {l.n}
               </text>
             ))}
           </g>
-          <g fontFamily="'Roboto Mono', monospace" fontSize="26" fontWeight="700" letterSpacing="3" style={{ textTransform: 'uppercase' }}>
+          <g fontFamily="'Roboto Mono', monospace" fontSize="22" fontWeight="700" letterSpacing="4" style={{ textTransform: 'uppercase' }}>
             {GEO.towns.map((t) => (
               <g key={t.n} transform={`translate(${t.at[0]} ${t.at[1]})`}>
-                <circle r="9" fill="#f2e9dc" fillOpacity="0.7" />
-                <text x="18" y="9" fill="rgba(242,233,220,0.6)">
+                <circle r="8" fill="none" stroke="rgba(243,226,176,0.5)" strokeWidth="3" />
+                <text x="18" y="8" fill="rgba(243,226,176,0.45)">
                   {t.n}
                 </text>
               </g>
             ))}
           </g>
-          <text
-            x={GEO.w * 0.62}
-            y={GEO.h * 0.38}
-            fill="rgba(242,233,220,0.3)"
-            fontFamily="'Roboto Mono', monospace"
-            fontSize="18"
-            fontWeight="700"
-            letterSpacing="5"
-          >
-            RN 40 · RUTA DE LOS SIETE LAGOS
-          </text>
         </svg>
-        {/* El velo: el mapa real queda atrás, oscuro; lo que se lee es la hoja. */}
+        {/* La cuadrícula de la hoja sigue por todo el fondo, y un halo del mismo azul la rodea: la hoja
+            se disuelve en el mapa en vez de estar apoyada encima. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)',
+            backgroundSize: '11px 11px',
+          }}
+        />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(90deg, rgba(8,9,12,0.88) 0%, rgba(8,9,12,0.55) 24%, rgba(8,9,12,0) 40%), radial-gradient(80% 95% at 57% 50%, rgba(8,9,12,0), rgba(8,9,12,0.55) 100%), rgba(8,9,12,0.12)',
+              'radial-gradient(48% 42% at 8% 92%, rgba(8,9,12,0.88), transparent 100%), radial-gradient(38% 62% at 57% 50%, rgba(63,126,150,0.32), rgba(63,126,150,0.12) 55%, transparent 80%), linear-gradient(90deg, rgba(8,9,12,0.86) 0%, rgba(8,9,12,0.5) 22%, rgba(8,9,12,0) 38%), radial-gradient(95% 110% at 57% 50%, transparent 55%, rgba(8,9,12,0.7) 100%)',
           }}
         />
 
@@ -230,29 +232,27 @@ export default function LagosSection() {
           viewBox={`0 0 ${MAP_W} ${MAP_H}`}
           preserveAspectRatio="xMidYMid meet"
           className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-10.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[4svh] lg:left-[57%] lg:h-[92svh] lg:w-auto lg:-translate-x-1/2"
-          style={{ aspectRatio: `${MAP_W} / ${MAP_H}`, filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.6))' }}
+          style={{
+            aspectRatio: `${MAP_W} / ${MAP_H}`,
+          }}
           role="img"
           aria-label="Mapa «Base 7-Lagos»: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi"
         >
           <defs>
-            {/* El papel se funde con el fondo: sin borde, los cuatro lados se apagan hacia la pantalla. */}
-            <linearGradient id="c33-lagos-fx" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0" stopColor="#000" />
-              <stop offset="0.05" stopColor="#fff" />
-              <stop offset="0.95" stopColor="#fff" />
-              <stop offset="1" stopColor="#000" />
-            </linearGradient>
-            <linearGradient id="c33-lagos-fy" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#000" />
-              <stop offset="0.04" stopColor="#fff" />
-              <stop offset="0.96" stopColor="#fff" />
-              <stop offset="1" stopColor="#000" />
-            </linearGradient>
-            <mask id="c33-lagos-fade" maskUnits="userSpaceOnUse" x="0" y="0" width={MAP_W} height={MAP_H}>
-              <rect width={MAP_W} height={MAP_H} fill="url(#c33-lagos-fx)" />
+            {/* La hoja se disuelve en el mapa: una máscara de bordes suaves por los cuatro lados (más en
+                las esquinas), sin borde recto ni sombra. */}
+            <filter id="c33-paper-soft" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="28" />
+            </filter>
+            {/* El azul del papel se va de a poco (fundido ancho): el dibujo queda sobre el mapa real. */}
+            <filter id="c33-paper-wide" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="120" />
+            </filter>
+            <mask id="c33-paper-bg-fade" maskUnits="userSpaceOnUse" x="-200" y="-200" width={MAP_W + 400} height={MAP_H + 400}>
+              <rect x="150" y="150" width={MAP_W - 300} height={MAP_H - 300} rx="200" fill="#fff" filter="url(#c33-paper-wide)" />
             </mask>
-            <mask id="c33-lagos-fade-y" maskUnits="userSpaceOnUse" x="0" y="0" width={MAP_W} height={MAP_H}>
-              <rect width={MAP_W} height={MAP_H} fill="url(#c33-lagos-fy)" />
+            <mask id="c33-paper-fade" maskUnits="userSpaceOnUse" x="0" y="0" width={MAP_W} height={MAP_H}>
+              <rect x="40" y="34" width={MAP_W - 80} height={MAP_H - 68} rx="90" fill="#fff" filter="url(#c33-paper-soft)" />
             </mask>
             <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="14" />
@@ -265,9 +265,10 @@ export default function LagosSection() {
               </feMerge>
             </filter>
           </defs>
-          <g mask="url(#c33-lagos-fade)">
-            <g mask="url(#c33-lagos-fade-y)">
-              <g ref={set('map')} style={{ opacity: 0.55 }} dangerouslySetInnerHTML={{ __html: MAP_SVG }} />
+          <rect x="-200" y="-200" width={MAP_W + 400} height={MAP_H + 400} fill={PAPER_COLOR} fillOpacity="0.92" mask="url(#c33-paper-bg-fade)" />
+          <g mask="url(#c33-paper-fade)">
+            <g>
+              <g ref={set('map')} style={{ opacity: 0.55 }} dangerouslySetInnerHTML={{ __html: MAP_CONTENT }} />
 
               {/* Los lagos que se encienden al pasar la ruta. */}
               {STOPS.map(([name, , [x, y, w, h]], i) => (

@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { id: 'mapa', label: 'El local' },
   { id: 'carta', label: 'Menú' },
   { id: 'galeria', label: 'Galería' },
-  { id: 'ruta', label: 'La ruta' },
+  { id: 'ruta', label: 'Ruta 7 Lagos' },
   { id: 'llegar', label: 'Cómo llegar' },
   { id: 'contacto', label: 'Contacto' },
 ]

@@ -465,6 +465,12 @@ function rightEdge() {
 }
 
 /** El mapa entero (sin el `<svg>`): para usar dentro de un `<svg viewBox="0 0 1272 1966">`. */
+// El papel (azul y cuadrícula), aparte: la sección lo dibuja con su propio fundido ancho.
+export const PAPER_COLOR = C.paper
+const PAPER_BG = `<rect width="${MAP_W}" height="${MAP_H}" fill="${C.paper}"/><rect width="${MAP_W}" height="${MAP_H}" fill="url(#c33m-grid)"/>`
+/** La hoja sin el papel de fondo (solo el dibujo). */
+export const MAP_CONTENT_ONLY = () => MAP_SVG.replace(PAPER_BG, '')
+
 const MOUNTAINS = flipped(mountains)
 const NETWORK = flipped(network)
 
@@ -477,8 +483,7 @@ export const MAP_SVG = `
       <line x1="0" y1="0" x2="0" y2="10" stroke="${C.mountDk}" stroke-width="2"/>
     </pattern>
   </defs>
-  <rect width="${MAP_W}" height="${MAP_H}" fill="${C.paper}"/>
-  <rect width="${MAP_W}" height="${MAP_H}" fill="url(#c33m-grid)"/>
+  ${PAPER_BG}
   ${MOUNTAINS.shapes}
   ${NETWORK.shapes}
   ${routeBase()}
