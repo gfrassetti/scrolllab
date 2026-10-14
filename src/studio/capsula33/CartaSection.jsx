@@ -1,15 +1,19 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
+import { getLenis } from '../../hooks/useLenis'
 import { C, MONO, DISPLAY, BODY } from './brand'
 
 /**
- * cāpsula33 — «La carta»: el menú take-away completo, que se lee con el scroll.
+ * cāpsula33 — «La carta»: el menú take-away como la pantalla de navegación de la nave.
  *
- * La carta es una tira de papel (la de verdad: portada azul de cuadrícula, rojo,
- * mosaico de píxeles) que sube por una pantalla fija. Una línea de lectura
- * naranja la recorre: lo que ya pasó queda leído, lo que viene espera apagado,
- * y a la izquierda el rubro que cruza la línea cambia de título. Los precios
- * son los de la carta impresa.
+ * A todo el ancho: un mapa estelar con seis sistemas, uno por rubro (cafetería,
+ * smoothies, laminados, cervezas, platos, helados). Al entrar se ve la carta
+ * entera como un mapa, con la ruta que une los planetas; con el scroll la cámara
+ * viaja de un sistema al siguiente (se aleja un poco en el viaje y se acerca al
+ * llegar) y, en cada uno, los productos se enganchan en órbita de a uno: el punto,
+ * la línea al planeta y el nombre con su precio. La consola de abajo lleva a
+ * cualquier sistema con un clic. En el teléfono los productos van en lista
+ * debajo del planeta. Precios de la carta impresa.
  */
 
 const VG = true
@@ -19,195 +23,225 @@ const CATEGORIES = [
     id: 'cafeteria',
     title: 'Cafetería',
     blurb: 'Espresso a 93 grados, de especialidad.',
-    groups: [
-      {
-        tag: 'Calientes',
-        items: [
-          ['Americano', '$4.800'],
-          ['Lagrima', '$4.500'],
-          ['Flat White', '$5.500'],
-          ['Capuccino', '$6.000'],
-          ['Latte', '$5.500'],
-          ['Latte cápsula33', '$6.000'],
-          ['Chocolate caliente', '$6.500'],
-          ['Chocolate caliente cápsula33', '$6.500'],
-          ['Golden milk', '$5.000'],
-        ],
-      },
-      {
-        tag: 'Fríos',
-        items: [
-          ['Americano con hielo', '$5.500'],
-          ['Latte con hielo', '$6.000'],
-          ['Affogato', '$6.500'],
-        ],
-      },
+    planet: ['#ffb067', '#ff7a1a', '#7a2a07'],
+    rows: [
+      ['tag', 'Calientes'],
+      ['Americano', '$4.800'],
+      ['Lagrima', '$4.500'],
+      ['Flat White', '$5.500'],
+      ['Capuccino', '$6.000'],
+      ['Latte', '$5.500'],
+      ['Latte cápsula33', '$6.000'],
+      ['Chocolate caliente', '$6.500'],
+      ['Chocolate caliente cápsula33', '$6.500'],
+      ['Golden milk', '$5.000'],
+      ['tag', 'Fríos'],
+      ['Americano con hielo', '$5.500'],
+      ['Latte con hielo', '$6.000'],
+      ['Affogato', '$6.500'],
     ],
   },
   {
     id: 'smoothies',
-    title: 'Bebidas smoothies',
+    title: 'Smoothies',
     blurb: 'Frutas licuadas, una por humor.',
-    groups: [
-      {
-        items: [
-          ['Alegría', '$9.000', 'Frutos rojos y ananá'],
-          ['Capricho', '$9.000', 'Oreo y mantequilla de maní'],
-          ['Vigor', '$9.000', 'Durazno y jengibre'],
-        ],
-      },
+    planet: ['#ff9fd0', '#d63c8f', '#4a0b2e'],
+    rows: [
+      ['Alegría', '$9.000', 'Frutos rojos y ananá'],
+      ['Capricho', '$9.000', 'Oreo y mantequilla de maní'],
+      ['Vigor', '$9.000', 'Durazno y jengibre'],
     ],
   },
   {
     id: 'laminados',
     title: 'Laminados y pastelería',
     blurb: 'Masa madre, manteca y horno de todos los días.',
-    groups: [
-      {
-        items: [
-          ['Medialuna clásica', '$3.500', null, VG],
-          ['Medialuna con jamón y queso', '$7.000'],
-          ['Croissant', '$4.500', null, VG],
-          ['Croissant de Coruscant', '$8.000', 'Croissant con jamón y queso'],
-          ['Croissant bicolor', '$5.000', 'Croissant de frambuesa', VG],
-          ['Alfajor Libra', '$6.000', 'Nuez / ddl / chocolate blanco / lima', VG],
-        ],
-      },
-      {
-        tag: 'Wookie Cookies',
-        vg: true,
-        items: [
-          ['Clásica', '$3.500', 'Vainilla + chips de chocolate + nueces'],
-          ['Salted caramel', '$3.500', 'Maní + salted caramel'],
-          ['Chocolate', '$3.500', 'Full chocolate'],
-        ],
-      },
+    planet: ['#ffe2a3', '#d9a441', '#5a3a07'],
+    rows: [
+      ['Medialuna clásica', '$3.500', null, VG],
+      ['Medialuna con jamón y queso', '$7.000'],
+      ['Croissant', '$4.500', null, VG],
+      ['Croissant de Coruscant', '$8.000', 'Con jamón y queso'],
+      ['Croissant bicolor', '$5.000', 'De frambuesa', VG],
+      ['Alfajor Libra', '$6.000', 'Nuez / ddl / chocolate blanco / lima', VG],
+      ['tag', 'Wookie Cookies · VG'],
+      ['Clásica', '$3.500', 'Vainilla, chips de chocolate y nueces'],
+      ['Salted caramel', '$3.500', 'Maní y salted caramel'],
+      ['Chocolate', '$3.500', 'Full chocolate'],
     ],
   },
   {
     id: 'cervezas',
     title: 'Cervezas',
     blurb: 'De la canilla.',
-    groups: [
-      {
-        items: [
-          ['Golden', '$6.000'],
-          ['Scottish', '$6.000'],
-          ['Porter', '$6.000'],
-          ['American Pale Ale', '$8.000'],
-          ['Hazy Indian Pale Ale', '$10.000'],
-          ['New England Indian Pale Ale', '$10.000'],
-        ],
-      },
+    planet: ['#ffd58a', '#e0901f', '#4d2a05'],
+    rows: [
+      ['Golden', '$6.000'],
+      ['Scottish', '$6.000'],
+      ['Porter', '$6.000'],
+      ['American Pale Ale', '$8.000'],
+      ['Hazy Indian Pale Ale', '$10.000'],
+      ['New England Indian Pale Ale', '$10.000'],
     ],
   },
   {
     id: 'platos',
     title: 'Platos intensos',
     blurb: 'Para quedarse un rato largo.',
-    groups: [
-      {
-        items: [
-          ['Sándwich de carne braseada', '$22.000', 'Pan ciabatta / carne desmechada / provolone / coleslaw / chimichurri / alioli de mostaza / papines rústicos'],
-          ['Pizzas de masa madre y mozzarella', '$15.000'],
-        ],
-      },
-      {
-        tag: 'Las de hoy',
-        items: [
-          ['Mozzarella', null, 'Pesto de albahaca / tomates asados', VG],
-          ['Mozzarella', null, 'Calabaza asada / queso azul / nueces', VG],
-          ['Mozzarella', null, 'Cantimpalo / olivas negras / muhammara'],
-          ['Mozzarella', null, 'Cebolla / orégano / olivas negras', VG],
-        ],
-      },
+    planet: ['#ff9a86', '#d8402f', '#4a0d07'],
+    rows: [
+      ['Sándwich de carne braseada', '$22.000', 'Ciabatta, carne desmechada, provolone, coleslaw, chimichurri, alioli de mostaza y papines'],
+      ['Pizza de masa madre y mozzarella', '$15.000'],
+      ['tag', 'Las pizzas'],
+      ['Pesto y tomates asados', null, null, VG],
+      ['Calabaza asada, queso azul y nueces', null, null, VG],
+      ['Cantimpalo, olivas y muhammara'],
+      ['Cebolla, orégano y olivas negras', null, null, VG],
     ],
   },
   {
     id: 'helados',
     title: 'Helados soft',
     blurb: 'Con toppings.',
-    groups: [
-      {
-        items: [
-          ['Helado soft con toppings', '$6.000'],
-          ['Crema', null, 'Coulis de frambuesa + crumble de avena'],
-          ['Dulce de leche', null, 'Ganache de chocolate + praline de almendras'],
-          ['Mixto', null, 'Salted caramel + cucurucho molido'],
-        ],
-      },
+    planet: ['#e8f4ff', '#8fb8e0', '#1d3550'],
+    rows: [
+      ['Crema', '$6.000', 'Coulis de frambuesa y crumble de avena'],
+      ['Dulce de leche', '$6.000', 'Ganache de chocolate y praliné de almendras'],
+      ['Mixto', '$6.000', 'Salted caramel y cucurucho molido'],
     ],
   },
 ]
 
-const PAPER = '#f3f0e8'
-const INK = '#101114'
-const TEAL = '#1b6a78'
-const RED = '#d8402f'
+const N = CATEGORIES.length
+const INTRO = 0.08
+const SEG = (1 - INTRO - 0.04) / N
+const TRAVEL = 0.34
 
-/** Mosaico de píxeles (los cuadraditos que se deshacen en el borde de la carta). */
-function Pixels({ rows = 3, flip = false, seed = 1 }) {
-  const cells = useMemo(() => {
-    let x = seed * 9301 + 49297
-    const rnd = () => ((x = (x * 9301 + 49297) % 233280) / 233280)
-    const cols = 34
-    const out = []
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const density = flip ? (r + 1) / rows : 1 - r / rows
-        if (rnd() < density * 0.62) out.push([c, r])
+const clamp01 = (v) => Math.min(1, Math.max(0, v))
+const lerp = (a, b, t) => a + (b - a) * t
+const smooth = (t) => t * t * (3 - 2 * t)
+
+/** Dónde cae cada cosa (en píxeles de pantalla a zoom 1), según el tamaño de la pantalla. */
+function layoutFor(W, H) {
+  const wide = W >= 1024
+  const S = wide ? W * 1.25 : W * 1.35
+  const systems = CATEGORIES.map((cat, i) => {
+    const x = i * S
+    const y = (i % 2 ? 1 : -1) * H * (wide ? 0.22 : 0.3)
+    const R = wide ? Math.min(H * 0.17, W * 0.1) : Math.min(W * 0.17, H * 0.1)
+    const n = cat.rows.length
+    // PC: los productos en un arco a la derecha del planeta. Teléfono: en lista debajo.
+    const px = wide ? -W * 0.2 : 0
+    const py = wide ? 0 : -H * 0.17
+    const items = cat.rows.map((_, j) => {
+      if (wide) {
+        const span = Math.min(150, 26 + n * 10)
+        const a = ((-span / 2 + (span * j) / Math.max(1, n - 1)) * Math.PI) / 180
+        const rx = W * 0.27
+        const ry = Math.min(H * 0.34, 30 + n * 30)
+        return { x: px + Math.cos(a) * rx * 0.62 + R * 0.6, y: py + Math.sin(a) * ry, a }
       }
-    }
-    return { out, cols }
-  }, [rows, flip, seed])
-  return (
-    <svg viewBox={`0 0 ${cells.cols * 10} ${rows * 10}`} preserveAspectRatio="none" className="block w-full" style={{ height: rows * 9 }} aria-hidden="true">
-      {cells.out.map(([c, r]) => (
-        <rect key={`${c}-${r}`} x={c * 10 + 1} y={r * 10 + 1} width="8" height="8" fill={TEAL} />
-      ))}
-    </svg>
-  )
+      const step = n > 10 ? 27 : 36
+      return { x: -W * 0.42, y: py + R + 46 + j * step, a: 0 }
+    })
+    return { x, y, R, px, py, items }
+  })
+  const minY = Math.min(...systems.map((s) => s.y)) - H * 0.45
+  const maxY = Math.max(...systems.map((s) => s.y)) + H * 0.45
+  const minX = -W * 0.5
+  const maxX = systems[N - 1].x + W * 0.5
+  const overview = { x: (minX + maxX) / 2, y: (minY + maxY) / 2, z: Math.min(W / (maxX - minX), H / (maxY - minY)) * 0.92 }
+  return { wide, systems, overview }
 }
 
 export default function CartaSection() {
   const rootRef = useRef(null)
-  const R = useRef({ titles: [], dots: [], items: [] })
+  const R = useRef({ sys: [], items: {}, lines: {}, dots: {}, nav: [] })
+  const [dims, setDims] = useState(() => (typeof window === 'undefined' ? { W: 1440, H: 900 } : { W: window.innerWidth, H: window.innerHeight }))
+  const L = useMemo(() => layoutFor(dims.W, dims.H), [dims])
+
+  useEffect(() => {
+    let t = 0
+    const on = () => {
+      clearTimeout(t)
+      t = setTimeout(() => setDims({ W: window.innerWidth, H: window.innerHeight }), 150)
+    }
+    window.addEventListener('resize', on)
+    return () => window.removeEventListener('resize', on)
+  }, [])
 
   useGSAP(
     () => {
       const r = R.current
-      let active = -1
+      const { W, H } = dims
+      let active = -2
+      r.routeLen = 0
       const paint = (p) => {
-        const view = r.view.clientHeight
-        const track = r.track.scrollHeight
-        const line = view * 0.4
-        const travel = Math.max(0, track - view * 0.7)
-        const y = -Math.max(0, (p - 0.07) / 0.93) * travel // la portada se ve entera al llegar
-        r.track.style.transform = `translate3d(0, ${y}px, 0)`
-        // La línea de lectura: lo que está por encima ya se leyó, lo que viene espera.
-        r.items.forEach((el) => {
-          const t = el.offsetTop + el.offsetHeight / 2 + y
-          const d = t - line
-          const near = Math.max(0, 1 - Math.abs(d) / (view * 0.22))
-          const o = d < 0 ? 0.62 + 0.38 * near : 0.2 + 0.8 * near
-          el.style.opacity = String(o)
-          el.style.transform = `translate3d(${(1 - Math.max(0, Math.min(1, 1 - d / (view * 0.5)))) * 10}px, 0, 0)`
-          el.dataset.hot = near > 0.55 ? '1' : '0'
+        // La cámara: el mapa entero al principio, después de sistema en sistema.
+        let cx = L.overview.x
+        let cy = L.overview.y
+        let z = L.overview.z
+        let cur = -1
+        let reveal = 0
+        let travel = 0
+        if (p >= INTRO) {
+          const i = Math.min(N - 1, Math.floor((p - INTRO) / SEG))
+          const u = clamp01((p - INTRO - i * SEG) / SEG)
+          const from = i === 0 ? L.overview : { x: L.systems[i - 1].x, y: L.systems[i - 1].y, z: 1 }
+          const to = L.systems[i]
+          const k = smooth(clamp01(u / TRAVEL))
+          cx = lerp(from.x, to.x, k)
+          cy = lerp(from.y, to.y, k)
+          z = lerp(from.z, 1, k) * (i === 0 ? 1 : 1 - 0.42 * Math.sin(Math.PI * k))
+          cur = i
+          travel = k
+          reveal = clamp01((u - TRAVEL * 0.9) / 0.5)
+        }
+        r.world.style.transform = `translate3d(${W / 2 - cx * z}px, ${H / 2 - cy * z}px, 0) scale(${z})`
+        // Las estrellas, en dos capas que se corren menos que el mapa.
+        r.stars1.style.backgroundPosition = `${-cx * 0.08}px ${-cy * 0.08}px`
+        r.stars2.style.backgroundPosition = `${-cx * 0.2}px ${-cy * 0.2}px`
+        // Los productos se enganchan de a uno en el sistema actual; los demás quedan apagados.
+        L.systems.forEach((s, i) => {
+          const on = i === cur
+          r.sys[i].style.opacity = String(cur < 0 ? 0.6 : on ? 1 : 0.3)
+          s.items.forEach((_, j) => {
+            const key = `${i}-${j}`
+            const el = r.items[key]
+            if (!el) return
+            const t = on ? clamp01((reveal - (j / s.items.length) * 0.7) / 0.22) : cur > i ? 1 : 0
+            const e = 1 - (1 - t) ** 3
+            el.style.opacity = String(e)
+            el.style.clipPath = `inset(-30% ${(1 - e) * 100}% -30% 0)`
+            const line = r.lines[key]
+            if (line) line.style.strokeDashoffset = String(1 - e)
+            const dot = r.dots[key]
+            if (dot) dot.style.transform = `scale(${e})`
+          })
         })
-        // El rubro que cruza la línea.
-        let cur = 0
-        r.sections.forEach((el, i) => {
-          if (el.offsetTop + y <= line + 8) cur = i
-        })
+        // La ruta recorrida y la nave.
+        const total = r.routeLen || (r.routeLen = r.route.getTotalLength())
+        const along = cur < 0 ? 0 : (cur - 1 + travel) / (N - 1)
+        const d = clamp01(along) * total
+        r.routeDone.style.strokeDasharray = `${total}`
+        r.routeDone.style.strokeDashoffset = String(total - d)
+        const pt = r.route.getPointAtLength(Math.max(0.01, d))
+        const pt2 = r.route.getPointAtLength(Math.min(total, d + 2))
+        const ang = (Math.atan2(pt2.y - pt.y, pt2.x - pt.x) * 180) / Math.PI
+        r.ship.setAttribute('transform', `translate(${pt.x} ${pt.y}) rotate(${ang}) scale(${1 / Math.max(0.25, z)})`)
+        // La consola.
         if (cur !== active) {
           active = cur
-          r.titles.forEach((el, i) => el && (el.dataset.on = i === cur ? '1' : '0'))
-          r.dots.forEach((el, i) => el && (el.dataset.on = i === cur ? '1' : i < cur ? 'done' : '0'))
-          if (r.count) r.count.textContent = `0${cur + 1} / 0${CATEGORIES.length}`
+          r.nav.forEach((el, i) => el && (el.dataset.on = i === cur ? '1' : i < cur ? 'done' : '0'))
+          r.sector.textContent = cur < 0 ? 'Carta de navegación · 6 sistemas' : `Sector 0${cur + 1} / 0${N} · ${CATEGORIES[cur].title}`
+          r.coord.textContent =
+            cur < 0 ? 'S 40°09′15″ · O 71°20′51″' : `Rumbo ${String(20 + cur * 47).padStart(3, '0')}° · ${CATEGORIES[cur].rows.filter((x) => x[0] !== 'tag').length} productos`
         }
+        const out = clamp01((p - INTRO * 0.5) / (INTRO * 0.45))
+        r.intro.style.opacity = String(1 - out)
+        r.intro.style.transform = `translate3d(0, ${-out * 30}px, 0)`
+        r.intro.style.visibility = out >= 1 ? 'hidden' : 'visible'
       }
-      r.sections = [...r.track.querySelectorAll('[data-cat]')]
-      r.items = [...r.track.querySelectorAll('[data-it]')]
       paint(0)
       ScrollTrigger.create({
         trigger: rootRef.current,
@@ -217,158 +251,251 @@ export default function CartaSection() {
         onRefresh: (self) => paint(self.progress),
       })
       gsap.fromTo(
-        r.head.querySelectorAll('[data-in]'),
-        { autoAlpha: 0, y: 18 },
-        { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: rootRef.current, start: 'top 60%', once: true } },
+        r.intro.querySelectorAll('[data-in]'),
+        { autoAlpha: 0, y: 22 },
+        { autoAlpha: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: rootRef.current, start: 'top 60%', once: true } },
       )
     },
-    { scope: rootRef },
+    { scope: rootRef, dependencies: [L], revertOnUpdate: true },
   )
 
+  const goTo = (i) => {
+    const root = rootRef.current
+    const top = root.getBoundingClientRect().top + window.scrollY
+    const y = top + (INTRO + i * SEG + SEG * TRAVEL + 0.01) * (root.offsetHeight - window.innerHeight)
+    const lenis = getLenis()
+    if (lenis) lenis.scrollTo(y, { duration: 1.6 })
+    else window.scrollTo({ top: y, behavior: 'smooth' })
+  }
+
   const set = (k) => (el) => (R.current[k] = el)
+  // La ruta une los planetas (no el centro de cada sistema: no cruza la lista de productos).
+  const routeD = 'M' + L.systems.map((s) => `${s.x + s.px} ${s.y + s.py}`).join(' L')
 
   return (
-    <section ref={rootRef} id="carta" className="relative h-[640svh]" style={{ background: '#05060a', color: C.cream }}>
+    <section ref={rootRef} id="carta" className="relative h-[820svh]" style={{ background: '#04050a', color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
-        {/* La cuadrícula de fondo, como la portada de la carta. */}
+        {/* Estrellas (dos capas) y la cuadrícula del radar. */}
+        <div
+          ref={set('stars1')}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.7), transparent), radial-gradient(1px 1px at 120px 80px, rgba(255,255,255,0.45), transparent), radial-gradient(1.5px 1.5px at 200px 160px, rgba(255,214,170,0.6), transparent), radial-gradient(1px 1px at 60px 200px, rgba(255,255,255,0.35), transparent)',
+            backgroundSize: '240px 240px',
+          }}
+        />
+        <div
+          ref={set('stars2')}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(1.5px 1.5px at 40px 60px, rgba(255,255,255,0.8), transparent), radial-gradient(2px 2px at 300px 220px, rgba(169,214,255,0.6), transparent), radial-gradient(1px 1px at 180px 330px, rgba(255,255,255,0.5), transparent)',
+            backgroundSize: '420px 420px',
+          }}
+        />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(rgba(27,106,120,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(27,106,120,0.16) 1px, transparent 1px)',
-            backgroundSize: '44px 44px',
+            backgroundImage: 'linear-gradient(rgba(127,212,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(127,212,255,0.05) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
           }}
         />
 
-        {/* A la izquierda (arriba en teléfono): el rubro que se está leyendo. */}
-        <div ref={set('head')} className="absolute top-20 right-6 left-6 md:left-10 lg:top-1/2 lg:right-auto lg:left-[5vw] lg:w-[min(36vw,34rem)] lg:-translate-y-1/2">
-          <p data-in className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
-            <span className="h-px w-8" style={{ background: C.neon }} />
-            La carta · take-away
-          </p>
-          <div data-in className="relative mt-3 h-[3.1rem] opacity-0 sm:h-[4.2rem] lg:h-[11.5rem]">
-            {CATEGORIES.map((c, i) => (
-              <div key={c.id} ref={(el) => (R.current.titles[i] = el)} data-on={i === 0 ? '1' : '0'} className="c33-cat absolute inset-x-0 top-0">
-                <h2 className="text-[clamp(1.7rem,6.4vw,2.4rem)] leading-[0.98] font-semibold uppercase lg:text-[clamp(2.6rem,4.6vw,5rem)]" style={DISPLAY}>
-                  {c.title}
-                </h2>
-                <p className="mt-2 hidden max-w-[30ch] text-[17px] leading-[1.5] lg:block" style={{ ...BODY, color: 'rgba(242,233,220,0.72)' }}>
-                  {c.blurb}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div data-in className="mt-6 hidden items-center gap-4 opacity-0 lg:flex">
-            <span ref={set('count')} className="text-[12px] tracking-[0.2em] tabular-nums" style={{ ...MONO, color: C.neon }}>
-              01 / 06
-            </span>
-            <ol className="flex flex-1 gap-1.5" aria-label="Rubros de la carta">
-              {CATEGORIES.map((c, i) => (
-                <li key={c.id} ref={(el) => (R.current.dots[i] = el)} data-on={i === 0 ? '1' : '0'} title={c.title} className="c33-dot h-1 flex-1 rounded-full">
-                  <span className="sr-only">{c.title}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
+        {/* El mapa: la ruta, los planetas y sus productos. */}
+        <div ref={set('world')} className="absolute top-0 left-0 will-change-transform" style={{ transformOrigin: '0 0' }}>
+          <svg className="absolute overflow-visible" style={{ left: 0, top: 0, width: 1, height: 1 }} aria-hidden="true">
+            <path ref={set('route')} d={routeD} fill="none" stroke="rgba(127,212,255,0.35)" strokeWidth="2" strokeDasharray="4 10" vectorEffect="non-scaling-stroke" />
+            <path ref={set('routeDone')} d={routeD} fill="none" stroke={C.neon} strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+            <g ref={set('ship')}>
+              <path d="M14 0 L-9 -8 L-4 0 L-9 8 Z" fill={C.neon} />
+              <circle r="22" fill="none" stroke={C.neon} strokeOpacity="0.4" />
+            </g>
+          </svg>
 
-        {/* La carta: una tira de papel que sube con el scroll. */}
-        <div
-          ref={set('view')}
-          className="absolute inset-x-4 top-[9rem] bottom-4 overflow-hidden rounded-[6px] sm:inset-x-[12vw] lg:inset-x-auto lg:top-[4svh] lg:right-[5vw] lg:bottom-[4svh] lg:w-[min(46vw,34rem)]"
-          style={{ background: PAPER, color: INK, boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)' }}
-        >
-          <div ref={set('track')} className="will-change-transform">
-            {/* Portada: cuadrícula azul, CAPSULA en rojo, sello. */}
-            <div className="relative px-5 pt-6 pb-5 md:px-7" style={{ background: TEAL, backgroundImage: 'linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '22px 22px' }}>
-              <p className="text-[11px] tracking-[0.3em] uppercase" style={{ ...MONO, color: '#dff3f2' }}>
-                Experiencia
-              </p>
-              <p
-                aria-label="Cápsula"
-                className="mt-1 text-[clamp(2.6rem,12.5vw,4.4rem)] leading-[0.9] font-bold tracking-[0.01em] uppercase lg:text-[clamp(2.6rem,4.4vw,4.4rem)]"
-                style={{ ...DISPLAY, color: RED, textShadow: '2px 2px 0 #7d1a12, 4px 4px 0 rgba(0,0,0,0.25)' }}
-              >
-                Capsula
-              </p>
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <span className="rounded-[2px] px-2 py-1 text-[10px] font-bold tracking-[0.2em] uppercase" style={{ ...MONO, background: INK, color: '#fff' }}>
-                  Declassified
-                </span>
-                <span className="text-[clamp(1.1rem,4.4vw,1.5rem)] font-semibold tracking-[0.06em] uppercase" style={{ ...DISPLAY, color: '#f1e9d6' }}>
-                  Take-away
-                </span>
-              </div>
-              <div className="mt-4 flex items-center gap-3 border-t pt-3 text-[11px] tracking-[0.16em] uppercase" style={{ ...MONO, borderColor: 'rgba(255,255,255,0.3)', color: '#dff3f2' }}>
-                <span>Bienvenidos, exploradores de universos</span>
-              </div>
-            </div>
-            <Pixels rows={3} flip seed={3} />
-
-            {CATEGORIES.map((cat) => (
-              <section key={cat.id} data-cat className="px-5 pt-6 pb-4 md:px-7">
-                <h3 data-it className="border-b-2 pb-2 text-[clamp(1.05rem,4.2vw,1.25rem)] font-semibold tracking-[0.08em] uppercase" style={{ ...DISPLAY, borderColor: INK }}>
-                  {cat.title}
-                </h3>
-                {cat.groups.map((g, gi) => (
-                  <div key={gi} className="mt-4">
-                    {g.tag ? (
-                      <p data-it className="mb-2 inline-flex items-center gap-2">
-                        <span className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.14em] uppercase" style={{ ...MONO, background: INK, color: PAPER }}>
-                          {g.tag}
+          {L.systems.map((s, i) => {
+            const cat = CATEGORIES[i]
+            const [c1, c2, c3] = cat.planet
+            return (
+              <div key={cat.id} ref={(el) => (R.current.sys[i] = el)} className="c33-sys absolute" style={{ left: s.x, top: s.y, width: 0, height: 0 }}>
+                {/* Órbitas y líneas a cada producto. */}
+                <svg className="absolute overflow-visible" style={{ left: 0, top: 0, width: 1, height: 1 }} aria-hidden="true">
+                  <ellipse cx={s.px} cy={s.py} rx={s.R * 1.7} ry={s.R * 0.42} fill="none" stroke="rgba(127,212,255,0.25)" transform={`rotate(-14 ${s.px} ${s.py})`} />
+                  <circle cx={s.px} cy={s.py} r={s.R * 2.3} fill="none" stroke="rgba(127,212,255,0.12)" strokeDasharray="2 6" />
+                  {L.wide
+                    ? s.items.map((it, j) =>
+                        cat.rows[j][0] === 'tag' ? null : (
+                          <line
+                            key={j}
+                            ref={(el) => (R.current.lines[`${i}-${j}`] = el)}
+                            x1={s.px + Math.cos(it.a) * s.R * 1.05}
+                            y1={s.py + Math.sin(it.a) * s.R * 1.05}
+                            x2={it.x - 6}
+                            y2={it.y}
+                            pathLength="1"
+                            stroke="rgba(255,122,26,0.45)"
+                            strokeWidth="1"
+                            strokeDasharray="1"
+                            strokeDashoffset="1"
+                          />
+                        ),
+                      )
+                    : null}
+                </svg>
+                {/* El planeta, con su luna. */}
+                <div
+                  aria-hidden="true"
+                  className="absolute rounded-full"
+                  style={{
+                    left: s.px - s.R,
+                    top: s.py - s.R,
+                    width: s.R * 2,
+                    height: s.R * 2,
+                    background: `radial-gradient(circle at 34% 30%, ${c1}, ${c2} 45%, ${c3} 100%)`,
+                    boxShadow: `0 0 ${s.R * 0.8}px ${c2}55, inset -${s.R * 0.25}px -${s.R * 0.2}px ${s.R * 0.5}px rgba(0,0,0,0.55)`,
+                  }}
+                >
+                  <span className="c33-moon absolute top-1/2 left-1/2 h-0 w-0" style={{ '--r': `${s.R * 1.45}px` }}>
+                    <span className="absolute h-2.5 w-2.5 rounded-full" style={{ background: '#f2e9dc', boxShadow: '0 0 10px #fff' }} />
+                  </span>
+                </div>
+                {/* El nombre del sistema. */}
+                <div
+                  className="absolute"
+                  style={{ left: L.wide ? s.px - s.R : -dims.W * 0.42, top: L.wide ? s.py - s.R - 124 : s.py - s.R - 102, width: L.wide ? s.R * 3.6 : dims.W * 0.84 }}
+                >
+                  <p className="text-[11px] tracking-[0.24em] uppercase" style={{ ...MONO, color: C.neon }}>
+                    Sector 0{i + 1}
+                  </p>
+                  <h3 className="mt-1 text-[clamp(1.6rem,3.2vw,3rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
+                    {cat.title}
+                  </h3>
+                  <p className="mt-1 text-[14px]" style={{ ...BODY, color: 'rgba(242,233,220,0.65)' }}>
+                    {cat.blurb}
+                  </p>
+                </div>
+                {/* Los productos. */}
+                {s.items.map((it, j) => {
+                  const [name, price, desc, vg] = cat.rows[j]
+                  const tag = name === 'tag'
+                  return (
+                    <div
+                      key={j}
+                      ref={(el) => (R.current.items[`${i}-${j}`] = el)}
+                      className="absolute flex items-start gap-2.5"
+                      style={{ left: it.x, top: it.y, transform: 'translateY(-50%)', width: L.wide ? dims.W * 0.3 : dims.W * 0.84, opacity: 0 }}
+                    >
+                      {tag ? (
+                        <span className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.18em] uppercase" style={{ ...MONO, background: 'rgba(127,212,255,0.16)', color: '#a9d6ff' }}>
+                          {price}
                         </span>
-                        {g.vg ? <span className="rounded-[2px] border px-1 text-[9px] font-bold" style={{ ...MONO, borderColor: INK }}>VG</span> : null}
-                      </p>
-                    ) : null}
-                    <ul>
-                      {g.items.map(([name, price, desc, vg], i) => (
-                        <li key={`${name}-${i}`} data-it className="py-[0.42rem]">
-                          <div className="flex items-baseline gap-3">
-                            <span className="flex-1 text-[15px] leading-[1.25] font-medium lg:text-[16px]" style={BODY}>
-                              {name}
-                              {vg ? <span className="ml-1.5 rounded-[2px] border px-1 align-middle text-[9px] font-bold" style={{ ...MONO, borderColor: INK }}>VG</span> : null}
+                      ) : (
+                        <>
+                          <span
+                            ref={(el) => (R.current.dots[`${i}-${j}`] = el)}
+                            className="mt-[0.45em] h-2 w-2 shrink-0 rounded-full"
+                            style={{ background: C.neon, boxShadow: `0 0 8px ${C.neon}`, transform: 'scale(0)' }}
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-baseline gap-2">
+                              <span className="text-[15px] leading-tight font-medium lg:text-[16px]" style={BODY}>
+                                {name}
+                                {vg ? (
+                                  <span className="ml-1.5 rounded-[2px] border px-1 align-middle text-[9px] font-bold" style={{ ...MONO, borderColor: 'rgba(242,233,220,0.4)' }}>
+                                    VG
+                                  </span>
+                                ) : null}
+                              </span>
+                              <span aria-hidden="true" className="mb-[0.3em] min-w-4 flex-1 border-b border-dotted" style={{ borderColor: 'rgba(242,233,220,0.25)' }} />
+                              {price ? (
+                                <span className="text-[14px] font-semibold tabular-nums" style={{ ...MONO, color: C.neon }}>
+                                  {price}
+                                </span>
+                              ) : null}
                             </span>
-                            {price ? (
-                              <span className="c33-price text-[14px] font-semibold tabular-nums" style={MONO}>
-                                {price}
+                            {desc && L.wide ? (
+                              <span className="mt-0.5 block text-[12.5px] leading-[1.35]" style={{ ...BODY, color: 'rgba(242,233,220,0.55)' }}>
+                                {desc}
                               </span>
                             ) : null}
-                          </div>
-                          {desc ? (
-                            <p className="mt-0.5 pr-8 text-[12.5px] leading-[1.4]" style={{ ...BODY, color: 'rgba(16,17,20,0.62)' }}>
-                              {desc}
-                            </p>
-                          ) : null}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </section>
-            ))}
-            <div className="mt-6">
-              <Pixels rows={4} seed={7} />
-            </div>
-            <p className="px-5 pt-3 pb-24 text-[11px] tracking-[0.16em] uppercase md:px-7" style={{ ...MONO, color: 'rgba(16,17,20,0.5)' }}>
-              VG: opción vegana · Av. Gral. Roca 1120
-            </p>
-          </div>
-
-          {/* La línea de lectura. */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[40%]">
-            <div className="h-px w-full" style={{ background: C.neon, boxShadow: `0 0 14px 1px ${C.neon}` }} />
-          </div>
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-10" style={{ background: `linear-gradient(to bottom, ${PAPER}, transparent)` }} />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-16" style={{ background: `linear-gradient(to top, ${PAPER}, transparent)` }} />
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
         </div>
+
+        {/* La consola: viñeta, barrido, esquinas, lecturas y el selector de sistemas. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(130% 100% at 50% 50%, transparent 55%, rgba(0,0,0,0.75) 100%)' }} />
+        <div aria-hidden="true" className="c33-scan pointer-events-none absolute inset-0" />
+        {['top-4 left-4 border-t-2 border-l-2', 'top-4 right-4 border-t-2 border-r-2', 'bottom-4 left-4 border-b-2 border-l-2', 'right-4 bottom-4 border-r-2 border-b-2'].map((c) => (
+          <span key={c} aria-hidden="true" className={`pointer-events-none absolute h-7 w-7 md:h-10 md:w-10 ${c}`} style={{ borderColor: 'rgba(127,212,255,0.5)' }} />
+        ))}
+        <div className="pointer-events-none absolute inset-x-0 top-20 flex items-center justify-between gap-6 px-6 md:top-8 md:px-14 lg:top-10">
+          <p className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.7)' }}>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.neon, boxShadow: `0 0 8px ${C.neon}` }} />
+            <span ref={set('sector')}>Carta de navegación · 6 sistemas</span>
+          </p>
+          <p ref={set('coord')} className="hidden text-[11px] tracking-[0.2em] uppercase md:block" style={{ ...MONO, color: 'rgba(169,214,255,0.7)' }}>
+            S 40°09′15″ · O 71°20′51″
+          </p>
+        </div>
+
+        {/* La entrada: el título sobre el mapa entero. */}
+        <div ref={set('intro')} className="pointer-events-none absolute inset-x-0 bottom-[16svh] px-6 md:px-14">
+          <p data-in className="text-[11px] tracking-[0.24em] uppercase opacity-0" style={{ ...MONO, color: C.neon }}>
+            La carta · take-away
+          </p>
+          <h2 data-in className="mt-3 text-[clamp(2.6rem,8vw,8.5rem)] leading-[0.88] font-semibold tracking-[-0.02em] uppercase opacity-0" style={DISPLAY}>
+            Seis sistemas,
+            <br />
+            <span style={{ color: C.neon }}>una carta.</span>
+          </h2>
+          <p data-in className="mt-4 max-w-[40ch] text-[16px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
+            Cada planeta es un rubro de la carta. La nave los recorre con el scroll y los productos entran en órbita, con su precio.
+          </p>
+        </div>
+
+        <nav aria-label="Sistemas de la carta" className="absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-8">
+          <ol
+            className="flex max-w-full gap-1 overflow-x-auto rounded-full border p-1 md:gap-1.5"
+            style={{ borderColor: 'rgba(127,212,255,0.25)', background: 'rgba(4,5,10,0.7)', backdropFilter: 'blur(8px)', scrollbarWidth: 'none' }}
+          >
+            {CATEGORIES.map((c, i) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  ref={(el) => (R.current.nav[i] = el)}
+                  data-on="0"
+                  onClick={() => goTo(i)}
+                  className="c33-nav tpl-hit flex h-9 items-center gap-2 rounded-full px-3 text-[10.5px] font-semibold tracking-[0.14em] whitespace-nowrap uppercase md:px-4 md:text-[11px]"
+                  style={MONO}
+                >
+                  <span className="tabular-nums opacity-60">0{i + 1}</span>
+                  <span className="hidden sm:inline">{c.title}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
       </div>
       <style>{`
-        .c33-cat { opacity: 0; transform: translateY(24px); filter: blur(6px); visibility: hidden; transition: opacity 700ms cubic-bezier(0.22,1,0.36,1), transform 700ms cubic-bezier(0.22,1,0.36,1), filter 700ms cubic-bezier(0.22,1,0.36,1), visibility 0s linear 700ms; }
-        .c33-cat[data-on='1'] { opacity: 1; transform: none; filter: none; visibility: visible; transition-delay: 0s; }
-        .c33-dot { background: rgba(242,233,220,0.18); transition: background-color 400ms; }
-        .c33-dot[data-on='1'] { background: ${C.orange}; }
-        .c33-dot[data-on='done'] { background: rgba(255,122,26,0.5); }
-        [data-it][data-hot='1'] .c33-price { color: ${RED}; }
+        .c33-sys { transition: opacity 600ms cubic-bezier(0.22,1,0.36,1); }
+        .c33-nav { color: rgba(242,233,220,0.6); transition: background-color 300ms, color 300ms; }
+        .c33-nav[data-on='done'] { color: rgba(255,122,26,0.75); }
+        .c33-nav[data-on='1'] { background: ${C.neon}; color: #0b0c0f; }
+        @media (hover: hover) { .c33-nav[data-on='0']:hover, .c33-nav[data-on='done']:hover { background: rgba(255,255,255,0.08); color: #f2e9dc; } }
+        .c33-nav:focus-visible { outline: 2px solid ${C.neon}; outline-offset: 2px; }
+        .c33-scan { background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px); mix-blend-mode: overlay; }
+        @keyframes c33-orbit { from { transform: rotate(0deg) translateX(var(--r)) rotate(0deg); } to { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); } }
+        .c33-moon { animation: c33-orbit 14s linear infinite; }
       `}</style>
     </section>
   )

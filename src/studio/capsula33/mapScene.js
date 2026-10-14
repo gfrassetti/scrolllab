@@ -18,7 +18,7 @@ export const ZONES = [
   {
     id: 'jardin',
     label: 'Jardín',
-    box: [[-8, -3, 0], [-4.4, -1, 3.2]],
+    box: [[-7.5, -3, 0], [-3.9, -1, 3.2]],
     kicker: 'Pulmón de manzana',
     title: 'El jardín',
     text: 'Plantas dentro de una caja blanca con arcos negros. Se ve desde el pasillo de entrada y desde el salón.',
@@ -26,10 +26,18 @@ export const ZONES = [
   {
     id: 'vitrinas',
     label: 'Vitrinas',
-    box: [[-9.6, 2.2, 0], [-2.05, 3, 3]],
+    box: [[-9.6, 2.2, 0], [-4.05, 3, 3]],
     kicker: 'La colección',
     title: 'Las vitrinas',
-    text: 'Las figuras de cine del dueño, en vitrinas de ojo de buey. Algunas, a la altura de los más chicos.',
+    text: 'Las figuras de cine del dueño en doce ojos de buey (cuatro por fila) y, al lado, una vitrina alta con la pieza más grande.',
+  },
+  {
+    id: 'mesas',
+    label: 'Mesas',
+    box: [[-9.5, -3, 0], [-7.55, -0.93, 1.3]],
+    kicker: 'Al entrar',
+    title: 'Las mesas de la entrada',
+    text: 'Dos mesas redondas naranjas contra la entrada y la mesa larga negra, al lado del jardín, bajo una espiral de luz.',
   },
   {
     id: 'pantalla',
@@ -51,7 +59,7 @@ export const ZONES = [
   {
     id: 'salon',
     label: 'Salón',
-    box: [[-4.3, -3, 0], [6, 0.4, 2.9]],
+    box: [[-3.8, -3, 0], [6, 0.4, 2.9]],
     kicker: 'Un lugar para reunirse',
     title: 'El salón',
     text: 'Mesas bajo las espirales de luz, hasta la pared naranja de los arcos.',
