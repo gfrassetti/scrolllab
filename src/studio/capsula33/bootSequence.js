@@ -18,32 +18,42 @@ import * as THREE from 'three'
 /** Los sistemas, en orden de encendido: [id, desde, hasta (0–1 del encendido), texto de la consola]. */
 export const BOOT_STEPS = [
   ['neon', 0.04, 0.17, 'Neón del pasillo', 'encendido'],
-  ['vitrinas', 0.2, 0.34, 'Vitrinas', '12 / 12'],
+  ['vitrinas', 0.2, 0.34, 'Vitrinas', 'encendidas'],
   ['barra', 0.37, 0.5, 'Cafetera', '93 °C'],
-  ['jardin', 0.53, 0.65, 'Jardín', 'luz cenital'],
+  ['ventanales', 0.53, 0.65, 'Ventanales', 'patio'],
   ['techo', 0.68, 0.76, 'Luces del techo', 'encendidas'],
   ['salon', 0.79, 0.88, 'Tripulación', 'a bordo'],
 ]
 
-// Zonas: [canal (0–5), puntos, intensidad, desenfoque en px sobre 512].
+// Zonas: [canal (0–5), puntos, intensidad, desenfoque en px sobre 512]. Medidas sobre
+// gen/interior-real-v1.png (el salón visto desde la entrada, como en la foto del local).
 const ZONES = [
-  // Neón: la bandeja del techo (fuerte) y su reflejo naranja en el piso y la barra (suave).
-  [0, [[0.42, 0.37], [0.5, 0.3], [0.59, 0.13], [0.61, 0.0], [0.8, 0.0], [0.76, 0.09], [0.6, 0.25], [0.47, 0.38]], 1, 10],
-  [0, [[0.36, 0.3], [0.62, 0.0], [0.84, 0.0], [0.6, 0.42], [0.36, 0.42]], 0.5, 40],
-  [0, [[0.44, 0.6], [0.56, 0.6], [0.74, 1.0], [0.46, 1.0]], 0.55, 30],
-  // Vitrinas: los estantes de vidrio de la izquierda y la luz que tiran a la pared y al piso.
-  [1, [[0.21, 0.33], [0.33, 0.36], [0.33, 0.6], [0.24, 0.8], [0.21, 0.82]], 1, 8],
-  [1, [[0.1, 0.12], [0.34, 0.3], [0.34, 0.62], [0.3, 1.0], [0.1, 1.0]], 0.45, 46],
-  // Barra: el mostrador plisado, la máquina, los estantes de atrás y el brillo bajo la barra.
-  [2, [[0.32, 0.35], [0.48, 0.35], [0.48, 0.58], [0.32, 0.58]], 1, 8],
-  [2, [[0.3, 0.55], [0.5, 0.55], [0.56, 0.75], [0.3, 0.75]], 0.6, 30],
-  // Jardín: las ventanas de la derecha (y las chicas del fondo).
-  [3, [[0.6, 0.2], [0.79, 0.04], [1.0, 0.0], [1.0, 0.78], [0.86, 0.62], [0.6, 0.52]], 1, 18],
-  [3, [[0.47, 0.34], [0.6, 0.3], [0.6, 0.5], [0.47, 0.5]], 0.8, 10],
-  // Luces del techo: los spots colgantes del centro y el techo.
-  [4, [[0.3, 0.0], [0.6, 0.0], [0.52, 0.36], [0.33, 0.36]], 1, 22],
-  // Salón: la barra alta, los banquitos y el piso de adelante.
-  [5, [[0.48, 0.44], [0.86, 0.5], [0.86, 1.0], [0.42, 1.0]], 1, 34],
+  // Neón: la bandeja del techo (fuerte), su resplandor y el reflejo en el piso.
+  [0, [[0.48, 0.39], [0.52, 0.36], [0.6, 0.2], [0.67, 0.05], [0.69, 0.0], [0.8, 0.0], [0.73, 0.08], [0.62, 0.24], [0.53, 0.39]], 1, 8],
+  [0, [[0.44, 0.42], [0.62, 0.0], [0.86, 0.0], [0.62, 0.45], [0.46, 0.48]], 0.45, 40],
+  [0, [[0.45, 0.82], [0.66, 0.82], [0.7, 1.0], [0.44, 1.0]], 0.35, 30],
+  // Vitrinas: el ojo de buey con las figuras, la vitrina baja de vidrio y la luz en la pared.
+  [1, [[0.16, 0.52], [0.156, 0.606], [0.144, 0.679], [0.125, 0.728], [0.104, 0.745], [0.083, 0.728], [0.064, 0.679], [0.052, 0.606], [0.048, 0.52], [0.052, 0.434], [0.064, 0.361], [0.083, 0.312], [0.104, 0.295], [0.125, 0.312], [0.144, 0.361], [0.156, 0.434]], 1, 6],
+  [1, [[0.0, 0.84], [0.21, 0.73], [0.23, 0.76], [0.23, 0.9], [0.1, 1.0], [0.0, 1.0]], 1, 8],
+  [1, [[0.0, 0.2], [0.2, 0.25], [0.2, 0.8], [0.0, 0.95]], 0.4, 40],
+  // Barra: el mostrador plisado, la máquina y los estantes, la vitrina de medialunas, el cartel
+  // «cāpsula33» con la salida, y el brillo de la tira de abajo en el piso.
+  [2, [[0.23, 0.57], [0.61, 0.57], [0.61, 0.82], [0.26, 0.83], [0.23, 0.82]], 1, 6],
+  [2, [[0.27, 0.33], [0.36, 0.33], [0.36, 0.57], [0.27, 0.57]], 1, 8],
+  [2, [[0.3, 0.47], [0.57, 0.43], [0.57, 0.57], [0.3, 0.57]], 1, 8],
+  [2, [[0.35, 0.29], [0.47, 0.29], [0.47, 0.35], [0.35, 0.35]], 1, 4],
+  [2, [[0.24, 0.81], [0.62, 0.8], [0.66, 0.93], [0.24, 0.93]], 0.6, 30],
+  // Ventanales: los arcos de la pared naranja del fondo, que dan al patio.
+  [3, [[0.37, 0.37], [0.68, 0.37], [0.68, 0.57], [0.37, 0.57]], 1, 10],
+  [3, [[0.68, 0.33], [0.86, 0.31], [0.86, 0.55], [0.68, 0.57]], 1, 10],
+  [3, [[0.86, 0.28], [1.0, 0.25], [1.0, 0.56], [0.86, 0.55]], 1, 10],
+  [3, [[0.36, 0.3], [1.0, 0.22], [1.0, 0.62], [0.36, 0.62]], 0.45, 40],
+  // Luces del techo: los spots colgantes y las espirales blancas del salón.
+  [4, [[0.2, 0.0], [1.0, 0.0], [1.0, 0.3], [0.2, 0.32]], 1, 24],
+  [4, [[0.68, 0.33], [0.98, 0.28], [0.98, 0.4], [0.68, 0.45]], 1, 10],
+  // Salón: las mesas con la gente, el piso de adelante y una base general.
+  [5, [[0.6, 0.5], [1.0, 0.55], [1.0, 0.86], [0.62, 0.8]], 1, 20],
+  [5, [[0.23, 0.75], [1.0, 0.75], [1.0, 1.0], [0.23, 1.0]], 0.6, 30],
   [5, [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]], 0.35, 0],
 ]
 
@@ -96,7 +106,7 @@ const FRAG = /* glsl */ `
     // Apagado: casi negro, frío; solo se adivinan los volúmenes.
     vec3 dark = lit * vec3(0.05, 0.055, 0.075) + lum * vec3(0.015, 0.025, 0.05);
     // Luz de emergencia: la tira de abajo de la barra, tenue y naranja.
-    float strip = smoothstep(0.045, 0.0, abs(vUv.y - 0.415)) * smoothstep(0.3, 0.34, vUv.x) * smoothstep(0.5, 0.46, vUv.x);
+    float strip = smoothstep(0.04, 0.0, abs(vUv.y - 0.18)) * smoothstep(0.25, 0.29, vUv.x) * smoothstep(0.62, 0.58, vUv.x);
     dark += vec3(0.5, 0.18, 0.04) * strip * (0.35 + 0.05 * sin(uTime * 2.0));
     vec3 a = texture2D(uMaskA, vUv).rgb;
     vec3 b = texture2D(uMaskB, vUv).rgb;

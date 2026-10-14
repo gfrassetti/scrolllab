@@ -7,7 +7,8 @@ import { C, MONO, DISPLAY, BODY } from './brand'
  * cāpsula33 — «La carta»: el menú take-away como la pantalla de navegación de la nave.
  *
  * A todo el ancho: un mapa estelar con seis sistemas, uno por rubro (cafetería,
- * smoothies, laminados, cervezas, platos, helados). Al entrar se ve la carta
+ * smoothies, laminados, cervezas, platos, helados: los rubros de la carta impresa).
+ * Los planetas son la metáfora de la página, no de la carta. Al entrar se ve la carta
  * entera como un mapa, con la ruta que une los planetas; con el scroll la cámara
  * viaja de un sistema al siguiente (se aleja un poco en el viaje y se acerca al
  * llegar) y, en cada uno, los productos se enganchan en órbita de a uno: el punto,
@@ -233,7 +234,7 @@ export default function CartaSection() {
         if (cur !== active) {
           active = cur
           r.nav.forEach((el, i) => el && (el.dataset.on = i === cur ? '1' : i < cur ? 'done' : '0'))
-          r.sector.textContent = cur < 0 ? 'Carta de navegación · 6 sistemas' : `Sector 0${cur + 1} / 0${N} · ${CATEGORIES[cur].title}`
+          r.sector.textContent = cur < 0 ? 'Carta take-away · 6 rubros' : `Rubro 0${cur + 1} / 0${N} · ${CATEGORIES[cur].title}`
           r.coord.textContent =
             cur < 0 ? 'S 40°09′15″ · O 71°20′51″' : `Rumbo ${String(20 + cur * 47).padStart(3, '0')}° · ${CATEGORIES[cur].rows.filter((x) => x[0] !== 'tag').length} productos`
         }
@@ -368,7 +369,7 @@ export default function CartaSection() {
                   style={{ left: L.wide ? s.px - s.R : -dims.W * 0.42, top: L.wide ? s.py - s.R - 124 : s.py - s.R - 102, width: L.wide ? s.R * 3.6 : dims.W * 0.84 }}
                 >
                   <p className="text-[11px] tracking-[0.24em] uppercase" style={{ ...MONO, color: C.neon }}>
-                    Sector 0{i + 1}
+                    Rubro 0{i + 1}
                   </p>
                   <h3 className="mt-1 text-[clamp(1.6rem,3.2vw,3rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
                     {cat.title}
@@ -441,7 +442,7 @@ export default function CartaSection() {
         <div className="pointer-events-none absolute inset-x-0 top-20 flex items-center justify-between gap-6 px-6 md:top-8 md:px-14 lg:top-10">
           <p className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.7)' }}>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.neon, boxShadow: `0 0 8px ${C.neon}` }} />
-            <span ref={set('sector')}>Carta de navegación · 6 sistemas</span>
+            <span ref={set('sector')}>Carta take-away · 6 rubros</span>
           </p>
           <p ref={set('coord')} className="hidden text-[11px] tracking-[0.2em] uppercase md:block" style={{ ...MONO, color: 'rgba(169,214,255,0.7)' }}>
             S 40°09′15″ · O 71°20′51″
@@ -451,19 +452,19 @@ export default function CartaSection() {
         {/* La entrada: el título sobre el mapa entero. */}
         <div ref={set('intro')} className="pointer-events-none absolute inset-x-0 bottom-[16svh] px-6 md:px-14">
           <p data-in className="text-[11px] tracking-[0.24em] uppercase opacity-0" style={{ ...MONO, color: C.neon }}>
-            La carta · take-away
+            Experiencia Capsula · take-away
           </p>
           <h2 data-in className="mt-3 text-[clamp(2.6rem,8vw,8.5rem)] leading-[0.88] font-semibold tracking-[-0.02em] uppercase opacity-0" style={DISPLAY}>
-            Seis sistemas,
+            La carta,
             <br />
-            <span style={{ color: C.neon }}>una carta.</span>
+            <span style={{ color: C.neon }}>en órbita.</span>
           </h2>
           <p data-in className="mt-4 max-w-[40ch] text-[16px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
-            Cada planeta es un rubro de la carta. La nave los recorre con el scroll y los productos entran en órbita, con su precio.
+            La carta take-away, rubro por rubro: cafetería, smoothies, laminados y pastelería, cervezas, platos intensos y helados soft, con los precios de hoy.
           </p>
         </div>
 
-        <nav aria-label="Sistemas de la carta" className="absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-8">
+        <nav aria-label="Rubros de la carta" className="absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-8">
           <ol
             className="flex max-w-full gap-1 overflow-x-auto rounded-full border p-1 md:gap-1.5"
             style={{ borderColor: 'rgba(127,212,255,0.25)', background: 'rgba(4,5,10,0.7)', backdropFilter: 'blur(8px)', scrollbarWidth: 'none' }}

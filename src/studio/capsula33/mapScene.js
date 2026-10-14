@@ -17,27 +17,27 @@ import { b2t, loadRoom } from './roomModel'
 export const ZONES = [
   {
     id: 'jardin',
+    img: '/studio/capsula33/zones/jardin.webp',
     label: 'Jardín',
     box: [[-7.5, -3, 0], [-3.9, -1, 3.2]],
     kicker: 'Pulmón de manzana',
     title: 'El jardín',
-    text: 'Plantas dentro de una caja blanca con arcos negros. Se ve desde el pasillo de entrada y desde el salón.',
   },
   {
     id: 'vitrinas',
+    img: '/studio/capsula33/zones/vitrinas.webp',
     label: 'Vitrinas',
     box: [[-9.6, 2.2, 0], [-4.05, 3, 3]],
     kicker: 'La colección',
     title: 'Las vitrinas',
-    text: 'Las figuras de cine del dueño en doce ojos de buey (cuatro por fila) y, al lado, una vitrina alta con la pieza más grande.',
   },
   {
     id: 'mesas',
+    img: '/studio/capsula33/zones/mesas.webp',
     label: 'Mesas',
     box: [[-9.5, -3, 0], [-7.55, -0.93, 1.3]],
     kicker: 'Al entrar',
     title: 'Las mesas de la entrada',
-    text: 'Dos mesas redondas naranjas contra la entrada y la mesa larga negra, al lado del jardín, bajo una espiral de luz.',
   },
   {
     id: 'pantalla',
@@ -45,24 +45,23 @@ export const ZONES = [
     box: null, // sale de la malla de la pantalla
     kicker: 'Cafetería',
     title: 'El menú',
-    text: 'Los precios de hoy, como en la pantalla LED de la barra.',
     prices: true,
   },
   {
     id: 'barra',
+    img: '/studio/capsula33/zones/barra.webp',
     label: 'Barra',
     box: [[-1.0, 0.15, 0], [3.2, 3, 3.1]],
     kicker: 'Café de especialidad',
     title: 'La barra',
-    text: 'Abajo, la luz de la barra plisada; arriba, el pasillo de neón y el cartel colgante.',
   },
   {
     id: 'salon',
+    img: '/studio/capsula33/zones/salon.webp',
     label: 'Salón',
     box: [[-3.8, -3, 0], [6, 0.4, 2.9]],
     kicker: 'Un lugar para reunirse',
     title: 'El salón',
-    text: 'Mesas bajo las espirales de luz, hasta la pared naranja de los arcos.',
   },
 ]
 

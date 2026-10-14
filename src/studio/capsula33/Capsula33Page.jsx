@@ -124,11 +124,12 @@ export default function Capsula33Page() {
         <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onBoard={() => setBoarded(true)} />
         <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
         <NosotrosSection />
-        <LagosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <MenuSection />
         <CartaSection />
         <GaleriaSection />
+        {/* La ruta va después de las fotos, antes de Cómo llegar (es lo menos importante para quien viene al local). */}
+        <LagosSection />
         <LlegarSection />
         <ContactSection />
         <Nav visible={boarded} />

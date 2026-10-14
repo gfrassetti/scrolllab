@@ -14,11 +14,24 @@ import { C, MONO, DISPLAY, openStatus } from './brand'
 const NAV_ITEMS = [
   { id: 'top', label: 'La cápsula' },
   { id: 'nosotros', label: 'Nosotros' },
-  { id: 'ruta', label: 'La ruta' },
   { id: 'mapa', label: 'El local' },
   { id: 'menu', label: 'Menú' },
   { id: 'galeria', label: 'Galería' },
+  { id: 'ruta', label: 'La ruta' },
+  { id: 'llegar', label: 'Cómo llegar' },
   { id: 'contacto', label: 'Contacto' },
+]
+// Secciones de la página (en orden) y qué ítem del menú encienden.
+const SPY = [
+  ['top', 'top'],
+  ['nosotros', 'nosotros'],
+  ['mapa', 'mapa'],
+  ['menu', 'menu'],
+  ['carta', 'menu'],
+  ['galeria', 'galeria'],
+  ['ruta', 'ruta'],
+  ['llegar', 'llegar'],
+  ['contacto', 'contacto'],
 ]
 
 export default function Nav({ visible }) {
@@ -44,10 +57,12 @@ export default function Nav({ visible }) {
       if (Math.abs(dy) > 5) lastY = y
       // La sección activa: la que cruza el 40 % de la pantalla.
       const line = window.innerHeight * 0.4
-      let current = NAV_ITEMS[0].id
-      for (const it of NAV_ITEMS) {
-        const el = document.getElementById(it.id)
-        if (el && el.getBoundingClientRect().top <= line) current = it.id
+      // (Las fijadas se miden por su contenedor: mientras están fijas su propio top queda en 0.)
+      let current = 'top'
+      for (const [id, item] of SPY) {
+        const el = document.getElementById(id)
+        const box = el && (el.closest('.pin-spacer') || el)
+        if (box && box.getBoundingClientRect().top <= line) current = item
       }
       setActive(current)
     }

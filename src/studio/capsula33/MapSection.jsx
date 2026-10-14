@@ -290,9 +290,10 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
               <p className="mt-2 text-[22px] leading-tight font-semibold uppercase" style={DISPLAY}>
                 {zone.title}
               </p>
-              <p className="mt-2 text-[14.5px] leading-[1.5]" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
-                {zone.text}
-              </p>
+              {/* Una vista de la zona, sin texto de relleno. */}
+              {zone.img ? (
+                <img key={zone.img} src={zone.img} alt="" width="640" height="400" decoding="async" className="c33-card-img mt-3 aspect-[16/10] w-full rounded-md object-cover" />
+              ) : null}
               {zone.prices ? (
                 // La pantalla LED de la barra: negra, de aeropuerto, texto blanco y naranja.
                 <div className="mt-4 rounded-md border-2 p-3.5" style={{ background: '#06070a', borderColor: '#23262d', boxShadow: 'inset 0 0 22px rgba(0,0,0,0.9)' }}>
@@ -366,7 +367,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         @keyframes c33-card-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
         .c33-card { animation: c33-card-in 260ms cubic-bezier(0.22,1,0.36,1); transform-origin: top left; }
         .c33-map-cta { transition: transform 160ms ease-out, background-color 200ms; }
-        @media (hover: hover) { .c33-map-cta:hover { background: #fff !important; } }
+        @media (hover: hover) { @keyframes c33-card-img { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } } .c33-card-img { animation: c33-card-img 520ms cubic-bezier(0.22,1,0.36,1); } .c33-map-cta:hover { background: #fff !important; } }
         .c33-map-cta:focus-visible { outline: 2px solid ${C.neon}; outline-offset: 3px; }
       `}</style>
     </section>

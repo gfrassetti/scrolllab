@@ -154,75 +154,98 @@ export default function LagosSection() {
         <svg
           viewBox={`0 0 ${MAP_W} ${MAP_H}`}
           preserveAspectRatio="xMidYMid meet"
-          className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-10.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[2svh] lg:left-[38vw] lg:h-[96svh] lg:w-[58vw]"
+          className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-10.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[1svh] lg:left-[27vw] lg:h-[98svh] lg:w-[58vw]"
           role="img"
           aria-label="Mapa «Base 7-Lagos»: la ruta de evacuación baja del lago Nahuel Huapi, pasa por los siete lagos y llega al lago Lácar y al domo C-33"
         >
           <defs>
+            {/* El papel se funde con el fondo: sin borde, los cuatro lados se apagan hacia la pantalla. */}
+            <linearGradient id="c33-lagos-fx" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stopColor="#000" />
+              <stop offset="0.2" stopColor="#fff" />
+              <stop offset="0.8" stopColor="#fff" />
+              <stop offset="1" stopColor="#000" />
+            </linearGradient>
+            <linearGradient id="c33-lagos-fy" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stopColor="#000" />
+              <stop offset="0.12" stopColor="#fff" />
+              <stop offset="0.88" stopColor="#fff" />
+              <stop offset="1" stopColor="#000" />
+            </linearGradient>
+            <mask id="c33-lagos-fade" maskUnits="userSpaceOnUse" x="0" y="0" width={MAP_W} height={MAP_H}>
+              <rect width={MAP_W} height={MAP_H} fill="url(#c33-lagos-fx)" />
+            </mask>
+            <mask id="c33-lagos-fade-y" maskUnits="userSpaceOnUse" x="0" y="0" width={MAP_W} height={MAP_H}>
+              <rect width={MAP_W} height={MAP_H} fill="url(#c33-lagos-fy)" />
+            </mask>
             <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="10" />
             </filter>
           </defs>
-          <g ref={set('map')} style={{ opacity: 0.55 }} dangerouslySetInnerHTML={{ __html: MAP_SVG }} />
+          <g mask="url(#c33-lagos-fade)">
+            <g mask="url(#c33-lagos-fade-y)">
+              <g ref={set('map')} style={{ opacity: 0.55 }} dangerouslySetInnerHTML={{ __html: MAP_SVG }} />
 
-          {/* Los lagos que se encienden al pasar la ruta. */}
-          {STOPS.map(([name, , [x, y, w, h]], i) => (
-            <rect
-              key={name}
-              ref={(el) => (R.current.lakes[i] = el)}
-              x={x - PAD}
-              y={y - PAD}
-              width={w + PAD * 2}
-              height={h + PAD * 2}
-              rx="18"
-              fill={C.neon}
-              fillOpacity="0.16"
-              stroke={C.neon}
-              strokeWidth="5"
-              style={{ opacity: 0, transformBox: 'fill-box', transformOrigin: 'center' }}
-            />
-          ))}
+              {/* Los lagos que se encienden al pasar la ruta. */}
+              {STOPS.map(([name, , [x, y, w, h]], i) => (
+                <rect
+                  key={name}
+                  ref={(el) => (R.current.lakes[i] = el)}
+                  x={x - PAD}
+                  y={y - PAD}
+                  width={w + PAD * 2}
+                  height={h + PAD * 2}
+                  rx="18"
+                  fill={C.neon}
+                  fillOpacity="0.16"
+                  stroke={C.neon}
+                  strokeWidth="5"
+                  style={{ opacity: 0, transformBox: 'fill-box', transformOrigin: 'center' }}
+                />
+              ))}
 
-          {/* La ruta: la base (para medir), el resplandor y el trazo encendido. */}
-          <path ref={set('route')} d={ROUTE_D} fill="none" stroke="none" />
-          <path
-            ref={set('glow')}
-            d={ROUTE_D}
-            pathLength="1"
-            fill="none"
-            stroke={C.neon}
-            strokeWidth="34"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            strokeDasharray="1"
-            strokeDashoffset="1"
-            filter="url(#c33-route-glow)"
-            style={{ opacity: 0.6 }}
-          />
-          <path
-            ref={set('progress')}
-            d={ROUTE_D}
-            pathLength="1"
-            fill="none"
-            stroke={C.neon}
-            strokeWidth="10"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            strokeDasharray="1"
-            strokeDashoffset="1"
-          />
-          <circle ref={set('head')} r="13" fill="#fff" stroke={C.neon} strokeWidth="4" style={{ opacity: 0 }} cx="968" cy="232" />
+              {/* La ruta: la base (para medir), el resplandor y el trazo encendido. */}
+              <path ref={set('route')} d={ROUTE_D} fill="none" stroke="none" />
+              <path
+                ref={set('glow')}
+                d={ROUTE_D}
+                pathLength="1"
+                fill="none"
+                stroke={C.neon}
+                strokeWidth="34"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeDasharray="1"
+                strokeDashoffset="1"
+                filter="url(#c33-route-glow)"
+                style={{ opacity: 0.6 }}
+              />
+              <path
+                ref={set('progress')}
+                d={ROUTE_D}
+                pathLength="1"
+                fill="none"
+                stroke={C.neon}
+                strokeWidth="10"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeDasharray="1"
+                strokeDashoffset="1"
+              />
+              <circle ref={set('head')} r="13" fill="#fff" stroke={C.neon} strokeWidth="4" style={{ opacity: 0 }} cx="968" cy="232" />
 
-          <path
-            ref={set('stamp')}
-            d={RESTRICTED}
-            fill={C.neon}
-            fillOpacity="0.12"
-            stroke={C.neon}
-            strokeWidth="6"
-            strokeLinejoin="round"
-            style={{ opacity: 0 }}
-          />
+              <path
+                ref={set('stamp')}
+                d={RESTRICTED}
+                fill={C.neon}
+                fillOpacity="0.12"
+                stroke={C.neon}
+                strokeWidth="6"
+                strokeLinejoin="round"
+                style={{ opacity: 0 }}
+              />
+            </g>
+          </g>
         </svg>
 
         {/* Arriba a la izquierda: el título (letra por letra al entrar). */}
@@ -235,7 +258,12 @@ export default function LagosSection() {
             <span className="h-px w-8" style={{ background: C.neon }} />
             La ruta
           </p>
-          <h2 data-h="title" aria-label="Base 7-Lagos." className="mt-3 flex flex-col text-[clamp(2.1rem,4.8vw,5rem)] leading-[0.95] font-semibold uppercase max-sm:flex-row max-sm:gap-x-[0.3em]" style={DISPLAY}>
+          <h2
+            data-h="title"
+            aria-label="Base 7-Lagos."
+            className="mt-3 flex flex-col text-[clamp(2.1rem,4.8vw,5rem)] leading-[0.95] font-semibold uppercase max-sm:flex-row max-sm:gap-x-[0.3em]"
+            style={DISPLAY}
+          >
             <span aria-hidden="true" className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
                 Base

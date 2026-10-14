@@ -112,13 +112,13 @@ export default function NosotrosSection() {
             <div ref={set('photo')} className="aspect-[16/9] overflow-hidden rounded-[3px] lg:aspect-[4/5]" style={{ clipPath: 'inset(100% 0 0 0)' }}>
               <img
                 ref={set('photoImg')}
-                src="/studio/capsula33/nosotros-mesa-1360.webp"
+                src="/studio/capsula33/nosotros-1200.webp"
                 alt="Mesas negras frente a la banqueta naranja del salón"
-                width="1360"
-                height="764"
+                width="1200"
+                height="1500"
                 loading="lazy"
                 decoding="async"
-                className="h-full w-full object-cover object-[38%_50%]"
+                className="h-full w-full object-cover object-[50%_45%]"
                 style={{ transform: 'scale(1.18)', transformOrigin: '50% 100%' }}
               />
             </div>
