@@ -9,7 +9,6 @@ import MapSection from './MapSection'
 import Nav from './Nav'
 import NosotrosSection from './NosotrosSection'
 import LagosSection from './LagosSection'
-import MenuSection from './MenuSection'
 import CartaSection from './CartaSection'
 import ContactSection from './ContactSection'
 import LlegarSection from './LlegarSection'
@@ -125,7 +124,6 @@ export default function Capsula33Page() {
         <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
         <NosotrosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
-        <MenuSection />
         <CartaSection />
         <GaleriaSection />
         {/* La ruta va después de las fotos, antes de Cómo llegar (es lo menos importante para quien viene al local). */}

@@ -382,6 +382,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
       u.uA.value.set(lv.a[0], lv.a[1], lv.a[2])
       u.uB.value.set(lv.b[0], lv.b[1], lv.b[2])
       u.uAll.value = lv.all
+      u.uSign.value = lv.sign
       u.uTime.value = now / 1000
       // El cartel flota: respira despacio y su sombra en la pared lo acompaña.
       if (parts.sign) {

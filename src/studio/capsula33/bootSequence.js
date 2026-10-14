@@ -17,7 +17,7 @@ import * as THREE from 'three'
 
 /** Los sistemas, en orden de encendido: [id, desde, hasta (0–1 del encendido), texto de la consola]. */
 export const BOOT_STEPS = [
-  ['neon', 0.04, 0.17, 'Neón del pasillo', 'encendido'],
+  ['neon', 0.07, 0.19, 'Neón del pasillo', 'encendido'],
   ['vitrinas', 0.2, 0.34, 'Vitrinas', 'encendidas'],
   ['barra', 0.37, 0.5, 'Cafetera', '93 °C'],
   ['ventanales', 0.53, 0.65, 'Ventanales', 'patio'],
@@ -41,7 +41,6 @@ const ZONES = [
   [2, [[0.23, 0.57], [0.61, 0.57], [0.61, 0.82], [0.26, 0.83], [0.23, 0.82]], 1, 6],
   [2, [[0.27, 0.33], [0.36, 0.33], [0.36, 0.57], [0.27, 0.57]], 1, 8],
   [2, [[0.3, 0.47], [0.57, 0.43], [0.57, 0.57], [0.3, 0.57]], 1, 8],
-  [2, [[0.35, 0.29], [0.47, 0.29], [0.47, 0.35], [0.35, 0.35]], 1, 4],
   [2, [[0.24, 0.81], [0.62, 0.8], [0.66, 0.93], [0.24, 0.93]], 0.6, 30],
   // Ventanales: los arcos de la pared naranja del fondo, que dan al patio.
   [3, [[0.37, 0.37], [0.68, 0.37], [0.68, 0.57], [0.37, 0.57]], 1, 10],
@@ -99,6 +98,7 @@ const FRAG = /* glsl */ `
   uniform vec3 uB;
   uniform float uAll;
   uniform float uTime;
+  uniform float uSign;
   varying vec2 vUv;
   void main() {
     vec3 lit = texture2D(uMap, vUv).rgb;
@@ -116,8 +116,16 @@ const FRAG = /* glsl */ `
     L = max(L, uAll);
     // Lo que se está encendiendo se pasa un poco de brillo (el golpe de tubo) y se asienta.
     float O = dot(a, max(uA - 1.0, vec3(0.0))) + dot(b, max(uB - 1.0, vec3(0.0)));
+    // El cartel «cāpsula33» (sobre la barra): la primera luz, antes que todo; derrama un poco
+    // de blanco alrededor.
+    vec2 sp = vec2(vUv.x, 1.0 - vUv.y);
+    float signBox = smoothstep(0.004, 0.0, max(max(0.358 - sp.x, sp.x - 0.47), max(0.292 - sp.y, sp.y - 0.338)));
+    float signHalo = exp(-pow(length((sp - vec2(0.414, 0.315)) * vec2(1.0, 2.2)) / 0.07, 2.0));
+    L = max(L, signBox * min(uSign, 1.0));
     vec3 c = mix(dark, lit, L);
     c += lit * O * 0.9;
+    c += lit * signBox * max(uSign - 1.0, 0.0) * 0.9;
+    c += vec3(1.0, 0.96, 0.9) * signHalo * 0.16 * min(uSign, 1.0) * (1.0 - uAll);
     gl_FragColor = vec4(c, 1.0);
   }
 `
@@ -133,6 +141,7 @@ export function createBootMaterial(map) {
       uB: { value: new THREE.Vector3() },
       uAll: { value: 1 },
       uTime: { value: 0 },
+      uSign: { value: 0 },
     },
     vertexShader: VERT,
     fragmentShader: FRAG,
@@ -155,5 +164,7 @@ export function bootLevels(boot, on) {
   const v = BOOT_STEPS.map(([, a, b]) => level((boot - a) / (b - a)))
   // Antes de entrar (o si el encendido no corre) el salón se ve como en la foto.
   const all = on ? Math.max(0, Math.min(1, (boot - 0.9) / 0.1)) : 1
-  return { a: v.slice(0, 3), b: v.slice(3, 6), all }
+  // El cartel: arranca apenas se cruza la puerta, con su propio titileo.
+  const sign = on ? level((boot - 0.004) / 0.05) : 1
+  return { a: v.slice(0, 3), b: v.slice(3, 6), all, sign }
 }

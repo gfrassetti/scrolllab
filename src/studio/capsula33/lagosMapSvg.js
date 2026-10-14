@@ -31,9 +31,14 @@ const C = {
 const MONO = "'Roboto Mono', ui-monospace, monospace"
 const DISP = "'Chakra Petch', 'Roboto Mono', sans-serif"
 
-// La ruta (eje), de arriba (el lago mayor) hacia abajo (el lazo junto al domo).
+// La red de lagos está dada vuelta respecto del papel original (que tenía el Nahuel Huapi arriba):
+// así coincide con el mapa real, norte arriba. Las formas se dibujan en las coordenadas de antes,
+// dentro de un grupo espejado en y alrededor de FC; los textos se escriben aparte, derechos.
+const FC = 1680
+
+// La ruta (eje), de arriba (el Lácar, la puerta del domo) hacia abajo (el lago mayor), ya espejada.
 export const ROUTE_D =
-  'M968 232 L968 262 L1000 296 L1000 520 L985 548 L930 604 L855 712 L765 822 L676 930 L634 990 L630 1300 L646 1330 L826 1330 L866 1368 L866 1540 L830 1578 L700 1578 L676 1546'
+  'M676 134 L700 102 L830 102 L866 140 L866 312 L826 350 L646 350 L630 380 L634 690 L676 750 L765 858 L855 968 L930 1076 L985 1132 L1000 1160 L1000 1330 L950 1384 L918 1418 L918 1448'
 
 /** Polígono redondeado (esquinas en chaflán), como las regiones del mapa. */
 const poly = (pts) => 'M' + pts.map((p) => p.join(' ')).join(' L') + ' Z'
@@ -47,10 +52,29 @@ const panel = (pts, fill = C.sage) => `
   <path d="${poly(pts)}" transform="translate(7 7)" fill="${C.purple}"/>
   <path d="${poly(pts)}" fill="${fill}" stroke="${C.navy}" stroke-width="3" stroke-linejoin="round"/>`
 
-const text = (x, y, s, { size = 13, weight = 500, fill = C.ink, anchor = 'start', font = MONO, ls = 0.4, italic = false } = {}) =>
+const rawText = (x, y, s, { size = 13, weight = 500, fill = C.ink, anchor = 'start', font = MONO, ls = 0.4, italic = false } = {}) =>
   `<text x="${x}" y="${y}" font-family="${font}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}" letter-spacing="${ls}"${italic ? ' font-style="italic"' : ''}>${s}</text>`
 
-const lines = (x, y, arr, opts = {}) => arr.map((s, i) => text(x, y + i * (opts.lh || 14), s, opts)).join('')
+// Mientras se dibuja la parte espejada, los textos se juntan aparte con la y ya espejada (cada
+// bloque de renglones se da vuelta como bloque, así se sigue leyendo de arriba hacia abajo).
+let FLIP = false
+let FLIP_DX = 0
+const FLIP_TEXT = []
+const lines = (x, y, arr, opts = {}) => {
+  const lh = opts.lh || 14
+  if (!FLIP) return arr.map((s, i) => rawText(x, y + i * lh, s, opts)).join('')
+  const y0 = FC - y - (arr.length - 1) * lh + 0.72 * (opts.size || 13)
+  FLIP_TEXT.push(arr.map((s, i) => rawText(x + FLIP_DX, Math.round(y0 + i * lh), s, opts)).join(''))
+  return ''
+}
+const text = (x, y, s, opts = {}) => lines(x, y, [s], opts)
+const flipped = (fn) => {
+  FLIP = true
+  FLIP_TEXT.length = 0
+  const shapes = fn()
+  FLIP = false
+  return { shapes: `<g transform="matrix(1 0 0 -1 0 ${FC})">${shapes}</g>`, texts: FLIP_TEXT.join('') }
+}
 
 const lake = (d, { fill = C.beige, stroke = C.red, sw = 4 } = {}) =>
   `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>`
@@ -58,8 +82,7 @@ const smallLake = (x, y, w, h) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(w, h) / 2}" fill="${C.sage}" stroke="${C.road}" stroke-width="3"/>`
 const redLabel = (x, y, w, h, l1, l2) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${C.red}"/>` +
-  text(x + w / 2, y + h / 2 - (l2 ? 2 : -4), l1, { size: 10, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 0.6 }) +
-  (l2 ? text(x + w / 2, y + h / 2 + 10, l2, { size: 10, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 0.6 }) : '')
+  lines(x + w / 2, y + h / 2 - (l2 ? 2 : -4), l2 ? [l1, l2] : [l1], { size: 10, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 0.6, lh: 12 })
 const label = (x, y, arr, size = 9.5) => lines(x, y, arr, { size, weight: 600, fill: C.ink, anchor: 'middle', lh: 11, ls: 0.8 })
 
 // Cada lista de la ruta de evacuación (texto del mapa).
@@ -150,7 +173,23 @@ function domeSection() {
   return s
 }
 
+// El área restringida, más chica, abajo a la derecha (donde ahora está el lago mayor).
+const RS = { k: 0.62, x: 490.5, y: 530.2 }
+const RESTRICTED_PTS = [
+  [970, 1290],
+  [1180, 1290],
+  [1228, 1338],
+  [1228, 1592],
+  [1180, 1640],
+  [970, 1640],
+  [925, 1595],
+  [925, 1335],
+]
+export const RESTRICTED_D = 'M' + RESTRICTED_PTS.map(([x, y]) => `${(x * RS.k + RS.x).toFixed(1)} ${(y * RS.k + RS.y).toFixed(1)}`).join(' L') + ' Z'
 function restricted() {
+  return `<g transform="translate(${RS.x} ${RS.y}) scale(${RS.k})">${restrictedInner()}</g>`
+}
+function restrictedInner() {
   const cx = 1075
   const cy = 1462
   let s = panel(
@@ -193,7 +232,10 @@ function mountains() {
 
 function network() {
   let s = ''
-  // Región de arriba (el norte).
+  // Región del lago mayor (abajo, una vez espejado), corrida a la izquierda para dejarle lugar
+  // al área restringida.
+  FLIP_DX = -50
+  s += '<g transform="translate(-50 0)">'
   s += region([
     [700, 122],
     [1062, 122],
@@ -210,7 +252,9 @@ function network() {
   s += `<rect x="1040" y="172" width="52" height="62" rx="10" fill="${C.red}" stroke="${C.redDk}" stroke-width="3"/><circle cx="1104" cy="188" r="11" fill="${C.red}" stroke="${C.redDk}" stroke-width="2"/>`
   s += smallLake(698, 228, 40, 72) + label(718, 316, ['LAGO', 'QUEÑI'])
   s += smallLake(784, 158, 40, 86) + label(816, 268, ['LAGO', 'NONTHUÉ'])
-  s += smallLake(866, 342, 34, 16) + label(930, 336, ['LAGO', 'ESCONDIDO'])
+  s += smallLake(866, 342, 34, 16) + label(930, 336, ['LAGO', 'PIRÉ'])
+  s += '</g>'
+  FLIP_DX = 0
   // El cuello hacia el centro.
   s += `<rect x="826" y="388" width="16" height="136" fill="${C.cream}" stroke="${C.navy}" stroke-width="3"/>`
   s += region(
@@ -243,10 +287,10 @@ function network() {
   s += `<ellipse cx="1050" cy="590" rx="44" ry="30" fill="${C.sage}" stroke="${C.road}" stroke-width="3"/>` + label(1050, 586, ['LAGO', 'MELIQUINA'])
   s += `<circle cx="1104" cy="636" r="4" fill="${C.creamLt}" stroke="${C.navy}" stroke-width="2"/>` + label(1104, 656, ['VILLA', 'MELIQUINA'])
   s += lake('M832 580 C846 568 900 566 912 584 C922 600 910 616 880 616 C850 616 822 600 832 580 Z')
-  s += redLabel(826, 580, 78, 28, 'LAGO', 'MACHÓNICO')
+  s += redLabel(826, 580, 78, 28, 'LAGO', 'ESPEJO')
   s += smallLake(800, 652, 56, 26) + label(828, 668, ['LAGO HERMOSO'], 8.5)
   s += lake('M858 790 C880 774 920 780 924 810 C928 846 912 872 884 870 C858 868 844 830 858 790 Z')
-  s += redLabel(856, 808, 64, 26, 'LAGO', 'FALKNER')
+  s += redLabel(849, 808, 78, 26, 'LAGO', 'CORRENTOSO')
   s += smallLake(966, 848, 44, 18) + label(988, 882, ['LAGO', 'NUEVO'])
   s += smallLake(1060, 848, 50, 18) + label(1085, 882, ['LAGO FILO', 'HUA HUM'], 8.5)
   // Región de la izquierda (Calcú, Espejo Chico, el lago en L).
@@ -262,9 +306,9 @@ function network() {
   s += `<rect x="452" y="858" width="48" height="66" rx="10" fill="${C.sageGray}" stroke="${C.road}" stroke-width="3"/>` + label(476, 886, ['LAGUNA', 'CALCÚ'])
   s += smallLake(538, 870, 22, 34) + label(552, 852, ['LAGO ESPEJO', 'CHICO'], 8.5)
   s += lake('M478 918 L560 918 L560 990 L478 990 Z')
-  s += redLabel(486, 930, 66, 26, 'LAGO', 'ESPEJO')
+  s += redLabel(480, 930, 78, 26, 'LAGO', 'FALKNER')
   s += lake('M432 1092 L512 1092 L512 1226 L640 1226 L640 1330 L436 1330 L416 1310 L416 1112 Z')
-  s += redLabel(524, 1262, 86, 30, 'LAGO', 'CORRENTOSO')
+  s += redLabel(524, 1262, 86, 30, 'LAGO', 'MACHÓNICO')
   s += label(452, 1004, ['LAGUNA', 'CAMPANA']) + label(452, 1038, ['LAGO', 'ARUNCO']) + label(452, 1072, ['LAGO', 'TOTORAL'])
   // El lazo de abajo (junto al domo).
   s += region([
@@ -280,8 +324,8 @@ function network() {
   s += redLabel(648, 1400, 70, 28, 'LAGO', 'LÁCAR')
   // Los villarino / escondido, en el tramo diagonal.
   s += lake('M680 770 C702 756 738 762 742 782 C746 804 724 814 698 812 C676 810 668 786 680 770 Z')
-  s += redLabel(674, 772, 64, 26, 'LAGO', 'VILLARINO')
-  s += redLabel(668, 830, 64, 26, 'LAGO', 'ESCONDIDO')
+  s += redLabel(674, 772, 64, 26, 'LAGO', 'ESCONDIDO')
+  s += redLabel(668, 830, 64, 26, 'LAGO', 'VILLARINO')
   // Rutas que entran desde afuera.
   s += `<path d="M372 1144 L540 1144 L560 1120 L600 1120 M372 1154 L540 1154 L564 1130 L600 1130" stroke="${C.creamLt}" stroke-width="3" fill="none"/>`
   s +=
@@ -289,13 +333,10 @@ function network() {
     text(437, 1153, '231', { size: 9.5, weight: 700, anchor: 'middle' })
   s +=
     `<rect x="420" y="1166" width="70" height="16" rx="3" fill="${C.navy}"/>` +
-    text(455, 1178, '▲ A CHILE', { size: 9, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 1 })
+    text(455, 1178, '◂ A CHILE', { size: 9, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 1 })
   s +=
     `<rect x="1106" y="1092" width="78" height="16" rx="3" fill="${C.navy}"/>` +
-    text(1145, 1104, 'A BARILOCHE ▸', { size: 9, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 0.8 })
-  s +=
-    `<rect x="666" y="92" width="58" height="16" rx="3" fill="${C.navy}"/>` +
-    text(695, 104, '▲ A CHILE', { size: 9, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 1 })
+    text(1145, 1104, 'A BARILOCHE ▾', { size: 9, weight: 700, fill: C.creamLt, anchor: 'middle', ls: 0.8 })
   // Columnas crema que bajan hacia el domo.
   s += `<rect x="752" y="1140" width="18" height="170" fill="${C.cream}" stroke="${C.navy}" stroke-width="3"/>`
   s += `<rect x="1088" y="1090" width="34" height="214" fill="${C.cream}" stroke="${C.navy}" stroke-width="3"/>`
@@ -345,7 +386,8 @@ function legendPanels() {
   s += text(62, 388, 'RUTA DE EVACUACIÓN', { size: 18, weight: 700, ls: 1.2 })
   s += hatchRule(60, 330, 410)
   s += rutaPanel()
-  // Conexiones internas.
+  // Conexiones internas y 03 domos: más abajo (arriba ahora está la red de lagos).
+  s += '<g transform="translate(0 560)">'
   s += `<rect x="390" y="333" width="104" height="278" rx="14" fill="${C.redDk}" transform="translate(6 6)"/><rect x="390" y="333" width="104" height="278" rx="14" fill="${C.red}" stroke="${C.redDk}" stroke-width="3"/>`
   s += lines(442, 362, ['CONEXIONES', 'INTERNAS'], { size: 8.5, weight: 700, fill: C.creamLt, anchor: 'middle', lh: 10, ls: 0.8 })
   const items = [
@@ -366,6 +408,7 @@ function legendPanels() {
   s +=
     text(484, 636, '03', { size: 22, weight: 700, fill: C.cream, anchor: 'middle', font: DISP }) +
     text(484, 652, 'DOMOS', { size: 7, weight: 700, fill: C.cream, anchor: 'middle', ls: 1 })
+  s += '</g>'
   // Sector SMA.
   s += panel([
     [60, 990],
@@ -422,6 +465,9 @@ function rightEdge() {
 }
 
 /** El mapa entero (sin el `<svg>`): para usar dentro de un `<svg viewBox="0 0 1272 1966">`. */
+const MOUNTAINS = flipped(mountains)
+const NETWORK = flipped(network)
+
 export const MAP_SVG = `
   <defs>
     <pattern id="c33m-grid" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -433,9 +479,10 @@ export const MAP_SVG = `
   </defs>
   <rect width="${MAP_W}" height="${MAP_H}" fill="${C.paper}"/>
   <rect width="${MAP_W}" height="${MAP_H}" fill="url(#c33m-grid)"/>
-  ${mountains()}
-  ${network()}
+  ${MOUNTAINS.shapes}
+  ${NETWORK.shapes}
   ${routeBase()}
+  ${NETWORK.texts}
   ${header()}
   ${legendPanels()}
   ${restricted()}
@@ -448,16 +495,16 @@ export const MAP_SVG = `
 `
 
 /**
- * Las escalas, en el orden en que la ruta baja (del lago mayor a la puerta del domo):
+ * Las escalas, en el orden de la ruta (del Lácar, arriba, al lago mayor, abajo):
  * [nombre, número en el mapa, caja del lago (x, y, ancho, alto), texto].
  */
 export const STOPS = [
-  ['Lago Nahuel Huapi', 'Bonus', [846, 160, 190, 106], 'El lago mayor del sistema: desde acá empieza el descenso hacia la base.'],
-  ['Lago Machónico', '02', [822, 566, 98, 52], 'Pequeño y tranquilo: un lago angosto de tránsito rápido.'],
-  ['Lago Falkner', '03', [846, 774, 82, 100], 'Área abierta de exploración, con vistas impresionantes.'],
-  ['Lago Villarino', '04', [668, 756, 82, 58], 'Largo y calmo, con el camino y el bosque al lado: un canal natural de conexión.'],
-  ['Lago Escondido', '05', [664, 826, 72, 34], 'Aguas tranquilas, rodeadas de bosque. Casi no se ve desde la ruta.'],
-  ['Lago Espejo', '07', [478, 918, 82, 72], 'Sus aguas calmas marcan una pausa dentro del recorrido.'],
-  ['Lago Correntoso', '06', [416, 1092, 224, 238], 'Famoso por su río, uno de los más cortos del mundo: flujo permanente entre sistemas.'],
-  ['Lago Lácar', '01', [646, 1382, 160, 100], 'El puerto: la ruta termina en la puerta del domo C-33. Llegaste a la cápsula.'],
+  ['Lago Lácar', '01', [646, 198, 160, 100], 'Puerto de partida: la ruta sale de San Martín de los Andes, a orillas del Lácar.'],
+  ['Lago Machónico', '02', [416, 350, 224, 238], 'Pequeño y tranquilo: un lago angosto de tránsito rápido.'],
+  ['Lago Falkner', '03', [478, 690, 82, 72], 'Área abierta de exploración, con vistas impresionantes.'],
+  ['Lago Villarino', '04', [664, 820, 72, 34], 'Largo y calmo, con el camino y el bosque al lado: un canal natural de conexión.'],
+  ['Lago Escondido', '05', [668, 866, 82, 58], 'Aguas tranquilas, rodeadas de bosque. Casi no se ve desde la ruta.'],
+  ['Lago Correntoso', '06', [846, 806, 82, 100], 'Famoso por su río, uno de los más cortos del mundo: flujo permanente entre sistemas.'],
+  ['Lago Espejo', '07', [822, 1062, 98, 52], 'Sus aguas calmas marcan una pausa dentro del recorrido.'],
+  ['Lago Nahuel Huapi', 'Bonus', [796, 1414, 190, 106], 'El lago mayor del sistema: acá termina la ruta, en Villa La Angostura.'],
 ]
