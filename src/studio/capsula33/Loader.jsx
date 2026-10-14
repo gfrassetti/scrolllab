@@ -175,7 +175,7 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
                   type="button"
                   onClick={board}
                   disabled={!ready}
-                  className="c33-board group relative h-14 w-full overflow-hidden rounded-full text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none"
+                  className={`c33-board ${ready ? 'is-ready' : ''} group relative h-14 w-full overflow-hidden rounded-full text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none`}
                   style={{ ...DISPLAY, background: INK, color: C.cream, opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(8px)' }}
                 >
                   <span
@@ -286,6 +286,18 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
 
       <style>{`
         .c33-board:focus-visible { outline: 3px solid ${C.cream}; outline-offset: 3px; }
+        /* Listo para abordar: titila como un neón que se enciende y después late. */
+        .c33-board.is-ready { animation: c33-board-on 1.1s steps(1, end) 1, c33-board-pulse 2.4s ease-in-out 1.1s infinite; }
+        @keyframes c33-board-on {
+          0% { opacity: 0.15; } 8% { opacity: 1; } 14% { opacity: 0.3; } 22% { opacity: 1; } 30% { opacity: 0.45; }
+          38% { opacity: 1; } 60% { opacity: 0.75; } 66%, 100% { opacity: 1; }
+        }
+        @keyframes c33-board-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,244,230,0), 0 0 14px rgba(255,244,230,0.25); }
+          50% { box-shadow: 0 0 0 4px rgba(242,233,220,0.35), 0 0 34px rgba(255,244,230,0.75); }
+        }
+        @media (hover: hover) { .c33-board.is-ready:hover { animation: c33-board-flick 0.7s steps(1, end) infinite, c33-board-pulse 2.4s ease-in-out infinite; } }
+        @keyframes c33-board-flick { 0%, 100% { opacity: 1; } 12% { opacity: 0.55; } 18% { opacity: 1; } 52% { opacity: 0.8; } 58% { opacity: 1; } }
       `}</style>
     </>
   )

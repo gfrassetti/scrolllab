@@ -233,8 +233,13 @@ export default function MenuSection() {
               <span className="h-px w-8" style={{ background: C.neon }} />
               Menú
             </p>
-            <h2 data-in className="mt-4 text-[clamp(2rem,4.6vw,4.8rem)] leading-[0.95] font-semibold uppercase opacity-0" style={DISPLAY}>
-              Cafetería, <span style={{ color: C.neon }}>con la c de cāpsula.</span>
+            {/* «cafetería» con la c del logo (la c con la barra naranja de c̄33). */}
+            <h2 data-in aria-label="Cafetería" className="c33-cafe mt-3 text-[clamp(2.6rem,6.4vw,6.4rem)] leading-[0.95] font-light opacity-0" style={{ ...MONO, letterSpacing: '-0.04em' }}>
+              <span aria-hidden="true" className="relative inline-block">
+                <span className="absolute left-[0.1em] right-[0.1em] top-[0.17em] h-[0.06em] rounded-full" style={{ background: C.orange, boxShadow: `0 0 18px ${C.neon}` }} />
+                c
+              </span>
+              <span aria-hidden="true">afetería</span>
             </h2>
           </div>
           <p data-in className="max-w-[34ch] text-[16px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.7)' }}>

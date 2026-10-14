@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../lib/gsap'
-import { getLenis } from '../../hooks/useLenis'
 import { trackPointer } from '../../lib/motion'
 import { createCorridorScene } from './corridorScene'
 import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
@@ -120,7 +119,6 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           door: scene.screenRect('door'),
         }
         place(r.port, r.rects.port)
-        place(r.door, r.rects.door)
         // Las notas: posición y tamaño según la distancia; aparecen de lejos y se van al pasar.
         const phone = window.innerWidth < 640
         notes.forEach((n, i) => {
@@ -326,7 +324,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
       const P = pointer
       const inside = (q, pad = 0) => q && P.clientX >= q.x - pad && P.clientX <= q.x + q.w + pad && P.clientY >= q.y - pad && P.clientY <= q.y + q.h + pad
       const live = r.moved && !noHover && !P.touching && still && r.rects
-      const over = !live ? null : inside(r.rects.door) ? 'door' : inside(r.rects.sign, 10) ? 'sign' : inside(r.rects.port) ? 'port' : null
+      const over = !live ? null : inside(r.rects.sign, 10) ? 'sign' : inside(r.rects.port) ? 'port' : null
       if (over !== r.over) {
         if (over === 'sign') {
           st.flickerAmp = 1
@@ -335,9 +333,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         r.over = over
         setHover(over)
       }
-      const want = (over === 'door' || r.focusDoor) && still ? 1 : 0
-      st.peek += (want - st.peek) * 0.08
-      st.glow += (want - st.glow) * 0.08
+      // La puerta no se entreabre ni se cliquea: se entra solo con el scroll.
     }
     raf = requestAnimationFrame(loop)
     return () => {
@@ -353,11 +349,6 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
     const id = setInterval(() => setTyped((n) => Math.min(LINE.length, n + 1)), 24)
     return () => clearInterval(id)
   }, [talk, typed])
-
-  const enter = () => {
-    const root = rootRef.current
-    getLenis()?.scrollTo(root.offsetTop + root.offsetHeight - window.innerHeight, { duration: 3.6 })
-  }
 
   const set = (k) => (el) => (R.current[k] = el)
 
@@ -580,15 +571,6 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
             </span>
             <span className="c33-mirror-label">c̄33</span>
           </span>
-          <button
-            ref={set('door')}
-            type="button"
-            aria-label="Entrar al café"
-            onFocus={() => (R.current.focusDoor = true)}
-            onBlur={() => (R.current.focusDoor = false)}
-            onClick={enter}
-            className="pointer-events-auto absolute top-0 left-0 cursor-pointer rounded-[0.6vw] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ff7a1a]"
-          />
         </div>
 
         {/* Viñeta: los bordes a oscuras, el centro (la entrada) con luz. */}
