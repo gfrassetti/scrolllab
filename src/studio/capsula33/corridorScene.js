@@ -55,13 +55,18 @@ const Z_MODULE = -D + 0.02
 const Z_LEAVES = -D + 0.01
 // Lejos de la puerta (el salón es largo): así, al cruzarla, lo que ve la cámara ya es casi el
 // interior entero y la imagen en DOM apenas se acomoda (de cerca había que hacer mucho zoom).
-const Z_INSIDE = -D - 8
+const Z_INSIDE = -D - 30
 const Z_START = -1.8 // arranca cerca: la entrada manda, poco pasillo (pedido del dueño)
 const Z_WALKED = -(D - 3.4) // frente a la entrada
 const Z_SIGN = Z_MODULE + 0.32 // el cartel flota delante de la pared
 const Z_INSIDE_CAM = -(D + 0.2) // ya cruzamos la puerta
 const INSIDE_H = 4.6 // alto del plano del interior
-const ENTER_STOP = 0.85 // la cámara llega antes; el resto lo hace la imagen en DOM (ver insideCover)
+const ENTER_STOP = 1 // todo el interior es 3D: el salón al fondo y las mesas en su propia capa
+// Las mesas y sillas: una capa entre la puerta y el salón. Desde la cámara final calza exacto
+// con la foto del salón (mismo tamaño aparente, las patas sobre el piso); desde cualquier otra
+// posición se corre distinto que el fondo: eso es la profundidad (al caminar y con el puntero).
+const FURNITURE_DIST = 6 // distancia a la cámara final
+const FURNITURE_DROP = 0.34 // la imagen de las mesas trae el horizonte alto: se baja un 34 % de su alto
 
 const PROJECT_VERT = /* glsl */ `
   uniform mat4 uProj0;
@@ -215,6 +220,10 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     inside.position.set(0, 0, Z_INSIDE)
     scene.add(inside)
     parts.inside = inside
+    const furniture = new THREE.Mesh(new THREE.PlaneGeometry(IMG.w / IMG.h, 1), flat(tex.furniture, { transparent: true }))
+    furniture.renderOrder = 1
+    scene.add(furniture)
+    parts.furniture = furniture
 
     // 3. Las hojas de la puerta.
     const door = rectAt(PARTS.door)
@@ -348,6 +357,11 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     const half = (hd + tanV * (Z_LEAVES - Z_INSIDE)) * 1.06
     parts.inside.scale.setScalar(half / (INSIDE_H / 2))
     parts.insideHalf = half
+    // Las mesas, a escala de su distancia: desde la cámara final se ven del tamaño de la foto.
+    const k = FURNITURE_DIST / (Z_INSIDE_CAM - Z_INSIDE)
+    const fh = 2 * half * k
+    parts.furniture.scale.set(fh, fh, 1)
+    parts.furniture.position.set(0, -FURNITURE_DROP * fh, Z_INSIDE_CAM - FURNITURE_DIST)
   }
 
   const resize = () => {
@@ -382,8 +396,10 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     const still = 1 - Math.min(1, walk * 1.4 + enter)
     // Paso: un vaivén mínimo mientras se camina.
     const bob = Math.sin(-z * 2.4) * 0.018 * Math.sin(Math.PI * state.walk)
-    camera.position.set(state.px * 0.16 * (1 - enter), state.py * -0.08 * (1 - enter) + bob, z)
-    camera.rotation.set(state.py * -0.018 * still, state.yaw * (1 - Math.max(walk, enter)) - state.px * 0.03 * still, 0)
+    // Adentro el puntero sigue moviendo la cámara (de costado, más que afuera): las mesas se
+    // corren contra el salón.
+    camera.position.set(state.px * (0.16 + 0.22 * enter), state.py * -(0.08 - 0.04 * enter) + bob, z)
+    camera.rotation.set(state.py * -0.018 * still, state.yaw * (1 - Math.max(walk, enter)) - state.px * (0.03 * still + 0.012 * enter), 0)
     if (built) {
       const peek = state.peek * (1 - state.open)
       parts.leafL.mesh.position.x = parts.leafL.x - parts.leafL.w * (state.open + peek * 0.1)
@@ -441,18 +457,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY, behind: v.z > 1 }
   }
 
-  /**
-   * Escala a la que una imagen del interior en DOM (object-cover) coincide con
-   * lo que ve la cámara al final: desde ahí el DOM toma la posta en alta.
-   */
-  const insideCover = () => {
-    const t = Math.tan(((camera.fov / 2) * Math.PI) / 180)
-    const dist = Z_INSIDE_CAM - Z_INSIDE
-    const imgAspect = IMG.w / IMG.h
-    const half = parts.insideHalf ?? INSIDE_H / 2
-    return camera.aspect <= imgAspect ? half / (t * dist) : (half * imgAspect) / (t * camera.aspect * dist)
-  }
-
   /** Un punto del pasillo en pantalla (px CSS) y a qué distancia está de la cámara. */
   const projectPoint = (x, y, z) => {
     v.set(x, y, z).project(camera)
@@ -467,8 +471,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     state,
     screenRect,
     projectPoint,
-    insideCover,
-    ENTER_STOP,
     dispose() {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)

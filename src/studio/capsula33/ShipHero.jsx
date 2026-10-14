@@ -33,6 +33,7 @@ function sources() {
     corridor: `${BASE}corridor-${s}.webp`,
     module: `${BASE}module-${s}.webp`,
     interior: `${BASE}interior-${s}.webp`,
+    furniture: `${BASE}furniture-${s}.webp`,
     doorL: `${BASE}door-l-285.webp`,
     doorR: `${BASE}door-r-289.webp`,
   }
@@ -164,22 +165,8 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
           scale: 1 + 0.35 * g,
           autoAlpha: 1 - Math.max(0, (g - 0.55) / 0.45),
         })
-        // Cruzada la puerta, el interior pasa al DOM (en alta) y se abre hasta verse entero.
-        const stop = r.scene.ENTER_STOP
-        const k = Math.max(0, Math.min(1, (cam.enter - stop) / (1 - stop)))
-        const s0 = r.scene.insideCover()
-        const e = 1 - Math.pow(1 - k, 3)
-        gsap.set(r.insideImg, {
-          autoAlpha: cam.enter >= stop ? 1 : 0,
-          scale: s0 + (1 - s0) * e,
-        })
-        // Las mesas y sillas, una capa aparte más cerca: llegan grandes y se asientan, así
-        // el salón tiene profundidad al entrar (y se corren más con el puntero).
-        gsap.set(r.furniture, {
-          autoAlpha: Math.min(1, k * 2.2),
-          scale: 1.55 - 0.55 * e,
-          yPercent: 34 + 6 * (1 - e), // la imagen trae el horizonte alto: así las patas apoyan en el piso del salón
-        })
+        // Ya adentro (el salón y las mesas son capas del 3D): el texto de bienvenida.
+        const k = Math.max(0, Math.min(1, (cam.enter - 0.8) / 0.2))
         gsap.set(r.inCopy, { autoAlpha: Math.max(0, (k - 0.55) / 0.45) })
         gsap.set(r.vignette, { opacity: 1 - 0.6 * k })
       }
@@ -261,7 +248,6 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
       s.y += (pointer.y - s.y) * 0.05
       const still = scroll.current.p < 0.02
       // La tripulante, lo más cerca: el parallax más grande y una respiración lenta.
-      if (r.furnitureWrap) r.furnitureWrap.style.transform = `translate3d(${s.x * -22}px, ${s.y * -8}px, 0)`
       if (r.girlWrap) r.girlWrap.style.transform = `translate3d(${s.x * -34}px, ${s.y * -16 + Math.sin(now * 0.0013) * 4}px, 0)`
       if (!r.scene) return
       const st = r.scene.state
@@ -314,29 +300,6 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
           role="img"
           aria-label="Un pasillo de nave espacial gris con luces blancas; al fondo, empotrada en la pared, la entrada naranja de cāpsula33 con su cartel de luz flotando, un ojo de buey, la puerta con dos ventanas en pastilla y un ventanal con listones"
         />
-
-        {/* Del otro lado de la puerta, en alta (toma la posta del 3D). */}
-        <img
-          ref={set('insideImg')}
-          src={`${BASE}interior-2688.webp`}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0"
-          style={{ visibility: 'hidden' }}
-        />
-
-        {/* Mesas y sillas del salón, en su propia capa. */}
-        <div ref={set('furnitureWrap')} aria-hidden="true" className="pointer-events-none absolute -inset-[3%]">
-          <img
-            ref={set('furniture')}
-            src={`${BASE}furniture-2688.webp`}
-            srcSet={`${BASE}furniture-1400.webp 1400w, ${BASE}furniture-2688.webp 2688w`}
-            sizes="106vw"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-0"
-            style={{ visibility: 'hidden', transformOrigin: '50% 62%', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,0.5))' }}
-          />
-        </div>
 
         {/* Notas suspendidas en el pasillo. */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
