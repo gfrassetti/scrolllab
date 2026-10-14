@@ -604,24 +604,6 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
 
         {/* La interfaz de la nave: marca, estado y la llamada. */}
         <div ref={set('chrome')} className="pointer-events-none absolute inset-0 flex flex-col justify-end px-6 pt-6 pb-8 md:px-10 md:pt-8 md:pb-10">
-          <div className="flex justify-center">
-            <button
-              type="button"
-              data-in
-              onClick={enter}
-              className="c33-cta pointer-events-auto relative flex items-center gap-3 overflow-hidden rounded-full border px-6 py-3 text-[12px] font-semibold tracking-[0.2em] uppercase opacity-0 active:scale-[0.97]"
-              style={{
-                ...MONO,
-                borderColor: 'rgba(242,233,220,0.35)',
-                background: 'rgba(5,6,10,0.5)',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              <span aria-hidden="true" className="c33-cta-fill absolute inset-0" style={{ background: C.orange }} />
-              <span aria-hidden="true" className="c33-scrollcue relative inline-block h-4 w-px" style={{ background: C.neon }} />
-              <span className="relative">Scroll para entrar</span>
-            </button>
-          </div>
         </div>
 
         {/* Adentro. */}

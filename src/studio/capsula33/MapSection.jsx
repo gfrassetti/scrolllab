@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
+import { getLenis } from '../../hooks/useLenis'
 import { createMapScene, MAP_BG, ZONES } from './mapScene'
 import { PRICES } from './roomModel'
 import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
@@ -18,7 +19,6 @@ import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
  * levanta del piso hasta quedar en isométrico.
  */
 
-const MAPS = 'https://www.google.com/maps/search/?api=1&query=Gral.+Roca+1120,+San+Mart%C3%ADn+de+los+Andes'
 
 /** El rectángulo donde entra el diorama: a la derecha en PC, abajo en tablet y teléfono. */
 function areaFor() {
@@ -50,6 +50,9 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
       onDrag: (on) => setDragging(on),
       onFrame: () => {
         const st = scene.state
+        // Con el local acercado, el texto se aparta (si no, el modelo lo tapa).
+        const away = Math.min(1, Math.max(0, (st.zoom - 1.04) / 0.25))
+        if (r.copy) r.copy.style.opacity = String(1 - away)
         const off = Math.abs(st.tYaw) > 0.02 || Math.abs(st.tElev) > 0.02 || st.tZoom > 1.02
         if (off !== r.moved) {
           r.moved = off
@@ -104,6 +107,20 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         { autoAlpha: 0, y: 14 },
         { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.1, delay: 0.35, scrollTrigger: { trigger: rootRef.current, start: 'top 35%', once: true } },
       )
+      // El logo de fondo: se dibuja mientras la sección pasa y al final queda con un relleno tenue.
+      ScrollTrigger.create({
+        trigger: rootRef.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        onUpdate: (self) => {
+          const p = self.progress
+          const draw = Math.min(1, Math.max(0, (p - 0.08) / 0.5))
+          r.logoText.setAttribute('stroke-dashoffset', String(1800 * (1 - draw)))
+          r.logoText.setAttribute('fill-opacity', String(0.07 * Math.min(1, Math.max(0, (p - 0.5) / 0.15))))
+          r.logoBar.setAttribute('stroke-dashoffset', String(1 - Math.min(1, Math.max(0, (p - 0.45) / 0.12))))
+          r.logo.style.transform = `translate3d(0, calc(-50% + ${(0.5 - p) * 70}px), 0) scale(${0.96 + p * 0.08})`
+        },
+      })
       return () => gsap.ticker.remove(ease)
     },
     { scope: rootRef },
@@ -163,34 +180,58 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   return (
     <section ref={rootRef} id="mapa" className="relative h-[230svh]" style={{ background: MAP_BG, color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
+        <svg ref={set('logo')} aria-hidden="true" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid meet" className="pointer-events-none absolute inset-x-[-4%] top-1/2 h-[86%] w-[108%] -translate-y-1/2">
+          <line ref={set('logoBar')} x1="78" y1="58" x2="292" y2="58" stroke={C.orange} strokeWidth="10" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset="1" />
+          <text
+            ref={set('logoText')}
+            x="500"
+            y="380"
+            textAnchor="middle"
+            fontFamily="'Roboto Mono', ui-monospace, monospace"
+            fontWeight="300"
+            fontSize="430"
+            letterSpacing="-12"
+            fill={C.orange}
+            fillOpacity="0"
+            stroke={C.cream}
+            strokeOpacity="0.22"
+            strokeWidth="2.5"
+            strokeDasharray="1800"
+            strokeDashoffset="1800"
+          >
+            c33
+          </text>
+        </svg>
         <canvas ref={set('canvas')} onClick={pickAt} className={`absolute inset-0 h-full w-full ${dragging ? 'cursor-grabbing' : hover ? 'cursor-pointer' : labelsOn ? 'cursor-grab' : ''}`}
           style={{ touchAction: 'pan-y' }} role="img" aria-label="El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón" />
 
         {/* El texto, a la izquierda (arriba en teléfono). */}
         <div ref={set('copy')} className="pointer-events-none absolute inset-x-0 top-0 px-6 pt-[12svh] md:px-10 lg:top-1/2 lg:right-auto lg:w-[40vw] lg:-translate-y-1/2 lg:pt-0 lg:pl-[5vw]">
           <p data-fade className="text-[11px] tracking-[0.22em] uppercase opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
-            El mapa del local
+            La planta, a escala
           </p>
           <h2 className="mt-4 text-[clamp(2.6rem,5.6vw,6.2rem)] leading-[0.92] font-semibold tracking-[-0.02em] uppercase" style={DISPLAY}>
             <span className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
-                Así es
+                La cápsula,
               </span>
             </span>
             <span className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
-                por dentro.
+                pieza por pieza.
               </span>
             </span>
           </h2>
           <p data-fade className="mt-6 max-w-[34ch] text-[17px] leading-[1.5] opacity-0 lg:text-[19px]" style={{ ...BODY, color: 'rgba(242,233,220,0.78)' }}>
-            El local tal como es: la entrada, el jardín en su caja blanca, la colección del dueño en vitrinas, la barra naranja con su pantalla y el salón bajo las espirales de luz.
+            El jardín en su caja blanca, la colección en vitrinas, la barra naranja y el salón bajo las espirales de luz. Cada zona se enciende al pasar el puntero y se abre con su ficha.
           </p>
           <div data-fade className="mt-8 hidden opacity-0 lg:block">
             <a
-              href={MAPS}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#llegar"
+              onClick={(e) => {
+                e.preventDefault()
+                getLenis()?.scrollTo('#llegar', { duration: 1.4 })
+              }}
               className="c33-map-cta pointer-events-auto inline-flex h-12 items-center rounded-md px-5 text-[15px] font-medium active:scale-[0.97]"
               style={{ ...BODY, background: C.cream, color: '#0b0c0f' }}
             >

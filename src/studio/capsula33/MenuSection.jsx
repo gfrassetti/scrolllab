@@ -19,7 +19,7 @@ const K = 1.45 // resolución de la matriz (más puntos = letras más limpias)
 const LINE = Math.round(13 * K) // alto de cada renglón, en puntos
 const colW = Math.round(92 * K)
 // Pantalla ancha: dos columnas lado a lado. Teléfono: una sola, una debajo de la otra.
-const dims = (narrow) => (narrow ? { GW: Math.round(120 * K), GH: Math.round(222 * K) } : { GW: Math.round(230 * K), GH: Math.round(132 * K) })
+const dims = (narrow) => (narrow ? { GW: Math.round(120 * K), GH: Math.round(222 * K) } : { GW: Math.round(230 * K), GH: Math.round(150 * K) })
 
 /** Dibuja el texto del tablero en un canvas chico y devuelve los puntos prendidos. */
 function buildDots(narrow) {
@@ -97,8 +97,12 @@ export default function MenuSection() {
 
     const layout = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const w = canvas.clientWidth
-      cell = w / GW
+      // Lo que entra en el lugar libre (alto y ancho), sin cortarse nunca.
+      const box = r.slot.getBoundingClientRect()
+      const pad = window.innerWidth >= 768 ? 40 : 24
+      cell = Math.max(1, Math.min((box.width - pad) / GW, (box.height - pad) / GH))
+      const w = cell * GW
+      canvas.style.width = `${w}px`
       canvas.width = Math.round(w * dpr)
       canvas.height = Math.round(cell * GH * dpr)
       canvas.style.height = `${cell * GH}px`
@@ -136,9 +140,15 @@ export default function MenuSection() {
         const base = d.head ? '255,122,26' : '127,212,255'
         const a = 0.82 + 0.18 * d.flash
         ctx.fillStyle = `rgba(${base},${a})`
-        ctx.beginPath()
-        ctx.arc((d.x + 0.5) * cell, (d.y + 0.5) * cell, cell * (0.34 + 0.12 * d.flash), 0, Math.PI * 2)
-        ctx.fill()
+        if (cell < 2.4) {
+          // Puntos muy chicos: un cuadrado lleno se ve encendido; un círculo de medio píxel, apagado.
+          const sz = cell * (0.86 + 0.14 * d.flash)
+          ctx.fillRect(d.x * cell, d.y * cell, sz, sz)
+        } else {
+          ctx.beginPath()
+          ctx.arc((d.x + 0.5) * cell, (d.y + 0.5) * cell, cell * (0.38 + 0.12 * d.flash), 0, Math.PI * 2)
+          ctx.fill()
+        }
         if (d.flash > 0) {
           d.flash = Math.max(0, d.flash - 0.04)
           animating = true
@@ -167,7 +177,7 @@ export default function MenuSection() {
     }
     start()
     const ro = new ResizeObserver(() => dots.length && layout())
-    ro.observe(canvas)
+    ro.observe(r.slot)
     return () => {
       alive = false
       cancelAnimationFrame(raf)
@@ -182,7 +192,26 @@ export default function MenuSection() {
         trigger: rootRef.current,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self) => (r.progress = Math.max(0, Math.min(1, self.progress / 0.72))),
+        onUpdate: (self) => {
+          r.progress = Math.max(0, Math.min(1, self.progress / 0.72))
+          // Los Elegidos: la tira corre con el scroll y el plato que pasa por el centro se enciende.
+          const q = Math.max(0, Math.min(1, (self.progress - 0.3) / 0.7))
+          const track = r.track
+          const lane = r.lane
+          if (!track || !lane) return
+          const items = [...track.querySelectorAll('[data-dish]')]
+          const travel = Math.max(0, track.scrollWidth - lane.clientWidth * 0.5)
+          const x = lane.clientWidth * 0.5 - items[0].offsetWidth / 2 - travel * q
+          track.style.transform = `translate3d(${x}px, 0, 0)`
+          const mid = lane.getBoundingClientRect().left + lane.clientWidth / 2
+          items.forEach((el) => {
+            const b = el.getBoundingClientRect()
+            const d = Math.abs(b.left + b.width / 2 - mid) / (lane.clientWidth / 2)
+            const k = Math.max(0, 1 - d * 1.6)
+            el.style.opacity = String(0.28 + 0.72 * k)
+            el.style.color = k > 0.5 ? C.neon : C.cream
+          })
+        },
       })
       gsap.fromTo(
         r.head.querySelectorAll('[data-in]'),
@@ -197,7 +226,7 @@ export default function MenuSection() {
 
   return (
     <section ref={rootRef} id="menu" className="relative h-[280svh]" style={{ background: '#05060a', color: C.cream }}>
-      <div className="sticky top-0 flex h-svh flex-col justify-center gap-7 overflow-hidden px-6 md:px-10 lg:px-[5vw]">
+      <div className="sticky top-0 flex h-svh flex-col gap-5 overflow-hidden px-6 pt-20 pb-6 md:gap-6 md:px-10 lg:px-[5vw] lg:pt-24 lg:pb-8">
         <div ref={set('head')} className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
           <div>
             <p data-in className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
@@ -205,7 +234,7 @@ export default function MenuSection() {
               Menú
             </p>
             <h2 data-in className="mt-4 text-[clamp(2rem,4.6vw,4.8rem)] leading-[0.95] font-semibold uppercase opacity-0" style={DISPLAY}>
-              La pantalla <span style={{ color: C.neon }}>de la barra.</span>
+              Cafetería, <span style={{ color: C.neon }}>con la c de cāpsula.</span>
             </h2>
           </div>
           <p data-in className="max-w-[34ch] text-[16px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.7)' }}>
@@ -213,8 +242,9 @@ export default function MenuSection() {
           </p>
         </div>
 
-        <div className="relative w-full self-center rounded-xl border p-3 md:p-5" style={{ maxWidth: `min(1500px, calc((100svh - 19rem) * ${(GW / GH).toFixed(3)}))`, background: '#03040a', borderColor: 'rgba(127,212,255,0.14)', boxShadow: '0 0 80px rgba(127,212,255,0.06) inset' }}>
-          <canvas ref={set('canvas')} aria-hidden="true" className="block w-full" />
+        <div ref={set('slot')} className="flex min-h-0 w-full flex-1 items-center justify-center">
+        <div className="relative rounded-xl border p-3 md:p-5" style={{ background: '#03040a', borderColor: 'rgba(127,212,255,0.14)', boxShadow: '0 0 80px rgba(127,212,255,0.06) inset' }}>
+          <canvas ref={set('canvas')} aria-hidden="true" className="block" />
           {/* Para lectores de pantalla: la lista, en texto. */}
           <div className="sr-only">
             <h3>Calientes</h3>
@@ -235,10 +265,24 @@ export default function MenuSection() {
             </ul>
           </div>
         </div>
+        </div>
 
-        <p className="text-[12px] leading-[1.7] tracking-[0.14em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}>
-          <span style={{ color: C.neon }}>Elegidos</span> · {ELEGIDOS.join(' · ')}
-        </p>
+        {/* Los Elegidos: una tira que corre con el scroll; el plato del centro se enciende. */}
+        <div className="flex items-center gap-5 border-t pt-4" style={{ borderColor: 'rgba(242,233,220,0.12)' }}>
+          <p className="shrink-0 text-[11px] font-semibold tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
+            Elegidos
+          </p>
+          <div ref={set('lane')} className="relative min-w-0 flex-1 overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, #000 12%, #000 88%, transparent)', maskImage: 'linear-gradient(to right, transparent, #000 12%, #000 88%, transparent)' }}>
+            <ul ref={set('track')} className="flex w-max items-center gap-10 will-change-transform md:gap-16">
+              {ELEGIDOS.map((d, i) => (
+                <li key={d} data-dish className="c33-dish flex items-center gap-10 text-[clamp(1.05rem,2vw,1.9rem)] leading-none font-semibold whitespace-nowrap uppercase md:gap-16" style={{ ...DISPLAY, opacity: 0.28 }}>
+                  {d}
+                  {i < ELEGIDOS.length - 1 ? <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: C.orange }} /> : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   )

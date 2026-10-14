@@ -1,8 +1,4 @@
 import * as THREE from 'three'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import { createFrameBudget } from '../../lib/motion'
 import { b2t, loadRoom } from './roomModel'
 
@@ -19,14 +15,6 @@ import { b2t, loadRoom } from './roomModel'
  */
 
 export const ZONES = [
-  {
-    id: 'entrada',
-    label: 'Entrada',
-    box: [[-10, -3, 0], [-8.05, 3, 3.2]],
-    kicker: 'Av. Gral. Roca 1120',
-    title: 'La entrada',
-    text: 'Pasando la puerta, la mesa naranja; después, el jardín a la derecha y la colección a la izquierda.',
-  },
   {
     id: 'jardin',
     label: 'Jardín',
@@ -45,11 +33,11 @@ export const ZONES = [
   },
   {
     id: 'pantalla',
-    label: 'Pantalla',
+    label: 'Menú',
     box: null, // sale de la malla de la pantalla
     kicker: 'Cafetería',
-    title: 'La pantalla',
-    text: 'Los precios de hoy, como los muestra la pantalla LED de la barra.',
+    title: 'El menú',
+    text: 'Los precios de hoy, como en la pantalla LED de la barra.',
     prices: true,
   },
   {
@@ -84,18 +72,14 @@ const smooth = (t) => t * t * (3 - 2 * t)
  *   `area`: el rectángulo de la pantalla (px CSS) donde tiene que entrar el diorama.
  */
 export function createMapScene({ canvas, area, onProgress = () => {}, onReady = () => {}, onHover = () => {}, onDrag = () => {}, onFrame = () => {} }) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' })
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' })
+  renderer.setClearColor(0x000000, 0)
   const maxDpr = Math.min(window.devicePixelRatio || 1, 2)
   renderer.setPixelRatio(maxDpr)
   renderer.outputColorSpace = THREE.SRGBColorSpace
 
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(MAP_BG) // opaco: el bloom no se lleva bien con el fondo transparente
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 400)
-  const composer = new EffectComposer(renderer)
-  composer.addPass(new RenderPass(scene, camera))
-  composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.3, 0.9))
-  composer.addPass(new OutputPass())
   const budget = createFrameBudget({
     dpr: maxDpr,
     apply: (d) => {
@@ -240,7 +224,6 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     const w = canvas.clientWidth
     const h = canvas.clientHeight
     renderer.setSize(w, h, false)
-    composer.setSize(w, h)
     fit()
   }
   const ro = new ResizeObserver(resize)
@@ -309,9 +292,22 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     }
   }
   const onWheel = (e) => {
-    if (!e.ctrlKey || !canOrbit()) return
+    if (!canOrbit()) return
+    if (!e.ctrlKey) {
+      const A = area()
+      const r = canvas.getBoundingClientRect()
+      const x = e.clientX - r.left
+      const y = e.clientY - r.top
+      if (x < A.x || x > A.x + A.w || y < A.y || y > A.y + A.h) return
+      const zoomIn = e.deltaY < 0
+      if ((zoomIn && state.tZoom >= LIMIT.zoom[1] - 0.001) || (!zoomIn && state.tZoom <= LIMIT.zoom[0] + 0.001)) return
+    }
     e.preventDefault()
-    state.tZoom *= Math.exp(-e.deltaY * 0.0025)
+    // Que Lenis no la tome como scroll (lo revisa más arriba, en el mismo evento).
+    canvas.setAttribute('data-lenis-prevent-wheel', '')
+    requestAnimationFrame(() => canvas.removeAttribute('data-lenis-prevent-wheel'))
+    const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY
+    state.tZoom *= Math.exp(-dy * (e.ctrlKey ? 0.0025 : 0.0016))
     clampT()
   }
   const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
@@ -372,7 +368,7 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
       state.zoom += (state.tZoom - state.zoom) * 0.12
       fit()
     }
-    composer.render()
+    renderer.render(scene, camera)
     if (built) onFrame()
   }
   raf = requestAnimationFrame(frame)
@@ -423,7 +419,6 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
           ;(Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m?.dispose())
         }
       })
-      composer.dispose?.()
       renderer.dispose()
     },
   }

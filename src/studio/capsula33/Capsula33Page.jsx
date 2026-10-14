@@ -11,9 +11,10 @@ import NosotrosSection from './NosotrosSection'
 import LagosSection from './LagosSection'
 import MenuSection from './MenuSection'
 import ContactSection from './ContactSection'
+import LlegarSection from './LlegarSection'
 import { BODY, C, FONTS_HREF } from './brand'
 
-const LOADER_MIN_MS = 5200
+const LOADER_MIN_MS = 2800
 
 /*
 THESIS: el café es un módulo acoplado a una nave — se aborda (loader con salto
@@ -97,6 +98,7 @@ export default function Capsula33Page() {
         <LagosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <MenuSection />
+        <LlegarSection />
         <ContactSection />
         <Nav visible={boarded} />
         <ScrollRail visible={boarded} />

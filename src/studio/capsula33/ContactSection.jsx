@@ -18,6 +18,7 @@ const fmt = (h) => `${h}:00`
 
 export default function ContactSection() {
   const rootRef = useRef(null)
+  const wordRef = useRef(null)
   const [status] = useState(() => openStatus())
   const mon = HOURS.find((h) => h.day === 1)
   const tue = HOURS.find((h) => h.day === 2)
@@ -25,6 +26,18 @@ export default function ContactSection() {
   useGSAP(
     () => {
       const root = rootRef.current
+      // La marca del cierre: las letras suben de a una mientras se llega al final de la página.
+      gsap.fromTo(
+        wordRef.current.querySelectorAll('[data-ch]'),
+        { yPercent: 105, rotate: 6 },
+        {
+          yPercent: 0,
+          rotate: 0,
+          ease: 'none',
+          stagger: 0.08,
+          scrollTrigger: { trigger: wordRef.current, start: 'top bottom', end: 'bottom bottom', scrub: 0.6 },
+        },
+      )
       gsap.fromTo(
         root.querySelectorAll('[data-line]'),
         { yPercent: 110 },
@@ -116,8 +129,18 @@ export default function ContactSection() {
 
       <footer className="mt-10">
         <p className="leading-[0.82] font-light whitespace-nowrap select-none" style={{ ...MONO, fontSize: 'min(17.6vw, 30svh)', letterSpacing: '-0.04em', paddingBottom: '0.2em' }} aria-label="cāpsula33">
-          <span aria-hidden="true">
-            cāpsula<span style={{ color: C.cream }}>33</span>
+          {/* Cada letra sube detrás de su máscara con el scroll; al pasar el puntero, salta. */}
+          <span aria-hidden="true" ref={wordRef} className="inline-flex">
+            {[...'cāpsula33'].map((ch, i) => (
+              <span key={i} className="inline-block overflow-hidden pt-[0.12em] pb-[0.08em]" style={{ margin: '-0.12em 0 -0.08em' }}>
+                {/* Afuera el salto del puntero (con transición), adentro la subida del scroll (GSAP): no se pisan. */}
+                <span className={`c33-end-ch inline-block ${i >= 7 ? 'is-33' : ''}`} style={{ color: i >= 7 ? C.cream : undefined }}>
+                  <span data-ch className="inline-block">
+                    {ch}
+                  </span>
+                </span>
+              </span>
+            ))}
           </span>
         </p>
         <p className="mt-4 flex flex-wrap justify-between gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase opacity-70" style={MONO}>
@@ -131,6 +154,12 @@ export default function ContactSection() {
         @media (hover: hover) {
           .c33-end-btn:hover { background: ${C.cream} !important; color: ${INK} !important; border-color: ${C.cream} !important; }
         }
+        .c33-end-ch { transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms; }
+        @media (hover: hover) {
+          .c33-end-ch:hover { transform: translateY(-9%); color: ${C.cream}; }
+          .c33-end-ch.is-33:hover { animation: c33-end-flicker 0.9s steps(1, end) 1; color: #fff7ec; text-shadow: 0 0 18px rgba(255,247,236,0.8); }
+        }
+        @keyframes c33-end-flicker { 0%, 100% { opacity: 1; } 10% { opacity: 0.3; } 18% { opacity: 1; } 30% { opacity: 0.45; } 40% { opacity: 1; } }
         .c33-end-btn:focus-visible { outline: 3px solid ${C.cream}; outline-offset: 3px; }
       `}</style>
     </section>

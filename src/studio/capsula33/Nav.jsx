@@ -74,12 +74,35 @@ export default function Nav({ visible }) {
     }
   }, [open])
 
+  // Ir a una sección: sin recorrer todo lo que hay en el medio (el hero es un recorrido largo,
+  // pasar por él de un tirón no es lindo). Un fundido corto tapa el salto.
+  const curtainRef = useRef(null)
   const go = (id) => (e) => {
     e.preventDefault()
     setOpen(false)
-    const target = id === 'top' ? 0 : document.getElementById(id)
-    // Un tick después: el panel soltó el scroll recién ahora.
-    setTimeout(() => getLenis()?.scrollTo(target, { duration: 1.7 }), open ? 60 : 0)
+    const lenis = getLenis()
+    const el = id === 'top' ? null : document.getElementById(id)
+    const target = el ? el.getBoundingClientRect().top + window.scrollY : 0
+    const far = Math.abs(target - window.scrollY) > window.innerHeight * 1.5
+    if (!far) {
+      setTimeout(() => lenis?.scrollTo(target, { duration: 1.1 }), open ? 60 : 0)
+      return
+    }
+    const curtain = curtainRef.current
+    curtain.style.transition = 'opacity 260ms cubic-bezier(0.22,1,0.36,1)'
+    curtain.style.opacity = '1'
+    curtain.style.pointerEvents = 'auto'
+    setTimeout(() => {
+      lenis?.start()
+      lenis?.scrollTo(target, { immediate: true, force: true })
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          curtain.style.transition = 'opacity 520ms cubic-bezier(0.22,1,0.36,1)'
+          curtain.style.opacity = '0'
+          curtain.style.pointerEvents = 'none'
+        }),
+      )
+    }, 280)
   }
 
   return (
@@ -138,6 +161,9 @@ export default function Nav({ visible }) {
           </div>
         </nav>
       </header>
+
+      {/* El fundido que tapa el salto entre secciones lejanas. */}
+      <div ref={curtainRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[35] opacity-0" style={{ background: '#05060a' }} />
 
       {/* Panel del teléfono. */}
       <div
