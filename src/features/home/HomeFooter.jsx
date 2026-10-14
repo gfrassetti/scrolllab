@@ -187,7 +187,7 @@ export default function HomeFooter({ t, templates }) {
           </span>
           <span
             data-footer-word
-            className="min-w-0 select-none font-brico text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] font-semibold tracking-[-0.04em] uppercase"
+            className="min-w-0 select-none voice text-[clamp(2.75rem,13.5vw,11rem)] leading-[0.85] tracking-[-0.04em]"
           >
             {SITE_NAME}
           </span>

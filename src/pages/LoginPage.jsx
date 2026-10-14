@@ -137,7 +137,7 @@ export default function LoginPage() {
             stashAuthReturn(next)
             markSessionIntent()
           }}
-          className="flex items-center justify-center gap-3 border-2 border-ink bg-ink px-6 py-4 text-center text-xs font-medium uppercase tracking-[0.25em] text-bone transition-colors hover:bg-accent hover:border-accent"
+          className="flex items-center justify-center gap-3 border-2 border-ink bg-ink px-6 py-4 text-center text-xs font-medium uppercase tracking-[0.25em] text-bone transition-colors hover:bg-accent hover:text-on-accent hover:border-accent"
         >
           <span className="grid size-6 shrink-0 place-items-center rounded-full bg-bone">
             <GoogleLogo />

@@ -377,7 +377,7 @@ export default function HomeContact() {
             <button
               type="submit"
               disabled={sending}
-              className="border border-ink bg-ink px-8 py-3.5 text-xs font-medium tracking-[0.22em] text-bone uppercase transition-colors hover:border-accent hover:bg-accent hover:text-ink disabled:opacity-40 md:text-[13px]"
+              className="border border-ink bg-ink px-8 py-3.5 text-xs font-medium tracking-[0.22em] text-bone uppercase transition-colors hover:border-accent hover:bg-accent hover:text-on-accent disabled:opacity-40 md:text-[13px]"
             >
               {sending ? t('home.contactSending') : t('home.contactSubmit')}
             </button>

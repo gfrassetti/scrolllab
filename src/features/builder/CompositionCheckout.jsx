@@ -70,7 +70,7 @@ export default function CompositionCheckout({ items, summaryRef, hasDuplicateChr
             <button
               type="button"
               onClick={buyComposition}
-              className="btn border-accent bg-accent text-ink transition-opacity hover:opacity-80 sm:flex-1"
+              className="btn border-accent bg-accent text-on-accent transition-opacity hover:opacity-80 sm:flex-1"
             >
               {looksLoggedIn
                 ? t('builder.buyLoggedIn')

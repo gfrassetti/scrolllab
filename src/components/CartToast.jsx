@@ -76,7 +76,7 @@ export default function CartToast() {
       <Link
         to="/cart"
         onClick={clear}
-        className="mt-3 block border border-ink bg-ink px-3 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-bone ui-press hover:border-accent hover:bg-accent"
+        className="mt-3 block border border-ink bg-ink px-3 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-bone ui-press hover:border-accent hover:bg-accent hover:text-on-accent"
       >
         {t('common.goToCart')}
       </Link>

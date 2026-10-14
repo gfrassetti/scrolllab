@@ -36,7 +36,7 @@ export default function BuilderHeader({ t, items, openPreview, looksLoggedIn, on
             className="tpl-hit relative flex shrink-0 items-center gap-2 text-ink transition-colors hover:text-accent"
           >
             <Logo className="size-5 shrink-0" />
-            <span className="hidden text-[11px] font-medium uppercase tracking-[0.25em] sm:inline">{SITE_NAME}</span>
+            <span className="hidden font-brico text-xs font-bold uppercase tracking-[0.14em] sm:inline">{SITE_NAME}</span>
           </Link>
           <span aria-hidden="true" className="hidden text-ink/25 sm:inline">
             /
