@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { id: 'ruta', label: 'La ruta' },
   { id: 'mapa', label: 'El local' },
   { id: 'menu', label: 'Menú' },
+  { id: 'galeria', label: 'Galería' },
   { id: 'contacto', label: 'Contacto' },
 ]
 

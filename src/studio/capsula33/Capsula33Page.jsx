@@ -12,6 +12,7 @@ import LagosSection from './LagosSection'
 import MenuSection from './MenuSection'
 import ContactSection from './ContactSection'
 import LlegarSection from './LlegarSection'
+import GaleriaSection from './GaleriaSection'
 import { BODY, C, FONTS_HREF } from './brand'
 
 const LOADER_MIN_MS = 2800
@@ -98,6 +99,7 @@ export default function Capsula33Page() {
         <LagosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <MenuSection />
+        <GaleriaSection />
         <LlegarSection />
         <ContactSection />
         <Nav visible={boarded} />
