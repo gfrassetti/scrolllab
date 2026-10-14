@@ -201,7 +201,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     ),
   )
 
-  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9, signOn: 0 }
+  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9, flickerAmp: 1, signOn: 0, landedAt: 0 }
   const parts = {}
   let built = false
 
@@ -467,13 +467,16 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
       parts.proj.uniforms.uDim.value = 1 - 0.25 * enter
       // El cartel flota: respira despacio y su sombra en la pared lo acompaña.
       if (parts.sign) {
-        const t = now * 0.001
-        parts.sign.position.y = parts.signY + Math.sin(t * 1.1) * 0.03
-        parts.sign.rotation.z = Math.sin(t * 0.7) * 0.006
-        parts.signShadow.position.y = parts.signY - 0.035 + Math.sin(t * 1.1) * 0.01
+        // La flotación arranca en cero desde que la marca llegó (sin salto) y crece despacio.
+        const since = state.landedAt ? (now - state.landedAt) / 1000 : 0
+        const amp = state.landedAt ? Math.min(1, since / 1.8) : 0
+        parts.sign.position.y = parts.signY + Math.sin(since * 1.1) * 0.02 * amp
+        parts.sign.rotation.z = Math.sin(since * 0.7) * 0.006 * amp
+        parts.signShadow.position.y = parts.signY - 0.035 * amp + Math.sin(since * 1.1) * 0.0067 * amp
         // Al pasar el puntero, titila como un neón que se reacomoda.
         const f = now - state.flickerAt
-        const flick = f >= 0 && f < 1100 ? [1, 0.25, 1, 0.4, 0.9, 0.15, 1, 1, 0.75, 1, 1][Math.floor(f / 100)] : 1
+        const raw = f >= 0 && f < 1100 ? [1, 0.25, 1, 0.4, 0.9, 0.15, 1, 1, 0.75, 1, 1][Math.floor(f / 100)] : 1
+        const flick = 1 - (1 - raw) * state.flickerAmp
         // El cartel espera a que la marca del loader llegue volando (signOn) y entra titilando.
         parts.sign.material.uniforms.uOpacity.value = flick * state.signOn
         // La sombra se nota de lejos y se borra al acercarse (de cerca se leía como un doble).
@@ -506,7 +509,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
       [r.x0, r.y1],
       [r.x1, r.y0],
     ]) {
-      v.set(x, y, Z_MODULE).project(camera)
+      v.set(x, y, name === 'sign' ? Z_SIGN : Z_MODULE).project(camera)
       const sx = (v.x * 0.5 + 0.5) * w
       const sy = (1 - (v.y * 0.5 + 0.5)) * h
       minX = Math.min(minX, sx)

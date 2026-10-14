@@ -130,8 +130,14 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
     if (bridge) {
       bridge.current.signRect = () => (r.rects ? r.rects.sign : null)
       bridge.current.land = () => {
+        // Aterriza sin saltos (la marca del DOM se funde con el cartel ya prendido, en el mismo
+        // lugar); medio segundo después, un titileo corto de neón que se acomoda.
         scene.state.signOn = 1
-        scene.state.flickerAt = performance.now()
+        scene.state.landedAt = performance.now()
+        setTimeout(() => {
+          scene.state.flickerAmp = 0.5
+          scene.state.flickerAt = performance.now()
+        }, 550)
       }
       bridge.current.show = () => (scene.state.signOn = 1)
     }
@@ -268,7 +274,10 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
       const live = r.moved && !noHover && !P.touching && still && r.rects
       const over = !live ? null : inside(r.rects.door) ? 'door' : inside(r.rects.sign, 10) ? 'sign' : inside(r.rects.port) ? 'port' : null
       if (over !== r.over) {
-        if (over === 'sign') st.flickerAt = now
+        if (over === 'sign') {
+          st.flickerAmp = 1
+          st.flickerAt = now
+        }
         r.over = over
         setHover(over)
       }

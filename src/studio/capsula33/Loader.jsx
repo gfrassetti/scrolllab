@@ -81,9 +81,31 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
     const x0 = from.left
     const y0 = from.top + from.height / 2 - (nat.height * s0) / 2
     // Dónde termina: el texto del cartel (86 % del ancho del plano, centrado a 55 % de su alto).
-    const s1 = (sign.w * 0.86) / nat.width
-    const x1 = sign.x + sign.w / 2 - (nat.width * s1) / 2
-    const y1 = sign.y + sign.h * 0.55 - (nat.height * s1) / 2
+    // El cartel de la escena no tiene interletraje negativo: se mide la marca sin él.
+    gsap.set(fly, { letterSpacing: '0em' })
+    const nat1 = fly.getBoundingClientRect()
+    gsap.set(fly, { letterSpacing: '-0.04em' })
+    // El cartel se mueve con el parallax del puntero: el destino se relee en cada cuadro.
+    const target = () => {
+      const r = bridge?.current.signRect?.() || sign
+      const sc = (r.w * 0.86) / nat1.width
+      // Correcciones medidas cuadro a cuadro: el canvas del cartel centra el texto distinto que el DOM
+      // (+0,4 % del ancho a la derecha y 0,1 em más arriba, con la fuente de 100 px de la voladora).
+      return {
+        s: sc,
+        x: r.x + r.w / 2 - (nat1.width * sc) / 2 + nat1.width * sc * 0.004,
+        y: r.y + r.h * 0.55 - (nat1.height * sc) / 2 - 10 * sc,
+        w: r.w,
+      }
+    }
+    const prog = { p: 0 }
+    const follow = () => {
+      const t = target()
+      const k = prog.p
+      gsap.set(fly, { x: x0 + (t.x - x0) * k, y: y0 + (t.y - y0) * k, scale: s0 + (t.s - s0) * k })
+    }
+    // El resplandor del cartel (canvas de 2048 px de ancho): mismo radio, en px locales de la voladora.
+    const glow = (px) => ((px / 2048) * target().w) / target().s
     gsap.set(fly, { x: x0, y: y0, scale: s0, opacity: 1 })
     gsap.set(flyA.current, { color: INK })
     gsap.set(flyB.current, { color: C.cream })
@@ -91,12 +113,25 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
     gsap.set(startEl, { visibility: 'hidden' })
     tl.call(onBoard, null, 0.2)
     wipe(tl, 0.45)
-    tl.to(fly, { x: x1, y: y1, scale: s1, duration: 1.35, ease: 'expo.inOut' }, 0.25)
-    tl.to([flyA.current, flyB.current], { color: '#ffe9cc', duration: 1, ease: 'power2.inOut' }, 0.55)
-    tl.to(fly, { textShadow: `0 0 6px #fff, 0 0 18px ${C.neon}, 0 0 38px ${C.neon}`, duration: 0.7, ease: 'power2.out' }, 1.0)
-    // Llegó: se prende el cartel de la escena (titila) y la voladora se va.
-    tl.call(() => bridge?.current.land?.(), null, 1.6)
-    tl.to(fly, { opacity: 0, duration: 0.18, ease: 'none' }, 1.62)
+    tl.to(prog, { p: 1, duration: 1.35, ease: 'expo.inOut' }, 0.25)
+    tl.to(fly, { letterSpacing: '0em', duration: 1.35, ease: 'expo.inOut' }, 0.25)
+    tl.eventCallback('onUpdate', follow)
+    tl.to([flyA.current, flyB.current], { color: '#fff7ec', duration: 1, ease: 'power2.inOut' }, 0.55)
+    tl.to(
+      fly,
+      { textShadow: `0 0 ${glow(18)}px rgba(255,220,180,0.9), 0 0 ${glow(60)}px rgba(255,140,60,0.95)`, duration: 0.7, ease: 'power2.out' },
+      1.0,
+    )
+    // Llegó: se prende el cartel de la escena y la voladora se va en el cuadro siguiente. Corte
+    // seco y no fundido: están en el mismo lugar, y un fundido suma los dos resplandores.
+    tl.call(
+      () => {
+        bridge?.current.land?.()
+        requestAnimationFrame(() => requestAnimationFrame(() => gsap.set(fly, { opacity: 0 })))
+      },
+      null,
+      1.62,
+    )
   }
 
   return (
@@ -134,25 +169,22 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
                 </p>
               </div>
 
-              {/* El botón de la nave: marco con franjas de advertencia, luces de estado y el pulso. */}
-              <div
-                className={`c33-launch-wrap w-full sm:w-[21rem] ${ready ? 'is-ready' : ''}`}
-                style={{ opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(10px)', pointerEvents: ready ? 'auto' : 'none' }}
-              >
-                <button ref={buttonRef} type="button" onClick={board} disabled={!ready} className="c33-launch group relative block h-[4.25rem] w-full">
-                  <span aria-hidden="true" className="c33-launch-frame absolute inset-0" />
-                  <span aria-hidden="true" className="c33-launch-plate absolute inset-[7px] flex items-center justify-between px-5">
-                    <span className="c33-led" />
-                    <span className="c33-launch-label text-[14px] font-bold tracking-[0.32em] uppercase" style={DISPLAY}>
-                      Abordar
-                    </span>
-                    <span className="c33-led c33-led-b" />
-                  </span>
-                  <span className="sr-only">Abordar</span>
+              <div className="h-14 w-full sm:w-[17rem]">
+                <button
+                  ref={buttonRef}
+                  type="button"
+                  onClick={board}
+                  disabled={!ready}
+                  className="c33-board group relative h-14 w-full overflow-hidden rounded-full text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none"
+                  style={{ ...DISPLAY, background: INK, color: C.cream, opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(8px)' }}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+                    style={{ background: C.cream }}
+                  />
+                  <span className="relative transition-colors duration-300 group-hover:text-[#0b0c0f]">Abordar</span>
                 </button>
-                <p className="mt-2 text-center text-[10px] font-semibold tracking-[0.22em] uppercase opacity-70" style={MONO}>
-                  Cabina lista · presioná para despegar
-                </p>
               </div>
             </div>
 
@@ -253,38 +285,7 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
       </div>
 
       <style>{`
-        .c33-launch-wrap { transition: opacity 600ms ease-out, transform 600ms cubic-bezier(0.22,1,0.36,1); }
-        .c33-launch-wrap.is-ready { animation: c33-launch-pulse 2.2s ease-in-out 600ms infinite; }
-        @keyframes c33-launch-pulse {
-          0%, 100% { filter: drop-shadow(0 0 6px rgba(255,244,230,0.55)) drop-shadow(0 0 18px rgba(255,236,210,0.35)); }
-          50% { filter: drop-shadow(0 0 12px rgba(255,255,255,0.95)) drop-shadow(0 0 34px rgba(255,244,230,0.7)); }
-        }
-        .c33-launch { cursor: pointer; transition: transform 140ms ease-out; -webkit-tap-highlight-color: transparent; }
-        .c33-launch:active { transform: scale(0.975); }
-        /* El marco: chaflanes y franjas de advertencia. */
-        .c33-launch-frame {
-          clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
-          background: repeating-linear-gradient(-45deg, ${INK} 0 9px, ${C.cream} 9px 18px);
-        }
-        .c33-launch-plate {
-          clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
-          background: ${C.cream};
-          color: ${INK};
-          box-shadow: inset 0 -6px 0 rgba(11,12,15,0.08);
-          transition: background-color 220ms ease-out, color 220ms ease-out;
-        }
-        .c33-launch-label { transition: letter-spacing 320ms cubic-bezier(0.22,1,0.36,1); }
-        /* Luces de estado: alternan como en un tablero. */
-        .c33-led { width: 10px; height: 10px; border-radius: 999px; background: ${C.orange}; box-shadow: 0 0 10px ${C.orange}; animation: c33-led 1.1s steps(1, end) infinite; }
-        .c33-led-b { animation-delay: 0.55s; }
-        @keyframes c33-led { 0% { opacity: 1; } 50% { opacity: 0.18; } }
-        @media (hover: hover) {
-          .c33-launch:hover .c33-launch-plate { background: ${INK}; color: ${C.cream}; }
-          .c33-launch:hover .c33-launch-label { letter-spacing: 0.42em; }
-          .c33-launch:hover .c33-led { background: #fff; box-shadow: 0 0 12px #fff; animation-duration: 0.45s; }
-        }
-        .c33-launch:focus-visible .c33-launch-plate { background: ${INK}; color: ${C.cream}; }
-        .c33-launch:focus-visible { outline: none; }
+        .c33-board:focus-visible { outline: 3px solid ${C.cream}; outline-offset: 3px; }
       `}</style>
     </>
   )
