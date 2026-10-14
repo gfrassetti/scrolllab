@@ -173,6 +173,13 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
           autoAlpha: cam.enter >= stop ? 1 : 0,
           scale: s0 + (1 - s0) * e,
         })
+        // Las mesas y sillas, una capa aparte más cerca: llegan grandes y se asientan, así
+        // el salón tiene profundidad al entrar (y se corren más con el puntero).
+        gsap.set(r.furniture, {
+          autoAlpha: Math.min(1, k * 2.2),
+          scale: 1.55 - 0.55 * e,
+          yPercent: 34 + 6 * (1 - e), // la imagen trae el horizonte alto: así las patas apoyan en el piso del salón
+        })
         gsap.set(r.inCopy, { autoAlpha: Math.max(0, (k - 0.55) / 0.45) })
         gsap.set(r.vignette, { opacity: 1 - 0.6 * k })
       }
@@ -254,6 +261,7 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
       s.y += (pointer.y - s.y) * 0.05
       const still = scroll.current.p < 0.02
       // La tripulante, lo más cerca: el parallax más grande y una respiración lenta.
+      if (r.furnitureWrap) r.furnitureWrap.style.transform = `translate3d(${s.x * -22}px, ${s.y * -8}px, 0)`
       if (r.girlWrap) r.girlWrap.style.transform = `translate3d(${s.x * -34}px, ${s.y * -16 + Math.sin(now * 0.0013) * 4}px, 0)`
       if (!r.scene) return
       const st = r.scene.state
@@ -316,6 +324,19 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
           className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0"
           style={{ visibility: 'hidden' }}
         />
+
+        {/* Mesas y sillas del salón, en su propia capa. */}
+        <div ref={set('furnitureWrap')} aria-hidden="true" className="pointer-events-none absolute -inset-[3%]">
+          <img
+            ref={set('furniture')}
+            src={`${BASE}furniture-2688.webp`}
+            srcSet={`${BASE}furniture-1400.webp 1400w, ${BASE}furniture-2688.webp 2688w`}
+            sizes="106vw"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-0"
+            style={{ visibility: 'hidden', transformOrigin: '50% 62%', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,0.5))' }}
+          />
+        </div>
 
         {/* Notas suspendidas en el pasillo. */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
