@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { createBootMaterial, bootLevels } from './bootSequence'
 import { createFrameBudget } from '../../lib/motion'
 
 /**
@@ -181,7 +182,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     ),
   )
 
-  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9, flickerAmp: 1, signOn: 0, landedAt: 0 }
+  const state = { walk: 0, enter: 0, open: 0, boot: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9, flickerAmp: 1, signOn: 0, landedAt: 0 }
   const parts = {}
   let built = false
 
@@ -219,7 +220,8 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     parts.proj = projMat
 
     // 2. El salón: la foto entera, en un plano lejano detrás de la puerta.
-    const inside = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), flat(tex.interior))
+    // Con la secuencia de encendido: arranca apagado y el scroll lo prende por sistemas.
+    const inside = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), createBootMaterial(tex.interior))
     inside.position.set(0, 0, Z_INSIDE_CAM - INSIDE_DIST)
     scene.add(inside)
     parts.inside = inside
@@ -360,7 +362,8 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     last = now
     const walk = smooth(state.walk)
     const enter = smooth(Math.min(1, state.enter / ENTER_STOP))
-    const z = Z_START + (Z_WALKED - Z_START) * walk + (Z_INSIDE_CAM - Z_WALKED) * enter
+    // Durante el encendido la cámara avanza apenas (el que se mueve es la luz, no la foto).
+    const z = Z_START + (Z_WALKED - Z_START) * walk + (Z_INSIDE_CAM - Z_WALKED) * enter - smooth(state.boot) * 0.45
     const still = 1 - Math.min(1, walk * 1.4 + enter)
     // Paso: un vaivén mínimo mientras se camina.
     const bob = Math.sin(-z * 2.4) * 0.018 * Math.sin(Math.PI * state.walk)
@@ -374,6 +377,12 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
       parts.leafR.mesh.position.x = parts.leafR.x + parts.leafR.w * (state.open + peek * 0.1)
       parts.module.material.uniforms.uGlow.value = state.glow * 0.12
       parts.proj.uniforms.uDim.value = 1 - 0.25 * enter
+      const lv = bootLevels(state.boot, true)
+      const u = parts.inside.material.uniforms
+      u.uA.value.set(lv.a[0], lv.a[1], lv.a[2])
+      u.uB.value.set(lv.b[0], lv.b[1], lv.b[2])
+      u.uAll.value = lv.all
+      u.uTime.value = now / 1000
       // El cartel flota: respira despacio y su sombra en la pared lo acompaña.
       if (parts.sign) {
         // La flotación arranca en cero desde que la marca llegó (sin salto) y crece despacio.

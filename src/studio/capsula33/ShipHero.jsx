@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
 import { createCorridorScene } from './corridorScene'
+import { BOOT_STEPS } from './bootSequence'
 import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
 
 /**
@@ -24,6 +25,9 @@ import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
 const BASE = '/studio/capsula33/ship/'
 // Dónde parpadea la tripulante al scrollear (fracción del recorrido del hero).
 const BLINK_MARKS = [0.012, 0.045, 0.085, 0.13, 0.17]
+// La parte de afuera (hablar, caminar, abrir, entrar) ocupa esta fracción del scroll del hero;
+// el resto es la secuencia de encendido del salón. Las marcas de arriba siguen en la escala de antes.
+const OUTSIDE = 0.56
 // Los ojos en la imagen de la tripulante (1360 × 2048) y cuánto más abajo está la piel que los tapa.
 const EYES = [
   { cx: 580, cy: 533, rx: 52, ry: 26, rot: 4 },
@@ -90,7 +94,7 @@ function notesFor(status) {
 
 export default function ShipHero({ boarded, bridge, onProgress = () => {}, onReady = () => {} }) {
   const rootRef = useRef(null)
-  const R = useRef({ notes: [] })
+  const R = useRef({ notes: [], bootLines: [] })
   const [hover, setHover] = useState(null)
   const [talk, setTalk] = useState(false)
   const [typed, setTyped] = useState(0)
@@ -172,7 +176,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
       const r = R.current
       const cam = r.scene.state
       const apply = () => {
-        const p = scroll.current.p
+        const p = scroll.current.p / OUTSIDE
         gsap.set(r.chrome, { autoAlpha: 1 - Math.min(1, p * 9) })
         // La tripulante: la pasamos (se corre a la derecha, crece) y desaparece.
         const g = Math.min(1, cam.walk / 0.42)
@@ -210,10 +214,20 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           scale: 1 + 0.35 * g,
           autoAlpha: 1 - Math.max(0, (g - 0.55) / 0.45),
         })
-        // Ya adentro (el salón y las mesas son capas del 3D): el texto de bienvenida.
-        const k = Math.max(0, Math.min(1, (cam.enter - 0.8) / 0.2))
-        gsap.set(r.inCopy, { autoAlpha: Math.max(0, (k - 0.55) / 0.45) })
-        gsap.set(r.vignette, { opacity: 1 - 0.6 * k })
+        // Adentro: la consola del encendido (cada sistema pasa de «···» a su valor) y, con todo
+        // prendido, el texto de bienvenida.
+        const boot = cam.boot
+        const inside = Math.max(0, Math.min(1, (cam.enter - 0.85) / 0.15))
+        const done = Math.max(0, Math.min(1, (boot - 0.9) / 0.1))
+        gsap.set(r.bootHud, { autoAlpha: inside * (1 - Math.max(0, Math.min(1, (boot - 0.92) / 0.06))) })
+        BOOT_STEPS.forEach(([, a, b], i) => {
+          const el = r.bootLines[i]
+          if (!el) return
+          const st = boot >= b ? 'on' : boot >= a ? 'go' : 'off'
+          if (el.dataset.st !== st) el.dataset.st = st
+        })
+        gsap.set(r.inCopy, { autoAlpha: done })
+        gsap.set(r.vignette, { opacity: 1 - 0.6 * done })
       }
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -226,9 +240,12 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         onUpdate: apply,
       })
       // Un primer tramo quieto: la tripulante habla y recién después caminamos.
-      tl.to(cam, { walk: 1, duration: 0.42, ease: 'none' }, 0.2)
-      tl.to(cam, { open: 1, duration: 0.13, ease: 'power2.inOut' }, 0.54)
-      tl.to(cam, { enter: 1, duration: 0.32, ease: 'none' }, 0.66)
+      const T = OUTSIDE
+      tl.to(cam, { walk: 1, duration: 0.42 * T, ease: 'none' }, 0.2 * T)
+      tl.to(cam, { open: 1, duration: 0.13 * T, ease: 'power2.inOut' }, 0.54 * T)
+      tl.to(cam, { enter: 1, duration: 0.32 * T, ease: 'none' }, 0.66 * T)
+      // La secuencia de encendido: el salón arranca apagado y se prende por sistemas.
+      tl.to(cam, { boot: 1, duration: 1 - 0.98 * T - 0.02, ease: 'none' }, 0.98 * T + 0.01)
       tl.progress(tl.scrollTrigger?.progress ?? 0)
       apply()
       return () => {
@@ -368,7 +385,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
   const set = (k) => (el) => (R.current[k] = el)
 
   return (
-    <section ref={rootRef} id="top" className="relative h-[420svh]" style={{ background: '#05060a', color: C.cream }}>
+    <section ref={rootRef} id="top" className="relative h-[680svh]" style={{ background: '#05060a', color: C.cream }}>
       <h1 className="sr-only">cāpsula33 — café de especialidad en San Martín de los Andes</h1>
       <p className="sr-only">{HEADLINE.replace(/\*/g, '')}</p>
       <div className="sticky top-0 h-svh overflow-hidden">
@@ -604,6 +621,23 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         <div ref={set('chrome')} className="pointer-events-none absolute inset-0 flex flex-col justify-end px-6 pt-6 pb-8 md:px-10 md:pt-8 md:pb-10">
         </div>
 
+        {/* La consola del encendido: cada sistema arranca en orden. */}
+        <div ref={set('bootHud')} aria-hidden="true" className="pointer-events-none absolute bottom-[12svh] left-6 opacity-0 md:left-10 lg:bottom-[14svh]">
+          <p className="mb-3 flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
+            <span className="h-px w-6" style={{ background: C.neon }} />
+            Secuencia de encendido
+          </p>
+          <ul className="space-y-1.5">
+            {BOOT_STEPS.map(([id, , , label, value], i) => (
+              <li key={id} ref={(el) => (R.current.bootLines[i] = el)} data-st="off" className="c33-boot flex items-center gap-3 text-[11px] tracking-[0.18em] uppercase md:text-[12px]" style={MONO}>
+                <span className="c33-boot-dot h-1.5 w-1.5 rounded-full" />
+                <span className="c33-boot-label">{label}</span>
+                <span className="c33-boot-val">{value}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         {/* Adentro. */}
         <div
           ref={set('inCopy')}
@@ -622,6 +656,15 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         </div>
       </div>
       <style>{`
+        .c33-boot { color: rgba(242,233,220,0.28); transition: color 300ms; }
+        .c33-boot-dot { background: rgba(242,233,220,0.25); transition: background-color 200ms, box-shadow 200ms; }
+        .c33-boot-val { opacity: 0; transition: opacity 300ms; color: ${C.neon}; }
+        .c33-boot[data-st='go'] { color: rgba(242,233,220,0.85); }
+        .c33-boot[data-st='go'] .c33-boot-dot { background: ${C.neon}; animation: c33-boot-blink 0.35s steps(1, end) infinite; }
+        .c33-boot[data-st='on'] { color: #f2e9dc; }
+        .c33-boot[data-st='on'] .c33-boot-dot { background: ${C.neon}; box-shadow: 0 0 8px ${C.neon}; }
+        .c33-boot[data-st='on'] .c33-boot-val { opacity: 1; }
+        @keyframes c33-boot-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.2; } }
         .c33-talk { opacity: 0; transform: translateY(6px) scale(0.96); transform-origin: 100% 100%; pointer-events: none; transition: opacity 160ms ease-out, transform 160ms ease-out; }
         .c33-talk.is-on { opacity: 1; transform: none; transition: opacity 240ms cubic-bezier(0.22,1,0.36,1), transform 240ms cubic-bezier(0.22,1,0.36,1); }
         @media (min-width: 640px) { .c33-talk { transform-origin: 100% 30%; } }
