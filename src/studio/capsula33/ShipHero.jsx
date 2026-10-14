@@ -79,7 +79,7 @@ function notesFor(status) {
   ]
 }
 
-export default function ShipHero({ boarded, onProgress = () => {}, onReady = () => {} }) {
+export default function ShipHero({ boarded, bridge, onProgress = () => {}, onReady = () => {} }) {
   const rootRef = useRef(null)
   const R = useRef({ notes: [] })
   const [hover, setHover] = useState(null)
@@ -126,6 +126,15 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
       },
     })
     r.scene = scene
+    // El loader pide dónde cae el cartel en pantalla y avisa cuando su marca llegó ahí.
+    if (bridge) {
+      bridge.current.signRect = () => (r.rects ? r.rects.sign : null)
+      bridge.current.land = () => {
+        scene.state.signOn = 1
+        scene.state.flickerAt = performance.now()
+      }
+      bridge.current.show = () => (scene.state.signOn = 1)
+    }
     return () => scene.dispose()
     // El loader llama una vez; los callbacks son estables.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { prefersReducedMotion } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
@@ -50,6 +50,8 @@ export default function Capsula33Page() {
   }, [])
 
   const [calm] = useState(() => prefersReducedMotion())
+  // Loader ↔ hero: la marca del loader vuela hasta el cartel de la entrada.
+  const bridge = useRef({})
   // Dos cargas: el pasillo (hero) y el local en miniatura (mapa).
   const [loadedHero, setLoadedHero] = useState(0)
   const [loadedMap, setLoadedMap] = useState(0)
@@ -88,8 +90,8 @@ export default function Capsula33Page() {
   return (
     <SmoothScrollProvider>
       <div className="min-h-svh" style={{ background: '#05070d', color: C.cream, ...BODY }}>
-        <Loader progress={progress} ready={ready} calm={calm} onBoard={() => setBoarded(true)} />
-        <ShipHero boarded={boarded} onProgress={onProgress} onReady={onReady} />
+        <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onBoard={() => setBoarded(true)} />
+        <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
         <NosotrosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <MenuSection />

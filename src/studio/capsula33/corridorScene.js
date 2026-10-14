@@ -201,7 +201,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     ),
   )
 
-  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9 }
+  const state = { walk: 0, enter: 0, open: 0, peek: 0, glow: 0, px: 0, py: 0, yaw: 0, portrait: false, flickerAt: -1e9, signOn: 0 }
   const parts = {}
   let built = false
 
@@ -474,9 +474,10 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
         // Al pasar el puntero, titila como un neón que se reacomoda.
         const f = now - state.flickerAt
         const flick = f >= 0 && f < 1100 ? [1, 0.25, 1, 0.4, 0.9, 0.15, 1, 1, 0.75, 1, 1][Math.floor(f / 100)] : 1
-        parts.sign.material.uniforms.uOpacity.value = flick
+        // El cartel espera a que la marca del loader llegue volando (signOn) y entra titilando.
+        parts.sign.material.uniforms.uOpacity.value = flick * state.signOn
         // La sombra se nota de lejos y se borra al acercarse (de cerca se leía como un doble).
-        parts.signShadow.material.uniforms.uOpacity.value = 0.32 * flick * (1 - walk)
+        parts.signShadow.material.uniforms.uOpacity.value = 0.32 * flick * (1 - walk) * state.signOn
       }
       if (parts.dust) {
         parts.dust.position.y = Math.sin(now * 0.00025) * 0.06
