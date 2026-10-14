@@ -252,8 +252,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     makeSign(signRect)
 
     // 6. Polvo en el aire del pasillo: profundidad mientras caminamos.
-    parts.dust = makeDust()
-    scene.add(parts.dust)
+    // Sin polvo: los puntos flotando se veían falsos (brillos sueltos sobre la puerta).
 
     parts.rects = { door, sign: signRect, port: rectAt(PARTS.port, D) }
     built = true
@@ -307,39 +306,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     parts.sign = sign
     parts.signShadow = shadow
     parts.signY = sign.position.y
-  }
-
-  const makeDust = () => {
-    const N = 520
-    const pos = new Float32Array(N * 3)
-    const { a, b, c } = TUN
-    for (let i = 0; i < N; i += 1) {
-      pos[i * 3] = (Math.random() * 2 - 1) * a * 0.9
-      pos[i * 3 + 1] = -b + Math.random() * (b + c)
-      pos[i * 3 + 2] = -1 - Math.random() * (D - 1.4)
-    }
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
-    const dot = document.createElement('canvas')
-    dot.width = dot.height = 64
-    const g = dot.getContext('2d')
-    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32)
-    grad.addColorStop(0, 'rgba(255,255,255,1)')
-    grad.addColorStop(0.35, 'rgba(255,255,255,0.35)')
-    grad.addColorStop(1, 'rgba(255,255,255,0)')
-    g.fillStyle = grad
-    g.fillRect(0, 0, 64, 64)
-    const mat = new THREE.PointsMaterial({
-      size: 0.035,
-      map: new THREE.CanvasTexture(dot),
-      color: 0xdfe6ff,
-      transparent: true,
-      opacity: 0.55,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      sizeAttenuation: true,
-    })
-    return new THREE.Points(geo, mat)
   }
 
   ready.then(() => {
@@ -424,10 +390,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
         parts.sign.material.uniforms.uOpacity.value = flick * state.signOn
         // La sombra se nota de lejos y se borra al acercarse (de cerca se leía como un doble).
         parts.signShadow.material.uniforms.uOpacity.value = 0.32 * flick * (1 - walk) * state.signOn
-      }
-      if (parts.dust) {
-        parts.dust.position.y = Math.sin(now * 0.00025) * 0.06
-        parts.dust.rotation.z = Math.sin(now * 0.0001) * 0.02
       }
     }
     renderer.render(scene, camera)

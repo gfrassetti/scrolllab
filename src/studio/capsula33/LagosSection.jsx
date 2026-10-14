@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useGSAP, ScrollTrigger } from '../../lib/gsap'
+import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../lib/gsap'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { MAP_BG } from './mapScene'
 import { MAP_SVG, MAP_W, MAP_H, ROUTE_D, STOPS } from './lagosMapSvg'
@@ -22,7 +22,7 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
 export default function LagosSection() {
   const rootRef = useRef(null)
-  const R = useRef({ lakes: [], times: [] })
+  const R = useRef({ lakes: [], times: [], caps: [], steps: [] })
   const [active, setActive] = useState(-1)
   const activeRef = useRef(-1)
 
@@ -77,6 +77,29 @@ export default function LagosSection() {
           r.lakes[i].style.transform = `scale(${1.12 - 0.12 * e})`
           if (k > 0.2) cur = i
         })
+        // Los textos de cada escala: se funden uno en otro con el scroll (sin saltos). Cada uno
+        // entra enfocándose, se queda y se va hacia arriba mientras entra el siguiente.
+        const n = r.times.length
+        r.times.forEach((t, i) => {
+          const el = r.caps[i]
+          if (!el) return
+          const at = START + SPAN * t
+          const next = i < n - 1 ? START + SPAN * r.times[i + 1] : 2
+          const inK = clamp01((p - (at - 0.012)) / 0.05)
+          const outK = clamp01((p - (next - 0.03)) / 0.05)
+          const e = inK * inK * (3 - 2 * inK)
+          const o = outK * outK * (3 - 2 * outK)
+          const vis = e * (1 - o)
+          el.style.opacity = String(vis)
+          el.style.transform = `translate3d(0, ${(1 - e) * 26 - o * 22}px, 0)`
+          el.style.filter = vis > 0.01 && vis < 0.99 ? `blur(${(1 - vis) * 7}px)` : 'none'
+          el.style.visibility = vis > 0.005 ? 'visible' : 'hidden'
+          const st = r.steps[i]
+          if (st) {
+            st.style.background = p >= at ? (i === cur ? C.orange : 'rgba(255,122,26,0.5)') : 'rgba(242,233,220,0.18)'
+            st.style.transform = `scaleY(${i === cur ? 2 : 1})`
+          }
+        })
         if (cur !== activeRef.current) {
           activeRef.current = cur
           setActive(cur)
@@ -85,6 +108,19 @@ export default function LagosSection() {
         r.stamp.style.opacity = String(clamp01((p - 0.9) / 0.07))
         r.now.style.opacity = String(draw > 0.005 ? 1 : 0)
       }
+      // El título entra línea por línea (las letras suben desde una máscara) y la bajada se escribe palabra por palabra.
+      const head = r.head
+      const lines = head.querySelectorAll('[data-line]')
+      const eyebrow = head.querySelector('[data-h="eyebrow"]')
+      const lede = head.querySelector('[data-h="lede"]')
+      const split = lede ? new SplitText(lede, { type: 'words', aria: 'none' }) : null
+      gsap.set(lines, { yPercent: 108 })
+      if (split) gsap.set(split.words, { opacity: 0.12 })
+      const tl = gsap.timeline({ scrollTrigger: { trigger: rootRef.current, start: 'top 62%', once: true } })
+      tl.to(eyebrow, { autoAlpha: 1, duration: 0.7, ease: 'expo.out' }, 0)
+        .to(lines, { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12 }, 0.1)
+        .to(lede, { autoAlpha: 1, duration: 0.6, ease: 'power2.out' }, 0.5)
+      if (split) tl.to(split.words, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.035 }, 0.6)
       paint(0)
       ScrollTrigger.create({
         trigger: rootRef.current,
@@ -118,7 +154,7 @@ export default function LagosSection() {
         <svg
           viewBox={`0 0 ${MAP_W} ${MAP_H}`}
           preserveAspectRatio="xMidYMid meet"
-          className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-9.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[5svh] lg:left-[34vw] lg:h-[90svh] lg:w-[62vw]"
+          className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-10.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[2svh] lg:left-[38vw] lg:h-[96svh] lg:w-[58vw]"
           role="img"
           aria-label="Mapa «Base 7-Lagos»: la ruta de evacuación baja del lago Nahuel Huapi, pasa por los siete lagos y llega al lago Lácar y al domo C-33"
         >
@@ -189,54 +225,82 @@ export default function LagosSection() {
           />
         </svg>
 
-        {/* Arriba a la izquierda: el título. */}
-        <div className="absolute top-20 left-6 max-w-[min(88vw,26rem)] md:left-10 lg:top-24 lg:left-[5vw] lg:max-w-[min(26rem,27vw)]">
-          <p className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
+        {/* Arriba a la izquierda: el título (letra por letra al entrar). */}
+        <div ref={set('head')} className="absolute top-20 left-6 max-w-[min(88vw,30rem)] md:left-10 lg:top-24 lg:left-[5vw] lg:max-w-[min(30rem,32vw)]">
+          <p
+            data-h="eyebrow"
+            className="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase opacity-0"
+            style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}
+          >
             <span className="h-px w-8" style={{ background: C.neon }} />
             La ruta
           </p>
-          <h2 className="mt-3 text-[clamp(1.9rem,4.4vw,4.6rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
-            Base{' '}
-            <span className="whitespace-nowrap" style={{ color: C.neon }}>
-              7-Lagos.
+          <h2 data-h="title" aria-label="Base 7-Lagos." className="mt-3 flex flex-col text-[clamp(2.1rem,4.8vw,5rem)] leading-[0.95] font-semibold uppercase max-sm:flex-row max-sm:gap-x-[0.3em]" style={DISPLAY}>
+            <span aria-hidden="true" className="block overflow-hidden pb-[0.06em]">
+              <span data-line className="block">
+                Base
+              </span>
+            </span>
+            <span aria-hidden="true" className="block overflow-hidden pb-[0.06em] whitespace-nowrap" style={{ color: C.neon }}>
+              <span data-line className="block">
+                7-Lagos.
+              </span>
             </span>
           </h2>
-          <p className="mt-4 hidden max-w-[34ch] text-[15px] leading-[1.5] lg:block" style={{ ...BODY, color: 'rgba(242,233,220,0.72)' }}>
+          <p
+            data-h="lede"
+            className="mt-4 hidden max-w-[36ch] text-[16px] leading-[1.5] opacity-0 lg:block"
+            style={{ ...BODY, color: 'rgba(242,233,220,0.74)' }}
+          >
             El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, del lago mayor a la puerta del domo.
           </p>
         </div>
 
-        {/* Abajo a la izquierda: la escala actual y la ruta como una regla de pasos. */}
-        <div className="absolute right-6 bottom-6 left-6 md:right-auto md:left-10 md:max-w-[26rem] lg:bottom-10 lg:left-[5vw] lg:max-w-[min(26rem,27vw)]">
-          <div ref={set('now')} className="transition-opacity duration-500" style={{ opacity: 0 }} aria-live="polite">
-            <p className="text-[11px] tracking-[0.22em] uppercase tabular-nums" style={{ ...MONO, color: C.neon }}>
-              {cur ? (cur[1] === 'Bonus' ? 'Bonus · el lago mayor' : `Escala ${cur[1]} / 07`) : ''}
-            </p>
-            <p key={active} className="c33-lake-now mt-1 text-[clamp(1.6rem,3.2vw,3.2rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
-              {cur ? cur[0] : ''}
-            </p>
-            <p key={`t${active}`} className="c33-lake-now mt-2 max-w-[42ch] text-[15px] leading-[1.45]" style={{ ...BODY, color: 'rgba(242,233,220,0.82)' }}>
-              {cur ? cur[3] : ''}
-            </p>
+        {/* Abajo a la izquierda: la escala actual (cada una se funde en la siguiente) y la regla de pasos. */}
+        <div className="absolute right-6 bottom-6 left-6 md:right-auto md:left-10 md:w-[30rem] lg:bottom-12 lg:left-[5vw] lg:w-[min(30rem,32vw)]">
+          <div
+            ref={set('now')}
+            className="relative h-[10.5rem] transition-opacity duration-700 sm:h-[11.5rem] lg:h-[15rem]"
+            style={{ opacity: 0 }}
+            aria-live="polite"
+          >
+            {STOPS.map(([name, num, , text], i) => (
+              <div
+                key={name}
+                ref={(el) => (R.current.caps[i] = el)}
+                className="absolute inset-x-0 bottom-0 will-change-transform"
+                style={{ opacity: 0, visibility: 'hidden' }}
+              >
+                <p className="text-[11px] tracking-[0.22em] uppercase tabular-nums" style={{ ...MONO, color: C.neon }}>
+                  {num === 'Bonus' ? 'Bonus · el lago mayor' : `Escala ${num} / 07`}
+                </p>
+                <p className="mt-1.5 text-[clamp(1.9rem,3.4vw,3.8rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
+                  {name}
+                </p>
+                <p className="mt-3 max-w-[40ch] text-[15px] leading-[1.5] lg:text-[17px]" style={{ ...BODY, color: 'rgba(242,233,220,0.84)' }}>
+                  {text}
+                </p>
+              </div>
+            ))}
           </div>
-          <ol className="mt-4 flex gap-1.5" aria-label="Ruta de evacuación">
+          <ol className="mt-5 flex items-end gap-1.5" aria-label="Ruta de evacuación">
             {STOPS.map(([name], i) => (
               <li
                 key={name}
                 title={name}
-                className="h-1 flex-1 rounded-full transition-colors duration-300"
-                style={{ background: i < active ? 'rgba(255,122,26,0.55)' : i === active ? C.orange : 'rgba(242,233,220,0.18)' }}
+                className="h-1 flex-1 origin-bottom rounded-full transition-[background-color,transform] duration-500"
+                ref={(el) => (R.current.steps[i] = el)}
+                style={{ background: 'rgba(242,233,220,0.18)' }}
               >
                 <span className="sr-only">{name}</span>
               </li>
             ))}
           </ol>
+          <p className="sr-only" aria-live="polite">
+            {cur ? `${cur[0]}: ${cur[3]}` : ''}
+          </p>
         </div>
       </div>
-      <style>{`
-        @keyframes c33-lake-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-        .c33-lake-now { animation: c33-lake-in 520ms cubic-bezier(0.22, 1, 0.36, 1); }
-      `}</style>
     </section>
   )
 }

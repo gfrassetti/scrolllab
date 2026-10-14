@@ -10,6 +10,7 @@ import Nav from './Nav'
 import NosotrosSection from './NosotrosSection'
 import LagosSection from './LagosSection'
 import MenuSection from './MenuSection'
+import CartaSection from './CartaSection'
 import ContactSection from './ContactSection'
 import LlegarSection from './LlegarSection'
 import GaleriaSection from './GaleriaSection'
@@ -99,6 +100,7 @@ export default function Capsula33Page() {
         <LagosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
         <MenuSection />
+        <CartaSection />
         <GaleriaSection />
         <LlegarSection />
         <ContactSection />
