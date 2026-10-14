@@ -176,12 +176,12 @@ export default function LagosSection() {
             </filter>
           </defs>
           <rect width={GEO.w} height={GEO.h} fill="#14171b" />
-          <path d={GEO.lakes} fill="#2e3d48" fillRule="evenodd" />
+          <path d={GEO.lakes} fill="#344654" fillRule="evenodd" />
           <path d={GEO.islands} fill="#14171b" />
           <path d={GEO.roads.minor} fill="none" stroke="#2a2f35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
           <path d={GEO.roads.main} fill="none" stroke="#353b42" strokeWidth="8" strokeLinejoin="round" strokeLinecap="round" />
           <path d={GEO.roads.r231} fill="none" stroke="#454c55" strokeWidth="10" strokeLinejoin="round" strokeLinecap="round" />
-          <path d={GEO.roads.r40} fill="none" stroke="#525a64" strokeWidth="11" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={GEO.roads.r40} fill="none" stroke="#5d6672" strokeWidth="11" strokeLinejoin="round" strokeLinecap="round" />
           <g ref={set('geoLit')} clipPath="url(#c33-geo-wipe)" style={{ opacity: 0 }}>
             <path d={GEO.roads.r40} fill="none" stroke={NEON} strokeWidth="34" strokeOpacity="0.35" filter="url(#c33-geo-glow)" />
             <path d={GEO.roads.r40} fill="none" stroke={NEON} strokeWidth="10" strokeLinejoin="round" strokeLinecap="round" />
@@ -208,9 +208,9 @@ export default function LagosSection() {
             y={GEO.h * 0.38}
             fill="rgba(242,233,220,0.3)"
             fontFamily="'Roboto Mono', monospace"
-            fontSize="24"
+            fontSize="18"
             fontWeight="700"
-            letterSpacing="6"
+            letterSpacing="5"
           >
             RN 40 · RUTA DE LOS SIETE LAGOS
           </text>
@@ -221,7 +221,7 @@ export default function LagosSection() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(90deg, rgba(8,9,12,0.88) 0%, rgba(8,9,12,0.55) 24%, rgba(8,9,12,0) 40%), radial-gradient(80% 95% at 57% 50%, rgba(8,9,12,0.1), rgba(8,9,12,0.7) 100%), rgba(8,9,12,0.25)',
+              'linear-gradient(90deg, rgba(8,9,12,0.88) 0%, rgba(8,9,12,0.55) 24%, rgba(8,9,12,0) 40%), radial-gradient(80% 95% at 57% 50%, rgba(8,9,12,0), rgba(8,9,12,0.55) 100%), rgba(8,9,12,0.12)',
           }}
         />
 
