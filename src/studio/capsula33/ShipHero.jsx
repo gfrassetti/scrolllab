@@ -107,7 +107,7 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         // La tripulante: la pasamos (se corre a la derecha, crece) y desaparece.
         const g = Math.min(1, cam.walk / 0.42)
         // El cuadro de diálogo: aparece con el primer movimiento del scroll y se va antes de que ella se vaya.
-        const show = p > 0.004 && p < 0.1
+        const show = p > 0.004 && p < 0.19 // unos cinco movimientos de la rueda
         if (show !== r.talk) {
           r.talk = show
           setTalk(show)
@@ -133,9 +133,9 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         onUpdate: apply,
       })
       // Un primer tramo quieto: la tripulante habla y recién después caminamos.
-      tl.to(cam, { walk: 1, duration: 0.5, ease: 'none' }, 0.09)
-      tl.to(cam, { open: 1, duration: 0.15, ease: 'power2.inOut' }, 0.5)
-      tl.to(cam, { enter: 1, duration: 0.36, ease: 'none' }, 0.61)
+      tl.to(cam, { walk: 1, duration: 0.42, ease: 'none' }, 0.2)
+      tl.to(cam, { open: 1, duration: 0.13, ease: 'power2.inOut' }, 0.54)
+      tl.to(cam, { enter: 1, duration: 0.32, ease: 'none' }, 0.66)
       tl.progress(tl.scrollTrigger?.progress ?? 0)
       apply()
       return () => {
@@ -214,7 +214,7 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
   const set = (k) => (el) => (R.current[k] = el)
 
   return (
-    <section ref={rootRef} id="top" className="relative h-[340svh]" style={{ background: '#05060a', color: C.cream }}>
+    <section ref={rootRef} id="top" className="relative h-[420svh]" style={{ background: '#05060a', color: C.cream }}>
       <h1 className="sr-only">cāpsula33 — café de especialidad en San Martín de los Andes</h1>
       <div className="sticky top-0 h-svh overflow-hidden">
         <canvas ref={set('canvas')} className="absolute inset-0 h-full w-full opacity-0" role="img" aria-label="Un pasillo de nave espacial gris con luces blancas; al fondo, empotrada en la pared, la entrada naranja de cāpsula33 con su cartel de luz flotando, un ojo de buey, la puerta con dos ventanas en pastilla y un ventanal con listones" />
