@@ -42,8 +42,18 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
   // Cuánto del tubo llena el mercurio (en el fondo de escala del termómetro).
   const fill = ((T_MIN + progress * (T_READY - T_MIN) - T_MIN) / (T_MAX - T_MIN)) * 100
 
+  // Enter / Espacio abordan sin tener que enfocar el botón (que se enfocara solo le ponía
+  // un aro de foco encima del borde animado).
   useEffect(() => {
-    if (ready) buttonRef.current?.focus({ preventScroll: true })
+    if (!ready) return undefined
+    const onKey = (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && document.activeElement === document.body) {
+        e.preventDefault()
+        buttonRef.current?.click()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [ready])
 
   const wipe = (tl, at) => {
@@ -170,20 +180,24 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
               </div>
 
               <div className="h-14 w-full sm:w-[17rem]">
+                {/* El borde es una luz que da vueltas alrededor del botón (y titila al encenderse). */}
                 <button
                   ref={buttonRef}
                   type="button"
                   onClick={board}
                   disabled={!ready}
-                  className={`c33-board ${ready ? 'is-ready' : ''} group relative h-14 w-full overflow-hidden rounded-full text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none`}
-                  style={{ ...DISPLAY, background: INK, color: C.cream, opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(8px)' }}
+                  className={`c33-board ${ready ? 'is-ready' : ''} group relative block h-14 w-full overflow-hidden rounded-full p-[3px] text-[13px] font-semibold tracking-[0.24em] uppercase transition-[opacity,transform] duration-500 active:scale-[0.98] disabled:pointer-events-none`}
+                  style={{ ...DISPLAY, color: C.cream, opacity: ready ? 1 : 0, transform: ready ? 'none' : 'translateY(8px)', background: 'rgba(11,12,15,0.55)' }}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
-                    style={{ background: C.cream }}
-                  />
-                  <span className="relative transition-colors duration-300 group-hover:text-[#0b0c0f]">Abordar</span>
+                  <span aria-hidden="true" className="c33-board-ring pointer-events-none absolute top-1/2 left-1/2 aspect-square w-[160%] -translate-x-1/2 -translate-y-1/2" />
+                  <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full" style={{ background: INK }}>
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+                      style={{ background: C.cream }}
+                    />
+                    <span className="relative transition-colors duration-300 group-hover:text-[#0b0c0f]">Abordar</span>
+                  </span>
                 </button>
               </div>
             </div>
@@ -285,19 +299,22 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
       </div>
 
       <style>{`
-        .c33-board:focus-visible { outline: 3px solid ${C.cream}; outline-offset: 3px; }
-        /* Listo para abordar: titila como un neón que se enciende y después late. */
-        .c33-board.is-ready { animation: c33-board-on 1.1s steps(1, end) 1, c33-board-pulse 2.4s ease-in-out 1.1s infinite; }
-        @keyframes c33-board-on {
-          0% { opacity: 0.15; } 8% { opacity: 1; } 14% { opacity: 0.3; } 22% { opacity: 1; } 30% { opacity: 0.45; }
-          38% { opacity: 1; } 60% { opacity: 0.75; } 66%, 100% { opacity: 1; }
+        .c33-board:focus-visible { outline: 2px solid ${INK}; outline-offset: 4px; }
+        /* El borde: un cometa de luz (cabeza crema, estela naranja) que gira; al encenderse, titila. */
+        .c33-board-ring {
+          background: conic-gradient(from 0deg, rgba(255,122,26,0) 0deg, rgba(255,122,26,0) 140deg, rgba(255,140,60,0.7) 260deg, ${C.neon} 320deg, #fff4e6 354deg, rgba(255,122,26,0) 360deg);
+          opacity: 0;
         }
-        @keyframes c33-board-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(255,244,230,0), 0 0 14px rgba(255,244,230,0.25); }
-          50% { box-shadow: 0 0 0 4px rgba(242,233,220,0.35), 0 0 34px rgba(255,244,230,0.75); }
+        .c33-board.is-ready .c33-board-ring {
+          animation: c33-ring-spin 2.2s linear infinite, c33-ring-on 1.2s steps(1, end) 1 forwards;
         }
-        @media (hover: hover) { .c33-board.is-ready:hover { animation: c33-board-flick 0.7s steps(1, end) infinite, c33-board-pulse 2.4s ease-in-out infinite; } }
-        @keyframes c33-board-flick { 0%, 100% { opacity: 1; } 12% { opacity: 0.55; } 18% { opacity: 1; } 52% { opacity: 0.8; } 58% { opacity: 1; } }
+        @keyframes c33-ring-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes c33-ring-on {
+          0% { opacity: 0.2; } 8% { opacity: 1; } 15% { opacity: 0.25; } 24% { opacity: 1; } 33% { opacity: 0.4; }
+          42% { opacity: 1; } 62% { opacity: 0.7; } 70%, 100% { opacity: 1; }
+        }
+        @media (hover: hover) { .c33-board.is-ready:hover .c33-board-ring { animation-duration: 0.9s, 1.2s; } }
+        @media (prefers-reduced-motion: reduce) { :where(:root:not([data-motion='full'])) .c33-board.is-ready .c33-board-ring { animation: c33-ring-on 1.2s steps(1, end) 1 forwards; background: ${C.neon}; } }
       `}</style>
     </>
   )
