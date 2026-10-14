@@ -34,6 +34,8 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   const [hover, setHover] = useState(null)
   const [active, setActive] = useState(null)
   const [labelsOn, setLabelsOn] = useState(false)
+  const [dragging, setDragging] = useState(false)
+  const [moved, setMoved] = useState(false) // la persona giró o acercó: aparece «Vista inicial»
   const [status] = useState(() => openStatus())
   const [touch] = useState(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches)
 
@@ -45,7 +47,14 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
       onProgress,
       onReady,
       onHover: (id) => setHover(id),
+      onDrag: (on) => setDragging(on),
       onFrame: () => {
+        const st = scene.state
+        const off = Math.abs(st.tYaw) > 0.02 || Math.abs(st.tElev) > 0.02 || st.tZoom > 1.02
+        if (off !== r.moved) {
+          r.moved = off
+          setMoved(off)
+        }
         for (const z of ZONES) {
           const el = r.labels[z.id]
           const at = scene.labelAt(z.id)
@@ -117,7 +126,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
     }
     raf = requestAnimationFrame(loop)
     const onMove = (e) => {
-      if (e.pointerType === 'touch' || !r.scene || r.overLabel) return
+      if (e.pointerType === 'touch' || !r.scene || r.overLabel || r.scene.dragged()) return
       r.scene.setHover(r.scene.zoneAt(e.clientX, e.clientY))
     }
     const onKey = (e) => e.key === 'Escape' && setActive(null)
@@ -138,6 +147,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   }, [active])
 
   const pickAt = (e) => {
+    if (R.current.scene?.dragged()) return // terminó un giro, no es un toque
     const id = R.current.scene?.zoneAt(e.clientX, e.clientY)
     setActive(id || null)
   }
@@ -153,7 +163,8 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   return (
     <section ref={rootRef} id="mapa" className="relative h-[230svh]" style={{ background: MAP_BG, color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
-        <canvas ref={set('canvas')} onClick={pickAt} className={`absolute inset-0 h-full w-full ${hover ? 'cursor-pointer' : ''}`} role="img" aria-label="El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón" />
+        <canvas ref={set('canvas')} onClick={pickAt} className={`absolute inset-0 h-full w-full ${dragging ? 'cursor-grabbing' : hover ? 'cursor-pointer' : labelsOn ? 'cursor-grab' : ''}`}
+          style={{ touchAction: 'pan-y' }} role="img" aria-label="El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón" />
 
         {/* El texto, a la izquierda (arriba en teléfono). */}
         <div ref={set('copy')} className="pointer-events-none absolute inset-x-0 top-0 px-6 pt-[12svh] md:px-10 lg:top-1/2 lg:right-auto lg:w-[40vw] lg:-translate-y-1/2 lg:pt-0 lg:pl-[5vw]">
@@ -267,11 +278,19 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         </div>
 
         {/* Abajo al centro: el estado y la pista. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-6 transition-opacity duration-700" style={{ opacity: labelsOn ? 1 : 0 }}>
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 flex flex-wrap items-center justify-center gap-2 px-6 transition-opacity duration-700" style={{ opacity: labelsOn ? 1 : 0 }}>
           <p className="flex items-center gap-2.5 rounded-full border px-4 py-2 text-[12px]" style={{ ...BODY, background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(242,233,220,0.12)', color: 'rgba(242,233,220,0.8)' }}>
             <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange, boxShadow: status.open ? '0 0 10px #7dffa8' : 'none' }} />
-            {status.label}. {touch ? 'Cada zona se abre al tocar su etiqueta.' : 'Cada zona se enciende al pasar el puntero y se abre al tocarla.'}
+            {status.label}. {touch ? 'El local gira deslizando de costado; cada zona se abre al tocar su etiqueta.' : 'El local gira al arrastrarlo y cada zona se abre al tocarla.'}
           </p>
+          <button
+            type="button"
+            onClick={() => R.current.scene?.resetView()}
+            className="pointer-events-auto rounded-full border px-4 py-2 text-[12px] transition-[opacity,transform] duration-300 active:scale-[0.97]"
+            style={{ ...BODY, background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(228,96,29,0.6)', color: C.cream, opacity: moved ? 1 : 0, transform: moved ? 'none' : 'translateY(6px)', pointerEvents: moved ? 'auto' : 'none' }}
+          >
+            Vista inicial
+          </button>
         </div>
       </div>
       <style>{`

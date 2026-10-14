@@ -53,7 +53,9 @@ const rectAt = ({ x0, y0, x1, y1 }, z = D) => {
 
 const Z_MODULE = -D + 0.02
 const Z_LEAVES = -D + 0.01
-const Z_INSIDE = -D - 1.6 // cerca de la puerta: así el plano tapa todo lo que se ve por ella
+// Lejos de la puerta (el salón es largo): así, al cruzarla, lo que ve la cámara ya es casi el
+// interior entero y la imagen en DOM apenas se acomoda (de cerca había que hacer mucho zoom).
+const Z_INSIDE = -D - 8
 const Z_START = -1.8 // arranca cerca: la entrada manda, poco pasillo (pedido del dueño)
 const Z_WALKED = -(D - 3.4) // frente a la entrada
 const Z_SIGN = Z_MODULE + 0.32 // el cartel flota delante de la pared

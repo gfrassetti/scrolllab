@@ -73,6 +73,9 @@ export const ZONES = [
 export const MAP_BG = '#0b0c0f'
 const ISO = new THREE.Vector3(-0.62, 0.92, 1).normalize() // de la esquina de la entrada, abierto al salón
 const TOP = new THREE.Vector3(0, 1, 0.0001)
+// Topes del giro (absolutos): de la fachada de la entrada (-74°) a apenas pasado el frente; de
+// casi a ras del piso a casi desde arriba.
+const LIMIT = { az: [-1.3, 0.25], el: [0.28, 1.3], zoom: [1, 1.8] }
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const smooth = (t) => t * t * (3 - 2 * t)
 
@@ -80,7 +83,7 @@ const smooth = (t) => t * t * (3 - 2 * t)
  * @param {{ canvas: HTMLCanvasElement, area: () => { x:number, y:number, w:number, h:number }, onProgress?: (p:number)=>void, onReady?: ()=>void, onHover?: (id:string|null)=>void, onFrame?: ()=>void }} opts
  *   `area`: el rectángulo de la pantalla (px CSS) donde tiene que entrar el diorama.
  */
-export function createMapScene({ canvas, area, onProgress = () => {}, onReady = () => {}, onHover = () => {}, onFrame = () => {} }) {
+export function createMapScene({ canvas, area, onProgress = () => {}, onReady = () => {}, onHover = () => {}, onDrag = () => {}, onFrame = () => {} }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' })
   const maxDpr = Math.min(window.devicePixelRatio || 1, 2)
   renderer.setPixelRatio(maxDpr)
@@ -101,7 +104,8 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     },
   })
 
-  const state = { rise: 0, px: 0, py: 0, hover: null, active: null }
+  // yaw/elev/zoom: lo que la persona giró y acercó (t* es el objetivo, se sigue con suavidad).
+  const state = { rise: 0, px: 0, py: 0, hover: null, active: null, yaw: 0, elev: 0, zoom: 1, tYaw: 0, tElev: 0, tZoom: 1 }
   const world = new THREE.Group()
   scene.add(world)
   const parts = { zones: [] }
@@ -158,21 +162,22 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
   const dir = new THREE.Vector3()
   const up = new THREE.Vector3()
   const corners = Array.from({ length: 8 }, () => new THREE.Vector3())
+  const aim = (d) => {
+    camera.position.copy(parts.center).addScaledVector(d, 80)
+    camera.lookAt(parts.center)
+    camera.updateMatrixWorld()
+  }
   const fit = () => {
     if (!parts.bounds) return
     const w = canvas.clientWidth
     const h = canvas.clientHeight
     const rise = smooth(clamp01(state.rise))
-    // De arriba (plano) a la esquina (isométrico); el puntero corre apenas la vista.
+    // De arriba (plano) a la esquina (isométrico). El tamaño se mide con esta vista base, así
+    // el local no cambia de tamaño mientras la persona lo gira.
     dir.copy(TOP).lerp(ISO, rise).normalize()
-    dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), state.px * 0.06 * rise)
-    dir.y += state.py * 0.03 * rise
-    dir.normalize()
     up.set(0, 0, -1).lerp(new THREE.Vector3(0, 1, 0), rise).normalize()
     camera.up.copy(up)
-    camera.position.copy(parts.center).addScaledVector(dir, 80)
-    camera.lookAt(parts.center)
-    camera.updateMatrixWorld()
+    aim(dir)
     // Lo que ocupa el diorama visto desde acá (la losa incluida).
     const b = parts.bounds
     let i = 0
@@ -199,7 +204,19 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     camera.right = camera.left + w * k
     camera.top = cy + acy * k
     camera.bottom = camera.top - h * k
+    camera.zoom = state.zoom
     camera.updateProjectionMatrix()
+    // Ahora sí, el giro de la persona (y un poco el puntero) sobre la vista base, con topes:
+    // es un corte con dos paredes abiertas, nunca se ve de atrás.
+    if (rise > 0.5) {
+      const k2 = (rise - 0.5) * 2
+      let az = Math.atan2(dir.x, dir.z) + (state.yaw + state.px * 0.05) * k2
+      let el = Math.asin(dir.y) + (state.elev - state.py * 0.03) * k2
+      az = Math.min(LIMIT.az[1], Math.max(LIMIT.az[0], az))
+      el = Math.min(LIMIT.el[1], Math.max(LIMIT.el[0], el))
+      dir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el))
+      aim(dir)
+    }
   }
 
   const resize = () => {
@@ -224,6 +241,88 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     if (!hit) return null
     return parts.zones.find((z) => z.box.containsPoint(hit.point))?.zone.id ?? null
   }
+
+  // --- girar y acercar ----------------------------------------------------------
+  // Arrastrar gira (en el teléfono, solo de costado: lo vertical sigue scrolleando la página);
+  // Ctrl + rueda o el pellizco acercan. Un toque sin arrastrar sigue eligiendo zona.
+  const press = { id: null, x: 0, y: 0, lx: 0, ly: 0, drag: false, touch: false, justDragged: false }
+  const pinch = { on: false, d0: 0, z0: 1 }
+  const clampT = () => {
+    const base = Math.atan2(ISO.x, ISO.z)
+    const baseEl = Math.asin(ISO.y)
+    state.tYaw = Math.min(LIMIT.az[1] - base, Math.max(LIMIT.az[0] - base, state.tYaw))
+    state.tElev = Math.min(LIMIT.el[1] - baseEl, Math.max(LIMIT.el[0] - baseEl, state.tElev))
+    state.tZoom = Math.min(LIMIT.zoom[1], Math.max(LIMIT.zoom[0], state.tZoom))
+  }
+  const canOrbit = () => built && state.rise > 0.92
+  const onDown = (e) => {
+    if (!canOrbit() || pinch.on) return
+    press.id = e.pointerId
+    press.x = press.lx = e.clientX
+    press.y = press.ly = e.clientY
+    press.drag = false
+    press.touch = e.pointerType === 'touch'
+  }
+  const onMove = (e) => {
+    if (e.pointerId !== press.id || pinch.on) return
+    const dx = e.clientX - press.lx
+    const dy = e.clientY - press.ly
+    if (!press.drag && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 6) {
+      press.drag = true
+      canvas.setPointerCapture?.(e.pointerId)
+      setHover(null)
+      onDrag(true)
+    }
+    if (press.drag) {
+      state.tYaw -= dx * 0.0065
+      if (!press.touch) state.tElev += dy * 0.004
+      clampT()
+    }
+    press.lx = e.clientX
+    press.ly = e.clientY
+  }
+  const onUp = (e) => {
+    if (e.pointerId !== press.id) return
+    press.id = null
+    if (press.drag) {
+      press.drag = false
+      onDrag(false)
+      press.justDragged = true
+      setTimeout(() => (press.justDragged = false), 0)
+    }
+  }
+  const onWheel = (e) => {
+    if (!e.ctrlKey || !canOrbit()) return
+    e.preventDefault()
+    state.tZoom *= Math.exp(-e.deltaY * 0.0025)
+    clampT()
+  }
+  const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+  const onTouchStart = (e) => {
+    if (e.touches.length === 2 && canOrbit()) {
+      pinch.on = true
+      pinch.d0 = touchDist(e.touches)
+      pinch.z0 = state.tZoom
+      press.id = null
+    }
+  }
+  const onTouchMove = (e) => {
+    if (!pinch.on || e.touches.length < 2) return
+    e.preventDefault()
+    state.tZoom = pinch.z0 * (touchDist(e.touches) / Math.max(1, pinch.d0))
+    clampT()
+  }
+  const onTouchEnd = (e) => {
+    if (e.touches.length < 2) pinch.on = false
+  }
+  canvas.addEventListener('pointerdown', onDown)
+  window.addEventListener('pointermove', onMove)
+  window.addEventListener('pointerup', onUp)
+  window.addEventListener('pointercancel', onUp)
+  canvas.addEventListener('wheel', onWheel, { passive: false })
+  canvas.addEventListener('touchstart', onTouchStart, { passive: true })
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false })
+  canvas.addEventListener('touchend', onTouchEnd, { passive: true })
 
   const setHover = (id) => {
     if (id === state.hover) return
@@ -251,6 +350,9 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
         z.outline.position.y = z.box.getCenter(v).y * room.root.scale.y
       }
       room.screen?.draw(now)
+      state.yaw += (state.tYaw - state.yaw) * 0.12
+      state.elev += (state.tElev - state.elev) * 0.12
+      state.zoom += (state.tZoom - state.zoom) * 0.12
       fit()
     }
     composer.render()
@@ -270,6 +372,13 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
 
   return {
     state,
+    /** Hubo arrastre recién (el click que lo termina no tiene que elegir zona). */
+    dragged: () => press.justDragged || press.drag,
+    resetView() {
+      state.tYaw = 0
+      state.tElev = 0
+      state.tZoom = 1
+    },
     zoneAt,
     setHover,
     labelAt,
@@ -277,6 +386,14 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     dispose() {
       cancelAnimationFrame(raf)
       ro.disconnect()
+      canvas.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      canvas.removeEventListener('wheel', onWheel)
+      canvas.removeEventListener('touchstart', onTouchStart)
+      canvas.removeEventListener('touchmove', onTouchMove)
+      canvas.removeEventListener('touchend', onTouchEnd)
       room?.dispose()
       scene.traverse((o) => {
         if (o.isMesh || o.isLineSegments) {
