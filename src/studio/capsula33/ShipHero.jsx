@@ -65,12 +65,14 @@ function notesFor(status) {
   return [
     {
       at: [1.85, -0.3, -5.4],
+      atPhone: [1.2, 0.5, -5.4],
       side: 'right',
       kicker: 'Módulo C33',
       text: 'Café de especialidad',
     },
     {
       at: [-1.55, -0.55, -6.4],
+      atPhone: [-1.1, -0.85, -6.4],
       side: 'left',
       kicker: 'En la pared del local',
       text: '«No somos lo que razonamos, somos lo que imaginamos.»',
@@ -78,6 +80,7 @@ function notesFor(status) {
     },
     {
       at: [1.6, 0.55, -7.4],
+      atPhone: [1.1, -0.6, -7.4],
       side: 'right',
       kicker: status.label,
       text: 'Av. Gral. Roca 1120',
@@ -123,8 +126,15 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         notes.forEach((n, i) => {
           const el = r.notes[i]
           if (!el) return
-          const q = scene.projectPoint(...n.at)
-          const s = Math.max(0.3, Math.min(2.4, (phone ? 1.7 : 2.4) / q.depth))
+          // En el teléfono van más juntas al centro y a alturas distintas: dos a la vez no se pisan.
+          const q = scene.projectPoint(...(phone ? n.atPhone : n.at))
+          // En el teléfono la nota no se achica hasta ser ilegible ni se sale de la pantalla.
+          const s = phone ? Math.max(0.82, Math.min(1.15, 1.7 / q.depth)) : Math.max(0.3, Math.min(2.4, 2.4 / q.depth))
+          if (phone) {
+            const w = el.offsetWidth * s
+            const W = window.innerWidth
+            q.x = n.side === 'left' ? Math.max(16, Math.min(W - 16 - w, q.x)) : Math.min(W - 16, Math.max(16 + w, q.x))
+          }
           const near = Math.max(0, Math.min(1, (q.depth - 0.9) / 0.9))
           const far = Math.max(0, Math.min(1, (3.6 - q.depth) / 0.8)) // de a una: aparece cuando se acerca
           el.style.opacity = q.depth > 0 ? String(near * far * (r.intro ?? 0)) : '0'
@@ -381,13 +391,13 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
               }}
             >
               <div
-                className={`flex flex-col gap-1.5 ${n.side === 'left' ? 'items-start text-left' : 'items-end text-right'}`}
-                style={{ width: n.quote ? 300 : 240 }}
+                className={`flex flex-col gap-1.5 max-sm:rounded-md max-sm:bg-[rgba(8,9,12,0.62)] max-sm:px-3 max-sm:py-2.5 max-sm:backdrop-blur-[6px] ${n.side === 'left' ? 'items-start text-left' : 'items-end text-right'}`}
+                style={{ width: n.quote ? 'min(300px, 72vw)' : 'min(240px, 62vw)' }}
               >
-                <span className="flex items-center gap-2 text-[9px] tracking-[0.22em] uppercase" style={{ ...MONO, color: C.neon }}>
-                  {n.side === 'left' ? <span className="h-px w-5" style={{ background: C.neon }} /> : null}
+                <span className="flex items-center gap-2 text-[11px] tracking-[0.16em] whitespace-nowrap uppercase sm:text-[9px] sm:tracking-[0.22em]" style={{ ...MONO, color: C.neon }}>
+                  {n.side === 'left' ? <span className="h-px w-5 max-sm:hidden" style={{ background: C.neon }} /> : null}
                   {n.kicker}
-                  {n.side === 'right' ? <span className="h-px w-5" style={{ background: C.neon }} /> : null}
+                  {n.side === 'right' ? <span className="h-px w-5 max-sm:hidden" style={{ background: C.neon }} /> : null}
                 </span>
                 <span
                   className={n.quote ? 'text-[17px] leading-[1.25] font-light italic' : 'text-[15px] leading-[1.2] tracking-[0.04em] uppercase'}
@@ -597,9 +607,10 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         {/* Adentro. */}
         <div
           ref={set('inCopy')}
-          className="pointer-events-none absolute inset-x-0 bottom-0 px-6 pb-10 opacity-0 md:px-10"
+          className="pointer-events-none absolute inset-x-0 bottom-0 px-6 pt-28 pb-10 opacity-0 md:px-10"
           style={{
-            background: 'linear-gradient(to top, rgba(5,6,10,0.85), transparent)',
+            // Funde la foto con el fondo de la sección siguiente: sin borde duro y con el texto legible.
+            background: 'linear-gradient(to top, #0b0c0f 0%, rgba(11,12,15,0.9) 45%, rgba(11,12,15,0.55) 72%, transparent)',
           }}
         >
           <p className="text-[11px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>

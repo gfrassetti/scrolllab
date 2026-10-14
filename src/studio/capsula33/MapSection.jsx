@@ -223,7 +223,9 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
             </span>
           </h2>
           <p data-fade className="mt-6 max-w-[34ch] text-[17px] leading-[1.5] opacity-0 lg:text-[19px]" style={{ ...BODY, color: 'rgba(242,233,220,0.78)' }}>
-            El jardín en su caja blanca, la colección en vitrinas, la barra naranja y el salón bajo las espirales de luz. Cada zona se enciende al pasar el puntero y se abre con su ficha.
+            El jardín en su caja blanca, la colección en vitrinas, la barra naranja y el salón bajo las espirales de luz.
+            {/* En el teléfono la instrucción ya va en la píldora de abajo. */}
+            {touch ? null : ' Cada zona se enciende al pasar el puntero y se abre con su ficha.'}
           </p>
           <div data-fade className="mt-8 hidden opacity-0 lg:block">
             <a

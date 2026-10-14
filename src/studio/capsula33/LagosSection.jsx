@@ -118,7 +118,7 @@ export default function LagosSection() {
         <svg
           viewBox={`0 0 ${MAP_W} ${MAP_H}`}
           preserveAspectRatio="xMidYMid meet"
-          className="absolute top-[19svh] left-3 h-[55svh] w-[calc(100%-1.5rem)] sm:top-[17svh] lg:top-[5svh] lg:left-[34vw] lg:h-[90svh] lg:w-[62vw]"
+          className="absolute top-[max(18svh,9.5rem)] left-3 h-[calc(100svh-max(18svh,9.5rem)-9.5rem)] w-[calc(100%-1.5rem)] sm:top-[17svh] sm:h-[55svh] lg:top-[5svh] lg:left-[34vw] lg:h-[90svh] lg:w-[62vw]"
           role="img"
           aria-label="Mapa «Base 7-Lagos»: la ruta de evacuación baja del lago Nahuel Huapi, pasa por los siete lagos y llega al lago Lácar y al domo C-33"
         >

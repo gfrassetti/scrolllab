@@ -5,7 +5,8 @@ import { C, MONO } from './brand'
 /**
  * cāpsula33 — la barra de scroll: un riel fino con una marca por sección.
  * El indicador sigue al scroll; tocar una marca lleva a esa sección. Reemplaza
- * a la barra del navegador mientras está la página.
+ * a la barra del navegador mientras está la página. En el teléfono no va: la línea
+ * cruzaba las fotos y el texto, y ahí el dedo ya sabe dónde está.
  */
 
 // Por ahora la página es una sola escena: el riel muestra solo el avance.
@@ -65,7 +66,7 @@ export default function ScrollRail({ visible }) {
       <style>{`html.c33-noscrollbar { scrollbar-width: none; } html.c33-noscrollbar::-webkit-scrollbar { display: none; }`}</style>
       <nav
         aria-label="Secciones"
-        className="fixed top-1/2 right-3 z-[80] h-[44svh] -translate-y-1/2 mix-blend-difference transition-opacity duration-700 md:right-5"
+        className="fixed top-1/2 right-3 z-[80] hidden h-[44svh] -translate-y-1/2 mix-blend-difference transition-opacity duration-700 sm:block md:right-5"
         style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? 'auto' : 'none' }}
       >
         <div className="relative h-full w-5">

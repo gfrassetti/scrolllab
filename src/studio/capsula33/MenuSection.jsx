@@ -188,12 +188,21 @@ export default function MenuSection() {
   useGSAP(
     () => {
       const r = R.current
+      // La pantalla se enciende apenas entra en vista (no recién cuando la sección se fija):
+      // en el teléfono quedaba una pantalla entera con el tablero apagado.
+      ScrollTrigger.create({
+        trigger: rootRef.current,
+        start: 'top 70%',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          r.progress = Math.max(0, Math.min(1, self.progress / 0.6))
+        },
+      })
       ScrollTrigger.create({
         trigger: rootRef.current,
         start: 'top top',
         end: 'bottom bottom',
         onUpdate: (self) => {
-          r.progress = Math.max(0, Math.min(1, self.progress / 0.72))
           // Los Elegidos: la tira corre con el scroll y el plato que pasa por el centro se enciende.
           const q = Math.max(0, Math.min(1, (self.progress - 0.3) / 0.7))
           const track = r.track

@@ -170,7 +170,7 @@ export default function Nav({ visible }) {
       <div
         id="c33-menu-panel"
         className="c33-panel fixed inset-0 z-30 flex flex-col justify-between px-6 pt-24 pb-8 md:hidden"
-        style={{ background: 'rgba(8,9,12,0.97)', opacity: open ? 1 : 0, visibility: open ? 'visible' : 'hidden', pointerEvents: open ? 'auto' : 'none' }}
+        style={{ background: '#08090c', opacity: open ? 1 : 0, visibility: open ? 'visible' : 'hidden', pointerEvents: open ? 'auto' : 'none' }}
         aria-hidden={!open}
       >
         <ul>

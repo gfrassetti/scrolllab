@@ -65,6 +65,7 @@ export default function LlegarSection() {
   const [loadMap, setLoadMap] = useState(false)
   const [focus, setFocus] = useState(null)
   // En vertical se ve solo una franja del plano: se corre para que el local quede en el centro.
+  const [touch] = useState(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches)
   const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && window.innerWidth / window.innerHeight < 0.9)
   useEffect(() => {
     const on = () => setNarrow(window.innerWidth / window.innerHeight < 0.9)
@@ -144,8 +145,9 @@ export default function LlegarSection() {
         r.card.style.pointerEvents = e > 0.98 ? 'auto' : 'none'
         r.plan.style.transform = `scale(${lerp(1.08, 1, e)})`
         // El texto grande se achica en un recuadro arriba a la izquierda.
-        const t = smooth(clamp01((p - 0.2) / 0.26))
-        r.big.style.opacity = String(1 - clamp01(t * 1.6))
+        // En el teléfono el plano crece desde abajo, encima del título: el título se va antes.
+        const t = smooth(clamp01((p - (wide ? 0.2 : 0.1)) / 0.26))
+        r.big.style.opacity = String(1 - clamp01(t * (wide ? 1.6 : 2.6)))
         r.big.style.transform = `translate3d(0, ${-t * 40}px, 0)`
         r.big.style.pointerEvents = t > 0.5 ? 'none' : 'auto'
         r.panel.style.opacity = String(clamp01((t - 0.55) / 0.45))
@@ -251,7 +253,8 @@ export default function LlegarSection() {
               <circle r="13" fill={C.orange} stroke={NAVY} strokeWidth="2" />
               <path d="M-6 3 A6 6 0 0 1 6 3 Z" fill={CREAM} />
             </g>
-            <g transform={`translate(${HQ[0] + 22} ${HQ[1] + 22})`}>
+            {/* En pantalla angosta el cartel va debajo del punto (al costado se cortaba). */}
+            <g transform={narrow ? `translate(${HQ[0] - 84} ${HQ[1] + 38})` : `translate(${HQ[0] + 22} ${HQ[1] + 22})`}>
               <rect width="168" height="44" rx="6" fill={NAVY} />
               <text x="12" y="19" fill={CREAM} fontFamily={mono} fontSize="13" fontWeight="600">cāpsula33</text>
               <text x="12" y="34" fill={CREAM} fillOpacity="0.75" fontFamily={mono} fontSize="10" letterSpacing="1">ROCA 1120 · C-33</text>
@@ -309,7 +312,7 @@ export default function LlegarSection() {
             ) : null}
           </div>
           <p ref={set('hint')} className="mt-3 text-[11px] leading-[1.5] opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}>
-            El plano esconde el mapa real: aparece al pasar el puntero y se abre entero con un clic.
+            {touch ? 'El plano esconde el mapa real: un toque lo abre entero.' : 'El plano esconde el mapa real: aparece al pasar el puntero y se abre entero con un clic.'}
           </p>
         </div>
 

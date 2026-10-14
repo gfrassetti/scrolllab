@@ -61,6 +61,10 @@ export const ZONES = [
 export const MAP_BG = '#0b0c0f'
 const ISO = new THREE.Vector3(-0.62, 0.92, 1).normalize() // de la esquina de la entrada, abierto al salón
 const TOP = new THREE.Vector3(0, 1, 0.0001)
+// En el teléfono (pantalla vertical) se mira más de frente a la fachada: el largo del local
+// corre hacia el fondo y el diorama llena el alto en vez de quedar como una tira angosta.
+const ISO_PHONE = new THREE.Vector3(-1.9, 1.35, 0.78).normalize()
+const isoFor = (w) => (w < 640 ? ISO_PHONE : ISO)
 // Topes del giro (absolutos): de la fachada de la entrada (-74°) a apenas pasado el frente; de
 // casi a ras del piso a casi desde arriba.
 const LIMIT = { az: [-1.85, 0.25], el: [0.2, 1.3], zoom: [1, 1.8] } // hasta ver la fachada de frente (−90°) y un poco más
@@ -175,7 +179,7 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     const rise = smooth(clamp01(state.rise))
     // De arriba (plano) a la esquina (isométrico). El tamaño se mide con esta vista base, así
     // el local no cambia de tamaño mientras la persona lo gira.
-    dir.copy(TOP).lerp(ISO, rise).normalize()
+    dir.copy(TOP).lerp(isoFor(w), rise).normalize()
     up.set(0, 0, -1).lerp(new THREE.Vector3(0, 1, 0), rise).normalize()
     camera.up.copy(up)
     aim(dir)
@@ -248,8 +252,9 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
   const press = { id: null, x: 0, y: 0, lx: 0, ly: 0, drag: false, touch: false, justDragged: false }
   const pinch = { on: false, d0: 0, z0: 1 }
   const clampT = () => {
-    const base = Math.atan2(ISO.x, ISO.z)
-    const baseEl = Math.asin(ISO.y)
+    const iso = isoFor(canvas.clientWidth)
+    const base = Math.atan2(iso.x, iso.z)
+    const baseEl = Math.asin(iso.y)
     state.tYaw = Math.min(LIMIT.az[1] - base, Math.max(LIMIT.az[0] - base, state.tYaw))
     state.tElev = Math.min(LIMIT.el[1] - baseEl, Math.max(LIMIT.el[0] - baseEl, state.tElev))
     state.tZoom = Math.min(LIMIT.zoom[1], Math.max(LIMIT.zoom[0], state.tZoom))
