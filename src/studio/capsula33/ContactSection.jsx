@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { gsap, useGSAP } from '../../lib/gsap'
-import { C, MONO, DISPLAY, BODY, HOURS, openStatus } from './brand'
+import { C, MONO, DISPLAY, BODY, HOURS, hourLabel } from './brand'
+import { useLang, useStatus } from './i18nCore'
 
 /**
  * cāpsula33 — «Contacto»: el cierre, a pantalla completa.
@@ -14,12 +15,12 @@ const MAPS = 'https://www.google.com/maps/search/?api=1&query=Gral.+Roca+1120,+S
 const INSTAGRAM = 'https://www.instagram.com/capsulas33/'
 const INK = '#0b0c0f'
 
-const fmt = (h) => `${h}:00`
-
 export default function ContactSection() {
   const rootRef = useRef(null)
   const wordRef = useRef(null)
-  const [status] = useState(() => openStatus())
+  const { lang, t } = useLang()
+  const status = useStatus()
+  const fmt = (h) => hourLabel(lang, h)
   const mon = HOURS.find((h) => h.day === 1)
   const tue = HOURS.find((h) => h.day === 2)
 
@@ -57,12 +58,12 @@ export default function ContactSection() {
       <div>
         <p data-in className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.22em] uppercase opacity-0" style={MONO}>
           <span className="h-px w-8" style={{ background: INK }} />
-          Contacto
+          {t('Contacto')}
         </p>
         <h2 className="mt-5 text-[clamp(2.4rem,7vw,7.4rem)] leading-[0.92] font-semibold uppercase" style={DISPLAY}>
           <span className="block overflow-hidden pb-[0.06em]">
             <span data-line className="block">
-              Estamos en
+              {t('Estamos en')}
             </span>
           </span>
           <span className="block overflow-hidden pb-[0.06em]">
@@ -75,7 +76,7 @@ export default function ContactSection() {
         <div className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
           <div data-in className="opacity-0">
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-60" style={MONO}>
-              Dirección
+              {t('Dirección')}
             </p>
             <p className="mt-2 text-[18px] leading-[1.35] font-medium" style={BODY}>
               Av. Gral. Roca 1120
@@ -85,19 +86,19 @@ export default function ContactSection() {
           </div>
           <div data-in className="opacity-0">
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-60" style={MONO}>
-              Horarios
+              {t('Horarios')}
             </p>
             <p className="mt-2 text-[18px] leading-[1.35] font-medium" style={BODY}>
-              Martes a sábado, {fmt(tue.open)} a {fmt(tue.close)}
+              {t('Martes a sábado, {a} a {b}', { a: fmt(tue.open), b: fmt(tue.close) })}
               <br />
-              Lunes, {fmt(mon.open)} a {fmt(mon.close)}
+              {t('Lunes, {a} a {b}', { a: fmt(mon.open), b: fmt(mon.close) })}
               <br />
-              Domingo, cerrado
+              {t('Domingo, cerrado')}
             </p>
           </div>
           <div data-in className="opacity-0">
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-60" style={MONO}>
-              Ahora
+              {t('Ahora')}
             </p>
             <p className="mt-2 flex items-center gap-2 text-[18px] leading-[1.35] font-medium" style={BODY}>
               <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ background: INK, opacity: status.open ? 1 : 0.35 }} />
@@ -112,7 +113,7 @@ export default function ContactSection() {
               className="c33-end-btn inline-flex h-12 items-center rounded-full px-6 text-[13px] font-semibold tracking-[0.18em] uppercase"
               style={{ ...DISPLAY, background: INK, color: C.cream }}
             >
-              Cómo llegar
+              {t('Cómo llegar')}
             </a>
             <a
               href={INSTAGRAM}
@@ -144,8 +145,8 @@ export default function ContactSection() {
           </span>
         </p>
         <p className="mt-4 flex flex-wrap justify-between gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase opacity-70" style={MONO}>
-          <span>Café de especialidad · San Martín de los Andes</span>
-          <span>Sitio de demostración · ScrollLab Estudio</span>
+          <span>{t('Café de especialidad · San Martín de los Andes')}</span>
+          <span>{t('Sitio de demostración · ScrollLab Estudio')}</span>
         </p>
       </footer>
       <style>{`

@@ -3,6 +3,7 @@ import { useGSAP, ScrollTrigger, gsap } from '../../lib/gsap'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { MAP_BG } from './mapScene'
 import { STREETS, M_PER_PX_Z16 } from './llegarStreets'
+import { useLang } from './i18nCore'
 
 /**
  * cāpsula33 — «Cómo llegar», fijada y a pantalla completa desde el principio.
@@ -77,6 +78,7 @@ const lerp = (a, b, t) => a + (b - a) * t
 const smooth = (t) => t * t * (3 - 2 * t)
 
 export default function LlegarSection() {
+  const { t } = useLang()
   const rootRef = useRef(null)
   const R = useRef({ routes: [], pins: [], cards: [], edges: [], labels: [] })
   const [revealed, setRevealed] = useState(false)
@@ -290,7 +292,7 @@ export default function LlegarSection() {
           ref={set('card')}
           role="button"
           tabIndex={revealed ? -1 : 0}
-          aria-label="Ver el mapa real del local"
+          aria-label={t('Ver el mapa real del local')}
           onPointerEnter={onEnter}
           onPointerMove={onMove}
           onPointerLeave={onLeave}
@@ -301,7 +303,7 @@ export default function LlegarSection() {
         >
           {loadMap ? (
             <iframe
-              title="Mapa de Google con la ubicación de cāpsula33"
+              title={t('Mapa de Google con la ubicación de cāpsula33')}
               src={EMBED}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -350,7 +352,7 @@ export default function LlegarSection() {
                   <path id={`c33-st-${i}`} d={l.d} fill="none" />
                   <text dy="-0.9em">
                     <textPath href={`#c33-st-${i}`} startOffset="50%" textAnchor="middle">
-                      {l.t}
+                      {t(l.t)}
                     </textPath>
                   </text>
                 </g>
@@ -375,7 +377,7 @@ export default function LlegarSection() {
                 <circle r="9" fill={CREAM} stroke={NAVY} strokeWidth="2" />
                 <circle r="3.5" fill={C.orange} />
                 <text x="-15" y="4" textAnchor="end" fill={NAVY} fontFamily={mono} fontSize="12" fontWeight="700" letterSpacing="1.2">
-                  LAGO LÁCAR
+                  {t('Lago Lácar').toUpperCase()}
                 </text>
               </g>
             </g>
@@ -432,7 +434,7 @@ export default function LlegarSection() {
                   ↑
                 </span>
                 <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={MONO}>
-                  {poi.name} · {poi.dist}
+                  {t(poi.name)} · {t(poi.dist)}
                 </span>
               </div>
             ),
@@ -449,7 +451,7 @@ export default function LlegarSection() {
               className="absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] whitespace-nowrap uppercase"
               style={{ ...MONO, background: NAVY, color: CREAM }}
             >
-              Clic para abrir
+              {t('Clic para abrir')}
             </span>
           </span>
         </div>
@@ -482,26 +484,26 @@ export default function LlegarSection() {
             style={{ ...MONO, color: 'rgba(242,233,220,0.7)' }}
           >
             <span className="h-px w-8" style={{ background: C.neon }} />
-            Cómo llegar · 40°09′15″ S · 71°20′51″ O
+            {t('Cómo llegar')} · {t('40°09′15″ S · 71°20′51″ O')}
           </p>
           <h2 className="mt-5 text-[clamp(3.2rem,12.5vw,13rem)] leading-[0.86] font-semibold tracking-[-0.03em] uppercase" style={DISPLAY}>
             <span className="block overflow-hidden pb-[0.04em]">
               <span data-line className="block">
-                Roca 1120,
+                {t('Roca 1120,')}
               </span>
             </span>
             <span className="block overflow-hidden pb-[0.04em]">
               <span data-line className="block" style={{ color: C.neon }}>
-                Sector SMA.
+                {t('Sector SMA.')}
               </span>
             </span>
           </h2>
           <div className="mt-6 flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
             <p data-fade className="max-w-[40ch] text-[16px] leading-[1.5] opacity-0 md:text-[18px]" style={{ ...BODY, color: 'rgba(242,233,220,0.82)' }}>
-              Sobre la avenida Roca, a metros de Sarmiento y a 1,2 km del Lácar. Martes a sábado de 9 a 21; lunes de 9 a 15.
+              {t('Sobre la avenida Roca, a metros de Sarmiento y a 1,2 km del Lácar. Martes a sábado de 9 a 21; lunes de 9 a 15.')}
             </p>
             <p data-fade className="text-[11px] tracking-[0.2em] uppercase opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}>
-              El plano, a escala ↓
+              {t('El plano, a escala ↓')}
             </p>
           </div>
         </div>
@@ -513,13 +515,13 @@ export default function LlegarSection() {
           style={{ background: 'rgba(11,12,15,0.86)', backdropFilter: 'blur(10px)', boxShadow: '0 18px 50px rgba(0,0,0,0.35)' }}
         >
           <p className="text-[10.5px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
-            Cómo llegar
+            {t('Cómo llegar')}
           </p>
           <p className="mt-1.5 text-[22px] leading-tight font-semibold uppercase" style={DISPLAY}>
-            Roca 1120, Sector SMA
+            {t('Roca 1120, Sector SMA')}
           </p>
           <p className="mt-1 text-[13px] leading-[1.5]" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
-            San Martín de los Andes · martes a sábado 9–21, lunes 9–15
+            {t('San Martín de los Andes · martes a sábado 9–21, lunes 9–15')}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <a
@@ -529,7 +531,7 @@ export default function LlegarSection() {
               className="c33-go inline-flex h-10 items-center rounded-full px-4 text-[12px] font-semibold tracking-[0.14em] uppercase"
               style={{ ...DISPLAY, background: C.cream, color: '#0b0c0f' }}
             >
-              Abrir en Google Maps
+              {t('Abrir en Google Maps')}
             </a>
             {revealed ? (
               <button
@@ -538,14 +540,14 @@ export default function LlegarSection() {
                 className="c33-back inline-flex h-10 items-center rounded-full border px-4 text-[12px] font-semibold tracking-[0.12em] uppercase"
                 style={{ ...MONO, borderColor: 'rgba(242,233,220,0.4)', color: C.cream }}
               >
-                Volver al plano
+                {t('Volver al plano')}
               </button>
             ) : null}
           </div>
           <p className="mt-3 text-[11px] leading-[1.5]" style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}>
             {touch
-              ? 'El plano está a escala del mapa real: un toque lo abre entero.'
-              : 'El plano está a escala del mapa real: la lente lo deja ver y un clic lo abre entero.'}
+              ? t('El plano está a escala del mapa real: un toque lo abre entero.')
+              : t('El plano está a escala del mapa real: la lente lo deja ver y un clic lo abre entero.')}
           </p>
         </div>
 
@@ -570,14 +572,14 @@ export default function LlegarSection() {
               <p className="flex items-center justify-between text-[10px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
                 <span>0{i + 1}</span>
                 <span style={{ color: 'rgba(242,233,220,0.6)' }}>
-                  {poi.dist} {poi.dir}
+                  {t(poi.dist)} {t(poi.dir)}
                 </span>
               </p>
               <p className="mt-1 text-[15px] font-semibold uppercase" style={DISPLAY}>
-                {poi.name}
+                {t(poi.name)}
               </p>
               <p className="mt-1 text-[12.5px] leading-[1.45]" style={{ ...BODY, color: 'rgba(242,233,220,0.72)' }}>
-                {poi.note}
+                {t(poi.note)}
               </p>
             </li>
           ))}

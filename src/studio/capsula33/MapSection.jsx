@@ -4,7 +4,8 @@ import { trackPointer } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
 import { createMapScene, MAP_BG, ZONES } from './mapScene'
 import { PRICES } from './roomModel'
-import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
+import { C, MONO, BODY, DISPLAY } from './brand'
+import { useLang, useStatus } from './i18nCore'
 
 /**
  * cāpsula33 — capítulo 2: el mapa vivo del local.
@@ -36,7 +37,8 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   const [labelsOn, setLabelsOn] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [moved, setMoved] = useState(false) // la persona giró o acercó: aparece «Vista inicial»
-  const [status] = useState(() => openStatus())
+  const { t } = useLang()
+  const status = useStatus()
   const [touch] = useState(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches)
 
   useLayoutEffect(() => {
@@ -203,29 +205,29 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
           </text>
         </svg>
         <canvas ref={set('canvas')} onClick={pickAt} className={`absolute inset-0 h-full w-full ${dragging ? 'cursor-grabbing' : hover ? 'cursor-pointer' : labelsOn ? 'cursor-grab' : ''}`}
-          style={{ touchAction: 'pan-y' }} role="img" aria-label="El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón" />
+          style={{ touchAction: 'pan-y' }} role="img" aria-label={t('El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón')} />
 
         {/* El texto, a la izquierda (arriba en teléfono). */}
         <div ref={set('copy')} className="pointer-events-none absolute inset-x-0 top-0 px-6 pt-[12svh] md:px-10 lg:top-1/2 lg:right-auto lg:w-[40vw] lg:-translate-y-1/2 lg:pt-0 lg:pl-[5vw]">
           <p data-fade className="text-[11px] tracking-[0.22em] uppercase opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
-            La planta, a escala
+            {t('La planta, a escala')}
           </p>
           <h2 className="mt-4 text-[clamp(2.6rem,5.6vw,6.2rem)] leading-[0.92] font-semibold tracking-[-0.02em] uppercase" style={DISPLAY}>
             <span className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
-                La cápsula,
+                {t('La cápsula,')}
               </span>
             </span>
             <span className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
-                pieza por pieza.
+                {t('pieza por pieza.')}
               </span>
             </span>
           </h2>
           <p data-fade className="mt-6 max-w-[34ch] text-[17px] leading-[1.5] opacity-0 lg:text-[19px]" style={{ ...BODY, color: 'rgba(242,233,220,0.78)' }}>
-            El jardín en su caja blanca, la colección en vitrinas, la barra naranja y el salón bajo las espirales de luz.
+            {t('El jardín en su caja blanca, la colección en vitrinas, la barra naranja y el salón bajo las espirales de luz.')}
             {/* En el teléfono la instrucción ya va en la píldora de abajo. */}
-            {touch ? null : ' Cada zona se enciende al pasar el puntero y se abre con su ficha.'}
+            {touch ? null : ` ${t('Cada zona se enciende al pasar el puntero y se abre con su ficha.')}`}
           </p>
           <div data-fade className="mt-8 hidden opacity-0 lg:block">
             <a
@@ -237,10 +239,10 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
               className="c33-map-cta pointer-events-auto inline-flex h-12 items-center rounded-md px-5 text-[15px] font-medium active:scale-[0.97]"
               style={{ ...BODY, background: C.cream, color: '#0b0c0f' }}
             >
-              Cómo llegar
+              {t('Cómo llegar')}
             </a>
             <p className="mt-3 text-[13px]" style={{ ...BODY, color: 'rgba(242,233,220,0.5)' }}>
-              Av. Gral. Roca 1120 · martes a sábado de 9 a 21, lunes de 9 a 15
+              {t('Av. Gral. Roca 1120 · martes a sábado de 9 a 21, lunes de 9 a 15')}
             </p>
           </div>
         </div>
@@ -267,7 +269,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                   className="rounded-[5px] border px-2.5 py-1.5 text-[10.5px] font-medium tracking-[0.16em] uppercase transition-colors duration-200"
                   style={{ ...MONO, background: on ? C.orange : 'rgba(11,12,15,0.88)', color: on ? '#0b0c0f' : C.cream, borderColor: on ? C.orange : 'rgba(228,96,29,0.7)', boxShadow: '0 6px 18px rgba(0,0,0,0.45)' }}
                 >
-                  {z.label}
+                  {t(z.label)}
                 </span>
                 <span aria-hidden="true" className="h-3 w-px" style={{ background: on ? C.orange : 'rgba(228,96,29,0.7)' }} />
               </button>
@@ -281,14 +283,14 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
             <div key={zone.id} className="c33-card pointer-events-auto w-[min(320px,86vw)] rounded-lg border p-5" style={{ background: 'rgba(14,15,19,0.96)', borderColor: 'rgba(242,233,220,0.14)', boxShadow: '0 24px 60px rgba(0,0,0,0.55)' }}>
               <div className="flex items-start justify-between gap-4">
                 <p className="text-[10.5px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
-                  {zone.kicker}
+                  {t(zone.kicker)}
                 </p>
-                <button type="button" onClick={() => setActive(null)} aria-label="Cerrar la ficha" className="tpl-hit -mt-1 -mr-1 grid h-7 w-7 place-items-center rounded-full text-[16px] leading-none transition-colors hover:bg-white/10" style={{ color: 'rgba(242,233,220,0.7)' }}>
+                <button type="button" onClick={() => setActive(null)} aria-label={t('Cerrar la ficha')} className="tpl-hit -mt-1 -mr-1 grid h-7 w-7 place-items-center rounded-full text-[16px] leading-none transition-colors hover:bg-white/10" style={{ color: 'rgba(242,233,220,0.7)' }}>
                   ×
                 </button>
               </div>
               <p className="mt-2 text-[22px] leading-tight font-semibold uppercase" style={DISPLAY}>
-                {zone.title}
+                {t(zone.title)}
               </p>
               {/* Una vista de la zona, sin texto de relleno. */}
               {zone.img ? (
@@ -298,7 +300,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                 // La pantalla LED de la barra: negra, de aeropuerto, texto blanco y naranja.
                 <div className="mt-4 rounded-md border-2 p-3.5" style={{ background: '#06070a', borderColor: '#23262d', boxShadow: 'inset 0 0 22px rgba(0,0,0,0.9)' }}>
                   <p className="flex items-center justify-between text-[13px] font-bold tracking-[0.2em] uppercase" style={{ ...MONO, color: '#fff' }}>
-                    Cafetería
+                    {t('Cafetería')}
                     <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ background: C.orange, boxShadow: `0 0 8px ${C.orange}` }} />
                   </p>
                   {[
@@ -307,7 +309,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                   ].map(([title, rows]) => (
                     <div key={title} className="mt-3">
                       <p className="mb-1 text-[10.5px] font-bold tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
-                        {title}
+                        {t(title)}
                       </p>
                       {rows.map(([name, price]) => (
                         <p key={name} className="flex items-baseline gap-2 text-[12.5px] leading-[1.75] uppercase" style={{ ...MONO, color: '#f4f4f1' }}>
@@ -330,13 +332,13 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         <div className="pointer-events-none absolute inset-x-0 bottom-6 flex flex-wrap items-center justify-center gap-2 px-6 transition-opacity duration-700" style={{ opacity: labelsOn ? 1 : 0 }}>
           <p className="flex items-center gap-2.5 rounded-full border px-4 py-2 text-[12px]" style={{ ...BODY, background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(242,233,220,0.12)', color: 'rgba(242,233,220,0.8)' }}>
             <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange, boxShadow: status.open ? '0 0 10px #7dffa8' : 'none' }} />
-            {status.label}. {touch ? 'El local gira deslizando de costado; cada zona se abre al tocar su etiqueta.' : 'El local gira al arrastrarlo y cada zona se abre al tocarla.'}
+            {status.label}. {touch ? t('El local gira deslizando de costado; cada zona se abre al tocar su etiqueta.') : t('El local gira al arrastrarlo y cada zona se abre al tocarla.')}
           </p>
           {/* Acercar y alejar (también Ctrl + rueda o el pellizco). */}
           <span className="pointer-events-auto flex overflow-hidden rounded-full border" style={{ background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(242,233,220,0.12)' }}>
             {[
-              ['−', 'Alejar el local', 1 / 1.25],
-              ['+', 'Acercar el local', 1.25],
+              ['−', t('Alejar el local'), 1 / 1.25],
+              ['+', t('Acercar el local'), 1.25],
             ].map(([sign, label, f]) => (
               <button
                 key={sign}
@@ -356,7 +358,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
             className="pointer-events-auto rounded-full border px-4 py-2 text-[12px] transition-[opacity,transform] duration-300 active:scale-[0.97]"
             style={{ ...BODY, background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(228,96,29,0.6)', color: C.cream, opacity: moved ? 1 : 0, transform: moved ? 'none' : 'translateY(6px)', pointerEvents: moved ? 'auto' : 'none' }}
           >
-            Vista inicial
+            {t('Vista inicial')}
           </button>
         </div>
       </div>

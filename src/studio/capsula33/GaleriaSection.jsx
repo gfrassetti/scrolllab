@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
+import { useLang } from './i18nCore'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { MAP_BG } from './mapScene'
 
@@ -31,6 +32,7 @@ const PANELS = [
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
 export default function GaleriaSection() {
+  const { t } = useLang()
   const rootRef = useRef(null)
   const R = useRef({ figs: [], imgs: [], nums: [], caps: [] })
   const cursorRef = useRef(null)
@@ -111,6 +113,8 @@ export default function GaleriaSection() {
           onUpdate: () => {
             const W = window.innerWidth
             r.figs.forEach((fig, i) => {
+              // (Al cambiar de idioma React suelta y vuelve a tomar los nodos: durante ese instante son null.)
+              if (!fig || !r.nums[i] || !r.imgs[i] || !r.caps[i]) return
               const b = fig.parentElement.getBoundingClientRect()
               // 0 cuando el borde de la foto asoma por la derecha; 1 cuando ya entró un tercio de pantalla
               // (así la última también termina de destaparse, pegada al borde).
@@ -137,6 +141,7 @@ export default function GaleriaSection() {
       })
       mm.add('(max-width: 1023px)', () => {
         r.figs.forEach((fig, i) => {
+          if (!fig || !r.caps[i] || !r.imgs[i]) return
           gsap.set(fig, { clipPath: 'inset(0 100% 0 0)' })
           gsap.set(r.caps[i], { opacity: 0, y: 18 })
           const tl = gsap.timeline({ scrollTrigger: { trigger: fig.parentElement, start: 'top 82%', once: true } })
@@ -146,13 +151,10 @@ export default function GaleriaSection() {
         })
       })
       // Estado inicial en PC (antes del primer scroll).
-      if (window.innerWidth >= 1024) r.figs.forEach((_, i) => paintPanel(i, 0))
-      return () => {
-        mm.revert()
-        split?.revert()
-      }
+      if (window.innerWidth >= 1024) r.figs.forEach((fig, i) => fig && r.imgs[i] && r.caps[i] && paintPanel(i, 0))
+      // El contexto de useGSAP deshace el matchMedia y el SplitText al volver a armar o al salir.
     },
-    { scope: rootRef, dependencies: [wide] },
+    { scope: rootRef, dependencies: [wide, t], revertOnUpdate: true },
   )
 
   // El cursor en círculo sobre las fotos (solo con mouse).
@@ -193,22 +195,23 @@ export default function GaleriaSection() {
               style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}
             >
               <span className="h-px w-8" style={{ background: C.neon }} />
-              Bitácora · 06
+              {t('Bitácora · 06')}
             </p>
             <h2
+              key={t('Seis vistas de')}
               data-title
-              aria-label="Seis vistas de la cápsula, de la puerta a la mesa."
+              aria-label={`${t('Seis vistas de')} ${t('la cápsula,')} ${t('de la puerta a la mesa.')}`}
               className="mt-4 text-[clamp(2.4rem,5.4vw,6rem)] leading-[0.94] font-semibold tracking-[-0.015em] uppercase"
               style={DISPLAY}
             >
-              Seis vistas de <span style={{ color: C.neon }}>la cápsula,</span> de la puerta a la mesa.
+              {t('Seis vistas de')} <span style={{ color: C.neon }}>{t('la cápsula,')}</span> {t('de la puerta a la mesa.')}
             </h2>
             <p
               data-rise
               className="mt-6 hidden max-w-[34ch] items-center gap-3 text-[13px] leading-[1.5] opacity-0 lg:flex"
               style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}
             >
-              Seguí bajando: las fotos corren de costado. Un clic las agranda.
+              {t('Seguí bajando: las fotos corren de costado. Un clic las agranda.')}
             </p>
           </div>
 
@@ -229,14 +232,14 @@ export default function GaleriaSection() {
                 onPointerEnter={onEnter}
                 onPointerMove={moveCursor}
                 onPointerLeave={onLeave}
-                aria-label={`Agrandar: ${p.title}`}
+                aria-label={`${t('Agrandar')}: ${t(p.title)}`}
                 className="c33-fig relative z-10 block w-full cursor-none overflow-hidden rounded-[3px] text-left lg:cursor-none"
               >
                 <span ref={set('figs', i)} className="block overflow-hidden rounded-[3px]" style={{ clipPath: wide ? 'inset(0 100% 0 0)' : undefined }}>
                   <img
                     ref={set('imgs', i)}
                     src={p.img}
-                    alt={p.caption}
+                    alt={t(p.caption)}
                     loading="lazy"
                     decoding="async"
                     onLoad={() => ScrollTrigger.refresh()}
@@ -253,10 +256,10 @@ export default function GaleriaSection() {
                 </span>
                 <span>
                   <span className="block text-[clamp(1.1rem,1.7vw,1.5rem)] leading-tight font-semibold uppercase" style={DISPLAY}>
-                    {p.title}
+                    {t(p.title)}
                   </span>
                   <span className="mt-1 block max-w-[34ch] text-[14px] leading-[1.45]" style={{ ...BODY, color: 'rgba(242,233,220,0.7)' }}>
-                    {p.caption}
+                    {t(p.caption)}
                   </span>
                 </span>
               </figcaption>
@@ -276,14 +279,14 @@ export default function GaleriaSection() {
                 className="c33-cursor pointer-events-none fixed top-0 left-0 z-[60] grid h-[84px] w-[84px] place-items-center rounded-full text-[12px] font-semibold tracking-[0.16em] uppercase mix-blend-normal"
                 style={{ ...MONO, background: C.neon, color: '#0b0c0f' }}
               >
-                Ver
+                {t('Ver')}
               </div>
 
               {/* La foto, a pantalla completa. */}
               <div
                 role="dialog"
                 aria-modal="true"
-                aria-label={panel ? panel.title : 'Foto'}
+                aria-label={panel ? t(panel.title) : t('Foto')}
                 aria-hidden={!panel}
                 className="fixed inset-0 z-[90] flex flex-col items-center justify-center p-5 md:p-10"
                 style={{
@@ -299,24 +302,24 @@ export default function GaleriaSection() {
               >
                 {panel ? (
                   <>
-                    <img key={panel.img} src={panel.img} alt={panel.caption} className="c33-light max-h-[76svh] max-w-full rounded-[3px] object-contain" />
+                    <img key={panel.img} src={panel.img} alt={t(panel.caption)} className="c33-light max-h-[76svh] max-w-full rounded-[3px] object-contain" />
                     <div className="mt-5 flex w-full max-w-[44rem] items-end justify-between gap-6">
                       <div>
                         <p className="text-[11px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
                           {panel.index} / 06
                         </p>
                         <p className="mt-1 text-[clamp(1.3rem,2.4vw,2rem)] leading-tight font-semibold uppercase" style={DISPLAY}>
-                          {panel.title}
+                          {t(panel.title)}
                         </p>
                         <p className="mt-1 text-[15px] leading-[1.45]" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
-                          {panel.caption}
+                          {t(panel.caption)}
                         </p>
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <button
                           type="button"
                           onClick={() => setOpen((i) => (i - 1 + PANELS.length) % PANELS.length)}
-                          aria-label="Foto anterior"
+                          aria-label={t('Foto anterior')}
                           className="c33-lbtn tpl-hit grid h-11 w-11 place-items-center rounded-full border text-[18px]"
                           style={{ borderColor: 'rgba(242,233,220,0.3)' }}
                         >
@@ -325,7 +328,7 @@ export default function GaleriaSection() {
                         <button
                           type="button"
                           onClick={() => setOpen((i) => (i + 1) % PANELS.length)}
-                          aria-label="Foto siguiente"
+                          aria-label={t('Foto siguiente')}
                           className="c33-lbtn tpl-hit grid h-11 w-11 place-items-center rounded-full border text-[18px]"
                           style={{ borderColor: 'rgba(242,233,220,0.3)' }}
                         >
@@ -339,7 +342,7 @@ export default function GaleriaSection() {
                   ref={closeRef}
                   type="button"
                   onClick={() => setOpen(-1)}
-                  aria-label="Cerrar"
+                  aria-label={t('Cerrar')}
                   className="c33-lbtn tpl-hit absolute top-4 right-4 grid h-11 w-11 place-items-center rounded-full border text-[18px] md:top-6 md:right-6"
                   style={{ borderColor: 'rgba(242,233,220,0.3)' }}
                 >

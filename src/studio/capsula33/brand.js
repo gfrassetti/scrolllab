@@ -33,23 +33,48 @@ export const HOURS = [
   { day: 6, open: 9, close: 21 },
 ]
 
-const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+const DAYS = {
+  es: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  pt: ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'],
+}
+
+/** Cómo se dice la hora en cada idioma (9 → «9:00»; en inglés, «9 AM»). */
+export function hourLabel(lang, h) {
+  if (lang !== 'en') return `${h}:00`
+  return `${h > 12 ? h - 12 : h} ${h >= 12 ? 'PM' : 'AM'}`
+}
 
 /** Abierto ahora (hora de San Martín de los Andes, UTC−3), y si no, cuándo abre. */
-export function openStatus(now = new Date()) {
+export function openStatus(now = new Date(), lang = 'es') {
+  const L = DAYS[lang] ? lang : 'es'
   const local = new Date(now.getTime() + now.getTimezoneOffset() * 60_000 - 3 * 3_600_000)
   const day = local.getDay()
   const hour = local.getHours() + local.getMinutes() / 60
   const today = HOURS.find((h) => h.day === day)
   if (today && hour >= today.open && hour < today.close) {
-    return { open: true, label: `Abierto · hasta las ${today.close}:00` }
+    const close = hourLabel(L, today.close)
+    const label = { es: `Abierto · hasta las ${close}`, en: `Open · until ${close}`, pt: `Aberto · até as ${close}` }[L]
+    return { open: true, label }
   }
   for (let i = 0; i < 8; i += 1) {
     const d = (day + i) % 7
     const h = HOURS.find((x) => x.day === d)
     if (!h) continue
     if (i === 0 && hour >= h.open) continue
-    return { open: false, label: `Cerrado · abre ${i === 0 ? 'hoy' : i === 1 ? 'mañana' : `el ${DAYS[d]}`} a las ${h.open}:00` }
+    const at = hourLabel(L, h.open)
+    const dayName = DAYS[L][d]
+    const when = {
+      es: i === 0 ? 'hoy' : i === 1 ? 'mañana' : `el ${dayName}`,
+      en: i === 0 ? 'today' : i === 1 ? 'tomorrow' : `on ${dayName}`,
+      pt: i === 0 ? 'hoje' : i === 1 ? 'amanhã' : `${d === 0 || d === 6 ? 'no' : 'na'} ${dayName}`,
+    }[L]
+    const label = {
+      es: `Cerrado · abre ${when} a las ${at}`,
+      en: `Closed · opens ${when} at ${at}`,
+      pt: `Fechado · abre ${when} às ${at}`,
+    }[L]
+    return { open: false, label }
   }
-  return { open: false, label: 'Cerrado' }
+  return { open: false, label: { es: 'Cerrado', en: 'Closed', pt: 'Fechado' }[L] }
 }

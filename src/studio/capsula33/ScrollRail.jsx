@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getLenis } from '../../hooks/useLenis'
 import { C, MONO } from './brand'
+import { useLang } from './i18nCore'
 
 /**
  * cāpsula33 — la barra de scroll: un riel fino con una marca por sección.
@@ -13,6 +14,7 @@ import { C, MONO } from './brand'
 const MARKS = []
 
 export default function ScrollRail({ visible }) {
+  const { t } = useLang()
   const thumbRef = useRef(null)
   const [tops, setTops] = useState(() => MARKS.map((_, i) => i / (MARKS.length - 1)))
   const [active, setActive] = useState(0)
@@ -65,7 +67,7 @@ export default function ScrollRail({ visible }) {
     <>
       <style>{`html.c33-noscrollbar { scrollbar-width: none; } html.c33-noscrollbar::-webkit-scrollbar { display: none; }`}</style>
       <nav
-        aria-label="Secciones"
+        aria-label={t('Secciones')}
         className="fixed top-1/2 right-3 z-[80] hidden h-[44svh] -translate-y-1/2 mix-blend-difference transition-opacity duration-700 sm:block md:right-5"
         style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? 'auto' : 'none' }}
       >

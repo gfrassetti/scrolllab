@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
 import { createCorridorScene } from './corridorScene'
 import { BOOT_STEPS } from './bootSequence'
-import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
+import { C, MONO, BODY, DISPLAY } from './brand'
+import { useLang, useStatus } from './i18nCore'
 
 /**
  * cāpsula33 — Hero: el café es un módulo de la nave.
@@ -53,9 +54,9 @@ function sources() {
 // (como el manifiesto de APEX o los capítulos de CHAPTERS). `*` marca el tramo en naranja.
 // La frase de la pared del local, junto al ojo de buey (texto real del dueño).
 const HEADLINE = 'No somos lo que razonamos, *somos lo que imaginamos.*'
-const HEADLINE_WORDS = (() => {
+const wordsOf = (headline) => {
   let accent = false
-  return HEADLINE.split(' ').map((raw) => {
+  return headline.split(' ').map((raw) => {
     const starts = raw.startsWith('*')
     const ends = raw.replace(/[,.:]$/, '').endsWith('*')
     if (starts) accent = true
@@ -63,24 +64,24 @@ const HEADLINE_WORDS = (() => {
     if (ends) accent = false
     return word
   })
-})()
+}
 
 /** Notas suspendidas en el pasillo (coordenadas del túnel: x a los lados, y arriba, z hacia la puerta). */
-function notesFor(status) {
+function notesFor(status, t) {
   return [
     {
       at: [1.85, -0.3, -5.4],
       atPhone: [1.2, 0.5, -5.4],
       side: 'right',
-      kicker: 'Módulo C33',
-      text: 'Café de especialidad',
+      kicker: t('Módulo C33'),
+      text: t('Café de especialidad'),
     },
     {
       at: [-1.55, -0.55, -6.4],
       atPhone: [-1.1, -0.85, -6.4],
       side: 'left',
-      kicker: 'La colección',
-      text: 'Figuras de cine y series',
+      kicker: t('La colección'),
+      text: t('Figuras de cine y series'),
     },
     {
       at: [1.6, 0.55, -7.4],
@@ -98,8 +99,12 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
   const [hover, setHover] = useState(null)
   const [talk, setTalk] = useState(false)
   const [typed, setTyped] = useState(0)
-  const [status] = useState(() => openStatus())
-  const [notes] = useState(() => notesFor(status))
+  const { t } = useLang()
+  const status = useStatus()
+  // Los textos que dependen del idioma (las posiciones de las notas no: son las mismas).
+  const notes = useMemo(() => notesFor(status, t), [status, t])
+  const line = t(LINE)
+  const headlineWords = useMemo(() => wordsOf(t(HEADLINE)), [t])
   const scroll = useRef({ p: 0 })
   // Párpados (los refs los llena el marcado) y las marcas del scroll donde parpadea.
   if (!R.current.lids) R.current.lids = []
@@ -378,10 +383,15 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
 
   // La frase se escribe letra por letra la primera vez que aparece.
   useEffect(() => {
-    if (!talk || typed >= LINE.length) return undefined
-    const id = setInterval(() => setTyped((n) => Math.min(LINE.length, n + 1)), 24)
+    if (!talk || typed >= line.length) return undefined
+    const id = setInterval(() => setTyped((n) => Math.min(line.length, n + 1)), 24)
     return () => clearInterval(id)
-  }, [talk, typed])
+  }, [talk, typed, line])
+
+  // El titular cambia de palabras con el idioma: el recorrido las vuelve a juntar.
+  useEffect(() => {
+    R.current.hw = null
+  }, [headlineWords])
 
   const set = (k) => (el) => (R.current[k] = el)
 
@@ -392,14 +402,16 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           ref={set('canvas')}
           className="absolute inset-0 h-full w-full opacity-0"
           role="img"
-          aria-label="Un pasillo de nave espacial gris con luces blancas; al fondo, empotrada en la pared, la entrada naranja de cāpsula33 con su cartel de luz flotando, un ojo de buey, la puerta con dos ventanas en pastilla y un ventanal con listones"
+          aria-label={t(
+            'Un pasillo de nave espacial gris con luces blancas; al fondo, empotrada en la pared, la entrada naranja de cāpsula33 con su cartel de luz flotando, un ojo de buey, la puerta con dos ventanas en pastilla y un ventanal con listones',
+          )}
         />
 
         {/* Notas suspendidas en el pasillo. */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           {notes.map((n, i) => (
             <div
-              key={n.text}
+              key={i}
               ref={(el) => (R.current.notes[i] = el)}
               className="absolute top-0 left-0 opacity-0 will-change-transform"
               style={{
@@ -444,11 +456,11 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           <div ref={set('ledeIn')} className="relative opacity-0">
             <p className="flex items-center gap-2 text-[10px] tracking-[0.22em] uppercase" style={{ ...MONO, color: C.neon }}>
               <span className="h-px w-6" style={{ background: C.neon }} />
-              40°09′S · 71°21′O
+              {t('40°09′S · 71°21′O')}
             </p>
             {/* El título de la página (lo que se busca): qué es y dónde. La frase grande es la marca. */}
             <h1 className="mt-1.5 text-[12px] font-normal tracking-[0.18em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.8)' }}>
-              Café de especialidad en San Martín de los Andes
+              {t('Café de especialidad en San Martín de los Andes')}
             </h1>
             <p
               ref={set('headline')}
@@ -460,7 +472,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                 textShadow: '0 2px 30px rgba(3,4,8,0.9)',
               }}
             >
-              {HEADLINE_WORDS.map((w, wi) => (
+              {headlineWords.map((w, wi) => (
                 <span
                   key={wi}
                   data-hw
@@ -472,7 +484,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                   }
                 >
                   {w.text}
-                  {wi < HEADLINE_WORDS.length - 1 ? ' ' : ''}
+                  {wi < headlineWords.length - 1 ? ' ' : ''}
                 </span>
               ))}
             </p>
@@ -501,10 +513,10 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                 }}
               >
                 <p className="text-[10px] tracking-[0.22em] uppercase" style={{ ...MONO, color: C.neon }}>
-                  Tripulante · C33
+                  {t('Tripulante · C33')}
                 </p>
                 <p className="mt-1.5 min-h-[3em] text-[15px] leading-[1.45]" style={{ ...BODY, color: C.cream }}>
-                  {LINE.slice(0, typed)}
+                  {line.slice(0, typed)}
                   <span aria-hidden="true" className="c33-caret ml-0.5 inline-block h-[0.9em] w-[0.45em] translate-y-[0.12em]" style={{ background: C.neon }} />
                 </p>
                 {/* La colita, hacia ella: abajo en el teléfono, a la derecha en pantallas anchas. */}
@@ -523,7 +535,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                 src="/studio/capsula33/girl-1360.webp"
                 srcSet="/studio/capsula33/girl-760.webp 760w, /studio/capsula33/girl-1360.webp 1360w"
                 sizes="(max-width: 640px) 40vw, 30vw"
-                alt="Una tripulante de pelo rosa, con casco transparente y auriculares, toma café con las dos manos"
+                alt={t('Una tripulante de pelo rosa, con casco transparente y auriculares, toma café con las dos manos')}
                 className="h-full w-auto max-w-none"
                 style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.55))' }}
               />
@@ -624,14 +636,14 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         <div ref={set('bootHud')} aria-hidden="true" className="pointer-events-none absolute bottom-[12svh] left-6 opacity-0 md:left-10 lg:bottom-[14svh]">
           <p className="mb-3 flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
             <span className="h-px w-6" style={{ background: C.neon }} />
-            Secuencia de encendido
+            {t('Secuencia de encendido')}
           </p>
           <ul className="space-y-1.5">
             {BOOT_STEPS.map(([id, , , label, value], i) => (
               <li key={id} ref={(el) => (R.current.bootLines[i] = el)} data-st="off" className="c33-boot flex items-center gap-3 text-[11px] tracking-[0.18em] uppercase md:text-[12px]" style={MONO}>
                 <span className="c33-boot-dot h-1.5 w-1.5 rounded-full" />
-                <span className="c33-boot-label">{label}</span>
-                <span className="c33-boot-val">{value}</span>
+                <span className="c33-boot-label">{t(label)}</span>
+                <span className="c33-boot-val">{t(value)}</span>
               </li>
             ))}
           </ul>
@@ -647,10 +659,10 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
           }}
         >
           <p className="text-[11px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
-            Bienvenidos, exploradores de universos
+            {t('Bienvenidos, exploradores de universos')}
           </p>
           <p className="mt-3 max-w-[40ch] text-[16px] leading-[1.55]" style={{ ...BODY, color: 'rgba(242,233,220,0.85)' }}>
-            Café de especialidad, laminados de todos los días y figuras de colección en vitrinas, en el centro de San Martín de los Andes.
+            {t('Café de especialidad, laminados de todos los días y figuras de colección en vitrinas, en el centro de San Martín de los Andes.')}
           </p>
         </div>
       </div>

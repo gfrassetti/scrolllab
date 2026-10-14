@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger, SplitText } from '../../lib/gsap'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { MAP_BG } from './mapScene'
-import { HOLO_SVG, MAP_W, MAP_H, ROUTE_D, STOPS, RESTRICTED_D } from './lagosMapSvg'
+import { holoSvgFor, MAP_W, MAP_H, ROUTE_D, STOPS, RESTRICTED_D } from './lagosMapSvg'
+import { useLang } from './i18nCore'
 
 /**
  * cāpsula33 — «La ruta»: el mapa «Base 7-Lagos» que el local tiene en la mesa,
@@ -23,6 +24,7 @@ const NEON = '#ff8a1f'
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
 export default function LagosSection() {
+  const { lang, t } = useLang()
   const rootRef = useRef(null)
   const R = useRef({ lakes: [], times: [], caps: [], steps: [] })
   const [active, setActive] = useState(-1)
@@ -143,7 +145,8 @@ export default function LagosSection() {
         onRefresh: (self) => paint(self.progress),
       })
     },
-    { scope: rootRef },
+    // Al cambiar de idioma el titular y la bajada se arman de nuevo.
+    { scope: rootRef, dependencies: [t], revertOnUpdate: true },
   )
 
   const set = (k) => (el) => (R.current[k] = el)
@@ -200,14 +203,14 @@ export default function LagosSection() {
               className="absolute inset-0 h-full w-full"
               style={{ filter: 'drop-shadow(0 0 3px rgba(95,230,255,0.55))' }}
             >
-              <g ref={set('map')} dangerouslySetInnerHTML={{ __html: HOLO_SVG }} />
+              <g ref={set('map')} dangerouslySetInnerHTML={{ __html: holoSvgFor(lang) }} />
             </svg>
             <svg
               viewBox={`0 0 ${MAP_W} ${MAP_H}`}
               preserveAspectRatio="xMidYMid meet"
               className="absolute inset-0 h-full w-full"
               role="img"
-              aria-label="Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi"
+              aria-label={t('Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi')}
             >
               <defs>
                 <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -315,7 +318,7 @@ export default function LagosSection() {
               className="absolute -top-6 left-0 hidden text-[10px] tracking-[0.24em] uppercase sm:block"
               style={{ ...MONO, color: 'rgba(127,240,255,0.75)' }}
             >
-              Holo · C-33 / Navegación
+              {t('Holo · C-33 / Navegación')}
             </p>
           </div>
         </div>
@@ -328,17 +331,17 @@ export default function LagosSection() {
             style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}
           >
             <span className="h-px w-8" style={{ background: C.neon }} />
-            La ruta
+            {t('La ruta')}
           </p>
           <h2
             data-h="title"
-            aria-label="Base 7-Lagos."
+            aria-label={`${t('Base')} 7-Lagos.`}
             className="mt-3 flex flex-col text-[clamp(2.1rem,4.8vw,5rem)] leading-[0.95] font-semibold uppercase max-sm:flex-row max-sm:gap-x-[0.3em]"
             style={DISPLAY}
           >
             <span aria-hidden="true" className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
-                Base
+                {t('Base')}
               </span>
             </span>
             <span aria-hidden="true" className="block overflow-hidden pb-[0.06em] whitespace-nowrap" style={{ color: C.neon }}>
@@ -348,12 +351,12 @@ export default function LagosSection() {
             </span>
           </h2>
           <p
+            key={lang}
             data-h="lede"
             className="mt-4 hidden max-w-[36ch] text-[16px] leading-[1.5] opacity-0 lg:block"
             style={{ ...BODY, color: 'rgba(242,233,220,0.74)' }}
           >
-            El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, de la puerta del domo en el Lácar al lago
-            mayor.
+            {t('El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, de la puerta del domo en el Lácar al lago mayor.')}
           </p>
         </div>
 
@@ -373,32 +376,32 @@ export default function LagosSection() {
                 style={{ opacity: 0, visibility: 'hidden' }}
               >
                 <p className="text-[11px] tracking-[0.22em] uppercase tabular-nums" style={{ ...MONO, color: C.neon }}>
-                  {num === 'Bonus' ? 'Bonus · el lago mayor' : `Escala ${num} / 07`}
+                  {num === 'Bonus' ? t('Bonus · el lago mayor') : t('Escala {n} / 07', { n: num })}
                 </p>
                 <p className="mt-1.5 text-[clamp(1.9rem,3.4vw,3.8rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
-                  {name}
+                  {t(name)}
                 </p>
                 <p className="mt-3 max-w-[40ch] text-[15px] leading-[1.5] lg:text-[17px]" style={{ ...BODY, color: 'rgba(242,233,220,0.84)' }}>
-                  {text}
+                  {t(text)}
                 </p>
               </div>
             ))}
           </div>
-          <ol className="mt-5 flex items-end gap-1.5" aria-label="Ruta de evacuación">
+          <ol className="mt-5 flex items-end gap-1.5" aria-label={t('Ruta de evacuación')}>
             {STOPS.map(([name], i) => (
               <li
                 key={name}
-                title={name}
+                title={t(name)}
                 className="h-1 flex-1 origin-bottom rounded-full transition-[background-color,transform] duration-500"
                 ref={(el) => (R.current.steps[i] = el)}
                 style={{ background: 'rgba(242,233,220,0.18)' }}
               >
-                <span className="sr-only">{name}</span>
+                <span className="sr-only">{t(name)}</span>
               </li>
             ))}
           </ol>
           <p className="sr-only" aria-live="polite">
-            {cur ? `${cur[0]}: ${cur[3]}` : ''}
+            {cur ? `${t(cur[0])}: ${t(cur[3])}` : ''}
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
+import { useLang } from './i18nCore'
 import { C, MONO, DISPLAY, BODY } from './brand'
 
 /**
@@ -157,6 +158,7 @@ function layoutFor(W, H) {
 
 export default function CartaSection() {
   const rootRef = useRef(null)
+  const { t } = useLang()
   const R = useRef({ sys: [], items: {}, lines: {}, dots: {}, nav: [] })
   const [dims, setDims] = useState(() => (typeof window === 'undefined' ? { W: 1440, H: 900 } : { W: window.innerWidth, H: window.innerHeight }))
   const L = useMemo(() => layoutFor(dims.W, dims.H), [dims])
@@ -234,11 +236,12 @@ export default function CartaSection() {
         if (cur !== active) {
           active = cur
           r.nav.forEach((el, i) => el && (el.dataset.on = i === cur ? '1' : i < cur ? 'done' : '0'))
-          r.sector.textContent = cur < 0 ? 'Carta take-away · 6 rubros' : `Rubro 0${cur + 1} / 0${N} · ${CATEGORIES[cur].title}`
+          r.sector.textContent =
+            cur < 0 ? t('Carta take-away · 6 rubros') : t('Rubro {n} / 0{N} · {title}', { n: `0${cur + 1}`, N, title: t(CATEGORIES[cur].title) })
           r.coord.textContent =
             cur < 0
-              ? 'S 40°09′15″ · O 71°20′51″'
-              : `Rumbo ${String(20 + cur * 47).padStart(3, '0')}° · ${CATEGORIES[cur].rows.filter((x) => x[0] !== 'tag').length} productos`
+              ? t('S 40°09′15″ · O 71°20′51″')
+              : t('Rumbo {deg}° · {n} productos', { deg: String(20 + cur * 47).padStart(3, '0'), n: CATEGORIES[cur].rows.filter((x) => x[0] !== 'tag').length })
         }
         const out = clamp01((p - INTRO * 0.5) / (INTRO * 0.45))
         r.intro.style.opacity = String(1 - out)
@@ -259,7 +262,7 @@ export default function CartaSection() {
         { autoAlpha: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: rootRef.current, start: 'top 60%', once: true } },
       )
     },
-    { scope: rootRef, dependencies: [L], revertOnUpdate: true },
+    { scope: rootRef, dependencies: [L, t], revertOnUpdate: true },
   )
 
   const goTo = (i) => {
@@ -397,13 +400,13 @@ export default function CartaSection() {
                   }}
                 >
                   <p className="text-[11px] tracking-[0.24em] uppercase" style={{ ...MONO, color: C.neon }}>
-                    Rubro 0{i + 1}
+                    {t('Rubro')} 0{i + 1}
                   </p>
                   <h3 className="mt-1 text-[clamp(1.6rem,3.2vw,3rem)] leading-[0.95] font-semibold uppercase" style={DISPLAY}>
-                    {cat.title}
+                    {t(cat.title)}
                   </h3>
                   <p className="mt-1 text-[14px]" style={{ ...BODY, color: 'rgba(242,233,220,0.65)' }}>
-                    {cat.blurb}
+                    {t(cat.blurb)}
                   </p>
                 </div>
                 {/* Los productos. */}
@@ -422,7 +425,7 @@ export default function CartaSection() {
                           className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.18em] uppercase"
                           style={{ ...MONO, background: 'rgba(127,212,255,0.16)', color: '#a9d6ff' }}
                         >
-                          {price}
+                          {t(price)}
                         </span>
                       ) : (
                         <>
@@ -434,7 +437,7 @@ export default function CartaSection() {
                           <span className="min-w-0 flex-1">
                             <span className="flex items-baseline gap-2">
                               <span className="text-[15px] leading-tight font-medium lg:text-[16px]" style={BODY}>
-                                {name}
+                                {t(name)}
                                 {vg ? (
                                   <span
                                     className="ml-1.5 rounded-[2px] border px-1 align-middle text-[9px] font-bold"
@@ -457,7 +460,7 @@ export default function CartaSection() {
                             </span>
                             {desc && L.wide ? (
                               <span className="mt-0.5 block text-[12.5px] leading-[1.35]" style={{ ...BODY, color: 'rgba(242,233,220,0.55)' }}>
-                                {desc}
+                                {t(desc)}
                               </span>
                             ) : null}
                           </span>
@@ -494,29 +497,29 @@ export default function CartaSection() {
         <div className="pointer-events-none absolute inset-x-0 top-20 flex items-center justify-between gap-6 px-6 md:top-8 md:px-14 lg:top-10">
           <p className="hidden items-center gap-3 text-[11px] tracking-[0.22em] uppercase md:flex" style={{ ...MONO, color: 'rgba(242,233,220,0.7)' }}>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.neon, boxShadow: `0 0 8px ${C.neon}` }} />
-            <span ref={set('sector')}>Carta take-away · 6 rubros</span>
+            <span ref={set('sector')}>{t('Carta take-away · 6 rubros')}</span>
           </p>
           <p ref={set('coord')} className="hidden text-[11px] tracking-[0.2em] uppercase md:block" style={{ ...MONO, color: 'rgba(169,214,255,0.7)' }}>
-            S 40°09′15″ · O 71°20′51″
+            {t('S 40°09′15″ · O 71°20′51″')}
           </p>
         </div>
 
         {/* La entrada: el título sobre el mapa entero. */}
         <div ref={set('intro')} className="pointer-events-none absolute inset-x-0 bottom-[16svh] px-6 md:px-14">
           <p data-in className="text-[11px] tracking-[0.24em] uppercase opacity-0" style={{ ...MONO, color: C.neon }}>
-            Experiencia Capsula · take-away
+            {t('Experiencia Capsula · take-away')}
           </p>
           <h2 data-in className="mt-3 text-[clamp(2.6rem,8vw,8.5rem)] leading-[0.88] font-semibold tracking-[-0.02em] uppercase opacity-0" style={DISPLAY}>
-            La carta,
+            {t('La carta,')}
             <br />
-            <span style={{ color: C.neon }}>en órbita.</span>
+            <span style={{ color: C.neon }}>{t('en órbita.')}</span>
           </h2>
           <p data-in className="mt-4 max-w-[40ch] text-[16px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
-            La carta take-away, rubro por rubro: cafetería, smoothies, laminados y pastelería, cervezas, platos intensos y helados soft, con los precios de hoy.
+            {t('La carta take-away, rubro por rubro: cafetería, smoothies, laminados y pastelería, cervezas, platos intensos y helados soft, con los precios de hoy.')}
           </p>
         </div>
 
-        <nav aria-label="Rubros de la carta" className="absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-8">
+        <nav aria-label={t('Rubros de la carta')} className="absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-8">
           <ol
             className="flex max-w-full gap-1 overflow-x-auto rounded-full border p-1 md:gap-1.5"
             style={{ borderColor: 'rgba(127,212,255,0.25)', background: 'rgba(4,5,10,0.7)', backdropFilter: 'blur(8px)', scrollbarWidth: 'none' }}
@@ -532,7 +535,7 @@ export default function CartaSection() {
                   style={MONO}
                 >
                   <span className="tabular-nums opacity-60">0{i + 1}</span>
-                  <span className="hidden sm:inline">{c.title}</span>
+                  <span className="hidden sm:inline">{t(c.title)}</span>
                 </button>
               </li>
             ))}

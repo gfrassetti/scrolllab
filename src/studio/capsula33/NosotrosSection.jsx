@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { C, MONO, DISPLAY } from './brand'
 import { MAP_BG } from './mapScene'
+import { useLang } from './i18nCore'
 
 /**
  * cāpsula33 — «Nosotros».
@@ -18,9 +19,10 @@ import { MAP_BG } from './mapScene'
 const STATEMENT =
   'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección* de cine y series en vitrinas de ojo de buey. Un lugar para reunirnos.'
 
-const WORDS = (() => {
+/** Las palabras de la frase; `*` marca el tramo en naranja (funciona en cualquier idioma). */
+const wordsOf = (statement) => {
   let accent = false
-  return STATEMENT.split(' ').map((raw) => {
+  return statement.split(' ').map((raw) => {
     const starts = raw.startsWith('*')
     const ends = raw.replace(/[.,:»]+$/, '').endsWith('*')
     if (starts) accent = true
@@ -28,7 +30,7 @@ const WORDS = (() => {
     if (ends) accent = false
     return word
   })
-})()
+}
 
 const FACTS = [
   ['6', 'días abiertos por semana'],
@@ -39,6 +41,8 @@ const FACTS = [
 export default function NosotrosSection() {
   const rootRef = useRef(null)
   const R = useRef({})
+  const { t } = useLang()
+  const WORDS = wordsOf(t(STATEMENT))
 
   useGSAP(
     () => {
@@ -78,7 +82,8 @@ export default function NosotrosSection() {
         onUpdate: (self) => paint(self.progress),
       })
     },
-    { scope: rootRef },
+    // Al cambiar de idioma las palabras son otras: se vuelve a armar el encendido.
+    { scope: rootRef, dependencies: [t], revertOnUpdate: true },
   )
 
   const set = (k) => (el) => (R.current[k] = el)
@@ -88,7 +93,7 @@ export default function NosotrosSection() {
       <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden px-6 md:px-10 lg:px-[5vw]">
         <p className="relative flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
           <span className="h-px w-8" style={{ background: C.neon }} />
-          Nosotros
+          {t('Nosotros')}
         </p>
         <p
           ref={set('text')}
@@ -113,7 +118,7 @@ export default function NosotrosSection() {
               <img
                 ref={set('photoImg')}
                 src="/studio/capsula33/nosotros-1200.webp"
-                alt="Mesas negras frente a la banqueta naranja del salón"
+                alt={t('Mesas negras frente a la banqueta naranja del salón')}
                 width="1200"
                 height="1500"
                 loading="lazy"
@@ -128,7 +133,7 @@ export default function NosotrosSection() {
               style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}
             >
               <span className="h-px w-6" style={{ background: C.neon }} />
-              El salón, adentro de la cápsula
+              {t('El salón, adentro de la cápsula')}
             </figcaption>
           </figure>
 
@@ -139,11 +144,12 @@ export default function NosotrosSection() {
             style={{ borderColor: C.neon }}
           >
             <blockquote className="text-[13px] leading-[1.75] md:text-[14px]" style={{ ...MONO, color: 'rgba(242,233,220,0.78)' }}>
-              El ser humano es la única fuerza en el universo que habita las historias que cuenta sobre sí mismo. Este espacio es una cápsula de preservación de
-              mitos de nuestra especie, un lugar para reunirnos y compartir lo que queremos ser, para no morir de realidad.
+              {t(
+                'El ser humano es la única fuerza en el universo que habita las historias que cuenta sobre sí mismo. Este espacio es una cápsula de preservación de mitos de nuestra especie, un lugar para reunirnos y compartir lo que queremos ser, para no morir de realidad.',
+              )}
             </blockquote>
             <figcaption className="mt-2 text-[11px] tracking-[0.18em] uppercase" style={{ ...MONO, color: C.neon }}>
-              En la pared, junto al ojo de buey
+              {t('En la pared, junto al ojo de buey')}
             </figcaption>
           </figure>
         </div>
@@ -159,7 +165,7 @@ export default function NosotrosSection() {
                 {big}
               </p>
               <p className="mt-2 text-[11px] leading-[1.5] tracking-[0.14em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}>
-                {small}
+                {t(small)}
               </p>
             </li>
           ))}

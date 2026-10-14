@@ -65,6 +65,8 @@ const HOLO_C = {
 }
 let C = PAPER_C
 let HOLO = false
+import { BLOCKS, WORDS } from './lagosMapText'
+
 const MONO = "'Roboto Mono', ui-monospace, monospace"
 const DISP = "'Chakra Petch', 'Roboto Mono', sans-serif"
 
@@ -102,7 +104,17 @@ const rawText = (x, y, s, { size = 13, weight = 500, fill = C.ink, anchor = 'sta
 let FLIP = false
 let FLIP_DX = 0
 const FLIP_TEXT = []
-const lines = (x, y, arr, opts = {}) => {
+// El idioma con el que se arma el mapa (lo fija compose).
+let LANG = 'es'
+const translateLines = (arr) => {
+  if (LANG === 'es') return arr
+  const block = BLOCKS[LANG]?.[arr.join('|')]
+  if (block) return block
+  const rules = WORDS[LANG] || []
+  return arr.map((l) => rules.reduce((acc, [re, to]) => acc.replace(re, to), l))
+}
+const lines = (x, y, arr0, opts = {}) => {
+  const arr = translateLines(arr0)
   const lh = opts.lh || 14
   if (!FLIP) return arr.map((s, i) => rawText(x, y + i * lh, s, opts)).join('')
   const y0 = FC - y - (arr.length - 1) * lh + 0.72 * (opts.size || 13)
@@ -507,9 +519,10 @@ function rightEdge() {
 }
 
 /** El mapa entero (sin el `<svg>`): para usar dentro de un `<svg viewBox="0 0 1272 1966">`. */
-function compose(palette, holo) {
+function compose(palette, holo, lang = 'es') {
   C = palette
   HOLO = holo
+  LANG = lang
   const MOUNTAINS = flipped(mountains)
   const NETWORK = flipped(network)
   const out = `
@@ -539,15 +552,19 @@ function compose(palette, holo) {
 `
   C = PAPER_C
   HOLO = false
+  LANG = 'es'
   // En el holograma los rellenos claros del papel (edificio, columnas, cajas) serían bloques
   // macizos: pasan a un cian transparente (el texto conserva su color).
   return holo ? out.replace(/<(rect|path|circle|ellipse)([^>]*?)fill="(#d8fbff|#8cf3ff|#5fe6ff)"/g, '<$1$2fill="rgba(95,230,255,0.13)"') : out
 }
 
+const CACHE = {}
 /** El mapa entero (sin el `<svg>`): para usar dentro de un `<svg viewBox="0 0 1272 1966">`. */
-export const MAP_SVG = compose(PAPER_C, false)
+export const paperSvgFor = (lang = 'es') => (CACHE[`p-${lang}`] ||= compose(PAPER_C, false, lang))
 /** El mismo mapa como holograma de la nave (cian, sin papel). */
-export const HOLO_SVG = compose(HOLO_C, true)
+export const holoSvgFor = (lang = 'es') => (CACHE[`h-${lang}`] ||= compose(HOLO_C, true, lang))
+export const MAP_SVG = paperSvgFor('es')
+export const HOLO_SVG = holoSvgFor('es')
 
 /**
  * Las escalas, en el orden de la ruta (del Lácar, arriba, al lago mayor, abajo):

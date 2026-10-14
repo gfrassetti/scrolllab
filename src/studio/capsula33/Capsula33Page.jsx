@@ -14,6 +14,8 @@ import ContactSection from './ContactSection'
 import LlegarSection from './LlegarSection'
 import GaleriaSection from './GaleriaSection'
 import { BODY, C, FONTS_HREF } from './brand'
+import { LangProvider } from './i18n'
+import { useLang } from './i18nCore'
 
 const LOADER_MIN_MS = 2800
 
@@ -39,18 +41,33 @@ FORM: brief del dueño (hero multicapa como el de NEON, fondo de nave espacial,
  * imágenes no viajan al repo (public/studio está en .gitignore).
  */
 export default function Capsula33Page() {
+  return (
+    <LangProvider>
+      <Capsula33 />
+    </LangProvider>
+  )
+}
+
+function Capsula33() {
+  const { t } = useLang()
+  // Las fuentes, una sola vez.
   useEffect(() => {
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.href = FONTS_HREF
     document.head.appendChild(link)
+    return () => link.remove()
+  }, [])
+  // El título, la descripción y los datos del local, en el idioma elegido.
+  useEffect(() => {
     const prevTitle = document.title
-    document.title = 'cāpsula33 · Café de especialidad en San Martín de los Andes'
+    document.title = t('cāpsula33 · Café de especialidad en San Martín de los Andes')
     // Lo que muestran los buscadores y los datos del local (horario, dirección, ubicación).
     const meta = document.createElement('meta')
     meta.name = 'description'
-    meta.content =
-      'Cafetería de especialidad en Av. Gral. Roca 1120, San Martín de los Andes: espresso, laminados, brunch y figuras de colección en una cápsula naranja. Martes a sábado de 9 a 21, lunes de 9 a 15.'
+    meta.content = t(
+      'Cafetería de especialidad en Av. Gral. Roca 1120, San Martín de los Andes: espresso, laminados, brunch y figuras de colección en una cápsula naranja. Martes a sábado de 9 a 21, lunes de 9 a 15.',
+    )
     const prevMeta = document.querySelector('meta[name="description"]')
     if (prevMeta) prevMeta.remove()
     document.head.appendChild(meta)
@@ -60,7 +77,7 @@ export default function Capsula33Page() {
       '@context': 'https://schema.org',
       '@type': 'CafeOrCoffeeShop',
       name: 'cāpsula33',
-      servesCuisine: ['Café de especialidad', 'Pastelería', 'Brunch'],
+      servesCuisine: [t('Café de especialidad'), t('Pastelería'), 'Brunch'],
       address: { '@type': 'PostalAddress', streetAddress: 'Av. Gral. Roca 1120', addressLocality: 'San Martín de los Andes', addressRegion: 'Neuquén', addressCountry: 'AR' },
       geo: { '@type': 'GeoCoordinates', latitude: -40.1542728, longitude: -71.347478 },
       openingHoursSpecification: [
@@ -71,13 +88,12 @@ export default function Capsula33Page() {
     })
     document.head.appendChild(ld)
     return () => {
-      link.remove()
       meta.remove()
       if (prevMeta) document.head.appendChild(prevMeta)
       ld.remove()
       document.title = prevTitle
     }
-  }, [])
+  }, [t])
 
   const [calm] = useState(() => prefersReducedMotion())
   // Loader ↔ hero: la marca del loader vuela hasta el cartel de la entrada.

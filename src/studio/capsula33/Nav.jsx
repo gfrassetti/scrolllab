@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { getLenis } from '../../hooks/useLenis'
-import { C, MONO, DISPLAY, openStatus } from './brand'
+import { C, MONO, DISPLAY } from './brand'
+import { LangSwitch } from './i18n'
+import { useLang, useStatus } from './i18nCore'
 
 /**
  * cāpsula33 — barra de navegación.
@@ -38,7 +40,8 @@ export default function Nav({ visible }) {
   const [solid, setSolid] = useState(false)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState('top')
-  const [status] = useState(() => openStatus())
+  const { t } = useLang()
+  const status = useStatus()
   const openRef = useRef(false)
   openRef.current = open
 
@@ -137,30 +140,31 @@ export default function Nav({ visible }) {
           borderBottom: solid ? '1px solid rgba(242,233,220,0.08)' : '1px solid transparent',
         }}
       >
-        <nav aria-label="Secciones" className="mx-auto flex h-16 max-w-[1680px] items-center justify-between gap-6 px-6 md:px-10">
-          <a href="#top" onClick={go('top')} className="c33-brand text-[20px] font-light md:text-[22px]" style={{ ...MONO, color: C.cream }} aria-label="cāpsula33, volver al principio">
+        <nav aria-label={t('Secciones')} className="mx-auto flex h-16 max-w-[1680px] items-center justify-between gap-6 px-6 md:px-10">
+          <a href="#top" onClick={go('top')} className="c33-brand text-[20px] font-light md:text-[22px]" style={{ ...MONO, color: C.cream }} aria-label={t('cāpsula33, volver al principio')}>
             cāpsula<span style={{ color: C.orange }}>33</span>
           </a>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-0.5 min-[1100px]:flex">
             {NAV_ITEMS.map((it) => (
               <li key={it.id}>
                 <a
                   href={`#${it.id}`}
                   onClick={go(it.id)}
                   aria-current={active === it.id ? 'location' : undefined}
-                  className="c33-link relative inline-flex h-10 items-center px-3.5 text-[12px] font-semibold tracking-[0.16em] uppercase"
+                  className="c33-link relative inline-flex h-10 items-center px-2.5 text-[12px] font-semibold tracking-[0.14em] whitespace-nowrap uppercase xl:px-3.5 xl:tracking-[0.16em]"
                   style={{ ...DISPLAY, color: active === it.id ? C.cream : 'rgba(242,233,220,0.62)' }}
                 >
-                  {it.label}
-                  <span aria-hidden="true" className="c33-link-line absolute right-3.5 bottom-1.5 left-3.5 h-px origin-left" style={{ background: C.orange, transform: active === it.id ? 'scaleX(1)' : 'scaleX(0)' }} />
+                  {t(it.label)}
+                  <span aria-hidden="true" className="c33-link-line absolute right-2.5 bottom-1.5 left-2.5 h-px origin-left xl:right-3.5 xl:left-3.5" style={{ background: C.orange, transform: active === it.id ? 'scaleX(1)' : 'scaleX(0)' }} />
                 </a>
               </li>
             ))}
           </ul>
 
-          <div className="flex items-center gap-5">
-            <p className="hidden items-center gap-2 text-[11px] tracking-[0.16em] uppercase lg:flex" style={{ ...MONO, color: 'rgba(242,233,220,0.85)' }}>
+          <div className="flex items-center gap-2 lg:gap-5">
+            <LangSwitch className="shrink-0" />
+            <p className="hidden items-center gap-2 text-[11px] tracking-[0.16em] whitespace-nowrap uppercase 2xl:flex" style={{ ...MONO, color: 'rgba(242,233,220,0.85)' }}>
               <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange, boxShadow: status.open ? '0 0 10px #7dffa8' : 'none' }} />
               {status.label}
             </p>
@@ -169,8 +173,8 @@ export default function Nav({ visible }) {
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="c33-menu-panel"
-              aria-label={open ? 'Cerrar el menú' : 'Abrir el menú'}
-              className="tpl-hit relative grid h-11 w-11 place-items-center md:hidden"
+              aria-label={open ? t('Cerrar el menú') : t('Abrir el menú')}
+              className="tpl-hit relative grid h-11 w-11 place-items-center min-[1100px]:hidden"
               style={{ color: C.cream }}
             >
               <span aria-hidden="true" className="c33-burger-line absolute h-px w-6" style={{ background: 'currentColor', transform: open ? 'rotate(45deg)' : 'translateY(-4px)' }} />
@@ -186,7 +190,7 @@ export default function Nav({ visible }) {
       {/* Panel del teléfono. */}
       <div
         id="c33-menu-panel"
-        className="c33-panel fixed inset-0 z-30 flex flex-col justify-between px-6 pt-24 pb-8 md:hidden"
+        className="c33-panel fixed inset-0 z-30 flex flex-col justify-between px-6 pt-24 pb-8 min-[1100px]:hidden"
         style={{ background: '#08090c', opacity: open ? 1 : 0, visibility: open ? 'visible' : 'hidden', pointerEvents: open ? 'auto' : 'none' }}
         aria-hidden={!open}
       >
@@ -203,15 +207,18 @@ export default function Nav({ visible }) {
                 <span className="text-[11px] tracking-[0.2em]" style={{ ...MONO, color: 'rgba(242,233,220,0.45)' }}>
                   0{i + 1}
                 </span>
-                {it.label}
+                {t(it.label)}
               </a>
             </li>
           ))}
         </ul>
-        <p className="flex items-center gap-2 text-[11px] tracking-[0.16em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.8)' }}>
-          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange }} />
-          {status.label} · Av. Gral. Roca 1120
-        </p>
+        <div className="flex flex-col gap-5">
+          <LangSwitch size="lg" className="-ml-2" />
+          <p className="flex items-center gap-2 text-[11px] tracking-[0.16em] uppercase" style={{ ...MONO, color: 'rgba(242,233,220,0.8)' }}>
+            <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange }} />
+            {status.label} · Av. Gral. Roca 1120
+          </p>
+        </div>
       </div>
 
       <style>{`

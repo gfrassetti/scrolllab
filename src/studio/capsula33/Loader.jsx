@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
 import { C, DISPLAY, MONO } from './brand'
+import { LangSwitch } from './i18n'
+import { useLang } from './i18nCore'
 
 /**
  * cāpsula33 — secuencia de abordaje (el loader).
@@ -25,10 +27,12 @@ const CHECKS = [
   ['Neón del pasillo', 'encendido'],
   ['Tripulación', 'a bordo'],
 ]
+const CHECK_VALUE_IS_TEXT = (v) => !/°C$/.test(v)
 
 const TICKS = Array.from({ length: (T_MAX - T_MIN) / 5 + 1 }, (_, i) => T_MIN + i * 5)
 
 export default function Loader({ progress, ready, calm, bridge, onBoard }) {
+  const { t } = useLang()
   const rootRef = useRef(null)
   const contentRef = useRef(null)
   const buttonRef = useRef(null)
@@ -151,7 +155,7 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
         className="fixed inset-0 z-50"
         role="dialog"
         aria-modal="true"
-        aria-label="Secuencia de abordaje"
+        aria-label={t('C33 · Secuencia de abordaje')}
         style={{ background: C.orange, color: INK, clipPath: 'inset(0% 0% 0% 0%)' }}
       >
         <div ref={contentRef} className="relative flex h-full flex-col justify-between px-6 py-6 md:px-10 md:py-8">
@@ -162,8 +166,11 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
           </div>
 
           <header className="flex items-start justify-between gap-4 text-[11px] font-semibold tracking-[0.18em] uppercase" style={DISPLAY}>
-            <span>C33 · Secuencia de abordaje</span>
-            <span className="hidden opacity-60 sm:inline">40°09′S 71°21′O</span>
+            <span>{t('C33 · Secuencia de abordaje')}</span>
+            <span className="flex items-center gap-4">
+              <span className="hidden opacity-60 sm:inline">{t('40°09′S 71°21′O')}</span>
+              <LangSwitch color={INK} dim="rgba(11,12,15,0.5)" accent={INK} className="-mr-2 -my-2" />
+            </span>
           </header>
 
           <div className="flex flex-1 flex-col justify-center gap-7">
@@ -171,7 +178,7 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
             <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
               <div>
                 <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-70" style={MONO}>
-                  Cafetera · temperatura del grupo
+                  {t('Cafetera · temperatura del grupo')}
                 </p>
                 <p className="mt-2 leading-[0.85] font-semibold tabular-nums" style={{ ...DISPLAY, fontSize: 'clamp(4.2rem, 11vw, 9.5rem)', letterSpacing: '-0.02em' }}>
                   {temp}
@@ -196,14 +203,14 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
                       className="absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
                       style={{ background: C.cream }}
                     />
-                    <span className="relative transition-colors duration-300 group-hover:text-[#0b0c0f]">Abordar</span>
+                    <span className="relative transition-colors duration-300 group-hover:text-[#0b0c0f]">{t('Abordar')}</span>
                   </span>
                 </button>
               </div>
             </div>
 
             {/* El termómetro: bulbo, tubo con mercurio y escala hasta el fondo. */}
-            <div role="progressbar" aria-label="Temperatura de la cafetera" aria-valuemin={T_MIN} aria-valuemax={T_READY} aria-valuenow={temp} aria-valuetext={`${temp} grados`}>
+            <div role="progressbar" aria-label={t('Temperatura de la cafetera')} aria-valuemin={T_MIN} aria-valuemax={T_READY} aria-valuenow={temp} aria-valuetext={t('{n} grados', { n: temp })}>
               <div className="flex items-center">
                 <span aria-hidden="true" className="relative z-10 grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full" style={{ background: INK, boxShadow: `0 0 0 3px ${C.orange}, 0 0 0 5px ${INK}` }}>
                   <span className="h-3 w-3 rounded-full" style={{ background: C.orange, opacity: 0.55 }} />
@@ -243,8 +250,8 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
                 return (
                   <li key={label} className="flex items-baseline gap-2 transition-opacity duration-500" style={{ opacity: done ? 1 : 0.4 }}>
                     <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: done ? INK : 'transparent', boxShadow: `inset 0 0 0 1.5px ${INK}` }} />
-                    <span>{label}</span>
-                    <span style={{ color: done ? C.cream : 'inherit' }}>{done ? value : '···'}</span>
+                    <span>{t(label)}</span>
+                    <span style={{ color: done ? C.cream : 'inherit' }}>{done ? (CHECK_VALUE_IS_TEXT(value) ? t(value) : value) : '···'}</span>
                   </li>
                 )
               })}
@@ -254,7 +261,7 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
           {/* La marca, a todo el ancho: se llena de tinta con la carga. */}
           <footer>
             <div className="mb-3 flex items-end justify-between gap-4 text-[11px] font-semibold tracking-[0.18em] uppercase" style={DISPLAY}>
-              <span className="opacity-70">Café de especialidad · San Martín de los Andes</span>
+              <span className="opacity-70">{t('Café de especialidad · San Martín de los Andes')}</span>
               <span className="text-[12px] tabular-nums" style={MONO}>
                 {pct}%
               </span>
