@@ -239,8 +239,8 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
     gsap.set(r.ledeIn, { autoAlpha: 1 })
     const ledeLines = r.ledeIn.querySelectorAll(':scope > p:not([data-headline])')
     const words = r.ledeIn.querySelectorAll('[data-hw]')
-    gsap.fromTo(ledeLines, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12, delay: 2.4 })
-    gsap.fromTo(words, { autoAlpha: 0, yPercent: 60 }, { autoAlpha: 1, yPercent: 0, duration: 1, ease: 'expo.out', stagger: 0.035, delay: 2.75, clearProps: 'transform' })
+    gsap.fromTo(ledeLines, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12, delay: 1.1 })
+    gsap.fromTo(words, { autoAlpha: 0, yPercent: 60 }, { autoAlpha: 1, yPercent: 0, duration: 1, ease: 'expo.out', stagger: 0.035, delay: 1.35, clearProps: 'transform' })
     gsap.fromTo(
       r.girlIn,
       { autoAlpha: 0, yPercent: 12 },
