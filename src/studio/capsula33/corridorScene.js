@@ -55,18 +55,36 @@ const Z_MODULE = -D + 0.02
 const Z_LEAVES = -D + 0.01
 // Lejos de la puerta (el salón es largo): así, al cruzarla, lo que ve la cámara ya es casi el
 // interior entero y la imagen en DOM apenas se acomoda (de cerca había que hacer mucho zoom).
-const Z_INSIDE = -D - 30
 const Z_START = -1.8 // arranca cerca: la entrada manda, poco pasillo (pedido del dueño)
 const Z_WALKED = -(D - 3.4) // frente a la entrada
 const Z_SIGN = Z_MODULE + 0.32 // el cartel flota delante de la pared
 const Z_INSIDE_CAM = -(D + 0.2) // ya cruzamos la puerta
-const INSIDE_H = 4.6 // alto del plano del interior
-const ENTER_STOP = 1 // todo el interior es 3D: el salón al fondo y las mesas en su propia capa
-// Las mesas y sillas: una capa entre la puerta y el salón. Desde la cámara final calza exacto
-// con la foto del salón (mismo tamaño aparente, las patas sobre el piso); desde cualquier otra
-// posición se corre distinto que el fondo: eso es la profundidad (al caminar y con el puntero).
-const FURNITURE_DIST = 6 // distancia a la cámara final
-const FURNITURE_DROP = 0.34 // la imagen de las mesas trae el horizonte alto: se baja un 34 % de su alto
+const ENTER_STOP = 1
+
+// El salón, del otro lado de la puerta: la foto se proyecta desde su cámara (la final del
+// recorrido) sobre una caja con su piso, sus paredes, el techo y el fondo, medidos en la foto.
+// Así el piso es piso de verdad y las mesas se apoyan en él desde cualquier punto de vista.
+const ROOM = {
+  eye: 1.71, // altura de la cámara sobre el piso (la misma que en el pasillo)
+  horizon: 760, // fila del horizonte en la foto (2688 × 1520, 60° vertical)
+  back: { left: 894, right: 1371, floor: 1001, top: 632 }, // el fondo (la barra), en píxeles
+  near: { left: 402, right: 2265 }, // donde las paredes tocan el piso en el borde de abajo
+}
+// Las mesas: un juego (mesa y dos sillas) parado sobre el piso del salón, en varios lugares.
+// [x respecto de la pared (+ desde la izquierda, − desde la derecha), profundidad, espejado]
+const TABLES = [
+  [1.15, 3.9, false],
+  [-1.05, 4.7, true],
+  [1.2, 6.2, true],
+  [-1.1, 7.4, false],
+]
+// La foto se proyecta desde un poco antes de la puerta (no desde la cámara final): así su cono
+// cubre también el piso y el techo que se ven al acercarse; al final del recorrido se ve un
+// poco recortada, nada más.
+const PHOTO_BACK = 1.6
+const TABLE_W = 1.7 // ancho del juego (mesa + dos sillas)
+const TABLE_ASPECT = 1160 / 1840 // alto / ancho del recorte
+const TABLE_FLOOR = 0.94 // fila del recorte donde apoyan las patas (desde arriba)
 
 const PROJECT_VERT = /* glsl */ `
   uniform mat4 uProj0;
@@ -81,6 +99,7 @@ const PROJECT_FRAG = /* glsl */ `
   uniform sampler2D uMap;
   uniform vec4 uHole;
   uniform float uDim;
+  uniform float uShade;
   varying vec4 vClip;
   void main() {
     if (vClip.w <= 0.0) discard;
@@ -90,7 +109,11 @@ const PROJECT_FRAG = /* glsl */ `
     // Más de noche que la imagen: el techo baja, los costados se apagan un poco.
     float top = smoothstep(0.5, 1.0, uv.y);
     float side = smoothstep(0.25, 0.5, abs(uv.x - 0.5));
-    c *= mix(1.0, 0.58, top) * mix(1.0, 0.82, side) * uDim;
+    c *= mix(1.0, mix(1.0, 0.58, top) * mix(1.0, 0.82, side), uShade) * uDim;
+    // El salón: lo que la foto no cubre (cerca de la puerta, visto desde afuera) se apaga en
+    // vez de estirar el borde de la imagen.
+    vec2 out2 = max(vec2(0.0), max(-uv, uv - 1.0));
+    c *= mix(1.0, 1.0 - smoothstep(0.0, 0.12, max(out2.x, out2.y)), 1.0 - uShade);
     gl_FragColor = vec4(c, 1.0);
   }
 `
@@ -188,7 +211,7 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     const e = toCorridor(PARTS.door.x1, PARTS.door.y1)
     const hole = new THREE.Vector4(d.px / TEX.w, 1 - (e.py + TEX.top) / TEX.h, e.px / TEX.w, 1 - (d.py + TEX.top) / TEX.h)
     const projMat = new THREE.ShaderMaterial({
-      uniforms: { uMap: { value: tex.corridor }, uProj0: { value: proj0 }, uHole: { value: hole }, uDim: { value: 1 } },
+      uniforms: { uMap: { value: tex.corridor }, uProj0: { value: proj0 }, uHole: { value: hole }, uDim: { value: 1 }, uShade: { value: 1 } },
       vertexShader: PROJECT_VERT,
       fragmentShader: PROJECT_FRAG,
       side: THREE.DoubleSide,
@@ -215,15 +238,8 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     scene.add(floor, ceil, left, right, end)
     parts.proj = projMat
 
-    // 2. El interior, detrás de la puerta: cubre la pantalla cuando ya cruzamos.
-    const inside = new THREE.Mesh(new THREE.PlaneGeometry(INSIDE_H * (IMG.w / IMG.h), INSIDE_H), flat(tex.interior))
-    inside.position.set(0, 0, Z_INSIDE)
-    scene.add(inside)
-    parts.inside = inside
-    const furniture = new THREE.Mesh(new THREE.PlaneGeometry(IMG.w / IMG.h, 1), flat(tex.furniture, { transparent: true }))
-    furniture.renderOrder = 1
-    scene.add(furniture)
-    parts.furniture = furniture
+    // 2. El salón: la caja con la foto proyectada y las mesas paradas sobre su piso.
+    buildRoom()
 
     // 3. Las hojas de la puerta.
     const door = rectAt(PARTS.door)
@@ -257,7 +273,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
 
     parts.rects = { door, sign: signRect, port: rectAt(PARTS.port, D) }
     built = true
-    fitInside()
   }
 
   /** Cartel «cāpsula33» en canvas (nítido de cerca) y su sombra difusa sobre la pared. */
@@ -348,20 +363,65 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     onReady()
   })
 
-  // El interior tiene que tapar todo lo que se ve por la puerta mientras nos acercamos: lo
-  // peor es cuando la puerta deja de recortar y manda el encuadre (más alto con lente angular).
-  const fitInside = () => {
-    if (!parts.inside) return
-    const tanV = Math.tan(((camera.fov / 2) * Math.PI) / 180)
-    const hd = (parts.rects.door.y1 - parts.rects.door.y0) / 2
-    const half = (hd + tanV * (Z_LEAVES - Z_INSIDE)) * 1.06
-    parts.inside.scale.setScalar(half / (INSIDE_H / 2))
-    parts.insideHalf = half
-    // Las mesas, a escala de su distancia: desde la cámara final se ven del tamaño de la foto.
-    const k = FURNITURE_DIST / (Z_INSIDE_CAM - Z_INSIDE)
-    const fh = 2 * half * k
-    parts.furniture.scale.set(fh, fh, 1)
-    parts.furniture.position.set(0, -FURNITURE_DROP * fh, Z_INSIDE_CAM - FURNITURE_DIST)
+  const buildRoom = () => {
+    const F1 = IMG.h / 2 / Math.tan(((FOV / 2) * Math.PI) / 180)
+    const z0 = Z_INSIDE_CAM + PHOTO_BACK // la cámara de la foto está acá
+    const dDoor = z0 - Z_LEAVES + 0.03 // la caja empieza justo detrás de la puerta (nunca delante de la fachada)
+    // Un punto del piso visto en la foto (px, py) → mundo.
+    const onFloor = (px, py) => {
+      const d = (ROOM.eye * F1) / (py - ROOM.horizon)
+      return { x: ((px - IMG.w / 2) * d) / F1, d }
+    }
+    const db = (ROOM.eye * F1) / (ROOM.back.floor - ROOM.horizon)
+    const top = ((ROOM.horizon - ROOM.back.top) * db) / F1
+    const yF = -ROOM.eye
+    const bl = { x: ((ROOM.back.left - IMG.w / 2) * db) / F1, d: db }
+    const br = { x: ((ROOM.back.right - IMG.w / 2) * db) / F1, d: db }
+    const nl = onFloor(ROOM.near.left, IMG.h)
+    const nr = onFloor(ROOM.near.right, IMG.h)
+    // Las paredes siguen hasta casi la puerta (más cerca de lo que muestra la foto).
+    const ext = (a, b, d) => ({ x: a.x + ((b.x - a.x) * (d - a.d)) / (b.d - a.d), d })
+    const fl = ext(nl, bl, dDoor)
+    const fr = ext(nr, br, dDoor)
+    parts.wallX = (side, d) => (side < 0 ? ext(nl, bl, d).x : ext(nr, br, d).x)
+    const P = (q, y) => [q.x, y, z0 - q.d]
+    const quad = (a, b, c, d) => {
+      const g = new THREE.BufferGeometry()
+      g.setAttribute('position', new THREE.Float32BufferAttribute([...a, ...b, ...c, ...a, ...c, ...d], 3))
+      return g
+    }
+    const cam1 = new THREE.PerspectiveCamera(FOV, IMG.w / IMG.h, 0.01, 100)
+    cam1.position.set(0, 0, z0)
+    cam1.updateMatrixWorld()
+    const proj1 = new THREE.Matrix4().multiplyMatrices(cam1.projectionMatrix, cam1.matrixWorldInverse)
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { uMap: { value: tex.interior }, uProj0: { value: proj1 }, uHole: { value: new THREE.Vector4(2, 2, 2, 2) }, uDim: { value: 1 }, uShade: { value: 0 } },
+      vertexShader: PROJECT_VERT,
+      fragmentShader: PROJECT_FRAG,
+      side: THREE.DoubleSide,
+    })
+    const room = new THREE.Group()
+    room.add(
+      new THREE.Mesh(quad(P(fl, yF), P(fr, yF), P(br, yF), P(bl, yF)), mat), // piso
+      new THREE.Mesh(quad(P(fl, top), P(bl, top), P(br, top), P(fr, top)), mat), // techo
+      new THREE.Mesh(quad(P(fl, yF), P(bl, yF), P(bl, top), P(fl, top)), mat), // pared izquierda
+      new THREE.Mesh(quad(P(fr, yF), P(fr, top), P(br, top), P(br, yF)), mat), // pared derecha
+      new THREE.Mesh(quad(P(bl, yF), P(br, yF), P(br, top), P(bl, top)), mat), // el fondo
+    )
+    scene.add(room)
+    parts.roomMat = mat
+
+    // Las mesas: el mismo juego en varios lugares, con las patas en el piso.
+    const h = TABLE_W * TABLE_ASPECT
+    const geo = new THREE.PlaneGeometry(TABLE_W, h)
+    TABLES.forEach(([dx, d, mirror]) => {
+      const x = dx > 0 ? parts.wallX(-1, d) + dx : parts.wallX(1, d) + dx
+      const m = new THREE.Mesh(geo, flat(tex.table, { transparent: true }))
+      m.position.set(x, yF + h * (TABLE_FLOOR - 0.5), z0 - d)
+      if (mirror) m.scale.x = -1
+      m.renderOrder = 1
+      scene.add(m)
+    })
   }
 
   const resize = () => {
@@ -378,7 +438,6 @@ export function createCorridorScene(canvas, { srcs, onProgress = () => {}, onRea
     camera.updateProjectionMatrix()
     state.portrait = aspect < 0.9
     state.yaw = 0
-    fitInside()
   }
   resize()
   window.addEventListener('resize', resize)

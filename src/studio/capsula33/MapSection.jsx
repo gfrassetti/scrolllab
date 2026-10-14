@@ -3,7 +3,7 @@ import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
 import { createMapScene, MAP_BG, ZONES } from './mapScene'
 import { PRICES } from './roomModel'
-import { C, MONO, BODY, openStatus } from './brand'
+import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
 
 /**
  * cāpsula33 — capítulo 2: el mapa vivo del local.
@@ -171,7 +171,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
           <p data-fade className="text-[11px] tracking-[0.22em] uppercase opacity-0" style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}>
             El mapa del local
           </p>
-          <h2 className="mt-4 text-[clamp(2.9rem,6.4vw,7.2rem)] leading-[0.9] font-medium tracking-[-0.045em]" style={{ fontFamily: "'Archivo', sans-serif", fontVariationSettings: "'wdth' 100" }}>
+          <h2 className="mt-4 text-[clamp(2.6rem,5.6vw,6.2rem)] leading-[0.92] font-semibold tracking-[-0.02em] uppercase" style={DISPLAY}>
             <span className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
                 Así es
@@ -244,7 +244,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                   ×
                 </button>
               </div>
-              <p className="mt-2 text-[22px] leading-tight font-medium tracking-[-0.02em]" style={{ fontFamily: "'Archivo', sans-serif" }}>
+              <p className="mt-2 text-[22px] leading-tight font-semibold uppercase" style={DISPLAY}>
                 {zone.title}
               </p>
               <p className="mt-2 text-[14.5px] leading-[1.5]" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>

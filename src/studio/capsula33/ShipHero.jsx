@@ -3,7 +3,7 @@ import { gsap, useGSAP } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
 import { trackPointer } from '../../lib/motion'
 import { createCorridorScene } from './corridorScene'
-import { C, MONO, BODY, openStatus } from './brand'
+import { C, MONO, BODY, DISPLAY, openStatus } from './brand'
 
 /**
  * cāpsula33 — Hero: el café es un módulo de la nave.
@@ -33,14 +33,14 @@ function sources() {
     corridor: `${BASE}corridor-${s}.webp`,
     module: `${BASE}module-${s}.webp`,
     interior: `${BASE}interior-${s}.webp`,
-    furniture: `${BASE}furniture-${s}.webp`,
+    table: `${BASE}table-${s === 2688 ? 1400 : 800}.webp`,
     doorL: `${BASE}door-l-285.webp`,
     doorR: `${BASE}door-r-289.webp`,
   }
 }
 
 // El titular grande, debajo de las coordenadas: se apaga palabra por palabra con el scroll
-// (como el manifiesto de APEX o los capítulos de CHAPTERS). `*` marca el tramo destacado.
+// (como el manifiesto de APEX o los capítulos de CHAPTERS). `*` marca el tramo en naranja.
 const HEADLINE = 'Una cápsula naranja en medio de la ciudad: *café de especialidad*, la colección de cine del dueño y un lugar para reunirse.'
 const HEADLINE_WORDS = (() => {
   let accent = false
@@ -144,11 +144,11 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
         // El titular se apaga palabra por palabra en el primer tramo (de la primera a la última)
         // y el bloque se va cuando empezamos a caminar.
         gsap.set(r.lede, {
-          autoAlpha: 1 - Math.max(0, Math.min(1, (p - 0.17) / 0.05)),
+          autoAlpha: 1 - Math.max(0, Math.min(1, (p - 0.065) / 0.03)),
         })
         if (r.headline) {
           const words = r.hw || (r.hw = [...r.headline.querySelectorAll('[data-hw]')])
-          const f = Math.min(1, p / 0.18) * (words.length + 3)
+          const f = Math.min(1, p / 0.06) * (words.length + 3)
           words.forEach((el, i) => {
             const k = Math.max(0, Math.min(1, f - i))
             el.style.opacity = String(1 - 0.86 * k)
@@ -358,9 +358,9 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
             </p>
             <p
               ref={set('headline')}
-              className="mt-4 text-[1.5rem] sm:text-[clamp(1.6rem,2.5vw,2.6rem)] leading-[1.02] font-medium tracking-[-0.035em]"
+              className="mt-4 text-[1.45rem] leading-[1.05] font-semibold tracking-[-0.01em] uppercase sm:text-[clamp(1.5rem,2.3vw,2.4rem)]"
               style={{
-                fontFamily: "'Archivo', sans-serif",
+                ...DISPLAY,
                 color: C.cream,
                 textShadow: '0 2px 30px rgba(3,4,8,0.9)',
               }}
@@ -372,14 +372,7 @@ export default function ShipHero({ boarded, onProgress = () => {}, onReady = () 
                   className="inline-block whitespace-pre"
                   style={
                     w.accent
-                      ? {
-                          fontFamily: "'Instrument Serif', serif",
-                          fontStyle: 'italic',
-                          fontWeight: 400,
-                          letterSpacing: 0,
-                          fontSize: '1.08em',
-                          color: C.neon,
-                        }
+                      ? { color: C.neon }
                       : undefined
                   }
                 >
