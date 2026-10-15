@@ -83,7 +83,7 @@ export default function ComicEgg({ open, onClose }) {
               className="relative rounded-[50%] px-5 py-4 text-center text-[14px] leading-snug font-bold"
               style={{ background: '#fff', color: '#111', border: '2.5px solid #111', fontFamily: "'Comic Neue', 'Chakra Petch', sans-serif" }}
             >
-              {t('¿El devorador de mundos? Se comió un planeta y pidió el café para llevar.')}
+              {t('¿El devorador de mundos? Se tomó tres cafés y se fue sin pagar. Nadie se animó a cobrarle.')}
             </p>
             <svg aria-hidden="true" viewBox="0 0 40 40" className="absolute -bottom-[26px] left-[36%] h-[34px] w-[34px]">
               <path d="M6 0 L30 0 L2 38 Z" fill="#fff" stroke="#111" strokeWidth="2.5" strokeLinejoin="round" />
