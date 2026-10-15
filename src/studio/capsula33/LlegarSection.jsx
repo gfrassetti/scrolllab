@@ -106,6 +106,34 @@ export default function LlegarSection() {
     r.ring.style.opacity = rad > 4 && !r.open ? '1' : '0'
   }
 
+  // En el teléfono no hay puntero: un cartel que pulsa («Tocá el plano para ver el mapa real») y,
+  // cada tanto, una ventanita que se abre sobre el local y deja ver el mapa de abajo.
+  const updateTapHint = () => {
+    const r = R.current
+    if (r.tapHint) r.tapHint.style.opacity = r.zoomed > 0.98 && !r.open ? '1' : '0'
+  }
+  useEffect(() => {
+    if (!touch) return undefined
+    let tl = null
+    const id = setInterval(() => {
+      const r = R.current
+      if (!r.plan || r.zoomed < 0.98 || r.open || (tl && tl.isActive())) return
+      // La ventana se abre sobre el local (si cayó fuera de la pantalla, en el centro).
+      const [hx, hy] = r.hq || [0.5, 0.5]
+      lens.current.x = Math.min(0.8, Math.max(0.2, hx))
+      lens.current.y = Math.min(0.7, Math.max(0.25, hy))
+      tl = gsap.timeline({ onUpdate: paintLens })
+      tl.to(lens.current, { r: 92, duration: 0.7, ease: 'expo.out' })
+        .to(lens.current, { r: 92, duration: 1.1 })
+        .to(lens.current, { r: 0, duration: 0.6, ease: 'power2.inOut' })
+    }, 5200)
+    return () => {
+      clearInterval(id)
+      tl?.kill()
+    }
+    // paintLens y lens son estables (leen refs).
+  }, [touch])
+
   // La lente funciona cuando el plano ya llegó a la escala del mapa real.
   const lensReady = () => R.current.zoomed > 0.98 && !R.current.open
   const onMove = (e) => {
@@ -128,6 +156,7 @@ export default function LlegarSection() {
     const r = R.current
     if (r.open || r.zoomed < 0.98) return
     r.open = true
+    updateTapHint()
     const b = r.card.getBoundingClientRect()
     if (e && e.clientX) {
       lens.current.x = (e.clientX - b.left) / b.width
@@ -146,6 +175,7 @@ export default function LlegarSection() {
     const r = R.current
     setRevealed(false)
     r.open = false
+    updateTapHint()
     gsap.to(lens.current, { r: 0, duration: 0.8, ease: 'expo.inOut', overwrite: 'auto', onUpdate: paintLens })
   }
 
@@ -196,6 +226,8 @@ export default function LlegarSection() {
         // 3: las rutas, de a una, y sus tarjetas. Los puntos de afuera, en el borde de la pantalla.
         const hx = (0 - cx) / mpp + W / 2
         const hy = (0 - cy) / mpp + H / 2
+        r.hq = [hx / W, hy / H]
+        updateTapHint()
         if (r.frame) {
           // El iframe, centrado en el local: más grande que la pantalla lo que haga falta.
           const ox = -end[0] / M_PER_PX_Z16
@@ -453,10 +485,30 @@ export default function LlegarSection() {
               className="absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] whitespace-nowrap uppercase"
               style={{ ...MONO, background: NAVY, color: CREAM }}
             >
-              {t('Clic para abrir')}
+              {touch ? t('Tocá para abrir') : t('Clic para abrir')}
             </span>
           </span>
         </div>
+
+        {/* Solo teléfono: avisa que tocar el plano abre el mapa de Google. */}
+        {touch ? (
+          <div
+            ref={set('tapHint')}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-[11.5rem] z-10 flex justify-center px-6 transition-opacity duration-500"
+            style={{ opacity: 0 }}
+          >
+            <span
+              className="c33-tap flex items-center gap-2.5 rounded-full py-2 pr-4 pl-2.5 text-[11px] font-semibold tracking-[0.12em] uppercase"
+              style={{ ...MONO, background: NAVY, color: CREAM, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}
+            >
+              <span className="c33-tap-dot relative grid h-5 w-5 place-items-center rounded-full" style={{ background: C.orange }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: NAVY }} />
+              </span>
+              {t('Tocá el plano para ver el mapa real')}
+            </span>
+          </div>
+        ) : null}
 
         {/* La escala y el norte (cuando el plano ya llegó al local). */}
         <div
@@ -594,6 +646,10 @@ export default function LlegarSection() {
         .c33-go:focus-visible, .c33-back:focus-visible, .c33-llegar:focus-visible { outline: 2px solid ${C.neon}; outline-offset: -4px; }
         .c33-poi { transition: background-color 220ms ease-out, border-color 220ms ease-out; }
         .c33-poi::-webkit-scrollbar { display: none; }
+        .c33-tap { animation: c33-tap-pulse 2.2s ease-in-out infinite; }
+        .c33-tap-dot::after { content: ''; position: absolute; inset: 0; border-radius: 9999px; background: ${C.orange}; animation: c33-tap-ring 1.6s ease-out infinite; }
+        @keyframes c33-tap-pulse { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes c33-tap-ring { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.6); opacity: 0; } }
         @keyframes c33-hq { 0%, 100% { transform: scale(1); opacity: 0.22; } 50% { transform: scale(1.5); opacity: 0.05; } }
         .c33-hq-pulse { transform-box: fill-box; transform-origin: center; animation: c33-hq 2.4s ease-in-out infinite; }
       `}</style>

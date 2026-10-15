@@ -225,6 +225,8 @@ const EN = {
   'RP 19 · a Chapelco': 'RP 19 · to Chapelco',
   'Ruta de los Siete Lagos': 'Seven Lakes Route',
   'Clic para abrir': 'Click to open',
+  'Tocá para abrir': 'Tap to open',
+  'Tocá el plano para ver el mapa real': 'Tap the plan to see the real map',
   '40°09′15″ S · 71°20′51″ O': '40°09′15″ S · 71°20′51″ W',
   'Roca 1120,': 'Roca 1120,',
   'Sector SMA.': 'SMA Sector.',
@@ -469,6 +471,8 @@ const PT = {
   'RP 19 · a Chapelco': 'RP 19 · para Chapelco',
   'Ruta de los Siete Lagos': 'Rota dos Sete Lagos',
   'Clic para abrir': 'Clique para abrir',
+  'Tocá para abrir': 'Toque para abrir',
+  'Tocá el plano para ver el mapa real': 'Toque na planta para ver o mapa real',
   '40°09′15″ S · 71°20′51″ O': '40°09′15″ S · 71°20′51″ O',
   'Sector SMA.': 'Setor SMA.',
   'Sobre la avenida Roca, a metros de Sarmiento y a 1,2 km del Lácar. Martes a sábado de 9 a 21; lunes de 9 a 15.':
