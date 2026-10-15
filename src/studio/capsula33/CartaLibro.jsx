@@ -86,7 +86,7 @@ function PageView({ p, side, go, tip }) {
             <span style={{ color: C.neon }}>{t('exploradores de universos.')}</span>
           </h3>
           <p className="c33-lead" style={BODY}>
-            {t('Esta es la carta take-away: seis rubros, todos con precio de hoy.')}
+            {t('Café, laminados, cerveza tirada y algo más para el viaje.')}
           </p>
           <p className="c33-kicker" style={MONO}>
             {t('En esta carta')}

@@ -242,9 +242,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
             </span>
           </h2>
           <p data-fade className="mt-6 max-w-[34ch] text-[17px] leading-[1.5] opacity-0 lg:text-[19px]" style={{ ...BODY, color: 'rgba(242,233,220,0.78)' }}>
-            {t('El jardín en su caja blanca, la colección en vitrinas, la barra naranja y el salón bajo las espirales de luz.')}
-            {/* En el teléfono la instrucción ya va en la píldora de abajo. */}
-            {touch ? null : ` ${t('Cada zona se enciende al pasar el puntero y se abre con su ficha.')}`}
+            {t('Un jardín adentro, una colección en las vitrinas y café de especialidad en la barra.')}
           </p>
           <div data-fade className="mt-8 hidden opacity-0 lg:block">
             <a
@@ -349,7 +347,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         <div className="pointer-events-none absolute inset-x-0 bottom-6 flex flex-wrap items-center justify-center gap-2 px-6 transition-opacity duration-700" style={{ opacity: labelsOn ? 1 : 0 }}>
           <p className="flex items-center gap-2.5 rounded-full border px-4 py-2 text-[12px]" style={{ ...BODY, background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(242,233,220,0.12)', color: 'rgba(242,233,220,0.8)' }}>
             <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#7dffa8' : C.orange, boxShadow: status.open ? '0 0 10px #7dffa8' : 'none' }} />
-            {status.label}. {touch ? t('El local gira deslizando de costado; cada zona se abre al tocar su etiqueta.') : t('El local gira al arrastrarlo y cada zona se abre al tocarla.')}
+            {status.label}. {touch ? t('Deslizá para girarlo; tocá una zona.') : t('Arrastrá para girarlo; clic en una zona.')}
           </p>
           {/* Acercar y alejar (también Ctrl + rueda o el pellizco). */}
           <span className="pointer-events-auto flex overflow-hidden rounded-full border" style={{ background: 'rgba(14,15,19,0.85)', borderColor: 'rgba(242,233,220,0.12)' }}>

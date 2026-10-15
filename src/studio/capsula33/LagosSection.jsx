@@ -356,7 +356,7 @@ export default function LagosSection() {
             className="mt-4 hidden max-w-[36ch] text-[16px] leading-[1.5] opacity-0 lg:block"
             style={{ ...BODY, color: 'rgba(242,233,220,0.74)' }}
           >
-            {t('El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, del lago mayor a la puerta del domo en el Lácar.')}
+            {t('De Villa La Angostura a San Martín de los Andes, lago por lago. La ruta termina en nuestra puerta.')}
           </p>
         </div>
 

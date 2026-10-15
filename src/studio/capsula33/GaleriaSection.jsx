@@ -26,7 +26,7 @@ const PANELS = [
   { index: '03', title: 'La colección', caption: 'Figuras de cine, cada una bajo su frasco de vidrio.', img: `${BASE}coleccion.webp` },
   { index: '04', title: 'La cocina', caption: 'Huevos pochados sobre yogur, con cebolla morada y eneldo.', img: `${BASE}huevos.webp` },
   { index: '05', title: 'El plato', caption: 'Tostada con hongos, crema verde y remolacha.', img: `${BASE}tostada.webp` },
-  { index: '06', title: 'Para llevar', caption: 'Portavasos y caja de cartón, con la marca de la cápsula.', img: `${BASE}delivery.webp` },
+  { index: '06', title: 'Para llevar', caption: 'El café también viaja.', img: `${BASE}delivery.webp` },
 ]
 
 // La cantidad de fotos, con dos cifras (el contador se arma solo si se suman más).
@@ -316,7 +316,7 @@ export default function GaleriaSection() {
               className="mt-6 hidden max-w-[34ch] items-center gap-3 text-[13px] leading-[1.5] opacity-0 lg:flex"
               style={{ ...MONO, color: 'rgba(242,233,220,0.55)' }}
             >
-              {t('Seguí bajando: las fotos corren de costado. Un clic las agranda.')}
+              {t('Un clic agranda cada foto.')}
             </p>
           </div>
 
