@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from '../../../lib/gsap'
 import { prefersReducedMotion } from '../../../lib/motion'
 import { imgAttrs } from '../../../lib/responsiveImage'
-import { lab, lounge, paint, craft, road, studio, wheel, variants } from './assets/images'
+import { lab, lounge, paint, craft, road, studio, wheel, labM, loungeM, paintM, craftM, roadM, studioM, wheelM, variants } from './assets/images'
 
 /**
  * APEX — Gallery
@@ -22,13 +22,13 @@ const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-seri
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 
 const DEFAULT_SLIDES = [
-  { image: studio, title: 'The studio', caption: 'Where every finished car is first seen in full light.' },
-  { image: lab, title: 'Battery lab', caption: 'Every cell is tested on its own before it goes in.' },
-  { image: paint, title: 'Paint shop', caption: 'Seven coats, polished by hand between each one.' },
-  { image: craft, title: 'Trim bench', caption: 'Leather cut and stitched for one car at a time.' },
-  { image: wheel, title: 'Wheels', caption: 'Forged in one piece, balanced by hand.' },
-  { image: lounge, title: 'Owners’ lounge', caption: 'Where the car is handed over, never delivered.' },
-  { image: road, title: 'First drive', caption: 'Two hundred kilometres before it is yours.' },
+  { image: studio, imageMobile: studioM, title: 'The studio', caption: 'Where every finished car is first seen in full light.' },
+  { image: lab, imageMobile: labM, title: 'Battery lab', caption: 'Every cell is tested on its own before it goes in.' },
+  { image: paint, imageMobile: paintM, title: 'Paint shop', caption: 'Seven coats, polished by hand between each one.' },
+  { image: craft, imageMobile: craftM, title: 'Trim bench', caption: 'Leather cut and stitched for one car at a time.' },
+  { image: wheel, imageMobile: wheelM, title: 'Wheels', caption: 'Forged in one piece, balanced by hand.' },
+  { image: lounge, imageMobile: loungeM, title: 'Owners’ lounge', caption: 'Where the car is handed over, never delivered.' },
+  { image: road, imageMobile: roadM, title: 'First drive', caption: 'Two hundred kilometres before it is yours.' },
 ]
 
 const THUMB = { w: 176, h: 224 }
@@ -56,7 +56,16 @@ export default function Gallery({
   const [cur, setCur] = useState(0)
 
   const edited = Array.isArray(slides)
-    ? slides.map((s, i) => ({ image: s?.image || DEFAULT_SLIDES[i]?.image, title: s?.title || '', caption: s?.caption || '' })).filter((s) => s.image)
+    ? slides
+        .map((s, i) => ({
+          image: s?.image || DEFAULT_SLIDES[i]?.image,
+          // The demo's portrait goes with the demo's photo only: a photo of your own
+          // without a portrait of its own is cropped to the screen, as before.
+          imageMobile: s?.imageMobile || (s?.image ? '' : DEFAULT_SLIDES[i]?.imageMobile) || '',
+          title: s?.title || '',
+          caption: s?.caption || '',
+        }))
+        .filter((s) => s.image)
     : []
   const items = edited.length ? edited : DEFAULT_SLIDES
   const n = items.length
@@ -227,16 +236,26 @@ export default function Gallery({
             aria-hidden={i === cur ? undefined : true}
           >
             {near(i) || i === 0 ? (
-              <img
-                {...imgAttrs(s.image, variants)}
-                sizes="100vw"
-                alt={s.title}
-                decoding="async"
-                loading={i === 0 ? 'eager' : 'lazy'}
-                draggable={false}
-                onError={onImgError}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              // A phone is a portrait: it gets the portrait cut of the slide when there is one.
+              <picture>
+                {s.imageMobile ? (
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={imgAttrs(s.imageMobile, variants).srcSet || s.imageMobile}
+                    sizes="100vw"
+                  />
+                ) : null}
+                <img
+                  {...imgAttrs(s.image, variants)}
+                  sizes="100vw"
+                  alt={s.title}
+                  decoding="async"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  draggable={false}
+                  onError={onImgError}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </picture>
             ) : null}
             <div aria-hidden="true" className="apex-ga-shade pointer-events-none absolute inset-0" />
           </div>

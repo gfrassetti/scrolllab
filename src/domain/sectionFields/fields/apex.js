@@ -181,6 +181,7 @@ export const APEX_FIELDS = {
       max: 12,
       item: [
         { key: 'image', label: 'Imagen (16:9, ≥ 1920 px)', type: 'image' },
+        { key: 'imageMobile', label: 'Imagen para teléfono (9:16, ≥ 1080 px; vacío = la de arriba)', type: 'image' },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'caption', label: 'Texto', type: 'text' },
       ],
