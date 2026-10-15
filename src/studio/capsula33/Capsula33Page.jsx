@@ -20,9 +20,9 @@ import { useLang } from './i18nCore'
 
 const LOADER_MIN_MS = 2800
 
-// Prueba de la carta: `?carta=pared` muestra la pared de cápsulas en lugar de la consola.
+// La carta: la pared de cápsulas por defecto; `?carta=consola` muestra la consola de pedidos.
 const CartaView =
-  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('carta') === 'pared' ? CartaPared : CartaSection
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('carta') === 'consola' ? CartaSection : CartaPared
 
 /*
 THESIS: el café es un módulo acoplado a una nave — se aborda (loader con salto
