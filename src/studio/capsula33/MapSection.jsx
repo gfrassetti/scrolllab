@@ -68,8 +68,22 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         if (r.card && r.activeId) {
           const at = scene.labelAt(r.activeId)
           if (at) {
-            const right = at.x > window.innerWidth * 0.62
-            r.card.style.transform = `translate3d(${at.x}px, ${at.y}px, 0) translate(${right ? 'calc(-100% + 24px)' : '-24px'}, 14px)`
+            // La ficha va junto a su etiqueta pero siempre entera dentro de la pantalla (en el teléfono
+            // la etiqueta puede estar casi en el borde y la ficha se cortaba).
+            const stage = r.card.parentElement
+            const W = stage.clientWidth
+            const H = stage.clientHeight
+            const box = r.card.firstElementChild
+            const cw = box ? box.offsetWidth : Math.min(320, W * 0.86)
+            const ch = box ? box.offsetHeight : 0
+            const M = 12
+            const right = at.x > W * 0.62
+            const x = Math.min(W - cw - M, Math.max(M, right ? at.x - cw + 24 : at.x - 24))
+            // Debajo de la etiqueta; si no entra, arriba de ella; y nunca fuera de la pantalla.
+            let y = at.y + 14
+            if (y + ch > H - M) y = Math.max(M, at.y - 44 - ch)
+            y = Math.min(H - ch - M, Math.max(M, y))
+            r.card.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
           }
         }
       },
@@ -294,7 +308,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
               </p>
               {/* Una vista de la zona, sin texto de relleno. */}
               {zone.img ? (
-                <img key={zone.img} src={zone.img} alt="" width="640" height="400" decoding="async" className="c33-card-img mt-3 aspect-[16/10] w-full rounded-md object-cover" />
+                <img key={zone.img} src={zone.img} alt="" width="640" height="400" decoding="async" className="c33-card-img mt-3 aspect-[2/1] w-full sm:aspect-[16/10] rounded-md object-cover" />
               ) : null}
               {zone.prices ? (
                 // La pantalla LED de la barra: negra, de aeropuerto, texto blanco y naranja.
