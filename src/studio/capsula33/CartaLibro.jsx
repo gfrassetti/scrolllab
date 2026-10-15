@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../lib/gsap'
 import { useLang } from './i18nCore'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { CATEGORIES, ICONS, groupsOf } from './cartaData'
+import { CARTA_PHOTOS, CARTA_PHOTO_BASE } from './cartaPhotos'
 
 /**
  * cāpsula33 — «La carta» como un libro: la carta take-away, página por página.
@@ -55,7 +56,7 @@ function PageShell({ p, children, side }) {
   )
 }
 
-function PageView({ p, side, go }) {
+function PageView({ p, side, go, tip }) {
   const { t } = useLang()
   const page = PAGES[p]
   if (!page) return <div className="c33-page c33-page-blank" />
@@ -133,7 +134,7 @@ function PageView({ p, side, go }) {
       <div className="c33-page c33-cover" data-side="right">
         <div className="c33-cover-glow" />
         <div className="c33-backcover">
-          <h3 className="c33-cover-title" style={{ ...DISPLAY, fontSize: 'calc(var(--u) * 11)' }}>
+          <h3 className="c33-cover-title c33-static" style={{ ...DISPLAY, fontSize: 'calc(var(--u) * 11)' }}>
             CAPSULA<span style={{ color: C.neon }}>33</span>
           </h3>
           <p className="c33-lead" style={{ ...BODY, textAlign: 'center' }}>
@@ -185,7 +186,14 @@ function PageView({ p, side, go }) {
             ) : null}
             <ul>
               {g.items.map((it) => (
-                <li key={it.name} className="c33-row">
+                <li
+                  key={it.name}
+                  className="c33-row"
+                  data-photo={CARTA_PHOTOS[it.name] ? '1' : '0'}
+                  onPointerEnter={(e) => e.pointerType === 'mouse' && tip.show(e.currentTarget, it, cat)}
+                  onPointerLeave={(e) => e.pointerType === 'mouse' && tip.hide()}
+                  onClick={(e) => e.pointerType !== 'mouse' && tip.toggle(e.currentTarget, it, cat)}
+                >
                   <span className="c33-row-line">
                     <span className="c33-row-name" style={BODY}>
                       {t(it.name)}
@@ -226,6 +234,36 @@ export default function CartaLibro() {
   const [page, setPage] = useState(0)
   const spread = Math.min(MAX_SPREAD, Math.ceil(page / 2))
   const swipe = useRef(null)
+  // La miniatura del producto que tenés bajo el mouse (o el que tocaste en el teléfono).
+  const [tipState, setTipState] = useState(null)
+  const tipKey = useRef('')
+  const tip = {
+    show: (el, it, cat) => {
+      if (!CARTA_PHOTOS[it.name]) return setTipState(null)
+      const r = el.getBoundingClientRect()
+      tipKey.current = it.name
+      setTipState({ it, cat, left: r.left, right: r.right, top: r.top, bottom: r.bottom })
+    },
+    hide: () => {
+      tipKey.current = ''
+      setTipState(null)
+    },
+    toggle: (el, it, cat) => (tipKey.current === it.name ? tip.hide() : tip.show(el, it, cat)),
+  }
+  // Al dar vuelta la página o scrollear, la miniatura se va.
+  useEffect(() => {
+    setTipState(null)
+    tipKey.current = ''
+  }, [page])
+  useEffect(() => {
+    if (!tipState) return undefined
+    const off = () => {
+      tipKey.current = ''
+      setTipState(null)
+    }
+    window.addEventListener('scroll', off, { passive: true })
+    return () => window.removeEventListener('scroll', off)
+  }, [tipState])
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
@@ -318,19 +356,19 @@ export default function CartaLibro() {
         >
           {single ? (
             <div key={page} className="c33-single">
-              <PageView p={page} side="right" go={go} />
+              <PageView p={page} side="right" go={go} tip={tip} />
             </div>
           ) : (
             <>
               <div className="c33-book" data-s={spread}>
                 {Array.from({ length: LEAVES }, (_, i) => (
                   <div key={i} className="c33-leaf" data-flipped={i < spread ? '1' : '0'} style={{ zIndex: i < spread ? i + 1 : 60 - i }}>
-                    <div className="c33-face c33-lf" onClick={next} data-turn={i === spread ? '1' : '0'}>
-                      <PageView p={2 * i} side="right" go={go} />
+                    <div className="c33-face c33-lf" onClick={(e) => !e.target.closest('.c33-row') && next()} data-turn={i === spread ? '1' : '0'}>
+                      <PageView p={2 * i} side="right" go={go} tip={tip} />
                       <span className="c33-shade" />
                     </div>
-                    <div className="c33-face c33-lb" onClick={prev}>
-                      {2 * i + 1 <= LAST ? <PageView p={2 * i + 1} side="left" go={go} /> : <div className="c33-page c33-page-blank" />}
+                    <div className="c33-face c33-lb" onClick={(e) => !e.target.closest('.c33-row') && prev()}>
+                      {2 * i + 1 <= LAST ? <PageView p={2 * i + 1} side="left" go={go} tip={tip} /> : <div className="c33-page c33-page-blank" />}
                       <span className="c33-shade" />
                     </div>
                   </div>
@@ -371,7 +409,47 @@ export default function CartaLibro() {
         </p>
       </div>
 
+      {tipState ? (
+        <div
+          className="c33-tip pointer-events-none fixed z-50"
+          style={(() => {
+            const w = 196
+            const x = Math.max(12, Math.min(tipState.right + 14, window.innerWidth - w - 12))
+            const y = Math.max(72, Math.min(window.innerHeight - 250, tipState.top + (tipState.bottom - tipState.top) / 2 - 110))
+            return single
+              ? { left: 12, right: 12, bottom: 12, margin: '0 auto', maxWidth: 360 }
+              : { left: x, top: y, width: w }
+          })()}
+          role="status"
+        >
+          <div className="p-2" style={{ background: 'rgba(4,5,10,0.95)', border: '1px solid rgba(127,212,255,0.45)', boxShadow: '0 18px 50px rgba(0,0,0,0.6), 0 0 26px rgba(255,122,26,0.18)' }}>
+            <div className="relative aspect-square w-full overflow-hidden" style={{ background: '#0b0c0f' }}>
+              <img src={`${CARTA_PHOTO_BASE}${CARTA_PHOTOS[tipState.it.name]}`} alt={t(tipState.it.name)} className="h-full w-full object-cover" draggable="false" />
+              <span aria-hidden="true" className="c33-tip-scan pointer-events-none absolute inset-0" />
+              {['top-1 left-1 border-t border-l', 'top-1 right-1 border-t border-r', 'bottom-1 left-1 border-b border-l', 'right-1 bottom-1 border-r border-b'].map((c) => (
+                <span key={c} aria-hidden="true" className={`absolute h-3 w-3 ${c}`} style={{ borderColor: C.neon }} />
+              ))}
+            </div>
+            <div className="mt-2 flex items-baseline justify-between gap-2">
+              <p className="min-w-0 text-[13.5px] leading-tight font-medium" style={BODY}>
+                {t(tipState.it.name)}
+              </p>
+              {tipState.it.price ? (
+                <span className="shrink-0 text-[13px] font-semibold tabular-nums" style={{ ...MONO, color: C.neon }}>
+                  {tipState.it.price}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <style>{`
+        .c33-tip { animation: c33-tip-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+        @keyframes c33-tip-in { from { opacity: 0; transform: translateY(6px) scale(0.97); } }
+        .c33-tip-scan { background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.16) 2px 3px); mix-blend-mode: multiply; }
+        .c33-row[data-photo='1'] { cursor: zoom-in; transition: background-color 160ms; }
+        @media (hover: hover) { .c33-row[data-photo='1']:hover { background: linear-gradient(90deg, rgba(255,122,26,0.1), transparent); } }
         .c33-stage { --ph: min(80svh, 780px, calc((100vw - 48px) / 1.48)); --pw: calc(var(--ph) * 0.74); --u: calc(var(--pw) / 100); --k: 1; position: relative; display: flex; justify-content: center; outline: none; }
         .c33-stage[data-single='1'] { --pw: min(calc(100vw - 32px), 440px); --ph: calc(var(--pw) / 0.74); --k: 1.28; touch-action: pan-y; }
         .c33-stage:focus-visible .c33-lf[data-turn='1'] { outline: 2px solid ${C.neon}; outline-offset: -2px; }
@@ -405,7 +483,7 @@ export default function CartaLibro() {
         .c33-page-head { padding-bottom: calc(var(--u) * 2.4); border-bottom: 1px solid rgba(127,212,255,0.22); }
         .c33-page-foot { margin-top: auto; padding-top: calc(var(--u) * 2.4); border-top: 1px solid rgba(127,212,255,0.15); color: rgba(169,214,255,0.4); }
 
-        .c33-list, .c33-welcome { position: relative; flex: 1; padding-top: calc(var(--u) * 4); display: flex; flex-direction: column; min-height: 0; }
+        .c33-list, .c33-welcome { position: relative; flex: 1; padding-top: calc(var(--u) * 4); padding-bottom: calc(var(--u) * 3); display: flex; flex-direction: column; min-height: 0; }
         .c33-kicker { font-size: calc(calc(var(--u) * 2.2) * var(--k)); letter-spacing: 0.22em; text-transform: uppercase; color: rgba(169,214,255,0.8); }
         .c33-h-xl { margin-top: calc(var(--u) * 1.4); font-weight: 600; text-transform: uppercase; line-height: 0.95; letter-spacing: -0.01em; font-size: calc(calc(var(--u) * 8.6) * var(--k)); }
         .c33-h-md { margin-top: calc(var(--u) * 1.4); font-weight: 600; text-transform: uppercase; line-height: 0.95; font-size: calc(calc(var(--u) * 6.4) * var(--k)); color: rgba(242,233,220,0.9); }
@@ -439,6 +517,7 @@ export default function CartaLibro() {
         .c33-cover-title { position: absolute; left: 0; right: 0; top: calc(var(--u) * 11); text-align: center; font-weight: 500; letter-spacing: 0.04em; font-size: calc(calc(var(--u) * 12.5) * var(--k)); line-height: 1; color: #f2e9dc; z-index: 2; }
         .c33-cover-sub { position: absolute; left: 0; right: 0; top: calc(calc(var(--u) * 11) + calc(var(--u) * 14.5) * var(--k)); text-align: center; font-size: calc(calc(var(--u) * 2.3) * var(--k)); letter-spacing: 0.34em; text-transform: uppercase; color: rgba(169,214,255,0.8); z-index: 2; }
         .c33-cover-girl { position: absolute; left: 50%; bottom: calc(var(--u) * -3); width: calc(var(--u) * 74); transform: translateX(-50%); object-fit: contain; z-index: 1; filter: drop-shadow(0 0 30px rgba(255,122,26,0.25)); }
+        .c33-cover-title.c33-static { position: static; }
         .c33-cover .c33-backcover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 3); padding: calc(var(--u) * 10); z-index: 2; }
 
         .c33-nav-btn { width: 44px; height: 44px; border-radius: 99px; border: 1px solid rgba(127,212,255,0.35); font-size: 18px; color: ${C.cream}; transition: background-color 180ms cubic-bezier(0.23,1,0.32,1), opacity 180ms, transform 120ms; }
