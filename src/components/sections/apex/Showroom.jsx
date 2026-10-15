@@ -242,7 +242,10 @@ function buildKeys(L, count, need = 7.5) {
     const cam = [camPhi, camR, st.y + 1.16 * k]
     const look = [camPhi - Math.PI, st.r, st.y + 0.64 * k]
     if (i > 0) s += TRAVEL
-    keys.push({ s, cam, look })
+    // Between stations the camera cuts across the room instead of skirting the
+    // ring: a narrow screen stands back at ~4.6 m, just inside the ring the
+    // plinths are on, and every other car would brush past the lens on the way.
+    keys.push({ s, cam, look, dip: i > 0 ? Math.max(0, camR - 1.1 * k) : 0 })
     s += HOLD
     keys.push({ s, cam, look })
   }
@@ -265,7 +268,10 @@ function poseAt(keys, s) {
     if (s <= b.s) {
       const t = smooth((s - a.s) / Math.max(1e-6, b.s - a.s))
       const mix = (u, v) => u.map((x, j) => x + (v[j] - x) * t)
-      return { cam: mix(a.cam, b.cam), look: mix(a.look, b.look) }
+      const cam = mix(a.cam, b.cam)
+      // The camera's radius dips towards the centre half way through a travel.
+      if (b.dip) cam[1] -= b.dip * Math.sin(Math.PI * t)
+      return { cam, look: mix(a.look, b.look) }
     }
   }
   return keys[keys.length - 1]
