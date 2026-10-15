@@ -417,7 +417,7 @@ export default function CartaLibro() {
             const x = Math.max(12, Math.min(tipState.right + 14, window.innerWidth - w - 12))
             const y = Math.max(72, Math.min(window.innerHeight - 250, tipState.top + (tipState.bottom - tipState.top) / 2 - 110))
             return single
-              ? { left: 12, right: 12, bottom: 12, margin: '0 auto', maxWidth: 360 }
+              ? { right: 12, bottom: 12, width: 190 }
               : { left: x, top: y, width: w }
           })()}
           role="status"
