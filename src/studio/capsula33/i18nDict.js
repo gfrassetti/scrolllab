@@ -191,6 +191,9 @@ const EN = {
   'La tripulación': 'The crew',
   'Bienvenidos, exploradores de universos.': 'Welcome, explorers of universes.',
   'Para llevar': 'To go',
+  'lista para llevar.': 'ready to go.',
+  'Foto en camino': 'Photo on its way',
+  '{n} productos': '{n} items',
   'Portavasos y caja de cartón, con la marca de la cápsula.': 'Cup carrier and cardboard box, with the capsule brand.',
 
   // — Ruta 7 Lagos
@@ -448,6 +451,9 @@ const PT = {
   'La tripulación': 'A tripulação',
   'Bienvenidos, exploradores de universos.': 'Bem-vindos, exploradores de universos.',
   'Para llevar': 'Para levar',
+  'lista para llevar.': 'pronta para levar.',
+  'Foto en camino': 'Foto a caminho',
+  '{n} productos': '{n} produtos',
   'Portavasos y caja de cartón, con la marca de la cápsula.': 'Porta-copos e caixa de papelão, com a marca da cápsula.',
 
   // — Ruta 7 Lagos
