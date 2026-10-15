@@ -29,6 +29,9 @@ const PANELS = [
   { index: '06', title: 'Para llevar', caption: 'Portavasos y caja de cartón, con la marca de la cápsula.', img: `${BASE}delivery.webp` },
 ]
 
+// La cantidad de fotos, con dos cifras (el contador se arma solo si se suman más).
+const TOTAL = String(PANELS.length).padStart(2, '0')
+
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
 export default function GaleriaSection() {
@@ -297,16 +300,16 @@ export default function GaleriaSection() {
               style={{ ...MONO, color: 'rgba(242,233,220,0.6)' }}
             >
               <span className="h-px w-8" style={{ background: C.neon }} />
-              {t('Bitácora · 06')}
+              {t('Bitácora')} · {TOTAL}
             </p>
             <h2
-              key={t('Seis vistas de')}
+              key={t('Vistas de')}
               data-title
-              aria-label={`${t('Seis vistas de')} ${t('la cápsula,')} ${t('de la puerta a la mesa.')}`}
+              aria-label={`${t('Vistas de')} ${t('la cápsula,')} ${t('de la puerta a la mesa.')}`}
               className="mt-4 text-[clamp(2.4rem,5.4vw,6rem)] leading-[0.94] font-semibold tracking-[-0.015em] uppercase"
               style={DISPLAY}
             >
-              {t('Seis vistas de')} <span style={{ color: C.neon }}>{t('la cápsula,')}</span> {t('de la puerta a la mesa.')}
+              {t('Vistas de')} <span style={{ color: C.neon }}>{t('la cápsula,')}</span> {t('de la puerta a la mesa.')}
             </h2>
             <p
               data-rise
@@ -417,7 +420,7 @@ export default function GaleriaSection() {
                     <div className="mt-5 flex w-full max-w-[44rem] items-end justify-between gap-6">
                       <div>
                         <p className="text-[11px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
-                          {panel.index} / 06
+                          {panel.index} / {TOTAL}
                         </p>
                         <p className="mt-1 text-[clamp(1.3rem,2.4vw,2rem)] leading-tight font-semibold uppercase" style={DISPLAY}>
                           {t(panel.title)}

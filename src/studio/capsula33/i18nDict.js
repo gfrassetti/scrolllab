@@ -167,8 +167,8 @@ const EN = {
   'Salted caramel y cucurucho molido': 'Salted caramel and crushed cone',
 
   // — Galería
-  'Bitácora · 06': 'Logbook · 06',
-  'Seis vistas de': 'Six views of',
+  'Bitácora': 'Logbook',
+  'Vistas de': 'Views of',
   'la cápsula,': 'the capsule,',
   'de la puerta a la mesa.': 'from the door to the table.',
   'Seguí bajando: las fotos corren de costado. Un clic las agranda.': 'Keep scrolling: the photos slide sideways. Click to enlarge.',
@@ -449,8 +449,8 @@ const PT = {
   'Salted caramel y cucurucho molido': 'Salted caramel e casquinha triturada',
 
   // — Galería
-  'Bitácora · 06': 'Diário de bordo · 06',
-  'Seis vistas de': 'Seis vistas da',
+  'Bitácora': 'Diário de bordo',
+  'Vistas de': 'Vistas da',
   'la cápsula,': 'cápsula,',
   'de la puerta a la mesa.': 'da porta à mesa.',
   'Seguí bajando: las fotos corren de costado. Un clic las agranda.': 'Continue descendo: as fotos correm para o lado. Um clique as amplia.',
