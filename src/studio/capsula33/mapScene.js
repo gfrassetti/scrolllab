@@ -69,6 +69,8 @@ export const MAP_BG = '#0b0c0f'
 
 // El ojo de buey en la foto de la fachada (u, v desde arriba a la izquierda; r en fracción del ancho).
 const PORT = { u: 0.166, v: 0.55, r: 0.075, aspect: 1400 / 640 }
+// La pared de la entrada en el modelo: 6 m de ancho, centrada; el piso en y = 0; la cara de afuera en x ≈ −9,7.
+const FACADE = { w: 6.0, floor: 0, x: -9.75 }
 const ISO = new THREE.Vector3(-0.62, 0.92, 1).normalize() // de la esquina de la entrada, abierto al salón
 const TOP = new THREE.Vector3(0, 1, 0.0001)
 // En el teléfono (pantalla vertical) se mira más de frente a la fachada: el largo del local
@@ -129,14 +131,15 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     new THREE.TextureLoader().load('/studio/capsula33/facade-front-1400.webp', (t) => {
       t.colorSpace = THREE.SRGBColorSpace
       t.anisotropy = renderer.capabilities.getMaxAnisotropy()
+      // Apoyada en el piso y del ancho de la pared de la entrada (Blender: y −3 … 3, z desde 0), igual
+      // que la usa pipeline/c33-entrance-match.py para calzar la puerta, el ojo de buey y el ventanal
+      // de adentro con los de afuera.
       const aspect = 2418 / 1105
-      const span = bounds.max.z - bounds.min.z
-      const wallH = bounds.max.y - bounds.min.y
-      const h = Math.min(wallH * 0.98, (span * 0.98) / aspect)
-      const w = h * aspect
+      const w = FACADE.w
+      const h = w / aspect
       const facade = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.02 }))
       facade.rotation.y = -Math.PI / 2 // mira hacia afuera (−x), como la entrada
-      facade.position.set(bounds.min.x - 0.03, bounds.min.y + h / 2, (bounds.min.z + bounds.max.z) / 2)
+      facade.position.set(FACADE.x, FACADE.floor + h / 2, 0) // pegada a la cara de afuera de la pared
       r.root.add(facade)
       // El ojo de buey (en la foto: centro en 16,6 % × 55 %, radio 7,5 % del ancho) late con un aro
       // naranja: es la puerta del easter egg.
