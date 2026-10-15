@@ -56,7 +56,7 @@ const EN = {
   '40°09′S · 71°21′O': '40°09′S · 71°21′W',
   'Café de especialidad en San Martín de los Andes': 'Specialty coffee in San Martín de los Andes',
   'Tripulante · C33': 'Crew · C33',
-  'Una tripulante de pelo rosa, con casco transparente y auriculares, toma café con las dos manos': 'A pink-haired crew member, with a clear helmet and headphones, holds a coffee with both hands',
+  'Una tripulante de pelo rosa con flequillo, casco con auriculares y placas oxidadas y collares de cuentas, toma café con las dos manos': 'A pink-haired crew member with bangs, a helmet with headphones and rusty plates and bead necklaces, holds a coffee with both hands',
   'Secuencia de encendido': 'Power-up sequence',
   'Bienvenidos, exploradores de universos': 'Welcome, explorers of universes',
   'Café de especialidad, laminados de todos los días y figuras de colección en vitrinas, en el centro de San Martín de los Andes.':
@@ -339,7 +339,7 @@ const PT = {
   '40°09′S · 71°21′O': '40°09′S · 71°21′O',
   'Café de especialidad en San Martín de los Andes': 'Café de especialidade em San Martín de los Andes',
   'Tripulante · C33': 'Tripulante · C33',
-  'Una tripulante de pelo rosa, con casco transparente y auriculares, toma café con las dos manos': 'Uma tripulante de cabelo rosa, com capacete transparente e fones de ouvido, segura um café com as duas mãos',
+  'Una tripulante de pelo rosa con flequillo, casco con auriculares y placas oxidadas y collares de cuentas, toma café con las dos manos': 'Uma tripulante de cabelo rosa com franja, capacete com fones de ouvido e placas enferrujadas e colares de contas, segura um café com as duas mãos',
   'Secuencia de encendido': 'Sequência de ignição',
   'Bienvenidos, exploradores de universos': 'Bem-vindos, exploradores de universos',
   'Café de especialidad, laminados de todos los días y figuras de colección en vitrinas, en el centro de San Martín de los Andes.':

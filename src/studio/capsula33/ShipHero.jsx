@@ -30,11 +30,13 @@ const BLINK_MARKS = [0.012, 0.045, 0.085, 0.13, 0.17]
 // el resto es la secuencia de encendido del salón. Las marcas de arriba siguen en la escala de antes.
 const OUTSIDE = 0.56
 // Los ojos en la imagen de la tripulante (1360 × 2048) y cuánto más abajo está la piel que los tapa.
+// (Medidos sobre la tripulante de la tarjeta de mesa del local, regenerada en 4K.)
 const EYES = [
-  { cx: 580, cy: 533, rx: 52, ry: 26, rot: 4 },
-  { cx: 770, cy: 516, rx: 54, ry: 26, rot: -6 },
+  { cx: 561, cy: 634, rx: 50, ry: 25, rot: 5 },
+  { cx: 749, cy: 639, rx: 54, ry: 25, rot: -4 },
 ]
-const EYE_SKIN_DROP = 50
+// La piel que baja a tapar el ojo sale de la mejilla, debajo de las pestañas de abajo.
+const EYE_SKIN_DROP = 62
 // Lo que dice la tripulante al primer movimiento del scroll (la primera frase es la de su revista).
 const LINE = 'Bienvenidos, exploradores de universos. El café está del otro lado de esa puerta.'
 
@@ -535,7 +537,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                 src="/studio/capsula33/girl-1360.webp"
                 srcSet="/studio/capsula33/girl-760.webp 760w, /studio/capsula33/girl-1360.webp 1360w"
                 sizes="(max-width: 640px) 40vw, 30vw"
-                alt={t('Una tripulante de pelo rosa, con casco transparente y auriculares, toma café con las dos manos')}
+                alt={t('Una tripulante de pelo rosa con flequillo, casco con auriculares y placas oxidadas y collares de cuentas, toma café con las dos manos')}
                 className="h-full w-auto max-w-none"
                 style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.55))' }}
               />
@@ -559,8 +561,8 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                         className="absolute inset-0 overflow-hidden"
                         style={{
                           borderRadius: '50%',
-                          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, #000 62%, transparent 100%)',
-                          maskImage: 'radial-gradient(ellipse at 50% 50%, #000 62%, transparent 100%)',
+                          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, #000 52%, transparent 100%)',
+                          maskImage: 'radial-gradient(ellipse at 50% 50%, #000 52%, transparent 100%)',
                         }}
                       >
                         <img
@@ -574,19 +576,33 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                           }}
                         />
                       </div>
+                      {/* La sombra del párpado (más oscuro arriba, en el pliegue, y hacia las pestañas). */}
+                      <span
+                        className="absolute inset-0"
+                        style={{
+                          borderRadius: '50%',
+                          background: 'linear-gradient(180deg, rgba(110,45,32,0.42), rgba(110,45,32,0.14) 45%, rgba(60,22,16,0.3) 100%)',
+                          mixBlendMode: 'multiply',
+                          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, #000 50%, transparent 100%)',
+                          maskImage: 'radial-gradient(ellipse at 50% 50%, #000 50%, transparent 100%)',
+                        }}
+                      />
                       {/* La línea de las pestañas, en el borde de abajo. */}
-                      <span className="absolute right-[6%] bottom-[8%] left-[4%] h-[34%] border-b-[1.5px]" style={{ borderColor: '#2a1713', borderRadius: '0 0 55% 55% / 0 0 100% 100%' }} />
+                      <span
+                        className="absolute right-[7%] bottom-[12%] left-[5%] h-[34%] border-b-2"
+                        style={{ borderColor: '#1c0e0b', borderRadius: '0 0 55% 55% / 0 0 100% 100%', filter: 'blur(0.4px)', boxShadow: '0 2px 2px -1px rgba(28,14,11,0.35)' }}
+                      />
                     </div>
                   </div>
                 ))}
               </div>
-              {/* Vapor de la taza: sale del borde (≈ 38 % del alto de la imagen) y sube por delante de la cara. */}
+              {/* Vapor de la taza: sale del borde (≈ 39 % del alto de la imagen, centrado en ≈ 45 % del ancho) y sube por delante de la cara. */}
               {[
-                { left: 46, delay: 0, w: 9.5 },
-                { left: 50.5, delay: 0.8, w: 11.5 },
-                { left: 54.5, delay: 1.6, w: 9 },
-                { left: 48.5, delay: 2.4, w: 8 },
-                { left: 52.5, delay: 3.1, w: 10.5 },
+                { left: 39.5, delay: 0, w: 9.5 },
+                { left: 43.5, delay: 0.8, w: 11.5 },
+                { left: 47, delay: 1.6, w: 9 },
+                { left: 41.5, delay: 2.4, w: 8 },
+                { left: 45.5, delay: 3.1, w: 10.5 },
               ].map((w, i) => (
                 <span key={i} aria-hidden="true" className="c33-steam" style={{ left: `${w.left}%`, top: '38.5%', width: `${w.w}%`, animationDelay: `${w.delay}s` }} />
               ))}
