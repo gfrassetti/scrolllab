@@ -65,6 +65,7 @@ function PageView({ p, side, go, tip }) {
     // La tapa es la revista «Experiencia Capsula» del local (recreada), con su frase de bienvenida.
     return (
       <div className="c33-page c33-cover" data-side="right">
+        <img src={COVER} alt="" aria-hidden="true" className="c33-cover-bg" draggable="false" />
         <img
           src={COVER}
           alt={t('Tapa de la carta: la revista «Experiencia Capsula», con la frase «Bienvenidos exploradores de universos»')}
@@ -438,7 +439,7 @@ export default function CartaLibro() {
         .c33-row[data-photo='1'] { cursor: zoom-in; transition: background-color 160ms; }
         @media (hover: hover) { .c33-row[data-photo='1']:hover { background: linear-gradient(90deg, rgba(255,122,26,0.1), transparent); } }
         .c33-stage { --ph: min(80svh, 780px, calc((100vw - 48px) / 1.48)); --pw: calc(var(--ph) * 0.74); --u: calc(var(--pw) / 100); --k: 1; position: relative; display: flex; justify-content: center; outline: none; }
-        .c33-stage[data-single='1'] { --pw: min(calc(100vw - 32px), 440px); --ph: calc(var(--pw) / 0.74); --k: 1.28; touch-action: pan-y; }
+        .c33-stage[data-single='1'] { --pw: min(calc(100vw - 32px), 440px); --ph: calc(var(--pw) * 1.55); --k: 1.12; touch-action: pan-y; }
         .c33-stage:focus-visible .c33-lf[data-turn='1'] { outline: 2px solid ${C.neon}; outline-offset: -2px; }
 
         .c33-book { position: relative; width: calc(var(--pw) * 2); height: var(--ph); perspective: 2600px; transition: transform 900ms cubic-bezier(0.77, 0, 0.175, 1); }
@@ -460,13 +461,13 @@ export default function CartaLibro() {
 
         .c33-single { width: var(--pw); animation: c33-slide 380ms cubic-bezier(0.23, 1, 0.32, 1) both; }
         @keyframes c33-slide { from { opacity: 0; transform: translateX(24px); } }
-        .c33-single .c33-page { height: auto; min-height: var(--ph); border-radius: 6px; }
+        .c33-single .c33-page { height: var(--ph); border-radius: 6px; }
 
         /* La hoja de papel. */
         .c33-page { position: relative; width: var(--pw); height: var(--ph); display: flex; flex-direction: column; color: ${C.cream};
           background: linear-gradient(165deg, #121c30, #0a111e 60%, #080d17); padding: calc(var(--u) * 6.4) calc(var(--u) * 7.5) calc(var(--u) * 5); overflow: hidden; }
         .c33-page-blank { background: linear-gradient(165deg, #121c30, #0a111e); }
-        .c33-page-head, .c33-page-foot { display: flex; justify-content: space-between; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: calc(calc(var(--u) * 2.1) * var(--k)); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(169,214,255,0.6); }
+        .c33-page-head, .c33-page-foot { display: flex; justify-content: space-between; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: max(10px, calc(calc(var(--u) * 2.1) * var(--k))); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(169,214,255,0.6); }
         .c33-page-head { padding-bottom: calc(var(--u) * 2.4); border-bottom: 1px solid rgba(127,212,255,0.22); }
         .c33-page-foot { margin-top: auto; padding-top: calc(var(--u) * 2.4); border-top: 1px solid rgba(127,212,255,0.15); color: rgba(169,214,255,0.4); }
 
@@ -499,6 +500,8 @@ export default function CartaLibro() {
         /* La tapa y la contratapa. */
         .c33-cover { padding: 0; background: radial-gradient(120% 70% at 50% 100%, #3a1608, #0d1424 55%, #080c15); }
         .c33-cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .c33-cover-bg { position: absolute; inset: -8%; width: 116%; height: 116%; object-fit: cover; filter: blur(18px) saturate(1.1); opacity: 0.9; }
+        .c33-single .c33-cover-img { object-fit: contain; }
         .c33-cover-glow { position: absolute; inset: 0; background: radial-gradient(60% 45% at 50% 62%, rgba(255,122,26,0.28), transparent 70%); }
         .c33-hud { position: absolute; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: calc(calc(var(--u) * 2) * var(--k)); letter-spacing: 0.18em; text-transform: uppercase; color: rgba(169,214,255,0.65); z-index: 2; }
         .c33-hud-turn { color: rgba(242,233,220,0.8); }
