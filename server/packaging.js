@@ -676,6 +676,11 @@ centres it and stands it on the floor; a model that is not car-sized (3.5–6.2 
 scaled to fill the plinth. A real-size car (metres, front toward −Z) is left as it is.
 Export with Draco and 2048 px WebP textures.
 
+On a phone the demo loads \`car-1-m.glb\` … (2K colour map, 1K data maps: ~33 MB of GPU
+memory per car instead of ~200). Any other model URL is used as it is, and on a phone its
+textures above 2048 px (colour) / 1024 px (normal, metal-rough…) are re-sampled before
+they reach the GPU. If you swap the cars, ship maps that size and you do not need a twin.
+
 The room can be any GLB (\`sceneUrl\`): a gallery, a garage, a landscape, a studio.
 The section measures it (centre, size and floor from its walls: meshes taller than
 half a metre) and lays the camera's walk over it: in from the +Z side, a stop at each

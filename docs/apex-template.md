@@ -242,6 +242,18 @@ lados alternados. Hosteable en LAB (FLOW).
    dedo: `touch-action: pan-y`); «Close» lo devuelve y muestra la ficha. Seguir bajando pasa al
    siguiente; subir, al anterior.
 7. **Calma / sin WebGL:** fotos de costado renderizadas en Blender con las mismas fichas.
+7b. **Teléfono (2026-10-15, del celular real del dueño: «se tilda al llegar al salón»).** Cada auto
+   traía 2 mapas de 4096² + 1 de 2048² ≈ 200 MB de GPU y se subían en el primer cuadro, justo al
+   llegar. Ahora: (a) `public/apex/showroom/car-N-m.glb`, gemelo para teléfono (color 2048, normal y
+   metal/rugosidad 1024: ~33 MB por auto y 1,7 MB en vez de 2,7), que `phoneVariant` elige solo
+   para los GLB de la demo (si falta, carga el original); cualquier otro GLB baja sus mapas con
+   `createImageBitmap` fuera del hilo (`capTextures`); (b) la escena se arma por tramos que ceden al
+   scroll (`yieldToScroll`) y, **antes** de que la sección esté a la vista, se suben las texturas de
+   a una por tramo y se compilan los shaders (`initTexture` + `compileAsync`), así el primer cuadro
+   no tiene nada pendiente; (c) en teléfono sin luces de borde (3 `RectAreaLight` en vez de 6).
+   Medido con emulador (Pixel 7, CPU ×4, `storage/qa/apex-showroom-landing.mjs`): la tarea más
+   larga pasó de ~2,2–3,1 s a ~0,7 s (el primer `setSize` del contexto GL) y ninguna cae al llegar.
+   Los gemelos se regeneran con Pillow a partir de `car-N.glb` (mapas a 2048/1024, WebP q82).
 8. **Builder sí, LAB no** (decisión del dueño): 10–20 MB de escena y un scroll fijado no van en
    el sitio de un cliente. Campos: primero la sala (GLB, «reemplaza el salón entero») y su póster,
    después las plataformas (nombre, GLB, foto, ficha), textos, reflejo on/off, colores.

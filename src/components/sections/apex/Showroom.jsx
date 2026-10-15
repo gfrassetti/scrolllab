@@ -34,6 +34,61 @@ import { showroom1, showroom2, showroom3, showroomEntry, variants } from './asse
 const DISPLAY = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif" }
 const LABEL = { fontFamily: "'Archivo', 'Inter Tight', sans-serif", fontStretch: '112%', fontVariationSettings: "'wdth' 112" }
 
+// The scene is built far from the visitor and in slices: one long task here is a
+// frozen screen when the phone reaches the section. Each slice yields to scroll.
+const yieldToScroll = () =>
+  new Promise((resolve) => {
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => resolve(), { timeout: 250 })
+    else setTimeout(resolve, 16)
+  })
+
+// The demo cars ship a phone twin (car-1-m.glb: 2K colour, 1K data maps: ~33 MB of
+// GPU memory instead of ~200 per car, and a lighter download). Any other URL is
+// used as it is; if the twin is missing, the original loads.
+const phoneVariant = (url, phone) => (phone && /^\/apex\/showroom\/car-\d\.glb$/.test(url) ? url.replace(/\.glb$/, '-m.glb') : url)
+
+// A phone does not need 4K maps: a 4096² map is ~90 MB of GPU memory with its
+// mip chain and ~1 s of upload on the first frame. They are re-sampled off the
+// main thread (createImageBitmap) before anything reaches the GPU. Colour maps
+// keep 2048, the data maps (normal, metal/rough, clearcoat…) 1024.
+const COLOUR_SLOTS = new Set(['map', 'emissiveMap'])
+async function capTextures(root, colourCap = 2048, dataCap = 1024) {
+  const jobs = new Map()
+  root.traverse((node) => {
+    if (!node.isMesh || !node.material) return
+    const mats = Array.isArray(node.material) ? node.material : [node.material]
+    mats.forEach((m) => {
+      Object.entries(m).forEach(([slot, tex]) => {
+        if (tex?.isTexture && tex.image && !jobs.has(tex)) jobs.set(tex, COLOUR_SLOTS.has(slot) ? colourCap : dataCap)
+      })
+    })
+  })
+  await Promise.all(
+    [...jobs].map(async ([tex, cap]) => {
+      const img = tex.image
+      const w = img.width || img.naturalWidth
+      const h = img.height || img.naturalHeight
+      if (!w || !h || Math.max(w, h) <= cap) return
+      const k = cap / Math.max(w, h)
+      try {
+        const small = await createImageBitmap(img, {
+          resizeWidth: Math.max(1, Math.round(w * k)),
+          resizeHeight: Math.max(1, Math.round(h * k)),
+          resizeQuality: 'medium',
+          premultiplyAlpha: 'none',
+          colorSpaceConversion: 'none',
+          imageOrientation: 'from-image',
+        })
+        tex.image = small
+        tex.needsUpdate = true
+        img.close?.()
+      } catch {
+        /* keeps the original */
+      }
+    }),
+  )
+}
+
 const DEFAULT_CARS = [
   { name: 'Apex Saloon', modelUrl: '/apex/showroom/car-1.glb', image: showroom1, specs: 'Year | 2026\nPower | 580 kW\nRange | 620 km\nTop speed | 250 km/h\nWeight | 2,140 kg' },
   { name: 'Apex Coupé', modelUrl: '/apex/showroom/car-2.glb', image: showroom2, specs: 'Year | 2027\nPower | 720 kW\nRange | 540 km\nTop speed | 290 km/h\nWeight | 1,960 kg' },
@@ -325,9 +380,19 @@ export default function Showroom({
       // a room that does not load drops the section to its still version.
       const [room, ...carScenes] = await Promise.all([
         roomUrl ? load(roomUrl) : null,
-        ...list.map((c) => load(c.modelUrl).catch(() => new THREE.Group())),
+        ...list.map((c) =>
+          load(phoneVariant(c.modelUrl, phone))
+            .catch(() => load(c.modelUrl))
+            .catch(() => new THREE.Group()),
+        ),
       ])
       draco.dispose()
+      if (disposed) return
+      if (phone) {
+        await Promise.all([room, ...carScenes].map((o) => o && capTextures(o)))
+        if (disposed) return
+      }
+      await yieldToScroll()
       if (disposed) return
 
       const L = readLayout(THREE, room)
@@ -391,6 +456,8 @@ export default function Showroom({
       // Reflections in the paint: our room, rendered once into an environment
       // map (its light rings show in the cars); any other room or none, a
       // neutral studio.
+      await yieldToScroll()
+      if (disposed) return
       const pmrem = new THREE.PMREMGenerator(renderer)
       let env
       if (room && baked) {
@@ -425,6 +492,9 @@ export default function Showroom({
         floor.material.transparent = true
         floor.material.opacity = 0.86
       }
+
+      await yieldToScroll()
+      if (disposed) return
 
       // The objects on their stations, side on to the centre (length tangent to the circle).
       const turn = []
@@ -470,12 +540,46 @@ export default function Showroom({
         panel.lookAt(x, st.y, z)
         panel.rotation.z = st.phi + Math.PI / 2
         scene.add(panel)
+        // Phone: no rim light. Every area light is a pass of the paint shader.
+        if (phone) return
         // a low rim from the room centre so the flank facing the camera reads
         const rim = new THREE.RectAreaLight('#dfe8ff', 2.2, 4.5 * L.s, 1.2 * L.s)
         rim.position.set(L.cx + (x - L.cx) * 0.35, st.y + 1.26 * L.s, L.cz + (z - L.cz) * 0.35)
         rim.lookAt(x, st.y + 0.66 * L.s, z)
         scene.add(rim)
       })
+
+      // Warm-up, now and not when the visitor lands: the shader programs are
+      // compiled (in parallel where the browser can) and the textures sent to the
+      // GPU one per slice, so the first frame on screen has nothing left to do.
+      await yieldToScroll()
+      const textures = new Set()
+      scene.traverse((node) => {
+        if (!node.material) return
+        const mats = Array.isArray(node.material) ? node.material : [node.material]
+        mats.forEach((m) =>
+          Object.values(m).forEach((v) => {
+            if (v?.isTexture && !v.isRenderTargetTexture && v.image) textures.add(v)
+          }),
+        )
+      })
+      // Left while warming up: the renderer and the environment go with it.
+      const abandon = () => {
+        env.dispose()
+        renderer.dispose()
+      }
+      for (const tex of textures) {
+        if (disposed) return abandon()
+        renderer.initTexture(tex)
+        await yieldToScroll()
+      }
+      if (disposed) return abandon()
+      try {
+        await renderer.compileAsync(scene, camera)
+      } catch {
+        /* the first frame compiles what is left */
+      }
+      if (disposed) return abandon()
 
       const size = () => {
         const w = canvas.clientWidth || window.innerWidth
