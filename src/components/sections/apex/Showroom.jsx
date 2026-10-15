@@ -354,7 +354,30 @@ export default function Showroom({
     let disposed = false
     let cleanup = () => {}
 
+    // The heavy steps (parse, environment map, shader compile) are synchronous
+    // and long: they wait for a pause in the scroll instead of landing in the
+    // middle of a swipe. Once the section is on screen there is nothing to wait for.
+    let lastMove = 0
+    let inView = false
+    const touched = () => {
+      lastMove = performance.now()
+    }
+    window.addEventListener('scroll', touched, { passive: true })
+    window.addEventListener('touchmove', touched, { passive: true })
+    window.addEventListener('wheel', touched, { passive: true })
+    const watch = new IntersectionObserver(([e]) => {
+      inView = e.isIntersecting
+    })
+    watch.observe(root)
+    const calm = async () => {
+      await yieldToScroll()
+      while (!disposed && !inView && performance.now() - lastMove < 160) {
+        await new Promise((resolve) => setTimeout(resolve, 60))
+      }
+    }
+
     const boot = async () => {
+      await calm()
       const THREE = await import('three')
       const [{ GLTFLoader }, { DRACOLoader }, { Reflector }, { RectAreaLightUniformsLib }, { RoomEnvironment }] = await Promise.all([
         import('three/examples/jsm/loaders/GLTFLoader.js'),
@@ -380,25 +403,46 @@ export default function Showroom({
 
       const draco = new DRACOLoader().setDecoderPath(dracoPath)
       const loader = new GLTFLoader().setDRACOLoader(draco)
-      const load = (url) => new Promise((resolve, reject) => loader.load(url, (g) => resolve(g.scene), undefined, reject))
+      const fetchBuf = async (url) => {
+        const res = await fetch(url)
+        if (!res.ok) throw new Error(`${res.status} ${url}`)
+        return res.arrayBuffer()
+      }
+      const parse = (buf) => new Promise((resolve, reject) => loader.parse(buf, '', (g) => resolve(g.scene), reject))
 
       // A model that does not load (a wrong URL) leaves its plinth empty; only
       // a room that does not load drops the section to its still version.
-      const [room, ...carScenes] = await Promise.all([
-        roomUrl ? load(roomUrl) : null,
-        ...list.map((c) =>
-          load(phoneVariant(c.modelUrl, phone))
-            .catch(() => load(c.modelUrl))
-            .catch(() => new THREE.Group()),
-        ),
-      ])
+      // The bytes come down together; each model is parsed on its own, on a pause.
+      const jobs = [
+        { url: roomUrl, fallback: '' },
+        ...list.map((c) => ({ url: phoneVariant(c.modelUrl, phone), fallback: c.modelUrl })),
+      ]
+      const bufs = await Promise.all(jobs.map((j) => (j.url ? fetchBuf(j.url).catch(() => null) : null)))
+      const scenes = []
+      for (let i = 0; i < jobs.length; i += 1) {
+        if (disposed) return
+        const { url, fallback } = jobs[i]
+        let scene = null
+        if (url) {
+          await calm()
+          if (bufs[i]) scene = await parse(bufs[i]).catch(() => null)
+          // The phone twin missing (the site answers with a page): the original.
+          if (!scene && fallback && fallback !== url) {
+            scene = await fetchBuf(fallback).then(parse).catch(() => null)
+          }
+        }
+        scenes.push(scene)
+      }
       draco.dispose()
       if (disposed) return
+      if (roomUrl && !scenes[0]) throw new Error('room')
+      const room = scenes[0]
+      const carScenes = scenes.slice(1).map((c) => c || new THREE.Group())
       if (phone) {
         await Promise.all([room, ...carScenes].map((o) => o && capTextures(o)))
         if (disposed) return
       }
-      await yieldToScroll()
+      await calm()
       if (disposed) return
 
       const L = readLayout(THREE, room)
@@ -462,7 +506,7 @@ export default function Showroom({
       // Reflections in the paint: our room, rendered once into an environment
       // map (its light rings show in the cars); any other room or none, a
       // neutral studio.
-      await yieldToScroll()
+      await calm()
       if (disposed) return
       const pmrem = new THREE.PMREMGenerator(renderer)
       let env
@@ -499,7 +543,7 @@ export default function Showroom({
         floor.material.opacity = 0.86
       }
 
-      await yieldToScroll()
+      await calm()
       if (disposed) return
 
       // The objects on their stations, side on to the centre (length tangent to the circle).
@@ -558,7 +602,7 @@ export default function Showroom({
       // Warm-up, now and not when the visitor lands: the shader programs are
       // compiled (in parallel where the browser can) and the textures sent to the
       // GPU one per slice, so the first frame on screen has nothing left to do.
-      await yieldToScroll()
+      await calm()
       const textures = new Set()
       scene.traverse((node) => {
         if (!node.material) return
@@ -577,7 +621,7 @@ export default function Showroom({
       for (const tex of textures) {
         if (disposed) return abandon()
         renderer.initTexture(tex)
-        await yieldToScroll()
+        await calm()
       }
       if (disposed) return abandon()
       try {
@@ -718,7 +762,10 @@ export default function Showroom({
       }
     }
 
-    // Only fetch the scene when the visitor is getting close.
+    // Only fetch the scene when the visitor is getting close. On a phone it
+    // starts later (40 % of a screen, not 150 %): the 5 MB and the GPU work
+    // landed on the carousel just above, where the visitor is swiping.
+    const phoneNear = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches
     const near = new IntersectionObserver(
       ([e]) => {
         if (!e.isIntersecting) return
@@ -727,12 +774,16 @@ export default function Showroom({
           if (!disposed) setFailed(true)
         })
       },
-      { rootMargin: '150% 0px' },
+      { rootMargin: phoneNear ? '40% 0px' : '150% 0px' },
     )
     near.observe(root)
     return () => {
       disposed = true
       near.disconnect()
+      watch.disconnect()
+      window.removeEventListener('scroll', touched)
+      window.removeEventListener('touchmove', touched)
+      window.removeEventListener('wheel', touched)
       cleanup()
     }
   }, [still, roomUrl, dracoPath, carsKey, stops, showReflections, bg, fg]) // eslint-disable-line react-hooks/exhaustive-deps
