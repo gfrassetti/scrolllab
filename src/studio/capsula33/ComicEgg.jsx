@@ -9,11 +9,25 @@ import { C, MONO } from './brand'
  * viñeta de historieta con la tripulante del café (y un planeta mordido por la ventana: el
  * devorador de mundos pasó por la vitrina). Ilustración propia; el globo y el rótulo son texto.
  */
-const IMG = '/studio/capsula33/egg/comic-1080.webp'
+// Tres tamaños (480 / 720 / 960 px de ancho, 100–400 KB): en el teléfono baja el de 720.
+const SRC = '/studio/capsula33/egg/comic-720.webp'
+const SRCSET = ['480', '720', '960'].map((w) => `/studio/capsula33/egg/comic-${w}.webp ${w}w`).join(', ')
+const SIZES = '(max-width: 640px) 60vw, 440px'
 
 export default function ComicEgg({ open, onClose }) {
   const { t } = useLang()
   const closeRef = useRef(null)
+
+  // La viñeta se baja de antemano (cuando la página ya cargó), así aparece al instante.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const im = new Image()
+      im.sizes = SIZES
+      im.srcset = SRCSET
+      im.src = SRC
+    }, 4000)
+    return () => clearTimeout(id)
+  }, [])
 
   useEffect(() => {
     if (!open) return undefined
@@ -53,7 +67,7 @@ export default function ComicEgg({ open, onClose }) {
 
       <figure className="c33-egg-panel relative w-[min(88vw,440px)]" onClick={(e) => e.stopPropagation()}>
         <div className="relative overflow-hidden" style={{ background: '#fff', padding: 7, border: '3px solid #111', boxShadow: '10px 12px 0 #111' }}>
-          <img src={IMG} alt={t('Viñeta de historieta: la tripulante del café toma su café; por la ventana, un planeta con un mordiscón')} className="block aspect-[4/5] w-full object-cover" style={{ border: '2px solid #111' }} />
+          <img src={SRC} srcSet={SRCSET} sizes={SIZES} decoding="async" alt={t('Viñeta de historieta: la tripulante del café toma su café; por la ventana, un planeta con un mordiscón')} className="block aspect-[4/5] w-full object-cover" style={{ border: '2px solid #111' }} />
 
           {/* El rótulo de narrador, abajo a la izquierda (sobre la mesa). */}
           <p
