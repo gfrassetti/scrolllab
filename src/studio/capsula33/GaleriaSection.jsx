@@ -185,64 +185,92 @@ export default function GaleriaSection() {
     { scope: rootRef, dependencies: [wide, t], revertOnUpdate: true },
   )
 
-  // El cursor en círculo sobre las fotos (solo con mouse). Se esconde apenas deja de estar sobre una
-  // foto: al scrollear con la rueda las fotos se mueven bajo el puntero sin que el navegador avise,
-  // y al salir de la galería (el pie de la página) no puede quedarse flotando.
-  const pointer = useRef({ x: -999, y: -999, over: false })
-  const moveCursor = useCallback((e) => {
-    const el = cursorRef.current
-    if (!el) return
-    pointer.current = { x: e.clientX, y: e.clientY, over: true }
-    el.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`
-  }, [])
+  // El cursor de la galería (solo con mouse). Dentro de la sección el cursor del sistema no aparece
+  // nunca (ni entre foto y foto): un único punto naranja te sigue con un poco de inercia y, sobre una
+  // foto, se agranda a «Ver». Al salir de la sección se va rápido y vuelve el del sistema.
   useEffect(() => {
-    const hide = () => {
-      pointer.current.over = false
-      if (cursorRef.current) cursorRef.current.dataset.on = '0'
-    }
-    let raf = 0
-    const check = () => {
-      raf = 0
-      const cur = cursorRef.current
-      if (!cur || cur.dataset.on !== '1') return
-      const { x, y } = pointer.current
-      const el = document.elementFromPoint(x, y)
-      if (!el || !el.closest('.c33-fig')) hide()
-    }
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(check)
-    }
     const root = rootRef.current
-    const io = new IntersectionObserver(([en]) => !en.isIntersecting && hide(), { threshold: 0 })
-    if (root) io.observe(root)
+    const cur = cursorRef.current
+    if (!root || !cur) return undefined
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return undefined
+    const st = { x: -200, y: -200, tx: -200, ty: -200, on: false, view: false, raf: 0, seen: false }
+    const apply = () => {
+      st.raf = 0
+      st.x += (st.tx - st.x) * 0.28
+      st.y += (st.ty - st.y) * 0.28
+      cur.style.transform = `translate3d(${st.x.toFixed(1)}px, ${st.y.toFixed(1)}px, 0) translate(-50%, -50%)`
+      if (st.on && (Math.abs(st.tx - st.x) > 0.3 || Math.abs(st.ty - st.y) > 0.3)) st.raf = requestAnimationFrame(apply)
+    }
+    const kick = () => {
+      if (!st.raf) st.raf = requestAnimationFrame(apply)
+    }
+    const setOn = (on) => {
+      if (on === st.on) return
+      st.on = on
+      cur.dataset.on = on ? '1' : '0'
+      root.classList.toggle('c33-gal-hidecursor', on)
+      if (on) kick()
+    }
+    const setView = (view) => {
+      if (view === st.view) return
+      st.view = view
+      cur.dataset.mode = view ? 'view' : 'dot'
+    }
+    const overFig = (x, y) => {
+      const el = document.elementFromPoint(x, y)
+      return el && root.contains(el) ? !!el.closest('.c33-fig') : null // null: fuera de la sección
+    }
+    const onMove = (e) => {
+      if (e.pointerType !== 'mouse') return
+      st.tx = e.clientX
+      st.ty = e.clientY
+      if (!st.on) {
+        // Entra ya en su lugar (sin barrer desde un costado).
+        st.x = st.tx
+        st.y = st.ty
+        setOn(true)
+      }
+      setView(!!e.target.closest?.('.c33-fig'))
+      kick()
+    }
+    const onLeave = () => setOn(false)
+    // Al scrollear con la rueda las fotos se mueven bajo el puntero sin que el navegador avise.
+    let sraf = 0
+    const onScroll = () => {
+      if (sraf || !st.on) return
+      sraf = requestAnimationFrame(() => {
+        sraf = 0
+        const over = overFig(st.tx, st.ty)
+        if (over === null) setOn(false)
+        else setView(over)
+      })
+    }
+    const io = new IntersectionObserver(([en]) => !en.isIntersecting && setOn(false), { threshold: 0 })
+    io.observe(root)
+    root.addEventListener('pointermove', onMove)
+    root.addEventListener('pointerleave', onLeave)
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('blur', hide)
-    document.documentElement.addEventListener('mouseleave', hide)
+    window.addEventListener('blur', onLeave)
+    document.documentElement.addEventListener('mouseleave', onLeave)
     return () => {
-      cancelAnimationFrame(raf)
+      cancelAnimationFrame(st.raf)
+      cancelAnimationFrame(sraf)
       io.disconnect()
+      root.classList.remove('c33-gal-hidecursor')
+      root.removeEventListener('pointermove', onMove)
+      root.removeEventListener('pointerleave', onLeave)
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('blur', hide)
-      document.documentElement.removeEventListener('mouseleave', hide)
+      window.removeEventListener('blur', onLeave)
+      document.documentElement.removeEventListener('mouseleave', onLeave)
     }
   }, [])
-  // Con la vista ampliada abierta no hay círculo.
+  // Con la vista ampliada abierta no hay punto (y vuelve el cursor del sistema).
   useEffect(() => {
-    if (open >= 0 && cursorRef.current) cursorRef.current.dataset.on = '0'
+    if (open < 0) return
+    const cur = cursorRef.current
+    if (cur) cur.dataset.on = '0'
+    rootRef.current?.classList.remove('c33-gal-hidecursor')
   }, [open])
-  const onEnter = useCallback(
-    (e) => {
-      if (e.pointerType !== 'mouse') return
-      const el = cursorRef.current
-      if (!el) return
-      moveCursor(e)
-      el.dataset.on = '1'
-    },
-    [moveCursor],
-  )
-  const onLeave = useCallback(() => {
-    if (cursorRef.current) cursorRef.current.dataset.on = '0'
-  }, [])
 
   // Un solo refresh del recorrido cuando están las seis fotos (con la ruta ya medida al cargar).
   const loaded = useRef(0)
@@ -303,11 +331,8 @@ export default function GaleriaSection() {
               <button
                 type="button"
                 onClick={() => setOpen(i)}
-                onPointerEnter={onEnter}
-                onPointerMove={moveCursor}
-                onPointerLeave={onLeave}
                 aria-label={`${t('Agrandar')}: ${t(p.title)}`}
-                className="c33-fig relative z-10 block w-full cursor-none overflow-hidden rounded-[3px] text-left lg:cursor-none"
+                className="c33-fig relative z-10 block w-full overflow-hidden rounded-[3px] text-left"
                 style={{ contain: 'paint' }}
               >
                 <span ref={set('figs', i)} className="relative block overflow-hidden rounded-[3px]">
@@ -352,15 +377,20 @@ export default function GaleriaSection() {
       {typeof document !== 'undefined'
         ? createPortal(
             <>
-              {/* El cursor: un círculo con «Ver» sobre las fotos. */}
+              {/* El cursor de la galería: un punto que sobre las fotos se agranda a «Ver». */}
               <div
                 ref={cursorRef}
                 aria-hidden="true"
                 data-on="0"
-                className="c33-cursor pointer-events-none fixed top-0 left-0 z-[60] grid h-[84px] w-[84px] place-items-center rounded-full text-[12px] font-semibold tracking-[0.16em] uppercase mix-blend-normal"
-                style={{ ...MONO, background: C.neon, color: '#0b0c0f' }}
+                data-mode="dot"
+                className="c33-cursor pointer-events-none fixed top-0 left-0 z-[60] h-[84px] w-[84px]"
               >
-                {t('Ver')}
+                <span
+                  className="c33-cursor-disc grid h-full w-full place-items-center rounded-full text-[12px] font-semibold tracking-[0.16em] uppercase"
+                  style={{ ...MONO, background: C.neon, color: '#0b0c0f' }}
+                >
+                  <span className="c33-cursor-label">{t('Ver')}</span>
+                </span>
               </div>
 
               {/* La foto, a pantalla completa. */}
@@ -436,9 +466,14 @@ export default function GaleriaSection() {
         : null}
 
       <style>{`
-        .c33-cursor { transform: translate3d(-100px, -100px, 0); opacity: 0; scale: 0.4; transition: opacity 220ms ease-out, scale 380ms cubic-bezier(0.22,1,0.36,1); }
-        .c33-cursor[data-on='1'] { opacity: 1; scale: 1; }
-        @media (hover: none) { .c33-cursor { display: none; } }
+        .c33-cursor { transform: translate3d(-200px, -200px, 0); opacity: 0; transition: opacity 140ms linear; }
+        .c33-cursor[data-on='1'] { opacity: 1; }
+        .c33-cursor-disc { transform: scale(0.14); transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .c33-cursor[data-mode='view'] .c33-cursor-disc { transform: scale(1); }
+        .c33-cursor-label { opacity: 0; transition: opacity 120ms linear; }
+        .c33-cursor[data-mode='view'] .c33-cursor-label { opacity: 1; transition: opacity 200ms linear 80ms; }
+        @media (hover: hover) and (pointer: fine) { .c33-gal-hidecursor, .c33-gal-hidecursor * { cursor: none !important; } }
+        @media (hover: none), (pointer: coarse) { .c33-cursor { display: none; } }
         .c33-fig:focus-visible { outline: 2px solid ${C.neon}; outline-offset: 4px; }
         @media (hover: none) { .c33-fig { cursor: pointer; } }
         @keyframes c33-light-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
