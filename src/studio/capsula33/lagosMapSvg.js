@@ -75,9 +75,16 @@ const DISP = "'Chakra Petch', 'Roboto Mono', sans-serif"
 // dentro de un grupo espejado en y alrededor de FC; los textos se escriben aparte, derechos.
 const FC = 1680
 
-// La ruta (eje), de arriba (el Lácar, la puerta del domo) hacia abajo (el lago mayor), ya espejada.
-export const ROUTE_D =
+// La ruta (eje) de arriba hacia abajo: sale del lago mayor (Nahuel Huapi, arriba) y baja por los
+// siete lagos hasta el Lácar, junto al domo de San Martín de los Andes (abajo). Está medida sobre el
+// dibujo ya espejado (con el Lácar arriba): se pasa a las coordenadas del papel y se la da vuelta.
+const ROUTE_MIRRORED =
   'M676 134 L700 102 L830 102 L866 140 L866 312 L826 350 L646 350 L630 380 L634 690 L676 750 L765 858 L855 968 L930 1076 L985 1132 L1000 1160 L1000 1330 L950 1384 L918 1418 L918 1448'
+const routeFromNahuel = (d) => {
+  const pts = [...d.matchAll(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g)].map((m) => [Number(m[1]), FC - Number(m[2])])
+  return 'M' + pts.reverse().map((p) => p.join(' ')).join(' L')
+}
+export const ROUTE_D = routeFromNahuel(ROUTE_MIRRORED)
 
 /** Polígono redondeado (esquinas en chaflán), como las regiones del mapa. */
 const poly = (pts) => 'M' + pts.map((p) => p.join(' ')).join(' L') + ' Z'
@@ -117,8 +124,7 @@ const lines = (x, y, arr0, opts = {}) => {
   const arr = translateLines(arr0)
   const lh = opts.lh || 14
   if (!FLIP) return arr.map((s, i) => rawText(x, y + i * lh, s, opts)).join('')
-  const y0 = FC - y - (arr.length - 1) * lh + 0.72 * (opts.size || 13)
-  FLIP_TEXT.push(arr.map((s, i) => rawText(x + FLIP_DX, Math.round(y0 + i * lh), s, opts)).join(''))
+  FLIP_TEXT.push(arr.map((s, i) => rawText(x + FLIP_DX, y + i * lh, s, opts)).join(''))
   return ''
 }
 const text = (x, y, s, opts = {}) => lines(x, y, [s], opts)
@@ -127,7 +133,7 @@ const flipped = (fn) => {
   FLIP_TEXT.length = 0
   const shapes = fn()
   FLIP = false
-  return { shapes: `<g transform="matrix(1 0 0 -1 0 ${FC})">${shapes}</g>`, texts: FLIP_TEXT.join('') }
+  return { shapes: `<g>${shapes}</g>`, texts: FLIP_TEXT.join('') }
 }
 
 const lake = (d, { fill = C.beige, stroke = C.red, sw = 4 } = {}) =>
@@ -227,8 +233,8 @@ function domeSection() {
   return s
 }
 
-// El área restringida, más chica, abajo a la derecha (donde ahora está el lago mayor).
-const RS = { k: 0.62, x: 490.5, y: 530.2 }
+// El área restringida, abajo a la derecha, como en el papel.
+const RS = { k: 1, x: 0, y: 0 }
 const RESTRICTED_PTS = [
   [970, 1290],
   [1180, 1290],
@@ -567,16 +573,17 @@ export const MAP_SVG = paperSvgFor('es')
 export const HOLO_SVG = holoSvgFor('es')
 
 /**
- * Las escalas, en el orden de la ruta (del Lácar, arriba, al lago mayor, abajo):
+ * Las escalas, en el orden de la ruta (del lago mayor, arriba, al Lácar, abajo, junto al domo):
  * [nombre, número en el mapa, caja del lago (x, y, ancho, alto), texto].
  */
-export const STOPS = [
-  ['Lago Lácar', '01', [646, 198, 160, 100], 'Puerto de partida: la ruta sale de San Martín de los Andes, a orillas del Lácar.'],
+const STOPS_MIRRORED = [
+  ['Lago Lácar', '01', [646, 198, 160, 100], 'Puerto de llegada: la ruta termina en San Martín de los Andes, a orillas del Lácar.'],
   ['Lago Machónico', '02', [416, 350, 224, 238], 'Pequeño y tranquilo: un lago angosto de tránsito rápido.'],
   ['Lago Falkner', '03', [478, 690, 82, 72], 'Área abierta de exploración, con vistas impresionantes.'],
   ['Lago Villarino', '04', [664, 820, 72, 34], 'Largo y calmo, con el camino y el bosque al lado: un canal natural de conexión.'],
   ['Lago Escondido', '05', [668, 866, 82, 58], 'Aguas tranquilas, rodeadas de bosque. Casi no se ve desde la ruta.'],
   ['Lago Correntoso', '06', [846, 806, 82, 100], 'Famoso por su río, uno de los más cortos del mundo: flujo permanente entre sistemas.'],
   ['Lago Espejo', '07', [822, 1062, 98, 52], 'Sus aguas calmas marcan una pausa dentro del recorrido.'],
-  ['Lago Nahuel Huapi', 'Bonus', [796, 1414, 190, 106], 'El lago mayor del sistema: acá termina la ruta, en Villa La Angostura.'],
+  ['Lago Nahuel Huapi', 'Bonus', [796, 1414, 190, 106], 'El lago mayor del sistema: acá empieza la ruta, en Villa La Angostura.'],
 ]
+export const STOPS = STOPS_MIRRORED.map(([name, num, [x, y, w, h], note]) => [name, num, [x, FC - (y + h), w, h], note]).reverse()

@@ -7,8 +7,8 @@ import { useLang } from './i18nCore'
 
 /**
  * cāpsula33 — «La ruta»: el mapa «Base 7-Lagos» que el local tiene en la mesa,
- * redibujado en vector (mismos paneles, lagos, domo en corte y textos), con el norte
- * arriba como el mapa real: el Lácar arriba, el Nahuel Huapi abajo.
+ * redibujado en vector (mismos paneles, lagos, domo en corte y textos), con la orientación del
+ * papel: el Nahuel Huapi arriba y el Lácar abajo, junto al domo. La ruta baja del lago mayor a SMA.
  *
  * El mapa es un holograma de la nave: el mismo dibujo de la hoja en cian, proyectado desde
  * una base sobre la mesa negra con su cuadrícula. Al llegar a la sección la pantalla se
@@ -210,7 +210,7 @@ export default function LagosSection() {
               preserveAspectRatio="xMidYMid meet"
               className="absolute inset-0 h-full w-full"
               role="img"
-              aria-label={t('Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi')}
+              aria-label={t('Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Nahuel Huapi, en Villa La Angostura, pasa por los siete lagos y llega al lago Lácar, en San Martín de los Andes')}
             >
               <defs>
                 <filter id="c33-route-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -356,7 +356,7 @@ export default function LagosSection() {
             className="mt-4 hidden max-w-[36ch] text-[16px] leading-[1.5] opacity-0 lg:block"
             style={{ ...BODY, color: 'rgba(242,233,220,0.74)' }}
           >
-            {t('El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, de la puerta del domo en el Lácar al lago mayor.')}
+            {t('El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, del lago mayor a la puerta del domo en el Lácar.')}
           </p>
         </div>
 

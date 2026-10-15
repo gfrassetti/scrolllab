@@ -216,13 +216,13 @@ const EN = {
   'Portavasos y caja de cartón, con la marca de la cápsula.': 'Cup carrier and cardboard box, with the capsule brand.',
 
   // — Ruta 7 Lagos
-  'Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi':
-    'Map "Base 7-Lagos" as a hologram: the route leaves Lake Lácar, in San Martín de los Andes, passes through the seven lakes and reaches Lake Nahuel Huapi',
+  'Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Nahuel Huapi, en Villa La Angostura, pasa por los siete lagos y llega al lago Lácar, en San Martín de los Andes':
+    'Map "Base 7-Lagos" as a hologram: the route leaves Lake Nahuel Huapi, in Villa La Angostura, passes through the seven lakes and reaches Lake Lácar, in San Martín de los Andes',
   'Holo · C-33 / Navegación': 'Holo · C-33 / Navigation',
   'La ruta': 'The route',
   Base: 'Base',
-  'El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, de la puerta del domo en el Lácar al lago mayor.':
-    "The map on the venue's tables: the Seven Lakes route as if it were a space station, from the dome's door at the Lácar to the great lake.",
+  'El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, del lago mayor a la puerta del domo en el Lácar.':
+    "The map on the venue's tables: the Seven Lakes route as if it were a space station, from the great lake to the dome's door at the Lácar.",
   'Bonus · el lago mayor': 'Bonus · the great lake',
   'Escala {n} / 07': 'Stop {n} / 07',
   'Ruta de evacuación': 'Evacuation route',
@@ -234,14 +234,14 @@ const EN = {
   'Lago Correntoso': 'Lake Correntoso',
   'Lago Espejo': 'Lake Espejo',
   'Lago Nahuel Huapi': 'Lake Nahuel Huapi',
-  'Puerto de partida: la ruta sale de San Martín de los Andes, a orillas del Lácar.': 'Departure port: the route leaves San Martín de los Andes, on the shore of the Lácar.',
+  'Puerto de llegada: la ruta termina en San Martín de los Andes, a orillas del Lácar.': 'Arrival port: the route ends in San Martín de los Andes, on the shore of the Lácar.',
   'Pequeño y tranquilo: un lago angosto de tránsito rápido.': 'Small and calm: a narrow lake of quick passage.',
   'Área abierta de exploración, con vistas impresionantes.': 'Open exploration area with stunning views.',
   'Largo y calmo, con el camino y el bosque al lado: un canal natural de conexión.': 'Long and calm, with the road and the forest alongside: a natural connecting channel.',
   'Aguas tranquilas, rodeadas de bosque. Casi no se ve desde la ruta.': 'Calm waters surrounded by forest. Hardly visible from the road.',
   'Famoso por su río, uno de los más cortos del mundo: flujo permanente entre sistemas.': 'Famous for its river, one of the shortest in the world: a permanent flow between systems.',
   'Sus aguas calmas marcan una pausa dentro del recorrido.': 'Its calm waters mark a pause along the journey.',
-  'El lago mayor del sistema: acá termina la ruta, en Villa La Angostura.': 'The great lake of the system: the route ends here, at Villa La Angostura.',
+  'El lago mayor del sistema: acá empieza la ruta, en Villa La Angostura.': 'The great lake of the system: the route starts here, at Villa La Angostura.',
 
   // — Cómo llegar
   'Ver el mapa real del local': "See the venue's real map",
@@ -495,23 +495,23 @@ const PT = {
   'Portavasos y caja de cartón, con la marca de la cápsula.': 'Porta-copos e caixa de papelão, com a marca da cápsula.',
 
   // — Ruta 7 Lagos
-  'Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi':
-    'Mapa «Base 7-Lagos» como holograma: a rota sai do lago Lácar, em San Martín de los Andes, passa pelos sete lagos e chega ao lago Nahuel Huapi',
+  'Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Nahuel Huapi, en Villa La Angostura, pasa por los siete lagos y llega al lago Lácar, en San Martín de los Andes':
+    'Mapa «Base 7-Lagos» como holograma: a rota sai do lago Nahuel Huapi, em Villa La Angostura, passa pelos sete lagos e chega ao lago Lácar, em San Martín de los Andes',
   'Holo · C-33 / Navegación': 'Holo · C-33 / Navegação',
   'La ruta': 'A rota',
-  'El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, de la puerta del domo en el Lácar al lago mayor.':
-    'O mapa que está nas mesas do local: a rota dos sete lagos como se fosse uma estação espacial, da porta do domo no Lácar ao lago maior.',
+  'El mapa que está en las mesas del local: la ruta de los siete lagos como si fuera una estación espacial, del lago mayor a la puerta del domo en el Lácar.':
+    'O mapa que está nas mesas do local: a rota dos sete lagos como se fosse uma estação espacial, do lago maior à porta do domo no Lácar.',
   'Bonus · el lago mayor': 'Bônus · o lago maior',
   'Escala {n} / 07': 'Parada {n} / 07',
   'Ruta de evacuación': 'Rota de evacuação',
-  'Puerto de partida: la ruta sale de San Martín de los Andes, a orillas del Lácar.': 'Porto de partida: a rota sai de San Martín de los Andes, às margens do Lácar.',
+  'Puerto de llegada: la ruta termina en San Martín de los Andes, a orillas del Lácar.': 'Porto de chegada: a rota termina em San Martín de los Andes, às margens do Lácar.',
   'Pequeño y tranquilo: un lago angosto de tránsito rápido.': 'Pequeno e tranquilo: um lago estreito de trânsito rápido.',
   'Área abierta de exploración, con vistas impresionantes.': 'Área aberta de exploração, com vistas impressionantes.',
   'Largo y calmo, con el camino y el bosque al lado: un canal natural de conexión.': 'Longo e calmo, com a estrada e a floresta ao lado: um canal natural de conexão.',
   'Aguas tranquilas, rodeadas de bosque. Casi no se ve desde la ruta.': 'Águas tranquilas, cercadas de floresta. Quase não se vê da estrada.',
   'Famoso por su río, uno de los más cortos del mundo: flujo permanente entre sistemas.': 'Famoso pelo seu rio, um dos mais curtos do mundo: fluxo permanente entre sistemas.',
   'Sus aguas calmas marcan una pausa dentro del recorrido.': 'Suas águas calmas marcam uma pausa no percurso.',
-  'El lago mayor del sistema: acá termina la ruta, en Villa La Angostura.': 'O lago maior do sistema: aqui termina a rota, em Villa La Angostura.',
+  'El lago mayor del sistema: acá empieza la ruta, en Villa La Angostura.': 'O lago maior do sistema: aqui começa a rota, em Villa La Angostura.',
 
   // — Cómo llegar
   'Ver el mapa real del local': 'Ver o mapa real do local',
