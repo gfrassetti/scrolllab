@@ -487,7 +487,7 @@ export default function LlegarSection() {
           <div
             ref={set('tapHint')}
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-[11.5rem] z-10 flex justify-center px-6 transition-opacity duration-500"
+            className="pointer-events-none absolute inset-x-0 top-[4.75rem] z-10 flex justify-center px-6 transition-opacity duration-500"
             style={{ opacity: 0 }}
           >
             <span
@@ -557,7 +557,7 @@ export default function LlegarSection() {
         {/* 2. El recuadro, sobre el plano abierto. */}
         <div
           ref={set('panel')}
-          className="absolute top-20 left-4 max-w-[min(92vw,22rem)] rounded-lg p-4 opacity-0 md:left-10 lg:top-24 lg:left-[5vw]"
+          className="absolute top-20 left-4 max-w-[min(92vw,22rem)] rounded-lg p-4 opacity-0 max-sm:hidden md:left-10 lg:top-24 lg:left-[5vw]"
           style={{ background: 'rgba(11,12,15,0.86)', backdropFilter: 'blur(10px)', boxShadow: '0 18px 50px rgba(0,0,0,0.35)' }}
         >
           <p className="text-[10.5px] tracking-[0.2em] uppercase" style={{ ...MONO, color: C.neon }}>
@@ -596,6 +596,18 @@ export default function LlegarSection() {
               : t('El plano está a escala del mapa real: la lente lo deja ver y un clic lo abre entero.')}
           </p>
         </div>
+
+        {/* Solo teléfono: con el mapa real abierto, un botón chico para volver al plano. */}
+        {revealed ? (
+          <button
+            type="button"
+            onClick={close}
+            className="c33-back absolute top-[4.75rem] left-4 z-10 inline-flex h-10 items-center rounded-full px-4 text-[11px] font-semibold tracking-[0.12em] uppercase sm:hidden"
+            style={{ ...MONO, background: 'rgba(11,12,15,0.88)', color: C.cream, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
+          >
+            ← {t('Volver al plano')}
+          </button>
+        ) : null}
 
         {/* 3. Las tarjetas de los puntos de la zona. */}
         <ul
