@@ -200,6 +200,10 @@ export default function CartaSection() {
           travel = k
           reveal = clamp01((u - TRAVEL * 0.9) / 0.5)
         }
+        // Si la medida de la pantalla llega en cero (pestaña oculta al cargar), no se pinta con NaN.
+        if (!Number.isFinite(z) || z <= 0) z = 1
+        if (!Number.isFinite(cx)) cx = 0
+        if (!Number.isFinite(cy)) cy = 0
         r.world.style.transform = `translate3d(${W / 2 - cx * z}px, ${H / 2 - cy * z}px, 0) scale(${z})`
         // Las estrellas, en dos capas que se corren menos que el mapa.
         r.stars1.style.backgroundPosition = `${-cx * 0.08}px ${-cy * 0.08}px`
