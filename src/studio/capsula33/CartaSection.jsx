@@ -3,6 +3,8 @@ import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
 import { useLang } from './i18nCore'
 import { C, MONO, DISPLAY, BODY } from './brand'
+import { CARTA_PHOTOS, CARTA_PHOTO_BASE } from './cartaPhotos'
+import PlanetSurface, { PlanetRing } from './PlanetSurface'
 
 /**
  * cāpsula33 — «La carta»: el menú take-away como la pantalla de navegación de la nave.
@@ -26,6 +28,7 @@ const CATEGORIES = [
     title: 'Cafetería',
     blurb: 'Espresso a 93 grados, de especialidad.',
     planet: ['#ffb067', '#ff7a1a', '#7a2a07'],
+    ring: true,
     rows: [
       ['tag', 'Calientes'],
       ['Americano', '$4.800'],
@@ -106,6 +109,7 @@ const CATEGORIES = [
     title: 'Helados soft',
     blurb: 'Con toppings.',
     planet: ['#e8f4ff', '#8fb8e0', '#1d3550'],
+    ring: true,
     rows: [
       ['Crema', '$6.000', 'Coulis de frambuesa y crumble de avena'],
       ['Dulce de leche', '$6.000', 'Ganache de chocolate y praliné de almendras'],
@@ -117,7 +121,9 @@ const CATEGORIES = [
 const N = CATEGORIES.length
 const INTRO = 0.08
 const SEG = (1 - INTRO - 0.04) / N
-const TRAVEL = 0.34
+// El viaje de un planeta al otro ocupa la mitad de cada tramo (antes un tercio) y el tramo
+// tiene más scroll: la nave tarda ~2,5 veces más en cruzar.
+const TRAVEL = 0.5
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const lerp = (a, b, t) => a + (b - a) * t
@@ -141,7 +147,7 @@ function layoutFor(W, H) {
         const a = ((-span / 2 + (span * j) / Math.max(1, n - 1)) * Math.PI) / 180
         const rx = W * 0.27
         const ry = Math.min(H * 0.34, 30 + n * 30)
-        return { x: px + Math.cos(a) * rx * 0.62 + R * 0.6, y: py + Math.sin(a) * ry, a }
+        return { x: px + Math.cos(a) * rx * 0.62 + R * 0.6 + W * 0.02, y: py + Math.sin(a) * ry, a }
       }
       const step = n > 10 ? 27 : 36
       return { x: -W * 0.42, y: py + R + 46 + j * step, a: 0 }
@@ -198,7 +204,7 @@ export default function CartaSection() {
           z = lerp(from.z, 1, k) * (i === 0 ? 1 : 1 - 0.42 * Math.sin(Math.PI * k))
           cur = i
           travel = k
-          reveal = clamp01((u - TRAVEL * 0.9) / 0.5)
+          reveal = clamp01((u - TRAVEL * 0.9) / 0.42)
         }
         // Si la medida de la pantalla llega en cero (pestaña oculta al cargar), no se pinta con NaN.
         if (!Number.isFinite(z) || z <= 0) z = 1
@@ -279,11 +285,50 @@ export default function CartaSection() {
   }
 
   const set = (k) => (el) => (R.current[k] = el)
+
+  // La foto en miniatura de cada producto: una tarjeta que sigue al puntero (solo con mouse).
+  // Va a la derecha de la fila, sin tapar el nombre ni el precio de ningún producto.
+  const photoPos = (rect, cy) => {
+    const card = R.current.photo
+    if (!card) return
+    const w = 184
+    const h = 212
+    // A la derecha de la fila; si no entra, se pega al borde de la pantalla.
+    const x = Math.max(12, Math.min(rect.right + 18, window.innerWidth - w - 12))
+    const y = Math.min(window.innerHeight - h - 12, Math.max(64, cy - h * 0.45))
+    card.style.transform = `translate3d(${x}px, ${y}px, 0)`
+  }
+  const showPhoto = (name, price, e) => {
+    if (e.pointerType !== 'mouse') return
+    const file = CARTA_PHOTOS[name]
+    const card = R.current.photo
+    if (!file || !card) return
+    // Un producto que todavía no apareció no tiene foto (los ítems nacen con opacidad 0).
+    if (parseFloat(e.currentTarget.style.opacity || '0') < 0.5) return
+    const img = R.current.photoImg
+    img.src = `${CARTA_PHOTO_BASE}${file}`
+    img.alt = t(name)
+    R.current.photoName.textContent = t(name)
+    R.current.photoPrice.textContent = price || ''
+    const rect = e.currentTarget.getBoundingClientRect()
+    photoPos(rect, rect.top + rect.height / 2)
+    card.dataset.on = '1'
+  }
+  const hidePhoto = () => {
+    if (R.current.photo) R.current.photo.dataset.on = '0'
+  }
+  // Las fotos se bajan al rato de cargar la página, no al hover (así aparecen sin demora).
+  useEffect(() => {
+    const files = Object.values(CARTA_PHOTOS)
+    if (!files.length) return undefined
+    const id = setTimeout(() => files.forEach((f) => { const im = new Image(); im.src = `${CARTA_PHOTO_BASE}${f}` }), 2500)
+    return () => clearTimeout(id)
+  }, [])
   // La ruta une los planetas (no el centro de cada sistema: no cruza la lista de productos).
   const routeD = 'M' + L.systems.map((s) => `${s.x + s.px} ${s.y + s.py}`).join(' L')
 
   return (
-    <section ref={rootRef} id="carta" className="relative h-[820svh]" style={{ background: '#04050a', color: C.cream }}>
+    <section ref={rootRef} id="carta" className="relative h-[1300svh]" style={{ background: '#04050a', color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* Estrellas (dos capas) y la cuadrícula del radar. */}
         <div
@@ -408,7 +453,8 @@ export default function CartaSection() {
                       )
                     : null}
                 </svg>
-                {/* El planeta, con su luna. */}
+                {/* El planeta (con superficie, atmósfera y, en algunos, anillo) y su luna. */}
+                {cat.ring ? <PlanetRing id={cat.id} px={s.px} py={s.py} R={s.R} color={c1} back /> : null}
                 <div
                   aria-hidden="true"
                   className="absolute rounded-full"
@@ -418,13 +464,23 @@ export default function CartaSection() {
                     width: s.R * 2,
                     height: s.R * 2,
                     background: `radial-gradient(circle at 34% 30%, ${c1}, ${c2} 45%, ${c3} 100%)`,
-                    boxShadow: `0 0 ${s.R * 0.8}px ${c2}55, inset -${s.R * 0.25}px -${s.R * 0.2}px ${s.R * 0.5}px rgba(0,0,0,0.55)`,
+                    boxShadow: `0 0 ${s.R * 0.8}px ${c2}55, 0 0 ${s.R * 0.12}px ${c1}66`,
                   }}
                 >
+                  <PlanetSurface id={cat.id} colors={cat.planet} />
+                  {/* El sombreado de esfera va encima de la superficie. */}
+                  <span
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      boxShadow: `inset -${s.R * 0.25}px -${s.R * 0.2}px ${s.R * 0.5}px rgba(0,0,0,0.6), inset ${s.R * 0.07}px ${s.R * 0.07}px ${s.R * 0.18}px rgba(255,255,255,0.22)`,
+                      background: 'radial-gradient(circle at 30% 26%, rgba(255,255,255,0.2), transparent 32%)',
+                    }}
+                  />
                   <span className="c33-moon absolute top-1/2 left-1/2 h-0 w-0" style={{ '--r': `${s.R * 1.45}px` }}>
                     <span className="absolute h-2.5 w-2.5 rounded-full" style={{ background: '#f2e9dc', boxShadow: '0 0 10px #fff' }} />
                   </span>
                 </div>
+                {cat.ring ? <PlanetRing id={cat.id} px={s.px} py={s.py} R={s.R} color={c1} /> : null}
                 {/* El nombre del sistema. */}
                 <div
                   className="absolute"
@@ -452,12 +508,14 @@ export default function CartaSection() {
                     <div
                       key={j}
                       ref={(el) => (R.current.items[`${i}-${j}`] = el)}
-                      className="absolute flex items-start gap-2.5"
+                      className="c33-item absolute flex items-start gap-2.5 lg:gap-3"
+                      onPointerEnter={tag ? undefined : (e) => showPhoto(name, price, e)}
+                      onPointerLeave={tag ? undefined : hidePhoto}
                       style={{ left: it.x, top: it.y, transform: 'translateY(-50%)', width: L.wide ? dims.W * 0.3 : dims.W * 0.84, opacity: 0 }}
                     >
                       {tag ? (
                         <span
-                          className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.18em] uppercase"
+                          className="rounded-[2px] px-1.5 py-0.5 text-[10.5px] font-bold tracking-[0.18em] uppercase lg:text-[12px]"
                           style={{ ...MONO, background: 'rgba(127,212,255,0.16)', color: '#a9d6ff' }}
                         >
                           {t(price)}
@@ -466,12 +524,12 @@ export default function CartaSection() {
                         <>
                           <span
                             ref={(el) => (R.current.dots[`${i}-${j}`] = el)}
-                            className="mt-[0.45em] h-2 w-2 shrink-0 rounded-full"
+                            className="mt-[0.45em] h-2 w-2 shrink-0 rounded-full lg:h-2.5 lg:w-2.5"
                             style={{ background: C.neon, boxShadow: `0 0 8px ${C.neon}`, transform: 'scale(0)' }}
                           />
                           <span className="min-w-0 flex-1">
                             <span className="flex items-baseline gap-2">
-                              <span className="text-[15px] leading-tight font-medium lg:text-[16px]" style={BODY}>
+                              <span className="text-[15px] leading-tight font-medium lg:text-[19px] lg:whitespace-nowrap" style={BODY}>
                                 {t(name)}
                                 {vg ? (
                                   <span
@@ -488,13 +546,13 @@ export default function CartaSection() {
                                 style={{ borderColor: 'rgba(242,233,220,0.25)' }}
                               />
                               {price ? (
-                                <span className="text-[14px] font-semibold tabular-nums" style={{ ...MONO, color: C.neon }}>
+                                <span className="text-[14px] font-semibold tabular-nums lg:text-[17px]" style={{ ...MONO, color: C.neon }}>
                                   {price}
                                 </span>
                               ) : null}
                             </span>
                             {desc && L.wide ? (
-                              <span className="mt-0.5 block text-[12.5px] leading-[1.35]" style={{ ...BODY, color: 'rgba(242,233,220,0.55)' }}>
+                              <span className="mt-0.5 block text-[12.5px] leading-[1.35] lg:text-[14px]" style={{ ...BODY, color: 'rgba(242,233,220,0.55)' }}>
                                 {t(desc)}
                               </span>
                             ) : null}
@@ -507,6 +565,29 @@ export default function CartaSection() {
               </div>
             )
           })}
+        </div>
+
+        {/* La foto del producto bajo el puntero. */}
+        <div
+          ref={set('photo')}
+          aria-hidden="true"
+          data-on="0"
+          className="c33-photo pointer-events-none fixed top-0 left-0 z-40 w-[184px]"
+        >
+          <div className="c33-photo-in p-2" style={{ background: 'rgba(4,5,10,0.92)', border: '1px solid rgba(127,212,255,0.4)', boxShadow: '0 12px 40px rgba(0,0,0,0.6), 0 0 24px rgba(255,122,26,0.18)' }}>
+            <div className="relative aspect-square w-full overflow-hidden" style={{ background: '#0b0c0f' }}>
+              <img ref={set('photoImg')} alt="" className="h-full w-full object-cover" draggable="false" />
+              <span className="c33-photo-scan absolute inset-0" />
+              <span className="absolute top-1 left-1 h-3 w-3 border-t border-l" style={{ borderColor: C.neon }} />
+              <span className="absolute top-1 right-1 h-3 w-3 border-t border-r" style={{ borderColor: C.neon }} />
+              <span className="absolute bottom-1 left-1 h-3 w-3 border-b border-l" style={{ borderColor: C.neon }} />
+              <span className="absolute right-1 bottom-1 h-3 w-3 border-r border-b" style={{ borderColor: C.neon }} />
+            </div>
+            <div className="mt-2 flex items-baseline justify-between gap-2 px-0.5">
+              <span ref={set('photoName')} className="min-w-0 text-[13px] leading-tight font-medium" style={BODY} />
+              <span ref={set('photoPrice')} className="shrink-0 text-[13px] font-semibold tabular-nums" style={{ ...MONO, color: C.neon }} />
+            </div>
+          </div>
         </div>
 
         {/* La consola: viñeta, barrido, esquinas, lecturas y el selector de sistemas. */}
@@ -589,6 +670,12 @@ export default function CartaSection() {
         .c33-scan { background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px); mix-blend-mode: overlay; }
         @keyframes c33-orbit { from { transform: rotate(0deg) translateX(var(--r)) rotate(0deg); } to { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); } }
         .c33-moon { animation: c33-orbit 14s linear infinite; }
+        .c33-photo { opacity: 0; transition: opacity 140ms cubic-bezier(0.23,1,0.32,1); will-change: transform; }
+        .c33-photo[data-on='1'] { opacity: 1; }
+        .c33-photo-in { transform: translateY(6px) scale(0.96); transition: transform 220ms cubic-bezier(0.23,1,0.32,1); }
+        .c33-photo[data-on='1'] .c33-photo-in { transform: none; }
+        .c33-photo-scan { background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.0) 0 2px, rgba(0,0,0,0.18) 2px 3px); mix-blend-mode: multiply; }
+        @media (hover: hover) and (pointer: fine) { .c33-item { cursor: default; } .c33-item:hover { filter: brightness(1.18); } }
         .c33-ship { filter: drop-shadow(0 0 5px rgba(255,122,26,0.55)); animation: c33-ship-bob 3.2s ease-in-out infinite; }
         .c33-ship-trail { animation: c33-ship-trail 0.14s steps(1, end) infinite; }
         .c33-ship-glow { animation: c33-ship-glow 0.9s ease-in-out infinite; }
