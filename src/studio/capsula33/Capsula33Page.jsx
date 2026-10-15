@@ -10,6 +10,7 @@ import Nav from './Nav'
 import NosotrosSection from './NosotrosSection'
 import LagosSection from './LagosSection'
 import CartaSection from './CartaSection'
+import CartaPared from './CartaPared'
 import ContactSection from './ContactSection'
 import LlegarSection from './LlegarSection'
 import GaleriaSection from './GaleriaSection'
@@ -18,6 +19,10 @@ import { LangProvider } from './i18n'
 import { useLang } from './i18nCore'
 
 const LOADER_MIN_MS = 2800
+
+// Prueba de la carta: `?carta=pared` muestra la pared de cápsulas en lugar de la consola.
+const CartaView =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('carta') === 'pared' ? CartaPared : CartaSection
 
 /*
 THESIS: el café es un módulo acoplado a una nave — se aborda (loader con salto
@@ -140,7 +145,7 @@ function Capsula33() {
         <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
         <NosotrosSection />
         <MapSection onProgress={onMapProgress} onReady={onMapReady} />
-        <CartaSection />
+        <CartaView />
         <GaleriaSection />
         {/* La ruta va después de las fotos, antes de Cómo llegar (es lo menos importante para quien viene al local). */}
         <LagosSection />
