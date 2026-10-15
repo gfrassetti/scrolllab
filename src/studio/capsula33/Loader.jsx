@@ -92,11 +92,16 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
     }
     // Tamaño natural de la marca voladora y dónde empieza (donde está la del loader).
     gsap.set(fly, { x: 0, y: 0, scale: 1, opacity: 0 })
+    gsap.set(flyB.current, { x: 0, y: 0 })
     const nat = fly.getBoundingClientRect()
     const from = startEl.getBoundingClientRect()
-    const s0 = desk ? from.width / nat.width : from.width / (nat.width * (7 / 9))
+    // En el teléfono la marca del loader va en dos renglones («cāpsula» / «33»): la voladora arranca
+    // igual (el «33» abajo, al principio del renglón) y se arma en uno solo mientras vuela.
+    const wA = flyA.current.getBoundingClientRect().width
+    const s0 = desk ? from.width / nat.width : from.width / wA
     const x0 = from.left
-    const y0 = from.top + from.height / 2 - (nat.height * s0) / 2
+    const y0 = desk ? from.top + from.height / 2 - (nat.height * s0) / 2 : from.top - 0.08 * 100 * s0
+    const b0 = desk ? { x: 0, y: 0 } : { x: -wA, y: 84 }
     // Dónde termina: el texto del cartel (86 % del ancho del plano, centrado a 55 % de su alto).
     // El cartel de la escena no tiene interletraje negativo: se mide la marca sin él.
     gsap.set(fly, { letterSpacing: '0em' })
@@ -120,10 +125,12 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
       const t = target()
       const k = prog.p
       gsap.set(fly, { x: x0 + (t.x - x0) * k, y: y0 + (t.y - y0) * k, scale: s0 + (t.s - s0) * k })
+      gsap.set(flyB.current, { x: b0.x * (1 - k), y: b0.y * (1 - k) })
     }
     // El resplandor del cartel (canvas de 2048 px de ancho): mismo radio, en px locales de la voladora.
     const glow = (px) => ((px / 2048) * target().w) / target().s
     gsap.set(fly, { x: x0, y: y0, scale: s0, opacity: 1 })
+    gsap.set(flyB.current, { x: b0.x, y: b0.y })
     gsap.set(flyA.current, { color: INK })
     gsap.set(flyB.current, { color: C.cream })
     // La del loader se apaga en el mismo cuadro en que la voladora toma su lugar.
@@ -303,7 +310,7 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
         style={{ ...MONO, fontSize: 100, letterSpacing: '-0.04em', transformOrigin: '0 0', willChange: 'transform' }}
       >
         <span ref={flyA}>cāpsula</span>
-        <span ref={flyB} style={{ color: C.cream }}>
+        <span ref={flyB} className="inline-block" style={{ color: C.cream }}>
           33
         </span>
       </div>
