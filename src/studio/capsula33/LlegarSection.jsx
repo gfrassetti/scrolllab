@@ -106,38 +106,17 @@ export default function LlegarSection() {
     r.ring.style.opacity = rad > 4 && !r.open ? '1' : '0'
   }
 
-  // En el teléfono no hay puntero: un cartel que pulsa («Tocá el plano para ver el mapa real») y,
-  // cada tanto, una ventanita que se abre sobre el local y deja ver el mapa de abajo.
+  // En el teléfono no hay puntero: un cartel que pulsa («Tocá el plano para ver el mapa real»).
+  // (La lente no se anima ahí: animar una máscara sobre el plano entero cada cuadro trababa el teléfono.)
   const updateTapHint = () => {
     const r = R.current
     if (r.tapHint) r.tapHint.style.opacity = r.zoomed > 0.98 && !r.open ? '1' : '0'
   }
-  useEffect(() => {
-    if (!touch) return undefined
-    let tl = null
-    const id = setInterval(() => {
-      const r = R.current
-      if (!r.plan || r.zoomed < 0.98 || r.open || (tl && tl.isActive())) return
-      // La ventana se abre sobre el local (si cayó fuera de la pantalla, en el centro).
-      const [hx, hy] = r.hq || [0.5, 0.5]
-      lens.current.x = Math.min(0.8, Math.max(0.2, hx))
-      lens.current.y = Math.min(0.7, Math.max(0.25, hy))
-      tl = gsap.timeline({ onUpdate: paintLens })
-      tl.to(lens.current, { r: 92, duration: 0.7, ease: 'expo.out' })
-        .to(lens.current, { r: 92, duration: 1.1 })
-        .to(lens.current, { r: 0, duration: 0.6, ease: 'power2.inOut' })
-    }, 5200)
-    return () => {
-      clearInterval(id)
-      tl?.kill()
-    }
-    // paintLens y lens son estables (leen refs).
-  }, [touch])
 
   // La lente funciona cuando el plano ya llegó a la escala del mapa real.
   const lensReady = () => R.current.zoomed > 0.98 && !R.current.open
   const onMove = (e) => {
-    if (!lensReady()) return
+    if (e.pointerType === 'touch' || !lensReady()) return
     const b = R.current.card.getBoundingClientRect()
     lens.current.x = (e.clientX - b.left) / b.width
     lens.current.y = (e.clientY - b.top) / b.height
@@ -157,6 +136,13 @@ export default function LlegarSection() {
     if (r.open || r.zoomed < 0.98) return
     r.open = true
     updateTapHint()
+    if (touch) {
+      // Teléfono: el plano se funde y listo; el mapa de abajo ya está dibujado.
+      lens.current.r = 0
+      paintLens()
+      setRevealed(true)
+      return
+    }
     const b = r.card.getBoundingClientRect()
     if (e && e.clientX) {
       lens.current.x = (e.clientX - b.left) / b.width
@@ -176,6 +162,7 @@ export default function LlegarSection() {
     setRevealed(false)
     r.open = false
     updateTapHint()
+    if (touch) return
     gsap.to(lens.current, { r: 0, duration: 0.8, ease: 'expo.inOut', overwrite: 'auto', onUpdate: paintLens })
   }
 
@@ -343,7 +330,7 @@ export default function LlegarSection() {
               referrerPolicy="no-referrer-when-downgrade"
               ref={set('frame')}
               className="absolute top-0 left-0 h-full w-full border-0"
-              style={{ filter: revealed ? 'none' : TINT, pointerEvents: revealed ? 'auto' : 'none', transition: 'filter 700ms ease-out' }}
+              style={{ filter: revealed ? 'none' : TINT, pointerEvents: revealed ? 'auto' : 'none' }}
             />
           ) : null}
 
@@ -353,7 +340,12 @@ export default function LlegarSection() {
             preserveAspectRatio="none"
             className="absolute inset-0 h-full w-full"
             aria-hidden="true"
-            style={{ opacity: revealed ? 0 : 1, transition: 'opacity 400ms ease-out' }}
+            style={{
+              opacity: revealed ? 0 : 1,
+              visibility: revealed ? 'hidden' : 'visible',
+              pointerEvents: revealed ? 'none' : 'auto',
+              transition: revealed ? 'opacity 400ms ease-out, visibility 0s linear 400ms' : 'opacity 400ms ease-out',
+            }}
           >
             <defs>
               <pattern id="c33-ll-grid" width="250" height="250" patternUnits="userSpaceOnUse">

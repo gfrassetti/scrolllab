@@ -45,7 +45,7 @@ export default function CartaPared() {
     if (!act) return undefined
     const onScroll = () => setAct(null)
     const onDown = (e) => {
-      if (!e.target.closest?.('.c33-pod') && !e.target.closest?.('.c33-card')) setAct(null)
+      if (!e.target.closest?.('.c33-pod') && !e.target.closest?.('.c33-pcard')) setAct(null)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     document.addEventListener('pointerdown', onDown)
@@ -229,7 +229,7 @@ export default function CartaPared() {
       {/* La tarjeta proyectada por la cápsula abierta. */}
       {act ? (
         <div
-          className="c33-card pointer-events-none fixed z-50"
+          className="c33-pcard pointer-events-none fixed z-50"
           style={{ ...cardStyle, '--c1': act.cat.planet[0], '--c2': act.cat.planet[1], '--c3': act.cat.planet[2] }}
           role="status"
         >
@@ -309,7 +309,7 @@ export default function CartaPared() {
         .c33-pod[data-open='1'] .c33-frost { transform: translateY(-101%); }
         .c33-pod[data-open='1'] .c33-ico { transform: translate(-50%, -50%) scale(1.14); filter: drop-shadow(0 0 12px var(--c1)); }
         .c33-pod[data-open='1'] .c33-name { color: #fff; }
-        .c33-card { animation: c33-card-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+        .c33-pcard { animation: c33-card-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both; }
         @keyframes c33-card-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
         .c33-photo-scan { background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.16) 2px 3px); mix-blend-mode: multiply; }
       `}</style>

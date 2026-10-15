@@ -17,7 +17,7 @@ import { useLang } from './i18nCore'
  */
 
 const STATEMENT =
-  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección* de cine y series en vitrinas de ojo de buey. Un lugar para reunirnos.'
+  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección*. Un lugar para reunirnos.'
 
 /** Las palabras de la frase; `*` marca el tramo en naranja (funciona en cualquier idioma). */
 const wordsOf = (statement) => {
@@ -137,7 +137,7 @@ export default function NosotrosSection() {
             </figcaption>
           </figure>
 
-          {/* Lo que dice la pared, junto al ojo de buey (texto del local). */}
+          {/* La frase de la pared del local. */}
           <figure
             ref={set('poem')}
             className="relative col-start-1 row-start-1 max-w-[44rem] border-l-2 pl-5 opacity-0 lg:max-w-[min(44rem,56vw)]"
@@ -148,9 +148,6 @@ export default function NosotrosSection() {
                 'El ser humano es la única fuerza en el universo que habita las historias que cuenta sobre sí mismo. Este espacio es una cápsula de preservación de mitos de nuestra especie, un lugar para reunirnos y compartir lo que queremos ser, para no morir de realidad.',
               )}
             </blockquote>
-            <figcaption className="mt-2 text-[11px] tracking-[0.18em] uppercase" style={{ ...MONO, color: C.neon }}>
-              {t('En la pared, junto al ojo de buey')}
-            </figcaption>
           </figure>
         </div>
 

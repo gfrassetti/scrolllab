@@ -68,8 +68,8 @@ const EN = {
   'Luces del techo': 'Ceiling lights',
 
   // — Nosotros
-  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección* de cine y series en vitrinas de ojo de buey. Un lugar para reunirnos.':
-    'We are an *orange capsule* of *specialty coffee* in San Martín de los Andes: espresso, fresh pastries every day and *collectible figures* from film and series in porthole display cases. A place to gather.',
+  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección*. Un lugar para reunirnos.':
+    'We are an *orange capsule* of *specialty coffee* in San Martín de los Andes: espresso, fresh pastries every day and *collectible figures*. A place to gather.',
   'días abiertos por semana': 'days open per week',
   'horas, de martes a sábado': 'hours, Tuesday to Saturday',
   'Av. Gral. Roca, San Martín de los Andes': 'Av. Gral. Roca, San Martín de los Andes',
@@ -77,7 +77,6 @@ const EN = {
   'El salón, adentro de la cápsula': 'The salon, inside the capsule',
   'El ser humano es la única fuerza en el universo que habita las historias que cuenta sobre sí mismo. Este espacio es una cápsula de preservación de mitos de nuestra especie, un lugar para reunirnos y compartir lo que queremos ser, para no morir de realidad.':
     'The human being is the only force in the universe that inhabits the stories it tells about itself. This space is a capsule for preserving the myths of our species, a place to gather and share what we want to be, so we do not die of reality.',
-  'En la pared, junto al ojo de buey': 'On the wall, next to the porthole',
 
   // — El local (diorama)
   'El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón':
@@ -351,15 +350,14 @@ const PT = {
   'Luces del techo': 'Luzes do teto',
 
   // — Nosotros
-  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección* de cine y series en vitrinas de ojo de buey. Un lugar para reunirnos.':
-    'Somos uma *cápsula laranja* de *café de especialidade* em San Martín de los Andes: espresso, folhados todos os dias e *figuras de colecionador* de cinema e séries em vitrines de vigia. Um lugar para nos reunirmos.',
+  'Somos una *cápsula naranja* de *café de especialidad* en San Martín de los Andes: espresso, laminados de todos los días y *figuras de colección*. Un lugar para reunirnos.':
+    'Somos uma *cápsula laranja* de *café de especialidade* em San Martín de los Andes: espresso, folhados todos os dias e *figuras de colecionador*. Um lugar para nos reunirmos.',
   'días abiertos por semana': 'dias abertos por semana',
   'horas, de martes a sábado': 'horas, de terça a sábado',
   'Mesas negras frente a la banqueta naranja del salón': 'Mesas pretas em frente ao banco laranja do salão',
   'El salón, adentro de la cápsula': 'O salão, dentro da cápsula',
   'El ser humano es la única fuerza en el universo que habita las historias que cuenta sobre sí mismo. Este espacio es una cápsula de preservación de mitos de nuestra especie, un lugar para reunirnos y compartir lo que queremos ser, para no morir de realidad.':
     'O ser humano é a única força do universo que habita as histórias que conta sobre si mesmo. Este espaço é uma cápsula de preservação dos mitos da nossa espécie, um lugar para nos reunirmos e compartilhar o que queremos ser, para não morrer de realidade.',
-  'En la pared, junto al ojo de buey': 'Na parede, ao lado da vigia',
 
   // — El local (diorama)
   'El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón':

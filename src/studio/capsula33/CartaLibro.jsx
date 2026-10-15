@@ -325,11 +325,11 @@ export default function CartaLibro() {
               <div className="c33-book" data-s={spread}>
                 {Array.from({ length: LEAVES }, (_, i) => (
                   <div key={i} className="c33-leaf" data-flipped={i < spread ? '1' : '0'} style={{ zIndex: i < spread ? i + 1 : 60 - i }}>
-                    <div className="c33-face c33-front" onClick={next} data-turn={i === spread ? '1' : '0'}>
+                    <div className="c33-face c33-lf" onClick={next} data-turn={i === spread ? '1' : '0'}>
                       <PageView p={2 * i} side="right" go={go} />
                       <span className="c33-shade" />
                     </div>
-                    <div className="c33-face c33-back" onClick={prev}>
+                    <div className="c33-face c33-lb" onClick={prev}>
                       {2 * i + 1 <= LAST ? <PageView p={2 * i + 1} side="left" go={go} /> : <div className="c33-page c33-page-blank" />}
                       <span className="c33-shade" />
                     </div>
@@ -374,7 +374,7 @@ export default function CartaLibro() {
       <style>{`
         .c33-stage { --ph: min(80svh, 780px, calc((100vw - 48px) / 1.48)); --pw: calc(var(--ph) * 0.74); --u: calc(var(--pw) / 100); --k: 1; position: relative; display: flex; justify-content: center; outline: none; }
         .c33-stage[data-single='1'] { --pw: min(calc(100vw - 32px), 440px); --ph: calc(var(--pw) / 0.74); --k: 1.28; touch-action: pan-y; }
-        .c33-stage:focus-visible .c33-front[data-turn='1'] { outline: 2px solid ${C.neon}; outline-offset: -2px; }
+        .c33-stage:focus-visible .c33-lf[data-turn='1'] { outline: 2px solid ${C.neon}; outline-offset: -2px; }
 
         .c33-book { position: relative; width: calc(var(--pw) * 2); height: var(--ph); perspective: 2600px; transition: transform 900ms cubic-bezier(0.77, 0, 0.175, 1); }
         .c33-book[data-s='0'] { transform: translateX(calc(var(--pw) / -2)); }
@@ -384,14 +384,14 @@ export default function CartaLibro() {
         .c33-leaf { position: absolute; top: 0; left: var(--pw); width: var(--pw); height: var(--ph); transform-origin: left center; transform-style: preserve-3d; transition: transform 900ms cubic-bezier(0.77, 0, 0.175, 1), z-index 0s linear 450ms; }
         .c33-leaf[data-flipped='1'] { transform: rotateY(-180deg); }
         .c33-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; cursor: pointer; }
-        .c33-back { transform: rotateY(180deg); }
-        .c33-front { border-radius: 2px 10px 10px 2px; box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 28px 60px rgba(0,0,0,0.35); }
-        .c33-back { border-radius: 10px 2px 2px 10px; }
+        .c33-lb { transform: rotateY(180deg); }
+        .c33-lf { border-radius: 2px 10px 10px 2px; box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 28px 60px rgba(0,0,0,0.35); }
+        .c33-lb { border-radius: 10px 2px 2px 10px; }
         .c33-shade { position: absolute; inset: 0; pointer-events: none; }
-        .c33-front .c33-shade { background: linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0) 9%), linear-gradient(0deg, rgba(0,0,0,0.18), transparent 12%); }
-        .c33-back .c33-shade { background: linear-gradient(270deg, rgba(0,0,0,0.55), rgba(0,0,0,0) 9%), linear-gradient(0deg, rgba(0,0,0,0.18), transparent 12%); }
-        .c33-front[data-turn='1']::after { content: ''; position: absolute; right: 0; bottom: 0; width: 0; height: 0; background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,122,26,0.4)); clip-path: polygon(100% 0, 0 100%, 100% 100%); transition: width 260ms cubic-bezier(0.23,1,0.32,1), height 260ms cubic-bezier(0.23,1,0.32,1); pointer-events: none; }
-        @media (hover: hover) { .c33-front[data-turn='1']:hover::after { width: 9%; height: 6.5%; } }
+        .c33-lf .c33-shade { background: linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0) 9%), linear-gradient(0deg, rgba(0,0,0,0.18), transparent 12%); }
+        .c33-lb .c33-shade { background: linear-gradient(270deg, rgba(0,0,0,0.55), rgba(0,0,0,0) 9%), linear-gradient(0deg, rgba(0,0,0,0.18), transparent 12%); }
+        .c33-lf[data-turn='1']::after { content: ''; position: absolute; right: 0; bottom: 0; width: 0; height: 0; background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,122,26,0.4)); clip-path: polygon(100% 0, 0 100%, 100% 100%); transition: width 260ms cubic-bezier(0.23,1,0.32,1), height 260ms cubic-bezier(0.23,1,0.32,1); pointer-events: none; }
+        @media (hover: hover) { .c33-lf[data-turn='1']:hover::after { width: 9%; height: 6.5%; } }
 
         .c33-single { width: var(--pw); animation: c33-slide 380ms cubic-bezier(0.23, 1, 0.32, 1) both; }
         @keyframes c33-slide { from { opacity: 0; transform: translateX(24px); } }
