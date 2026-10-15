@@ -14,7 +14,7 @@ import { CARTA_PHOTOS, CARTA_PHOTO_BASE } from './cartaPhotos'
  * Los precios son los de la carta impresa.
  */
 
-const GIRL = '/studio/capsula33/girl-760.webp'
+const COVER = '/studio/capsula33/portada-revista.webp'
 
 // El orden de las páginas. Página 0 = tapa (derecha), 1 = izquierda de la primera apertura, etc.
 const PAGES = [
@@ -62,28 +62,15 @@ function PageView({ p, side, go, tip }) {
   if (!page) return <div className="c33-page c33-page-blank" />
 
   if (page.kind === 'cover') {
+    // La tapa es la revista «Experiencia Capsula» del local (recreada), con su frase de bienvenida.
     return (
       <div className="c33-page c33-cover" data-side="right">
-        <div className="c33-cover-glow" />
-        <p className="c33-hud" style={{ top: 'calc(var(--u) * 5)', left: 'calc(var(--u) * 6)' }}>
-          C33.02 · {t('Carta take-away')}
-        </p>
-        <p className="c33-hud" style={{ top: 'calc(var(--u) * 5)', right: 'calc(var(--u) * 6)' }}>
-          DKO-22
-        </p>
-        <h3 className="c33-cover-title" style={DISPLAY}>
-          CAPSULA<span style={{ color: C.neon }}>33</span>
-        </h3>
-        <p className="c33-cover-sub" style={MONO}>
-          {t('Sabores que conectan')}
-        </p>
-        <img src={GIRL} alt="" className="c33-cover-girl" draggable="false" />
-        <p className="c33-hud" style={{ bottom: 'calc(var(--u) * 5)', left: 'calc(var(--u) * 6)', color: C.neon }}>
-          @capsulas33
-        </p>
-        <p className="c33-hud c33-hud-turn" style={{ bottom: 'calc(var(--u) * 5)', right: 'calc(var(--u) * 6)' }}>
-          {t('Pasá la página')} →
-        </p>
+        <img
+          src={COVER}
+          alt={t('Tapa de la carta: la revista «Experiencia Capsula», con la frase «Bienvenidos exploradores de universos»')}
+          className="c33-cover-img"
+          draggable="false"
+        />
       </div>
     )
   }
@@ -511,6 +498,7 @@ export default function CartaLibro() {
 
         /* La tapa y la contratapa. */
         .c33-cover { padding: 0; background: radial-gradient(120% 70% at 50% 100%, #3a1608, #0d1424 55%, #080c15); }
+        .c33-cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
         .c33-cover-glow { position: absolute; inset: 0; background: radial-gradient(60% 45% at 50% 62%, rgba(255,122,26,0.28), transparent 70%); }
         .c33-hud { position: absolute; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: calc(calc(var(--u) * 2) * var(--k)); letter-spacing: 0.18em; text-transform: uppercase; color: rgba(169,214,255,0.65); z-index: 2; }
         .c33-hud-turn { color: rgba(242,233,220,0.8); }
