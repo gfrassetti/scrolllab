@@ -35,8 +35,9 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   const rootRef = useRef(null)
   const R = useRef({ labels: {} })
   const [hover, setHover] = useState(null)
+  const [portHover, setPortHover] = useState(false)
   const [active, setActive] = useState(null)
-  // Easter egg: tres toques seguidos sobre las vitrinas.
+  // Easter egg: el ojo de buey de la fachada (o tres toques seguidos sobre las vitrinas).
   const [egg, setEgg] = useState(false)
   const closeEgg = useCallback(() => setEgg(false), [])
   const taps = useRef([])
@@ -182,7 +183,13 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
     raf = requestAnimationFrame(loop)
     const onMove = (e) => {
       if (e.pointerType === 'touch' || !r.scene || r.overLabel || r.scene.dragged()) return
-      r.scene.setHover(r.scene.zoneAt(e.clientX, e.clientY))
+      const port = r.scene.portAt(e.clientX, e.clientY)
+      r.scene.state.portHover = port
+      if (port !== r.portHover) {
+        r.portHover = port
+        setPortHover(port)
+      }
+      r.scene.setHover(port ? null : r.scene.zoneAt(e.clientX, e.clientY))
     }
     const onKey = (e) => e.key === 'Escape' && setActive(null)
     window.addEventListener('pointermove', onMove)
@@ -203,6 +210,12 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
 
   const pickAt = (e) => {
     if (R.current.scene?.dragged()) return // terminó un giro, no es un toque
+    // El ojo de buey abre el easter egg.
+    if (R.current.scene?.portAt(e.clientX, e.clientY)) {
+      setActive(null)
+      setEgg(true)
+      return
+    }
     const id = R.current.scene?.zoneAt(e.clientX, e.clientY)
     if (tapZone(id)) return
     setActive(id || null)
@@ -241,7 +254,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
             c33
           </text>
         </svg>
-        <canvas ref={set('canvas')} onClick={pickAt} className={`absolute inset-0 h-full w-full ${dragging ? 'cursor-grabbing' : hover ? 'cursor-pointer' : labelsOn ? 'cursor-grab' : ''}`}
+        <canvas ref={set('canvas')} onClick={pickAt} className={`absolute inset-0 h-full w-full ${dragging ? 'cursor-grabbing' : hover || portHover ? 'cursor-pointer' : labelsOn ? 'cursor-grab' : ''}`}
           style={{ touchAction: 'pan-y' }} role="img" aria-label={t('El local de cāpsula33 en miniatura, en isométrico: la entrada, el jardín, las vitrinas, la barra con su pantalla y el salón')} />
 
         {/* El texto, a la izquierda (arriba en teléfono). */}

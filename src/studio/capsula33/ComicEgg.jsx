@@ -5,7 +5,7 @@ import { useLang } from './i18nCore'
 import { C, MONO } from './brand'
 
 /**
- * cāpsula33 — easter egg: tres toques seguidos sobre las vitrinas del local en 3D y aparece una
+ * cāpsula33 — easter egg: un toque en el ojo de buey del local en 3D (o tres en las vitrinas) y aparece una
  * viñeta de historieta con la tripulante del café (y un planeta mordido por la ventana: el
  * devorador de mundos pasó por la vitrina). Ilustración propia; el globo y el rótulo son texto.
  */

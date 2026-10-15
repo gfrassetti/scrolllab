@@ -66,6 +66,9 @@ export const ZONES = [
 ]
 
 export const MAP_BG = '#0b0c0f'
+
+// El ojo de buey en la foto de la fachada (u, v desde arriba a la izquierda; r en fracción del ancho).
+const PORT = { u: 0.166, v: 0.55, r: 0.075, aspect: 1400 / 640 }
 const ISO = new THREE.Vector3(-0.62, 0.92, 1).normalize() // de la esquina de la entrada, abierto al salón
 const TOP = new THREE.Vector3(0, 1, 0.0001)
 // En el teléfono (pantalla vertical) se mira más de frente a la fachada: el largo del local
@@ -135,6 +138,20 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
       facade.rotation.y = -Math.PI / 2 // mira hacia afuera (−x), como la entrada
       facade.position.set(bounds.min.x - 0.03, bounds.min.y + h / 2, (bounds.min.z + bounds.max.z) / 2)
       r.root.add(facade)
+      // El ojo de buey (en la foto: centro en 16,6 % × 55 %, radio 7,5 % del ancho) late con un aro
+      // naranja: es la puerta del easter egg.
+      const pr = PORT.r * w
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(pr * 0.9, pr * 1.18, 48),
+        new THREE.MeshBasicMaterial({ color: 0xffa040, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }),
+      )
+      ring.position.set((PORT.u - 0.5) * w, (0.5 - PORT.v) * h, 0.01)
+      // Las dos son transparentes: el aro se dibuja después de la foto (si no, la foto lo tapa).
+      facade.renderOrder = 1
+      ring.renderOrder = 2
+      facade.add(ring)
+      parts.facade = facade
+      parts.portRing = ring
     })
 
     // La losa: el local apoyado sobre un bloque oscuro con el borde de luz naranja.
@@ -251,6 +268,19 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
     const hit = ray.intersectObjects(room.pickable, false)[0]
     if (!hit) return null
     return parts.zones.find((z) => z.box.containsPoint(hit.point))?.zone.id ?? null
+  }
+
+  /** ¿El puntero está sobre el ojo de buey de la fachada (y nada lo tapa)? */
+  const portAt = (clientX, clientY) => {
+    if (!built || !parts.facade || state.rise < 0.92) return false
+    const r = canvas.getBoundingClientRect()
+    ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1)
+    ray.setFromCamera(ndc, camera)
+    const hit = ray.intersectObjects([parts.facade, ...room.pickable], false)[0]
+    if (!hit || hit.object !== parts.facade || !hit.uv) return false
+    const dx = (hit.uv.x - PORT.u) / PORT.r
+    const dy = ((1 - hit.uv.y - PORT.v) / PORT.r) / PORT.aspect
+    return dx * dx + dy * dy < 1.15
   }
 
   // --- girar y acercar ----------------------------------------------------------
@@ -382,6 +412,11 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
         z.outline.scale.y = room.root.scale.y
         z.outline.position.y = z.box.getCenter(v).y * room.root.scale.y
       }
+      if (parts.portRing) {
+        // Late suave siempre; con el puntero encima se enciende.
+        const target = state.portHover ? 1 : 0.45 + 0.4 * Math.sin(now * 0.004)
+        parts.portRing.material.opacity += (target * rise - parts.portRing.material.opacity) * 0.2
+      }
       room.screen?.draw(now)
       state.yaw += (state.tYaw - state.yaw) * 0.12
       state.elev += (state.tElev - state.elev) * 0.12
@@ -418,6 +453,7 @@ export function createMapScene({ canvas, area, onProgress = () => {}, onReady = 
       state.tZoom = 1
     },
     zoneAt,
+    portAt,
     setHover,
     labelAt,
     zoneIds: () => parts.zones.map((z) => z.zone.id),
