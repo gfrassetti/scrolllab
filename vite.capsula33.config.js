@@ -20,10 +20,11 @@ const finish = {
     fs.renameSync(`${out}/capsula33.html`, `${out}/index.html`)
     fs.cpSync(abs('./public/studio/capsula33'), `${out}/studio/capsula33`, { recursive: true })
     fs.writeFileSync(`${out}/robots.txt`, 'User-agent: *\nDisallow: /\n')
-    // Cloudflare Pages / Netlify: cabeceras (nada de índice, y las fotos y el JS con caché largo).
+    // Cloudflare: cabeceras. Nada de índice; el JS (con hash en el nombre) con caché largo; las fotos y
+    // el modelo (mismo nombre en cada versión) se revalidan siempre, así un deploy nuevo se ve enseguida.
     fs.writeFileSync(
       `${out}/_headers`,
-      '/*\n  X-Robots-Tag: noindex, nofollow, noarchive\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/studio/*\n  Cache-Control: public, max-age=86400\n',
+      '/*\n  X-Robots-Tag: noindex, nofollow, noarchive\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/studio/*\n  Cache-Control: public, no-cache\n',
     )
   },
 }
