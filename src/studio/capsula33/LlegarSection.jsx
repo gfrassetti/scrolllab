@@ -49,7 +49,7 @@ const POIS = [
   {
     id: 'chapelco',
     name: 'Cerro Chapelco',
-    note: 'El centro de esquí, subiendo por la RP 19.',
+    note: 'La antena natural: el centro de esquí, subiendo por la RP 19.',
     bearing: 133,
     dist: '16 km',
     dir: 'al sureste',
@@ -62,7 +62,7 @@ const POIS = [
     dist: '7,5 km',
     dir: 'al oeste',
   },
-  { id: 'lanin', name: 'Volcán Lanín', note: 'El volcán, hacia el norte, pasando Junín de los Andes.', bearing: 347, dist: '59 km', dir: 'al norte' },
+  { id: 'lanin', name: 'Volcán Lanín', note: 'El reactor dormido, hacia el norte, pasando Junín de los Andes.', bearing: 347, dist: '59 km', dir: 'al norte' },
 ]
 
 const ROADS = [

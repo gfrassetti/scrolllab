@@ -579,11 +579,11 @@ export const HOLO_SVG = holoSvgFor('es')
 const STOPS_MIRRORED = [
   ['Lago Lácar', '01', [646, 198, 160, 100], 'Fin del recorrido: San Martín de los Andes. El café queda a 1,2 km.'],
   ['Lago Machónico', '02', [416, 350, 224, 238], 'Angosto y quieto. Se pasa rápido.'],
-  ['Lago Falkner', '03', [478, 690, 82, 72], 'Playa larga al costado de la ruta: buena parada para estirar las piernas.'],
+  ['Lago Falkner', '03', [478, 690, 82, 72], 'Área abierta de exploración, con vistas impresionantes.'],
   ['Lago Villarino', '04', [664, 820, 72, 34], 'Pegado a la ruta, con el bosque del otro lado.'],
   ['Lago Escondido', '05', [668, 866, 82, 58], 'Hace honor al nombre: casi no se ve desde la ruta.'],
   ['Lago Correntoso', '06', [846, 806, 82, 100], 'Tiene uno de los ríos más cortos del mundo.'],
-  ['Lago Espejo', '07', [822, 1062, 98, 52], 'Sin viento, el nombre se explica solo.'],
+  ['Lago Espejo', '07', [822, 1062, 98, 52], 'Sus aguas calmas marcan una pausa dentro del recorrido.'],
   ['Lago Nahuel Huapi', 'Bonus', [796, 1414, 190, 106], 'Punto de partida: Villa La Angostura, sobre el lago más grande de la ruta.'],
 ]
 export const STOPS = STOPS_MIRRORED.map(([name, num, [x, y, w, h], note]) => [name, num, [x, FC - (y + h), w, h], note]).reverse()
