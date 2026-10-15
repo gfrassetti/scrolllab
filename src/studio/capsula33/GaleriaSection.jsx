@@ -26,7 +26,7 @@ const PANELS = [
   { index: '03', title: 'La colección', caption: 'Figuras de cine, cada una bajo su frasco de vidrio.', img: `${BASE}coleccion.webp` },
   { index: '04', title: 'La cocina', caption: 'Huevos pochados sobre yogur, con cebolla morada y eneldo.', img: `${BASE}huevos.webp` },
   { index: '05', title: 'El plato', caption: 'Tostada con hongos, crema verde y remolacha.', img: `${BASE}tostada.webp` },
-  { index: '06', title: 'La tripulación', caption: 'Bienvenidos, exploradores de universos.', img: `${BASE}tripulante.webp` },
+  { index: '06', title: 'Para llevar', caption: 'Portavasos y caja de cartón, con la marca de la cápsula.', img: `${BASE}delivery.webp` },
 ]
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))

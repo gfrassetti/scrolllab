@@ -190,6 +190,8 @@ const EN = {
   'Tostada con hongos, crema verde y remolacha.': 'Toast with mushrooms, green cream and beetroot.',
   'La tripulación': 'The crew',
   'Bienvenidos, exploradores de universos.': 'Welcome, explorers of universes.',
+  'Para llevar': 'To go',
+  'Portavasos y caja de cartón, con la marca de la cápsula.': 'Cup carrier and cardboard box, with the capsule brand.',
 
   // — Ruta 7 Lagos
   'Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi':
@@ -445,6 +447,8 @@ const PT = {
   'Tostada con hongos, crema verde y remolacha.': 'Torrada com cogumelos, creme verde e beterraba.',
   'La tripulación': 'A tripulação',
   'Bienvenidos, exploradores de universos.': 'Bem-vindos, exploradores de universos.',
+  'Para llevar': 'Para levar',
+  'Portavasos y caja de cartón, con la marca de la cápsula.': 'Porta-copos e caixa de papelão, com a marca da cápsula.',
 
   // — Ruta 7 Lagos
   'Mapa «Base 7-Lagos» como holograma: la ruta sale del lago Lácar, en San Martín de los Andes, pasa por los siete lagos y llega al lago Nahuel Huapi':
