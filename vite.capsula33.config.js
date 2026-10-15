@@ -34,11 +34,8 @@ const finish = {
     fs.renameSync(`${out}/capsula33.html`, `${out}/index.html`)
     fs.cpSync(abs('./public/studio/capsula33'), `${out}${MEDIA}`.replace(/\/$/, ''), { recursive: true })
     fs.writeFileSync(`${out}/robots.txt`, 'User-agent: *\nDisallow: /\n')
-    // Cloudflare: cabeceras. Nada de índice; el JS y las fotos (con la versión en la ruta) con caché largo.
-    fs.writeFileSync(
-      `${out}/_headers`,
-      '/*\n  X-Robots-Tag: noindex, nofollow, noarchive\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/m-*\n  Cache-Control: public, max-age=31536000, immutable\n/\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n',
-    )
+    // Cloudflare: cabeceras. Nada de índice y nada de caché (decisión del dueño): cada visita baja todo.
+    fs.writeFileSync(`${out}/_headers`, '/*\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: no-store\n')
     console.log('fotos y modelo en', MEDIA)
   },
 }
