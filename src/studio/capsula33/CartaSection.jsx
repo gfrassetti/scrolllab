@@ -330,9 +330,30 @@ export default function CartaSection() {
               vectorEffect="non-scaling-stroke"
             />
             <path ref={set('routeDone')} d={routeD} fill="none" stroke={C.neon} strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+            {/* La nave: un caza chico visto desde arriba, apuntando hacia donde va (mira a +x). */}
             <g ref={set('ship')}>
-              <path d="M14 0 L-9 -8 L-4 0 L-9 8 Z" fill={C.neon} />
-              <circle r="22" fill="none" stroke={C.neon} strokeOpacity="0.4" />
+              <g className="c33-ship">
+                {/* La estela de los motores. */}
+                <g className="c33-ship-trail" style={{ transformBox: 'fill-box', transformOrigin: '100% 50%' }}>
+                  <path d="M-15 -9 L-52 -9.6 L-15 -7 Z M-15 9 L-52 9.6 L-15 7 Z" fill={C.neon} fillOpacity="0.55" />
+                  <path d="M-15 -9 L-34 -9.2 L-15 -8 Z M-15 9 L-34 9.2 L-15 8 Z" fill="#fff4e2" fillOpacity="0.8" />
+                </g>
+                {/* Alas en X (se ven dos, abiertas), con los cañones en las puntas. */}
+                <path d="M7 -2.6 L-6 -19 L-14 -19 L-9 -9 L-12 -4 Z" fill="#aab4c2" stroke="#2a3340" strokeWidth="0.8" strokeLinejoin="round" />
+                <path d="M7 2.6 L-6 19 L-14 19 L-9 9 L-12 4 Z" fill="#aab4c2" stroke="#2a3340" strokeWidth="0.8" strokeLinejoin="round" />
+                <path d="M-6 -19 L9 -19.4 L9 -17.8 L-6 -17.6 Z M-6 19 L9 19.4 L9 17.8 L-6 17.6 Z" fill="#6c7788" stroke="#2a3340" strokeWidth="0.6" />
+                <path d="M-7 -14 L-12 -14 M-7 14 L-12 14" stroke={C.neon} strokeWidth="1.6" strokeLinecap="round" />
+                {/* Los motores. */}
+                <circle cx="-14" cy="-9.2" r="2.8" fill="#2a3340" stroke="#7a8696" strokeWidth="0.7" />
+                <circle cx="-14" cy="9.2" r="2.8" fill="#2a3340" stroke="#7a8696" strokeWidth="0.7" />
+                <circle className="c33-ship-glow" cx="-14.4" cy="-9.2" r="1.9" fill={C.neon} />
+                <circle className="c33-ship-glow" cx="-14.4" cy="9.2" r="1.9" fill={C.neon} />
+                {/* El fuselaje largo y fino, la nariz y la cabina. */}
+                <path d="M27 0 L13 -2.4 L-6 -3.6 L-13 -2 L-13 2 L-6 3.6 L13 2.4 Z" fill="#dfe5ec" stroke="#2a3340" strokeWidth="0.8" strokeLinejoin="round" />
+                <path d="M27 0 L18 -1.4 L18 1.4 Z" fill={C.neon} />
+                <ellipse cx="3" cy="0" rx="6" ry="2.1" fill="#7fd4ff" stroke="#1d3550" strokeWidth="0.7" />
+                <path d="M-1 0 L7 0" stroke="#fff" strokeOpacity="0.7" strokeWidth="0.6" />
+              </g>
             </g>
           </svg>
 
@@ -515,7 +536,9 @@ export default function CartaSection() {
             <span style={{ color: C.neon }}>{t('en órbita.')}</span>
           </h2>
           <p data-in className="mt-4 max-w-[40ch] text-[16px] leading-[1.5] opacity-0" style={{ ...BODY, color: 'rgba(242,233,220,0.75)' }}>
-            {t('La carta take-away, rubro por rubro: cafetería, smoothies, laminados y pastelería, cervezas, platos intensos y helados soft, con los precios de hoy.')}
+            {t(
+              'La carta take-away, rubro por rubro: cafetería, smoothies, laminados y pastelería, cervezas, platos intensos y helados soft, con los precios de hoy.',
+            )}
           </p>
         </div>
 
@@ -552,6 +575,12 @@ export default function CartaSection() {
         .c33-scan { background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px); mix-blend-mode: overlay; }
         @keyframes c33-orbit { from { transform: rotate(0deg) translateX(var(--r)) rotate(0deg); } to { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); } }
         .c33-moon { animation: c33-orbit 14s linear infinite; }
+        .c33-ship { filter: drop-shadow(0 0 5px rgba(255,122,26,0.55)); animation: c33-ship-bob 3.2s ease-in-out infinite; }
+        .c33-ship-trail { animation: c33-ship-trail 0.14s steps(1, end) infinite; }
+        .c33-ship-glow { animation: c33-ship-glow 0.9s ease-in-out infinite; }
+        @keyframes c33-ship-bob { 0%, 100% { transform: translateY(-1.2px) rotate(-1.5deg); } 50% { transform: translateY(1.2px) rotate(1.5deg); } }
+        @keyframes c33-ship-trail { 0% { transform: scaleX(1); } 50% { transform: scaleX(0.82); } }
+        @keyframes c33-ship-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
       `}</style>
     </section>
   )
