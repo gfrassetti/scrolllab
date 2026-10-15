@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
 import { aim } from './tilt'
@@ -7,6 +7,7 @@ import { createMapScene, MAP_BG, ZONES } from './mapScene'
 import { PRICES } from './roomModel'
 import { C, MONO, BODY, DISPLAY } from './brand'
 import { useLang, useStatus } from './i18nCore'
+import ComicEgg from './ComicEgg'
 
 /**
  * cāpsula33 — capítulo 2: el mapa vivo del local.
@@ -35,6 +36,24 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   const R = useRef({ labels: {} })
   const [hover, setHover] = useState(null)
   const [active, setActive] = useState(null)
+  // Easter egg: tres toques seguidos sobre las vitrinas.
+  const [egg, setEgg] = useState(false)
+  const closeEgg = useCallback(() => setEgg(false), [])
+  const taps = useRef([])
+  const tapZone = (id) => {
+    if (id !== 'vitrinas') {
+      taps.current = []
+      return false
+    }
+    const now = performance.now()
+    taps.current = taps.current.filter((at) => now - at < 1800)
+    taps.current.push(now)
+    if (taps.current.length < 3) return false
+    taps.current = []
+    setActive(null)
+    setEgg(true)
+    return true
+  }
   const [labelsOn, setLabelsOn] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [moved, setMoved] = useState(false) // la persona giró o acercó: aparece «Vista inicial»
@@ -185,6 +204,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
   const pickAt = (e) => {
     if (R.current.scene?.dragged()) return // terminó un giro, no es un toque
     const id = R.current.scene?.zoneAt(e.clientX, e.clientY)
+    if (tapZone(id)) return
     setActive(id || null)
   }
   const overLabel = (id) => {
@@ -275,7 +295,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                 onMouseLeave={() => overLabel(null)}
                 onFocus={() => overLabel(z.id)}
                 onBlur={() => overLabel(null)}
-                onClick={() => setActive(active === z.id ? null : z.id)}
+                onClick={() => !tapZone(z.id) && setActive(active === z.id ? null : z.id)}
                 aria-expanded={active === z.id}
                 className="c33-label absolute top-0 left-0 flex flex-col items-center"
                 style={{ opacity: labelsOn ? 1 : 0, pointerEvents: labelsOn ? 'auto' : 'none', transitionDelay: labelsOn ? `${i * 70}ms` : '0ms' }}
@@ -387,6 +407,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
         @media (hover: hover) { @keyframes c33-card-img { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } } .c33-card-img { animation: c33-card-img 520ms cubic-bezier(0.22,1,0.36,1); } .c33-map-cta:hover { background: #fff !important; } }
         .c33-map-cta:focus-visible { outline: 2px solid ${C.neon}; outline-offset: 3px; }
       `}</style>
+      <ComicEgg open={egg} onClose={closeEgg} />
     </section>
   )
 }
