@@ -330,29 +330,39 @@ export default function CartaSection() {
               vectorEffect="non-scaling-stroke"
             />
             <path ref={set('routeDone')} d={routeD} fill="none" stroke={C.neon} strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
-            {/* La nave: un caza chico visto desde arriba, apuntando hacia donde va (mira a +x). */}
+            {/* La nave: un carguero de casco redondo, dos pinzas al frente y la cabina corrida a un costado,
+                visto desde arriba y apuntando hacia donde va (mira a +x). Dibujo propio, simplificado. */}
             <g ref={set('ship')}>
               <g className="c33-ship">
-                {/* La estela de los motores. */}
+                {/* La estela del motor (la barra de popa). */}
                 <g className="c33-ship-trail" style={{ transformBox: 'fill-box', transformOrigin: '100% 50%' }}>
-                  <path d="M-15 -9 L-52 -9.6 L-15 -7 Z M-15 9 L-52 9.6 L-15 7 Z" fill={C.neon} fillOpacity="0.55" />
-                  <path d="M-15 -9 L-34 -9.2 L-15 -8 Z M-15 9 L-34 9.2 L-15 8 Z" fill="#fff4e2" fillOpacity="0.8" />
+                  <path d="M-19 -9 L-58 -4 L-58 4 L-19 9 Z" fill={C.neon} fillOpacity="0.5" />
+                  <path d="M-19 -7 L-38 -3 L-38 3 L-19 7 Z" fill="#fff4e2" fillOpacity="0.8" />
                 </g>
-                {/* Alas en X (se ven dos, abiertas), con los cañones en las puntas. */}
-                <path d="M7 -2.6 L-6 -19 L-14 -19 L-9 -9 L-12 -4 Z" fill="#aab4c2" stroke="#2a3340" strokeWidth="0.8" strokeLinejoin="round" />
-                <path d="M7 2.6 L-6 19 L-14 19 L-9 9 L-12 4 Z" fill="#aab4c2" stroke="#2a3340" strokeWidth="0.8" strokeLinejoin="round" />
-                <path d="M-6 -19 L9 -19.4 L9 -17.8 L-6 -17.6 Z M-6 19 L9 19.4 L9 17.8 L-6 17.6 Z" fill="#6c7788" stroke="#2a3340" strokeWidth="0.6" />
-                <path d="M-7 -14 L-12 -14 M-7 14 L-12 14" stroke={C.neon} strokeWidth="1.6" strokeLinecap="round" />
-                {/* Los motores. */}
-                <circle cx="-14" cy="-9.2" r="2.8" fill="#2a3340" stroke="#7a8696" strokeWidth="0.7" />
-                <circle cx="-14" cy="9.2" r="2.8" fill="#2a3340" stroke="#7a8696" strokeWidth="0.7" />
-                <circle className="c33-ship-glow" cx="-14.4" cy="-9.2" r="1.9" fill={C.neon} />
-                <circle className="c33-ship-glow" cx="-14.4" cy="9.2" r="1.9" fill={C.neon} />
-                {/* El fuselaje largo y fino, la nariz y la cabina. */}
-                <path d="M27 0 L13 -2.4 L-6 -3.6 L-13 -2 L-13 2 L-6 3.6 L13 2.4 Z" fill="#dfe5ec" stroke="#2a3340" strokeWidth="0.8" strokeLinejoin="round" />
-                <path d="M27 0 L18 -1.4 L18 1.4 Z" fill={C.neon} />
-                <ellipse cx="3" cy="0" rx="6" ry="2.1" fill="#7fd4ff" stroke="#1d3550" strokeWidth="0.7" />
-                <path d="M-1 0 L7 0" stroke="#fff" strokeOpacity="0.7" strokeWidth="0.6" />
+                {/* La cabina: un tubo largo que sale por el costado. */}
+                <rect x="8" y="12" width="20" height="5" rx="2.5" fill="#cfd6df" stroke="#2a3340" strokeWidth="0.8" />
+                <ellipse cx="25.2" cy="14.5" rx="2.6" ry="1.5" fill="#7fd4ff" stroke="#1d3550" strokeWidth="0.6" />
+                <path d="M10 14.5 L22 14.5" stroke="#2a3340" strokeOpacity="0.45" strokeWidth="0.6" />
+                {/* El casco: disco con la horquilla de proa. */}
+                <path
+                  d="M30 -6.5 L30 -2.8 L9 -2.6 L9 2.6 L30 2.8 L30 6.5 L12 13 A18.4 18.4 0 1 1 12 -13 Z"
+                  fill="#dfe5ec"
+                  stroke="#2a3340"
+                  strokeWidth="0.9"
+                  strokeLinejoin="round"
+                />
+                {/* Paneles: el anillo central, las divisiones y el plato de radar. */}
+                <circle cx="-2" cy="0" r="8.2" fill="#c3cbd6" stroke="#2a3340" strokeWidth="0.7" />
+                <circle cx="-2" cy="0" r="3.2" fill="#2a3340" />
+                <circle cx="-2" cy="0" r="1.4" fill={C.neon} className="c33-ship-glow" />
+                <path d="M-2 -8.2 L-2 -17 M-2 8.2 L-2 17 M-9.2 -4 L-15 -8 M-9.2 4 L-15 8" stroke="#6c7788" strokeWidth="0.7" strokeLinecap="round" />
+                <path d="M30 -6.5 L12 -13 M30 -4.6 L13 -4.4" stroke="#6c7788" strokeWidth="0.6" />
+                <circle cx="8" cy="-10" r="2.3" fill="#aab4c2" stroke="#2a3340" strokeWidth="0.6" />
+                <path d="M30 -5 L22 -5" stroke={C.neon} strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M30 5 L22 5" stroke={C.neon} strokeWidth="1.5" strokeLinecap="round" />
+                {/* La barra de motores de popa. */}
+                <path d="M-18.2 -8 A18.4 18.4 0 0 0 -18.2 8" fill="none" stroke="#2a3340" strokeWidth="3" strokeLinecap="round" />
+                <path className="c33-ship-glow" d="M-18.2 -7 A18.4 18.4 0 0 0 -18.2 7" fill="none" stroke={C.neon} strokeWidth="1.6" strokeLinecap="round" />
               </g>
             </g>
           </svg>
