@@ -11,6 +11,7 @@ import NosotrosSection from './NosotrosSection'
 import LagosSection from './LagosSection'
 import CartaSection from './CartaSection'
 import CartaPared from './CartaPared'
+import CartaLibro from './CartaLibro'
 import ContactSection from './ContactSection'
 import LlegarSection from './LlegarSection'
 import GaleriaSection from './GaleriaSection'
@@ -20,9 +21,10 @@ import { useLang } from './i18nCore'
 
 const LOADER_MIN_MS = 2800
 
-// La carta: la pared de cápsulas por defecto; `?carta=consola` muestra la consola de pedidos.
+// La carta: el libro por defecto; `?carta=consola` o `?carta=pared` muestran las otras versiones.
+const CARTA_VIEWS = { consola: CartaSection, pared: CartaPared, libro: CartaLibro }
 const CartaView =
-  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('carta') === 'consola' ? CartaSection : CartaPared
+  CARTA_VIEWS[typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('carta') : null] || CartaLibro
 
 /*
 THESIS: el café es un módulo acoplado a una nave — se aborda (loader con salto

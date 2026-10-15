@@ -3,7 +3,7 @@ import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { useLang } from './i18nCore'
 import { C, MONO, DISPLAY, BODY } from './brand'
 import { CARTA_PHOTOS, CARTA_PHOTO_BASE } from './cartaPhotos'
-import { CATEGORIES, isTag } from './cartaData'
+import { CATEGORIES, ICONS, groupsOf } from './cartaData'
 
 /**
  * cāpsula33 — «La carta» como la pared de cápsulas de la nave.
@@ -12,32 +12,6 @@ import { CATEGORIES, isTag } from './cartaData'
  * muestran su código, un ícono del rubro, el nombre y el precio; al pasar el mouse (o tocar)
  * el vidrio se destapa y se proyecta una tarjeta con la foto y la descripción.
  */
-
-// Íconos de línea de cada rubro (viewBox 48).
-const ICONS = {
-  cafeteria: 'M10 18h22v10a8 8 0 0 1-8 8h-6a8 8 0 0 1-8-8z M32 20h3a4 4 0 0 1 0 8h-3 M16 8c-2 2 2 3 0 6 M23 8c-2 2 2 3 0 6',
-  smoothies: 'M12 14h24l-3 24a3 3 0 0 1-3 3H18a3 3 0 0 1-3-3z M30 14l5-9 M14 23h20',
-  laminados: 'M5 31c3-15 35-15 38 0-6-4-10-4-12.5 0-3-4-8-4-11 0-3-4-8-4-14.500 0z M14 21l3 8 M24 18v10 M34 21l-3 8',
-  cervezas: 'M12 13h20v25a3 3 0 0 1-3 3H15a3 3 0 0 1-3-3z M32 19h5a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-5 M12 13c0-4 5-5 8-3 3-3 9-1 9 3 M18 21v14 M24 21v14',
-  platos: 'M7 11c11-5 23-5 34 0L24 42z M19 19a2 2 0 1 0 .1 0 M29 21a2 2 0 1 0 .1 0 M23 31a2 2 0 1 0 .1 0',
-  helados: 'M15 23h18L24 43z M13 23a11 11 0 0 1 22 0 M18 23c0-3 2-6 6-6',
-}
-
-/** Parte las filas de un rubro en grupos, cortando en cada subtítulo. */
-function groupsOf(rows) {
-  const groups = []
-  let cur = { label: null, items: [] }
-  rows.forEach((r) => {
-    if (isTag(r)) {
-      if (cur.items.length) groups.push(cur)
-      cur = { label: r[1], items: [] }
-    } else {
-      cur.items.push({ name: r[0], price: r[1], desc: r[2], vg: r[3] })
-    }
-  })
-  if (cur.items.length) groups.push(cur)
-  return groups
-}
 
 const CARD_W = 256
 
