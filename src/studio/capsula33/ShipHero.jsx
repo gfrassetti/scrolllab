@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
+import { aim } from './tilt'
 import { createCorridorScene } from './corridorScene'
 import { BOOT_STEPS } from './bootSequence'
 import { C, MONO, BODY, DISPLAY } from './brand'
@@ -41,7 +42,10 @@ const EYE_SKIN_DROP = 62
 const LINE = 'Bienvenidos, exploradores de universos. El café está del otro lado de esa puerta.'
 
 function sources() {
-  const big = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1600
+  // La toma (2688 × 1520) cubre la pantalla: en un teléfono vertical se amplía para llenar el alto y
+  // se ve una franja. Se elige la versión por el ancho al que se dibuja la toma, no por el de la pantalla.
+  const shown = Math.max(window.innerWidth, window.innerHeight * (2688 / 1520))
+  const big = shown * Math.min(window.devicePixelRatio || 1, 2) > 1600
   const s = big ? 2688 : 1400
   return {
     corridor: `${BASE}corridor-${s}.webp`,
@@ -351,8 +355,10 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
     let raf = 0
     const loop = (now) => {
       raf = requestAnimationFrame(loop)
-      s.x += (pointer.x - s.x) * 0.05
-      s.y += (pointer.y - s.y) * 0.05
+      // En el teléfono, sin el dedo apoyado, manda la inclinación (el giroscopio).
+      const target = aim(pointer)
+      s.x += (target.x - s.x) * 0.05
+      s.y += (target.y - s.y) * 0.05
       const still = scroll.current.p < 0.02
       // La tripulante, lo más cerca: el parallax más grande y una respiración lenta.
       if (r.girlWrap) r.girlWrap.style.transform = `translate3d(${s.x * -34}px, ${s.y * -16 + Math.sin(now * 0.0013) * 4}px, 0)`
@@ -536,7 +542,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
               <img
                 src="/studio/capsula33/girl-1360.webp"
                 srcSet="/studio/capsula33/girl-760.webp 760w, /studio/capsula33/girl-1360.webp 1360w"
-                sizes="(max-width: 640px) 40vw, 30vw"
+                sizes="(max-width: 640px) 30vh, 46vh"
                 alt={t('Una tripulante de pelo rosa con flequillo, casco con auriculares y placas oxidadas y collares de cuentas, toma café con las dos manos')}
                 className="h-full w-auto max-w-none"
                 style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.55))' }}

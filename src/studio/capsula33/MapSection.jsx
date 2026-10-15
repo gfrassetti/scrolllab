@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../../lib/gsap'
 import { trackPointer } from '../../lib/motion'
+import { aim } from './tilt'
 import { getLenis } from '../../hooks/useLenis'
 import { createMapScene, MAP_BG, ZONES } from './mapScene'
 import { PRICES } from './roomModel'
@@ -150,8 +151,10 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
     let raf = 0
     const loop = () => {
       raf = requestAnimationFrame(loop)
-      s.x += (pointer.x - s.x) * 0.05
-      s.y += (pointer.y - s.y) * 0.05
+      // En el teléfono, sin el dedo apoyado, el local gira con la inclinación (el giroscopio).
+      const target = aim(pointer)
+      s.x += (target.x - s.x) * 0.05
+      s.y += (target.y - s.y) * 0.05
       if (r.scene) {
         r.scene.state.px = s.x
         r.scene.state.py = s.y

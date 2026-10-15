@@ -3,6 +3,7 @@ import { gsap } from '../../lib/gsap'
 import { C, DISPLAY, MONO } from './brand'
 import { LangSwitch } from './i18n'
 import { useLang } from './i18nCore'
+import { enableTilt } from './tilt'
 
 /**
  * cāpsula33 — secuencia de abordaje (el loader).
@@ -67,6 +68,8 @@ export default function Loader({ progress, ready, calm, bridge, onBoard }) {
   }
 
   const board = () => {
+    // El giroscopio del teléfono (iOS solo da permiso dentro de este toque).
+    enableTilt()
     const root = rootRef.current
     if (!root) return
     if (calm) {
