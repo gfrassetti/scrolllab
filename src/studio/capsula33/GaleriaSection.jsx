@@ -34,7 +34,7 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v))
 export default function GaleriaSection() {
   const { t } = useLang()
   const rootRef = useRef(null)
-  const R = useRef({ figs: [], imgs: [], nums: [], caps: [] })
+  const R = useRef({ figs: [], imgs: [], nums: [], caps: [], curtains: [], cur: [] })
   const cursorRef = useRef(null)
   const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches)
   const [open, setOpen] = useState(-1)
@@ -93,76 +93,143 @@ export default function GaleriaSection() {
         { autoAlpha: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: root, start: 'top 60%', once: true } },
       )
 
+      // El destape es una cortina (del color del fondo) que se corre con `scaleX`: solo transform,
+      // va por la placa de video. Antes era `clip-path` + `filter` sobre fotos de 1080 × 1350.
       const paintPanel = (i, vis) => {
         // vis: 0 → la foto todavía no entró; 1 → ya está del todo. (Se mide por su posición en pantalla.)
-        const e = 1 - (1 - vis) ** 3
-        r.figs[i].style.clipPath = `inset(0 ${(1 - e) * 100}% 0 0)`
+        const k = Math.round(vis * 200) / 200
+        if (r.cur[i] === k) return
+        r.cur[i] = k
+        const e = 1 - (1 - k) ** 3
+        r.curtains[i].style.transform = `scaleX(${1 - e})`
         r.imgs[i].style.transform = `scale(${1.28 - 0.28 * e})`
-        r.caps[i].style.opacity = String(clamp01((vis - 0.35) / 0.5))
-        r.caps[i].style.transform = `translate3d(0, ${(1 - clamp01((vis - 0.35) / 0.5)) * 18}px, 0)`
+        const c = clamp01((k - 0.35) / 0.5)
+        r.caps[i].style.opacity = String(c)
+        r.caps[i].style.transform = `translate3d(0, ${(1 - c) * 18}px, 0)`
       }
 
       const mm = gsap.matchMedia()
       mm.add('(min-width: 1024px)', () => {
         const track = r.track
+        // Las posiciones de cada foto, medidas una sola vez por layout (no por cuadro).
+        let lefts = []
+        let widths = []
+        const measure = () => {
+          lefts = r.figs.map((fig) => (fig ? fig.parentElement.offsetLeft : 0))
+          widths = r.figs.map((fig) => (fig ? fig.parentElement.offsetWidth : 0))
+        }
+        measure()
         const dist = () => Math.max(0, track.scrollWidth - window.innerWidth)
-        // Se pinta con el tween (sigue al scrub): con el onUpdate del scroll quedaban fotos a medio destapar.
-        gsap.to(track, {
+        const update = () => {
+          const W = window.innerWidth
+          const x = gsap.getProperty(track, 'x')
+          for (let i = 0; i < r.figs.length; i++) {
+            // (Al cambiar de idioma React suelta y vuelve a tomar los nodos: durante ese instante son null.)
+            if (!r.figs[i] || !r.nums[i] || !r.imgs[i] || !r.caps[i] || !r.curtains[i]) continue
+            const left = lefts[i] + x
+            // Fuera de pantalla (y ya resuelta) no se toca nada.
+            if (left > W * 1.15 || left + widths[i] < -W * 0.25) {
+              if (left > W * 1.15) paintPanel(i, 0)
+              continue
+            }
+            // 0 cuando el borde de la foto asoma por la derecha; 1 cuando ya entró un tercio de pantalla
+            // (así la última también termina de destaparse, pegada al borde).
+            paintPanel(i, clamp01((W - left) / (W * 0.32)))
+            // El número grande va más lento que la foto (paralaje).
+            const tt = (left + widths[i] / 2 - W / 2) / W
+            r.nums[i].style.transform = `translate3d(${(tt * -90).toFixed(1)}px, 0, 0)`
+          }
+        }
+        // Se pinta con el tween (sigue al scroll): sin un segundo suavizado encima del de Lenis.
+        const tween = gsap.to(track, {
           x: () => -dist(),
           ease: 'none',
-          onUpdate: () => {
-            const W = window.innerWidth
-            r.figs.forEach((fig, i) => {
-              // (Al cambiar de idioma React suelta y vuelve a tomar los nodos: durante ese instante son null.)
-              if (!fig || !r.nums[i] || !r.imgs[i] || !r.caps[i]) return
-              const b = fig.parentElement.getBoundingClientRect()
-              // 0 cuando el borde de la foto asoma por la derecha; 1 cuando ya entró un tercio de pantalla
-              // (así la última también termina de destaparse, pegada al borde).
-              const vis = clamp01((W - b.left) / (W * 0.32))
-              paintPanel(i, vis)
-              // El número grande va más lento que la foto (paralaje).
-              const t = (b.left + b.width / 2 - W / 2) / W
-              r.nums[i].style.transform = `translate3d(${t * -90}px, 0, 0)`
-            })
-          },
+          onUpdate: update,
           scrollTrigger: {
             trigger: root,
             start: 'top top',
             end: () => `+=${dist()}`,
             pin: true,
-            scrub: 0.7,
+            scrub: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            onRefresh: () => {
+              measure()
+              update()
+            },
           },
         })
+        void tween
         return () => {
           gsap.set(track, { clearProps: 'transform' })
         }
       })
       mm.add('(max-width: 1023px)', () => {
         r.figs.forEach((fig, i) => {
-          if (!fig || !r.caps[i] || !r.imgs[i]) return
-          gsap.set(fig, { clipPath: 'inset(0 100% 0 0)' })
+          if (!fig || !r.caps[i] || !r.imgs[i] || !r.curtains[i]) return
+          gsap.set(r.curtains[i], { scaleX: 1 })
           gsap.set(r.caps[i], { opacity: 0, y: 18 })
           const tl = gsap.timeline({ scrollTrigger: { trigger: fig.parentElement, start: 'top 82%', once: true } })
-          tl.to(fig, { clipPath: 'inset(0 0% 0 0)', duration: 1.1, ease: 'expo.out' }, 0)
+          tl.to(r.curtains[i], { scaleX: 0, duration: 1.1, ease: 'expo.out' }, 0)
             .fromTo(r.imgs[i], { scale: 1.28 }, { scale: 1, duration: 1.4, ease: 'expo.out' }, 0)
             .to(r.caps[i], { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out' }, 0.35)
         })
       })
       // Estado inicial en PC (antes del primer scroll).
-      if (window.innerWidth >= 1024) r.figs.forEach((fig, i) => fig && r.imgs[i] && r.caps[i] && paintPanel(i, 0))
+      if (window.innerWidth >= 1024) {
+        r.cur = []
+        r.figs.forEach((fig, i) => fig && r.imgs[i] && r.caps[i] && r.curtains[i] && paintPanel(i, 0))
+      }
       // El contexto de useGSAP deshace el matchMedia y el SplitText al volver a armar o al salir.
     },
     { scope: rootRef, dependencies: [wide, t], revertOnUpdate: true },
   )
 
-  // El cursor en círculo sobre las fotos (solo con mouse).
+  // El cursor en círculo sobre las fotos (solo con mouse). Se esconde apenas deja de estar sobre una
+  // foto: al scrollear con la rueda las fotos se mueven bajo el puntero sin que el navegador avise,
+  // y al salir de la galería (el pie de la página) no puede quedarse flotando.
+  const pointer = useRef({ x: -999, y: -999, over: false })
   const moveCursor = useCallback((e) => {
     const el = cursorRef.current
     if (!el) return
+    pointer.current = { x: e.clientX, y: e.clientY, over: true }
     el.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`
   }, [])
+  useEffect(() => {
+    const hide = () => {
+      pointer.current.over = false
+      if (cursorRef.current) cursorRef.current.dataset.on = '0'
+    }
+    let raf = 0
+    const check = () => {
+      raf = 0
+      const cur = cursorRef.current
+      if (!cur || cur.dataset.on !== '1') return
+      const { x, y } = pointer.current
+      const el = document.elementFromPoint(x, y)
+      if (!el || !el.closest('.c33-fig')) hide()
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(check)
+    }
+    const root = rootRef.current
+    const io = new IntersectionObserver(([en]) => !en.isIntersecting && hide(), { threshold: 0 })
+    if (root) io.observe(root)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('blur', hide)
+    document.documentElement.addEventListener('mouseleave', hide)
+    return () => {
+      cancelAnimationFrame(raf)
+      io.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('blur', hide)
+      document.documentElement.removeEventListener('mouseleave', hide)
+    }
+  }, [])
+  // Con la vista ampliada abierta no hay círculo.
+  useEffect(() => {
+    if (open >= 0 && cursorRef.current) cursorRef.current.dataset.on = '0'
+  }, [open])
   const onEnter = useCallback(
     (e) => {
       if (e.pointerType !== 'mouse') return
@@ -175,6 +242,13 @@ export default function GaleriaSection() {
   )
   const onLeave = useCallback(() => {
     if (cursorRef.current) cursorRef.current.dataset.on = '0'
+  }, [])
+
+  // Un solo refresh del recorrido cuando están las seis fotos (con la ruta ya medida al cargar).
+  const loaded = useRef(0)
+  const onImgLoad = useCallback(() => {
+    loaded.current += 1
+    if (loaded.current === PANELS.length) ScrollTrigger.refresh()
   }, [])
 
   const set = (k, i) => (el) => (R.current[k][i] = el)
@@ -222,7 +296,7 @@ export default function GaleriaSection() {
                 ref={set('nums', i)}
                 aria-hidden="true"
                 className="pointer-events-none absolute -top-[0.62em] -left-[0.04em] z-0 text-[clamp(5rem,14vw,12rem)] leading-none font-semibold select-none"
-                style={{ ...DISPLAY, color: 'transparent', WebkitTextStroke: '1.5px rgba(242,233,220,0.22)' }}
+                style={{ ...DISPLAY, color: 'transparent', WebkitTextStroke: '1.5px rgba(242,233,220,0.22)', willChange: 'transform' }}
               >
                 {p.index}
               </span>
@@ -234,19 +308,26 @@ export default function GaleriaSection() {
                 onPointerLeave={onLeave}
                 aria-label={`${t('Agrandar')}: ${t(p.title)}`}
                 className="c33-fig relative z-10 block w-full cursor-none overflow-hidden rounded-[3px] text-left lg:cursor-none"
+                style={{ contain: 'paint' }}
               >
-                <span ref={set('figs', i)} className="block overflow-hidden rounded-[3px]" style={{ clipPath: wide ? 'inset(0 100% 0 0)' : undefined }}>
+                <span ref={set('figs', i)} className="relative block overflow-hidden rounded-[3px]">
                   <img
                     ref={set('imgs', i)}
                     src={p.img}
                     alt={t(p.caption)}
-                    loading="lazy"
+                    loading="eager"
                     decoding="async"
-                    onLoad={() => ScrollTrigger.refresh()}
+                    onLoad={onImgLoad}
                     width="1080"
                     height="1350"
-                    className="block aspect-[4/5] w-full object-cover lg:h-[min(64svh,44vw)] lg:w-auto"
-                    style={{ filter: 'saturate(1.05) contrast(1.03)' }}
+                    className="block aspect-[4/5] w-full object-cover will-change-transform lg:h-[min(64svh,44vw)] lg:w-auto"
+                  />
+                  {/* La cortina del destape (del color del fondo). */}
+                  <span
+                    ref={set('curtains', i)}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 will-change-transform"
+                    style={{ background: MAP_BG, transformOrigin: '100% 50%', transform: 'scaleX(1)' }}
                   />
                 </span>
               </button>

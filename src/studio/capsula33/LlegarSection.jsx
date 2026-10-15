@@ -212,7 +212,9 @@ export default function LlegarSection() {
         const bottom = H - (wide ? 150 : 170)
         POIS.forEach((poi, i) => {
           const kk = clamp01((p - (0.44 + i * 0.09)) / 0.12)
-          const c = clamp01((p - (0.5 + i * 0.09)) / 0.1)
+          // Las tarjetas entran recién cuando ya se dibujó la ruta de cada punto, de a una y con el scroll.
+          const c = clamp01((p - (0.64 + i * 0.075)) / 0.1)
+          r.cards[i].style.visibility = c > 0.002 ? 'visible' : 'hidden'
           r.cards[i].style.opacity = String(c)
           r.cards[i].style.transform = `translate3d(0, ${(1 - c) * 24}px, 0)`
           if (poi.at) {
@@ -285,7 +287,7 @@ export default function LlegarSection() {
   const mono = "'Roboto Mono', ui-monospace, monospace"
 
   return (
-    <section ref={rootRef} id="llegar" className="relative h-[460svh]" style={{ background: MAP_BG, color: C.cream }}>
+    <section ref={rootRef} id="llegar" className="relative h-[520svh]" style={{ background: MAP_BG, color: C.cream }}>
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* El plano (y el mapa real abajo), a pantalla completa. */}
         <div
