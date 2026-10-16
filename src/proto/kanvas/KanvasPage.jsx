@@ -119,6 +119,15 @@ function Kanvas() {
     let mixer = null
     let clipDur = 1
     let crystal = null
+    let lookAt = null // el «Camera_Target» del GLB: el punto que mira la cámara
+    let content = null // lo que se inclina al mouse
+    // La inclinación al mouse: con más peso que el puntero (amortiguado propio, λ ≈ 2,6).
+    const tilt = { x: 0, y: 0 }
+    const pivot = new THREE.Vector3()
+    const qx = new THREE.Quaternion()
+    const qy = new THREE.Quaternion()
+    const right = new THREE.Vector3()
+    const up = new THREE.Vector3()
     const fitHero = () => {
       const { W, H } = k.size()
       const dpr = k.renderer.getPixelRatio()
@@ -139,12 +148,23 @@ function Kanvas() {
         }
       })
       root.add(g.scene)
+      lookAt = g.scene.getObjectByName('Camera_Target') || null
+      // La cámara viene dentro del GLB: si se inclina todo, gira con la escena y no se nota nada.
+      // El contenido (todo menos la cámara y su punto de mira) va a un grupo propio, que es el que se
+      // inclina. Sigue dentro de g.scene, así las animaciones lo encuentran por nombre.
+      content = new THREE.Group()
+      content.name = 'content'
+      for (const child of [...g.scene.children]) {
+        if (child.isCamera || child === lookAt || child.getObjectByProperty('isCamera', true)) continue
+        content.add(child)
+      }
+      g.scene.add(content)
       if (g.cameras[0]) heroCam = g.cameras[0]
-      const clip = g.animations[0]
-      if (clip) {
+      // Todas las animaciones del GLB van juntas (la cámara y su punto de mira vienen por separado).
+      if (g.animations.length) {
         mixer = new THREE.AnimationMixer(g.scene)
-        mixer.clipAction(clip).play()
-        clipDur = clip.duration
+        for (const clip of g.animations) mixer.clipAction(clip).play()
+        clipDur = Math.max(...g.animations.map((c) => c.duration))
       }
       fitHero()
     })
@@ -202,8 +222,22 @@ function Kanvas() {
 
         // la cámara del GLB avanza con el progreso (del cristal a la isla entera) y orbita al puntero
         if (mixer) mixer.setTime(Math.min(clipDur - 0.001, clamp01(p / T.morph[1]) * clipDur))
-        root.rotation.y = pointer.sx * 0.18 + now * 0.00004
-        root.rotation.x = pointer.sy * 0.05
+        // El objeto entero se inclina hacia el mouse, en los ejes de la cámara (derecha / arriba como
+        // los ves) y alrededor del punto que la cámara está mirando.
+        const kt = 1 - Math.exp(-2.6 * dt)
+        tilt.x += (pointer.x - tilt.x) * kt
+        tilt.y += (pointer.y - tilt.y) * kt
+        heroCam.updateMatrixWorld()
+        right.setFromMatrixColumn(heroCam.matrixWorld, 0).normalize()
+        up.setFromMatrixColumn(heroCam.matrixWorld, 1).normalize()
+        if (content) {
+          if (lookAt) lookAt.getWorldPosition(pivot)
+          else heroCam.getWorldDirection(pivot).multiplyScalar(4).add(heroCam.position)
+          qy.setFromAxisAngle(up, tilt.x * 0.32) // mouse a la derecha → gira hacia la derecha
+          qx.setFromAxisAngle(right, tilt.y * 0.2) // mouse abajo → se inclina hacia abajo
+          content.quaternion.copy(qy).multiply(qx)
+          content.position.copy(pivot).sub(pivot.clone().applyQuaternion(content.quaternion))
+        }
         if (crystal) crystal.position.y = crystal.userData.baseY + Math.sin(now * 0.0015) * 0.06
         k.renderer.setRenderTarget(rt)
         k.renderer.render(hero, heroCam)
