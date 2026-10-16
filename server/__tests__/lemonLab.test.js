@@ -91,6 +91,8 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
     const body = ls.calls.filter((x) => x.route === 'POST /v1/checkouts').at(-1).body.data
     assert.equal(body.relationships.variant.data.id, variantOf('hosted_starter').id)
     assert.equal(body.attributes.checkout_options.skip_trial, false)
+    // El checkout muestra solo el plan elegido.
+    assert.deepEqual(body.attributes.product_options.enabled_variants, [Number(variantOf('hosted_starter').id)])
     assert.equal(body.attributes.checkout_data.custom.kind, 'lab')
     assert.equal(body.attributes.checkout_data.custom.subscriptionId, out.subscriptionId)
 

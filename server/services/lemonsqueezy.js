@@ -300,7 +300,14 @@ export function buildSubscriptionCheckoutBody({ storeId, variantId, subscription
     data: {
       type: 'checkouts',
       attributes: {
-        product_options: { redirect_url: redirectUrl, receipt_button_text: 'Open LAB', receipt_link_url: redirectUrl },
+        // Solo el plan elegido: sin esto el checkout lista las seis variantes y el
+        // comprador podía pagar otro plan (que el servidor no activa).
+        product_options: {
+          enabled_variants: [Number(variantId)],
+          redirect_url: redirectUrl,
+          receipt_button_text: 'Open LAB',
+          receipt_link_url: redirectUrl,
+        },
         checkout_options: { embed: false, media: false, logo: true, desc: true, discount: false, skip_trial: Boolean(skipTrial) },
         checkout_data: {
           ...(email ? { email } : {}),
