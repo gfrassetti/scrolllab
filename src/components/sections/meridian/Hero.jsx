@@ -323,10 +323,12 @@ export default function Hero({
         const w = stage.current.clientWidth || window.innerWidth || 0
         const h = stage.current.clientHeight || window.innerHeight || 0
         if (w < 2 || h < 2) return
-        canvas.width = Math.round(w * dpr)
-        canvas.height = Math.round(h * dpr)
-        canvas.style.width = `${w}px`
-        canvas.style.height = `${h}px`
+        const cw = Math.round(w * dpr)
+        const ch = Math.round(h * dpr)
+        if (cw === canvas.width && ch === canvas.height) return
+        // El tamaño en pantalla lo da el CSS (h-full w-full): acá solo la resolución.
+        canvas.width = cw
+        canvas.height = ch
         dirty = true
         paint(Math.max(0, shown))
       }
@@ -554,6 +556,11 @@ export default function Hero({
 
       resize()
       window.addEventListener('resize', resize)
+      // El ancho también cambia sin que cambie la ventana: en Windows la barra de scroll aparece o se
+      // va después de cargar (unos 15 px). Sin esto el canvas quedaba angosto y en la franja de la
+      // derecha se veía la foto de fondo, que no coincide con el cuadro del video.
+      const ro = new ResizeObserver(() => resize())
+      ro.observe(stage.current)
 
       {
         loadedRef.current = 0
@@ -669,6 +676,7 @@ export default function Hero({
         alive.v = false
         gsap.ticker.remove(frameTick)
         window.removeEventListener('resize', resize)
+        ro.disconnect()
         window.removeEventListener('scroll', onHeaderScroll)
         window.removeEventListener('resize', onHeaderResize)
         if (welcomeRef.current) welcomeRef.current.style.display = ''
