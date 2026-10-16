@@ -1589,7 +1589,7 @@
   "privacy": {
     "eyebrow": "Legal",
     "title": "Política de Privacidad",
-    "effectiveDate": "Vigente desde el 7 de octubre de 2026",
+    "effectiveDate": "Vigente desde el 15 de octubre de 2026",
     "intro": "Esta Política de Privacidad explica cómo {{seller}} ({{site}}) recopila, usa y protege tus datos cuando visitás el sitio, iniciás sesión, realizás una compra, descargás un producto o nos escribís por un proyecto de Estudio.",
     "sections": [
       {
@@ -1615,7 +1615,7 @@
       },
       {
         "title": "Servicios de terceros",
-        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos desde Argentina en pesos y Lemon Squeezy, nuestro revendedor autorizado (Merchant of Record), para los pagos desde otros países en dólares: Lemon Squeezy recibe tu nombre, email, país y datos de pago para cobrar, emitir la factura y calcular impuestos, y trata esos datos bajo su propia política de privacidad (lemonsqueezy.com/privacy), Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos desde Argentina en pesos y Lemon Squeezy, nuestro revendedor autorizado (Merchant of Record), para los pagos desde otros países en dólares: Lemon Squeezy recibe tu nombre, email, país y datos de pago para cobrar, emitir la factura y calcular impuestos, y trata esos datos bajo su propia política de privacidad (lemonsqueezy.com/privacy; el tratamiento puede ocurrir fuera de tu país, incluido Estados Unidos), Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
       },
       {
         "title": "Cookies y almacenamiento local",
@@ -1627,7 +1627,7 @@
       },
       {
         "title": "Tus derechos",
-        "body": "Podés solicitar acceso, corrección o eliminación de tus datos personales, y revocar el acceso de Google desde tu cuenta de Google. Algunas órdenes pueden conservarse cuando exista una obligación legal. Para ejercer tus derechos, escribinos al email indicado abajo."
+        "body": "Podés solicitar acceso, corrección o eliminación de tus datos personales, y revocar el acceso de Google desde tu cuenta de Google. Algunas órdenes pueden conservarse cuando exista una obligación legal. Los datos de pago que tratan Mercado Pago o Lemon Squeezy como responsables propios se ejercen ante ellos. Para ejercer tus derechos sobre los datos que tenemos nosotros, escribinos al email indicado abajo. La Agencia de Acceso a la Información Pública (AAIP) es el órgano de control de la Ley 25.326 y atiende las denuncias y los reclamos por incumplimientos de la protección de datos personales."
       },
       {
         "title": "Cambios a esta política",
@@ -1647,7 +1647,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 12 de octubre de 2026",
+    "effectiveDate": "Vigentes desde el 15 de octubre de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
       {
@@ -1704,7 +1704,7 @@
         "items": [
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
-          "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago en pesos o, si pagás desde otro país, mediante Lemon Squeezy en dólares, como revendedor autorizado; se renueva automáticamente al final de cada período hasta que la des de baja.",
+          "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago en pesos (el cobro con tarjeta en dólares de LAB todavía no está disponible); se renueva automáticamente al final de cada período hasta que la des de baja.",
           "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Cada cobro se puede reembolsar dentro de los {{days}} días según la Política de reembolsos; pasado ese plazo, los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
@@ -1719,8 +1719,8 @@
   "refunds": {
     "eyebrow": "Legal",
     "title": "Política de reembolsos",
-    "effectiveDate": "Vigente desde el 7 de octubre de 2026",
-    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}, pagues con Mercado Pago o con tarjeta (Lemon Squeezy).",
+    "effectiveDate": "Vigente desde el 15 de octubre de 2026",
+    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}. Templates, bundle y builder se pagan con Mercado Pago o con tarjeta (Lemon Squeezy); las suscripciones LAB, por ahora, solo con Mercado Pago.",
     "sections": [
       {
         "title": "Plazo",
@@ -1748,7 +1748,9 @@
         "title": "Cómo pedirlo",
         "items": [
           "Desde el Botón de arrepentimiento (al pie del home): sin cuenta, con un código de seguimiento al instante. Vale para cualquier medio de pago.",
-          "Si pagaste con tarjeta, también podés pedírselo directamente a Lemon Squeezy, nuestro revendedor autorizado.",
+          "Si pagaste con tarjeta, la devolución la gestionamos nosotros con Lemon Squeezy, nuestro revendedor autorizado, que fue quien te cobró: no hace falta que le escribas. Por dudas sobre el cobro o la factura sí podés escribirle a Lemon Squeezy.",
+          "Si te cobraron impuestos (IVA o sales tax) y estás registrado en tu país, Lemon Squeezy los devuelve si se lo pedís dentro de los 60 días de la compra, con tu código fiscal válido.",
+          "Antes de disputar el cargo con tu banco, escribinos o usá el Botón de arrepentimiento: lo resolvemos más rápido.",
           "O escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página). Lo revisamos y respondemos lo antes posible."
         ],
         "link": {

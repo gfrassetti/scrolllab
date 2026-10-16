@@ -1589,7 +1589,7 @@
   "privacy": {
     "eyebrow": "Legal",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective October 7, 2026",
+    "effectiveDate": "Effective October 15, 2026",
     "intro": "This Privacy Policy explains how {{seller}} ({{site}}) collects, uses, and protects your data when you visit the site, sign in, make a purchase, download a product, or write to us about a Studio project.",
     "sections": [
       {
@@ -1615,7 +1615,7 @@
       },
       {
         "title": "Third-party services",
-        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Lemon Squeezy, our online reseller (Merchant of Record), for payments from other countries in US dollars: Lemon Squeezy receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (lemonsqueezy.com/privacy), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Lemon Squeezy, our online reseller (Merchant of Record), for payments from other countries in US dollars: Lemon Squeezy receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (lemonsqueezy.com/privacy; processing may take place outside your country, including the United States), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
       },
       {
         "title": "Cookies and local storage",
@@ -1627,7 +1627,7 @@
       },
       {
         "title": "Your rights",
-        "body": "You may request access, correction, or deletion of your personal data, and revoke Google access from your Google account. Some order information may be retained where legally required. To exercise your rights, email us at the address below."
+        "body": "You may request access, correction, or deletion of your personal data, and revoke Google access from your Google account. Some order information may be retained where legally required. Payment data handled by Mercado Pago or Lemon Squeezy as independent controllers is exercised with them. To exercise your rights over the data we hold, email us at the address below. In Argentina, the Agencia de Acceso a la Información Pública (AAIP) is the supervisory authority under Law 25,326 and handles complaints about breaches of personal-data protection."
       },
       {
         "title": "Changes to this policy",
@@ -1647,7 +1647,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective October 12, 2026",
+    "effectiveDate": "Effective October 15, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -1704,7 +1704,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos or, if you pay from another country, through Lemon Squeezy in US dollars as our authorized reseller; it renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos (card payment in US dollars for LAB is not available yet); it renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1719,8 +1719,8 @@
   "refunds": {
     "eyebrow": "Legal",
     "title": "Refund policy",
-    "effectiveDate": "Effective October 7, 2026",
-    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}, whether you pay with Mercado Pago or by card (Lemon Squeezy).",
+    "effectiveDate": "Effective October 15, 2026",
+    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}. Templates, bundle and builder are paid with Mercado Pago or by card (Lemon Squeezy); LAB subscriptions, for now, only with Mercado Pago.",
     "sections": [
       {
         "title": "Refund period",
@@ -1748,7 +1748,9 @@
         "title": "How to request it",
         "items": [
           "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
-          "If you paid by card, you can also ask Lemon Squeezy, our authorized reseller, directly.",
+          "If you paid by card, we handle the refund with Lemon Squeezy, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Lemon Squeezy.",
+          "If you were charged taxes (VAT or sales tax) and are registered in your country, Lemon Squeezy refunds them if you ask within 60 days of the purchase, with a valid tax code.",
+          "Before disputing the charge with your bank, write to us or use the Withdrawal request button: we resolve it faster.",
           "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
         ],
         "link": {

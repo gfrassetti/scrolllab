@@ -49,6 +49,9 @@ cuenta bancaria** (o por PayPal). Es un revendedor autorizado: el comprador le c
 3. **LAB** (lo que falta para cobrar afuera; el código de Paddle en `server/services/subscriptions/paddleSync.js` es la referencia): variantes de suscripción, `subscription_*`, cambio de plan (con prorrateo), cancelación al fin
    del período, cuota rechazada y gracia. El circuito de cambio de precio (`docs/lab-price-changes.md`) hay
    que adaptarlo: acá el precio vive en la variante.
+   Al activarlo, actualizar los legales (`terms.sections` → «Componentes alojados (LAB)» y «Precios y pagos»,
+   `refunds.intro`, `lab.intlNoSubs` y `labIntlEnabled` en `payRegion.js`): hoy dicen que LAB se cobra solo
+   con Mercado Pago.
 4. ✅ **UI**: el selector «Medio de pago» y la moneda siguen al carril internacional (Lemon Squeezy); logo y legales dicen Lemon Squeezy.
 
 ## Probarlo de punta a punta (modo prueba, solo para nosotros)
