@@ -7,6 +7,8 @@ export default [
   {
     ignores: [
       'dist',
+      // Builds aparte (p. ej. dist-capsula33, el sitio privado de cāpsula33).
+      'dist-*',
       'embed-dist',
       'storage/**',
       // Código de terceros: skills instalados y el decoder Draco vendorizado.
