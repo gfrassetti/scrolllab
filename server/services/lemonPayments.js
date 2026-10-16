@@ -72,6 +72,8 @@ export async function fulfillLemonOrder({ event, config }) {
     return alert('mismatch', 'La orden no se cobra con Lemon Squeezy', order)
   }
   if (event.currency !== LEMON_CURRENCY) return alert('mismatch', 'Moneda del pago no coincide', order)
+  // Un pago de prueba (tarjeta 4242) solo cumple órdenes de prueba: nunca una compra real.
+  if (event.testMode && !order.qa) return alert('mismatch', 'Pago de prueba sobre una orden real', order)
   // Nuestros descuentos ya vienen en el precio: uno hecho en Lemon Squeezy cobraría menos.
   if (event.discountCents !== 0) return alert('mismatch', 'El pago trae un descuento hecho en Lemon Squeezy', order)
   if (event.subtotalCents !== usdCents(order.total)) {

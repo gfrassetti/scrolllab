@@ -13,6 +13,10 @@ import { createFakeMercadoPago, startAppAgainstFakeMp } from './fakeMercadoPago.
  */
 export const LEMON_TEST_SECRET = 'lemon_whsec_test_secret_0123456789abcdef'
 
+// Ids de orden únicos en todo el proceso, como los reales (varios fakes pueden
+// compartir el mismo store de archivos en un archivo de tests).
+let orderSeq = 900000
+
 export function createFakeLemon(nextFetch = globalThis.fetch) {
   const ls = {
     apiKey: 'lsk_test_fake_api_key',
@@ -77,7 +81,7 @@ export function createFakeLemon(nextFetch = globalThis.fetch) {
     const tax = opts.tax ?? 0
     const discount = opts.discount ?? 0
     const order = {
-      id: String(900000 + ++ls.seq),
+      id: String(++orderSeq),
       attributes: {
         status: opts.status || 'paid',
         currency: 'USD',
@@ -117,7 +121,8 @@ export async function startAppAgainstFakeLemon(env = {}) {
     LEMONSQUEEZY_STORE_ID: ls.storeId,
     LEMONSQUEEZY_ORDER_VARIANT_ID: ls.variantId,
     LEMONSQUEEZY_WEBHOOK_SECRET: LEMON_TEST_SECRET,
-    LEMONSQUEEZY_TEST_MODE: 'true',
+    // Por defecto modo real: el modo prueba es solo para las cuentas de QA.
+    LEMONSQUEEZY_TEST_MODE: 'false',
     ...env,
   })
   const started = await startAppAgainstFakeMp(mp)

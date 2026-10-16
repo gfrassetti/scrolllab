@@ -7,7 +7,7 @@ import { arsFromUsd, discountedArsFromUsd, PRODUCTS } from '../catalog.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import { getUsdArsRate } from '../fx.js'
 import { resolveCouponForCheckout, autoWelcomeCoupon } from './coupons.js'
-import { assertQaBuyer } from '../qa.js'
+import { assertQaBuyer, isQaBuyer } from '../qa.js'
 import {
   isQaSku,
   QA_TEMPLATE_SKU,
@@ -99,16 +99,19 @@ export async function createCheckoutOrder({
   if (!CHECKOUT_PROVIDERS.includes(provider)) {
     throw new HttpError(400, 'Medio de pago inválido')
   }
+  // Lemon Squeezy en modo prueba no cobra (tarjeta 4242): mientras esté así, existe
+  // solo para las cuentas de QA. Para cualquier otro, como si no estuviera.
+  const lemonUsable = Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
   // El carril «internacional» (USD) es uno solo para el comprador: Paddle si está
   // disponible; si no, Lemon Squeezy. El front sigue pidiendo `paddle`.
-  if (provider === 'paddle' && !config.paddle?.enabled && config.lemon?.enabled) {
+  if (provider === 'paddle' && !config.paddle?.enabled && lemonUsable) {
     provider = 'lemonsqueezy'
   }
   const paddle = provider === 'paddle'
   const lemon = provider === 'lemonsqueezy'
   // Los dos cobran el precio de lista en USD, calculado por el servidor.
   const usd = paddle || lemon
-  if ((paddle && !config.paddle?.enabled) || (lemon && !config.lemon?.enabled)) {
+  if ((paddle && !config.paddle?.enabled) || (lemon && !lemonUsable)) {
     throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
   }
   const lang = locale === 'en' ? 'en' : 'es'
@@ -202,7 +205,8 @@ export async function createCheckoutOrder({
     discountPct: coupon?.percent,
     currency_id: usd ? 'USD' : 'ARS',
     expiresAt: pendingExpiresAt(),
-    ...(qa ? { qa: true } : {}),
+    // Pagada en modo prueba de Lemon Squeezy: no es plata, fuera de las métricas.
+    ...(qa || (lemon && config.lemon.testMode) ? { qa: true } : {}),
   })
 
   const orderId = db.uid(order) || order.id

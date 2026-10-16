@@ -17,6 +17,7 @@ import { createCheckoutOrder } from '../../services/checkout.js'
 import { confirmPaddleCheckout } from '../../services/paddlePayments.js'
 import { paddleClientInfo } from '../../services/paddle.js'
 import { confirmLemonCheckout } from '../../services/lemonPayments.js'
+import { isQaBuyer } from '../../qa.js'
 
 /** País del request según el proxy (Vercel / Cloudflare), en mayúsculas o null. */
 export function requestCountry(req) {
@@ -113,7 +114,11 @@ export function createCheckoutRouter({ config, limits }) {
     const paddleOn = Boolean(config.paddle?.enabled)
     // Un solo carril «internacional» en USD: Paddle si está, si no Lemon Squeezy
     // (redirección: sin overlay, así que no manda token de cliente).
-    const lemonOn = Boolean(config.lemon?.enabled) && !paddleOn
+    // En modo prueba (no cobra), solo para las cuentas de QA: para el resto no hay carril.
+    const lemonOn =
+      Boolean(config.lemon?.enabled) &&
+      !paddleOn &&
+      (!config.lemon.testMode || isQaBuyer(req.user, config))
     const intlOn = paddleOn || lemonOn
     res.set('Cache-Control', 'private, no-store')
     res.json({

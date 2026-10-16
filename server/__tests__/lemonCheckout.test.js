@@ -66,7 +66,7 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
 
       const sent = ls.calls.find((c) => c.route === 'POST /v1/checkouts').body.data.attributes
       assert.equal(sent.custom_price, 15210)
-      assert.equal(sent.test_mode, true)
+      assert.equal(sent.test_mode, false)
       assert.equal(sent.checkout_data.email, 'lista@test.com')
       assert.equal(sent.checkout_data.custom.kind, 'order')
       assert.equal(sent.checkout_data.custom.orderId, out.orderId)
@@ -183,13 +183,13 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
     })
 
     it('una orden de otro modo (real vs prueba) no se cumple', async () => {
-      const { out, lemon } = await paid('modo@test.com', [{ sku: 'chapters' }], { testMode: false })
+      const { out, lemon } = await paid('modo@test.com', [{ sku: 'chapters' }], { testMode: true })
       assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
       assert.equal((await orderRow(out.orderId)).status, 'pending')
     })
 
     it('un pago sin orden conocida avisa al dueño y no rompe', async () => {
-      const lemon = { id: '999001', custom: { kind: 'order', orderId: 'no-existe' }, attributes: { status: 'paid', currency: 'USD', subtotal: 100, discount_total: 0, total: 100, user_email: 'x@y.com', test_mode: true } }
+      const lemon = { id: '999001', custom: { kind: 'order', orderId: 'no-existe' }, attributes: { status: 'paid', currency: 'USD', subtotal: 100, discount_total: 0, total: 100, user_email: 'x@y.com', test_mode: false } }
       assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
       await waitFor(() => alerts('SIN ORDEN').length >= 1, 'el aviso de pago sin orden')
     })
@@ -299,5 +299,64 @@ describe('Arrepentimiento sobre una compra de Lemon Squeezy', () => {
     })
     assert.equal(out.status, 'manual')
     assert.equal((await fileDb.findOrderById(orderId)).status, 'paid')
+  })
+})
+
+describe('Lemon Squeezy en modo prueba: solo para las cuentas de QA', () => {
+  let ls
+  let loginAs
+  let lemonWebhook
+  let cleanup
+  let fileDb
+
+  before(async () => {
+    process.env.QA_BUYER_EMAILS = 'qa-owner@test.com'
+    ;({ ls, loginAs, lemonWebhook, cleanup, fileDb } = await startAppAgainstFakeLemon({ LEMONSQUEEZY_TEST_MODE: 'true' }))
+  })
+  after(() => cleanup())
+
+  it('para un cliente cualquiera no hay carril internacional ni checkout (no se puede «pagar» con la 4242)', async () => {
+    const agent = await loginAs('cliente@test.com')
+    const methods = await agent.get('/api/checkout/methods').set('x-vercel-ip-country', 'ES')
+    assert.equal(methods.body.providers.paddle.enabled, false)
+    assert.equal(methods.body.suggested, 'mercadopago')
+    for (const provider of ['paddle', 'lemonsqueezy']) {
+      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider })
+      assert.equal(res.status, 400, `${provider}: ${JSON.stringify(res.body)}`)
+    }
+    assert.equal(ls.calls.filter((c) => c.route === 'POST /v1/checkouts').length, 0)
+  })
+
+  it('para QA sí, y la orden (aunque sea un producto real) queda marcada de prueba', async () => {
+    const agent = await loginAs('qa-owner@test.com')
+    const methods = await agent.get('/api/checkout/methods')
+    assert.equal(methods.body.providers.paddle.gateway, 'lemonsqueezy')
+    assert.equal(methods.body.providers.paddle.testMode, true)
+    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'bundle' }], provider: 'paddle' })
+    assert.equal(res.status, 200, JSON.stringify(res.body))
+    const order = await fileDb.findOrderById(res.body.orderId)
+    assert.equal(order.qa, true)
+    const lemon = ls.pay(res.body.init_point.split('/').pop(), { email: 'qa-owner@test.com' })
+    assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
+    assert.equal((await fileDb.findOrderById(res.body.orderId)).status, 'paid')
+  })
+
+  it('un pago de prueba nunca cumple una orden real (defensa extra)', async () => {
+    const me = await (await loginAs('real@test.com')).get('/api/auth/me')
+    const order = await fileDb.createOrder({
+      userId: me.body.user.id,
+      status: 'pending',
+      provider: 'lemonsqueezy',
+      currency_id: 'USD',
+      items: [{ sku: 'chapters', title: 'CHAPTERS' }],
+      total: 169,
+    })
+    const lemon = {
+      id: '990001',
+      custom: { kind: 'order', orderId: order.id },
+      attributes: { status: 'paid', currency: 'USD', subtotal: 16900, discount_total: 0, total: 16900, user_email: 'real@test.com', test_mode: true },
+    }
+    assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
+    assert.equal((await fileDb.findOrderById(order.id)).status, 'pending')
   })
 })
