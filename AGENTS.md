@@ -395,7 +395,7 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 
 Modo prueba (`QA_BUYER_EMAILS`, `src/domain/qa.js`): `/test`, `/builder-test` y `/lab-test` venden al mínimo ($1 template y builder; LAB $15/$30/$60 —el piso de MP para suscripciones es $15—, con la prueba gratis de LAB real: 7 días en la primera suscripción de la cuenta) solo a esas cuentas, con plata real y fuera de las métricas — para probar en producción compra, mails y reembolsos. Detalle en `docs/DEPLOY.md`.
 
-LAB (suscripciones) se cobra con Mercado Pago PreApproval en ARS. El cobro internacional de LAB (Lemon Squeezy, USD: `HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`) **todavía no está** (etapa 3 de `docs/lemonsqueezy.md`): hasta entonces, un comprador del exterior ve LAB en pesos y la grilla le avisa (`lab.intlNoSubs`). El código de suscripciones de Paddle queda apagado como referencia para esa etapa.
+LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Lemon Squeezy en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`; producto «ScrollLab LAB» con 6 variantes buscadas por nombre, `server/services/subscriptions/lemonSync.js`). Alta con prueba, cobros, rechazo, cambio de plan, baja y arrepentimiento probados en vivo en modo prueba (2026-10-16); el reembolso de un cobro de suscripción falla desde el panel de Lemon en modo prueba (consulta abierta con soporte). El circuito de cambio de precio de LAB sigue solo con Mercado Pago.
 
 Widgets de LAB (`HOSTABLE_SECTIONS`, `server/sections.js` + `embed/src/registry.js`): entran también las pineadas y
 las de escenario sticky (el frame pasa a modo PIN: una pantalla pegada en el sitio que recorre su propio
