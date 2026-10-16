@@ -6,6 +6,8 @@ import { refundPayment, fetchPayment } from './mercadoPago.js'
 import { createAdjustment, getTransaction, PADDLE_PAID_STATUSES } from './paddle.js'
 import { reverseOrderPayment, alertAdmin, REVERSED_PAYMENT_STATUSES } from './orders.js'
 import { reversePaddleAdjustment } from './paddlePayments.js'
+import { refundOrder as refundLemonOrder, parseLemonEvent } from './lemonsqueezy.js'
+import { reverseLemonRefund } from './lemonPayments.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
 import { isPaddleSub } from './subscriptions/paddleSync.js'
@@ -75,6 +77,26 @@ async function refundOrder(order, row, config, deps) {
       return { status: 'manual', note: 'Paddle sin cuenta real (mock)' }
     }
     return refundPaddleTransaction(order.paddleTransactionId, row, config, deps)
+  }
+
+  if (order.provider === 'lemonsqueezy') {
+    if (!config.lemon?.enabled || !order.lemonOrderId) {
+      return { status: 'manual', note: 'Lemon Squeezy sin orden cobrada' }
+    }
+    const refunded = await (deps.refundLemonOrder || refundLemonOrder)(config, order.lemonOrderId)
+    // La orden se corta ya con lo que respondió la API (el webhook `order_refunded`
+    // llega después y no repite nada: el libro y la baja son idempotentes).
+    const event = parseLemonEvent({ meta: {}, data: { ...refunded, type: 'orders', id: order.lemonOrderId } })
+    await reverseLemonRefund({
+      event: {
+        ...event,
+        status: 'refunded',
+        currency: 'USD',
+        refundedAmountCents: Math.round(Number(order.total) * 100),
+      },
+      config,
+    })
+    return { status: 'refunded', note: `orden Lemon Squeezy ${order.lemonOrderId}` }
   }
 
   if (config.mpMock || !config.mpAccessToken || !order.mpPaymentId) {
@@ -221,7 +243,7 @@ export async function executeWithdrawal(row, config, deps = {}) {
       title: done
         ? `ARREPENTIMIENTO ${row.code} — ${done}`
         : `ARREPENTIMIENTO ${row.code} — NO SE PUDO DEVOLVER SOLO: hacelo a mano`,
-      lines: [`${row.name || ''} <${row.email}>`, out.note || '', done ? '' : 'Devolvé desde el panel de Mercado Pago o de Paddle.'].filter(Boolean),
+      lines: [`${row.name || ''} <${row.email}>`, out.note || '', done ? '' : 'Devolvé desde el panel de Mercado Pago, Paddle o Lemon Squeezy.'].filter(Boolean),
       config,
     })
   }

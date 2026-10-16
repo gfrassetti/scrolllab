@@ -72,11 +72,9 @@ const SHOWS_ERROR = new Set(['error', 'review', 'wrong-account'])
  */
 export default function CheckoutSuccessPage() {
   const [params] = useSearchParams()
-  return params.get('provider') === 'paddle' ? (
-    <PaddleCheckoutSuccess />
-  ) : (
-    <MercadoPagoCheckoutSuccess />
-  )
+  const provider = params.get('provider')
+  if (provider === 'lemonsqueezy') return <PaddleCheckoutSuccess gateway="lemonsqueezy" />
+  return provider === 'paddle' ? <PaddleCheckoutSuccess /> : <MercadoPagoCheckoutSuccess />
 }
 
 /** Panel final (resuelto) de la vuelta del pago, compartido por las dos pasarelas. */
@@ -131,7 +129,7 @@ const PADDLE_MAX_TRIES = 6
  * siempre (15 s) y cada error tiene su panel: otra cuenta (403) o un pago que
  * no se pudo asociar (400/404, el carrito queda como estaba).
  */
-function PaddleCheckoutSuccess() {
+function PaddleCheckoutSuccess({ gateway = 'paddle' }) {
   const t = useT()
   const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
@@ -141,7 +139,10 @@ function PaddleCheckoutSuccess() {
   const [confirmState, setConfirmState] = useState('idle')
   const [confirmError, setConfirmError] = useState('')
   const [confirmRef, setConfirmRef] = useState('')
-  const transactionId = params.get('txn') || ''
+  // Paddle vuelve con la transacción; Lemon Squeezy, con nuestra orden (la cumple
+  // el webhook y esta pantalla espera a que figure paga).
+  const lemon = gateway === 'lemonsqueezy'
+  const transactionId = (lemon ? params.get('orderId') : params.get('txn')) || ''
 
   useEffect(() => {
     if (authLoading) return undefined
@@ -166,7 +167,9 @@ function PaddleCheckoutSuccess() {
     ;(async () => {
       for (let attempt = 1; attempt <= PADDLE_MAX_TRIES; attempt += 1) {
         try {
-          const data = await api.confirmPaddleCheckout(transactionId)
+          const data = lemon
+            ? await api.confirmLemonCheckout(transactionId)
+            : await api.confirmPaddleCheckout(transactionId)
           if (cancelled) return
           clearTimeout(watchdog)
           clearCart()
@@ -206,7 +209,7 @@ function PaddleCheckoutSuccess() {
       cancelled = true
       clearTimeout(watchdog)
     }
-  }, [authLoading, user, transactionId, navigate, clearCart, dropWelcome])
+  }, [authLoading, user, transactionId, lemon, navigate, clearCart, dropWelcome])
 
   const panel = RESOLVED_PANELS[confirmState]
   if (panel) {

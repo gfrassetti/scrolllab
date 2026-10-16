@@ -57,7 +57,7 @@ const orderSchema = new mongoose.Schema(
     // docs/paddle.md). En Paddle `total` y los `unit_price` están en USD.
     provider: {
       type: String,
-      enum: ["mercadopago", "paddle"],
+      enum: ["mercadopago", "paddle", "lemonsqueezy"],
       default: "mercadopago",
     },
     // Idioma de los mails de la orden (el del sitio al comprar).
@@ -68,6 +68,10 @@ const orderSchema = new mongoose.Schema(
     mpPaymentId: { type: String, sparse: true, unique: true },
     // Transacción de Paddle que armamos al abrir el checkout: solo esa la paga.
     paddleTransactionId: { type: String, sparse: true, unique: true },
+    // Lemon Squeezy: el checkout que armamos al abrir el pago y, cuando cobra
+    // (webhook `order_created`), el id de su orden: ese es el pago.
+    lemonCheckoutId: String,
+    lemonOrderId: { type: String, sparse: true, unique: true },
     // Último pago rechazado (la orden sigue pending: se puede reintentar).
     paymentFailedAt: Date,
     // Mail «pago rechazado»: uno por orden, mismo claim que el recibo.
@@ -445,7 +449,7 @@ const withdrawalSchema = new mongoose.Schema(
 const refundSchema = new mongoose.Schema(
   {
     externalId: { type: String, required: true, unique: true },
-    provider: { type: String, enum: ["mercadopago", "paddle"], required: true },
+    provider: { type: String, enum: ["mercadopago", "paddle", "lemonsqueezy"], required: true },
     kind: { type: String, enum: ["order", "lab"], required: true },
     orderId: { type: String, default: null },
     subscriptionId: { type: String, default: null },

@@ -55,7 +55,12 @@ export async function createApp(config) {
       // La firma de Paddle se calcula sobre los bytes exactos del body: se
       // guardan solo para su webhook (al resto no le hace falta).
       verify(req, _res, buf) {
-        if (req.originalUrl?.startsWith('/api/webhooks/paddle')) req.rawBody = buf
+        if (
+          req.originalUrl?.startsWith('/api/webhooks/paddle') ||
+          req.originalUrl?.startsWith('/api/webhooks/lemonsqueezy')
+        ) {
+          req.rawBody = buf
+        }
       },
     }),
   )

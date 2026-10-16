@@ -175,7 +175,7 @@ const PAYMENT_FAILED_COPY = {
     eyebrow: 'Pago rechazado',
     title: (name) => `Tu pago no se acreditó, ${name}.`,
     intro: (provider) =>
-      `${provider === 'paddle' ? 'El procesador' : 'Mercado Pago'} rechazó el pago de tu compra, así que no se te cobró nada. Suele pasar por fondos, límites de la tarjeta o una validación del banco.`,
+      `${isMerchantOfRecord(provider) ? 'El procesador' : 'Mercado Pago'} rechazó el pago de tu compra, así que no se te cobró nada. Suele pasar por fondos, límites de la tarjeta o una validación del banco.`,
     notice:
       'Tu carrito sigue guardado: podés reintentar con otra tarjeta u otro medio de pago.',
     order: 'Orden',
@@ -241,9 +241,18 @@ const PADDLE_INVOICE_NOTE = {
   en: 'Your invoice is issued by Paddle.com, our authorized reseller, and arrives in a separate email.',
 }
 
-/** Nota del pie del recibo cuando cobró Paddle (merchant of record). */
-export function paddleInvoiceNote(locale) {
-  return PADDLE_INVOICE_NOTE[langOf(locale)]
+const LEMON_INVOICE_NOTE = {
+  es: 'La factura la emite Lemon Squeezy, nuestro revendedor autorizado, y te llega en un mail aparte.',
+  en: 'Your invoice is issued by Lemon Squeezy, our authorized reseller, and arrives in a separate email.',
+}
+
+/** ¿Cobra un merchant of record en USD? (Paddle o Lemon Squeezy). */
+export const isMerchantOfRecord = (provider) => provider === 'paddle' || provider === 'lemonsqueezy'
+
+/** Nota del pie del recibo cuando cobró un merchant of record (Paddle o Lemon Squeezy). */
+export function paddleInvoiceNote(locale, provider = 'paddle') {
+  const notes = provider === 'lemonsqueezy' ? LEMON_INVOICE_NOTE : PADDLE_INVOICE_NOTE
+  return notes[langOf(locale)]
 }
 
 /**
@@ -255,8 +264,8 @@ export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   const id = orderIdOf(order)
   const summary = orderPriceSummary(order)
   const footer =
-    order.provider === 'paddle'
-      ? `This email is your purchase summary, not a tax invoice. ${PADDLE_INVOICE_NOTE.en} Need help? Just reply.`
+    isMerchantOfRecord(order.provider)
+      ? `This email is your purchase summary, not a tax invoice. ${paddleInvoiceNote('en', order.provider)} Need help? Just reply.`
       : 'This email is your purchase summary, not a tax invoice. Need help? Just reply.'
   return render({
     lang: 'en',
@@ -661,8 +670,8 @@ export function buildSubscriptionTrialReminderEn({ subscription, user, accountUr
 // ——— Devoluciones, confirmación del arrepentimiento y avisos de LAB ———
 
 const GATEWAY = {
-  es: { mercadopago: 'Mercado Pago', paddle: 'tu tarjeta (Paddle)' },
-  en: { mercadopago: 'Mercado Pago', paddle: 'your card (Paddle)' },
+  es: { mercadopago: 'Mercado Pago', paddle: 'tu tarjeta (Paddle)', lemonsqueezy: 'tu tarjeta (Lemon Squeezy)' },
+  en: { mercadopago: 'Mercado Pago', paddle: 'your card (Paddle)', lemonsqueezy: 'your card (Lemon Squeezy)' },
 }
 
 const REFUND_COPY = {
@@ -708,7 +717,7 @@ const REFUND_COPY = {
 export function buildRefundIssued({ name, locale, amount, currency, provider, what, kind, partial = false, accountUrl, logoUrl }) {
   const lang = langOf(locale)
   const c = REFUND_COPY[lang]
-  const gateway = GATEWAY[lang][provider === 'paddle' ? 'paddle' : 'mercadopago']
+  const gateway = GATEWAY[lang][isMerchantOfRecord(provider) ? provider : 'mercadopago']
   return render({
     lang,
     logoUrl,

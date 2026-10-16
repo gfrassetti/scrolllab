@@ -1,8 +1,22 @@
 # Lemon Squeezy — segunda pasarela internacional (USD, merchant of record)
 
-Estado (2026-10-15): **base lista, sin conectar.** Existe el cliente, la firma de webhooks y el armado del
-checkout (`server/services/lemonsqueezy.js`, con tests). Todavía no está en `CHECKOUT_PROVIDERS` ni en la
-UI: ninguna compra pasa por acá hasta que haya tienda aprobada y credenciales de prueba.
+Estado (2026-10-15): **etapas 1 y 2 conectadas** (compras de templates y builder, reembolsos y Botón de
+arrepentimiento). **LAB (suscripciones) todavía no.** Se prende solo cuando están las cuatro variables
+`LEMONSQUEEZY_*` (ver abajo); sin ellas todo sigue como antes.
+
+Cómo está armado:
+
+- `server/services/lemonsqueezy.js`: cliente de la API, firma de webhooks, checkout.
+- `server/services/lemonPayments.js`: cumplir una orden (`order_created`), reembolso (`order_refunded`),
+  contracargo (`dispute_created`, solo avisa) y la vuelta del comprador.
+- El front sigue pidiendo `provider: 'paddle'`: **es un solo carril «internacional» en USD**. Si Paddle
+  está habilitado cobra Paddle; si no, Lemon Squeezy. La pantalla `/checkout/success?provider=lemonsqueezy`
+  espera al webhook (`POST /api/checkout/lemonsqueezy/confirm` solo lee la orden del usuario).
+- La orden se valida contra lo que guardó el servidor: pasarela, moneda USD, **modo (prueba/real) igual
+  al del servidor**, sin descuento hecho en Lemon Squeezy y **subtotal (antes de impuestos) igual al total
+  de la orden**. Si algo no coincide no se entrega y le llega un mail al dueño.
+- Tests: `server/__tests__/lemonsqueezy.test.js` (cliente) y `lemonCheckout.test.js` (flujo completo contra
+  un Lemon Squeezy simulado, `helpers/fakeLemon.js`).
 
 ## Por qué
 
@@ -24,10 +38,10 @@ conviven; el comprador del exterior ve el medio de pago que corresponda.
 
 ## Etapas
 
-1. **Compras únicas** (templates y builder): crear checkout con `custom_price`, webhook `order_created`
+1. ✅ **Compras únicas** (templates y builder): crear checkout con `custom_price`, webhook `order_created`
    (marca pagada, arma el ZIP), `order_refunded` (corta la descarga, libro, mail). Cupón de primera compra:
    el servidor ya manda el total descontado, el descuento de Lemon Squeezy queda apagado.
-2. **Reembolsos y Botón de arrepentimiento**: `autoRefund` por la API de Lemon Squeezy.
+2. ✅ **Reembolsos y Botón de arrepentimiento**: `autoRefund` por la API de Lemon Squeezy.
 3. **LAB**: variantes de suscripción, `subscription_*`, cambio de plan (con prorrateo), cancelación al fin
    del período, cuota rechazada y gracia. El circuito de cambio de precio (`docs/lab-price-changes.md`) hay
    que adaptarlo: acá el precio vive en la variante.
@@ -35,7 +49,7 @@ conviven; el comprador del exterior ve el medio de pago que corresponda.
 
 ## Qué hace falta de tu lado (cuenta y credenciales)
 
-1. Crear la cuenta en lemonsqueezy.com y la **tienda** (nombre «Scroll Lab - Web Design», dominio
+1. Crear la cuenta en lemonsqueezy.com y la **tienda** (nombre «Scroll Lab - Web Studio», dominio
    `scrolllab.com.ar`). Completar la verificación de identidad y de pagos.
 2. En **Settings → Payouts**: cobro por **banco en USD** (Argentina figura en la lista) o PayPal.
 3. Crear **un producto «ScrollLab order»** (compra única, precio de ejemplo cualquiera, p. ej. USD 1) y

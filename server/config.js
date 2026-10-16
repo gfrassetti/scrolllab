@@ -172,6 +172,41 @@ export function loadPaddleConfig(env = process.env, prod = isProd) {
 }
 
 /**
+ * Lemon Squeezy (segunda pasarela internacional en USD, ver docs/lemonsqueezy.md).
+ * Nunca tira: sin las cuatro variables completas queda apagado y el resto de la API
+ * arranca igual. Se prende con `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`,
+ * `LEMONSQUEEZY_ORDER_VARIANT_ID` (la variante genérica sobre la que se cobra cada
+ * orden con `custom_price`) y `LEMONSQUEEZY_WEBHOOK_SECRET`. `LEMONSQUEEZY_TEST_MODE`
+ * pone los checkouts en modo prueba (no cobran).
+ * @param {NodeJS.ProcessEnv} [env]
+ */
+export function loadLemonConfig(env = process.env) {
+  const apiKey = (env.LEMONSQUEEZY_API_KEY || "").trim();
+  const storeId = (env.LEMONSQUEEZY_STORE_ID || "").trim();
+  const variantId = (env.LEMONSQUEEZY_ORDER_VARIANT_ID || "").trim();
+  const webhookSecret = env.LEMONSQUEEZY_WEBHOOK_SECRET || "";
+  const flag = (v) => v === "true" || v === "1";
+  const hidden = flag(env.LEMONSQUEEZY_HIDDEN);
+  const missing = [
+    !apiKey && "LEMONSQUEEZY_API_KEY",
+    !/^\d+$/.test(storeId) && "LEMONSQUEEZY_STORE_ID",
+    !/^\d+$/.test(variantId) && "LEMONSQUEEZY_ORDER_VARIANT_ID",
+    !webhookSecret && "LEMONSQUEEZY_WEBHOOK_SECRET",
+  ].filter(Boolean);
+  return {
+    enabled: !hidden && missing.length === 0,
+    hidden,
+    missing,
+    apiKey,
+    storeId,
+    variantId,
+    webhookSecret,
+    testMode: flag(env.LEMONSQUEEZY_TEST_MODE),
+    apiBase: (env.LEMONSQUEEZY_API_BASE || "https://api.lemonsqueezy.com/v1").replace(/\/$/, ""),
+  };
+}
+
+/**
  * La config de Paddle para el arranque. En desarrollo un error de configuración
  * tira (se ve y se arregla en el momento). En **producción** Paddle es una
  * integración opcional: una variable mal puesta (clave de sandbox, falta el
@@ -291,6 +326,7 @@ export function loadConfig() {
   }
 
   const paddle = loadPaddleConfigSafe();
+  const lemon = loadLemonConfig();
 
   // SMTP (p. ej. Gmail con contraseña de aplicación): si está SMTP_USER + SMTP_PASS,
   // los mails salen por ahí en vez de Resend y el remitente es esa cuenta.
@@ -333,6 +369,7 @@ export function loadConfig() {
     mpAccessToken,
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET || "",
     paddle,
+    lemon,
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",

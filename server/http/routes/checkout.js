@@ -16,6 +16,7 @@ import {
 import { createCheckoutOrder } from '../../services/checkout.js'
 import { confirmPaddleCheckout } from '../../services/paddlePayments.js'
 import { paddleClientInfo } from '../../services/paddle.js'
+import { confirmLemonCheckout } from '../../services/lemonPayments.js'
 
 /** País del request según el proxy (Vercel / Cloudflare), en mayúsculas o null. */
 export function requestCountry(req) {
@@ -110,16 +111,22 @@ export function createCheckoutRouter({ config, limits }) {
   router.get('/api/checkout/methods', (req, res) => {
     const country = requestCountry(req)
     const paddleOn = Boolean(config.paddle?.enabled)
+    // Un solo carril «internacional» en USD: Paddle si está, si no Lemon Squeezy
+    // (redirección: sin overlay, así que no manda token de cliente).
+    const lemonOn = Boolean(config.lemon?.enabled) && !paddleOn
+    const intlOn = paddleOn || lemonOn
     res.set('Cache-Control', 'private, no-store')
     res.json({
       country,
-      suggested: paddleOn && country && country !== 'AR' ? 'paddle' : 'mercadopago',
+      suggested: intlOn && country && country !== 'AR' ? 'paddle' : 'mercadopago',
       providers: {
         mercadopago: { enabled: true, mock: Boolean(config.mpMock), currency: 'ARS' },
         paddle: {
-          enabled: paddleOn,
+          enabled: intlOn,
           mock: Boolean(config.paddle?.mock),
           currency: 'USD',
+          // Quién cobra de verdad ese carril (el front solo abre overlay con Paddle).
+          gateway: paddleOn ? 'paddle' : lemonOn ? 'lemonsqueezy' : null,
           ...(paddleOn && !config.paddle.mock ? paddleClientInfo(config) : {}),
         },
       },
@@ -136,7 +143,9 @@ export function createCheckoutRouter({ config, limits }) {
           user: req.user,
           items: req.body?.items,
           couponCode: req.body?.couponCode,
-          provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
+          provider: ['paddle', 'lemonsqueezy'].includes(req.body?.provider)
+            ? req.body.provider
+            : 'mercadopago',
           locale: req.body?.locale,
           config,
         }),
@@ -177,6 +186,39 @@ export function createCheckoutRouter({ config, limits }) {
               ...(order.qa ? { qa: true } : {}),
             }
           : null,
+      })
+    }),
+  )
+
+  /**
+   * Vuelta de Lemon Squeezy: la orden la cumple el webhook; esto solo dice cómo va
+   * (409 mientras el webhook no llegó: el front reintenta). Lee la orden de este
+   * usuario, no confía en la URL.
+   */
+  router.post(
+    '/api/checkout/lemonsqueezy/confirm',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (!config.lemon?.enabled) {
+        throw new HttpError(400, 'Confirmación de Lemon Squeezy no disponible')
+      }
+      const { order, orderId, alreadyFulfilled } = await confirmLemonCheckout({
+        orderId: String(req.body?.orderId || '').trim(),
+        userId: db.uid(req.user),
+      })
+      res.json({
+        ok: true,
+        orderId,
+        alreadyFulfilled,
+        status: order.status,
+        order: {
+          id: orderId,
+          status: order.status,
+          items: order.items,
+          total: order.total,
+          currency_id: order.currency_id,
+        },
       })
     }),
   )

@@ -7,6 +7,7 @@ import {
   buildSubscriptionCanceledEn,
   buildSubscriptionTrialReminderEn,
   paddleInvoiceNote,
+  isMerchantOfRecord,
 } from './emailTemplatesBilling.js'
 
 /**
@@ -59,7 +60,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
   }
   const orderId = String(db.uid(order) || order.id)
   // Paddle es el vendedor legal (merchant of record): la factura la manda él.
-  const invoiceNote = order.provider === 'paddle' ? ` ${paddleInvoiceNote('es')}` : ''
+  const invoiceNote = isMerchantOfRecord(order.provider) ? ` ${paddleInvoiceNote('es', order.provider)}` : ''
   const buyerName = user.name || user.email
   // Con descuento de primera compra: ítems a precio de lista, la línea del
   // descuento y el total cobrado. Sin descuento, igual que siempre.

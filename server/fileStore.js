@@ -55,7 +55,7 @@ function duplicateKey(index) {
  */
 // Un elemento puede ser una clave compuesta (array de campos): único el conjunto.
 const UNIQUE_FIELDS = {
-  orders: ["mpPaymentId", "paddleTransactionId"],
+  orders: ["mpPaymentId", "paddleTransactionId", "lemonOrderId"],
   leads: ["couponCode"],
   withdrawals: ["code"],
   "price-change-notices": [["subscriptionId", "changeId"]],
@@ -139,7 +139,7 @@ export const fileDb = {
     const rows = read("orders");
     // Índices únicos sparse del esquema (server/models.js): un pago de MP o una
     // transacción de Paddle pertenece a una sola orden.
-    for (const field of ["mpPaymentId", "paddleTransactionId"]) {
+    for (const field of ["mpPaymentId", "paddleTransactionId", "lemonOrderId"]) {
       const value = data[field];
       if (value != null && rows.some((o) => o[field] === String(value))) {
         throw duplicateKey(field);
@@ -162,9 +162,14 @@ export const fileDb = {
     return withSave(read("orders").find((o) => o.id === String(id)) || null);
   },
   /** La orden ya paga con ese pago de MP o esa transacción de Paddle, o null. */
-  async findPaidOrderByPayment({ mpPaymentId, paddleTransactionId }) {
-    const field = paddleTransactionId != null ? "paddleTransactionId" : "mpPaymentId";
-    const value = String(paddleTransactionId ?? mpPaymentId);
+  async findPaidOrderByPayment({ mpPaymentId, paddleTransactionId, lemonOrderId }) {
+    const field =
+      lemonOrderId != null
+        ? "lemonOrderId"
+        : paddleTransactionId != null
+          ? "paddleTransactionId"
+          : "mpPaymentId";
+    const value = String(lemonOrderId ?? paddleTransactionId ?? mpPaymentId);
     return withSave(
       read("orders").find((o) => o[field] === value && o.status === "paid") ||
         null,
@@ -175,6 +180,11 @@ export const fileDb = {
       read("orders").find(
         (o) => o.paddleTransactionId === String(transactionId),
       ) || null,
+    );
+  },
+  async findOrderByLemonOrder(lemonOrderId) {
+    return withSave(
+      read("orders").find((o) => o.lemonOrderId === String(lemonOrderId)) || null,
     );
   },
   async deletePendingOrder(orderId) {

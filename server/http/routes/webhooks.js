@@ -2,6 +2,7 @@ import express from 'express'
 import { asyncHandler } from '../../middleware.js'
 import { handleMercadoPagoNotification } from '../../services/payments.js'
 import { handlePaddleNotification } from '../../services/paddlePayments.js'
+import { handleLemonNotification } from '../../services/lemonPayments.js'
 
 /**
  * Webhook de Paddle (abajo) y de Mercado Pago (una sola URL): pagos únicos de Checkout Pro
@@ -37,6 +38,20 @@ export function createWebhooksRouter({ config, limits }) {
       await handlePaddleNotification({
         rawBody: req.rawBody ?? '',
         signature: req.headers['paddle-signature'],
+        config,
+      })
+      res.sendStatus(200)
+    }),
+  )
+
+  // Lemon Squeezy: igual que Paddle, la firma (`X-Signature`) va sobre el body crudo.
+  router.post(
+    '/api/webhooks/lemonsqueezy',
+    limits.webhook,
+    asyncHandler(async (req, res) => {
+      await handleLemonNotification({
+        rawBody: req.rawBody ?? '',
+        signature: req.headers['x-signature'],
         config,
       })
       res.sendStatus(200)

@@ -91,6 +91,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ transactionId }),
     }),
+  // Vuelta de Lemon Squeezy: cómo va la orden (409 mientras el webhook no llegó).
+  confirmLemonCheckout: (orderId) =>
+    request('/api/checkout/lemonsqueezy/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ orderId }),
+    }),
   // Cupón de bienvenida de quien tiene sesión: lo crea la primera vez (y manda el mail).
   welcomeCoupon: (body) =>
     request('/api/coupons/welcome', {

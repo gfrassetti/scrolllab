@@ -194,6 +194,10 @@ export function parseLemonEvent(payload) {
     id: data.id != null ? String(data.id) : '',
     status: String(a.status || ''),
     totalCents: Number.isFinite(Number(a.total)) ? Number(a.total) : null,
+    // Antes de impuestos (el MoR suma el tax del país del comprador al total): es lo
+    // que tiene que coincidir con el precio que calculó el servidor.
+    subtotalCents: Number.isFinite(Number(a.subtotal)) ? Number(a.subtotal) : null,
+    discountCents: Number.isFinite(Number(a.discount_total)) ? Number(a.discount_total) : 0,
     currency: String(a.currency || ''),
     email: String(a.user_email || ''),
     refunded: Boolean(a.refunded),
