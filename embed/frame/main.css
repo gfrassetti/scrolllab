@@ -9,6 +9,9 @@
 @source "../src";
 @source "../../src/components/sections";
 @source "../../src/lib/modelWrappers.js";
+/* El panel legal que montan los footers (APEX, ATRIUM, COMIC, FIZZ, MERIDIAN): sin esto le faltaba
+   `translate-x-full` y quedaba abierto, tapando el widget. */
+@source "../../src/components/LegalSheet.jsx";
 
 /*
  * El frame corre en NUESTRO origen: no hay CSS del host que aislar, así que
