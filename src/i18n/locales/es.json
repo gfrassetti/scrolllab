@@ -1704,7 +1704,7 @@
         "items": [
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
-          "La suscripción se cobra por adelantado (mensual o anual) mediante Mercado Pago en pesos (el cobro con tarjeta en dólares de LAB todavía no está disponible); se renueva automáticamente al final de cada período hasta que la des de baja.",
+          "La suscripción se cobra por adelantado (mensual o anual): desde Argentina, mediante Mercado Pago en pesos; desde otro país, con tarjeta en dólares a través de Lemon Squeezy, nuestro revendedor autorizado. Se renueva automáticamente al final de cada período hasta que la des de baja.",
           "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Cada cobro se puede reembolsar dentro de los {{days}} días según la Política de reembolsos; pasado ese plazo, los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
@@ -1720,7 +1720,7 @@
     "eyebrow": "Legal",
     "title": "Política de reembolsos",
     "effectiveDate": "Vigente desde el 15 de octubre de 2026",
-    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}. Templates, bundle y builder se pagan con Mercado Pago o con tarjeta (Lemon Squeezy); las suscripciones LAB, por ahora, solo con Mercado Pago.",
+    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}. Templates, bundle, builder y las suscripciones LAB se pagan con Mercado Pago o con tarjeta (Lemon Squeezy).",
     "sections": [
       {
         "title": "Plazo",

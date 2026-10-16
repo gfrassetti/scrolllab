@@ -1704,7 +1704,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos (card payment in US dollars for LAB is not available yet); it renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, by card in US dollars through Lemon Squeezy, our authorized reseller. It renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1720,7 +1720,7 @@
     "eyebrow": "Legal",
     "title": "Refund policy",
     "effectiveDate": "Effective October 15, 2026",
-    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}. Templates, bundle and builder are paid with Mercado Pago or by card (Lemon Squeezy); LAB subscriptions, for now, only with Mercado Pago.",
+    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}. Templates, bundle, builder and LAB subscriptions are paid with Mercado Pago or by card (Lemon Squeezy).",
     "sections": [
       {
         "title": "Refund period",

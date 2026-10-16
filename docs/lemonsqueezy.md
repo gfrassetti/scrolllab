@@ -1,9 +1,8 @@
 # Lemon Squeezy — segunda pasarela internacional (USD, merchant of record)
 
 Estado (2026-10-15): **es la pasarela internacional; Paddle se descartó** (no aprobó la cuenta, ver
-`docs/paddle.md`). **Etapas 1 y 2 conectadas** (compras de templates y builder, reembolsos y Botón de
-arrepentimiento). **LAB (suscripciones) todavía no**: hasta la etapa 3 un comprador del exterior ve LAB en
-pesos y la grilla le avisa (`lab.intlNoSubs`). Se prende solo cuando están las cuatro variables
+`docs/paddle.md`). **Etapas 1, 2 y 3 conectadas** (compras de templates y builder, reembolsos, Botón de
+arrepentimiento y LAB). Se prende solo cuando están las cuatro variables
 `LEMONSQUEEZY_*` (ver abajo); sin ellas todo sigue por Mercado Pago.
 
 Cómo está armado:
@@ -15,7 +14,7 @@ Cómo está armado:
   `providers.paddle` (el nombre del contrato, de cuando era Paddle) con `gateway: 'lemonsqueezy'`; el
   front (`usePayRegion`) lo guarda y pide `provider: 'lemonsqueezy'` explícito. La pantalla
   `/checkout/success?provider=lemonsqueezy` espera al webhook (`POST /api/checkout/lemonsqueezy/confirm`
-  solo lee la orden del usuario). `labIntlEnabled` es falso con Lemon Squeezy: LAB no ofrece USD.
+  solo lee la orden del usuario). `labIntlEnabled` es verdadero con Lemon Squeezy: LAB ofrece USD.
 - La orden se valida contra lo que guardó el servidor: pasarela, moneda USD, **modo (prueba/real) igual
   al del servidor**, sin descuento hecho en Lemon Squeezy y **subtotal (antes de impuestos) igual al total
   de la orden**. Si algo no coincide no se entrega y le llega un mail al dueño.
@@ -46,12 +45,15 @@ cuenta bancaria** (o por PayPal). Es un revendedor autorizado: el comprador le c
    (marca pagada, arma el ZIP), `order_refunded` (corta la descarga, libro, mail). Cupón de primera compra:
    el servidor ya manda el total descontado, el descuento de Lemon Squeezy queda apagado.
 2. ✅ **Reembolsos y Botón de arrepentimiento**: `autoRefund` por la API de Lemon Squeezy.
-3. **LAB** (lo que falta para cobrar afuera; el código de Paddle en `server/services/subscriptions/paddleSync.js` es la referencia): variantes de suscripción, `subscription_*`, cambio de plan (con prorrateo), cancelación al fin
-   del período, cuota rechazada y gracia. El circuito de cambio de precio (`docs/lab-price-changes.md`) hay
-   que adaptarlo: acá el precio vive en la variante.
-   Al activarlo, actualizar los legales (`terms.sections` → «Componentes alojados (LAB)» y «Precios y pagos»,
-   `refunds.intro`, `lab.intlNoSubs` y `labIntlEnabled` en `payRegion.js`): hoy dicen que LAB se cobra solo
-   con Mercado Pago.
+3. ✅ **LAB** (`server/services/subscriptions/lemonSync.js`, tests en `lemonLab.test.js`). Cada plan y ciclo
+   es una variante de catálogo del producto **«ScrollLab LAB»** (precio de lista y 7 días de prueba); el
+   servidor las encuentra por nombre en la tienda (sin variables) y no vende una variante cuyo precio no sea
+   el de lista. Sin prueba el checkout la saltea (`skip_trial`); los días ya pagos de una baja van como
+   `trial_ends_at`. Cambiar de plan es cambiar de variante: subir cobra el prorrateo de Lemon Squeezy en el
+   acto (`invoice_immediately`), bajar no cobra (`disable_prorations`). El primer cobro se devuelve por la API
+   (`/subscription-invoices/:id/refund`) y da de baja. Webhooks `subscription_*` y `subscription_payment_*`.
+   Legales actualizados. **Pendiente:** el circuito de cambio de precio (`docs/lab-price-changes.md`) sigue
+   solo con Mercado Pago: acá el precio vive en la variante.
 4. ✅ **UI**: el selector «Medio de pago» y la moneda siguen al carril internacional (Lemon Squeezy); logo y legales dicen Lemon Squeezy.
 
 ## Probarlo de punta a punta (modo prueba, solo para nosotros)
@@ -77,7 +79,12 @@ que Mercado Pago: orden marcada `qa`, fuera de las métricas, ZIP real, recibo e
    anotar su **variant id**. Sus textos reales los pisa cada checkout.
 4. En **Settings → API**: crear una API key (en **test mode** primero).
 5. En **Settings → Webhooks**: crear uno apuntando a `https://<api>/api/webhooks/lemonsqueezy` con el
-   secreto que elijas y los eventos `order_created`, `order_refunded` (y, para LAB, los `subscription_*`).
+   secreto que elijas y los eventos `order_created`, `order_refunded`, `dispute_created` y, para LAB, todos
+   los `subscription_*` y `subscription_payment_*`.
+7. Para LAB: un producto de suscripción **«ScrollLab LAB»** con seis variantes, cada una con **7 días de prueba**
+   y categoría SaaS: `Starter (monthly)` US$19 / mes, `Starter (yearly)` US$190 / año, `Pro (monthly)` US$79,
+   `Pro (yearly)` US$790, `Studio (monthly)` US$229, `Studio (yearly)` US$2290 (los precios de `HOSTED_PLANS`).
+   El nombre empieza con el plan; si el precio no coincide con la lista, ese plan no se vende.
 6. Cargar en Railway (no en el chat, ni en el repo):
 
 ```

@@ -147,7 +147,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
   const setRegion = usePayRegion((s) => s.setRegion)
   const intlForRegion = usePayRegion((s) => s.intlEnabled)
   // LAB es una suscripción: solo cobra afuera una pasarela que las tenga
-  // (Lemon Squeezy todavía no: docs/lemonsqueezy.md, etapa 3).
+  // (Lemon Squeezy desde la etapa 3, docs/lemonsqueezy.md).
   const labIntlForRegion = usePayRegion((s) => s.labIntlEnabled)
   const gateway = usePayRegion((s) => s.gateway)
   // Prueba: sin prueba gratis y solo Mercado Pago.
@@ -163,8 +163,9 @@ export default function HostedPlans({ qa: qaPage = false }) {
     loadRegion()
   }, [loadRegion])
   const intl = intlEnabled && region === 'intl'
-  const paddleSub = planProvider === 'paddle'
-  // Textos que nombran a la pasarela: con una suscripción de Paddle, su variante.
+  // Suscripción cobrada con tarjeta en USD (Lemon Squeezy, o Paddle en filas viejas).
+  const paddleSub = planProvider === 'paddle' || planProvider === 'lemonsqueezy'
+  // Textos que nombran a la pasarela: con una suscripción internacional, su variante.
   const tp = (key, vars) => t(paddleSub ? `lab.paddle.${key}` : `lab.${key}`, vars)
   const root = useRef(null)
   const [searchParams, setSearchParams] = useSearchParams()

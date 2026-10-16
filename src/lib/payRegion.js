@@ -95,7 +95,7 @@ export const usePayRegion = create((set, get) => ({
   intlEnabled: false,
   /** Quién cobra el carril internacional: 'lemonsqueezy' | 'paddle' | null. */
   gateway: null,
-  /** ¿El carril internacional cobra suscripciones (LAB)? Solo Paddle por ahora. */
+  /** ¿El carril internacional cobra suscripciones (LAB)? Paddle y Lemon Squeezy. */
   labIntlEnabled: false,
   setRegion(region) {
     if (!PAY_REGIONS.includes(region)) return
@@ -123,7 +123,7 @@ export const usePayRegion = create((set, get) => ({
       methods,
       intlEnabled,
       gateway,
-      labIntlEnabled: gateway === 'paddle',
+      labIntlEnabled: gateway === 'paddle' || gateway === 'lemonsqueezy',
       status: 'ready',
       region: pickRegion({
         stored: readStored(),
