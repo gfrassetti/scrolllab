@@ -1,21 +1,39 @@
 import { useEffect, useRef, useState } from 'react'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
 
-import heroImg from '../../components/sections/apex/assets/road.webp'
 import cardA from '../../components/sections/atelier/assets/card-1.webp'
 import cardB from '../../components/sections/apex/assets/lounge.webp'
 import cardC from '../../components/sections/atelier/assets/work-3.webp'
 
 /**
- * Prototipo técnico (solo local): loader → hero → el hero se aleja y queda como card → más cards,
- * todo en UN canvas. Las imágenes son provisorias (APEX / ATELIER): acá se prueba la mecánica.
+ * Kanvas v2 — prototipo técnico (solo local) con la arquitectura de la referencia:
+ *
+ *   · Un RELOJ único: el scroll (Lenis) produce un progreso 0 → 1 para todo el sitio. No hay
+ *     secciones en el flujo de la página ni `sticky`: un espaciador da el largo del scroll y nada más.
+ *   · Una capa CANVAS fija (todo lo que es imagen o 3D) y una capa UI fija encima (texto, HUD), con
+ *     las secciones APILADAS: el progreso decide cuál se ve, cuál entra y cuál sale.
+ *   · El hero es una ESCENA 3D (GLB hecho en Blender, con su cámara animada adentro). El progreso
+ *     reproduce esa cámara; el puntero la hace orbitar un poco. Al alejarse, la escena queda dentro
+ *     de una card con forma de carpeta, en el mismo canvas.
+ *
+ * El arte es provisorio (la isla es una prueba propia; las cards son fotos de APEX / ATELIER).
  */
 
-const DARK = '#0e0e12'
 const CREAM = '#ede8df'
 const WHITE = '#ffffff'
+const SCROLL_SCREENS = 6 // largo del recorrido, en pantallas
+
+// El guion, en progreso (0 → 1).
+const T = {
+  heroOut: [0.12, 0.2], // el titular del hero se va
+  morph: [0.2, 0.46], // el hero se aleja y queda como card
+  tableIn: [0.3, 0.46], // la sección siguiente sube a su lugar
+  ink: [0.42, 0.58], // su titular se entinta
+}
+
 const CARD_SHAPE = (w) => {
   const k = Math.min(1, w / 520)
   return { radius: 14 * k + 6, tab: [w * 0.42, 22 * k + 10, 26 * k + 12], cut: 34 * k + 14 }
@@ -23,6 +41,7 @@ const CARD_SHAPE = (w) => {
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const easeOut = (t) => 1 - (1 - t) ** 3
+const seg = (p, [a, b]) => clamp01((p - a) / (b - a))
 
 export default function KanvasPage() {
   return (
@@ -34,11 +53,8 @@ export default function KanvasPage() {
 
 function Kanvas() {
   const canvasRef = useRef(null)
-  const heroRef = useRef(null)
-  const destRef = useRef(null)
-  const slotsRef = useRef([])
-  const headRef = useRef(null)
-  const heroTextRef = useRef(null)
+  const spacerRef = useRef(null)
+  const R = useRef({ slots: [] })
   const loadRef = useRef(null)
   const [ready, setReady] = useState(false)
 
@@ -48,60 +64,115 @@ function Kanvas() {
     window.scrollTo(0, 0)
     const k = createKanvas(canvasRef.current, { clear: WHITE })
     const { THREE } = k
+    const r = R.current
 
-    // --- texturas, con progreso real -------------------------------------------------------
+    // --- carga real: el GLB y las fotos ---------------------------------------------------------
     const manager = new THREE.LoadingManager()
-    const loader = new THREE.TextureLoader(manager)
+    const texLoader = new THREE.TextureLoader(manager)
     const tex = (src) => {
-      const t = loader.load(src, (tt) => {
+      const t = texLoader.load(src, (tt) => {
         tt.userData.size = [tt.image.width, tt.image.height]
-        k.renderer.initTexture(tt) // sube a la GPU antes de que se vea: sin tirón al aparecer
+        k.renderer.initTexture(tt)
       })
       t.colorSpace = THREE.SRGBColorSpace
-      t.minFilter = THREE.LinearMipmapLinearFilter
       t.anisotropy = 4
       return t
     }
-    const tHero = tex(heroImg)
     const tCards = [tex(cardA), tex(cardB), tex(cardC)]
     const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1)
     white.needsUpdate = true
 
     const boot = { prog: 0, shown: 0, reveal: 0, loaded: false }
-    // Lo que comparten las capas en cada cuadro (cuánto se alejó el hero).
-    const shared = { m: 0 }
     manager.onProgress = (_u, done, total) => (boot.prog = done / total)
     manager.onLoad = () => (boot.loaded = true)
 
-    // --- el hero: una escena propia, en perspectiva, dibujada en una textura ----------------
+    // --- la escena 3D del hero, dibujada en una textura -------------------------------------------
     const rt = new THREE.WebGLRenderTarget(16, 16, { samples: 4 })
     rt.texture.colorSpace = THREE.SRGBColorSpace
-    const heroScene = new THREE.Scene()
-    heroScene.background = new THREE.Color(DARK)
-    const heroCam = new THREE.PerspectiveCamera(35, 1, 0.1, 100)
-    const heroMat = new THREE.MeshBasicMaterial({ map: tHero })
-    const heroQuad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), heroMat)
-    heroScene.add(heroQuad)
-    let heroAspect = 1
-    const fitHero = (W, H) => {
+    const hero = new THREE.Scene()
+    // cielo: degradado pintado (lavanda arriba, durazno al horizonte)
+    const sky = document.createElement('canvas')
+    sky.width = 4
+    sky.height = 256
+    const sg = sky.getContext('2d')
+    const grd = sg.createLinearGradient(0, 0, 0, 256)
+    grd.addColorStop(0, '#5b4b8a')
+    grd.addColorStop(0.55, '#c99bb8')
+    grd.addColorStop(1, '#f6cfa8')
+    sg.fillStyle = grd
+    sg.fillRect(0, 0, 4, 256)
+    const skyTex = new THREE.CanvasTexture(sky)
+    skyTex.colorSpace = THREE.SRGBColorSpace
+    hero.background = skyTex
+    hero.fog = new THREE.Fog('#d9a9bd', 9, 22)
+    hero.add(new THREE.HemisphereLight('#fff1e0', '#5a4a80', 1.6))
+    const sun = new THREE.DirectionalLight('#ffe2c4', 2.4)
+    sun.position.set(4, 6, 3)
+    hero.add(sun)
+    // sombreado «pintado»: tres tonos por cara, con el color por vértice del GLB
+    const ramp = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]), 3, 1)
+    ramp.minFilter = ramp.magFilter = THREE.NearestFilter
+    ramp.needsUpdate = true
+    const root = new THREE.Group()
+    hero.add(root)
+    let heroCam = new THREE.PerspectiveCamera(40, 1, 0.1, 100)
+    let mixer = null
+    let clipDur = 1
+    let crystal = null
+    const fitHero = () => {
+      const { W, H } = k.size()
       const dpr = k.renderer.getPixelRatio()
       rt.setSize(Math.round(W * dpr), Math.round(H * dpr))
-      heroAspect = W / H
-      heroCam.aspect = heroAspect
+      heroCam.aspect = W / H
       heroCam.updateProjectionMatrix()
     }
+    new GLTFLoader(manager).load('/proto/kanvas/isle.glb', (g) => {
+      g.scene.traverse((o) => {
+        if (!o.isMesh) return
+        o.material = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: ramp })
+        const c = o.geometry.attributes.color
+        // el cristal: el único objeto verde agua
+        if (!crystal && c?.count && c.getY(0) > 0.85 && c.getX(0) < 0.5) {
+          crystal = o
+          o.userData.baseY = o.position.y
+          o.material.emissive = new THREE.Color('#2aa89a')
+        }
+      })
+      root.add(g.scene)
+      if (g.cameras[0]) heroCam = g.cameras[0]
+      const clip = g.animations[0]
+      if (clip) {
+        mixer = new THREE.AnimationMixer(g.scene)
+        mixer.clipAction(clip).play()
+        clipDur = clip.duration
+      }
+      fitHero()
+    })
+
     const heroPlane = k.plane(rt.texture, [16, 16], 10)
     const linePlane = k.plane(white, [1, 1], 20)
-    linePlane.u.uTint.value.set(DARK)
+    linePlane.u.uTint.value.set('#0e0e12')
     linePlane.u.uTintMix.value = 1
-
     const cardPlanes = tCards.map((t, i) => k.plane(t, [1536, 1024], 5 + i))
 
-    // --- capa: loader + hero + morph a card ---------------------------------------------------
+    // --- el reloj ---------------------------------------------------------------------------------
+    const progress = (scrollY) => {
+      const max = (spacerRef.current?.offsetHeight || 1) - window.innerHeight
+      return clamp01(scrollY / Math.max(1, max))
+    }
+    const show = (el, v, y = 0) => {
+      if (!el) return
+      el.style.opacity = String(v)
+      el.style.visibility = v > 0.001 ? 'visible' : 'hidden'
+      el.style.transform = `translate3d(0, ${y}px, 0)`
+    }
+
     k.add({
-      onResize: (W, H) => fitHero(W, H),
-      update: ({ dt, W, H, scrollY, pointer }) => {
-        // 1) loader: una línea que avanza con la carga real
+      onResize: () => fitHero(),
+      update: ({ dt, now, W, H, scrollY, pointer }) => {
+        const p = progress(scrollY)
+
+        // 1) carga: la línea avanza con la carga real y se abre en el hero
         boot.shown += (boot.prog - boot.shown) * (1 - Math.exp(-6 * dt))
         if (loadRef.current) loadRef.current.textContent = String(Math.round(boot.shown * 100)).padStart(2, '0')
         if (boot.loaded && boot.shown > 0.995 && boot.reveal === 0) {
@@ -110,103 +181,69 @@ function Kanvas() {
         }
         if (boot.reveal > 0 && boot.reveal < 1) boot.reveal = Math.min(1, boot.reveal + dt / 1.6)
         const rv = easeInOut(boot.reveal)
-
         const lw = W * 0.56
         const lx = (W - lw) / 2
         const ly = H / 2
         linePlane.rect(lx, ly - 1, lw * Math.min(1, boot.shown), 2)
         linePlane.u.uAlpha.value = 1 - clamp01(rv * 3)
 
-        // 2) el hero sale de la línea y llena la pantalla (mismo plano: nunca hay corte)
-        const full = { x: 0, y: 0, w: W, h: H }
-        const fromLine = { x: lx, y: ly - 1, w: lw, h: 2 }
-        let r = {
-          x: lerp(fromLine.x, full.x, rv),
-          y: lerp(fromLine.y, full.y, rv),
-          w: lerp(fromLine.w, full.w, rv),
-          h: lerp(fromLine.h, full.h, rv),
+        // 2) el hero: de la línea a pantalla completa; con el progreso, a su card
+        const m = rv >= 1 ? easeInOut(seg(p, T.morph)) : 0
+        const dest = r.dest?.getBoundingClientRect()
+        let rect = { x: lerp(lx, 0, rv), y: lerp(ly - 1, 0, rv), w: lerp(lw, W, rv), h: lerp(2, H, rv) }
+        if (dest && m > 0) {
+          rect = { x: lerp(0, dest.left, m), y: lerp(0, dest.top, m), w: lerp(W, dest.width, m), h: lerp(H, dest.height, m) }
         }
-
-        // 3) con el scroll, se aleja y aterriza en su card (la del tableau, que ya está en la página)
-        let m = 0
-        const dest = destRef.current?.getBoundingClientRect()
-        if (dest && rv >= 1) {
-          const end = dest.top + scrollY - (H - dest.height) / 2
-          const start = end - H * 1.15
-          m = easeInOut(clamp01((scrollY - start) / (end - start)))
-          r = {
-            x: lerp(0, dest.left, m),
-            y: lerp(0, dest.top, m),
-            w: lerp(W, dest.width, m),
-            h: lerp(H, dest.height, m),
-          }
-        }
-        shared.m = m
-        heroPlane.rect(r.x, r.y, r.w, r.h)
+        heroPlane.rect(rect.x, rect.y, rect.w, rect.h)
         heroPlane.u.uMapSize.value.set(rt.width, rt.height)
-        const sh = CARD_SHAPE(r.w)
+        const sh = CARD_SHAPE(rect.w)
         heroPlane.shape({ radius: sh.radius * m, tab: [sh.tab[0], sh.tab[1] * m, sh.tab[2] * m], cut: sh.cut * m })
         heroPlane.u.uAlpha.value = rv > 0 ? 1 : 0
 
-        // la escena de adentro: órbita al puntero y, al hacerse card, la cámara se aleja
-        const dist = 3.2 + m * 1.6 - rv * 0.4
-        const vh = 2 * Math.tan((heroCam.fov * Math.PI) / 360) * 3.2
-        const img = tHero.userData.size || [2688, 1520]
-        const ia = img[0] / img[1]
-        const qh = Math.max(vh, (vh * heroAspect) / ia) * 1.18
-        heroQuad.scale.set(qh * ia, qh, 1)
-        heroCam.position.set(pointer.sx * 0.22, -pointer.sy * 0.14, dist)
-        heroCam.lookAt(0, 0, 0)
+        // la cámara del GLB avanza con el progreso (del cristal a la isla entera) y orbita al puntero
+        if (mixer) mixer.setTime(Math.min(clipDur - 0.001, clamp01(p / T.morph[1]) * clipDur))
+        root.rotation.y = pointer.sx * 0.18 + now * 0.00004
+        root.rotation.x = pointer.sy * 0.05
+        if (crystal) crystal.position.y = crystal.userData.baseY + Math.sin(now * 0.0015) * 0.06
         k.renderer.setRenderTarget(rt)
-        k.renderer.render(heroScene, heroCam)
+        k.renderer.render(hero, heroCam)
 
-        // el fondo de la página: blanco mientras la línea se abre; cuando el hero ya cubre todo,
-        // pasa a crema por detrás (no se ve hasta que el hero se achica: nunca hay un gris de mezcla)
         k.clearColor.set(rv >= 1 ? CREAM : WHITE)
-        // el titular del hero se va con el morph
-        if (heroTextRef.current) {
-          // se va al principio del alejamiento, antes de que asome el titular de abajo
-          const out = clamp01(m / 0.18)
-          const inn = clamp01((rv - 0.72) / 0.28) // entra cuando la imagen ya casi llenó la pantalla
-          heroTextRef.current.style.opacity = String(inn * (1 - out))
-          heroTextRef.current.style.transform = `translate3d(0, ${(1 - inn) * 30 - out * 40}px, 0)`
-          heroTextRef.current.style.filter = out > 0.01 && out < 0.99 ? `blur(${out * 6}px)` : 'none'
-        }
-      },
-    })
 
-    // --- capa: las cards del tableau (cada una sobre su slot, con parallax propio) -------------
-    k.add({
-      update: ({ H }) => {
-        slotsRef.current.forEach((el, i) => {
-          const p = cardPlanes[i]
-          if (!el || !p) return
+        // 3) la capa UI: secciones apiladas, una sola visible por tramo
+        const out = seg(p, T.heroOut)
+        const inn = clamp01((rv - 0.72) / 0.28)
+        show(r.heroUi, inn * (1 - out), (1 - inn) * 30 - out * 50)
+        if (r.heroTitle) r.heroTitle.style.filter = out > 0.01 && out < 0.99 ? `blur(${out * 6}px)` : 'none'
+        const tin = easeOut(seg(p, T.tableIn))
+        const drift = p > T.tableIn[1] ? (p - T.tableIn[1]) * H * 0.9 : 0
+        show(r.tableUi, tin > 0 ? 1 : 0, (1 - tin) * H * 0.6 - drift)
+        if (r.ink) {
+          const t = seg(p, T.ink)
+          const gv = Math.round(lerp(205, 18, t))
+          r.ink.style.color = `rgb(${gv},${gv},${gv})`
+          r.ink.style.opacity = String(clamp01((m - 0.3) / 0.3))
+        }
+
+        // 4) las cards: cada una sobre su slot (que sube con la sección) y con su parallax propio
+        r.slots.forEach((el, i) => {
+          const pl = cardPlanes[i]
+          if (!el || !pl) return
           const b = el.getBoundingClientRect()
           const depth = Number(el.dataset.depth || 0)
-          const c = (b.top + b.height / 2 - H / 2) / H // −1 … 1 alrededor del centro
-          const enter = easeOut(clamp01((H - b.top) / (H * 0.55)))
-          const y = b.top + c * depth * 120
+          const c = (b.top + b.height / 2 - H / 2) / H
+          const enter = easeOut(clamp01((H - b.top) / (H * 0.5))) * (tin > 0 ? 1 : 0)
           const s = lerp(0.9, 1, enter)
           const w = b.width * s
           const h = b.height * s
-          p.rect(b.left + (b.width - w) / 2, y + (b.height - h) / 2, w, h)
-          p.shape(CARD_SHAPE(w))
-          p.u.uZoom.value = 1.22
-          p.u.uShift.value.set(0, -c * 0.9)
-          p.u.uAlpha.value = enter
-          const t = cardPlanes[i].u.uMap.value.userData.size
-          if (t) p.u.uMapSize.value.set(t[0], t[1])
+          pl.rect(b.left + (b.width - w) / 2, b.top + c * depth * 140 + (b.height - h) / 2, w, h)
+          pl.shape(CARD_SHAPE(w))
+          pl.u.uZoom.value = 1.22
+          pl.u.uShift.value.set(0, -c * 0.9)
+          pl.u.uAlpha.value = enter
+          const sz = pl.u.uMap.value.userData.size
+          if (sz) pl.u.uMapSize.value.set(sz[0], sz[1])
         })
-        // el titular se entinta: de gris claro a negro con el scroll
-        const hd = headRef.current
-        if (hd) {
-          const b = hd.getBoundingClientRect()
-          const t = clamp01((H * 0.7 - b.top) / (H * 0.45))
-          const g = Math.round(lerp(205, 18, t))
-          hd.style.color = `rgb(${g},${g},${g})`
-          // entra recién cuando el titular del hero ya se fue
-          hd.style.opacity = String(clamp01((shared.m - 0.22) / 0.25))
-        }
       },
     })
 
@@ -217,78 +254,85 @@ function Kanvas() {
     }
   }, [])
 
-  // Al terminar el revelado, se libera el scroll.
   useEffect(() => {
     if (!ready) return undefined
     const id = setTimeout(() => getLenis()?.start(), 1500)
     return () => clearTimeout(id)
   }, [ready])
 
+  const set = (key) => (el) => (R.current[key] = el)
   const mono = { fontFamily: "'Space Mono', ui-monospace, monospace" }
   const display = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif", fontWeight: 800, letterSpacing: '-0.045em' }
+  const layer = 'fixed inset-0 h-svh w-full'
 
   return (
-    <div className="relative" style={{ color: '#111' }}>
-      <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-svh w-full" />
+    <div style={{ color: '#111' }}>
+      {/* El largo del scroll y nada más: el contenido no está en el flujo de la página. */}
+      <div ref={spacerRef} aria-hidden="true" style={{ height: `${SCROLL_SCREENS * 100}svh` }} />
 
-      {/* Carga: el número y el rótulo (la línea la dibuja el canvas). */}
-      <div
-        className="pointer-events-none fixed inset-x-0 top-1/2 z-20 mx-auto flex w-[56vw] -translate-y-[calc(100%+14px)] justify-between text-[11px] tracking-[0.18em] uppercase transition-opacity duration-500"
-        style={{ ...mono, opacity: ready ? 0 : 1 }}
-      >
-        <span>Loading — <span ref={loadRef}>00</span>%</span>
-        <span className="opacity-50">kanvas://proto.v1</span>
-      </div>
+      {/* Capa 1: el canvas (todo lo que es imagen o 3D). */}
+      <canvas ref={canvasRef} aria-hidden="true" className={`pointer-events-none z-0 ${layer}`} />
 
-      {/* HUD: riel izquierdo con la cruz, columnas finas. */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-y-0 left-0 z-20 hidden w-14 border-r border-black/10 md:block">
-        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[28px] leading-none mix-blend-difference" style={{ color: '#fff' }}>
-          ✛
-        </span>
-      </div>
+      {/* Capa 2: la UI, con las secciones apiladas. */}
+      <div className={`pointer-events-none z-10 ${layer}`}>
+        {/* carga */}
+        <div
+          className="absolute inset-x-0 top-1/2 mx-auto flex w-[56vw] -translate-y-[calc(100%+14px)] justify-between text-[11px] tracking-[0.18em] uppercase transition-opacity duration-500"
+          style={{ ...mono, opacity: ready ? 0 : 1 }}
+        >
+          <span>
+            Loading — <span ref={loadRef}>00</span>%
+          </span>
+          <span className="opacity-50">kanvas://proto.v2</span>
+        </div>
 
-      {/* 1. Hero: el titular sobre el canvas; el alto es el recorrido del morph. */}
-      <section ref={heroRef} className="relative z-10 h-[200svh]">
-        <div className="sticky top-0 flex h-svh items-end px-6 pb-[12svh] md:px-24">
-          <h1 ref={heroTextRef} className="text-[clamp(3.2rem,11vw,12rem)] leading-[0.82] uppercase" style={{ ...display, color: '#fff', opacity: 0 }}>
-            The city
+        {/* HUD: riel izquierdo con la cruz */}
+        <div aria-hidden="true" className="absolute inset-y-0 left-0 hidden w-14 border-r border-black/10 md:block">
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[28px] leading-none" style={{ color: '#111' }}>
+            ✛
+          </span>
+        </div>
+
+        {/* Sección: hero */}
+        <section ref={set('heroUi')} className="absolute inset-0 flex items-end px-6 pb-[12svh] md:px-24" style={{ opacity: 0, visibility: 'hidden' }}>
+          <h1 ref={set('heroTitle')} className="text-[clamp(3.2rem,11vw,12rem)] leading-[0.82] text-white uppercase" style={display}>
+            The isle
             <br />
             remembers.
           </h1>
-        </div>
-      </section>
+        </section>
 
-      {/* 2. Tableau: entra por debajo del hero (se superpone su último tramo). */}
-      <section className="relative z-10 -mt-[100svh] min-h-[200svh] px-6 pt-[16svh] md:pl-24 md:pr-10">
-        <div className="grid gap-6 md:grid-cols-12">
-          <p className="text-[11px] md:col-span-1" style={mono}>
-            ■ 001
-          </p>
-          <h2 ref={headRef} className="text-[clamp(2.4rem,6.4vw,6.8rem)] leading-[0.86] uppercase md:col-span-11" style={{ ...display, color: 'rgb(205,205,205)' }}>
-            Every map was drawn by someone who left.
-          </h2>
-        </div>
-        <div className="mt-[10svh] grid gap-6 md:grid-cols-12 md:gap-8">
-          <div className="md:col-span-3">
-            <div ref={(el) => (slotsRef.current[0] = el)} data-depth="0.35" className="aspect-[16/9] w-full" />
-            <p className="mt-[24svh] max-w-[26ch] text-[17px] leading-snug" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Six districts, one curfew, and a signal nobody admits to sending.
+        {/* Sección: tableau (sube a su lugar mientras el hero se aleja) */}
+        <section ref={set('tableUi')} className="absolute inset-0 px-6 pt-[14svh] md:pr-10 md:pl-24" style={{ opacity: 0, visibility: 'hidden' }}>
+          <div className="grid gap-6 md:grid-cols-12">
+            <p className="text-[11px] md:col-span-1" style={mono}>
+              ■ 001
             </p>
+            <h2 ref={set('ink')} className="text-[clamp(2.2rem,5.6vw,6rem)] leading-[0.86] uppercase md:col-span-11" style={{ ...display, color: 'rgb(205,205,205)' }}>
+              Every map was drawn by someone who left.
+            </h2>
           </div>
-          <div className="md:col-span-4 md:col-start-6 md:mt-[22svh]">
-            <div ref={(el) => (slotsRef.current[1] = el)} data-depth="-0.25" className="aspect-[4/5] w-full" />
+          <div className="mt-[7svh] grid gap-6 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-3">
+              <div ref={(el) => (R.current.slots[0] = el)} data-depth="0.35" className="aspect-[16/9] w-full" />
+              <p className="mt-[20svh] max-w-[26ch] text-[16px] leading-snug" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Six districts, one curfew, and a signal nobody admits to sending.
+              </p>
+            </div>
+            <div className="md:col-span-3 md:col-start-6 md:mt-[16svh]">
+              <div ref={(el) => (R.current.slots[1] = el)} data-depth="-0.25" className="aspect-[4/5] w-full" />
+            </div>
+            <div className="md:col-span-3 md:col-start-10">
+              <div ref={set('dest')} className="aspect-[3/4] w-full" />
+            </div>
           </div>
-          <div className="md:col-span-3 md:col-start-10">
-            <div ref={destRef} className="aspect-[3/4] w-full" />
+          <div className="mt-[8svh] grid md:grid-cols-12">
+            <div className="md:col-span-4 md:col-start-3">
+              <div ref={(el) => (R.current.slots[2] = el)} data-depth="0.5" className="aspect-[3/2] w-full" />
+            </div>
           </div>
-        </div>
-        <div className="mt-[12svh] grid md:grid-cols-12">
-          <div className="md:col-span-5 md:col-start-3">
-            <div ref={(el) => (slotsRef.current[2] = el)} data-depth="0.5" className="aspect-[3/2] w-full" />
-          </div>
-        </div>
-      </section>
-      <div className="relative z-10 h-[60svh]" />
+        </section>
+      </div>
     </div>
   )
 }

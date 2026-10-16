@@ -89,7 +89,10 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
 export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+  // Como la referencia: en el teléfono se dibuja a menos píxeles que la pantalla (90 %, sin la
+  // densidad ×3). En PC, hasta ×2. Es buena parte de la ligereza.
+  const phone = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches
+  renderer.setPixelRatio(phone ? 0.9 : Math.min(window.devicePixelRatio || 1, 2))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   const clearColor = new THREE.Color(clear)
   renderer.setClearColor(clearColor, 1)
