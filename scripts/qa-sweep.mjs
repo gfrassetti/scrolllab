@@ -3,9 +3,10 @@
  * qué probar, lo prueba en una copia limpia de HEAD y anota los hallazgos.
  * Arquitectura y porqué: docs/adr/0007-pruebas-continuas-de-secciones.md.
  *
- *   1. Qué probar: los modelos que cambiaron desde la última corrida (git diff;
- *      un archivo compartido prueba todo) + uno en rotación, para que todo se
- *      pruebe entero cada tanto aunque nadie lo toque.
+ *   1. Qué probar: entero, los modelos que cambiaron desde la última corrida
+ *      (git diff) + uno en rotación, para que todo se pruebe entero cada tanto
+ *      aunque nadie lo toque. Si cambió algo compartido, el resto pasa solo por
+ *      los pasos rápidos (probarlos enteros a todos llevaba ~4 h por corrida).
  *   2. Dónde: una copia de `git archive HEAD` (scripts/lib/clean-verify.mjs),
  *      nunca el árbol de trabajo: el trabajo a medias de otra sesión daría rojos
  *      falsos.
@@ -141,6 +142,8 @@ const head = git('rev-parse', 'HEAD')
 
 let models
 let why
+/** Modelos que corren solo los pasos rápidos (cambió algo compartido, no ellos). */
+let fastOnly = new Set()
 if (has('--all')) {
   models = [...MODELS]
   why = 'todos (--all)'
@@ -156,10 +159,12 @@ if (has('--all')) {
   }
   const plan = state.lastCommit ? modelsToCheck(changed, MODELS) : { all: false, models: [] }
   const rotate = nextInRotation(MODELS, state.rotation || null)
-  models = plan.all ? [...MODELS] : [...new Set([...plan.models, rotate])]
-  why = plan.all
-    ? `cambió algo compartido desde ${state.lastCommit.slice(0, 7)}`
-    : `cambiaron: ${plan.models.join(', ') || 'ninguno'} · rotación: ${rotate}`
+  const full = new Set([...plan.models, rotate])
+  models = plan.all ? [...MODELS] : [...full]
+  if (plan.all) fastOnly = new Set(MODELS.filter((m) => !full.has(m)))
+  why =
+    `cambiaron: ${plan.models.join(', ') || 'ninguno'} · rotación: ${rotate}` +
+    (plan.all ? ` · cambió algo compartido desde ${state.lastCommit.slice(0, 7)}: el resto, pasos rápidos` : '')
   state.rotation = rotate
 }
 
@@ -196,7 +201,8 @@ try {
   for (const model of models) {
     const log = path.join(RUN, `${model}.log`)
     const t0 = Date.now()
-    const code = await run(COPY, ['scripts/check-sections.mjs', model, ...FAST], log)
+    const flags = FAST.length || fastOnly.has(model) ? ['--fast'] : []
+    const code = await run(COPY, ['scripts/check-sections.mjs', model, ...flags], log)
     // El informe por paso de check:sections: qué corrió y qué falló.
     const steps = path.join(COPY, 'storage', 'section-check', model)
     for (const file of fs.existsSync(steps) ? fs.readdirSync(steps) : []) {
@@ -209,7 +215,7 @@ try {
         for (const detail of parseFailures(text)) found.push({ model, step, detail })
       }
     }
-    summary.push(`${model}: ${code === 0 ? 'ok' : 'con fallas'} (${Math.round((Date.now() - t0) / 60000)} min)`)
+    summary.push(`${model}${flags.length ? ' (rápido)' : ''}: ${code === 0 ? 'ok' : 'con fallas'} (${Math.round((Date.now() - t0) / 60000)} min)`)
     console.log(`  ${code === 0 ? '✓' : '✖'} ${model}`)
   }
 

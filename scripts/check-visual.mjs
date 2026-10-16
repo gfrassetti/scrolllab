@@ -145,7 +145,7 @@ async function inspect(browser, dist, name) {
   }
 }
 
-async function check(browser, name, packTo) {
+async function check(browser, name, packTo, { minHeight = 1200 } = {}) {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), `sl-${name}-`))
   const problems = []
 
@@ -178,7 +178,7 @@ async function check(browser, name, packTo) {
   )
 
   if (text.length < 40) problems.push(`${name}: la página renderiza casi vacía`)
-  if (height < 1200) problems.push(`${name}: la página mide ${height}px, no hay scroll`)
+  if (height < minHeight) problems.push(`${name}: la página mide ${height}px, no hay scroll`)
   for (const error of errors) problems.push(`${name}: error en consola — ${error}`)
 
   // Windows can hold a file for a moment after the browser closes (the FOLD
@@ -227,6 +227,9 @@ for (const arg of only.filter((a) => a.startsWith('custom:'))) {
   targets.push({
     name: arg.replace(':', '-'),
     packTo: (destPath) => packCustomTemplate({ recipe: validateRecipe(ids), destPath, licenseMeta: LICENSE }),
+    // Un grupo de secciones sin template propio (contacto, tienda) puede ser una
+    // página corta a propósito: ahí el «casi vacía» de arriba alcanza.
+    ...(model in PRODUCTS ? {} : { minHeight: 0 }),
   })
 }
 
@@ -238,7 +241,7 @@ const problems = []
 
 for (const target of targets) {
   process.stdout.write(`· ${target.name} … `)
-  const found = await check(browser, target.name, target.packTo)
+  const found = await check(browser, target.name, target.packTo, { minHeight: target.minHeight })
   problems.push(...found)
   console.log(found.length ? `${found.length} problema(s)` : 'ok')
 }

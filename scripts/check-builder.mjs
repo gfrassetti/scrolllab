@@ -166,10 +166,11 @@ async function checkSectionRendersProps(page, sectionId) {
   await page.waitForTimeout(1200)
 
   // Algunas props viajan en atributos (un mail en `mailto:`, un alt, un
-  // placeholder, una imagen en src o en un background) en vez de ser texto.
+  // placeholder, una imagen en src, en un background o en el srcset de un
+  // <source> de <picture>) en vez de ser texto.
   const haystack = squash(
     await page.evaluate(() => {
-      const attrs = ['href', 'src', 'poster', 'aria-label', 'alt', 'title', 'placeholder', 'value', 'id', 'style']
+      const attrs = ['href', 'src', 'srcset', 'poster', 'aria-label', 'alt', 'title', 'placeholder', 'value', 'id', 'style']
       const values = [...document.querySelectorAll('*')].flatMap((el) =>
         attrs.map((name) => el.getAttribute(name)).filter(Boolean),
       )

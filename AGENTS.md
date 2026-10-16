@@ -222,7 +222,7 @@ npm run ssr:snapshot   # HTML renderizado en el servidor: la red de los refactor
 npm run pack:templates # prebuild catalog ZIPs for chapters/nocturne/monolith
 npm run check:sections # EL procedimiento de prueba de un template o sección: ZIP de cada sección, campos, builder, guardado, colores, ZIP compilado, teléfono, movimiento, paridad y, si es widget, LAB (`-- apex`, `-- apex/Hero`, `--fast`, `--only=paso`). Ver docs/testing-sections.md
 npm run check:builder-save # con sesión: editar → se guarda solo → otro navegador lo abre igual → comprar (simulado) → el ZIP trae lo editado
-npm run qa:sweep       # el barrido nocturno (ADR 0007): copia limpia de HEAD, lo que cambió + uno en rotación; hallazgos en storage/qa/ (--queue / --mark para el agente section-fixer)
+npm run qa:sweep       # el barrido nocturno (ADR 0007): copia limpia de HEAD, lo que cambió + uno en rotación (si cambió algo compartido, el resto solo pasos rápidos); hallazgos en storage/qa/ (--queue / --mark para el agente section-fixer)
 npm run check:visual   # instala, compila y fotografía cada ZIP: los 8 del bundle, los que se venden sueltos y el custom (lento); `-- custom:apex` = la composición del builder con todas las secciones de ese modelo
 npm run check:builder  # el editor del builder aplica los cambios (Chromium); `-- apex` = solo ese modelo
 npm run check:editable # todo texto/imagen/link/color visible de cada sección del builder es un campo (SSR): las 86 al 100%, falla si algo vuelve a quedar fijo

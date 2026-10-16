@@ -7,9 +7,10 @@
 import { createHash } from 'node:crypto'
 
 /**
- * Archivos que, si cambian, afectan a cualquier sección: se prueba todo. El
- * motor de animación, el embed, el empaquetador, los estilos compartidos y las
- * propias herramientas de prueba.
+ * Archivos que, si cambian, afectan a cualquier sección: todos los modelos
+ * pasan por los pasos rápidos; los completos quedan para los que cambiaron y el
+ * de la rotación. El motor de animación, el embed, el empaquetador, los estilos
+ * compartidos y las propias herramientas de prueba.
  */
 const SHARED = [
   /^embed\//,
@@ -24,7 +25,9 @@ const SHARED = [
 ]
 
 /**
- * Modelos a probar a partir de los archivos que cambiaron.
+ * Modelos a probar a partir de los archivos que cambiaron. `all`: cambió algo
+ * compartido; `models`: los que cambiaron directamente (su sección, campos,
+ * página o public/), haya o no algo compartido.
  * @param {string[]} files rutas relativas al repo (con `/`)
  * @param {string[]} models los modelos que existen
  * @returns {{ all: boolean, models: string[] }}
@@ -33,9 +36,13 @@ export function modelsToCheck(files, models) {
   const known = new Set(models)
   const byLower = new Map(models.map((m) => [m.toLowerCase(), m]))
   const out = new Set()
+  let all = false
   for (const raw of files) {
     const f = raw.replace(/\\/g, '/')
-    if (SHARED.some((re) => re.test(f))) return { all: true, models: [...models] }
+    if (SHARED.some((re) => re.test(f))) {
+      all = true
+      continue
+    }
     const m =
       f.match(/^src\/components\/sections\/([^/]+)\//)?.[1] ||
       f.match(/^src\/domain\/sectionFields\/fields\/([^/.]+)\.js$/)?.[1] ||
@@ -43,7 +50,7 @@ export function modelsToCheck(files, models) {
       byLower.get((f.match(/^src\/pages\/([A-Za-z]+)Page\.jsx$/)?.[1] || '').toLowerCase())
     if (m && known.has(m)) out.add(m)
   }
-  return { all: false, models: models.filter((m) => out.has(m)) }
+  return { all, models: models.filter((m) => out.has(m)) }
 }
 
 /** El siguiente modelo de la rotación: todo se prueba entero cada tanto aunque no cambie. */
@@ -80,8 +87,10 @@ export function parseFailures(log) {
   const lines = String(log).split(/\r?\n/)
   // Sin los colores de la terminal (ESC[…m).
   const ansi = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
-  // El «Call log:» de Playwright lista sus pasos con «- »: no son hallazgos.
+  // El «Call log:» de Playwright lista sus pasos con «- », y un aviso de Vite
+  // («(!) Some chunks are larger…») sus sugerencias: no son hallazgos.
   let inCallLog = false
+  let inViteWarning = false
   const hits = lines
     .map((l) => l.replace(ansi, '').trim())
     .filter((l) => {
@@ -89,11 +98,18 @@ export function parseFailures(log) {
         inCallLog = true
         return false
       }
-      if (inCallLog && /^- /.test(l)) return false
+      if (/^\(!\)/.test(l)) {
+        inViteWarning = true
+        return false
+      }
+      if ((inCallLog || inViteWarning) && /^- /.test(l)) return false
       inCallLog = false
+      inViteWarning = false
+      // node --test (TAP): el motivo de cada prueba que falló, no el de la suite.
+      if (/^error: '.+'$/.test(l)) return !/subtests? failed/.test(l)
       return /^(✗|✖|- )/.test(l) && !/^✖ (\d+ problema|fallaron|\d+ inconsistencia)/.test(l)
     })
-    .map((l) => l.replace(/^(✗|✖|-)\s*/, ''))
+    .map((l) => l.replace(/^(✗|✖|-)\s*/, '').replace(/^error: '(.+)'$/, '$1'))
   if (hits.length) return [...new Set(hits)].slice(0, 30)
   const tail = lines.filter((l) => l.trim()).slice(-6).join(' / ')
   return tail ? [`sin detalle; final de la salida: ${tail.slice(0, 300)}`] : ['falló sin salida']

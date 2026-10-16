@@ -1164,12 +1164,17 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
             return
           }
 
-          // el puente de altura converge en un par de frames tras el reveal
+          // el puente de altura converge en un par de frames tras el reveal: se
+          // espera a que el iframe llegue al contenido Y se quede quieto. El
+          // contenido incluye la tira del sello del plan gratis, que entra un poco
+          // después de la sección (kin/Intro lo dejaba ver: +44 px que no son
+          // crecimiento).
           const iframeLoc = page.locator('iframe[data-scrolllab-frame]')
           let iframeH = 0
           for (let i = 0; i < 15; i++) {
+            const prev = iframeH
             iframeH = await iframeLoc.evaluate((el) => el.getBoundingClientRect().height)
-            if (iframeH >= m.rootH - 8) break
+            if (iframeH >= m.rootH - 8 && Math.abs(iframeH - prev) <= 1) break
             await sleep(300)
           }
           assert.ok(iframeH > 50, `${sectionId} @${vp.name}: iframe casi sin alto (${iframeH}px)`)

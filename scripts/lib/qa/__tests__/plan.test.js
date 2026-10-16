@@ -36,6 +36,13 @@ describe('modelsToCheck', () => {
       assert.equal(modelsToCheck([f], MODELS).all, true, f)
     }
   })
+  it('con algo compartido igual dice qué modelos cambiaron (esos van enteros)', () => {
+    assert.deepEqual(modelsToCheck(['src/lib/motion.js', 'src/components/sections/kin/Press.jsx'], MODELS), {
+      all: true,
+      models: ['kin'],
+    })
+    assert.deepEqual(modelsToCheck(['src/lib/motion.js'], MODELS), { all: true, models: [] })
+  })
   it('sin cambios en secciones, nada; un modelo que no existe no cuenta', () => {
     assert.deepEqual(modelsToCheck(['README.md', 'src/components/sections/plum/X.jsx'], MODELS), { all: false, models: [] })
   })
@@ -92,6 +99,20 @@ describe('parseFailures', () => {
       '[(página)] error falló la auditoría: TimeoutError: page.screenshot: Timeout 60000ms exceeded.',
       '[Hero] text<11 10px',
     ])
+  })
+  it('un aviso de Vite no es un hallazgo; el motivo de una prueba de node --test que falló, sí', () => {
+    const log = [
+      '(!) Some chunks are larger than 500 kB after minification. Consider:',
+      '- Using dynamic import() to code-split the application',
+      '- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.',
+      '✓ built in 2.00s',
+      '    not ok 299 - kin/Intro — tablet 768px: sin overflow y visible',
+      "      error: 'kin/Intro @tablet: el alto no converge (1973px → 1990px)'",
+      'not ok 1 - embed e2e — todas las HOSTABLE_SECTIONS',
+      "  error: '2 subtests failed'",
+      '(exit 1)',
+    ].join('\n')
+    assert.deepEqual(parseFailures(log), ['kin/Intro @tablet: el alto no converge (1973px → 1990px)'])
   })
   it('sin líneas de error, el final de la salida', () => {
     assert.match(parseFailures('a\nb\nError: boom')[0], /Error: boom/)

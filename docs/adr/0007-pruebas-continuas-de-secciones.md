@@ -60,7 +60,9 @@ decide una persona: un segundo registro sería otra fuente de verdad (ADR 0001) 
 
 - Una sección o un template nuevo entran solos al nivel verify (salen de las tablas de dominio) y al barrido (git diff).
 - El barrido tarda (cada modelo ~20 min): corre de noche y solo sobre lo que cambió más uno en rotación; un `--all`
-  completo son horas.
+  completo son horas. Si cambió algo compartido, el resto de los modelos pasa solo por los pasos rápidos (2026-10-16:
+  probarlos enteros a todos llevaba ~4 h por corrida y el fixer terminaba arrancando de día).
+- El fixer no arranca después de las 8:00 aunque la corrida haya empezado de noche (el dueño ya trabaja en la carpeta).
 - Las tareas programadas de la app corren solo con la app abierta; si está cerrada, la corrida sale al abrirla.
 - Un emulador no es un teléfono: GPU real y Safari siguen siendo a mano (`?motion-debug`).
 - Cambiar una prueba (umbral, excepción) sigue siendo una decisión de una persona, con el motivo en el código.
