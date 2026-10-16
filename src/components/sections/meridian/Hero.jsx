@@ -204,6 +204,7 @@ export default function Hero({
   const stage = useRef(null)
   const canvasRef = useRef(null)
   const wordmarkRef = useRef(null)
+  const veilRef = useRef(null)
   const welcomeRef = useRef(null)
   const stateRefs = useRef([])
   const navRef = useRef(null)
@@ -468,9 +469,11 @@ export default function Hero({
           return Math.max(0, Math.min(1, inO * outO))
         }
 
+        let seen = 0
         words.forEach((word, i) => {
           const t = n > 1 ? i / (n - 1) : 0
           const o = oAt(t)
+          seen = Math.max(seen, o)
           word.style.opacity = o.toFixed(3)
           word.style.filter = `blur(${((1 - o) * 4).toFixed(2)}px)`
         })
@@ -485,6 +488,7 @@ export default function Hero({
           tail.style.opacity = o.toFixed(3)
           tail.style.filter = `blur(${((1 - o) * 4).toFixed(2)}px)`
         })
+        return seen
       }
 
       // Mobile: welcome + quote are dropped, the last (invite) state is
@@ -506,24 +510,36 @@ export default function Hero({
       }
 
       function layoutWelcome(prog) {
-        if (mobile) return
+        if (mobile) return 0
         const el = welcomeRef.current
-        if (!el) return
-        layoutScrub(el, prog, WELCOME_AT, WELCOME_SPAN, false)
+        if (!el) return 0
+        return layoutScrub(el, prog, WELCOME_AT, WELCOME_SPAN, false)
       }
 
       function layoutStates(prog) {
-        if (mobile) return
+        if (mobile) return 1 // el teléfono deja la invitación siempre a la vista
+        let seen = 0
         for (let k = 0; k < STATES.length; k++) {
           const el = stateRefs.current[k]
           const st = STATES[k]
           if (!el) continue
-          layoutScrub(el, prog, st.at, st.span, st.hold)
+          seen = Math.max(seen, layoutScrub(el, prog, st.at, st.span, st.hold))
           // Pointer events on the whole state block — only clickable
           // when it's actually visible enough to hit.
           const anyVisible = el.querySelector('[data-word-i]')?.style.opacity ?? '0'
           el.style.pointerEvents = parseFloat(anyVisible) > 0.5 ? 'auto' : 'none'
         }
+        return seen
+      }
+
+      // El velo para leer: mientras hay texto en el centro (el wordmark grande, la bienvenida, las
+      // frases, la invitación) el video se oscurece; cuando el texto se va, vuelve a la luz normal.
+      function layoutVeil(prog, seenWelcome, seenStates) {
+        const el = veilRef.current
+        if (!el) return
+        const big = mobile ? 0 : 1 - Math.max(0, Math.min(1, prog / WORDMARK_RANGE))
+        const v = Math.max(big, seenWelcome, seenStates)
+        el.style.opacity = v.toFixed(3)
       }
 
       let targetProg = 0
@@ -550,8 +566,7 @@ export default function Hero({
         if (mobile) panT = prog
         paint(idxOf(prog))
         layoutWordmark(prog)
-        layoutWelcome(prog)
-        layoutStates(prog)
+        layoutVeil(prog, layoutWelcome(prog), layoutStates(prog))
       }
 
       resize()
@@ -737,6 +752,17 @@ export default function Hero({
             style={{
               background:
                 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 22%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.55) 100%)',
+            }}
+          />
+          {/* velo para leer: más oscuro al centro, solo mientras hay texto encima (lo maneja el scroll) */}
+          <div
+            ref={veilRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[2]"
+            style={{
+              opacity: 1,
+              background:
+                'radial-gradient(ellipse 75% 60% at 50% 52%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.32) 55%, rgba(0,0,0,0.18) 100%)',
             }}
           />
         </div>
