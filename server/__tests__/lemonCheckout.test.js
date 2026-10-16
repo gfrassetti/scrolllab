@@ -22,6 +22,7 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
 
   before(async () => {
     process.env.EMAIL_NOTIFY_TO = OWNER
+    process.env.QA_BUYER_EMAILS = 'qa-owner@test.com'
     ;({ ls, mp, loginAs, lemonWebhook, cleanup, fileDb } = await startAppAgainstFakeLemon())
   })
   after(() => cleanup())
@@ -88,10 +89,40 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
       assert.equal((await fileDb.findOrdersByUser(me.body.user.id)).length, 0)
     })
 
-    it('un producto de prueba no se cobra por Lemon Squeezy', async () => {
-      const agent = await loginAs('qa@test.com')
-      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'test-template' }], provider: 'lemonsqueezy' })
-      assert.ok(res.status >= 400, JSON.stringify(res.body))
+    it('el producto de prueba: solo para las cuentas de QA, a US$ 1 fijos y sin el 10 %', async () => {
+      const stranger = await loginAs('curioso@test.com')
+      const denied = await stranger.post('/api/checkout').send({ items: [{ sku: 'qa-template' }], provider: 'lemonsqueezy' })
+      // Como con Mercado Pago: para quien no es de QA, el producto simplemente no existe.
+      assert.equal(denied.status, 400, JSON.stringify(denied.body))
+      assert.match(JSON.stringify(denied.body), /SKU inválido/)
+
+      const agent = await loginAs('qa-owner@test.com')
+      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'qa-template' }], provider: 'lemonsqueezy' })
+      assert.equal(res.status, 200, JSON.stringify(res.body))
+      assert.equal(res.body.provider, 'lemonsqueezy')
+      const sent = ls.calls.filter((c) => c.route === 'POST /v1/checkouts').at(-1).body.data.attributes
+      assert.equal(sent.custom_price, 100)
+      const order = await orderRow(res.body.orderId)
+      assert.equal(order.qa, true)
+      assert.equal(order.currency_id, 'USD')
+      assert.equal(order.total, 1)
+      assert.equal(order.discountPct, undefined)
+
+      // Pagar (con el webhook) cumple la orden de prueba y entrega su ZIP.
+      const lemon = ls.pay(res.body.init_point.split('/').pop(), { email: 'qa-owner@test.com' })
+      assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
+      const paidOrder = await orderRow(res.body.orderId)
+      assert.equal(paidOrder.status, 'paid')
+      assert.ok(fs.existsSync(paidOrder.zipPath))
+    })
+
+    it('Paddle no cobra productos de prueba', async () => {
+      // Aunque el front pida `paddle`, con Lemon Squeezy como carril ya se resuelve ahí;
+      // el rechazo de Paddle real está cubierto en paddleCheckout.test.js.
+      const agent = await loginAs('qa-owner@test.com')
+      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'qa-template' }], provider: 'paddle' })
+      assert.equal(res.status, 200)
+      assert.equal(res.body.provider, 'lemonsqueezy')
     })
   })
 

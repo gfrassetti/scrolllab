@@ -46,7 +46,7 @@ export function checkoutPayloadFromItems(items) {
  *   navigate: (to: string) => void,
  *   loginNext?: string,
  *   couponCode?: string,
- *   provider?: 'mercadopago' | 'paddle',
+ *   provider?: 'mercadopago' | 'paddle' | 'lemonsqueezy',
  *   locale?: string,
  * }} opts
  * @returns {Promise<'login' | 'redirect' | 'paid' | 'closed'>}
@@ -74,9 +74,10 @@ export async function startCheckout({
     return 'login'
   }
 
-  // Mercado Pago es el default del servidor: solo Paddle viaja explícito.
+  // Mercado Pago es el default del servidor: solo Paddle (y Lemon Squeezy, desde el
+  // modo prueba) viajan explícitos.
   const data = await api.checkout(payload, couponCode, {
-    provider: provider === 'paddle' ? 'paddle' : undefined,
+    provider: provider === 'paddle' || provider === 'lemonsqueezy' ? provider : undefined,
     locale,
   })
   if (data?.provider === 'paddle' && data.transactionId) {

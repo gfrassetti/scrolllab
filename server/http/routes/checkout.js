@@ -127,6 +127,7 @@ export function createCheckoutRouter({ config, limits }) {
           currency: 'USD',
           // Quién cobra de verdad ese carril (el front solo abre overlay con Paddle).
           gateway: paddleOn ? 'paddle' : lemonOn ? 'lemonsqueezy' : null,
+          ...(lemonOn ? { testMode: Boolean(config.lemon.testMode) } : {}),
           ...(paddleOn && !config.paddle.mock ? paddleClientInfo(config) : {}),
         },
       },

@@ -13,6 +13,7 @@ import {
   QA_TEMPLATE_SKU,
   QA_TEMPLATE_MODEL,
   QA_TEMPLATE_ARS,
+  QA_TEMPLATE_USD,
   qaCustomPriceArs,
   qaDiscountedArs,
 } from '../../src/domain/qa.js'
@@ -117,8 +118,9 @@ export async function createCheckoutOrder({
   const qa = Array.isArray(items) && items.some((i) => isQaSku(i?.sku))
   if (qa) {
     assertQaBuyer(user, config)
-    if (usd) {
-      throw new HttpError(400, 'Los productos de prueba se cobran solo con Mercado Pago', { expose: true })
+    // Con tarjeta internacional solo Lemon Squeezy (US$ 1 fijo); Paddle no.
+    if (paddle) {
+      throw new HttpError(400, 'Los productos de prueba se cobran con Mercado Pago o Lemon Squeezy', { expose: true })
     }
   }
 
@@ -146,6 +148,8 @@ export async function createCheckoutOrder({
     : await autoWelcomeCoupon({ user })
   // Prueba a $1: el 10% no baja el precio. No se aplica ni se gasta (y la
   // pantalla de MP no dice «10% off» sin descuento).
+  // Lemon Squeezy: US$ 1 fijos, sin el 10 % de primera compra.
+  if (qa && lemon) coupon = null
   if (qa && coupon) {
     const pct = coupon.percent
     const listOf = (/** @type {any} */ i) => Number(i.list_ars)
@@ -154,6 +158,7 @@ export async function createCheckoutOrder({
 
   // Paddle cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {
+    if (qa && lemon) return { ...i, unit_price: QA_TEMPLATE_USD, unit_price_usd: QA_TEMPLATE_USD, currency_id: 'USD' }
     if (qa) return coupon ? { ...i, unit_price: qaDiscountedArs(i.list_ars, coupon.percent) } : i
     if (usd) {
       const amount = coupon

@@ -47,6 +47,20 @@ conviven; el comprador del exterior ve el medio de pago que corresponda.
    que adaptarlo: acá el precio vive en la variante.
 4. **UI**: el selector «Medio de pago» suma la opción y la moneda sigue al medio (USD).
 
+## Probarlo de punta a punta (modo prueba, solo para nosotros)
+
+La página `/test` (404 para cualquiera que no esté en `QA_BUYER_EMAILS`) suma, cuando Lemon Squeezy
+está prendido, el botón «Comprar por US$ 1» del template de prueba por Lemon Squeezy. El servidor
+vuelve a chequear la cuenta en cada compra (para el resto, `SKU inválido`). Es el mismo circuito
+que Mercado Pago: orden marcada `qa`, fuera de las métricas, ZIP real, recibo en USD, reembolso.
+
+- Con `LEMONSQUEEZY_TEST_MODE=true` **no cobra**: tarjeta `4242 4242 4242 4242`, fecha futura y CVC cualquiera.
+- Sin esa variable (modo real) cobra US$ 1 de verdad y se devuelve igual desde Mis compras.
+- Pasos: comprar → vuelve a `/checkout/success` (espera el webhook) → Mis compras «Paga» → mail →
+  «Pedir reembolso» (sin descargar) → «Te devolvimos el dinero». Variante: reembolsar a mano desde el
+  panel de Lemon Squeezy y ver que el webhook corta la orden.
+- El builder de prueba (`/builder-test`) sigue cobrando por Mercado Pago.
+
 ## Qué hace falta de tu lado (cuenta y credenciales)
 
 1. Crear la cuenta en lemonsqueezy.com y la **tienda** (nombre «Scroll Lab - Web Studio», dominio

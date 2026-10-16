@@ -15,6 +15,11 @@ export const QA_TEMPLATE_SKU = 'qa-template'
 /** El modelo que se empaqueta para el template de prueba. */
 export const QA_TEMPLATE_MODEL = 'chapters'
 export const QA_TEMPLATE_ARS = 1
+/**
+ * Lemon Squeezy: el mismo producto de prueba, a US$ 1 fijos (el cupón de primera
+ * compra no se aplica). Con `LEMONSQUEEZY_TEST_MODE` el checkout no cobra nada.
+ */
+export const QA_TEMPLATE_USD = 1
 
 /** SKU de la composición del builder de prueba en el pedido. */
 export const QA_CUSTOM_SKU = 'qa-custom'

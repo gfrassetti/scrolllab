@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { startCheckout } from '../lib/startCheckout'
+import { api } from '../lib/api'
 import { formatArs } from '../lib/pricing'
 import {
   QA_TEMPLATE_SKU,
   QA_TEMPLATE_MODEL,
   QA_TEMPLATE_ARS,
+  QA_TEMPLATE_USD,
   QA_BUILDER_BASE_ARS,
   QA_LAB_PRICES_ARS,
 } from '../domain/qa'
@@ -42,6 +44,17 @@ function QaBadge() {
 }
 
 const FLOWS = [
+  {
+    title: 'Lemon Squeezy (tarjeta, en dólares)',
+    steps: [
+      `Comprar el template de prueba por US$ ${QA_TEMPLATE_USD} (el botón de Lemon Squeezy, abajo del de Mercado Pago).`,
+      'En modo prueba de Lemon Squeezy no cobra: tarjeta 4242 4242 4242 4242, cualquier fecha futura y CVC.',
+      'Al pagar vuelve a /checkout/success, que espera al webhook y manda a Mis compras con la orden «Paga».',
+      'Llega «Tu compra en SCROLLLAB» en dólares, con la nota de que la factura la emite Lemon Squeezy.',
+      'Sin descargar: Mis compras → Pedir reembolso. Se devuelve por la API de Lemon Squeezy y llega «Te devolvimos el dinero».',
+      'Mismo flujo, pero con el reembolso hecho a mano desde el panel de Lemon Squeezy: el webhook corta la orden.',
+    ],
+  },
   {
     title: 'Template',
     steps: [
@@ -86,6 +99,41 @@ function QaHub() {
   const navigate = useNavigate()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  // Lemon Squeezy solo aparece si el servidor lo tiene prendido (es el carril
+  // internacional en USD cuando Paddle no está).
+  const [lemon, setLemon] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    api
+      .checkoutMethods()
+      .then((m) => {
+        const p = m?.providers?.paddle
+        if (!cancelled && p?.enabled && p.gateway === 'lemonsqueezy') setLemon({ testMode: Boolean(p.testMode) })
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const buyTemplateLemon = async () => {
+    if (busy) return
+    setBusy(true)
+    setError('')
+    try {
+      const result = await startCheckout({
+        items: [{ sku: QA_TEMPLATE_SKU, title: `PRUEBA — ${QA_TEMPLATE_MODEL.toUpperCase()}` }],
+        user,
+        navigate,
+        loginNext: '/test',
+        provider: 'lemonsqueezy',
+      })
+      if (result !== 'redirect') setBusy(false)
+    } catch (err) {
+      setError(err?.message || 'No se pudo iniciar el pago de prueba')
+      setBusy(false)
+    }
+  }
 
   const buyTemplate = async () => {
     if (busy) return
@@ -135,6 +183,28 @@ function QaHub() {
           </button>
           {error ? <p className="mt-3 text-body-sm text-danger">{error}</p> : null}
         </section>
+
+        {lemon ? (
+          <section className="mt-6 border border-ink/15 p-5 md:p-7">
+            <p className="text-eyebrow uppercase text-ink/50">Template de prueba · Lemon Squeezy</p>
+            <p className="mt-2 text-title-sm font-medium">
+              {QA_TEMPLATE_MODEL.toUpperCase()} · US$ {QA_TEMPLATE_USD}
+            </p>
+            <p className="mt-1 text-body-sm text-ink/60">
+              {lemon.testMode
+                ? 'Modo prueba de Lemon Squeezy: no cobra. Tarjeta 4242 4242 4242 4242.'
+                : 'Cobra de verdad US$ 1 con tarjeta.'}
+            </p>
+            <button
+              type="button"
+              onClick={buyTemplateLemon}
+              disabled={busy}
+              className="btn btn-primary mt-5 disabled:opacity-50"
+            >
+              {busy ? 'Yendo a Lemon Squeezy…' : `Comprar por US$ ${QA_TEMPLATE_USD} →`}
+            </button>
+          </section>
+        ) : null}
 
         <nav className="mt-6 grid gap-3 sm:grid-cols-2">
           <Link to="/builder-test" className="btn btn-ghost">Builder de prueba →</Link>
