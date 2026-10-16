@@ -178,8 +178,14 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
     assert.equal(String(patchUp.attributes.variant_id), variantOf('hosted_pro').id)
     assert.equal(patchUp.attributes.invoice_immediately, true)
     assert.equal((await c.row()).plan, 'hosted_pro')
-    // El cobro del prorrateo llega como una factura más.
+    // El cobro del prorrateo llega como una factura más, pero no es una cuota: no
+    // mueve el último cobro (el arrepentimiento la tomaba por una renovación).
+    const before = (await c.row()).lastPaidAt
     assert.equal((await lemonWebhook('subscription_payment_success', ls.lastProration)).status, 200)
+    const afterUp = await c.row()
+    assert.equal(new Date(afterUp.lastPaidAt).getTime(), new Date(before).getTime())
+    assert.equal(afterUp.upgradePayments.length, 1)
+    assert.equal(afterUp.upgradePayments[0].paymentId, ls.lastProration.id)
 
     const down = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_starter' })
     assert.equal(down.status, 200, JSON.stringify(down.body))
@@ -237,6 +243,37 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
     assert.equal(after.status, 'cancelled')
     assert.ok(after.refundedAt)
     await waitFor(() => c.mails().some((m) => /devolvimos/i.test(m.body.subject)), 'el mail de la devolución')
+  })
+
+  it('arrepentimiento después de subir de plan: sigue siendo el primer cobro y devuelve también la diferencia', async () => {
+    const c = await customer('arrep-up@test.com')
+    const me = await c.agent.get('/api/auth/me')
+    await fileDb.createSubscription({
+      userId: me.body.user.id,
+      plan: 'hosted_starter',
+      cycle: 'monthly',
+      status: 'cancelled',
+      provider: 'mercadopago',
+      activatedAt: new Date(T0 - 90 * DAY),
+      canceledAt: new Date(T0 - 60 * DAY),
+      currentPeriodEnd: new Date(T0 - 60 * DAY),
+    })
+    const out = await openCheckout(c, 'hosted_starter')
+    const { invoice } = await subscribe(out.checkoutId)
+    await c.goTo(1)
+    const up = await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
+    assert.equal(up.status, 200, JSON.stringify(up.body))
+    await lemonWebhook('subscription_payment_success', ls.lastProration)
+    await c.goTo(2)
+    const row = (await rowsOf(c.agent)).find((r) => r.provider === 'lemonsqueezy')
+    const result = await executeWithdrawal({ code: 'ARR-LAB2', subscriptionId: String(row.id), email: c.email }, config)
+    assert.equal(result.status, 'refunded', JSON.stringify(result))
+    const refunded = ls.calls.filter((x) => x.route === 'POST /v1/subscription-invoices/:id/refund').map((x) => x.path.split('/')[3])
+    assert.ok(refunded.includes(invoice.id))
+    assert.ok(refunded.includes(ls.lastProration.id))
+    const after = await fileDb.findSubscriptionById(String(row.id))
+    assert.equal(after.status, 'cancelled')
+    assert.ok(after.upgradePayments[0].refundedAt)
   })
 
   it('la vuelta del checkout antes del webhook: el sync la encuentra por el mail y la activa', async () => {

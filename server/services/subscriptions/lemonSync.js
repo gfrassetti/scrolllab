@@ -308,6 +308,27 @@ export async function handleLemonLabInvoice({ invoice, custom, config }, deps = 
       config,
     })
   }
+  // La diferencia de un cambio de plan no es una cuota: no mueve el período ni el
+  // último cobro (si no, el arrepentimiento la tomaba por una renovación). Se anota
+  // aparte, como las diferencias de Mercado Pago, y se devuelve con el primer cobro.
+  if (invoice.billingReason === 'updated') {
+    const list = [...(sub.upgradePayments || [])]
+    if (!list.some((p) => p.paymentId === invoice.id)) {
+      list.push({ paymentId: invoice.id, plan: sub.plan, amount: charged / 100, at: invoice.createdAt, outcome: 'applied' })
+    }
+    sub.upgradePayments = list
+    sub.paymentFailedAt = undefined
+    await sub.save()
+    fireCharge(sub, config, {
+      ref: `lemon-${invoice.id}`,
+      firstCharge: false,
+      amount: charged / 100,
+      currency: invoice.currency || 'USD',
+      paidAt: invoice.createdAt,
+    })
+    return { status: sub.status, currentPeriodEnd: sub.currentPeriodEnd || null, approved: true, upgrade: true }
+  }
+
   const firstCharge = !sub.lastPaidAt
   let activated = false
   const periodEnd = ls?.renewsAt || null

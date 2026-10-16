@@ -168,6 +168,30 @@ async function refundLab(sub, row, config, deps) {
   }
   if (isLemonSub(sub)) {
     if (!config.lemon?.enabled) return { status: 'manual', note: 'Lemon Squeezy apagado' }
+    // Diferencias de plan pagadas en el plazo: también vuelven, antes que el primer
+    // cobro (si una falla, no quedó nada a medias dado de baja).
+    const refundInvoice = deps.refundSubscriptionInvoice || refundSubscriptionInvoice
+    const extras = []
+    for (const extra of (sub.upgradePayments || []).filter((p) => p.outcome === 'applied' && p.paymentId && !p.refundedAt)) {
+      await refundInvoice(config, extra.paymentId)
+      await handleLabRefund({
+        sub,
+        provider: 'lemonsqueezy',
+        externalId: `lemon-inv-${extra.paymentId}`,
+        chargeId: String(extra.paymentId),
+        amount: Number(extra.amount) || 0,
+        currency: 'USD',
+        partial: false,
+        reason: 'refunded',
+        config,
+      }, deps)
+      extra.refundedAt = new Date()
+      extras.push(String(extra.paymentId))
+    }
+    if (extras.length) {
+      sub.markModified?.('upgradePayments')
+      await sub.save()
+    }
     // El primer cobro es una factura de la suscripción: se devuelve entera y se da
     // de baja en el momento (handleLabRefund). El webhook que llega después no repite nada.
     const data = await (deps.refundSubscriptionInvoice || refundSubscriptionInvoice)(config, sub.firstChargeId)
@@ -184,7 +208,12 @@ async function refundLab(sub, row, config, deps) {
       reason: 'refunded',
       config,
     }, deps)
-    return { status: 'refunded', note: `factura Lemon Squeezy ${sub.firstChargeId}` }
+    return {
+      status: 'refunded',
+      note: extras.length
+        ? `facturas Lemon Squeezy ${[sub.firstChargeId, ...extras].join(', ')} (primer cobro + diferencias de plan)`
+        : `factura Lemon Squeezy ${sub.firstChargeId}`,
+    }
   }
   const token = config.mpSubs?.accessToken
   if (config.mpMock || !token) return { status: 'manual', note: 'Mercado Pago sin cuenta real (mock)' }
