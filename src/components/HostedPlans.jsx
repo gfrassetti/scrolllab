@@ -68,6 +68,7 @@ const planPrice = (p, cycle, currency) =>
 const GATEWAY_TERMS = {
   mercadopago: { name: 'Mercado Pago', href: 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194' },
   paddle: { name: 'Paddle', href: 'https://www.paddle.com/legal/checkout-buyer-terms' },
+  lemonsqueezy: { name: 'Lemon Squeezy', href: 'https://www.lemonsqueezy.com/buyer-terms' },
 }
 
 /**
@@ -141,12 +142,19 @@ export default function HostedPlans({ qa: qaPage = false }) {
   // pantalla (sus precios son los de prueba; si no, /lab mostraba los reales).
   const qa = qaPage || !!planIsQa
   const { t, locale } = useI18n()
-  // Desde dónde paga (Argentina → MP en pesos; otro país → Paddle en USD).
+  // Desde dónde paga (Argentina → MP en pesos; otro país → tarjeta en USD).
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)
-  const paddleForRegion = usePayRegion((s) => s.paddleEnabled)
+  const intlForRegion = usePayRegion((s) => s.intlEnabled)
+  // LAB es una suscripción: solo cobra afuera una pasarela que las tenga
+  // (Lemon Squeezy todavía no: docs/lemonsqueezy.md, etapa 3).
+  const labIntlForRegion = usePayRegion((s) => s.labIntlEnabled)
+  const gateway = usePayRegion((s) => s.gateway)
   // Prueba: sin prueba gratis y solo Mercado Pago.
-  const paddleEnabled = !qa && paddleForRegion
+  const intlEnabled = !qa && labIntlForRegion
+  // Está el carril internacional pero no para suscripciones: se avisa en vez de
+  // dejar a un comprador del exterior sin saber por qué ve pesos.
+  const intlNoSubs = !qa && intlForRegion && !labIntlForRegion && region === 'intl'
   // La prueba gratis no se elige: la primera suscripción de la cuenta la tiene
   // (también en /lab-test, misma regla que LAB real).
   const trialAvailable = trialAvailableForPlan
@@ -154,7 +162,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
   useEffect(() => {
     loadRegion()
   }, [loadRegion])
-  const intl = paddleEnabled && region === 'intl'
+  const intl = intlEnabled && region === 'intl'
   const paddleSub = planProvider === 'paddle'
   // Textos que nombran a la pasarela: con una suscripción de Paddle, su variante.
   const tp = (key, vars) => t(paddleSub ? `lab.paddle.${key}` : `lab.${key}`, vars)
@@ -339,7 +347,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
     setBusy(planId)
     setError('')
     setNotice('')
-    const provider = via || (paddleEnabled ? providerForRegion(region) : 'mercadopago')
+    const provider = via || (intlEnabled ? providerForRegion(region, gateway) : 'mercadopago')
     try {
       const res = await api.subscribe(planId, planCycle, { provider, locale, qa })
       if (res.provider === 'paddle' && res.transactionId) {
@@ -711,7 +719,10 @@ export default function HostedPlans({ qa: qaPage = false }) {
             </ul>
           </div>
 
-          {paddleEnabled && choosing && (
+          {intlNoSubs && choosing && (
+            <p className="mt-6 max-w-[72ch] text-body-sm text-ink/60">{t('lab.intlNoSubs')}</p>
+          )}
+          {intlEnabled && choosing && (
             <PaymentMethodPicker
               region={region}
               onChange={setRegion}
@@ -908,7 +919,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
               }
               trialDays={!activePlan && trialAvailable ? trialDays : 0}
               cycle={cycle}
-              provider={paddleEnabled ? providerForRegion(region) : 'mercadopago'}
+              provider={intlEnabled ? providerForRegion(region, gateway) : 'mercadopago'}
             />
           )}
           <p className="mt-4 text-body-sm text-ink/55">

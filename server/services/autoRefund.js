@@ -243,7 +243,7 @@ export async function executeWithdrawal(row, config, deps = {}) {
       title: done
         ? `ARREPENTIMIENTO ${row.code} — ${done}`
         : `ARREPENTIMIENTO ${row.code} — NO SE PUDO DEVOLVER SOLO: hacelo a mano`,
-      lines: [`${row.name || ''} <${row.email}>`, out.note || '', done ? '' : 'Devolvé desde el panel de Mercado Pago, Paddle o Lemon Squeezy.'].filter(Boolean),
+      lines: [`${row.name || ''} <${row.email}>`, out.note || '', done ? '' : 'Devolvé desde el panel de Mercado Pago o de Lemon Squeezy.'].filter(Boolean),
       config,
     })
   }

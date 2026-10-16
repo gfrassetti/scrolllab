@@ -146,11 +146,28 @@ En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
 
 Sin `MP_WEBHOOK_SECRET` + token de prod, el boot en producción **falla** a propósito.
 
-## Paddle — cobro internacional (USD)
+## Lemon Squeezy — cobro internacional (USD)
 
-Afuera de Argentina cobra Paddle, en USD y como merchant of record (factura y
-liquida el IVA / sales tax de cada país). Setup del panel, eventos del webhook,
-flujos y tests en [`paddle.md`](paddle.md). En Railway:
+Afuera de Argentina cobra Lemon Squeezy, en USD y como merchant of record
+(factura y liquida el IVA / sales tax de cada país). Alcance (templates y
+builder; LAB todavía no), cuenta, panel y variables en
+[`lemonsqueezy.md`](lemonsqueezy.md). En Railway:
+
+```
+LEMONSQUEEZY_API_KEY=...
+LEMONSQUEEZY_STORE_ID=...
+LEMONSQUEEZY_ORDER_VARIANT_ID=...
+LEMONSQUEEZY_WEBHOOK_SECRET=...   # webhook → /api/webhooks/lemonsqueezy
+LEMONSQUEEZY_TEST_MODE=true       # sacarlo al salir a producción
+```
+
+Sin esas cuatro variables queda apagado (todo por Mercado Pago).
+
+### Paddle (descartado)
+
+Paddle no aprobó la cuenta y se dejó de usar (2026-10-15). Su código sigue en el
+repo, apagado, y no hay que cargar sus variables; si alguna vez vuelve, esto es
+lo que pedía ([`paddle.md`](paddle.md)). En Railway:
 
 ```
 PADDLE_ENV=production
@@ -219,7 +236,7 @@ cada tanto para que el respaldo no quede viejo.
 
 Para cobrar de verdad en dólares (comprador del exterior, tarjeta
 internacional) hace falta un merchant of record aparte — Lemon Squeezy o
-Paddle, ~5% + USD 0,50. No está integrado.
+Paddle, ~5% + USD 0,50. Hoy lo cubre Lemon Squeezy (ver arriba).
 
 ## Email de confirmación (Resend) — scrolllab.com.ar
 

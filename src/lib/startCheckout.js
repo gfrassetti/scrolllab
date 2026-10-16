@@ -12,8 +12,8 @@ import { usePayRegion, providerForRegion } from './payRegion.js'
  * esto. Sin cargar todavía, Mercado Pago (el comportamiento de siempre).
  */
 function currentProvider() {
-  const { paddleEnabled, region } = usePayRegion.getState()
-  return paddleEnabled ? providerForRegion(region) : 'mercadopago'
+  const { intlEnabled, region, gateway } = usePayRegion.getState()
+  return intlEnabled ? providerForRegion(region, gateway) : 'mercadopago'
 }
 
 /** Idioma del sitio (para los mails de la orden), sin depender del contexto de React. */
@@ -35,9 +35,9 @@ export function checkoutPayloadFromItems(items) {
 }
 
 /**
- * Inicia el pago: Mercado Pago (redirect a Checkout Pro, o mock) o Paddle
- * (overlay sobre la transacción que armó el servidor; al completarse va a
- * /checkout/success, que confirma contra la API).
+ * Inicia el pago: Mercado Pago (redirect a Checkout Pro, o mock) o Lemon
+ * Squeezy (redirect a su página de pago; vuelve a /checkout/success, que espera
+ * al webhook). Paddle (overlay) queda solo por si vuelve a prenderse.
  * Sin sesión: marca intención y manda a login; al volver a /cart el carrito retoma solo.
  *
  * @param {{
@@ -74,8 +74,7 @@ export async function startCheckout({
     return 'login'
   }
 
-  // Mercado Pago es el default del servidor: solo Paddle (y Lemon Squeezy, desde el
-  // modo prueba) viajan explícitos.
+  // Mercado Pago es el default del servidor: solo el carril internacional viaja explícito.
   const data = await api.checkout(payload, couponCode, {
     provider: provider === 'paddle' || provider === 'lemonsqueezy' ? provider : undefined,
     locale,

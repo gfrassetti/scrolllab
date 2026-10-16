@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState } from 'react'
 const RANGES = [7, 30, 90]
 const nf = new Intl.NumberFormat('es-AR')
 const pct = (a, b) => (b ? `${((a / b) * 100).toFixed(1).replace('.', ',')}%` : '—')
-// USD con centavos si los hay (Paddle cobra con centavos); pesos sin.
+// USD con centavos si los hay (en dólares se cobra con centavos); pesos sin.
 const money = (n, cur) =>
   new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -21,7 +21,8 @@ const money = (n, cur) =>
     maximumFractionDigits: cur === 'USD' && !Number.isInteger(Number(n)) ? 2 : 0,
   }).format(n)
 const moneyList = (rows) => (rows?.length ? rows.map((r) => money(r.total, r.currency)).join(' + ') : '—')
-const gateway = (p) => (p === 'paddle' ? 'Paddle' : 'Mercado Pago')
+const GATEWAYS = { paddle: 'Paddle', lemonsqueezy: 'Lemon Squeezy' }
+const gateway = (p) => GATEWAYS[p] || 'Mercado Pago'
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }) : '—')
 const when = (iso) =>
   iso
@@ -223,7 +224,7 @@ export default function AdminAnalytics() {
                   />
                 </div>
                 <p className="mt-2 text-xs text-ink/45">
-                  Montos brutos, antes de la comisión. Mercado Pago ya retiene cada venta 18 días; Paddle paga una vez por mes. Lo de «No tocar» es lo que tiene que quedar en la cuenta por si piden la devolución.
+                  Montos brutos, antes de la comisión. Mercado Pago ya retiene cada venta 18 días; Lemon Squeezy paga según su calendario de pagos (Settings → Payouts). Lo de «No tocar» es lo que tiene que quedar en la cuenta por si piden la devolución.
                 </p>
                 <div className="mt-4">
                   <Table

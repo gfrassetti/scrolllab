@@ -1,12 +1,12 @@
 import { useI18n } from '../i18n'
 
 /**
- * Medio de pago: Mercado Pago (pesos) o tarjeta (dólares, Paddle). Viene
+ * Medio de pago: Mercado Pago (pesos) o tarjeta (dólares, Lemon Squeezy). Viene
  * marcado el que corresponde a la ubicación (lib/payRegion.js), pero el
  * comprador siempre puede cambiarlo: un argentino en el exterior, alguien con
  * VPN o un extranjero que quiere pagar con Mercado Pago. Radios nativos
  * (teclado y lector de pantalla gratis), compactos, en el lenguaje del carrito.
- * Lo usan el carrito y los planes de LAB. Ver docs/paddle.md.
+ * Lo usan el carrito y los planes de LAB. Ver docs/lemonsqueezy.md.
  *
  * @param {{ region: 'ar' | 'intl', onChange: (region: 'ar' | 'intl') => void, disabled?: boolean, name?: string, className?: string }} props
  */

@@ -28,6 +28,7 @@
     "labShort": "widgets"
   },
   "lab": {
+    "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Card payment in US dollars isn’t available yet.",
     "eyebrow": "Online widgets",
     "body": "Premium animated sections for your site, no code. They work on WordPress, Webflow, Shopify, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
@@ -226,15 +227,15 @@
     "previewNote": "This is the same embed that goes on your site, with your unsaved edits. Links don't navigate here.",
     "domainsDropped": "Not domains, not saved: {{list}}",
     "paddle": {
-      "planPausedNote": "paused in Paddle · won’t renew",
-      "planPastDue": "We’re confirming the charge with Paddle. If it doesn’t go through, the plan is suspended on {{date}}.",
-      "planPaymentFailed": "We couldn’t charge your plan. Paddle will retry; if it isn’t resolved, it’s suspended on {{date}}. Update your card so the next attempt goes through.",
-      "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
-      "planChangeHint": "You switch plans without canceling. Moving up, Paddle charges your card only the difference for the rest of your period; moving down costs nothing. The new price applies from your next charge. If the new plan covers fewer widgets, the newest ones are paused (not deleted) and your packs show only the ones that fit.",
-      "changeConfirmPaid": "You move to {{plan}} now. Paddle charges {{amount}} to your card for the rest of your period ({{days}}); from {{date}}, {{price}} {{per}}.",
-      "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Paddle charges {{price}} {{per}}.",
+      "planPausedNote": "paused in Lemon Squeezy · won’t renew",
+      "planPastDue": "We’re confirming the charge with Lemon Squeezy. If it doesn’t go through, the plan is suspended on {{date}}.",
+      "planPaymentFailed": "We couldn’t charge your plan. Lemon Squeezy will retry; if it isn’t resolved, it’s suspended on {{date}}. Update your card so the next attempt goes through.",
+      "planLapsed": "Your {{plan}} plan is suspended because we couldn’t charge it. If Lemon Squeezy gets the charge through, it comes back on its own. If you subscribe again, we cancel the old one: no double charge.",
+      "planChangeHint": "You switch plans without canceling. Moving up, Lemon Squeezy charges your card only the difference for the rest of your period; moving down costs nothing. The new price applies from your next charge. If the new plan covers fewer widgets, the newest ones are paused (not deleted) and your packs show only the ones that fit.",
+      "changeConfirmPaid": "You move to {{plan}} now. Lemon Squeezy charges {{amount}} to your card for the rest of your period ({{days}}); from {{date}}, {{price}} {{per}}.",
+      "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Lemon Squeezy charges {{price}} {{per}}.",
       "changePay": "Charge {{amount}} and switch",
-      "returnPending": "We don’t see Paddle’s confirmation yet. If you already paid, it shows up in a few seconds.",
+      "returnPending": "We don’t see Lemon Squeezy’s confirmation yet. If you already paid, it shows up in a few seconds.",
       "updateCard": "Update card"
     },
     "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
@@ -500,7 +501,7 @@
     "howHostedNote": "No code? With LAB you add premium widgets to your site — any of our 30+ sections — and edit them online.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
-    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Paddle. We never see or store your card details.",
+    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Lemon Squeezy. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
     "zip1": "The full editable project",
     "zip2": "Sections from the model or what you built",
@@ -1503,12 +1504,12 @@
     "subSyncDone": "Status updated",
     "welcomeCoupon": "You get {{percent}}% off your first purchase of templates, the bundle or the builder. It’s applied automatically at checkout, once; it doesn’t apply to LAB.",
     "paddle": {
-      "subPaused": "Paused in Paddle · you keep access until {{date}}",
-      "subRenewing": "Confirming the charge with Paddle · if it doesn’t go through, the plan is suspended on {{date}}",
-      "subPaymentFailed": "We couldn’t charge the renewal. Paddle will retry; if it isn’t resolved, the plan is suspended on {{date}}. Update your card so the next attempt goes through.",
-      "subLapsed": "Your {{plan}} plan is suspended: we couldn’t charge it. If Paddle gets the charge through, it comes back on its own. Update your card, or cancel it and it won’t be retried.",
-      "subLapsedPaused": "Your {{plan}} plan is paused in Paddle and no longer covers your sections.",
-      "subSync": "Sync with Paddle"
+      "subPaused": "Paused in Lemon Squeezy · you keep access until {{date}}",
+      "subRenewing": "Confirming the charge with Lemon Squeezy · if it doesn’t go through, the plan is suspended on {{date}}",
+      "subPaymentFailed": "We couldn’t charge the renewal. Lemon Squeezy will retry; if it isn’t resolved, the plan is suspended on {{date}}. Update your card so the next attempt goes through.",
+      "subLapsed": "Your {{plan}} plan is suspended: we couldn’t charge it. If Lemon Squeezy gets the charge through, it comes back on its own. Update your card, or cancel it and it won’t be retried.",
+      "subLapsedPaused": "Your {{plan}} plan is paused in Lemon Squeezy and no longer covers your sections.",
+      "subSync": "Sync with Lemon Squeezy"
     },
     "discountApplied": "Includes the {{percent}}% first-purchase discount (−{{amount}})",
     "downloadComposition": "Composition {{n}}",
@@ -1562,7 +1563,7 @@
     "wrongAccountTitle": "That payment belongs to another account",
     "wrongAccountBody": "Sign in with the account you bought with: you’ll find the purchase in My purchases.",
     "reviewTitle": "We’re reviewing your payment",
-    "reviewBody": "Paddle recorded the payment, but we couldn’t match it to your purchase. We’ve been notified and will email you to deliver what you bought or refund you."
+    "reviewBody": "Lemon Squeezy recorded the payment, but we couldn’t match it to your purchase. We’ve been notified and will email you to deliver what you bought or refund you."
   },
   "license": {
     "eyebrow": "Regular License",
@@ -1595,7 +1596,7 @@
         "title": "Data we collect",
         "items": [
           "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
-          "Purchase and order data: products, amount, currency, payment status, Mercado Pago or Paddle identifiers (depending on how you pay), and download count.",
+          "Purchase and order data: products, amount, currency, payment status, Mercado Pago or Lemon Squeezy identifiers (depending on how you pay), and download count.",
           "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies.",
           "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it.",
           "If you write to us through the contact or Studio form: your name, email, message, and the project type you selected."
@@ -1614,7 +1615,7 @@
       },
       {
         "title": "Third-party services",
-        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Paddle.com, our online reseller (Merchant of Record), for payments from other countries in US dollars: Paddle receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (paddle.com/legal/privacy), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Lemon Squeezy, our online reseller (Merchant of Record), for payments from other countries in US dollars: Lemon Squeezy receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (lemonsqueezy.com/privacy), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
       },
       {
         "title": "Cookies and local storage",
@@ -1651,7 +1652,7 @@
     "sections": [
       {
         "title": "Who sells",
-        "body": "The site, products, and services are offered by {{seller}}, a web design and development studio based in Argentina. For any question about these Terms, a purchase, or a refund, write to us at the email at the end of this page. Purchases from outside Argentina are processed by Paddle.com as reseller (see «Prices and payments»)."
+        "body": "The site, products, and services are offered by {{seller}}, a web design and development studio based in Argentina. For any question about these Terms, a purchase, or a refund, write to us at the email at the end of this page. Purchases from outside Argentina are processed by Lemon Squeezy as reseller (see «Prices and payments»)."
       },
       {
         "title": "Account and access",
@@ -1663,7 +1664,7 @@
       },
       {
         "title": "Prices and payments",
-        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Paddle.com, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Paddle confirms the payment, and the purchase is also governed by Paddle’s checkout buyer terms (paddle.com/legal/checkout-buyer-terms). Welcome coupon: new accounts get 10% off their first purchase of templates, the bundle or builder compositions, once, with the Google account they signed up with. It’s applied automatically at checkout and doesn’t stack: the second purchase and later ones are at list price, and a refunded purchase counts as a purchase. It doesn’t apply to LAB subscriptions."
+        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Lemon Squeezy, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Lemon Squeezy confirms the payment, and the purchase is also governed by Lemon Squeezy’s buyer terms (lemonsqueezy.com/buyer-terms). Welcome coupon: new accounts get 10% off their first purchase of templates, the bundle or builder compositions, once, with the Google account they signed up with. It’s applied automatically at checkout and doesn’t stack: the second purchase and later ones are at list price, and a refunded purchase counts as a purchase. It doesn’t apply to LAB subscriptions."
       },
       {
         "title": "Delivery and downloads",
@@ -1671,7 +1672,7 @@
       },
       {
         "title": "Refunds",
-        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: you can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it), and the subscription ends right away; renewals aren’t refunded and canceling stops future charges. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Paddle) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
+        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: you can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it), and the subscription ends right away; renewals aren’t refunded and canceling stops future charges. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Lemon Squeezy) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
         "link": {
           "to": "/legal/refunds",
           "label": "See the Refund policy →"
@@ -1703,7 +1704,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos or, if you pay from another country, through Paddle.com in US dollars as our authorized reseller; it renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly) through Mercado Pago in Argentine pesos or, if you pay from another country, through Lemon Squeezy in US dollars as our authorized reseller; it renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1719,7 +1720,7 @@
     "eyebrow": "Legal",
     "title": "Refund policy",
     "effectiveDate": "Effective October 7, 2026",
-    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}, whether you pay with Mercado Pago or by card (Paddle).",
+    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}, whether you pay with Mercado Pago or by card (Lemon Squeezy).",
     "sections": [
       {
         "title": "Refund period",
@@ -1747,7 +1748,7 @@
         "title": "How to request it",
         "items": [
           "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
-          "If you paid by card (Paddle), you can also ask Paddle, our authorized reseller, directly at paddle.net.",
+          "If you paid by card, you can also ask Lemon Squeezy, our authorized reseller, directly.",
           "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
         ],
         "link": {
@@ -1858,9 +1859,9 @@
     "methodMp": "Mercado Pago",
     "methodMpNote": "in Argentine pesos",
     "methodCard": "Card",
-    "methodCardNote": "in US dollars · via Paddle",
-    "trustIntl": "Card payment via Paddle · license included",
-    "intlTaxNote": "Paddle processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
+    "methodCardNote": "in US dollars · via Lemon Squeezy",
+    "trustIntl": "Card payment via Lemon Squeezy · license included",
+    "intlTaxNote": "Lemon Squeezy processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
     "confirming": "Confirming your payment…",
     "opening": "Opening the payment…",
     "invalidLink": "That payment link isn’t valid. If you got it by email, write to us and we’ll send a new one.",
@@ -1882,7 +1883,7 @@
   },
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
-    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Paddle).",
+    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Lemon Squeezy).",
     "theme": "Theme",
     "labelShort": "Preferences ({{current}})"
   }

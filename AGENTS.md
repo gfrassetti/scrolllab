@@ -1,6 +1,6 @@
 # AGENTS.md — SCROLLLAB (storytelling-pages-templates)
 
-Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro (Argentina, ARS) y Paddle (resto del mundo, USD, merchant of record — [`docs/paddle.md`](docs/paddle.md)); el medio de pago viene marcado por ubicación y el comprador puede cambiarlo (selector «Medio de pago», un solo botón de pago). Auth: Google (o login de desarrollo).
+Marketplace de templates scrollytelling. Cada modelo es una demo completa; el builder arma composiciones; la compra entrega un **ZIP con código fuente** + `LICENSE.txt` (watermark con orden/email). Pagos: Mercado Pago Checkout Pro (Argentina, ARS) y Lemon Squeezy (resto del mundo, USD, merchant of record — [`docs/lemonsqueezy.md`](docs/lemonsqueezy.md); Paddle se descartó el 2026-10-15 y su código queda apagado: [`docs/paddle.md`](docs/paddle.md)); el medio de pago viene marcado por ubicación y el comprador puede cambiarlo (selector «Medio de pago», un solo botón de pago). Auth: Google (o login de desarrollo).
 
 **Language convention**: product chrome (catalog, builder, cart, account) in Spanish with rioplatense voseo; template demo content stays in English and reads as **an invented business** (its own name, voice and figures), never «Headline 1» or lorem ipsum; every link goes to a section of the page and Privacy/Terms open `LegalSheet` (decisión del dueño, 2026-10-13 — [`docs/template-copy.md`](docs/template-copy.md)). **Voz** (decisión del dueño, 2026-10-10): vos, pero sin mandar — imperativo solo en botones, links y CTA («Empezá gratis») y en pasos de instalación numerados; títulos, bajadas, avisos, estados vacíos y errores describen («Queda guardado y lo seguís cuando quieras», «Falta un email válido», «Podés intentarlo de nuevo»). Controles sin verbo conjugado: «Elegir widget». En inglés, imperativo normal. Brand: `src/lib/site.js` → `SCROLLLAB`.
 
@@ -234,8 +234,8 @@ npm run check:forms    # los formularios de contacto (y cada tipo del general: p
 npm run audit:editable # lupa estática: colores fijos en el código, adornos sin interruptor, fotos sin campo (para canvas / WebGL)
 npm run check:embed-stacks # el embed instalado como un cliente: HTML, React (StrictMode), Next y Vue, con @scrolllab/embed desde packages/embed (antes de publicar en npm)
 npm run check:mp-sandbox # suscripciones LAB contra el sandbox real de MP (credenciales de prueba)
-npm run check:paddle-sandbox # transacciones (template, cupón, builder, LAB con prueba) contra el sandbox real de Paddle
-npm run check:paddle-e2e # Paddle de punta a punta: Chromium + ventana de pago real del sandbox (compra, rechazo, webhook, reembolso, LAB, cambio de plan, baja)
+npm run check:paddle-sandbox # (Paddle descartado, solo si vuelve) transacciones contra el sandbox real de Paddle
+npm run check:paddle-e2e # (Paddle descartado, solo si vuelve) Paddle de punta a punta: Chromium + ventana de pago real del sandbox (compra, rechazo, webhook, reembolso, LAB, cambio de plan, baja)
 npm run check:responsive # captura cada ruta a 390/768/1024/1440 + report de overflow (dev server arriba)
 npm run check:mobile   # cada sección de los 10 templates, 320→1280 + reduced motion: desbordes, texto, toque, imágenes (--snapshot para seguir editando)
 npm run check:motion   # emulador de teléfono: gestos táctiles reales, CPU ×4, 10 templates + home, normal / reduce / forced (huecos, trabas, texto oculto)
@@ -382,20 +382,20 @@ Copy `.env.example` → `.env`. Without `MP_ACCESS_TOKEN`, checkout uses mock pa
 
 1. User logs in (`/login`) → session cookie.
 2. Adds SKU to cart (Zustand) or buys builder recipe (`custom:` + recipe array). Hasta 5 composiciones del builder por compra (`MAX_CART_COMPOSITIONS`): cada una tiene su `compositionId` (el carrito sincroniza solo la que está abierta en el builder; «Vaciar» / «Armar otra» empiezan otra), se cobra aparte y se baja en su propio ZIP (`GET /api/orders/:id/download?item=N`), además del ZIP de la orden con todo.
-3. El medio de pago viene marcado por ubicación (país del request o zona horaria): Argentina → Mercado Pago en ARS; otro país → Paddle en USD. El comprador siempre puede cambiarlo con el selector «Medio de pago» (`PaymentMethodPicker`: argentino en el exterior, VPN, extranjero que quiere Mercado Pago). Un solo botón de pago; el «Comprar» rápido hereda el medio vigente. El header tiene un selector ARS | USD (`CurrencySelector`) que es esa misma elección: **la moneda de los precios sigue al medio de pago, no al idioma** (`useCurrency`, `src/lib/currency.js`; los precios se formatean con `formatPriceFromUsd(usd, currency, rate)`).
-4. `POST /api/checkout` (`provider`) creates Order + MP preference, o la transacción de Paddle (overlay), o mock URL.
-5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/paddle`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en (si Resend falla, el barrido lo reintenta hasta 3 días); un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
+3. El medio de pago viene marcado por ubicación (país del request o zona horaria): Argentina → Mercado Pago en ARS; otro país → Lemon Squeezy en USD. El comprador siempre puede cambiarlo con el selector «Medio de pago» (`PaymentMethodPicker`: argentino en el exterior, VPN, extranjero que quiere Mercado Pago). Un solo botón de pago; el «Comprar» rápido hereda el medio vigente. El header tiene un selector ARS | USD (`CurrencySelector`) que es esa misma elección: **la moneda de los precios sigue al medio de pago, no al idioma** (`useCurrency`, `src/lib/currency.js`; los precios se formatean con `formatPriceFromUsd(usd, currency, rate)`).
+4. `POST /api/checkout` (`provider`) creates Order + MP preference, o el checkout de Lemon Squeezy (redirect; el contrato sigue llamando `paddle` al carril internacional, y `gateway` dice quién cobra), o mock URL.
+5. Webhook (`/api/webhooks/mercadopago` o `/api/webhooks/lemonsqueezy`), confirm del front o mock-pay marks `paid` and packs ZIP into `storage/orders/` with watermarked LICENSE. Recibo es/en (si Resend falla, el barrido lo reintenta hasta 3 días); un pago rechazado avisa por mail una vez, ~10 min después y solo si la orden sigue sin pagar (`services/paymentFailedSweep.js`).
 6. `/account` → signed download token → `GET /api/download/:token` (link de 15 min; descargas sin tope salvo `MAX_DOWNLOADS`, ver `docs/DEPLOY.md`).
 7. Reembolsos y Botón de arrepentimiento (`/arrepentimiento`): lo que cumple la política
    (`src/domain/policy.js`: compra sin descargar en 14 días; LAB, 14 días desde el alta con la
    prueba adentro, solo el primer cobro) se devuelve solo por la API de la pasarela
    (`server/services/autoRefund.js`; sin sesión, con un link de confirmación por mail). El webhook
    corta la orden o da de baja LAB, lo anota en el libro (`/admin`) y manda «Te devolvimos el
-   dinero». Runbook en [`docs/paddle.md`](docs/paddle.md).
+   dinero». Runbook en [`docs/lemonsqueezy.md`](docs/lemonsqueezy.md).
 
 Modo prueba (`QA_BUYER_EMAILS`, `src/domain/qa.js`): `/test`, `/builder-test` y `/lab-test` venden al mínimo ($1 template y builder; LAB $15/$30/$60 —el piso de MP para suscripciones es $15—, con la prueba gratis de LAB real: 7 días en la primera suscripción de la cuenta) solo a esas cuentas, con plata real y fuera de las métricas — para probar en producción compra, mails y reembolsos. Detalle en `docs/DEPLOY.md`.
 
-LAB (suscripciones) usa el mismo selector: Mercado Pago PreApproval en ARS o Paddle Billing en USD (`HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`). Cuota cobrada y cuota rechazada mandan mail en las dos pasarelas.
+LAB (suscripciones) se cobra con Mercado Pago PreApproval en ARS. El cobro internacional de LAB (Lemon Squeezy, USD: `HOSTED_PLANS.priceMonthlyUsd` / `priceYearlyUsd`) **todavía no está** (etapa 3 de `docs/lemonsqueezy.md`): hasta entonces, un comprador del exterior ve LAB en pesos y la grilla le avisa (`lab.intlNoSubs`). El código de suscripciones de Paddle queda apagado como referencia para esa etapa.
 
 Widgets de LAB (`HOSTABLE_SECTIONS`, `server/sections.js` + `embed/src/registry.js`): entran también las pineadas y
 las de escenario sticky (el frame pasa a modo PIN: una pantalla pegada en el sitio que recorre su propio

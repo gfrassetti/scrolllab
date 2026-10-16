@@ -73,8 +73,8 @@ const SHOWS_ERROR = new Set(['error', 'review', 'wrong-account'])
 export default function CheckoutSuccessPage() {
   const [params] = useSearchParams()
   const provider = params.get('provider')
-  if (provider === 'lemonsqueezy') return <PaddleCheckoutSuccess gateway="lemonsqueezy" />
-  return provider === 'paddle' ? <PaddleCheckoutSuccess /> : <MercadoPagoCheckoutSuccess />
+  if (provider === 'lemonsqueezy') return <IntlCheckoutSuccess gateway="lemonsqueezy" />
+  return provider === 'paddle' ? <IntlCheckoutSuccess /> : <MercadoPagoCheckoutSuccess />
 }
 
 /** Panel final (resuelto) de la vuelta del pago, compartido por las dos pasarelas. */
@@ -117,19 +117,20 @@ function ResolvedPanel({ panel, confirmState, confirmError, confirmRef }) {
   )
 }
 
-/** Espera entre reintentos mientras Paddle termina de procesar (409). */
-const PADDLE_RETRY_MS = 2000
-const PADDLE_MAX_TRIES = 6
+/** Espera entre reintentos mientras la pasarela termina de procesar (409). */
+const INTL_RETRY_MS = 2000
+const INTL_MAX_TRIES = 6
 
 /**
- * Vuelta del overlay de Paddle. El pago ya está hecho del lado de Paddle: se
- * confirma contra la API (que trae la transacción de Paddle, no confía en la
- * URL) y se manda a Mis compras. Mientras Paddle procesa (409) se reintenta un
- * rato; el webhook cumple la orden igual aunque esto falle. Nunca gira para
- * siempre (15 s) y cada error tiene su panel: otra cuenta (403) o un pago que
- * no se pudo asociar (400/404, el carrito queda como estaba).
+ * Vuelta del pago internacional. Con Lemon Squeezy (`gateway="lemonsqueezy"`) la
+ * orden la cumple el webhook y esto solo pregunta cómo va (409 mientras no
+ * llegó); con Paddle (overlay) se confirma contra la API de Paddle. En los dos
+ * casos se reintenta un rato y se manda a Mis compras; el webhook cumple la
+ * orden igual aunque esto falle. Nunca gira para siempre (15 s) y cada error
+ * tiene su panel: otra cuenta (403) o un pago que no se pudo asociar (400/404,
+ * el carrito queda como estaba).
  */
-function PaddleCheckoutSuccess({ gateway = 'paddle' }) {
+function IntlCheckoutSuccess({ gateway = 'paddle' }) {
   const t = useT()
   const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
@@ -165,7 +166,7 @@ function PaddleCheckoutSuccess({ gateway = 'paddle' }) {
       setConfirmState((prev) => (prev === 'busy' ? 'received' : prev))
     }, CONFIRM_TIMEOUT_MS)
     ;(async () => {
-      for (let attempt = 1; attempt <= PADDLE_MAX_TRIES; attempt += 1) {
+      for (let attempt = 1; attempt <= INTL_MAX_TRIES; attempt += 1) {
         try {
           const data = lemon
             ? await api.confirmLemonCheckout(transactionId)
@@ -181,8 +182,8 @@ function PaddleCheckoutSuccess({ gateway = 'paddle' }) {
           return
         } catch (err) {
           if (cancelled) return
-          if (err.status === 409 && attempt < PADDLE_MAX_TRIES) {
-            await new Promise((r) => setTimeout(r, PADDLE_RETRY_MS))
+          if (err.status === 409 && attempt < INTL_MAX_TRIES) {
+            await new Promise((r) => setTimeout(r, INTL_RETRY_MS))
             continue
           }
           clearTimeout(watchdog)

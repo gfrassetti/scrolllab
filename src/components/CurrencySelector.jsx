@@ -6,8 +6,9 @@ const CURRENCIES = ['ARS', 'USD']
 /**
  * Selector ARS | USD en el header, al lado del de idioma. Cambia la moneda de
  * todos los precios del sitio y, con ella, el medio de pago (USD → tarjeta con
- * Paddle, ARS → Mercado Pago): es la misma elección que el «Medio de pago» del
- * carrito. Solo aparece con Paddle activo; sin él no hay otra moneda en que cobrar.
+ * Lemon Squeezy, ARS → Mercado Pago): es la misma elección que el «Medio de pago»
+ * del carrito. Solo aparece con el carril internacional activo; sin él no hay otra
+ * moneda en que cobrar.
  */
 export default function CurrencySelector() {
   const { t } = useI18n()

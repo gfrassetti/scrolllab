@@ -3,20 +3,20 @@ import { usePayRegion, resolveCurrency } from './payRegion.js'
 
 /**
  * La moneda vigente y cómo cambiarla. `setCurrency('USD')` cambia el medio de
- * pago a tarjeta (Paddle); `'ARS'`, a Mercado Pago: es la misma elección que el
- * selector «Medio de pago» del carrito. `canChoose` es falso sin Paddle (no hay
- * otra moneda en la que cobrar).
+ * pago a tarjeta (Lemon Squeezy); `'ARS'`, a Mercado Pago: es la misma elección
+ * que el selector «Medio de pago» del carrito. `canChoose` es falso sin carril
+ * internacional (no hay otra moneda en la que cobrar).
  */
 export function useCurrency() {
   const { locale } = useI18n()
-  const paddleEnabled = usePayRegion((s) => s.paddleEnabled)
+  const intlEnabled = usePayRegion((s) => s.intlEnabled)
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)
-  const currency = resolveCurrency({ paddleEnabled, region, locale })
+  const currency = resolveCurrency({ intlEnabled, region, locale })
   return {
     currency,
     showUsd: currency === 'USD',
-    canChoose: paddleEnabled,
+    canChoose: intlEnabled,
     setCurrency: (next) => setRegion(next === 'USD' ? 'intl' : 'ar'),
   }
 }

@@ -41,20 +41,20 @@ describe('región de pago', () => {
   })
 
   it('el default: sin Paddle, Argentina; si no, guardado > país > zona horaria > Argentina', () => {
-    assert.equal(pickRegion({ stored: 'intl', country: 'ES', paddleEnabled: false }), 'ar')
+    assert.equal(pickRegion({ stored: 'intl', country: 'ES', intlEnabled: false }), 'ar')
     assert.equal(
-      pickRegion({ stored: 'ar', country: 'ES', timeZone: 'Europe/Madrid', paddleEnabled: true }),
+      pickRegion({ stored: 'ar', country: 'ES', timeZone: 'Europe/Madrid', intlEnabled: true }),
       'ar',
     )
     assert.equal(
-      pickRegion({ stored: null, country: 'ES', timeZone: 'America/Argentina/Salta', paddleEnabled: true }),
+      pickRegion({ stored: null, country: 'ES', timeZone: 'America/Argentina/Salta', intlEnabled: true }),
       'intl',
     )
     assert.equal(
-      pickRegion({ stored: 'basura', country: null, timeZone: 'Europe/Madrid', paddleEnabled: true }),
+      pickRegion({ stored: 'basura', country: null, timeZone: 'Europe/Madrid', intlEnabled: true }),
       'intl',
     )
-    assert.equal(pickRegion({ paddleEnabled: true }), 'ar')
+    assert.equal(pickRegion({ intlEnabled: true }), 'ar')
   })
 
   it('cada región tiene su pasarela', () => {
@@ -62,13 +62,19 @@ describe('región de pago', () => {
     assert.equal(providerForRegion('intl'), 'paddle')
   })
 
+  it('el carril internacional pide a Lemon Squeezy explícito cuando el servidor lo dice', () => {
+    assert.equal(providerForRegion('intl', 'lemonsqueezy'), 'lemonsqueezy')
+    assert.equal(providerForRegion('intl', 'paddle'), 'paddle')
+    assert.equal(providerForRegion('ar', 'lemonsqueezy'), 'mercadopago')
+  })
+
   it('moneda: con Paddle sigue al medio de pago, no al idioma; sin Paddle, la regla de siempre', () => {
     // Un español (sitio en español) que elige tarjeta ve dólares; un argentino con el sitio en inglés ve pesos.
-    assert.equal(resolveCurrency({ paddleEnabled: true, region: 'intl', locale: 'es' }), 'USD')
-    assert.equal(resolveCurrency({ paddleEnabled: true, region: 'ar', locale: 'en' }), 'ARS')
+    assert.equal(resolveCurrency({ intlEnabled: true, region: 'intl', locale: 'es' }), 'USD')
+    assert.equal(resolveCurrency({ intlEnabled: true, region: 'ar', locale: 'en' }), 'ARS')
     // Sin Paddle no hay cómo cobrar en dólares: EN muestra USD de referencia, ES pesos.
-    assert.equal(resolveCurrency({ paddleEnabled: false, region: 'intl', locale: 'es' }), 'ARS')
-    assert.equal(resolveCurrency({ paddleEnabled: false, region: 'ar', locale: 'en' }), 'USD')
+    assert.equal(resolveCurrency({ intlEnabled: false, region: 'intl', locale: 'es' }), 'ARS')
+    assert.equal(resolveCurrency({ intlEnabled: false, region: 'ar', locale: 'en' }), 'USD')
   })
 
   it('los precios se formatean en la moneda pedida (y aceptan el idioma de antes)', () => {

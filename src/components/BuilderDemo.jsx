@@ -93,8 +93,8 @@ export default function BuilderDemo() {
   const c = {
     ...base,
     price: showUsd ? (usd) => formatUsd(usd) : (usd) => formatArs(arsFromUsd(usd, FALLBACK_USD_ARS) ?? 0),
-    // Paddle solo se nombra si existe: sin él, USD es una referencia y se cobra en Mercado Pago.
-    paid: base.paid.replace('Mercado Pago', showUsd && canChoose ? 'Paddle' : 'Mercado Pago'),
+    // Lemon Squeezy solo se nombra si existe: sin él, USD es una referencia y se cobra en Mercado Pago.
+    paid: base.paid.replace('Mercado Pago', showUsd && canChoose ? 'Lemon Squeezy' : 'Mercado Pago'),
   }
 
   useGSAP(

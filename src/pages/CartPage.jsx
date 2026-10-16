@@ -48,18 +48,19 @@ export default function CartPage() {
   const navigate = useNavigate()
   const { rate } = useFxRate()
   const { t, locale } = useI18n()
-  // Con Paddle, la moneda la decide desde dónde paga (Argentina → pesos con
-  // MP; otro país → USD con Paddle). Sin Paddle, como siempre: USD de
-  // referencia en inglés y el cobro en pesos.
+  // Con el carril internacional, la moneda la decide desde dónde paga (Argentina
+  // → pesos con MP; otro país → USD con Lemon Squeezy). Sin él, como siempre:
+  // USD de referencia en inglés y el cobro en pesos.
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)
-  const paddleEnabled = usePayRegion((s) => s.paddleEnabled)
+  const intlEnabled = usePayRegion((s) => s.intlEnabled)
+  const gateway = usePayRegion((s) => s.gateway)
   const regionStatus = usePayRegion((s) => s.status)
   const loadRegion = usePayRegion((s) => s.load)
   useEffect(() => {
     loadRegion()
   }, [loadRegion])
-  const intl = paddleEnabled && region === 'intl'
+  const intl = intlEnabled && region === 'intl'
   const { showUsd } = useCurrency()
 
   // Cupón de bienvenida: se aplica solo si hay sesión (lo pide WelcomeCouponSync al
@@ -108,10 +109,10 @@ export default function CartPage() {
         user,
         navigate,
         couponCode: coupon?.code,
-        provider: paddleEnabled ? providerForRegion(region) : 'mercadopago',
+        provider: intlEnabled ? providerForRegion(region, gateway) : 'mercadopago',
         locale,
       })
-      // redirect a MP o pago completo en Paddle: dejamos busy. login o overlay
+      // redirect a la pasarela o pago completo: dejamos busy. login o overlay
       // cerrado sin pagar: liberamos para que pueda reintentar.
       if (result !== 'redirect' && result !== 'paid') setBusy(false)
     } catch (err) {
@@ -124,7 +125,7 @@ export default function CartPage() {
       }
       setBusy(false)
     }
-  }, [items, navigate, user, coupon, dropWelcome, t, paddleEnabled, region, locale])
+  }, [items, navigate, user, coupon, dropWelcome, t, intlEnabled, region, gateway, locale])
 
   // Volvió del login con el pago ya pedido: sigue derecho al pago (cuando ya se
   // sabe por dónde paga, para no abrir Mercado Pago a quien eligió USD).
@@ -141,7 +142,7 @@ export default function CartPage() {
     ? t('cart.payLoggedOut')
     : busy
       ? t('cart.redirecting')
-      : !paddleEnabled
+      : !intlEnabled
         ? t('cart.payLoggedIn')
         : intl
           ? t('pay.payIntl')
@@ -252,7 +253,7 @@ export default function CartPage() {
               aria-label={t('cart.summary')}
               className="mt-10 border border-ink/15 p-6 lg:sticky lg:top-24 lg:mt-0"
             >
-              {paddleEnabled && (
+              {intlEnabled && (
                 <PaymentMethodPicker
                   region={region}
                   onChange={setRegion}

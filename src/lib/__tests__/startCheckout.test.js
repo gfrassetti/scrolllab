@@ -168,21 +168,26 @@ describe('startCheckout', () => {
     const { usePayRegion } = await import('../payRegion.js')
     try {
       // Sin Paddle configurado o sin cargar: Mercado Pago, sin campo de más.
-      usePayRegion.setState({ paddleEnabled: false, region: 'intl' })
+      usePayRegion.setState({ intlEnabled: false, region: 'intl' })
       let out = await checkoutWithSession({})
       assert.equal('provider' in out.calls[0].body, false)
 
       // Paddle activo y ubicación fuera de Argentina: el pedido va por Paddle.
-      usePayRegion.setState({ paddleEnabled: true, region: 'intl' })
+      usePayRegion.setState({ intlEnabled: true, region: 'intl' })
       out = await paddleCheckout({ name: 'checkout.closed', data: {} }, { provider: undefined })
       assert.equal(out.calls[0].body.provider, 'paddle')
 
+      // El servidor dice que ese carril lo cobra Lemon Squeezy: viaja explícito.
+      usePayRegion.setState({ intlEnabled: true, region: 'intl', gateway: 'lemonsqueezy' })
+      out = await checkoutWithSession({})
+      assert.equal(out.calls[0].body.provider, 'lemonsqueezy')
+
       // Un argentino que eligió Mercado Pago sigue en Mercado Pago.
-      usePayRegion.setState({ paddleEnabled: true, region: 'ar' })
+      usePayRegion.setState({ intlEnabled: true, region: 'ar' })
       out = await checkoutWithSession({})
       assert.equal('provider' in out.calls[0].body, false)
     } finally {
-      usePayRegion.setState({ paddleEnabled: false, region: 'ar' })
+      usePayRegion.setState({ intlEnabled: false, region: 'ar', gateway: null })
     }
   })
 

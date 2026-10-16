@@ -1,5 +1,11 @@
 # Paddle — cobro internacional en USD (market, builder y LAB)
 
+> **Descartado (2026-10-15).** Paddle no aprobó la cuenta y el dueño pasó el cobro internacional a
+> **Lemon Squeezy** ([`lemonsqueezy.md`](lemonsqueezy.md)). El código de Paddle sigue en el repo, apagado
+> (`PADDLE_HIDDEN` o sin credenciales), porque su manejo de suscripciones es la referencia para la
+> etapa 3 de Lemon Squeezy (LAB). Cuando LAB ande por Lemon Squeezy se borra. Lo que sigue describe cómo
+> funcionaba, no cómo se cobra hoy.
+
 Mercado Pago sigue siendo la pasarela de Argentina (ARS). Paddle cobra al resto
 del mundo en USD y es **merchant of record**: factura, cobra y liquida el IVA /
 sales tax de cada país. Por eso se eligió sobre Stripe (no abre cuentas a

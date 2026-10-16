@@ -1,17 +1,21 @@
 # Lemon Squeezy — segunda pasarela internacional (USD, merchant of record)
 
-Estado (2026-10-15): **etapas 1 y 2 conectadas** (compras de templates y builder, reembolsos y Botón de
-arrepentimiento). **LAB (suscripciones) todavía no.** Se prende solo cuando están las cuatro variables
-`LEMONSQUEEZY_*` (ver abajo); sin ellas todo sigue como antes.
+Estado (2026-10-15): **es la pasarela internacional; Paddle se descartó** (no aprobó la cuenta, ver
+`docs/paddle.md`). **Etapas 1 y 2 conectadas** (compras de templates y builder, reembolsos y Botón de
+arrepentimiento). **LAB (suscripciones) todavía no**: hasta la etapa 3 un comprador del exterior ve LAB en
+pesos y la grilla le avisa (`lab.intlNoSubs`). Se prende solo cuando están las cuatro variables
+`LEMONSQUEEZY_*` (ver abajo); sin ellas todo sigue por Mercado Pago.
 
 Cómo está armado:
 
 - `server/services/lemonsqueezy.js`: cliente de la API, firma de webhooks, checkout.
 - `server/services/lemonPayments.js`: cumplir una orden (`order_created`), reembolso (`order_refunded`),
   contracargo (`dispute_created`, solo avisa) y la vuelta del comprador.
-- El front sigue pidiendo `provider: 'paddle'`: **es un solo carril «internacional» en USD**. Si Paddle
-  está habilitado cobra Paddle; si no, Lemon Squeezy. La pantalla `/checkout/success?provider=lemonsqueezy`
-  espera al webhook (`POST /api/checkout/lemonsqueezy/confirm` solo lee la orden del usuario).
+- **Es un solo carril «internacional» en USD.** `GET /api/checkout/methods` lo informa en
+  `providers.paddle` (el nombre del contrato, de cuando era Paddle) con `gateway: 'lemonsqueezy'`; el
+  front (`usePayRegion`) lo guarda y pide `provider: 'lemonsqueezy'` explícito. La pantalla
+  `/checkout/success?provider=lemonsqueezy` espera al webhook (`POST /api/checkout/lemonsqueezy/confirm`
+  solo lee la orden del usuario). `labIntlEnabled` es falso con Lemon Squeezy: LAB no ofrece USD.
 - La orden se valida contra lo que guardó el servidor: pasarela, moneda USD, **modo (prueba/real) igual
   al del servidor**, sin descuento hecho en Lemon Squeezy y **subtotal (antes de impuestos) igual al total
   de la orden**. Si algo no coincide no se entrega y le llega un mail al dueño.
@@ -20,10 +24,10 @@ Cómo está armado:
 
 ## Por qué
 
-Paddle tardó en aprobar el dominio (ver `docs/paddle.md`). Lemon Squeezy es otro merchant of record: cobra
-y liquida los impuestos de cada país, y paga a Argentina **en USD, a una cuenta bancaria** (o por PayPal).
-Se abre en paralelo: los plazos de revisión de cada una corren a la vez. Si Paddle aprueba primero, las dos
-conviven; el comprador del exterior ve el medio de pago que corresponda.
+Paddle no aprobó el dominio (ver `docs/paddle.md`) y el dueño decidió dejarlo (2026-10-15). Lemon Squeezy es
+otro merchant of record: cobra y liquida los impuestos de cada país, y paga a Argentina **en USD, a una
+cuenta bancaria** (o por PayPal). Es un revendedor autorizado: el comprador le compra a Lemon Squeezy
+(sus términos: lemonsqueezy.com/buyer-terms), y así lo dicen los legales, el recibo y el mail.
 
 ## Lo que cambia respecto de Paddle
 
@@ -42,10 +46,10 @@ conviven; el comprador del exterior ve el medio de pago que corresponda.
    (marca pagada, arma el ZIP), `order_refunded` (corta la descarga, libro, mail). Cupón de primera compra:
    el servidor ya manda el total descontado, el descuento de Lemon Squeezy queda apagado.
 2. ✅ **Reembolsos y Botón de arrepentimiento**: `autoRefund` por la API de Lemon Squeezy.
-3. **LAB**: variantes de suscripción, `subscription_*`, cambio de plan (con prorrateo), cancelación al fin
+3. **LAB** (lo que falta para cobrar afuera; el código de Paddle en `server/services/subscriptions/paddleSync.js` es la referencia): variantes de suscripción, `subscription_*`, cambio de plan (con prorrateo), cancelación al fin
    del período, cuota rechazada y gracia. El circuito de cambio de precio (`docs/lab-price-changes.md`) hay
    que adaptarlo: acá el precio vive en la variante.
-4. **UI**: el selector «Medio de pago» suma la opción y la moneda sigue al medio (USD).
+4. ✅ **UI**: el selector «Medio de pago» y la moneda siguen al carril internacional (Lemon Squeezy); logo y legales dicen Lemon Squeezy.
 
 ## Probarlo de punta a punta (modo prueba, solo para nosotros)
 
