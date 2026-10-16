@@ -6,8 +6,8 @@ import { api } from './api.js'
  * internacional (Lemon Squeezy, USD). Lo elige él; la detección solo pone el
  * default: la elección guardada, el país que ve el servidor (Vercel /
  * Cloudflare) o, si no hay, la zona horaria del navegador. Ver
- * docs/lemonsqueezy.md. «Internacional» es un solo carril: quién cobra de
- * verdad lo dice el servidor (`gateway` de GET /api/checkout/methods).
+ * docs/lemonsqueezy.md. Si el carril internacional está, lo dice el servidor
+ * (`providers.lemonsqueezy` de GET /api/checkout/methods).
  */
 
 export const PAY_REGIONS = Object.freeze(['ar', 'intl'])
@@ -59,14 +59,10 @@ export function resolveCurrency({ intlEnabled, region, locale }) {
 }
 
 /**
- * La pasarela de cada región. `gateway` es la que dice el servidor para el
- * carril internacional: Lemon Squeezy viaja explícito; sin dato queda
- * `paddle`, el nombre de siempre del carril (el servidor lo resuelve).
+ * La pasarela de cada región.
  * @param {'ar' | 'intl'} region
- * @param {string | null} [gateway]
  */
-export const providerForRegion = (region, gateway = null) =>
-  region === 'intl' ? (gateway === 'lemonsqueezy' ? 'lemonsqueezy' : 'paddle') : 'mercadopago'
+export const providerForRegion = (region) => (region === 'intl' ? 'lemonsqueezy' : 'mercadopago')
 
 function readStored() {
   try {
@@ -93,9 +89,7 @@ export const usePayRegion = create((set, get) => ({
   status: 'idle',
   methods: null,
   intlEnabled: false,
-  /** Quién cobra el carril internacional: 'lemonsqueezy' | 'paddle' | null. */
-  gateway: null,
-  /** ¿El carril internacional cobra suscripciones (LAB)? Paddle y Lemon Squeezy. */
+  /** ¿El carril internacional cobra suscripciones (LAB)? */
   labIntlEnabled: false,
   setRegion(region) {
     if (!PAY_REGIONS.includes(region)) return
@@ -115,15 +109,11 @@ export const usePayRegion = create((set, get) => ({
     } catch {
       methods = null
     }
-    // El carril internacional va en `providers.paddle` (el nombre del contrato).
-    const lane = methods?.providers?.paddle
-    const intlEnabled = Boolean(lane?.enabled)
-    const gateway = intlEnabled ? lane?.gateway || 'paddle' : null
+    const intlEnabled = Boolean(methods?.providers?.lemonsqueezy?.enabled)
     set({
       methods,
       intlEnabled,
-      gateway,
-      labIntlEnabled: gateway === 'paddle' || gateway === 'lemonsqueezy',
+      labIntlEnabled: intlEnabled,
       status: 'ready',
       region: pickRegion({
         stored: readStored(),

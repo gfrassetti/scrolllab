@@ -6,7 +6,6 @@ import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { useWelcomeCoupon } from '../lib/welcomeCoupon'
 import { outcomeForStatus, shouldClearCart } from '../lib/checkoutOutcome'
-import { ensurePaddle } from '../lib/paddleCheckout'
 import { useT } from '../i18n'
 
 const CONFIRM_TIMEOUT_MS = 15000
@@ -46,14 +45,14 @@ const RESOLVED_PANELS = {
     to: '/login?next=/account',
     cta: 'checkout.needsLoginCta',
   },
-  // Paddle: el pago es de otra cuenta (403).
+  // Pago internacional: el pago es de otra cuenta (403).
   'wrong-account': {
     title: 'checkout.wrongAccountTitle',
     body: 'checkout.wrongAccountBody',
     to: '/login?next=/account',
     cta: 'checkout.needsLoginCta',
   },
-  // Paddle: cobró, pero el servidor no lo pudo asociar a la compra (400/404).
+  // Pago internacional: cobró, pero el servidor no lo pudo asociar a la compra (400/404).
   // Al dueño ya le llegó el aviso para entregar o devolver.
   review: {
     title: 'checkout.reviewTitle',
@@ -67,14 +66,12 @@ const RESOLVED_PANELS = {
 const SHOWS_ERROR = new Set(['error', 'review', 'wrong-account'])
 
 /**
- * Vuelta del pago: Mercado Pago pega su `payment_id` en la URL; Paddle (overlay)
- * llega con `provider=paddle&txn=…`. Cada uno confirma contra la API a su modo.
+ * Vuelta del pago: Mercado Pago pega su `payment_id` en la URL; Lemon Squeezy
+ * llega con `provider=lemonsqueezy&orderId=…`. Cada uno confirma contra la API a su modo.
  */
 export default function CheckoutSuccessPage() {
   const [params] = useSearchParams()
-  const provider = params.get('provider')
-  if (provider === 'lemonsqueezy') return <IntlCheckoutSuccess gateway="lemonsqueezy" />
-  return provider === 'paddle' ? <IntlCheckoutSuccess /> : <MercadoPagoCheckoutSuccess />
+  return params.get('provider') === 'lemonsqueezy' ? <LemonCheckoutSuccess /> : <MercadoPagoCheckoutSuccess />
 }
 
 /** Panel final (resuelto) de la vuelta del pago, compartido por las dos pasarelas. */
@@ -122,15 +119,14 @@ const INTL_RETRY_MS = 2000
 const INTL_MAX_TRIES = 6
 
 /**
- * Vuelta del pago internacional. Con Lemon Squeezy (`gateway="lemonsqueezy"`) la
- * orden la cumple el webhook y esto solo pregunta cómo va (409 mientras no
- * llegó); con Paddle (overlay) se confirma contra la API de Paddle. En los dos
- * casos se reintenta un rato y se manda a Mis compras; el webhook cumple la
+ * Vuelta del pago internacional (Lemon Squeezy): la orden la cumple el webhook y
+ * esto solo pregunta cómo va (409 mientras no llegó). Se reintenta un rato y se
+ * manda a Mis compras; el webhook cumple la
  * orden igual aunque esto falle. Nunca gira para siempre (15 s) y cada error
  * tiene su panel: otra cuenta (403) o un pago que no se pudo asociar (400/404,
  * el carrito queda como estaba).
  */
-function IntlCheckoutSuccess({ gateway = 'paddle' }) {
+function LemonCheckoutSuccess() {
   const t = useT()
   const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
@@ -140,10 +136,8 @@ function IntlCheckoutSuccess({ gateway = 'paddle' }) {
   const [confirmState, setConfirmState] = useState('idle')
   const [confirmError, setConfirmError] = useState('')
   const [confirmRef, setConfirmRef] = useState('')
-  // Paddle vuelve con la transacción; Lemon Squeezy, con nuestra orden (la cumple
-  // el webhook y esta pantalla espera a que figure paga).
-  const lemon = gateway === 'lemonsqueezy'
-  const transactionId = (lemon ? params.get('orderId') : params.get('txn')) || ''
+  // Vuelve con nuestra orden (la cumple el webhook y esta pantalla espera a que figure paga).
+  const orderId = params.get('orderId') || ''
 
   useEffect(() => {
     if (authLoading) return undefined
@@ -151,7 +145,7 @@ function IntlCheckoutSuccess({ gateway = 'paddle' }) {
       setConfirmState('needs-login')
       return undefined
     }
-    if (!transactionId) {
+    if (!orderId) {
       navigate('/account', { replace: true })
       return undefined
     }
@@ -168,9 +162,7 @@ function IntlCheckoutSuccess({ gateway = 'paddle' }) {
     ;(async () => {
       for (let attempt = 1; attempt <= INTL_MAX_TRIES; attempt += 1) {
         try {
-          const data = lemon
-            ? await api.confirmLemonCheckout(transactionId)
-            : await api.confirmPaddleCheckout(transactionId)
+          const data = await api.confirmLemonCheckout(orderId)
           if (cancelled) return
           clearTimeout(watchdog)
           clearCart()
@@ -210,7 +202,7 @@ function IntlCheckoutSuccess({ gateway = 'paddle' }) {
       cancelled = true
       clearTimeout(watchdog)
     }
-  }, [authLoading, user, transactionId, lemon, navigate, clearCart, dropWelcome])
+  }, [authLoading, user, orderId, navigate, clearCart, dropWelcome])
 
   const panel = RESOLVED_PANELS[confirmState]
   if (panel) {
@@ -342,125 +334,6 @@ function MercadoPagoCheckoutSuccess() {
   return (
     <div className="flex min-h-svh items-center justify-center bg-bone text-[11px] uppercase tracking-[0.25em] text-ink/50">
       {t('checkout.confirming')}
-    </div>
-  )
-}
-
-/** Si Paddle no avisa que el checkout cargó en este tiempo, se muestra el error con salida. */
-const PAY_LINK_TIMEOUT_MS = 20_000
-
-/**
- * Link de pago de Paddle (`/checkout/pay?_ptxn=txn_…`): el «default payment
- * link» del panel de Paddle. Lo usan los mails de Paddle (p. ej. pagar una
- * cuota vencida). Paddle.js abre solo el checkout de `_ptxn` al inicializarse;
- * si ya estaba inicializado (se llegó navegando dentro del sitio) se abre a
- * mano. Al pagar se cierra el overlay y se vuelve al lugar que corresponde:
- * LAB si la transacción es de una suscripción, Mis compras si es de una orden.
- */
-export function CheckoutPayPage() {
-  const t = useT()
-  const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const [state, setState] = useState('loading')
-  const transactionId = params.get('_ptxn') || ''
-
-  useEffect(() => {
-    if (!/^txn_[a-z0-9]+$/i.test(transactionId)) {
-      setState('invalid')
-      return undefined
-    }
-    let cancelled = false
-    let paddleRef = null
-    const watchdog = setTimeout(() => {
-      if (!cancelled) setState((prev) => (prev === 'loading' ? 'error' : prev))
-    }, PAY_LINK_TIMEOUT_MS)
-    ;(async () => {
-      try {
-        const methods = await api.checkoutMethods()
-        const paddle = methods?.providers?.paddle
-        if (!paddle?.enabled || !paddle.clientToken) throw new Error('Paddle no disponible')
-        const { Paddle, fresh } = await ensurePaddle({
-          environment: paddle.environment,
-          clientToken: paddle.clientToken,
-          handler: (event) => {
-            if (cancelled) return
-            const name = event?.name
-            if (name === 'checkout.loaded') {
-              clearTimeout(watchdog)
-              setState('open')
-            } else if (name === 'checkout.completed') {
-              clearTimeout(watchdog)
-              // Una cuota o un alta de LAB trae su suscripción; una compra, no.
-              const lab = Boolean(event.data?.subscription_id) || event.data?.custom_data?.kind === 'lab'
-              paddleRef?.Checkout.close()
-              navigate(
-                lab
-                  ? '/lab?suscripcion=volver'
-                  : `/checkout/success?provider=paddle&txn=${encodeURIComponent(transactionId)}`,
-                { replace: true },
-              )
-            } else if (name === 'checkout.closed') {
-              clearTimeout(watchdog)
-              setState('closed')
-            } else if (name === 'checkout.error') {
-              clearTimeout(watchdog)
-              setState('error')
-            }
-          },
-        })
-        paddleRef = Paddle
-        // Recién inicializado, Paddle abre solo el `_ptxn` de la URL.
-        if (!fresh && !cancelled) {
-          Paddle.Checkout.open({ transactionId, settings: { showAddDiscounts: false } })
-        }
-      } catch {
-        if (!cancelled) {
-          clearTimeout(watchdog)
-          setState('error')
-        }
-      }
-    })()
-    return () => {
-      cancelled = true
-      clearTimeout(watchdog)
-    }
-  }, [transactionId, navigate])
-
-  const message = {
-    loading: t('pay.opening'),
-    open: t('pay.opening'),
-    invalid: t('pay.invalidLink'),
-    error: t('pay.openError'),
-    closed: t('pay.closed'),
-  }[state]
-
-  return (
-    <div className="min-h-svh bg-bone text-ink">
-      <SiteHeader />
-      <main className="mx-auto max-w-lg px-5 py-16 md:px-10">
-        <p role="status" className="text-sm leading-relaxed text-ink/70">
-          {message}
-        </p>
-        {state !== 'loading' && state !== 'open' && (
-          <div className="mt-8 flex flex-wrap gap-3">
-            {(state === 'error' || state === 'closed') && (
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="border-2 border-ink bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] text-bone transition-colors hover:border-accent hover:bg-accent hover:text-on-accent"
-              >
-                {t('pay.retry')}
-              </button>
-            )}
-            <Link
-              to="/account"
-              className="border-2 border-ink px-6 py-3 text-[11px] uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone"
-            >
-              {t('checkout.goAccount')}
-            </Link>
-          </div>
-        )}
-      </main>
     </div>
   )
 }

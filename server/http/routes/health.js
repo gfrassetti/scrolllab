@@ -49,13 +49,8 @@ export function createHealthRouter({ config }) {
         mongo: mongoOk,
         storage: storageOk,
         mpMock: config.mpMock,
-        // Estado de Paddle (sin detalles): `misconfigured` = variables PADDLE_*
-        // inválidas en producción, Paddle quedó apagado (el motivo está en el log).
-        paddle: config.paddle?.error
-          ? 'misconfigured'
-          : config.paddle?.enabled
-            ? 'on'
-            : 'off',
+        // Estado de Lemon Squeezy (sin detalles): `test` = modo prueba (solo QA).
+        lemonsqueezy: !config.lemon?.enabled ? 'off' : config.lemon.testMode ? 'test' : 'on',
         auth: authDiagnostics(config),
       })
     }),

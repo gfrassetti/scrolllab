@@ -241,7 +241,7 @@ export function arsFromUsdOrNull(usd, rate) {
 }
 
 /**
- * Precio en USD con cupón (lo que cobra Paddle afuera de Argentina): descuenta
+ * Precio en USD con cupón (lo que cobra Lemon Squeezy afuera de Argentina): descuenta
  * en centavos enteros, igual que el precio en pesos. `null` si la entrada o el
  * porcentaje no sirven.
  * @param {number} usd

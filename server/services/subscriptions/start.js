@@ -3,16 +3,9 @@ import { HttpError } from '../../errors.js'
 import { HOSTED_PLANS, isHostedPlanId, subscriptionPlanPrice } from '../../catalog.js'
 import { assertQaBuyer, isQaBuyer } from '../../qa.js'
 import { createPreapproval, billingFrequency } from '../mercadoPago.js'
-import { paddleClientInfo } from '../paddle.js'
 import { isMock, trialEligible } from './billing.js'
 import { isHigherPlan } from './planChange.js'
 import { retirePendingSubscription, closeLapsedSubscription } from './mpSync.js'
-import {
-  isPaddleSub,
-  startPaddleSubscription,
-  cancelPaddleConfirmed,
-  retirePendingPaddle,
-} from './paddleSync.js'
 import {
   isLemonSub,
   startLemonSubscription,
@@ -25,11 +18,8 @@ import {
  * @property {string} subscriptionId
  * @property {string | null} trialEndsAt ISO
  * @property {string | null} firstChargeAt ISO
- * @property {string} [init_point] Mercado Pago: a dónde manda el comprador
- * @property {'paddle' | 'lemonsqueezy'} [provider] Paddle (y su mock) o Lemon Squeezy
- * @property {string} [transactionId] Paddle: la transacción que abre el overlay
- * @property {string} [customerEmail] Paddle
- * @property {{ environment: string, clientToken: string }} [paddle] Paddle.js
+ * @property {string} [init_point] a dónde manda al comprador (Mercado Pago o Lemon Squeezy)
+ * @property {'lemonsqueezy'} [provider] Lemon Squeezy
  * @property {boolean} [mock] Atajo de desarrollo: sin pasarela real
  */
 
@@ -37,23 +27,12 @@ import {
  * Altas a medio hacer y renovaciones caídas, cada una con su pasarela.
  */
 const retirePending = (sub, config) =>
-  isPaddleSub(sub)
-    ? retirePendingPaddle(sub, config)
-    : isLemonSub(sub)
-      ? retirePendingLemon(sub, config)
-      : retirePendingSubscription(sub, config)
+  isLemonSub(sub) ? retirePendingLemon(sub, config) : retirePendingSubscription(sub, config)
 
 async function closeLapsed(sub, config) {
   if (isLemonSub(sub)) {
     await cancelLemonConfirmed(sub, config)
     sub.canceledAt = sub.canceledAt || new Date()
-    sub.status = 'cancelled'
-    await sub.save()
-    return
-  }
-  if (isPaddleSub(sub)) {
-    await cancelPaddleConfirmed(sub, config, { immediately: true })
-    sub.canceledAt = new Date()
     sub.status = 'cancelled'
     await sub.save()
     return
@@ -73,12 +52,12 @@ async function closeLapsed(sub, config) {
  * Devuelve lo que responde `POST /api/subscriptions`, salvo `activateUrl`, que
  * es una ruta HTTP y la agrega el router cuando `mock` es true:
  *  - `mercadopago`: `{ subscriptionId, trialEndsAt, firstChargeAt, init_point }`.
- *  - `paddle`: `{ …, provider: 'paddle', transactionId, customerEmail, paddle }`.
- *  - mock de dev (de la pasarela elegida): `{ …, [provider], mock: true }`.
+ *  - `lemonsqueezy`: `{ …, provider: 'lemonsqueezy', init_point }`.
+ *  - mock de dev (Mercado Pago): `{ …, mock: true }`.
  * `qa`: la suscripción de prueba (src/domain/qa.js) — solo cuentas de
- * QA_BUYER_EMAILS, solo Mercado Pago y a QA_LAB_PRICES_ARS. La prueba gratis
+ * QA_BUYER_EMAILS, a QA_LAB_PRICES_ARS en Mercado Pago. La prueba gratis
  * sigue la misma regla que LAB real (la primera suscripción de la cuenta).
- * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'paddle' | 'lemonsqueezy', locale: 'es' | 'en', qa?: boolean, config: any }} args
+ * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'lemonsqueezy', locale: 'es' | 'en', qa?: boolean, config: any }} args
  * @returns {Promise<StartedSubscription>}
  */
 export async function startSubscription({
@@ -93,17 +72,9 @@ export async function startSubscription({
   if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
   // Lemon Squeezy en modo prueba (no cobra) existe solo para las cuentas de QA.
   const lemonUsable = Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
-  // Un solo carril internacional: Paddle si está; si no, Lemon Squeezy.
-  if (provider === 'paddle' && !config.paddle?.enabled && lemonUsable) provider = 'lemonsqueezy'
-  const paddle = provider === 'paddle'
   const lemon = provider === 'lemonsqueezy'
-  if (qa) {
-    assertQaBuyer(user, config, 'Plan inválido')
-    if (paddle) {
-      throw new HttpError(400, 'La suscripción de prueba se cobra con Mercado Pago o Lemon Squeezy', { expose: true })
-    }
-  }
-  if ((paddle && !config.paddle?.enabled) || (lemon && !lemonUsable)) {
+  if (qa) assertQaBuyer(user, config, 'Plan inválido')
+  if (lemon && !lemonUsable) {
     throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
   }
 
@@ -169,8 +140,8 @@ export async function startSubscription({
     plan,
     cycle,
     status: 'pending',
-    provider: paddle ? 'paddle' : lemon ? 'lemonsqueezy' : 'mercadopago',
-    currency_id: paddle || lemon ? 'USD' : 'ARS',
+    provider: lemon ? 'lemonsqueezy' : 'mercadopago',
+    currency_id: lemon ? 'USD' : 'ARS',
     locale,
     // En modo prueba de Lemon Squeezy no hay plata: fuera de las métricas.
     ...(qa || (lemon && config.lemon.testMode) ? { qa: true } : {}),
@@ -190,13 +161,7 @@ export async function startSubscription({
     firstChargeAt: firstChargeAt ? firstChargeAt.toISOString() : null,
   }
 
-  if (!lemon && (paddle ? Boolean(config.paddle.mock) : isMock(config))) {
-    return {
-      ...out,
-      ...(paddle ? { provider: 'paddle' } : {}),
-      mock: true,
-    }
-  }
+  if (!lemon && isMock(config)) return { ...out, mock: true }
 
   if (lemon) {
     let started
@@ -213,30 +178,6 @@ export async function startSubscription({
       )
     }
     return { ...out, provider: 'lemonsqueezy', init_point: started.init_point }
-  }
-
-  if (paddle) {
-    let started
-    try {
-      started = await startPaddleSubscription({ sub, user, firstChargeAt, config })
-    } catch (err) {
-      // Sin transacción en Paddle no hay nada que pagar: la fila no puede
-      // bloquear el próximo intento.
-      await db.deleteSubscription(subscriptionId)
-      console.error(`subs alta FALLÓ en Paddle user=${userId}`, err?.message || err)
-      throw new HttpError(
-        502,
-        'No pudimos iniciar la suscripción internacional. Probá de nuevo en unos minutos.',
-        { expose: true },
-      )
-    }
-    return {
-      ...out,
-      provider: 'paddle',
-      transactionId: started.transactionId,
-      customerEmail: started.email,
-      paddle: paddleClientInfo(config),
-    }
   }
 
   const plof = HOSTED_PLANS[plan]

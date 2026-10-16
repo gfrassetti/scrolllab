@@ -125,7 +125,6 @@ const apiProc = spawn(process.execPath, ['server/index.js'], {
     MP_WEBHOOK_SECRET: WEBHOOK_SECRET,
     MP_SUBS_ACCESS_TOKEN: '',
     MP_SUBS_WEBHOOK_SECRET: '',
-    PADDLE_API_KEY: '',
     EMAIL_ENABLED: 'false',
     RATE_LIMIT_DISABLED: 'true',
     // MP pide URLs públicas en la preference. Al pagar, MP vuelve al sitio real:

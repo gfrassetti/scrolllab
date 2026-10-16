@@ -14,8 +14,6 @@ import {
   sendOrderAdminNotifyOnce,
 } from '../../services/email.js'
 import { createCheckoutOrder } from '../../services/checkout.js'
-import { confirmPaddleCheckout } from '../../services/paddlePayments.js'
-import { paddleClientInfo } from '../../services/paddle.js'
 import { confirmLemonCheckout } from '../../services/lemonPayments.js'
 import { isQaBuyer } from '../../qa.js'
 
@@ -33,8 +31,8 @@ export function requestCountry(req) {
 /**
  * Compra de templates y composiciones del builder: crear la orden con los
  * precios del servidor (y el cupón, si viene) y el checkout de la pasarela
- * (Checkout Pro de MP en ARS, o Paddle en USD); confirmar el pago al volver
- * (en test MP no manda webhooks; Paddle sí, pero el confirm no lo espera); qué
+ * (Checkout Pro de MP en ARS, o Lemon Squeezy en USD); confirmar el pago al volver
+ * (en test MP no manda webhooks; con Lemon Squeezy se espera al webhook); qué
  * pasarelas hay y desde qué país viene el request; y el pago mock de
  * desarrollo. Los webhooks viven en webhooks.js.
  */
@@ -107,33 +105,23 @@ export function createCheckoutRouter({ config, limits }) {
   )
 
   // Qué pasarelas hay y desde dónde se conecta: el carrito preselecciona
-  // «Argentina» (MP) o «internacional» (Paddle). Es solo el default: el
-  // comprador elige. Sin sesión (se muestra antes de loguearse).
+  // «Argentina» (MP) o «internacional» (Lemon Squeezy, USD). Es solo el default:
+  // el comprador elige. Sin sesión (se muestra antes de loguearse).
   router.get('/api/checkout/methods', (req, res) => {
     const country = requestCountry(req)
-    const paddleOn = Boolean(config.paddle?.enabled)
-    // Un solo carril «internacional» en USD: Paddle si está, si no Lemon Squeezy
-    // (redirección: sin overlay, así que no manda token de cliente).
     // En modo prueba (no cobra), solo para las cuentas de QA: para el resto no hay carril.
     const lemonOn =
-      Boolean(config.lemon?.enabled) &&
-      !paddleOn &&
-      (!config.lemon.testMode || isQaBuyer(req.user, config))
-    const intlOn = paddleOn || lemonOn
+      Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(req.user, config))
     res.set('Cache-Control', 'private, no-store')
     res.json({
       country,
-      suggested: intlOn && country && country !== 'AR' ? 'paddle' : 'mercadopago',
+      suggested: lemonOn && country && country !== 'AR' ? 'lemonsqueezy' : 'mercadopago',
       providers: {
         mercadopago: { enabled: true, mock: Boolean(config.mpMock), currency: 'ARS' },
-        paddle: {
-          enabled: intlOn,
-          mock: Boolean(config.paddle?.mock),
+        lemonsqueezy: {
+          enabled: lemonOn,
           currency: 'USD',
-          // Quién cobra de verdad ese carril (el front solo abre overlay con Paddle).
-          gateway: paddleOn ? 'paddle' : lemonOn ? 'lemonsqueezy' : null,
           ...(lemonOn ? { testMode: Boolean(config.lemon.testMode) } : {}),
-          ...(paddleOn && !config.paddle.mock ? paddleClientInfo(config) : {}),
         },
       },
     })
@@ -149,50 +137,11 @@ export function createCheckoutRouter({ config, limits }) {
           user: req.user,
           items: req.body?.items,
           couponCode: req.body?.couponCode,
-          provider: ['paddle', 'lemonsqueezy'].includes(req.body?.provider)
-            ? req.body.provider
-            : 'mercadopago',
+          provider: req.body?.provider === 'lemonsqueezy' ? 'lemonsqueezy' : 'mercadopago',
           locale: req.body?.locale,
           config,
         }),
       )
-    }),
-  )
-
-  /**
-   * Cierre del overlay de Paddle: trae la transacción de Paddle y cumple la
-   * orden sin esperar al webhook. 409 mientras Paddle la sigue procesando
-   * (el front reintenta).
-   */
-  router.post(
-    '/api/checkout/paddle/confirm',
-    requireAuth,
-    limits.checkout,
-    asyncHandler(async (req, res) => {
-      if (!config.paddle?.apiKey || config.paddle.mock) {
-        throw new HttpError(400, 'Confirmación de Paddle no disponible')
-      }
-      const { order, orderId, alreadyFulfilled } = await confirmPaddleCheckout({
-        transactionId: String(req.body?.transactionId || '').trim(),
-        userId: db.uid(req.user),
-        config,
-      })
-      res.json({
-        ok: true,
-        orderId,
-        alreadyFulfilled,
-        status: order?.status || 'paid',
-        order: order
-          ? {
-              id: orderId,
-              status: order.status,
-              items: order.items,
-              total: order.total,
-              currency_id: order.currency_id,
-              ...(order.qa ? { qa: true } : {}),
-            }
-          : null,
-      })
     }),
   )
 
@@ -234,7 +183,7 @@ export function createCheckoutRouter({ config, limits }) {
     requireAuth,
     limits.checkout,
     asyncHandler(async (req, res) => {
-      if (!config.mpMock && !config.paddle?.mock && !config.authDev) {
+      if (!config.mpMock && !config.authDev) {
         throw new HttpError(403, 'Mock pay deshabilitado')
       }
       const orderId = String(req.body?.orderId || '')

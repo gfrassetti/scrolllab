@@ -3,7 +3,7 @@ import { HttpError } from '../errors.js'
 import { validateCheckoutItems, validateRecipe } from '../validation.js'
 import { pendingExpiresAt } from '../orderRetention.js'
 import { createCheckoutPreference } from './mercadoPago.js'
-import { arsFromUsd, discountedArsFromUsd, PRODUCTS } from '../catalog.js'
+import { arsFromUsd, discountedArsFromUsd } from '../catalog.js'
 import { discountedUsdOrNull } from '../../src/domain/catalog.js'
 import { getUsdArsRate } from '../fx.js'
 import { resolveCouponForCheckout, autoWelcomeCoupon } from './coupons.js'
@@ -18,16 +18,10 @@ import {
   qaDiscountedArs,
 } from '../../src/domain/qa.js'
 import { recipeSectionId } from '../../src/domain/catalog.js'
-import {
-  createTransaction,
-  buildOrderTransactionBody,
-  paddleClientInfo,
-  PaddleError,
-} from './paddle.js'
 import { createCheckout, buildCheckoutBody, LemonError } from './lemonsqueezy.js'
 
 /** Pasarelas que acepta POST /api/checkout. */
-export const CHECKOUT_PROVIDERS = Object.freeze(['mercadopago', 'paddle', 'lemonsqueezy'])
+export const CHECKOUT_PROVIDERS = Object.freeze(['mercadopago', 'lemonsqueezy'])
 
 /**
  * Ítems de prueba (src/domain/qa.js): uno solo por pedido y sin mezclar con
@@ -78,14 +72,14 @@ export function resolveQaItems(rawItems, { maxRecipeSections }) {
  * builder) con los precios del servidor, el cupón de bienvenida si viene, y
  * el checkout de la pasarela elegida:
  *  - `mercadopago` (default): ARS a la cotización del día, Checkout Pro.
- *  - `paddle`: USD de lista, transacción de Paddle (docs/paddle.md).
+ *  - `lemonsqueezy`: USD de lista, checkout de Lemon Squeezy (docs/lemonsqueezy.md).
  * Nada sale de montos del cliente: `items` se valida contra el catálogo y la
  * receta contra la allowlist, y el descuento se recalcula sobre el precio de
  * lista.
  *
  * Devuelve lo que responde POST /api/checkout: `{ init_point, orderId }` en MP
- * (+ `mock: true` en modo mock) y `{ provider: 'paddle', orderId,
- * transactionId, paddle }` en Paddle.
+ * (+ `mock: true` en modo mock) y `{ provider: 'lemonsqueezy', init_point, orderId }`
+ * en Lemon Squeezy.
  * @param {{ user: any, items: any, couponCode?: string, provider?: string, locale?: string, config: any }} args
  */
 export async function createCheckoutOrder({
@@ -102,16 +96,10 @@ export async function createCheckoutOrder({
   // Lemon Squeezy en modo prueba no cobra (tarjeta 4242): mientras esté así, existe
   // solo para las cuentas de QA. Para cualquier otro, como si no estuviera.
   const lemonUsable = Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
-  // El carril «internacional» (USD) es uno solo para el comprador: Paddle si está
-  // disponible; si no, Lemon Squeezy. El front sigue pidiendo `paddle`.
-  if (provider === 'paddle' && !config.paddle?.enabled && lemonUsable) {
-    provider = 'lemonsqueezy'
-  }
-  const paddle = provider === 'paddle'
   const lemon = provider === 'lemonsqueezy'
-  // Los dos cobran el precio de lista en USD, calculado por el servidor.
-  const usd = paddle || lemon
-  if ((paddle && !config.paddle?.enabled) || (lemon && !lemonUsable)) {
+  // Cobra el precio de lista en USD, calculado por el servidor.
+  const usd = lemon
+  if (lemon && !lemonUsable) {
     throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
   }
   const lang = locale === 'en' ? 'en' : 'es'
@@ -121,14 +109,10 @@ export async function createCheckoutOrder({
   const qa = Array.isArray(items) && items.some((i) => isQaSku(i?.sku))
   if (qa) {
     assertQaBuyer(user, config)
-    // Con tarjeta internacional solo Lemon Squeezy (US$ 1 fijo); Paddle no.
-    if (paddle) {
-      throw new HttpError(400, 'Los productos de prueba se cobran con Mercado Pago o Lemon Squeezy', { expose: true })
-    }
   }
 
-  // Paddle cobra en USD: no depende de la cotización (la validación pide una
-  // tasa para el precio en pesos, que en Paddle no se usa). Prueba: pesos fijos.
+  // Lemon Squeezy cobra en USD: no depende de la cotización (la validación pide una
+  // tasa para el precio en pesos, que en USD no se usa). Prueba: pesos fijos.
   const fx = usd || qa ? null : await getUsdArsRate()
   const resolved = qa
     ? resolveQaItems(items, { maxRecipeSections: config.maxRecipeSections })
@@ -159,7 +143,7 @@ export async function createCheckoutOrder({
     if (resolved.every((i) => qaDiscountedArs(listOf(i), pct) >= listOf(i))) coupon = null
   }
 
-  // Paddle cobra el precio de lista en USD; MP, en pesos.
+  // Lemon Squeezy cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {
     if (qa && lemon) return { ...i, unit_price: QA_TEMPLATE_USD, unit_price_usd: QA_TEMPLATE_USD, currency_id: 'USD' }
     if (qa) return coupon ? { ...i, unit_price: qaDiscountedArs(i.list_ars, coupon.percent) } : i
@@ -174,7 +158,7 @@ export async function createCheckoutOrder({
       : i
   })
 
-  // Un cupón al 100 % (o un precio mal cargado) no se manda a Paddle: cobraría
+  // Un cupón al 100 % (o un precio mal cargado) no se manda a Lemon Squeezy: cobraría
   // cero y entregaría el ZIP gratis.
   if (usd && lines.some((l) => !(Number(l.unit_price) > 0))) {
     throw new HttpError(400, 'Ese precio no se puede cobrar con tarjeta', { expose: true })
@@ -213,9 +197,8 @@ export async function createCheckoutOrder({
 
   // Lo que ve el comprador en la pantalla de la pasarela: el descuento con nombre
   // (el precio ya viene descontado; el título dice por qué).
-  const shown = coupon ? lines.map((l) => labelDiscount(l, coupon.percent, { paddle: usd, lang, rate: fx?.rate })) : lines
+  const shown = coupon ? lines.map((l) => labelDiscount(l, coupon.percent, { usd, lang, rate: fx?.rate })) : lines
 
-  if (paddle) return startPaddleCheckout({ order, orderId, lines: shown, user, config })
   if (lemon) return startLemonCheckout({ order, orderId, lines: shown, user, lang, config })
 
   if (config.mpMock) {
@@ -249,13 +232,13 @@ export async function createCheckoutOrder({
 
 /**
  * Título y descripción de un ítem con el descuento de primera compra a la vista,
- * para la pantalla de Mercado Pago o de Paddle (el monto ya viene descontado).
+ * para la pantalla de Mercado Pago o de Lemon Squeezy (el monto ya viene descontado).
  * @param {any} line
  * @param {number} percent
- * @param {{ paddle: boolean, lang?: string, rate?: number }} opts
+ * @param {{ usd: boolean, lang?: string, rate?: number }} opts
  */
-export function labelDiscount(line, percent, { paddle, lang, rate }) {
-  if (paddle) {
+export function labelDiscount(line, percent, { usd, lang, rate }) {
+  if (usd) {
     const en = lang === 'en'
     return {
       ...line,
@@ -272,58 +255,6 @@ export function labelDiscount(line, percent, { paddle, lang, rate }) {
     description: list
       ? `Precio de lista $ ${list.toLocaleString('es-AR')} — ${percent}% de descuento de primera compra.`
       : `${percent}% de descuento de primera compra.`,
-  }
-}
-
-/**
- * Transacción de Paddle de una orden ya creada. Sin cuenta (mock de dev), el
- * mismo pago mock que Mercado Pago. Si Paddle no la crea, la orden se borra:
- * una orden sin transacción no se puede pagar nunca y no tiene que aparecer
- * en Mis compras.
- */
-async function startPaddleCheckout({ order, orderId, lines, user, config }) {
-  if (config.paddle.mock) {
-    return {
-      provider: 'paddle',
-      init_point: `${config.clientUrl}/checkout/mock?orderId=${orderId}`,
-      orderId,
-      mock: true,
-    }
-  }
-  let txn
-  try {
-    txn = await createTransaction(
-      config,
-      buildOrderTransactionBody({
-        orderId,
-        userId: db.uid(user),
-        lines: lines.map((l) => ({
-          ...l,
-          picture: PRODUCTS[l.sku]?.picture || '/icon-512.png',
-        })),
-        taxCategory: config.paddle.taxCategory.template,
-        clientUrl: config.clientUrl,
-      }),
-    )
-  } catch (err) {
-    console.error(`checkout paddle FALLÓ order=${orderId}`, err?.message || err)
-    await db.deletePendingOrder(orderId)
-    throw new HttpError(
-      502,
-      err instanceof PaddleError && err.status === 503
-        ? 'El pago internacional no está disponible'
-        : 'No pudimos iniciar el pago internacional. Probá de nuevo en unos minutos.',
-      { expose: true },
-    )
-  }
-  order.paddleTransactionId = String(txn.id)
-  await order.save()
-  return {
-    provider: 'paddle',
-    orderId,
-    transactionId: String(txn.id),
-    paddle: paddleClientInfo(config),
-    customerEmail: user.email,
   }
 }
 

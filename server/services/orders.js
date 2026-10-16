@@ -7,7 +7,6 @@ import { HttpError } from '../errors.js'
 import { db } from '../db.js'
 import { noteRefund } from './refundLedger.js'
 import { assertPaymentMatchesOrder, expirePreference } from './mercadoPago.js'
-import { cancelTransaction } from './paddle.js'
 import {
   sendOrderReceiptOnce,
   sendOrderAdminNotifyOnce,
@@ -176,12 +175,12 @@ export async function ensureOrderItemZip(order, index, user, config) {
 /**
  * Marca la orden como paga de forma atómica e idempotente.
  * Devuelve { order, created: boolean } donde created=false si ya estaba paga.
- * Mercado Pago pasa `mpPaymentId`; Paddle, `paddleTransactionId`; Lemon
+ * Mercado Pago pasa `mpPaymentId`; Lemon
  * Squeezy, `lemonOrderId`.
- * @param {{ orderId: string, mpPaymentId?: string, paddleTransactionId?: string, lemonOrderId?: string, config?: any }} args
+ * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string, config?: any }} args
  */
-export async function markOrderPaid({ orderId, mpPaymentId, paddleTransactionId, lemonOrderId, config: alertConfig = null }) {
-  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId, paddleTransactionId, lemonOrderId })
+export async function markOrderPaid({ orderId, mpPaymentId, lemonOrderId, config: alertConfig = null }) {
+  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId, lemonOrderId })
   // Canjear el cupón es contabilidad: si falla no puede frenar lo ya pagado.
   if (result.created && result.order?.couponCode) {
     try {
@@ -398,8 +397,7 @@ export async function deliverPaidOrder(paid, config) {
 }
 
 /**
- * Un pago de una orden fue rechazado (MP `rejected`, Paddle
- * `transaction.payment_failed`): se anota y la orden sigue pendiente. El mail
+ * Un pago de una orden fue rechazado (MP `rejected`): se anota y la orden sigue pendiente. El mail
  * no sale acá: el comprador suele reintentar en el mismo checkout, así que lo
  * manda el barrido (services/paymentFailedSweep.js) un rato después y solo si
  * la orden sigue sin pagarse. Nunca tira.
@@ -514,8 +512,7 @@ export async function recordMpRefund({ payment, order = null, partial, config })
  * El 10% es solo para la primera compra. Si el comprador dejó otras compras
  * abiertas que se armaron con el descuento (dos pestañas, un checkout viejo),
  * al pagar una las demás se anulan en la pasarela para que no se puedan pagar
- * también con descuento: la preference de Mercado Pago vence y la transacción
- * de Paddle se cancela. Si vuelve a comprar, paga precio de lista. Nunca frena
+ * también con descuento: la preference de Mercado Pago vence. Si vuelve a comprar, paga precio de lista. Nunca frena
  * la entrega de lo pagado.
  */
 export async function voidOtherCouponOrders(paid, config) {
@@ -532,11 +529,7 @@ export async function voidOtherCouponOrders(paid, config) {
   for (const o of pending) {
     const id = String(db.uid(o) || o.id)
     try {
-      if (o.provider === 'paddle') {
-        if (o.paddleTransactionId && !config?.paddle?.mock) {
-          await cancelTransaction(config, o.paddleTransactionId)
-        }
-      } else if (o.mpPreferenceId && !config?.mpMock && config?.mpAccessToken) {
+      if (o.mpPreferenceId && !config?.mpMock && config?.mpAccessToken) {
         await expirePreference(config.mpAccessToken, o.mpPreferenceId)
       }
       await db.deletePendingOrder(id)

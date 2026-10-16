@@ -6,7 +6,7 @@ import {
   buildSubscriptionWelcomeEn,
   buildSubscriptionCanceledEn,
   buildSubscriptionTrialReminderEn,
-  paddleInvoiceNote,
+  invoiceNote,
   isMerchantOfRecord,
 } from './emailTemplatesBilling.js'
 
@@ -27,7 +27,7 @@ export function escapeHtml(value) {
 
 export function formatMoney(value, currency = 'ARS') {
   const n = Number(value || 0)
-  // USD (Paddle) puede traer centavos de un cupón; ARS se redondea al peso.
+  // USD (Lemon Squeezy) puede traer centavos de un cupón; ARS se redondea al peso.
   const usd = currency === 'USD'
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -37,7 +37,7 @@ export function formatMoney(value, currency = 'ARS') {
   }).format(n)
 }
 
-/** Precio del plan de una suscripción, en su moneda (ARS en MP, USD en Paddle). */
+/** Precio del plan de una suscripción, en su moneda (ARS en MP, USD en Lemon Squeezy). */
 function subscriptionPriceLabel(subscription) {
   const currency = subscription.currency_id || 'ARS'
   const price = subscriptionPlanPrice(subscription, subscription.plan, subscription.cycle, currency)
@@ -59,8 +59,8 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
     return buildOrderReceiptEn({ order, user, accountUrl, logoUrl })
   }
   const orderId = String(db.uid(order) || order.id)
-  // Paddle es el vendedor legal (merchant of record): la factura la manda él.
-  const invoiceNote = isMerchantOfRecord(order.provider) ? ` ${paddleInvoiceNote('es', order.provider)}` : ''
+  // Lemon Squeezy es el vendedor legal (merchant of record): la factura la manda él.
+  const invoiceLine = isMerchantOfRecord(order.provider) ? ` ${invoiceNote('es')}` : ''
   const buyerName = user.name || user.email
   // Con descuento de primera compra: ítems a precio de lista, la línea del
   // descuento y el total cobrado. Sin descuento, igual que siempre.
@@ -143,7 +143,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
             </tr>
             <tr>
               <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
-                Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${escapeHtml(invoiceNote)}
+                Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${escapeHtml(invoiceLine)}
                 Si necesitás ayuda, respondé a este email.
               </td>
             </tr>
@@ -169,7 +169,7 @@ Total: ${formatMoney(order.total, order.currency_id)}
 Ingresá y descargá tu ZIP desde:
 ${accountUrl}
 
-Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${invoiceNote}`
+Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${invoiceLine}`
 
   return {
     subject: `Tu compra en Scroll Lab · Orden ${orderId.slice(-8)}`,

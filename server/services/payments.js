@@ -148,7 +148,7 @@ export async function handleMercadoPagoNotification({
     } else {
       await fulfillApprovedPayment({ payment, config })
       // Reembolso parcial: MP deja el pago «approved» con la devolución adentro.
-      // La compra sigue paga (como en Paddle); solo se avisa, una vez por monto.
+      // La compra sigue paga; solo se avisa, una vez por monto.
       const refunded = Number(payment.transaction_amount_refunded) || 0
       if (refunded > 0) {
         await recordMpRefund({ payment, partial: true, config })

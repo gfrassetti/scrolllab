@@ -2,7 +2,6 @@ import { api } from './api.js'
 import { markCheckoutIntent } from './cart.js'
 import { trackBeginCheckout } from './gtm.js'
 import { isQaSku } from '../domain/qa.js'
-import { openPaddleCheckout } from './paddleCheckout.js'
 import { usePayRegion, providerForRegion } from './payRegion.js'
 
 /**
@@ -12,8 +11,8 @@ import { usePayRegion, providerForRegion } from './payRegion.js'
  * esto. Sin cargar todavía, Mercado Pago (el comportamiento de siempre).
  */
 function currentProvider() {
-  const { intlEnabled, region, gateway } = usePayRegion.getState()
-  return intlEnabled ? providerForRegion(region, gateway) : 'mercadopago'
+  const { intlEnabled, region } = usePayRegion.getState()
+  return intlEnabled ? providerForRegion(region) : 'mercadopago'
 }
 
 /** Idioma del sitio (para los mails de la orden), sin depender del contexto de React. */
@@ -37,7 +36,7 @@ export function checkoutPayloadFromItems(items) {
 /**
  * Inicia el pago: Mercado Pago (redirect a Checkout Pro, o mock) o Lemon
  * Squeezy (redirect a su página de pago; vuelve a /checkout/success, que espera
- * al webhook). Paddle (overlay) queda solo por si vuelve a prenderse.
+ * al webhook).
  * Sin sesión: marca intención y manda a login; al volver a /cart el carrito retoma solo.
  *
  * @param {{
@@ -46,10 +45,10 @@ export function checkoutPayloadFromItems(items) {
  *   navigate: (to: string) => void,
  *   loginNext?: string,
  *   couponCode?: string,
- *   provider?: 'mercadopago' | 'paddle' | 'lemonsqueezy',
+ *   provider?: 'mercadopago' | 'lemonsqueezy',
  *   locale?: string,
  * }} opts
- * @returns {Promise<'login' | 'redirect' | 'paid' | 'closed'>}
+ * @returns {Promise<'login' | 'redirect'>}
  */
 export async function startCheckout({
   items,
@@ -76,23 +75,9 @@ export async function startCheckout({
 
   // Mercado Pago es el default del servidor: solo el carril internacional viaja explícito.
   const data = await api.checkout(payload, couponCode, {
-    provider: provider === 'paddle' || provider === 'lemonsqueezy' ? provider : undefined,
+    provider: provider === 'lemonsqueezy' ? provider : undefined,
     locale,
   })
-  if (data?.provider === 'paddle' && data.transactionId) {
-    const result = await openPaddleCheckout({
-      environment: data.paddle?.environment,
-      clientToken: data.paddle?.clientToken,
-      transactionId: data.transactionId,
-      email: data.customerEmail,
-      locale,
-    })
-    if (result.status !== 'completed') return 'closed'
-    navigate(
-      `/checkout/success?provider=paddle&txn=${encodeURIComponent(result.transactionId)}`,
-    )
-    return 'paid'
-  }
   if (!data?.init_point) {
     throw new Error('Checkout sin init_point')
   }

@@ -1,15 +1,14 @@
 # Cambiar el precio de LAB a los que ya están suscriptos
 
-Estado (2026-10-12): **listo en simulación, solo Mercado Pago.** Paddle espera a que se apruebe su revisión y
-al paso (0) de abajo. Diseño revisado con la sesión de Arquitectura.
+Estado (2026-10-12): **listo en simulación, solo Mercado Pago.** Lemon Squeezy (LAB en USD) espera al paso (0)
+de abajo. Diseño revisado con la sesión de Arquitectura.
 
 ## Antes de tocar un precio: el paso (0) pendiente
 
 Hoy cada suscripción no guarda cuánto paga: las cuentas usan el precio de **lista** (`server/catalog.js`). Hasta que
 esté el paso (0) (guardar el monto que cobra el proveedor en cada suscripción, lo hace la sesión de Arquitectura
-cuando Paddle apruebe), **no cambies los precios de LAB en el catálogo**: el cambio de plan calcularía mal la
-diferencia, los mails mostrarían el precio nuevo a quien paga el viejo y, en Paddle, una suscripción que pausa y
-reactiva quedaría sin acceso.
+cuando se retome), **no cambies los precios de LAB en el catálogo**: el cambio de plan calcularía mal la
+diferencia, los mails mostrarían el precio nuevo a quien paga el viejo.
 
 ## Cómo es el circuito
 
@@ -30,6 +29,6 @@ no hace nada.
 
 ## Pendiente
 
-- Paso (0) y Paddle (después de la aprobación de Paddle).
+- Paso (0) y Lemon Squeezy (cambiar el precio de la variante para los ya suscriptos).
 - Probar en el sandbox de Mercado Pago que cambiar el monto no le manda nada raro al suscriptor.
 - Lo legal (cuántos días de aviso, derecho a cancelar): lo confirma el dueño con quien lo asesore.

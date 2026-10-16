@@ -3,12 +3,11 @@ import { alertAdmin } from '../orders.js'
 import { noteRefund } from '../refundLedger.js'
 import { subId, isMock, fireCanceled } from './billing.js'
 import { cancelPreapprovalConfirmed } from './mpSync.js'
-import { cancelPaddleConfirmed, isPaddleSub } from './paddleSync.js'
 import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
 
 /**
  * Devolución (o contracargo) de un cobro de LAB, venga de Mercado Pago o de
- * Paddle. Política (src/domain/policy.js `labRefundEligibility`): solo se
+ * Lemon Squeezy. Política (src/domain/policy.js `labRefundEligibility`): solo se
  * devuelve el PRIMER cobro, dentro de los días del alta; al devolverlo, la
  * suscripción se da de baja en el momento (no se le vuelve a cobrar y pierde el
  * acceso). Un contracargo también la da de baja. Una devolución de otra cuota
@@ -19,7 +18,7 @@ import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
  * aviso al dueño. Idempotente: el mismo evento dos veces no da de baja dos
  * veces ni manda dos mails.
  *
- * @param {{ sub: any, provider: 'mercadopago' | 'paddle' | 'lemonsqueezy', externalId: string, chargeId: string | null, amount: number, currency: string, partial: boolean, reason: 'refunded' | 'charged_back', config: any }} args
+ * @param {{ sub: any, provider: 'mercadopago' | 'lemonsqueezy', externalId: string, chargeId: string | null, amount: number, currency: string, partial: boolean, reason: 'refunded' | 'charged_back', config: any }} args
  */
 export async function handleLabRefund(
   { sub, provider, externalId, chargeId, amount, currency, partial, reason, config },
@@ -57,7 +56,7 @@ export async function handleLabRefund(
       ? `LAB: ${reason === 'charged_back' ? 'CONTRACARGO' : 'DEVOLUCIÓN DEL PRIMER COBRO'} — suscripción dada de baja`
       : `LAB: ${reason === 'charged_back' ? 'CONTRACARGO' : partial ? 'DEVOLUCIÓN PARCIAL' : 'DEVOLUCIÓN DE UNA CUOTA'} — la suscripción sigue`,
     lines: [
-      `${provider === 'paddle' ? 'Paddle' : provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'} ${externalId} · ${amount} ${currency}`,
+      `${provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'} ${externalId} · ${amount} ${currency}`,
       `suscripción ${subId(sub)} · plan ${sub.plan} · ${ended ? 'baja inmediata y acceso cortado' : sub.status}`,
     ],
     config,
@@ -115,9 +114,7 @@ export async function handleUpgradeRefund({ sub, paymentId, amount, currency, re
  */
 async function endSubscriptionNow(sub, config, deps) {
   try {
-    if (isPaddleSub(sub)) {
-      await cancelPaddleConfirmed(sub, config, { immediately: true }, deps)
-    } else if (isLemonSub(sub)) {
+    if (isLemonSub(sub)) {
       // Lemon Squeezy no corta en el acto: deja de cobrar y la vence al fin del
       // período. El acceso lo cortamos acá abajo.
       await cancelLemonConfirmed(sub, config, deps)
@@ -153,7 +150,7 @@ export async function findLabSubscriptionForMpPayment(payment) {
   const ref = String(payment?.external_reference || '')
   if (ref) {
     const byRef = await db.findSubscriptionById(ref).catch(() => null)
-    if (byRef && !isPaddleSub(byRef) && !isLemonSub(byRef)) return byRef
+    if (byRef && !isLemonSub(byRef)) return byRef
   }
   const preapprovalId =
     payment?.metadata?.preapproval_id ||

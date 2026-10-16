@@ -34,9 +34,8 @@ import { addBillingCycle, isMock, subId } from './billing.js'
  *   cuenta a quién inscribiría, avisaría y aplicaría, sin escribir, mandar ni
  *   tocar el proveedor. Una lista vacía no hace nada.
  * - Tope de mails por barrido (`maxEmails`, 50).
- * - Solo Mercado Pago. Paddle queda esperando (decisión del dueño, 2026-10-12:
- *   hasta que se apruebe la revisión de Paddle no se toca su flujo; tampoco
- *   está el monto recurrente guardado en la fila, el paso (0) del plan).
+ * - Solo Mercado Pago. Lemon Squeezy queda esperando: todavía no está el monto
+ *   recurrente guardado en la fila (el paso (0) del plan).
  * - Un resumen al dueño cuando algo pasó (alertAdmin, una vez por corrida).
  * - Anual: un recordatorio cuando faltan YEARLY_REMINDER_DAYS o menos para el
  *   cobro con el precio nuevo (claimPriceChangeReminder: una sola vez).
@@ -61,7 +60,6 @@ export function currentChanges(changes) {
  * cobro. `skip` explica por qué no se puede saber (y entonces no se toca).
  */
 async function providerState(sub, config, deps) {
-  if (sub.provider === 'paddle') return { skip: 'paddle-pendiente' }
   if (sub.provider === 'lemonsqueezy') return { skip: 'lemonsqueezy-pendiente' }
   if (!sub.mpPreapprovalId) return { skip: 'sin-preapproval' }
   const fetch = deps.fetchPreapproval || (isMock(config) ? null : fetchPreapproval)

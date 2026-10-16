@@ -139,8 +139,7 @@ export function buildMoneyStatus({
   const AUTO = {
     refunded: "devuelto automáticamente",
     canceled: "baja en la prueba (sin cobro)",
-    refund_pending: "pedido a Paddle (en revisión)",
-    refund_retry: "esperando a Paddle (reintenta solo)",
+    refund_retry: "esperando el cobro de la pasarela (reintenta solo)",
     awaiting_confirmation: "esperando que confirme por mail",
     executing: "procesando",
     manual: "NO SALIÓ SOLO — devolver a mano",

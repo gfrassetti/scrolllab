@@ -226,7 +226,7 @@
     "previewMobile": "Mobile",
     "previewNote": "This is the same embed that goes on your site, with your unsaved edits. Links don't navigate here.",
     "domainsDropped": "Not domains, not saved: {{list}}",
-    "paddle": {
+    "card": {
       "planPausedNote": "paused in Lemon Squeezy · won’t renew",
       "planPastDue": "We’re confirming the charge with Lemon Squeezy. If it doesn’t go through, the plan is suspended on {{date}}.",
       "planPaymentFailed": "We couldn’t charge your plan. Lemon Squeezy will retry; if it isn’t resolved, it’s suspended on {{date}}. Update your card so the next attempt goes through.",
@@ -235,7 +235,6 @@
       "changeConfirmPaid": "You move to {{plan}} now. Lemon Squeezy charges {{amount}} to your card for the rest of your period ({{days}}); from {{date}}, {{price}} {{per}}.",
       "changeConfirmFree": "You move to {{plan}} now, at no charge. From {{date}}, Lemon Squeezy charges {{price}} {{per}}.",
       "changePay": "Charge {{amount}} and switch",
-      "returnPending": "We don’t see Lemon Squeezy’s confirmation yet. If you already paid, it shows up in a few seconds.",
       "updateCard": "Update card"
     },
     "refundNote": "Cancel anytime. You can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it); renewals aren’t refunded.",
@@ -1503,7 +1502,7 @@
     "subSyncHint": "Subscribed just now and it's not showing?",
     "subSyncDone": "Status updated",
     "welcomeCoupon": "You get {{percent}}% off your first purchase of templates, the bundle or the builder. It’s applied automatically at checkout, once; it doesn’t apply to LAB.",
-    "paddle": {
+    "card": {
       "subPaused": "Paused in Lemon Squeezy · you keep access until {{date}}",
       "subRenewing": "Confirming the charge with Lemon Squeezy · if it doesn’t go through, the plan is suspended on {{date}}",
       "subPaymentFailed": "We couldn’t charge the renewal. Lemon Squeezy will retry; if it isn’t resolved, the plan is suspended on {{date}}. Update your card so the next attempt goes through.",
@@ -1864,12 +1863,7 @@
     "methodCardNote": "in US dollars · via Lemon Squeezy",
     "trustIntl": "Card payment via Lemon Squeezy · license included",
     "intlTaxNote": "Lemon Squeezy processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
-    "confirming": "Confirming your payment…",
-    "opening": "Opening the payment…",
-    "invalidLink": "That payment link isn’t valid. If you got it by email, write to us and we’ll send a new one.",
-    "openError": "We couldn’t open the payment. Try again in a few minutes or write to us.",
-    "closed": "You closed the payment without finishing it: you haven’t been charged.",
-    "retry": "Try again"
+    "confirming": "Confirming your payment…"
   },
   "fields": {
     "swatch": {

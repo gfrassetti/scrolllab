@@ -12,7 +12,7 @@ import { couponLinePrice } from '../coupon.js'
 
 /**
  * Desde dónde paga el comprador (el default del selector del carrito y de
- * LAB): la detección solo propone; la elección guardada manda; sin Paddle,
+ * LAB): la detección solo propone; la elección guardada manda; sin Lemon Squeezy,
  * siempre Mercado Pago.
  */
 describe('región de pago', () => {
@@ -40,7 +40,7 @@ describe('región de pago', () => {
     assert.equal(regionFromTimeZone(''), null)
   })
 
-  it('el default: sin Paddle, Argentina; si no, guardado > país > zona horaria > Argentina', () => {
+  it('el default: sin carril internacional, Argentina; si no, guardado > país > zona horaria > Argentina', () => {
     assert.equal(pickRegion({ stored: 'intl', country: 'ES', intlEnabled: false }), 'ar')
     assert.equal(
       pickRegion({ stored: 'ar', country: 'ES', timeZone: 'Europe/Madrid', intlEnabled: true }),
@@ -59,20 +59,14 @@ describe('región de pago', () => {
 
   it('cada región tiene su pasarela', () => {
     assert.equal(providerForRegion('ar'), 'mercadopago')
-    assert.equal(providerForRegion('intl'), 'paddle')
+    assert.equal(providerForRegion('intl'), 'lemonsqueezy')
   })
 
-  it('el carril internacional pide a Lemon Squeezy explícito cuando el servidor lo dice', () => {
-    assert.equal(providerForRegion('intl', 'lemonsqueezy'), 'lemonsqueezy')
-    assert.equal(providerForRegion('intl', 'paddle'), 'paddle')
-    assert.equal(providerForRegion('ar', 'lemonsqueezy'), 'mercadopago')
-  })
-
-  it('moneda: con Paddle sigue al medio de pago, no al idioma; sin Paddle, la regla de siempre', () => {
+  it('moneda: con el carril internacional sigue al medio de pago, no al idioma; sin él, la regla de siempre', () => {
     // Un español (sitio en español) que elige tarjeta ve dólares; un argentino con el sitio en inglés ve pesos.
     assert.equal(resolveCurrency({ intlEnabled: true, region: 'intl', locale: 'es' }), 'USD')
     assert.equal(resolveCurrency({ intlEnabled: true, region: 'ar', locale: 'en' }), 'ARS')
-    // Sin Paddle no hay cómo cobrar en dólares: EN muestra USD de referencia, ES pesos.
+    // Sin carril internacional no hay cómo cobrar en dólares: EN muestra USD de referencia, ES pesos.
     assert.equal(resolveCurrency({ intlEnabled: false, region: 'intl', locale: 'es' }), 'ARS')
     assert.equal(resolveCurrency({ intlEnabled: false, region: 'ar', locale: 'en' }), 'USD')
   })
@@ -87,7 +81,7 @@ describe('región de pago', () => {
     assert.match(formatNextSectionPrice(8, false, 'ARS', RATE), /\$\s?\d/)
   })
 
-  it('USD: centavos solo si los hay, igual que lo que cobra Paddle con el cupón', () => {
+  it('USD: centavos solo si los hay, igual que lo que cobra Lemon Squeezy con el cupón', () => {
     assert.equal(formatUsd(149), 'US$149')
     const discounted = couponLinePrice({ usd: 149, rate: 1500, percent: 10, currency: 'USD' })
     assert.equal(discounted, 134.1)

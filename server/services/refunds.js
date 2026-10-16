@@ -8,7 +8,7 @@ import { sendWithdrawalReceived, sendWithdrawalConfirm } from './email.js'
 import { executeWithdrawal, signWithdrawalToken, verifyWithdrawalToken } from './autoRefund.js'
 import { refundWhat } from './refundLedger.js'
 import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
-import { isPaddleSub } from './subscriptions/paddleSync.js'
+import { isLemonSub } from './subscriptions/lemonSync.js'
 
 /**
  * Una suscripción de Mercado Pago sin cobro anotado: antes de decir «prueba
@@ -16,7 +16,7 @@ import { isPaddleSub } from './subscriptions/paddleSync.js'
  * webhook (el de la cuota tarda) y no es lo mismo: ese se devuelve.
  */
 async function withMpChargesSynced(sub, config) {
-  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && !isPaddleSub(sub)) {
+  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub)) {
     await syncLabChargesFromMp(sub, config)
   }
   return sub
@@ -332,7 +332,7 @@ export async function confirmWithdrawal({ token, config }) {
 function outcomeOf(status) {
   if (status === 'refunded') return 'refunded'
   if (status === 'canceled') return 'canceled'
-  if (status === 'refund_pending' || status === 'refund_retry' || status === 'executing') return 'pending'
+  if (status === 'refund_retry' || status === 'executing') return 'pending'
   if (status === 'awaiting_confirmation') return 'check_email'
   return 'review'
 }

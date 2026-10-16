@@ -100,79 +100,8 @@ function assertProdAuthHosts(clientUrl, apiPublicUrl, googleCallback) {
   }
 }
 
-const PADDLE_API = {
-  sandbox: "https://sandbox-api.paddle.com",
-  production: "https://api.paddle.com",
-};
-
 /**
- * Paddle (cobro internacional en USD, ver docs/paddle.md). Apagado sin
- * `PADDLE_API_KEY` (salvo el mock de dev). Con la key puesta, el entorno, la
- * key y el client token tienen que ser del mismo lado: una key de sandbox en
- * producción, o al revés, no arranca.
- */
-export function loadPaddleConfig(env = process.env, prod = isProd) {
-  const environment = (env.PADDLE_ENV || "sandbox").toLowerCase();
-  if (!PADDLE_API[environment]) {
-    throw new Error("PADDLE_ENV inválido (sandbox|production)");
-  }
-  const apiKey = env.PADDLE_API_KEY || "";
-  const clientToken = env.PADDLE_CLIENT_TOKEN || "";
-  const webhookSecret = env.PADDLE_WEBHOOK_SECRET || "";
-  const mockRaw = env.PADDLE_MOCK_ENABLED;
-  const mock =
-    !prod && !apiKey && (mockRaw === "true" || mockRaw === "1");
-
-  if (apiKey) {
-    const live = environment === "production";
-    const keyLive = apiKey.startsWith("pdl_live_");
-    const keySandbox = apiKey.startsWith("pdl_sdbx_");
-    if ((live && !keyLive) || (!live && !keySandbox)) {
-      throw new Error(
-        `PADDLE_API_KEY no es de ${environment} (pdl_${live ? "live" : "sdbx"}_…)`,
-      );
-    }
-    if (clientToken) {
-      const tokenLive = clientToken.startsWith("live_");
-      const tokenTest = clientToken.startsWith("test_");
-      if ((live && !tokenLive) || (!live && !tokenTest)) {
-        throw new Error(
-          `PADDLE_CLIENT_TOKEN no es de ${environment} (${live ? "live" : "test"}_…)`,
-        );
-      }
-    }
-    if (prod) {
-      if (!live) throw new Error("PADDLE_ENV=production es obligatorio en producción");
-      if (!clientToken) throw new Error("Falta la variable de entorno PADDLE_CLIENT_TOKEN");
-      if (!webhookSecret) throw new Error("Falta la variable de entorno PADDLE_WEBHOOK_SECRET");
-    }
-  }
-  if (prod && (mockRaw === "true" || mockRaw === "1")) {
-    throw new Error("PADDLE_MOCK_ENABLED no puede estar activo en producción");
-  }
-
-  // Paddle apagado a propósito (todavía no aprobaron la cuenta): sin selector
-  // «Tarjeta», sin checkout ni LAB por Paddle, aunque haya credenciales.
-  const hidden = env.PADDLE_HIDDEN === "true" || env.PADDLE_HIDDEN === "1";
-
-  return {
-    enabled: !hidden && (Boolean(apiKey) || mock),
-    hidden,
-    mock: !hidden && mock,
-    environment,
-    apiBase: (env.PADDLE_API_BASE || PADDLE_API[environment]).replace(/\/$/, ""),
-    apiKey,
-    clientToken,
-    webhookSecret,
-    taxCategory: {
-      template: env.PADDLE_TAX_CATEGORY_TEMPLATE || "standard",
-      lab: env.PADDLE_TAX_CATEGORY_LAB || "saas",
-    },
-  };
-}
-
-/**
- * Lemon Squeezy (segunda pasarela internacional en USD, ver docs/lemonsqueezy.md).
+ * Lemon Squeezy (pasarela internacional en USD, ver docs/lemonsqueezy.md).
  * Nunca tira: sin las cuatro variables completas queda apagado y el resto de la API
  * arranca igual. Se prende con `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`,
  * `LEMONSQUEEZY_ORDER_VARIANT_ID` (la variante genérica sobre la que se cobra cada
@@ -204,32 +133,6 @@ export function loadLemonConfig(env = process.env) {
     testMode: flag(env.LEMONSQUEEZY_TEST_MODE),
     apiBase: (env.LEMONSQUEEZY_API_BASE || "https://api.lemonsqueezy.com/v1").replace(/\/$/, ""),
   };
-}
-
-/**
- * La config de Paddle para el arranque. En desarrollo un error de configuración
- * tira (se ve y se arregla en el momento). En **producción** Paddle es una
- * integración opcional: una variable mal puesta (clave de sandbox, falta el
- * secreto…) NO puede tumbar la API entera y, con ella, los pagos por Mercado
- * Pago. Entonces Paddle queda apagado, el motivo sale fuerte en el log del
- * arranque y en `GET /api/ready` (`paddle: "misconfigured"`), y el resto
- * arranca igual.
- * @param {NodeJS.ProcessEnv} [env]
- * @param {boolean} [prod]
- * @param {(msg: string) => void} [log]
- */
-export function loadPaddleConfigSafe(env = process.env, prod = isProd, log = console.error) {
-  try {
-    return loadPaddleConfig(env, prod);
-  } catch (err) {
-    if (!prod) throw err;
-    const reason = err instanceof Error ? err.message : String(err);
-    log(
-      `PADDLE DESACTIVADO (configuración inválida): ${reason}. ` +
-        "El resto de la API arranca; corregí las variables PADDLE_* en Railway y redeployá.",
-    );
-    return { ...loadPaddleConfig({}, prod), error: reason };
-  }
 }
 
 /**
@@ -325,7 +228,6 @@ export function loadConfig() {
     );
   }
 
-  const paddle = loadPaddleConfigSafe();
   const lemon = loadLemonConfig();
 
   // SMTP (p. ej. Gmail con contraseña de aplicación): si está SMTP_USER + SMTP_PASS,
@@ -368,7 +270,6 @@ export function loadConfig() {
     mpMock: isProd ? false : mpMock,
     mpAccessToken,
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET || "",
-    paddle,
     lemon,
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",

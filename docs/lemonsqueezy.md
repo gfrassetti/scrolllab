@@ -1,7 +1,7 @@
-# Lemon Squeezy — segunda pasarela internacional (USD, merchant of record)
+# Lemon Squeezy — pasarela internacional (USD, merchant of record)
 
-Estado (2026-10-15): **es la pasarela internacional; Paddle se descartó** (no aprobó la cuenta, ver
-`docs/paddle.md`). **Etapas 1, 2 y 3 conectadas** (compras de templates y builder, reembolsos, Botón de
+Estado (2026-10-16): **es la pasarela internacional; Paddle se descartó** (no aprobó la cuenta) y su código
+se borró. **Etapas 1, 2 y 3 conectadas** (compras de templates y builder, reembolsos, Botón de
 arrepentimiento y LAB). Se prende solo cuando están las cuatro variables
 `LEMONSQUEEZY_*` (ver abajo); sin ellas todo sigue por Mercado Pago.
 
@@ -11,8 +11,8 @@ Cómo está armado:
 - `server/services/lemonPayments.js`: cumplir una orden (`order_created`), reembolso (`order_refunded`),
   contracargo (`dispute_created`, solo avisa) y la vuelta del comprador.
 - **Es un solo carril «internacional» en USD.** `GET /api/checkout/methods` lo informa en
-  `providers.paddle` (el nombre del contrato, de cuando era Paddle) con `gateway: 'lemonsqueezy'`; el
-  front (`usePayRegion`) lo guarda y pide `provider: 'lemonsqueezy'` explícito. La pantalla
+  `providers.lemonsqueezy`; el front (`usePayRegion`) lo guarda y pide `provider: 'lemonsqueezy'` explícito
+  (un `provider` desconocido, como el `paddle` de un front viejo, cae en Mercado Pago). La pantalla
   `/checkout/success?provider=lemonsqueezy` espera al webhook (`POST /api/checkout/lemonsqueezy/confirm`
   solo lee la orden del usuario). `labIntlEnabled` es verdadero con Lemon Squeezy: LAB ofrece USD.
 - La orden se valida contra lo que guardó el servidor: pasarela, moneda USD, **modo (prueba/real) igual
@@ -23,21 +23,10 @@ Cómo está armado:
 
 ## Por qué
 
-Paddle no aprobó el dominio (ver `docs/paddle.md`) y el dueño decidió dejarlo (2026-10-15). Lemon Squeezy es
+Paddle no aprobó el dominio y el dueño decidió dejarlo (2026-10-15). Lemon Squeezy es
 otro merchant of record: cobra y liquida los impuestos de cada país, y paga a Argentina **en USD, a una
 cuenta bancaria** (o por PayPal). Es un revendedor autorizado: el comprador le compra a Lemon Squeezy
 (sus términos: lemonsqueezy.com/buyer-terms), y así lo dicen los legales, el recibo y el mail.
-
-## Lo que cambia respecto de Paddle
-
-| | Paddle | Lemon Squeezy |
-|---|---|---|
-| Precio de una orden | ítem *non-catalog* (efímero, por orden) | una variante genérica «ScrollLab order» y `custom_price` por checkout |
-| Pago | overlay de Paddle.js en nuestra página | página de pago alojada (redirección) o `lemon.js`; vuelve a `/checkout/success` |
-| Webhook | `Paddle-Signature: ts=…;h1=…` (con ventana de tiempo) | `X-Signature` = HMAC-SHA256 hex del cuerpo, **sin marca de tiempo**: la idempotencia la da el estado de la orden |
-| Reembolso | `POST /adjustments` | `POST /orders/:id/refund` (verificar en test mode) |
-| LAB (suscripciones) | precio recurrente non-catalog por plan | **variantes de catálogo** (3 planes × mensual/anual = 6) con prueba gratis de 7 días |
-| Comisión (aprox.) | ~5 % + USD 0,50 | 5 % + USD 0,50 |
 
 ## Etapas
 

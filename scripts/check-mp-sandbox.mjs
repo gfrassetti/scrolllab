@@ -286,7 +286,7 @@ async function main() {
   const firstLine = labelDiscount(
     { sku: 'chapters', title: 'CHAPTERS — template [check sandbox]', unit_price_usd: 149, unit_price: discountedArsFromUsd(149, rate, 10), currency_id: 'ARS' },
     10,
-    { paddle: false, rate },
+    { usd: false, rate },
   )
   const first = await createCheckoutPreference({
     accessToken: token,

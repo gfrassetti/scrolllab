@@ -65,8 +65,7 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
   }
 
   async function openCheckout(c, plan, { cycle = 'monthly' } = {}) {
-    // El front pide el carril internacional como `paddle`: sin Paddle, lo cobra Lemon Squeezy.
-    const res = await c.agent.post('/api/subscriptions').send({ plan, cycle, provider: 'paddle' })
+    const res = await c.agent.post('/api/subscriptions').send({ plan, cycle, provider: 'lemonsqueezy' })
     assert.equal(res.status, 200, JSON.stringify(res.body))
     assert.equal(res.body.provider, 'lemonsqueezy')
     return { ...res.body, checkoutId: res.body.init_point.split('/').pop() }
@@ -276,6 +275,51 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
     assert.ok(after.upgradePayments[0].refundedAt)
   })
 
+  /** Reembolso hecho a mano desde el panel de Lemon Squeezy: llega solo el webhook. */
+  async function refundFromPanel(invoice) {
+    const inv = ls.invoices.get(invoice.id)
+    inv.attributes.status = 'refunded'
+    inv.attributes.refunded_amount = inv.attributes.total
+    assert.equal((await lemonWebhook('subscription_payment_refunded', inv)).status, 200)
+  }
+
+  it('el primer cobro devuelto desde el panel: baja inmediata, libro, mail al cliente y aviso al dueño', async () => {
+    const c = await customer('panel-primer@test.com')
+    const out = await openCheckout(c, 'hosted_starter')
+    const { lsub } = await subscribe(out.checkoutId)
+    await c.goTo(7, 1)
+    const invoice = ls.renew(lsub.id)
+    await lemonWebhook('subscription_payment_success', invoice)
+    await c.goTo(9)
+    await refundFromPanel(invoice)
+    const row = await c.row()
+    assert.equal(row.status, 'cancelled')
+    assert.ok(row.refundedAt)
+    assert.ok(ls.calls.some((x) => x.route === 'DELETE /v1/subscriptions/:id' && x.path.endsWith(lsub.id)))
+    assert.ok((await fileDb.listRefunds()).some((r) => r.externalId === `lemon-inv-${invoice.id}` && r.kind === 'lab'))
+    await waitFor(() => c.mails().some((m) => /devolvimos/i.test(m.body.subject)), 'el mail de la devolución')
+    await waitFor(() => mp.mailsTo(OWNER).some((m) => /PRIMER COBRO/.test(m.body.subject)), 'el aviso al dueño')
+    // El mismo webhook otra vez no repite nada.
+    await refundFromPanel(invoice)
+    assert.equal(c.mails().filter((m) => /devolvimos/i.test(m.body.subject)).length, 1)
+  })
+
+  it('una renovación devuelta desde el panel (excepción): se anota y avisa, la suscripción sigue', async () => {
+    const c = await customer('panel-renov@test.com')
+    const out = await openCheckout(c, 'hosted_starter')
+    const { lsub } = await subscribe(out.checkoutId)
+    await c.goTo(7, 1)
+    await lemonWebhook('subscription_payment_success', ls.renew(lsub.id))
+    await c.goTo(38)
+    const second = ls.renew(lsub.id)
+    await lemonWebhook('subscription_payment_success', second)
+    await refundFromPanel(second)
+    const row = await c.row()
+    assert.equal(row.status, 'authorized')
+    assert.equal(row.refundedAt, undefined)
+    await waitFor(() => c.mails().some((m) => /devolvimos/i.test(m.body.subject)), 'el mail de la devolución')
+  })
+
   it('la vuelta del checkout antes del webhook: el sync la encuentra por el mail y la activa', async () => {
     const c = await customer('vuelta@test.com')
     const out = await openCheckout(c, 'hosted_starter')
@@ -294,7 +338,7 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
     v.price = original + 100
     resetLabVariantCache()
     try {
-      const res = await c.agent.post('/api/subscriptions').send({ plan: 'hosted_studio', cycle: 'monthly', provider: 'paddle' })
+      const res = await c.agent.post('/api/subscriptions').send({ plan: 'hosted_studio', cycle: 'monthly', provider: 'lemonsqueezy' })
       assert.equal(res.status, 502)
       assert.equal((await rowsOf(c.agent)).length, 0)
     } finally {

@@ -22,7 +22,7 @@ export const FIRST_CHARGE_GRACE_DAYS = 1
 // Subir de plan: por debajo de esto la diferencia no se cobra (últimas horas
 // del período). ARS.
 export const MIN_UPGRADE_CHARGE = 1000
-// Lo mismo en USD (suscripciones de Paddle).
+// Lo mismo en USD (suscripciones de Lemon Squeezy).
 export const MIN_UPGRADE_CHARGE_USD = 1
 
 // El checkout de la diferencia vence rápido: el monto depende de los días que

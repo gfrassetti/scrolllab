@@ -163,29 +163,6 @@ LEMONSQUEEZY_TEST_MODE=true       # sacarlo al salir a producción
 
 Sin esas cuatro variables queda apagado (todo por Mercado Pago).
 
-### Paddle (descartado)
-
-Paddle no aprobó la cuenta y se dejó de usar (2026-10-15). Su código sigue en el
-repo, apagado, y no hay que cargar sus variables; si alguna vez vuelve, esto es
-lo que pedía ([`paddle.md`](paddle.md)). En Railway:
-
-```
-PADDLE_ENV=production
-PADDLE_API_KEY=pdl_live_apikey_...
-PADDLE_CLIENT_TOKEN=live_...
-PADDLE_WEBHOOK_SECRET=...      # notification destination → /api/webhooks/paddle
-```
-
-Sin `PADDLE_API_KEY` Paddle queda apagado (todo por Mercado Pago). Con la key
-puesta, producción exige el token y el secreto, `PADDLE_ENV=production` y que la
-key y el token sean Live (no de sandbox). **Si algo de eso está mal, el deploy
-NO falla**: Paddle queda apagado, la API y Mercado Pago arrancan igual, el
-motivo sale en el log del arranque (`PADDLE DESACTIVADO (configuración
-inválida): …`) y `GET /api/ready` informa `paddle: "misconfigured"` (`on` / `off`
-en los otros casos). Corregí las variables y redeployá. El default payment link del panel es `https://www.scrolllab.com.ar/checkout/pay`.
-Antes de prender producción: `npm run check:paddle-sandbox` con la key de
-sandbox, y una compra real chica + su reembolso desde el panel.
-
 ## Precios en USD, cobro en pesos
 
 Mercado Pago Argentina **siempre procesa en moneda local**. Mandar
@@ -235,8 +212,8 @@ configurado usa blue de dolarapi con spread 0. Actualizá `FX_FALLBACK_RATE`
 cada tanto para que el respaldo no quede viejo.
 
 Para cobrar de verdad en dólares (comprador del exterior, tarjeta
-internacional) hace falta un merchant of record aparte — Lemon Squeezy o
-Paddle, ~5% + USD 0,50. Hoy lo cubre Lemon Squeezy (ver arriba).
+internacional) hace falta un merchant of record aparte (~5% + USD 0,50): lo
+cubre Lemon Squeezy (ver arriba).
 
 ## Email de confirmación (Resend) — scrolllab.com.ar
 

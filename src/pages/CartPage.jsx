@@ -54,7 +54,6 @@ export default function CartPage() {
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)
   const intlEnabled = usePayRegion((s) => s.intlEnabled)
-  const gateway = usePayRegion((s) => s.gateway)
   const regionStatus = usePayRegion((s) => s.status)
   const loadRegion = usePayRegion((s) => s.load)
   useEffect(() => {
@@ -109,12 +108,11 @@ export default function CartPage() {
         user,
         navigate,
         couponCode: coupon?.code,
-        provider: intlEnabled ? providerForRegion(region, gateway) : 'mercadopago',
+        provider: intlEnabled ? providerForRegion(region) : 'mercadopago',
         locale,
       })
-      // redirect a la pasarela o pago completo: dejamos busy. login o overlay
-      // cerrado sin pagar: liberamos para que pueda reintentar.
-      if (result !== 'redirect' && result !== 'paid') setBusy(false)
+      // redirect a la pasarela: dejamos busy. login: liberamos para que pueda reintentar.
+      if (result !== 'redirect') setBusy(false)
     } catch (err) {
       if (coupon && (COUPON_ERRORS[err.status] || err.code === COUPON_OTHER_ACCOUNT || err.status === 404)) {
         // El cupón dejó de valer (lo usó en otra pestaña, venció…): se saca y se avisa.
@@ -125,7 +123,7 @@ export default function CartPage() {
       }
       setBusy(false)
     }
-  }, [items, navigate, user, coupon, dropWelcome, t, intlEnabled, region, gateway, locale])
+  }, [items, navigate, user, coupon, dropWelcome, t, intlEnabled, region, locale])
 
   // Volvió del login con el pago ya pedido: sigue derecho al pago (cuando ya se
   // sabe por dónde paga, para no abrir Mercado Pago a quien eligió USD).

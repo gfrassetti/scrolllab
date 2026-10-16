@@ -32,9 +32,9 @@ export default function SubscriptionCard() {
     loading,
     refresh,
   } = usePlan()
-  // Los textos nombran la pasarela de ESTA suscripción (Paddle o Mercado Pago).
-  const paddle = provider === 'paddle'
-  const tk = (key) => (paddle ? `account.paddle.${key}` : `account.${key}`)
+  // Los textos nombran la pasarela de ESTA suscripción (Lemon Squeezy o Mercado Pago).
+  const card = provider === 'lemonsqueezy'
+  const tk = (key) => (card ? `account.card.${key}` : `account.${key}`)
   const { t, locale } = useI18n()
   const dateLocale = locale === 'en' ? 'en-US' : 'es-AR'
 
@@ -66,7 +66,7 @@ export default function SubscriptionCard() {
     }).format(n)
   const tierName = (planId) => t(`lab.tier.${String(planId).replace('hosted_', '')}`)
 
-  // Paddle: el link firmado para cambiar la tarjeta (cuota rechazada o tarjeta vieja).
+  // Lemon Squeezy: el link firmado para cambiar la tarjeta (cuota rechazada o tarjeta vieja).
   const updateCard = async () => {
     if (busy) return
     setBusy(true)
@@ -119,7 +119,7 @@ export default function SubscriptionCard() {
       disabled={busy}
       className="text-[11px] uppercase tracking-[0.2em] text-ink/45 transition-colors hover:text-accent disabled:opacity-40"
     >
-      {t('lab.paddle.updateCard')}
+      {t('lab.card.updateCard')}
     </button>
   )
 
@@ -228,7 +228,7 @@ export default function SubscriptionCard() {
               {t('account.subSeePlans')}
             </Link>
             <SyncButton />
-            {paddle && <CardButton />}
+            {card && <CardButton />}
             {cancelControl}
           </div>
         </>
@@ -259,7 +259,7 @@ export default function SubscriptionCard() {
             {(() => {
               const p = plans.find((x) => x.id === plan)
               if (!p) return null
-              // En la moneda en que se cobra: USD con Paddle, pesos con MP.
+              // En la moneda en que se cobra: USD con Lemon Squeezy, pesos con MP.
               const usd = currency === 'USD'
               const price = usd
                 ? cycle === 'yearly' ? p.priceYearlyUsd : p.priceMonthlyUsd
@@ -315,7 +315,7 @@ export default function SubscriptionCard() {
 
             <SyncButton />
 
-            {paddle && <CardButton />}
+            {card && <CardButton />}
 
             {!canceledAt && cancelControl}
           </div>

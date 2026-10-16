@@ -53,11 +53,11 @@ const orderSchema = new mongoose.Schema(
     // Compra de prueba (src/domain/qa.js): plata real, fuera de las métricas.
     qa: { type: Boolean, default: undefined },
     currency_id: { type: String, default: "ARS" },
-    // Pasarela que cobra la orden: Mercado Pago (ARS) o Paddle (USD, ver
-    // docs/paddle.md). En Paddle `total` y los `unit_price` están en USD.
+    // Pasarela que cobra la orden: Mercado Pago (ARS) o Lemon Squeezy (USD, ver
+    // docs/lemonsqueezy.md). En USD `total` y los `unit_price` están en dólares.
     provider: {
       type: String,
-      enum: ["mercadopago", "paddle", "lemonsqueezy"],
+      enum: ["mercadopago", "lemonsqueezy"],
       default: "mercadopago",
     },
     // Idioma de los mails de la orden (el del sitio al comprar).
@@ -66,8 +66,6 @@ const orderSchema = new mongoose.Schema(
     // Cuándo se cobró: desde acá corre el plazo de reembolso (lib/site REFUND_DAYS).
     paidAt: Date,
     mpPaymentId: { type: String, sparse: true, unique: true },
-    // Transacción de Paddle que armamos al abrir el checkout: solo esa la paga.
-    paddleTransactionId: { type: String, sparse: true, unique: true },
     // Lemon Squeezy: el checkout que armamos al abrir el pago y, cuando cobra
     // (webhook `order_created`), el id de su orden: ese es el pago.
     lemonCheckoutId: String,
@@ -232,7 +230,7 @@ const subscriptionSchema = new mongoose.Schema(
     lastPaidAt: Date,
     // Primer cobro de período: el único que se puede devolver (src/domain/policy.js).
     firstPaidAt: Date,
-    // El cobro que se puede devolver: pago de MP o transacción de Paddle.
+    // El cobro que se puede devolver: pago de MP o factura de Lemon Squeezy.
     firstChargeId: String,
     // Último pago de MP anotado (webhook payment / authorized_payment): no se anota dos veces.
     lastChargeId: String,
@@ -274,13 +272,13 @@ const subscriptionSchema = new mongoose.Schema(
       ],
       default: undefined,
     },
-    // MP / Paddle no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
+    // MP / Lemon Squeezy no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
     paymentFailedAt: Date,
     mpPreapprovalId: { type: String, sparse: true },
-    // Pasarela de la suscripción. Paddle cobra en USD (docs/paddle.md).
+    // Pasarela de la suscripción. Lemon Squeezy cobra en USD (docs/lemonsqueezy.md).
     provider: {
       type: String,
-      enum: ["mercadopago", "paddle", "lemonsqueezy"],
+      enum: ["mercadopago", "lemonsqueezy"],
       default: "mercadopago",
     },
     currency_id: { type: String, default: "ARS" },
@@ -288,10 +286,6 @@ const subscriptionSchema = new mongoose.Schema(
     // planes, sin prueba gratis, fuera de las métricas.
     qa: { type: Boolean, default: undefined },
     locale: { type: String, enum: ["es", "en"], default: "es" },
-    // Transacción del alta (checkout) y suscripción que Paddle crea al pagarla.
-    paddleTransactionId: { type: String, sparse: true },
-    paddleSubscriptionId: { type: String, sparse: true, index: true },
-    paddleCustomerId: String,
     // Lemon Squeezy: el checkout del alta y, cuando se crea, su suscripción.
     lemonCheckoutId: String,
     lemonSubscriptionId: { type: String, sparse: true, index: true },
@@ -313,7 +307,7 @@ const subscriptionSchema = new mongoose.Schema(
     trialReminderEmailId: String,
     trialReminderEmailError: String,
     // Mails por evento (uno por cobro): `Ref` es el cobro del último mail
-    // reclamado o enviado (authorized_payment de MP / transacción de Paddle).
+    // reclamado o enviado (authorized_payment de MP / factura de Lemon Squeezy).
     chargeEmailRef: String,
     chargeEmailSendingAt: Date,
     chargeEmailSentAt: Date,
@@ -431,11 +425,11 @@ const withdrawalSchema = new mongoose.Schema(
     locale: { type: String, enum: ["es", "en"], default: "es" },
     eligibility: mongoose.Schema.Types.Mixed,
     // received (lo revisa el dueño) · awaiting_confirmation (link por mail) ·
-    // executing · refunded · canceled (LAB en prueba) · refund_pending (Paddle
-    // en revisión) · refund_retry (Paddle completando) · manual (no salió solo) · resolved
+    // executing · refunded · canceled (LAB en prueba) · refund_retry (el primer
+    // cobro de LAB todavía no llegó) · manual (no salió solo) · resolved
     status: {
       type: String,
-      enum: ["received", "awaiting_confirmation", "executing", "refunded", "canceled", "refund_pending", "refund_retry", "manual", "resolved"],
+      enum: ["received", "awaiting_confirmation", "executing", "refunded", "canceled", "refund_retry", "manual", "resolved"],
       default: "received",
     },
     note: String,
@@ -447,13 +441,13 @@ const withdrawalSchema = new mongoose.Schema(
 );
 
 /**
- * Libro de reembolsos: una fila por pago de MP o ajuste de Paddle devuelto (o
+ * Libro de reembolsos: una fila por pago de MP o cobro de Lemon Squeezy devuelto (o
  * contracargo), con quién y cuánto. Lo escriben los webhooks; lo lee el panel.
  */
 const refundSchema = new mongoose.Schema(
   {
     externalId: { type: String, required: true, unique: true },
-    provider: { type: String, enum: ["mercadopago", "paddle", "lemonsqueezy"], required: true },
+    provider: { type: String, enum: ["mercadopago", "lemonsqueezy"], required: true },
     kind: { type: String, enum: ["order", "lab"], required: true },
     orderId: { type: String, default: null },
     subscriptionId: { type: String, default: null },

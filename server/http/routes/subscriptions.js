@@ -18,12 +18,10 @@ import {
 } from '../../services/subscriptions.js'
 import { cancelAtPeriodEnd } from '../../services/subscriptions/cancel.js'
 import { HOSTED_PLANS } from '../../catalog.js'
-import { isPaddleSub, syncPaddleForUser } from '../../services/subscriptions/paddleSync.js'
-import { getSubscription } from '../../services/paddle.js'
 import { isLemonSub, syncLemonForUser, lemonUpdatePaymentUrl } from '../../services/subscriptions/lemonSync.js'
 
 /**
- * Suscripciones de LAB (Fase 4) — Mercado Pago PreApproval: planes, mi
+ * Suscripciones de LAB (Fase 4) — Mercado Pago PreApproval o Lemon Squeezy: planes, mi
  * suscripción, alta (con prueba gratis), sincronizar, cancelar, cambio de plan
  * (cotización + upgrade con pago de la diferencia) y los atajos mock de dev.
  */
@@ -31,13 +29,11 @@ export function createSubscriptionsRouter({ config, limits }) {
   const router = express.Router()
 
   const subsMock = () => !config.isProd && (config.mpMock || !config.mpSubs.accessToken)
-  const paddleOn = () => Boolean(config.paddle?.enabled)
   // Lemon Squeezy en modo prueba (no cobra) solo para las cuentas de QA.
   const lemonOn = (user) =>
-    !paddleOn() && Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
-  const paddleMock = () => Boolean(config.paddle?.mock)
-  /** ¿Esta fila se maneja sin pasarela real (mock de MP o de Paddle)? */
-  const rowMock = (sub) => (isLemonSub(sub) ? false : isPaddleSub(sub) ? paddleMock() : subsMock())
+    Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
+  /** ¿Esta fila se maneja sin pasarela real (mock de MP)? */
+  const rowMock = (sub) => (isLemonSub(sub) ? false : subsMock())
 
   // `instanceQuota` puede ser `Infinity` (plan sin tope) — JSON no tiene forma
   // de representar eso, y `JSON.stringify` lo pisa por `null` en silencio.
@@ -51,7 +47,7 @@ export function createSubscriptionsRouter({ config, limits }) {
       tier: p.tier,
       priceMonthly: qa ? QA_LAB_PRICES_ARS[p.id] : p.priceMonthly,
       priceYearly: qa ? QA_LAB_PRICES_ARS[p.id] : p.priceYearly,
-      // Cobro internacional (Paddle).
+      // Cobro internacional (Lemon Squeezy).
       priceMonthlyUsd: p.priceMonthlyUsd,
       priceYearlyUsd: p.priceYearlyUsd,
       instanceQuota: quotaForWire(p.instanceQuota),
@@ -73,7 +69,6 @@ export function createSubscriptionsRouter({ config, limits }) {
       freeQuota: config.hostedFreeQuota,
       providers: {
         mercadopago: { enabled: true, mock: subsMock(), currency: 'ARS' },
-        paddle: { enabled: paddleOn(), mock: paddleMock(), currency: 'USD' },
         lemonsqueezy: { enabled: lemon, currency: 'USD', ...(lemon ? { testMode: Boolean(config.lemon.testMode) } : {}) },
       },
     })
@@ -111,7 +106,7 @@ export function createSubscriptionsRouter({ config, limits }) {
         user: req.user,
         plan: String(req.body?.plan || ''),
         cycle: req.body?.cycle === 'yearly' ? 'yearly' : 'monthly',
-        provider: ['paddle', 'lemonsqueezy'].includes(req.body?.provider) ? req.body.provider : 'mercadopago',
+        provider: req.body?.provider === 'lemonsqueezy' ? 'lemonsqueezy' : 'mercadopago',
         locale: req.body?.locale === 'en' ? 'en' : 'es',
         qa: req.body?.qa === true,
         config,
@@ -130,7 +125,7 @@ export function createSubscriptionsRouter({ config, limits }) {
     '/api/subscriptions/:id/mock-activate',
     requireAuth,
     asyncHandler(async (req, res) => {
-      if (!subsMock() && !paddleMock()) throw new HttpError(403, 'Mock deshabilitado')
+      if (!subsMock()) throw new HttpError(403, 'Mock deshabilitado')
       assertObjectIdLike(req.params.id)
       const sub = await db.findSubscriptionById(req.params.id)
       if (!sub || String(sub.userId) !== String(db.uid(req.user))) {
@@ -160,17 +155,12 @@ export function createSubscriptionsRouter({ config, limits }) {
       const rows = await db.findSubscriptionsByUser(userId)
       const latest = rows.find(
         (s) =>
-          (s.mpPreapprovalId || s.paddleTransactionId || s.paddleSubscriptionId || s.lemonCheckoutId || s.lemonSubscriptionId) &&
+          (s.mpPreapprovalId || s.lemonCheckoutId || s.lemonSubscriptionId) &&
           s.status !== 'cancelled' &&
           !s.abandonedAt,
       )
       if (latest && isLemonSub(latest)) {
         const out = await syncLemonForUser({ userId, email: req.user.email, config })
-        return res.json({ ok: true, ...out })
-      }
-      if (latest && isPaddleSub(latest)) {
-        if (paddleMock()) throw new HttpError(403, 'Mock activo: usá activar directo')
-        const out = await syncPaddleForUser({ userId, config })
         return res.json({ ok: true, ...out })
       }
       if (subsMock()) throw new HttpError(403, 'Mock activo: usá activar directo')
@@ -249,24 +239,14 @@ export function createSubscriptionsRouter({ config, limits }) {
     }),
   )
 
-  // Link de Paddle para cambiar la tarjeta (cobro rechazado o tarjeta
-  // vencida). Se pide en el momento: Paddle lo firma y vence.
+  // Link de Lemon Squeezy para cambiar la tarjeta (cobro rechazado o tarjeta
+  // vencida). Se pide en el momento: Lemon Squeezy lo firma y vence.
   router.get(
     '/api/subscriptions/payment-method',
     requireAuth,
     asyncHandler(async (req, res) => {
       const sub = await db.findActiveSubscriptionByUser(db.uid(req.user))
-      if (sub && isLemonSub(sub)) {
-        const url = await lemonUpdatePaymentUrl(sub, config).catch(() => null)
-        if (!url) throw new HttpError(404, 'No hay un medio de pago para actualizar', { expose: true })
-        res.set('Cache-Control', 'no-store')
-        return res.json({ ok: true, url })
-      }
-      if (!sub || !isPaddleSub(sub) || !sub.paddleSubscriptionId || paddleMock()) {
-        throw new HttpError(404, 'No hay un medio de pago para actualizar', { expose: true })
-      }
-      const ps = await getSubscription(config, sub.paddleSubscriptionId)
-      const url = ps?.management_urls?.update_payment_method
+      const url = sub && isLemonSub(sub) ? await lemonUpdatePaymentUrl(sub, config).catch(() => null) : null
       if (!url) {
         throw new HttpError(404, 'No hay un medio de pago para actualizar', { expose: true })
       }

@@ -55,7 +55,7 @@ function duplicateKey(index) {
  */
 // Un elemento puede ser una clave compuesta (array de campos): único el conjunto.
 const UNIQUE_FIELDS = {
-  orders: ["mpPaymentId", "paddleTransactionId", "lemonOrderId"],
+  orders: ["mpPaymentId", "lemonOrderId"],
   leads: ["couponCode"],
   withdrawals: ["code"],
   "price-change-notices": [["subscriptionId", "changeId"]],
@@ -138,8 +138,8 @@ export const fileDb = {
   async createOrder(data) {
     const rows = read("orders");
     // Índices únicos sparse del esquema (server/models.js): un pago de MP o una
-    // transacción de Paddle pertenece a una sola orden.
-    for (const field of ["mpPaymentId", "paddleTransactionId", "lemonOrderId"]) {
+    // orden de Lemon Squeezy pertenece a una sola orden nuestra.
+    for (const field of ["mpPaymentId", "lemonOrderId"]) {
       const value = data[field];
       if (value != null && rows.some((o) => o[field] === String(value))) {
         throw duplicateKey(field);
@@ -161,25 +161,13 @@ export const fileDb = {
   async findOrderById(id) {
     return withSave(read("orders").find((o) => o.id === String(id)) || null);
   },
-  /** La orden ya paga con ese pago de MP o esa transacción de Paddle, o null. */
-  async findPaidOrderByPayment({ mpPaymentId, paddleTransactionId, lemonOrderId }) {
-    const field =
-      lemonOrderId != null
-        ? "lemonOrderId"
-        : paddleTransactionId != null
-          ? "paddleTransactionId"
-          : "mpPaymentId";
-    const value = String(lemonOrderId ?? paddleTransactionId ?? mpPaymentId);
+  /** La orden ya paga con ese pago de MP o esa orden de Lemon Squeezy, o null. */
+  async findPaidOrderByPayment({ mpPaymentId, lemonOrderId }) {
+    const field = lemonOrderId != null ? "lemonOrderId" : "mpPaymentId";
+    const value = String(lemonOrderId ?? mpPaymentId);
     return withSave(
       read("orders").find((o) => o[field] === value && o.status === "paid") ||
         null,
-    );
-  },
-  async findOrderByPaddleTransaction(transactionId) {
-    return withSave(
-      read("orders").find(
-        (o) => o.paddleTransactionId === String(transactionId),
-      ) || null,
     );
   },
   async findOrderByLemonOrder(lemonOrderId) {
@@ -436,16 +424,6 @@ export const fileDb = {
   async findSubscriptionByLemon(lemonSubscriptionId) {
     const row =
       read("subscriptions").find((s) => s.lemonSubscriptionId === String(lemonSubscriptionId)) || null;
-    return withSaveDoc("subscriptions", row);
-  },
-  async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
-    const rows = read("subscriptions");
-    const row =
-      (subscriptionId &&
-        rows.find((s) => s.paddleSubscriptionId === String(subscriptionId))) ||
-      (transactionId &&
-        rows.find((s) => s.paddleTransactionId === String(transactionId))) ||
-      null;
     return withSaveDoc("subscriptions", row);
   },
   async findActiveSubscriptionByUser(userId) {

@@ -87,28 +87,6 @@ export const subscriptionsRepo = {
       : MongoSubscription.findOne({ lemonSubscriptionId: String(lemonSubscriptionId) });
   },
   // Vigente = `authorized` o `paused` (una pausa respeta lo ya pagado).
-  /**
-   * Suscripción de Paddle por el id de la suscripción o, antes de que exista,
-   * por la transacción del alta.
-   * @param {{ subscriptionId?: string | null, transactionId?: string | null }} ids
-   */
-  async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
-    if (isFileMode()) {
-      return fileDb.findSubscriptionByPaddle({ subscriptionId, transactionId });
-    }
-    if (subscriptionId) {
-      const bySub = await MongoSubscription.findOne({
-        paddleSubscriptionId: String(subscriptionId),
-      });
-      if (bySub) return bySub;
-    }
-    if (transactionId) {
-      return MongoSubscription.findOne({
-        paddleTransactionId: String(transactionId),
-      });
-    }
-    return null;
-  },
   async findActiveSubscriptionByUser(userId) {
     if (isFileMode()) return fileDb.findActiveSubscriptionByUser(userId);
     return MongoSubscription.findOne({

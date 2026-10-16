@@ -3,9 +3,7 @@ import { db } from '../db.js'
 import { HttpError } from '../errors.js'
 import { refundEligibility, labRefundEligibility } from '../../src/domain/policy.js'
 import { refundPayment, fetchPayment } from './mercadoPago.js'
-import { createAdjustment, getTransaction, PADDLE_PAID_STATUSES } from './paddle.js'
 import { reverseOrderPayment, alertAdmin, REVERSED_PAYMENT_STATUSES } from './orders.js'
-import { reversePaddleAdjustment } from './paddlePayments.js'
 import {
   refundOrder as refundLemonOrder,
   refundSubscriptionInvoice,
@@ -15,7 +13,6 @@ import {
 import { reverseLemonRefund } from './lemonPayments.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
-import { isPaddleSub } from './subscriptions/paddleSync.js'
 import { isLemonSub } from './subscriptions/lemonSync.js'
 import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
 
@@ -30,20 +27,16 @@ import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
  *
  * La pasarela devuelve al mismo medio de pago. Lo que sigue (orden cortada,
  * baja, libro de reembolsos, mail «Te devolvimos el dinero») lo hacen los
- * mismos caminos que el webhook (`reverseOrderPayment`, `reversePaddleAdjustment`,
+ * mismos caminos que el webhook (`reverseOrderPayment`, `reverseLemonRefund`,
  * `handleLabRefund`), así que da igual si llega antes la respuesta o el webhook.
  *
  * Resultado (`status` de la solicitud): `refunded` · `canceled` (LAB en prueba)
- * · `refund_pending` (Paddle la tiene en revisión: se aplica con su webhook) ·
- * `refund_retry` (Paddle todavía no completó la transacción: reintenta el
- * barrido) · `manual` (no se pudo: avisa al dueño para hacerlo a mano).
+ * · `refund_retry` (el primer cobro de LAB todavía no llegó de la pasarela:
+ * reintenta el barrido) · `manual` (no se pudo: avisa al dueño para hacerlo a mano).
  */
 
 const WITHDRAWAL_TOKEN_TTL_MS = 48 * 60 * 60 * 1000
 const RETRY_WINDOW_MS = 48 * 60 * 60 * 1000
-
-/** Error que el barrido tiene que reintentar (Paddle todavía procesa el cobro). */
-const retryLater = (message) => Object.assign(new Error(message), { retry: true })
 
 // ——— link de confirmación (pedido sin sesión) ———
 
@@ -78,13 +71,6 @@ async function refundOrder(order, row, config, deps) {
   const e = refundEligibility(order)
   if (!e.eligible) return { status: 'manual', note: `ya no corresponde: ${e.reason}` }
 
-  if (order.provider === 'paddle') {
-    if (config.paddle?.mock || !order.paddleTransactionId) {
-      return { status: 'manual', note: 'Paddle sin cuenta real (mock)' }
-    }
-    return refundPaddleTransaction(order.paddleTransactionId, row, config, deps)
-  }
-
   if (order.provider === 'lemonsqueezy') {
     if (!config.lemon?.enabled || !order.lemonOrderId) {
       return { status: 'manual', note: 'Lemon Squeezy sin orden cobrada' }
@@ -116,33 +102,11 @@ async function refundOrder(order, row, config, deps) {
   return { status: 'refunded', note: `pago MP ${order.mpPaymentId}` }
 }
 
-/** Devolución total de una transacción de Paddle (compra o primer cobro de LAB). */
-async function refundPaddleTransaction(transactionId, row, config, deps) {
-  const txn = await (deps.getTransaction || getTransaction)(config, transactionId)
-  // Paddle solo reembolsa transacciones completadas (pasan de «paid» a
-  // «completed» al rato): hasta entonces, reintenta el barrido.
-  if (txn?.status !== 'completed') {
-    if (PADDLE_PAID_STATUSES.has(txn?.status)) throw retryLater(`Paddle todavía completa ${transactionId}`)
-    return { status: 'manual', note: `transacción ${txn?.status || 'desconocida'}` }
-  }
-  const adj = await (deps.createAdjustment || createAdjustment)(config, {
-    action: 'refund',
-    type: 'full',
-    reason: `Withdrawal request ${row.code}`,
-    transaction_id: transactionId,
-  })
-  if (adj?.status === 'approved') {
-    await reversePaddleAdjustment({ adjustment: adj, config })
-    return { status: 'refunded', note: `ajuste Paddle ${adj.id}` }
-  }
-  return { status: 'refund_pending', note: `ajuste Paddle ${adj?.id} ${adj?.status}` }
-}
-
 async function refundLab(sub, row, config, deps) {
   if (!sub) return { status: 'manual', note: 'la suscripción ya no existe' }
   // Sin cobro anotado, se le pregunta a MP: el del alta pudo no haber llegado
   // por webhook, y no es lo mismo que una prueba gratis.
-  if (!sub.firstPaidAt && !sub.lastPaidAt && !isPaddleSub(sub) && !isLemonSub(sub)) {
+  if (!sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub)) {
     await syncLabChargesFromMp(sub, config, deps)
   }
   const e = labRefundEligibility(sub)
@@ -162,10 +126,6 @@ async function refundLab(sub, row, config, deps) {
   if (!e.eligible) return { status: 'manual', note: `ya no corresponde: ${e.reason}` }
   if (!sub.firstChargeId) return { status: 'manual', note: 'no hay registro del primer cobro' }
 
-  if (isPaddleSub(sub)) {
-    if (config.paddle?.mock) return { status: 'manual', note: 'Paddle sin cuenta real (mock)' }
-    return refundPaddleTransaction(sub.firstChargeId, row, config, deps)
-  }
   if (isLemonSub(sub)) {
     if (!config.lemon?.enabled) return { status: 'manual', note: 'Lemon Squeezy apagado' }
     // Diferencias de plan pagadas en el plazo: también vuelven, antes que el primer
@@ -279,8 +239,8 @@ export async function executeWithdrawal(row, config, deps = {}) {
       out = { status: 'manual', note: 'sin compra ni suscripción asociada' }
     }
   } catch (err) {
-    const message = err instanceof HttpError || err?.name === 'PaddleError' ? err.message : String(err?.message || err)
-    out = { status: err?.retry ? 'refund_retry' : 'manual', note: message.slice(0, 300) }
+    const message = err instanceof HttpError || err?.name === 'LemonError' ? err.message : String(err?.message || err)
+    out = { status: 'manual', note: message.slice(0, 300) }
   }
 
   await db.updateWithdrawal(row.code, {
@@ -290,7 +250,7 @@ export async function executeWithdrawal(row, config, deps = {}) {
     attempts: (Number(row.attempts) || 0) + 1,
   })
 
-  const done = { refunded: 'DEVUELTO AUTOMÁTICAMENTE', canceled: 'BAJA EN LA PRUEBA (sin cobro)', refund_pending: 'DEVOLUCIÓN PEDIDA A PADDLE (en revisión)' }[out.status]
+  const done = { refunded: 'DEVUELTO AUTOMÁTICAMENTE', canceled: 'BAJA EN LA PRUEBA (sin cobro)' }[out.status]
   if (out.status !== 'refund_retry') {
     alertAdmin({
       kind: 'withdrawal-done',
@@ -306,8 +266,8 @@ export async function executeWithdrawal(row, config, deps = {}) {
 }
 
 /**
- * Barrido: reintenta las devoluciones que esperaban que Paddle completara la
- * transacción. Pasadas 48 h, quedan para el dueño.
+ * Barrido: reintenta las devoluciones que esperaban que llegara el primer cobro
+ * de la pasarela. Pasadas 48 h, quedan para el dueño.
  */
 export async function retryPendingWithdrawals(config, deps = {}, now = Date.now()) {
   const rows = (await db.listWithdrawals()).filter((w) => w.status === 'refund_retry')

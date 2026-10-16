@@ -9,7 +9,6 @@ import { prefersReducedMotion } from '../lib/motion'
 import { usePayRegion, providerForRegion } from '../lib/payRegion'
 import { REFUND_DAYS } from '../lib/site'
 import { WELCOME_COUPON_PERCENT } from '../domain/catalog'
-import { openPaddleCheckout } from '../lib/paddleCheckout'
 import PaymentMethodPicker from './PaymentMethodPicker'
 
 const TIER_ORDER = ['starter', 'pro', 'studio']
@@ -39,7 +38,7 @@ function fmtArs(n, locale) {
   }).format(n)
 }
 
-/** Precio en la moneda de la pasarela: ARS (MP) o USD con centavos si los hay (Paddle). */
+/** Precio en la moneda de la pasarela: ARS (MP) o USD con centavos si los hay (Lemon Squeezy). */
 function fmtMoney(n, currency, locale) {
   if (currency !== 'USD') return fmtArs(n, locale)
   const cents = !Number.isInteger(Number(n))
@@ -61,13 +60,9 @@ const planPrice = (p, cycle, currency) =>
       ? p.priceYearly
       : p.priceMonthly
 
-// Paddle tarda en crear la suscripción después del pago (unos segundos, a veces
-// más): el sync se reintenta ~30 s antes de decir «todavía no la vemos». Aunque
-// se agote, el webhook la activa igual.
 /** Términos de cada pasarela: el aviso de renovación los enlaza junto a los nuestros. */
 const GATEWAY_TERMS = {
   mercadopago: { name: 'Mercado Pago', href: 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194' },
-  paddle: { name: 'Paddle', href: 'https://www.paddle.com/legal/checkout-buyer-terms' },
   lemonsqueezy: { name: 'Lemon Squeezy', href: 'https://www.lemonsqueezy.com/buyer-terms' },
 }
 
@@ -102,9 +97,6 @@ function AutoRenewNotice({ t, button, trialDays, cycle, provider }) {
     </p>
   )
 }
-
-const PADDLE_SYNC_TRIES = 12
-const PADDLE_SYNC_WAIT_MS = 2500
 
 // El server manda `null` para "sin tope" (Infinity no es JSON) — ver
 // `quotaForWire` en server/app.js.
@@ -149,7 +141,6 @@ export default function HostedPlans({ qa: qaPage = false }) {
   // LAB es una suscripción: solo cobra afuera una pasarela que las tenga
   // (Lemon Squeezy desde la etapa 3, docs/lemonsqueezy.md).
   const labIntlForRegion = usePayRegion((s) => s.labIntlEnabled)
-  const gateway = usePayRegion((s) => s.gateway)
   // Prueba: sin prueba gratis y solo Mercado Pago.
   const intlEnabled = !qa && labIntlForRegion
   // Está el carril internacional pero no para suscripciones: se avisa en vez de
@@ -163,10 +154,10 @@ export default function HostedPlans({ qa: qaPage = false }) {
     loadRegion()
   }, [loadRegion])
   const intl = intlEnabled && region === 'intl'
-  // Suscripción cobrada con tarjeta en USD (Lemon Squeezy, o Paddle en filas viejas).
-  const paddleSub = planProvider === 'paddle' || planProvider === 'lemonsqueezy'
+  // Suscripción cobrada con tarjeta en USD (Lemon Squeezy).
+  const cardSub = planProvider === 'lemonsqueezy'
   // Textos que nombran a la pasarela: con una suscripción internacional, su variante.
-  const tp = (key, vars) => t(paddleSub ? `lab.paddle.${key}` : `lab.${key}`, vars)
+  const tp = (key, vars) => t(cardSub ? `lab.card.${key}` : `lab.${key}`, vars)
   const root = useRef(null)
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -324,23 +315,6 @@ export default function HostedPlans({ qa: qaPage = false }) {
       .finally(() => refreshPlan())
   }, [upgradeReturn, searchParams, setSearchParams, refreshPlan, t])
 
-  /** Después del overlay de Paddle: baja el estado sin esperar al webhook. */
-  const syncAfterPaddle = async () => {
-    for (let i = 0; i < PADDLE_SYNC_TRIES; i += 1) {
-      try {
-        const out = await api.subscriptionSync()
-        if (out?.status === 'authorized') {
-          setNotice(t('lab.returnSynced'))
-          return
-        }
-      } catch {
-        /* reintenta */
-      }
-      await new Promise((r) => setTimeout(r, PADDLE_SYNC_WAIT_MS))
-    }
-    setNotice(t('lab.paddle.returnPending'))
-  }
-
   // `via`: la pasarela del alta. Reactivar mantiene la de la suscripción; un
   // alta nueva usa la región elegida.
   const subscribe = async (planId, planCycle = cycle, via) => {
@@ -348,23 +322,9 @@ export default function HostedPlans({ qa: qaPage = false }) {
     setBusy(planId)
     setError('')
     setNotice('')
-    const provider = via || (intlEnabled ? providerForRegion(region, gateway) : 'mercadopago')
+    const provider = via || (intlEnabled ? providerForRegion(region) : 'mercadopago')
     try {
       const res = await api.subscribe(planId, planCycle, { provider, locale, qa })
-      if (res.provider === 'paddle' && res.transactionId) {
-        const result = await openPaddleCheckout({
-          environment: res.paddle?.environment,
-          clientToken: res.paddle?.clientToken,
-          transactionId: res.transactionId,
-          email: res.customerEmail,
-          locale,
-        })
-        if (result.status === 'completed') {
-          await syncAfterPaddle()
-          await refreshPlan()
-        }
-        return
-      }
       if (res.init_point) {
         window.location.href = res.init_point
         return
@@ -380,7 +340,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
     }
   }
 
-  // Cuota rechazada en Paddle: el link firmado para cambiar la tarjeta.
+  // Cuota rechazada con tarjeta (Lemon Squeezy): el link firmado para cambiar la tarjeta.
   const updateCard = async () => {
     if (busy) return
     setBusy('card')
@@ -589,14 +549,14 @@ export default function HostedPlans({ qa: qaPage = false }) {
                 })}
               </p>
             )}
-            {paymentFailed && paddleSub && !canceledAt && (
+            {paymentFailed && cardSub && !canceledAt && (
               <button
                 type="button"
                 onClick={updateCard}
                 disabled={!!busy}
                 className="btn mt-3 border-ink bg-ink text-bone hover:opacity-90 disabled:opacity-40"
               >
-                {busy === 'card' ? '…' : t('lab.paddle.updateCard')}
+                {busy === 'card' ? '…' : t('lab.card.updateCard')}
               </button>
             )}
             {subscriptionStatus === 'paused' && !canceledAt && (
@@ -920,7 +880,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
               }
               trialDays={!activePlan && trialAvailable ? trialDays : 0}
               cycle={cycle}
-              provider={intlEnabled ? providerForRegion(region, gateway) : 'mercadopago'}
+              provider={intlEnabled ? providerForRegion(region) : 'mercadopago'}
             />
           )}
           <p className="mt-4 text-body-sm text-ink/55">

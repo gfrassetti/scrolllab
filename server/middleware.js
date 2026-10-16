@@ -129,7 +129,7 @@ export function rateLimits() {
     // Checkout, confirmaciones y sync de LAB: siempre con sesión (va después de
     // requireAuth), así que se cuenta por usuario. Por IP, detrás de
     // Vercel → Railway todos podían compartir la misma y cortarse entre sí. El
-    // techo deja holgura para un alta de Paddle (el front sincroniza ~12 veces).
+    // techo deja holgura para un alta de LAB (el front sincroniza ~12 veces).
     checkout: mk({
       windowMs: 60 * 60 * 1000,
       max: 60,
@@ -228,10 +228,10 @@ export function notFound(_req, res) {
 export function errorHandler(config) {
   return (err, req, res, _next) => {
     const requestId = req.requestId || null
-    // Un error de la API de Paddle trae ids y detalles internos: nunca llega
-    // crudo al navegador. El detalle va al log; el comprador, un 502 genérico.
-    if (err?.name === 'PaddleError') {
-      console.error(`[${requestId || '-'}] Paddle ${err.status} ${err.code}: ${err.message}`)
+    // Un error de la API de Lemon Squeezy trae ids y detalles internos: nunca
+    // llega crudo al navegador. El detalle va al log; el comprador, un 502 genérico.
+    if (err?.name === 'LemonError') {
+      console.error(`[${requestId || '-'}] Lemon Squeezy ${err.status} ${err.code}: ${err.message}`)
       res.status(502).json({
         error: 'No pudimos completar la operación con el procesador de pagos. Probá de nuevo en un momento.',
         code: 'payment_provider',

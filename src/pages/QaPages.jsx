@@ -99,16 +99,16 @@ function QaHub() {
   const navigate = useNavigate()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  // Lemon Squeezy solo aparece si el servidor lo tiene prendido (es el carril
-  // internacional en USD cuando Paddle no está).
+  // Lemon Squeezy solo aparece si el servidor lo tiene prendido (el carril
+  // internacional en USD).
   const [lemon, setLemon] = useState(null)
   useEffect(() => {
     let cancelled = false
     api
       .checkoutMethods()
       .then((m) => {
-        const p = m?.providers?.paddle
-        if (!cancelled && p?.enabled && p.gateway === 'lemonsqueezy') setLemon({ testMode: Boolean(p.testMode) })
+        const p = m?.providers?.lemonsqueezy
+        if (!cancelled && p?.enabled) setLemon({ testMode: Boolean(p.testMode) })
       })
       .catch(() => {})
     return () => {

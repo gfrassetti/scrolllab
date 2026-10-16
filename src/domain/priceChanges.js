@@ -55,8 +55,8 @@ export function priceChangeKind(change) {
 
 /**
  * ¿Este cambio le toca a esta suscripción? `currentAmount` es lo que el
- * proveedor le cobra hoy (MP auto_recurring.transaction_amount / Paddle precio
- * del item), no la lista: si ya paga `to` (entró después) no se le avisa nada,
+ * proveedor le cobra hoy (MP auto_recurring.transaction_amount / precio de la
+ * variante en Lemon Squeezy), no la lista: si ya paga `to` (entró después) no se le avisa nada,
  * y una suba nunca se le aplica a quien paga más que `to`.
  *
  * @param {PriceChange} change
@@ -91,7 +91,7 @@ export function earliestEffectiveAt(change, emailSentAt) {
 
 /**
  * ¿Se cambia ya el monto en el proveedor? Solo si el próximo cobro (la fecha
- * REAL del proveedor: MP next_payment_date / Paddle next_billed_at) cae en o
+ * REAL del proveedor: MP next_payment_date / Lemon Squeezy renews_at) cae en o
  * después de `earliestEffectiveAt`: es decir, después del último cobro a precio
  * viejo y antes del primero a precio nuevo. Si el próximo cobro es antes, se
  * espera a que pase (ese cobro va con el precio viejo, como se avisó).

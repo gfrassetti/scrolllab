@@ -39,7 +39,7 @@ describe('mail de cambio de precio de LAB', () => {
     assert.match(m.text, /por año/)
     assert.match(m.text, /cancelás desde Mi LAB/)
   })
-  it('en inglés y en dólares (Paddle)', () => {
+  it('en inglés y en dólares (Lemon Squeezy)', () => {
     const m = buildSubscriptionPriceChange(
       args({ ...base, locale: 'en', currency_id: 'USD' }, { kind: 'increase', from: 79, to: 99, effectiveAt: '2026-12-01T12:00:00Z' }),
     )

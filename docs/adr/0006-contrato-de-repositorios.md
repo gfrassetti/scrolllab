@@ -34,7 +34,7 @@ y en la máquina de desarrollo.
 
 - Un repositorio nuevo o un método nuevo se prueba **una vez** y corre contra las dos implementaciones.
 - El almacén de archivos replica de Mongo lo que importa para que desarrollo no esconda errores: índices únicos
-  (`mpPaymentId`, `paddleTransactionId`, `couponCode`, `code` del arrepentimiento), el pago ya aplicado a otra orden y los
+  (`mpPaymentId`, `lemonOrderId`, `couponCode`, `code` del arrepentimiento), el pago ya aplicado a otra orden y los
   listados de lo más nuevo primero. Si Mongo gana un índice único, el contrato lo muestra.
 - Correr `npm test` sin `mongod` instalado saltea el contrato de Mongo (se avisa en la salida).
 - **No** se eliminó el almacén de archivos: sigue permitiendo desarrollar sin instalar Mongo. Si algún día se quiere

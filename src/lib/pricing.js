@@ -96,7 +96,7 @@ export function formatAmount(amount, locale) {
 }
 
 export function formatUsd(amount) {
-  // Centavos solo si los hay (un cupón los deja): es lo que cobra Paddle.
+  // Centavos solo si los hay (un cupón los deja): es lo que cobra Lemon Squeezy.
   // «US$» siempre: al lado de precios en pesos, un «$» solo se lee como pesos.
   const cents = !Number.isInteger(Number(amount))
   return `US${new Intl.NumberFormat('en-US', {
@@ -115,7 +115,7 @@ const isUsd = (currency) => currency === 'USD' || currency === 'en'
 
 /**
  * Precio de lista para UI en la moneda vigente: USD tal cual, o ARS con la
- * cotización del catálogo. El checkout cobra en esa moneda (Paddle en USD,
+ * cotización del catálogo. El checkout cobra en esa moneda (Lemon Squeezy en USD,
  * Mercado Pago en pesos).
  * @param {number} usd
  * @param {'USD' | 'ARS' | string} currency

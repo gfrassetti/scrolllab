@@ -5,8 +5,8 @@
 /**
  * Plazo (días corridos) para pedir el reembolso total por arrepentimiento.
  * Templates, bundle y builder: solo si no se descargó el ZIP. LAB: cada cobro,
- * sin condiciones. Paddle exige entre 14 y 90 para aprobar el dominio: no bajar
- * de 14. Ver docs/paddle.md.
+ * sin condiciones. No bajar de 14: es lo que piden las pasarelas internacionales
+ * (merchant of record) y supera los 10 días de la ley argentina.
  */
 export const REFUND_DAYS = 14
 

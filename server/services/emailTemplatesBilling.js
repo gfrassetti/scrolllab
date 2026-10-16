@@ -203,7 +203,7 @@ const PAYMENT_FAILED_COPY = {
 }
 
 /**
- * «Pago rechazado» de una compra (Mercado Pago o Paddle). La orden sigue
+ * «Pago rechazado» de una compra (Mercado Pago o Lemon Squeezy). La orden sigue
  * pendiente y el carrito del comprador no se vació.
  * @param {{ order: any, user: any, retryUrl: string, logoUrl: string }} args
  */
@@ -236,23 +236,17 @@ export function buildOrderPaymentFailed({ order, user, retryUrl, logoUrl }) {
   })
 }
 
-const PADDLE_INVOICE_NOTE = {
-  es: 'La factura la emite Paddle.com, nuestro revendedor autorizado, y te llega en un mail aparte.',
-  en: 'Your invoice is issued by Paddle.com, our authorized reseller, and arrives in a separate email.',
-}
-
 const LEMON_INVOICE_NOTE = {
   es: 'La factura la emite Lemon Squeezy, nuestro revendedor autorizado, y te llega en un mail aparte.',
   en: 'Your invoice is issued by Lemon Squeezy, our authorized reseller, and arrives in a separate email.',
 }
 
-/** ¿Cobra un merchant of record en USD? (Paddle o Lemon Squeezy). */
-export const isMerchantOfRecord = (provider) => provider === 'paddle' || provider === 'lemonsqueezy'
+/** ¿Cobra un merchant of record en USD? (Lemon Squeezy). */
+export const isMerchantOfRecord = (provider) => provider === 'lemonsqueezy'
 
-/** Nota del pie del recibo cuando cobró un merchant of record (Paddle o Lemon Squeezy). */
-export function paddleInvoiceNote(locale, provider = 'paddle') {
-  const notes = provider === 'lemonsqueezy' ? LEMON_INVOICE_NOTE : PADDLE_INVOICE_NOTE
-  return notes[langOf(locale)]
+/** Nota del pie del recibo cuando cobró el merchant of record (Lemon Squeezy). */
+export function invoiceNote(locale) {
+  return LEMON_INVOICE_NOTE[langOf(locale)]
 }
 
 /**
@@ -265,7 +259,7 @@ export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   const summary = orderPriceSummary(order)
   const footer =
     isMerchantOfRecord(order.provider)
-      ? `This email is your purchase summary, not a tax invoice. ${paddleInvoiceNote('en', order.provider)} Need help? Just reply.`
+      ? `This email is your purchase summary, not a tax invoice. ${invoiceNote('en')} Need help? Just reply.`
       : 'This email is your purchase summary, not a tax invoice. Need help? Just reply.'
   return render({
     lang: 'en',
@@ -436,7 +430,7 @@ export function buildSubscriptionCharge({ subscription, user, accountUrl, logoUr
     ? null
     : dateLong(charge.periodEnd || subscription.currentPeriodEnd, lang)
   const footer =
-    subscription.provider === 'paddle' ? `${c.footer} ${paddleInvoiceNote(lang)}` : c.footer
+    isMerchantOfRecord(subscription.provider) ? `${c.footer} ${invoiceNote(lang)}` : c.footer
   return render({
     lang,
     logoUrl,
@@ -670,8 +664,8 @@ export function buildSubscriptionTrialReminderEn({ subscription, user, accountUr
 // ——— Devoluciones, confirmación del arrepentimiento y avisos de LAB ———
 
 const GATEWAY = {
-  es: { mercadopago: 'Mercado Pago', paddle: 'tu tarjeta (Paddle)', lemonsqueezy: 'tu tarjeta (Lemon Squeezy)' },
-  en: { mercadopago: 'Mercado Pago', paddle: 'your card (Paddle)', lemonsqueezy: 'your card (Lemon Squeezy)' },
+  es: { mercadopago: 'Mercado Pago', lemonsqueezy: 'tu tarjeta (Lemon Squeezy)' },
+  en: { mercadopago: 'Mercado Pago', lemonsqueezy: 'your card (Lemon Squeezy)' },
 }
 
 const REFUND_COPY = {
@@ -812,8 +806,8 @@ const SUSPENDED_COPY = {
     intro: (tier) =>
       `No pudimos cobrar la renovación de tu plan ${tier} y terminó el período de gracia, así que pasó al plan gratis: las secciones por encima del tope gratis dejaron de mostrarse.`,
     notice: (provider) =>
-      provider === 'paddle'
-        ? 'Actualizá tu tarjeta y, si Paddle logra el cobro, el plan vuelve solo con tus secciones.'
+      provider === 'lemonsqueezy'
+        ? 'Actualizá tu tarjeta y, si Lemon Squeezy logra el cobro, el plan vuelve solo con tus secciones.'
         : 'Si Mercado Pago logra el cobro, el plan vuelve solo con tus secciones. También podés volver a suscribirte desde LAB.',
     plan: 'Plan',
     since: 'Suspendido el',
@@ -828,8 +822,8 @@ const SUSPENDED_COPY = {
     intro: (tier) =>
       `We couldn’t charge the renewal of your ${tier} plan and the grace period ended, so it moved to the free plan: sections above the free limit stopped showing.`,
     notice: (provider) =>
-      provider === 'paddle'
-        ? 'Update your card and, if Paddle gets the charge through, the plan comes back with your sections.'
+      provider === 'lemonsqueezy'
+        ? 'Update your card and, if Lemon Squeezy gets the charge through, the plan comes back with your sections.'
         : 'If Mercado Pago gets the charge through, the plan comes back with your sections. You can also subscribe again from LAB.',
     plan: 'Plan',
     since: 'Suspended on',

@@ -8,8 +8,7 @@ import { startAppAgainstFakeLemon } from './helpers/fakeLemon.js'
  * Compras del market y del builder cobradas por Lemon Squeezy (USD), contra el
  * Lemon Squeezy simulado: el checkout que arma el servidor, el webhook firmado, la
  * vuelta del comprador, los controles de que un pago solo cumple su orden y los
- * reembolsos. El carril «internacional» lo pide el front como `paddle`; sin Paddle
- * habilitado lo cobra Lemon Squeezy.
+ * reembolsos.
  */
 describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
   const OWNER = 'owner@scrolllab.test'
@@ -31,7 +30,7 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
   const alerts = (title) => mp.mailsTo(OWNER).filter((m) => m.body.subject.includes(title))
 
   async function checkout(agent, items, extra = {}) {
-    const res = await agent.post('/api/checkout').send({ items, provider: 'paddle', ...extra })
+    const res = await agent.post('/api/checkout').send({ items, provider: 'lemonsqueezy', ...extra })
     assert.equal(res.status, 200, JSON.stringify(res.body))
     const checkoutId = res.body.init_point.split('/').pop()
     return { ...res.body, checkoutId }
@@ -44,13 +43,12 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
   }
 
   describe('qué carril ofrece', () => {
-    it('sin Paddle, el carril internacional lo cobra Lemon Squeezy (sin token de cliente)', async () => {
+    it('el carril internacional lo cobra Lemon Squeezy (sin secretos en la respuesta)', async () => {
       const agent = await loginAs('methods@test.com')
       const es = await agent.get('/api/checkout/methods').set('x-vercel-ip-country', 'ES')
-      assert.equal(es.body.suggested, 'paddle')
-      assert.equal(es.body.providers.paddle.enabled, true)
-      assert.equal(es.body.providers.paddle.gateway, 'lemonsqueezy')
-      assert.equal(es.body.providers.paddle.clientToken, undefined)
+      assert.equal(es.body.suggested, 'lemonsqueezy')
+      assert.equal(es.body.providers.lemonsqueezy.enabled, true)
+      assert.equal(es.body.providers.paddle, undefined)
       assert.ok(!JSON.stringify(es.body).includes(ls.apiKey))
       const ar = await agent.get('/api/checkout/methods').set('cf-ipcountry', 'AR')
       assert.equal(ar.body.suggested, 'mercadopago')
@@ -83,7 +81,7 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
     it('si Lemon Squeezy no crea el checkout, la orden se borra y el comprador ve un error claro', async () => {
       const agent = await loginAs('caido@test.com')
       ls.failNext['POST /v1/checkouts'] = 500
-      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'paddle' })
+      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'lemonsqueezy' })
       assert.equal(res.status, 502)
       const me = await agent.get('/api/auth/me')
       assert.equal((await fileDb.findOrdersByUser(me.body.user.id)).length, 0)
@@ -116,13 +114,12 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
       assert.ok(fs.existsSync(paidOrder.zipPath))
     })
 
-    it('Paddle no cobra productos de prueba', async () => {
-      // Aunque el front pida `paddle`, con Lemon Squeezy como carril ya se resuelve ahí;
-      // el rechazo de Paddle real está cubierto en paddleCheckout.test.js.
-      const agent = await loginAs('qa-owner@test.com')
-      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'qa-template' }], provider: 'paddle' })
-      assert.equal(res.status, 200)
-      assert.equal(res.body.provider, 'lemonsqueezy')
+    it('un front viejo que pide `paddle` cae en Mercado Pago (Paddle ya no existe)', async () => {
+      const agent = await loginAs('viejo@test.com')
+      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'paddle' })
+      assert.equal(res.status, 200, JSON.stringify(res.body))
+      assert.notEqual(res.body.provider, 'lemonsqueezy')
+      assert.equal((await orderRow(res.body.orderId)).provider, 'mercadopago')
     })
   })
 
@@ -265,7 +262,7 @@ describe('Arrepentimiento sobre una compra de Lemon Squeezy', () => {
 
   async function paidOrder(email) {
     const agent = await loginAs(email)
-    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'paddle' })
+    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'lemonsqueezy' })
     const lemon = ls.pay(res.body.init_point.split('/').pop(), { email })
     await lemonWebhook('order_created', lemon)
     return { orderId: res.body.orderId, lemon }
@@ -318,21 +315,19 @@ describe('Lemon Squeezy en modo prueba: solo para las cuentas de QA', () => {
   it('para un cliente cualquiera no hay carril internacional ni checkout (no se puede «pagar» con la 4242)', async () => {
     const agent = await loginAs('cliente@test.com')
     const methods = await agent.get('/api/checkout/methods').set('x-vercel-ip-country', 'ES')
-    assert.equal(methods.body.providers.paddle.enabled, false)
+    assert.equal(methods.body.providers.lemonsqueezy.enabled, false)
     assert.equal(methods.body.suggested, 'mercadopago')
-    for (const provider of ['paddle', 'lemonsqueezy']) {
-      const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider })
-      assert.equal(res.status, 400, `${provider}: ${JSON.stringify(res.body)}`)
-    }
+    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'chapters' }], provider: 'lemonsqueezy' })
+    assert.equal(res.status, 400, JSON.stringify(res.body))
     assert.equal(ls.calls.filter((c) => c.route === 'POST /v1/checkouts').length, 0)
   })
 
   it('para QA sí, y la orden (aunque sea un producto real) queda marcada de prueba', async () => {
     const agent = await loginAs('qa-owner@test.com')
     const methods = await agent.get('/api/checkout/methods')
-    assert.equal(methods.body.providers.paddle.gateway, 'lemonsqueezy')
-    assert.equal(methods.body.providers.paddle.testMode, true)
-    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'bundle' }], provider: 'paddle' })
+    assert.equal(methods.body.providers.lemonsqueezy.enabled, true)
+    assert.equal(methods.body.providers.lemonsqueezy.testMode, true)
+    const res = await agent.post('/api/checkout').send({ items: [{ sku: 'bundle' }], provider: 'lemonsqueezy' })
     assert.equal(res.status, 200, JSON.stringify(res.body))
     const order = await fileDb.findOrderById(res.body.orderId)
     assert.equal(order.qa, true)

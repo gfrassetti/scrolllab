@@ -6,8 +6,8 @@ export const SUPPORT_EMAIL = 'hola@scrolllab.com.ar'
 
 /**
  * Quién vende, como figura en los Términos y la Política de Privacidad
- * (`{{seller}}`). Paddle lo exige para aprobar el dominio: el nombre del
- * vendedor tiene que estar en los Términos (decisión del dueño, 2026-10-12).
+ * (`{{seller}}`). El nombre del vendedor tiene que estar en los Términos
+ * (decisión del dueño, 2026-10-12).
  */
 export const SELLER_NAME = 'Scroll Lab - Web Design'
 

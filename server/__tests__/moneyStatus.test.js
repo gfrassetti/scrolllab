@@ -24,7 +24,7 @@ describe('buildMoneyStatus', () => {
       now,
       users,
       orders: [
-        { _id: 'o1', userId: 'u1', status: 'paid', paidAt: ago(2), downloadCount: 0, total: 149, currency_id: 'USD', provider: 'paddle', items: [{ sku: 'chapters', title: 'CHAPTERS' }] },
+        { _id: 'o1', userId: 'u1', status: 'paid', paidAt: ago(2), downloadCount: 0, total: 149, currency_id: 'USD', provider: 'lemonsqueezy', items: [{ sku: 'chapters', title: 'CHAPTERS' }] },
         { _id: 'o2', userId: 'u2', status: 'paid', paidAt: ago(2), downloadCount: 1, total: 231000, currency_id: 'ARS', items: [{ sku: 'nocturne' }] },
         { _id: 'o3', userId: 'u3', status: 'paid', paidAt: ago(REFUND_DAYS + 1), downloadCount: 0, total: 100000, currency_id: 'ARS', items: [] },
         { _id: 'o4', userId: 'u3', status: 'pending', total: 5, currency_id: 'USD', items: [] },
@@ -40,7 +40,7 @@ describe('buildMoneyStatus', () => {
   })
 
   it('LAB: solo el primer cobro queda sin tocar, mientras dure el plazo desde el alta', () => {
-    const lab = (extra) => ({ status: 'authorized', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', provider: 'paddle', ...extra })
+    const lab = (extra) => ({ status: 'authorized', plan: 'hosted_pro', cycle: 'monthly', currency_id: 'USD', provider: 'lemonsqueezy', ...extra })
     const out = buildMoneyStatus({
       now,
       users,
@@ -71,8 +71,8 @@ describe('buildMoneyStatus', () => {
         { _id: 'o9', userId: 'u2', status: 'refunded', refundedAt: ago(40), total: 231000, currency_id: 'ARS', items: [{ sku: 'nocturne' }] },
       ],
       refunds: [
-        { externalId: 'paddle-adj_1', provider: 'paddle', kind: 'order', orderId: 'o1', userId: 'u1', amount: 5, currency: 'USD', partial: true, refundedAt: ago(1) },
-        { externalId: 'paddle-adj_2', provider: 'paddle', kind: 'lab', userId: 'u3', email: 'caro@test.com', amount: 79, currency: 'USD', refundedAt: ago(2) },
+        { externalId: 'lemon-ord_1', provider: 'lemonsqueezy', kind: 'order', orderId: 'o1', userId: 'u1', amount: 5, currency: 'USD', partial: true, refundedAt: ago(1) },
+        { externalId: 'lemon-inv_2', provider: 'lemonsqueezy', kind: 'lab', userId: 'u3', email: 'caro@test.com', amount: 79, currency: 'USD', refundedAt: ago(2) },
       ],
     })
     assert.deepEqual(out.locked.total, [{ currency: 'USD', total: 144 }])
@@ -94,7 +94,7 @@ describe('buildMoneyStatus', () => {
       now,
       users,
       orders: [
-        { _id: 'o1', userId: 'u1', status: 'paid', paidAt: ago(1), downloadCount: 0, total: 149, currency_id: 'USD', provider: 'paddle', items: [{ title: 'CHAPTERS' }] },
+        { _id: 'o1', userId: 'u1', status: 'paid', paidAt: ago(1), downloadCount: 0, total: 149, currency_id: 'USD', provider: 'lemonsqueezy', items: [{ title: 'CHAPTERS' }] },
         { _id: 'o2', userId: 'u2', status: 'paid', paidAt: ago(1), downloadCount: 2, total: 149, currency_id: 'USD', items: [] },
         { _id: 'o3', userId: 'u3', status: 'refunded', total: 149, currency_id: 'USD', items: [] },
       ],

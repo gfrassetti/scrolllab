@@ -73,7 +73,7 @@ export const api = {
       body: JSON.stringify({ token }),
     }),
   // El cupón viaja como código: el descuento lo calcula el servidor.
-  // `provider`: 'mercadopago' (ARS) o 'paddle' (USD, cobro internacional).
+  // `provider`: 'mercadopago' (ARS) o 'lemonsqueezy' (USD, cobro internacional).
   checkout: (items, couponCode, { provider, locale } = {}) =>
     request('/api/checkout', {
       method: 'POST',
@@ -86,11 +86,6 @@ export const api = {
     }),
   // Qué pasarelas hay y desde qué país viene el request (default del selector).
   checkoutMethods: () => request('/api/checkout/methods'),
-  confirmPaddleCheckout: (transactionId) =>
-    request('/api/checkout/paddle/confirm', {
-      method: 'POST',
-      body: JSON.stringify({ transactionId }),
-    }),
   // Vuelta de Lemon Squeezy: cómo va la orden (409 mientras el webhook no llegó).
   confirmLemonCheckout: (orderId) =>
     request('/api/checkout/lemonsqueezy/confirm', {
@@ -183,7 +178,7 @@ export const api = {
         ...(qa ? { qa: true } : {}),
       }),
     }),
-  // Link de Paddle para cambiar la tarjeta de la suscripción.
+  // Link de Lemon Squeezy para cambiar la tarjeta de la suscripción.
   subscriptionPaymentMethod: () => request('/api/subscriptions/payment-method'),
   subscriptionMockActivate: (url) => request(url, { method: 'POST' }),
   subscriptionSync: () =>

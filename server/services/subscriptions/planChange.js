@@ -9,7 +9,6 @@ import {
   subscriptionPlanPrice,
   isHostedPlanId,
 } from '../../catalog.js'
-import { isPaddleSub, changePaddlePlan } from './paddleSync.js'
 import { isLemonSub, changeLemonPlan } from './lemonSync.js'
 import { sendSubscriptionPlanChanged } from '../email.js'
 import {
@@ -69,7 +68,7 @@ const planReason = (plan, cycle) =>
  * - Menos de `MIN_UPGRADE_CHARGE`: 0 (no vale un cobro por los últimos días).
  */
 export function quoteUpgrade(sub, targetPlan, now = Date.now()) {
-  // En la moneda de la suscripción: ARS (MP) o USD con centavos (Paddle).
+  // En la moneda de la suscripción: ARS (MP) o USD con centavos (Lemon Squeezy).
   const usd = sub.currency_id === 'USD'
   const priceOf = (plan, cycle) => subscriptionPlanPrice(sub, plan, cycle, usd ? 'USD' : 'ARS')
   const base = { amount: 0, newPrice: priceOf(targetPlan, sub.cycle) }
@@ -116,7 +115,7 @@ async function loadChangeableSubscription(userId, targetPlan) {
   if (!isHostedPlanId(targetPlan)) throw new HttpError(400, 'Plan inválido')
 
   const sub = await db.findActiveSubscriptionByUser(userId)
-  const gateway = sub?.provider === 'paddle' ? 'Paddle' : sub?.provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'
+  const gateway = sub?.provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'
   if (sub?.status === 'paused') {
     throw new HttpError(
       409,
@@ -201,9 +200,6 @@ export async function changeSubscriptionPlan(
 ) {
   const { sub, targetQuota } = await loadChangeableSubscription(userId, targetPlan)
   const quote = quoteUpgrade(sub, targetPlan)
-  if (isPaddleSub(sub)) {
-    return changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
-  }
   if (isLemonSub(sub)) {
     return changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
   }
@@ -294,52 +290,6 @@ async function changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote
   return {
     requiresPayment: false,
     charged,
-    plan: sub.plan,
-    previousPlan,
-    quota: targetQuota,
-    cycle: sub.cycle,
-    priceEffectiveAt: sub.currentPeriodEnd || null,
-  }
-}
-
-/**
- * Paddle: la misma diferencia que Mercado Pago, pero se cobra a la tarjeta
- * guardada al instante (cargo único, sin checkout); si la rechaza, no cambia
- * nada. El plan nuevo rige apenas Paddle cobra.
- */
-async function changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
-  const bill = quote.amount > 0
-  await changePaddlePlan(
-    { sub, targetPlan, amountUsd: quote.amount, days: quote.days ?? null, config },
-    deps,
-  )
-  const previousPlan = sub.plan
-  const window = paidWindow(sub)
-  if (window && !sub.paidPlan) {
-    sub.paidPlan = window.plan
-    sub.paidCycle = window.cycle
-  }
-  // Pagó la diferencia (o era mínima y se regala): el período ya es del plan nuevo.
-  if (bill || quote.reason === 'minimal') sub.paidPlan = targetPlan
-  sub.plan = targetPlan
-  try {
-    await sub.save()
-  } catch (err) {
-    console.error(
-      `subs change RECONCILE: Paddle en ${targetPlan} pero local sigue en ` +
-        `${previousPlan} sub=${subId(sub)} paddle=${sub.paddleSubscriptionId}`,
-      err?.message,
-    )
-    throw err
-  }
-  firePlanChanged(sub, config, {
-    from: previousPlan,
-    charged: bill ? quote.amount : null,
-    ref: `${subId(sub)}-${previousPlan}-${sub.plan}-${Date.now()}`,
-  })
-  return {
-    requiresPayment: false,
-    charged: bill,
     plan: sub.plan,
     previousPlan,
     quota: targetQuota,

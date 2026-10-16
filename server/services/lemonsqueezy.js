@@ -5,11 +5,10 @@ import { HttpError } from '../errors.js'
  * Lemon Squeezy (API v1, JSON:API) por `fetch`, sin SDK: cobro internacional en USD
  * como merchant of record (ver docs/lemonsqueezy.md). Acá viven el cliente HTTP, la
  * verificación de la firma de los webhooks y el armado del checkout. Las reglas de
- * negocio (orden pagada, reembolso, baja) van aparte, como con Paddle.
+ * negocio (orden pagada, reembolso, baja) van aparte (lemonPayments.js).
  *
- * A diferencia de Paddle no hay precios efímeros: una orden se cobra sobre UNA variante
- * «ScrollLab order» y el monto sale de `custom_price` (el servidor lo calcula, igual que
- * con Paddle). Montos en centavos enteros.
+ * No hay precios efímeros: una orden se cobra sobre UNA variante «ScrollLab order» y el
+ * monto sale de `custom_price` (lo calcula el servidor). Montos en centavos enteros.
  *
  * Los datos que identifican la orden viajan en `checkout_data.custom` y vuelven en
  * `meta.custom_data` de cada webhook.

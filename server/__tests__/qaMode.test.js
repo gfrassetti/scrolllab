@@ -153,13 +153,13 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.ok((await fileDb.findOrderById(res.body.orderId)).zipPath)
   })
 
-  it('no se mezcla con productos reales, va de a uno y no se cobra con Paddle', async () => {
+  it('no se mezcla con productos reales, va de a uno y no se cobra por un carril que no está', async () => {
     const agent = await loginAs(QA)
     let res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }, { sku: 'fizz' }] })
     assert.equal(res.status, 400)
     res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }, { sku: QA_CUSTOM_SKU, recipe: RECIPE3 }] })
     assert.equal(res.status, 400)
-    res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }], provider: 'paddle' })
+    res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }], provider: 'lemonsqueezy' })
     assert.equal(res.status, 400)
     res = await agent.post('/api/checkout').send({ items: [{ sku: QA_CUSTOM_SKU, recipe: ['plum/Hero'] }] })
     assert.equal(res.status, 400, 'la receta se valida igual que en el builder real')

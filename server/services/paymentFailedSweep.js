@@ -13,7 +13,7 @@ const MINUTE_MS = 60 * 1000
 
 /**
  * Cuánto se espera después de un rechazo antes de mandar el mail. En el
- * checkout (Mercado Pago o Paddle) el comprador suele reintentar con otra
+ * checkout (Mercado Pago o Lemon Squeezy) el comprador suele reintentar con otra
  * tarjeta en el momento: si paga, no tiene que recibir un «rechazado».
  */
 export const PAYMENT_FAILED_EMAIL_DELAY_MS = 10 * MINUTE_MS
@@ -49,7 +49,7 @@ export async function sendDuePaymentFailedEmails({ config, client, now = new Dat
         subscription,
         config,
         client,
-        ref: `checkout-${subscription.paddleTransactionId || db.uid(subscription)}`,
+        ref: `checkout-${db.uid(subscription)}`,
         stage: 'checkout',
       })
       if (out.sent) sent += 1

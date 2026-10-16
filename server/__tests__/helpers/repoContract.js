@@ -97,31 +97,33 @@ export function defineRepoContract(ctx) {
       assert.equal((await db.findOrderById(id(second))).status, 'pending')
     })
 
-    it('markOrderPaidAtomic (Paddle): solo la transacción que abrió el checkout paga la orden', async () => {
+    it('markOrderPaidAtomic (Lemon Squeezy): guarda su orden y un mismo pago no paga dos órdenes', async () => {
       const user = await newUser()
-      const txn = uniq('txn')
-      const o = await newOrder(user, { provider: 'paddle', paddleTransactionId: txn })
+      const lemon = uniq('ls')
+      const o = await newOrder(user, { provider: 'lemonsqueezy' })
+      const other = await newOrder(user, { provider: 'lemonsqueezy' })
 
-      const wrong = await db.markOrderPaidAtomic({ orderId: id(o), paddleTransactionId: uniq('txn') })
-      assert.equal(wrong.created, false)
-      assert.equal((await db.findOrderById(id(o))).status, 'pending')
-
-      const right = await db.markOrderPaidAtomic({ orderId: id(o), paddleTransactionId: txn })
+      const right = await db.markOrderPaidAtomic({ orderId: id(o), lemonOrderId: lemon })
       assert.equal(right.created, true)
       assert.equal(right.order.status, 'paid')
-      assert.equal(right.order.paddleTransactionId, txn)
+      assert.equal(right.order.lemonOrderId, lemon)
       assert.equal(right.order.mpPaymentId ?? null, null)
       assert.ok(right.order.paidAt)
 
-      assert.equal(String(id(await db.findOrderByPaddleTransaction(txn))), String(id(o)))
-      assert.equal(await db.findOrderByPaddleTransaction(uniq('nada')), null)
+      const again = await db.markOrderPaidAtomic({ orderId: id(other), lemonOrderId: lemon })
+      assert.equal(again.created, false)
+      assert.equal(String(id(again.order)), String(id(o)))
+      assert.equal((await db.findOrderById(id(other))).status, 'pending')
+
+      assert.equal(String(id(await db.findOrderByLemonOrder(lemon))), String(id(o)))
+      assert.equal(await db.findOrderByLemonOrder(uniq('nada')), null)
     })
 
-    it('dos órdenes no pueden compartir la misma transacción de Paddle ni el mismo pago de MP', async () => {
+    it('dos órdenes no pueden compartir la misma orden de Lemon Squeezy ni el mismo pago de MP', async () => {
       const user = await newUser()
-      const txn = uniq('txn')
-      await newOrder(user, { provider: 'paddle', paddleTransactionId: txn })
-      await assert.rejects(newOrder(user, { provider: 'paddle', paddleTransactionId: txn }))
+      const lemon = uniq('ls')
+      await newOrder(user, { provider: 'lemonsqueezy', lemonOrderId: lemon })
+      await assert.rejects(newOrder(user, { provider: 'lemonsqueezy', lemonOrderId: lemon }))
 
       const pay = uniq('mp')
       const a = await newOrder(user, { mpPaymentId: pay })
@@ -287,24 +289,17 @@ export function defineRepoContract(ctx) {
       assert.equal(await db.findActiveSubscriptionByUser(id(await newUser())), null)
     })
 
-    it('se busca por preapproval de MP y por suscripción o transacción de Paddle', async () => {
+    it('se busca por preapproval de MP y por suscripción de Lemon Squeezy', async () => {
       const user = await newUser()
       const pre = uniq('pre')
       const mp = await newSub(user, { mpPreapprovalId: pre })
       assert.equal(String(id(await db.findSubscriptionByPreapproval(pre))), String(id(mp)))
       assert.equal(await db.findSubscriptionByPreapproval(uniq('nada')), null)
 
-      const psub = uniq('sub')
-      const ptxn = uniq('txn')
-      const pd = await newSub(user, { provider: 'paddle', paddleSubscriptionId: psub, paddleTransactionId: ptxn })
-      assert.equal(String((id(await db.findSubscriptionByPaddle({ subscriptionId: psub })))), String(id(pd)))
-      assert.equal(String((id(await db.findSubscriptionByPaddle({ transactionId: ptxn })))), String(id(pd)))
-      assert.equal(
-        String((id(await db.findSubscriptionByPaddle({ subscriptionId: uniq('x'), transactionId: ptxn })))),
-        String(id(pd)),
-        'sin la suscripción, cae a la transacción del alta',
-      )
-      assert.equal(await db.findSubscriptionByPaddle({ subscriptionId: null, transactionId: null }), null)
+      const lsub = uniq('sub')
+      const ls = await newSub(user, { provider: 'lemonsqueezy', lemonSubscriptionId: lsub })
+      assert.equal(String(id(await db.findSubscriptionByLemon(lsub))), String(id(ls)))
+      assert.equal(await db.findSubscriptionByLemon(uniq('nada')), null)
     })
 
     it('deleteSubscription borra una vez', async () => {

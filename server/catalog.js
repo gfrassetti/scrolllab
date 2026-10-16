@@ -143,8 +143,8 @@ export const PRODUCTS = {
  * `monthly` (2 meses gratis) y siempre por debajo de 12× (el "ahorro").
  * Cambiar un precio es una acción explícita; nunca automática.
  *
- * `priceMonthlyUsd` / `priceYearlyUsd`: lo que cobra Paddle afuera de
- * Argentina (docs/paddle.md). Fijados por el owner (2026-10-06): 19 / 79 / 229
+ * `priceMonthlyUsd` / `priceYearlyUsd`: lo que cobra Lemon Squeezy afuera de
+ * Argentina (docs/lemonsqueezy.md). Fijados por el owner (2026-10-06): 19 / 79 / 229
  * por mes (misma escalera ~4× / ~12×), anual = 10×.
  */
 export const HOSTED_PLANS = Object.freeze({
@@ -197,7 +197,7 @@ export function hostedPlanPrice(planId, cycle) {
 
 /**
  * Precio de un plan en la moneda de la suscripción: ARS (Mercado Pago) o USD
- * (Paddle).
+ * (Lemon Squeezy).
  * @param {string} planId
  * @param {'monthly' | 'yearly' | string} cycle
  * @param {'ARS' | 'USD' | string} [currency]

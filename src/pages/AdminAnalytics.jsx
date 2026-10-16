@@ -21,7 +21,7 @@ const money = (n, cur) =>
     maximumFractionDigits: cur === 'USD' && !Number.isInteger(Number(n)) ? 2 : 0,
   }).format(n)
 const moneyList = (rows) => (rows?.length ? rows.map((r) => money(r.total, r.currency)).join(' + ') : '—')
-const GATEWAYS = { paddle: 'Paddle', lemonsqueezy: 'Lemon Squeezy' }
+const GATEWAYS = { lemonsqueezy: 'Lemon Squeezy' }
 const gateway = (p) => GATEWAYS[p] || 'Mercado Pago'
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }) : '—')
 const when = (iso) =>
