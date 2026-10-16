@@ -5,9 +5,9 @@ import * as THREE from 'three'
  *
  * Un único <canvas> fijo a pantalla completa y un único bucle. El HTML es el esqueleto: cada
  * imagen de la página es un `div` vacío (un «slot») y, cuadro a cuadro, el canvas dibuja un plano
- * exactamente encima de su rectángulo (getBoundingClientRect). La forma de carpeta (pestaña arriba a
- * la izquierda, esquina cortada abajo a la derecha, bordes redondeados) la recorta el shader, así se
- * puede animar: un plano a pantalla completa se convierte en card sin cortes.
+ * exactamente encima de su rectángulo (getBoundingClientRect). La forma la recorta el shader (un radio
+ * por esquina: arco arriba, píldora…), así se puede animar: un plano a pantalla completa se convierte
+ * en card sin cortes.
  *
  * Nada se monta ni se desmonta: el loader, el hero y las cards son el mismo dibujo cambiando de
  * estado. Por eso no hay saltos entre tramos.
@@ -27,48 +27,28 @@ varying vec2 vUv;
 uniform sampler2D uMap;
 uniform vec2 uSize;      // px del plano
 uniform vec2 uMapSize;   // px de la imagen
-uniform float uRadius;   // redondeo
-uniform vec3 uTab;       // ancho de la pestaña, alto (caída), largo de la diagonal
-uniform float uCut;      // esquina cortada abajo a la derecha
+uniform vec4 uRadii;     // radio de cada esquina: arriba-der, abajo-der, arriba-izq, abajo-izq (px)
 uniform vec2 uShift;     // corrimiento de la imagen dentro del plano (parallax, en fracción)
 uniform float uZoom;     // >1 = la imagen más grande que el plano (lugar para el parallax)
 uniform float uAlpha;
 uniform vec3 uTint;
 uniform float uTintMix;
 
-#define N 7
-float sdPoly(vec2 p, vec2 v[N]) {
-  float d = dot(p - v[0], p - v[0]);
-  float s = 1.0;
-  for (int i = 0, j = N - 1; i < N; j = i, i++) {
-    vec2 e = v[j] - v[i];
-    vec2 w = p - v[i];
-    vec2 b = w - e * clamp(dot(w, e) / dot(e, e), 0.0, 1.0);
-    d = min(d, dot(b, b));
-    bvec3 c = bvec3(p.y >= v[i].y, p.y < v[j].y, e.x * w.y > e.y * w.x);
-    if (all(c) || all(not(c))) s *= -1.0;
-  }
-  return s * sqrt(d);
+// Rectángulo con un radio por esquina (Inigo Quilez). Con los de arriba = medio ancho, es un arco;
+// con todos = medio alto, una píldora / un ojo que se abre.
+float sdRoundBox(vec2 p, vec2 b, vec4 r) {
+  r.xy = (p.x > 0.0) ? r.xy : r.zw;
+  r.x = (p.y > 0.0) ? r.x : r.y;
+  vec2 q = abs(p) - b + r.x;
+  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
 void main() {
-  // px con origen arriba a la izquierda, y hacia abajo
-  vec2 p = vec2(vUv.x, 1.0 - vUv.y) * uSize;
-  float r = uRadius;
-  float w = uSize.x, h = uSize.y;
-  float tw = uTab.x, th = uTab.y, ts = uTab.z;
-  float c = uCut;
-  vec2 v[N];
-  v[0] = vec2(r, r);
-  v[1] = vec2(max(r, tw - r * 0.4), r);
-  v[2] = vec2(max(r, tw + ts - r * 0.4), r + th);
-  v[3] = vec2(w - r, r + th);
-  v[4] = vec2(w - r, h - r - c);
-  v[5] = vec2(w - r - c, h - r);
-  v[6] = vec2(r, h - r);
-  float d = sdPoly(p, v) - r;
-  float aa = 1.0;
-  float mask = 1.0 - smoothstep(-aa, aa, d);
+  vec2 hb = uSize * 0.5;
+  vec2 p = (vUv - 0.5) * uSize; // centro, y hacia arriba
+  vec4 r = min(uRadii, vec4(min(hb.x, hb.y)));
+  float d = sdRoundBox(p, hb, r);
+  float mask = 1.0 - smoothstep(-1.0, 1.0, d);
   if (mask <= 0.001) discard;
 
   // la imagen «cubre» el plano (como object-fit: cover), con zoom y corrimiento
@@ -124,9 +104,7 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
         uMap: { value: map },
         uSize: { value: new THREE.Vector2(1, 1) },
         uMapSize: { value: new THREE.Vector2(...mapSize) },
-        uRadius: { value: 0 },
-        uTab: { value: new THREE.Vector3(0, 0, 0) },
-        uCut: { value: 0 },
+        uRadii: { value: new THREE.Vector4(0, 0, 0, 0) },
         uShift: { value: new THREE.Vector2(0, 0) },
         uZoom: { value: 1 },
         uAlpha: { value: 1 },
@@ -149,10 +127,9 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
         mesh.position.set(x + w / 2, -(y + h / 2), 0)
         u.uSize.value.set(Math.max(1, w), Math.max(1, h))
       },
-      shape({ radius = 0, tab = [0, 0, 0], cut = 0 } = {}) {
-        u.uRadius.value = radius
-        u.uTab.value.set(tab[0], tab[1], tab[2])
-        u.uCut.value = cut
+      /** Radio de cada esquina en px: arriba / abajo (los de arriba en medio ancho = un arco). */
+      shape({ top = 0, bottom = 0 } = {}) {
+        u.uRadii.value.set(top, bottom, top, bottom)
       },
       dispose() {
         scene.remove(mesh)

@@ -34,10 +34,9 @@ const T = {
   ink: [0.42, 0.58], // su titular se entinta
 }
 
-const CARD_SHAPE = (w) => {
-  const k = Math.min(1, w / 520)
-  return { radius: 14 * k + 6, tab: [w * 0.42, 22 * k + 10, 26 * k + 12], cut: 34 * k + 14 }
-}
+// Las cards son «láminas del atlas»: arco arriba (como una ventana), esquinas de abajo apenas
+// redondeadas. Una silueta propia, no la carpeta de la referencia.
+const CARD_SHAPE = (w) => ({ top: w / 2, bottom: Math.min(14, w * 0.04) })
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const easeOut = (t) => 1 - (1 - t) ** 3
@@ -205,19 +204,29 @@ function Kanvas() {
         const lx = (W - lw) / 2
         const ly = H / 2
         linePlane.rect(lx, ly - 1, lw * Math.min(1, boot.shown), 2)
-        linePlane.u.uAlpha.value = 1 - clamp01(rv * 3)
+        linePlane.u.uAlpha.value = 1 - clamp01(rv * 6)
 
         // 2) el hero: de la línea a pantalla completa; con el progreso, a su card
         const m = rv >= 1 ? easeInOut(seg(p, T.morph)) : 0
         const dest = r.dest?.getBoundingClientRect()
-        let rect = { x: lerp(lx, 0, rv), y: lerp(ly - 1, 0, rv), w: lerp(lw, W, rv), h: lerp(2, H, rv) }
+        // primero se abre en alto (el ojo) y recién después se estira a los bordes
+        const ro = easeInOut(clamp01(boot.reveal / 0.7))
+        const rw = easeInOut(clamp01((boot.reveal - 0.3) / 0.7))
+        let rect = { x: lerp(lx, 0, rw), y: lerp(ly - 1, 0, ro), w: lerp(lw, W, rw), h: lerp(2, H, ro) }
         if (dest && m > 0) {
           rect = { x: lerp(0, dest.left, m), y: lerp(0, dest.top, m), w: lerp(W, dest.width, m), h: lerp(H, dest.height, m) }
         }
         heroPlane.rect(rect.x, rect.y, rect.w, rect.h)
         heroPlane.u.uMapSize.value.set(rt.width, rt.height)
-        const sh = CARD_SHAPE(rect.w)
-        heroPlane.shape({ radius: sh.radius * m, tab: [sh.tab[0], sh.tab[1] * m, sh.tab[2] * m], cut: sh.cut * m })
+        if (m > 0) {
+          // de pantalla completa a lámina: el arco de arriba crece con el alejamiento
+          const sh = CARD_SHAPE(rect.w)
+          heroPlane.shape({ top: sh.top * m, bottom: sh.bottom * m })
+        } else {
+          // la carga: el horizonte se abre como un ojo (los extremos redondos se van aplanando)
+          const lens = (rect.h / 2) * (1 - rv)
+          heroPlane.shape({ top: lens, bottom: lens })
+        }
         heroPlane.u.uAlpha.value = rv > 0 ? 1 : 0
 
         // la cámara del GLB avanza con el progreso (del cristal a la isla entera) y orbita al puntero
@@ -288,6 +297,15 @@ function Kanvas() {
     }
   }, [])
 
+  // Las tipografías del prototipo: una serif de libro ilustrado y una mono para las marcas.
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&family=IBM+Plex+Mono:wght@400;500&display=swap'
+    document.head.appendChild(link)
+    return () => link.remove()
+  }, [])
+
   useEffect(() => {
     if (!ready) return undefined
     const id = setTimeout(() => getLenis()?.start(), 1500)
@@ -295,8 +313,8 @@ function Kanvas() {
   }, [ready])
 
   const set = (key) => (el) => (R.current[key] = el)
-  const mono = { fontFamily: "'Space Mono', ui-monospace, monospace" }
-  const display = { fontFamily: "'Inter Tight', 'Helvetica Neue', Arial, sans-serif", fontWeight: 800, letterSpacing: '-0.045em' }
+  const mono = { fontFamily: "'IBM Plex Mono', ui-monospace, monospace" }
+  const display = { fontFamily: "'Fraunces', Georgia, serif", fontWeight: 300, letterSpacing: '-0.02em' }
   const layer = 'fixed inset-0 h-svh w-full'
 
   return (
@@ -315,34 +333,43 @@ function Kanvas() {
           style={{ ...mono, opacity: ready ? 0 : 1 }}
         >
           <span>
-            Loading — <span ref={loadRef}>00</span>%
+            Charting the horizon — <span ref={loadRef}>00</span>%
           </span>
-          <span className="opacity-50">kanvas://proto.v2</span>
+          <span className="opacity-50">Atlas · leaf 00</span>
         </div>
 
-        {/* HUD: riel izquierdo con la cruz */}
-        <div aria-hidden="true" className="absolute inset-y-0 left-0 hidden w-14 border-r border-black/10 md:block">
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[28px] leading-none" style={{ color: '#111' }}>
-            ✛
-          </span>
+        {/* Marcas de atlas: rosa de los vientos, coordenadas y escala (no un HUD de consola). */}
+        <div aria-hidden="true" className="absolute top-5 right-6 hidden items-center gap-4 text-[11px] tracking-[0.16em] uppercase md:flex" style={{ ...mono, color: 'rgba(17,17,17,0.6)', mixBlendMode: 'difference', filter: 'invert(1)' }}>
+          <span>44°12′N · 12°06′E</span>
+          <svg width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1">
+            <circle cx="20" cy="20" r="15" />
+            <path d="M20 2 L23 20 L20 38 L17 20 Z" fill="currentColor" fillOpacity="0.15" />
+            <path d="M2 20 L20 17 L38 20 L20 23 Z" />
+            <text x="20" y="9" textAnchor="middle" fontSize="6" fill="currentColor" stroke="none">N</text>
+          </svg>
+        </div>
+        <div aria-hidden="true" className="absolute bottom-6 left-6 hidden items-end gap-3 text-[10px] tracking-[0.16em] uppercase md:flex" style={{ ...mono, color: 'rgba(17,17,17,0.6)', mixBlendMode: 'difference', filter: 'invert(1)' }}>
+          <span className="block h-2 w-24 border-x border-b border-current" />
+          <span>1 : 40 000</span>
         </div>
 
         {/* Sección: hero */}
-        <section ref={set('heroUi')} className="absolute inset-0 flex items-end px-6 pb-[12svh] md:px-24" style={{ opacity: 0, visibility: 'hidden' }}>
-          <h1 ref={set('heroTitle')} className="text-[clamp(3.2rem,11vw,12rem)] leading-[0.82] text-white uppercase" style={display}>
-            The isle
-            <br />
-            remembers.
+        <section ref={set('heroUi')} className="absolute inset-0 flex flex-col justify-end px-6 pb-[11svh] md:px-16" style={{ opacity: 0, visibility: 'hidden' }}>
+          <p className="mb-5 text-[11px] tracking-[0.22em] text-white/80 uppercase" style={mono}>
+            Atlas · leaf 01 — the outer isles
+          </p>
+          <h1 ref={set('heroTitle')} className="max-w-[14ch] text-[clamp(3rem,9vw,10rem)] leading-[0.9] text-white" style={display}>
+            Beyond the <em className="italic">last</em> map.
           </h1>
         </section>
 
         {/* Sección: tableau (sube a su lugar mientras el hero se aleja) */}
         <section ref={set('tableUi')} className="absolute inset-0 px-6 pt-[14svh] md:pr-10 md:pl-24" style={{ opacity: 0, visibility: 'hidden' }}>
           <div className="grid gap-6 md:grid-cols-12">
-            <p className="text-[11px] md:col-span-1" style={mono}>
-              ■ 001
+            <p className="text-[11px] tracking-[0.16em] uppercase md:col-span-1" style={mono}>
+              Leaf 02
             </p>
-            <h2 ref={set('ink')} className="text-[clamp(2.2rem,5.6vw,6rem)] leading-[0.86] uppercase md:col-span-11" style={{ ...display, color: 'rgb(205,205,205)' }}>
+            <h2 ref={set('ink')} className="text-[clamp(2.2rem,5.2vw,5.6rem)] leading-[0.92] md:col-span-11" style={{ ...display, color: 'rgb(205,205,205)' }}>
               Every map was drawn by someone who left.
             </h2>
           </div>
