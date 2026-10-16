@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { useLang } from './lang'
 import { externalProps, legalDocs } from '../../../lib/contactLinks'
@@ -22,14 +22,15 @@ Prices are given on request and do not include taxes or notary fees. Availabilit
 Images on this site are computer renderings. Texts, plans and images belong to Meridian Villas S.L. and may not be reused without written permission.`
 
 /**
- * MERIDIAN — Footer (~80% of the viewport)
+ * MERIDIAN — Footer
  *
- * Same anatomy as the reference's closing band on a warm charcoal ground:
- * contact block top-left, phone + email in big light serif top-right, the
- * monogram dead-centre, the address with a "see on map" button and round
- * social buttons bottom-left, a villas link bottom-right, and a hairline
- * legal row underneath. Everything reveals with a soft blur-up as it
- * enters.
+ * The closing band on a warm charcoal ground: contact block top-left, phone +
+ * email in big light serif top-right, the address with a "see on map" button
+ * and round social buttons, a villas link, a hairline legal row (with the
+ * monogram) — and, to close the page, the wordmark set edge to edge in the
+ * hero's light serif, fading into the ground. Its letters rise one by one as
+ * the page reaches the end (scrubbed with the scroll). Everything else
+ * reveals with a soft blur-up as it enters.
  *
  * Labels come from the language dictionary (lang.jsx) unless a prop sets
  * them (a prop always wins); contact data, links, socials and the two colours
@@ -127,9 +128,47 @@ export default function Footer({
   // 1–2 letters sit in the circle at their size; longer ones are squeezed in
   const mark = String(monogram || '').trim() || 'M'
 
+  const bigRef = useRef(null)
+  const bigText = String(wordmark || '').trim().toUpperCase() || 'MERIDIAN'
+
+  // The wordmark fills the width exactly: measured at 100px, then scaled.
+  useLayoutEffect(() => {
+    const el = bigRef.current
+    if (!el) return undefined
+    const fit = () => {
+      const word = el.firstElementChild
+      if (!word) return
+      word.style.fontSize = '100px'
+      const w = word.getBoundingClientRect().width
+      if (w > 0) word.style.fontSize = `${(el.clientWidth / w) * 100 * 0.985}px`
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    document.fonts?.ready.then(fit)
+    return () => ro.disconnect()
+  }, [bigText])
+
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      const letters = bigRef.current?.querySelectorAll('[data-ft-letter]')
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        // Calm: the wordmark just fades in.
+        gsap.from(bigRef.current, { opacity: 0, duration: 1.2, ease: 'power2.out', scrollTrigger: { trigger: bigRef.current, start: 'top 95%', once: true } })
+        return
+      }
+      if (letters?.length) {
+        gsap.fromTo(
+          letters,
+          { yPercent: 105 },
+          {
+            yPercent: 0,
+            ease: 'none',
+            stagger: 0.08,
+            scrollTrigger: { trigger: bigRef.current, start: 'top bottom', end: 'bottom bottom', scrub: 0.6 },
+          },
+        )
+      }
       gsap.from('[data-ft-reveal]', {
         opacity: 0,
         y: 24,
@@ -140,14 +179,14 @@ export default function Footer({
         scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [bigText], revertOnUpdate: true },
   )
 
   return (
     <footer
       ref={root}
       id="footer"
-      className="relative flex min-h-[80svh] flex-col justify-between px-6 pt-14 pb-6 md:px-16 md:pt-16"
+      className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pt-14 pb-0 md:px-16 md:pt-16"
       style={{
         background: ink,
         color: sand,
@@ -178,28 +217,7 @@ export default function Footer({
         </div>
       </div>
 
-      <div data-ft-reveal className="flex flex-col items-center gap-5 py-12 md:py-8" aria-hidden="true">
-        <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
-          <circle cx="75" cy="75" r="66" stroke={sand} strokeWidth="2" />
-          <text
-            x="75"
-            y="96"
-            textAnchor="middle"
-            fontFamily="'Fraunces', serif"
-            fontWeight="300"
-            fontSize={mark.length > 1 ? 56 : 72}
-            fill={sand}
-            {...(mark.length > 2 ? { textLength: 104, lengthAdjust: 'spacingAndGlyphs' } : {})}
-          >
-            {mark}
-          </text>
-        </svg>
-        <span className="text-[11px] uppercase tracking-[0.3em] opacity-50" style={MONO}>
-          {wordmark}
-        </span>
-      </div>
-
-      <div>
+      <div className="mt-16 md:mt-20">
         <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <div data-ft-reveal>
             <p className="text-[clamp(1.5rem,2.2vw,2.1rem)] leading-[1.1]" style={SERIF}>
@@ -239,7 +257,22 @@ export default function Footer({
             color: 'color-mix(in srgb, var(--mer-ft-sand) 55%, transparent)',
           }}
         >
-          <span>
+          <span className="flex items-center gap-3">
+            <svg width="30" height="30" viewBox="0 0 150 150" fill="none" aria-hidden="true" className="shrink-0">
+              <circle cx="75" cy="75" r="68" stroke={sand} strokeWidth="5" />
+              <text
+                x="75"
+                y="98"
+                textAnchor="middle"
+                fontFamily="'Fraunces', serif"
+                fontWeight="300"
+                fontSize={mark.length > 1 ? 56 : 72}
+                fill={sand}
+                {...(mark.length > 2 ? { textLength: 104, lengthAdjust: 'spacingAndGlyphs' } : {})}
+              >
+                {mark}
+              </text>
+            </svg>
             © {wordmark} — {new Date().getFullYear()} {rightsLabel || t('rights')}
           </span>
           <span className="flex gap-5">
@@ -259,6 +292,17 @@ export default function Footer({
         </div>
       </div>
 
+      {/* The wordmark, edge to edge, rising from the bottom edge. */}
+      <div ref={bigRef} aria-hidden="true" className="mer-ft-big relative -mx-6 mt-8 overflow-hidden md:-mx-16 md:mt-10">
+        <div className="block w-max mx-auto whitespace-nowrap uppercase leading-[0.8]" style={{ ...SERIF, letterSpacing: '-0.02em', paddingTop: '0.06em' }}>
+          {[...bigText].map((ch, i) => (
+            <span key={i} data-ft-letter className="mer-ft-letter inline-block">
+              {ch === ' ' ? ' ' : ch}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <LegalSheet
         docs={legalDocs([
           { href: privacyHref, title: privacyLabel || t('privacy'), body: privacyText },
@@ -273,6 +317,13 @@ export default function Footer({
         /* Sin transition de opacity: GSAP anima la opacity de estos links (data-ft-reveal)
            y, con una transición CSS en la misma propiedad, un ScrollTrigger.refresh() a
            mitad del reveal le hace capturar mal el valor final y el link queda en 0. */
+        /* The big wordmark: sand fading into the ground, a little cut by the bottom edge. */
+        .mer-ft-big { margin-bottom: -0.02em; }
+        .mer-ft-letter {
+          background: linear-gradient(to bottom, color-mix(in srgb, var(--mer-ft-sand) 55%, transparent) 0%, color-mix(in srgb, var(--mer-ft-sand) 14%, transparent) 70%, color-mix(in srgb, var(--mer-ft-sand) 4%, transparent) 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+          will-change: transform;
+        }
         .mer-ft-link { position: relative; }
         .mer-ft-link:not(.block) { display: inline-block; }
         .mer-ft-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
