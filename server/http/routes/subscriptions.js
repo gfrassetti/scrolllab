@@ -20,6 +20,7 @@ import { cancelAtPeriodEnd } from '../../services/subscriptions/cancel.js'
 import { HOSTED_PLANS } from '../../catalog.js'
 import { isPaddleSub, syncPaddleForUser } from '../../services/subscriptions/paddleSync.js'
 import { getSubscription } from '../../services/paddle.js'
+import { isLemonSub, syncLemonForUser, lemonUpdatePaymentUrl } from '../../services/subscriptions/lemonSync.js'
 
 /**
  * Suscripciones de LAB (Fase 4) — Mercado Pago PreApproval: planes, mi
@@ -31,9 +32,12 @@ export function createSubscriptionsRouter({ config, limits }) {
 
   const subsMock = () => !config.isProd && (config.mpMock || !config.mpSubs.accessToken)
   const paddleOn = () => Boolean(config.paddle?.enabled)
+  // Lemon Squeezy en modo prueba (no cobra) solo para las cuentas de QA.
+  const lemonOn = (user) =>
+    !paddleOn() && Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
   const paddleMock = () => Boolean(config.paddle?.mock)
   /** ¿Esta fila se maneja sin pasarela real (mock de MP o de Paddle)? */
-  const rowMock = (sub) => (isPaddleSub(sub) ? paddleMock() : subsMock())
+  const rowMock = (sub) => (isLemonSub(sub) ? false : isPaddleSub(sub) ? paddleMock() : subsMock())
 
   // `instanceQuota` puede ser `Infinity` (plan sin tope) — JSON no tiene forma
   // de representar eso, y `JSON.stringify` lo pisa por `null` en silencio.
@@ -59,7 +63,9 @@ export function createSubscriptionsRouter({ config, limits }) {
     // `?qa=1` solo cambia algo para una cuenta de QA_BUYER_EMAILS; esa respuesta
     // es personal y no se cachea.
     const qa = req.query.qa === '1' && isQaBuyer(req.user, config)
-    res.set('Cache-Control', qa ? 'private, no-store' : 'public, max-age=300')
+    // Lemon Squeezy en modo prueba depende de quién mira: no se cachea en público.
+    const lemon = lemonOn(req.user)
+    res.set('Cache-Control', qa || (config.lemon?.enabled && config.lemon.testMode) ? 'private, no-store' : 'public, max-age=300')
     res.json({
       plans: publicPlans({ qa }),
       ...(qa ? { qa: true, trialDays: 0 } : {}),
@@ -68,6 +74,7 @@ export function createSubscriptionsRouter({ config, limits }) {
       providers: {
         mercadopago: { enabled: true, mock: subsMock(), currency: 'ARS' },
         paddle: { enabled: paddleOn(), mock: paddleMock(), currency: 'USD' },
+        lemonsqueezy: { enabled: lemon, currency: 'USD', ...(lemon ? { testMode: Boolean(config.lemon.testMode) } : {}) },
       },
     })
   })
@@ -104,7 +111,7 @@ export function createSubscriptionsRouter({ config, limits }) {
         user: req.user,
         plan: String(req.body?.plan || ''),
         cycle: req.body?.cycle === 'yearly' ? 'yearly' : 'monthly',
-        provider: req.body?.provider === 'paddle' ? 'paddle' : 'mercadopago',
+        provider: ['paddle', 'lemonsqueezy'].includes(req.body?.provider) ? req.body.provider : 'mercadopago',
         locale: req.body?.locale === 'en' ? 'en' : 'es',
         qa: req.body?.qa === true,
         config,
@@ -153,10 +160,14 @@ export function createSubscriptionsRouter({ config, limits }) {
       const rows = await db.findSubscriptionsByUser(userId)
       const latest = rows.find(
         (s) =>
-          (s.mpPreapprovalId || s.paddleTransactionId || s.paddleSubscriptionId) &&
+          (s.mpPreapprovalId || s.paddleTransactionId || s.paddleSubscriptionId || s.lemonCheckoutId || s.lemonSubscriptionId) &&
           s.status !== 'cancelled' &&
           !s.abandonedAt,
       )
+      if (latest && isLemonSub(latest)) {
+        const out = await syncLemonForUser({ userId, email: req.user.email, config })
+        return res.json({ ok: true, ...out })
+      }
       if (latest && isPaddleSub(latest)) {
         if (paddleMock()) throw new HttpError(403, 'Mock activo: usá activar directo')
         const out = await syncPaddleForUser({ userId, config })
@@ -245,6 +256,12 @@ export function createSubscriptionsRouter({ config, limits }) {
     requireAuth,
     asyncHandler(async (req, res) => {
       const sub = await db.findActiveSubscriptionByUser(db.uid(req.user))
+      if (sub && isLemonSub(sub)) {
+        const url = await lemonUpdatePaymentUrl(sub, config).catch(() => null)
+        if (!url) throw new HttpError(404, 'No hay un medio de pago para actualizar', { expose: true })
+        res.set('Cache-Control', 'no-store')
+        return res.json({ ok: true, url })
+      }
       if (!sub || !isPaddleSub(sub) || !sub.paddleSubscriptionId || paddleMock()) {
         throw new HttpError(404, 'No hay un medio de pago para actualizar', { expose: true })
       }

@@ -6,11 +6,17 @@ import { refundPayment, fetchPayment } from './mercadoPago.js'
 import { createAdjustment, getTransaction, PADDLE_PAID_STATUSES } from './paddle.js'
 import { reverseOrderPayment, alertAdmin, REVERSED_PAYMENT_STATUSES } from './orders.js'
 import { reversePaddleAdjustment } from './paddlePayments.js'
-import { refundOrder as refundLemonOrder, parseLemonEvent } from './lemonsqueezy.js'
+import {
+  refundOrder as refundLemonOrder,
+  refundSubscriptionInvoice,
+  parseLemonEvent,
+  parseLemonInvoice,
+} from './lemonsqueezy.js'
 import { reverseLemonRefund } from './lemonPayments.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
 import { isPaddleSub } from './subscriptions/paddleSync.js'
+import { isLemonSub } from './subscriptions/lemonSync.js'
 import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
 
 /**
@@ -136,7 +142,7 @@ async function refundLab(sub, row, config, deps) {
   if (!sub) return { status: 'manual', note: 'la suscripción ya no existe' }
   // Sin cobro anotado, se le pregunta a MP: el del alta pudo no haber llegado
   // por webhook, y no es lo mismo que una prueba gratis.
-  if (!sub.firstPaidAt && !sub.lastPaidAt && !isPaddleSub(sub)) {
+  if (!sub.firstPaidAt && !sub.lastPaidAt && !isPaddleSub(sub) && !isLemonSub(sub)) {
     await syncLabChargesFromMp(sub, config, deps)
   }
   const e = labRefundEligibility(sub)
@@ -159,6 +165,26 @@ async function refundLab(sub, row, config, deps) {
   if (isPaddleSub(sub)) {
     if (config.paddle?.mock) return { status: 'manual', note: 'Paddle sin cuenta real (mock)' }
     return refundPaddleTransaction(sub.firstChargeId, row, config, deps)
+  }
+  if (isLemonSub(sub)) {
+    if (!config.lemon?.enabled) return { status: 'manual', note: 'Lemon Squeezy apagado' }
+    // El primer cobro es una factura de la suscripción: se devuelve entera y se da
+    // de baja en el momento (handleLabRefund). El webhook que llega después no repite nada.
+    const data = await (deps.refundSubscriptionInvoice || refundSubscriptionInvoice)(config, sub.firstChargeId)
+    const invoice = parseLemonInvoice({ ...data, id: sub.firstChargeId })
+    const back = invoice.refundedAmountCents || invoice.totalCents
+    await handleLabRefund({
+      sub,
+      provider: 'lemonsqueezy',
+      externalId: `lemon-inv-${sub.firstChargeId}`,
+      chargeId: String(sub.firstChargeId),
+      amount: back ? back / 100 : Number(sub.firstChargeAmount) || 0,
+      currency: invoice.currency || 'USD',
+      partial: false,
+      reason: 'refunded',
+      config,
+    }, deps)
+    return { status: 'refunded', note: `factura Lemon Squeezy ${sub.firstChargeId}` }
   }
   const token = config.mpSubs?.accessToken
   if (config.mpMock || !token) return { status: 'manual', note: 'Mercado Pago sin cuenta real (mock)' }

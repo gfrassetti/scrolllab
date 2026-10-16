@@ -433,6 +433,11 @@ export const fileDb = {
       ) || null,
     );
   },
+  async findSubscriptionByLemon(lemonSubscriptionId) {
+    const row =
+      read("subscriptions").find((s) => s.lemonSubscriptionId === String(lemonSubscriptionId)) || null;
+    return withSaveDoc("subscriptions", row);
+  },
   async findSubscriptionByPaddle({ subscriptionId, transactionId }) {
     const rows = read("subscriptions");
     const row =

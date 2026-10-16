@@ -280,7 +280,7 @@ const subscriptionSchema = new mongoose.Schema(
     // Pasarela de la suscripción. Paddle cobra en USD (docs/paddle.md).
     provider: {
       type: String,
-      enum: ["mercadopago", "paddle"],
+      enum: ["mercadopago", "paddle", "lemonsqueezy"],
       default: "mercadopago",
     },
     currency_id: { type: String, default: "ARS" },
@@ -292,6 +292,10 @@ const subscriptionSchema = new mongoose.Schema(
     paddleTransactionId: { type: String, sparse: true },
     paddleSubscriptionId: { type: String, sparse: true, index: true },
     paddleCustomerId: String,
+    // Lemon Squeezy: el checkout del alta y, cuando se crea, su suscripción.
+    lemonCheckoutId: String,
+    lemonSubscriptionId: { type: String, sparse: true, index: true },
+    lemonCustomerId: String,
     // Mails de suscripción (una vez cada uno). Mismo patrón claim/complete/
     // release que el recibo de orden. `welcome` al pasar a `authorized`,
     // `canceled` al setear `canceledAt`, `trialReminder` unos días antes del

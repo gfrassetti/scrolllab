@@ -8,6 +8,13 @@ import {
   LEMON_CURRENCY,
 } from './lemonsqueezy.js'
 import { markOrderPaid, deliverPaidOrder, alertAdmin } from './orders.js'
+import { parseLemonInvoice } from './lemonsqueezy.js'
+import {
+  syncLemonSubscriptionEvent,
+  handleLemonLabInvoice,
+  handleLemonLabPaymentFailed,
+} from './subscriptions/lemonSync.js'
+import { handleLabRefund } from './subscriptions/labRefund.js'
 
 /**
  * Casos de uso de Lemon Squeezy para las compras (market y builder) y su webhook.
@@ -174,6 +181,44 @@ export async function reverseLemonRefund({ event, config }) {
 }
 
 /**
+ * Facturas de LAB: cobro (alta, renovación, diferencia de plan), rechazo y devolución.
+ * @param {{ name: string, data: any, custom: any, config: any }} args
+ */
+async function handleLemonLabInvoiceEvent({ name, data, custom, config }) {
+  const invoice = parseLemonInvoice(data)
+  if (name === 'subscription_payment_success' || name === 'subscription_payment_recovered') {
+    return handleLemonLabInvoice({ invoice, custom, config })
+  }
+  if (name === 'subscription_payment_failed') return handleLemonLabPaymentFailed({ invoice, custom, config })
+  if (name === 'subscription_payment_refunded') {
+    const sub = invoice.subscriptionId ? await db.findSubscriptionByLemon(invoice.subscriptionId) : null
+    const amount = (invoice.refundedAmountCents ?? invoice.totalCents ?? 0) / 100
+    if (!sub) {
+      alertAdmin({
+        kind: 'reversed',
+        key: `lemon-inv-${invoice.id}-refund`,
+        title: 'REEMBOLSO DE LAB EN LEMON SQUEEZY — sin suscripción local, revisar',
+        lines: [`factura ${invoice.id} · ${amount} ${invoice.currency} · suscripción ${invoice.subscriptionId}`],
+        config,
+      })
+      return { skipped: 'sin suscripción local' }
+    }
+    return handleLabRefund({
+      sub,
+      provider: 'lemonsqueezy',
+      externalId: `lemon-inv-${invoice.id}`,
+      chargeId: invoice.id,
+      amount,
+      currency: invoice.currency || 'USD',
+      partial: invoice.status === 'partial_refund',
+      reason: 'refunded',
+      config,
+    })
+  }
+  return { skipped: `evento ${name}` }
+}
+
+/**
  * Webhook de Lemon Squeezy. La firma se verifica sobre el body crudo, siempre.
  * Resuelve cuando el evento quedó atendido o no aplica (200); tira solo cuando
  * Lemon Squeezy tiene que reintentar: firma inválida (401) o una falla nuestra (5xx).
@@ -192,6 +237,15 @@ export async function handleLemonNotification({ rawBody, signature, config }) {
   const event = parseLemonEvent(payload)
 
   try {
+    // LAB: los `subscription_*` traen la suscripción; los `subscription_payment_*`, una factura.
+    if (event.name.startsWith('subscription_payment_')) {
+      return await handleLemonLabInvoiceEvent({ name: event.name, data: payload?.data, custom: event.custom, config })
+    }
+    if (event.name.startsWith('subscription_')) {
+      return await syncLemonSubscriptionEvent({ data: payload?.data, custom: event.custom, config })
+    }
+    // Una orden de suscripción (el alta) también llega como `order_created`: la entrega es por la suscripción.
+    if (event.name === 'order_created' && event.custom?.kind === 'lab') return { skipped: 'orden de LAB' }
     if (event.name === 'order_created') return await fulfillLemonOrder({ event, config })
     if (event.name === 'order_refunded') return await reverseLemonRefund({ event, config })
     if (event.name === 'dispute_created') {

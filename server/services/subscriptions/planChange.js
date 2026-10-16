@@ -10,6 +10,7 @@ import {
   isHostedPlanId,
 } from '../../catalog.js'
 import { isPaddleSub, changePaddlePlan } from './paddleSync.js'
+import { isLemonSub, changeLemonPlan } from './lemonSync.js'
 import { sendSubscriptionPlanChanged } from '../email.js'
 import {
   updatePreapprovalAmount,
@@ -115,7 +116,7 @@ async function loadChangeableSubscription(userId, targetPlan) {
   if (!isHostedPlanId(targetPlan)) throw new HttpError(400, 'Plan inválido')
 
   const sub = await db.findActiveSubscriptionByUser(userId)
-  const gateway = sub?.provider === 'paddle' ? 'Paddle' : 'Mercado Pago'
+  const gateway = sub?.provider === 'paddle' ? 'Paddle' : sub?.provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'
   if (sub?.status === 'paused') {
     throw new HttpError(
       409,
@@ -203,6 +204,9 @@ export async function changeSubscriptionPlan(
   if (isPaddleSub(sub)) {
     return changePaddleSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
   }
+  if (isLemonSub(sub)) {
+    return changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
+  }
   if (quote.amount > 0) {
     return startUpgradePayment({ sub, targetPlan, quote, config }, deps)
   }
@@ -253,6 +257,47 @@ export async function changeSubscriptionPlan(
     quota: targetQuota,
     cycle: sub.cycle,
     // El monto nuevo lo cobra MP recién en el próximo ciclo.
+    priceEffectiveAt: sub.currentPeriodEnd || null,
+  }
+}
+
+/**
+ * Lemon Squeezy: cambia la variante. La diferencia (si hay) la cobra Lemon Squeezy en
+ * el momento con su prorrateo; el cobro llega por webhook como una factura más
+ * (`subscription_payment_success`) y sale el mail de cobro.
+ */
+async function changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
+  const { charged } = await changeLemonPlan({ sub, targetPlan, quote, config }, deps)
+  const previousPlan = sub.plan
+  const window = paidWindow(sub)
+  if (window && !sub.paidPlan) {
+    sub.paidPlan = window.plan
+    sub.paidCycle = window.cycle
+  }
+  if (charged || quote.reason === 'minimal') sub.paidPlan = targetPlan
+  sub.plan = targetPlan
+  try {
+    await sub.save()
+  } catch (err) {
+    console.error(
+      `subs change RECONCILE: Lemon Squeezy en ${targetPlan} pero local sigue en ` +
+        `${previousPlan} sub=${subId(sub)} lemon=${sub.lemonSubscriptionId}`,
+      err?.message,
+    )
+    throw err
+  }
+  firePlanChanged(sub, config, {
+    from: previousPlan,
+    charged: charged ? quote.amount : null,
+    ref: `${subId(sub)}-${previousPlan}-${sub.plan}-${Date.now()}`,
+  })
+  return {
+    requiresPayment: false,
+    charged,
+    plan: sub.plan,
+    previousPlan,
+    quota: targetQuota,
+    cycle: sub.cycle,
     priceEffectiveAt: sub.currentPeriodEnd || null,
   }
 }

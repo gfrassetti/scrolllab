@@ -79,6 +79,13 @@ export const subscriptionsRepo = {
       return fileDb.findSubscriptionByPreapproval(preapprovalId);
     return MongoSubscription.findOne({ mpPreapprovalId: String(preapprovalId) });
   },
+  /** Suscripción de Lemon Squeezy por el id de su suscripción. */
+  async findSubscriptionByLemon(lemonSubscriptionId) {
+    if (!lemonSubscriptionId) return null;
+    return isFileMode()
+      ? fileDb.findSubscriptionByLemon(lemonSubscriptionId)
+      : MongoSubscription.findOne({ lemonSubscriptionId: String(lemonSubscriptionId) });
+  },
   // Vigente = `authorized` o `paused` (una pausa respeta lo ya pagado).
   /**
    * Suscripción de Paddle por el id de la suscripción o, antes de que exista,

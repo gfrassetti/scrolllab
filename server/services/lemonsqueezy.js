@@ -205,3 +205,192 @@ export function parseLemonEvent(payload) {
     testMode: Boolean(a.test_mode),
   }
 }
+
+// ——— LAB (suscripciones) ———
+
+/**
+ * Los planes de LAB son variantes de catálogo de un producto de suscripción
+ * («ScrollLab LAB»): una por plan y ciclo, con el precio de lista y 7 días de prueba.
+ * No hacen falta ids en variables: se buscan por nombre en la tienda (el nombre de la
+ * variante empieza con el tier, el ciclo lo da su `interval`). Cambiar de plan es
+ * cambiar de variante, así que el precio tiene que vivir en la variante.
+ */
+const LAB_PRODUCT = /scroll\s*lab\s+lab/i
+const variantCache = new Map()
+const VARIANT_TTL_MS = 10 * 60 * 1000
+
+/** Todas las variantes de LAB de la tienda: `{ id, tier, cycle, priceCents, trialDays }`. */
+export async function listLabVariants(config) {
+  const key = `${config.lemon.storeId}:${config.lemon.testMode ? 'test' : 'live'}`
+  const hit = variantCache.get(key)
+  if (hit && Date.now() - hit.at < VARIANT_TTL_MS) return hit.variants
+  const products = await lemonRequest(
+    config,
+    'GET',
+    `/products?filter%5Bstore_id%5D=${encodeURIComponent(config.lemon.storeId)}&page%5Bsize%5D=50`,
+  )
+  const product = (products?.data || []).find((p) => LAB_PRODUCT.test(String(p?.attributes?.name || '')))
+  if (!product) throw new LemonError('No hay un producto «ScrollLab LAB» en la tienda', { status: 503 })
+  const json = await lemonRequest(
+    config,
+    'GET',
+    `/variants?filter%5Bproduct_id%5D=${encodeURIComponent(product.id)}&page%5Bsize%5D=50`,
+  )
+  const variants = (json?.data || [])
+    .map((v) => {
+      const a = v.attributes || {}
+      const name = String(a.name || '').toLowerCase()
+      const tier = ['starter', 'pro', 'studio'].find((t) => name.startsWith(t))
+      const cycle = a.interval === 'year' ? 'yearly' : a.interval === 'month' ? 'monthly' : null
+      return {
+        id: String(v.id),
+        tier,
+        cycle,
+        priceCents: Number(a.price),
+        trialDays: a.has_free_trial ? Number(a.trial_interval_count || 0) * (a.trial_interval === 'week' ? 7 : 1) : 0,
+        status: a.status,
+      }
+    })
+    .filter((v) => v.tier && v.cycle && v.status !== 'draft')
+  variantCache.set(key, { at: Date.now(), variants })
+  return variants
+}
+
+/** Para los tests: olvida lo que se leyó de la tienda. */
+export function resetLabVariantCache() {
+  variantCache.clear()
+}
+
+/**
+ * La variante de un plan y ciclo. Su precio tiene que ser el de lista: si alguien lo
+ * cambió en el panel, no se vende (cobraría otra cosa que la que mostramos).
+ * @param {any} config
+ * @param {string} tier starter | pro | studio
+ * @param {'monthly' | 'yearly'} cycle
+ * @param {number} expectedUsd
+ */
+export async function resolveLabVariant(config, tier, cycle, expectedUsd) {
+  const variants = await listLabVariants(config)
+  const v = variants.find((x) => x.tier === tier && x.cycle === cycle)
+  if (!v) throw new LemonError(`Falta la variante de LAB ${tier}/${cycle} en Lemon Squeezy`, { status: 503 })
+  if (v.priceCents !== usdCents(expectedUsd)) {
+    throw new LemonError(
+      `La variante de LAB ${tier}/${cycle} cuesta ${v.priceCents} centavos y la lista dice ${usdCents(expectedUsd)}`,
+      { status: 503 },
+    )
+  }
+  return v
+}
+
+/** El plan y ciclo de una variante (o null si no es de LAB). */
+export async function labPlanOfVariant(config, variantId) {
+  const variants = await listLabVariants(config)
+  return variants.find((v) => v.id === String(variantId)) || null
+}
+
+/**
+ * Checkout del alta de LAB. `skipTrial`: sin la prueba de la variante (no le
+ * corresponde, o la fija el servidor con `trial_ends_at` apenas se crea la
+ * suscripción, como los días ya pagos de una baja).
+ * @param {{ storeId: string, variantId: string, subscriptionId: string, userId: string, email?: string,
+ *   name?: string, redirectUrl: string, skipTrial: boolean, testMode?: boolean }} args
+ */
+export function buildSubscriptionCheckoutBody({ storeId, variantId, subscriptionId, userId, email, name, redirectUrl, skipTrial, testMode = false }) {
+  return {
+    data: {
+      type: 'checkouts',
+      attributes: {
+        product_options: { redirect_url: redirectUrl, receipt_button_text: 'Open LAB', receipt_link_url: redirectUrl },
+        checkout_options: { embed: false, media: false, logo: true, desc: true, discount: false, skip_trial: Boolean(skipTrial) },
+        checkout_data: {
+          ...(email ? { email } : {}),
+          ...(name ? { name } : {}),
+          custom: { kind: 'lab', subscriptionId: String(subscriptionId), userId: String(userId) },
+        },
+        test_mode: Boolean(testMode),
+      },
+      relationships: {
+        store: { data: { type: 'stores', id: String(storeId) } },
+        variant: { data: { type: 'variants', id: String(variantId) } },
+      },
+    },
+  }
+}
+
+export async function getSubscription(config, id) {
+  const json = await lemonRequest(config, 'GET', `/subscriptions/${encodeURIComponent(id)}`)
+  return json?.data
+}
+
+/** PATCH de una suscripción: `variant_id`, `cancelled`, `trial_ends_at`, `invoice_immediately`, `disable_prorations`… */
+export async function updateSubscription(config, id, attributes) {
+  const json = await lemonRequest(config, 'PATCH', `/subscriptions/${encodeURIComponent(id)}`, {
+    data: { type: 'subscriptions', id: String(id), attributes },
+  })
+  return json?.data
+}
+
+/** Baja: Lemon Squeezy la deja `cancelled` y corta al fin del período pago (`ends_at`). */
+export async function cancelSubscription(config, id) {
+  const json = await lemonRequest(config, 'DELETE', `/subscriptions/${encodeURIComponent(id)}`)
+  return json?.data
+}
+
+/** Reembolso de una factura de suscripción (sin monto: total). */
+export async function refundSubscriptionInvoice(config, id, amountCents) {
+  const attributes = amountCents ? { amount: Math.round(amountCents) } : {}
+  const json = await lemonRequest(config, 'POST', `/subscription-invoices/${encodeURIComponent(id)}/refund`, {
+    data: { type: 'subscription-invoices', id: String(id), attributes },
+  })
+  return json?.data
+}
+
+const dateOrNull = (v) => (v ? new Date(v) : null)
+
+/** Lo que importa de una suscripción de Lemon Squeezy. */
+export function parseLemonSubscription(data) {
+  const a = data?.attributes || {}
+  return {
+    id: data?.id != null ? String(data.id) : '',
+    status: String(a.status || ''),
+    variantId: a.variant_id != null ? String(a.variant_id) : '',
+    customerId: a.customer_id != null ? String(a.customer_id) : '',
+    cancelled: Boolean(a.cancelled),
+    renewsAt: dateOrNull(a.renews_at),
+    endsAt: dateOrNull(a.ends_at),
+    trialEndsAt: dateOrNull(a.trial_ends_at),
+    testMode: Boolean(a.test_mode),
+    updatePaymentUrl: a.urls?.update_payment_method || null,
+    email: String(a.user_email || ''),
+  }
+}
+
+/** Lo que importa de una factura de suscripción (cobro inicial, renovación o diferencia). */
+export function parseLemonInvoice(data) {
+  const a = data?.attributes || {}
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : null)
+  return {
+    id: data?.id != null ? String(data.id) : '',
+    subscriptionId: a.subscription_id != null ? String(a.subscription_id) : '',
+    billingReason: String(a.billing_reason || ''),
+    status: String(a.status || ''),
+    totalCents: num(a.total),
+    subtotalCents: num(a.subtotal),
+    discountCents: num(a.discount_total) || 0,
+    refundedAmountCents: num(a.refunded_amount),
+    currency: String(a.currency || ''),
+    createdAt: dateOrNull(a.created_at) || new Date(),
+    testMode: Boolean(a.test_mode),
+    email: String(a.user_email || ''),
+  }
+}
+
+/** Suscripciones de la tienda de un mail (la vuelta del checkout, antes del webhook). */
+export async function listSubscriptionsByEmail(config, email) {
+  const json = await lemonRequest(
+    config,
+    'GET',
+    `/subscriptions?filter%5Bstore_id%5D=${encodeURIComponent(config.lemon.storeId)}&filter%5Buser_email%5D=${encodeURIComponent(email)}&page%5Bsize%5D=25`,
+  )
+  return json?.data || []
+}
