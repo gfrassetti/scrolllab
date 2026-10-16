@@ -253,9 +253,12 @@ export default function FlavorWorlds({
       )
       const lines = panels.map((panel) => panel.querySelectorAll('[data-world-line]'))
       gsap.set(panels, { autoAlpha: 0 })
+      // El sabor que no está en escena queda inerte (sin foco ni lectura).
+      panels.forEach((panel) => { panel.inert = true })
 
       const copyOut = (i) => {
         if (i < 0) return
+        panels[i].inert = true
         gsap.to(gsap.utils.shuffle([...splits[i].chars]), {
           yPercent: 100,
           scale: 0.8,
@@ -270,6 +273,7 @@ export default function FlavorWorlds({
       }
       const copyIn = (i, delay) => {
         if (i < 0) return
+        panels[i].inert = false
         gsap.set(panels[i], { autoAlpha: 1, overwrite: true })
         gsap.fromTo(
           gsap.utils.shuffle([...splits[i].chars]),
