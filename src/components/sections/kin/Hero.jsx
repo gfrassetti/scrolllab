@@ -660,6 +660,16 @@ export default function Hero({
       // In a builder composition the hero may sit further down the page:
       // then there is no loader (it would yank the page to the top); the
       // word is simply set and the scroll beat takes over.
+      // En un teléfono la barra del navegador cambia solo el alto al scrollear:
+      // no es un cambio de pantalla (ScrollTrigger lo ignora igual,
+      // `ignoreMobileResize`), así que no se rehace el riel ni se re-mide.
+      let lastW = window.innerWidth
+      const heightOnly = () => {
+        const same = window.innerWidth === lastW
+        lastW = window.innerWidth
+        return same && window.matchMedia('(pointer: coarse)').matches
+      }
+
       const atTop = root.getBoundingClientRect().top + window.scrollY < 10
       if (!atTop) {
         gsap.set(layer, { zIndex: 30 })
@@ -668,6 +678,7 @@ export default function Hero({
         ScrollTrigger.refresh()
         let staticTimer = 0
         const onResizeStatic = () => {
+          if (heightOnly()) return
           window.clearTimeout(staticTimer)
           staticTimer = window.setTimeout(() => {
             buildScroll()
@@ -778,7 +789,7 @@ export default function Hero({
 
       let resizeTimer = 0
       const onResize = () => {
-        if (loader.isActive()) return
+        if (loader.isActive() || heightOnly()) return
         window.clearTimeout(resizeTimer)
         resizeTimer = window.setTimeout(() => {
           buildScroll()
