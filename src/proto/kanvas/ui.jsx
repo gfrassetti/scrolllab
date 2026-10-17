@@ -15,18 +15,13 @@ export const AMBER = '#f3b04f'
 export const INK = '#15111d'
 
 /**
- * Tipografías de titulares para comparar: mayúsculas de inscripción, de filo clásico y serio (el
- * registro de un juego de rol épico, no de un shooter). Todas de Google Fonts. `scale` iguala el
- * ancho visual entre ellas para el mismo renglón.
+ * Titulares: Big Shoulders Display en negra, una condensada de arena / esports (elegida por el dueño
+ * entre 12 opciones). `scale` es su tamaño relativo: como es angosta, va más grande que una de ancho
+ * normal para el mismo renglón.
  */
-export const FONTS = {
-  cinzel: { label: 'Cinzel', family: "'Cinzel'", weight: 900, tracking: '0.01em', scale: 0.8 },
-  spectral: { label: 'Spectral SC', family: "'Spectral SC'", weight: 800, tracking: '0', scale: 0.86 },
-  alegreya: { label: 'Alegreya SC', family: "'Alegreya SC'", weight: 900, tracking: '0', scale: 0.92 },
-  marcellus: { label: 'Marcellus SC', family: "'Marcellus SC'", weight: 400, tracking: '0.02em', scale: 0.84 },
-}
+export const DISPLAY = { family: "'Big Shoulders Display'", weight: 900, tracking: '0.005em', scale: 1.3 }
 export const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Spectral+SC:wght@400;800&family=Alegreya+SC:wght@400;900&family=Marcellus+SC&family=Barlow:wght@400;500&family=Barlow+Semi+Condensed:wght@500;600&display=swap'
+  'https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500&family=Barlow+Semi+Condensed:wght@500;600&display=swap'
 
 export const KANVAS_CSS = `
 .kv { --pad: 20px; --bar: 56px; --rail: 0px; --radius: 4px; }
@@ -117,7 +112,7 @@ export function AudioWave({ on, onClick, className = '', icon = false, label = f
  * acento barre de izquierda a derecha y descubre el panel quieto detrás; los ítems llegan de a uno.
  * Queda dentro del margen del HUD: no toca los bordes de la pantalla.
  */
-export function Menu({ open, onClose, items, active, onGo, displayFont, footer }) {
+export function Menu({ open, onClose, items, active, onGo, footer }) {
   const root = useRef(null)
   const under = useRef(null)
   const outer = useRef(null)
@@ -192,7 +187,7 @@ export function Menu({ open, onClose, items, active, onGo, displayFont, footer }
                         active={it.id === active}
                         onClick={() => onGo(it)}
                         className="text-left text-[clamp(2.2rem,6.4vw,4.6rem)] uppercase"
-                        style={{ fontFamily: displayFont.family, fontWeight: displayFont.weight, letterSpacing: displayFont.tracking, fontSize: `calc(clamp(2.2rem,6.4vw,4.6rem) * ${displayFont.scale})`, '--rl-to': AMBER, '--fg': '#fff' }}
+                        style={{ fontFamily: DISPLAY.family, fontWeight: DISPLAY.weight, letterSpacing: DISPLAY.tracking, fontSize: `calc(clamp(2.2rem,6.4vw,4.6rem) * ${DISPLAY.scale})`, '--rl-to': AMBER, '--fg': '#fff' }}
                       />
                     </li>
                   ))}

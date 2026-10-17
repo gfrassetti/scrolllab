@@ -189,6 +189,12 @@ que crear una textura nueva en cada redibujo.
 Hecho: carga con el nombre, hero 3D con cámara al scroll e inclinación al mouse, hero → lámina
 inclinada, tres láminas vivas, HUD, menú, hover, sonido, teléfono.
 
-Pendiente: tipografía final (el selector «Type» del prototipo compara opciones), shader pintado,
+Tipografía (elegida por el dueño entre 12 opciones, 2026-10-16): **Big Shoulders Display** en negra para
+titulares, el nombre de la carga y el menú (`DISPLAY` en `ui.jsx`); **Barlow Semi Condensed** en
+mayúsculas espaciadas para la UI y **Barlow** para el texto corrido. Se descartaron Fraunces
+(«falta videojuego»), Tektur / Unbounded / Oxanium / Michroma («muy Fortnite») y Cinzel / Spectral SC /
+Alegreya SC / Marcellus SC.
+
+Pendiente: shader pintado,
 más secciones (facciones, mundo), personajes pintados originales estilo serie animada (con créditos de
 Higgsfield o Meshy), giroscopio en el teléfono, nombre definitivo.

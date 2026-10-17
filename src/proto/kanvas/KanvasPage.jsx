@@ -4,7 +4,7 @@ import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
 import { createAudio } from './audio'
-import { AMBER, AudioWave, BODY, FONTS, FONTS_HREF, KANVAS_CSS, Menu, LABEL, RollLink, useSubscribed } from './ui'
+import { AMBER, AudioWave, BODY, DISPLAY, FONTS_HREF, KANVAS_CSS, Menu, LABEL, RollLink, useSubscribed } from './ui'
 
 /**
  * Kanvas — prototipo (solo local) con la arquitectura de la referencia y una identidad propia: VESPER,
@@ -114,16 +114,7 @@ function Kanvas() {
   const [stage, setStage] = useState('load') // load → word → open → done
   const [active, setActive] = useState('atlas')
   const [menu, setMenu] = useState(false)
-  // la tipografía de titulares, para comparar: ?font=cinzel | spectral | alegreya | marcellus
-  const [fontId, setFontId] = useState(() => {
-    const q = new URLSearchParams(window.location.search).get('font')
-    return FONTS[q] ? q : 'cinzel'
-  })
-  const font = FONTS[fontId]
-  const fontRef = useRef(font)
-  useEffect(() => {
-    fontRef.current = font
-  }, [font])
+  const font = DISPLAY
   const audio = useMemo(() => createAudio(), [])
   const audioOn = useSubscribed(audio, false)
 
@@ -159,7 +150,7 @@ function Kanvas() {
       const { W, H } = k.size()
       const dpr = Math.min(2, window.devicePixelRatio || 1)
       const g = wordCanvas.getContext('2d')
-      const f = fontRef.current
+      const f = DISPLAY
       const css = (px) => `${f.weight} ${px}px ${f.family}, system-ui, sans-serif`
       let fs = 200
       g.font = css(fs)
@@ -194,7 +185,7 @@ function Kanvas() {
       manager.itemEnd('fonts')
     }
     fontsLink.onload = () => {
-      const f = fontRef.current
+      const f = DISPLAY
       Promise.all([document.fonts.load(`${f.weight} 120px ${f.family}`), document.fonts.load("500 12px 'Barlow Semi Condensed'"), document.fonts.load("400 16px 'Barlow'")]).finally(fontsReady)
     }
     fontsLink.onerror = fontsReady
@@ -511,17 +502,10 @@ function Kanvas() {
     setMenu(false)
   }, [audio])
 
-
   const set = (key) => (el) => (R.current[key] = el)
   const display = { fontFamily: font.family, fontWeight: font.weight, letterSpacing: font.tracking }
   const layer = 'fixed inset-0 h-svh w-full'
   const inset = 'calc(var(--pad) + 28px)'
-  const pickFont = (id) => {
-    setFontId(id)
-    const u = new URL(window.location.href)
-    u.searchParams.set('font', id)
-    window.history.replaceState(null, '', u)
-  }
 
   return (
     <div className="kv" style={{ color: INK, fontFamily: BODY }}>
@@ -623,7 +607,7 @@ function Kanvas() {
               <h2
                 ref={set('ink')}
                 className="leading-[0.98] md:col-span-10"
-                style={{ fontFamily: font.family, fontWeight: Math.min(font.weight, 600), letterSpacing: font.tracking, fontSize: `calc(clamp(2rem, 4.6vw, 5rem) * ${font.scale})`, color: 'rgb(205,205,205)' }}
+                style={{ fontFamily: font.family, fontWeight: 800, letterSpacing: font.tracking, fontSize: `calc(clamp(2rem, 4.6vw, 5rem) * ${font.scale})`, color: 'rgb(205,205,205)' }}
               >
                 Every map was drawn by someone who left.
               </h2>
@@ -669,11 +653,11 @@ function Kanvas() {
               <button type="button" onClick={openMenu} aria-label="Open menu" className="pointer-events-auto flex h-11 w-11 cursor-pointer items-center justify-center">
                 <Burger />
               </button>
-              <span className="hidden text-[18px] uppercase md:inline" style={{ ...display, fontSize: `${20 * font.scale}px`, letterSpacing: '0.14em' }}>
+              <span className="hidden text-[18px] uppercase md:inline" style={{ ...display, fontSize: `${20 * font.scale}px`, letterSpacing: '0.08em' }}>
                 {NAME}
               </span>
             </div>
-            <span className="absolute left-1/2 -translate-x-1/2 text-[18px] uppercase md:hidden" style={{ ...display, fontSize: `${18 * font.scale}px`, letterSpacing: '0.14em' }}>
+            <span className="absolute left-1/2 -translate-x-1/2 text-[18px] uppercase md:hidden" style={{ ...display, fontSize: `${18 * font.scale}px`, letterSpacing: '0.08em' }}>
               {NAME}
             </span>
             <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[12px] tracking-[0.1em] uppercase md:flex" style={{ fontFamily: LABEL }} aria-label="Sections">
@@ -719,17 +703,7 @@ function Kanvas() {
         </div>
       </div>
 
-      {/* Solo del prototipo: para comparar tipografías de titulares en vivo. */}
-      <div className="fixed bottom-[calc(var(--pad)+10px)] left-[calc(var(--pad)+130px)] z-30 hidden items-center gap-1 rounded-sm bg-black/55 p-1 text-[10px] tracking-[0.08em] text-white uppercase backdrop-blur md:flex" style={{ fontFamily: LABEL }}>
-        <span className="px-2 opacity-60">Type</span>
-        {Object.entries(FONTS).map(([id, f]) => (
-          <button key={id} type="button" onClick={() => pickFont(id)} className="cursor-pointer rounded-sm px-2 py-1" style={id === fontId ? { background: AMBER, color: INK } : null}>
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      <Menu open={menu} onClose={closeMenu} items={MENU} active={active} onGo={go} displayFont={font} footer={<MenuFooter onGo={go} audioOn={audioOn} onAudio={() => audio.toggle()} />} />
+      <Menu open={menu} onClose={closeMenu} items={MENU} active={active} onGo={go} footer={<MenuFooter onGo={go} audioOn={audioOn} onAudio={() => audio.toggle()} />} />
     </div>
   )
 }
