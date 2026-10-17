@@ -1,46 +1,102 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
-
-import cardA from '../../components/sections/atelier/assets/card-1.webp'
-import cardB from '../../components/sections/apex/assets/lounge.webp'
-import cardC from '../../components/sections/atelier/assets/work-3.webp'
+import { createAudio } from './audio'
+import { AudioWave, HackLink, KANVAS_CSS, Mark, Menu, MONO, SERIF, useSubscribed } from './ui'
 
 /**
- * Kanvas v2 — prototipo técnico (solo local) con la arquitectura de la referencia:
+ * Kanvas — prototipo (solo local) con la arquitectura de la referencia y una identidad propia: VESPER,
+ * un atlas ilustrado.
  *
- *   · Un RELOJ único: el scroll (Lenis) produce un progreso 0 → 1 para todo el sitio. No hay
- *     secciones en el flujo de la página ni `sticky`: un espaciador da el largo del scroll y nada más.
- *   · Una capa CANVAS fija (todo lo que es imagen o 3D) y una capa UI fija encima (texto, HUD), con
- *     las secciones APILADAS: el progreso decide cuál se ve, cuál entra y cuál sale.
- *   · El hero es una ESCENA 3D (GLB hecho en Blender, con su cámara animada adentro). El progreso
- *     reproduce esa cámara; el puntero la hace orbitar un poco. Al alejarse, la escena queda dentro
- *     de una card con forma de carpeta, en el mismo canvas.
+ *   · Un RELOJ único: el scroll (Lenis) produce un progreso 0 → 1. No hay secciones en el flujo de la
+ *     página: un espaciador da el largo del scroll y nada más.
+ *   · Una capa CANVAS fija (todo lo que es imagen o 3D) y una capa UI fija encima, con las secciones
+ *     APILADAS: el progreso decide cuál se ve.
+ *   · La carga: la línea de progreso estalla en vetas que se juntan en el nombre; el nombre se pliega
+ *     en la línea del horizonte y el horizonte se abre como un ojo sobre la escena.
+ *   · El hero es una ESCENA 3D (GLB hecho en Blender, con su cámara animada adentro) que se aleja y
+ *     queda como una lámina inclinada, una de las tres de la sección siguiente. Las otras dos son la
+ *     misma escena vista por otras cámaras: nada de fotos.
  *
- * El arte es provisorio (la isla es una prueba propia; las cards son fotos de APEX / ATELIER).
+ * El arte es provisorio (formas simples en Blender) hasta tener los modelos pintados.
  */
 
+const NAME = 'VESPER'
 const CREAM = '#ede8df'
 const WHITE = '#ffffff'
-const SCROLL_SCREENS = 6 // largo del recorrido, en pantallas
+const INK = '#15111d'
+const SCROLL_SCREENS = 6
 
 // El guion, en progreso (0 → 1).
 const T = {
-  heroOut: [0.12, 0.2], // el titular del hero se va
-  morph: [0.2, 0.46], // el hero se aleja y queda como card
-  tableIn: [0.3, 0.46], // la sección siguiente sube a su lugar
-  ink: [0.42, 0.58], // su titular se entinta
+  heroOut: [0.06, 0.16], // el titular y el párrafo del hero se desvanecen
+  morph: [0.14, 0.46], // el hero se aleja y queda como lámina
+  tableIn: [0.28, 0.46], // la sección siguiente sube a su lugar
+  ink: [0.4, 0.56], // su titular se entinta
 }
 
-// Las cards son «láminas del atlas»: arco arriba (como una ventana), esquinas de abajo apenas
-// redondeadas. Una silueta propia, no la carpeta de la referencia.
+// Las láminas del atlas: arco arriba, esquinas de abajo apenas redondeadas.
 const CARD_SHAPE = (w) => ({ top: w / 2, bottom: Math.min(14, w * 0.04) })
+
+// Las otras dos láminas: la misma escena desde otras cámaras (coordenadas de three, y arriba).
+const VIEWS = [
+  { pos: [-0.15, 0.95, 4.4], at: [-0.6, 0.62, 1.6], fov: 34 }, // los tres viajeros
+  { pos: [2.5, 0.05, 3.5], at: [0.3, 2.5, 0.2], fov: 46 }, // la torre y el cristal, desde abajo
+]
+
+const NAV = [
+  { id: 'atlas', label: 'Atlas', p: 0, leaf: '01' },
+  { id: 'isles', label: 'The Isles', p: 0.62, leaf: '02' },
+  { id: 'wayfarers', label: 'Wayfarers', p: 0.62, leaf: '03' },
+  { id: 'chronicle', label: 'Chronicle', p: 1, leaf: '04' },
+]
+const MENU = [
+  { id: 'atlas', label: 'Atlas', p: 0, leaf: '01' },
+  { id: 'isles', label: 'The Isles', p: 0.62, leaf: '02' },
+  { id: 'wayfarers', label: 'Wayfarers', p: 0.62, leaf: '03' },
+  { id: 'chronicle', label: 'Chronicle', p: 1, leaf: '04' },
+  { id: 'gallery', label: 'Gallery', p: 1, leaf: '05' },
+  { id: 'about', label: 'About', p: 1, leaf: '06' },
+]
+
+// La palabra de la carga: cada fila de píxeles es una veta que llega desde un costado, estirada
+// (lee una sola línea del glifo) y se acomoda en su lugar. Mientras llega, se repite (las copias que
+// barren la pantalla) y parpadea. Al plegarse, todas las filas leen la línea del medio: el nombre se
+// vuelve una raya, que es el horizonte que después se abre.
+const WORD_FRAG = /* glsl */ `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uMap;
+uniform vec3 uTint;
+uniform float uAlpha;
+uniform float uForm;
+uniform float uFold;
+uniform float uTime;
+float hash(float n) { return fract(sin(n * 91.3458) * 47453.5453); }
+void main() {
+  const float N = 30.0;
+  float row = floor(vUv.y * N);
+  float r = hash(row + 3.0);
+  float e = clamp((uForm - r * 0.5) / 0.5, 0.0, 1.0);
+  e = 1.0 - pow(1.0 - e, 3.0);
+  float side = mod(row, 2.0) < 1.0 ? -1.0 : 1.0;
+  float sx = vUv.x + (1.0 - e) * side * (0.3 + r * 1.1);
+  float sy = mix((row + 0.5) / N, vUv.y, e);
+  sy = mix(sy, 0.5, uFold);
+  float a = texture2D(uMap, vec2(fract(sx), sy)).a;
+  float blink = step(0.8, hash(row * 7.0 + floor(uTime * 16.0)));
+  a *= 1.0 - blink * (1.0 - e);
+  a *= smoothstep(0.0, 0.06, uForm - r * 0.5 + 0.06);
+  gl_FragColor = vec4(uTint, a * uAlpha);
+}
+`
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const easeOut = (t) => 1 - (1 - t) ** 3
 const seg = (p, [a, b]) => clamp01((p - a) / (b - a))
+const DEG = Math.PI / 180
 
 export default function KanvasPage() {
   return (
@@ -55,7 +111,13 @@ function Kanvas() {
   const spacerRef = useRef(null)
   const R = useRef({ slots: [] })
   const loadRef = useRef(null)
-  const [ready, setReady] = useState(false)
+  const [stage, setStage] = useState('load') // load → word → open → done
+  const [active, setActive] = useState('atlas')
+  const [menu, setMenu] = useState(false)
+  const audio = useMemo(() => createAudio(), [])
+  const audioOn = useSubscribed(audio, false)
+
+  useEffect(() => () => audio.dispose(), [audio])
 
   useEffect(() => {
     const lenis = getLenis()
@@ -64,32 +126,71 @@ function Kanvas() {
     const k = createKanvas(canvasRef.current, { clear: WHITE })
     const { THREE } = k
     const r = R.current
-
-    // --- carga real: el GLB y las fotos ---------------------------------------------------------
-    const manager = new THREE.LoadingManager()
-    const texLoader = new THREE.TextureLoader(manager)
-    const tex = (src) => {
-      const t = texLoader.load(src, (tt) => {
-        tt.userData.size = [tt.image.width, tt.image.height]
-        k.renderer.initTexture(tt)
-      })
-      t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = 4
-      return t
+    let stageNow = 'load'
+    let activeNow = 'atlas'
+    let themeNow = ''
+    const toStage = (s) => {
+      if (s === stageNow) return
+      stageNow = s
+      setStage(s)
     }
-    const tCards = [tex(cardA), tex(cardB), tex(cardC)]
-    const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1)
-    white.needsUpdate = true
 
-    const boot = { prog: 0, shown: 0, reveal: 0, loaded: false }
+    // --- carga real: el GLB y las tipografías ---------------------------------------------------
+    const manager = new THREE.LoadingManager()
+    const boot = { prog: 0, shown: 0, loaded: false, form: 0, hold: 0, fold: 0, reveal: 0 }
     manager.onProgress = (_u, done, total) => (boot.prog = done / total)
     manager.onLoad = () => (boot.loaded = true)
 
-    // --- la escena 3D del hero, dibujada en una textura -------------------------------------------
+    // --- la palabra de la carga, dibujada en una textura ----------------------------------------
+    const wordCanvas = document.createElement('canvas')
+    let wordTex = null
+    const word = { h: 1, ready: false }
+    const drawWord = () => {
+      const { W, H } = k.size()
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      const g = wordCanvas.getContext('2d')
+      let fs = 200
+      g.font = `800 ${fs}px Fraunces, Georgia, serif`
+      const span = W < 768 ? 0.9 : 0.8
+      fs = Math.min((fs * W * span) / g.measureText(NAME).width, H * 0.42)
+      word.h = Math.round(fs * 0.9)
+      wordCanvas.width = Math.min(4096, Math.round(W * dpr))
+      wordCanvas.height = Math.round(word.h * dpr)
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      g.clearRect(0, 0, W, word.h)
+      g.font = `800 ${fs}px Fraunces, Georgia, serif`
+      if ('letterSpacing' in g) g.letterSpacing = `${-fs * 0.03}px`
+      g.fillStyle = '#fff'
+      g.textAlign = 'center'
+      const cap = g.measureText('V').actualBoundingBoxAscent || fs * 0.7
+      g.fillText(NAME, W / 2, word.h / 2 + cap / 2)
+      // textura nueva en cada dibujo: la anterior quedó reservada con otro tamaño en la GPU
+      wordTex?.dispose()
+      wordTex = new THREE.CanvasTexture(wordCanvas)
+      wordPlane.u.uMap.value = wordTex
+      word.ready = true
+    }
+    manager.itemStart('fonts')
+    const fontsLink = document.createElement('link')
+    fontsLink.rel = 'stylesheet'
+    fontsLink.href =
+      'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500&display=swap'
+    let fontsDone = false
+    const fontsReady = () => {
+      if (fontsDone) return
+      fontsDone = true
+      drawWord()
+      manager.itemEnd('fonts')
+    }
+    fontsLink.onload = () => Promise.all([document.fonts.load("800 120px 'Fraunces'"), document.fonts.load("400 12px 'JetBrains Mono'")]).finally(fontsReady)
+    fontsLink.onerror = fontsReady
+    const fontsTimeout = setTimeout(fontsReady, 4000)
+    document.head.appendChild(fontsLink)
+
+    // --- la escena 3D del hero ------------------------------------------------------------------
     const rt = new THREE.WebGLRenderTarget(16, 16, { samples: 4 })
     rt.texture.colorSpace = THREE.SRGBColorSpace
     const hero = new THREE.Scene()
-    // cielo: degradado pintado (lavanda arriba, durazno al horizonte)
     const sky = document.createElement('canvas')
     sky.width = 4
     sky.height = 256
@@ -108,7 +209,6 @@ function Kanvas() {
     const sun = new THREE.DirectionalLight('#ffe2c4', 2.4)
     sun.position.set(4, 6, 3)
     hero.add(sun)
-    // sombreado «pintado»: tres tonos por cara, con el color por vértice del GLB
     const ramp = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]), 3, 1)
     ramp.minFilter = ramp.magFilter = THREE.NearestFilter
     ramp.needsUpdate = true
@@ -118,9 +218,8 @@ function Kanvas() {
     let mixer = null
     let clipDur = 1
     let crystal = null
-    let lookAt = null // el «Camera_Target» del GLB: el punto que mira la cámara
-    let content = null // lo que se inclina al mouse
-    // La inclinación al mouse: con más peso que el puntero (amortiguado propio, λ ≈ 2,6).
+    let lookAt = null
+    let content = null
     const tilt = { x: 0, y: 0 }
     const pivot = new THREE.Vector3()
     const qx = new THREE.Quaternion()
@@ -139,18 +238,20 @@ function Kanvas() {
         if (!o.isMesh) return
         o.material = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: ramp })
         const c = o.geometry.attributes.color
-        // el cristal: el único objeto verde agua
-        if (!crystal && c?.count && c.getY(0) > 0.85 && c.getX(0) < 0.5) {
+        if (!c?.count) return
+        const [cr, cg, cb] = [c.getX(0), c.getY(0), c.getZ(0)]
+        if (!crystal && cg > 0.85 && cr < 0.5) {
           crystal = o
           o.userData.baseY = o.position.y
           o.material.emissive = new THREE.Color('#2aa89a')
         }
+        // los faroles: se encienden
+        if (cr > 0.95 && cg > 0.75 && cb < 0.55) o.material.emissive = new THREE.Color('#ffb347')
       })
       root.add(g.scene)
       lookAt = g.scene.getObjectByName('Camera_Target') || null
-      // La cámara viene dentro del GLB: si se inclina todo, gira con la escena y no se nota nada.
       // El contenido (todo menos la cámara y su punto de mira) va a un grupo propio, que es el que se
-      // inclina. Sigue dentro de g.scene, así las animaciones lo encuentran por nombre.
+      // inclina con el mouse; la cámara del GLB queda afuera.
       content = new THREE.Group()
       content.name = 'content'
       for (const child of [...g.scene.children]) {
@@ -159,7 +260,6 @@ function Kanvas() {
       }
       g.scene.add(content)
       if (g.cameras[0]) heroCam = g.cameras[0]
-      // Todas las animaciones del GLB van juntas (la cámara y su punto de mira vienen por separado).
       if (g.animations.length) {
         mixer = new THREE.AnimationMixer(g.scene)
         for (const clip of g.animations) mixer.clipAction(clip).play()
@@ -168,11 +268,28 @@ function Kanvas() {
       fitHero()
     })
 
+    // las otras dos láminas: la misma escena, con su cámara y su textura
+    const views = VIEWS.map((v) => {
+      const cam = new THREE.PerspectiveCamera(v.fov, 1, 0.1, 100)
+      cam.position.set(...v.pos)
+      cam.lookAt(...v.at)
+      const vrt = new THREE.WebGLRenderTarget(16, 16, { samples: 4 })
+      vrt.texture.colorSpace = THREE.SRGBColorSpace
+      return { cam, rt: vrt }
+    })
+
+    const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1)
+    white.needsUpdate = true
+    const cardPlanes = views.map((v, i) => k.plane(v.rt.texture, [16, 16], 5 + i))
     const heroPlane = k.plane(rt.texture, [16, 16], 10)
     const linePlane = k.plane(white, [1, 1], 20)
-    linePlane.u.uTint.value.set('#0e0e12')
+    linePlane.u.uTint.value.set(INK)
     linePlane.u.uTintMix.value = 1
-    const cardPlanes = tCards.map((t, i) => k.plane(t, [1536, 1024], 5 + i))
+    const wordPlane = k.plane(white, [1, 1], 21, {
+      frag: WORD_FRAG,
+      uniforms: { uForm: { value: 0 }, uFold: { value: 0 }, uTime: { value: 0 } },
+    })
+    wordPlane.u.uTint.value.set(INK)
 
     // --- el reloj ---------------------------------------------------------------------------------
     const progress = (scrollY) => {
@@ -185,54 +302,89 @@ function Kanvas() {
       el.style.visibility = v > 0.001 ? 'visible' : 'hidden'
       el.style.transform = `translate3d(0, ${y}px, 0)`
     }
+    const renderView = (scene, cam, target, w, h) => {
+      const dpr = k.renderer.getPixelRatio()
+      const tw = Math.max(16, Math.round((w * dpr) / 8) * 8)
+      const th = Math.max(16, Math.round((h * dpr) / 8) * 8)
+      if (target.width !== tw || target.height !== th) target.setSize(tw, th)
+      cam.aspect = w / h
+      cam.updateProjectionMatrix()
+      k.renderer.setRenderTarget(target)
+      k.renderer.render(scene, cam)
+    }
 
     k.add({
-      onResize: () => fitHero(),
+      onResize: () => {
+        fitHero()
+        if (fontsDone) drawWord()
+      },
       update: ({ dt, now, W, H, scrollY, pointer }) => {
         const p = progress(scrollY)
 
-        // 1) carga: la línea avanza con la carga real y se abre en el hero
+        // 1) la carga: línea de progreso → el nombre se forma → se pliega en el horizonte → se abre
         boot.shown += (boot.prog - boot.shown) * (1 - Math.exp(-6 * dt))
         if (loadRef.current) loadRef.current.textContent = String(Math.round(boot.shown * 100)).padStart(2, '0')
-        if (boot.loaded && boot.shown > 0.995 && boot.reveal === 0) {
-          boot.reveal = 0.0001
-          setReady(true)
+        if (boot.loaded && word.ready && boot.shown > 0.995 && boot.form === 0) {
+          boot.form = 0.0001
+          toStage('word')
         }
-        if (boot.reveal > 0 && boot.reveal < 1) boot.reveal = Math.min(1, boot.reveal + dt / 1.6)
+        if (boot.form > 0 && boot.form < 1) boot.form = Math.min(1, boot.form + dt / 1.6)
+        if (boot.form >= 1 && boot.hold < 1) boot.hold = Math.min(1, boot.hold + dt / 0.8)
+        if (boot.hold >= 1 && boot.fold < 1) boot.fold = Math.min(1, boot.fold + dt / 0.6)
+        if (boot.fold >= 1 && boot.reveal === 0) {
+          boot.reveal = 0.0001
+          toStage('open')
+        }
+        if (boot.reveal > 0 && boot.reveal < 1) {
+          boot.reveal = Math.min(1, boot.reveal + dt / 1.6)
+          if (boot.reveal >= 1) toStage('done')
+        }
         const rv = easeInOut(boot.reveal)
         const lw = W * 0.56
         const lx = (W - lw) / 2
         const ly = H / 2
-        linePlane.rect(lx, ly - 1, lw * Math.min(1, boot.shown), 2)
-        linePlane.u.uAlpha.value = 1 - clamp01(rv * 6)
 
-        // 2) el hero: de la línea a pantalla completa; con el progreso, a su card
+        const fo = easeInOut(boot.fold)
+        const wh = lerp(word.h, 2, fo)
+        wordPlane.rect(lerp(0, lx, fo), H / 2 - wh / 2, lerp(W, lw, fo), wh)
+        wordPlane.u.uForm.value = boot.form
+        wordPlane.u.uFold.value = clamp01(boot.fold * 1.6)
+        wordPlane.u.uTime.value = now / 1000
+        wordPlane.u.uAlpha.value = boot.form > 0 ? 1 - clamp01((boot.fold - 0.8) / 0.2) : 0
+        wordPlane.mesh.visible = wordPlane.mesh.visible && boot.reveal === 0
+
+        linePlane.rect(lx, ly - 1, boot.form > 0 ? lw : lw * Math.min(1, boot.shown), 2)
+        linePlane.u.uAlpha.value =
+          boot.reveal > 0 ? 1 - clamp01(rv * 6) : boot.fold > 0 ? clamp01((boot.fold - 0.55) / 0.35) : 1 - clamp01(boot.form * 5)
+
+        // 2) el hero: del horizonte a pantalla completa; con el progreso, a su lámina inclinada
         const m = rv >= 1 ? easeInOut(seg(p, T.morph)) : 0
         const dest = r.dest?.getBoundingClientRect()
-        // primero se abre en alto (el ojo) y recién después se estira a los bordes
         const ro = easeInOut(clamp01(boot.reveal / 0.7))
         const rw = easeInOut(clamp01((boot.reveal - 0.3) / 0.7))
         let rect = { x: lerp(lx, 0, rw), y: lerp(ly - 1, 0, ro), w: lerp(lw, W, rw), h: lerp(2, H, ro) }
+        let rot = 0
         if (dest && m > 0) {
           rect = { x: lerp(0, dest.left, m), y: lerp(0, dest.top, m), w: lerp(W, dest.width, m), h: lerp(H, dest.height, m) }
+          rot = Number(r.dest.dataset.rot || 0) * DEG * m
         }
-        heroPlane.rect(rect.x, rect.y, rect.w, rect.h)
+        heroPlane.rect(rect.x, rect.y, rect.w, rect.h, rot)
+        // la ventana del marco: lo que sube más allá de la barra de arriba se corta en su línea
+        const fr = W < 768 ? { pad: 10, rail: 0, bar: 52 } : { pad: 20, rail: 67, bar: 51 }
+        const win = { x: fr.pad + fr.rail, y: fr.pad + fr.bar, w: W - fr.pad * 2 - fr.rail, h: H - fr.pad * 2 - fr.bar }
+        heroPlane.clip(lerp(0, win.x, m), lerp(0, win.y, m), lerp(W, win.w, m), lerp(H, win.h, m))
         heroPlane.u.uMapSize.value.set(rt.width, rt.height)
         if (m > 0) {
-          // de pantalla completa a lámina: el arco de arriba crece con el alejamiento
           const sh = CARD_SHAPE(rect.w)
           heroPlane.shape({ top: sh.top * m, bottom: sh.bottom * m })
         } else {
-          // la carga: el horizonte se abre como un ojo (los extremos redondos se van aplanando)
           const lens = (rect.h / 2) * (1 - rv)
           heroPlane.shape({ top: lens, bottom: lens })
         }
-        heroPlane.u.uAlpha.value = rv > 0 ? 1 : 0
+        heroPlane.u.uAlpha.value = boot.reveal > 0 ? 1 : 0
 
-        // la cámara del GLB avanza con el progreso (del cristal a la isla entera) y orbita al puntero
         if (mixer) mixer.setTime(Math.min(clipDur - 0.001, clamp01(p / T.morph[1]) * clipDur))
-        // El objeto entero se inclina hacia el mouse, en los ejes de la cámara (derecha / arriba como
-        // los ves) y alrededor del punto que la cámara está mirando.
+        // la escena se inclina hacia el mouse, en los ejes de la cámara y alrededor del punto que mira
         const kt = 1 - Math.exp(-2.6 * dt)
         tilt.x += (pointer.x - tilt.x) * kt
         tilt.y += (pointer.y - tilt.y) * kt
@@ -242,157 +394,317 @@ function Kanvas() {
         if (content) {
           if (lookAt) lookAt.getWorldPosition(pivot)
           else heroCam.getWorldDirection(pivot).multiplyScalar(4).add(heroCam.position)
-          qy.setFromAxisAngle(up, tilt.x * 0.32) // mouse a la derecha → gira hacia la derecha
-          qx.setFromAxisAngle(right, tilt.y * 0.2) // mouse abajo → se inclina hacia abajo
+          qy.setFromAxisAngle(up, tilt.x * 0.32)
+          qx.setFromAxisAngle(right, tilt.y * 0.2)
           content.quaternion.copy(qy).multiply(qx)
           content.position.copy(pivot).sub(pivot.clone().applyQuaternion(content.quaternion))
         }
         if (crystal) crystal.position.y = crystal.userData.baseY + Math.sin(now * 0.0015) * 0.06
-        k.renderer.setRenderTarget(rt)
-        k.renderer.render(hero, heroCam)
+        if (boot.reveal > 0) {
+          k.renderer.setRenderTarget(rt)
+          k.renderer.render(hero, heroCam)
+        }
 
         k.clearColor.set(rv >= 1 ? CREAM : WHITE)
 
-        // 3) la capa UI: secciones apiladas, una sola visible por tramo
-        const out = seg(p, T.heroOut)
-        const inn = clamp01((rv - 0.72) / 0.28)
-        show(r.heroUi, inn * (1 - out), (1 - inn) * 30 - out * 50)
-        if (r.heroTitle) r.heroTitle.style.filter = out > 0.01 && out < 0.99 ? `blur(${out * 6}px)` : 'none'
+        // 3) la capa UI: el marco y las secciones apiladas
+        const out = easeOut(seg(p, T.heroOut))
+        const inn = clamp01((rv - 0.82) / 0.18) // el texto llega cuando el ojo ya está casi abierto
+        show(r.frame, inn)
+        const theme = m > 0.5 ? 'light' : 'dark'
+        if (r.frame && theme !== themeNow) {
+          themeNow = theme
+          r.frame.dataset.theme = theme
+        }
+        show(r.heroUi, inn * (1 - out), (1 - inn) * 24 - out * 40)
+        if (r.heroTitle) r.heroTitle.style.filter = out > 0.01 && out < 0.99 ? `blur(${out * 8}px)` : 'none'
+        if (r.scrollHint) r.scrollHint.style.opacity = String(inn * (1 - clamp01(p * 30)))
         const tin = easeOut(seg(p, T.tableIn))
         const drift = p > T.tableIn[1] ? (p - T.tableIn[1]) * H * 0.9 : 0
         show(r.tableUi, tin > 0 ? 1 : 0, (1 - tin) * H * 0.6 - drift)
         if (r.ink) {
           const t = seg(p, T.ink)
-          const gv = Math.round(lerp(205, 18, t))
-          r.ink.style.color = `rgb(${gv},${gv},${gv})`
+          // de gris a la tinta (#15111d)
+          r.ink.style.color = `rgb(${Math.round(lerp(205, 21, t))},${Math.round(lerp(205, 17, t))},${Math.round(lerp(205, 29, t))})`
           r.ink.style.opacity = String(clamp01((m - 0.3) / 0.3))
         }
+        const act = p < 0.3 ? 'atlas' : 'isles'
+        if (act !== activeNow) {
+          activeNow = act
+          setActive(act)
+        }
 
-        // 4) las cards: cada una sobre su slot (que sube con la sección) y con su parallax propio
+        // 4) las otras dos láminas: escenas vivas sobre su slot, con su giro y su parallax
         r.slots.forEach((el, i) => {
           const pl = cardPlanes[i]
+          const v = views[i]
           if (!el || !pl) return
           const b = el.getBoundingClientRect()
           const depth = Number(el.dataset.depth || 0)
           const c = (b.top + b.height / 2 - H / 2) / H
           const enter = easeOut(clamp01((H - b.top) / (H * 0.5))) * (tin > 0 ? 1 : 0)
-          const s = lerp(0.9, 1, enter)
+          const s = lerp(0.88, 1, enter)
           const w = b.width * s
           const h = b.height * s
-          pl.rect(b.left + (b.width - w) / 2, b.top + c * depth * 140 + (b.height - h) / 2, w, h)
+          pl.rect(b.left + (b.width - w) / 2, b.top + c * depth * 140 + (b.height - h) / 2, w, h, Number(el.dataset.rot || 0) * DEG * enter)
           pl.shape(CARD_SHAPE(w))
-          pl.u.uZoom.value = 1.22
+          pl.clip(win.x, win.y, win.w, win.h)
+          pl.u.uZoom.value = 1.15
           pl.u.uShift.value.set(0, -c * 0.9)
           pl.u.uAlpha.value = enter
-          const sz = pl.u.uMap.value.userData.size
-          if (sz) pl.u.uMapSize.value.set(sz[0], sz[1])
+          if (enter > 0.001 && pl.mesh.visible) {
+            renderView(hero, v.cam, v.rt, b.width, b.height)
+            pl.u.uMapSize.value.set(v.rt.width, v.rt.height)
+          }
         })
       },
     })
 
     return () => {
+      clearTimeout(fontsTimeout)
+      fontsLink.remove()
       k.dispose()
       rt.dispose()
+      views.forEach((v) => v.rt.dispose())
+      wordTex?.dispose()
       lenis?.start()
     }
   }, [])
 
-  // Las tipografías del prototipo: una serif de libro ilustrado y una mono para las marcas.
+  // El scroll se libera cuando el hero terminó de abrirse.
   useEffect(() => {
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&family=IBM+Plex+Mono:wght@400;500&display=swap'
-    document.head.appendChild(link)
-    return () => link.remove()
-  }, [])
+    if (stage !== 'done' || menu) return undefined
+    getLenis()?.start()
+    return () => getLenis()?.stop()
+  }, [stage, menu])
 
-  useEffect(() => {
-    if (!ready) return undefined
-    const id = setTimeout(() => getLenis()?.start(), 1500)
-    return () => clearTimeout(id)
-  }, [ready])
+  const go = useCallback((it) => {
+    setMenu(false)
+    const lenis = getLenis()
+    const max = (spacerRef.current?.offsetHeight || 1) - window.innerHeight
+    // el cajón termina de cerrarse antes de que el scroll arranque
+    setTimeout(() => lenis?.scrollTo(it.p * max, { duration: 1.8 }), 380)
+  }, [])
+  const openMenu = () => {
+    audio.drawer(true)
+    setMenu(true)
+  }
+  const closeMenu = useCallback(() => {
+    audio.drawer(false)
+    setMenu(false)
+  }, [audio])
 
   const set = (key) => (el) => (R.current[key] = el)
-  const mono = { fontFamily: "'IBM Plex Mono', ui-monospace, monospace" }
-  const display = { fontFamily: "'Fraunces', Georgia, serif", fontWeight: 300, letterSpacing: '-0.02em' }
+  const display = { fontFamily: SERIF, fontWeight: 800, letterSpacing: '-0.02em', wordSpacing: '0.06em' }
   const layer = 'fixed inset-0 h-svh w-full'
+  const inset = 'calc(var(--pad) + var(--rail) + 36px)'
+  const label = 'pointer-events-none absolute -top-1 -left-1 hidden -translate-x-full text-[12px] font-normal tracking-[0.08em] md:block'
 
   return (
-    <div style={{ color: '#111' }}>
-      {/* El largo del scroll y nada más: el contenido no está en el flujo de la página. */}
+    <div className="kv" style={{ color: INK, fontFamily: SERIF }}>
+      <style>{KANVAS_CSS}</style>
       <div ref={spacerRef} aria-hidden="true" style={{ height: `${SCROLL_SCREENS * 100}svh` }} />
 
-      {/* Capa 1: el canvas (todo lo que es imagen o 3D). */}
+      {/* Capa 1: el canvas. */}
       <canvas ref={canvasRef} aria-hidden="true" className={`pointer-events-none z-0 ${layer}`} />
 
       {/* Capa 2: la UI, con las secciones apiladas. */}
       <div className={`pointer-events-none z-10 ${layer}`}>
-        {/* carga */}
+        {/* carga: el porcentaje sobre la línea y el botón del sonido */}
         <div
-          className="absolute inset-x-0 top-1/2 mx-auto flex w-[56vw] -translate-y-[calc(100%+14px)] justify-between text-[11px] tracking-[0.18em] uppercase transition-opacity duration-500"
-          style={{ ...mono, opacity: ready ? 0 : 1 }}
+          className="absolute inset-x-0 top-1/2 mx-auto flex w-[56vw] -translate-y-[calc(100%+12px)] justify-between text-[11px] tracking-[0.12em] uppercase"
+          style={{ fontFamily: MONO, opacity: stage === 'load' ? 1 : 0, transition: `opacity .4s` }}
         >
           <span>
             Charting the horizon — <span ref={loadRef}>00</span>%
           </span>
-          <span className="opacity-50">Atlas · leaf 00</span>
+          <span className="hidden opacity-50 sm:inline">vesper/atlas/leaf-00</span>
         </div>
-
-        {/* Marcas de atlas: rosa de los vientos, coordenadas y escala (no un HUD de consola). */}
-        <div aria-hidden="true" className="absolute top-5 right-6 hidden items-center gap-4 text-[11px] tracking-[0.16em] uppercase md:flex" style={{ ...mono, color: 'rgba(17,17,17,0.6)', mixBlendMode: 'difference', filter: 'invert(1)' }}>
-          <span>44°12′N · 12°06′E</span>
-          <svg width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1">
-            <circle cx="20" cy="20" r="15" />
-            <path d="M20 2 L23 20 L20 38 L17 20 Z" fill="currentColor" fillOpacity="0.15" />
-            <path d="M2 20 L20 17 L38 20 L20 23 Z" />
-            <text x="20" y="9" textAnchor="middle" fontSize="6" fill="currentColor" stroke="none">N</text>
-          </svg>
-        </div>
-        <div aria-hidden="true" className="absolute bottom-6 left-6 hidden items-end gap-3 text-[10px] tracking-[0.16em] uppercase md:flex" style={{ ...mono, color: 'rgba(17,17,17,0.6)', mixBlendMode: 'difference', filter: 'invert(1)' }}>
-          <span className="block h-2 w-24 border-x border-b border-current" />
-          <span>1 : 40 000</span>
+        <div
+          className="absolute inset-x-0 bottom-[14svh] flex flex-col items-center gap-3"
+          style={{ opacity: stage === 'load' || stage === 'word' ? 1 : 0, transition: 'opacity .5s', visibility: stage === 'done' ? 'hidden' : 'visible' }}
+        >
+          <button
+            type="button"
+            onClick={() => audio.set(!audioOn)}
+            aria-label={audioOn ? 'Sound off' : 'Sound on'}
+            className="pointer-events-auto relative flex h-16 w-16 cursor-pointer items-center justify-center"
+          >
+            <svg viewBox="0 0 64 64" className="kv-ring absolute inset-0" fill="none" stroke="currentColor" strokeWidth="1">
+              <circle cx="32" cy="32" r="31" strokeDasharray="40 8 6 8" />
+            </svg>
+            <AudioWave on={audioOn} icon />
+          </button>
+          <span className="text-[10px] tracking-[0.14em] uppercase opacity-60" style={{ fontFamily: MONO }}>
+            {audioOn ? 'Sound on' : 'Tap for sound'}
+          </span>
         </div>
 
         {/* Sección: hero */}
-        <section ref={set('heroUi')} className="absolute inset-0 flex flex-col justify-end px-6 pb-[11svh] md:px-16" style={{ opacity: 0, visibility: 'hidden' }}>
-          <p className="mb-5 text-[11px] tracking-[0.22em] text-white/80 uppercase" style={mono}>
-            Atlas · leaf 01 — the outer isles
+        <section ref={set('heroUi')} className="absolute inset-0 text-white" style={{ opacity: 0, visibility: 'hidden' }}>
+          <p
+            className="absolute max-w-[30ch] text-[15px] leading-[1.35] md:max-w-[36ch] md:text-[17px]"
+            style={{ left: inset, top: 'calc(var(--pad) + var(--bar) + 32px)', fontWeight: 400, textShadow: '0 1px 18px rgba(40,24,70,.35)' }}
+          >
+            Vesper is an illustrated world told one leaf at a time — three wayfarers, the last lanterns, and a map that keeps redrawing itself.
           </p>
-          <h1 ref={set('heroTitle')} className="max-w-[14ch] text-[clamp(3rem,9vw,10rem)] leading-[0.9] text-white" style={display}>
-            Beyond the <em className="italic">last</em> map.
+          <h1
+            ref={set('heroTitle')}
+            className="absolute text-[clamp(3.6rem,18vw,6rem)] leading-[0.84] uppercase md:text-[clamp(5rem,10.5vw,15rem)]"
+            style={{ ...display, left: inset, right: 'calc(var(--pad) + 28px)', bottom: 'calc(var(--pad) + 44px)', textShadow: '0 2px 40px rgba(40,24,70,.25)' }}
+          >
+            <span className="relative block md:ml-[16vw] md:w-fit">
+              <span className={label} style={{ fontFamily: MONO }}>N44°</span>
+              Beyond
+            </span>
+            <span className="relative block md:ml-[30vw] md:w-fit">
+              <span className={label} style={{ fontFamily: MONO }}>E12°</span>
+              the last
+            </span>
+            <span className="relative block md:w-fit">
+              <span className={label} style={{ fontFamily: MONO }}>W07°</span>
+              map.
+            </span>
           </h1>
+          <div ref={set('scrollHint')} className="absolute flex items-center gap-2 text-[11px] tracking-[0.14em] uppercase" style={{ right: 'calc(var(--pad) + 28px)', bottom: 'calc(var(--pad) + 22px)', fontFamily: MONO }}>
+            Scroll
+            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="1.2">
+              <path d="M1 1.5l5 5 5-5" />
+            </svg>
+          </div>
         </section>
 
-        {/* Sección: tableau (sube a su lugar mientras el hero se aleja) */}
-        <section ref={set('tableUi')} className="absolute inset-0 px-6 pt-[14svh] md:pr-10 md:pl-24" style={{ opacity: 0, visibility: 'hidden' }}>
-          <div className="grid gap-6 md:grid-cols-12">
-            <p className="text-[11px] tracking-[0.16em] uppercase md:col-span-1" style={mono}>
-              Leaf 02
+        {/* Sección: las tres láminas (sube a su lugar mientras el hero se aleja). La envuelve la ventana
+            del marco: lo que sube más allá de la barra se corta en su línea, igual que en el canvas. */}
+        <div className="absolute inset-0" style={{ clipPath: 'inset(calc(var(--pad) + var(--bar)) var(--pad) var(--pad) calc(var(--pad) + var(--rail)))' }}>
+        <section
+          ref={set('tableUi')}
+          className="absolute inset-0"
+          style={{ opacity: 0, visibility: 'hidden', paddingLeft: inset, paddingRight: 'calc(var(--pad) + 36px)', paddingTop: 'calc(var(--pad) + var(--bar) + 6svh)' }}
+        >
+          <div className="grid gap-4 md:grid-cols-12 md:gap-8">
+            <p className="text-[11px] tracking-[0.12em] uppercase md:col-span-2 md:pt-3" style={{ fontFamily: MONO }}>
+              Leaf 02 — The isles
             </p>
-            <h2 ref={set('ink')} className="text-[clamp(2.2rem,5.2vw,5.6rem)] leading-[0.92] md:col-span-11" style={{ ...display, color: 'rgb(205,205,205)' }}>
-              Every map was drawn by someone who left.
+            <h2 ref={set('ink')} className="text-[clamp(2.2rem,5vw,5.4rem)] leading-[0.95] md:col-span-10" style={{ fontWeight: 300, letterSpacing: '-0.025em', color: 'rgb(205,205,205)' }}>
+              Every map was drawn by <em>someone</em> who left.
             </h2>
           </div>
-          <div className="mt-[7svh] grid gap-6 md:grid-cols-12 md:gap-8">
-            <div className="md:col-span-3">
-              <div ref={(el) => (R.current.slots[0] = el)} data-depth="0.35" className="aspect-[16/9] w-full" />
-              <p className="mt-[20svh] max-w-[26ch] text-[16px] leading-snug" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Six districts, one curfew, and a signal nobody admits to sending.
-              </p>
-            </div>
-            <div className="md:col-span-3 md:col-start-6 md:mt-[16svh]">
-              <div ref={(el) => (R.current.slots[1] = el)} data-depth="-0.25" className="aspect-[4/5] w-full" />
-            </div>
-            <div className="md:col-span-3 md:col-start-10">
-              <div ref={set('dest')} className="aspect-[3/4] w-full" />
-            </div>
-          </div>
-          <div className="mt-[8svh] grid md:grid-cols-12">
-            <div className="md:col-span-4 md:col-start-3">
-              <div ref={(el) => (R.current.slots[2] = el)} data-depth="0.5" className="aspect-[3/2] w-full" />
-            </div>
+          <div className="mt-[6svh] grid gap-10 md:grid-cols-12 md:gap-8">
+            <figure className="md:col-span-3 md:mt-[12svh]">
+              <div ref={(el) => (R.current.slots[0] = el)} data-depth="0.3" data-rot="3" className="aspect-[4/5] w-full" />
+              <figcaption className="mt-5 text-[11px] tracking-[0.12em] uppercase" style={{ fontFamily: MONO }}>
+                I — The wayfarers
+              </figcaption>
+              <p className="mt-2 max-w-[28ch] text-[16px] leading-snug">Three cloaks, three lanterns, one road nobody has finished.</p>
+            </figure>
+            <figure className="md:col-span-3 md:col-start-5">
+              <div ref={(el) => (R.current.slots[1] = el)} data-depth="-0.2" data-rot="-2" className="aspect-[3/4] w-full" />
+              <figcaption className="mt-5 text-[11px] tracking-[0.12em] uppercase" style={{ fontFamily: MONO }}>
+                II — The lantern tower
+              </figcaption>
+            </figure>
+            <figure className="md:col-span-4 md:col-start-9 md:mt-[4svh]">
+              <div ref={set('dest')} data-rot="-5" className="aspect-[3/4] w-full" />
+              <figcaption className="mt-5 text-[11px] tracking-[0.12em] uppercase" style={{ fontFamily: MONO }}>
+                III — The outer isle
+              </figcaption>
+            </figure>
           </div>
         </section>
+        </div>
+      </div>
+
+      {/* Capa 3: el marco (riel izquierdo, barra de arriba) */}
+      <div ref={set('frame')} data-theme="dark" className="kv-frame pointer-events-none fixed inset-0 z-20" style={{ opacity: 0, visibility: 'hidden' }}>
+        <div className="kv-line absolute border" style={{ inset: 'var(--pad)', borderRadius: 'var(--radius)' }}>
+          {/* barra de arriba */}
+          <div className="kv-line absolute inset-x-0 top-0 flex items-center justify-between border-b md:justify-center" style={{ height: 'var(--bar)', paddingLeft: 'var(--rail)' }}>
+            <button type="button" onClick={openMenu} aria-label="Open menu" className="pointer-events-auto flex h-full w-14 cursor-pointer items-center justify-center md:hidden">
+              <Burger />
+            </button>
+            <span className="text-[13px] tracking-[0.3em] md:hidden" style={{ fontFamily: MONO }}>
+              {NAME}
+            </span>
+            <nav className="hidden items-center gap-7 text-[11px] uppercase md:flex" style={{ fontFamily: MONO }} aria-label="Sections">
+              {NAV.map((it) => (
+                <HackLink key={it.id} text={it.label} onClick={() => go(it)} className="px-1 py-[3px]" style={{ opacity: it.id === active ? 1 : 0.5 }}>
+                  <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-[1px]" style={{ opacity: it.id === active ? 1 : 0 }} />
+                </HackLink>
+              ))}
+            </nav>
+            <AudioWave on={audioOn} onClick={() => audio.toggle()} className="md:hidden" />
+            <button
+              type="button"
+              onClick={() => go(NAV[3])}
+              className="pointer-events-auto absolute top-[7px] right-[7px] hidden h-[calc(var(--bar)-14px)] cursor-pointer items-center gap-2 bg-[var(--fg)] px-5 text-[11px] tracking-[0.1em] text-[var(--fg-inv)] uppercase md:flex"
+              style={{ fontFamily: MONO, borderRadius: '16px 4px 4px 4px', transition: 'background .5s, color .5s' }}
+            >
+              <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#f3b04f]" />
+              Get the atlas
+            </button>
+          </div>
+          {/* riel izquierdo */}
+          <div className="kv-line absolute inset-y-0 left-0 hidden flex-col items-center justify-between border-r md:flex" style={{ width: 'var(--rail)' }}>
+            <button type="button" onClick={openMenu} aria-label="Open menu" className="kv-line pointer-events-auto flex w-full cursor-pointer items-center justify-center border-b" style={{ height: 'var(--bar)' }}>
+              <Burger />
+            </button>
+            <Mark className="h-16 w-10" />
+            <AudioWave on={audioOn} onClick={() => audio.toggle()} className="mb-3" />
+          </div>
+        </div>
+      </div>
+
+      <Menu
+        open={menu}
+        onClose={closeMenu}
+        items={MENU}
+        active={active}
+        onGo={go}
+        audioOn={audioOn}
+        onAudio={() => audio.toggle()}
+        footer={<MenuFooter onGo={go} />}
+      />
+    </div>
+  )
+}
+
+function Burger() {
+  return (
+    <svg width="26" height="8" viewBox="0 0 26 8" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+      <path d="M1 1h24M9 7h16" />
+    </svg>
+  )
+}
+
+function MenuFooter({ onGo }) {
+  const row = 'flex items-start gap-6 border-t border-white/15 px-6 py-5 md:px-12'
+  const lab = 'hidden w-32 shrink-0 pt-[3px] text-[11px] tracking-[0.12em] uppercase md:block'
+  const link = 'px-1 py-[2px] text-[13px] tracking-[0.06em] uppercase'
+  const style = { fontFamily: MONO, '--hk-bg': '#f3b04f', '--hk-on': '#15111d' }
+  const end = { id: 'chronicle', p: 1 }
+  return (
+    <div style={{ fontFamily: MONO }}>
+      <div className={row}>
+        <p className={lab}>
+          <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-middle" />
+          Follow
+        </p>
+        <div className="flex flex-col items-start gap-1">
+          <HackLink text="Instagram" onClick={() => onGo(end)} className={link} style={style} />
+          <HackLink text="Discord" onClick={() => onGo(end)} className={link} style={style} />
+        </div>
+      </div>
+      <div className={row}>
+        <p className={lab}>
+          <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-middle" />
+          Read on
+        </p>
+        <HackLink text="The Chronicle" onClick={() => onGo(end)} className={link} style={style} />
+      </div>
+      <div className={`${row} justify-between text-[11px] tracking-[0.1em] uppercase`}>
+        <span>EN</span>
+        <span className="opacity-50">© 2026 Vesper Atlas</span>
       </div>
     </div>
   )

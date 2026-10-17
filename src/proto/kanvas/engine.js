@@ -33,6 +33,7 @@ uniform float uZoom;     // >1 = la imagen más grande que el plano (lugar para 
 uniform float uAlpha;
 uniform vec3 uTint;
 uniform float uTintMix;
+uniform vec4 uClip;      // ventana visible: x0, y0, x1, y1 en px del buffer (y desde abajo)
 
 // Rectángulo con un radio por esquina (Inigo Quilez). Con los de arriba = medio ancho, es un arco;
 // con todos = medio alto, una píldora / un ojo que se abre.
@@ -44,6 +45,7 @@ float sdRoundBox(vec2 p, vec2 b, vec4 r) {
 }
 
 void main() {
+  if (gl_FragCoord.x < uClip.x || gl_FragCoord.x > uClip.z || gl_FragCoord.y < uClip.y || gl_FragCoord.y > uClip.w) discard;
   vec2 hb = uSize * 0.5;
   vec2 p = (vUv - 0.5) * uSize; // centro, y hacia arriba
   vec4 r = min(uRadii, vec4(min(hb.x, hb.y)));
@@ -93,11 +95,14 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
     for (const l of layers) l.onResize?.(W, H)
   }
 
-  /** Un plano con forma de carpeta. Devuelve su manejador: rect, forma y textura se fijan por cuadro. */
-  const plane = (map, mapSize, z = 0) => {
+  /**
+   * Un plano recortado por el shader. Devuelve su manejador: rect, forma y textura se fijan por cuadro.
+   * `frag` / `uniforms` permiten otro fragment shader con los mismos uniforms de base (la palabra de la carga).
+   */
+  const plane = (map, mapSize, z = 0, { frag = FRAG, uniforms = {} } = {}) => {
     const mat = new THREE.ShaderMaterial({
       vertexShader: VERT,
-      fragmentShader: FRAG,
+      fragmentShader: frag,
       transparent: true,
       depthTest: false,
       uniforms: {
@@ -110,6 +115,8 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
         uAlpha: { value: 1 },
         uTint: { value: new THREE.Color(0, 0, 0) },
         uTintMix: { value: 0 },
+        uClip: { value: new THREE.Vector4(-1e5, -1e5, 1e5, 1e5) },
+        ...uniforms,
       },
     })
     const mesh = new THREE.Mesh(geo, mat)
@@ -120,16 +127,23 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
     return {
       mesh,
       u,
-      /** Rect en px de pantalla (x, y arriba a la izquierda). */
-      rect(x, y, w, h) {
+      /** Rect en px de pantalla (x, y arriba a la izquierda) y giro en radianes alrededor de su centro. */
+      rect(x, y, w, h, rot = 0) {
         mesh.visible = w > 0.5 && h > 0.5 && y < H + 50 && y + h > -50
         mesh.scale.set(Math.max(1, w), Math.max(1, h), 1)
         mesh.position.set(x + w / 2, -(y + h / 2), 0)
+        mesh.rotation.z = -rot // la pantalla tiene la y hacia abajo: positivo = horario, como en CSS
         u.uSize.value.set(Math.max(1, w), Math.max(1, h))
       },
       /** Radio de cada esquina en px: arriba / abajo (los de arriba en medio ancho = un arco). */
       shape({ top = 0, bottom = 0 } = {}) {
         u.uRadii.value.set(top, bottom, top, bottom)
+      },
+      /** Ventana fuera de la cual el plano no se dibuja (px de pantalla); sin argumentos, sin recorte. */
+      clip(x, y, w, h) {
+        if (x === undefined) return u.uClip.value.set(-1e5, -1e5, 1e5, 1e5)
+        const d = renderer.getPixelRatio()
+        u.uClip.value.set(x * d, (H - y - h) * d, (x + w) * d, (H - y) * d)
       },
       dispose() {
         scene.remove(mesh)
@@ -193,4 +207,4 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
   }
 }
 
-export { lerp, clamp01 }
+export { lerp, clamp01, VERT }
