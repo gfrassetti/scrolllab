@@ -11,6 +11,9 @@ import { db } from '../db.js'
 export async function resolveGoogleUser(profile) {
   const email = profile.emails?.[0]?.value
   if (!email) throw new Error('Google profile without email')
+  // Un mail que Google no verificó no identifica a nadie: con él se podría
+  // reclamar la cuenta de QA (QA_BUYER_EMAILS) o la de otro.
+  if (profile.emails[0].verified === false) throw new Error('Google profile with unverified email')
   let user = await db.findUser({ googleId: profile.id })
   if (!user) {
     const byEmail = await db.findUser({ email })

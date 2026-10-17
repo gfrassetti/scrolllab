@@ -240,18 +240,9 @@ El mail **solo se envía cuando la orden pasa a `paid`**. Si quedó `pending`
 6. Redeploy del API. Comprá un ítem de prueba (o mock en staging) y verificá
    que llegue el mail a Mis compras / inbox.
 
-**Alternativa: enviar desde una cuenta de Gmail (SMTP).** Con `SMTP_USER` y
-`SMTP_PASS` (contraseña de aplicación de esa cuenta, con verificación en dos
-pasos) los mails salen por Gmail en vez de Resend: el remitente es esa cuenta y
-Gmail muestra su foto de perfil como logo. Sin esas dos variables sigue Resend.
-Límites: ~500 mails por día, sin clave de idempotencia (el servidor recuerda un
-día las claves en memoria), y se pierde la firma del dominio propio.
-
-**En Railway no anda con los planes Trial, Free ni Hobby**: bloquean las conexiones
-SMTP salientes y todo envío termina en `Connection timeout` (visto el 2026-10-12, con
-el recibo y el aviso interno de la compra de prueba). Solo sirve donde el puerto 465
-esté abierto (plan Pro de Railway u otro hosting); en un plan sin SMTP dejá
-`SMTP_USER` y `SMTP_PASS` sin cargar y los mails siguen por Resend.
+**Sin SMTP**: los mails salen solo por Resend. El envío por Gmail se sacó (2026-10-17):
+Railway bloquea SMTP saliente en los planes sin Pro y la dependencia tenía fallas de
+seguridad conocidas.
 
 Después de confirmar el pago y generar el ZIP, el backend envía un detalle
 de orden con CTA a `/account`. La orden guarda el estado del envío y Resend

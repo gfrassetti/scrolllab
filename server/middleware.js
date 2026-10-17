@@ -114,9 +114,9 @@ export function requireSameOrigin(config) {
 
 export function rateLimits() {
   // Bypass solo para tests (`RATE_LIMIT_DISABLED=true` en el setup): las suites
-  // comparten IP y agotarían la ventana. Nunca se prende en prod.
+  // comparten IP y agotarían la ventana. En producción se ignora aunque esté puesta.
   const skip =
-    process.env.RATE_LIMIT_DISABLED === 'true'
+    process.env.RATE_LIMIT_DISABLED === 'true' && process.env.NODE_ENV !== 'production'
       ? () => true
       : undefined
   const mk = (opts) => rateLimit({ standardHeaders: true, legacyHeaders: false, skip, ...opts })

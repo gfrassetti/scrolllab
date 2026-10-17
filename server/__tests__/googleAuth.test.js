@@ -35,6 +35,13 @@ describe('resolveGoogleUser', () => {
     fs.rmSync(dir, { recursive: true, force: true })
   })
 
+  it('un mail que Google no verificó no entra (ni crea cuenta)', async () => {
+    const p = profile('g-unverified', 'qa-owner@x.com')
+    p.emails[0].verified = false
+    await assert.rejects(resolveGoogleUser(p), /unverified/)
+    assert.equal(await db.findUser({ email: 'qa-owner@x.com' }), null)
+  })
+
   it('crea la cuenta si no hay ni googleId ni email', async () => {
     const user = await resolveGoogleUser(profile('g-new', 'nueva@x.com', { name: 'Nueva', photo: 'https://a/p.png' }))
     assert.equal(user.googleId, 'g-new')

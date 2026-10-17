@@ -54,6 +54,16 @@ function assertStrongSecret(name, value) {
   }
 }
 
+/** ADMIN_TOKEN usable: en producción, solo si es fuerte; si no, apagado (sin tirar el arranque). */
+function adminTokenFrom(value) {
+  const token = value || "";
+  if (isProd && token && (token.length < 24 || WEAK_SECRETS.has(token))) {
+    console.error("ADMIN_TOKEN DESACTIVADO: tiene que tener 24 caracteres o más (y no ser de ejemplo).");
+    return "";
+  }
+  return token;
+}
+
 function hostOf(url) {
   return new URL(url).hostname;
 }
@@ -230,24 +240,10 @@ export function loadConfig() {
 
   const lemon = loadLemonConfig();
 
-  // SMTP (p. ej. Gmail con contraseña de aplicación): si está SMTP_USER + SMTP_PASS,
-  // los mails salen por ahí en vez de Resend y el remitente es esa cuenta.
-  const smtp = {
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT) || 465,
-    user: (process.env.SMTP_USER || "").trim(),
-    // Gmail muestra la contraseña de aplicación en grupos de 4 con espacios.
-    pass: (process.env.SMTP_PASS || "").replace(/\s+/g, ""),
-  };
-  const usesSmtp = Boolean(smtp.user && smtp.pass);
-
-  const emailEnabled = bool(
-    "EMAIL_ENABLED",
-    Boolean(process.env.RESEND_API_KEY) || usesSmtp,
-  );
+  const emailEnabled = bool("EMAIL_ENABLED", Boolean(process.env.RESEND_API_KEY));
   if (emailEnabled) {
-    if (!usesSmtp) requireEnv("RESEND_API_KEY");
-    if (!usesSmtp) requireEnv("EMAIL_FROM");
+    requireEnv("RESEND_API_KEY");
+    requireEnv("EMAIL_FROM");
   }
 
   return {
@@ -281,11 +277,7 @@ export function loadConfig() {
     email: {
       enabled: emailEnabled,
       apiKey: process.env.RESEND_API_KEY || "",
-      // Por SMTP el remitente tiene que ser la cuenta que envía.
-      smtp: usesSmtp ? smtp : null,
-      from: brandedFrom(
-        usesSmtp ? smtp.user : process.env.EMAIL_FROM || "onboarding@resend.dev",
-      ),
+      from: brandedFrom(process.env.EMAIL_FROM || "onboarding@resend.dev"),
       replyTo: process.env.EMAIL_REPLY_TO || "",
       notifyTo: process.env.EMAIL_NOTIFY_TO || "",
       logoUrl: process.env.EMAIL_LOGO_URL || "",
@@ -318,7 +310,8 @@ export function loadConfig() {
     // defecto para que ande en cualquier host sin configurar headers; prendelo
     // (`EMBED_SRI=true`) una vez confirmado el CORS.
     embedSri: process.env.EMBED_SRI === "true",
-    adminToken: process.env.ADMIN_TOKEN || "",
+    // Un token corto o de ejemplo en producción no abre nada: queda apagado (y se avisa).
+    adminToken: adminTokenFrom(process.env.ADMIN_TOKEN),
     // Cuentas que ven y compran los productos de prueba (src/domain/qa.js).
     qaBuyerEmails: parseQaEmails(process.env.QA_BUYER_EMAILS),
     // Cuántas instancias hosteadas PUBLICADAS puede tener un usuario sin
