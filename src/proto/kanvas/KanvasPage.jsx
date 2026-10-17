@@ -4,7 +4,7 @@ import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
 import { createAudio } from './audio'
-import { AMBER, AudioWave, BODY, FONTS, FONTS_HREF, KANVAS_CSS, Menu, MONO, RollLink, useSubscribed } from './ui'
+import { AMBER, AudioWave, BODY, FONTS, FONTS_HREF, KANVAS_CSS, Menu, LABEL, RollLink, useSubscribed } from './ui'
 
 /**
  * Kanvas — prototipo (solo local) con la arquitectura de la referencia y una identidad propia: VESPER,
@@ -114,10 +114,10 @@ function Kanvas() {
   const [stage, setStage] = useState('load') // load → word → open → done
   const [active, setActive] = useState('atlas')
   const [menu, setMenu] = useState(false)
-  // la tipografía de titulares, para comparar: ?font=tektur | unbounded | oxanium | michroma
+  // la tipografía de titulares, para comparar: ?font=cinzel | spectral | alegreya | marcellus
   const [fontId, setFontId] = useState(() => {
     const q = new URLSearchParams(window.location.search).get('font')
-    return FONTS[q] ? q : 'tektur'
+    return FONTS[q] ? q : 'cinzel'
   })
   const font = FONTS[fontId]
   const fontRef = useRef(font)
@@ -195,7 +195,7 @@ function Kanvas() {
     }
     fontsLink.onload = () => {
       const f = fontRef.current
-      Promise.all([document.fonts.load(`${f.weight} 120px ${f.family}`), document.fonts.load("400 12px 'Share Tech Mono'"), document.fonts.load("400 16px 'Chakra Petch'")]).finally(fontsReady)
+      Promise.all([document.fonts.load(`${f.weight} 120px ${f.family}`), document.fonts.load("500 12px 'Barlow Semi Condensed'"), document.fonts.load("400 16px 'Barlow'")]).finally(fontsReady)
     }
     fontsLink.onerror = fontsReady
     const fontsTimeout = setTimeout(fontsReady, 4000)
@@ -536,7 +536,7 @@ function Kanvas() {
         {/* carga: el porcentaje sobre la línea y el botón del sonido */}
         <div
           className="absolute inset-x-0 top-1/2 mx-auto flex w-[56vw] -translate-y-[calc(100%+12px)] justify-between text-[11px] tracking-[0.12em] uppercase"
-          style={{ fontFamily: MONO, opacity: stage === 'load' ? 1 : 0, transition: `opacity .4s` }}
+          style={{ fontFamily: LABEL, opacity: stage === 'load' ? 1 : 0, transition: `opacity .4s` }}
         >
           <span>
             Charting the horizon — <span ref={loadRef}>00</span>%
@@ -558,7 +558,7 @@ function Kanvas() {
             </svg>
             <AudioWave on={audioOn} icon />
           </button>
-          <span className="text-[10px] tracking-[0.14em] uppercase opacity-60" style={{ fontFamily: MONO }}>
+          <span className="text-[10px] tracking-[0.14em] uppercase opacity-60" style={{ fontFamily: LABEL }}>
             {audioOn ? 'Sound on' : 'Tap for sound'}
           </span>
         </div>
@@ -567,7 +567,7 @@ function Kanvas() {
             derecha, como la entrada de una bitácora. */}
         <section ref={set('heroUi')} className="absolute inset-0 text-white" style={{ opacity: 0, visibility: 'hidden' }}>
           <div className="absolute" style={{ left: inset, right: inset, top: 'calc(var(--pad) + var(--bar) + 3svh)' }}>
-            <p className="mb-3 flex items-center gap-3 text-[11px] tracking-[0.16em] uppercase" style={{ fontFamily: MONO }}>
+            <p className="mb-3 flex items-center gap-3 text-[11px] tracking-[0.16em] uppercase" style={{ fontFamily: LABEL }}>
               <span className="inline-block h-[7px] w-[7px]" style={{ background: AMBER }} />
               Leaf 01 // The outer isles
             </p>
@@ -587,20 +587,20 @@ function Kanvas() {
             className="absolute right-[calc(var(--pad)+16px)] w-[min(34ch,calc(100vw-var(--pad)*2-32px))] md:right-[calc(var(--pad)+44px)] md:w-[36ch]"
             style={{ bottom: 'calc(var(--pad) + 52px)', textShadow: '0 1px 16px rgba(30,16,60,.4)' }}
           >
-            <p className="flex items-center gap-3 border-t border-white/40 pt-3 text-[11px] tracking-[0.16em] uppercase" style={{ fontFamily: MONO }}>
+            <p className="flex items-center gap-3 border-t border-white/40 pt-3 text-[11px] tracking-[0.16em] uppercase" style={{ fontFamily: LABEL }}>
               <span style={{ color: AMBER }}>Log 01</span>
               <span className="opacity-70">44°12′N · 12°06′E</span>
             </p>
             <p className="mt-3 text-[16px] leading-[1.4] md:text-[17px]">
               Vesper is an illustrated world told one leaf at a time — three wayfarers, the last lanterns, and a map that keeps redrawing itself.
             </p>
-            <RollLink text="Begin the crossing" onClick={() => go(NAV[1])} className="mt-4 text-[12px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO, '--rl-to': AMBER }}>
+            <RollLink text="Begin the crossing" onClick={() => go(NAV[1])} className="mt-4 text-[12px] tracking-[0.14em] uppercase" style={{ fontFamily: LABEL, '--rl-to': AMBER }}>
               <span className="mr-2" style={{ color: AMBER }}>
                 ▸
               </span>
             </RollLink>
           </div>
-          <div ref={set('scrollHint')} className="absolute left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-[11px] tracking-[0.16em] uppercase md:flex" style={{ bottom: 'calc(var(--pad) + 18px)', fontFamily: MONO }}>
+          <div ref={set('scrollHint')} className="absolute left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-[11px] tracking-[0.16em] uppercase md:flex" style={{ bottom: 'calc(var(--pad) + 18px)', fontFamily: LABEL }}>
             Scroll
             <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="1.2">
               <path d="M1 1.5l5 5 5-5" />
@@ -617,7 +617,7 @@ function Kanvas() {
             style={{ opacity: 0, visibility: 'hidden', paddingLeft: inset, paddingRight: 'calc(var(--pad) + 48px)', paddingTop: 'calc(var(--pad) + var(--bar) + 6svh)' }}
           >
             <div className="grid gap-4 md:grid-cols-12 md:gap-8">
-              <p className="text-[11px] tracking-[0.14em] uppercase md:col-span-2 md:pt-3" style={{ fontFamily: MONO }}>
+              <p className="text-[11px] tracking-[0.14em] uppercase md:col-span-2 md:pt-3" style={{ fontFamily: LABEL }}>
                 Leaf 02 // The isles
               </p>
               <h2
@@ -631,20 +631,20 @@ function Kanvas() {
             <div className="mt-[6svh] grid gap-10 md:grid-cols-12 md:gap-8">
               <figure className="md:col-span-3 md:mt-[12svh]">
                 <div ref={(el) => (R.current.slots[0] = el)} data-depth="0.3" data-rot="3" className="aspect-[4/5] w-full" />
-                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: LABEL }}>
                   01 // The wayfarers
                 </figcaption>
                 <p className="mt-2 max-w-[28ch] text-[16px] leading-snug">Three cloaks, three lanterns, one road nobody has finished.</p>
               </figure>
               <figure className="md:col-span-3 md:col-start-5">
                 <div ref={(el) => (R.current.slots[1] = el)} data-depth="-0.2" data-rot="-2" className="aspect-[3/4] w-full" />
-                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: LABEL }}>
                   02 // The lantern tower
                 </figcaption>
               </figure>
               <figure className="md:col-span-4 md:col-start-9 md:mt-[4svh]">
                 <div ref={set('dest')} data-rot="-5" className="aspect-[3/4] w-full" />
-                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: LABEL }}>
                   03 // The outer isle
                 </figcaption>
               </figure>
@@ -669,14 +669,14 @@ function Kanvas() {
               <button type="button" onClick={openMenu} aria-label="Open menu" className="pointer-events-auto flex h-11 w-11 cursor-pointer items-center justify-center">
                 <Burger />
               </button>
-              <span className="hidden text-[18px] uppercase md:inline" style={{ ...display, fontSize: `${20 * font.scale}px`, letterSpacing: '0.04em' }}>
+              <span className="hidden text-[18px] uppercase md:inline" style={{ ...display, fontSize: `${20 * font.scale}px`, letterSpacing: '0.14em' }}>
                 {NAME}
               </span>
             </div>
-            <span className="absolute left-1/2 -translate-x-1/2 text-[18px] uppercase md:hidden" style={{ ...display, fontSize: `${18 * font.scale}px`, letterSpacing: '0.04em' }}>
+            <span className="absolute left-1/2 -translate-x-1/2 text-[18px] uppercase md:hidden" style={{ ...display, fontSize: `${18 * font.scale}px`, letterSpacing: '0.14em' }}>
               {NAME}
             </span>
-            <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[12px] tracking-[0.1em] uppercase md:flex" style={{ fontFamily: MONO }} aria-label="Sections">
+            <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[12px] tracking-[0.1em] uppercase md:flex" style={{ fontFamily: LABEL }} aria-label="Sections">
               {NAV.map((it) => (
                 <RollLink key={it.id} text={it.label} active={it.id === active} onClick={() => go(it)} />
               ))}
@@ -686,7 +686,7 @@ function Kanvas() {
               type="button"
               onClick={() => go(NAV[3])}
               className="kv-chamfer pointer-events-auto hidden h-9 cursor-pointer items-center gap-2 px-5 text-[12px] tracking-[0.12em] uppercase md:flex"
-              style={{ fontFamily: MONO, background: 'var(--fg)', color: 'var(--fg-inv)', transition: 'background .5s, color .5s' }}
+              style={{ fontFamily: LABEL, background: 'var(--fg)', color: 'var(--fg-inv)', transition: 'background .5s, color .5s' }}
             >
               <span className="inline-block h-[6px] w-[6px]" style={{ background: AMBER }} />
               Get the atlas
@@ -695,7 +695,7 @@ function Kanvas() {
 
           {/* rótulo vertical, a la izquierda */}
           <div className="absolute inset-y-0 left-0 hidden w-7 items-center justify-center md:flex">
-            <p className="text-[11px] tracking-[0.2em] whitespace-nowrap uppercase opacity-70" style={{ fontFamily: MONO, writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+            <p className="text-[11px] tracking-[0.2em] whitespace-nowrap uppercase opacity-70" style={{ fontFamily: LABEL, writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
               Vesper atlas — leaves 01/06
             </p>
           </div>
@@ -703,7 +703,7 @@ function Kanvas() {
           {/* el altímetro, a la derecha */}
           <div ref={set('meter')} className="kv-ruler absolute right-2 hidden w-[10px] md:block" style={{ top: 'calc(var(--bar) + 24px)', bottom: 56 }}>
             <div ref={set('meterMark')} className="absolute top-0 right-0 flex -translate-y-1/2 items-center gap-2" style={{ willChange: 'transform' }}>
-              <span className="text-[11px] tracking-[0.1em]" style={{ fontFamily: MONO }}>
+              <span className="text-[11px] tracking-[0.1em]" style={{ fontFamily: LABEL }}>
                 ALT <span ref={set('meterNum')}>4800</span>
               </span>
               <svg width="8" height="10" viewBox="0 0 8 10" style={{ color: 'var(--accent)' }}>
@@ -720,7 +720,7 @@ function Kanvas() {
       </div>
 
       {/* Solo del prototipo: para comparar tipografías de titulares en vivo. */}
-      <div className="fixed bottom-[calc(var(--pad)+10px)] left-[calc(var(--pad)+130px)] z-30 hidden items-center gap-1 rounded-sm bg-black/55 p-1 text-[10px] tracking-[0.08em] text-white uppercase backdrop-blur md:flex" style={{ fontFamily: MONO }}>
+      <div className="fixed bottom-[calc(var(--pad)+10px)] left-[calc(var(--pad)+130px)] z-30 hidden items-center gap-1 rounded-sm bg-black/55 p-1 text-[10px] tracking-[0.08em] text-white uppercase backdrop-blur md:flex" style={{ fontFamily: LABEL }}>
         <span className="px-2 opacity-60">Type</span>
         {Object.entries(FONTS).map(([id, f]) => (
           <button key={id} type="button" onClick={() => pickFont(id)} className="cursor-pointer rounded-sm px-2 py-1" style={id === fontId ? { background: AMBER, color: INK } : null}>
@@ -746,10 +746,10 @@ function MenuFooter({ onGo, audioOn, onAudio }) {
   const row = 'flex items-center gap-6 border-t border-white/15 px-6 py-4 md:px-10'
   const lab = 'hidden w-24 shrink-0 text-[11px] tracking-[0.14em] uppercase opacity-60 md:block'
   const link = 'text-[13px] tracking-[0.1em] uppercase'
-  const style = { fontFamily: MONO, '--rl-to': AMBER }
+  const style = { fontFamily: LABEL, '--rl-to': AMBER }
   const end = { id: 'chronicle', p: 1 }
   return (
-    <div style={{ fontFamily: MONO }}>
+    <div style={{ fontFamily: LABEL }}>
       <div className={row}>
         <p className={lab}>Follow</p>
         <div className="flex flex-wrap items-center gap-6">

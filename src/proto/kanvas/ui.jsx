@@ -7,23 +7,26 @@ import { useEffect, useRef, useState } from 'react'
 
 export const EASE = 'cubic-bezier(0.16, 1, 0.3, 1)'
 const EASE_IO = 'cubic-bezier(0.65, 0, 0.35, 1)'
-export const MONO = "'Share Tech Mono', ui-monospace, monospace"
-export const BODY = "'Chakra Petch', system-ui, sans-serif"
+// Rótulos y UI: una condensada en mayúsculas espaciadas (como los menús de un juego de rol); texto
+// corrido: la misma familia, en su corte normal.
+export const LABEL = "'Barlow Semi Condensed', system-ui, sans-serif"
+export const BODY = "'Barlow', system-ui, sans-serif"
 export const AMBER = '#f3b04f'
 export const INK = '#15111d'
 
 /**
- * Tipografías de titulares para comparar (todas de Google Fonts, de corte juego / sci-fi). `scale`
- * iguala el ancho visual: las anchas (Unbounded, Michroma) van más chicas para el mismo renglón.
+ * Tipografías de titulares para comparar: mayúsculas de inscripción, de filo clásico y serio (el
+ * registro de un juego de rol épico, no de un shooter). Todas de Google Fonts. `scale` iguala el
+ * ancho visual entre ellas para el mismo renglón.
  */
 export const FONTS = {
-  tektur: { label: 'Tektur', family: "'Tektur'", weight: 900, tracking: '-0.01em', scale: 1 },
-  unbounded: { label: 'Unbounded', family: "'Unbounded'", weight: 900, tracking: '-0.045em', scale: 0.74 },
-  oxanium: { label: 'Oxanium', family: "'Oxanium'", weight: 800, tracking: '-0.02em', scale: 0.92 },
-  michroma: { label: 'Michroma', family: "'Michroma'", weight: 400, tracking: '-0.03em', scale: 0.66 },
+  cinzel: { label: 'Cinzel', family: "'Cinzel'", weight: 900, tracking: '0.01em', scale: 0.8 },
+  spectral: { label: 'Spectral SC', family: "'Spectral SC'", weight: 800, tracking: '0', scale: 0.86 },
+  alegreya: { label: 'Alegreya SC', family: "'Alegreya SC'", weight: 900, tracking: '0', scale: 0.92 },
+  marcellus: { label: 'Marcellus SC', family: "'Marcellus SC'", weight: 400, tracking: '0.02em', scale: 0.84 },
 }
 export const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Tektur:wdth,wght@75..100,400..900&family=Unbounded:wght@400..900&family=Oxanium:wght@400..800&family=Michroma&family=Chakra+Petch:wght@400;500;600&family=Share+Tech+Mono&display=swap'
+  'https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Spectral+SC:wght@400;800&family=Alegreya+SC:wght@400;900&family=Marcellus+SC&family=Barlow:wght@400;500&family=Barlow+Semi+Condensed:wght@500;600&display=swap'
 
 export const KANVAS_CSS = `
 .kv { --pad: 20px; --bar: 56px; --rail: 0px; --radius: 4px; }
@@ -101,7 +104,7 @@ export function AudioWave({ on, onClick, className = '', icon = false, label = f
     >
       {bars}
       {label && (
-        <span className="text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+        <span className="text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: LABEL }}>
           Snd {on ? 'on' : 'off'}
         </span>
       )}
@@ -168,7 +171,7 @@ export function Menu({ open, onClose, items, active, onGo, displayFont, footer }
           <div className="kv-chamfer h-full overflow-hidden" style={{ background: INK }}>
             <div ref={inner} className="flex h-full flex-col">
               <div className="flex items-center justify-between px-6 md:px-10" style={{ height: 'var(--bar)' }}>
-                <span className="text-[11px] tracking-[0.16em] uppercase opacity-60" style={{ fontFamily: MONO }}>
+                <span className="text-[11px] tracking-[0.16em] uppercase opacity-60" style={{ fontFamily: LABEL }}>
                   Index — {String(items.length).padStart(2, '0')} leaves
                 </span>
                 <button type="button" onClick={onClose} aria-label="Close menu" className="flex h-11 w-11 cursor-pointer items-center justify-center">
@@ -181,7 +184,7 @@ export function Menu({ open, onClose, items, active, onGo, displayFont, footer }
                 <ul className="flex flex-col gap-1">
                   {items.map((it, i) => (
                     <li key={it.id} data-mi="" className="flex items-baseline gap-4">
-                      <span className="w-6 text-[11px] opacity-50" style={{ fontFamily: MONO, color: it.id === active ? AMBER : undefined }}>
+                      <span className="w-6 text-[11px] opacity-50" style={{ fontFamily: LABEL, color: it.id === active ? AMBER : undefined }}>
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <RollLink
