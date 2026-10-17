@@ -67,6 +67,15 @@ export const KANVAS_CSS = `
 .kv-grid[data-on='1'] i:nth-child(2) { transition-delay: .12s; }
 .kv-grid[data-on='1'] i:nth-child(3) { transition-delay: .2s; }
 .kv-grid[data-on='1'] i:nth-child(4) { transition-delay: .3s; }
+/* la ficha de la reliquia: filas con barra y pips que se llenan al entrar */
+.kv-row { display: grid; grid-template-columns: 72px 1fr 44px; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid rgba(21,17,29,.16); }
+.kv-row > dd:last-child { text-align: right; }
+.kv-bar { position: relative; height: 6px; background: rgba(21,17,29,.12); }
+.kv-bar i { position: absolute; inset: 0; background: ${INK}; transform-origin: left; transform: scaleX(0); transition: transform 1.3s ${EASE} .15s; }
+.kv-stats[data-on='1'] .kv-bar i { transform: scaleX(var(--v)); }
+.kv-pips { display: flex; gap: 4px; }
+.kv-pips i { flex: 1; height: 6px; transform: skewX(-24deg); background: rgba(21,17,29,.12); transition: background .3s; }
+.kv-stats[data-on='1'] .kv-pips i[data-full='1'] { background: ${AMBER}; transition-delay: var(--d); }
 .kv-chamfer { clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
 `
 

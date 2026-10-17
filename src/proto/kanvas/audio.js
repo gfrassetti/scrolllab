@@ -267,7 +267,7 @@ export function createAudio() {
     hero: [0.8, 1, 1, 0.8, 0, 9000],
     tableau: [0.6, 0.85, 0.9, 1.1, 0, 9000],
     ridge: [1, 0.5, 0.8, 0.5, 0.9, 1600],
-    wayfarers: [1, 0.7, 0.9, 0.7, 1.2, 3200],
+    relic: [0.7, 1, 1, 1, 0.2, 9000],
   }
   const applyMix = (name, glide = 1.2) => {
     if (!ctx) return

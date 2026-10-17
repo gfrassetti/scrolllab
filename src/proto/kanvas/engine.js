@@ -13,11 +13,26 @@ import * as THREE from 'three'
  * estado. Por eso no hay saltos entre tramos.
  */
 
+// Giro en 3D (alrededor del eje vertical / horizontal del plano) con perspectiva: la cámara es
+// ortográfica, así que la profundidad se simula escalando cada vértice según qué tan cerca queda.
 const VERT = /* glsl */ `
+uniform vec2 uSize;
+uniform vec2 uTurn;   // giro en radianes: x = alrededor del eje vertical, y = del horizontal
+uniform float uPersp; // distancia de la «cámara» en px
 varying vec2 vUv;
 void main() {
   vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  vec3 p = position;
+  if (uTurn.x != 0.0 || uTurn.y != 0.0) {
+    vec3 q = vec3(p.x * uSize.x, p.y * uSize.y, 0.0);
+    float cy = cos(uTurn.x), sy = sin(uTurn.x);
+    q = vec3(q.x * cy, q.y, -q.x * sy);
+    float cx = cos(uTurn.y), sx = sin(uTurn.y);
+    q = vec3(q.x, q.y * cx - q.z * sx, q.y * sx + q.z * cx);
+    float k = uPersp / (uPersp - q.z);
+    p = vec3(q.x * k / uSize.x, q.y * k / uSize.y, 0.0);
+  }
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
 }
 `
 
@@ -81,7 +96,8 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
 
   const scene = new THREE.Scene()
   const camera = new THREE.OrthographicCamera(0, 1, 0, -1, -1000, 1000)
-  const geo = new THREE.PlaneGeometry(1, 1)
+  // subdividido: con el giro en perspectiva, dos triángulos solos deformarían la imagen
+  const geo = new THREE.PlaneGeometry(1, 1, 24, 24)
 
   let W = 1
   let H = 1
@@ -116,6 +132,8 @@ export function createKanvas(canvas, { clear = '#ffffff' } = {}) {
         uTint: { value: new THREE.Color(0, 0, 0) },
         uTintMix: { value: 0 },
         uClip: { value: new THREE.Vector4(-1e5, -1e5, 1e5, 1e5) },
+        uTurn: { value: new THREE.Vector2(0, 0) },
+        uPersp: { value: 1400 },
         ...uniforms,
       },
     })

@@ -3,11 +3,10 @@
  *
  * Todo es código, sin imágenes: un cielo, capas de nubes y de montañas dibujadas por shaders (las
  * crestas salen de ruido, con nieve en la cara iluminada, pinos y pinceladas) puestas a distintas
- * profundidades para que la cámara haga parallax al bajar y al seguir el mouse, y dos viajeros de
- * espaldas con el pelo, la bufanda y la capa al viento (los vértices se mueven en el shader).
+ * profundidades para que la cámara haga parallax al bajar y al seguir el mouse. Es provisoria: la
+ * escena se rehace cuando haya imágenes generadas.
  *
- * `update({ q, time, pointer })`: q (0 → 1) es el recorrido de la cámara: del cielo a la cordillera
- * y de ahí a los viajeros.
+ * `update({ q, now, dt, pointer })`: q (0 → 1) es el recorrido de la cámara, del cielo a la cordillera.
  */
 
 const NOISE = /* glsl */ `
@@ -113,35 +112,6 @@ void main() {
 }
 `
 
-// Los viajeros: color plano a contraluz, con el borde encendido por el atardecer. Los vértices se
-// mueven con el viento según `uv.y` (raíz = 1, punta = 0): pelo, bufanda y el ruedo de la capa.
-const WIND_VERT = /* glsl */ `
-uniform float uTime, uAmp, uPhase;
-varying vec3 vN;
-varying vec3 vV;
-void main() {
-  vec4 w = modelMatrix * vec4(position, 1.0);
-  float along = 1.0 - uv.y;
-  float k = pow(along, 1.6) * uAmp;
-  w.x += k * (0.55 + 0.22 * sin(uTime * 5.3 + uPhase + along * 5.0));
-  w.y += k * 0.16 * sin(uTime * 7.1 + uPhase * 1.7 + along * 7.0);
-  w.z += k * 0.12 * sin(uTime * 3.7 + uPhase + along * 3.0);
-  vN = normalize(mat3(modelMatrix) * normal);
-  vV = normalize(cameraPosition - w.xyz);
-  gl_Position = projectionMatrix * viewMatrix * w;
-}
-`
-const WIND_FRAG = /* glsl */ `
-uniform vec3 uColor, uRim;
-varying vec3 vN;
-varying vec3 vV;
-void main() {
-  float rim = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.6);
-  vec3 c = uColor * (0.85 + 0.25 * vN.y) + uRim * rim * 0.9;
-  gl_FragColor = vec4(c, 1.0);
-}
-`
-
 export function createRidge(THREE) {
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 400)
@@ -175,10 +145,9 @@ export function createRidge(THREE) {
     [25, 6, -96, 120, 14, '#694a7a', '#c57f86', '#f8bd8c', 1],
     [-28, 19, -94, 80, 14, '#5a417a', '#b27389', '#f1ad86', 0.9],
   ]
-  const cloudMats = clouds.map(([x, y, z, w, h, s, m, l, a], i) => {
+  clouds.forEach(([x, y, z, w, h, s, m, l, a], i) => {
     const cm = mat(CLOUD_FRAG, { uSeed: { value: i * 7.3 + 1 }, uTime: time, uAlpha: { value: a }, uShadow: { value: col(s) }, uMidC: { value: col(m) }, uLight: { value: col(l) } })
     plane(w, h, cm, x, y, z, 1 + i)
-    return cm
   })
 
   // la cordillera: de la más lejana (clara, violácea) a la más cercana (oscura, con pinos)
@@ -206,69 +175,10 @@ export function createRidge(THREE) {
     plane(600, 120, m, 0, r.base - 20, r.z, 10 + i)
   })
 
-  // los dos viajeros, de espaldas, sobre una cornisa (la última cresta)
-  const windMat = (color, amp, phase) => {
-    const m = new THREE.ShaderMaterial({
-      vertexShader: WIND_VERT,
-      fragmentShader: WIND_FRAG,
-      uniforms: { uTime: time, uAmp: { value: amp }, uPhase: { value: phase }, uColor: { value: col(color) }, uRim: { value: col('#ffb98a') } },
-      side: THREE.DoubleSide,
-    })
-    disposables.push(m)
-    return m
-  }
-  const figures = new THREE.Group()
-  figures.renderOrder = 20
-  scene.add(figures)
-  const add = (geo, m, x, y, z, rx = 0, ry = 0, rz = 0) => {
-    disposables.push(geo)
-    const o = new THREE.Mesh(geo, m)
-    o.position.set(x, y, z)
-    o.rotation.set(rx, ry, rz)
-    o.renderOrder = 20
-    return o
-  }
-  const figure = ({ x, s, cloak, skin, hair, long, scarf, phase }) => {
-    const g = new THREE.Group()
-    const still = windMat(cloak, 0, phase)
-    // capa larga (el ruedo flamea), hombros, cuello y cabeza
-    g.add(add(new THREE.CylinderGeometry(0.32, 0.46, 1.95, 20, 10, true), windMat(cloak, 0.28, phase), 0, 0.98, 0))
-    const torso = add(new THREE.SphereGeometry(0.42, 20, 14), still, 0, 1.96, 0)
-    torso.scale.set(1.18, 0.36, 0.62)
-    g.add(torso)
-    g.add(add(new THREE.CylinderGeometry(0.07, 0.09, 0.2, 10), windMat(skin, 0, phase), 0, 2.14, 0))
-    const head = add(new THREE.SphereGeometry(0.16, 20, 16), windMat(hair, 0, phase), 0, 2.36, 0.02)
-    head.scale.set(0.92, 1.12, 1)
-    g.add(head)
-    // mechones: tiras que salen de la coronilla y la nuca y se van con el viento
-    const n = long ? 16 : 12
-    const hairMat = windMat(hair, long ? 1.1 : 0.7, phase + 1)
-    for (let i = 0; i < n; i++) {
-      const len = (long ? 0.95 : 0.45) * (0.7 + Math.random() * 0.6)
-      const geo = new THREE.PlaneGeometry(long ? 0.12 : 0.1, len, 1, 12)
-      geo.translate(0, -len / 2, 0)
-      const a = (i / (n - 1) - 0.5) * 2.6
-      g.add(add(geo, hairMat, Math.sin(a) * 0.13, 2.48 - Math.abs(a) * 0.07, -0.06 - Math.cos(a) * 0.08, -0.3 - (long ? 0.1 : 0.55), a * 0.4, Math.PI / 2 + a * 0.45))
-    }
-    if (scarf) {
-      const geo = new THREE.PlaneGeometry(0.17, 2.4, 1, 28)
-      geo.translate(0, -1.2, 0)
-      g.add(add(geo, windMat(scarf, 1.8, phase + 2), 0.14, 2.18, 0.06, 0.1, 0, Math.PI / 2 - 0.2))
-    }
-    g.position.set(x, -10.6, -9)
-    g.userData.x = x
-    g.scale.setScalar(s)
-    figures.add(g)
-  }
-  figure({ x: -1.15, s: 1.08, cloak: '#2a2233', skin: '#7a5560', hair: '#1b1724', long: false, scarf: '#b34a3a', phase: 0 })
-  figure({ x: 1.2, s: 0.96, cloak: '#3a2a3c', skin: '#80585e', hair: '#2a1e2a', long: true, scarf: null, phase: 2.4 })
-
-  // la cámara: del cielo (q = 0) a la cordillera (q ≈ 0,55) y a los viajeros (q = 1)
+  // la cámara: del cielo (q = 0) baja a la cordillera (q = 1)
   const path = [
     [0, { p: [0, 26, 30], t: [0, 24, -60] }],
-    [0.55, { p: [0, 4, 24], t: [0, 2, -60] }],
-    [0.62, { p: [0, -9.2, -0.8], t: [0, -4.6, -40] }],
-    [1, { p: [0, -9.7, -2.6], t: [0, -5.6, -40] }],
+    [1, { p: [0, 3, 24], t: [0, 1.5, -60] }],
   ]
   const P = new THREE.Vector3()
   const L = new THREE.Vector3()
@@ -285,7 +195,6 @@ export function createRidge(THREE) {
       while (i < path.length - 2 && q > path[i + 1][0]) i++
       const [qa, A] = path[i]
       const [qb, B] = path[i + 1]
-      // el tramo cielo → cordillera es continuo; el corte a los viajeros va tapado por la transición
       const t = ease(Math.min(1, Math.max(0, (q - qa) / (qb - qa))))
       lerpV(P, A.p, B.p, t)
       lerpV(L, A.t, B.t, t)
@@ -293,15 +202,8 @@ export function createRidge(THREE) {
       const k = 1 - Math.exp(-2.4 * dt)
       sway.x += (pointer.x - sway.x) * k
       sway.y += (pointer.y - sway.y) * k
-      const near = q > 0.6 ? 0.25 : 1
-      // pantalla vertical (teléfono): la cámara se aleja para que entren los dos viajeros
-      // y los dos se juntan un poco
-      const narrow = camera.aspect < 1
-      if (q > 0.58 && narrow) P.z += (1 / camera.aspect - 1) * 3
-      figures.children.forEach((fg) => (fg.position.x = fg.userData.x * (narrow ? 0.62 : 1)))
-      camera.position.set(P.x + sway.x * 1.6 * near, P.y - sway.y * 0.8 * near, P.z)
-      camera.lookAt(L.x + sway.x * 0.6 * near, L.y - sway.y * 0.3 * near, L.z)
-      cloudMats.length // (las nubes se mueven solas con uTime)
+      camera.position.set(P.x + sway.x * 1.6, P.y - sway.y * 0.8, P.z)
+      camera.lookAt(L.x + sway.x * 0.6, L.y - sway.y * 0.3, L.z)
     },
     setSize(w, h) {
       camera.aspect = w / h

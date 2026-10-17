@@ -167,11 +167,21 @@ cambia su textura del render target de la isla al de la cordillera.
   tonos y la nieve solo cerca de los picos. Si la luz depende solo de la x, salen columnas verticales.
 - Dos textos grandes flotan (003 y 004). Con el segundo, el HUD dibuja una grilla (`.kv-grid`, CSS) y
   aparece una pantalla chica con un relieve de puntos que gira (`createTopo`), sobre su slot.
-- **Transición a pantalla completa** (`WIPE_FRAG`): franjas de tinta con el filo ámbar entran desde
-  los costados, tapan todo y siguen de largo. Debajo, la cámara baja a los viajeros.
-- **Los viajeros**: dos figuras de espaldas hechas con primitivas; el pelo, la bufanda y el ruedo de
-  la capa se mueven en el vertex shader según `uv.y` (raíz quieta, punta al viento). En pantallas
-  verticales la cámara se aleja y se juntan.
+- Es provisoria: el dueño la rehace con imágenes generadas (los dos viajeros de espaldas que había
+  se quitaron: eran demasiado la referencia).
+- **Transición a pantalla completa** (`WIPE_FRAG`): una grilla de rombos (la estrella del atlas)
+  crece de abajo hacia arriba hasta tapar todo y se abre desde adentro en el mismo orden, con el filo
+  ámbar. Con todo tapado, debajo cambia de sección.
+
+### 2.11 La reliquia (`relic.js`)
+
+La sección que sigue: a la izquierda, la ficha del objeto (como el inventario de un juego: barras y
+pips que se llenan al entrar, dial con los grados de giro); al centro, una carta con **el último
+farol** (3D en código: jaula de bronce, vidrio, llama con halo y luz interior, chispas) que **gira
+con el scroll** en perspectiva (`uTurn` / `uPersp` del motor: el vertex shader rota el plano y lo
+escala según la profundidad; la geometría va subdividida para que la imagen no se deforme); a la
+derecha, el número vertical gigante (312 hojas) que cuenta al entrar. El HUD suma una barra de
+progreso del scroll en el borde de abajo.
 - Las láminas de la sección anterior ya no se mueven todas: la del hero sigue al mouse, la de la
   torre es un «video» (su cámara orbita sola) y la de los viajeros es una imagen quieta.
 

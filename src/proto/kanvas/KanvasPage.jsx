@@ -5,6 +5,7 @@ import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
 import { createAudio } from './audio'
 import { createRidge, createTopo } from './ridge'
+import { createRelic } from './relic'
 import { AMBER, AudioWave, BODY, DISPLAY, FONTS_HREF, KANVAS_CSS, Menu, LABEL, RollLink, setHoverFx, useSubscribed } from './ui'
 
 /**
@@ -23,25 +24,26 @@ const NAME = 'VESPER'
 const CREAM = '#ede8df'
 const WHITE = '#ffffff'
 const INK = '#15111d'
-const SCROLL_SCREENS = 14
+const SCROLL_SCREENS = 16
 
 // El guion, en progreso (0 → 1).
 const T = {
-  heroOut: [0.012, 0.045], // el titular y la bitácora del hero se desvanecen
-  morph: [0.035, 0.16], // el hero se aleja y queda como lámina
-  tableIn: [0.085, 0.16], // las láminas suben a su lugar
-  ink: [0.14, 0.2], // su titular se entinta
-  tableOut: [0.27, 0.3], // el texto de las láminas se va
-  flip: [0.27, 0.36], // la lámina del hero se da vuelta y crece a pantalla completa
-  ridge: [0.35, 1], // la cordillera: q de 0 a 1
+  heroOut: [0.01, 0.04], // el titular y la bitácora del hero se desvanecen
+  morph: [0.03, 0.14], // el hero se aleja y queda como lámina
+  tableIn: [0.075, 0.14], // las láminas suben a su lugar
+  ink: [0.12, 0.17], // su titular se entinta
+  tableOut: [0.23, 0.26], // el texto de las láminas se va
+  flip: [0.23, 0.31], // la lámina del hero se da vuelta y crece a pantalla completa
+  ridge: [0.3, 0.7], // la cordillera: q de 0 a 1
+  wipe: [0.66, 0.76], // la transición de rombos (tapa todo en el medio)
+  relic: [0.71, 1], // la reliquia: la carta gira con el scroll
 }
 // Dentro de la cordillera (q).
 const Q = {
-  textA: [0.03, 0.12, 0.3, 0.38], // entra, se queda, se va
-  textB: [0.4, 0.46, 0.55, 0.58],
-  wipe: [0.56, 0.68], // la transición a pantalla completa (tapa del todo en el medio)
-  wayfarers: [0.7, 0.8],
+  textA: [0.04, 0.14, 0.36, 0.46], // entra, se queda, se va
+  textB: [0.5, 0.58, 0.86, 0.95],
 }
+const RELIC_COUNT = 312 // el número vertical: hojas del atlas
 
 const CARD_SHAPE = (w) => ({ top: w / 2, bottom: Math.min(14, w * 0.04) })
 
@@ -54,11 +56,11 @@ const VIEWS = [
 
 const NAV = [
   { id: 'atlas', label: 'Atlas', p: 0, leaf: '01' },
-  { id: 'isles', label: 'The Isles', p: 0.235, leaf: '02' },
-  { id: 'wayfarers', label: 'Wayfarers', p: 0.86, leaf: '03' },
-  { id: 'chronicle', label: 'Chronicle', p: 1, leaf: '04' },
+  { id: 'isles', label: 'The Isles', p: 0.195, leaf: '02' },
+  { id: 'wayfarers', label: 'Wayfarers', p: 0.52, leaf: '03' },
+  { id: 'relics', label: 'Relics', p: 0.86, leaf: '04' },
 ]
-const MENU = [...NAV, { id: 'gallery', label: 'Gallery', p: 1, leaf: '05' }, { id: 'about', label: 'About', p: 1, leaf: '06' }]
+const MENU = [...NAV, { id: 'chronicle', label: 'Chronicle', p: 1, leaf: '05' }, { id: 'about', label: 'About', p: 1, leaf: '06' }]
 
 // La palabra de la carga: cada fila de píxeles es una veta que llega desde un costado, estirada, y se
 // acomoda; al plegarse, todas las filas leen la línea del medio y el nombre se vuelve el horizonte.
@@ -87,28 +89,29 @@ void main() {
 }
 `
 
-// La transición a pantalla completa: las mismas vetas de la carga, ahora en franjas que cruzan la
-// pantalla desde los costados (con el filo en ámbar), la tapan y siguen de largo.
+// La transición a pantalla completa: una grilla de rombos (la estrella del atlas). Los rombos crecen de
+// abajo hacia arriba hasta tapar todo y después se abren desde adentro en el mismo orden, con el filo
+// en ámbar. (La referencia usa letras recortadas; acá es geometría.)
 const WIPE_FRAG = /* glsl */ `
 precision highp float;
 varying vec2 vUv;
+uniform vec2 uSize;
 uniform float uT;
 uniform vec3 uTint, uEdgeC;
-float hash(float n) { return fract(sin(n * 91.3458) * 47453.5453); }
+float hash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
 void main() {
-  const float N = 14.0;
-  float row = floor(vUv.y * N);
-  float r = hash(row + 11.0);
-  float side = mod(row, 2.0) < 1.0 ? 1.0 : -1.0;
-  float x = side > 0.0 ? vUv.x : 1.0 - vUv.x;
-  float tin = clamp((uT * 2.0 - r * 0.35) / 0.65, 0.0, 1.0);
-  tin = 1.0 - pow(1.0 - tin, 3.0);
-  float tout = clamp(((uT - 0.5) * 2.0 - r * 0.35) / 0.65, 0.0, 1.0);
-  tout = tout * tout * (3.0 - 2.0 * tout);
-  float inside = step(x, tin * 1.02) * step(tout * 1.02, x);
-  if (inside < 0.5) discard;
-  float edge = max(1.0 - smoothstep(0.0, 0.012, abs(x - tin)), 1.0 - smoothstep(0.0, 0.012, abs(x - tout))) * step(0.001, tin) * (1.0 - step(0.999, tin) * (1.0 - step(0.001, tout)));
-  gl_FragColor = vec4(mix(uTint, uEdgeC, edge), 1.0);
+  const float CELL = 110.0;
+  vec2 px = vUv * uSize;
+  vec2 id = floor(px / CELL);
+  vec2 f = fract(px / CELL) * 2.0 - 1.0;
+  float d = abs(f.x) + abs(f.y); // 0 en el centro del rombo, 2 en las esquinas de la celda
+  float order = id.y / max(1.0, uSize.y / CELL) * 0.55 + hash(id) * 0.15;
+  float rin = clamp(uT * 2.0 * 1.7 - order, 0.0, 1.0) * 2.05;
+  float rout = clamp((uT * 2.0 - 1.0) * 1.7 - order, 0.0, 1.0) * 2.05;
+  if (d > rin || d < rout) discard;
+  float eIn = (1.0 - smoothstep(0.0, 0.07, abs(d - rin))) * step(rin, 2.0);
+  float eOut = (1.0 - smoothstep(0.0, 0.07, abs(d - rout))) * step(0.001, rout);
+  gl_FragColor = vec4(mix(uTint, uEdgeC, clamp(max(eIn, eOut), 0.0, 1.0)), 1.0);
 }
 `
 
@@ -343,6 +346,8 @@ function Kanvas() {
       ridge.setSize(W, H)
     }
     fitRidge()
+    const relic = createRelic(THREE)
+    const relicRt = target()
 
     // --- los planos del canvas ----------------------------------------------------------------------
     const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1)
@@ -350,6 +355,8 @@ function Kanvas() {
     const cardPlanes = views.map((v, i) => k.plane(v.rt.texture, [16, 16], 5 + i))
     const heroPlane = k.plane(rt.texture, [16, 16], 10)
     const topoPlane = k.plane(topoRt.texture, [16, 16], 12)
+    const relicPlane = k.plane(relicRt.texture, [16, 16], 14)
+    const tiltCard = { x: 0, y: 0 }
     const linePlane = k.plane(white, [1, 1], 20)
     linePlane.u.uTint.value.set(INK)
     linePlane.u.uTintMix.value = 1
@@ -506,9 +513,12 @@ function Kanvas() {
           k.renderer.render(hero, heroCam)
         }
 
-        // la cordillera: q recorre la cámara; se dibuja solo cuando se ve
+        // la cordillera: q recorre la cámara; se dibuja solo cuando se ve. Pasada la mitad de la
+        // transición (todo tapado), queda atrás: debajo ya está la sección de la reliquia.
         const q = seg(p, T.ridge)
-        if (f > 0.45) {
+        const past = p >= (T.wipe[0] + T.wipe[1]) / 2
+        if (past) heroPlane.u.uAlpha.value = 0
+        if (f > 0.45 && !past) {
           ridge.update({ q, now, dt, pointer })
           k.renderer.setRenderTarget(ridgeRt)
           k.renderer.render(ridge.scene, ridge.camera)
@@ -520,7 +530,7 @@ function Kanvas() {
         const out = easeOut(seg(p, T.heroOut))
         const inn = clamp01((rv - 0.82) / 0.18)
         show(r.frame, inn)
-        const theme = m > 0.5 && !back ? 'light' : 'dark'
+        const theme = (m > 0.5 && !back) || past ? 'light' : 'dark'
         if (r.frame && theme !== themeNow) {
           themeNow = theme
           r.frame.dataset.theme = theme
@@ -540,8 +550,8 @@ function Kanvas() {
         }
 
         // la cordillera: dos textos grandes que flotan, la grilla del HUD y la pantalla del relieve
-        const vis = f >= 1 ? 1 : 0
-        const wipeT = seg(q, Q.wipe)
+        const vis = f >= 1 && !past ? 1 : 0
+        const wipeT = seg(p, T.wipe)
         const hidden = wipeT > 0.04 && wipeT < 0.96 ? 0 : 1
         const a = span(q, Q.textA) * vis * hidden
         show(r.ridgeA, a, lerp(H * 0.22, -H * 0.18, seg(q, [Q.textA[0], Q.textA[3]])))
@@ -552,9 +562,6 @@ function Kanvas() {
           gridNow = grid
           r.grid.dataset.on = grid ? '1' : '0'
         }
-        const wf = easeOut(seg(q, Q.wayfarers)) * vis * hidden
-        show(r.wayfarers, wf, (1 - wf) * 30)
-        if (r.sigil) r.sigil.style.transform = `translate(-50%, -50%) scale(${lerp(1.25, 1, wf)})`
 
         // la pantalla del relieve (el «video» chico del HUD) sobre su slot
         const ts = r.topo?.getBoundingClientRect()
@@ -566,24 +573,50 @@ function Kanvas() {
           topoPlane.u.uAlpha.value = b
         } else topoPlane.rect(0, 0, 0, 0)
 
-        // la transición: tapa toda la pantalla mientras la cámara baja a los viajeros
+        // la transición de rombos: tapa toda la pantalla y debajo cambia la sección
         wipePlane.rect(0, 0, wipeT > 0 && wipeT < 1 ? W : 0, H)
         wipePlane.u.uT.value = wipeT
-        const side = q < (Q.wipe[0] + Q.wipe[1]) / 2 ? -1 : 1
+        const side = past ? 1 : -1
         if (wipeT > 0 && wipeT < 1 && side !== wipeSide) {
           wipeSide = side
           audio.sweep()
         } else if (wipeT === 0 || wipeT === 1) wipeSide = 0
 
-        // el altímetro del HUD
+        // la reliquia: la carta del centro gira con el scroll (y un poco con el mouse); el farol gira
+        // adentro, con su llama y sus chispas
+        const rp = seg(p, T.relic)
+        const relicOn = past ? 1 : 0
+        const relicV = past ? clamp01((wipeT - 0.65) / 0.35) : 0 // el texto llega cuando los rombos se abren
+        show(r.relicUi, relicV, (1 - relicV) * 24)
+        if (r.relicStats) r.relicStats.dataset.on = rp > 0.12 ? '1' : '0'
+        if (r.relicNum) r.relicNum.textContent = String(Math.round(RELIC_COUNT * easeOut(clamp01(rp * 4)))).padStart(3, '0')
+        const ks = r.relicSlot?.getBoundingClientRect()
+        if (ks && relicOn) {
+          const kc = 1 - Math.exp(-3 * dt)
+          tiltCard.x += (pointer.x - tiltCard.x) * kc
+          tiltCard.y += (pointer.y - tiltCard.y) * kc
+          const turn = lerp(-0.85, 0.85, easeInOut(rp)) + tiltCard.x * 0.22
+          relic.update({ now, turn: -turn * 0.6 })
+          renderTo(relic.scene, relic.camera, relicRt, ks.width, ks.height)
+          relicPlane.rect(ks.left, ks.top, ks.width, ks.height, -2.5 * DEG)
+          relicPlane.shape(CARD_SHAPE(ks.width))
+          relicPlane.u.uTurn.value.set(turn, -tiltCard.y * 0.18)
+          relicPlane.u.uMapSize.value.set(relicRt.width, relicRt.height)
+          relicPlane.u.uAlpha.value = 1
+          if (r.relicDeg) r.relicDeg.textContent = String(Math.round(((turn / DEG) % 360) + 360) % 360).padStart(3, '0')
+        } else relicPlane.rect(0, 0, 0, 0)
+
+        // el altímetro y la barra de progreso del HUD
         if (r.meterMark) r.meterMark.style.transform = `translate3d(0, ${(p * (r.meter?.offsetHeight || 0)).toFixed(1)}px, 0)`
         if (r.meterNum) r.meterNum.textContent = String(Math.round(4800 - p * 4800)).padStart(4, '0')
-        const act = p < 0.08 ? 'atlas' : p < 0.33 ? 'isles' : 'wayfarers'
+        if (r.progBar) r.progBar.style.transform = `scaleX(${p.toFixed(4)})`
+        if (r.progNum) r.progNum.textContent = String(Math.round(p * 100)).padStart(3, '0')
+        const act = p < 0.07 ? 'atlas' : p < 0.29 ? 'isles' : !past ? 'wayfarers' : 'relics'
         if (act !== activeNow) {
           activeNow = act
           setActive(act)
         }
-        const sc = rv < 1 ? 'intro' : p < 0.08 ? 'hero' : p < 0.33 ? 'tableau' : q < 0.62 ? 'ridge' : 'wayfarers'
+        const sc = rv < 1 ? 'intro' : p < 0.07 ? 'hero' : p < 0.29 ? 'tableau' : !past ? 'ridge' : 'relic'
         if (sc !== sceneNow) {
           sceneNow = sc
           audio.scene(sc)
@@ -621,8 +654,9 @@ function Kanvas() {
       clearTimeout(fontsTimeout)
       fontsLink.remove()
       k.dispose()
-      ;[rt, ridgeRt, topoRt, ...views.map((v) => v.rt)].forEach((t) => t.dispose())
+      ;[rt, ridgeRt, topoRt, relicRt, ...views.map((v) => v.rt)].forEach((t) => t.dispose())
       ridge.dispose()
+      relic.dispose()
       topo.dispose()
       wordTex?.dispose()
       lenis?.start()
@@ -812,7 +846,7 @@ function Kanvas() {
               {dot}
               004
             </p>
-            <p className="uppercase" style={{ ...display, fontSize: 'min(8.4svh, 5.6vw)', lineHeight: 0.9, textIndent: 'min(6vw, 90px)', textShadow: '0 4px 40px rgba(40,20,50,.35)' }}>
+            <p className="uppercase" style={{ ...display, fontSize: 'clamp(30px, 5.6vw, 8.4svh)', lineHeight: 0.9, textIndent: 'min(6vw, 90px)', textShadow: '0 4px 40px rgba(40,20,50,.35)' }}>
               What will you carry? The lantern or the map? To light the way — or to hide it?
             </p>
           </div>
@@ -834,18 +868,77 @@ function Kanvas() {
             Wayfarer sigil
           </p>
         </section>
-        <section ref={set('wayfarers')} className="absolute inset-0 text-white" style={{ opacity: 0, visibility: 'hidden' }}>
-          <svg ref={set('sigil')} viewBox="0 0 120 200" className="absolute top-[44%] left-1/2 h-[34svh] w-auto" fill="none" aria-hidden="true">
-            <path d="M60 4v192M14 100h92" stroke="#fff" strokeWidth="10" strokeLinecap="round" />
-            <path d="M60 46l14 54-14 54-14-54z" fill="#fff" />
-            <circle cx="60" cy="100" r="22" stroke="#fff" strokeWidth="8" />
-          </svg>
-          <div className="absolute" style={{ left: inset, bottom: 'calc(var(--pad) + 56px)' }}>
+        {/* Sección: la reliquia. A la izquierda, su ficha (como el inventario de un juego); al
+            centro, la carta que gira con el scroll; a la derecha, el número vertical gigante. */}
+        <section ref={set('relicUi')} className="absolute inset-0" style={{ opacity: 0, visibility: 'hidden' }}>
+          <div ref={set('relicStats')} data-on="0" className="kv-stats absolute hidden md:block" style={{ left: inset, top: 'calc(var(--pad) + var(--bar) + 5svh)', width: 'min(25vw, 330px)' }}>
             <p className={tag} style={{ fontFamily: LABEL }}>
               {dot}
-              005 // The wayfarers
+              005 // Relic
             </p>
-            <p className="mt-2 max-w-[30ch] text-[16px] leading-snug">Two of the three. The third went ahead with the only lantern still lit.</p>
+            <h2 className="mt-3 uppercase" style={{ ...display, fontSize: 'min(8svh, 4.6vw)', lineHeight: 0.88 }}>
+              The last
+              <br />
+              lantern
+            </h2>
+            <p className="mt-3 text-[15px] leading-snug opacity-80">Lit once, carried by three. It burns as long as someone still remembers the road.</p>
+            <dl className="mt-6 text-[12px] tracking-[0.12em] uppercase" style={{ fontFamily: LABEL }}>
+              <div className="kv-row">
+                <dt>Lumen</dt>
+                <dd className="kv-bar" style={{ '--v': 0.87 }}>
+                  <i />
+                </dd>
+                <dd>87</dd>
+              </div>
+              <div className="kv-row">
+                <dt>Oil</dt>
+                <dd className="kv-pips">
+                  {Array.from({ length: 7 }, (_, i) => (
+                    <i key={i} data-full={i < 3 ? '1' : '0'} style={{ '--d': `${i * 60}ms` }} />
+                  ))}
+                </dd>
+                <dd>3/7</dd>
+              </div>
+              <div className="kv-row">
+                <dt>Range</dt>
+                <dd className="col-span-2 text-right">1.2 leagues</dd>
+              </div>
+              <div className="kv-row">
+                <dt>Keeper</dt>
+                <dd className="col-span-2 text-right">Aurel Vane</dd>
+              </div>
+              <div className="kv-row">
+                <dt>Forged</dt>
+                <dd className="col-span-2 text-right">Drowned coast, yr 0</dd>
+              </div>
+            </dl>
+          </div>
+          {/* el dial: cuánto giró la carta */}
+          <div className="absolute hidden items-center gap-3 md:flex" style={{ left: inset, bottom: 'calc(var(--pad) + 52px)' }}>
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="currentColor" aria-hidden="true">
+              <circle cx="22" cy="22" r="20" strokeOpacity="0.3" />
+              <circle cx="22" cy="22" r="20" strokeDasharray="2 5.2" />
+              <path d="M22 6v8M22 30v8M6 22h8M30 22h8" stroke={AMBER} strokeWidth="1.5" />
+            </svg>
+            <p className="text-[11px] leading-[1.5] tracking-[0.14em] uppercase" style={{ fontFamily: LABEL }}>
+              Turn <span ref={set('relicDeg')} className="tabular-nums">000</span>°
+              <br />
+              <span className="opacity-60">Scroll to turn the relic</span>
+            </p>
+          </div>
+          <div ref={set('relicSlot')} className="absolute top-1/2 left-1/2 aspect-[4/5] w-[min(64vw,44svh)] -translate-x-1/2 -translate-y-[44%] md:w-[min(30vw,54svh)]" />
+          <div className="absolute inset-x-0 bottom-[calc(var(--pad)+52px)] text-center md:hidden">
+            <p className="uppercase" style={{ ...display, fontSize: '34px', lineHeight: 0.9 }}>
+              The last lantern
+            </p>
+          </div>
+          <div className="absolute inset-y-0 hidden items-center gap-3 md:flex" style={{ right: 'calc(var(--pad) + 44px)' }}>
+            <p className="text-[11px] tracking-[0.16em] uppercase opacity-70" style={{ fontFamily: LABEL, writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+              Leaves in the atlas ▸
+            </p>
+            <p ref={set('relicNum')} className="leading-[0.78] tabular-nums" style={{ ...display, fontSize: 'min(34svh, 19vw)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+              {RELIC_COUNT}
+            </p>
           </div>
         </section>
       </div>
@@ -858,6 +951,14 @@ function Kanvas() {
           <span className="kv-corner top-0 right-0" style={{ borderTopWidth: 1.5, borderRightWidth: 1.5 }} />
           <span className="kv-corner bottom-0 left-0" style={{ borderBottomWidth: 1.5, borderLeftWidth: 1.5 }} />
           <span className="kv-corner right-0 bottom-0" style={{ borderBottomWidth: 1.5, borderRightWidth: 1.5 }} />
+
+          {/* la barra de progreso del scroll, en el borde de abajo, entre las esquinas */}
+          <div className="absolute right-10 bottom-0 left-10 h-px" style={{ background: 'var(--dim)' }} aria-hidden="true">
+            <span ref={set('progBar')} className="absolute inset-0 origin-left" style={{ background: 'var(--accent)', transform: 'scaleX(0)' }} />
+          </div>
+          <p className="absolute right-12 bottom-2 hidden text-[11px] tracking-[0.14em] tabular-nums md:block" style={{ fontFamily: LABEL }}>
+            <span ref={set('progNum')}>000</span>%
+          </p>
 
           <div ref={set('grid')} data-on="0" className="kv-grid absolute inset-0 hidden md:block" aria-hidden="true">
             <i className="h" style={{ top: 'calc(24svh - var(--pad) - 24px)' }} />
