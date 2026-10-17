@@ -510,7 +510,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
             <div
               role="status"
               aria-live="polite"
-              className={`c33-talk absolute right-0 bottom-[100%] w-[min(260px,72vw)] sm:top-[9%] sm:right-[88%] sm:bottom-auto sm:w-[300px] ${talk ? 'is-on' : ''}`}
+              className={`c33-talk absolute right-0 bottom-[100%] w-[min(260px,72vw)] sm:landscape:top-[9%] sm:landscape:right-[88%] sm:landscape:bottom-auto sm:landscape:w-[300px] ${talk ? 'is-on' : ''}`}
             >
               <div
                 className="relative rounded-lg border px-4 pt-3 pb-3.5"
@@ -520,17 +520,18 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
                   boxShadow: '0 18px 50px rgba(0,0,0,0.55)',
                 }}
               >
-                <p className="text-[10px] tracking-[0.22em] uppercase" style={{ ...MONO, color: C.neon }}>
+                <p className="text-[11px] tracking-[0.22em] uppercase" style={{ ...MONO, color: C.neon }}>
                   {t('Tripulante · C33')}
                 </p>
                 <p className="mt-1.5 min-h-[3em] text-[15px] leading-[1.45]" style={{ ...BODY, color: C.cream }}>
                   {line.slice(0, typed)}
                   <span aria-hidden="true" className="c33-caret ml-0.5 inline-block h-[0.9em] w-[0.45em] translate-y-[0.12em]" style={{ background: C.neon }} />
                 </p>
-                {/* La colita, hacia ella: abajo en el teléfono, a la derecha en pantallas anchas. */}
+                {/* La colita, hacia ella: abajo en el teléfono y la tablet parada (globo arriba de ella), a la
+                    derecha en pantallas apaisadas (globo a su izquierda; en una tablet parada no entraba). */}
                 <span
                   aria-hidden="true"
-                  className="absolute right-10 -bottom-[6px] h-3 w-3 rotate-45 border-r border-b sm:top-8 sm:-right-[6px] sm:bottom-auto sm:border-t sm:border-b-0"
+                  className="absolute right-10 -bottom-[6px] h-3 w-3 rotate-45 border-r border-b sm:landscape:top-8 sm:landscape:-right-[6px] sm:landscape:bottom-auto sm:landscape:border-t sm:landscape:border-b-0"
                   style={{
                     background: 'rgb(8,9,12)',
                     borderColor: 'rgba(228,96,29,0.75)',
@@ -700,7 +701,7 @@ export default function ShipHero({ boarded, bridge, onProgress = () => {}, onRea
         @keyframes c33-boot-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.2; } }
         .c33-talk { opacity: 0; transform: translateY(6px) scale(0.96); transform-origin: 100% 100%; pointer-events: none; transition: opacity 160ms ease-out, transform 160ms ease-out; }
         .c33-talk.is-on { opacity: 1; transform: none; transition: opacity 240ms cubic-bezier(0.22,1,0.36,1), transform 240ms cubic-bezier(0.22,1,0.36,1); }
-        @media (min-width: 640px) { .c33-talk { transform-origin: 100% 30%; } }
+        @media (min-width: 640px) and (orientation: landscape) { .c33-talk { transform-origin: 100% 30%; } }
         @keyframes c33-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
         .c33-caret { animation: c33-caret 1s steps(1, end) infinite; }
         @keyframes c33-pulse { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }

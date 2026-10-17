@@ -511,7 +511,7 @@ export default function LlegarSection() {
         >
           <div>
             <div ref={set('scaleBar')} className="h-2 border-x-2 border-b-2" style={{ borderColor: NAVY, width: 110 }} />
-            <p className="mt-1 text-[10px] font-bold tracking-[0.16em]" style={MONO}>
+            <p className="mt-1 text-[11px] font-bold tracking-[0.16em]" style={MONO}>
               200 M
             </p>
           </div>
