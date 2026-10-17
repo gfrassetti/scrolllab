@@ -710,4 +710,39 @@ export const fileDb = {
     write("price-change-notices", rows);
     return withSaveDoc("price-change-notices", row);
   },
+
+  // Links de acceso por mail (hash del token, un solo uso).
+  async createLoginLink(data) {
+    const rows = read("login-links");
+    const now = new Date().toISOString();
+    const row = {
+      id: nid(),
+      ...data,
+      email: String(data.email),
+      expiresAt: new Date(data.expiresAt).toISOString(),
+      usedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    // Lo vencido hace más de un día se va (como el TTL de Mongo).
+    const keep = rows.filter((r) => Date.parse(r.expiresAt) > Date.now() - 24 * 60 * 60 * 1000);
+    keep.push(row);
+    write("login-links", keep);
+    return row;
+  },
+  async consumeLoginLink(tokenHash, now = new Date(Date.now())) {
+    const rows = read("login-links");
+    const row = rows.find((r) => r.tokenHash === String(tokenHash));
+    if (!row || row.usedAt || Date.parse(row.expiresAt) <= now.getTime()) return null;
+    row.usedAt = now.toISOString();
+    row.updatedAt = row.usedAt;
+    write("login-links", rows);
+    return row;
+  },
+  async countLoginLinksSince(email, since) {
+    return read("login-links").filter(
+      (r) => r.email === String(email) && Date.parse(r.createdAt) >= new Date(since).getTime(),
+    ).length;
+  },
+
 };

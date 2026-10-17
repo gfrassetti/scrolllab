@@ -51,6 +51,11 @@ export const api = {
   logout: () => request('/api/auth/logout', { method: 'POST' }),
   devLogin: (body) =>
     request('/api/auth/dev-login', { method: 'POST', body: JSON.stringify(body || {}) }),
+  // Entrar con un link por mail: pedirlo (responde igual exista o no la cuenta) y canjearlo.
+  emailLogin: ({ email, next, locale }) =>
+    request('/api/auth/email', { method: 'POST', body: JSON.stringify({ email, next, locale }) }),
+  emailLoginVerify: (token) =>
+    request('/api/auth/email/verify', { method: 'POST', body: JSON.stringify({ token }) }),
   googleUrl: (next) => {
     const url = `${API_BASE}/api/auth/google`
     if (!next) return url

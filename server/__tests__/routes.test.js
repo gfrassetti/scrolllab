@@ -44,6 +44,8 @@ const EXPECTED = [
   'GET /api/subscriptions/plans',
   'GET /api/withdrawals/options',
   'POST /api/auth/dev-login',
+  'POST /api/auth/email',
+  'POST /api/auth/email/verify',
   'POST /api/auth/logout',
   'POST /api/builder-projects',
   'POST /api/checkout',

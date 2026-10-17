@@ -504,6 +504,26 @@ const priceChangeNoticeSchema = new mongoose.Schema(
 );
 priceChangeNoticeSchema.index({ subscriptionId: 1, changeId: 1 }, { unique: true });
 
+/**
+ * Link de acceso por mail: el hash del token (el token viaja solo en el mail),
+ * a qué mail, adónde volver y hasta cuándo vale. Un solo uso (`usedAt`). Mongo
+ * borra la fila un día después de vencida.
+ */
+const loginLinkSchema = new mongoose.Schema(
+  {
+    tokenHash: { type: String, required: true, unique: true },
+    email: { type: String, required: true, index: true },
+    next: String,
+    locale: String,
+    expiresAt: { type: Date, required: true, index: { expireAfterSeconds: 24 * 60 * 60 } },
+    usedAt: { type: Date, default: null },
+  },
+  { timestamps: true },
+);
+
+/** @type {AnyModel} */
+export const LoginLink = mongoose.models.LoginLink || mongoose.model("LoginLink", loginLinkSchema);
+
 /** @type {AnyModel} */
 export const PriceChangeNotice =
   mongoose.models.PriceChangeNotice ||

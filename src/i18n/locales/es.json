@@ -1436,7 +1436,7 @@
   "login": {
     "eyebrow": "Cuenta",
     "title": "Con tu cuenta comprás y descargás",
-    "body": "Para comprar y bajar tu página hace falta una cuenta. Con Google es un clic.",
+    "body": "Para comprar y bajar tu página hace falta una cuenta. Con Google es un clic; sin Google, te mandamos un link a tu mail.",
     "google": "Continuar con Google",
     "devLogin": "Entrar sin Google (solo desarrollo)",
     "errorGoogle": "No se pudo iniciar sesión con Google.",
@@ -1444,9 +1444,28 @@
     "errorNotConfiguredProd": "El inicio de sesión no está disponible ahora. Volvé a probar más tarde.",
     "inAppTitle": "Estás dentro de otra app",
     "inAppTitleNamed": "Estás en el navegador de {{app}}",
-    "inAppBody": "Google no deja iniciar sesión desde acá. Funciona abriendo esta página en Chrome o Safari (menú ⋯ → «Abrir en el navegador») o copiando el link y pegándolo ahí.",
+    "inAppBody": "Google no deja iniciar sesión desde acá. Podés entrar con tu mail, más abajo, o abrir esta página en Chrome o Safari (menú ⋯ → «Abrir en el navegador»).",
     "inAppCopy": "Copiar link",
-    "inAppCopied": "¡Copiado! Ya se puede pegar en Chrome o Safari"
+    "inAppCopied": "¡Copiado! Ya se puede pegar en Chrome o Safari",
+    "or": "o con tu mail",
+    "emailLabel": "Tu mail",
+    "emailSubmit": "Mandarme el link",
+    "emailSending": "Mandando…",
+    "emailSentTitle": "El link va en camino",
+    "emailSent": "Te mandamos un link a {{email}}. Vale 15 minutos y sirve una vez.",
+    "emailSentHint": "Si no aparece en un par de minutos, puede estar en spam o en promociones.",
+    "emailOther": "Usar otro mail",
+    "emailError": "Falta un email válido"
+  },
+  "loginEmail": {
+    "eyebrow": "Cuenta",
+    "title": "Tu link para entrar",
+    "body": "Falta un paso: con «Entrar» queda la sesión abierta en este navegador.",
+    "submit": "Entrar",
+    "working": "Entrando…",
+    "invalid": "Este link no es válido. Se puede pedir otro desde «Entrar».",
+    "again": "Pedir otro link",
+    "expired": "El link venció o ya se usó. Se puede pedir otro desde «Entrar»."
   },
   "account": {
     "eyebrow": "Mi cuenta",

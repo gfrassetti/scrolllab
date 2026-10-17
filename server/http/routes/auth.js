@@ -4,6 +4,7 @@ import passport from 'passport'
 import { db } from '../../db.js'
 import { asyncHandler, HttpError } from '../../middleware.js'
 import { sanitizeAuthReturn } from '../../authReturn.js'
+import { requestLoginLink, consumeLoginLink } from '../../services/emailLogin.js'
 
 /**
  * Sesión: quién soy, login con Google (ida y vuelta, con `next` para volver
@@ -89,6 +90,38 @@ export function createAuthRouter({ config, limits }) {
         res.redirect(`${config.clientUrl}${nextPath}`)
       })
     },
+  )
+
+  // Entrar con un link por mail (server/services/emailLogin.js).
+  router.post(
+    '/api/auth/email',
+    limits.auth,
+    asyncHandler(async (req, res) => {
+      res.json(
+        await requestLoginLink({
+          email: req.body?.email,
+          next: req.body?.next,
+          locale: req.body?.locale,
+          config,
+        }),
+      )
+    }),
+  )
+
+  router.post(
+    '/api/auth/email/verify',
+    limits.auth,
+    asyncHandler(async (req, res) => {
+      const { user, next } = await consumeLoginLink({ token: req.body?.token })
+      // `login` regenera la sesión (anti session fixation).
+      await /** @type {Promise<void>} */ (
+        new Promise((resolve, reject) => {
+          req.login(user, (err) => (err ? reject(err) : resolve()))
+        })
+      )
+      res.clearCookie(PICK_ACCOUNT_COOKIE, pickAccountCookieOptions())
+      res.json({ user: publicUser(user), next })
+    }),
   )
 
   router.post(

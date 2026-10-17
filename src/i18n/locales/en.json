@@ -1436,7 +1436,7 @@
   "login": {
     "eyebrow": "Account",
     "title": "Log in to buy and download",
-    "body": "To buy and download your page you need an account. Sign in with Google and you’re set.",
+    "body": "You need an account to buy and download your page. With Google it’s one click; without Google, we email you a link.",
     "google": "Continue with Google",
     "devLogin": "Sign in without Google (dev only)",
     "errorGoogle": "Could not sign in with Google.",
@@ -1444,9 +1444,28 @@
     "errorNotConfiguredProd": "Sign-in is unavailable right now. Try again later.",
     "inAppTitle": "You’re inside another app",
     "inAppTitleNamed": "You’re in {{app}}’s built-in browser",
-    "inAppBody": "Google doesn’t allow sign-in from here. Open this page in Chrome or Safari (⋯ menu → “Open in browser”), or copy the link and paste it there.",
+    "inAppBody": "Google doesn’t allow signing in from here. Sign in with your email below, or open this page in Chrome or Safari (⋯ menu → “Open in browser”).",
     "inAppCopy": "Copy link",
-    "inAppCopied": "Copied! Paste it in Chrome or Safari"
+    "inAppCopied": "Copied! Paste it in Chrome or Safari",
+    "or": "or with your email",
+    "emailLabel": "Your email",
+    "emailSubmit": "Email me a link",
+    "emailSending": "Sending…",
+    "emailSentTitle": "Check your inbox",
+    "emailSent": "We sent a link to {{email}}. It’s valid for 15 minutes and works once.",
+    "emailSentHint": "If it doesn’t show up in a couple of minutes, check spam or promotions.",
+    "emailOther": "Use another email",
+    "emailError": "Enter a valid email"
+  },
+  "loginEmail": {
+    "eyebrow": "Account",
+    "title": "Your sign-in link",
+    "body": "One more step: tap “Sign in” and you stay signed in on this browser.",
+    "submit": "Sign in",
+    "working": "Signing in…",
+    "invalid": "This link isn’t valid. Request a new one from “Sign in”.",
+    "again": "Get a new link",
+    "expired": "The link expired or was already used. Request a new one from “Sign in”."
   },
   "account": {
     "eyebrow": "My account",

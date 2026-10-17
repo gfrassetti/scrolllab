@@ -53,6 +53,7 @@ const LabSharedEditPage = lazy(() => import('./pages/LabSharedEditPage'))
 const LabPackPage = lazy(() => import('./pages/LabPackPage'))
 const PreviewPage = lazy(() => import('./pages/PreviewPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
+const LoginEmailPage = lazy(() => import('./pages/LoginEmailPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
 const CheckoutSuccessPage = lazy(() =>
@@ -243,6 +244,7 @@ export default function App() {
                     element={<Navigate to="/legal/license" replace />}
                   />
                   <Route path="/login" element={<LoginPage />} />
+                  <Route path="/login/email" element={<LoginEmailPage />} />
                   <Route path="/account" element={<AccountPage />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout/success" element={<CheckoutSuccessPage />} />

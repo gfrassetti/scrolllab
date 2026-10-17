@@ -1032,4 +1032,24 @@ export function defineRepoContract(ctx) {
     })
   })
 
+
+  // ——————————————————————————— Links de acceso por mail ———————————————————————————
+  describe('links de acceso por mail', () => {
+    it('se canjean una sola vez, no después de vencer, y se cuentan por mail', async () => {
+      const email = `${uniq('m')}@contract.test`
+      const hash = uniq('h')
+      await db.createLoginLink({ tokenHash: hash, email, next: '/lab', locale: 'es', expiresAt: new Date(Date.now() + 60_000) })
+      const used = await db.consumeLoginLink(hash)
+      assert.equal(used.email, email)
+      assert.equal(used.next, '/lab')
+      assert.equal(await db.consumeLoginLink(hash), null, 'segunda vez')
+      assert.equal(await db.consumeLoginLink(uniq('nada')), null)
+
+      const old = uniq('h')
+      await db.createLoginLink({ tokenHash: old, email, expiresAt: new Date(Date.now() - 1000) })
+      assert.equal(await db.consumeLoginLink(old), null, 'vencido')
+      assert.equal(await db.countLoginLinksSince(email, new Date(Date.now() - 60_000)), 2)
+      assert.equal(await db.countLoginLinksSince(`${uniq('otro')}@contract.test`, new Date(0)), 0)
+    })
+  })
 }

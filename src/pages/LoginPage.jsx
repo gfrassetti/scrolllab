@@ -10,7 +10,7 @@ import {
 } from '../lib/authReturn'
 import { detectInAppBrowser } from '../lib/inAppBrowser'
 import { SITE_NAME } from '../lib/site'
-import { useT } from '../i18n'
+import { useI18n, useT } from '../i18n'
 
 function GoogleLogo() {
   return (
@@ -84,8 +84,11 @@ export default function LoginPage() {
   const [params] = useSearchParams()
   const error = params.get('error')
   const next = sanitizeAuthReturn(params.get('next')) || '/account'
-  const t = useT()
+  const { t, locale } = useI18n()
   const [inApp] = useState(() => detectInAppBrowser(navigator.userAgent))
+  const [email, setEmail] = useState('')
+  const [emailState, setEmailState] = useState('idle') // idle | sending | sent | error
+  const [emailError, setEmailError] = useState('')
 
   useEffect(() => {
     stashAuthReturn(next)
@@ -102,6 +105,20 @@ export default function LoginPage() {
   }
 
   const googleHref = api.googleUrl(next)
+
+  const sendLink = async (e) => {
+    e.preventDefault()
+    if (emailState === 'sending') return
+    setEmailState('sending')
+    setEmailError('')
+    try {
+      await api.emailLogin({ email: email.trim(), next, locale })
+      setEmailState('sent')
+    } catch (err) {
+      setEmailError(err?.status === 400 ? t('login.emailError') : err.message)
+      setEmailState('error')
+    }
+  }
 
   return (
     <div className="min-h-svh bg-bone text-ink">
@@ -144,6 +161,59 @@ export default function LoginPage() {
           </span>
           {t('login.google')}
         </a>
+
+        <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.25em] text-ink/50">
+          <span className="h-px flex-1 bg-ink/15" aria-hidden="true" />
+          {t('login.or')}
+          <span className="h-px flex-1 bg-ink/15" aria-hidden="true" />
+        </div>
+
+        {emailState === 'sent' ? (
+          <div role="status" data-testid="email-link-sent" className="border border-ink/20 px-5 py-5">
+            <p className="text-base font-medium">{t('login.emailSentTitle')}</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink/70">{t('login.emailSent', { email: email.trim() })}</p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/55">{t('login.emailSentHint')}</p>
+            <button
+              type="button"
+              onClick={() => setEmailState('idle')}
+              className="tpl-hit mt-4 text-[11px] uppercase tracking-[0.25em] text-ink/60 underline underline-offset-4 transition-colors hover:text-ink"
+            >
+              {t('login.emailOther')}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={sendLink} noValidate className="flex flex-col gap-3">
+            <label htmlFor="login-email" className="text-[11px] uppercase tracking-[0.25em] text-ink/60">
+              {t('login.emailLabel')}
+            </label>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <input
+                id="login-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={emailState === 'error' || undefined}
+                aria-describedby={emailError ? 'login-email-error' : undefined}
+                className="min-w-0 flex-1 border-2 border-ink/25 bg-transparent px-4 py-3.5 text-base outline-none transition-colors focus:border-ink"
+              />
+              <button
+                type="submit"
+                disabled={emailState === 'sending'}
+                className="border-2 border-ink px-6 py-3.5 text-xs font-medium uppercase tracking-[0.25em] transition-colors hover:bg-ink hover:text-bone disabled:opacity-60"
+              >
+                {emailState === 'sending' ? t('login.emailSending') : t('login.emailSubmit')}
+              </button>
+            </div>
+            {emailError && (
+              <p id="login-email-error" role="alert" className="text-sm text-danger">
+                {emailError}
+              </p>
+            )}
+          </form>
+        )}
 
         {import.meta.env.DEV && (
           <button

@@ -11,6 +11,7 @@ import { withdrawalsRepo } from "./repositories/withdrawals.js";
 import { refundsRepo } from "./repositories/refunds.js";
 import { eventsRepo } from "./repositories/events.js";
 import { priceChangeNoticesRepo } from "./repositories/priceChangeNotices.js";
+import { loginLinksRepo } from "./repositories/loginLinks.js";
 
 /**
  * Conecta a Mongo o usa file store.
@@ -77,6 +78,7 @@ export const db = {
   ...refundsRepo,
   ...eventsRepo,
   ...priceChangeNoticesRepo,
+  ...loginLinksRepo,
 
   async isReady() {
     if (getMode() === "file") return true;

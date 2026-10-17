@@ -19,6 +19,7 @@ import {
   buildSubscriptionSuspended,
   buildSubscriptionPlanChanged,
   buildSubscriptionPriceChange,
+  buildLoginLink,
 } from './emailTemplatesBilling.js'
 import { buildLabFormMessage } from './emailTemplatesLab.js'
 
@@ -73,6 +74,17 @@ export function sendRefundIssued({ to, ref, config, client, kind, ...rest }) {
   const accountUrl = new URL(kind === 'lab' ? '/lab' : '/account', config.clientUrl).toString()
   const message = buildRefundIssued({ ...rest, kind, accountUrl, logoUrl: logoOf(config) })
   return sendTransactional({ to, message, tag: 'refund_issued', key: `scrolllab-refund-${ref}-${rest.amount}`, config, client })
+}
+
+/**
+ * Link para entrar sin Google (server/services/emailLogin.js). Cada pedido es un
+ * token distinto: la clave de idempotencia es su comienzo.
+ * @param {{ to: string, token: string, locale?: string, config: any, client?: any }} args
+ */
+export function sendLoginLink({ to, token, locale, config, client }) {
+  const loginUrl = `${new URL('/login/email', config.clientUrl).toString()}?token=${encodeURIComponent(token)}`
+  const message = buildLoginLink({ locale, loginUrl, logoUrl: logoOf(config) })
+  return sendTransactional({ to, message, tag: 'login_link', key: `scrolllab-login-${token.slice(0, 16)}`, config, client })
 }
 
 /**

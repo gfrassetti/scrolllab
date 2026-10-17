@@ -731,6 +731,50 @@ export function buildRefundIssued({ name, locale, amount, currency, provider, wh
   })
 }
 
+// ——— Acceso ———
+
+const LOGIN_LINK_COPY = {
+  es: {
+    subject: 'Tu link para entrar a Scroll Lab',
+    preheader: 'Un click y estás adentro. Vale 15 minutos.',
+    eyebrow: 'Entrar',
+    title: 'Tu link para entrar.',
+    intro: 'Pediste entrar a Scroll Lab con este mail. El botón te lleva al sitio y ahí confirmás con «Entrar».',
+    cta: 'Entrar a Scroll Lab',
+    after: 'El link vale 15 minutos y sirve una sola vez. Si no lo pediste vos, ignorá este mail: nadie entra sin él.',
+    footer: '¿Dudas? Respondé a este email.',
+  },
+  en: {
+    subject: 'Your link to sign in to Scroll Lab',
+    preheader: 'One click and you’re in. Valid for 15 minutes.',
+    eyebrow: 'Sign in',
+    title: 'Your sign-in link.',
+    intro: 'You asked to sign in to Scroll Lab with this email. The button takes you to the site, where you confirm with “Sign in”.',
+    cta: 'Sign in to Scroll Lab',
+    after: 'The link is valid for 15 minutes and works once. If you didn’t ask for it, ignore this email: nobody gets in without it.',
+    footer: 'Questions? Just reply.',
+  },
+}
+
+/** @param {{ locale?: string, loginUrl: string, logoUrl: string }} args */
+export function buildLoginLink({ locale, loginUrl, logoUrl }) {
+  const lang = langOf(locale)
+  const c = LOGIN_LINK_COPY[lang]
+  return render({
+    lang,
+    logoUrl,
+    subject: c.subject,
+    preheader: c.preheader,
+    eyebrow: c.eyebrow,
+    eyebrowTone: 'muted',
+    title: c.title,
+    intro: c.intro,
+    cta: { href: loginUrl, label: c.cta },
+    after: c.after,
+    footer: c.footer,
+  })
+}
+
 const WITHDRAWAL_CONFIRM_COPY = {
   es: {
     subject: (code) => `Confirmá la devolución de tu compra · ${code}`,
