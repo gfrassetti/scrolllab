@@ -147,7 +147,7 @@ export default function ContactSection() {
         </p>
         <p className="mt-4 flex flex-wrap justify-between gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase opacity-70" style={MONO}>
           <span>{t('Café de especialidad · San Martín de los Andes')}</span>
-          <span>{t('Sitio de demostración · ScrollLab Estudio')}</span>
+          <span>© {new Date().getFullYear()} cāpsula33</span>
         </p>
       </footer>
       <style>{`

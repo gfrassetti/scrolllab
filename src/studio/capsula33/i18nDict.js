@@ -290,7 +290,6 @@ const EN = {
   'Lunes, {a} a {b}': 'Monday, {a} to {b}',
   'Domingo, cerrado': 'Sunday, closed',
   Ahora: 'Now',
-  'Sitio de demostración · ScrollLab Estudio': 'Demo site · ScrollLab Estudio',
 }
 
 const PT = {
@@ -563,7 +562,6 @@ const PT = {
   'Lunes, {a} a {b}': 'Segunda, {a} às {b}',
   'Domingo, cerrado': 'Domingo, fechado',
   Ahora: 'Agora',
-  'Sitio de demostración · ScrollLab Estudio': 'Site de demonstração · ScrollLab Estudio',
 }
 
 // Nombres de lagos y zonas que en portugués se escriben igual que en español: se aprovecha el español.
