@@ -192,7 +192,9 @@ async function handleLemonLabInvoiceEvent({ name, data, custom, config }) {
   if (name === 'subscription_payment_failed') return handleLemonLabPaymentFailed({ invoice, custom, config })
   if (name === 'subscription_payment_refunded') {
     const sub = invoice.subscriptionId ? await db.findSubscriptionByLemon(invoice.subscriptionId) : null
-    const amount = (invoice.refundedAmountCents ?? invoice.totalCents ?? 0) / 100
+    // `refunded_amount` en 0 (el evento simulado del panel, o un aviso que llega antes
+    // de que Lemon lo complete) no es «devolvimos US$ 0»: vale el total de la factura.
+    const amount = (invoice.refundedAmountCents || invoice.totalCents || 0) / 100
     if (!sub) {
       alertAdmin({
         kind: 'reversed',
@@ -203,7 +205,7 @@ async function handleLemonLabInvoiceEvent({ name, data, custom, config }) {
       })
       return { skipped: 'sin suscripción local' }
     }
-    return handleLabRefund({
+    const out = await handleLabRefund({
       sub,
       provider: 'lemonsqueezy',
       externalId: `lemon-inv-${invoice.id}`,
@@ -214,6 +216,15 @@ async function handleLemonLabInvoiceEvent({ name, data, custom, config }) {
       reason: 'refunded',
       config,
     })
+    // La diferencia de un cambio de plan devuelta: queda marcada, así el
+    // arrepentimiento no la vuelve a pedir.
+    const upgrade = (sub.upgradePayments || []).find((p) => String(p.paymentId) === String(invoice.id))
+    if (upgrade && !upgrade.refundedAt) {
+      upgrade.refundedAt = new Date()
+      sub.markModified?.('upgradePayments')
+      await sub.save()
+    }
+    return out
   }
   return { skipped: `evento ${name}` }
 }

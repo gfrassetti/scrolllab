@@ -193,6 +193,27 @@ describe('LAB con Lemon Squeezy (reloj simulado)', () => {
     assert.equal((await c.row()).plan, 'hosted_starter')
   })
 
+  it('la diferencia de plan devuelta (como el evento simulado del panel): monto real, queda marcada y la suscripción sigue', async () => {
+    const c = await customer('dif-devuelta@test.com')
+    const out = await openCheckout(c, 'hosted_starter')
+    const { lsub } = await subscribe(out.checkoutId)
+    await c.goTo(7, 1)
+    await lemonWebhook('subscription_payment_success', ls.renew(lsub.id))
+    await c.goTo(10)
+    await c.agent.post('/api/subscriptions/change').send({ plan: 'hosted_pro' })
+    const proration = ls.lastProration
+    await lemonWebhook('subscription_payment_success', proration)
+    // El simulador manda la factura tal cual: «paid» y refunded_amount 0.
+    assert.equal((await lemonWebhook('subscription_payment_refunded', proration)).status, 200)
+    const row = await c.row()
+    assert.equal(row.status, 'authorized')
+    assert.ok(row.upgradePayments[0].refundedAt)
+    const entry = (await fileDb.listRefunds()).find((r) => r.externalId === `lemon-inv-${proration.id}`)
+    assert.equal(entry.amount, proration.attributes.total / 100)
+    await waitFor(() => c.mails().some((m) => /devolvimos/i.test(m.body.subject)), 'el mail de la devolución')
+    assert.doesNotMatch(c.mails().find((m) => /devolvimos/i.test(m.body.subject)).body.text, /\$\s?0([.,]00)?(?!\d)/)
+  })
+
   it('alta sin prueba (ya tuvo una): saltea la prueba, cobra en el acto y activa', async () => {
     const c = await customer('sinprueba@test.com')
     const me = await c.agent.get('/api/auth/me')
