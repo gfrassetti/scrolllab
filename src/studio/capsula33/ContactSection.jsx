@@ -147,10 +147,27 @@ export default function ContactSection() {
         </p>
         <p className="mt-4 flex flex-wrap justify-between gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase opacity-70" style={MONO}>
           <span>{t('Café de especialidad · San Martín de los Andes')}</span>
-          <span>© {new Date().getFullYear()} cāpsula33</span>
+          <span className="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <span>© {new Date().getFullYear()} cāpsula33</span>
+            {/* El crédito del sitio: la marca de Guido Frassetti, con enlace a su portfolio. */}
+            <a
+              href="https://guidofrassetti-dev.netlify.app/"
+              target="_blank"
+              rel="noopener"
+              className="c33-credit tpl-hit inline-flex items-center gap-2"
+              aria-label={t('Diseñado por Guido Frassetti')}
+            >
+              <span aria-hidden="true">{t('Diseñado por')}</span>
+              <svg aria-hidden="true" viewBox="-1 -1 46 22" className="h-[12px] w-auto" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="miter">
+                <path d="M5 0H22V5H5V15H17V14H11V9H22V20H0V5Z M26 0H44L40 5H31V8H40V13H31V20H26Z" vectorEffect="non-scaling-stroke" />
+              </svg>
+            </a>
+          </span>
         </p>
       </footer>
       <style>{`
+        .c33-credit { transition: opacity 200ms ease-out; }
+        @media (hover: hover) { .c33-credit:hover { opacity: 0.55; } }
         .c33-end-btn { transition: transform 160ms ease-out, background-color 250ms, color 250ms; }
         .c33-end-btn:active { transform: scale(0.97); }
         @media (hover: hover) {
