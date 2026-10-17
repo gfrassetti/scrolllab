@@ -149,24 +149,19 @@ export default function ContactSection() {
           <span>{t('Café de especialidad · San Martín de los Andes')}</span>
           <span className="flex flex-wrap items-center gap-x-5 gap-y-1">
             <span>© {new Date().getFullYear()} cāpsula33</span>
-            {/* El crédito del sitio: la marca de Scroll Lab (el estudio), con enlace a su sección Estudio. */}
+            {/* El crédito del sitio: la marca de Guido Frassetti, con enlace a su portfolio (trabajos y
+                contacto; desde ahí también se llega a Scroll Lab). Uno solo, a propósito. */}
             <a
-              href="https://www.scrolllab.com.ar/#estudio"
+              href="https://guidofrassetti-dev.netlify.app/"
               target="_blank"
               rel="noopener"
               className="c33-credit tpl-hit inline-flex items-center gap-2"
-              aria-label={t('Diseñado por Scroll Lab')}
+              aria-label={t('Diseñado por Guido Frassetti')}
             >
               <span aria-hidden="true">{t('Diseñado por')}</span>
-              <span aria-hidden="true" className="inline-flex items-center gap-1.5">
-                <svg viewBox="0 0 32 32" className="h-[14px] w-[14px]">
-                  <rect x="4" y="5" width="24" height="4.5" fill="currentColor" />
-                  <rect x="4" y="13.75" width="14" height="4.5" fill="currentColor" />
-                  <rect x="22.5" y="13.75" width="5.5" height="4.5" fill={C.cream} />
-                  <rect x="4" y="22.5" width="19" height="4.5" fill="currentColor" />
-                </svg>
-                Scroll Lab
-              </span>
+              <svg aria-hidden="true" viewBox="-1 -1 46 22" className="h-[12px] w-auto" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="miter">
+                <path d="M5 0H22V5H5V15H17V14H11V9H22V20H0V5Z M26 0H44L40 5H31V8H40V13H31V20H26Z" vectorEffect="non-scaling-stroke" />
+              </svg>
             </a>
           </span>
         </p>
