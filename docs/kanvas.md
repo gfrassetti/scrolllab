@@ -155,6 +155,34 @@ que crear una textura nueva en cada redibujo.
   sintetizado (bombo 808, bajo saturado, cencerro con melodía, palmas, hats) y un «whoosh» para el
   menú. Se silencia con la pestaña oculta. La pista real sería un archivo con licencia.
 
+### 2.9 La lámina se da vuelta: la cordillera (`ridge.js`)
+
+Después de las láminas, la del hero **gira** (el ancho se cierra con `cos`, de canto se oscurece) y del
+otro lado ya está otra escena, que crece a pantalla completa. Es el mismo plano: a mitad del giro
+cambia su textura del render target de la isla al de la cordillera.
+
+- La cordillera es **todo código**: un cielo, nubes y crestas dibujadas por shaders en planos a
+  distintas profundidades. Al bajar y al seguir el mouse, las capas cercanas se corren más que las
+  lejanas (parallax). Las crestas salen de ruido «crestado»; el color son facetas en diagonal en tres
+  tonos y la nieve solo cerca de los picos. Si la luz depende solo de la x, salen columnas verticales.
+- Dos textos grandes flotan (003 y 004). Con el segundo, el HUD dibuja una grilla (`.kv-grid`, CSS) y
+  aparece una pantalla chica con un relieve de puntos que gira (`createTopo`), sobre su slot.
+- **Transición a pantalla completa** (`WIPE_FRAG`): franjas de tinta con el filo ámbar entran desde
+  los costados, tapan todo y siguen de largo. Debajo, la cámara baja a los viajeros.
+- **Los viajeros**: dos figuras de espaldas hechas con primitivas; el pelo, la bufanda y el ruedo de
+  la capa se mueven en el vertex shader según `uv.y` (raíz quieta, punta al viento). En pantallas
+  verticales la cámara se aleja y se juntan.
+- Las láminas de la sección anterior ya no se mueven todas: la del hero sigue al mouse, la de la
+  torre es un «video» (su cámara orbita sola) y la de los viajeros es una imagen quieta.
+
+### 2.10 Sonido por tramos (`audio.js`)
+
+Como la referencia (que carga una canción de intro, un loop después, una por sección, viento,
+transición y sonidos de hover), no un tema único: `audio.scene('intro' | 'hero' | 'tableau' |
+'ridge' | 'wayfarers')` cambia la mezcla con fundido (pad, batería, 808, cencerro, viento, filtro);
+`sweep()` suena con la transición, `tick()` al pasar por un link, `drawer()` con el menú. Todo
+sintetizado; las pistas definitivas serían archivos con licencia.
+
 ## 3. Recetas
 
 **Sumar una sección**
@@ -181,6 +209,9 @@ que crear una textura nueva en cada redibujo.
 - En el panel del navegador de la app, `requestAnimationFrame` puede ir a ~10 cuadros por segundo:
   para mirar la animación de verdad, Chrome. Las láminas de prueba se sacan con Playwright
   (`--use-angle=swiftshader`).
+- **Color:** el plano final del motor no pasa a sRGB, así que lo que se dibuja en un render target
+  se ve con sus números tal cual. Los `ShaderMaterial` propios cargan sus colores como están escritos
+  (`setStyle(hex, LinearSRGBColorSpace)`); con `new THREE.Color(hex)` salen mucho más oscuros.
 - Lo que sube detrás de la barra del HUD se recorta dos veces: el canvas con `clip()` y la capa UI con
   `clip-path`, con los mismos números (`--pad`, `--bar`).
 

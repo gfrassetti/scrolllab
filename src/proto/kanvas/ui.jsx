@@ -21,7 +21,7 @@ export const INK = '#15111d'
  */
 export const DISPLAY = { family: "'Big Shoulders Display'", weight: 900, tracking: '0.005em', scale: 1.3 }
 export const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500&family=Barlow+Semi+Condensed:wght@500;600&display=swap'
+  'https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500&family=Barlow+Semi+Condensed:wght@500;600&display=block'
 
 export const KANVAS_CSS = `
 .kv { --pad: 20px; --bar: 56px; --rail: 0px; --radius: 4px; }
@@ -55,6 +55,18 @@ export const KANVAS_CSS = `
 @keyframes kv-wave { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
 .kv-ring { animation: kv-spin 14s linear infinite; transform-origin: center; }
 @keyframes kv-spin { to { transform: rotate(1turn); } }
+/* la carga: una barra de segmentos inclinados, como una barra de energía */
+.kv-segs i { flex: 1; height: 12px; transform: skewX(-24deg); background: rgba(21,17,29,.09); transition: background .3s; }
+.kv-segs i[data-on='1'] { background: ${INK}; }
+.kv-segs i[data-on='1']:has(+ i[data-on='0']) { background: ${AMBER}; }
+/* la grilla que el HUD dibuja en la cordillera: las líneas se trazan desde un extremo */
+.kv-grid i { position: absolute; background: rgba(255,255,255,.32); transition: transform 1.2s ${EASE}; }
+.kv-grid i.h { left: 0; right: 0; height: 1px; transform: scaleX(0); transform-origin: left; }
+.kv-grid i.v { top: 0; bottom: 0; width: 1px; transform: scaleY(0); transform-origin: top; }
+.kv-grid[data-on='1'] i { transform: none; }
+.kv-grid[data-on='1'] i:nth-child(2) { transition-delay: .12s; }
+.kv-grid[data-on='1'] i:nth-child(3) { transition-delay: .2s; }
+.kv-grid[data-on='1'] i:nth-child(4) { transition-delay: .3s; }
 .kv-chamfer { clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
 `
 
@@ -62,9 +74,23 @@ export const KANVAS_CSS = `
  * Link de la casa: cada letra rueda hacia arriba, con un pequeño retraso entre una y otra, y la que
  * entra ya viene en el color de acento; dos esquinas se cierran alrededor como una mira.
  */
+let hoverFx = null
+/** El sonido corto que suena al pasar el mouse por un link (lo registra la página). */
+export const setHoverFx = (fn) => {
+  hoverFx = fn
+}
+
 export function RollLink({ text, onClick, className = '', style, active = false, children }) {
   return (
-    <button type="button" onClick={onClick} className={`rl pointer-events-auto ${className}`} style={style} data-active={active ? '' : undefined} aria-label={text}>
+    <button
+      type="button"
+      onClick={onClick}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && hoverFx?.()}
+      className={`rl pointer-events-auto ${className}`}
+      style={style}
+      data-active={active ? '' : undefined}
+      aria-label={text}
+    >
       {children}
       <span aria-hidden="true" className="inline-flex">
         {[...text].map((c, i) => (
