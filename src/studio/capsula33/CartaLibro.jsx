@@ -324,7 +324,7 @@ export default function CartaLibro() {
             {t('Experiencia Capsula · take-away')}
           </p>
           <h2 data-in className="mt-3 text-[clamp(2.6rem,7vw,6.5rem)] leading-[0.9] font-semibold tracking-[-0.02em] uppercase opacity-0" style={DISPLAY}>
-            {t('Nuestra carta')}
+            {t('Nuestra carta')}{' '}
             <br />
             <span style={{ color: C.neon }}>{t('take-away.')}</span>
           </h2>

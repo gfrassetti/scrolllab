@@ -538,6 +538,7 @@ export default function LlegarSection() {
                 {t('Roca 1120,')}
               </span>
             </span>
+            {/* el espacio entre renglones: para buscadores y lectores de pantalla */}{' '}
             <span className="block overflow-hidden pb-[0.04em]">
               <span data-line className="block" style={{ color: C.neon }}>
                 {t('Sector SMA.')}

@@ -67,7 +67,7 @@ export default function ScrollRail({ visible }) {
     <>
       <style>{`html.c33-noscrollbar { scrollbar-width: none; } html.c33-noscrollbar::-webkit-scrollbar { display: none; }`}</style>
       <nav
-        aria-label={t('Secciones')}
+        aria-label={t('Recorrido de la página')}
         className="fixed top-1/2 right-3 z-[80] hidden h-[44svh] -translate-y-1/2 mix-blend-difference transition-opacity duration-700 sm:block md:right-5"
         style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? 'auto' : 'none' }}
       >

@@ -66,6 +66,7 @@ export default function ContactSection() {
               {t('Estamos en')}
             </span>
           </span>
+          {/* el espacio entre renglones: para buscadores y lectores de pantalla */}{' '}
           <span className="block overflow-hidden pb-[0.06em]">
             <span data-line className="block">
               Roca 1120.
@@ -78,11 +79,11 @@ export default function ContactSection() {
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-60" style={MONO}>
               {t('Dirección')}
             </p>
-            <p className="mt-2 text-[18px] leading-[1.35] font-medium" style={BODY}>
+            <address className="mt-2 text-[18px] leading-[1.35] font-medium not-italic" style={BODY}>
               Av. Gral. Roca 1120
               <br />
               San Martín de los Andes
-            </p>
+            </address>
           </div>
           <div data-in className="opacity-0">
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-60" style={MONO}>

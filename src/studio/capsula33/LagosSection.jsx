@@ -344,6 +344,7 @@ export default function LagosSection() {
                 {t('Base')}
               </span>
             </span>
+            {/* el espacio entre renglones: para buscadores y lectores de pantalla */}{' '}
             <span aria-hidden="true" className="block overflow-hidden pb-[0.06em] whitespace-nowrap" style={{ color: C.neon }}>
               <span data-line className="block">
                 7-Lagos.

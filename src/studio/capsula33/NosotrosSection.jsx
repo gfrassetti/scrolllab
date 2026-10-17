@@ -95,7 +95,8 @@ export default function NosotrosSection() {
           <span className="h-px w-8" style={{ background: C.neon }} />
           {t('Nosotros')}
         </p>
-        <p
+        {/* La frase del local es el título de la sección. */}
+        <h2
           ref={set('text')}
           className="relative mt-6 max-w-[26ch] text-[clamp(1.5rem,3.7vw,3.9rem)] leading-[1.08] font-semibold tracking-[-0.005em] uppercase md:max-w-[34ch] lg:max-w-[56vw] lg:text-[clamp(1.5rem,2.9vw,3.4rem)]"
           style={DISPLAY}
@@ -106,7 +107,7 @@ export default function NosotrosSection() {
               {i < WORDS.length - 1 ? ' ' : ''}
             </span>
           ))}
-        </p>
+        </h2>
 
         {/* En el teléfono la foto y el poema comparten lugar: la foto deja paso al poema. En PC la foto va al lado de la frase. */}
         <div className="mt-6 grid lg:mt-8 lg:block">

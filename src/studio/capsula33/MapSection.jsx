@@ -268,6 +268,7 @@ export default function MapSection({ onProgress = () => {}, onReady = () => {} }
                 {t('La cápsula,')}
               </span>
             </span>
+            {/* el espacio entre renglones: para buscadores y lectores de pantalla */}{' '}
             <span className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
                 {t('pieza por pieza.')}

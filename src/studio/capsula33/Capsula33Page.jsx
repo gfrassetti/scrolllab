@@ -57,48 +57,44 @@ export default function Capsula33Page() {
 
 function Capsula33() {
   const { t } = useLang()
-  // Las fuentes, una sola vez.
+  // Las fuentes, una sola vez (el sitio publicado ya las trae en el HTML).
   useEffect(() => {
+    if ([...document.querySelectorAll('link[rel="stylesheet"]')].some((l) => l.href === FONTS_HREF)) return undefined
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.href = FONTS_HREF
     document.head.appendChild(link)
     return () => link.remove()
   }, [])
-  // El título, la descripción y los datos del local, en el idioma elegido.
+  // El título y la descripción, en el idioma elegido (en el buscador y al compartir). Los datos del
+  // local (JSON-LD) viven en el HTML: capsula33.html.
   useEffect(() => {
     const prevTitle = document.title
-    document.title = t('cāpsula33 · Café de especialidad en San Martín de los Andes')
-    // Lo que muestran los buscadores y los datos del local (horario, dirección, ubicación).
-    const meta = document.createElement('meta')
-    meta.name = 'description'
-    meta.content = t(
+    const title = t('cāpsula33 · Café de especialidad en San Martín de los Andes')
+    const description = t(
       'Cafetería de especialidad en Av. Gral. Roca 1120, San Martín de los Andes: espresso, laminados, brunch y figuras de colección en una cápsula naranja. Martes a sábado de 9 a 21, lunes de 9 a 15.',
     )
-    const prevMeta = document.querySelector('meta[name="description"]')
-    if (prevMeta) prevMeta.remove()
-    document.head.appendChild(meta)
-    const ld = document.createElement('script')
-    ld.type = 'application/ld+json'
-    ld.textContent = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'CafeOrCoffeeShop',
-      name: 'cāpsula33',
-      servesCuisine: [t('Café de especialidad'), t('Pastelería'), 'Brunch'],
-      address: { '@type': 'PostalAddress', streetAddress: 'Av. Gral. Roca 1120', addressLocality: 'San Martín de los Andes', addressRegion: 'Neuquén', addressCountry: 'AR' },
-      geo: { '@type': 'GeoCoordinates', latitude: -40.1542728, longitude: -71.347478 },
-      openingHoursSpecification: [
-        { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '09:00', closes: '21:00' },
-        { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Monday', opens: '09:00', closes: '15:00' },
-      ],
-      sameAs: ['https://www.instagram.com/capsulas33/'],
-    })
-    document.head.appendChild(ld)
+    document.title = title
+    let meta = document.head.querySelector('meta[name="description"]')
+    const created = !meta
+    if (created) {
+      meta = document.createElement('meta')
+      meta.name = 'description'
+      document.head.appendChild(meta)
+    }
+    const prevDescription = meta.content
+    meta.content = description
+    const social = [
+      ['meta[property="og:title"]', title],
+      ['meta[name="twitter:title"]', title],
+    ]
+    const prevSocial = social.map(([sel]) => document.head.querySelector(sel)?.content)
+    social.forEach(([sel, v]) => document.head.querySelector(sel)?.setAttribute('content', v))
     return () => {
-      meta.remove()
-      if (prevMeta) document.head.appendChild(prevMeta)
-      ld.remove()
       document.title = prevTitle
+      if (created) meta.remove()
+      else meta.content = prevDescription
+      social.forEach(([sel], k) => prevSocial[k] != null && document.head.querySelector(sel)?.setAttribute('content', prevSocial[k]))
     }
   }, [t])
 
@@ -143,16 +139,25 @@ function Capsula33() {
   return (
     <SmoothScrollProvider>
       <div className="min-h-svh" style={{ background: '#05070d', color: C.cream, ...BODY }}>
+        <a
+          href="#contenido"
+          className="fixed top-3 left-3 z-[200] -translate-y-[200%] rounded-full px-4 py-2.5 text-[14px] font-semibold transition-transform focus:translate-y-0"
+          style={{ background: C.orange, color: '#111113' }}
+        >
+          {t('Saltar al contenido')}
+        </a>
         <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onBoard={() => setBoarded(true)} />
-        <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
-        <NosotrosSection />
-        <MapSection onProgress={onMapProgress} onReady={onMapReady} />
-        <CartaView />
-        <GaleriaSection />
-        {/* La ruta va después de las fotos, antes de Cómo llegar (es lo menos importante para quien viene al local). */}
-        <LagosSection />
-        <LlegarSection />
-        <ContactSection />
+        <main id="contenido" tabIndex={-1} className="outline-none">
+          <ShipHero boarded={boarded} bridge={bridge} onProgress={onProgress} onReady={onReady} />
+          <NosotrosSection />
+          <MapSection onProgress={onMapProgress} onReady={onMapReady} />
+          <CartaView />
+          <GaleriaSection />
+          {/* La ruta va después de las fotos, antes de Cómo llegar (es lo menos importante para quien viene al local). */}
+          <LagosSection />
+          <LlegarSection />
+          <ContactSection />
+        </main>
         <Nav visible={boarded} />
         <ScrollRail visible={boarded} />
       </div>

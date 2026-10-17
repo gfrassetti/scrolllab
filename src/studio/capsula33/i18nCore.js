@@ -8,8 +8,9 @@ import { openStatus } from './brand'
  *
  * Las claves del diccionario son los textos en español tal como están escritos en el código:
  * `t('Nosotros')` devuelve la traducción o, si no hay, el mismo texto. Lo que lleva datos va
- * con marcadores: `t('Escala {n} / 07', { n: 3 })`. La elección queda guardada en el
- * navegador; la primera vez se toma del idioma del navegador (pt, en o, por defecto, es).
+ * con marcadores: `t('Escala {n} / 07', { n: 3 })`. El idioma va en la dirección (`?lang=en`,
+ * `?lang=pt`; el español no lleva nada): cada versión tiene su URL para los buscadores. Sin eso,
+ * manda lo guardado en el navegador y, la primera vez, el idioma del navegador (pt, en o es).
  */
 
 export const LANGS = [
@@ -19,8 +20,16 @@ export const LANGS = [
 ]
 export const LANG_KEY = 'c33-lang'
 export const LANG_CODES = LANGS.map(([c]) => c)
+/** Para `<html lang>` y Open Graph. */
+export const LANG_TAGS = { es: ['es-AR', 'es_AR'], en: ['en', 'en_US'], pt: ['pt-BR', 'pt_BR'] }
 
 export function initialLang() {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get('lang')
+    if (LANG_CODES.includes(fromUrl)) return fromUrl
+  } catch {
+    /* sin window */
+  }
   try {
     const saved = window.localStorage.getItem(LANG_KEY)
     if (LANG_CODES.includes(saved)) return saved

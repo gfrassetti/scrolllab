@@ -9,6 +9,7 @@
     "dev:api": "nodemon server/index.js",
     "build": "vite build && node scripts/gen-share-pages.mjs",
     "build:capsula33": "vite build --config vite.capsula33.config.js",
+    "build:capsula33:public": "vite build --config vite.capsula33.config.js --mode public",
     "build:embed": "vite build --config embed/vite.config.js && node embed/build-loader.mjs",
     "build:loader": "node embed/build-loader.mjs",
     "lint": "eslint .",

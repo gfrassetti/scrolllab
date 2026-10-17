@@ -1,26 +1,154 @@
 <!doctype html>
-<html lang="es-AR">
+<html lang="es-AR" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0c0f" />
-    <!-- Demo privado para el dueño: que no lo indexe nadie. -->
-    <meta name="robots" content="noindex, nofollow, noarchive" />
-    <title>cāpsula33 — Café de especialidad en San Martín de los Andes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Lo que se busca: qué es y dónde. El título y la descripción cambian con el idioma (Capsula33Page). -->
+    <title>cāpsula33 · Café de especialidad en San Martín de los Andes</title>
     <meta
       name="description"
-      content="cāpsula33: café de especialidad en San Martín de los Andes, Av. Gral. Roca 1120."
+      content="Cafetería de especialidad en Av. Gral. Roca 1120, San Martín de los Andes: espresso, laminados, brunch y figuras de colección en una cápsula naranja. Martes a sábado de 9 a 21, lunes de 9 a 15."
     />
+    <!-- %C33_ROBOTS% lo pone el build: «index» en el sitio público, «noindex» en la demo. -->
+    <meta name="robots" content="%C33_ROBOTS%" />
+    <link rel="canonical" href="%C33_URL%/" />
+
+    <!-- Idiomas: la misma página en español, inglés y portugués (?lang=). -->
+    <link rel="alternate" hreflang="es" href="%C33_URL%/" />
+    <link rel="alternate" hreflang="en" href="%C33_URL%/?lang=en" />
+    <link rel="alternate" hreflang="pt" href="%C33_URL%/?lang=pt" />
+    <link rel="alternate" hreflang="x-default" href="%C33_URL%/" />
+
+    <!-- Datos del lugar (Google, Apple Maps, Bing). -->
+    <meta name="geo.region" content="AR-Q" />
+    <meta name="geo.placename" content="San Martín de los Andes" />
+    <meta name="geo.position" content="-40.1542728;-71.347478" />
+    <meta name="ICBM" content="-40.1542728, -71.347478" />
+
+    <!-- Al compartir el link (WhatsApp, Instagram, Facebook, LinkedIn, X). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="cāpsula33" />
+    <meta property="og:url" content="%C33_URL%/" />
+    <meta property="og:title" content="cāpsula33 · Café de especialidad en San Martín de los Andes" />
+    <meta
+      property="og:description"
+      content="Espresso, laminados y brunch a bordo de una cápsula naranja. Av. Gral. Roca 1120, San Martín de los Andes."
+    />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale:alternate" content="pt_BR" />
+    <meta property="og:image" content="%C33_URL%/og.jpg" />
+    <meta property="og:image:secure_url" content="%C33_URL%/og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="La entrada naranja de cāpsula33 al fondo de un pasillo de nave espacial" />
+    <meta property="place:location:latitude" content="-40.1542728" />
+    <meta property="place:location:longitude" content="-71.347478" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="cāpsula33 · Café de especialidad en San Martín de los Andes" />
+    <meta name="twitter:description" content="Espresso, laminados y brunch a bordo de una cápsula naranja. Av. Gral. Roca 1120." />
+    <meta name="twitter:image" content="%C33_URL%/og.jpg" />
+    <meta name="twitter:image:alt" content="La entrada naranja de cāpsula33 al fondo de un pasillo de nave espacial" />
+
+    <!-- Íconos y app instalable. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#05060a" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-title" content="cāpsula33" />
+    <meta name="application-name" content="cāpsula33" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Tipografías: la conexión se abre antes de que arranque el JS. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;600;700&family=Barlow:wght@400;500&display=swap"
+    />
+
+    <!-- Datos estructurados: el café (horarios, dirección, ubicación, redes) y el sitio. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "CafeOrCoffeeShop",
+            "@id": "%C33_URL%/#cafe",
+            "name": "cāpsula33",
+            "alternateName": ["capsula33", "Cápsula 33"],
+            "description": "Cafetería de especialidad en San Martín de los Andes: espresso, laminados, brunch y figuras de colección en un local con estética de nave espacial.",
+            "url": "%C33_URL%/",
+            "image": ["%C33_URL%/og.jpg"],
+            "logo": "%C33_URL%/icon-512.png",
+            "slogan": "Sabores que conectan",
+            "servesCuisine": ["Café de especialidad", "Pastelería", "Brunch"],
+            "priceRange": "$$",
+            "currenciesAccepted": "ARS",
+            "menu": "%C33_URL%/#carta",
+            "hasMap": "https://www.google.com/maps/search/?api=1&query=Gral.+Roca+1120,+San+Mart%C3%ADn+de+los+Andes",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Av. Gral. Roca 1120",
+              "addressLocality": "San Martín de los Andes",
+              "addressRegion": "Neuquén",
+              "postalCode": "8370",
+              "addressCountry": "AR"
+            },
+            "geo": { "@type": "GeoCoordinates", "latitude": -40.1542728, "longitude": -71.347478 },
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "opens": "09:00",
+                "closes": "21:00"
+              },
+              { "@type": "OpeningHoursSpecification", "dayOfWeek": "Monday", "opens": "09:00", "closes": "15:00" }
+            ],
+            "sameAs": ["https://www.instagram.com/capsulas33/"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "%C33_URL%/#website",
+            "url": "%C33_URL%/",
+            "name": "cāpsula33",
+            "inLanguage": ["es-AR", "en", "pt-BR"],
+            "publisher": { "@id": "%C33_URL%/#cafe" }
+          }
+        ]
+      }
+    </script>
+
     <style>
       html,
       body {
         margin: 0;
-        background: #0b0c0f;
+        background: #05060a;
       }
     </style>
   </head>
   <body>
     <div id="root"></div>
+    <!-- Sin JavaScript: lo esencial del café, en HTML plano. -->
+    <noscript>
+      <main style="max-width: 40rem; margin: 0 auto; padding: 48px 24px; color: #f2e9dc; font-family: system-ui, sans-serif; line-height: 1.5">
+        <h1>cāpsula33 · Café de especialidad en San Martín de los Andes</h1>
+        <p>Espresso, laminados, brunch y figuras de colección en una cápsula naranja.</p>
+        <h2>Dónde estamos</h2>
+        <address style="font-style: normal">Av. Gral. Roca 1120, San Martín de los Andes, Neuquén, Argentina</address>
+        <h2>Horarios</h2>
+        <ul>
+          <li>Martes a sábado, de 9 a 21</li>
+          <li>Lunes, de 9 a 15</li>
+          <li>Domingo, cerrado</li>
+        </ul>
+        <p><a style="color: #ff7a1a" href="https://www.instagram.com/capsulas33/">Instagram @capsulas33</a></p>
+      </main>
+    </noscript>
     <script type="module" src="/src/studio/capsula33/standalone.jsx"></script>
   </body>
 </html>

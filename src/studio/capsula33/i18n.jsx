@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { LANGS, LANG_CODES, LANG_KEY, LangContext, initialLang, translate, useLang } from './i18nCore'
+import { LANGS, LANG_CODES, LANG_KEY, LANG_TAGS, LangContext, initialLang, translate, useLang } from './i18nCore'
 
-/** El proveedor del idioma (y `<html lang>`) y el selector ES · EN · PT. Los hooks están en i18nCore. */
+/** Pone o cambia un `<meta>` o `<link>` del head (sin duplicar). */
+function setHead(selector, attr, value) {
+  const el = document.head.querySelector(selector)
+  if (el) el.setAttribute(attr, value)
+}
+
+/**
+ * El proveedor del idioma y el selector ES · EN · PT. Los hooks están en i18nCore. Con el idioma
+ * cambian también `<html lang>`, la dirección (`?lang=`, sin recargar), el canonical y el locale de
+ * Open Graph: cada versión se presenta con su propia URL.
+ */
 export function LangProvider({ children }) {
   const [lang, setLangState] = useState(initialLang)
   const setLang = useCallback((next) => {
@@ -14,7 +24,20 @@ export function LangProvider({ children }) {
     }
   }, [])
   useEffect(() => {
-    document.documentElement.lang = lang
+    const [htmlLang, ogLocale] = LANG_TAGS[lang]
+    document.documentElement.lang = htmlLang
+    const url = new URL(window.location.href)
+    if (lang === 'es') url.searchParams.delete('lang')
+    else url.searchParams.set('lang', lang)
+    if (url.href !== window.location.href) window.history.replaceState(window.history.state, '', url)
+    const canonical = document.head.querySelector('link[rel="canonical"]')
+    if (canonical) {
+      const base = new URL(canonical.href)
+      base.search = lang === 'es' ? '' : `?lang=${lang}`
+      canonical.href = base.href
+      setHead('meta[property="og:url"]', 'content', base.href)
+    }
+    setHead('meta[property="og:locale"]', 'content', ogLocale)
   }, [lang])
   const value = useMemo(() => ({ lang, setLang, t: (s, v) => translate(lang, s, v) }), [lang, setLang])
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>
