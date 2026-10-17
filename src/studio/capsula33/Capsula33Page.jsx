@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { prefersReducedMotion } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
+import { ScrollTrigger } from '../../lib/gsap'
 import Loader from './Loader'
 import ShipHero from './ShipHero'
 import ScrollRail from './ScrollRail'
@@ -20,6 +21,22 @@ import { LangProvider } from './i18n'
 import { useLang } from './i18nCore'
 
 const LOADER_MIN_MS = 2800
+
+// Siempre se arranca arriba, en el hero. Al recargar, el navegador devolvía la página a donde estaba
+// (por ejemplo el pie) y al abordar la marca volaba hacia una entrada que no estaba en pantalla.
+// Un #ancla en la dirección tampoco salta: el abordaje empieza en la entrada. Se fija con ScrollTrigger:
+// guarda el valor al arrancar y lo repone en cada recálculo (si se cambia a mano, vuelve a «auto»).
+function startAtTop() {
+  if (typeof window === 'undefined') return
+  if ('scrollRestoration' in window.history) ScrollTrigger.clearScrollMemory('manual')
+  if (window.location.hash) {
+    const url = new URL(window.location.href)
+    url.hash = ''
+    window.history.replaceState(window.history.state, '', url)
+  }
+  window.scrollTo(0, 0)
+}
+startAtTop()
 
 // La carta: el libro por defecto; `?carta=consola` o `?carta=pared` muestran las otras versiones.
 const CARTA_VIEWS = { consola: CartaSection, pared: CartaPared, libro: CartaLibro }
