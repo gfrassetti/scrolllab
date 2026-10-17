@@ -1,27 +1,54 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * Kanvas — la UI de encima del canvas: el marco (riel izquierdo + barra de arriba), los links que se
- * pintan y se desordenan al pasar, la onda del sonido y el menú que sale del riel como un cajón.
+ * Kanvas — la UI de encima del canvas: el HUD (esquinas, medidor de altura, barra de arriba), los
+ * links que ruedan letra por letra y se enmarcan al pasar, la onda del sonido y el menú en cajón.
  */
 
 export const EASE = 'cubic-bezier(0.16, 1, 0.3, 1)'
 const EASE_IO = 'cubic-bezier(0.65, 0, 0.35, 1)'
-export const MONO = "'JetBrains Mono', ui-monospace, monospace"
-export const SERIF = "'Fraunces', Georgia, serif"
+export const MONO = "'Share Tech Mono', ui-monospace, monospace"
+export const BODY = "'Chakra Petch', system-ui, sans-serif"
+export const AMBER = '#f3b04f'
+export const INK = '#15111d'
+
+/**
+ * Tipografías de titulares para comparar (todas de Google Fonts, de corte juego / sci-fi). `scale`
+ * iguala el ancho visual: las anchas (Unbounded, Michroma) van más chicas para el mismo renglón.
+ */
+export const FONTS = {
+  tektur: { label: 'Tektur', family: "'Tektur'", weight: 900, tracking: '-0.01em', scale: 1 },
+  unbounded: { label: 'Unbounded', family: "'Unbounded'", weight: 900, tracking: '-0.045em', scale: 0.74 },
+  oxanium: { label: 'Oxanium', family: "'Oxanium'", weight: 800, tracking: '-0.02em', scale: 0.92 },
+  michroma: { label: 'Michroma', family: "'Michroma'", weight: 400, tracking: '-0.03em', scale: 0.66 },
+}
+export const FONTS_HREF =
+  'https://fonts.googleapis.com/css2?family=Tektur:wdth,wght@75..100,400..900&family=Unbounded:wght@400..900&family=Oxanium:wght@400..800&family=Michroma&family=Chakra+Petch:wght@400;500;600&family=Share+Tech+Mono&display=swap'
 
 export const KANVAS_CSS = `
-.kv { --pad: 20px; --rail: 67px; --bar: 51px; --radius: 10px; }
-@media (max-width: 767px) { .kv { --pad: 10px; --rail: 0px; --bar: 52px; } }
-.kv-frame { --fg: #fff; --fg-inv: #15111d; --line: rgba(255,255,255,.22); color: var(--fg); transition: color .5s ${EASE}; }
-.kv-frame[data-theme='light'] { --fg: #15111d; --fg-inv: #fff; --line: rgba(21,17,29,.14); }
-.kv-line { border-color: var(--line); transition: border-color .5s ${EASE}; }
-.hk { position: relative; display: inline-block; overflow: hidden; vertical-align: top; }
-.hk-bg { position: absolute; inset: 0; background: var(--hk-bg, var(--fg)); transform: translateX(-101%); }
-.hk-t { position: relative; display: inline-block; transition: color .18s linear; }
-.hk[data-on] .hk-t { color: var(--hk-on, var(--fg-inv)); transition: color .45s ${EASE}; }
-.hk-a { position: absolute; left: 0; top: 0; white-space: pre; visibility: hidden; }
-.kv-wave i { display: block; width: 1px; height: 13px; margin: 0 1px; background: currentColor; transform: scaleY(.2); transition: transform .4s ${EASE}; }
+.kv { --pad: 20px; --bar: 56px; --rail: 0px; --radius: 4px; }
+@media (max-width: 767px) { .kv { --pad: 12px; --bar: 52px; } }
+.kv-frame { --fg: #fff; --fg-inv: ${INK}; --line: rgba(255,255,255,.55); --dim: rgba(255,255,255,.28); --accent: ${AMBER}; color: var(--fg); transition: color .5s ${EASE}; }
+.kv-frame[data-theme='light'] { --fg: ${INK}; --fg-inv: #fff; --line: rgba(21,17,29,.6); --dim: rgba(21,17,29,.22); --accent: #d9480f; }
+.kv-corner { position: absolute; width: 22px; height: 22px; border-color: var(--line); border-style: solid; border-width: 0; transition: border-color .5s ${EASE}; }
+.kv-ruler { background: repeating-linear-gradient(to bottom, var(--dim) 0 1px, transparent 1px 12px); transition: background .5s; }
+.kv-ruler::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 60px); width: 14px; }
+
+/* Link: las letras ruedan hacia arriba una tras otra (la que entra ya viene en el color de acento) y dos
+   esquinas cierran el link como una mira. */
+.rl { position: relative; display: inline-flex; align-items: center; cursor: pointer; --rl-to: var(--accent); }
+.rl-c { display: inline-block; overflow: hidden; height: 1.12em; line-height: 1.12; vertical-align: top; }
+.rl-c > span { display: block; white-space: pre; text-shadow: 0 1.12em var(--rl-to); transition: transform .55s ${EASE}; transition-delay: calc(var(--i) * 16ms); }
+.rl::before, .rl::after { content: ''; position: absolute; width: max(6px, .32em); height: max(6px, .32em); opacity: 0; transition: transform .45s ${EASE}, opacity .25s; pointer-events: none; }
+.rl::before { left: max(-8px, -.3em); top: max(-5px, -.16em); border-left: max(1.5px, .05em) solid var(--rl-to); border-top: max(1.5px, .05em) solid var(--rl-to); transform: translate(-6px, -6px); }
+.rl::after { right: max(-8px, -.3em); bottom: max(-5px, -.16em); border-right: max(1.5px, .05em) solid var(--rl-to); border-bottom: max(1.5px, .05em) solid var(--rl-to); transform: translate(6px, 6px); }
+@media (hover: hover) { .rl:hover .rl-c > span { transform: translateY(-1.12em); } .rl:hover::before, .rl:hover::after { opacity: 1; transform: none; } }
+.rl:focus-visible { outline: none; }
+.rl:focus-visible .rl-c > span { transform: translateY(-1.12em); }
+.rl:focus-visible::before, .rl:focus-visible::after { opacity: 1; transform: none; }
+.rl[data-active] .rl-c > span { color: var(--rl-to); text-shadow: 0 1.12em var(--fg, #fff); }
+
+.kv-wave i { display: block; width: 1.5px; height: 14px; margin: 0 1.5px; background: currentColor; transform: scaleY(.2); transition: transform .4s ${EASE}; }
 .kv-wave[data-on] i { animation: kv-wave 1s ease-in-out infinite alternate; }
 .kv-wave[data-on] i:nth-child(2) { animation-duration: .7s; animation-delay: -.3s; }
 .kv-wave[data-on] i:nth-child(3) { animation-duration: 1.3s; animation-delay: -.6s; }
@@ -30,148 +57,64 @@ export const KANVAS_CSS = `
 @keyframes kv-wave { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
 .kv-ring { animation: kv-spin 14s linear infinite; transform-origin: center; }
 @keyframes kv-spin { to { transform: rotate(1turn); } }
+.kv-chamfer { clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
 `
 
-const GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&*+=/<>'
-
 /**
- * Link con el efecto de la casa: al entrar, un bloque pinta el texto de izquierda a derecha mientras las
- * letras se desordenan y se acomodan en el mismo orden; al salir, el bloque sigue de largo hacia la derecha.
- * El texto real queda en su lugar (invisible mientras anima) para que el ancho no salte.
+ * Link de la casa: cada letra rueda hacia arriba, con un pequeño retraso entre una y otra, y la que
+ * entra ya viene en el color de acento; dos esquinas se cierran alrededor como una mira.
  */
-export function HackLink({ text, onClick, className = '', style, children, ...rest }) {
-  const root = useRef(null)
-  const bg = useRef(null)
-  const sp = useRef(null)
-  const an = useRef(null)
-  const raf = useRef(0)
-
-  const scramble = () => {
-    const el = an.current
-    const spacer = sp.current
-    if (!el || !spacer) return
-    cancelAnimationFrame(raf.current)
-    const chars = [...text]
-    const t0 = performance.now()
-    const dur = 380 + chars.length * 26
-    let swap = 0
-    let rand = chars
-    spacer.style.visibility = 'hidden'
-    el.style.visibility = 'visible'
-    const step = (now) => {
-      const t = Math.min(1, (now - t0) / dur)
-      if (now - swap > 50) {
-        rand = chars.map((c) => (c === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0]))
-        swap = now
-      }
-      const fixed = Math.floor((t * 1.3 - 0.3) * chars.length)
-      el.textContent = chars.map((c, i) => (i < fixed ? c : rand[i])).join('')
-      if (t < 1) raf.current = requestAnimationFrame(step)
-      else {
-        el.textContent = text
-        el.style.visibility = 'hidden'
-        spacer.style.visibility = ''
-      }
-    }
-    raf.current = requestAnimationFrame(step)
-  }
-
-  const enter = () => {
-    const b = bg.current
-    root.current?.setAttribute('data-on', '')
-    if (b.dataset.pos !== 'in') {
-      b.style.transition = 'none'
-      b.style.transform = 'translateX(-101%)'
-      void b.offsetWidth
-    }
-    b.dataset.pos = 'in'
-    b.style.transition = `transform .6s ${EASE}`
-    b.style.transform = 'translateX(0)'
-    scramble()
-  }
-  const leave = () => {
-    const b = bg.current
-    root.current?.removeAttribute('data-on')
-    b.dataset.pos = 'out'
-    b.style.transition = `transform .5s ${EASE}`
-    b.style.transform = 'translateX(101%)'
-  }
-
-  useEffect(() => () => cancelAnimationFrame(raf.current), [])
-
+export function RollLink({ text, onClick, className = '', style, active = false, children }) {
   return (
-    <button
-      ref={root}
-      type="button"
-      className={`hk pointer-events-auto cursor-pointer ${className}`}
-      style={style}
-      onPointerEnter={(e) => e.pointerType === 'mouse' && enter()}
-      onPointerLeave={(e) => e.pointerType === 'mouse' && leave()}
-      onFocus={enter}
-      onBlur={leave}
-      onClick={onClick}
-      {...rest}
-    >
-      <span ref={bg} className="hk-bg" aria-hidden="true" />
-      <span className="hk-t">
-        {children}
-        <span ref={sp}>{text}</span>
-        <span ref={an} className="hk-a" aria-hidden="true">
-          {text}
-        </span>
+    <button type="button" onClick={onClick} className={`rl pointer-events-auto ${className}`} style={style} data-active={active ? '' : undefined} aria-label={text}>
+      {children}
+      <span aria-hidden="true" className="inline-flex">
+        {[...text].map((c, i) => (
+          <span key={i} className="rl-c" style={{ '--i': i }}>
+            <span>{c}</span>
+          </span>
+        ))}
       </span>
     </button>
   )
 }
 
 /** La onda del sonido: cinco líneas que laten con el audio prendido y quedan planas apagado. */
-export function AudioWave({ on, onClick, className = '', icon = false }) {
-  if (icon) {
-    return (
-      <span aria-hidden="true" data-on={on ? '' : undefined} className={`kv-wave flex items-center justify-center ${className}`}>
-        <i />
-        <i />
-        <i />
-        <i />
-        <i />
-      </span>
-    )
-  }
+export function AudioWave({ on, onClick, className = '', icon = false, label = false }) {
+  const bars = (
+    <span aria-hidden="true" data-on={on ? '' : undefined} className="kv-wave flex items-center justify-center">
+      <i />
+      <i />
+      <i />
+      <i />
+      <i />
+    </span>
+  )
+  if (icon) return bars
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={on ? 'Sound off' : 'Sound on'}
       aria-pressed={on}
-      data-on={on ? '' : undefined}
-      className={`kv-wave pointer-events-auto flex h-11 w-11 cursor-pointer items-center justify-center ${className}`}
+      className={`pointer-events-auto flex h-11 min-w-11 cursor-pointer items-center justify-center gap-3 ${className}`}
     >
-      <i />
-      <i />
-      <i />
-      <i />
-      <i />
+      {bars}
+      {label && (
+        <span className="text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+          Snd {on ? 'on' : 'off'}
+        </span>
+      )}
     </button>
   )
 }
 
-/** La marca del riel: una estrella de rumbo con el farol en el centro. */
-export function Mark({ className = '' }) {
-  return (
-    <svg viewBox="0 0 40 64" className={className} fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-      <path d="M20 2v60M8 32h24" />
-      <path d="M20 14l4 18-4 18-4-18z" fill="currentColor" stroke="none" />
-      <circle cx="20" cy="32" r="6.5" />
-    </svg>
-  )
-}
-
 /**
- * El menú: sale del riel izquierdo como un cajón. El riel se desliza hacia la derecha llevando el panel
- * oscuro, que se descubre quieto detrás (la máscara se mueve, el contenido no); los ítems llegan de a
- * uno. Sin tocar los bordes de la pantalla: queda dentro del margen del marco.
+ * El menú: un panel de esquinas cortadas que sale desde la esquina izquierda del HUD. Una línea de
+ * acento barre de izquierda a derecha y descubre el panel quieto detrás; los ítems llegan de a uno.
+ * Queda dentro del margen del HUD: no toca los bordes de la pantalla.
  */
-export function Menu({ open, onClose, items, active, onGo, audioOn, onAudio, footer }) {
+export function Menu({ open, onClose, items, active, onGo, displayFont, footer }) {
   const root = useRef(null)
   const under = useRef(null)
   const outer = useRef(null)
@@ -189,18 +132,17 @@ export function Menu({ open, onClose, items, active, onGo, audioOn, onAudio, foo
       return undefined
     }
     const r = root.current
-    const w = () => outer.current.offsetWidth
     const its = [...r.querySelectorAll('[data-mi]')]
+    const px = outer.current.offsetWidth
     if (open) {
       r.style.display = 'block'
-      const px = w()
       under.current.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'linear', fill: 'both' })
       outer.current.animate([{ transform: `translateX(${-px}px)` }, { transform: 'none' }], { duration: 820, easing: EASE, fill: 'both' })
       inner.current.animate([{ transform: `translateX(${px}px)` }, { transform: 'none' }], { duration: 820, easing: EASE, fill: 'both' })
       its.forEach((it, i) =>
-        it.animate([{ transform: 'translateX(-180px)', opacity: 0 }, { transform: 'none', opacity: 1 }], {
+        it.animate([{ transform: 'translateX(-120px)', opacity: 0 }, { transform: 'none', opacity: 1 }], {
           duration: 900,
-          delay: 160 + i * 55,
+          delay: 180 + i * 55,
           easing: EASE,
           fill: 'both',
         }),
@@ -209,7 +151,6 @@ export function Menu({ open, onClose, items, active, onGo, audioOn, onAudio, foo
       window.addEventListener('keydown', onKey)
       return () => window.removeEventListener('keydown', onKey)
     }
-    const px = w()
     outer.current.animate([{ transform: 'none' }, { transform: `translateX(${-px}px)` }], { duration: 560, easing: EASE_IO, fill: 'both' })
     inner.current.animate([{ transform: 'none' }, { transform: `translateX(${px}px)` }], { duration: 560, easing: EASE_IO, fill: 'both' })
     const a = under.current.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 260, easing: 'linear', fill: 'both' })
@@ -220,58 +161,42 @@ export function Menu({ open, onClose, items, active, onGo, audioOn, onAudio, foo
   return (
     <div ref={root} data-open={open ? '' : undefined} className="fixed inset-0 z-50" style={{ display: 'none' }}>
       <div ref={under} className="absolute inset-0 bg-white/75" onClick={onClose} aria-hidden="true" />
-      <div
-        className="absolute overflow-hidden"
-        style={{ left: 'var(--pad)', top: 'var(--pad)', bottom: 'var(--pad)', borderRadius: 'var(--radius)', width: 'min(calc(100vw - var(--pad) * 2), 800px)' }}
-      >
-        <div ref={outer} className="flex h-full w-full text-white">
-          {/* el panel: quieto mientras la máscara lo descubre */}
-          <div className="relative min-w-0 flex-1 overflow-hidden" style={{ background: '#15111d', borderRadius: 'var(--radius) 0 0 var(--radius)' }}>
+      <div className="absolute overflow-hidden" style={{ left: 'var(--pad)', top: 'var(--pad)', bottom: 'var(--pad)', width: 'min(calc(100vw - var(--pad) * 2), 780px)' }}>
+        <div ref={outer} className="relative h-full w-full text-white">
+          {/* la línea de acento que barre: el borde del cajón */}
+          <span className="absolute inset-y-0 right-0 z-10 w-[2px]" style={{ background: AMBER, boxShadow: `0 0 18px ${AMBER}` }} aria-hidden="true" />
+          <div className="kv-chamfer h-full overflow-hidden" style={{ background: INK }}>
             <div ref={inner} className="flex h-full flex-col">
-              <nav className="flex flex-1 items-start gap-6 px-6 pt-8 md:px-12 md:pt-12" aria-label="Menu">
-                <p className="hidden w-32 shrink-0 pt-3 text-[11px] tracking-[0.12em] uppercase md:block" style={{ fontFamily: MONO }}>
-                  <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-middle" />
-                  Discover
-                </p>
-                <ul className="flex flex-col">
-                  {items.map((it) => (
-                    <li key={it.id} data-mi="" className="flex items-start gap-3">
-                      <HackLink
+              <div className="flex items-center justify-between px-6 md:px-10" style={{ height: 'var(--bar)' }}>
+                <span className="text-[11px] tracking-[0.16em] uppercase opacity-60" style={{ fontFamily: MONO }}>
+                  Index — {String(items.length).padStart(2, '0')} leaves
+                </span>
+                <button type="button" onClick={onClose} aria-label="Close menu" className="flex h-11 w-11 cursor-pointer items-center justify-center">
+                  <svg width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M2 2l14 14M16 2L2 16" />
+                  </svg>
+                </button>
+              </div>
+              <nav className="flex-1 px-6 pt-4 md:px-10 md:pt-8" aria-label="Menu">
+                <ul className="flex flex-col gap-1">
+                  {items.map((it, i) => (
+                    <li key={it.id} data-mi="" className="flex items-baseline gap-4">
+                      <span className="w-6 text-[11px] opacity-50" style={{ fontFamily: MONO, color: it.id === active ? AMBER : undefined }}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <RollLink
                         text={it.label}
+                        active={it.id === active}
                         onClick={() => onGo(it)}
-                        className="py-[2px] pr-2 pl-1 text-left text-[clamp(2.4rem,7.2vw,5.4rem)] leading-[0.92] uppercase"
-                        style={{
-                          fontFamily: SERIF,
-                          fontWeight: 800,
-                          letterSpacing: '-0.035em',
-                          '--hk-bg': '#f3b04f',
-                          '--hk-on': '#15111d',
-                          ...(it.id === active ? { background: '#f3b04f', color: '#15111d', borderRadius: '0 0 0 14px' } : null),
-                        }}
+                        className="text-left text-[clamp(2.2rem,6.4vw,4.6rem)] uppercase"
+                        style={{ fontFamily: displayFont.family, fontWeight: displayFont.weight, letterSpacing: displayFont.tracking, fontSize: `calc(clamp(2.2rem,6.4vw,4.6rem) * ${displayFont.scale})`, '--rl-to': AMBER, '--fg': '#fff' }}
                       />
-                      {it.id === active && (
-                        <span className="pt-2 text-[10px] leading-tight tracking-[0.1em] text-[#f3b04f] uppercase" style={{ fontFamily: MONO }}>
-                          Leaf
-                          <br />
-                          {it.leaf}
-                        </span>
-                      )}
                     </li>
                   ))}
                 </ul>
               </nav>
               {footer}
             </div>
-          </div>
-          {/* el riel: el mismo del marco, que viaja con el borde del cajón */}
-          <div className="flex w-14 shrink-0 flex-col items-center justify-between border-l border-white/15 md:w-[var(--rail)]" style={{ background: '#15111d', borderRadius: '0 var(--radius) var(--radius) 0' }}>
-            <button type="button" onClick={onClose} aria-label="Close menu" className="flex h-[var(--bar)] w-full cursor-pointer items-center justify-center border-b border-white/15">
-              <svg width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" strokeWidth="1.4">
-                <path d="M2 2l14 14M16 2L2 16" />
-              </svg>
-            </button>
-            <Mark className="h-16 w-10" />
-            <AudioWave on={audioOn} onClick={onAudio} className="mb-3" />
           </div>
         </div>
       </div>

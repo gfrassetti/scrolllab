@@ -4,7 +4,7 @@ import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
 import { createAudio } from './audio'
-import { AudioWave, HackLink, KANVAS_CSS, Mark, Menu, MONO, SERIF, useSubscribed } from './ui'
+import { AMBER, AudioWave, BODY, FONTS, FONTS_HREF, KANVAS_CSS, Menu, MONO, RollLink, useSubscribed } from './ui'
 
 /**
  * Kanvas — prototipo (solo local) con la arquitectura de la referencia y una identidad propia: VESPER,
@@ -114,6 +114,16 @@ function Kanvas() {
   const [stage, setStage] = useState('load') // load → word → open → done
   const [active, setActive] = useState('atlas')
   const [menu, setMenu] = useState(false)
+  // la tipografía de titulares, para comparar: ?font=tektur | unbounded | oxanium | michroma
+  const [fontId, setFontId] = useState(() => {
+    const q = new URLSearchParams(window.location.search).get('font')
+    return FONTS[q] ? q : 'tektur'
+  })
+  const font = FONTS[fontId]
+  const fontRef = useRef(font)
+  useEffect(() => {
+    fontRef.current = font
+  }, [font])
   const audio = useMemo(() => createAudio(), [])
   const audioOn = useSubscribed(audio, false)
 
@@ -149,17 +159,19 @@ function Kanvas() {
       const { W, H } = k.size()
       const dpr = Math.min(2, window.devicePixelRatio || 1)
       const g = wordCanvas.getContext('2d')
+      const f = fontRef.current
+      const css = (px) => `${f.weight} ${px}px ${f.family}, system-ui, sans-serif`
       let fs = 200
-      g.font = `800 ${fs}px Fraunces, Georgia, serif`
+      g.font = css(fs)
       const span = W < 768 ? 0.9 : 0.8
       fs = Math.min((fs * W * span) / g.measureText(NAME).width, H * 0.42)
-      word.h = Math.round(fs * 0.9)
+      word.h = Math.round(fs * 0.95)
       wordCanvas.width = Math.min(4096, Math.round(W * dpr))
       wordCanvas.height = Math.round(word.h * dpr)
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, W, word.h)
-      g.font = `800 ${fs}px Fraunces, Georgia, serif`
-      if ('letterSpacing' in g) g.letterSpacing = `${-fs * 0.03}px`
+      g.font = css(fs)
+      if ('letterSpacing' in g) g.letterSpacing = `${-fs * 0.01}px`
       g.fillStyle = '#fff'
       g.textAlign = 'center'
       const cap = g.measureText('V').actualBoundingBoxAscent || fs * 0.7
@@ -173,8 +185,7 @@ function Kanvas() {
     manager.itemStart('fonts')
     const fontsLink = document.createElement('link')
     fontsLink.rel = 'stylesheet'
-    fontsLink.href =
-      'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500&display=swap'
+    fontsLink.href = FONTS_HREF
     let fontsDone = false
     const fontsReady = () => {
       if (fontsDone) return
@@ -182,7 +193,10 @@ function Kanvas() {
       drawWord()
       manager.itemEnd('fonts')
     }
-    fontsLink.onload = () => Promise.all([document.fonts.load("800 120px 'Fraunces'"), document.fonts.load("400 12px 'JetBrains Mono'")]).finally(fontsReady)
+    fontsLink.onload = () => {
+      const f = fontRef.current
+      Promise.all([document.fonts.load(`${f.weight} 120px ${f.family}`), document.fonts.load("400 12px 'Share Tech Mono'"), document.fonts.load("400 16px 'Chakra Petch'")]).finally(fontsReady)
+    }
     fontsLink.onerror = fontsReady
     const fontsTimeout = setTimeout(fontsReady, 4000)
     document.head.appendChild(fontsLink)
@@ -369,9 +383,9 @@ function Kanvas() {
           rot = Number(r.dest.dataset.rot || 0) * DEG * m
         }
         heroPlane.rect(rect.x, rect.y, rect.w, rect.h, rot)
-        // la ventana del marco: lo que sube más allá de la barra de arriba se corta en su línea
-        const fr = W < 768 ? { pad: 10, rail: 0, bar: 52 } : { pad: 20, rail: 67, bar: 51 }
-        const win = { x: fr.pad + fr.rail, y: fr.pad + fr.bar, w: W - fr.pad * 2 - fr.rail, h: H - fr.pad * 2 - fr.bar }
+        // la ventana del HUD: lo que sube más allá de la barra de arriba se corta en su línea
+        const fr = W < 768 ? { pad: 12, bar: 52 } : { pad: 20, bar: 56 }
+        const win = { x: fr.pad, y: fr.pad + fr.bar, w: W - fr.pad * 2, h: H - fr.pad * 2 - fr.bar }
         heroPlane.clip(lerp(0, win.x, m), lerp(0, win.y, m), lerp(W, win.w, m), lerp(H, win.h, m))
         heroPlane.u.uMapSize.value.set(rt.width, rt.height)
         if (m > 0) {
@@ -428,6 +442,9 @@ function Kanvas() {
           r.ink.style.color = `rgb(${Math.round(lerp(205, 21, t))},${Math.round(lerp(205, 17, t))},${Math.round(lerp(205, 29, t))})`
           r.ink.style.opacity = String(clamp01((m - 0.3) / 0.3))
         }
+        // el altímetro del HUD: la marca baja con el progreso y el número cuenta la altura
+        if (r.meterMark) r.meterMark.style.transform = `translate3d(0, ${(p * (r.meter?.offsetHeight || 0)).toFixed(1)}px, 0)`
+        if (r.meterNum) r.meterNum.textContent = String(Math.round(4800 - p * 4800)).padStart(4, '0')
         const act = p < 0.3 ? 'atlas' : 'isles'
         if (act !== activeNow) {
           activeNow = act
@@ -494,14 +511,20 @@ function Kanvas() {
     setMenu(false)
   }, [audio])
 
+
   const set = (key) => (el) => (R.current[key] = el)
-  const display = { fontFamily: SERIF, fontWeight: 800, letterSpacing: '-0.02em', wordSpacing: '0.06em' }
+  const display = { fontFamily: font.family, fontWeight: font.weight, letterSpacing: font.tracking }
   const layer = 'fixed inset-0 h-svh w-full'
-  const inset = 'calc(var(--pad) + var(--rail) + 36px)'
-  const label = 'pointer-events-none absolute -top-1 -left-1 hidden -translate-x-full text-[12px] font-normal tracking-[0.08em] md:block'
+  const inset = 'calc(var(--pad) + 28px)'
+  const pickFont = (id) => {
+    setFontId(id)
+    const u = new URL(window.location.href)
+    u.searchParams.set('font', id)
+    window.history.replaceState(null, '', u)
+  }
 
   return (
-    <div className="kv" style={{ color: INK, fontFamily: SERIF }}>
+    <div className="kv" style={{ color: INK, fontFamily: BODY }}>
       <style>{KANVAS_CSS}</style>
       <div ref={spacerRef} aria-hidden="true" style={{ height: `${SCROLL_SCREENS * 100}svh` }} />
 
@@ -540,33 +563,44 @@ function Kanvas() {
           </span>
         </div>
 
-        {/* Sección: hero */}
+        {/* Sección: hero. El titular arriba, como el cartel de un nivel; el párrafo abajo a la
+            derecha, como la entrada de una bitácora. */}
         <section ref={set('heroUi')} className="absolute inset-0 text-white" style={{ opacity: 0, visibility: 'hidden' }}>
-          <p
-            className="absolute max-w-[30ch] text-[15px] leading-[1.35] md:max-w-[36ch] md:text-[17px]"
-            style={{ left: inset, top: 'calc(var(--pad) + var(--bar) + 32px)', fontWeight: 400, textShadow: '0 1px 18px rgba(40,24,70,.35)' }}
+          <div className="absolute" style={{ left: inset, right: inset, top: 'calc(var(--pad) + var(--bar) + 3svh)' }}>
+            <p className="mb-3 flex items-center gap-3 text-[11px] tracking-[0.16em] uppercase" style={{ fontFamily: MONO }}>
+              <span className="inline-block h-[7px] w-[7px]" style={{ background: AMBER }} />
+              Leaf 01 // The outer isles
+            </p>
+            <h1
+              ref={set('heroTitle')}
+              className="uppercase"
+              style={{ ...display, fontSize: `calc(clamp(3.2rem, 15vw, 9.5rem) * ${font.scale})`, lineHeight: 0.86, textShadow: '0 2px 40px rgba(30,16,60,.3)' }}
+            >
+              <span className="block">Beyond</span>
+              <span className="block">the last</span>
+              <span className="block">
+                map<span style={{ color: AMBER }}>.</span>
+              </span>
+            </h1>
+          </div>
+          <div
+            className="absolute right-[calc(var(--pad)+16px)] w-[min(34ch,calc(100vw-var(--pad)*2-32px))] md:right-[calc(var(--pad)+44px)] md:w-[36ch]"
+            style={{ bottom: 'calc(var(--pad) + 52px)', textShadow: '0 1px 16px rgba(30,16,60,.4)' }}
           >
-            Vesper is an illustrated world told one leaf at a time — three wayfarers, the last lanterns, and a map that keeps redrawing itself.
-          </p>
-          <h1
-            ref={set('heroTitle')}
-            className="absolute text-[clamp(3.6rem,18vw,6rem)] leading-[0.84] uppercase md:text-[clamp(5rem,10.5vw,15rem)]"
-            style={{ ...display, left: inset, right: 'calc(var(--pad) + 28px)', bottom: 'calc(var(--pad) + 44px)', textShadow: '0 2px 40px rgba(40,24,70,.25)' }}
-          >
-            <span className="relative block md:ml-[16vw] md:w-fit">
-              <span className={label} style={{ fontFamily: MONO }}>N44°</span>
-              Beyond
-            </span>
-            <span className="relative block md:ml-[30vw] md:w-fit">
-              <span className={label} style={{ fontFamily: MONO }}>E12°</span>
-              the last
-            </span>
-            <span className="relative block md:w-fit">
-              <span className={label} style={{ fontFamily: MONO }}>W07°</span>
-              map.
-            </span>
-          </h1>
-          <div ref={set('scrollHint')} className="absolute flex items-center gap-2 text-[11px] tracking-[0.14em] uppercase" style={{ right: 'calc(var(--pad) + 28px)', bottom: 'calc(var(--pad) + 22px)', fontFamily: MONO }}>
+            <p className="flex items-center gap-3 border-t border-white/40 pt-3 text-[11px] tracking-[0.16em] uppercase" style={{ fontFamily: MONO }}>
+              <span style={{ color: AMBER }}>Log 01</span>
+              <span className="opacity-70">44°12′N · 12°06′E</span>
+            </p>
+            <p className="mt-3 text-[16px] leading-[1.4] md:text-[17px]">
+              Vesper is an illustrated world told one leaf at a time — three wayfarers, the last lanterns, and a map that keeps redrawing itself.
+            </p>
+            <RollLink text="Begin the crossing" onClick={() => go(NAV[1])} className="mt-4 text-[12px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO, '--rl-to': AMBER }}>
+              <span className="mr-2" style={{ color: AMBER }}>
+                ▸
+              </span>
+            </RollLink>
+          </div>
+          <div ref={set('scrollHint')} className="absolute left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-[11px] tracking-[0.16em] uppercase md:flex" style={{ bottom: 'calc(var(--pad) + 18px)', fontFamily: MONO }}>
             Scroll
             <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="1.2">
               <path d="M1 1.5l5 5 5-5" />
@@ -575,135 +609,157 @@ function Kanvas() {
         </section>
 
         {/* Sección: las tres láminas (sube a su lugar mientras el hero se aleja). La envuelve la ventana
-            del marco: lo que sube más allá de la barra se corta en su línea, igual que en el canvas. */}
-        <div className="absolute inset-0" style={{ clipPath: 'inset(calc(var(--pad) + var(--bar)) var(--pad) var(--pad) calc(var(--pad) + var(--rail)))' }}>
-        <section
-          ref={set('tableUi')}
-          className="absolute inset-0"
-          style={{ opacity: 0, visibility: 'hidden', paddingLeft: inset, paddingRight: 'calc(var(--pad) + 36px)', paddingTop: 'calc(var(--pad) + var(--bar) + 6svh)' }}
-        >
-          <div className="grid gap-4 md:grid-cols-12 md:gap-8">
-            <p className="text-[11px] tracking-[0.12em] uppercase md:col-span-2 md:pt-3" style={{ fontFamily: MONO }}>
-              Leaf 02 — The isles
-            </p>
-            <h2 ref={set('ink')} className="text-[clamp(2.2rem,5vw,5.4rem)] leading-[0.95] md:col-span-10" style={{ fontWeight: 300, letterSpacing: '-0.025em', color: 'rgb(205,205,205)' }}>
-              Every map was drawn by <em>someone</em> who left.
-            </h2>
-          </div>
-          <div className="mt-[6svh] grid gap-10 md:grid-cols-12 md:gap-8">
-            <figure className="md:col-span-3 md:mt-[12svh]">
-              <div ref={(el) => (R.current.slots[0] = el)} data-depth="0.3" data-rot="3" className="aspect-[4/5] w-full" />
-              <figcaption className="mt-5 text-[11px] tracking-[0.12em] uppercase" style={{ fontFamily: MONO }}>
-                I — The wayfarers
-              </figcaption>
-              <p className="mt-2 max-w-[28ch] text-[16px] leading-snug">Three cloaks, three lanterns, one road nobody has finished.</p>
-            </figure>
-            <figure className="md:col-span-3 md:col-start-5">
-              <div ref={(el) => (R.current.slots[1] = el)} data-depth="-0.2" data-rot="-2" className="aspect-[3/4] w-full" />
-              <figcaption className="mt-5 text-[11px] tracking-[0.12em] uppercase" style={{ fontFamily: MONO }}>
-                II — The lantern tower
-              </figcaption>
-            </figure>
-            <figure className="md:col-span-4 md:col-start-9 md:mt-[4svh]">
-              <div ref={set('dest')} data-rot="-5" className="aspect-[3/4] w-full" />
-              <figcaption className="mt-5 text-[11px] tracking-[0.12em] uppercase" style={{ fontFamily: MONO }}>
-                III — The outer isle
-              </figcaption>
-            </figure>
-          </div>
-        </section>
+            del HUD: lo que sube más allá de la barra se corta en su línea, igual que en el canvas. */}
+        <div className="absolute inset-0" style={{ clipPath: 'inset(calc(var(--pad) + var(--bar)) var(--pad) var(--pad) var(--pad))' }}>
+          <section
+            ref={set('tableUi')}
+            className="absolute inset-0"
+            style={{ opacity: 0, visibility: 'hidden', paddingLeft: inset, paddingRight: 'calc(var(--pad) + 48px)', paddingTop: 'calc(var(--pad) + var(--bar) + 6svh)' }}
+          >
+            <div className="grid gap-4 md:grid-cols-12 md:gap-8">
+              <p className="text-[11px] tracking-[0.14em] uppercase md:col-span-2 md:pt-3" style={{ fontFamily: MONO }}>
+                Leaf 02 // The isles
+              </p>
+              <h2
+                ref={set('ink')}
+                className="leading-[0.98] md:col-span-10"
+                style={{ fontFamily: font.family, fontWeight: Math.min(font.weight, 600), letterSpacing: font.tracking, fontSize: `calc(clamp(2rem, 4.6vw, 5rem) * ${font.scale})`, color: 'rgb(205,205,205)' }}
+              >
+                Every map was drawn by someone who left.
+              </h2>
+            </div>
+            <div className="mt-[6svh] grid gap-10 md:grid-cols-12 md:gap-8">
+              <figure className="md:col-span-3 md:mt-[12svh]">
+                <div ref={(el) => (R.current.slots[0] = el)} data-depth="0.3" data-rot="3" className="aspect-[4/5] w-full" />
+                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+                  01 // The wayfarers
+                </figcaption>
+                <p className="mt-2 max-w-[28ch] text-[16px] leading-snug">Three cloaks, three lanterns, one road nobody has finished.</p>
+              </figure>
+              <figure className="md:col-span-3 md:col-start-5">
+                <div ref={(el) => (R.current.slots[1] = el)} data-depth="-0.2" data-rot="-2" className="aspect-[3/4] w-full" />
+                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+                  02 // The lantern tower
+                </figcaption>
+              </figure>
+              <figure className="md:col-span-4 md:col-start-9 md:mt-[4svh]">
+                <div ref={set('dest')} data-rot="-5" className="aspect-[3/4] w-full" />
+                <figcaption className="mt-5 text-[11px] tracking-[0.14em] uppercase" style={{ fontFamily: MONO }}>
+                  03 // The outer isle
+                </figcaption>
+              </figure>
+            </div>
+          </section>
         </div>
       </div>
 
-      {/* Capa 3: el marco (riel izquierdo, barra de arriba) */}
+      {/* Capa 3: el HUD. Sin marco cerrado: cuatro esquinas de mira, la barra de arriba, un
+          altímetro a la derecha que baja con el scroll y el rótulo vertical a la izquierda. */}
       <div ref={set('frame')} data-theme="dark" className="kv-frame pointer-events-none fixed inset-0 z-20" style={{ opacity: 0, visibility: 'hidden' }}>
-        <div className="kv-line absolute border" style={{ inset: 'var(--pad)', borderRadius: 'var(--radius)' }}>
+        <div className="absolute" style={{ inset: 'var(--pad)' }}>
+          <span className="kv-corner top-0 left-0" style={{ borderTopWidth: 1.5, borderLeftWidth: 1.5 }} />
+          <span className="kv-corner top-0 right-0" style={{ borderTopWidth: 1.5, borderRightWidth: 1.5 }} />
+          <span className="kv-corner bottom-0 left-0" style={{ borderBottomWidth: 1.5, borderLeftWidth: 1.5 }} />
+          <span className="kv-corner right-0 bottom-0" style={{ borderBottomWidth: 1.5, borderRightWidth: 1.5 }} />
+
           {/* barra de arriba */}
-          <div className="kv-line absolute inset-x-0 top-0 flex items-center justify-between border-b md:justify-center" style={{ height: 'var(--bar)', paddingLeft: 'var(--rail)' }}>
-            <button type="button" onClick={openMenu} aria-label="Open menu" className="pointer-events-auto flex h-full w-14 cursor-pointer items-center justify-center md:hidden">
-              <Burger />
-            </button>
-            <span className="text-[13px] tracking-[0.3em] md:hidden" style={{ fontFamily: MONO }}>
+          <div className="absolute inset-x-0 top-0 flex items-center justify-between px-2 md:px-4" style={{ height: 'var(--bar)' }}>
+            <span className="absolute right-8 bottom-0 left-8 h-px" style={{ background: 'var(--dim)' }} aria-hidden="true" />
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={openMenu} aria-label="Open menu" className="pointer-events-auto flex h-11 w-11 cursor-pointer items-center justify-center">
+                <Burger />
+              </button>
+              <span className="hidden text-[18px] uppercase md:inline" style={{ ...display, fontSize: `${20 * font.scale}px`, letterSpacing: '0.04em' }}>
+                {NAME}
+              </span>
+            </div>
+            <span className="absolute left-1/2 -translate-x-1/2 text-[18px] uppercase md:hidden" style={{ ...display, fontSize: `${18 * font.scale}px`, letterSpacing: '0.04em' }}>
               {NAME}
             </span>
-            <nav className="hidden items-center gap-7 text-[11px] uppercase md:flex" style={{ fontFamily: MONO }} aria-label="Sections">
+            <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[12px] tracking-[0.1em] uppercase md:flex" style={{ fontFamily: MONO }} aria-label="Sections">
               {NAV.map((it) => (
-                <HackLink key={it.id} text={it.label} onClick={() => go(it)} className="px-1 py-[3px]" style={{ opacity: it.id === active ? 1 : 0.5 }}>
-                  <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-[1px]" style={{ opacity: it.id === active ? 1 : 0 }} />
-                </HackLink>
+                <RollLink key={it.id} text={it.label} active={it.id === active} onClick={() => go(it)} />
               ))}
             </nav>
             <AudioWave on={audioOn} onClick={() => audio.toggle()} className="md:hidden" />
             <button
               type="button"
               onClick={() => go(NAV[3])}
-              className="pointer-events-auto absolute top-[7px] right-[7px] hidden h-[calc(var(--bar)-14px)] cursor-pointer items-center gap-2 bg-[var(--fg)] px-5 text-[11px] tracking-[0.1em] text-[var(--fg-inv)] uppercase md:flex"
-              style={{ fontFamily: MONO, borderRadius: '16px 4px 4px 4px', transition: 'background .5s, color .5s' }}
+              className="kv-chamfer pointer-events-auto hidden h-9 cursor-pointer items-center gap-2 px-5 text-[12px] tracking-[0.12em] uppercase md:flex"
+              style={{ fontFamily: MONO, background: 'var(--fg)', color: 'var(--fg-inv)', transition: 'background .5s, color .5s' }}
             >
-              <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#f3b04f]" />
+              <span className="inline-block h-[6px] w-[6px]" style={{ background: AMBER }} />
               Get the atlas
             </button>
           </div>
-          {/* riel izquierdo */}
-          <div className="kv-line absolute inset-y-0 left-0 hidden flex-col items-center justify-between border-r md:flex" style={{ width: 'var(--rail)' }}>
-            <button type="button" onClick={openMenu} aria-label="Open menu" className="kv-line pointer-events-auto flex w-full cursor-pointer items-center justify-center border-b" style={{ height: 'var(--bar)' }}>
-              <Burger />
-            </button>
-            <Mark className="h-16 w-10" />
-            <AudioWave on={audioOn} onClick={() => audio.toggle()} className="mb-3" />
+
+          {/* rótulo vertical, a la izquierda */}
+          <div className="absolute inset-y-0 left-0 hidden w-7 items-center justify-center md:flex">
+            <p className="text-[11px] tracking-[0.2em] whitespace-nowrap uppercase opacity-70" style={{ fontFamily: MONO, writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+              Vesper atlas — leaves 01/06
+            </p>
+          </div>
+
+          {/* el altímetro, a la derecha */}
+          <div ref={set('meter')} className="kv-ruler absolute right-2 hidden w-[10px] md:block" style={{ top: 'calc(var(--bar) + 24px)', bottom: 56 }}>
+            <div ref={set('meterMark')} className="absolute top-0 right-0 flex -translate-y-1/2 items-center gap-2" style={{ willChange: 'transform' }}>
+              <span className="text-[11px] tracking-[0.1em]" style={{ fontFamily: MONO }}>
+                ALT <span ref={set('meterNum')}>4800</span>
+              </span>
+              <svg width="8" height="10" viewBox="0 0 8 10" style={{ color: 'var(--accent)' }}>
+                <path d="M0 0l8 5-8 5z" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
+
+          {/* abajo: sonido a la izquierda */}
+          <div className="absolute bottom-1 left-2 hidden md:block">
+            <AudioWave on={audioOn} onClick={() => audio.toggle()} label />
           </div>
         </div>
       </div>
 
-      <Menu
-        open={menu}
-        onClose={closeMenu}
-        items={MENU}
-        active={active}
-        onGo={go}
-        audioOn={audioOn}
-        onAudio={() => audio.toggle()}
-        footer={<MenuFooter onGo={go} />}
-      />
+      {/* Solo del prototipo: para comparar tipografías de titulares en vivo. */}
+      <div className="fixed bottom-[calc(var(--pad)+10px)] left-[calc(var(--pad)+130px)] z-30 hidden items-center gap-1 rounded-sm bg-black/55 p-1 text-[10px] tracking-[0.08em] text-white uppercase backdrop-blur md:flex" style={{ fontFamily: MONO }}>
+        <span className="px-2 opacity-60">Type</span>
+        {Object.entries(FONTS).map(([id, f]) => (
+          <button key={id} type="button" onClick={() => pickFont(id)} className="cursor-pointer rounded-sm px-2 py-1" style={id === fontId ? { background: AMBER, color: INK } : null}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      <Menu open={menu} onClose={closeMenu} items={MENU} active={active} onGo={go} displayFont={font} footer={<MenuFooter onGo={go} audioOn={audioOn} onAudio={() => audio.toggle()} />} />
     </div>
   )
 }
 
 function Burger() {
   return (
-    <svg width="26" height="8" viewBox="0 0 26 8" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
-      <path d="M1 1h24M9 7h16" />
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <path d="M1 1h22M1 6h14M1 11h22" />
     </svg>
   )
 }
 
-function MenuFooter({ onGo }) {
-  const row = 'flex items-start gap-6 border-t border-white/15 px-6 py-5 md:px-12'
-  const lab = 'hidden w-32 shrink-0 pt-[3px] text-[11px] tracking-[0.12em] uppercase md:block'
-  const link = 'px-1 py-[2px] text-[13px] tracking-[0.06em] uppercase'
-  const style = { fontFamily: MONO, '--hk-bg': '#f3b04f', '--hk-on': '#15111d' }
+function MenuFooter({ onGo, audioOn, onAudio }) {
+  const row = 'flex items-center gap-6 border-t border-white/15 px-6 py-4 md:px-10'
+  const lab = 'hidden w-24 shrink-0 text-[11px] tracking-[0.14em] uppercase opacity-60 md:block'
+  const link = 'text-[13px] tracking-[0.1em] uppercase'
+  const style = { fontFamily: MONO, '--rl-to': AMBER }
   const end = { id: 'chronicle', p: 1 }
   return (
     <div style={{ fontFamily: MONO }}>
       <div className={row}>
-        <p className={lab}>
-          <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-middle" />
-          Follow
-        </p>
-        <div className="flex flex-col items-start gap-1">
-          <HackLink text="Instagram" onClick={() => onGo(end)} className={link} style={style} />
-          <HackLink text="Discord" onClick={() => onGo(end)} className={link} style={style} />
+        <p className={lab}>Follow</p>
+        <div className="flex flex-wrap items-center gap-6">
+          <RollLink text="Instagram" onClick={() => onGo(end)} className={link} style={style} />
+          <RollLink text="Discord" onClick={() => onGo(end)} className={link} style={style} />
+          <RollLink text="The Chronicle" onClick={() => onGo(end)} className={link} style={style} />
         </div>
       </div>
-      <div className={row}>
-        <p className={lab}>
-          <span className="mr-2 inline-block h-[5px] w-[5px] bg-current align-middle" />
-          Read on
-        </p>
-        <HackLink text="The Chronicle" onClick={() => onGo(end)} className={link} style={style} />
-      </div>
-      <div className={`${row} justify-between text-[11px] tracking-[0.1em] uppercase`}>
-        <span>EN</span>
+      <div className={`${row} justify-between text-[11px] tracking-[0.12em] uppercase`}>
+        <AudioWave on={audioOn} onClick={onAudio} label />
         <span className="opacity-50">© 2026 Vesper Atlas</span>
       </div>
     </div>
