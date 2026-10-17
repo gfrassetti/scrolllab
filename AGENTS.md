@@ -112,6 +112,7 @@ Nota Obsidian: `Impeccable + UI UX Pro Max.md` en ScrollLab.
 | Scroll / GSAP / Lenis / WebGL | Cookbook + skills GSAP + “Qué vendemos” |
 | Motion de piezas en una sección (riel / cubo / letras) | **Beat** — [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md) + `src/lib/beat/` |
 | Card hero / tableau / emblem Three.js | **WebGL mini motor** — [`docs/scrolllab-webgl.md`](docs/scrolllab-webgl.md) + `src/lib/webgl/` |
+| Página «todo en un canvas» tipo kprverse (canvas fijo + secciones apiladas + un reloj de scroll) | **Kanvas** — [`docs/kanvas.md`](docs/kanvas.md) + `src/proto/kanvas/` |
 | “3D” al scroll (WebGL vs secuencia WebP tipo pear.no / Apple) | [`docs/scroll-media.md`](docs/scroll-media.md) — mismo playhead `progress`; APIs distintas |
 | Ref es Readymag (`window.RM`, `rmcdn`, `.animation-container`) | Extraer recetas → Beat. Método: [`docs/readymag-motion.md`](docs/readymag-motion.md) |
 | Ref es Webflow + Lottie (`data-w-id`, `lottie-animation` con `data-src=*.json`) | Leer el Lottie y el IX2 solo para entender, reconstruir con código propio. Caso trabajado y método: [`docs/kin-template.md`](docs/kin-template.md) |
