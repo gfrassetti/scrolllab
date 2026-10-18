@@ -1294,3 +1294,17 @@ sitio, a propósito).
 - **`check:lab`**: al volver al editor espera a que el campo muestre lo publicado antes de escribir (con la
   máquina cargada la prueba escribía antes y medía su propia carrera), y cada falla deja una captura en
   `storage/lab-check/`.
+
+## Fase N — MONOLITH ProcessSteps y la capa `interact` (2026-10-18)
+
+- **`monolith/ProcessSteps` entra** como widget (FLOW): cinco pasos con un molde de hormigón que se llena con
+  el scroll. El molde es CSS puro (`--p` en la sección, sin pin), así que no depende del reloj de GSAP del frame.
+  Props: `unit` `total` `label` `unitLabel` `title` `cureLabel` · `bg` `fg` `accent` · `steps` (list:
+  `title`/`time`/`body`, max 8) · `showMould`. Caso en `CASES` (`MKPROC`). `check:sections` en verde.
+- **`src/lib/interact.js`** (en `SHARED`, viaja en el ZIP y en el embed): `magnetic`, `tilt`, `hover` y `badge`
+  solo con mouse; `depth`, `lean` y `frame` siguen al dedo (`trackPointer`). Chapters, Nocturne y Unity la usan;
+  cada sección con su interruptor `showHover`. Con el dedo, `tilt` congelaba el cuadro de StickyWordCycle en
+  `check:motion` — por eso quedó solo para mouse.
+- **Atelier/ServicesStone**: pincha `[data-services-pin]` y no la sección (React es dueño de la sección; con el
+  pin en la raíz el builder rompía con `insertBefore`).
+- Publicar: el frame se despliega solo en Vercel al pushear (`npm run build:embed`, verificado local).
