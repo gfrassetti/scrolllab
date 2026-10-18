@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { pointerFx } from '../../../lib/interact'
 import { portrait, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -24,6 +25,8 @@ export default function LastPortrait({
   stat3Value = '06',
   bg,
   fg,
+  /** El retrato se inclina hacia el puntero. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -60,8 +63,13 @@ export default function LastPortrait({
           },
         },
       )
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.tilt(root.current.querySelector('[data-last-frame]'), { max: 3.5, scale: 1.015 })
+      return fx.dispose
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, showHover] },
   )
 
   return (
@@ -81,6 +89,7 @@ export default function LastPortrait({
       <div className="mt-12 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-5">
           <div
+            data-last-frame
             className="relative aspect-[4/5] overflow-hidden"
             style={{ background: 'color-mix(in srgb, currentColor 8%, transparent)' }}
           >

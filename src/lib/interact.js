@@ -9,8 +9,9 @@ import { prefersReducedMotion, trackPointer } from './motion'
  *
  * Everything is subtle on purpose (a few pixels, a few degrees) and shares one
  * ticker per page section. It reads the pointer through `trackPointer()`, so a
- * finger on a phone drives it the same way; effects that only make sense with a
- * mouse (the badge) switch themselves off without one.
+ * finger on a phone drives `depth`, `lean` and `frame` the same way; what only
+ * makes sense with a hovering mouse (`magnetic`, `tilt`, `hover`, `badge`)
+ * switches itself off without one.
  *
  *   const fx = pointerFx(sectionEl)
  *   fx.magnetic(ctaEl)
@@ -61,6 +62,7 @@ export function pointerFx(root) {
      * share of the distance it follows, `reach` how many px around it count.
      */
     magnetic(target, { pull = 0.3, reach = 80 } = {}) {
+      if (!hasMouse()) return
       for (const el of list(target)) {
         const x = gsap.quickTo(el, 'x', { duration: 0.6, ease: 'power3.out' })
         const y = gsap.quickTo(el, 'y', { duration: 0.6, ease: 'power3.out' })
@@ -82,6 +84,7 @@ export function pointerFx(root) {
      * them out when the element's y / scale belong to a scroll animation.
      */
     tilt(target, { max = 5, lift, scale } = {}) {
+      if (!hasMouse()) return
       for (const el of list(target)) {
         gsap.set(el, { transformPerspective: 1000 })
         const ry = gsap.quickTo(el, 'rotationY', { duration: 0.7, ease: 'power3.out' })
@@ -109,7 +112,7 @@ export function pointerFx(root) {
 
     /** Calls `enter()` when the pointer comes onto the element and `leave()` when it goes off. */
     hover(el, { enter, leave } = {}) {
-      if (!el) return
+      if (!el || !hasMouse()) return
       let inside = false
       jobs.push((p) => {
         const r = el.getBoundingClientRect()

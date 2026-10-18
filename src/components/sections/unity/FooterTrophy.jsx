@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import RisingOrb from './RisingOrb'
 import { mixHex } from '../../../lib/themeVars'
+import { pointerFx } from '../../../lib/interact'
 
 /**
  * FooterTrophy — sky closer. Super-size type behind a rising
@@ -18,6 +19,8 @@ export default function FooterTrophy({
   fg,
   /** La palabra destacada; sin fondo propio, también arma el degradé. */
   accent: accentColor,
+  /** El trofeo se corre con el puntero y «volver arriba» se acerca al cursor. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
 
@@ -52,6 +55,12 @@ export default function FooterTrophy({
       }
       scheduleFit()
 
+      const fx = pointerFx(root.current)
+      if (showHover !== 'off') {
+        fx.depth([{ el: root.current.querySelector('[data-trophy]'), amount: 26 }])
+        fx.magnetic(root.current.querySelector('[data-trophy-top]'), { pull: 0.35, reach: 60 })
+      }
+
       const ro = new ResizeObserver(scheduleFit)
       if (root.current) ro.observe(root.current)
       window.addEventListener('resize', scheduleFit)
@@ -59,6 +68,7 @@ export default function FooterTrophy({
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         gsap.set('[data-trophy]', { yPercent: 0 })
         return () => {
+          fx.dispose()
           ro.disconnect()
           window.removeEventListener('resize', scheduleFit)
         }
@@ -97,11 +107,12 @@ export default function FooterTrophy({
       )
 
       return () => {
+        fx.dispose()
         ro.disconnect()
         window.removeEventListener('resize', scheduleFit)
       }
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   const lines = String(title)
@@ -172,7 +183,7 @@ export default function FooterTrophy({
 
       <div className="relative z-30 mt-2 flex items-end justify-between gap-4 border-t border-current/25 pt-4 text-[11px] tracking-[0.22em] uppercase md:mt-4">
         <span>{metaLeft}</span>
-        <a href="#top" className="tpl-link tpl-hit relative">
+        <a href="#top" data-trophy-top className="tpl-link tpl-hit relative">
           {metaRight}
         </a>
       </div>

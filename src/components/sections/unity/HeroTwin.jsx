@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 /**
@@ -17,6 +18,8 @@ export default function HeroTwin({
   fg,
   /** El titular que cruza la foto. */
   accent,
+  /** El párrafo y cada línea del titular flotan a distinta profundidad con el puntero. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -37,8 +40,16 @@ export default function HeroTwin({
 
       tl.to('[data-twin-body]', { yPercent: -28, opacity: 0.35 }, 0)
       tl.to('[data-twin-head]', { yPercent: 42 }, 0)
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.depth([
+        { el: root.current.querySelector('[data-twin-body]'), amount: 10 },
+        ...gsap.utils.toArray('[data-twin-head] > span', root.current).map((el, i) => ({ el, amount: i % 2 ? 18 : -18 })),
+      ])
+      return fx.dispose
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, showHover] },
   )
 
   const lines = String(headline)

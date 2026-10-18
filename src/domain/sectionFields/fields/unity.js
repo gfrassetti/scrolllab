@@ -1,4 +1,4 @@
-import { navLinks } from '../helpers.js'
+import { navLinks, toggle } from '../helpers.js'
 
 /** @typedef {import('../types.js').SectionField} SectionField */
 
@@ -23,6 +23,7 @@ export const UNITY_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color del titular que cruza la foto', type: 'color' },
+    toggle('showHover', 'El párrafo y el titular flotan con el puntero'),
   ],
   'unity/MosaicSlider': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -59,6 +60,7 @@ export const UNITY_FIELDS = {
     },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    toggle('showHover', 'Las barras se encienden cerca del puntero'),
   ],
   'unity/LanguageBlock': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -88,6 +90,7 @@ export const UNITY_FIELDS = {
     { key: 'stat3Value', label: 'Stat 3 value', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
+    toggle('showHover', 'El retrato se inclina con el puntero'),
   ],
   'unity/StageLines': [
     { key: 'eyebrow1', label: 'Eyebrow 1', type: 'text' },
@@ -111,5 +114,6 @@ export const UNITY_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de la palabra destacada (y del degradé si no hay fondo propio)', type: 'color' },
+    toggle('showHover', 'El trofeo se corre con el puntero'),
   ],
 }

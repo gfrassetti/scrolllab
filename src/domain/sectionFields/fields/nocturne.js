@@ -27,6 +27,7 @@ export const NOCTURNE_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
+    toggle('showHover', 'Luz que sigue al puntero sobre la foto'),
   ],
   'nocturne/DiagonalMarquee': [
     { key: 'textA', label: 'Texto — cinta 1', type: 'text' },
@@ -55,6 +56,7 @@ export const NOCTURNE_FIELDS = {
       ],
     },
     { key: 'accent', label: 'Color de acento (rótulos)', type: 'color' },
+    toggle('showHover', 'Las fotos se inclinan con el puntero'),
   ],
   'nocturne/WorkIndex': [
     SEQ_LABEL,
@@ -100,6 +102,7 @@ export const NOCTURNE_FIELDS = {
       ],
     },
     { key: 'accent', label: 'Color de acento (el punto final)', type: 'color' },
+    toggle('showHover', 'Insignia que sigue al cursor sobre la palabra'),
   ],
   'nocturne/ZoomPortal': [
     SEQ_LABEL,

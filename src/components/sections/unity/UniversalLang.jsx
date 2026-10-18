@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
+import { pointerFx } from '../../../lib/interact'
 
 const DEFAULT_STATS = [
   { label: 'COUNTRIES', value: '19' },
@@ -27,6 +28,8 @@ export default function UniversalLang({
   stats = DEFAULT_STATS,
   bg,
   fg,
+  /** Las barras del código de barras se encienden cerca del puntero. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
@@ -66,8 +69,32 @@ export default function UniversalLang({
           },
         },
       )
+
+      if (showHover === 'off') return
+      // Las barras cerca del puntero quedan encendidas; las demás bajan de opacidad.
+      // (la altura es del scrub, así que acá solo se toca `opacity`)
+      const fx = pointerFx(root.current)
+      const box = root.current.querySelector('[data-uni-bars]')
+      const bars = box ? Array.from(box.children) : []
+      const level = bars.map(() => 1)
+      fx.frame((p) => {
+        const r = box.getBoundingClientRect()
+        const near = p.clientY > r.top - 140 && p.clientY < r.bottom + 140 && r.height > 0
+        const at = ((p.clientX - r.left) / r.width) * bars.length
+        bars.forEach((bar, i) => {
+          const target = near ? 0.3 + 0.7 * Math.max(0, 1 - Math.abs(i - at) / 6) ** 2 : 1
+          level[i] += (target - level[i]) * 0.2
+          bar.style.opacity = level[i].toFixed(3)
+        })
+      })
+      return () => {
+        fx.dispose()
+        bars.forEach((bar) => {
+          bar.style.opacity = ''
+        })
+      }
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, showHover] },
   )
 
   const rows = Array.isArray(stats) && stats.length ? stats : DEFAULT_STATS

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 import { imgAttrs } from '../../../lib/responsiveImage'
 import { hero as heroImg, variants } from './assets/images'
 
@@ -22,6 +23,8 @@ export default function HeroCinematic({
   bg,
   fg,
   accent,
+  /** Una luz sigue al puntero sobre la foto y el título se corre apenas. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
 
@@ -69,8 +72,20 @@ export default function HeroCinematic({
           scrub: true,
         },
       })
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      const light = root.current.querySelector('[data-hero-light]')
+      const lx = gsap.quickTo(light, '--mx', { duration: 0.9, ease: 'power3.out' })
+      const ly = gsap.quickTo(light, '--my', { duration: 0.9, ease: 'power3.out' })
+      fx.frame((p) => {
+        lx(p.clientX)
+        ly(p.clientY)
+      })
+      fx.depth(gsap.utils.toArray('[data-hero-title]', root.current).map((el, i) => ({ el, amount: [-12, 18][i] ?? 0 })))
+      return fx.dispose
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   return (
@@ -94,6 +109,18 @@ export default function HeroCinematic({
         className="absolute inset-0 h-full w-full object-cover opacity-60"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-noir via-noir/20 to-noir/60" />
+      {showHover !== 'off' && (
+        <div
+          aria-hidden="true"
+          data-hero-light
+          className="pointer-events-none absolute inset-0 mix-blend-soft-light"
+          style={{
+            '--mx': '50vw',
+            '--my': '40svh',
+            background: 'radial-gradient(circle 32vmax at var(--mx) var(--my), rgb(255 255 255 / 0.55), transparent 70%)',
+          }}
+        />
+      )}
 
       <div
         data-hero-content

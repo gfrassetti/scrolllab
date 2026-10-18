@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 import { imgAttrs } from '../../../lib/responsiveImage'
 import { beatDiner, beatRoad, beatRoof, variants } from './assets/images'
 import { themeVars } from '../../../lib/themeVars'
@@ -43,6 +44,8 @@ export default function SplitReveals({
   bg,
   fg,
   accent,
+  /** Cada foto se inclina hacia el puntero y se acerca un poco. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   // `beats` editable trae solo kicker/title/body (la imagen del embed viene
@@ -80,8 +83,13 @@ export default function SplitReveals({
           scrollTrigger: { trigger: row, start: 'top 70%', once: true },
         })
       })
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.tilt(gsap.utils.toArray('[data-beat-img]', root.current), { max: 3.5, scale: 1.015 })
+      return fx.dispose
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   return (

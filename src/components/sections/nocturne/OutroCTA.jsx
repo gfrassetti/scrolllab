@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 import { themeVars } from '../../../lib/themeVars'
 import { parseNavLinks } from '../../../lib/navLinks'
 import { externalProps } from '../../../lib/contactLinks'
@@ -44,6 +45,8 @@ export default function OutroCTA({
   backToTop = 'Back to top ↑',
   /** Ancla de la sección: el nav apunta acá. */
   id = 'contact',
+  /** Una insignia redonda sigue al cursor sobre la palabra gigante. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -68,8 +71,14 @@ export default function OutroCTA({
           once: true,
         },
       })
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.badge('[data-cursor]')
+      fx.magnetic(root.current.querySelector('[data-outro-top]'), { pull: 0.35, reach: 60 })
+      return fx.dispose
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   return (
@@ -125,7 +134,7 @@ export default function OutroCTA({
         </div>
       </div>
 
-      <a href={cta} className="group tpl-hit relative block" aria-label={email}>
+      <a href={cta} data-cursor="open" className="group tpl-hit relative block" aria-label={email}>
         <span
           data-outro-word
           className="block font-brico text-[11.5vw] leading-[0.85] font-extrabold tracking-[-0.02em] whitespace-nowrap uppercase transition-colors duration-500 group-hover:text-acid"
@@ -142,7 +151,7 @@ export default function OutroCTA({
 
       <div className="mt-10 flex flex-col gap-2 border-t border-salt/20 pt-4 text-[11px] uppercase tracking-[0.3em] text-salt/40 md:flex-row md:items-baseline md:justify-between md:text-xs">
         <p>{legal}</p>
-        <a href="#top" className="tpl-link tpl-hit relative self-start transition-colors duration-300 hover:text-acid md:self-auto">
+        <a href="#top" data-outro-top className="tpl-link tpl-hit relative self-start transition-colors duration-300 hover:text-acid md:self-auto">
           {backToTop}
         </a>
       </div>
