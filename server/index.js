@@ -32,8 +32,15 @@ async function boot() {
     process.exit(1)
   })
 
-  const stopTrialReminders = startTrialReminders({ config })
-  const stopPaymentFailedSweep = startPaymentFailedSweep({ config })
+  // Los barridos (mails de pago rechazado, avisos de prueba, devoluciones que
+  // esperan, cambios de precio) corren solo en producción. Un servidor local suele
+  // apuntar a la base de producción (el .env, para ver el panel /admin): ahí
+  // mandaría mails o tocaría pagos reales con la config local. RUN_SWEEPS=1 los
+  // prende a propósito en desarrollo.
+  const sweeps = config.isProd || process.env.RUN_SWEEPS === '1'
+  if (!sweeps) console.log('Barridos apagados (desarrollo). RUN_SWEEPS=1 los prende.')
+  const stopTrialReminders = sweeps ? startTrialReminders({ config }) : () => {}
+  const stopPaymentFailedSweep = sweeps ? startPaymentFailedSweep({ config }) : () => {}
   if (config.email.enabled && config.hostedTrialReminderDays > 0) {
     console.log(
       `Aviso de fin de prueba (LAB): ${config.hostedTrialReminderDays} días antes del primer cobro`,
