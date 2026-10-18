@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 import { parseNavLinks } from '../../../lib/navLinks'
 import { externalProps } from '../../../lib/contactLinks'
 
@@ -44,6 +45,8 @@ export default function FooterCTA({
   backToTop = 'Back to top ↑',
   /** Ancla de la sección: el nav apunta acá. */
   id = 'subscribe',
+  /** Una insignia redonda sigue al cursor sobre la palabra gigante. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   const cta = ctaHref || `mailto:${email}`
@@ -69,8 +72,13 @@ export default function FooterCTA({
           once: true,
         },
       })
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.badge('[data-cursor]')
+      return fx.dispose
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   return (
@@ -126,7 +134,7 @@ export default function FooterCTA({
         </div>
       </div>
 
-      <a href={cta} className="group tpl-hit relative block" aria-label={email}>
+      <a href={cta} data-cursor="open" className="group tpl-hit relative block" aria-label={email}>
         <span
           data-cta-word
           className="block text-[13.5vw] leading-[0.85] font-medium tracking-[-0.03em] whitespace-nowrap uppercase transition-colors duration-500 group-hover:text-accent"

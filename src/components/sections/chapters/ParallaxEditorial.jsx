@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 import { editA, editB, editC, editD, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -54,6 +55,8 @@ export default function ParallaxEditorial({
   fg,
   /** La palabra gigante en contorno detrás de las fotos. */
   showGhost = 'on',
+  /** Cada foto se inclina hacia el puntero cuando pasa por encima. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   const valid = figures?.filter((f) => f?.img || f?.caption)
@@ -79,8 +82,13 @@ export default function ParallaxEditorial({
           },
         })
       })
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.tilt(gsap.utils.toArray('figure', root.current), { max: 4 })
+      return fx.dispose
     },
-    { scope: root, dependencies: [list.length], revertOnUpdate: true },
+    { scope: root, dependencies: [list.length, showHover], revertOnUpdate: true },
   )
 
   return (

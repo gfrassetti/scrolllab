@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 
 /**
  * HeroKinetic — full-viewport hero with oversized kinetic typography.
@@ -22,6 +23,8 @@ export default function HeroKinetic({
   bg,
   fg,
   accent,
+  /** Las tres líneas se corren apenas, cada una a su ritmo, con el puntero. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
 
@@ -73,8 +76,15 @@ export default function HeroKinetic({
           scrub: true,
         },
       })
+
+      // Las líneas flotan a distinta profundidad con el puntero (o el dedo).
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      const lines = gsap.utils.toArray('[data-hero-line]', root.current)
+      fx.depth(lines.map((el, i) => ({ el, amount: [-14, 22, -8][i] ?? 0 })))
+      return fx.dispose
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   return (

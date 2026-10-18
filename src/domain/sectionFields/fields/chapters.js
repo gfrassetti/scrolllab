@@ -26,6 +26,7 @@ export const CHAPTERS_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
+    toggle('showHover', 'Las líneas se mueven con el puntero'),
   ],
   'chapters/ManifestoReveal': [
     CHAPTER_LABEL,
@@ -78,6 +79,7 @@ export const CHAPTERS_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     toggle('showGhost', 'Palabra gigante de fondo'),
+    toggle('showHover', 'Las fotos se inclinan con el puntero'),
   ],
   'chapters/FooterCTA': [
     { key: 'ctaWord', label: 'Marca gigante', type: 'text' },
@@ -98,6 +100,7 @@ export const CHAPTERS_FIELDS = {
         { key: 'href', label: 'Enlace', type: 'href' },
       ],
     },
+    toggle('showHover', 'Insignia que sigue al cursor sobre la marca'),
   ],
   'chapters/HorizontalPanels': [
     {
@@ -194,5 +197,6 @@ export const CHAPTERS_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
+    toggle('showHover', 'Las cartas se inclinan con el puntero'),
   ],
 }

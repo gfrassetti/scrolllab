@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { pointerFx } from '../../../lib/interact'
 
 const defaultCards = [
   {
@@ -51,6 +52,8 @@ export default function StackingCards({
   bg,
   fg,
   accent,
+  /** Cada carta se inclina apenas hacia el puntero. */
+  showHover = 'on',
 }) {
   const root = useRef(null)
   // Cartas del builder: el contraste de cada una (theme) sigue el ritmo de las
@@ -82,8 +85,13 @@ export default function StackingCards({
           },
         })
       })
+
+      if (showHover === 'off') return
+      const fx = pointerFx(root.current)
+      fx.tilt(gsap.utils.toArray('[data-card]', root.current), { max: 1.6 })
+      return fx.dispose
     },
-    { scope: root },
+    { scope: root, dependencies: [showHover] },
   )
 
   return (
