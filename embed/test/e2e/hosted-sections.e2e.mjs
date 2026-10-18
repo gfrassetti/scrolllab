@@ -86,6 +86,18 @@ const CASES = {
     },
     marker: 'MKTYPA',
   },
+  'monolith/ProcessSteps': {
+    props: {
+      label: 'MKPROC',
+      title: 'MKPROC',
+      unit: '01',
+      total: '02',
+      bg: '#0c0c0c',
+      fg: '#e8e8e8',
+      steps: [{ title: 'MKPROC', time: 'Week 1', body: 'cuerpo' }],
+    },
+    marker: 'MKPROC',
+  },
   'chapters/VelocityMarquee': {
     props: { text: 'MKMARQ', bg: '#101014', fg: '#f5f5f5' },
     marker: 'MKMARQ',

@@ -25,6 +25,7 @@ import SkewScroller from '../components/sections/monolith/SkewScroller'
 import SpecSheet from '../components/sections/monolith/SpecSheet'
 import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
+import ProcessSteps from '../components/sections/monolith/ProcessSteps'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
 
 import NavFizz from '../components/sections/fizz/NavFizz'
@@ -176,6 +177,7 @@ const allModels = [
       { id: 'monolith/SpecSheet', name: 'Spec Sheet', kind: 'section', component: SpecSheet, blurb: 'Brutalist data table, rows invert on hover' },
       { id: 'monolith/ExhibitGrid', name: 'Exhibit Grid', kind: 'section', component: ExhibitGrid, blurb: 'Hard-bordered grid, grayscale until hovered' },
       { id: 'monolith/TypeAccordion', name: 'Type Accordion', kind: 'section', component: TypeAccordion, blurb: 'Condensed titles expanding into drawers' },
+      { id: 'monolith/ProcessSteps', name: 'Process Steps', kind: 'section', component: ProcessSteps, blurb: 'A mould fills with concrete as the steps go by' },
       { id: 'monolith/FooterBrutal', name: 'Footer Brutal', kind: 'footer', component: FooterBrutal, blurb: 'Klein-blue closing block with mono links' },
     ],
   },

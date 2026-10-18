@@ -910,6 +910,10 @@
           "name": "Type Accordion",
           "blurb": "Condensed titles expanding into drawers"
         },
+        "ProcessSteps": {
+          "name": "Process Steps",
+          "blurb": "A mould fills with concrete as the steps go by"
+        },
         "FooterBrutal": {
           "name": "Footer Brutal",
           "blurb": "Klein-blue closing block with mono links"

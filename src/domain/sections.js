@@ -45,6 +45,7 @@ const BY_MODEL = {
     SpecSheet: 'section',
     ExhibitGrid: 'section',
     TypeAccordion: 'section',
+    ProcessSteps: 'section',
     FooterBrutal: 'footer',
   },
   fizz: {

@@ -42,6 +42,7 @@ const APPROVED = [
   'monolith/SpecSheet',
   'monolith/ExhibitGrid',
   'monolith/TypeAccordion',
+  'monolith/ProcessSteps',
   'monolith/FooterBrutal',
   'fizz/NavFizz',
   'fizz/HeroBubbles',

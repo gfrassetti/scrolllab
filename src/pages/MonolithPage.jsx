@@ -6,6 +6,7 @@ import SkewScroller from '../components/sections/monolith/SkewScroller'
 import SpecSheet from '../components/sections/monolith/SpecSheet'
 import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
+import ProcessSteps from '../components/sections/monolith/ProcessSteps'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
 import ContactForm from '../components/sections/contact/ContactForm'
 
@@ -27,6 +28,7 @@ export default function MonolithPage() {
           <SpecSheet unit="02" />
           <ExhibitGrid unit="03" />
           <TypeAccordion unit="04" />
+          <ProcessSteps unit="05" />
           <ContactForm
             theme="monolith"
             eyebrow="Commissions"

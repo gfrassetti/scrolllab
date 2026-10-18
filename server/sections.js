@@ -53,6 +53,7 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'chapters/BigNumbers',
   'atelier/KeyFacts',
   'monolith/TypeAccordion',
+  'monolith/ProcessSteps',
   // Fase D — segunda tanda. Ribbons continuos (loop `repeat:-1` sin pin; el
   // boost por velocidad de scroll no dispara si el host no scrollea, pero el
   // loop de fondo sigue andando — no rompe) + más bloques `once`.

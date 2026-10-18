@@ -42,6 +42,7 @@ const SECTIONS = {
   'chapters/BigNumbers': () => import('../../src/components/sections/chapters/BigNumbers.jsx'),
   'atelier/KeyFacts': () => import('../../src/components/sections/atelier/KeyFacts.jsx'),
   'monolith/TypeAccordion': () => import('../../src/components/sections/monolith/TypeAccordion.jsx'),
+  'monolith/ProcessSteps': () => import('../../src/components/sections/monolith/ProcessSteps.jsx'),
   'chapters/VelocityMarquee': () => import('../../src/components/sections/chapters/VelocityMarquee.jsx'),
   'nocturne/DiagonalMarquee': () => import('../../src/components/sections/nocturne/DiagonalMarquee.jsx'),
   'nocturne/SplitReveals': () => import('../../src/components/sections/nocturne/SplitReveals.jsx'),

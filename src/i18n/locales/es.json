@@ -910,6 +910,10 @@
           "name": "Acordeón tipográfico",
           "blurb": "Títulos condensados que se abren en cajones"
         },
+        "ProcessSteps": {
+          "name": "Process Steps",
+          "blurb": "Un molde se llena de hormigón a medida que pasan los pasos"
+        },
         "FooterBrutal": {
           "name": "Footer brutal",
           "blurb": "Bloque de cierre azul Klein con links mono"
