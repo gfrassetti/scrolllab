@@ -13,8 +13,9 @@ import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 06 — "ATELIER"
- * Inspired by studio sites like Trionn (https://trionn.com/): scroll-reactive fog,
- * WebGL emblem/stone scrubbed by scroll, GSAP + Lenis (via provider).
+ * An interiors and furniture studio. The 3D is the studio's own object — a stone bench
+ * with a vessel (studioPiece.js) — that turns with the pointer, comes apart on scroll and
+ * changes material with each service. GSAP + Lenis (via provider).
  * See Obsidian: "Atelier — mapa de referencia". Demo/generic copy only.
  */
 export default function AtelierPage() {

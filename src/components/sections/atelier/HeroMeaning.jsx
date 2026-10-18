@@ -3,16 +3,19 @@ import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { createFrameBudget, fitCameraDistance, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
+import { createStudioPiece } from './studioPiece'
 
-// Cámara del emblema. En PC queda en EMBLEM_Z; en vertical se aleja (`fitCameraDistance`)
-// hasta que el emblema entra en el ancho: el aro (1,35 + 0,08) es lo más ancho, con margen.
-const EMBLEM_FOV = 40
-const EMBLEM_Z = 6
-const EMBLEM_RADIUS = 1.45
+// Cámara de la pieza. En PC queda en PIECE_Z; en vertical se aleja (`fitCameraDistance`)
+// hasta que la banca entra en el ancho (con la vasija y las patas abiertas).
+const PIECE_FOV = 38
+const PIECE_Z = 7.2
+const PIECE_RADIUS = 2.2
 
 /**
- * HeroMeaning — Trionn-inspired hero: blur text reveal + WebGL emblem
- * that drifts with pointer and scrubs apart on scroll.
+ * HeroMeaning — the studio's own object, in 3D: a stone bench with a vessel
+ * (see studioPiece.js) turns with the pointer, sits in front of the title, and
+ * comes apart like an assembly drawing as you scroll. The letters of the title
+ * step aside when the pointer comes near.
  */
 export default function HeroMeaning({
   line1 = 'Quiet rooms,',
@@ -22,7 +25,7 @@ export default function HeroMeaning({
   body = 'An interior and object studio. Homes and hotels, and the furniture, materials and names that go in them.',
   bg,
   fg,
-  /** El emblema 3D: el bloque y el anillo. */
+  /** La pieza 3D: el tinte de la banca (blanco = material natural) y el color de la vasija. */
   objectColor,
   ringColor,
   /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
@@ -40,27 +43,24 @@ export default function HeroMeaning({
       // `filter` animado, justo cuando el 3D está arrancando, traban.
       const coarse = window.matchMedia('(pointer: coarse)').matches
 
-      const split = new SplitText('[data-atelier-hero]', {
-        type: 'chars',
-        mask: 'chars',
-      })
-      // La máscara mide lo que la línea y con este interlineado cortaba los
-      // descendentes: se la agranda hacia abajo sin mover el layout.
-      for (const mask of split.masks || []) {
-        mask.style.paddingBottom = '0.22em'
-        mask.style.marginBottom = '-0.22em'
-      }
-      gsap.set(split.chars, coarse ? { autoAlpha: 0 } : { autoAlpha: 0, filter: 'blur(12px)' })
+      // Sin máscara: las letras se mueven fuera de su caja cuando el puntero se acerca.
+      const split = new SplitText('[data-atelier-hero]', { type: 'chars' })
+      gsap.set(split.chars, coarse ? { autoAlpha: 0, y: 24 } : { autoAlpha: 0, y: 24, filter: 'blur(12px)' })
+      let intro = false
       gsap.to(split.chars, {
         autoAlpha: 1,
+        y: 0,
         ...(coarse ? {} : { filter: 'blur(0px)' }),
-        duration: 0.85,
+        duration: 0.9,
         stagger: { each: 0.035, from: 'random' },
-        ease: 'power2.out',
+        ease: 'power3.out',
         delay: 0.2,
+        onComplete: () => {
+          intro = true
+        },
       })
 
-      // —— Three emblem ——
+      // —— Three: the studio piece ——
       const canvas = canvasRef.current
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -70,49 +70,32 @@ export default function HeroMeaning({
       // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
       const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
       renderer.setPixelRatio(dpr)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 0.9
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(EMBLEM_FOV, 1, 0.1, 50)
-      camera.position.z = EMBLEM_Z
-
-      const group = new THREE.Group()
-      const mat = new THREE.MeshStandardMaterial({
-        color: objectColor || 0x2a2d33,
-        roughness: 0.55,
-        metalness: 0.35,
-      })
-      const core = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.6, 1.6), mat)
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(1.35, 0.08, 12, 64),
-        new THREE.MeshStandardMaterial({
-          color: ringColor || 0xc8d0dc,
-          roughness: 0.3,
-          metalness: 0.7,
-        }),
-      )
-      ring.rotation.x = Math.PI / 2.4
-      group.add(core, ring)
-      scene.add(group)
-      scene.add(new THREE.AmbientLight(0xffffff, 0.55))
-      const key = new THREE.DirectionalLight(0xffffff, 1.1)
-      key.position.set(3, 4, 5)
-      scene.add(key)
+      const camera = new THREE.PerspectiveCamera(PIECE_FOV, 1, 0.1, 60)
+      const piece = createStudioPiece(renderer, scene, { tint: objectColor, vessel: ringColor })
+      const { group } = piece
 
       // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
-      // pointermove y el emblema quedaba sin reaccionar).
+      // pointermove y la pieza quedaba sin reaccionar).
       const pointer = trackPointer()
 
       const resize = () => {
         const { clientWidth: w, clientHeight: h } = canvas
         renderer.setSize(w, h, false)
         camera.aspect = w / Math.max(h, 1)
-        // En vertical la cámara se aleja hasta que el emblema entra en el ancho.
-        camera.position.z = fitCameraDistance({
-          fov: EMBLEM_FOV,
-          aspect: camera.aspect,
-          radius: EMBLEM_RADIUS,
-          base: EMBLEM_Z,
-        })
+        const z = fitCameraDistance({ fov: PIECE_FOV, aspect: camera.aspect, radius: PIECE_RADIUS, base: PIECE_Z })
+        camera.position.set(0, 1.5, z)
+        camera.lookAt(0, 0.1, 0)
         camera.updateProjectionMatrix()
+        // en pantalla ancha la banca queda a la derecha, detrás del titular a la izquierda;
+        // en vertical, arriba del texto
+        const halfW = Math.tan((PIECE_FOV * Math.PI) / 360) * z * camera.aspect
+        const wide = camera.aspect > 1.15
+        const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
+        piece.place(wide ? halfW * 0.42 : 0, wide ? 0 : halfH * 0.36, wide ? 1.2 : 0.85)
       }
       resize()
       window.addEventListener('resize', resize)
@@ -150,19 +133,50 @@ export default function HeroMeaning({
         },
       })
 
+      // Las letras se apartan del puntero: cada una guarda el centro de su caja.
+      const chars = split.chars.map((el) => ({
+        el,
+        x: gsap.quickTo(el, 'x', { duration: 0.7, ease: 'power3.out' }),
+        y: gsap.quickTo(el, 'y', { duration: 0.7, ease: 'power3.out' }),
+        cx: 0,
+        cy: 0,
+      }))
+      const measure = () => {
+        chars.forEach((c) => {
+          const r = c.el.getBoundingClientRect()
+          c.cx = r.left + r.width / 2 - (gsap.getProperty(c.el, 'x') || 0)
+          c.cy = r.top + r.height / 2 - (gsap.getProperty(c.el, 'y') || 0)
+        })
+      }
+      const measured = gsap.delayedCall(1.6, measure)
+      window.addEventListener('resize', measure)
+      const REACH = 170
+
+      let yaw = 0.55
+      let pitch = 0
       const tick = (time, deltaMs) => {
         if (!onScreen) return
-        const spin = reduced ? 0.002 : 0.008
-        group.rotation.y += spin
-        group.rotation.x += (-pointer.y * 0.35 - group.rotation.x) * 0.06
-        group.rotation.y += (pointer.x * 0.35 - group.rotation.y) * 0.04
-        core.position.z = explode * 0.8
-        ring.scale.setScalar(1 + explode * 0.55)
-        ring.material.opacity = 1 - explode * 0.7
-        ring.material.transparent = true
-        group.scale.setScalar(1 + explode * 0.35)
+        // un vaivén lento y la mirada del puntero; al scrollear gira y se desarma
+        const targetYaw = 0.55 + (reduced ? 0 : Math.sin(time * 0.35) * 0.16) + pointer.x * 0.5 + explode * 1.1
+        const targetPitch = -pointer.y * 0.1 - explode * 0.12
+        yaw += (targetYaw - yaw) * 0.06
+        pitch += (targetPitch - pitch) * 0.06
+        group.rotation.set(pitch, yaw, 0)
+        piece.setExplode(explode)
         renderer.render(scene, camera)
         budget.tick(deltaMs)
+
+        if (intro && !coarse && !reduced) {
+          for (const c of chars) {
+            const dx = c.cx - pointer.clientX
+            const dy = c.cy - pointer.clientY
+            const dist = Math.hypot(dx, dy) || 1
+            const f = Math.max(0, 1 - dist / REACH)
+            const push = f * f * 46
+            c.x((dx / dist) * push)
+            c.y((dy / dist) * push)
+          }
+        }
       }
       gsap.ticker.add(tick)
 
@@ -177,15 +191,14 @@ export default function HeroMeaning({
       return () => {
         pointer.dispose()
         window.removeEventListener('resize', resize)
+        window.removeEventListener('resize', measure)
+        measured.kill()
         gsap.ticker.remove(tick)
         io.disconnect()
         st.scrollTrigger?.kill()
         st.kill()
+        piece.dispose()
         renderer.dispose()
-        core.geometry.dispose()
-        ring.geometry.dispose()
-        mat.dispose()
-        ring.material.dispose()
         split.revert()
       }
     },
@@ -205,7 +218,7 @@ export default function HeroMeaning({
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-90"
+        className="pointer-events-none absolute inset-0 z-[5] h-full w-full"
       />
 
       <p
@@ -215,7 +228,7 @@ export default function HeroMeaning({
         {meta}
       </p>
 
-      <div className="relative z-10 mix-blend-difference">
+      <div className="relative z-[2] mix-blend-difference">
         <h1
           data-atelier-hero
           className="max-w-[12ch] font-brico text-[clamp(2.8rem,10vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.04em]"
