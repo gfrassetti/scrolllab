@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { gsap, useGSAP } from '../../../lib/gsap'
+import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { ex01, ex02, ex03, ex04, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
@@ -42,13 +42,29 @@ export default function ExhibitGrid({
       // Calma: cada pieza entra con un fundido en vez de abrirse con una máscara.
       if (prefersReducedMotion()) return calmReveal('[data-exhibit]', { y: 14, stagger: 0.08 })
 
-      gsap.from('[data-exhibit]', {
-        clipPath: 'inset(0 0 100% 0)',
-        duration: 1,
-        stagger: 0.12,
-        ease: 'power4.inOut',
-        scrollTrigger: { trigger: root.current, start: 'top 70%', once: true },
-      })
+      // Las piezas se colocan como bloques en obra: caen a su celda una por una
+      // y la foto se destapa de abajo hacia arriba.
+      const cells = gsap.utils.toArray('[data-exhibit]', root.current)
+      gsap
+        .timeline({ scrollTrigger: { trigger: root.current, start: 'top 70%', once: true } })
+        .from(cells, {
+          yPercent: -35,
+          autoAlpha: 0,
+          duration: 0.7,
+          stagger: { each: 0.1, grid: 'auto', from: 'start' },
+          ease: 'power4.out',
+        })
+        .from(
+          gsap.utils.toArray('[data-exhibit-media]', root.current),
+          { clipPath: 'inset(100% 0 0 0)', duration: 0.9, stagger: 0.1, ease: 'power4.inOut' },
+          0.15,
+        )
+
+      // La pieza que pasa por el medio de la pantalla toma color (en el teléfono no hay hover).
+      const lit = cells.map((cell) =>
+        ScrollTrigger.create({ trigger: cell, start: 'top 62%', end: 'bottom 38%', toggleClass: 'is-lit' }),
+      )
+      return () => lit.forEach((t) => t.kill())
     },
     { scope: root },
   )
@@ -70,7 +86,7 @@ export default function ExhibitGrid({
       <div className="grid grid-cols-2 gap-[2px] border-2 border-carbon bg-carbon md:grid-cols-4">
         {rows.map((exhibit, i) => (
           <figure key={i} data-exhibit className="group bg-concrete">
-            <div className="aspect-square overflow-hidden">
+            <div data-exhibit-media className="aspect-square overflow-hidden">
               {exhibit.img ? (
                 <img
                   {...imgAttrs(exhibit.img, variants)}
@@ -78,7 +94,7 @@ export default function ExhibitGrid({
                   alt=""
                   loading="lazy"
                   decoding="async"
-                  className="aspect-square w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
+                  className="aspect-square w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0 group-[.is-lit]:grayscale-0"
                 />
               ) : null}
             </div>

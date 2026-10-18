@@ -26,6 +26,8 @@ import SpecSheet from '../components/sections/monolith/SpecSheet'
 import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
 import ProcessSteps from '../components/sections/monolith/ProcessSteps'
+import AssemblyStack from '../components/sections/monolith/AssemblyStack'
+import LoadNumbers from '../components/sections/monolith/LoadNumbers'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
 
 import NavFizz from '../components/sections/fizz/NavFizz'
@@ -58,6 +60,7 @@ import NavUnity from '../components/sections/unity/NavUnity'
 import HeroTwin from '../components/sections/unity/HeroTwin'
 import MosaicSlider from '../components/sections/unity/MosaicSlider'
 import UniversalLang from '../components/sections/unity/UniversalLang'
+import MatchBoard from '../components/sections/unity/MatchBoard'
 import LanguageBlock from '../components/sections/unity/LanguageBlock'
 import LastPortrait from '../components/sections/unity/LastPortrait'
 import StageLines from '../components/sections/unity/StageLines'
@@ -156,8 +159,8 @@ const allModels = [
     wrapperClass: MODEL_WRAPPER_CLASS.nocturne,
     sections: [
       { id: 'nocturne/NavNocturne', name: 'Nav Nocturne', kind: 'nav', component: NavNocturne, blurb: 'Fixed dark header with reel marker · numbered mobile menu' },
-      { id: 'nocturne/HeroCinematic', name: 'Hero Cinematic', kind: 'hero', component: HeroCinematic, blurb: 'Full-bleed photo with slow zoom, credit type' },
-      { id: 'nocturne/ZoomPortal', name: 'Zoom Portal', kind: 'section', component: ZoomPortal, blurb: 'Small window grows to swallow the viewport' },
+      { id: 'nocturne/HeroCinematic', name: 'Hero Cinematic', kind: 'hero', component: HeroCinematic, blurb: 'A layered night shot: the camera pushes in, rain falls, the title sits between layers' },
+      { id: 'nocturne/ZoomPortal', name: 'Zoom Portal', kind: 'section', component: ZoomPortal, blurb: 'A screening room: walk into the screen and the reel plays to your scroll' },
       { id: 'nocturne/DiagonalMarquee', name: 'Diagonal Marquee', kind: 'section', component: DiagonalMarquee, blurb: 'Two tilted ribbons crossing directions' },
       { id: 'nocturne/SplitReveals', name: 'Split Reveals', kind: 'section', component: SplitReveals, blurb: 'Alternating rows with clip-path wipes' },
       { id: 'nocturne/WorkIndex', name: 'Work Index', kind: 'section', component: WorkIndex, blurb: 'Hover list with cursor-trailing preview' },
@@ -176,7 +179,9 @@ const allModels = [
       { id: 'monolith/SkewScroller', name: 'Skew Scroller', kind: 'section', component: SkewScroller, blurb: 'Giant words shearing with scroll velocity' },
       { id: 'monolith/SpecSheet', name: 'Spec Sheet', kind: 'section', component: SpecSheet, blurb: 'Brutalist data table, rows invert on hover' },
       { id: 'monolith/ExhibitGrid', name: 'Exhibit Grid', kind: 'section', component: ExhibitGrid, blurb: 'Hard-bordered grid, grayscale until hovered' },
+      { id: 'monolith/AssemblyStack', name: 'Assembly Stack', kind: 'section', component: AssemblyStack, blurb: 'An isometric monolith built layer by layer as you scroll' },
       { id: 'monolith/TypeAccordion', name: 'Type Accordion', kind: 'section', component: TypeAccordion, blurb: 'Condensed titles expanding into drawers' },
+      { id: 'monolith/LoadNumbers', name: 'Load Numbers', kind: 'section', component: LoadNumbers, blurb: 'Figures that count up while each cell fills like a pour' },
       { id: 'monolith/ProcessSteps', name: 'Process Steps', kind: 'section', component: ProcessSteps, blurb: 'A mould fills with concrete as the steps go by' },
       { id: 'monolith/FooterBrutal', name: 'Footer Brutal', kind: 'footer', component: FooterBrutal, blurb: 'Klein-blue closing block with mono links' },
     ],
@@ -238,6 +243,7 @@ const allModels = [
       { id: 'unity/HeroTwin', name: 'Hero Twin', kind: 'hero', component: HeroTwin, blurb: 'Two headlines peeling apart on scroll parallax' },
       { id: 'unity/MosaicSlider', name: 'Mosaic Slider', kind: 'section', component: MosaicSlider, blurb: 'Scattered polaroids that unfold into a full-bleed slider' },
       { id: 'unity/UniversalLang', name: 'Universal Lang', kind: 'section', component: UniversalLang, blurb: 'Pinned giant number with barcode stats' },
+      { id: 'unity/MatchBoard', name: 'Match Board', kind: 'section', component: MatchBoard, blurb: 'Fixtures on a split-flap board that spins into place' },
       { id: 'unity/LanguageBlock', name: 'Language Block', kind: 'section', component: LanguageBlock, blurb: 'Oversized type interleaved with fixed-feel photo windows' },
       { id: 'unity/LastPortrait', name: 'Last Portrait', kind: 'section', component: LastPortrait, blurb: 'Dark portrait closer with stats row' },
       { id: 'unity/StageLines', name: 'Stage Lines', kind: 'section', component: StageLines, blurb: 'Two typographic stage beats over drifting media' },

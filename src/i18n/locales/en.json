@@ -858,11 +858,11 @@
         },
         "HeroCinematic": {
           "name": "Hero Cinematic",
-          "blurb": "Full-bleed photo with slow zoom, credit type"
+          "blurb": "A layered night shot: the camera pushes in, rain falls, the title sits between layers"
         },
         "ZoomPortal": {
           "name": "Zoom Portal",
-          "blurb": "Small window grows to swallow the viewport"
+          "blurb": "A screening room: walk into the screen and the reel plays to your scroll"
         },
         "DiagonalMarquee": {
           "name": "Diagonal Marquee",
@@ -909,6 +909,14 @@
         "TypeAccordion": {
           "name": "Type Accordion",
           "blurb": "Condensed titles expanding into drawers"
+        },
+        "AssemblyStack": {
+          "name": "Assembly Stack",
+          "blurb": "An isometric monolith built layer by layer as you scroll"
+        },
+        "LoadNumbers": {
+          "name": "Load Numbers",
+          "blurb": "Figures that count up while each cell fills like a pour"
         },
         "ProcessSteps": {
           "name": "Process Steps",
@@ -1037,6 +1045,10 @@
         "UniversalLang": {
           "name": "Universal Lang",
           "blurb": "Pinned giant number with barcode stats"
+        },
+        "MatchBoard": {
+          "name": "Match Board",
+          "blurb": "Fixtures on a split-flap board that spins into place"
         },
         "LanguageBlock": {
           "name": "Language Block",

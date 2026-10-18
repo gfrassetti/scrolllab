@@ -858,11 +858,11 @@
         },
         "HeroCinematic": {
           "name": "Hero cinematográfico",
-          "blurb": "Foto a sangre con zoom lento y tipografía de créditos"
+          "blurb": "Una toma nocturna en capas: la cámara entra, llueve y el título queda entre capas"
         },
         "ZoomPortal": {
           "name": "Portal con zoom",
-          "blurb": "Una ventanita crece hasta tragar el viewport"
+          "blurb": "Una sala de proyección: entrás en la pantalla y el carrete corre con el scroll"
         },
         "DiagonalMarquee": {
           "name": "Marquee diagonal",
@@ -909,6 +909,14 @@
         "TypeAccordion": {
           "name": "Acordeón tipográfico",
           "blurb": "Títulos condensados que se abren en cajones"
+        },
+        "AssemblyStack": {
+          "name": "Assembly Stack",
+          "blurb": "Un monolito isométrico que se arma capa por capa al scrollear"
+        },
+        "LoadNumbers": {
+          "name": "Load Numbers",
+          "blurb": "Cifras que cuentan mientras cada celda se llena como un vertido"
         },
         "ProcessSteps": {
           "name": "Process Steps",
@@ -1037,6 +1045,10 @@
         "UniversalLang": {
           "name": "Universal lang",
           "blurb": "Número gigante pineado con stats barcode"
+        },
+        "MatchBoard": {
+          "name": "Match Board",
+          "blurb": "Los partidos en un tablero de fichas que giran hasta asentarse"
         },
         "LanguageBlock": {
           "name": "Language block",

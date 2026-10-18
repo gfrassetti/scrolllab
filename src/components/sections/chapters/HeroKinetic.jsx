@@ -25,6 +25,8 @@ export default function HeroKinetic({
   accent,
   /** Las tres líneas se corren apenas, cada una a su ritmo, con el puntero. */
   showHover = 'on',
+  /** El sello redondo que gira (lleva el texto de «Meta»). */
+  showStamp = 'on',
 }) {
   const root = useRef(null)
 
@@ -65,17 +67,23 @@ export default function HeroKinetic({
         delay: 1,
       })
 
-      gsap.to('[data-hero-inner]', {
-        yPercent: -14,
-        opacity: 0.15,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: root.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
+      const exit = {
+        trigger: root.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      }
+      gsap.to('[data-hero-inner]', { yPercent: -14, opacity: 0.15, ease: 'none', scrollTrigger: exit })
+      // al salir, las tres líneas se separan hacia lados opuestos, como páginas que se abren
+      gsap.utils.toArray('[data-hero-line]', root.current).forEach((line, i) => {
+        gsap.to(line, { xPercent: i % 2 ? 18 : -14, ease: 'none', scrollTrigger: { ...exit } })
       })
+      // el sello del número gira con el scroll (y solo, despacio)
+      const stamp = root.current.querySelector('[data-hero-stamp]')
+      if (stamp) {
+        gsap.to(stamp, { rotation: 360, duration: 28, ease: 'none', repeat: -1 })
+        gsap.to('[data-hero-stamp-wrap]', { rotation: 220, ease: 'none', scrollTrigger: { ...exit } })
+      }
 
       // Las líneas flotan a distinta profundidad con el puntero (o el dedo).
       if (showHover === 'off') return
@@ -125,6 +133,25 @@ export default function HeroKinetic({
             {lineThree}
           </span>
         </h1>
+
+        {showStamp !== 'off' && (
+          <div
+            data-hero-stamp-wrap
+            aria-hidden="true"
+            className="pointer-events-none absolute right-5 bottom-20 size-28 md:right-10 md:bottom-24 md:size-40"
+          >
+            <svg data-hero-stamp viewBox="0 0 200 200" className="size-full">
+              <defs>
+                <path id="chapters-stamp-path" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
+              </defs>
+              {/* el texto ocupa justo la vuelta (textLength = 2π·78): cualquier largo cierra el círculo */}
+              <text className="fill-current text-[15px] uppercase">
+                <textPath href="#chapters-stamp-path" textLength="486" lengthAdjust="spacing">{`${meta} · `}</textPath>
+              </text>
+              <circle cx="100" cy="100" r="5" className="fill-accent" />
+            </svg>
+          </div>
+        )}
 
         <div className="flex items-end justify-between border-t border-ink/15 pt-4">
           <p

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal } from '../../../lib/motion'
 import { pointerFx } from '../../../lib/interact'
@@ -18,11 +18,31 @@ export default function HeroTwin({
   fg,
   /** El titular que cruza la foto. */
   accent,
+  /** El saludo que va cambiando de idioma arriba (separados por coma). */
+  greeting = 'Hello, Hola, Bonjour, Olá, Ciao, Merhaba, Jambo, Salam, Hallo, Cześć, Habari, Sawubona',
+  greetingLabel = 'Say it in 19 languages',
   /** El párrafo y cada línea del titular flotan a distinta profundidad con el puntero. */
   showHover = 'on',
 }) {
   const root = useRef(null)
   const reduced = useReducedMotion()
+  const words = String(greeting)
+    .split(',')
+    .map((w) => w.trim())
+    .filter(Boolean)
+  const [word, setWord] = useState(0)
+
+  // el saludo cambia de idioma cada 1,4 s; cada palabra entra de abajo, letra por letra
+  useEffect(() => {
+    if (words.length < 2 || reduced) return undefined
+    const id = setInterval(() => setWord((w) => (w + 1) % words.length), 1400)
+    return () => clearInterval(id)
+  }, [words.length, reduced])
+  useEffect(() => {
+    if (reduced) return
+    const chars = root.current?.querySelectorAll('[data-greet] > span')
+    if (chars?.length) gsap.fromTo(chars, { yPercent: 110 }, { yPercent: 0, duration: 0.55, stagger: 0.03, ease: 'power3.out' })
+  }, [word, reduced])
 
   useGSAP(
     () => {
@@ -68,6 +88,23 @@ export default function HeroTwin({
         color: fg || '#0a0a0a',
       }}
     >
+      {words.length > 0 && (
+        <div className="absolute inset-x-0 top-24 flex flex-col items-center gap-2 md:top-28">
+          <p className="text-[11px] tracking-[0.28em] uppercase opacity-55">{greetingLabel}</p>
+          <p
+            data-greet
+            aria-live="off"
+            className="flex overflow-hidden pb-[0.08em] font-anton text-[clamp(2rem,5vw,3.4rem)] leading-[1.2] tracking-[-0.01em] text-(color:--ut-accent) uppercase"
+          >
+            {[...(words[word] || '')].map((c, i) => (
+              <span key={`${word}-${i}`} className="inline-block whitespace-pre">
+                {c}
+              </span>
+            ))}
+          </p>
+        </div>
+      )}
+
       <div className="relative mx-auto w-full max-w-5xl text-center calm:flex calm:flex-col-reverse calm:items-center calm:gap-8">
         <p
           data-twin-body

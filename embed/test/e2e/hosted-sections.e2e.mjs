@@ -86,6 +86,14 @@ const CASES = {
     },
     marker: 'MKTYPA',
   },
+  'monolith/AssemblyStack': {
+    props: { label: 'MKASSE', title: 'MKASSE', bg: '#0c0c0c', fg: '#e8e8e8', layers: [{ name: 'MKASSE', spec: 'x' }] },
+    marker: 'MKASSE',
+  },
+  'monolith/LoadNumbers': {
+    props: { label: 'MKLOAD', title: 'MKLOAD', bg: '#0c0c0c', fg: '#e8e8e8', stats: [{ value: '12', label: 'MKLOAD' }] },
+    marker: 'MKLOAD',
+  },
   'monolith/ProcessSteps': {
     props: {
       label: 'MKPROC',
@@ -430,6 +438,10 @@ const CASES = {
   'chapters/QuoteBreak': {
     props: { chapterLabel: 'MKQBCH', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKQBCH',
+  },
+  'unity/MatchBoard': {
+    props: { title: 'MKMBUN', bg: '#141414', fg: '#f0f0f0', rows: [{ time: '10:00', home: 'MKMBUN', away: 'b', pitch: 'c' }] },
+    marker: 'MKMBUN',
   },
   'nocturne/HeroCinematic': {
     props: { titleTop: 'MKHCNO', bg: '#141414', fg: '#f0f0f0' },

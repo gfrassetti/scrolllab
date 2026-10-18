@@ -61,6 +61,11 @@ export const ASSET_URL_KEYS = new Set([
   'imgMid',
   'imgFront',
   'nextImg',
+  // NOCTURNE HeroCinematic: las capas de la toma (además de `img`, el fondo).
+  'leftImg',
+  'rightImg',
+  'streetImg',
+  'figureImg',
   'logoSrc',
   'orbSrc',
   'cardImage',

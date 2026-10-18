@@ -18,7 +18,7 @@ const defaultLinks = [
  * CTA word and a single mono link strip.
  */
 export default function FooterBrutal({
-  ctaWord = 'COMMISSION',
+  ctaWord = 'MONOLITH',
   email = 'studio@monolithworks.com',
   ctaHref,
   links = defaultLinks,

@@ -24,6 +24,8 @@ export const UNITY_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color del titular que cruza la foto', type: 'color' },
     toggle('showHover', 'El párrafo y el titular flotan con el puntero'),
+    { key: 'greeting', label: 'Saludo que cambia de idioma (separados por coma)', type: 'textarea' },
+    { key: 'greetingLabel', label: 'Rótulo del saludo', type: 'text' },
   ],
   'unity/MosaicSlider': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
@@ -61,6 +63,28 @@ export const UNITY_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     toggle('showHover', 'Las barras se encienden cerca del puntero'),
+  ],
+  'unity/MatchBoard': [
+    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'note', label: 'Nota', type: 'text' },
+    { key: 'vsLabel', label: 'Entre los clubes (VS)', type: 'text' },
+    {
+      key: 'rows',
+      label: 'Partidos',
+      type: 'list',
+      max: 8,
+      item: [
+        { key: 'time', label: 'Hora', type: 'text' },
+        { key: 'home', label: 'Local', type: 'text' },
+        { key: 'away', label: 'Visitante', type: 'text' },
+        { key: 'pitch', label: 'Cancha', type: 'text' },
+      ],
+    },
+    { key: 'bg', label: 'Color de fondo', type: 'color' },
+    { key: 'fg', label: 'Color de texto', type: 'color' },
+    { key: 'cardBg', label: 'Color de las fichas', type: 'color' },
+    { key: 'accent', label: 'Color de la hora', type: 'color' },
   ],
   'unity/LanguageBlock': [
     { key: 'eyebrow', label: 'Eyebrow', type: 'text' },

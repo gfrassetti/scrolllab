@@ -1,5 +1,7 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import ScrollRail from '../components/ScrollRail'
+import BallCursor from '../components/sections/unity/BallCursor'
+import MatchBoard from '../components/sections/unity/MatchBoard'
 import NavUnity from '../components/sections/unity/NavUnity'
 import HeroTwin from '../components/sections/unity/HeroTwin'
 import MosaicSlider from '../components/sections/unity/MosaicSlider'
@@ -32,11 +34,13 @@ export default function UnityPage() {
       <div id="top" className="tpl-world bg-[#e7e4dc] text-[#0a0a0a] selection:bg-unity-gold selection:text-unity-cream">
         <ScrollRail trackClassName="bg-[#0a0a0a]/10" fillClassName="bg-unity-gold" />
         <NavUnity />
+        <BallCursor />
 
         <main>
           <HeroTwin />
           <MosaicSlider />
           <UniversalLang />
+          <MatchBoard />
           <LanguageBlock
             eyebrow="JOY"
             line1="SCORE"

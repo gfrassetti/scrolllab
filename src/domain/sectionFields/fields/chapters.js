@@ -15,6 +15,7 @@ export const CHAPTERS_FIELDS = {
     { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
     { key: 'fg', label: 'Menú móvil — color de texto', type: 'color' },
     { key: 'barColor', label: 'Barra — color (se invierte sobre lo que tenga abajo)', type: 'color' },
+    { key: 'contentsTitle', label: 'Índice — rótulo de arriba', type: 'text' },
   ],
   'chapters/HeroKinetic': [
     { key: 'lineOne', label: 'Linea 1', type: 'text' },
@@ -27,6 +28,7 @@ export const CHAPTERS_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
     toggle('showHover', 'Las líneas se mueven con el puntero'),
+    toggle('showStamp', 'Sello redondo que gira (usa el texto de «Meta»)'),
   ],
   'chapters/ManifestoReveal': [
     CHAPTER_LABEL,

@@ -1,5 +1,5 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
-import ScrollRail from '../components/ScrollRail'
+import ChapterRail from '../components/sections/chapters/ChapterRail'
 import NavMinimal from '../components/sections/chapters/NavMinimal'
 import HeroKinetic from '../components/sections/chapters/HeroKinetic'
 import VelocityMarquee from '../components/sections/chapters/VelocityMarquee'
@@ -21,7 +21,7 @@ export default function ChaptersPage() {
   return (
     <SmoothScrollProvider>
       <div id="top" className="tpl-world bg-bone text-ink">
-        <ScrollRail trackClassName="bg-ink/10" fillClassName="bg-accent" />
+        <ChapterRail />
         <NavMinimal />
 
         <main>

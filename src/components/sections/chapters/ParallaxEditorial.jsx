@@ -114,7 +114,8 @@ export default function ParallaxEditorial({
         className={`pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-[24vw] leading-none font-medium tracking-[-0.02em] text-transparent uppercase ${
           showGhost === 'off' ? 'hidden' : ''
         }`}
-        style={{ WebkitTextStroke: '1px color-mix(in srgb, currentColor 18%, transparent)' }}
+        // el contorno sigue al color del texto (currentColor ahí sería transparente: text-transparent)
+        style={{ WebkitTextStroke: `1px color-mix(in srgb, ${fg || 'var(--color-ink)'} 18%, transparent)` }}
       >
         {ghostWord}
       </span>

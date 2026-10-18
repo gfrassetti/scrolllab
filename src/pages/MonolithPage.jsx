@@ -6,6 +6,8 @@ import SkewScroller from '../components/sections/monolith/SkewScroller'
 import SpecSheet from '../components/sections/monolith/SpecSheet'
 import ExhibitGrid from '../components/sections/monolith/ExhibitGrid'
 import TypeAccordion from '../components/sections/monolith/TypeAccordion'
+import AssemblyStack from '../components/sections/monolith/AssemblyStack'
+import LoadNumbers from '../components/sections/monolith/LoadNumbers'
 import ProcessSteps from '../components/sections/monolith/ProcessSteps'
 import FooterBrutal from '../components/sections/monolith/FooterBrutal'
 import ContactForm from '../components/sections/contact/ContactForm'
@@ -24,11 +26,13 @@ export default function MonolithPage() {
 
         <main>
           <HeroThree shape="sphere" />
-          <SkewScroller unit="01" />
-          <SpecSheet unit="02" />
-          <ExhibitGrid unit="03" />
-          <TypeAccordion unit="04" />
-          <ProcessSteps unit="05" />
+          <SkewScroller unit="01" total="07" />
+          <SpecSheet unit="02" total="07" />
+          <ExhibitGrid unit="03" total="07" />
+          <AssemblyStack unit="04" total="07" />
+          <TypeAccordion unit="05" total="07" />
+          <LoadNumbers unit="06" total="07" />
+          <ProcessSteps unit="07" total="07" />
           <ContactForm
             theme="monolith"
             eyebrow="Commissions"

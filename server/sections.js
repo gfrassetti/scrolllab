@@ -54,6 +54,8 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'atelier/KeyFacts',
   'monolith/TypeAccordion',
   'monolith/ProcessSteps',
+  'monolith/AssemblyStack',
+  'monolith/LoadNumbers',
   // Fase D — segunda tanda. Ribbons continuos (loop `repeat:-1` sin pin; el
   // boost por velocidad de scroll no dispara si el host no scrollea, pero el
   // loop de fondo sigue andando — no rompe) + más bloques `once`.
@@ -125,6 +127,7 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   'unity/HeroTwin',
   'unity/MosaicSlider',
   'unity/UniversalLang',
+  'unity/MatchBoard',
   'unity/LanguageBlock',
   'unity/StageLines',
   'unity/FooterTrophy',

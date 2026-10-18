@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { ScrollTrigger } from '../../../lib/gsap'
+import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { prefersReducedMotion } from '../../../lib/motion'
 import { accA, accB, accC, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 import { themeVars } from '../../../lib/themeVars'
@@ -41,6 +42,9 @@ export default function TypeAccordion({
   accent,
   /** Las fotos de los cajones. */
   showImages = 'on',
+  /** El rótulo de las filas cerradas y el de la abierta (dicen que se pueden abrir). */
+  openLabel = 'Open',
+  closeLabel = 'Close',
 }) {
   const root = useRef(null)
   const [open, setOpen] = useState(0)
@@ -49,6 +53,38 @@ export default function TypeAccordion({
     ? items.map((row, i) => ({ ...row, img: row.img || defaultItems[i]?.img }))
     : defaultItems
   const rows = showImages === 'off' ? given.map((row) => ({ ...row, img: null })) : given
+
+  // Las filas cerradas «respiran» (el + crece y vuelve, de a una) para decir que
+  // se abren; la abierta queda quieta. Las líneas se trazan al entrar.
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return
+      const plus = gsap.utils.toArray('[data-acc-plus="closed"]', root.current)
+      const pulse = gsap.timeline({ repeat: -1, repeatDelay: 0.8 })
+      plus.forEach((el, i) => {
+        pulse.to(el, { scale: 1.25, duration: 0.35, ease: 'power2.out' }, i * 0.45)
+        pulse.to(el, { scale: 1, duration: 0.5, ease: 'power2.inOut' }, i * 0.45 + 0.35)
+      })
+      return () => {
+        pulse.kill()
+        gsap.set(plus, { scale: 1 })
+      }
+    },
+    { scope: root, dependencies: [open, rows.length], revertOnUpdate: true },
+  )
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return
+      gsap.from('[data-acc-line]', {
+        scaleX: 0,
+        duration: 0.9,
+        stagger: 0.12,
+        ease: 'power3.inOut',
+        scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
+      })
+    },
+    { scope: root },
+  )
 
   const toggle = (index) => {
     setOpen((current) => (current === index ? -1 : index))
@@ -73,12 +109,13 @@ export default function TypeAccordion({
         {rows.map((item, i) => {
           const isOpen = open === i
           return (
-            <div key={i} className="border-t-2 border-carbon">
+            <div key={i} className="relative">
+              <span data-acc-line aria-hidden="true" className="absolute inset-x-0 top-0 h-0.5 origin-left bg-carbon" />
               <button
                 type="button"
                 onClick={() => toggle(i)}
                 aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 py-4 text-left"
+                className="group flex w-full items-center justify-between gap-4 py-4 text-left transition-colors duration-200 hover:text-klein"
               >
                 <span className="flex items-baseline gap-4 md:gap-8">
                   <span className="font-mono text-[11px] tracking-[0.1em] md:text-xs">
@@ -92,13 +129,19 @@ export default function TypeAccordion({
                     {item.title}
                   </span>
                 </span>
-                <span
-                  aria-hidden="true"
-                  className={`font-anton text-[7vw] leading-none transition-transform duration-500 md:text-[4vw] ${
-                    isOpen ? 'rotate-45' : ''
-                  }`}
-                >
-                  +
+                <span className="flex shrink-0 items-center gap-3 md:gap-5">
+                  <span className="hidden font-mono text-[11px] tracking-[0.1em] uppercase opacity-60 transition-opacity duration-200 group-hover:opacity-100 sm:inline md:text-xs">
+                    {isOpen ? closeLabel : openLabel}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    data-acc-plus={isOpen ? 'open' : 'closed'}
+                    className={`flex size-11 items-center justify-center border-2 border-current font-anton text-3xl leading-none transition-[transform,background-color,color] duration-500 md:size-16 md:text-5xl ${
+                      isOpen ? 'bg-carbon text-concrete' : 'group-hover:bg-klein group-hover:text-concrete'
+                    }`}
+                  >
+                    <span className={`block transition-transform duration-500 ${isOpen ? 'rotate-45' : ''}`}>+</span>
+                  </span>
                 </span>
               </button>
 
