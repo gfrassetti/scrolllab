@@ -141,7 +141,10 @@ export default function ServicesStone({
         const wide = camera.aspect > 1.15
         // en pantalla ancha la lista queda a la izquierda y la banca a la derecha
         const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
-        piece.place(wide ? halfW * 0.4 : 0, wide ? 0 : halfH * 0.34, wide ? 1.05 : 0.8)
+        // En calma, en pantallas chicas, el canvas va en el flujo arriba de la lista: la banca al centro.
+        const inFlow = getComputedStyle(canvas).position === 'relative'
+        if (inFlow) piece.place(0, 0, 0.8)
+        else piece.place(wide ? halfW * 0.4 : 0, wide ? 0 : halfH * 0.34, wide ? 1.05 : 0.8)
       }
       resize()
       window.addEventListener('resize', resize)
@@ -218,10 +221,12 @@ export default function ServicesStone({
         <canvas
           ref={canvasRef}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
+          className={`pointer-events-none z-[1] w-full ${
+            reducedMotion ? 'relative mt-16 h-[40svh] lg:absolute lg:inset-0 lg:mt-0 lg:h-full' : 'absolute inset-0 h-full'
+          }`}
         />
 
-        <div className="relative z-10 flex h-full flex-col px-5 pt-24 pb-8 md:px-10">
+        <div className={`relative z-10 flex h-full flex-col px-5 pb-8 md:px-10 ${reducedMotion ? 'pt-6 lg:pt-24' : 'pt-24'}`}>
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <p className="text-[11px] tracking-[0.25em] text-current/40 uppercase">
               {eyebrow}

@@ -68,7 +68,9 @@ export default function ProcessSteps({
       const section = root.current
       if (!section) return
       if (prefersReducedMotion()) {
+        // calma: el molde lleno y todos los pasos por igual (sin uno «activo»)
         section.style.setProperty('--p', '1')
+        setActive(-1)
         return calmReveal('[data-step]', { y: 20, stagger: 0.1 })
       }
 
@@ -141,7 +143,7 @@ export default function ProcessSteps({
                 {cureLabel}
               </p>
               <p className="absolute right-3 bottom-1 font-anton text-[clamp(3.2rem,7vw,7rem)] leading-none uppercase text-concrete mix-blend-difference md:right-4 md:bottom-3">
-                {pad(Math.min(active + 1, rows.length))}
+                {pad(active < 0 ? rows.length : Math.min(active + 1, rows.length))}
                 <span className="text-[0.4em]">/{pad(rows.length)}</span>
               </p>
             </div>
@@ -153,7 +155,7 @@ export default function ProcessSteps({
             <li
               key={i}
               data-step
-              data-active={active === i ? 'true' : 'false'}
+              data-active={active < 0 ? 'all' : active === i ? 'true' : 'false'}
               className="group border-t-2 border-carbon py-8 transition-opacity duration-500 ease-out last:border-b-2 data-[active=false]:opacity-35 md:min-h-[44svh] md:py-12"
             >
               <p className="font-mono text-[11px] uppercase tracking-[0.1em] md:text-xs">
