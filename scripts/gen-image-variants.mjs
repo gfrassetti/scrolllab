@@ -32,7 +32,7 @@ const MASTERS = path.join(REPO, 'design', 'masters')
 const SECTIONS = path.join(REPO, 'src', 'components', 'sections')
 
 /** Anchos intermedios; cada uno se genera solo si el original es ≥15 % más ancho. */
-const WIDTHS = [640, 1080]
+const WIDTHS = [640, 1080, 1920, 2560]
 const CUTOUT_WIDTHS = [320]
 const WEBP = { quality: 80, effort: 5, smartSubsample: true, alphaQuality: 90 }
 const SOURCE_EXT = /\.(png|jpe?g)$/i
@@ -70,7 +70,8 @@ async function processSku(sku, force) {
       if (force || isStale(src, dest)) {
         const img = sharp(src)
         if (out.width !== meta.width) img.resize({ width: out.width })
-        await img.webp(WEBP).toFile(dest)
+        // Las versiones grandes (pantalla completa) pesan: calidad más baja, no se nota a ese tamaño.
+        await img.webp(out.width >= 1920 ? { ...WEBP, quality: 68 } : WEBP).toFile(dest)
         written++
       }
     }

@@ -40,12 +40,16 @@ export default function HeroMeaning({
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [reduced, setReduced] = useState(false)
+  // Las fotos de la demo (pesadas) bajan de a una: primero la que se ve, después las demás.
+  const [firstReady, setFirstReady] = useState(false)
   const prev = useRef(0)
   const seconds = Math.min(15, Math.max(3, Number(interval) || 6))
   const auto = showAutoplay !== 'off' && !reduced && list.length > 1
 
   useEffect(() => {
     setReduced(prefersReducedMotion())
+    const t = setTimeout(() => setFirstReady(true), 3500)
+    return () => clearTimeout(t)
   }, [])
 
   // Pausa fuera de pantalla y con la pestaña oculta.
@@ -129,8 +133,10 @@ export default function HeroMeaning({
             className="absolute inset-0"
             style={{ visibility: i === 0 ? 'visible' : 'hidden', zIndex: i === 0 ? 2 : 0 }}
           >
-            <img
+            {(i === 0 || firstReady || !variants[slide.img]) && (
+              <img
               {...imgAttrs(slide.img, variants)}
+              onLoad={i === 0 ? () => setFirstReady(true) : undefined}
               sizes="(max-width: 767px) 125vh, 100vw"
               alt={slide.caption || ''}
               fetchPriority={i === 0 ? 'high' : 'low'}
@@ -138,6 +144,7 @@ export default function HeroMeaning({
               decoding="async"
               className="h-full w-full object-cover"
             />
+            )}
           </div>
         ))}
       </div>
