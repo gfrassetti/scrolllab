@@ -95,10 +95,6 @@ export default function SelectedWork({
     { scope: root },
   )
 
-  const hoverOpen = (i) => (e) => {
-    if (e.pointerType === 'mouse') setOpen(i)
-  }
-
   return (
     <section
       ref={root}
@@ -124,7 +120,7 @@ export default function SelectedWork({
         {/* Desktop: columnas que se abren de costado */}
         <div
           data-work-list
-          className="hidden h-[min(82svh,46rem)] min-h-[30rem] gap-2 transition-[grid-template-columns] duration-[800ms] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none md:grid"
+          className="hidden h-[min(68svh,42rem)] min-h-[28rem] gap-2 transition-[grid-template-columns] duration-[800ms] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none md:grid"
           style={{ gridTemplateColumns: cols }}
         >
           {items.map((p, i) => {
@@ -133,10 +129,15 @@ export default function SelectedWork({
               <div
                 key={`${p.title}-${i}`}
                 data-work-col
-                onPointerEnter={hoverOpen(i)}
-                className="relative min-w-0 overflow-clip"
-                style={cardTone(p.color || '#3d4a3a')}
+                className="group/col relative min-w-0 overflow-clip"
               >
+                {/* Fondo: la columna cerrada es un panel tenue; abierta, la foto (o el color si no hay) */}
+                <div
+                  className={`absolute inset-0 transition-[background-color] duration-500 ${
+                    on ? '' : 'bg-current/[0.07] group-hover/col:bg-current/[0.14]'
+                  }`}
+                  style={on ? cardTone(p.color || '#3d4a3a') : undefined}
+                />
                 {p.img && (
                   <img
                     {...imgAttrs(p.img, variants)}
@@ -144,8 +145,8 @@ export default function SelectedWork({
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    className={`absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      on ? 'scale-100 opacity-100' : 'scale-110 opacity-0'
+                    className={`absolute inset-0 h-full w-full object-cover transition-[opacity,transform,clip-path] duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      on ? 'scale-100 opacity-100 [clip-path:inset(0_0_0_0)]' : 'scale-[1.18] opacity-0 [clip-path:inset(100%_0_0_0)]'
                     }`}
                   />
                 )}
@@ -159,6 +160,7 @@ export default function SelectedWork({
                 <button
                   type="button"
                   onClick={() => setOpen(i)}
+                  onMouseDown={(e) => e.preventDefault()}
                   aria-expanded={on}
                   aria-label={p.title}
                   inert={on}
@@ -194,7 +196,11 @@ export default function SelectedWork({
                       {String(i + 1).padStart(2, '0')}
                     </span>
                   </div>
-                  <div className="min-w-[26rem] max-w-[34rem]">
+                  <div
+                    className={`min-w-[26rem] max-w-[34rem] transition-[transform,opacity] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      on ? 'translate-y-0 opacity-100 delay-[450ms]' : 'translate-y-8 opacity-0'
+                    }`}
+                  >
                     <h3 className="text-[clamp(2rem,3.6vw,3.6rem)] leading-[0.98] font-medium tracking-[-0.045em]">
                       {p.title}
                     </h3>
