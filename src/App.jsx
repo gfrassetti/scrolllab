@@ -34,8 +34,8 @@ const NeonPage = lazy(() => import('./pages/NeonPage'))
 // cāpsula33: demo privado del Estudio (sitio a medida). Solo en local: en producción
 // el import no existe, así que ni el código ni las fotos del local viajan al build.
 const Capsula33Page = import.meta.env.DEV ? lazy(() => import('./studio/capsula33/Capsula33Page')) : null
-// VESPER (motor Kanvas, «todo en un canvas»): la vitrina del Estudio, pública en /estudio/vesper. No se
-// vende ni entra al builder ni a LAB (docs/kanvas.md).
+// VESPER (motor Kanvas, «todo en un canvas»): pieza propia del Estudio en /estudio/vesper, sin link desde el
+// sitio y fuera de los buscadores: se muestra a mano. No se vende ni entra al builder ni a LAB (docs/kanvas.md).
 const KanvasPage = lazy(() => import('./proto/kanvas/KanvasPage'))
 const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const KinPage = lazy(() => import('./pages/KinPage'))

@@ -1,6 +1,6 @@
 # Kanvas — «todo en un canvas» (estudio de kprverse.com)
 
-**VESPER**, la vitrina del Estudio, en `/estudio/vesper` (pública desde 2026-10-18; `/templates/vesper` y `/proto/kanvas` llevan ahí). No se vende ni entra al builder ni a LAB: se muestra, y quien quiera algo así lo pide a medida. Se llega desde la zona Estudio del home. **Kanvas** es el nombre del motor y de la carpeta (`src/proto/kanvas/`).
+**VESPER**, pieza propia del Estudio, en `/estudio/vesper` (`/templates/vesper` y `/proto/kanvas` llevan ahí). No se vende ni entra al builder ni a LAB. **No está linkeada en el sitio y está fuera de los buscadores** (`noindex` en `site.js` y en `vercel.json`): no es un trabajo para un cliente, así que no se presenta como tal; se muestra a mano, en una conversación (dueño, 2026-10-19). **Kanvas** es el nombre del motor y de la carpeta (`src/proto/kanvas/`).
 Recrea la técnica de [kprverse.com](https://kprverse.com) con identidad propia: **VESPER**, un atlas
 ilustrado (nombre provisorio). Hubo dos intentos anteriores que fallaron; `docs/kprverse-handoff.md` se
 descartó. Este documento es la referencia.
