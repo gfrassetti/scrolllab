@@ -4,6 +4,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
 import { getLenis } from '../../hooks/useLenis'
 import { createKanvas, lerp, clamp01 } from './engine'
+import { createFrameBudget } from '../../lib/motion'
 import { createAudio } from './audio'
 import { createRidge, createTopo } from './ridge'
 import { createRelic } from './relic'
@@ -330,6 +331,21 @@ function Kanvas() {
     lenis?.stop()
     window.scrollTo(0, 0)
     const k = createKanvas(canvasRef.current, { clear: CREAM })
+    // Si el equipo no llega a ~30 cuadros, la resolución baja de a escalones (createFrameBudget). Se mide
+    // al entrar y otra vez en las secciones pesadas (el Faro, los juramentos, el mundo), que dibujan la
+    // escena varias veces por cuadro. En un equipo rápido no cambia nada.
+    const newBudget = () =>
+      createFrameBudget({
+        dpr: k.renderer.getPixelRatio(),
+        min: 0.6,
+        apply: (d) => {
+          k.renderer.setPixelRatio(d)
+          window.dispatchEvent(new Event('resize')) // el motor y los render targets se acomodan
+        },
+      })
+    let budget = newBudget()
+    const budgetFor = new Set()
+    let frameNo = 0
     const { THREE } = k
     const r = R.current
     let stageNow = 'load'
@@ -741,16 +757,17 @@ function Kanvas() {
       el.style.visibility = v > 0.001 ? 'visible' : 'hidden'
       el.style.transform = `translate3d(0, ${y}px, 0)`
     }
-    const fitRt = (tgt, w, h) => {
-      const dpr = k.renderer.getPixelRatio()
+    /** `scale` < 1: el render target a menos resolución (fondos oscurecidos o detrás de otras capas). */
+    const fitRt = (tgt, w, h, scale = 1) => {
+      const dpr = k.renderer.getPixelRatio() * scale
       const tw = Math.max(16, Math.round((w * dpr) / 8) * 8)
       const th = Math.max(16, Math.round((h * dpr) / 8) * 8)
       if (tgt.width === tw && tgt.height === th) return false
       tgt.setSize(tw, th)
       return true
     }
-    const renderTo = (scene, cam, tgt, w, h) => {
-      const resized = fitRt(tgt, w, h)
+    const renderTo = (scene, cam, tgt, w, h, scale = 1) => {
+      const resized = fitRt(tgt, w, h, scale)
       cam.aspect = w / h
       cam.updateProjectionMatrix()
       k.renderer.setRenderTarget(tgt)
@@ -924,6 +941,8 @@ function Kanvas() {
         endNow.word = ''
       },
       update: ({ dt, now, W, H, scrollY, pointer }) => {
+        frameNo += 1
+        budget.tick(dt * 1000)
         const p = progress(scrollY)
         // pasado el recorrido, la página (canvas, secciones y HUD) sube como una cortina y descubre la
         // marca del footer, que está fija abajo, detrás de todo. No sube 1:1 con el scroll: arranca más
@@ -1223,10 +1242,11 @@ function Kanvas() {
             motePos[i * 3 + 2] = 0.2 + Math.sin(a) * m2.r
           })
           motesGeo.attributes.position.needsUpdate = true
-          neutral(() => renderTo(hero, keepCam, keepRt, W, H))
-
           const bgV = easeOut(seg(bk, B.bgIn))
           const ex = easeInOut(seg(bk, B.expand))
+          // detrás de las cartas el mundo va oscurecido y agrandado: a 60 % de resolución no se nota; cuando la
+          // carta del centro se abre a pantalla completa, vuelve a la resolución entera
+          neutral(() => renderTo(hero, keepCam, keepRt, W, H, ex > 0.02 ? 1 : 0.6))
           beaconBg.rect(0, 0, W, H)
           beaconBg.u.uMapSize.value.set(keepRt.width, keepRt.height)
           beaconBg.u.uTint.value.setStyle('#2b2318', THREE.LinearSRGBColorSpace)
@@ -1304,7 +1324,7 @@ function Kanvas() {
           const ss = r.scanSlot?.getBoundingClientRect()
           const scanV = hv * (1 - hold.v) * (1 - clamp01(bo * 4))
           if (ss && scanV > 0.01) {
-            renderScan(scanRt, ss.width, ss.height, now)
+            if (frameNo % 2 === 0 || scanRt.width < 32) renderScan(scanRt, ss.width, ss.height, now) // un cuadro sí, uno no
             scanPlane.rect(ss.left, ss.top, ss.width, ss.height)
             scanPlane.u.uMapSize.value.set(scanRt.width, scanRt.height)
             scanPlane.u.uAlpha.value = scanV
@@ -1329,7 +1349,9 @@ function Kanvas() {
           beamMat.uniforms.uT.value = now / 1000
           oathCam.position.x = -12 + Math.sin(now * 0.00009) * 0.6
           oathCam.lookAt(0.3, 1.6, 0)
-          neutral(() => renderTo(hero, oathCam, oathWorldRt, W, H))
+          // la isla de fondo casi no se mueve (y va detrás de la bruma y los personajes): a 70 % de resolución
+          // y un cuadro de cada tres
+          if (frameNo % 3 === 0 || oathWorldRt.width < 32) neutral(() => renderTo(hero, oathCam, oathWorldRt, W, H, 0.7))
           beam.visible = motes.visible = false
           oaths.update({ now, dt, aspect: W / H, pointer, push: seg(p, T.oaths) })
           renderTo(oaths.scene, oaths.camera, oathRt, W, H)
@@ -1417,7 +1439,7 @@ function Kanvas() {
             } else {
               // un primer plano del navegante de los juramentos (se dibuja una vez y se acerca despacio)
               if (endNow.face) {
-                neutral(() => renderTo(hero, oathCam, oathWorldRt, W, H))
+                neutral(() => renderTo(hero, oathCam, oathWorldRt, W, H, 0.7))
                 // con el formato de la carta (apaisado también en el teléfono): el encuadre es el mismo
                 const fa = bx.width / bx.height
                 oaths.update({ now, dt: 1, aspect: fa, pointer: { x: 0, y: 0 }, push: 1 })
@@ -1497,6 +1519,11 @@ function Kanvas() {
         if (sc !== sceneNow) {
           sceneNow = sc
           audio.scene(sc)
+          // la primera vez en cada sección pesada se vuelve a medir (desde la resolución que haya)
+          if ((sc === 'beacon' || sc === 'oaths' || sc === 'world') && !budgetFor.has(sc)) {
+            budgetFor.add(sc)
+            budget = newBudget()
+          }
         }
 
         // 4) la hoja rayada detrás de las láminas (solo en pantallas anchas: el teléfono va con una)
