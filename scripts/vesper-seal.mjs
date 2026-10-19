@@ -5,8 +5,9 @@
  *   node scripts/vesper-seal.mjs
  *
  * Lee los originales de public/proto/kanvas/ (gitignored: nunca entran al repo ni al build) y escribe:
- *   · server/showcase/vesper/<id>.bin — cada archivo cifrado (AES-256-GCM: iv de 12 bytes, el cifrado y
- *     la etiqueta). Los sirve la API con un link que vence (server/services/showcase/vesperAssets.js).
+ *   · public/proto/kanvas/s/<id>.bin — cada archivo cifrado (AES-256-GCM: iv de 12 bytes, el cifrado y
+ *     la etiqueta). Archivos estáticos: los sirve la CDN como cualquier otro (rápido y con caché); sin la
+ *     clave no sirven de nada. El id sale del contenido, así se pueden cachear para siempre.
  *   · src/proto/kanvas/seal.js — la clave y el mapa nombre → id que usa la página para descifrar en
  *     memoria (src/proto/kanvas/sealed.js). En producción ese código sale ofuscado (vite.config.js).
  *
@@ -25,7 +26,7 @@ import sharp from 'sharp'
 
 const ROOT = process.cwd()
 const SRC = path.join(ROOT, 'public/proto/kanvas')
-const OUT = path.join(ROOT, 'server/showcase/vesper')
+const OUT = path.join(ROOT, 'public/proto/kanvas/s')
 const SEAL_FILE = path.join(ROOT, 'src/proto/kanvas/seal.js')
 const COPYRIGHT = '© 2026 ScrollLab Estudio — VESPER. All rights reserved. scrolllab.com.ar'
 
@@ -95,8 +96,8 @@ for (const name of ASSETS) {
   const file = path.join(SRC, name)
   if (!fs.existsSync(file)) throw new Error(`falta el original: ${path.relative(ROOT, file)}`)
   const signed = name.endsWith('.glb') ? signGlb(fs.readFileSync(file)) : await signImage(file)
-  const id = crypto.createHash('sha256').update(key).update(name).digest('hex').slice(0, 20)
   const out = seal(key, signed)
+  const id = crypto.createHash('sha256').update(out).digest('hex').slice(0, 20)
   fs.writeFileSync(path.join(OUT, `${id}.bin`), out)
   map[name] = id
   bytes += out.length

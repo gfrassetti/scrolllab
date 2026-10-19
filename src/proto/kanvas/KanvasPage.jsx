@@ -439,9 +439,12 @@ function Kanvas() {
     }
     // La isla flotante dibujada: el centro del archipiélago del mundo y la escena que filman las secciones.
     const draco = new DRACOLoader().setDecoderPath('/proto/kanvas/draco/')
-    // Los modelos y las imágenes viajan sellados (sealed.js): se bajan con un pase y se descifran en memoria.
+    // Los modelos y las imágenes viajan sellados (sealed.js) y se descifran en memoria. La carga espera solo
+    // lo del hero (`manager`); lo de las secciones de más abajo baja de fondo (`later`) mientras se mira.
+    const later = new THREE.LoadingManager()
     const gltf = sealedGltfLoader(new GLTFLoader().setDRACOLoader(draco), manager)
-    gltf.load('/proto/kanvas/isle-drawn.glb', (g) => {
+    const gltfLater = sealedGltfLoader(new GLTFLoader().setDRACOLoader(draco), later)
+    gltfLater.load('/proto/kanvas/isle-drawn.glb', (g) => {
       ink.apply(g.scene)
       world.setCenter(g.scene)
       hero.add(g.scene)
@@ -528,7 +531,7 @@ function Kanvas() {
       ridge.setSize(W, H)
     }
     fitRidge()
-    const relic = createRelic(THREE, { loader: sealedGltfLoader(new GLTFLoader(), manager), ink })
+    const relic = createRelic(THREE, { loader: sealedGltfLoader(new GLTFLoader(), later), ink })
     const relicRt = target()
 
     // --- los guardianes y el Faro ---------------------------------------------------------------------
@@ -540,7 +543,7 @@ function Kanvas() {
     // cuando llegan; mientras tanto, el busto en silueta
     const portraits = []
     KEEPERS.forEach((_, i) => {
-      sealedImage(`/proto/kanvas/keepers/k${String(i).padStart(2, '0')}.webp`, manager)
+      sealedImage(`/proto/kanvas/keepers/k${String(i).padStart(2, '0')}.webp`, later)
         .then((im) => {
           portraits[i] = im
           if (fontsDone) paintKeeper(i)
@@ -618,7 +621,7 @@ function Kanvas() {
     const filmCams = FILM_VIEWS.map((v) => new THREE.PerspectiveCamera(v.fov, 1, 0.1, 100))
     const filmNow = { key: '' }
     // los juramentos: la isla de fondo (otra cámara) y la escena en capas
-    const oaths = createOaths(THREE, { loader: sealedGltfLoader(new GLTFLoader(), manager), ink })
+    const oaths = createOaths(THREE, { loader: sealedGltfLoader(new GLTFLoader(), later), ink })
     const oathWorldRt = target()
     const oathRt = target()
     const oathCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100)

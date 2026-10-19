@@ -1,11 +1,14 @@
-import { api } from '../../lib/api'
 import { SEAL } from './seal'
 
 /**
- * Las piezas de VESPER (modelos e imágenes) viajan cifradas (scripts/vesper-seal.mjs). Acá se pide un
- * pase a la API (vence a los 15 min), se baja cada una y se descifra en memoria con WebCrypto: en la
- * pestaña de red no hay ningún .glb ni .webp para guardar. Las imágenes pasan por una URL `blob:` que se
- * revoca apenas cargan.
+ * Las piezas de VESPER (modelos e imágenes) viajan cifradas (scripts/vesper-seal.mjs) como archivos
+ * estáticos (`/proto/kanvas/s/<id>.bin`, los sirve la CDN con caché). Acá se bajan y se descifran en
+ * memoria con WebCrypto: en la pestaña de red no hay ningún .glb ni .webp para guardar, y un .bin
+ * copiado no sirve sin la clave (que va en el código ofuscado). Las imágenes pasan por una URL `blob:`
+ * que se revoca apenas cargan.
+ *
+ * (Antes las servía la API con un pase que vencía: en producción pasaban por Vercel → Railway sin caché
+ * y la carga tardaba decenas de segundos. 2026-10-18.)
  *
  * Los nombres son los de siempre (`/proto/kanvas/hero/field.glb`): `sealedGltfLoader` se comporta como un
  * GLTFLoader para relic.js y oaths.js, que no se enteran.
@@ -17,23 +20,7 @@ const nameOf = (url) => (url.startsWith(PREFIX) ? url.slice(PREFIX.length) : url
 const bytes = (hex) => Uint8Array.from(hex.match(/../g), (b) => parseInt(b, 16))
 
 let keyP = null
-let passP = null
-let passUntil = 0
 const key = () => (keyP ||= crypto.subtle.importKey('raw', bytes(SEAL.k), 'AES-GCM', false, ['decrypt']))
-const pass = () => {
-  // uno por visita (todas las piezas lo comparten); se renueva un minuto antes de vencer
-  if (!passP || Date.now() > passUntil - 60_000) {
-    passUntil = Date.now() + 14 * 60_000 // mientras llega, el pedido en curso vale para todas
-    passP = fetch(`${api.base}/api/showcase/vesper/pass`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`pase ${r.status}`))))
-      .then((j) => {
-        passUntil = j.expiresAt
-        return j.pass
-      })
-    passP.catch(() => (passP = null))
-  }
-  return passP
-}
 
 const cache = new Map()
 /**
@@ -53,8 +40,7 @@ export function sealedBuffer(url) {
 async function fetchSealed(name) {
   const id = SEAL.m[name]
   if (!id) throw new Error(`pieza desconocida: ${name}`)
-  const [k, p] = await Promise.all([key(), pass()])
-  const r = await fetch(`${api.base}/api/showcase/vesper/a/${id}?p=${encodeURIComponent(p)}`)
+  const [k, r] = await Promise.all([key(), fetch(`/proto/kanvas/s/${id}.bin`)])
   if (!r.ok) throw new Error(`pieza ${r.status}`)
   const b = new Uint8Array(await r.arrayBuffer())
   return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.subarray(0, 12) }, k, b.subarray(12))

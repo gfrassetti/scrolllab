@@ -23,12 +23,12 @@ const skipLocalOnlyAssets = {
       recursive: true,
       force: true,
     })
-    // VESPER: los originales sin cifrar (si hay una copia local) no viajan; solo el decodificador Draco.
-    // Las piezas van selladas por la API (scripts/vesper-seal.mjs).
+    // VESPER: los originales sin cifrar (si hay una copia local) no viajan; solo el decodificador Draco y
+    // las piezas selladas (s/, scripts/vesper-seal.mjs).
     const kanvas = path.join(outDir, 'proto/kanvas')
     if (fs.existsSync(kanvas)) {
       for (const f of fs.readdirSync(kanvas)) {
-        if (f !== 'draco') fs.rmSync(`${kanvas}/${f}`, { recursive: true, force: true })
+        if (f !== 'draco' && f !== 's') fs.rmSync(`${kanvas}/${f}`, { recursive: true, force: true })
       }
     }
   },

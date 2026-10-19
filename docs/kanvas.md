@@ -419,14 +419,19 @@ navegador muestra siempre se puede sacar de la memoria con herramientas especial
 cueste mucho más que mirarlo:
 
 - **Piezas selladas.** Los modelos y las imágenes no están en el repo ni en el build sin cifrar
-  (`public/proto/kanvas/*` está en `.gitignore`, salvo `draco/`; el build borra lo que haya en
-  `dist/proto/kanvas` salvo `draco/`). `node scripts/vesper-seal.mjs` los cifra (AES-256-GCM) en
-  `server/showcase/vesper/<id>.bin` y escribe `src/proto/kanvas/seal.js` (clave y mapa). **Después de
-  cambiar un modelo o una imagen hay que volver a correrlo** y commitear los `.bin` nuevos.
-- **Links que vencen.** La página pide un pase (`GET /api/showcase/vesper/pass`, 15 min) y baja cada pieza
-  con él (`GET /api/showcase/vesper/a/:id?p=…`); solo desde el propio sitio (`Sec-Fetch-Site`, o el
-  Origin/Referer contra los orígenes permitidos). Un link copiado o pegado en otro sitio da 403
-  (`server/services/showcase/vesperAssets.js`, pruebas en `server/__tests__/showcaseAssets.test.js`).
+  (`public/proto/kanvas/*` está en `.gitignore`, salvo `draco/` y `s/`; el build borra lo demás de
+  `dist/proto/kanvas`). `node scripts/vesper-seal.mjs` los cifra (AES-256-GCM) en
+  `public/proto/kanvas/s/<id>.bin` (el id sale del contenido) y escribe `src/proto/kanvas/seal.js` (clave y
+  mapa). **Después de cambiar un modelo o una imagen hay que volver a correrlo** y commitear los `.bin`
+  nuevos. Los sirve la CDN de Vercel con caché para siempre (`vercel.json`); un `.bin` suelto no sirve sin
+  la clave. En `npm run dev`, Vite lista `public/` al arrancar: si el script generó archivos nuevos,
+  reiniciar el servidor (si no, devuelve el HTML y el descifrado falla con `OperationError`).
+- **No por la API (2026-10-18).** Primero se sirvieron por la API con un pase que vencía: en producción
+  pasaban por Vercel → Railway sin caché y la carga quedaba trabada decenas de segundos en «Inking the
+  atlas 033%» (3,5 MB tardaban 9,5 s). Se volvió a archivos estáticos.
+- **Carga en dos tandas.** La carga espera solo lo del hero (escenario, personajes, láminas: ~7,5 MB, ~5 s
+  a 25 Mbit/s); la isla, la reliquia, los juramentos y los retratos bajan de fondo (`later` en
+  `KanvasPage.jsx`).
 - **En memoria.** `src/proto/kanvas/sealed.js` descifra con WebCrypto: en la pestaña de red no hay ningún
   `.glb` ni `.webp`. Las imágenes pasan por una URL `blob:` que se revoca apenas cargan. WebCrypto pide
   contexto seguro: anda en localhost y en https, **no** por http con la IP de la red local (para probar en
@@ -437,8 +442,6 @@ cueste mucho más que mirarlo:
 - **Firma.** Cada GLB lleva el copyright en `asset.copyright` y cada imagen en sus metadatos, más una marca
   casi invisible en una esquina; el SEO de la ruta pide `noai, noimageai`.
 
-En desarrollo hace falta la API corriendo (`npm run dev`, o `dev:web` + `dev:api`): sin ella la página no
-tiene de dónde bajar las piezas.
 
 ## 3. Recetas
 
