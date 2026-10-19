@@ -88,8 +88,13 @@ export default function MatchBoard({
             busy = false
           })
         }
+        // el mouse la dispara al pasar; el dedo, al tocar la fila (pointerenter no llega con scroll táctil)
         row.addEventListener('pointerenter', again)
-        return () => row.removeEventListener('pointerenter', again)
+        row.addEventListener('pointerdown', again)
+        return () => {
+          row.removeEventListener('pointerenter', again)
+          row.removeEventListener('pointerdown', again)
+        }
       })
       return () => {
         st.scrollTrigger?.kill()
