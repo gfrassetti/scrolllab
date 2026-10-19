@@ -60,7 +60,7 @@ const CASES = {
     marker: 'MKVELO',
   },
   'atelier/FooterAtelier': {
-    props: { line: 'MKATEL', eyebrow: 'e', brand: 'B', legal: 'x', bg: '#0b0c10', fg: '#ffffff' },
+    props: { blurb: 'MKATEL', bg: '#0b0c10', fg: '#ffffff' },
     marker: 'MKATEL',
   },
   'atrium/FooterAtrium': {
@@ -169,7 +169,7 @@ const CASES = {
     marker: 'MKBUBL',
   },
   'atelier/AboutClarity': {
-    props: { eyebrow: 'x', title: 'MKABTC', body: 'cuerpo', bg: '#0b0c10', fg: '#ffffff' },
+    props: { eyebrow: 'x', lead: 'MKABTC', body: 'cuerpo', bg: '#0b0c10', fg: '#ffffff' },
     marker: 'MKABTC',
   },
   'fizz/CanCarousel': {
@@ -469,7 +469,7 @@ const CASES = {
     marker: 'MKTMVE',
   },
   'atelier/VisionShutter': {
-    props: { line1: 'MKVSAT', bg: '#141414', fg: '#f0f0f0' },
+    props: { line: 'MKVSAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKVSAT',
   },
   'atelier/SelectedWork': {
