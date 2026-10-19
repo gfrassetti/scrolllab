@@ -55,7 +55,8 @@ export default function FooterAtelier({
 }) {
   const links = Array.isArray(index) && index.length ? index : defaultIndex
   const networks = Array.isArray(social) ? social : defaultSocial
-  const col = 'space-y-2 text-sm'
+  const col = 'text-sm'
+  const hit = 'tpl-link relative inline-flex min-h-11 min-w-11 items-center'
   const heading = 'mb-4 text-sm font-medium opacity-55'
   return (
     <footer
@@ -70,7 +71,7 @@ export default function FooterAtelier({
           <ul className={col}>
             {links.map((l) => (
               <li key={l.label}>
-                <a href={l.href} className="tpl-link tpl-hit relative">
+                <a href={l.href} className={hit}>
                   {l.label}
                 </a>
               </li>
@@ -81,12 +82,12 @@ export default function FooterAtelier({
           <h2 className={heading}>{legalTitle}</h2>
           <ul className={col}>
             <li>
-              <a href={privacyHref} className="tpl-link tpl-hit relative">
+              <a href={privacyHref} className={hit}>
                 {privacyLabel}
               </a>
             </li>
             <li>
-              <a href={termsHref} className="tpl-link tpl-hit relative">
+              <a href={termsHref} className={hit}>
                 {termsLabel}
               </a>
             </li>
@@ -98,7 +99,7 @@ export default function FooterAtelier({
             {[email, phone].map((line) => (
               <li key={line}>
                 {contactHref(line) ? (
-                  <a href={contactHref(line)} className="tpl-link tpl-hit relative">
+                  <a href={contactHref(line)} className={hit}>
                     {line}
                   </a>
                 ) : (
@@ -106,10 +107,10 @@ export default function FooterAtelier({
                 )}
               </li>
             ))}
-            <li className="opacity-70">{address}</li>
+            <li className="py-2 opacity-70">{address}</li>
             {networks.map((s) => (
               <li key={s.label}>
-                <a href={s.href} {...externalProps(s.href)} className="tpl-link tpl-hit relative">
+                <a href={s.href} {...externalProps(s.href)} className={hit}>
                   {s.label}
                 </a>
               </li>
@@ -126,7 +127,7 @@ export default function FooterAtelier({
       </p>
       <p className="mt-6 flex items-center justify-between border-t border-current/15 pt-4 text-xs opacity-60">
         <span>{year}</span>
-        <a href="#top" className="tpl-link tpl-hit relative">
+        <a href="#top" className={hit}>
           ↑
         </a>
       </p>
