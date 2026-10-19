@@ -48,7 +48,7 @@ const defaultProjects = [
   },
 ]
 
-const COLLAPSED = '5.25rem'
+const COLLAPSED = '4.5rem'
 
 /**
  * SelectedWork — the projects as a vertical accordion on ink. Desktop: a row of
@@ -101,7 +101,12 @@ export default function SelectedWork({
       id="projects"
       data-tone="dark"
       className="px-5 pt-24 pb-24 md:px-8 md:pt-32 md:pb-32"
-      style={{ backgroundColor: bg || '#111111', color: fg || '#ffffff' }}
+      style={{
+        backgroundColor: bg || '#111111',
+        color: fg || '#ffffff',
+        '--wk-bg': bg || '#111111',
+        '--wk-fg': fg || '#ffffff',
+      }}
     >
       <div className="mx-auto max-w-[1700px]">
         <header data-work-head className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-20">
@@ -117,10 +122,10 @@ export default function SelectedWork({
           </a>
         </header>
 
-        {/* Desktop: columnas que se abren de costado */}
+        {/* Desktop: columnas que se abren de costado (clic); al pasar el mouse la cerrada se invierte */}
         <div
           data-work-list
-          className="hidden h-[min(68svh,42rem)] min-h-[28rem] gap-2 transition-[grid-template-columns] duration-[800ms] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none md:grid"
+          className="hidden h-[min(72svh,43rem)] min-h-[30rem] border-y border-current/30 transition-[grid-template-columns] duration-[500ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none md:grid"
           style={{ gridTemplateColumns: cols }}
         >
           {items.map((p, i) => {
@@ -129,34 +134,13 @@ export default function SelectedWork({
               <div
                 key={`${p.title}-${i}`}
                 data-work-col
-                className="group/col relative min-w-0 overflow-clip"
+                className={`group/col relative min-w-0 overflow-clip border-l border-current/30 last:border-r ${
+                  on
+                    ? ''
+                    : 'cursor-pointer transition-[background-color,color] duration-300 hover:bg-[var(--wk-fg)] hover:text-[var(--wk-bg)]'
+                }`}
               >
-                {/* Fondo: la columna cerrada es un panel tenue; abierta, la foto (o el color si no hay) */}
-                <div
-                  className={`absolute inset-0 transition-[background-color] duration-500 ${
-                    on ? '' : 'bg-current/[0.07] group-hover/col:bg-current/[0.14]'
-                  }`}
-                  style={on ? cardTone(p.color || '#3d4a3a') : undefined}
-                />
-                {p.img && (
-                  <img
-                    {...imgAttrs(p.img, variants)}
-                    sizes="(min-width: 1024px) 70vw, 60vw"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className={`absolute inset-0 h-full w-full object-cover transition-[opacity,transform,clip-path] duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      on ? 'scale-100 opacity-100 [clip-path:inset(0_0_0_0)]' : 'scale-[1.18] opacity-0 [clip-path:inset(100%_0_0_0)]'
-                    }`}
-                  />
-                )}
-                <div
-                  className={`absolute inset-0 transition-colors duration-500 ${
-                    on ? 'bg-gradient-to-t from-black/70 via-black/10 to-black/30' : 'bg-black/0'
-                  }`}
-                />
-
-                {/* Cerrada: el + , el título vertical y el número */}
+                {/* Cerrada: el +, el título vertical y el número */}
                 <button
                   type="button"
                   onClick={() => setOpen(i)}
@@ -165,54 +149,59 @@ export default function SelectedWork({
                   aria-label={p.title}
                   inert={on}
                   tabIndex={on ? -1 : 0}
-                  className={`absolute inset-0 flex flex-col items-center justify-between py-6 text-white transition-opacity duration-500 ${
-                    on ? 'pointer-events-none opacity-0' : 'opacity-100 delay-300'
+                  className={`absolute inset-0 flex flex-col items-center py-3 transition-opacity duration-300 ${
+                    on ? 'pointer-events-none opacity-0' : 'opacity-100 delay-150'
                   }`}
                 >
-                  <span className="text-3xl leading-none font-light" aria-hidden="true">
+                  <span className="text-5xl leading-none font-light opacity-50" aria-hidden="true">
                     +
                   </span>
                   <span
-                    className="text-xl font-medium tracking-[-0.02em] whitespace-nowrap [writing-mode:vertical-rl] rotate-180"
+                    className="flex flex-1 rotate-180 items-center text-xl font-semibold tracking-[-0.02em] whitespace-nowrap [writing-mode:vertical-rl]"
                     aria-hidden="true"
                   >
                     {p.title}
                   </span>
-                  <span className="text-4xl font-medium tracking-[-0.05em] tabular-nums" aria-hidden="true">
-                    {String(i + 1).padStart(2, '0')}
+                  <span className="text-5xl leading-[1.3] font-semibold tracking-[-0.04em] tabular-nums opacity-50" aria-hidden="true">
+                    {i + 1}
                   </span>
                 </button>
 
-                {/* Abierta: foto, número, título, texto y enlace (ancho fijo: no se reacomoda al abrir) */}
+                {/* Abierta: foto arriba (con zoom al pasar el mouse), título, texto, enlace y número. Ancho fijo: al abrir se desliza, no se reacomoda. */}
                 <article
                   inert={!on}
-                  className={`absolute inset-0 flex flex-col justify-between p-8 text-white transition-opacity duration-500 ${
-                    on ? 'opacity-100 delay-300' : 'pointer-events-none opacity-0'
+                  className={`absolute inset-y-0 left-0 flex w-full min-w-[30rem] flex-col p-5 pb-3 transition-opacity duration-300 ${
+                    on ? 'opacity-100 delay-200' : 'pointer-events-none opacity-0'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-6">
-                    <p className="text-sm font-medium opacity-80">{p.tag}</p>
-                    <span className="text-5xl font-medium tracking-[-0.05em] tabular-nums md:text-7xl">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <div
-                    className={`min-w-[26rem] max-w-[34rem] transition-[transform,opacity] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      on ? 'translate-y-0 opacity-100 delay-[450ms]' : 'translate-y-8 opacity-0'
-                    }`}
+                  <a
+                    href={p.href || '#studio'}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    className="group/img relative block min-h-0 flex-1 overflow-hidden"
+                    style={cardTone(p.color || '#3d4a3a')}
                   >
-                    <h3 className="text-[clamp(2rem,3.6vw,3.6rem)] leading-[0.98] font-medium tracking-[-0.045em]">
-                      {p.title}
-                    </h3>
-                    <p className="mt-4 text-base leading-snug opacity-85">{p.body}</p>
-                    <a
-                      href={p.href || '#studio'}
-                      className="tpl-hit mt-6 inline-flex items-center gap-3 rounded-full border border-white px-5 py-2.5 text-sm font-medium transition-[background-color,color] duration-300 hover:bg-white hover:text-black"
-                    >
+                    {p.img && (
+                      <img
+                        {...imgAttrs(p.img, variants)}
+                        sizes="(min-width: 1024px) 60vw, 55vw"
+                        alt={p.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/img:scale-110"
+                      />
+                    )}
+                  </a>
+                  <div className="shrink-0 pt-6">
+                    <h3 className="mb-3 text-2xl leading-none font-semibold tracking-[-0.02em]">{p.title}</h3>
+                    <p className="mb-3 max-w-[38rem] text-base leading-snug opacity-75">{p.body}</p>
+                    <a href={p.href || '#studio'} className="tpl-link tpl-hit relative inline-block text-base font-medium">
                       {linkLabel}
-                      <span aria-hidden="true">→</span>
                     </a>
                   </div>
+                  <span className="shrink-0 text-5xl leading-[1.3] font-semibold tracking-[-0.04em] tabular-nums opacity-50">
+                    {i + 1}
+                  </span>
                 </article>
               </div>
             )
