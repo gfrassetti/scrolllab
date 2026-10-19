@@ -31,7 +31,7 @@ const SCROLL_AT = {
   monolith: 0,
   fizz: 0,
   // la casa de ladrillo y madera entre los pinos (el hero, ya cargado)
-  atelier: 0.03,
+  atelier: 0,
   // el camión con el perro y el chancho
   comic: 0.06,
   // el jugador gritando, a pantalla completa
