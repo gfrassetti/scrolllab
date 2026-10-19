@@ -213,7 +213,7 @@ def place(path, name, height, x, y, rot_deg, sink=0.0, max_tris=None, tex=1024, 
 
 
 # alturas en unidades de la escena: los personajes miden 1.1 (≈ 1,75 m), así que 1 ≈ 1,6 m
-place(os.path.join(A, 'ruin-sam.glb'), 'ruin', 5.2, -6.2, 9.0, 35, sink=0.15, max_tris=30000)
+place(os.path.join(A, 'ruin-sam.glb'), 'ruin', 5.2, -6.2, 9.0, 35, sink=0.15, max_tris=18000)  # queda atrás: 18k alcanzan
 place(os.path.join(A, 'car-sam.glb'), 'car', 1.0, 3.6, 4.4, -125, sink=0.12, max_tris=14000)
 place(os.path.join(A, 'tower-arc-sam.glb'), 'tower', 10.0, 5.2, 16.0, 0, sink=0.2, max_tris=40000, keep_largest=True)
 place(os.path.join(A, 'machine-tripo.glb'), 'machine', 15.0, -9.0, 40.0, 25, sink=1.6, max_tris=50000)
@@ -310,9 +310,27 @@ cam.animation_data.action.name = 'CAMERA_action'
 if '--blend' in sys.argv:
     bpy.ops.wm.save_as_mainfile(filepath=sys.argv[sys.argv.index('--blend') + 1])
 bpy.ops.object.select_all(action='DESELECT')
+# solo el color: el trazo de tinta (ink.js) no usa relieve, rugosidad ni metal; sin esas texturas pesa menos
+for mat in bpy.data.materials:
+    if not mat.use_nodes:
+        continue
+    nt = mat.node_tree
+    bsdf = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+    if not bsdf:
+        continue
+    for inp in bsdf.inputs:
+        if inp.identifier != 'Base Color':
+            for link in list(inp.links):
+                nt.links.remove(link)
+
 bpy.ops.export_scene.gltf(
     filepath=OUT, export_format='GLB', export_cameras=True, export_animations=True, export_apply=True,
-    export_yup=True, export_vertex_color='ACTIVE', export_materials='EXPORT', export_image_format='JPEG',
-    export_jpeg_quality=85, export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=6,
+    export_yup=True, export_vertex_color='ACTIVE', export_materials='EXPORT',
+    # texturas en WebP y geometría Draco cuantizada: el hero pesaba 3,5 MB y en conexiones lentas la carga
+    # tardaba (2026-10-19); a la distancia de la cámara la diferencia no se ve
+    export_image_format='WEBP', export_image_quality=82,
+    export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=10,
+    export_draco_position_quantization=12, export_draco_normal_quantization=8,
+    export_draco_texcoord_quantization=11, export_draco_color_quantization=8,
 )
 print('field ok', OUT, os.path.getsize(OUT) // 1024, 'KB')

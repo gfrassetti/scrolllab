@@ -103,7 +103,11 @@ scatter('fence', os.path.join(A, 'fence-sam.glb'), 5000, [(-0.6, -1.4, 0.08, 0.4
 
 bpy.ops.object.select_all(action='DESELECT')
 bpy.ops.export_scene.gltf(
-    filepath=OUT, export_format='GLB', export_apply=True, export_yup=True, export_image_format='JPEG',
-    export_jpeg_quality=85, export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=6,
+    filepath=OUT, export_format='GLB', export_apply=True, export_yup=True,
+    # WebP y Draco cuantizado (2026-10-19): la mitad del peso, sin diferencia visible
+    export_image_format='WEBP', export_image_quality=82,
+    export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=10,
+    export_draco_position_quantization=12, export_draco_normal_quantization=8,
+    export_draco_texcoord_quantization=11, export_draco_color_quantization=8,
 )
 print('isle ok', OUT, os.path.getsize(OUT) // 1024, 'KB', 'isle size', tuple(round(v * s, 2) for v in d))

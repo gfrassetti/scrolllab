@@ -549,7 +549,7 @@ function Kanvas() {
       ridge.setSize(W, H)
     }
     fitRidge()
-    const relic = createRelic(THREE, { loader: sealedGltfLoader(new GLTFLoader(), later), ink })
+    const relic = createRelic(THREE, { loader: sealedGltfLoader(new GLTFLoader().setDRACOLoader(draco), later), ink })
     const relicRt = target()
 
     // --- los guardianes y el Faro ---------------------------------------------------------------------
@@ -639,7 +639,7 @@ function Kanvas() {
     const filmCams = FILM_VIEWS.map((v) => new THREE.PerspectiveCamera(v.fov, 1, 0.1, 100))
     const filmNow = { key: '' }
     // los juramentos: la isla de fondo (otra cámara) y la escena en capas
-    const oaths = createOaths(THREE, { loader: sealedGltfLoader(new GLTFLoader(), later), ink })
+    const oaths = createOaths(THREE, { loader: sealedGltfLoader(new GLTFLoader().setDRACOLoader(draco), later), ink })
     const oathWorldRt = target()
     const oathRt = target()
     const oathCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100)

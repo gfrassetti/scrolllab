@@ -429,6 +429,13 @@ cueste mucho más que mirarlo:
 - **No por la API (2026-10-18).** Primero se sirvieron por la API con un pase que vencía: en producción
   pasaban por Vercel → Railway sin caché y la carga quedaba trabada decenas de segundos en «Inking the
   atlas 033%» (3,5 MB tardaban 9,5 s). Se volvió a archivos estáticos.
+- **Peso (2026-10-19).** En producción la carga tardaba ~50 s con una conexión de 4 Mbit/s: los
+  personajes iban sin comprimir (1,8 MB cada uno) y el escenario pesaba 3,5 MB. Ahora todo sale con Draco
+  cuantizado y texturas WebP, sin los mapas que el trazo de tinta no usa (relieve, rugosidad, metal):
+  `build-field.py` y `build-isle-drawn.py` exportan así, y `design/masters/kanvas/compress-glb.py` comprime
+  cualquier GLB suelto (los personajes, la reliquia). Hero ~3,1 MB (antes 7,5), todo sellado 5,1 MB (antes
+  10,2). Con el build: la escena empieza a dibujarse a los 3,4 s a 25 Mbit/s y a los 14,7 s a 4 Mbit/s.
+  Un GLB nuevo de Tripo: `lighten-glb.py` y después `compress-glb.py`.
 - **Carga en dos tandas.** La carga espera solo lo del hero (escenario, personajes, láminas: ~7,5 MB, ~5 s
   a 25 Mbit/s); la isla, la reliquia, los juramentos y los retratos bajan de fondo (`later` en
   `KanvasPage.jsx`).
