@@ -5,7 +5,7 @@ import { cartItemPreviewHref, itemPreviewHref } from '../orderPreview.js'
 
 describe('cartItemPreviewHref', () => {
   it('manda los templates fijos a su demo', () => {
-    assert.equal(cartItemPreviewHref({ sku: 'nocturne' }), '/templates/nocturne')
+    assert.equal(cartItemPreviewHref({ sku: 'unity' }), '/templates/unity')
     assert.equal(cartItemPreviewHref({ sku: 'bundle' }), '/#templates')
   })
 

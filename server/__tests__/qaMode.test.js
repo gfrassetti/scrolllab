@@ -23,7 +23,7 @@ import { orderPriceSummary } from '../../src/domain/orderSummary.js'
  * arrepentimiento con devolución), y fuera de las métricas.
  */
 const QA = 'dueno-qa@test.com'
-const RECIPE3 = ['chapters/HeroKinetic', 'nocturne/StickyWordCycle', 'chapters/BigNumbers']
+const RECIPE3 = ['chapters/HeroKinetic', 'chapters/QuoteBreak', 'chapters/BigNumbers']
 
 describe('modo prueba (QA_BUYER_EMAILS)', () => {
   const mp = createFakeMercadoPago()
@@ -346,7 +346,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     const { agent } = await qaSubscribed('lab-e@test.com', 'hosted_pro')
     const { HOSTED_PLANS } = await import('../catalog.js')
     const STARTER = HOSTED_PLANS.hosted_starter.instanceQuota
-    const pool = ['chapters/FooterCTA', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'atrium/FooterAtrium', 'chapters/BigNumbers', 'velocity/HelmetGrid']
+    const pool = ['chapters/FooterCTA', 'unity/FooterTrophy', 'fizz/FooterSplash', 'atrium/FooterAtrium', 'chapters/BigNumbers', 'monolith/LoadNumbers']
     // Una más que el cupo de Starter, con Pro (cupo mayor) todas se publican.
     const sections = Array.from({ length: STARTER + 1 }, (_, i) => pool[i % pool.length])
     const keys = []

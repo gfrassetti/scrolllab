@@ -121,7 +121,7 @@ describe('cupón de bienvenida — pagos reales (SDK con red interceptada)', () 
   /** Cliente que ya compró antes: sin el 10% de primera compra. */
   async function returning(agent) {
     const me = await agent.get('/api/auth/me').set('Origin', ORIGIN)
-    await db.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'mercadopago', items: [{ sku: 'nocturne' }], total: 1, currency_id: 'ARS' })
+    await db.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'mercadopago', items: [{ sku: 'unity' }], total: 1, currency_id: 'ARS' })
     return agent
   }
   async function pendingOrder(agent, body) {

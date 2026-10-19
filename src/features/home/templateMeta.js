@@ -13,15 +13,6 @@ export const TEMPLATE_META = [
     palette: ['#f2efe9', '#161412', '#ff4b00'],
   },
   {
-    id: '02',
-    sku: 'nocturne',
-    name: 'NOCTURNE',
-    path: '/templates/nocturne',
-    category: 'CINEMA',
-    tagline: 'AFTER DARK',
-    palette: ['#0e0e11', '#ece9e2', '#d9ff3f'],
-  },
-  {
     id: '03',
     sku: 'monolith',
     name: 'MONOLITH',
@@ -29,15 +20,6 @@ export const TEMPLATE_META = [
     category: 'SYSTEM',
     tagline: 'brutal form',
     palette: ['#cdcbc4', '#101010', '#2b3cff'],
-  },
-  {
-    id: '04',
-    sku: 'velocity',
-    name: 'VELOCITY',
-    path: '/templates/velocity',
-    category: 'ATHLETE',
-    tagline: 'full send',
-    palette: ['#0a1a12', '#ece9e2', '#d9ff3f'],
   },
   {
     id: '05',

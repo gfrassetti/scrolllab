@@ -2,6 +2,7 @@ import { db } from '../../db.js'
 import { HttpError } from '../../errors.js'
 import { assertObjectIdLike } from '../../validation.js'
 import { isHostableSectionId } from '../../sections.js'
+import { isBuilderHiddenSku } from '../../../src/domain/catalog.js'
 import { sanitizeHostedProps } from '../../sectionFields.js'
 import { newHostedKey, cleanDomains } from '../../hostedKey.js'
 import { resolveEntitlement, assertCanPublish } from '../subscriptions.js'
@@ -35,7 +36,8 @@ export async function getOwnedHostedInstance(userId, id) {
  */
 export async function createHostedInstance({ userId, body, config }) {
   const sectionId = String(body?.sectionId || '')
-  if (!isHostableSectionId(sectionId)) {
+  // un modelo fuera de la venta (VELOCITY) no suma widgets nuevos; los publicados siguen
+  if (!isHostableSectionId(sectionId) || isBuilderHiddenSku(sectionId.split('/')[0])) {
     throw new HttpError(400, 'Sección no hosteable')
   }
   const ent = await resolveEntitlement(userId, config, { persist: false })

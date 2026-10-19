@@ -183,7 +183,7 @@ describe('sanitizeSectionProps — color / href / list', () => {
 
 describe('validateRecipe', () => {
   it('acepta secciones de la allowlist (legacy string[])', () => {
-    const recipe = validateRecipe(['chapters/HeroKinetic', 'nocturne/OutroCTA'])
+    const recipe = validateRecipe(['chapters/HeroKinetic', 'unity/FooterTrophy'])
     assert.equal(recipe.length, 2)
     assert.deepEqual(recipe[0], { id: 'chapters/HeroKinetic' })
   })
@@ -239,14 +239,18 @@ describe('validateRecipe', () => {
     })
   })
 
-  it('acepta secciones atelier y velocity', () => {
+  it('acepta secciones atelier y monolith', () => {
     const recipe = validateRecipe([
       { id: 'atelier/HeroMeaning', props: { line1: 'Hello' } },
-      { id: 'velocity/NavVelocity', props: { brand: 'BRAND' } },
+      { id: 'monolith/NavBrutal', props: { brand: 'BRAND' } },
     ])
     assert.equal(recipe.length, 2)
     assert.equal(recipe[0].props.line1, 'Hello')
     assert.equal(recipe[1].props.brand, 'BRAND')
+  })
+
+  it('rechaza secciones de VELOCITY (salió de la venta)', () => {
+    assert.throws(() => validateRecipe([{ id: 'velocity/NavVelocity' }]), /no permitida/)
   })
 
   it('rechaza secciones de modelos ocultos en el builder', () => {
@@ -336,11 +340,11 @@ describe('validateCheckoutItems', () => {
     assert.equal(
       status([
         { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
-        { sku: 'custom:b', recipe: ['nocturne/SplitReveals'] },
+        { sku: 'custom:b', recipe: ['unity/LanguageBlock'] },
       ]),
       200,
     )
-    assert.equal(status([{ sku: 'chapters' }, { sku: 'nocturne' }]), 200)
+    assert.equal(status([{ sku: 'chapters' }, { sku: 'unity' }]), 200)
     assert.equal(status([{ sku: 'bundle' }, { sku: 'meridian' }]), 200)
   })
 

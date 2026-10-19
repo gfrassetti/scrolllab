@@ -112,18 +112,18 @@ describe('productPageData — cada template en venta', () => {
     assert.throws(() => productPageData('nope', es), /no tiene página/)
 
     const sinTextos = structuredClone(es)
-    delete sinTextos.templates.nocturne
-    assert.throws(() => productPageData('nocturne', sinTextos), /faltan textos de "nocturne"/)
+    delete sinTextos.templates.unity
+    assert.throws(() => productPageData('unity', sinTextos), /faltan textos de "unity"/)
 
     const sinTags = structuredClone(es)
-    delete sinTags.templates.nocturne.tags
-    assert.throws(() => productPageData('nocturne', sinTags), /faltan textos de "nocturne"/)
+    delete sinTags.templates.unity.tags
+    assert.throws(() => productPageData('unity', sinTags), /faltan textos de "unity"/)
   })
 
   it('sin lista de secciones (como COMIC) la página sale igual, sin ese bloque', () => {
     const sinSecciones = structuredClone(es)
-    delete sinSecciones.builder.sections.nocturne
-    const d = productPageData('nocturne', sinSecciones)
+    delete sinSecciones.builder.sections.unity
+    const d = productPageData('unity', sinSecciones)
     assert.deepEqual(d.sections, [])
     const html = renderProductPage(indexHtml, d)
     assert.ok(!html.includes(PRODUCT_COPY.sectionsTitle), 'quedó el título de secciones sin secciones')
@@ -133,15 +133,15 @@ describe('productPageData — cada template en venta', () => {
 
 describe('productSeoForPath', () => {
   it('da el title y la meta de una página de producto, con o sin barra final', () => {
-    const seo = productSeoForPath('/plantillas/nocturne', es)
-    assert.equal(seo.title, productPageData('nocturne', es).title)
-    assert.equal(seo.canonical, `${SITE_URL}/plantillas/nocturne`)
+    const seo = productSeoForPath('/plantillas/unity', es)
+    assert.equal(seo.title, productPageData('unity', es).title)
+    assert.equal(seo.canonical, `${SITE_URL}/plantillas/unity`)
     assert.match(seo.robots, /^index/)
-    assert.deepEqual(productSeoForPath('/plantillas/nocturne/', es), seo)
+    assert.deepEqual(productSeoForPath('/plantillas/unity/', es), seo)
   })
 
   it('devuelve null para cualquier otra ruta', () => {
-    for (const p of ['/', '/builder', '/templates/nocturne', '/plantillas', '/plantillas/plum', '/plantillas/nope', '/plantillas/nocturne/extra', '', undefined]) {
+    for (const p of ['/', '/builder', '/templates/unity', '/plantillas', '/plantillas/plum', '/plantillas/nope', '/plantillas/unity/extra', '', undefined]) {
       assert.equal(productSeoForPath(p, es), null, String(p))
     }
   })
@@ -170,16 +170,16 @@ describe('productJsonLd', () => {
 })
 
 describe('renderProductPage', () => {
-  const data = productPageData('nocturne', es)
+  const data = productPageData('unity', es)
   const html = renderProductPage(indexHtml, data)
 
   it('pone el title, la descripción, el canonical y la tarjeta propios', () => {
     assert.equal(tag(html, /<title>([\s\S]*?)<\/title>/), data.title)
     assert.equal(tag(html, /<meta name="description" content="([^"]*)"/), data.description)
-    assert.equal(tag(html, /<link rel="canonical" href="([^"]*)"/), `${SITE_URL}/plantillas/nocturne`)
+    assert.equal(tag(html, /<link rel="canonical" href="([^"]*)"/), `${SITE_URL}/plantillas/unity`)
     assert.match(tag(html, /<meta name="robots" content="([^"]*)"/), /^index, follow/)
-    assert.equal(tag(html, /<meta property="og:url" content="([^"]*)"/), `${SITE_URL}/plantillas/nocturne`)
-    assert.equal(tag(html, /<meta property="og:image" content="([^"]*)"/), `${SITE_URL}/og/nocturne.jpg`)
+    assert.equal(tag(html, /<meta property="og:url" content="([^"]*)"/), `${SITE_URL}/plantillas/unity`)
+    assert.equal(tag(html, /<meta property="og:image" content="([^"]*)"/), `${SITE_URL}/og/unity.jpg`)
     assert.equal(tag(html, /<meta property="og:title" content="([^"]*)"/), data.title)
   })
 
@@ -195,20 +195,20 @@ describe('renderProductPage', () => {
   it('deja el contenido dentro de #root: título, precio, secciones y links', () => {
     assert.ok(!html.includes('<div id="root"></div>'), '#root quedó vacío')
     const root = html.slice(html.indexOf('<div id="root">'))
-    assert.ok(root.includes('<h1>NOCTURNE — Template de storytelling</h1>'))
-    assert.ok(root.includes(`USD ${TEMPLATE_PRICES_USD.nocturne} de lista`))
+    assert.ok(root.includes('<h1>UNITY — Template de storytelling</h1>'))
+    assert.ok(root.includes(`USD ${TEMPLATE_PRICES_USD.unity} de lista`))
     for (const s of data.sections) assert.ok(root.includes(s.name), s.name)
     for (const t of data.tags) assert.ok(root.includes(t), t)
-    assert.ok(root.includes('href="/templates/nocturne"'), 'falta el link a la demo')
+    assert.ok(root.includes('href="/templates/unity"'), 'falta el link a la demo')
     for (const r of data.related) assert.ok(root.includes(`href="${r.path}"`), r.path)
     assert.ok(root.includes(PRODUCT_COPY.how[0]))
   })
 
   it('escapa lo que venga de los textos: no se cuela HTML ni se cierra el <script>', () => {
     const hostil = structuredClone(es)
-    hostil.templates.nocturne.vibe = '<img src=x onerror=alert(1)> Noir'
-    hostil.builder.sections.nocturne.HeroCinematic.name = '</script><b id="x">Hero</b>'
-    const out = renderProductPage(indexHtml, productPageData('nocturne', hostil))
+    hostil.templates.unity.vibe = '<img src=x onerror=alert(1)> Sport'
+    hostil.builder.sections.unity.HeroTwin.name = '</script><b id="x">Hero</b>'
+    const out = renderProductPage(indexHtml, productPageData('unity', hostil))
     assert.ok(!out.includes('<img src=x'), 'HTML sin escapar en el contenido')
     assert.ok(!out.includes('<b id="x">'), 'HTML sin escapar en una sección')
     const ld = ldScripts(out).at(-1)
@@ -218,8 +218,8 @@ describe('renderProductPage', () => {
 
   it('no interpreta patrones de replace ("$&") en los textos', () => {
     const raro = structuredClone(es)
-    raro.templates.nocturne.tags[0] = 'Precio $& $1 $$'
-    const out = renderProductPage(indexHtml, productPageData('nocturne', raro))
+    raro.templates.unity.tags[0] = 'Precio $& $1 $$'
+    const out = renderProductPage(indexHtml, productPageData('unity', raro))
     assert.ok(out.includes('Precio $&amp; $1 $$') || out.includes('Precio $& $1 $$'))
   })
 

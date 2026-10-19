@@ -565,7 +565,7 @@ Producto: [`docs/scrolllab-beat.md`](docs/scrolllab-beat.md). Widgets: `<BeatSta
 
 #### Precio
 
-- RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta (2026-10-12): 169 (CHAPTERS, NOCTURNE, UNITY) · 229 FOLD · 239 (MONOLITH, FIZZ, APEX) · 279 ATELIER · 307 (VELOCITY, COMIC, ATRIUM) · 379 (MERIDIAN, KIN: el más caro hoy). Bundle de 8: USD 879 (mismo ~53% off sobre la lista nueva).
+- RATIO lista **USD 269** (Beat) pero sigue en `COMING_SOON_SKUS`, no cuenta para el piso. Catálogo en venta (2026-10-12): 169 (CHAPTERS, UNITY) · 229 FOLD · 239 (MONOLITH, FIZZ, APEX) · 279 ATELIER · 307 (COMIC, ATRIUM) · 379 (MERIDIAN, KIN: el más caro hoy). Bundle de 8: USD 879 (mismo ~53% off sobre la lista nueva). VELOCITY salió de la venta el 2026-10-18 (decisión del dueño: en `COMING_SOON`/`LOCAL_ONLY`/`BUILDER_HIDDEN`, su código queda solo para rearmar ZIP vendidos y no romper widgets publicados); ATRIUM ocupa su lugar en el bundle. NOCTURNE salió el mismo día por la misma vía; APEX ocupa su lugar en el bundle.
 - RATIO lista **USD 269** (Beat). Los precios vigentes están en el punto de arriba y en `src/domain/catalog.js` (fuente única).
 - La base del builder (`CUSTOM_BASE_PRICE_USD`, hoy 549) tiene que superar al template más caro **en venta** (RATIO no cuenta mientras esté en `COMING_SOON_SKUS`). Si subís un SKU vendible por encima de la base, subí la base o `npm run check` falla.
 

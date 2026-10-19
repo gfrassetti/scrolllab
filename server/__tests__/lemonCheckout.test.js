@@ -143,13 +143,13 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
     })
 
     it('con tax del país del comprador igual coincide (se compara el subtotal)', async () => {
-      const { out, lemon } = await paid('tax@test.com', [{ sku: 'nocturne' }], { tax: 3200 })
+      const { out, lemon } = await paid('tax@test.com', [{ sku: 'unity' }], { tax: 3200 })
       assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
       assert.equal((await orderRow(out.orderId)).status, 'paid')
     })
 
     it('el mismo evento repetido: una sola entrega y un solo recibo', async () => {
-      const { out, lemon } = await paid('doble@test.com', [{ sku: 'nocturne' }])
+      const { out, lemon } = await paid('doble@test.com', [{ sku: 'unity' }])
       for (let i = 0; i < 3; i += 1) assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
       await waitFor(() => mp.mailsTo('doble@test.com').length === 1, 'el recibo')
       await new Promise((r) => setTimeout(r, 100))
@@ -232,7 +232,7 @@ describe('Compras con Lemon Squeezy (Lemon Squeezy simulado)', () => {
     })
 
     it('parcial: la orden sigue paga y avisa al dueño', async () => {
-      const { out, lemon } = await paid('parcial@test.com', [{ sku: 'nocturne' }])
+      const { out, lemon } = await paid('parcial@test.com', [{ sku: 'unity' }])
       await lemonWebhook('order_created', lemon)
       await lemonWebhook('order_refunded', lemon, {
         overrides: { status: 'partial_refund', refunded: true, refunded_amount: 1000 },

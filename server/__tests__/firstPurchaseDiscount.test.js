@@ -21,7 +21,7 @@ import {
 const RATE = 1560
 const PCT = WELCOME_COUPON_PERCENT
 const OWNER = 'owner@scrolllab.test'
-const RECIPE = ['chapters/HeroKinetic', 'nocturne/StickyWordCycle', 'chapters/BigNumbers']
+const RECIPE = ['chapters/HeroKinetic', 'chapters/QuoteBreak', 'chapters/BigNumbers']
 
 const KINDS = [
   { kind: 'template', items: [{ sku: 'chapters' }], usd: TEMPLATE_PRICES_USD.chapters },

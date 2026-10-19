@@ -14,11 +14,9 @@ Scroll Lab es un proyecto argentino. Los precios de lista están en dólares (US
 ## Los templates
 
 - [CHAPTERS](https://www.scrolllab.com.ar/plantillas/chapters): editorial cinética
-- [NOCTURNE](https://www.scrolllab.com.ar/plantillas/nocturne): noir cinematográfico
 - [MONOLITH](https://www.scrolllab.com.ar/plantillas/monolith): sistema brutalista
-- [VELOCITY](https://www.scrolllab.com.ar/plantillas/velocity): energía athlete
 - [FIZZ](https://www.scrolllab.com.ar/plantillas/fizz): pop carbonatado
-- [ATELIER](https://www.scrolllab.com.ar/plantillas/atelier): studio WebGL
+- [ATELIER](https://www.scrolllab.com.ar/plantillas/atelier): estudio de arquitectura e interiores
 - [COMIC](https://www.scrolllab.com.ar/plantillas/comic): historieta ilustrada
 - [UNITY](https://www.scrolllab.com.ar/plantillas/unity): editorial deportivo
 - [ATRIUM](https://www.scrolllab.com.ar/plantillas/atrium): estudio de arquitectura

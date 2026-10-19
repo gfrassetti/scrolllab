@@ -16,17 +16,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.scrolllab.com.ar/plantillas/nocturne</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.scrolllab.com.ar/plantillas/monolith</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.scrolllab.com.ar/plantillas/velocity</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

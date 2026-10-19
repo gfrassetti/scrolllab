@@ -136,7 +136,7 @@ describe('recipeToComposition', () => {
   it('el ida y vuelta no altera la receta', () => {
     const recipe = [
       { id: 'chapters/NavMinimal' },
-      { id: 'nocturne/NavNocturne' },
+      { id: 'unity/NavUnity' },
       { id: 'atelier/HeroMeaning', props: { line1: 'uno' } },
     ]
     assert.deepEqual(compositionToRecipe(recipeToComposition(recipe)), recipe)
@@ -158,7 +158,7 @@ describe('addSectionToComposition — chrome único', () => {
 
   it('bloquea una segunda nav', () => {
     const first = addSectionToComposition([], 'chapters/NavMinimal')
-    const second = addSectionToComposition(first.items, 'nocturne/NavNocturne')
+    const second = addSectionToComposition(first.items, 'unity/NavUnity')
     assert.equal(second.blocked, true)
     assert.equal(second.kind, 'nav')
     assert.equal(second.items, first.items)
@@ -174,7 +174,7 @@ describe('addSectionToComposition — chrome único', () => {
   it('permite varios heroes y secciones', () => {
     let { items } = addSectionToComposition([], 'atelier/HeroMeaning')
     ;({ items } = addSectionToComposition(items, 'chapters/HeroKinetic'))
-    ;({ items } = addSectionToComposition(items, 'nocturne/SplitReveals'))
+    ;({ items } = addSectionToComposition(items, 'unity/LanguageBlock'))
     assert.equal(items.length, 3)
   })
 })
@@ -183,7 +183,7 @@ describe('dedupeUniqueKinds', () => {
   it('conserva la primera nav y el primer footer', () => {
     const cleaned = dedupeUniqueKinds([
       createCompositionItem('chapters/NavMinimal'),
-      createCompositionItem('nocturne/NavNocturne'),
+      createCompositionItem('unity/NavUnity'),
       createCompositionItem('atelier/HeroMeaning'),
       createCompositionItem('chapters/FooterCTA'),
       createCompositionItem('atelier/FooterAtelier'),
@@ -198,7 +198,7 @@ describe('dedupeUniqueKinds', () => {
 describe('kindIsBlocked / hasDuplicateChrome', () => {
   it('marca un kind único ya tomado', () => {
     const items = [createCompositionItem('chapters/NavMinimal')]
-    assert.ok(kindIsBlocked('nocturne/NavNocturne', items))
+    assert.ok(kindIsBlocked('unity/NavUnity', items))
     assert.ok(!kindIsBlocked('atelier/HeroMeaning', items))
   })
 
@@ -206,7 +206,7 @@ describe('kindIsBlocked / hasDuplicateChrome', () => {
     assert.ok(
       hasDuplicateChrome([
         createCompositionItem('chapters/NavMinimal'),
-        createCompositionItem('nocturne/NavNocturne'),
+        createCompositionItem('unity/NavUnity'),
       ]),
     )
   })
@@ -216,7 +216,7 @@ describe('mover y reordenar', () => {
   const items = [
     { uid: 'a', sectionId: 'chapters/HeroKinetic' },
     { uid: 'b', sectionId: 'atelier/HeroMeaning' },
-    { uid: 'c', sectionId: 'nocturne/SplitReveals' },
+    { uid: 'c', sectionId: 'unity/LanguageBlock' },
   ]
 
   it('mueve un ítem arriba y abajo', () => {
@@ -297,7 +297,7 @@ describe('readCompositionCount', () => {
       STORAGE_KEY,
       JSON.stringify([
         { uid: 'a', sectionId: 'chapters/NavMinimal' },
-        { uid: 'b', sectionId: 'nocturne/NavNocturne' },
+        { uid: 'b', sectionId: 'unity/NavUnity' },
         { uid: 'c', sectionId: 'inventada/NoExiste' },
         { uid: 'd', sectionId: 'atelier/HeroMeaning' },
       ]),

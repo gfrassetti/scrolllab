@@ -76,7 +76,7 @@ describe('Proyectos del builder (file store)', () => {
     ])
 
     const id = full.body.project.id
-    const saved = await send('put', `/api/builder-projects/${id}`, { recipe: [{ id: 'nocturne/SplitReveals' }] })
+    const saved = await send('put', `/api/builder-projects/${id}`, { recipe: [{ id: 'unity/LanguageBlock' }] })
     assert.equal(saved.status, 200)
     assert.equal(saved.body.project.sections, 1)
     const renamed = await send('put', `/api/builder-projects/${id}`, { name: 'Home v2' })
@@ -90,7 +90,7 @@ describe('Proyectos del builder (file store)', () => {
     assert.equal(list.body.projects[0].recipe, undefined, 'la lista no trae recetas')
 
     const one = await send('get', `/api/builder-projects/${id}`)
-    assert.deepEqual(one.body.project.recipe, [{ id: 'nocturne/SplitReveals' }])
+    assert.deepEqual(one.body.project.recipe, [{ id: 'unity/LanguageBlock' }])
 
     assert.equal((await send('delete', `/api/builder-projects/${id}`)).status, 200)
     assert.equal((await send('get', `/api/builder-projects/${id}`)).status, 404)

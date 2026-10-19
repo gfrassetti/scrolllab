@@ -62,7 +62,7 @@ describe('Pagos de templates (MP simulado)', () => {
       .post('/api/auth/dev-login')
       .send({ email: 'ana@test.com', name: 'Ana María Pérez' })
     const before = Date.now()
-    const { pref } = await checkout(agent, [{ sku: 'chapters' }, { sku: 'nocturne' }])
+    const { pref } = await checkout(agent, [{ sku: 'chapters' }, { sku: 'unity' }])
 
     assert.deepEqual(pref.payer, { email: 'ana@test.com', name: 'Ana', surname: 'María Pérez' })
     assert.equal(pref.items.length, 2)
@@ -77,7 +77,7 @@ describe('Pagos de templates (MP simulado)', () => {
   it('comprar dos templates juntos: MP cobra la suma y el ZIP trae los dos', async () => {
     const { agent, orderId, payment } = await paidOrder('two@test.com', [
       { sku: 'chapters' },
-      { sku: 'nocturne' },
+      { sku: 'unity' },
     ])
     const order = await fileDb.findOrderById(orderId)
     assert.equal(order.status, 'paid')
@@ -88,7 +88,7 @@ describe('Pagos de templates (MP simulado)', () => {
     const zip = fs.readFileSync(order.zipPath || (await fileDb.findOrderById(orderId)).zipPath)
     const names = zip.toString('latin1')
     assert.ok(names.includes('chapters/package.json'))
-    assert.ok(names.includes('nocturne/package.json'))
+    assert.ok(names.includes('unity/package.json'))
   })
 
   // La composición del builder de punta a punta: precio por tramos del
@@ -101,10 +101,10 @@ describe('Pagos de templates (MP simulado)', () => {
       { id: 'chapters/BigNumbers', props: { stats: [{ value: '12', suffix: 'k', label: 'Visitas' }] } },
       { id: 'meridian/GallerySlider' },
       { id: 'atelier/KeyFacts' },
-      { id: 'nocturne/DiagonalMarquee' },
+      { id: 'chapters/VelocityMarquee' },
       { id: 'unity/HeroTwin' },
       { id: 'atrium/ScopeSerif' },
-      { id: 'velocity/ParallaxRise' },
+      { id: 'unity/MatchBoard' },
       { id: 'commerce/ProductGrid', props: { title: 'Tienda' } },
       {
         id: 'chapters/FooterCTA',

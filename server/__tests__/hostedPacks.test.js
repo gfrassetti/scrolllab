@@ -121,7 +121,7 @@ describe('LAB packs (file store)', () => {
     const agent = await loginAgent('frozen-pack@test.com')
     const widgets = []
     // Una más que el cupo de Starter, para que la más nueva quede congelada al bajar.
-    const sections = ['chapters/FooterCTA', 'chapters/BigNumbers', 'atelier/KeyFacts', 'nocturne/OutroCTA', 'fizz/FooterSplash', 'monolith/FooterBrutal']
+    const sections = ['chapters/FooterCTA', 'chapters/BigNumbers', 'atelier/KeyFacts', 'unity/FooterTrophy', 'fizz/FooterSplash', 'monolith/FooterBrutal']
     for (let i = 0; i < HOSTED_PLANS.hosted_starter.instanceQuota + 1; i++) {
       widgets.push(await widget(agent, sections[i % sections.length]))
     }

@@ -136,7 +136,7 @@ describe('API HTTP (file store)', () => {
     const checkout = await agent
       .post('/api/checkout')
       .set('Origin', config.clientUrl)
-      .send({ items: [{ sku: 'chapters' }, { sku: 'nocturne' }] })
+      .send({ items: [{ sku: 'chapters' }, { sku: 'unity' }] })
     assert.equal(checkout.status, 200)
     const { orderId } = checkout.body
     await agent
@@ -149,7 +149,7 @@ describe('API HTTP (file store)', () => {
       .set('Origin', config.clientUrl)
     const dl = await agent.get(link.body.url).buffer().parse(binaryParser)
     const files = readZip(dl.body)
-    for (const model of ['chapters', 'nocturne']) {
+    for (const model of ['chapters', 'unity']) {
       assert.ok(files.has(`${model}/package.json`), `el ZIP no trae ${model}`)
       assert.ok(files.has(`${model}/src/App.jsx`), `el ZIP no trae ${model}/src/App.jsx`)
     }
@@ -169,7 +169,7 @@ describe('API HTTP (file store)', () => {
       .send({
         items: [
           { sku: 'custom', recipe: [{ id: 'chapters/HeroKinetic', props: { lineOne: 'PRIMERA' } }] },
-          { sku: 'custom', recipe: [{ id: 'nocturne/SplitReveals' }, { id: 'chapters/FooterCTA' }] },
+          { sku: 'custom', recipe: [{ id: 'unity/LanguageBlock' }, { id: 'chapters/FooterCTA' }] },
         ],
       })
     assert.equal(checkout.status, 200)
@@ -196,13 +196,13 @@ describe('API HTTP (file store)', () => {
     const first = await bajar('?item=0')
     assert.match(first.name, new RegExp(`scrolllab-${orderId}-1\\.zip`))
     assert.match(first.files.get('src/App.jsx').toString('utf8'), /PRIMERA/)
-    assert.ok(!first.files.get('src/App.jsx').toString('utf8').includes('SplitReveals'))
+    assert.ok(!first.files.get('src/App.jsx').toString('utf8').includes('LanguageBlock'))
     assert.match(first.files.get('LICENSE.txt').toString('utf8'), /two-compositions@test\.com/)
     assert.deepEqual(brokenImports(first.files), [])
 
     const second = await bajar('?item=1')
     const app2 = second.files.get('src/App.jsx').toString('utf8')
-    assert.match(app2, /SplitReveals/)
+    assert.match(app2, /LanguageBlock/)
     assert.match(app2, /FooterCTA/)
     assert.ok(!app2.includes('PRIMERA'))
     assert.deepEqual(brokenImports(second.files), [])
@@ -242,7 +242,7 @@ describe('API HTTP (file store)', () => {
     // precio); más de MAX_CART_COMPOSITIONS no.
     const twoCompositions = await post([
       { sku: 'custom', recipe: ['chapters/HeroKinetic'] },
-      { sku: 'custom', recipe: ['nocturne/SplitReveals'] },
+      { sku: 'custom', recipe: ['unity/LanguageBlock'] },
     ])
     assert.equal(twoCompositions.status, 200)
     const tooMany = await post(
@@ -254,7 +254,7 @@ describe('API HTTP (file store)', () => {
     // Un template y una composición sí van juntos.
     const mixed = await post([
       { sku: 'chapters' },
-      { sku: 'custom', recipe: ['nocturne/SplitReveals'] },
+      { sku: 'custom', recipe: ['unity/LanguageBlock'] },
     ])
     assert.equal(mixed.status, 200)
   })
@@ -394,7 +394,7 @@ describe('API HTTP (file store)', () => {
             unit_price: 1,
             recipe: [
               { id: 'chapters/HeroKinetic' },
-              { id: 'nocturne/StickyWordCycle' },
+              { id: 'chapters/QuoteBreak' },
               { id: 'commerce/ProductGrid' },
             ],
           },

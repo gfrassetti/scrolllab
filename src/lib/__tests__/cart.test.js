@@ -76,14 +76,14 @@ describe('useCart', () => {
     useCart.getState().addItem({
       sku: 'custom:new',
       title: 'Nueva',
-      recipe: [{ id: 'nocturne/StickyWordCycle' }],
+      recipe: [{ id: 'chapters/QuoteBreak' }],
     })
 
     const items = useCart.getState().items
     assert.equal(items.length, 1)
     assert.equal(items[0].sku, 'custom')
     assert.equal(items[0].title, 'Nueva')
-    assert.deepEqual(items[0].recipe, [{ id: 'nocturne/StickyWordCycle' }])
+    assert.deepEqual(items[0].recipe, [{ id: 'chapters/QuoteBreak' }])
     assert.equal(useCartNotice.getState().notice?.updated, true)
   })
 
@@ -161,7 +161,7 @@ describe('useCart', () => {
     const add = (compositionId, id) =>
       useCart.getState().addItem({ sku: 'custom', title: 'Comp', compositionId, recipe: [{ id }] })
     add('a', 'chapters/HeroKinetic')
-    add('b', 'nocturne/SplitReveals')
+    add('b', 'unity/LanguageBlock')
     assert.equal(useCart.getState().items.length, 2)
     add('a', 'monolith/HeroThree')
     const items = useCart.getState().items
@@ -174,7 +174,7 @@ describe('useCart', () => {
 
   it('sincronizar toca solo la composición del builder abierta', () => {
     useCart.getState().addItem({ sku: 'custom', title: 'A', compositionId: 'a', recipe: [{ id: 'chapters/HeroKinetic' }] })
-    useCart.getState().addItem({ sku: 'custom', title: 'B', compositionId: 'b', recipe: [{ id: 'nocturne/SplitReveals' }] })
+    useCart.getState().addItem({ sku: 'custom', title: 'B', compositionId: 'b', recipe: [{ id: 'unity/LanguageBlock' }] })
     useCart.getState().syncComposition([{ id: 'chapters/FooterCTA' }], 'b')
     const items = useCart.getState().items
     assert.deepEqual(items.find((i) => i.compositionId === 'a').recipe, [{ id: 'chapters/HeroKinetic' }])
@@ -198,7 +198,7 @@ describe('useCart', () => {
   // Guardar la composición como proyecto le cambia el id: sigue siendo la misma línea.
   it('renombrar una composición conserva la línea y no toca las otras', () => {
     useCart.getState().addItem({ sku: 'custom', title: 'A', compositionId: 'a', recipe: [{ id: 'chapters/HeroKinetic' }] })
-    useCart.getState().addItem({ sku: 'custom', title: 'B', compositionId: 'b', recipe: [{ id: 'nocturne/SplitReveals' }] })
+    useCart.getState().addItem({ sku: 'custom', title: 'B', compositionId: 'b', recipe: [{ id: 'unity/LanguageBlock' }] })
     useCart.getState().renameComposition('a', 'project-123')
     assert.deepEqual(useCart.getState().items.map((i) => i.compositionId), ['project-123', 'b'])
     useCart.getState().renameComposition('nope', 'x')

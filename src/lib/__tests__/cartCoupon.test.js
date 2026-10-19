@@ -28,7 +28,7 @@ const recipeOf = (ids, times = 1) => Array.from({ length: times }, () => ids).fl
 const CARTS = {
   'un modelo': [{ sku: 'chapters', title: 'CHAPTERS' }],
   // Modelos que el bundle no trae: los que sí trae no pueden ir al lado.
-  'varios modelos y el bundle': [{ sku: 'meridian' }, { sku: 'atrium' }, { sku: 'bundle' }],
+  'varios modelos y el bundle': [{ sku: 'meridian' }, { sku: 'kin' }, { sku: 'bundle' }],
   'una composición chica': [{ sku: 'custom:a', recipe: ['chapters/HeroKinetic'] }],
   'una composición con secciones extra (más de 8)': [
     { sku: 'custom:b', recipe: recipeOf(['chapters/HeroKinetic', 'chapters/QuoteBreak'], 5) },
@@ -37,7 +37,7 @@ const CARTS = {
     { sku: 'custom:c', recipe: ['chapters/HeroKinetic', commerceId] },
   ],
   'todo mezclado': [
-    { sku: 'atrium' },
+    { sku: 'kin' },
     { sku: 'custom:d', recipe: ['chapters/HeroKinetic', commerceId] },
     { sku: 'bundle' },
   ],

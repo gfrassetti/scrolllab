@@ -7,6 +7,7 @@ import crypto from 'node:crypto'
 import { db } from '../../db.js'
 import { requireAuth, asyncHandler, HttpError } from '../../middleware.js'
 import { HOSTABLE_SECTIONS } from '../../sections.js'
+import { isBuilderHiddenSku } from '../../../src/domain/catalog.js'
 import { requestHost } from '../../hostedKey.js'
 import {
   resolveEmbedConfig,
@@ -204,7 +205,8 @@ export function createHostedRouter({ config, limits }) {
     '/api/hosted/sections',
     requireAuth,
     asyncHandler(async (_req, res) => {
-      res.json({ sections: HOSTABLE_SECTIONS })
+      // la lista para elegir un widget nuevo: sin los modelos fuera de la venta
+      res.json({ sections: HOSTABLE_SECTIONS.filter((id) => !isBuilderHiddenSku(id.split('/')[0])) })
     }),
   )
 

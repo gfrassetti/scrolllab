@@ -44,11 +44,15 @@ export const TEMPLATE_PRICES_USD = Object.freeze({
 export const BUNDLE_PRICE_USD = 879
 
 /** Modelos que trae el SKU `bundle`. Orden = orden del ZIP. */
+/**
+ * 2026-10-18 (decisión del dueño): VELOCITY y NOCTURNE salen de la venta;
+ * ATRIUM y APEX ocupan sus lugares y el bundle sigue en 8 y en 879.
+ */
 export const BUNDLE_MODELS = Object.freeze([
   'chapters',
-  'nocturne',
+  'apex',
   'monolith',
-  'velocity',
+  'atrium',
   'fizz',
   'atelier',
   'comic',
@@ -92,22 +96,24 @@ export const WELCOME_COUPON_PERCENT = 10
 
 /**
  * No se venden ni van en el bundle. Los que además son LOCAL_ONLY no se
- * listan en ningún lado.
+ * listan en ningún lado. VELOCITY y NOCTURNE salieron de la venta el 2026-10-18
+ * (decisión del dueño): su código queda solo para rearmar los ZIP ya vendidos y no romper los
+ * widgets de LAB ya publicados.
  */
-export const COMING_SOON_SKUS = Object.freeze(['ratio', 'plum', 'signal'])
+export const COMING_SOON_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne'])
 
 /**
  * Solo en local: sin card en home, sin sitemap ni páginas de producto, y en
  * producción la ruta redirige a la home. RATIO sigue en obra; PLUM y SIGNAL no
  * se van a terminar.
  */
-export const LOCAL_ONLY_SKUS = Object.freeze(['ratio', 'plum', 'signal'])
+export const LOCAL_ONLY_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne'])
 
 /**
  * No entran a la paleta pública del builder, y el servidor rechaza sus
  * secciones aunque alguien arme la receta a mano.
  */
-export const BUILDER_HIDDEN_SKUS = Object.freeze(['ratio', 'plum', 'signal'])
+export const BUILDER_HIDDEN_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne'])
 
 /**
  * No se van a terminar: quedan en el repo solo como referencia local y el

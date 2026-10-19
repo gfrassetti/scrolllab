@@ -53,7 +53,7 @@ describe('createCheckoutOrder', () => {
   })
 
   it('ignora el precio del cliente y cobra el de lista (cliente que ya compró)', async () => {
-    await db.createOrder({ userId: db.uid(user), status: 'paid', provider: 'mercadopago', items: [{ sku: 'nocturne' }], total: 1, currency_id: 'ARS' })
+    await db.createOrder({ userId: db.uid(user), status: 'paid', provider: 'mercadopago', items: [{ sku: 'unity' }], total: 1, currency_id: 'ARS' })
     const out = await createCheckoutOrder({
       user,
       items: [{ sku: 'chapters', unit_price: 1, unit_price_usd: 1 }],

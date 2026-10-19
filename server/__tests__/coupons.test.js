@@ -555,7 +555,7 @@ describe('cupón de bienvenida — API (file store)', () => {
     const me = await agent.get('/api/auth/me').set('Origin', ORIGIN)
     await db.createOrder({ userId: me.body.user.id, status: 'paid', provider: 'mercadopago', items: [{ sku: 'chapters' }], total: 1, currency_id: 'ARS' })
 
-    const res = await checkout(agent, { items: [{ sku: 'nocturne' }], couponCode: code })
+    const res = await checkout(agent, { items: [{ sku: 'unity' }], couponCode: code })
     assert.equal(res.status, 422)
     assert.equal((await check(code, agent)).status, 422)
     // Sin sesión no se puede saber: el chequeo pasa y el checkout decide.

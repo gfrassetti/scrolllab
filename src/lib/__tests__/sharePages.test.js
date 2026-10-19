@@ -22,7 +22,7 @@ function metaContent(html, attr, key) {
   return match ? match[1] : null
 }
 
-const nocturne = demoSharePage('nocturne', {
+const nocturne = demoSharePage('unity', {
   vibe: 'Cinematic noir',
   description: 'Full-bleed images and a zoom portal.',
 })
@@ -30,8 +30,11 @@ const nocturne = demoSharePage('nocturne', {
 describe('publicDemoSkus', () => {
   it('lista las demos públicas y deja afuera las que no se venden', () => {
     const skus = publicDemoSkus()
-    assert.ok(skus.includes('nocturne'))
+    assert.ok(skus.includes('unity'))
     assert.ok(skus.includes('atrium'))
+    // fuera de la venta el 2026-10-18
+    assert.ok(!skus.includes('nocturne'))
+    assert.ok(!skus.includes('velocity'))
     assert.ok(!skus.includes('ratio'))
     assert.ok(!skus.includes('plum'))
   })
@@ -54,11 +57,11 @@ describe('renderSharePage — demo', () => {
   const html = renderSharePage(indexHtml, nocturne)
 
   it('pone la tarjeta y la URL propias de la demo', () => {
-    assert.equal(metaContent(html, 'property', 'og:image'), `${SITE_URL}/og/nocturne.jpg`)
+    assert.equal(metaContent(html, 'property', 'og:image'), `${SITE_URL}/og/unity.jpg`)
     assert.equal(metaContent(html, 'property', 'og:image:type'), 'image/jpeg')
-    assert.equal(metaContent(html, 'property', 'og:url'), `${SITE_URL}/templates/nocturne`)
-    assert.equal(metaContent(html, 'name', 'twitter:image'), `${SITE_URL}/og/nocturne.jpg`)
-    assert.match(metaContent(html, 'property', 'og:title'), /^NOCTURNE — Cinematic noir/)
+    assert.equal(metaContent(html, 'property', 'og:url'), `${SITE_URL}/templates/unity`)
+    assert.equal(metaContent(html, 'name', 'twitter:image'), `${SITE_URL}/og/unity.jpg`)
+    assert.match(metaContent(html, 'property', 'og:title'), /^UNITY — Cinematic noir/)
     assert.equal(
       metaContent(html, 'name', 'twitter:title'),
       metaContent(html, 'property', 'og:title'),

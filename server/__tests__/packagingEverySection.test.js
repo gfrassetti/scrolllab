@@ -68,7 +68,7 @@ const SOLD_ALONE = Object.keys(PRODUCTS).filter(
 
 describe('ZIP de cada template que se vende suelto', () => {
   it('hay alguno (la lista sale del catálogo)', () => {
-    assert.ok(SOLD_ALONE.includes('apex'), `SOLD_ALONE: ${SOLD_ALONE.join(', ')}`)
+    assert.ok(SOLD_ALONE.includes('kin'), `SOLD_ALONE: ${SOLD_ALONE.join(', ')}`)
   })
   for (const model of SOLD_ALONE) {
     it(`${model}: proyecto completo, sin imports rotos ni archivos faltantes`, async () => {

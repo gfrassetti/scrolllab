@@ -160,10 +160,18 @@ export default function App() {
                     element={import.meta.env.DEV ? <AdminAnalytics /> : <Navigate to="/" replace />}
                   />
                   <Route path="/templates/chapters" element={<ChaptersPage />} />
-                  <Route path="/templates/nocturne" element={<NocturnePage />} />
+                  {/* NOCTURNE salió de la venta (2026-10-18): solo en local, como VELOCITY. */}
+                  <Route
+                    path="/templates/nocturne"
+                    element={import.meta.env.DEV ? <NocturnePage /> : <Navigate to="/" replace />}
+                  />
                   <Route path="/templates/monolith" element={<MonolithPage />} />
                   <Route path="/templates/fizz" element={<FizzPage />} />
-                  <Route path="/templates/velocity" element={<VelocityPage />} />
+                  {/* VELOCITY salió de la venta (2026-10-18): solo en local; el código queda para los ZIP vendidos. */}
+                  <Route
+                    path="/templates/velocity"
+                    element={import.meta.env.DEV ? <VelocityPage /> : <Navigate to="/" replace />}
+                  />
                   <Route path="/templates/atelier" element={<AtelierPage />} />
                   <Route path="/templates/comic" element={<ComicPage />} />
                   <Route path="/templates/unity" element={<UnityPage />} />
