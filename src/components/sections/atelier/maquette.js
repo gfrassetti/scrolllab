@@ -3,6 +3,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import oakUrl from './assets/tex-oak.webp'
 import concreteUrl from './assets/tex-concrete.webp'
+import walnutUrl from './assets/tex-walnut.webp'
 
 /**
  * maquette — the studio's architectural model, the kind that sits on the big
@@ -20,7 +21,13 @@ import concreteUrl from './assets/tex-concrete.webp'
  *   2 Landscape    — the trees and the planting grow around the building
  *   3 Materials    — the card turns into cast concrete and the slabs into oak
  *
- * Textures: Poly Haven (CC0) — oak_veneer_01, concrete_wall_008.
+ * The scene is lit like a product shot: a studio environment (reflections on
+ * the glass and the oak), a warm key light with soft shadows, and the model sits on a
+ * walnut work table — plan sheets, a pencil and a ruler beside it, scale figures
+ * on the terrace — that fades into the page.
+ *
+ * Textures: Poly Haven (CC0) — oak_veneer_01, concrete_wall_008,
+ * american_walnut_veneer.
  */
 
 export const STATE_COUNT = 4
@@ -78,6 +85,92 @@ function planTexture() {
   return new THREE.CanvasTexture(c)
 }
 
+/** Fibra de cartulina: ruido fino para rugosidad y relieve (la luz rasante la muestra). */
+function paperTexture() {
+  const c = document.createElement('canvas')
+  c.width = c.height = 256
+  const g = c.getContext('2d')
+  const img = g.createImageData(256, 256)
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 200 + Math.random() * 55
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v
+    img.data[i + 3] = 255
+  }
+  g.putImageData(img, 0, 0)
+  const t = new THREE.CanvasTexture(c)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(3, 3)
+  return t
+}
+
+/** Una hoja de plano (papel claro con la planta, renglones y rótulo). */
+function sheetTexture(seed) {
+  const c = document.createElement('canvas')
+  c.width = 1024
+  c.height = 724
+  const g = c.getContext('2d')
+  g.fillStyle = '#f3f0ea'
+  g.fillRect(0, 0, 1024, 724)
+  g.strokeStyle = 'rgba(30,40,60,0.55)'
+  g.lineWidth = 1.5
+  g.strokeRect(30, 30, 964, 664)
+  g.strokeRect(760, 600, 234, 94)
+  g.lineWidth = 2.5
+  const r = (n) => Math.sin(seed * 99 + n * 12.9) * 0.5 + 0.5
+  for (let k = 0; k < 6; k += 1) {
+    const x = 80 + r(k) * 520
+    const y = 80 + r(k + 7) * 360
+    g.strokeRect(x, y, 120 + r(k + 3) * 220, 80 + r(k + 5) * 160)
+  }
+  g.lineWidth = 1
+  for (let k = 0; k < 14; k += 1) {
+    const y = 60 + k * 38
+    g.beginPath()
+    g.moveTo(640, y)
+    g.lineTo(980, y)
+    g.stroke()
+  }
+  g.font = '22px monospace'
+  g.fillStyle = 'rgba(30,40,60,0.7)'
+  g.fillText(seed % 2 ? 'SECTION A-A  1:50' : 'GROUND FLOOR  1:100', 776, 640)
+  g.fillText('ATELIER NOVE', 776, 676)
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+
+/** Las marcas de una regla. */
+function rulerTexture() {
+  const c = document.createElement('canvas')
+  c.width = 1024
+  c.height = 64
+  const g = c.getContext('2d')
+  g.fillStyle = '#e9e4da'
+  g.fillRect(0, 0, 1024, 64)
+  g.fillStyle = '#2a2a2a'
+  for (let i = 0; i <= 100; i += 1) {
+    const x = 12 + i * 10
+    g.fillRect(x, 0, 1.4, i % 10 === 0 ? 26 : i % 5 === 0 ? 18 : 10)
+  }
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+
+/** Alfa radial: la mesa se funde con el fondo de la página. */
+function fadeTexture() {
+  const c = document.createElement('canvas')
+  c.width = c.height = 256
+  const g = c.getContext('2d')
+  const grad = g.createRadialGradient(128, 128, 30, 128, 128, 128)
+  grad.addColorStop(0, '#fff')
+  grad.addColorStop(0.55, '#bbb')
+  grad.addColorStop(1, '#000')
+  g.fillStyle = grad
+  g.fillRect(0, 0, 256, 256)
+  return new THREE.CanvasTexture(c)
+}
+
 /**
  * @param {THREE.WebGLRenderer} renderer
  * @param {THREE.Scene} scene
@@ -112,14 +205,15 @@ export function createMaquette(renderer, scene, { tint, accent } = {}) {
     cardConcrete.color.copy(concreteColor)
     cardConcrete.needsUpdate = true
   }))
-  const card = own('mat', new THREE.MeshStandardMaterial({ color: cardColor.clone(), roughness: 0.82, metalness: 0 }))
+  const paper = own('tex', paperTexture())
+  const card = own('mat', new THREE.MeshStandardMaterial({ color: cardColor.clone(), roughness: 0.86, roughnessMap: paper, bumpMap: paper, bumpScale: 0.6, metalness: 0 }))
   const cardConcrete = own('mat', new THREE.MeshStandardMaterial({ color: concreteColor, roughness: 0.92, transparent: true, opacity: 0 }))
   const slab = own('mat', new THREE.MeshStandardMaterial({ color: cardColor.clone(), roughness: 0.75 }))
   const slabOak = own('mat', new THREE.MeshStandardMaterial({ color: '#b98b5c', roughness: 0.6, transparent: true, opacity: 0 }))
   const base = own('mat', new THREE.MeshStandardMaterial({ color: '#b98b5c', roughness: 0.55 }))
   const plan = own('tex', planTexture())
   const planMat = own('mat', new THREE.MeshBasicMaterial({ map: plan, transparent: true, opacity: 0.85, depthWrite: false }))
-  const glass = own('mat', new THREE.MeshPhysicalMaterial({ color: '#b8c6c9', roughness: 0.08, metalness: 0, transparent: true, opacity: 0.32 }))
+  const glass = own('mat', new THREE.MeshPhysicalMaterial({ color: '#c3d1d4', roughness: 0.04, metalness: 0, transparent: true, opacity: 0.28, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.4 }))
   const dark = own('mat', new THREE.MeshStandardMaterial({ color: '#2a2a2c', roughness: 0.4 }))
   const tree = own('mat', new THREE.MeshStandardMaterial({ color: accent || '#dfe3d6', roughness: 0.9 }))
   const furniture = own('mat', new THREE.MeshStandardMaterial({ color: '#c8b49a', roughness: 0.8 }))
@@ -150,6 +244,50 @@ export function createMaquette(renderer, scene, { tint, accent } = {}) {
   planMesh.position.y = FLOOR + 0.002
   group.add(planMesh)
 
+  // —— la mesa de trabajo: nogal que se funde con el fondo, planos, lápiz y regla ——
+  const table = new THREE.Mesh(
+    own('geo', new THREE.PlaneGeometry(14, 10)),
+    own('mat', new THREE.MeshStandardMaterial({ color: '#5a3d28', roughness: 0.48, alphaMap: own('tex', fadeTexture()), transparent: true })),
+  )
+  const walnut = own('tex', loadTexture(walnutUrl, renderer, 3, () => {
+    table.material.map = walnut
+    table.material.color.set('#ffffff')
+    table.material.needsUpdate = true
+  }))
+  table.rotation.x = -Math.PI / 2
+  table.position.y = FLOOR - 0.141
+  table.receiveShadow = true
+  group.add(table)
+  const sheet = (seed, w, x, z, rot) => {
+    const m = new THREE.Mesh(
+      own('geo', new THREE.PlaneGeometry(w, w * 0.707)),
+      own('mat', new THREE.MeshStandardMaterial({ map: own('tex', sheetTexture(seed)), roughness: 0.9 })),
+    )
+    m.rotation.set(-Math.PI / 2, 0, rot)
+    m.position.set(x, FLOOR - 0.138 + seed * 0.0015, z)
+    m.receiveShadow = true
+    group.add(m)
+  }
+  sheet(1, 2.6, -2.9, 1.2, 0.22)
+  sheet(2, 2.2, 2.7, -1.7, -0.3)
+  sheet(3, 2.0, 3.2, 1.5, 0.12)
+  // lápiz: cuerpo hexagonal, madera y grafito
+  const pencil = new THREE.Group()
+  const pBody = new THREE.Mesh(own('geo', new THREE.CylinderGeometry(0.035, 0.035, 1.2, 6)), own('mat', new THREE.MeshStandardMaterial({ color: '#1f2a24', roughness: 0.45 })))
+  const pTip = new THREE.Mesh(own('geo', new THREE.ConeGeometry(0.035, 0.12, 6)), own('mat', new THREE.MeshStandardMaterial({ color: '#d9b98c', roughness: 0.7 })))
+  pTip.position.y = 0.66
+  pBody.castShadow = pTip.castShadow = true
+  pencil.add(pBody, pTip)
+  pencil.rotation.set(Math.PI / 2, 0, 1.15)
+  pencil.position.set(2.4, FLOOR - 0.1, 1.05)
+  group.add(pencil)
+  // regla
+  const ruler = new THREE.Mesh(own('geo', new THREE.BoxGeometry(2.2, 0.02, 0.16)), own('mat', new THREE.MeshStandardMaterial({ map: own('tex', rulerTexture()), roughness: 0.5 })))
+  ruler.rotation.y = -0.35
+  ruler.position.set(-2.6, FLOOR - 0.128, -1.45)
+  ruler.castShadow = ruler.receiveShadow = true
+  group.add(ruler)
+
   // —— las piezas del edificio, en el orden en que se arman ——
   // cada pieza: { obj, home (posición final), from (desplazamiento desde arriba), at (cuándo llega) }
   const pieces = []
@@ -177,6 +315,25 @@ export function createMaquette(renderer, scene, { tint, accent } = {}) {
   l2win.position.set(0.05, 0.02, 0.505)
   l2.add(l2win)
   add(mesh(box(1.1, 0.04, 1.0), slab, slabOak), 0.85, y0 + 1.04, -0.04, 0.58)
+  // parantes del vidrio de la planta baja
+  for (let k = 0; k < 7; k += 1) {
+    add(mesh(box(0.016, 0.46, 0.016, 0.003), card, cardConcrete), -0.84 + k * 0.24, y0 + 0.29, 0.47, 0.18)
+  }
+  // baranda de la terraza
+  const rail = new THREE.Group()
+  const railTop = mesh(box(1.08, 0.012, 0.012, 0.003), card)
+  railTop.position.set(0, 0.12, 0.49)
+  rail.add(railTop)
+  for (let k = 0; k < 10; k += 1) {
+    const post = mesh(box(0.008, 0.12, 0.008, 0.002), card)
+    post.position.set(-0.52 + k * 0.115, 0.06, 0.49)
+    rail.add(post)
+  }
+  add(rail, 0.85, y0 + 1.06, -0.04, 0.6)
+  // escalera de acceso
+  for (let k = 0; k < 5; k += 1) {
+    add(mesh(box(0.42, 0.03 * (k + 1), 0.09, 0.004), slab, slabOak), 0.62, y0 + 0.015 * (k + 1), 0.92 - k * 0.09, 0.08)
+  }
   // torre de escalera y techo
   add(mesh(box(0.36, 1.72, 0.36), card, cardConcrete), -1.12, y0 + 0.86, -0.42, 0.66)
   add(mesh(box(1.4, 0.05, 1.1), slab, slabOak), -0.36, y0 + 1.525, -0.04, 0.76)
@@ -222,15 +379,32 @@ export function createMaquette(renderer, scene, { tint, accent } = {}) {
   }
   group.add(trees)
 
+  // —— figuras a escala (como en toda maqueta): cuerpo y cabeza ——
+  const figBody = own('geo', new THREE.CapsuleGeometry(0.022, 0.09, 3, 8))
+  const figHead = own('geo', new THREE.SphereGeometry(0.02, 10, 8))
+  const figures = new THREE.Group()
+  for (const [x, y, z] of [[0.95, y0 + 0.08, 0.92], [1.12, y0 + 0.08, 0.98], [-1.5, y0 + 0.08, 0.3], [0.7, y0 + 1.13, 0.05], [1.05, y0 + 1.13, -0.2]]) {
+    const f = new THREE.Group()
+    const b = new THREE.Mesh(figBody, slab)
+    const h = new THREE.Mesh(figHead, slab)
+    h.position.y = 0.085
+    b.castShadow = h.castShadow = true
+    f.add(b, h)
+    f.position.set(x, y, z)
+    figures.add(f)
+  }
+  group.add(figures)
+
   // —— luz ——
   const ambient = new THREE.AmbientLight(0xffffff, 0.25)
   const key = new THREE.DirectionalLight(0xfff3e4, 2.1)
   key.position.set(3, 5.5, 3.2)
   key.castShadow = true
-  key.shadow.mapSize.set(1024, 1024)
-  Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 1, far: 14 })
-  key.shadow.radius = 5
-  key.shadow.bias = -0.0005
+  key.shadow.mapSize.set(2048, 2048)
+  Object.assign(key.shadow.camera, { left: -4.5, right: 4.5, top: 4.5, bottom: -4.5, near: 1, far: 16 })
+  key.shadow.radius = 4
+  key.shadow.bias = -0.0003
+  key.shadow.normalBias = 0.02
   key.target = group
   const fill = new THREE.DirectionalLight(0xcfdcff, 0.5)
   fill.position.set(-4, 2, 2)
@@ -252,6 +426,10 @@ export function createMaquette(renderer, scene, { tint, accent } = {}) {
     // Interiors: el primer piso y lo de arriba se levantan, aparece el plan amueblado
     const lift = span(state, 0.35, 1) * (1 - span(state, 1.4, 1.9))
     for (const p of pieces) if (p.home.y > y0 + 0.6) p.obj.position.y += lift * 1.15
+    figures.children.forEach((f, i) => {
+      if (i >= 3) f.position.y = y0 + 1.13 + lift * 1.15
+      f.visible = i < 3 ? build > 0.15 : build > 0.62
+    })
     interior.scale.setScalar(Math.max(0.001, lift))
     // Landscape: crecen los árboles (y se quedan)
     const grow = span(state, 1.35, 2.1)

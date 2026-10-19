@@ -37,15 +37,16 @@ export const HERO_THREE_SHAPES = [
 ]
 
 /**
- * Un conjunto de torres de cubos, como una maqueta de bloques de hormigón: una
- * planta de 5 × 5, alturas que suben hacia el centro (con un poco de azar
- * fijo), algunos huecos y dos voladizos arriba. Cada cubo aporta sus aristas y
+ * Una ciudad de cubos de hormigón que llena todo el hero: una planta de 13 × 9,
+ * torres que suben hacia el centro (con azar fijo), calles vacías que la cruzan
+ * y voladizos arriba. Es más grande que la pantalla a propósito: la cámara queda
+ * adentro del conjunto y gira despacio sobre él. Cada cubo aporta sus aristas y
  * sus esquinas (los puntos azules).
  */
 function structureGeometry() {
-  const S = 0.68
-  // azar fijo: la misma estructura en cada carga
-  let seed = 7
+  const S = 0.62
+  // azar fijo: la misma ciudad en cada carga
+  let seed = 11
   const rand = () => {
     seed = (seed * 16807) % 2147483647
     return seed / 2147483647
@@ -56,18 +57,18 @@ function structureGeometry() {
     g.translate(x * S, y * S, z * S)
     parts.push(g)
   }
-  for (let x = -2; x <= 2; x += 1) {
-    for (let z = -2; z <= 2; z += 1) {
-      const d = Math.max(Math.abs(x), Math.abs(z))
-      if (d === 2 && rand() < 0.35) continue // huecos en el borde
-      const h = Math.max(1, Math.round((3 - d) * 2.1 + rand() * 2.2))
+  for (let x = -6; x <= 6; x += 1) {
+    for (let z = -4; z <= 4; z += 1) {
+      if (x === -3 || z === 1) continue // dos calles que cruzan la ciudad
+      if (rand() < 0.12) continue // algún lote vacío
+      const d = Math.hypot(x / 6, z / 4) // 0 en el centro, ~1.4 en las esquinas
+      const h = Math.max(1, Math.round((1.25 - Math.min(d, 1.2)) * 9 + rand() * 3))
       for (let y = 0; y < h; y += 1) add(x, y, z)
     }
   }
-  // voladizos: dos brazos que salen de las torres altas
-  const top = 6
-  for (let k = 1; k <= 3; k += 1) add(k, top, 0)
-  for (let k = 1; k <= 2; k += 1) add(0, top - 2, -k)
+  // voladizos: brazos que salen de las torres altas
+  for (let k = 1; k <= 3; k += 1) add(k, 9, 0)
+  for (let k = 1; k <= 2; k += 1) add(-1, 7, -k - 1)
   const merged = mergeGeometries(parts, false)
   parts.forEach((g) => g.dispose())
   merged.center()
@@ -174,7 +175,8 @@ export default function HeroThree({
       geometry.computeBoundingSphere()
       // Radio de la esfera que envuelve al objeto (con su escala de reposo): con él
       // la cámara sabe cuánto alejarse para que entre en el ancho de la pantalla.
-      let fitRadius = geometry.boundingSphere.radius * REST_SCALE
+      // la ciudad de cubos desborda la pantalla a propósito: se encuadra como un objeto chico
+      let fitRadius = (resolvedShape === 'structure' ? 2.6 : geometry.boundingSphere.radius) * REST_SCALE
       // La estructura de cubos se dibuja solo con sus aristas (sin las diagonales
       // de los triángulos): se lee como una estructura, no como una malla.
       const wireframe =

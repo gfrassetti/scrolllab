@@ -99,7 +99,7 @@ export default function HeroMeaning({
         const halfW = Math.tan((PIECE_FOV * Math.PI) / 360) * z * camera.aspect
         const wide = camera.aspect > 1.15
         const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
-        piece.place(wide ? halfW * 0.5 : 0, wide ? 0.05 : halfH * 0.32, wide ? 0.74 : 0.62)
+        piece.place(wide ? halfW * 0.38 : 0, wide ? halfH * 0.18 : halfH * 0.32, wide ? 0.8 : 0.62)
       }
       resize()
       window.addEventListener('resize', resize)
@@ -245,14 +245,16 @@ export default function HeroMeaning({
         {meta}
       </p>
 
-      <div className="relative z-[2] mix-blend-difference">
-        <h1
-          data-atelier-hero
-          className="max-w-[12ch] font-brico text-[clamp(2.8rem,10vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.04em]"
-        >
-          {line1}
-          <br />
-          {line2}
+      {/* el titular: Space Grotesk liviana (la letra de la página) y una cursiva de
+          libro de arquitectura para la segunda línea; delante de la maqueta */}
+      <div className="pointer-events-none relative z-10 mt-auto mb-8 md:mb-10">
+        <h1 data-atelier-hero className="leading-[0.86] text-current">
+          <span className="block font-grotesk text-[clamp(3.4rem,12.5vw,11rem)] font-light tracking-[-0.06em]">
+            {line1}
+          </span>
+          <span className="block pl-[0.06em] font-display text-[clamp(3.4rem,12.5vw,11rem)] font-normal tracking-[-0.03em] italic">
+            {line2}
+          </span>
         </h1>
       </div>
 

@@ -81,7 +81,8 @@ export function brokenImports(files) {
   for (const [name, content] of files) {
     if (!/\.(jsx?|tsx?)$/.test(name)) continue
     for (const spec of relativeImports(content.toString('utf8'))) {
-      if (!resolveInZip(files, name, spec)) broken.push(`${name} → ${spec}`)
+      // `./x.hdr?url`: Vite resuelve el archivo sin el sufijo de la consulta
+      if (!resolveInZip(files, name, spec.replace(/\?.*$/, ''))) broken.push(`${name} → ${spec}`)
     }
   }
   return broken

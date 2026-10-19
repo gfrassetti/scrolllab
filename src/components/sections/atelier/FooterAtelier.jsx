@@ -17,7 +17,7 @@ export default function FooterAtelier({
   line = 'Tell us about the place.',
   cta = 'Start a project →',
   ctaHref = '#contact',
-  brand = 'NOVE',
+  brand = 'ATELIER',
   legal = '©2026 Atelier Nove S.r.l. — Milan',
   email = 'studio@ateliernove.it',
   phone = '+39 02 555 0187',
