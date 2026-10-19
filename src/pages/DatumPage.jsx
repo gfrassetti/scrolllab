@@ -1,13 +1,14 @@
 import SmoothScrollProvider from '../components/SmoothScrollProvider'
 import HeroDatum from '../components/sections/datum/HeroDatum'
 import NavDatum, { InvertDatum } from '../components/sections/datum/NavDatum'
+import PracticeDatum from '../components/sections/datum/PracticeDatum'
 
 /**
  * Template model — "DATUM" (in progress, local only)
  * An architecture practice in Porto. The page is a drawing sheet: an 8-column grid of hairlines, a datum
  * line from corner to corner, ruler ticks and a scale bar; black and white, and «Invert drawing» turns it
  * over. Reference studied: santalarch.com (structure and feel only — own name, copy, details and fonts).
- * Only the hero exists so far.
+ * So far: the hero and the practice (the cube field).
  */
 const THEME = `
 @property --datum-paper { syntax: '<color>'; inherits: true; initial-value: #efefed; }
@@ -26,7 +27,8 @@ export default function DatumPage() {
         <NavDatum />
         <main>
           <HeroDatum />
-          <section id="practice" className="flex min-h-svh items-center justify-center px-6 text-center" style={{ background: 'var(--datum-ink)', color: 'var(--datum-paper)' }}>
+          <PracticeDatum />
+          <section id="buildings" className="flex min-h-svh items-center justify-center px-6 text-center" style={{ background: 'var(--datum-ink)', color: 'var(--datum-paper)' }}>
             <p className="opacity-60">Next section — in progress.</p>
           </section>
         </main>
