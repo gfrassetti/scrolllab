@@ -37,8 +37,10 @@ const CREAM = '#efe6d3' // el papel del cuaderno: fondo de la carga y de las pá
 // La carga, en segundos desde que todo bajó: la línea crece desde el visor, después entra el color.
 const INK_SECS = 4.4
 const INK = '#1f1810' // tinta cálida, como el contorno de las ilustraciones
-const SCROLL_SCREENS = 40
-// El guion se escribe en pantallas de scroll (0 = arriba de todo, 39 = el final) y se pasa a progreso.
+// 2026-10-19, dueño: «hay que scrollear demasiado» en la página 02, las cartas, el Faro, los juramentos y el
+// mundo. El guion se apretó de 39 a 27,5 pantallas: cada tramo dura menos y se pisan más entre sí.
+const SCROLL_SCREENS = 28.5
+// El guion se escribe en pantallas de scroll (0 = arriba de todo, 27,5 = el final) y se pasa a progreso.
 const TRAVEL = SCROLL_SCREENS - 1
 const S = (a, b) => [a / TRAVEL, b / TRAVEL]
 // Cuánto mide de verdad cada «pantalla» del guion, en svh. La referencia recorre todo en ~16 pantallas
@@ -49,31 +51,31 @@ const SCREEN_SVH = 58
 
 
 const T = {
-  heroOut: S(0.15, 0.6), // el titular y la bitácora del hero se desvanecen
-  morph: S(0.45, 2.1), // el hero se aleja y queda como lámina
-  tableIn: S(1.12, 2.1), // las láminas suben a su lugar
-  ink: S(1.8, 2.55), // su titular se entinta
-  tableOut: S(3.45, 3.9), // el texto de las láminas se va
-  flip: S(3.45, 4.65), // la lámina del hero se da vuelta y crece a pantalla completa
-  ridge: S(4.5, 10.5), // la cordillera: q de 0 a 1
-  wipe: S(9.9, 11.4), // la transición de rombos (tapa todo en el medio)
-  relic: S(10.65, 13.6), // la reliquia: la carta gira con el scroll
-  relicOut: S(13.4, 14.4), // la carta se aleja y la sección se va
-  rosterBg: S(13.6, 14.6), // un cuadrado oscuro crece desde el centro hasta llenar la pantalla
-  rosterIn: S(14.1, 15.1), // los dos abanicos de guardianes se abren desde el centro
-  roster: S(13.9, 18.4),
-  rosterAuto: S(14.6, 17.1), // mientras tanto pasan solos; pasado este punto se frenan
-  rosterFold: S(17.1, 17.8), // y se cierran hacia el centro (queda una carta por lado)
-  rosterOut: S(17.7, 18.3), // las dos cartas se achican y se van
-  beacon: S(18, 23), // el Faro: b de 0 a 1
-  beaconOut: S(23, 24.2), // el mundo del Faro se achica a una carta y sale volando hacia arriba
-  oathsIn: S(23.75, 25.2), // la carta de los juramentos sube desde abajo y crece a pantalla completa
-  oaths: S(25.4, 30.6), // los juramentos: dos personajes en capas, con su propio HOLD
-  oathsOut: S(30.4, 31.6), // se van como el Faro: carta que sale volando
-  worldIn: S(31.15, 32.8), // sube la carta del mundo
-  world: S(32.8, 37.2), // el mundo: el archipiélago desde el acantilado, con su HOLD
-  worldOut: S(37, 38.2),
-  endIn: S(37.5, 39), // el cierre: la marca gigante y el collage de tres cartas
+  heroOut: S(0.12, 0.45), // el titular y la bitácora del hero se desvanecen
+  morph: S(0.3, 1.45), // el hero se aleja y queda como lámina (el giro: más corto y ágil)
+  tableIn: S(0.8, 1.45), // las láminas suben a su lugar
+  ink: S(1.2, 1.75), // su titular se entinta
+  tableOut: S(2.25, 2.6), // el texto de las láminas se va (la página 02 ya no se queda esperando)
+  flip: S(2.25, 3.25), // la lámina del hero se da vuelta y crece a pantalla completa
+  ridge: S(3.15, 7.8), // la cordillera: q de 0 a 1
+  wipe: S(7.2, 8.6), // la transición de rombos (tapa todo en el medio)
+  relic: S(7.9, 10.3), // la reliquia: la carta gira con el scroll
+  relicOut: S(10.1, 10.9), // la carta se aleja y la sección se va
+  rosterBg: S(10.3, 11.1), // un cuadrado oscuro crece desde el centro hasta llenar la pantalla
+  rosterIn: S(10.7, 11.5), // los dos abanicos de guardianes se abren desde el centro
+  roster: S(10.5, 13.8),
+  rosterAuto: S(11.1, 12.5), // mientras tanto pasan solos; pasado este punto se frenan
+  rosterFold: S(12.5, 13.0), // y se cierran hacia el centro (queda una carta por lado)
+  rosterOut: S(13.0, 13.6), // las dos cartas se achican y se van
+  beacon: S(13.5, 16.9), // el Faro: b de 0 a 1
+  beaconOut: S(16.9, 17.8), // el mundo del Faro se achica a una carta y sale volando hacia arriba
+  oathsIn: S(17.4, 18.5), // la carta de los juramentos sube desde abajo y crece a pantalla completa
+  oaths: S(18.6, 21.4), // los juramentos: dos personajes en capas, con su propio HOLD
+  oathsOut: S(21.3, 22.2), // se van como el Faro: carta que sale volando
+  worldIn: S(21.9, 23.0), // sube la carta del mundo
+  world: S(23.0, 25.6), // el mundo: el archipiélago desde el acantilado, con su HOLD
+  worldOut: S(25.5, 26.3),
+  endIn: S(26.0, 27.5), // el cierre: la marca gigante y el collage de tres cartas
 }
 // Dentro del Faro (b).
 const B = {
@@ -124,13 +126,13 @@ const HERO_CARDS = ['/proto/kanvas/hero/card-still.webp', '/proto/kanvas/hero/ca
 
 const NAV = [
   { id: 'atlas', label: 'Atlas', p: 0, leaf: '01' },
-  { id: 'isles', label: 'The Isles', p: 2.9 / TRAVEL, leaf: '02' },
-  { id: 'wayfarers', label: 'Wayfarers', p: 8.6 / TRAVEL, leaf: '03' },
-  { id: 'relics', label: 'Relics', p: 12.6 / TRAVEL, leaf: '04' },
-  { id: 'keepers', label: 'Keepers', p: 16 / TRAVEL, leaf: '05' },
-  { id: 'beacon', label: 'The Beacon', p: 21.6 / TRAVEL, leaf: '06' },
-  { id: 'oaths', label: 'The Oaths', p: 27 / TRAVEL, leaf: '07' },
-  { id: 'world', label: 'The World', p: 34.5 / TRAVEL, leaf: '08' },
+  { id: 'isles', label: 'The Isles', p: 1.9 / TRAVEL, leaf: '02' },
+  { id: 'wayfarers', label: 'Wayfarers', p: 5.9 / TRAVEL, leaf: '03' },
+  { id: 'relics', label: 'Relics', p: 9.3 / TRAVEL, leaf: '04' },
+  { id: 'keepers', label: 'Keepers', p: 11.8 / TRAVEL, leaf: '05' },
+  { id: 'beacon', label: 'The Beacon', p: 16.0 / TRAVEL, leaf: '06' },
+  { id: 'oaths', label: 'The Oaths', p: 20.0 / TRAVEL, leaf: '07' },
+  { id: 'world', label: 'The World', p: 24.5 / TRAVEL, leaf: '08' },
 ]
 const END = { id: 'end', p: 1 }
 // las tres cartas del cierre: a qué hoja lleva cada una (el rótulo aparece al pasar el mouse)
