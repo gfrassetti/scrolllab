@@ -127,12 +127,13 @@ export function seoForPath(pathname) {
   }
   if (path === '/estudio/vesper') {
     // VESPER es una pieza propia del Estudio, no un trabajo para un cliente: no está linkeada en el sitio y
-    // se muestra solo a mano, en una conversación (dueño, 2026-10-19). Fuera de los buscadores.
+    // se muestra solo a mano (dueño, 2026-10-19). Sin título ni descripción propios (no tiene sentido si no
+    // aparece en ningún lado): solo queda fuera de los buscadores.
     return {
-      title: 'VESPER',
-      description: 'Un mundo ilustrado en 3D que se recorre en un solo canvas.',
+      title: SITE_SEO.title,
+      description: SITE_SEO.description,
       robots: 'noindex, nofollow, noarchive, noai, noimageai',
-      canonical: `${SITE_URL}/estudio/vesper`,
+      canonical: `${SITE_URL}/`,
     }
   }
   if (path === '/builder') {
