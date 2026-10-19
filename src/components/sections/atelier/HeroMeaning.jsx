@@ -131,7 +131,7 @@ export default function HeroMeaning({
           >
             <img
               {...imgAttrs(slide.img, variants)}
-              sizes="(max-width: 767px) 180vh, 100vw"
+              sizes="(max-width: 767px) 125vh, 100vw"
               alt={slide.caption || ''}
               fetchPriority={i === 0 ? 'high' : 'low'}
               loading={i === 0 ? 'eager' : 'lazy'}
