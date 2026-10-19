@@ -243,6 +243,9 @@ async function main() {
         [STORAGE_KEY, JSON.stringify([{ uid: 'c1', sectionId: id, props }])],
       )
       await page.goto(`http://127.0.0.1:${port}/preview`, { waitUntil: 'domcontentloaded' })
+      // En frío (Vite recién arrancado, una sola sección) 2,5 s fijos no alcanzaban
+      // y salía «no se encontró la sección» sin que la sección tuviera nada.
+      await page.waitForSelector('#top > div', { timeout: 20_000 }).catch(() => {})
       await page.waitForTimeout(2500)
       const res = used.length ? await page.evaluate(scanInPage, used) : { noFields: true }
       const accepted = ACCEPTED[id] || []
