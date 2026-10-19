@@ -139,7 +139,7 @@ export default function LastPortrait({
               [stat3Label, stat3Value],
             ].map(([label, value], i) => (
               <div key={i} className="min-w-0 break-words">
-                <dt className="text-[11px] tracking-[0.22em] uppercase opacity-45">
+                <dt className="text-[11px] tracking-[0.22em] uppercase opacity-60">
                   {label}
                 </dt>
                 <dd className="mt-1 font-oswald text-2xl font-semibold uppercase">
