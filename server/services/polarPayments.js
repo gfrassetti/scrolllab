@@ -7,7 +7,7 @@ import { syncPolarSubscriptionEvent, handlePolarLabOrder, handlePolarLabRefund }
 
 /**
  * Casos de uso de Polar para las compras (market y builder) y su webhook. Ver
- * docs/polar.md. Mismo contrato que Lemon Squeezy (lemonPayments.js): la orden se
+ * docs/polar.md. Mismo contrato que Mercado Pago (payments.js): la orden se
  * identifica por lo que guardó el servidor al abrir el checkout (`metadata.orderId`,
  * dentro del webhook firmado) y se valida contra ella: proveedor, moneda, entorno
  * (prueba / real) y el monto antes de impuestos. Un pago que no coincide no entrega

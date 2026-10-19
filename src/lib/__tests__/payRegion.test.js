@@ -12,7 +12,7 @@ import { couponLinePrice } from '../coupon.js'
 
 /**
  * Desde dónde paga el comprador (el default del selector del carrito y de
- * LAB): la detección solo propone; la elección guardada manda; sin Lemon Squeezy,
+ * LAB): la detección solo propone; la elección guardada manda; sin Polar,
  * siempre Mercado Pago.
  */
 describe('región de pago', () => {
@@ -59,7 +59,7 @@ describe('región de pago', () => {
 
   it('cada región tiene su pasarela', () => {
     assert.equal(providerForRegion('ar'), 'mercadopago')
-    assert.equal(providerForRegion('intl'), 'lemonsqueezy')
+    assert.equal(providerForRegion('intl'), 'polar')
   })
 
   it('moneda: con el carril internacional sigue al medio de pago, no al idioma; sin él, la regla de siempre', () => {
@@ -81,7 +81,7 @@ describe('región de pago', () => {
     assert.match(formatNextSectionPrice(8, false, 'ARS', RATE), /\$\s?\d/)
   })
 
-  it('USD: centavos solo si los hay, igual que lo que cobra Lemon Squeezy con el cupón', () => {
+  it('USD: centavos solo si los hay, igual que lo que cobra Polar con el cupón', () => {
     assert.equal(formatUsd(149), 'US$149')
     const discounted = couponLinePrice({ usd: 149, rate: 1500, percent: 10, currency: 'USD' })
     assert.equal(discounted, 134.1)

@@ -127,9 +127,9 @@ describe('cambio de precio de LAB — servicio', () => {
     assert.ok((await db.findPriceChangeNotice(String(db.uid(sub)), up.id)).appliedAt)
   })
 
-  it('no inscribe a quien ya paga el precio nuevo, a Lemon Squeezy (en espera), a canceladas ni a las de prueba', async () => {
+  it('no inscribe a quien ya paga el precio nuevo, a Polar (en espera), a canceladas ni a las de prueba', async () => {
     const paying = await newSub({ mpPreapprovalId: 'pa-new' })
-    const lemon = await newSub({ provider: 'lemonsqueezy', mpPreapprovalId: undefined, currency_id: 'ARS' })
+    const polar = await newSub({ provider: 'polar', mpPreapprovalId: undefined, currency_id: 'ARS' })
     const canceled = await newSub({ mpPreapprovalId: 'pa-cx', canceledAt: new Date() })
     const qa = await newSub({ mpPreapprovalId: 'pa-qa', qa: true })
     const mp = fakeMp({
@@ -138,10 +138,10 @@ describe('cambio de precio de LAB — servicio', () => {
       'pa-qa': { amount: 99900, next: '2026-12-20T12:00:00Z' },
     })
     const s = await runPriceChanges({ config: config(), changes: [up], deps: { ...mp, send: async () => ({ sent: true, id: 'x' }) } })
-    for (const sub of [paying, lemon, canceled, qa]) {
+    for (const sub of [paying, polar, canceled, qa]) {
       assert.equal(await db.findPriceChangeNotice(String(db.uid(sub)), up.id), null)
     }
-    assert.ok(s.skipped['lemonsqueezy-pendiente'] >= 1)
+    assert.ok(s.skipped['polar-pendiente'] >= 1)
   })
 
   it('anual: aviso al anunciar y un solo recordatorio cerca del cobro con el precio nuevo', async () => {

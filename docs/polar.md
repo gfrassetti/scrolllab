@@ -1,25 +1,25 @@
 # Polar — pasarela internacional (USD, merchant of record)
 
-Estado (2026-10-19): **etapas 1 y 2 conectadas** (compras de templates, bundle y builder, reembolsos, Botón de
-arrepentimiento y LAB). Compras probadas en vivo en el sandbox (compra, devolución por el botón y devolución desde
-el panel). Se abrió como plan B de Lemon Squeezy, que lleva días sin aprobar
-la tienda (`docs/lemonsqueezy.md`). La que apruebe primero queda como carril internacional; las dos pueden estar
-conectadas a la vez.
+Estado (2026-10-19): **etapas 1 y 2 conectadas y probadas en vivo en el sandbox** (compras de templates, bundle y
+builder, reembolsos, Botón de arrepentimiento y LAB: alta, primer cobro, subir y bajar de plan, devolución del
+primer cobro con baja inmediata). Es la única pasarela internacional: Paddle se descartó el 2026-10-15 y Lemon
+Squeezy el 2026-10-19 (no aprobaba la tienda y los reembolsos de suscripción fallaban en su modo prueba); el código
+de las dos se borró. Las filas viejas de QA con `provider: 'lemonsqueezy'` quedan en la base y se ven a mano.
 
 ## Por qué Polar
 
-- Merchant of record: cobra y liquida los impuestos de cada país, como Lemon Squeezy.
+- Merchant of record: cobra y liquida los impuestos de cada país.
 - Paga a vendedores de Argentina (Stripe Connect Express, a una cuenta bancaria en pesos a nombre del titular).
 - **Tiene un entorno de prueba aparte** (`sandbox.polar.sh`, otra cuenta y otro token): se prueba todo, incluidas las
-  devoluciones, antes de que aprueben la cuenta real. Con Lemon eso no se pudo.
+  devoluciones, antes de que aprueben la cuenta real.
 
 ## Cómo está armado
 
 - `server/services/polar.js`: cliente de la API, firma de los webhooks (Standard Webhooks) y checkout.
 - `server/services/polarPayments.js`: cumplir una orden (`order.paid`), reembolso (`order.refunded` / `order.updated`),
   la vuelta del comprador y el webhook.
-- `server/services/intlGateway.js`: qué pasarela cobra el carril internacional. Con Polar y Lemon Squeezy usables, manda
-  `INTL_GATEWAY` (`polar` | `lemonsqueezy`); sin él, Polar. `GET /api/checkout/methods` lo informa en `intl`.
+- `server/services/intlGateway.js`: si el carril internacional está y quién lo puede usar (en sandbox, solo QA).
+  `GET /api/checkout/methods` lo informa en `intl`.
 - Cada orden se cobra sobre un producto genérico **«ScrollLab order»** con un **precio ad hoc** (`prices` del checkout)
   que calcula el servidor. El producto se busca por nombre y, si no existe, se crea solo: no hace falta una variable.
 - La orden viaja en `metadata` del checkout (`kind`, `orderId`, `userId`) y Polar la copia a la orden. Se valida:
@@ -36,7 +36,6 @@ conectadas a la vez.
 POLAR_ACCESS_TOKEN=...        # Organization Access Token (del entorno que corresponda)
 POLAR_WEBHOOK_SECRET=whsec_...
 POLAR_ENV=sandbox             # «production» al salir a cobros reales; sandbox = solo cuentas de QA
-# INTL_GATEWAY=polar          # opcional, si están Polar y Lemon Squeezy a la vez
 ```
 
 En desarrollo el token puede ir como `POLAR_SANDBOX_TOKEN` en `.env`.
@@ -44,9 +43,19 @@ En desarrollo el token puede ir como `POLAR_SANDBOX_TOKEN` en `.env`.
 Webhook (en Polar: Settings → Webhooks): URL `https://scrolllab-production.up.railway.app/api/webhooks/polar`,
 formato **Raw**, eventos `order.paid`, `order.updated`, `order.refunded` y (para LAB) todos los `subscription.*`.
 
+## Devolver una compra (runbook)
+
+1. El cliente usa el **Botón de arrepentimiento** (pie del home). Lo que cumple la política (compra sin descargar en 14
+   días; LAB, el primer cobro dentro de los 14 días del alta) se devuelve solo por la API, después de que confirma por
+   mail.
+2. Lo demás llega al dueño (aviso por mail y `/admin` → «Arrepentimiento»). Si corresponde, en Polar: Sales → Orders →
+   la orden → **Refund**.
+3. Solo: el webhook (`order.refunded` / `order.updated`) corta la orden o da de baja LAB, lo anota en el libro (`/admin`
+   → «Reembolsos») y manda «Te devolvimos el dinero».
+
 ## Probar
 
-- `server/__tests__/polarCheckout.test.js` contra un Polar simulado (`helpers/fakePolar.js`).
+- `server/__tests__/polarCheckout.test.js` y `polarLab.test.js` contra un Polar simulado (`helpers/fakePolar.js`).
 - En vivo, con la cuenta de QA: `/test` → «Template de prueba · Polar» → tarjeta 4242 → Mis compras → Botón de
   arrepentimiento.
 

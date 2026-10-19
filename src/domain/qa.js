@@ -16,8 +16,8 @@ export const QA_TEMPLATE_SKU = 'qa-template'
 export const QA_TEMPLATE_MODEL = 'chapters'
 export const QA_TEMPLATE_ARS = 1
 /**
- * Lemon Squeezy: el mismo producto de prueba, a US$ 1 fijos (el cupón de primera
- * compra no se aplica). Con `LEMONSQUEEZY_TEST_MODE` el checkout no cobra nada.
+ * Polar: el mismo producto de prueba, a US$ 1 fijos (el cupón de primera
+ * compra no se aplica). Con `POLAR_ENV=sandbox` el checkout no cobra nada.
  */
 export const QA_TEMPLATE_USD = 1
 

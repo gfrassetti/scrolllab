@@ -4,7 +4,7 @@ import { sendRefundIssued } from './email.js'
 
 /**
  * El libro de reembolsos y el mail al cliente, en un solo lugar: lo llaman los
- * webhooks de Mercado Pago y de Lemon Squeezy cuando la pasarela confirma una
+ * webhooks de Mercado Pago y de Polar cuando la pasarela confirma una
  * devolución (automática por el Botón de arrepentimiento o hecha a mano en el
  * panel). Una fila por pago/ajuste (`externalId`); el mail «Te devolvimos el
  * dinero» sale una vez por monto (un parcial que se completa manda otro) y

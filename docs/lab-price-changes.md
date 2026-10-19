@@ -1,6 +1,6 @@
 # Cambiar el precio de LAB a los que ya están suscriptos
 
-Estado (2026-10-12): **listo en simulación, solo Mercado Pago.** Lemon Squeezy (LAB en USD) espera al paso (0)
+Estado (2026-10-12): **listo en simulación, solo Mercado Pago.** Polar (LAB en USD) espera al paso (0)
 de abajo. Diseño revisado con la sesión de Arquitectura.
 
 ## Antes de tocar un precio: el paso (0) pendiente
@@ -29,6 +29,6 @@ no hace nada.
 
 ## Pendiente
 
-- Paso (0) y Lemon Squeezy (cambiar el precio de la variante para los ya suscriptos).
+- Paso (0) y Polar (cambiar el precio del producto para los ya suscriptos).
 - Probar en el sandbox de Mercado Pago que cambiar el monto no le manda nada raro al suscriptor.
 - Lo legal (cuántos días de aviso, derecho a cancelar): lo confirma el dueño con quien lo asesore.

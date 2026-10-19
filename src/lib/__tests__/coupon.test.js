@@ -39,7 +39,7 @@ describe('firstPurchaseDeal (precio de los «Comprar» rápidos)', () => {
     assert.match(deal.price.replace(/\s/g, ' '), /210\.000/)
   })
 
-  it('con cupón vigente, en dólares (Lemon Squeezy): con centavos', () => {
+  it('con cupón vigente, en dólares (Polar): con centavos', () => {
     const deal = firstPurchaseDeal({ usd: 149, currency: 'USD', coupon: COUPON })
     assert.deepEqual(deal, { list: 'US$149', price: 'US$134.10', percent: 10 })
   })

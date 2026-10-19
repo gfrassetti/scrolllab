@@ -21,7 +21,7 @@ import { HOSTED_PLANS } from '../catalog.js'
 
 /**
  * La matriz de mails al cliente: cada evento, en español e inglés, cobrado por
- * Mercado Pago (ARS) y por Lemon Squeezy (USD). Cada mail tiene que salir completo
+ * Mercado Pago (ARS) y por Polar (USD). Cada mail tiene que salir completo
  * (asunto, html y texto), sin nada roto («undefined», «NaN», «Invalid Date»,
  * «null», una llave `{{…}}` sin reemplazar), en el idioma que corresponde y con
  * el monto en su moneda. Los tests de cada flujo verifican CUÁNDO sale cada uno
@@ -36,7 +36,7 @@ const user = { name: 'Ana Pérez', email: 'ana@test.com' }
 // «US$ 134,10» / «$134.10».
 const PROVIDERS = [
   { provider: 'mercadopago', currency: 'ARS', amount: 210000, money: { es: /\$\s?210\.000/, en: /ARS\s?210,000/ } },
-  { provider: 'lemonsqueezy', currency: 'USD', amount: 134.1, money: { es: /US\$\s?134,10/, en: /\$134\.10/ } },
+  { provider: 'polar', currency: 'USD', amount: 134.1, money: { es: /US\$\s?134,10/, en: /\$134\.10/ } },
 ]
 const LANGS = [
   { locale: 'es', word: /tu|Tu/ },
@@ -73,7 +73,7 @@ const sub = (p, locale, extra = {}) => ({
   ...extra,
 })
 
-describe('matriz de mails al cliente (es/en · Mercado Pago/Lemon Squeezy)', () => {
+describe('matriz de mails al cliente (es/en · Mercado Pago/Polar)', () => {
   for (const p of PROVIDERS) {
     for (const l of LANGS) {
       const tag = `${p.provider}/${l.locale}`
@@ -98,7 +98,7 @@ describe('matriz de mails al cliente (es/en · Mercado Pago/Lemon Squeezy)', () 
           const mail = buildRefundIssued({ name: 'Ana', locale: l.locale, amount: p.amount, currency: p.currency, provider: p.provider, what: 'CHAPTERS', kind, partial, ...urls })
           assertClean(mail, `devolución ${kind}${partial ? ' parcial' : ''}`)
           assert.match(mail.text, p.money[l.locale])
-          assert.match(mail.text, p.provider === 'lemonsqueezy' ? /Lemon Squeezy/ : /Mercado Pago/)
+          assert.match(mail.text, p.provider === 'polar' ? /Polar/ : /Mercado Pago/)
         }
       })
 

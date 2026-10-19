@@ -34,7 +34,7 @@ export function checkoutPayloadFromItems(items) {
 }
 
 /**
- * Inicia el pago: Mercado Pago (redirect a Checkout Pro, o mock) o Lemon
+ * Inicia el pago: Mercado Pago (redirect a Checkout Pro, o mock) o Polar
  * Squeezy (redirect a su página de pago; vuelve a /checkout/success, que espera
  * al webhook).
  * Sin sesión: marca intención y manda a login; al volver a /cart el carrito retoma solo.
@@ -45,7 +45,7 @@ export function checkoutPayloadFromItems(items) {
  *   navigate: (to: string) => void,
  *   loginNext?: string,
  *   couponCode?: string,
- *   provider?: 'mercadopago' | 'lemonsqueezy' | 'polar',
+ *   provider?: 'mercadopago' | 'polar',
  *   locale?: string,
  * }} opts
  * @returns {Promise<'login' | 'redirect'>}
@@ -75,7 +75,7 @@ export async function startCheckout({
 
   // Mercado Pago es el default del servidor: solo el carril internacional viaja explícito.
   const data = await api.checkout(payload, couponCode, {
-    provider: provider === 'lemonsqueezy' || provider === 'polar' ? provider : undefined,
+    provider: provider === 'polar' ? provider : undefined,
     locale,
   })
   if (!data?.init_point) {

@@ -34,7 +34,7 @@ import { addBillingCycle, isMock, subId } from './billing.js'
  *   cuenta a quién inscribiría, avisaría y aplicaría, sin escribir, mandar ni
  *   tocar el proveedor. Una lista vacía no hace nada.
  * - Tope de mails por barrido (`maxEmails`, 50).
- * - Solo Mercado Pago. Lemon Squeezy queda esperando: todavía no está el monto
+ * - Solo Mercado Pago. Polar queda esperando: todavía no está el monto
  *   recurrente guardado en la fila (el paso (0) del plan).
  * - Un resumen al dueño cuando algo pasó (alertAdmin, una vez por corrida).
  * - Anual: un recordatorio cuando faltan YEARLY_REMINDER_DAYS o menos para el
@@ -60,8 +60,8 @@ export function currentChanges(changes) {
  * cobro. `skip` explica por qué no se puede saber (y entonces no se toca).
  */
 async function providerState(sub, config, deps) {
-  if (sub.provider === 'lemonsqueezy') return { skip: 'lemonsqueezy-pendiente' }
-  if (sub.provider === 'polar') return { skip: 'polar-pendiente' }
+  // Polar y las filas viejas de Lemon Squeezy (pasarela retirada el 2026-10-19).
+  if (sub.provider === 'polar' || sub.provider === 'lemonsqueezy') return { skip: 'polar-pendiente' }
   if (!sub.mpPreapprovalId) return { skip: 'sin-preapproval' }
   const fetch = deps.fetchPreapproval || (isMock(config) ? null : fetchPreapproval)
   if (!fetch) return { skip: 'mp-simulado' }

@@ -203,7 +203,7 @@ const PAYMENT_FAILED_COPY = {
 }
 
 /**
- * «Pago rechazado» de una compra (Mercado Pago o Lemon Squeezy). La orden sigue
+ * «Pago rechazado» de una compra (Mercado Pago o Polar). La orden sigue
  * pendiente y el carrito del comprador no se vació.
  * @param {{ order: any, user: any, retryUrl: string, logoUrl: string }} args
  */
@@ -236,26 +236,21 @@ export function buildOrderPaymentFailed({ order, user, retryUrl, logoUrl }) {
   })
 }
 
-const LEMON_INVOICE_NOTE = {
-  es: 'La factura la emite Lemon Squeezy, nuestro revendedor autorizado, y te llega en un mail aparte.',
-  en: 'Your invoice is issued by Lemon Squeezy, our authorized reseller, and arrives in a separate email.',
-}
-
 const POLAR_INVOICE_NOTE = {
   es: 'La factura la emite Polar, nuestro revendedor autorizado, y te llega en un mail aparte.',
   en: 'Your invoice is issued by Polar, our authorized reseller, and arrives in a separate email.',
 }
 
-/** ¿Cobra un merchant of record en USD? (Lemon Squeezy o Polar). */
-export const isMerchantOfRecord = (provider) => provider === 'lemonsqueezy' || provider === 'polar'
+/** ¿Cobra un merchant of record en USD? (Polar). */
+export const isMerchantOfRecord = (provider) => provider === 'polar'
 
 /** Nombre de la pasarela para los textos. */
 export const gatewayName = (provider) =>
-  provider === 'polar' ? 'Polar' : provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'
+  provider === 'polar' ? 'Polar' : 'Mercado Pago'
 
 /** Nota del pie del recibo cuando cobró el merchant of record. */
-export function invoiceNote(locale, provider = 'lemonsqueezy') {
-  return (provider === 'polar' ? POLAR_INVOICE_NOTE : LEMON_INVOICE_NOTE)[langOf(locale)]
+export function invoiceNote(locale) {
+  return POLAR_INVOICE_NOTE[langOf(locale)]
 }
 
 /**
@@ -268,7 +263,7 @@ export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   const summary = orderPriceSummary(order)
   const footer =
     isMerchantOfRecord(order.provider)
-      ? `This email is your purchase summary, not a tax invoice. ${invoiceNote('en', order.provider)} Need help? Just reply.`
+      ? `This email is your purchase summary, not a tax invoice. ${invoiceNote('en')} Need help? Just reply.`
       : 'This email is your purchase summary, not a tax invoice. Need help? Just reply.'
   return render({
     lang: 'en',
@@ -439,7 +434,7 @@ export function buildSubscriptionCharge({ subscription, user, accountUrl, logoUr
     ? null
     : dateLong(charge.periodEnd || subscription.currentPeriodEnd, lang)
   const footer =
-    isMerchantOfRecord(subscription.provider) ? `${c.footer} ${invoiceNote(lang, subscription.provider)}` : c.footer
+    isMerchantOfRecord(subscription.provider) ? `${c.footer} ${invoiceNote(lang)}` : c.footer
   return render({
     lang,
     logoUrl,
@@ -673,8 +668,8 @@ export function buildSubscriptionTrialReminderEn({ subscription, user, accountUr
 // ——— Devoluciones, confirmación del arrepentimiento y avisos de LAB ———
 
 const GATEWAY = {
-  es: { mercadopago: 'Mercado Pago', lemonsqueezy: 'tu tarjeta (Lemon Squeezy)', polar: 'tu tarjeta (Polar)' },
-  en: { mercadopago: 'Mercado Pago', lemonsqueezy: 'your card (Lemon Squeezy)', polar: 'your card (Polar)' },
+  es: { mercadopago: 'Mercado Pago', polar: 'tu tarjeta (Polar)' },
+  en: { mercadopago: 'Mercado Pago', polar: 'your card (Polar)' },
 }
 
 const REFUND_COPY = {

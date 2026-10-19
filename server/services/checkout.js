@@ -18,12 +18,11 @@ import {
   qaDiscountedArs,
 } from '../../src/domain/qa.js'
 import { recipeSectionId } from '../../src/domain/catalog.js'
-import { createCheckout, buildCheckoutBody, LemonError } from './lemonsqueezy.js'
 import * as polarApi from './polar.js'
 import { gatewayUsable, gatewayTestMode } from './intlGateway.js'
 
 /** Pasarelas que acepta POST /api/checkout. */
-export const CHECKOUT_PROVIDERS = Object.freeze(['mercadopago', 'lemonsqueezy', 'polar'])
+export const CHECKOUT_PROVIDERS = Object.freeze(['mercadopago', 'polar'])
 
 /**
  * Ítems de prueba (src/domain/qa.js): uno solo por pedido y sin mezclar con
@@ -74,15 +73,14 @@ export function resolveQaItems(rawItems, { maxRecipeSections }) {
  * builder) con los precios del servidor, el cupón de bienvenida si viene, y
  * el checkout de la pasarela elegida:
  *  - `mercadopago` (default): ARS a la cotización del día, Checkout Pro.
- *  - `lemonsqueezy` / `polar`: USD de lista, checkout de la pasarela internacional
- *    (docs/lemonsqueezy.md, docs/polar.md).
+ *  - `polar`: USD de lista, checkout de la pasarela internacional (docs/polar.md).
  * Nada sale de montos del cliente: `items` se valida contra el catálogo y la
  * receta contra la allowlist, y el descuento se recalcula sobre el precio de
  * lista.
  *
  * Devuelve lo que responde POST /api/checkout: `{ init_point, orderId }` en MP
- * (+ `mock: true` en modo mock) y `{ provider: 'lemonsqueezy', init_point, orderId }`
- * en Lemon Squeezy.
+ * (+ `mock: true` en modo mock) y `{ provider: 'polar', init_point, orderId }`
+ * en Polar.
  * @param {{ user: any, items: any, couponCode?: string, provider?: string, locale?: string, config: any }} args
  */
 export async function createCheckoutOrder({
@@ -96,12 +94,10 @@ export async function createCheckoutOrder({
   if (!CHECKOUT_PROVIDERS.includes(provider)) {
     throw new HttpError(400, 'Medio de pago inválido')
   }
-  // Una pasarela internacional en modo prueba no cobra (tarjeta 4242): mientras esté
-  // así, existe solo para las cuentas de QA. Para cualquier otro, como si no estuviera.
-  const lemon = provider === 'lemonsqueezy'
-  const polar = provider === 'polar'
-  // Cobran el precio de lista en USD, calculado por el servidor.
-  const usd = lemon || polar
+  // Polar en sandbox no cobra (tarjeta 4242): mientras esté así, existe solo para las
+  // cuentas de QA. Para cualquier otro, como si no estuviera. Cobra el precio de lista
+  // en USD, calculado por el servidor.
+  const usd = provider === 'polar'
   const testMode = usd && gatewayTestMode(config, provider)
   if (usd && !gatewayUsable(config, provider, user)) {
     throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
@@ -115,7 +111,7 @@ export async function createCheckoutOrder({
     assertQaBuyer(user, config)
   }
 
-  // Lemon Squeezy cobra en USD: no depende de la cotización (la validación pide una
+  // Polar cobra en USD: no depende de la cotización (la validación pide una
   // tasa para el precio en pesos, que en USD no se usa). Prueba: pesos fijos.
   const fx = usd || qa ? null : await getUsdArsRate()
   const resolved = qa
@@ -147,7 +143,7 @@ export async function createCheckoutOrder({
     if (resolved.every((i) => qaDiscountedArs(listOf(i), pct) >= listOf(i))) coupon = null
   }
 
-  // Lemon Squeezy cobra el precio de lista en USD; MP, en pesos.
+  // Polar cobra el precio de lista en USD; MP, en pesos.
   const lines = resolved.map((i) => {
     if (qa && usd) return { ...i, unit_price: QA_TEMPLATE_USD, unit_price_usd: QA_TEMPLATE_USD, currency_id: 'USD' }
     if (qa) return coupon ? { ...i, unit_price: qaDiscountedArs(i.list_ars, coupon.percent) } : i
@@ -162,7 +158,7 @@ export async function createCheckoutOrder({
       : i
   })
 
-  // Un cupón al 100 % (o un precio mal cargado) no se manda a Lemon Squeezy: cobraría
+  // Un cupón al 100 % (o un precio mal cargado) no se manda a Polar: cobraría
   // cero y entregaría el ZIP gratis.
   if (usd && lines.some((l) => !(Number(l.unit_price) > 0))) {
     throw new HttpError(400, 'Ese precio no se puede cobrar con tarjeta', { expose: true })
@@ -203,8 +199,7 @@ export async function createCheckoutOrder({
   // (el precio ya viene descontado; el título dice por qué).
   const shown = coupon ? lines.map((l) => labelDiscount(l, coupon.percent, { usd, lang, rate: fx?.rate })) : lines
 
-  if (lemon) return startLemonCheckout({ order, orderId, lines: shown, user, lang, config })
-  if (polar) return startPolarCheckout({ order, orderId, lines: shown, user, lang, config })
+  if (usd) return startPolarCheckout({ order, orderId, lines: shown, user, lang, config })
 
   if (config.mpMock) {
     return {
@@ -237,7 +232,7 @@ export async function createCheckoutOrder({
 
 /**
  * Título y descripción de un ítem con el descuento de primera compra a la vista,
- * para la pantalla de Mercado Pago o de Lemon Squeezy (el monto ya viene descontado).
+ * para la pantalla de Mercado Pago o de Polar (el monto ya viene descontado).
  * @param {any} line
  * @param {number} percent
  * @param {{ usd: boolean, lang?: string, rate?: number }} opts
@@ -264,58 +259,8 @@ export function labelDiscount(line, percent, { usd, lang, rate }) {
 }
 
 /**
- * Checkout de Lemon Squeezy de una orden ya creada: una sola línea (la variante
- * genérica) con el total que calculó el servidor. El comprador paga en la página de
- * Lemon Squeezy y vuelve a `/checkout/success`, que espera al webhook. Si no se crea,
- * la orden se borra: sin checkout no se puede pagar y no tiene que aparecer en Mis compras.
- */
-async function startLemonCheckout({ order, orderId, lines, user, lang, config }) {
-  const total = lines.reduce((sum, l) => sum + Math.round(l.unit_price * 100), 0) / 100
-  const title =
-    lines.length === 1
-      ? lines[0].title
-      : lang === 'en'
-        ? `Scroll Lab — ${lines.length} items`
-        : `Scroll Lab — ${lines.length} productos`
-  const description = lines.map((l) => l.description || l.title).join(' · ')
-  let checkout
-  try {
-    checkout = await createCheckout(
-      config,
-      buildCheckoutBody({
-        storeId: config.lemon.storeId,
-        variantId: config.lemon.variantId,
-        orderId,
-        userId: db.uid(user),
-        title,
-        description,
-        totalUsd: total,
-        email: user.email,
-        name: user.name,
-        redirectUrl: `${config.clientUrl}/checkout/success?provider=lemonsqueezy&orderId=${encodeURIComponent(orderId)}`,
-        testMode: config.lemon.testMode,
-      }),
-    )
-  } catch (err) {
-    console.error(`checkout lemon FALLÓ order=${orderId}`, err?.message || err)
-    await db.deletePendingOrder(orderId)
-    throw new HttpError(
-      502,
-      err instanceof LemonError && err.status === 503
-        ? 'El pago internacional no está disponible'
-        : 'No pudimos iniciar el pago internacional. Probá de nuevo en unos minutos.',
-      { expose: true },
-    )
-  }
-  order.lemonCheckoutId = checkout.id
-  await order.save()
-  return { provider: 'lemonsqueezy', init_point: checkout.url, orderId }
-}
-
-/**
  * Checkout de Polar de una orden ya creada: el producto genérico con el total que
- * calculó el servidor (precio ad hoc). Mismo recorrido que Lemon Squeezy: el comprador
- * paga en Polar y vuelve a `/checkout/success`, que espera al webhook. Si no se crea,
+ * calculó el servidor (precio ad hoc). El comprador paga en Polar y vuelve a `/checkout/success`, que espera al webhook. Si no se crea,
  * la orden se borra.
  */
 async function startPolarCheckout({ order, orderId, lines, user, lang, config }) {

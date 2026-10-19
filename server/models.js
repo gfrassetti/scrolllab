@@ -53,8 +53,8 @@ const orderSchema = new mongoose.Schema(
     // Compra de prueba (src/domain/qa.js): plata real, fuera de las métricas.
     qa: { type: Boolean, default: undefined },
     currency_id: { type: String, default: "ARS" },
-    // Pasarela que cobra la orden: Mercado Pago (ARS) o Lemon Squeezy (USD, ver
-    // docs/lemonsqueezy.md). En USD `total` y los `unit_price` están en dólares.
+    // Pasarela que cobra la orden: Mercado Pago (ARS) o Polar (USD, ver
+    // docs/polar.md; `lemonsqueezy` queda por filas viejas de QA). En USD `total` y los `unit_price` están en dólares.
     provider: {
       type: String,
       enum: ["mercadopago", "lemonsqueezy", "polar"],
@@ -66,7 +66,7 @@ const orderSchema = new mongoose.Schema(
     // Cuándo se cobró: desde acá corre el plazo de reembolso (lib/site REFUND_DAYS).
     paidAt: Date,
     mpPaymentId: { type: String, sparse: true, unique: true },
-    // Lemon Squeezy: el checkout que armamos al abrir el pago y, cuando cobra
+    // Lemon Squeezy (retirada el 2026-10-19, filas viejas de QA): el checkout que armamos al abrir el pago y, cuando cobra
     // (webhook `order_created`), el id de su orden: ese es el pago.
     lemonCheckoutId: String,
     lemonOrderId: { type: String, sparse: true, unique: true },
@@ -233,7 +233,7 @@ const subscriptionSchema = new mongoose.Schema(
     lastPaidAt: Date,
     // Primer cobro de período: el único que se puede devolver (src/domain/policy.js).
     firstPaidAt: Date,
-    // El cobro que se puede devolver: pago de MP o factura de Lemon Squeezy.
+    // El cobro que se puede devolver: pago de MP u orden de Polar.
     firstChargeId: String,
     // Último pago de MP anotado (webhook payment / authorized_payment): no se anota dos veces.
     lastChargeId: String,
@@ -275,10 +275,10 @@ const subscriptionSchema = new mongoose.Schema(
       ],
       default: undefined,
     },
-    // MP / Lemon Squeezy no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
+    // MP / Polar no pudo cobrar la cuota del ciclo (reintenta); lo limpia un cobro OK.
     paymentFailedAt: Date,
     mpPreapprovalId: { type: String, sparse: true },
-    // Pasarela de la suscripción. Lemon Squeezy cobra en USD (docs/lemonsqueezy.md).
+    // Pasarela de la suscripción. Polar cobra en USD (docs/polar.md); `lemonsqueezy`, filas viejas de QA.
     provider: {
       type: String,
       enum: ["mercadopago", "lemonsqueezy", "polar"],
@@ -293,7 +293,7 @@ const subscriptionSchema = new mongoose.Schema(
     polarCheckoutId: String,
     polarSubscriptionId: { type: String, sparse: true, index: true },
     polarCustomerId: String,
-    // Lemon Squeezy: el checkout del alta y, cuando se crea, su suscripción.
+    // Lemon Squeezy (retirada el 2026-10-19, filas viejas de QA): el checkout del alta y su suscripción.
     lemonCheckoutId: String,
     lemonSubscriptionId: { type: String, sparse: true, index: true },
     lemonCustomerId: String,
@@ -314,7 +314,7 @@ const subscriptionSchema = new mongoose.Schema(
     trialReminderEmailId: String,
     trialReminderEmailError: String,
     // Mails por evento (uno por cobro): `Ref` es el cobro del último mail
-    // reclamado o enviado (authorized_payment de MP / factura de Lemon Squeezy).
+    // reclamado o enviado (authorized_payment de MP / orden de Polar).
     chargeEmailRef: String,
     chargeEmailSendingAt: Date,
     chargeEmailSentAt: Date,
@@ -448,7 +448,7 @@ const withdrawalSchema = new mongoose.Schema(
 );
 
 /**
- * Libro de reembolsos: una fila por pago de MP o cobro de Lemon Squeezy devuelto (o
+ * Libro de reembolsos: una fila por pago de MP o cobro de Polar devuelto (o
  * contracargo), con quién y cuánto. Lo escriben los webhooks; lo lee el panel.
  */
 const refundSchema = new mongoose.Schema(

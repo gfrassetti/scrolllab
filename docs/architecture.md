@@ -39,10 +39,10 @@ Se importa **solo hacia abajo**. Lo primero lo hace cumplir ESLint; el resto es 
 |---|---|
 | `server/app.js` | Composition root (~135 líneas): middlewares, sesión, Passport y el montaje de los routers |
 | `server/http/routes/` | `health`, `auth`, `orders`, `checkout`, `webhooks`, `hosted`, `subscriptions`, `coupons` |
-| `server/services/checkout.js` | `createCheckoutOrder`: precios del servidor, cupón, orden y el checkout de la pasarela elegida (Mercado Pago en ARS, Lemon Squeezy en USD) |
+| `server/services/checkout.js` | `createCheckoutOrder`: precios del servidor, cupón, orden y el checkout de la pasarela elegida (Mercado Pago en ARS, Polar en USD) |
 | `server/services/payments.js` | `handleMercadoPagoNotification`: el webhook (pago, reembolso, upgrade de LAB, suscripción) |
-| `server/services/lemonsqueezy.js` · `lemonPayments.js` | Lemon Squeezy: el adaptador de la API y la firma del webhook (`lemonsqueezy.js`, como `mercadoPago.js`) y sus casos de uso: cumplir una orden, reembolsos y el webhook (`lemonPayments.js`). Ver [`lemonsqueezy.md`](lemonsqueezy.md) |
-| `server/services/subscriptions/` | `billing` (períodos y reglas base), `entitlement` (qué puede usar el usuario), `planChange`, `start` (`startSubscription`: el alta, con la pasarela elegida), `lifecycle` (activar y reemplazar, igual en toda pasarela), `mpSync` (Mercado Pago) y `lemonSync` (Lemon Squeezy) |
+| `server/services/polar.js` · `polarPayments.js` · `intlGateway.js` | Polar: el adaptador de la API y la firma del webhook (`polar.js`, como `mercadoPago.js`), sus casos de uso: cumplir una orden, reembolsos y el webhook (`polarPayments.js`), y quién puede usar el carril internacional (`intlGateway.js`). Ver [`polar.md`](polar.md) |
+| `server/services/subscriptions/` | `billing` (períodos y reglas base), `entitlement` (qué puede usar el usuario), `planChange`, `start` (`startSubscription`: el alta, con la pasarela elegida), `lifecycle` (activar y reemplazar, igual en toda pasarela), `mpSync` (Mercado Pago) y `polarSync` (Polar) |
 | `server/services/hosted/` | LAB: `serving` (qué se sirve al embed, packs permitidos, flags del panel), `instances` (crear, editar, publicar con cupo, suspender) y `packs`. El router `hosted.js` solo traduce HTTP |
 | `server/services/email.js` · `emailTemplates.js` | El envío (Resend, idempotencia) y el contenido de los mails (puro) |
 | `server/repositories/` | `users`, `leads`, `orders`, `hosted`, `hostedPacks`, `subscriptions`, `builderProjects`, `withdrawals`, `refunds`, `events`, `priceChangeNotices` y `mode` (archivos o Mongo). Todos están en el contrato ([ADR 0006](adr/0006-contrato-de-repositorios.md)) |

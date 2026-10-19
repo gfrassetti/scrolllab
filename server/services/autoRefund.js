@@ -4,19 +4,11 @@ import { HttpError } from '../errors.js'
 import { refundEligibility, labRefundEligibility } from '../../src/domain/policy.js'
 import { refundPayment, fetchPayment } from './mercadoPago.js'
 import { reverseOrderPayment, alertAdmin, REVERSED_PAYMENT_STATUSES } from './orders.js'
-import {
-  refundOrder as refundLemonOrder,
-  refundSubscriptionInvoice,
-  parseLemonEvent,
-  parseLemonInvoice,
-} from './lemonsqueezy.js'
-import { reverseLemonRefund } from './lemonPayments.js'
 import { refundOrder as refundPolarOrder } from './polar.js'
 import { reversePolarRefund } from './polarPayments.js'
 import { refundSubscriptionOrder as refundPolarSubscriptionOrder } from './polar.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
-import { isLemonSub } from './subscriptions/lemonSync.js'
 import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
 
 /**
@@ -30,7 +22,7 @@ import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
  *
  * La pasarela devuelve al mismo medio de pago. Lo que sigue (orden cortada,
  * baja, libro de reembolsos, mail «Te devolvimos el dinero») lo hacen los
- * mismos caminos que el webhook (`reverseOrderPayment`, `reverseLemonRefund`,
+ * mismos caminos que el webhook (`reverseOrderPayment`, `reversePolarRefund`,
  * `handleLabRefund`), así que da igual si llega antes la respuesta o el webhook.
  *
  * Resultado (`status` de la solicitud): `refunded` · `canceled` (LAB en prueba)
@@ -74,25 +66,8 @@ async function refundOrder(order, row, config, deps) {
   const e = refundEligibility(order)
   if (!e.eligible) return { status: 'manual', note: `ya no corresponde: ${e.reason}` }
 
-  if (order.provider === 'lemonsqueezy') {
-    if (!config.lemon?.enabled || !order.lemonOrderId) {
-      return { status: 'manual', note: 'Lemon Squeezy sin orden cobrada' }
-    }
-    const refunded = await (deps.refundLemonOrder || refundLemonOrder)(config, order.lemonOrderId)
-    // La orden se corta ya con lo que respondió la API (el webhook `order_refunded`
-    // llega después y no repite nada: el libro y la baja son idempotentes).
-    const event = parseLemonEvent({ meta: {}, data: { ...refunded, type: 'orders', id: order.lemonOrderId } })
-    await reverseLemonRefund({
-      event: {
-        ...event,
-        status: 'refunded',
-        currency: 'USD',
-        refundedAmountCents: Math.round(Number(order.total) * 100),
-      },
-      config,
-    })
-    return { status: 'refunded', note: `orden Lemon Squeezy ${order.lemonOrderId}` }
-  }
+  // Lemon Squeezy se dejó de usar (2026-10-19): sus órdenes (solo de QA) se ven a mano.
+  if (order.provider === 'lemonsqueezy') return { status: 'manual', note: 'orden de Lemon Squeezy (pasarela retirada)' }
 
   if (order.provider === 'polar') {
     if (!config.polar?.enabled || !order.polarOrderId) {
@@ -126,9 +101,10 @@ async function refundOrder(order, row, config, deps) {
 
 async function refundLab(sub, row, config, deps) {
   if (!sub) return { status: 'manual', note: 'la suscripción ya no existe' }
+  if (sub.provider === 'lemonsqueezy') return { status: 'manual', note: 'suscripción de Lemon Squeezy (pasarela retirada)' }
   // Sin cobro anotado, se le pregunta a MP: el del alta pudo no haber llegado
   // por webhook, y no es lo mismo que una prueba gratis.
-  if (!sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub) && sub.provider !== 'polar') {
+  if (!sub.firstPaidAt && !sub.lastPaidAt && (sub.provider || 'mercadopago') === 'mercadopago') {
     await syncLabChargesFromMp(sub, config, deps)
   }
   const e = labRefundEligibility(sub)
@@ -177,55 +153,6 @@ async function refundLab(sub, row, config, deps) {
     return {
       status: 'refunded',
       note: extras.length ? `órdenes Polar ${[sub.firstChargeId, ...extras].join(', ')} (primer cobro + diferencias de plan)` : `orden Polar ${sub.firstChargeId}`,
-    }
-  }
-  if (isLemonSub(sub)) {
-    if (!config.lemon?.enabled) return { status: 'manual', note: 'Lemon Squeezy apagado' }
-    // Diferencias de plan pagadas en el plazo: también vuelven, antes que el primer
-    // cobro (si una falla, no quedó nada a medias dado de baja).
-    const refundInvoice = deps.refundSubscriptionInvoice || refundSubscriptionInvoice
-    const extras = []
-    for (const extra of (sub.upgradePayments || []).filter((p) => p.outcome === 'applied' && p.paymentId && !p.refundedAt)) {
-      await refundInvoice(config, extra.paymentId)
-      await handleLabRefund({
-        sub,
-        provider: 'lemonsqueezy',
-        externalId: `lemon-inv-${extra.paymentId}`,
-        chargeId: String(extra.paymentId),
-        amount: Number(extra.amount) || 0,
-        currency: 'USD',
-        partial: false,
-        reason: 'refunded',
-        config,
-      }, deps)
-      extra.refundedAt = new Date()
-      extras.push(String(extra.paymentId))
-    }
-    if (extras.length) {
-      sub.markModified?.('upgradePayments')
-      await sub.save()
-    }
-    // El primer cobro es una factura de la suscripción: se devuelve entera y se da
-    // de baja en el momento (handleLabRefund). El webhook que llega después no repite nada.
-    const data = await (deps.refundSubscriptionInvoice || refundSubscriptionInvoice)(config, sub.firstChargeId)
-    const invoice = parseLemonInvoice({ ...data, id: sub.firstChargeId })
-    const back = invoice.refundedAmountCents || invoice.totalCents
-    await handleLabRefund({
-      sub,
-      provider: 'lemonsqueezy',
-      externalId: `lemon-inv-${sub.firstChargeId}`,
-      chargeId: String(sub.firstChargeId),
-      amount: back ? back / 100 : Number(sub.firstChargeAmount) || 0,
-      currency: invoice.currency || 'USD',
-      partial: false,
-      reason: 'refunded',
-      config,
-    }, deps)
-    return {
-      status: 'refunded',
-      note: extras.length
-        ? `facturas Lemon Squeezy ${[sub.firstChargeId, ...extras].join(', ')} (primer cobro + diferencias de plan)`
-        : `factura Lemon Squeezy ${sub.firstChargeId}`,
     }
   }
   const token = config.mpSubs?.accessToken
@@ -292,7 +219,7 @@ export async function executeWithdrawal(row, config, deps = {}) {
       out = { status: 'manual', note: 'sin compra ni suscripción asociada' }
     }
   } catch (err) {
-    const message = err instanceof HttpError || err?.name === 'LemonError' || err?.name === 'PolarError' ? err.message : String(err?.message || err)
+    const message = err instanceof HttpError || err?.name === 'PolarError' ? err.message : String(err?.message || err)
     out = { status: 'manual', note: message.slice(0, 300) }
   }
 
@@ -311,7 +238,7 @@ export async function executeWithdrawal(row, config, deps = {}) {
       title: done
         ? `ARREPENTIMIENTO ${row.code} — ${done}`
         : `ARREPENTIMIENTO ${row.code} — NO SE PUDO DEVOLVER SOLO: hacelo a mano`,
-      lines: [`${row.name || ''} <${row.email}>`, out.note || '', done ? '' : 'Devolvé desde el panel de Mercado Pago o de Lemon Squeezy.'].filter(Boolean),
+      lines: [`${row.name || ''} <${row.email}>`, out.note || '', done ? '' : 'Devolvé desde el panel de Mercado Pago o de Polar.'].filter(Boolean),
       config,
     })
   }

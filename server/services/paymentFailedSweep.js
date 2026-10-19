@@ -13,7 +13,7 @@ const MINUTE_MS = 60 * 1000
 
 /**
  * Cuánto se espera después de un rechazo antes de mandar el mail. En el
- * checkout (Mercado Pago o Lemon Squeezy) el comprador suele reintentar con otra
+ * checkout (Mercado Pago o Polar) el comprador suele reintentar con otra
  * tarjeta en el momento: si paga, no tiene que recibir un «rechazado».
  */
 export const PAYMENT_FAILED_EMAIL_DELAY_MS = 10 * MINUTE_MS

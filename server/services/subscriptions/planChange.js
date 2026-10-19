@@ -9,7 +9,6 @@ import {
   subscriptionPlanPrice,
   isHostedPlanId,
 } from '../../catalog.js'
-import { isLemonSub, changeLemonPlan } from './lemonSync.js'
 import { isPolarSub, changePolarPlan } from './polarSync.js'
 import { gatewayName } from '../emailTemplatesBilling.js'
 import { sendSubscriptionPlanChanged } from '../email.js'
@@ -70,7 +69,7 @@ const planReason = (plan, cycle) =>
  * - Menos de `MIN_UPGRADE_CHARGE`: 0 (no vale un cobro por los últimos días).
  */
 export function quoteUpgrade(sub, targetPlan, now = Date.now()) {
-  // En la moneda de la suscripción: ARS (MP) o USD con centavos (Lemon Squeezy).
+  // En la moneda de la suscripción: ARS (MP) o USD con centavos (Polar).
   const usd = sub.currency_id === 'USD'
   const priceOf = (plan, cycle) => subscriptionPlanPrice(sub, plan, cycle, usd ? 'USD' : 'ARS')
   const base = { amount: 0, newPrice: priceOf(targetPlan, sub.cycle) }
@@ -202,11 +201,8 @@ export async function changeSubscriptionPlan(
 ) {
   const { sub, targetQuota } = await loadChangeableSubscription(userId, targetPlan)
   const quote = quoteUpgrade(sub, targetPlan)
-  if (isLemonSub(sub)) {
-    return changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
-  }
   if (isPolarSub(sub)) {
-    return changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config, change: changePolarPlan }, deps)
+    return changePolarSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
   }
   if (quote.amount > 0) {
     return startUpgradePayment({ sub, targetPlan, quote, config }, deps)
@@ -263,12 +259,11 @@ export async function changeSubscriptionPlan(
 }
 
 /**
- * Lemon Squeezy: cambia la variante. La diferencia (si hay) la cobra Lemon Squeezy en
- * el momento con su prorrateo; el cobro llega por webhook como una factura más
- * (`subscription_payment_success`) y sale el mail de cobro.
+ * Polar: cambia el producto. La diferencia (si hay) la cobra Polar en el momento con su
+ * prorrateo (`invoice`); el cobro llega por webhook como una orden `subscription_update`.
  */
-async function changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config, change = changeLemonPlan }, deps) {
-  const { charged } = await change({ sub, targetPlan, quote, config }, deps)
+async function changePolarSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
+  const { charged } = await changePolarPlan({ sub, targetPlan, quote, config }, deps)
   const previousPlan = sub.plan
   const window = paidWindow(sub)
   if (window && !sub.paidPlan) {
@@ -281,8 +276,8 @@ async function changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote
     await sub.save()
   } catch (err) {
     console.error(
-      `subs change RECONCILE: Lemon Squeezy en ${targetPlan} pero local sigue en ` +
-        `${previousPlan} sub=${subId(sub)} lemon=${sub.lemonSubscriptionId}`,
+      `subs change RECONCILE: Polar en ${targetPlan} pero local sigue en ` +
+        `${previousPlan} sub=${subId(sub)} polar=${sub.polarSubscriptionId}`,
       err?.message,
     )
     throw err

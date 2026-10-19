@@ -32,9 +32,9 @@ export default function SubscriptionCard() {
     loading,
     refresh,
   } = usePlan()
-  // Los textos nombran la pasarela de ESTA suscripción (Polar, Lemon Squeezy o Mercado Pago).
-  const card = provider === 'lemonsqueezy' || provider === 'polar'
-  const gateway = provider === 'polar' ? 'Polar' : 'Lemon Squeezy'
+  // Los textos nombran la pasarela de ESTA suscripción (Polar o Mercado Pago).
+  const card = provider === 'polar'
+  const gateway = 'Polar'
   const tk = (key) => (card ? `account.card.${key}` : `account.${key}`)
   const { t, locale } = useI18n()
   const tc = (key, vars) => t(tk(key), { gateway, ...vars })
@@ -68,7 +68,7 @@ export default function SubscriptionCard() {
     }).format(n)
   const tierName = (planId) => t(`lab.tier.${String(planId).replace('hosted_', '')}`)
 
-  // Lemon Squeezy: el link firmado para cambiar la tarjeta (cuota rechazada o tarjeta vieja).
+  // Polar: el portal para cambiar la tarjeta (cuota rechazada o tarjeta vieja).
   const updateCard = async () => {
     if (busy) return
     setBusy(true)
@@ -261,7 +261,7 @@ export default function SubscriptionCard() {
             {(() => {
               const p = plans.find((x) => x.id === plan)
               if (!p) return null
-              // En la moneda en que se cobra: USD con Lemon Squeezy, pesos con MP.
+              // En la moneda en que se cobra: USD con Polar, pesos con MP.
               const usd = currency === 'USD'
               const price = usd
                 ? cycle === 'yearly' ? p.priceYearlyUsd : p.priceMonthlyUsd

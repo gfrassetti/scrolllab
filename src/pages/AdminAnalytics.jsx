@@ -21,7 +21,7 @@ const money = (n, cur) =>
     maximumFractionDigits: cur === 'USD' && !Number.isInteger(Number(n)) ? 2 : 0,
   }).format(n)
 const moneyList = (rows) => (rows?.length ? rows.map((r) => money(r.total, r.currency)).join(' + ') : '—')
-const GATEWAYS = { lemonsqueezy: 'Lemon Squeezy', polar: 'Polar' }
+const GATEWAYS = { polar: 'Polar', lemonsqueezy: 'Lemon Squeezy (retirada)' }
 const gateway = (p) => GATEWAYS[p] || 'Mercado Pago'
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }) : '—')
 const when = (iso) =>
@@ -224,7 +224,7 @@ export default function AdminAnalytics() {
                   />
                 </div>
                 <p className="mt-2 text-xs text-ink/45">
-                  Montos brutos, antes de la comisión. Mercado Pago ya retiene cada venta 18 días; Lemon Squeezy paga según su calendario de pagos (Settings → Payouts). Lo de «No tocar» es lo que tiene que quedar en la cuenta por si piden la devolución.
+                  Montos brutos, antes de la comisión. Mercado Pago ya retiene cada venta 18 días; Polar paga según su calendario de pagos (Finance → Payouts). Lo de «No tocar» es lo que tiene que quedar en la cuenta por si piden la devolución.
                 </p>
                 <div className="mt-4">
                   <Table

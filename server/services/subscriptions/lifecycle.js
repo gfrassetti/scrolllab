@@ -4,7 +4,7 @@ import { toMs, subId } from './billing.js'
 /**
  * Ciclo de vida de una suscripción de LAB, igual para cualquier pasarela:
  * activarla, cerrar las que reemplaza y detectar una segunda vigente. Lo usan
- * mpSync.js (Mercado Pago) y lemonSync.js (Lemon Squeezy).
+ * mpSync.js (Mercado Pago) y polarSync.js (Polar).
  */
 
 export function markActivated(sub) {
@@ -31,7 +31,7 @@ export async function closeSupersededSubscriptions(sub) {
     } else {
       console.error(
         `subs DOBLE SUSCRIPCIÓN user=${sub.userId} nueva=${id} previa=${subId(other)} ` +
-          `ref=${other.mpPreapprovalId || other.lemonSubscriptionId || '-'} — revisar y dar de baja una`,
+          `ref=${other.mpPreapprovalId || other.polarSubscriptionId || '-'} — revisar y dar de baja una`,
       )
     }
   }

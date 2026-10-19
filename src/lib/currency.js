@@ -3,7 +3,7 @@ import { usePayRegion, resolveCurrency } from './payRegion.js'
 
 /**
  * La moneda vigente y cómo cambiarla. `setCurrency('USD')` cambia el medio de
- * pago a tarjeta (Lemon Squeezy); `'ARS'`, a Mercado Pago: es la misma elección
+ * pago a tarjeta (Polar); `'ARS'`, a Mercado Pago: es la misma elección
  * que el selector «Medio de pago» del carrito. `canChoose` es falso sin carril
  * internacional (no hay otra moneda en la que cobrar).
  */

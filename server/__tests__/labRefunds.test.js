@@ -4,7 +4,7 @@ import { createFakeMercadoPago, startAppAgainstFakeMp, waitFor } from './helpers
 
 /**
  * Devoluciones de LAB (política: solo el primer cobro; al devolverlo, baja
- * inmediata) con Mercado Pago (Lemon Squeezy: lemonLab.test.js): el cobro devuelto queda en el libro, al
+ * inmediata) con Mercado Pago (Polar: polarLab.test.js): el cobro devuelto queda en el libro, al
  * cliente le llega «Te devolvimos el dinero», al dueño el aviso, y la
  * suscripción se da de baja en la pasarela y acá. Una cuota posterior devuelta a
  * mano (excepción) se anota y avisa, pero la suscripción sigue.

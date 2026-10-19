@@ -3,10 +3,10 @@ import { api } from './api.js'
 
 /**
  * Desde dónde paga el comprador: Argentina (Mercado Pago, ARS) o
- * internacional (Lemon Squeezy, USD). Lo elige él; la detección solo pone el
+ * internacional (Polar, USD). Lo elige él; la detección solo pone el
  * default: la elección guardada, el país que ve el servidor (Vercel /
  * Cloudflare) o, si no hay, la zona horaria del navegador. Ver
- * docs/lemonsqueezy.md y docs/polar.md. Si el carril internacional está y qué
+ * docs/polar.md. Si el carril internacional está y qué
  * pasarela lo cobra, lo dice el servidor (`intl` de GET /api/checkout/methods).
  */
 
@@ -42,7 +42,7 @@ export function pickRegion({ stored, country, timeZone, intlEnabled }) {
 
 /**
  * Moneda en que se muestran (y se cobran) los precios. Solo hay dos, las que
- * cobramos: ARS (Mercado Pago) y USD (Lemon Squeezy, ver docs/lemonsqueezy.md).
+ * cobramos: ARS (Mercado Pago) y USD (Polar, ver docs/polar.md).
  *
  * Con el carril internacional activo la moneda **sigue al medio de pago**
  * elegido o detectado por ubicación, no al idioma: un español que lee el sitio
@@ -60,12 +60,12 @@ export function resolveCurrency({ intlEnabled, region, locale }) {
 
 /**
  * La pasarela de cada región. `intl`: la que cobra el carril internacional según el
- * servidor (`polar` o `lemonsqueezy`; sin dato, Lemon Squeezy).
+ * servidor (hoy siempre `polar`).
  * @param {'ar' | 'intl'} region
  * @param {string | null} [intl]
  */
 export const providerForRegion = (region, intl = null) =>
-  region === 'intl' ? (intl === 'polar' ? 'polar' : 'lemonsqueezy') : 'mercadopago'
+  region === 'intl' ? intl || 'polar' : 'mercadopago'
 
 function readStored() {
   try {
@@ -94,7 +94,7 @@ export const usePayRegion = create((set, get) => ({
   intlEnabled: false,
   /** ¿El carril internacional cobra suscripciones (LAB)? */
   labIntlEnabled: false,
-  /** Quién cobra el carril internacional: 'polar' | 'lemonsqueezy' | null. */
+  /** Quién cobra el carril internacional: 'polar' | null. */
   intl: null,
   setRegion(region) {
     if (!PAY_REGIONS.includes(region)) return
@@ -114,7 +114,7 @@ export const usePayRegion = create((set, get) => ({
     } catch {
       methods = null
     }
-    const intl = methods?.intl || (methods?.providers?.lemonsqueezy?.enabled ? 'lemonsqueezy' : null)
+    const intl = methods?.intl || null
     const intlEnabled = Boolean(intl && methods?.providers?.[intl]?.enabled)
     set({
       methods,

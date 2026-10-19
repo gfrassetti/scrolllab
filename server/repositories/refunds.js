@@ -13,7 +13,7 @@ import { isFileMode } from "./mode.js";
  */
 export const refundsRepo = {
   /**
-   * Alta o actualización por `externalId` (el pago de MP o el reembolso de Lemon Squeezy):
+   * Alta o actualización por `externalId` (el pago de MP o el reembolso de Polar):
    * un webhook repetido no duplica, y un parcial que después se completa queda
    * en la misma fila con el monto acumulado.
    */

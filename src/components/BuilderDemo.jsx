@@ -5,7 +5,6 @@ import { formatArs, formatUsd, arsFromUsd, FALLBACK_USD_ARS } from '../lib/prici
 import { useI18n } from '../i18n'
 import { useCurrency } from '../lib/currency'
 import { prefersReducedMotion } from '../lib/motion'
-import { usePayRegion } from '../lib/payRegion'
 
 /**
  * BuilderDemo — demo animado del Builder (pago único). Elegís secciones del
@@ -88,7 +87,6 @@ export default function BuilderDemo() {
   const root = useRef(null)
   const { locale } = useI18n()
   const { showUsd, canChoose } = useCurrency()
-  const intlGateway = usePayRegion((s) => s.intl)
   const base = COPY[locale === 'en' ? 'en' : 'es']
   // La moneda no depende del idioma: el precio y la pasarela que se nombran
   // siguen a la moneda vigente. El demo se remonta al cambiarla (key en BuilderZone).
@@ -98,7 +96,7 @@ export default function BuilderDemo() {
     // La pasarela en USD solo se nombra si existe: sin ella, USD es una referencia y se cobra en Mercado Pago.
     paid: base.paid.replace(
       'Mercado Pago',
-      showUsd && canChoose ? (intlGateway === 'polar' ? 'Polar' : 'Lemon Squeezy') : 'Mercado Pago',
+      showUsd && canChoose ? 'Polar' : 'Mercado Pago',
     ),
   }
 

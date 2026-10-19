@@ -97,33 +97,33 @@ export function defineRepoContract(ctx) {
       assert.equal((await db.findOrderById(id(second))).status, 'pending')
     })
 
-    it('markOrderPaidAtomic (Lemon Squeezy): guarda su orden y un mismo pago no paga dos órdenes', async () => {
+    it('markOrderPaidAtomic (Polar): guarda su orden y un mismo pago no paga dos órdenes', async () => {
       const user = await newUser()
-      const lemon = uniq('ls')
-      const o = await newOrder(user, { provider: 'lemonsqueezy' })
-      const other = await newOrder(user, { provider: 'lemonsqueezy' })
+      const polar = uniq('pl')
+      const o = await newOrder(user, { provider: 'polar' })
+      const other = await newOrder(user, { provider: 'polar' })
 
-      const right = await db.markOrderPaidAtomic({ orderId: id(o), lemonOrderId: lemon })
+      const right = await db.markOrderPaidAtomic({ orderId: id(o), polarOrderId: polar })
       assert.equal(right.created, true)
       assert.equal(right.order.status, 'paid')
-      assert.equal(right.order.lemonOrderId, lemon)
+      assert.equal(right.order.polarOrderId, polar)
       assert.equal(right.order.mpPaymentId ?? null, null)
       assert.ok(right.order.paidAt)
 
-      const again = await db.markOrderPaidAtomic({ orderId: id(other), lemonOrderId: lemon })
+      const again = await db.markOrderPaidAtomic({ orderId: id(other), polarOrderId: polar })
       assert.equal(again.created, false)
       assert.equal(String(id(again.order)), String(id(o)))
       assert.equal((await db.findOrderById(id(other))).status, 'pending')
 
-      assert.equal(String(id(await db.findOrderByLemonOrder(lemon))), String(id(o)))
-      assert.equal(await db.findOrderByLemonOrder(uniq('nada')), null)
+      assert.equal(String(id(await db.findOrderByPolarOrder(polar))), String(id(o)))
+      assert.equal(await db.findOrderByPolarOrder(uniq('nada')), null)
     })
 
-    it('dos órdenes no pueden compartir la misma orden de Lemon Squeezy ni el mismo pago de MP', async () => {
+    it('dos órdenes no pueden compartir la misma orden de Polar ni el mismo pago de MP', async () => {
       const user = await newUser()
-      const lemon = uniq('ls')
-      await newOrder(user, { provider: 'lemonsqueezy', lemonOrderId: lemon })
-      await assert.rejects(newOrder(user, { provider: 'lemonsqueezy', lemonOrderId: lemon }))
+      const polar = uniq('pl')
+      await newOrder(user, { provider: 'polar', polarOrderId: polar })
+      await assert.rejects(newOrder(user, { provider: 'polar', polarOrderId: polar }))
 
       const pay = uniq('mp')
       const a = await newOrder(user, { mpPaymentId: pay })
@@ -289,17 +289,17 @@ export function defineRepoContract(ctx) {
       assert.equal(await db.findActiveSubscriptionByUser(id(await newUser())), null)
     })
 
-    it('se busca por preapproval de MP y por suscripción de Lemon Squeezy', async () => {
+    it('se busca por preapproval de MP y por suscripción de Polar', async () => {
       const user = await newUser()
       const pre = uniq('pre')
       const mp = await newSub(user, { mpPreapprovalId: pre })
       assert.equal(String(id(await db.findSubscriptionByPreapproval(pre))), String(id(mp)))
       assert.equal(await db.findSubscriptionByPreapproval(uniq('nada')), null)
 
-      const lsub = uniq('sub')
-      const ls = await newSub(user, { provider: 'lemonsqueezy', lemonSubscriptionId: lsub })
-      assert.equal(String(id(await db.findSubscriptionByLemon(lsub))), String(id(ls)))
-      assert.equal(await db.findSubscriptionByLemon(uniq('nada')), null)
+      const psub = uniq('sub')
+      const ps = await newSub(user, { provider: 'polar', polarSubscriptionId: psub })
+      assert.equal(String(id(await db.findSubscriptionByPolar(psub))), String(id(ps)))
+      assert.equal(await db.findSubscriptionByPolar(uniq('nada')), null)
     })
 
     it('deleteSubscription borra una vez', async () => {

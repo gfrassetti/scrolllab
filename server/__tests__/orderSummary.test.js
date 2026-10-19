@@ -10,7 +10,7 @@ const RATE = 1560
 /**
  * El 10% de primera compra a la vista y bien cuadrado: el resumen (subtotal a
  * precio de lista − descuento = total cobrado) en pesos y en dólares, el recibo
- * y lo que ven las pantallas de Mercado Pago y de Lemon Squeezy.
+ * y lo que ven las pantallas de Mercado Pago y de Polar.
  */
 describe('orderPriceSummary', () => {
   it('en pesos: subtotal de lista − descuento = lo cobrado, con el mismo redondeo', () => {
@@ -49,7 +49,7 @@ describe('el descuento a la vista', () => {
     const order = {
       id: 'o1',
       currency_id: 'USD',
-      provider: 'lemonsqueezy',
+      provider: 'polar',
       discountPct: 10,
       total: 134.1,
       items: [{ sku: 'chapters', title: 'CHAPTERS — template', unit_price_usd: 149, unit_price: 134.1 }],
@@ -68,7 +68,7 @@ describe('el descuento a la vista', () => {
     assert.ok(!/Descuento/.test(mail.text))
   })
 
-  it('Mercado Pago y Lemon Squeezy muestran el descuento en el nombre del ítem', () => {
+  it('Mercado Pago y Polar muestran el descuento en el nombre del ítem', () => {
     const line = { sku: 'chapters', title: 'CHAPTERS — template', unit_price_usd: 149, unit_price: 210000 }
     const mp = labelDiscount(line, 10, { usd: false, rate: RATE })
     assert.equal(mp.title, 'CHAPTERS — template · 10% off primera compra')

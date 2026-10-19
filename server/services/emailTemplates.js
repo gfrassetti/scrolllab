@@ -27,7 +27,7 @@ export function escapeHtml(value) {
 
 export function formatMoney(value, currency = 'ARS') {
   const n = Number(value || 0)
-  // USD (Lemon Squeezy) puede traer centavos de un cupón; ARS se redondea al peso.
+  // USD (Polar) puede traer centavos de un cupón; ARS se redondea al peso.
   const usd = currency === 'USD'
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -37,7 +37,7 @@ export function formatMoney(value, currency = 'ARS') {
   }).format(n)
 }
 
-/** Precio del plan de una suscripción, en su moneda (ARS en MP, USD en Lemon Squeezy). */
+/** Precio del plan de una suscripción, en su moneda (ARS en MP, USD en Polar). */
 function subscriptionPriceLabel(subscription) {
   const currency = subscription.currency_id || 'ARS'
   const price = subscriptionPlanPrice(subscription, subscription.plan, subscription.cycle, currency)
@@ -59,8 +59,8 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
     return buildOrderReceiptEn({ order, user, accountUrl, logoUrl })
   }
   const orderId = String(db.uid(order) || order.id)
-  // Lemon Squeezy es el vendedor legal (merchant of record): la factura la manda él.
-  const invoiceLine = isMerchantOfRecord(order.provider) ? ` ${invoiceNote('es', order.provider)}` : ''
+  // Polar es el vendedor legal (merchant of record): la factura la manda él.
+  const invoiceLine = isMerchantOfRecord(order.provider) ? ` ${invoiceNote('es')}` : ''
   const buyerName = user.name || user.email
   // Con descuento de primera compra: ítems a precio de lista, la línea del
   // descuento y el total cobrado. Sin descuento, igual que siempre.

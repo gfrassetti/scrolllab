@@ -71,26 +71,14 @@ export default function HowItWorks({ t, howPanels }) {
               />
             </a>
             <a
-              href="https://www.lemonsqueezy.com/"
+              href="https://polar.sh/"
               target="_blank"
               rel="noreferrer"
-              className="flex h-16 items-center gap-2.5 rounded-sm border border-ink/15 bg-bone px-4 transition-colors hover:border-ink/40"
-              aria-label="Lemon Squeezy"
+              className="flex h-16 items-center rounded-sm border border-ink/15 bg-bone px-6 transition-colors hover:border-ink/40"
+              aria-label="Polar"
             >
-              <img
-                src="/payment/lemonsqueezy.svg"
-                alt=""
-                aria-hidden="true"
-                className="h-7 w-7 object-contain dark:hidden"
-              />
-              <img
-                src="/payment/lemonsqueezy-white.svg"
-                alt=""
-                aria-hidden="true"
-                className="hidden h-7 w-7 object-contain dark:block"
-              />
               <span className="text-xl font-semibold tracking-tight text-ink">
-                Lemon Squeezy
+                Polar
               </span>
             </a>
           </div>

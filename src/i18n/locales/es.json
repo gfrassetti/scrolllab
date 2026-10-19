@@ -500,7 +500,7 @@
     "howHostedNote": "¿Sin programar? Con LAB le sumás a tu sitio widgets premium — cualquiera de nuestras más de 30 secciones — y los editás online.",
     "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
-    "paymentsBody": "Pagás con Mercado Pago en pesos, o con tarjeta en dólares a través de Lemon Squeezy. No vemos ni guardamos los datos de tu tarjeta.",
+    "paymentsBody": "Pagás con Mercado Pago en pesos, o con tarjeta en dólares a través de Polar. No vemos ni guardamos los datos de tu tarjeta.",
     "zipTitle": "Qué viene en el ZIP",
     "zip1": "El proyecto completo, editable",
     "zip2": "Las secciones del modelo o de lo que armaste en el builder",
@@ -1597,7 +1597,7 @@
     "wrongAccountTitle": "Ese pago es de otra cuenta",
     "wrongAccountBody": "La compra está en la cuenta con la que pagaste: ahí la ves en Mis compras.",
     "reviewTitle": "Estamos revisando tu pago",
-    "reviewBody": "Lemon Squeezy registró el pago, pero no lo pudimos asociar a tu compra. Ya nos llegó el aviso: te escribimos para entregarte lo que compraste o devolverte el dinero."
+    "reviewBody": "Polar registró el pago, pero no lo pudimos asociar a tu compra. Ya nos llegó el aviso: te escribimos para entregarte lo que compraste o devolverte el dinero."
   },
   "license": {
     "eyebrow": "Licencia Regular",
@@ -1630,7 +1630,7 @@
         "title": "Datos que recopilamos",
         "items": [
           "Datos de tu cuenta de Google: identificador, nombre, dirección de email y foto de perfil, cuando elegís iniciar sesión con Google.",
-          "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago o de Lemon Squeezy (según cómo pagues) y cantidad de descargas.",
+          "Datos de compra y de orden: productos, importe, moneda, estado del pago, identificadores de Mercado Pago o de Polar (según cómo pagues) y cantidad de descargas.",
           "Datos técnicos básicos necesarios para operar y proteger el servicio, como dirección IP, navegador, registros del servidor y cookies de sesión.",
           "El cupón de bienvenida que te damos al crear tu cuenta: tu email, cuándo lo recibiste, de qué canal llegaste (si venís de un link con etiquetas) y si lo usaste.",
           "Si nos escribís por el formulario de contacto o de Estudio: tu nombre, email, mensaje y qué tipo de proyecto marcaste."
@@ -1649,7 +1649,7 @@
       },
       {
         "title": "Servicios de terceros",
-        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos desde Argentina en pesos y Lemon Squeezy, nuestro revendedor autorizado (Merchant of Record), para los pagos desde otros países en dólares: Lemon Squeezy recibe tu nombre, email, país y datos de pago para cobrar, emitir la factura y calcular impuestos, y trata esos datos bajo su propia política de privacidad (lemonsqueezy.com/privacy; el tratamiento puede ocurrir fuera de tu país, incluido Estados Unidos), Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
+        "body": "Usamos Google para autenticación, Mercado Pago para procesar pagos desde Argentina en pesos y Polar, nuestro revendedor autorizado (Merchant of Record), para los pagos desde otros países en dólares: Polar recibe tu nombre, email, país y datos de pago para cobrar, emitir la factura y calcular impuestos, y trata esos datos bajo su propia política de privacidad (polar.sh/legal/privacy; el tratamiento puede ocurrir fuera de tu país, incluido Estados Unidos), Formspree para recibir los mensajes del formulario de contacto, Google Tag Manager y Google Analytics para entender de forma agregada cómo se usa el sitio, y proveedores de email para enviar comprobantes y cupones. Estos proveedores tratan datos bajo sus propias políticas de privacidad. No recibimos ni almacenamos los datos completos de tu tarjeta."
       },
       {
         "title": "Cookies y almacenamiento local",
@@ -1661,7 +1661,7 @@
       },
       {
         "title": "Tus derechos",
-        "body": "Podés solicitar acceso, corrección o eliminación de tus datos personales, y revocar el acceso de Google desde tu cuenta de Google. Algunas órdenes pueden conservarse cuando exista una obligación legal. Los datos de pago que tratan Mercado Pago o Lemon Squeezy como responsables propios se ejercen ante ellos. Para ejercer tus derechos sobre los datos que tenemos nosotros, escribinos al email indicado abajo. La Agencia de Acceso a la Información Pública (AAIP) es el órgano de control de la Ley 25.326 y atiende las denuncias y los reclamos por incumplimientos de la protección de datos personales."
+        "body": "Podés solicitar acceso, corrección o eliminación de tus datos personales, y revocar el acceso de Google desde tu cuenta de Google. Algunas órdenes pueden conservarse cuando exista una obligación legal. Los datos de pago que tratan Mercado Pago o Polar como responsables propios se ejercen ante ellos. Para ejercer tus derechos sobre los datos que tenemos nosotros, escribinos al email indicado abajo. La Agencia de Acceso a la Información Pública (AAIP) es el órgano de control de la Ley 25.326 y atiende las denuncias y los reclamos por incumplimientos de la protección de datos personales."
       },
       {
         "title": "Cambios a esta política",
@@ -1686,7 +1686,7 @@
     "sections": [
       {
         "title": "Quién vende",
-        "body": "El sitio, los productos y los servicios los ofrece {{seller}}, un estudio de diseño y desarrollo web de Argentina. Para cualquier consulta sobre estos Términos, una compra o un reembolso, nos escribís al email que figura al final. Las compras desde fuera de Argentina las procesa Lemon Squeezy como revendedor (ver «Precios y pagos»)."
+        "body": "El sitio, los productos y los servicios los ofrece {{seller}}, un estudio de diseño y desarrollo web de Argentina. Para cualquier consulta sobre estos Términos, una compra o un reembolso, nos escribís al email que figura al final. Las compras desde fuera de Argentina las procesa Polar como revendedor (ver «Precios y pagos»)."
       },
       {
         "title": "Cuenta y acceso",
@@ -1698,7 +1698,7 @@
       },
       {
         "title": "Precios y pagos",
-        "body": "Los precios vigentes se muestran en el catálogo y el builder. Si pagás desde Argentina, el pago lo procesa Mercado Pago en pesos: el total es el que figura al pagar, sujeto a su aprobación, y la orden se considera pagada cuando Mercado Pago confirma el pago. Si pagás desde otro país, el proceso de compra lo realiza nuestro revendedor autorizado Lemon Squeezy, que es el vendedor oficial (Merchant of Record) de esas órdenes: cobra en dólares estadounidenses, emite la factura, aplica los impuestos que correspondan según tu país y atiende las consultas sobre el cobro. En ese caso la orden se considera pagada cuando Lemon Squeezy confirma el pago, y la compra se rige también por los términos de compra de Lemon Squeezy (lemonsqueezy.com/buyer-terms). Cupón de bienvenida: quien crea su cuenta tiene un 10% de descuento en su primera compra de templates, bundle o composiciones del builder, una sola vez, con la cuenta de Google con la que se registró. Se aplica solo al pagar y no se acumula: la segunda compra y las siguientes van a precio de lista, y una compra reembolsada cuenta como compra. No aplica a las suscripciones de LAB."
+        "body": "Los precios vigentes se muestran en el catálogo y el builder. Si pagás desde Argentina, el pago lo procesa Mercado Pago en pesos: el total es el que figura al pagar, sujeto a su aprobación, y la orden se considera pagada cuando Mercado Pago confirma el pago. Si pagás desde otro país, el proceso de compra lo realiza nuestro revendedor autorizado Polar, que es el vendedor oficial (Merchant of Record) de esas órdenes: cobra en dólares estadounidenses, emite la factura, aplica los impuestos que correspondan según tu país y atiende las consultas sobre el cobro. En ese caso la orden se considera pagada cuando Polar confirma el pago, y la compra se rige también por los términos de compra de Polar (polar.sh/legal/checkout-buyer-terms). Cupón de bienvenida: quien crea su cuenta tiene un 10% de descuento en su primera compra de templates, bundle o composiciones del builder, una sola vez, con la cuenta de Google con la que se registró. Se aplica solo al pagar y no se acumula: la segunda compra y las siguientes van a precio de lista, y una compra reembolsada cuenta como compra. No aplica a las suscripciones de LAB."
       },
       {
         "title": "Entrega y descargas",
@@ -1706,7 +1706,7 @@
       },
       {
         "title": "Reembolsos",
-        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro), y la suscripción se da de baja en el momento; las renovaciones no se devuelven y cancelar detiene los próximos cobros. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Lemon Squeezy) y la licencia y las descargas de esa orden quedan sin efecto. Para pedirlo usá el Botón de arrepentimiento, al pie del home.",
+        "body": "Templates, bundle y builder: podés pedir el reembolso total dentro de los {{days}} días corridos de la compra, por cualquier motivo, siempre que no hayas descargado el ZIP. LAB: podés pedir la devolución del primer cobro dentro de los {{days}} días desde que te suscribís (la prueba gratis cuenta adentro), y la suscripción se da de baja en el momento; las renovaciones no se devuelven y cancelar detiene los próximos cobros. Si ya descargaste el ZIP, solo hay reembolso si el archivo no puede abrirse o entregarse, tiene un defecto técnico sustancial o no es lo descripto, o si la normativa aplicable lo dispone. El alcance, qué se devuelve y cómo pedirlo están en la Política de reembolsos. Un reembolso aprobado se devuelve al mismo medio de pago (Mercado Pago o Polar) y la licencia y las descargas de esa orden quedan sin efecto. Para pedirlo usá el Botón de arrepentimiento, al pie del home.",
         "link": {
           "to": "/legal/refunds",
           "label": "Ver la Política de reembolsos →"
@@ -1738,7 +1738,7 @@
         "items": [
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
-          "La suscripción se cobra por adelantado (mensual o anual): desde Argentina, mediante Mercado Pago en pesos; desde otro país, con tarjeta en dólares a través de Lemon Squeezy, nuestro revendedor autorizado. Se renueva automáticamente al final de cada período hasta que la des de baja.",
+          "La suscripción se cobra por adelantado (mensual o anual): desde Argentina, mediante Mercado Pago en pesos; desde otro país, con tarjeta en dólares a través de Polar, nuestro revendedor autorizado. Se renueva automáticamente al final de cada período hasta que la des de baja.",
           "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Cada cobro se puede reembolsar dentro de los {{days}} días según la Política de reembolsos; pasado ese plazo, los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
@@ -1754,7 +1754,7 @@
     "eyebrow": "Legal",
     "title": "Política de reembolsos",
     "effectiveDate": "Vigente desde el 15 de octubre de 2026",
-    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}. Templates, bundle, builder y las suscripciones LAB se pagan con Mercado Pago o con tarjeta (Lemon Squeezy).",
+    "intro": "Acá está cuándo y cómo te devolvemos el dinero. Vale para los templates, el bundle, las composiciones del builder y las suscripciones LAB de {{site}}. Templates, bundle, builder y las suscripciones LAB se pagan con Mercado Pago o con tarjeta (Polar).",
     "sections": [
       {
         "title": "Plazo",
@@ -1782,8 +1782,7 @@
         "title": "Cómo pedirlo",
         "items": [
           "Desde el Botón de arrepentimiento (al pie del home): sin cuenta, con un código de seguimiento al instante. Vale para cualquier medio de pago.",
-          "Si pagaste con tarjeta, la devolución la gestionamos nosotros con Lemon Squeezy, nuestro revendedor autorizado, que fue quien te cobró: no hace falta que le escribas. Por dudas sobre el cobro o la factura sí podés escribirle a Lemon Squeezy.",
-          "Si te cobraron impuestos (IVA o sales tax) y estás registrado en tu país, Lemon Squeezy los devuelve si se lo pedís dentro de los 60 días de la compra, con tu código fiscal válido.",
+          "Si pagaste con tarjeta, la devolución la gestionamos nosotros con Polar, nuestro revendedor autorizado, que fue quien te cobró: no hace falta que le escribas. Por dudas sobre el cobro o la factura sí podés escribirle a Polar.",
           "Antes de disputar el cargo con tu banco, escribinos o usá el Botón de arrepentimiento: lo resolvemos más rápido.",
           "O escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página). Lo revisamos y respondemos lo antes posible."
         ],
@@ -1895,9 +1894,9 @@
     "methodMp": "Mercado Pago",
     "methodMpNote": "en pesos argentinos",
     "methodCard": "Tarjeta",
-    "methodCardNote": "en dólares · vía Lemon Squeezy",
-    "trustIntl": "Pago con tarjeta vía Lemon Squeezy · licencia incluida",
-    "intlTaxNote": "Lemon Squeezy procesa el pago en USD y, antes de pagar, te muestra los impuestos de tu país (IVA o sales tax) si corresponden.",
+    "methodCardNote": "en dólares · vía Polar",
+    "trustIntl": "Pago con tarjeta vía Polar · licencia incluida",
+    "intlTaxNote": "Polar procesa el pago en USD y, antes de pagar, te muestra los impuestos de tu país (IVA o sales tax) si corresponden.",
     "confirming": "Confirmando el pago…"
   },
   "fields": {
@@ -1914,7 +1913,7 @@
   },
   "prefs": {
     "label": "Idioma, moneda y tema ({{current}})",
-    "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Lemon Squeezy).",
+    "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Polar).",
     "theme": "Tema",
     "labelShort": "Preferencias ({{current}})"
   }

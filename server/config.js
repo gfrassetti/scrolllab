@@ -111,45 +111,10 @@ function assertProdAuthHosts(clientUrl, apiPublicUrl, googleCallback) {
 }
 
 /**
- * Lemon Squeezy (pasarela internacional en USD, ver docs/lemonsqueezy.md).
- * Nunca tira: sin las cuatro variables completas queda apagado y el resto de la API
- * arranca igual. Se prende con `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`,
- * `LEMONSQUEEZY_ORDER_VARIANT_ID` (la variante genérica sobre la que se cobra cada
- * orden con `custom_price`) y `LEMONSQUEEZY_WEBHOOK_SECRET`. `LEMONSQUEEZY_TEST_MODE`
- * pone los checkouts en modo prueba (no cobran).
- * @param {NodeJS.ProcessEnv} [env]
- */
-export function loadLemonConfig(env = process.env) {
-  const apiKey = (env.LEMONSQUEEZY_API_KEY || "").trim();
-  const storeId = (env.LEMONSQUEEZY_STORE_ID || "").trim();
-  const variantId = (env.LEMONSQUEEZY_ORDER_VARIANT_ID || "").trim();
-  const webhookSecret = env.LEMONSQUEEZY_WEBHOOK_SECRET || "";
-  const flag = (v) => v === "true" || v === "1";
-  const hidden = flag(env.LEMONSQUEEZY_HIDDEN);
-  const missing = [
-    !apiKey && "LEMONSQUEEZY_API_KEY",
-    !/^\d+$/.test(storeId) && "LEMONSQUEEZY_STORE_ID",
-    !/^\d+$/.test(variantId) && "LEMONSQUEEZY_ORDER_VARIANT_ID",
-    !webhookSecret && "LEMONSQUEEZY_WEBHOOK_SECRET",
-  ].filter(Boolean);
-  return {
-    enabled: !hidden && missing.length === 0,
-    hidden,
-    missing,
-    apiKey,
-    storeId,
-    variantId,
-    webhookSecret,
-    testMode: flag(env.LEMONSQUEEZY_TEST_MODE),
-    apiBase: (env.LEMONSQUEEZY_API_BASE || "https://api.lemonsqueezy.com/v1").replace(/\/$/, ""),
-  };
-}
-
-/**
  * Polar (pasarela internacional en USD, ver docs/polar.md). Nunca tira: sin token ni
  * secreto del webhook queda apagado y el resto de la API arranca igual.
  * `POLAR_ENV=sandbox` (por defecto) usa el entorno de prueba: no cobra plata real y,
- * como el modo prueba de Lemon Squeezy, existe solo para las cuentas de QA.
+ * existe solo para las cuentas de QA.
  * En desarrollo el token puede venir como `POLAR_SANDBOX_TOKEN`.
  * @param {NodeJS.ProcessEnv} [env]
  */
@@ -272,7 +237,6 @@ export function loadConfig() {
     );
   }
 
-  const lemon = loadLemonConfig();
   const polar = loadPolarConfig();
 
   const emailEnabled = bool("EMAIL_ENABLED", Boolean(process.env.RESEND_API_KEY));
@@ -301,7 +265,6 @@ export function loadConfig() {
     mpMock: isProd ? false : mpMock,
     mpAccessToken,
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET || "",
-    lemon,
     polar,
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",

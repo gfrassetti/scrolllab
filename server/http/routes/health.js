@@ -49,8 +49,8 @@ export function createHealthRouter({ config }) {
         mongo: mongoOk,
         storage: storageOk,
         mpMock: config.mpMock,
-        // Estado de Lemon Squeezy (sin detalles): `test` = modo prueba (solo QA).
-        lemonsqueezy: !config.lemon?.enabled ? 'off' : config.lemon.testMode ? 'test' : 'on',
+        // Estado de Polar (sin detalles): `test` = sandbox (solo QA).
+        polar: !config.polar?.enabled ? 'off' : config.polar.testMode ? 'test' : 'on',
         auth: authDiagnostics(config),
       })
     }),

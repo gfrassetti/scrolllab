@@ -8,7 +8,6 @@ import { sendWithdrawalReceived, sendWithdrawalConfirm } from './email.js'
 import { executeWithdrawal, signWithdrawalToken, verifyWithdrawalToken } from './autoRefund.js'
 import { refundWhat } from './refundLedger.js'
 import { syncLabChargesFromMp } from './subscriptions/mpSync.js'
-import { isLemonSub } from './subscriptions/lemonSync.js'
 
 /**
  * Una suscripción de Mercado Pago sin cobro anotado: antes de decir «prueba
@@ -16,7 +15,7 @@ import { isLemonSub } from './subscriptions/lemonSync.js'
  * webhook (el de la cuota tarda) y no es lo mismo: ese se devuelve.
  */
 async function withMpChargesSynced(sub, config) {
-  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub) && sub.provider !== 'polar') {
+  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && (sub.provider || 'mercadopago') === 'mercadopago') {
     await syncLabChargesFromMp(sub, config)
   }
   return sub

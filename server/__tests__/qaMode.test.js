@@ -159,7 +159,7 @@ describe('modo prueba (QA_BUYER_EMAILS)', () => {
     assert.equal(res.status, 400)
     res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }, { sku: QA_CUSTOM_SKU, recipe: RECIPE3 }] })
     assert.equal(res.status, 400)
-    res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }], provider: 'lemonsqueezy' })
+    res = await agent.post('/api/checkout').send({ items: [{ sku: QA_TEMPLATE_SKU }], provider: 'polar' })
     assert.equal(res.status, 400)
     res = await agent.post('/api/checkout').send({ items: [{ sku: QA_CUSTOM_SKU, recipe: ['plum/Hero'] }] })
     assert.equal(res.status, 400, 'la receta se valida igual que en el builder real')

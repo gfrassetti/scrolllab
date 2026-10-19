@@ -86,13 +86,13 @@ describe('startCheckout', () => {
     assert.equal(takeCheckoutIntent(), true)
   })
 
-  it('Lemon Squeezy: pide el checkout y manda a su página de pago', async () => {
-    const { result, calls, href } = await checkoutWithSession({ provider: 'lemonsqueezy', locale: 'en' })
+  it('Polar: pide el checkout y manda a su página de pago', async () => {
+    const { result, calls, href } = await checkoutWithSession({ provider: 'polar', locale: 'en' })
     assert.equal(result, 'redirect')
     assert.equal(href, 'https://mp.test/pay')
     assert.deepEqual(calls[0].body, {
       items: [{ sku: 'chapters', title: 'CHAPTERS' }],
-      provider: 'lemonsqueezy',
+      provider: 'polar',
       locale: 'en',
     })
   })
@@ -105,10 +105,10 @@ describe('startCheckout', () => {
       let out = await checkoutWithSession({})
       assert.equal('provider' in out.calls[0].body, false)
 
-      // Carril internacional activo y ubicación fuera de Argentina: Lemon Squeezy.
+      // Carril internacional activo y ubicación fuera de Argentina: Polar.
       usePayRegion.setState({ intlEnabled: true, region: 'intl' })
       out = await checkoutWithSession({})
-      assert.equal(out.calls[0].body.provider, 'lemonsqueezy')
+      assert.equal(out.calls[0].body.provider, 'polar')
 
       // Un argentino que eligió Mercado Pago sigue en Mercado Pago.
       usePayRegion.setState({ intlEnabled: true, region: 'ar' })

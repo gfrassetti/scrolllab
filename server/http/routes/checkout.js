@@ -14,7 +14,6 @@ import {
   sendOrderAdminNotifyOnce,
 } from '../../services/email.js'
 import { createCheckoutOrder } from '../../services/checkout.js'
-import { confirmLemonCheckout } from '../../services/lemonPayments.js'
 import { confirmPolarCheckout } from '../../services/polarPayments.js'
 import { gatewayUsable, intlGatewayFor } from '../../services/intlGateway.js'
 
@@ -32,8 +31,8 @@ export function requestCountry(req) {
 /**
  * Compra de templates y composiciones del builder: crear la orden con los
  * precios del servidor (y el cupón, si viene) y el checkout de la pasarela
- * (Checkout Pro de MP en ARS, o Lemon Squeezy en USD); confirmar el pago al volver
- * (en test MP no manda webhooks; con Lemon Squeezy se espera al webhook); qué
+ * (Checkout Pro de MP en ARS, o Polar en USD); confirmar el pago al volver
+ * (en test MP no manda webhooks; con Polar se espera al webhook); qué
  * pasarelas hay y desde qué país viene el request; y el pago mock de
  * desarrollo. Los webhooks viven en webhooks.js.
  */
@@ -106,12 +105,12 @@ export function createCheckoutRouter({ config, limits }) {
   )
 
   // Qué pasarelas hay y desde dónde se conecta: el carrito preselecciona
-  // «Argentina» (MP) o «internacional» (Lemon Squeezy, USD). Es solo el default:
+  // «Argentina» (MP) o «internacional» (Polar, USD). Es solo el default:
   // el comprador elige. Sin sesión (se muestra antes de loguearse).
   router.get('/api/checkout/methods', (req, res) => {
     const country = requestCountry(req)
     // En modo prueba (no cobra), solo para las cuentas de QA: para el resto no hay carril.
-    // `intl`: la pasarela internacional que le toca a este usuario (Polar o Lemon Squeezy).
+    // `intl`: la pasarela internacional que le toca a este usuario (Polar), o null.
     const intl = intlGatewayFor(config, req.user)
     const lane = (gateway, conf) => {
       const on = gatewayUsable(config, gateway, req.user)
@@ -124,7 +123,6 @@ export function createCheckoutRouter({ config, limits }) {
       suggested: intl && country && country !== 'AR' ? intl : 'mercadopago',
       providers: {
         mercadopago: { enabled: true, mock: Boolean(config.mpMock), currency: 'ARS' },
-        lemonsqueezy: lane('lemonsqueezy', config.lemon),
         polar: lane('polar', config.polar),
       },
     })
@@ -140,7 +138,7 @@ export function createCheckoutRouter({ config, limits }) {
           user: req.user,
           items: req.body?.items,
           couponCode: req.body?.couponCode,
-          provider: ['lemonsqueezy', 'polar'].includes(req.body?.provider) ? req.body.provider : 'mercadopago',
+          provider: req.body?.provider === 'polar' ? req.body.provider : 'mercadopago',
           locale: req.body?.locale,
           config,
         }),
@@ -149,39 +147,9 @@ export function createCheckoutRouter({ config, limits }) {
   )
 
   /**
-   * Vuelta de Lemon Squeezy: la orden la cumple el webhook; esto solo dice cómo va
-   * (409 mientras el webhook no llegó: el front reintenta). Lee la orden de este
-   * usuario, no confía en la URL.
+   * Vuelta de Polar: la orden la cumple el webhook; esto solo dice cómo va (409 mientras
+   * el webhook no llegó: el front reintenta). Lee la orden de este usuario, no confía en la URL.
    */
-  router.post(
-    '/api/checkout/lemonsqueezy/confirm',
-    requireAuth,
-    limits.checkout,
-    asyncHandler(async (req, res) => {
-      if (!config.lemon?.enabled) {
-        throw new HttpError(400, 'Confirmación de Lemon Squeezy no disponible')
-      }
-      const { order, orderId, alreadyFulfilled } = await confirmLemonCheckout({
-        orderId: String(req.body?.orderId || '').trim(),
-        userId: db.uid(req.user),
-      })
-      res.json({
-        ok: true,
-        orderId,
-        alreadyFulfilled,
-        status: order.status,
-        order: {
-          id: orderId,
-          status: order.status,
-          items: order.items,
-          total: order.total,
-          currency_id: order.currency_id,
-        },
-      })
-    }),
-  )
-
-  /** Vuelta de Polar: igual que Lemon Squeezy (la cumple el webhook; 409 mientras no llegó). */
   router.post(
     '/api/checkout/polar/confirm',
     requireAuth,

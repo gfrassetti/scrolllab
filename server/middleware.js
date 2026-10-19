@@ -228,10 +228,10 @@ export function notFound(_req, res) {
 export function errorHandler(config) {
   return (err, req, res, _next) => {
     const requestId = req.requestId || null
-    // Un error de la API de Lemon Squeezy trae ids y detalles internos: nunca
+    // Un error de la API de Polar trae ids y detalles internos: nunca
     // llega crudo al navegador. El detalle va al log; el comprador, un 502 genérico.
-    if (err?.name === 'LemonError') {
-      console.error(`[${requestId || '-'}] Lemon Squeezy ${err.status} ${err.code}: ${err.message}`)
+    if (err?.name === 'PolarError') {
+      console.error(`[${requestId || '-'}] Polar ${err.status}: ${err.message}`)
       res.status(502).json({
         error: 'No pudimos completar la operación con el procesador de pagos. Probá de nuevo en un momento.',
         code: 'payment_provider',

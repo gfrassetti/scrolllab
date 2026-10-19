@@ -36,7 +36,7 @@ como "del video". El 10% no es un formulario: se lo dan al entrar con Google.
 3. Tag de GA4 para el evento `generate_lead` en GTM.
 4. Una compra de prueba con cupón con credenciales de prueba de Mercado Pago.
 5. Reservar los perfiles. `@scrolllab` en Instagram ya existe y parece de otra marca: probá `@scrolllab.dev` o similar.
-6. Los videos en inglés esperan al cobro en dólares. Hoy Mercado Pago cobra en pesos y una tarjeta de afuera muchas veces no pasa (Fase 0, pendiente: comercio intermediario tipo Polar o Lemon Squeezy). Hasta entonces publicá solo los `-es`; con los `-en` traés gente que no puede comprar.
+6. Los videos en inglés esperan al cobro en dólares. Hoy Mercado Pago cobra en pesos y una tarjeta de afuera muchas veces no pasa (Fase 0, pendiente: comercio intermediario: Polar, en sandbox hasta que aprueben la cuenta). Hasta entonces publicá solo los `-es`; con los `-en` traés gente que no puede comprar.
 
 ## Calendario de 4 semanas
 

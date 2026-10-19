@@ -22,7 +22,7 @@ import { handleLabRefund } from './labRefund.js'
 /**
  * LAB cobrado por Polar (USD, ver docs/polar.md): alta, estados de la suscripción,
  * cuotas cobradas o rechazadas, baja, alta abandonada, cambio de plan y devoluciones.
- * Mismas reglas de acceso que con Mercado Pago y Lemon Squeezy (entitlement.js no sabe
+ * Mismas reglas de acceso que con Mercado Pago (entitlement.js no sabe
  * de pasarelas): `currentPeriodEnd` lo extiende solo un cobro, la baja respeta los
  * días pagos y una suscripción nueva cierra la vieja.
  *
@@ -167,7 +167,8 @@ export async function applyPolarSubscriptionState(sub, ps, config, deps = {}) {
     }
     const periodEnd = ps.status === 'trialing' ? ps.trialEnd || ps.currentPeriodEnd : ps.currentPeriodEnd
     if (!sub.currentPeriodEnd && periodEnd) sub.currentPeriodEnd = periodEnd
-    if (ps.status === 'trialing' && !sub.trialEndsAt && ps.trialEnd) sub.trialEndsAt = ps.trialEnd
+    // `trialing` en Polar también cubre los días ya pagados que se arrastran de otra
+    // suscripción: no es una prueba gratis. La prueba real la marca el alta (start.js).
     if ((ps.status === 'past_due' || ps.status === 'unpaid') && !sub.paymentFailedAt) sub.paymentFailedAt = new Date()
   }
 

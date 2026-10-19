@@ -49,7 +49,7 @@ export default function CartPage() {
   const { rate } = useFxRate()
   const { t, locale } = useI18n()
   // Con el carril internacional, la moneda la decide desde dónde paga (Argentina
-  // → pesos con MP; otro país → USD con Lemon Squeezy). Sin él, como siempre:
+  // → pesos con MP; otro país → USD con Polar). Sin él, como siempre:
   // USD de referencia en inglés y el cobro en pesos.
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)

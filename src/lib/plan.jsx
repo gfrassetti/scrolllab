@@ -26,7 +26,7 @@ const EMPTY = {
   // Plan con el que está pago el período en curso (null en la prueba).
   paidPlan: null,
   // Pasarela y moneda de la suscripción vigente ('mercadopago' / ARS o
-  // 'lemonsqueezy' / USD); null sin suscripción.
+  // 'polar' / USD); null sin suscripción.
   provider: null,
   currency_id: null,
   loading: true,

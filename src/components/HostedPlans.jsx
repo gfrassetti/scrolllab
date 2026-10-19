@@ -38,7 +38,7 @@ function fmtArs(n, locale) {
   }).format(n)
 }
 
-/** Precio en la moneda de la pasarela: ARS (MP) o USD con centavos si los hay (Lemon Squeezy). */
+/** Precio en la moneda de la pasarela: ARS (MP) o USD con centavos si los hay (Polar). */
 function fmtMoney(n, currency, locale) {
   if (currency !== 'USD') return fmtArs(n, locale)
   const cents = !Number.isInteger(Number(n))
@@ -63,7 +63,6 @@ const planPrice = (p, cycle, currency) =>
 /** Términos de cada pasarela: el aviso de renovación los enlaza junto a los nuestros. */
 const GATEWAY_TERMS = {
   mercadopago: { name: 'Mercado Pago', href: 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194' },
-  lemonsqueezy: { name: 'Lemon Squeezy', href: 'https://www.lemonsqueezy.com/buyer-terms' },
   polar: { name: 'Polar', href: 'https://polar.sh/legal/checkout-buyer-terms' },
 }
 
@@ -140,7 +139,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
   const setRegion = usePayRegion((s) => s.setRegion)
   const intlForRegion = usePayRegion((s) => s.intlEnabled)
   // LAB es una suscripción: solo cobra afuera una pasarela que las tenga
-  // (Lemon Squeezy desde la etapa 3, docs/lemonsqueezy.md).
+  // (Polar, docs/polar.md).
   const labIntlForRegion = usePayRegion((s) => s.labIntlEnabled)
   // Prueba: sin prueba gratis y solo Mercado Pago.
   const intlEnabled = !qa && labIntlForRegion
@@ -156,9 +155,9 @@ export default function HostedPlans({ qa: qaPage = false }) {
   }, [loadRegion])
   const intlGateway = usePayRegion((s) => s.intl)
   const intl = intlEnabled && region === 'intl'
-  // Suscripción cobrada con tarjeta en USD (Polar o Lemon Squeezy).
-  const cardSub = planProvider === 'lemonsqueezy' || planProvider === 'polar'
-  const cardGateway = GATEWAY_TERMS[planProvider]?.name || 'Lemon Squeezy'
+  // Suscripción cobrada con tarjeta en USD (Polar).
+  const cardSub = planProvider === 'polar'
+  const cardGateway = GATEWAY_TERMS[planProvider]?.name || 'Polar'
   // Textos que nombran a la pasarela: con una suscripción internacional, su variante.
   const tp = (key, vars) => t(cardSub ? `lab.card.${key}` : `lab.${key}`, { gateway: cardGateway, ...vars })
   const root = useRef(null)
@@ -343,7 +342,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
     }
   }
 
-  // Cuota rechazada con tarjeta (Lemon Squeezy): el link firmado para cambiar la tarjeta.
+  // Cuota rechazada con tarjeta (Polar): el portal para cambiar la tarjeta.
   const updateCard = async () => {
     if (busy) return
     setBusy('card')

@@ -146,22 +146,20 @@ En [Mercado Pago Developers](https://www.mercadopago.com.ar/developers):
 
 Sin `MP_WEBHOOK_SECRET` + token de prod, el boot en producción **falla** a propósito.
 
-## Lemon Squeezy — cobro internacional (USD)
+## Polar — cobro internacional (USD)
 
-Afuera de Argentina cobra Lemon Squeezy, en USD y como merchant of record
-(factura y liquida el IVA / sales tax de cada país). Alcance (templates y
-builder; LAB todavía no), cuenta, panel y variables en
-[`lemonsqueezy.md`](lemonsqueezy.md). En Railway:
+Afuera de Argentina cobra Polar, en USD y como merchant of record (factura y
+liquida el IVA / sales tax de cada país): templates, bundle, builder y LAB.
+Cuenta, panel, webhook y variables en [`polar.md`](polar.md). En Railway:
 
 ```
-LEMONSQUEEZY_API_KEY=...
-LEMONSQUEEZY_STORE_ID=...
-LEMONSQUEEZY_ORDER_VARIANT_ID=...
-LEMONSQUEEZY_WEBHOOK_SECRET=...   # webhook → /api/webhooks/lemonsqueezy
-LEMONSQUEEZY_TEST_MODE=true       # sacarlo al salir a producción
+POLAR_ACCESS_TOKEN=...            # en sandbox también sirve POLAR_SANDBOX_TOKEN
+POLAR_WEBHOOK_SECRET=whsec_...    # webhook → /api/webhooks/polar
+POLAR_ENV=sandbox                 # «production» al salir a cobros reales
 ```
 
-Sin esas cuatro variables queda apagado (todo por Mercado Pago).
+Sin token ni secreto queda apagado (todo por Mercado Pago). En sandbox solo lo
+ven las cuentas de `QA_BUYER_EMAILS`.
 
 ## Precios en USD, cobro en pesos
 
@@ -213,7 +211,7 @@ cada tanto para que el respaldo no quede viejo.
 
 Para cobrar de verdad en dólares (comprador del exterior, tarjeta
 internacional) hace falta un merchant of record aparte (~5% + USD 0,50): lo
-cubre Lemon Squeezy (ver arriba).
+cubre Polar (ver arriba).
 
 ## Email de confirmación (Resend) — scrolllab.com.ar
 

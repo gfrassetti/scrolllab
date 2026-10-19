@@ -8,7 +8,7 @@ import { discountedUsdOrNull } from '../domain/catalog.js'
 
 /**
  * Precio de una línea con el cupón: pesos (mismo redondeo que el servidor) o
- * USD (cobro internacional, Lemon Squeezy). null si falta el precio de lista.
+ * USD (cobro internacional, Polar). null si falta el precio de lista.
  */
 export function couponLinePrice({ usd, rate, percent, currency }) {
   if (usd == null) return null

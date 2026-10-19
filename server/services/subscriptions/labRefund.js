@@ -3,12 +3,11 @@ import { alertAdmin } from '../orders.js'
 import { noteRefund } from '../refundLedger.js'
 import { subId, isMock, fireCanceled } from './billing.js'
 import { cancelPreapprovalConfirmed } from './mpSync.js'
-import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
 import { gatewayName } from '../emailTemplatesBilling.js'
 
 /**
  * Devolución (o contracargo) de un cobro de LAB, venga de Mercado Pago o de
- * Lemon Squeezy. Política (src/domain/policy.js `labRefundEligibility`): solo se
+ * Polar. Política (src/domain/policy.js `labRefundEligibility`): solo se
  * devuelve el PRIMER cobro, dentro de los días del alta; al devolverlo, la
  * suscripción se da de baja en el momento (no se le vuelve a cobrar y pierde el
  * acceso). Un contracargo también la da de baja. Una devolución de otra cuota
@@ -19,7 +18,7 @@ import { gatewayName } from '../emailTemplatesBilling.js'
  * aviso al dueño. Idempotente: el mismo evento dos veces no da de baja dos
  * veces ni manda dos mails.
  *
- * @param {{ sub: any, provider: 'mercadopago' | 'lemonsqueezy' | 'polar', externalId: string, chargeId: string | null, amount: number, currency: string, partial: boolean, reason: 'refunded' | 'charged_back', config: any }} args
+ * @param {{ sub: any, provider: 'mercadopago' | 'polar', externalId: string, chargeId: string | null, amount: number, currency: string, partial: boolean, reason: 'refunded' | 'charged_back', config: any }} args
  */
 export async function handleLabRefund(
   { sub, provider, externalId, chargeId, amount, currency, partial, reason, config },
@@ -119,10 +118,6 @@ async function endSubscriptionNow(sub, config, deps) {
       // Polar sí corta en el acto (`revoke`).
       const { cancelPolarConfirmed } = await import('./polarSync.js')
       await cancelPolarConfirmed(sub, config, { immediately: true }, deps)
-    } else if (isLemonSub(sub)) {
-      // Lemon Squeezy no corta en el acto: deja de cobrar y la vence al fin del
-      // período. El acceso lo cortamos acá abajo.
-      await cancelLemonConfirmed(sub, config, deps)
     } else if (!isMock(config) && sub.mpPreapprovalId) {
       await cancelPreapprovalConfirmed(sub, config, deps)
     }
@@ -155,7 +150,7 @@ export async function findLabSubscriptionForMpPayment(payment) {
   const ref = String(payment?.external_reference || '')
   if (ref) {
     const byRef = await db.findSubscriptionById(ref).catch(() => null)
-    if (byRef && !isLemonSub(byRef) && byRef.provider !== 'polar') return byRef
+    if (byRef && (byRef.provider || 'mercadopago') === 'mercadopago') return byRef
   }
   const preapprovalId =
     payment?.metadata?.preapproval_id ||

@@ -66,13 +66,13 @@ const RESOLVED_PANELS = {
 const SHOWS_ERROR = new Set(['error', 'review', 'wrong-account'])
 
 /**
- * Vuelta del pago: Mercado Pago pega su `payment_id` en la URL; Lemon Squeezy
- * (o Polar) llega con `provider=lemonsqueezy&orderId=…` (`provider=polar`). Cada uno confirma contra la API a su modo.
+ * Vuelta del pago: Mercado Pago pega su `payment_id` en la URL; Polar llega con
+ * `provider=polar&orderId=…`. Cada uno confirma contra la API a su modo.
  */
 export default function CheckoutSuccessPage() {
   const [params] = useSearchParams()
   const provider = params.get('provider')
-  if (provider === 'lemonsqueezy' || provider === 'polar') return <IntlCheckoutSuccess provider={provider} />
+  if (provider === 'polar') return <IntlCheckoutSuccess provider={provider} />
   return <MercadoPagoCheckoutSuccess />
 }
 
@@ -121,7 +121,7 @@ const INTL_RETRY_MS = 2000
 const INTL_MAX_TRIES = 6
 
 /**
- * Vuelta del pago internacional (Lemon Squeezy o Polar): la orden la cumple el webhook y
+ * Vuelta del pago internacional (Polar): la orden la cumple el webhook y
  * esto solo pregunta cómo va (409 mientras no llegó). Se reintenta un rato y se
  * manda a Mis compras; el webhook cumple la
  * orden igual aunque esto falle. Nunca gira para siempre (15 s) y cada error
@@ -164,8 +164,7 @@ function IntlCheckoutSuccess({ provider }) {
     ;(async () => {
       for (let attempt = 1; attempt <= INTL_MAX_TRIES; attempt += 1) {
         try {
-          const data =
-            provider === 'polar' ? await api.confirmPolarCheckout(orderId) : await api.confirmLemonCheckout(orderId)
+          const data = await api.confirmPolarCheckout(orderId)
           if (cancelled) return
           clearTimeout(watchdog)
           clearCart()

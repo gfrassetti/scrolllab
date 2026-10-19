@@ -500,7 +500,7 @@
     "howHostedNote": "No code? With LAB you add premium widgets to your site — any of our 30+ sections — and edit them online.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
-    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Lemon Squeezy. We never see or store your card details.",
+    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Polar. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
     "zip1": "The full editable project",
     "zip2": "Sections from the model or what you built",
@@ -1597,7 +1597,7 @@
     "wrongAccountTitle": "That payment belongs to another account",
     "wrongAccountBody": "Sign in with the account you bought with: you’ll find the purchase in My purchases.",
     "reviewTitle": "We’re reviewing your payment",
-    "reviewBody": "Lemon Squeezy recorded the payment, but we couldn’t match it to your purchase. We’ve been notified and will email you to deliver what you bought or refund you."
+    "reviewBody": "Polar recorded the payment, but we couldn’t match it to your purchase. We’ve been notified and will email you to deliver what you bought or refund you."
   },
   "license": {
     "eyebrow": "Regular License",
@@ -1630,7 +1630,7 @@
         "title": "Data we collect",
         "items": [
           "Google account data: identifier, name, email address, and profile picture when you choose to sign in with Google.",
-          "Purchase and order data: products, amount, currency, payment status, Mercado Pago or Lemon Squeezy identifiers (depending on how you pay), and download count.",
+          "Purchase and order data: products, amount, currency, payment status, Mercado Pago or Polar identifiers (depending on how you pay), and download count.",
           "Basic technical data needed to operate and protect the service, such as IP address, browser, server logs, and session cookies.",
           "The welcome coupon we give you when you create your account: your email address, when you received it, which channel you came from (if you arrived through a tagged link) and whether you used it.",
           "If you write to us through the contact or Studio form: your name, email, message, and the project type you selected."
@@ -1649,7 +1649,7 @@
       },
       {
         "title": "Third-party services",
-        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Lemon Squeezy, our online reseller (Merchant of Record), for payments from other countries in US dollars: Lemon Squeezy receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (lemonsqueezy.com/privacy; processing may take place outside your country, including the United States), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
+        "body": "We use Google for authentication, Mercado Pago to process payments from Argentina in pesos and Polar, our online reseller (Merchant of Record), for payments from other countries in US dollars: Polar receives your name, email, country and payment details to charge you, issue the invoice and calculate taxes, and handles that data under its own privacy policy (polar.sh/legal/privacy; processing may take place outside your country, including the United States), Formspree to receive contact-form messages, Google Tag Manager and Google Analytics to understand aggregate site usage, and email providers to send receipts and coupons. These providers handle data under their own privacy policies. We do not receive or store your complete card details."
       },
       {
         "title": "Cookies and local storage",
@@ -1661,7 +1661,7 @@
       },
       {
         "title": "Your rights",
-        "body": "You may request access, correction, or deletion of your personal data, and revoke Google access from your Google account. Some order information may be retained where legally required. Payment data handled by Mercado Pago or Lemon Squeezy as independent controllers is exercised with them. To exercise your rights over the data we hold, email us at the address below. In Argentina, the Agencia de Acceso a la Información Pública (AAIP) is the supervisory authority under Law 25,326 and handles complaints about breaches of personal-data protection."
+        "body": "You may request access, correction, or deletion of your personal data, and revoke Google access from your Google account. Some order information may be retained where legally required. Payment data handled by Mercado Pago or Polar as independent controllers is exercised with them. To exercise your rights over the data we hold, email us at the address below. In Argentina, the Agencia de Acceso a la Información Pública (AAIP) is the supervisory authority under Law 25,326 and handles complaints about breaches of personal-data protection."
       },
       {
         "title": "Changes to this policy",
@@ -1686,7 +1686,7 @@
     "sections": [
       {
         "title": "Who sells",
-        "body": "The site, products, and services are offered by {{seller}}, a web design and development studio based in Argentina. For any question about these Terms, a purchase, or a refund, write to us at the email at the end of this page. Purchases from outside Argentina are processed by Lemon Squeezy as reseller (see «Prices and payments»)."
+        "body": "The site, products, and services are offered by {{seller}}, a web design and development studio based in Argentina. For any question about these Terms, a purchase, or a refund, write to us at the email at the end of this page. Purchases from outside Argentina are processed by Polar as reseller (see «Prices and payments»)."
       },
       {
         "title": "Account and access",
@@ -1698,7 +1698,7 @@
       },
       {
         "title": "Prices and payments",
-        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Lemon Squeezy, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Lemon Squeezy confirms the payment, and the purchase is also governed by Lemon Squeezy’s buyer terms (lemonsqueezy.com/buyer-terms). Welcome coupon: new accounts get 10% off their first purchase of templates, the bundle or builder compositions, once, with the Google account they signed up with. It’s applied automatically at checkout and doesn’t stack: the second purchase and later ones are at list price, and a refunded purchase counts as a purchase. It doesn’t apply to LAB subscriptions."
+        "body": "Current prices are shown in the catalog and builder. If you pay from Argentina, the payment is processed by Mercado Pago in Argentine pesos: the total is the one shown when you pay, subject to their approval, and an order is considered paid when Mercado Pago confirms the payment. If you pay from any other country, our order process is conducted by our online reseller Polar, which is the Merchant of Record for those orders: it charges in US dollars, issues the invoice, applies any taxes due in your country and handles billing inquiries. In that case an order is considered paid when Polar confirms the payment, and the purchase is also governed by Polar’s buyer terms (polar.sh/legal/checkout-buyer-terms). Welcome coupon: new accounts get 10% off their first purchase of templates, the bundle or builder compositions, once, with the Google account they signed up with. It’s applied automatically at checkout and doesn’t stack: the second purchase and later ones are at list price, and a refunded purchase counts as a purchase. It doesn’t apply to LAB subscriptions."
       },
       {
         "title": "Delivery and downloads",
@@ -1706,7 +1706,7 @@
       },
       {
         "title": "Refunds",
-        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: you can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it), and the subscription ends right away; renewals aren’t refunded and canceling stops future charges. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Lemon Squeezy) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
+        "body": "Templates, bundle and builder: you can ask for a full refund within {{days}} calendar days of purchase, for any reason, as long as you haven’t downloaded the ZIP. LAB: you can ask for a refund of the first charge within {{days}} days of subscribing (the free trial counts toward it), and the subscription ends right away; renewals aren’t refunded and canceling stops future charges. If you already downloaded the ZIP, a refund is only available if the file can’t be opened or delivered, has a substantial technical defect or isn’t as described, or if applicable law requires it. Scope, what is returned and how to ask are in the Refund policy. An approved refund goes back to the original payment method (Mercado Pago or Polar) and the license and downloads for that order are revoked. To request it, use the Withdrawal request button at the bottom of the home page.",
         "link": {
           "to": "/legal/refunds",
           "label": "See the Refund policy →"
@@ -1738,7 +1738,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, by card in US dollars through Lemon Squeezy, our authorized reseller. It renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, by card in US dollars through Polar, our authorized reseller. It renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1754,7 +1754,7 @@
     "eyebrow": "Legal",
     "title": "Refund policy",
     "effectiveDate": "Effective October 15, 2026",
-    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}. Templates, bundle, builder and LAB subscriptions are paid with Mercado Pago or by card (Lemon Squeezy).",
+    "intro": "This is when and how we give your money back. It covers the templates, the bundle, builder compositions and LAB subscriptions from {{site}}. Templates, bundle, builder and LAB subscriptions are paid with Mercado Pago or by card (Polar).",
     "sections": [
       {
         "title": "Refund period",
@@ -1782,8 +1782,7 @@
         "title": "How to request it",
         "items": [
           "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
-          "If you paid by card, we handle the refund with Lemon Squeezy, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Lemon Squeezy.",
-          "If you were charged taxes (VAT or sales tax) and are registered in your country, Lemon Squeezy refunds them if you ask within 60 days of the purchase, with a valid tax code.",
+          "If you paid by card, we handle the refund with Polar, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Polar.",
           "Before disputing the charge with your bank, write to us or use the Withdrawal request button: we resolve it faster.",
           "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
         ],
@@ -1895,9 +1894,9 @@
     "methodMp": "Mercado Pago",
     "methodMpNote": "in Argentine pesos",
     "methodCard": "Card",
-    "methodCardNote": "in US dollars · via Lemon Squeezy",
-    "trustIntl": "Card payment via Lemon Squeezy · license included",
-    "intlTaxNote": "Lemon Squeezy processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
+    "methodCardNote": "in US dollars · via Polar",
+    "trustIntl": "Card payment via Polar · license included",
+    "intlTaxNote": "Polar processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
     "confirming": "Confirming your payment…"
   },
   "fields": {
@@ -1914,7 +1913,7 @@
   },
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
-    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Lemon Squeezy).",
+    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Polar).",
     "theme": "Theme",
     "labelShort": "Preferences ({{current}})"
   }

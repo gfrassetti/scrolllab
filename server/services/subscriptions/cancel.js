@@ -1,7 +1,6 @@
 import { sendSubscriptionCanceledOnce } from '../email.js'
 import { isMock } from './billing.js'
 import { cancelPreapprovalConfirmed } from './mpSync.js'
-import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
 import { cancelPolarConfirmed, isPolarSub } from './polarSync.js'
 
 /**
@@ -15,8 +14,6 @@ import { cancelPolarConfirmed, isPolarSub } from './polarSync.js'
 export async function cancelAtPeriodEnd(sub, config, deps = {}) {
   if (isPolarSub(sub)) {
     await cancelPolarConfirmed(sub, config, {}, deps)
-  } else if (isLemonSub(sub)) {
-    await cancelLemonConfirmed(sub, config, deps)
   } else if (!isMock(config) && sub.mpPreapprovalId) {
     await cancelPreapprovalConfirmed(sub, config, deps)
   }

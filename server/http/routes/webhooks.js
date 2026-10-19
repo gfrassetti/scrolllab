@@ -1,7 +1,6 @@
 import express from 'express'
 import { asyncHandler } from '../../middleware.js'
 import { handleMercadoPagoNotification } from '../../services/payments.js'
-import { handleLemonNotification } from '../../services/lemonPayments.js'
 import { handlePolarNotification } from '../../services/polarPayments.js'
 
 /**
@@ -23,21 +22,6 @@ export function createWebhooksRouter({ config, limits }) {
         source: req.query.source,
         xSignature: req.headers['x-signature'],
         xRequestId: req.headers['x-request-id'],
-        config,
-      })
-      res.sendStatus(200)
-    }),
-  )
-
-  // Lemon Squeezy: la firma (`X-Signature`) va sobre el body crudo, que app.js
-  // guarda en `req.rawBody` solo para esta ruta (express.json ya lo parseó).
-  router.post(
-    '/api/webhooks/lemonsqueezy',
-    limits.webhook,
-    asyncHandler(async (req, res) => {
-      await handleLemonNotification({
-        rawBody: req.rawBody ?? '',
-        signature: req.headers['x-signature'],
         config,
       })
       res.sendStatus(200)

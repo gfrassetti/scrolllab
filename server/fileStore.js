@@ -138,7 +138,7 @@ export const fileDb = {
   async createOrder(data) {
     const rows = read("orders");
     // Índices únicos sparse del esquema (server/models.js): un pago de MP o una
-    // orden de Lemon Squeezy pertenece a una sola orden nuestra.
+    // orden de Polar pertenece a una sola orden nuestra.
     for (const field of ["mpPaymentId", "lemonOrderId", "polarOrderId"]) {
       const value = data[field];
       if (value != null && rows.some((o) => o[field] === String(value))) {
@@ -161,11 +161,10 @@ export const fileDb = {
   async findOrderById(id) {
     return withSave(read("orders").find((o) => o.id === String(id)) || null);
   },
-  /** La orden ya paga con ese pago de MP o esa orden de Lemon Squeezy / Polar, o null. */
-  async findPaidOrderByPayment({ mpPaymentId, lemonOrderId, polarOrderId }) {
-    const field =
-      polarOrderId != null ? "polarOrderId" : lemonOrderId != null ? "lemonOrderId" : "mpPaymentId";
-    const value = String(polarOrderId ?? lemonOrderId ?? mpPaymentId);
+  /** La orden ya paga con ese pago de MP o esa orden de Polar, o null. */
+  async findPaidOrderByPayment({ mpPaymentId, polarOrderId }) {
+    const field = polarOrderId != null ? "polarOrderId" : "mpPaymentId";
+    const value = String(polarOrderId ?? mpPaymentId);
     return withSave(
       read("orders").find((o) => o[field] === value && o.status === "paid") ||
         null,
@@ -174,11 +173,6 @@ export const fileDb = {
   async findOrderByPolarOrder(polarOrderId) {
     return withSave(
       read("orders").find((o) => o.polarOrderId === String(polarOrderId)) || null,
-    );
-  },
-  async findOrderByLemonOrder(lemonOrderId) {
-    return withSave(
-      read("orders").find((o) => o.lemonOrderId === String(lemonOrderId)) || null,
     );
   },
   async deletePendingOrder(orderId) {
@@ -430,11 +424,6 @@ export const fileDb = {
   async findSubscriptionByPolar(polarSubscriptionId) {
     const row =
       read("subscriptions").find((s) => s.polarSubscriptionId === String(polarSubscriptionId)) || null;
-    return withSaveDoc("subscriptions", row);
-  },
-  async findSubscriptionByLemon(lemonSubscriptionId) {
-    const row =
-      read("subscriptions").find((s) => s.lemonSubscriptionId === String(lemonSubscriptionId)) || null;
     return withSaveDoc("subscriptions", row);
   },
   async findActiveSubscriptionByUser(userId) {

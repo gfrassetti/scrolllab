@@ -1,7 +1,7 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { createFakeMercadoPago, startAppAgainstFakeMp, waitFor } from './helpers/fakeMercadoPago.js'
-import { startAppAgainstFakeLemon } from './helpers/fakeLemon.js'
+import { startAppAgainstFakePolar } from './helpers/fakePolar.js'
 import { arsFromUsd, discountedArsFromUsd, HOSTED_PLANS } from '../catalog.js'
 import {
   TEMPLATE_PRICES_USD,
@@ -13,7 +13,7 @@ import {
 /**
  * El 10% de bienvenida: SOLO en la primera compra de cada usuario, y en
  * cualquier cosa del market (template, bundle, builder), cobre Mercado Pago o
- * Lemon Squeezy. Nunca en la segunda ni en la tercera, ni aunque mande el código; una
+ * Polar. Nunca en la segunda ni en la tercera, ni aunque mande el código; una
  * compra reembolsada cuenta como compra; dos compras abiertas a la vez no se
  * llevan el descuento las dos. LAB (suscripciones) no tiene descuento y no gasta
  * el cupón.
@@ -142,46 +142,47 @@ describe('10% de primera compra — Mercado Pago (pesos)', () => {
   })
 })
 
-describe('10% de primera compra — Lemon Squeezy (dólares)', () => {
-  let ls
+describe('10% de primera compra — Polar (dólares)', () => {
+  let pl
   let mp
   let loginAs
-  let lemonWebhook
+  let polarWebhook
   let cleanup
   let fileDb
 
   before(async () => {
     process.env.EMAIL_NOTIFY_TO = OWNER
-    ;({ ls, mp, loginAs, lemonWebhook, cleanup, fileDb } = await startAppAgainstFakeLemon())
+    ;({ pl, mp, loginAs, polarWebhook, cleanup, fileDb } = await startAppAgainstFakePolar())
   })
   after(() => cleanup())
 
-  const lastCheckout = () => ls.calls.filter((c) => c.route === 'POST /v1/checkouts').at(-1).body.data.attributes
+  const lastCheckout = () => pl.calls.filter((c) => c.route === 'POST /checkouts/').at(-1).body
+  /** El precio ad hoc del checkout, en centavos (undefined si se cobra el precio del producto). */
+  const adhoc = (body) => Object.values(body.prices || {})[0]?.[0]?.price_amount
   async function checkout(agent, items, extra = {}) {
-    const res = await agent.post('/api/checkout').send({ items, provider: 'lemonsqueezy', ...extra })
+    const res = await agent.post('/api/checkout').send({ items, provider: 'polar', ...extra })
     return {
       res,
       order: res.status === 200 ? await fileDb.findOrderById(res.body.orderId) : null,
-      checkoutId: res.body?.init_point?.split('/').pop(),
+      checkoutId: res.body?.init_point?.split('polar_c_').pop(),
       body: res.status === 200 ? lastCheckout() : null,
     }
   }
   async function pay(checkoutId, email) {
-    const lemon = ls.pay(checkoutId, { email })
-    assert.equal((await lemonWebhook('order_created', lemon)).status, 200)
-    return lemon
+    const order = pl.pay(checkoutId, { email })
+    assert.equal((await polarWebhook('order.paid', order)).status, 202)
+    return order
   }
   const cents = (usd) => Math.round(usd * 100)
 
   for (const k of KINDS) {
     it(`${k.kind}: la primera compra lleva el 10% en USD; la segunda y la tercera, precio de lista`, async () => {
-      const email = `ls-${k.kind}@test.com`
+      const email = `pl-${k.kind}@test.com`
       const agent = await loginAs(email)
       const first = await checkout(agent, k.items)
       assert.equal(first.res.status, 200, JSON.stringify(first.res.body))
       assert.equal(first.order.total, usdWithDiscount(k.usd))
-      assert.equal(first.body.custom_price, cents(usdWithDiscount(k.usd)))
-      assert.match(first.body.product_options.name, /10% off/)
+      assert.equal(adhoc(first.body), cents(usdWithDiscount(k.usd)))
       await pay(first.checkoutId, email)
       const code = first.order.couponCode
       assert.equal((await agent.post('/api/coupons/welcome').send({})).body.coupon, null)
@@ -189,8 +190,7 @@ describe('10% de primera compra — Lemon Squeezy (dólares)', () => {
       for (const nth of ['2ª', '3ª']) {
         const next = await checkout(agent, k.items)
         assert.equal(next.order.total, k.usd, `${nth} compra`)
-        assert.equal(next.body.custom_price, cents(k.usd), `${nth} compra`)
-        assert.doesNotMatch(next.body.product_options.name, /off/)
+        assert.equal(adhoc(next.body), cents(k.usd), `${nth} compra`)
         const withCode = await checkout(agent, k.items, { couponCode: code })
         assert.ok([409, 422].includes(withCode.res.status), `${nth} con código: ${withCode.res.status}`)
         await pay(next.checkoutId, email)
@@ -199,36 +199,36 @@ describe('10% de primera compra — Lemon Squeezy (dólares)', () => {
   }
 
   it('dos compras abiertas a la vez: al pagar una, la otra sale de Mis compras', async () => {
-    const agent = await loginAs('ls-dos@test.com')
+    const agent = await loginAs('pl-dos@test.com')
     const a = await checkout(agent, [{ sku: 'chapters' }])
     const b = await checkout(agent, [{ sku: 'fizz' }])
-    await pay(a.checkoutId, 'ls-dos@test.com')
+    await pay(a.checkoutId, 'pl-dos@test.com')
     assert.equal(await fileDb.findOrderById(b.order.id), null)
   })
 
   it('si igual se pagan las dos (a la vez), al dueño le llega el aviso', async () => {
-    const agent = await loginAs('ls-carrera@test.com')
+    const agent = await loginAs('pl-carrera@test.com')
     const a = await checkout(agent, [{ sku: 'chapters' }])
     const b = await checkout(agent, [{ sku: 'fizz' }])
     // Las dos se cobran antes de que llegue ningún webhook.
-    const la = ls.pay(a.checkoutId, { email: 'ls-carrera@test.com' })
-    const lb = ls.pay(b.checkoutId, { email: 'ls-carrera@test.com' })
-    await lemonWebhook('order_created', la)
-    await lemonWebhook('order_created', lb)
+    const la = pl.pay(a.checkoutId, { email: 'pl-carrera@test.com' })
+    const lb = pl.pay(b.checkoutId, { email: 'pl-carrera@test.com' })
+    await polarWebhook('order.paid', la)
+    await polarWebhook('order.paid', lb)
     await waitFor(
       () => mp.mailsTo(OWNER).some((m) => /PAGO SIN ORDEN/.test(m.body.subject) && m.body.text.includes(b.order.id)),
       'el aviso del segundo pago con descuento',
     )
   })
 
-  it('LAB no tiene descuento en Lemon Squeezy (ni con el código)', async () => {
-    const agent = await loginAs('ls-lab@test.com')
+  it('LAB no tiene descuento en Polar (ni con el código)', async () => {
+    const agent = await loginAs('pl-lab@test.com')
     const welcome = await agent.post('/api/coupons/welcome').send({})
     const res = await agent
       .post('/api/subscriptions')
-      .send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'lemonsqueezy', couponCode: welcome.body.coupon.code })
+      .send({ plan: 'hosted_pro', cycle: 'monthly', provider: 'polar', couponCode: welcome.body.coupon.code })
     assert.equal(res.status, 200, JSON.stringify(res.body))
-    // Se cobra la variante a precio de lista: sin `custom_price`.
-    assert.equal(lastCheckout().custom_price, undefined)
+    // Se cobra el producto del plan a precio de lista: sin precio ad hoc.
+    assert.equal(adhoc(lastCheckout()), undefined)
   })
 })

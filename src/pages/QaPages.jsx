@@ -45,14 +45,14 @@ function QaBadge() {
 
 const FLOWS = [
   {
-    title: 'Lemon Squeezy (tarjeta, en dólares)',
+    title: 'Polar (tarjeta, en dólares)',
     steps: [
-      `Comprar el template de prueba por US$ ${QA_TEMPLATE_USD} (el botón de Lemon Squeezy, abajo del de Mercado Pago).`,
-      'En modo prueba de Lemon Squeezy no cobra: tarjeta 4242 4242 4242 4242, cualquier fecha futura y CVC.',
+      `Comprar el template de prueba por US$ ${QA_TEMPLATE_USD} (el botón de Polar, abajo del de Mercado Pago).`,
+      'En el sandbox de Polar no cobra: tarjeta 4242 4242 4242 4242, cualquier fecha futura y CVC.',
       'Al pagar vuelve a /checkout/success, que espera al webhook y manda a Mis compras con la orden «Paga».',
-      'Llega «Tu compra en SCROLLLAB» en dólares, con la nota de que la factura la emite Lemon Squeezy.',
-      'Sin descargar: Mis compras → Pedir reembolso. Se devuelve por la API de Lemon Squeezy y llega «Te devolvimos el dinero».',
-      'Mismo flujo, pero con el reembolso hecho a mano desde el panel de Lemon Squeezy: el webhook corta la orden.',
+      'Llega «Tu compra en SCROLLLAB» en dólares, con la nota de que la factura la emite Polar.',
+      'Sin descargar: Botón de arrepentimiento. Se devuelve por la API de Polar y llega «Te devolvimos el dinero».',
+      'Mismo flujo, pero con el reembolso hecho a mano desde el panel de Polar: el webhook corta la orden.',
     ],
   },
   {
@@ -100,17 +100,17 @@ function QaHub() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   // La tarjeta en USD solo aparece si el servidor tiene prendido el carril
-  // internacional (Polar o Lemon Squeezy: `intl` de /api/checkout/methods).
-  const [lemon, setLemon] = useState(null)
+  // internacional (Polar: `intl` de /api/checkout/methods).
+  const [intl, setIntl] = useState(null)
   useEffect(() => {
     let cancelled = false
     api
       .checkoutMethods()
       .then((m) => {
-        const gateway = m?.intl || (m?.providers?.lemonsqueezy?.enabled ? 'lemonsqueezy' : null)
+        const gateway = m?.intl || null
         const p = gateway ? m?.providers?.[gateway] : null
         if (!cancelled && p?.enabled) {
-          setLemon({ testMode: Boolean(p.testMode), gateway, name: gateway === 'polar' ? 'Polar' : 'Lemon Squeezy' })
+          setIntl({ testMode: Boolean(p.testMode), gateway, name: 'Polar' })
         }
       })
       .catch(() => {})
@@ -119,7 +119,7 @@ function QaHub() {
     }
   }, [])
 
-  const buyTemplateLemon = async () => {
+  const buyTemplateIntl = async () => {
     if (busy) return
     setBusy(true)
     setError('')
@@ -129,7 +129,7 @@ function QaHub() {
         user,
         navigate,
         loginNext: '/test',
-        provider: lemon?.gateway || 'lemonsqueezy',
+        provider: intl?.gateway || 'polar',
       })
       if (result !== 'redirect') setBusy(false)
     } catch (err) {
@@ -187,24 +187,24 @@ function QaHub() {
           {error ? <p className="mt-3 text-body-sm text-danger">{error}</p> : null}
         </section>
 
-        {lemon ? (
+        {intl ? (
           <section className="mt-6 border border-ink/15 p-5 md:p-7">
-            <p className="text-eyebrow uppercase text-ink/50">Template de prueba · {lemon.name}</p>
+            <p className="text-eyebrow uppercase text-ink/50">Template de prueba · {intl.name}</p>
             <p className="mt-2 text-title-sm font-medium">
               {QA_TEMPLATE_MODEL.toUpperCase()} · US$ {QA_TEMPLATE_USD}
             </p>
             <p className="mt-1 text-body-sm text-ink/60">
-              {lemon.testMode
-                ? `Modo prueba de ${lemon.name}: no cobra. Tarjeta 4242 4242 4242 4242.`
+              {intl.testMode
+                ? `Modo prueba de ${intl.name}: no cobra. Tarjeta 4242 4242 4242 4242.`
                 : 'Cobra de verdad US$ 1 con tarjeta.'}
             </p>
             <button
               type="button"
-              onClick={buyTemplateLemon}
+              onClick={buyTemplateIntl}
               disabled={busy}
               className="btn btn-primary mt-5 disabled:opacity-50"
             >
-              {busy ? `Yendo a ${lemon.name}…` : `Comprar por US$ ${QA_TEMPLATE_USD} →`}
+              {busy ? `Yendo a ${intl.name}…` : `Comprar por US$ ${QA_TEMPLATE_USD} →`}
             </button>
           </section>
         ) : null}

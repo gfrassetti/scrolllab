@@ -52,15 +52,10 @@ export async function createApp(config) {
   app.use(
     express.json({
       limit: '64kb',
-      // La firma de Lemon Squeezy y la de Polar se calculan sobre los bytes exactos del body:
-      // se guardan solo para su webhook (al resto no le hace falta).
+      // La firma de Polar se calcula sobre los bytes exactos del body: se guardan solo
+      // para su webhook (al resto no le hace falta).
       verify(req, _res, buf) {
-        if (
-          req.originalUrl?.startsWith('/api/webhooks/lemonsqueezy') ||
-          req.originalUrl?.startsWith('/api/webhooks/polar')
-        ) {
-          req.rawBody = buf
-        }
+        if (req.originalUrl?.startsWith('/api/webhooks/polar')) req.rawBody = buf
       },
     }),
   )

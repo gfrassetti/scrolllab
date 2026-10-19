@@ -67,7 +67,7 @@ const logoOf = (config) => config.email.logoUrl || new URL('/logo.svg', config.c
 
 /**
  * «Te devolvimos el dinero». `ref` identifica la devolución (pago de MP o
- * reembolso de Lemon Squeezy) y el monto: un parcial que después se completa manda otro.
+ * reembolso de Polar) y el monto: un parcial que después se completa manda otro.
  * @param {{ to: string, ref: string, name: string, locale?: string, amount: number, currency: string, provider: string, what: string, kind: 'order' | 'lab', partial?: boolean, config: any, client?: any }} args
  */
 export function sendRefundIssued({ to, ref, config, client, kind, ...rest }) {
@@ -213,7 +213,7 @@ export async function sendOrderReceiptOnce({ order, user, config, client }) {
 }
 
 /**
- * «Pago rechazado» de una compra (Mercado Pago o Lemon Squeezy): uno por orden, y
+ * «Pago rechazado» de una compra (Mercado Pago o Polar): uno por orden, y
  * solo si la orden sigue pendiente (un reintento que pagó ya no lo manda). El
  * botón lleva al carrito, que sigue armado.
  * @param {{ order: any, config: any, client?: any }} args
@@ -394,7 +394,7 @@ export function sendSubscriptionTrialReminderOnce({
 }
 
 /**
- * Cuota de LAB cobrada (MP o Lemon Squeezy). Una por cobro (`ref`).
+ * Cuota de LAB cobrada (MP o Polar). Una por cobro (`ref`).
  * @param {{ subscription: any, config: any, ref: string, charge?: { amount?: number | null, currency?: string, paidAt?: any, periodEnd?: any }, client?: any }} args
  */
 export function sendSubscriptionChargeOnce({ subscription, config, ref, charge, client }) {
@@ -409,7 +409,7 @@ export function sendSubscriptionChargeOnce({ subscription, config, ref, charge, 
 }
 
 /**
- * Cobro de LAB rechazado (MP o Lemon Squeezy). Uno por cobro (`ref`).
+ * Cobro de LAB rechazado (MP o Polar). Uno por cobro (`ref`).
  * @param {{ subscription: any, config: any, ref: string, stage?: 'renewal' | 'checkout', updateUrl?: string | null, graceEndsAt?: any, client?: any }} args
  */
 export function sendSubscriptionPaymentFailedOnce({
