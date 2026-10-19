@@ -23,8 +23,6 @@ const CSS = `
 .dp-plan svg { width: 100%; height: 100%; display: block; }
 .dp-sheet { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: difference; z-index: 3; }
 .dp-col { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(239,239,237,.08); }
-.dp-row { position: absolute; left: 0; right: 0; height: 1px; background: rgba(239,239,237,.08); }
-@media (max-width: 767px) { .dp-col[data-odd] { display: none; } }
 .dp-state { position: absolute; inset: 0; z-index: 4; pointer-events: none; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
   align-items: center; padding: 0; }
 .dp-title { grid-column: 2 / 5; font-size: clamp(44px, 6.2vw, 112px); line-height: .9; letter-spacing: -.05em; padding-left: 0; }
@@ -362,9 +360,9 @@ export default function PracticeDatum({
           ))}
         </div>
         <div className="dp-sheet" aria-hidden="true">
-          {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <i key={i} className="dp-col" data-odd={i % 2 ? '' : undefined} style={{ left: `${(i / 8) * 100}%` }} />
-          ))}
+          {/* the same two lines as the hero (it measures them on the name and writes the variables) */}
+          <i className="dp-col" style={{ left: 'var(--datum-l1, 12.5%)' }} />
+          <i className="dp-col" style={{ left: 'var(--datum-l2, 50%)' }} />
         </div>
         {states.map((s, i) => (
           <div key={s.title} data-state="" className="dp-state">
