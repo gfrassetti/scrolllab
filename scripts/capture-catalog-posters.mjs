@@ -90,7 +90,7 @@ async function main() {
     // Algunos tienen su propia pantalla de carga con «Loading 84 %» (APEX, MERIDIAN): se espera a que se vaya.
     await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
     await page
-      .waitForFunction(() => !/loading/i.test(document.body.innerText), null, { timeout: 30_000 })
+      .waitForFunction(() => !/\bloading\b/i.test(document.body.innerText), null, { timeout: 30_000 })
       .catch(() => {})
     await page.waitForTimeout(2800)
     const ratio = SCROLL_AT[sku] ?? 0.04

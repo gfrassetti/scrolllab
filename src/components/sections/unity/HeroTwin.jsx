@@ -7,9 +7,8 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion'
 /**
  * HeroTwin — two stacked headlines with opposing scroll parallax.
  *
- * Calma: el titular es `absolute` sobre el párrafo (el parallax los separa
- * al scrollear); sin parallax quedaban uno encima del otro. En calma el
- * titular va arriba del párrafo, en fila.
+ * El titular va en el flujo, debajo del párrafo (el parallax los aleja: el
+ * párrafo sube y el titular baja, nunca se cruzan). En calma va arriba, en fila.
  */
 export default function HeroTwin({
   body = 'The Unity Cup brings 32 community clubs from 19 countries to Bristol for nine days of football. No sponsors on the shirts, no tickets to buy: just the game everyone already speaks.',
@@ -41,7 +40,7 @@ export default function HeroTwin({
   useEffect(() => {
     if (reduced) return
     const chars = root.current?.querySelectorAll('[data-greet] > span')
-    if (chars?.length) gsap.fromTo(chars, { yPercent: 110 }, { yPercent: 0, duration: 0.55, stagger: 0.03, ease: 'power3.out' })
+    if (chars?.length) gsap.fromTo(chars, { yPercent: 60, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.55, stagger: 0.03, ease: 'power3.out' })
   }, [word, reduced])
 
   useGSAP(
@@ -81,7 +80,7 @@ export default function HeroTwin({
     <section
       ref={root}
       id="start"
-      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-(--sec-bg) px-5 pt-24 pb-20 text-current md:px-10"
+      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-(--sec-bg) px-5 pt-52 pb-20 text-current md:px-10 md:pt-56"
       style={{
         '--sec-bg': bg || '#e7e4dc',
         '--ut-accent': accent || '#2c4a42',
@@ -94,7 +93,7 @@ export default function HeroTwin({
           <p
             data-greet
             aria-live="off"
-            className="flex overflow-hidden pb-[0.08em] font-anton text-[clamp(2rem,5vw,3.4rem)] leading-[1.2] tracking-[-0.01em] text-(color:--ut-accent) uppercase"
+            className="flex pb-[0.08em] font-anton text-[clamp(2rem,5vw,3.4rem)] leading-[1.2] tracking-[-0.01em] text-(color:--ut-accent) uppercase"
           >
             {[...(words[word] || '')].map((c, i) => (
               <span key={`${word}-${i}`} className="inline-block whitespace-pre">
@@ -115,7 +114,7 @@ export default function HeroTwin({
 
         <h1
           data-twin-head
-          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 font-anton text-[clamp(2.6rem,9vw,6.5rem)] leading-[0.9] font-normal tracking-[-0.03em] text-(color:--ut-accent) uppercase will-change-transform calm:static calm:translate-y-0"
+          className="pointer-events-none mt-8 block font-anton text-[clamp(2.6rem,9vw,6.5rem)] leading-[0.9] font-normal tracking-[-0.03em] text-(color:--ut-accent) uppercase will-change-transform"
         >
           {lines.map((line) => (
             <span key={line} className="block">
