@@ -43,7 +43,7 @@ export default function ServicesStone({
 
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return calmReveal('[data-area-row] > *', { y: 14, duration: 0.8 })
+      if (prefersReducedMotion()) return calmReveal('[data-area-inner]', { y: 14, duration: 0.8 })
       const rows = gsap.utils.toArray('[data-area-row]')
       // Cada fila queda pegada arriba y la siguiente entra por encima: la de atrás
       // se apaga (velo) y se hunde un poco, más lento que el scroll.
@@ -54,7 +54,7 @@ export default function ServicesStone({
           scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
         })
         tl.to(row.querySelector('[data-area-veil]'), { opacity: 0.32 }, 0)
-        tl.to(row.querySelector('[data-area-inner]'), { yPercent: -7, scale: 0.97 }, 0)
+        tl.to(row.querySelector('[data-area-inner]'), { yPercent: 3, scale: 0.97 }, 0)
       })
       return undefined
     },
@@ -108,10 +108,10 @@ export default function ServicesStone({
                 <p className="max-w-[34rem] text-[clamp(1.05rem,1.7vw,1.6rem)] leading-[1.22] tracking-[-0.02em]">
                   {a.body}
                 </p>
-                <div className="relative min-h-0 flex-1 overflow-hidden md:max-w-[62%]">
+                <div className="relative min-h-0 flex-1 overflow-hidden md:max-w-[62%] calm:aspect-[4/3] calm:flex-none">
                   <img
                     {...imgAttrs(a.img, variants)}
-                    sizes="(min-width: 768px) 40vw, 100vw"
+                    sizes="(min-width: 1024px) 40vw, 100vw"
                     alt=""
                     loading="lazy"
                     decoding="async"
@@ -129,7 +129,7 @@ export default function ServicesStone({
             <div
               data-area-veil
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 opacity-0"
+              className="pointer-events-none absolute inset-0 opacity-0 calm:hidden"
               style={{ backgroundColor: fg || '#111111' }}
             />
           </li>

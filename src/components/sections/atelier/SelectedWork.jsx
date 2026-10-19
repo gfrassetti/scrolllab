@@ -122,10 +122,10 @@ export default function SelectedWork({
           </a>
         </header>
 
-        {/* Desktop: columnas que se abren de costado (clic); al pasar el mouse la cerrada se invierte */}
+        {/* Desktop (lg): columnas que se abren de costado (clic); al pasar el mouse la cerrada se invierte */}
         <div
           data-work-list
-          className="hidden h-[min(72svh,43rem)] min-h-[30rem] border-y border-current/30 transition-[grid-template-columns] duration-[500ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none md:grid"
+          className="hidden h-[min(72svh,43rem)] min-h-[30rem] border-y border-current/30 transition-[grid-template-columns] duration-[500ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:grid"
           style={{ gridTemplateColumns: cols }}
         >
           {items.map((p, i) => {
@@ -208,8 +208,8 @@ export default function SelectedWork({
           })}
         </div>
 
-        {/* Teléfono y tablet angosta: filas que se abren hacia abajo */}
-        <ul className="border-t border-current/20 md:hidden">
+        {/* Teléfono y tablet: filas que se abren hacia abajo */}
+        <ul className="border-t border-current/20 lg:hidden">
           {items.map((p, i) => {
             const on = i === open
             return (
@@ -252,7 +252,7 @@ export default function SelectedWork({
                       <p className="mt-2 text-base leading-snug opacity-85">{p.body}</p>
                       <a
                         href={p.href || '#studio'}
-                        className="tpl-hit mt-5 inline-flex items-center gap-3 rounded-full border border-current px-5 py-2.5 text-sm font-medium"
+                        className="tpl-hit mt-5 inline-flex min-h-11 items-center gap-3 rounded-full border border-current px-5 py-2.5 text-sm font-medium"
                       >
                         {linkLabel}
                         <span aria-hidden="true">→</span>

@@ -62,7 +62,7 @@ export default function KeyFacts({
         <img
           data-studio-img
           {...imgAttrs(img, variants)}
-          sizes="(max-width: 767px) 120vh, 100vw"
+          sizes="(max-width: 767px) 120vh, (max-aspect-ratio: 1/1) 190vh, 100vw"
           alt=""
           loading="lazy"
           decoding="async"
