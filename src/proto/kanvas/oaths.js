@@ -114,14 +114,14 @@ export function createOaths(THREE, { loader, ink } = {}) {
   const tide = new THREE.Group()
   tide.position.z = -0.6
   scene.add(tide)
-  const fig = (url, into, rotY) =>
+  const fig = (url, into, rotY, phase) =>
     loader?.load(url, (gl) => {
-      ink?.apply(gl.scene)
+      ink?.apply(gl.scene, { breathe: true, phase }) // respiran (el reloj lo lleva ink.tick)
       gl.scene.rotation.y = rotY
       into.add(gl.scene)
     })
-  fig('/proto/kanvas/hero/man.glb', lamp, -1.25)
-  fig('/proto/kanvas/hero/raider.glb', tide, -1.9)
+  fig('/proto/kanvas/hero/man.glb', lamp, -1.25, 1.9)
+  fig('/proto/kanvas/hero/raider.glb', tide, -1.9, 0)
 
   // motas de luz entre las capas
   const N = 50

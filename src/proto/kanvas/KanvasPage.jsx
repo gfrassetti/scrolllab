@@ -508,15 +508,15 @@ function Kanvas() {
         content.add(grass.object)
       }
       // Los dos personajes (GLB de Tripo aligerados en Blender, design/masters/kanvas/3d)
-      for (const c of HERO_CHARS) {
+      HERO_CHARS.forEach((c, i) => {
         gltf.load(c.src, (cg) => {
-          ink.apply(cg.scene)
+          ink.apply(cg.scene, { breathe: true, phase: i * 1.9 }) // respiran, desfasados
           cg.scene.scale.setScalar(c.scale)
           cg.scene.position.set(...c.pos)
           cg.scene.rotation.y = c.rotY
           content.add(cg.scene)
         })
-      }
+      })
       if (g.cameras[0]) heroCam = g.cameras[0]
       if (g.animations.length) {
         mixer = new THREE.AnimationMixer(g.scene)
@@ -943,6 +943,7 @@ function Kanvas() {
       update: ({ dt, now, W, H, scrollY, pointer }) => {
         frameNo += 1
         budget.tick(dt * 1000)
+        ink.tick(now)
         const p = progress(scrollY)
         // pasado el recorrido, la página (canvas, secciones y HUD) sube como una cortina y descubre la
         // marca del footer, que está fija abajo, detrás de todo. No sube 1:1 con el scroll: arranca más
