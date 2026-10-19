@@ -100,11 +100,28 @@ export default function WorkIndex({
         duration: 0.45,
         ease: 'power3',
       })
+
+      // Con la rueda la lista se mueve debajo de un mouse quieto y no llega
+      // ningún mouseleave: la foto quedaba clavada sobre otra sección. Al
+      // scrollear se mira qué hay debajo del puntero.
+      const onScroll = () => {
+        const { x, y } = last.current
+        if (x == null) return
+        const row = document.elementFromPoint(x, y)?.closest?.('[data-work-row]')
+        if (row && root.current?.contains(row)) {
+          const i = Number(row.dataset.index)
+          if (rows[i]) showPreview(rows[i].img)
+        } else hidePreview()
+      }
+      window.addEventListener('scroll', onScroll, { passive: true })
+      return () => window.removeEventListener('scroll', onScroll)
     },
     { scope: root, dependencies: [showHoverImage], revertOnUpdate: true },
   )
 
+  const last = useRef({ x: null, y: null })
   const handleMove = (e) => {
+    last.current = { x: e.clientX, y: e.clientY }
     quick.current.x?.(e.clientX)
     quick.current.y?.(e.clientY)
   }
@@ -139,6 +156,7 @@ export default function WorkIndex({
           <li
             key={i}
             data-work-row
+            data-index={i}
             className="border-b border-salt/15 first:border-t"
           >
             <a

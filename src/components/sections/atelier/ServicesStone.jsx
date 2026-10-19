@@ -5,28 +5,28 @@ import { getLenis } from '../../../hooks/useLenis'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { createFrameBudget, fitCameraDistance, trackPointer } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
-import { createStudioPiece } from './studioPiece'
+import { createMaquette } from './maquette'
 
 const SERVICES = [
   {
-    title: 'Interiors',
-    body: 'Homes, hotels and restaurants, from the first layout to the last detail on site.',
-    material: 'Travertine',
+    title: 'Architecture',
+    body: 'Houses, hotels and small public buildings, from the first massing model to the keys.',
+    material: 'Massing model',
   },
   {
-    title: 'Furniture',
-    body: 'Pieces designed for one room and made by hand in our workshop in Brianza.',
-    material: 'Oak',
+    title: 'Interiors',
+    body: 'The rooms inside: plans, joinery and furniture drawn for the building they live in.',
+    material: 'Plan & fit-out',
+  },
+  {
+    title: 'Landscape',
+    body: 'Gardens, courtyards and the ground around the building, planted to grow into it.',
+    material: 'Planting',
   },
   {
     title: 'Materials',
-    body: 'A library of stone, timber and textile, chosen again for every project.',
-    material: 'Linen',
-  },
-  {
-    title: 'Identity',
-    body: 'Names, signage and print for the places we design, so the door matches the room.',
-    material: 'Ink',
+    body: 'Concrete, oak, stone and lime, chosen and tested on site before anything is built.',
+    material: 'Concrete & oak',
   },
 ]
 
@@ -40,10 +40,11 @@ const LEAD = 0.1
 const SPAN = 0.8
 
 /**
- * ServicesStone — the same bench as the hero, now showing what the studio
- * works in. Scrolling (or choosing a service) walks the piece through four
- * materials with a sweep — travertine, oak, linen, ink — one for each service;
- * the chosen service opens, the others step back.
+ * ServicesStone — the same model as the hero, now showing what the studio
+ * does. Scrolling (or choosing a service) walks it through four states:
+ * Architecture (the white massing model), Interiors (the upper floors lift off
+ * and the furnished plan shows), Landscape (the trees grow around it) and
+ * Materials (the card turns into concrete and the slabs into oak).
  *
  * Per-service title/body are editable from the builder via
  * service1Title / service1Body … service4Body, and the material names via
@@ -64,7 +65,7 @@ export default function ServicesStone({
   material2,
   material3,
   material4,
-  note = 'Every project keeps one lead designer, from the first meeting to the day we hand over the keys.',
+  note = 'Every project keeps one lead architect, from the first sketch to the day we hand over the keys.',
   cta = 'See selected work →',
   ctaHref = '#work',
   bg,
@@ -124,7 +125,7 @@ export default function ServicesStone({
       renderer.toneMappingExposure = 0.95
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(PIECE_FOV, 1, 0.1, 60)
-      const piece = createStudioPiece(renderer, scene, { tint: objectColor, vessel: markColor })
+      const piece = createMaquette(renderer, scene, { tint: objectColor, accent: markColor })
       if (lightColor) piece.fill.color.set(lightColor)
       const { group } = piece
       const pointer = trackPointer()
@@ -134,8 +135,8 @@ export default function ServicesStone({
         renderer.setSize(w, h, false)
         camera.aspect = w / Math.max(h, 1)
         const z = fitCameraDistance({ fov: PIECE_FOV, aspect: camera.aspect, radius: PIECE_RADIUS, base: PIECE_Z })
-        camera.position.set(0, 1.7, z)
-        camera.lookAt(0, 0.05, 0)
+        camera.position.set(0, z * 0.5, z)
+        camera.lookAt(0, -0.3, 0)
         camera.updateProjectionMatrix()
         const halfW = Math.tan((PIECE_FOV * Math.PI) / 360) * z * camera.aspect
         const wide = camera.aspect > 1.15
@@ -143,8 +144,8 @@ export default function ServicesStone({
         const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
         // En calma, en pantallas chicas, el canvas va en el flujo arriba de la lista: la banca al centro.
         const inFlow = getComputedStyle(canvas).position === 'relative'
-        if (inFlow) piece.place(0, 0, 0.8)
-        else piece.place(wide ? halfW * 0.4 : 0, wide ? 0 : halfH * 0.34, wide ? 1.05 : 0.8)
+        if (inFlow) piece.place(0, 0, 0.7)
+        else piece.place(wide ? halfW * 0.45 : 0, wide ? -0.25 : halfH * 0.3, wide ? 0.62 : 0.55)
       }
       resize()
       window.addEventListener('resize', resize)
@@ -173,20 +174,16 @@ export default function ServicesStone({
         },
       })
 
-      let yaw = 0.3
+      let yaw = -0.6
       let pitch = 0
       const tick = (time, deltaMs) => {
         if (!onScreen) return
-        const frac = state.s - Math.floor(state.s)
-        // while the sweep crosses, the piece lifts apart a little, like being re-made
-        const lift = state.s >= services.length - 1 ? 0 : Math.sin(Math.PI * THREE.MathUtils.clamp((frac - 0.45) / 0.55, 0, 1)) * 0.3
-        const targetYaw = 0.35 + state.p * 0.7 + pointer.x * 0.35 + (reduced ? 0 : Math.sin(time * 0.4) * 0.05)
+        const targetYaw = -0.6 + state.p * 0.8 + pointer.x * 0.3 + (reduced ? 0 : Math.sin(time * 0.4) * 0.05)
         const targetPitch = -pointer.y * 0.08
         yaw += (targetYaw - yaw) * 0.07
         pitch += (targetPitch - pitch) * 0.07
         group.rotation.set(pitch, yaw, 0)
-        piece.setMaterial(state.s)
-        piece.setExplode(lift)
+        piece.setState(state.s)
         renderer.render(scene, camera)
         budget.tick(deltaMs)
       }
@@ -324,7 +321,8 @@ function ScrollTriggerPin(section, state, count, setActive) {
         const p = self.progress
         state.p = p
         state.s = THREE.MathUtils.clamp((p - LEAD) / SPAN, 0, 1) * (count - 1)
-        const idx = Math.round(state.s)
+        // el servicio cambia a mitad de cada cambio de la maqueta
+        const idx = Math.min(count - 1, Math.round(state.s))
         if (idx !== last) {
           last = idx
           setActive(idx)

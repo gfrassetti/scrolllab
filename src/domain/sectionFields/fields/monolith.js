@@ -26,7 +26,8 @@ export const MONOLITH_FIELDS = {
       label: 'Objeto 3D — forma (si no ponés un modelo propio)',
       type: 'select',
       options: [
-        { value: 'icosahedron', label: 'Icosaedro (la de la demo)' },
+        { value: 'structure', label: 'Estructura de cubos (la de la demo)' },
+        { value: 'icosahedron', label: 'Icosaedro' },
         { value: 'box', label: 'Cubo' },
         { value: 'octahedron', label: 'Octaedro' },
         { value: 'torus', label: 'Toroide' },

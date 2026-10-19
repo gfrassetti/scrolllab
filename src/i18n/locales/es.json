@@ -638,14 +638,14 @@
       "description": "Azul eléctrico, colores golosina y una botella de vidrio 3D girando entre burbujas. Cada sabor es una pantalla completa que tiñe la página al scrollear. Ideal para bebidas, snacks, golosinas u otro producto comestible con sabores o variantes para mostrar."
     },
     "atelier": {
-      "vibe": "Studio WebGL",
+      "vibe": "Estudio de arquitectura",
       "tags": [
+        "Maqueta 3D que se arma al scrollear",
+        "Interiores en corte",
         "Niebla reactiva al scroll",
-        "Emblema 3D",
-        "Piedra scrubeada",
-        "Servicios asimétricos"
+        "Servicios pineados"
       ],
-      "description": "Fondo oscuro atmosférico, canvas de niebla atado al scroll y piezas 3D que rotan o explotan mientras bajás. Estética de estudio digital. Ideal para agencias, estudios creativos o de arquitectura que venden servicios premium y quieren un site de prestigio."
+      "description": "Un estudio de arquitectura e interiores: su propia maqueta 3D se arma pieza por pieza mientras bajás, después se abre para mostrar los interiores, le crece el paisaje y pasa a hormigón y roble. Ideal para estudios de arquitectura, diseñadores de interiores y constructoras que quieren un sitio de prestigio."
     },
     "comic": {
       "vibe": "Historieta ilustrada",
@@ -858,11 +858,11 @@
         },
         "HeroCinematic": {
           "name": "Hero cinematográfico",
-          "blurb": "Una toma nocturna en capas: la cámara entra, llueve y el título queda entre capas"
+          "blurb": "Una toma nocturna en 2.5D (foto + mapa de profundidad): la cámara baja por la calle bajo la lluvia"
         },
         "ZoomPortal": {
           "name": "Portal con zoom",
-          "blurb": "Una sala de proyección: entrás en la pantalla y el carrete corre con el scroll"
+          "blurb": "Una tira de película de 35 mm corre con el scroll; el cuadro de la ventanilla crece y toma color"
         },
         "DiagonalMarquee": {
           "name": "Marquee diagonal",
@@ -994,7 +994,7 @@
         },
         "HeroMeaning": {
           "name": "Hero meaning",
-          "blurb": "Tipo con blur e emblema WebGL scrubeado"
+          "blurb": "Maqueta de arquitectura sobre una base de roble, que se arma pieza por pieza con el scroll"
         },
         "AboutClarity": {
           "name": "About clarity",
@@ -1002,7 +1002,7 @@
         },
         "ServicesStone": {
           "name": "Services stone",
-          "blurb": "Servicios pineados con piedra 3D"
+          "blurb": "Servicios pineados: la maqueta pasa por arquitectura, interiores, paisaje y materiales"
         },
         "VisionShutter": {
           "name": "Vision shutter",
@@ -1694,7 +1694,7 @@
       },
       {
         "title": "Productos y licencia",
-        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER), composiciones armadas en el builder y, si lo incluís, el kit Commerce (catálogo, ficha de producto, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye tu licencia con email y número de orden."
+        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, MONOLITH, FIZZ, ATELIER), composiciones armadas en el builder y, si lo incluís, el kit Commerce (catálogo, ficha de producto, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye tu licencia con email y número de orden."
       },
       {
         "title": "Precios y pagos",

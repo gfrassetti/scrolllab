@@ -138,14 +138,14 @@ export default function HeroKinetic({
           <div
             data-hero-stamp-wrap
             aria-hidden="true"
-            className="pointer-events-none absolute right-5 bottom-20 size-28 md:right-10 md:bottom-24 md:size-40"
+            className="pointer-events-none absolute right-5 bottom-20 size-40 md:right-10 md:bottom-24 md:size-44"
           >
             <svg data-hero-stamp viewBox="0 0 200 200" className="size-full">
               <defs>
                 <path id="chapters-stamp-path" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
               </defs>
               {/* el texto ocupa justo la vuelta (textLength = 2π·78): cualquier largo cierra el círculo */}
-              <text className="fill-current text-[15px] uppercase">
+              <text className="fill-current text-[14px] uppercase">
                 <textPath href="#chapters-stamp-path" textLength="486" lengthAdjust="spacing">{`${meta} · `}</textPath>
               </text>
               <circle cx="100" cy="100" r="5" className="fill-accent" />

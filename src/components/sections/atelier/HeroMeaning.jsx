@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { createFrameBudget, fitCameraDistance, prefersReducedMotion, trackPointer } from '../../../lib/motion'
 import ScrollFog from './ScrollFog'
-import { createStudioPiece } from './studioPiece'
+import { createMaquette } from './maquette'
 
 // Cámara de la pieza. En PC queda en PIECE_Z; en vertical se aleja (`fitCameraDistance`)
 // hasta que la banca entra en el ancho (con la vasija y las patas abiertas).
@@ -12,20 +12,22 @@ const PIECE_Z = 7.2
 const PIECE_RADIUS = 2.2
 
 /**
- * HeroMeaning — the studio's own object, in 3D: a stone bench with a vessel
- * (see studioPiece.js) turns with the pointer, sits in front of the title, and
- * comes apart like an assembly drawing as you scroll. The letters of the title
- * step aside when the pointer comes near.
+ * HeroMeaning — the studio's architectural model, in 3D (see maquette.js):
+ * the plan is drawn on an oak base, the slab and the glass ground floor arrive
+ * as the page opens, and the scroll (pinned) assembles the rest — the
+ * cantilevered floor, the upper volume, the stair tower, the roof — piece by
+ * piece, while the model turns. The letters of the title step aside when the
+ * mouse comes near.
  */
 export default function HeroMeaning({
-  line1 = 'Quiet rooms,',
-  line2 = 'made to last.',
-  hint = 'Scroll to enter',
-  meta = 'Atelier Nove — Milan — since 2011',
-  body = 'An interior and object studio. Homes and hotels, and the furniture, materials and names that go in them.',
+  line1 = 'Buildings that',
+  line2 = 'hold the light.',
+  hint = 'Scroll to build',
+  meta = 'Atelier Nove — Architecture & Interiors — Milan',
+  body = 'An architecture and interiors studio. Houses, hotels and the rooms inside them, from the first sketch to the last fitting.',
   bg,
   fg,
-  /** La pieza 3D: el tinte de la banca (blanco = material natural) y el color de la vasija. */
+  /** La maqueta: el color de la cartulina y el de los árboles. */
   objectColor,
   ringColor,
   /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
@@ -45,10 +47,11 @@ export default function HeroMeaning({
 
       // Sin máscara: las letras se mueven fuera de su caja cuando el puntero se acerca.
       const split = new SplitText('[data-atelier-hero]', { type: 'chars' })
-      gsap.set(split.chars, coarse ? { autoAlpha: 0, y: 24 } : { autoAlpha: 0, y: 24, filter: 'blur(12px)' })
+      // opacity (no autoAlpha): el texto sigue en el árbol de accesibilidad mientras entra
+      gsap.set(split.chars, coarse ? { opacity: 0, y: 24 } : { opacity: 0, y: 24, filter: 'blur(12px)' })
       let intro = false
       gsap.to(split.chars, {
-        autoAlpha: 1,
+        opacity: 1,
         y: 0,
         ...(coarse ? {} : { filter: 'blur(0px)' }),
         duration: 0.9,
@@ -75,7 +78,7 @@ export default function HeroMeaning({
       renderer.toneMappingExposure = 0.9
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(PIECE_FOV, 1, 0.1, 60)
-      const piece = createStudioPiece(renderer, scene, { tint: objectColor, vessel: ringColor })
+      const piece = createMaquette(renderer, scene, { tint: objectColor, accent: ringColor })
       const { group } = piece
 
       // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
@@ -87,30 +90,35 @@ export default function HeroMeaning({
         renderer.setSize(w, h, false)
         camera.aspect = w / Math.max(h, 1)
         const z = fitCameraDistance({ fov: PIECE_FOV, aspect: camera.aspect, radius: PIECE_RADIUS, base: PIECE_Z })
-        camera.position.set(0, 1.5, z)
-        camera.lookAt(0, 0.1, 0)
+        // vista de maqueta: desde arriba, como se mira sobre la mesa del estudio
+        camera.position.set(0, z * 0.48, z)
+        camera.lookAt(0, -0.35, 0)
         camera.updateProjectionMatrix()
         // en pantalla ancha la banca queda a la derecha, detrás del titular a la izquierda;
         // en vertical, arriba del texto
         const halfW = Math.tan((PIECE_FOV * Math.PI) / 360) * z * camera.aspect
         const wide = camera.aspect > 1.15
         const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
-        piece.place(wide ? halfW * 0.42 : 0, wide ? 0 : halfH * 0.36, wide ? 1.2 : 0.85)
+        piece.place(wide ? halfW * 0.5 : 0, wide ? 0.05 : halfH * 0.32, wide ? 0.74 : 0.62)
       }
       resize()
       window.addEventListener('resize', resize)
 
-      let explode = 0
+      // la maqueta se arma: al cargar llegan la losa y la planta baja; el resto, con el scroll
+      const build = { intro: 0, scroll: 0 }
+      gsap.to(build, { intro: 1, duration: 2.4, delay: 0.4, ease: 'power2.out' })
       const st = gsap.to(
         {},
         {
           scrollTrigger: {
             trigger: root.current,
             start: 'top top',
-            end: 'bottom top',
-            scrub: true,
+            end: '+=140%',
+            pin: root.current.querySelector('[data-hero-pin]'),
+            scrub: 0.6,
+            anticipatePin: 1,
             onUpdate: (self) => {
-              explode = self.progress
+              build.scroll = self.progress
             },
           },
         },
@@ -151,22 +159,29 @@ export default function HeroMeaning({
       const measured = gsap.delayedCall(1.6, measure)
       window.addEventListener('resize', measure)
       const REACH = 170
+      // Sin mouse todavía el puntero «está» en el centro de la pantalla: las
+      // letras de ahí se corrían solas al cargar. Se apartan recién cuando el mouse se mueve.
+      let moved = false
+      const onMove = () => {
+        moved = true
+      }
+      window.addEventListener('pointermove', onMove, { passive: true, once: true })
 
       let yaw = 0.55
       let pitch = 0
       const tick = (time, deltaMs) => {
         if (!onScreen) return
-        // un vaivén lento y la mirada del puntero; al scrollear gira y se desarma
-        const targetYaw = 0.55 + (reduced ? 0 : Math.sin(time * 0.35) * 0.16) + pointer.x * 0.5 + explode * 1.1
-        const targetPitch = -pointer.y * 0.1 - explode * 0.12
+        // un vaivén lento y la mirada del puntero; mientras se arma, la maqueta gira despacio
+        const targetYaw = -0.55 + (reduced ? 0 : Math.sin(time * 0.22) * 0.5) + pointer.x * 0.35 + build.scroll * 0.9
+        const targetPitch = -pointer.y * 0.06
         yaw += (targetYaw - yaw) * 0.06
         pitch += (targetPitch - pitch) * 0.06
         group.rotation.set(pitch, yaw, 0)
-        piece.setExplode(explode)
+        piece.setBuild(reduced ? 1 : build.intro * 0.3 + build.scroll * 0.7)
         renderer.render(scene, camera)
         budget.tick(deltaMs)
 
-        if (intro && !coarse && !reduced) {
+        if (intro && moved && !coarse && !reduced) {
           for (const c of chars) {
             const dx = c.cx - pointer.clientX
             const dy = c.cy - pointer.clientY
@@ -189,6 +204,7 @@ export default function HeroMeaning({
       })
 
       return () => {
+        window.removeEventListener('pointermove', onMove)
         pointer.dispose()
         window.removeEventListener('resize', resize)
         window.removeEventListener('resize', measure)
@@ -208,12 +224,13 @@ export default function HeroMeaning({
   return (
     <section
       ref={root}
-      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-(--sec-bg) px-5 pt-24 pb-8 text-current md:px-10 md:pt-28"
+      className="bg-(--sec-bg) text-current"
       style={{
         '--sec-bg': bg || '#0b0c10',
         color: fg || '#ffffff',
       }}
     >
+      <div data-hero-pin className="relative flex min-h-svh flex-col justify-between overflow-hidden px-5 pt-24 pb-8 md:px-10 md:pt-28">
       {showFog !== 'off' && <ScrollFog density={0.7} bg={fogBg} fg={fogFg} />}
       <canvas
         ref={canvasRef}
@@ -252,6 +269,7 @@ export default function HeroMeaning({
         >
           {hint} ↓
         </p>
+      </div>
       </div>
     </section>
   )

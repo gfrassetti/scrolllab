@@ -116,7 +116,6 @@ const ACCEPTED = {
   // completa que se re-compone en cada paso: en un teléfono real cuesta GPU y no aporta
   // (la regla de «paridad» manda el mismo beat con otro medio, no el mismo adorno).
   'kin/Hero/css-quieto': 'la señal «Scroll» que flota (kin-cue) solo existe en PC (hidden md:block): en el teléfono el scroll se descubre con el dedo',
-  'atelier/ServicesStone/canvas-quieto': 'la banca anima igual en el teléfono (cambia de material con el barrido), pero en vertical ocupa menos del canvas y el cambio medido queda en 0.30 contra el 0.35 de corte',
   'apex/Hero/css-quieto': 'el grano de película se apaga en el teléfono (blend sobre video = GPU)',
 }
 

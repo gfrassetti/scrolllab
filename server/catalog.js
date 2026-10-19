@@ -74,7 +74,7 @@ export const PRODUCTS = {
   atelier: template(
     'atelier',
     'ATELIER — template',
-    'Modelo studio con WebGL + fondos reactivos al scroll (código fuente).',
+    'Modelo estudio de arquitectura: maqueta 3D que se arma con el scroll (código fuente).',
   ),
   comic: template(
     'comic',

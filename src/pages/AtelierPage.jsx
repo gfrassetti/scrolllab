@@ -13,9 +13,10 @@ import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 06 — "ATELIER"
- * An interiors and furniture studio. The 3D is the studio's own object — a stone bench
- * with a vessel (studioPiece.js) — that turns with the pointer, comes apart on scroll and
- * changes material with each service. GSAP + Lenis (via provider).
+ * An architecture and interiors studio. The 3D is the studio's own architectural
+ * model (maquette.js): it is assembled piece by piece as you scroll the hero, and
+ * Services walks it through architecture, interiors, landscape and materials.
+ * GSAP + Lenis (via provider).
  * See Obsidian: "Atelier — mapa de referencia". Demo/generic copy only.
  */
 export default function AtelierPage() {

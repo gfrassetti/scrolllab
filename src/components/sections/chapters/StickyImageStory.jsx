@@ -3,6 +3,7 @@ import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { sceneA, sceneB, sceneC, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import LineWork, { drawLineWork } from './LineWork'
 
 const defaultScenes = [
   {
@@ -49,6 +50,8 @@ export default function StickyImageStory({
   bg,
   fg,
   accent,
+  /** Líneas verticales que se dibujan de arriba hacia abajo en el fondo. */
+  showLines = 'on',
 }) {
   const root = useRef(null)
   // Escenas del builder: una fila sin foto toma la de ejemplo de su lugar, así
@@ -61,6 +64,10 @@ export default function StickyImageStory({
   useGSAP(
     () => {
       if (prefersReducedMotion()) return calmReveal('[data-scene-step]', { y: 16, stagger: 0.1 })
+
+      if (showLines !== 'off') {
+        drawLineWork(root.current, { trigger: root.current, start: 'top 70%', end: 'bottom 30%', scrub: 0.6 })
+      }
 
       const mm = gsap.matchMedia()
 
@@ -117,14 +124,14 @@ export default function StickyImageStory({
         })
       })
     },
-    { scope: root },
+    { scope: root, dependencies: [showLines] },
   )
 
   return (
     <section
       ref={root}
       id={id}
-      className="px-5 md:px-10"
+      className="relative isolate px-5 md:px-10"
       style={{
         background: bg || undefined,
         color: fg || undefined,
@@ -133,6 +140,7 @@ export default function StickyImageStory({
         '--color-accent': accent || undefined,
       }}
     >
+      <LineWork variant="squares" hidden={showLines === 'off'} />
       <div className="mb-10 flex items-baseline justify-between border-t border-ink/15 pt-4 md:mb-16">
         <p className="text-[11px] uppercase tracking-[0.25em] text-ink/60 md:text-xs">
           {chapterLabel} {chapter} / {total}

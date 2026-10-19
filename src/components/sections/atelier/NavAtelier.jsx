@@ -11,7 +11,7 @@ export default function NavAtelier({
   brand = 'NOVE',
   cta = 'Start a project',
   ctaHref = '#contact',
-  label = 'Interiors · Objects · Identity',
+  label = 'Architecture · Interiors · Landscape',
   links = ['Work | #work', 'Services | #services', 'Studio | #facts', 'Contact | #contact'],
   linksText,
   menuLabel = 'Menu',

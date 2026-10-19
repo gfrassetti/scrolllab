@@ -159,8 +159,8 @@ const allModels = [
     wrapperClass: MODEL_WRAPPER_CLASS.nocturne,
     sections: [
       { id: 'nocturne/NavNocturne', name: 'Nav Nocturne', kind: 'nav', component: NavNocturne, blurb: 'Fixed dark header with reel marker · numbered mobile menu' },
-      { id: 'nocturne/HeroCinematic', name: 'Hero Cinematic', kind: 'hero', component: HeroCinematic, blurb: 'A layered night shot: the camera pushes in, rain falls, the title sits between layers' },
-      { id: 'nocturne/ZoomPortal', name: 'Zoom Portal', kind: 'section', component: ZoomPortal, blurb: 'A screening room: walk into the screen and the reel plays to your scroll' },
+      { id: 'nocturne/HeroCinematic', name: 'Hero Cinematic', kind: 'hero', component: HeroCinematic, blurb: 'A night shot in 2.5D from one photo and its depth map: the camera walks down the street in the rain' },
+      { id: 'nocturne/ZoomPortal', name: 'Zoom Portal', kind: 'section', component: ZoomPortal, blurb: 'A 35 mm film strip runs with the scroll; the frame in the gate grows and takes colour' },
       { id: 'nocturne/DiagonalMarquee', name: 'Diagonal Marquee', kind: 'section', component: DiagonalMarquee, blurb: 'Two tilted ribbons crossing directions' },
       { id: 'nocturne/SplitReveals', name: 'Split Reveals', kind: 'section', component: SplitReveals, blurb: 'Alternating rows with clip-path wipes' },
       { id: 'nocturne/WorkIndex', name: 'Work Index', kind: 'section', component: WorkIndex, blurb: 'Hover list with cursor-trailing preview' },
@@ -223,9 +223,9 @@ const allModels = [
     wrapperClass: MODEL_WRAPPER_CLASS.atelier,
     sections: [
       { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Floating MENU pill + CTA · full-screen overlay' },
-      { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Blur-in type with a scroll-scrubbed WebGL emblem' },
+      { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Architectural model on an oak base, assembled piece by piece with the scroll' },
       { id: 'atelier/AboutClarity', name: 'About Clarity', kind: 'section', component: AboutClarity, blurb: 'Word-masked about statement over scroll fog' },
-      { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Pinned services with a scrubbed 3D stone' },
+      { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Pinned services: the model walks through architecture, interiors, landscape and materials' },
       { id: 'atelier/VisionShutter', name: 'Vision Shutter', kind: 'section', component: VisionShutter, blurb: 'Shutter bands and oversized scrubbing words' },
       { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Horizontal work slider — cards rise in with fade' },
       { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Big numbers with fog atmosphere' },

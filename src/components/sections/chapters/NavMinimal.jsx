@@ -98,7 +98,7 @@ export default function NavMinimal({
         {/* el número del capítulo bajo el puntero, gigante y en contorno */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute right-[3vw] -bottom-[8vw] font-display text-[48vw] leading-none italic text-transparent transition-opacity duration-500 select-none md:text-[34vw]"
+          className="pointer-events-none absolute right-[3vw] bottom-0 font-display text-[40vw] leading-none italic text-transparent transition-opacity duration-500 select-none md:text-[26vw]"
           style={{ WebkitTextStroke: `1px color-mix(in srgb, ${fg || 'var(--color-ink)'} 22%, transparent)`, opacity: open ? 1 : 0 }}
         >
           {String(hover + 1).padStart(2, '0')}

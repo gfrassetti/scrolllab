@@ -3,6 +3,7 @@ import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { panelA, panelB, panelC, panelD, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
+import LineWork, { drawLineWork } from './LineWork'
 
 const defaultPanels = [
   {
@@ -66,6 +67,8 @@ export default function HorizontalPanels({
   bg,
   fg,
   accent,
+  /** Líneas que cruzan las fotos de izquierda a derecha mientras avanza el riel. */
+  showLines = 'on',
 }) {
   // Del builder llegan filas sin foto: toman la de la demo en esa posición.
   const panels =
@@ -131,12 +134,22 @@ export default function HorizontalPanels({
               trigger: root.current,
               start: 'top top',
               end: () => `+=${getDistance()}`,
-              pin: true,
+              pin: root.current.querySelector('[data-panels-pin]'),
               scrub: 1,
               anticipatePin: 1,
               invalidateOnRefresh: true,
             },
           })
+          // las líneas cruzan de izquierda a derecha al ritmo del riel
+          if (showLines !== 'off') {
+            drawLineWork(root.current, {
+              trigger: root.current,
+              start: 'top top',
+              end: () => `+=${getDistance()}`,
+              scrub: 1,
+              invalidateOnRefresh: true,
+            })
+          }
 
           if (introSplit) {
             const introEl = root.current.querySelector('[data-panels-intro]')
@@ -308,14 +321,14 @@ export default function HorizontalPanels({
         mm.revert()
       }
     },
-    { scope: root, dependencies: [variant, panels.length, idleOpacity] },
+    { scope: root, dependencies: [variant, panels.length, idleOpacity, showLines] },
   )
 
   return (
     <section
       ref={root}
       id={id || undefined}
-      className="relative overflow-hidden md:h-svh calm:md:h-auto"
+      className="relative"
       style={{
         background: bg || undefined,
         color: fg || undefined,
@@ -324,6 +337,10 @@ export default function HorizontalPanels({
         '--color-accent': accent || undefined,
       }}
     >
+      {/* se pincha este contenedor, no la sección: React es dueño de la sección
+          (el builder la re-renderiza y con el pin en la raíz rompía) */}
+      <div data-panels-pin className="relative isolate overflow-hidden md:h-svh calm:md:h-auto">
+      <LineWork variant="frames" hidden={showLines === 'off'} />
       {/* Pinneada, la sección queda en el tope del viewport: el rótulo baja
           lo que mide la nav fija para no pisarse con ella. */}
       <div className="flex items-baseline justify-between border-t border-ink/15 px-5 pt-4 md:absolute md:inset-x-0 md:top-20 md:z-10 md:mx-10 md:px-0 calm:md:static calm:md:mx-0 calm:md:px-10">
@@ -441,6 +458,7 @@ export default function HorizontalPanels({
             </figure>
           ),
         )}
+      </div>
       </div>
     </section>
   )

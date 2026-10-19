@@ -638,14 +638,14 @@
       "description": "Electric blue, candy colors and a 3D glass bottle spinning through bubbles. Every flavor is a full screen that repaints the page as you scroll. Ideal for drinks, snacks, candy, or any edible product with flavors or variants to showcase."
     },
     "atelier": {
-      "vibe": "WebGL studio",
+      "vibe": "Architecture studio",
       "tags": [
+        "3D model that builds on scroll",
+        "Cutaway interiors",
         "Scroll-reactive fog",
-        "3D emblem",
-        "Scrubbed stone",
-        "Asymmetric services"
+        "Pinned services"
       ],
-      "description": "Atmospheric dark canvas, scroll-tied fog, and 3D pieces that rotate or shatter as you scroll. Digital studio aesthetic. Ideal for agencies, creative studios, or architecture practices selling premium services with a prestige site."
+      "description": "An architecture and interiors studio: its own 3D model is assembled piece by piece as you scroll, then opens to show the interiors, grows its landscape and turns to concrete and oak. Ideal for architecture practices, interior designers and builders who want a prestige site."
     },
     "comic": {
       "vibe": "Illustrated comic",
@@ -858,11 +858,11 @@
         },
         "HeroCinematic": {
           "name": "Hero Cinematic",
-          "blurb": "A layered night shot: the camera pushes in, rain falls, the title sits between layers"
+          "blurb": "A night shot in 2.5D from one photo and its depth map: the camera walks down the street in the rain"
         },
         "ZoomPortal": {
           "name": "Zoom Portal",
-          "blurb": "A screening room: walk into the screen and the reel plays to your scroll"
+          "blurb": "A 35 mm film strip runs with the scroll; the frame in the gate grows and takes colour"
         },
         "DiagonalMarquee": {
           "name": "Diagonal Marquee",
@@ -994,7 +994,7 @@
         },
         "HeroMeaning": {
           "name": "Hero Meaning",
-          "blurb": "Blur-in type with a scroll-scrubbed WebGL emblem"
+          "blurb": "Architectural model on an oak base, assembled piece by piece with the scroll"
         },
         "AboutClarity": {
           "name": "About Clarity",
@@ -1002,7 +1002,7 @@
         },
         "ServicesStone": {
           "name": "Services Stone",
-          "blurb": "Pinned services with a scrubbed 3D stone"
+          "blurb": "Pinned services: the model walks through architecture, interiors, landscape and materials"
         },
         "VisionShutter": {
           "name": "Vision Shutter",
@@ -1694,7 +1694,7 @@
       },
       {
         "title": "Products and license",
-        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, NOCTURNE, MONOLITH, VELOCITY, FIZZ, ATELIER), builder compositions, and—if you add it—the Commerce kit (catalog, product page, cart, and checkout). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes your license with email and order number."
+        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, MONOLITH, FIZZ, ATELIER), builder compositions, and—if you add it—the Commerce kit (catalog, product page, cart, and checkout). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes your license with email and order number."
       },
       {
         "title": "Prices and payments",
