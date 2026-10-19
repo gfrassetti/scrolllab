@@ -17,27 +17,33 @@ import { BUNDLE_MODELS } from '../server/catalog.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'public', 'catalog')
-const BASE = process.argv[2] || 'http://localhost:5173'
+const BASE = process.argv.slice(2).find((a) => a.startsWith('http')) || 'http://localhost:5173'
 
 /** Scroll ratio por SKU: hero / beat más “vendible” en el primer viewport+ */
 const SCROLL_AT = {
-  chapters: 0.02,
+  chapters: 0,
   nocturne: 0.04,
-  monolith: 0.03,
+  monolith: 0,
   // Antes del final del cruce: el título ya se lee y la foto todavía no se desenfocó.
   velocity: 0.08,
   // El titular 3D sube con la página: arriba del todo se lee entero.
   fizz: 0,
+  // pegado: la maqueta ya armada (ver SCROLL_PX)
   atelier: 0,
   comic: 0.06,
-  unity: 0.04,
+  unity: 0,
   kin: 0,
   ratio: 0.08,
 }
 
+/** Scroll en píxeles (gana sobre el ratio): héroes pegados que se arman con el scroll. */
+const SCROLL_PX = {
+  atelier: 1500,
+}
+
 async function main() {
   fs.mkdirSync(OUT, { recursive: true })
-  const browser = await chromium.launch()
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
   const context = await browser.newContext({
     viewport: { width: 900, height: 1125 },
     deviceScaleFactor: 1.25,
@@ -52,7 +58,10 @@ async function main() {
   })
   const page = await context.newPage()
 
-  for (const sku of BUNDLE_MODELS) {
+  // el bundle más los que se venden sueltos; `--only=sku,sku` rehace solo esos
+  const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean)
+  const skus = [...new Set([...BUNDLE_MODELS, 'kin', 'meridian', 'fold'])].filter((k) => !only.length || only.includes(k))
+  for (const sku of skus) {
     const url = `${BASE}/templates/${sku}`
     process.stdout.write(`→ ${sku} … `)
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90_000 })
@@ -67,10 +76,10 @@ async function main() {
     }
     await page.waitForTimeout(2800)
     const ratio = SCROLL_AT[sku] ?? 0.04
-    await page.evaluate((r) => {
-      const y = Math.max(0, Math.floor(document.body.scrollHeight * r))
+    await page.evaluate(([r, px]) => {
+      const y = px != null ? px : Math.max(0, Math.floor(document.body.scrollHeight * r))
       window.scrollTo(0, y)
-    }, ratio)
+    }, [ratio, SCROLL_PX[sku] ?? null])
     await page.waitForTimeout(1800)
     const dest = path.join(OUT, `${sku}.jpg`)
     await page.screenshot({ path: dest, type: 'jpeg', quality: 84 })

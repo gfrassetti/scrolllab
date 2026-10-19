@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
 import { pointerFx } from '../../../lib/interact'
-import LineWork, { drawLineWork } from './LineWork'
 import { editA, editB, editC, editD, variants } from './assets/images'
 import { imgAttrs } from '../../../lib/responsiveImage'
 
@@ -58,9 +57,6 @@ export default function ParallaxEditorial({
   showGhost = 'on',
   /** Cada foto se inclina hacia el puntero cuando pasa por encima. */
   showHover = 'on',
-  /** Una línea que se dibuja y se borra con el scroll y escribe esta palabra. */
-  showLines = 'on',
-  lineWord = 'CHAPTERS',
 }) {
   const root = useRef(null)
   const valid = figures?.filter((f) => f?.img || f?.caption)
@@ -87,16 +83,12 @@ export default function ParallaxEditorial({
         })
       })
 
-      if (showLines !== 'off') {
-        drawLineWork(root.current, { trigger: root.current, start: 'top 75%', end: 'bottom 25%', scrub: 0.6 })
-      }
-
       if (showHover === 'off') return
       const fx = pointerFx(root.current)
       fx.tilt(gsap.utils.toArray('figure', root.current), { max: 4 })
       return fx.dispose
     },
-    { scope: root, dependencies: [list.length, showHover, showLines], revertOnUpdate: true },
+    { scope: root, dependencies: [list.length, showHover], revertOnUpdate: true },
   )
 
   return (
@@ -106,7 +98,6 @@ export default function ParallaxEditorial({
       className="relative isolate overflow-clip px-5 py-28 md:px-10 md:py-44"
       style={{ background: bg || undefined, color: fg || undefined }}
     >
-      <LineWork variant="word" word={lineWord} hidden={showLines === 'off'} />
       <div
         className="mb-14 flex items-baseline justify-between border-t pt-4 md:mb-24"
         style={{ borderColor: 'color-mix(in srgb, currentColor 15%, transparent)' }}

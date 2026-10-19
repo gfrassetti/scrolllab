@@ -82,8 +82,6 @@ export const CHAPTERS_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
     toggle('showGhost', 'Palabra gigante de fondo'),
     toggle('showHover', 'Las fotos se inclinan con el puntero'),
-    { key: 'lineWord', label: 'Palabra que escribe la línea del fondo', type: 'text' },
-    toggle('showLines', 'Dibujo de fondo: una línea que escribe la palabra'),
   ],
   'chapters/FooterCTA': [
     { key: 'ctaWord', label: 'Marca gigante', type: 'text' },
@@ -136,7 +134,6 @@ export const CHAPTERS_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
-    toggle('showLines', 'Dibujo de fondo: una línea que arma cuadros bajo las fotos'),
   ],
   'chapters/VelocityMarquee': [
     { key: 'text', label: 'Texto', type: 'text' },
@@ -181,7 +178,6 @@ export const CHAPTERS_FIELDS = {
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
-    toggle('showLines', 'Dibujo de fondo: una línea que se vuelve cuadrados (se dibuja y se borra con el scroll)'),
   ],
   'chapters/StackingCards': [
     CHAPTER_LABEL,
