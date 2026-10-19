@@ -19,6 +19,8 @@ import {
 import { cancelAtPeriodEnd } from '../../services/subscriptions/cancel.js'
 import { HOSTED_PLANS } from '../../catalog.js'
 import { isLemonSub, syncLemonForUser, lemonUpdatePaymentUrl } from '../../services/subscriptions/lemonSync.js'
+import { isPolarSub, syncPolarForUser, polarUpdatePaymentUrl } from '../../services/subscriptions/polarSync.js'
+import { gatewayUsable, intlGatewayFor } from '../../services/intlGateway.js'
 
 /**
  * Suscripciones de LAB (Fase 4) — Mercado Pago PreApproval o Lemon Squeezy: planes, mi
@@ -33,7 +35,7 @@ export function createSubscriptionsRouter({ config, limits }) {
   const lemonOn = (user) =>
     Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
   /** ¿Esta fila se maneja sin pasarela real (mock de MP)? */
-  const rowMock = (sub) => (isLemonSub(sub) ? false : subsMock())
+  const rowMock = (sub) => (isLemonSub(sub) || isPolarSub(sub) ? false : subsMock())
 
   // `instanceQuota` puede ser `Infinity` (plan sin tope) — JSON no tiene forma
   // de representar eso, y `JSON.stringify` lo pisa por `null` en silencio.
@@ -60,6 +62,8 @@ export function createSubscriptionsRouter({ config, limits }) {
     // es personal y no se cachea.
     const qa = req.query.qa === '1' && isQaBuyer(req.user, config)
     // Lemon Squeezy en modo prueba depende de quién mira: no se cachea en público.
+    const polarOn = gatewayUsable(config, 'polar', req.user)
+    const intl = intlGatewayFor(config, req.user)
     const lemon = lemonOn(req.user)
     res.set('Cache-Control', qa || (config.lemon?.enabled && config.lemon.testMode) ? 'private, no-store' : 'public, max-age=300')
     res.json({
@@ -67,9 +71,11 @@ export function createSubscriptionsRouter({ config, limits }) {
       ...(qa ? { qa: true, trialDays: 0 } : {}),
       mock: subsMock(),
       freeQuota: config.hostedFreeQuota,
+      intl,
       providers: {
         mercadopago: { enabled: true, mock: subsMock(), currency: 'ARS' },
         lemonsqueezy: { enabled: lemon, currency: 'USD', ...(lemon ? { testMode: Boolean(config.lemon.testMode) } : {}) },
+        polar: { enabled: polarOn, currency: 'USD', ...(polarOn ? { testMode: Boolean(config.polar.testMode) } : {}) },
       },
     })
   })
@@ -106,7 +112,7 @@ export function createSubscriptionsRouter({ config, limits }) {
         user: req.user,
         plan: String(req.body?.plan || ''),
         cycle: req.body?.cycle === 'yearly' ? 'yearly' : 'monthly',
-        provider: req.body?.provider === 'lemonsqueezy' ? 'lemonsqueezy' : 'mercadopago',
+        provider: ['lemonsqueezy', 'polar'].includes(req.body?.provider) ? req.body.provider : 'mercadopago',
         locale: req.body?.locale === 'en' ? 'en' : 'es',
         qa: req.body?.qa === true,
         config,
@@ -155,10 +161,14 @@ export function createSubscriptionsRouter({ config, limits }) {
       const rows = await db.findSubscriptionsByUser(userId)
       const latest = rows.find(
         (s) =>
-          (s.mpPreapprovalId || s.lemonCheckoutId || s.lemonSubscriptionId) &&
+          (s.mpPreapprovalId || s.lemonCheckoutId || s.lemonSubscriptionId || s.polarCheckoutId || s.polarSubscriptionId) &&
           s.status !== 'cancelled' &&
           !s.abandonedAt,
       )
+      if (latest && isPolarSub(latest)) {
+        const out = await syncPolarForUser({ userId, config })
+        return res.json({ ok: true, ...out })
+      }
       if (latest && isLemonSub(latest)) {
         const out = await syncLemonForUser({ userId, email: req.user.email, config })
         return res.json({ ok: true, ...out })
@@ -246,7 +256,12 @@ export function createSubscriptionsRouter({ config, limits }) {
     requireAuth,
     asyncHandler(async (req, res) => {
       const sub = await db.findActiveSubscriptionByUser(db.uid(req.user))
-      const url = sub && isLemonSub(sub) ? await lemonUpdatePaymentUrl(sub, config).catch(() => null) : null
+      const url =
+        sub && isPolarSub(sub)
+          ? await polarUpdatePaymentUrl(sub, config).catch(() => null)
+          : sub && isLemonSub(sub)
+            ? await lemonUpdatePaymentUrl(sub, config).catch(() => null)
+            : null
       if (!url) {
         throw new HttpError(404, 'No hay un medio de pago para actualizar', { expose: true })
       }

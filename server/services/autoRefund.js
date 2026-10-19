@@ -13,6 +13,7 @@ import {
 import { reverseLemonRefund } from './lemonPayments.js'
 import { refundOrder as refundPolarOrder } from './polar.js'
 import { reversePolarRefund } from './polarPayments.js'
+import { refundSubscriptionOrder as refundPolarSubscriptionOrder } from './polar.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
 import { isLemonSub } from './subscriptions/lemonSync.js'
@@ -127,7 +128,7 @@ async function refundLab(sub, row, config, deps) {
   if (!sub) return { status: 'manual', note: 'la suscripción ya no existe' }
   // Sin cobro anotado, se le pregunta a MP: el del alta pudo no haber llegado
   // por webhook, y no es lo mismo que una prueba gratis.
-  if (!sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub)) {
+  if (!sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub) && sub.provider !== 'polar') {
     await syncLabChargesFromMp(sub, config, deps)
   }
   const e = labRefundEligibility(sub)
@@ -147,6 +148,37 @@ async function refundLab(sub, row, config, deps) {
   if (!e.eligible) return { status: 'manual', note: `ya no corresponde: ${e.reason}` }
   if (!sub.firstChargeId) return { status: 'manual', note: 'no hay registro del primer cobro' }
 
+  if (sub.provider === 'polar') {
+    if (!config.polar?.enabled) return { status: 'manual', note: 'Polar apagado' }
+    const refund = deps.refundPolarSubscriptionOrder || refundPolarSubscriptionOrder
+    // Diferencias de plan pagadas en el plazo primero (si una falla, no quedó nada a medias).
+    const extras = []
+    for (const extra of (sub.upgradePayments || []).filter((p) => p.outcome === 'applied' && p.paymentId && !p.refundedAt)) {
+      const cents = Math.round((Number(extra.amount) || 0) * 100)
+      await refund(config, { orderId: extra.paymentId, amountCents: cents, comment: `Botón de arrepentimiento ${row.code}` })
+      await handleLabRefund({
+        sub, provider: 'polar', externalId: `polar-${extra.paymentId}-${cents}`, chargeId: String(extra.paymentId),
+        amount: cents / 100, currency: 'USD', partial: false, reason: 'refunded', config,
+      }, deps)
+      extra.refundedAt = new Date()
+      extras.push(String(extra.paymentId))
+    }
+    if (extras.length) {
+      sub.markModified?.('upgradePayments')
+      await sub.save()
+    }
+    const cents = Math.round((Number(sub.firstChargeAmount) || 0) * 100)
+    await refund(config, { orderId: sub.firstChargeId, amountCents: cents, comment: `Botón de arrepentimiento ${row.code}` })
+    // Baja en el momento (handleLabRefund); el webhook que llega después no repite nada.
+    await handleLabRefund({
+      sub, provider: 'polar', externalId: `polar-${sub.firstChargeId}-${cents}`, chargeId: String(sub.firstChargeId),
+      amount: cents / 100, currency: 'USD', partial: false, reason: 'refunded', config,
+    }, deps)
+    return {
+      status: 'refunded',
+      note: extras.length ? `órdenes Polar ${[sub.firstChargeId, ...extras].join(', ')} (primer cobro + diferencias de plan)` : `orden Polar ${sub.firstChargeId}`,
+    }
+  }
   if (isLemonSub(sub)) {
     if (!config.lemon?.enabled) return { status: 'manual', note: 'Lemon Squeezy apagado' }
     // Diferencias de plan pagadas en el plazo: también vuelven, antes que el primer

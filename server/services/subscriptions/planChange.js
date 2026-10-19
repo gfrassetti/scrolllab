@@ -10,6 +10,8 @@ import {
   isHostedPlanId,
 } from '../../catalog.js'
 import { isLemonSub, changeLemonPlan } from './lemonSync.js'
+import { isPolarSub, changePolarPlan } from './polarSync.js'
+import { gatewayName } from '../emailTemplatesBilling.js'
 import { sendSubscriptionPlanChanged } from '../email.js'
 import {
   updatePreapprovalAmount,
@@ -115,7 +117,7 @@ async function loadChangeableSubscription(userId, targetPlan) {
   if (!isHostedPlanId(targetPlan)) throw new HttpError(400, 'Plan inválido')
 
   const sub = await db.findActiveSubscriptionByUser(userId)
-  const gateway = sub?.provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'
+  const gateway = gatewayName(sub?.provider)
   if (sub?.status === 'paused') {
     throw new HttpError(
       409,
@@ -203,6 +205,9 @@ export async function changeSubscriptionPlan(
   if (isLemonSub(sub)) {
     return changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps)
   }
+  if (isPolarSub(sub)) {
+    return changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config, change: changePolarPlan }, deps)
+  }
   if (quote.amount > 0) {
     return startUpgradePayment({ sub, targetPlan, quote, config }, deps)
   }
@@ -262,8 +267,8 @@ export async function changeSubscriptionPlan(
  * el momento con su prorrateo; el cobro llega por webhook como una factura más
  * (`subscription_payment_success`) y sale el mail de cobro.
  */
-async function changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config }, deps) {
-  const { charged } = await changeLemonPlan({ sub, targetPlan, quote, config }, deps)
+async function changeLemonSubscriptionPlan({ sub, targetPlan, targetQuota, quote, config, change = changeLemonPlan }, deps) {
+  const { charged } = await change({ sub, targetPlan, quote, config }, deps)
   const previousPlan = sub.plan
   const window = paidWindow(sub)
   if (window && !sub.paidPlan) {

@@ -120,8 +120,7 @@ export const usePayRegion = create((set, get) => ({
       methods,
       intl: intlEnabled ? intl : null,
       intlEnabled,
-      // LAB en USD, por ahora solo con Lemon Squeezy (Polar: etapa 2 de docs/polar.md).
-      labIntlEnabled: intlEnabled && intl === 'lemonsqueezy',
+      labIntlEnabled: intlEnabled,
       status: 'ready',
       region: pickRegion({
         stored: readStored(),

@@ -2,6 +2,7 @@ import { sendSubscriptionCanceledOnce } from '../email.js'
 import { isMock } from './billing.js'
 import { cancelPreapprovalConfirmed } from './mpSync.js'
 import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
+import { cancelPolarConfirmed, isPolarSub } from './polarSync.js'
 
 /**
  * Baja de LAB pedida por el cliente (desde LAB, Mi cuenta o el Botón de
@@ -12,7 +13,9 @@ import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
  * @returns {Promise<{ endsAt: Date | null, status: string }>}
  */
 export async function cancelAtPeriodEnd(sub, config, deps = {}) {
-  if (isLemonSub(sub)) {
+  if (isPolarSub(sub)) {
+    await cancelPolarConfirmed(sub, config, {}, deps)
+  } else if (isLemonSub(sub)) {
     await cancelLemonConfirmed(sub, config, deps)
   } else if (!isMock(config) && sub.mpPreapprovalId) {
     await cancelPreapprovalConfirmed(sub, config, deps)

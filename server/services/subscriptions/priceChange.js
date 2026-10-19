@@ -61,6 +61,7 @@ export function currentChanges(changes) {
  */
 async function providerState(sub, config, deps) {
   if (sub.provider === 'lemonsqueezy') return { skip: 'lemonsqueezy-pendiente' }
+  if (sub.provider === 'polar') return { skip: 'polar-pendiente' }
   if (!sub.mpPreapprovalId) return { skip: 'sin-preapproval' }
   const fetch = deps.fetchPreapproval || (isMock(config) ? null : fetchPreapproval)
   if (!fetch) return { skip: 'mp-simulado' }

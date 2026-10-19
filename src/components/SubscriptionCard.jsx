@@ -32,10 +32,12 @@ export default function SubscriptionCard() {
     loading,
     refresh,
   } = usePlan()
-  // Los textos nombran la pasarela de ESTA suscripción (Lemon Squeezy o Mercado Pago).
-  const card = provider === 'lemonsqueezy'
+  // Los textos nombran la pasarela de ESTA suscripción (Polar, Lemon Squeezy o Mercado Pago).
+  const card = provider === 'lemonsqueezy' || provider === 'polar'
+  const gateway = provider === 'polar' ? 'Polar' : 'Lemon Squeezy'
   const tk = (key) => (card ? `account.card.${key}` : `account.${key}`)
   const { t, locale } = useI18n()
+  const tc = (key, vars) => t(tk(key), { gateway, ...vars })
   const dateLocale = locale === 'en' ? 'en-US' : 'es-AR'
 
   const [plans, setPlans] = useState([])
@@ -131,7 +133,7 @@ export default function SubscriptionCard() {
         disabled={busy}
         className="text-[11px] uppercase tracking-[0.2em] text-ink/45 hover:text-accent disabled:opacity-40"
       >
-        {t(tk('subSync'))}
+        {tc('subSync')}
       </button>
     )
 
@@ -192,9 +194,9 @@ export default function SubscriptionCard() {
   const statusLine = canceledAt
     ? t('account.subCanceled', { date: fmtDate(currentPeriodEnd) })
     : subscriptionStatus === 'paused'
-      ? t(tk('subPaused'), { date: fmtDate(currentPeriodEnd) })
+      ? tc('subPaused', { date: fmtDate(currentPeriodEnd) })
       : pastDue
-        ? t(tk(paymentFailed ? 'subPaymentFailed' : 'subRenewing'), {
+        ? tc(paymentFailed ? 'subPaymentFailed' : 'subRenewing', {
             date: fmtDate(graceEndsAt),
           })
         : trialing
@@ -215,7 +217,7 @@ export default function SubscriptionCard() {
           {/* Se cayó por falta de cobro (o pausa vencida): ya es free, pero
               sigue abierta en MP. Cancelar corta los reintentos. */}
           <p className="mt-3 border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
-            {t(tk(subscriptionStatus === 'paused' ? 'subLapsedPaused' : 'subLapsed'), {
+            {tc(subscriptionStatus === 'paused' ? 'subLapsedPaused' : 'subLapsed', {
               plan: tierName(lapsedPlan),
             })}
           </p>

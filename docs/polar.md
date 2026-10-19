@@ -1,7 +1,8 @@
 # Polar — pasarela internacional (USD, merchant of record)
 
-Estado (2026-10-19): **etapa 1 conectada** (compras de templates, bundle y builder, reembolsos y Botón de
-arrepentimiento). LAB (suscripciones) es la etapa 2. Se abrió como plan B de Lemon Squeezy, que lleva días sin aprobar
+Estado (2026-10-19): **etapas 1 y 2 conectadas** (compras de templates, bundle y builder, reembolsos, Botón de
+arrepentimiento y LAB). Compras probadas en vivo en el sandbox (compra, devolución por el botón y devolución desde
+el panel). Se abrió como plan B de Lemon Squeezy, que lleva días sin aprobar
 la tienda (`docs/lemonsqueezy.md`). La que apruebe primero queda como carril internacional; las dos pueden estar
 conectadas a la vez.
 
@@ -52,7 +53,11 @@ formato **Raw**, eventos `order.paid`, `order.updated`, `order.refunded` y (para
 ## Etapas
 
 1. ✅ Compras (templates, bundle, builder), reembolsos y arrepentimiento.
-2. ⏳ LAB: productos de suscripción por plan y ciclo, alta con prueba, cobros, rechazo, cambio de plan, baja y
-   devolución del primer cobro.
+2. ✅ LAB (`server/services/subscriptions/polarSync.js`): un producto recurrente por plan y ciclo («ScrollLab LAB —
+   Starter (monthly)», con el precio de lista; si no coincide, ese plan no se vende), la prueba gratis la pone el
+   checkout (`trial_interval: day`), cobros = órdenes con `subscription_id` (`subscription_create` / `_cycle` /
+   `_update`, la diferencia de plan va aparte), `past_due` → gracia + mail con el portal del cliente, baja al fin del
+   período (`cancel_at_period_end`) o inmediata (`revoke`), cambio de plan (`invoice` al subir, `next_period` al
+   bajar) y devolución del primer cobro por la API con baja inmediata.
 3. ⏳ Salir a cobros reales: cuenta aprobada, token y webhook de producción, `POLAR_ENV=production`, legales y textos
    del sitio que nombran a Polar.

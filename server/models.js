@@ -289,6 +289,10 @@ const subscriptionSchema = new mongoose.Schema(
     // planes, sin prueba gratis, fuera de las métricas.
     qa: { type: Boolean, default: undefined },
     locale: { type: String, enum: ["es", "en"], default: "es" },
+    // Polar: el checkout del alta, la suscripción y el cliente (portal para cambiar la tarjeta).
+    polarCheckoutId: String,
+    polarSubscriptionId: { type: String, sparse: true, index: true },
+    polarCustomerId: String,
     // Lemon Squeezy: el checkout del alta y, cuando se crea, su suscripción.
     lemonCheckoutId: String,
     lemonSubscriptionId: { type: String, sparse: true, index: true },

@@ -4,6 +4,7 @@ import { noteRefund } from '../refundLedger.js'
 import { subId, isMock, fireCanceled } from './billing.js'
 import { cancelPreapprovalConfirmed } from './mpSync.js'
 import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
+import { gatewayName } from '../emailTemplatesBilling.js'
 
 /**
  * Devolución (o contracargo) de un cobro de LAB, venga de Mercado Pago o de
@@ -18,7 +19,7 @@ import { cancelLemonConfirmed, isLemonSub } from './lemonSync.js'
  * aviso al dueño. Idempotente: el mismo evento dos veces no da de baja dos
  * veces ni manda dos mails.
  *
- * @param {{ sub: any, provider: 'mercadopago' | 'lemonsqueezy', externalId: string, chargeId: string | null, amount: number, currency: string, partial: boolean, reason: 'refunded' | 'charged_back', config: any }} args
+ * @param {{ sub: any, provider: 'mercadopago' | 'lemonsqueezy' | 'polar', externalId: string, chargeId: string | null, amount: number, currency: string, partial: boolean, reason: 'refunded' | 'charged_back', config: any }} args
  */
 export async function handleLabRefund(
   { sub, provider, externalId, chargeId, amount, currency, partial, reason, config },
@@ -56,7 +57,7 @@ export async function handleLabRefund(
       ? `LAB: ${reason === 'charged_back' ? 'CONTRACARGO' : 'DEVOLUCIÓN DEL PRIMER COBRO'} — suscripción dada de baja`
       : `LAB: ${reason === 'charged_back' ? 'CONTRACARGO' : partial ? 'DEVOLUCIÓN PARCIAL' : 'DEVOLUCIÓN DE UNA CUOTA'} — la suscripción sigue`,
     lines: [
-      `${provider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Mercado Pago'} ${externalId} · ${amount} ${currency}`,
+      `${gatewayName(provider)} ${externalId} · ${amount} ${currency}`,
       `suscripción ${subId(sub)} · plan ${sub.plan} · ${ended ? 'baja inmediata y acceso cortado' : sub.status}`,
     ],
     config,
@@ -114,7 +115,11 @@ export async function handleUpgradeRefund({ sub, paymentId, amount, currency, re
  */
 async function endSubscriptionNow(sub, config, deps) {
   try {
-    if (isLemonSub(sub)) {
+    if (sub?.provider === 'polar') {
+      // Polar sí corta en el acto (`revoke`).
+      const { cancelPolarConfirmed } = await import('./polarSync.js')
+      await cancelPolarConfirmed(sub, config, { immediately: true }, deps)
+    } else if (isLemonSub(sub)) {
       // Lemon Squeezy no corta en el acto: deja de cobrar y la vence al fin del
       // período. El acceso lo cortamos acá abajo.
       await cancelLemonConfirmed(sub, config, deps)
@@ -150,7 +155,7 @@ export async function findLabSubscriptionForMpPayment(payment) {
   const ref = String(payment?.external_reference || '')
   if (ref) {
     const byRef = await db.findSubscriptionById(ref).catch(() => null)
-    if (byRef && !isLemonSub(byRef)) return byRef
+    if (byRef && !isLemonSub(byRef) && byRef.provider !== 'polar') return byRef
   }
   const preapprovalId =
     payment?.metadata?.preapproval_id ||

@@ -64,6 +64,7 @@ const planPrice = (p, cycle, currency) =>
 const GATEWAY_TERMS = {
   mercadopago: { name: 'Mercado Pago', href: 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194' },
   lemonsqueezy: { name: 'Lemon Squeezy', href: 'https://www.lemonsqueezy.com/buyer-terms' },
+  polar: { name: 'Polar', href: 'https://polar.sh/legal/checkout-buyer-terms' },
 }
 
 /**
@@ -153,11 +154,13 @@ export default function HostedPlans({ qa: qaPage = false }) {
   useEffect(() => {
     loadRegion()
   }, [loadRegion])
+  const intlGateway = usePayRegion((s) => s.intl)
   const intl = intlEnabled && region === 'intl'
-  // Suscripción cobrada con tarjeta en USD (Lemon Squeezy).
-  const cardSub = planProvider === 'lemonsqueezy'
+  // Suscripción cobrada con tarjeta en USD (Polar o Lemon Squeezy).
+  const cardSub = planProvider === 'lemonsqueezy' || planProvider === 'polar'
+  const cardGateway = GATEWAY_TERMS[planProvider]?.name || 'Lemon Squeezy'
   // Textos que nombran a la pasarela: con una suscripción internacional, su variante.
-  const tp = (key, vars) => t(cardSub ? `lab.card.${key}` : `lab.${key}`, vars)
+  const tp = (key, vars) => t(cardSub ? `lab.card.${key}` : `lab.${key}`, { gateway: cardGateway, ...vars })
   const root = useRef(null)
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -322,7 +325,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
     setBusy(planId)
     setError('')
     setNotice('')
-    const provider = via || (intlEnabled ? providerForRegion(region) : 'mercadopago')
+    const provider = via || (intlEnabled ? providerForRegion(region, intlGateway) : 'mercadopago')
     try {
       const res = await api.subscribe(planId, planCycle, { provider, locale, qa })
       if (res.init_point) {
@@ -880,7 +883,7 @@ export default function HostedPlans({ qa: qaPage = false }) {
               }
               trialDays={!activePlan && trialAvailable ? trialDays : 0}
               cycle={cycle}
-              provider={intlEnabled ? providerForRegion(region) : 'mercadopago'}
+              provider={intlEnabled ? providerForRegion(region, intlGateway) : 'mercadopago'}
             />
           )}
           <p className="mt-4 text-body-sm text-ink/55">

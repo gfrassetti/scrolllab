@@ -1,7 +1,7 @@
 import { db } from '../../db.js'
 import { HttpError } from '../../errors.js'
 import { HOSTED_PLANS, isHostedPlanId, subscriptionPlanPrice } from '../../catalog.js'
-import { assertQaBuyer, isQaBuyer } from '../../qa.js'
+import { assertQaBuyer } from '../../qa.js'
 import { createPreapproval, billingFrequency } from '../mercadoPago.js'
 import { isMock, trialEligible } from './billing.js'
 import { isHigherPlan } from './planChange.js'
@@ -12,6 +12,8 @@ import {
   cancelLemonConfirmed,
   retirePendingLemon,
 } from './lemonSync.js'
+import { isPolarSub, startPolarSubscription, cancelPolarConfirmed, retirePendingPolar } from './polarSync.js'
+import { gatewayUsable, gatewayTestMode } from '../intlGateway.js'
 
 /**
  * @typedef {Object} StartedSubscription
@@ -19,7 +21,7 @@ import {
  * @property {string | null} trialEndsAt ISO
  * @property {string | null} firstChargeAt ISO
  * @property {string} [init_point] a dónde manda al comprador (Mercado Pago o Lemon Squeezy)
- * @property {'lemonsqueezy'} [provider] Lemon Squeezy
+ * @property {'lemonsqueezy' | 'polar'} [provider] la pasarela internacional
  * @property {boolean} [mock] Atajo de desarrollo: sin pasarela real
  */
 
@@ -27,9 +29,20 @@ import {
  * Altas a medio hacer y renovaciones caídas, cada una con su pasarela.
  */
 const retirePending = (sub, config) =>
-  isLemonSub(sub) ? retirePendingLemon(sub, config) : retirePendingSubscription(sub, config)
+  isPolarSub(sub)
+    ? retirePendingPolar(sub, config)
+    : isLemonSub(sub)
+      ? retirePendingLemon(sub, config)
+      : retirePendingSubscription(sub, config)
 
 async function closeLapsed(sub, config) {
+  if (isPolarSub(sub)) {
+    await cancelPolarConfirmed(sub, config, { immediately: true })
+    sub.canceledAt = sub.canceledAt || new Date()
+    sub.status = 'cancelled'
+    await sub.save()
+    return
+  }
   if (isLemonSub(sub)) {
     await cancelLemonConfirmed(sub, config)
     sub.canceledAt = sub.canceledAt || new Date()
@@ -52,12 +65,12 @@ async function closeLapsed(sub, config) {
  * Devuelve lo que responde `POST /api/subscriptions`, salvo `activateUrl`, que
  * es una ruta HTTP y la agrega el router cuando `mock` es true:
  *  - `mercadopago`: `{ subscriptionId, trialEndsAt, firstChargeAt, init_point }`.
- *  - `lemonsqueezy`: `{ …, provider: 'lemonsqueezy', init_point }`.
+ *  - `lemonsqueezy` / `polar`: `{ …, provider, init_point }`.
  *  - mock de dev (Mercado Pago): `{ …, mock: true }`.
  * `qa`: la suscripción de prueba (src/domain/qa.js) — solo cuentas de
  * QA_BUYER_EMAILS, a QA_LAB_PRICES_ARS en Mercado Pago. La prueba gratis
  * sigue la misma regla que LAB real (la primera suscripción de la cuenta).
- * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'lemonsqueezy', locale: 'es' | 'en', qa?: boolean, config: any }} args
+ * @param {{ user: any, plan: string, cycle: 'monthly' | 'yearly', provider?: 'mercadopago' | 'lemonsqueezy' | 'polar', locale: 'es' | 'en', qa?: boolean, config: any }} args
  * @returns {Promise<StartedSubscription>}
  */
 export async function startSubscription({
@@ -70,11 +83,12 @@ export async function startSubscription({
   config,
 }) {
   if (!isHostedPlanId(plan)) throw new HttpError(400, 'Plan inválido')
-  // Lemon Squeezy en modo prueba (no cobra) existe solo para las cuentas de QA.
-  const lemonUsable = Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(user, config))
+  // Una pasarela internacional en modo prueba (no cobra) existe solo para las cuentas de QA.
   const lemon = provider === 'lemonsqueezy'
+  const polar = provider === 'polar'
+  const intl = lemon || polar
   if (qa) assertQaBuyer(user, config, 'Plan inválido')
-  if (lemon && !lemonUsable) {
+  if (intl && !gatewayUsable(config, provider, user)) {
     throw new HttpError(400, 'El pago internacional no está disponible', { expose: true })
   }
 
@@ -140,11 +154,11 @@ export async function startSubscription({
     plan,
     cycle,
     status: 'pending',
-    provider: lemon ? 'lemonsqueezy' : 'mercadopago',
-    currency_id: lemon ? 'USD' : 'ARS',
+    provider: intl ? provider : 'mercadopago',
+    currency_id: intl ? 'USD' : 'ARS',
     locale,
     // En modo prueba de Lemon Squeezy no hay plata: fuera de las métricas.
-    ...(qa || (lemon && config.lemon.testMode) ? { qa: true } : {}),
+    ...(qa || (intl && gatewayTestMode(config, provider)) ? { qa: true } : {}),
     ...(trialEndsAt ? { trialEndsAt } : {}),
     ...(firstChargeAt ? { firstChargeAt } : {}),
     ...(carriedPaidPlan
@@ -161,7 +175,20 @@ export async function startSubscription({
     firstChargeAt: firstChargeAt ? firstChargeAt.toISOString() : null,
   }
 
-  if (!lemon && isMock(config)) return { ...out, mock: true }
+  if (!intl && isMock(config)) return { ...out, mock: true }
+
+  if (polar) {
+    let started
+    try {
+      started = await startPolarSubscription({ sub, user, firstChargeAt, qa, locale, config })
+    } catch (err) {
+      // Sin checkout no hay nada que pagar: la fila no puede bloquear el próximo intento.
+      await db.deleteSubscription(subscriptionId)
+      console.error(`subs alta FALLÓ en Polar user=${userId}`, err?.message || err)
+      throw new HttpError(502, 'No pudimos iniciar la suscripción internacional. Probá de nuevo en unos minutos.', { expose: true })
+    }
+    return { ...out, provider: 'polar', init_point: started.init_point }
+  }
 
   if (lemon) {
     let started

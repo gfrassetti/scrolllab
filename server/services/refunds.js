@@ -16,7 +16,7 @@ import { isLemonSub } from './subscriptions/lemonSync.js'
  * webhook (el de la cuota tarda) y no es lo mismo: ese se devuelve.
  */
 async function withMpChargesSynced(sub, config) {
-  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub)) {
+  if (sub && config && !sub.firstPaidAt && !sub.lastPaidAt && !isLemonSub(sub) && sub.provider !== 'polar') {
     await syncLabChargesFromMp(sub, config)
   }
   return sub

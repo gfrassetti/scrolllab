@@ -80,6 +80,11 @@ export const subscriptionsRepo = {
     return MongoSubscription.findOne({ mpPreapprovalId: String(preapprovalId) });
   },
   /** Suscripción de Lemon Squeezy por el id de su suscripción. */
+  async findSubscriptionByPolar(polarSubscriptionId) {
+    return isFileMode()
+      ? fileDb.findSubscriptionByPolar(polarSubscriptionId)
+      : MongoSubscription.findOne({ polarSubscriptionId: String(polarSubscriptionId) });
+  },
   async findSubscriptionByLemon(lemonSubscriptionId) {
     if (!lemonSubscriptionId) return null;
     return isFileMode()

@@ -427,6 +427,11 @@ export const fileDb = {
       ) || null,
     );
   },
+  async findSubscriptionByPolar(polarSubscriptionId) {
+    const row =
+      read("subscriptions").find((s) => s.polarSubscriptionId === String(polarSubscriptionId)) || null;
+    return withSaveDoc("subscriptions", row);
+  },
   async findSubscriptionByLemon(lemonSubscriptionId) {
     const row =
       read("subscriptions").find((s) => s.lemonSubscriptionId === String(lemonSubscriptionId)) || null;

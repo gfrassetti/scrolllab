@@ -3,6 +3,7 @@ import { noteRefund } from './refundLedger.js'
 import { HttpError } from '../errors.js'
 import { verifyPolarSignature, parsePolarOrder, usdCents, POLAR_CURRENCY } from './polar.js'
 import { markOrderPaid, deliverPaidOrder, alertAdmin } from './orders.js'
+import { syncPolarSubscriptionEvent, handlePolarLabOrder, handlePolarLabRefund } from './subscriptions/polarSync.js'
 
 /**
  * Casos de uso de Polar para las compras (market y builder) y su webhook. Ver
@@ -165,9 +166,9 @@ export async function reversePolarRefund({ order: po, config }) {
  * Webhook de Polar. La firma se verifica sobre el body crudo, siempre. Resuelve cuando
  * el evento quedó atendido o no aplica (200); tira solo cuando Polar tiene que
  * reintentar: firma inválida (401) o una falla nuestra (5xx).
- * @param {{ rawBody: Buffer | string, headers: Record<string, any>, config: any, labHandler?: (type: string, data: any) => Promise<any> }} args
+ * @param {{ rawBody: Buffer | string, headers: Record<string, any>, config: any }} args
  */
-export async function handlePolarNotification({ rawBody, headers, config, labHandler }) {
+export async function handlePolarNotification({ rawBody, headers, config }) {
   if (!config.polar?.enabled) return { skipped: 'polar apagado' }
   verifyPolarSignature({ rawBody, headers, secret: config.polar.webhookSecret })
 
@@ -181,8 +182,14 @@ export async function handlePolarNotification({ rawBody, headers, config, labHan
   const data = payload?.data || {}
 
   try {
-    if (type.startsWith('subscription.') || (type.startsWith('order.') && data?.subscription_id)) {
-      return labHandler ? await labHandler(type, data) : { skipped: `LAB ${type}` }
+    // LAB: la suscripción, sus cobros (órdenes con `subscription_id`) y sus devoluciones.
+    if (type.startsWith('subscription.')) return await syncPolarSubscriptionEvent({ type, data, config })
+    if (type.startsWith('order.') && data?.subscription_id) {
+      if (type === 'order.paid') return await handlePolarLabOrder({ data, config })
+      if ((type === 'order.refunded' || type === 'order.updated') && Number(data?.refunded_amount) > 0) {
+        return await handlePolarLabRefund({ data, config })
+      }
+      return { skipped: `LAB ${type}` }
     }
     if (type === 'order.paid') return await fulfillPolarOrder({ order: parsePolarOrder(data), config })
     if (type === 'order.refunded' || type === 'order.updated') {
