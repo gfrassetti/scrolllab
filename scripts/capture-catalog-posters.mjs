@@ -19,31 +19,44 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(REPO, 'public', 'catalog')
 const BASE = process.argv.slice(2).find((a) => a.startsWith('http')) || 'http://localhost:5173'
 
-/** Scroll ratio por SKU: hero / beat más “vendible” en el primer viewport+ */
+/**
+ * Scroll ratio por SKU: el cuadro más vistoso de cada uno, elegido mirando cada template entero
+ * (2026-10-19, dueño: «muestra lo mejor de cada uno; nada vacío, feo o a medio cargar»).
+ */
 const SCROLL_AT = {
-  chapters: 0,
-  nocturne: 0.04,
+  // el auto y la rueda bien grandes (el hero)
+  apex: 0,
+  // el collage del archivo: la máquina de escribir, la escalera y el retrato
+  chapters: 0.5,
   monolith: 0,
-  // Antes del final del cruce: el título ya se lee y la foto todavía no se desenfocó.
-  velocity: 0.08,
-  // El titular 3D sube con la página: arriba del todo se lee entero.
   fizz: 0,
-  // pegado: la maqueta ya armada (ver SCROLL_PX)
-  atelier: 0,
+  // la casa de ladrillo y madera entre los pinos (el hero, ya cargado)
+  atelier: 0.03,
+  // el camión con el perro y el chancho
   comic: 0.06,
-  unity: 0,
-  kin: 0,
+  // el jugador gritando, a pantalla completa
+  unity: 0.26,
+  // el edificio en el pastizal (el hero)
+  atrium: 0,
+  // la villa al atardecer con la montaña (no la carga ni el plano)
+  meridian: 0.39,
+  // la obra roja, azul y negra de la colección
+  kin: 0.23,
+  // el puente de papel de noche, con las linternas encendidas
+  fold: 0.3,
+  nocturne: 0.04,
+  velocity: 0.08,
   ratio: 0.08,
 }
 
 /** Scroll en píxeles (gana sobre el ratio): héroes pegados que se arman con el scroll. */
-const SCROLL_PX = {
-  atelier: 1500,
-}
+const SCROLL_PX = {}
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true })
-  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
+  // Con la placa de video: con swiftshader los 3D (APEX, MONOLITH, ATELIER…) salían vacíos o a medio dibujar.
+  const gpu = process.platform === 'win32' ? ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] : ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+  const browser = await chromium.launch({ args: gpu })
   const context = await browser.newContext({
     viewport: { width: 900, height: 1125 },
     deviceScaleFactor: 1.25,
@@ -74,13 +87,23 @@ async function main() {
       if (!busy) break
       await page.waitForTimeout(500)
     }
+    // Algunos tienen su propia pantalla de carga con «Loading 84 %» (APEX, MERIDIAN): se espera a que se vaya.
+    await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
+    await page
+      .waitForFunction(() => !/loading/i.test(document.body.innerText), null, { timeout: 30_000 })
+      .catch(() => {})
     await page.waitForTimeout(2800)
     const ratio = SCROLL_AT[sku] ?? 0.04
-    await page.evaluate(([r, px]) => {
-      const y = px != null ? px : Math.max(0, Math.floor(document.body.scrollHeight * r))
-      window.scrollTo(0, y)
-    }, [ratio, SCROLL_PX[sku] ?? null])
-    await page.waitForTimeout(1800)
+    const target = await page.evaluate(
+      ([r, px]) => (px != null ? px : Math.max(0, Math.floor(document.body.scrollHeight * r))),
+      [ratio, SCROLL_PX[sku] ?? null],
+    )
+    // de a poco, como una persona: un salto directo deja los pines y los relojes de scroll a mitad de camino
+    for (let i = 1; i <= 8; i += 1) {
+      await page.evaluate((y) => window.scrollTo(0, y), Math.round((target * i) / 8))
+      await page.waitForTimeout(350)
+    }
+    await page.waitForTimeout(2200)
     const dest = path.join(OUT, `${sku}.jpg`)
     await page.screenshot({ path: dest, type: 'jpeg', quality: 84 })
     await sharp(dest).resize({ width: 960 }).webp({ quality: 80 }).toFile(path.join(OUT, `${sku}.webp`))
