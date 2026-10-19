@@ -31,6 +31,8 @@ const AtriumPage = lazy(() => import('./pages/AtriumPage'))
 const PlumPage = lazy(() => import('./pages/PlumPage'))
 const SignalPage = lazy(() => import('./pages/SignalPage'))
 const NeonPage = lazy(() => import('./pages/NeonPage'))
+// DATUM: template en obra (estudio de arquitectura, la página como una hoja de plano). Solo en local.
+const DatumPage = lazy(() => import('./pages/DatumPage'))
 // cāpsula33: demo privado del Estudio (sitio a medida). Solo en local: en producción
 // el import no existe, así que ni el código ni las fotos del local viajan al build.
 const Capsula33Page = import.meta.env.DEV ? lazy(() => import('./studio/capsula33/Capsula33Page')) : null
@@ -217,6 +219,8 @@ export default function App() {
                     path="/estudio/capsula33"
                     element={Capsula33Page ? <Capsula33Page /> : <Navigate to="/" replace />}
                   />
+                  {/* DATUM: template en obra, solo en local como NEON. */}
+                  <Route path="/templates/datum" element={import.meta.env.DEV ? <DatumPage /> : <Navigate to="/" replace />} />
                   {/* NEON: prototipo, solo en local. */}
                   <Route
                     path="/templates/neon"

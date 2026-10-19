@@ -1,0 +1,3129 @@
+{
+  "url": "https://santalarch.com",
+  "sku": "datum",
+  "name": "DATUM",
+  "maxScroll": 16461,
+  "libs": [
+    "lenis",
+    "swiper",
+    "react"
+  ],
+  "beats": [
+    {
+      "index": 0,
+      "progress": 0,
+      "y": 0,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Architectural studio built on uncompromising pre"
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "beat inicial"
+      ],
+      "shot": "beat-00.jpg"
+    },
+    {
+      "index": 1,
+      "progress": 0.031,
+      "y": 514,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Architectural studio built on uncompromising pre"
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        }
+      ],
+      "movers": [],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "sticky entra: cubes-target"
+      ],
+      "shot": "beat-01.jpg"
+    },
+    {
+      "index": 2,
+      "progress": 0.063,
+      "y": 1029,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Architectural studio built on uncompromising pre"
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        }
+      ],
+      "movers": [],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "sticky entra: cubes-content-wrap"
+      ],
+      "shot": "beat-02.jpg"
+    },
+    {
+      "index": 3,
+      "progress": 0.094,
+      "y": 1543,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Architectural studio built on uncompromising pre"
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -907)",
+          "area": 2602552.5,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "hero-tagline",
+          "text": "ArchitectureShapes Perception",
+          "size": "98px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "sticky sale: Cookie consent",
+        "figura entra: div (div)",
+        "texto aparece: “layer”",
+        "texto aparece: “by”",
+        "texto aparece: “ArchitectureShapes Perception”"
+      ],
+      "shot": "beat-03.jpg"
+    },
+    {
+      "index": 4,
+      "progress": 0.125,
+      "y": 2058,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Architectural studio built on uncompromising pre"
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -907)",
+          "area": 2602552.5,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -587.738, 0)",
+          "area": 648000,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "hero-tagline",
+          "text": "ArchitectureShapes Perception",
+          "size": "98px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "sticky entra: cubes-nav",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -587.738, 0)"
+      ],
+      "shot": "beat-04.jpg"
+    },
+    {
+      "index": 5,
+      "progress": 0.156,
+      "y": 2572,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Architectural studio built on uncompromising pre"
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, -907)",
+          "area": 2602552.5,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -215.492, 0)",
+          "area": 648000.0549316406,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -489.883, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -331.083, 0)",
+          "area": 647999.9450683594,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, -907)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -215.492, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -489.883, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -331.083, 0)",
+        "texto sale: “ArchitectureShapes Perception”"
+      ],
+      "shot": "beat-05.jpg"
+    },
+    {
+      "index": 6,
+      "progress": 0.188,
+      "y": 3086,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "WEOur Approach"
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -60.6165, 0)",
+          "area": 648000.0549316406,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -104.634, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -171.263, 0)",
+          "area": 647999.9450683594,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 235.777, 0)",
+          "area": 148204.875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 430.617, 0)",
+          "area": 148204.875,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -60.6165, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -104.634, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -171.263, 0)",
+        "figura entra: span (span)",
+        "figura entra: span (span)"
+      ],
+      "shot": "beat-06.jpg"
+    },
+    {
+      "index": 7,
+      "progress": 0.219,
+      "y": 3601,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "WEOur Approach"
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Intent Before ImageEvery project begins with a c"
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "DirectionSystemSystemResolution0001020304 04"
+        }
+      ],
+      "movers": [
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -40.1956, 0)",
+          "area": 648000.0549316406,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -20.3556, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -9.1327, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 95.8046, 0)",
+          "area": 148204.88742542267,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 148204.875,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 19.2869, 0)",
+          "area": 148204.86257457733,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 230.562, 0)",
+          "area": 148204.86257457733,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "sticky sale: cubes-content-wrap",
+        "sticky sale: cubes-nav",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -40.1956, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -20.3556, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -9.1327, 0)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 95.8046, 0)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 19.2869, 0)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 230.562, 0)"
+      ],
+      "shot": "beat-07.jpg"
+    },
+    {
+      "index": 8,
+      "progress": 0.25,
+      "y": 4115,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -138.743, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -82.9015, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -46.6754, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 46.6754, 0)",
+          "area": 24952.5,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "sticky entra: cubes-content-wrap",
+        "sticky entra: cubes-nav",
+        "figura entra: canvas (canvas)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -138.743, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -82.9015, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -46.6754, 0)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 46.6754, 0)"
+      ],
+      "shot": "beat-08.jpg"
+    },
+    {
+      "index": 9,
+      "progress": 0.281,
+      "y": 4630,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 720, 0)",
+          "area": 24952.5,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "Until it becomes whole",
+          "size": "33px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: span opacity 1→1 t=matrix(1, 0, 0, 1, 720, 0)",
+        "texto aparece: “Until it becomes whole”"
+      ],
+      "shot": "beat-09.jpg"
+    },
+    {
+      "index": 10,
+      "progress": 0.375,
+      "y": 6173,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 0.6085, 0, 0)",
+          "area": 394308.017578125,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 0.6085, 0, 0)",
+          "area": 394308.017578125,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 720, 0)",
+          "area": 24952.5,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "Until it becomes whole",
+          "size": "33px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 0.6085, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 0.6085, 0, 0)"
+      ],
+      "shot": "beat-10.jpg"
+    },
+    {
+      "index": 11,
+      "progress": 0.406,
+      "y": 6687,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0.1039",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 0.9879, 0, 0)",
+          "area": 640159.2333984375,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 0.9879, 0, 0)",
+          "area": 640159.2333984375,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 35880.646728515625,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 720, 0)",
+          "area": 24952.5,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "Until it becomes whole",
+          "size": "33px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 0.9879, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 0.9879, 0, 0)",
+        "figura entra: cubes-video (canvas)"
+      ],
+      "shot": "beat-11.jpg"
+    },
+    {
+      "index": 12,
+      "progress": 0.438,
+      "y": 7202,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "preloader",
+          "pos": "fixed",
+          "opacity": "0.6159",
+          "transform": null,
+          "text": "layerbylayer Architecture is understood An archi"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0.39",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, -720, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 49415.900634765625,
+          "src": null
+        },
+        {
+          "name": "span",
+          "tag": "span",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 720, 0)",
+          "area": 24952.5,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "by",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "layer",
+          "size": "33px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "p",
+          "text": "Until it becomes whole",
+          "size": "33px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, -720, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)",
+        "figura mueve: div opacity 1→1 t=matrix(1, 0, 0, 1, 0, 0)"
+      ],
+      "shot": "beat-12.jpg"
+    },
+    {
+      "index": 13,
+      "progress": 0.469,
+      "y": 7716,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0.6756",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 113569,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "sticky entra: Cookie consent",
+        "sticky sale: preloader",
+        "figura entra: Cookie consent (aside)",
+        "texto sale: “layer”",
+        "texto sale: “by”",
+        "texto sale: “Until it becomes whole”"
+      ],
+      "shot": "beat-13.jpg"
+    },
+    {
+      "index": 14,
+      "progress": 0.5,
+      "y": 8231,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0.9617",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-14.jpg"
+    },
+    {
+      "index": 15,
+      "progress": 0.531,
+      "y": 8745,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-15.jpg"
+    },
+    {
+      "index": 16,
+      "progress": 0.594,
+      "y": 9774,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "0.7287",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-16.jpg"
+    },
+    {
+      "index": 17,
+      "progress": 0.625,
+      "y": 10288,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "h2",
+          "text": "Bold",
+          "size": "98px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “Bold”"
+      ],
+      "shot": "beat-17.jpg"
+    },
+    {
+      "index": 18,
+      "progress": 0.719,
+      "y": 11831,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0.4356",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "texto sale: “Bold”"
+      ],
+      "shot": "beat-18.jpg"
+    },
+    {
+      "index": 19,
+      "progress": 0.75,
+      "y": 12346,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 946321.875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "cambio sutil de composición"
+      ],
+      "shot": "beat-19.jpg"
+    },
+    {
+      "index": 20,
+      "progress": 0.781,
+      "y": 12860,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 946321.875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "A precise system of decisions, where every detail is resolved to create reliability, clarity, and lasting performance",
+          "text": "A precise system of decisions, where every detail is resolved to create reliabil",
+          "size": "16px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “A precise system of decisions, where every detail ”"
+      ],
+      "shot": "beat-20.jpg"
+    },
+    {
+      "index": 21,
+      "progress": 0.813,
+      "y": 13375,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 946321.875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "h2",
+          "text": "Confident",
+          "size": "98px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        },
+        {
+          "name": "A precise system of decisions, where every detail is resolved to create reliability, clarity, and lasting performance",
+          "text": "A precise system of decisions, where every detail is resolved to create reliabil",
+          "size": "16px",
+          "color": "rgb(240, 240, 240)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “Confident”"
+      ],
+      "shot": "beat-21.jpg"
+    },
+    {
+      "index": 22,
+      "progress": 0.906,
+      "y": 14918,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 946321.875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [],
+      "framerVisible": [],
+      "changes": [
+        "texto sale: “Confident”",
+        "texto sale: “A precise system of decisions, where every detail ”"
+      ],
+      "shot": "beat-22.jpg"
+    },
+    {
+      "index": 23,
+      "progress": 1,
+      "y": 16461,
+      "bodyBg": "rgba(0, 0, 0, 0)",
+      "sticky": [
+        {
+          "name": "Cookie consent",
+          "pos": "fixed",
+          "opacity": "1",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "text": "This site uses cookies.DeclineDeclineAcceptAccep"
+        },
+        {
+          "name": "header",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "PhilosophyPhilosophyWorksWorksServicesServicesPr"
+        },
+        {
+          "name": "main-lines",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-bg",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-target",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "div",
+          "pos": "sticky",
+          "opacity": "0",
+          "transform": null,
+          "text": ""
+        },
+        {
+          "name": "cubes-content-wrap",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "BoldA clear visual position, formed through stre"
+        },
+        {
+          "name": "cubes-nav",
+          "pos": "sticky",
+          "opacity": "1",
+          "transform": null,
+          "text": "Our Vision00010203 03"
+        }
+      ],
+      "movers": [
+        {
+          "name": "canvas",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 1296000,
+          "src": null
+        },
+        {
+          "name": "cubes-video",
+          "tag": "canvas",
+          "opacity": 1,
+          "transform": null,
+          "area": 946321.875,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "div",
+          "tag": "div",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 648720,
+          "src": null
+        },
+        {
+          "name": "Cookie consent",
+          "tag": "aside",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "area": 11230.3125,
+          "src": null
+        }
+      ],
+      "texts": [
+        {
+          "name": "A quiet presence, formed through restraint and balance — architecture that does not shout, yet continues to resonate",
+          "text": "A quiet presence, formed through restraint and balance — architecture that does ",
+          "size": "16px",
+          "color": "rgb(15, 15, 15)",
+          "weight": "400",
+          "font": "Helvetica"
+        }
+      ],
+      "framerVisible": [],
+      "changes": [
+        "texto aparece: “A quiet presence, formed through restraint and bal”"
+      ],
+      "shot": "beat-23.jpg"
+    }
+  ]
+}
