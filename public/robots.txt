@@ -32,6 +32,9 @@ Disallow: /templates/
 Disallow: /plantillas/
 Disallow: /builder
 Disallow: /lab
+# VESPER, la vitrina del Estudio, y sus piezas (selladas) tampoco se usan para entrenar
+Disallow: /estudio/
+Disallow: /proto/
 
 # Answer / search / live-fetch engines de IA: permitidos (visibilidad +
 # tráfico de cita). ChatGPT-User y Claude-User son el fetch en vivo cuando
@@ -61,6 +64,8 @@ Disallow: /login
 Disallow: /preview
 Disallow: /checkout
 Disallow: /api/
+# las piezas cifradas de VESPER (no son páginas)
+Disallow: /proto/
 
 # SIGNAL y PLUM no salen a producción (redirigen a la home); por si quedó un link viejo.
 Disallow: /templates/signal

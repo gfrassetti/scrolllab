@@ -437,8 +437,17 @@ cueste mucho más que mirarlo:
   contexto seguro: anda en localhost y en https, **no** por http con la IP de la red local (para probar en
   un teléfono, el sitio publicado).
 - **Código ofuscado.** En el build de producción, los chunks con módulos de `src/proto/kanvas/` pasan por
-  `javascript-obfuscator` (plugin `obfuscateShowcase` en `vite.config.js`; sin aplanar el flujo, que el
-  bucle corre a 60 cuadros). Nada más del sitio se ofusca; los templates que se venden, nunca.
+  `javascript-obfuscator` (plugin `obfuscateShowcase` en `vite.config.js`): nombres en hexadecimal, textos
+  en un arreglo codificado con envoltorios, claves de objetos transformadas, consola apagada y autodefensa
+  (deja de andar si se lo «embellece»). Sin aplanar el flujo ni código muerto: el bucle corre a 60
+  cuadros. Nada más del sitio se ofusca; los templates que se venden, nunca.
+- **Clases codificadas.** En el mismo paso, las clases propias con guion (`kv-frame`, `kv-load`, `rl-u`…)
+  pasan a nombres sin sentido (`x3f9a1c`) en el CSS y en el JSX a la vez. **Las pruebas sobre el build
+  tienen que buscar atributos (`[data-stage]`, `[data-hud]`), no esas clases**: en desarrollo existen, en
+  producción no.
+- **Bots de IA.** `public/robots.txt` les cierra `/estudio/` y `/proto/` a los crawlers de entrenamiento
+  (la lista que ya bloqueaba el catálogo); los buscadores comunes siguen indexando la página. Contra bots
+  que no respetan `robots.txt`, el firewall de bots de Vercel (lo prende el dueño en el panel).
 - **Firma.** Cada GLB lleva el copyright en `asset.copyright` y cada imagen en sus metadatos, más una marca
   casi invisible en una esquina; el SEO de la ruta pide `noai, noimageai`.
 

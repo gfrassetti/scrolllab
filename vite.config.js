@@ -35,9 +35,15 @@ const skipLocalOnlyAssets = {
 }
 
 /**
- * VESPER es la vitrina del Estudio, no se vende: su código sale ofuscado en producción (no se puede leer
- * para copiarlo). Solo los chunks con módulos de src/proto/kanvas/; el resto del sitio queda igual. Los
- * templates que se venden nunca se ofuscan (el ZIP es código fuente).
+ * VESPER es la vitrina del Estudio, no se vende: en producción su código sale difícil de leer y de copiar.
+ * Solo los chunks con módulos de src/proto/kanvas/; el resto del sitio queda igual. Los templates que se
+ * venden nunca se ofuscan (el ZIP es código fuente).
+ *
+ * 1. Las clases propias (`kv-frame`, `kv-load`…) pasan a nombres sin sentido (`x3f9a1c`), en el CSS y en el
+ *    JSX a la vez (viven en el mismo chunk). Solo las que tienen guion: no pueden chocar con una variable.
+ * 2. javascript-obfuscator: nombres en hexadecimal, textos en un arreglo codificado con envoltorios, claves
+ *    de objetos transformadas, la consola apagada y autodefensa (deja de andar si se lo «embellece»). Lo
+ *    que cuesta en cada cuadro queda afuera (aplanar el flujo, código muerto): el bucle corre a 60 cuadros.
  */
 const obfuscateShowcase = {
   name: 'obfuscate-showcase',
@@ -45,20 +51,29 @@ const obfuscateShowcase = {
   async renderChunk(code, chunk) {
     const ids = chunk.moduleIds || Object.keys(chunk.modules || {})
     if (!ids.some((id) => id.replace(/\\/g, '/').includes('/src/proto/kanvas/'))) return null
+    const { createHash } = await import('node:crypto')
+    const renamed = code.replace(/\b(kv-[a-z0-9]+(?:-[a-z0-9]+)*|rl-u)\b/g, (name) => `x${createHash('sha1').update(`vesper:${name}`).digest('hex').slice(0, 6)}`)
     const { default: JavaScriptObfuscator } = await import('javascript-obfuscator')
-    const out = JavaScriptObfuscator.obfuscate(code, {
+    const out = JavaScriptObfuscator.obfuscate(renamed, {
       compact: true,
       target: 'browser',
       identifierNamesGenerator: 'hexadecimal',
       stringArray: true,
       stringArrayEncoding: ['base64'],
-      stringArrayThreshold: 0.75,
+      stringArrayThreshold: 0.85,
+      stringArrayRotate: true,
+      stringArrayShuffle: true,
+      stringArrayIndexShift: true,
+      stringArrayWrappersCount: 2,
+      stringArrayWrappersType: 'function',
       splitStrings: true,
-      splitStringsChunkLength: 12,
+      splitStringsChunkLength: 10,
+      transformObjectKeys: true,
+      disableConsoleOutput: true,
+      selfDefending: true,
       // lo que cuesta en cada cuadro queda afuera: el bucle corre 60 veces por segundo
       controlFlowFlattening: false,
       deadCodeInjection: false,
-      selfDefending: false,
       renameGlobals: false,
       sourceMap: false,
     })
