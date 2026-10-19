@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import ZoneHeadline from './ZoneHeadline.jsx'
 
 /**
@@ -54,6 +55,14 @@ export default function StudioZone({ t, studioServices }) {
             </div>
           ))}
         </div>
+
+        {/* la vitrina: un trabajo a medida para mirar (no se vende) */}
+        <p className="mx-auto mt-8 max-w-[60ch] text-center text-body-sm text-ink/70">
+          {t('home.studioShowcase')}{' '}
+          <Link to="/estudio/vesper" className="font-medium text-ink underline decoration-accent decoration-2 underline-offset-4 transition-colors hover:text-accent">
+            {t('home.studioShowcaseCta')}
+          </Link>
+        </p>
 
         <div className="mt-10 flex justify-center md:mt-14">
           <a href="#contacto" className="btn btn-primary">

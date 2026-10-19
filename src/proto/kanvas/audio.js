@@ -1,23 +1,28 @@
 /**
- * Kanvas — el sonido, sin archivos (Web Audio). Arma el mismo diseño que la referencia, no su música:
+ * Kanvas — el sonido (Web Audio). Suenan DOS cosas y nada más (decisión del dueño, 2026-10-18:
+ * «la música on debe ser solo música»):
  *
- *   · una INTRO que crece al abrirse el hero (pad oscuro + riser) y después el LOOP de la página;
- *   · cada tramo tiene su mezcla (`scene()`): el hero con todo, las láminas con el cencerro al frente,
- *     la cordillera filtrada con VIENTO encima;
- *   · efectos: el cajón del menú, la transición a pantalla completa y un clic al pasar por un link.
+ *   · la MÚSICA, que prende y apaga el botón de la onda: la pista (`track`, un MP3) tal cual, sin
+ *     filtros por tramo; si no hay pista o no carga, un loop de phonk sintetizado;
+ *   · el CAJÓN DEL MENÚ, que suena siempre, con la música prendida o apagada.
  *
- * El loop es phonk a medio tiempo (bombo y 808 con glissando, palma en el 3, hats con redobles,
- * cencerro con eco) sobre un pad grave con reverb. El navegador no deja sonar nada hasta un gesto:
- * arranca apagado. Las pistas definitivas serían archivos con licencia en lugar de los osciladores.
+ * Nada más: ni viento, ni riser, ni la música apagándose detrás de un filtro al scrollear, ni pitidos
+ * o clics en links y transiciones. El navegador no deja sonar nada hasta un gesto: arranca apagado.
  */
-export function createAudio() {
+export function createAudio({ track = null } = {}) {
+  // la pista (si hay): un archivo que suena en loop, igual en toda la página. Sin pista (o si no carga),
+  // suena el loop sintetizado.
+  let trackBuf = null
+  let trackSrc = null
+  let trackAt = 0
+  let trackOffset = 0
+  let trackFailed = false
   let ctx = null
   let master
   let bus = {}
   let noise
   let timer = 0
   let on = false
-  let started = false
   let current = 'intro'
   const subs = new Set()
   const emit = () => subs.forEach((f) => f(on))
@@ -66,7 +71,12 @@ export function createAudio() {
       }
       return n
     }
-    bus = { tone, verb, pad: mk(0, 0.8), drums: mk(0, 0.08), bass: mk(0), bell: mk(0, 0.5), wind: mk(0, 0.2), fx: mk(0.9, 0.35) }
+    // el cajón del menú va por su propia salida, por fuera de `master`: suena siempre, aunque la
+    // música esté apagada (el botón de la onda es solo para la música)
+    const fx = ctx.createGain()
+    fx.gain.value = 0.9
+    fx.connect(comp)
+    bus = { tone, verb, pad: mk(0, 0.8), drums: mk(0, 0.08), bass: mk(0), bell: mk(0, 0.5), music: mk(0), fx }
     // eco del cencerro (corchea con puntillo)
     const dl = ctx.createDelay(1)
     dl.delayTime.value = (60 / BPM) * 0.75
@@ -75,8 +85,28 @@ export function createAudio() {
     bus.bell.connect(dl)
     dl.connect(fb).connect(dl)
     dl.connect(tone)
+  }
 
-    startWind()
+  // la pista se baja recién cuando se prende la música (abrir el menú no la descarga)
+  let trackLoading = false
+  const loadTrack = () => {
+    if (!track || trackLoading) return
+    trackLoading = true
+    fetch(track)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(r.status))))
+      .then((b) => ctx.decodeAudioData(b))
+      .then((buf) => {
+        trackBuf = buf
+        if (on) {
+          startTrack()
+          applyMix(current, 0.6)
+        }
+      })
+      .catch(() => {
+        // sin pista: suena el loop sintetizado
+        trackFailed = true
+        if (on) startLoop()
+      })
   }
 
   const env = (g, t, peak, attack, decay) => {
@@ -233,69 +263,68 @@ export function createAudio() {
     window.clearInterval(timer)
     timer = 0
   }
-
-  // viento: ruido por un pasabanda que se mueve lento (siempre corre; su volumen lo pone el tramo)
-  const startWind = () => {
-    const s = ctx.createBufferSource()
-    s.buffer = noise
-    s.loop = true
-    const bp = ctx.createBiquadFilter()
-    bp.type = 'bandpass'
-    bp.Q.value = 0.9
-    bp.frequency.value = 600
-    const lfo = ctx.createOscillator()
-    lfo.frequency.value = 0.13
-    const lfoAmt = ctx.createGain()
-    lfoAmt.gain.value = 380
-    lfo.connect(lfoAmt).connect(bp.frequency)
-    const g = ctx.createGain()
-    g.gain.value = 0.7
-    const lfo2 = ctx.createOscillator()
-    lfo2.frequency.value = 0.21
-    const amt2 = ctx.createGain()
-    amt2.gain.value = 0.3
-    lfo2.connect(amt2).connect(g.gain)
-    s.connect(bp).connect(g).connect(bus.wind)
-    s.start()
-    lfo.start()
-    lfo2.start()
+  const startTrack = () => {
+    if (!trackBuf || trackSrc) return
+    trackSrc = ctx.createBufferSource()
+    trackSrc.buffer = trackBuf
+    trackSrc.loop = true
+    trackSrc.connect(bus.music)
+    trackSrc.start(0, trackOffset % trackBuf.duration)
+    trackAt = ctx.currentTime - trackOffset
+  }
+  const stopTrack = () => {
+    if (!trackSrc) return
+    trackOffset = (ctx.currentTime - trackAt) % trackBuf.duration // al volver sigue donde quedó
+    trackSrc.stop()
+    trackSrc.disconnect()
+    trackSrc = null
+  }
+  // mientras la pista se decodifica no suena nada (para no empezar con el sintetizado y cortarlo)
+  const play = () => (trackBuf ? startTrack() : !track || trackFailed ? startLoop() : null)
+  const pause = () => {
+    stopLoop()
+    stopTrack()
   }
 
-  // las mezclas de cada tramo: [pad, drums, bass, bell, wind, corte del filtro]
+
+  // el loop sintetizado (solo si no hay pista) cambia de instrumentos por tramo: [pad, drums, bass,
+  // bell, corte del filtro]. Es la misma música, no un efecto.
   const MIX = {
-    intro: [1, 0, 0.6, 0, 0, 1400],
-    hero: [0.8, 1, 1, 0.8, 0, 9000],
-    tableau: [0.6, 0.85, 0.9, 1.1, 0, 9000],
-    ridge: [1, 0.5, 0.8, 0.5, 0.9, 1600],
-    relic: [0.7, 1, 1, 1, 0.2, 9000],
+    intro: [1, 0, 0.6, 0, 1400],
+    hero: [0.8, 1, 1, 0.8, 9000],
+    tableau: [0.6, 0.85, 0.9, 1.1, 9000],
+    ridge: [1, 0.5, 0.8, 0.5, 9000],
+    relic: [0.7, 1, 1, 1, 9000],
+    roster: [0.6, 1, 1, 1.1, 9000],
+    beacon: [1, 0.5, 0.8, 0.4, 9000],
+    oaths: [0.7, 1, 1, 0.9, 9000],
+    world: [1, 0.6, 0.8, 0.6, 9000],
+    end: [0.9, 0.4, 0.7, 0.8, 9000],
   }
   const applyMix = (name, glide = 1.2) => {
     if (!ctx) return
-    const m = MIX[name] || MIX.hero
     const t = ctx.currentTime
-    ;['pad', 'drums', 'bass', 'bell', 'wind'].forEach((k, i) => bus[k].gain.setTargetAtTime(m[i], t, glide / 3))
-    bus.tone.frequency.setTargetAtTime(m[5], t, glide / 3)
+    const g = glide / 3
+    if (trackBuf) {
+      // con la pista: suena la pista, entera y al mismo volumen en toda la página
+      ;['pad', 'drums', 'bass', 'bell'].forEach((k) => bus[k].gain.setTargetAtTime(0, t, g))
+      bus.music.gain.setTargetAtTime(0.9, t, g)
+      bus.tone.frequency.setTargetAtTime(20000, t, g)
+      return
+    }
+    const m = MIX[name] || MIX.hero
+    ;['pad', 'drums', 'bass', 'bell'].forEach((k, i) => bus[k].gain.setTargetAtTime(m[i], t, g))
+    bus.music.gain.setTargetAtTime(0, t, g)
+    bus.tone.frequency.setTargetAtTime(m[4], t, g)
   }
 
-  // la intro: un riser de ruido que sube y abre el loop
-  const riser = () => {
-    const t = ctx.currentTime + 0.02
-    const s = noiseSrc(t, 2.6)
-    const f = ctx.createBiquadFilter()
-    f.type = 'bandpass'
-    f.Q.value = 2
-    f.frequency.setValueAtTime(300, t)
-    f.frequency.exponentialRampToValueAtTime(5200, t + 2.4)
-    const g = ctx.createGain()
-    g.gain.setValueAtTime(0.0001, t)
-    g.gain.exponentialRampToValueAtTime(0.4, t + 2.2)
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.6)
-    s.connect(f).connect(g).connect(bus.fx)
-  }
-
-  /** Abrir: aire que sube y un golpe grave. Cerrar: el mismo aire, bajando. */
+  /**
+   * Abrir: aire que sube y un golpe grave. Cerrar: el mismo aire, bajando. Suena SIEMPRE, con la
+   * música prendida o apagada (abrir el menú es un gesto: alcanza para despertar el audio).
+   */
   const drawer = (open) => {
-    if (!on || !ctx) return
+    init()
+    if (ctx.state !== 'running') ctx.resume()
     const t = ctx.currentTime + 0.01
     const s = noiseSrc(t, 0.6)
     const f = ctx.createBiquadFilter()
@@ -315,44 +344,8 @@ export function createAudio() {
     o.start(t)
     o.stop(t + 0.7)
   }
-  /** La transición a pantalla completa: un barrido grave con un golpe al cubrir. */
-  const sweep = () => {
-    if (!on || !ctx) return
-    const t = ctx.currentTime + 0.01
-    const s = noiseSrc(t, 1.2)
-    const f = ctx.createBiquadFilter()
-    f.type = 'lowpass'
-    f.frequency.setValueAtTime(400, t)
-    f.frequency.exponentialRampToValueAtTime(6000, t + 0.5)
-    f.frequency.exponentialRampToValueAtTime(300, t + 1.1)
-    const g = ctx.createGain()
-    env(g, t, 0.6, 0.35, 0.8)
-    s.connect(f).connect(g).connect(bus.fx)
-    const o = ctx.createOscillator()
-    const og = ctx.createGain()
-    o.frequency.setValueAtTime(70, t + 0.4)
-    o.frequency.exponentialRampToValueAtTime(34, t + 1.2)
-    env(og, t + 0.4, 0.8, 0.005, 0.8)
-    o.connect(og).connect(bus.fx)
-    o.start(t)
-    o.stop(t + 1.4)
-  }
-  /** El clic al pasar por un link: corto y agudo. */
-  let lastTick = 0
-  const tickFx = () => {
-    if (!on || !ctx || ctx.currentTime - lastTick < 0.05) return
-    lastTick = ctx.currentTime
-    const t = ctx.currentTime + 0.005
-    const o = ctx.createOscillator()
-    const g = ctx.createGain()
-    o.type = 'triangle'
-    o.frequency.setValueAtTime(2600, t)
-    o.frequency.exponentialRampToValueAtTime(1500, t + 0.03)
-    env(g, t, 0.07, 0.001, 0.04)
-    o.connect(g).connect(bus.fx)
-    o.start(t)
-    o.stop(t + 0.08)
-  }
+  // Sin pitidos ni clics: ni al pasar por los links ni en las transiciones (decisión del dueño,
+  // 2026-10-16). Suenan solo la música y el cajón del menú.
 
   const set = (v) => {
     init()
@@ -362,16 +355,13 @@ export function createAudio() {
     master.gain.setValueAtTime(master.gain.value, t)
     if (on) {
       ctx.resume()
-      startLoop()
-      if (!started) {
-        started = true
-        if (current === 'intro') riser()
-      }
+      loadTrack()
+      play()
       applyMix(current, 0.2)
       master.gain.linearRampToValueAtTime(1, t + 0.8)
     } else {
       master.gain.linearRampToValueAtTime(0, t + 0.4)
-      window.setTimeout(() => !on && stopLoop(), 450)
+      window.setTimeout(() => !on && pause(), 450)
     }
     emit()
   }
@@ -379,10 +369,10 @@ export function createAudio() {
   const onVis = () => {
     if (!ctx || !on) return
     if (document.hidden) {
-      stopLoop()
+      pause()
       ctx.suspend()
     } else {
-      ctx.resume().then(startLoop)
+      ctx.resume().then(play)
     }
   }
   document.addEventListener('visibilitychange', onVis)
@@ -394,15 +384,11 @@ export function createAudio() {
     set,
     toggle: () => set(!on),
     drawer,
-    sweep,
-    tick: tickFx,
-    /** El tramo actual: cambia la mezcla con un fundido. 'intro' → 'hero' hace sonar el riser. */
+    /** El tramo actual: solo cambia los instrumentos del loop sintetizado; la pista no se toca. */
     scene(name) {
       if (name === current) return
-      const prev = current
       current = name
       if (!on || !ctx) return
-      if (prev === 'intro' && name === 'hero') riser()
       applyMix(name)
     },
     subscribe(f) {
@@ -411,7 +397,7 @@ export function createAudio() {
     },
     dispose() {
       document.removeEventListener('visibilitychange', onVis)
-      stopLoop()
+      if (ctx) pause()
       ctx?.close()
     },
   }

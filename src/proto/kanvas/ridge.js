@@ -135,28 +135,28 @@ export function createRidge(THREE) {
   }
 
   // cielo
-  plane(900, 500, mat(SKY_FRAG, { uTop: { value: col('#3a2c6a') }, uMid: { value: col('#a9708f') }, uLow: { value: col('#f2ad80') } }, { transparent: false }), 0, 40, -150, 0)
+  plane(900, 500, mat(SKY_FRAG, { uTop: { value: col('#5b7c99') }, uMid: { value: col('#b9b49a') }, uLow: { value: col('#efcf96') } }, { transparent: false }), 0, 40, -150, 0)
 
-  // nubes: lejos (lavanda) → cerca (durazno)
+  // nubes: la tarde de las ilustraciones (dueño, 2026-10-18): sombra azul polvo, cuerpo crema, luz dorada
   const clouds = [
-    [-30, 30, -125, 170, 30, '#4f3b76', '#93638c', '#d8987f', 0.9],
-    [40, 22, -112, 160, 26, '#583f7a', '#a86b8a', '#eda57f', 0.95],
-    [-10, 13, -100, 150, 22, '#5f4479', '#b87487', '#f4b083', 1],
-    [25, 6, -96, 120, 14, '#694a7a', '#c57f86', '#f8bd8c', 1],
-    [-28, 19, -94, 80, 14, '#5a417a', '#b27389', '#f1ad86', 0.9],
+    [-30, 30, -125, 170, 30, '#7d8ea4', '#cdbf9f', '#f3e3bf', 0.9],
+    [40, 22, -112, 160, 26, '#8594a6', '#d6c4a0', '#f6e6c2', 0.95],
+    [-10, 13, -100, 150, 22, '#8c97a2', '#dcc8a0', '#f8e8c0', 1],
+    [25, 6, -96, 120, 14, '#949b9e', '#e2cc9e', '#fbe9bd', 1],
+    [-28, 19, -94, 80, 14, '#8a95a3', '#d9c6a1', '#f6e5c0', 0.9],
   ]
   clouds.forEach(([x, y, z, w, h, s, m, l, a], i) => {
     const cm = mat(CLOUD_FRAG, { uSeed: { value: i * 7.3 + 1 }, uTime: time, uAlpha: { value: a }, uShadow: { value: col(s) }, uMidC: { value: col(m) }, uLight: { value: col(l) } })
     plane(w, h, cm, x, y, z, 1 + i)
   })
 
-  // la cordillera: de la más lejana (clara, violácea) a la más cercana (oscura, con pinos)
+  // la cordillera: de la más lejana (azul gris, con bruma) a la más cercana (oliva oscuro, con pinos)
   const ridges = [
-    { z: -90, base: -6, amp: 26, freq: 0.018, trees: 0, snow: 1, dark: '#5a4878', light: '#b0839e', fog: 0.35, seed: 3 },
-    { z: -60, base: -10, amp: 22, freq: 0.03, trees: 0, snow: 1, dark: '#45365e', light: '#9b6f8b', fog: 0.2, seed: 11 },
-    { z: -38, base: -14, amp: 16, freq: 0.045, trees: 0, snow: 0.8, dark: '#34284a', light: '#845d76', fog: 0.1, seed: 23 },
-    { z: -22, base: -16, amp: 10, freq: 0.07, trees: 0.9, snow: 0.3, dark: '#241b33', light: '#5f4358', fog: 0.04, seed: 41 },
-    { z: -10, base: -12.5, amp: 3.2, freq: 0.12, trees: 1.4, snow: 0, dark: '#130e1a', light: '#30232f', fog: 0, seed: 57 },
+    { z: -90, base: -6, amp: 26, freq: 0.018, trees: 0, snow: 1, dark: '#6f8196', light: '#aeb9c2', fog: 0.35, seed: 3 },
+    { z: -60, base: -10, amp: 22, freq: 0.03, trees: 0, snow: 1, dark: '#64727c', light: '#a3aa9e', fog: 0.2, seed: 11 },
+    { z: -38, base: -14, amp: 16, freq: 0.045, trees: 0, snow: 0.8, dark: '#5c6648', light: '#9e9b6c', fog: 0.1, seed: 23 },
+    { z: -22, base: -16, amp: 10, freq: 0.07, trees: 0.9, snow: 0.3, dark: '#454628', light: '#857a46', fog: 0.04, seed: 41 },
+    { z: -10, base: -12.5, amp: 3.2, freq: 0.12, trees: 1.4, snow: 0, dark: '#2c2a18', light: '#5a5230', fog: 0, seed: 57 },
   ]
   ridges.forEach((r, i) => {
     const m = mat(RIDGE_FRAG, {
@@ -169,8 +169,8 @@ export function createRidge(THREE) {
       uFogMix: { value: r.fog },
       uDark: { value: col(r.dark) },
       uLight: { value: col(r.light) },
-      uSnowC: { value: col('#f4dccd') },
-      uFog: { value: col('#c08aa0') },
+      uSnowC: { value: col('#f4ecd8') },
+      uFog: { value: col('#d9cba9') },
     })
     plane(600, 120, m, 0, r.base - 20, r.z, 10 + i)
   })

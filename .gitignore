@@ -105,3 +105,13 @@ design/masters/apex-3d/
 design/masters/capsula33/
 public/studio/
 dist-capsula33
+
+# Kanvas: la pista de la demo (Pixabay Content License): se usa en el sitio, no se redistribuye en el repo ni en el ZIP.
+public/proto/kanvas/audio/
+# VESPER (la vitrina del Estudio): los modelos y las imágenes sin cifrar no entran al repo ni al build; viajan
+# sellados en server/showcase/vesper/ (scripts/vesper-seal.mjs). El decodificador Draco sí (es público).
+public/proto/kanvas/*
+!public/proto/kanvas/draco/
+# los masters pesados (GLB de Tripo de ~45 MB, pruebas de estilo); los scripts de Blender sí se versionan
+design/masters/kanvas/3d/
+design/masters/kanvas/style/

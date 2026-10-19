@@ -38,6 +38,8 @@ const EXPECTED = [
   'GET /api/orders',
   'GET /api/orders/:id/download',
   'GET /api/ready',
+  'GET /api/showcase/vesper/a/:id',
+  'GET /api/showcase/vesper/pass',
   'GET /api/subscriptions/change/quote',
   'GET /api/subscriptions/me',
   'GET /api/subscriptions/payment-method',

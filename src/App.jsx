@@ -34,8 +34,9 @@ const NeonPage = lazy(() => import('./pages/NeonPage'))
 // cāpsula33: demo privado del Estudio (sitio a medida). Solo en local: en producción
 // el import no existe, así que ni el código ni las fotos del local viajan al build.
 const Capsula33Page = import.meta.env.DEV ? lazy(() => import('./studio/capsula33/Capsula33Page')) : null
-// Kanvas: prototipo técnico del «todo en un canvas» (estudio de una referencia). Solo en local.
-const KanvasPage = import.meta.env.DEV ? lazy(() => import('./proto/kanvas/KanvasPage')) : null
+// VESPER (motor Kanvas, «todo en un canvas»): la vitrina del Estudio, pública en /estudio/vesper. No se
+// vende ni entra al builder ni a LAB (docs/kanvas.md).
+const KanvasPage = lazy(() => import('./proto/kanvas/KanvasPage'))
 const MeridianPage = lazy(() => import('./pages/MeridianPage'))
 const KinPage = lazy(() => import('./pages/KinPage'))
 const FoldPage = lazy(() => import('./pages/FoldPage'))
@@ -94,12 +95,12 @@ function ScrollToTop() {
 }
 
 // Qué fuente de cuerpo corresponde: el market usa --font-ui; las demos de
-// /templates/* conservan la del template (y la del ZIP). Ver index.css.
+// /templates/* (y la vitrina VESPER) conservan la del template (y la del ZIP). Ver index.css.
 function SurfaceMarker() {
   const { pathname } = useLocation()
   useLayoutEffect(() => {
     const root = document.documentElement
-    root.dataset.surface = pathname.startsWith('/templates/') ? 'template' : 'market'
+    root.dataset.surface = pathname.startsWith('/templates/') || pathname === '/estudio/vesper' ? 'template' : 'market'
   }, [pathname])
   return null
 }
@@ -208,7 +209,10 @@ export default function App() {
                       )
                     }
                   />
-                  <Route path="/proto/kanvas" element={KanvasPage ? <KanvasPage /> : <Navigate to="/" replace />} />
+                  {/* VESPER: la vitrina del Estudio (motor Kanvas, src/proto/kanvas). */}
+                  <Route path="/estudio/vesper" element={<KanvasPage />} />
+                  <Route path="/templates/vesper" element={<Navigate to="/estudio/vesper" replace />} />
+                  <Route path="/proto/kanvas" element={<Navigate to="/estudio/vesper" replace />} />
                   <Route
                     path="/estudio/capsula33"
                     element={Capsula33Page ? <Capsula33Page /> : <Navigate to="/" replace />}

@@ -125,6 +125,16 @@ export function seoForPath(pathname) {
       canonical: `${SITE_URL}/lab`,
     }
   }
+  if (path === '/estudio/vesper') {
+    // La vitrina del Estudio: se indexa la página, no sus imágenes ni para entrenar modelos.
+    return {
+      title: 'VESPER — un trabajo a medida de ScrollLab',
+      description:
+        'Un mundo ilustrado en 3D que se recorre en un solo canvas: escenas en vivo, viñetas que se dibujan y un cuaderno de expedición. Hecho a medida por el Estudio de ScrollLab.',
+      robots: 'index, follow, noai, noimageai',
+      canonical: `${SITE_URL}/estudio/vesper`,
+    }
+  }
   if (path === '/builder') {
     return {
       title: BUILDER_SEO.title,

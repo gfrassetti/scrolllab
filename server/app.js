@@ -14,6 +14,7 @@ import { createSubscriptionsRouter } from './http/routes/subscriptions.js'
 import { createCheckoutRouter } from './http/routes/checkout.js'
 import { createWebhooksRouter } from './http/routes/webhooks.js'
 import { createAnalyticsRouter } from './http/routes/analytics.js'
+import { createShowcaseRouter } from './http/routes/showcase.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { connectDb, storeMode } from './db.js'
@@ -147,6 +148,9 @@ export async function createApp(config) {
   app.use(createWithdrawalsRouter({ config, limits }))
 
   app.use(createAnalyticsRouter({ config, limits }))
+
+  // la vitrina del Estudio (VESPER): piezas selladas con un pase que vence
+  app.use(createShowcaseRouter({ config, limits }))
 
   app.use(notFound)
   app.use(errorHandler(config))

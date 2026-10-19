@@ -1,11 +1,12 @@
 /**
- * Kanvas — la reliquia: el último farol, en 3D y en código (sin imágenes). Una jaula de bronce con
- * vidrio, la llama encendida (con su halo y la luz que pinta la jaula desde adentro) y chispas que
- * suben. Se dibuja en una textura que la página muestra dentro de la carta que gira con el scroll.
+ * Kanvas — la reliquia: el último farol. Es una pieza dibujada en 3D (imagen generada → SAM 3D,
+ * public/proto/kanvas/relic-lantern.glb) pintada como ilustración (`ink`), con un halo que late donde
+ * está la llama, la luz que sale de adentro y chispas que suben. Se dibuja en una textura que la página
+ * muestra dentro de la carta que gira con el scroll (el plano la pasa a sRGB).
  *
  * `update({ now, turn })`: `turn` es el giro extra (el scroll y el mouse) además del giro lento propio.
  */
-export function createRelic(THREE) {
+export function createRelic(THREE, { loader, ink } = {}) {
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50)
   camera.position.set(0, 1.35, 7)
@@ -13,83 +14,60 @@ export function createRelic(THREE) {
   const disposables = []
   const keep = (x) => (disposables.push(x), x)
 
-  // fondo: un degradado violeta oscuro con el centro más claro (detrás del farol)
+  // fondo: la tarde clara de las ilustraciones, con el centro más cálido (detrás del farol)
   const bg = document.createElement('canvas')
   bg.width = 256
   bg.height = 320
   const g = bg.getContext('2d')
   const lin = g.createLinearGradient(0, 0, 0, 320)
-  lin.addColorStop(0, '#1f1838')
-  lin.addColorStop(1, '#4a3670')
+  lin.addColorStop(0, '#9fb3c2')
+  lin.addColorStop(1, '#e8d3a8')
   g.fillStyle = lin
   g.fillRect(0, 0, 256, 320)
   const rad = g.createRadialGradient(128, 150, 10, 128, 150, 170)
-  rad.addColorStop(0, 'rgba(255,190,120,0.45)')
-  rad.addColorStop(1, 'rgba(255,190,120,0)')
+  rad.addColorStop(0, 'rgba(255,226,170,0.75)')
+  rad.addColorStop(1, 'rgba(255,226,170,0)')
   g.fillStyle = rad
   g.fillRect(0, 0, 256, 320)
   const bgTex = keep(new THREE.CanvasTexture(bg))
   bgTex.colorSpace = THREE.SRGBColorSpace
   scene.background = bgTex
 
-  const ramp = keep(new THREE.DataTexture(new Uint8Array([70, 70, 70, 255, 160, 160, 160, 255, 255, 255, 255, 255]), 3, 1))
-  ramp.minFilter = ramp.magFilter = THREE.NearestFilter
-  ramp.needsUpdate = true
-  const toon = (c, emissive) => keep(new THREE.MeshToonMaterial({ color: c, gradientMap: ramp, emissive: emissive || '#000000' }))
-  const brass = toon('#c8904a')
-  const iron = toon('#2b2238')
-
-  scene.add(new THREE.HemisphereLight('#b9a6ff', '#2a1d3a', 1.1))
-  const rim = new THREE.DirectionalLight('#ff9a6a', 2.2)
-  rim.position.set(-3, 3, -2)
-  scene.add(rim)
-  const fill = new THREE.DirectionalLight('#a48cff', 0.8)
-  fill.position.set(3, 2, 4)
-  scene.add(fill)
+  scene.add(new THREE.HemisphereLight('#ffffff', '#d8ccb0', 1.3))
+  const key = new THREE.DirectionalLight('#fff6e8', 0.9)
+  key.position.set(3, 4, 5)
+  scene.add(key)
 
   const lantern = new THREE.Group()
   scene.add(lantern)
-  const mesh = (geo, m, x = 0, y = 0, z = 0) => {
-    const o = new THREE.Mesh(keep(geo), m)
-    o.position.set(x, y, z)
-    lantern.add(o)
-    return o
-  }
-  // base, aro, jaula, techo, argolla
-  mesh(new THREE.CylinderGeometry(0.62, 0.7, 0.28, 32), iron, 0, 0.14, 0)
-  mesh(new THREE.TorusGeometry(0.6, 0.04, 8, 40), brass, 0, 0.3, 0).rotation.x = Math.PI / 2
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2
-    mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.5, 8), brass, Math.cos(a) * 0.52, 1.05, Math.sin(a) * 0.52)
-  }
-  mesh(new THREE.TorusGeometry(0.55, 0.035, 8, 40), brass, 0, 1.8, 0).rotation.x = Math.PI / 2
-  mesh(new THREE.ConeGeometry(0.72, 0.6, 32), iron, 0, 2.1, 0)
-  mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.18, 12), brass, 0, 2.46, 0)
-  mesh(new THREE.TorusGeometry(0.2, 0.04, 8, 32), brass, 0, 2.72, 0)
-  // vidrio
-  const glass = keep(new THREE.MeshBasicMaterial({ color: '#ffd7a0', transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }))
-  mesh(new THREE.CylinderGeometry(0.47, 0.47, 1.45, 32, 1, true), glass, 0, 1.05, 0)
-  // la llama: núcleo, cuerpo y halo (sprite aditivo), y la luz que pinta la jaula desde adentro
-  const flameMat = keep(new THREE.MeshBasicMaterial({ color: '#ffb950' }))
-  const flame = mesh(new THREE.SphereGeometry(0.17, 20, 16), flameMat, 0, 1.0, 0)
-  flame.scale.set(1, 1.6, 1)
-  mesh(new THREE.SphereGeometry(0.08, 16, 12), keep(new THREE.MeshBasicMaterial({ color: '#fff4dc' })), 0, 0.98, 0)
+  loader?.load('/proto/kanvas/relic-lantern.glb', (gl) => {
+    const box = new THREE.Box3().setFromObject(gl.scene)
+    const size = box.getSize(new THREE.Vector3())
+    const s = 2.8 / size.y
+    gl.scene.scale.setScalar(s)
+    const c = box.getCenter(new THREE.Vector3())
+    gl.scene.position.set(-c.x * s, -box.min.y * s, -c.z * s)
+    ink?.apply(gl.scene)
+    lantern.add(gl.scene)
+  })
+
+  // la llama: halo aditivo que late y la luz que sale de adentro (a la altura del vidrio)
   const halo = document.createElement('canvas')
   halo.width = halo.height = 128
   const hg = halo.getContext('2d')
   const hr = hg.createRadialGradient(64, 64, 0, 64, 64, 64)
-  hr.addColorStop(0, 'rgba(255,210,140,0.95)')
-  hr.addColorStop(0.35, 'rgba(255,160,80,0.35)')
-  hr.addColorStop(1, 'rgba(255,140,60,0)')
+  hr.addColorStop(0, 'rgba(255,214,140,0.85)')
+  hr.addColorStop(0.35, 'rgba(255,170,80,0.3)')
+  hr.addColorStop(1, 'rgba(255,150,60,0)')
   hg.fillStyle = hr
   hg.fillRect(0, 0, 128, 128)
   const haloTex = keep(new THREE.CanvasTexture(halo))
   const glow = new THREE.Sprite(keep(new THREE.SpriteMaterial({ map: haloTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })))
-  glow.position.set(0, 1.0, 0)
-  glow.scale.set(2.6, 2.6, 1)
+  glow.position.set(0, 1.25, 0)
+  glow.scale.set(2.2, 2.2, 1)
   lantern.add(glow)
-  const light = new THREE.PointLight('#ffb15e', 6, 5, 1.6)
-  light.position.set(0, 1.0, 0)
+  const light = new THREE.PointLight('#ffb15e', 2.5, 5, 1.6)
+  light.position.set(0, 1.25, 0.6)
   lantern.add(light)
 
   // chispas que suben y se apagan
@@ -110,9 +88,8 @@ export function createRelic(THREE) {
       lantern.rotation.z = Math.sin(t * 0.9) * 0.04
       lantern.position.y = Math.sin(t * 1.1) * 0.06
       const flick = 0.85 + Math.sin(t * 13) * 0.06 + Math.sin(t * 23.7) * 0.05
-      flame.scale.set(flick, 1.6 * (2 - flick), flick)
-      light.intensity = 6 * flick
-      glow.scale.setScalar(2.6 * flick)
+      light.intensity = 2.5 * flick
+      glow.scale.setScalar(2.2 * flick)
       seeds.forEach((s, i) => {
         const life = (t * s.s + s.o) % 1
         pos[i * 3] = Math.cos(s.a + t * 0.3) * s.r * (0.5 + life)
