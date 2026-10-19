@@ -7,23 +7,23 @@ import ServicesStone from '../components/sections/atelier/ServicesStone'
 import VisionShutter from '../components/sections/atelier/VisionShutter'
 import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
+import Testimonial from '../components/sections/atelier/Testimonial'
 import StudioCards from '../components/sections/atelier/StudioCards'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
 import ContactForm from '../components/sections/contact/ContactForm'
 
 /**
  * Template model 06 — "ATELIER"
- * An architecture and interiors studio. The 3D is the studio's own architectural
- * model (maquette.js): it is assembled piece by piece as you scroll the hero, and
- * Services walks it through architecture, interiors, landscape and materials.
- * GSAP + Lenis (via provider).
- * See Obsidian: "Atelier — mapa de referencia". Demo/generic copy only.
+ * An architecture studio in black and white. A full-bleed photo carousel opens the
+ * page; the studio statement turns to ink word by word; a transition of vertical
+ * black columns closes on the Projects section, which opens as a vertical
+ * accordion of photographs. GSAP + Lenis (via provider). Demo copy only.
  */
 export default function AtelierPage() {
   return (
     <SmoothScrollProvider>
-      <div id="top" className="tpl-world bg-[#0b0c10] text-white selection:bg-white selection:text-[#0b0c10]">
-        <ScrollRail trackClassName="bg-white/10" fillClassName="bg-white" />
+      <div id="top" className="tpl-world bg-white font-grotesk text-[#111111] selection:bg-[#111111] selection:text-white">
+        <ScrollRail trackClassName="bg-[#111111]/10" fillClassName="bg-[#111111]" />
         <NavAtelier />
         <main>
           <HeroMeaning />
@@ -32,6 +32,7 @@ export default function AtelierPage() {
           <VisionShutter />
           <SelectedWork />
           <KeyFacts />
+          <Testimonial />
           <StudioCards />
           <ContactForm
             theme="atelier"

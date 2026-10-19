@@ -1,278 +1,206 @@
-import { useRef } from 'react'
-import * as THREE from 'three'
-import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
-import { createFrameBudget, fitCameraDistance, prefersReducedMotion, trackPointer } from '../../../lib/motion'
-import ScrollFog from './ScrollFog'
-import { createMaquette } from './maquette'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { gsap, useGSAP } from '../../../lib/gsap'
+import { prefersReducedMotion } from '../../../lib/motion'
+import { hero1, hero2, hero3, hero4, hero5, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
-// Cámara de la pieza. En PC queda en PIECE_Z; en vertical se aleja (`fitCameraDistance`)
-// hasta que la banca entra en el ancho (con la vasija y las patas abiertas).
-const PIECE_FOV = 38
-const PIECE_Z = 7.2
-const PIECE_RADIUS = 2.2
+const defaultSlides = [
+  { img: hero1, caption: 'Pine House, Surrey' },
+  { img: hero2, caption: 'Courtyard House, Norfolk' },
+  { img: hero3, caption: 'The Black Barn, Dorset' },
+  { img: hero4, caption: 'Reflecting House, Wiltshire' },
+  { img: hero5, caption: 'Garden Room, Kent' },
+]
 
 /**
- * HeroMeaning — the studio's architectural model, in 3D (see maquette.js):
- * the plan is drawn on an oak base, the slab and the glass ground floor arrive
- * as the page opens, and the scroll (pinned) assembles the rest — the
- * cantilevered floor, the upper volume, the stair tower, the roof — piece by
- * piece, while the model turns. The letters of the title step aside when the
- * mouse comes near.
+ * HeroMeaning — the opening image carousel. Full-bleed photographs that wipe
+ * into each other, a segmented progress bar (click a segment to jump) and the
+ * studio's one-line introduction with a single button in the bottom-left.
+ * Autoplay pauses when the hero is off-screen or the tab is hidden, and is off
+ * when the device asks for less motion (the segments still work).
  */
 export default function HeroMeaning({
-  line1 = 'Buildings that',
-  line2 = 'hold the light.',
-  hint = 'Scroll to build',
-  meta = 'Atelier Nove — Architecture & Interiors — Milan',
-  body = 'An architecture and interiors studio. Houses, hotels and the rooms inside them, from the first sketch to the last fitting.',
+  intro = 'Atelier Nove is an architecture studio for houses and the gardens around them. We design calm, well-made homes that belong to their place.',
+  cta = 'View Projects',
+  ctaHref = '#projects',
+  slides = defaultSlides,
+  interval = '6',
+  /** Nombres para lectores de pantalla. */
+  carouselLabel = 'Selected houses',
+  slidesLabel = 'Slides',
   bg,
   fg,
-  /** La maqueta: el color de la cartulina y el de los árboles. */
-  objectColor,
-  ringColor,
-  /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
-  showFog = 'on',
+  /** Degradado oscuro abajo para que el texto se lea sobre cualquier foto. */
+  showShade = 'on',
+  /** El carrusel avanza solo. */
+  showAutoplay = 'on',
 }) {
   const root = useRef(null)
-  const fogBg = bg || '#0b0c10'
-  const fogFg = fg || '#ffffff'
-  const canvasRef = useRef(null)
+  const list = (Array.isArray(slides) && slides.length ? slides : defaultSlides).slice(0, 8)
+  const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const [reduced, setReduced] = useState(false)
+  const prev = useRef(0)
+  const seconds = Math.min(15, Math.max(3, Number(interval) || 6))
+  const auto = showAutoplay !== 'off' && !reduced && list.length > 1
 
+  useEffect(() => {
+    setReduced(prefersReducedMotion())
+  }, [])
+
+  // Pausa fuera de pantalla y con la pestaña oculta.
+  useEffect(() => {
+    const el = root.current
+    if (!el) return undefined
+    let visible = true
+    let tabVisible = !document.hidden
+    const sync = () => setPaused(!(visible && tabVisible))
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting
+      sync()
+    })
+    io.observe(el)
+    const onVis = () => {
+      tabVisible = !document.hidden
+      sync()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      io.disconnect()
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [])
+
+  const go = useCallback(
+    (n) => setIndex(((n % list.length) + list.length) % list.length),
+    [list.length],
+  )
+
+  // La foto nueva entra con una cortina desde abajo y un zoom que se asienta.
   useGSAP(
     () => {
-      const reduced = prefersReducedMotion()
-      // En un teléfono las letras entran sin desenfoque: veinte capas con
-      // `filter` animado, justo cuando el 3D está arrancando, traban.
-      const coarse = window.matchMedia('(pointer: coarse)').matches
-
-      // Sin máscara: las letras se mueven fuera de su caja cuando el puntero se acerca.
-      const split = new SplitText('[data-atelier-hero]', { type: 'chars' })
-      // opacity (no autoAlpha): el texto sigue en el árbol de accesibilidad mientras entra
-      gsap.set(split.chars, coarse ? { opacity: 0, y: 24 } : { opacity: 0, y: 24, filter: 'blur(12px)' })
-      let intro = false
-      gsap.to(split.chars, {
-        opacity: 1,
-        y: 0,
-        ...(coarse ? {} : { filter: 'blur(0px)' }),
-        duration: 0.9,
-        stagger: { each: 0.035, from: 'random' },
-        ease: 'power3.out',
-        delay: 0.2,
-        onComplete: () => {
-          intro = true
-        },
+      const from = prev.current
+      prev.current = index
+      if (from === index) return
+      const slidesEl = gsap.utils.toArray('[data-hero-slide]')
+      const next = slidesEl[index]
+      const old = slidesEl[from]
+      if (!next) return
+      slidesEl.forEach((el, i) => {
+        if (i !== index && i !== from) gsap.set(el, { autoAlpha: 0 })
       })
-
-      // —— Three: the studio piece ——
-      const canvas = canvasRef.current
-      const renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: true,
-      })
-      // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
-      renderer.setPixelRatio(dpr)
-      renderer.outputColorSpace = THREE.SRGBColorSpace
-      renderer.toneMapping = THREE.ACESFilmicToneMapping
-      renderer.toneMappingExposure = 0.9
-      const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(PIECE_FOV, 1, 0.1, 60)
-      const piece = createMaquette(renderer, scene, { tint: objectColor, accent: ringColor })
-      const { group } = piece
-
-      // El mouse en PC, el dedo en el teléfono (un dedo que scrollea cancela
-      // pointermove y la pieza quedaba sin reaccionar).
-      const pointer = trackPointer()
-
-      const resize = () => {
-        const { clientWidth: w, clientHeight: h } = canvas
-        renderer.setSize(w, h, false)
-        camera.aspect = w / Math.max(h, 1)
-        const z = fitCameraDistance({ fov: PIECE_FOV, aspect: camera.aspect, radius: PIECE_RADIUS, base: PIECE_Z })
-        // vista de maqueta: desde arriba, como se mira sobre la mesa del estudio
-        camera.position.set(0, z * 0.48, z)
-        camera.lookAt(0, -0.35, 0)
-        camera.updateProjectionMatrix()
-        // en pantalla ancha la banca queda a la derecha, detrás del titular a la izquierda;
-        // en vertical, arriba del texto
-        const halfW = Math.tan((PIECE_FOV * Math.PI) / 360) * z * camera.aspect
-        const wide = camera.aspect > 1.15
-        const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
-        piece.place(wide ? halfW * 0.38 : 0, wide ? halfH * 0.18 : halfH * 0.32, wide ? 0.8 : 0.62)
+      if (reduced) {
+        gsap.set(next, { autoAlpha: 1, clipPath: 'none', zIndex: 2 })
+        if (old) gsap.set(old, { autoAlpha: 0 })
+        return
       }
-      resize()
-      window.addEventListener('resize', resize)
-
-      // la maqueta se arma: al cargar llegan la losa y la planta baja; el resto, con el scroll
-      const build = { intro: 0, scroll: 0 }
-      gsap.to(build, { intro: 1, duration: 2.4, delay: 0.4, ease: 'power2.out' })
-      const st = gsap.to(
-        {},
-        {
-          scrollTrigger: {
-            trigger: root.current,
-            start: 'top top',
-            end: '+=140%',
-            pin: root.current.querySelector('[data-hero-pin]'),
-            scrub: 0.6,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              build.scroll = self.progress
-            },
-          },
-        },
-      )
-
-      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
-      // el 3D mientras se leía el resto de la página.
-      let onScreen = true
-      const io = new IntersectionObserver(([entry]) => {
-        onScreen = entry.isIntersecting
-      })
-      io.observe(root.current)
-
-      // Si el teléfono no llega a ~30 cuadros baja la resolución de a escalones.
-      const budget = createFrameBudget({
-        dpr,
-        apply: (value) => {
-          renderer.setPixelRatio(value)
-          resize()
-        },
-      })
-
-      // Las letras se apartan del puntero: cada una guarda el centro de su caja.
-      const chars = split.chars.map((el) => ({
-        el,
-        x: gsap.quickTo(el, 'x', { duration: 0.7, ease: 'power3.out' }),
-        y: gsap.quickTo(el, 'y', { duration: 0.7, ease: 'power3.out' }),
-        cx: 0,
-        cy: 0,
-      }))
-      const measure = () => {
-        chars.forEach((c) => {
-          const r = c.el.getBoundingClientRect()
-          c.cx = r.left + r.width / 2 - (gsap.getProperty(c.el, 'x') || 0)
-          c.cy = r.top + r.height / 2 - (gsap.getProperty(c.el, 'y') || 0)
-        })
-      }
-      const measured = gsap.delayedCall(1.6, measure)
-      window.addEventListener('resize', measure)
-      const REACH = 170
-      // Sin mouse todavía el puntero «está» en el centro de la pantalla: las
-      // letras de ahí se corrían solas al cargar. Se apartan recién cuando el mouse se mueve.
-      let moved = false
-      const onMove = () => {
-        moved = true
-      }
-      window.addEventListener('pointermove', onMove, { passive: true, once: true })
-
-      let yaw = 0.55
-      let pitch = 0
-      const tick = (time, deltaMs) => {
-        if (!onScreen) return
-        // un vaivén lento y la mirada del puntero; mientras se arma, la maqueta gira despacio
-        const targetYaw = -0.55 + (reduced ? 0 : Math.sin(time * 0.22) * 0.5) + pointer.x * 0.35 + build.scroll * 0.9
-        const targetPitch = -pointer.y * 0.06
-        yaw += (targetYaw - yaw) * 0.06
-        pitch += (targetPitch - pitch) * 0.06
-        group.rotation.set(pitch, yaw, 0)
-        piece.setBuild(reduced ? 1 : build.intro * 0.3 + build.scroll * 0.7)
-        renderer.render(scene, camera)
-        budget.tick(deltaMs)
-
-        if (intro && moved && !coarse && !reduced) {
-          for (const c of chars) {
-            const dx = c.cx - pointer.clientX
-            const dy = c.cy - pointer.clientY
-            const dist = Math.hypot(dx, dy) || 1
-            const f = Math.max(0, 1 - dist / REACH)
-            const push = f * f * 46
-            c.x((dx / dist) * push)
-            c.y((dy / dist) * push)
-          }
-        }
-      }
-      gsap.ticker.add(tick)
-
-      gsap.from('[data-atelier-meta]', {
-        opacity: 0,
-        y: 16,
-        duration: 0.9,
-        delay: 0.9,
-        stagger: 0.1,
-      })
-
-      return () => {
-        window.removeEventListener('pointermove', onMove)
-        pointer.dispose()
-        window.removeEventListener('resize', resize)
-        window.removeEventListener('resize', measure)
-        measured.kill()
-        gsap.ticker.remove(tick)
-        io.disconnect()
-        st.scrollTrigger?.kill()
-        st.kill()
-        piece.dispose()
-        renderer.dispose()
-        split.revert()
-      }
+      gsap.set(next, { autoAlpha: 1, zIndex: 2, clipPath: 'inset(100% 0% 0% 0%)' })
+      if (old) gsap.set(old, { zIndex: 1 })
+      gsap
+        .timeline({ onComplete: () => old && gsap.set(old, { autoAlpha: 0 }) })
+        .to(next, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'power3.inOut' })
+        .fromTo(
+          next.querySelector('img'),
+          { scale: 1.18 },
+          { scale: 1, duration: 1.8, ease: 'power2.out' },
+          0,
+        )
+        .fromTo('[data-hero-caption]', { yPercent: 100 }, { yPercent: 0, duration: 0.7, ease: 'power3.out' }, 0.5)
     },
-    { scope: root, dependencies: [objectColor, ringColor], revertOnUpdate: true },
+    { scope: root, dependencies: [index, reduced] },
   )
 
   return (
     <section
       ref={root}
-      className="bg-(--sec-bg) text-current"
-      style={{
-        '--sec-bg': bg || '#0b0c10',
-        color: fg || '#ffffff',
-      }}
+      id="top-hero"
+      data-tone="dark"
+      aria-roledescription="carousel"
+      aria-label={carouselLabel}
+      className="relative h-svh min-h-[560px] w-full overflow-clip"
+      style={{ backgroundColor: bg || '#111111', color: fg || '#ffffff' }}
     >
-      <div data-hero-pin className="relative flex min-h-svh flex-col justify-between overflow-hidden px-5 pt-24 pb-8 md:px-10 md:pt-28">
-      {showFog !== 'off' && <ScrollFog density={0.7} bg={fogBg} fg={fogFg} />}
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[5] h-full w-full"
-      />
-
-      <p
-        data-atelier-meta
-        className="relative z-10 max-w-[36ch] text-[11px] tracking-[0.22em] text-current/45 uppercase"
-      >
-        {meta}
-      </p>
-
-      {/* el titular: Space Grotesk liviana (la letra de la página) y una cursiva de
-          libro de arquitectura para la segunda línea; delante de la maqueta */}
-      <div className="pointer-events-none relative z-10 mt-auto mb-8 md:mb-10">
-        <h1 data-atelier-hero className="leading-[0.86] text-current">
-          <span className="block font-grotesk text-[clamp(3.4rem,12.5vw,11rem)] font-light tracking-[-0.06em]">
-            {line1}
-          </span>
-          <span className="block pl-[0.06em] font-display text-[clamp(3.4rem,12.5vw,11rem)] font-normal tracking-[-0.03em] italic">
-            {line2}
-          </span>
-        </h1>
+      <div className="absolute inset-0" aria-live="off">
+        {list.map((slide, i) => (
+          <div
+            key={`${slide.img}-${i}`}
+            data-hero-slide
+            aria-hidden={i !== index}
+            className="absolute inset-0"
+            style={{ visibility: i === 0 ? 'visible' : 'hidden', zIndex: i === 0 ? 2 : 0 }}
+          >
+            <img
+              {...imgAttrs(slide.img, variants)}
+              sizes="(max-width: 767px) 180vh, 100vw"
+              alt={slide.caption || ''}
+              fetchPriority={i === 0 ? 'high' : 'low'}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ))}
       </div>
 
-      <div className="relative z-10 flex flex-col gap-3 border-t border-current/15 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-        <p
-          data-atelier-meta
-          className="max-w-[40ch] text-sm text-current/55"
-        >
-          {body}
-        </p>
-        <p
-          data-atelier-meta
-          className="shrink-0 text-[11px] tracking-[0.22em] text-current/50 uppercase"
-        >
-          {hint} ↓
-        </p>
+      {showShade !== 'off' && (
+        <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-t from-black/60 via-black/10 to-black/25" />
+      )}
+
+      <div className="absolute inset-x-0 bottom-0 z-[4] px-5 pb-6 md:px-8 md:pb-8">
+        <div className="mb-8 flex items-end justify-between gap-6 md:mb-12">
+          <div className="max-w-[34rem]">
+            <h1
+              data-atelier-hero
+              className="text-[clamp(1.05rem,1.9vw,1.5rem)] leading-[1.25] font-normal tracking-[-0.015em] text-balance"
+            >
+              {intro}
+            </h1>
+            <a
+              href={ctaHref}
+              className="tpl-hit mt-6 inline-flex items-center gap-3 rounded-full border border-current px-6 py-3 text-sm font-medium transition-[background-color,color] duration-300 hover:bg-white hover:text-black md:mt-8"
+            >
+              {cta}
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          <p className="hidden shrink-0 overflow-hidden text-right text-sm md:block" aria-live="polite">
+            <span data-hero-caption className="block">
+              {list[index]?.caption}
+            </span>
+          </p>
+        </div>
+
+        <ol className="flex gap-2" aria-label={slidesLabel}>
+          {list.map((slide, i) => (
+            <li key={i} className="flex-1">
+              <button
+                type="button"
+                onClick={() => go(i)}
+                aria-label={`${i + 1} / ${list.length}${slide.caption ? ` — ${slide.caption}` : ''}`}
+                aria-current={i === index ? 'true' : undefined}
+                className="tpl-hit group relative block h-6 w-full"
+              >
+                <span className="absolute inset-x-0 top-1/2 block h-px -translate-y-1/2 bg-white/35 transition-[height] duration-300 group-hover:h-[3px]" />
+                <span
+                  key={i === index ? `on-${index}` : 'off'}
+                  onAnimationEnd={auto && i === index ? () => go(index + 1) : undefined}
+                  className="absolute inset-x-0 top-1/2 block h-px origin-left -translate-y-1/2 bg-white transition-[height] duration-300 group-hover:h-[3px]"
+                  style={{
+                    transform: i < index || (!auto && i === index) ? 'translateY(-50%) scaleX(1)' : 'translateY(-50%) scaleX(0)',
+                    animationName: auto && i === index ? 'atelier-hero-bar' : undefined,
+                    animationDuration: `${seconds}s`,
+                    animationTimingFunction: 'linear',
+                    animationFillMode: 'forwards',
+                    animationPlayState: paused ? 'paused' : 'running',
+                  }}
+                />
+              </button>
+            </li>
+          ))}
+        </ol>
       </div>
-      </div>
+
+      <style>{`@keyframes atelier-hero-bar { from { transform: translateY(-50%) scaleX(0) } to { transform: translateY(-50%) scaleX(1) } }`}</style>
     </section>
   )
 }

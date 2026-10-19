@@ -1,68 +1,73 @@
 import { useRef } from 'react'
-import { gsap, useGSAP, SplitText } from '../../../lib/gsap'
+import { gsap, useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
-import ScrollFog from './ScrollFog'
 
+/**
+ * AboutClarity — the studio statement. Two paragraphs on white paper; each word
+ * starts pale and turns to ink as the reader moves down the page, so the text
+ * is read at the pace of the scroll. Calm version: a short fade.
+ */
 export default function AboutClarity({
-  eyebrow = 'About',
-  title = 'We design rooms people want to stay in, and the objects that make them theirs.',
-  body = 'Atelier Nove is eleven architects, makers and designers. We take a project from the first sketch to the last cushion: plan, materials, furniture, light and the name on the door.',
-  tags = 'Interiors · Furniture · Identity',
+  eyebrow = 'Studio',
+  lead = 'Every house we draw begins with the place: the light across the plot, the trees worth keeping, the way the ground falls away.',
+  body = 'We are eleven architects and designers working from a converted printworks in Bristol. We build fewer houses than we are asked to, so that each one gets the whole studio and a long, careful site visit at every stage.',
   bg,
   fg,
-  /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
-  showFog = 'on',
 }) {
   const root = useRef(null)
-  const fogBg = bg || '#0b0c10'
-  const fogFg = fg || '#ffffff'
 
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return calmReveal('[data-atelier-about]', { y: 16, duration: 0.9 })
-      const split = new SplitText('[data-atelier-about]', {
-        type: 'words',
-        mask: 'words',
+      const paras = gsap.utils.toArray('[data-about-p]')
+      if (prefersReducedMotion()) return calmReveal(paras, { y: 16, duration: 0.9 })
+      paras.forEach((p) => {
+        const words = p.querySelectorAll('[data-w]')
+        gsap.set(words, { opacity: 0.16 })
+        gsap.to(words, {
+          opacity: 1,
+          ease: 'none',
+          stagger: 0.5,
+          scrollTrigger: { trigger: p, start: 'top 82%', end: 'bottom 52%', scrub: 0.6 },
+        })
       })
-      gsap.from(split.words, {
-        yPercent: 110,
-        opacity: 0,
-        stagger: 0.02,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: root.current,
-          start: 'top 70%',
-        },
-      })
-      return () => split.revert()
+      return () => ScrollTrigger.refresh()
     },
     { scope: root },
   )
 
+  const words = (text) =>
+    String(text)
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((w, i) => (
+        <span key={i} data-w className="inline-block">
+          {w}
+          {' '}
+        </span>
+      ))
+
   return (
     <section
       ref={root}
-      className="relative overflow-hidden border-t border-current/10 bg-[#0b0c10] px-5 py-24 text-white md:px-10 md:py-32"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      id="about"
+      data-tone="light"
+      className="px-5 py-28 md:px-8 md:py-44"
+      style={{ backgroundColor: bg || '#ffffff', color: fg || '#111111' }}
     >
-      {showFog !== 'off' && <ScrollFog density={0.45} bg={fogBg} fg={fogFg} />}
-      <div className="relative z-10 grid gap-10 md:grid-cols-12">
-        <p className="text-[11px] tracking-[0.25em] text-white/40 uppercase md:col-span-3">
-          {eyebrow}
-        </p>
-        <div className="md:col-span-9">
-          <h2
-            data-atelier-about
-            className="max-w-[22ch] text-[clamp(1.6rem,3.5vw,2.8rem)] leading-[1.15] font-medium tracking-[-0.02em]"
+      <div className="mx-auto grid max-w-[1500px] gap-10 md:grid-cols-12">
+        <p className="text-sm font-medium md:col-span-2">{eyebrow}</p>
+        <div className="space-y-12 md:col-span-9 md:space-y-20">
+          <p
+            data-about-p
+            className="text-[clamp(1.7rem,3.8vw,3.4rem)] leading-[1.12] font-medium tracking-[-0.035em]"
           >
-            {title}
-          </h2>
-          <p className="mt-8 max-w-[52ch] text-sm leading-relaxed text-white/55 md:text-base">
-            {body}
+            {words(lead)}
           </p>
-          <p className="mt-6 text-[11px] tracking-[0.22em] text-white/35 uppercase">
-            {tags}
+          <p
+            data-about-p
+            className="max-w-[48rem] text-[clamp(1.1rem,1.9vw,1.6rem)] leading-[1.3] tracking-[-0.02em] md:ml-[16.66%]"
+          >
+            {words(body)}
           </p>
         </div>
       </div>

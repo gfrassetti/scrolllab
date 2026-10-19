@@ -33,15 +33,15 @@ import {
 describe('updateCompositionItemProps', () => {
   const base = [
     { uid: 'a', sectionId: 'chapters/HeroKinetic' },
-    { uid: 'b', sectionId: 'atelier/HeroMeaning', props: { line1: 'viejo' } },
+    { uid: 'b', sectionId: 'atelier/HeroMeaning', props: { intro: 'viejo' } },
   ]
 
   it('aplica las props a la sección correcta', () => {
     const next = updateCompositionItemProps(base, 'b', {
-      line1: 'nuevo',
-      line2: 'también',
+      intro: 'nuevo',
+      cta: 'también',
     })
-    assert.deepEqual(next[1].props, { line1: 'nuevo', line2: 'también' })
+    assert.deepEqual(next[1].props, { intro: 'nuevo', cta: 'también' })
     assert.equal(next[0].props, undefined)
   })
 
@@ -52,10 +52,10 @@ describe('updateCompositionItemProps', () => {
 
   it('descarta props que la sección no declara', () => {
     const next = updateCompositionItemProps(base, 'b', {
-      line1: 'ok',
+      intro: 'ok',
       onClick: 'alert(1)',
     })
-    assert.deepEqual(next[1].props, { line1: 'ok' })
+    assert.deepEqual(next[1].props, { intro: 'ok' })
   })
 
   it('borra las props si se vacían todas', () => {
@@ -137,7 +137,7 @@ describe('recipeToComposition', () => {
     const recipe = [
       { id: 'chapters/NavMinimal' },
       { id: 'unity/NavUnity' },
-      { id: 'atelier/HeroMeaning', props: { line1: 'uno' } },
+      { id: 'atelier/HeroMeaning', props: { intro: 'uno' } },
     ]
     assert.deepEqual(compositionToRecipe(recipeToComposition(recipe)), recipe)
   })

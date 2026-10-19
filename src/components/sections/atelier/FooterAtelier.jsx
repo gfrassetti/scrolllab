@@ -1,156 +1,145 @@
-import { useEffect, useState } from 'react'
-import { contactHref, externalProps } from '../../../lib/contactLinks'
+import { contactHref, externalProps, legalDocs } from '../../../lib/contactLinks'
+import LegalSheet from '../../LegalSheet'
 
-/**
- * FooterAtelier — dark studio closer (Trionn-style layout, generic copy):
- * CTA block + enquiry/social columns + oversized lined brand mark.
- */
+const PRIVACY = `Last updated: 1 January 2026
+
+Atelier Nove Ltd, 14 Foundry Lane, Bristol BS2 0AA, runs this site.
+
+Privacy. We keep what you send us through the enquiry form (your name, your email and your message) only to answer you, and delete it after two years without contact. We do not use advertising trackers.
+
+To see, correct or delete your data, write to studio@atelier-nove.co.uk.`
+
+const TERMS = `Last updated: 1 January 2026
+
+The drawings, photographs and texts on this site belong to Atelier Nove Ltd or to the photographers credited beside each project. Please ask before you reuse them.
+
+Information on this site describes our work and is not an offer. Every commission is agreed in a written appointment before work starts.`
+
+const defaultIndex = [
+  { label: 'Projects', href: '#projects' },
+  { label: 'Expertise', href: '#expertise' },
+  { label: 'Studio', href: '#studio' },
+  { label: 'Journal', href: '#journal' },
+]
 const defaultSocial = [
   { label: 'Instagram', href: 'https://www.instagram.com/' },
-  { label: 'Pinterest', href: 'https://www.pinterest.com/' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/' },
-  { label: 'Behance', href: 'https://www.behance.net/' },
 ]
 
+/**
+ * FooterAtelier — site index, legal and contact in quiet columns, and the
+ * studio's name set to the width of the screen underneath. Privacy and Terms
+ * open their text in a panel over the page (LegalSheet).
+ */
 export default function FooterAtelier({
-  eyebrow = 'Have a room in mind?',
-  line = 'Tell us about the place.',
-  cta = 'Start a project →',
-  ctaHref = '#contact',
-  brand = 'ATELIER',
-  legal = '©2026 Atelier Nove S.r.l. — Milan',
-  email = 'studio@ateliernove.it',
-  phone = '+39 02 555 0187',
-  hint = 'Hover the lines.',
-  clockLabel = 'Milan →',
-  enquiryLabel = 'New projects',
-  emailLabel = 'E.',
-  phoneLabel = 'P.',
-  socialLabel = 'Social',
-  social,
+  mark = 'ATELIER',
+  blurb = 'Architecture and interiors for houses that belong to their place.',
+  indexTitle = 'Site index',
+  legalTitle = 'Legal',
+  contactTitle = 'Contact',
+  index = defaultIndex,
+  privacyLabel = 'Privacy',
+  privacyHref = '#privacy',
+  privacyText = PRIVACY,
+  termsLabel = 'Terms',
+  termsHref = '#terms',
+  termsText = TERMS,
+  closeLabel = 'Close',
+  email = 'studio@atelier-nove.co.uk',
+  phone = '+44 117 555 0142',
+  address = '14 Foundry Lane, Bristol BS2 0AA',
+  social = defaultSocial,
+  year = '© 2026 Atelier Nove',
   bg,
   fg,
-  /** El brillo que sube desde abajo. */
-  showGlow = 'on',
 }) {
-  const [clock, setClock] = useState('')
-  const socialLinks = (Array.isArray(social) && social.length ? social : defaultSocial).filter(
-    (l) => l && l.label,
-  )
-
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date()
-      const hh = String(now.getHours()).padStart(2, '0')
-      const mm = String(now.getMinutes()).padStart(2, '0')
-      setClock(`${hh}:${mm}`)
-    }
-    tick()
-    const id = window.setInterval(tick, 30_000)
-    return () => window.clearInterval(id)
-  }, [])
-
+  const links = Array.isArray(index) && index.length ? index : defaultIndex
+  const networks = Array.isArray(social) ? social : defaultSocial
+  const col = 'space-y-2 text-sm'
+  const heading = 'mb-4 text-sm font-medium opacity-55'
   return (
     <footer
-      className="relative overflow-hidden bg-[#0b0c10] px-5 pt-20 pb-0 text-white md:px-10 md:pt-28"
-      style={{ backgroundColor: bg || undefined, color: fg || undefined }}
+      data-tone="dark"
+      className="overflow-clip px-5 pt-20 pb-5 md:px-8 md:pt-28 md:pb-6"
+      style={{ backgroundColor: bg || '#111111', color: fg || '#ffffff' }}
     >
-      {showGlow !== 'off' && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-40"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse 80% 50% at 50% 100%, color-mix(in srgb, currentColor 12%, transparent), transparent 55%)',
-          }}
-        />
-      )}
-
-      <div className="relative z-10 mx-auto max-w-[1400px]">
-        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-xl">
-            <p className="text-[11px] tracking-[0.22em] text-white/45 uppercase">
-              {eyebrow}
-            </p>
-            <h2 className="mt-4 font-brico text-[clamp(2rem,5vw,3.6rem)] leading-[1.05] font-semibold tracking-[-0.03em]">
-              {line}
-            </h2>
-            <p className="mt-8 text-[11px] tracking-[0.18em] text-white/40 uppercase">
-              {legal}
-            </p>
-            <p className="mt-2 text-[11px] tracking-[0.18em] text-white/35 uppercase">
-              {hint}
-            </p>
-          </div>
-
-          <div className="flex flex-col items-start gap-8 lg:items-end lg:text-right">
-            {clock ? (
-              <p className="text-[11px] tracking-[0.2em] text-white/40 uppercase">
-                {clockLabel} {clock}
-              </p>
-            ) : null}
-            <a
-              href={ctaHref}
-              className="tpl-hit relative text-[12px] tracking-[0.2em] uppercase underline underline-offset-4 decoration-white/35 transition-[text-decoration-color] duration-300 hover:decoration-white"
-            >
-              {cta}
-            </a>
-
-            <div className="grid w-full max-w-md grid-cols-2 gap-8 text-left lg:text-right">
-              <div>
-                <p className="text-[11px] tracking-[0.22em] text-white/35 uppercase">
-                  {enquiryLabel}
-                </p>
-                <a
-                  href={`mailto:${email}`}
-                  className="tpl-link mt-3 block w-fit py-3 text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto lg:py-0.5"
-                >
-                  {emailLabel} {email}
+      <div className="mx-auto grid max-w-[1700px] gap-12 md:grid-cols-12">
+        <p className="max-w-[20rem] text-xl leading-tight font-medium tracking-[-0.02em] md:col-span-4">{blurb}</p>
+        <nav aria-label={indexTitle} className="md:col-span-2 md:col-start-6">
+          <h2 className={heading}>{indexTitle}</h2>
+          <ul className={col}>
+            {links.map((l) => (
+              <li key={l.label}>
+                <a href={l.href} className="tpl-link tpl-hit relative">
+                  {l.label}
                 </a>
-                <a
-                  href={contactHref(phone) || undefined}
-                  className="tpl-link tpl-hit relative block w-fit py-3 text-sm text-white/70 transition-colors duration-300 hover:text-white lg:ml-auto lg:py-0.5"
-                >
-                  {phoneLabel} {phone}
-                </a>
-              </div>
-              <div>
-                <p className="text-[11px] tracking-[0.22em] text-white/35 uppercase">
-                  {socialLabel}
-                </p>
-                <ul className="mt-3 text-sm text-white/70 lg:space-y-1.5">
-                  {socialLinks.map((l, i) => (
-                    <li key={i}>
-                      <a href={l.href || '#top'} {...externalProps(l.href)} className="tpl-link tpl-hit relative inline-block py-3 transition-colors duration-300 hover:text-white lg:py-0.5">
-                        {l.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="md:col-span-2">
+          <h2 className={heading}>{legalTitle}</h2>
+          <ul className={col}>
+            <li>
+              <a href={privacyHref} className="tpl-link tpl-hit relative">
+                {privacyLabel}
+              </a>
+            </li>
+            <li>
+              <a href={termsHref} className="tpl-link tpl-hit relative">
+                {termsLabel}
+              </a>
+            </li>
+          </ul>
         </div>
-
-        {/* Oversized lined brand mark — clipped at the bottom edge */}
-        <p
-          aria-hidden="true"
-          className="mt-16 select-none text-center font-brico text-[clamp(5.5rem,22vw,16rem)] leading-[0.78] font-extrabold tracking-[-0.05em] uppercase md:mt-20"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(to bottom, rgba(255,255,255,0.92) 0 2px, transparent 2px 7px)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-            maskImage:
-              'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
-          }}
-        >
-          {brand}
-        </p>
+        <div className="md:col-span-3">
+          <h2 className={heading}>{contactTitle}</h2>
+          <ul className={col}>
+            {[email, phone].map((line) => (
+              <li key={line}>
+                {contactHref(line) ? (
+                  <a href={contactHref(line)} className="tpl-link tpl-hit relative">
+                    {line}
+                  </a>
+                ) : (
+                  line
+                )}
+              </li>
+            ))}
+            <li className="opacity-70">{address}</li>
+            {networks.map((s) => (
+              <li key={s.label}>
+                <a href={s.href} {...externalProps(s.href)} className="tpl-link tpl-hit relative">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+      <p
+        aria-hidden="true"
+        className="mt-20 -ml-[0.05em] text-[clamp(4.5rem,23.5vw,26rem)] leading-[0.74] font-medium tracking-[-0.07em] whitespace-nowrap md:mt-28"
+      >
+        {mark}
+      </p>
+      <p className="mt-6 flex items-center justify-between border-t border-current/15 pt-4 text-xs opacity-60">
+        <span>{year}</span>
+        <a href="#top" className="tpl-link tpl-hit relative">
+          ↑
+        </a>
+      </p>
+
+      <LegalSheet
+        docs={legalDocs([
+          { href: privacyHref, title: privacyLabel, body: privacyText },
+          { href: termsHref, title: termsLabel, body: termsText },
+        ])}
+        closeLabel={closeLabel}
+        bg={fg || '#ffffff'}
+        fg={bg || '#111111'}
+      />
     </footer>
   )
 }

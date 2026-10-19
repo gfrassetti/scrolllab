@@ -77,15 +77,15 @@ const THEMES = {
     radius: 'rounded-full',
   },
   atelier: {
-    surface: 'bg-[#0b0c10] text-white',
-    eyebrow: 'text-white/45',
-    title: 'font-grotesk font-light tracking-[-0.04em]',
-    body: 'text-white/60',
-    field: 'border-white/15 focus:border-white/60 placeholder:text-white/25',
+    surface: 'bg-white text-[#111111]',
+    eyebrow: 'text-[#111111]/55',
+    title: 'font-grotesk font-medium tracking-[-0.045em]',
+    body: 'text-[#111111]/65',
+    field: 'border-[#111111]/20 focus:border-[#111111] placeholder:text-[#111111]/35',
     button:
-      'border border-white/70 hover:bg-white hover:text-[#0b0c10] disabled:opacity-40',
-    note: 'text-white/35',
-    radius: '',
+      'border border-[#111111] bg-[#111111] text-white hover:bg-transparent hover:text-[#111111] disabled:opacity-40',
+    note: 'text-[#111111]/50',
+    radius: 'rounded-full',
   },
   comic: {
     surface: 'bg-comic-paper text-[#2a2622]',

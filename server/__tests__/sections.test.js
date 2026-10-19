@@ -67,6 +67,7 @@ const APPROVED = [
   'atelier/VisionShutter',
   'atelier/SelectedWork',
   'atelier/KeyFacts',
+  'atelier/Testimonial',
   'atelier/StudioCards',
   'atelier/FooterAtelier',
   'unity/NavUnity',

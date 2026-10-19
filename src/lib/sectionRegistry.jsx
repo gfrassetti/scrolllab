@@ -53,6 +53,7 @@ import ServicesStone from '../components/sections/atelier/ServicesStone'
 import VisionShutter from '../components/sections/atelier/VisionShutter'
 import SelectedWork from '../components/sections/atelier/SelectedWork'
 import KeyFacts from '../components/sections/atelier/KeyFacts'
+import Testimonial from '../components/sections/atelier/Testimonial'
 import StudioCards from '../components/sections/atelier/StudioCards'
 import FooterAtelier from '../components/sections/atelier/FooterAtelier'
 
@@ -222,15 +223,16 @@ const allModels = [
     accent: '#c8d0dc',
     wrapperClass: MODEL_WRAPPER_CLASS.atelier,
     sections: [
-      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Floating MENU pill + CTA · full-screen overlay' },
-      { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Architectural model on an oak base, assembled piece by piece with the scroll' },
-      { id: 'atelier/AboutClarity', name: 'About Clarity', kind: 'section', component: AboutClarity, blurb: 'Word-masked about statement over scroll fog' },
-      { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Pinned services: the model walks through architecture, interiors, landscape and materials' },
-      { id: 'atelier/VisionShutter', name: 'Vision Shutter', kind: 'section', component: VisionShutter, blurb: 'Shutter bands and oversized scrubbing words' },
-      { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Horizontal work slider — cards rise in with fade' },
-      { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Big numbers with fog atmosphere' },
-      { id: 'atelier/StudioCards', name: 'Studio Cards', kind: 'section', component: StudioCards, blurb: 'Light 2×3 card grid that staggers in after the shutter wash' },
-      { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Dark studio closer with lined brand mark + collaboration CTA' },
+      { id: 'atelier/NavAtelier', name: 'Nav Atelier', kind: 'nav', component: NavAtelier, blurb: 'Fixed header: wordmark, three links and a Contact pill · full-screen menu on phones' },
+      { id: 'atelier/HeroMeaning', name: 'Hero Meaning', kind: 'hero', component: HeroMeaning, blurb: 'Full-bleed photo carousel with wipe transitions, segmented progress bar and one-line intro' },
+      { id: 'atelier/AboutClarity', name: 'About Clarity', kind: 'section', component: AboutClarity, blurb: 'Two-paragraph studio statement that turns to ink word by word with the scroll' },
+      { id: 'atelier/ServicesStone', name: 'Services Stone', kind: 'section', component: ServicesStone, blurb: 'Areas of expertise: ruled rows with photo, text and a huge pale numeral' },
+      { id: 'atelier/VisionShutter', name: 'Vision Shutter', kind: 'section', component: VisionShutter, blurb: 'Vertical black columns draw in, slide past each other and close to full black' },
+      { id: 'atelier/SelectedWork', name: 'Selected Work', kind: 'section', component: SelectedWork, blurb: 'Projects as a vertical accordion: narrow columns open into a full photograph' },
+      { id: 'atelier/KeyFacts', name: 'Key Facts', kind: 'section', component: KeyFacts, blurb: 'Full-bleed parallax studio statement with three plain figures' },
+      { id: 'atelier/Testimonial', name: 'Testimonial', kind: 'section', component: Testimonial, blurb: 'One client sentence set large, rising into place' },
+      { id: 'atelier/StudioCards', name: 'Studio Cards', kind: 'section', component: StudioCards, blurb: 'Journal: ruled list of notes with date, title, thumbnail and a Read link' },
+      { id: 'atelier/FooterAtelier', name: 'Footer Atelier', kind: 'footer', component: FooterAtelier, blurb: 'Site index, legal and contact columns under a screen-wide ATELIER wordmark' },
     ],
   },
   {

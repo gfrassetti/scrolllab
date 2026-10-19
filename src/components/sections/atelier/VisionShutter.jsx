@@ -1,187 +1,142 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
+import { prefersReducedMotion } from '../../../lib/motion'
+
+const COLS = 21
+
+/** Posiciones fijas (siempre las mismas): cada columna tiene 2–4 bloques de distinto alto. */
+function makeColumns(n) {
+  let s = 7
+  const rnd = () => {
+    s = (s * 16807) % 2147483647
+    return (s - 1) / 2147483646
+  }
+  return Array.from({ length: n }, () => {
+    const count = 2 + Math.floor(rnd() * 3)
+    let y = rnd() * 14
+    const blocks = []
+    for (let b = 0; b < count; b++) {
+      const h = 8 + rnd() * 24
+      blocks.push({ top: Math.min(y, 94 - h), h })
+      y += h + 6 + rnd() * 16
+    }
+    return { blocks, dir: rnd() > 0.5 ? 1 : -1, shift: 12 + rnd() * 22 }
+  })
+}
+const COLUMNS = makeColumns(COLS)
 
 /**
- * VisionShutter — Trionn-inspired scroll transition:
- * horizontal light bands (shutters) slice across a dark field while
- * oversized words scrub sideways. Bars expand until the frame washes light.
- *
- * The three marquee words are editable from the builder (word1–word3).
+ * VisionShutter — the transition between "what we do" and the projects: a white
+ * field cut by vertical columns of black blocks. The blocks draw in, the columns
+ * slide past each other, and then every column fills until the whole screen is
+ * black — the colour of the next section. The pinned stage is a child of the
+ * section (CSS sticky), so the section stays a normal block in the builder.
  */
 export default function VisionShutter({
-  line1 = 'Less, but better.',
-  line2 = 'Made to be lived in.',
-  word1 = 'MATERIAL',
-  word2 = 'LIGHT',
-  word3 = 'TIME',
+  kicker = 'Selected work',
+  line = 'Twelve years, forty-one houses, one idea: build less, and build it well.',
   /** Nombre de la sección para lectores de pantalla. */
-  regionLabel = 'Vision transition',
-  /** Fondo y texto; la persiana; y el color con que cierra (el de la sección siguiente). */
-  bg = '#0b0c10',
-  fg = '#ffffff',
-  bg2 = '#d9d9d6',
-  endBg = '#e8e8e6',
+  regionLabel = 'Transition to the projects',
+  /** Fondo y texto de cierre; los bloques; el color con que cierra (el de la sección siguiente). */
+  bg = '#ffffff',
+  fg = '#111111',
 }) {
   const root = useRef(null)
-  const words = [word1, word2, word3, word1, word2]
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches
+      const cols = gsap.utils.toArray('[data-bars-col]')
+      const blocks = gsap.utils.toArray('[data-bars-block]')
+      const fills = gsap.utils.toArray('[data-bars-fill]')
+      const copy = root.current.querySelectorAll('[data-bars-copy] > *')
 
-      const bars = gsap.utils.toArray('[data-shutter-bar]')
-      const words = root.current.querySelector('[data-shutter-words]')
-      const wash = root.current.querySelector('[data-shutter-wash]')
-      const pillars = gsap.utils.toArray('[data-shutter-pillar]')
-      const copy = root.current.querySelector('[data-shutter-copy]')
+      if (prefersReducedMotion()) {
+        gsap.set(blocks, { scaleY: 1 })
+        gsap.set(fills, { scaleY: 1 })
+        gsap.set(copy, { autoAlpha: 1 })
+        return undefined
+      }
 
-      gsap.set(bars, {
-        scaleY: reduced ? 0.35 : 0.08,
-        transformOrigin: '50% 50%',
-      })
-      gsap.set(wash, { autoAlpha: 0 })
+      gsap.set(blocks, { scaleY: 0 })
+      gsap.set(fills, { scaleY: 0 })
+      gsap.set(copy, { autoAlpha: 0, y: 24 })
 
       const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root.current,
-          start: 'top top',
-          end: '+=280%',
-          pin: true,
-          scrub: 0.65,
-          anticipatePin: 1,
-        },
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom bottom', scrub: 0.7 },
       })
-
-      tl.to(
-        words,
-        {
-          xPercent: reduced ? -18 : -55,
-          ease: 'none',
-        },
-        0,
-      )
-
-      tl.to(
-        pillars,
-        {
-          yPercent: -12,
-          opacity: 0.55,
-          stagger: 0.04,
-          ease: 'none',
-        },
-        0,
-      )
-
-      tl.to(
-        bars,
-        {
-          scaleY: 1,
-          stagger: { each: 0.03, from: 'edges' },
-          ease: 'none',
-        },
-        0.08,
-      )
-
-      tl.to(
-        copy,
-        { autoAlpha: 0.35, y: -24, ease: 'none' },
-        0.35,
-      )
-
-      tl.to(
-        words,
-        { autoAlpha: 0.15, ease: 'none' },
-        0.55,
-      )
-
-      // Bars + wash become the light plane that leads into Selected Work
-      tl.to(
-        wash,
-        { autoAlpha: 1, ease: 'none' },
-        0.72,
-      )
-      tl.to(
-        bars,
-        { backgroundColor: endBg, ease: 'none' },
-        0.72,
-      )
+      // 1 · los bloques se dibujan, columna por columna
+      tl.to(blocks, { scaleY: 1, duration: 0.3, stagger: { amount: 0.28, from: 'start' } }, 0)
+      // 2 · las columnas se cruzan en vertical
+      cols.forEach((col, i) => {
+        const c = COLUMNS[i]
+        tl.to(col, { yPercent: c.dir * c.shift, duration: 0.45 }, 0.3)
+      })
+      // 3 · cada columna se llena hasta cerrar en negro; el texto sube sobre el cierre
+      tl.to(fills, { scaleY: 1, duration: 0.25, stagger: { amount: 0.2, from: 'center' } }, 0.7)
+      tl.to(copy, { autoAlpha: 1, y: 0, duration: 0.18, stagger: 0.04 }, 0.86)
+      return undefined
     },
-    { scope: root, dependencies: [endBg], revertOnUpdate: true },
+    { scope: root },
   )
 
   return (
     <section
       ref={root}
       aria-label={regionLabel}
-      className="relative"
-      style={{ backgroundColor: bg, color: fg }}
+      data-tone="mixed"
+      className="relative h-[320vh] overflow-clip calm:h-svh"
+      style={{ backgroundColor: bg, color: bg }}
     >
-      <div className="relative h-svh overflow-hidden">
-        {/* Soft 3D-ish pillars */}
+      <div className="sticky top-0 h-svh w-full overflow-clip calm:static">
         <div
+          className="absolute inset-0 grid [--cols:9] md:[--cols:21]"
+          style={{ gridTemplateColumns: 'repeat(var(--cols), minmax(0, 1fr))' }}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-end justify-center gap-[4vw] px-[8vw] pb-[8vh]"
         >
-          {[0.55, 0.8, 1, 0.72, 0.9, 0.62].map((h, i) => (
+          {COLUMNS.map((c, i) => (
+            <div
+              key={i}
+              data-bars-col
+              className={`relative h-full will-change-transform ${i >= 9 ? 'max-md:hidden' : ''}`}
+            >
+              {c.blocks.map((b, j) => (
+                <span
+                  key={j}
+                  data-bars-block
+                  className="absolute inset-x-0 origin-top"
+                  style={{ top: `${b.top}%`, height: `${b.h}%`, backgroundColor: fg }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* El cierre vive fuera de las columnas que se mueven: llena el alto exacto. */}
+        <div
+          className="absolute inset-0 grid [--cols:9] md:[--cols:21]"
+          style={{ gridTemplateColumns: 'repeat(var(--cols), minmax(0, 1fr))' }}
+          aria-hidden="true"
+        >
+          {COLUMNS.map((c, i) => (
             <span
               key={i}
-              data-shutter-pillar
-              className="w-[7vw] max-w-16 min-w-8 rounded-sm bg-gradient-to-b from-current/18 via-current/6 to-transparent"
-              style={{ height: `${h * 42}vh`, opacity: 0.35 + i * 0.04 }}
+              data-bars-fill
+              className={`block h-full ${i % 2 ? 'origin-top' : 'origin-bottom'} ${i >= 9 ? 'max-md:hidden' : ''}`}
+              style={{ backgroundColor: fg }}
             />
           ))}
         </div>
 
         <div
-          data-shutter-copy
-          className="absolute top-[18%] left-5 z-20 max-w-[18ch] md:left-10"
+          data-bars-copy
+          className="relative z-10 flex h-full flex-col items-start justify-end gap-5 px-5 pb-16 md:px-8 md:pb-24"
+          style={{ color: bg }}
         >
-          <p className="text-[clamp(1rem,2vw,1.35rem)] leading-snug font-medium tracking-[-0.02em]">
-            {line1}
-            <br />
-            {line2}
+          <p className="text-sm font-medium">{kicker}</p>
+          <p className="max-w-[44rem] text-[clamp(1.8rem,4.4vw,4rem)] leading-[1.05] font-medium tracking-[-0.04em] text-balance">
+            {line}
           </p>
         </div>
-
-        <div className="absolute inset-0 z-10 flex items-center overflow-hidden">
-          {/* `data-scrub-tail`: la cinta de palabras corre de lado con el scroll a
-              propósito y nunca se ve entera (en calma recorre menos). */}
-          <p
-            data-shutter-words
-            data-scrub-tail
-            className="flex whitespace-nowrap font-brico text-[clamp(4.5rem,14vw,11rem)] leading-none font-semibold tracking-[-0.04em] will-change-transform"
-          >
-            {words.map((word, i) => (
-              <span key={i} className="px-[0.12em]">
-                {word}
-              </span>
-            ))}
-          </p>
-        </div>
-
-        {/* Venetian / shutter bands */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-30 flex flex-col justify-between py-[6vh]"
-        >
-          {Array.from({ length: 7 }).map((_, i) => (
-            <span
-              key={i}
-              data-shutter-bar
-              className="block h-[9vh] w-full origin-center will-change-transform"
-              style={{ opacity: 0.92 - (i % 3) * 0.04, backgroundColor: bg2 }}
-            />
-          ))}
-        </div>
-
-        <div
-          data-shutter-wash
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-40"
-          style={{ backgroundColor: endBg }}
-        />
       </div>
     </section>
   )

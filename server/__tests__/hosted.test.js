@@ -118,10 +118,10 @@ describe('Hosted Component API (file store)', () => {
     // Una instancia publicada antes de la regla: la /ruta se saca al servir.
     const { db } = await import('../db.js')
     const doc = await db.findHostedInstanceByKey(inst.key)
-    doc.publishedProps = { note: 'vieja', cards: [{ title: 'Vieja', img: '/vieja.jpg' }] }
+    doc.publishedProps = { eyebrow: 'vieja', cards: [{ title: 'Vieja', img: '/vieja.jpg' }] }
     await doc.save()
     const legacy = await request(app).get(`/api/embed/${inst.key}/config`)
-    assert.deepEqual(legacy.body.props, { note: 'vieja', cards: [{ title: 'Vieja' }] })
+    assert.deepEqual(legacy.body.props, { eyebrow: 'vieja', cards: [{ title: 'Vieja' }] })
   })
 
   it('rechaza secciones no hosteables', async () => {

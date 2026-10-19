@@ -1,335 +1,120 @@
-import { useRef, useState } from 'react'
-import * as THREE from 'three'
+import { useRef } from 'react'
 import { gsap, useGSAP } from '../../../lib/gsap'
-import { getLenis } from '../../../hooks/useLenis'
-import { useReducedMotion } from '../../../hooks/useReducedMotion'
-import { createFrameBudget, fitCameraDistance, trackPointer } from '../../../lib/motion'
-import ScrollFog from './ScrollFog'
-import { createMaquette } from './maquette'
+import { calmReveal, prefersReducedMotion } from '../../../lib/motion'
+import { areaInterior, areaHomes, areaLandscape, variants } from './assets/images'
+import { imgAttrs } from '../../../lib/responsiveImage'
 
-const SERVICES = [
+const defaultAreas = [
   {
-    title: 'Architecture',
-    body: 'Houses, hotels and small public buildings, from the first massing model to the keys.',
-    material: 'Massing model',
+    title: 'Interior Atmosphere',
+    body: 'Rooms planned around light and the way a household moves: joinery drawn to fit, materials chosen to age well, nothing added that does not earn its place.',
+    img: areaInterior,
+    href: '#projects',
   },
   {
-    title: 'Interiors',
-    body: 'The rooms inside: plans, joinery and furniture drawn for the building they live in.',
-    material: 'Plan & fit-out',
+    title: 'Contemporary Homes',
+    body: 'New houses and careful extensions in brick, timber and stone. Each starts from the plot, the orientation and a long conversation about how you live.',
+    img: areaHomes,
+    href: '#projects',
   },
   {
-    title: 'Landscape',
-    body: 'Gardens, courtyards and the ground around the building, planted to grow into it.',
-    material: 'Planting',
-  },
-  {
-    title: 'Materials',
-    body: 'Concrete, oak, stone and lime, chosen and tested on site before anything is built.',
-    material: 'Concrete & oak',
+    title: 'Landscape Integration',
+    body: 'Terraces, planting and paths designed together with the building, so the house sits in its garden instead of on top of it.',
+    img: areaLandscape,
+    href: '#projects',
   },
 ]
 
-const PIECE_FOV = 36
-const PIECE_Z = 6.6
-const PIECE_RADIUS = 2.3
-
-// Where the four services sit along the pinned scroll: a margin at each end
-// and an even share of the rest.
-const LEAD = 0.1
-const SPAN = 0.8
-
 /**
- * ServicesStone — the same model as the hero, now showing what the studio
- * does. Scrolling (or choosing a service) walks it through four states:
- * Architecture (the white massing model), Interiors (the upper floors lift off
- * and the furnished plan shows), Landscape (the trees grow around it) and
- * Materials (the card turns into concrete and the slabs into oak).
- *
- * Per-service title/body are editable from the builder via
- * service1Title / service1Body … service4Body, and the material names via
- * material1 … material4.
+ * ServicesStone — "areas of expertise": a ruled list of three rows. Each row is
+ * a title, a short paragraph, a photograph and a huge pale numeral. On a mouse
+ * device the photograph slides open on hover; on touch it is always visible.
  */
 export default function ServicesStone({
-  eyebrow = 'Services',
-  title = 'Four things, done properly.',
-  service1Title,
-  service1Body,
-  service2Title,
-  service2Body,
-  service3Title,
-  service3Body,
-  service4Title,
-  service4Body,
-  material1,
-  material2,
-  material3,
-  material4,
-  note = 'Every project keeps one lead architect, from the first sketch to the day we hand over the keys.',
-  cta = 'See selected work →',
-  ctaHref = '#work',
+  eyebrow = 'What we do',
+  title = 'Our areas of expertise',
+  areas = defaultAreas,
+  linkLabel = 'See related projects',
   bg,
   fg,
-  /** La pieza 3D: el tinte de la banca, el color de la vasija y la luz de relleno. */
-  objectColor,
-  markColor,
-  lightColor,
-  /** La niebla que se mueve con el scroll (sale del fondo y del texto). */
-  showFog = 'on',
 }) {
   const root = useRef(null)
-  const fogBg = bg || '#0b0c10'
-  const fogFg = fg || '#ffffff'
-  const canvasRef = useRef(null)
-  const stRef = useRef(null)
-  const [active, setActive] = useState(0)
-
-  const overrides = [
-    { title: service1Title, body: service1Body, material: material1 },
-    { title: service2Title, body: service2Body, material: material2 },
-    { title: service3Title, body: service3Body, material: material3 },
-    { title: service4Title, body: service4Body, material: material4 },
-  ]
-  const reducedMotion = useReducedMotion()
-  const services = SERVICES.map((service, i) => ({
-    title: overrides[i]?.title || service.title,
-    body: overrides[i]?.body || service.body,
-    material: overrides[i]?.material || service.material,
-  }))
-
-  // Choosing a service scrolls the pinned scene to where its material shows.
-  const goTo = (i) => {
-    const st = stRef.current
-    if (!st) return setActive(i)
-    const top = st.start + (st.end - st.start) * (LEAD + (i / (services.length - 1)) * SPAN)
-    const lenis = getLenis()
-    if (lenis) lenis.scrollTo(top, { duration: 1.1 })
-    else window.scrollTo({ top, behavior: 'smooth' })
-  }
+  const items = (Array.isArray(areas) && areas.length ? areas : defaultAreas).slice(0, 6)
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-      const canvas = canvasRef.current
-      const renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: true,
+      if (prefersReducedMotion()) return calmReveal('[data-area-row]', { y: 14, duration: 0.8 })
+      gsap.from('[data-area-row]', {
+        autoAlpha: 0,
+        y: 36,
+        duration: 0.9,
+        ease: 'power3.out',
+        stagger: 0.12,
+        scrollTrigger: { trigger: '[data-area-list]', start: 'top 80%' },
       })
-      // En un teléfono (DPR 3) 1.5 se ve igual de nítido y cuesta la mitad de GPU.
-      const dpr = Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)
-      renderer.setPixelRatio(dpr)
-      renderer.outputColorSpace = THREE.SRGBColorSpace
-      renderer.toneMapping = THREE.ACESFilmicToneMapping
-      renderer.toneMappingExposure = 0.95
-      const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(PIECE_FOV, 1, 0.1, 60)
-      const piece = createMaquette(renderer, scene, { tint: objectColor, accent: markColor })
-      if (lightColor) piece.fill.color.set(lightColor)
-      const { group } = piece
-      const pointer = trackPointer()
-
-      const resize = () => {
-        const { clientWidth: w, clientHeight: h } = canvas
-        renderer.setSize(w, h, false)
-        camera.aspect = w / Math.max(h, 1)
-        const z = fitCameraDistance({ fov: PIECE_FOV, aspect: camera.aspect, radius: PIECE_RADIUS, base: PIECE_Z })
-        camera.position.set(0, z * 0.5, z)
-        camera.lookAt(0, -0.3, 0)
-        camera.updateProjectionMatrix()
-        const halfW = Math.tan((PIECE_FOV * Math.PI) / 360) * z * camera.aspect
-        const wide = camera.aspect > 1.15
-        // en pantalla ancha la lista queda a la izquierda y la banca a la derecha
-        const halfH = Math.tan((PIECE_FOV * Math.PI) / 360) * z
-        // En calma, en pantallas chicas, el canvas va en el flujo arriba de la lista: la banca al centro.
-        const inFlow = getComputedStyle(canvas).position === 'relative'
-        if (inFlow) piece.place(0, 0, 0.7)
-        else piece.place(wide ? halfW * 0.45 : 0, wide ? -0.25 : halfH * 0.3, wide ? 0.62 : 0.55)
-      }
-      resize()
-      window.addEventListener('resize', resize)
-
-      // `s`: 0 = first service … 3 = last; the progress line follows the scroll
-      const state = { s: 0, p: 0 }
-      let st = null
-      if (!reduced) {
-        st = ScrollTriggerPin(root.current, state, services.length, setActive)
-        stRef.current = st
-      }
-
-      // Fuera de pantalla no se dibuja: en un teléfono la GPU seguía renderizando
-      // el 3D mientras se leía el resto de la página.
-      let onScreen = true
-      const io = new IntersectionObserver(([entry]) => {
-        onScreen = entry.isIntersecting
-      })
-      io.observe(root.current)
-      // Si el teléfono no llega a ~30 cuadros baja la resolución de a escalones.
-      const budget = createFrameBudget({
-        dpr,
-        apply: (value) => {
-          renderer.setPixelRatio(value)
-          resize()
-        },
-      })
-
-      let yaw = -0.6
-      let pitch = 0
-      const tick = (time, deltaMs) => {
-        if (!onScreen) return
-        const targetYaw = -0.6 + state.p * 0.8 + pointer.x * 0.3 + (reduced ? 0 : Math.sin(time * 0.4) * 0.05)
-        const targetPitch = -pointer.y * 0.08
-        yaw += (targetYaw - yaw) * 0.07
-        pitch += (targetPitch - pitch) * 0.07
-        group.rotation.set(pitch, yaw, 0)
-        piece.setState(state.s)
-        renderer.render(scene, camera)
-        budget.tick(deltaMs)
-      }
-      gsap.ticker.add(tick)
-
-      return () => {
-        stRef.current = null
-        st?.kill()
-        pointer.dispose()
-        window.removeEventListener('resize', resize)
-        gsap.ticker.remove(tick)
-        io.disconnect()
-        piece.dispose()
-        renderer.dispose()
-      }
+      return undefined
     },
-    { scope: root, dependencies: [objectColor, markColor, lightColor], revertOnUpdate: true },
+    { scope: root },
   )
 
   return (
     <section
-      id="services"
       ref={root}
-      className="relative bg-(--sec-bg) text-current"
-      style={{
-        '--sec-bg': bg || '#0b0c10',
-        color: fg || '#ffffff',
-      }}
+      id="expertise"
+      data-tone="light"
+      className="px-5 py-24 md:px-8 md:py-36"
+      style={{ backgroundColor: bg || '#ffffff', color: fg || '#111111' }}
     >
-      <div data-services-pin className={`relative overflow-hidden ${reducedMotion ? 'min-h-svh' : 'h-svh'}`}>
-        {showFog !== 'off' && <ScrollFog density={0.65} bg={fogBg} fg={fogFg} />}
-        <canvas
-          ref={canvasRef}
-          aria-hidden="true"
-          className={`pointer-events-none z-[1] w-full ${
-            reducedMotion ? 'relative mt-16 h-[40svh] lg:absolute lg:inset-0 lg:mt-0 lg:h-full' : 'absolute inset-0 h-full'
-          }`}
-        />
+      <div className="mx-auto max-w-[1500px]">
+        <header className="mb-14 grid gap-4 md:mb-24 md:grid-cols-12">
+          <p className="text-sm font-medium md:col-span-2">{eyebrow}</p>
+          <h2 className="text-[clamp(2.2rem,6vw,5.4rem)] leading-[0.98] font-medium tracking-[-0.045em] md:col-span-10">
+            {title}
+          </h2>
+        </header>
 
-        <div className={`relative z-10 flex h-full flex-col px-5 pb-8 md:px-10 ${reducedMotion ? 'pt-6 lg:pt-24' : 'pt-24'}`}>
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <p className="text-[11px] tracking-[0.25em] text-current/40 uppercase">
-              {eyebrow}
-            </p>
-            <p className="max-w-[36ch] text-right text-xs text-current/45 md:text-sm">
-              {note}
-            </p>
-          </div>
-
-          <div className="relative mt-6 flex flex-1 items-end pb-4 md:mt-8 md:items-center md:pb-0">
-            <ol className="relative w-full max-w-[34rem] space-y-1 pl-6 md:space-y-2 md:pl-8">
-              {/* the line fills as the scroll walks the four materials */}
-              <span aria-hidden="true" className="absolute top-2 bottom-2 left-0 w-px bg-current/15" />
-              <span
-                aria-hidden="true"
-                data-services-line
-                className="absolute top-2 bottom-2 left-0 w-px origin-top scale-y-0 bg-current"
-              />
-              {services.map((service, i) => {
-                const open = reducedMotion || active === i
-                return (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      onClick={() => goTo(i)}
-                      aria-current={active === i ? 'true' : undefined}
-                      className="group relative block min-h-11 w-full py-1.5 text-left"
-                    >
-                      <span
-                        className={`block text-[clamp(1.6rem,4.4vw,3.6rem)] leading-[1.02] font-medium tracking-[-0.03em] transition-[opacity,transform] duration-500 ease-out ${
-                          open ? 'translate-x-0 opacity-100' : 'opacity-35 group-hover:translate-x-1.5 group-hover:opacity-70'
-                        }`}
-                      >
-                        {service.title}
-                        <span className="ml-3 align-middle text-[11px] font-normal tracking-[0.2em] text-current/40 uppercase">
-                          {service.material}
-                        </span>
-                      </span>
-                      <span
-                        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
-                          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                        }`}
-                      >
-                        <span className="overflow-hidden">
-                          <span className="mt-2 block max-w-[38ch] text-sm leading-relaxed text-current/60 md:text-[15px]">
-                            {service.body}
-                          </span>
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ol>
-          </div>
-
-          <div className="flex items-end justify-between gap-4 border-t border-current/10 pt-4">
-            <p className="text-[11px] tracking-[0.2em] text-current/40 uppercase">
-              ✦ {title}
-              <span className="ml-3 text-current/70" data-services-material>
-                {services[active]?.material}
-              </span>
-            </p>
-            <a
-              href={ctaHref}
-              className="tpl-link tpl-hit relative text-[11px] tracking-[0.2em] text-current uppercase"
-            >
-              {cta}
-            </a>
-          </div>
-        </div>
+        <ul data-area-list className="border-t border-current/20">
+          {items.map((a, i) => (
+            <li key={`${a.title}-${i}`} data-area-row className="group border-b border-current/20">
+              <a
+                href={a.href || '#projects'}
+                className="relative grid items-start gap-6 py-8 md:grid-cols-12 md:gap-8 md:py-12"
+                aria-label={`${a.title} — ${linkLabel}`}
+              >
+                <span className="text-sm font-medium tabular-nums md:col-span-1">{String(i + 1).padStart(2, '0')}</span>
+                <div className="md:col-span-5">
+                  <h3 className="text-[clamp(1.7rem,3.2vw,3rem)] leading-[1.02] font-medium tracking-[-0.04em]">
+                    {a.title}
+                  </h3>
+                  <p className="mt-5 max-w-[32rem] text-base leading-snug opacity-70 md:text-[1.05rem]">{a.body}</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium">
+                    <span className="tpl-link">{linkLabel}</span>
+                    <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
+                      →
+                    </span>
+                  </span>
+                </div>
+                <div className="overflow-hidden md:col-span-3 md:aspect-[4/5] md:max-h-[26rem]">
+                  <img
+                    {...imgAttrs(a.img, variants)}
+                    sizes="(min-width: 768px) 25vw, 100vw"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[3/2] h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] md:aspect-auto"
+                  />
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="hidden self-end text-right text-[clamp(5rem,13vw,12rem)] leading-[0.8] font-medium tracking-[-0.06em] opacity-[0.1] md:col-span-3 md:block"
+                >
+                  {i + 1}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   )
-}
-
-/**
- * The pinned scroll that walks the four services. `state.s` goes 0 → n-1 across
- * the middle of the scroll (a margin at each end); `state.p` is the whole
- * progress. The active service and the line follow it.
- */
-function ScrollTriggerPin(section, state, count, setActive) {
-  const line = section.querySelector('[data-services-line]')
-  let last = -1
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: '+=320%',
-      // se pincha el contenido, no la sección: React es dueño de la sección (el builder la re-renderiza)
-      pin: section.querySelector('[data-services-pin]'),
-      scrub: 0.6,
-      anticipatePin: 1,
-      onUpdate: (self) => {
-        const p = self.progress
-        state.p = p
-        state.s = THREE.MathUtils.clamp((p - LEAD) / SPAN, 0, 1) * (count - 1)
-        // el servicio cambia a mitad de cada cambio de la maqueta
-        const idx = Math.min(count - 1, Math.round(state.s))
-        if (idx !== last) {
-          last = idx
-          setActive(idx)
-        }
-        if (line) line.style.transform = `scaleY(${THREE.MathUtils.clamp((p - LEAD) / SPAN, 0, 1)})`
-      },
-    },
-  })
-  return tl.scrollTrigger
 }

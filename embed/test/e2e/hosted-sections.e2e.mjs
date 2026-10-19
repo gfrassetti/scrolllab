@@ -496,13 +496,17 @@ const CASES = {
     marker: 'MKH3MO',
   },
   'atelier/HeroMeaning': {
-    // El titular entra letra por letra (oculto hasta la entrada): el marcador va en la bajada.
-    props: { body: 'MKHMAT', bg: '#141414', fg: '#f0f0f0' },
+    // El marcador va en el texto de presentación (el h1 del hero).
+    props: { intro: 'MKHMAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKHMAT',
   },
   'atelier/ServicesStone': {
     props: { title: 'MKSSAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKSSAT',
+  },
+  'atelier/Testimonial': {
+    props: { name: 'MKTEAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKTEAT',
   },
   'unity/HeroTwin': {
     props: { body: 'MKHTUN', bg: '#141414', fg: '#f0f0f0' },

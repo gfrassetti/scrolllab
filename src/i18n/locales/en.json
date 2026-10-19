@@ -642,12 +642,12 @@
     "atelier": {
       "vibe": "Architecture studio",
       "tags": [
-        "3D model that builds on scroll",
-        "Cutaway interiors",
-        "Scroll-reactive fog",
-        "Pinned services"
+        "Photo carousel hero",
+        "Vertical-bar transition",
+        "Vertical project accordion",
+        "Word-by-word statement"
       ],
-      "description": "An architecture and interiors studio: its own 3D model is assembled piece by piece as you scroll, then opens to show the interiors, grows its landscape and turns to concrete and oak. Ideal for architecture practices, interior designers and builders who want a prestige site."
+      "description": "An architecture and interiors studio in black and white: a full-bleed photo carousel, a transition of vertical black columns, projects that open as a vertical accordion, and a journal. Ideal for architecture practices, interior designers and builders who want a prestige site."
     },
     "comic": {
       "vibe": "Illustrated comic",
@@ -992,43 +992,43 @@
       "atelier": {
         "NavAtelier": {
           "name": "Nav Atelier",
-          "blurb": "Fixed header that flips over light sections"
+          "blurb": "Fixed header: wordmark, three links and a Contact pill · full-screen menu on phones"
         },
         "HeroMeaning": {
           "name": "Hero Meaning",
-          "blurb": "Architectural model on an oak base, assembled piece by piece with the scroll"
+          "blurb": "Full-bleed photo carousel with wipe transitions, segmented progress bar and one-line intro"
         },
         "AboutClarity": {
           "name": "About Clarity",
-          "blurb": "Word-masked about statement over scroll fog"
+          "blurb": "Two-paragraph studio statement that turns to ink word by word with the scroll"
         },
         "ServicesStone": {
           "name": "Services Stone",
-          "blurb": "Pinned services: the model walks through architecture, interiors, landscape and materials"
+          "blurb": "Areas of expertise: ruled rows with photo, text and a huge pale numeral"
         },
         "VisionShutter": {
           "name": "Vision Shutter",
-          "blurb": "Shutter bands and oversized scrubbing words"
+          "blurb": "Vertical black columns draw in, slide past each other and close to full black"
         },
         "SelectedWork": {
           "name": "Selected Work",
-          "blurb": "Light sticky-title project column"
+          "blurb": "Projects as a vertical accordion: narrow columns open into a full photograph"
         },
         "KeyFacts": {
           "name": "Key Facts",
-          "blurb": "Big numbers with fog atmosphere"
+          "blurb": "Full-bleed parallax studio statement with three plain figures"
         },
-        "WordStripe": {
-          "name": "Word Stripe",
-          "blurb": "Pinned shutter transition — same mechanic as Vision Shutter"
+        "Testimonial": {
+          "name": "Testimonial",
+          "blurb": "One client sentence set large"
         },
         "StudioCards": {
           "name": "Studio Cards",
-          "blurb": "Light 2×3 card grid that staggers in after the shutter wash"
+          "blurb": "Journal: ruled list of notes with date, title, thumbnail and a Read link"
         },
         "FooterAtelier": {
           "name": "Footer Atelier",
-          "blurb": "Closing statement and legal line"
+          "blurb": "Site index, legal and contact columns under a screen-wide ATELIER wordmark"
         }
       },
       "unity": {

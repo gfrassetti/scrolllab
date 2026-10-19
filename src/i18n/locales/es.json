@@ -642,12 +642,12 @@
     "atelier": {
       "vibe": "Estudio de arquitectura",
       "tags": [
-        "Maqueta 3D que se arma al scrollear",
-        "Interiores en corte",
-        "Niebla reactiva al scroll",
-        "Servicios pineados"
+        "Hero con carrusel de fotos",
+        "Transición de barras verticales",
+        "Proyectos en acordeón vertical",
+        "Statement palabra por palabra"
       ],
-      "description": "Un estudio de arquitectura e interiores: su propia maqueta 3D se arma pieza por pieza mientras bajás, después se abre para mostrar los interiores, le crece el paisaje y pasa a hormigón y roble. Ideal para estudios de arquitectura, diseñadores de interiores y constructoras que quieren un sitio de prestigio."
+      "description": "Un estudio de arquitectura e interiores en blanco y negro: carrusel de fotos a pantalla completa, una transición de columnas negras verticales, proyectos que se abren como un acordeón vertical y un journal. Ideal para estudios de arquitectura, diseñadores de interiores y constructoras que quieren un sitio de prestigio."
     },
     "comic": {
       "vibe": "Historieta ilustrada",
@@ -992,43 +992,43 @@
       "atelier": {
         "NavAtelier": {
           "name": "Nav atelier",
-          "blurb": "Header fijo que se invierte sobre secciones claras"
+          "blurb": "Header fijo: marca, tres links y botón Contact · menú a pantalla completa en el teléfono"
         },
         "HeroMeaning": {
           "name": "Hero meaning",
-          "blurb": "Maqueta de arquitectura sobre una base de roble, que se arma pieza por pieza con el scroll"
+          "blurb": "Carrusel de fotos a pantalla completa con cortina, barra de progreso por foto y presentación de una línea"
         },
         "AboutClarity": {
           "name": "About clarity",
-          "blurb": "Statement con máscara de palabras y niebla"
+          "blurb": "Statement de dos párrafos que pasa a tinta palabra por palabra con el scroll"
         },
         "ServicesStone": {
           "name": "Services stone",
-          "blurb": "Servicios pineados: la maqueta pasa por arquitectura, interiores, paisaje y materiales"
+          "blurb": "Áreas de trabajo: filas con foto, texto y un número gigante apagado"
         },
         "VisionShutter": {
           "name": "Vision shutter",
-          "blurb": "Persianas y palabras gigantes al scroll"
+          "blurb": "Columnas verticales negras que se dibujan, se cruzan y cierran en negro"
         },
         "SelectedWork": {
           "name": "Selected work",
-          "blurb": "Columna de proyectos con título sticky"
+          "blurb": "Proyectos como acordeón vertical: columnas angostas que se abren en una foto completa"
         },
         "KeyFacts": {
           "name": "Key facts",
-          "blurb": "Números grandes con niebla"
+          "blurb": "Statement del estudio con foto a pantalla completa en parallax y tres cifras"
         },
-        "WordStripe": {
-          "name": "Word stripe",
-          "blurb": "Transición pineada con persianas — misma mecánica que Vision Shutter"
+        "Testimonial": {
+          "name": "Testimonial",
+          "blurb": "Una frase de un cliente en grande"
         },
         "StudioCards": {
           "name": "Studio cards",
-          "blurb": "Grilla 2×3 clara que entra en stagger después del wash"
+          "blurb": "Journal: lista de notas con fecha, título, miniatura y «Read»"
         },
         "FooterAtelier": {
           "name": "Footer atelier",
-          "blurb": "Cierre y línea legal"
+          "blurb": "Índice, legal y contacto bajo el nombre ATELIER a todo el ancho"
         }
       },
       "unity": {

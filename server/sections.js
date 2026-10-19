@@ -52,6 +52,7 @@ export const HOSTABLE_SECTIONS = Object.freeze([
   // estable). Modelos ya tokenizados en el frame por la familia footer.
   'chapters/BigNumbers',
   'atelier/KeyFacts',
+  'atelier/Testimonial',
   'monolith/TypeAccordion',
   'monolith/ProcessSteps',
   'monolith/AssemblyStack',

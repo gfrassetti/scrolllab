@@ -262,8 +262,8 @@ describe('sanitizeProps — Fase D (segunda tanda)', () => {
     assert.equal(clean.benefits[1].color, undefined) // nombre CSS no permitido en color
   })
   it('AboutClarity: solo bg/fg + textos', () => {
-    const clean = sanitizeProps('atelier/AboutClarity', { title: 'X', bg: '#0b0c10' })
-    assert.deepEqual(clean, { title: 'X', bg: '#0b0c10' })
+    const clean = sanitizeProps('atelier/AboutClarity', { lead: 'X', bg: '#0b0c10' })
+    assert.deepEqual(clean, { lead: 'X', bg: '#0b0c10' })
   })
 })
 
@@ -289,9 +289,9 @@ describe('sanitizeProps — Fase E (grillas con imagen editable)', () => {
   it('StudioCards: cards list title/label/img', () => {
     const clean = sanitizeProps('atelier/StudioCards', {
       cards: [{ title: 'C1', label: 'L1', img: 'https://cdn.test/c1.jpg' }],
-      ctaHref: '/coleccion',
+      readLabel: 'Leer',
     })
-    assert.equal(clean.ctaHref, '/coleccion')
+    assert.equal(clean.readLabel, 'Leer')
     assert.deepEqual(clean.cards[0], {
       title: 'C1',
       label: 'L1',
@@ -365,7 +365,7 @@ describe('sanitizeHostedProps (LAB)', () => {
   it('imágenes solo con URL completa; conserva el resto y las filas vacías del editor', async () => {
     const { sanitizeHostedProps } = await import('../sectionFields.js')
     const out = sanitizeHostedProps('atelier/StudioCards', {
-      note: 'Hola',
+      eyebrow: 'Hola',
       cards: [
         { title: 'Con foto', img: 'https://cdn.cliente.com/a.jpg' },
         { title: 'Relativa', img: '/a.jpg' },
@@ -373,7 +373,7 @@ describe('sanitizeHostedProps (LAB)', () => {
       ],
     })
     assert.deepEqual(out, {
-      note: 'Hola',
+      eyebrow: 'Hola',
       cards: [{ title: 'Con foto', img: 'https://cdn.cliente.com/a.jpg' }, { title: 'Relativa' }, {}],
     })
   })

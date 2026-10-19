@@ -241,11 +241,11 @@ describe('validateRecipe', () => {
 
   it('acepta secciones atelier y monolith', () => {
     const recipe = validateRecipe([
-      { id: 'atelier/HeroMeaning', props: { line1: 'Hello' } },
+      { id: 'atelier/HeroMeaning', props: { intro: 'Hello' } },
       { id: 'monolith/NavBrutal', props: { brand: 'BRAND' } },
     ])
     assert.equal(recipe.length, 2)
-    assert.equal(recipe[0].props.line1, 'Hello')
+    assert.equal(recipe[0].props.intro, 'Hello')
     assert.equal(recipe[1].props.brand, 'BRAND')
   })
 

@@ -15,7 +15,7 @@ export const MODEL_WRAPPER_CLASS = {
   monolith: 'bg-concrete font-grotesk text-carbon',
   fizz: 'bg-grape font-grotesk text-foam',
   velocity: 'bg-[#0a1a12] font-grotesk text-[#ece9e2]',
-  atelier: 'bg-[#0b0c10] font-grotesk text-white',
+  atelier: 'bg-white font-grotesk text-[#111111]',
   unity: 'bg-[#e7e4dc] font-grotesk text-[#0a0a0a]',
   ratio: 'bg-ratio-paper font-grotesk text-ratio-ink',
   atrium: 'bg-[#f4f1ea] font-grotesk text-[#111111]',

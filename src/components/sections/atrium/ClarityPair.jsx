@@ -63,7 +63,6 @@ export default function ClarityPair({
     () => {
       if (reduced) return calmReveal('[data-calm-reveal]', { y: 16, stagger: 0.12 })
 
-      const pin = root.current.querySelector('[data-clarity-pin]')
       const strokes = gsap.utils.toArray('[data-clarity-stroke]')
 
       strokes.forEach((path) => {
@@ -71,29 +70,31 @@ export default function ClarityPair({
         gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
       })
 
+      // Una sola composición: el texto no se mueve nunca. El papel se vuelve tinta con
+      // un velo que sube desde abajo; dentro del velo hay una copia exacta del texto en
+      // el color invertido, así el color cambia justo en el borde del velo.
       gsap.set('[data-clarity-b]', { autoAlpha: 0 })
-      gsap.set('[data-clarity-body]', { autoAlpha: 0, y: 18 })
+      gsap.set('[data-clarity-body]', { autoAlpha: 0, y: 14 })
       gsap.set('[data-clarity-num]', { autoAlpha: 0 })
+      gsap.set('[data-clarity-ink]', { clipPath: 'inset(100% 0% 0% 0%)' })
 
       const tl = gsap.timeline({
+        defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.4,
+          scrub: 0.5,
         },
       })
 
-      tl.to(strokes, { strokeDashoffset: 0, ease: 'none', stagger: 0.03 }, 0)
-      tl.to('[data-clarity-num]', { autoAlpha: 1, stagger: 0.02, ease: 'none' }, 0.12)
-      tl.to('[data-clarity-figure]', { rotate: 26, ease: 'none' }, 0)
-
-      tl.to('[data-clarity-ink]', { opacity: 1, ease: 'none' }, 0.46)
-      tl.to(pin, { color: bg || '#f4f1ea', ease: 'none' }, 0.46)
-      tl.to('[data-clarity-a]', { autoAlpha: 0, ease: 'none' }, 0.46)
-      tl.to('[data-clarity-b]', { autoAlpha: 1, ease: 'none' }, 0.58)
-
-      tl.to('[data-clarity-body]', { autoAlpha: 1, y: 0, stagger: 0.06, ease: 'none' }, 0.66)
+      tl.to(strokes, { strokeDashoffset: 0, stagger: 0.03 }, 0)
+      tl.to('[data-clarity-num]', { autoAlpha: 1, stagger: 0.02 }, 0.1)
+      tl.to('[data-clarity-figure]', { rotate: 26 }, 0)
+      tl.to('[data-clarity-body]', { autoAlpha: 1, y: 0, stagger: 0.05 }, 0.2)
+      // la segunda frase entra a su lugar (ya reservado) mientras el velo sube
+      tl.to('[data-clarity-b]', { autoAlpha: 1 }, 0.42)
+      tl.to('[data-clarity-ink]', { clipPath: 'inset(0% 0% 0% 0%)' }, 0.38)
     },
     { scope: root, dependencies: [reduced, bg, fg], revertOnUpdate: true },
   )
@@ -162,47 +163,46 @@ export default function ClarityPair({
     )
   }
 
+  // La composición completa; se dibuja dos veces (papel y tinta) en el mismo lugar.
+  const layer = (
+    <div className="relative h-full">
+      {figure}
+
+      {kicker ? (
+        <p className="atrium-note absolute top-[13svh] left-5 font-display opacity-65 md:left-10">{kicker}</p>
+      ) : null}
+
+      <div className="absolute inset-0 flex items-center justify-center px-5">
+        <h2 className="atrium-mid max-w-[16ch] text-center text-balance">
+          <span className="block">{left}</span>
+          <span data-clarity-b className="block">
+            {right}
+          </span>
+        </h2>
+      </div>
+
+      <div className="atrium-note absolute inset-x-5 bottom-[9svh] grid gap-6 opacity-60 md:inset-x-10 md:grid-cols-2 md:gap-24">
+        <p data-clarity-body className="md:max-w-[34ch]">
+          {bodyLeft}
+        </p>
+        <p data-clarity-body className="md:max-w-[34ch] md:justify-self-end md:text-right">
+          {bodyRight}
+        </p>
+      </div>
+    </div>
+  )
+
   return (
     <section ref={root} id="practice" className="relative h-[300svh] bg-atrium-ink" style={colors}>
-      <div
-        data-clarity-pin
-        className="sticky top-0 h-svh overflow-hidden text-atrium-ink"
-      >
-        <div className="absolute inset-0 bg-atrium-paper" />
-        <div data-clarity-ink className="absolute inset-0 bg-atrium-ink opacity-0" />
-
-        <div className="relative h-full">
-          {figure}
-
-          {kicker ? (
-            <p className="atrium-note absolute top-[13svh] left-5 font-display opacity-65 md:left-10">
-              {kicker}
-            </p>
-          ) : null}
-
-          <div className="absolute inset-0 flex items-center justify-center px-5">
-            <h2
-              data-clarity-a
-              className="atrium-mid max-w-[15ch] text-center text-balance"
-            >
-              {left}
-            </h2>
-            <h2
-              data-clarity-b
-              className="atrium-mid absolute max-w-[15ch] px-5 text-center text-balance"
-            >
-              {right}
-            </h2>
-          </div>
-
-          <div className="atrium-note absolute inset-x-5 bottom-[9svh] grid gap-6 opacity-60 md:inset-x-10 md:grid-cols-2 md:gap-24">
-            <p data-clarity-body className="md:max-w-[34ch]">
-              {bodyLeft}
-            </p>
-            <p data-clarity-body className="md:max-w-[34ch] md:justify-self-end md:text-right">
-              {bodyRight}
-            </p>
-          </div>
+      <div data-clarity-pin className="sticky top-0 h-svh overflow-hidden">
+        <div className="absolute inset-0 bg-atrium-paper text-atrium-ink">{layer}</div>
+        <div
+          data-clarity-ink
+          aria-hidden="true"
+          className="absolute inset-0 bg-atrium-ink text-atrium-paper"
+          style={{ clipPath: 'inset(100% 0% 0% 0%)' }}
+        >
+          {layer}
         </div>
       </div>
     </section>

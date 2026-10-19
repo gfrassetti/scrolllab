@@ -1,143 +1,124 @@
-import { useRef } from 'react'
-import { useGSAP, ScrollTrigger } from '../../../lib/gsap'
+import { useEffect, useState } from 'react'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
 
 /**
- * NavAtelier — studio header. On scroll, brand fades; CTA + MENU pill
- * stay floating top-right (Trionn-style chrome, generic copy).
+ * NavAtelier — fixed header in the practice's own voice: the wordmark on the
+ * left, three plain links in the middle, a hairline "Contact" button on the
+ * right. It is drawn with `mix-blend-difference`, so it reads white over the
+ * photographs and black over the paper without any scroll logic. On a phone
+ * the links fold into a full-screen paper menu (a sibling of the header, so
+ * the blend does not invert it).
  */
 export default function NavAtelier({
-  brand = 'NOVE',
-  cta = 'Start a project',
-  ctaHref = '#contact',
-  label = 'Architecture · Interiors · Landscape',
-  links = ['Work | #work', 'Services | #services', 'Studio | #facts', 'Contact | #contact'],
+  brand = 'Atelier',
+  links = ['Projects | #projects', 'Studio | #studio', 'Journal | #journal'],
   linksText,
+  cta = 'Contact',
+  ctaHref = '#contact',
   menuLabel = 'Menu',
-  /** Section the header flips to dark type over. */
-  lightSection = '#work',
-  bandHeight = 80,
-  /** Menú de pantalla completa: fondo y texto (la barra cambia sola sobre claro/oscuro). */
+  closeLabel = 'Close',
+  /** El menú del teléfono: fondo y texto (la barra se invierte sola). */
   bg,
   fg,
 }) {
-  const root = useRef(null)
   const items = parseNavLinks(links, linksText)
-  const { open, close, panelProps, triggerProps } = useMobileMenu({
-    breakpoint: null,
-  })
-
-  useGSAP(
-    () => {
-      const header = root.current
-      if (!header) return
-
-      const section = document.querySelector(lightSection)
-
-      const sync = () => {
-        const scrolled = window.scrollY > 48
-        if (scrolled) header.setAttribute('data-scrolled', 'true')
-        else header.removeAttribute('data-scrolled')
-
-        if (!section) return
-        const { top, bottom } = section.getBoundingClientRect()
-        const overlapping = top <= bandHeight && bottom > 0
-        if (overlapping) header.setAttribute('data-on-light', 'true')
-        else header.removeAttribute('data-on-light')
-      }
-
-      ScrollTrigger.create({
-        start: 0,
-        end: 'max',
-        onUpdate: sync,
-        onRefresh: sync,
-      })
-
-      sync()
-    },
-    { scope: root },
-  )
-
-  const onLight = (classes) => (open ? '' : classes)
+  const { open, close, panelProps, triggerProps } = useMobileMenu()
+  // El color de la barra sigue a lo que hay debajo: blanco sobre fotos y fondos
+  // oscuros, tinta sobre papel, y en la transición de columnas se invierte sola.
+  const [tone, setTone] = useState('dark')
+  useEffect(() => {
+    let raf = 0
+    const read = () => {
+      raf = 0
+      const hit = document
+        .elementsFromPoint(window.innerWidth / 2, 36)
+        .map((el) => el.closest?.('[data-tone]'))
+        .find(Boolean)
+      setTone(hit?.dataset.tone || 'light')
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(read)
+    }
+    read()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+  const ink = tone === 'light' && !open
 
   return (
-    <header
-      ref={root}
-      className={`group fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 px-5 py-4 md:px-10 ${onLight('data-on-light:text-[#111214]')}`}
-    >
-      <a
-        href="#top"
-        className={`tpl-hit relative z-10 text-sm font-medium tracking-[0.2em] text-white uppercase transition-opacity duration-300 ${onLight('group-data-on-light:text-[#111214]')} group-data-scrolled:opacity-0 group-data-scrolled:pointer-events-none md:group-data-scrolled:opacity-100 md:group-data-scrolled:pointer-events-auto`}
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+          open ? 'text-current' : ink ? '' : 'text-white'
+        } ${tone === 'mixed' && !open ? 'mix-blend-difference !text-white' : ''}`}
+        style={open || ink ? { color: fg || '#111111' } : undefined}
       >
-        {brand}
-      </a>
-      <p
-        className={`hidden text-[11px] tracking-[0.25em] text-white/40 uppercase transition-opacity duration-300 md:block ${onLight('group-data-on-light:text-black/40')} group-data-scrolled:opacity-0`}
-      >
-        {label}
-      </p>
+        <nav className="grid grid-cols-[1fr_auto] items-center px-5 py-5 md:grid-cols-[1fr_auto_1fr] md:px-8 md:py-6">
+          <a href="#top" className="tpl-hit relative text-xl font-medium tracking-[-0.03em] md:text-2xl">
+            {brand}
+          </a>
 
-      {/* Floating cluster — always above the overlay */}
-      <div className="relative z-50 ml-auto flex items-center gap-2">
-        <a
-          href={ctaHref}
-          className={`ui-press tpl-hit relative rounded-full bg-white px-4 py-2.5 text-[11px] font-medium tracking-[0.18em] text-black uppercase shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-transform duration-300 group-data-scrolled:scale-[1.02] ${onLight('group-data-on-light:bg-[#111214] group-data-on-light:text-white')}`}
-        >
-          {cta}
-        </a>
-        <button
-          {...triggerProps}
-          aria-label={menuLabel}
-          className={`ui-press tpl-hit relative inline-flex items-center gap-2.5 rounded-full border border-white/55 bg-black/25 px-4 py-2.5 text-[11px] font-medium tracking-[0.2em] text-white uppercase backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-[background-color,border-color,color] duration-300 ${onLight('group-data-on-light:border-black/35 group-data-on-light:bg-white/70 group-data-on-light:text-[#111214]')}`}
-        >
-          <span>{menuLabel}</span>
-          <span aria-hidden="true" className="relative grid h-2.5 w-3.5 place-items-center">
-            <span
-              className={`absolute h-px w-full bg-current transition-transform duration-200 motion-reduce:transition-none ${
-                open ? 'rotate-45' : '-translate-y-[3px]'
-              }`}
-            />
-            <span
-              className={`absolute h-px w-full bg-current transition-transform duration-200 motion-reduce:transition-none ${
-                open ? '-rotate-45' : 'translate-y-[3px]'
-              }`}
-            />
-          </span>
-        </button>
-      </div>
-
-      <div
-        {...panelProps}
-        aria-label={menuLabel}
-        inert={!open}
-        style={{ background: bg || undefined, color: fg || undefined }}
-        className={`fixed inset-0 z-40 bg-[#0b0c10] text-white transition-opacity duration-300 motion-reduce:transition-none ${
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      >
-        <div className="flex h-full flex-col justify-center px-5 md:px-10">
-          <p className="mb-10 text-[11px] tracking-[0.25em] text-current/40 uppercase">
-            {label}
-          </p>
-          <ul className="space-y-1">
-            {items.map((item, i) => (
+          <ul className="hidden items-center gap-8 md:flex">
+            {items.map((item) => (
               <li key={item.label}>
-                <a
-                  href={item.href}
-                  onClick={close}
-                  style={{ transitionDelay: open ? `${100 + i * 70}ms` : '0ms' }}
-                  className={`block py-3 text-[clamp(2rem,11vw,3.5rem)] leading-none font-medium tracking-[-0.03em] transition-all duration-500 motion-reduce:transition-none ${
-                    open ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
-                  }`}
-                >
+                <a href={item.href} className="tpl-link tpl-hit relative text-sm font-medium tracking-[-0.01em]">
                   {item.label}
                 </a>
               </li>
             ))}
           </ul>
-        </div>
+
+          <div className="flex items-center justify-end gap-3">
+            <a
+              href={ctaHref}
+              className={`hidden rounded-full border border-current px-5 py-2 text-sm font-medium transition-[background-color,color] duration-300 md:inline-flex ${
+                ink ? 'hover:bg-[#111111] hover:text-white' : 'hover:bg-white hover:text-black'
+              }`}
+            >
+              {cta}
+            </a>
+            <button
+              {...triggerProps}
+              className="ui-press tpl-hit relative text-sm font-medium tracking-[-0.01em] md:hidden"
+            >
+              {open ? closeLabel : menuLabel}
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      <div
+        {...panelProps}
+        aria-label={menuLabel}
+        inert={!open}
+        style={{ backgroundColor: bg || '#ffffff', color: fg || '#111111' }}
+        className={`fixed inset-0 z-40 transition-opacity duration-500 md:hidden motion-reduce:transition-none ${
+          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      >
+        <ul className="flex h-full flex-col justify-center gap-1 px-5">
+          {[...items, { label: cta, href: ctaHref }].map((item, i) => (
+            <li key={item.label} className="overflow-hidden border-b border-current/15">
+              <a
+                href={item.href}
+                onClick={close}
+                style={{ transitionDelay: open ? `${120 + i * 70}ms` : '0ms' }}
+                className={`block py-5 text-[clamp(2.2rem,11vw,3.6rem)] leading-none font-medium tracking-[-0.04em] transition-all duration-500 motion-reduce:transition-none ${
+                  open ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+                }`}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
-    </header>
+    </>
   )
 }

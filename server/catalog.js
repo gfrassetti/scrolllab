@@ -74,7 +74,7 @@ export const PRODUCTS = {
   atelier: template(
     'atelier',
     'ATELIER — template',
-    'Modelo estudio de arquitectura: maqueta 3D que se arma con el scroll (código fuente).',
+    'Modelo estudio de arquitectura: carrusel de fotos, transición de barras verticales y proyectos en acordeón (código fuente).',
   ),
   comic: template(
     'comic',

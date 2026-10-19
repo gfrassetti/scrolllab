@@ -40,6 +40,7 @@ const SECTIONS = {
   'atelier/FooterAtelier': () => import('../../src/components/sections/atelier/FooterAtelier.jsx'),
   'atrium/FooterAtrium': () => import('../../src/components/sections/atrium/FooterAtrium.jsx'),
   'chapters/BigNumbers': () => import('../../src/components/sections/chapters/BigNumbers.jsx'),
+  'atelier/Testimonial': () => import('../../src/components/sections/atelier/Testimonial.jsx'),
   'atelier/KeyFacts': () => import('../../src/components/sections/atelier/KeyFacts.jsx'),
   'monolith/TypeAccordion': () => import('../../src/components/sections/monolith/TypeAccordion.jsx'),
   'monolith/ProcessSteps': () => import('../../src/components/sections/monolith/ProcessSteps.jsx'),
