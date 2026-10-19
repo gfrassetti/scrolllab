@@ -54,6 +54,7 @@ export default function CartPage() {
   const region = usePayRegion((s) => s.region)
   const setRegion = usePayRegion((s) => s.setRegion)
   const intlEnabled = usePayRegion((s) => s.intlEnabled)
+  const intlGateway = usePayRegion((s) => s.intl)
   const regionStatus = usePayRegion((s) => s.status)
   const loadRegion = usePayRegion((s) => s.load)
   useEffect(() => {
@@ -108,7 +109,7 @@ export default function CartPage() {
         user,
         navigate,
         couponCode: coupon?.code,
-        provider: intlEnabled ? providerForRegion(region) : 'mercadopago',
+        provider: intlEnabled ? providerForRegion(region, intlGateway) : 'mercadopago',
         locale,
       })
       // redirect a la pasarela: dejamos busy. login: liberamos para que pueda reintentar.
@@ -123,7 +124,7 @@ export default function CartPage() {
       }
       setBusy(false)
     }
-  }, [items, navigate, user, coupon, dropWelcome, t, intlEnabled, region, locale])
+  }, [items, navigate, user, coupon, dropWelcome, t, intlEnabled, region, intlGateway, locale])
 
   // Volvió del login con el pago ya pedido: sigue derecho al pago (cuando ya se
   // sabe por dónde paga, para no abrir Mercado Pago a quien eligió USD).

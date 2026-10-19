@@ -67,11 +67,13 @@ const SHOWS_ERROR = new Set(['error', 'review', 'wrong-account'])
 
 /**
  * Vuelta del pago: Mercado Pago pega su `payment_id` en la URL; Lemon Squeezy
- * llega con `provider=lemonsqueezy&orderId=…`. Cada uno confirma contra la API a su modo.
+ * (o Polar) llega con `provider=lemonsqueezy&orderId=…` (`provider=polar`). Cada uno confirma contra la API a su modo.
  */
 export default function CheckoutSuccessPage() {
   const [params] = useSearchParams()
-  return params.get('provider') === 'lemonsqueezy' ? <LemonCheckoutSuccess /> : <MercadoPagoCheckoutSuccess />
+  const provider = params.get('provider')
+  if (provider === 'lemonsqueezy' || provider === 'polar') return <IntlCheckoutSuccess provider={provider} />
+  return <MercadoPagoCheckoutSuccess />
 }
 
 /** Panel final (resuelto) de la vuelta del pago, compartido por las dos pasarelas. */
@@ -119,14 +121,14 @@ const INTL_RETRY_MS = 2000
 const INTL_MAX_TRIES = 6
 
 /**
- * Vuelta del pago internacional (Lemon Squeezy): la orden la cumple el webhook y
+ * Vuelta del pago internacional (Lemon Squeezy o Polar): la orden la cumple el webhook y
  * esto solo pregunta cómo va (409 mientras no llegó). Se reintenta un rato y se
  * manda a Mis compras; el webhook cumple la
  * orden igual aunque esto falle. Nunca gira para siempre (15 s) y cada error
  * tiene su panel: otra cuenta (403) o un pago que no se pudo asociar (400/404,
  * el carrito queda como estaba).
  */
-function LemonCheckoutSuccess() {
+function IntlCheckoutSuccess({ provider }) {
   const t = useT()
   const navigate = useNavigate()
   const clearCart = useCart((s) => s.clear)
@@ -162,7 +164,8 @@ function LemonCheckoutSuccess() {
     ;(async () => {
       for (let attempt = 1; attempt <= INTL_MAX_TRIES; attempt += 1) {
         try {
-          const data = await api.confirmLemonCheckout(orderId)
+          const data =
+            provider === 'polar' ? await api.confirmPolarCheckout(orderId) : await api.confirmLemonCheckout(orderId)
           if (cancelled) return
           clearTimeout(watchdog)
           clearCart()
@@ -202,7 +205,7 @@ function LemonCheckoutSuccess() {
       cancelled = true
       clearTimeout(watchdog)
     }
-  }, [authLoading, user, orderId, navigate, clearCart, dropWelcome])
+  }, [authLoading, user, orderId, provider, navigate, clearCart, dropWelcome])
 
   const panel = RESOLVED_PANELS[confirmState]
   if (panel) {

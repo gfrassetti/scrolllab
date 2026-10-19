@@ -57,7 +57,7 @@ const orderSchema = new mongoose.Schema(
     // docs/lemonsqueezy.md). En USD `total` y los `unit_price` están en dólares.
     provider: {
       type: String,
-      enum: ["mercadopago", "lemonsqueezy"],
+      enum: ["mercadopago", "lemonsqueezy", "polar"],
       default: "mercadopago",
     },
     // Idioma de los mails de la orden (el del sitio al comprar).
@@ -70,6 +70,9 @@ const orderSchema = new mongoose.Schema(
     // (webhook `order_created`), el id de su orden: ese es el pago.
     lemonCheckoutId: String,
     lemonOrderId: { type: String, sparse: true, unique: true },
+    // Polar: el checkout que armamos y, cuando cobra (webhook `order.paid`), su orden.
+    polarCheckoutId: String,
+    polarOrderId: { type: String, sparse: true, unique: true },
     // Último pago rechazado (la orden sigue pending: se puede reintentar).
     paymentFailedAt: Date,
     // Mail «pago rechazado»: uno por orden, mismo claim que el recibo.
@@ -278,7 +281,7 @@ const subscriptionSchema = new mongoose.Schema(
     // Pasarela de la suscripción. Lemon Squeezy cobra en USD (docs/lemonsqueezy.md).
     provider: {
       type: String,
-      enum: ["mercadopago", "lemonsqueezy"],
+      enum: ["mercadopago", "lemonsqueezy", "polar"],
       default: "mercadopago",
     },
     currency_id: { type: String, default: "ARS" },
@@ -447,7 +450,7 @@ const withdrawalSchema = new mongoose.Schema(
 const refundSchema = new mongoose.Schema(
   {
     externalId: { type: String, required: true, unique: true },
-    provider: { type: String, enum: ["mercadopago", "lemonsqueezy"], required: true },
+    provider: { type: String, enum: ["mercadopago", "lemonsqueezy", "polar"], required: true },
     kind: { type: String, enum: ["order", "lab"], required: true },
     orderId: { type: String, default: null },
     subscriptionId: { type: String, default: null },

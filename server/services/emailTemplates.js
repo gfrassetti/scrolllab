@@ -60,7 +60,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
   }
   const orderId = String(db.uid(order) || order.id)
   // Lemon Squeezy es el vendedor legal (merchant of record): la factura la manda él.
-  const invoiceLine = isMerchantOfRecord(order.provider) ? ` ${invoiceNote('es')}` : ''
+  const invoiceLine = isMerchantOfRecord(order.provider) ? ` ${invoiceNote('es', order.provider)}` : ''
   const buyerName = user.name || user.email
   // Con descuento de primera compra: ítems a precio de lista, la línea del
   // descuento y el total cobrado. Sin descuento, igual que siempre.

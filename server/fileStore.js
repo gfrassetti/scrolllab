@@ -55,7 +55,7 @@ function duplicateKey(index) {
  */
 // Un elemento puede ser una clave compuesta (array de campos): único el conjunto.
 const UNIQUE_FIELDS = {
-  orders: ["mpPaymentId", "lemonOrderId"],
+  orders: ["mpPaymentId", "lemonOrderId", "polarOrderId"],
   leads: ["couponCode"],
   withdrawals: ["code"],
   "price-change-notices": [["subscriptionId", "changeId"]],
@@ -139,7 +139,7 @@ export const fileDb = {
     const rows = read("orders");
     // Índices únicos sparse del esquema (server/models.js): un pago de MP o una
     // orden de Lemon Squeezy pertenece a una sola orden nuestra.
-    for (const field of ["mpPaymentId", "lemonOrderId"]) {
+    for (const field of ["mpPaymentId", "lemonOrderId", "polarOrderId"]) {
       const value = data[field];
       if (value != null && rows.some((o) => o[field] === String(value))) {
         throw duplicateKey(field);
@@ -161,13 +161,19 @@ export const fileDb = {
   async findOrderById(id) {
     return withSave(read("orders").find((o) => o.id === String(id)) || null);
   },
-  /** La orden ya paga con ese pago de MP o esa orden de Lemon Squeezy, o null. */
-  async findPaidOrderByPayment({ mpPaymentId, lemonOrderId }) {
-    const field = lemonOrderId != null ? "lemonOrderId" : "mpPaymentId";
-    const value = String(lemonOrderId ?? mpPaymentId);
+  /** La orden ya paga con ese pago de MP o esa orden de Lemon Squeezy / Polar, o null. */
+  async findPaidOrderByPayment({ mpPaymentId, lemonOrderId, polarOrderId }) {
+    const field =
+      polarOrderId != null ? "polarOrderId" : lemonOrderId != null ? "lemonOrderId" : "mpPaymentId";
+    const value = String(polarOrderId ?? lemonOrderId ?? mpPaymentId);
     return withSave(
       read("orders").find((o) => o[field] === value && o.status === "paid") ||
         null,
+    );
+  },
+  async findOrderByPolarOrder(polarOrderId) {
+    return withSave(
+      read("orders").find((o) => o.polarOrderId === String(polarOrderId)) || null,
     );
   },
   async findOrderByLemonOrder(lemonOrderId) {

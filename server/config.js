@@ -146,6 +146,40 @@ export function loadLemonConfig(env = process.env) {
 }
 
 /**
+ * Polar (pasarela internacional en USD, ver docs/polar.md). Nunca tira: sin token ni
+ * secreto del webhook queda apagado y el resto de la API arranca igual.
+ * `POLAR_ENV=sandbox` (por defecto) usa el entorno de prueba: no cobra plata real y,
+ * como el modo prueba de Lemon Squeezy, existe solo para las cuentas de QA.
+ * En desarrollo el token puede venir como `POLAR_SANDBOX_TOKEN`.
+ * @param {NodeJS.ProcessEnv} [env]
+ */
+export function loadPolarConfig(env = process.env) {
+  const environment = (env.POLAR_ENV || "sandbox").trim().toLowerCase() === "production" ? "production" : "sandbox";
+  const accessToken = (
+    env.POLAR_ACCESS_TOKEN ||
+    (environment === "sandbox" ? env.POLAR_SANDBOX_TOKEN : "") ||
+    ""
+  ).trim();
+  const webhookSecret = (env.POLAR_WEBHOOK_SECRET || "").trim();
+  const hidden = env.POLAR_HIDDEN === "true" || env.POLAR_HIDDEN === "1";
+  const missing = [!accessToken && "POLAR_ACCESS_TOKEN", !webhookSecret && "POLAR_WEBHOOK_SECRET"].filter(Boolean);
+  const apiBase = (
+    env.POLAR_API_BASE ||
+    (environment === "production" ? "https://api.polar.sh/v1" : "https://sandbox-api.polar.sh/v1")
+  ).replace(/\/$/, "");
+  return {
+    enabled: !hidden && missing.length === 0,
+    hidden,
+    missing,
+    environment,
+    testMode: environment === "sandbox",
+    accessToken,
+    webhookSecret,
+    apiBase,
+  };
+}
+
+/**
  * Parseo y validación central de env.
  * En producción falla el boot si faltan secretos, Mongo o flags inseguros.
  */
@@ -239,6 +273,7 @@ export function loadConfig() {
   }
 
   const lemon = loadLemonConfig();
+  const polar = loadPolarConfig();
 
   const emailEnabled = bool("EMAIL_ENABLED", Boolean(process.env.RESEND_API_KEY));
   if (emailEnabled) {
@@ -267,6 +302,7 @@ export function loadConfig() {
     mpAccessToken,
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET || "",
     lemon,
+    polar,
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",

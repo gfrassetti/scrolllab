@@ -15,6 +15,11 @@ export const ordersRepo = {
   async findOrderById(id) {
     return isFileMode() ? fileDb.findOrderById(id) : MongoOrder.findById(id);
   },
+  async findOrderByPolarOrder(polarOrderId) {
+    return isFileMode()
+      ? fileDb.findOrderByPolarOrder(polarOrderId)
+      : MongoOrder.findOne({ polarOrderId: String(polarOrderId) });
+  },
   async findOrderByLemonOrder(lemonOrderId) {
     return isFileMode()
       ? fileDb.findOrderByLemonOrder(lemonOrderId)
@@ -57,17 +62,20 @@ export const ordersRepo = {
    * Transición pending→paid atómica. Si ya está paga con el mismo paymentId, ok.
    * Mercado Pago pasa `mpPaymentId` (queda guardado).
    * Lemon Squeezy pasa `lemonOrderId`: su id de orden llega recién al cobrar, y
-   * queda guardado como el de MP (la orden se identifica por el pago).
-   * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string }} args
+   * queda guardado como el de MP (la orden se identifica por el pago). Polar pasa
+   * `polarOrderId`, igual.
+   * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string, polarOrderId?: string }} args
    */
-  async markOrderPaidAtomic({ orderId, mpPaymentId, lemonOrderId }) {
-    const lemon = lemonOrderId != null;
+  async markOrderPaidAtomic({ orderId, mpPaymentId, lemonOrderId, polarOrderId }) {
+    const polar = polarOrderId != null;
+    const lemon = !polar && lemonOrderId != null;
     if (isFileMode()) {
       // Igual que en Mongo: un pago ya aplicado a una orden no paga otra, y se
       // devuelve la que ya pagó.
       const existing = await fileDb.findPaidOrderByPayment({
         mpPaymentId,
         lemonOrderId,
+        polarOrderId,
       });
       if (existing) return { order: existing, created: false };
       const order = await fileDb.findOrderById(orderId);
@@ -77,16 +85,19 @@ export const ordersRepo = {
       }
       order.status = "paid";
       order.paidAt = new Date().toISOString();
-      if (lemon) order.lemonOrderId = String(lemonOrderId);
+      if (polar) order.polarOrderId = String(polarOrderId);
+      else if (lemon) order.lemonOrderId = String(lemonOrderId);
       else order.mpPaymentId = String(mpPaymentId);
       delete order.expiresAt;
       await order.save();
       return { order, created: true };
     }
 
-    const paidBy = lemon
-      ? { lemonOrderId: String(lemonOrderId) }
-      : { mpPaymentId: String(mpPaymentId) };
+    const paidBy = polar
+      ? { polarOrderId: String(polarOrderId) }
+      : lemon
+        ? { lemonOrderId: String(lemonOrderId) }
+        : { mpPaymentId: String(mpPaymentId) };
     const existing = await MongoOrder.findOne({ ...paidBy, status: "paid" });
     if (existing) {
       return { order: existing, created: false };
@@ -113,14 +124,16 @@ export const ordersRepo = {
   /**
    * paid→refunded atómica, solo si el pago devuelto es el que la pagó (el
    * reembolso de un segundo pago duplicado no toca la orden).
-   * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string, reason: string }} args
+   * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string, polarOrderId?: string, reason: string }} args
    */
-  async markOrderRefundedAtomic({ orderId, mpPaymentId, lemonOrderId, reason }) {
+  async markOrderRefundedAtomic({ orderId, mpPaymentId, lemonOrderId, polarOrderId, reason }) {
     const at = new Date();
     const paidBy =
-      lemonOrderId != null
-        ? { lemonOrderId: String(lemonOrderId) }
-        : { mpPaymentId: String(mpPaymentId) };
+      polarOrderId != null
+        ? { polarOrderId: String(polarOrderId) }
+        : lemonOrderId != null
+          ? { lemonOrderId: String(lemonOrderId) }
+          : { mpPaymentId: String(mpPaymentId) };
     const [field, value] = Object.entries(paidBy)[0];
     if (isFileMode()) {
       const order = await fileDb.findOrderById(orderId);

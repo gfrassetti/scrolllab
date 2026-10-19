@@ -2,6 +2,7 @@ import express from 'express'
 import { asyncHandler } from '../../middleware.js'
 import { handleMercadoPagoNotification } from '../../services/payments.js'
 import { handleLemonNotification } from '../../services/lemonPayments.js'
+import { handlePolarNotification } from '../../services/polarPayments.js'
 
 /**
  * Webhooks de Mercado Pago (una sola URL): pagos únicos de Checkout Pro
@@ -40,6 +41,16 @@ export function createWebhooksRouter({ config, limits }) {
         config,
       })
       res.sendStatus(200)
+    }),
+  )
+
+  // Polar: Standard Webhooks (webhook-id / -timestamp / -signature) sobre el body crudo.
+  router.post(
+    '/api/webhooks/polar',
+    limits.webhook,
+    asyncHandler(async (req, res) => {
+      await handlePolarNotification({ rawBody: req.rawBody ?? '', headers: req.headers, config })
+      res.sendStatus(202)
     }),
   )
 

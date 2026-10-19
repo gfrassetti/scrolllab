@@ -78,7 +78,7 @@ export const api = {
       body: JSON.stringify({ token }),
     }),
   // El cupón viaja como código: el descuento lo calcula el servidor.
-  // `provider`: 'mercadopago' (ARS) o 'lemonsqueezy' (USD, cobro internacional).
+  // `provider`: 'mercadopago' (ARS) o 'lemonsqueezy' / 'polar' (USD, cobro internacional).
   checkout: (items, couponCode, { provider, locale } = {}) =>
     request('/api/checkout', {
       method: 'POST',
@@ -94,6 +94,12 @@ export const api = {
   // Vuelta de Lemon Squeezy: cómo va la orden (409 mientras el webhook no llegó).
   confirmLemonCheckout: (orderId) =>
     request('/api/checkout/lemonsqueezy/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ orderId }),
+    }),
+  // Vuelta de Polar: igual.
+  confirmPolarCheckout: (orderId) =>
+    request('/api/checkout/polar/confirm', {
       method: 'POST',
       body: JSON.stringify({ orderId }),
     }),

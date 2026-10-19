@@ -11,8 +11,8 @@ import { usePayRegion, providerForRegion } from './payRegion.js'
  * esto. Sin cargar todavía, Mercado Pago (el comportamiento de siempre).
  */
 function currentProvider() {
-  const { intlEnabled, region } = usePayRegion.getState()
-  return intlEnabled ? providerForRegion(region) : 'mercadopago'
+  const { intlEnabled, region, intl } = usePayRegion.getState()
+  return intlEnabled ? providerForRegion(region, intl) : 'mercadopago'
 }
 
 /** Idioma del sitio (para los mails de la orden), sin depender del contexto de React. */
@@ -45,7 +45,7 @@ export function checkoutPayloadFromItems(items) {
  *   navigate: (to: string) => void,
  *   loginNext?: string,
  *   couponCode?: string,
- *   provider?: 'mercadopago' | 'lemonsqueezy',
+ *   provider?: 'mercadopago' | 'lemonsqueezy' | 'polar',
  *   locale?: string,
  * }} opts
  * @returns {Promise<'login' | 'redirect'>}
@@ -75,7 +75,7 @@ export async function startCheckout({
 
   // Mercado Pago es el default del servidor: solo el carril internacional viaja explícito.
   const data = await api.checkout(payload, couponCode, {
-    provider: provider === 'lemonsqueezy' ? provider : undefined,
+    provider: provider === 'lemonsqueezy' || provider === 'polar' ? provider : undefined,
     locale,
   })
   if (!data?.init_point) {

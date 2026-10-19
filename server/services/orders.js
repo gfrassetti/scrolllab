@@ -176,11 +176,11 @@ export async function ensureOrderItemZip(order, index, user, config) {
  * Marca la orden como paga de forma atómica e idempotente.
  * Devuelve { order, created: boolean } donde created=false si ya estaba paga.
  * Mercado Pago pasa `mpPaymentId`; Lemon
- * Squeezy, `lemonOrderId`.
- * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string, config?: any }} args
+ * Squeezy, `lemonOrderId`; Polar, `polarOrderId`.
+ * @param {{ orderId: string, mpPaymentId?: string, lemonOrderId?: string, polarOrderId?: string, config?: any }} args
  */
-export async function markOrderPaid({ orderId, mpPaymentId, lemonOrderId, config: alertConfig = null }) {
-  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId, lemonOrderId })
+export async function markOrderPaid({ orderId, mpPaymentId, lemonOrderId, polarOrderId, config: alertConfig = null }) {
+  const result = await db.markOrderPaidAtomic({ orderId, mpPaymentId, lemonOrderId, polarOrderId })
   // Canjear el cupón es contabilidad: si falla no puede frenar lo ya pagado.
   if (result.created && result.order?.couponCode) {
     try {

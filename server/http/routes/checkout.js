@@ -15,7 +15,8 @@ import {
 } from '../../services/email.js'
 import { createCheckoutOrder } from '../../services/checkout.js'
 import { confirmLemonCheckout } from '../../services/lemonPayments.js'
-import { isQaBuyer } from '../../qa.js'
+import { confirmPolarCheckout } from '../../services/polarPayments.js'
+import { gatewayUsable, intlGatewayFor } from '../../services/intlGateway.js'
 
 /** País del request según el proxy (Vercel / Cloudflare), en mayúsculas o null. */
 export function requestCountry(req) {
@@ -110,19 +111,21 @@ export function createCheckoutRouter({ config, limits }) {
   router.get('/api/checkout/methods', (req, res) => {
     const country = requestCountry(req)
     // En modo prueba (no cobra), solo para las cuentas de QA: para el resto no hay carril.
-    const lemonOn =
-      Boolean(config.lemon?.enabled) && (!config.lemon.testMode || isQaBuyer(req.user, config))
+    // `intl`: la pasarela internacional que le toca a este usuario (Polar o Lemon Squeezy).
+    const intl = intlGatewayFor(config, req.user)
+    const lane = (gateway, conf) => {
+      const on = gatewayUsable(config, gateway, req.user)
+      return { enabled: on, currency: 'USD', ...(on ? { testMode: Boolean(conf?.testMode) } : {}) }
+    }
     res.set('Cache-Control', 'private, no-store')
     res.json({
       country,
-      suggested: lemonOn && country && country !== 'AR' ? 'lemonsqueezy' : 'mercadopago',
+      intl,
+      suggested: intl && country && country !== 'AR' ? intl : 'mercadopago',
       providers: {
         mercadopago: { enabled: true, mock: Boolean(config.mpMock), currency: 'ARS' },
-        lemonsqueezy: {
-          enabled: lemonOn,
-          currency: 'USD',
-          ...(lemonOn ? { testMode: Boolean(config.lemon.testMode) } : {}),
-        },
+        lemonsqueezy: lane('lemonsqueezy', config.lemon),
+        polar: lane('polar', config.polar),
       },
     })
   })
@@ -137,7 +140,7 @@ export function createCheckoutRouter({ config, limits }) {
           user: req.user,
           items: req.body?.items,
           couponCode: req.body?.couponCode,
-          provider: req.body?.provider === 'lemonsqueezy' ? 'lemonsqueezy' : 'mercadopago',
+          provider: ['lemonsqueezy', 'polar'].includes(req.body?.provider) ? req.body.provider : 'mercadopago',
           locale: req.body?.locale,
           config,
         }),
@@ -174,6 +177,27 @@ export function createCheckoutRouter({ config, limits }) {
           total: order.total,
           currency_id: order.currency_id,
         },
+      })
+    }),
+  )
+
+  /** Vuelta de Polar: igual que Lemon Squeezy (la cumple el webhook; 409 mientras no llegó). */
+  router.post(
+    '/api/checkout/polar/confirm',
+    requireAuth,
+    limits.checkout,
+    asyncHandler(async (req, res) => {
+      if (!config.polar?.enabled) throw new HttpError(400, 'Confirmación de Polar no disponible')
+      const { order, orderId, alreadyFulfilled } = await confirmPolarCheckout({
+        orderId: String(req.body?.orderId || '').trim(),
+        userId: db.uid(req.user),
+      })
+      res.json({
+        ok: true,
+        orderId,
+        alreadyFulfilled,
+        status: order.status,
+        order: { id: orderId, status: order.status, items: order.items, total: order.total, currency_id: order.currency_id },
       })
     }),
   )

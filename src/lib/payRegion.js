@@ -6,8 +6,8 @@ import { api } from './api.js'
  * internacional (Lemon Squeezy, USD). Lo elige él; la detección solo pone el
  * default: la elección guardada, el país que ve el servidor (Vercel /
  * Cloudflare) o, si no hay, la zona horaria del navegador. Ver
- * docs/lemonsqueezy.md. Si el carril internacional está, lo dice el servidor
- * (`providers.lemonsqueezy` de GET /api/checkout/methods).
+ * docs/lemonsqueezy.md y docs/polar.md. Si el carril internacional está y qué
+ * pasarela lo cobra, lo dice el servidor (`intl` de GET /api/checkout/methods).
  */
 
 export const PAY_REGIONS = Object.freeze(['ar', 'intl'])
@@ -59,10 +59,13 @@ export function resolveCurrency({ intlEnabled, region, locale }) {
 }
 
 /**
- * La pasarela de cada región.
+ * La pasarela de cada región. `intl`: la que cobra el carril internacional según el
+ * servidor (`polar` o `lemonsqueezy`; sin dato, Lemon Squeezy).
  * @param {'ar' | 'intl'} region
+ * @param {string | null} [intl]
  */
-export const providerForRegion = (region) => (region === 'intl' ? 'lemonsqueezy' : 'mercadopago')
+export const providerForRegion = (region, intl = null) =>
+  region === 'intl' ? (intl === 'polar' ? 'polar' : 'lemonsqueezy') : 'mercadopago'
 
 function readStored() {
   try {
@@ -91,6 +94,8 @@ export const usePayRegion = create((set, get) => ({
   intlEnabled: false,
   /** ¿El carril internacional cobra suscripciones (LAB)? */
   labIntlEnabled: false,
+  /** Quién cobra el carril internacional: 'polar' | 'lemonsqueezy' | null. */
+  intl: null,
   setRegion(region) {
     if (!PAY_REGIONS.includes(region)) return
     try {
@@ -109,11 +114,14 @@ export const usePayRegion = create((set, get) => ({
     } catch {
       methods = null
     }
-    const intlEnabled = Boolean(methods?.providers?.lemonsqueezy?.enabled)
+    const intl = methods?.intl || (methods?.providers?.lemonsqueezy?.enabled ? 'lemonsqueezy' : null)
+    const intlEnabled = Boolean(intl && methods?.providers?.[intl]?.enabled)
     set({
       methods,
+      intl: intlEnabled ? intl : null,
       intlEnabled,
-      labIntlEnabled: intlEnabled,
+      // LAB en USD, por ahora solo con Lemon Squeezy (Polar: etapa 2 de docs/polar.md).
+      labIntlEnabled: intlEnabled && intl === 'lemonsqueezy',
       status: 'ready',
       region: pickRegion({
         stored: readStored(),

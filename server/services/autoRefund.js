@@ -11,6 +11,8 @@ import {
   parseLemonInvoice,
 } from './lemonsqueezy.js'
 import { reverseLemonRefund } from './lemonPayments.js'
+import { refundOrder as refundPolarOrder } from './polar.js'
+import { reversePolarRefund } from './polarPayments.js'
 import { handleLabRefund, handleUpgradeRefund } from './subscriptions/labRefund.js'
 import { cancelAtPeriodEnd } from './subscriptions/cancel.js'
 import { isLemonSub } from './subscriptions/lemonSync.js'
@@ -89,6 +91,25 @@ async function refundOrder(order, row, config, deps) {
       config,
     })
     return { status: 'refunded', note: `orden Lemon Squeezy ${order.lemonOrderId}` }
+  }
+
+  if (order.provider === 'polar') {
+    if (!config.polar?.enabled || !order.polarOrderId) {
+      return { status: 'manual', note: 'Polar sin orden cobrada' }
+    }
+    // El monto es el precio antes de impuestos (Polar devuelve el impuesto proporcional).
+    const amountCents = Math.round(Number(order.total) * 100)
+    await (deps.refundPolarOrder || refundPolarOrder)(config, {
+      orderId: order.polarOrderId,
+      amountCents,
+      comment: `Botón de arrepentimiento ${row.code}`,
+    })
+    // La orden se corta ya (el webhook de la devolución llega después y no repite nada).
+    await reversePolarRefund({
+      order: { id: order.polarOrderId, status: 'refunded', refundedCents: amountCents, currency: 'USD', email: '' },
+      config,
+    })
+    return { status: 'refunded', note: `orden Polar ${order.polarOrderId}` }
   }
 
   if (config.mpMock || !config.mpAccessToken || !order.mpPaymentId) {
@@ -239,7 +260,7 @@ export async function executeWithdrawal(row, config, deps = {}) {
       out = { status: 'manual', note: 'sin compra ni suscripción asociada' }
     }
   } catch (err) {
-    const message = err instanceof HttpError || err?.name === 'LemonError' ? err.message : String(err?.message || err)
+    const message = err instanceof HttpError || err?.name === 'LemonError' || err?.name === 'PolarError' ? err.message : String(err?.message || err)
     out = { status: 'manual', note: message.slice(0, 300) }
   }
 
