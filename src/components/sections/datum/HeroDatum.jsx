@@ -10,10 +10,11 @@ import { useGSAP, ScrollTrigger } from '../../../lib/gsap'
  * spacing are solved for it). Scrolling, the name leaves (the menu takes its place at the top), the datum
  * turns a full circle and settles level, clearing the first copy as it sweeps; the statement rises from
  * below and is cut by the level line as it passes it; then black comes up the sheet — the «poché» of a
- * section drawing — and the second statement comes up in paper colour.
+ * section drawing. The practice (PracticeDatum) starts on that black without a seam: it overlaps the last
+ * screen of this one and its first words appear where the sheet went dark.
  *
  * Every number lives in `apply(q)` (q = 0 → 1 over the section). Reduced motion: no pin, the sheet and
- * both statements in place, nothing hidden.
+ * the statement in place, nothing hidden.
  */
 const CSS = `
 .datum-hero { position: relative; height: 420svh; }
@@ -51,23 +52,15 @@ const CSS = `
 .datum-poche { position: absolute; inset: 0; z-index: 3; background: var(--datum-ink);
   -webkit-mask-image: linear-gradient(var(--a2), #000 var(--p2), transparent var(--p2));
   mask-image: linear-gradient(var(--a2), #000 var(--p2), transparent var(--p2)); }
-.datum-statement[data-second] { color: var(--datum-paper); z-index: 3; right: auto; left: 50%; top: 50%; text-align: left;
-  transform: translate(-30%, -50%); opacity: 0; will-change: auto; }
-.datum-statement[data-second] span:nth-child(odd) { padding: 0; }
-.datum-statement[data-second] span:nth-child(2) { padding-left: 12.5vw; }
 @media (max-width: 767px) {
   .datum-statement { right: 6vw; font-size: 12vw; }
   .datum-statement span:nth-child(odd) { padding-right: 10vw; }
-  .datum-statement[data-second] { left: 6vw; transform: translateY(-50%); }
-  .datum-statement[data-second] span:nth-child(2) { padding-left: 10vw; }
 }
-/* reduced motion: the drawing, unpinned and complete; the second statement follows on the black */
+/* reduced motion: the drawing, unpinned and complete */
 .datum-hero[data-calm] { height: auto; }
 .datum-hero[data-calm] .datum-stage { position: relative; height: auto; min-height: 100svh; }
 .datum-hero[data-calm] .datum-layer, .datum-hero[data-calm] .datum-fade { -webkit-mask-image: none; mask-image: none; }
 .datum-hero[data-calm] .datum-poche { display: none; }
-.datum-hero[data-calm] .datum-statement[data-second] { position: relative; left: auto; top: auto; transform: none; opacity: 1;
-  margin-top: 100svh; padding: 14svh 6vw; background: var(--datum-ink); }
 `
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
@@ -178,7 +171,6 @@ export default function HeroDatum({
   caption = 'Measured form.\nRooms that last.',
   lede = 'An architecture practice\nthat draws every line\ntwice before it builds one.',
   statement = ['Every line', 'becomes', 'a wall.'],
-  second = ['Every wall', 'holds', 'a life.'],
   place = 'Porto · Est. 2009',
   scaleLabel = '0 — 4 m · 1:100',
   hint = 'Scroll to read the drawing',
@@ -192,7 +184,6 @@ export default function HeroDatum({
       const brand = el.querySelector('[data-brand]')
       const word = brand.firstElementChild
       const first = el.querySelector('[data-reveal] .datum-statement')
-      const second2 = el.querySelector('[data-second]')
       const fade = el.querySelector('.datum-fade')
       const docStyle = document.documentElement.style
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -253,11 +244,10 @@ export default function HeroDatum({
         const gone = ease(seg(q, 0.6, 0.72))
         first.style.transform = `translate3d(0, ${(1 - up) * box.rise + gone * box.exit}px, 0)`
 
-        // black comes up the sheet behind a second, level sweep
-        const s2 = ease(seg(q, 0.66, 0.88))
+        // black comes up the sheet behind a second, level sweep; the practice takes over on the black
+        const s2 = ease(seg(q, 0.68, 0.97))
         stage.style.setProperty('--a2', '0deg')
         stage.style.setProperty('--p2', `${-4 + s2 * 108}%`)
-        second2.style.opacity = String(clamp01((q - 0.8) / 0.08))
       }
 
       // measured again with the real face once it has loaded (asked for by name: `ready` can resolve before
@@ -353,13 +343,6 @@ export default function HeroDatum({
           </h2>
         </div>
         <div className="datum-poche" aria-hidden="true" />
-        <h2 data-second="" className="datum-statement" aria-label={second.join(' ')}>
-          {second.map((l) => (
-            <span key={l} aria-hidden="true">
-              {l}
-            </span>
-          ))}
-        </h2>
       </div>
     </section>
   )
