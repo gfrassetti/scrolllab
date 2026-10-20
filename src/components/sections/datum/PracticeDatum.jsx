@@ -4,27 +4,25 @@ import { useGSAP, ScrollTrigger } from '../../../lib/gsap'
 import { createFrameBudget, trackPointer } from '../../../lib/motion'
 
 /**
- * PracticeDatum — what the practice stands for: one long, slow shot through a solid block of cubes.
+ * PracticeDatum — what the practice stands for: one long shot through a solid block of cubes.
  *
  * It starts on the black the hero ends with: it overlaps the hero's last screen and only shows once it is
  * pinned, and its first frame has the hero's last word («a wall.») in 3D, exactly where the page left it
- * (it measures a copy of the hero's statement laid out with the same rules). The other two lines of the
- * statement come back faintly above it — also in 3D, so the pointer moves them. They sit on the front faces
- * of three cubes one behind the other, seen through a long lens; the lens widens and the camera moves onto
- * their line of sight, so they slide into each other (the nearest the whitest) and recede, while the block
- * comes out of the dark across the whole screen, words on its faces and light running along a few edges.
- *
- * The block is packed (the cubes touch: one grid of lines). Seen from the front and a little to the right
- * (looking left), the camera climbs and rolls, slowly, over many screens, until it looks straight down on
- * the top of the block like at a wall; then it sinks into one cube whose four walls carry a word each. Its
- * floor is the picture, which opens to the whole screen and carries three states — Weight, Light, Time —
- * with the counter 01 / 03. The pointer (or the finger) tilts the camera a little all along the way.
+ * (it measures a copy of the hero's statement laid out with the same rules). The other two lines come back
+ * above it, also in 3D (the pointer moves them): the three sit on the front faces of three cubes one
+ * behind the other, seen from a little below, so the nearest reads on top. The camera only climbs: level
+ * with them they fall onto each other — no zoom, the front one keeps its size and the others shrink behind
+ * it — while the block comes out of the dark across the whole screen, words on its faces, light running
+ * along a few edges. On up over the rows (looking a little to the left), rolling, slowly, until it looks
+ * straight down on the block. Then the nine columns around a shaft rise out of the block, faster than the
+ * rest, and pass the camera: it is inside the shaft, words on its walls, and the picture at the bottom
+ * comes up to fill the screen and carries three states — Weight, Light, Time — with the counter 01 / 03.
  *
  * Colours come from the page (`--datum-ink` / `--datum-paper`), so «Invert drawing» turns this over too.
  * Reduced motion: no canvas and no pin; the three states one under the other.
  */
 const CSS = `
-.dp { position: relative; height: 1800svh; margin-top: -100svh; background: var(--datum-ink); color: var(--datum-paper); }
+.dp { position: relative; height: 1400svh; margin-top: -100svh; background: var(--datum-ink); color: var(--datum-paper); }
 .dp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--datum-ink); }
 /* until it pins, the hero's last screen is what shows (the same black, the same lines, the same word) */
 .dp:not([data-live]) .dp-stage { visibility: hidden; }
@@ -225,43 +223,97 @@ export default function PracticeDatum({
       renderer.setPixelRatio(dpr)
       const budget = createFrameBudget({ dpr, apply: (v) => renderer.setPixelRatio(v) })
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(45, 1, 0.05, 120)
-      const fog = new THREE.Fog(0x101010, 40, 90)
+      const FOV = 40
+      const camera = new THREE.PerspectiveCamera(FOV, 1, 0.05, 120)
+      const fog = new THREE.Fog(0x101010, 5, 21)
       scene.fog = fog
       const bg = new THREE.Color(0x101010)
       const fg = new THREE.Color(0xefefed)
 
-      // --- the block: packed cubes, one grid of lines -----------------------------------------------
-      const S = 1.6 // cube size = grid step: the cubes touch
+      // --- the block -----------------------------------------------------------------------------------
+      // Packed cubes (they touch). The top layer is y = 0, the front row z = 0. Around the cube the camera
+      // ends in stands a 3 × 3 tower (the column in the middle is empty all the way down: a shaft, its walls
+      // carrying words, the picture at the bottom); late in the shot the tower rises out of the block, faster
+      // than the rest, and passes the camera.
+      const S = 1.6
       const H2 = S / 2
-      const X = [-7, 7]
-      const Y = [-6, 0] // the top layer is y = 0: its top faces are the wall seen from above
-      const Z = [-10, 0] // the front layer is z = 0
-      const cell = (i, j, k) => new THREE.Vector3(i * S, j * S, k * S)
-      const COL = { i: 0, j: -3 } // the column of the three words of the statement (front to back)
-      const TARGET = { i: 0, j: 0, k: -4 } // the cube the camera goes into
-      const target = cell(TARGET.i, TARGET.j, TARGET.k)
+      const X = [-6, 6]
+      const Y = [-2, 0]
+      const Z = [-12, 0]
+      const T = { i: 0, k: -6 } // the shaft
+      const cellPos = (i, j, k) => new THREE.Vector3(i * S, j * S, k * S)
+      const inShaft = (i, k) => i === T.i && k === T.k
+      const inTower = (i, k) => Math.abs(i - T.i) <= 1 && Math.abs(k - T.k) <= 1 && !inShaft(i, k)
+      const shaftTop = cellPos(T.i, 0, T.k).add(new THREE.Vector3(0, H2, 0))
+      const floorY = Y[0] * S - H2
 
-      const grid = []
-      const xs = [X[0] * S - H2, X[1] * S + H2]
-      const ys = [Y[0] * S - H2, Y[1] * S + H2]
-      const zs = [Z[0] * S - H2, Z[1] * S + H2]
-      for (let j = Y[0]; j <= Y[1] + 1; j++) {
-        for (let k = Z[0]; k <= Z[1] + 1; k++) grid.push(xs[0], j * S - H2, k * S - H2, xs[1], j * S - H2, k * S - H2)
+      const still = new THREE.Group() // the block
+      const tower = new THREE.Group() // the nine columns that rise
+      scene.add(still, tower)
+
+      // the edges of a set of cubes, each shared edge once
+      const edgesOf = (cells) => {
+        const seen = new Set()
+        const pos = []
+        const add = (key, a, b) => {
+          if (seen.has(key)) return
+          seen.add(key)
+          pos.push(...a, ...b)
+        }
+        for (const [i, j, k] of cells) {
+          const x0 = i * S - H2
+          const x1 = i * S + H2
+          const y0 = j * S - H2
+          const y1 = j * S + H2
+          const z0 = k * S - H2
+          const z1 = k * S + H2
+          for (const [y, sy] of [
+            [y0, 2 * j - 1],
+            [y1, 2 * j + 1],
+          ]) {
+            for (const [z, sz] of [
+              [z0, 2 * k - 1],
+              [z1, 2 * k + 1],
+            ]) add(`x${i},${sy},${sz}`, [x0, y, z], [x1, y, z])
+          }
+          for (const [x, sx] of [
+            [x0, 2 * i - 1],
+            [x1, 2 * i + 1],
+          ]) {
+            for (const [z, sz] of [
+              [z0, 2 * k - 1],
+              [z1, 2 * k + 1],
+            ]) add(`y${sx},${j},${sz}`, [x, y0, z], [x, y1, z])
+            for (const [y, sy] of [
+              [y0, 2 * j - 1],
+              [y1, 2 * j + 1],
+            ]) add(`z${sx},${sy},${k}`, [x, y, z0], [x, y, z1])
+          }
+        }
+        const g = new THREE.BufferGeometry()
+        g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+        return g
       }
-      for (let i = X[0]; i <= X[1] + 1; i++) {
-        for (let k = Z[0]; k <= Z[1] + 1; k++) grid.push(i * S - H2, ys[0], k * S - H2, i * S - H2, ys[1], k * S - H2)
-        for (let j = Y[0]; j <= Y[1] + 1; j++) grid.push(i * S - H2, j * S - H2, zs[0], i * S - H2, j * S - H2, zs[1])
+      const stillCells = []
+      const towerCells = []
+      for (let i = X[0]; i <= X[1]; i++) {
+        for (let j = Y[0]; j <= Y[1]; j++) {
+          for (let k = Z[0]; k <= Z[1]; k++) {
+            if (inShaft(i, k)) continue
+            ;(inTower(i, k) ? towerCells : stillCells).push([i, j, k])
+          }
+        }
       }
-      const lineGeo = new THREE.BufferGeometry()
-      lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(grid, 3))
       const lineMat = new THREE.LineBasicMaterial({ color: 0xefefed, transparent: true, opacity: 0, fog: true, depthWrite: false })
-      scene.add(new THREE.LineSegments(lineGeo, lineMat))
+      const stillLines = edgesOf(stillCells)
+      const towerLines = edgesOf(towerCells)
+      still.add(new THREE.LineSegments(stillLines, lineMat))
+      tower.add(new THREE.LineSegments(towerLines, lineMat))
 
       let seed = 23
       const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
 
-      // light along the edges of a few cubes, near the surfaces the camera sees
+      // light running along the edges of a few cubes of the top layer
       const LOOP = [
         [-1, -1, -1],
         [1, -1, -1],
@@ -273,17 +325,17 @@ export default function PracticeDatum({
       const gPos = []
       const gS = []
       const gPhase = []
-      for (let n = 0; n < 34; n++) {
-        const top = n % 2 === 0
-        const c = top
-          ? cell(Math.round(lerp(X[0], X[1], rnd())), 0, Math.round(lerp(Z[0], Z[1], rnd())))
-          : cell(Math.round(lerp(X[0], X[1], rnd())), Math.round(lerp(Y[0], Y[1], rnd())), -Math.floor(rnd() * 3))
+      for (let n = 0; n < 30; n++) {
+        const i = Math.round(lerp(X[0], X[1], rnd()))
+        const k = Math.round(lerp(Z[0], Z[1], rnd()))
+        if (inShaft(i, k) || inTower(i, k)) continue
+        const c = cellPos(i, n % 3 === 0 ? -1 : 0, k)
         const ph = rnd()
-        for (let k = 0; k < 6; k++) {
-          const a = LOOP[k]
-          const b = LOOP[(k + 1) % 6]
+        for (let e = 0; e < 6; e++) {
+          const a = LOOP[e]
+          const b = LOOP[(e + 1) % 6]
           gPos.push(c.x + a[0] * H2, c.y + a[1] * H2, c.z + a[2] * H2, c.x + b[0] * H2, c.y + b[1] * H2, c.z + b[2] * H2)
-          gS.push(k, k + 1)
+          gS.push(e, e + 1)
           gPhase.push(ph, ph)
         }
       }
@@ -296,66 +348,66 @@ export default function PracticeDatum({
         fragmentShader: GLOW_FRAG,
         transparent: true,
         depthWrite: false,
-        uniforms: { uTime: { value: 0 }, uGlow: { value: 0 }, uFar: { value: 22 }, uColor: { value: new THREE.Color(0xefefed) } },
+        uniforms: { uTime: { value: 0 }, uGlow: { value: 0 }, uFar: { value: 21 }, uColor: { value: new THREE.Color(0xefefed) } },
       })
-      scene.add(new THREE.LineSegments(glowGeo, glowMat))
+      still.add(new THREE.LineSegments(glowGeo, glowMat))
 
-      // words on the faces: front faces of the first layers (rows, like lines of a drawing), the tops of the
-      // top layer (the wall seen from above) and a few sides, turned. One instanced plane per word.
+      // words on the faces. Front faces of the first rows of the top layers (rows of words, like the lines of a
+      // drawing), the tops of the top layer, a few sides; the shaft's walls inside the tower.
       const FACES = {
         front: [new THREE.Vector3(0, 0, 1), new THREE.Euler(0, 0, 0)],
         top: [new THREE.Vector3(0, 1, 0), new THREE.Euler(-Math.PI / 2, 0, 0)],
         right: [new THREE.Vector3(1, 0, 0), new THREE.Euler(0, Math.PI / 2, 0)],
         left: [new THREE.Vector3(-1, 0, 0), new THREE.Euler(0, -Math.PI / 2, 0)],
+        back: [new THREE.Vector3(0, 0, -1), new THREE.Euler(0, Math.PI, 0)],
       }
-      const near = (i, j, k, o) => Math.abs(i - o.i) + Math.abs(j - o.j) + Math.abs(k - (o.k ?? k)) === 0
-      const spots = []
+      const stillSpots = []
+      const towerSpots = []
       for (let i = X[0]; i <= X[1]; i++) {
         for (let j = Y[0]; j <= Y[1]; j++) {
           for (let k = Z[0]; k <= Z[1]; k++) {
-            const inPhrase = i === COL.i && j === COL.j && k >= -2
-            const isTarget = near(i, j, k, TARGET)
-            const nextToTarget = j === TARGET.j && Math.abs(i - TARGET.i) + Math.abs(k - TARGET.k) === 1
-            if (k >= -3 && !inPhrase && rnd() < 0.6 - -k * 0.08) spots.push({ c: cell(i, j, k), face: 'front', spin: 0, delay: rnd(), tier: k === 0 ? 0.55 + rnd() * 0.45 : 0.25 + rnd() * 0.4 })
-            if (j === 0 && !isTarget && rnd() < 0.62) spots.push({ c: cell(i, j, k), face: 'top', spin: rnd() < 0.8 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.3 + rnd() * 0.7 })
-            if (!isTarget && !nextToTarget && k >= -3 && rnd() < 0.05) spots.push({ c: cell(i, j, k), face: rnd() < 0.5 ? 'right' : 'left', spin: Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.3 })
+            if (inShaft(i, k)) continue
+            const list = inTower(i, k) ? towerSpots : stillSpots
+            const c = cellPos(i, j, k)
+            const phraseCell = i === 0 && j === 0 && k >= -2
+            if (!inTower(i, k) && !phraseCell && j >= -1 && rnd() < (j === 0 ? 0.55 : 0.3)) {
+              list.push({ c, face: 'front', spin: 0, delay: rnd(), tier: j === 0 ? 0.45 + rnd() * 0.55 : 0.2 + rnd() * 0.3 })
+            }
+            if (j === 0 && rnd() < 0.55) list.push({ c, face: 'top', spin: rnd() < 0.75 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.3 + rnd() * 0.6 })
+            if (!inTower(i, k) && j >= -1 && rnd() < 0.05) list.push({ c, face: rnd() < 0.5 ? 'right' : 'left', spin: Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.3 })
+            // the shaft's walls: the faces of the tower that look into it, one word each, every layer
+            if (inTower(i, k)) {
+              const di = T.i - i
+              const dk = T.k - k
+              if (Math.abs(di) + Math.abs(dk) === 1) {
+                const face = di === 1 ? 'right' : di === -1 ? 'left' : dk === 1 ? 'front' : 'back'
+                list.push({ c, face, spin: 0, delay: rnd(), tier: 1, wall: true })
+              }
+            }
           }
         }
       }
-      spots.forEach((s) => (s.k = Math.floor(rnd() * WORDS.length)))
-      // the four walls of the target cube, facing in
-      const INNER = [
-        [new THREE.Vector3(H2 - 0.004, 0, 0), new THREE.Euler(0, -Math.PI / 2, 0)],
-        [new THREE.Vector3(-H2 + 0.004, 0, 0), new THREE.Euler(0, Math.PI / 2, 0)],
-        [new THREE.Vector3(0, 0, H2 - 0.004), new THREE.Euler(0, Math.PI, 0)],
-        [new THREE.Vector3(0, 0, -H2 + 0.004), new THREE.Euler(0, 0, 0)],
-      ]
+      ;[...stillSpots, ...towerSpots].forEach((s) => (s.k = s.wall ? WORDS.length + Math.floor(rnd() * WALLS.length) : Math.floor(rnd() * WORDS.length)))
 
-      const fieldTex = WORDS.map((w) => wordTexture(w))
-      const wallTex = WALLS.map((w) => wordTexture(w, { weight: 500, px: 160, track: -0.03 }))
+      const allTex = [...WORDS.map((w) => wordTexture(w)), ...WALLS.map((w) => wordTexture(w, { weight: 500, px: 160, track: -0.03 }))]
       const phraseTex = statement.map((w) => wordTexture(w, { weight: 400, px: 220, track: -0.045 }))
       const plane = new THREE.PlaneGeometry(1, 1)
       const wordMat = (t) => new THREE.MeshBasicMaterial({ map: t.tex, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: true })
-      const groups = fieldTex.map((t, k) => {
-        const list = spots.filter((s) => s.k === k)
-        const mesh = new THREE.InstancedMesh(plane, wordMat(t), Math.max(1, list.length))
-        mesh.count = list.length
-        mesh.frustumCulled = false
-        scene.add(mesh)
-        return { t, list, mesh }
-      })
-      const walls = wallTex.map((t, i) => {
-        const m = new THREE.Mesh(plane, wordMat(t))
-        m.position.copy(target).add(INNER[i][0])
-        m.rotation.copy(INNER[i][1])
-        scene.add(m)
-        return m
-      })
-      // the statement, front to back: the last line is the front word
+      const makeGroups = (spots, parent) =>
+        allTex.map((t, k) => {
+          const list = spots.filter((s) => s.k === k)
+          const mesh = new THREE.InstancedMesh(plane, wordMat(t), Math.max(1, list.length))
+          mesh.count = list.length
+          mesh.frustumCulled = false
+          parent.add(mesh)
+          return { t, list, mesh }
+        })
+      const groups = [...makeGroups(stillSpots, still), ...makeGroups(towerSpots, tower)]
+      // the statement: line i on the front face of the cube i rows back, in the column x = 0 of the top layer
       const phraseMeshes = phraseTex.map((t) => {
         const m = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({ map: t.tex, transparent: true, depthWrite: false, fog: true }))
         m.renderOrder = 2
-        scene.add(m)
+        still.add(m)
         return m
       })
 
@@ -364,7 +416,9 @@ export default function PracticeDatum({
         for (const g of groups) {
           g.list.forEach((s, i) => {
             const [n, rot] = FACES[s.face]
-            const h = Math.min(S * 0.2, (S * 0.8) / g.t.aspect)
+            // (a wall of the shaft is the face of a tower cube that looks into it: its normal points into the shaft)
+            const big = s.wall ? 0.34 : 0.2
+            const h = Math.min(S * big, (S * (s.wall ? 0.9 : 0.8)) / g.t.aspect)
             dummy.position.copy(s.c).addScaledVector(n, H2 + 0.004)
             dummy.rotation.copy(rot)
             if (s.spin) dummy.rotateZ(s.spin)
@@ -376,43 +430,44 @@ export default function PracticeDatum({
           g.mesh.instanceMatrix.needsUpdate = true
           if (g.mesh.instanceColor) g.mesh.instanceColor.needsUpdate = true
         }
-        walls.forEach((m, i) => {
-          const h = Math.min(S * 0.32, (S * 0.9) / wallTex[i].aspect)
-          m.scale.set(h * wallTex[i].aspect, h, 1)
-        })
       }
 
       // --- the camera ---------------------------------------------------------------------------------
-      // C0: a long lens, straight on, placed so the front word (the hero's last line) lands on the front face
-      // of its cube exactly where the page left it; the other two lines sit on the faces of the two cubes
-      // behind, along their rays. Cm: on the line through the front and back words, a wide lens — from there
-      // they fall onto each other. Then the orbit: from the front, a little to the right, up and over, rolling
-      // until the camera looks straight down on the top of the block.
-      const FOV0 = 9
-      const FOVM = 42
+      // C0: a little below the words and looking up at them, so the nearest («Every line») reads on top and
+      // the farthest («a wall.», the hero's word) at the bottom — each placed on its face along the ray through
+      // where the page laid it out, sized to read alike. Cm: level with them, on their line: they fall onto
+      // each other, the back ones shrinking to their true size behind the front one. Then the camera only
+      // climbs: over the rows, rolling, until it looks straight down on the block.
       const look = (eye, at, up) => new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(eye, at, up))
+      const XAXIS = new THREE.Vector3(1, 0, 0)
       const C0 = new THREE.Vector3()
-      const P = statement.map(() => new THREE.Vector3())
-      const Cm = new THREE.Vector3()
-      const Cb = new THREE.Vector3()
-      let qm = new THREE.Quaternion()
       const q0 = new THREE.Quaternion()
-      const pivot0 = new THREE.Vector3()
-      const pivot1 = target.clone().add(new THREE.Vector3(0, H2, 0))
-      const R0 = 9
-      const R1 = 9.5
+      const Cm = new THREE.Vector3()
+      let qm = new THREE.Quaternion()
+      const P = statement.map(() => new THREE.Vector3())
+      const scale0 = statement.map(() => new THREE.Vector2(1, 1))
+      const scale1 = statement.map(() => new THREE.Vector2(1, 1))
+      // the orbit looks first at the rows just behind the words, then moves its eye to the shaft
+      const pivotA = new THREE.Vector3(0, -0.6, -2 * S)
+      const pivot = new THREE.Vector3()
+      const EL0 = 30
+      const AZ0 = 14
+      const R0 = 7
+      const R1 = 8
       const orbit = (t, pos, quat) => {
-        const pv = new THREE.Vector3().lerpVectors(pivot0, pivot1, smooth(t))
-        const el = lerp(5, 90, t) * DEG
-        const az = lerp(16, 0, smooth(t)) * DEG
+        pivot.lerpVectors(pivotA, shaftTop, smooth(t))
+        const el = lerp(EL0, 90, t) * DEG
+        const az = lerp(AZ0, 0, smooth(t)) * DEG
         const r = lerp(R0, R1, t)
-        pos.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)).multiplyScalar(r).add(pv)
+        pos.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)).multiplyScalar(r).add(pivot)
         // the roll grows with the climb: at the top the world's x points up the screen and the words stand up
         const roll = lerp(0, 90, smooth(t)) * DEG
-        quat.copy(look(pos, pv, new THREE.Vector3(Math.sin(roll), Math.cos(roll), 0)))
+        quat.copy(look(pos, pivot, new THREE.Vector3(Math.sin(roll), Math.cos(roll), 0)))
       }
+      const O0 = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() }
       const O1 = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() }
-      const inside = target.clone().add(new THREE.Vector3(0, H2 * 1.15, 0))
+      orbit(0, O0.pos, O0.quat)
+      orbit(1, O1.pos, O1.quat)
 
       let W = 1
       let H = 1
@@ -422,7 +477,9 @@ export default function PracticeDatum({
         H = stage.clientHeight
         renderer.setSize(W, H, false)
         camera.aspect = W / H
-        // where the page lays the statement out (the hero's last word a hair under the level line)
+        camera.fov = FOV
+        camera.updateProjectionMatrix()
+        // where the page lays the statement out (the hero's last word just under the level line)
         const spans = [...measure.children]
         const fs = parseFloat(getComputedStyle(measure).fontSize)
         const box = stage.getBoundingClientRect()
@@ -434,38 +491,55 @@ export default function PracticeDatum({
           const r = range.getBoundingClientRect()
           return { x: r.left - box.left + r.width / 2, y: r.top - box.top + dy + r.height / 2, h: r.height }
         })
-        const tan0 = Math.tan((FOV0 * DEG) / 2)
-        const dirOf = (rc) => ray.set(((rc.x - W / 2) / (H / 2)) * tan0, -((rc.y - H / 2) / (H / 2)) * tan0, -1)
-        // the front word, on the front face of the front cube of the column, centred there
+        const tanH = Math.tan((FOV * DEG) / 2)
+        const rayAt = (rc, pitch) => ray.set(((rc.x - W / 2) / (H / 2)) * tanH, -((rc.y - H / 2) / (H / 2)) * tanH, -1).applyAxisAngle(XAXIS, pitch)
         const n = statement.length
-        const front = n - 1
-        const face0 = cell(COL.i, COL.j, 0).add(new THREE.Vector3(0, 0, H2 + 0.004))
-        // distance chosen so the longest line still fits its cube face from this lens
-        let D0 = 30
-        statement.forEach((_, i) => {
-          const back = front - i
-          const wpx = (rects[i].h * phraseTex[i].aspect) / phraseTex[i].box
-          const fit = (0.86 * S * H) / (2 * tan0 * wpx) - back * S
-          D0 = Math.min(D0, fit)
+        const faceZ = (i) => -i * S + H2 + 0.004
+        const zc = faceZ(0) + 3.4
+        // the pitch at which the first and the last line both land at the height of their faces (y = 0)
+        const miss = (pitch) => {
+          const r0 = rayAt(rects[0], pitch).clone()
+          const t0 = (faceZ(0) - zc) / r0.z
+          const y0 = -t0 * r0.y
+          const r2 = rayAt(rects[n - 1], pitch)
+          const t2 = (faceZ(n - 1) - zc) / r2.z
+          return { y0, err: y0 + t2 * r2.y }
+        }
+        let lo = -0.2
+        let hi = 0.8
+        let pitch = 0.16
+        if (Math.sign(miss(lo).err) !== Math.sign(miss(hi).err)) {
+          for (let it = 0; it < 40; it++) {
+            const mid = (lo + hi) / 2
+            if (Math.sign(miss(mid).err) === Math.sign(miss(lo).err)) lo = mid
+            else hi = mid
+          }
+          pitch = (lo + hi) / 2
+        }
+        const y0 = miss(pitch).y0
+        q0.setFromAxisAngle(XAXIS, pitch)
+        C0.set(0, y0, zc)
+        const ts = rects.map((rc, i) => {
+          const r = rayAt(rc, pitch)
+          return [r.clone(), (faceZ(i) - zc) / r.z]
         })
-        D0 = Math.max(6, D0)
-        C0.copy(face0).addScaledVector(dirOf(rects[front]), -D0)
+        // centre the column on the middle line
+        const mid = ts[Math.floor(n / 2)]
+        C0.x = -mid[0].x * mid[1]
         statement.forEach((_, i) => {
-          const back = front - i
-          const D = D0 + back * S
-          P[i].copy(C0).addScaledVector(dirOf(rects[i]), D)
-          const wpp = (2 * D * tan0) / H
+          const [r, t] = ts[i]
+          P[i].copy(C0).addScaledVector(r, t)
+          // depth along the view is t (the ray has −1 on the camera's own z)
+          const wpp = (2 * t * tanH) / H
           const h = rects[i].h * phraseTex[i].box * wpp
-          phraseMeshes[i].position.copy(P[i])
-          phraseMeshes[i].scale.set(h * phraseTex[i].aspect, h, 1)
+          scale0[i].set(h * phraseTex[i].aspect, h)
         })
-        const u = P[0].clone().sub(P[front]).normalize()
-        Cm.copy(P[front]).addScaledVector(u, -5)
-        qm = look(Cm, P[0], new THREE.Vector3(0, 1, 0))
-        // straight back along the same line: the three stay one on top of the other while the block opens
-        Cb.copy(P[front]).addScaledVector(u, -9)
-        pivot0.copy(P[front]).setZ(H2)
-        orbit(1, O1.pos, O1.quat)
+        // their true size: all as the front one is
+        statement.forEach((_, i) => scale1[i].copy(scale0[0]).multiplyScalar(phraseTex[i].aspect / phraseTex[0].aspect).setY(scale0[0].y))
+        // as far from the front word as the first camera was: it keeps its size while the others fall behind it
+        const dir = P[0].clone().sub(P[n - 1]).normalize()
+        Cm.copy(P[0]).addScaledVector(dir, P[0].distanceTo(C0))
+        qm = look(Cm, P[n - 1], new THREE.Vector3(0, 1, 0))
         dirty = true
       }
 
@@ -484,93 +558,86 @@ export default function PracticeDatum({
       // brightness of every word for the scroll position: a mix from the background to the paper colour
       const col = new THREE.Color()
       const tint = (q) => {
-        const front = statement.length - 1
-        const come = seg(q, 0.004, 0.03)
-        const bright = seg(q, 0.035, 0.06)
-        const merge = seg(q, 0.07, 0.16)
+        const n = statement.length
+        const come = seg(q, 0.0, 0.02)
+        const merge = seg(q, 0.02, 0.07)
         phraseMeshes.forEach((m, i) => {
-          const back = front - i
-          // the front word is the hero's, at full strength from the first frame; the other two come back faintly,
-          // brighten, then settle by depth as they slide behind it
-          const k = back === 0 ? lerp(1, 0.95, merge) : come * lerp(lerp(0.32, 0.72, bright), back === 1 ? 0.5 : 0.32, merge)
+          // the hero's word is there from the first frame; the other two come back, a little dimmer; once they
+          // fall into line the front one is the whitest
+          const start = i === n - 1 ? 1 : lerp(0, 0.78, come)
+          const end = i === 0 ? 1 : i === n - 1 ? 0.42 : 0.6
+          const k = lerp(start, end, merge)
           m.material.color.copy(bg).lerp(fg, k)
           m.visible = k > 0.002
         })
         for (const g of groups) {
           g.list.forEach((s, i) => {
-            const a = seg(q, 0.1 + s.delay * 0.12, 0.14 + s.delay * 0.12)
+            const a = s.wall ? seg(q, 0.36, 0.46) : seg(q, 0.04 + s.delay * 0.08, 0.07 + s.delay * 0.08)
             g.mesh.setColorAt(i, col.copy(bg).lerp(fg, a * s.tier))
           })
           if (g.mesh.instanceColor) g.mesh.instanceColor.needsUpdate = true
         }
-        const w = seg(q, 0.42, 0.56)
-        walls.forEach((m) => m.material.color.copy(bg).lerp(fg, w))
       }
 
-      // --- scroll → camera, words, window, states ----------------------------------------------------
-      const base = { pos: new THREE.Vector3(), quat: new THREE.Quaternion(), fov: FOVM, tilt: 1 }
+      // --- scroll → camera, block, window, states ----------------------------------------------------
+      const base = { pos: new THREE.Vector3(), quat: new THREE.Quaternion(), tilt: 1 }
       let lastQ = 0
       let dirty = true
+      let rise = 0
       const tmpQ = new THREE.Quaternion()
       const apply = (q) => {
         lastQ = q
         dirty = true
-        // 1 · the long lens widens and the camera moves onto the words' line: they slide into each other
-        const m = ease(seg(q, 0.06, 0.18))
-        // 2 · back a little and to the right, looking left at the block
-        const b = smooth(seg(q, 0.18, 0.25))
-        // 3 · up and over, rolling, slowly, until straight down on the top
-        const o = seg(q, 0.25, 0.56)
-        // 4 · down into the cube
-        const d = smooth(seg(q, 0.58, 0.7))
+        // 1 · up to the words' level: they fall into line (no zoom: the front one keeps its size)
+        const m = ease(seg(q, 0.004, 0.07))
+        // 2 · on up over the rows, looking down at them and a little to the left
+        const b = smooth(seg(q, 0.07, 0.13))
+        // 3 · climbing and rolling until straight down on the block
+        const o = seg(q, 0.13, 0.36)
         if (b <= 0) {
           base.pos.copy(C0).lerp(Cm, m)
-          base.quat.copy(q0).slerp(qm, m)
-          base.fov = lerp(FOV0, FOVM, m)
+          base.quat.copy(tmpQ.copy(q0).slerp(qm, m))
         } else if (o <= 0) {
-          base.pos.copy(Cm).lerp(Cb, b)
-          base.quat.copy(qm)
-          base.fov = FOVM
-        } else if (d <= 0) {
-          // from that line into the orbit (from the front, a little to the right, looking left), then up
-          orbit(smooth(o), base.pos, base.quat)
-          const w = smooth(seg(o, 0, 0.22))
-          base.pos.lerpVectors(Cb, base.pos, w)
-          // (slerp from a copy: slerpQuaternions(qm, base.quat) would overwrite base.quat before reading it)
-          base.quat.copy(tmpQ.copy(qm).slerp(base.quat, w))
-          base.fov = FOVM
+          base.pos.copy(Cm).lerp(O0.pos, b)
+          base.quat.copy(tmpQ.copy(qm).slerp(O0.quat, b))
         } else {
-          base.pos.copy(O1.pos).lerp(inside, d)
-          base.quat.copy(O1.quat)
-          base.fov = FOVM
+          orbit(o - Math.sin(o * 2 * Math.PI) / (2 * Math.PI), base.pos, base.quat)
         }
-        // the pointer tilts the camera until it is over the cube (then the floor has to stay square)
-        base.tilt = 1 - seg(q, 0.52, 0.57)
-        // the dark gives way as the lens widens: the block comes out across the whole screen
-        const f = seg(q, 0.07, 0.2)
-        fog.near = lerp(40, 3, f)
-        fog.far = lerp(90, lerp(15, 21, seg(q, 0.3, 0.5)), f)
-        lineMat.opacity = seg(q, 0.08, 0.2) * 0.13
-        glowMat.uniforms.uGlow.value = seg(q, 0.14, 0.22) * (1 - seg(q, 0.62, 0.7))
-        level.style.opacity = String(0.6 * (1 - seg(q, 0.005, 0.05)))
+        phraseMeshes.forEach((mesh, i) => {
+          mesh.position.copy(P[i])
+          mesh.scale.set(lerp(scale0[i].x, scale1[i].x, m), lerp(scale0[i].y, scale1[i].y, m), 1)
+        })
+        // 4 · from above, the nine columns around the shaft rise out of the block, faster than the rest, and
+        // pass the camera: it is inside the shaft, its walls go by, the picture at the bottom comes up to fill
+        // the screen
+        const camY = O1.pos.y
+        // (the floor fills the screen's height when it is H2 / tan(fov / 2) below the camera)
+        const lift = camY - H2 / Math.tan((FOV * DEG) / 2) - floorY
+        rise = 3 * smooth(seg(q, 0.38, 0.45)) + (lift - 3) * ease(seg(q, 0.45, 0.62))
+        tower.position.y = rise
+        still.position.y = 0.9 * smooth(seg(q, 0.38, 0.5))
+        base.tilt = 1 - seg(q, 0.34, 0.38)
+        lineMat.opacity = seg(q, 0.03, 0.09) * 0.16
+        glowMat.uniforms.uGlow.value = seg(q, 0.07, 0.13) * (1 - seg(q, 0.5, 0.58))
+        level.style.opacity = String(0.6 * (1 - seg(q, 0.002, 0.03)))
         tint(q)
 
         // three states over the open floor
-        const s = q < 0.78 ? -1 : q < 0.855 ? 0 : q < 0.93 ? 1 : 2
-        stateEls.forEach((n, i) => (i === s ? (n.dataset.on = '') : delete n.dataset.on))
-        plans.forEach((n, i) => (i === Math.max(0, s) ? (n.dataset.on = '') : delete n.dataset.on))
+        const s = q < 0.68 ? -1 : q < 0.785 ? 0 : q < 0.89 ? 1 : 2
+        stateEls.forEach((nd, i) => (i === s ? (nd.dataset.on = '') : delete nd.dataset.on))
+        plans.forEach((nd, i) => (i === Math.max(0, s) ? (nd.dataset.on = '') : delete nd.dataset.on))
         if (s >= 0) {
           count.dataset.on = ''
           countN.textContent = String(s + 1).padStart(2, '0')
         } else delete count.dataset.on
       }
 
-      // the floor of the target cube, projected: the window (the picture) sits exactly on it, then opens
-      const floor = [-1, 1].flatMap((sx) => [-1, 1].map((sz) => target.clone().add(new THREE.Vector3(sx * H2, -H2, sz * H2))))
+      // the floor of the shaft, projected: the window (the picture) sits exactly on it, then opens
+      const corner = [-1, 1].flatMap((sx) => [-1, 1].map((sz) => [T.i * S + sx * H2, T.k * S + sz * H2]))
       const v = new THREE.Vector3()
       const frameWindow = () => {
         const q = lastQ
-        const shown = seg(q, 0.57, 0.61)
+        const shown = seg(q, 0.42, 0.54)
         if (shown <= 0) {
           win.style.opacity = '0'
           canvas.style.opacity = '1'
@@ -580,8 +647,8 @@ export default function PracticeDatum({
         let y0 = Infinity
         let x1 = -Infinity
         let y1 = -Infinity
-        for (const c of floor) {
-          v.copy(c).project(camera)
+        for (const [cx, cz] of corner) {
+          v.set(cx, floorY + rise, cz).project(camera)
           const sx = ((v.x + 1) / 2) * W
           const sy = ((1 - v.y) / 2) * H
           x0 = Math.min(x0, sx)
@@ -589,7 +656,7 @@ export default function PracticeDatum({
           y0 = Math.min(y0, sy)
           y1 = Math.max(y1, sy)
         }
-        const open = ease(seg(q, 0.7, 0.77))
+        const open = ease(seg(q, 0.61, 0.67))
         win.style.transform = `translate3d(${lerp(x0, 0, open)}px, ${lerp(y0, 0, open)}px, 0)`
         win.style.width = `${Math.max(0, lerp(x1 - x0, W, open))}px`
         win.style.height = `${Math.max(0, lerp(y1 - y0, H, open))}px`
@@ -612,20 +679,14 @@ export default function PracticeDatum({
         sp.x += (pointer.x - sp.x) * 0.05
         sp.y += (pointer.y - sp.y) * 0.05
         const moving = Math.abs(pointer.x - sp.x) + Math.abs(pointer.y - sp.y) > 0.0005
-        if (!(lastQ < 0.78 || dirty || moving)) return
+        if (!(lastQ < 0.68 || dirty || moving)) return
         camera.position.copy(base.pos)
-        // the pointer turns the view a little; with the long lens of the first frames a little goes a long way
-        const k = (base.tilt * base.fov) / FOVM
-        euler.set(-sp.y * 0.05 * k, -sp.x * 0.075 * k, 0)
+        euler.set(-sp.y * 0.045 * base.tilt, -sp.x * 0.07 * base.tilt, 0)
         camera.quaternion.copy(base.quat).multiply(tmpQ.setFromEuler(euler))
-        if (camera.fov !== base.fov) {
-          camera.fov = base.fov
-          camera.updateProjectionMatrix()
-        }
         camera.updateMatrixWorld()
         glowMat.uniforms.uTime.value = now / 1000
         frameWindow()
-        if (lastQ < 0.79) {
+        if (lastQ < 0.68) {
           renderer.render(scene, camera)
           budget.tick(dt)
         }
@@ -643,7 +704,7 @@ export default function PracticeDatum({
       }
       // the words are painted in the page's face: if it has not arrived yet, they are painted again when it does
       Promise.all([document.fonts?.load("500 140px 'Inter Tight'"), document.fonts?.load("400 220px 'Inter Tight'")]).then(() => {
-        ;[...fieldTex, ...wallTex, ...phraseTex].forEach((t) => t.draw())
+        ;[...allTex, ...phraseTex].forEach((t) => t.draw())
         place()
         refit()
       })
@@ -675,11 +736,11 @@ export default function PracticeDatum({
         io.disconnect()
         mo.disconnect()
         renderer.dispose()
-        ;[lineGeo, plane, glowGeo].forEach((g) => g.dispose())
+        ;[stillLines, towerLines, plane, glowGeo].forEach((g) => g.dispose())
         ;[lineMat, glowMat].forEach((mt) => mt.dispose())
         groups.forEach((g) => g.mesh.material.dispose())
-        ;[...walls, ...phraseMeshes].forEach((mesh) => mesh.material.dispose())
-        ;[...fieldTex, ...wallTex, ...phraseTex].forEach((t) => t.tex.dispose())
+        phraseMeshes.forEach((mesh) => mesh.material.dispose())
+        ;[...allTex, ...phraseTex].forEach((t) => t.tex.dispose())
       }
     },
     { scope: root },
