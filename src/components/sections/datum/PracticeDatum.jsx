@@ -155,8 +155,9 @@ function wordTexture(text, { weight = 500, px = 140, track = -0.01 } = {}) {
   return out
 }
 
-// light running along the edges of a cube: a closed path of six edges (its Petrie polygon), the head of the
-// light at `fract(time · speed + phase) · 6` and a tail behind it
+// light running along the edges of a cube: a path of six edges (its Petrie polygon). The head runs the six
+// edges quickly, bright, with a long trail fading behind it, then the cube rests dark for a while (the cycle
+// is 6 edges of light and 4 of rest, each cube at its own phase)
 const GLOW_VERT = `
 attribute float aS;
 attribute float aPhase;
@@ -179,10 +180,11 @@ varying float vS;
 varying float vPhase;
 varying float vDepth;
 void main() {
-  float head = fract(uTime * 0.09 + vPhase) * 6.0;
-  float d = mod(head - vS + 6.0, 6.0);
-  float a = (1.0 - smoothstep(0.0, 1.2, d)) * (1.0 - smoothstep(uFar * 0.5, uFar, vDepth));
-  gl_FragColor = vec4(uColor, a * uGlow);
+  float head = fract(uTime * 0.26 + vPhase) * 10.0;
+  float d = head - vS;
+  float a = d < 0.0 ? 0.0 : exp(-d * 1.5);
+  a *= 1.0 - smoothstep(uFar * 0.55, uFar, vDepth);
+  gl_FragColor = vec4(uColor, min(1.0, a * 1.35) * uGlow);
 }`
 
 export default function PracticeDatum({
@@ -329,18 +331,35 @@ export default function PracticeDatum({
       const gPos = []
       const gS = []
       const gPhase = []
-      for (let n = 0; n < 30; n++) {
+      // WebGL draws lines one pixel wide: each lit edge is drawn five times, a hair apart across it, so the light
+      // has some body
+      const SPREAD = [
+        [0, 0],
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ]
+      for (let n = 0; n < 44; n++) {
         const i = Math.round(lerp(X[0], X[1], rnd()))
         const k = Math.round(lerp(Z[0], Z[1], rnd()))
         if (inShaft(i, k) || inTower(i, k)) continue
-        const c = cellPos(i, Math.round(lerp(Y[0] + 3, Y[1], rnd())), 0)
+        const c = cellPos(i, Math.round(lerp(Y[0] + 2, Y[1], rnd())), k)
         const ph = rnd()
         for (let e = 0; e < 6; e++) {
           const a = LOOP[e]
           const b = LOOP[(e + 1) % 6]
-          gPos.push(c.x + a[0] * H2, c.y + a[1] * H2, c.z + a[2] * H2, c.x + b[0] * H2, c.y + b[1] * H2, c.z + b[2] * H2)
-          gS.push(e, e + 1)
-          gPhase.push(ph, ph)
+          const axis = a[0] !== b[0] ? 0 : a[1] !== b[1] ? 1 : 2
+          const across = [0, 1, 2].filter((x) => x !== axis)
+          for (const [u, w] of SPREAD) {
+            const off = [0, 0, 0]
+            off[across[0]] = u * 0.007
+            off[across[1]] = w * 0.007
+            gPos.push(c.x + a[0] * H2 + off[0], c.y + a[1] * H2 + off[1], c.z + a[2] * H2 + off[2])
+            gPos.push(c.x + b[0] * H2 + off[0], c.y + b[1] * H2 + off[1], c.z + b[2] * H2 + off[2])
+            gS.push(e, e + 1)
+            gPhase.push(ph, ph)
+          }
         }
       }
       const glowGeo = new THREE.BufferGeometry()
