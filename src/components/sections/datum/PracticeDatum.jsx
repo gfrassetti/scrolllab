@@ -22,7 +22,7 @@ import { createFrameBudget, trackPointer } from '../../../lib/motion'
  * Reduced motion: no canvas and no pin; the three states one under the other.
  */
 const CSS = `
-.dp { position: relative; height: 1400svh; margin-top: -100svh; background: var(--datum-ink); color: var(--datum-paper); }
+.dp { position: relative; height: 2000svh; margin-top: -100svh; background: var(--datum-ink); color: var(--datum-paper); }
 .dp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--datum-ink); }
 /* until it pins, the hero's last screen is what shows (the same black, the same lines, the same word) */
 .dp:not([data-live]) .dp-stage { visibility: hidden; }
@@ -456,7 +456,8 @@ export default function PracticeDatum({
       const R1 = 8
       const orbit = (t, pos, quat) => {
         pivot.lerpVectors(pivotA, shaftTop, smooth(t))
-        const el = lerp(EL0, 90, t) * DEG
+        // pitch and roll come up evenly over the whole climb: straight down only at its very end
+        const el = lerp(EL0, 90, 0.5 * t + 0.5 * smooth(t)) * DEG
         const az = lerp(AZ0, 0, smooth(t)) * DEG
         const r = lerp(R0, R1, t)
         pos.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)).multiplyScalar(r).add(pivot)
@@ -559,8 +560,8 @@ export default function PracticeDatum({
       const col = new THREE.Color()
       const tint = (q) => {
         const n = statement.length
-        const come = seg(q, 0.0, 0.02)
-        const merge = seg(q, 0.02, 0.07)
+        const come = seg(q, 0.0, 0.014)
+        const merge = seg(q, 0.014, 0.048)
         phraseMeshes.forEach((m, i) => {
           // the hero's word is there from the first frame; the other two come back, a little dimmer; once they
           // fall into line the front one is the whitest
@@ -572,7 +573,7 @@ export default function PracticeDatum({
         })
         for (const g of groups) {
           g.list.forEach((s, i) => {
-            const a = s.wall ? seg(q, 0.36, 0.46) : seg(q, 0.04 + s.delay * 0.08, 0.07 + s.delay * 0.08)
+            const a = s.wall ? seg(q, 0.37, 0.47) : seg(q, 0.028 + s.delay * 0.055, 0.048 + s.delay * 0.055)
             g.mesh.setColorAt(i, col.copy(bg).lerp(fg, a * s.tier))
           })
           if (g.mesh.instanceColor) g.mesh.instanceColor.needsUpdate = true
@@ -589,11 +590,11 @@ export default function PracticeDatum({
         lastQ = q
         dirty = true
         // 1 · up to the words' level: they fall into line (no zoom: the front one keeps its size)
-        const m = ease(seg(q, 0.004, 0.07))
+        const m = ease(seg(q, 0.003, 0.048))
         // 2 · on up over the rows, looking down at them and a little to the left
-        const b = smooth(seg(q, 0.07, 0.13))
+        const b = smooth(seg(q, 0.048, 0.09))
         // 3 · climbing and rolling until straight down on the block
-        const o = seg(q, 0.13, 0.36)
+        const o = seg(q, 0.09, 0.38)
         if (b <= 0) {
           base.pos.copy(C0).lerp(Cm, m)
           base.quat.copy(tmpQ.copy(q0).slerp(qm, m))
@@ -601,7 +602,7 @@ export default function PracticeDatum({
           base.pos.copy(Cm).lerp(O0.pos, b)
           base.quat.copy(tmpQ.copy(qm).slerp(O0.quat, b))
         } else {
-          orbit(o - Math.sin(o * 2 * Math.PI) / (2 * Math.PI), base.pos, base.quat)
+          orbit(o, base.pos, base.quat)
         }
         phraseMeshes.forEach((mesh, i) => {
           mesh.position.copy(P[i])
@@ -613,17 +614,17 @@ export default function PracticeDatum({
         const camY = O1.pos.y
         // (the floor fills the screen's height when it is H2 / tan(fov / 2) below the camera)
         const lift = camY - H2 / Math.tan((FOV * DEG) / 2) - floorY
-        rise = 3 * smooth(seg(q, 0.38, 0.45)) + (lift - 3) * ease(seg(q, 0.45, 0.62))
+        rise = 3 * smooth(seg(q, 0.4, 0.47)) + (lift - 3) * ease(seg(q, 0.47, 0.62))
         tower.position.y = rise
-        still.position.y = 0.9 * smooth(seg(q, 0.38, 0.5))
-        base.tilt = 1 - seg(q, 0.34, 0.38)
-        lineMat.opacity = seg(q, 0.03, 0.09) * 0.16
-        glowMat.uniforms.uGlow.value = seg(q, 0.07, 0.13) * (1 - seg(q, 0.5, 0.58))
-        level.style.opacity = String(0.6 * (1 - seg(q, 0.002, 0.03)))
+        still.position.y = 0.9 * smooth(seg(q, 0.4, 0.52))
+        base.tilt = 1 - seg(q, 0.36, 0.42)
+        lineMat.opacity = seg(q, 0.02, 0.06) * 0.16
+        glowMat.uniforms.uGlow.value = seg(q, 0.05, 0.09) * (1 - seg(q, 0.52, 0.6))
+        level.style.opacity = String(0.6 * (1 - seg(q, 0.002, 0.02)))
         tint(q)
 
         // three states over the open floor
-        const s = q < 0.68 ? -1 : q < 0.785 ? 0 : q < 0.89 ? 1 : 2
+        const s = q < 0.68 ? -1 : q < 0.79 ? 0 : q < 0.895 ? 1 : 2
         stateEls.forEach((nd, i) => (i === s ? (nd.dataset.on = '') : delete nd.dataset.on))
         plans.forEach((nd, i) => (i === Math.max(0, s) ? (nd.dataset.on = '') : delete nd.dataset.on))
         if (s >= 0) {
@@ -637,7 +638,7 @@ export default function PracticeDatum({
       const v = new THREE.Vector3()
       const frameWindow = () => {
         const q = lastQ
-        const shown = seg(q, 0.42, 0.54)
+        const shown = seg(q, 0.45, 0.55)
         if (shown <= 0) {
           win.style.opacity = '0'
           canvas.style.opacity = '1'
@@ -656,7 +657,7 @@ export default function PracticeDatum({
           y0 = Math.min(y0, sy)
           y1 = Math.max(y1, sy)
         }
-        const open = ease(seg(q, 0.61, 0.67))
+        const open = ease(seg(q, 0.61, 0.66))
         win.style.transform = `translate3d(${lerp(x0, 0, open)}px, ${lerp(y0, 0, open)}px, 0)`
         win.style.width = `${Math.max(0, lerp(x1 - x0, W, open))}px`
         win.style.height = `${Math.max(0, lerp(y1 - y0, H, open))}px`
