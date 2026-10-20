@@ -416,6 +416,8 @@ export default function PracticeDatum({
         still.add(m)
         return m
       })
+      // the hero's word is drawn over the other two when they slide behind it
+      phraseMeshes[phraseMeshes.length - 1].renderOrder = 3
 
       const dummy = new THREE.Object3D()
       const place = () => {
@@ -450,6 +452,18 @@ export default function PracticeDatum({
       const q0 = new THREE.Quaternion()
       const Cm = new THREE.Vector3()
       let qm = new THREE.Quaternion()
+      const qmHeld = new THREE.Quaternion()
+      // the hero's word stays where the page left it: the camera is turned (the least) so that the word keeps
+      // the direction it had from the first camera
+      const held = new THREE.Vector3()
+      const hv1 = new THREE.Vector3()
+      const hv2 = new THREE.Vector3()
+      const hq = new THREE.Quaternion()
+      const hold = (pos, quat, out) => {
+        hv1.copy(held).applyQuaternion(quat)
+        hv2.copy(P[P.length - 1]).sub(pos).normalize()
+        return out.copy(hq.setFromUnitVectors(hv1, hv2).multiply(quat))
+      }
       const P = statement.map(() => new THREE.Vector3())
       const scale0 = statement.map(() => new THREE.Vector2(1, 1))
       const scale1 = statement.map(() => new THREE.Vector2(1, 1))
@@ -542,12 +556,21 @@ export default function PracticeDatum({
           const h = rects[i].h * phraseTex[i].box * wpp
           scale0[i].set(h * phraseTex[i].aspect, h)
         })
-        // their true size: all as the front one is
-        statement.forEach((_, i) => scale1[i].copy(scale0[0]).multiplyScalar(phraseTex[i].aspect / phraseTex[0].aspect).setY(scale0[0].y))
-        // as far from the front word as the first camera was: it keeps its size while the others fall behind it
-        const dir = P[0].clone().sub(P[n - 1]).normalize()
-        Cm.copy(P[0]).addScaledVector(dir, P[0].distanceTo(C0))
-        qm = look(Cm, P[n - 1], new THREE.Vector3(0, 1, 0))
+        // Cm: on the words' line, as far from the hero's word as the first camera was — the word keeps its size
+        // (and, with the camera turned to hold it, its place) while the other two slide onto it
+        const last = n - 1
+        const dir = P[0].clone().sub(P[last]).normalize()
+        Cm.copy(P[last]).addScaledVector(dir, P[last].distanceTo(C0))
+        qm = look(Cm, P[last], new THREE.Vector3(0, 1, 0))
+        held.copy(P[last]).sub(C0).normalize().applyQuaternion(q0.clone().invert())
+        hold(Cm, qm, qmHeld)
+        // the other two end smaller than it on the screen, as words on cubes further off would be
+        statement.forEach((_, i) => {
+          if (i === last) return scale1[i].copy(scale0[i])
+          const k = (0.6 * P[i].distanceTo(Cm)) / P[last].distanceTo(Cm)
+          const h = scale0[last].y * k
+          scale1[i].set(h * phraseTex[i].aspect, h)
+        })
         dirty = true
       }
 
@@ -567,14 +590,12 @@ export default function PracticeDatum({
       const col = new THREE.Color()
       const tint = (q) => {
         const n = statement.length
-        const come = seg(q, 0.0, 0.014)
-        const merge = seg(q, 0.014, 0.048)
+        const come = smooth(seg(q, 0.002, 0.036))
+        const merge = smooth(seg(q, 0.03, 0.065))
         phraseMeshes.forEach((m, i) => {
-          // the hero's word is there from the first frame; the other two come back, a little dimmer; once they
-          // fall into line the front one is the whitest
-          const start = i === n - 1 ? 1 : lerp(0, 0.78, come)
-          const end = i === 0 ? 1 : i === n - 1 ? 0.42 : 0.6
-          const k = lerp(start, end, merge)
+          // the hero's word stays as it was; the other two come up out of the dark, slowly, then grey as they
+          // slide behind it
+          const k = i === n - 1 ? 1 : lerp(lerp(0, 0.66, come), i === 0 ? 0.3 : 0.4, merge)
           m.material.color.copy(bg).lerp(fg, k)
           m.visible = k > 0.002
         })
@@ -597,17 +618,17 @@ export default function PracticeDatum({
         lastQ = q
         dirty = true
         // 1 · up to the words' level: they fall into line (no zoom: the front one keeps its size)
-        const m = ease(seg(q, 0.003, 0.048))
+        const m = ease(seg(q, 0.014, 0.065))
         // 2 · on up over the rows, looking down at them and a little to the left
-        const b = smooth(seg(q, 0.048, 0.09))
+        const b = smooth(seg(q, 0.065, 0.1))
         // 3 · climbing and rolling until straight down on the block
-        const o = seg(q, 0.09, 0.38)
+        const o = seg(q, 0.1, 0.38)
         if (b <= 0) {
           base.pos.copy(C0).lerp(Cm, m)
-          base.quat.copy(tmpQ.copy(q0).slerp(qm, m))
+          hold(base.pos, tmpQ.copy(q0).slerp(qm, m), base.quat)
         } else if (o <= 0) {
           base.pos.copy(Cm).lerp(O0.pos, b)
-          base.quat.copy(tmpQ.copy(qm).slerp(O0.quat, b))
+          base.quat.copy(tmpQ.copy(qmHeld).slerp(O0.quat, b))
         } else {
           orbit(o, base.pos, base.quat)
         }
