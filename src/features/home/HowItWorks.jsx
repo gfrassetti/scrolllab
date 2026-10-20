@@ -74,12 +74,19 @@ export default function HowItWorks({ t, howPanels }) {
               href="https://polar.sh/"
               target="_blank"
               rel="noreferrer"
-              className="flex h-16 items-center rounded-sm border border-ink/15 bg-bone px-6 transition-colors hover:border-ink/40"
+              className="flex h-16 items-center rounded-sm border border-ink/15 bg-bone px-4 transition-colors hover:border-ink/40"
               aria-label="Polar"
             >
-              <span className="text-xl font-semibold tracking-tight text-ink">
-                Polar
-              </span>
+              <img
+                src="/payment/polar.svg"
+                alt="Polar"
+                className="h-12 w-32 object-contain px-5 dark:hidden"
+              />
+              <img
+                src="/payment/polar-white.svg"
+                alt="Polar"
+                className="hidden h-12 w-32 object-contain px-5 dark:block"
+              />
             </a>
           </div>
         </div>
