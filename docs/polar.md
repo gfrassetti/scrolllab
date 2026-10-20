@@ -1,6 +1,6 @@
 # Polar — pasarela internacional (USD, merchant of record)
 
-Estado (2026-10-19): **etapas 1 y 2 conectadas y probadas en vivo en el sandbox** (compras de templates, bundle y
+Estado (2026-10-20): **en vivo** (cobros reales desde el 2026-10-20). Etapas 1 y 2 probadas en el sandbox (compras de templates, bundle y
 builder, reembolsos, Botón de arrepentimiento y LAB: alta, primer cobro, subir y bajar de plan, devolución del
 primer cobro con baja inmediata). Es la única pasarela internacional: Paddle se descartó el 2026-10-15 y Lemon
 Squeezy el 2026-10-19 (no aprobaba la tienda y los reembolsos de suscripción fallaban en su modo prueba); el código
@@ -68,5 +68,7 @@ formato **Raw**, eventos `order.paid`, `order.updated`, `order.refunded` y (para
    `_update`, la diferencia de plan va aparte), `past_due` → gracia + mail con el portal del cliente, baja al fin del
    período (`cancel_at_period_end`) o inmediata (`revoke`), cambio de plan (`invoice` al subir, `next_period` al
    bajar) y devolución del primer cobro por la API con baja inmediata.
-3. ⏳ Salir a cobros reales: cuenta aprobada, token y webhook de producción, `POLAR_ENV=production`, legales y textos
-   del sitio que nombran a Polar.
+3. ✅ En vivo desde el 2026-10-20: cuenta aprobada (Stripe Connect a una cuenta en pesos), token y webhook de producción,
+   `POLAR_ENV=production`. Compra real de US$1 y devolución por el Botón de arrepentimiento (ARR-27YXKN) probadas.
+   Ojo: muchas tarjetas argentinas fallan en la validación del banco (Visa Secure) en un comercio del exterior hasta
+   habilitar las compras al exterior; los argentinos pagan con Mercado Pago.
