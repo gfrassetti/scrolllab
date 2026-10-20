@@ -1146,6 +1146,18 @@
           "name": "Stat field",
           "blurb": "Practice counters that count up on enter, closing on a typographic statement"
         },
+        "AwardsPress": {
+          "name": "Awards press",
+          "blurb": "Recognition as a ruled table: year, award and the project it was for"
+        },
+        "ClientVoice": {
+          "name": "Client voice",
+          "blurb": "One client sentence at headline size in the serif, with a project photograph"
+        },
+        "JournalList": {
+          "name": "Journal list",
+          "blurb": "Three notes from the studio: photograph, date, title and a read link"
+        },
         "FooterAtrium": {
           "name": "Footer atrium",
           "blurb": "Giant wordmark closer and a legal row"

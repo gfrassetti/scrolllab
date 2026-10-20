@@ -564,6 +564,18 @@ const CASES = {
     props: { kicker: 'MKSFAT', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKSFAT',
   },
+  'atrium/AwardsPress': {
+    props: { kicker: 'MKAPAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKAPAT',
+  },
+  'atrium/ClientVoice': {
+    props: { name: 'MKCVAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKCVAT',
+  },
+  'atrium/JournalList': {
+    props: { kicker: 'MKJLAT', bg: '#141414', fg: '#f0f0f0' },
+    marker: 'MKJLAT',
+  },
   'meridian/Concept': {
     props: { kicker: 'MKCME', bg: '#141414', fg: '#f0f0f0' },
     marker: 'MKCME',

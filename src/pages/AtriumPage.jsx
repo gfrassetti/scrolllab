@@ -10,6 +10,9 @@ import ClarityPair from '../components/sections/atrium/ClarityPair'
 import PeopleScatter from '../components/sections/atrium/PeopleScatter'
 import OrbitRing from '../components/sections/atrium/OrbitRing'
 import StatField from '../components/sections/atrium/StatField'
+import AwardsPress from '../components/sections/atrium/AwardsPress'
+import ClientVoice from '../components/sections/atrium/ClientVoice'
+import JournalList from '../components/sections/atrium/JournalList'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import ContactForm from '../components/sections/contact/ContactForm'
 
@@ -18,7 +21,8 @@ import ContactForm from '../components/sections/contact/ContactForm'
  * Architecture bureau. One arc: paper (hero, manifesto, scope, work,
  * process) → the ClarityPair hinge inverts the field → ink (people, the
  * ring, the figures) → paper again for the brief → the wordmark closes.
- * Contact sits after the black act, never inside it. Generic English copy.
+ * Recognition, a client voice and the journal come back on paper after it;
+ * contact sits after the black act, never inside it. Generic English copy.
  */
 export default function AtriumPage() {
   return (
@@ -44,6 +48,9 @@ export default function AtriumPage() {
           <PeopleScatter />
           <OrbitRing />
           <StatField />
+          <AwardsPress />
+          <ClientVoice />
+          <JournalList />
           <ContactForm
             theme="atrium"
             eyebrow="Commissions"

@@ -85,6 +85,9 @@ import ProcessPin from '../components/sections/atrium/ProcessPin'
 import PeopleScatter from '../components/sections/atrium/PeopleScatter'
 import OrbitRing from '../components/sections/atrium/OrbitRing'
 import StatField from '../components/sections/atrium/StatField'
+import AwardsPress from '../components/sections/atrium/AwardsPress'
+import ClientVoice from '../components/sections/atrium/ClientVoice'
+import JournalList from '../components/sections/atrium/JournalList'
 import FooterAtrium from '../components/sections/atrium/FooterAtrium'
 import FilmScroll from '../components/sections/plum/FilmScroll'
 import MeridianHero from '../components/sections/meridian/Hero'
@@ -285,6 +288,9 @@ const allModels = [
       { id: 'atrium/PeopleScatter', name: 'People Scatter', kind: 'section', component: PeopleScatter, blurb: 'Black field, serif studio line, tilted photos with parallax' },
       { id: 'atrium/OrbitRing', name: 'Orbit Ring', kind: 'section', component: OrbitRing, blurb: 'Black pin, a rotating ring of studio photographs around the founding year' },
       { id: 'atrium/StatField', name: 'Stat Field', kind: 'section', component: StatField, blurb: 'Practice counters that count up on enter, closing on a typographic statement' },
+      { id: 'atrium/AwardsPress', name: 'Awards Press', kind: 'section', component: AwardsPress, blurb: 'Recognition as a ruled table: year, award and the project it was for' },
+      { id: 'atrium/ClientVoice', name: 'Client Voice', kind: 'section', component: ClientVoice, blurb: 'One client sentence at headline size in the serif, with a project photograph' },
+      { id: 'atrium/JournalList', name: 'Journal List', kind: 'section', component: JournalList, blurb: 'Three notes from the studio: photograph, date, title and a read link' },
       { id: 'atrium/FooterAtrium', name: 'Footer Atrium', kind: 'footer', component: FooterAtrium, blurb: 'Giant wordmark closer and a legal row' },
     ],
   },

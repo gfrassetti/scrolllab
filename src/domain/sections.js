@@ -113,6 +113,9 @@ const BY_MODEL = {
     PeopleScatter: 'section',
     OrbitRing: 'section',
     StatField: 'section',
+    AwardsPress: 'section',
+    ClientVoice: 'section',
+    JournalList: 'section',
     FooterAtrium: 'footer',
   },
   plum: {

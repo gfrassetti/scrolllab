@@ -1146,6 +1146,18 @@
           "name": "Stat field",
           "blurb": "Contadores del estudio que cuentan al entrar y cierran en una frase tipográfica"
         },
+        "AwardsPress": {
+          "name": "Awards press",
+          "blurb": "Premios y prensa como tabla con reglas: año, premio y el proyecto"
+        },
+        "ClientVoice": {
+          "name": "Client voice",
+          "blurb": "Una frase de un cliente en serif grande, con una foto del proyecto"
+        },
+        "JournalList": {
+          "name": "Journal list",
+          "blurb": "Tres notas del estudio: foto, fecha, título y un Read"
+        },
         "FooterAtrium": {
           "name": "Footer atrium",
           "blurb": "Wordmark gigante y fila legal"
