@@ -231,16 +231,20 @@ export default function PracticeDatum({
       const fg = new THREE.Color(0xefefed)
 
       // --- the block -----------------------------------------------------------------------------------
-      // Packed cubes (they touch). The top layer is y = 0, the front row z = 0. Around the cube the camera
-      // ends in stands a 3 × 3 tower (the column in the middle is empty all the way down: a shaft, its walls
-      // carrying words, the picture at the bottom); late in the shot the tower rises out of the block, faster
-      // than the rest, and passes the camera.
+      // A wall of packed cubes (they touch): 13 wide, 13 high, only 3 deep, so from the front it fills the
+      // screen up and down, and the cubes behind show greyer through the front ones (no floor running off to a
+      // horizon, nothing empty above). The top layer is y = 0, the front row z = 0. Around the column the camera
+      // ends over stands a 3 × 3 tower, the whole depth of the wall: its middle column is empty all the way down
+      // (a shaft, its walls carrying words, the picture far at the bottom); late in the shot the tower rises out
+      // of the wall, faster than the rest, and passes the camera.
       const S = 1.6
       const H2 = S / 2
       const X = [-6, 6]
-      const Y = [-2, 0]
-      const Z = [-12, 0]
-      const T = { i: 0, k: -6 } // the shaft
+      const Y = [-12, 0]
+      const Z = [-2, 0]
+      const T = { i: 3, k: -1 } // the shaft
+      const PJ = -6 // the layer of the statement, halfway up the wall
+      const yP = PJ * S
       const cellPos = (i, j, k) => new THREE.Vector3(i * S, j * S, k * S)
       const inShaft = (i, k) => i === T.i && k === T.k
       const inTower = (i, k) => Math.abs(i - T.i) <= 1 && Math.abs(k - T.k) <= 1 && !inShaft(i, k)
@@ -329,7 +333,7 @@ export default function PracticeDatum({
         const i = Math.round(lerp(X[0], X[1], rnd()))
         const k = Math.round(lerp(Z[0], Z[1], rnd()))
         if (inShaft(i, k) || inTower(i, k)) continue
-        const c = cellPos(i, n % 3 === 0 ? -1 : 0, k)
+        const c = cellPos(i, Math.round(lerp(Y[0] + 3, Y[1], rnd())), 0)
         const ph = rnd()
         for (let e = 0; e < 6; e++) {
           const a = LOOP[e]
@@ -369,12 +373,14 @@ export default function PracticeDatum({
             if (inShaft(i, k)) continue
             const list = inTower(i, k) ? towerSpots : stillSpots
             const c = cellPos(i, j, k)
-            const phraseCell = i === 0 && j === 0 && k >= -2
-            if (!inTower(i, k) && !phraseCell && j >= -1 && rnd() < (j === 0 ? 0.55 : 0.3)) {
-              list.push({ c, face: 'front', spin: 0, delay: rnd(), tier: j === 0 ? 0.45 + rnd() * 0.55 : 0.2 + rnd() * 0.3 })
+            const phraseCell = i === 0 && j === PJ
+            // rows of words on the front faces, the front row whitest, the two behind greyer through it
+            if (!inTower(i, k) && !phraseCell && rnd() < (k === 0 ? 0.6 : 0.4)) {
+              list.push({ c, face: 'front', spin: 0, delay: rnd(), tier: k === 0 ? 0.5 + rnd() * 0.5 : 0.18 + rnd() * 0.3 })
             }
-            if (j === 0 && rnd() < 0.55) list.push({ c, face: 'top', spin: rnd() < 0.75 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.3 + rnd() * 0.6 })
-            if (!inTower(i, k) && j >= -1 && rnd() < 0.05) list.push({ c, face: rnd() < 0.5 ? 'right' : 'left', spin: Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.3 })
+            // smaller words lying on the tops (between the layers), read as the camera climbs over them
+            if (rnd() < (j === 0 ? 0.6 : 0.22)) list.push({ c, face: 'top', spin: rnd() < 0.7 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.5, small: j !== 0 })
+            if (!inTower(i, k) && rnd() < 0.04) list.push({ c, face: rnd() < 0.5 ? 'right' : 'left', spin: Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.3 })
             // the shaft's walls: the faces of the tower that look into it, one word each, every layer
             if (inTower(i, k)) {
               const di = T.i - i
@@ -417,8 +423,8 @@ export default function PracticeDatum({
           g.list.forEach((s, i) => {
             const [n, rot] = FACES[s.face]
             // (a wall of the shaft is the face of a tower cube that looks into it: its normal points into the shaft)
-            const big = s.wall ? 0.34 : 0.2
-            const h = Math.min(S * big, (S * (s.wall ? 0.9 : 0.8)) / g.t.aspect)
+            const big = s.wall ? 0.34 : s.small ? 0.14 : 0.26
+            const h = Math.min(S * big, (S * (s.wall ? 0.9 : 0.86)) / g.t.aspect)
             dummy.position.copy(s.c).addScaledVector(n, H2 + 0.004)
             dummy.rotation.copy(rot)
             if (s.spin) dummy.rotateZ(s.spin)
@@ -448,12 +454,13 @@ export default function PracticeDatum({
       const scale0 = statement.map(() => new THREE.Vector2(1, 1))
       const scale1 = statement.map(() => new THREE.Vector2(1, 1))
       // the orbit looks first at the rows just behind the words, then moves its eye to the shaft
-      const pivotA = new THREE.Vector3(0, -0.6, -2 * S)
+      const pivotA = new THREE.Vector3(0, yP - 0.4, -S)
       const pivot = new THREE.Vector3()
-      const EL0 = 30
+      const EL0 = 12
       const AZ0 = 14
       const R0 = 7
-      const R1 = 8
+      // at the top the wall's three cubes of depth span the screen's width
+      const R1 = 4.6
       const orbit = (t, pos, quat) => {
         pivot.lerpVectors(pivotA, shaftTop, smooth(t))
         // pitch and roll come up evenly over the whole climb: straight down only at its very end
@@ -519,7 +526,7 @@ export default function PracticeDatum({
         }
         const y0 = miss(pitch).y0
         q0.setFromAxisAngle(XAXIS, pitch)
-        C0.set(0, y0, zc)
+        C0.set(0, y0 + yP, zc)
         const ts = rects.map((rc, i) => {
           const r = rayAt(rc, pitch)
           return [r.clone(), (faceZ(i) - zc) / r.z]
