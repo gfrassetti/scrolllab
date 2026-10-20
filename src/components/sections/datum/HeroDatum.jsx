@@ -7,11 +7,15 @@ import { useGSAP, ScrollTrigger } from '../../../lib/gsap'
  * The name runs edge to edge over a sheet of only two hairlines and a diagonal from corner to corner (the
  * datum line). The lines are not on a fixed grid: the name is measured, so the first letter ends exactly
  * on the first line and a stem of a middle letter lands on the second one (the size and the letter
- * spacing are solved for it). Scrolling, the name leaves (the menu takes its place at the top), the datum
- * turns a full circle and settles level, clearing the first copy as it sweeps; the statement rises from
- * below and is cut by the level line as it passes it; then black comes up the sheet — the «poché» of a
- * section drawing. The practice (PracticeDatum) starts on that black without a seam: it overlaps the last
- * screen of this one and its first words appear where the sheet went dark.
+ * spacing are solved for it). Scrolling, the name leaves (the menu takes its place at the top) and the datum
+ * turns, slowly, from the diagonal to level (148° at 16:10). The line is a boundary: on one side the
+ * drawing shows (the lede, then the statement), on the other nothing. The lede sits just touching it, so
+ * the turn starts without cutting anything; turning, it wipes the lede and lets the statement in from
+ * below. The statement keeps rising and its lines go into the level line one by one until only «a wall.»
+ * is left under it. Then black closes in two bands — one rising from the line, one from the bottom — and
+ * the last word turns paper-coloured where they cross it. The practice (PracticeDatum) takes over on that
+ * black without a seam: it overlaps the last screen of this one and puts the same word, in 3D, exactly
+ * where this one left it.
  *
  * Every number lives in `apply(q)` (q = 0 → 1 over the section). Reduced motion: no pin, the sheet and
  * the statement in place, nothing hidden.
@@ -20,53 +24,51 @@ const CSS = `
 .datum-hero { position: relative; height: 420svh; }
 .datum-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--datum-paper); }
 .datum-layer { position: absolute; inset: 0; z-index: 2; }
-/* the statement only shows below the level datum: it disappears into the line as it rises */
-.datum-layer[data-reveal] { z-index: 3; -webkit-mask-image: linear-gradient(180deg, transparent 50%, #000 50%); mask-image: linear-gradient(180deg, transparent 50%, #000 50%); }
+/* one side of the datum shows the drawing, the other nothing: the boundary turns with it */
+.datum-layer[data-reveal] { z-index: 3; -webkit-mask-image: linear-gradient(var(--a), #000 50%, transparent 50%);
+  mask-image: linear-gradient(var(--a), #000 50%, transparent 50%); }
 .datum-sheet { position: absolute; inset: 0; pointer-events: none; z-index: 4; mix-blend-mode: difference;
   --hair: rgba(239,239,237,.2); --hair-strong: rgba(239,239,237,.3); }
 .datum-col { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--hair); }
 .datum-diag { position: absolute; inset: 0;
   background: linear-gradient(var(--a), transparent calc(50% - .5px), var(--hair-strong) calc(50% - .5px), var(--hair-strong) calc(50% + .5px), transparent calc(50% + .5px)); }
-.datum-sweep { position: absolute; inset: 0;
-  background: linear-gradient(var(--a2), transparent calc(var(--p2) - .5px), rgba(239,239,237,.55) calc(var(--p2) - .5px), rgba(239,239,237,.55) calc(var(--p2) + .5px), transparent calc(var(--p2) + .5px)); }
 .datum-brand { position: absolute; left: 0; right: 0; top: 1.6svh; z-index: 2; white-space: nowrap; line-height: .78;
   font-family: 'Archivo', sans-serif; font-weight: 800; font-variation-settings: 'wdth' 125; font-kerning: none; will-change: transform; }
 .datum-brand > span { display: inline-block; }
 .datum-copy { position: absolute; z-index: 2; letter-spacing: -.01em; }
 .datum-cap { font-weight: 500; font-size: 14px; line-height: 1.15; }
-.datum-lede { font-size: clamp(26px, 3.06vw, 52px); line-height: 1.05; letter-spacing: -.035em; }
+.datum-lede { font-size: clamp(26px, 3.06vw, 52px); line-height: 1.05; letter-spacing: -.035em; will-change: transform; }
 .datum-meta { font-weight: 500; font-size: 12px; }
 .datum-scale { align-items: flex-end; font-weight: 500; font-size: 10px; letter-spacing: .06em; }
 .datum-scale i { display: block; width: 2.6vw; max-width: 40px; height: 6px; border: 1px solid currentColor; border-top: 0; }
 .datum-scale i:nth-child(odd) { background: currentColor; }
-/* the first copy: the turning datum wipes it, two opposite sectors growing like a drafting arm */
-.datum-fade { --m: conic-gradient(from var(--c0, 0deg) at 50% 50%, transparent 0deg var(--d, 0deg), #000 var(--d, 0deg) 180deg,
-  transparent 180deg calc(180deg + var(--d, 0deg)), #000 calc(180deg + var(--d, 0deg)) 360deg);
-  -webkit-mask-image: var(--m); mask-image: var(--m); }
-/* the statement: three lines stepped like a section, resting just under the level datum */
-.datum-statement { position: absolute; z-index: 3; right: 25%; top: calc(50% + 4svh);
-  font-size: clamp(40px, 5.2vw, 96px); line-height: .98; letter-spacing: -.045em; text-align: right; will-change: transform; }
+/* the lede: its last line just touches the diagonal where it crosses the second line of the sheet */
+.datum-lede { left: var(--datum-l2, 50%); bottom: calc(50% + 10px); }
+@media (max-width: 767px) { .datum-lede { left: 30vw; bottom: auto; top: calc(var(--datum-nav-top, 12svh) + 4svh); font-size: 22px; } }
+/* the statement, right-aligned on the second line of the sheet, resting just under the level datum
+   (PracticeDatum measures a copy with these same rules: keep them in step) */
+.datum-statement { position: absolute; z-index: 3; right: calc(100% - var(--datum-l2, 50%)); top: calc(50% + 3svh); margin: 0;
+  font-size: clamp(44px, 6.4vw, 124px); font-weight: 400; line-height: .98; letter-spacing: -.045em; text-align: right; white-space: nowrap; will-change: transform; }
 .datum-statement span { display: block; }
-.datum-statement span:nth-child(odd) { padding-right: 12.5vw; }
-/* the poché: black comes up the sheet behind the second sweep */
-.datum-poche { position: absolute; inset: 0; z-index: 3; background: var(--datum-ink);
-  -webkit-mask-image: linear-gradient(var(--a2), #000 var(--p2), transparent var(--p2));
-  mask-image: linear-gradient(var(--a2), #000 var(--p2), transparent var(--p2)); }
-@media (max-width: 767px) {
-  .datum-statement { right: 6vw; font-size: 12vw; }
-  .datum-statement span:nth-child(odd) { padding-right: 10vw; }
-}
+@media (max-width: 767px) { .datum-statement { right: 6vw; font-size: 12.5vw; } }
+/* black closes in two bands: one rising from the level line, one from the bottom; under the bottom one the
+   statement is drawn again in paper colour, so the word turns over where the band crosses it */
+.datum-band { position: absolute; left: 0; right: 0; z-index: 3; height: 0; overflow: hidden; background: var(--datum-ink); }
+.datum-band[data-top] { bottom: 50%; }
+.datum-band[data-bottom] { bottom: 0; }
+.datum-band-in { position: absolute; left: 0; right: 0; bottom: 0; height: var(--stage-h, 100svh); }
+.datum-band .datum-statement { color: var(--datum-paper); }
 /* reduced motion: the drawing, unpinned and complete */
 .datum-hero[data-calm] { height: auto; }
 .datum-hero[data-calm] .datum-stage { position: relative; height: auto; min-height: 100svh; }
-.datum-hero[data-calm] .datum-layer, .datum-hero[data-calm] .datum-fade { -webkit-mask-image: none; mask-image: none; }
-.datum-hero[data-calm] .datum-poche { display: none; }
+.datum-hero[data-calm] .datum-layer { -webkit-mask-image: none; mask-image: none; }
+.datum-hero[data-calm] .datum-band { display: none; }
 `
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const seg = (q, a, b) => clamp01((q - a) / (b - a))
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
-const easeOut = (t) => 1 - (1 - t) ** 3
+const lerp = (a, b, t) => a + (b - a) * t
 
 // The ink of each letter of the name, in em, drawn on a canvas in the brand's own face (Archivo 800,
 // wdth 125, no kerning): advance, left and right ink, and the edges of its stems (columns inked over
@@ -184,7 +186,11 @@ export default function HeroDatum({
       const brand = el.querySelector('[data-brand]')
       const word = brand.firstElementChild
       const first = el.querySelector('[data-reveal] .datum-statement')
-      const fade = el.querySelector('.datum-fade')
+      const turned = el.querySelector('[data-band-copy]')
+      const lede = el.querySelector('.datum-lede')
+      const notes = el.querySelector('[data-notes]')
+      const bandTop = el.querySelector('[data-top]')
+      const bandBottom = el.querySelector('[data-bottom]')
       const docStyle = document.documentElement.style
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       if (calm) el.dataset.calm = ''
@@ -218,9 +224,12 @@ export default function HeroDatum({
         // far enough up that no ink is left (the letters overhang their tight line box)
         box.out = brand.offsetTop + brand.offsetHeight + fit.fs * 0.25
         docStyle.setProperty('--datum-nav-top', `${box.navTop}px`)
-        // the statement rises from under the screen and leaves through the level line
-        box.rise = H * 0.5
-        box.exit = -(first.offsetHeight + H * 0.04 + 4)
+        stage.style.setProperty('--stage-h', `${stage.clientHeight}px`)
+        // the statement comes up from under the screen and stops with only its last line under the datum
+        box.rise = H * 0.62
+        // (its top a hair under the line, where PracticeDatum puts the same word in 3D)
+        const fs = parseFloat(getComputedStyle(first).fontSize)
+        box.exit = H / 2 + fs * 0.02 - first.offsetTop - first.lastElementChild.offsetTop
         if (!calm) apply(lastQ)
       }
 
@@ -231,23 +240,25 @@ export default function HeroDatum({
         brand.style.transform = `translate3d(0, ${-out * box.out}px, 0)`
         docStyle.setProperty('--datum-nav-y', `${-out * box.navTop}px`)
 
-        // the datum turns a full circle and settles level (540° ≡ 180°): the first half-turn wipes the copy
-        const s1 = ease(seg(q, 0.06, 0.42))
-        const a = box.a + s1 * (540 - box.a)
+        // the datum turns from the diagonal to level, clockwise and slowly; the side that shows the drawing
+        // turns with it (from above the diagonal to below the level line)
+        const turn = seg(q, 0.02, 0.27)
+        const a = 180 + box.a + (180 - box.a) * (turn - Math.sin(turn * 2 * Math.PI) / (2 * Math.PI))
         stage.style.setProperty('--a', `${a}deg`)
-        fade.style.setProperty('--c0', `${box.a + 90}deg`)
-        fade.style.setProperty('--d', `${Math.min(180, a - box.a)}deg`)
-        fade.style.visibility = a - box.a >= 180 ? 'hidden' : ''
+        // the lede drifts up as if the sheet scrolled, so the turning line takes it from its first word
+        lede.style.transform = `translate3d(0, ${-seg(q, 0, 0.3) * box.H * 0.16}px, 0)`
+        notes.style.opacity = String(1 - seg(q, 0.03, 0.14))
 
-        // the statement comes up under the line, rests, then goes into it
-        const up = easeOut(seg(q, 0.36, 0.52))
-        const gone = ease(seg(q, 0.6, 0.72))
-        first.style.transform = `translate3d(0, ${(1 - up) * box.rise + gone * box.exit}px, 0)`
+        // the statement rises the whole way, its lines going into the level line one after the other
+        const t = seg(q, 0.07, 0.66)
+        const y = lerp(box.rise, box.exit, t * (2 - t))
+        first.style.transform = `translate3d(0, ${y}px, 0)`
+        turned.style.transform = first.style.transform
 
-        // black comes up the sheet behind a second, level sweep; the practice takes over on the black
-        const s2 = ease(seg(q, 0.68, 0.97))
-        stage.style.setProperty('--a2', '0deg')
-        stage.style.setProperty('--p2', `${-4 + s2 * 108}%`)
+        // black: from the line upwards, then from the bottom up through the last word
+        bandTop.style.height = `calc(${ease(seg(q, 0.62, 0.82)) * 50}% + 1px)`
+        bandBottom.style.height = `${ease(seg(q, 0.7, 0.95)) * 50}%`
+        bandTop.style.visibility = q > 0.62 ? '' : 'hidden'
       }
 
       // measured again with the real face once it has loaded (asked for by name: `ready` can resolve before
@@ -264,8 +275,6 @@ export default function HeroDatum({
       document.fonts?.addEventListener('loadingdone', remeasure)
 
       if (calm) {
-        stage.style.setProperty('--a2', '0deg')
-        stage.style.setProperty('--p2', '-4%')
         remeasure()
         return () => {
           dead = true
@@ -302,20 +311,16 @@ export default function HeroDatum({
           <i className="datum-col" style={{ left: 'var(--datum-l1, 12.5%)' }} />
           <i className="datum-col" style={{ left: 'var(--datum-l2, 50%)' }} />
           <i className="datum-diag" />
-          <i className="datum-sweep" />
         </div>
 
         <h1 data-brand="" className="datum-brand">
           <span>{name}</span>
         </h1>
 
-        {/* the first copy: wiped by the turning datum */}
-        <div className="datum-layer datum-fade">
+        {/* small notes: they fade as the drawing turns */}
+        <div className="datum-layer" data-notes="">
           <p className="datum-copy datum-cap hidden md:block" style={{ left: 'var(--datum-l1, 12.5%)', top: 'calc(var(--datum-nav-top, 30svh) + 18svh)' }}>
             {lines(caption)}
-          </p>
-          <p className="datum-copy datum-lede left-[6vw] md:left-[var(--datum-l2,50%)]" style={{ top: 'calc(var(--datum-nav-top, 30svh) + 16svh)' }}>
-            {lines(lede)}
           </p>
           <p className="datum-copy datum-meta hidden md:block" style={{ left: 'var(--datum-l1, 12.5%)', bottom: 26 }}>
             {place}
@@ -332,8 +337,9 @@ export default function HeroDatum({
           </p>
         </div>
 
-        {/* the statement: rises under the level datum and goes into it */}
+        {/* the drawing on the shown side of the datum: the lede, then the statement */}
         <div className="datum-layer" data-reveal="">
+          <p className="datum-copy datum-lede">{lines(lede)}</p>
           <h2 className="datum-statement" aria-label={statement.join(' ')}>
             {statement.map((l) => (
               <span key={l} aria-hidden="true">
@@ -342,7 +348,16 @@ export default function HeroDatum({
             ))}
           </h2>
         </div>
-        <div className="datum-poche" aria-hidden="true" />
+        <div className="datum-band" data-top="" aria-hidden="true" />
+        <div className="datum-band" data-bottom="" aria-hidden="true">
+          <div className="datum-band-in">
+            <p data-band-copy="" className="datum-statement">
+              {statement.map((l) => (
+                <span key={l}>{l}</span>
+              ))}
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )
