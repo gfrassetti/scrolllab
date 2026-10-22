@@ -57,6 +57,7 @@ export const ATRIUM_FIELDS = {
   'atrium/ProjectRail': [
     { key: 'kicker', label: 'Kicker', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
+    { key: 'linkLabel', label: 'Texto del enlace de cada proyecto', type: 'text' },
     {
       key: 'works',
       label: 'Proyectos',
@@ -65,7 +66,10 @@ export const ATRIUM_FIELDS = {
       item: [
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'meta', label: 'Dato (m², año…)', type: 'text' },
+        { key: 'body', label: 'Descripción', type: 'textarea' },
         { key: 'img', label: 'Foto (vacío = la de la demo)', type: 'image' },
+        { key: 'href', label: 'Enlace del proyecto', type: 'href' },
+        { key: 'color', label: 'Color de la columna (se ve sin foto)', type: 'color' },
       ],
     },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
