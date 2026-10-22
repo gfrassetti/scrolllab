@@ -247,25 +247,28 @@ const DECOR_ORDER = [
   'plinth-objects',
 ]
 
-/** El color final de cada material. */
+/**
+ * El color final de cada material: una maqueta de papel casi monocroma (como las de Illoca), con
+ * el óxido de la marca en el arco y algunas piezas, y el verde apagado de las plantas.
+ */
 const FINAL = {
-  base: '#e7e2d7',
-  floor: '#c8ab84',
-  wall: '#ece4d6',
-  metal: '#2a2826',
-  glass: '#cdd8d6',
-  rug: '#d9cdb7',
-  stone: '#dccfba',
-  top: '#3a3631',
-  wood: '#a77a52',
-  clay: '#b4653f',
-  cream: '#efe7d9',
-  ink: '#2a2826',
-  shade: '#d8b067',
+  base: '#d6d0c3',
+  floor: '#e4dfd3',
+  wall: '#efebe3',
+  metal: '#3b3934',
+  glass: '#d3dcdd',
+  rug: '#d9d3c5',
+  stone: '#e2ddd1',
+  top: '#6b665d',
+  wood: '#d2c6b1',
+  clay: '#c4441f',
+  cream: '#f3efe7',
+  ink: '#2c2a26',
+  shade: '#eee3cc',
   accent: '#c4441f',
-  linen: '#e5dbca',
-  olive: '#7f8a62',
-  leaf: '#6f8f5c',
+  linen: '#e8e2d5',
+  olive: '#8f9a7b',
+  leaf: '#8fa682',
 }
 
 /* ── El filtro de boceto ─────────────────────────────────────────────── */
@@ -285,6 +288,9 @@ const sketchFragment = /* glsl */ `
   uniform sampler2D tNormalB;
   uniform sampler2D tColorO;  // lo que muestra el arrastre (el otro estado)
   uniform sampler2D tNormalO;
+  uniform sampler2D tPhoto;   // la foto del local terminado (misma cámara que el arranque)
+  uniform float uPhoto;       // 1: el arrastre muestra la foto
+  uniform vec4 uFrame;        // el cuadro de la cámara en el canvas (x, y, w, h en 0–1, y hacia arriba)
   uniform vec2 uRes;      // px del canvas (con el dpr)
   uniform float uDpr;
   uniform float uA;       // cuánto se ve el 3D
@@ -324,7 +330,11 @@ const sketchFragment = /* glsl */ `
   // Una capa: el render (con tone mapping) o, según sketch, su boceto a lápiz y carbonilla.
   vec4 layer(sampler2D col, sampler2D nrm, float sketch, float reveal) {
     vec4 render = texture2D(col, vUv);
-    vec4 outColor = vec4(toSrgb(aces(render.rgb * uExposure)) * render.a, render.a);
+    vec3 rgb = toSrgb(aces(render.rgb * uExposure));
+    // Grano de papel sobre el 3D: la maqueta se lee impresa, no renderizada.
+    vec2 gp = vUv * uRes;
+    rgb *= 1.0 - (hash(floor(gp)) - 0.5) * 0.09 - (fbm(gp * 0.012) - 0.5) * 0.05;
+    vec4 outColor = vec4(rgb * render.a, render.a);
     if (sketch < 0.001) return outColor;
 
     vec2 px = vUv * uRes / uDpr;
@@ -371,6 +381,13 @@ const sketchFragment = /* glsl */ `
     vec4 base = sk + a * (1.0 - sk.a);
     if (uSplitOn > 0.001) {
       vec4 o = layer(tColorO, tNormalO, uSketchO, 1.0);
+      if (uPhoto > 0.5) {
+        // La foto ocupa el cuadro de la cámara; afuera queda el papel.
+        vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
+        float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
+        vec3 ph = texture2D(tPhoto, clamp(fuv, 0.0, 1.0)).rgb;
+        o = vec4(ph, 1.0) * inside;
+      }
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
       float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
@@ -384,7 +401,7 @@ const sketchFragment = /* glsl */ `
   }
 `
 
-export function createLocalScene({ canvas, phone = false }) {
+export function createLocalScene({ canvas, phone = false, photo = null }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, premultipliedAlpha: true })
   renderer.setClearColor(0x000000, 0)
   renderer.shadowMap.enabled = true
@@ -459,7 +476,7 @@ export function createLocalScene({ canvas, phone = false }) {
   Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 })
   sun.shadow.bias = -0.0004
   sun.shadow.normalBias = 0.025
-  sun.shadow.radius = 3
+  sun.shadow.radius = 1.5 // sombras con borde, de ilustración
   scene.add(hemi, ambient, sun, sun.target)
   const bulbs = [6.45, 7.3, 8.15].map((x) => {
     const l = new THREE.PointLight('#ffb866', 0, 3.2, 1.6)
@@ -467,7 +484,7 @@ export function createLocalScene({ canvas, phone = false }) {
     scene.add(l)
     return l
   })
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.14 }))
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ color: '#2f3640', opacity: 0.16 }))
   ground.rotation.x = -Math.PI / 2
   ground.position.set(4.5, -0.221, 3)
   ground.receiveShadow = true
@@ -493,6 +510,9 @@ export function createLocalScene({ canvas, phone = false }) {
       tColorO: { value: rtColorO.texture },
       tNormalO: { value: rtNormalO.texture },
       uA: { value: 0 },
+      tPhoto: { value: null },
+      uPhoto: { value: 0 },
+      uFrame: { value: new THREE.Vector4(0, 0, 1, 1) },
       uSketchO: { value: 0 },
       uSplit: { value: 0.5 },
       uSplitOn: { value: 0 },
@@ -507,6 +527,18 @@ export function createLocalScene({ canvas, phone = false }) {
     depthWrite: false,
     blending: THREE.NoBlending,
   })
+  // La foto del arrastre: se carga aparte y, hasta que llega, el arrastre muestra el 3D terminado.
+  let photoTex = null
+  if (photo) {
+    new THREE.TextureLoader().load(photo, (tex) => {
+      tex.colorSpace = THREE.NoColorSpace // se muestra tal cual (el filtro escribe sRGB directo)
+      tex.minFilter = THREE.LinearMipmapLinearFilter
+      tex.anisotropy = 4
+      photoTex = tex
+      post.uniforms.tPhoto.value = tex
+      dirty = true
+    })
+  }
   const postScene = new THREE.Scene()
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post)
   quad.frustumCulled = false
@@ -526,6 +558,7 @@ export function createLocalScene({ canvas, phone = false }) {
     camera.setViewOffset(frame.w, frame.h, -frame.x, -frame.y, canvasW, canvasH)
     camera.updateProjectionMatrix()
     post.uniforms.uCenter.value.set((frame.x + frame.w / 2) / canvasW, 1 - (frame.y + frame.h * 0.55) / canvasH)
+    post.uniforms.uFrame.value.set(frame.x / canvasW, 1 - (frame.y + frame.h) / canvasH, frame.w / canvasW, frame.h / canvasH)
   }
   const sizeTargets = () => {
     const w = Math.max(1, Math.round(canvasW * dpr))
@@ -566,11 +599,11 @@ export function createLocalScene({ canvas, phone = false }) {
       b.intensity = lit * 1.4
     })
     const warm = smooth(0.3, 1, view.decor)
-    edgeMat.opacity = THREE.MathUtils.lerp(0.85, 0.14, warm)
-    hemi.intensity = THREE.MathUtils.lerp(2.1, 1.05, warm)
-    hemi.color.set('#ffffff').lerp(new THREE.Color('#fff1dc'), warm)
-    sun.intensity = THREE.MathUtils.lerp(2.2, 2.4, warm)
-    sun.color.set('#fff4e2').lerp(new THREE.Color('#ffd7a3'), warm)
+    edgeMat.opacity = THREE.MathUtils.lerp(0.85, 0.5, warm)
+    hemi.intensity = THREE.MathUtils.lerp(2.1, 1.35, warm)
+    hemi.color.set('#ffffff').lerp(new THREE.Color('#f4f1ea'), warm)
+    sun.intensity = THREE.MathUtils.lerp(2.2, 2.9, warm)
+    sun.color.set('#fff4e2').lerp(new THREE.Color('#ffe6c2'), warm)
 
     // La cámara: mientras el local sube, se eleva con él (mira más arriba y baja un poco el ángulo,
     // para que se lea la altura); al final se acerca. El boceto usa la misma cámara: siempre coincide.
@@ -609,15 +642,16 @@ export function createLocalScene({ canvas, phone = false }) {
   }
 
   /** El estado que muestra el arrastre: el local terminado mientras se ve el boceto, y al revés. */
-  const otherView = () => (state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0 } : { rise: 1, decor: 0, sketch: 1 })
+  const otherView = () => (state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0, photo: !!photoTex } : { rise: 1, decor: 0, sketch: 1, photo: false })
 
   const draw = () => {
     const u = post.uniforms
     u.uSplit.value = state.split
     u.uSplitOn.value = state.splitOn
     // El otro estado (solo mientras se arrastra).
-    if (state.splitOn > 0.001) {
-      const other = otherView()
+    const other = otherView()
+    u.uPhoto.value = other.photo ? 1 : 0
+    if (state.splitOn > 0.001 && !other.photo) {
       update({ ...state, ...other })
       pass(rtColorO, rtNormalO, other.sketch > 0.001)
       u.uSketchO.value = other.sketch
@@ -656,7 +690,7 @@ export function createLocalScene({ canvas, phone = false }) {
     setSplit: set('split'),
     setSplitOn: set('splitOn'),
     /** Qué muestra el arrastre ahora: 'final' (el local terminado) o 'sketch' (el boceto). */
-    splitShows: () => (otherView().sketch ? 'sketch' : 'final'),
+    splitShows: () => (otherView().sketch ? 'sketch' : otherView().photo ? 'photo' : 'final'),
     setPixelRatio(v) {
       dpr = v
       renderer.setPixelRatio(v)
@@ -697,6 +731,7 @@ export function createLocalScene({ canvas, phone = false }) {
       ownMats.forEach((m) => m.dispose())
       ;[edgeMat, normalMat, post, ground.material].forEach((m) => m.dispose())
       ;[rtColor, rtNormal, rtColorB, rtNormalB, rtColorO, rtNormalO].forEach((t) => t.dispose())
+      photoTex?.dispose()
       renderer.dispose()
     },
   }

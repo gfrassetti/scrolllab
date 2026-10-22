@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
-import { BAND_H, C, NAV_H, OPEN_DELAY, SITE } from './brand'
+import { BAND_H, C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
+import { paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
 
@@ -26,6 +27,9 @@ import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
  */
 
 const REVEAL_SECONDS = 3.2
+// `?foto-ref`: el local terminado con la cámara de arranque y el cuadro a todo el canvas, para
+// generar la foto del arrastre a partir de él (scripts propios, no se usa en el sitio).
+const PHOTO_REF = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('foto-ref')
 
 const STAGES = [
   { n: '01', title: 'Boceto', text: 'Todo empieza a mano: la idea del espacio, a lápiz y carbonilla.' },
@@ -34,7 +38,6 @@ const STAGES = [
   { n: '04', title: 'Experiencia', text: 'Un lugar listo para vivirse.' },
 ]
 
-const MONO = { fontFamily: "'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace" }
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const smooth = (a, b, v) => {
   const t = clamp01((v - a) / (b - a))
@@ -161,15 +164,29 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         })
 
     let shownStage = -1
+    let shownSide = 'none'
     const apply = (p) => {
       // El cuadrante: toda la lámina → a la derecha (texto a la izquierda) → a la izquierda (texto a la derecha).
       const toRight = calm ? 1 : smooth(0.03, 0.12, p)
       const toLeft = calm ? 0 : smooth(0.46, 0.58, p)
       const P = lerpRect(lerpRect(L.full, L.right.panel, toRight), L.left.panel, toLeft)
-      const T = lerpRect(L.right.text, L.left.text, toLeft)
+      // El texto no viaja por encima del dibujo: se apaga, salta de lado y se vuelve a pintar.
+      const T = toLeft < 0.5 ? L.right.text : L.left.text
       // El texto entra con el corrimiento y, al cruzar de lado, se apaga en el medio del viaje.
       const textAlpha = toRight * (1 - smooth(0, 0.3, toLeft) + smooth(0.7, 1, toLeft))
       const key = `${P.x.toFixed(1)}|${P.y.toFixed(1)}|${P.w.toFixed(1)}|${P.h.toFixed(1)}|${textAlpha.toFixed(3)}`
+      if (PHOTO_REF) {
+        const W = stageEl.clientWidth
+        const H = stageEl.clientHeight
+        scene.setFrame(0, 0, W, H)
+        canvas.style.clipPath = 'none'
+        scene.setRise(1)
+        scene.setSketch(0)
+        scene.setDecor(1)
+        scene.setCamera(0)
+        scene.setReveal(1)
+        return
+      }
       if (key !== lastKey) {
         lastKey = key
         const f = cameraFrame(P)
@@ -182,6 +199,12 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         stageEl.style.setProperty('--py', `${P.y}px`)
         stageEl.style.setProperty('--pw', `${P.w}px`)
         stageEl.style.setProperty('--ph', `${P.h}px`)
+      }
+      // Cada vez que el texto llega a un lado, se pinta de nuevo (en el teléfono, al aparecer).
+      const sideNow = toRight < 0.5 ? 'none' : toLeft < 0.5 ? 'right' : 'left'
+      if (sideNow !== shownSide) {
+        shownSide = sideNow
+        if (sideNow !== 'none' && !calm) paint(left.querySelectorAll('[data-paint]'), { stagger: 0.05, duration: 0.8 })
       }
       // Boceto → el local sube desde el dibujo → se decora → la cámara se acerca.
       scene.setRise(calm ? 1 : clamp01((p - 0.16) / 0.28))
@@ -262,6 +285,18 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     }
   }, [calm])
 
+  // Al cambiar de etapa, lo que cambia se vuelve a pintar (el título, el texto, el estado y la lámina).
+  const firstStage = useRef(true)
+  useEffect(() => {
+    if (firstStage.current) {
+      firstStage.current = false
+      return undefined
+    }
+    if (calm) return undefined
+    const tween = paint(stageRef.current.querySelectorAll('[data-paint-stage]'), { stagger: 0.06, duration: 0.75 })
+    return () => tween.kill()
+  }, [stage, calm])
+
   // Antes de que termine el loader: la grilla, el cuadrante y la columna, escondidos.
   useLayoutEffect(() => {
     if (calm) return undefined
@@ -320,10 +355,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span data-panel-edge className="es-panel__edge es-panel__edge--r" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--b" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--l" />
-          <span className="es-panel__label es-panel__label--tl" style={MONO}>
+          <span data-paint-stage className="es-paint es-panel__label es-panel__label--tl" style={LABEL}>
             {st.n} — {st.title}
           </span>
-          <span className="es-panel__label es-panel__label--tr" style={MONO}>
+          <span className="es-panel__label es-panel__label--tr" style={LABEL}>
             Esc. 1:50 · N ↑
           </span>
         </div>
@@ -346,28 +381,40 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <h1 className="sr-only">
             {SITE.name} — {SITE.tagline}
           </h1>
-          <p data-left-in className="es-left__lede hidden sm:block">
+          <p data-paint className="es-paint es-left__lede hidden sm:block">
             Diseño e interiorismo enfocado en la experiencia de usuario.
           </p>
-          <div data-left-in className="es-left__stage" aria-live="polite">
-            <span className="es-left__n" style={MONO}>
+          <div className="es-left__stage" aria-live="polite">
+            <span data-paint data-paint-stage className="es-paint es-left__n" style={LABEL}>
               {st.n}
             </span>
-            <div key={stage} className="es-left__stage-in">
-              <h2 className="es-left__title">{st.title}</h2>
-              <p className="es-left__text">{st.text}</p>
+            <div>
+              <h2 data-paint data-paint-stage className="es-paint es-left__title">
+                {st.title}
+              </h2>
+              <p data-paint data-paint-stage className="es-paint es-left__text">
+                {st.text}
+              </p>
             </div>
           </div>
-          <dl data-left-in className="es-rotulo hidden sm:grid" style={MONO}>
+          <dl className="es-rotulo hidden sm:grid" style={LABEL}>
             {rows.map(([k, v]) => (
               <div key={k} className="es-rotulo__row">
-                <dt>{k}</dt>
-                <dd>{v}</dd>
+                <dt data-paint className="es-paint">
+                  {k}
+                </dt>
+                <dd data-paint {...(k === 'Estado' || k === 'Lámina' ? { 'data-paint-stage': '' } : {})} className="es-paint">
+                  {v}
+                </dd>
               </div>
             ))}
             <div className="es-rotulo__row es-rotulo__row--sign">
-              <dt>Dibujó</dt>
-              <dd>{SITE.name}</dd>
+              <dt data-paint className="es-paint">
+                Dibujó
+              </dt>
+              <dd data-paint className="es-paint">
+                {SITE.name}
+              </dd>
             </div>
           </dl>
         </div>

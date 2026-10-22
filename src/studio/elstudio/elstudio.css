@@ -124,9 +124,10 @@
   top: 12px;
   white-space: pre;
   text-align: right;
-  font-family: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  font-size: 11px;
-  line-height: 1.5;
+  font-family: 'Archivo Narrow', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.45;
   letter-spacing: 0.06em;
   color: #6d675c;
   font-variant-numeric: tabular-nums;
@@ -150,9 +151,10 @@
   padding: 7px 10px 8px;
   background: #1d1c1a;
   color: #f3f1ea;
-  font-family: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  font-size: 10.5px;
-  line-height: 1.45;
+  font-family: 'Archivo Narrow', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 11.5px;
+  line-height: 1.4;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: normal;
@@ -373,7 +375,7 @@
 .es-panel__label {
   position: absolute;
   top: 10px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #6d675c;
@@ -420,7 +422,7 @@
   align-items: start;
 }
 .es-left__n {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   color: var(--es-rust);
   padding-top: 0.55em;
@@ -439,27 +441,13 @@
   line-height: 1.45;
   color: #4d4840;
 }
-.es-left__stage-in {
-  animation: es-stage-in 0.7s var(--es-ease) both;
-}
-@keyframes es-stage-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* El rótulo: el cuadro de datos de una lámina. */
 .es-rotulo {
   margin: 0;
   grid-template-columns: 1fr 1fr;
   border-top: 1px solid rgba(22, 21, 19, 0.42);
   border-left: 1px solid rgba(22, 21, 19, 0.42);
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -471,7 +459,11 @@
 }
 .es-rotulo__row dt {
   color: #8a8478;
-  font-size: 9.5px;
+  font-size: 10.5px;
+}
+.es-rotulo__row dt,
+.es-rotulo__row dd {
+  display: block;
 }
 .es-rotulo__row dd {
   margin: 3px 0 0;
@@ -554,4 +546,22 @@
   .es-guide {
     transition: opacity 0.2s linear;
   }
+}
+
+/* ── «Se pinta» (paint.js) ──────────────────────────────────────────── */
+/*
+ * La máscara mide tres veces el ancho del elemento: a la izquierda tinta, a la derecha vacío y, en el
+ * medio, un borde irregular de trazo (ruido que desplaza el borde). Correrla de 100 % a 0 % barre el
+ * elemento de izquierda a derecha.
+ */
+.es-paint {
+  --paint: 0;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='100' viewBox='0 0 600 100' preserveAspectRatio='none'><filter id='r' x='-10%' y='0' width='120%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.06 0.35' numOctaves='3' seed='3'/><feDisplacementMap in='SourceGraphic' scale='34' xChannelSelector='R' yChannelSelector='G'/></filter><rect x='-20' y='-10' width='330' height='120' fill='black' filter='url(%23r)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='100' viewBox='0 0 600 100' preserveAspectRatio='none'><filter id='r' x='-10%' y='0' width='120%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.06 0.35' numOctaves='3' seed='3'/><feDisplacementMap in='SourceGraphic' scale='34' xChannelSelector='R' yChannelSelector='G'/></filter><rect x='-20' y='-10' width='330' height='120' fill='black' filter='url(%23r)'/></svg>");
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: calc(var(--paint) * 1%) 0;
+  mask-position: calc(var(--paint) * 1%) 0;
 }
