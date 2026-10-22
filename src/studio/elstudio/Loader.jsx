@@ -2,14 +2,12 @@ import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
 import { C, DISPLAY, SITE } from './brand'
 import Logo from './Logo'
-import { LOGO_VIEWBOX as VB } from './logoPaths'
 
 /**
  * elStudio — el loader.
  *
- * Una hoja clara donde una mira de plano (cruz fina, un cuadradito en el centro y las coordenadas
- * `X 7.814 Y 2.983`) dibuja a mano la S de STUDIO: recorre su contorno, despacio, y a su paso la
- * letra se rellena. Después el resto del logo entra como siempre: T U D I O suben desde una línea,
+ * Una hoja clara donde la S de STUDIO se dibuja sola: un trazo fino va recorriendo su contorno,
+ * despacio, y a su paso la letra se rellena. Después el resto del logo entra como siempre: T U D I O suben desde una línea,
  * «el» entra de costado y la tapa óxido cae sobre la T. Por último se escribe «Diseño e
  * Interiorismo», la hoja se levanta como una cortina y el logo viaja hasta su lugar en el
  * encabezado (`bridge.current.target()`).
@@ -17,9 +15,9 @@ import { LOGO_VIEWBOX as VB } from './logoPaths'
  * Sin sonido.
  */
 
-// La mira dibuja solo la S de STUDIO, despacio (la firma). El resto del logo entra después con
+// Solo la S de STUDIO se dibuja, despacio (la firma). El resto del logo entra después con
 // el gesto de siempre: letras que suben desde una línea, «el» de costado, la tapa que cae.
-const S_SECONDS = 2.4 // lo que tarda la mira en recorrer la S
+const S_SECONDS = 2.4 // lo que tarda en trazarse la S
 const RISE = ['T', 'U', 'D', 'I', 'O']
 
 export default function Loader({ ready, calm, bridge, onDone }) {
@@ -28,8 +26,6 @@ export default function Loader({ ready, calm, bridge, onDone }) {
   const logoRef = useRef(null)
   const footRef = useRef(null)
   const lineRef = useRef(null)
-  const penRef = useRef(null)
-  const coordsRef = useRef(null)
   const doneRef = useRef(false)
   const [drawn, setDrawn] = useState(calm)
 
@@ -42,15 +38,9 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       gsap.to(logo, { autoAlpha: 1, duration: 0.5, ease: 'power2.out' })
       return undefined
     }
-    const pen = penRef.current
-    const coords = coordsRef.current
-    const svg = logo.querySelector('svg[data-part=row]')
     const ctx = gsap.context(() => {
       const strokes = q('[data-part=S] [data-stroke]')
       const fill = q('[data-part=S] [data-fill]')
-      // La mira sigue el contorno de la S (es uno solo).
-      const outer = strokes[0]
-      const length = outer.getTotalLength()
       // El desplazamiento de la raya se escribe como atributo (GSAP le agregaría «px» y con pathLength no rinde igual).
       const setTrail = (amount) => strokes.forEach((el) => el.setAttribute('stroke-dashoffset', String(1 - amount)))
       setTrail(0)
@@ -63,15 +53,6 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       gsap.set(q('[data-part=slab]'), { autoAlpha: 0, y: -520, rotation: -6, transformOrigin: '20% 100%' })
       gsap.set(q('[data-part=sub]'), { autoAlpha: 0, letterSpacing: '0.7em' })
       gsap.set(footRef.current, { autoAlpha: 0, y: 10 })
-      gsap.set(pen, { autoAlpha: 0 })
-
-      // Un punto de la S (unidades del logo) → pantalla.
-      const place = (at) => {
-        const point = outer.getPointAtLength(at * length)
-        const r = svg.getBoundingClientRect()
-        gsap.set(pen, { x: r.left + ((point.x - VB.x) * r.width) / VB.w, y: r.top + ((point.y - VB.y) * r.height) / VB.h })
-        coords.textContent = `X ${(point.x / 100).toFixed(3)}   Y ${(-point.y / 100).toFixed(3)}`
-      }
 
       const start = 0.35
       const end = start + S_SECONDS // la S termina y entra el resto
@@ -81,9 +62,7 @@ export default function Loader({ ready, calm, bridge, onDone }) {
         onComplete: () => setDrawn(true),
       })
       tl.to(footRef.current, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, 0.1)
-        .call(() => place(0), null, start - 0.05)
-        .to(pen, { autoAlpha: 1, duration: 0.4 }, start - 0.05)
-        // La mira recorre el contorno de la S y el trazo se dibuja detrás de ella…
+        // El trazo recorre el contorno de la S…
         .fromTo(
           trail,
           { p: 0 },
@@ -91,17 +70,13 @@ export default function Loader({ ready, calm, bridge, onDone }) {
             p: 1,
             duration: S_SECONDS,
             ease: 'power1.inOut',
-            onUpdate: () => {
-              setTrail(trail.p)
-              place(trail.p)
-            },
+            onUpdate: () => setTrail(trail.p),
           },
           start,
         )
         // …la letra se rellena a su paso y el trazo se apaga.
         .to(fill, { opacity: 1, duration: 0.7, ease: 'power1.out' }, start + S_SECONDS * 0.7)
         .to(strokes, { opacity: 0, duration: 0.5, ease: 'power1.out' }, start + S_SECONDS * 0.88)
-        .to(pen, { autoAlpha: 0, duration: 0.4 }, end)
         // El resto, como siempre.
         .to(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07 }, end)
         .to(q('[data-part=e]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.45)
@@ -178,13 +153,6 @@ export default function Loader({ ready, calm, bridge, onDone }) {
         <div ref={logoRef} style={{ fontSize: 'clamp(64px, 12.5vw, 168px)', willChange: 'transform' }}>
           <Logo />
         </div>
-      </div>
-      {/* La mira que dibuja: dos ejes finos, un cuadradito en el centro y las coordenadas. */}
-      <div ref={penRef} className="es-pen pointer-events-none absolute top-0 left-0" aria-hidden="true">
-        <span className="es-pen__h" />
-        <span className="es-pen__v" />
-        <span className="es-pen__box" />
-        <span ref={coordsRef} className="es-pen__coords" />
       </div>
     </div>
   )
