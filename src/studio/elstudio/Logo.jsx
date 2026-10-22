@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { LOGO_FONT, C, SITE } from './brand'
 import { LOGO_PARTS, LOGO_VIEWBOX as VB, LOGO_WORD_X } from './logoPaths'
 
@@ -12,7 +13,12 @@ import { LOGO_PARTS, LOGO_VIEWBOX as VB, LOGO_WORD_X } from './logoPaths'
 // El subtítulo es más chico que el logo (0.115 em): sus márgenes se miden en su propio em.
 const SUB = 0.115
 
+// Las letras que suben desde una línea (el loader las anima): van dentro de un recorte que las oculta
+// debajo de la línea de base.
+const RISERS = new Set(['T', 'U', 'D', 'I', 'O'])
+
 export default function Logo({ compact = false, className = '', style, ...rest }) {
+  const clipId = `${useId().replace(/:/g, '')}-clip`
   return (
     <span
       role="img"
@@ -27,11 +33,16 @@ export default function Logo({ compact = false, className = '', style, ...rest }
         viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`}
         style={{ display: 'block', width: `${VB.w / 1000}em`, height: `${VB.h / 1000}em`, overflow: 'visible' }}
       >
+        <defs>
+          <clipPath id={clipId}>
+            <rect x={VB.x} y={VB.y} width={VB.w} height={VB.h} />
+          </clipPath>
+        </defs>
         {LOGO_PARTS.map((part) => {
           const color = part.id === 'slab' ? C.rust : C.ink
           // El trazo que dibuja la mira va en óxido (el color de la tapa); el relleno, en tinta.
-          return (
-            <g key={part.id} data-part={part.id}>
+          const body = (
+            <g data-part={part.id}>
               <path data-fill d={part.fill} fill={color} />
               {part.contours.map((d, i) => (
                 <path
@@ -49,6 +60,13 @@ export default function Logo({ compact = false, className = '', style, ...rest }
                 />
               ))}
             </g>
+          )
+          return RISERS.has(part.id) ? (
+            <g key={part.id} clipPath={`url(#${clipId})`}>
+              {body}
+            </g>
+          ) : (
+            <g key={part.id}>{body}</g>
           )
         })}
       </svg>

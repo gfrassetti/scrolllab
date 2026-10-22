@@ -8,20 +8,19 @@ import { LOGO_VIEWBOX as VB } from './logoPaths'
  * elStudio — el loader.
  *
  * Una hoja clara donde una mira de plano (cruz fina, un cuadradito en el centro y las coordenadas
- * `X 7.814 Y 2.983`) dibuja el logo a mano: primero recorre el contorno de la S de STUDIO, despacio,
- * y a su paso la letra se rellena; después hace lo mismo, con el mismo gesto, con T U D I O, «el» y
- * la tapa óxido de la T. Al terminar se escribe «Diseño e Interiorismo», la hoja se levanta como
- * una cortina y el logo viaja hasta su lugar en el encabezado (`bridge.current.target()`).
+ * `X 7.814 Y 2.983`) dibuja a mano la S de STUDIO: recorre su contorno, despacio, y a su paso la
+ * letra se rellena. Después el resto del logo entra como siempre: T U D I O suben desde una línea,
+ * «el» entra de costado y la tapa óxido cae sobre la T. Por último se escribe «Diseño e
+ * Interiorismo», la hoja se levanta como una cortina y el logo viaja hasta su lugar en el
+ * encabezado (`bridge.current.target()`).
  * Abajo, una línea de tinta que sigue al dibujo. Con «reducir movimiento»: un fundido corto.
  * Sin sonido.
  */
 
-// Qué se dibuja y en qué orden. La S va primero y sola; el resto de STUDIO la sigue, después «el»
-// y por último la tapa de mesa.
-const ORDER = ['S', 'T', 'U', 'D', 'I', 'O', 'e', 'l', 'slab']
-const S_SECONDS = 1.2 // lo que tarda la mira en recorrer la S (la firma: despacio)
-const REST_SPEED = 14 // el resto va más rápido, con el mismo gesto (× la velocidad de la S)
-const HOP = 0.06 // lo que tarda la mira en pasar de una letra a la siguiente
+// La mira dibuja solo la S de STUDIO, despacio (la firma). El resto del logo entra después con
+// el gesto de siempre: letras que suben desde una línea, «el» de costado, la tapa que cae.
+const S_SECONDS = 2.4 // lo que tarda la mira en recorrer la S
+const RISE = ['T', 'U', 'D', 'I', 'O']
 
 export default function Loader({ ready, calm, bridge, onDone }) {
   const rootRef = useRef(null)
@@ -47,72 +46,69 @@ export default function Loader({ ready, calm, bridge, onDone }) {
     const coords = coordsRef.current
     const svg = logo.querySelector('svg[data-part=row]')
     const ctx = gsap.context(() => {
-      const piece = (id) => {
-        const strokes = q(`[data-part=${id}] [data-stroke]`)
-        // La mira sigue el contorno más largo (el de afuera); los de adentro se dibujan a la par.
-        const outer = strokes.reduce((a, b) => (b.getTotalLength() > a.getTotalLength() ? b : a))
-        return { id, fill: q(`[data-part=${id}] [data-fill]`), strokes, outer, length: outer.getTotalLength() }
-      }
-      const pieces = ORDER.map(piece)
-      gsap.set(pieces.flatMap((p) => p.fill), { opacity: 0 })
+      const strokes = q('[data-part=S] [data-stroke]')
+      const fill = q('[data-part=S] [data-fill]')
+      // La mira sigue el contorno de la S (es uno solo).
+      const outer = strokes[0]
+      const length = outer.getTotalLength()
       // El desplazamiento de la raya se escribe como atributo (GSAP le agregaría «px» y con pathLength no rinde igual).
-      const setTrail = (p, amount) => p.strokes.forEach((el) => el.setAttribute('stroke-dashoffset', String(1 - amount)))
-      pieces.forEach((p) => setTrail(p, 0))
-      gsap.set(pieces.flatMap((p) => p.strokes), { opacity: 1 })
+      const setTrail = (amount) => strokes.forEach((el) => el.setAttribute('stroke-dashoffset', String(1 - amount)))
+      setTrail(0)
+      gsap.set(fill, { opacity: 0 })
+      gsap.set(strokes, { opacity: 1 })
+      // El resto del logo, escondido hasta que termine la S (las unidades son las del dibujo: 1000 = 1 em).
+      gsap.set(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 820 })
+      gsap.set(q('[data-part=e]'), { autoAlpha: 0, x: -90 })
+      gsap.set(q('[data-part=l]'), { autoAlpha: 0, x: -90 })
+      gsap.set(q('[data-part=slab]'), { autoAlpha: 0, y: -520, rotation: -6, transformOrigin: '20% 100%' })
       gsap.set(q('[data-part=sub]'), { autoAlpha: 0, letterSpacing: '0.7em' })
       gsap.set(footRef.current, { autoAlpha: 0, y: 10 })
       gsap.set(pen, { autoAlpha: 0 })
 
-      // De un punto del dibujo (unidades del logo) a la pantalla.
-      const toScreen = (x, y) => {
+      // Un punto de la S (unidades del logo) → pantalla.
+      const place = (at) => {
+        const point = outer.getPointAtLength(at * length)
         const r = svg.getBoundingClientRect()
-        return { x: r.left + ((x - VB.x) * r.width) / VB.w, y: r.top + ((y - VB.y) * r.height) / VB.h }
-      }
-      const place = (p, at) => {
-        const point = p.outer.getPointAtLength(at * p.length)
-        const s = toScreen(point.x, point.y)
-        gsap.set(pen, { x: s.x, y: s.y })
+        gsap.set(pen, { x: r.left + ((point.x - VB.x) * r.width) / VB.w, y: r.top + ((point.y - VB.y) * r.height) / VB.h })
         coords.textContent = `X ${(point.x / 100).toFixed(3)}   Y ${(-point.y / 100).toFixed(3)}`
       }
 
-      const speed = pieces[0].length / S_SECONDS // unidades por segundo
+      const start = 0.35
+      const end = start + S_SECONDS // la S termina y entra el resto
+      const trail = { p: 0 }
       const tl = gsap.timeline({
-        delay: 0.2,
         onUpdate: () => gsap.set(lineRef.current, { scaleX: tl.progress() }),
         onComplete: () => setDrawn(true),
       })
-      tl.to(footRef.current, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, 0)
-        .to(pen, { autoAlpha: 1, duration: 0.4 }, 0.2)
-
-      let t = 0.2
-      const trail = { p: 0 }
-      pieces.forEach((p, i) => {
-        const dur = i === 0 ? S_SECONDS : Math.min(0.45, Math.max(0.2, p.length / (speed * REST_SPEED)))
-        // La mira llega al punto de arranque de la letra…
-        tl.call(() => place(p, 0), null, t)
-        // …y recorre su contorno (el trazo se dibuja detrás de ella).
-        tl.fromTo(
+      tl.to(footRef.current, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, 0.1)
+        .call(() => place(0), null, start - 0.05)
+        .to(pen, { autoAlpha: 1, duration: 0.4 }, start - 0.05)
+        // La mira recorre el contorno de la S y el trazo se dibuja detrás de ella…
+        .fromTo(
           trail,
           { p: 0 },
           {
             p: 1,
-            duration: dur,
+            duration: S_SECONDS,
             ease: 'power1.inOut',
             onUpdate: () => {
-              setTrail(p, trail.p)
-              place(p, trail.p)
+              setTrail(trail.p)
+              place(trail.p)
             },
           },
-          t,
+          start,
         )
-          // La letra se rellena a su paso y el trazo se apaga.
-          .to(p.fill, { opacity: 1, duration: 0.55, ease: 'power1.out' }, t + dur * 0.72)
-          .to(p.strokes, { opacity: 0, duration: 0.4, ease: 'power1.out' }, t + dur * 0.9)
-        t += dur + HOP
-      })
-      tl.to(pen, { autoAlpha: 0, duration: 0.35 }, t - HOP + 0.1)
-        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 0.7, ease: 'expo.out' }, t - HOP)
-        .to({}, { duration: 0.15 }) // un respiro antes de salir
+        // …la letra se rellena a su paso y el trazo se apaga.
+        .to(fill, { opacity: 1, duration: 0.7, ease: 'power1.out' }, start + S_SECONDS * 0.7)
+        .to(strokes, { opacity: 0, duration: 0.5, ease: 'power1.out' }, start + S_SECONDS * 0.88)
+        .to(pen, { autoAlpha: 0, duration: 0.4 }, end)
+        // El resto, como siempre.
+        .to(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07 }, end)
+        .to(q('[data-part=e]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.45)
+        .to(q('[data-part=l]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.5)
+        .to(q('[data-part=slab]'), { autoAlpha: 1, y: 0, rotation: 0, duration: 0.8, ease: 'power4.out' }, end + 0.95)
+        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1.2, ease: 'expo.out' }, end + 1.35)
+        .to({}, { duration: 0.4 }) // un respiro antes de salir
     }, logo)
     return () => ctx.revert()
   }, [calm])
