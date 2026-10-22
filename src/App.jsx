@@ -36,6 +36,8 @@ const DatumPage = lazy(() => import('./pages/DatumPage'))
 // cāpsula33: demo privado del Estudio (sitio a medida). Solo en local: en producción
 // el import no existe, así que ni el código ni las fotos del local viajan al build.
 const Capsula33Page = import.meta.env.DEV ? lazy(() => import('./studio/capsula33/Capsula33Page')) : null
+// elStudio: demo del Estudio para un cliente (diseño e interiorismo). Solo en local, igual que cāpsula33.
+const ElStudioPage = import.meta.env.DEV ? lazy(() => import('./studio/elstudio/ElStudioPage')) : null
 // VESPER (motor Kanvas, «todo en un canvas»): pieza propia del Estudio en /estudio/vesper, sin link desde el
 // sitio y fuera de los buscadores: se muestra a mano. No se vende ni entra al builder ni a LAB (docs/kanvas.md).
 const KanvasPage = lazy(() => import('./proto/kanvas/KanvasPage'))
@@ -219,6 +221,7 @@ export default function App() {
                     path="/estudio/capsula33"
                     element={Capsula33Page ? <Capsula33Page /> : <Navigate to="/" replace />}
                   />
+                  <Route path="/estudio/elstudio" element={ElStudioPage ? <ElStudioPage /> : <Navigate to="/" replace />} />
                   {/* DATUM: template en obra, solo en local como NEON. */}
                   <Route path="/templates/datum" element={import.meta.env.DEV ? <DatumPage /> : <Navigate to="/" replace />} />
                   {/* NEON: prototipo, solo en local. */}

@@ -105,6 +105,7 @@ design/masters/apex-3d/
 design/masters/capsula33/
 public/studio/
 dist-capsula33
+dist-elstudio
 
 # Kanvas: la pista de la demo (Pixabay Content License): se usa en el sitio, no se redistribuye en el repo ni en el ZIP.
 public/proto/kanvas/audio/

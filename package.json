@@ -10,6 +10,7 @@
     "build": "vite build && node scripts/gen-share-pages.mjs",
     "build:capsula33": "vite build --config vite.capsula33.config.js",
     "build:capsula33:public": "vite build --config vite.capsula33.config.js --mode public",
+    "build:elstudio": "vite build --config vite.elstudio.config.js",
     "build:embed": "vite build --config embed/vite.config.js && node embed/build-loader.mjs",
     "build:loader": "node embed/build-loader.mjs",
     "lint": "eslint .",
