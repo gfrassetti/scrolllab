@@ -2,93 +2,162 @@ import { useEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
 
 /**
- * El cursor de elStudio: un punto de tinta que sigue al mouse con un poco de
- * inercia. Sobre un link se abre en un aro; sobre algo con `data-cursor="Ver"`
- * se vuelve un disco de tinta con esa palabra adentro. Solo con mouse (hover +
- * puntero fino): en el teléfono no se monta nada. El cursor nativo se oculta
- * recién con el primer movimiento, así que sin JS no se pierde el puntero.
+ * El cursor de elStudio. Solo con mouse (hover + puntero fino): en el teléfono no se monta nada.
  *
- *   <a data-cursor="Abrir">…</a>      disco con texto
- *   <a>…</a> / <button>…</button>     aro
+ * En el hero es una mira de plano: una cruz roja en el puntero, dos ejes finos que cruzan toda la
+ * pantalla y, al costado, las coordenadas en px (`X:289PX / Y:63PX`) contadas desde la esquina del
+ * hero, así que cambian también cuando la página se mueve bajo el mouse. Sobre un link la cruz se
+ * gira a 45° (una ×). Fuera del hero es un punto de tinta con inercia, que sobre algo con
+ * `data-cursor="Ver"` se vuelve un disco con esa palabra.
+ *
+ * El cursor nativo se oculta recién con el primer movimiento, así que sin JS no se pierde el puntero.
  */
-const STATES = {
+const HERO_ID = 'inicio'
+const DOT_STATES = {
   dot: { width: 14, height: 14, backgroundColor: '#161513', boxShadow: 'inset 0 0 0 0px #161513' },
   ring: { width: 46, height: 46, backgroundColor: 'rgba(22,21,19,0)', boxShadow: 'inset 0 0 0 1px #161513' },
   label: { width: 96, height: 96, backgroundColor: 'rgba(22,21,19,1)', boxShadow: 'inset 0 0 0 0px #161513' },
 }
+const INTERACTIVE = 'a, button, [role="button"], summary, input, textarea'
 
 export default function Cursor() {
-  const rootRef = useRef(null)
-  const bodyRef = useRef(null)
-  const labelRef = useRef(null)
+  const crossRef = useRef(null)
+  const lineH = useRef(null)
+  const lineV = useRef(null)
+  const point = useRef(null)
+  const plus = useRef(null)
+  const coords = useRef(null)
+  const dotRoot = useRef(null)
+  const dotBody = useRef(null)
+  const dotLabel = useRef(null)
 
   useEffect(() => {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return undefined
-    const root = rootRef.current
-    const body = bodyRef.current
-    const label = labelRef.current
     const html = document.documentElement
+    const cross = crossRef.current
+    const root = dotRoot.current
+    const body = dotBody.current
+    const label = dotLabel.current
+    const plusEl = plus.current
 
-    gsap.set(root, { autoAlpha: 0 })
+    gsap.set([cross, root], { autoAlpha: 0 })
     gsap.set(body, { xPercent: -50, yPercent: -50 }) // centrado sobre el puntero aunque cambie de tamaño
-    const moveX = gsap.quickTo(root, 'x', { duration: 0.35, ease: 'power3' })
-    const moveY = gsap.quickTo(root, 'y', { duration: 0.35, ease: 'power3' })
+    gsap.set(plusEl, { xPercent: -50, yPercent: -50 })
+    const dotX = gsap.quickTo(root, 'x', { duration: 0.35, ease: 'power3' })
+    const dotY = gsap.quickTo(root, 'y', { duration: 0.35, ease: 'power3' })
 
     let shown = false
-    let state = 'dot'
-    const setState = (next, text = '') => {
-      if (next === state && label.textContent === text) return
-      state = next
+    let mode = null // 'cross' | 'dot'
+    let dotState = 'dot'
+    let last = { x: 0, y: 0 }
+    let overLink = false
+
+    const setMode = (next) => {
+      if (next === mode) return
+      mode = next
+      gsap.to(cross, { autoAlpha: next === 'cross' ? 1 : 0, duration: 0.2, overwrite: 'auto' })
+      gsap.to(root, { autoAlpha: next === 'dot' ? 1 : 0, duration: 0.2, overwrite: 'auto' })
+    }
+    const setDot = (next, text = '') => {
+      if (next === dotState && label.textContent === text) return
+      dotState = next
       if (text) label.textContent = text
-      gsap.to(body, { ...STATES[next], duration: 0.45, ease: 'expo.out', overwrite: 'auto' })
+      gsap.to(body, { ...DOT_STATES[next], duration: 0.45, ease: 'expo.out', overwrite: 'auto' })
       gsap.to(label, { autoAlpha: next === 'label' ? 1 : 0, duration: next === 'label' ? 0.3 : 0.15, delay: next === 'label' ? 0.08 : 0 })
+    }
+
+    // Pinta la mira (o el punto) en la posición del puntero y las coordenadas contadas desde el hero.
+    const render = () => {
+      const { x, y } = last
+      const hero = document.getElementById(HERO_ID)
+      const rect = hero?.getBoundingClientRect()
+      const inHero = !!rect && y >= rect.top && y <= rect.bottom
+      setMode(inHero ? 'cross' : 'dot')
+      if (inHero) {
+        lineH.current.style.transform = `translate3d(0, ${Math.round(y)}px, 0)`
+        lineV.current.style.transform = `translate3d(${Math.round(x)}px, 0, 0)`
+        point.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
+        coords.current.textContent = `X:${Math.round(x - rect.left)}PX\nY:${Math.round(y - rect.top)}PX`
+        // Cerca de un borde del visor las coordenadas pasan al otro lado de la cruz, para no cortarse.
+        coords.current.dataset.flipX = x < 130 ? '1' : '0'
+        coords.current.dataset.flipY = y > window.innerHeight - 64 ? '1' : '0'
+      } else {
+        dotX(x)
+        dotY(y)
+      }
     }
 
     const onMove = (e) => {
       if (e.pointerType === 'touch') return
+      last = { x: e.clientX, y: e.clientY }
       if (!shown) {
         shown = true
-        gsap.set(root, { x: e.clientX, y: e.clientY })
         html.classList.add('es-has-cursor')
-        gsap.to(root, { autoAlpha: 1, duration: 0.3 })
+        gsap.set(root, { x: e.clientX, y: e.clientY })
       }
-      moveX(e.clientX)
-      moveY(e.clientY)
+      render()
     }
+    // Con la página moviéndose bajo el mouse (scroll) las coordenadas siguen contando.
+    const onScroll = () => shown && render()
     const onOver = (e) => {
       const target = e.target instanceof Element ? e.target : null
+      const interactive = !!target?.closest(INTERACTIVE)
+      overLink = interactive
+      gsap.to(plusEl, { rotation: interactive ? 45 : 0, scale: interactive ? 1.3 : 1, duration: 0.4, ease: 'expo.out' })
       const tagged = target?.closest('[data-cursor]')
-      if (tagged) return setState('label', tagged.getAttribute('data-cursor'))
-      if (target?.closest('a, button, [role="button"], summary, input, textarea')) return setState('ring')
-      setState('dot')
+      if (tagged) return setDot('label', tagged.getAttribute('data-cursor'))
+      setDot(interactive ? 'ring' : 'dot')
     }
-    const onDown = () => gsap.to(body, { scale: 0.82, duration: 0.18, ease: 'power2.out' })
-    const onUp = () => gsap.to(body, { scale: 1, duration: 0.5, ease: 'elastic.out(1, 0.5)' })
-    const onLeave = () => gsap.to(root, { autoAlpha: 0, duration: 0.2 })
-    const onEnter = () => shown && gsap.to(root, { autoAlpha: 1, duration: 0.2 })
+    const onDown = () => {
+      gsap.to(plusEl, { scale: 0.8, duration: 0.15, ease: 'power2.out' })
+      gsap.to(body, { scale: 0.82, duration: 0.18, ease: 'power2.out' })
+    }
+    const onUp = () => {
+      gsap.to(plusEl, { scale: overLink ? 1.3 : 1, duration: 0.4, ease: 'expo.out' })
+      gsap.to(body, { scale: 1, duration: 0.5, ease: 'elastic.out(1, 0.5)' })
+    }
+    const onLeave = () => gsap.to([cross, root], { autoAlpha: 0, duration: 0.2, overwrite: 'auto' })
+    const onEnter = () => {
+      if (!shown) return
+      const m = mode
+      mode = null
+      setMode(m)
+    }
 
     window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
     document.addEventListener('mouseover', onOver, { passive: true })
     window.addEventListener('pointerdown', onDown)
     window.addEventListener('pointerup', onUp)
-    document.documentElement.addEventListener('mouseleave', onLeave)
-    document.documentElement.addEventListener('mouseenter', onEnter)
+    html.addEventListener('mouseleave', onLeave)
+    html.addEventListener('mouseenter', onEnter)
     return () => {
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('scroll', onScroll)
       document.removeEventListener('mouseover', onOver)
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
-      document.documentElement.removeEventListener('mouseleave', onLeave)
-      document.documentElement.removeEventListener('mouseenter', onEnter)
+      html.removeEventListener('mouseleave', onLeave)
+      html.removeEventListener('mouseenter', onEnter)
       html.classList.remove('es-has-cursor')
-      gsap.killTweensOf([root, body, label])
+      gsap.killTweensOf([cross, root, body, label, plusEl])
     }
   }, [])
 
   return (
-    <div ref={rootRef} className="es-cursor" aria-hidden="true">
-      <div ref={bodyRef} className="es-cursor__body">
-        <span ref={labelRef} className="es-cursor__label" />
+    <div className="es-cursor" aria-hidden="true">
+      <div ref={crossRef} className="es-cross">
+        <span ref={lineH} className="es-cross__h" />
+        <span ref={lineV} className="es-cross__v" />
+        <span ref={point} className="es-cross__pt">
+          <span ref={plus} className="es-cross__plus" />
+          <span ref={coords} className="es-cross__coords" data-flip-x="0" data-flip-y="0" />
+        </span>
+      </div>
+      <div ref={dotRoot} className="es-cursor__dot">
+        <div ref={dotBody} className="es-cursor__body">
+          <span ref={dotLabel} className="es-cursor__label" />
+        </div>
       </div>
     </div>
   )

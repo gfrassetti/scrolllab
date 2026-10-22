@@ -18,7 +18,7 @@ export const C = {
 }
 
 export const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&family=Jost:ital,wght@0,400;0,500;0,600;1,200;1,300&display=swap'
+  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=Hanken+Grotesk:wght@300;400;500&family=Jost:ital,wght@0,400;0,500;0,600;1,200;1,300&display=swap'
 
 export const LOGO_FONT = { fontFamily: "'Jost', 'Futura', 'Century Gothic', sans-serif" }
 export const DISPLAY = { fontFamily: "'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif" }

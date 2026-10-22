@@ -46,11 +46,8 @@
 /* ── Cursor ─────────────────────────────────────────────────────────── */
 .es-cursor {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 9999;
-  width: 0;
-  height: 0;
   pointer-events: none;
   display: none;
 }
@@ -64,6 +61,93 @@
   html.es-has-cursor .es-root button {
     cursor: none;
   }
+}
+
+/* La mira del hero: dos ejes que cruzan la pantalla, la cruz roja y las coordenadas. */
+.es-cross {
+  position: absolute;
+  inset: 0;
+}
+.es-cross__h,
+.es-cross__v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(22, 21, 19, 0.22);
+  will-change: transform;
+}
+.es-cross__h {
+  width: 100%;
+  height: 1px;
+}
+.es-cross__v {
+  width: 1px;
+  height: 100%;
+}
+.es-cross__pt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+.es-cross__plus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+}
+.es-cross__plus::before,
+.es-cross__plus::after {
+  content: '';
+  position: absolute;
+  background: #e5431a;
+}
+.es-cross__plus::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+}
+.es-cross__plus::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+}
+/* Las coordenadas: abajo a la izquierda de la cruz; junto a un borde pasan al otro lado. */
+.es-cross__coords {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  white-space: pre;
+  text-align: right;
+  font-family: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  color: #6d675c;
+  font-variant-numeric: tabular-nums;
+}
+.es-cross__coords[data-flip-x='1'] {
+  right: auto;
+  left: 12px;
+  text-align: left;
+}
+.es-cross__coords[data-flip-y='1'] {
+  top: auto;
+  bottom: 12px;
+}
+
+/* Fuera del hero: el punto de tinta (disco con texto sobre `data-cursor`). */
+.es-cursor__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
 }
 .es-cursor__body {
   position: absolute;
