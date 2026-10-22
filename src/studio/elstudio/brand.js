@@ -24,6 +24,10 @@ export const LOGO_FONT = { fontFamily: "'Jost', 'Futura', 'Century Gothic', sans
 // declara un @font-face con el archivo y se pone primero acá y en elstudio.css.
 export const DISPLAY = { fontFamily: "'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', sans-serif" }
 
+/** Alto del nav y de la franja de abajo del marco (px), en el teléfono y desde 640 px (elstudio.css lo repite). */
+export const NAV_H = { phone: 60, desk: 72 }
+export const BAND_H = { phone: 56, desk: 64 }
+
 export const SITE = {
   name: 'elStudio',
   tagline: 'Diseño e Interiorismo',

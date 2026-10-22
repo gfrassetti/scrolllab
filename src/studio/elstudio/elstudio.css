@@ -170,3 +170,117 @@
   white-space: nowrap;
   opacity: 0;
 }
+
+/* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
+.es-frame {
+  --nav-h: 60px;
+  --band-h: 56px;
+  --line: rgba(22, 21, 19, 0.5);
+}
+@media (min-width: 640px) {
+  .es-frame {
+    --nav-h: 72px;
+    --band-h: 64px;
+  }
+}
+.es-frame__nav {
+  height: var(--nav-h);
+}
+.es-frame__band {
+  height: var(--band-h);
+}
+.es-frame__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+  transform-origin: center;
+}
+.es-frame__line--top {
+  top: var(--nav-h);
+}
+.es-frame__line--bottom {
+  bottom: var(--band-h);
+}
+/* La regla bajo el nav: una marca por cada 8 px y una más larga cada 80. */
+.es-frame__ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) + 1px);
+  height: 8px;
+  background-image:
+    repeating-linear-gradient(to right, rgba(22, 21, 19, 0.38) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to right, rgba(22, 21, 19, 0.22) 0 1px, transparent 1px 8px);
+  background-size: 100% 8px, 100% 4px;
+  background-repeat: no-repeat;
+  transform-origin: left center;
+}
+.es-cell {
+  transition: background-color 0.3s var(--es-ease);
+}
+@media (hover: hover) {
+  .es-cell:hover {
+    background-color: rgba(22, 21, 19, 0.045);
+  }
+}
+.es-cell__divider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+  transform-origin: top center;
+}
+.es-cell__corner {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 6px;
+  height: 6px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.5;
+}
+/* Cruces de registro en las esquinas del cuadro. */
+.es-frame__mark {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+}
+.es-frame__mark::before,
+.es-frame__mark::after {
+  content: '';
+  position: absolute;
+  background: var(--es-ink);
+}
+.es-frame__mark::before {
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 1px;
+}
+.es-frame__mark::after {
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 1px;
+}
+.es-frame__mark--tl {
+  left: 12px;
+  top: calc(var(--nav-h) + 14px);
+}
+.es-frame__mark--tr {
+  right: 12px;
+  top: calc(var(--nav-h) + 14px);
+}
+.es-frame__mark--bl {
+  left: 12px;
+  bottom: calc(var(--band-h) + 10px);
+}
+.es-frame__mark--br {
+  right: 12px;
+  bottom: calc(var(--band-h) + 10px);
+}

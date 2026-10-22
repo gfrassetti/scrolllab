@@ -89,7 +89,7 @@ export default function ElStudioPage() {
     <SmoothScrollProvider>
       <div className="es-root min-h-svh">
         <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
-        <Nav bridge={bridge} />
+        <Nav bridge={bridge} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
           <Hero boarded={boarded} calm={calm} />
         </main>

@@ -1,0 +1,622 @@
+import * as THREE from 'three'
+
+/**
+ * La escena del hero: un local (café / showroom) en maqueta, visto como una casa de muñecas (dos
+ * muros de fondo y el piso, sin los muros que taparían la vista).
+ *
+ * Se ve en tres estados, todos de la misma escena (por eso coinciden al milímetro):
+ *   boceto    un filtro de dibujo sobre el render: contornos en grafito que tiemblan y se cortan
+ *             como un trazo a mano, sombras en rayado / rayado cruzado según la luz y manchas de
+ *             carbonilla en lo más oscuro. Se «pinta» con `setReveal` (desde el centro hacia afuera).
+ *   maqueta   el 3D de papel blanco con las aristas en tinta (`setSketch(0)`).
+ *   decorado  pieza por pieza toma su material, entran los objetos y se encienden las lámparas
+ *             (`setDecor`).
+ *
+ * Todo en metros: x a la derecha (a lo largo del muro del fondo), z hacia el frente, y hacia arriba;
+ * el rincón del fondo a la izquierda es el origen.
+ *
+ *   const scene = createLocalScene({ canvas })
+ *   scene.setFrame(x, y, w, h)  el rectángulo de la pantalla donde va el cuadro
+ *   scene.setReveal(0..1)       cuánto del boceto está dibujado
+ *   scene.setSketch(0..1)       boceto (1) → maqueta 3D (0)
+ *   scene.setDecor(0..1)        cuánto está decorado
+ *   scene.setCamera(0..1)       la cámara se acerca al final
+ *   scene.render()              dibuja si algo cambió
+ */
+
+export const ROOM = { w: 9, d: 6, h: 3.3, t: 0.2 }
+/** El cuadro: la cámara encuadra este aspecto, entero, dentro del rectángulo que le den. */
+export const FRAME_ASPECT = 16 / 9
+
+const INK = new THREE.Color('#161513')
+const PAPER = new THREE.Color('#f6f4ee')
+const FOV = 30
+const TARGET = new THREE.Vector3(4.6, 0.55, 3.25)
+const START = { polar: 0.98, azimuth: 0.64, dist: 18.6 }
+
+const clamp01 = (v) => Math.min(1, Math.max(0, v))
+const smooth = (a, b, v) => {
+  const t = clamp01((v - a) / (b - a))
+  return t * t * (3 - 2 * t)
+}
+const backOut = (t) => {
+  const s = 1.5
+  const u = t - 1
+  return 1 + (s + 1) * u * u * u + s * u * u
+}
+
+/* ── Piezas ─────────────────────────────────────────────────────────── */
+
+const box = (w, h, d, x, y, z) => {
+  const g = new THREE.BoxGeometry(w, h, d)
+  g.translate(x, y + h / 2, z)
+  return g
+}
+const cyl = (r, h, x, y, z, seg = 40, rTop = r) => {
+  const g = new THREE.CylinderGeometry(rTop, r, h, seg)
+  g.translate(x, y + h / 2, z)
+  return g
+}
+const ball = (r, x, y, z) => new THREE.SphereGeometry(r, 28, 18).translate(x, y, z)
+
+/**
+ * Las piezas del local. `object: true` son los objetos que entran al decorar (jarrones, libros,
+ * almohadones…): no están en el boceto. El resto está desde el principio y al decorar toma color.
+ */
+function buildPieces() {
+  const { w, d, h, t } = ROOM
+  const list = []
+  const add = (id, parts, object = false) => list.push({ id, parts, object })
+
+  // La caja: base, piso, muro del fondo y muro izquierdo con la vidriera.
+  // La base termina justo debajo del piso: si las dos caras quedan en el mismo plano, se pelean (rayas).
+  add('base', [{ geo: box(w + t, 0.2, d + t, w / 2 - t / 2, -0.22, d / 2 - t / 2), mat: 'base' }])
+  add('floor', [{ geo: box(w, 0.02, d, w / 2, -0.02, d / 2), mat: 'floor' }])
+  const win = { z0: 1.1, z1: 4.9, y0: 0.45, y1: 2.85 }
+  add('walls', [
+    { geo: box(w + t, h, t, w / 2 - t / 2, 0, -t / 2), mat: 'wall' },
+    { geo: box(t, h, win.z0, -t / 2, 0, win.z0 / 2), mat: 'wall' },
+    { geo: box(t, h, d - win.z1, -t / 2, 0, (win.z1 + d) / 2), mat: 'wall' },
+    { geo: box(t, win.y0, win.z1 - win.z0, -t / 2, 0, (win.z0 + win.z1) / 2), mat: 'wall' },
+    { geo: box(t, h - win.y1, win.z1 - win.z0, -t / 2, win.y1, (win.z0 + win.z1) / 2), mat: 'wall' },
+  ])
+  const frame = []
+  for (const z of [win.z0, win.z0 + 1.27, win.z0 + 2.53, win.z1]) frame.push({ geo: box(0.07, win.y1 - win.y0, 0.06, -t / 2, win.y0, z), mat: 'metal' })
+  frame.push({ geo: box(0.07, 0.06, win.z1 - win.z0, -t / 2, win.y0, (win.z0 + win.z1) / 2), mat: 'metal' })
+  frame.push({ geo: box(0.07, 0.06, win.z1 - win.z0, -t / 2, win.y1 - 0.06, (win.z0 + win.z1) / 2), mat: 'metal' })
+  frame.push({ geo: box(0.07, 0.04, win.z1 - win.z0, -t / 2, 2.2, (win.z0 + win.z1) / 2), mat: 'metal' })
+  frame.push({ geo: box(0.01, win.y1 - win.y0, win.z1 - win.z0, -t / 2, win.y0, (win.z0 + win.z1) / 2), mat: 'glass', edges: false })
+  add('window', frame)
+
+  // El nicho en arco del fondo y su consola.
+  const arch = new THREE.Shape()
+  const aw = 1.7
+  const ah = 2.7
+  arch.moveTo(-aw / 2, 0)
+  arch.lineTo(-aw / 2, ah - aw / 2)
+  arch.absarc(0, ah - aw / 2, aw / 2, Math.PI, 0, true)
+  arch.lineTo(aw / 2, 0)
+  arch.closePath()
+  const archGeo = new THREE.ExtrudeGeometry(arch, { depth: 0.04, bevelEnabled: false, curveSegments: 32 })
+  archGeo.translate(2.9, 0.15, 0.001)
+  add('arch', [{ geo: archGeo, mat: 'accent' }])
+  add('console', [{ geo: box(1.3, 0.72, 0.36, 2.9, 0, 0.24), mat: 'wood' }])
+  add(
+    'console-objects',
+    [
+      { geo: cyl(0.12, 0.42, 2.55, 0.72, 0.24, 24, 0.07), mat: 'cream' },
+      { geo: ball(0.11, 3.2, 0.83, 0.24), mat: 'clay' },
+    ],
+    true,
+  )
+
+  // Alfombra redonda.
+  add('rug', [{ geo: cyl(1.35, 0.015, 4.7, 0, 3.7, 64), mat: 'rug' }])
+
+  // La barra con el extremo redondeado y la mesada oscura apenas volada.
+  const bar = { x0: 5.9, x1: 8.7, z0: 0.15, z1: 0.9, h: 1.05 }
+  const bz = (bar.z0 + bar.z1) / 2
+  const bd = bar.z1 - bar.z0
+  add('bar', [
+    { geo: box(bar.x1 - bar.x0, bar.h - 0.05, bd, (bar.x0 + bar.x1) / 2, 0, bz), mat: 'stone' },
+    { geo: cyl(bd / 2, bar.h - 0.05, bar.x0, 0, bz), mat: 'stone' },
+    { geo: box(bar.x1 - bar.x0 + 0.04, 0.05, bd + 0.08, (bar.x0 + bar.x1) / 2, bar.h - 0.05, bz + 0.02), mat: 'top' },
+    { geo: cyl(bd / 2 + 0.04, 0.05, bar.x0, bar.h - 0.05, bz + 0.02), mat: 'top' },
+  ])
+  const stools = []
+  for (const x of [6.4, 7.25, 8.1]) {
+    stools.push({ geo: cyl(0.025, 0.72, x, 0, 1.38, 16), mat: 'metal' })
+    stools.push({ geo: cyl(0.2, 0.02, x, 0, 1.38, 32), mat: 'metal' })
+    stools.push({ geo: cyl(0.19, 0.06, x, 0.72, 1.38, 32), mat: 'wood' })
+  }
+  add('stools', stools)
+
+  // Estantes sobre la barra y lo que va encima.
+  add(
+    'shelves',
+    [1.65, 2.1, 2.55].map((y) => ({ geo: box(2.5, 0.04, 0.26, 7.3, y, 0.13), mat: 'wood' })),
+  )
+  const objects = [
+    [6.3, 1.69, 0.08, 0.32, 'clay'],
+    [6.55, 1.69, 0.06, 0.22, 'cream'],
+    [7.6, 1.69, 0.1, 0.18, 'clay'],
+    [8.3, 1.69, 0.05, 0.3, 'ink'],
+    [6.6, 2.14, 0.09, 0.2, 'cream'],
+    [7.9, 2.14, 0.07, 0.34, 'clay'],
+    [8.15, 2.14, 0.05, 0.18, 'cream'],
+    [6.9, 2.59, 0.08, 0.26, 'ink'],
+    [7.35, 2.59, 0.11, 0.15, 'clay'],
+  ].map(([x, y, r, hh, m]) => ({ geo: cyl(r, hh, x, y, 0.13, 24, r * 0.75), mat: m }))
+  objects.push({ geo: box(0.32, 0.06, 0.2, 7.2, 2.14, 0.13), mat: 'ink' })
+  objects.push({ geo: box(0.28, 0.05, 0.19, 7.22, 2.2, 0.13), mat: 'clay' })
+  add('shelf-objects', objects, true)
+
+  // Lámparas colgantes (la pantalla es la que se enciende).
+  const lamps = []
+  for (const x of [6.45, 7.3, 8.15]) {
+    lamps.push({ geo: cyl(0.006, h - 2.3, x, 2.3, 0.6, 6), mat: 'ink', edges: false })
+    lamps.push({
+      geo: new THREE.SphereGeometry(0.2, 32, 12, 0, Math.PI * 2, 0, Math.PI / 2).translate(x, 2.12, 0.6),
+      mat: 'shade',
+    })
+  }
+  add('lamps', lamps)
+
+  // Mesa redonda y dos sillas.
+  add('table', [
+    { geo: cyl(0.3, 0.03, 4.7, 0, 3.7, 40), mat: 'stone' },
+    { geo: cyl(0.06, 0.7, 4.7, 0.03, 3.7, 20), mat: 'stone' },
+    { geo: cyl(0.6, 0.04, 4.7, 0.73, 3.7, 64), mat: 'stone' },
+  ])
+  add('table-objects', [{ geo: cyl(0.08, 0.24, 4.55, 0.77, 3.62, 20, 0.05), mat: 'clay' }], true)
+  const chair = (cx, cz, rot) =>
+    [
+      box(0.46, 0.05, 0.46, 0, 0.44, 0),
+      box(0.46, 0.42, 0.05, 0, 0.49, -0.21),
+      ...[-0.19, 0.19].flatMap((x) => [-0.19, 0.19].map((z) => box(0.04, 0.44, 0.04, x, 0, z))),
+    ].map((g) => ({ geo: g.rotateY(rot).translate(cx, 0, cz), mat: 'wood' }))
+  add('chairs', [...chair(4.7, 2.75, 0), ...chair(5.65, 4.1, -2.2)])
+
+  // Banco bajo la vidriera y sus almohadones.
+  add('bench', [
+    { geo: box(0.55, 0.32, 3.4, 0.33, 0, 3.0), mat: 'wood' },
+    { geo: box(0.55, 0.12, 3.4, 0.33, 0.32, 3.0), mat: 'linen' },
+  ])
+  add(
+    'pillows',
+    [
+      { geo: box(0.14, 0.4, 0.5, 0.12, 0.44, 2.0), mat: 'accent' },
+      { geo: box(0.14, 0.36, 0.45, 0.12, 0.44, 2.6), mat: 'olive' },
+    ],
+    true,
+  )
+
+  // Pedestales de exhibición (es un showroom) y sus piezas.
+  add('plinths', [
+    { geo: box(0.55, 0.95, 0.55, 7.55, 0, 4.35), mat: 'stone' },
+    { geo: box(0.45, 0.6, 0.45, 8.25, 0, 4.95), mat: 'stone' },
+  ])
+  add(
+    'plinth-objects',
+    [
+      { geo: cyl(0.13, 0.46, 7.55, 0.95, 4.35, 28, 0.08), mat: 'clay' },
+      { geo: ball(0.17, 8.25, 0.77, 4.95), mat: 'ink' },
+    ],
+    true,
+  )
+
+  // Planta grande en el rincón de adelante.
+  add('plant', [
+    { geo: cyl(0.26, 0.55, 0.62, 0, 5.4, 32, 0.3), mat: 'clay' },
+    { geo: cyl(0.02, 0.6, 0.62, 0.5, 5.4, 8), mat: 'wood', edges: false },
+    ...[
+      [0.62, 1.05, 5.35, 0.36],
+      [0.45, 1.45, 5.2, 0.3],
+      [0.85, 1.4, 5.5, 0.28],
+      [0.6, 1.8, 5.4, 0.26],
+      [0.4, 1.15, 5.6, 0.25],
+    ].map(([x, y, z, r]) => ({ geo: new THREE.IcosahedronGeometry(r, 1).translate(x, y, z), mat: 'leaf' })),
+  ])
+
+  return list
+}
+
+/** El orden en que se decora: cada paso colorea una pieza o hace entrar sus objetos. */
+const DECOR_ORDER = [
+  'floor',
+  'walls',
+  'base',
+  'window',
+  'arch',
+  'console',
+  'console-objects',
+  'rug',
+  'bar',
+  'stools',
+  'shelves',
+  'shelf-objects',
+  'lamps',
+  'table',
+  'chairs',
+  'table-objects',
+  'bench',
+  'pillows',
+  'plant',
+  'plinths',
+  'plinth-objects',
+]
+
+/** El color final de cada material. */
+const FINAL = {
+  base: '#e7e2d7',
+  floor: '#c8ab84',
+  wall: '#ece4d6',
+  metal: '#2a2826',
+  glass: '#cdd8d6',
+  rug: '#d9cdb7',
+  stone: '#dccfba',
+  top: '#3a3631',
+  wood: '#a77a52',
+  clay: '#b4653f',
+  cream: '#efe7d9',
+  ink: '#2a2826',
+  shade: '#d8b067',
+  accent: '#c4441f',
+  linen: '#e5dbca',
+  olive: '#7f8a62',
+  leaf: '#6f8f5c',
+}
+
+/* ── El filtro de boceto ─────────────────────────────────────────────── */
+
+const sketchVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = vec4(position.xy, 0.0, 1.0);
+  }
+`
+
+const sketchFragment = /* glsl */ `
+  uniform sampler2D tColor;
+  uniform sampler2D tNormal;
+  uniform vec2 uRes;      // px del canvas (con el dpr)
+  uniform float uDpr;
+  uniform float uSketch;  // 1 boceto, 0 render
+  uniform float uReveal;  // cuánto del boceto está dibujado
+  uniform vec2 uCenter;   // desde dónde se pinta (0–1)
+  uniform float uExposure;
+  varying vec2 vUv;
+
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float noise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+  }
+  float fbm(vec2 p) {
+    float v = 0.0, a = 0.5;
+    for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.03; a *= 0.5; }
+    return v;
+  }
+  vec3 toSrgb(vec3 c) { return pow(max(c, 0.0), vec3(1.0 / 2.2)); }
+  // Tone mapping fílmico (ACES, aproximación de Narkowicz): las luces altas no se queman.
+  vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+
+  // El render compuesto sobre papel blanco, en sRGB (el tono como se ve).
+  vec3 onPaper(vec2 uv) {
+    vec4 c = texture2D(tColor, uv);
+    return mix(vec3(1.0), toSrgb(c.rgb), c.a);
+  }
+  float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
+
+  // Una familia de rayas en pantalla (px de CSS), con el trazo un poco tembloroso.
+  float hatch(vec2 p, float angle, float spacing, float width) {
+    vec2 d = vec2(cos(angle), sin(angle));
+    float v = dot(p, vec2(-d.y, d.x)) + (fbm(p * 0.035) - 0.5) * 6.0;
+    float f = abs(fract(v / spacing) - 0.5) * spacing;
+    return 1.0 - smoothstep(width * 0.5, width * 0.5 + 0.9, f);
+  }
+
+  void main() {
+    vec4 render = texture2D(tColor, vUv);
+    vec4 outColor = vec4(toSrgb(aces(render.rgb * uExposure)) * render.a, render.a);
+
+    if (uSketch > 0.001) {
+      vec2 px = vUv * uRes / uDpr;
+      // El temblor de la mano: el dibujo se lee con un leve corrimiento que cambia a lo largo del trazo.
+      vec2 wob = (vec2(fbm(px * 0.02), fbm(px * 0.02 + 17.0)) - 0.5) * 2.2 * uDpr / uRes;
+      vec2 uv = vUv + wob;
+      float l = lum(onPaper(uv));
+
+      // Contornos: las aristas en tinta del render (lo más oscuro) y los saltos de normal (siluetas).
+      vec2 e = uDpr / uRes;
+      vec4 nc = texture2D(tNormal, uv);
+      vec4 nx1 = texture2D(tNormal, uv + vec2(e.x, 0.0));
+      vec4 nx0 = texture2D(tNormal, uv - vec2(e.x, 0.0));
+      vec4 ny1 = texture2D(tNormal, uv + vec2(0.0, e.y));
+      vec4 ny0 = texture2D(tNormal, uv - vec2(0.0, e.y));
+      float nEdge = length(nx1 - nx0) + length(ny1 - ny0);
+      float silhouette = smoothstep(0.4, 1.0, nEdge);
+      float inkLine = smoothstep(0.62, 0.3, l);
+      // El grafito no es parejo: la línea se aclara y se corta a tramos.
+      float pressure = mix(0.45, 1.0, smoothstep(0.25, 0.7, noise(px * vec2(0.09, 0.07))));
+      float line = clamp(max(inkLine, silhouette * 0.85), 0.0, 1.0) * pressure;
+
+      // Sombreado: cuanto más oscuro, más capas de rayado; en lo más hondo, carbonilla.
+      float tone = clamp((0.95 - l) / 0.36, 0.0, 1.0) * (1.0 - inkLine);
+      float h = hatch(px, 0.785, 6.5, 0.9) * smoothstep(0.08, 0.2, tone);
+      h = max(h, hatch(px, -0.785, 6.5, 0.9) * smoothstep(0.38, 0.5, tone));
+      h = max(h, hatch(px, 0.2, 4.5, 0.8) * smoothstep(0.65, 0.8, tone));
+      float charcoal = smoothstep(0.4, 1.0, tone) * (0.3 + 0.4 * fbm(px * 0.012));
+      float shade = clamp(h * (0.28 + 0.42 * tone) + charcoal, 0.0, 1.0);
+
+      // Se pinta desde el centro del cuadro hacia afuera, con un borde irregular de trazo;
+      // las líneas van un poco adelante del sombreado.
+      float dist = length((vUv - uCenter) * vec2(uRes.x / uRes.y, 1.0));
+      float field = dist * 0.85 + (fbm(px * 0.006) - 0.5) * 0.45;
+      float lineMask = 1.0 - smoothstep(uReveal * 1.12 - 0.1, uReveal * 1.12, field);
+      float shadeMask = 1.0 - smoothstep(uReveal * 1.12 - 0.3, uReveal * 1.12 - 0.12, field);
+
+      float ink = clamp(line * lineMask + shade * shadeMask, 0.0, 1.0);
+      vec3 graphite = vec3(0.17, 0.165, 0.155);
+      outColor = mix(outColor, vec4(graphite * ink, ink), uSketch);
+    }
+    gl_FragColor = outColor;
+  }
+`
+
+export function createLocalScene({ canvas, phone = false }) {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, premultipliedAlpha: true })
+  renderer.setClearColor(0x000000, 0)
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(FOV, FRAME_ASPECT, 0.1, 200)
+
+  // Un material por material y por pieza: cada pieza toma su color a su turno.
+  const baseMat = (key) =>
+    key === 'glass'
+      ? new THREE.MeshBasicMaterial({ color: PAPER.clone(), transparent: true, opacity: 0.25, depthWrite: false })
+      : new THREE.MeshStandardMaterial({
+          color: PAPER.clone(),
+          roughness: key === 'metal' || key === 'top' ? 0.55 : 0.9,
+          polygonOffset: true,
+          polygonOffsetFactor: 1,
+          polygonOffsetUnits: 1,
+        })
+  const edgeMat = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.6 })
+  const edgeLines = []
+  const ownMats = []
+
+  const pieces = buildPieces().map(({ id, parts, object }) => {
+    const group = new THREE.Group()
+    group.name = id
+    const mats = {}
+    for (const p of parts) {
+      if (!mats[p.mat]) {
+        mats[p.mat] = { key: p.mat, m: baseMat(p.mat), final: new THREE.Color(FINAL[p.mat]) }
+        ownMats.push(mats[p.mat].m)
+      }
+      const mesh = new THREE.Mesh(p.geo, mats[p.mat].m)
+      mesh.userData.glass = p.mat === 'glass'
+      if (p.mat !== 'glass') {
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+      }
+      if (p.edges !== false && p.mat !== 'glass') {
+        const lines = new THREE.LineSegments(new THREE.EdgesGeometry(p.geo, 25), edgeMat)
+        edgeLines.push(lines)
+        mesh.add(lines)
+      }
+      group.add(mesh)
+    }
+    // Los objetos crecen desde su base (el centro de la huella).
+    if (object) {
+      const b = new THREE.Box3().setFromObject(group)
+      const pivot = new THREE.Vector3((b.min.x + b.max.x) / 2, b.min.y, (b.min.z + b.max.z) / 2)
+      group.children.forEach((c) => c.position.sub(pivot))
+      group.position.copy(pivot)
+      group.visible = false
+    }
+    scene.add(group)
+    return { id, group, mats: Object.values(mats), object }
+  })
+  const byId = Object.fromEntries(pieces.map((p) => [p.id, p]))
+  const steps = DECOR_ORDER.map((id) => byId[id]).filter(Boolean)
+  const shade = byId.lamps.mats.find((x) => x.key === 'shade').m
+
+  // Luz: cielo parejo de maqueta y un sol de la tarde que entra por la vidriera.
+  const hemi = new THREE.HemisphereLight('#ffffff', '#ece6d8', 2.1)
+  const ambient = new THREE.AmbientLight('#ffffff', 0.4)
+  const sun = new THREE.DirectionalLight('#fff4e2', 2.2)
+  sun.position.set(-7, 7.5, 4.5)
+  sun.target.position.set(4, 0, 3)
+  sun.castShadow = true
+  sun.shadow.mapSize.set(phone ? 1024 : 2048, phone ? 1024 : 2048)
+  Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 })
+  sun.shadow.bias = -0.0004
+  sun.shadow.normalBias = 0.025
+  sun.shadow.radius = 3
+  scene.add(hemi, ambient, sun, sun.target)
+  const bulbs = [6.45, 7.3, 8.15].map((x) => {
+    const l = new THREE.PointLight('#ffb866', 0, 3.2, 1.6)
+    l.position.set(x, 1.95, 0.75)
+    scene.add(l)
+    return l
+  })
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.14 }))
+  ground.rotation.x = -Math.PI / 2
+  ground.position.set(4.5, -0.221, 3)
+  ground.receiveShadow = true
+  scene.add(ground)
+
+  // Los pases: el render (con MSAA), las normales (para las siluetas del boceto) y el filtro final.
+  const rtColor = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
+  const rtNormal = new THREE.WebGLRenderTarget(1, 1)
+  const normalMat = new THREE.MeshNormalMaterial()
+  const post = new THREE.ShaderMaterial({
+    vertexShader: sketchVertex,
+    fragmentShader: sketchFragment,
+    uniforms: {
+      tColor: { value: rtColor.texture },
+      tNormal: { value: rtNormal.texture },
+      uRes: { value: new THREE.Vector2(1, 1) },
+      uDpr: { value: 1 },
+      uSketch: { value: 1 },
+      uReveal: { value: 0 },
+      uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+      uExposure: { value: 1.25 },
+    },
+    depthTest: false,
+    depthWrite: false,
+    blending: THREE.NoBlending,
+  })
+  const postScene = new THREE.Scene()
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post)
+  quad.frustumCulled = false
+  postScene.add(quad)
+  const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+
+  let canvasW = 1
+  let canvasH = 1
+  let dpr = 1
+  let frame = { x: 0, y: 0, w: 1, h: 1 }
+  const state = { reveal: 0, sketch: 1, decor: 0, camera: 0 }
+  let dirty = true
+
+  const applyFrame = () => {
+    // La cámara encuadra el rectángulo del cuadro; el resto del canvas es lo que queda alrededor.
+    camera.aspect = frame.w / frame.h
+    camera.setViewOffset(frame.w, frame.h, -frame.x, -frame.y, canvasW, canvasH)
+    camera.updateProjectionMatrix()
+    post.uniforms.uCenter.value.set((frame.x + frame.w / 2) / canvasW, 1 - (frame.y + frame.h * 0.55) / canvasH)
+  }
+  const sizeTargets = () => {
+    const w = Math.max(1, Math.round(canvasW * dpr))
+    const h = Math.max(1, Math.round(canvasH * dpr))
+    rtColor.setSize(w, h)
+    rtNormal.setSize(w, h)
+    post.uniforms.uRes.value.set(w, h)
+    post.uniforms.uDpr.value = dpr
+  }
+
+  const update = () => {
+    // Decorar: cada paso tiene su tramo; una pieza toma su color, un objeto entra creciendo.
+    const n = steps.length
+    let lit = 0
+    steps.forEach((p, i) => {
+      const k = clamp01((state.decor * (n + 1.5) - i) / 2.5)
+      if (p.object) {
+        p.group.visible = k > 0
+        p.group.scale.setScalar(Math.max(0.0001, backOut(k)))
+      }
+      for (const { m, final } of p.mats) m.color.copy(PAPER).lerp(final, p.object ? 1 : k)
+      if (p.id === 'lamps') lit = k
+    })
+    shade.emissive.set('#ffb866').multiplyScalar(lit * 0.75)
+    bulbs.forEach((b) => {
+      b.intensity = lit * 1.4
+    })
+    const warm = smooth(0.3, 1, state.decor)
+    edgeMat.opacity = THREE.MathUtils.lerp(0.6, 0.14, warm)
+    hemi.intensity = THREE.MathUtils.lerp(2.1, 1.05, warm)
+    hemi.color.set('#ffffff').lerp(new THREE.Color('#fff1dc'), warm)
+    sun.intensity = THREE.MathUtils.lerp(2.2, 2.4, warm)
+    sun.color.set('#fff4e2').lerp(new THREE.Color('#ffd7a3'), warm)
+
+    // La cámara: quieta mientras está el boceto (tiene que coincidir); al final se acerca un poco.
+    const c = smooth(0, 1, state.camera)
+    const polar = THREE.MathUtils.lerp(START.polar, START.polar + 0.1, c)
+    const azimuth = THREE.MathUtils.lerp(START.azimuth, START.azimuth - 0.18, c)
+    const dist = THREE.MathUtils.lerp(START.dist, START.dist * 0.8, c)
+    camera.position.set(
+      TARGET.x + dist * Math.sin(polar) * Math.sin(azimuth),
+      TARGET.y + dist * Math.cos(polar),
+      TARGET.z + dist * Math.sin(polar) * Math.cos(azimuth),
+    )
+    camera.lookAt(TARGET)
+    post.uniforms.uSketch.value = state.sketch
+    post.uniforms.uReveal.value = state.reveal
+  }
+
+  const draw = () => {
+    update()
+    renderer.setRenderTarget(rtColor)
+    renderer.clear()
+    renderer.render(scene, camera)
+    if (state.sketch > 0.001) {
+      // Normales: sin aristas, sin vidrio y sin el piso de sombras.
+      const hidden = [ground, ...edgeLines]
+      scene.traverse((o) => o.userData.glass && hidden.push(o))
+      const was = hidden.map((o) => o.visible)
+      hidden.forEach((o) => (o.visible = false))
+      scene.overrideMaterial = normalMat
+      renderer.setRenderTarget(rtNormal)
+      renderer.clear()
+      renderer.render(scene, camera)
+      scene.overrideMaterial = null
+      hidden.forEach((o, i) => (o.visible = was[i]))
+    }
+    renderer.setRenderTarget(null)
+    renderer.render(postScene, postCamera)
+  }
+
+  const set = (key) => (v) => {
+    if (Math.abs(v - state[key]) > 1e-5) {
+      state[key] = v
+      dirty = true
+    }
+  }
+
+  return {
+    setReveal: set('reveal'),
+    setSketch: set('sketch'),
+    setDecor: set('decor'),
+    setCamera: set('camera'),
+    setPixelRatio(v) {
+      dpr = v
+      renderer.setPixelRatio(v)
+      sizeTargets()
+      dirty = true
+    },
+    resize(w, h) {
+      canvasW = w
+      canvasH = h
+      renderer.setSize(w, h, false)
+      sizeTargets()
+      applyFrame()
+      dirty = true
+    },
+    setFrame(x, y, w, h) {
+      frame = { x, y, w, h }
+      applyFrame()
+      dirty = true
+    },
+    /** El punto del piso bajo el puntero (px del canvas), en metros del local; null si cae afuera. */
+    probe(x, y) {
+      const ndc = new THREE.Vector2((x / canvasW) * 2 - 1, -(y / canvasH) * 2 + 1)
+      const ray = new THREE.Raycaster()
+      ray.setFromCamera(ndc, camera)
+      const hit = new THREE.Vector3()
+      if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit)) return null
+      if (hit.x < 0 || hit.x > ROOM.w || hit.z < 0 || hit.z > ROOM.d) return null
+      return { x: hit.x, y: hit.z }
+    },
+    render(force = false) {
+      if (!dirty && !force) return false
+      dirty = false
+      draw()
+      return true
+    },
+    dispose() {
+      scene.traverse((o) => o.geometry?.dispose?.())
+      ownMats.forEach((m) => m.dispose())
+      ;[edgeMat, normalMat, post, ground.material].forEach((m) => m.dispose())
+      rtColor.dispose()
+      rtNormal.dispose()
+      renderer.dispose()
+    },
+  }
+}
