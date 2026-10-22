@@ -77,12 +77,10 @@
   will-change: transform;
 }
 .es-cross__h {
-  width: 100%;
   height: 1px;
 }
 .es-cross__v {
   width: 1px;
-  height: 100%;
 }
 .es-cross__pt {
   position: absolute;
@@ -490,7 +488,7 @@
     transform 0.8s var(--es-ease);
 }
 .es-guide--h {
-  left: 0;
+  left: calc(var(--px) - 28px);
   right: 0;
   height: 1px;
   background: repeating-linear-gradient(to right, rgba(22, 21, 19, 0.3) 0 6px, transparent 6px 11px);

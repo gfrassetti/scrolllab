@@ -13,7 +13,8 @@ import { readPlanProbe } from './planProbe'
  *
  * El cursor nativo se oculta recién con el primer movimiento, así que sin JS no se pierde el puntero.
  */
-const HERO_ID = 'inicio'
+// Dónde se vuelve mira: solo sobre el cuadrante del dibujo (el elemento con data-cursor-zone).
+const ZONE = '[data-cursor-zone]'
 const DOT_STATES = {
   dot: { width: 14, height: 14, backgroundColor: '#161513', boxShadow: 'inset 0 0 0 0px #161513' },
   ring: { width: 46, height: 46, backgroundColor: 'rgba(22,21,19,0)', boxShadow: 'inset 0 0 0 1px #161513' },
@@ -72,25 +73,25 @@ export default function Cursor() {
       gsap.to(label, { autoAlpha: next === 'label' ? 1 : 0, duration: next === 'label' ? 0.3 : 0.15, delay: next === 'label' ? 0.08 : 0 })
     }
 
-    // Pinta la mira (o el punto) en la posición del puntero y las coordenadas contadas desde el hero.
+    // Pinta la mira (o el punto) en la posición del puntero. La mira vive solo dentro del cuadrante del
+    // dibujo: sus ejes llegan hasta los bordes del cuadrante y no cruzan el texto de al lado.
     const render = () => {
       const { x, y } = last
-      const hero = document.getElementById(HERO_ID)
-      const rect = hero?.getBoundingClientRect()
-      const inHero = !!rect && y >= rect.top && y <= rect.bottom
-      setMode(inHero ? 'cross' : 'dot')
-      if (inHero) {
-        lineH.current.style.transform = `translate3d(0, ${Math.round(y)}px, 0)`
-        lineV.current.style.transform = `translate3d(${Math.round(x)}px, 0, 0)`
+      const rect = document.querySelector(ZONE)?.getBoundingClientRect()
+      const inZone = !!rect && rect.width > 0 && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+      setMode(inZone ? 'cross' : 'dot')
+      if (inZone) {
+        Object.assign(lineH.current.style, { left: `${rect.left}px`, width: `${rect.width}px`, transform: `translate3d(0, ${Math.round(y)}px, 0)` })
+        Object.assign(lineV.current.style, { top: `${rect.top}px`, height: `${rect.height}px`, transform: `translate3d(${Math.round(x)}px, 0, 0)` })
         point.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
-        // Sobre el plano, metros reales; fuera de él, píxeles del hero.
+        // Sobre el piso del local, metros reales; en el resto del cuadrante, píxeles del cuadrante.
         const m = readPlanProbe(x, y)
         coords.current.textContent = m
           ? `X:${m.x.toFixed(2)}M\nY:${m.y.toFixed(2)}M`
           : `X:${Math.round(x - rect.left)}PX\nY:${Math.round(y - rect.top)}PX`
         // Cerca de un borde del visor las coordenadas pasan al otro lado de la cruz, para no cortarse.
-        coords.current.dataset.flipX = x < 130 ? '1' : '0'
-        coords.current.dataset.flipY = y > window.innerHeight - 64 ? '1' : '0'
+        coords.current.dataset.flipX = x < rect.left + 110 ? '1' : '0'
+        coords.current.dataset.flipY = y > rect.bottom - 50 ? '1' : '0'
         // El cartel junto a la mira (al estilo de un plano anotado), si lo que está debajo lo pide.
         const text = tipEl?.getAttribute('data-cursor-tip') || ''
         if (text !== tipShown) {
@@ -98,7 +99,7 @@ export default function Cursor() {
           if (text) tip.textContent = text
           gsap.to(tip, { autoAlpha: text ? 1 : 0, duration: text ? 0.3 : 0.15, overwrite: 'auto' })
         }
-        tip.dataset.flipX = x > window.innerWidth - 260 ? '1' : '0'
+        tip.dataset.flipX = x > rect.right - 240 ? '1' : '0'
       } else {
         dotX(x)
         dotY(y)

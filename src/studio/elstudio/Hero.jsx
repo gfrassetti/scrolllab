@@ -245,15 +245,16 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       dragging = false
       gsap.to(split, { on: 0, duration: 0.55, ease: 'expo.out', overwrite: true, onUpdate: () => scene.setSplitOn(split.on) })
     }
-    // Las líneas de construcción: aparecen al entrar al hero con el mouse.
+    // Las líneas de construcción: aparecen al entrar al dibujo con el mouse (el canvas solo recibe el
+    // puntero dentro del cuadrante, por su clip-path).
     const onEnter = (e) => e.pointerType !== 'touch' && stageEl.classList.add('is-hover')
     const onLeave = () => stageEl.classList.remove('is-hover')
     canvas.addEventListener('pointerdown', onDown)
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerup', onUp)
     window.addEventListener('pointercancel', onUp)
-    stageEl.addEventListener('pointerenter', onEnter)
-    stageEl.addEventListener('pointerleave', onLeave)
+    canvas.addEventListener('pointerenter', onEnter)
+    canvas.addEventListener('pointerleave', onLeave)
 
     return () => {
       gsap.ticker.remove(tick)
@@ -264,8 +265,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
-      stageEl.removeEventListener('pointerenter', onEnter)
-      stageEl.removeEventListener('pointerleave', onLeave)
+      canvas.removeEventListener('pointerenter', onEnter)
+      canvas.removeEventListener('pointerleave', onLeave)
       setPlanProbe(null)
       scene.dispose()
       sceneRef.current = null
@@ -339,7 +340,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
-        <div ref={panelRef} className="es-panel" aria-hidden="true">
+        <div ref={panelRef} className="es-panel" data-cursor-zone aria-hidden="true">
           <span data-panel-edge className="es-panel__edge es-panel__edge--t" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--r" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--b" />
