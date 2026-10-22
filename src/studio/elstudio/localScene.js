@@ -18,7 +18,8 @@ import * as THREE from 'three'
  *   const scene = createLocalScene({ canvas })
  *   scene.setFrame(x, y, w, h)  el rectángulo de la pantalla donde va el cuadro
  *   scene.setReveal(0..1)       cuánto del boceto está dibujado
- *   scene.setSketch(0..1)       boceto (1) → maqueta 3D (0)
+ *   scene.setSketch(0..1)       cuánto se ve el boceto (va encima del 3D)
+ *   scene.setRise(0..1)         el local sube desde el dibujo (y la cámara con él)
  *   scene.setDecor(0..1)        cuánto está decorado
  *   scene.setCamera(0..1)       la cámara se acerca al final
  *   scene.render()              dibuja si algo cambió
@@ -278,18 +279,21 @@ const sketchVertex = /* glsl */ `
 `
 
 const sketchFragment = /* glsl */ `
-  uniform sampler2D tColor;   // capa A: lo que se ve
+  uniform sampler2D tColor;   // el 3D tal como está (sube y se decora)
   uniform sampler2D tNormal;
-  uniform sampler2D tColorB;  // capa B: lo que muestra el arrastre (el otro estado)
+  uniform sampler2D tColorB;  // la fuente del boceto: el local entero, en maqueta blanca
   uniform sampler2D tNormalB;
+  uniform sampler2D tColorO;  // lo que muestra el arrastre (el otro estado)
+  uniform sampler2D tNormalO;
   uniform vec2 uRes;      // px del canvas (con el dpr)
   uniform float uDpr;
-  uniform float uSketch;  // capa A: 1 boceto, 0 render
-  uniform float uSketchB; // capa B: ídem
+  uniform float uA;       // cuánto se ve el 3D
+  uniform float uSketch;  // cuánto se ve el boceto (va encima del 3D)
+  uniform float uSketchO; // el otro estado: 1 boceto, 0 render
   uniform float uReveal;  // cuánto del boceto está dibujado
   uniform vec2 uCenter;   // desde dónde se pinta (0–1)
   uniform float uExposure;
-  uniform float uSplit;   // dónde corta el arrastre (0–1 en x); la capa B va a la izquierda
+  uniform float uSplit;   // dónde corta el arrastre (0–1 en x); el otro estado va a la izquierda
   uniform float uSplitOn; // 0 sin arrastre, 1 con
   varying vec2 vUv;
 
@@ -361,20 +365,22 @@ const sketchFragment = /* glsl */ `
   }
 
   void main() {
-    vec4 a = layer(tColor, tNormal, uSketch, uReveal);
+    // El boceto va encima del 3D: mientras el local sube desde el dibujo, el trazo se apaga.
+    vec4 a = layer(tColor, tNormal, 0.0, 1.0) * uA;
+    vec4 sk = layer(tColorB, tNormalB, 1.0, uReveal) * uSketch;
+    vec4 base = sk + a * (1.0 - sk.a);
     if (uSplitOn > 0.001) {
-      vec4 b = layer(tColorB, tNormalB, uSketchB, 1.0);
+      vec4 o = layer(tColorO, tNormalO, uSketchO, 1.0);
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
       float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
-      vec4 mixed = mix(a, b, side);
+      vec4 mixed = mix(base, o, side);
       // La línea del corte, en el óxido de la marca.
-      float lineW = 1.0 * uDpr;
-      float onLine = 1.0 - smoothstep(lineW * 0.5, lineW * 0.5 + uDpr, abs(pxX - cut));
+      float onLine = 1.0 - smoothstep(uDpr * 0.5, uDpr * 1.5, abs(pxX - cut));
       mixed = mix(mixed, vec4(vec3(0.769, 0.267, 0.122), 1.0), onLine);
-      a = mix(a, mixed, uSplitOn);
+      base = mix(base, mixed, uSplitOn);
     }
-    gl_FragColor = a;
+    gl_FragColor = base;
   }
 `
 
@@ -438,6 +444,9 @@ export function createLocalScene({ canvas, phone = false }) {
   const byId = Object.fromEntries(pieces.map((p) => [p.id, p]))
   const steps = DECOR_ORDER.map((id) => byId[id]).filter(Boolean)
   const shade = byId.lamps.mats.find((x) => x.key === 'shade').m
+  /** Lo que sube desde el dibujo, en orden: la caja primero, después los muebles. El piso y la base ya están. */
+  const RISE_ORDER = ['walls', 'window', 'arch', 'console', 'bar', 'shelves', 'stools', 'lamps', 'rug', 'table', 'chairs', 'bench', 'plinths', 'plant']
+  const risers = RISE_ORDER.map((id) => byId[id]?.group).filter(Boolean)
 
   // Luz: cielo parejo de maqueta y un sol de la tarde que entra por la vidriera.
   const hemi = new THREE.HemisphereLight('#ffffff', '#ece6d8', 2.1)
@@ -467,9 +476,11 @@ export function createLocalScene({ canvas, phone = false }) {
   // Los pases: el render (con MSAA), las normales (para las siluetas del boceto) y el filtro final.
   const rtColor = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
   const rtNormal = new THREE.WebGLRenderTarget(1, 1)
-  // La capa B (el otro estado, para el arrastre): se dibuja solo mientras se arrastra.
+  // La fuente del boceto (el local entero en blanco) y el otro estado del arrastre.
   const rtColorB = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
   const rtNormalB = new THREE.WebGLRenderTarget(1, 1)
+  const rtColorO = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
+  const rtNormalO = new THREE.WebGLRenderTarget(1, 1)
   const normalMat = new THREE.MeshNormalMaterial()
   const post = new THREE.ShaderMaterial({
     vertexShader: sketchVertex,
@@ -479,7 +490,10 @@ export function createLocalScene({ canvas, phone = false }) {
       tNormal: { value: rtNormal.texture },
       tColorB: { value: rtColorB.texture },
       tNormalB: { value: rtNormalB.texture },
-      uSketchB: { value: 0 },
+      tColorO: { value: rtColorO.texture },
+      tNormalO: { value: rtNormalO.texture },
+      uA: { value: 0 },
+      uSketchO: { value: 0 },
       uSplit: { value: 0.5 },
       uSplitOn: { value: 0 },
       uRes: { value: new THREE.Vector2(1, 1) },
@@ -503,7 +517,7 @@ export function createLocalScene({ canvas, phone = false }) {
   let canvasH = 1
   let dpr = 1
   let frame = { x: 0, y: 0, w: 1, h: 1 }
-  const state = { reveal: 0, sketch: 1, decor: 0, camera: 0, split: 0.5, splitOn: 0 }
+  const state = { reveal: 0, sketch: 1, rise: 0, decor: 0, camera: 0, split: 0.5, splitOn: 0 }
   let dirty = true
 
   const applyFrame = () => {
@@ -520,11 +534,21 @@ export function createLocalScene({ canvas, phone = false }) {
     rtNormal.setSize(w, h)
     rtColorB.setSize(w, h)
     rtNormalB.setSize(w, h)
+    rtColorO.setSize(w, h)
+    rtNormalO.setSize(w, h)
     post.uniforms.uRes.value.set(w, h)
     post.uniforms.uDpr.value = dpr
   }
 
   const update = (view = state) => {
+    // Subir: cada pieza crece desde el piso, en orden (primero los muros, después los muebles).
+    const r = risers.length
+    risers.forEach((g, i) => {
+      const k = clamp01((view.rise * (r + 2.5) - i) / 3.5)
+      const e = 1 - (1 - k) ** 3
+      g.visible = k > 0.002
+      g.scale.y = Math.max(0.0001, e)
+    })
     // Decorar: cada paso tiene su tramo; una pieza toma su color, un objeto entra creciendo.
     const n = steps.length
     let lit = 0
@@ -542,23 +566,27 @@ export function createLocalScene({ canvas, phone = false }) {
       b.intensity = lit * 1.4
     })
     const warm = smooth(0.3, 1, view.decor)
-    edgeMat.opacity = THREE.MathUtils.lerp(0.6, 0.14, warm)
+    edgeMat.opacity = THREE.MathUtils.lerp(0.85, 0.14, warm)
     hemi.intensity = THREE.MathUtils.lerp(2.1, 1.05, warm)
     hemi.color.set('#ffffff').lerp(new THREE.Color('#fff1dc'), warm)
     sun.intensity = THREE.MathUtils.lerp(2.2, 2.4, warm)
     sun.color.set('#fff4e2').lerp(new THREE.Color('#ffd7a3'), warm)
 
-    // La cámara: quieta mientras está el boceto (tiene que coincidir); al final se acerca un poco.
+    // La cámara: mientras el local sube, se eleva con él (mira más arriba y baja un poco el ángulo,
+    // para que se lea la altura); al final se acerca. El boceto usa la misma cámara: siempre coincide.
+    const lift = smooth(0, 1, state.rise)
     const c = smooth(0, 1, state.camera)
-    const polar = THREE.MathUtils.lerp(START.polar, START.polar + 0.1, c)
-    const azimuth = THREE.MathUtils.lerp(START.azimuth, START.azimuth - 0.18, c)
-    const dist = THREE.MathUtils.lerp(START.dist, START.dist * 0.8, c)
+    const polar = START.polar + lift * 0.14 + c * 0.04
+    const azimuth = START.azimuth - lift * 0.1 - c * 0.12
+    const dist = START.dist * (1 - lift * 0.07 - c * 0.14)
+    const target = TARGET.clone()
+    target.y += lift * 0.75
     camera.position.set(
-      TARGET.x + dist * Math.sin(polar) * Math.sin(azimuth),
-      TARGET.y + dist * Math.cos(polar),
-      TARGET.z + dist * Math.sin(polar) * Math.cos(azimuth),
+      target.x + dist * Math.sin(polar) * Math.sin(azimuth),
+      target.y + dist * Math.cos(polar),
+      target.z + dist * Math.sin(polar) * Math.cos(azimuth),
     )
-    camera.lookAt(TARGET)
+    camera.lookAt(target)
   }
 
   // Una pasada de la escena a su par de targets: el color y, si hay boceto, las normales.
@@ -581,20 +609,31 @@ export function createLocalScene({ canvas, phone = false }) {
   }
 
   /** El estado que muestra el arrastre: el local terminado mientras se ve el boceto, y al revés. */
-  const otherView = () => (state.decor < 0.5 ? { decor: 1, sketch: 0 } : { decor: 0, sketch: 1 })
+  const otherView = () => (state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0 } : { rise: 1, decor: 0, sketch: 1 })
 
   const draw = () => {
     const u = post.uniforms
     u.uSplit.value = state.split
     u.uSplitOn.value = state.splitOn
+    // El otro estado (solo mientras se arrastra).
     if (state.splitOn > 0.001) {
       const other = otherView()
       update({ ...state, ...other })
-      pass(rtColorB, rtNormalB, other.sketch > 0.001)
-      u.uSketchB.value = other.sketch
+      pass(rtColorO, rtNormalO, other.sketch > 0.001)
+      u.uSketchO.value = other.sketch
     }
-    update()
-    pass(rtColor, rtNormal, state.sketch > 0.001)
+    // La fuente del boceto: el local entero, sin decorar.
+    if (state.sketch > 0.001) {
+      update({ ...state, rise: 1, decor: 0 })
+      pass(rtColorB, rtNormalB, true)
+    }
+    // El 3D tal como está.
+    const a3d = smooth(0, 0.08, state.rise)
+    if (a3d > 0.001) {
+      update()
+      pass(rtColor, rtNormal, false)
+    }
+    u.uA.value = a3d
     u.uSketch.value = state.sketch
     u.uReveal.value = state.reveal
     renderer.setRenderTarget(null)
@@ -611,12 +650,13 @@ export function createLocalScene({ canvas, phone = false }) {
   return {
     setReveal: set('reveal'),
     setSketch: set('sketch'),
+    setRise: set('rise'),
     setDecor: set('decor'),
     setCamera: set('camera'),
     setSplit: set('split'),
     setSplitOn: set('splitOn'),
     /** Qué muestra el arrastre ahora: 'final' (el local terminado) o 'sketch' (el boceto). */
-    splitShows: () => (otherView().decor === 1 ? 'final' : 'sketch'),
+    splitShows: () => (otherView().sketch ? 'sketch' : 'final'),
     setPixelRatio(v) {
       dpr = v
       renderer.setPixelRatio(v)
@@ -656,7 +696,7 @@ export function createLocalScene({ canvas, phone = false }) {
       scene.traverse((o) => o.geometry?.dispose?.())
       ownMats.forEach((m) => m.dispose())
       ;[edgeMat, normalMat, post, ground.material].forEach((m) => m.dispose())
-      ;[rtColor, rtNormal, rtColorB, rtNormalB].forEach((t) => t.dispose())
+      ;[rtColor, rtNormal, rtColorB, rtNormalB, rtColorO, rtNormalO].forEach((t) => t.dispose())
       renderer.dispose()
     },
   }

@@ -399,6 +399,7 @@
 /* La columna de la izquierda. */
 .es-left {
   position: absolute;
+  user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
