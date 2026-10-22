@@ -2,19 +2,19 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
 import { scrollToSection } from '../../hooks/useLenis'
 import { hidePaint } from './paint'
-import { BAND_H, C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
+import { C, LABEL, OPEN_DELAY, SITE } from './brand'
 import Logo from './Logo'
 
 /**
- * El marco del sitio, dibujado con líneas como un plano: el nav arriba y una franja abajo.
+ * El marco del sitio, dibujado con líneas como un plano: el nav arriba y, abajo, el borde del bloque
+ * de texto del hero (su alto es --band-h, en elstudio.css).
  *
  * La apertura (después de que el boceto se pinta): dos líneas finas nacen en el centro de la
  * pantalla y se estiran hasta los bordes; una sube y queda como el borde del nav, la otra baja y
- * queda como el borde de la franja de abajo. Después se trazan las divisiones del nav (de arriba
+ * queda como el borde del bloque de abajo. Después se trazan las divisiones del nav (de arriba
  * hacia abajo), los botones se pintan (paint.js) y entran la regla y las cruces de registro.
  *
- * El logo chico (`logoRef`) arranca invisible: el loader aterriza en la marca gigante del hero, y
- * es el hero el que lo enciende cuando esa marca se achica hasta acá al scrollear.
+ * El logo chico (`logoRef`) arranca invisible: el loader aterriza ahí y lo enciende (vía el hero).
  */
 
 const LINKS = [
@@ -32,9 +32,9 @@ export default function Nav({ logoRef, open, calm }) {
     const q = gsap.utils.selector(rootRef.current)
     const ctx = gsap.context(() => {
       if (calm) return
-      const mid = () => window.innerHeight / 2
-      gsap.set(q('[data-line=top]'), { scaleX: 0, y: () => mid() - navH() })
-      gsap.set(q('[data-line=bottom]'), { scaleX: 0, y: () => -(mid() - bandH()) })
+      // Cada línea arranca en el centro de la pantalla: se mide dónde queda y se la corre hasta ahí.
+      const mid = window.innerHeight / 2
+      gsap.set(q('[data-line]'), { scaleX: 0, y: (_i, el) => mid - el.getBoundingClientRect().top })
       gsap.set(q('[data-divider]'), { scaleY: 0 })
       hidePaint(q('[data-in]'))
       gsap.set(q('[data-ruler]'), { scaleX: 0 })
@@ -118,23 +118,6 @@ export default function Nav({ logoRef, open, calm }) {
         <span key={k} data-mark className={`es-frame__mark es-frame__mark--${k}`} aria-hidden="true" />
       ))}
 
-      {/* La franja de abajo. */}
-      <div className="es-frame__band absolute inset-x-0 bottom-0 flex items-center justify-between px-4 text-[12px] tracking-[0.1em] uppercase sm:px-9" style={{ ...LABEL, color: C.mute }}>
-        <span data-in className="es-paint">
-          Diseño e interiorismo<span className="hidden sm:inline"> · Enfocado en la experiencia de usuario</span>
-        </span>
-        <span data-in className="es-paint flex items-center gap-3">
-          <span className="block h-px w-8" style={{ background: C.ink }} />
-          Scroll
-        </span>
-      </div>
     </div>
   )
-}
-
-function navH() {
-  return window.matchMedia('(min-width: 640px)').matches ? NAV_H.desk : NAV_H.phone
-}
-function bandH() {
-  return window.matchMedia('(min-width: 640px)').matches ? BAND_H.desk : BAND_H.phone
 }

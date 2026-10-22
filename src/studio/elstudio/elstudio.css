@@ -195,13 +195,14 @@
 /* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
 .es-root {
   --nav-h: 60px;
-  --band-h: 56px;
+  /* El bloque de texto de abajo del hero (título, bajada, botón y cinta). */
+  --band-h: max(250px, 36svh);
   --line: rgba(22, 21, 19, 0.5);
 }
 @media (min-width: 640px) {
   .es-root {
     --nav-h: 72px;
-    --band-h: 64px;
+    --band-h: max(210px, 26svh);
   }
 }
 .es-frame__nav {
@@ -384,6 +385,16 @@
 .es-panel__label--tr {
   right: 12px;
 }
+.es-panel__sub {
+  display: block;
+  margin-top: 4px;
+  max-width: 34ch;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  line-height: 1.35;
+}
 
 /* La marca gigante: se ubica y se escala desde el JS (font-size = el ancho de la lámina). */
 .es-word {
@@ -396,51 +407,13 @@
   line-height: 0;
 }
 
-/* La columna de la izquierda. */
-.es-left {
-  position: absolute;
-  user-select: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 20px;
-}
-.es-left__lede {
-  max-width: 22ch;
-  font-size: clamp(20px, 1.9vw, 30px);
-  font-weight: 300;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-.es-left__stage {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 16px;
-  align-items: start;
-}
-.es-left__n {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  color: var(--es-rust);
-  padding-top: 0.55em;
-}
-.es-left__title {
-  margin: 0;
-  font-size: clamp(22px, 2.3vw, 36px);
-  font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1;
-}
-.es-left__text {
-  margin: 8px 0 0;
-  max-width: 34ch;
-  font-size: 14px;
-  line-height: 1.45;
-  color: #4d4840;
-}
 /* El rótulo: el cuadro de datos de una lámina. */
 .es-rotulo {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 232px;
+  background: var(--es-paper);
   margin: 0;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   border-top: 1px solid rgba(22, 21, 19, 0.42);
@@ -450,7 +423,7 @@
   text-transform: uppercase;
 }
 .es-rotulo__row {
-  padding: 7px 9px 8px;
+  padding: 5px 8px 6px;
   border-right: 1px solid rgba(22, 21, 19, 0.42);
   border-bottom: 1px solid rgba(22, 21, 19, 0.42);
   min-width: 0;
@@ -562,4 +535,139 @@
   mask-repeat: no-repeat;
   -webkit-mask-position: calc(var(--paint) * 1%) 0;
   mask-position: calc(var(--paint) * 1%) 0;
+}
+
+/* ── El bloque de abajo del hero ───────────────────────────────────── */
+.es-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--band-h);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.es-info__title {
+  margin: 0;
+  padding: 18px 16px 14px;
+  align-self: end;
+  font-size: clamp(30px, 8.6vw, 44px);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.es-info__line {
+  display: block;
+  /* El interlineado es apretado: el aire de arriba evita que la máscara del pintado corte la tilde. */
+  padding-top: 0.16em;
+  margin-top: -0.16em;
+}
+.es-info__side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
+  border-top: 1px solid var(--line);
+  min-height: 0;
+}
+.es-info__lede {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #3b3833;
+  min-width: 0;
+}
+.es-info__cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 128px;
+  padding: 12px 14px;
+  border-left: 1px solid var(--line);
+  color: var(--es-rust);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 0.3s var(--es-ease);
+}
+.es-info__arrow {
+  align-self: flex-end;
+  font-size: 16px;
+  transition: transform 0.4s var(--es-ease);
+}
+@media (hover: hover) {
+  .es-info__cta:hover {
+    background: rgba(196, 68, 31, 0.06);
+  }
+  .es-info__cta:hover .es-info__arrow {
+    transform: translateX(4px);
+  }
+}
+.es-info__ticker {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  padding: 11px 0 12px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5a564e;
+}
+.es-info__track {
+  display: flex;
+  width: max-content;
+  animation: es-ticker 38s linear infinite;
+}
+.es-info__run {
+  display: flex;
+}
+.es-info__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 26px;
+  white-space: nowrap;
+}
+.es-info__dot {
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+@keyframes es-ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .es-info__track {
+    animation: none;
+  }
+}
+@media (min-width: 640px) {
+  .es-info {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 3fr);
+    padding-left: 36px;
+  }
+  .es-info__title {
+    padding: 0 24px 26px 0;
+    font-size: clamp(34px, 4.15vw, 86px);
+    white-space: nowrap;
+  }
+  .es-info__side {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+  .es-info__lede {
+    padding: 18px 20px;
+    font-size: clamp(14px, 1.05vw, 17px);
+  }
+  .es-info__cta {
+    min-width: clamp(140px, 11vw, 190px);
+    padding: 16px 18px;
+  }
 }

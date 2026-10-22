@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
-import { BAND_H, C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
+import { scrollToSection } from '../../hooks/useLenis'
+import { C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
@@ -13,8 +14,10 @@ import sketchSmall from './assets/boceto-local-1200.webp'
 /**
  * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
  *
- * La lámina está dividida desde el primer cuadro: a la izquierda la bajada, la etapa y el rótulo;
- * a la derecha el cuadrante del dibujo (en pantallas angostas, el dibujo arriba y la etapa abajo).
+ * La disposición (como la de un hero de plano): arriba, tres cuartos de la pantalla para el cuadrante
+ * del dibujo, a todo el ancho, con la etapa y el rótulo de la lámina en sus esquinas; abajo, el
+ * bloque de texto: el título grande a la izquierda y, a la derecha, la bajada, el botón a proyectos
+ * y una cinta con los servicios. El alto de ese bloque es --band-h (elstudio.css).
  * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
  * (el hero queda fijo):
  *   01 Boceto       el dibujo a lápiz.
@@ -50,36 +53,18 @@ const smooth = (a, b, v) => {
 }
 
 /**
- * Las medidas de la lámina para un escenario de W × H: el cuadrante del dibujo y la columna de texto.
- * Desde 1024 px: texto en las columnas 1–3 y dibujo en las 4–8. Más angosto: dibujo arriba y la
- * etapa debajo.
+ * Las medidas de la lámina para un escenario de W × H: el cuadrante del dibujo va a todo el ancho,
+ * entre el nav y el bloque de texto de abajo (que empieza en `infoTop`).
  */
-function sheetLayout(W, H) {
-  const desk = W >= 1024
+function sheetLayout(W, H, infoTop) {
   const side = W >= 640 ? 36 : 16
-  const gap = 16
   const cols = W >= 640 ? 8 : 4
-  const colW = (W - side * 2 - gap * (cols - 1)) / cols
-  const top = (W >= 640 ? NAV_H.desk : NAV_H.phone) + (W >= 640 ? 26 : 20)
-  const bottom = H - (W >= 640 ? BAND_H.desk : BAND_H.phone) - (W >= 640 ? 20 : 14)
-  if (desk) {
-    const span = (n) => n * colW + (n - 1) * gap
-    const x = (c) => side + c * (colW + gap)
-    return {
-      desk,
-      cols,
-      panel: { x: x(3), y: top, w: span(5), h: bottom - top },
-      text: { x: x(0), y: top, w: span(3) - gap, h: bottom - top },
-    }
-  }
-  const textH = 92
-  return {
-    desk,
-    cols,
-    panel: { x: side, y: top, w: W - side * 2, h: bottom - top - textH },
-    text: { x: side, y: bottom - textH + 14, w: W - side * 2, h: textH - 14 },
-  }
+  const top = (W >= 640 ? NAV_H.desk : NAV_H.phone) + (W >= 640 ? 22 : 16)
+  const bottom = infoTop - (W >= 640 ? 18 : 12)
+  return { cols, panel: { x: side, y: top, w: W - side * 2, h: Math.max(80, bottom - top) } }
 }
+
+const SERVICES = ['Interiorismo', 'Locales comerciales', 'Mobiliario a medida', 'Vivienda', 'Objetos', 'Dirección de obra']
 
 /** El cuadro de la cámara dentro del cuadrante: 16:9 entero; si el cuadrante es angosto, un poco más grande (recorta los costados). */
 function cameraFrame(p) {
@@ -104,7 +89,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   const stageRef = useRef(null)
   const canvasRef = useRef(null)
   const panelRef = useRef(null)
-  const leftRef = useRef(null)
+  const infoRef = useRef(null)
   const colsRef = useRef(null)
   const sceneRef = useRef(null)
   const [stage, setStage] = useState(calm ? 3 : 0)
@@ -129,7 +114,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const canvas = canvasRef.current
     const stageEl = stageRef.current
     const panel = panelRef.current
-    const left = leftRef.current
+    const info = infoRef.current
     const phone = window.matchMedia('(max-width: 767px)').matches
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
     // El boceto a lápiz y la foto del local (misma toma): en pantallas chicas, los livianos.
@@ -146,7 +131,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       const W = stageEl.clientWidth
       const H = stageEl.clientHeight
       scene.resize(W, H)
-      L = sheetLayout(W, H)
+      L = sheetLayout(W, H, info.offsetTop)
       setCols(L.cols)
       lastKey = ''
     }
@@ -184,12 +169,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       if (!lastKey) {
         lastKey = 'set'
         const P = L.panel
-        const T = L.text
         const f = cameraFrame(P)
         scene.setFrame(f.x, f.y, f.w, f.h)
         canvas.style.clipPath = `inset(${P.y}px ${stageEl.clientWidth - P.x - P.w}px ${stageEl.clientHeight - P.y - P.h}px ${P.x}px)`
         Object.assign(panel.style, { left: `${P.x}px`, top: `${P.y}px`, width: `${P.w}px`, height: `${P.h}px` })
-        Object.assign(left.style, { left: `${T.x}px`, top: `${T.y}px`, width: `${T.w}px`, height: `${T.h}px` })
         stageEl.style.setProperty('--px', `${P.x}px`)
         stageEl.style.setProperty('--py', `${P.y}px`)
         stageEl.style.setProperty('--pw', `${P.w}px`)
@@ -325,12 +308,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
 
   const st = STAGES[stage]
   const rows = [
-    ['Proyecto', 'Local · café y showroom'],
+    ['Proyecto', 'Local · café'],
     ['Superficie', `${ROOM.w * ROOM.d} m²`],
-    ['Escala', '1:50'],
     ['Estado', st.title],
     ['Lámina', `${st.n} / 04`],
-    ['Fecha', '10 · 2026'],
   ]
 
   return (
@@ -357,12 +338,30 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span data-panel-edge className="es-panel__edge es-panel__edge--r" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--b" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--l" />
-          <span data-paint-stage className="es-paint es-panel__label es-panel__label--tl" style={LABEL}>
-            {st.n} — {st.title}
+          <span className="es-panel__label es-panel__label--tl" style={LABEL}>
+            <span data-paint data-paint-stage className="es-paint block">
+              {st.n} — {st.title}
+            </span>
+            <span data-paint data-paint-stage className="es-paint es-panel__sub">
+              {st.text}
+            </span>
           </span>
-          <span className="es-panel__label es-panel__label--tr" style={LABEL}>
+          <span data-paint className="es-paint es-panel__label es-panel__label--tr" style={LABEL}>
             Esc. 1:50 · N ↑
           </span>
+          {/* El rótulo de la lámina, como el cuadro de datos de un plano. */}
+          <dl className="es-rotulo hidden xl:grid" style={LABEL}>
+            {rows.map(([k, v]) => (
+              <div key={k} className="es-rotulo__row">
+                <dt data-paint className="es-paint">
+                  {k}
+                </dt>
+                <dd data-paint {...(k === 'Estado' || k === 'Lámina' ? { 'data-paint-stage': '' } : {})} className="es-paint">
+                  {v}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         {/* Las líneas de construcción (con el mouse). */}
@@ -378,47 +377,53 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span className="es-guide es-guide--rust-h" />
         </div>
 
-        {/* La columna de texto (cambia de lado): bajada, etapa y rótulo. */}
-        <div ref={leftRef} className="es-left" style={{ color: C.ink }}>
-          <h1 className="sr-only">
-            {SITE.name} — {SITE.tagline}
-          </h1>
-          <p data-paint className="es-paint es-left__lede hidden lg:block">
-            Diseño e interiorismo enfocado en la experiencia de usuario.
-          </p>
-          <div className="es-left__stage" aria-live="polite">
-            <span data-paint data-paint-stage className="es-paint es-left__n" style={LABEL}>
-              {st.n}
+        {/* El bloque de abajo: el título grande, la bajada, el botón y la cinta de servicios. */}
+        <div ref={infoRef} className="es-info" style={{ color: C.ink }}>
+          <h1 className="es-info__title">
+            <span className="sr-only">{SITE.name} — </span>
+            <span data-paint className="es-paint es-info__line">
+              Diseño e interiorismo
             </span>
-            <div>
-              <h2 data-paint data-paint-stage className="es-paint es-left__title">
-                {st.title}
-              </h2>
-              <p data-paint data-paint-stage className="es-paint es-left__text">
-                {st.text}
-              </p>
+            <span data-paint className="es-paint es-info__line">
+              para quien lo vive
+            </span>
+          </h1>
+          <div className="es-info__side">
+            <p data-paint className="es-paint es-info__lede">
+              Estudio multidisciplinario de diseño e interiorismo, enfocado en la experiencia de usuario. Desde la Patagonia y Buenos
+              Aires, para cualquier lugar.
+            </p>
+            <a
+              href="#proyectos"
+              className="es-info__cta"
+              style={LABEL}
+              onClick={(e) => {
+                e.preventDefault()
+                scrollToSection('proyectos')
+              }}
+            >
+              <span data-paint className="es-paint">
+                Ver proyectos
+              </span>
+              <span data-paint className="es-paint es-info__arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+            <div className="es-info__ticker" style={LABEL} aria-label={`Servicios: ${SERVICES.join(', ')}`}>
+              <div data-paint className="es-paint es-info__track" aria-hidden="true">
+                {[0, 1].map((k) => (
+                  <span key={k} className="es-info__run">
+                    {SERVICES.map((t) => (
+                      <span key={t} className="es-info__item">
+                        <span className="es-info__dot" />
+                        {t}
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-          <dl className="es-rotulo hidden lg:grid" style={LABEL}>
-            {rows.map(([k, v]) => (
-              <div key={k} className="es-rotulo__row">
-                <dt data-paint className="es-paint">
-                  {k}
-                </dt>
-                <dd data-paint {...(k === 'Estado' || k === 'Lámina' ? { 'data-paint-stage': '' } : {})} className="es-paint">
-                  {v}
-                </dd>
-              </div>
-            ))}
-            <div className="es-rotulo__row es-rotulo__row--sign">
-              <dt data-paint className="es-paint">
-                Dibujó
-              </dt>
-              <dd data-paint className="es-paint">
-                {SITE.name}
-              </dd>
-            </div>
-          </dl>
         </div>
       </div>
     </section>
